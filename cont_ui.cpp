@@ -56,11 +56,24 @@ void CC_WinNodeCont::DeleteSheet(unsigned sht) {
 }
 
 void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont) {
-  editor->Update();
+  if (sht == editor->GetShowDescr()->curr_ss) {
+    if (cont <= editor->GetCurrent()) {
+      editor->IncCurrent();
+    }
+    editor->Update();
+  }
 }
 
 void CC_WinNodeCont::DeleteContinuity(unsigned sht, unsigned cont) {
-  editor->Update();
+  if (sht == editor->GetShowDescr()->curr_ss) {
+    if (cont == editor->GetCurrent()) editor->DetachText();
+    if (editor->GetCurrent() > 0) {
+      if (cont <= editor->GetCurrent()) {
+	editor->DecCurrent();
+      }
+    }
+    editor->Update();
+  }
 }
 
 void CC_WinNodeCont::FlushContinuity() {
@@ -163,10 +176,22 @@ Bool ContinuityEditor::OnClose(void) {
 }
 
 void ContinuityEditor::OnMenuCommand(int id) {
+  CC_sheet *sht;
+  char *contname;
+
   switch(id) {
   case CALCHART__CONT_NEW:
+    sht = descr->CurrSheet();
+    contname = wxGetTextFromUser("Enter the new continuity's name",
+				 "New Continuity",
+				 NULL, this);
+    if (contname) {
+      sht->UserNewContinuity(contname);
+    }
     break;
   case CALCHART__CONT_DELETE:
+    sht = descr->CurrSheet();
+    sht->UserDeleteContinuity(curr_cont);
     break;
   case CALCHART__CONT_CLOSE:
     Close();
@@ -199,8 +224,9 @@ void ContinuityEditor::Update(Bool quick) {
        curranimcont = curranimcont->next) {
     conts->Append((char *)((const char *)curranimcont->name));
   }
-  conts->SetSelection(0);
-  curr_cont = 0;
+  if (curr_cont > sht->numanimcont && sht->numanimcont > 0)
+    curr_cont = sht->numanimcont-1;
+  conts->SetSelection(curr_cont);
 
   UpdateText(quick);
 }

@@ -522,26 +522,73 @@ CC_continuity *CC_sheet::UserGetNthContinuity(unsigned i) {
   return GetNthContinuity(i);
 }
 
-void CC_sheet::SetNthContinuity(const char *text, unsigned cont) {
+void CC_sheet::SetNthContinuity(const char *text, unsigned i) {
   CC_continuity *c;
 
-  c = GetNthContinuity(cont);
+  c = GetNthContinuity(i);
   if (c) {
     c->SetText(text);
   }
 }
 
-void CC_sheet::UserSetNthContinuity(const char *text, unsigned cont,
+void CC_sheet::UserSetNthContinuity(const char *text, unsigned i,
 				    wxWindow *win) {
   CC_continuity *c;
 
-  c = GetNthContinuity(cont);
+  c = GetNthContinuity(i);
   if (c) {
     // Create undo entry
-    show->undolist->Add(new ShowUndoCont(show->GetSheetPos(this), cont, this));
+    show->undolist->Add(new ShowUndoCont(show->GetSheetPos(this), i, this));
     c->SetText(text);
-    show->winlist->SetContinuity(win, show->GetSheetPos(this), cont);
+    show->winlist->SetContinuity(win, show->GetSheetPos(this), i);
   }
+}
+
+CC_continuity *CC_sheet::RemoveNthContinuity(unsigned i) {
+  CC_continuity *cont = animcont;
+  CC_continuity *tmp;
+  unsigned idx;
+
+  if (i > 0) {
+    idx = i;
+    while (--idx) {
+      cont = cont->next;
+    }
+    tmp = cont->next;
+    cont->next = tmp->next;
+    cont = tmp;
+  } else {
+    animcont = animcont->next;
+  }
+  numanimcont--;
+  cont->next = NULL;
+  show->winlist->DeleteContinuity(show->GetSheetPos(this), i);
+  return cont;
+}
+
+void CC_sheet::UserDeleteContinuity(unsigned i) {
+  CC_continuity *cont = RemoveNthContinuity(i);
+  show->undolist->Add(new ShowUndoDeleteContinuity(show->GetSheetPos(this),
+						   i, cont));
+}
+
+void CC_sheet::InsertContinuity(CC_continuity *newcont, unsigned i) {
+  CC_continuity *cont = animcont;
+  unsigned idx;
+
+  if (i > 0) {
+    idx = i;
+    while (--idx) {
+      cont = cont->next;
+    }
+    newcont->next = cont->next;
+    cont->next = newcont;
+  } else {
+    newcont->next = animcont;
+    animcont = newcont;
+  }
+  numanimcont++;
+  show->winlist->AddContinuity(show->GetSheetPos(this), i);
 }
 
 void CC_sheet::AppendContinuity(CC_continuity *newcont) {
@@ -555,6 +602,38 @@ void CC_sheet::AppendContinuity(CC_continuity *newcont) {
     last->next = newcont;
   }
   numanimcont++;
+}
+
+void CC_sheet::UserNewContinuity(const char *name) {
+  CC_continuity *newcont;
+  unsigned newcontnum;
+
+  newcont = new CC_continuity;
+  newcont->SetName(name);
+  newcontnum = NextUnusedContinuityNum();
+  newcont->num = newcontnum;
+  AppendContinuity(newcont);
+  show->winlist->AddContinuity(show->GetSheetPos(this), numanimcont-1);
+  show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
+						numanimcont-1));
+}
+
+unsigned CC_sheet::NextUnusedContinuityNum() {
+  unsigned i = 0;
+  Bool found;
+  CC_continuity *c;
+
+  do {
+    found = FALSE;
+    for (c = animcont; c != NULL; c = c->next) {
+      if (c->num == i) {
+	found = TRUE;
+	i++;
+	break;
+      }
+    }
+  } while (found);
+  return i;
 }
 
 void CC_sheet::UserSetName(const char *newname) {

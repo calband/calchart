@@ -150,6 +150,34 @@ private:
   wxString conttext;
 };
 
+// Added continuity
+class ShowUndoAddContinuity : public ShowUndo {
+public:
+  ShowUndoAddContinuity(unsigned sheetnum, unsigned contnum);
+  ~ShowUndoAddContinuity();
+
+  virtual int Undo(CC_show *show);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+private:
+  unsigned addcontnum;
+};
+
+// Deleted continuity
+class ShowUndoDeleteContinuity : public ShowUndo {
+public:
+  ShowUndoDeleteContinuity(unsigned sheetnum, unsigned contnum,
+			   CC_continuity *cont);
+  ~ShowUndoDeleteContinuity();
+
+  virtual int Undo(CC_show *show);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+private:
+  CC_continuity *deleted_cont;
+  unsigned delcontnum;
+};
+
 // Show description changes
 class ShowUndoDescr : public ShowUndo {
 public:
@@ -178,10 +206,13 @@ private:
   ShowUndo *Pop();
   void Push(ShowUndo *undo);
   void Clean();
+  friend ostream& operator<< (ostream&, const ShowUndoList&);
 
   CC_show *show;
   ShowUndo *list;
   int limit;
 };
+
+ostream& operator<< (ostream&, const ShowUndoList&);
 
 #endif

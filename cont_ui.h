@@ -69,6 +69,9 @@ public:
   inline unsigned GetCurrent() { return curr_cont; }
   inline void SetCurrent(unsigned i) { curr_cont = i; UpdateText(); }
 
+  inline void IncCurrent() { curr_cont++; text_contnum++; }
+  inline void DecCurrent() { curr_cont--; text_contnum--; }
+
   inline CC_descr *GetShowDescr() { return descr; }
 
   void SelectPoints();

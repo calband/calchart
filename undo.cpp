@@ -240,6 +240,49 @@ unsigned ShowUndoCont::Size() {
 
 char *ShowUndoCont::UndoDescription() { return "Undo edit continuity"; }
 
+ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
+					     unsigned contnum)
+:ShowUndo(sheetnum), addcontnum(contnum) {
+}
+
+ShowUndoAddContinuity::~ShowUndoAddContinuity() {
+}
+
+int ShowUndoAddContinuity::Undo(CC_show *show) {
+  delete show->GetNthSheet(sheetidx)->RemoveNthContinuity(addcontnum);
+  return (int)sheetidx;
+}
+
+unsigned ShowUndoAddContinuity::Size() { return sizeof(*this); }
+
+char *ShowUndoAddContinuity::UndoDescription() {
+  return "Undo add continuity";
+}
+
+ShowUndoDeleteContinuity::ShowUndoDeleteContinuity(unsigned sheetnum,
+						   unsigned contnum,
+						   CC_continuity *cont)
+:ShowUndo(sheetnum), deleted_cont(cont), delcontnum(contnum) {
+}
+
+ShowUndoDeleteContinuity::~ShowUndoDeleteContinuity() {
+  if (deleted_cont) delete deleted_cont;
+}
+
+int ShowUndoDeleteContinuity::Undo(CC_show *show) {
+  show->GetNthSheet(sheetidx)->InsertContinuity(deleted_cont, delcontnum);
+  deleted_cont = NULL; // So it isn't deleted
+  return (int)sheetidx;
+}
+
+unsigned ShowUndoDeleteContinuity::Size() {
+  return sizeof(*this) + sizeof(*deleted_cont);
+}
+
+char *ShowUndoDeleteContinuity::UndoDescription() {
+  return "Undo delete continuity";
+}
+
 ShowUndoDescr::ShowUndoDescr(CC_show *show)
 :ShowUndo(0) {
   
@@ -366,4 +409,16 @@ void ShowUndoList::Clean() {
       }
     }
   }
+}
+
+ostream& operator<< (ostream& s, const ShowUndoList& list) {
+  ShowUndo *elem;
+
+  elem = list.list;
+  while (elem) {
+    s << elem->UndoDescription() << endl;
+    elem = elem->next;
+  }
+  s << "*** End of undo stack." << endl;
+  return s;
 }

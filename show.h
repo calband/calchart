@@ -289,9 +289,14 @@ public:
 
   CC_continuity *GetNthContinuity(unsigned i);
   CC_continuity *UserGetNthContinuity(unsigned i);
-  void SetNthContinuity(const char *text, unsigned cont);
-  void UserSetNthContinuity(const char *text, unsigned cont, wxWindow* win);
+  void SetNthContinuity(const char *text, unsigned i);
+  void UserSetNthContinuity(const char *text, unsigned i, wxWindow* win);
+  CC_continuity *RemoveNthContinuity(unsigned i);
+  void UserDeleteContinuity(unsigned i);
+  void InsertContinuity(CC_continuity *newcont, unsigned i);
   void AppendContinuity(CC_continuity *newcont);
+  void UserNewContinuity(const char *name);
+  unsigned NextUnusedContinuityNum();
 
   inline const char *GetName() { return name; }
   inline void SetName(const char *newname) { name = newname; }
