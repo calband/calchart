@@ -13,15 +13,27 @@
 #RUNTIME_DIR
 #C:\CALCHART\RUNTIME
 
+# location of autosave files
+#AUTOSAVE_DIR
+#$TEMPDIR
+
 # size of window to open
 WINDOW_WIDTH
 600
 WINDOW_HEIGHT
 400
 
+# default zoom of field
+DEFAULT_ZOOM
+5
+
 # size of undo buffer in bytes
 UNDO_BUF_SIZE
 50000
+
+# autosave interval in seconds (0 to disable)
+AUTOSAVE_INTERVAL
+300
 
 # print options
 
@@ -197,12 +209,12 @@ COLOR
 COLOR
 "ANIM SIDE" "SKY BLUE" 0 0 1 0
 COLOR
-"HILIT ANIM FRONT" "255 192 128" 0 1 1 0
+"HILIT ANIM FRONT" "RED" 0 1 1 0
 COLOR
-"HILIT ANIM BACK" "ORANGE" 0 1 1 0
+"HILIT ANIM BACK" "RED" 0 1 1 0
 COLOR
-"HILIT ANIM SIDE" "BROWN" 0 1 1 0
+"HILIT ANIM SIDE" "RED" 0 1 1 0
 COLOR
 "ANIM COLLISION" "PURPLE" 0 1 1 0
 COLOR
-"SHAPES" "GREY" 0 0 1 0
+"SHAPES" "RED" 0 0 1 0
