@@ -77,7 +77,8 @@ char spr_line_text[MAX_SPR_LINES][8] = {
   "E",
 };
 
-wxPathList configdirs;
+static wxPathList configdirs;
+static char runtimedir[MAX_PATH_LEN];
 
 char *ReadConfig(void) {
   FILE *fp;
@@ -92,15 +93,11 @@ char *ReadConfig(void) {
   short eps_text_left, eps_text_right, eps_text_top, eps_text_bottom;
   unsigned char which_spr_yards;
 
-  {
-    char runtimedir[MAX_PATH_LEN];
-
-    // Add './runtime'
-    wxGetWorkingDirectory(runtimedir, MAX_PATH_LEN);
-    strncat(runtimedir, PATH_SEPARATOR, MAX_PATH_LEN);
-    strncat(runtimedir, "runtime", MAX_PATH_LEN);
-    configdirs.Add(runtimedir);
-  }
+  // Add './runtime'
+  wxGetWorkingDirectory(runtimedir, MAX_PATH_LEN);
+  strncat(runtimedir, PATH_SEPARATOR, MAX_PATH_LEN);
+  strncat(runtimedir, "runtime", MAX_PATH_LEN);
+  configdirs.Add(runtimedir);
   configdirs.AddEnvList("CALCHART_RT");
 
   fp = OpenFileInDir("config", "r");
