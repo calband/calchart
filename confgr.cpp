@@ -521,7 +521,20 @@ char *ReadConfig(const char *path) {
     bd = new unsigned char[COLOR_NUM];
     CalChartColorMap = new wxColourMap();
     for (i = 0; i < COLOR_NUM; i++) {
+      /* old code to prevent white and black from being allocated
       for (j = -2; j < i; j++) {
+	c1 = &CalChartPens[i]->GetColour();
+	if (j >= 0) {
+	  c2 = &CalChartPens[j]->GetColour();
+	} else {
+	  if (j < -1) {
+	    c2 = wxBLACK;
+	  } else {
+	    c2 = wxWHITE;
+	  }
+	}
+	*/
+      for (j = 0; j < i; j++) {
 	c1 = &CalChartPens[i]->GetColour();
 	if (j >= 0) {
 	  c2 = &CalChartPens[j]->GetColour();

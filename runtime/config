@@ -169,7 +169,7 @@ A B C D E
 # only "color" is used for color displays
 # for mono displays, mono=1 means white, 0 means black
 COLOR
-"FIELD" "30 128 30" 1 0 1 0
+"FIELD" "FOREST GREEN" 1 0 1 0
 COLOR
 "FIELD DETAIL" "WHITE" 0 0 1 0
 COLOR
