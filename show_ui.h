@@ -85,7 +85,6 @@ public:
 	      int x = -1, int y = -1, int width = 400, int height = 400);
   ~ShowInfoReq();
   Bool OnClose(void);
-  void OnSize(int w, int h);
 
   void UpdateLabels();
   void UpdateNumPoints();
