@@ -165,7 +165,7 @@ void StuntSheetPicker::OnSize(int, int) {
   GetClientSize(&width, &height);
   panel->SetSize(0, 0, width, height);
   list->GetPosition(&list_x, &list_y);
-  list->SetSize(0, list_y, width, height-list_y);
+  list->SetSize(0, list_y, width-list_x, height-list_y-list_x);
 }
 
 void StuntSheetPicker::Update() {
@@ -193,11 +193,10 @@ static void ShowInfoClose(wxButton& button, wxEvent&) {
   ((ShowInfoReq*)button.GetParent()->GetParent())->Close();
 }
 
-static void ShowInfoSetNum(wxText& text, wxEvent& ev) {
+static void ShowInfoSetNum(wxButton& button, wxEvent&) {
   unsigned num;
-  ShowInfoReq *req = (ShowInfoReq *)text.GetParent()->GetParent();
+  ShowInfoReq *req = (ShowInfoReq *)button.GetParent()->GetParent();
 
-  if (ev.eventType != wxEVENT_TYPE_TEXT_ENTER_COMMAND) return;
   num = req->GetNumPoints();
   if (num != req->show->GetNumPoints()) {
     if(wxMessageBox("Changing the number of points is not undoable.\nProceed?",
@@ -272,6 +271,8 @@ show(shw) {
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)ShowInfoClose,
 				    "Close");
+  (void)new wxButton(panel, (wxFunction)ShowInfoSetNum,
+		     "Set Num Points");
   (void)new wxButton(panel, (wxFunction)ShowInfoSetLabels,
 		     "Set Labels");
   panel->NewLine();
@@ -279,8 +280,8 @@ show(shw) {
   closeBut->SetDefault();
 
   sprintf(buf, "%u", show->GetNumPoints());
-  numpnts = new wxText(panel, (wxFunction)ShowInfoSetNum, "Points", buf,
-		       -1, -1, 100, -1, wxPROCESS_ENTER);
+  numpnts = new wxText(panel, (wxFunction)NULL, "Points", buf,
+		       -1, -1, 100, -1);
   strs[0] = "Numbers";
   strs[1] = "Letters";
   label_type = new wxRadioBox(panel, (wxFunction)NULL, "Labels",
@@ -288,18 +289,16 @@ show(shw) {
   label_type->SetSelection(use_letters);
   panel->NewLine();
   lettersize = new wxSlider(panel, (wxFunction)NULL, "Points per letter",
-			    maxnum, 1, 10, 150);
+			    maxnum, 1, 10, -1);
   panel->NewLine();
   labels = new wxListBox(panel, (wxFunction)NULL, "Letters",
-			 wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 100);
+			 wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
   buf[1] = '\0';
   for (i = 0; i < 26; i++) {
     buf[0] = i + 'A';
     labels->Append(buf);
     labels->SetSelection(i, letters[i]);
   }
-  panel->NewLine();
-  panel->NewLine();
 
   choice = new wxChoice(panel, (wxFunction)ShowInfoModeChoice, "Show mode");
   ShowMode *mode = modelist->First();
