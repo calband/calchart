@@ -152,8 +152,8 @@ clean::
 
 depend::
 	rm -f depend
-	gcc -MM $(CPPFLAGS) $(SRCS) $(SYNTHETIC_SRCS) > depend
-#	$(MAKEDEP) -- $(CPPFLAGS) $(DFLAGS) -- $(SRCS) $(SYNTHETIC_SRCS)
+	gcc -MM $(CXXFLAGS) $(SRCS) $(SYNTHETIC_SRCS) > depend
+#	$(MAKEDEP) -- $(CXXFLAGS) $(DFLAGS) -- $(SRCS) $(SYNTHETIC_SRCS)
 
 ifeq (depend,$(wildcard depend))
 include depend
