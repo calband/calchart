@@ -2,17 +2,11 @@
 
 NAME = calchart
 
-COMPMODE = win386 # nt
-
 WXDIR = d:\source\wxwin
-!ifeq COMPMODE win386
 !include $(WXDIR)\src\makewat.env
-CTLDLL = $(WXDIR)\contrib\ctl3d\ctl3dv2.dll
-!endif
-!ifeq COMPMODE nt
-!include $(WXDIR)\src\makew32.env
+EMU387 = $(%WATCOM)\binw\wemu387.386
 CTLDLL = $(WXDIR)\contrib\ctl3d\ctl3d32.dll
-!endif
+INSTPROG = $(WXDIR)\utils\winstall\bin\install.exe
 
 LNK = $(name).lnk
 
@@ -47,7 +41,7 @@ $(LNK) : makefile.wat
 	@%append $(LNK) $(MAXDATA)
 	@%append $(LNK) $(STACK)
 	@%append $(LNK) name $(name)
-	@%append $(LNK) file $(WXDIR)\lib\$(WXLIB)
+	@%append $(LNK) file $(WXDIR)\lib\wx$(LEVEL).lib
 	@for %i in ($(EXTRALIBS)) do @%append $(LNK) file %i
 	@for %i in ($(OBJS)) do @%append $(LNK) file %i
 
@@ -74,5 +68,7 @@ clean: .SYMBOLIC
 
 distrib: .SYMBOLIC
 	-erase $(name).zip
-	zip -Dr9 $(name).zip $(name).exe $(HELPFILES) runtime
-	zip -j9 $(name).zip d:\watcom\binw\wemu387.386 $(CTLDLL)
+	zip -Dr9 $(name).zip $(name).exe $(HELPFILES) runtime install.inf
+	zip -j9 $(name).zip $(CTLDLL)
+	zip -j9 $(name).zip $(EMU387)
+	zip -j9 $(name).zip $(INSTPROG)

@@ -283,7 +283,8 @@ public:
   CC_sheet(CC_sheet *sht);
   ~CC_sheet();
 
-  void Draw(wxDC *dc, unsigned ref, Bool drawall = TRUE, int point = -1);
+  void Draw(wxDC *dc, unsigned ref, Bool primary = TRUE,
+	    Bool drawall = TRUE, int point = -1);
 
   // internal use only
   char *PrintStandard(FILE *fp);
@@ -292,7 +293,7 @@ public:
   char *PrintCont(FILE *fp);
 
   unsigned GetNumSelectedPoints();
-  int FindPoint(Coord x, Coord y);
+  int FindPoint(Coord x, Coord y, unsigned ref = 0);
   Bool SelectPointsInRect(CC_coord c1, CC_coord c2);
   Bool SelectContinuity(unsigned i);
   void SetContinuity(unsigned i);
@@ -331,7 +332,6 @@ public:
   const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
   void SetAllPositions(const CC_coord& val, unsigned i);
   void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
-  void SetPosition(const cc_oldcoord& val, unsigned i, unsigned ref = 0);
   Bool TranslatePoints(CC_coord delta, unsigned ref = 0);
 
   CC_sheet *next;

@@ -12,6 +12,7 @@
 
 #include "anim_ui.h"
 #include "modes.h"
+#include "confgr.h"
 
 static void toolbar_anim_stop(CoolToolBar *tb);
 static void toolbar_anim_play(CoolToolBar *tb);
@@ -29,14 +30,6 @@ ToolBarEntry anim_tb[] = {
   { 0, NULL, "Previous stuntsheet", toolbar_anim_prev_sheet },
   { 0, NULL, "Next stuntsheet", toolbar_anim_next_sheet }
 };
-
-extern wxBrush *grassBrush;
-extern wxBrush *hilitBrush;
-extern wxPen *hilitPen;
-extern wxBrush *animhilitBrush;
-extern wxPen *animhilitPen;
-extern wxBrush *blueBrush;
-extern wxPen *bluePen;
 
 CC_WinNodeAnim::CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
@@ -81,13 +74,11 @@ AnimationCanvas::AnimationCanvas(wxFrame *frame, CC_descr *dcr)
   anim(NULL), show_descr(dcr), ourframe(frame), tempo(120) {
   float f;
 
+  SetColourMap(CalChartColorMap);
+
   timer = new AnimationTimer(this);
 
-  if (GetDC()->Colour) {
-    SetBackground(grassBrush);
-  } else {
-    SetBackground(wxWHITE_BRUSH);
-  }
+  SetBackground(CalChartBrushes[COLOR_FIELD]);
   f = DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0);
   SetUserScale(f, f);
 }
@@ -105,48 +96,55 @@ void AnimationCanvas::OnPaint() {
   dc->BeginDrawing();
 
   dc->Clear();
-  if (dc->Colour) {
-    dc->SetPen(wxWHITE_PEN);
-  } else {
-    dc->SetPen(wxBLACK_PEN);
-  }
+  dc->SetPen(CalChartPens[COLOR_FIELD_DETAIL]);
   show_descr->show->mode->DrawAnim(dc);
   if (anim)
   for (i = 0; i < anim->numpts; i++) {
-    if (dc->Colour) {
-      if (show_descr->show->IsSelected(i)) {
-	dc->SetPen(animhilitPen);
-	dc->SetBrush(animhilitBrush);
-      } else {
-	if (anim->curr_cmds[i]) {
-	  switch (anim->curr_cmds[i]->Direction()) {
-	  case ANIMDIR_SW:
-	  case ANIMDIR_W:
-	  case ANIMDIR_NW:
-	    dc->SetPen(hilitPen);
-	    dc->SetBrush(hilitBrush);
-	    break;
-	  case ANIMDIR_SE:
-	  case ANIMDIR_E:
-	  case ANIMDIR_NE:
-	    dc->SetPen(wxWHITE_PEN);
-	    dc->SetBrush(wxWHITE_BRUSH);
-	    break;
-	  default:
-	    dc->SetPen(bluePen);
-	    dc->SetBrush(blueBrush);
-	  }
-	} else {
-	  dc->SetPen(wxWHITE_PEN);
-	  dc->SetBrush(wxWHITE_BRUSH);
+    if (show_descr->show->IsSelected(i)) {
+      if (anim->curr_cmds[i]) {
+	switch (anim->curr_cmds[i]->Direction()) {
+	case ANIMDIR_SW:
+	case ANIMDIR_W:
+	case ANIMDIR_NW:
+	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
+	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
+	  break;
+	case ANIMDIR_SE:
+	case ANIMDIR_E:
+	case ANIMDIR_NE:
+	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
+	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
+	  break;
+	default:
+	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
+	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
 	}
+      } else {
+	dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
+	dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
       }
     } else {
-      dc->SetPen(wxBLACK_PEN);
-      if (show_descr->show->IsSelected(i)) {
-	dc->SetBrush(wxTRANSPARENT_BRUSH);
+      if (anim->curr_cmds[i]) {
+	switch (anim->curr_cmds[i]->Direction()) {
+	case ANIMDIR_SW:
+	case ANIMDIR_W:
+	case ANIMDIR_NW:
+	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_BACK]);
+	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_BACK]);
+	  break;
+	case ANIMDIR_SE:
+	case ANIMDIR_E:
+	case ANIMDIR_NE:
+	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_FRONT]);
+	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
+	  break;
+	default:
+	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_SIDE]);
+	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
+	}
       } else {
-	dc->SetBrush(wxBLACK_BRUSH);
+	dc->SetPen(CalChartPens[COLOR_POINT_ANIM_FRONT]);
+	dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
       }
     }
     x = anim->pts[i].pos.x+show_descr->show->mode->Offset().x;
@@ -220,11 +218,11 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 
   // Make a menubar
   wxMenu *anim_menu = new wxMenu;
-  anim_menu->Append(CALCHART__ANIM_REANIMATE, "Reanimate Show");
-  anim_menu->Append(CALCHART__ANIM_CLOSE, "Close Animation");
+  anim_menu->Append(CALCHART__ANIM_REANIMATE, "&Reanimate Show");
+  anim_menu->Append(CALCHART__ANIM_CLOSE, "&Close Animation");
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(anim_menu, "Animate");
+  menu_bar->Append(anim_menu, "&Animate");
   SetMenuBar(menu_bar);
 
   // Add a toolbar
@@ -240,8 +238,9 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 
   // Add the controls
   SetPanel(new wxPanel(this));
+  (void)new wxCheckBox(framePanel, (wxFunction)NULL, "&Collisions");
   AnimationSlider *sldr =
-    new AnimationSlider(framePanel, slider_anim_tempo, "Tempo",
+    new AnimationSlider(framePanel, slider_anim_tempo, "&Tempo",
 			canvas->GetTempo(), 10, 300, 150);
   sldr->canvas = canvas;
 

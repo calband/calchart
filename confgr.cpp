@@ -10,6 +10,7 @@
  */
 
 #include <wx_utils.h>
+#include <wx_gdi.h>
 #include "show.h"
 #include <ctype.h>
 
@@ -17,6 +18,136 @@
 #include "modes.h"
 
 extern ShowModeList *modelist;
+
+static char* ColorNames[COLOR_NUM] = {
+  "FIELD",
+  "FIELD DETAIL",
+  "FIELD TEXT",
+  "POINT",
+  "POINT TEXT",
+  "HILIT POINT",
+  "HILIT POINT TEXT",
+  "REF POINT",
+  "REF POINT TEXT",
+  "HILIT REF POINT",
+  "HILIT REF POINT TEXT",
+  "ANIM FRONT",
+  "ANIM BACK",
+  "ANIM SIDE",
+  "HILIT ANIM FRONT",
+  "HILIT ANIM BACK",
+  "HILIT ANIM SIDE",
+  "ANIM COLLISION"
+};
+
+static char* DefaultColors[COLOR_NUM] = {
+  "FOREST GREEN",
+  "WHITE",
+  "BLACK",
+  "WHITE",
+  "BLACK",
+  "YELLOW",
+  "BLACK",
+  "PURPLE",
+  "BLACK",
+  "PURPLE",
+  "BLACK",
+  "WHITE",
+  "YELLOW",
+  "SKY BLUE",
+  "255 192 128",
+  "ORANGE",
+  "BROWN",
+  "PURPLE"
+};
+
+static Bool DefaultMonoColors[COLOR_NUM] = {
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+};
+
+static int DefaultMonoPenHollow[COLOR_NUM] = {
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1
+};
+
+static int DefaultMonoPenWidth[COLOR_NUM] = {
+  1,
+  1,
+  1,
+  1,
+  1,
+  3,
+  1,
+  1,
+  1,
+  3,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+};
+
+static int DefaultMonoPenDotted[COLOR_NUM] = {
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+};
+
+wxColourMap *CalChartColorMap;
+wxPen *CalChartPens[COLOR_NUM];
+wxBrush *CalChartBrushes[COLOR_NUM];
 
 unsigned int window_default_width = 600;
 unsigned int window_default_height = 450;
@@ -82,6 +213,7 @@ static char runtimedir[MAX_PATH_LEN];
 
 char *ReadConfig(void) {
   FILE *fp;
+  int i;
   char com_buf[1024];
   char stage_eps_file[MAX_FNAME_LEN];
   CC_coord bord1(INT2COORD(8),INT2COORD(8)), bord2(INT2COORD(8),INT2COORD(8));
@@ -284,6 +416,46 @@ char *ReadConfig(void) {
 	       spr_line_text[3], spr_line_text[4]);
 	continue;
       }
+      if (strcmp("COLOR", com_buf) == 0) {
+	int mono, hollow, width, dotted;
+	char colname_buf[256];
+
+	fscanf(fp, " \"%[^\"]\" \"%[^\"]\" %d %d %d %d ",
+	       com_buf, colname_buf, &mono, &hollow, &width, &dotted);
+	for (i=0; i<COLOR_NUM; i++) {
+	  if (strcmp(ColorNames[i], com_buf) == 0) {
+	    if (wxColourDisplay()) {
+	      unsigned r, g, b;
+	      wxColour *c;
+	      
+	      if (sscanf(colname_buf, " %u %u %u ", &r, &g, &b) == 3) {
+		c = new wxColour(r, g, b);
+	      } else {
+		c = new wxColour(colname_buf);
+	      }
+	      CalChartPens[i] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
+	      CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c,
+								     wxSOLID);
+	      delete c;
+	    } else {
+	      CalChartPens[i] =
+		wxThePenList->FindOrCreatePen(mono ? wxWHITE:wxBLACK, width,
+					      dotted ? wxDOT:wxSOLID);
+	      CalChartBrushes[i] = hollow ? wxTRANSPARENT_BRUSH :
+		(mono ? wxWHITE_BRUSH:wxBLACK_BRUSH);
+	    }
+	    break;
+	  }
+	}
+	if (i == COLOR_NUM) {
+	  char tmpbuf[256];
+	  sprintf(tmpbuf,
+		  "Warning: color '%s' in config file is not recognized.\n",
+		  com_buf);
+	  retmsg = copystring(tmpbuf);
+	}
+	continue;
+      }
       if (!retmsg) {
 	char tmpbuf[256];
 	sprintf(tmpbuf, "Warning: '%s' is not recognized in config file.\n",
@@ -298,6 +470,76 @@ char *ReadConfig(void) {
     // No modes were defined.  Add a default
     modelist->Add(new ShowModeStandard("Standard", bord1, bord2,
 				       DEF_HASH_W, DEF_HASH_E));
+  }
+
+  if (wxColourDisplay()) {
+    unsigned char *rd, *gd, *bd;
+    int j;
+    int n = 0;
+    wxColour *c1, *c2;
+
+    for (i=0; i<COLOR_NUM; i++) {
+      unsigned r, g, b;
+      wxColour *c;
+      
+      if (sscanf(DefaultColors[i], " %u %u %u ", &r, &g, &b) == 3) {
+	c = new wxColour(r, g, b);
+      } else {
+	c = new wxColour(DefaultColors[i]);
+      }
+      if (CalChartPens[i] == NULL) {
+	CalChartPens[i] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
+      }
+      if (CalChartBrushes[i] == NULL) {
+	CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
+      }
+      delete c;
+    }
+    rd = new unsigned char[COLOR_NUM];
+    gd = new unsigned char[COLOR_NUM];
+    bd = new unsigned char[COLOR_NUM];
+    CalChartColorMap = new wxColourMap();
+    for (i = 0; i < COLOR_NUM; i++) {
+      for (j = -2; j < i; j++) {
+	c1 = &CalChartPens[i]->GetColour();
+	if (j >= 0) {
+	  c2 = &CalChartPens[j]->GetColour();
+	} else {
+	  if (j < -1) {
+	    c2 = wxBLACK;
+	  } else {
+	    c2 = wxWHITE;
+	  }
+	}
+	if ((c1->Red() == c2->Red()) &&
+	    (c1->Green() == c2->Green()) &&
+	    (c1->Blue() == c2->Blue())) {
+	  break;
+	}
+      }
+      if (i == j) {
+	CalChartPens[i]->GetColour().Get(&rd[n], &gd[n], &bd[n]);
+	n++;
+      }
+    }
+    CalChartColorMap->Create(n, rd, gd, bd);
+    delete [] rd;
+    delete [] gd;
+    delete [] bd;
+  } else {
+    for (i=0; i<COLOR_NUM; i++) {
+      if (CalChartPens[i] == NULL) {
+	CalChartPens[i] =
+	  wxThePenList->FindOrCreatePen(DefaultMonoColors[i] ? wxWHITE:wxBLACK,
+					DefaultMonoPenWidth[i],
+					DefaultMonoPenDotted[i]?wxDOT:wxSOLID);
+      }
+      if (CalChartBrushes[i] == NULL) {
+	CalChartBrushes[i] =
+	  DefaultMonoPenHollow[i] ? wxTRANSPARENT_BRUSH :
+	  (DefaultMonoColors[i] ? wxWHITE_BRUSH:wxBLACK_BRUSH);
+      }
+    }
   }
 
   return retmsg;

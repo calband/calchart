@@ -100,14 +100,22 @@ AnimateDir AnimGetDirFromAngle(float ang) {
 AnimateCommand::AnimateCommand(unsigned beats)
 : next(NULL), prev(NULL), numbeats(beats) {}
 
-Bool AnimateCommand::Begin(AnimatePoint&) {
+Bool AnimateCommand::Begin(AnimatePoint& pt) {
   beat = 0;
-  return TRUE;
+  if (numbeats == 0) {
+    ApplyForward(pt);
+    return FALSE;
+  }
+  else return TRUE;
 }
 
-Bool AnimateCommand::End(AnimatePoint&) {
+Bool AnimateCommand::End(AnimatePoint& pt) {
   beat = numbeats;
-  return TRUE;
+  if (numbeats == 0) {
+    ApplyBackward(pt);
+    return FALSE;
+  }
+  else return TRUE;
 }
 
 Bool AnimateCommand::NextBeat(AnimatePoint&) {
@@ -142,24 +150,6 @@ AnimateDir AnimateCommandMT::Direction() { return dir; }
 
 AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
 : AnimateCommandMT(beats, AnimGetDirFromVector(movement)), vector(movement) {
-}
-
-Bool AnimateCommandMove::Begin(AnimatePoint& pt) {
-  if (numbeats == 0) {
-    pt.pos += vector;
-    return FALSE;
-  } else {
-    return AnimateCommand::Begin(pt);
-  }
-}
-
-Bool AnimateCommandMove::End(AnimatePoint& pt) {
-  if (numbeats == 0) {
-    pt.pos -= vector;
-    return FALSE;
-  } else {
-    return AnimateCommand::End(pt);
-  }
 }
 
 Bool AnimateCommandMove::NextBeat(AnimatePoint& pt) {
@@ -202,24 +192,6 @@ void AnimateCommandMove::ClipBeats(unsigned beats) {
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
 					   float rad, float ang1, float ang2)
 : AnimateCommand(beats), origin(cntr), r(rad), ang_start(ang1), ang_end(ang2) {
-}
-
-Bool AnimateCommandRotate::Begin(AnimatePoint& pt) {
-  if (numbeats == 0) {
-    ApplyForward(pt);
-    return FALSE;
-  } else {
-    return AnimateCommand::Begin(pt);
-  }
-}
-
-Bool AnimateCommandRotate::End(AnimatePoint& pt) {
-  if (numbeats == 0) {
-    ApplyBackward(pt);
-    return FALSE;
-  } else {
-    return AnimateCommand::End(pt);
-  }
 }
 
 Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
@@ -341,42 +313,33 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
 	 currcont  = currcont->next) {
       if ((yyinputbuffer = currcont->text) != NULL) {
-	sprintf(tempbuf, "Parsing \"%.32s\" %.32s...",
+	sprintf(tempbuf, "Compiling \"%.32s\" %.32s...",
 		comp.curr_sheet->GetName(), (const char *)currcont->name);
 	frame->SetStatusText(tempbuf);
 	parsecontinuity();
-	if (ParsedContinuity != NULL) {
-	  for (j = 0; j < numpts; j++) {
-	    if (comp.curr_sheet->GetPoint(j).cont == currcont->num) {
-	      comp.Init(j);
-	      for (curr_proc = ParsedContinuity; curr_proc;
-		   curr_proc = curr_proc->next) {
-		curr_proc->Compile(&comp);
-	      }
-	      CC_coord c;
-	      if (comp.curr_sheet->next) {
-		if (comp.pt.pos !=
-		    comp.curr_sheet->next->GetPosition(comp.curr_pt)) {
-		  c = comp.curr_sheet->next->GetPosition(comp.curr_pt) -
-		    comp.pt.pos;
-		  comp.RegisterError(ANIMERR_WRONGPLACE);
-		  comp.Append(new AnimateCommandMove(comp.beats_rem, c));
-		}
-	      }
-	      if (comp.beats_rem) {
-		comp.RegisterError(ANIMERR_EXTRATIME);
-		comp.Append(new AnimateCommandMT(comp.beats_rem, ANIMDIR_E));
-	      }
-	      curr_sheet->commands[j] = comp.cmds;
+	for (j = 0; j < numpts; j++) {
+	  if (comp.curr_sheet->GetPoint(j).cont == currcont->num) {
+	    comp.Compile(j, ParsedContinuity);
+	    curr_sheet->commands[j] = comp.cmds;
 	      curr_sheet->end_cmds[j] = comp.curr_cmd;
-	    }
-	  }
-	  while (ParsedContinuity) {
-	    curr_proc = ParsedContinuity->next;
-	    delete ParsedContinuity;
-	    ParsedContinuity = curr_proc;
 	  }
 	}
+	while (ParsedContinuity) {
+	  curr_proc = ParsedContinuity->next;
+	  delete ParsedContinuity;
+	  ParsedContinuity = curr_proc;
+	}
+      }
+    }
+    // Handle points that don't have continuity (shouldn't happen)
+    sprintf(tempbuf, "Compiling \"%.32s\"...",
+	    comp.curr_sheet->GetName());
+    frame->SetStatusText(tempbuf);
+    for (j = 0; j < numpts; j++) {
+      if (curr_sheet->commands[j] == NULL) {
+	comp.Compile(j, NULL);
+	curr_sheet->commands[j] = comp.cmds;
+	curr_sheet->end_cmds[j] = comp.curr_cmd;
       }
     }
     if (!comp.Okay()) {
@@ -441,11 +404,15 @@ Bool Animation::PrevBeat() {
     curr_beat = curr_sheet->numbeats;
   }
   for (i = 0; i < numpts; i++) {
-    while (curr_cmds[i] != NULL) {
-      if (curr_cmds[i]->PrevBeat(pts[i])) break;
+    if (!curr_cmds[i]->PrevBeat(pts[i])) {
       // Advance to prev command, skipping zero beat commands
-      curr_cmds[i] = curr_cmds[i]->prev;
-      EndCmd(i);
+      if (curr_cmds[i]->prev) {
+	curr_cmds[i] = curr_cmds[i]->prev;
+	EndCmd(i);
+	// Set to next-to-last beat of this command
+	// Should always return TRUE
+	curr_cmds[i]->PrevBeat(pts[i]);
+      }
     }
   }
   curr_beat--;
@@ -463,8 +430,10 @@ Bool Animation::NextBeat() {
     if (curr_cmds[i]) {
       if (!curr_cmds[i]->NextBeat(pts[i])) {
 	// Advance to next command, skipping zero beat commands
-	curr_cmds[i] = curr_cmds[i]->next;
-	BeginCmd(i);
+	if (curr_cmds[i]->next) {
+	  curr_cmds[i] = curr_cmds[i]->next;
+	  BeginCmd(i);
+	}
       }
     }
   }
@@ -482,16 +451,20 @@ void Animation::GotoSheet(unsigned i) {
 }
 
 void Animation::BeginCmd(unsigned i) {
-  while (curr_cmds[i] != NULL) {
-    if (curr_cmds[i]->Begin(pts[i])) return;
-    curr_cmds[i] = curr_cmds[i]->next;
+  if (curr_cmds[i] != NULL) {
+    while (!curr_cmds[i]->Begin(pts[i])) {
+      if (curr_cmds[i]->next == NULL) return;
+      curr_cmds[i] = curr_cmds[i]->next;
+    }
   }
 }
 
 void Animation::EndCmd(unsigned i) {
-  while (curr_cmds[i] != NULL) {
-    if (curr_cmds[i]->End(pts[i])) return;
-    curr_cmds[i] = curr_cmds[i]->next;
+  if (curr_cmds[i] != NULL) {
+    while (!curr_cmds[i]->End(pts[i])) {
+      if (curr_cmds[i]->prev == NULL) return;
+      curr_cmds[i] = curr_cmds[i]->prev;
+    }
   }
 }
 
@@ -515,8 +488,13 @@ AnimateCompile::AnimateCompile()
   }
 }
 
-void AnimateCompile::Init(unsigned pt_num) {
+AnimateCompile::~AnimateCompile() {
+  FreeErrorMarkers();
+}
+
+void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
   unsigned i;
+  CC_coord c;
 
   for (i = 0; i < NUMCONTVARS; i++) {
     vars[i] = 0.0;
@@ -526,10 +504,22 @@ void AnimateCompile::Init(unsigned pt_num) {
   cmds = curr_cmd = NULL;
   curr_pt = pt_num;
   beats_rem = curr_sheet->beats;
-}
 
-AnimateCompile::~AnimateCompile() {
-  FreeErrorMarkers();
+  for (; proc; proc = proc->next) {
+    proc->Compile(this);
+  }
+  if (curr_sheet->next) {
+    if (pt.pos !=
+	curr_sheet->next->GetPosition(curr_pt)) {
+      c = curr_sheet->next->GetPosition(curr_pt) - pt.pos;
+      RegisterError(ANIMERR_WRONGPLACE);
+      Append(new AnimateCommandMove(beats_rem, c));
+    }
+  }
+  if (beats_rem) {
+    RegisterError(ANIMERR_EXTRATIME);
+    Append(new AnimateCommandMT(beats_rem, ANIMDIR_E));
+  }
 }
 
 Bool AnimateCompile::Append(AnimateCommand *cmd) {

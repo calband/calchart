@@ -139,19 +139,19 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
 
   panel = new wxPanel(this);
 
-  (void)new wxButton(panel, (wxFunction)ContEditSet, "Set Points");
-  (void)new wxButton(panel, (wxFunction)ContEditSelect, "Select Points");
+  (void)new wxButton(panel, (wxFunction)ContEditSet, "&Set Points");
+  (void)new wxButton(panel, (wxFunction)ContEditSelect, "Select &Points");
 
   conts = new wxChoice(panel, (wxFunction)ContEditCurrent, "");
 
   text = new FancyTextWin(this);
   
   wxMenu *cont_menu = new wxMenu;
-  cont_menu->Append(CALCHART__CONT_NEW, "New");
-  cont_menu->Append(CALCHART__CONT_DELETE, "Delete");
-  cont_menu->Append(CALCHART__CONT_CLOSE, "Close window");
+  cont_menu->Append(CALCHART__CONT_NEW, "&New");
+  cont_menu->Append(CALCHART__CONT_DELETE, "&Delete");
+  cont_menu->Append(CALCHART__CONT_CLOSE, "&Close window");
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(cont_menu, "Continuity");
+  menu_bar->Append(cont_menu, "&Continuity");
   SetMenuBar(menu_bar);
 
   OnSize(-1, -1);
@@ -481,7 +481,7 @@ PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
 
   // Add the buttons
   SetPanel(new wxPanel(this));
-  (void)new wxButton(framePanel, (wxFunction)PrintContClose, "Close");
+  (void)new wxButton(framePanel, (wxFunction)PrintContClose, "&Close");
 
   node = new CC_WinNodePrintCont(lst, this);
 

@@ -65,11 +65,18 @@ public:
   int OnExit(void);
 };
 
+// Top-level frame
+class TopFrame : public wxFrame {
+public:
+  TopFrame(wxFrame *frame = NULL);
+  Bool OnClose(void);
+};
+
 // Define a new frame
 class MainFrame : public wxFrameWithStuff {
 public:
   MainFrame(wxFrame *frame, int x, int y, int w, int h,
-	    MainFrame *other_frame = NULL);
+	    CC_show *show = NULL, MainFrame *other_frame = NULL);
   ~MainFrame();
 
   Bool OnClose(void);
@@ -199,7 +206,6 @@ enum {
   CALCHART__PRINT,
   CALCHART__PRINT_EPS,
   CALCHART__CLOSE,
-  CALCHART__QUIT,
   CALCHART__UNDO,
   CALCHART__REDO,
   CALCHART__INSERT_BEFORE,
@@ -219,10 +225,7 @@ enum {
 
 class MainFrameList: public wxList {
 public:
-  MainFrameList(): wxList() {}
-  ~MainFrameList();
-
-  void CloseAllWindows();
+  Bool CloseAllWindows();
 };
 
 #endif

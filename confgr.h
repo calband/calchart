@@ -16,6 +16,36 @@
 #define MAX_FNAME_LEN 128
 #define MAX_FONT_LEN 100
 
+enum CalChartColors {
+  COLOR_FIELD,
+  COLOR_FIELD_DETAIL,
+  COLOR_FIELD_TEXT,
+  COLOR_POINT,
+  COLOR_POINT_TEXT,
+  COLOR_POINT_HILIT,
+  COLOR_POINT_HILIT_TEXT,
+  COLOR_REF_POINT,
+  COLOR_REF_POINT_TEXT,
+  COLOR_REF_POINT_HILIT,
+  COLOR_REF_POINT_HILIT_TEXT,
+  COLOR_POINT_ANIM_FRONT,
+  COLOR_POINT_ANIM_BACK,
+  COLOR_POINT_ANIM_SIDE,
+  COLOR_POINT_ANIM_HILIT_FRONT,
+  COLOR_POINT_ANIM_HILIT_BACK,
+  COLOR_POINT_ANIM_HILIT_SIDE,
+  COLOR_POINT_ANIM_COLLISION,
+  COLOR_NUM
+};
+
+class wxColourMap;
+extern wxColourMap *CalChartColorMap;
+
+class wxPen;
+extern wxPen *CalChartPens[COLOR_NUM];
+class wxBrush;
+extern wxBrush *CalChartBrushes[COLOR_NUM];
+
 extern unsigned int window_default_width;
 extern unsigned int window_default_height;
 extern unsigned int undo_buffer_size;

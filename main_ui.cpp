@@ -117,13 +117,6 @@ wxFont *contItalFont;
 wxFont *contBoldItalFont;
 wxFont *pointLabelFont;
 wxFont *yardLabelFont;
-wxBrush *grassBrush;
-wxBrush *hilitBrush;
-wxPen *hilitPen;
-wxBrush *animhilitBrush;
-wxPen *animhilitPen;
-wxBrush *blueBrush;
-wxPen *bluePen;
 
 ShowModeList *modelist;
 
@@ -145,7 +138,12 @@ void CC_WinNodeMain::ChangeName() {
   winlist.ChangeName();
 }
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
-  canvas->RefreshShow(FALSE, point);
+  if (canvas->GetDC()->Colour) {
+    canvas->RefreshShow(FALSE, point);
+  } else {
+    // In mono we use different line widths, so must redraw everything
+    canvas->RefreshShow();
+  }
   winlist.UpdateSelections(win, point);
 }
 void CC_WinNodeMain::UpdatePoints() {
@@ -300,31 +298,13 @@ wxFrame *CalChartApp::OnInit(void)
 			      wxSWISS, wxNORMAL, wxNORMAL);
   yardLabelFont = new wxFont((int)FLOAT2NUM(yards_size),
 			      wxSWISS, wxNORMAL, wxNORMAL);
-#ifdef wx_msw
-  // MS-Windows is lame
-  wxColour grassColour(30,128,30);
-  grassBrush = new wxBrush(grassColour, wxSOLID);
-#else
-  grassBrush = new wxBrush("FOREST GREEN", wxSOLID);
-#endif
-
-  hilitBrush = new wxBrush("YELLOW", wxSOLID);
-  hilitPen = new wxPen("YELLOW", 1, wxSOLID);
-
-  animhilitBrush = new wxBrush("ORANGE", wxSOLID);
-  animhilitPen = new wxPen("ORANGE", 1, wxSOLID);
-
-  blueBrush = new wxBrush("BLUE", wxSOLID);
-  bluePen = new wxPen("BLUE", 1, wxSOLID);
 
   window_list = new MainFrameList();
 
   help_inst = new wxHelpInstance(TRUE);
   help_inst->Initialize("charthlp");
 
-  // Create and return the main frame window
-  return (new MainFrame(NULL, 50, 50,
-			window_default_width, window_default_height));
+  return new TopFrame();
 }
 
 int CalChartApp::OnExit(void) {
@@ -335,13 +315,67 @@ int CalChartApp::OnExit(void) {
   return 0;
 }
 
+static void new_window(wxButton&, wxEvent&) {
+  (void)new MainFrame(NULL, 50, 50,
+		      window_default_width, window_default_height);
+}
+
+static void open_window(wxButton&, wxEvent&) {
+  const char *s;
+  CC_show *shw;
+
+  s = wxFileSelector("Load show", NULL, NULL, NULL, file_wild);
+  if (s) {
+    shw = new CC_show(s);
+    if (shw->Ok()) {
+      new MainFrame(NULL, 50, 50,
+		    window_default_width, window_default_height, shw);
+    } else {
+      (void)wxMessageBox(shw->GetError(), "Load Error");
+      delete shw;
+    }
+  }
+}
+
+static void quit_callback(wxButton &button, wxEvent &) {
+  wxFrame *f = (wxFrame*)button.GetParent()->GetParent();
+  f->Close();
+}
+
+TopFrame::TopFrame(wxFrame *frame):
+  wxFrame(frame, "CalChart")
+{
+  int w, h;
+
+  // Give it an icon
+  SetBandIcon(this);
+
+  wxPanel *p = new wxPanel(this);
+  p->SetHorizontalSpacing(0);
+  p->SetVerticalSpacing(0);
+  (void)new wxButton(p, (wxFunction)new_window, "&New");
+  (void)new wxButton(p, (wxFunction)open_window, "&Open");
+  (void)new wxButton(p, (wxFunction)quit_callback, "&Quit");
+  p->Fit();
+  p->GetSize(&w, &h);
+  SetClientSize(w, h);
+#ifndef BUGGY_SIZE_HINTS
+  GetSize(&w, &h);
+  SetSizeHints(w, h, w, h);
+#endif
+  Show(TRUE);
+}
+
+Bool TopFrame::OnClose(void) {
+  return window_list->CloseAllWindows();
+}
+
 // Main frame constructor
 MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
-		     MainFrame *other_frame):
+		     CC_show *show, MainFrame *other_frame):
   wxFrameWithStuff(frame, "CalChart", x, y, w, h, wxSDI|wxDEFAULT_FRAME),
   field(NULL)
 {
-  CC_show *show;
   unsigned ss;
   unsigned def_zoom;
   unsigned def_grid;
@@ -356,43 +390,42 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
-  file_menu->Append(CALCHART__NEW, "New Show");
-  file_menu->Append(CALCHART__NEW_WINDOW, "New Window");
-  file_menu->Append(CALCHART__LOAD_FILE, "Open...");
-  file_menu->Append(CALCHART__APPEND_FILE, "Append...");
-  file_menu->Append(CALCHART__SAVE, "Save");
-  file_menu->Append(CALCHART__SAVE_AS, "Save As...");
-  file_menu->Append(CALCHART__PRINT, "Print...");
-  file_menu->Append(CALCHART__PRINT_EPS, "Print EPS...");
-  file_menu->Append(CALCHART__CLOSE, "Close Window");
-  file_menu->Append(CALCHART__QUIT, "Quit");
+  file_menu->Append(CALCHART__NEW, "&New Show");
+  file_menu->Append(CALCHART__NEW_WINDOW, "New &Window");
+  file_menu->Append(CALCHART__LOAD_FILE, "&Open...");
+  file_menu->Append(CALCHART__APPEND_FILE, "&Append...");
+  file_menu->Append(CALCHART__SAVE, "&Save");
+  file_menu->Append(CALCHART__SAVE_AS, "Save &As...");
+  file_menu->Append(CALCHART__PRINT, "&Print...");
+  file_menu->Append(CALCHART__PRINT_EPS, "Print &EPS...");
+  file_menu->Append(CALCHART__CLOSE, "&Close Window");
 
   wxMenu *edit_menu = new wxMenu;
-  edit_menu->Append(CALCHART__UNDO, "Undo");
-  edit_menu->Append(CALCHART__REDO, "Redo");
-  edit_menu->Append(CALCHART__INSERT_BEFORE, "Insert Sheet Before");
-  edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet After");
-  edit_menu->Append(CALCHART__DELETE, "Delete Sheet");
-  edit_menu->Append(CALCHART__RELABEL, "Relabel Sheets");
-  edit_menu->Append(CALCHART__EDIT_CONTINUITY, "Edit Continuity...");
-  edit_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit Printed Continuity...");
-  edit_menu->Append(CALCHART__SET_TITLE, "Set Title...");
-  edit_menu->Append(CALCHART__SET_BEATS, "Set Beats...");
+  edit_menu->Append(CALCHART__UNDO, "&Undo");
+  edit_menu->Append(CALCHART__REDO, "&Redo");
+  edit_menu->Append(CALCHART__INSERT_BEFORE, "&Insert Sheet Before");
+  edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet &After");
+  edit_menu->Append(CALCHART__DELETE, "&Delete Sheet");
+  edit_menu->Append(CALCHART__RELABEL, "&Relabel Sheets");
+  edit_menu->Append(CALCHART__EDIT_CONTINUITY, "&Edit Continuity...");
+  edit_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit &Printed Continuity...");
+  edit_menu->Append(CALCHART__SET_TITLE, "Set &Title...");
+  edit_menu->Append(CALCHART__SET_BEATS, "Set &Beats...");
 
   wxMenu *win_menu = new wxMenu;
-  win_menu->Append(CALCHART__INFO, "Information...");
-  win_menu->Append(CALCHART__POINTS, "Point Selections...");
-  win_menu->Append(CALCHART__ANIMATE, "Animate...");
+  win_menu->Append(CALCHART__INFO, "&Information...");
+  win_menu->Append(CALCHART__POINTS, "Point &Selections...");
+  win_menu->Append(CALCHART__ANIMATE, "&Animate...");
 
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(CALCHART__ABOUT, "About CalChart...");
-  help_menu->Append(CALCHART__HELP, "Help on CalChart...");
+  help_menu->Append(CALCHART__ABOUT, "&About CalChart...");
+  help_menu->Append(CALCHART__HELP, "&Help on CalChart...");
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, "File");
-  menu_bar->Append(edit_menu, "Edit");
-  menu_bar->Append(win_menu, "Windows");
-  menu_bar->Append(help_menu, "Help");
+  menu_bar->Append(file_menu, "&File");
+  menu_bar->Append(edit_menu, "&Edit");
+  menu_bar->Append(win_menu, "&Windows");
+  menu_bar->Append(help_menu, "&Help");
   SetMenuBar(menu_bar);
 
   // Add a toolbar
@@ -403,7 +436,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   // Add the field canvas
   if (!other_frame) {
-    show = new CC_show();
+    if (!show) show = new CC_show();
     ss = 0;
     def_zoom = FIELD_DEFAULT_ZOOM;
     def_grid = 2;
@@ -429,7 +462,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
     unsigned i;
 
     ref_choice = new ChoiceWithField(framePanel, (wxFunction)refnum_callback,
-				     "Ref Group");
+				     "&Ref Group");
     ref_choice->Append("Off");
     for (i = 1; i <= NUM_REF_PNTS; i++) {
       sprintf(buf, "%u", i);
@@ -439,12 +472,12 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   ((ChoiceWithField*)ref_choice)->field = field;
   ref_choice->SetSelection(def_ref);
   grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
-			     "Grid", -1, -1, -1, -1,
+			     "&Grid", -1, -1, -1, -1,
 			     sizeof(gridtext)/sizeof(char*),
 			     gridtext);
   grid_choice->SetSelection(def_grid);
   SliderWithField *sldr = new SliderWithField(framePanel, slider_zoom_callback,
-					      "Zoom", def_zoom,
+					      "&Zoom", def_zoom,
 					      1, FIELD_MAXZOOM, 150);
   sldr->field = field;
   zoom_slider = sldr;
@@ -490,7 +523,7 @@ void MainFrame::OnMenuCommand(int id)
     break;
   case CALCHART__NEW_WINDOW:
     frame = new MainFrame(NULL, 50, 50, window_default_width,
-			  window_default_height, this);
+			  window_default_height, NULL, this);
     break;
   case CALCHART__LOAD_FILE:
     LoadShow();
@@ -518,9 +551,6 @@ void MainFrame::OnMenuCommand(int id)
     break;
   case CALCHART__CLOSE:
     Close();
-    break;
-  case CALCHART__QUIT:
-    window_list->CloseAllWindows();
     break;
   case CALCHART__UNDO:
     sheetnum = field->show_descr.show->undolist->Undo(field->show_descr.show);
@@ -659,9 +689,6 @@ void MainFrame::OnMenuSelect(int id)
     break;
   case CALCHART__CLOSE:
     msg = "Close this window";
-    break;
-  case CALCHART__QUIT:
-    msg = "Quit the program";
     break;
   case CALCHART__UNDO:
     msg = field->show_descr.show->undolist->UndoDescription();
@@ -834,16 +861,14 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
  AutoScrollCanvas(frame, x, y, w, h), ourframe(frame), curr_lasso(CC_DRAG_BOX),
  curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
 {
+  SetColourMap(CalChartColorMap);
+
   show_descr.show = show;
   show_descr.curr_ss = ss;
 
   SetZoomQuick(def_zoom);
 
-  if (GetDC()->Colour) {
-    SetBackground(grassBrush);
-  } else {
-    SetBackground(wxWHITE_BRUSH);
-  }
+  SetBackground(CalChartBrushes[COLOR_FIELD]);
 
   UpdateBars();
   UpdatePanel();
@@ -929,7 +954,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
       if (event.LeftDown()) {
 	Bool changed = FALSE;
 	if (!event.shiftDown) changed = show_descr.show->UnselectAll();
-	i = sheet->FindPoint(pos.x, pos.y);
+	i = sheet->FindPoint(pos.x, pos.y, curr_ref);
 	if (i >= 0) {
 	  if (!(show_descr.show->IsSelected(i))) {
 	    show_descr.show->Select(i);
@@ -942,7 +967,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	if (i < 0) {
 	  BeginDrag(curr_lasso, pos);
 	} else {
-	  BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i));
+	  BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
 	}
       } else {
 	if (event.LeftUp()) {
@@ -992,7 +1017,12 @@ void FieldCanvas::RefreshShow(Bool drawall, int point) {
   if (show_descr.show) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
-      sheet->Draw(GetMemDC(), curr_ref, drawall, point);
+      if (curr_ref > 0) {
+	sheet->Draw(GetMemDC(), 0, FALSE, drawall, point);
+	sheet->Draw(GetMemDC(), curr_ref, TRUE, FALSE, point);
+      } else {
+	sheet->Draw(GetMemDC(), curr_ref, TRUE, drawall, point);
+      }
       Blit();
       dragon = FALSE; // since the canvas gets cleared
       DrawDrag(TRUE);
@@ -1017,10 +1047,7 @@ void FieldCanvas::UpdateBars() {
   }
 }
 
-MainFrameList::~MainFrameList() {
-}
-
-void MainFrameList::CloseAllWindows() {
+Bool MainFrameList::CloseAllWindows() {
   wxNode *node, *node_tmp;
   MainFrame *mf;
 
@@ -1028,9 +1055,10 @@ void MainFrameList::CloseAllWindows() {
     mf = (MainFrame *)node->Data();
     // This node will be deleted by the window's deconstructor
     node_tmp = node->Next();
-    mf->Close();
+    if (!mf->Close()) return FALSE;
     node = node_tmp;
   }
+  return TRUE;
 }
 
 static void toolbar_prev_ss(CoolToolBar *tb) {

@@ -79,8 +79,6 @@ class AnimateCommandMove : public AnimateCommandMT {
 public:
   AnimateCommandMove(unsigned beats, CC_coord movement);
 
-  virtual Bool Begin(AnimatePoint& pt);
-  virtual Bool End(AnimatePoint& pt);
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
 
@@ -97,8 +95,6 @@ public:
   AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad,
 		       float ang1, float ang2);
 
-  virtual Bool Begin(AnimatePoint& pt);
-  virtual Bool End(AnimatePoint& pt);
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
 
@@ -158,13 +154,14 @@ private:
   AnimateSheet *sheets;
 };
 
+class ContProcedure;
 class AnimateCompile {
 public:
   AnimateCompile();
   ~AnimateCompile();
 
-  // Prepare for compiling a point
-  void Init(unsigned pt_num);
+  // Compile a point
+  void Compile(unsigned pt_num, ContProcedure* proc);
   // TRUE if successful
   Bool Append(AnimateCommand *cmd);
 

@@ -32,7 +32,7 @@ OBJS = $(SRCS:.cc=.o) $(SYNTHETIC_SRCS:.cc=.o)
 PSFILES = postscript/calchart.ps postscript/setup.sh postscript/vmstatus.sh \
 	postscript/zllrbach.fig
 RUNTIME = runtime/config runtime/prolog0.ps runtime/prolog1.ps \
-	runtime/setup2.ps
+	runtime/prolog2.ps runtime/setup2.ps
 RUNTIME_ALL = $(RUNTIME) runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps
 PS_SYNTH_FILES = runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps postscript/vmstatus.ps
 IMAGES = tb_left.xbm tb_right.xbm tb_box.xbm tb_poly.xbm tb_lasso.xbm \
@@ -52,9 +52,9 @@ DOCS = docs/charthlp.tex docs/tex2rtf.ini docs/texhelp.sty \
 
 MOSTSRCS = $(SRCS) $(SYNTHETIC_BASES) $(HEADERS) $(DOCS)
 ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) $(PSFILES) Makefile xbm2xpm \
-	makefile.wat calchart.rc
+	makefile.wat calchart.rc install.inf
 MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
-	makefile.wat calchart.rc
+	makefile.wat calchart.rc install.inf
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@

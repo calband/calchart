@@ -145,8 +145,8 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 
   SetLabelPosition(wxVERTICAL);
 
-  wxButton *okBut = new wxButton(this, (wxFunction)ShowPrintOk, "Print");
-  (void) new wxButton(this, (wxFunction)ShowPrintCancel, "Close");
+  wxButton *okBut = new wxButton(this, (wxFunction)ShowPrintOk, "&Print");
+  (void) new wxButton(this, (wxFunction)ShowPrintCancel, "&Close");
   NewLine();
   NewLine();
   okBut->SetDefault();
@@ -172,7 +172,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 #endif
 
 #ifndef PRINT__RUN_CMD
-  text_cmd = new wxText(this, (wxFunction)NULL, "Printer Device: ",
+  text_cmd = new wxText(this, (wxFunction)NULL, "Printer &Device: ",
 			print_file,
 			-1, -1, 100, -1);
 
@@ -183,7 +183,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   char *orientation[2];
   orientation[0] = "Portrait";
   orientation[1] = "Landscape";
-  radio_orient = new wxRadioBox(this, (wxFunction)NULL, "Orientation: ",
+  radio_orient = new wxRadioBox(this, (wxFunction)NULL, "&Orientation: ",
 		    -1,-1,-1,-1,2,orientation,2,wxHORIZONTAL|wxFLAT);
   radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
 
@@ -196,7 +196,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 #else
   int features = 2;
 #endif
-  radio_method = new wxRadioBox(this, (wxFunction)NULL, "PostScript:",
+  radio_method = new wxRadioBox(this, (wxFunction)NULL, "Post&Script:",
 				-1,-1,-1,-1, features, print_modes,
 				features, wxHORIZONTAL|wxFLAT);
   radio_method->SetSelection(0);
@@ -204,37 +204,37 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   NewLine();
   NewLine();
 
-  check_overview = new wxCheckBox(this, (wxFunction)NULL, "Overview");
+  check_overview = new wxCheckBox(this, (wxFunction)NULL, "Over&view");
   check_overview->SetValue(FALSE);
-  check_cont = new wxCheckBox(this, (wxFunction)NULL, "Continuity");
+  check_cont = new wxCheckBox(this, (wxFunction)NULL, "Continuit&y");
   check_cont->SetValue(show_descr->show->GetBoolDoCont());
   if (!eps) {
-    check_pages = new wxCheckBox(this, (wxFunction)NULL, "Cover pages");
+    check_pages = new wxCheckBox(this, (wxFunction)NULL, "Cove&r pages");
     check_pages->SetValue(show_descr->show->GetBoolDoContSheet());
   }
 
   if (!eps) {
     NewLine();
-    (void) new wxButton(this, (wxFunction)ShowPrintSelect, "Select sheets...");
+    (void) new wxButton(this, (wxFunction)ShowPrintSelect,"S&elect sheets...");
   }
 
   NewLine();
   NewLine();
 
   sprintf(buf, "%.2f", page_width);
-  text_width = new wxText(this, (wxFunction)NULL, "Page width: ",
+  text_width = new wxText(this, (wxFunction)NULL, "Page &width: ",
 		      buf, -1, -1, 100, -1);
 
   sprintf(buf, "%.2f", page_height);
-  text_height = new wxText(this, (wxFunction)NULL, "Page height: ",
+  text_height = new wxText(this, (wxFunction)NULL, "Page &height: ",
 		      buf, -1, -1, 100, -1);
 
   sprintf(buf, "%.2f", page_offset_x);
-  text_x = new wxText(this, (wxFunction)NULL, "Left margin: ",
+  text_x = new wxText(this, (wxFunction)NULL, "&Left margin: ",
 			  buf, -1, -1, 100, -1);
 
   sprintf(buf, "%.2f", page_offset_y);
-  text_y = new wxText(this, (wxFunction)NULL, "Top margin: ",
+  text_y = new wxText(this, (wxFunction)NULL, "&Top margin: ",
 			   buf, -1, -1, 100, -1);
 
   NewLine();

@@ -417,12 +417,13 @@ unsigned CC_sheet::GetNumSelectedPoints() {
 }
 
 // Find point at certain coords
-int CC_sheet::FindPoint(Coord x, Coord y) {
+int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) {
   unsigned i;
+  CC_coord c;
   Coord w = FLOAT2COORD(dot_ratio);
   for (i = 0; i < show->GetNumPoints(); i++) {
-    if (((x+w) >= pts[i].pos.x) && ((x-w) <= pts[i].pos.x) &&
-	 ((y+w) >= pts[i].pos.y) && ((y-w) <= pts[i].pos.y)) {
+    c = GetPosition(i, ref);
+    if (((x+w) >= c.x) && ((x-w) <= c.x) && ((y+w) >= c.y) && ((y-w) <= c.y)) {
       return i;
     }
   }
@@ -799,7 +800,7 @@ void CC_sheet::SetPoint(const cc_oldpoint& val, unsigned i) {
     pts[i].sym = SYMBOL_PLAIN;
   else pts[i].sym = (SYMBOL_TYPE)(val.sym - 111);
   pts[i].cont = get_lil_word(&val.cont);
-  SetPosition(val.pos, i);
+  SetAllPositions(val.pos, i);
   for (unsigned j = 0; j < 3; j++) {
     // -1 means undefined (endian doesn't matter)
     if ((val.ref[j].x == 0xFFFF) && (val.ref[j].y == 0xFFFF)) {
@@ -830,17 +831,18 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i) {
 
 // Set position of point
 void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref) {
-  if (ref == 0)
+  unsigned j;
+  if (ref == 0) {
+    for (j=0; j<NUM_REF_PNTS; j++) {
+      if (pts[i].ref[j] == pts[i].pos) {
+	pts[i].ref[j] = val;
+      }
+    }
     pts[i].pos = val;
-  else
+  }
+  else {
     pts[i].ref[ref-1] = val;
-}
-
-// Set position of point from old coord
-void CC_sheet::SetPosition(const cc_oldcoord& val, unsigned i, unsigned ref) {
-  CC_coord c = val;
-
-  SetPosition(c, i, ref);
+  }
 }
 
 // Move points

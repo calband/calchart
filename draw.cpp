@@ -12,10 +12,9 @@
 #include "modes.h"
 
 extern wxFont *pointLabelFont;
-extern wxBrush *hilitBrush;
-extern wxPen *hilitPen;
 
-void CC_sheet::Draw(wxDC *dc, unsigned ref, Bool drawall, int point) {
+void CC_sheet::Draw(wxDC *dc, unsigned ref, Bool primary,
+		    Bool drawall, int point) {
   unsigned short i;
   unsigned lastpoint;
   wxBrush *fillBrush;
@@ -27,23 +26,18 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, Bool drawall, int point) {
 
   dc->BeginDrawing();
   dc->SetBackgroundMode(wxTRANSPARENT);
-  if (dc->Colour) {
-    dc->SetPen(wxWHITE_PEN);
-    fillBrush = wxWHITE_BRUSH;
-  } else {
-    dc->SetPen(wxBLACK_PEN);
-    fillBrush = wxBLACK_BRUSH;
-  }
-  dc->SetTextForeground(wxBLACK);
-  dc->SetLogicalFunction(wxCOPY);
 
   if (drawall) {
     dc->Clear();
+    dc->SetPen(CalChartPens[COLOR_FIELD_DETAIL]);
+    dc->SetTextForeground(&CalChartPens[COLOR_FIELD_TEXT]->GetColour());
+    dc->SetLogicalFunction(wxCOPY);
     show->mode->Draw(dc);
   }
 
   if (pts) {
     dc->SetFont(pointLabelFont);
+    dc->SetTextForeground(&CalChartPens[COLOR_POINT_TEXT]->GetColour());
     circ_r = FLOAT2COORD(dot_ratio);
     offset = circ_r / 2;
     plineoff = offset * pline_ratio;
@@ -58,17 +52,22 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, Bool drawall, int point) {
       lastpoint = (unsigned)point + 1;
     }
     for (; i < lastpoint; i++) {
-      if (dc->Colour) {
-	if (show->IsSelected(i)) {
-	  dc->SetPen(hilitPen);
-	  fillBrush = hilitBrush;
+      if (show->IsSelected(i)) {
+	if (primary) {
+	  dc->SetPen(CalChartPens[COLOR_POINT_HILIT]);
+	  fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
 	} else {
-	  dc->SetPen(wxWHITE_PEN);
-	  fillBrush = wxWHITE_BRUSH;
+	  dc->SetPen(CalChartPens[COLOR_REF_POINT_HILIT]);
+	  fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
 	}
       } else {
-	dc->SetPen(wxBLACK_PEN);
-	fillBrush = wxBLACK_BRUSH;
+	if (primary) {
+	  dc->SetPen(CalChartPens[COLOR_POINT]);
+	  fillBrush = CalChartBrushes[COLOR_POINT];
+	} else {
+	  dc->SetPen(CalChartPens[COLOR_REF_POINT]);
+	  fillBrush = CalChartBrushes[COLOR_REF_POINT];
+	}
       }
       x = GetPosition(i, ref).x+origin.x;
       y = GetPosition(i, ref).y+origin.y;

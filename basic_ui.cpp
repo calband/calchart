@@ -261,7 +261,7 @@ void wxFrameWithStuffSized::Fit()
 AutoScrollCanvas::AutoScrollCanvas(wxWindow *parent,
 				   int x, int y, int w, int h):
   wxCanvas(parent, x, y, w, h, 0 /* not retained */), memdc(NULL), membm(NULL),
-  x_scale(1.0), y_scale(1.0)
+  x_scale(1.0), y_scale(1.0), cmap(NULL)
 {
   if ((w > 0) && (h > 0)) {
     SetSize(w, h);
@@ -287,6 +287,7 @@ void AutoScrollCanvas::SetSize(int width, int height) {
     } else {
       memdc->SelectObject(membm);
       memdc->SetBackground(GetDC()->GetBackground());
+      memdc->SetColourMap(cmap);
       memdc->SetUserScale(x_scale, y_scale);
     }
   }
@@ -295,6 +296,12 @@ void AutoScrollCanvas::SetSize(int width, int height) {
 void AutoScrollCanvas::SetBackground(wxBrush *brush) {
   wxCanvas::SetBackground(brush);
   if (memdc) memdc->SetBackground(brush);
+}
+
+void AutoScrollCanvas::SetColourMap(wxColourMap *colourMap) {
+  cmap = colourMap;
+  wxCanvas::SetColourMap(cmap);
+  if (memdc) memdc->SetColourMap(cmap);
 }
 
 void AutoScrollCanvas::SetUserScale(float x, float y) {
@@ -331,11 +338,21 @@ void AutoScrollCanvas::Move(float x, float y) {
 
 void AutoScrollCanvas::Blit() {
   if (memdc) {
-    GetDC()->SetUserScale(1.0, 1.0);
+    wxDC *dc = GetDC();
+    dc->SetUserScale(1.0, 1.0);
     memdc->SetUserScale(1.0, 1.0);
-    GetDC()->Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
-		  memdc, 0, 0, wxCOPY);
-    GetDC()->SetUserScale(x_scale, y_scale);
+    if (!dc->Colour) {
+      // Source is a mono bitmap, so we must set the fg and bg colors
+      dc->SetPen(wxWHITE_PEN);
+      dc->SetBackground(wxBLACK_BRUSH);
+    }
+    dc->Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
+	     memdc, 0, 0, wxCOPY);
+    if (!dc->Colour) {
+      // Restore original background
+      dc->SetBackground(memdc->GetBackground());
+    }
+    dc->SetUserScale(x_scale, y_scale);
     memdc->SetUserScale(x_scale, y_scale);
   }
 }

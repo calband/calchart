@@ -169,7 +169,7 @@ show(shw) {
   panel = new wxPanel(this);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)SheetPickerClose,
-				    "Close");
+				    "&Close");
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -179,7 +179,7 @@ show(shw) {
 
   if (multi) {
     wxButton *allBut = new wxButton(panel, (wxFunction)SheetPickerAll,
-				    "All");
+				    "&All");
     wxLayoutConstraints *bt1 = new wxLayoutConstraints;
     bt1->left.RightOf(closeBut, 5);
     bt1->top.SameAs(closeBut, wxTop);
@@ -188,7 +188,7 @@ show(shw) {
     allBut->SetConstraints(bt1);
 
     wxButton *noneBut = new wxButton(panel, (wxFunction)SheetPickerNone,
-				     "None");
+				     "&None");
     wxLayoutConstraints *bt2 = new wxLayoutConstraints;
     bt2->left.RightOf(allBut, 5);
     bt2->top.SameAs(closeBut, wxTop);
@@ -313,7 +313,7 @@ show(shw) {
   panel = new wxPanel(this);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)PointPickerClose,
-				    "Close");
+				    "&Close");
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -323,7 +323,7 @@ show(shw) {
 
   if (multi) {
     wxButton *allBut = new wxButton(panel, (wxFunction)PointPickerAll,
-				    "All");
+				    "&All");
     wxLayoutConstraints *bt1 = new wxLayoutConstraints;
     bt1->left.RightOf(closeBut, 5);
     bt1->top.SameAs(closeBut, wxTop);
@@ -332,7 +332,7 @@ show(shw) {
     allBut->SetConstraints(bt1);
 
     wxButton *noneBut = new wxButton(panel, (wxFunction)PointPickerNone,
-				     "None");
+				     "&None");
     wxLayoutConstraints *bt2 = new wxLayoutConstraints;
     bt2->left.RightOf(allBut, 5);
     bt2->top.SameAs(closeBut, wxTop);
@@ -498,7 +498,7 @@ show(shw) {
   panel->SetLabelPosition(wxVERTICAL);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)ShowInfoClose,
-				    "Close");
+				    "&Close");
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -507,7 +507,7 @@ show(shw) {
   closeBut->SetConstraints(bt0);
 
   wxButton *setnumBut = new wxButton(panel, (wxFunction)ShowInfoSetNum,
-				     "Set Num Points");
+				     "Set &Num Points");
   wxLayoutConstraints *bt1 = new wxLayoutConstraints;
   bt1->left.RightOf(closeBut, 5);
   bt1->top.SameAs(closeBut, wxTop);
@@ -516,7 +516,7 @@ show(shw) {
   setnumBut->SetConstraints(bt1);
 
   wxButton *setlabBut = new wxButton(panel, (wxFunction)ShowInfoSetLabels,
-				     "Set Labels");
+				     "Set &Labels");
   wxLayoutConstraints *bt2 = new wxLayoutConstraints;
   bt2->left.RightOf(setnumBut, 5);
   bt2->top.SameAs(closeBut, wxTop);
@@ -526,7 +526,7 @@ show(shw) {
 
   closeBut->SetDefault();
 
-  lettersize = new wxSlider(panel, (wxFunction)NULL, "Points per letter",
+  lettersize = new wxSlider(panel, (wxFunction)NULL, "P&oints per letter",
 			    maxnum, 1, 10, -1);
   wxLayoutConstraints *b0 = new wxLayoutConstraints;
   b0->left.SameAs(panel, wxLeft, 5);
@@ -535,7 +535,7 @@ show(shw) {
   b0->height.AsIs();
   lettersize->SetConstraints(b0);
 
-  labels = new GoodListBox(panel, (wxFunction)NULL, "Letters",
+  labels = new GoodListBox(panel, (wxFunction)NULL, "&Letters",
 			   wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
   buf[1] = '\0';
   for (i = 0; i < 26; i++) {
@@ -552,7 +552,7 @@ show(shw) {
   labels->SetConstraints(b1);
 
   sprintf(buf, "%u", show->GetNumPoints());
-  numpnts = new wxText(panel, (wxFunction)NULL, "Points", buf);
+  numpnts = new wxText(panel, (wxFunction)NULL, "&Points", buf);
 
   wxLayoutConstraints *b2 = new wxLayoutConstraints;
   b2->left.RightOf(labels, 5);
@@ -563,7 +563,7 @@ show(shw) {
 
   strs[0] = "Numbers";
   strs[1] = "Letters";
-  label_type = new wxRadioBox(panel, (wxFunction)NULL, "Labels",
+  label_type = new wxRadioBox(panel, (wxFunction)NULL, "&Labels",
 			      -1, -1, -1, -1, 2, strs, 2, wxHORIZONTAL|wxFLAT);
   label_type->SetSelection(use_letters);
 
@@ -574,7 +574,7 @@ show(shw) {
   b3->height.AsIs();
   label_type->SetConstraints(b3);
 
-  choice = new wxChoice(panel, (wxFunction)ShowInfoModeChoice, "Show mode");
+  choice = new wxChoice(panel, (wxFunction)ShowInfoModeChoice, "Show &mode");
   ShowMode *mode = modelist->First();
   while (mode != NULL) {
     choice->Append(mode->Name());
