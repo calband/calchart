@@ -16,8 +16,6 @@
 void SetXOR(wxDC *dc) {
   dc->SetBrush(wxTRANSPARENT_BRUSH);
   dc->SetPen(wxWHITE_PEN);
-  // Strange bug, make sure we really get wxINVERT
-  dc->SetLogicalFunction(wxCOPY);
   dc->SetLogicalFunction(wxINVERT);
 }
 
