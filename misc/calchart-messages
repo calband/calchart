@@ -8194,3 +8194,1096 @@ a Macintosh to work with Cal Chart.  Hope everthing goes well.
 
 
 
+From dci@math.uchicago.edu Tue Apr  9 11:56:26 1996
+Received: from math.uchicago.edu (math.uchicago.edu [128.135.72.38]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id LAA27565 for <gmeeker@volga.EECS.Berkeley.EDU>; Tue, 9 Apr 1996 11:56:24 -0700
+Received: (from dci@localhost) by math.uchicago.edu (8.6.11/8.6.10) id NAA15135 for gmeeker@volga.EECS.Berkeley.EDU; Tue, 9 Apr 1996 13:56:28 -0500
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199604091856.NAA15135@math.uchicago.edu>
+Subject: Re: calchart docs
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Tue, 9 Apr 1996 13:56:27 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960403182058.2890A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Apr 3, 96 07:13:29 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 744       
+Status: RO
+X-Status: A
+
+
+> Okay, I checked the docs for tex2rtf (the converter program) and it 
+> seemed to support this.  You should at least look at the section "What 
+> compromises must I make" under "Writing documents with Tex2RTF."  Also, I 
+> suppose I could put this program on the web page so you can see what 
+> things look like in HTML.
+
+I finally got around to checking this out.  I skimmed through the section 
+that you suggested, and I don't think that there will be any problems.  
+The only moderately complicated things that we will be doing are 
+inserting some figures and making an index.  I didn't see any references 
+to making an index, so I'm not sure if Tex2RTF will support that.  There 
+is a fairly nice way of doing indices with Latex.
+ 
+Dan
+
+
+
+From dci@math.uchicago.edu Mon Apr 15 13:15:05 1996
+Received: from math.uchicago.edu (math.uchicago.edu [128.135.72.38]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id NAA23462 for <gmeeker@ute.CS.Berkeley.EDU>; Mon, 15 Apr 1996 13:14:59 -0700
+Received: (from dci@localhost) by math.uchicago.edu (8.6.11/8.6.10) id PAA01144 for gmeeker@ute.CS.Berkeley.EDU; Mon, 15 Apr 1996 15:15:02 -0500
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199604152015.PAA01144@math.uchicago.edu>
+Subject: Re: Motif version of calchart
+To: gmeeker@ute.CS.Berkeley.EDU (Garrick Meeker)
+Date: Mon, 15 Apr 1996 15:15:02 -0500 (CDT)
+In-Reply-To: <Pine.HPP.3.91.960412165109.22587D-100000@ute.CS.Berkeley.EDU> from "Garrick Meeker" at Apr 12, 96 04:57:35 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 1269      
+Status: RO
+X-Status: A
+
+
+> Nothing to be sorry about.  Because of your message I discover another 
+> bug.  I just fixed it.  It will be on the web page shortly.  No need to 
+> get it if $CALCHART_RT is set, however.  Under Windows, this variable 
+> doesn't need to be set because you can set the current directory from the 
+> icon.  Also, it seems pointless to provide Motif and XView versions.  The 
+> only real benefit from the XView version is that I don't have to 
+> statically link it.  Is that okay by you?  You might want to look at both 
+> versions before you decide.
+
+I have looked at both versions a bit, and I have already noticed a few 
+bugs that occur with one version but not the other.  Most of the bugs 
+that I have already found occur in both versions.  So if you want to 
+claim to be supporting both versions, then you had best continue to make 
+both versions available so that I can find bugs.
+
+I don't have an opinion about the importance of supporting both Motif and 
+XView because I don't know the technical differences.  So, you should 
+decide whether you want to continue to support both or not.  Maybe you 
+could make only one available most of the time, but once in a while you 
+should make both available.
+
+I will send you a bug report by the end of the week.
+
+Dan
+
+
+From dci@math.uchicago.edu Wed Apr 17 07:46:01 1996
+Received: from harvey.calband.berkeley.edu (harvey.CalBand.Berkeley.EDU [128.32.89.167]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id HAA05349 for <gmeeker@pasteur.eecs.berkeley.edu>; Wed, 17 Apr 1996 07:46:00 -0700
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by harvey.calband.berkeley.edu (8.6.12/8.6.12) with ESMTP id HAA27618 for <gmeeker@calband.berkeley.edu>; Wed, 17 Apr 1996 07:45:00 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.6.11/8.6.10) id JAA10513 for gmeeker@calband.berkeley.edu; Wed, 17 Apr 1996 09:46:06 -0500
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199604171446.JAA10513@hog.uchicago.edu>
+Subject: calchart bugs
+To: gmeeker@CalBand.Berkeley.EDU
+Date: Wed, 17 Apr 1996 09:46:05 -0500 (CDT)
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 7204      
+Status: RO
+X-Status: 
+
+
+Here is a preliminary list of bugs that I have found.  It is far from 
+complete; there are many features that I haven't played with thoroughly yet.
+
+All the bugs listed apply to the Motif version.  Probably they also apply 
+to the XView version, but I haven't explicitly tested them.  However, the 
+ones marked XV have been reproduced on the XView version.
+
+I am particularly proud of my work on number 18 (see below).
+
+1(XV). When I select "help", I get a message in my shell window saying that 
+the program cannot find "wxhelp"; this is the problem that you told me 
+would occur.  However, the program freezes; then a dialog box appears 
+with a warning about "timing out after 15 seconds".  After I close the 
+dialog box, the whole process starts all over again.  The only recourse 
+is to kill the process externally.
+
+2(XV). Loading a show still results in a seg fault.
+
+3(XV). Extraneous "Deleting show...." messages in my shell window.  Are 
+these useful for debugging?  Just don't forget to get rid of them eventually.
+
+4. Extraneous "Deleting window from list of n elements." messages in my 
+shell window.  
+
+5.  In the show info box, click on a letter, then scroll.  Funny things 
+happen to the dotted lines.
+
+6.  Text editing is fucked up.  Control characters create nonstandard 
+symbols, backspace doesn't work, etc.  This applies in such places as: 
+setting the number of points in the show info box; the text box at the 
+bottom of the show info box; typing how many rows you want in your 
+initial formation; etc.
+
+7.  (XV) Having to press ENTER to change the number of points is
+illogical.  I believe we discussed this a while ago.  When I started
+testing again recently, I couldn't figure out how to add points for quite
+a while.  Eventually, I stumbled across the answer.  Anyway, the current
+system is too confusing; if I can't figure it out, can you imagine how
+confused Stunt will be? 
+
+8.  If you type text in the box at the bottom of the show info box, it 
+doesn't reappear when you open the show info box again.
+
+9.  (XV) There is an ambiguity in the name "Show info".  Do you mean it 
+as an adjective and noun (ie, "information pertaining to this show")
+or do you mean it as a verb and noun (ie, "put the information on the 
+screen")?  Can we think of a non-ambiguous synonym?
+
+10.  If two points get put on top of each other, they can later be 
+separated by using individual move.  In version 2, the program made an
+arbitrary choice as to which point you would be picking up.  It told you 
+which one it had selected for you at the bottom of the screen.  Something 
+analogous should happen in version 3.  Maybe the program should ask you 
+which one you want; at the very least it should tell you which one you've 
+got.
+
+11.  Auto relabeling is of course very useful.  But there is potentially 
+a time for manual relabeling.  What if I am experimenting, and the points 
+get all jumbled up so that there is no nice consecutive pattern to the 
+labeling?  Even if I relabel, the labels will still be in the same 
+illogical order.  It should be possible to straighten out the pattern, 
+even if it requires a lot of manual work.
+
+What I am talking about is the fact that the labels in the pregame wedge 
+are in a nice pattern; usually the first page of a halftime show is the 
+same way.
+
+12.  You can't undo immediately after an undo.  Why not be able to undo 
+an undo operation?  Or do something like emacs and be able to undo the 
+last n operations.
+
+13.  When moving individual points, I am slightly bothered by the fact 
+that the drawn line moves continuously rather than snapping to the grid.  
+It really ought to snap to the grid, since that better reflects what the 
+move is actually going to be.  Unless of course you have selected no 
+grid, in which case it is fine to move continuously.
+
+14.  Saving seems to work, in the sense that a file is created.  However, 
+loading it results in a seg fault (see 2).
+
+15.  The points-per-letter slide in the show info box is too short.  Tiny 
+movements of one pixel can cause the number to change by more than one.
+
+16.  Lots and lots of warnings in my shell window.  We already talked 
+about these.
+
+17.  There are problems with refreshing the screen far away from the 
+field proper.  This only occurs when your window is much bigger than the 
+entire field (for example, at very low zoom sizes).
+
+When you switch to spring show mode, the screen is not refreshed 
+properly.  Changing the zoom size was the only way I could find to force 
+it to refresh.
+
+If you put points far far away from the football field then remove them 
+by reducing the number of points on the show info grid, they don't get 
+erased.  Of course they don't exist anymore, but they still appear on screen.
+
+I suspect that both of these problems are symptoms of the same bug.
+
+18.  Although the set of possible locations for points is theoretically
+infinite, the region that you are capable of seeing is bounded by the size
+of your monitor.  If a point lies over your "horizon", you can never get
+it back.  Of course, there's no way to get the points over your "horizon"
+in the first place.  Or is there?  I have found two ways.
+
+Let's say you add 1000 points and choose to have only one point per 
+row.  This will create a really long line along the south endzone.  It 
+will spill far off the field, and probably off the screen unless you have 
+a very big window. 
+
+The other way is to use block move.  Blockmove a line of points by 
+indicating where one end will go.  It is possible to manuever the other 
+end over the horizon.
+
+If you use the second trick on the top edge of the window, the points 
+will be displayed as piled up along the edge of the window.  Although 
+they are displayed there, they aren't actually there.  Their actual 
+location is exactly where they ought to have been translated into the 
+"negative" region of the plane.
+
+You may wonder how I know what their actual location is when they are off 
+in unviewable "negative land".  If you block select points and your 
+rectangle spills out of your window, it affects the selected region even 
+if it isn't displayed.  I used this fact to gain information about the 
+locations of the undisplayed points.  Pretty clever, huh?
+
+I think the ideal solution to this problem is this.  When points are very
+far away from the football field, the scrolling routines should recognize
+this and allow you to scroll that far.  This solution still provides for
+the theoretically infinite plane, which is a nice thing.  And it avoids
+the obstruction of the "horizon" that I talked about. 
+
+One problem with this suggestion is that it still is not easy to put a 
+point very far away.  (Don't ask why you would ever want to set a point 
+out in the parking lot outside the stadium :) )  There should be a way to 
+tell the scrolling routines to let me go a certain prescribed distance, 
+even though there aren't points out there yet.
+
+19.  It's impossible to use letter labels with more than 260 points.  Is 
+it worthwhile inventing a scheme with double letters (AA, BB, etc.)?  Or 
+should we just forget about it and expect that the band will never get 
+that big?  Certainly there do exist bands that are that big.
+
+
+
+
+From dci@math.uchicago.edu Wed Apr 24 12:18:31 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id MAA20152 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 24 Apr 1996 12:18:30 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.6.11/8.6.10) id OAA22845 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 24 Apr 1996 14:18:40 -0500
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199604241918.OAA22845@hog.uchicago.edu>
+Subject: Re: CalChart
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 24 Apr 1996 14:18:39 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960422205905.26125A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Apr 22, 96 09:40:00 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 1171      
+Status: RO
+X-Status: A
+
+
+> I fixed that bug in loading shows.  It also has some more sanity checks, so 
+> hopefully random bugs will give an error message instead of seg 
+> faulting.  The problem was basically that the standard C library in SunOS 
+> doesn't handle DOS-style ASCII text.  The fix was pretty minor.  For the 
+> new format, there was also a small, stupid bug.  A new version of wxWindows 
+> was released, so I've incorporated that also.  This might fix some bugs.  
+> I've also put wxhelp on the web page, so you can try it out.  I've only 
+> put the XView version on there because it's smaller than the Motif 
+> binary, but it will work with either version.
+
+Loading shows works now.
+
+Am I supposed to do something to the wxhelp file before using it?  When I
+click on the help menu item, I get the following messages in my shell
+window: 
+
+	./wxhelp: syntax error at line 1: `(' unexpected
+	select in wxSleep: Interrupted system call
+
+After playing around with both versions, I have decided that I prefer the
+motif version to the xview version.  I don't know why exactly; it just has
+a more comfortable feel to me.  However, I will continue to test whatever 
+you want me to.
+
+Dan
+
+
+From dci@math.uchicago.edu Wed Apr 24 15:24:46 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id PAA28119 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 24 Apr 1996 15:24:45 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.6.11/8.6.10) id RAA23281 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 24 Apr 1996 17:24:55 -0500
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199604242224.RAA23281@hog.uchicago.edu>
+Subject: Re: calchart bugs
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 24 Apr 1996 17:24:53 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960419160008.5282E-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Apr 19, 96 04:59:52 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 7073      
+Status: RO
+X-Status: 
+
+
+> > 6.  Text editing is fucked up.  Control characters create nonstandard 
+> > symbols, backspace doesn't work, etc.  This applies in such places as: 
+> > setting the number of points in the show info box; the text box at the 
+> > bottom of the show info box; typing how many rows you want in your 
+> > initial formation; etc.
+> 
+> This is a standard Motif widget, so it's a matter of system 
+> configuration.  I think the control characters thing is supposed to do 
+> that.  As for backspace, this is probably related to the warnings you get 
+> (see below).  If backspace still doesn't work, let me know if the delete 
+> key does.
+
+I forgot to get XKeysymDB before, but now I have done it.  Things work 
+much better.  Both backspace and delete work fine.  Also, all the warning 
+messages no longer appear.
+ 
+> > 9.  (XV) There is an ambiguity in the name "Show info".  Do you mean it 
+> > as an adjective and noun (ie, "information pertaining to this show")
+> > or do you mean it as a verb and noun (ie, "put the information on the 
+> > screen")?  Can we think of a non-ambiguous synonym?
+> 
+> Agreed.  Nothing comes to mind right now.
+
+
+ 
+> > 12.  You can't undo immediately after an undo.  Why not be able to undo 
+> > an undo operation?  Or do something like emacs and be able to undo the 
+> > last n operations.
+> 
+> This shouldn't be too hard, but I'm not sure about the interface.  The 
+> undo operations are keep in a stack, so I can't just add an undo to the 
+> top because you wouldn't be able to undo more than one operation.  Emacs 
+> gets around this by forcing you to do the undo's without anything 
+> inbetween.  Maybe there should be another option to undo an undo.
+
+I think a separate option for unundo would be just fine.
+ 
+> > 18.  Although the set of possible locations for points is theoretically
+> > infinite, the region that you are capable of seeing is bounded by the size
+> > of your monitor.  If a point lies over your "horizon", you can never get
+> > it back.  Of course, there's no way to get the points over your "horizon"
+> > in the first place.  Or is there?  I have found two ways.
+> > 
+> > Let's say you add 1000 points and choose to have only one point per 
+> > row.  This will create a really long line along the south endzone.  It 
+> > will spill far off the field, and probably off the screen unless you have 
+> > a very big window. 
+> > 
+> > The other way is to use block move.  Blockmove a line of points by 
+> > indicating where one end will go.  It is possible to manuever the other 
+> > end over the horizon.
+> > 
+> > If you use the second trick on the top edge of the window, the points 
+> > will be displayed as piled up along the edge of the window.  Although 
+> > they are displayed there, they aren't actually there.  Their actual 
+> > location is exactly where they ought to have been translated into the 
+> > "negative" region of the plane.
+> > 
+> > You may wonder how I know what their actual location is when they are off 
+> > in unviewable "negative land".  If you block select points and your 
+> > rectangle spills out of your window, it affects the selected region even 
+> > if it isn't displayed.  I used this fact to gain information about the 
+> > locations of the undisplayed points.  Pretty clever, huh?
+> > 
+> > I think the ideal solution to this problem is this.  When points are very
+> > far away from the football field, the scrolling routines should recognize
+> > this and allow you to scroll that far.  This solution still provides for
+> > the theoretically infinite plane, which is a nice thing.  And it avoids
+> > the obstruction of the "horizon" that I talked about. 
+> > 
+> > One problem with this suggestion is that it still is not easy to put a 
+> > point very far away.  (Don't ask why you would ever want to set a point 
+> > out in the parking lot outside the stadium :) )  There should be a way to 
+> > tell the scrolling routines to let me go a certain prescribed distance, 
+> > even though there aren't points out there yet.
+> 
+> A related problem is that the end zones are handled.  Full field spread 
+> for a 169 wedge goes into the end zones, so it's definately useful.  
+> Right now, the border around the field is part of the field mode, but I'm 
+> realizing that this would be cumbersome if things need to be changed.  
+> For instance, in spring show, it's possible that stunt would want to 
+> chart people off in the wings.  Also, tunnel flow could be charted off 
+> the normal field so that the yard lines are automatically printed 
+> correctly.  But the interface is a problem.  Not only for scrolling to 
+> these other regions, but also for the animation window.  I guess for 
+> animation, anything outside a certain region could be clipped off.  But 
+> that's not very desirable for tunnel.  Print will also be a problem, 
+> mainly because a lot of that is hard-coded.  I wrote that stuff way 
+> before I planned to rewrite calchart, so I wasn't planning on the size of 
+> the field changing.
+
+I don't see how the animation is much of a problem.  You could add 
+scrolling to the animation when necessary so that all the points can be 
+seen, even though perhaps not all at once.
+
+Here is my suggestion for interface design to deal with this problem.  
+There will be variables defining the north, south, east, and west 
+boundaries of the viewable region.  In the current version, these 
+variables are fixed at 10N, 10S, 10W, and 10E respectively.  My 
+notation "nX" means "n yards beyond the X side of the field".
+
+If you move a point off the field, then the variables get changed
+automatically so that there is always a 10yard zone around the outside of
+the viewable region without any points in it.  The viewable region can
+expand AND contract automatically in this way, but it never gets smaller
+than the full field plus 10 yards on all sides. 
+
+The user can manually set these variables if he so desires.  The values 
+can be typed in directly.  Is there a good way to allow for graphical 
+definition of these values?  Selecting a region, or something?  I can't 
+think of anything satisfying.  There should also be an easy way to return 
+to the "normal" situation.
+
+Once the user manually sets values, the automatic method will never 
+contract the region beyond those values.  However, it will expand as 
+necessary (and contract after expansion, as long as it doesn't drop below 
+the manually set values).
+
+Negative values for the variables are allowed.  This would have the 
+effect of preventing you from scrolling to all parts of the field.  I'm 
+not sure why you would want to do this, but it should be possible.  In 
+this case, the automatic method neither expands nor contracts.
+
+There are two constraints: [north] + [south] > -100 and [east] + [west] >
+53 1/3.  The program will not accept data violating these values.
+
+Strictly speaking, it could be possible to allow for data violating these 
+constraints.  This would have the effect of reversing the orientation of 
+the display so that north is to the left, or whatever.  But I don't see 
+any reason to allow for this.
+
+Dan
+
+
+From runes@CalBand.Berkeley.EDU Sun Jun 16 20:34:01 1996
+Received: from harvey.calband.berkeley.edu (harvey.CalBand.Berkeley.EDU [128.32.89.167]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id UAA01261 for <gmeeker@pasteur.eecs.berkeley.edu>; Sun, 16 Jun 1996 20:34:00 -0700
+Received: (from runes@localhost) by harvey.calband.berkeley.edu (8.6.12/8.6.12) id UAA25529; Sun, 16 Jun 1996 20:33:55 -0700
+From: Rune Stromsness <runes@CalBand.Berkeley.EDU>
+Message-Id: <199606170333.UAA25529@harvey.calband.berkeley.edu>
+Subject: Calchart questions/suggestions/comments
+To: gurk@CalBand.Berkeley.EDU
+Date: Sun, 16 Jun 1996 20:33:54 -0700 (PDT)
+Cc: runes@CalBand.Berkeley.EDU (Rune Stromsness)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 1039      
+Status: RO
+X-Status: A
+
+So, adding CalChart to the standard Band program manager and trying to
+figure out how to best configure it I have these suggestions/questions:
+
+Is there a way to specify the default data directory?  In order to 
+get it to read the configuration file I had to make the default 
+directory S:\CALCHART, which then means that they get dropped into
+S:\CALCHART when they want to open a file or save a file or whatever,
+which is a lot more confusing then getting dropped into some standard
+place where they actually have write permissions  :-)  Is there a 
+way currently to do this?  Make the program and config file be in
+the S:\CALCHART, and then have the default data directory someplace
+like G:\ or U:\ or R:\?  How about even a little more complicated--
+Program is in S:\CALCHART, config file is in U:\, standard data
+directory is G:\CALCHART.  Is this possible?  How about with a
+command line option giving the config file location (this is how
+a lot of other Windoze programs do it).
+
+Anyway, that's my question.
+
+Talk to you soon.
+
+Rune
+
+
+From dci@math.uchicago.edu Wed Apr 24 15:24:46 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id PAA28119 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 24 Apr 1996 15:24:45 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.6.11/8.6.10) id RAA23281 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 24 Apr 1996 17:24:55 -0500
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199604242224.RAA23281@hog.uchicago.edu>
+Subject: Re: calchart bugs
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 24 Apr 1996 17:24:53 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960419160008.5282E-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Apr 19, 96 04:59:52 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 7073      
+Status: RO
+X-Status: 
+
+
+> > 6.  Text editing is fucked up.  Control characters create nonstandard 
+> > symbols, backspace doesn't work, etc.  This applies in such places as: 
+> > setting the number of points in the show info box; the text box at the 
+> > bottom of the show info box; typing how many rows you want in your 
+> > initial formation; etc.
+> 
+> This is a standard Motif widget, so it's a matter of system 
+> configuration.  I think the control characters thing is supposed to do 
+> that.  As for backspace, this is probably related to the warnings you get 
+> (see below).  If backspace still doesn't work, let me know if the delete 
+> key does.
+
+I forgot to get XKeysymDB before, but now I have done it.  Things work 
+much better.  Both backspace and delete work fine.  Also, all the warning 
+messages no longer appear.
+ 
+> > 9.  (XV) There is an ambiguity in the name "Show info".  Do you mean it 
+> > as an adjective and noun (ie, "information pertaining to this show")
+> > or do you mean it as a verb and noun (ie, "put the information on the 
+> > screen")?  Can we think of a non-ambiguous synonym?
+> 
+> Agreed.  Nothing comes to mind right now.
+
+
+ 
+> > 12.  You can't undo immediately after an undo.  Why not be able to undo 
+> > an undo operation?  Or do something like emacs and be able to undo the 
+> > last n operations.
+> 
+> This shouldn't be too hard, but I'm not sure about the interface.  The 
+> undo operations are keep in a stack, so I can't just add an undo to the 
+> top because you wouldn't be able to undo more than one operation.  Emacs 
+> gets around this by forcing you to do the undo's without anything 
+> inbetween.  Maybe there should be another option to undo an undo.
+
+I think a separate option for unundo would be just fine.
+ 
+> > 18.  Although the set of possible locations for points is theoretically
+> > infinite, the region that you are capable of seeing is bounded by the size
+> > of your monitor.  If a point lies over your "horizon", you can never get
+> > it back.  Of course, there's no way to get the points over your "horizon"
+> > in the first place.  Or is there?  I have found two ways.
+> > 
+> > Let's say you add 1000 points and choose to have only one point per 
+> > row.  This will create a really long line along the south endzone.  It 
+> > will spill far off the field, and probably off the screen unless you have 
+> > a very big window. 
+> > 
+> > The other way is to use block move.  Blockmove a line of points by 
+> > indicating where one end will go.  It is possible to manuever the other 
+> > end over the horizon.
+> > 
+> > If you use the second trick on the top edge of the window, the points 
+> > will be displayed as piled up along the edge of the window.  Although 
+> > they are displayed there, they aren't actually there.  Their actual 
+> > location is exactly where they ought to have been translated into the 
+> > "negative" region of the plane.
+> > 
+> > You may wonder how I know what their actual location is when they are off 
+> > in unviewable "negative land".  If you block select points and your 
+> > rectangle spills out of your window, it affects the selected region even 
+> > if it isn't displayed.  I used this fact to gain information about the 
+> > locations of the undisplayed points.  Pretty clever, huh?
+> > 
+> > I think the ideal solution to this problem is this.  When points are very
+> > far away from the football field, the scrolling routines should recognize
+> > this and allow you to scroll that far.  This solution still provides for
+> > the theoretically infinite plane, which is a nice thing.  And it avoids
+> > the obstruction of the "horizon" that I talked about. 
+> > 
+> > One problem with this suggestion is that it still is not easy to put a 
+> > point very far away.  (Don't ask why you would ever want to set a point 
+> > out in the parking lot outside the stadium :) )  There should be a way to 
+> > tell the scrolling routines to let me go a certain prescribed distance, 
+> > even though there aren't points out there yet.
+> 
+> A related problem is that the end zones are handled.  Full field spread 
+> for a 169 wedge goes into the end zones, so it's definately useful.  
+> Right now, the border around the field is part of the field mode, but I'm 
+> realizing that this would be cumbersome if things need to be changed.  
+> For instance, in spring show, it's possible that stunt would want to 
+> chart people off in the wings.  Also, tunnel flow could be charted off 
+> the normal field so that the yard lines are automatically printed 
+> correctly.  But the interface is a problem.  Not only for scrolling to 
+> these other regions, but also for the animation window.  I guess for 
+> animation, anything outside a certain region could be clipped off.  But 
+> that's not very desirable for tunnel.  Print will also be a problem, 
+> mainly because a lot of that is hard-coded.  I wrote that stuff way 
+> before I planned to rewrite calchart, so I wasn't planning on the size of 
+> the field changing.
+
+I don't see how the animation is much of a problem.  You could add 
+scrolling to the animation when necessary so that all the points can be 
+seen, even though perhaps not all at once.
+
+Here is my suggestion for interface design to deal with this problem.  
+There will be variables defining the north, south, east, and west 
+boundaries of the viewable region.  In the current version, these 
+variables are fixed at 10N, 10S, 10W, and 10E respectively.  My 
+notation "nX" means "n yards beyond the X side of the field".
+
+If you move a point off the field, then the variables get changed
+automatically so that there is always a 10yard zone around the outside of
+the viewable region without any points in it.  The viewable region can
+expand AND contract automatically in this way, but it never gets smaller
+than the full field plus 10 yards on all sides. 
+
+The user can manually set these variables if he so desires.  The values 
+can be typed in directly.  Is there a good way to allow for graphical 
+definition of these values?  Selecting a region, or something?  I can't 
+think of anything satisfying.  There should also be an easy way to return 
+to the "normal" situation.
+
+Once the user manually sets values, the automatic method will never 
+contract the region beyond those values.  However, it will expand as 
+necessary (and contract after expansion, as long as it doesn't drop below 
+the manually set values).
+
+Negative values for the variables are allowed.  This would have the 
+effect of preventing you from scrolling to all parts of the field.  I'm 
+not sure why you would want to do this, but it should be possible.  In 
+this case, the automatic method neither expands nor contracts.
+
+There are two constraints: [north] + [south] > -100 and [east] + [west] >
+53 1/3.  The program will not accept data violating these values.
+
+Strictly speaking, it could be possible to allow for data violating these 
+constraints.  This would have the effect of reversing the orientation of 
+the display so that north is to the left, or whatever.  But I don't see 
+any reason to allow for this.
+
+Dan
+
+
+From dci@hog.uchicago.edu Mon Jun 24 10:40:31 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id KAA11817 for <gmeeker@volga.eecs.berkeley.edu>; Mon, 24 Jun 1996 10:40:30 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id MAA10995 for gmeeker@volga.eecs.berkeley.edu; Mon, 24 Jun 1996 12:40:41 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199606241740.MAA10995@hog.uchicago.edu>
+Subject: calchart bugs in 6/17 version
+To: gmeeker@volga.eecs.berkeley.edu
+Date: Mon, 24 Jun 1996 12:40:40 -0500 (CDT)
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+
+> I've finally figured out a solution to editing text in calchart.  It's 
+> going to be very difficult to make edits take effect immediately, so it 
+> only copies the text from the window to the actually internals when you 
+> try to read the text.  I've implemented the show description windows 
+> now.  So if you try to save the show, or open another description window, 
+> the changes are copied.  If you want, you can try out the latest 
+> version.  Try opening multiple description windows and watch the * 
+> indicating a modified show.  Please let me know if you think this will be 
+> confusing to people.
+
+After grabbing XKeysymDB, everything seems to work perfectly.
+
+Here is an initial list of comments.  Many more to come over the next few 
+days.  Except for the first three, they all pertain to the show info window.
+
+1)  I had trouble unzipping the archived shows.  unzip responds with 
+"Unknown compression method".
+
+2)  When I try to use help, I get error messages because wxhelp is not 
+available.  After two 15-second attempts, it gives up.  This is basically 
+fine, but I was wondering if there is a way to abort the process so that 
+you don't have to wait for 30 seconds before you regain control.
+
+3)  Changing the zoom size causes the screen to be refreshed twice.  I 
+think that this is a result of the way that you fixed a previous bug that 
+I mentioned.  Anyway, this is generally inefficient and annoying.  Also, 
+sometimes there is a significant delay of several seconds between the 
+first and second refresh.
+
+4)  I am much less confused by the "set labels" and "set num points" 
+buttons.  Did you change something?  I don't remember how it was.
+
+5)  Why is there a scroll bar underneath the letters?
+
+6)  Same thing about "not enough labels defined".  I know it's not that 
+important, but still worth mentioning.
+
+7)  When you open the window, the cursor in the comments window appears 
+at the end of the text.  Should the cursor appear at the beginning of the 
+text?  I'm not sure what is the convention.
+
+8)  Funny things still happen to the dotted line when you scroll through 
+the letters.  We already discussed this and you blamed it on a bug in 
+some standard library, but I don't accept excuses! 
+
+9)  Is there a way to (de)select blocks of letters?  Or all letters?  If 
+not, there should be.
+
+10)  We had discussed the ambiguity in the name "Show info...."  I 
+propose "Information" as the name of the window.
+
+11) I see that you have made great progress in dealing with more than one 
+"Information" window open at once.  The number of points and the 
+points-per-letter are transferred correctly; that is, when you implement 
+the change, the other windows change accordingly.
+
+However, the comments do not get updated.  I see two ways around this, 
+but I'm not sure if either is doable.  First, you could have the comments 
+appear only in the first "Information" window; all the rest wouldn't even 
+have a field for comments.  Second, you could transfer changes from the 
+first window to the second when you select the comments field of the 
+second. 
+
+Which version of the comments gets stored as the official version when 
+you close all the windows?  It seems arbitrary to me.
+
+There are some very strange things going on with the selected letters for 
+labels.  When you set labels in one window, the other window gets updated 
+in a completely bizarre manner.  I can't even figure out what is 
+happenning, let alone why.
+
+12) (De)selecting letters does not get "remembered" after closing and 
+reopening unless you clicked on "set labels".  Is this the way it should 
+be?  I guess so.
+
+Dan
+
+
+
+From disaksen@d.umn.edu Wed Jun 26 10:12:20 1996
+Received: from harvey.calband.berkeley.edu (harvey.CalBand.Berkeley.EDU [128.32.89.167]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id KAA29048 for <gmeeker@pasteur.eecs.berkeley.edu>; Wed, 26 Jun 1996 10:12:18 -0700
+Received: from mail.d.umn.edu (mail.d.umn.edu [131.212.109.2]) by harvey.calband.berkeley.edu (8.6.12/8.6.12) with ESMTP id KAA05223 for <gmeeker@calband.berkeley.edu>; Wed, 26 Jun 1996 10:11:50 -0700
+Received: from fab4.d.umn.edu (fab4.d.umn.edu [131.212.153.2]) by mail.d.umn.edu (8.6.12/8.6.12) with ESMTP id MAA24663 for <gmeeker@calband.berkeley.edu>; Wed, 26 Jun 1996 12:11:09 -0500
+From: daniel isaksen <disaksen@d.umn.edu>
+Received: (disaksen@localhost) by fab4.d.umn.edu (8.6.12/8.6.12) id MAA07015 for gmeeker@calband.berkeley.edu; Wed, 26 Jun 1996 12:15:13 -0500
+Message-Id: <199606261715.MAA07015@fab4.d.umn.edu>
+Subject: bug report for Calchart v3.6/17/96
+To: gmeeker@CalBand.Berkeley.EDU
+Date: Wed, 26 Jun 1996 12:15:10 -0500 (CDT)
+X-Mailer: ELM [version 2.4 PL22]
+Content-Type: text
+Content-Length: 4386      
+Status: RO
+X-Status: 
+
+
+Here is a list of things that I have tinkered with:
+
+	Show info...
+	Zoom
+	label flips
+	symbol changes
+	Copy sheet before
+	Copy sheet after
+	Set beats...
+	Set title...
+	Grid
+	some of the Animation
+
+Things that I have yet to tinker with:
+
+	file loading, saving, etc.
+	Some of the animation
+	Continuity editing
+	Bizarre things with moving men
+	Multiple windows of various sorts
+
+I am limited by the fact that I can't get any of the archived shows to
+unzip.  If I had something to work with, it would be a lot easier.
+
+Last night, I had a bright idea about making circles.  Gridsize is a way
+of restricting destinations of individualmoves to a certain set of points.
+There could be an option to restrict destinations to the points on a circle
+with a given center and a given radius.  There could even be a suboption to
+restrict further to N evenly spaced points around the circle.  I imagine
+this being implemented as a "Circle..." option on the grid menu.  I believe
+that this will be a significant aid to users.
+
+Come to think of it, this might be generalizable to other kinds of curves,
+but I think that could wait for Version 3.1.
+
+
+Here are a whole bunch of comments.  More will come tomorrow or on Thursday.
+
+1)  In general, there is too much screen refreshing.  It is both slow and
+annoying.  Martin dealt with this problem effectively by refreshing locally.
+Is this possible?
+
+2)  The *.shw and *.mas inconsistency for default names is still present.
+
+3)  Moving the zoom slide and returning it to its original position causes an
+unnecessary refresh.
+
+4)  The label font seems a little bit too big.  Three-digit labels should be
+easily readable at two-step spacing.  Right now, it looks like 141, 151, 161,
+..., instead of 114, 115, 116, etc.
+
+5)  I am very pleased with the snap-to-grid for moving.  It makes 1step
+locating much easier because you can count the jumps from a corner.  It also
+makes low zooms actually useful for more than just overviewing.
+
+6)  A zoom change always returns the view to the SW corner of the field.
+I think the center point of the view should be preserved under change of zoom,
+unless the entire field will fit into the view in which case the field should
+be located in the upper left corner of the view.
+
+7)  Label flips works perfectly.
+
+8)  Lassoing should NOT snap to grid, no matter what the grid setting.
+
+9)  Aren't "plain slash men" usually called just "slashmen"?  Regardless, the
+band's convention should be what you use.  This is important for the help bar
+at the bottom of the window.
+
+10) When you make a new sheet, the name of a sheet gets copied from the
+previous one.
+I remember we had a very long discussion about an auto-naming scheme.  What
+happenned to that idea?
+
+11) Probably a good idea to ask for verification before deleting a sheet.
+
+12) I think that "Copy sheet before (resp. after)" should be called "Insert
+sheet before (resp. after)".
+
+13) Long long names push the sheet number and the "*" offscreen.  How about
+a maximum of 32 characters or so?
+
+14) "1 beats".  Is there a way to improve the grammar?
+but you and I think like computer scientists.  I'm not sure if itbut you and I think like computer scientists.  I'm not sure if it
+15) Blockmoves should not snap all the men to grid, just the "leading" man.
+
+16) In animation window, the sheet number (i.e., "1 of 20") should be
+displayed as well as the beat number and the sheet name.
+
+17) Your convention is to show the zeroth beat of a sheet as opposed to
+showing the 16th (or whateverth) beat of a sheet.  I think this makes sense
+because it agrees with the way that musicians talk about beats.  However,
+it is a change from the conventions of version 2.  I'm just pointing out
+the difference and that your convention really is an arbitrary decision.
+
+18) In most applications, the last sheet has 0 beats.  However, sometimes
+it has beats.  If the last sheet has 16 beats, then the animator will only
+go up to 15; you need to add an extra click of animation for the "close".
+
+19) The animation window should have a reverse play button, a jump-to-sheet
+option, a jump-to-end, and a jump-to-beginning.  Come to think of it, the
+latter three ought to be available in the main window, too.
+
+20) In the animation window, previous-stuntsheet should take you to the
+beginning of the current sheet if you are not at the zeroth beat.  Think
+about how a CD player works.
+
+
+
+
+From dci@hog.uchicago.edu Mon Jul  1 09:17:09 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id JAA23222 for <gmeeker@volga.EECS.Berkeley.EDU>; Mon, 1 Jul 1996 09:17:07 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id LAA06912 for gmeeker@volga.EECS.Berkeley.EDU; Mon, 1 Jul 1996 11:17:19 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607011617.LAA06912@hog.uchicago.edu>
+Subject: Re: calchart bugs in 6/17 version
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Mon, 1 Jul 1996 11:17:19 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960626155849.24657B-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jun 26, 96 04:22:17 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+
+> > 1)  I had trouble unzipping the archived shows.  unzip responds with 
+> > "Unknown compression method".
+> 
+> My guess is that you have an old version of unzip.  Let me know specific 
+> files and I will convert them to tar.gz files.
+
+I got around the problem by unzipping them with my Chicago account and 
+then ftping them to Duluth.  However, it still didn't work.  I got a 
+dialog box saying "Error reading points file".  This happenned with two 
+shows from 1990; I will try something more recent.
+ 
+> > 6)  Same thing about "not enough labels defined".  I know it's not that 
+> > important, but still worth mentioning.
+> 
+> What do you mean by same thing?
+
+Sorry for the confusion.  We have already had a discussion on this issue 
+before.  You pointed out that it was a rather minor question.
+ 
+> > 7)  When you open the window, the cursor in the comments window appears 
+> > at the end of the text.  Should the cursor appear at the beginning of the 
+> > text?  I'm not sure what is the convention.
+> 
+> I'm not sure.
+
+I think beginning is good.  We are not envisioning long comments, are we?
+ 
+> There was a bug in the wxWin library where some labels would get 
+> deselected when they shouldn't be.  I have a work around, but maybe it 
+> wasn't working on the sun version.
+
+No, it definitely wasn't working.
+ 
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Mon Jul  1 09:25:07 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id JAA23331 for <gmeeker@volga.EECS.Berkeley.EDU>; Mon, 1 Jul 1996 09:25:06 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id LAA06924 for gmeeker@volga.EECS.Berkeley.EDU; Mon, 1 Jul 1996 11:25:18 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607011625.LAA06924@hog.uchicago.edu>
+Subject: Re: bug report for Calchart v3.6/17/96
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Mon, 1 Jul 1996 11:25:18 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960626162325.24657C-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jun 26, 96 04:39:01 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+
+> > 2)  The *.shw and *.mas inconsistency for default names is still present.
+> 
+> This is not a problem under Windows, but there isn't really anything I 
+> can do until Motif.  I suppose I could add a different menu option.
+
+Huh?  Are you sure that we are talking about the same thing?
+
+When you select the Open... option, the filter default is set to 
+blahblah/*.mas.  But when you select the Save As... option, the filter 
+default is set to blahblah/*.shw.  I know I don't know what I'm talking 
+about, but I'm pretty sure that it is possible to deal with this.
+ 
+> > 4)  The label font seems a little bit too big.  Three-digit labels should be
+> > easily readable at two-step spacing.  Right now, it looks like 141, 151, 161,
+> > ..., instead of 114, 115, 116, etc.
+> 
+> Yeah, it also isn't very readable at the default zoom level.  I think I 
+> need to find a different font.
+
+Martin designed his own font for versions 1 and 2.  He bitmapped an 
+entire alphabet and set of numerals.
+ 
+> > 12) I think that "Copy sheet before (resp. after)" should be called "Insert
+> > sheet before (resp. after)".
+> 
+> Do you think so?  It does copy the current sheet after all (for the most 
+> part).  But the old version does say insert...
+
+I guess I'm just old-fashioned.  I think of it as "inserting" a sheet 
+because that's what we used to call it, but others might of it as 
+"copying" a sheet.  Here's another possibility: "New sheet before" and 
+"New sheet after".
+ 
+> > 15) Blockmoves should not snap all the men to grid, just the "leading" man.
+> 
+> Hmm, this is something you can't really do with the old version, but it 
+> does seem much more useful this way.
+
+This is one of the most significant mistakes in version 2.  By mistake, I 
+mean something that works wrong as opposed to something that just wasn't 
+implemented at all.
+ 
+> > 17) Your convention is to show the zeroth beat of a sheet as opposed to
+> > showing the 16th (or whateverth) beat of a sheet.  I think this makes sense
+> > because it agrees with the way that musicians talk about beats.  However,
+> > it is a change from the conventions of version 2.  I'm just pointing out
+> > the difference and that your convention really is an arbitrary decision.
+> 
+> I know it's different, but I've heard other people complain about that 
+> numbering, since it's a little different than the way we count when we're 
+> marching.
+
+I agree; your way is correct.
+ 
+> Now, about editing continuity.  I've realized something that need to be 
+> done still.  For instance, if you set the symbol on a point, the 
+> continuity isn't set to match.  Also, you have to create the continuities 
+> by hand.  Currently, you need to open the editor and pick "New" from the 
+> menu.  Then select the points you want and pick "Set Points."  I'm not 
+> completely sure what I'm going to do because you just open an editor.  
+> You don't edit a specific continuity.  But somehow the continuity should 
+> automatically appear in the list.  And they should disappear when not 
+> needed (if the continuity is empty, which is the way the old version works).
+> I know it's not very elegant right now, but it should work.
+
+I haven't gotten to testing this yet.  Expect more comments in the 
+next few days.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Fri Jul  5 20:59:23 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id UAA16457 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 5 Jul 1996 20:59:22 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id WAA13928 for gmeeker@volga.EECS.Berkeley.EDU; Fri, 5 Jul 1996 22:59:37 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607060359.WAA13928@hog.uchicago.edu>
+Subject: Re: Calchart continuity
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Fri, 5 Jul 1996 22:59:36 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960705175227.468A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 5, 96 06:20:05 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+
+I think that the general solution to the problem is to have the following 
+"attitude" about continuity list management.  The technical details will 
+become obvious once we think about things the right way.
+
+A continuity should be deleted if and only if it has no men assigned to 
+it AND it has no text (excluding whitespace).  I think that this answers 
+all of your questions and scenarios.
+
+A continuity should be created whenever men are changed to a symbol whose
+contniuity group does not exist AND there are not already men with that
+symbol.  What I'm saying is this.  If all the men are plain, all the men
+are assigned to PLAIN continuity, and no other continuities exist; then
+when you change some men to solid, the SOLID continuity is created.  If
+the SOLID continuity already exists, then changing men to solid obviously
+does not cause the SOLID continuity to be created.  If some men are plain
+and some men are solid, and all the men are assigned to PLAIN continuity; 
+then changing more men to solid does NOT create the SOLID continuity. 
+
+I'm not entirely clear yet on the proper way to implement this strategy.  
+You seem to be asking the following question: when should the program do 
+a check to see if any continuities should be deleted or created?  The 
+answer (I think) is: when the number of points is changed; when a symbol 
+is changed; when a continuity assignment is changed; when a continuity is 
+selected for editing in the continuity editor.  This covers all instances 
+of actions that might affect the existence of a continuity group.
+
+The symbol continuities should definitely appear at the top of the list 
+in the "standard" order: PLAIN, SOLID, SLASH, etc.  Funny how I think 
+about continuity group names in caps.  The other continuities should 
+appear at the end of the list.
+
+Undo sounds trickier to work with.  But this seems like it is really part 
+of a broader question concerning undoing changes to text.  I suppose the 
+thing to do is to consider all of the editing since you selected the text 
+window as a single action - an undo will restore the text to its form 
+before you started editing it.
+
+I feel that an undo operation should return the program to its status 
+before the action had been taken (or as close to the original status as 
+possible).  So undoing an automatic continuity group deletion should also 
+undo the action that caused the deletion, since these two occurrences are 
+really a single action.
+
+Dan
+ 
+> So I need to figure out how to deal with the list of continuity.  
+> Ideally, it would always have continuities the symbols currently on the 
+> sheet and empty continuities would automatically be deleted.  This seems 
+> very complicated, however, so I need to really think this through.  Okay, 
+> it seems there are two parts to this: adding new continuities and 
+> deleting continuities.  I think the only time a new continuity needs to 
+> be added is when a symbol is changed.  When a symbol is changed, any 
+> empty continuities that aren't being used should be deleted.  Setting the 
+> number points in a show could affect this also, and undo may be a little 
+> complicated.  Another thing, should the list be sorted so that the 8 
+> standard continuities are at the top?  Oh, setting the continuity for 
+> points could also delete continuities.  For undo, I think it might be 
+> easier to put separate entries into the list.  So the first time the user 
+> picks undo, the deleted continuity is added back, and the second time the 
+> symbols are changed back.  But that's probably going to confuse people.  
+> I will have to make some changes to implement the redo option, so I could 
+> add something to handle this then.  Anyway, does this sound intuitive?  
+> Can you think of anything else that might need to change this continuity 
+> list?  Sorry my thoughts aren't very organized.
+> 
+> Wait, I just thought of a scenario.  What if all the points are plain, 
+> and then the user sets all of them to a new continuity.  The plain 
+> continuity gets deleted.  What if the user then wants to set one to the 
+> plain continuity.  Maybe the 8 standard ones should always be there.  But 
+> I like having a list that shows which ones are actually being used.  
+> Maybe the user should have to set the symbol again.  Oh, I just realized 
+> that "Delete continuity" should make sure that it isn't being used.  Or 
+> maybe it shouldn't really delete it but just erase the text so it will 
+> get deleted automatically when it isn't in use.  This is getting complicated.
+> I think I'll fiddle around with the old version a little, even though it 
+> does things completely differently.
+
+
