@@ -9287,3 +9287,747 @@ Dan
 > does things completely differently.
 
 
+From dci@hog.uchicago.edu Sun Jul  7 18:30:29 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id SAA04906 for <gmeeker@volga.EECS.Berkeley.EDU>; Sun, 7 Jul 1996 18:30:28 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id UAA15764 for gmeeker@volga.EECS.Berkeley.EDU; Sun, 7 Jul 1996 20:30:43 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607080130.UAA15764@hog.uchicago.edu>
+Subject: Re: Calchart continuity
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Sun, 7 Jul 1996 20:30:42 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960705214433.2293A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 5, 96 09:51:08 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+> 
+> We're basically in agreement (although I was figuring this out as I was 
+> writing).  The question I have left is this:
+> 
+> You create a new sheet, so all the people are plain.  You then create a 
+> new continuity, say SPECIAL, and assign all people to it.  PLAIN gets 
+> deleted because it's empty and not used.  What if the user decides to 
+> have a group have PLAIN continuity again?  Under this system the user 
+> could either create a new continuity or set the group's symbol to plain.  
+> This seems okay to me, but what do you think?
+
+The way I imagine it is that the user will have to select "New 
+Continuity" and type "PLAIN" when the program asks for the name of the 
+new continuity.
+
+If you just reselect the points to be plain, the PLAIN continuity will NOT 
+be created because the continuity group of the selected points will 
+not change to PLAIN because the autocontinuity function does not apply in 
+this case.  The reason is that the continuity group (SPECIAL) does not 
+match the symbols of the affected men.
+
+The autocontinuity function works as follows.  Recall that if a man's
+continuity group matches his symbol, then his continuity group will be
+changed automatically when his symbol is changed.  Otherwise, it will stay
+the same under symbol changes. 
+
+Dan
+
+
+From runes@CalBand.Berkeley.EDU Mon Jul  8 06:46:38 1996
+Received: from harvey.calband.berkeley.edu (harvey.CalBand.Berkeley.EDU [128.32.89.167]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id GAA10893 for <gmeeker@volga.EECS.Berkeley.EDU>; Mon, 8 Jul 1996 06:46:37 -0700
+Received: (from runes@localhost) by harvey.calband.berkeley.edu (8.6.12/8.6.12) id GAA14145; Mon, 8 Jul 1996 06:45:43 -0700
+From: Rune Stromsness <runes@CalBand.Berkeley.EDU>
+Message-Id: <199607081345.GAA14145@harvey.calband.berkeley.edu>
+Subject: Re: CalChart and Win32s
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Mon, 8 Jul 1996 06:45:42 -0700 (PDT)
+Cc: runes@CalBand.Berkeley.EDU (Rune Stromsness)
+In-Reply-To: <Pine.ULT.3.91.960707173600.26772D-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 7, 96 05:37:34 pm
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Content-Length: 900       
+Status: RO
+X-Status: 
+
+> From gmeeker@volga.EECS.Berkeley.EDU Sun Jul  7 17:34:44 1996
+> Date: Sun, 7 Jul 1996 17:37:34 -0700 (PDT)
+> From: Garrick Meeker <gmeeker@volga.EECS.Berkeley.EDU>
+> To: runes@calband.Berkeley.EDU
+> Subject: CalChart and Win32s
+> 
+> I tried it out and it seems to work with the DLL's on there, so I'll 
+> probably put the Win32 version of CalChart on there in the future.  One 
+> question, when a program didn't work with the DLL's, did it give some 
+> error immediately or would it crash later on?
+
+The problems I got were immediate or rather immediate--upon opening
+the program, or upon opening a file in the program (getting the
+"open file" dialog box was actually the most common place to 
+crash).  In LanWorkplace I usually tested Host Presentor, which would
+usually open just fine, but when you tried to open a session it 
+would complain that there was an undefined dynalink.
+
+> -Gurk
+
+Rune
+
+
+From dci@hog.uchicago.edu Tue Jul  9 18:44:45 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id SAA22405 for <gmeeker@volga.EECS.Berkeley.EDU>; Tue, 9 Jul 1996 18:44:44 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id UAA18392 for gmeeker@volga.EECS.Berkeley.EDU; Tue, 9 Jul 1996 20:45:00 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607100145.UAA18392@hog.uchicago.edu>
+Subject: Re: Calchart continuity
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Tue, 9 Jul 1996 20:45:00 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960708115217.7521A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 8, 96 12:01:15 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+ 
+> That makes sense, but I didn't do it this way yet.  I'll correct it.  But 
+> it now creates and assigns the continuities automatically.  It doesn't 
+> delete them automatically, but it checks to make sure that the continuity 
+> isn't in use.  So it's pretty usable.
+
+I am probably more proud of the autocontinuity design than of anything 
+else about the program except for geniusmove, of course.  It is amazingly 
+good at second-guessing what the user is thinking.  In fact, I can't ever 
+recall a situation where it did the "wrong thing" and it screwed me up.
+
+This was the way in which I influenced Version 2.  I wrote virtually no 
+code, except for a few obvious bug fixes that were not much more than 
+typos.  But I did design the way in which a lot of the user interface 
+worked, and I invented almost all of the continuity language beyond the 
+basic "MARCH" and "MT" and so forth.
+ 
+> Another question... how to deal with case.  The old calchart made 
+> everything upper case.  I'm mainly talking about continuity names (because 
+> it searchs the names for a string like "PLAIN").  Currently, the user can 
+> enter either case, but the search is case-sensitive.  So "Plain" won't be 
+> detected as a continuity for plainmen.  I see three options:
+> 1. Leave it the way it is.
+> 2. Convert the user's entries to upper case.
+> 3. Make the search case-insensitive.
+> The automatically created continuities are upper case, so maybe 2 is 
+> good, but 3 might be okay.  1 is probably not intuitive to users, but it 
+> was easiest.
+
+1 is out of the question.  There are more than 100 billion alphabetic 
+strings of length 8 or less; there is no need to allow for upper and 
+lower case also!  So 2 or 3 HAS to be be done.
+
+The main point for me is to rule out the problem that arises when someone 
+types "plain" but really means "PLAIN" and the program doesn't recognize 
+this as a distinguished symbol-associated continuity group.  After 
+avoiding this kind of problem, my only remaining concern is for what 
+looks good.  Is it easier to read all uppercase or all lowercase or just 
+capitalize the first letter?  I believe that just capitalizing the first 
+letter would be more consistent with the rest of the program.
+
+So my final analysis is to make everything case-insensitive, but the 
+programs displays the names as "Plain".  That is, "PLAIN" and "plain" and 
+"pLaIn" all mean "Plain", but the pulldown list of continuities looks like
+
+	Plain
+	Solid
+	X
+	Slash
+	Sl
+	Bksl
+	Solsl
+	Solbksl	
+	Solx
+
+Is there any reason to change these standard abbreviations?  I don't see 
+why.  Martin chose them originally to be short yet memorable.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Wed Jul 10 12:28:26 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id MAA07951 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 10 Jul 1996 12:28:23 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id OAA19430 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 10 Jul 1996 14:28:39 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607101928.OAA19430@hog.uchicago.edu>
+Subject: Re: calchart bugs in 6/17 version
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 10 Jul 1996 14:28:37 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960704155423.16737A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 4, 96 04:07:23 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+ 
+> Apparently these old calchart files use a slightly different format.  I 
+> think I'd better look at the old source to handle this.  I do know that 
+> the newer ones, like '94 and '95, seem to work, so maybe it's due to an 
+> older version of calchart.
+
+The files from 95 seem to work fine.  So I've got plenty of data with 
+which to experiment.
+ 
+> The variable CALCHART_RT can now handle multiple directories, separated 
+> by colons, like the PATH variable.  This is primarily for the band's 
+> network, so people can modify the configuration files if they want.
+
+Not the kind of feature that I can test, so whatever.
+ 
+> There is a new window called point selector.  You can select individual 
+> points by their labels.  This was something that Mary had asked for a 
+> long time ago, and I wasn't in the mood to write anything more difficult 
+> one day.
+
+It seems to work well.  When you select points by 
+clicking in the main window, the point selector is updated correctly.  
+However, when the list gets updated, it always returns to the top of the 
+list.  It would be much more convenient for the list to be updated 
+without changing the displayed portion.
+
+Is there a way to select several points without having to click on each 
+one?  Some kind of shift-click dragging?  Additionally, what about being 
+able to type in labels?  Come to think of it, one should be able to set 
+labels (in the information window) by typing them.
+
+I haven't yet experimented with multiple point selector windows.
+
+> Changes to continuity editing (and I think editing the description).  
+> Adding and deleting continuity are new, I believe, which would expain 
+> your difficulty.  You might want to experiment with these again.
+
+I haven't gotten around to testing these thoroughly yet.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Wed Jul 10 12:38:27 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id MAA08185 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 10 Jul 1996 12:38:26 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id OAA19458 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 10 Jul 1996 14:38:41 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607101938.OAA19458@hog.uchicago.edu>
+Subject: Re: CalChart lasso
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 10 Jul 1996 14:38:41 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960709222821.27249A@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 9, 96 10:41:46 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+
+>    I've been thinking about a lasso to select points in addition to the 
+> current box method.  I'm thinking about which algorithm to use.  
+> Basically, the user will draw a blob that will really be a polygon (I'll 
+> probably also allow a polygon to be input by specifying each endpoint.)  
+> So there are really two algorithms for filling polygons.  The difference 
+> is as follows:
+>    Imagine a polygon that's a five-pointed star, so the edges cross each 
+> other.  One algorithm will fill in the middle region, while the other 
+> will not.  This is a minor detail, since I don't think most people will 
+> think this way.  I can't at the moment think of how this could really be 
+> useful, so unless you see something I'm missing I'll probably just do 
+> what's easiest (which will probably be the one that leaves the region 
+> unfilled, since that's the more common algorithm).
+
+We had talked about lassoing long ago as a way of selecting points.  
+Certainly it would be useful.
+
+As far as your algorithms are concerned, I think I understand the 
+difference, but I'm not sure.  When you draw a closed curve in the plane 
+(that possibly crosses itself), there always results exactly ONE 
+unbounded component.  The first algorithm selects all the regions except 
+for the unbounded one.  
+
+Now there is always a way to color the regions alternately black and 
+white, like a perverted checkerboard.  The second algorithm only selects 
+the black regions (where white is the color of the unbounded component).
+
+Is this a correct mathematical description of the differences?  My 
+opinion is that this is irrelevant.  Anybody messing around with 
+5-pointed stars deserves to the confusion that results.  So whatever you 
+want is fine.
+ 
+> Another thing about making selections...  Right now, you have to shift 
+> click on a selected point to move it.  It might be better have a regular 
+> click on it move it.  But then how do you unselect points?  I think we 
+> decided that the right button should be for genuis move type stuff, but I 
+> don't remember.  I'll look at your old messages, but basically I need to 
+> change what I've implemented because it's cumbersome.
+
+I'll have to play around with this for a while before I have an opinion.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Thu Jul 11 09:19:17 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id JAA27266 for <gmeeker@volga.EECS.Berkeley.EDU>; Thu, 11 Jul 1996 09:19:16 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id LAA20487 for gmeeker@volga.EECS.Berkeley.EDU; Thu, 11 Jul 1996 11:19:32 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607111619.LAA20487@hog.uchicago.edu>
+Subject: Re: CalChart lasso
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Thu, 11 Jul 1996 11:19:31 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960709222821.27249A@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 9, 96 10:41:46 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+ 
+> Another thing about making selections...  Right now, you have to shift 
+> click on a selected point to move it.  It might be better have a regular 
+> click on it move it.  But then how do you unselect points?  I think we 
+> decided that the right button should be for genuis move type stuff, but I 
+> don't remember.  I'll look at your old messages, but basically I need to 
+> change what I've implemented because it's cumbersome.
+
+I don't fully understand you.  If you left click on a man and drag it,
+this causes an individual move.  If you shift left click on a man and drag
+it, this causes a block move.  If you left click on an unoccupied point
+and drag, this causes rectangular selection.  If you shift left click on
+an unoccupied point, this causes "additive" selection. 
+
+If a single man is selected and you want to move it, then you can shift 
+left click in order to do a block move (where the block consists of a 
+single point).  Or you can left click, which causes the man to be 
+unselected for an instant, then immediately reselected, then moved 
+individually.
+
+If a bunch of men are selected, but you only want to move one of them, 
+then left click deselects all the men, reselects the one you want, and 
+moves it.
+
+My "mental picture" of the system is as follows.  There is no such thing 
+as an individual move.  When you move a single man, you are really moving 
+a block of order 1.  This picture makes the functioning of the program 
+perfectly clear to me.
+
+This system seems to be working fine for me.  The only problem is the
+annoyance and delay associated with the excessive screen refreshing.  I am
+becoming more and more convinced that the screen refreshing trouble is
+going to be a huge pain in the ass for users; this is certainly the most
+significant problem that I have encountered so far in testing.  If its
+solution is a major project, then I suggest you deal with it sooner rather
+than later. 
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Thu Jul 11 14:03:44 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id OAA03045 for <gmeeker@volga.eecs.berkeley.edu>; Thu, 11 Jul 1996 14:03:42 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id QAA20962 for gmeeker@volga.eecs.berkeley.edu; Thu, 11 Jul 1996 16:03:58 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607112103.QAA20962@hog.uchicago.edu>
+Subject: calchart bugs 6/17/96
+To: gmeeker@volga.eecs.berkeley.edu
+Date: Thu, 11 Jul 1996 16:03:55 -0500 (CDT)
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+> > > The variable CALCHART_RT can now handle multiple directories, separated 
+> > > by colons, like the PATH variable.  This is primarily for the band's 
+> > > network, so people can modify the configuration files if they want.
+> > 
+> > Not the kind of feature that I can test, so whatever.
+> 
+> Well, you could, say by having the postscript configuration files in a 
+> different location than the configuration file.  But I'm already 
+> satisfied that this works (and it isn't really even my code).
+
+You misplaced the emphasis in my sentence.  Not the kind of feature that 
+_I_ can test.  Technically speaking, it is possible for someone in my 
+position to test this.  But I don't really know what I am doing, so it is 
+a waste of time for me to worry about that.
+ 
+> > Is there a way to select several points without having to click on each 
+> > one?  Some kind of shift-click dragging?  Additionally, what about being 
+> > able to type in labels?  Come to think of it, one should be able to set 
+> > labels (in the information window) by typing them.
+> 
+> There's nothing like this built-in, but I could add that.  Any ideas for 
+> an interface to setting the labels?  The current one is pretty fast and 
+> does what most people will want, but it isn't very flexible.
+
+How about a pair of buttons to choose between Standard Labels and Custom 
+Labels.  There will also need to be an Edit Labels window.
+In the window is a list of all the labels (just like in the 
+point selector).  However, you can textedit the lines of this list.  
+Changes should NOT be immediate; there should be a Cancel button and a 
+Change Labels button.  The Cancel button resets the text in the list to 
+match what the labels actually are.  And the Change Labels button changes 
+the labels to whatever is in the list.
+
+There is another way to do this.  I have been bothered for a while by the 
+fact that the functions of the Information window are a bit random.  They 
+don't really have anything in common, other than that the data is 
+relevant to all sheets and there is no better place to put them.
+
+Maybe the time has come for a separate Labels window.  Here is a full 
+description of what I am imagining.
+
+1) A list displaying all the current labels; the text in this window is
+editable, and the lines are selectable.  I'm not sure how the mouse
+controls are going to work here.  Maybe there has to be a pair of those 
+diamond-shaped buttons in order to choose between Edit and 
+Select.  Or maybe single clicking to move the cursor and double clicking 
+to select the line.
+
+2)  Another list displaying the letters of the alphabet, which are
+selectable as in the current Information window.
+
+3) A Numbers button; when you click on this, the selected labels are
+changed to an increasing sequence of numbers, but skipping numbers that
+are used elsewhere on the list.  The labels in the main window are not
+affected (yet).  Note that it is possible to change only some of the 
+labels to numbers while leaving the rest alone.  Usually, this feature 
+will be used after ALL the labels have been selected.
+
+4) A Letters button that works similarly and whose specific function
+depends on the status of the letter list. 
+
+5) A pulldown menu called Points with two options: Add Points and Delete 
+Points.
+
+6) The Add Points option works in just the same way as the current method. 
+Dialog boxes asking for the number of points to be added, for
+verification, and for the number of points per column.  The labels for the
+new points get set to the lowest numbers that are not already taken.  For
+example, if you add points to a letter-labeled show, the new points will
+be labelled 1,2,3, .... If you add points to a number-labeled show, the
+new points will be labelled 145, 146, 147....  Custom labelling may result
+in the new labels skipping around; they could be 1,3,5,7,... if the even
+numbers are already being used. 
+
+7) The Delete Points option deletes the points whose labels are selected 
+on the label list.  Of course there should be a dialog box for 
+verification first.
+
+8) A Change Labels button which causes the changes made to the label list 
+to take effect in all the other windows.
+
+9) A Reset List button which undoes all the changes made to the label 
+list since the last time that the the Change Labels button was selected.
+
+10) A Close Window button.
+
+Perhaps 3, 4, 8, and 9 should be located on a Labels pulldown menu.
+
+Empty labels are allowed (and even conceivably useful!!), but only after 
+a warning message.  Duplicate labels are also allowed (and even 
+conceivably useful!!), but only after a warning message.
+
+The Labels window takes care of all the old functions of the Information 
+window except for comments and field format.  We can create a new 
+Comments window, and we can stick field format somewhere by itself.
+
+I see this new idea as an improvement over the old one.  First, it 
+integrates custom labelling in an obvious way.  Second, it emphasizes 
+correctly the difference between adding points and deleting points.  They 
+really are different processes, in the same way that inserting sheets and 
+deleting sheets are different.  Third, it makes it easy to delete the 
+points you want, not just the points at the "end of the list".
+
+But there is one disadvantage.  Is "proliferation" of windows becoming a 
+problem?  Are we ending up with the same kind of interface as Version 2, 
+except that you use the mouse instead of the keyboard?
+
+We should probably be evaluating this on a case-by-case basis.  In this 
+situation, it seems to be appropriate.  Almost all the time, the Labels 
+window will only be used when first creating a new show.  Then it is gone 
+forever.  Only special circumstances (changing the number of points, 
+changing from numbered labels to lettered labels, custom labels, etc) 
+will require additional use of this window.  So it won't clutter up the 
+workspace in the same way that the animation window, the continuity 
+window, and the point selector window might.
+
+
+On a slightly related issue, last year in our out-of-control technical 
+discussions about Version 2, we fixed the term "point" to refer to a 
+field location and the term "man" to refer to a circular symbol with a 
+label.  This sounds pedantic, but it is going to become very important 
+when you try to write an intelligible manual.
+
+I have noticed that you are using the word "point" to refer to a circular 
+symbol with a label.  If it weren't for the accusations of sexism, I 
+would encourage you to change to "man", since it is the obvious 
+generalization of "plainman", "solidman", etc.  Is there another word 
+that we can use that will be more acceptable?  If not, then we will have 
+to think up another word for field location.  I guess "location" would 
+work for that.
+
+Dan
+
+
+From emilblis@uclink2.berkeley.edu Fri Jul 12 12:45:08 1996
+Received: from uclink4.berkeley.edu (uclink4.Berkeley.EDU [128.32.155.12]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id MAA22863 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 12:45:07 -0700
+Received: from uclink2.berkeley.edu (uclink2.berkeley.edu [128.32.136.72]) by uclink4.berkeley.edu (8.7.5/8.6.12) with ESMTP id MAA00893 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 12:45:24 -0700 (PDT)
+Received: from [136.152.79.98] (blissful.HIP.Berkeley.EDU [136.152.79.98]) by uclink2.berkeley.edu (8.7.5/8.6.12) with SMTP id MAA25015 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 12:40:27 -0700
+Message-Id: <v02130501ae0b949f7157@[136.152.79.98]>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+X-mailer: Eudora Pro 2.1.3
+Date: Fri, 12 Jul 1996 12:40:29 -0800
+To: Garrick Meeker <gmeeker@volga.EECS.Berkeley.EDU>
+From: Emil Lafayette Bliss <emilblis@uclink2.berkeley.edu>
+Subject: Re: CalChart for Macintosh
+Status: RO
+X-Status: A
+
+Hi Gurk,
+    How is the Mac version of CalChart coming?  If, or when,
+    it's done I would like a copy of it.  If it's not too big
+    you can email it to me or else just tell me where to pick it
+    up.
+
+Thanks,
+
+______________________________
+Emil L. Bliss
+emilblis@uclink2.berkeley.edu
+------------------------------
+
+
+
+From pering@zabriskie.EECS.Berkeley.EDU Fri Jul 12 15:05:52 1996
+Received: from zabriskie.EECS.Berkeley.EDU (zabriskie.EECS.Berkeley.EDU [128.32.139.1]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id PAA25751 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 15:05:51 -0700
+Received: from waskosim.EECS.Berkeley.EDU (waskosim.EECS.Berkeley.EDU [128.32.139.50]) by zabriskie.EECS.Berkeley.EDU (8.6.12/8.6.12) with ESMTP id PAA23821 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 15:06:08 -0700
+Received: (pering@localhost) by waskosim.EECS.Berkeley.EDU (8.6.12/8.6.12) id PAA08022; Fri, 12 Jul 1996 15:06:07 -0700
+Date: Fri, 12 Jul 1996 15:06:06 -0700 (PDT)
+From: Trevor Pering <pering@waskosim.EECS.Berkeley.EDU>
+Subject: Re: Mac CalChart
+To: Garrick Meeker <gmeeker@volga.EECS.Berkeley.EDU>
+In-Reply-To: <Pine.ULT.3.91.960712150602.6053F-100000@volga.EECS.Berkeley.EDU>
+Message-ID: <Pine.3.89.9607121547.A8017-0100000@waskosim.EECS.Berkeley.EDU>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Status: RO
+X-Status: 
+
+
+Yes, I should have some free time.  Drop me a line when you're ready. 
+
+	Trevor
+
+
+On Fri, 12 Jul 1996, Garrick Meeker wrote:
+
+> I'm hoping to compile the Mac version of CalChart in the next few weeks.  
+> Do you think you might have some free time (maybe a half day or so)?  I'm 
+> really sure when I'll be ready though.
+> 
+> -Gurk
+> 
+> 
+
+
+From dci@hog.uchicago.edu Fri Jul 12 18:34:08 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id SAA29075 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 18:34:07 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id UAA22549; Fri, 12 Jul 1996 20:34:23 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607130134.UAA22549@hog.uchicago.edu>
+Subject: Re: Implementing FOUNTAIN
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Fri, 12 Jul 1996 20:34:22 -0500 (CDT)
+Cc: dci@hog.uchicago.edu (Dan Isaksen)
+In-Reply-To: <Pine.ULT.3.91.960712153251.6347A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 12, 96 03:44:03 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+ 
+> I was just thinking about how to implement the FOUNTAIN command.  Because 
+> of complicated situtations (like if the result is to go NW and then S) I 
+> think I need to use some math instead of just brute force.  I was 
+> thinking of doing this:
+
+Well, I think brute force is actually the way to go.  However, more 
+sophisticated techniques will make the calculation of the nasty formulae 
+easier.
+ 
+> Put unit vectors of the two directions into a 2x2 matrix (M).  The 
+> resulting vector is v and the scalors are in u.
+> 
+> So we have: Mu = v
+> 
+> We want u so:
+>      -1
+> u = M  v
+> 
+> I would invert M with gaussian elimination, right?
+
+See below for a formula in the 2 x 2 case.
+ 
+> So if M isn't invertible, then the directions are either the same or 
+> opposite, and we can check to see if it's possible to get there easily.
+ 
+In this case, most of the time it will not be possible to reach the 
+desired point.  However, sometimes it will be.  In this case, there will 
+generally be infinitely many ways of getting there.  The only time that 
+there is a UNIQUE solution is when the two vectors in M are exactly equal 
+(same direction AND stepsize).
+
+> Is this how the old version of calchart does this or is there an easier 
+> way I'm missing?
+
+This is basically the way that the old calchart does it.
+
+Here is a more methodical explanation of how things work.
+
+I believe that we decided on the format for the fountain command:
+	FOUNTAIN <dir1> <step1> <dir2> <step2> <point>
+
+Let u and v be the vectors determined by the first four variables:
+	u = ( <step1> cos <dir1> , <step1> sin <dir1> ) = (a, c)
+	v = ( <step2> cos <dir2> , <step2> sin <dir2> ) = (b, d)
+
+Let w be the vector given by the displacement from the current position 
+to <point>:
+	w = (e, f) = <point> - P
+
+We need to find scalars g and h so that:
+	w = g u + h v
+
+Once we have calculated g and h, then the marching instructions are:
+	MARCH <step1> g <dir1>
+	MARCH <step2> h <dir2>
+
+Now we calculate g and h.
+
+Let M be the matrix with columns u and v:
+	    | a b |
+	M = | c d |
+
+Let x = (g, h).  Then we want:
+	w = Mx
+
+Thus the desired formula is:
+	x = M^{-1}w
+
+In particular, M must be invertible.
+
+Now for a more concrete description of the solution.
+The condition that M is invertible is the same as the condition that u 
+and v are linearly independent, which is the same as saying that they are 
+not colinear (the angle between them is not 0 nor \pi).  The easy way to 
+check for invertibility is to see whether the determinant det M is nonzero.  
+The formula is:
+	det M = a d - b c
+
+If a d - b c is zero, then the routine is either not possible or possible 
+in infinitely many ways.  In either case, you will have 
+to produce an error message.
+
+The easy way to calculate the inverses of 2 x 2 matrices is the following 
+formula:
+	       -1      1
+	| a b |   = ------- |  d  -b |
+	| c d |     ad - bc | -c   a |
+
+Note that the denominator is just det M.
+
+To be completely concrete, the final answer is:
+	     de - bf         af - ce 
+	g =  ------- ,  h =  -------
+	     ad - bc	     ad - bc
+
+These last two formulae are all the program really needs to know.  The 
+need for checking the determinant becomes obvious because it appears in 
+the denominators.  I don't see any reason for using sophisticated matrix 
+arithmetic libraries (if such things exist for C); just type in the 
+formulae directly.
+
+There is one situation in which the degenerate case (det M = 0) actually 
+makes sense.  This happens when u = v and w is a multiple of v.  Let N be 
+the matrix with columns w and u:
+	    | e a |
+	N = | f c |
+
+Then w is a multiple of v if and only if det N = 0.
+
+Hence, the degenerate case makes sense precisely when:
+	a = b, c = d, ec - af = 0.
+
+To understand this condition intuitively, note that the formulae for g 
+and h look like 0/0.  As a general rule of thumb in mathematics, always 
+expect weird things when you see 0/0 (or \infinity - \infinity).
+
+When the degenerate case makes sense, then the formulae for g and h are:
+	g = e/c, h = 0.
+
+There are other versions of these formulae, but they are all equivalent.
+
+For arbitrary n x n matrices, there is no nice formula for determinants. 
+Then you have to resort to something like Gaussian elimination or other
+various fancy algorithms.  A lot of people have spent a lot of time
+investigating fast algorithms for matrix inversion.
+
+I guess this answer is about 1000 times more thorough than you had 
+expected.  Or maybe you have come to expect this kind of thing from me.
+
+By the way, my latest project is to think about the various ways in which 
+one can lace shoes.
+
+Dan
+
+
+
+From emilblis@uclink2.berkeley.edu Fri Jul 12 18:39:47 1996
+Received: from uclink4.berkeley.edu (uclink4.Berkeley.EDU [128.32.155.12]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id SAA29142 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 18:39:46 -0700
+Received: from uclink2.berkeley.edu (uclink2.berkeley.edu [128.32.136.72]) by uclink4.berkeley.edu (8.7.5/8.6.12) with ESMTP id SAA17217 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 18:40:03 -0700 (PDT)
+Received: from localhost (emilblis@localhost) by uclink2.berkeley.edu (8.7.5/8.6.12) with SMTP id SAA22630 for <gmeeker@volga.EECS.Berkeley.EDU>; Fri, 12 Jul 1996 18:38:54 -0700
+Date: Fri, 12 Jul 1996 18:38:54 -0700 (PDT)
+From: Emil Lafayette Bliss <emilblis@uclink2.berkeley.edu>
+To: Garrick Meeker <gmeeker@volga.EECS.Berkeley.EDU>
+Subject: Re: CalChart for Macintosh
+In-Reply-To: <Pine.ULT.3.91.960712131923.4826C-100000@volga.EECS.Berkeley.EDU>
+Message-ID: <Pine.ULT.3.93.960712183638.22429A-100000@uclink2.berkeley.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Status: RO
+X-Status: A
+
+Hey Gurk,
+	I came to BRH today for the Stunt run and Todd was sitting at a
+computer charting.  So Stunt has already started charting pregame.  He is
+the first one (Big C) and I think I'm the only one with a Mac and I'm
+doing Fight so I won't need it for a little while longer.  I don't know
+how long exactly so as soon as it is convienient for you...
+
+Thanks,
+
+________________________________________________________
+|						       |
+|   |		     Emil Lafayette Bliss	       |
+| --+--          emilblis@uclink2.berkeley.edu	       |
+|   |	    http://www.csua.berkeley.edu/~emilblis/    |
+|   |	     					       |
+|						       |
+|"All you inhabitants of the world, you who live on    |
+| the earth, when a signal is raised on the mountain   |
+| look!  When a trumpet is blown, listen!" Isaiah 18:3 |
+|______________________________________________________|
+
+
+
