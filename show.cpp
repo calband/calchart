@@ -65,6 +65,8 @@ void CC_WinNode::SelectSheet(wxWindow*, unsigned) {}
 void CC_WinNode::AddContinuity(unsigned, unsigned) {}
 void CC_WinNode::DeleteContinuity(unsigned, unsigned) {}
 void CC_WinNode::ChangePrint(wxWindow*) {}
+void CC_WinNode::FlushDescr() {}
+void CC_WinNode::SetDescr(wxWindow* win) {}
 
 CC_WinList::CC_WinList()
 : list(NULL) {}
@@ -229,6 +231,22 @@ void CC_WinList::ChangePrint(wxWindow* win) {
 
   for (n = list; n != NULL; n = n->next) {
     n->ChangePrint(win);
+  }
+}
+
+void CC_WinList::FlushDescr() {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->FlushDescr();
+  }
+}
+
+void CC_WinList::SetDescr(wxWindow* win) {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->SetDescr(win);
   }
 }
 
@@ -653,6 +671,14 @@ static char* load_show_MODE(INGLchunk* chunk) {
   return NULL;
 }
 
+static char* load_show_DESC(INGLchunk* chunk) {
+  CC_show *show = (CC_show*)chunk->prev->userdata;
+
+  show->SetDescr((char*)chunk->data);
+
+  return NULL;
+}
+
 static char* load_show_NAME(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   
@@ -731,6 +757,7 @@ static INGLhandler load_show_handlers[] = {
   { INGL_SIZE, INGL_SHOW, load_show_SIZE },
   { INGL_LABL, INGL_SHOW, load_show_LABL },
   { INGL_MODE, INGL_SHOW, load_show_MODE },
+  { INGL_DESC, INGL_SHOW, load_show_DESC },
   { INGL_NAME, INGL_SHET, load_show_NAME },
   { INGL_DURA, INGL_SHET, load_show_DURA },
   { INGL_POS , INGL_SHET, load_show_POS  },
@@ -1262,6 +1289,7 @@ char *CC_show::Save(const char *filename) {
   unsigned i;
   Coord crd;
   unsigned char c;
+  const char *str;
 
   if (!handl->Okay()) {
     delete handl;
@@ -1297,6 +1325,14 @@ char *CC_show::Save(const char *filename) {
   }
 
   //handl->WriteChunkStr(INGL_MODE, mode->Name());
+
+  // Description
+  str = UserGetDescr();
+  if (str[0] != '\0') {
+    if (!handl->WriteChunkStr(INGL_DESC, str)) {
+      return writeerr_str;
+    }
+  }
 
   // Handle sheets
   for (CC_sheet *curr_sheet = GetSheet();
@@ -1517,6 +1553,8 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
   pt_labels = new_labels;
 
   numpoints = num;
+
+  SetModified(TRUE);
 }
 
 void CC_show::SetNumPointsInternal(unsigned num) {

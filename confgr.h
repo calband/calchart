@@ -46,11 +46,9 @@ extern float sline_ratio;
 extern float cont_ratio;
 extern char yard_text[21][8];
 extern char spr_line_text[MAX_SPR_LINES][8];
-extern char configdir[MAX_PATH_LEN];
 
 extern char *ReadConfig(void);
-extern FILE *OpenFileInDir(const char *name, const char *modes,
-			   const char *dir=configdir);
+extern FILE *OpenFileInDir(const char *name, const char *modes);
 extern char *my_fgets(char *buffer, int length, FILE *fp);
 
 #endif

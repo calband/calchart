@@ -69,6 +69,8 @@ public:
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
   virtual void ChangePrint(wxWindow* win);
+  virtual void FlushDescr();
+  virtual void SetDescr(wxWindow* win);
 
   CC_WinNode *next;
 protected:
@@ -104,6 +106,8 @@ public:
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
   virtual void ChangePrint(wxWindow* win);
+  virtual void FlushDescr();
+  virtual void SetDescr(wxWindow* win);
 
 private:
   CC_WinNode *list;
@@ -332,6 +336,13 @@ public:
     name = newname; winlist->ChangeName();
   }
 
+  inline const char *GetDescr() { return descr; }
+  inline const char *UserGetDescr() { winlist->FlushDescr(); return descr; }
+  inline void SetDescr(const char *newdescr) { descr = newdescr; }
+  inline void UserSetDescr(const char *newdescr, wxWindow* win) {
+    descr = newdescr; SetModified(TRUE); winlist->SetDescr(win);
+  }
+
   inline Bool Modified() { return modified; }
   inline void SetModified(Bool b) { modified = b; winlist->UpdateStatusBar(); }
 
@@ -382,6 +393,7 @@ private:
 
   char *error;
   wxString name;
+  wxString descr;
   unsigned short numpoints;
   unsigned short numsheets;
   CC_sheet *sheets;

@@ -212,6 +212,12 @@ void CC_WinNodeMain::DeleteContinuity(unsigned sht, unsigned cont) {
 void CC_WinNodeMain::ChangePrint(wxWindow* win) {
   winlist.ChangePrint(win);
 }
+void CC_WinNodeMain::FlushDescr() {
+  winlist.FlushDescr();
+}
+void CC_WinNodeMain::SetDescr(wxWindow* win) {
+  winlist.SetDescr(win);
+}
 
 // Create windows and return main app frame
 wxFrame *CalChartApp::OnInit(void)

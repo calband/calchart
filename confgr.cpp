@@ -77,10 +77,9 @@ char spr_line_text[MAX_SPR_LINES][8] = {
   "E",
 };
 
-char configdir[MAX_PATH_LEN];
+wxPathList configdirs;
 
 char *ReadConfig(void) {
-  char *env_val;
   FILE *fp;
   char com_buf[1024];
   char stage_eps_file[MAX_FNAME_LEN];
@@ -93,15 +92,16 @@ char *ReadConfig(void) {
   short eps_text_left, eps_text_right, eps_text_top, eps_text_bottom;
   unsigned char which_spr_yards;
 
-  env_val = getenv("CALCHART_RT");
-  if (env_val) {
-    strncpy(configdir, env_val, MAX_PATH_LEN);
-  } else {
-    // CALCHART_RT was not set.  Try './runtime'
-    wxGetWorkingDirectory(configdir, MAX_PATH_LEN);
-    strncat(configdir, PATH_SEPARATOR, MAX_PATH_LEN);
-    strncat(configdir, "runtime", MAX_PATH_LEN);
+  {
+    char runtimedir[MAX_PATH_LEN];
+
+    // Add './runtime'
+    wxGetWorkingDirectory(runtimedir, MAX_PATH_LEN);
+    strncat(runtimedir, PATH_SEPARATOR, MAX_PATH_LEN);
+    strncat(runtimedir, "runtime", MAX_PATH_LEN);
+    configdirs.Add(runtimedir);
   }
+  configdirs.AddEnvList("CALCHART_RT");
 
   fp = OpenFileInDir("config", "r");
   if (fp == NULL) {
@@ -307,13 +307,13 @@ char *ReadConfig(void) {
 }
 
 // Open a file in the specified dir.
-FILE *OpenFileInDir(const char *name, const char *modes, const char *dir) {
+FILE *OpenFileInDir(const char *name, const char *modes) {
   FILE *fp;
-  char fullpath[MAX_PATH_LEN];
+  char *fullpath;
 
-  strncpy(fullpath, dir, MAX_PATH_LEN);
-  strncat(fullpath, PATH_SEPARATOR, MAX_PATH_LEN);
-  strncat(fullpath, name, MAX_PATH_LEN);
+  fullpath = configdirs.FindValidPath((char *)name);
+  if (fullpath == NULL) return NULL;
+
   fp = fopen(fullpath, modes);
   return fp;
 }

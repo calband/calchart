@@ -97,8 +97,8 @@ descr(dcr), curr_cont(0) {
 
   panel = new wxPanel(this);
 
-  (void)new wxButton(panel, (wxFunction)ContEditSet, "Set");
-  (void)new wxButton(panel, (wxFunction)ContEditSelect, "Select");
+  (void)new wxButton(panel, (wxFunction)ContEditSet, "Set Points");
+  (void)new wxButton(panel, (wxFunction)ContEditSelect, "Select Points");
 
   conts = new wxChoice(panel, (wxFunction)ContEditCurrent, "");
 

@@ -74,6 +74,16 @@ void CC_WinNodeInfo::ChangeShowMode(wxWindow *win) {
   }
 }
 
+void CC_WinNodeInfo::FlushDescr() {
+  inforeq->FlushDescr();
+}
+
+void CC_WinNodeInfo::SetDescr(wxWindow* win) {
+  if (win != inforeq) {
+    inforeq->UpdateDescrQuick();
+  }
+}
+
 static void SheetPickerClose(wxButton& button, wxEvent&) {
   ((StuntSheetPicker*)button.GetParent()->GetParent())->Close();
 }
@@ -406,6 +416,7 @@ show(shw) {
   c2->right.SameAs(this, wxRight);
   c2->bottom.SameAs(this, wxBottom);
   text->SetConstraints(c2);
+  UpdateDescr();
 
   node = new CC_WinNodeInfo(lst, this);
 
@@ -423,6 +434,7 @@ ShowInfoReq::~ShowInfoReq()
 }
 
 Bool ShowInfoReq::OnClose(void) {
+  FlushDescr();
   return TRUE;
 }
 
@@ -453,10 +465,31 @@ void ShowInfoReq::UpdateMode() {
   choice->SetStringSelection(show->mode->Name());
 }
 
+void ShowInfoReq::UpdateDescr() {
+  text->Clear();
+  text->WriteText((char *)show->UserGetDescr());
+}
+
+void ShowInfoReq::UpdateDescrQuick() {
+  text->Clear();
+  text->WriteText((char *)show->GetDescr());
+}
+
 void ShowInfoReq::Update(CC_show *shw) {
   if (shw != NULL) show = shw;
+  UpdateDescr();
   UpdateMode();
   UpdateNumPoints();
+}
+
+void ShowInfoReq::FlushDescr() {
+  char *descr;
+
+  descr = text->GetContents();
+  if (strcmp(descr,show->GetDescr()) != 0) {
+    show->UserSetDescr(descr, this);
+  }
+  delete descr;
 }
 
 unsigned ShowInfoReq::GetNumPoints() {

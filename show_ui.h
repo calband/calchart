@@ -42,6 +42,8 @@ public:
   virtual void ChangeNumPoints(wxWindow *win);
   virtual void ChangePointLabels(wxWindow *win);
   virtual void ChangeShowMode(wxWindow *win);
+  virtual void FlushDescr();
+  virtual void SetDescr(wxWindow *win);
 
 private:
   ShowInfoReq *inforeq;
@@ -89,7 +91,11 @@ public:
   void UpdateLabels();
   void UpdateNumPoints();
   void UpdateMode();
+  void UpdateDescr();
+  void UpdateDescrQuick(); // doesn't flush other windows
   void Update(CC_show *shw = NULL);
+
+  void FlushDescr(); // Flush changes in description text window
 
   inline char *GetChoiceStrSelection() { return choice->GetStringSelection(); }
   inline int GetChoiceSelection() { return choice->GetSelection(); }

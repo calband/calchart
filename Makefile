@@ -8,7 +8,7 @@ PROG = calchart
 #MAKEDEP = makedepend
 MAKEDEP = ./makedep
 
-DFLAGS = -g
+DFLAGS = -g -Wall
 
 LEX = flex
 LFLAGS = -B

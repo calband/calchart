@@ -45,6 +45,8 @@ public:
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
   virtual void ChangePrint(wxWindow* win);
+  virtual void FlushDescr();
+  virtual void SetDescr(wxWindow* win);
 
   CC_WinList winlist;
 private:
