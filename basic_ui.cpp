@@ -251,6 +251,9 @@ void wxFrameWithStuffSized::Fit()
     height_pnl = 0;
   }
   width_frm = width_cnv;
+  if (width_pnl > width_frm) width_frm = width_pnl;
+  if (width_tb > width_frm) width_frm = width_tb;
+
   height_frm = height_cnv + height_tb + height_pnl;
 
   SetClientSize(width_frm, height_frm);

@@ -267,7 +267,7 @@ ContFuncDir::~ContFuncDir() {
 
 float ContFuncDir::Get(AnimateCompile* anim) const {
   CC_coord c = pnt->Get(anim);
-  if (c == 0) {
+  if (c == anim->pt.pos) {
     anim->RegisterError(ANIMERR_UNDEFINED);
   }
   return anim->pt.pos.Direction(c);
@@ -321,8 +321,10 @@ float ContFuncEither::Get(AnimateCompile* anim) const {
   float d1, d2;
   CC_coord c = pnt->Get(anim);
 
-  if (anim->pt.pos == c)
+  if (anim->pt.pos == c) {
     anim->RegisterError(ANIMERR_UNDEFINED);
+    return dir1->Get(anim);
+  }
   dir = anim->pt.pos.Direction(c);
   d1 = dir1->Get(anim) - dir;
   d2 = dir2->Get(anim) - dir;

@@ -325,7 +325,7 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     }
     numsheets++;
     curr_sheet->SetName(comp.curr_sheet->GetName());
-    curr_sheet->numbeats = comp.curr_sheet->beats;
+    curr_sheet->numbeats = comp.curr_sheet->GetBeats();
     for (i = 0; i < numpts; i++) {
       curr_sheet->pts[i].pos = comp.curr_sheet->GetPosition(i);
     }
@@ -487,8 +487,8 @@ void Animation::GotoSheet(unsigned i) {
     curr_sheet = curr_sheet->next;
     i--;
   }    
-  CheckCollisions();
   RefreshSheet();
+  CheckCollisions();
 }
 
 void Animation::BeginCmd(unsigned i) {
@@ -563,7 +563,7 @@ void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
   pt.pos = curr_sheet->GetPosition(pt_num);
   cmds = curr_cmd = NULL;
   curr_pt = pt_num;
-  beats_rem = curr_sheet->beats;
+  beats_rem = curr_sheet->GetBeats();
 
   if (proc == NULL) {
     // no continuity was specified

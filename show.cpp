@@ -484,19 +484,19 @@ CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
 
 CC_sheet::CC_sheet(CC_show *shw)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), beats(1), picked(TRUE) {
+  numanimcont(0), picked(TRUE), beats(1) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_show *shw, const char *newname)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), beats(1), picked(TRUE), pts(NULL), name(newname) {
+  numanimcont(0), picked(TRUE), beats(1), pts(NULL), name(newname) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_sheet *sht)
 : next(NULL), show(sht->show),
-  beats(1), picked(sht->picked), name(sht->name), number(sht->number)
+  picked(sht->picked), beats(1), name(sht->name), number(sht->number)
 {
   int i;
 
@@ -814,7 +814,7 @@ void CC_sheet::UserSetName(const char *newname) {
 void CC_sheet::UserSetBeats(unsigned short b) {
   // Create undo entry
   show->undolist->Add(new ShowUndoBeat(show->GetSheetPos(this), this));
-  beats = b;
+  SetBeats(b);
   show->winlist->ChangeTitle(show->GetSheetPos(this));
 }
 
@@ -1151,7 +1151,7 @@ static char* load_show_DURA(INGLchunk* chunk) {
   if (chunk->size != 4) {
     return "Bad DURA chunk";
   }
-  sheet->beats = get_big_long(chunk->data);
+  sheet->SetBeats(get_big_long(chunk->data));
 
   return NULL;
 }
@@ -1422,7 +1422,7 @@ CC_show::CC_show(const char *file)
 	}
 	curr_sheet = curr_sheet->next;
       }
-      curr_sheet->beats = j;
+      curr_sheet->SetBeats(j);
     }
     fclose(fp);
 
@@ -2002,7 +2002,7 @@ char *CC_show::SaveInternal(const char *filename) {
       return writeerr_str;
     }
     // Beats
-    put_big_long(&id, curr_sheet->beats);
+    put_big_long(&id, curr_sheet->GetBeats());
     if (!handl->WriteChunk(INGL_DURA, 4, &id)) {
       return writeerr_str;
     }

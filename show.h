@@ -356,6 +356,8 @@ public:
   inline void SetName(const char *newname) { name = newname; }
   inline const char *GetNumber() { return number; }
   inline void SetNumber(const char *newnumber) { number = newnumber; }
+  inline unsigned short GetBeats() { return beats; }
+  inline void SetBeats(unsigned short b) { beats = b; }
   inline Bool IsInAnimation() { return (beats != 0); }
   void UserSetName(const char *newname);
   void UserSetBeats(unsigned short b);
@@ -381,9 +383,9 @@ public:
   CC_continuity *animcont;
   CC_show *show;
   unsigned numanimcont;
-  unsigned short beats;
   Bool picked; /* for requestors like printing */
 private:
+  unsigned short beats;
   CC_point *pts;
   wxString name;
   wxString number;

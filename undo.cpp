@@ -379,7 +379,7 @@ char *ShowUndoName::UndoDescription() { return "Undo change stuntsheet name"; }
 char *ShowUndoName::RedoDescription() { return "Redo change stuntsheet name"; }
 
 ShowUndoBeat::ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum), beats(sheet->beats) {}
+:ShowUndo(sheetnum), beats(sheet->GetBeats()) {}
 
 ShowUndoBeat::~ShowUndoBeat() {}
 
@@ -388,7 +388,8 @@ int ShowUndoBeat::Undo(CC_show *show, ShowUndo** newundo)
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
 
   *newundo = new ShowUndoBeat(sheetidx, sheet);
-  sheet->UserSetBeats(beats);
+  sheet->SetBeats(beats);
+  show->winlist->ChangeTitle(sheetidx);
   return (int)sheetidx;
 }
 

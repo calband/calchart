@@ -1106,7 +1106,7 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__SET_BEATS:
     if (field->show_descr.show) {
       wxString buf;
-      buf.sprintf("%u", field->show_descr.CurrSheet()->beats);
+      buf.sprintf("%u", field->show_descr.CurrSheet()->GetBeats());
       s = wxGetTextFromUser("Enter the number of beats",
 			    (char *)field->show_descr.CurrSheet()->GetName(),
 			    buf.GetData(), this);
@@ -1830,7 +1830,7 @@ void MainFrame::UpdatePanel() {
 
   tempbuf.sprintf("%s%d of %d \"%.32s\" %d beats",
 		  field->show_descr.show->Modified() ? "* ":"", curr,
-		  num, sht->GetName(), sht->beats);
+		  num, sht->GetName(), sht->GetBeats());
   SetStatusText(tempbuf.GetData(), 1);
 
   if (num > 1) {
