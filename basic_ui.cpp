@@ -12,11 +12,20 @@
 
 #include "basic_ui.h"
 
+#ifdef wx_x
+#include "calchart.xpm"
+#endif
+
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc) {
   dc->SetBrush(wxTRANSPARENT_BRUSH);
   dc->SetPen(wxWHITE_PEN);
   dc->SetLogicalFunction(wxINVERT);
+}
+
+// Set icon to band's insignia
+void SetBandIcon(wxFrame *frame) {
+  frame->SetIcon(new wxIcon(ICON_NAME(calchart)));
 }
 
 // Text subwindow that can respoind to drag-and-drop
@@ -25,6 +34,28 @@ FancyTextWin::FancyTextWin(wxFrame *frame, int x, int y,
 :wxTextWindow(frame, x, y, width, height, style) {
   DragAcceptFiles(TRUE);
 }
+
+#ifdef TEXT_DOS_STYLE
+char *FancyTextWin::GetContents(void) {
+  char *src;
+  char *dest;
+  unsigned i, len;
+
+  // Copy string but not carriage returns
+  src = wxTextWindow::GetContents();
+  for (i = 0, len = 0; src[i]; i++) {
+    if (src[i] != '\r') len++;
+  }
+  dest = new char[len+1];
+  for (i = 0, len = 0; src[i]; i++) {
+    if (src[i] != '\r') dest[len++] = src[i];
+  }
+  dest[len] = 0;
+
+  delete src;
+  return dest;
+}
+#endif
 
 void FancyTextWin::OnDropFiles(int, char *files[], int, int) {
   LoadFile(files[0]);
@@ -227,8 +258,93 @@ void wxFrameWithStuffSized::Fit()
   OnSize(-1, -1);
 }
 
+AutoScrollCanvas::AutoScrollCanvas(wxWindow *parent,
+				   int x, int y, int w, int h):
+  wxCanvas(parent, x, y, w, h, 0 /* not retained */), memdc(NULL), membm(NULL),
+  x_scale(1.0), y_scale(1.0)
+{
+}
+
+AutoScrollCanvas::~AutoScrollCanvas() {
+  FreeMem();
+}
+
+void AutoScrollCanvas::SetSize(int width, int height) {
+  GetDC()->SetLogicalFunction(wxCOPY);
+  Clear();
+  FreeMem();
+  x_off = y_off = 0.0;
+  memdc = new wxMemoryDC(GetDC());
+  if (!memdc->Ok()) {
+    FreeMem();
+  } else {
+    membm = new wxBitmap(width, height);
+    if (!membm->Ok()) {
+      FreeMem();
+    } else {
+      memdc->SelectObject(membm);
+      memdc->SetBackground(GetDC()->GetBackground());
+      memdc->SetUserScale(x_scale, y_scale);
+    }
+  }
+}
+
+void AutoScrollCanvas::SetUserScale(float x, float y) {
+  x_scale = x;
+  y_scale = y;
+  GetDC()->SetUserScale(x, y);
+  if (memdc) memdc->SetUserScale(x, y);
+}
+
+void AutoScrollCanvas::Move(float x, float y) {
+  int width, height;
+  int w, h;
+
+  x *= x_scale;
+  y *= y_scale;
+
+  if (memdc) {
+    GetClientSize(&width, &height);
+    w = membm->GetWidth() - width;
+    h = membm->GetHeight() - height;
+
+    if (w > 0) {
+      x_off = -w * x / width;
+    } else {
+      x_off = 0;
+    }
+    if (h > 0) {
+      y_off = -h * y / height;
+    } else {
+      y_off = 0;
+    }
+  }
+}
+
+void AutoScrollCanvas::Blit() {
+  if (memdc) {
+    GetDC()->SetUserScale(1.0, 1.0);
+    memdc->SetUserScale(1.0, 1.0);
+    GetDC()->Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
+		  memdc, 0, 0, wxCOPY);
+    GetDC()->SetUserScale(x_scale, y_scale);
+    memdc->SetUserScale(x_scale, y_scale);
+  }
+}
+
+void AutoScrollCanvas::FreeMem() {
+  if (memdc) {
+    delete memdc;
+    memdc = NULL;
+  }
+  if (membm) {
+    delete membm;
+    membm = NULL;
+  }
+}
+
 CoolToolBar::CoolToolBar(wxFrame *frame, int x, int y, int w, int h,
-            long style, int direction, int RowsOrColumns):
+			 long style, int direction, int RowsOrColumns):
   PlainToolBar(frame, x, y, w, h, style, direction, RowsOrColumns),
   ourframe(frame) {}
 

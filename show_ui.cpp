@@ -157,6 +157,9 @@ StuntSheetPicker::StuntSheetPicker(CC_show *shw, CC_WinList *lst,
 				   int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
 show(shw) {
+  // Give it an icon
+  SetBandIcon(this);
+
   SetAutoLayout(TRUE);
 
   panel = new wxPanel(this);
@@ -298,6 +301,9 @@ PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
 			 int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
 show(shw) {
+  // Give it an icon
+  SetBandIcon(this);
+
   SetAutoLayout(TRUE);
 
   panel = new wxPanel(this);
@@ -477,6 +483,9 @@ show(shw) {
   Bool letters[26];
   Bool use_letters;
   int maxnum;
+
+  // Give it an icon
+  SetBandIcon(this);
 
   SetAutoLayout(TRUE);
 

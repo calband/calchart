@@ -125,6 +125,9 @@ ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
 				   int x, int y, int width, int height):
 wxFrame(parent, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
 descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
+  // Give it an icon
+  SetBandIcon(this);
+
   CreateStatusLine();
 
   panel = new wxPanel(this);
@@ -418,6 +421,9 @@ PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
 				 wxFrame *parent, char *title,
 				 int x, int y, int width, int height)
 : wxFrameWithStuff(parent, title, x, y, width, height) {
+  // Give it an icon
+  SetBandIcon(this);
+
   CreateStatusLine(1);
 
   // Add a toolbar

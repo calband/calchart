@@ -303,14 +303,16 @@ private:
 
 class ContProcFountain : public ContProcedure {
 public:
-  ContProcFountain(ContValue *d1, ContValue *d2, ContPoint *p)
-    : dir1(d1), dir2(d2), pnt(p) {}
+  ContProcFountain(ContValue *d1, ContValue *d2, ContValue *s1, ContValue *s2,
+		   ContPoint *p)
+    : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
   virtual ~ContProcFountain();
 
   virtual void Compile(AnimateCompile* anim);
 
 private:
   ContValue *dir1, *dir2;
+  ContValue *stepsize1, *stepsize2;
   ContPoint *pnt;
 };
 

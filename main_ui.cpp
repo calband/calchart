@@ -22,7 +22,6 @@
 #include <wx_help.h>
 
 #ifdef wx_x
-#include "calchart.xpm"
 #include "tb_left.xbm"
 #include "tb_right.xbm"
 #include "tb_box.xbm"
@@ -339,7 +338,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   unsigned def_grid;
 
   // Give it an icon
-  SetIcon(new wxIcon(ICON_NAME(calchart)));
+  SetBandIcon(this);
 
   // Give it a status line
   CreateStatusLine(2);
@@ -426,6 +425,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   window_list->Insert(this);
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   OnSize(-1, -1);
+  field->RefreshShow();
   Show(TRUE);
 }
 
@@ -784,24 +784,23 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
-			 int def_zoom, int x, int y, int w, int h, long style):
- wxCanvas(frame, x, y, w, h, style), ourframe(frame), curr_lasso(CC_DRAG_BOX),
+			 int def_zoom, int x, int y, int w, int h):
+ AutoScrollCanvas(frame, x, y, w, h), ourframe(frame), curr_lasso(CC_DRAG_BOX),
  drag(CC_DRAG_NONE), dragon(FALSE)
 {
   show_descr.show = show;
   show_descr.curr_ss = ss;
 
-  GetDC()->SetMapMode(MM_TEXT);
   SetZoomQuick(def_zoom);
-  EnableScrolling(FALSE, FALSE); // Windows messes up scrolling
 
   if (GetDC()->Colour) {
     SetBackground(grassBrush);
   } else {
     SetBackground(wxWHITE_BRUSH);
   }
-  UpdatePanel();
+
   UpdateBars();
+  UpdatePanel();
 }
 
 FieldCanvas::~FieldCanvas(void)
@@ -836,14 +835,17 @@ void FieldCanvas::DrawDrag(Bool on)
       }
       if ((w > 1) && (h > 1)) {
 	SetXOR(dc);
-	dc->DrawRectangle(orig.x+origin.x, orig.y+origin.y, w, h);
+	dc->DrawRectangle(orig.x+origin.x+GetPositionX(),
+			  orig.y+origin.y+GetPositionY(), w, h);
 	dragon = on;
       }
       break;
     case CC_DRAG_LINE:
       SetXOR(dc);
-      dc->DrawLine(drag_start.x+origin.x, drag_start.y+origin.y,
-		   drag_end.x+origin.x, drag_end.y+origin.y);
+      dc->DrawLine(drag_start.x+origin.x+GetPositionX(),
+		   drag_start.y+origin.y+GetPositionY(),
+		   drag_end.x+origin.x+GetPositionX(),
+		   drag_end.y+origin.y+GetPositionY());
       dragon = on;
       break;
     default:
@@ -855,7 +857,9 @@ void FieldCanvas::DrawDrag(Bool on)
 // Define the repainting behaviour
 void FieldCanvas::OnPaint(void)
 {
-  RefreshShow();
+  Blit();
+  dragon = FALSE; // since the canvas gets cleared
+  DrawDrag(TRUE);
 }
 
 void FieldCanvas::OnEvent(wxMouseEvent& event)
@@ -868,9 +872,13 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
       event.Position(&x, &y);
+      Move(x, y);
+      Blit();
+      dragon = FALSE; // since the canvas gets cleared
+
       pos = show_descr.show->mode->Offset();
-      pos.x = Coord(x - pos.x);
-      pos.y = Coord(y - pos.y);
+      pos.x = Coord(x - GetPositionX() - pos.x);
+      pos.y = Coord(y - GetPositionY() - pos.y);
 
       if (event.LeftDown()) {
 	Bool changed = FALSE;
@@ -938,8 +946,9 @@ void FieldCanvas::RefreshShow(Bool drawall, int point) {
   if (show_descr.show) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
-      sheet->Draw(GetDC(), drawall, point);
-      if (drawall) dragon = FALSE; // since the canvas gets cleared
+      sheet->Draw(GetMemDC(), drawall, point);
+      Blit();
+      dragon = FALSE; // since the canvas gets cleared
       DrawDrag(TRUE);
     }
   }
@@ -956,18 +965,10 @@ void FieldCanvas::UpdatePanel() {
 }
 
 void FieldCanvas::UpdateBars() {
-#ifdef FIELD_SCROLL_BARS
   if (show_descr.show) {
-    int f1, f2;
-    int d1x, d1y;
-
-    f1 = zoomf;
-    d1x = COORD2INT(show_descr.show->mode->Size().x);
-    d1y = COORD2INT(show_descr.show->mode->Size().y);
-    f2 = 8;
-    SetScrollbars(f1, f1, d1x, d1y, f2, f2);
+    SetSize(COORD2INT(show_descr.show->mode->Size().x) * zoomf,
+	    COORD2INT(show_descr.show->mode->Size().y) * zoomf);
   }
-#endif
 }
 
 MainFrameList::~MainFrameList() {

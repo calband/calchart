@@ -184,6 +184,9 @@ void AnimationCanvas::FreeAnim() {
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 			       CC_WinList *lst)
 : wxFrameWithStuffSized(frame, "Animation") {
+  // Give it an icon
+  SetBandIcon(this);
+
   CreateStatusLine(2);
 
   // Make a menubar

@@ -10,8 +10,6 @@
   Commands left to implement:
   CM
   DMCM
-  Fountain
-  Grid
   HSCM
   */
 
@@ -22,10 +20,19 @@
 #include "cont.h"
 #include <math.h>
 
+#define BASICALLY_ZERO_BASICALLY 0.00001
+#define IS_ZERO(a) (ABS((a)) < BASICALLY_ZERO_BASICALLY)
+
 float BoundDirection(float f) {
   while (f >= 360.0) f -= 360.0;
   while (f < 0.0) f += 360.0;
   return f;
+}
+
+Bool IsDiagonalDirection(float f) {
+  f = BoundDirection(f);
+  return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) ||
+	  IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
 }
 
 ContPoint::~ContPoint() {}
@@ -138,7 +145,7 @@ float ContValueDiv::Get(AnimateCompile* anim) {
   float f;
 
   f = val2->Get(anim);
-  if ((f < 0.00001) && (f > -0.00001)) {
+  if (IS_ZERO(f)) {
     anim->SetStatus(FALSE);
     return 0.0;
   } else {
@@ -362,9 +369,83 @@ void ContProcEWNS::Compile(AnimateCompile* anim) {
 ContProcFountain::~ContProcFountain() {
   if (dir1) delete dir1;
   if (dir2) delete dir2;
+  if (stepsize1) delete stepsize1;
+  if (stepsize2) delete stepsize2;
 }
 
 void ContProcFountain::Compile(AnimateCompile* anim) {
+  float a, b, c, d, e, f;
+  float f1, f2;
+  CC_coord v;
+
+  f1 = dir1->Get(anim);
+  if (stepsize1) {
+    f2 = stepsize1->Get(anim);
+    a = f2 * cos(f1 * PI / 180.0);
+    c = f2 * sin(f1 * PI / 180.0);
+  } else {
+    f1 = BoundDirection(f1);
+    if (IsDiagonalDirection(f1)) {
+      a = c = 1.0;
+      if ((f1 > 50.0) && (f1 < 310.0)) a = -a;
+      if (f1 < 180.0) c = -c;
+    } else {
+      a = cos(f1 * PI / 180.0);
+      c = sin(f1 * PI / 180.0);
+    }
+  }
+  f1 = dir2->Get(anim);
+  if (stepsize2) {
+    f2 = stepsize2->Get(anim);
+    b = f2 * cos(f1 * PI / 180.0);
+    d = f2 * sin(f1 * PI / 180.0);
+  } else {
+    f1 = BoundDirection(f1);
+    if (IsDiagonalDirection(f1)) {
+      b = d = 1.0;
+      if ((f1 > 50.0) && (f1 < 310.0)) b = -b;
+      if (f1 < 180.0) d = -d;
+    } else {
+      b = cos(f1 * PI / 180.0);
+      d = sin(f1 * PI / 180.0);
+    }
+  }
+  v = pnt->Get(anim) - anim->pt.pos;
+  e = COORD2FLOAT(v.x);
+  f = COORD2FLOAT(v.y);
+  f1 = a*d - b*c;
+  if (IS_ZERO(f1)) {
+    if (IS_ZERO(a-b) && IS_ZERO(c-d) && IS_ZERO(e*c-a*f)) {
+      // Special case: directions are same
+      if (IS_ZERO(c)) {
+	f1 = f/c;
+      } else {
+	f1 = e/a;
+      }
+      if (!anim->Append(new AnimateCommandMove((unsigned)ABS(f1), v))) {
+	return;
+      }
+    } else {
+      return;
+    }
+  } else {
+    f2 = (d*e - b*f) / f1;
+    if (!IS_ZERO(f2)) {
+      v.x = FLOAT2COORD(f2*a);
+      v.y = FLOAT2COORD(f2*c);
+      if (!anim->Append(new AnimateCommandMove((unsigned)ABS(f2), v))) {
+	return;
+      }
+    }
+    f2 = (a*f - c*e) / f1;
+    if (!IS_ZERO(f2)) {
+      v.x = FLOAT2COORD(f2*b);
+      v.y = FLOAT2COORD(f2*d);
+      if (!anim->Append(new AnimateCommandMove((unsigned)ABS(f2), v))) {
+	return;
+      }
+    }
+  }
 }
 
 ContProcFM::~ContProcFM() {
@@ -379,10 +460,7 @@ void ContProcFM::Compile(AnimateCompile* anim) {
 
   d = dir->Get(anim);
   d = BoundDirection(d);
-  if ((ABS(d - 45.0) < 0.00001) ||
-      (ABS(d - 135.0) < 0.00001) ||
-      (ABS(d - 225.0) < 0.00001) ||
-      (ABS(d - 315.0) < 0.00001)) {
+  if (IsDiagonalDirection(d)) {
     c.x = c.y = FLOAT2COORD(stps->Get(anim));
     if ((d > 50.0) && (d < 310.0)) c.x = -c.x;
     if (d < 180.0) c.y = -c.y;
@@ -416,6 +494,23 @@ ContProcGrid::~ContProcGrid() {
 }
 
 void ContProcGrid::Compile(AnimateCompile* anim) {
+  Coord gridc;
+  Coord gridmask;
+  Coord gridadjust;
+  CC_coord c;
+
+  gridc = FLOAT2COORD(grid->Get(anim));
+  gridadjust = gridc >> 1; // Half of grid value
+  gridmask = ~(gridc-1); // Create mask to snap to this coord
+
+  c.x = (anim->pt.pos.x+gridadjust) & gridmask;
+  // Adjust so 4 step grid will be on visible grid
+  c.y = ((anim->pt.pos.y+gridadjust-INT2COORD(2)) & gridmask) + INT2COORD(2);
+
+  c -= anim->pt.pos;
+  if (c != 0) {
+    anim->Append(new AnimateCommandMove(0, c));
+  }
 }
 
 ContProcHSCM::~ContProcHSCM() {

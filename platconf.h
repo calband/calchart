@@ -38,11 +38,16 @@
 
 // Wildcard in file selector
 #ifdef wx_msw
-#define FILE_WILDCARDS "All shows | *.shw;*.mas | New shows (*.shw) | *.shw | Old shows (*.mas) | *.mas"
+#define FILE_WILDCARDS "All shows (*.shw;*.mas) | *.shw;*.mas | New shows (*.shw) | *.shw | Old shows (*.mas) | *.mas"
 #define FILE_SAVE_WILDCARDS "New shows (*.shw) | *.shw"
 #else
 #define FILE_WILDCARDS "*.mas"
 #define FILE_SAVE_WILDCARDS "*.shw"
+#endif
+
+// Need to handle DOS-style text
+#ifdef wx_msw
+#define TEXT_DOS_STYLE
 #endif
 
 // SetSizeHints doesn't work in Watcom for Win 3.1

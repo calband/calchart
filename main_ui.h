@@ -16,9 +16,6 @@
 #include "basic_ui.h"
 #include "show.h"
 
-// Possible scrolling methods
-#define FIELD_SCROLL_BARS
-
 // Value of 10 translates to a canvas of 1760x1000.
 #define FIELD_MAXZOOM 10
 #define FIELD_DEFAULT_ZOOM 5
@@ -94,13 +91,12 @@ public:
   CC_WinNodeMain *node;
 };
 
-class FieldCanvas : public wxCanvas {
+class FieldCanvas : public AutoScrollCanvas {
 public:
   // Basic functions
   FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 	      int def_zoom = FIELD_DEFAULT_ZOOM,
-	      int x = -1, int y = -1, int w = -1, int h = -1,
-	      long style = wxRETAINED);
+	      int x = -1, int y = -1, int w = -1, int h = -1);
   ~FieldCanvas(void);
   void OnPaint(void);
   void OnEvent(wxMouseEvent& event);
@@ -134,10 +130,10 @@ public:
   inline void SetZoomQuick(int factor) {
     zoomf = factor;
     float f = factor * COORD2FLOAT(1);
-    GetDC()->SetUserScale(f, f);
+    SetUserScale(f, f);
   }
   inline void SetZoom(int factor) {
-    SetZoomQuick(factor); UpdateBars();
+    SetZoomQuick(factor); UpdateBars(); RefreshShow();
   }
 
   inline void BeginDrag(CC_DRAG_TYPES type, CC_coord start) {

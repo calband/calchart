@@ -32,11 +32,17 @@
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc);
 
+// Set icon to band's insignia
+void SetBandIcon(wxFrame *frame);
+
 // Define a text subwindow that can respond to drag-and-drop
 class FancyTextWin : public wxTextWindow {
 public:
   FancyTextWin(wxFrame *frame, int x=-1, int y=-1, int width=-1, int height=-1,
 	       long style=wxNATIVE_IMPL|wxHSCROLL);
+#ifdef TEXT_DOS_STYLE
+  char *GetContents(void);
+#endif
   void OnDropFiles(int n, char *files[], int x, int y);
 };
 
@@ -93,6 +99,34 @@ public:
 			long style = wxSDI | wxDEFAULT_FRAME);
   void OnSize(int w, int h);  // Default OnSize handler
   void Fit();  // Shrinks frame to fit around a given canvas size
+};
+
+class AutoScrollCanvas: public wxCanvas
+{
+public:
+  AutoScrollCanvas(wxWindow *parent, int x = -1, int y = -1,
+		   int w = -1, int h = -1);
+  ~AutoScrollCanvas();
+
+  inline wxDC *GetMemDC() { return memdc; }
+  void SetSize(int width, int height);
+  void SetUserScale(float x, float y);
+  inline void SetPosition(float x, float y) {
+    x_off = x; y_off = y;
+  }
+  inline float GetPositionX() { return x_off/x_scale; }
+  inline float GetPositionY() { return y_off/y_scale; }
+
+  void Move(float x, float y);
+  void Blit();
+
+private:
+  void FreeMem();
+
+  wxMemoryDC *memdc;
+  wxBitmap *membm;
+  float x_off, y_off;
+  float x_scale, y_scale;
 };
 
 struct ToolBarEntry;

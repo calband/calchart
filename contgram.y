@@ -91,7 +91,7 @@ procedure
 	| pEWNS point
 		{ $$ = new ContProcEWNS($2); }
 	| pFOUNTAIN value value point
-		{ $$ = new ContProcFountain($2, $3, $4); }
+		{ $$ = new ContProcFountain($2, $3, NULL, NULL, $4); }
 	| pFM value value
 		{ $$ = new ContProcFM($2, $3); }
 	| pFMTO point
