@@ -14,6 +14,17 @@
 #include "show_ui.h"
 #include "confgr.h"
 
+enum {
+  CC_PRINT_ORIENT_PORTRAIT,
+  CC_PRINT_ORIENT_LANDSCAPE
+};
+
+enum {
+  CC_PRINT_ACTION_PRINTER,
+  CC_PRINT_ACTION_FILE,
+  CC_PRINT_ACTION_PREVIEW
+};
+
 CC_WinNodePrint::CC_WinNodePrint(CC_WinList *lst, ShowPrintDialog *req)
 : CC_WinNode(lst), printreq(req) {
 }
@@ -35,6 +46,7 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   wxString buf;
 #endif
   Bool overview;
+  int minyards;
 
   ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
 
@@ -42,9 +54,10 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   StringToFloat(dialog->text_y->GetValue(), &page_offset_y);
   StringToFloat(dialog->text_width->GetValue(), &page_width);
   StringToFloat(dialog->text_height->GetValue(), &page_height);
+  StringToInt(dialog->text_minyards->GetValue(), &minyards);
 
   dialog->show_descr->show->GetBoolLandscape() =
-    (dialog->radio_orient->GetSelection() == PS_LANDSCAPE);
+    (dialog->radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
 
   dialog->show_descr->show->GetBoolDoCont() = dialog->check_cont->GetValue();
   if (!dialog->eps)
@@ -53,7 +66,7 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   overview = dialog->check_overview->GetValue();
 
   switch (dialog->radio_method->GetSelection()) {
-  case PS_PREVIEW:
+  case CC_PRINT_ACTION_PREVIEW:
 #ifdef PRINT__RUN_CMD
     print_view_cmd = dialog->text_view_cmd->GetValue();
     print_view_opts = dialog->text_view_opts->GetValue();
@@ -61,12 +74,12 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
     buf.sprintf("%s %s %s", print_view_cmd.Chars(),print_view_opts.Chars(),s);
 #endif
     break;
-  case PS_FILE:
+  case CC_PRINT_ACTION_FILE:
     s = wxFileSelector("Print to file", NULL, NULL, NULL,
 		       dialog->eps ? "*.eps":"*.ps");
     if (!s) return;
     break;
-  case PS_PRINTER:
+  case CC_PRINT_ACTION_PRINTER:
 #ifdef PRINT__RUN_CMD
     print_cmd = dialog->text_cmd->GetValue();
     print_opts = dialog->text_opts->GetValue();
@@ -93,13 +106,13 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
 
     wxBeginBusyCursor();
     n = dialog->show_descr->show->Print(fp, dialog->eps, overview,
-					dialog->show_descr->curr_ss);
+					dialog->show_descr->curr_ss, minyards);
     fflush(fp);
     fclose(fp);
 
 #ifdef PRINT__RUN_CMD
     switch (dialog->radio_method->GetSelection()) {
-    case PS_FILE:
+    case CC_PRINT_ACTION_FILE:
       break;
     default:
       if (dialog->show_descr->show->Ok()) {
@@ -239,6 +252,9 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   buf.sprintf("%.2f", page_offset_y);
   text_y = new wxText(this, (wxFunction)NULL, "&Top margin: ",
 		      buf.GetData(), -1, -1, 100, -1);
+
+  text_minyards = new wxText(this, (wxFunction)NULL, "Yards: ",
+			     "50", -1, -1, 100, -1);
 
   NewLine();
   NewLine();

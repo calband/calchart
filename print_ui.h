@@ -47,6 +47,7 @@ public:
   Bool eps;
   wxText *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
   wxText *text_x, *text_y, *text_width, *text_height;
+  wxText *text_minyards;
   wxRadioBox *radio_orient, *radio_method;
   wxCheckBox *check_cont, *check_pages, *check_overview;
   wxFrame *frame;

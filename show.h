@@ -409,7 +409,7 @@ public:
   wxString* ImportContinuity(const wxString& file);
 
   int Print(FILE *fp, Bool eps = FALSE, Bool overview = FALSE,
-	    unsigned curr_ss = 0);
+	    unsigned curr_ss = 0, int min_yards = 50);
 
   inline const char *GetError() { return error; }
   inline Bool Ok() { return okay; }
