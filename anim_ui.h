@@ -27,7 +27,7 @@ public:
   CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm);
 
   virtual void SetShow(CC_show *shw);
-  virtual void UpdateSelections();
+  virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void ChangeNumPoints(wxWindow *win);
 
 private:

@@ -136,9 +136,9 @@ void CC_WinNodeMain::ChangeName() {
   canvas->ourframe->SetTitle((char *)canvas->show_descr.show->UserGetName());
   winlist.ChangeName();
 }
-void CC_WinNodeMain::UpdateSelections() {
+void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
   canvas->RefreshShow();
-  winlist.UpdateSelections();
+  winlist.UpdateSelections(win, point);
 }
 void CC_WinNodeMain::UpdatePoints() {
   canvas->RefreshShow();
@@ -359,6 +359,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   wxMenu *win_menu = new wxMenu;
   win_menu->Append(CALCHART__INFO, "Info on this Show...");
+  win_menu->Append(CALCHART__POINTS, "Point Selections...");
   win_menu->Append(CALCHART__ANIMATE, "Animate...");
 
   wxMenu *help_menu = new wxMenu;
@@ -537,6 +538,11 @@ void MainFrame::OnMenuCommand(int id)
     if (field->show_descr.show)
       (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
 			    "Info on this show");
+    break;
+  case CALCHART__POINTS:
+    if (field->show_descr.show)
+      (void)new PointPicker(field->show_descr.show, &node->winlist,
+			     TRUE, this, "Select points");
     break;
   case CALCHART__ANIMATE:
     if (field->show_descr.show) {

@@ -53,7 +53,7 @@ public:
 
   virtual void SetShow(CC_show *shw);
   virtual void ChangeName();
-  virtual void UpdateSelections();
+  virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void UpdatePoints();
   virtual void UpdatePointsOnSheet(unsigned sht);
   virtual void ChangeNumPoints(wxWindow *win);
@@ -92,7 +92,7 @@ public:
 
   virtual void SetShow(CC_show *shw);
   virtual void ChangeName();
-  virtual void UpdateSelections();
+  virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void UpdatePoints();
   virtual void UpdatePointsOnSheet(unsigned sht);
   virtual void ChangeNumPoints(wxWindow *win);

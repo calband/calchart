@@ -46,6 +46,33 @@ void CC_WinNodePicker::SelectSheet(wxWindow *win, unsigned sht) {
   }
 }
 
+CC_WinNodePointPicker::CC_WinNodePointPicker(CC_WinList *lst,
+					     PointPicker *req)
+: CC_WinNode(lst), picker(req) {}
+
+void CC_WinNodePointPicker::SetShow(CC_show *shw) {
+  picker->show = shw;
+  picker->Update();
+}
+
+void CC_WinNodePointPicker::ChangeNumPoints(wxWindow*) {
+  picker->Update();
+}
+
+void CC_WinNodePointPicker::ChangePointLabels(wxWindow*) {
+  picker->Update();
+}
+
+void CC_WinNodePointPicker::UpdateSelections(wxWindow *win, int point) {
+  if (win != picker) {
+    if (point < 0) {
+      picker->Update();
+    } else {
+      picker->Set(point, picker->show->IsSelected(point));
+    }
+  }
+}
+
 CC_WinNodeInfo::CC_WinNodeInfo(CC_WinList *lst, ShowInfoReq *req)
 : CC_WinNode(lst), inforeq(req) {}
 
@@ -222,7 +249,151 @@ void StuntSheetPicker::SetListBoxEntries() {
   }
   list->Set(show->GetNumSheets(), text);
   for (n = 0, sheet = show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next) {
-    list->SetSelection(n, sheet->picked);
+    if (!sheet->picked || !list->Selected(n)) { // so Motif version works
+      list->SetSelection(n, sheet->picked);
+    }
+  }
+  delete text;
+}
+
+static void PointPickerClose(wxButton& button, wxEvent&) {
+  ((PointPicker*)button.GetParent()->GetParent())->Close();
+}
+
+static void PointPickerAll(wxButton& button, wxEvent&) {
+  PointPicker* picker =
+    (PointPicker*)button.GetParent()->GetParent();
+
+  for (unsigned i=0; i < picker->show->GetNumPoints(); i++) {
+    picker->Set(i, TRUE);
+  }
+  picker->show->winlist->UpdateSelections(picker);
+}
+
+static void PointPickerNone(wxButton& button, wxEvent&) {
+  PointPicker* picker =
+    (PointPicker*)button.GetParent()->GetParent();
+
+  for (unsigned i=0; i < picker->show->GetNumPoints(); i++) {
+    picker->Set(i, FALSE);
+  }
+  picker->show->winlist->UpdateSelections(picker);
+}
+
+static void PointPickerClick(wxListBox& list, wxCommandEvent&) {
+  unsigned n;
+  Bool sel;
+
+  PointPicker *picker = (PointPicker*)list.GetParent()->GetParent();
+  for (n = 0; n < picker->show->GetNumPoints(); n++) {
+    sel = picker->Get(n);
+    if (picker->show->IsSelected(n) != sel) {
+      picker->show->Select(n, sel);
+      picker->show->winlist->UpdateSelections(picker, n);
+    }
+  }
+}
+
+PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
+			 Bool multi, wxFrame *frame,
+			 char *title,
+			 int x, int y, int width, int height):
+wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
+show(shw) {
+  SetAutoLayout(TRUE);
+
+  panel = new wxPanel(this);
+
+  wxButton *closeBut = new wxButton(panel, (wxFunction)PointPickerClose,
+				    "Close");
+  wxLayoutConstraints *bt0 = new wxLayoutConstraints;
+  bt0->left.SameAs(panel, wxLeft, 5);
+  bt0->top.SameAs(panel, wxTop, 5);
+  bt0->width.AsIs();
+  bt0->height.AsIs();
+  closeBut->SetConstraints(bt0);
+
+  if (multi) {
+    wxButton *allBut = new wxButton(panel, (wxFunction)PointPickerAll,
+				    "All");
+    wxLayoutConstraints *bt1 = new wxLayoutConstraints;
+    bt1->left.RightOf(closeBut, 5);
+    bt1->top.SameAs(closeBut, wxTop);
+    bt1->width.AsIs();
+    bt1->height.AsIs();
+    allBut->SetConstraints(bt1);
+
+    wxButton *noneBut = new wxButton(panel, (wxFunction)PointPickerNone,
+				     "None");
+    wxLayoutConstraints *bt2 = new wxLayoutConstraints;
+    bt2->left.RightOf(allBut, 5);
+    bt2->top.SameAs(closeBut, wxTop);
+    bt2->width.AsIs();
+    bt2->height.AsIs();
+    noneBut->SetConstraints(bt2);
+  }
+
+  closeBut->SetDefault();
+
+  list = new wxListBox(panel, (wxFunction)PointPickerClick, "",
+		       multi ? wxMULTIPLE:wxSINGLE,
+		       -1, -1, -1, -1);
+  SetListBoxEntries();
+  wxLayoutConstraints *b1 = new wxLayoutConstraints;
+  b1->left.SameAs(panel, wxLeft, 5);
+  b1->top.Below(closeBut, 5);
+  b1->right.SameAs(panel, wxRight, 5);
+  b1->bottom.SameAs(panel, wxBottom, 5);
+  list->SetConstraints(b1);
+
+  wxLayoutConstraints *c1 = new wxLayoutConstraints;
+  c1->left.SameAs(this, wxLeft);
+  c1->top.SameAs(this, wxTop);
+  c1->right.SameAs(this, wxRight);
+  c1->bottom.SameAs(this, wxBottom);
+  panel->SetConstraints(c1);
+
+  node = new CC_WinNodePointPicker(lst, this);
+
+  OnSize(-1,-1);
+
+  Show(TRUE);
+}
+
+PointPicker::~PointPicker()
+{
+  if (node) {
+    node->Remove();
+    delete node;
+  }
+}
+
+void PointPicker::OnSize(int, int) {
+  Layout();
+}
+
+Bool PointPicker::OnClose(void) {
+  return TRUE;
+}
+
+void PointPicker::Update() {
+  list->Clear();
+  SetListBoxEntries();
+}
+
+void PointPicker::SetListBoxEntries() {
+  char **text;
+  unsigned n;
+
+  text = new char*[show->GetNumPoints()];
+  for (n = 0; n < show->GetNumPoints(); n++) {
+    text[n] = (char *)show->GetPointLabel(n);
+  }
+  list->Set(show->GetNumPoints(), text);
+  for (n = 0; n < show->GetNumPoints(); n++) {
+    if (!show->IsSelected(n) || !list->Selected(n)) { // so Motif version works
+      list->SetSelection(n, show->IsSelected(n));
+    }
   }
   delete text;
 }
@@ -449,7 +620,9 @@ void ShowInfoReq::UpdateLabels() {
   label_type->SetSelection(use_letters);
   lettersize->SetValue(maxnum);
   for (i = 0; i < 26; i++) {
-    labels->SetSelection(i, letters[i]);
+    if (!letters[i] || !labels->Selected(i)) { // so Motif version works
+      labels->SetSelection(i, letters[i]);
+    }
   }
 }
 

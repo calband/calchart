@@ -49,7 +49,7 @@ void CC_WinNode::Remove() {
 
 void CC_WinNode::SetShow(CC_show*) {}
 void CC_WinNode::ChangeName() {}
-void CC_WinNode::UpdateSelections() {}
+void CC_WinNode::UpdateSelections(wxWindow*, int) {}
 void CC_WinNode::UpdatePoints() {}
 void CC_WinNode::UpdatePointsOnSheet(unsigned) {}
 void CC_WinNode::ChangeNumPoints(wxWindow*) {}
@@ -123,11 +123,11 @@ void CC_WinList::ChangeName() {
     n->ChangeName();
   }
 }
-void CC_WinList::UpdateSelections() {
+void CC_WinList::UpdateSelections(wxWindow* win, int point) {
   CC_WinNode *n;
 
   for (n = list; n != NULL; n = n->next) {
-    n->UpdateSelections();
+    n->UpdateSelections(win, point);
   }
 }
 void CC_WinList::UpdatePoints() {
@@ -837,12 +837,12 @@ static char* load_show_CONT(INGLchunk* chunk) {
   if (((char*)chunk->data)[chunk->size-1] != '\0') { // make sure we have a nil
     return badcontchunk;
   }
-  name = (char *)(chunk->data + 2);
+  name = (char *)chunk->data + 2;
   num = strlen(name);
   if (chunk->size < num + 4) { // check for room for text string
     return badcontchunk;
   }
-  text = (char *)(chunk->data + 3 + strlen(name));
+  text = (char *)chunk->data + 3 + strlen(name);
 
   num = get_big_word(chunk->data);
 

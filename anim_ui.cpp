@@ -45,7 +45,7 @@ void CC_WinNodeAnim::SetShow(CC_show *) {
   frame->canvas->FreeAnim();
 }
 
-void CC_WinNodeAnim::UpdateSelections() {
+void CC_WinNodeAnim::UpdateSelections(wxWindow*, int) {
   frame->canvas->OnPaint();
 }
 

@@ -17,6 +17,7 @@
 #include "basic_ui.h"
 
 class StuntSheetPicker;
+class PointPicker;
 class ShowInfoReq;
 
 class CC_WinNodePicker : public CC_WinNode {
@@ -32,6 +33,19 @@ public:
 
 private:
   StuntSheetPicker *picker;
+};
+
+class CC_WinNodePointPicker : public CC_WinNode {
+public:
+  CC_WinNodePointPicker(CC_WinList *lst, PointPicker *req);
+
+  virtual void SetShow(CC_show *shw);
+  virtual void UpdateSelections(wxWindow* win, int point = -1);
+  virtual void ChangeNumPoints(wxWindow *win);
+  virtual void ChangePointLabels(wxWindow *win);
+
+private:
+  PointPicker *picker;
 };
 
 class CC_WinNodeInfo : public CC_WinNode {
@@ -78,6 +92,37 @@ private:
   wxPanel *panel;
   wxListBox *list;
   CC_WinNodePicker *node;
+};
+
+class PointPicker : public wxFrame
+{
+public:
+  PointPicker(CC_show *shw, CC_WinList *lst,
+	      Bool multi, wxFrame *frame, char *title,
+	      int x = -1, int y = -1, int width = 250, int height = 300);
+  ~PointPicker();
+  Bool OnClose(void);
+  void OnSize(int w, int h);
+
+  inline Bool Okay() { return ok; };
+
+  inline Bool Get(unsigned n) { return list->Selected(n); }
+  inline void Set(unsigned n, Bool v = TRUE) {
+    if (!v || !list->Selected(n)) { // so Motif version works
+      list->SetSelection(n,v);
+      show->Select(n,v);
+    }
+  }
+  void Update();
+
+  CC_show *show;
+private:
+  void SetListBoxEntries();
+
+  Bool ok;
+  wxPanel *panel;
+  wxListBox *list;
+  CC_WinNodePointPicker *node;
 };
 
 class ShowInfoReq : public wxFrame {

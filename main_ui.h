@@ -29,7 +29,7 @@ public:
 
   virtual void SetShow(CC_show *shw);
   virtual void ChangeName();
-  virtual void UpdateSelections();
+  virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void UpdatePoints();
   virtual void UpdatePointsOnSheet(unsigned sht);
   virtual void ChangeNumPoints(wxWindow *win);
@@ -188,6 +188,7 @@ enum {
   CALCHART__SET_TITLE,
   CALCHART__SET_BEATS,
   CALCHART__INFO,
+  CALCHART__POINTS,
   CALCHART__ANIMATE,
   CALCHART__ABOUT,
   CALCHART__HELP
