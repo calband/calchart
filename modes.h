@@ -52,11 +52,11 @@ class ShowModeStandard : public ShowMode
 public:
   ShowModeStandard(const char *nam, CC_coord bord1, CC_coord bord2,
 		   unsigned short whash, unsigned short ehash);
-  ~ShowModeStandard();
+  virtual ~ShowModeStandard();
 
-  SHOW_TYPE GetType();
-  void Draw(wxDC *dc);
-  void DrawAnim(wxDC *dc);
+  virtual SHOW_TYPE GetType();
+  virtual void Draw(wxDC *dc);
+  virtual void DrawAnim(wxDC *dc);
   inline unsigned short HashW() { return hashw; }
   inline unsigned short HashE() { return hashe; }
 
@@ -78,11 +78,11 @@ public:
 		  short stps_w, short stps_h,
 		  short txt_l, short txt_r,
 		  short txt_tp, short txt_bm);
-  ~ShowModeSprShow();
+  virtual ~ShowModeSprShow();
 
-  SHOW_TYPE GetType();
-  void Draw(wxDC *dc);
-  void DrawAnim(wxDC *dc);
+  virtual SHOW_TYPE GetType();
+  virtual void Draw(wxDC *dc);
+  virtual void DrawAnim(wxDC *dc);
   inline const char *StageFile() { return stagefile; }
   inline unsigned char WhichYards() { return which_yards; }
   inline short StageX() { return stage_x; }

@@ -211,6 +211,10 @@ void AnimationCanvas::Generate() {
   }
   anim = new Animation(show_descr->show, ourframe,
 		       ((AnimationFrame*)ourframe)->node->GetList());
+  if (anim && (anim->numsheets == 0)) {
+    delete anim;
+    anim = NULL;
+  }
   if (anim) {
     anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionsOn());
     anim->GotoSheet(show_descr->curr_ss);
@@ -318,6 +322,8 @@ const char * AnimationCanvas::GenerateRIBFrame() {
   RtColor color;
   static RtFloat amb_intensity = 0.2, dist_intensity = 0.9;
   RtPoint field[4];
+
+  if (!anim) return NULL;
 
   field[0][0] = -1408;
   field[0][1] = 400;

@@ -1,4 +1,4 @@
-/* cont.h
+/* cont.cc
  * Classes for continuity
  *
  * Modification history:
@@ -20,7 +20,7 @@
 
 // So we don't have icky macros to worry about
 unsigned float2unsigned(float f) {
-  return (unsigned)(ABS(f)+0.5);
+  return (unsigned)(ABS(f)/*+0.5*/);
 }
 
 float BoundDirection(float f) {
@@ -79,6 +79,7 @@ void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
   float c;
   unsigned leg;
 
+  //use the law of sines to compute components
   ref1 = pnt1->Get(anim);
   ref2 = pnt2->Get(anim);
   steps1 = stps->Get(anim);
@@ -168,10 +169,16 @@ const CC_coord& ContPoint::Get(AnimateCompile* anim) const {
 }
 
 const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const {
-  if (anim->curr_sheet->next) {
-    return anim->curr_sheet->next->GetPosition(anim->curr_pt);
-  } else {
-    return ContPoint::Get(anim);
+  CC_sheet *sheet = anim->curr_sheet->next; 
+
+  while (1) {
+    if (sheet == NULL) {
+      return ContPoint::Get(anim);
+    }
+    if (sheet->IsInAnimation()) {
+      return anim->curr_sheet->next->GetPosition(anim->curr_pt);
+    }
+    sheet = sheet->next;
   }
 }
 
@@ -377,7 +384,7 @@ float ContFuncStep::Get(AnimateCompile* anim) const {
   CC_coord c;
 
   c = pnt->Get(anim) - anim->pt.pos;
-  return (c.Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
+  return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
 }
 
 ContProcedure::~ContProcedure() {}

@@ -297,6 +297,7 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
 
   for (comp.curr_sheet = show->GetSheet(); comp.curr_sheet;
        comp.curr_sheet = comp.curr_sheet->next) {
+    if (! comp.curr_sheet->IsInAnimation()) continue;
     if (curr_sheet) {
       curr_sheet->next = new AnimateSheet(numpts);
       curr_sheet->next->prev = curr_sheet;
@@ -387,11 +388,14 @@ Bool Animation::NextSheet() {
     RefreshSheet();
     CheckCollisions();
   } else {
-    if ((curr_sheet == sheets) && (curr_beat != 0)) {
-      RefreshSheet();
-      CheckCollisions();
+    if (curr_beat >= curr_sheet->numbeats) {
+      if (curr_sheet->numbeats == 0) {
+	curr_beat = 0;
+      } else {
+	curr_beat = curr_sheet->numbeats-1;
+      }
     }
-    else return FALSE;
+    return FALSE;
   }
   return TRUE;
 }
@@ -421,7 +425,8 @@ Bool Animation::PrevBeat() {
       }
     }
   }
-  curr_beat--;
+  if (curr_beat > 0)
+    curr_beat--;
   CheckCollisions();
   return TRUE;
 }
@@ -540,6 +545,12 @@ void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
   cmds = curr_cmd = NULL;
   curr_pt = pt_num;
   beats_rem = curr_sheet->beats;
+
+  if (proc == NULL) {
+    // no continuity was specified; use EVEN REM NP
+    ContProcEven defcont(new ContValueFloat(beats_rem), new ContNextPoint());
+    defcont.Compile(this);
+  }
 
   for (; proc; proc = proc->next) {
     proc->Compile(this);

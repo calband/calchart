@@ -54,7 +54,7 @@ void initscanner() {
 
 DIGIT		[0-9]
 NUMBER		{DIGIT}+
-FLOAT		{DIGIT}+"."{DIGIT}*
+FLOAT		({DIGIT}+"."{DIGIT}*)|("."{DIGIT}+)
 VAR		[ABCDXYZ]
 SPACE		[ \t\r]
 NEWLINE		[\n\f]

@@ -356,7 +356,7 @@ float CC_coord::Direction() const {
 
   ang = acos(COORD2FLOAT(x)/Magnitude()); // normalize
   ang *= 180.0/PI; // convert to degrees
-  if (y > 0) ang += 180.0; // check for > PI
+  if (y > 0) ang = (-ang); // check for > PI
 
   return ang;
 }
@@ -389,19 +389,19 @@ CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
 
 CC_sheet::CC_sheet(CC_show *shw)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), beats(0), picked(TRUE) {
+  numanimcont(0), beats(1), picked(TRUE) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_show *shw, const char *newname)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), beats(0), picked(TRUE), pts(NULL), name(newname) {
+  numanimcont(0), beats(1), picked(TRUE), pts(NULL), name(newname) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_sheet *sht)
 : next(NULL), show(sht->show),
-  beats(0), picked(sht->picked), name(sht->name), number(sht->number)
+  beats(1), picked(sht->picked), name(sht->name), number(sht->number)
 {
   int i;
 
@@ -1253,6 +1253,7 @@ CC_show::CC_show(const char *file)
 	error = badfile_mas_str;
 	return;
       }
+      if (j == 0) j=1;
       off = strlen(sheetnamebuf);
       while (off > 0) {
 	off--;

@@ -337,6 +337,7 @@ public:
   inline void SetName(const char *newname) { name = newname; }
   inline const char *GetNumber() { return number; }
   inline void SetNumber(const char *newnumber) { number = newnumber; }
+  inline Bool IsInAnimation() { return (beats != 0); }
   void UserSetName(const char *newname);
   void UserSetBeats(unsigned short b);
   Bool SetPointsSym(SYMBOL_TYPE sym);

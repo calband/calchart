@@ -84,7 +84,8 @@ all: calchart $(PS_SYNTH_FILES) charthlp.xlp
 
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ \
-	$(wx_lib) $(gui_libraries) $(extra_lib) $(CONF_LIBS) $(math_lib)
+	$(link_dir) $(wx_lib) $(gui_libraries) $(extra_lib) \
+	$(CONF_LIBS) $(math_lib)
 
 contscan.o: contgram.h
 
