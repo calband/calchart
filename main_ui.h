@@ -44,6 +44,8 @@ public:
   virtual void SelectSheet(wxWindow* win, unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
+  virtual void FlushContinuity();
+  virtual void SetContinuity(wxWindow* win, unsigned sht, unsigned cont);
   virtual void ChangePrint(wxWindow* win);
   virtual void FlushDescr();
   virtual void SetDescr(wxWindow* win);

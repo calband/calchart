@@ -21,7 +21,7 @@ public:
   virtual ~ShowUndo();
 
   // returns the sheet to go to
-  virtual unsigned Undo(CC_show *show) = 0;
+  virtual int Undo(CC_show *show) = 0;
   // returns amount of memory used
   virtual unsigned Size() = 0;
   // returns description of this event
@@ -42,7 +42,7 @@ public:
   ShowUndoMove(unsigned sheetnum, CC_sheet *sheet);
   ~ShowUndoMove();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 private:
@@ -60,7 +60,7 @@ public:
   ShowUndoSym(unsigned sheetnum, CC_sheet *sheet);
   ~ShowUndoSym();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 private:
@@ -78,7 +78,7 @@ public:
   ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet);
   ~ShowUndoLbl();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 private:
@@ -92,7 +92,7 @@ public:
   ShowUndoCopy(unsigned sheetnum);
   ~ShowUndoCopy();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 };
@@ -103,7 +103,7 @@ public:
   ShowUndoDelete(unsigned sheetnum, CC_sheet *sheet);
   ~ShowUndoDelete();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 private:
@@ -116,7 +116,7 @@ public:
   ShowUndoName(unsigned sheetnum, CC_sheet *sheet);
   ~ShowUndoName();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 private:
@@ -129,11 +129,38 @@ public:
   ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet);
   ~ShowUndoBeat();
 
-  virtual unsigned Undo(CC_show *show);
+  virtual int Undo(CC_show *show);
   virtual unsigned Size();
   virtual char *UndoDescription();
 private:
   unsigned short beats;
+};
+
+// Stuntsheet animation continuity changes
+class ShowUndoCont : public ShowUndo {
+public:
+  ShowUndoCont(unsigned sheetnum, unsigned contnum, CC_sheet *sheet);
+  ~ShowUndoCont();
+
+  virtual int Undo(CC_show *show);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+private:
+  unsigned cont;
+  wxString conttext;
+};
+
+// Show description changes
+class ShowUndoDescr : public ShowUndo {
+public:
+  ShowUndoDescr(CC_show *show);
+  ~ShowUndoDescr();
+
+  virtual int Undo(CC_show *show);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+private:
+  wxString descrtext;
 };
 
 class ShowUndoList {

@@ -91,9 +91,8 @@ public:
   void UpdateLabels();
   void UpdateNumPoints();
   void UpdateMode();
-  void UpdateDescr();
-  void UpdateDescrQuick(); // doesn't flush other windows
-  void Update(CC_show *shw = NULL);
+  void UpdateDescr(Bool quick = FALSE); // quick doesn't flush other windows
+  void Update(Bool quick = FALSE, CC_show *shw = NULL);
 
   void FlushDescr(); // Flush changes in description text window
 

@@ -68,6 +68,8 @@ public:
   virtual void SelectSheet(wxWindow* win, unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
+  virtual void FlushContinuity();
+  virtual void SetContinuity(wxWindow* win, unsigned sht, unsigned cont);
   virtual void ChangePrint(wxWindow* win);
   virtual void FlushDescr();
   virtual void SetDescr(wxWindow* win);
@@ -105,6 +107,8 @@ public:
   virtual void SelectSheet(wxWindow* win, unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
+  virtual void FlushContinuity();
+  virtual void SetContinuity(wxWindow* win, unsigned sht, unsigned cont);
   virtual void ChangePrint(wxWindow* win);
   virtual void FlushDescr();
   virtual void SetDescr(wxWindow* win);
@@ -162,6 +166,7 @@ public:
   void SetText(const char* s);
   void AppendText(const char* s);
 
+  CC_continuity *next;
   unsigned num;
   wxString name;
   wxString text;
@@ -282,6 +287,12 @@ public:
   void SetContinuity(unsigned i);
   void SetNumPoints(unsigned num, unsigned columns);
 
+  CC_continuity *GetNthContinuity(unsigned i);
+  CC_continuity *UserGetNthContinuity(unsigned i);
+  void SetNthContinuity(const char *text, unsigned cont);
+  void UserSetNthContinuity(const char *text, unsigned cont, wxWindow* win);
+  void AppendContinuity(CC_continuity *newcont);
+
   inline const char *GetName() { return name; }
   inline void SetName(const char *newname) { name = newname; }
   inline const char *GetNumber() { return number; }
@@ -329,6 +340,10 @@ public:
 
   char *Save(const char *filename);
 
+  inline void FlushAllTextWindows() {
+    winlist->FlushDescr(); winlist->FlushContinuity();
+  }
+
   inline const char *GetName() { return name; }
   const char *UserGetName();
   inline void SetName(const char *newname) { name = newname; }
@@ -339,9 +354,7 @@ public:
   inline const char *GetDescr() { return descr; }
   inline const char *UserGetDescr() { winlist->FlushDescr(); return descr; }
   inline void SetDescr(const char *newdescr) { descr = newdescr; }
-  inline void UserSetDescr(const char *newdescr, wxWindow* win) {
-    descr = newdescr; SetModified(TRUE); winlist->SetDescr(win);
-  }
+  void UserSetDescr(const char *newdescr, wxWindow* win);
 
   inline Bool Modified() { return modified; }
   inline void SetModified(Bool b) { modified = b; winlist->UpdateStatusBar(); }

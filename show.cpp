@@ -64,9 +64,11 @@ void CC_WinNode::ChangeTitle(unsigned) {}
 void CC_WinNode::SelectSheet(wxWindow*, unsigned) {}
 void CC_WinNode::AddContinuity(unsigned, unsigned) {}
 void CC_WinNode::DeleteContinuity(unsigned, unsigned) {}
+void CC_WinNode::FlushContinuity() {}
+void CC_WinNode::SetContinuity(wxWindow*, unsigned, unsigned) {}
 void CC_WinNode::ChangePrint(wxWindow*) {}
 void CC_WinNode::FlushDescr() {}
-void CC_WinNode::SetDescr(wxWindow* win) {}
+void CC_WinNode::SetDescr(wxWindow*) {}
 
 CC_WinList::CC_WinList()
 : list(NULL) {}
@@ -226,6 +228,20 @@ void CC_WinList::DeleteContinuity(unsigned sht, unsigned cont) {
     n->DeleteContinuity(sht, cont);
   }
 }
+void CC_WinList::FlushContinuity() {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->FlushContinuity();
+  }
+}
+void CC_WinList::SetContinuity(wxWindow* win, unsigned sht, unsigned cont) {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->SetContinuity(win, sht, cont);
+  }
+}
 void CC_WinList::ChangePrint(wxWindow* win) {
   CC_WinNode *n;
 
@@ -233,7 +249,6 @@ void CC_WinList::ChangePrint(wxWindow* win) {
     n->ChangePrint(win);
   }
 }
-
 void CC_WinList::FlushDescr() {
   CC_WinNode *n;
 
@@ -241,7 +256,6 @@ void CC_WinList::FlushDescr() {
     n->FlushDescr();
   }
 }
-
 void CC_WinList::SetDescr(wxWindow* win) {
   CC_WinNode *n;
 
@@ -258,7 +272,7 @@ void CC_WinListShow::Empty() {
 }
 
 CC_continuity::CC_continuity()
-: num(0) {}
+: next(NULL), num(0) {}
 
 CC_continuity::~CC_continuity() {
 }
@@ -362,9 +376,16 @@ CC_sheet::CC_sheet(CC_sheet *sht)
 
 CC_sheet::~CC_sheet() {
   cc_text *tmp;
+  CC_continuity *conttmp;
 
   if (pts) delete [] pts;
-  if (animcont) delete [] animcont;
+  if (animcont) {
+    while (animcont) {
+      conttmp = animcont->next;
+      delete animcont;
+      animcont = conttmp;
+    }
+  }
   while (continuity) {
     while (continuity->more) {
       tmp = continuity->more->more;
@@ -483,6 +504,57 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
   }
   delete [] pts;
   pts = newpts;
+}
+
+CC_continuity *CC_sheet::GetNthContinuity(unsigned i) {
+  CC_continuity *c;
+
+  c = animcont;
+  while ((i > 0) && c) {
+    i--;
+    c = c->next;
+  }
+  return c;
+}
+
+CC_continuity *CC_sheet::UserGetNthContinuity(unsigned i) {
+  show->winlist->FlushContinuity();
+  return GetNthContinuity(i);
+}
+
+void CC_sheet::SetNthContinuity(const char *text, unsigned cont) {
+  CC_continuity *c;
+
+  c = GetNthContinuity(cont);
+  if (c) {
+    c->SetText(text);
+  }
+}
+
+void CC_sheet::UserSetNthContinuity(const char *text, unsigned cont,
+				    wxWindow *win) {
+  CC_continuity *c;
+
+  c = GetNthContinuity(cont);
+  if (c) {
+    // Create undo entry
+    show->undolist->Add(new ShowUndoCont(show->GetSheetPos(this), cont, this));
+    c->SetText(text);
+    show->winlist->SetContinuity(win, show->GetSheetPos(this), cont);
+  }
+}
+
+void CC_sheet::AppendContinuity(CC_continuity *newcont) {
+  CC_continuity *last;
+
+  if (animcont == NULL) {
+    animcont = newcont;
+  } else {
+    last = animcont;
+    while (last->next != NULL) last = last->next;
+    last->next = newcont;
+  }
+  numanimcont++;
 }
 
 void CC_sheet::UserSetName(const char *newname) {
@@ -751,6 +823,38 @@ static char* load_show_SHET_LABL(INGLchunk* chunk) {
   return NULL;
 }
 
+static char badcontchunk[] = "Bad CONT chunk";
+static char* load_show_CONT(INGLchunk* chunk) {
+  CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
+  CC_continuity *newcont;
+  unsigned num;
+  char *name;
+  char *text;
+
+  if (chunk->size < 4) { // two byte num + two nils minimum
+    return badcontchunk;
+  }
+  if (((char*)chunk->data)[chunk->size-1] != '\0') { // make sure we have a nil
+    return badcontchunk;
+  }
+  name = (char *)(chunk->data + 2);
+  num = strlen(name);
+  if (chunk->size < num + 4) { // check for room for text string
+    return badcontchunk;
+  }
+  text = (char *)(chunk->data + 3 + strlen(name));
+
+  num = get_big_word(chunk->data);
+
+  newcont = new CC_continuity;
+  newcont->num = num;
+  newcont->SetName(name);
+  newcont->SetText(text);
+  sheet->AppendContinuity(newcont);
+
+  return NULL;
+}
+
 static INGLhandler load_show_handlers[] = {
   { INGL_SHOW, 0, load_show_SHOW },
   { INGL_SHET, INGL_SHOW, load_show_SHET },
@@ -762,7 +866,8 @@ static INGLhandler load_show_handlers[] = {
   { INGL_DURA, INGL_SHET, load_show_DURA },
   { INGL_POS , INGL_SHET, load_show_POS  },
   { INGL_SYMB, INGL_SHET, load_show_SYMB },
-  { INGL_LABL, INGL_SHET, load_show_SHET_LABL }
+  { INGL_LABL, INGL_SHET, load_show_SHET_LABL },
+  { INGL_CONT, INGL_SHET, load_show_CONT }
 };
 
 #define SHOWBUFSIZE 128
@@ -780,6 +885,8 @@ CC_show::CC_show(const char *file)
   unsigned int i, j, k;
   unsigned int off;
   CC_sheet *curr_sheet = NULL;
+  CC_continuity *newanimcont;
+  unsigned numanimcont;
   char tempbuf[SHOWBUFSIZE];
   char sheetnamebuf[SHOWBUFSIZE];
 
@@ -942,12 +1049,13 @@ CC_show::CC_show(const char *file)
 	error = badanimcont_str;
 	return;
       }
-      if (sscanf(tempbuf, " %u", &curr_sheet->numanimcont) != 1) {
+      if (sscanf(tempbuf, " %u", &numanimcont) != 1) {
 	error = badanimcont_str;
 	return;
       }
-      curr_sheet->animcont = new CC_continuity[curr_sheet->numanimcont];
-      for (i = 0; i < curr_sheet->numanimcont; i++) {
+      for (i = 0; i < numanimcont; i++) {
+	newanimcont = new CC_continuity;
+
 	// Skip blank line
 	if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
 	  error = badanimcont_str;
@@ -958,11 +1066,11 @@ CC_show::CC_show(const char *file)
 	  return;
 	}
 	if (sscanf(tempbuf, " \"%[^\"]\" , %u , %u\n",
-		   tempbuf, &curr_sheet->animcont[i].num, &j) != 3) {
+		   tempbuf, &newanimcont->num, &j) != 3) {
 	  error = badanimcont_str;
 	  return;
 	}
-	curr_sheet->animcont[i].SetName(tempbuf);
+	newanimcont->SetName(tempbuf);
 	while (j > 0) {
 	  j--;
 	  if (my_fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
@@ -978,8 +1086,9 @@ CC_show::CC_show(const char *file)
 	  }
 	  tempbuf[off] = '\n';
 	  tempbuf[off+1] = 0;
-	  curr_sheet->animcont[i].AppendText(tempbuf);
+	  newanimcont->AppendText(tempbuf);
 	}
+	curr_sheet->AppendContinuity(newanimcont);
       }
       fclose(fp);
     }
@@ -1290,6 +1399,9 @@ char *CC_show::Save(const char *filename) {
   Coord crd;
   unsigned char c;
   const char *str;
+  CC_continuity *curranimcont;
+
+  FlushAllTextWindows();
 
   if (!handl->Okay()) {
     delete handl;
@@ -1411,20 +1523,21 @@ char *CC_show::Save(const char *filename) {
 	break;
       }
     }
-    for (i = 0; i < curr_sheet->numanimcont; i++) {
+    for (curranimcont = curr_sheet->animcont; curranimcont != NULL;
+	 curranimcont  = curranimcont->next) {
       if (!handl->WriteChunkHeader(INGL_CONT,
-				   2+curr_sheet->animcont[i].name.Length()+1+
-				   curr_sheet->animcont[i].text.Length()+1)) {
+				   2+curranimcont->name.Length()+1+
+				   curranimcont->text.Length()+1)) {
 	return writeerr_str;
       }
-      put_big_word(&short_data, curr_sheet->animcont[i].num);
+      put_big_word(&short_data, curranimcont->num);
       if (!handl->Write(&short_data, 2)) {
 	return writeerr_str;
       }
-      if (!handl->WriteStr(curr_sheet->animcont[i].name)) {
+      if (!handl->WriteStr(curranimcont->name)) {
 	return writeerr_str;
       }
-      if (!handl->WriteStr(curr_sheet->animcont[i].text)) {
+      if (!handl->WriteStr(curranimcont->text)) {
 	return writeerr_str;
       }
     }
@@ -1446,6 +1559,14 @@ const char *CC_show::UserGetName() {
   if (name.Empty()) return "Untitled";
   else return wxFileNameFromPath((char *)name.GetData());
 }
+
+void CC_show::UserSetDescr(const char *newdescr, wxWindow *win) {
+  // Create undo entry
+  undolist->Add(new ShowUndoDescr(this));
+  descr = newdescr;
+  winlist->SetDescr(win);
+}
+
 CC_sheet *CC_show::GetNthSheet(unsigned n) {
   CC_sheet *nsheet = sheets;
   while (n && nsheet) {

@@ -41,11 +41,18 @@ CC_WinNodeCont::CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req)
 : CC_WinNode(lst), editor(req) {}
 
 void CC_WinNodeCont::SetShow(CC_show *) {
-  editor->Update();
+  editor->DetachText();
+  editor->Update(TRUE);
 }
 
 void CC_WinNodeCont::GotoSheet(unsigned) {
   editor->Update();
+}
+
+void CC_WinNodeCont::DeleteSheet(unsigned sht) {
+  if (sht == editor->GetShowDescr()->curr_ss) {
+    editor->DetachText();
+  }
 }
 
 void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont) {
@@ -54,6 +61,18 @@ void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont) {
 
 void CC_WinNodeCont::DeleteContinuity(unsigned sht, unsigned cont) {
   editor->Update();
+}
+
+void CC_WinNodeCont::FlushContinuity() {
+  editor->FlushText();
+}
+
+void CC_WinNodeCont::SetContinuity(wxWindow *win,
+				   unsigned sht, unsigned cont) {
+  if ((win != editor) && (sht == editor->GetShowDescr()->curr_ss) &&
+      (cont == editor->GetCurrent())) {
+    editor->UpdateText(TRUE);
+  }
 }
 
 CC_WinNodePrintCont::CC_WinNodePrintCont(CC_WinList *lst,
@@ -92,7 +111,7 @@ ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
 				   wxFrame *parent, char *title,
 				   int x, int y, int width, int height):
 wxFrame(parent, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
-descr(dcr), curr_cont(0) {
+descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   CreateStatusLine();
 
   panel = new wxPanel(this);
@@ -102,7 +121,7 @@ descr(dcr), curr_cont(0) {
 
   conts = new wxChoice(panel, (wxFunction)ContEditCurrent, "");
 
-  text = new FancyTextWin(this, -1, -1, -1, -1, wxNATIVE_IMPL);
+  text = new FancyTextWin(this);
   
   wxMenu *cont_menu = new wxMenu;
   cont_menu->Append(CALCHART__CONT_NEW, "New");
@@ -112,12 +131,12 @@ descr(dcr), curr_cont(0) {
   menu_bar->Append(cont_menu, "Continuity");
   SetMenuBar(menu_bar);
 
-  node = new CC_WinNodeCont(lst, this);
-
   OnSize(-1, -1);
   Show(TRUE);
 
   Update();
+
+  node = new CC_WinNodeCont(lst, this);
 }
 
 ContinuityEditor::~ContinuityEditor() {
@@ -139,6 +158,7 @@ void ContinuityEditor::OnSize(int, int) {
 }
 
 Bool ContinuityEditor::OnClose(void) {
+  FlushText();
   return TRUE;
 }
 
@@ -170,35 +190,62 @@ void ContinuityEditor::OnMenuSelect(int id) {
   if (msg) SetStatusText(msg);
 }
 
-void ContinuityEditor::Update() {
+void ContinuityEditor::Update(Bool quick) {
   CC_sheet *sht = descr->CurrSheet();
-  unsigned i;
+  CC_continuity *curranimcont;
 
   conts->Clear();
-  for (i = 0; i < sht->numanimcont; i++) {
-    conts->Append((char *)((const char *)sht->animcont[i].name));
+  for (curranimcont = sht->animcont; curranimcont != NULL;
+       curranimcont = curranimcont->next) {
+    conts->Append((char *)((const char *)curranimcont->name));
   }
   conts->SetSelection(0);
   curr_cont = 0;
 
-  UpdateText();
+  UpdateText(quick);
 }
 
-void ContinuityEditor::UpdateText() {
+void ContinuityEditor::UpdateText(Bool quick) {
   CC_sheet *sht = descr->CurrSheet();
+  CC_continuity *c;
 
+  if (quick) {
+    c = sht->GetNthContinuity(curr_cont);
+  } else {
+    c = sht->UserGetNthContinuity(curr_cont);
+  }
+  text_sheet = sht;
+  text_contnum = curr_cont;
   text->Clear();
-  if (sht->numanimcont > 0) {
-    if (sht->animcont[curr_cont].text)
-      text->WriteText((char *)((const char *)sht->animcont[curr_cont].text));
+  if (c != NULL) {
+    if (c->text)
+      text->WriteText((char *)((const char *)c->text));
+  }
+}
+
+void ContinuityEditor::FlushText() {
+  char *conttext;
+  CC_continuity *cont;
+
+  if (text_sheet) {
+    cont = text_sheet->GetNthContinuity(text_contnum);
+    if (cont != NULL) {
+      conttext = text->GetContents();
+      if (strcmp(conttext, cont->text) != 0) {
+	text_sheet->UserSetNthContinuity(conttext, text_contnum, this);
+      }
+      delete conttext;
+    }
   }
 }
 
 void ContinuityEditor::SelectPoints() {
   CC_sheet *sht = descr->CurrSheet();
+  CC_continuity *c;
 
-  if (curr_cont < sht->numanimcont) {
-    if (sht->SelectContinuity(sht->animcont[curr_cont].num)) {
+  c = sht->GetNthContinuity(curr_cont);
+  if (c != NULL) {
+    if (sht->SelectContinuity(c->num)) {
       descr->show->winlist->UpdateSelections();
     }
   }
@@ -206,9 +253,11 @@ void ContinuityEditor::SelectPoints() {
 
 void ContinuityEditor::SetPoints() {
   CC_sheet *sht = descr->CurrSheet();
+  CC_continuity *c;
 
-  if (curr_cont < sht->numanimcont) {
-    sht->SetContinuity(sht->animcont[curr_cont].num);
+  c = sht->GetNthContinuity(curr_cont);
+  if (c != NULL) {
+    sht->SetContinuity(c->num);
   }
 }
 

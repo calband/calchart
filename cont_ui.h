@@ -25,8 +25,11 @@ public:
 
   virtual void SetShow(CC_show *shw);
   virtual void GotoSheet(unsigned sht);
+  virtual void DeleteSheet(unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
+  virtual void FlushContinuity();
+  virtual void SetContinuity(wxWindow *win, unsigned sht, unsigned cont);
 
 private:
   ContinuityEditor *editor;
@@ -55,11 +58,18 @@ public:
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
 
-  void Update(); // Refresh all window controls
-  void UpdateText(); // Update text window to current continuity
+  void Update(Bool quick = FALSE); // Refresh all window controls
+  // Update text window to current continuity
+  // quick doesn't flush other windows
+  void UpdateText(Bool quick = FALSE);
+
+  void FlushText(); // Flush changes in text window
+  inline void DetachText() { text_sheet = NULL; } // When sheet goes away
 
   inline unsigned GetCurrent() { return curr_cont; }
   inline void SetCurrent(unsigned i) { curr_cont = i; UpdateText(); }
+
+  inline CC_descr *GetShowDescr() { return descr; }
 
   void SelectPoints();
   void SetPoints();
@@ -70,6 +80,8 @@ private:
   wxPanel *panel;
   wxChoice *conts;
   FancyTextWin *text;
+  CC_sheet *text_sheet;
+  unsigned text_contnum;
   CC_WinNodeCont *node;
 };
 

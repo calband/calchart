@@ -50,7 +50,7 @@ CC_WinNodeInfo::CC_WinNodeInfo(CC_WinList *lst, ShowInfoReq *req)
 : CC_WinNode(lst), inforeq(req) {}
 
 void CC_WinNodeInfo::SetShow(CC_show *shw) {
-  inforeq->Update(shw);
+  inforeq->Update(TRUE, shw);
 }
 
 void CC_WinNodeInfo::ChangeNumPoints(wxWindow *win) {
@@ -80,7 +80,7 @@ void CC_WinNodeInfo::FlushDescr() {
 
 void CC_WinNodeInfo::SetDescr(wxWindow* win) {
   if (win != inforeq) {
-    inforeq->UpdateDescrQuick();
+    inforeq->UpdateDescr(TRUE);
   }
 }
 
@@ -409,7 +409,7 @@ show(shw) {
   c1->height.PercentOf(this, wxHeight, 70);
   panel->SetConstraints(c1);
 
-  text = new FancyTextWin(this, -1, -1, -1, -1, wxNATIVE_IMPL);
+  text = new FancyTextWin(this);
   wxLayoutConstraints *c2 = new wxLayoutConstraints;
   c2->left.SameAs(this, wxLeft);
   c2->top.Below(panel);
@@ -465,19 +465,21 @@ void ShowInfoReq::UpdateMode() {
   choice->SetStringSelection(show->mode->Name());
 }
 
-void ShowInfoReq::UpdateDescr() {
+void ShowInfoReq::UpdateDescr(Bool quick) {
+  char *c;
+
   text->Clear();
-  text->WriteText((char *)show->UserGetDescr());
+  if (quick) {
+    c = (char *)show->GetDescr();
+  } else {
+    c = (char *)show->UserGetDescr();
+  }
+  text->WriteText(c);
 }
 
-void ShowInfoReq::UpdateDescrQuick() {
-  text->Clear();
-  text->WriteText((char *)show->GetDescr());
-}
-
-void ShowInfoReq::Update(CC_show *shw) {
+void ShowInfoReq::Update(Bool quick, CC_show *shw) {
   if (shw != NULL) show = shw;
-  UpdateDescr();
+  UpdateDescr(quick);
   UpdateMode();
   UpdateNumPoints();
 }

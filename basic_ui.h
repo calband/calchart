@@ -36,8 +36,8 @@ void SetXOR(wxDC *dc);
 // Define a text subwindow that can respond to drag-and-drop
 class FancyTextWin : public wxTextWindow {
 public:
-  FancyTextWin(wxFrame *frame, int x=-1, int y=-1,
-	       int width=-1, int height=-1, long style=0);
+  FancyTextWin(wxFrame *frame, int x=-1, int y=-1, int width=-1, int height=-1,
+	       long style=wxNATIVE_IMPL|wxHSCROLL);
   void OnDropFiles(int n, char *files[], int x, int y);
 };
 

@@ -270,12 +270,15 @@ Animation::Animation(CC_show *show)
   unsigned i, j;
   ContProcedure* curr_proc;
   AnimateCompile comp;
+  CC_continuity *currcont;
 
   pts = new AnimatePoint[numpts];
   curr_cmds = new AnimateCommand*[numpts];
   
   // Now compile
   comp.show = show;
+  comp.show->winlist->FlushContinuity(); // get all changes in text windows
+
   for (comp.curr_sheet = show->GetSheet(); comp.curr_sheet;
        comp.curr_sheet = comp.curr_sheet->next) {
     if (curr_sheet) {
@@ -292,17 +295,17 @@ Animation::Animation(CC_show *show)
     }
 
     // Now parse continuity
-    for (i = 0; i < comp.curr_sheet->numanimcont; i++) {
-      if ((yyinputbuffer = comp.curr_sheet->animcont[i].text) != NULL) {
+    for (currcont = comp.curr_sheet->animcont; currcont != NULL;
+	 currcont  = currcont->next) {
+      if ((yyinputbuffer = currcont->text) != NULL) {
 #ifndef wx_msw
 	fprintf(stderr, "Parsing %s %s...\n", comp.curr_sheet->GetName(),
-		(const char *)comp.curr_sheet->animcont[i].name);
+		(const char *)currcont->name);
 #endif
 	parsecontinuity();
 	if (ParsedContinuity != NULL) {
 	  for (j = 0; j < numpts; j++) {
-	    if (comp.curr_sheet->pts[j].cont ==
-		comp.curr_sheet->animcont[i].num) {
+	    if (comp.curr_sheet->pts[j].cont == currcont->num) {
 	      comp.Init(j);
 	      for (curr_proc = ParsedContinuity; curr_proc;
 		   curr_proc = curr_proc->next) {

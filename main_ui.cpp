@@ -127,10 +127,10 @@ void CC_WinNodeMain::SetShow(CC_show *shw) {
   list = shw->winlist;
   shw->winlist->Add(this);
   canvas->show_descr.show = shw;
+  winlist.SetShow(shw); // Must set new show before redrawing
   canvas->UpdateBars();
   canvas->GotoSS(0);
   ChangeName();
-  winlist.SetShow(shw);
 }
 void CC_WinNodeMain::ChangeName() {
   canvas->ourframe->SetTitle((char *)canvas->show_descr.show->UserGetName());
@@ -208,6 +208,13 @@ void CC_WinNodeMain::AddContinuity(unsigned sht, unsigned cont) {
 }
 void CC_WinNodeMain::DeleteContinuity(unsigned sht, unsigned cont) {
   winlist.DeleteContinuity(sht, cont);
+}
+void CC_WinNodeMain::FlushContinuity() {
+  winlist.FlushContinuity();
+}
+void CC_WinNodeMain::SetContinuity(wxWindow* win,
+				   unsigned sht, unsigned cont) {
+  winlist.SetContinuity(win, sht, cont);
 }
 void CC_WinNodeMain::ChangePrint(wxWindow* win) {
   winlist.ChangePrint(win);
@@ -351,7 +358,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   edit_menu->Append(CALCHART__SET_BEATS, "Set Beats...");
 
   wxMenu *win_menu = new wxMenu;
-  win_menu->Append(CALCHART__INFO, "Show Info...");
+  win_menu->Append(CALCHART__INFO, "Info on this Show...");
   win_menu->Append(CALCHART__ANIMATE, "Animate...");
 
   wxMenu *help_menu = new wxMenu;
@@ -529,7 +536,7 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__INFO:
     if (field->show_descr.show)
       (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
-			    "Show info");
+			    "Info on this show");
     break;
   case CALCHART__ANIMATE:
     if (field->show_descr.show) {

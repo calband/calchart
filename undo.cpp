@@ -38,7 +38,7 @@ ShowUndoMove::~ShowUndoMove() {
   }
 }
 
-unsigned ShowUndoMove::Undo(CC_show *show)
+int ShowUndoMove::Undo(CC_show *show)
 {
   unsigned i;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
@@ -46,7 +46,7 @@ unsigned ShowUndoMove::Undo(CC_show *show)
     sheet->pts[elems[i].idx].pos = elems[i].pos;
   }
   show->winlist->UpdatePointsOnSheet(sheetidx);
-  return sheetidx;
+  return (int)sheetidx;
 }
 
 unsigned ShowUndoMove::Size() {
@@ -78,7 +78,7 @@ ShowUndoSym::~ShowUndoSym() {
   }
 }
 
-unsigned ShowUndoSym::Undo(CC_show *show)
+int ShowUndoSym::Undo(CC_show *show)
 {
   unsigned i;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
@@ -86,7 +86,7 @@ unsigned ShowUndoSym::Undo(CC_show *show)
     sheet->pts[elems[i].idx].sym = elems[i].sym;
   }
   show->winlist->UpdatePointsOnSheet(sheetidx);
-  return sheetidx;
+  return (int)sheetidx;
 }
 
 unsigned ShowUndoSym::Size() {
@@ -118,7 +118,7 @@ ShowUndoLbl::~ShowUndoLbl() {
   }
 }
 
-unsigned ShowUndoLbl::Undo(CC_show *show)
+int ShowUndoLbl::Undo(CC_show *show)
 {
   unsigned i;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
@@ -126,7 +126,7 @@ unsigned ShowUndoLbl::Undo(CC_show *show)
     sheet->pts[elems[i].idx].Flip(elems[i].right);
   }
   show->winlist->UpdatePointsOnSheet(sheetidx);
-  return sheetidx;
+  return (int)sheetidx;
 }
 
 unsigned ShowUndoLbl::Size() {
@@ -142,7 +142,7 @@ ShowUndoCopy::ShowUndoCopy(unsigned sheetnum)
 ShowUndoCopy::~ShowUndoCopy() {
 }
 
-unsigned ShowUndoCopy::Undo(CC_show *show) {
+int ShowUndoCopy::Undo(CC_show *show) {
   show->DeleteNthSheet(sheetidx);
   if (sheetidx > 0) {
     return (sheetidx-1);
@@ -163,10 +163,10 @@ ShowUndoDelete::~ShowUndoDelete() {
   if (deleted_sheet) delete deleted_sheet;
 }
 
-unsigned ShowUndoDelete::Undo(CC_show *show) {
+int ShowUndoDelete::Undo(CC_show *show) {
   show->InsertSheet(deleted_sheet, sheetidx);
   deleted_sheet = NULL; // So it isn't deleted
-  return sheetidx;
+  return (int)sheetidx;
 }
 
 unsigned ShowUndoDelete::Size() {
@@ -184,11 +184,12 @@ ShowUndoName::ShowUndoName(unsigned sheetnum, CC_sheet *sheet)
 ShowUndoName::~ShowUndoName() {
 }
 
-unsigned ShowUndoName::Undo(CC_show *show)
+int ShowUndoName::Undo(CC_show *show)
 {
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
   sheet->SetName(name);
-  return sheetidx;
+  show->winlist->ChangeTitle(sheetidx);
+  return (int)sheetidx;
 }
 
 unsigned ShowUndoName::Size() {
@@ -202,11 +203,11 @@ ShowUndoBeat::ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet)
 
 ShowUndoBeat::~ShowUndoBeat() {}
 
-unsigned ShowUndoBeat::Undo(CC_show *show)
+int ShowUndoBeat::Undo(CC_show *show)
 {
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
   sheet->UserSetBeats(beats);
-  return sheetidx;
+  return (int)sheetidx;
 }
 
 unsigned ShowUndoBeat::Size() {
@@ -214,6 +215,52 @@ unsigned ShowUndoBeat::Size() {
 }
 
 char *ShowUndoBeat::UndoDescription() { return "Undo set number of beats"; }
+
+ShowUndoCont::ShowUndoCont(unsigned sheetnum, unsigned contnum,
+			   CC_sheet *sheet)
+:ShowUndo(sheetnum), cont(contnum) {
+
+  conttext = sheet->GetNthContinuity(cont)->text;
+}
+
+ShowUndoCont::~ShowUndoCont() {
+}
+
+int ShowUndoCont::Undo(CC_show *show)
+{
+  CC_sheet *sheet = show->GetNthSheet(sheetidx);
+  sheet->SetNthContinuity(conttext, cont);
+  show->winlist->SetContinuity(NULL, sheetidx, cont);
+  return (int)sheetidx;
+}
+
+unsigned ShowUndoCont::Size() {
+  return strlen(conttext) + sizeof(*this);
+}
+
+char *ShowUndoCont::UndoDescription() { return "Undo edit continuity"; }
+
+ShowUndoDescr::ShowUndoDescr(CC_show *show)
+:ShowUndo(0) {
+  
+  descrtext = show->GetDescr();
+}
+
+ShowUndoDescr::~ShowUndoDescr() {
+}
+
+int ShowUndoDescr::Undo(CC_show *show)
+{
+  show->SetDescr(descrtext);
+  show->winlist->SetDescr(NULL);
+  return -1; // don't goto another sheet
+}
+
+unsigned ShowUndoDescr::Size() {
+  return strlen(descrtext) + sizeof(*this);
+}
+
+char *ShowUndoDescr::UndoDescription() { return "Undo edit show description"; }
 
 ShowUndoList::ShowUndoList(CC_show *shw, int lim)
 :show(shw), list(NULL), limit(lim) {}
