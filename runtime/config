@@ -1,6 +1,18 @@
 # Configuration file for CalChart
 # comments must be between definitions
 
+# location of program
+#PROGRAM_DIR
+#C:\CALCHART
+
+# default location of shows
+#SHOWS_DIR
+#C:\CALCHART\SHOWS
+
+# possible location of runtime files
+#RUNTIME_DIR
+#C:\CALCHART\RUNTIME
+
 # size of window to open
 WINDOW_WIDTH
 600
