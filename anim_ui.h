@@ -145,12 +145,13 @@ public:
 
   void UpdatePanel();
 
-  inline Bool CollisionsOn() { return collis->GetValue(); }
+  inline CollisionWarning CollisionType() {
+    return (CollisionWarning)collis->GetSelection(); }
 
   AnimationCanvas *canvas;
 private:
   CC_WinNodeAnim *node;
-  wxCheckBox *collis;
+  wxChoice *collis;
   wxSlider *sheet_slider;
   wxSlider *beat_slider;
 

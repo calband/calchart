@@ -83,7 +83,9 @@ extern wxString yard_text[21];
 extern wxString spr_line_text[MAX_SPR_LINES];
 
 extern char *ReadConfig(const char *path);
-extern FILE *OpenFileInDir(const char *name, const char *modes);
+class wxPathList;
+extern FILE *OpenFileInDir(const char *name, const char *modes,
+			   wxPathList *list = NULL);
 extern char *FullPath(const char *path);
 extern int ReadDOSline(FILE *fp, wxString& str);
 

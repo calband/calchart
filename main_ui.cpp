@@ -18,6 +18,7 @@
 #include "undo.h"
 #include "modes.h"
 #include "confgr.h"
+#include "ccvers.h"
 
 #include <wx_help.h>
 
@@ -373,7 +374,7 @@ wxFrame *CalChartApp::OnInit(void)
     if (shw->Ok()) {
       topframe->NewShow(shw);
     } else {
-      (void)wxMessageBox(shw->GetError(), "Load Error");
+      (void)wxMessageBox((char*)shw->GetError(), "Load Error");
       delete shw;
     }
   }
@@ -766,7 +767,7 @@ void TopFrame::OpenShow(const char *filename) {
     if (shw->Ok()) {
       NewShow(shw);
     } else {
-      (void)wxMessageBox(shw->GetError(), "Load Error");
+      (void)wxMessageBox((char*)shw->GetError(), "Load Error");
       delete shw;
     }
   }
@@ -777,7 +778,7 @@ void TopFrame::Quit() {
 }
 
 void TopFrame::About() {
-  (void)wxMessageBox("CalChart v3.0\nAuthor: Gurk Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1994-1997\nCompiled on " __DATE__ " at " __TIME__, "About CalChart");
+  (void)wxMessageBox("CalChart " CC_VERSION "\nAuthor: Gurk Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1994-1998\nCompiled on " __DATE__ " at " __TIME__, "About CalChart");
 }
 
 void TopFrame::Help() {
@@ -810,6 +811,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   file_menu->Append(CALCHART__NEW_WINDOW, "New &Window");
   file_menu->Append(CALCHART__LOAD_FILE, "&Open...");
   file_menu->Append(CALCHART__APPEND_FILE, "&Append...");
+  file_menu->Append(CALCHART__IMPORT_CONT_FILE, "&Import Continuity...");
   file_menu->Append(CALCHART__SAVE, "&Save");
   file_menu->Append(CALCHART__SAVE_AS, "Save &As...");
   file_menu->Append(CALCHART__PRINT, "&Print...");
@@ -1007,6 +1009,9 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__APPEND_FILE:
     AppendShow();
     break;
+  case CALCHART__IMPORT_CONT_FILE:
+    ImportContFile();
+    break;
   case CALCHART__SAVE:
     SaveShow();
     break;
@@ -1163,6 +1168,9 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__APPEND_FILE:
     msg = "Append a show to the end";
     break;
+  case CALCHART__IMPORT_CONT_FILE:
+    msg = "Import continuity text";
+    break;
   case CALCHART__SAVE:
     msg = field->show_descr.show->Modified() ?
       "Save show (needed)" :
@@ -1282,7 +1290,7 @@ void MainFrame::LoadShow() {
       if (shw->Ok()) {
 	node->SetShow(shw);
       } else {
-	(void)wxMessageBox(shw->GetError(), "Load Error");
+	(void)wxMessageBox((char*)shw->GetError(), "Load Error");
 	delete shw;
       }
     }
@@ -1306,8 +1314,23 @@ void MainFrame::AppendShow() {
 	delete shw;
       }
     } else {
-      (void)wxMessageBox(shw->GetError(), "Load Error");
+      (void)wxMessageBox((char*)shw->GetError(), "Load Error");
       delete shw;
+    }
+  }
+}
+
+// Append a show with file selector
+void MainFrame::ImportContFile() {
+  const char *s;
+  wxString *err;
+
+  s = wxFileSelector("Import Continuity", NULL, NULL, NULL, "*.txt");
+  if (s) {
+    err = field->show_descr.show->ImportContinuity(s);
+    if (err) {
+      (void)wxMessageBox(err->GetData(), "Load Error");
+      delete err;
     }
   }
 }

@@ -22,7 +22,7 @@ FIG2EPS = fig2dev -L ps # -P for non-encapsulated
 
 HEADERS = animate.h anim_ui.h basic_ui.h confgr.h cont.h cont_ui.h \
 	ingl.h linmath.h main_ui.h modes.h parse.h platconf.h print_ui.h \
-	show.h show_ui.h undo.h
+	show.h show_ui.h undo.h ccvers.h
 
 SRCS = animate.cc anim_ui.cc basic_ui.cc confgr.cc cont.cc cont_ui.cc \
 	draw.cc ingl.cc main_ui.cc modes.cc print.cc print_ui.cc show.cc \
@@ -52,8 +52,10 @@ IMAGES_MSW = $(IMAGES_BMP) calchart.ico
 IMAGES_ALL = $(IMAGES) calchart.xbm calchart.xpm calchart.ico
 IMAGES_SYNTH = $(IMAGES_BMP)
 
-DOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
-	docs/overview.tex docs/tex2rtf.ini docs/texhelp.sty \
+TEXDOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
+	docs/overview.tex docs/refer.tex docs/tex2rtf.ini docs/texhelp.sty
+
+DOCS = $(TEXDOCS) \
 	docs/contents.gif docs/up.gif docs/back.gif docs/forward.gif
 
 MOSTSRCS = $(SRCS) $(SYNTHETIC_BASES) $(HEADERS) $(DOCS)
@@ -108,9 +110,19 @@ docs/charthlp.dvi: $(DOCS)
 
 docs/charthlp.ps: docs/charthlp.dvi
 	cd docs; dvips -f -r < charthlp.dvi > charthlp.ps
+docs/charthlp.ps.gz: docs/charthlp.ps
+	rm -f $@
+	gzip -c9 $< > $@
 
 docs/charthlp_contents.html: $(DOCS)
 	cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
+docs/charthlp.html.tar.gz: docs/charthlp_contents.html
+	rm -f $@
+	tar cf - docs/*.html | gzip -9 > $@
+
+docs/charthlp.tex.tar.gz: $(TEXDOCS)
+	rm -f $@
+	tar cf - $(TEXDOCS) | gzip -9 > $@
 
 ps: docs/charthlp.ps
 html: docs/charthlp_contents.html
@@ -151,7 +163,8 @@ length::
 
 tar:: chartsrc.tar.gz
 
-distrib:: chartbin.tar.gz
+distrib:: chartbin.tar.gz docs/charthlp.ps.gz docs/charthlp.html.tar.gz \
+	docs/charthlp.tex.tar.gz
 
 zip:: chartsrc.zip
 

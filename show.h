@@ -405,11 +405,13 @@ public:
   CC_show(const char *file);
   ~CC_show();
 
+  wxString* ImportContinuity(const wxString& file);
+
   int Print(FILE *fp, Bool eps = FALSE, Bool overview = FALSE,
 	    unsigned curr_ss = 0);
 
-  inline char *GetError() { return error; }
-  inline Bool Ok() { return (error == NULL); }
+  inline const char *GetError() { return error; }
+  inline Bool Ok() { return okay; }
 
   void Append(CC_show *shw);
   void Append(CC_sheet *newsheets);
@@ -474,7 +476,14 @@ private:
   char *SaveInternal(const char *filename);
   void SetAutosaveName(const char *realname);
 
-  char *error;
+  void AddError(const wxString& str) {
+    error += str + '\n';
+    okay = FALSE;
+  }
+
+  wxString error;
+  Bool okay;
+
   wxString name;
   wxString autosave_name;
   wxString descr;

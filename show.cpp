@@ -1031,7 +1031,7 @@ Bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
 
 // Create a new show
 CC_show::CC_show(unsigned npoints)
-:numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
+:okay(TRUE), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
  modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
  print_do_cont_sheet(TRUE) {
   wxString tmpname;
@@ -1045,7 +1045,7 @@ CC_show::CC_show(unsigned npoints)
     pt_labels = new char[npoints][4];
     if (pt_labels == NULL) {
       // Out of mem!
-      error = nomem_str;
+      AddError(nomem_str);
       return;
     }
     for (unsigned int i = 0; i < npoints; i++) {
@@ -1054,7 +1054,7 @@ CC_show::CC_show(unsigned npoints)
     selections = new Bool[npoints];
     if (selections == NULL) {
       // Out of mem!
-      error = nomem_str;
+      AddError(nomem_str);
       return;
     }
     UnselectAll();
@@ -1066,7 +1066,6 @@ CC_show::CC_show(unsigned npoints)
   sheets->animcont->SetName(contnames[0]);
   sheets->numanimcont = 1;
 
-  error = NULL;
   autosaveTimer.AddShow(this);
 }
 
@@ -1314,9 +1313,9 @@ enum CONT_PARSE_MODE {
 
 // Load a show
 CC_show::CC_show(const char *file)
-:numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL), selections(NULL),
- modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
- print_do_cont_sheet(TRUE) {
+:okay(TRUE), numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL),
+ selections(NULL), modified(FALSE), print_landscape(FALSE),
+ print_do_cont(TRUE), print_do_cont_sheet(TRUE) {
   cc_oldpoint *diskpts;
 
   // These are for really old reference point format
@@ -1340,7 +1339,6 @@ CC_show::CC_show(const char *file)
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
-  error = NULL;
 
   namelen = strlen(file);
   if (namelen > 4) {
@@ -1354,33 +1352,33 @@ CC_show::CC_show(const char *file)
   if (old_format) {
     namebuf = copystring(file);
     if (!namebuf) {
-      error = nomem_str;
+      AddError(nomem_str);
       return;
     }
     fp = fopen(namebuf, "r");
     if (!fp) {
-      error = nofile_str;
+      AddError(nofile_str);
       return;
     }
     if (ReadDOSline(fp, tempbuf) <= 0) {
-      error = badfile_mas_str;
+      AddError(badfile_mas_str);
       return;
     }
     if (sscanf(tempbuf, " %u ", &i) != 1) {
-      error = badfile_mas_str;
+      AddError(badfile_mas_str);
       return;
     }
     if (i != 1024) {
-      error = badfile_mas_str;
+      AddError(badfile_mas_str);
       return;
     }
 
     if (ReadDOSline(fp, tempbuf) <= 0) {
-      error = badfile_mas_str;
+      AddError(badfile_mas_str);
       return;
     }
     if (sscanf(tempbuf, " %hu , %hu ", &numsheets, &numpoints) != 2) {
-      error = badfile_mas_str;
+      AddError(badfile_mas_str);
       return;
     }
     pt_labels = new char[numpoints][4];
@@ -1389,12 +1387,12 @@ CC_show::CC_show(const char *file)
 
     for (i = 0; i < numsheets; i++) {
       if (ReadDOSline(fp, tempbuf) <= 0) {
-	error = badfile_mas_str;
+	AddError(badfile_mas_str);
 	return;
       }
       if (sscanf(tempbuf, " \"%[^\"]\" , %u , %u\n",
 		 sheetnamebuf, &j, &off) != 3) {
-	error = badfile_mas_str;
+	AddError(badfile_mas_str);
 	return;
       }
       if (j == 0) j=1;
@@ -1410,14 +1408,14 @@ CC_show::CC_show(const char *file)
       if (curr_sheet == NULL) {
 	sheets = new CC_sheet(this, sheetnamebuf);
 	if (!sheets) {
-	  error = nomem_str;
+	  AddError(nomem_str);
 	  return;
 	}
 	curr_sheet = sheets;
       } else {
 	curr_sheet->next = new CC_sheet(this, sheetnamebuf);
 	if (!sheets) {
-	  error = nomem_str;
+	  AddError(nomem_str);
 	  return;
 	}
 	curr_sheet = curr_sheet->next;
@@ -1428,7 +1426,7 @@ CC_show::CC_show(const char *file)
 
     diskpts = new cc_oldpoint[numpoints];
     if (!diskpts) {
-      error = nomem_str;
+      AddError(nomem_str);
       return;
     }
     for (k = 1, curr_sheet = sheets;
@@ -1438,7 +1436,7 @@ CC_show::CC_show(const char *file)
 	      old_format_uppercase ? 'S':'s', k);
       fp = fopen(namebuf, "rb");
       if (!fp) {
-	error = nofile_str;
+	AddError(nofile_str);
 	return;
       }
       record_len = fread(diskpts, numpoints, sizeof(cc_oldpoint), fp);
@@ -1447,7 +1445,7 @@ CC_show::CC_show(const char *file)
       } else if (record_len == sizeof(cc_reallyoldpoint)) {
 	reallyoldpnts = TRUE;
       } else {
-	error = badfile_pnt_str;
+	AddError(badfile_pnt_str);
 	return;
       }
       fclose(fp);
@@ -1519,23 +1517,23 @@ CC_show::CC_show(const char *file)
 	      old_format_uppercase ? 'F':'f', k);
       fp = fopen(namebuf, "r");
       if (!fp) {
-	error = nofile_str;
+	AddError(nofile_str);
 	return;
       }
       if (ReadDOSline(fp, tempbuf) <= 0) {
-	error = badfile_cnt_str;
+	AddError(badfile_cnt_str);
 	return;
       }
       if (tempbuf != "'NEW") {
-	error = badanimcont_str;
+	AddError(badanimcont_str);
 	return;
       }
       if (ReadDOSline(fp, tempbuf) <= 0) {
-	error = badanimcont_str;
+	AddError(badanimcont_str);
 	return;
       }
       if (sscanf(tempbuf, " %u", &numanimcont) != 1) {
-	error = badanimcont_str;
+	AddError(badanimcont_str);
 	return;
       }
       for (i = 0; i < numanimcont; i++) {
@@ -1543,24 +1541,24 @@ CC_show::CC_show(const char *file)
 
 	// Skip blank line
 	if (feof(fp)) {
-	  error = badanimcont_str;
+	  AddError(badanimcont_str);
 	  return;
 	}
 	ReadDOSline(fp, tempbuf);
 	if (ReadDOSline(fp, tempbuf) <= 0) {
-	  error = badanimcont_str;
+	  AddError(badanimcont_str);
 	  return;
 	}
 	if (sscanf(tempbuf, " \"%[^\"]\" , %u , %u\n",
 		   sheetnamebuf, &newanimcont->num, &j) != 3) {
-	  error = badanimcont_str;
+	  AddError(badanimcont_str);
 	  return;
 	}
 	newanimcont->SetName(sheetnamebuf);
 	while (j > 0) {
 	  j--;
 	  if (feof(fp)) {
-	    error = badanimcont_str;
+	    AddError(badanimcont_str);
 	  }
 	  ReadDOSline(fp, tempbuf);
 	  newanimcont->AppendText(tempbuf.Strip() + '\n');
@@ -1570,289 +1568,17 @@ CC_show::CC_show(const char *file)
       fclose(fp);
     }
     delete diskpts;
-    // now load continuity file if it exists
-    /* This is the format for each sheet:
-     * %%str      where str is the string printed for the stuntsheet number
-     * normal ascii text possibly containing the following codes:
-     * \bs \be \is \ie for bold start, bold end, italics start, italics end
-     * \po plainman
-     * \pb backslashman
-     * \ps slashman
-     * \px xman
-     * \so solidman
-     * \sb solidbackslashman
-     * \ss solidslashman
-     * \sx solidxman
-     * a line may begin with these symbols in order: <>~
-     * < don't print continuity on individual sheets
-     * > don't print continuity on master sheet
-     * ~ center this line
-     * also, there are three tab stops set for standard continuity format
-     */
-    strcpy(namebuf+namelen-3, old_format_uppercase ? "TXT":"txt");
-    fp = fopen(namebuf, "r");
-    if (fp) {
-      CC_textline *line_text;
-      CC_textchunk *new_text;
-      unsigned pos;
-      Bool on_sheet, on_main, center, font_changed;
-      enum CONT_PARSE_MODE parsemode;
-      enum PSFONT_TYPE currfontnum, lastfontnum;
-      wxString lineotext;
-      char c;
-      Bool sheetmark;
 
-      curr_sheet = NULL;
-      currfontnum = lastfontnum = PSFONT_NORM;
-      line_text = NULL;
-      while (TRUE) {
-	if (feof(fp)) break;
-	ReadDOSline(fp, tempbuf);
-	sheetmark = FALSE;
-	line_text = NULL;
-	if (tempbuf.Length() >= 2) {
-	  if ((tempbuf.Elem(0) == '%') && (tempbuf.Elem(1) == '%')) {
-	    sheetmark = TRUE;
-	  }
-	}
-	if (sheetmark) {
-	  if (curr_sheet) curr_sheet = curr_sheet->next;
-	  else curr_sheet = sheets;
-	  if (!curr_sheet) break;
-	  if (tempbuf.Length() > 2) {
-	    curr_sheet->SetNumber(tempbuf.From(2).Chars());
-	  }
-	} else {
-	  if (curr_sheet == NULL) {
-	    // Continuity doesn't begin with a sheet header
-	    error = contnohead_str;
-	    return;
-	  }
-	  on_main = TRUE;
-	  on_sheet = TRUE;
-	  pos = 0;
-	  if (pos < tempbuf.Length()) {
-	    if (tempbuf.Elem(pos) == '<') {
-	      on_sheet = FALSE;
-	      pos++;
-	    } else {
-	      if (tempbuf.Elem(pos) == '>') {
-		on_main = FALSE;
-		pos++;
-	      }
-	    }
-	  }
-	  center = FALSE;
-	  if (pos < tempbuf.Length()) {
-	    if (tempbuf.Elem(pos) == '~') {
-	      center = TRUE;
-	      pos++;
-	    }
-	  }
-	  parsemode = CONT_PARSE_NORMAL;
-	  do {
-	    font_changed = FALSE;
-	    lineotext = "";
-	    while ((pos < tempbuf.Length()) && !font_changed) {
-	      switch (parsemode) {
-	      case CONT_PARSE_NORMAL:
-		c = tempbuf.Elem(pos++);
-		switch (c) {
-		case '\\':
-		  parsemode = CONT_PARSE_BS;
-		  break;
-		case '\t':
-		  parsemode = CONT_PARSE_TAB;
-		  font_changed = TRUE;
-		  break;
-		default:
-		  lineotext.Append(c);
-		  break;
-		}
-		break;
-	      case CONT_PARSE_TAB:
-		parsemode = CONT_PARSE_NORMAL;
-		currfontnum = PSFONT_TAB;
-		font_changed = TRUE;
-		break;
-	      case CONT_PARSE_BS:
-		c = tolower(tempbuf.Elem(pos++));
-		switch (c) {
-		case 'p':
-		  parsemode = CONT_PARSE_PLAIN;
-		  font_changed = TRUE;
-		  break;
-		case 's':
-		  parsemode = CONT_PARSE_SOLID;
-		  font_changed = TRUE;
-		  break;
-		case 'b':
-		  parsemode = CONT_PARSE_BOLD;
-		  break;
-		case 'i':
-		  parsemode = CONT_PARSE_ITALIC;
-		  break;
-		default:
-		  parsemode = CONT_PARSE_NORMAL;
-		  lineotext.Append(c);
-		  break;
-		}
-		break;
-	      case CONT_PARSE_PLAIN:
-		parsemode = CONT_PARSE_NORMAL;
-		font_changed = TRUE;
-		currfontnum = PSFONT_SYMBOL;
-		c = tolower(tempbuf.Elem(pos++));
-		switch (c) {
-		case 'o':
-		  lineotext.Append('A');
-		  break;
-		case 'b':
-		  lineotext.Append('C');
-		  break;
-		case 's':
-		  lineotext.Append('D');
-		  break;
-		case 'x':
-		  lineotext.Append('E');
-		  break;
-		default:
-		  // code not recognized
-		  error = badcont_str;
-		  return;
-		}
-		break;
-	      case CONT_PARSE_SOLID:
-		parsemode = CONT_PARSE_NORMAL;
-		font_changed = TRUE;
-		currfontnum = PSFONT_SYMBOL;
-		c = tolower(tempbuf.Elem(pos++));
-		switch (c) {
-		case 'o':
-		  lineotext.Append('B');
-		  break;
-		case 'b':
-		  lineotext.Append('F');
-		  break;
-		case 's':
-		  lineotext.Append('G');
-		  break;
-		case 'x':
-		  lineotext.Append('H');
-		  break;
-		default:
-		  // code not recognized
-		  error = badcont_str;
-		  return;
-		}
-		break;
-	      case CONT_PARSE_BOLD:
-		parsemode = CONT_PARSE_NORMAL;
-		c = tolower(tempbuf.Elem(pos++));
-		switch (c) {
-		case 's':
-		  switch (currfontnum) {
-		  case PSFONT_NORM:
-		    lastfontnum = PSFONT_BOLD;
-		    font_changed = TRUE;
-		    break;
-		  case PSFONT_ITAL:
-		    lastfontnum = PSFONT_BOLDITAL;
-		    font_changed = TRUE;
-		    break;
-		  default:
-		    break;
-		  }
-		  break;
-		case 'e':
-		  switch (currfontnum) {
-		  case PSFONT_BOLD:
-		    lastfontnum = PSFONT_NORM;
-		    font_changed = TRUE;
-		    break;
-		  case PSFONT_BOLDITAL:
-		    lastfontnum = PSFONT_ITAL;
-		    font_changed = TRUE;
-		    break;
-		  default:
-		    break;
-		  }
-		  break;
-		default:
-		  // code not recognized
-		  error = badcont_str;
-		  return;
-		}
-		break;
-	      case CONT_PARSE_ITALIC:
-		parsemode = CONT_PARSE_NORMAL;
-		c = tolower(tempbuf.Elem(pos++));
-		switch (c) {
-		case 's':
-		  switch (currfontnum) {
-		  case PSFONT_NORM:
-		    lastfontnum = PSFONT_ITAL;
-		    font_changed = TRUE;
-		    break;
-		  case PSFONT_BOLD:
-		    lastfontnum = PSFONT_BOLDITAL;
-		    font_changed = TRUE;
-		    break;
-		  default:
-		    break;
-		  }
-		  break;
-		case 'e':
-		  switch (currfontnum) {
-		  case PSFONT_ITAL:
-		    lastfontnum = PSFONT_NORM;
-		    font_changed = TRUE;
-		    break;
-		  case PSFONT_BOLDITAL:
-		    lastfontnum = PSFONT_BOLD;
-		    font_changed = TRUE;
-		    break;
-		  default:
-		    break;
-		  }
-		  break;
-		default:
-		  // code not recognized
-		  error = badcont_str;
-		  return;
-		}
-		break;
-	      }
-	    }
-	    // Add any remaining text
-	    // Empty text only okay if line is blank
-	    if ((!lineotext.Empty()) ||
-		(currfontnum == PSFONT_TAB) ||
-		// Empty line
-		((pos >= tempbuf.Length()) && (line_text == NULL))) {
-	      new_text = new CC_textchunk;
-	      if (new_text == NULL) {
-		error = nomem_str;
-		return;
-	      }
-	      if (line_text == NULL) {
-		line_text = new CC_textline();
-		line_text->on_main = on_main;
-		line_text->on_sheet = on_sheet;
-		line_text->center = center;
-		curr_sheet->continuity.lines.Append(line_text);
-	      }
-	      new_text->font = currfontnum;
-	      new_text->text = lineotext;
-	      line_text->chunks.Append(new_text);
-	    }
-	    // restore to previous font (used for symbols and tabs)
-	    currfontnum = lastfontnum;
-	  } while (pos < tempbuf.Length());
-	}
+    // now load continuity file if it exists
+    strcpy(namebuf+namelen-3, old_format_uppercase ? "TXT":"txt");
+    if (wxFileExists(namebuf)) {
+      wxString* conterr = ImportContinuity(namebuf);
+      if (conterr) {
+	AddError(*conterr);
+	delete conterr;
       }
-      fclose(fp);
     }
+
     wxString shwname;
     ChangeExtension(namebuf, shwname, "shw");
     SetName(shwname);
@@ -1860,16 +1586,19 @@ CC_show::CC_show(const char *file)
   } else {
     INGLread readhnd(file);
     if (!readhnd.Okay()) {
-      error = nofile_str;
+      AddError(nofile_str);
     } else {
+      char *parseerror = NULL;
       readhnd.ParseFile(load_show_handlers,
 			sizeof(load_show_handlers)/sizeof(INGLhandler),
-			&error, this);
+			&parseerror, this);
+      if (parseerror != NULL)
+	AddError(parseerror);
       SetName(file);
     }
   }
-  if ((error == NULL) && (sheets == NULL)) {
-    error = nosheets_str;
+  if (okay && (sheets == NULL)) {
+    AddError(nosheets_str);
     return;
   }
   autosaveTimer.AddShow(this);
@@ -1891,6 +1620,290 @@ CC_show::~CC_show() {
     delete sheets;
     sheets = tmp;
   }
+}
+
+wxString* CC_show::ImportContinuity(const wxString& file) {
+  /* This is the format for each sheet:
+   * %%str      where str is the string printed for the stuntsheet number
+   * normal ascii text possibly containing the following codes:
+   * \bs \be \is \ie for bold start, bold end, italics start, italics end
+   * \po plainman
+   * \pb backslashman
+   * \ps slashman
+   * \px xman
+   * \so solidman
+   * \sb solidbackslashman
+   * \ss solidslashman
+   * \sx solidxman
+   * a line may begin with these symbols in order: <>~
+   * < don't print continuity on individual sheets
+   * > don't print continuity on master sheet
+   * ~ center this line
+   * also, there are three tab stops set for standard continuity format
+   */
+  FILE *fp;
+  CC_sheet *curr_sheet;
+  wxString tempbuf;
+  CC_textline *line_text;
+  CC_textchunk *new_text;
+  unsigned pos;
+  Bool on_sheet, on_main, center, font_changed;
+  enum CONT_PARSE_MODE parsemode;
+  enum PSFONT_TYPE currfontnum, lastfontnum;
+  wxString lineotext;
+  char c;
+  Bool sheetmark;
+
+  fp = fopen(file, "r");
+  if (fp) {
+    curr_sheet = NULL;
+    currfontnum = lastfontnum = PSFONT_NORM;
+    line_text = NULL;
+    while (TRUE) {
+      if (feof(fp)) break;
+      ReadDOSline(fp, tempbuf);
+      sheetmark = FALSE;
+      line_text = NULL;
+      if (tempbuf.Length() >= 2) {
+	if ((tempbuf.Elem(0) == '%') && (tempbuf.Elem(1) == '%')) {
+	  sheetmark = TRUE;
+	}
+      }
+      if (sheetmark) {
+	if (curr_sheet) curr_sheet = curr_sheet->next;
+	else curr_sheet = sheets;
+	if (!curr_sheet) break;
+	if (tempbuf.Length() > 2) {
+	  curr_sheet->SetNumber(tempbuf.From(2).Chars());
+	}
+      } else {
+	if (curr_sheet == NULL) {
+	  // Continuity doesn't begin with a sheet header
+	  return new wxString(contnohead_str);
+	}
+	on_main = TRUE;
+	on_sheet = TRUE;
+	pos = 0;
+	if (pos < tempbuf.Length()) {
+	  if (tempbuf.Elem(pos) == '<') {
+	    on_sheet = FALSE;
+	    pos++;
+	  } else {
+	    if (tempbuf.Elem(pos) == '>') {
+	      on_main = FALSE;
+	      pos++;
+	    }
+	  }
+	}
+	center = FALSE;
+	if (pos < tempbuf.Length()) {
+	  if (tempbuf.Elem(pos) == '~') {
+	    center = TRUE;
+	    pos++;
+	  }
+	}
+	parsemode = CONT_PARSE_NORMAL;
+	do {
+	  font_changed = FALSE;
+	  lineotext = "";
+	  while ((pos < tempbuf.Length()) && !font_changed) {
+	    switch (parsemode) {
+	    case CONT_PARSE_NORMAL:
+	      c = tempbuf.Elem(pos++);
+	      switch (c) {
+	      case '\\':
+		parsemode = CONT_PARSE_BS;
+		break;
+	      case '\t':
+		parsemode = CONT_PARSE_TAB;
+		font_changed = TRUE;
+		break;
+	      default:
+		lineotext.Append(c);
+		break;
+	      }
+	      break;
+	    case CONT_PARSE_TAB:
+	      parsemode = CONT_PARSE_NORMAL;
+	      currfontnum = PSFONT_TAB;
+	      font_changed = TRUE;
+	      break;
+	    case CONT_PARSE_BS:
+	      c = tolower(tempbuf.Elem(pos++));
+	      switch (c) {
+	      case 'p':
+		parsemode = CONT_PARSE_PLAIN;
+		font_changed = TRUE;
+		break;
+	      case 's':
+		parsemode = CONT_PARSE_SOLID;
+		font_changed = TRUE;
+		break;
+	      case 'b':
+		parsemode = CONT_PARSE_BOLD;
+		break;
+	      case 'i':
+		parsemode = CONT_PARSE_ITALIC;
+		break;
+	      default:
+		parsemode = CONT_PARSE_NORMAL;
+		lineotext.Append(c);
+		break;
+	      }
+	      break;
+	    case CONT_PARSE_PLAIN:
+	      parsemode = CONT_PARSE_NORMAL;
+	      font_changed = TRUE;
+	      currfontnum = PSFONT_SYMBOL;
+	      c = tolower(tempbuf.Elem(pos++));
+	      switch (c) {
+	      case 'o':
+		lineotext.Append('A');
+		break;
+	      case 'b':
+		lineotext.Append('C');
+		break;
+	      case 's':
+		lineotext.Append('D');
+		break;
+	      case 'x':
+		lineotext.Append('E');
+		break;
+	      default:
+		// code not recognized
+		return new wxString(badcont_str);
+	      }
+	      break;
+	    case CONT_PARSE_SOLID:
+	      parsemode = CONT_PARSE_NORMAL;
+	      font_changed = TRUE;
+	      currfontnum = PSFONT_SYMBOL;
+	      c = tolower(tempbuf.Elem(pos++));
+	      switch (c) {
+	      case 'o':
+		lineotext.Append('B');
+		break;
+	      case 'b':
+		lineotext.Append('F');
+		break;
+	      case 's':
+		lineotext.Append('G');
+		break;
+	      case 'x':
+		lineotext.Append('H');
+		break;
+	      default:
+		// code not recognized
+		return new wxString(badcont_str);
+	      }
+	      break;
+	    case CONT_PARSE_BOLD:
+	      parsemode = CONT_PARSE_NORMAL;
+	      c = tolower(tempbuf.Elem(pos++));
+	      switch (c) {
+	      case 's':
+		switch (currfontnum) {
+		case PSFONT_NORM:
+		  lastfontnum = PSFONT_BOLD;
+		  font_changed = TRUE;
+		  break;
+		case PSFONT_ITAL:
+		  lastfontnum = PSFONT_BOLDITAL;
+		  font_changed = TRUE;
+		  break;
+		default:
+		  break;
+		}
+		break;
+	      case 'e':
+		switch (currfontnum) {
+		case PSFONT_BOLD:
+		  lastfontnum = PSFONT_NORM;
+		  font_changed = TRUE;
+		  break;
+		case PSFONT_BOLDITAL:
+		  lastfontnum = PSFONT_ITAL;
+		  font_changed = TRUE;
+		  break;
+		default:
+		  break;
+		}
+		break;
+	      default:
+		// code not recognized
+		return new wxString(badcont_str);
+	      }
+	      break;
+	    case CONT_PARSE_ITALIC:
+	      parsemode = CONT_PARSE_NORMAL;
+	      c = tolower(tempbuf.Elem(pos++));
+	      switch (c) {
+	      case 's':
+		switch (currfontnum) {
+		case PSFONT_NORM:
+		  lastfontnum = PSFONT_ITAL;
+		  font_changed = TRUE;
+		  break;
+		case PSFONT_BOLD:
+		  lastfontnum = PSFONT_BOLDITAL;
+		  font_changed = TRUE;
+		  break;
+		default:
+		  break;
+		}
+		break;
+	      case 'e':
+		switch (currfontnum) {
+		case PSFONT_ITAL:
+		  lastfontnum = PSFONT_NORM;
+		  font_changed = TRUE;
+		  break;
+		case PSFONT_BOLDITAL:
+		  lastfontnum = PSFONT_BOLD;
+		  font_changed = TRUE;
+		  break;
+		default:
+		  break;
+		}
+		break;
+	      default:
+		// code not recognized
+		return new wxString(badcont_str);
+	      }
+	      break;
+	    }
+	  }
+	  // Add any remaining text
+	  // Empty text only okay if line is blank
+	  if ((!lineotext.Empty()) ||
+	      (currfontnum == PSFONT_TAB) ||
+	      // Empty line
+	      ((pos >= tempbuf.Length()) && (line_text == NULL))) {
+	    new_text = new CC_textchunk;
+	    if (new_text == NULL) {
+	      return new wxString(nomem_str);
+	    }
+	    if (line_text == NULL) {
+	      line_text = new CC_textline();
+	      line_text->on_main = on_main;
+	      line_text->on_sheet = on_sheet;
+	      line_text->center = center;
+	      curr_sheet->continuity.lines.Append(line_text);
+	    }
+	    new_text->font = currfontnum;
+	    new_text->text = lineotext;
+	    line_text->chunks.Append(new_text);
+	  }
+	  // restore to previous font (used for symbols and tabs)
+	  currfontnum = lastfontnum;
+	} while (pos < tempbuf.Length());
+      }
+    }
+    fclose(fp);
+  } else {
+    return new wxString(nofile_str);
+  }
+  return NULL;
 }
 
 void CC_show::Append(CC_show *shw) {
@@ -2022,7 +2035,7 @@ char *CC_show::SaveInternal(const char *filename) {
       }
     }
     // Ref point positions
-    for (j = 0; j < NUM_REF_PNTS; j++) {
+    for (j = 1; j <= NUM_REF_PNTS; j++) {
       for (i = 0; i < GetNumPoints(); i++) {
 	if (curr_sheet->GetPosition(i) != curr_sheet->GetPosition(i, j)) {
 	  if (!handl->WriteChunkHeader(INGL_REFP, GetNumPoints()*4+2)) {

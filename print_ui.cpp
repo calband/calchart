@@ -116,7 +116,7 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
       (void)wxMessageBox(tempbuf.GetData(),
 			 (char *)dialog->show_descr->show->GetName());
     } else {
-      (void)wxMessageBox(dialog->show_descr->show->GetError(),
+      (void)wxMessageBox((char *)dialog->show_descr->show->GetError(),
 			 (char *)dialog->show_descr->show->GetName());
     }
   } else {

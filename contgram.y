@@ -25,7 +25,7 @@ ContProcedure *ParsedContinuity = NULL;
 %{
 	/* Reserved word definitions */
 %}
-%token rwP rwNP rwR rwREM rwSP rwDOF
+%token rwP rwNP rwR rwREM rwSP rwDOF rwDOH
 %token pBLAM pCOUNTERMARCH pDMCM pDMHS pEVEN pEWNS pFOUNTAIN pFM pFMTO
 %token pGRID pHSDM pHSCM pMAGIC pMARCH pMT pMTRM pNSEW pROTATE
 %token fDIR fDIRFROM fDIST fDISTFROM fEITHER fOPP fSTEP
@@ -155,6 +155,8 @@ value
 		{ $$ = new ContValueREM(); }
 	| rwDOF
 		{ $$ = new ContValueVar(CONTVAR_DOF); }
+	| rwDOH
+		{ $$ = new ContValueVar(CONTVAR_DOH); }
 	| varvalue
 		{ $$ = $1; }
 	| function

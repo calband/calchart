@@ -15,9 +15,19 @@
 
 #include "show.h"
 
-// Number of variables in continuity language (A B C D X Y Z DOF)
-#define NUMCONTVARS 8
-#define CONTVAR_DOF 7
+// Number of variables in continuity language (A B C D X Y Z DOF DOH)
+enum {
+  CONTVAR_A,
+  CONTVAR_B,
+  CONTVAR_C,
+  CONTVAR_D,
+  CONTVAR_X,
+  CONTVAR_Y,
+  CONTVAR_Z,
+  CONTVAR_DOF,
+  CONTVAR_DOH,
+  NUMCONTVARS
+};
 
 enum AnimateDir {
   ANIMDIR_N, ANIMDIR_NE, ANIMDIR_E, ANIMDIR_SE,
@@ -62,6 +72,7 @@ public:
 
   virtual AnimateDir Direction() = 0;
   virtual float RealDirection() = 0;
+  virtual float MotionDirection();
   virtual void ClipBeats(unsigned beats);
 
   AnimateCommand *next, *prev;
@@ -92,6 +103,7 @@ public:
   virtual void ApplyForward(AnimatePoint& pt);
   virtual void ApplyBackward(AnimatePoint& pt);
 
+  virtual float MotionDirection();
   virtual void ClipBeats(unsigned beats);
 private:
   CC_coord vector;
@@ -132,6 +144,12 @@ private:
   unsigned numpts;
 };
 
+enum CollisionWarning {
+  COLLISION_NONE,
+  COLLISION_SHOW,
+  COLLISION_BEEP
+};
+
 class wxFrame;
 class Animation {
 public:
@@ -149,7 +167,7 @@ public:
 
   void GotoSheet(unsigned i);
 
-  inline void EnableCollisions(Bool on) { check_collis = on; }
+  inline void EnableCollisions(CollisionWarning col) { check_collis = col; }
   void CheckCollisions();
 
   AnimatePoint *pts;
@@ -167,7 +185,19 @@ private:
   void RefreshSheet();
 
   AnimateSheet *sheets;
-  Bool check_collis;
+  CollisionWarning check_collis;
+};
+
+class AnimateVariable {
+private:
+  float v;
+  Bool valid;
+public:
+  AnimateVariable(): v(0.0), valid(FALSE) {}
+  inline Bool IsValid() const { return valid; }
+  inline float GetValue() const { return v; }
+  inline void SetValue(float newv) { v = newv; valid = TRUE; }
+  inline void ClearValue() { v = 0.0; valid = FALSE; }
 };
 
 class ContProcedure;
@@ -191,8 +221,9 @@ public:
   }
   void FreeErrorMarkers();
 
-  float vars[NUMCONTVARS];
-  Bool vars_valid[NUMCONTVARS];
+  float GetVarValue(int varnum);
+  void SetVarValue(int varnum, float value);
+
   AnimatePoint pt;
   AnimateCommand *cmds;
   AnimateCommand *curr_cmd;
@@ -202,6 +233,7 @@ public:
   unsigned beats_rem;
   Bool *error_markers[NUM_ANIMERR];
 private:
+  AnimateVariable *vars[NUMCONTVARS];
   void MakeErrorMarker(AnimateError err);
   Bool okay;
 };

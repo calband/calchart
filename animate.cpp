@@ -142,6 +142,10 @@ void AnimateCommand::ApplyBackward(AnimatePoint&) {
   beat = 0;
 }
 
+float AnimateCommand::MotionDirection() {
+  return RealDirection();
+}
+
 void AnimateCommand::ClipBeats(unsigned beats) {
   numbeats = beats;
 }
@@ -195,6 +199,10 @@ void AnimateCommandMove::ApplyForward(AnimatePoint& pt) {
 void AnimateCommandMove::ApplyBackward(AnimatePoint& pt) {
   AnimateCommand::ApplyBackward(pt);
   pt.pos -= vector;
+}
+
+float AnimateCommandMove::MotionDirection() {
+  return vector.Direction();
 }
 
 void AnimateCommandMove::ClipBeats(unsigned beats) {
@@ -522,18 +530,23 @@ void Animation::RefreshSheet() {
 
 void Animation::CheckCollisions() {
   unsigned i, j;
+  Bool beep = FALSE;
 
   for (i = 0; i < numpts; i++) {
     collisions[i] = FALSE;
   }
-  if (check_collis) {
+  if (check_collis != COLLISION_NONE) {
     for (i = 0; i < numpts; i++) {
       for (j = i+1; j < numpts; j++) {
 	if (pts[i].pos.Collides(pts[j].pos)) {
 	  collisions[i] = TRUE;
 	  collisions[j] = TRUE;
+	  beep = TRUE;
 	}
       }
+    }
+    if (beep && (check_collis == COLLISION_BEEP)) {
+      wxBell();
     }
   }
 }
@@ -545,20 +558,25 @@ AnimateCompile::AnimateCompile()
   for (i = 0; i < NUM_ANIMERR; i++) {
     error_markers[i] = NULL;
   }
+  for (i = 0; i < NUMCONTVARS; i++) {
+    vars[i] = NULL;
+  }
 }
 
 AnimateCompile::~AnimateCompile() {
+  unsigned i;
+
   FreeErrorMarkers();
+  for (i = 0; i < NUMCONTVARS; i++) {
+    if (vars[i] != NULL) {
+      delete [] vars[i];
+      vars[i] = NULL;
+    }
+  }
 }
 
 void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
-  unsigned i;
   CC_coord c;
-
-  for (i = 0; i < NUMCONTVARS; i++) {
-    vars[i] = 0.0;
-    vars_valid[i] = FALSE;
-  }
 
   pt.pos = curr_sheet->GetPosition(pt_num);
   cmds = curr_cmd = NULL;
@@ -625,8 +643,8 @@ Bool AnimateCompile::Append(AnimateCommand *cmd) {
   beats_rem -= cmd->numbeats;
 
   cmd->ApplyForward(pt); // Move current point to new position
-  vars[CONTVAR_DOF] = cmd->RealDirection();
-  vars_valid[CONTVAR_DOF] = TRUE;
+  SetVarValue(CONTVAR_DOF, cmd->MotionDirection());
+  SetVarValue(CONTVAR_DOH, cmd->RealDirection());
   return TRUE;
 }
 
@@ -645,6 +663,23 @@ void AnimateCompile::FreeErrorMarkers() {
       error_markers[i] = NULL;
     }
   }
+}
+
+float AnimateCompile::GetVarValue(int varnum) {
+  if (vars[varnum]) {
+    if (vars[varnum][curr_pt].IsValid()) {
+      return vars[varnum][curr_pt].GetValue();
+    }
+  }
+  RegisterError(ANIMERR_UNDEFINED);
+  return 0.0;
+}
+
+void AnimateCompile::SetVarValue(int varnum, float value) {
+  if (!vars[varnum]) {
+    vars[varnum] = new AnimateVariable[show->GetNumPoints()];
+  }
+  vars[varnum][curr_pt].SetValue(value);
 }
 
 void AnimateCompile::MakeErrorMarker(AnimateError err) {

@@ -22,6 +22,11 @@ A special symbol for the "direction of flow" is called DOF.  DOF contains
 the direction of the last movement or marktime (note that it is undefined
 if none has occurred).
 
+A special symbol for the "direction of horn" is called DOH.  DOH contains
+the direction faced after the last movement or marktime (note that it is
+undefined if none has occurred).  This is only different from DOF for
+things like grapevine (see \helpref{MARCH}{march}.)
+
 Any function which returns a direction may be used in place of a direction;
 see the section on \helpref{FUNCTIONS}{functions}.
 
@@ -260,6 +265,13 @@ may occur off the grid.  BLAM is equivalent to:
 \end{verbatim}
 except when REM is 0, in which case it is equivalent to
 MAGIC \verb$<destination>$.
+
+\subsection{CLOSE}\label{close}
+
+Format: CLOSE \verb$<beats>$ \verb$<direction>$
+
+CLOSE is identical to \helpref{MT}{mt}.  It is provided to help keep track
+of what sections are marktime and what are closed.
 
 \subsection{COUNTERMARCH}\label{countermarch}
 
@@ -528,7 +540,8 @@ Note that angle is interpreted in the standard mathematical way:
   Negative angles rotate clockwise
 
 Another note:  If \verb$<pivot point>$ coincides with P, then the person will
-rotate around himself (i.e. stand in one place and turn slowly).
+rotate around himself (i.e. stand in one place and turn slowly).  The
+person will begin the rotation facing DOH.
 
 \section{STEPS}\label{steps}
 

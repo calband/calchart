@@ -251,14 +251,11 @@ float ContValueREM::Get(AnimateCompile* anim) const {
 }
 
 float ContValueVar::Get(AnimateCompile* anim) const {
-  if (!anim->vars_valid[varnum])
-    anim->RegisterError(ANIMERR_UNDEFINED);
-  return anim->vars[varnum];
+  return anim->GetVarValue(varnum);
 }
 
 void ContValueVar::Set(AnimateCompile* anim, float v) {
-  anim->vars_valid[varnum] = TRUE;
-  anim->vars[varnum] = v;
+  anim->SetVarValue(varnum, v);
 }
 
 ContFuncDir::~ContFuncDir() {
@@ -798,8 +795,9 @@ void ContProcRotate::Compile(AnimateCompile* anim) {
   c = pnt->Get(anim);
   rad = anim->pt.pos - c;
   if (c == anim->pt.pos)
-    anim->RegisterError(ANIMERR_UNDEFINED);
-  start_ang = c.Direction(anim->pt.pos);
+    start_ang = anim->GetVarValue(CONTVAR_DOH);
+  else
+    start_ang = c.Direction(anim->pt.pos);
   anim->Append(new AnimateCommandRotate(float2unsigned(stps->Get(anim)), c,
 					// Don't use Magnitude() because
 					// we want Coord numbers

@@ -235,20 +235,22 @@ char *ReadConfig(const char *path) {
   short eps_steps_x, eps_steps_y, eps_steps_w, eps_steps_h;
   short eps_text_left, eps_text_right, eps_text_top, eps_text_bottom;
   unsigned char which_spr_yards;
+  wxPathList tmp_configdirs;
 
   char *tmpstr = wxGetWorkingDirectory();
   program_dir = tmpstr;
   delete [] tmpstr;
 
-  // Set search path for files
-  configdirs.AddEnvList("CALCHART_RT");
-  // Add default path
+  // Get default path
   tmpstr = FullPath(path);
   runtime_dir = tmpstr;
   delete [] tmpstr;
-  configdirs.Add(runtime_dir.GetData());
 
-  fp = OpenFileInDir("config", "r");
+  // Set search path for files
+  tmp_configdirs.AddEnvList("CALCHART_RT");
+  tmp_configdirs.Add(runtime_dir.GetData());
+
+  fp = OpenFileInDir("config", "r", &tmp_configdirs);
   if (fp == NULL) {
     retmsg = "Unable to open config file.  Using default values.\n";
   } else {
@@ -608,16 +610,20 @@ char *ReadConfig(const char *path) {
       }
     }
   }
+  // Set search path for files
+  configdirs.AddEnvList("CALCHART_RT");
+  configdirs.Add(runtime_dir.GetData());
 
   return retmsg;
 }
 
 // Open a file in the specified dir.
-FILE *OpenFileInDir(const char *name, const char *modes) {
+FILE *OpenFileInDir(const char *name, const char *modes, wxPathList *list) {
   FILE *fp;
   char *fullpath;
 
-  fullpath = configdirs.FindValidPath((char *)name);
+  if (!list) list = &configdirs;
+  fullpath = list->FindValidPath((char *)name);
   if (fullpath == NULL) return NULL;
 
   fp = fopen(fullpath, modes);

@@ -30,6 +30,7 @@ enum {
   CALCHART__NEW_WINDOW,
   CALCHART__LOAD_FILE,
   CALCHART__APPEND_FILE,
+  CALCHART__IMPORT_CONT_FILE,
   CALCHART__SAVE,
   CALCHART__SAVE_AS,
   CALCHART__PRINT,
@@ -256,6 +257,7 @@ public:
 
   void LoadShow();
   void AppendShow();
+  void ImportContFile();
   void SaveShow();
   void SaveShowAs();
 

@@ -58,6 +58,7 @@ FLOAT		({DIGIT}+"."{DIGIT}*)|("."{DIGIT}+)
 VAR		[ABCDXYZ]
 SPACE		[ \t\r]
 NEWLINE		[\n\f]
+COMMENT		"#"[^\n\f]*
 
 %%
 	yylloc.first_line = yylineno;
@@ -65,6 +66,7 @@ NEWLINE		[\n\f]
 
 {NEWLINE}	{yylineno++; yycolno = 1; return(yylex());}
 {SPACE}+	{yycolno += yyleng; return(yylex());}
+{COMMENT}	{return(yylex());}
 
 "P"		ReturnToken(rwP);
 "NP"		ReturnToken(rwNP);
@@ -80,6 +82,7 @@ NEWLINE		[\n\f]
 "E"		yylval.d = CC_E; ReturnToken(DEFINECONST);
 "NE"		yylval.d = CC_NE; ReturnToken(DEFINECONST);
 "DOF"		ReturnToken(rwDOF);
+"DOH"		ReturnToken(rwDOH);
 "+"		ReturnToken('+');
 "-"		ReturnToken('-');
 "*"		ReturnToken('*');
@@ -95,6 +98,7 @@ NEWLINE		[\n\f]
 "M"		yylval.d = CC_M; ReturnToken(DEFINECONST);
 "DM"		yylval.d = CC_DM; ReturnToken(DEFINECONST);
 "BLAM"		ReturnToken(pBLAM);
+"CLOSE"		ReturnToken(pMT);
 "COUNTERMARCH"	ReturnToken(pCOUNTERMARCH);
 "DMCM"		ReturnToken(pDMCM);
 "DMHS"		ReturnToken(pDMHS);

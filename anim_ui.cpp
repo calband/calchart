@@ -23,7 +23,7 @@ static void toolbar_anim_prev_beat(CoolToolBar *tb);
 static void toolbar_anim_next_beat(CoolToolBar *tb);
 static void toolbar_anim_prev_sheet(CoolToolBar *tb);
 static void toolbar_anim_next_sheet(CoolToolBar *tb);
-static void collision_callback(wxCheckBox &cb, wxEvent &ev);
+static void collision_callback(wxChoice &ch, wxEvent &ev);
 static void slider_anim_tempo(wxObject &obj, wxEvent &ev);
 static void slider_gotosheet(wxObject &obj, wxEvent &ev);
 static void slider_gotobeat(wxObject &obj, wxEvent &ev);
@@ -219,7 +219,7 @@ void AnimationCanvas::Generate() {
     anim = NULL;
   }
   if (anim) {
-    anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionsOn());
+    anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionType());
     anim->GotoSheet(show_descr->curr_ss);
   }
   ourframe->UpdatePanel();
@@ -421,6 +421,10 @@ const char * AnimationCanvas::GenerateRIBFile(const char *filename,
 }
 #endif
 
+static char *collis_text[] = {
+  "Ignore", "Show", "Beep"
+};
+
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 			       CC_WinList *lst)
 : wxFrameWithStuffSized(frame, "Animation") {
@@ -461,8 +465,10 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   SetPanel(new wxPanel(this));
   framePanel->SetAutoLayout(TRUE);
 
-  collis = new wxCheckBox(framePanel, (wxFunction)collision_callback,
-			  "&Collisions");
+  collis = new wxChoice(framePanel, (wxFunction)collision_callback,
+			"&Collisions", -1, -1, -1, -1,
+			sizeof(collis_text)/sizeof(char*), collis_text);
+
   AnimationSlider *sldr =
     new AnimationSlider(framePanel, slider_anim_tempo, "&Tempo",
 			canvas->GetTempo(), 10, 300, 150);
@@ -665,11 +671,11 @@ static void toolbar_anim_next_sheet(CoolToolBar *tb) {
   af->canvas->NextSheet();
 }
 
-static void collision_callback(wxCheckBox &cb, wxEvent&) {
+static void collision_callback(wxChoice &ch, wxEvent&) {
   AnimationCanvas* ac =
-    ((AnimationFrame*)(cb.GetParent()->GetParent()))->canvas;
+    ((AnimationFrame*)(ch.GetParent()->GetParent()))->canvas;
   if (ac->anim) {
-    ac->anim->EnableCollisions(cb.GetValue());
+    ac->anim->EnableCollisions((CollisionWarning)ch.GetSelection());
     ac->anim->CheckCollisions();
     ac->Redraw();
   }
