@@ -330,6 +330,57 @@ void CC_continuity::AppendText(const char* s) {
   text.Append(s);
 }
 
+// So we don't have icky macros to worry about
+unsigned float2unsigned(float f) {
+  return (unsigned)(ABS(f)/*+0.5*/);
+}
+
+float BoundDirection(float f) {
+  while (f >= 360.0) f -= 360.0;
+  while (f < 0.0) f += 360.0;
+  return f;
+}
+
+float BoundDirectionSigned(float f) {
+  while (f >= 180.0) f -= 360.0;
+  while (f < -180.0) f += 360.0;
+  return f;
+}
+
+Bool IsDiagonalDirection(float f) {
+  f = BoundDirection(f);
+  return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) ||
+	  IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
+}
+
+void CreateVector(CC_coord& c, float dir, float mag) {
+  float f;
+
+  dir = BoundDirection(dir);
+  if (IsDiagonalDirection(dir)) {
+    c.x = c.y = FLOAT2COORD(mag);
+    if ((dir > 50.0) && (dir < 310.0)) c.x = -c.x;
+    if (dir < 180.0) c.y = -c.y;
+  } else {
+    f = mag * cos(DEG2RAD(dir));
+    c.x = FLOAT2COORD(f);
+    f = mag * -sin(DEG2RAD(dir));
+    c.y = FLOAT2COORD(f);
+  }
+}
+
+void CreateUnitVector(float& a, float& b, float dir) {
+  dir = BoundDirection(dir);
+  if (IsDiagonalDirection(dir)) {
+    a = b = 1.0;
+    if ((dir > 50.0) && (dir < 310.0)) a = -a;
+    if (dir < 180.0) b = -b;
+  } else {
+    a = cos(DEG2RAD(dir));
+    b = -sin(DEG2RAD(dir));
+  }
+}
+
 // Get magnitude of vector
 float CC_coord::Magnitude() const {
   float x_f, y_f;
@@ -863,6 +914,32 @@ Bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref) {
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       SetPosition(GetPosition(i, ref) + delta, i, ref);
+      change = TRUE;
+    }
+  }
+  return change;
+}
+
+// Move points
+Bool CC_sheet::TransformPoints(const Matrix& transmat, unsigned ref) {
+  unsigned i;
+  Bool change = FALSE;
+  Vector v;
+  CC_coord c;
+
+  if (GetNumSelectedPoints() <= 0) return FALSE;
+
+  // Create undo entry
+  show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
+
+  for (i = 0; i < show->GetNumPoints(); i++) {
+    if (show->IsSelected(i)) {
+      c = GetPosition(i, ref);
+      v = Vector(c.x, c.y, 0);
+      v = transmat * v;
+      v.Homogenize();
+      c = CC_coord((Coord)CLIPFLOAT(v.GetX()), (Coord)CLIPFLOAT(v.GetY()));
+      SetPosition(c, i, ref);
       change = TRUE;
     }
   }

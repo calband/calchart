@@ -23,6 +23,7 @@
 #include <wx_list.h>
 
 #include "platconf.h"
+#include "linmath.h"
 
 typedef short Coord;
 
@@ -34,6 +35,11 @@ typedef short Coord;
 #define FLOAT2COORD(a) (Coord)FLOAT2NUM((a))
 #define COORD2FLOAT(a) ((a) / ((float)(1 << COORD_SHIFT)))
 #define CLIPFLOAT(a) (((a) < 0) ? ((a) - 0.5) : ((a) + 0.5))
+
+#define BASICALLY_ZERO_BASICALLY 0.00001
+#define IS_ZERO(a) (ABS((a)) < BASICALLY_ZERO_BASICALLY)
+#define DEG2RAD(a) ((a) * PI / 180.0)
+#define SQRT2 1.4142136;
 
 #define MAX_POINTS 1000
 #define NUM_REF_PNTS 3
@@ -274,6 +280,19 @@ inline int operator != (const CC_coord& a, const short b) {
   return ((a.x != b) || (a.y != b));
 }
 
+// So we don't have icky macros to worry about
+unsigned float2unsigned(float f);
+
+float BoundDirection(float f);
+
+float BoundDirectionSigned(float f);
+
+Bool IsDiagonalDirection(float f);
+
+void CreateVector(CC_coord& c, float dir, float mag);
+
+void CreateUnitVector(float& a, float& b, float dir);
+
 #define PNT_LABEL 1
 class CC_point {
 public:
@@ -352,6 +371,7 @@ public:
   void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
   void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
   Bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
+  Bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
   Bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
 			unsigned ref);
 

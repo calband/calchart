@@ -20,7 +20,7 @@
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc) {
   dc->SetBrush(wxTRANSPARENT_BRUSH);
-  dc->SetPen(CalChartPens[COLOR_FIELD_DETAIL]);
+  dc->SetPen(CalChartPens[COLOR_SHAPES]);
   /*
   dc->SetPen(wxWHITE_PEN);
   dc->SetLogicalFunction(wxINVERT);
@@ -384,7 +384,8 @@ void CoolToolBar::SetupBar(ToolBarEntry *tbe, int n)
   GetDC()->SetBackground(wxGREY_BRUSH);
 
   for (int i = 0; i < n; i++) {
-    AddTool(i, entries[i].bm, NULL, FALSE, -1, -1, NULL);
+    AddTool(i, entries[i].bm, NULL, (entries[i].flags & TOOLBAR_TOGGLE),
+	    -1, -1, NULL);
     if (entries[i].flags & TOOLBAR_SPACE) AddSeparator();
   }
   CreateTools();

@@ -179,6 +179,9 @@ void AnimationCanvas::OnChar(wxKeyEvent&) {
 
 void AnimationCanvas::SetTempo(unsigned t) {
   tempo = t;
+  if (timeron) {
+    StartTimer();
+  }
 }
 
 void AnimationCanvas::UpdateText() {
@@ -202,7 +205,7 @@ void AnimationCanvas::Refresh() {
 }
 
 void AnimationCanvas::Generate() {
-  timer->Stop();
+  StopTimer();
   ourframe->SetStatusText("Compiling...");
   if (anim) {
     delete anim;
@@ -623,16 +626,23 @@ void AnimationFrame::UpdatePanel() {
   }
 }
 
+void AnimationCanvas::StartTimer() {
+  if (!timer->Start(60000/GetTempo())) {
+    ourframe->SetStatusText("Could not get timer!");
+    timeron = FALSE;
+  } else {
+    timeron = TRUE;
+  }
+}
+
 static void toolbar_anim_stop(CoolToolBar *tb) {
   AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->timer->Stop();
+  af->canvas->StopTimer();
 }
 
 static void toolbar_anim_play(CoolToolBar *tb) {
   AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  if (!af->canvas->timer->Start(60000/af->canvas->GetTempo())) {
-    af->SetStatusText("Could not get timer!");
-  }
+  af->canvas->StartTimer();
 }
 
 static void toolbar_anim_prev_beat(CoolToolBar *tb) {
@@ -693,7 +703,7 @@ static void AnimErrorClick(wxListBox& list, wxCommandEvent&) {
 AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 			     wxFrame *frame, char *title,
 			     int x, int y, int width, int height)
-: wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME) {
+: wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER) {
   unsigned i, j;
 
   for (i = 0; i < NUM_ANIMERR; i++) {

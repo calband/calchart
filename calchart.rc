@@ -1,3 +1,9 @@
+/* Useful if PROVIDE_DEFAULT_ICONS is set in wx_setup.h */
+#define IHaveMDIParentIcon
+#define IHaveMDIChildIcon
+
+wxSTD_MDIPARENTFRAME    ICON    "calchart.ico"
+wxSTD_MDICHILDFRAME     ICON    "calchart.ico"
 calchart ICON calchart.ico
 #include "wx.rc"
 
@@ -6,7 +12,13 @@ tb_right BITMAP tb_right.bmp
 tb_box BITMAP tb_box.bmp
 tb_poly BITMAP tb_poly.bmp
 tb_lasso BITMAP tb_lasso.bmp
+tb_mv BITMAP tb_mv.bmp
 tb_line BITMAP tb_line.bmp
+tb_rot BITMAP tb_rot.bmp
+tb_shr BITMAP tb_shr.bmp
+tb_ref BITMAP tb_ref.bmp
+tb_siz BITMAP tb_siz.bmp
+tb_gen BITMAP tb_gen.bmp
 tb_lbl_l BITMAP tb_lbl_l.bmp
 tb_lbl_r BITMAP tb_lbl_r.bmp
 tb_lbl_f BITMAP tb_lbl_f.bmp

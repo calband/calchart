@@ -36,12 +36,14 @@
 #define PATH_SEPARATOR "/"
 #endif
 
+#define AUTOSAVE_CHAR "#"
+
 // Wildcard in file selector
 #ifdef wx_msw
 #define FILE_WILDCARDS "All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas"
 #define FILE_SAVE_WILDCARDS "New shows (*.shw)|*.shw"
 #else
-#define FILE_WILDCARDS "*.mas"
+#define FILE_WILDCARDS "*.shw"
 #define FILE_SAVE_WILDCARDS "*.shw"
 #endif
 

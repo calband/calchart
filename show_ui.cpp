@@ -159,7 +159,7 @@ StuntSheetPicker::StuntSheetPicker(CC_show *shw, CC_WinList *lst,
 				   Bool multi, wxFrame *frame,
 				   char *title,
 				   int x, int y, int width, int height):
-wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
+wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
 show(shw) {
   // Give it an icon
   SetBandIcon(this);
@@ -303,7 +303,7 @@ PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
 			 Bool multi, wxFrame *frame,
 			 char *title,
 			 int x, int y, int width, int height):
-wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
+wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
 show(shw) {
   // Give it an icon
   SetBandIcon(this);
@@ -478,7 +478,7 @@ static void CalculateLabels(CC_show *show, Bool letters[26],
 ShowInfoReq::ShowInfoReq(CC_show *shw, CC_WinList *lst,
 			 wxFrame *frame, char *title,
 			 int x, int y, int width, int height):
-wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
+wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
 show(shw) {
   unsigned i;
   wxString buf;

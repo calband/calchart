@@ -13,62 +13,6 @@
 #include "cont.h"
 #include <math.h>
 
-#define BASICALLY_ZERO_BASICALLY 0.00001
-#define IS_ZERO(a) (ABS((a)) < BASICALLY_ZERO_BASICALLY)
-#define DEG2RAD(a) ((a) * PI / 180.0)
-#define SQRT2 1.4142136;
-
-// So we don't have icky macros to worry about
-unsigned float2unsigned(float f) {
-  return (unsigned)(ABS(f)/*+0.5*/);
-}
-
-float BoundDirection(float f) {
-  while (f >= 360.0) f -= 360.0;
-  while (f < 0.0) f += 360.0;
-  return f;
-}
-
-float BoundDirectionSigned(float f) {
-  while (f >= 180.0) f -= 360.0;
-  while (f < -180.0) f += 360.0;
-  return f;
-}
-
-Bool IsDiagonalDirection(float f) {
-  f = BoundDirection(f);
-  return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) ||
-	  IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
-}
-
-void CreateVector(CC_coord& c, float dir, float mag) {
-  float f;
-
-  dir = BoundDirection(dir);
-  if (IsDiagonalDirection(dir)) {
-    c.x = c.y = FLOAT2COORD(mag);
-    if ((dir > 50.0) && (dir < 310.0)) c.x = -c.x;
-    if (dir < 180.0) c.y = -c.y;
-  } else {
-    f = mag * cos(DEG2RAD(dir));
-    c.x = FLOAT2COORD(f);
-    f = mag * -sin(DEG2RAD(dir));
-    c.y = FLOAT2COORD(f);
-  }
-}
-
-void CreateUnitVector(float& a, float& b, float dir) {
-  dir = BoundDirection(dir);
-  if (IsDiagonalDirection(dir)) {
-    a = b = 1.0;
-    if ((dir > 50.0) && (dir < 310.0)) a = -a;
-    if (dir < 180.0) b = -b;
-  } else {
-    a = cos(DEG2RAD(dir));
-    b = -sin(DEG2RAD(dir));
-  }
-}
-
 void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
 		    ContValue *stps, ContValue *dir1, ContValue *dir2,
 		    ContValue *numbeats) {

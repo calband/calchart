@@ -33,7 +33,13 @@
 #include "tb_box.xbm"
 #include "tb_poly.xbm"
 #include "tb_lasso.xbm"
+#include "tb_mv.xbm"
 #include "tb_line.xbm"
+#include "tb_rot.xbm"
+#include "tb_shr.xbm"
+#include "tb_ref.xbm"
+#include "tb_siz.xbm"
+#include "tb_gen.xbm"
 #include "tb_lbl_l.xbm"
 #include "tb_lbl_r.xbm"
 #include "tb_lbl_f.xbm"
@@ -58,7 +64,13 @@ static void toolbar_next_ss(CoolToolBar *tb);
 static void toolbar_box(CoolToolBar *tb);
 static void toolbar_poly(CoolToolBar *tb);
 static void toolbar_lasso(CoolToolBar *tb);
+static void toolbar_move(CoolToolBar *tb);
 static void toolbar_line(CoolToolBar *tb);
+static void toolbar_rot(CoolToolBar *tb);
+static void toolbar_shear(CoolToolBar *tb);
+static void toolbar_reflect(CoolToolBar *tb);
+static void toolbar_size(CoolToolBar *tb);
+static void toolbar_genius(CoolToolBar *tb);
 static void toolbar_label_left(CoolToolBar *tb);
 static void toolbar_label_right(CoolToolBar *tb);
 static void toolbar_label_flip(CoolToolBar *tb);
@@ -77,10 +89,17 @@ static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
 static ToolBarEntry main_tb[] = {
   { 0, NULL, "Previous stuntsheet", toolbar_prev_ss },
   { TOOLBAR_SPACE, NULL, "Next stuntsheet", toolbar_next_ss },
-  { 0, NULL, "Select points with box", toolbar_box },
-  { 0, NULL, "Select points with polygon", toolbar_poly },
-  { TOOLBAR_SPACE, NULL, "Select points with lasso", toolbar_lasso },
-  { TOOLBAR_SPACE, NULL, "Move points into line", toolbar_line },
+  { TOOLBAR_TOGGLE, NULL, "Select points with box", toolbar_box },
+  { TOOLBAR_TOGGLE, NULL, "Select points with polygon", toolbar_poly },
+  { TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL,
+    "Select points with lasso", toolbar_lasso },
+  { TOOLBAR_TOGGLE, NULL, "Translate points", toolbar_move },
+  { TOOLBAR_TOGGLE, NULL, "Move points into line", toolbar_line },
+  { TOOLBAR_TOGGLE, NULL, "Rotate block", toolbar_rot },
+  { TOOLBAR_TOGGLE, NULL, "Shear block", toolbar_shear },
+  { TOOLBAR_TOGGLE, NULL, "Reflect block", toolbar_reflect },
+  { TOOLBAR_TOGGLE, NULL, "Resize block", toolbar_size },
+  { TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL, "Genius move", toolbar_genius },
   { 0, NULL, "Label on left", toolbar_label_left },
   { 0, NULL, "Flip label", toolbar_label_flip },
   { TOOLBAR_SPACE, NULL, "Label on right", toolbar_label_right },
@@ -93,6 +112,9 @@ static ToolBarEntry main_tb[] = {
   { 0, NULL, "Change to solid slash men", toolbar_setsym6 },
   { 0, NULL, "Change to solid x men", toolbar_setsym7 }
 };
+
+#define TOOLBAR_BOX 2
+#define TOOLBAR_TRANS 5
 
 extern ToolBarEntry anim_tb[];
 extern ToolBarEntry printcont_tb[];
@@ -120,6 +142,8 @@ CalChartApp theApp;
 static MainFrameList *window_list;
 
 wxHelpInstance *help_inst = NULL;
+
+TopFrame *topframe = NULL;
 
 wxFont *contPlainFont;
 wxFont *contBoldFont;
@@ -283,7 +307,13 @@ wxFrame *CalChartApp::OnInit(void)
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_box));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_poly));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lasso));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_mv));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_line));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_rot));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_shr));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_ref));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_siz));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_gen));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
@@ -334,13 +364,14 @@ wxFrame *CalChartApp::OnInit(void)
     help_inst->Initialize(helpfile.GetData());
   }
 
+  topframe = new TopFrame(300, 100);
+  topframe->Maximize(TRUE);
   for (i = 1; i < realargc; i++) {
     CC_show *shw;
 
     shw = new CC_show(argv[i]);
     if (shw->Ok()) {
-      new MainFrame(NULL, 50, 50,
-		    window_default_width, window_default_height, shw);
+      topframe->NewShow(shw);
     } else {
       (void)wxMessageBox(shw->GetError(), "Load Error");
       delete shw;
@@ -349,8 +380,7 @@ wxFrame *CalChartApp::OnInit(void)
   if (!shows_dir.Empty()) {
     wxSetWorkingDirectory(shows_dir.GetData());
   }
-
-  return new TopFrame();
+  return topframe;
 }
 
 int CalChartApp::OnExit(void) {
@@ -361,10 +391,176 @@ int CalChartApp::OnExit(void) {
   return 0;
 }
 
-CC_lasso::CC_lasso() {}
+CC_shape::CC_shape() {}
+CC_shape::~CC_shape() {}
+
+CC_shape_1point::CC_shape_1point(const CC_coord& p)
+  : origin(p.x, p.y) {}
+
+void CC_shape_1point::OnMove(const CC_coord& p, MainFrame *) {
+  MoveOrigin(p);
+}
+
+void CC_shape_1point::MoveOrigin(const CC_coord& p) {
+  origin.x = p.x;
+  origin.y = p.y;
+}
+
+CC_coord CC_shape_1point::GetOrigin() const {
+  return CC_coord(Coord(origin.x), Coord(origin.y));
+}
+
+CC_shape_cross::CC_shape_cross(const CC_coord& p, Coord width)
+  : CC_shape_1point(p), cross_width(width) {}
+
+void CC_shape_cross::OnMove(const CC_coord& p, MainFrame *frame) {
+  CC_coord p1 = p;
+
+  frame->SnapToGrid(p1);
+  MoveOrigin(p1);
+}
+
+void CC_shape_cross::Draw(wxDC *dc, float x, float y) const {
+  dc->DrawLine(origin.x + x - cross_width, origin.y + y - cross_width,
+	       origin.x + x + cross_width, origin.y + y + cross_width);
+  dc->DrawLine(origin.x + x + cross_width, origin.y + y - cross_width,
+	       origin.x + x - cross_width, origin.y + y + cross_width);
+}
+
+CC_shape_2point::CC_shape_2point(const CC_coord& p)
+  : CC_shape_1point(p), point(p.x, p.y) {}
+
+CC_shape_2point::CC_shape_2point(const CC_coord& p1, const CC_coord& p2)
+  : CC_shape_1point(p1), point(p2.x, p2.y) {}
+
+void CC_shape_2point::OnMove(const CC_coord& p, MainFrame *) {
+  MovePoint(p);
+}
+
+void CC_shape_2point::MovePoint(const CC_coord& p) {
+  point.x = p.x;
+  point.y = p.y;
+}
+
+CC_coord CC_shape_2point::GetPoint() const {
+  return CC_coord(Coord(point.x), Coord(point.y));
+}
+
+CC_shape_line::CC_shape_line(const CC_coord& p)
+  : CC_shape_2point(p) {}
+
+CC_shape_line::CC_shape_line(const CC_coord& p1, const CC_coord& p2)
+  : CC_shape_2point(p1, p2) {}
+
+void CC_shape_line::OnMove(const CC_coord& p, MainFrame *frame) {
+  CC_coord p1 = p;
+
+  frame->SnapToGrid(p1);
+  MovePoint(p1);
+}
+
+void CC_shape_line::Draw(wxDC *dc, float x, float y) const {
+  dc->DrawLine(origin.x + x, origin.y + y,
+	       point.x + x, point.y + y);
+}
+
+CC_shape_angline::CC_shape_angline(const CC_coord& p, const CC_coord& refvect)
+  : CC_shape_line(p), vect(refvect), mag(refvect.Magnitude()) {
+}
+
+void CC_shape_angline::OnMove(const CC_coord& p, MainFrame *frame) {
+  CC_coord o = GetOrigin();
+  CC_coord p1 = p;
+  float d;
+
+  frame->SnapToGrid(p1);
+  p1 -= o;
+  d = (COORD2FLOAT(p1.x) * COORD2FLOAT(vect.x) +
+       COORD2FLOAT(p1.y) * COORD2FLOAT(vect.y)) / (mag*mag);
+  p1.x = (Coord)(o.x + vect.x * d);
+  p1.y = (Coord)(o.y + vect.y * d);
+  MovePoint(p1);
+}
+
+CC_shape_arc::CC_shape_arc(const CC_coord& c, const CC_coord& p)
+  : CC_shape_2point(c, p) {
+    CC_coord p1 = p-c;
+
+    r = r0 = p1.Direction()*PI/180.0;
+    d = p1.Magnitude()*COORD_DECIMAL;
+}
+
+CC_shape_arc::CC_shape_arc(const CC_coord& c,
+			   const CC_coord& p1, const CC_coord& p2)
+  : CC_shape_2point(c, p2) {
+    CC_coord p = p1-c;
+
+    r0 = p.Direction();
+    d = p.Magnitude()*COORD_DECIMAL;
+    r = (p2-c).Direction();
+}
+
+void CC_shape_arc::OnMove(const CC_coord& p, MainFrame *frame) {
+  CC_coord p1 = p;
+
+  frame->SnapToGrid(p1);
+  r = GetOrigin().Direction(p1)*PI/180.0;
+  p1.x = Coord(origin.x + d*cos(r));
+  p1.y = Coord(origin.y + -d*sin(r));
+  MovePoint(p1);
+}
+
+void CC_shape_arc::Draw(wxDC *dc, float x, float y) const {
+  // DrawArc always goes counterclockwise
+  if (GetAngle() < 0.0 || GetAngle() > 180.0) {
+    dc->DrawArc(origin.x + x + d*cos(r), origin.y + y + -d*sin(r),
+		origin.x + x + d*cos(r0), origin.y + y + -d*sin(r0),
+		origin.x + x, origin.y + y);
+  } else {
+    dc->DrawArc(origin.x + x + d*cos(r0), origin.y + y + -d*sin(r0),
+		origin.x + x + d*cos(r), origin.y + y + -d*sin(r),
+		origin.x + x, origin.y + y);
+  }
+}
+
+CC_shape_rect::CC_shape_rect(const CC_coord& p)
+  : CC_shape_2point(p) {}
+
+CC_shape_rect::CC_shape_rect(const CC_coord& p1, const CC_coord& p2)
+  : CC_shape_2point(p1, p2) {}
+
+void CC_shape_rect::Draw(wxDC *dc, float x, float y) const {
+  float w, h;
+
+  if (origin.x < point.x) {
+    x += origin.x;
+    w = point.x - origin.x + 1;
+  } else {
+    x += point.x;
+    w = origin.x - point.x + 1;
+  }
+  if (origin.y < point.y) {
+    y += origin.y;
+    h = point.y - origin.y + 1;
+  } else {
+    y += point.y;
+    h = origin.y - point.y + 1;
+  }
+  if ((w > 1) && (h > 1)) {
+    dc->DrawRectangle(x, y, w, h);
+  }
+}
+
+CC_lasso::CC_lasso(const CC_coord &p) {
+  Append(p);
+}
 
 CC_lasso::~CC_lasso() {
   Clear();
+}
+
+void CC_lasso::OnMove(const CC_coord& p, MainFrame *) {
+  Append(p);
 }
 
 void CC_lasso::Clear() {
@@ -395,10 +591,10 @@ void CC_lasso::Append(const CC_coord& p) {
 }
 
 // Test if inside polygon using odd-even rule
-Bool CC_lasso::Inside(const CC_coord& p) {
+Bool CC_lasso::Inside(const CC_coord& p) const {
   Bool parity = FALSE;
   wxNode *last;
-  wxNode *n = pntlist.First();
+  wxNode *n = ((wxList*)&pntlist)->First();
   if (n != NULL) {
     last = n;
     n = n->Next();
@@ -413,31 +609,10 @@ Bool CC_lasso::Inside(const CC_coord& p) {
   return parity;
 }
 
-void CC_lasso::Draw(wxDC *dc, float x, float y) {
-  SetXOR(dc);
-  dc->DrawLines(&pntlist, x, y);
+void CC_lasso::Draw(wxDC *dc, float x, float y) const {
+  dc->DrawLines((wxList*)&pntlist, x, y);
 }
 
-/*
-void CC_lasso::Drag(wxDC *dc, const CC_coord& p) {
-  wxNode *n1, *n2;
-  wxPoint *p1, *p2;
-
-  n1 = pntlist.First();
-  if (n1 != NULL) {
-    n2 = n1->Next();
-    if (n2 != NULL) {
-      SetXOR(dc);
-      p1 = (wxPoint*)n1->Data();
-      p2 = (wxPoint*)n2->Data();
-      dc->DrawLine(p1->x, p1->y, p2->x, p2->y);
-      p1->x = p.x;
-      p1->y = p.y;
-      dc->DrawLine(p1->x, p1->y, p2->x, p2->y);
-    }
-  }
-}
-*/
 void CC_lasso::Drag(const CC_coord& p) {
   wxNode *n1;
   wxPoint *p1;
@@ -451,7 +626,7 @@ void CC_lasso::Drag(const CC_coord& p) {
 }
 
 Bool CC_lasso::CrossesLine(const wxPoint* start, const wxPoint* end,
-			   const CC_coord& p) {
+			   const CC_coord& p) const {
   if (start->y > end->y) {
     if (!((p.y <= start->y) && (p.y > end->y))) {
       return FALSE;
@@ -468,40 +643,54 @@ Bool CC_lasso::CrossesLine(const wxPoint* start, const wxPoint* end,
   return FALSE;
 }
 
-static void new_window(wxButton&, wxEvent&) {
-  (void)new MainFrame(NULL, 50, 50,
-		      window_default_width, window_default_height);
+CC_poly::CC_poly(const CC_coord &p)
+  : CC_lasso(p) {
+    // add end point
+    Append(p);
 }
 
-static void open_window(wxButton&, wxEvent&) {
-  const char *s;
-  CC_show *shw;
+void CC_poly::OnMove(const CC_coord& p, MainFrame *) {
+  Drag(p);
+}
 
-  s = wxFileSelector("Load show", NULL, NULL, NULL, file_wild);
-  if (s) {
-    shw = new CC_show(s);
-    if (shw->Ok()) {
-      new MainFrame(NULL, 50, 50,
-		    window_default_width, window_default_height, shw);
-    } else {
-      (void)wxMessageBox(shw->GetError(), "Load Error");
-      delete shw;
-    }
-  }
+#ifndef CC_USE_MDI
+static void new_window(wxButton& button, wxEvent&) {
+  TopFrame *f = (TopFrame*)button.GetParent()->GetParent();
+  f->NewShow();
+}
+
+static void open_window(wxButton& button, wxEvent&) {
+  TopFrame *f = (TopFrame*)button.GetParent()->GetParent();
+  f->OpenShow();
 }
 
 static void quit_callback(wxButton &button, wxEvent &) {
-  wxFrame *f = (wxFrame*)button.GetParent()->GetParent();
-  f->Close();
+  TopFrame *f = (TopFrame*)button.GetParent()->GetParent();
+  f->Quit();
 }
+#endif
 
-TopFrame::TopFrame(wxFrame *frame):
-  wxFrame(frame, "CalChart")
-{
-  int w, h;
-
+TopFrame::TopFrame(int width, int height):
+  wxFrame(NULL, "CalChart", 0, 0, width, height, CC_FRAME_TOP) {
   // Give it an icon
   SetBandIcon(this);
+
+#ifdef CC_USE_MDI
+  wxMenu *file_menu = new wxMenu;
+  file_menu->Append(CALCHART__NEW, "&New Show");
+  file_menu->Append(CALCHART__LOAD_FILE, "&Open...");
+  file_menu->Append(CALCHART__QUIT, "&Quit");
+
+  wxMenu *help_menu = new wxMenu;
+  help_menu->Append(CALCHART__ABOUT, "&About CalChart...");
+  help_menu->Append(CALCHART__HELP, "&Help on CalChart...");
+
+  wxMenuBar *menu_bar = new wxMenuBar;
+  menu_bar->Append(file_menu, "&File");
+  menu_bar->Append(help_menu, "&Help");
+  SetMenuBar(menu_bar);
+#else
+  int w, h;
 
   wxPanel *p = new wxPanel(this);
   p->SetHorizontalSpacing(0);
@@ -516,23 +705,94 @@ TopFrame::TopFrame(wxFrame *frame):
   GetSize(&w, &h);
   SetSizeHints(w, h, w, h);
 #endif
+#endif
+  DragAcceptFiles(TRUE);
   Show(TRUE);
+}
+
+TopFrame::~TopFrame() {
 }
 
 Bool TopFrame::OnClose(void) {
   return window_list->CloseAllWindows();
 }
 
+#ifdef CC_USE_MDI
+void TopFrame::OnMenuCommand(int id) {
+  switch (id) {
+  case CALCHART__NEW:
+    NewShow();
+    break;
+  case CALCHART__LOAD_FILE:
+    OpenShow();
+    break;
+  case CALCHART__QUIT:
+    Quit();
+    break;
+  case CALCHART__ABOUT:
+    About();
+    break;
+  case CALCHART__HELP:
+    Help();
+    break;
+  }
+}
+
+void TopFrame::OnMenuSelect(int id) {
+}
+#endif
+
+void TopFrame::OnDropFiles(int n, char *files[], int, int) {
+  for (int i = 0; i < n; i++) {
+    OpenShow(files[i]);
+  }
+}
+
+void TopFrame::NewShow(CC_show *shw) {
+  (void)new MainFrame(this, 50, 50,
+		      window_default_width, window_default_height, shw);
+}
+
+void TopFrame::OpenShow(const char *filename) {
+  CC_show *shw;
+
+  if (filename == NULL)
+    filename = wxFileSelector("Load show", NULL, NULL, NULL, file_wild);
+  if (filename) {
+    shw = new CC_show(filename);
+    if (shw->Ok()) {
+      NewShow(shw);
+    } else {
+      (void)wxMessageBox(shw->GetError(), "Load Error");
+      delete shw;
+    }
+  }
+}
+
+void TopFrame::Quit() {
+  Close();
+}
+
+void TopFrame::About() {
+  (void)wxMessageBox("CalChart v3.0\nAuthor: Gurk Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1994-1997\nCompiled on " __DATE__ " at " __TIME__, "About CalChart");
+}
+
+void TopFrame::Help() {
+  help_inst->LoadFile();
+  help_inst->DisplayContents();
+}
+
 // Main frame constructor
 MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 		     CC_show *show, MainFrame *other_frame):
-  wxFrameWithStuff(frame, "CalChart", x, y, w, h, wxSDI|wxDEFAULT_FRAME),
+  wxFrameWithStuff(frame, "CalChart", x, y, w, h, CC_FRAME_CHILD),
   field(NULL)
 {
   unsigned ss;
   unsigned def_zoom;
   unsigned def_grid;
   unsigned def_ref;
+  Bool setup;
 
   // Give it an icon
   SetBandIcon(this);
@@ -552,6 +812,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   file_menu->Append(CALCHART__PRINT, "&Print...");
   file_menu->Append(CALCHART__PRINT_EPS, "Print &EPS...");
   file_menu->Append(CALCHART__CLOSE, "&Close Window");
+  file_menu->Append(CALCHART__QUIT, "&Quit");
 
   wxMenu *edit_menu = new wxMenu;
   edit_menu->Append(CALCHART__UNDO, "&Undo");
@@ -560,15 +821,15 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet &After");
   edit_menu->Append(CALCHART__DELETE, "&Delete Sheet");
   edit_menu->Append(CALCHART__RELABEL, "&Relabel Sheets");
-  edit_menu->Append(CALCHART__EDIT_CONTINUITY, "&Edit Continuity...");
-  edit_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit &Printed Continuity...");
+  edit_menu->Append(CALCHART__SETUP, "&Setup Show...");
+  edit_menu->Append(CALCHART__POINTS, "&Point Selections...");
   edit_menu->Append(CALCHART__SET_TITLE, "Set &Title...");
   edit_menu->Append(CALCHART__SET_BEATS, "Set &Beats...");
 
-  wxMenu *win_menu = new wxMenu;
-  win_menu->Append(CALCHART__INFO, "&Information...");
-  win_menu->Append(CALCHART__POINTS, "Point &Selections...");
-  win_menu->Append(CALCHART__ANIMATE, "&Animate...");
+  wxMenu *anim_menu = new wxMenu;
+  anim_menu->Append(CALCHART__EDIT_CONTINUITY, "&Edit Continuity...");
+  anim_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit &Printed Continuity...");
+  anim_menu->Append(CALCHART__ANIMATE, "&Animate...");
 
   wxMenu *select_menu = new wxMenu;
   // These items are checkable
@@ -586,20 +847,24 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu, "&File");
   menu_bar->Append(edit_menu, "&Edit");
-  menu_bar->Append(win_menu, "&Windows");
+  menu_bar->Append(anim_menu, "&Animation");
   menu_bar->Append(options_menu, "&Options");
   menu_bar->Append(help_menu, "&Help");
   SetMenuBar(menu_bar);
 
   // Add a toolbar
   CoolToolBar *ribbon = new CoolToolBar(this, 0, 0, -1, -1, 0,
-					wxHORIZONTAL, 20);
+					wxHORIZONTAL, 23);
   ribbon->SetupBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry));
   SetToolBar(ribbon);
 
   // Add the field canvas
+  setup = FALSE;
   if (!other_frame) {
-    if (!show) show = new CC_show();
+    if (!show) {
+      show = new CC_show();
+      setup = TRUE;
+    }
     ss = 0;
     def_zoom = FIELD_DEFAULT_ZOOM;
     def_grid = 2;
@@ -684,6 +949,10 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   sl1->height.AsIs();
   sldr->SetConstraints(sl1);
 
+  // Update the tool bar
+  SetCurrentLasso(field->curr_lasso);
+  SetCurrentMove(field->curr_move);
+
   // Show the frame
   UpdatePanel();
   window_list->Insert(this);
@@ -691,6 +960,8 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   OnSize(-1, -1);
   field->RefreshShow();
   Show(TRUE);
+
+  if (setup) Setup();
 }
 
 MainFrame::~MainFrame() {
@@ -720,16 +991,14 @@ void MainFrame::OnMenuCommand(int id)
 
   switch (id) {
   case CALCHART__NEW:
-    if (OkayToClearShow()) {
-      node->SetShow(new CC_show());
-    }
+    topframe->NewShow();
     break;
   case CALCHART__NEW_WINDOW:
-    frame = new MainFrame(NULL, 50, 50, window_default_width,
+    frame = new MainFrame(topframe, 50, 50, window_default_width,
 			  window_default_height, NULL, this);
     break;
   case CALCHART__LOAD_FILE:
-    LoadShow();
+    topframe->OpenShow();
     break;
   case CALCHART__APPEND_FILE:
     AppendShow();
@@ -754,6 +1023,9 @@ void MainFrame::OnMenuCommand(int id)
     break;
   case CALCHART__CLOSE:
     Close();
+    break;
+  case CALCHART__QUIT:
+    topframe->Quit();
     break;
   case CALCHART__UNDO:
     sheetnum = field->show_descr.show->undolist->Undo(field->show_descr.show);
@@ -832,10 +1104,8 @@ void MainFrame::OnMenuCommand(int id)
       }
     }
     break;
-  case CALCHART__INFO:
-    if (field->show_descr.show)
-      (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
-			    "Information");
+  case CALCHART__SETUP:
+    Setup();
     break;
   case CALCHART__POINTS:
     if (field->show_descr.show)
@@ -857,11 +1127,10 @@ void MainFrame::OnMenuCommand(int id)
     GetMenuBar()->Check(id, TRUE);
     break;
   case CALCHART__ABOUT:
-    (void)wxMessageBox("CalChart v3.0\nAuthor: Gurk Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1994-1996\nCompiled on " __DATE__ " at " __TIME__, "About CalChart");
+    topframe->About();
     break;
   case CALCHART__HELP:
-    help_inst->LoadFile();
-    help_inst->DisplayContents();
+    topframe->Help();
     break;
   }
 }
@@ -900,6 +1169,9 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__CLOSE:
     msg = "Close this window";
     break;
+  case CALCHART__QUIT:
+    msg = "Quit CalChart";
+    break;
   case CALCHART__UNDO:
     msg = field->show_descr.show->undolist->UndoDescription();
     break;
@@ -930,8 +1202,8 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__SET_BEATS:
     msg = "Change the number of beats for this stuntsheet";
     break;
-  case CALCHART__INFO:
-    msg = "Change basic information";
+  case CALCHART__SETUP:
+    msg = "Setup basic show information";
     break;
   case CALCHART__ANIMATE:
     msg = "Open animation window";
@@ -1074,6 +1346,30 @@ void MainFrame::SnapToGrid(CC_coord& c) {
   c.y = ((c.y + gridadjust - INT2COORD(2)) & gridmask) + INT2COORD(2);
 }
 
+void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type) {
+  if (field->curr_lasso != CC_DRAG_NONE) {
+    frameToolBar->ToggleTool(TOOLBAR_BOX+field->curr_lasso-CC_DRAG_BOX, FALSE);
+  }
+  field->curr_lasso = type;
+  if (field->curr_lasso != CC_DRAG_NONE) {
+    frameToolBar->ToggleTool(TOOLBAR_BOX + type - CC_DRAG_BOX, TRUE);
+  }
+}
+
+void MainFrame::SetCurrentMove(CC_MOVE_MODES type) {
+  frameToolBar->ToggleTool(TOOLBAR_TRANS + field->curr_move - CC_MOVE_NORMAL,
+			   FALSE);
+  field->curr_move = type;
+  frameToolBar->ToggleTool(TOOLBAR_TRANS + type - CC_MOVE_NORMAL, TRUE);
+  field->EndDrag();
+}
+
+void MainFrame::Setup() {
+  if (field->show_descr.show)
+    (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
+			  "Setup Show");
+}
+
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int def_zoom, FieldCanvas *from_canvas,
@@ -1087,6 +1383,7 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
     curr_move = from_canvas->curr_move;
     curr_select = from_canvas->curr_select;
   }
+
   SetColourMap(CalChartColorMap);
 
   show_descr.show = show;
@@ -1099,57 +1396,35 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
   UpdateBars();
 }
 
-FieldCanvas::~FieldCanvas(void)
-{
+FieldCanvas::~FieldCanvas(void) {
+  ClearShapes();
+}
+
+void FieldCanvas::ClearShapes() {
+  for (wxNode *n = shape_list.First(); n != NULL; n = n->Next()) {
+    delete (CC_shape*)(n->Data());
+  }
+  shape_list.Clear();
+  curr_shape = NULL;
 }
 
 // Draw the current drag feedback
 void FieldCanvas::DrawDrag(Bool on)
 {
   wxDC *dc = GetDC();
-  Coord w,h;
-  CC_coord orig;
   CC_coord origin;
 
-  if (on != dragon) {
-    origin = show_descr.show->mode->Offset();
-    switch (drag) {
-    case CC_DRAG_BOX:
-      if (drag_start.x < drag_end.x) {
-	orig.x = drag_start.x;
-	w = drag_end.x - drag_start.x + 1;
-      } else {
-	orig.x = drag_end.x;
-	w = drag_start.x - drag_end.x + 1;
-      }
-      if (drag_start.y < drag_end.y) {
-	orig.y = drag_start.y;
-	h = drag_end.y - drag_start.y + 1;
-      } else {
-	orig.y = drag_end.y;
-	h = drag_start.y - drag_end.y + 1;
-      }
-      if ((w > 1) && (h > 1)) {
-	SetXOR(dc);
-	dc->DrawRectangle(orig.x+origin.x+GetPositionX(),
-			  orig.y+origin.y+GetPositionY(), w, h);
-	dragon = on;
-      }
-      break;
-    case CC_DRAG_LINE:
+  if ((on != dragon) && curr_shape) {
+    dragon = on;
+    if (on) {
       SetXOR(dc);
-      dc->DrawLine(drag_start.x+origin.x+GetPositionX(),
-		   drag_start.y+origin.y+GetPositionY(),
-		   drag_end.x+origin.x+GetPositionX(),
-		   drag_end.y+origin.y+GetPositionY());
-      dragon = on;
-      break;
-    case CC_DRAG_POLY:
-    case CC_DRAG_LASSO:
-      lasso.Draw(dc, origin.x+GetPositionX(), origin.y+GetPositionY());
-      dragon = on;
-    default:
-      break;
+      origin = show_descr.show->mode->Offset();
+      for (wxNode *n = shape_list.First(); n != NULL; n = n->Next()) {
+	((CC_shape*)(n->Data()))->Draw(dc, origin.x+GetPositionX(),
+				       origin.y+GetPositionY());
+      }
+    } else {
+      Blit();
     }
   }
 }
@@ -1188,11 +1463,51 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  ourframe->SnapToGrid(pos);
 	  BeginDrag(CC_DRAG_LINE, pos);
 	  break;
+	case CC_MOVE_ROTATE:
+	  ourframe->SnapToGrid(pos);
+	  if (curr_shape &&
+	      (((CC_shape_1point*)curr_shape)->GetOrigin() != pos)) {
+	    AddDrag(CC_DRAG_LINE,
+		    new CC_shape_arc(((CC_shape_1point*)
+				      curr_shape)->GetOrigin(), pos));
+	  } else {
+	    BeginDrag(CC_DRAG_CROSS, pos);
+	  }
+	  break;
+	case CC_MOVE_SHEAR:
+	  ourframe->SnapToGrid(pos);
+	  if (curr_shape &&
+	      (((CC_shape_1point*)curr_shape)->GetOrigin() != pos)) {
+	    CC_coord vect(pos - ((CC_shape_1point*)curr_shape)->GetOrigin());
+	    // rotate vect 90 degrees
+	    AddDrag(CC_DRAG_LINE,
+		    new CC_shape_angline(pos,CC_coord(-vect.y, vect.x)));
+	  } else {
+	    BeginDrag(CC_DRAG_CROSS, pos);
+	  }
+	  break;
+	case CC_MOVE_REFL:
+	  ourframe->SnapToGrid(pos);
+	  BeginDrag(CC_DRAG_LINE, pos);
+	  break;
+	case CC_MOVE_SIZE:
+	  ourframe->SnapToGrid(pos);
+	  if (curr_shape &&
+	      (((CC_shape_1point*)curr_shape)->GetOrigin() != pos)) {
+	    AddDrag(CC_DRAG_LINE, new CC_shape_line(pos));
+	  } else {
+	    BeginDrag(CC_DRAG_CROSS, pos);
+	  }
+	  break;
+	case CC_MOVE_GENIUS:
+	  ourframe->SnapToGrid(pos);
+	  AddDrag(CC_DRAG_LINE, new CC_shape_line(pos));
+	  break;
 	default:
 	  switch (drag) {
 	  case CC_DRAG_POLY:
 	    {
-	      wxPoint *p = lasso.FirstPoint();
+	      const wxPoint *p = ((CC_lasso*)curr_shape)->FirstPoint();
 	      float d;
 	      if (p != NULL) {
 		Coord polydist =
@@ -1201,13 +1516,13 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 		if (ABS(d) < polydist) {
 		  d = p->y - pos.y;
 		  if (ABS(d) < polydist) {
+		    SelectWithLasso((CC_lasso*)curr_shape);
 		    EndDrag();
-		    SelectWithLasso();
 		    break;
 		  }
 		}
 	      }
-	      lasso.Append(pos);
+	      ((CC_lasso*)curr_shape)->Append(pos);
 	    }
 	  break;
 	  default:
@@ -1231,56 +1546,219 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  }
 	  break;
 	}
-      } else if (event.LeftUp()) {
+      } else if (event.LeftUp() && curr_shape) {
+	const CC_shape_2point *shape = (CC_shape_2point*)curr_shape;
+	const CC_shape_1point *origin;
 	switch (curr_move) {
 	case CC_MOVE_LINE:
-	  EndDrag();
-	  if (sheet->MovePointsInLine(drag_start, drag_end, curr_ref))
+	  if (sheet->MovePointsInLine(shape->GetOrigin(), shape->GetPoint(),
+				      curr_ref))
 	    show_descr.show->winlist->
 	      UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
-	  curr_move = CC_MOVE_NORMAL;
+	  EndDrag();
+	  ourframe->SetCurrentMove(CC_MOVE_NORMAL);
+	  break;
+	case CC_MOVE_ROTATE:
+	  if (shape_list.Number() > 1) {
+	    origin = (CC_shape_1point*)shape_list.First()->Data();
+	    if (shape->GetOrigin() == shape->GetPoint()) {
+	      BeginDrag(CC_DRAG_CROSS, pos);
+	    } else {
+	      Matrix m;
+	      CC_coord c1 = origin->GetOrigin();
+	      float r = -((CC_shape_arc*)curr_shape)->GetAngle();
+
+	      m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+		ZRotationMatrix(r) *
+		TranslationMatrix(Vector(c1.x, c1.y, 0));
+	      if (sheet->TransformPoints(m, curr_ref))
+		show_descr.show->winlist->
+		  UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	      EndDrag();
+	      ourframe->SetCurrentMove(CC_MOVE_NORMAL);
+	    }
+	  }
+	  break;
+	case CC_MOVE_SHEAR:
+	  if (shape_list.Number() > 1) {
+	    origin = (CC_shape_1point*)shape_list.First()->Data();
+	    if (shape->GetOrigin() == shape->GetPoint()) {
+	      BeginDrag(CC_DRAG_CROSS, pos);
+	    } else {
+	      Matrix m;
+	      CC_coord o = origin->GetOrigin();
+	      CC_coord c1 = shape->GetOrigin();
+	      CC_coord c2 = shape->GetPoint();
+	      CC_coord v1, v2;
+	      float ang, amount;
+	      
+	      v1 = c1 - o;
+	      v2 = c2 - c1;
+	      amount = v2.Magnitude() / v1.Magnitude();
+	      if (BoundDirectionSigned(v1.Direction() -
+				       (c2-o).Direction()) < 0)
+		amount = -amount;
+	      ang = -v1.Direction()*PI/180.0;
+	      m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
+		ZRotationMatrix(-ang) *
+		YXShearMatrix(amount) *
+		ZRotationMatrix(ang) *
+		TranslationMatrix(Vector(o.x, o.y, 0));
+	      if (sheet->TransformPoints(m, curr_ref))
+		show_descr.show->winlist->
+		  UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	      EndDrag();
+	      ourframe->SetCurrentMove(CC_MOVE_NORMAL);
+	    }
+	  }
+	  break;
+	case CC_MOVE_REFL:
+	  if (shape->GetOrigin() != shape->GetPoint()) {
+	    Matrix m;
+	    CC_coord c1 = shape->GetOrigin();
+	    CC_coord c2;
+	    float ang;
+	    
+	    c2 = shape->GetPoint() - c1;
+	    ang = -c2.Direction()*PI/180.0;
+	    m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+	      ZRotationMatrix(-ang) *
+	      YReflectionMatrix() *
+	      ZRotationMatrix(ang) *
+	      TranslationMatrix(Vector(c1.x, c1.y, 0));
+	    if (sheet->TransformPoints(m, curr_ref))
+	      show_descr.show->winlist->
+		UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	  }
+	  EndDrag();
+	  ourframe->SetCurrentMove(CC_MOVE_NORMAL);
+	  break;
+	case CC_MOVE_SIZE:
+	  if (shape_list.Number() > 1) {
+	    origin = (CC_shape_1point*)shape_list.First()->Data();
+	    if (shape->GetOrigin() == shape->GetPoint()) {
+	      BeginDrag(CC_DRAG_CROSS, pos);
+	    } else {
+	      Matrix m;
+	      CC_coord c1 = origin->GetOrigin();
+	      CC_coord c2;
+	      float sx, sy;
+
+	      c2 = shape->GetPoint() - c1;
+	      sx = c2.x;
+	      sy = c2.y;
+	      c2 = shape->GetOrigin() - c1;
+	      if ((c2.x != 0) || (c2.y != 0)) {
+		if (c2.x != 0) {
+		  sx /= c2.x;
+		} else {
+		  sx = 1;
+		}
+		if (c2.y != 0) {
+		  sy /= c2.y;
+		} else {
+		  sy = 1;
+		}
+		m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+		  ScaleMatrix(Vector(sx, sy, 0)) *
+		  TranslationMatrix(Vector(c1.x, c1.y, 0));
+		if (sheet->TransformPoints(m, curr_ref))
+		  show_descr.show->winlist->
+		    UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	      }
+	      EndDrag();
+	      ourframe->SetCurrentMove(CC_MOVE_NORMAL);
+	    }
+	  }
+	  break;
+	case CC_MOVE_GENIUS:
+	  if (shape_list.Number() >= 3) {
+	    CC_shape_2point* v1 = (CC_shape_2point*)shape_list.First()->Data();
+	    CC_shape_2point* v2 = (CC_shape_2point*)
+	      shape_list.First()->Next()->Data();
+	    CC_shape_2point* v3 = (CC_shape_2point*)
+	      shape_list.First()->Next()->Next()->Data();
+	    CC_coord s1, s2, s3;
+	    CC_coord e1, e2, e3;
+	    float d;
+	    Matrix m;
+
+	    s1 = v1->GetOrigin();
+	    e1 = v1->GetPoint();
+	    s2 = v2->GetOrigin();
+	    e2 = v2->GetPoint();
+	    s3 = v3->GetOrigin();
+	    e3 = v3->GetPoint();
+	    d = (float)s1.x*(float)s2.y - (float)s2.x*(float)s1.y +
+	      (float)s3.x*(float)s1.y - (float)s1.x*(float)s3.y +
+	      (float)s2.x*(float)s3.y - (float)s3.x*(float)s2.y;
+	    if (IS_ZERO(d)) {
+	      (void)wxMessageBox("Invalid genius move definition",
+				 "Genius Move");
+	    } else {
+	      Matrix A = Matrix(Vector(e1.x,e2.x,0,e3.x),
+				Vector(e1.y,e2.y,0,e3.y),
+				Vector(0,0,0,0),
+				Vector(1,1,0,1));
+	      Matrix Binv = Matrix(Vector((float)s2.y-(float)s3.y,
+					  (float)s3.x-(float)s2.x, 0,
+					  (float)s2.x*(float)s3.y -
+					  (float)s3.x*(float)s2.y),
+				   Vector((float)s3.y-(float)s1.y,
+					  (float)s1.x-(float)s3.x, 0,
+					  (float)s3.x*(float)s1.y - 
+					  (float)s1.x*(float)s3.y),
+				   Vector(0, 0, 0, 0),
+				   Vector((float)s1.y-(float)s2.y,
+					  (float)s2.x-(float)s1.x, 0,
+					  (float)s1.x*(float)s2.y -
+					  (float)s2.x*(float)s1.y));
+	      Binv /= d;
+	      m = Binv*A;
+	      if (sheet->TransformPoints(m, curr_ref))
+		show_descr.show->winlist->
+		  UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	    }
+	    EndDrag();
+	    ourframe->SetCurrentMove(CC_MOVE_NORMAL);
+	  }
 	  break;
 	default:
 	  switch (drag) {
 	  case CC_DRAG_BOX:
+	    SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(),
+			       curr_ref);
 	    EndDrag();
-	    SelectPointsInRect(drag_start, drag_end, curr_ref);
 	    break;
 	  case CC_DRAG_LINE:
-	    EndDrag();
-	    pos.x = drag_end.x - drag_start.x;
-	    pos.y = drag_end.y - drag_start.y;
+	    pos = shape->GetPoint() - shape->GetOrigin();
 	    if (sheet->TranslatePoints(pos, curr_ref))
 	      show_descr.show->winlist->
 		UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	    EndDrag();
 	    break;
 	  case CC_DRAG_LASSO:
+	    ((CC_lasso*)curr_shape)->End();
+	    SelectWithLasso((CC_lasso*)curr_shape);
 	    EndDrag();
-	    SelectWithLasso();
 	    break;
 	  default:
 	    break;
 	  }
 	  break;
 	}
-      } else if (event.RightDown()) {
+      } else if (event.RightDown() && curr_shape) {
 	switch (drag) {
 	case CC_DRAG_POLY:
+	  SelectWithLasso((CC_lasso*)curr_shape);
 	  EndDrag();
-	  SelectWithLasso();
 	  break;
 	default:
 	  break;
 	}
-      } else if (event.Dragging() && event.LeftIsDown()) {
-	switch (drag) {
-	case CC_DRAG_LINE:
-	  ourframe->SnapToGrid(pos);
-	default:
-	  MoveDrag(pos);
-	  break;
-	}
-      } else if (event.Moving()) {
+      } else if (event.Dragging() && event.LeftIsDown() && curr_shape) {
+	MoveDrag(pos);
+      } else if (event.Moving() && curr_shape) {
 	switch (drag) {
 	case CC_DRAG_POLY:
 	  MoveDrag(pos);
@@ -1356,46 +1834,55 @@ void FieldCanvas::UpdateBars() {
 void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
   DrawDrag(FALSE);
   drag = type;
-  switch (drag) {
+  ClearShapes();
+  curr_shape = NULL;
+  switch (type) {
+  case CC_DRAG_BOX:
+    AddDrag(type, new CC_shape_rect(start));
+    break;
   case CC_DRAG_POLY:
-    lasso.Clear();
-    lasso.Append(start);
-    lasso.Append(start);
+    AddDrag(type, new CC_poly(start));
     break;
   case CC_DRAG_LASSO:
-    lasso.Clear();
-    lasso.Append(start);
+    AddDrag(type, new CC_lasso(start));
     break;
+  case CC_DRAG_LINE:
+    AddDrag(type, new CC_shape_line(start));
+    break;
+  case CC_DRAG_CROSS:
+    AddDrag(type, new CC_shape_cross(start, INT2COORD(2)));
   default:
-    drag_start = drag_end = start;
+    break;
   }
+}
+
+void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_shape *shape) {
+  DrawDrag(FALSE);
+  drag = type;
+  ClearShapes();
+  curr_shape = NULL;
+  AddDrag(type, shape);
+}
+
+void FieldCanvas::AddDrag(CC_DRAG_TYPES type, CC_shape *shape) {
+  DrawDrag(FALSE);
+  drag = type;
+  shape_list.Append((wxObject*)shape);
+  curr_shape = shape;
   DrawDrag(TRUE);
 }
 
 void FieldCanvas::MoveDrag(CC_coord end) {
-  DrawDrag(FALSE);
-  switch (drag) {
-  case CC_DRAG_POLY:
-    lasso.Drag(end);
-    break;
-  case CC_DRAG_LASSO:
-    lasso.Append(end);
-    break;
-  default:
-    drag_end = end;
+  if (curr_shape) {
+    DrawDrag(FALSE);
+    curr_shape->OnMove(end, ourframe);
+    DrawDrag(TRUE);
   }
-  DrawDrag(TRUE);
 }
 
 void FieldCanvas::EndDrag() {
   DrawDrag(FALSE);
-  switch (drag) {
-  case CC_DRAG_LASSO:
-    lasso.End();
-    break;
-  default:
-    break;
-  }
+  ClearShapes();
   drag = CC_DRAG_NONE;
 }
 
@@ -1467,24 +1954,23 @@ void FieldCanvas::SelectOrdered(wxList& pointlist,
   }
 }
 
-Bool FieldCanvas::SelectWithLasso() {
+Bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso) {
   Bool changed = FALSE;
   CC_sheet* sheet = show_descr.CurrSheet();
   wxList pointlist;
-  wxPoint *pnt;
+  const wxPoint *pnt;
 
   for (unsigned i = 0; i < show_descr.show->GetNumPoints(); i++) {
-    if (lasso.Inside(sheet->GetPosition(i, curr_ref))) {
+    if (lasso->Inside(sheet->GetPosition(i, curr_ref))) {
       changed = TRUE;
       pointlist.Append(i, NULL);
     }
   }
-  pnt = lasso.FirstPoint();
+  pnt = lasso->FirstPoint();
   if (changed && pnt) {
     SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y));
     show_descr.show->winlist->UpdateSelections();
   }
-  lasso.Clear();
 
   return changed;
 }
@@ -1555,22 +2041,52 @@ static void toolbar_next_ss(CoolToolBar *tb) {
 
 static void toolbar_box(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->field->curr_lasso = CC_DRAG_BOX;
+  mf->SetCurrentLasso(CC_DRAG_BOX);
 }
 
 static void toolbar_poly(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->field->curr_lasso = CC_DRAG_POLY;
+  mf->SetCurrentLasso(CC_DRAG_POLY);
 }
 
 static void toolbar_lasso(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->field->curr_lasso = CC_DRAG_LASSO;
+  mf->SetCurrentLasso(CC_DRAG_LASSO);
+}
+
+static void toolbar_move(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->SetCurrentMove(CC_MOVE_NORMAL);
 }
 
 static void toolbar_line(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->field->curr_move = CC_MOVE_LINE;
+  mf->SetCurrentMove(CC_MOVE_LINE);
+}
+
+static void toolbar_rot(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->SetCurrentMove(CC_MOVE_ROTATE);
+}
+
+static void toolbar_shear(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->SetCurrentMove(CC_MOVE_SHEAR);
+}
+
+static void toolbar_reflect(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->SetCurrentMove(CC_MOVE_REFL);
+}
+
+static void toolbar_size(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->SetCurrentMove(CC_MOVE_SIZE);
+}
+
+static void toolbar_genius(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->SetCurrentMove(CC_MOVE_GENIUS);
 }
 
 static void toolbar_label_left(CoolToolBar *tb) {

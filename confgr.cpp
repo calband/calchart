@@ -37,7 +37,8 @@ static char* ColorNames[COLOR_NUM] = {
   "HILIT ANIM FRONT",
   "HILIT ANIM BACK",
   "HILIT ANIM SIDE",
-  "ANIM COLLISION"
+  "ANIM COLLISION",
+  "SHAPES"
 };
 
 static char* DefaultColors[COLOR_NUM] = {
@@ -58,11 +59,13 @@ static char* DefaultColors[COLOR_NUM] = {
   "255 192 128",
   "ORANGE",
   "BROWN",
-  "PURPLE"
+  "PURPLE",
+  "GREY"
 };
 
 static Bool DefaultMonoColors[COLOR_NUM] = {
   1,
+  0,
   0,
   0,
   0,
@@ -100,7 +103,8 @@ static int DefaultMonoPenHollow[COLOR_NUM] = {
   1,
   1,
   1,
-  1
+  1,
+  0
 };
 
 static int DefaultMonoPenWidth[COLOR_NUM] = {
@@ -114,6 +118,7 @@ static int DefaultMonoPenWidth[COLOR_NUM] = {
   1,
   1,
   3,
+  1,
   1,
   1,
   1,
@@ -135,6 +140,7 @@ static int DefaultMonoPenDotted[COLOR_NUM] = {
   1,
   0,
   1,
+  0,
   0,
   0,
   0,

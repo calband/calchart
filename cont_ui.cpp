@@ -134,7 +134,7 @@ static void ContEditCurrent(wxChoice& choice, wxEvent&) {
 ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
 				   wxFrame *parent, char *title,
 				   int x, int y, int width, int height):
-wxFrame(parent, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
+wxFrame(parent, title, x, y, width, height, CC_FRAME_OTHER),
 descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   // Give it an icon
   SetBandIcon(this);

@@ -103,6 +103,11 @@ public:
   inline void GotoSheet(unsigned i) {
     if (anim) { anim->GotoSheet(i); Refresh(); }
   }
+
+  void StartTimer();
+  inline void StopTimer() {
+    timer->Stop(); timeron = FALSE;
+  }
 #ifdef ANIM_OUTPUT_POVRAY
   const char * GeneratePOVFiles(const char *filebasename);
 #endif
@@ -113,6 +118,7 @@ public:
 
   Animation* anim;
   AnimationTimer* timer;
+  Bool timeron;
 private:
   CC_descr *show_descr;
   AnimationFrame *ourframe;

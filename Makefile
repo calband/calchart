@@ -20,12 +20,13 @@ YFLAGS = -dv
 
 FIG2EPS = fig2dev -L ps # -P for non-encapsulated
 
-HEADERS = main_ui.h basic_ui.h show.h print_ui.h show_ui.h \
-	undo.h modes.h confgr.h animate.h anim_ui.h cont.h cont_ui.h parse.h \
-	ingl.h platconf.h
-SRCS = main_ui.cc basic_ui.cc show.cc draw.cc print.cc \
-	print_ui.cc show_ui.cc undo.cc modes.cc confgr.cc \
-	animate.cc anim_ui.cc cont.cc cont_ui.cc ingl.cc
+HEADERS = animate.h anim_ui.h basic_ui.h confgr.h cont.h cont_ui.h \
+	ingl.h linmath.h main_ui.h modes.h parse.h platconf.h print_ui.h \
+	show.h show_ui.h undo.h
+
+SRCS = animate.cc anim_ui.cc basic_ui.cc confgr.cc cont.cc cont_ui.cc \
+	draw.cc ingl.cc main_ui.cc modes.cc print.cc print_ui.cc show.cc \
+	show_ui.cc undo.cc
 
 SYNTHETIC_BASES = contscan.l contgram.y
 SYNTHETIC_SRCS = contscan.cc contgram.cc
@@ -39,7 +40,8 @@ RUNTIME = runtime/config runtime/prolog0.ps runtime/prolog1.ps \
 RUNTIME_ALL = $(RUNTIME) runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps
 PS_SYNTH_FILES = runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps postscript/vmstatus.ps
 IMAGES = tb_left.xbm tb_right.xbm tb_box.xbm tb_poly.xbm tb_lasso.xbm \
-	tb_line.xbm tb_lbl_l.xbm tb_lbl_r.xbm tb_lbl_f.xbm \
+	tb_mv.xbm tb_line.xbm tb_rot.xbm tb_shr.xbm tb_ref.xbm tb_siz.xbm \
+	tb_gen.xbm tb_lbl_l.xbm tb_lbl_r.xbm tb_lbl_f.xbm \
 	tb_sym0.xbm tb_sym1.xbm tb_sym2.xbm tb_sym3.xbm \
 	tb_sym4.xbm tb_sym5.xbm tb_sym6.xbm tb_sym7.xbm \
 	tb_stop.xbm tb_play.xbm tb_pbeat.xbm tb_nbeat.xbm \

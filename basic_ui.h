@@ -29,6 +29,17 @@
 #define PlainToolBar wxToolBar
 #endif
 
+#define CC_USE_MDI
+#ifdef CC_USE_MDI
+#define CC_FRAME_TOP (wxMDI_PARENT | wxMAXIMIZE | wxDEFAULT_FRAME)
+#define CC_FRAME_CHILD (wxMDI_CHILD | wxDEFAULT_FRAME)
+#define CC_FRAME_OTHER (wxDEFAULT_FRAME)
+#else
+#define CC_FRAME_TOP (wxSDI | wxDEFAULT_FRAME)
+#define CC_FRAME_CHILD (wxSDI | wxDEFAULT_FRAME)
+#define CC_FRAME_OTHER (wxSDI | wxDEFAULT_FRAME)
+#endif
+
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc);
 
@@ -77,7 +88,7 @@ public:
 
   wxFrameWithStuff(wxFrame *frame, char *title,
 		   int x = -1, int y = -1, int w = -1, int h = -1,
-		   long style = wxSDI | wxDEFAULT_FRAME);
+		   long style = CC_FRAME_OTHER);
   void OnSize(int w, int h);  // Default OnSize handler
   Bool OnClose(void);
   inline void SetToolBar(PlainToolBar *tb) { frameToolBar = tb; }
@@ -96,7 +107,7 @@ class wxFrameWithStuffSized: public wxFrameWithStuff
 public:
   wxFrameWithStuffSized(wxFrame *frame, char *title,
 			int x = -1, int y = -1,
-			long style = wxSDI | wxDEFAULT_FRAME);
+			long style = CC_FRAME_OTHER);
   void OnSize(int w, int h);  // Default OnSize handler
   void Fit();  // Shrinks frame to fit around a given canvas size
 };
