@@ -52,6 +52,7 @@ public:
   inline CC_WinList* GetList() { return list; }
 
   virtual void SetShow(CC_show *shw);
+  virtual void ChangeName();
   virtual void UpdateSelections();
   virtual void UpdatePoints();
   virtual void UpdatePointsOnSheet(unsigned sht);
@@ -86,6 +87,7 @@ public:
   virtual void Empty();
 
   virtual void SetShow(CC_show *shw);
+  virtual void ChangeName();
   virtual void UpdateSelections();
   virtual void UpdatePoints();
   virtual void UpdatePointsOnSheet(unsigned sht);
@@ -318,7 +320,11 @@ public:
   char *Save(const char *filename);
 
   inline const char *GetName() { return name; }
+  const char *UserGetName();
   inline void SetName(const char *newname) { name = newname; }
+  inline void UserSetName(const char *newname) {
+    name = newname; winlist->ChangeName();
+  }
 
   inline Bool Modified() { return modified; }
   inline void SetModified(Bool b) { modified = b; winlist->UpdateStatusBar(); }

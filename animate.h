@@ -42,6 +42,10 @@ public:
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
 
+  // go through all beats at once
+  virtual void ApplyForward(AnimatePoint& pt);
+  virtual void ApplyBackward(AnimatePoint& pt);
+
   virtual AnimateDir Direction() = 0;
   virtual void ClipBeats(unsigned beats);
 
@@ -69,6 +73,9 @@ public:
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
 
+  virtual void ApplyForward(AnimatePoint& pt);
+  virtual void ApplyBackward(AnimatePoint& pt);
+
   virtual void ClipBeats(unsigned beats);
 private:
   CC_coord vector;
@@ -82,6 +89,9 @@ public:
   virtual Bool End(AnimatePoint& pt);
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
+
+  virtual void ApplyForward(AnimatePoint& pt);
+  virtual void ApplyBackward(AnimatePoint& pt);
 
   virtual AnimateDir Direction();
   virtual void ClipBeats(unsigned beats);

@@ -129,8 +129,12 @@ void CC_WinNodeMain::SetShow(CC_show *shw) {
   canvas->show_descr.show = shw;
   canvas->UpdateBars();
   canvas->GotoSS(0);
-  canvas->ourframe->SetTitleFromPath(shw->GetName());
+  ChangeName();
   winlist.SetShow(shw);
+}
+void CC_WinNodeMain::ChangeName() {
+  canvas->ourframe->SetTitle((char *)canvas->show_descr.show->UserGetName());
+  winlist.ChangeName();
 }
 void CC_WinNodeMain::UpdateSelections() {
   canvas->RefreshShow();
@@ -374,7 +378,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
     def_grid = other_frame->grid_choice->GetSelection();
   }
 
-  SetTitleFromPath(show->GetName());
+  SetTitle((char *)show->UserGetName());
   field = new FieldCanvas(show, ss, this);
   frameCanvas = field;
   node = new CC_WinNodeMain(show->winlist, field);
@@ -620,15 +624,6 @@ void MainFrame::OnMenuSelect(int id)
     SetStatusText(msg);
 }
 
-// Set title to file name from full path
-const char* MainFrame::GetTitleFromPath(const char *path) {
-  if (path[0] == '\0') {
-    return "Untitled";
-  } else {
-    return wxFileNameFromPath((char *)path); // should be const
-  }
-}
-
 // Give the use a chance to save the current show
 Bool MainFrame::OkayToClearShow() {
   char buf[1024];
@@ -636,7 +631,7 @@ Bool MainFrame::OkayToClearShow() {
   if (field->show_descr.show->Modified()) {
     if (!field->show_descr.show->winlist->MultipleWindows()) {
       sprintf(buf, "Save changes to '%s'?",
-	      GetTitleFromPath(field->show_descr.show->GetName()));
+	      field->show_descr.show->UserGetName());
       switch (wxMessageBox(buf, "Unsaved changes",
 			   wxYES_NO | wxCANCEL, this)) {
       case wxYES:
@@ -692,15 +687,17 @@ void MainFrame::SaveShow() {
 // Load a show with file selector
 void MainFrame::SaveShowAs() {
   const char *s;
+  const char *err;
 
   s = wxFileSelector("Save show", NULL, NULL, NULL, file_save_wild,
 		     wxSAVE | wxOVERWRITE_PROMPT);
   if (s) {
-    s = field->show_descr.show->Save(s);
-    if (s != NULL) {
-      (void)wxMessageBox((char *)s, "Save Error"); // should be const
+    err = field->show_descr.show->Save(s);
+    if (err != NULL) {
+      (void)wxMessageBox((char *)err, "Save Error"); // should be const
     } else {
       field->show_descr.show->SetModified(FALSE);
+      field->show_descr.show->UserSetName(s);
     }
   }    
 }

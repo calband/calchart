@@ -28,6 +28,7 @@ public:
   CC_WinNodeMain(CC_WinList *lst, FieldCanvas *canv);
 
   virtual void SetShow(CC_show *shw);
+  virtual void ChangeName();
   virtual void UpdateSelections();
   virtual void UpdatePoints();
   virtual void UpdatePointsOnSheet(unsigned sht);
@@ -67,10 +68,6 @@ public:
   Bool OnClose(void);
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
-  const char* GetTitleFromPath(const char *path);
-  inline void SetTitleFromPath(const char *path) {
-    SetTitle((char*)GetTitleFromPath(path));
-  }
 
   Bool OkayToClearShow();
 

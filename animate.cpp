@@ -116,6 +116,12 @@ Bool AnimateCommand::PrevBeat(AnimatePoint&) {
   }
 }
 
+void AnimateCommand::ApplyForward(AnimatePoint&) {
+}
+
+void AnimateCommand::ApplyBackward(AnimatePoint&) {
+}
+
 void AnimateCommand::ClipBeats(unsigned beats) {
   numbeats = beats;
 }
@@ -173,6 +179,14 @@ Bool AnimateCommandMove::PrevBeat(AnimatePoint& pt) {
   }
 }
 
+void AnimateCommandMove::ApplyForward(AnimatePoint& pt) {
+  pt.pos += vector;
+}
+
+void AnimateCommandMove::ApplyBackward(AnimatePoint& pt) {
+  pt.pos -= vector;
+}
+
 void AnimateCommandMove::ClipBeats(unsigned beats) {
   AnimateCommand::ClipBeats(beats);
 }
@@ -195,6 +209,14 @@ Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
 
 Bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
   return AnimateCommand::PrevBeat(pt);
+}
+
+void AnimateCommandRotate::ApplyForward(AnimatePoint& pt) {
+  AnimateCommand::ApplyForward(pt);
+}
+
+void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt) {
+  AnimateCommand::ApplyBackward(pt);
 }
 
 AnimateDir AnimateCommandRotate::Direction() {
@@ -461,5 +483,8 @@ Bool AnimateCompile::Append(AnimateCommand *cmd) {
     cmds = curr_cmd = cmd;
   }
   beats_rem -= cmd->numbeats;
+
+  cmd->ApplyForward(pt); // Move current point to new position
+
   return TRUE;
 }

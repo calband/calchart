@@ -247,6 +247,9 @@ void PrintContCanvas::OnPaint() {
       for (c = cont; c != NULL; c = c->more) {
 	do_tab = FALSE;
 	switch (c->font) {
+	case PSFONT_SYMBOL:
+	  x += contPlainFont->GetPointSize()*strlen(c->text);
+	  break;
 	case PSFONT_NORM:
 	  SetFont(contPlainFont);
 	  break;
@@ -263,7 +266,7 @@ void PrintContCanvas::OnPaint() {
 	  do_tab = TRUE;
 	  break;
 	}
-	if (!do_tab) {
+	if (!do_tab && (c->font != PSFONT_SYMBOL)) {
 	  GetTextExtent(c->text, &textw, &texth, &textd);
 	  x += textw;
 	}
@@ -299,11 +302,17 @@ void PrintContCanvas::OnPaint() {
       default:
 	break;
       }
-      if (!do_tab) {
-	GetTextExtent(c->text, &textw, &texth, &textd);
-	if (texth > maxtexth) maxtexth = texth;
-	DrawText(c->text, x, y);
-	x += textw;
+      if (c->font == PSFONT_SYMBOL) {
+	int pointsize = contPlainFont->GetPointSize();
+	x += pointsize*strlen(c->text);
+	if (pointsize > maxtexth) maxtexth = pointsize;
+      } else {
+	if (!do_tab) {
+	  GetTextExtent(c->text, &textw, &texth, &textd);
+	  if (texth > maxtexth) maxtexth = texth;
+	  DrawText(c->text, x, y);
+	  x += textw;
+	}
       }
     }
     y += maxtexth;

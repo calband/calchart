@@ -48,6 +48,7 @@ void CC_WinNode::Remove() {
 }
 
 void CC_WinNode::SetShow(CC_show*) {}
+void CC_WinNode::ChangeName() {}
 void CC_WinNode::UpdateSelections() {}
 void CC_WinNode::UpdatePoints() {}
 void CC_WinNode::UpdatePointsOnSheet(unsigned) {}
@@ -109,6 +110,13 @@ void CC_WinList::SetShow(CC_show *shw) {
 
   for (n = list; n != NULL; n = n->next) {
     n->SetShow(shw);
+  }
+}
+void CC_WinList::ChangeName() {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->ChangeName();
   }
 }
 void CC_WinList::UpdateSelections() {
@@ -291,9 +299,9 @@ CC_point& CC_point::operator = (const cc_oldpoint& old) {
   for (unsigned i = 0; i < 3; i++) {
     // -1 means undefined (endian doesn't matter)
     if ((old.ref[i].x == 0xFFFF) && (old.ref[i].y == 0xFFFF)) {
-      ref[i] = old.ref[i];
-    } else {
       ref[i] = pos;
+    } else {
+      ref[i] = old.ref[i];
     }
   }
   return *this;
@@ -1390,6 +1398,10 @@ char *CC_show::Save(const char *filename) {
   return NULL;
 }
 
+const char *CC_show::UserGetName() {
+  if (name.Empty()) return "Untitled";
+  else return wxFileNameFromPath((char *)name.GetData());
+}
 CC_sheet *CC_show::GetNthSheet(unsigned n) {
   CC_sheet *nsheet = sheets;
   while (n && nsheet) {
