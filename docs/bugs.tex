@@ -1,53 +1,13 @@
-\chapter{Guide to Testing CalChart}\label{testing}
-
-Most of the testing I have done is with small, specific examples.  I'd
-like people to put it through normal use.  Start by charting a short
-show from scratch.
-
-There are also two components that I think should be heavily tested: the
-undo/redo system and the animation system.
-
-The default is to buffer 50K of undo information.  I've not tested the
-program significantly when the buffer is full.  Therefore, I'd like you
-to use the program for a long time continuously and then undo as much as you
-can.  Then try to redo everything and if everything is the same.  You
-should also try to use these options as much as possible when charting.
-
-The animation system is by far the most complicated part of the
-program.  I've tried to make the commands work the same as in the
-original program, but there are many variations that still need to be
-tested.  I'd also like to know if collision detecting slows down the
-animation on slower machines (like the band's computers).
-
-You can begin by downloading all of the old shows from the CalChart web
-page and go make sure they are all animated correctly.  Some of them may
-also give errors under the old version of CalChart, so try them with it
-as well.  You should also save each show and reload it and check for any
-changes.  You should make sure that any collisions detected in the old
-version show up in this one.  I may divide up the work of testing the
-old shows.
-
-Most importantly, you should test every feature of the continuity language
-(even commands like EITHER and features like variables).  Try making a
-show that uses obscure commands or does things in weird ways (like use
-complicated functions to compute the direction).  Try animating this
-show with the old version of CalChart (you'll have to create it with the
-old version or re-enter it) and look for any inconsistencies.  You
-should refer to the section on \helpref{animation commands}{animcont}
-to make sure the documentation matches the behavior of the program.
-
-And finally, don't only test correct continuity, but also look at how
-the new and old versions handle errors.  Using zeros or incorrect values
-or the wrong number of beats is a good place to start.
+\chapter{Guide to Bugs}\label{bugs}
 
 \section{About Reporting Bugs}\label{reportingbugs}
 
 Mail bug reports to gurk@calband.berkeley.edu.  Please try to include
-helpful information.  "It crashed" is not going to help me fix bugs.
-Please try to reproduce the bug, and give me instructions on how to
-duplicate it, or include a show that illustrates the problem.  Include
-the date from the About window so I know what version you're using.  Comments
-or suggestions are also appreciated and should be mailed to
+helpful information to track down the bug.  Try to reproduce the bug,
+and give me instructions on how to duplicate it, or include a show that
+illustrates the problem.  Include the date from the About window so I
+know what version you're using.  Comments or suggestions are also
+appreciated and should be mailed to
 calchart-discussion@calband.berkeley.edu.
 
 \section{Known Problems}\label{problems}
@@ -58,6 +18,17 @@ calchart-discussion@calband.berkeley.edu.
 \item Documentation is sorely lacking
 \item Redrawing is slow
 \item Handling of points off the field (and in endzones) could be better
+\item Define DOF between sheets
+\item Sheet bar should be a scroll bar
+\item Autosave doesn't use unique filenames or prompt to recover files
+\item Arc drawing for Rotatemove is incorrect sometimes
+\item Shearmove can't be specified as any direction
+\item Zero vectors for Geniusmove aren't displayed
+\item Order of move icons should be changed
+\item Large values of beats don't work
+\item Somehow points get set to multiple continuities (Dan's animation bug)
+\item Edit printed continuity menu item should be moved
+\item COUNTERMARCH (there are probably bugs)
 \end{itemize}
 
 \section{Unimplemented Features}\label{notdone}
@@ -69,4 +40,24 @@ calchart-discussion@calband.berkeley.edu.
 \item Moving the pointer over a reference point doesn't highlight the
 corresponding point
 \item Yard lines can only be moved by editing the configuration file
+\item Snap points to grid
+\item Flow control commands in continuity (if, for, subroutines, etc.)
+\item Keyboard shortcuts
+\item Yardline ruler (to display yardlines at all times)
+\item View multiple reference sheets
+\item Handle negative beats (COUNTERMARCH, EVEN, FM, HSCM, MARCH, MT, ROTATE)
+\item Handle non-integer values
+\item FMMT (for FMTO NP; MTRM, we didn't decide on a name)
+\item EITHER should take a direction
+\item Improved scrolling
+\item Improved selecting
+\item Improved blockmove
+\item DOF, DOM, whatever we call them
+\item Title bars reflecting show name
+\item Default name for new sheets
+\item Point variables... SPOT, VECTOR, etc.
+\item Clear continuity text
+\item Display sheet number in continuity window
+\item More informative error messages (line numbers, etc.)
+\item Special cases of Geniusmove
 \end{itemize}

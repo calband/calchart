@@ -194,7 +194,7 @@ using standard arithmetic symbols:
 \ruledrow{negation&- \verb$<num>$}
 \end{tabular}
 
-These symbols are always interpreted from left-to-right, unless they are
+These symbols are interpreted in stardard arithmetic order, unless they are
 grouped with parentheses.
 
 Numerical expressions cannot be used when a point is expected.
@@ -208,7 +208,7 @@ To specify a point, one of these symbols MUST be used:
 \row{SP&location on the current stuntsheet}
 \row{P&current location}
 \row{NP&location on the next stuntsheet}
-\row{R1&first reference point defined on the current stuntsheet}
+\row{R1&first reference point on the current stuntsheet}
 \row{R2&second reference point}
 \ruledrow{R3&third reference point}
 \end{tabular}
@@ -219,9 +219,6 @@ throughout a single stuntsheet.
 Second, points differ from numerical expressions in that they cannot be
 combined by arithmetic operators, and cannot be used when a numeric
 parameter is expected.
-
-Third, if a reference point is not defined in the stuntsheet editor, then
-it defaults to the initial location of P on the stuntsheet.
 
 \section{PROCEDURES}\label{procedures}
 
@@ -589,4 +586,3 @@ This places the value 3 in the variable A; it will remain there until it is
 replaced or the execution of the continuity is completed.
 
 To use a variable, simply use the name of the variable in place of a number.
-
