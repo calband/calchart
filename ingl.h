@@ -51,7 +51,8 @@ public:
 
   Bool Okay();
 
-  void *ParseFile(INGLhandler hndlr[], unsigned num, char **error);
+  void *ParseFile(INGLhandler hndlr[], unsigned num, char **error,
+		  void *topdata = NULL);
 
 private:
   Bool ReadLong(INGLid *d);

@@ -698,7 +698,7 @@ void MainFrame::SaveShowAs() {
   if (s) {
     s = field->show_descr.show->Save(s);
     if (s != NULL) {
-      (void)wxMessageBox((char *)s, "Load Error"); // should be const
+      (void)wxMessageBox((char *)s, "Save Error"); // should be const
     } else {
       field->show_descr.show->SetModified(FALSE);
     }

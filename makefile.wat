@@ -2,15 +2,16 @@
 
 NAME = calchart
 
-COMPMODE = win386
-#COMPMODE = nt
+COMPMODE = win386 # nt
 
 WXDIR = d:\source\wxwin
 !ifeq COMPMODE win386
 !include $(WXDIR)\src\makewat.env
+CTLDLL = $(WXDIR)\contrib\ctl3d\ctl3dv2.dll
 !endif
 !ifeq COMPMODE nt
 !include $(WXDIR)\src\makew32.env
+CTLDLL = $(WXDIR)\contrib\ctl3d\ctl3d32.dll
 !endif
 
 LNK = $(name).lnk
@@ -71,15 +72,7 @@ strip: .SYMBOLIC
 clean: .SYMBOLIC
 	@for %i in ($(OBJS) $(name).exe $(name).res $(LNK) *.err TAGS) do -erase %i
 
-!ifeq COMPMODE win386
 distrib: .SYMBOLIC
 	-erase $(name).zip
 	zip -Dr9 $(name).zip $(name).exe $(HELPFILES) runtime
-	zip -j9 $(name).zip $(name).zip d:\watcom\binw\wemu387.386 $(WXDIR)\contrib\ctl3d\ctl3dv2.dll
-!endif
-!ifeq COMPMODE nt
-distrib: .SYMBOLIC
-	-erase $(name).zip
-	zip -Dr9 $(name).zip $(name).exe $(HELPFILES) runtime
-	zip -j9 $(name).zip $(name).zip d:\watcom\binw\wemu387.386 d:\windows\system\ctl3d32.dll
-!endif
+	zip -j9 $(name).zip d:\watcom\binw\wemu387.386 $(CTLDLL)

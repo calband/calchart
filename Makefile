@@ -1,21 +1,9 @@
 # Makefile for calchart (UNIX).
 
-include $(WXDIR)/src/make.env
+top_srcdir = $(WXDIR)
+include $(WXDIR)/make.tmpl
 
-#Uncomment one of the following sections:
-
-GUI = -Dwx_motif
-GUISUFFIX = _motif
-LDLIBS = $(MOTIFLDLIBS)
-
-#GUI = -Dwx_xview
-#GUISUFFIX = _ol
-#LINK_OBJS = $(XVIEW_LINK)
-#LDLIBS = $(XVIEWLDLIBS)
-
-#GUI = -Dwx_motif
-#GUISUFFIX = _hp
-#LDLIBS = $(HPLDLIBS)
+PROG = calchart
 
 #MAKEDEP = makedepend
 MAKEDEP = ./makedep
@@ -68,7 +56,7 @@ MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 	makefile.wat calchart.rc
 
 %.o: %.cc
-	$(CC) $(CPPFLAGS) $(DFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
 %.cc %.h: %.y
 	$(YACC) $(YFLAGS) $*.y
@@ -89,8 +77,9 @@ runtime/%.eps: postscript/%.fig
 
 all: calchart $(PS_SYNTH_FILES) charthlp.xlp
 
-calchart: $(OBJS)
-	$(CC) $(CPPFLAGS) $(DFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(LINK_OBJS) $(LDLIBS)
+$(PROG): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ \
+	$(wx_lib) $(gui_libraries) $(extra_lib) $(math_lib)
 
 contscan.o: contgram.h
 

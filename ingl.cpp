@@ -14,6 +14,9 @@
 
 #include <string.h>
 
+static char readerr_str[] = "Read error: check disk media";
+static char seekerr_str[] = "Seek error: file is corrupted";
+
 INGLchunk::INGLchunk()
   : prev(NULL), data(NULL), userdata(NULL) {}
 
@@ -30,7 +33,14 @@ INGLread::INGLread(const char *filename) {
 }
 
 INGLread::~INGLread() {
+  INGLchunk *tmpc;
+
   if (fp) fclose(fp);
+  while (chunks != NULL) {
+    tmpc = chunks->prev;
+    delete chunks;
+    chunks = tmpc;
+  }
 }
 
 Bool INGLread::Okay() {
@@ -42,7 +52,8 @@ Bool INGLread::Okay() {
   return TRUE;
 }
 
-void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error) {
+void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error,
+			  void *topdata) {
   void *data = NULL;
   INGLchunk *cnk;
   INGLhandler *hndl;
@@ -53,8 +64,14 @@ void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error) {
     cnk->prev = chunks;
     chunks = cnk;
 
-    ReadLong(&cnk->name);
-    ReadLong(&cnk->size);
+    if (!ReadLong(&cnk->name)) {
+      *error = readerr_str;
+      return NULL;
+    }
+    if (!ReadLong(&cnk->size)) {
+      *error = readerr_str;
+      return NULL;
+    }
 
     if (cnk->name == MakeINGLid('E','N','D',' ')) {
       PopChunk();
@@ -65,6 +82,10 @@ void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error) {
       if (cnk->name == MakeINGLid('G','U','R','K')) {
 	cnk->name = cnk->size;
 	gurkchunk = TRUE;
+	// Set first chunk to top level data
+	if (cnk->prev == NULL) {
+	  cnk->userdata = topdata;
+	}
       } else {
 	gurkchunk = FALSE;
       }
@@ -93,12 +114,18 @@ void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error) {
 	if (hndl) {
 	  if (cnk->size > 0) {
 	    cnk->data = new unsigned char[cnk->size];
-	    fread(cnk->data, cnk->size, 1, fp);
+	    if (fread(cnk->data, cnk->size, 1, fp) != 1) {
+	      *error = readerr_str;
+	      return NULL;
+	    }
 	  }
 	  *error = hndl->func(cnk);
 	  if (*error) return data;
 	} else {
-	  fseek(fp, cnk->size, SEEK_CUR);
+	  if (fseek(fp, cnk->size, SEEK_CUR) != 0) {
+	    *error = seekerr_str;
+	    return NULL;
+	  }
 	}
 	data = PopChunk();
       }

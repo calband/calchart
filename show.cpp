@@ -32,6 +32,7 @@ static char badanimcont_str[] = "Error in animation continuity file";
 static char badcont_str[] = "Error in continuity file";
 static char contnohead_str[] = "Continuity file doesn't begin with header";
 static char nosheets_str[] = "No sheets found";
+static char writeerr_str[] = "Write error: check disk media";
 
 extern ShowModeList *modelist;
 
@@ -592,10 +593,8 @@ CC_show::CC_show(unsigned npoints)
 #define INGL_CONT MakeINGLid('C','O','N','T')
 #define INGL_PCNT MakeINGLid('P','C','N','T')
 
-static CC_show* loading_show;
-
-static char* load_show_SHOW(INGLchunk* chunk) {
-  chunk->userdata = loading_show;
+// Only exists so SHOW chunk is recognized
+static char* load_show_SHOW(INGLchunk*) {
   return NULL;
 }
 
@@ -1212,10 +1211,9 @@ CC_show::CC_show(const char *file)
     if (!readhnd.Okay()) {
       error = nofile_str;
     } else {
-      loading_show = this;
       readhnd.ParseFile(load_show_handlers,
 			sizeof(load_show_handlers)/sizeof(INGLhandler),
-			&error);
+			&error, this);
       SetName(file);
     }
   }
@@ -1253,22 +1251,32 @@ char *CC_show::Save(const char *filename) {
     delete handl;
     return nofile_str;
   }
-  handl->WriteHeader();
-  handl->WriteGurk(INGL_SHOW);
+  if (!handl->WriteHeader()) {
+    return writeerr_str;
+  }
+  if (!handl->WriteGurk(INGL_SHOW)) {
+    return writeerr_str;
+  }
 
   // Handle show info
   i = GetNumPoints();
   put_big_long(&id, i);
-  handl->WriteChunk(INGL_SIZE, 4, &id);
+  if (!handl->WriteChunk(INGL_SIZE, 4, &id)) {
+    return writeerr_str;
+  }
 
   id = 0;
   for (i = 0; i < GetNumPoints(); i++) {
     id += strlen(GetPointLabel(i))+1;
   }
   if (id > 0) {
-    handl->WriteChunkHeader(INGL_LABL, id);
+    if (!handl->WriteChunkHeader(INGL_LABL, id)) {
+      return writeerr_str;
+    }
     for (i = 0; i < GetNumPoints(); i++) {
-      handl->WriteStr(GetPointLabel(i));
+      if (!handl->WriteStr(GetPointLabel(i))) {
+	return writeerr_str;
+      }
     }
   }
 
@@ -1278,27 +1286,42 @@ char *CC_show::Save(const char *filename) {
   for (CC_sheet *curr_sheet = GetSheet();
        curr_sheet != NULL;
        curr_sheet = curr_sheet->next) {
-    handl->WriteGurk(INGL_SHET);
+    if (!handl->WriteGurk(INGL_SHET)) {
+      return writeerr_str;
+    }
     // Name
-    handl->WriteChunkStr(INGL_NAME, curr_sheet->GetName());
+    if (!handl->WriteChunkStr(INGL_NAME, curr_sheet->GetName())) {
+      return writeerr_str;
+    }
     // Beats
     put_big_long(&id, curr_sheet->beats);
-    handl->WriteChunk(INGL_DURA, 4, &id);
+    if (!handl->WriteChunk(INGL_DURA, 4, &id)) {
+      return writeerr_str;
+    }
     
     // Point positions
-    handl->WriteChunkHeader(INGL_POS, GetNumPoints()*4);
+    if (!handl->WriteChunkHeader(INGL_POS, GetNumPoints()*4)) {
+    }
     for (i = 0; i < GetNumPoints(); i++) {
       put_big_word(&crd, curr_sheet->pts[i].pos.x);
-      handl->Write(&crd, 2);
+      if (!handl->Write(&crd, 2)) {
+	return writeerr_str;
+      }
       put_big_word(&crd, curr_sheet->pts[i].pos.y);
-      handl->Write(&crd, 2);
+      if (!handl->Write(&crd, 2)) {
+	return writeerr_str;
+      }
     }
     // Point symbols
     for (i = 0; i < GetNumPoints(); i++) {
       if (curr_sheet->pts[i].sym != 0) {
-	handl->WriteChunkHeader(INGL_SYMB, GetNumPoints());
+	if (!handl->WriteChunkHeader(INGL_SYMB, GetNumPoints())) {
+	  return writeerr_str;
+	}
 	for (i = 0; i < GetNumPoints(); i++) {
-	  handl->Write(&curr_sheet->pts[i].sym, 1);
+	  if (!handl->Write(&curr_sheet->pts[i].sym, 1)) {
+	    return writeerr_str;
+	  }
 	}
 	break;
       }
@@ -1306,9 +1329,13 @@ char *CC_show::Save(const char *filename) {
     // Point continuity types
     for (i = 0; i < GetNumPoints(); i++) {
       if (curr_sheet->pts[i].sym != 0) {
-	handl->WriteChunkHeader(INGL_TYPE, GetNumPoints());
+	if (!handl->WriteChunkHeader(INGL_TYPE, GetNumPoints())) {
+	  return writeerr_str;
+	}
 	for (i = 0; i < GetNumPoints(); i++) {
-	  handl->Write(&curr_sheet->pts[i].cont, 1);
+	  if (!handl->Write(&curr_sheet->pts[i].cont, 1)) {
+	    return writeerr_str;
+	  }
 	}
 	break;
       }
@@ -1316,31 +1343,48 @@ char *CC_show::Save(const char *filename) {
     // Point labels (left or right)
     for (i = 0; i < GetNumPoints(); i++) {
       if (curr_sheet->pts[i].GetFlip()) {
-	handl->WriteChunkHeader(INGL_LABL, GetNumPoints());
+	if (!handl->WriteChunkHeader(INGL_LABL, GetNumPoints())) {
+	  return writeerr_str;
+	}
 	for (i = 0; i < GetNumPoints(); i++) {
 	  if (curr_sheet->pts[i].GetFlip()) {
 	    c = TRUE;
 	  } else {
 	    c = FALSE;
 	  }
-	  handl->Write(&c, 1);
+	  if (!handl->Write(&c, 1)) {
+	    return writeerr_str;
+	  }
 	}
 	break;
       }
     }
     for (i = 0; i < curr_sheet->numanimcont; i++) {
-      handl->WriteChunkHeader(INGL_CONT,
-			      2 + curr_sheet->animcont[i].name.Length()+1 +
-			      curr_sheet->animcont[i].text.Length()+1);
+      if (!handl->WriteChunkHeader(INGL_CONT,
+				   2+curr_sheet->animcont[i].name.Length()+1+
+				   curr_sheet->animcont[i].text.Length()+1)) {
+	return writeerr_str;
+      }
       put_big_word(&short_data, curr_sheet->animcont[i].num);
-      handl->Write(&short_data, 2);
-      handl->WriteStr(curr_sheet->animcont[i].name);
-      handl->WriteStr(curr_sheet->animcont[i].text);
+      if (!handl->Write(&short_data, 2)) {
+	return writeerr_str;
+      }
+      if (!handl->WriteStr(curr_sheet->animcont[i].name)) {
+	return writeerr_str;
+      }
+      if (!handl->WriteStr(curr_sheet->animcont[i].text)) {
+	return writeerr_str;
+      }
     }
-    handl->WriteEnd(INGL_SHET);
+    if (!handl->WriteEnd(INGL_SHET)) {
+      return writeerr_str;
+    }
   }
 
-  handl->WriteEnd(INGL_SHOW);
+  if (!handl->WriteEnd(INGL_SHOW)) {
+    return writeerr_str;
+  }
+
   delete handl;
 
   return NULL;
