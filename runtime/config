@@ -15,7 +15,7 @@ UNDO_BUF_SIZE
 
 # this is for Windows
 PRINT_FILE
-LPT1
+LPT2
 
 # these are for printing under Unix
 PRINT_CMD
