@@ -49,7 +49,7 @@ private:
 
 // Point movement
 struct ShowUndoMoveElem {
-  unsigned idx;
+  unsigned short idx, refmask;
   CC_coord pos;
 };
 class ShowUndoMove : public ShowUndo {

@@ -332,6 +332,7 @@ public:
   const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
   void SetAllPositions(const CC_coord& val, unsigned i);
   void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
+  void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
   Bool TranslatePoints(CC_coord delta, unsigned ref = 0);
 
   CC_sheet *next;

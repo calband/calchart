@@ -70,7 +70,7 @@ char *ShowUndoMany::RedoDescription() {
 
 ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref)
 :ShowUndo(sheetnum), refnum(ref) {
-  unsigned i;
+  unsigned i, j;
   
   num = sheet->GetNumSelectedPoints();
   if (num > 0) {
@@ -80,6 +80,12 @@ ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref)
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
       elems[num].pos = sheet->GetPosition(i, refnum);
+      elems[num].refmask = 1<<ref;
+      if (refnum == 0) for (j = 1; j <= NUM_REF_PNTS; j++) {
+	if (sheet->GetPosition(i, j) == sheet->GetPosition(i, 0)) {
+	  elems[i].refmask |= 1<<j;
+	}
+      }
       num++;
     }
   }
@@ -94,6 +100,7 @@ ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
   }
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
+    elems[i].refmask = old->elems[i].refmask;
     elems[i].pos = sheet->GetPosition(elems[i].idx, refnum);
   }
 }
@@ -106,12 +113,16 @@ ShowUndoMove::~ShowUndoMove() {
 
 int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
 {
-  unsigned i;
+  unsigned i, j;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
 
   *newundo = new ShowUndoMove(this, sheet);
   for (i = 0; i < num; i++) {
-    sheet->SetPosition(elems[i].pos, elems[i].idx, refnum);
+    for (j = 0; j <= NUM_REF_PNTS; j++) {
+      if (elems[i].refmask & (1<<j)) {
+	sheet->SetPositionQuick(elems[i].pos, elems[i].idx, j);
+      }
+    }
   }
   show->winlist->UpdatePointsOnSheet(sheetidx, refnum);
   return (int)sheetidx;

@@ -152,7 +152,8 @@ void CC_WinNodeMain::UpdatePoints() {
 }
 void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht, int ref) {
   if (sht == canvas->show_descr.curr_ss) {
-    if ((ref < 0) || (ref == (int)canvas->curr_ref)) {
+    // ref = 0 means that any points could move
+    if ((ref <= 0) || (ref == (int)canvas->curr_ref)) {
       canvas->RefreshShow();
     }
   }

@@ -839,8 +839,16 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref) {
       }
     }
     pts[i].pos = val;
+  } else {
+    pts[i].ref[ref-1] = val;
   }
-  else {
+}
+
+// Set position of point and don't touch reference points
+void CC_sheet::SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref){
+  if (ref == 0) {
+    pts[i].pos = val;
+  } else {
     pts[i].ref[ref-1] = val;
   }
 }
