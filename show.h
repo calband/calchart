@@ -31,8 +31,7 @@ typedef short Coord;
 #define COORD2INT(a) ((a) / COORD_DECIMAL)
 #define FLOAT2COORD(a) (Coord)((a) * (1 << COORD_SHIFT))
 #define COORD2FLOAT(a) ((a) / ((float)(1 << COORD_SHIFT)))
-
-#define DEFAULT_GRID INT2COORD(2)
+#define CLIPCOORD(a) ((Coord)((a) + ((1 << COORD_SHIFT)/2.0)))
 
 #define MAX_POINTS 1000
 #define NUM_REF_PNTS 3
@@ -146,6 +145,17 @@ struct cc_oldpoint {
   char code[2];
   unsigned short cont;
   cc_oldcoord ref[3];
+};
+
+struct cc_reallyoldpoint {
+  unsigned char sym;
+  unsigned char flags;
+  cc_oldcoord pos;
+  unsigned short color;
+  char code[2];
+  unsigned short cont;
+  short refnum;
+  cc_oldcoord ref;
 };
 
 struct cc_text {
@@ -384,16 +394,6 @@ public:
   inline Bool& GetBoolDoCont() { return print_do_cont; }
   inline Bool& GetBoolDoContSheet() { return print_do_cont_sheet; }
 
-  inline void SetGrid(Coord c) {
-    gridadjust = c >> 1; // Half of grid value
-    gridmask = ~(c-1); // Create mask to snap to this coord
-  }
-  inline Coord SnapX(Coord c) { return ((c+gridadjust) & gridmask); }
-  inline Coord SnapY(Coord c) {
-    // Adjust so 4 step grid will be on visible grid
-    return ((c + gridadjust - INT2COORD(2)) & gridmask) + INT2COORD(2);
-  }
-
   Bool UnselectAll();
   inline Bool IsSelected(unsigned i) { return selections[i]; }
   inline void Select(unsigned i, Bool val = TRUE) { selections[i] = val; }
@@ -420,8 +420,6 @@ private:
   Bool print_landscape;
   Bool print_do_cont;
   Bool print_do_cont_sheet;
-  Coord gridmask;
-  Coord gridadjust;
 };
 
 class CC_descr {

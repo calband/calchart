@@ -88,6 +88,7 @@
 #define get_big_word(a) (((((unsigned char *)(a))[0] & 0xFF) << 8) | (((unsigned char *)(a))[1] & 0xFF))
 #define get_big_long(a) (((((unsigned char *)(a))[0] & 0xFF) << 24) | ((((unsigned char *)(a))[1] & 0xFF) << 16) | ((((unsigned char *)(a))[2] & 0xFF) << 8) | (((unsigned char *)(a))[3] & 0xFF))
 
+#define put_lil_word(a,v) {((unsigned char *)(a))[0]=((unsigned short)(v));((unsigned char *)(a))[1]=((unsigned short)(v))>>8;}
 #define get_lil_word(a) ((((unsigned char *)(a))[0] & 0xFF) | ((((unsigned char *)(a))[1] & 0xFF) << 8))
 
 #endif

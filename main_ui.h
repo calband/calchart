@@ -19,6 +19,10 @@
 // Possible scrolling methods
 #define FIELD_SCROLL_BARS
 
+// Value of 10 translates to a canvas of 1760x1000.
+#define FIELD_MAXZOOM 10
+#define FIELD_DEFAULT_ZOOM 5
+
 enum CC_DRAG_TYPES { CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_LINE };
 
 class FieldCanvas;
@@ -79,6 +83,8 @@ public:
   void SaveShow();
   void SaveShowAs();
 
+  void SnapToGrid(CC_coord& c);
+
   wxChoice *grid_choice;
   wxSlider *zoom_slider;
 
@@ -90,6 +96,7 @@ class FieldCanvas : public wxCanvas {
 public:
   // Basic functions
   FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
+	      int def_zoom = FIELD_DEFAULT_ZOOM,
 	      int x = -1, int y = -1, int w = -1, int h = -1,
 	      long style = wxRETAINED);
   ~FieldCanvas(void);
@@ -128,7 +135,7 @@ public:
     GetDC()->SetUserScale(f, f);
   }
   inline void SetZoom(int factor) {
-    SetZoomQuick(factor); UpdateBars(); RefreshShow();
+    SetZoomQuick(factor); UpdateBars();
   }
 
   inline void BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
@@ -170,7 +177,7 @@ class SliderWithField: public wxSlider {
 
 enum {
   CALCHART__NEW = 100,
-  CALCHART__CLONE,
+  CALCHART__NEW_WINDOW,
   CALCHART__LOAD_FILE,
   CALCHART__APPEND_FILE,
   CALCHART__SAVE,
@@ -180,8 +187,8 @@ enum {
   CALCHART__CLOSE,
   CALCHART__QUIT,
   CALCHART__UNDO,
-  CALCHART__COPY_BEFORE,
-  CALCHART__COPY_AFTER,
+  CALCHART__INSERT_BEFORE,
+  CALCHART__INSERT_AFTER,
   CALCHART__DELETE,
   CALCHART__EDIT_CONTINUITY,
   CALCHART__EDIT_PRINTCONT,
@@ -193,10 +200,6 @@ enum {
   CALCHART__ABOUT,
   CALCHART__HELP
 };
-
-// Value of 10 translates to a canvas of 1760x1000.
-#define FIELD_MAXZOOM 10
-#define FIELD_DEFAULT_ZOOM 5
 
 class MainFrameList: public wxList {
 public:

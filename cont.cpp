@@ -14,7 +14,6 @@
   Fountain
   Grid
   HSCM
-  Rotate
   */
 
 #ifdef __GNUG__
@@ -538,4 +537,17 @@ ContProcRotate::~ContProcRotate() {
 }
 
 void ContProcRotate::Compile(AnimateCompile* anim) {
+  float start_ang;
+  CC_coord c;
+  CC_coord rad;
+
+  // Most of the work is converting to polar coordinates
+  c = pnt->Get(anim);
+  rad = anim->pt.pos - c;
+  start_ang = c.Direction(anim->pt.pos);
+  anim->Append(new AnimateCommandRotate((unsigned)stps->Get(anim), c,
+					// Don't use Magnitude() because
+					// we want Coord numbers
+					sqrt(rad.x*rad.x + rad.y*rad.y),
+					start_ang, start_ang+ang->Get(anim)));
 }

@@ -191,36 +191,67 @@ void AnimateCommandMove::ClipBeats(unsigned beats) {
   AnimateCommand::ClipBeats(beats);
 }
 
-AnimateCommandRotate::AnimateCommandRotate(unsigned beats)
-: AnimateCommand(beats) {
+AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
+					   float rad, float ang1, float ang2)
+: AnimateCommand(beats), origin(cntr), r(rad), ang_start(ang1), ang_end(ang2) {
 }
 
 Bool AnimateCommandRotate::Begin(AnimatePoint& pt) {
-  return AnimateCommand::Begin(pt);
+  if (numbeats == 0) {
+    ApplyForward(pt);
+    return FALSE;
+  } else {
+    return AnimateCommand::Begin(pt);
+  }
 }
 
 Bool AnimateCommandRotate::End(AnimatePoint& pt) {
-  return AnimateCommand::End(pt);
+  if (numbeats == 0) {
+    ApplyBackward(pt);
+    return FALSE;
+  } else {
+    return AnimateCommand::End(pt);
+  }
 }
 
 Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
-  return AnimateCommand::NextBeat(pt);
+  Bool b = AnimateCommand::NextBeat(pt);
+  float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
+    * PI / 180.0;
+  pt.pos.x = CLIPCOORD(origin.x + cos(curr_ang)*r);
+  pt.pos.y = CLIPCOORD(origin.y - sin(curr_ang)*r);
+  return b;
 }
 
 Bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
-  return AnimateCommand::PrevBeat(pt);
+  if (AnimateCommand::PrevBeat(pt)) {
+    float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
+      * PI / 180.0;
+    pt.pos.x = CLIPCOORD(origin.x + cos(curr_ang)*r);
+    pt.pos.y = CLIPCOORD(origin.y - sin(curr_ang)*r);
+    return TRUE;
+  } else {
+    return FALSE;
+  }
 }
 
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt) {
-  AnimateCommand::ApplyForward(pt);
+  pt.pos.x = CLIPCOORD(origin.x + cos(ang_end*PI/180.0)*r);
+  pt.pos.y = CLIPCOORD(origin.y - sin(ang_end*PI/180.0)*r);
 }
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt) {
-  AnimateCommand::ApplyBackward(pt);
+  pt.pos.x = CLIPCOORD(origin.x + cos(ang_start*PI/180.0)*r);
+  pt.pos.y = CLIPCOORD(origin.y - sin(ang_start*PI/180.0)*r);
 }
 
 AnimateDir AnimateCommandRotate::Direction() {
-  return ANIMDIR_E;
+  float curr_ang = (ang_end - ang_start) * beat / numbeats + ang_start;
+  if (ang_end > ang_start) {
+    return AnimGetDirFromAngle(curr_ang + 90);
+  } else {
+    return AnimGetDirFromAngle(curr_ang - 90);
+  }
 }
 
 void AnimateCommandRotate::ClipBeats(unsigned beats) {

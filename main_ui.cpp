@@ -58,7 +58,6 @@ static void toolbar_setsym5(CoolToolBar *tb);
 static void toolbar_setsym6(CoolToolBar *tb);
 static void toolbar_setsym7(CoolToolBar *tb);
 static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
-static void ChangeGrid(wxChoice& choice, wxCommandEvent& ev);
 
 static ToolBarEntry main_tb[] = {
   { NULL, "Previous stuntsheet", toolbar_prev_ss },
@@ -337,7 +336,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
   file_menu->Append(CALCHART__NEW, "New Show");
-  file_menu->Append(CALCHART__CLONE, "New Window");
+  file_menu->Append(CALCHART__NEW_WINDOW, "New Window");
   file_menu->Append(CALCHART__LOAD_FILE, "Open...");
   file_menu->Append(CALCHART__APPEND_FILE, "Append...");
   file_menu->Append(CALCHART__SAVE, "Save");
@@ -349,8 +348,8 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   wxMenu *edit_menu = new wxMenu;
   edit_menu->Append(CALCHART__UNDO, "Undo");
-  edit_menu->Append(CALCHART__COPY_BEFORE, "Copy Sheet Before");
-  edit_menu->Append(CALCHART__COPY_AFTER, "Copy Sheet After");
+  edit_menu->Append(CALCHART__INSERT_BEFORE, "Insert Sheet Before");
+  edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet After");
   edit_menu->Append(CALCHART__DELETE, "Delete Sheet");
   edit_menu->Append(CALCHART__EDIT_CONTINUITY, "Edit Continuity...");
   edit_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit Printed Continuity...");
@@ -393,20 +392,20 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   }
 
   SetTitle((char *)show->UserGetName());
-  field = new FieldCanvas(show, ss, this);
+  field = new FieldCanvas(show, ss, this, def_zoom);
   frameCanvas = field;
   node = new CC_WinNodeMain(show->winlist, field);
 
   // Add the controls
   framePanel = new wxPanel(this);
-  grid_choice = new wxChoice(framePanel, (wxFunction)ChangeGrid,
-				  "Grid", -1, -1, -1, -1,
-				  sizeof(gridtext)/sizeof(char*),
-				  gridtext);
+  grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
+			     "Grid", -1, -1, -1, -1,
+			     sizeof(gridtext)/sizeof(char*),
+			     gridtext);
   grid_choice->SetSelection(def_grid);
   SliderWithField *sldr = new SliderWithField(framePanel, slider_zoom_callback,
-					  "Zoom", def_zoom,
-					  1, FIELD_MAXZOOM, 150);
+					      "Zoom", def_zoom,
+					      1, FIELD_MAXZOOM, 150);
   sldr->field = field;
   zoom_slider = sldr;
 
@@ -448,7 +447,7 @@ void MainFrame::OnMenuCommand(int id)
       node->SetShow(new CC_show());
     }
     break;
-  case CALCHART__CLONE:
+  case CALCHART__NEW_WINDOW:
     frame = new MainFrame(NULL, 50, 50, window_default_width,
 			  window_default_height, this);
     break;
@@ -484,12 +483,12 @@ void MainFrame::OnMenuCommand(int id)
     if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
       field->GotoSS((unsigned)sheetnum);
     break;
-  case CALCHART__COPY_BEFORE:
+  case CALCHART__INSERT_BEFORE:
     sht = new CC_sheet(field->show_descr.CurrSheet());
     field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss);
     field->PrevSS();
     break;
-  case CALCHART__COPY_AFTER:
+  case CALCHART__INSERT_AFTER:
     sht = new CC_sheet(field->show_descr.CurrSheet());
     field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss+1);
     field->NextSS();
@@ -570,7 +569,7 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__NEW:
     msg = "Create a new show";
     break;
-  case CALCHART__CLONE:
+  case CALCHART__NEW_WINDOW:
     msg = "Open a new window";
     break;
   case CALCHART__LOAD_FILE:
@@ -599,11 +598,11 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__UNDO:
     msg = field->show_descr.show->undolist->UndoDescription();
     break;
-  case CALCHART__COPY_BEFORE:
-    msg = "Make a copy before this stuntsheet";
+  case CALCHART__INSERT_BEFORE:
+    msg = "Insert a new stuntsheet before this one";
     break;
-  case CALCHART__COPY_AFTER:
-    msg = "Make a copy after this stuntsheet";
+  case CALCHART__INSERT_AFTER:
+    msg = "Insert a new stuntsheet after this one";
     break;
   case CALCHART__DELETE:
     msg = "Delete this stuntsheet";
@@ -721,16 +720,30 @@ void MainFrame::SaveShowAs() {
   }    
 }
 
+void MainFrame::SnapToGrid(CC_coord& c) {
+  Coord gridc;
+  Coord gridmask;
+  Coord gridadjust;
+
+  gridc = gridvalue[grid_choice->GetSelection()];
+  gridadjust = gridc >> 1; // Half of grid value
+  gridmask = ~(gridc-1); // Create mask to snap to this coord
+
+  c.x = (c.x+gridadjust) & gridmask;
+  // Adjust so 4 step grid will be on visible grid
+  c.y = ((c.y + gridadjust - INT2COORD(2)) & gridmask) + INT2COORD(2);
+}
+
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
-			 int x, int y, int w, int h, long style):
+			 int def_zoom, int x, int y, int w, int h, long style):
  wxCanvas(frame, x, y, w, h, style), ourframe(frame), drag(CC_DRAG_NONE)
 {
   show_descr.show = show;
   show_descr.curr_ss = ss;
 
   GetDC()->SetMapMode(MM_TEXT);
-  SetZoomQuick(FIELD_DEFAULT_ZOOM);
+  SetZoomQuick(def_zoom);
 
   if (GetDC()->Colour) {
     SetBackground(grassBrush);
@@ -808,8 +821,8 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
     if (sheet) {
       event.Position(&x, &y);
       pos = show_descr.show->mode->Offset();
-      pos.x = show_descr.show->SnapX(Coord(x - pos.x));
-      pos.y = show_descr.show->SnapY(Coord(y - pos.y));
+      pos.x = Coord(x - pos.x);
+      pos.y = Coord(y - pos.y);
 
       if (event.LeftDown()) {
 	Bool changed = FALSE;
@@ -827,7 +840,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	if (i < 0) {
 	  BeginDrag(CC_DRAG_BOX, pos);
 	} else {
-	  BeginDrag(CC_DRAG_LINE, pos);
+	  BeginDrag(CC_DRAG_LINE, sheet->pts[i].pos);
 	}
       } else {
 	if (event.LeftUp()) {
@@ -850,6 +863,9 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  }
 	} else {
 	  if (event.Dragging() && event.LeftIsDown()) {
+	    if (drag != CC_DRAG_BOX) {
+	      ourframe->SnapToGrid(pos);
+	    }
 	    MoveDrag(pos);
 	  }
 	}
@@ -988,10 +1004,4 @@ static void toolbar_setsym7(CoolToolBar *tb) {
 static void slider_zoom_callback(wxObject &obj, wxEvent &) {
   SliderWithField *slider = (SliderWithField *)&obj;
   slider->field->SetZoom(slider->GetValue());
-}
-
-static void ChangeGrid(wxChoice& choice, wxCommandEvent&) {
-  MainFrame *frame = (MainFrame*) choice.GetParent()->GetParent();
-
-  frame->field->show_descr.show->SetGrid(gridvalue[choice.GetSelection()]);
 }

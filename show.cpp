@@ -722,8 +722,8 @@ Bool CC_sheet::TranslatePoints(CC_coord delta) {
 
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
-      pts[i].pos.x = show->SnapX(pts[i].pos.x + delta.x);
-      pts[i].pos.y = show->SnapY(pts[i].pos.y + delta.y);
+      pts[i].pos.x += delta.x;
+      pts[i].pos.y += delta.y;
       change = TRUE;
     }
   }
@@ -735,7 +735,6 @@ CC_show::CC_show(unsigned npoints)
 :numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
  modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
  print_do_cont_sheet(TRUE) {
-  SetGrid(DEFAULT_GRID);
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
@@ -956,6 +955,12 @@ CC_show::CC_show(const char *file)
  pt_labels(NULL), modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
  print_do_cont_sheet(TRUE) {
   cc_oldpoint *diskpts;
+
+  // These are for really old reference point format
+  cc_oldpoint conv_diskpt;
+  Bool reallyoldpnts;
+  int record_len;
+
   int namelen;
   char *namebuf;
   Bool old_format = FALSE;
@@ -969,7 +974,6 @@ CC_show::CC_show(const char *file)
   char tempbuf[SHOWBUFSIZE];
   char sheetnamebuf[SHOWBUFSIZE];
 
-  SetGrid(DEFAULT_GRID);
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
@@ -1073,14 +1077,51 @@ CC_show::CC_show(const char *file)
 	error = nofile_str;
 	return;
       }
-      if (fread(diskpts, sizeof(cc_oldpoint), numpoints, fp) != numpoints) {
+      record_len = fread(diskpts, numpoints, sizeof(cc_oldpoint), fp);
+      if (record_len == sizeof(cc_oldpoint)) {
+	reallyoldpnts = FALSE;
+      } else if (record_len == sizeof(cc_reallyoldpoint)) {
+	reallyoldpnts = TRUE;
+      } else {
 	error = badfile_pnt_str;
 	return;
       }
       fclose(fp);
 
       for (i = 0; i < numpoints; i++) {
-	curr_sheet->pts[i] = diskpts[i];
+	if (reallyoldpnts) {
+	  short refidx;
+	  unsigned short refloc;
+
+	  conv_diskpt.sym = ((cc_reallyoldpoint*)diskpts)[i].sym;
+	  conv_diskpt.flags = ((cc_reallyoldpoint*)diskpts)[i].flags;
+	  conv_diskpt.pos = ((cc_reallyoldpoint*)diskpts)[i].pos;
+	  conv_diskpt.color = ((cc_reallyoldpoint*)diskpts)[i].color;
+	  conv_diskpt.code = ((cc_reallyoldpoint*)diskpts)[i].code;
+	  conv_diskpt.cont = ((cc_reallyoldpoint*)diskpts)[i].cont;
+	  refidx = get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].refnum);
+	  if (refidx >= 0) {
+	    refloc =
+	      get_lil_word(&((cc_reallyoldpoint*)diskpts)[refidx].pos.x) +
+	      (short)get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].ref.x);
+	    put_lil_word(&conv_diskpt.ref[0].x, refloc);
+
+	    refloc =
+	      get_lil_word(&((cc_reallyoldpoint*)diskpts)[refidx].pos.y) +
+	      (short)get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].ref.y);
+	    put_lil_word(&conv_diskpt.ref[0].y, refloc);
+	  } else {
+	    conv_diskpt.ref[0].x = 0xFFFF;
+	    conv_diskpt.ref[0].x = 0xFFFF;
+	  }
+	  conv_diskpt.ref[1].x = 0xFFFF;
+	  conv_diskpt.ref[1].x = 0xFFFF;
+	  conv_diskpt.ref[2].x = 0xFFFF;
+	  conv_diskpt.ref[2].x = 0xFFFF;
+	  curr_sheet->pts[i] = conv_diskpt;
+	} else {
+	  curr_sheet->pts[i] = diskpts[i];
+	}
 
 	if (k == 1) {
 	  // Build table for point labels

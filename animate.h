@@ -83,7 +83,8 @@ private:
 
 class AnimateCommandRotate : public AnimateCommand {
 public:
-  AnimateCommandRotate(unsigned beats);
+  AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad,
+		       float ang1, float ang2);
 
   virtual Bool Begin(AnimatePoint& pt);
   virtual Bool End(AnimatePoint& pt);
@@ -96,6 +97,8 @@ public:
   virtual AnimateDir Direction();
   virtual void ClipBeats(unsigned beats);
 private:
+  CC_coord origin;
+  float r, ang_start, ang_end;
 };
 
 class AnimateSheet {

@@ -90,8 +90,8 @@ procedure
 		{ $$ = new ContProcEven($2, $3); }
 	| pEWNS point
 		{ $$ = new ContProcEWNS($2); }
-	| pFOUNTAIN value value
-		{ $$ = new ContProcFountain($2, $3); }
+	| pFOUNTAIN value value point
+		{ $$ = new ContProcFountain($2, $3, $4); }
 	| pFM value value
 		{ $$ = new ContProcFM($2, $3); }
 	| pFMTO point
