@@ -10031,3 +10031,403 @@ ________________________________________________________
 
 
 
+From dci@hog.uchicago.edu Sun Jul 14 13:09:51 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id NAA19597 for <gmeeker@volga.EECS.Berkeley.EDU>; Sun, 14 Jul 1996 13:09:50 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id PAA24304 for gmeeker@volga.EECS.Berkeley.EDU; Sun, 14 Jul 1996 15:10:07 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607142010.PAA24304@hog.uchicago.edu>
+Subject: Re: CalChart scrolling
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Sun, 14 Jul 1996 15:10:07 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960714123518.1432C-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 14, 96 12:40:19 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+
+>    I finally decided that it was time to get rid of the scroll bars on 
+> the field canvas.  Besides being awkward to use, they don't work 
+> correctly under Windows.  The new version scrolls automatically.  Let me 
+> know what you think.  Obviously, this is an early prototype and there 
+> will be later features like locking the field's position.
+
+I just tried it out.  I haven't really tested it yet, but I can already 
+tell that it is a huge improvement over the scrollbars.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Sun Jul 14 13:14:37 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id NAA19673 for <gmeeker@volga.EECS.Berkeley.EDU>; Sun, 14 Jul 1996 13:14:36 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id PAA24314 for gmeeker@volga.EECS.Berkeley.EDU; Sun, 14 Jul 1996 15:14:53 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607142014.PAA24314@hog.uchicago.edu>
+Subject: Re: CalChart lasso
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Sun, 14 Jul 1996 15:14:53 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960712132621.4826D-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 12, 96 01:31:00 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+ 
+> Okay, my message wasn't very clear.  I was just wondering if it should be 
+> possible to do a block move without shift clicking.  It's probably okay 
+> the way it is, though.
+
+I think it is fine the way it is.
+ 
+> > This system seems to be working fine for me.  The only problem is the
+> > annoyance and delay associated with the excessive screen refreshing.  I am
+> > becoming more and more convinced that the screen refreshing trouble is
+> > going to be a huge pain in the ass for users; this is certainly the most
+> > significant problem that I have encountered so far in testing.  If its
+> > solution is a major project, then I suggest you deal with it sooner rather
+> > than later. 
+> 
+> This is much better with the current version.  It still should be 
+> faster.  On my computer it's fine, but it's slow on some of the band's 
+> computers.  In particular, it takes a long time to draw the field because 
+> of all the lines.  I'll probably have it store the field in a image.  I 
+> could also have it only redraw the damaged regions.
+
+I like the idea of redrawing only the damaged regions, but I have no way 
+to tell if this is at all feasible.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Sun Jul 14 14:11:17 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id OAA20249 for <gmeeker@volga.EECS.Berkeley.EDU>; Sun, 14 Jul 1996 14:11:16 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id QAA24345 for gmeeker@volga.EECS.Berkeley.EDU; Sun, 14 Jul 1996 16:11:33 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607142111.QAA24345@hog.uchicago.edu>
+Subject: Re: calchart bugs 6/17/96
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Sun, 14 Jul 1996 16:11:33 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960712133212.4826E-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 12, 96 01:41:56 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+
+> > Maybe the time has come for a separate Labels window.  Here is a full 
+> > description of what I am imagining.
+> 
+> I think I'll postpone this for now.  This is something we can probably 
+> live without for a while.
+
+Certainly a low priority.  But I do think it ought to be done eventually.
+ 
+> > But there is one disadvantage.  Is "proliferation" of windows becoming a 
+> > problem?  Are we ending up with the same kind of interface as Version 2, 
+> > except that you use the mouse instead of the keyboard?
+> > 
+> > We should probably be evaluating this on a case-by-case basis.  In this 
+> > situation, it seems to be appropriate.  Almost all the time, the Labels 
+> > window will only be used when first creating a new show.  Then it is gone 
+> > forever.  Only special circumstances (changing the number of points, 
+> > changing from numbered labels to lettered labels, custom labels, etc) 
+> > will require additional use of this window.  So it won't clutter up the 
+> > workspace in the same way that the animation window, the continuity 
+> > window, and the point selector window might.
+> 
+> Well, you can close any windows that aren't being used, so I don't see 
+> the problem...
+
+True, but closing and opening windows can be a pain in the ass.  I like 
+to leave windows open if I am planning on using them again soon.
+ 
+> > I have noticed that you are using the word "point" to refer to a circular 
+> > symbol with a label.  If it weren't for the accusations of sexism, I 
+> > would encourage you to change to "man", since it is the obvious 
+> > generalization of "plainman", "solidman", etc.  Is there another word 
+> > that we can use that will be more acceptable?  If not, then we will have 
+> > to think up another word for field location.  I guess "location" would 
+> > work for that.
+> 
+> I had forgotten about this.  I guess I'm still used the old terminology.  
+> But I beginning to think that this might be confusing.  For instance, the 
+> term "reference point."  True, it really refers to a location, but it's 
+> displayed basically the same way as a man.  Also, the term "man" is not 
+> very good.  I mean, "man selector" sounds pretty dumb.  I could try to 
+> avoid it by saying things like "change block size," but maybe it would be 
+> better to use "location" for a field location.
+
+Good point about "man selector".  OK, then "point" and "location" are the 
+choices.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Sun Jul 14 14:35:52 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id OAA20504 for <gmeeker@volga.EECS.Berkeley.EDU>; Sun, 14 Jul 1996 14:35:51 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id QAA24469 for gmeeker@volga.EECS.Berkeley.EDU; Sun, 14 Jul 1996 16:36:08 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607142136.QAA24469@hog.uchicago.edu>
+Subject: Re: Implementing FOUNTAIN
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Sun, 14 Jul 1996 16:36:08 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960712203438.8837A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 12, 96 08:55:39 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+ 
+> The current format is:
+>    FOUNTAIN <dir1> <dir2> <point>
+> The stepsize should be added, but it does make a slight problem (I think 
+> I mentioned this before).  Because the arguments are only separated by 
+> white space the following is ambiguous:
+>    FOUNTAIN 90 - 1 180 - 1 NP
+> Does this mean:
+>    FOUNTAIN (90 - 1) (180 - 1) NP
+> or:
+>    FOUNTAIN 90 (-1) 180 (-1) NP
+> I forget what I make it default to when I ran into this (so it's 
+> something I've already taken care of).  If anyone actually were to use 
+> arithmetic, they should really use parenthesis.  I'm telling you this 
+> because I think this should be mentioned in the manual.  It's a big 
+> weakness in the language, technically speaking.
+
+Adding the stepsize doesn't make it any more ambiguous, does it?  It's 
+already ambiguous:
+	FOUTAIN 180 - 90 NP
+
+Maybe you are envisioning a command that takes either 2 or 4 arguments.  
+All of the commands in version 2 have a fixed number of arguments; no 
+flexibility in that way.
+
+My suggestion is to require 4 arguments for FOUNTAIN.  If you want a 
+two-argument command, then make a new one called FT or FNT or something 
+like that.  That fits the general pattern (like COUNTERMARCH vs. HSCM, or 
+MARCH vs. FM).
+
+A lot of seeming ambiguities can be solved by a smart parser.  For example,
+	FOUNTAIN 90 - 1 180 - 1 NP
+only makes sense if you interpret it as
+	FOUNTAIN 90 (-1) 180 (-1) NP.
+Any other interpretation does not provide 4 arguments.
+ 
+> > For arbitrary n x n matrices, there is no nice formula for determinants. 
+> > Then you have to resort to something like Gaussian elimination or other
+> > various fancy algorithms.  A lot of people have spent a lot of time
+> > investigating fast algorithms for matrix inversion.
+> 
+> I had forgotten that I could simplify this for 2x2 matrices.  Maybe 
+> because I've had to write Gaussian elimination algorithms so many times 
+> for graphics classes (when dealing with 3x3 or 4x4 matrices).  I'm glad 
+> you reminded me of this before I did it again.  Maybe I should brush up 
+> on my linear algebra.
+
+For any given n, there exist such explicit formulae.  However, they get 
+very complicated very quickly.  In actual practice, the matrices that 
+usually arise tend to have lots of 0 entries.  So if you just use the 
+formulae, you will waste a lot of time multiplying by 0 over and over 
+again.
+
+Gaussian elimination is advantageous in that it can avoid this 
+problem.  It can tell when a matrix is "easy to invert", and does it the 
+easy way without a lot of unnecessary work.
+
+However, the 2 x 2 case is so simple that it's just not worth it.
+ 
+> I seem to have deleted the relevant part of your response, but you think 
+> that:
+>    FOUNTAIN N S NP
+> should produce an error if NP is, say, north of P?  I don't know why 
+> anyone would do that anyway.
+
+I kept a copy of the response, so let me know if you need another copy.
+
+Here's the trouble with FT N S NP.  Let's say that NP is 8 steps due 
+north of our current position.  What should the continuity be?  8 N, 0 S 
+looks reasonable.  What about 10 N, 2 S?  Or how about -4 N, 12 S?
+
+Technically speaking, these are all perfectly valid solutions to the 
+problem.  If you want to add a "shortest possible path" routine when the 
+solution is not unique, then that is fine.  But in this capacity, FT is 
+functioning more like DMHS or HSDM.
+ 
+> > By the way, my latest project is to think about the various ways in which 
+> > one can lace shoes.
+> 
+> Sounds interesting.  I'd be interested in the results.
+
+I'll let you know when I've got a proof of my conjecture.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Wed Jul 17 07:32:03 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id HAA17130 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 17 Jul 1996 07:32:02 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id JAA28825 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 17 Jul 1996 09:32:19 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607171432.JAA28825@hog.uchicago.edu>
+Subject: Re: CalChart FOUNTAIN formula
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 17 Jul 1996 09:32:19 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960716151240.29654A-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 16, 96 03:20:48 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: 
+
+ 
+> I've got a question about the formula for special case where:
+> a = b, c = d, ec - af = 0
+> (I'm assuming you have your message to look at)
+> So said that we get:
+> g = e/c, h = 0
+> Don't we really want
+> ||(e,f)|| / ||(a,c)||
+> Although it'd be faster to use one component, so e/a or f/c if a = 0
+
+Yep, you're right.  That was an accidental mistake.  Definitely go with 
+the faster method; taking square roots is an unhappy business.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Wed Jul 17 07:56:50 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id HAA17439 for <gmeeker@volga.EECS.Berkeley.EDU>; Wed, 17 Jul 1996 07:56:49 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id JAA28892 for gmeeker@volga.EECS.Berkeley.EDU; Wed, 17 Jul 1996 09:57:00 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199607171457.JAA28892@hog.uchicago.edu>
+Subject: Re: Implementing FOUNTAIN
+To: gmeeker@volga.EECS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 17 Jul 1996 09:56:59 -0500 (CDT)
+In-Reply-To: <Pine.ULT.3.91.960714165121.3490C-100000@volga.EECS.Berkeley.EDU> from "Garrick Meeker" at Jul 14, 96 05:08:25 pm
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+ 
+> We really should have backwards compatibility, so FOUNTAIN should work 
+> with 2 arguments.  There isn't really an technical reason why we can't 
+> have it take either 2 or 4 arguments, but maybe it would be easier for 
+> the user if there were two different commands.
+
+I am concerned with consistency between the various commands.  If we are 
+going to allow FOUNTAIN to take either 2 or 4 arguments, then we should 
+allow MARCH to take 1, 2, or 3 arguments.  And so forth.
+ 
+I also highly value backwards compatibility.  We have a slight advantage 
+in this situation in that the collection of old data is under our 
+control.  One solution would be to write a script to convert all the old 
+continuity files by replacing "FOUNTAIN" with "FNT".
+
+The other solution I propose is to allow FOUNTAIN to take 2 or 4 
+commands, but not to tell anyone about it.  This will give backwards 
+compatibility, but it will not confuse current users, either.
+
+Of course, I don't mean LITERALLY not tell anyone.  There ought to be a 
+mention in an obscure part of the manual.
+
+> Now the other thing is that the parser is automatically generated from a 
+> grammar file, which is a common this to do.  Without going into too much 
+> detail, the parser only looks one token ahead so it has to immediately 
+> decide what to do.  This parser generator is designed for things like 
+> programming languages where this isn't a problem.  I could write a parser 
+> from scratch that would handle this, but it would probably be slower and 
+> I think it would be way too much work for something that most users will 
+> never run into.  Probably better to document that parenthises should be used.
+
+I don't see what's wrong with dependency on parentheses.  Better to 
+require parentheses some of the time than commas all of the time.
+
+> > Here's the trouble with FT N S NP.  Let's say that NP is 8 steps due 
+> > north of our current position.  What should the continuity be?  8 N, 0 S 
+> > looks reasonable.  What about 10 N, 2 S?  Or how about -4 N, 12 S?
+> > 
+> > Technically speaking, these are all perfectly valid solutions to the 
+> > problem.  If you want to add a "shortest possible path" routine when the 
+> > solution is not unique, then that is fine.  But in this capacity, FT is 
+> > functioning more like DMHS or HSDM.
+> 
+> I was thinking of "shortest possible path" in this situation.  But this 
+> isn't really necessary.  I mainly just want to do it the same way the old 
+> one does.  I assume the old version doesn't allow this?  I suppose I 
+> could just check.
+
+I do not remember what the old version does.  Come to think of it, I 
+think that "shortest possible path" is probably the right thing to do.  
+If you had a command like FT DIRTO(R1) DIRTO(R2) NP, the point on the 50 
+might end up with something like FT N S NP.  You wouldn't want to make a 
+special continuity just for that point.
+
+Dan
+
+
+
+From dci@hog.uchicago.edu Wed Jul 31 17:54:20 1996
+Received: from hog.uchicago.edu (hog.uchicago.edu [128.135.72.46]) by pasteur.EECS.Berkeley.EDU (8.6.11/8.6.4) with ESMTP id RAA18249 for <gmeeker@fox.CS.Berkeley.EDU>; Wed, 31 Jul 1996 17:54:19 -0700
+Received: (from dci@localhost) by hog.uchicago.edu (8.7.5/8.7.5) id TAA19179 for gmeeker@fox.CS.Berkeley.EDU; Wed, 31 Jul 1996 19:54:18 -0500 (CDT)
+From: Dan Isaksen <dci@math.uchicago.edu>
+Message-Id: <199608010054.TAA19179@hog.uchicago.edu>
+Subject: Re: Implementing FOUNTAIN
+To: gmeeker@fox.CS.Berkeley.EDU (Garrick Meeker)
+Date: Wed, 31 Jul 1996 19:54:17 +1900 (CDT)
+In-Reply-To: <Pine.HPP.3.91.960725035617.14774A-100000@fox.CS.Berkeley.EDU> from "Garrick Meeker" at Jul 25, 96 04:08:03 am
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Status: RO
+X-Status: A
+
+ 
+> I think this is much better.  For one think, people that are familiar 
+> with calchart now don't need to do anything different.  Maybe the manual 
+> could have a technical section with the exact grammar for all the commands.
+
+Without question some part of the manual should completely describe all 
+of the continuity language.  And should completely describe all of the 
+reast of the program...
+ 
+> In other news, did you get the calchart manual?  The only reason I ask is 
+> that I wasn't completely sure if the prepaid envelope would work.
+
+Yes, I did.  Thanks a lot.  It has definitely been useful to me.
+ 
+> Also, there's a new version of calchart on the web page.  The main thing 
+> of interest is the redo option.  There are also minor enhancements in the 
+> undo system (bug fixes and undo for more commands).  The commands GRID 
+> and FOUNTAIN are now implemented.  I'm going to focus energy on the 
+> animation system now.
+
+This is my last week in Duluth, and I have been kind of busy.  I won't 
+have time to do any testing until early next week (when I am back in 
+Chicago).  I haven't even looked at the latest version yet.
+
+How is your new job?  You should remind computer comm to not remove your 
+email alias on the band's computers because you are still working on a 
+computer project for them.  Besides, that way I won't have to write down 
+a new address for you.
+
+Dan
+
+
+
