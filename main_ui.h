@@ -108,7 +108,7 @@ public:
   void OnScroll(wxCommandEvent& event);
 
   // Misc show functions
-  inline void RefreshShow() { OnPaint(); }
+  void RefreshShow(Bool drawall = TRUE, int point = -1);
   void UpdatePanel();
   void UpdateBars();
   inline void UpdateSS() { RefreshShow(); UpdatePanel(); }
@@ -141,18 +141,18 @@ public:
   }
 
   inline void BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
-    DrawDrag();
+    DrawDrag(FALSE);
     drag = type;
     drag_start = drag_end = start;
-    DrawDrag();
+    DrawDrag(TRUE);
   };
   inline void MoveDrag(CC_coord end) {
-    DrawDrag();
+    DrawDrag(FALSE);
     drag_end = end;
-    DrawDrag();
+    DrawDrag(TRUE);
   };
   inline void EndDrag() {
-    DrawDrag();
+    DrawDrag(FALSE);
     drag = CC_DRAG_NONE;
   };
 
@@ -162,10 +162,11 @@ public:
   CC_DRAG_TYPES curr_lasso;
 
 private:
-  void DrawDrag();
+  void DrawDrag(Bool on = TRUE);
 
   CC_DRAG_TYPES drag;
   CC_coord drag_start, drag_end;
+  Bool dragon;
   int zoomf;
 };
 

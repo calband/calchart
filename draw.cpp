@@ -15,8 +15,9 @@ extern wxFont *pointLabelFont;
 extern wxBrush *hilitBrush;
 extern wxPen *hilitPen;
 
-void CC_sheet::Draw(wxDC *dc) {
+void CC_sheet::Draw(wxDC *dc, Bool drawall, int point) {
   unsigned short i;
+  unsigned lastpoint;
   wxBrush *fillBrush;
   unsigned long x, y;
   float offset, lineoff, textoff;
@@ -35,9 +36,11 @@ void CC_sheet::Draw(wxDC *dc) {
   }
   dc->SetTextForeground(wxBLACK);
   dc->SetLogicalFunction(wxCOPY);
-  dc->Clear();
 
-  show->mode->Draw(dc);
+  if (drawall) {
+    dc->Clear();
+    show->mode->Draw(dc);
+  }
 
   if (pts) {
     dc->SetFont(pointLabelFont);
@@ -46,7 +49,14 @@ void CC_sheet::Draw(wxDC *dc) {
     lineoff = offset * pline_ratio;
     textoff = offset * 1.25;
     origin = show->mode->Offset();
-    for (i = 0; i < show->GetNumPoints(); i++) {
+    if (point < 0) {
+      i = 0;
+      lastpoint = show->GetNumPoints();
+    } else {
+      i = (unsigned)point;
+      lastpoint = (unsigned)point + 1;
+    }
+    for (; i < lastpoint; i++) {
       if (dc->Colour) {
 	if (show->IsSelected(i)) {
 	  dc->SetPen(hilitPen);

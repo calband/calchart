@@ -288,7 +288,7 @@ public:
   CC_sheet(CC_sheet *sht);
   ~CC_sheet();
 
-  void Draw(wxDC *dc);
+  void Draw(wxDC *dc, Bool drawall = TRUE, int point = -1);
 
   // internal use only
   char *PrintStandard(FILE *fp);

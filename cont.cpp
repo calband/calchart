@@ -8,7 +8,6 @@
 
 /*
   Commands left to implement:
-  Either
   CM
   DMCM
   Fountain
@@ -213,9 +212,18 @@ ContFuncEither::~ContFuncEither() {
   if (pnt) delete pnt;
 }
 
-float ContFuncEither::Get(AnimateCompile*) {
-  // TODO
-  return 0.0;
+float ContFuncEither::Get(AnimateCompile* anim) {
+  float dir;
+  float d1, d2;
+
+  dir = anim->pt.pos.Direction(pnt->Get(anim));
+  d1 = dir1->Get(anim) - dir;
+  d2 = dir2->Get(anim) - dir;
+  while (d1 > 180) d1-=360;
+  while (d1 < -180) d1+=360;
+  while (d2 > 180) d2-=360;
+  while (d2 < -180) d2+=360;
+  return (ABS(d1) > ABS(d2)) ? dir2->Get(anim) : dir1->Get(anim);
 }
 
 ContFuncOpp::~ContFuncOpp() {

@@ -66,7 +66,7 @@ void CC_WinNodePointPicker::ChangePointLabels(wxWindow*) {
 void CC_WinNodePointPicker::UpdateSelections(wxWindow *win, int point) {
   if (win != picker) {
     if (point < 0) {
-      picker->Update();
+      picker->UpdateSelections();
     } else {
       picker->Set(point, picker->show->IsSelected(point));
     }
@@ -192,9 +192,9 @@ show(shw) {
 
   closeBut->SetDefault();
 
-  list = new wxListBox(panel, (wxFunction)SheetPickerClick, "",
-		       multi ? wxMULTIPLE:wxSINGLE,
-		       -1, -1, -1, -1);
+  list = new GoodListBox(panel, (wxFunction)SheetPickerClick, "",
+			 multi ? wxMULTIPLE:wxSINGLE,
+			 -1, -1, -1, -1);
   SetListBoxEntries();
   wxLayoutConstraints *b1 = new wxLayoutConstraints;
   b1->left.SameAs(panel, wxLeft, 5);
@@ -249,9 +249,7 @@ void StuntSheetPicker::SetListBoxEntries() {
   }
   list->Set(show->GetNumSheets(), text);
   for (n = 0, sheet = show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next) {
-    if (!sheet->picked || !list->Selected(n)) { // so Motif version works
-      list->SetSelection(n, sheet->picked);
-    }
+    list->SetSelection(n, sheet->picked);
   }
   delete text;
 }
@@ -335,9 +333,9 @@ show(shw) {
 
   closeBut->SetDefault();
 
-  list = new wxListBox(panel, (wxFunction)PointPickerClick, "",
-		       multi ? wxMULTIPLE:wxSINGLE,
-		       -1, -1, -1, -1);
+  list = new GoodListBox(panel, (wxFunction)PointPickerClick, "",
+			 multi ? wxMULTIPLE:wxSINGLE,
+			 -1, -1, -1, -1);
   SetListBoxEntries();
   wxLayoutConstraints *b1 = new wxLayoutConstraints;
   b1->left.SameAs(panel, wxLeft, 5);
@@ -381,6 +379,14 @@ void PointPicker::Update() {
   SetListBoxEntries();
 }
 
+void PointPicker::UpdateSelections() {
+  unsigned n;
+
+  for (n = 0; n < show->GetNumPoints(); n++) {
+    list->SetSelection(n, show->IsSelected(n));
+  }
+}
+
 void PointPicker::SetListBoxEntries() {
   char **text;
   unsigned n;
@@ -391,9 +397,7 @@ void PointPicker::SetListBoxEntries() {
   }
   list->Set(show->GetNumPoints(), text);
   for (n = 0; n < show->GetNumPoints(); n++) {
-    if (!show->IsSelected(n) || !list->Selected(n)) { // so Motif version works
-      list->SetSelection(n, show->IsSelected(n));
-    }
+    list->SetSelection(n, show->IsSelected(n));
   }
   delete text;
 }
@@ -519,8 +523,8 @@ show(shw) {
   b0->height.AsIs();
   lettersize->SetConstraints(b0);
 
-  labels = new wxListBox(panel, (wxFunction)NULL, "Letters",
-			 wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
+  labels = new GoodListBox(panel, (wxFunction)NULL, "Letters",
+			   wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
   buf[1] = '\0';
   for (i = 0; i < 26; i++) {
     buf[0] = i + 'A';

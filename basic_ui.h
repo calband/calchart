@@ -49,6 +49,17 @@ enum FRAMESTUFF_LAYOUT {
   wxFRAMESTUFF_CNV_PNL
 };
 
+// Define a list box that fixes Motif bug
+class GoodListBox : public wxListBox {
+public:
+  GoodListBox(wxPanel *panel, wxFunction func, char *Title,
+	      Bool Multiple = wxSINGLE|wxNEEDED_SB,
+	      int x = -1, int y = -1, int width = -1, int height = -1,
+	      int N = 0, char **Choices = NULL,
+	      long style = 0, char *name = "listBox");
+  void SetSelection(int N, Bool select = TRUE);
+};
+
 // Define a frame with a toolbar and a panel and canvas
 class wxFrameWithStuff: public wxFrame
 {

@@ -30,6 +30,19 @@ void FancyTextWin::OnDropFiles(int, char *files[], int, int) {
   LoadFile(files[0]);
 }
 
+GoodListBox::GoodListBox(wxPanel *panel, wxFunction func, char *Title,
+			 Bool Multiple, int x, int y, int width, int height,
+			 int N, char **Choices, long style, char *name)
+  : wxListBox(panel, func, Title, Multiple, x, y, width, height,
+	      N, Choices, style, name) {}
+
+void GoodListBox::SetSelection(int N, Bool select) {
+  // so Motif version works
+  if (!select || !Selected(N)) {
+    wxListBox::SetSelection(N, select);
+  }
+}
+
 // Toolbar-handling frame constructor
 wxFrameWithStuff::wxFrameWithStuff(wxFrame *frame, char *title,
 				   int x, int y, int w, int h,

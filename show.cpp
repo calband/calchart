@@ -35,14 +35,14 @@ static char nosheets_str[] = "No sheets found";
 static char writeerr_str[] = "Write error: check disk media";
 
 static char *contnames[] = {
-  "PLAIN",
-  "SOL",
-  "BKSL",
-  "SL",
+  "Plain",
+  "Sol",
+  "Bksl",
+  "Sl",
   "X",
-  "SOLBKSL",
-  "SOLSL",
-  "SOLX"
+  "Solbksl",
+  "Solsl",
+  "Solx"
 };
 
 extern ShowModeList *modelist;
@@ -290,6 +290,7 @@ CC_continuity::~CC_continuity() {
 
 void CC_continuity::SetName(const char* s) {
   name = s;
+  name.Capitalize();
 }
 
 void CC_continuity::SetText(const char* s) {
@@ -668,7 +669,7 @@ CC_continuity *CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym) {
   unsigned i,idx;
 
   for (c = animcont; c != NULL; c = c->next) {
-    if (c->name == contnames[sym]) {
+    if (c->name.CompareTo(contnames[sym], wxString::ignoreCase) == 0) {
       break;
     }
   }
@@ -695,7 +696,7 @@ unsigned CC_sheet::FindContinuityByName(const char *name) {
   CC_continuity *c;
 
   for (idx = 0, c = animcont; c != NULL; idx++, c = c->next) {
-    if (c->name == name) {
+    if (c->name.CompareTo(name, wxString::ignoreCase) == 0) {
       break;
     }
   }

@@ -77,10 +77,8 @@ public:
 
   inline Bool Get(unsigned n) { return list->Selected(n); }
   inline void Set(unsigned n, Bool v = TRUE) {
-    if (!v || !list->Selected(n)) { // so Motif version works
-      list->SetSelection(n,v);
-      show->GetNthSheet(n)->picked = v;
-    }
+    list->SetSelection(n,v);
+    show->GetNthSheet(n)->picked = v;
   }
   void Update();
 
@@ -90,7 +88,7 @@ private:
 
   Bool ok;
   wxPanel *panel;
-  wxListBox *list;
+  GoodListBox *list;
   CC_WinNodePicker *node;
 };
 
@@ -108,12 +106,11 @@ public:
 
   inline Bool Get(unsigned n) { return list->Selected(n); }
   inline void Set(unsigned n, Bool v = TRUE) {
-    if (!v || !list->Selected(n)) { // so Motif version works
-      list->SetSelection(n,v);
-      show->Select(n,v);
-    }
+    list->SetSelection(n,v);
+    show->Select(n,v);
   }
   void Update();
+  void UpdateSelections();
 
   CC_show *show;
 private:
@@ -121,7 +118,7 @@ private:
 
   Bool ok;
   wxPanel *panel;
-  wxListBox *list;
+  GoodListBox *list;
   CC_WinNodePointPicker *node;
 };
 
@@ -155,7 +152,7 @@ private:
   wxPanel *panel;
   wxText *numpnts;
   wxRadioBox *label_type;
-  wxListBox *labels;
+  GoodListBox *labels;
   wxChoice *choice;
   wxSlider *lettersize;
   FancyTextWin *text;

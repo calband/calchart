@@ -145,7 +145,7 @@ void CC_WinNodeMain::ChangeName() {
   winlist.ChangeName();
 }
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
-  canvas->RefreshShow();
+  canvas->RefreshShow(FALSE, point);
   winlist.UpdateSelections(win, point);
 }
 void CC_WinNodeMain::UpdatePoints() {
@@ -786,7 +786,7 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int def_zoom, int x, int y, int w, int h, long style):
  wxCanvas(frame, x, y, w, h, style), ourframe(frame), curr_lasso(CC_DRAG_BOX),
- drag(CC_DRAG_NONE)
+ drag(CC_DRAG_NONE), dragon(FALSE)
 {
   show_descr.show = show;
   show_descr.curr_ss = ss;
@@ -809,55 +809,53 @@ FieldCanvas::~FieldCanvas(void)
 }
 
 // Draw the current drag feedback
-void FieldCanvas::DrawDrag()
+void FieldCanvas::DrawDrag(Bool on)
 {
   wxDC *dc = GetDC();
   Coord w,h;
   CC_coord orig;
   CC_coord origin;
 
-  origin = show_descr.show->mode->Offset();
-  switch (drag) {
-  case CC_DRAG_BOX:
-    if (drag_start.x < drag_end.x) {
-      orig.x = drag_start.x;
-      w = drag_end.x - drag_start.x + 1;
-    } else {
-      orig.x = drag_end.x;
-      w = drag_start.x - drag_end.x + 1;
-    }
-    if (drag_start.y < drag_end.y) {
-      orig.y = drag_start.y;
-      h = drag_end.y - drag_start.y + 1;
-    } else {
-      orig.y = drag_end.y;
-      h = drag_start.y - drag_end.y + 1;
-    }
-    if ((w > 1) && (h > 1)) {
+  if (on != dragon) {
+    origin = show_descr.show->mode->Offset();
+    switch (drag) {
+    case CC_DRAG_BOX:
+      if (drag_start.x < drag_end.x) {
+	orig.x = drag_start.x;
+	w = drag_end.x - drag_start.x + 1;
+      } else {
+	orig.x = drag_end.x;
+	w = drag_start.x - drag_end.x + 1;
+      }
+      if (drag_start.y < drag_end.y) {
+	orig.y = drag_start.y;
+	h = drag_end.y - drag_start.y + 1;
+      } else {
+	orig.y = drag_end.y;
+	h = drag_start.y - drag_end.y + 1;
+      }
+      if ((w > 1) && (h > 1)) {
+	SetXOR(dc);
+	dc->DrawRectangle(orig.x+origin.x, orig.y+origin.y, w, h);
+	dragon = on;
+      }
+      break;
+    case CC_DRAG_LINE:
       SetXOR(dc);
-      dc->DrawRectangle(orig.x+origin.x, orig.y+origin.y, w, h);
+      dc->DrawLine(drag_start.x+origin.x, drag_start.y+origin.y,
+		   drag_end.x+origin.x, drag_end.y+origin.y);
+      dragon = on;
+      break;
+    default:
+      break;
     }
-    break;
-  case CC_DRAG_LINE:
-    SetXOR(dc);
-    dc->DrawLine(drag_start.x+origin.x, drag_start.y+origin.y,
-		 drag_end.x+origin.x, drag_end.y+origin.y);
-    break;
-  default:
-    break;
   }
 }
 
 // Define the repainting behaviour
 void FieldCanvas::OnPaint(void)
 {
-  if (show_descr.show) {
-    CC_sheet *sheet = show_descr.CurrSheet();
-    if (sheet) {
-      sheet->Draw(GetDC());
-      DrawDrag();
-    }
-  }
+  RefreshShow();
 }
 
 void FieldCanvas::OnEvent(wxMouseEvent& event)
@@ -934,6 +932,17 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
 {
   // Process the default behaviour
   wxCanvas::OnChar(event);
+}
+
+void FieldCanvas::RefreshShow(Bool drawall, int point) {
+  if (show_descr.show) {
+    CC_sheet *sheet = show_descr.CurrSheet();
+    if (sheet) {
+      sheet->Draw(GetDC(), drawall, point);
+      if (drawall) dragon = FALSE; // since the canvas gets cleared
+      DrawDrag(TRUE);
+    }
+  }
 }
 
 void FieldCanvas::UpdatePanel() {
