@@ -297,8 +297,6 @@ public:
 
   unsigned GetNumSelectedPoints();
   int FindPoint(Coord x, Coord y, unsigned ref = 0);
-  Bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
-			  unsigned ref = 0);
   Bool SelectContinuity(unsigned i);
   void SetContinuity(unsigned i);
   void SetNumPoints(unsigned num, unsigned columns);

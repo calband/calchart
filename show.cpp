@@ -442,41 +442,6 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) {
   return -1;
 }
 
-// Select points within rectangle
-Bool CC_sheet::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
-				  unsigned ref) {
-  unsigned i;
-  Bool changed = FALSE;
-  CC_coord top_left, bottom_right;
-  const CC_coord *pos;
-
-  if (c1.x > c2.x) {
-    top_left.x = c2.x;
-    bottom_right.x = c1.x;
-  } else {
-    top_left.x = c1.x;
-    bottom_right.x = c2.x;
-  }
-  if (c1.y > c2.y) {
-    top_left.y = c2.y;
-    bottom_right.y = c1.y;
-  } else {
-    top_left.y = c1.y;
-    bottom_right.y = c2.y;
-  }
-  for (i = 0; i < show->GetNumPoints(); i++) {
-    pos = &GetPosition(i, ref);
-    if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
-	(pos->y >= top_left.y) && (pos->y <= bottom_right.y)) {
-      if (!show->IsSelected(i)) {
-	show->Select(i);
-	changed = TRUE;
-      }
-    }
-  }
-  return changed;
-}
-
 Bool CC_sheet::SelectContinuity(unsigned i) {
   unsigned j;
   Bool changed = FALSE;
@@ -1443,8 +1408,7 @@ CC_show::CC_show(const char *file)
 	    error = badanimcont_str;
 	  }
 	  ReadDOSline(fp, tempbuf);
-	  tempbuf.Strip();
-	  newanimcont->AppendText(tempbuf);
+	  newanimcont->AppendText(tempbuf.Strip() + '\n');
 	}
 	curr_sheet->AppendContinuity(newanimcont);
       }
@@ -1562,9 +1526,11 @@ CC_show::CC_show(const char *file)
 		switch (c) {
 		case 'p':
 		  parsemode = CONT_PARSE_PLAIN;
+		  font_changed = TRUE;
 		  break;
 		case 's':
 		  parsemode = CONT_PARSE_SOLID;
+		  font_changed = TRUE;
 		  break;
 		case 'b':
 		  parsemode = CONT_PARSE_BOLD;
@@ -1581,23 +1547,20 @@ CC_show::CC_show(const char *file)
 	      case CONT_PARSE_PLAIN:
 		parsemode = CONT_PARSE_NORMAL;
 		font_changed = TRUE;
+		currfontnum = PSFONT_SYMBOL;
 		c = tolower(tempbuf.Elem(pos++));
 		switch (c) {
 		case 'o':
 		  lineotext.Append('A');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		case 'b':
 		  lineotext.Append('C');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		case 's':
 		  lineotext.Append('D');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		case 'x':
 		  lineotext.Append('E');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		default:
 		  // code not recognized
@@ -1608,23 +1571,20 @@ CC_show::CC_show(const char *file)
 	      case CONT_PARSE_SOLID:
 		parsemode = CONT_PARSE_NORMAL;
 		font_changed = TRUE;
+		currfontnum = PSFONT_SYMBOL;
 		c = tolower(tempbuf.Elem(pos++));
 		switch (c) {
 		case 'o':
 		  lineotext.Append('B');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		case 'b':
 		  lineotext.Append('F');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		case 's':
 		  lineotext.Append('G');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		case 'x':
 		  lineotext.Append('H');
-		  currfontnum = PSFONT_SYMBOL;
 		  break;
 		default:
 		  // code not recognized
@@ -1634,16 +1594,17 @@ CC_show::CC_show(const char *file)
 		break;
 	      case CONT_PARSE_BOLD:
 		parsemode = CONT_PARSE_NORMAL;
-		font_changed = TRUE;
 		c = tolower(tempbuf.Elem(pos++));
 		switch (c) {
 		case 's':
 		  switch (currfontnum) {
 		  case PSFONT_NORM:
-		    currfontnum = lastfontnum = PSFONT_BOLD;
+		    lastfontnum = PSFONT_BOLD;
+		    font_changed = TRUE;
 		    break;
 		  case PSFONT_ITAL:
-		    currfontnum = lastfontnum = PSFONT_BOLDITAL;
+		    lastfontnum = PSFONT_BOLDITAL;
+		    font_changed = TRUE;
 		    break;
 		  default:
 		    break;
@@ -1652,10 +1613,12 @@ CC_show::CC_show(const char *file)
 		case 'e':
 		  switch (currfontnum) {
 		  case PSFONT_BOLD:
-		    currfontnum = lastfontnum = PSFONT_NORM;
+		    lastfontnum = PSFONT_NORM;
+		    font_changed = TRUE;
 		    break;
 		  case PSFONT_BOLDITAL:
-		    currfontnum = lastfontnum = PSFONT_ITAL;
+		    lastfontnum = PSFONT_ITAL;
+		    font_changed = TRUE;
 		    break;
 		  default:
 		    break;
@@ -1669,16 +1632,17 @@ CC_show::CC_show(const char *file)
 		break;
 	      case CONT_PARSE_ITALIC:
 		parsemode = CONT_PARSE_NORMAL;
-		font_changed = TRUE;
 		c = tolower(tempbuf.Elem(pos++));
 		switch (c) {
 		case 's':
 		  switch (currfontnum) {
 		  case PSFONT_NORM:
-		    currfontnum = lastfontnum = PSFONT_ITAL;
+		    lastfontnum = PSFONT_ITAL;
+		    font_changed = TRUE;
 		    break;
 		  case PSFONT_BOLD:
-		    currfontnum = lastfontnum = PSFONT_BOLDITAL;
+		    lastfontnum = PSFONT_BOLDITAL;
+		    font_changed = TRUE;
 		    break;
 		  default:
 		    break;
@@ -1687,10 +1651,12 @@ CC_show::CC_show(const char *file)
 		case 'e':
 		  switch (currfontnum) {
 		  case PSFONT_ITAL:
-		    currfontnum = lastfontnum = PSFONT_NORM;
+		    lastfontnum = PSFONT_NORM;
+		    font_changed = TRUE;
 		    break;
 		  case PSFONT_BOLDITAL:
-		    currfontnum = lastfontnum = PSFONT_BOLD;
+		    lastfontnum = PSFONT_BOLD;
+		    font_changed = TRUE;
 		    break;
 		  default:
 		    break;

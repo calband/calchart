@@ -320,7 +320,7 @@ void ContinuityEditor::SetPoints() {
 
 PrintContCanvas::PrintContCanvas(wxFrame *frame, CC_descr *dcr):
 wxCanvas(frame, -1, -1, -1, -1, 0), show_descr(dcr), ourframe(frame),
-topline(0) {
+topline(0), width(0), height(0) {
   GetDC()->SetMapMode(MM_TEXT);
   GetDC()->SetBackground(wxWHITE_BRUSH);
 }
@@ -342,11 +342,12 @@ void PrintContCanvas::OnPaint() {
   SetTextForeground(wxBLACK);
   Clear();
 
+  width = 0;
   cont = sht->continuity;
   for (i = 0; (i < topline) && (cont != NULL); i++, cont = cont->next);
   y = 0.0;
   SetFont(contPlainFont);
-  GetTextExtent("012345", &tabw, &texth, &textd); // Get size of tab
+  tabw = GetCharWidth() * 6; // Size of tab
   while (cont) {
     x = 0.0;
     if (cont->center) {
@@ -354,7 +355,8 @@ void PrintContCanvas::OnPaint() {
 	do_tab = FALSE;
 	switch (c->font) {
 	case PSFONT_SYMBOL:
-	  x += contPlainFont->GetPointSize()*strlen(c->text);
+	  GetTextExtent("O", &textw, &texth, &textd);
+	  x += textw * strlen(c->text);
 	  break;
 	case PSFONT_NORM:
 	  SetFont(contPlainFont);
@@ -381,12 +383,13 @@ void PrintContCanvas::OnPaint() {
       x = (GetDC()->DeviceToLogicalX(devx) - x) / 2;
       if (x < 0.0) x = 0.0;
     }
-    maxtexth = 0.0;
+    maxtexth = contPlainFont->GetPointSize();
     tabnum = 0;
     for (c = cont; c != NULL; c = c->more) {
       do_tab = FALSE;
       switch (c->font) {
       case PSFONT_NORM:
+      case PSFONT_SYMBOL:
 	SetFont(contPlainFont);
 	break;
       case PSFONT_BOLD:
@@ -409,8 +412,11 @@ void PrintContCanvas::OnPaint() {
 	break;
       }
       if (c->font == PSFONT_SYMBOL) {
-	int pointsize = contPlainFont->GetPointSize();
+	GetTextExtent("O", &textw, &texth, &textd);
+	float d = textw;
 	SYMBOL_TYPE sym;
+
+	float topline = y + texth - textd - d;
 
 	for (const char *s = c->text; *s; s++) {
 	  sym = (SYMBOL_TYPE)(*s - 'A');
@@ -424,13 +430,13 @@ void PrintContCanvas::OnPaint() {
 	  default:
 	    SetBrush(wxTRANSPARENT_BRUSH);
 	  }
-	  DrawEllipse(x, y, pointsize, pointsize);
+	  DrawEllipse(x, topline, d, d);
 	  switch (sym) {
 	  case SYMBOL_SL:
 	  case SYMBOL_X:
 	  case SYMBOL_SOLSL:
 	  case SYMBOL_SOLX:
-	    DrawLine(x, y + pointsize, x + pointsize, y);
+	    DrawLine(x, topline + d, x + d, topline);
 	    break;
 	  default:
 	    break;
@@ -440,14 +446,14 @@ void PrintContCanvas::OnPaint() {
 	  case SYMBOL_X:
 	  case SYMBOL_SOLBKSL:
 	  case SYMBOL_SOLX:
-	    DrawLine(x, y, x + pointsize, y + pointsize);
+	    DrawLine(x, topline, x + d, topline + d);
 	    break;
 	  default:
 	    break;
 	  }
-	  x += pointsize;
+	  x += d;
 	}
-	if (pointsize > maxtexth) maxtexth = pointsize;
+	if (texth > maxtexth) maxtexth = texth;
       } else {
 	if (!do_tab) {
 	  GetTextExtent(c->text, &textw, &texth, &textd);
@@ -457,9 +463,11 @@ void PrintContCanvas::OnPaint() {
 	}
       }
     }
+    if (x > width) width = x;
     y += maxtexth;
     cont = cont->next;
   }
+  height = y;
 
   SetFont(NULL);
   EndDrawing();
@@ -469,6 +477,10 @@ void PrintContCanvas::OnEvent(wxMouseEvent& /*event*/) {
 }
 
 void PrintContCanvas::OnChar(wxKeyEvent& /*event*/) {
+}
+
+void PrintContCanvas::UpdateBars() {
+  SetScrollbars(1, 1, (int)width, (int)height, 1, 1);
 }
 
 void PrintContClose(wxButton& button, wxEvent&) {
@@ -499,6 +511,8 @@ PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
   (void)new wxButton(framePanel, (wxFunction)PrintContClose, "&Close");
 
   node = new CC_WinNodePrintCont(lst, this);
+
+  canvas->Update();
 
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   OnSize(-1, -1);

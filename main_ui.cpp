@@ -570,6 +570,15 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   win_menu->Append(CALCHART__POINTS, "Point &Selections...");
   win_menu->Append(CALCHART__ANIMATE, "&Animate...");
 
+  wxMenu *select_menu = new wxMenu;
+  // These items are checkable
+  select_menu->Append(CALCHART__ROWS, "Rows first", NULL, TRUE);
+  select_menu->Append(CALCHART__COLUMNS, "Columns first", NULL, TRUE);
+  select_menu->Append(CALCHART__NEAREST, "Nearest", NULL, TRUE);
+
+  wxMenu *options_menu = new wxMenu;
+  options_menu->Append(CALCHART__SELECTION, "Selection Order", select_menu);
+
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(CALCHART__ABOUT, "&About CalChart...");
   help_menu->Append(CALCHART__HELP, "&Help on CalChart...");
@@ -578,6 +587,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   menu_bar->Append(file_menu, "&File");
   menu_bar->Append(edit_menu, "&Edit");
   menu_bar->Append(win_menu, "&Windows");
+  menu_bar->Append(options_menu, "&Options");
   menu_bar->Append(help_menu, "&Help");
   SetMenuBar(menu_bar);
 
@@ -594,19 +604,31 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
     def_zoom = FIELD_DEFAULT_ZOOM;
     def_grid = 2;
     def_ref = 0;
+    field = new FieldCanvas(show, ss, this, def_zoom);
   } else {
     show = other_frame->field->show_descr.show;
     ss = other_frame->field->show_descr.curr_ss;
     def_zoom = other_frame->zoom_slider->GetValue();
     def_grid = other_frame->grid_choice->GetSelection();
     def_ref = other_frame->field->curr_ref;
+    field = new FieldCanvas(show, ss, this, def_zoom, other_frame->field);
   }
 
   SetTitle((char *)show->UserGetName());
-  field = new FieldCanvas(show, ss, this, def_zoom);
   field->curr_ref = def_ref;
   frameCanvas = field;
   node = new CC_WinNodeMain(show->winlist, this);
+  switch(field->curr_select) {
+  case CC_SELECT_ROWS:
+    menu_bar->Check(CALCHART__ROWS, TRUE);
+    break;
+  case CC_SELECT_COLUMNS:
+    menu_bar->Check(CALCHART__COLUMNS, TRUE);
+    break;
+  case CC_SELECT_NEAREST:
+    menu_bar->Check(CALCHART__NEAREST, TRUE);
+    break;
+  }
 
   // Add the controls
   framePanel = new wxPanel(this);
@@ -827,6 +849,13 @@ void MainFrame::OnMenuCommand(int id)
       anim->canvas->Generate();
     }
     break;
+  case CALCHART__ROWS:
+  case CALCHART__COLUMNS:
+  case CALCHART__NEAREST:
+    GetMenuBar()->Check(field->curr_select, FALSE);
+    field->curr_select = (CC_SELECT_TYPES)id;
+    GetMenuBar()->Check(id, TRUE);
+    break;
   case CALCHART__ABOUT:
     (void)wxMessageBox("CalChart v3.0\nAuthor: Gurk Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1994-1996\nCompiled on " __DATE__ " at " __TIME__, "About CalChart");
     break;
@@ -906,6 +935,15 @@ void MainFrame::OnMenuSelect(int id)
     break;
   case CALCHART__ANIMATE:
     msg = "Open animation window";
+    break;
+  case CALCHART__ROWS:
+    msg = "Select points by rows";
+    break;
+  case CALCHART__COLUMNS:
+    msg = "Select points by columns";
+    break;
+  case CALCHART__NEAREST:
+    msg = "Select points in nearest order";
     break;
   case CALCHART__ABOUT:
     msg = "Information about the program";
@@ -1038,10 +1076,17 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
-			 int def_zoom, int x, int y, int w, int h):
+			 int def_zoom, FieldCanvas *from_canvas,
+			 int x, int y, int w, int h):
  AutoScrollCanvas(frame, x, y, w, h), ourframe(frame), curr_lasso(CC_DRAG_BOX),
- curr_move(CC_MOVE_NORMAL), curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
+ curr_move(CC_MOVE_NORMAL), curr_select(CC_SELECT_ROWS),
+ curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
 {
+  if (from_canvas) {
+    curr_lasso = from_canvas->curr_lasso;
+    curr_move = from_canvas->curr_move;
+    curr_select = from_canvas->curr_select;
+  }
   SetColourMap(CalChartColorMap);
 
   show_descr.show = show;
@@ -1199,8 +1244,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  switch (drag) {
 	  case CC_DRAG_BOX:
 	    EndDrag();
-	    if (sheet->SelectPointsInRect(drag_start, drag_end, curr_ref))
-	      show_descr.show->winlist->UpdateSelections();
+	    SelectPointsInRect(drag_start, drag_end, curr_ref);
 	    break;
 	  case CC_DRAG_LINE:
 	    EndDrag();
@@ -1355,18 +1399,136 @@ void FieldCanvas::EndDrag() {
   drag = CC_DRAG_NONE;
 }
 
-void FieldCanvas::SelectWithLasso() {
+void FieldCanvas::SelectOrdered(wxList& pointlist,
+				const CC_coord& start) {
+  wxNode *pnt, *n;
+  CC_coord c1, c2, last;
+  Coord v1, v2;
+  float f1, f2, fx, fy;
+  CC_sheet* sheet = show_descr.CurrSheet();
+
+  last = start;
+  while ((pnt = pointlist.First()) != NULL) {
+    c1 = sheet->GetPosition((unsigned)pnt->key.integer, curr_ref);
+    for (n = pnt->Next(); n != NULL; n = n->Next()) {
+      switch (curr_select) {
+      case CC_SELECT_ROWS:
+	v1 = ABS(start.y - c1.y);
+	c2 = sheet->GetPosition((unsigned)n->key.integer, curr_ref);
+	v2 = ABS(start.y - c2.y);
+	if (v2 < v1) {
+	  pnt = n;
+	  c1 = c2;
+	} else if ((v2 == v1) && ((c1.y == c2.y) || (c2.y < start.y))) {
+	  // make sure we keep rows together
+	  v1 = ABS(start.x - c1.x);
+	  v2 = ABS(start.x - c2.x);
+	  if (v2 < v1) {
+	    pnt = n;
+	    c1 = c2;
+	  }
+	}
+	break;
+      case CC_SELECT_COLUMNS:
+	v1 = ABS(start.x - c1.x);
+	c2 = sheet->GetPosition((unsigned)n->key.integer, curr_ref);
+	v2 = ABS(start.x - c2.x);
+	if (v2 < v1) {
+	  pnt = n;
+	  c1 = c2;
+	} else if ((v2 == v1) && ((c1.x == c2.x) || (c2.x < start.x))) {
+	  // make sure we keep columns together
+	  v1 = ABS(start.y - c1.y);
+	  v2 = ABS(start.y - c2.y);
+	  if (v2 < v1) {
+	    pnt = n;
+	    c1 = c2;
+	  }
+	}
+	break;
+      case CC_SELECT_NEAREST:
+	fx = (float)(last.x - c1.x);
+	fy = (float)(last.y - c1.y);
+	f1 = fx*fx+fy*fy;
+	c2 = sheet->GetPosition((unsigned)n->key.integer, curr_ref);
+	fx = (float)(last.x - c2.x);
+	fy = (float)(last.y - c2.y);
+	f2 = fx*fx+fy*fy;
+	if (f2 < f1) {
+	  pnt = n;
+	  c1 = c2;
+	}
+	break;
+      }
+    }
+    show_descr.show->Select((unsigned)pnt->key.integer);
+    last = c1;
+    pointlist.DeleteNode(pnt);
+  }
+}
+
+Bool FieldCanvas::SelectWithLasso() {
   Bool changed = FALSE;
   CC_sheet* sheet = show_descr.CurrSheet();
-  
+  wxList pointlist;
+  wxPoint *pnt;
+
   for (unsigned i = 0; i < show_descr.show->GetNumPoints(); i++) {
     if (lasso.Inside(sheet->GetPosition(i, curr_ref))) {
       changed = TRUE;
-      show_descr.show->Select(i);
+      pointlist.Append(i, NULL);
     }
   }
-  if (changed) show_descr.show->winlist->UpdateSelections();
+  pnt = lasso.FirstPoint();
+  if (changed && pnt) {
+    SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y));
+    show_descr.show->winlist->UpdateSelections();
+  }
   lasso.Clear();
+
+  return changed;
+}
+
+// Select points within rectangle
+Bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+				     unsigned ref) {
+  unsigned i;
+  Bool changed = FALSE;
+  CC_sheet* sheet = show_descr.CurrSheet();
+  CC_coord top_left, bottom_right;
+  const CC_coord *pos;
+  wxList pointlist;
+
+  if (c1.x > c2.x) {
+    top_left.x = c2.x;
+    bottom_right.x = c1.x;
+  } else {
+    top_left.x = c1.x;
+    bottom_right.x = c2.x;
+  }
+  if (c1.y > c2.y) {
+    top_left.y = c2.y;
+    bottom_right.y = c1.y;
+  } else {
+    top_left.y = c1.y;
+    bottom_right.y = c2.y;
+  }
+  for (i = 0; i < show_descr.show->GetNumPoints(); i++) {
+    pos = &sheet->GetPosition(i, ref);
+    if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
+	(pos->y >= top_left.y) && (pos->y <= bottom_right.y)) {
+      if (!show_descr.show->IsSelected(i)) {
+	pointlist.Append(i, NULL);
+	changed = TRUE;
+      }
+    }
+  }
+  if (changed) {
+    SelectOrdered(pointlist, c1);
+    show_descr.show->winlist->UpdateSelections();
+  }
+
+  return changed;
 }
 
 Bool MainFrameList::CloseAllWindows() {

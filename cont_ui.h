@@ -98,12 +98,14 @@ public:
   void OnEvent(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
 
-  inline void Update() { topline = 0; OnPaint(); }
+  inline void Update() { topline = 0; OnPaint(); UpdateBars(); }
+  void UpdateBars();
 
 private:
   CC_descr *show_descr;
   wxFrame *ourframe;
   unsigned topline;
+  float width, height;
 };
 
 class PrintContEditor : public wxFrameWithStuff {

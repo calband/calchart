@@ -23,6 +23,41 @@
 enum CC_DRAG_TYPES { CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
 		     CC_DRAG_LASSO, CC_DRAG_LINE };
 enum CC_MOVE_MODES { CC_MOVE_NORMAL, CC_MOVE_LINE };
+enum {
+  CALCHART__NEW = 100,
+  CALCHART__NEW_WINDOW,
+  CALCHART__LOAD_FILE,
+  CALCHART__APPEND_FILE,
+  CALCHART__SAVE,
+  CALCHART__SAVE_AS,
+  CALCHART__PRINT,
+  CALCHART__PRINT_EPS,
+  CALCHART__CLOSE,
+  CALCHART__UNDO,
+  CALCHART__REDO,
+  CALCHART__INSERT_BEFORE,
+  CALCHART__INSERT_AFTER,
+  CALCHART__DELETE,
+  CALCHART__RELABEL,
+  CALCHART__EDIT_CONTINUITY,
+  CALCHART__EDIT_PRINTCONT,
+  CALCHART__SET_TITLE,
+  CALCHART__SET_BEATS,
+  CALCHART__INFO,
+  CALCHART__POINTS,
+  CALCHART__ANIMATE,
+  CALCHART__SELECTION,
+  CALCHART__ROWS,
+  CALCHART__COLUMNS,
+  CALCHART__NEAREST,
+  CALCHART__ABOUT,
+  CALCHART__HELP
+};
+enum CC_SELECT_TYPES {
+  CC_SELECT_ROWS = CALCHART__ROWS,
+  CC_SELECT_COLUMNS = CALCHART__COLUMNS,
+  CC_SELECT_NEAREST = CALCHART__NEAREST,
+};
 
 class CC_lasso {
 public:
@@ -133,6 +168,7 @@ public:
   // Basic functions
   FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 	      int def_zoom = FIELD_DEFAULT_ZOOM,
+	      FieldCanvas *from_canvas = NULL,
 	      int x = -1, int y = -1, int w = -1, int h = -1);
   ~FieldCanvas(void);
   void OnPaint(void);
@@ -181,11 +217,15 @@ public:
   CC_descr show_descr;
   CC_DRAG_TYPES curr_lasso;
   CC_MOVE_MODES curr_move;
+  CC_SELECT_TYPES curr_select;
   unsigned curr_ref;
 
 private:
   void DrawDrag(Bool on = TRUE);
-  void SelectWithLasso();
+  void SelectOrdered(wxList& pointlist, const CC_coord& start);
+  Bool SelectWithLasso();
+  Bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+			  unsigned ref = 0);
 
   CC_DRAG_TYPES drag;
   CC_lasso lasso;
@@ -212,33 +252,6 @@ public:
 	     int value, int min_value, int max_value, int width):
   wxSlider(parent, func, label, value, min_value, max_value, width),
   field(NULL) {};
-};
-
-enum {
-  CALCHART__NEW = 100,
-  CALCHART__NEW_WINDOW,
-  CALCHART__LOAD_FILE,
-  CALCHART__APPEND_FILE,
-  CALCHART__SAVE,
-  CALCHART__SAVE_AS,
-  CALCHART__PRINT,
-  CALCHART__PRINT_EPS,
-  CALCHART__CLOSE,
-  CALCHART__UNDO,
-  CALCHART__REDO,
-  CALCHART__INSERT_BEFORE,
-  CALCHART__INSERT_AFTER,
-  CALCHART__DELETE,
-  CALCHART__RELABEL,
-  CALCHART__EDIT_CONTINUITY,
-  CALCHART__EDIT_PRINTCONT,
-  CALCHART__SET_TITLE,
-  CALCHART__SET_BEATS,
-  CALCHART__INFO,
-  CALCHART__POINTS,
-  CALCHART__ANIMATE,
-  CALCHART__ABOUT,
-  CALCHART__HELP
 };
 
 class MainFrameList: public wxList {

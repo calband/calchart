@@ -293,6 +293,7 @@ void AutoScrollCanvas::SetSize(int width, int height) {
       memdc->SetBackground(GetDC()->GetBackground());
       memdc->SetColourMap(cmap);
       memdc->SetUserScale(x_scale, y_scale);
+      memdc->Clear();
     }
   }
 }
