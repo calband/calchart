@@ -605,19 +605,27 @@ ContProcGrid::~ContProcGrid() {
   if (grid) delete grid;
 }
 
+static inline Coord roundcoord(Coord a, Coord mod) {
+  mod = ABS(mod);
+  if (mod > 0) {
+    if (a < 0) {
+      a = ((a-(mod/2))/mod)*mod;
+    } else {
+      a = ((a+(mod/2))/mod)*mod;
+    }
+  }
+  return a;
+}
+
 void ContProcGrid::Compile(AnimateCompile* anim) {
   Coord gridc;
-  Coord gridmask;
-  Coord gridadjust;
   CC_coord c;
 
   gridc = FLOAT2COORD(grid->Get(anim));
-  gridadjust = gridc >> 1; // Half of grid value
-  gridmask = ~(gridc-1); // Create mask to snap to this coord
 
-  c.x = (anim->pt.pos.x+gridadjust) & gridmask;
+  c.x = roundcoord(anim->pt.pos.x, gridc);
   // Adjust so 4 step grid will be on visible grid
-  c.y = ((anim->pt.pos.y+gridadjust-INT2COORD(2)) & gridmask) + INT2COORD(2);
+  c.y = roundcoord(anim->pt.pos.y-INT2COORD(2), gridc) + INT2COORD(2);
 
   c -= anim->pt.pos;
   if (c != 0) {

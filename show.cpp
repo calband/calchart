@@ -2350,7 +2350,7 @@ Bool CC_show::RelabelSheets(unsigned sht) {
   for (i = 0; i < GetNumPoints(); i++) {
     for (j = 0; j < GetNumPoints(); j++) {
       if (!used_table[j]) {
-	if (sheet->GetPosition(i) == sheet->next->GetPosition(i)) {
+	if (sheet->GetPosition(i) == sheet->next->GetPosition(j)) {
 	  table[i] = j;
 	  used_table[j] = TRUE;
 	  break;

@@ -1301,14 +1301,19 @@ void MainFrame::LoadShow() {
 void MainFrame::AppendShow() {
   const char *s;
   CC_show *shw;
+  unsigned currend;
 
   s = wxFileSelector("Append show", NULL, NULL, NULL, file_wild);
   if (s) {
     shw = new CC_show(s);
     if (shw->Ok()) {
       if (shw->GetNumPoints() == field->show_descr.show->GetNumPoints()) {
-	field->show_descr.show->undolist->Add(new ShowUndoAppendSheets(field->show_descr.show->GetNumSheets()));
+	currend = field->show_descr.show->GetNumSheets();
+	field->show_descr.show->undolist->Add(new ShowUndoAppendSheets(currend));
 	field->show_descr.show->Append(shw);
+	if (!field->show_descr.show->RelabelSheets(currend-1))
+	  (void)wxMessageBox("Stuntsheets don't match",
+			     "Append Error");
       } else {
 	(void)wxMessageBox("The blocksize doesn't match", "Append Error");
 	delete shw;
