@@ -1,0 +1,11 @@
+*.html
+*.dvi
+*.ps
+*.aux
+*.con
+*.idx
+*.ilg
+*.ind
+*.log
+*.ref
+*.toc

@@ -1,0 +1,10 @@
+#!/bin/csh
+echo '/* XPM */'
+echo 'static char *'`echo $1 | sed 's/\.xbm$//'`'[] = {'
+set width = `cat $1 | egrep '^#define.*_width' | awk '{print $3}'`
+set height = `cat $1 | egrep '^#define.*_height' | awk '{print $3}'`
+echo '"'$width $height 2 1'",'
+echo '". c #ffffff",'
+echo '"# c #000000",'
+bmtoa -chars '.#' $1 | sed 's/^/\"/' | sed 's/$/\"\,/'
+echo '};'

@@ -1,0 +1,754 @@
+
+General
+
+At any given time, a particular group is current - it is the one being
+displayed topmost onscreen.  Most groups are stuntsheets
+or refptsheets.  In the latter case, the associated stuntsheet is also
+sometimes called current.
+
+Arrow keys work just like moving the mouse, but the cursor stays on
+the grid in this case.  There are some exceptions to this.  Use of the arrow
+keys together with the keyboard commands makes almost anything possible
+without the use of the mouse.
+
+The screen has four sections.  Viewing region, icons, help/advice/warning
+bar, and text menu.
+
+The text menu can be accessed by either positioning the cursor on it and
+clicking.  TAB will cycle through menu options.
+
+Clicking on a point with more than one man will cause a menu with a list of
+labels of men at that point to appear.  Choose a man with the mouse.
+This applies to individualmove, individualblock,
+smartmove, and clevermove.  ** Are there any other times when this feature
+is needed?
+
+ESC always aborts.  If a selected set existed, it still exists (except
+when ESC is erasing an existing selection).  Not repeatable but is undoable.
+
+Undo.  U or icon or menu option.  
+Undoes the last undoable action (not all actions are undoable).
+
+Repeat.  T or icon or menu option.  Repeats last repeatable action (not all
+actions are repeatable).
+Aborted actions are never repeated in this or any other "repeat last" context.
+
+Killchanges.  E,K or menu option (not an icon).  Undoes all changes made
+since the current stuntsheet became the current stuntsheet.  Only affects
+the position of the men on the current stuntsheet.  Does not undo changes
+made to continuity or to stuntsheet order or whatever.
+
+Background.  E,B or menu option.  Choose stuntsheets for which background
+will be changed.  Select as many as desired.  Default is all stuntsheets.
+Select college football, high school football, professional football,
+Harmon Gym, or Zellerbach Hall.
+
+Choosing items from a list (stuntsheets, groups, symbol names, etc.) always
+works the same way.  Leftclick to select one item.  Leftdrag
+or rightdrag to select a consecutive block of items.  Leftclicking or
+dragging when some items are already selected will cause those original
+selected items to become deselected.  Rightclick on a selected item to
+deselect it; rightclick on an unselected item to select it (no effect on
+the selection status of any other items).  CTRL and SHIFT in conjunction
+with dragging cause XOR and OR.  ** This is supposed to be analogous to
+point-blocking.
+
+Whenever a command makes no sense (repeatlastaction before any actions
+have been executed, etc.), nothing happens but a warning on the warning
+bar.  If possible, a brief explanation is given.
+
+Blocking
+
+If a selected set currently exists, it is highlighted.  If a selected set
+exists and the user implements another block command (EXCEPT for
+individualblock), the original selected set will vanish and the new block
+command will define a brand new one.  If the user holds SHIFT while
+blocking, then the old selected set and the new one are ORed; if the user
+holds CTRL while blocking, then the old selected set and the new one are
+XORed (EXCEPT for individualblock).
+
+None are repeatable, and only individualblock is undoable.  Press ESC to
+erase currently existing selected set.
+
+Rectangularblock.  Press and hold the left button when the cursor is at p1. 
+Move the cursor to p2.  All men within the NSEW rectangle with diagonally
+opposite corners p1 and p2 are highlighted.  Release the left button to
+select the highlighted men.  Boundary inclusive.
+
+Lassoblock.  Press and hold the left button when the cursor is at p1. 
+trace out a curve with the mouse to p2 - the curve appears onscreen as it is
+defined.  All points within the region bounded by the curve and the segment
+p1p2 are highlighted.  Release the right button to select the highlighted men.
+Boundary inclusive.
+
+Individualblock.  Place the cursor on an unselected man and click with the
+right button.  The man is added to the selected set.  Place the cursor on
+a selected man and click with the right button.  The man is subtracted
+from the selected set.  If there is more than one man at the same
+location, all are simultaneously added or subtracted.
+
+Menublock.  Choose the menu item for blocking, and the program requests
+the name of a group, which can be entered either by typing or by choosing
+from a list.  Default only selects the local restriction of the group, but
+global (or multiple SS) groups can be selected at will.  ** Do the other
+forms of blocking need to be on the menu? 
+
+Repeatlastblock.  Icon and menu item.  This is defined in terms of the men
+who were selected, NOT by their locations when they were selected. 
+Execution is immediate.
+
+** Should there be a way to change the default to XOR or OR?
+
+Individualmove
+
+Place the cursor on a man.  click with the left button.  The man
+disappears, and the shape of the cursor changes.  ** A target like in the
+old version?  Move the cursor and click on another point.  The man reappears.
+
+Geniusmove Family
+
+Each is an icon and menu option.  Press RETURN before entering any new data
+to recall the data from the most
+recent action of the current type (i.e., translation data ONLY gets
+applied to translation, not to other types).  If the user decides to recall
+data after he has already input some new data, he should press ESC, then call
+the action again and press RETURN immediately.
+
+The advice bar displays the quantity and
+type of information still required to uniquely determine the action.
+
+If you try to input nonsensical data (e.g., two source points identical
+with different destination points), the data will not be accepted and a
+warning will appear.  If you try to input data when none more is required,
+it will not be accepted and a warning will appear.
+
+Click with the left to define a new source at the current cursor location p1. 
+The shape of cursor changes.  Move the cursor to another point p2
+(possibly p1 = p2).  A line appears from p1 to p2, and a dot appears at p2.
+Click left again to set destination.
+
+If the new data entry is identical (same source and destination) as an already
+existing data entry, then it is completely ignored, and a warning message.
+
+In some contexts, direction of motion is restricted.  After clicking on the
+source, the freedom of motion of the cursor is restricted.
+The displayed location of the cursor is the nearest "projection" of the mouse-
+defined location onto an allowed direction.  ** I fear that I'm not explaining
+this well.
+
+To edit existing data, position the cursor over either a destination or a
+source point.  Click and hold the left button.  Move the cursor and the
+underlying point moves, too (the line changes simulateously).  Release the
+left button, and the point is set at the current location of the cursor.
+If more than one endpoint lies at the same location, then one of them will be
+chosen arbitrarily when editing is invoked.  Note that if you try to edit a
+fixed point, you might end up moving the source or the destination.  ** What is
+the convention for choosing arbitrarily here?
+
+To remove a data entry, click with the right on either endpoint.  Does NOT
+request Y/N confirmation since the data entry is fairly easy to re-input.
+See above paragraph when more than one endpoint lies at the same location.
+
+Press RETURN to execute action with current data.  If the action is not well-
+defined, then nothing will happen, but a warning message appears.
+
+Translation.  G,T or icon or menu option.  Requires one data entry.
+
+There is a shortcut for executing translations.  Whenever a selected set
+exists, individualmoving a point will cause the entire selected set to be
+translated similarly.
+
+Shear.  G,S or icon or menu option.  Requires two data entries.  First data
+entry is arbitrary, but direction must be cardinal.
+Second entry must be parallel, and it cannot be colinear with the first data
+entry.  If the line connecting
+the two sources is perpendicular to the direction of motion and the lengths of
+the new motions is the same, then the data is accepted, but a warning message
+appears that this is actually going to be a translation, not a shear.
+
+If the selected set of men is colinear, then it is possible for one properly
+chosen data entry to define the action uniquely.  The data entry must lie on
+the same line as all of the men.  In this case, a message appears that the
+be cardinal).  
+
+Reflection.  G,X or icon or menu option.  Choose one of four directions for
+the axis of reflection from a menu
+(must be cardinal).  One data entry required.  Direction of motion must be
+perpendicular to axis of reflection.
+
+Dilation.  G,D or icon or menu option.  Two data entries required. 
+Directions of 
+motion must be parallel.  Entries can be colinear.  If the line between source
+points is perpendicular to the direction of motion, then the motions must be
+of the same length.  In this case, there is a warning that the action will
+actually be a translation, not a dilation.
+
+If the set of selected men is colinear, then it is possible to define some
+dilations with only one entry.  The source point must be colinear with the
+selected set, and the direction of motion must be perpendicular to the line of
+men.  In this case, a message appears that the action is already defined, but 
+another data entry will be accepted.
+
+Geniusmove.  G,G or icon or menu option.  Three data entries are required.
+
+If the selected set is colinear, then it is possible to define the geniusmove
+with only two entries.  Source points must be colinear with the selected set.
+
+If the selected set lies entirely at a point, then it is possible to define
+the geniusmove with only one entry.  The source point must coincide with the
+location of the selected set.
+
+In both cases, a warning message informs that the action is already
+well-defined.  However, more data entries are accepted (up to the usual
+maximum of three).
+
+Rotation.  G,R or icon or menu option.  Rotation does not follow the convention
+of the rest of the geniusmove family for data entry.  Locate the cursor at the
+desired center of rotation and click with the left button.  A dot appears.
+Remove the dot with right click, and move it with left drag.  Press RETURN
+to execute.
+
+Smartmove
+
+Icon or menu option.  Not repeatable.  If two men have not been
+individualmoved since the
+program started running, the action will abort with a warning message.
+Otherwise, a target appears at the next destination.  Right click on a man to
+make him move to the target location.  Simultaneously, the target moves to the
+next destination.  This process continues until ESC is pressed.  No other
+actions are allowable until smartmove is aborted.
+
+Undo before aborting smartmove will just undo the most recent move and will
+return the target to its previous position.  Undo after aborting will undo
+all movements caused during the entire smartmove.
+
+Clevermove
+
+Icon or menu option.  Not repeatable. 
+If three men have not been individualmoved since the
+program started running, then the action will abort with a warning message.
+A target appears.  Right click on any man to move it to the position of the
+target.  This continues until ESC is pressed; no other actions are allowed
+until clevermove is aborted.
+
+Undo before aborting will just undo the most recent move and will return the
+target to its previous position.  Undo after aborting will undo the entire
+clevermove.
+
+Suppose that p1, p2, and p3 are the destinations of the three most recent
+individualmoves in that order.  The target initially appears at
+p1 + 2 (p2 - p1).  Each time the right button is pressed, the target is
+incremented by (p2 - p1) automatically.  Right arrow (respectively left arrow)
+manually increments (respectively decrements) the location of the target by
+p2 - p1.  Up arrow (down arrow) manually increments (decrements) the location
+of the target by p3 - p1.  Press the left mouse button to move the target to
+p1 + (n+1) (p3 - p1), when the target was at p1 + m (p2 - p1) + n (p3 - p1).
+
+Note that the meaning of the arrows has nothing to do with the relative
+position of p1, p2, and p3.  Therefore, it is most logical to start in the
+lower left corner of a block.  If the user starts in the upper right corner,
+then down arrow will move the target up and right arrow will move the target
+left.
+
+Stuntsheet Manipulation
+
+Nextsheet. N or icon or stuntsheet submenu option.  Changes current stuntsheet.
+If the current sheet is last, prompt to insert new sheet at the end.
+
+Previoussheet. P or icon or stuntsheet submenu option.  Changes current
+stuntsheet.  If the current sheet is first, prompt to insert new sheet at
+the beginning.
+
+Insertsheet.  I or icon or stuntsheet submenu option.
+To choose sheet after which
+insertion is to take place, submenu listing all stuntsheets.  Option to insert
+before first stuntsheet.  Default is current stuntsheet.  Group names not
+accepted.
+
+To choose initial configuration, submenu listing all stuntsheets.  Option
+to list all groups.  Default is current stuntsheet.  Group names accepted.
+
+To choose name, type.  Default is the logical numerical choice, if one exists.
+"Logical" numbers consist of
+a number followed by a letter (e.g., 15, 35A, 16N).  If the nearby sheets
+are not numbered logically, then there is no default.
+
+If insert after last stuntsheet numbered 32 (or 32A), then default is 33.
+If insert before first stuntsheet numbered 1 or 0 or 3A, then default is
+0 or -1 or 3 respectively.  If insert between consecutive sheets 15 and
+18, then default is 16.  If insert between consecutive sheets 15 and 16,
+then default is 15A.  If insert between consecutive sheets 15A and 16, then
+default is 15B.  If insert between consecutive sheets 16 and 15, then there
+is no default.
+
+Stuntsheet.  Icon or S or menu option.  A list of the stuntsheets in order
+appears, and a submenu of options for manipulating stuntsheets (icons or
+keys).
+
+Choose sheets to be manipulated.  Option for listing all groups.
+
+Press ESC
+after selecting a suboption to cancel suboption.  Press ESC while no
+particular suboption is selected to return to normal operation.
+
+Below are listed submenu options for stuntsheet manipulation.
+
+Nextsheet.  N or icon.  Changes current stuntsheet.  
+If the current sheet is last, prompt to insert new sheet at the end.  Can also
+be accessed directly without going through the stuntsheet submenu.  Selected
+set of sheets is irrelevant.
+
+Previoussheet.  Icon or P.  Changes current stuntsheet.
+If the current sheet is first, prompt to insert new sheet at the beginning.
+Can also be accessed directly without going through the stuntsheet submenu.
+Selected set of sheets is irrelevant.
+
+Goto.  Icon or G.  Changes current stuntsheet to the stuntsheet occurring
+first in the selected set of sheets.
+
+Removesheets.  Icon or R.  Erases all selected sheets.
+Y/N prompt to REALLY remove sheets.  If not sheets are selected, prompt to
+delete current sheet.
+
+Insertsheet.  I or icon.  Inserts sheet immediately after earliest selected
+sheet.
+Option to insert before first stuntsheet.  If no sheets are selected, then
+insert after current sheet.
+
+See above on how to choose initial configuration and how to choose name.
+
+Movesheets.  Icon or M.  All selected sheets are moved.  If no sheets are
+selected, then current sheet is moved.
+To choose
+stuntsheet after which selected sheets will be moved, submenu listing all
+stuntsheets (groups not accepted).  Option for moving to the very beginning.
+Default is current stuntsheet.
+
+Effect of execution is best described by example.  Suppose that sheets 2, 4,
+and 5 have been selected, and the destination is after SS7.  Then the new
+order will be 1, 3, 6, 7, 2, 4, 5, 8, 9.
+
+Copysheet.  C or icon.  All selected sheets are changed.  If no sheets are
+selected, then current sheet will be changed.
+To choose sheet to be copied, submenu listing all stuntsheets.
+Option to list all groups, and option to list groups from another show.
+Default is current stuntsheet,
+
+Name.  N or icon.  Earliest sheet among selected sheets is renamed.  If no
+sheets are selected, then rename current sheet.  Type new name for stuntsheet.
+
+Autoname.  Icon or A.  Rename all selected stuntsheets so that they are in
+increasing numerical order.  All associated refptsheets, etc. are
+simultaneously changed.
+
+This may create conflicts with the uniqueness of stuntsheet names.  If
+autoname would require two stuntsheets to have the same name, then A is
+prefixed to the not-selected sheet.  For example, suppose that the show
+consists of sheets named 1, 2, 3, and 4.  Suppose that 2 and 4 are selected
+and autoname is executed.  The result will be sheets named A1, 1, 3, 2.
+If the A prefix also causes conflict, then prefix B, or C, etc.
+
+Undo.  U or icon.  Undo most recent stuntsheet manipulation.  Note that undoing
+AFTER escaping from the stuntsheet manipulation submenu will also cancel
+the most stuntsheet manipulation.
+
+Reference Points
+
+Each stuntsheet is associated to arbitrarily many refptsheets.  The names for
+these refptsheets are sRn, where s is the name of the stuntsheet and n is the
+number of the refptsheet.  For example, the third refptsheet of SS13 is 13R3.
+By convention, 13 is synonymous with 13R0.
+Of course, these names can be changed, and associations can be changed.
+Associations are an artificial construction to ease usage and are not
+essential from the perspective of groups.
+
+Selectrefpt.  R,S or icon or menu option.  Submenu listing all refptsheets
+associated to the current stuntsheet that are not identical to the current
+stuntsheet, plus the associated refptsheet with the SMALLEST number that IS
+identical to the current stuntsheet.  [** Latter is for making "new" 
+refptsheets; perhaps some special annotation on the list.  Or maybe there
+should be an Insertrefpt command.]
+If stuntsheet s is onscreen, then default is sR1.  If sRn is
+onscreen, then sR(n+1) is default.  
+Option for listing all refptsheets of all stuntsheets, and
+option for listing all groups.  Type name or select from menu (groups are
+accepted).  Execution causes selected group to become current; all 
+subsequent move commands are applied to the selected refptsheet.
+
+Removerefpts.  R,R or menu option.  Submenu listing all refptsheets
+associated to the current stuntsheet.  Option for listing all refptsheets
+or for listing all groups.  Select as many refptsheets as desired (groups
+accepted).  Y/N prompt to REALLY remove data.  **  This is the new version of
+zap.
+
+Copyrefpt.  R,C or menu option.  To choose destination, submenu listing
+all refptsheets associated to the current stuntsheet.  Default is the current
+refptsheet.  Option for listing all refptsheets or listing all groups.
+
+To choose source, submenu listing all refptsheets associated to the current
+stuntsheet.  Default is sR(n+1) when the current refptsheet is sRn.  Options
+for listing all refptsheets or listing all groups.
+
+Execution causes the destination sheet to become a copy of the source sheet.
+
+Associate.  R,A or menu option.  Choose refptsheets for which associations
+will be defined.  Submenu listing all refptsheets associated to the current
+stuntsheet.  Default is the current refptsheet.  Option for displaying all
+refptsheets or all groups.  Select as many refptsheets (or groups) as
+desired.
+
+Choose stuntsheet to which refptsheets will be associated.  Submenu listing
+all stuntsheets.  Default is current stuntsheet.  Groups not accepted.  More
+than one stuntsheet can be selected.
+If only one stuntsheet is selected, then prompt if names should be changed
+to match the sRn convention.  If yes, then
+sheets are renamed with lowest available values of n.
+
+Name.  R,N or menu option.  To choose refptsheet to be renamed, submenu
+listing all refptsheets associated to the current stuntsheet.  Default is
+the current refptsheet.  Option to list all refptsheets or all groups.
+Type new name.
+
+Autoname.  R,U or menu option.  Submenu listing all stuntsheets.  Default
+is current stuntsheet.  Choose as many stuntsheets as desired.
+
+Upon execution, associated refptsheets are renamed to match the sRn
+convention with minimal values for n.  If a refptsheet is associated to
+more than one stuntsheet, then prompt to change name to?
+
+Labels
+
+Labels abstractly are nothing more than Groups.  For each label, there is a
+corresponding Group.  Usually, each section of a label Group is a singleton
+subset of the associated group. [** Defn: The section of G associated to g
+is the subset G(g) of g.]  The only way to change the singleton-ness of a
+label Group is through Group actions.
+
+Locations of labels are also Groups.  Upperleft is the Group containing all
+points whose labels appear above and to the left,
+and Upperright is the Group containing
+all points whose labels appear above and to the right.  Lowerleft and
+Lowerright are defined similarly.
+
+Note that these four Groups are generally mutually
+exclusive and cover Show, which is the Group all of whose sections are full.
+[** Defn: A section G(g) is full if G(g) = g.  Defn: A set of Groups covers
+another Group G if for each group, the section of G is contained in the
+union of the sections of the other Groups.]  However, this does not have to
+be the case.  If a point lies in none of these Groups, then its label is
+simply not displayed on the particular group.  If a point lies in more than
+one of these Groups, then its label is displayed more than once on the same
+group.  The only way to make this actually happen is through the group menu.
+
+Horizontalflip.  F,H or icon or menu option.  Action is applied only to
+preselected set of points.  Points in Upperleft are removed from Upperleft
+and put in Upperright (and conversely).  Points in Lowerleft are removed from
+Lowerleft and put in Lowerright (and conversely).
+
+Verticalflip.  F,V or menu option.  Action is applied only to
+preselected set of points.  Points in Upperleft are removed from Upperleft
+and put in Lowerleft (and conversely).  Points in Upperright are removed from
+Upperright and put in Lowerright (and conversely).
+
+Right.  F,R or icon or menu option.  Action is applied only to preselected
+set of points.  Points in Upperleft are removed from Upperleft and put
+in Upperright.  Lowerleft gets moved to Lowerright.  No effect on points
+already in Lowerright or Upperright.
+
+Left. Up. Down.  Completely analogous to right.  All are menu options.
+Left is also an icon.  Keystrokes are L,L; L,U; and L;D.
+
+Observe that no ambiguities in these actions are created by the existence
+of points with more than one label or with no label.  None of these actions
+will have any effect on points without labels.  Suppose that a point
+has both an upperleft and an upperright label.  Then h-flip will not make
+any difference, v-flip will cause the labels to move to lowerleft and
+lowerright, right will make only a single label upperright, etc.
+
+Name.  L,N or menu option.  
+Action is applied to preselected set of points.  For each selected
+point, a new label must be typed.  Alternately, one can specify a list of
+labels (using the standard shorthand if desired), and the program will
+assign them arbitrarily.  The names of the labels are changed on all groups
+including stuntsheets and refptsheets, but there is an option to change the
+names for the current group only.  
+
+Relabel.  L,A or menu option.  Action is applied to selected set only.
+Prompt to renumber last portion or first portion of show; default is last.
+Submenu to choose latest (earliest) stuntsheet that will NOT be changed;
+default is current stuntsheet, and group names NOT accepted.  To choose group
+to "emulate," submenu listing all stuntsheets.  Option for listing all
+groups.  Default is the stuntsheet directly following (preceding) the
+stuntsheet chosen above.  The set of point on the last (first) unchanged
+stuntsheet must precisely match the set of points on the "emulated" group.
+In case of superimposition, the correspondence is assigned arbitrarily.
+
+Files
+
+Save.  F,S or icon or menu option.  Default is save
+under current name, but there is an option to change the name by typing
+it.  If the show does not yet have a name, then this option is invoked
+automatically.  Not undoable, not repeatable.
+
+Load.  F,L or menu option.  Asks to save the outgoing
+show.  Asks for a name of new show, which can be typed or chosen from a
+directory browser.  Loads new show.  If new show does not exist, enter
+show creation routine.  Not undoable, not repeatable.
+
+Quit.  F,Q or menu option.  Prompts Y/N to really quit.  Obviously
+not undoable or repeatable.
+
+Merge.  F,M or menu option.  Prompt to merge onto beginning or onto end of
+current show; default is end.  Submenu listing current directory.  Type
+name or choose from
+menu.  If points on first and last stuntsheets exactly correspond, then
+prompt to automatically relabel, and then prompt to relabel first part or
+last part; defaults are yes and last part.
+
+If last sheet of the show that
+will become the first part is numerical, then prompt to renumber stuntsheets 
+on latter part of merged show.  The names of the latter part will be changed
+to be consecutive numbers, starting with the number of the last sheet on the
+earlier part.  However, stuntsheets of the latter part that are not numerical
+initially are left unchanged.  For example, suppose that "SONS" is being
+merged onto the end of "BIGC."  BIGC has sheets named TUNNEL, 1, 5, GRRAH,
+and 3.  SONS has sheets named 1, 2A, 2B, and SPELLOUT.  Automatic renumbering
+will give sheets named TUNNEL, 1, 2, GRRAH, 3, 4, SONS5, 6, SPELLOUT (see
+next paragraph for an explanation of "SONS5.")
+
+In case of duplication of group names, the
+name of the group of the non-current show is changed by adding the name of
+the show onto the front of the name.  For example, suppose "SONS" is being
+merged onto the end of "BIGC."  BIGC has four sheets named 1,2,3,4, and
+SONS has three sheets named 1,2,3.  The user does NOT choose to automatically
+renumber the sheets, so the resulting sheet names are 1, 2, 3, 4, SONS1,
+SONS2, SONS3.
+
+Print. F,P or icon or menu option.  Choose sheets to be printed.  Select as
+many as desired.  Default is all sheets.  Option to change collection
+(default is Show).  Option to list all groups.
+
+Option to select printer.
+
+Option for PRComm-style overview sheets.  **  Note that it is not necessary to
+choose between football field and spring show since Background takes care of
+that.
+
+Groups
+
+Associate.  G,A or menu option.  Choose refptsheets for which associations
+will be defined.  Default is the current group.
+Select as many groups as desired.
+
+Choose stuntsheet to which groups will be associated.  Submenu listing
+all stuntsheets.  Default is current stuntsheet.  Groups not accepted.  More
+than one stuntsheet can be selected.
+If only one stuntsheet is selected, then prompt if names should be changed
+to match the sRn convention.  If yes, then
+sheets are renamed with lowest available values of n.
+
+Option for unassociating selected groups.
+
+Selectgroup.  G,S or menu option.  Submenu listing all groups.  Default is
+current group.  Type name or
+choose from menu.  Selected group becomes current.  Generalizes Nextsheet,
+Previoussheet, Goto, and Selectrefpt.
+
+Removegroups. G,R or menu option.  Submenu listing all groups.  Default is
+current group.
+Choose as many groups as desired.  Prompt to REALLY delete data.
+
+Creategroup.  G,C or menu option.
+Enter name for new group.  Choose initial
+configuration for group by selecting from submenu listing all groups; default
+is current group.
+
+Deletepoints.  G,D or menu option.  Selected set is removed from current
+group; they actually disappear from the screen.
+
+Editpoints. G,A or menu option.  Each click with left button causes a point
+to appear onscreen.  Click with right on a point to delete a point.  In case
+of superimposed points, submenu for choosing which point is to be deleted.
+Note that added points will not have labels.  Press
+ESC to return to normal operation.
+
+Collections
+
+** I know this is a clumsy way to manipulate collections, but who cares?  We're
+only expecting pros to even think about using this feature, and even they will
+hardly ever have to bother with it.  This method seems to minimize the
+necessary additions to the user interface.
+
+Createcollection.  C,C or menu option.  Prompt name for new collection.  
+To choose initial configuration of collection, submenu listing all collections.
+Default is Show.
+
+Addsection.  C,A or menu option.  Submenu listing all collections.
+Default is most recently accessed collection.  If no collection
+has been accessed specifically, then default is Show.  Selected
+set is added to the section of the chosen collection corresponding to the
+current group.  If some points already lie in the section, then the action
+has no effect on those points.
+
+Deletesection.  C,D or menu option.  Same as Addsection except that selected
+set is removed from section corresponding to current group.  If some selected
+points already are not contained in section, then the action has no effect
+on those points.
+
+Editsection.  C,E or menu option.  Submenu listing all collections; default
+as above.  Section becomes highlighted onscreen.  Leftclick to add a point
+to the section.  Rightclick to delete a point from the section.  Press ESC
+to return to normal operation.
+
+Removecollection.  C,R or menu option.  Submenu listing all collections;
+default as above.  Choose as many collections as desired.
+Prompt to really erase data.  Collection is gone forever.
+
+Label collections can be removed; the effect is to erase a particular label
+from each and every group.  However, the associated point is still there.
+Symbol collections can also be removed; the effect of removing Solid is to
+make all solidmen into plainmen.  The Solid collection will automatically
+be recreated when the user tries to change a symbol to solid (using the
+symbol features).  
+
+Removing Show is possible but is generally a very very bad idea.  Without Show,
+just about nothing except for the group and collection menus will work.
+Special prompt before the program actually erases Show.
+
+Unioncollections.  C,U or menu option.  Choose collections to be changed from a
+list of all collections (select as many as desired).  Choose collections to
+be added (select as many as desired).  Execution causes each section of the
+collections-to-be-changed to include the points in the corresponding sections
+of the collections-to-be-added.  This is essentially a union operation on 
+the level of collections.
+
+Subtractcollections.  C,S or menu option.  Same as above, except points of
+sections of collections-to-be-deleted are removed from the sections of
+collections-to-be-changed.  This operation is A AND (NOT B), where A is
+the collection-to-be-changed, and B is the collection-to-be-added.
+
+(Section-wise) complementation of a collection A can be implemented by creating
+a new collection as a copy of Show, then subtracting A from the new section.
+** single command for complementation?
+
+** Should we allow relations between collections to be defined?  "A is
+contained (section-wise) in B."  "A and B are mutually exclusive (section-
+wise)."  "A and B cover C (section-wise)."
+
+Grid
+
+The program always rounds off location to the nearest point on a lattice.
+The lattice can be of varying size and is determined by the size of the grid.
+There are four possible lattice sizes: 4step, 2step, 1step, .5step.
+
+Gridsize.  Icon or E,G or menu.  Choose new gridsize from list of four
+possible choices.  Default is current gridsize.
+
+Symbol
+
+Changesymbol.  Icon or Y,C or menu option.  Choose from list of eight possible
+symbols.  Default is symbol that was chosen in most recent changesymbol
+action.  Upon execution, selected men are changed to the selected symbol.
+
+Solid.  Y,O or menu option.  Symbols of men in selected set are inverted
+with respect to solidness.  Plainmen become solidmen; solidmen become
+plainmen; slashmen become solidslashmen; solidslashmen become slashmen;
+etc.
+
+Slash.  Y,S or menu option.  Symbols of men in selected set are inverted
+with respect to possession of slash.  Plain becomes slash; X becomes
+backslash; solidslash becomes solid; etc.
+
+Backslash.  Y,B or menu option.  Symbols of men in selected set are inverted
+with respect to possession of backslash.
+
+Continuity
+
+Editcontinuity.  Icon or E,E or menu option.  Choose from list of all symbol
+collections (default is symbol most recently used by any command), or request
+list of all collections.  Type away.  ESC to leave.
+
+Option to split window so that more than one set of instructions can be
+viewed and edited simultaneously.  Choose from list as above.
+
+Option to switch between windows within continuity editor.  Option to
+unsplit window.
+
+Standard cut and paste utilities for deleting, copying, and moving text
+within a window or between windows.
+
+Option to edit continuity for a stuntsheet other than the current
+one.  This option operates at the level of each window, so that continuities
+from different stuntsheets can be viewed simultaneously.
+
+Option to call Createcollection directly without having to press ESC, so that
+continuity instructions can be created that do not correspond to an already
+existing collection.
+
+Option to verify accuracy of continuity.  Checks for typographical errors,
+and checks to make sure that the animation makes sense.  Do all men reach
+NP in time?  Does some man have too much continuity for the time allotted?
+Operates individually on each individual continuity assignment, or you can
+call the Verifycontinuity command (see below).
+
+
+** This one command is pretty complicated, but it combines a lot of features
+from the old version in a more logical and easy-to-use fashion.
+
+Animation
+
+Animate.  Icon or A or menu option.  Animation starts at beat 1 of the current
+sheet.  However, if the last animation was aborted while depicting
+this same stuntsheet, then the animation starts at the beat where it was
+aborted.
+
+Click right or right arrow to advance one beat.  Click left or left arrow
+to back up one beat.  Options are activated by typing key (shown in
+parentheses) or clicking on icon.  Note that to advance a beat, the cursor
+must NOT be located on an icon.
+
+Option to check for collisions (C).  Collisions appear in some special color,
+and
+labels of colliding men are displayed.  Option to turn warning bell on or
+off (default is on) (B).  Option to set collision tolerance (T) (choices are
+0; 1/2; sqrt(2)/2; 1; sqrt(2); 1.5; 2; or type any real number).
+
+Option for automatic animation (A).  Option to set speed (default is speed used
+most recently on this show (recalled from previous time this show was
+edited if necessary)).  Number keys 1-9 correspond to specific beats per
+minute (bpm).  +/- increments/decrements bpm in jumps corresponding to the
+standard metronome markings.  ** Not all numbers are used for metronome
+markings; I'll send you a list, or you can copy them off of a metronome.
+Option to type bpm (S)(any positive integer).  Option to adjust bpm graphically
+(VCR-style).  Left click or left arrow to animate backwards.  Right click
+or right arrow to animate forwards.
+
+Option to highlight particular collections (H).  Choose from list displaying
+all
+collections.  Select as many as desired.  Selected collections appear in a
+special color.
+
+Animatepoints.  A,P or menu option.  Selected men are added to the section
+of the Animation collection associated to the current group.
+Option to add all men (without having to first select all men).
+
+Deanimatepoints. A,D or menu option.  Selected men are subtracted from the
+section of the Animation collection associated to the current group.  Option
+to subtract all men (without having to first select all men).
+
+Sections of Animation associated to groups that are not stuntsheets are
+completely irrelevant.
+
+Fancier collection operations are accessible through the general collection
+command.
+
+Beats.  Icon or A,B or menu.  Choose sheets for which beats will be
+assigned.  Select as many as desired.  Default is current stuntsheet.
+Type absolute number of beats, or option for typing relative change (positive
+or negative).
+
+Verifycontinuity.  Icon or A,V or menu.  Choose sheets for which continuity
+will be checked.  Select as many as desired.  Default is all sheets.
+Checks for typographical accuracy as well as verifying that the animation
+makes sense.  Do all men reach NP in time?  Does any man have too much 
+continuity for the time allotted?

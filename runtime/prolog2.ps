@@ -1,0 +1,35 @@
+/smoveto { transform round exch round exch itransform moveto } def
+/slineto { transform round exch round exch itransform lineto } def
+/dotbox {
+   /y exch def
+   /x exch def
+   newpath
+   x w sub y w sub smoveto
+   x w add y w sub slineto
+   x w add y w add slineto
+   x w sub y w add slineto
+   closepath
+   fill
+} bind def
+/drawfield {
+   newpath 0 0 smoveto
+   0 fieldh slineto
+   fieldw fieldh slineto
+   fieldw 0 slineto
+   closepath stroke
+   0 84 ehash sub fieldh mul 84 div smoveto
+   .2 fieldw mul 20 div 84 ehash sub fieldh mul 84 div slineto stroke
+   19.8 fieldw mul 20 div 84 ehash sub fieldh mul 84 div smoveto
+   fieldw 84 ehash sub fieldh mul 84 div slineto stroke
+   0 84 whash sub fieldh mul 84 div smoveto
+   .2 fieldw mul 20 div 84 whash sub fieldh mul 84 div slineto stroke
+   19.8 fieldw mul 20 div 84 whash sub fieldh mul 84 div smoveto
+   fieldw 84 whash sub fieldh mul 84 div slineto stroke
+   1 1 19 {
+      dup fieldw mul 20 div dup 0 smoveto fieldh slineto stroke
+      dup .2 sub fieldw mul 20 div 84 ehash sub fieldh mul 84 div smoveto
+      dup .2 add fieldw mul 20 div 84 ehash sub fieldh mul 84 div slineto stroke
+      dup .2 sub fieldw mul 20 div 84 whash sub fieldh mul 84 div smoveto
+      .2 add fieldw mul 20 div 84 whash sub fieldh mul 84 div slineto stroke
+   } for
+} bind def

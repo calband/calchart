@@ -1,0 +1,117 @@
+8 dict begin
+/FontType 3 def
+/FontMatrix [.001 0 0 .001 0 0] def
+/FontBBox [0 0 1000 1000] def
+/Encoding 256 array def
+0 1 255 {Encoding exch /.notdef put} for
+Encoding 65 /plainman put
+Encoding 66 /solman put
+Encoding 67 /bsman put
+Encoding 68 /slman put
+Encoding 69 /xman put
+Encoding 70 /solbsman put
+Encoding 71 /solslman put
+Encoding 72 /solxman put
+/CharProcs 9 dict def
+CharProcs begin
+/.notdef {} def
+/plainman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   stroke
+   0.25 setlinewidth
+} bind def
+/solman {
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   fill
+} bind def
+/bsman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   stroke
+   0 600 moveto
+   600 0 lineto
+   stroke
+   0.25 setlinewidth
+} bind def
+/slman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   stroke
+   600 600 moveto
+   0 0 lineto
+   stroke
+   0.25 setlinewidth
+} bind def
+/xman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   stroke
+   0 600 moveto
+   600 0 lineto
+   stroke
+   600 600 moveto
+   0 0 lineto
+   stroke
+   0.25 setlinewidth
+} bind def
+/solbsman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   fill
+   0 600 moveto
+   600 0 lineto
+   stroke
+   0.25 setlinewidth
+} bind def
+/solslman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   fill
+   600 600 moveto
+   0 0 lineto
+   stroke
+   0.25 setlinewidth
+} bind def
+/solxman {
+   30 setlinewidth
+   newpath
+   300 300 250 0 360 arc
+   closepath
+   fill
+   0 600 moveto
+   600 0 lineto
+   stroke
+   600 600 moveto
+   0 0 lineto
+   stroke
+   0.25 setlinewidth
+} bind def
+end
+/BuildGlyph {
+   700 0 0 0 600 600 setcachedevice
+   exch /CharProcs get exch
+   2 copy known not {pop /.notdef} if
+   get exec
+} bind def
+/BuildChar {
+   1 index /Encoding get exch get
+   1 index /BuildGlyph get exec
+} bind def
+currentdict
+end
+/CalChart exch definefont pop

@@ -1,0 +1,154 @@
+# Configuration file for CalChart
+# comments must be between definitions
+
+# size of window to open
+WINDOW_WIDTH
+600
+WINDOW_HEIGHT
+400
+
+# size of undo buffer in bytes
+UNDO_BUF_SIZE
+50000
+
+# print options
+
+# this is for Windows
+PRINT_FILE
+LPT1
+
+# these are for printing under Unix
+PRINT_CMD
+lpr
+PRINT_OPTS
+
+# these are for previewing under Unix
+PRINT_VIEW_CMD
+ghostview
+PRINT_VIEW_OPTS
+
+#define standard modes like this:
+#DEFINE_STANDARD_MODE
+#name of mode
+#whash ehash (steps from west sideline)
+#left top right bottom (border in steps)
+
+DEFINE_STANDARD_MODE
+Standard
+32 52
+8 8 8 8
+
+DEFINE_STANDARD_MODE
+Old Field
+28 56
+8 8 8 8
+
+DEFINE_STANDARD_MODE
+Pro Field
+36 48
+8 8 8 8
+
+#define spring show modes like this:
+#DEFINE_SPRSHOW_MODE
+#name of mode
+#name of EPS file
+#X (hex digit of which yard lines to print:
+#   8 = left, 4 = right, 2 = above, 1 = below)
+#left top right bottom (border in steps)
+#x y w h (size of stage EPS file as per BoundingBox)
+#x y w h (where to put the field on the stage, depends on the EPS file)
+#x y w h (region of the field to use, in steps)
+#l r t b (location of yard line text's inside edge, depends on the EPS file)
+
+DEFINE_SPRSHOW_MODE
+Zellerbach
+zllrbach.eps
+D
+8 8 8 8
+0 0 571 400
+163 38 265 232
+-16 -30 32 28
+153 438 270 12
+
+# width of page in inches
+PRINT_PAGE_WIDTH
+7.5
+
+# height of print region in inches
+PRINT_PAGE_HEIGHT
+10.0
+
+# height of page in inches
+PRINT_PAPER_LENGTH
+11.0
+
+# left margin in inches
+PRINT_LEFT_MARGIN
+0.5
+
+# top margin in inches
+PRINT_TOP_MARGIN
+0.5
+
+# size of header text in steps
+PRINT_HEADER_SIZE
+3.0
+
+# size of yards text in steps
+PRINT_YARDS_SIZE
+1.5
+
+# size of continuity text in points (1/72")
+PRINT_TEXT_SIZE
+10
+
+# width of point circles in steps
+PRINT_DOT_RATIO
+0.9
+
+# ratio of point number text to the size of the circles
+PRINT_NUM_RATIO
+1.35
+
+# ratio of lines for plain-type men to the circles
+PRINT_PLAIN_LINE
+1.2
+
+# ratio of lines for solid-type men to the circles
+PRINT_SOLID_LINE
+1.2
+
+# ratio of continuity to the page height
+# this can be used to control the amount of the field visible
+PRINT_CONT_RATIO
+0.2
+
+# PS font for the header text
+PRINT_HEADER_FONT
+Palatino-Bold
+
+# PS font for yard lines and stuff
+PRINT_ANNO_FONT
+Helvetica
+
+# PS font for point numbers
+PRINT_NUMBER_FONT
+Helvetica-Bold
+
+# PS fonts for continuity
+PRINT_FONT
+Courier
+PRINT_BOLD_FONT
+Courier-Bold
+PRINT_ITALIC_FONT
+Courier-Italic
+PRINT_BOLD_ITALIC_FONT
+Courier-BoldItalic
+
+# text for yardlines, beginning with south inzone
+PRINT_YARDS
+0 5 10 15 20 25 30 35 40 45 50 45 40 35 30 25 20 15 10 5 0
+
+# text for spring show lines, beginning with bottom
+PRINT_SPR_LINES
+A B C D E

@@ -1,0 +1,115 @@
+
+arrows	mouse movement
+ESC	abort
+SHIFT	OR blocking
+CTRL	XOR blocking
+RETURN	execute (geniusmove family)
+	recalllastdata (geniusmove family)
+TAB	cycle menu options
+
+A,A	animate
+A,B	beats
+A,D	deanimate points
+A,P	animate points
+C,A	add to section
+C,C	create collection
+C,D	delete from section
+C,E	edit section
+C,R	remove collection
+C,S	subtract collections
+C,U	union collections
+E,E	edit continuity instructions
+E,G	gridsize
+E,K	kill changes
+E,U	undo
+F,L	load show
+F,M	merge shows
+F,P	print show
+F,Q	quit
+F,S	save show
+G,A	associate groups
+G,C	create group
+G,D	delete point
+G,E	edit points
+G,R	remove groups
+G,S	select group
+I	insert stuntsheet
+L,A	relabel
+L,D	down label
+L,H	horizontal label flip
+L,L	left label
+L,N	name label
+L,R	right label
+L,U	up label
+L,V	vertical label flip
+M,C	clevermove
+M,D	dilation
+M,G	geniusmove
+M,M	smartmove
+M,R	rotation
+M,S	shear
+M,T	translation
+M,X	reflection
+N	next stuntsheet
+P	previous stuntsheet
+R,A	associate refpt sheets
+R,C	copy refpt sheet
+R,N	name refpt sheet
+R,R	remove refpt sheet
+R,S	select refpt sheet
+R,U	autoname refpt sheets
+S	stuntsheet
+T	repeat last action
+U	undo last action
+Y,B	backslash inversion
+Y,C	change symbol
+Y,O	solid inversion
+Y,S	slash inversion
+
+animation control keys
+
+arrows	manually animate
++	forward
+-	backward
+1-9	speed
+A	automatic animation
+B	bell on/off
+C	collisions
+H	highlight
+S	type bpm
+T	collision tolerance
+
+stuntsheet control keys
+
+A	autoname stuntsheets
+C	copy stuntsheets
+E	rename stuntsheet
+G	goto stuntsheet
+I	insert stuntsheet
+M	move stuntsheets
+N	next stuntsheet
+P	previous stuntsheet
+R	remove stuntsheets
+U	undo
+
+Commands for which it might be nice to have single keystroke keyboard
+commands to speed usage.
+
+gridsize
+load show
+print show
+quit
+save show
+insert ss
+horiz label flip
+clevermove
+geniusmove
+translation
+smartmove
+next ss
+prev ss
+select refpt sheet
+goto ss
+remove ss
+undo
+change symbol

@@ -1,0 +1,9 @@
+calchart
+*.shw
+*.bmp
+shows
+depend
+*.output
+contgram.cc
+contscan.cc
+contgram.h
