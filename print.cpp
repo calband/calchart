@@ -50,7 +50,7 @@ static char *fontnames[] = {
 static char nofile[] = "Unable to open print config files";
 static char badfile[] = "Error writing to print file";
 
-static char *gen_cont_line(const cc_text *line, PSFONT_TYPE *currfontnum,
+static char *gen_cont_line(CC_textline *line, PSFONT_TYPE *currfontnum,
 			   float fontsize, FILE *fp);
 static char *print_start_page(FILE *fp, Bool landscape);
 static Bool copy_ps_file(const char *name, FILE *fp);
@@ -367,14 +367,17 @@ int CC_show::Print(FILE *fp, Bool eps, Bool overview, unsigned curr_ss) {
 }
 
 void CC_show::PrintSheets(FILE *fp) {
-  const cc_text *text;
+  wxNode *textnode;
+  CC_textline *text;
   enum PSFONT_TYPE currfontnum = PSFONT_NORM;
   short lines_left = 0;
   short need_eject = FALSE;
   CC_sheet *sheet;
 
   for (sheet = sheets; sheet != NULL; sheet = sheet->next) {
-    for (text = sheet->continuity; text != NULL; text = text->next) {
+    for (textnode = sheet->continuity.lines.First(); textnode != NULL;
+	 textnode = textnode->Next()) {
+      text = (CC_textline*)textnode->Data();
       if (!text->on_main) continue;
       if (lines_left <= 0) {
 	if (num_pages > 0) {
@@ -417,15 +420,17 @@ void CC_show::PrintSheets(FILE *fp) {
 }
 
 char *CC_sheet::PrintCont(FILE *fp) {
-  const cc_text *text;
+  wxNode *textnode;
+  CC_textline *text;
   enum PSFONT_TYPE currfontnum = PSFONT_NORM;
   short cont_len = 0;
   float cont_height, this_size;
   char *error;
 
   cont_height = field_y - step_size*10;
-  for (text = continuity; text != NULL;
-       text = text->next) {
+  for (textnode = continuity.lines.First(); textnode != NULL;
+       textnode = textnode->Next()) {
+    text = (CC_textline*)textnode->Data();
     if (text->on_sheet) cont_len++;
   }
   if (cont_len == 0) return NULL;
@@ -438,7 +443,9 @@ char *CC_sheet::PrintCont(FILE *fp) {
 		     width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5));
   CHECKPRINT(fprintf(fp, "/contfont findfont %.2f scalefont setfont\n",
 		     this_size));
-  for (text = continuity; text != NULL; text = text->next) {
+  for (textnode = continuity.lines.First(); textnode != NULL;
+       textnode = textnode->Next()) {
+    text = (CC_textline*)textnode->Data();
     if (!text->on_sheet) continue;
     CHECKPRINT(fprintf(fp, "/x lmargin def\n"));
 
@@ -450,15 +457,18 @@ char *CC_sheet::PrintCont(FILE *fp) {
   return NULL;
 }
 
-char *gen_cont_line(const cc_text *line, PSFONT_TYPE *currfontnum,
+char *gen_cont_line(CC_textline *line, PSFONT_TYPE *currfontnum,
 		    float fontsize, FILE *fp) {
-  const cc_text *part;
+  wxNode *textnode;
+  CC_textchunk *part;
   const char *text;
   short tabstop;
   wxString temp_buf;
 
   tabstop = 0;
-  for (part = line; part != NULL; part = part->more) {
+  for (textnode = line->chunks.First(); textnode != NULL;
+       textnode = textnode->Next()) {
+    part = (CC_textchunk*)textnode->Data();
     if (part->font == PSFONT_TAB) {
       if (++tabstop > 3) {
 	CHECKPRINT(fprintf(fp, "space_over\n"));

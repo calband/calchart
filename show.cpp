@@ -290,6 +290,27 @@ void CC_WinListShow::Empty() {
   delete show;
 }
 
+CC_textline::CC_textline()
+  : center(FALSE), on_main(TRUE), on_sheet(TRUE) {}
+CC_textline::~CC_textline() {
+  wxNode *node;
+
+  for (node = chunks.First(); node != NULL; node = node->Next()) {
+    delete (CC_textchunk*)node->Data();
+  }
+}
+
+CC_text::CC_text() {
+}
+
+CC_text::~CC_text() {
+  wxNode *node;
+
+  for (node = lines.First(); node != NULL; node = node->Next()) {
+    delete (CC_textline*)node->Data();
+  }
+}
+
 CC_continuity::CC_continuity()
 : next(NULL), num(0) {}
 
@@ -367,19 +388,19 @@ CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
 }
 
 CC_sheet::CC_sheet(CC_show *shw)
-: next(NULL), continuity(NULL), animcont(NULL), show(shw),
+: next(NULL), animcont(NULL), show(shw),
   numanimcont(0), beats(0), picked(TRUE) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_show *shw, const char *newname)
-: next(NULL), continuity(NULL), animcont(NULL), show(shw),
+: next(NULL), animcont(NULL), show(shw),
   numanimcont(0), beats(0), picked(TRUE), pts(NULL), name(newname) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_sheet *sht)
-: next(NULL), continuity(NULL), show(sht->show),
+: next(NULL), show(sht->show),
   beats(0), picked(sht->picked), name(sht->name), number(sht->number)
 {
   int i;
@@ -396,7 +417,6 @@ CC_sheet::CC_sheet(CC_sheet *sht)
 }
 
 CC_sheet::~CC_sheet() {
-  cc_text *tmp;
   CC_continuity *conttmp;
 
   if (pts) delete [] pts;
@@ -406,16 +426,6 @@ CC_sheet::~CC_sheet() {
       delete animcont;
       animcont = conttmp;
     }
-  }
-  while (continuity) {
-    while (continuity->more) {
-      tmp = continuity->more->more;
-      delete continuity->more;
-      continuity->more = tmp;
-    }
-    tmp = continuity->next;
-    delete continuity;
-    continuity = tmp;
   }
 }
 
@@ -1437,8 +1447,8 @@ CC_show::CC_show(const char *file)
     strcpy(namebuf+namelen-3, old_format_uppercase ? "TXT":"txt");
     fp = fopen(namebuf, "r");
     if (fp) {
-      cc_text *last_text, *start_text;
-      cc_text *new_text;
+      CC_textline *line_text;
+      CC_textchunk *new_text;
       unsigned pos;
       Bool on_sheet, on_main, center, font_changed;
       enum CONT_PARSE_MODE parsemode;
@@ -1449,11 +1459,12 @@ CC_show::CC_show(const char *file)
 
       curr_sheet = NULL;
       currfontnum = lastfontnum = PSFONT_NORM;
-      last_text = NULL;
+      line_text = NULL;
       while (TRUE) {
 	if (feof(fp)) break;
 	ReadDOSline(fp, tempbuf);
 	sheetmark = FALSE;
+	line_text = NULL;
 	if (tempbuf.Length() >= 2) {
 	  if ((tempbuf.Elem(0) == '%') && (tempbuf.Elem(1) == '%')) {
 	    sheetmark = TRUE;
@@ -1466,7 +1477,6 @@ CC_show::CC_show(const char *file)
 	  if (tempbuf.Length() > 2) {
 	    curr_sheet->SetNumber(tempbuf.From(2).Chars());
 	  }
-	  last_text = NULL;
 	} else {
 	  if (curr_sheet == NULL) {
 	    // Continuity doesn't begin with a sheet header
@@ -1495,7 +1505,6 @@ CC_show::CC_show(const char *file)
 	    }
 	  }
 	  parsemode = CONT_PARSE_NORMAL;
-	  start_text = NULL;
 	  do {
 	    font_changed = FALSE;
 	    lineotext = "";
@@ -1675,26 +1684,22 @@ CC_show::CC_show(const char *file)
 	    if ((!lineotext.Empty()) ||
 		(currfontnum == PSFONT_TAB) ||
 		// Empty line
-		((pos >= tempbuf.Length()) && (start_text == NULL))) {
-	      new_text = new cc_text;
+		((pos >= tempbuf.Length()) && (line_text == NULL))) {
+	      new_text = new CC_textchunk;
 	      if (new_text == NULL) {
 		error = nomem_str;
 		return;
 	      }
-	      if (start_text) start_text->more = new_text;
-	      else {
-		if (last_text) last_text->next = new_text;
-		else curr_sheet->continuity = new_text;
-		last_text = new_text;
+	      if (line_text == NULL) {
+		line_text = new CC_textline();
+		line_text->on_main = on_main;
+		line_text->on_sheet = on_sheet;
+		line_text->center = center;
+		curr_sheet->continuity.lines.Append(line_text);
 	      }
-	      start_text = new_text;
-	      new_text->next = NULL;
-	      new_text->more = NULL;
-	      new_text->on_main = on_main;
-	      new_text->on_sheet = on_sheet;
-	      new_text->center = center;
 	      new_text->font = currfontnum;
 	      new_text->text = lineotext;
+	      line_text->chunks.Append(new_text);
 	    }
 	    // restore to previous font (used for symbols and tabs)
 	    currfontnum = lastfontnum;

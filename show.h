@@ -167,14 +167,29 @@ struct cc_reallyoldpoint {
   cc_oldcoord ref;
 };
 
-struct cc_text {
-  cc_text *next;
-  cc_text *more;
+class CC_textchunk : public wxObject {
+public:
   wxString text;
   enum PSFONT_TYPE font;
+};
+
+class CC_textline : public wxObject {
+public:
+  CC_textline();
+  ~CC_textline();
+
+  wxList chunks;
   Bool center;
   Bool on_main;
   Bool on_sheet;
+};
+
+class CC_text {
+public:
+  CC_text();
+  ~CC_text();
+
+  wxList lines;
 };
 
 class CC_continuity {
@@ -340,7 +355,7 @@ public:
 			unsigned ref);
 
   CC_sheet *next;
-  cc_text *continuity;
+  CC_text continuity;
   CC_continuity *animcont;
   CC_show *show;
   unsigned numanimcont;

@@ -320,38 +320,53 @@ void ContinuityEditor::SetPoints() {
 
 PrintContCanvas::PrintContCanvas(wxFrame *frame, CC_descr *dcr):
 wxCanvas(frame, -1, -1, -1, -1, 0), show_descr(dcr), ourframe(frame),
-topline(0), width(0), height(0) {
+topline(0), width(0), height(0), cursorx(0), cursory(0),
+maxlines(0), maxcolumns(0) {
   GetDC()->SetMapMode(MM_TEXT);
   GetDC()->SetBackground(wxWHITE_BRUSH);
 }
 
 PrintContCanvas::~PrintContCanvas() {}
 
-void PrintContCanvas::OnPaint() {
-  cc_text *cont, *c;
+void PrintContCanvas::Draw(int firstrow, int lastrow) {
+  wxNode *linenode, *textnode;
+  CC_textline *cont;
+  CC_textchunk *c;
   CC_sheet *sht = show_descr->CurrSheet();
   Bool do_tab;
-  unsigned i;
+  unsigned row, column;
   float x, y;
   float textw, texth, textd, maxtexth;
   int devx, devy;
   unsigned tabnum;
   float tabw;
+  float cur_posx, cur_posy, cur_height;
+  wxString tmpstr;
+  Bool drawall;
+
+  drawall = ((firstrow == 0) && (lastrow < 0));
+  cur_posx = cur_posy = cur_height = 0;
+  maxlines = maxcolumns = 0;
 
   BeginDrawing();
+  if (drawall) Clear();
   SetTextForeground(wxBLACK);
-  Clear();
 
   width = 0;
-  cont = sht->continuity;
-  for (i = 0; (i < topline) && (cont != NULL); i++, cont = cont->next);
+  linenode = sht->continuity.lines.First();
+  for (row = 0; (row < topline) && (linenode != NULL);
+       row++, linenode = linenode->Next());
   y = 0.0;
   SetFont(contPlainFont);
   tabw = GetCharWidth() * 6; // Size of tab
-  while (cont) {
+  while (linenode) {
+    cont = (CC_textline*)linenode->Data();
     x = 0.0;
+    column = 0;
     if (cont->center) {
-      for (c = cont; c != NULL; c = c->more) {
+      for (textnode = cont->chunks.First(); textnode != NULL;
+	   textnode = textnode->Next()) {
+	c = (CC_textchunk*)textnode->Data();
 	do_tab = FALSE;
 	switch (c->font) {
 	case PSFONT_SYMBOL:
@@ -385,7 +400,9 @@ void PrintContCanvas::OnPaint() {
     }
     maxtexth = contPlainFont->GetPointSize();
     tabnum = 0;
-    for (c = cont; c != NULL; c = c->more) {
+    for (textnode = cont->chunks.First(); textnode != NULL;
+	 textnode = textnode->Next()) {
+      c = (CC_textchunk*)textnode->Data();
       do_tab = FALSE;
       switch (c->font) {
       case PSFONT_NORM:
@@ -402,6 +419,10 @@ void PrintContCanvas::OnPaint() {
 	SetFont(contBoldItalFont);
 	break;
       case PSFONT_TAB:
+	if ((row == cursory) && (column <= cursorx)) {
+	  cur_posx = x;
+	}
+	column++;
 	tabnum++;
 	textw = tabnum * tabw;
 	if (textw >= x) x = textw;
@@ -416,71 +437,149 @@ void PrintContCanvas::OnPaint() {
 	float d = textw;
 	SYMBOL_TYPE sym;
 
-	float topline = y + texth - textd - d;
+	float top_y = y + texth - textd - d;
 
-	for (const char *s = c->text; *s; s++) {
-	  sym = (SYMBOL_TYPE)(*s - 'A');
-	  switch (sym) {
-	  case SYMBOL_SOL:
-	  case SYMBOL_SOLBKSL:
-	  case SYMBOL_SOLSL:
-	  case SYMBOL_SOLX:
-	    SetBrush(wxBLACK_BRUSH);
-	    break;
-	  default:
-	    SetBrush(wxTRANSPARENT_BRUSH);
+	for (const char *s = c->text; *s; s++, column++) {
+	  if ((row == cursory) && (column <= cursorx)) {
+	    cur_posx = x;
 	  }
-	  DrawEllipse(x, topline, d, d);
-	  switch (sym) {
-	  case SYMBOL_SL:
-	  case SYMBOL_X:
-	  case SYMBOL_SOLSL:
-	  case SYMBOL_SOLX:
-	    DrawLine(x, topline + d, x + d, topline);
-	    break;
-	  default:
-	    break;
-	  }
-	  switch (sym) {
-	  case SYMBOL_BKSL:
-	  case SYMBOL_X:
-	  case SYMBOL_SOLBKSL:
-	  case SYMBOL_SOLX:
-	    DrawLine(x, topline, x + d, topline + d);
-	    break;
-	  default:
-	    break;
+	    
+	  if (drawall ||
+	      ((row >= (unsigned)firstrow) && (lastrow >= 0) &&
+	       (row <= (unsigned)lastrow))) {
+	    SetPen(wxBLACK_PEN);
+	    sym = (SYMBOL_TYPE)(*s - 'A');
+	    switch (sym) {
+	    case SYMBOL_SOL:
+	    case SYMBOL_SOLBKSL:
+	    case SYMBOL_SOLSL:
+	    case SYMBOL_SOLX:
+	      SetBrush(wxBLACK_BRUSH);
+	      break;
+	    default:
+	      SetBrush(wxTRANSPARENT_BRUSH);
+	    }
+	    DrawEllipse(x, top_y, d, d);
+	    switch (sym) {
+	    case SYMBOL_SL:
+	    case SYMBOL_X:
+	    case SYMBOL_SOLSL:
+	    case SYMBOL_SOLX:
+	      DrawLine(x, top_y + d, x + d, top_y);
+	      break;
+	    default:
+	      break;
+	    }
+	    switch (sym) {
+	    case SYMBOL_BKSL:
+	    case SYMBOL_X:
+	    case SYMBOL_SOLBKSL:
+	    case SYMBOL_SOLX:
+	      DrawLine(x, top_y, x + d, top_y + d);
+	      break;
+	    default:
+	      break;
+	    }
 	  }
 	  x += d;
 	}
 	if (texth > maxtexth) maxtexth = texth;
       } else {
 	if (!do_tab) {
+	  int len = strlen(c->text);
 	  GetTextExtent(c->text, &textw, &texth, &textd);
 	  if (texth > maxtexth) maxtexth = texth;
-	  DrawText(c->text, x, y);
+	  if (drawall ||
+	      ((row >= (unsigned)firstrow) && (lastrow >= 0) &&
+	       (row <= (unsigned)lastrow)))
+	    DrawText(c->text, x, y);
+	  if (row == cursory) {
+	    if (column == cursorx) {
+	      cur_posx = x;
+	    } else if ((column + len) <= cursorx) {
+	      cur_posx = x+textw;
+	    } else if (column < cursorx) {
+	      float w;
+	      tmpstr = c->text.SubString(0, (cursorx - column - 1));
+	      GetTextExtent(tmpstr.GetData(), &w, &texth, &textd);
+	      cur_posx = x+w;
+	    }
+	  }
 	  x += textw;
+	  column += len;
 	}
       }
     }
+    if (row <= cursory) {
+      cur_posy = y;
+      cur_height = maxtexth;
+      maxcolumns = column;
+    }
     if (x > width) width = x;
     y += maxtexth;
-    cont = cont->next;
+    linenode = linenode->Next();
+    maxlines++;
+    row++;
   }
   height = y;
+
+  DrawCursor(cur_posx, cur_posy, cur_height);
 
   SetFont(NULL);
   EndDrawing();
 }
 
+void PrintContCanvas::OnPaint() {
+  Draw();
+}
+
 void PrintContCanvas::OnEvent(wxMouseEvent& /*event*/) {
 }
 
-void PrintContCanvas::OnChar(wxKeyEvent& /*event*/) {
+void PrintContCanvas::OnChar(wxKeyEvent& event) {
+  switch (event.KeyCode()) {
+  case WXK_LEFT:
+    if (cursorx > 0) {
+      MoveCursor(MIN(maxcolumns-1,cursorx-1), cursory);
+    }
+    break;
+  case WXK_RIGHT:
+    if (cursorx < maxcolumns) {
+      MoveCursor(cursorx+1, cursory);
+    }
+    break;
+  case WXK_UP:
+    if (cursory > 0) {
+      MoveCursor(cursorx, cursory-1);
+    }
+    break;
+  case WXK_DOWN:
+    if (cursory < (maxlines-1)) {
+      MoveCursor(cursorx, cursory+1);
+    }
+    break;
+  }
 }
 
 void PrintContCanvas::UpdateBars() {
   SetScrollbars(1, 1, (int)width, (int)height, 1, 1);
+}
+
+void PrintContCanvas::MoveCursor(unsigned column, unsigned row) {
+  cursorx = column;
+  cursory = row;
+  OnPaint();
+}
+
+void PrintContCanvas::DrawCursor(float x, float y, float height) {
+  SetPen(wxRED_PEN);
+  DrawLine(x, y, x, y+height-1);
+}
+
+void PrintContCanvas::InsertChar(unsigned onechar) {
+}
+
+void PrintContCanvas::DeleteChar(Bool backspace) {
 }
 
 void PrintContClose(wxButton& button, wxEvent&) {
@@ -523,6 +622,12 @@ PrintContEditor::~PrintContEditor() {
   if (node) {
     node->Remove();
     delete node;
+  }
+}
+
+void PrintContEditor::OnActivate(Bool active) {
+  if (active) {
+    canvas->SetFocus();
   }
 }
 

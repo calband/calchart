@@ -94,18 +94,26 @@ public:
   PrintContCanvas(wxFrame *frame, CC_descr *dcr);
   ~PrintContCanvas();
 
+  void Draw(int firstrow = 0, int lastrow = -1);
+
   void OnPaint();
   void OnEvent(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
-
   inline void Update() { topline = 0; OnPaint(); UpdateBars(); }
   void UpdateBars();
 
 private:
+  void MoveCursor(unsigned column, unsigned row);
+  void DrawCursor(float x, float y, float height);
+  void InsertChar(unsigned onechar);
+  void DeleteChar(Bool backspace = TRUE);
+
   CC_descr *show_descr;
   wxFrame *ourframe;
   unsigned topline;
   float width, height;
+  unsigned cursorx, cursory;
+  unsigned maxlines, maxcolumns;
 };
 
 class PrintContEditor : public wxFrameWithStuff {
@@ -114,6 +122,8 @@ public:
 		  wxFrame *parent, char *title,
 		  int x = -1, int y = -1, int width = 400, int height = 400);
   ~PrintContEditor();
+
+  void OnActivate(Bool active);
 
   PrintContCanvas *canvas;
 private:
