@@ -648,7 +648,7 @@ void MainFrame::OnMenuCommand(int id)
     }
     break;
   case CALCHART__ABOUT:
-    (void)wxMessageBox("CalChart v3.0\nAuthor: Garrick Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1995", "About CalChart");
+    (void)wxMessageBox("CalChart v3.0\nAuthor: Gurk Meeker\nhttp://www.calband.berkeley.edu/calchart\n(c) 1994-1996\nCompiled on " __DATE__ " at " __TIME__, "About CalChart");
     break;
   case CALCHART__HELP:
     help_inst->LoadFile();

@@ -347,6 +347,18 @@ float CC_coord::Direction(const CC_coord& c) const {
   return vect.Direction();
 }
 
+// Returns TRUE if this coordinate is within 1 step of another
+Bool CC_coord::Collides(const CC_coord& c) const {
+  Coord dx, dy;
+
+  dx = x - c.x;
+  dy = y - c.y;
+  // Check for special cases to avoid multiplications
+  if (ABS(dx) > INT2COORD(1)) return FALSE;
+  if (ABS(dy) > INT2COORD(1)) return FALSE;
+  return (((dx*dx)+(dy*dy)) <= (INT2COORD(1)*INT2COORD(1)));
+}
+
 // Set a coordinate from an old format disk coord
 CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
   x = ((get_lil_word(&old.x)+2) << (COORD_SHIFT-3)) - INT2COORD(88);

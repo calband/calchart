@@ -118,9 +118,13 @@ public:
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
 
+  inline Bool CollisionsOn() { return collis->GetValue(); }
+
   AnimationCanvas *canvas;
 private:
   CC_WinNodeAnim *node;
+  wxCheckBox *collis;
+
   friend AnimationCanvas;
 };
 

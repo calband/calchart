@@ -204,6 +204,8 @@ public:
   float Direction() const;
   float Direction(const CC_coord& c) const;
 
+  Bool Collides(const CC_coord& c) const;
+
   CC_coord& operator = (const cc_oldcoord& old);
   inline CC_coord& operator = (const CC_coord& c) {
     x = c.x; y = c.y;

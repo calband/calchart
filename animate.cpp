@@ -286,7 +286,11 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
 
   pts = new AnimatePoint[numpts];
   curr_cmds = new AnimateCommand*[numpts];
-  
+  collisions = new Bool[numpts];
+  for (i = 0; i < numpts; i++) {
+    collisions[i] = FALSE;
+  }
+
   // Now compile
   comp.show = show;
   comp.show->winlist->FlushContinuity(); // get all changes in text windows
@@ -374,6 +378,7 @@ Bool Animation::PrevSheet() {
     }
   }
   RefreshSheet();
+  CheckCollisions();
   return TRUE;
 }
 
@@ -382,9 +387,12 @@ Bool Animation::NextSheet() {
     curr_sheet = curr_sheet->next;
     curr_sheetnum++;
     RefreshSheet();
+    CheckCollisions();
   } else {
-    if ((curr_sheet == sheets) && (curr_beat != 0))
+    if ((curr_sheet == sheets) && (curr_beat != 0)) {
       RefreshSheet();
+      CheckCollisions();
+    }
     else return FALSE;
   }
   return TRUE;
@@ -416,6 +424,7 @@ Bool Animation::PrevBeat() {
     }
   }
   curr_beat--;
+  CheckCollisions();
   return TRUE;
 }
 
@@ -437,6 +446,7 @@ Bool Animation::NextBeat() {
       }
     }
   }
+  CheckCollisions();
   return TRUE;
 }
 
@@ -477,6 +487,24 @@ void Animation::RefreshSheet() {
     BeginCmd(i);
   }
   curr_beat = 0;
+}
+
+void Animation::CheckCollisions() {
+  unsigned i, j;
+
+  for (i = 0; i < numpts; i++) {
+    collisions[i] = FALSE;
+  }
+  if (check_collis) {
+    for (i = 0; i < numpts; i++) {
+      for (j = i+1; j < numpts; j++) {
+	if (pts[i].pos.Collides(pts[j].pos)) {
+	  collisions[i] = TRUE;
+	  collisions[j] = TRUE;
+	}
+      }
+    }
+  }
 }
 
 AnimateCompile::AnimateCompile()

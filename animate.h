@@ -138,6 +138,8 @@ public:
 
   void GotoSheet(unsigned i);
 
+  inline void EnableCollisions(Bool on) { check_collis = on; }
+
   AnimatePoint *pts;
   AnimateSheet *curr_sheet;
   unsigned curr_sheetnum;
@@ -145,13 +147,16 @@ public:
   unsigned curr_beat;
   unsigned numpts;
   AnimateCommand **curr_cmds;
+  Bool *collisions;
 private:
   void BeginCmd(unsigned i);
   void EndCmd(unsigned i);
 
   void RefreshSheet();
+  void CheckCollisions();
 
   AnimateSheet *sheets;
+  Bool check_collis;
 };
 
 class ContProcedure;

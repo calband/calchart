@@ -47,7 +47,8 @@ IMAGES_MSW = $(IMAGES_BMP) calchart.ico
 IMAGES_ALL = $(IMAGES) calchart.xbm calchart.xpm calchart.ico
 IMAGES_SYNTH = $(IMAGES_BMP)
 
-DOCS = docs/charthlp.tex docs/tex2rtf.ini docs/texhelp.sty \
+DOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
+	docs/overview.tex docs/tex2rtf.ini docs/texhelp.sty \
 	docs/contents.gif docs/up.gif docs/back.gif docs/forward.gif
 
 MOSTSRCS = $(SRCS) $(SYNTHETIC_BASES) $(HEADERS) $(DOCS)
@@ -93,16 +94,16 @@ tags:: TAGS
 charthlp.xlp: docs/charthlp.xlp
 	cp docs/charthlp.xlp charthlp.xlp
 
-docs/charthlp.xlp: docs/charthlp.tex
+docs/charthlp.xlp: $(DOCS)
 	cd docs; tex2rtf charthlp.tex charthlp.xlp -twice -xlp
 
-docs/charthlp.dvi: docs/charthlp.tex
+docs/charthlp.dvi: $(DOCS)
 	cd docs; latex charthlp; latex charthlp; makeindex charthlp; latex charthlp
 
 docs/charthlp.ps: docs/charthlp.dvi
 	cd docs; dvips -f -r < charthlp.dvi > charthlp.ps
 
-docs/charthlp_contents.html: docs/charthlp.tex
+docs/charthlp_contents.html: $(DOCS)
 	cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
 
 ps: docs/charthlp.ps

@@ -20,6 +20,7 @@ static void toolbar_anim_prev_beat(CoolToolBar *tb);
 static void toolbar_anim_next_beat(CoolToolBar *tb);
 static void toolbar_anim_prev_sheet(CoolToolBar *tb);
 static void toolbar_anim_next_sheet(CoolToolBar *tb);
+static void collision_callback(wxCheckBox &cb, wxEvent &ev);
 static void slider_anim_tempo(wxObject &obj, wxEvent &ev);
 
 ToolBarEntry anim_tb[] = {
@@ -100,7 +101,10 @@ void AnimationCanvas::OnPaint() {
   show_descr->show->mode->DrawAnim(dc);
   if (anim)
   for (i = 0; i < anim->numpts; i++) {
-    if (show_descr->show->IsSelected(i)) {
+    if (anim->collisions[i]) {
+      dc->SetPen(CalChartPens[COLOR_POINT_ANIM_COLLISION]);
+      dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
+    } else if (show_descr->show->IsSelected(i)) {
       if (anim->curr_cmds[i]) {
 	switch (anim->curr_cmds[i]->Direction()) {
 	case ANIMDIR_SW:
@@ -194,6 +198,7 @@ void AnimationCanvas::Generate() {
   anim = new Animation(show_descr->show, ourframe,
 		       ((AnimationFrame*)ourframe)->node->GetList());
   if (anim) {
+    anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionsOn());
     anim->GotoSheet(show_descr->curr_ss);
   }
   Refresh();
@@ -238,7 +243,8 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 
   // Add the controls
   SetPanel(new wxPanel(this));
-  (void)new wxCheckBox(framePanel, (wxFunction)NULL, "&Collisions");
+  collis = new wxCheckBox(framePanel, (wxFunction)collision_callback,
+			  "&Collisions");
   AnimationSlider *sldr =
     new AnimationSlider(framePanel, slider_anim_tempo, "&Tempo",
 			canvas->GetTempo(), 10, 300, 150);
@@ -313,6 +319,14 @@ static void toolbar_anim_prev_sheet(CoolToolBar *tb) {
 static void toolbar_anim_next_sheet(CoolToolBar *tb) {
   AnimationFrame* af = (AnimationFrame*)tb->ourframe;
   af->canvas->NextSheet();
+}
+
+static void collision_callback(wxCheckBox &cb, wxEvent&) {
+  AnimationCanvas* ac =
+    ((AnimationFrame*)(cb.GetParent()->GetParent()))->canvas;
+  if (ac->anim) {
+    ac->anim->EnableCollisions(cb.GetValue());
+  }
 }
 
 static void slider_anim_tempo(wxObject &obj, wxEvent &) {

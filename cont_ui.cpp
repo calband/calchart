@@ -13,10 +13,14 @@
 #include "cont_ui.h"
 #include "confgr.h"
 
+#include <wx_help.h>
+
 extern wxFont *contPlainFont;
 extern wxFont *contBoldFont;
 extern wxFont *contItalFont;
 extern wxFont *contBoldItalFont;
+
+extern wxHelpInstance *help_inst;
 
 static void toolbar_printcont_sym0(CoolToolBar *tb);
 static void toolbar_printcont_sym1(CoolToolBar *tb);
@@ -150,8 +154,11 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   cont_menu->Append(CALCHART__CONT_NEW, "&New");
   cont_menu->Append(CALCHART__CONT_DELETE, "&Delete");
   cont_menu->Append(CALCHART__CONT_CLOSE, "&Close window");
+  wxMenu *help_menu = new wxMenu;
+  help_menu->Append(CALCHART__CONT_HELP, "&Help on Continuity...");
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(cont_menu, "&Continuity");
+  menu_bar->Append(help_menu, "&Help");
   SetMenuBar(menu_bar);
 
   OnSize(-1, -1);
@@ -209,6 +216,11 @@ void ContinuityEditor::OnMenuCommand(int id) {
     break;
   case CALCHART__CONT_CLOSE:
     Close();
+    break;
+  case CALCHART__CONT_HELP:
+    help_inst->LoadFile();
+    help_inst->KeywordSearch("Animation Commands");
+    break;
   }
 }
 
@@ -224,6 +236,9 @@ void ContinuityEditor::OnMenuSelect(int id) {
     break;
   case CALCHART__CONT_CLOSE:
     msg = "Close window";
+    break;
+  case CALCHART__CONT_HELP:
+    msg = "Help on continuity commands";
     break;
   }
   if (msg) SetStatusText(msg);
