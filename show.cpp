@@ -258,7 +258,7 @@ void CC_continuity::AppendText(const char* s) {
 }
 
 // Get magnitude of vector
-float CC_coord::Magnitude() {
+float CC_coord::Magnitude() const {
   float x_f, y_f;
 
   x_f = COORD2FLOAT(x);
@@ -267,7 +267,7 @@ float CC_coord::Magnitude() {
 }
 
 // Get magnitude, but check for diagonal military
-float CC_coord::DM_Magnitude() {
+float CC_coord::DM_Magnitude() const {
   if ((x == y) || (x == -y)) {
     return COORD2FLOAT(ABS(x));
   } else {
@@ -276,9 +276,17 @@ float CC_coord::DM_Magnitude() {
 }
 
 // Get direction from this coord to another
-float CC_coord::Direction(const CC_coord& c) {
-  // TODO
-  return 0.0;
+float CC_coord::Direction(const CC_coord& c) const {
+  CC_coord vect = c - *this;
+  float ang;
+
+  if (vect == 0) return 0.0;
+
+  ang = acos(COORD2FLOAT(vect.x)/vect.Magnitude()); // normalize
+  ang *= 180.0/PI; // convert to degrees
+  if (vect.y > 0) ang += 180.0; // check for > PI
+
+  return ang;
 }
 
 // Set a coordinate from an old format disk coord

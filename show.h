@@ -172,9 +172,9 @@ public:
   CC_coord(const CC_coord& c) { *this = c; }
   CC_coord(const cc_oldcoord& old) { *this = old; }
 
-  float Magnitude();
-  float DM_Magnitude(); // check for diagonal military also
-  float Direction(const CC_coord& c);
+  float Magnitude() const;
+  float DM_Magnitude() const; // check for diagonal military also
+  float Direction(const CC_coord& c) const;
 
   CC_coord& operator = (const cc_oldcoord& old);
   inline CC_coord& operator = (const CC_coord& c) {
@@ -218,8 +218,14 @@ inline CC_coord operator - (const CC_coord& c) {
 inline int operator == (const CC_coord& a, const CC_coord& b) {
   return ((a.x == b.x) && (a.y == b.y));
 }
+inline int operator == (const CC_coord& a, const short b) {
+  return ((a.x == b) && (a.y == b));
+}
 inline int operator != (const CC_coord& a, const CC_coord& b) {
   return ((a.x != b.x) || (a.y != b.y));
+}
+inline int operator != (const CC_coord& a, const short b) {
+  return ((a.x != b) || (a.y != b));
 }
 
 #define PNT_LABEL 1

@@ -6,6 +6,17 @@
  *
  */
 
+/*
+  Commands left to implement:
+  Either
+  CM
+  DMCM
+  Fountain
+  Grid
+  HSCM
+  Rotate
+  */
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -274,6 +285,32 @@ ContProcDMHS::~ContProcDMHS() {
 }
 
 void ContProcDMHS::Compile(AnimateCompile* anim) {
+  CC_coord c, c_hs, c_dm;
+  short b, b_hs;
+
+  c = pnt->Get(anim) - anim->pt.pos;
+  if (ABS(c.x) > ABS(c.y)) {
+    c_hs.x = ((c.x<0) != (c.y<0)) ? c.x+c.y : c.x-c.y; // adjust sign
+    c_hs.y = 0;
+    c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y; // adjust sign
+    c_dm.y = c.y;
+    b_hs = COORD2INT(c_hs.x);
+  } else {
+    c_hs.x = 0;
+    c_hs.y = ((c.x<0) != (c.y<0)) ? c.y+c.x : c.y-c.x; // adjust sign
+    c_dm.x = c.x;
+    c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x; // adjust sign
+    b_hs = COORD2INT(c_hs.y);
+  }
+  if (c_dm != 0) {
+    b = COORD2INT(c_dm.x);
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c_dm))) {
+      return;
+    }
+  }
+  if (c_hs != 0) {
+    anim->Append(new AnimateCommandMove(ABS(b_hs), c_hs));
+  }
 }
 
 ContProcEven::~ContProcEven() {
@@ -331,6 +368,7 @@ ContProcFM::~ContProcFM() {
 void ContProcFM::Compile(AnimateCompile* anim) {
   CC_coord c;
   float rads, mag, d;
+  unsigned b;
 
   d = dir->Get(anim);
   d = BoundDirection(d);
@@ -347,7 +385,10 @@ void ContProcFM::Compile(AnimateCompile* anim) {
     c.x = FLOAT2COORD(cos(rads)*mag);
     c.y = -(FLOAT2COORD(sin(rads)*mag));
   }
-  anim->Append(new AnimateCommandMove((unsigned)stps->Get(anim), c));
+  b = (unsigned)stps->Get(anim);
+  if ((b != 0) || (c != 0)) {
+    anim->Append(new AnimateCommandMove(b, c));
+  }
 }
 
 ContProcFMTO::~ContProcFMTO() {
@@ -358,8 +399,9 @@ void ContProcFMTO::Compile(AnimateCompile* anim) {
   CC_coord c;
 
   c = pnt->Get(anim) - anim->pt.pos;
-  
-  anim->Append(new AnimateCommandMove((unsigned)c.DM_Magnitude(), c));
+  if (c != 0) {
+    anim->Append(new AnimateCommandMove((unsigned)c.DM_Magnitude(), c));
+  }
 }
 
 ContProcGrid::~ContProcGrid() {
@@ -383,6 +425,32 @@ ContProcHSDM::~ContProcHSDM() {
 }
 
 void ContProcHSDM::Compile(AnimateCompile* anim) {
+  CC_coord c, c_hs, c_dm;
+  short b;
+
+  c = pnt->Get(anim) - anim->pt.pos;
+  if (ABS(c.x) > ABS(c.y)) {
+    c_hs.x = ((c.x<0) != (c.y<0)) ? c.x+c.y : c.x-c.y; // adjust sign
+    c_hs.y = 0;
+    c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y; // adjust sign
+    c_dm.y = c.y;
+    b = COORD2INT(c_hs.x);
+  } else {
+    c_hs.x = 0;
+    c_hs.y = ((c.x<0) != (c.y<0)) ? c.y+c.x : c.y-c.x; // adjust sign
+    c_dm.x = c.x;
+    c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x; // adjust sign
+    b = COORD2INT(c_hs.y);
+  }
+  if (c_hs != 0) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c_hs))) {
+      return;
+    }
+  }
+  if (c_dm != 0) {
+    b = COORD2INT(c_dm.x);
+    anim->Append(new AnimateCommandMove(ABS(b), c_dm));
+  }
 }
 
 ContProcMagic::~ContProcMagic() {
@@ -405,12 +473,16 @@ ContProcMarch::~ContProcMarch() {
 void ContProcMarch::Compile(AnimateCompile* anim) {
   CC_coord c;
   float rads, mag;
+  unsigned b;
 
   rads = dir->Get(anim) * PI / 180.0;
   mag = stpsize->Get(anim) * stps->Get(anim);
   c.x = FLOAT2COORD(cos(rads)*mag);
   c.y = -(FLOAT2COORD(sin(rads)*mag));
-  anim->Append(new AnimateCommandMove((unsigned)stps->Get(anim), c));
+  b = (unsigned)stps->Get(anim);
+  if ((b != 0) || (c != 0)) {
+    anim->Append(new AnimateCommandMove(b, c));
+  }
 }
 
 ContProcMT::~ContProcMT() {

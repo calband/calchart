@@ -24,10 +24,10 @@ static void slider_anim_tempo(wxObject &obj, wxEvent &ev);
 ToolBarEntry anim_tb[] = {
   { NULL, "Stop", toolbar_anim_stop },
   { NULL, "Play", toolbar_anim_play },
-  { NULL, "Previous Beat", toolbar_anim_prev_beat },
-  { NULL, "Next Beat", toolbar_anim_next_beat },
-  { NULL, "Previous Beat", toolbar_anim_prev_sheet },
-  { NULL, "Next Beat", toolbar_anim_next_sheet }
+  { NULL, "Previous beat", toolbar_anim_prev_beat },
+  { NULL, "Next beat", toolbar_anim_next_beat },
+  { NULL, "Previous stuntsheet", toolbar_anim_prev_sheet },
+  { NULL, "Next stuntsheet", toolbar_anim_next_sheet }
 };
 
 extern wxBrush *grassBrush;
@@ -93,7 +93,6 @@ void AnimationCanvas::OnPaint() {
   if (anim)
   for (i = 0; i < anim->numpts; i++) {
     if (dc->Colour) {
-      // TODO - find real color
       if (show_descr->show->IsSelected(i)) {
 	dc->SetPen(animhilitPen);
 	dc->SetBrush(animhilitBrush);
