@@ -188,7 +188,7 @@ StuntSheetPicker::~StuntSheetPicker()
   }
 }
 
-void StuntSheetPicker::OnSize(int w, int h) {
+void StuntSheetPicker::OnSize(int, int) {
   Layout();
 }
 

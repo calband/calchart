@@ -466,10 +466,11 @@ char *gen_cont_line(const cc_text *line, PSFONT_TYPE *currfontnum,
       while (*text != 0) {
 	dest = temp_buf;
 	while (*text != 0) {
+	  // Need backslash before parenthesis
 	  if ((*text == '(') || (*text == ')')) {
 	    *(dest++) = '\\';
 	  }
-	  else *(dest++) = *(text++);
+	  *(dest++) = *(text++);
 	}
 	*dest = 0;
 	

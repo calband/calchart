@@ -82,7 +82,7 @@ class ShowInfoReq : public wxFrame {
 public:
   ShowInfoReq(CC_show *shw, CC_WinList *lst,
 	      wxFrame *frame, char *title,
-	      int x = -1, int y = -1, int width = 400, int height = 400);
+	      int x = -1, int y = -1, int width = 400, int height = 450);
   ~ShowInfoReq();
   Bool OnClose(void);
 
