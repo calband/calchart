@@ -45,6 +45,13 @@
 #define FILE_SAVE_WILDCARDS "*.shw"
 #endif
 
+// SetSizeHints doesn't work in Watcom for Win 3.1
+#ifdef wx_msw
+#ifndef WIN32
+#define BUGGY_SIZE_HINTS
+#endif
+#endif
+
 /*****************************************
  * platform independent definitions follow
  *****************************************/

@@ -358,7 +358,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   edit_menu->Append(CALCHART__SET_BEATS, "Set Beats...");
 
   wxMenu *win_menu = new wxMenu;
-  win_menu->Append(CALCHART__INFO, "Info on this Show...");
+  win_menu->Append(CALCHART__INFO, "Information...");
   win_menu->Append(CALCHART__POINTS, "Point Selections...");
   win_menu->Append(CALCHART__ANIMATE, "Animate...");
 
@@ -537,7 +537,7 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__INFO:
     if (field->show_descr.show)
       (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
-			    "Info on this show");
+			    "Information");
     break;
   case CALCHART__POINTS:
     if (field->show_descr.show)

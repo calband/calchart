@@ -206,8 +206,10 @@ void wxFrameWithStuffSized::Fit()
   height_frm = height_cnv + height_tb + height_pnl;
 
   SetClientSize(width_frm, height_frm);
+#ifndef BUGGY_SIZE_HINTS
   GetSize(&width_frm, &height_frm);
   SetSizeHints(width_frm, height_frm, width_frm, height_frm);
+#endif
 
   OnSize(-1, -1);
 }
