@@ -173,7 +173,7 @@ enum {
 
 class AnimErrorList: public wxFrame {
 public:
-  AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
+  AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
 		wxFrame *frame, char *title,
 		int x = -1, int y = -1, int width = 300, int height = 300);
   ~AnimErrorList();
@@ -188,9 +188,10 @@ public:
   CC_show *show;
 private:
   Bool ok;
+  unsigned sheetnum;
   wxPanel *panel;
   GoodListBox *list;
-  Bool *pointsels[NUM_ANIMERR];
+  ErrorMarker pointsels[NUM_ANIMERR];
   CC_WinNodeAnimErrors *node;
 };
 

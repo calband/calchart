@@ -18,7 +18,14 @@
 enum ContDefinedValue { CC_N, CC_NW, CC_W, CC_SW, CC_S, CC_SE, CC_E, CC_NE,
 			CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM };
 
-class ContPoint {
+class ContToken {
+public:
+  ContToken();
+  virtual ~ContToken();
+  int line, col;
+};
+
+class ContPoint: public ContToken {
 public:
   ContPoint() {}
   virtual ~ContPoint();
@@ -49,7 +56,7 @@ private:
   unsigned refnum;
 };
 
-class ContValue {
+class ContValue: public ContToken {
 public:
   ContValue() {}
   virtual ~ContValue();
@@ -216,7 +223,7 @@ private:
   ContPoint *pnt;
 };
 
-class ContProcedure {
+class ContProcedure: public ContToken {
 public:
   ContProcedure(): next(NULL) {}
   virtual ~ContProcedure();

@@ -25,7 +25,8 @@ const char *animate_err_msgs[] = {
   "Invalid countermarch",
   "Invalid fountain",
   "Division by zero",
-  "Undefined value"
+  "Undefined value",
+  "Syntax error"
 };
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector) {
@@ -321,8 +322,9 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
   comp.show = show;
   comp.show->winlist->FlushContinuity(); // get all changes in text windows
 
+  unsigned sheetnum = 0;
   for (comp.curr_sheet = show->GetSheet(); comp.curr_sheet;
-       comp.curr_sheet = comp.curr_sheet->next) {
+       comp.curr_sheet = comp.curr_sheet->next, sheetnum++) {
     if (! comp.curr_sheet->IsInAnimation()) continue;
     if (curr_sheet) {
       curr_sheet->next = new AnimateSheet(numpts);
@@ -341,18 +343,23 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     // Now parse continuity
     comp.SetStatus(TRUE);
     comp.FreeErrorMarkers();
+    int contnum = 0;
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
-	 currcont  = currcont->next) {
+	 currcont  = currcont->next, contnum++) {
       if ((yyinputbuffer = currcont->text) != NULL) {
 	tempbuf.sprintf("Compiling \"%.32s\" %.32s...",
 			comp.curr_sheet->GetName(), currcont->name.GetData());
 	frame->SetStatusText(tempbuf.GetData());
-	parsecontinuity();
+	int parseerr = parsecontinuity();
+	ContToken dummy; // get position of parse error
 	for (j = 0; j < numpts; j++) {
 	  if (comp.curr_sheet->GetPoint(j).cont == currcont->num) {
-	    comp.Compile(j, ParsedContinuity);
+	    comp.Compile(j, contnum, ParsedContinuity);
 	    curr_sheet->commands[j] = comp.cmds;
-	      curr_sheet->end_cmds[j] = comp.curr_cmd;
+	    curr_sheet->end_cmds[j] = comp.curr_cmd;
+	    if (parseerr != 0) {
+	      comp.RegisterError(ANIMERR_SYNTAX, &dummy);
+	    }
 	  }
 	}
 	while (ParsedContinuity) {
@@ -367,14 +374,15 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     frame->SetStatusText(tempbuf.GetData());
     for (j = 0; j < numpts; j++) {
       if (curr_sheet->commands[j] == NULL) {
-	comp.Compile(j, NULL);
+	comp.Compile(j, 0, NULL);
 	curr_sheet->commands[j] = comp.cmds;
 	curr_sheet->end_cmds[j] = comp.curr_cmd;
       }
     }
     if (!comp.Okay()) {
       tempbuf.sprintf("Errors for \"%.32s\"", comp.curr_sheet->GetName());
-      (void)new AnimErrorList(&comp, winlist, frame, tempbuf.GetData());
+      (void)new AnimErrorList(&comp, winlist, sheetnum,
+			      frame, tempbuf.GetData());
       if (wxMessageBox("Ignore errors?", "Animate", wxYES_NO) != wxYES) {
 	break;
       }
@@ -555,9 +563,6 @@ AnimateCompile::AnimateCompile()
 : okay(TRUE) {
   unsigned i;
 
-  for (i = 0; i < NUM_ANIMERR; i++) {
-    error_markers[i] = NULL;
-  }
   for (i = 0; i < NUMCONTVARS; i++) {
     vars[i] = NULL;
   }
@@ -575,9 +580,11 @@ AnimateCompile::~AnimateCompile() {
   }
 }
 
-void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
+void AnimateCompile::Compile(unsigned pt_num, unsigned cont_num,
+			     ContProcedure* proc) {
   CC_coord c;
 
+  contnum = cont_num;
   pt.pos = curr_sheet->GetPosition(pt_num);
   cmds = curr_cmd = NULL;
   curr_pt = pt_num;
@@ -609,21 +616,21 @@ void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
     if (pt.pos !=
 	curr_sheet->next->GetPosition(curr_pt)) {
       c = curr_sheet->next->GetPosition(curr_pt) - pt.pos;
-      RegisterError(ANIMERR_WRONGPLACE);
-      Append(new AnimateCommandMove(beats_rem, c));
+      RegisterError(ANIMERR_WRONGPLACE, NULL);
+      Append(new AnimateCommandMove(beats_rem, c), NULL);
     }
   }
   if (beats_rem) {
-    RegisterError(ANIMERR_EXTRATIME);
-    Append(new AnimateCommandMT(beats_rem, ANIMDIR_E));
+    RegisterError(ANIMERR_EXTRATIME, NULL);
+    Append(new AnimateCommandMT(beats_rem, ANIMDIR_E), NULL);
   }
 }
 
-Bool AnimateCompile::Append(AnimateCommand *cmd) {
+Bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token) {
   Bool clipped;
 
   if (beats_rem < cmd->numbeats) {
-    RegisterError(ANIMERR_OUTOFTIME);
+    RegisterError(ANIMERR_OUTOFTIME, token);
     if (beats_rem == 0) {
       delete cmd;
       return FALSE;
@@ -648,9 +655,9 @@ Bool AnimateCompile::Append(AnimateCommand *cmd) {
   return TRUE;
 }
 
-void AnimateCompile::RegisterError(AnimateError err) {
-  MakeErrorMarker(err);
-  error_markers[err][curr_pt] = TRUE;
+void AnimateCompile::RegisterError(AnimateError err, const ContToken *token) {
+  MakeErrorMarker(err, token);
+  error_markers[err].pntgroup[curr_pt] = TRUE;
   SetStatus(FALSE);
 }
 
@@ -658,20 +665,17 @@ void AnimateCompile::FreeErrorMarkers() {
   unsigned i;
   
   for (i = 0; i < NUM_ANIMERR; i++) {
-    if (error_markers[i]) {
-      delete [] error_markers[i];
-      error_markers[i] = NULL;
-    }
+    error_markers[i].Free();
   }
 }
 
-float AnimateCompile::GetVarValue(int varnum) {
+float AnimateCompile::GetVarValue(int varnum, const ContToken *token) {
   if (vars[varnum]) {
     if (vars[varnum][curr_pt].IsValid()) {
       return vars[varnum][curr_pt].GetValue();
     }
   }
-  RegisterError(ANIMERR_UNDEFINED);
+  RegisterError(ANIMERR_UNDEFINED, token);
   return 0.0;
 }
 
@@ -682,13 +686,19 @@ void AnimateCompile::SetVarValue(int varnum, float value) {
   vars[varnum][curr_pt].SetValue(value);
 }
 
-void AnimateCompile::MakeErrorMarker(AnimateError err) {
+void AnimateCompile::MakeErrorMarker(AnimateError err,
+				     const ContToken *token) {
   unsigned i;
 
-  if (!error_markers[err]) {
-    error_markers[err] = new Bool[show->GetNumPoints()];
+  if (!error_markers[err].pntgroup) {
+    error_markers[err].pntgroup = new Bool[show->GetNumPoints()];
     for (i = 0; i < show->GetNumPoints(); i++) {
-      error_markers[err][i] = FALSE;
+      error_markers[err].pntgroup[i] = FALSE;
+    }
+    error_markers[err].contnum = contnum;
+    if (token != NULL) {
+      error_markers[err].line = token->line;
+      error_markers[err].col = token->col;
     }
   }
 }

@@ -25,6 +25,8 @@ public:
 
   virtual void SetShow(CC_show *shw);
   virtual void GotoSheet(unsigned sht);
+  virtual void GotoContLocation(unsigned sht, unsigned contnum,
+				int line = -1, int col = -1);
   virtual void DeleteSheet(unsigned sht);
   virtual void RemoveSheets(unsigned num);
   virtual void AddContinuity(unsigned sht, unsigned cont);
@@ -69,6 +71,7 @@ public:
 
   inline unsigned GetCurrent() { return curr_cont; }
   inline void SetCurrent(unsigned i) { curr_cont = i; UpdateText(); }
+  void UpdateContChoice();
 
   inline void IncCurrent() { curr_cont++; text_contnum++; }
   inline void DecCurrent() { curr_cont--; text_contnum--; }
@@ -78,6 +81,10 @@ public:
   void SelectPoints();
   void SetPoints();
 
+  inline void SetInsertionPoint(int x, int y) {
+    text->SetInsertionPoint(text->XYToPosition((long)x-1,(long)y-1));
+    text->SetFocus();
+  }
 private:
   CC_descr *descr;
   unsigned curr_cont;

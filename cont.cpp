@@ -12,8 +12,10 @@
 
 #include "cont.h"
 #include <math.h>
+#include "parse.h"
 
-void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
+void DoCounterMarch(const ContProcedure *proc,
+		    AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
 		    ContValue *stps, ContValue *dir1, ContValue *dir2,
 		    ContValue *numbeats) {
   CC_coord p[4];
@@ -32,7 +34,7 @@ void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
   beats = numbeats->Get(anim);
   c = sin(DEG2RAD(d1 - d2));
   if (IS_ZERO(c)) {
-    anim->RegisterError(ANIMERR_INVALID_CM);
+    anim->RegisterError(ANIMERR_INVALID_CM, proc);
     return;
   }
   CreateVector(v1, d1, steps1);
@@ -68,7 +70,7 @@ void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
 	  leg = 0;
 	} else {
 	  // Current point is not in path of countermarch
-	  anim->RegisterError(ANIMERR_INVALID_CM);
+	  anim->RegisterError(ANIMERR_INVALID_CM, proc);
 	  return;
 	}
       }
@@ -80,7 +82,7 @@ void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
     c = v1.DM_Magnitude();
     if (c <= beats) {
       beats -= c;
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(c), v1))) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(c), v1), proc)) {
 	return;
       }
     } else {
@@ -98,13 +100,16 @@ void DoCounterMarch(AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
 	CreateVector(v1, d1+180.0, beats);
 	break;
       }
-      anim->Append(new AnimateCommandMove(float2unsigned(beats), v1));
+      anim->Append(new AnimateCommandMove(float2unsigned(beats), v1), proc);
       return;
     }
     leg++;
     if (leg > 3) leg = 0;
   }
 }
+
+ContToken::ContToken(): line(yylloc.first_line), col(yylloc.first_column) {}
+ContToken::~ContToken() {}
 
 ContPoint::~ContPoint() {}
 
@@ -121,7 +126,7 @@ const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const {
 
   while (1) {
     if (sheet == NULL) {
-      anim->RegisterError(ANIMERR_UNDEFINED);
+      anim->RegisterError(ANIMERR_UNDEFINED, this);
       return ContPoint::Get(anim);
     }
     if (sheet->IsInAnimation()) {
@@ -231,7 +236,7 @@ float ContValueDiv::Get(AnimateCompile* anim) const {
 
   f = val2->Get(anim);
   if (IS_ZERO(f)) {
-    anim->RegisterError(ANIMERR_DIVISION_ZERO);
+    anim->RegisterError(ANIMERR_DIVISION_ZERO, this);
     return 0.0;
   } else {
     return (val1->Get(anim) / f);
@@ -251,7 +256,7 @@ float ContValueREM::Get(AnimateCompile* anim) const {
 }
 
 float ContValueVar::Get(AnimateCompile* anim) const {
-  return anim->GetVarValue(varnum);
+  return anim->GetVarValue(varnum, this);
 }
 
 void ContValueVar::Set(AnimateCompile* anim, float v) {
@@ -265,7 +270,7 @@ ContFuncDir::~ContFuncDir() {
 float ContFuncDir::Get(AnimateCompile* anim) const {
   CC_coord c = pnt->Get(anim);
   if (c == anim->pt.pos) {
-    anim->RegisterError(ANIMERR_UNDEFINED);
+    anim->RegisterError(ANIMERR_UNDEFINED, this);
   }
   return anim->pt.pos.Direction(c);
 }
@@ -279,7 +284,7 @@ float ContFuncDirFrom::Get(AnimateCompile* anim) const {
   CC_coord start = pnt_start->Get(anim);
   CC_coord end = pnt_end->Get(anim);
   if (start == end) {
-    anim->RegisterError(ANIMERR_UNDEFINED);
+    anim->RegisterError(ANIMERR_UNDEFINED, this);
   }
   return start.Direction(end);
 }
@@ -319,7 +324,7 @@ float ContFuncEither::Get(AnimateCompile* anim) const {
   CC_coord c = pnt->Get(anim);
 
   if (anim->pt.pos == c) {
-    anim->RegisterError(ANIMERR_UNDEFINED);
+    anim->RegisterError(ANIMERR_UNDEFINED, this);
     return dir1->Get(anim);
   }
   dir = anim->pt.pos.Direction(c);
@@ -369,7 +374,7 @@ void ContProcBlam::Compile(AnimateCompile* anim) {
   CC_coord c;
 
   c = np.Get(anim) - anim->pt.pos;
-  anim->Append(new AnimateCommandMove(anim->beats_rem, c));
+  anim->Append(new AnimateCommandMove(anim->beats_rem, c), this);
 }
 
 ContProcCM::~ContProcCM() {
@@ -382,7 +387,7 @@ ContProcCM::~ContProcCM() {
 }
 
 void ContProcCM::Compile(AnimateCompile* anim) {
-  DoCounterMarch(anim, pnt1, pnt2, stps, dir1, dir2, numbeats);
+  DoCounterMarch(this, anim, pnt1, pnt2, stps, dir1, dir2, numbeats);
 }
 
 ContProcDMCM::~ContProcDMCM() {
@@ -403,32 +408,32 @@ void ContProcDMCM::Compile(AnimateCompile* anim) {
     if (c >= 0) {
       ContValueDefined dir1(CC_SW);
       ContValueDefined dir2(CC_W);
-      DoCounterMarch(anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+      DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
       return;
     }
   } else if (c == (r1.y - r2.y - INT2COORD(2))) {
     if (c >= 0) {
       ContValueDefined dir1(CC_SE);
       ContValueDefined dir2(CC_W);
-      DoCounterMarch(anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+      DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
       return;
     }
   } else if (c == (r1.y - r2.y + INT2COORD(2))) {
     if (c <= 0) {
       ContValueDefined dir1(CC_NW);
       ContValueDefined dir2(CC_E);
-      DoCounterMarch(anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+      DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
       return;
     }
   } else if (c == (r2.y - r1.y - INT2COORD(2))) {
     if (c <= 0) {
       ContValueDefined dir1(CC_NE);
       ContValueDefined dir2(CC_E);
-      DoCounterMarch(anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+      DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
       return;
     }
   }
-  anim->RegisterError(ANIMERR_INVALID_CM);
+  anim->RegisterError(ANIMERR_INVALID_CM, this);
 }
 
 ContProcDMHS::~ContProcDMHS() {
@@ -455,12 +460,12 @@ void ContProcDMHS::Compile(AnimateCompile* anim) {
   }
   if (c_dm != 0) {
     b = COORD2INT(c_dm.x);
-    if (!anim->Append(new AnimateCommandMove(ABS(b), c_dm))) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c_dm), this)) {
       return;
     }
   }
   if (c_hs != 0) {
-    anim->Append(new AnimateCommandMove(ABS(b_hs), c_hs));
+    anim->Append(new AnimateCommandMove(ABS(b_hs), c_hs), this);
   }
 }
 
@@ -473,7 +478,8 @@ void ContProcEven::Compile(AnimateCompile* anim) {
   CC_coord c;
 
   c = pnt->Get(anim) - anim->pt.pos;
-  anim->Append(new AnimateCommandMove(float2unsigned(stps->Get(anim)), c));
+  anim->Append(new AnimateCommandMove(float2unsigned(stps->Get(anim)), c),
+	       this);
 }
 
 ContProcEWNS::~ContProcEWNS() {
@@ -489,7 +495,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim) {
     c2.x = 0;
     c2.y = c1.y;
     b = COORD2INT(c2.y);
-    if (!anim->Append(new AnimateCommandMove(ABS(b), c2))) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c2), this)) {
       return;
     }
   }
@@ -497,7 +503,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim) {
     c2.x = c1.x;
     c2.y = 0;
     b = COORD2INT(c2.x);
-    if (!anim->Append(new AnimateCommandMove(ABS(b), c2))) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c2), this)) {
       return;
     }
   }
@@ -543,11 +549,11 @@ void ContProcFountain::Compile(AnimateCompile* anim) {
       } else {
 	f1 = e/a;
       }
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(f1), v))) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(f1), v), this)) {
 	return;
       }
     } else {
-      anim->RegisterError(ANIMERR_INVALID_FNTN);
+      anim->RegisterError(ANIMERR_INVALID_FNTN, this);
       return;
     }
   } else {
@@ -555,7 +561,7 @@ void ContProcFountain::Compile(AnimateCompile* anim) {
     if (!IS_ZERO(f2)) {
       v.x = FLOAT2COORD(f2*a);
       v.y = FLOAT2COORD(f2*c);
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(f2), v))) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(f2), v), this)) {
 	return;
       }
     }
@@ -563,7 +569,7 @@ void ContProcFountain::Compile(AnimateCompile* anim) {
     if (!IS_ZERO(f2)) {
       v.x = FLOAT2COORD(f2*b);
       v.y = FLOAT2COORD(f2*d);
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(f2), v))) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(f2), v), this)) {
 	return;
       }
     }
@@ -583,7 +589,7 @@ void ContProcFM::Compile(AnimateCompile* anim) {
   if (b != 0) {
     CreateVector(c, dir->Get(anim), stps->Get(anim));
     if (c != 0) {
-      anim->Append(new AnimateCommandMove(b, c));
+      anim->Append(new AnimateCommandMove(b, c), this);
     }
   }
 }
@@ -597,7 +603,8 @@ void ContProcFMTO::Compile(AnimateCompile* anim) {
 
   c = pnt->Get(anim) - anim->pt.pos;
   if (c != 0) {
-    anim->Append(new AnimateCommandMove(float2unsigned(c.DM_Magnitude()), c));
+    anim->Append(new AnimateCommandMove(float2unsigned(c.DM_Magnitude()), c),
+		 this);
   }
 }
 
@@ -629,7 +636,7 @@ void ContProcGrid::Compile(AnimateCompile* anim) {
 
   c -= anim->pt.pos;
   if (c != 0) {
-    anim->Append(new AnimateCommandMove(0, c));
+    anim->Append(new AnimateCommandMove(0, c), this);
   }
 }
 
@@ -650,7 +657,7 @@ void ContProcHSCM::Compile(AnimateCompile* anim) {
     if (r2.x >= r1.x) {
       ContValueDefined dirs(CC_S);
       ContValueDefined dirw(CC_W);
-      DoCounterMarch(anim, pnt1, pnt2, &steps, &dirs, &dirw, numbeats);
+      DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirs, &dirw, numbeats);
       return;
     }
     break;
@@ -658,14 +665,14 @@ void ContProcHSCM::Compile(AnimateCompile* anim) {
     if (r1.x >= r2.x) {
       ContValueDefined dirn(CC_N);
       ContValueDefined dire(CC_E);
-      DoCounterMarch(anim, pnt1, pnt2, &steps, &dirn, &dire, numbeats);
+      DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirn, &dire, numbeats);
       return;
     }
     break;
   default:
     break;
   }
-  anim->RegisterError(ANIMERR_INVALID_CM);
+  anim->RegisterError(ANIMERR_INVALID_CM, this);
 }
 
 ContProcHSDM::~ContProcHSDM() {
@@ -691,13 +698,13 @@ void ContProcHSDM::Compile(AnimateCompile* anim) {
     b = COORD2INT(c_hs.y);
   }
   if (c_hs != 0) {
-    if (!anim->Append(new AnimateCommandMove(ABS(b), c_hs))) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c_hs), this)) {
       return;
     }
   }
   if (c_dm != 0) {
     b = COORD2INT(c_dm.x);
-    anim->Append(new AnimateCommandMove(ABS(b), c_dm));
+    anim->Append(new AnimateCommandMove(ABS(b), c_dm), this);
   }
 }
 
@@ -709,7 +716,7 @@ void ContProcMagic::Compile(AnimateCompile* anim) {
   CC_coord c;
 
   c = pnt->Get(anim) - anim->pt.pos;
-  anim->Append(new AnimateCommandMove(0, c));
+  anim->Append(new AnimateCommandMove(0, c), this);
 }
 
 ContProcMarch::~ContProcMarch() {
@@ -731,9 +738,9 @@ void ContProcMarch::Compile(AnimateCompile* anim) {
     c.y = -(FLOAT2COORD(sin(rads)*mag));
     if (c != 0) {
       if (facedir)
-	anim->Append(new AnimateCommandMove(b, c, facedir->Get(anim)));
+	anim->Append(new AnimateCommandMove(b, c, facedir->Get(anim)), this);
       else
-	anim->Append(new AnimateCommandMove(b, c));
+	anim->Append(new AnimateCommandMove(b, c), this);
     }
   }
 }
@@ -748,7 +755,7 @@ void ContProcMT::Compile(AnimateCompile* anim) {
 
   b = float2unsigned(numbeats->Get(anim));
   if (b != 0) {
-    anim->Append(new AnimateCommandMT(b, dir->Get(anim)));
+    anim->Append(new AnimateCommandMT(b, dir->Get(anim)), this);
   }
 }
 
@@ -758,7 +765,7 @@ ContProcMTRM::~ContProcMTRM() {
 
 void ContProcMTRM::Compile(AnimateCompile* anim) {
   anim->Append(new AnimateCommandMT(anim->beats_rem,
-				    dir->Get(anim)));
+				    dir->Get(anim)), this);
 }
 
 ContProcNSEW::~ContProcNSEW() {
@@ -774,7 +781,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim) {
     c2.x = c1.x;
     c2.y = 0;
     b = COORD2INT(c2.x);
-    if (!anim->Append(new AnimateCommandMove(ABS(b), c2))) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c2), this)) {
       return;
     }
   }
@@ -782,7 +789,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim) {
     c2.x = 0;
     c2.y = c1.y;
     b = COORD2INT(c2.y);
-    if (!anim->Append(new AnimateCommandMove(ABS(b), c2))) {
+    if (!anim->Append(new AnimateCommandMove(ABS(b), c2), this)) {
       return;
     }
   }
@@ -803,12 +810,13 @@ void ContProcRotate::Compile(AnimateCompile* anim) {
   c = pnt->Get(anim);
   rad = anim->pt.pos - c;
   if (c == anim->pt.pos)
-    start_ang = anim->GetVarValue(CONTVAR_DOH);
+    start_ang = anim->GetVarValue(CONTVAR_DOH, this);
   else
     start_ang = c.Direction(anim->pt.pos);
   anim->Append(new AnimateCommandRotate(float2unsigned(stps->Get(anim)), c,
 					// Don't use Magnitude() because
 					// we want Coord numbers
 					sqrt(rad.x*rad.x + rad.y*rad.y),
-					start_ang, start_ang+ang->Get(anim)));
+					start_ang, start_ang+ang->Get(anim)),
+	       this);
 }

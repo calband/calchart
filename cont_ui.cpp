@@ -54,6 +54,15 @@ void CC_WinNodeCont::GotoSheet(unsigned) {
   editor->Update();
 }
 
+void CC_WinNodeCont::GotoContLocation(unsigned, unsigned contnum,
+				      int line, int col) {
+  editor->SetCurrent(contnum);
+  editor->UpdateContChoice();
+  if ((line > 0) && (col > 0)) {
+    editor->SetInsertionPoint(col, line);
+  }
+}
+
 void CC_WinNodeCont::DeleteSheet(unsigned sht) {
   if (sht == editor->GetShowDescr()->curr_ss) {
     editor->DetachText();
@@ -253,11 +262,15 @@ void ContinuityEditor::Update(Bool quick) {
        curranimcont = curranimcont->next) {
     conts->Append((char *)((const char *)curranimcont->name));
   }
+  UpdateContChoice();
+  UpdateText(quick);
+}
+
+void ContinuityEditor::UpdateContChoice() {
+  CC_sheet *sht = descr->CurrSheet();
   if (curr_cont >= sht->numanimcont && sht->numanimcont > 0)
     curr_cont = sht->numanimcont-1;
   conts->SetSelection(curr_cont);
-
-  UpdateText(quick);
 }
 
 void ContinuityEditor::UpdateText(Bool quick) {

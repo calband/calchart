@@ -214,6 +214,11 @@ void CC_WinNodeMain::UpdateStatusBar() {
 void CC_WinNodeMain::GotoSheet(unsigned sht) {
   winlist.GotoSheet(sht);
 }
+void CC_WinNodeMain::GotoContLocation(unsigned sht, unsigned contnum,
+				      int line, int col) {
+  frame->field->GotoSS(sht);
+  winlist.GotoContLocation(sht,contnum,line,col);
+}
 void CC_WinNodeMain::AddSheet(unsigned sht) {
   if (sht <= frame->field->show_descr.curr_ss) {
     frame->field->show_descr.curr_ss++;

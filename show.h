@@ -68,6 +68,8 @@ public:
   virtual void ChangeShowMode(wxWindow *win);
   virtual void UpdateStatusBar();
   virtual void GotoSheet(unsigned sht);
+  virtual void GotoContLocation(unsigned sht, unsigned contnum,
+				int line = -1, int col = -1);
   virtual void AddSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
   virtual void AppendSheets();
@@ -108,6 +110,8 @@ public:
   virtual void ChangeShowMode(wxWindow *win);
   virtual void UpdateStatusBar();
   virtual void GotoSheet(unsigned sht);
+  virtual void GotoContLocation(unsigned sht, unsigned contnum,
+				int line = -1, int col = -1);
   virtual void AddSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
   virtual void AppendSheets();

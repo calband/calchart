@@ -42,6 +42,7 @@ enum AnimateError {
   ANIMERR_INVALID_FNTN,
   ANIMERR_DIVISION_ZERO,
   ANIMERR_UNDEFINED,
+  ANIMERR_SYNTAX,
   NUM_ANIMERR
 };
 
@@ -200,28 +201,52 @@ public:
   inline void ClearValue() { v = 0.0; valid = FALSE; }
 };
 
+class ErrorMarker {
+public:
+  Bool *pntgroup; // which points have this error
+  unsigned contnum; // which continuity
+  int line, col; // where
+  ErrorMarker(): pntgroup(NULL), contnum(0), line(-1), col(-1) {}
+  ~ErrorMarker() {
+    Free();
+  }
+  inline Bool Defined() { return pntgroup != NULL; }
+  void Free() {
+    if (pntgroup != NULL) {
+      delete [] pntgroup;
+      pntgroup = NULL;
+    }
+    contnum = 0;
+    line = col = -1;
+  }
+  void StealErrorMarker(ErrorMarker *other) {
+    Free();
+    pntgroup = other->pntgroup;
+    other->pntgroup = NULL;
+    contnum = other->contnum;
+    line = other->line;
+    col = other->col;
+  }
+};
+
 class ContProcedure;
+class ContToken;
 class AnimateCompile {
 public:
   AnimateCompile();
   ~AnimateCompile();
 
   // Compile a point
-  void Compile(unsigned pt_num, ContProcedure* proc);
+  void Compile(unsigned pt_num, unsigned cont_num, ContProcedure* proc);
   // TRUE if successful
-  Bool Append(AnimateCommand *cmd);
+  Bool Append(AnimateCommand *cmd, const ContToken *token);
 
   inline Bool Okay() { return okay; };
   inline void SetStatus(Bool s) { okay = s; };
-  void RegisterError(AnimateError err);
-  inline Bool *StealErrorMarker(unsigned i) {
-    Bool *b = error_markers[i];
-    error_markers[i] = NULL;
-    return b;
-  }
+  void RegisterError(AnimateError err, const ContToken *token);
   void FreeErrorMarkers();
 
-  float GetVarValue(int varnum);
+  float GetVarValue(int varnum, const ContToken *token);
   void SetVarValue(int varnum, float value);
 
   AnimatePoint pt;
@@ -231,10 +256,11 @@ public:
   CC_sheet *curr_sheet;
   unsigned curr_pt;
   unsigned beats_rem;
-  Bool *error_markers[NUM_ANIMERR];
+  ErrorMarker error_markers[NUM_ANIMERR];
 private:
+  unsigned contnum;
   AnimateVariable *vars[NUMCONTVARS];
-  void MakeErrorMarker(AnimateError err);
+  void MakeErrorMarker(AnimateError err, const ContToken *token);
   Bool okay;
 };
 

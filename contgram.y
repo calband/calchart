@@ -222,16 +222,14 @@ varvalue
 
 int parsecontinuity()
 {
+  ParsedContinuity = NULL;
   initscanner();
 //  yydebug = 1;
   return yyparse();
 }
 
-int yyerror(char *s)
+int yyerror(char *)
 {
-  wxString tempbuf;
-  tempbuf.sprintf("%s near line %d, column %d.\n", 
-                  s, yylloc.first_line, yylloc.first_column);
-  (void)wxMessageBox(tempbuf.GetData(), "Animate");
+  // handled outside
   return 0;
 }

@@ -112,6 +112,9 @@ void CC_WinNode::ChangePointLabels(wxWindow*) {}
 void CC_WinNode::ChangeShowMode(wxWindow*) {}
 void CC_WinNode::UpdateStatusBar() {}
 void CC_WinNode::GotoSheet(unsigned) {}
+void CC_WinNode::GotoContLocation(unsigned sht, unsigned, int, int) {
+  GotoSheet(sht);
+}
 void CC_WinNode::AddSheet(unsigned) {}
 void CC_WinNode::DeleteSheet(unsigned) {}
 void CC_WinNode::AppendSheets() {}
@@ -233,6 +236,14 @@ void CC_WinList::GotoSheet(unsigned sht) {
 
   for (n = list; n != NULL; n = n->next) {
     n->GotoSheet(sht);
+  }
+}
+void CC_WinList::GotoContLocation(unsigned sht, unsigned contnum,
+				  int line, int col) {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->GotoContLocation(sht, contnum, line, col);
   }
 }
 void CC_WinList::AddSheet(unsigned sht) {

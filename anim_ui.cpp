@@ -707,14 +707,10 @@ static void AnimErrorClick(wxListBox& list, wxCommandEvent&) {
 }
 
 AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
-			     wxFrame *frame, char *title,
+			     unsigned num, wxFrame *frame, char *title,
 			     int x, int y, int width, int height)
-: wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER) {
+: wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER), sheetnum(num) {
   unsigned i, j;
-
-  for (i = 0; i < NUM_ANIMERR; i++) {
-    pointsels[i] = NULL;
-  }
 
   // Give it an icon
   SetBandIcon(this);
@@ -740,9 +736,9 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 			 wxSINGLE, -1, -1, -1, -1);
 
   for (i = 0, j = 0; i < NUM_ANIMERR; i++) {
-    if (comp->error_markers[i]) {
+    if (comp->error_markers[i].pntgroup) {
       list->Append((char*)animate_err_msgs[i]);
-      pointsels[j++] = comp->StealErrorMarker(i);
+      pointsels[j++].StealErrorMarker(&comp->error_markers[i]);
     }
   }
 
@@ -768,14 +764,9 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 }
 
 AnimErrorList::~AnimErrorList() {
-  unsigned i;
-
   if (node) {
     node->Remove();
     delete node;
-  }
-  for (i = 0; i < NUM_ANIMERR; i++) {
-    if (pointsels[i]) delete [] pointsels[i];
   }
 }
 
@@ -797,11 +788,15 @@ void AnimErrorList::Unselect() {
 
 void AnimErrorList::Update() {
   int i = list->GetSelection();
-
+  
   if (i >= 0) {
     for (unsigned j = 0; j < show->GetNumPoints(); j++) {
-      show->Select(j, pointsels[i][j]);
+      show->Select(j, pointsels[i].pntgroup[j]);
     }
     show->winlist->UpdateSelections(this);
   }
+  show->winlist->GotoContLocation(sheetnum > show->GetNumSheets() ?
+				  show->GetNumSheets()-1 : sheetnum,
+				  pointsels[i].contnum,
+				  pointsels[i].line, pointsels[i].col);
 }
