@@ -13,6 +13,7 @@
 #include "animate.h"
 #include "cont.h"
 #include <wx_utils.h>
+#include <math.h>
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;

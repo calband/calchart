@@ -62,10 +62,10 @@ void CC_sheet::Draw(wxDC *dc) {
       x = pts[i].pos.x+origin.x;
       y = pts[i].pos.y+origin.y;
       switch (pts[i].sym) {
-      case 1:
-      case 5:
-      case 6:
-      case 7:
+      case SYMBOL_SOL:
+      case SYMBOL_SOLBKSL:
+      case SYMBOL_SOLSL:
+      case SYMBOL_SOLX:
 	dc->SetBrush(fillBrush);
 	break;
       default:
@@ -73,19 +73,23 @@ void CC_sheet::Draw(wxDC *dc) {
       }
       dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
       switch (pts[i].sym) {
-      case 3:
-      case 4:
-      case 6:
-      case 7:
+      case SYMBOL_SL:
+      case SYMBOL_X:
+      case SYMBOL_SOLSL:
+      case SYMBOL_SOLX:
 	dc->DrawLine(x - lineoff, y + lineoff, x + lineoff, y - lineoff);
+	break;
+      default:
 	break;
       }
       switch (pts[i].sym) {
-      case 2:
-      case 4:
-      case 5:
-      case 7:
+      case SYMBOL_BKSL:
+      case SYMBOL_X:
+      case SYMBOL_SOLBKSL:
+      case SYMBOL_SOLX:
 	dc->DrawLine(x - lineoff, y - lineoff, x + lineoff, y + lineoff);
+	break;
+      default:
 	break;
       }
       dc->GetTextExtent(show->GetPointLabel(i), &textw, &texth, &textd);

@@ -67,6 +67,7 @@ ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet)
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
       elems[num].sym = sheet->pts[i].sym;
+      elems[num].cont = sheet->pts[i].cont;
       num++;
     }
   }
@@ -84,6 +85,7 @@ int ShowUndoSym::Undo(CC_show *show)
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
   for (i = 0; i < num; i++) {
     sheet->pts[elems[i].idx].sym = elems[i].sym;
+    sheet->pts[elems[i].idx].cont = elems[i].cont;
   }
   show->winlist->UpdatePointsOnSheet(sheetidx);
   return (int)sheetidx;

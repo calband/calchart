@@ -191,7 +191,11 @@ void ContinuityEditor::OnMenuCommand(int id) {
     break;
   case CALCHART__CONT_DELETE:
     sht = descr->CurrSheet();
-    sht->UserDeleteContinuity(curr_cont);
+    if (sht->ContinuityInUse(curr_cont)) {
+      (void)wxMessageBox("This continuity is being used.\nSet these points to a different continuity first.", "Delete continuity");
+    } else {
+      sht->UserDeleteContinuity(curr_cont);
+    }
     break;
   case CALCHART__CONT_CLOSE:
     Close();
@@ -244,8 +248,10 @@ void ContinuityEditor::UpdateText(Bool quick) {
   text_contnum = curr_cont;
   text->Clear();
   if (c != NULL) {
-    if (c->text)
+    if (c->text) {
       text->WriteText((char *)((const char *)c->text));
+      text->SetInsertionPoint(0);
+    }
   }
 }
 

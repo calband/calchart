@@ -648,6 +648,7 @@ void ShowInfoReq::UpdateDescr(Bool quick) {
     c = (char *)show->UserGetDescr();
   }
   text->WriteText(c);
+  text->SetInsertionPoint(0);
 }
 
 void ShowInfoReq::Update(Bool quick, CC_show *shw) {

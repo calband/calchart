@@ -53,7 +53,8 @@ private:
 // Point symbol changes
 struct ShowUndoSymElem {
   unsigned idx;
-  unsigned char sym;
+  SYMBOL_TYPE sym;
+  unsigned char cont;
 };
 class ShowUndoSym : public ShowUndo {
 public:

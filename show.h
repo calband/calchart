@@ -130,6 +130,11 @@ enum PSFONT_TYPE {
   PSFONT_TAB
 };
 
+enum SYMBOL_TYPE {
+  SYMBOL_PLAIN = 0, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
+  SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+};
+
 struct cc_oldcoord {
   unsigned short x;
   unsigned short y;
@@ -251,9 +256,9 @@ inline int operator != (const CC_coord& a, const short b) {
 class CC_point {
 public:
   CC_point()
-    :flags(0), sym(0), cont(0) {}
+    :flags(0), sym(SYMBOL_PLAIN), cont(0) {}
   CC_point(const CC_coord p)
-    :flags(0), sym(0), cont(0), pos(p) {
+    :flags(0), sym(SYMBOL_PLAIN), cont(0), pos(p) {
       for (unsigned i = 0; i < NUM_REF_PNTS; i++) {
 	ref[i] = p;
       }
@@ -270,7 +275,8 @@ public:
   inline void FlipToggle() { Flip(GetFlip() ? FALSE:TRUE); }
 
   unsigned short flags;
-  unsigned char sym, cont;
+  SYMBOL_TYPE sym;
+  unsigned char cont;
   CC_coord pos;
   CC_coord ref[NUM_REF_PNTS];
 };
@@ -305,8 +311,13 @@ public:
   void UserDeleteContinuity(unsigned i);
   void InsertContinuity(CC_continuity *newcont, unsigned i);
   void AppendContinuity(CC_continuity *newcont);
-  void UserNewContinuity(const char *name);
+  CC_continuity *UserNewContinuity(const char *name);
   unsigned NextUnusedContinuityNum();
+  // creates if doesn't exist
+  CC_continuity *GetStandardContinuity(SYMBOL_TYPE sym);
+  // return 0 if not found else index+1
+  unsigned FindContinuityByName(const char *name);
+  Bool ContinuityInUse(unsigned idx);
 
   inline const char *GetName() { return name; }
   inline void SetName(const char *newname) { name = newname; }
@@ -314,7 +325,7 @@ public:
   inline void SetNumber(const char *newnumber) { number = newnumber; }
   void UserSetName(const char *newname);
   void UserSetBeats(unsigned short b);
-  Bool SetPointsSym(unsigned char sym);
+  Bool SetPointsSym(SYMBOL_TYPE sym);
   Bool SetPointsLabel(Bool right);
   Bool SetPointsLabelFlip();
 

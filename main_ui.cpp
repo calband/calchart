@@ -906,7 +906,7 @@ void FieldCanvas::UpdateBars() {
     f1 = zoomf;
     d1x = COORD2INT(show_descr.show->mode->Size().x);
     d1y = COORD2INT(show_descr.show->mode->Size().y);
-    f2 = f1*8;
+    f2 = 8;
     SetScrollbars(f1, f1, d1x, d1y, f2, f2);
   }
 #endif
@@ -939,67 +939,78 @@ static void toolbar_next_ss(CoolToolBar *tb) {
 static void toolbar_label_left(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
   if (mf->field->show_descr.CurrSheet()->SetPointsLabel(FALSE))
-    mf->field->RefreshShow();
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_label_right(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
   if (mf->field->show_descr.CurrSheet()->SetPointsLabel(TRUE))
-    mf->field->RefreshShow();
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_label_flip(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
   if (mf->field->show_descr.CurrSheet()->SetPointsLabelFlip())
-    mf->field->RefreshShow();
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym0(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(0))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_PLAIN))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym1(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(1))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOL))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym2(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(2))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_BKSL))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym3(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(3))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SL))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym4(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(4))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_X))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym5(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(5))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLBKSL))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym6(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(6))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLSL))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_setsym7(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(7))
-    mf->field->RefreshShow();
+  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
+    mf->field->show_descr.show->winlist->
+      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void slider_zoom_callback(wxObject &obj, wxEvent &) {

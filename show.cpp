@@ -34,6 +34,17 @@ static char contnohead_str[] = "Continuity file doesn't begin with header";
 static char nosheets_str[] = "No sheets found";
 static char writeerr_str[] = "Write error: check disk media";
 
+static char *contnames[] = {
+  "PLAIN",
+  "SOL",
+  "BKSL",
+  "SL",
+  "X",
+  "SOLBKSL",
+  "SOLSL",
+  "SOLX"
+};
+
 extern ShowModeList *modelist;
 
 CC_WinNode::CC_WinNode(CC_WinList *lst)
@@ -332,8 +343,8 @@ CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
 CC_point& CC_point::operator = (const cc_oldpoint& old) {
   flags = (old.flags & OLD_FLAG_FLIP) ? PNT_LABEL:0;
   if ((old.sym < 111) || (old.sym > 118))
-    sym = 0;
-  else sym = old.sym - 111;
+    sym = SYMBOL_PLAIN;
+  else sym = (SYMBOL_TYPE)(old.sym - 111);
   cont = get_lil_word(&old.cont);
   pos = old.pos;
   for (unsigned i = 0; i < 3; i++) {
@@ -360,18 +371,20 @@ CC_sheet::CC_sheet(CC_show *shw, const char *newname)
 }
 
 CC_sheet::CC_sheet(CC_sheet *sht)
-: next(NULL), continuity(NULL), animcont(NULL), show(sht->show),
-  numanimcont(0), beats(0), picked(sht->picked),
-  name(sht->name), number(sht->number)
+: next(NULL), continuity(NULL), show(sht->show),
+  beats(0), picked(sht->picked), name(sht->name), number(sht->number)
 {
   int i;
 
   pts = new CC_point[show->GetNumPoints()];
   for (i = 0; i < show->GetNumPoints(); i++) {
     pts[i] = sht->pts[i];
-    pts[i].sym = 0;
+    pts[i].sym = SYMBOL_PLAIN;
     pts[i].cont = 0;
   }
+  animcont = new CC_continuity;
+  animcont->SetName(contnames[0]);
+  numanimcont = 1;
 }
 
 CC_sheet::~CC_sheet() {
@@ -482,6 +495,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
   CC_point *newpts;
   unsigned i, j, cpy, col;
   CC_coord c, coff(show->mode->FieldOffset());
+  CC_continuity *plaincont;
 
   newpts = new CC_point[num];
   cpy = MIN(show->GetNumPoints(), num);
@@ -489,14 +503,15 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
     newpts[i] = pts[i];
   }
   for (c = coff, col = 0; i < num; i++, col++, c.x += INT2COORD(2)) {
+    plaincont = GetStandardContinuity(SYMBOL_PLAIN);
     if (col >= columns) {
       c.x = coff.x;
       c.y += INT2COORD(2);
       col = 0;
     }
     newpts[i].flags = 0;
-    newpts[i].sym = 0;
-    newpts[i].cont = 0;
+    newpts[i].sym = SYMBOL_PLAIN;
+    newpts[i].cont = plaincont->num;
     newpts[i].pos = c;
     for (j = 0; j < NUM_REF_PNTS; j++) {
       newpts[i].ref[j] = newpts[i].pos;
@@ -604,7 +619,7 @@ void CC_sheet::AppendContinuity(CC_continuity *newcont) {
   numanimcont++;
 }
 
-void CC_sheet::UserNewContinuity(const char *name) {
+CC_continuity *CC_sheet::UserNewContinuity(const char *name) {
   CC_continuity *newcont;
   unsigned newcontnum;
 
@@ -616,6 +631,7 @@ void CC_sheet::UserNewContinuity(const char *name) {
   show->winlist->AddContinuity(show->GetSheetPos(this), numanimcont-1);
   show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
 						numanimcont-1));
+  return newcont;
 }
 
 unsigned CC_sheet::NextUnusedContinuityNum() {
@@ -636,6 +652,58 @@ unsigned CC_sheet::NextUnusedContinuityNum() {
   return i;
 }
 
+CC_continuity *CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym) {
+  CC_continuity *c;
+  unsigned i,idx;
+
+  for (c = animcont; c != NULL; c = c->next) {
+    if (c->name == contnames[sym]) {
+      break;
+    }
+  }
+  if (c == NULL) {
+    i = (unsigned)sym;
+    idx = 0;
+    // Put in correct postion
+    while (i > 0) {
+      idx = FindContinuityByName(contnames[--i]);
+      if (idx != 0) break;
+    }
+    c = new CC_continuity;
+    c->SetName(contnames[sym]);
+    c->num = NextUnusedContinuityNum();
+    InsertContinuity(c, idx);
+    show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
+						  idx));
+  }
+  return c;
+}
+
+unsigned CC_sheet::FindContinuityByName(const char *name) {
+  unsigned idx;
+  CC_continuity *c;
+
+  for (idx = 0, c = animcont; c != NULL; idx++, c = c->next) {
+    if (c->name == name) {
+      break;
+    }
+  }
+  if (c == NULL) {
+    idx = 0;
+  }
+  return idx;
+}
+
+Bool CC_sheet::ContinuityInUse(unsigned idx) {
+  unsigned i;
+  CC_continuity *c = GetNthContinuity(idx);
+ 
+  for (i = 0; i < show->GetNumPoints(); i++) {
+    if (pts[i].cont == c->num) return TRUE;
+  }
+  return FALSE;
+}
+
 void CC_sheet::UserSetName(const char *newname) {
   // Create undo entry
   show->undolist->Add(new ShowUndoName(show->GetSheetPos(this), this));
@@ -651,19 +719,22 @@ void CC_sheet::UserSetBeats(unsigned short b) {
 }
 
 // Set point symbols
-Bool CC_sheet::SetPointsSym(unsigned char sym) {
+Bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym) {
   unsigned i;
   Bool change = FALSE;
+  CC_continuity *c;
 
   if (GetNumSelectedPoints() <= 0) return FALSE;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this));
 
+  c = GetStandardContinuity(sym);
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       if (pts[i].sym != sym) {
 	pts[i].sym = sym;
+	pts[i].cont = c->num;
 	change = TRUE;
       }
     }
@@ -759,6 +830,10 @@ CC_show::CC_show(unsigned npoints)
     pt_labels = NULL;
     selections = NULL;
   }
+  sheets->animcont = new CC_continuity;
+  sheets->animcont->SetName(contnames[0]);
+  sheets->numanimcont = 1;
+
   error = NULL;
 }
 
@@ -877,7 +952,7 @@ static char* load_show_SYMB(INGLchunk* chunk) {
   }
   data = (unsigned char *)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
-    sheet->pts[i].sym = *(data++);
+    sheet->pts[i].sym = (SYMBOL_TYPE)(*(data++));
   }
 
   return NULL;
@@ -1097,7 +1172,8 @@ CC_show::CC_show(const char *file)
 	  conv_diskpt.flags = ((cc_reallyoldpoint*)diskpts)[i].flags;
 	  conv_diskpt.pos = ((cc_reallyoldpoint*)diskpts)[i].pos;
 	  conv_diskpt.color = ((cc_reallyoldpoint*)diskpts)[i].color;
-	  conv_diskpt.code = ((cc_reallyoldpoint*)diskpts)[i].code;
+	  conv_diskpt.code[0] = ((cc_reallyoldpoint*)diskpts)[i].code[0];
+	  conv_diskpt.code[1] = ((cc_reallyoldpoint*)diskpts)[i].code[1];
 	  conv_diskpt.cont = ((cc_reallyoldpoint*)diskpts)[i].cont;
 	  refidx = get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].refnum);
 	  if (refidx >= 0) {
