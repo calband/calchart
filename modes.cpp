@@ -121,18 +121,30 @@ void ShowModeStandard::Draw(wxDC *dc) {
 		 j+FLOAT2COORD(.8*8)+border1.x,
 		 FLOAT2COORD(hashw-(.2*8))+border1.y);
 
-    dc->DrawLine(j+INT2COORD(8), INT2COORD(hashe+8),
-		 j+FLOAT2COORD(8+(.1*8)), INT2COORD(hashe+8));
-    dc->DrawLine(j+FLOAT2COORD(8+(.9*8)), INT2COORD(hashe+8),
-		 j+INT2COORD(16), INT2COORD(hashe+8));
-    dc->DrawLine(j+FLOAT2COORD(8+(.2*8)), INT2COORD(hashe+8),
-		 j+FLOAT2COORD(8+(.2*8)), FLOAT2COORD(hashe+8+(.2*8)));
-    dc->DrawLine(j+FLOAT2COORD(8+(.4*8)), INT2COORD(hashe+8),
-		 j+FLOAT2COORD(8+(.4*8)), FLOAT2COORD(hashe+8+(.2*8)));
-    dc->DrawLine(j+FLOAT2COORD(8+(.6*8)), INT2COORD(hashe+8),
-		 j+FLOAT2COORD(8+(.6*8)), FLOAT2COORD(hashe+8+(.2*8)));
-    dc->DrawLine(j+FLOAT2COORD(8+(.8*8)), INT2COORD(hashe+8),
-		 j+FLOAT2COORD(8+(.8*8)), FLOAT2COORD(hashe+8+(.2*8)));
+    dc->DrawLine(j+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+FLOAT2COORD(.1*8)+border1.x,
+		 INT2COORD(hashe)+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+INT2COORD(8)+border1.x,
+		 INT2COORD(hashe)+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.2*8)+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+FLOAT2COORD(.2*8)+border1.x,
+		 FLOAT2COORD(hashe+(.2*8))+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.4*8)+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+FLOAT2COORD(.4*8)+border1.x,
+		 FLOAT2COORD(hashe+(.2*8))+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.6*8)+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+FLOAT2COORD(.6*8)+border1.x,
+		 FLOAT2COORD(hashe+(.2*8))+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.8*8)+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+FLOAT2COORD(.8*8)+border1.x,
+		 FLOAT2COORD(hashe+(.2*8))+border1.y);
   }
 
   dc->SetFont(yardLabelFont);
@@ -145,6 +157,68 @@ void ShowModeStandard::Draw(wxDC *dc) {
 		 INT2COORD(i*8) - textw/2 + border1.x,
 		 size.y - border2.y);
   }
+}
+
+void ShowModeStandard::DrawAnim(wxDC *dc) {
+  Coord j;
+  wxIntPoint points[5];
+  CC_coord fieldsize;
+
+  fieldsize = size - border1 - border2;
+
+  points[0].x = 0;
+  points[0].y = 0;
+  points[1].x = fieldsize.x;
+  points[1].y = 0;
+  points[2].x = fieldsize.x;
+  points[2].y = fieldsize.y;
+  points[3].x = 0;
+  points[3].y = fieldsize.y;
+  points[4].x = 0;
+  points[4].y = 0;
+
+  // Draw vertical lines
+  dc->DrawLines(5, points, border1.x, border1.y);
+  for (j = INT2COORD(8); j < fieldsize.x; j+=INT2COORD(8)) {
+    dc->DrawLine(j+border1.x, border1.y,
+		 j+border1.x, size.y - border2.y);
+  }
+
+  for (j = 0; j < fieldsize.x; j+=INT2COORD(8)) {
+    // Draw hashes
+    dc->DrawLine(j+border1.x,
+		 INT2COORD(hashw)+border1.y,
+		 j+FLOAT2COORD(.1*8)+border1.x,
+		 INT2COORD(hashw)+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
+		 INT2COORD(hashw)+border1.y,
+		 j+INT2COORD(8)+border1.x,
+		 INT2COORD(hashw)+border1.y);
+
+    dc->DrawLine(j+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+FLOAT2COORD(.1*8)+border1.x,
+		 INT2COORD(hashe)+border1.y);
+    dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
+		 INT2COORD(hashe)+border1.y,
+		 j+INT2COORD(8)+border1.x,
+		 INT2COORD(hashe)+border1.y);
+  }
+
+#ifdef TEXT_ON_ANIM
+  unsigned short i;
+  float textw, texth, textd;
+  dc->SetFont(yardLabelFont);
+  for (i = 0; i < 21; i++) {
+    dc->GetTextExtent(yard_text[i], &textw, &texth, &textd);
+    dc->DrawText(yard_text[i],
+		 INT2COORD(i*8) - textw/2 + border1.x,
+		 border1.y - texth);
+    dc->DrawText(yard_text[i],
+		 INT2COORD(i*8) - textw/2 + border1.x,
+		 size.y - border2.y);
+  }
+#endif
 }
 
 ShowModeSprShow::ShowModeSprShow(char *nam, CC_coord bord1, CC_coord bord2,
@@ -237,6 +311,53 @@ void ShowModeSprShow::Draw(wxDC *dc) {
 		   fieldsize.x + border1.x,
 		   border1.y - texth/2 + INT2COORD(i));
   }
+}
+
+void ShowModeSprShow::DrawAnim(wxDC *dc) {
+  Coord j;
+  CC_coord fieldsize;
+
+  fieldsize = size - border1 - border2;
+
+  // Draw vertical lines
+  for (j = 0; j <= fieldsize.x; j+=INT2COORD(8)) {
+    dc->DrawLine(j+border1.x, border1.y,
+		 j+border1.x, size.y - border2.y);
+  }
+
+  // Draw horizontal lines
+  for (j = 0; j <= fieldsize.y; j+=INT2COORD(8)) {
+    dc->DrawLine(border1.x, j+border1.y,
+		 fieldsize.x+border1.x, j+border1.y);
+  }
+
+#ifdef TEXT_ON_ANIM
+  unsigned short i;
+  float textw, texth, textd;
+  dc->SetFont(yardLabelFont);
+  for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
+    dc->GetTextExtent(yard_text[i+(steps_x+80)/8], &textw, &texth, &textd);
+    if (which_yards & SPR_YARD_ABOVE)
+      dc->DrawText(yard_text[i+(steps_x+80)/8],
+		   INT2COORD(i*8) - textw/2 + border1.x,
+		   border1.y - texth);
+    if (which_yards & SPR_YARD_BELOW)
+      dc->DrawText(yard_text[i+(steps_x+80)/8],
+		   INT2COORD(i*8) - textw/2 + border1.x,
+		   size.y - border2.y);
+  }
+  for (i = 0; i <= COORD2INT(fieldsize.y); i+=8) {
+    dc->GetTextExtent(spr_line_text[i/8], &textw, &texth, &textd);
+    if (which_yards & SPR_YARD_LEFT)
+      dc->DrawText(spr_line_text[i/8],
+		   border1.x - textw,
+		   border1.y - texth/2 + INT2COORD(i));
+    if (which_yards & SPR_YARD_RIGHT)
+      dc->DrawText(spr_line_text[i/8],
+		   fieldsize.x + border1.x,
+		   border1.y - texth/2 + INT2COORD(i));
+  }
+#endif
 }
 
 ShowModeList::ShowModeList()

@@ -11,6 +11,7 @@
 #endif
 
 #include "cont_ui.h"
+#include "confgr.h"
 
 extern wxFont *contPlainFont;
 extern wxFont *contBoldFont;
@@ -237,7 +238,7 @@ void ContinuityEditor::Update(Bool quick) {
        curranimcont = curranimcont->next) {
     conts->Append((char *)((const char *)curranimcont->name));
   }
-  if (curr_cont > sht->numanimcont && sht->numanimcont > 0)
+  if (curr_cont >= sht->numanimcont && sht->numanimcont > 0)
     curr_cont = sht->numanimcont-1;
   conts->SetSelection(curr_cont);
 
@@ -394,7 +395,43 @@ void PrintContCanvas::OnPaint() {
       }
       if (c->font == PSFONT_SYMBOL) {
 	int pointsize = contPlainFont->GetPointSize();
-	x += pointsize*strlen(c->text);
+	SYMBOL_TYPE sym;
+
+	for (const char *s = c->text; *s; s++) {
+	  sym = (SYMBOL_TYPE)(*s - 'A');
+	  switch (sym) {
+	  case SYMBOL_SOL:
+	  case SYMBOL_SOLBKSL:
+	  case SYMBOL_SOLSL:
+	  case SYMBOL_SOLX:
+	    SetBrush(wxBLACK_BRUSH);
+	    break;
+	  default:
+	    SetBrush(wxTRANSPARENT_BRUSH);
+	  }
+	  DrawEllipse(x, y, pointsize, pointsize);
+	  switch (sym) {
+	  case SYMBOL_SL:
+	  case SYMBOL_X:
+	  case SYMBOL_SOLSL:
+	  case SYMBOL_SOLX:
+	    DrawLine(x, y + pointsize, x + pointsize, y);
+	    break;
+	  default:
+	    break;
+	  }
+	  switch (sym) {
+	  case SYMBOL_BKSL:
+	  case SYMBOL_X:
+	  case SYMBOL_SOLBKSL:
+	  case SYMBOL_SOLX:
+	    DrawLine(x, y, x + pointsize, y + pointsize);
+	    break;
+	  default:
+	    break;
+	  }
+	  x += pointsize;
+	}
 	if (pointsize > maxtexth) maxtexth = pointsize;
       } else {
 	if (!do_tab) {

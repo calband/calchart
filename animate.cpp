@@ -10,14 +10,21 @@
 #pragma implementation
 #endif
 
-#include "animate.h"
+#include "anim_ui.h"
 #include "cont.h"
-#include <wx_utils.h>
 #include <math.h>
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
 extern ContProcedure *ParsedContinuity;
+
+const char *animate_err_msgs[] = {
+  "Ran out of time",
+  "Not enough to do",
+  "Didn't make it to position",
+  "Invalid countermarch",
+  "Invalid fountain"
+};
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector) {
   if (vector.y < vector.x/2) {
@@ -219,8 +226,8 @@ Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
   Bool b = AnimateCommand::NextBeat(pt);
   float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
     * PI / 180.0;
-  pt.pos.x = CLIPCOORD(origin.x + cos(curr_ang)*r);
-  pt.pos.y = CLIPCOORD(origin.y - sin(curr_ang)*r);
+  pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
+  pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
   return b;
 }
 
@@ -228,8 +235,8 @@ Bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
   if (AnimateCommand::PrevBeat(pt)) {
     float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
       * PI / 180.0;
-    pt.pos.x = CLIPCOORD(origin.x + cos(curr_ang)*r);
-    pt.pos.y = CLIPCOORD(origin.y - sin(curr_ang)*r);
+    pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
+    pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
     return TRUE;
   } else {
     return FALSE;
@@ -237,13 +244,13 @@ Bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
 }
 
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt) {
-  pt.pos.x = CLIPCOORD(origin.x + cos(ang_end*PI/180.0)*r);
-  pt.pos.y = CLIPCOORD(origin.y - sin(ang_end*PI/180.0)*r);
+  pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(ang_end*PI/180.0)*r);
+  pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(ang_end*PI/180.0)*r);
 }
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt) {
-  pt.pos.x = CLIPCOORD(origin.x + cos(ang_start*PI/180.0)*r);
-  pt.pos.y = CLIPCOORD(origin.y - sin(ang_start*PI/180.0)*r);
+  pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(ang_start*PI/180.0)*r);
+  pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(ang_start*PI/180.0)*r);
 }
 
 AnimateDir AnimateCommandRotate::Direction() {
@@ -297,12 +304,13 @@ void AnimateSheet::SetName(const char *s) {
   name = copystring(s);
 }
 
-Animation::Animation(CC_show *show)
+Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
 : curr_sheet(NULL), numsheets(0), numpts(show->GetNumPoints()), sheets(NULL) {
   unsigned i, j;
   ContProcedure* curr_proc;
   AnimateCompile comp;
   CC_continuity *currcont;
+  char tempbuf[100];
 
   pts = new AnimatePoint[numpts];
   curr_cmds = new AnimateCommand*[numpts];
@@ -324,21 +332,22 @@ Animation::Animation(CC_show *show)
     curr_sheet->SetName(comp.curr_sheet->GetName());
     curr_sheet->numbeats = comp.curr_sheet->beats;
     for (i = 0; i < numpts; i++) {
-      curr_sheet->pts[i].pos = comp.curr_sheet->pts[i].pos;
+      curr_sheet->pts[i].pos = comp.curr_sheet->GetPosition(i);
     }
 
     // Now parse continuity
+    comp.SetStatus(TRUE);
+    comp.FreeErrorMarkers();
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
 	 currcont  = currcont->next) {
       if ((yyinputbuffer = currcont->text) != NULL) {
-#ifndef wx_msw
-	fprintf(stderr, "Parsing %s %s...\n", comp.curr_sheet->GetName(),
-		(const char *)currcont->name);
-#endif
+	sprintf(tempbuf, "Parsing \"%.32s\" %.32s...",
+		comp.curr_sheet->GetName(), (const char *)currcont->name);
+	frame->SetStatusText(tempbuf);
 	parsecontinuity();
 	if (ParsedContinuity != NULL) {
 	  for (j = 0; j < numpts; j++) {
-	    if (comp.curr_sheet->pts[j].cont == currcont->num) {
+	    if (comp.curr_sheet->GetPoint(j).cont == currcont->num) {
 	      comp.Init(j);
 	      for (curr_proc = ParsedContinuity; curr_proc;
 		   curr_proc = curr_proc->next) {
@@ -347,13 +356,15 @@ Animation::Animation(CC_show *show)
 	      CC_coord c;
 	      if (comp.curr_sheet->next) {
 		if (comp.pt.pos !=
-		    comp.curr_sheet->next->pts[comp.curr_pt].pos) {
-		  c = comp.curr_sheet->next->pts[comp.curr_pt].pos -
+		    comp.curr_sheet->next->GetPosition(comp.curr_pt)) {
+		  c = comp.curr_sheet->next->GetPosition(comp.curr_pt) -
 		    comp.pt.pos;
+		  comp.RegisterError(ANIMERR_WRONGPLACE);
 		  comp.Append(new AnimateCommandMove(comp.beats_rem, c));
 		}
 	      }
 	      if (comp.beats_rem) {
+		comp.RegisterError(ANIMERR_EXTRATIME);
 		comp.Append(new AnimateCommandMT(comp.beats_rem, ANIMDIR_E));
 	      }
 	      curr_sheet->commands[j] = comp.cmds;
@@ -366,6 +377,14 @@ Animation::Animation(CC_show *show)
 	    ParsedContinuity = curr_proc;
 	  }
 	}
+      }
+    }
+    if (!comp.Okay()) {
+      sprintf(tempbuf, "Errors for \"%.32s\"",
+	      comp.curr_sheet->GetName());
+      (void)new AnimErrorList(&comp, winlist, frame, tempbuf);
+      if (wxMessageBox("Ignore errors?", "Animate", wxYES_NO) != wxYES) {
+	break;
       }
     }
   }
@@ -489,6 +508,11 @@ void Animation::RefreshSheet() {
 
 AnimateCompile::AnimateCompile()
 : okay(TRUE) {
+  unsigned i;
+
+  for (i = 0; i < NUM_ANIMERR; i++) {
+    error_markers[i] = NULL;
+  }
 }
 
 void AnimateCompile::Init(unsigned pt_num) {
@@ -497,17 +521,22 @@ void AnimateCompile::Init(unsigned pt_num) {
   for (i = 0; i < NUMCONTVARS; i++) {
     vars[i] = 0.0;
   }
-  pt.pos = curr_sheet->pts[pt_num].pos;
+
+  pt.pos = curr_sheet->GetPosition(pt_num);
   cmds = curr_cmd = NULL;
   curr_pt = pt_num;
   beats_rem = curr_sheet->beats;
-  okay = TRUE;
+}
+
+AnimateCompile::~AnimateCompile() {
+  FreeErrorMarkers();
 }
 
 Bool AnimateCompile::Append(AnimateCommand *cmd) {
   Bool clipped;
 
   if (beats_rem < cmd->numbeats) {
+    RegisterError(ANIMERR_OUTOFTIME);
     if (beats_rem == 0) {
       delete cmd;
       return FALSE;
@@ -529,4 +558,32 @@ Bool AnimateCompile::Append(AnimateCommand *cmd) {
   cmd->ApplyForward(pt); // Move current point to new position
 
   return TRUE;
+}
+
+void AnimateCompile::RegisterError(AnimateError err) {
+  MakeErrorMarker(err);
+  error_markers[err][curr_pt] = TRUE;
+  SetStatus(FALSE);
+}
+
+void AnimateCompile::FreeErrorMarkers() {
+  unsigned i;
+  
+  for (i = 0; i < NUM_ANIMERR; i++) {
+    if (error_markers[i]) {
+      delete [] error_markers[i];
+      error_markers[i] = NULL;
+    }
+  }
+}
+
+void AnimateCompile::MakeErrorMarker(AnimateError err) {
+  unsigned i;
+
+  if (!error_markers[err]) {
+    error_markers[err] = new Bool[show->GetNumPoints()];
+    for (i = 0; i < show->GetNumPoints(); i++) {
+      error_markers[err][i] = FALSE;
+    }
+  }
 }

@@ -28,6 +28,7 @@ public:
 
   virtual SHOW_TYPE GetType() = 0;
   virtual void Draw(wxDC *dc) = 0;
+  virtual void DrawAnim(wxDC *dc) = 0;
   inline CC_coord& Offset() { return offset; };
   inline CC_coord FieldOffset() { return -(offset-border1); }
   inline CC_coord& Size() { return size; };
@@ -52,6 +53,7 @@ public:
 
   SHOW_TYPE GetType();
   void Draw(wxDC *dc);
+  void DrawAnim(wxDC *dc);
   inline unsigned short HashW() { return hashw; }
   inline unsigned short HashE() { return hashe; }
 
@@ -77,6 +79,7 @@ public:
 
   SHOW_TYPE GetType();
   void Draw(wxDC *dc);
+  void DrawAnim(wxDC *dc);
   inline char *StageFile() { return stagefile; }
   inline unsigned char WhichYards() { return which_yards; }
   inline short StageX() { return stage_x; }

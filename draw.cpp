@@ -15,12 +15,12 @@ extern wxFont *pointLabelFont;
 extern wxBrush *hilitBrush;
 extern wxPen *hilitPen;
 
-void CC_sheet::Draw(wxDC *dc, Bool drawall, int point) {
+void CC_sheet::Draw(wxDC *dc, unsigned ref, Bool drawall, int point) {
   unsigned short i;
   unsigned lastpoint;
   wxBrush *fillBrush;
   unsigned long x, y;
-  float offset, lineoff, textoff;
+  float offset, plineoff, slineoff, textoff;
   float textw, texth, textd;
   float circ_r;
   CC_coord origin;
@@ -46,7 +46,8 @@ void CC_sheet::Draw(wxDC *dc, Bool drawall, int point) {
     dc->SetFont(pointLabelFont);
     circ_r = FLOAT2COORD(dot_ratio);
     offset = circ_r / 2;
-    lineoff = offset * pline_ratio;
+    plineoff = offset * pline_ratio;
+    slineoff = offset * sline_ratio;
     textoff = offset * 1.25;
     origin = show->mode->Offset();
     if (point < 0) {
@@ -69,8 +70,8 @@ void CC_sheet::Draw(wxDC *dc, Bool drawall, int point) {
 	dc->SetPen(wxBLACK_PEN);
 	fillBrush = wxBLACK_BRUSH;
       }
-      x = pts[i].pos.x+origin.x;
-      y = pts[i].pos.y+origin.y;
+      x = GetPosition(i, ref).x+origin.x;
+      y = GetPosition(i, ref).y+origin.y;
       switch (pts[i].sym) {
       case SYMBOL_SOL:
       case SYMBOL_SOLBKSL:
@@ -85,9 +86,11 @@ void CC_sheet::Draw(wxDC *dc, Bool drawall, int point) {
       switch (pts[i].sym) {
       case SYMBOL_SL:
       case SYMBOL_X:
+	dc->DrawLine(x - plineoff, y + plineoff, x + plineoff, y - plineoff);
+	break;
       case SYMBOL_SOLSL:
       case SYMBOL_SOLX:
-	dc->DrawLine(x - lineoff, y + lineoff, x + lineoff, y - lineoff);
+	dc->DrawLine(x - slineoff, y + slineoff, x + slineoff, y - slineoff);
 	break;
       default:
 	break;
@@ -95,9 +98,11 @@ void CC_sheet::Draw(wxDC *dc, Bool drawall, int point) {
       switch (pts[i].sym) {
       case SYMBOL_BKSL:
       case SYMBOL_X:
+	dc->DrawLine(x - plineoff, y - plineoff, x + plineoff, y + plineoff);
+	break;
       case SYMBOL_SOLBKSL:
       case SYMBOL_SOLX:
-	dc->DrawLine(x - lineoff, y - lineoff, x + lineoff, y + lineoff);
+	dc->DrawLine(x - slineoff, y - slineoff, x + slineoff, y + slineoff);
 	break;
       default:
 	break;

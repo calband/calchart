@@ -68,8 +68,8 @@ char *ShowUndoMany::RedoDescription() {
   else return NULL;
 }
 
-ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum) {
+ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref)
+:ShowUndo(sheetnum), refnum(ref) {
   unsigned i;
   
   num = sheet->GetNumSelectedPoints();
@@ -79,14 +79,14 @@ ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet)
   for (num=0,i=0; i < sheet->show->GetNumPoints(); i++) {
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
-      elems[num].pos = sheet->pts[i].pos;
+      elems[num].pos = sheet->GetPosition(i, refnum);
       num++;
     }
   }
 }
 
 ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
-:ShowUndo(old->sheetidx), num(old->num) {
+:ShowUndo(old->sheetidx), num(old->num), refnum(old->refnum) {
   unsigned i;
 
   if (num > 0) {
@@ -94,7 +94,7 @@ ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
   }
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
-    elems[i].pos = sheet->pts[elems[i].idx].pos;
+    elems[i].pos = sheet->GetPosition(elems[i].idx, refnum);
   }
 }
     
@@ -111,9 +111,9 @@ int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
 
   *newundo = new ShowUndoMove(this, sheet);
   for (i = 0; i < num; i++) {
-    sheet->pts[elems[i].idx].pos = elems[i].pos;
+    sheet->SetPosition(elems[i].pos, elems[i].idx, refnum);
   }
-  show->winlist->UpdatePointsOnSheet(sheetidx);
+  show->winlist->UpdatePointsOnSheet(sheetidx, refnum);
   return (int)sheetidx;
 }
 
@@ -135,8 +135,8 @@ ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, Bool contchanged)
   for (num=0,i=0; i < sheet->show->GetNumPoints(); i++) {
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
-      elems[num].sym = sheet->pts[i].sym;
-      elems[num].cont = sheet->pts[i].cont;
+      elems[num].sym = sheet->GetPoint(i).sym;
+      elems[num].cont = sheet->GetPoint(i).cont;
       num++;
     }
   }
@@ -151,8 +151,8 @@ ShowUndoSym::ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet)
   }
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
-    elems[i].sym = sheet->pts[elems[i].idx].sym;
-    elems[i].cont = sheet->pts[elems[i].idx].cont;
+    elems[i].sym = sheet->GetPoint(elems[i].idx).sym;
+    elems[i].cont = sheet->GetPoint(elems[i].idx).cont;
   }
 }
     
@@ -169,8 +169,8 @@ int ShowUndoSym::Undo(CC_show *show, ShowUndo** newundo)
 
   *newundo = new ShowUndoSym(this, sheet);
   for (i = 0; i < num; i++) {
-    sheet->pts[elems[i].idx].sym = elems[i].sym;
-    sheet->pts[elems[i].idx].cont = elems[i].cont;
+    sheet->GetPoint(elems[i].idx).sym = elems[i].sym;
+    sheet->GetPoint(elems[i].idx).cont = elems[i].cont;
   }
   show->winlist->UpdatePointsOnSheet(sheetidx);
   return (int)sheetidx;
@@ -198,7 +198,7 @@ ShowUndoLbl::ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet)
   for (num=0,i=0; i < sheet->show->GetNumPoints(); i++) {
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
-      elems[num].right = sheet->pts[i].GetFlip();
+      elems[num].right = sheet->GetPoint(i).GetFlip();
       num++;
     }
   }
@@ -213,7 +213,7 @@ ShowUndoLbl::ShowUndoLbl(ShowUndoLbl* old, CC_sheet *sheet)
   }
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
-    elems[i].right = sheet->pts[elems[i].idx].GetFlip();
+    elems[i].right = sheet->GetPoint(elems[i].idx).GetFlip();
   }
 }
     
@@ -230,7 +230,7 @@ int ShowUndoLbl::Undo(CC_show *show, ShowUndo** newundo)
 
   *newundo = new ShowUndoLbl(this, sheet);
   for (i = 0; i < num; i++) {
-    sheet->pts[elems[i].idx].Flip(elems[i].right);
+    sheet->GetPoint(elems[i].idx).Flip(elems[i].right);
   }
   show->winlist->UpdatePointsOnSheet(sheetidx);
   return (int)sheetidx;

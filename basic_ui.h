@@ -110,6 +110,7 @@ public:
 
   inline wxDC *GetMemDC() { return memdc; }
   void SetSize(int width, int height);
+  void SetBackground(wxBrush *brush);
   void SetUserScale(float x, float y);
   inline void SetPosition(float x, float y) {
     x_off = x; y_off = y;

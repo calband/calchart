@@ -23,6 +23,17 @@ enum AnimateDir {
   ANIMDIR_S, ANIMDIR_SW, ANIMDIR_W, ANIMDIR_NW
 };
 
+enum AnimateError {
+  ANIMERR_OUTOFTIME,
+  ANIMERR_EXTRATIME,
+  ANIMERR_WRONGPLACE,
+  ANIMERR_INVALID_CM,
+  ANIMERR_INVALID_FNTN,
+  NUM_ANIMERR
+};
+
+extern const char *animate_err_msgs[];
+
 AnimateDir AnimGetDirFromVector(CC_coord& vector);
 AnimateDir AnimGetDirFromAngle(float ang);
 
@@ -117,9 +128,10 @@ private:
   unsigned numpts;
 };
 
+class wxFrame;
 class Animation {
 public:
-  Animation(CC_show *show);
+  Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist);
   ~Animation();
 
   // Returns TRUE if changes made
@@ -149,6 +161,7 @@ private:
 class AnimateCompile {
 public:
   AnimateCompile();
+  ~AnimateCompile();
 
   // Prepare for compiling a point
   void Init(unsigned pt_num);
@@ -157,6 +170,13 @@ public:
 
   inline Bool Okay() { return okay; };
   inline void SetStatus(Bool s) { okay = s; };
+  void RegisterError(AnimateError err);
+  inline Bool *StealErrorMarker(unsigned i) {
+    Bool *b = error_markers[i];
+    error_markers[i] = NULL;
+    return b;
+  }
+  void FreeErrorMarkers();
 
   float vars[NUMCONTVARS];
   AnimatePoint pt;
@@ -166,7 +186,9 @@ public:
   CC_sheet *curr_sheet;
   unsigned curr_pt;
   unsigned beats_rem;
+  Bool *error_markers[NUM_ANIMERR];
 private:
+  void MakeErrorMarker(AnimateError err);
   Bool okay;
 };
 

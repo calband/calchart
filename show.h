@@ -29,9 +29,10 @@ typedef short Coord;
 #define COORD_DECIMAL (1<<COORD_SHIFT)
 #define INT2COORD(a) ((a) * COORD_DECIMAL)
 #define COORD2INT(a) ((a) / COORD_DECIMAL)
-#define FLOAT2COORD(a) (Coord)((a) * (1 << COORD_SHIFT))
+#define FLOAT2NUM(a) CLIPFLOAT((a) * (1 << COORD_SHIFT))
+#define FLOAT2COORD(a) (Coord)FLOAT2NUM((a))
 #define COORD2FLOAT(a) ((a) / ((float)(1 << COORD_SHIFT)))
-#define CLIPCOORD(a) ((Coord)((a) + ((1 << COORD_SHIFT)/2.0)))
+#define CLIPFLOAT(a) (((a) < 0) ? ((a) - 0.5) : ((a) + 0.5))
 
 #define MAX_POINTS 1000
 #define NUM_REF_PNTS 3
@@ -54,7 +55,7 @@ public:
   virtual void ChangeName();
   virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void UpdatePoints();
-  virtual void UpdatePointsOnSheet(unsigned sht);
+  virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1);
   virtual void ChangeNumPoints(wxWindow *win);
   virtual void ChangePointLabels(wxWindow *win);
   virtual void ChangeShowMode(wxWindow *win);
@@ -94,7 +95,7 @@ public:
   virtual void ChangeName();
   virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void UpdatePoints();
-  virtual void UpdatePointsOnSheet(unsigned sht);
+  virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1);
   virtual void ChangeNumPoints(wxWindow *win);
   virtual void ChangePointLabels(wxWindow *win);
   virtual void ChangeShowMode(wxWindow *win);
@@ -200,6 +201,7 @@ public:
 
   float Magnitude() const;
   float DM_Magnitude() const; // check for diagonal military also
+  float Direction() const;
   float Direction(const CC_coord& c) const;
 
   CC_coord& operator = (const cc_oldcoord& old);
@@ -259,15 +261,6 @@ class CC_point {
 public:
   CC_point()
     :flags(0), sym(SYMBOL_PLAIN), cont(0) {}
-  CC_point(const CC_coord p)
-    :flags(0), sym(SYMBOL_PLAIN), cont(0), pos(p) {
-      for (unsigned i = 0; i < NUM_REF_PNTS; i++) {
-	ref[i] = p;
-      }
-    }
-  CC_point(const cc_oldpoint old) { *this = old; }
-
-  CC_point& operator = (const cc_oldpoint& old);
 
   inline Bool GetFlip() { return (Bool)(flags & PNT_LABEL); }
   inline void Flip(Bool val = TRUE) {
@@ -290,7 +283,7 @@ public:
   CC_sheet(CC_sheet *sht);
   ~CC_sheet();
 
-  void Draw(wxDC *dc, Bool drawall = TRUE, int point = -1);
+  void Draw(wxDC *dc, unsigned ref, Bool drawall = TRUE, int point = -1);
 
   // internal use only
   char *PrintStandard(FILE *fp);
@@ -332,10 +325,16 @@ public:
   Bool SetPointsLabel(Bool right);
   Bool SetPointsLabelFlip();
 
-  Bool TranslatePoints(CC_coord delta);
+  inline CC_point& GetPoint(unsigned i) { return pts[i]; }
+  inline void SetPoint(const cc_oldpoint& val, unsigned i);
+
+  const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
+  void SetAllPositions(const CC_coord& val, unsigned i);
+  void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
+  void SetPosition(const cc_oldcoord& val, unsigned i, unsigned ref = 0);
+  Bool TranslatePoints(CC_coord delta, unsigned ref = 0);
 
   CC_sheet *next;
-  CC_point *pts;
   cc_text *continuity;
   CC_continuity *animcont;
   CC_show *show;
@@ -343,6 +342,7 @@ public:
   unsigned short beats;
   Bool picked; /* for requestors like printing */
 private:
+  CC_point *pts;
   wxString name;
   wxString number;
 };

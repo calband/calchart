@@ -34,6 +34,20 @@ private:
   AnimationFrame *frame;
 };
 
+class AnimErrorList;
+
+class CC_WinNodeAnimErrors : public CC_WinNode {
+public:
+  CC_WinNodeAnimErrors(CC_WinList *lst, AnimErrorList *err);
+
+  virtual void SetShow(CC_show *shw);
+  virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
+  virtual void ChangeNumPoints(wxWindow *win);
+
+private:
+  AnimErrorList *errlist;
+};
+
 class AnimationTimer: public wxTimer {
 public:
   AnimationTimer(AnimationCanvas* c): canvas(c) {}
@@ -43,7 +57,7 @@ private:
   AnimationCanvas* canvas;
 };
 
-class AnimationCanvas: public wxCanvas {
+class AnimationCanvas: public AutoScrollCanvas {
 public:
   AnimationCanvas(wxFrame *frame, CC_descr *dcr);
   ~AnimationCanvas();
@@ -107,11 +121,35 @@ public:
   AnimationCanvas *canvas;
 private:
   CC_WinNodeAnim *node;
+  friend AnimationCanvas;
 };
 
 enum {
   CALCHART__ANIM_REANIMATE = 100,
   CALCHART__ANIM_CLOSE
+};
+
+class AnimErrorList: public wxFrame {
+public:
+  AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
+		wxFrame *frame, char *title,
+		int x = -1, int y = -1, int width = 300, int height = 300);
+  ~AnimErrorList();
+  Bool OnClose(void);
+  void OnSize(int w, int h);
+
+  inline Bool Okay() { return ok; };
+
+  void Unselect();
+  void Update();
+
+  CC_show *show;
+private:
+  Bool ok;
+  wxPanel *panel;
+  GoodListBox *list;
+  Bool *pointsels[NUM_ANIMERR];
+  CC_WinNodeAnimErrors *node;
 };
 
 #endif

@@ -54,7 +54,7 @@ struct ShowUndoMoveElem {
 };
 class ShowUndoMove : public ShowUndo {
 public:
-  ShowUndoMove(unsigned sheetnum, CC_sheet *sheet);
+  ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref = 0);
   ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet);
   virtual ~ShowUndoMove();
 
@@ -63,7 +63,7 @@ public:
   virtual char *UndoDescription();
   virtual char *RedoDescription();
 private:
-  unsigned num;
+  unsigned num, refnum;
   ShowUndoMoveElem *elems;
 };
 

@@ -53,20 +53,35 @@ void CC_WinNodeAnim::ChangeNumPoints(wxWindow *) {
   frame->canvas->FreeAnim();
 }
 
+CC_WinNodeAnimErrors::CC_WinNodeAnimErrors(CC_WinList *lst, AnimErrorList *err)
+: CC_WinNode(lst), errlist(err) {}
+
+void CC_WinNodeAnimErrors::SetShow(CC_show *) {
+  errlist->Close();
+}
+
+void CC_WinNodeAnimErrors::UpdateSelections(wxWindow *win, int) {
+  if (win != errlist) {
+    errlist->Unselect();
+  }
+}
+
+void CC_WinNodeAnimErrors::ChangeNumPoints(wxWindow *) {
+  errlist->Close();
+}
+
 void AnimationTimer::Notify() {
   if (!canvas->NextBeat()) Stop();
 }
 
 AnimationCanvas::AnimationCanvas(wxFrame *frame, CC_descr *dcr)
-: wxCanvas(frame, -1, -1,
+: AutoScrollCanvas(frame, -1, -1,
 	   COORD2INT(dcr->show->mode->Size().x)*DEFAULT_ANIM_SIZE,
-	   COORD2INT(dcr->show->mode->Size().y)*DEFAULT_ANIM_SIZE, 0),
+	   COORD2INT(dcr->show->mode->Size().y)*DEFAULT_ANIM_SIZE),
   anim(NULL), show_descr(dcr), ourframe(frame), tempo(120) {
   float f;
 
   timer = new AnimationTimer(this);
-
-  GetDC()->SetMapMode(MM_TEXT);
 
   if (GetDC()->Colour) {
     SetBackground(grassBrush);
@@ -74,7 +89,7 @@ AnimationCanvas::AnimationCanvas(wxFrame *frame, CC_descr *dcr)
     SetBackground(wxWHITE_BRUSH);
   }
   f = DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0);
-  GetDC()->SetUserScale(f, f);
+  SetUserScale(f, f);
 }
 
 AnimationCanvas::~AnimationCanvas() {
@@ -85,11 +100,17 @@ AnimationCanvas::~AnimationCanvas() {
 void AnimationCanvas::OnPaint() {
   unsigned long x, y;
   unsigned i;
-  wxDC *dc = GetDC();
+  wxDC *dc = GetMemDC();
 
   dc->BeginDrawing();
 
   dc->Clear();
+  if (dc->Colour) {
+    dc->SetPen(wxWHITE_PEN);
+  } else {
+    dc->SetPen(wxBLACK_PEN);
+  }
+  show_descr->show->mode->DrawAnim(dc);
   if (anim)
   for (i = 0; i < anim->numpts; i++) {
     if (dc->Colour) {
@@ -135,6 +156,7 @@ void AnimationCanvas::OnPaint() {
   }
 
   dc->EndDrawing();
+  Blit();
 }
 
 void AnimationCanvas::OnEvent(wxMouseEvent& event) {
@@ -166,9 +188,16 @@ void AnimationCanvas::UpdateText() {
 void AnimationCanvas::Generate() {
   timer->Stop();
   ourframe->SetStatusText("Compiling...");
-  if (anim) delete anim;
-  anim = new Animation(show_descr->show);
-  if (anim) anim->GotoSheet(show_descr->curr_ss);
+  if (anim) {
+    delete anim;
+    anim = NULL;
+    Refresh();
+  }
+  anim = new Animation(show_descr->show, ourframe,
+		       ((AnimationFrame*)ourframe)->node->GetList());
+  if (anim) {
+    anim->GotoSheet(show_descr->curr_ss);
+  }
   Refresh();
   ourframe->SetStatusText("Ready");
 }
@@ -221,8 +250,6 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   Fit();
   Show(TRUE);
-
-  canvas->Generate();
 }
 
 AnimationFrame::~AnimationFrame() {
@@ -292,4 +319,114 @@ static void toolbar_anim_next_sheet(CoolToolBar *tb) {
 static void slider_anim_tempo(wxObject &obj, wxEvent &) {
   AnimationSlider *slider = (AnimationSlider*)&obj;
   slider->canvas->SetTempo(slider->GetValue());
+}
+
+static void AnimErrorClose(wxButton& button, wxEvent&) {
+  ((AnimErrorList*)button.GetParent()->GetParent())->Close();
+}
+
+static void AnimErrorClick(wxListBox& list, wxCommandEvent&) {
+  AnimErrorList *err = (AnimErrorList*)list.GetParent()->GetParent();
+
+  err->Update();
+}
+
+AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
+			     wxFrame *frame, char *title,
+			     int x, int y, int width, int height)
+: wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME) {
+  unsigned i, j;
+
+  for (i = 0; i < NUM_ANIMERR; i++) {
+    pointsels[i] = NULL;
+  }
+
+  // Give it an icon
+  SetBandIcon(this);
+
+  SetAutoLayout(TRUE);
+
+  show = comp->show;
+
+  panel = new wxPanel(this);
+
+  wxButton *closeBut = new wxButton(panel, (wxFunction)AnimErrorClose,
+				    "Close");
+  wxLayoutConstraints *bt0 = new wxLayoutConstraints;
+  bt0->left.SameAs(panel, wxLeft, 5);
+  bt0->top.SameAs(panel, wxTop, 5);
+  bt0->width.AsIs();
+  bt0->height.AsIs();
+  closeBut->SetConstraints(bt0);
+
+  closeBut->SetDefault();
+
+  list = new GoodListBox(panel, (wxFunction)AnimErrorClick, "",
+			 wxSINGLE, -1, -1, -1, -1);
+
+  for (i = 0, j = 0; i < NUM_ANIMERR; i++) {
+    if (comp->error_markers[i]) {
+      list->Append((char*)animate_err_msgs[i]);
+      pointsels[j++] = comp->StealErrorMarker(i);
+    }
+  }
+
+  wxLayoutConstraints *b1 = new wxLayoutConstraints;
+  b1->left.SameAs(panel, wxLeft, 5);
+  b1->top.Below(closeBut, 5);
+  b1->right.SameAs(panel, wxRight, 5);
+  b1->bottom.SameAs(panel, wxBottom, 5);
+  list->SetConstraints(b1);
+
+  wxLayoutConstraints *c1 = new wxLayoutConstraints;
+  c1->left.SameAs(this, wxLeft);
+  c1->top.SameAs(this, wxTop);
+  c1->right.SameAs(this, wxRight);
+  c1->bottom.SameAs(this, wxBottom);
+  panel->SetConstraints(c1);
+
+  node = new CC_WinNodeAnimErrors(lst, this);
+
+  OnSize(-1,-1);
+
+  Show(TRUE);
+}
+
+AnimErrorList::~AnimErrorList() {
+  unsigned i;
+
+  if (node) {
+    node->Remove();
+    delete node;
+  }
+  for (i = 0; i < NUM_ANIMERR; i++) {
+    if (pointsels[i]) delete [] pointsels[i];
+  }
+}
+
+void AnimErrorList::OnSize(int, int) {
+  Layout();
+}
+
+Bool AnimErrorList::OnClose(void) {
+  return TRUE;
+}
+
+void AnimErrorList::Unselect() {
+  int i = list->GetSelection();
+
+  if (i >= 0) {
+    list->Deselect(i);
+  }
+}
+
+void AnimErrorList::Update() {
+  int i = list->GetSelection();
+
+  if (i >= 0) {
+    for (unsigned j = 0; j < show->GetNumPoints(); j++) {
+      show->Select(j, pointsels[i][j]);
+    }
+    show->winlist->UpdateSelections(this);
+  }
 }

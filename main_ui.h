@@ -33,7 +33,7 @@ public:
   virtual void ChangeName();
   virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
   virtual void UpdatePoints();
-  virtual void UpdatePointsOnSheet(unsigned sht);
+  virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1);
   virtual void ChangeNumPoints(wxWindow *win);
   virtual void ChangePointLabels(wxWindow *win);
   virtual void ChangeShowMode(wxWindow *win);
@@ -86,6 +86,7 @@ public:
   void SnapToGrid(CC_coord& c);
 
   wxChoice *grid_choice;
+  wxChoice *ref_choice;
   wxSlider *zoom_slider;
 
   FieldCanvas *field;
@@ -157,6 +158,7 @@ public:
   MainFrame *ourframe;
   CC_descr show_descr;
   CC_DRAG_TYPES curr_lasso;
+  unsigned curr_ref;
 
 private:
   void DrawDrag(Bool on = TRUE);
@@ -167,8 +169,19 @@ private:
   int zoomf;
 };
 
+class ChoiceWithField: public wxChoice {
+public:
+  FieldCanvas *field;
+  ChoiceWithField(wxPanel *panel, wxFunction func, char *Title,
+		  int x = -1, int y = -1, int width = -1, int height = -1,
+		  int N = 0, char **Choices = NULL,
+		  long style = 0, char *name = "choice"):
+    wxChoice(panel, func, Title, x, y, width, height, N, Choices, style, name),
+    field(NULL) {};
+};
+
 class SliderWithField: public wxSlider {
- public:
+public:
   FieldCanvas *field;
   SliderWithField(wxPanel *parent, wxFunction func, char *label,
 	     int value, int min_value, int max_value, int width):

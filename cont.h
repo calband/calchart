@@ -23,21 +23,21 @@ public:
   ContPoint() {}
   virtual ~ContPoint();
 
-  virtual CC_coord& Get(AnimateCompile* anim);
+  virtual const CC_coord& Get(AnimateCompile* anim) const;
 };
 
 class ContNextPoint : public ContPoint {
 public:
   ContNextPoint() {}
 
-  virtual CC_coord& Get(AnimateCompile* anim);
+  virtual const CC_coord& Get(AnimateCompile* anim) const;
 };
 
 class ContRefPoint : public ContPoint {
 public:
   ContRefPoint(unsigned n): refnum(n) {}
 
-  virtual CC_coord& Get(AnimateCompile* anim);
+  virtual const CC_coord& Get(AnimateCompile* anim) const;
 private:
   unsigned refnum;
 };
@@ -47,14 +47,14 @@ public:
   ContValue() {}
   virtual ~ContValue();
 
-  virtual float Get(AnimateCompile* anim) = 0;
+  virtual float Get(AnimateCompile* anim) const = 0;
 };
 
 class ContValueFloat : public ContValue {
 public:
   ContValueFloat(float v): val(v) {}
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   float val;
 };
@@ -63,7 +63,7 @@ class ContValueDefined : public ContValue {
 public:
   ContValueDefined(ContDefinedValue v): val(v) {}
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContDefinedValue val;
 };
@@ -73,7 +73,7 @@ public:
   ContValueAdd(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
   virtual ~ContValueAdd();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *val1, *val2;
 };
@@ -83,7 +83,7 @@ public:
   ContValueSub(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
   virtual ~ContValueSub();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *val1, *val2;
 };
@@ -93,7 +93,7 @@ public:
   ContValueMult(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
   virtual ~ContValueMult();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *val1, *val2;
 };
@@ -103,7 +103,7 @@ public:
   ContValueDiv(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
   virtual ~ContValueDiv();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *val1, *val2;
 };
@@ -113,21 +113,21 @@ public:
   ContValueNeg(ContValue *v) : val(v) {}
   virtual ~ContValueNeg();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *val;
 };
 
 class ContValueREM : public ContValue {
 public:
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 };
 
 class ContValueVar : public ContValue {
 public:
   ContValueVar(unsigned num): varnum(num) {}
   
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
   void Set(AnimateCompile* anim, float v);
 private:
   unsigned varnum;
@@ -138,7 +138,7 @@ public:
   ContFuncDir(ContPoint *p): pnt(p) {}
   virtual ~ContFuncDir();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContPoint *pnt;
 };
@@ -149,7 +149,7 @@ public:
     : pnt_start(start), pnt_end(end) {}
   virtual ~ContFuncDirFrom();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContPoint *pnt_start, *pnt_end;
 };
@@ -159,7 +159,7 @@ public:
   ContFuncDist(ContPoint *p): pnt(p) {}
   virtual ~ContFuncDist();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContPoint *pnt;
 };
@@ -170,7 +170,7 @@ public:
     : pnt_start(start), pnt_end(end) {}
   virtual ~ContFuncDistFrom();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContPoint *pnt_start, *pnt_end;
 };
@@ -181,7 +181,7 @@ public:
     : dir1(d1), dir2(d2), pnt(p) {}
   virtual ~ContFuncEither();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *dir1, *dir2;
   ContPoint *pnt;
@@ -192,7 +192,7 @@ public:
   ContFuncOpp(ContValue *d): dir(d) {}
   virtual ~ContFuncOpp();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *dir;
 };
@@ -203,7 +203,7 @@ public:
     : numbeats(beats), blksize(blocksize), pnt(p) {}
   virtual ~ContFuncStep();
 
-  virtual float Get(AnimateCompile* anim);
+  virtual float Get(AnimateCompile* anim) const;
 private:
   ContValue *numbeats, *blksize;
   ContPoint *pnt;

@@ -7,6 +7,7 @@
  *
  */
 
+#include <wx.h>
 #include "cont.h"
 #include "parse.h"
 
@@ -27,6 +28,7 @@ ContProcedure *ParsedContinuity = NULL;
 %token pBLAM pCOUNTERMARCH pDMCM pDMHS pEVEN pEWNS pFOUNTAIN pFM pFMTO
 %token pGRID pHSDM pHSCM pMAGIC pMARCH pMT pMTRM pNSEW pROTATE
 %token fDIR fDIRFROM fDIST fDISTFROM fEITHER fOPP fSTEP
+%token UNKNOWN_TOKEN
 
 %{
 	/* Constants and variables */
@@ -211,7 +213,9 @@ int parsecontinuity()
 
 int yyerror(char *s)
 {
-  fprintf(stderr, "%s near line %d, column %d.\n", 
+  char tempbuf[256];
+  sprintf(tempbuf, "%s near line %d, column %d.\n", 
           s, yylloc.first_line, yylloc.first_column);
+  (void)wxMessageBox(tempbuf, "Animate");
   return 0;
 }

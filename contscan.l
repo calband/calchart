@@ -45,6 +45,7 @@ void initscanner() {
   yylineno = 1;
   yycolno = 1;
   yyinputbufferlen = strlen(yyinputbuffer);
+  if (YY_CURRENT_BUFFER != NULL) yy_flush_buffer(YY_CURRENT_BUFFER);
 }
 
 %}
@@ -119,7 +120,7 @@ NEWLINE		[\n\f]
 {NUMBER}	{ yylval.f = (float)atoi(yytext); ReturnToken(FLOATCONST); }
 {FLOAT}		{ yylval.f = atof(yytext); ReturnToken(FLOATCONST); }
 {VAR}		{ yylval.v = yytext[0]; ReturnToken(VARIABLE); }
-.		{ }
+.		ReturnToken(UNKNOWN_TOKEN);
 
 %%
 

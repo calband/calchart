@@ -62,6 +62,7 @@ static void toolbar_setsym4(CoolToolBar *tb);
 static void toolbar_setsym5(CoolToolBar *tb);
 static void toolbar_setsym6(CoolToolBar *tb);
 static void toolbar_setsym7(CoolToolBar *tb);
+static void refnum_callback(wxObject &obj, wxEvent &ev);
 static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
 
 static ToolBarEntry main_tb[] = {
@@ -151,11 +152,13 @@ void CC_WinNodeMain::UpdatePoints() {
   canvas->RefreshShow();
   winlist.UpdatePoints();
 }
-void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht) {
+void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht, int ref) {
   if (sht == canvas->show_descr.curr_ss) {
-    canvas->RefreshShow();
+    if ((ref < 0) || (ref == (int)canvas->curr_ref)) {
+      canvas->RefreshShow();
+    }
   }
-  winlist.UpdatePointsOnSheet(sht);
+  winlist.UpdatePointsOnSheet(sht, ref);
 }
 void CC_WinNodeMain::ChangeNumPoints(wxWindow *win) {
   canvas->UpdateSS();
@@ -293,9 +296,9 @@ wxFrame *CalChartApp::OnInit(void)
   contBoldFont = new wxFont(11, wxMODERN, wxNORMAL, wxBOLD);
   contItalFont = new wxFont(11, wxMODERN, wxITALIC, wxNORMAL);
   contBoldItalFont = new wxFont(11, wxMODERN, wxITALIC, wxBOLD);
-  pointLabelFont = new wxFont(FLOAT2COORD(dot_ratio * num_ratio),
+  pointLabelFont = new wxFont((int)FLOAT2NUM(dot_ratio * num_ratio),
 			      wxSWISS, wxNORMAL, wxNORMAL);
-  yardLabelFont = new wxFont(FLOAT2COORD(yards_size),
+  yardLabelFont = new wxFont((int)FLOAT2NUM(yards_size),
 			      wxSWISS, wxNORMAL, wxNORMAL);
 #ifdef wx_msw
   // MS-Windows is lame
@@ -342,6 +345,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   unsigned ss;
   unsigned def_zoom;
   unsigned def_grid;
+  unsigned def_ref;
 
   // Give it an icon
   SetBandIcon(this);
@@ -403,20 +407,37 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
     ss = 0;
     def_zoom = FIELD_DEFAULT_ZOOM;
     def_grid = 2;
+    def_ref = 0;
   } else {
     show = other_frame->field->show_descr.show;
     ss = other_frame->field->show_descr.curr_ss;
     def_zoom = other_frame->zoom_slider->GetValue();
     def_grid = other_frame->grid_choice->GetSelection();
+    def_ref = other_frame->field->curr_ref;
   }
 
   SetTitle((char *)show->UserGetName());
   field = new FieldCanvas(show, ss, this, def_zoom);
+  field->curr_ref = def_ref;
   frameCanvas = field;
   node = new CC_WinNodeMain(show->winlist, field);
 
   // Add the controls
   framePanel = new wxPanel(this);
+  {
+    char buf[4];
+    unsigned i;
+
+    ref_choice = new ChoiceWithField(framePanel, (wxFunction)refnum_callback,
+				     "Ref Group");
+    ref_choice->Append("Off");
+    for (i = 1; i <= NUM_REF_PNTS; i++) {
+      sprintf(buf, "%u", i);
+      ref_choice->Append(buf);
+    }
+  }
+  ((ChoiceWithField*)ref_choice)->field = field;
+  ref_choice->SetSelection(def_ref);
   grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
 			     "Grid", -1, -1, -1, -1,
 			     sizeof(gridtext)/sizeof(char*),
@@ -590,7 +611,9 @@ void MainFrame::OnMenuCommand(int id)
     break;
   case CALCHART__ANIMATE:
     if (field->show_descr.show) {
-      (void)new AnimationFrame(this, &field->show_descr, &node->winlist);
+      AnimationFrame *anim =
+	new AnimationFrame(this, &field->show_descr, &node->winlist);
+      anim->canvas->Generate();
     }
     break;
   case CALCHART__ABOUT:
@@ -809,7 +832,7 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int def_zoom, int x, int y, int w, int h):
  AutoScrollCanvas(frame, x, y, w, h), ourframe(frame), curr_lasso(CC_DRAG_BOX),
- drag(CC_DRAG_NONE), dragon(FALSE)
+ curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
 {
   show_descr.show = show;
   show_descr.curr_ss = ss;
@@ -919,7 +942,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	if (i < 0) {
 	  BeginDrag(curr_lasso, pos);
 	} else {
-	  BeginDrag(CC_DRAG_LINE, sheet->pts[i].pos);
+	  BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i));
 	}
       } else {
 	if (event.LeftUp()) {
@@ -933,9 +956,9 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  case CC_DRAG_LINE:
 	    pos.x = drag_end.x - drag_start.x;
 	    pos.y = drag_end.y - drag_start.y;
-	    if (sheet->TranslatePoints(pos))
+	    if (sheet->TranslatePoints(pos, curr_ref))
 	      show_descr.show->winlist->
-		UpdatePointsOnSheet(show_descr.curr_ss);
+		UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 	    break;
 	  default:
 	    break;
@@ -969,7 +992,7 @@ void FieldCanvas::RefreshShow(Bool drawall, int point) {
   if (show_descr.show) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
-      sheet->Draw(GetMemDC(), drawall, point);
+      sheet->Draw(GetMemDC(), curr_ref, drawall, point);
       Blit();
       dragon = FALSE; // since the canvas gets cleared
       DrawDrag(TRUE);
@@ -1108,6 +1131,12 @@ static void toolbar_setsym7(CoolToolBar *tb) {
   if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
     mf->field->show_descr.show->winlist->
       UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
+}
+
+static void refnum_callback(wxObject &obj, wxEvent &) {
+  ChoiceWithField *choice = (ChoiceWithField *)&obj;
+  choice->field->curr_ref = (unsigned)choice->GetSelection();
+  choice->field->RefreshShow();
 }
 
 static void slider_zoom_callback(wxObject &obj, wxEvent &) {

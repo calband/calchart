@@ -62,7 +62,7 @@ void CC_WinNode::SetShow(CC_show*) {}
 void CC_WinNode::ChangeName() {}
 void CC_WinNode::UpdateSelections(wxWindow*, int) {}
 void CC_WinNode::UpdatePoints() {}
-void CC_WinNode::UpdatePointsOnSheet(unsigned) {}
+void CC_WinNode::UpdatePointsOnSheet(unsigned, int) {}
 void CC_WinNode::ChangeNumPoints(wxWindow*) {}
 void CC_WinNode::ChangePointLabels(wxWindow*) {}
 void CC_WinNode::ChangeShowMode(wxWindow*) {}
@@ -149,11 +149,11 @@ void CC_WinList::UpdatePoints() {
     n->UpdatePoints();
   }
 }
-void CC_WinList::UpdatePointsOnSheet(unsigned sht) {
+void CC_WinList::UpdatePointsOnSheet(unsigned sht, int ref) {
   CC_WinNode *n;
 
   for (n = list; n != NULL; n = n->next) {
-    n->UpdatePointsOnSheet(sht);
+    n->UpdatePointsOnSheet(sht, ref);
   }
 }
 void CC_WinList::ChangeNumPoints(wxWindow *win) {
@@ -327,43 +327,30 @@ float CC_coord::DM_Magnitude() const {
   }
 }
 
+// Get direction of this vector
+float CC_coord::Direction() const {
+  float ang;
+
+  if (*this == 0) return 0.0;
+
+  ang = acos(COORD2FLOAT(x)/Magnitude()); // normalize
+  ang *= 180.0/PI; // convert to degrees
+  if (y > 0) ang += 180.0; // check for > PI
+
+  return ang;
+}
+
 // Get direction from this coord to another
 float CC_coord::Direction(const CC_coord& c) const {
   CC_coord vect = c - *this;
-  float ang;
 
-  if (vect == 0) return 0.0;
-
-  ang = acos(COORD2FLOAT(vect.x)/vect.Magnitude()); // normalize
-  ang *= 180.0/PI; // convert to degrees
-  if (vect.y > 0) ang += 180.0; // check for > PI
-
-  return ang;
+  return vect.Direction();
 }
 
 // Set a coordinate from an old format disk coord
 CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
   x = ((get_lil_word(&old.x)+2) << (COORD_SHIFT-3)) - INT2COORD(88);
   y = (((get_lil_word(&old.y)+2) << COORD_SHIFT) / 6) - INT2COORD(50);
-  return *this;
-}
-
-// Set a point from an old format disk point
-CC_point& CC_point::operator = (const cc_oldpoint& old) {
-  flags = (old.flags & OLD_FLAG_FLIP) ? PNT_LABEL:0;
-  if ((old.sym < 111) || (old.sym > 118))
-    sym = SYMBOL_PLAIN;
-  else sym = (SYMBOL_TYPE)(old.sym - 111);
-  cont = get_lil_word(&old.cont);
-  pos = old.pos;
-  for (unsigned i = 0; i < 3; i++) {
-    // -1 means undefined (endian doesn't matter)
-    if ((old.ref[i].x == 0xFFFF) && (old.ref[i].y == 0xFFFF)) {
-      ref[i] = pos;
-    } else {
-      ref[i] = old.ref[i];
-    }
-  }
   return *this;
 }
 
@@ -374,8 +361,8 @@ CC_sheet::CC_sheet(CC_show *shw)
 }
 
 CC_sheet::CC_sheet(CC_show *shw, const char *newname)
-: next(NULL), pts(NULL), continuity(NULL), animcont(NULL), show(shw),
-  numanimcont(0), beats(0), picked(TRUE), name(newname) {
+: next(NULL), continuity(NULL), animcont(NULL), show(shw),
+  numanimcont(0), beats(0), picked(TRUE), pts(NULL), name(newname) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
@@ -805,8 +792,59 @@ Bool CC_sheet::SetPointsLabelFlip() {
   return change;
 }
 
+// Set a point from an old format disk point
+void CC_sheet::SetPoint(const cc_oldpoint& val, unsigned i) {
+  pts[i].flags = (val.flags & OLD_FLAG_FLIP) ? PNT_LABEL:0;
+  if ((val.sym < 111) || (val.sym > 118))
+    pts[i].sym = SYMBOL_PLAIN;
+  else pts[i].sym = (SYMBOL_TYPE)(val.sym - 111);
+  pts[i].cont = get_lil_word(&val.cont);
+  SetPosition(val.pos, i);
+  for (unsigned j = 0; j < 3; j++) {
+    // -1 means undefined (endian doesn't matter)
+    if ((val.ref[j].x == 0xFFFF) && (val.ref[j].y == 0xFFFF)) {
+      SetPosition(val.pos, i, j+1);
+    } else {
+      SetPosition(val.ref[j], i, j+1);
+    }
+  }
+}
+
+// Get position of point
+const CC_coord& CC_sheet::GetPosition(unsigned i, unsigned ref) const {
+  if (ref == 0)
+    return pts[i].pos;
+  else
+    return pts[i].ref[ref-1];
+}
+
+// Set position of point and all refs
+void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i) {
+  unsigned j;
+
+  pts[i].pos = val;
+  for (j = 0; j < NUM_REF_PNTS; j++) {
+    pts[i].ref[j] = val;
+  }
+}
+
+// Set position of point
+void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref) {
+  if (ref == 0)
+    pts[i].pos = val;
+  else
+    pts[i].ref[ref-1] = val;
+}
+
+// Set position of point from old coord
+void CC_sheet::SetPosition(const cc_oldcoord& val, unsigned i, unsigned ref) {
+  CC_coord c = val;
+
+  SetPosition(c, i, ref);
+}
+
 // Move points
-Bool CC_sheet::TranslatePoints(CC_coord delta) {
+Bool CC_sheet::TranslatePoints(CC_coord delta, unsigned ref) {
   unsigned i;
   Bool change = FALSE;
 
@@ -814,12 +852,11 @@ Bool CC_sheet::TranslatePoints(CC_coord delta) {
       (GetNumSelectedPoints() <= 0)) return FALSE;
 
   // Create undo entry
-  show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this));
+  show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
 
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
-      pts[i].pos.x += delta.x;
-      pts[i].pos.y += delta.y;
+      SetPosition(GetPosition(i, ref) + delta, i, ref);
       change = TRUE;
     }
   }
@@ -952,16 +989,18 @@ static char* load_show_POS(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   unsigned i;
   unsigned char *data;
+  CC_coord c;
 
   if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4) {
     return "Bad POS chunk";
   }
   data = (unsigned char*)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
-    sheet->pts[i].pos.x = get_big_word(data);
+    c.x = get_big_word(data);
     data += 2;
-    sheet->pts[i].pos.y = get_big_word(data);
+    c.y = get_big_word(data);
     data += 2;
+    sheet->SetAllPositions(c, i);
   }
 
   return NULL;
@@ -977,7 +1016,46 @@ static char* load_show_SYMB(INGLchunk* chunk) {
   }
   data = (unsigned char *)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
-    sheet->pts[i].sym = (SYMBOL_TYPE)(*(data++));
+    sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(data++));
+  }
+
+  return NULL;
+}
+
+static char* load_show_TYPE(INGLchunk* chunk) {
+  CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
+  unsigned i;
+  unsigned char *data;
+
+  if (chunk->size != sheet->show->GetNumPoints()) {
+    return "Bad TYPE chunk";
+  }
+  data = (unsigned char *)chunk->data;
+  for (i = 0; i < sheet->show->GetNumPoints(); i++) {
+    sheet->GetPoint(i).cont = *(data++);
+  }
+
+  return NULL;
+}
+
+static char* load_show_REFP(INGLchunk* chunk) {
+  CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
+  unsigned i, ref;
+  unsigned char *data;
+  CC_coord c;
+
+  if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4+2) {
+    return "Bad REFP chunk";
+  }
+  data = (unsigned char*)chunk->data;
+  ref = get_big_word(data);
+  data += 2;
+  for (i = 0; i < sheet->show->GetNumPoints(); i++) {
+    c.x = get_big_word(data);
+    data += 2;
+    c.y = get_big_word(data);
+    data += 2;
+    sheet->SetPosition(c, i, ref);
   }
 
   return NULL;
@@ -994,7 +1072,7 @@ static char* load_show_SHET_LABL(INGLchunk* chunk) {
   data = (unsigned char *)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     if (*(data++)) {
-      sheet->pts[i].Flip();
+      sheet->GetPoint(i).Flip();
     }
   }
 
@@ -1009,27 +1087,29 @@ static char* load_show_CONT(INGLchunk* chunk) {
   char *name;
   char *text;
 
-  if (chunk->size < 4) { // two byte num + two nils minimum
+  if (chunk->size < 3) { // one byte num + two nils minimum
     return badcontchunk;
   }
   if (((char*)chunk->data)[chunk->size-1] != '\0') { // make sure we have a nil
     return badcontchunk;
   }
-  name = (char *)chunk->data + 2;
+  name = (char *)chunk->data + 1;
   num = strlen(name);
-  if (chunk->size < num + 4) { // check for room for text string
+  if (chunk->size < num + 3) { // check for room for text string
     return badcontchunk;
   }
-  text = (char *)chunk->data + 3 + strlen(name);
-
-  num = get_big_word(chunk->data);
+  text = (char *)chunk->data + 2 + strlen(name);
 
   newcont = new CC_continuity;
-  newcont->num = num;
+  newcont->num = *((unsigned char *)chunk->data);
   newcont->SetName(name);
   newcont->SetText(text);
   sheet->AppendContinuity(newcont);
 
+  return NULL;
+}
+
+static char* load_show_PCNT(INGLchunk* /*chunk*/) {
   return NULL;
 }
 
@@ -1044,8 +1124,11 @@ static INGLhandler load_show_handlers[] = {
   { INGL_DURA, INGL_SHET, load_show_DURA },
   { INGL_POS , INGL_SHET, load_show_POS  },
   { INGL_SYMB, INGL_SHET, load_show_SYMB },
+  { INGL_TYPE, INGL_SHET, load_show_TYPE },
+  { INGL_REFP, INGL_SHET, load_show_REFP },
   { INGL_LABL, INGL_SHET, load_show_SHET_LABL },
-  { INGL_CONT, INGL_SHET, load_show_CONT }
+  { INGL_CONT, INGL_SHET, load_show_CONT },
+  { INGL_PCNT, INGL_SHET, load_show_PCNT }
 };
 
 #define SHOWBUFSIZE 128
@@ -1219,9 +1302,9 @@ CC_show::CC_show(const char *file)
 	  conv_diskpt.ref[1].x = 0xFFFF;
 	  conv_diskpt.ref[2].x = 0xFFFF;
 	  conv_diskpt.ref[2].x = 0xFFFF;
-	  curr_sheet->pts[i] = conv_diskpt;
+	  curr_sheet->SetPoint(conv_diskpt, i);
 	} else {
-	  curr_sheet->pts[i] = diskpts[i];
+	  curr_sheet->SetPoint(diskpts[i], i);
 	}
 
 	if (k == 1) {
@@ -1651,8 +1734,7 @@ void CC_show::Append(CC_sheet *newsheets) {
 char *CC_show::Save(const char *filename) {
   INGLwrite *handl = new INGLwrite(filename);
   INGLid id;
-  unsigned short short_data;
-  unsigned i;
+  unsigned i, j;
   Coord crd;
   unsigned char c;
   const char *str;
@@ -1722,25 +1804,51 @@ char *CC_show::Save(const char *filename) {
     
     // Point positions
     if (!handl->WriteChunkHeader(INGL_POS, GetNumPoints()*4)) {
+      return writeerr_str;
     }
     for (i = 0; i < GetNumPoints(); i++) {
-      put_big_word(&crd, curr_sheet->pts[i].pos.x);
+      put_big_word(&crd, curr_sheet->GetPosition(i).x);
       if (!handl->Write(&crd, 2)) {
 	return writeerr_str;
       }
-      put_big_word(&crd, curr_sheet->pts[i].pos.y);
+      put_big_word(&crd, curr_sheet->GetPosition(i).y);
       if (!handl->Write(&crd, 2)) {
 	return writeerr_str;
+      }
+    }
+    // Ref point positions
+    for (j = 0; j < NUM_REF_PNTS; j++) {
+      for (i = 0; i < GetNumPoints(); i++) {
+	if (curr_sheet->GetPosition(i) != curr_sheet->GetPosition(i, j)) {
+	  if (!handl->WriteChunkHeader(INGL_REFP, GetNumPoints()*4+2)) {
+	    return writeerr_str;
+	  }
+	  put_big_word(&crd, j);
+	  if (!handl->Write(&crd, 2)) {
+	    return writeerr_str;
+	  }
+	  for (i = 0; i < GetNumPoints(); i++) {
+	    put_big_word(&crd, curr_sheet->GetPosition(i, j).x);
+	    if (!handl->Write(&crd, 2)) {
+	      return writeerr_str;
+	    }
+	    put_big_word(&crd, curr_sheet->GetPosition(i, j).y);
+	    if (!handl->Write(&crd, 2)) {
+	      return writeerr_str;
+	    }
+	  }
+	  break;
+	}
       }
     }
     // Point symbols
     for (i = 0; i < GetNumPoints(); i++) {
-      if (curr_sheet->pts[i].sym != 0) {
+      if (curr_sheet->GetPoint(i).sym != 0) {
 	if (!handl->WriteChunkHeader(INGL_SYMB, GetNumPoints())) {
 	  return writeerr_str;
 	}
 	for (i = 0; i < GetNumPoints(); i++) {
-	  if (!handl->Write(&curr_sheet->pts[i].sym, 1)) {
+	  if (!handl->Write(&curr_sheet->GetPoint(i).sym, 1)) {
 	    return writeerr_str;
 	  }
 	}
@@ -1749,12 +1857,12 @@ char *CC_show::Save(const char *filename) {
     }
     // Point continuity types
     for (i = 0; i < GetNumPoints(); i++) {
-      if (curr_sheet->pts[i].sym != 0) {
+      if (curr_sheet->GetPoint(i).cont != 0) {
 	if (!handl->WriteChunkHeader(INGL_TYPE, GetNumPoints())) {
 	  return writeerr_str;
 	}
 	for (i = 0; i < GetNumPoints(); i++) {
-	  if (!handl->Write(&curr_sheet->pts[i].cont, 1)) {
+	  if (!handl->Write(&curr_sheet->GetPoint(i).cont, 1)) {
 	    return writeerr_str;
 	  }
 	}
@@ -1763,12 +1871,12 @@ char *CC_show::Save(const char *filename) {
     }
     // Point labels (left or right)
     for (i = 0; i < GetNumPoints(); i++) {
-      if (curr_sheet->pts[i].GetFlip()) {
+      if (curr_sheet->GetPoint(i).GetFlip()) {
 	if (!handl->WriteChunkHeader(INGL_LABL, GetNumPoints())) {
 	  return writeerr_str;
 	}
 	for (i = 0; i < GetNumPoints(); i++) {
-	  if (curr_sheet->pts[i].GetFlip()) {
+	  if (curr_sheet->GetPoint(i).GetFlip()) {
 	    c = TRUE;
 	  } else {
 	    c = FALSE;
@@ -1780,15 +1888,15 @@ char *CC_show::Save(const char *filename) {
 	break;
       }
     }
+    // Continuity text
     for (curranimcont = curr_sheet->animcont; curranimcont != NULL;
 	 curranimcont  = curranimcont->next) {
       if (!handl->WriteChunkHeader(INGL_CONT,
-				   2+curranimcont->name.Length()+1+
+				   1+curranimcont->name.Length()+1+
 				   curranimcont->text.Length()+1)) {
 	return writeerr_str;
       }
-      put_big_word(&short_data, curranimcont->num);
-      if (!handl->Write(&short_data, 2)) {
+      if (!handl->Write(&curranimcont->num, 1)) {
 	return writeerr_str;
       }
       if (!handl->WriteStr(curranimcont->name)) {
@@ -1981,7 +2089,7 @@ Bool CC_show::RelabelSheets(unsigned sht) {
   for (i = 0; i < GetNumPoints(); i++) {
     for (j = 0; j < GetNumPoints(); j++) {
       if (!used_table[j]) {
-	if (sheet->pts[i].pos == sheet->next->pts[j].pos) {
+	if (sheet->GetPosition(i) == sheet->next->GetPosition(i)) {
 	  table[i] = j;
 	  used_table[j] = TRUE;
 	  break;

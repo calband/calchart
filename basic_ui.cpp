@@ -263,6 +263,9 @@ AutoScrollCanvas::AutoScrollCanvas(wxWindow *parent,
   wxCanvas(parent, x, y, w, h, 0 /* not retained */), memdc(NULL), membm(NULL),
   x_scale(1.0), y_scale(1.0)
 {
+  if ((w > 0) && (h > 0)) {
+    SetSize(w, h);
+  }
 }
 
 AutoScrollCanvas::~AutoScrollCanvas() {
@@ -287,6 +290,11 @@ void AutoScrollCanvas::SetSize(int width, int height) {
       memdc->SetUserScale(x_scale, y_scale);
     }
   }
+}
+
+void AutoScrollCanvas::SetBackground(wxBrush *brush) {
+  wxCanvas::SetBackground(brush);
+  if (memdc) memdc->SetBackground(brush);
 }
 
 void AutoScrollCanvas::SetUserScale(float x, float y) {
