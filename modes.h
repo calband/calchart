@@ -21,9 +21,9 @@ enum SHOW_TYPE { SHOW_STANDARD, SHOW_SPRINGSHOW };
 class ShowMode
 {
 public:
-  ShowMode(char *nam, CC_coord siz, CC_coord off,
+  ShowMode(const char *nam, CC_coord siz, CC_coord off,
 	   CC_coord bord1, CC_coord bord2);
-  ShowMode(char *nam, CC_coord siz, CC_coord bord1, CC_coord bord2);
+  ShowMode(const char *nam, CC_coord siz, CC_coord bord1, CC_coord bord2);
   virtual ~ShowMode();
 
   virtual SHOW_TYPE GetType() = 0;
@@ -33,7 +33,10 @@ public:
   inline CC_coord FieldOffset() { return -(offset-border1); }
   inline CC_coord& Size() { return size; };
   inline CC_coord FieldSize() { return size-border1-border2; }
-  inline char *Name() { return name; };
+  inline CC_coord MinPosition() { return -offset; }
+  inline CC_coord MaxPosition() { return size-offset; }
+  inline const char *GetName() { return name; };
+  CC_coord ClipPosition(const CC_coord& pos);
 
   ShowMode *next;
 
@@ -47,7 +50,7 @@ private:
 class ShowModeStandard : public ShowMode
 {
 public:
-  ShowModeStandard(char *nam, CC_coord bord1, CC_coord bord2,
+  ShowModeStandard(const char *nam, CC_coord bord1, CC_coord bord2,
 		   unsigned short whash, unsigned short ehash);
   ~ShowModeStandard();
 
@@ -65,8 +68,8 @@ class ShowModeSprShow : public ShowMode
 {
 public:
   // Look at calchart.cfg for description of arguments
-  ShowModeSprShow(char *nam, CC_coord bord1, CC_coord bord2,
-		  unsigned char which, char *file,
+  ShowModeSprShow(const char *nam, CC_coord bord1, CC_coord bord2,
+		  unsigned char which, const char *file,
 		  short stg_x, short stg_y,
 		  short stg_w, short stg_h,
 		  short fld_x, short fld_y,
@@ -80,7 +83,7 @@ public:
   SHOW_TYPE GetType();
   void Draw(wxDC *dc);
   void DrawAnim(wxDC *dc);
-  inline char *StageFile() { return stagefile; }
+  inline const char *StageFile() { return stagefile; }
   inline unsigned char WhichYards() { return which_yards; }
   inline short StageX() { return stage_x; }
   inline short StageY() { return stage_y; }

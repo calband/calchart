@@ -57,9 +57,10 @@ private:
   AnimationCanvas* canvas;
 };
 
+class AnimationFrame;
 class AnimationCanvas: public AutoScrollCanvas {
 public:
-  AnimationCanvas(wxFrame *frame, CC_descr *dcr);
+  AnimationCanvas(AnimationFrame *frame, CC_descr *dcr);
   ~AnimationCanvas();
 
   void OnPaint();
@@ -69,10 +70,15 @@ public:
   inline unsigned GetTempo() { return tempo; }
   void SetTempo(unsigned t);
 
+  inline void Redraw() { RedrawBuffer(); OnPaint(); }
+  void RedrawBuffer();
   void UpdateText();
-  inline void Refresh() { OnPaint(); UpdateText(); }
+  void Refresh();
   void Generate();
   void FreeAnim();
+
+  // Select colliding points and redraw
+  void SelectCollisions();
 
   // TRUE if changes made
   inline Bool PrevBeat() {
@@ -83,6 +89,9 @@ public:
     if (anim) { if (anim->NextBeat()) { Refresh(); return TRUE; } }
     return FALSE;
   }
+  inline void GotoBeat(unsigned i) {
+    if (anim) { anim->GotoBeat(i); Refresh(); }
+  }
   inline Bool PrevSheet() {
     if (anim) { if (anim->PrevSheet()) { Refresh(); return TRUE; } }
     return FALSE;
@@ -91,12 +100,22 @@ public:
     if (anim) { if (anim->NextSheet()) { Refresh(); return TRUE; } }
     return FALSE;
   }
+  inline void GotoSheet(unsigned i) {
+    if (anim) { anim->GotoSheet(i); Refresh(); }
+  }
+#ifdef ANIM_OUTPUT_POVRAY
+  const char * GeneratePOVFiles(const char *filebasename);
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  const char * GenerateRIBFrame();
+  const char * GenerateRIBFile(const char *filename, Bool all = TRUE);
+#endif
 
   Animation* anim;
   AnimationTimer* timer;
 private:
   CC_descr *show_descr;
-  wxFrame *ourframe;
+  AnimationFrame *ourframe;
   unsigned tempo;
 };
 
@@ -118,18 +137,30 @@ public:
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
 
+  void UpdatePanel();
+
   inline Bool CollisionsOn() { return collis->GetValue(); }
 
   AnimationCanvas *canvas;
 private:
   CC_WinNodeAnim *node;
   wxCheckBox *collis;
+  wxSlider *sheet_slider;
+  wxSlider *beat_slider;
 
   friend AnimationCanvas;
 };
 
 enum {
   CALCHART__ANIM_REANIMATE = 100,
+  CALCHART__ANIM_SELECT_COLL,
+#ifdef ANIM_OUTPUT_POVRAY
+  CALCHART__ANIM_POVRAY,
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  CALCHART__ANIM_RIB_FRAME,
+  CALCHART__ANIM_RIB,
+#endif
   CALCHART__ANIM_CLOSE
 };
 

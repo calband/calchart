@@ -30,8 +30,10 @@ void CC_WinNodePrint::ChangePrint(wxWindow* win) {
 }
 
 static void ShowPrintOk(wxButton& button, wxEvent&) {
-  char *s;
-  char buf[256];
+  const char *s;
+#ifdef PRINT__RUN_CMD
+  wxString buf;
+#endif
   Bool overview;
 
   ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
@@ -53,10 +55,10 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   switch (dialog->radio_method->GetSelection()) {
   case PS_PREVIEW:
 #ifdef PRINT__RUN_CMD
-    strcpy(print_view_cmd, dialog->text_view_cmd->GetValue());
-    strcpy(print_view_opts, dialog->text_view_opts->GetValue());
+    print_view_cmd = dialog->text_view_cmd->GetValue();
+    print_view_opts = dialog->text_view_opts->GetValue();
     s = tmpnam(NULL);
-    sprintf(buf, "%s %s %s", print_view_cmd, print_view_opts, s);
+    buf.sprintf("%s %s %s", print_view_cmd.Chars(),print_view_opts.Chars(),s);
 #endif
     break;
   case PS_FILE:
@@ -66,13 +68,13 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
     break;
   case PS_PRINTER:
 #ifdef PRINT__RUN_CMD
-    strcpy(print_cmd, dialog->text_cmd->GetValue());
-    strcpy(print_opts, dialog->text_opts->GetValue());
+    print_cmd = dialog->text_cmd->GetValue();
+    print_opts = dialog->text_opts->GetValue();
     s = tmpnam(NULL);
-    sprintf(buf, "%s %s %s", print_cmd, print_opts, s);
+    buf.sprintf("%s %s %s", print_cmd.Chars(), print_opts.Chars(), s);
 #else
-    strcpy(print_file, dialog->text_cmd->GetValue());
-    s = print_file;
+    s = dialog->text_cmd->GetValue();
+    print_file = s;
 #endif
     break;
   default:
@@ -87,7 +89,7 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   fp = fopen(s, "w");
   if (fp) {
     int n;
-    char tempbuf[32];
+    wxString tempbuf;
 
     wxBeginBusyCursor();
     n = dialog->show_descr->show->Print(fp, dialog->eps, overview,
@@ -110,8 +112,9 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
     wxEndBusyCursor();
 
     if (dialog->show_descr->show->Ok()) {
-      sprintf(tempbuf, "Printed %d pages.", n);
-      (void)wxMessageBox(tempbuf, (char *)dialog->show_descr->show->GetName());
+      tempbuf.sprintf("Printed %d pages.", n);
+      (void)wxMessageBox(tempbuf.GetData(),
+			 (char *)dialog->show_descr->show->GetName());
     } else {
       (void)wxMessageBox(dialog->show_descr->show->GetError(),
 			 (char *)dialog->show_descr->show->GetName());
@@ -139,7 +142,7 @@ ShowPrintDialog::ShowPrintDialog(CC_descr *dcr, CC_WinList *lst,
 				 int width, int height):
 wxDialogBox(parent, title, isModal, x, y, width, height),
 show_descr(dcr), eps(printEPS), frame(parent) {
-  char buf[16];
+  wxString buf;
 
   node = new CC_WinNodePrint(lst, this);
 
@@ -153,19 +156,19 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 
 #ifdef PRINT__RUN_CMD
   text_cmd = new wxText(this, (wxFunction)NULL, "Printer Command: ",
-			print_cmd,
+			print_cmd.GetData(),
 			-1, -1, 100, -1);
 
   text_opts = new wxText(this, (wxFunction)NULL, "Printer Options: ",
-			 print_opts,
+			 print_opts.GetData(),
 			 -1, -1, 150, -1);
   NewLine();
   text_view_cmd = new wxText(this, (wxFunction)NULL, "Preview Command: ",
-			     print_view_cmd,
+			     print_view_cmd.GetData(),
 			     -1, -1, 100, -1);
 
   text_view_opts = new wxText(this, (wxFunction)NULL, "Preview Options: ",
-			      print_view_opts,
+			      print_view_opts.GetData(),
 			      -1, -1, 150, -1);
   NewLine();
   NewLine();
@@ -173,7 +176,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 
 #ifndef PRINT__RUN_CMD
   text_cmd = new wxText(this, (wxFunction)NULL, "Printer &Device: ",
-			print_file,
+			print_file.GetData(),
 			-1, -1, 100, -1);
 
   NewLine();
@@ -221,21 +224,21 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   NewLine();
   NewLine();
 
-  sprintf(buf, "%.2f", page_width);
+  buf.sprintf("%.2f", page_width);
   text_width = new wxText(this, (wxFunction)NULL, "Page &width: ",
-		      buf, -1, -1, 100, -1);
+			  buf.GetData(), -1, -1, 100, -1);
 
-  sprintf(buf, "%.2f", page_height);
+  buf.sprintf("%.2f", page_height);
   text_height = new wxText(this, (wxFunction)NULL, "Page &height: ",
-		      buf, -1, -1, 100, -1);
+			   buf.GetData(), -1, -1, 100, -1);
 
-  sprintf(buf, "%.2f", page_offset_x);
+  buf.sprintf("%.2f", page_offset_x);
   text_x = new wxText(this, (wxFunction)NULL, "&Left margin: ",
-			  buf, -1, -1, 100, -1);
-
-  sprintf(buf, "%.2f", page_offset_y);
+		      buf.GetData(), -1, -1, 100, -1);
+  
+  buf.sprintf("%.2f", page_offset_y);
   text_y = new wxText(this, (wxFunction)NULL, "&Top margin: ",
-			   buf, -1, -1, 100, -1);
+		      buf.GetData(), -1, -1, 100, -1);
 
   NewLine();
   NewLine();

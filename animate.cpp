@@ -282,7 +282,7 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
   ContProcedure* curr_proc;
   AnimateCompile comp;
   CC_continuity *currcont;
-  char tempbuf[100];
+  wxString tempbuf;
 
   pts = new AnimatePoint[numpts];
   curr_cmds = new AnimateCommand*[numpts];
@@ -317,9 +317,9 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
 	 currcont  = currcont->next) {
       if ((yyinputbuffer = currcont->text) != NULL) {
-	sprintf(tempbuf, "Compiling \"%.32s\" %.32s...",
-		comp.curr_sheet->GetName(), (const char *)currcont->name);
-	frame->SetStatusText(tempbuf);
+	tempbuf.sprintf("Compiling \"%.32s\" %.32s...",
+			comp.curr_sheet->GetName(), currcont->name.GetData());
+	frame->SetStatusText(tempbuf.GetData());
 	parsecontinuity();
 	for (j = 0; j < numpts; j++) {
 	  if (comp.curr_sheet->GetPoint(j).cont == currcont->num) {
@@ -336,9 +336,8 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
       }
     }
     // Handle points that don't have continuity (shouldn't happen)
-    sprintf(tempbuf, "Compiling \"%.32s\"...",
-	    comp.curr_sheet->GetName());
-    frame->SetStatusText(tempbuf);
+    tempbuf.sprintf("Compiling \"%.32s\"...", comp.curr_sheet->GetName());
+    frame->SetStatusText(tempbuf.GetData());
     for (j = 0; j < numpts; j++) {
       if (curr_sheet->commands[j] == NULL) {
 	comp.Compile(j, NULL);
@@ -347,9 +346,8 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
       }
     }
     if (!comp.Okay()) {
-      sprintf(tempbuf, "Errors for \"%.32s\"",
-	      comp.curr_sheet->GetName());
-      (void)new AnimErrorList(&comp, winlist, frame, tempbuf);
+      tempbuf.sprintf("Errors for \"%.32s\"", comp.curr_sheet->GetName());
+      (void)new AnimErrorList(&comp, winlist, frame, tempbuf.GetData());
       if (wxMessageBox("Ignore errors?", "Animate", wxYES_NO) != wxYES) {
 	break;
       }
@@ -450,6 +448,15 @@ Bool Animation::NextBeat() {
   return TRUE;
 }
 
+void Animation::GotoBeat(unsigned i) {
+  while (curr_beat > i) {
+    PrevBeat();
+  }    
+  while (curr_beat < i) {
+    NextBeat();
+  }    
+}
+
 void Animation::GotoSheet(unsigned i) {
   curr_sheetnum = i;
   curr_sheet = sheets;
@@ -457,6 +464,7 @@ void Animation::GotoSheet(unsigned i) {
     curr_sheet = curr_sheet->next;
     i--;
   }    
+  CheckCollisions();
   RefreshSheet();
 }
 

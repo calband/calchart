@@ -481,7 +481,7 @@ ShowInfoReq::ShowInfoReq(CC_show *shw, CC_WinList *lst,
 wxFrame(frame, title, x, y, width, height, wxSDI | wxDEFAULT_FRAME),
 show(shw) {
   unsigned i;
-  char buf[16];
+  wxString buf;
   char *strs[2];
   Bool letters[26];
   Bool use_letters;
@@ -516,7 +516,7 @@ show(shw) {
   setnumBut->SetConstraints(bt1);
 
   wxButton *setlabBut = new wxButton(panel, (wxFunction)ShowInfoSetLabels,
-				     "Set &Labels");
+				     "&Set Labels");
   wxLayoutConstraints *bt2 = new wxLayoutConstraints;
   bt2->left.RightOf(setnumBut, 5);
   bt2->top.SameAs(closeBut, wxTop);
@@ -537,10 +537,9 @@ show(shw) {
 
   labels = new GoodListBox(panel, (wxFunction)NULL, "&Letters",
 			   wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
-  buf[1] = '\0';
   for (i = 0; i < 26; i++) {
-    buf[0] = i + 'A';
-    labels->Append(buf);
+    buf = (char)(i + 'A');
+    labels->Append(buf.GetData());
     labels->SetSelection(i, letters[i]);
   }
 
@@ -551,8 +550,8 @@ show(shw) {
   b1->bottom.Above(lettersize, 5);
   labels->SetConstraints(b1);
 
-  sprintf(buf, "%u", show->GetNumPoints());
-  numpnts = new wxText(panel, (wxFunction)NULL, "&Points", buf);
+  buf.sprintf("%u", show->GetNumPoints());
+  numpnts = new wxText(panel, (wxFunction)NULL, "&Points", buf.GetData());
 
   wxLayoutConstraints *b2 = new wxLayoutConstraints;
   b2->left.RightOf(labels, 5);
@@ -577,7 +576,7 @@ show(shw) {
   choice = new wxChoice(panel, (wxFunction)ShowInfoModeChoice, "Show &mode");
   ShowMode *mode = modelist->First();
   while (mode != NULL) {
-    choice->Append(mode->Name());
+    choice->Append((char*)mode->GetName());
     mode = mode->next;
   }
   UpdateMode();
@@ -643,15 +642,15 @@ void ShowInfoReq::UpdateLabels() {
 }
 
 void ShowInfoReq::UpdateNumPoints() {
-  char buf[16];
+  wxString buf;
 
-  sprintf(buf, "%u", show->GetNumPoints());
-  numpnts->SetValue(buf);
+  buf.sprintf("%u", show->GetNumPoints());
+  numpnts->SetValue(buf.GetData());
   UpdateLabels();
 }
 
 void ShowInfoReq::UpdateMode() {
-  choice->SetStringSelection(show->mode->Name());
+  choice->SetStringSelection((char*)show->mode->GetName());
 }
 
 void ShowInfoReq::UpdateDescr(Bool quick) {
@@ -686,7 +685,7 @@ void ShowInfoReq::FlushDescr() {
 
 unsigned ShowInfoReq::GetNumPoints() {
   int i;
-  char buf[16];
+  wxString buf;
 
   StringToInt(numpnts->GetValue(), &i);
   if (i < 0) {
@@ -694,8 +693,8 @@ unsigned ShowInfoReq::GetNumPoints() {
     i = 0;
   }
   if (i > MAX_POINTS) {
-    sprintf(buf, "%u", MAX_POINTS);
-    numpnts->SetValue(buf);
+    buf.sprintf("%u", MAX_POINTS);
+    numpnts->SetValue(buf.GetData());
     i = MAX_POINTS;
   }
   return (unsigned)i;

@@ -10,11 +10,9 @@
 #ifndef _CONFGR_H_
 #define _CONFGR_H_
 
-#define MAX_SPR_LINES 5
+#include <wxstring.h>
 
-#define MAX_PATH_LEN 512
-#define MAX_FNAME_LEN 128
-#define MAX_FONT_LEN 100
+#define MAX_SPR_LINES 5
 
 enum CalChartColors {
   COLOR_FIELD,
@@ -46,21 +44,23 @@ extern wxPen *CalChartPens[COLOR_NUM];
 class wxBrush;
 extern wxBrush *CalChartBrushes[COLOR_NUM];
 
+extern wxString program_dir;
+extern wxString shows_dir;
 extern unsigned int window_default_width;
 extern unsigned int window_default_height;
 extern unsigned int undo_buffer_size;
-extern char print_file[MAX_FNAME_LEN];
-extern char print_cmd[MAX_FNAME_LEN];
-extern char print_opts[MAX_FNAME_LEN];
-extern char print_view_cmd[MAX_FNAME_LEN];
-extern char print_view_opts[MAX_FNAME_LEN];
-extern char head_font[MAX_FONT_LEN];
-extern char main_font[MAX_FONT_LEN];
-extern char number_font[MAX_FONT_LEN];
-extern char cont_font[MAX_FONT_LEN];
-extern char bold_font[MAX_FONT_LEN];
-extern char ital_font[MAX_FONT_LEN];
-extern char bold_ital_font[MAX_FONT_LEN];
+extern wxString print_file;
+extern wxString print_cmd;
+extern wxString print_opts;
+extern wxString print_view_cmd;
+extern wxString print_view_opts;
+extern wxString head_font;
+extern wxString main_font;
+extern wxString number_font;
+extern wxString cont_font;
+extern wxString bold_font;
+extern wxString ital_font;
+extern wxString bold_ital_font;
 extern float page_width;
 extern float page_height;
 extern float paper_length;
@@ -74,11 +74,12 @@ extern float num_ratio;
 extern float pline_ratio;
 extern float sline_ratio;
 extern float cont_ratio;
-extern char yard_text[21][8];
-extern char spr_line_text[MAX_SPR_LINES][8];
+extern wxString yard_text[21];
+extern wxString spr_line_text[MAX_SPR_LINES];
 
-extern char *ReadConfig(void);
+extern char *ReadConfig(const char *path);
 extern FILE *OpenFileInDir(const char *name, const char *modes);
-extern char *my_fgets(char *buffer, int length, FILE *fp);
+extern char *FullPath(const char *path);
+extern int ReadDOSline(FILE *fp, wxString& str);
 
 #endif

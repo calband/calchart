@@ -83,7 +83,7 @@ ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref)
       elems[num].refmask = 1<<ref;
       if (refnum == 0) for (j = 1; j <= NUM_REF_PNTS; j++) {
 	if (sheet->GetPosition(i, j) == sheet->GetPosition(i, 0)) {
-	  elems[i].refmask |= 1<<j;
+	  elems[num].refmask |= 1<<j;
 	}
       }
       num++;

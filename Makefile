@@ -8,7 +8,10 @@ PROG = calchart
 #MAKEDEP = makedepend
 MAKEDEP = ./makedep
 
-DFLAGS = -g -Wall
+CONF_FLAGS = -DANIM_OUTPUT_POVRAY -DANIM_OUTPUT_RIB
+CONF_LIBS = -lribout
+
+DFLAGS = -g -Wall $(CONF_FLAGS)
 
 LEX = flex
 LFLAGS = -B
@@ -36,7 +39,7 @@ RUNTIME = runtime/config runtime/prolog0.ps runtime/prolog1.ps \
 RUNTIME_ALL = $(RUNTIME) runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps
 PS_SYNTH_FILES = runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps postscript/vmstatus.ps
 IMAGES = tb_left.xbm tb_right.xbm tb_box.xbm tb_poly.xbm tb_lasso.xbm \
-	tb_lbl_l.xbm tb_lbl_r.xbm tb_lbl_f.xbm \
+	tb_line.xbm tb_lbl_l.xbm tb_lbl_r.xbm tb_lbl_f.xbm \
 	tb_sym0.xbm tb_sym1.xbm tb_sym2.xbm tb_sym3.xbm \
 	tb_sym4.xbm tb_sym5.xbm tb_sym6.xbm tb_sym7.xbm \
 	tb_stop.xbm tb_play.xbm tb_pbeat.xbm tb_nbeat.xbm \
@@ -81,7 +84,7 @@ all: calchart $(PS_SYNTH_FILES) charthlp.xlp
 
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ \
-	$(wx_lib) $(gui_libraries) $(extra_lib) $(math_lib)
+	$(wx_lib) $(gui_libraries) $(extra_lib) $(CONF_LIBS) $(math_lib)
 
 contscan.o: contgram.h
 

@@ -17,7 +17,7 @@
 
 extern wxFont *yardLabelFont;
 
-ShowMode::ShowMode(char *nam, CC_coord siz, CC_coord off,
+ShowMode::ShowMode(const char *nam, CC_coord siz, CC_coord off,
 		   CC_coord bord1, CC_coord bord2)
 : next(NULL), offset(off), size(siz), border1(bord1), border2(bord2)
 {
@@ -26,7 +26,8 @@ ShowMode::ShowMode(char *nam, CC_coord siz, CC_coord off,
   name = copystring(nam);
 }
 
-ShowMode::ShowMode(char *nam, CC_coord siz, CC_coord bord1, CC_coord bord2)
+ShowMode::ShowMode(const char *nam, CC_coord siz,
+		   CC_coord bord1, CC_coord bord2)
 : next(NULL), offset(siz/2), size(siz), border1(bord1), border2(bord2)
 {
   size += border1 + border2;
@@ -38,7 +39,22 @@ ShowMode::~ShowMode() {
   delete name;
 }
 
-ShowModeStandard::ShowModeStandard(char *nam, CC_coord bord1, CC_coord bord2,
+CC_coord ShowMode::ClipPosition(const CC_coord& pos) {
+  CC_coord clipped;
+  CC_coord min = MinPosition();
+  CC_coord max = MaxPosition();
+
+  if (pos.x < min.x) clipped.x = min.x;
+  else if (pos.x > max.x) clipped.x = max.x;
+  else clipped.x = pos.x;
+  if (pos.y < min.y) clipped.y = min.y;
+  else if (pos.y > max.y) clipped.y = max.y;
+  clipped.y = pos.y;
+  return clipped;
+}
+
+ShowModeStandard::ShowModeStandard(const char *nam,
+				   CC_coord bord1, CC_coord bord2,
 				   unsigned short hashw, unsigned short hashe)
 : ShowMode(nam, CC_coord(INT2COORD(160),INT2COORD(84)),bord1, bord2),
   hashw(hashw), hashe(hashe)
@@ -221,8 +237,9 @@ void ShowModeStandard::DrawAnim(wxDC *dc) {
 #endif
 }
 
-ShowModeSprShow::ShowModeSprShow(char *nam, CC_coord bord1, CC_coord bord2,
-				 unsigned char which, char *file,
+ShowModeSprShow::ShowModeSprShow(const char *nam,
+				 CC_coord bord1, CC_coord bord2,
+				 unsigned char which, const char *file,
 				 short stg_x, short stg_y,
 				 short stg_w, short stg_h,
 				 short fld_x, short fld_y,
@@ -393,7 +410,7 @@ ShowMode *ShowModeList::Find(char *name) {
   ShowMode *mode = list;
 
   while (mode != NULL) {
-    if (strcmp(mode->Name(), name) == 0) break;
+    if (strcmp(mode->GetName(), name) == 0) break;
     mode = mode->next;
   }
   return mode;

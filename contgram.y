@@ -213,9 +213,9 @@ int parsecontinuity()
 
 int yyerror(char *s)
 {
-  char tempbuf[256];
-  sprintf(tempbuf, "%s near line %d, column %d.\n", 
-          s, yylloc.first_line, yylloc.first_column);
-  (void)wxMessageBox(tempbuf, "Animate");
+  wxString tempbuf;
+  tempbuf.sprintf("%s near line %d, column %d.\n", 
+                  s, yylloc.first_line, yylloc.first_column);
+  (void)wxMessageBox(tempbuf.GetData(), "Animate");
   return 0;
 }

@@ -11,6 +11,7 @@
 #endif
 
 #include "basic_ui.h"
+#include "confgr.h"
 
 #ifdef wx_x
 #include "calchart.xpm"
@@ -19,8 +20,11 @@
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc) {
   dc->SetBrush(wxTRANSPARENT_BRUSH);
+  dc->SetPen(CalChartPens[COLOR_FIELD_DETAIL]);
+  /*
   dc->SetPen(wxWHITE_PEN);
   dc->SetLogicalFunction(wxINVERT);
+  */
 }
 
 // Set icon to band's insignia

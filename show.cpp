@@ -443,24 +443,31 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) {
 }
 
 // Select points within rectangle
-Bool CC_sheet::SelectPointsInRect(CC_coord c1, CC_coord c2) {
+Bool CC_sheet::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+				  unsigned ref) {
   unsigned i;
   Bool changed = FALSE;
-  Coord n;
+  CC_coord top_left, bottom_right;
+  const CC_coord *pos;
 
   if (c1.x > c2.x) {
-    n = c2.x;
-    c2.x = c1.x;
-    c1.x = n;
+    top_left.x = c2.x;
+    bottom_right.x = c1.x;
+  } else {
+    top_left.x = c1.x;
+    bottom_right.x = c2.x;
   }
   if (c1.y > c2.y) {
-    n = c2.y;
-    c2.y = c1.y;
-    c1.y = n;
+    top_left.y = c2.y;
+    bottom_right.y = c1.y;
+  } else {
+    top_left.y = c1.y;
+    bottom_right.y = c2.y;
   }
   for (i = 0; i < show->GetNumPoints(); i++) {
-    if ((pts[i].pos.x >= c1.x) && (pts[i].pos.x <= c2.x) &&
-	(pts[i].pos.y >= c1.y) && (pts[i].pos.y <= c2.y)) {
+    pos = &GetPosition(i, ref);
+    if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
+	(pos->y >= top_left.y) && (pos->y <= bottom_right.y)) {
       if (!show->IsSelected(i)) {
 	show->Select(i);
 	changed = TRUE;
@@ -844,29 +851,31 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i) {
 // Set position of point
 void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref) {
   unsigned j;
+  CC_coord clippedval = show->mode->ClipPosition(val);
   if (ref == 0) {
     for (j=0; j<NUM_REF_PNTS; j++) {
       if (pts[i].ref[j] == pts[i].pos) {
-	pts[i].ref[j] = val;
+	pts[i].ref[j] = clippedval;
       }
     }
-    pts[i].pos = val;
+    pts[i].pos = clippedval;
   } else {
-    pts[i].ref[ref-1] = val;
+    pts[i].ref[ref-1] = clippedval;
   }
 }
 
 // Set position of point and don't touch reference points
 void CC_sheet::SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref){
+  CC_coord clippedval = show->mode->ClipPosition(val);
   if (ref == 0) {
-    pts[i].pos = val;
+    pts[i].pos = clippedval;
   } else {
-    pts[i].ref[ref-1] = val;
+    pts[i].ref[ref-1] = clippedval;
   }
 }
 
 // Move points
-Bool CC_sheet::TranslatePoints(CC_coord delta, unsigned ref) {
+Bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref) {
   unsigned i;
   Bool change = FALSE;
 
@@ -881,6 +890,27 @@ Bool CC_sheet::TranslatePoints(CC_coord delta, unsigned ref) {
       SetPosition(GetPosition(i, ref) + delta, i, ref);
       change = TRUE;
     }
+  }
+  return change;
+}
+
+// Move points into a line (old smart move)
+Bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
+			       unsigned ref) {
+  CC_coord curr_pos;
+  Bool change = FALSE;
+  wxNode *n;
+
+  if (GetNumSelectedPoints() <= 0) return FALSE;
+
+  // Create undo entry
+  show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
+
+  for (n = show->GetSelectionList().First(), curr_pos = start;
+       n != NULL;
+       n = n->Next(), curr_pos += second - start) {
+    SetPosition(curr_pos, n->key.integer, ref);
+    change = TRUE;
   }
   return change;
 }
@@ -1153,11 +1183,20 @@ static INGLhandler load_show_handlers[] = {
   { INGL_PCNT, INGL_SHET, load_show_PCNT }
 };
 
-#define SHOWBUFSIZE 128
+enum CONT_PARSE_MODE {
+  CONT_PARSE_NORMAL,
+  CONT_PARSE_TAB,
+  CONT_PARSE_BS,
+  CONT_PARSE_PLAIN,
+  CONT_PARSE_SOLID,
+  CONT_PARSE_BOLD,
+  CONT_PARSE_ITALIC
+};
+
 // Load a show
 CC_show::CC_show(const char *file)
-:selections(NULL), numpoints(0), numsheets(0), sheets(NULL),
- pt_labels(NULL), modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
+:numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL), selections(NULL),
+ modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
  print_do_cont_sheet(TRUE) {
   cc_oldpoint *diskpts;
 
@@ -1176,8 +1215,8 @@ CC_show::CC_show(const char *file)
   CC_sheet *curr_sheet = NULL;
   CC_continuity *newanimcont;
   unsigned numanimcont;
-  char tempbuf[SHOWBUFSIZE];
-  char sheetnamebuf[SHOWBUFSIZE];
+  wxString tempbuf;
+  char sheetnamebuf[16];
 
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
@@ -1204,7 +1243,7 @@ CC_show::CC_show(const char *file)
       error = nofile_str;
       return;
     }
-    if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+    if (ReadDOSline(fp, tempbuf) <= 0) {
       error = badfile_mas_str;
       return;
     }
@@ -1217,7 +1256,7 @@ CC_show::CC_show(const char *file)
       return;
     }
 
-    if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+    if (ReadDOSline(fp, tempbuf) <= 0) {
       error = badfile_mas_str;
       return;
     }
@@ -1230,7 +1269,7 @@ CC_show::CC_show(const char *file)
     UnselectAll();
 
     for (i = 0; i < numsheets; i++) {
-      if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+      if (ReadDOSline(fp, tempbuf) <= 0) {
 	error = badfile_mas_str;
 	return;
       }
@@ -1363,15 +1402,15 @@ CC_show::CC_show(const char *file)
 	error = nofile_str;
 	return;
       }
-      if (my_fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+      if (ReadDOSline(fp, tempbuf) <= 0) {
 	error = badfile_cnt_str;
 	return;
       }
-      if (strcmp("'NEW", tempbuf) != 0) {
+      if (tempbuf != "'NEW") {
 	error = badanimcont_str;
 	return;
       }
-      if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+      if (ReadDOSline(fp, tempbuf) <= 0) {
 	error = badanimcont_str;
 	return;
       }
@@ -1383,35 +1422,28 @@ CC_show::CC_show(const char *file)
 	newanimcont = new CC_continuity;
 
 	// Skip blank line
-	if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+	if (feof(fp)) {
 	  error = badanimcont_str;
 	  return;
 	}
-	if (fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+	ReadDOSline(fp, tempbuf);
+	if (ReadDOSline(fp, tempbuf) <= 0) {
 	  error = badanimcont_str;
 	  return;
 	}
 	if (sscanf(tempbuf, " \"%[^\"]\" , %u , %u\n",
-		   tempbuf, &newanimcont->num, &j) != 3) {
+		   sheetnamebuf, &newanimcont->num, &j) != 3) {
 	  error = badanimcont_str;
 	  return;
 	}
-	newanimcont->SetName(tempbuf);
+	newanimcont->SetName(sheetnamebuf);
 	while (j > 0) {
 	  j--;
-	  if (my_fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) {
+	  if (feof(fp)) {
 	    error = badanimcont_str;
 	  }
-	  off = strlen(tempbuf);
-	  while (off > 0) {
-	    off--;
-	    if (tempbuf[off] != ' ') {
-	      off++;
-	      break;
-	    }
-	  }
-	  tempbuf[off] = '\n';
-	  tempbuf[off+1] = 0;
+	  ReadDOSline(fp, tempbuf);
+	  tempbuf.Strip();
 	  newanimcont->AppendText(tempbuf);
 	}
 	curr_sheet->AppendContinuity(newanimcont);
@@ -1444,23 +1476,31 @@ CC_show::CC_show(const char *file)
       cc_text *last_text, *start_text;
       cc_text *new_text;
       unsigned pos;
-      Bool do_bs, do_sym, do_tab;
-      Bool on_sheet, on_main, center;
+      Bool on_sheet, on_main, center, font_changed;
+      enum CONT_PARSE_MODE parsemode;
       enum PSFONT_TYPE currfontnum, lastfontnum;
-      char lineotext[SHOWBUFSIZE];
-      char c1, c2;
+      wxString lineotext;
+      char c;
+      Bool sheetmark;
 
       curr_sheet = NULL;
       currfontnum = lastfontnum = PSFONT_NORM;
       last_text = NULL;
       while (TRUE) {
-	if (my_fgets(tempbuf, SHOWBUFSIZE, fp) == NULL) break;
-	if ((tempbuf[0] == '%') && (tempbuf[1] == '%')) {
+	if (feof(fp)) break;
+	ReadDOSline(fp, tempbuf);
+	sheetmark = FALSE;
+	if (tempbuf.Length() >= 2) {
+	  if ((tempbuf.Elem(0) == '%') && (tempbuf.Elem(1) == '%')) {
+	    sheetmark = TRUE;
+	  }
+	}
+	if (sheetmark) {
 	  if (curr_sheet) curr_sheet = curr_sheet->next;
 	  else curr_sheet = sheets;
 	  if (!curr_sheet) break;
-	  if (tempbuf[2]) {
-	    curr_sheet->SetNumber(&tempbuf[2]);
+	  if (tempbuf.Length() > 2) {
+	    curr_sheet->SetNumber(tempbuf.From(2).Chars());
 	  }
 	  last_text = NULL;
 	} else {
@@ -1472,188 +1512,204 @@ CC_show::CC_show(const char *file)
 	  on_main = TRUE;
 	  on_sheet = TRUE;
 	  pos = 0;
-	  if (tempbuf[pos] == '<') {
-	    on_sheet = FALSE;
-	    pos++;
-	  } else {
-	    if (tempbuf[pos] == '>') {
-	      on_main = FALSE;
+	  if (pos < tempbuf.Length()) {
+	    if (tempbuf.Elem(pos) == '<') {
+	      on_sheet = FALSE;
+	      pos++;
+	    } else {
+	      if (tempbuf.Elem(pos) == '>') {
+		on_main = FALSE;
+		pos++;
+	      }
+	    }
+	  }
+	  center = FALSE;
+	  if (pos < tempbuf.Length()) {
+	    if (tempbuf.Elem(pos) == '~') {
+	      center = TRUE;
 	      pos++;
 	    }
 	  }
-	  if (tempbuf[pos] == '~') {
-	    center = TRUE;
-	    pos++;
-	  } else {
-	    center = FALSE;
-	  }
-	  do_bs = FALSE;
-	  do_tab = FALSE;
+	  parsemode = CONT_PARSE_NORMAL;
 	  start_text = NULL;
 	  do {
-	    do_sym = FALSE;
-	    for (i=0; tempbuf[pos] && !(do_sym); pos++) {
-	      if (do_bs) {
-		c1 = tolower(tempbuf[pos]);
-		switch (c1) {
+	    font_changed = FALSE;
+	    lineotext = "";
+	    while ((pos < tempbuf.Length()) && !font_changed) {
+	      switch (parsemode) {
+	      case CONT_PARSE_NORMAL:
+		c = tempbuf.Elem(pos++);
+		switch (c) {
+		case '\\':
+		  parsemode = CONT_PARSE_BS;
+		  break;
+		case '\t':
+		  parsemode = CONT_PARSE_TAB;
+		  font_changed = TRUE;
+		  break;
+		default:
+		  lineotext.Append(c);
+		  break;
+		}
+		break;
+	      case CONT_PARSE_TAB:
+		parsemode = CONT_PARSE_NORMAL;
+		currfontnum = PSFONT_TAB;
+		font_changed = TRUE;
+		break;
+	      case CONT_PARSE_BS:
+		c = tolower(tempbuf.Elem(pos++));
+		switch (c) {
 		case 'p':
-		  do_sym = TRUE;
-		  c2 = tolower(tempbuf[++pos]);
-		  switch (c2) {
-		  case 'o':
-		    lineotext[i++] = 'A';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  case 'b':
-		    lineotext[i++] = 'C';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  case 's':
-		    lineotext[i++] = 'D';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  case 'x':
-		    lineotext[i++] = 'E';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  default:
-		    // code not recognized
-		    error = badcont_str;
-		    return;
-		    break;
-		  }
+		  parsemode = CONT_PARSE_PLAIN;
 		  break;
 		case 's':
-		  do_sym = TRUE;
-		  c2 = tolower(tempbuf[++pos]);
-		  switch (c2) {
-		  case 'o':
-		    lineotext[i++] = 'B';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  case 'b':
-		    lineotext[i++] = 'F';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  case 's':
-		    lineotext[i++] = 'G';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  case 'x':
-		    lineotext[i++] = 'H';
-		    currfontnum = PSFONT_SYMBOL;
-		    break;
-		  default:
-		    // code not recognized
-		    error = badcont_str;
-		    return;
-		    break;
-		  }
+		  parsemode = CONT_PARSE_SOLID;
 		  break;
 		case 'b':
-		  c2 = tolower(tempbuf[pos+1]);
-		  switch (c2) {
-		  case 's':
-		    pos++;
-		    switch (currfontnum) {
-		    case PSFONT_NORM:
-		      currfontnum = lastfontnum = PSFONT_BOLD;
-		      break;
-		    case PSFONT_ITAL:
-		      currfontnum = lastfontnum = PSFONT_BOLDITAL;
-		      break;
-		    default:
-		      break;
-		    }
+		  parsemode = CONT_PARSE_BOLD;
+		  break;
+		case 'i':
+		  parsemode = CONT_PARSE_ITALIC;
+		  break;
+		default:
+		  parsemode = CONT_PARSE_NORMAL;
+		  lineotext.Append(c);
+		  break;
+		}
+		break;
+	      case CONT_PARSE_PLAIN:
+		parsemode = CONT_PARSE_NORMAL;
+		font_changed = TRUE;
+		c = tolower(tempbuf.Elem(pos++));
+		switch (c) {
+		case 'o':
+		  lineotext.Append('A');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		case 'b':
+		  lineotext.Append('C');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		case 's':
+		  lineotext.Append('D');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		case 'x':
+		  lineotext.Append('E');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		default:
+		  // code not recognized
+		  error = badcont_str;
+		  return;
+		}
+		break;
+	      case CONT_PARSE_SOLID:
+		parsemode = CONT_PARSE_NORMAL;
+		font_changed = TRUE;
+		c = tolower(tempbuf.Elem(pos++));
+		switch (c) {
+		case 'o':
+		  lineotext.Append('B');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		case 'b':
+		  lineotext.Append('F');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		case 's':
+		  lineotext.Append('G');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		case 'x':
+		  lineotext.Append('H');
+		  currfontnum = PSFONT_SYMBOL;
+		  break;
+		default:
+		  // code not recognized
+		  error = badcont_str;
+		  return;
+		}
+		break;
+	      case CONT_PARSE_BOLD:
+		parsemode = CONT_PARSE_NORMAL;
+		font_changed = TRUE;
+		c = tolower(tempbuf.Elem(pos++));
+		switch (c) {
+		case 's':
+		  switch (currfontnum) {
+		  case PSFONT_NORM:
+		    currfontnum = lastfontnum = PSFONT_BOLD;
 		    break;
-		  case 'e':
-		    pos++;
-		    switch (currfontnum) {
-		    case PSFONT_BOLD:
-		      currfontnum = lastfontnum = PSFONT_NORM;
-		      break;
-		    case PSFONT_BOLDITAL:
-		      currfontnum = lastfontnum = PSFONT_ITAL;
-		      break;
-		    default:
-		      break;
-		    }
+		  case PSFONT_ITAL:
+		    currfontnum = lastfontnum = PSFONT_BOLDITAL;
 		    break;
 		  default:
-		    // code not recognized
-		    error = badcont_str;
-		    return;
 		    break;
 		  }
 		  break;
-		case 'i':
-		  c2 = tolower(tempbuf[pos+1]);
-		  switch (c2) {
-		  case 's':
-		    pos++;
-		    switch (currfontnum) {
-		    case PSFONT_NORM:
-		      currfontnum = lastfontnum = PSFONT_ITAL;
-		      break;
-		    case PSFONT_BOLD:
-		      currfontnum = lastfontnum = PSFONT_BOLDITAL;
-		      break;
-		    default:
-		      break;
-		    }
+		case 'e':
+		  switch (currfontnum) {
+		  case PSFONT_BOLD:
+		    currfontnum = lastfontnum = PSFONT_NORM;
 		    break;
-		  case 'e':
-		    pos++;
-		    switch (currfontnum) {
-		    case PSFONT_ITAL:
-		      currfontnum = lastfontnum = PSFONT_NORM;
-		      break;
-		    case PSFONT_BOLDITAL:
-		      currfontnum = lastfontnum = PSFONT_BOLD;
-		      break;
-		    default:
-		      break;
-		    }
+		  case PSFONT_BOLDITAL:
+		    currfontnum = lastfontnum = PSFONT_ITAL;
 		    break;
 		  default:
-		    // code not recognized
-		    error = badcont_str;
-		    return;
 		    break;
 		  }
 		  break;
 		default:
-		  lineotext[i++] = '\\';
-		  lineotext[i++] = c1;
+		  // code not recognized
+		  error = badcont_str;
+		  return;
 		}
-		do_bs = FALSE;
-	      } else {
-		if (do_tab) {
-		  currfontnum = PSFONT_TAB;
-		  do_tab = FALSE;
-		  break;
-		} else {
-		  if (tempbuf[pos] == '\\') {
-		    do_bs = TRUE;
-		    pos++;
+		break;
+	      case CONT_PARSE_ITALIC:
+		parsemode = CONT_PARSE_NORMAL;
+		font_changed = TRUE;
+		c = tolower(tempbuf.Elem(pos++));
+		switch (c) {
+		case 's':
+		  switch (currfontnum) {
+		  case PSFONT_NORM:
+		    currfontnum = lastfontnum = PSFONT_ITAL;
 		    break;
-		  } else {
-		    if (tempbuf[pos] == '\t') {
-		      do_tab = TRUE;
-		      pos++;
-		      break;
-		    } else {
-		      lineotext[i++] = tempbuf[pos];
-		    }
+		  case PSFONT_BOLD:
+		    currfontnum = lastfontnum = PSFONT_BOLDITAL;
+		    break;
+		  default:
+		    break;
 		  }
+		  break;
+		case 'e':
+		  switch (currfontnum) {
+		  case PSFONT_ITAL:
+		    currfontnum = lastfontnum = PSFONT_NORM;
+		    break;
+		  case PSFONT_BOLDITAL:
+		    currfontnum = lastfontnum = PSFONT_BOLD;
+		    break;
+		  default:
+		    break;
+		  }
+		  break;
+		default:
+		  // code not recognized
+		  error = badcont_str;
+		  return;
 		}
+		break;
 	      }
 	    }
 	    // Add any remaining text
 	    // Empty text only okay if line is blank
-	    if ((i > 0) || (currfontnum == PSFONT_TAB) ||
-		(!tempbuf[pos] && (start_text == NULL))) {
-	      lineotext[i] = 0;
+	    if ((!lineotext.Empty()) ||
+		(currfontnum == PSFONT_TAB) ||
+		// Empty line
+		((pos >= tempbuf.Length()) && (start_text == NULL))) {
 	      new_text = new cc_text;
 	      if (new_text == NULL) {
 		error = nomem_str;
@@ -1676,7 +1732,7 @@ CC_show::CC_show(const char *file)
 	    }
 	    // restore to previous font (used for symbols and tabs)
 	    currfontnum = lastfontnum;
-	  } while (tempbuf[pos]);
+	  } while (pos < tempbuf.Length());
 	}
       }
       fclose(fp);
@@ -1695,7 +1751,7 @@ CC_show::CC_show(const char *file)
       SetName(file);
     }
   }
-  if (sheets == NULL) {
+  if ((error == NULL) && (sheets == NULL)) {
     error = nosheets_str;
   }
 }
@@ -1947,6 +2003,13 @@ const char *CC_show::UserGetName() {
   else return wxFileNameFromPath((char *)name.GetData());
 }
 
+void CC_show::SetName(const char *newname) {
+  // make into a full path
+  char *path = FullPath(newname);
+  name = path;
+  delete [] path;
+}
+
 void CC_show::UserSetDescr(const char *newdescr, wxWindow *win) {
   // Create undo entry
   undolist->Add(new ShowUndoDescr(this));
@@ -2142,4 +2205,17 @@ Bool CC_show::UnselectAll() {
     }
   }
   return changed;
+}
+
+void CC_show::Select(unsigned i, Bool val) {
+  wxNode *n;
+
+  selections[i] = val;
+  if (val) {
+    selectionList.Append(i, NULL);
+  } else {
+    if ((n = selectionList.Find(i)) != NULL) {
+      selectionList.DeleteNode(n);
+    }
+  }
 }

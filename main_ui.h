@@ -22,12 +22,37 @@
 
 enum CC_DRAG_TYPES { CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
 		     CC_DRAG_LASSO, CC_DRAG_LINE };
+enum CC_MOVE_MODES { CC_MOVE_NORMAL, CC_MOVE_LINE };
 
-class FieldCanvas;
+class CC_lasso {
+public:
+  CC_lasso();
+  ~CC_lasso();
+
+  void Clear();
+  void Start(const CC_coord& p);
+  void End();
+  void Append(const CC_coord& p);
+  Bool Inside(const CC_coord& p);
+  void Draw(wxDC *dc, float x, float y);
+  void Drag(const CC_coord& p);
+  inline wxPoint *FirstPoint() {
+    wxNode *n = pntlist.Last();
+    if (n != NULL)
+      return (wxPoint*)n->Data();
+    else return NULL;
+  }
+private:
+  Bool CrossesLine(const wxPoint* start, const wxPoint* end,
+		   const CC_coord& p);
+  wxList pntlist;
+};
+
+class MainFrame;
 
 class CC_WinNodeMain : public CC_WinNode {
 public:
-  CC_WinNodeMain(CC_WinList *lst, FieldCanvas *canv);
+  CC_WinNodeMain(CC_WinList *lst, MainFrame *frm);
 
   virtual void SetShow(CC_show *shw);
   virtual void ChangeName();
@@ -55,7 +80,7 @@ public:
 
   CC_WinList winlist;
 private:
-  FieldCanvas *canvas;
+  MainFrame *frame;
 };
 
 // Define a new application
@@ -72,7 +97,8 @@ public:
   Bool OnClose(void);
 };
 
-// Define a new frame
+class FieldCanvas;
+// Define the main editing frame
 class MainFrame : public wxFrameWithStuff {
 public:
   MainFrame(wxFrame *frame, int x, int y, int w, int h,
@@ -91,10 +117,12 @@ public:
   void SaveShowAs();
 
   void SnapToGrid(CC_coord& c);
+  void UpdatePanel();
 
   wxChoice *grid_choice;
   wxChoice *ref_choice;
   wxSlider *zoom_slider;
+  wxSlider *sheet_slider;
 
   FieldCanvas *field;
   CC_WinNodeMain *node;
@@ -114,9 +142,8 @@ public:
 
   // Misc show functions
   void RefreshShow(Bool drawall = TRUE, int point = -1);
-  void UpdatePanel();
   void UpdateBars();
-  inline void UpdateSS() { RefreshShow(); UpdatePanel(); }
+  inline void UpdateSS() { RefreshShow(); ourframe->UpdatePanel(); }
   inline void GotoThisSS() {
     UpdateSS();
     ourframe->node->GotoSheet(show_descr.curr_ss);
@@ -145,32 +172,23 @@ public:
     SetZoomQuick(factor); UpdateBars(); RefreshShow();
   }
 
-  inline void BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
-    DrawDrag(FALSE);
-    drag = type;
-    drag_start = drag_end = start;
-    DrawDrag(TRUE);
-  };
-  inline void MoveDrag(CC_coord end) {
-    DrawDrag(FALSE);
-    drag_end = end;
-    DrawDrag(TRUE);
-  };
-  inline void EndDrag() {
-    DrawDrag(FALSE);
-    drag = CC_DRAG_NONE;
-  };
+  void BeginDrag(CC_DRAG_TYPES type, CC_coord start);
+  void MoveDrag(CC_coord end);
+  void EndDrag();
 
   // Variables
   MainFrame *ourframe;
   CC_descr show_descr;
   CC_DRAG_TYPES curr_lasso;
+  CC_MOVE_MODES curr_move;
   unsigned curr_ref;
 
 private:
   void DrawDrag(Bool on = TRUE);
+  void SelectWithLasso();
 
   CC_DRAG_TYPES drag;
+  CC_lasso lasso;
   CC_coord drag_start, drag_end;
   Bool dragon;
   int zoomf;

@@ -20,6 +20,7 @@
 
 #include <common.h>  // For basic wx defines
 #include <wxstring.h>
+#include <wx_list.h>
 
 #include "platconf.h"
 
@@ -296,7 +297,8 @@ public:
 
   unsigned GetNumSelectedPoints();
   int FindPoint(Coord x, Coord y, unsigned ref = 0);
-  Bool SelectPointsInRect(CC_coord c1, CC_coord c2);
+  Bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+			  unsigned ref = 0);
   Bool SelectContinuity(unsigned i);
   void SetContinuity(unsigned i);
   void SetNumPoints(unsigned num, unsigned columns);
@@ -335,7 +337,9 @@ public:
   void SetAllPositions(const CC_coord& val, unsigned i);
   void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
   void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
-  Bool TranslatePoints(CC_coord delta, unsigned ref = 0);
+  Bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
+  Bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
+			unsigned ref);
 
   CC_sheet *next;
   cc_text *continuity;
@@ -380,9 +384,9 @@ public:
 
   inline const char *GetName() { return name; }
   const char *UserGetName();
-  inline void SetName(const char *newname) { name = newname; }
+  void SetName(const char *newname);
   inline void UserSetName(const char *newname) {
-    name = newname; winlist->ChangeName();
+    SetName(newname); winlist->ChangeName();
   }
 
   inline const char *GetDescr() { return descr; }
@@ -416,15 +420,15 @@ public:
 
   Bool UnselectAll();
   inline Bool IsSelected(unsigned i) { return selections[i]; }
-  inline void Select(unsigned i, Bool val = TRUE) { selections[i] = val; }
+  void Select(unsigned i, Bool val = TRUE);
   inline void SelectToggle(unsigned i) {
     selections[i] = selections[i] ? FALSE:TRUE;
   }
+  inline wxList& GetSelectionList() { return selectionList; }
 
   CC_WinListShow *winlist;
   ShowUndoList *undolist;
   ShowMode *mode;
-  Bool *selections; // array for each point
 
 private:
   void PrintSheets(FILE *fp); // called by Print()
@@ -436,6 +440,8 @@ private:
   unsigned short numsheets;
   CC_sheet *sheets;
   char (*pt_labels)[4];
+  Bool *selections; // array for each point
+  wxList selectionList; // order of selections
   Bool modified;
   Bool print_landscape;
   Bool print_do_cont;

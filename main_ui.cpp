@@ -21,12 +21,19 @@
 
 #include <wx_help.h>
 
+#ifdef wx_msw
+#include <direct.h>
+#else
+#include <dirent.h>
+#endif
+
 #ifdef wx_x
 #include "tb_left.xbm"
 #include "tb_right.xbm"
 #include "tb_box.xbm"
 #include "tb_poly.xbm"
 #include "tb_lasso.xbm"
+#include "tb_line.xbm"
 #include "tb_lbl_l.xbm"
 #include "tb_lbl_r.xbm"
 #include "tb_lbl_f.xbm"
@@ -51,6 +58,7 @@ static void toolbar_next_ss(CoolToolBar *tb);
 static void toolbar_box(CoolToolBar *tb);
 static void toolbar_poly(CoolToolBar *tb);
 static void toolbar_lasso(CoolToolBar *tb);
+static void toolbar_line(CoolToolBar *tb);
 static void toolbar_label_left(CoolToolBar *tb);
 static void toolbar_label_right(CoolToolBar *tb);
 static void toolbar_label_flip(CoolToolBar *tb);
@@ -63,6 +71,7 @@ static void toolbar_setsym5(CoolToolBar *tb);
 static void toolbar_setsym6(CoolToolBar *tb);
 static void toolbar_setsym7(CoolToolBar *tb);
 static void refnum_callback(wxObject &obj, wxEvent &ev);
+static void slider_sheet_callback(wxObject &obj, wxEvent &ev);
 static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
 
 static ToolBarEntry main_tb[] = {
@@ -71,6 +80,7 @@ static ToolBarEntry main_tb[] = {
   { 0, NULL, "Select points with box", toolbar_box },
   { 0, NULL, "Select points with polygon", toolbar_poly },
   { TOOLBAR_SPACE, NULL, "Select points with lasso", toolbar_lasso },
+  { TOOLBAR_SPACE, NULL, "Move points into line", toolbar_line },
   { 0, NULL, "Label on left", toolbar_label_left },
   { 0, NULL, "Flip label", toolbar_label_flip },
   { TOOLBAR_SPACE, NULL, "Label on right", toolbar_label_right },
@@ -120,99 +130,101 @@ wxFont *yardLabelFont;
 
 ShowModeList *modelist;
 
-CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, FieldCanvas *canv)
-: CC_WinNode(lst), canvas(canv) {}
+CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
+: CC_WinNode(lst), frame(frm) {}
 
 void CC_WinNodeMain::SetShow(CC_show *shw) {
   Remove();
   list = shw->winlist;
   shw->winlist->Add(this);
-  canvas->show_descr.show = shw;
+  frame->field->show_descr.show = shw;
   winlist.SetShow(shw); // Must set new show before redrawing
-  canvas->UpdateBars();
-  canvas->GotoSS(0);
+  frame->field->UpdateBars();
+  frame->field->GotoSS(0);
   ChangeName();
 }
 void CC_WinNodeMain::ChangeName() {
-  canvas->ourframe->SetTitle((char *)canvas->show_descr.show->UserGetName());
+  frame->SetTitle((char *)frame->field->show_descr.show->UserGetName());
   winlist.ChangeName();
 }
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
-  if (canvas->GetDC()->Colour) {
-    canvas->RefreshShow(FALSE, point);
+  if (frame->field->GetDC()->Colour) {
+    frame->field->RefreshShow(FALSE, point);
   } else {
     // In mono we use different line widths, so must redraw everything
-    canvas->RefreshShow();
+    frame->field->RefreshShow();
   }
   winlist.UpdateSelections(win, point);
 }
 void CC_WinNodeMain::UpdatePoints() {
-  canvas->RefreshShow();
+  frame->field->RefreshShow();
   winlist.UpdatePoints();
 }
 void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht, int ref) {
-  if (sht == canvas->show_descr.curr_ss) {
+  if (sht == frame->field->show_descr.curr_ss) {
     // ref = 0 means that any points could move
-    if ((ref <= 0) || (ref == (int)canvas->curr_ref)) {
-      canvas->RefreshShow();
+    if ((ref <= 0) || (ref == (int)frame->field->curr_ref)) {
+      frame->field->RefreshShow();
     }
   }
   winlist.UpdatePointsOnSheet(sht, ref);
 }
 void CC_WinNodeMain::ChangeNumPoints(wxWindow *win) {
-  canvas->UpdateSS();
+  frame->field->UpdateSS();
   winlist.ChangeNumPoints(win);
 }
 void CC_WinNodeMain::ChangePointLabels(wxWindow *win) {
-  canvas->UpdateSS();
+  frame->field->UpdateSS();
   winlist.ChangePointLabels(win);
 }
 void CC_WinNodeMain::ChangeShowMode(wxWindow *win) {
-  canvas->UpdateBars();
-  canvas->UpdateSS();
+  frame->field->UpdateBars();
+  frame->field->UpdateSS();
   winlist.ChangeShowMode(win);
 }
 void CC_WinNodeMain::UpdateStatusBar() {
-  canvas->UpdatePanel();
+  frame->UpdatePanel();
   winlist.UpdateStatusBar();
 }
 void CC_WinNodeMain::GotoSheet(unsigned sht) {
   winlist.GotoSheet(sht);
 }
 void CC_WinNodeMain::AddSheet(unsigned sht) {
-  if (sht <= canvas->show_descr.curr_ss) {
-    canvas->show_descr.curr_ss++;
+  if (sht <= frame->field->show_descr.curr_ss) {
+    frame->field->show_descr.curr_ss++;
   }
-  canvas->UpdatePanel();
+  frame->UpdatePanel();
   winlist.AddSheet(sht);
 }
 void CC_WinNodeMain::DeleteSheet(unsigned sht) {
   winlist.DeleteSheet(sht);
-  if (sht < canvas->show_descr.curr_ss) {
-    canvas->show_descr.curr_ss--;
+  if (sht < frame->field->show_descr.curr_ss) {
+    frame->field->show_descr.curr_ss--;
   }
-  if (canvas->show_descr.curr_ss >= canvas->show_descr.show->GetNumSheets()) {
-    canvas->PrevSS();
+  if (frame->field->show_descr.curr_ss >=
+      frame->field->show_descr.show->GetNumSheets()) {
+    frame->field->PrevSS();
   } else {
-    if (sht == canvas->show_descr.curr_ss) {
-      canvas->GotoThisSS();
+    if (sht == frame->field->show_descr.curr_ss) {
+      frame->field->GotoThisSS();
     } else {
-      canvas->UpdatePanel();
+      frame->UpdatePanel();
     }
   }
 }
 void CC_WinNodeMain::AppendSheets() {
-  canvas->UpdatePanel();
+  frame->UpdatePanel();
   winlist.AppendSheets();
 }
 void CC_WinNodeMain::RemoveSheets(unsigned num) {
   winlist.RemoveSheets(num);
-  if (canvas->show_descr.curr_ss >= canvas->show_descr.show->GetNumSheets()) {
-    canvas->GotoSS(num-1);
+  if (frame->field->show_descr.curr_ss >=
+      frame->field->show_descr.show->GetNumSheets()) {
+    frame->field->GotoSS(num-1);
   }
 }
 void CC_WinNodeMain::ChangeTitle(unsigned sht) {
-  if (sht == canvas->show_descr.curr_ss) canvas->UpdatePanel();
+  if (sht == frame->field->show_descr.curr_ss) frame->UpdatePanel();
   winlist.ChangeTitle(sht);
 }
 void CC_WinNodeMain::SelectSheet(wxWindow* win, unsigned sht) {
@@ -244,21 +256,34 @@ void CC_WinNodeMain::SetDescr(wxWindow* win) {
 // Create windows and return main app frame
 wxFrame *CalChartApp::OnInit(void)
 {
+  char *runtimepath = "runtime";
+  int realargc = argc;
+
   modelist = new ShowModeList();
 
-  char *s = ReadConfig();
+  if (argc > 1) {
+    DIR *d = opendir(argv[argc-1]);
+    if (d != NULL) {
+      runtimepath = argv[argc-1];
+      closedir(d);
+      realargc--;
+    }
+  }
+
+  char *s = ReadConfig(runtimepath);
   if (s) {
     (void)wxMessageBox(s, "CalChart");
   }
 
   //Create toolbar bitmaps
-  unsigned i = 0;
+  int i = 0;
 
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_left));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_right));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_box));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_poly));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lasso));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_line));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
@@ -302,8 +327,28 @@ wxFrame *CalChartApp::OnInit(void)
 
   window_list = new MainFrameList();
 
-  help_inst = new wxHelpInstance(TRUE);
-  help_inst->Initialize("charthlp");
+  {
+    wxString helpfile(program_dir);
+    helpfile.Append(PATH_SEPARATOR "charthlp");
+    help_inst = new wxHelpInstance(TRUE);
+    help_inst->Initialize(helpfile.GetData());
+  }
+
+  for (i = 1; i < realargc; i++) {
+    CC_show *shw;
+
+    shw = new CC_show(argv[i]);
+    if (shw->Ok()) {
+      new MainFrame(NULL, 50, 50,
+		    window_default_width, window_default_height, shw);
+    } else {
+      (void)wxMessageBox(shw->GetError(), "Load Error");
+      delete shw;
+    }
+  }
+  if (!shows_dir.Empty()) {
+    wxSetWorkingDirectory(shows_dir.GetData());
+  }
 
   return new TopFrame();
 }
@@ -314,6 +359,113 @@ int CalChartApp::OnExit(void) {
   if (window_list) delete window_list;
 
   return 0;
+}
+
+CC_lasso::CC_lasso() {}
+
+CC_lasso::~CC_lasso() {
+  Clear();
+}
+
+void CC_lasso::Clear() {
+  for (wxNode *n = pntlist.First(); n != NULL; n = n->Next()) {
+    delete n->Data();
+  }
+  pntlist.Clear();
+}
+
+void CC_lasso::Start(const CC_coord& p) {
+  Clear();
+  Append(p);
+}
+
+// Closes polygon
+void CC_lasso::End() {
+  wxNode *n = pntlist.Last();
+  wxPoint *first;
+  if (n) {
+    first = (wxPoint*)n->Data();
+    wxPoint *p = new wxPoint(first->x, first->y);
+    pntlist.Insert(p);
+  }
+}
+
+void CC_lasso::Append(const CC_coord& p) {
+  pntlist.Insert(new wxPoint(p.x, p.y));
+}
+
+// Test if inside polygon using odd-even rule
+Bool CC_lasso::Inside(const CC_coord& p) {
+  Bool parity = FALSE;
+  wxNode *last;
+  wxNode *n = pntlist.First();
+  if (n != NULL) {
+    last = n;
+    n = n->Next();
+    while (n != NULL) {
+      if (CrossesLine((wxPoint*)last->Data(), (wxPoint*)n->Data(), p)) {
+	parity ^= TRUE;
+      }
+      last = n;
+      n = n->Next();
+    }
+  }
+  return parity;
+}
+
+void CC_lasso::Draw(wxDC *dc, float x, float y) {
+  SetXOR(dc);
+  dc->DrawLines(&pntlist, x, y);
+}
+
+/*
+void CC_lasso::Drag(wxDC *dc, const CC_coord& p) {
+  wxNode *n1, *n2;
+  wxPoint *p1, *p2;
+
+  n1 = pntlist.First();
+  if (n1 != NULL) {
+    n2 = n1->Next();
+    if (n2 != NULL) {
+      SetXOR(dc);
+      p1 = (wxPoint*)n1->Data();
+      p2 = (wxPoint*)n2->Data();
+      dc->DrawLine(p1->x, p1->y, p2->x, p2->y);
+      p1->x = p.x;
+      p1->y = p.y;
+      dc->DrawLine(p1->x, p1->y, p2->x, p2->y);
+    }
+  }
+}
+*/
+void CC_lasso::Drag(const CC_coord& p) {
+  wxNode *n1;
+  wxPoint *p1;
+
+  n1 = pntlist.First();
+  if (n1 != NULL) {
+    p1 = (wxPoint*)n1->Data();
+    p1->x = p.x;
+    p1->y = p.y;
+  }
+}
+
+Bool CC_lasso::CrossesLine(const wxPoint* start, const wxPoint* end,
+			   const CC_coord& p) {
+  if (start->y > end->y) {
+    if (!((p.y <= start->y) && (p.y > end->y))) {
+      return FALSE;
+    }
+  } else {
+    if (!((p.y <= end->y) && (p.y > start->y))) {
+      return FALSE;
+    }
+  }
+  if (p.x >=
+      ((end->x-start->x) * (p.y-start->y) / (end->y-start->y) + start->x)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 static void new_window(wxButton&, wxEvent&) {
@@ -454,36 +606,64 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   field = new FieldCanvas(show, ss, this, def_zoom);
   field->curr_ref = def_ref;
   frameCanvas = field;
-  node = new CC_WinNodeMain(show->winlist, field);
+  node = new CC_WinNodeMain(show->winlist, this);
 
   // Add the controls
   framePanel = new wxPanel(this);
+  framePanel->SetAutoLayout(TRUE);
+
+  // Grid choice
+  grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
+			     "&Grid", -1, -1, -1, -1,
+			     sizeof(gridtext)/sizeof(char*),
+			     gridtext);
+  grid_choice->SetSelection(def_grid);
+
+  // Zoom slider
+  SliderWithField *sldr = new SliderWithField(framePanel, slider_zoom_callback,
+					      "&Zoom", def_zoom,
+					      1, FIELD_MAXZOOM, 150);
+  sldr->field = field;
+  zoom_slider = sldr;
+  wxLayoutConstraints *sl0 = new wxLayoutConstraints;
+  sl0->left.AsIs();
+  sl0->top.AsIs();
+  sl0->right.SameAs(framePanel, wxRight, 5);
+  sl0->height.AsIs();
+  sldr->SetConstraints(sl0);
+
+  framePanel->NewLine();
+
+  // Reference choice
   {
-    char buf[4];
+    wxString buf;
     unsigned i;
 
     ref_choice = new ChoiceWithField(framePanel, (wxFunction)refnum_callback,
 				     "&Ref Group");
     ref_choice->Append("Off");
     for (i = 1; i <= NUM_REF_PNTS; i++) {
-      sprintf(buf, "%u", i);
-      ref_choice->Append(buf);
+      buf.sprintf("%u", i);
+      ref_choice->Append(buf.GetData());
     }
   }
   ((ChoiceWithField*)ref_choice)->field = field;
   ref_choice->SetSelection(def_ref);
-  grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
-			     "&Grid", -1, -1, -1, -1,
-			     sizeof(gridtext)/sizeof(char*),
-			     gridtext);
-  grid_choice->SetSelection(def_grid);
-  SliderWithField *sldr = new SliderWithField(framePanel, slider_zoom_callback,
-					      "&Zoom", def_zoom,
-					      1, FIELD_MAXZOOM, 150);
+
+  // Sheet slider (will get set later with UpdatePanel())
+  sldr = new SliderWithField(framePanel, slider_sheet_callback,
+			     "&Sheet", 1, 1, 2, 150);
   sldr->field = field;
-  zoom_slider = sldr;
+  sheet_slider = sldr;
+  wxLayoutConstraints *sl1 = new wxLayoutConstraints;
+  sl1->left.AsIs();
+  sl1->top.AsIs();
+  sl1->right.SameAs(framePanel, wxRight, 5);
+  sl1->height.AsIs();
+  sldr->SetConstraints(sl1);
 
   // Show the frame
+  UpdatePanel();
   window_list->Insert(this);
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   OnSize(-1, -1);
@@ -620,11 +800,11 @@ void MainFrame::OnMenuCommand(int id)
     break;
   case CALCHART__SET_BEATS:
     if (field->show_descr.show) {
-      char buf[16];
-      sprintf(buf, "%u", field->show_descr.CurrSheet()->beats);
+      wxString buf;
+      buf.sprintf("%u", field->show_descr.CurrSheet()->beats);
       s = wxGetTextFromUser("Enter the number of beats",
 			    (char *)field->show_descr.CurrSheet()->GetName(),
-			    buf, this);
+			    buf.GetData(), this);
       if (s) {
 	field->show_descr.CurrSheet()->UserSetBeats(atoi(s));
       }
@@ -743,13 +923,13 @@ void MainFrame::OnMenuSelect(int id)
 
 // Give the use a chance to save the current show
 Bool MainFrame::OkayToClearShow() {
-  char buf[1024];
+  wxString buf;
 
   if (field->show_descr.show->Modified()) {
     if (!field->show_descr.show->winlist->MultipleWindows()) {
-      sprintf(buf, "Save changes to '%s'?",
-	      field->show_descr.show->UserGetName());
-      switch (wxMessageBox(buf, "Unsaved changes",
+      buf.sprintf("Save changes to '%s'?",
+		  field->show_descr.show->UserGetName());
+      switch (wxMessageBox(buf.GetData(), "Unsaved changes",
 			   wxYES_NO | wxCANCEL, this)) {
       case wxYES:
 	SaveShowAs();
@@ -860,7 +1040,7 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int def_zoom, int x, int y, int w, int h):
  AutoScrollCanvas(frame, x, y, w, h), ourframe(frame), curr_lasso(CC_DRAG_BOX),
- curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
+ curr_move(CC_MOVE_NORMAL), curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
 {
   SetColourMap(CalChartColorMap);
 
@@ -872,7 +1052,6 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
   SetBackground(CalChartBrushes[COLOR_FIELD]);
 
   UpdateBars();
-  UpdatePanel();
 }
 
 FieldCanvas::~FieldCanvas(void)
@@ -920,6 +1099,10 @@ void FieldCanvas::DrawDrag(Bool on)
 		   drag_end.y+origin.y+GetPositionY());
       dragon = on;
       break;
+    case CC_DRAG_POLY:
+    case CC_DRAG_LASSO:
+      lasso.Draw(dc, origin.x+GetPositionX(), origin.y+GetPositionY());
+      dragon = on;
     default:
       break;
     }
@@ -934,6 +1117,8 @@ void FieldCanvas::OnPaint(void)
   DrawDrag(TRUE);
 }
 
+// Allow clicking within pixels to close polygons
+#define CLOSE_ENOUGH_TO_CLOSE 10
 void FieldCanvas::OnEvent(wxMouseEvent& event)
 {
   float x,y;
@@ -953,51 +1138,114 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
       pos.y = Coord(y - GetPositionY() - pos.y);
 
       if (event.LeftDown()) {
-	Bool changed = FALSE;
-	if (!event.shiftDown) changed = show_descr.show->UnselectAll();
-	i = sheet->FindPoint(pos.x, pos.y, curr_ref);
-	if (i >= 0) {
-	  if (!(show_descr.show->IsSelected(i))) {
-	    show_descr.show->Select(i);
-	    changed = TRUE;
+	switch (curr_move) {
+	case CC_MOVE_LINE:
+	  ourframe->SnapToGrid(pos);
+	  BeginDrag(CC_DRAG_LINE, pos);
+	  break;
+	default:
+	  switch (drag) {
+	  case CC_DRAG_POLY:
+	    {
+	      wxPoint *p = lasso.FirstPoint();
+	      float d;
+	      if (p != NULL) {
+		Coord polydist =
+		  (Coord)GetDC()->DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
+		d = p->x - pos.x;
+		if (ABS(d) < polydist) {
+		  d = p->y - pos.y;
+		  if (ABS(d) < polydist) {
+		    EndDrag();
+		    SelectWithLasso();
+		    break;
+		  }
+		}
+	      }
+	      lasso.Append(pos);
+	    }
+	  break;
+	  default:
+	    Bool changed = FALSE;
+	    if (!event.shiftDown) changed = show_descr.show->UnselectAll();
+	    i = sheet->FindPoint(pos.x, pos.y, curr_ref);
+	    if (i >= 0) {
+	      if (!(show_descr.show->IsSelected(i))) {
+		show_descr.show->Select(i);
+		changed = TRUE;
+	      }
+	    }
+	    if (changed) {
+	      show_descr.show->winlist->UpdateSelections();
+	    }
+	    if (i < 0) {
+	      BeginDrag(curr_lasso, pos);
+	    } else {
+	      BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
+	    }
 	  }
+	  break;
 	}
-	if (changed) {
-	  show_descr.show->winlist->UpdateSelections();
-	}
-	if (i < 0) {
-	  BeginDrag(curr_lasso, pos);
-	} else {
-	  BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
-	}
-      } else {
-	if (event.LeftUp()) {
-	  CC_DRAG_TYPES drag_tmp = drag;
+      } else if (event.LeftUp()) {
+	switch (curr_move) {
+	case CC_MOVE_LINE:
 	  EndDrag();
-	  switch (drag_tmp) {
+	  if (sheet->MovePointsInLine(drag_start, drag_end, curr_ref))
+	    show_descr.show->winlist->
+	      UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+	  curr_move = CC_MOVE_NORMAL;
+	  break;
+	default:
+	  switch (drag) {
 	  case CC_DRAG_BOX:
-	    if (sheet->SelectPointsInRect(drag_start, drag_end))
+	    EndDrag();
+	    if (sheet->SelectPointsInRect(drag_start, drag_end, curr_ref))
 	      show_descr.show->winlist->UpdateSelections();
 	    break;
 	  case CC_DRAG_LINE:
+	    EndDrag();
 	    pos.x = drag_end.x - drag_start.x;
 	    pos.y = drag_end.y - drag_start.y;
 	    if (sheet->TranslatePoints(pos, curr_ref))
 	      show_descr.show->winlist->
 		UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 	    break;
+	  case CC_DRAG_LASSO:
+	    EndDrag();
+	    SelectWithLasso();
+	    break;
 	  default:
 	    break;
 	  }
-	} else {
-	  if (event.Dragging() && event.LeftIsDown()) {
-	    if (drag != CC_DRAG_BOX) {
-	      ourframe->SnapToGrid(pos);
-	    }
-	    MoveDrag(pos);
-	  }
+	  break;
+	}
+      } else if (event.RightDown()) {
+	switch (drag) {
+	case CC_DRAG_POLY:
+	  EndDrag();
+	  SelectWithLasso();
+	  break;
+	default:
+	  break;
+	}
+      } else if (event.Dragging() && event.LeftIsDown()) {
+	switch (drag) {
+	case CC_DRAG_LINE:
+	  ourframe->SnapToGrid(pos);
+	default:
+	  MoveDrag(pos);
+	  break;
+	}
+      } else if (event.Moving()) {
+	switch (drag) {
+	case CC_DRAG_POLY:
+	  MoveDrag(pos);
+	  break;
+	default:
+	  break;
 	}
       }
+      DrawDrag(TRUE);
     }
   }
 }
@@ -1031,14 +1279,27 @@ void FieldCanvas::RefreshShow(Bool drawall, int point) {
   }
 }
 
-void FieldCanvas::UpdatePanel() {
-  char tempbuf[256];
-  CC_sheet *sht = show_descr.CurrSheet();
+void MainFrame::UpdatePanel() {
+  wxString tempbuf;
+  CC_sheet *sht = field->show_descr.CurrSheet();
+  unsigned num = field->show_descr.show->GetNumSheets();
+  unsigned curr = field->show_descr.curr_ss+1;
 
-  sprintf(tempbuf, "%s%d of %d \"%.32s\" %d beats",
-	  show_descr.show->Modified() ? "* ":"", show_descr.curr_ss+1,
-	  show_descr.show->GetNumSheets(), sht->GetName(), sht->beats);
-  ourframe->SetStatusText(tempbuf, 1);
+  tempbuf.sprintf("%s%d of %d \"%.32s\" %d beats",
+		  field->show_descr.show->Modified() ? "* ":"", curr,
+		  num, sht->GetName(), sht->beats);
+  SetStatusText(tempbuf.GetData(), 1);
+
+  if (num > 1) {
+    sheet_slider->Enable(TRUE);
+    if ((unsigned)sheet_slider->GetMax() != num)
+      sheet_slider->SetValue(1); // So Motif doesn't complain about value
+      sheet_slider->SetRange(1, num);
+    if ((unsigned)sheet_slider->GetValue() != curr)
+      sheet_slider->SetValue(curr);
+  } else {
+    sheet_slider->Enable(FALSE);
+  }
 }
 
 void FieldCanvas::UpdateBars() {
@@ -1046,6 +1307,66 @@ void FieldCanvas::UpdateBars() {
     SetSize(COORD2INT(show_descr.show->mode->Size().x) * zoomf,
 	    COORD2INT(show_descr.show->mode->Size().y) * zoomf);
   }
+}
+
+void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
+  DrawDrag(FALSE);
+  drag = type;
+  switch (drag) {
+  case CC_DRAG_POLY:
+    lasso.Clear();
+    lasso.Append(start);
+    lasso.Append(start);
+    break;
+  case CC_DRAG_LASSO:
+    lasso.Clear();
+    lasso.Append(start);
+    break;
+  default:
+    drag_start = drag_end = start;
+  }
+  DrawDrag(TRUE);
+}
+
+void FieldCanvas::MoveDrag(CC_coord end) {
+  DrawDrag(FALSE);
+  switch (drag) {
+  case CC_DRAG_POLY:
+    lasso.Drag(end);
+    break;
+  case CC_DRAG_LASSO:
+    lasso.Append(end);
+    break;
+  default:
+    drag_end = end;
+  }
+  DrawDrag(TRUE);
+}
+
+void FieldCanvas::EndDrag() {
+  DrawDrag(FALSE);
+  switch (drag) {
+  case CC_DRAG_LASSO:
+    lasso.End();
+    break;
+  default:
+    break;
+  }
+  drag = CC_DRAG_NONE;
+}
+
+void FieldCanvas::SelectWithLasso() {
+  Bool changed = FALSE;
+  CC_sheet* sheet = show_descr.CurrSheet();
+  
+  for (unsigned i = 0; i < show_descr.show->GetNumPoints(); i++) {
+    if (lasso.Inside(sheet->GetPosition(i, curr_ref))) {
+      changed = TRUE;
+      show_descr.show->Select(i);
+    }
+  }
+  if (changed) show_descr.show->winlist->UpdateSelections();
+  lasso.Clear();
 }
 
 Bool MainFrameList::CloseAllWindows() {
@@ -1083,6 +1404,11 @@ static void toolbar_poly(CoolToolBar *tb) {
 static void toolbar_lasso(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
   mf->field->curr_lasso = CC_DRAG_LASSO;
+}
+
+static void toolbar_line(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->field->curr_move = CC_MOVE_LINE;
 }
 
 static void toolbar_label_left(CoolToolBar *tb) {
@@ -1166,6 +1492,11 @@ static void refnum_callback(wxObject &obj, wxEvent &) {
   ChoiceWithField *choice = (ChoiceWithField *)&obj;
   choice->field->curr_ref = (unsigned)choice->GetSelection();
   choice->field->RefreshShow();
+}
+
+static void slider_sheet_callback(wxObject &obj, wxEvent &) {
+  SliderWithField *slider = (SliderWithField *)&obj;
+  slider->field->GotoSS(slider->GetValue()-1);
 }
 
 static void slider_zoom_callback(wxObject &obj, wxEvent &) {

@@ -149,21 +149,23 @@ wxColourMap *CalChartColorMap;
 wxPen *CalChartPens[COLOR_NUM];
 wxBrush *CalChartBrushes[COLOR_NUM];
 
+wxString program_dir;
+wxString shows_dir;
 unsigned int window_default_width = 600;
 unsigned int window_default_height = 450;
 unsigned int undo_buffer_size = 50000;
-char print_file[MAX_FNAME_LEN] = "LPT1";
-char print_cmd[MAX_FNAME_LEN] = "lpr";
-char print_opts[MAX_FNAME_LEN] = "";
-char print_view_cmd[MAX_FNAME_LEN] = "ghostview";
-char print_view_opts[MAX_FNAME_LEN] = "";
-char head_font[MAX_FONT_LEN] = "Helvetica-Bold";
-char main_font[MAX_FONT_LEN] = "Helvetica";
-char number_font[MAX_FONT_LEN] = "Helvetica";
-char cont_font[MAX_FONT_LEN] = "Courier";
-char bold_font[MAX_FONT_LEN] = "Courier-Bold";
-char ital_font[MAX_FONT_LEN] = "Courier-Italic";
-char bold_ital_font[MAX_FONT_LEN] = "Courier-BoldItalic";
+wxString print_file = "LPT1";
+wxString print_cmd = "lpr";
+wxString print_opts = "";
+wxString print_view_cmd = "ghostview";
+wxString print_view_opts = "";
+wxString head_font = "Helvetica-Bold";
+wxString main_font = "Helvetica";
+wxString number_font = "Helvetica";
+wxString cont_font = "Courier";
+wxString bold_font = "Courier-Bold";
+wxString ital_font = "Courier-Italic";
+wxString bold_ital_font = "Courier-BoldItalic";
 float page_width = 7.5;
 float page_height = 10.0;
 float paper_length = 11.0;
@@ -177,7 +179,7 @@ float num_ratio = 1.2;
 float pline_ratio = 1.0;
 float sline_ratio = 1.0;
 float cont_ratio = 0.25;
-char yard_text[21][8] = {
+wxString yard_text[21] = {
   "0",
   "5",
   "10",
@@ -200,7 +202,7 @@ char yard_text[21][8] = {
   "5",
   "0",
 };
-char spr_line_text[MAX_SPR_LINES][8] = {
+wxString spr_line_text[MAX_SPR_LINES] = {
   "A",
   "B",
   "C",
@@ -209,13 +211,12 @@ char spr_line_text[MAX_SPR_LINES][8] = {
 };
 
 static wxPathList configdirs;
-static char runtimedir[MAX_PATH_LEN];
+static wxString runtime_dir;
 
-char *ReadConfig(void) {
+char *ReadConfig(const char *path) {
   FILE *fp;
   int i;
-  char com_buf[1024];
-  char stage_eps_file[MAX_FNAME_LEN];
+  wxString com_buf;
   CC_coord bord1(INT2COORD(8),INT2COORD(8)), bord2(INT2COORD(8),INT2COORD(8));
   char *retmsg = NULL;
   unsigned short whash, ehash;
@@ -225,21 +226,40 @@ char *ReadConfig(void) {
   short eps_text_left, eps_text_right, eps_text_top, eps_text_bottom;
   unsigned char which_spr_yards;
 
-  // Add './runtime'
-  wxGetWorkingDirectory(runtimedir, MAX_PATH_LEN);
-  strncat(runtimedir, PATH_SEPARATOR, MAX_PATH_LEN);
-  strncat(runtimedir, "runtime", MAX_PATH_LEN);
-  configdirs.Add(runtimedir);
+  char *tmpstr = wxGetWorkingDirectory();
+  program_dir = tmpstr;
+  delete [] tmpstr;
+
+  // Set search path for files
   configdirs.AddEnvList("CALCHART_RT");
+  // Add default path
+  tmpstr = FullPath(path);
+  runtime_dir = tmpstr;
+  delete [] tmpstr;
+  configdirs.Add(runtime_dir.GetData());
 
   fp = OpenFileInDir("config", "r");
   if (fp == NULL) {
     retmsg = "Unable to open config file.  Using default values.\n";
   } else {
-    while (my_fgets(com_buf, 1024, fp) != NULL) {
+    while (!feof(fp)) {
+      ReadDOSline(fp, com_buf);
+
+      if (com_buf.Empty()) continue;
       /* check for comment */
-      if (com_buf[0] == '#') continue;
-      if (com_buf[0] == 0) continue;
+      if (com_buf.Elem(0) == '#') continue;
+      if (strcmp("PROGRAM_DIR", com_buf) == 0) {
+	ReadDOSline(fp, program_dir);
+	continue;
+      }
+      if (strcmp("SHOWS_DIR", com_buf) == 0) {
+	ReadDOSline(fp, shows_dir);
+	continue;
+      }
+      if (strcmp("RUNTIME_DIR", com_buf) == 0) {
+	ReadDOSline(fp, runtime_dir);
+	continue;
+      }
       if (strcmp("WINDOW_WIDTH", com_buf) == 0) {
 	fscanf(fp, " %d \n", &window_default_width);
 	continue;
@@ -253,27 +273,27 @@ char *ReadConfig(void) {
 	continue;
       }
       if (strcmp("PRINT_FILE", com_buf) == 0) {
-	my_fgets(print_file, MAX_FNAME_LEN, fp);
+	ReadDOSline(fp, print_file);
 	continue;
       }
       if (strcmp("PRINT_CMD", com_buf) == 0) {
-	my_fgets(print_cmd, MAX_FNAME_LEN, fp);
+	ReadDOSline(fp, print_cmd);
 	continue;
       }
       if (strcmp("PRINT_OPTS", com_buf) == 0) {
-	my_fgets(print_opts, MAX_FNAME_LEN, fp);
+	ReadDOSline(fp, print_opts);
 	continue;
       }
       if (strcmp("PRINT_VIEW_CMD", com_buf) == 0) {
-	my_fgets(print_view_cmd, MAX_FNAME_LEN, fp);
+	ReadDOSline(fp, print_view_cmd);
 	continue;
       }
       if (strcmp("PRINT_VIEW_OPTS", com_buf) == 0) {
-	my_fgets(print_view_opts, MAX_FNAME_LEN, fp);
+	ReadDOSline(fp, print_view_opts);
 	continue;
       }
       if (strcmp("DEFINE_STANDARD_MODE", com_buf) == 0) {
-	my_fgets(com_buf, 1024, fp);
+	ReadDOSline(fp, com_buf);
 	fscanf(fp, " %hu %hu \n", &whash, &ehash);
 	fscanf(fp, " %hu %hu %hu %hu \n",
 	       &bord1.x, &bord1.y, &bord2.x, &bord2.y);
@@ -286,8 +306,9 @@ char *ReadConfig(void) {
 	continue;
       }
       if (strcmp("DEFINE_SPRSHOW_MODE", com_buf) == 0) {
-	my_fgets(com_buf, 1024, fp);
-	my_fgets(stage_eps_file, MAX_FNAME_LEN, fp);
+	wxString mode_name;
+	ReadDOSline(fp, mode_name);
+	ReadDOSline(fp, com_buf);
 	fscanf(fp, " %c \n", &which_spr_yards);
 	if (which_spr_yards <= '9') {
 	  which_spr_yards -= '0';
@@ -308,8 +329,8 @@ char *ReadConfig(void) {
 	       &eps_steps_w, &eps_steps_h);
 	fscanf(fp, " %hd %hd %hd %hd \n", &eps_text_left, &eps_text_right,
 	       &eps_text_top, &eps_text_bottom);
-	modelist->Add(new ShowModeSprShow(com_buf, bord1, bord2,
-					  which_spr_yards, stage_eps_file,
+	modelist->Add(new ShowModeSprShow(mode_name.Chars(), bord1, bord2,
+					  which_spr_yards, com_buf,
 					  eps_stage_x, eps_stage_y,
 					  eps_stage_w, eps_stage_h,
 					  eps_field_x, eps_field_y,
@@ -373,57 +394,58 @@ char *ReadConfig(void) {
 	continue;
       }
       if (strcmp("PRINT_HEADER_FONT", com_buf) == 0) {
-	my_fgets(head_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, head_font);
 	continue;
       }
       if (strcmp("PRINT_NUMBER_FONT", com_buf) == 0) {
-	my_fgets(number_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, number_font);
 	continue;
       }
       if (strcmp("PRINT_ANNO_FONT", com_buf) == 0) {
-	my_fgets(main_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, main_font);
 	continue;
       }
       if (strcmp("PRINT_FONT", com_buf) == 0) {
-	my_fgets(cont_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, cont_font);
 	continue;
       }
       if (strcmp("PRINT_BOLD_FONT", com_buf) == 0) {
-	my_fgets(bold_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, bold_font);
 	continue;
       }
       if (strcmp("PRINT_ITALIC_FONT", com_buf) == 0) {
-	my_fgets(ital_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, ital_font);
 	continue;
       }
       if (strcmp("PRINT_BOLD_ITALIC_FONT", com_buf) == 0) {
-	my_fgets(bold_ital_font, MAX_FONT_LEN, fp);
+	ReadDOSline(fp, bold_ital_font);
 	continue;
       }
       if (strcmp("PRINT_YARDS", com_buf) == 0) {
-	fscanf(fp, " %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s ",
-	       yard_text[0], yard_text[1], yard_text[2],
-	       yard_text[3], yard_text[4], yard_text[5], yard_text[6],
-	       yard_text[7], yard_text[8], yard_text[9], yard_text[10],
-	       yard_text[11], yard_text[12], yard_text[13], yard_text[14],
-	       yard_text[15], yard_text[16], yard_text[17], yard_text[18],
-	       yard_text[19], yard_text[20]);
+	char yardbuf[16];
+	for (i=0; i<21; i++) {
+	  fscanf(fp, " %s ", yardbuf);
+	  yard_text[i] = yardbuf;
+	}
 	continue;
       }
       if (strcmp("PRINT_SPR_LINES", com_buf) == 0) {
-	fscanf(fp, " %s %s %s %s %s ",
-	       spr_line_text[0], spr_line_text[1], spr_line_text[2],
-	       spr_line_text[3], spr_line_text[4]);
+	char yardbuf[16];
+	for (i=0; i<MAX_SPR_LINES; i++) {
+	  fscanf(fp, " %s ", yardbuf);
+	  spr_line_text[i] = yardbuf;
+	}
 	continue;
       }
       if (strcmp("COLOR", com_buf) == 0) {
 	int mono, hollow, width, dotted;
+	char coltype_buf[256];
 	char colname_buf[256];
 
 	fscanf(fp, " \"%[^\"]\" \"%[^\"]\" %d %d %d %d ",
-	       com_buf, colname_buf, &mono, &hollow, &width, &dotted);
+	       coltype_buf, colname_buf, &mono, &hollow, &width, &dotted);
 	for (i=0; i<COLOR_NUM; i++) {
-	  if (strcmp(ColorNames[i], com_buf) == 0) {
+	  if (strcmp(ColorNames[i], coltype_buf) == 0) {
 	    if (wxColourDisplay()) {
 	      unsigned r, g, b;
 	      wxColour *c;
@@ -448,19 +470,18 @@ char *ReadConfig(void) {
 	  }
 	}
 	if (i == COLOR_NUM) {
-	  char tmpbuf[256];
-	  sprintf(tmpbuf,
-		  "Warning: color '%s' in config file is not recognized.\n",
-		  com_buf);
-	  retmsg = copystring(tmpbuf);
+	  wxString tmpbuf;
+	  tmpbuf.sprintf("Warning: color '%s' in config file is not recognized.\n",
+			 coltype_buf);
+	  retmsg = copystring(tmpbuf.GetData());
 	}
 	continue;
       }
       if (!retmsg) {
-	char tmpbuf[256];
-	sprintf(tmpbuf, "Warning: '%s' is not recognized in config file.\n",
-		com_buf);
-	retmsg = copystring(tmpbuf);
+	wxString tmpbuf;
+	tmpbuf.sprintf("Warning: '%s' is not recognized in config file.\n",
+		       com_buf.GetData());
+	retmsg = copystring(tmpbuf.GetData());
       }
     }
     fclose(fp);
@@ -557,20 +578,28 @@ FILE *OpenFileInDir(const char *name, const char *modes) {
   return fp;
 }
 
-// Like fgets, but strips off the newline
-char *my_fgets(char *buffer, int length, FILE *fp) {
-  char *p;
-  int i;
+char *FullPath(const char *path) {
+  if (wxIsAbsolutePath(path)) {
+    return copystring(path);
+  } else {
+    // make into a full path
+    wxString newpath;
+    char *cdw = wxGetWorkingDirectory();
+    newpath = cdw;
+    delete [] cdw;
+    newpath.Append(PATH_SEPARATOR);
+    newpath.Append(path);
+    return copystring(newpath.GetData());
+  }
+}
 
-  p = fgets(buffer, length, fp);
-  if (p != NULL) {
-    i = strlen(buffer);
-    if (--i >= 0) {
-      if (buffer[i] == '\n') buffer[i] = 0;
-    }
-    if (--i >= 0) {
-      if (buffer[i] == '\r') buffer[i] = 0;
+int ReadDOSline(FILE *fp, wxString& str) {
+  int c = Readline(fp, str);
+  if (c > 0) {
+    if (str[str.Length()-1] == '\r') {
+      str.RemoveLast();
+      return c-1;
     }
   }
-  return p;
+  return c;
 }

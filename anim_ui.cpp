@@ -13,6 +13,9 @@
 #include "anim_ui.h"
 #include "modes.h"
 #include "confgr.h"
+#ifdef ANIM_OUTPUT_RIB
+#include <ri.h>
+#endif
 
 static void toolbar_anim_stop(CoolToolBar *tb);
 static void toolbar_anim_play(CoolToolBar *tb);
@@ -22,6 +25,8 @@ static void toolbar_anim_prev_sheet(CoolToolBar *tb);
 static void toolbar_anim_next_sheet(CoolToolBar *tb);
 static void collision_callback(wxCheckBox &cb, wxEvent &ev);
 static void slider_anim_tempo(wxObject &obj, wxEvent &ev);
+static void slider_gotosheet(wxObject &obj, wxEvent &ev);
+static void slider_gotobeat(wxObject &obj, wxEvent &ev);
 
 ToolBarEntry anim_tb[] = {
   { 0, NULL, "Stop", toolbar_anim_stop },
@@ -40,7 +45,7 @@ void CC_WinNodeAnim::SetShow(CC_show *) {
 }
 
 void CC_WinNodeAnim::UpdateSelections(wxWindow*, int) {
-  frame->canvas->OnPaint();
+  frame->canvas->Redraw();
 }
 
 void CC_WinNodeAnim::ChangeNumPoints(wxWindow *) {
@@ -68,7 +73,7 @@ void AnimationTimer::Notify() {
   if (!canvas->NextBeat()) Stop();
 }
 
-AnimationCanvas::AnimationCanvas(wxFrame *frame, CC_descr *dcr)
+AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_descr *dcr)
 : AutoScrollCanvas(frame, -1, -1,
 	   COORD2INT(dcr->show->mode->Size().x)*DEFAULT_ANIM_SIZE,
 	   COORD2INT(dcr->show->mode->Size().y)*DEFAULT_ANIM_SIZE),
@@ -90,6 +95,10 @@ AnimationCanvas::~AnimationCanvas() {
 }
 
 void AnimationCanvas::OnPaint() {
+  Blit();
+}
+
+void AnimationCanvas::RedrawBuffer() {
   unsigned long x, y;
   unsigned i;
   wxDC *dc = GetMemDC();
@@ -158,7 +167,6 @@ void AnimationCanvas::OnPaint() {
   }
 
   dc->EndDrawing();
-  Blit();
 }
 
 void AnimationCanvas::OnEvent(wxMouseEvent& event) {
@@ -174,17 +182,23 @@ void AnimationCanvas::SetTempo(unsigned t) {
 }
 
 void AnimationCanvas::UpdateText() {
-  char tempbuf[100];
+  wxString tempbuf;
 
   if (anim) {
-    sprintf(tempbuf, "Beat %u of %u  Sheet %d of %d \"%.32s\"",
-	    anim->curr_beat, anim->curr_sheet->numbeats,
-	    anim->curr_sheetnum+1, anim->numsheets,
-	    anim->curr_sheet->name);
-    ourframe->SetStatusText(tempbuf, 1);
+    tempbuf.sprintf("Beat %u of %u  Sheet %d of %d \"%.32s\"",
+		    anim->curr_beat, anim->curr_sheet->numbeats,
+		    anim->curr_sheetnum+1, anim->numsheets,
+		    anim->curr_sheet->name);
+    ourframe->SetStatusText(tempbuf.GetData(), 1);
   } else {
     ourframe->SetStatusText("No animation available", 1);
   }
+}
+
+void AnimationCanvas::Refresh() {
+  Redraw();
+  UpdateText();
+  ourframe->UpdatePanel();
 }
 
 void AnimationCanvas::Generate() {
@@ -201,6 +215,7 @@ void AnimationCanvas::Generate() {
     anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionsOn());
     anim->GotoSheet(show_descr->curr_ss);
   }
+  ourframe->UpdatePanel();
   Refresh();
   ourframe->SetStatusText("Ready");
 }
@@ -213,6 +228,190 @@ void AnimationCanvas::FreeAnim() {
   }
 }
 
+void AnimationCanvas::SelectCollisions() {
+  unsigned i;
+
+  if (anim) {
+    for (i = 0; i < anim->numpts; i++) {
+      if (anim->collisions[i]) {
+	show_descr->show->Select(i);
+      } else {
+	show_descr->show->Select(i, FALSE);
+      }
+    }
+    show_descr->show->winlist->UpdateSelections();
+  }
+}
+
+#ifdef ANIM_OUTPUT_POVRAY
+#define POV_SCALE 16
+const char *AnimationCanvas::GeneratePOVFiles(const char *filebasename) {
+  unsigned framenum, pt;
+  wxString filename;
+  FILE *fp;
+  float x, y;
+  Bool east = 1;
+  wxPen *pen;
+
+  if (anim) {
+    GotoSheet(0);
+    framenum = 1;
+    do {
+      filename.sprintf("%s%05d.pov", filebasename, framenum);
+      fp = fopen(filename.Chars(), "w");
+      if (fp == NULL) {
+	return "Error opening file";
+      }
+      for (pt = 0; pt < anim->numpts; pt++) {
+	x = COORD2FLOAT(anim->pts[pt].pos.x) * POV_SCALE;
+	y = COORD2FLOAT(anim->pts[pt].pos.y) * POV_SCALE;
+	/* x is already flipped because of the different axises */
+	if (east) {
+	  x = (-x);
+	} else {
+	  y = (-y);
+	}
+	fprintf(fp, "cylinder { <%f, 0.0, %f>, <%f, %f, %f> %f\n",
+		x, y,
+		x, 4.0 * POV_SCALE, y,
+		0.75 * POV_SCALE);
+	if (anim->curr_cmds[pt]) {
+	  switch (anim->curr_cmds[pt]->Direction()) {
+	  case ANIMDIR_SW:
+	  case ANIMDIR_W:
+	  case ANIMDIR_NW:
+	    pen = CalChartPens[COLOR_POINT_ANIM_BACK];
+	    break;
+	  case ANIMDIR_SE:
+	  case ANIMDIR_E:
+	  case ANIMDIR_NE:
+	    pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
+	    break;
+	  default:
+	    pen = CalChartPens[COLOR_POINT_ANIM_SIDE];
+	  }
+	} else {
+	    pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
+	}
+	fprintf(fp, "pigment { colour red %f green %f blue %f }\n",
+		pen->GetColour().Red() / 255.0,
+		pen->GetColour().Green() / 255.0,
+		pen->GetColour().Blue() / 255.0);
+	fprintf(fp, "}\n");
+      }
+      fclose(fp);
+      framenum++;
+    } while (NextBeat());
+  }
+  return NULL;
+}
+#endif
+
+#ifdef ANIM_OUTPUT_RIB
+
+static char *texturefile = "memorial.tif";
+const char * AnimationCanvas::GenerateRIBFrame() {
+  unsigned pt;
+  float x, y;
+  Bool east = 1;
+  wxPen *pen;
+  RtColor color;
+  static RtFloat amb_intensity = 0.2, dist_intensity = 0.9;
+  RtPoint field[4];
+
+  field[0][0] = -1408;
+  field[0][1] = 400;
+  field[0][2] = 0;
+  field[1][0] = 1408;
+  field[1][1] = 400;
+  field[1][2] = 0;
+  field[2][0] = 1408;
+  field[2][1] = -400;
+  field[2][2] = 0;
+  field[3][0] = -1408;
+  field[3][1] = -400;
+  field[3][2] = 0;
+
+  RiWorldBegin();
+  RiAttributeBegin();
+  RiLightSource(RI_AMBIENTLIGHT, RI_INTENSITY, &amb_intensity, RI_NULL);
+  RiLightSource(RI_DISTANTLIGHT, RI_INTENSITY, &dist_intensity, RI_NULL);
+  RiDeclare("tmap", "uniform string");
+  RiSurface("fieldtexture", "tmap", &texturefile, RI_NULL);
+  RiPolygon(4, RI_P, (RtPointer)field, RI_NULL);
+  for (pt = 0; pt < anim->numpts; pt++) {
+    if (anim->curr_cmds[pt]) {
+      switch (anim->curr_cmds[pt]->Direction()) {
+      case ANIMDIR_SW:
+      case ANIMDIR_W:
+      case ANIMDIR_NW:
+	pen = CalChartPens[COLOR_POINT_ANIM_BACK];
+	break;
+      case ANIMDIR_SE:
+      case ANIMDIR_E:
+      case ANIMDIR_NE:
+	pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
+	break;
+      default:
+	pen = CalChartPens[COLOR_POINT_ANIM_SIDE];
+      }
+    } else {
+      pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
+    }
+    color[0] = pen->GetColour().Red() / 255.0;
+    color[1] = pen->GetColour().Green() / 255.0;
+    color[2] = pen->GetColour().Blue() / 255.0;
+    RiColor(color);
+    x = COORD2FLOAT(anim->pts[pt].pos.x) * POV_SCALE;
+    y = COORD2FLOAT(anim->pts[pt].pos.y) * POV_SCALE;
+    /* x is already flipped because of the different axises */
+    if (east) {
+      x = (-x);
+    } else {
+      y = (-y);
+    }
+    RiTransformBegin();
+    RiTranslate(x, y, 0.0);
+    RiCylinder(0.75 * POV_SCALE, -4.0 * POV_SCALE, 0.0, 360.0, RI_NULL);
+    RiDisk(-4.0 * POV_SCALE, 0.75 * POV_SCALE, 360.0, RI_NULL);
+    RiTransformEnd();
+  }
+  RiAttributeEnd();
+  RiWorldEnd();
+  return NULL;
+}
+
+const char * AnimationCanvas::GenerateRIBFile(const char *filename,
+					      Bool allframes) {
+  unsigned framenum;
+  const char *err;
+
+  if (anim) {
+    if (allframes) {
+      GotoSheet(0);
+    }
+    framenum = 1;
+    RiBegin((char *)filename);
+    RiProjection(RI_PERSPECTIVE, RI_NULL);
+    RiRotate(45.0, 1.0, 0.0, 0.0);
+    RiTranslate(0.0, 1471.0, 1471.0);
+    if (allframes) do {
+      RiFrameBegin(framenum);
+      err = GenerateRIBFrame();
+      if (err) return err;
+      RiFrameEnd();
+      framenum++;
+    } while (NextBeat());
+    else {
+      err = GenerateRIBFrame();
+      if (err) return err;
+    }
+    RiEnd();
+  }
+  return NULL;
+}
+#endif
+
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 			       CC_WinList *lst)
 : wxFrameWithStuffSized(frame, "Animation") {
@@ -224,6 +423,14 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   // Make a menubar
   wxMenu *anim_menu = new wxMenu;
   anim_menu->Append(CALCHART__ANIM_REANIMATE, "&Reanimate Show");
+  anim_menu->Append(CALCHART__ANIM_SELECT_COLL, "&Select Collisions");
+#ifdef ANIM_OUTPUT_POVRAY
+  anim_menu->Append(CALCHART__ANIM_POVRAY, "Output &POVRay Stubs");
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  anim_menu->Append(CALCHART__ANIM_RIB_FRAME, "Output RenderMan RIB Frame");
+  anim_menu->Append(CALCHART__ANIM_RIB, "Output Render&Man RIB");
+#endif
   anim_menu->Append(CALCHART__ANIM_CLOSE, "&Close Animation");
 
   wxMenuBar *menu_bar = new wxMenuBar;
@@ -243,15 +450,50 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 
   // Add the controls
   SetPanel(new wxPanel(this));
+  framePanel->SetAutoLayout(TRUE);
+
   collis = new wxCheckBox(framePanel, (wxFunction)collision_callback,
 			  "&Collisions");
   AnimationSlider *sldr =
     new AnimationSlider(framePanel, slider_anim_tempo, "&Tempo",
 			canvas->GetTempo(), 10, 300, 150);
   sldr->canvas = canvas;
+  wxLayoutConstraints *lc = new wxLayoutConstraints;
+  lc->left.AsIs();
+  lc->top.AsIs();
+  lc->right.SameAs(framePanel, wxRight, 5);
+  lc->height.AsIs();
+  sldr->SetConstraints(lc);
+
+  framePanel->NewLine();
+
+  // Sheet slider (will get set later with UpdatePanel())
+  sldr = new AnimationSlider(framePanel, slider_gotosheet, "&Sheet",
+			     1, 1, 2, 150);
+  sldr->canvas = canvas;
+  sheet_slider = sldr;
+  lc = new wxLayoutConstraints;
+  lc->left.AsIs();
+  lc->top.AsIs();
+  lc->right.PercentOf(framePanel, wxWidth, 50);
+  lc->height.AsIs();
+  sldr->SetConstraints(lc);
+
+  // Beat slider (will get set later with UpdatePanel())
+  sldr = new AnimationSlider(framePanel, slider_gotobeat, "&Beat",
+			     0, 0, 1, 150);
+  sldr->canvas = canvas;
+  beat_slider = sldr;
+  lc = new wxLayoutConstraints;
+  lc->left.RightOf(sheet_slider, 5);
+  lc->top.AsIs();
+  lc->right.SameAs(framePanel, wxRight, 5);
+  lc->height.AsIs();
+  sldr->SetConstraints(lc);
 
   node = new CC_WinNodeAnim(lst, this);
 
+  UpdatePanel();
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   Fit();
   Show(TRUE);
@@ -265,10 +507,43 @@ AnimationFrame::~AnimationFrame() {
 }
 
 void AnimationFrame::OnMenuCommand(int id) {
+  const char *s;
+  const char *err;
+  Bool allframes = TRUE;
+
   switch (id) {
   case CALCHART__ANIM_REANIMATE:
     canvas->Generate();
     break;
+  case CALCHART__ANIM_SELECT_COLL:
+    canvas->SelectCollisions();
+    break;
+#ifdef ANIM_OUTPUT_POVRAY
+  case CALCHART__ANIM_POVRAY:
+    s = wxFileSelector("Save POV Files", NULL, NULL, NULL, "*.*",
+		       wxSAVE);
+    if (s) {
+      err = canvas->GeneratePOVFiles(s);
+      if (err != NULL) {
+	(void)wxMessageBox((char *)err, "Save Error"); // should be const
+      }
+    }
+    break;
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  case CALCHART__ANIM_RIB_FRAME:
+    allframes = FALSE;
+  case CALCHART__ANIM_RIB:
+    s = wxFileSelector("Save RIB File", NULL, NULL, NULL, "*.rib",
+		       wxSAVE);
+    if (s) {
+      err = canvas->GenerateRIBFile(s, allframes);
+      if (err != NULL) {
+	(void)wxMessageBox((char *)err, "Save Error"); // should be const
+      }
+    }
+    break;
+#endif
   case CALCHART__ANIM_CLOSE:
     Close();
     break;
@@ -282,11 +557,64 @@ void AnimationFrame::OnMenuSelect(int id) {
   case CALCHART__ANIM_REANIMATE:
     msg = "Regenerate animation";
     break;
+  case CALCHART__ANIM_SELECT_COLL:
+    msg = "Select colliding points";
+    break;
+#ifdef ANIM_OUTPUT_POVRAY
+  case CALCHART__ANIM_POVRAY:
+    msg = "Ouput files for rendering with POVRay";
+    break;
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  case CALCHART__ANIM_RIB:
+    msg = "Output RIB file for RenderMan rendering";
+    break;
+#endif
   case CALCHART__ANIM_CLOSE:
     msg = "Close window";
     break;
   }
   if (msg) SetStatusText(msg);
+}
+
+void AnimationFrame::UpdatePanel() {
+  int num, curr;
+
+  if (canvas->anim) {
+    num = (int)canvas->anim->numsheets;
+    curr = (int)canvas->anim->curr_sheetnum+1;
+  } else {
+    num = 1;
+    curr = 1;
+  }
+  if (num > 1) {
+    sheet_slider->Enable(TRUE);
+    if (sheet_slider->GetMax() != num)
+      sheet_slider->SetValue(1); // So Motif doesn't complain about value
+      sheet_slider->SetRange(1, num);
+    if (sheet_slider->GetValue() != curr)
+      sheet_slider->SetValue(curr);
+  } else {
+    sheet_slider->Enable(FALSE);
+  }
+
+  if (canvas->anim) {
+    num = ((int)canvas->anim->curr_sheet->numbeats)-1;
+    curr = (int)canvas->anim->curr_beat;
+  } else {
+    num = 0;
+    curr = 0;
+  }
+  if (num > 0) {
+    beat_slider->Enable(TRUE);
+    if (beat_slider->GetMax() != num)
+      beat_slider->SetValue(0); // So Motif doesn't complain about value
+      beat_slider->SetRange(0, num);
+    if (beat_slider->GetValue() != curr)
+      beat_slider->SetValue(curr);
+  } else {
+    beat_slider->Enable(FALSE);
+  }
 }
 
 static void toolbar_anim_stop(CoolToolBar *tb) {
@@ -326,12 +654,24 @@ static void collision_callback(wxCheckBox &cb, wxEvent&) {
     ((AnimationFrame*)(cb.GetParent()->GetParent()))->canvas;
   if (ac->anim) {
     ac->anim->EnableCollisions(cb.GetValue());
+    ac->anim->CheckCollisions();
+    ac->Redraw();
   }
 }
 
 static void slider_anim_tempo(wxObject &obj, wxEvent &) {
   AnimationSlider *slider = (AnimationSlider*)&obj;
   slider->canvas->SetTempo(slider->GetValue());
+}
+
+static void slider_gotosheet(wxObject &obj, wxEvent &) {
+  AnimationSlider *slider = (AnimationSlider*)&obj;
+  slider->canvas->GotoSheet(slider->GetValue()-1);
+}
+
+static void slider_gotobeat(wxObject &obj, wxEvent &) {
+  AnimationSlider *slider = (AnimationSlider*)&obj;
+  slider->canvas->GotoBeat(slider->GetValue());
 }
 
 static void AnimErrorClose(wxButton& button, wxEvent&) {

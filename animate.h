@@ -133,12 +133,16 @@ public:
   // Returns TRUE if changes made
   Bool PrevSheet();
   Bool NextSheet();
+
+  void GotoBeat(unsigned i);
+
   Bool PrevBeat();
   Bool NextBeat();
 
   void GotoSheet(unsigned i);
 
   inline void EnableCollisions(Bool on) { check_collis = on; }
+  void CheckCollisions();
 
   AnimatePoint *pts;
   AnimateSheet *curr_sheet;
@@ -153,7 +157,6 @@ private:
   void EndCmd(unsigned i);
 
   void RefreshSheet();
-  void CheckCollisions();
 
   AnimateSheet *sheets;
   Bool check_collis;
