@@ -24,10 +24,6 @@ static short split_sheet;
 
 #define DPI 72
 
-/* convert to signed long because short isn't big enough */
-#define FIELD_NS_BORDER INT2COORD(8)
-#define FIELD_EW_BORDER INT2COORD(8)
-
 static char *dot_routines[] = {
   "dotplain",
   "dotsolid",
@@ -62,6 +58,12 @@ static Bool copy_ps_file(const char *name, FILE *fp);
 int CC_show::Print(FILE *fp, Bool eps, Bool overview, unsigned curr_ss) {
   time_t t;
   CC_sheet *curr_sheet;
+  CC_coord fullsize = mode->Size();
+  CC_coord fieldsize = mode->FieldSize();
+  float fullwidth = COORD2FLOAT(fullsize.x);
+  float fullheight = COORD2FLOAT(fullsize.y);
+  float fieldwidth = COORD2FLOAT(fieldsize.x);
+  float fieldheight = COORD2FLOAT(fieldsize.y);
 
   num_pages = 0;
   /* first, calculate dimensions */
@@ -89,13 +91,13 @@ int CC_show::Print(FILE *fp, Bool eps, Bool overview, unsigned curr_ss) {
       }
       real_width = page_width * DPI;
       real_height = page_height * DPI;
-      step_width = (short)(width / (height / 108.0));
-      if (step_width > 160) step_width = 160;
-      if (step_width >= 84) {
+      step_width = (short)(width / (height / (fullheight+8.0)));
+      if (step_width > COORD2INT(fieldsize.x)) step_width = fieldsize.x;
+      if (step_width >= COORD2INT(fieldsize.y)) {
 	/* We can get at least 50 yards */
 	step_width = (step_width / 8) * 8;
-	field_w = step_width * (height / 108.0);
-	field_h = height * (84.0/108.0);
+	field_w = step_width * (height / (fullheight+8.0));
+	field_h = height * (fieldheight/(fullheight+8.0));
 	if ((field_w/step_width*(step_width+4)) > width) {
 	  /* Oops, we didn't made it big enough */
 	  field_h *= width*step_width/(step_width+4)/field_w;
@@ -103,9 +105,9 @@ int CC_show::Print(FILE *fp, Bool eps, Bool overview, unsigned curr_ss) {
 	}
       } else {
 	/* Decrease height to get 50 yards */
-	field_w = width * (80.0/84.0);
+	field_w = width * (fieldwidth/fieldheight/2);
 	field_h = width;
-	step_width = 80;
+	step_width = COORD2INT(fieldsize.x)/2;
       }
       step_size = field_w/step_width;
       field_x = (width - field_w) / 2;
@@ -164,10 +166,10 @@ int CC_show::Print(FILE *fp, Bool eps, Bool overview, unsigned curr_ss) {
       width = page_width * DPI;
       height = page_height * DPI;
     }
-    if ((width * (100.0 / 176.0)) > height) {
-      width = height * (176.0 / 100.0);
+    if ((width * (fullheight / fullwidth)) > height) {
+      width = height * (fullwidth / fullheight);
     } else {
-      height = width * (100.0 / 176.0);
+      height = width * (fullheight / fullwidth);
     }
     width--; height--;
     if (print_landscape) {
@@ -177,10 +179,10 @@ int CC_show::Print(FILE *fp, Bool eps, Bool overview, unsigned curr_ss) {
       real_width = width;
       real_height = height;
     }
-    field_x = 8.0 / 176.0 * width;
-    field_y = 8.0 / 100.0 * height;
-    width *= 160.0/176.0;
-    height *= 84.0/100.0;
+    field_x = 8.0 / fullwidth * width;
+    field_y = 8.0 / fullheight * height;
+    width *= fieldwidth/fullwidth;
+    height *= fieldheight/fullheight;
   }
 
   /* Now write postscript header */
@@ -406,7 +408,7 @@ void CC_show::PrintSheets(FILE *fp) {
       }
 
       error = gen_cont_line(text, &currfontnum, text_size, fp);
-      if (error) return;
+      if (!Ok()) return;
 
       CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
       CHECKPRINT1(fprintf(fp, "/y y h sub def\n"));
@@ -523,6 +525,16 @@ char *CC_sheet::PrintStandard(FILE *fp) {
   unsigned short i;
   short j;
   char *error;
+  CC_coord fieldsize = show->mode->FieldSize();
+  CC_coord fieldoff = show->mode->FieldOffset();
+  Coord pmin = show->mode->MinPosition().x;
+  Coord pmax = show->mode->MaxPosition().x;
+  Coord fmin = show->mode->FieldOffset().x;
+  Coord fmax = show->mode->FieldSize().x + fmin;
+  float fieldwidth = COORD2FLOAT(fieldsize.x);
+  float fieldheight = COORD2FLOAT(fieldsize.y);
+  float fieldoffx = COORD2FLOAT(fieldoff.x);
+  float fieldoffy = COORD2FLOAT(fieldoff.y);
 
   if (split_sheet) {
     CHECKPRINT(fprintf(fp, "%%%%Page: %s(N)\n", (const char *)name));
@@ -532,24 +544,25 @@ char *CC_sheet::PrintStandard(FILE *fp) {
     else {
       CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
     }
-    step_offset = 160 - step_width;
-    clip_s = INT2COORD(step_offset) - INT2COORD(80); /* south yardline */
-    clip_n = INT2COORD(80) + FIELD_NS_BORDER;
+    step_offset = COORD2INT(fieldsize.x) - step_width;
+    /* south yardline */
+    clip_s = INT2COORD(step_offset) + pmin;
+    clip_n = pmax;
     split_sheet = FALSE;
   } else {
     /* find bounds */
-    max_s = INT2COORD(80);
-    max_n = -(INT2COORD(80));
+    max_s = fmax;
+    max_n = fmin;
     for (i=0; i < show->GetNumPoints(); i++) {
       if (pts[i].pos.x < max_s) max_s = pts[i].pos.x;
       if (pts[i].pos.x > max_n) max_n = pts[i].pos.x;
     }
     /* make sure bounds are on field */
-    if (max_s < -INT2COORD(80)) max_s = -INT2COORD(80);
-    if (max_n > INT2COORD(80)) max_n = INT2COORD(80);
+    if (max_s < fmin) max_s = fmin;
+    if (max_n > fmax) max_n = fmax;
 
     if (COORD2INT((max_n-max_s) +
-		  ((max_s+INT2COORD(80)) % INT2COORD(8)))
+		  ((max_s+fmin) % INT2COORD(8)))
 	  > step_width) {
       /* Need to split into two pages */
       CHECKPRINT(fprintf(fp, "%%%%Page: %s(S)\n", (const char *)name));
@@ -561,8 +574,8 @@ char *CC_sheet::PrintStandard(FILE *fp) {
       }
       step_offset = 0;
       split_sheet = TRUE;
-      clip_s = -INT2COORD(80) - FIELD_NS_BORDER;
-      clip_n = INT2COORD(step_width) - INT2COORD(80); /* north yardline */
+      clip_s = pmin;
+      clip_n = INT2COORD(step_width) - fmin; /* north yardline */
     } else {
       CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", (const char *)name));
       if (number) {
@@ -571,18 +584,19 @@ char *CC_sheet::PrintStandard(FILE *fp) {
       } else {
 	CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
       }
-      step_offset = (160 - step_width) / 2;
+      step_offset = (COORD2INT(show->mode->FieldSize().x) - step_width) / 2;
       step_offset = (step_offset / 8) * 8;
-      clip_s = -INT2COORD(80) - FIELD_NS_BORDER;
-      clip_n = INT2COORD(80) + FIELD_NS_BORDER;
-      x_s = COORD2INT(max_s) + 80;
-      x_n = COORD2INT(max_n) + 80;
+      clip_s = pmin;
+      clip_n = pmax;
+      x_s = COORD2INT(max_s) - COORD2INT(fmin);
+      x_n = COORD2INT(max_n) - COORD2INT(fmin);
       if ((x_s < step_offset) || (x_n > (step_offset + step_width))) {
 	/* Recenter formation */
 	step_offset = x_s - (step_width-(x_n-x_s))/2;
 	if (step_offset < 0) step_offset = 0;
-	else if ((step_offset + step_width) > 160)
-	  step_offset = 160 - step_width;
+	else if ((step_offset + step_width) >
+		 COORD2INT(show->mode->FieldSize().x))
+	  step_offset = COORD2INT(show->mode->FieldSize().x) - step_width;
 	step_offset = (step_offset / 8) * 8;
       }
     }
@@ -602,7 +616,8 @@ char *CC_sheet::PrintStandard(FILE *fp) {
     CHECKPRINT(fprintf(fp, "/y %.2f def\n", field_h + (step_size / 2)));
     CHECKPRINT(fprintf(fp, "(%s) dup centerText\n",
 		       yard_text[(step_offset +
-				  (MAX_YARD_LINES-1)*4 - 80 + j)/8].Chars()));
+				  (MAX_YARD_LINES-1)*4 +
+				  COORD2INT(fieldoff.x) + j)/8].Chars()));
     CHECKPRINT(fprintf(fp, "/y %.2f def\n", -(step_size * 2)));
     CHECKPRINT(fprintf(fp, "centerText\n"));
   }
@@ -615,9 +630,9 @@ char *CC_sheet::PrintStandard(FILE *fp) {
 		     dot_w * 2 * num_ratio));
   for (i = 0; i < show->GetNumPoints(); i++) {
     if ((pts[i].pos.x > clip_n) || (pts[i].pos.x < clip_s)) continue;
-    dot_x = (COORD2FLOAT(pts[i].pos.x) + 80.0 - step_offset) /
+    dot_x = (COORD2FLOAT(pts[i].pos.x) - fieldoffx - step_offset) /
       step_width * field_w;
-    dot_y = (1.0 - (COORD2FLOAT(pts[i].pos.y)+42.0)/84.0) * field_h;
+    dot_y = (1.0 - (COORD2FLOAT(pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
     CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
 		       dot_x, dot_y, dot_routines[pts[i].sym]));
     CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
@@ -749,6 +764,12 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 char *CC_sheet::PrintOverview(FILE *fp) {
   unsigned short i;
   char *error;
+  CC_coord fieldoff = show->mode->FieldOffset();
+  CC_coord fieldsize = show->mode->FieldSize();
+  float fieldx = COORD2FLOAT(fieldoff.x);
+  float fieldy = COORD2FLOAT(fieldoff.y);
+  float fieldwidth = COORD2FLOAT(fieldsize.x);
+  float fieldheight = COORD2FLOAT(fieldsize.y);
 
   CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", (const char *)name));
 
@@ -757,11 +778,11 @@ char *CC_sheet::PrintOverview(FILE *fp) {
 
   CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
   CHECKPRINT(fprintf(fp, "drawfield\n"));
-  CHECKPRINT(fprintf(fp, "/w %.2f def\n", width / 240));
+  CHECKPRINT(fprintf(fp, "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0));
   for (i = 0; i < show->GetNumPoints(); i++) {
     CHECKPRINT(fprintf(fp, "%.2f %.2f dotbox\n",
-	    (COORD2FLOAT(pts[i].pos.x)+80.0) / 160.0 * width,
-	    (1.0 - (COORD2FLOAT(pts[i].pos.y)+42.0)/84.0) * height));
+	    (COORD2FLOAT(pts[i].pos.x)+fieldx) / fieldwidth * width,
+	    (1.0 - (COORD2FLOAT(pts[i].pos.y)+fieldy)/fieldheight) * height));
   }
   return NULL;
 }
