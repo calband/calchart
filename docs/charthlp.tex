@@ -1,42 +1,46 @@
 \documentstyle[a4,texhelp]{report}
 \title{CalChart User's Manual 3.0}
-\author{Garrick Meeker}
-\date{March 28, 1996}
+\author{Gurk Meeker}
+\date{September 22, 1996}
 \makeindex
 \begin{document}
 \maketitle
 \tableofcontents
+
+\chapter*{Copyright Notice}\label{copyright}
+
+Copyright (c) 1994-1996 Garrick Brian Meeker
+
+Permission to use and distribute this software and its documentation is
+hereby granted without fee.
+
+\chapter*{Acknowledgments}\label{acknowledge}
+
+Portions of this manual were written by Daniel Isaksen and Martin Haye.
+
+Many thanks to Dan Isaksen for assisting in the design and testing of
+this program.
+
+Thanks to Rommel Suratos (DM '94) for supporting the initial PostScript
+printing routines that were the beginnings of this program.
+
+And of course, thanks to Martin Haye for writing the initial version,
+and to Greg Jones (DM '90) for supporting the concept of CalChart.
 
 \chapter{Introduction}
 
 CalChart is a tool for designing shows for the University of California
 Marching Band.
 
-\chapter{Obtaining CalChart}
+\input{install.tex}
+\input{overview.tex}
+\input{bugs.tex}
+\input{anim.tex}
 
-The lastest version of CalChart, both binaries and source code, as well as
-previous shows, can be accessed by WWW from:
+\chapter{Future of CalChart}\label{future}
 
-\begin{verbatim}
-http://www.calband.berkeley.edu/calchart
-\end{verbatim}
-
-\chapter{Future of CalChart}
-
-\section{Bugs}
-\subsection{Reporting Bugs}
-E-mail bug reports to:
-
-\begin{verbatim}
-gurk@calband.berkeley.edu
-\end{verbatim}
-
-\section{To Do List}
-\begin{itemize}\itemsep=0pt
-\item Reference points
-\item Edit printed continuity
-\item Lasso and genius move
-\item Finish animation
-\end{itemize}
+I'm currently trying to fix any remaining bugs.  I'll also do smart and
+genius movement and printed continuity editing.  My first planned frill
+feature is 3D animation.  The direction of the program after that is unknown.
 
 \end{document}

@@ -1,0 +1,101 @@
+\chapter{Obtaining and Installing CalChart}\label{software}
+
+\section{Obtaining the Software}\label{obtaining}
+
+The latest version of CalChart may be obtained from the official
+CalChart web page:
+
+\begin{verbatim}
+http://www.calband.berkeley.edu/calchart/
+\end{verbatim}
+
+There are currently versions for Windows (95, NT, and Win32s), SunOS,
+and Linux.  A version for Macintosh is on the way.  Other UNIX platforms
+are also possible, but you'll have to compile it yourself.
+
+If you are running Windows 3.1, you must also download and install
+Win32s (if it isn't installed already).  I'm no longer supporting the
+version that runs without Win32s.
+
+\section{Installing the Software}\label{installing}
+
+\subsection{Windows Installation}\label{wininstall}
+
+You need an unzip program installed.  Unzip the software with the
+command:
+
+\begin{verbatim}
+unzip calchart.zip
+\end{verbatim}
+or
+\begin{verbatim}
+pkunzip -d calchart.zip
+\end{verbatim}
+
+\subsubsection{Easy Installation}\label{easyinstall}
+
+For simple installation, choose Run from the Program Manager's menu.
+Run the install.exe program you extracted.  Enter the path you want and
+click on Okay.  A group called Cal Band will be created with an icon for
+CalChart.
+
+\subsubsection{Advanced Installation}\label{advinstall}
+
+Advanced users can simply create a new icon.  You should copy
+ctl3d32.dll to your windows directory if needed and then delete it
+from the CalChart directory if it's already there.
+
+\subsubsection{Math Coprocessor Support}\label{mathcop}
+
+If you have a machine without a math coprocessor (386 or 486SX) you need
+to install the math coprocessor emulator.  In the [386enh] section of
+the SYSTEM.INI file, add the line:
+
+\begin{verbatim}
+device=C:\WINDOWS\SYSTEM\WEMU387.386
+\end{verbatim}
+
+And restart Windows.  Actually, I'm not sure if this emulator is necessary.
+If anyone doesn't have a math coprocessor, please let me know if
+CalChart works without it.
+
+\subsubsection{Printer Configuration}\label{winprinter}
+
+Edit the file runtime$\backslash$config and change the printer device to the
+one your printer is connected to.  CalChart can currently only print to
+PostScript printers (such as laser printers).  This is not likely to
+change in the near future.  You could print to a PostScript file and use
+ghostscript (a free PostScript interpreter) to print to another
+printer.
+
+\subsection{UNIX Installation}\label{unixinstall}
+
+You need gnuzip installed on your system.  cd to the directory where you
+wish to install CalChart.  Uncompress the software with the command:
+
+\begin{verbatim}
+gzip -dc chartbin.tar.gz | tar xvf -
+\end{verbatim}
+
+To run CalChart, you should include this directory in your path and set
+the environment variable $CALCHART\_RT$ to the path of the runtime
+directory.
+
+If you downloaded a version with dynamic libraries, you must also
+extract the libraries.  Set the variable $LD\_LIBRARY\_PATH$ to this
+directory.  If you don't have Motif on your system (e.g. Linux) you
+should get the static binaries.
+
+If you get lots of errors printed when starting CalChart, you probably
+need to copy XKeysymDB to /usr/lib/X11 or /usr/openwin/lib.  This
+location may be overridden with the variable $XKEYSYMDB$.
+
+\subsubsection{Online Help}\label{unixhelp}
+
+You must install wxhelp if you want to use online help.  Install it using
+the procedures above and make sure it's in your path.
+
+\subsubsection{Printer Configuration}\label{unixprinter}
+
+Edit runtime/config to set the programs and options used for printing
+and previewing.  The defaults are lpr and ghostview.
