@@ -18,13 +18,14 @@ Free Space=1000
 [SourceDirs]
 1=.
 2=.\runtime
+3=.\system
 
 [FileGroups]
 1=CalChart
 2,N=Coprocessor Emulation Support
 
 [Windows Files]
-CTL3D Library=ctl3d32.dll ctl3d32.dll 1 0 1 N
+CTL3D Library=ctl3d32.dll ctl3d32.dll 3 0 1 N
 
 [Files1]
 CalChart=calchart.exe calchart.exe 1 1 1 N
@@ -40,7 +41,7 @@ Spring Show Prolog=prolog1.ps prolog1.ps 2 2 1 N
 Overview Prolog=prolog2.ps prolog2.ps 2 2 1 N
 
 [Files2]
-Windows Coprocessor Emulator=wemu387.386 wemu387.386 1 3 1 N
+Windows Coprocessor Emulator=wemu387.386 wemu387.386 3 3 1 N
 
 [PM Group]
 CalChart={1}calchart.exe

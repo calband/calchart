@@ -68,7 +68,9 @@ clean: .SYMBOLIC
 
 distrib: .SYMBOLIC
 	-erase $(name).zip
-	zip -Dr9 $(name).zip $(name).exe $(HELPFILES) runtime install.inf
-	zip -j9 $(name).zip $(CTLDLL)
-	zip -j9 $(name).zip $(EMU387)
+	-deltree system
+	mkdir system
+	copy $(CTLDLL) system
+	copy $(EMU387) system
+	zip -Dr9 $(name).zip $(name).exe $(HELPFILES) runtime install.inf system
 	zip -j9 $(name).zip $(INSTPROG)
