@@ -67,9 +67,9 @@ static ToolBarEntry main_tb[] = {
   { NULL, "Label on right", toolbar_label_right },
   { NULL, "Change to plainmen", toolbar_setsym0 },
   { NULL, "Change to solidmen", toolbar_setsym1 },
-  { NULL, "Change to plain backslash men", toolbar_setsym2 },
-  { NULL, "Change to plain slash men", toolbar_setsym3 },
-  { NULL, "Change to plain x men", toolbar_setsym4 },
+  { NULL, "Change to backslash men", toolbar_setsym2 },
+  { NULL, "Change to slash men", toolbar_setsym3 },
+  { NULL, "Change to x men", toolbar_setsym4 },
   { NULL, "Change to solid backslash men", toolbar_setsym5 },
   { NULL, "Change to solid slash men", toolbar_setsym6 },
   { NULL, "Change to solid x men", toolbar_setsym7 }
@@ -744,6 +744,7 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 
   GetDC()->SetMapMode(MM_TEXT);
   SetZoomQuick(def_zoom);
+  EnableScrolling(FALSE, FALSE); // Windows messes up scrolling
 
   if (GetDC()->Colour) {
     SetBackground(grassBrush);
@@ -890,7 +891,7 @@ void FieldCanvas::UpdatePanel() {
   char tempbuf[256];
   CC_sheet *sht = show_descr.CurrSheet();
 
-  sprintf(tempbuf, "%s%d of %d \"%s\" %d beats",
+  sprintf(tempbuf, "%s%d of %d \"%.32s\" %d beats",
 	  show_descr.show->Modified() ? "* ":"", show_descr.curr_ss+1,
 	  show_descr.show->GetNumSheets(), sht->GetName(), sht->beats);
   ourframe->SetStatusText(tempbuf, 1);

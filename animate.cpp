@@ -297,7 +297,7 @@ void AnimateSheet::SetName(const char *s) {
 }
 
 Animation::Animation(CC_show *show)
-: curr_sheet(NULL), numpts(show->GetNumPoints()), sheets(NULL) {
+: curr_sheet(NULL), numsheets(0), numpts(show->GetNumPoints()), sheets(NULL) {
   unsigned i, j;
   ContProcedure* curr_proc;
   AnimateCompile comp;
@@ -319,6 +319,7 @@ Animation::Animation(CC_show *show)
     } else  {
       sheets = curr_sheet = new AnimateSheet(numpts);
     }
+    numsheets++;
     curr_sheet->SetName(comp.curr_sheet->GetName());
     curr_sheet->numbeats = comp.curr_sheet->beats;
     for (i = 0; i < numpts; i++) {
@@ -383,8 +384,11 @@ Animation::~Animation() {
 }
 
 Bool Animation::PrevSheet() {
-  if (curr_sheet->prev) {
-    curr_sheet = curr_sheet->prev;
+  if (curr_beat == 0) {
+    if (curr_sheet->prev) {
+      curr_sheet = curr_sheet->prev;
+      curr_sheetnum--;
+    }
   }
   RefreshSheet();
   return TRUE;
@@ -393,6 +397,7 @@ Bool Animation::PrevSheet() {
 Bool Animation::NextSheet() {
   if (curr_sheet->next) {
     curr_sheet = curr_sheet->next;
+    curr_sheetnum++;
     RefreshSheet();
   } else {
     if ((curr_sheet == sheets) && (curr_beat != 0))
@@ -408,6 +413,7 @@ Bool Animation::PrevBeat() {
   if (curr_beat == 0) {
     if (curr_sheet->prev == NULL) return FALSE;
     curr_sheet = curr_sheet->prev;
+    curr_sheetnum--;
     for (i = 0; i < numpts; i++) {
       curr_cmds[i] = curr_sheet->end_cmds[i];
       EndCmd(i);
@@ -446,6 +452,7 @@ Bool Animation::NextBeat() {
 }
 
 void Animation::GotoSheet(unsigned i) {
+  curr_sheetnum = i;
   curr_sheet = sheets;
   while (i > 0) {
     curr_sheet = curr_sheet->next;

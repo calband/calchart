@@ -27,14 +27,14 @@ static void toolbar_printcont_sym6(CoolToolBar *tb);
 static void toolbar_printcont_sym7(CoolToolBar *tb);
 
 ToolBarEntry printcont_tb[] = {
-  { NULL, "Insert plainmen", toolbar_printcont_sym0 },
-  { NULL, "Insert solidmen", toolbar_printcont_sym1 },
-  { NULL, "Insert plain backslash men", toolbar_printcont_sym2 },
-  { NULL, "Insert plain slash men", toolbar_printcont_sym3 },
-  { NULL, "Insert plain x men", toolbar_printcont_sym4 },
-  { NULL, "Insert solid backslash men", toolbar_printcont_sym5 },
-  { NULL, "Insert solid slash men", toolbar_printcont_sym6 },
-  { NULL, "Insert solid x men", toolbar_printcont_sym7 }
+  { NULL, "Insert plainman", toolbar_printcont_sym0 },
+  { NULL, "Insert solidman", toolbar_printcont_sym1 },
+  { NULL, "Insert backslash man", toolbar_printcont_sym2 },
+  { NULL, "Insert slash man", toolbar_printcont_sym3 },
+  { NULL, "Insert x man", toolbar_printcont_sym4 },
+  { NULL, "Insert solid backslash man", toolbar_printcont_sym5 },
+  { NULL, "Insert solid slash man", toolbar_printcont_sym6 },
+  { NULL, "Insert solid x man", toolbar_printcont_sym7 }
 };
 
 CC_WinNodeCont::CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req)

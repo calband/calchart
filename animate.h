@@ -132,6 +132,8 @@ public:
 
   AnimatePoint *pts;
   AnimateSheet *curr_sheet;
+  unsigned curr_sheetnum;
+  unsigned numsheets;
   unsigned curr_beat;
   unsigned numpts;
   AnimateCommand **curr_cmds;

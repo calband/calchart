@@ -153,8 +153,10 @@ void AnimationCanvas::UpdateText() {
   char tempbuf[100];
 
   if (anim) {
-    sprintf(tempbuf, "Beat %u of %u  \"%s\"", anim->curr_beat,
-	    anim->curr_sheet->numbeats, anim->curr_sheet->name);
+    sprintf(tempbuf, "Beat %u of %u  Sheet %d of %d \"%.32s\"",
+	    anim->curr_beat, anim->curr_sheet->numbeats,
+	    anim->curr_sheetnum+1, anim->numsheets,
+	    anim->curr_sheet->name);
     ourframe->SetStatusText(tempbuf, 1);
   } else {
     ourframe->SetStatusText("No animation available", 1);
