@@ -56,21 +56,37 @@ PRINT_VIEW_OPTS
 #name of mode
 #whash ehash (steps from west sideline)
 #left top right bottom (border in steps)
+#x y w h (region of the field to use, in steps)
 
 DEFINE_STANDARD_MODE
 Standard
 32 52
 8 8 8 8
+-80 -42 160 84
+
+DEFINE_STANDARD_MODE
+Full Field
+32 52
+8 8 8 8
+-96 -42 192 84
+
+DEFINE_STANDARD_MODE
+Tunnel
+32 52
+8 8 8 8
+16 -42 192 84
 
 DEFINE_STANDARD_MODE
 Old Field
 28 56
 8 8 8 8
+-80 -42 160 84
 
 DEFINE_STANDARD_MODE
 Pro Field
 36 48
 8 8 8 8
+-80 -42 160 84
 
 #define spring show modes like this:
 #DEFINE_SPRSHOW_MODE
@@ -79,9 +95,9 @@ Pro Field
 #X (hex digit of which yard lines to print:
 #   8 = left, 4 = right, 2 = above, 1 = below)
 #left top right bottom (border in steps)
+#x y w h (region of the field to use, in steps)
 #x y w h (size of stage EPS file as per BoundingBox)
 #x y w h (where to put the field on the stage, depends on the EPS file)
-#x y w h (region of the field to use, in steps)
 #l r t b (location of yard line text's inside edge, depends on the EPS file)
 
 DEFINE_SPRSHOW_MODE
@@ -89,9 +105,9 @@ Zellerbach
 zllrbach.eps
 D
 8 8 8 8
+-16 -30 32 28
 0 0 571 400
 163 38 265 232
--16 -30 32 28
 153 438 270 12
 
 # width of page in inches
@@ -169,9 +185,9 @@ Courier-Italic
 PRINT_BOLD_ITALIC_FONT
 Courier-BoldItalic
 
-# text for yardlines, beginning with south inzone
+# text for yardlines, beginning with south tunnel
 PRINT_YARDS
-0 5 10 15 20 25 30 35 40 45 50 45 40 35 30 25 20 15 10 5 0
+N M L K J I H G F E D C B A -10 -5 0 5 10 15 20 25 30 35 40 45 50 45 40 35 30 25 20 15 10 5 0 -5 -10 A B C D E F G H I J K L M N
 
 # text for spring show lines, beginning with bottom
 PRINT_SPR_LINES
