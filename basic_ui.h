@@ -41,19 +41,6 @@ public:
   void OnDropFiles(int n, char *files[], int x, int y);
 };
 
-// Define a frame with a toolbar and one subwindow
-class wxFrameWithToolBar: public wxFrame
-{
-public:
-  PlainToolBar *frameToolBar;
-  wxFrameWithToolBar(wxFrame *frame, char *title, int x, int y, int w, int h,
-		     long style = wxSDI | wxDEFAULT_FRAME);
-  void OnSize(int w, int h);  // Default OnSize handler
-  Bool OnClose(void);
-  inline void SetToolBar(PlainToolBar *tb) { frameToolBar = tb; }
-  inline PlainToolBar *GetFrameToolBar(void) { return frameToolBar; }
-};
-
 enum FRAMESTUFF_LAYOUT {
   wxFRAMESTUFF_TB_PNL,
   wxFRAMESTUFF_TB_CNV,
@@ -77,7 +64,6 @@ public:
 		   long style = wxSDI | wxDEFAULT_FRAME);
   void OnSize(int w, int h);  // Default OnSize handler
   Bool OnClose(void);
-  void Fit();  // Shrinks frame to fit around a given canvas size
   inline void SetToolBar(PlainToolBar *tb) { frameToolBar = tb; }
   inline void SetPanel(wxPanel *pnl) { framePanel = pnl; }
   inline void SetCanvas(wxCanvas *cnv) { frameCanvas = cnv; }
@@ -86,6 +72,17 @@ public:
   inline wxCanvas *GetFrameCanvas(void) { return frameCanvas; }
   inline void SetLayoutMethod(FRAMESTUFF_LAYOUT lo) { layout = lo; }
   inline FRAMESTUFF_LAYOUT GetLayoutMethod(void) { return layout; }
+};
+
+// Define a frame with a toolbar and a panel and fixed size canvas
+class wxFrameWithStuffSized: public wxFrameWithStuff
+{
+public:
+  wxFrameWithStuffSized(wxFrame *frame, char *title,
+			int x = -1, int y = -1,
+			long style = wxSDI | wxDEFAULT_FRAME);
+  void OnSize(int w, int h);  // Default OnSize handler
+  void Fit();  // Shrinks frame to fit around a given canvas size
 };
 
 struct ToolBarEntry;

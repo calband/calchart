@@ -182,7 +182,7 @@ void AnimationCanvas::FreeAnim() {
 
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 			       CC_WinList *lst)
-: wxFrameWithStuff(frame, "Animation") {
+: wxFrameWithStuffSized(frame, "Animation") {
   CreateStatusLine(2);
 
   // Make a menubar

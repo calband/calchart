@@ -17,7 +17,7 @@
 #include "show.h"
 #include "animate.h"
 #include <wx_timer.h>
-#define DEFAULT_ANIM_SIZE 4
+#define DEFAULT_ANIM_SIZE 3
 
 class AnimationCanvas;
 class AnimationFrame;
@@ -96,7 +96,7 @@ public:
   AnimationCanvas *canvas;
 };
 
-class AnimationFrame: public wxFrameWithStuff {
+class AnimationFrame: public wxFrameWithStuffSized {
 public:
   AnimationFrame(wxFrame *frame, CC_descr *dcr, CC_WinList *lst);
   ~AnimationFrame();

@@ -33,55 +33,6 @@ void FancyTextWin::OnDropFiles(int, char *files[], int, int) {
 }
 
 // Toolbar-handling frame constructor
-wxFrameWithToolBar::wxFrameWithToolBar(wxFrame *frame, char *title,
-				       int x, int y, int w, int h,
-				       long style):
-				       wxFrame(frame, title, x, y, w, h, style)
-{
-  frameToolBar = NULL;
-}
-
-Bool wxFrameWithToolBar::OnClose(void) {
-  return TRUE;
-}
-
-// Reposition the toolbar and child subwindow
-void wxFrameWithToolBar::OnSize(int w, int h) {
-  float maxToolBarWidth = 0.0, maxToolBarHeight = 0.0;
-  if (frameToolBar)
-    frameToolBar->GetMaxSize(&maxToolBarWidth, &maxToolBarHeight);
-  else {
-    wxFrame::OnSize(w, h);
-    return;
-  }
-
-  // Find the frame's child (assuming there is only one)
-  wxWindow *child = NULL;
-  wxNode *node = GetChildren()->First();
-  while (node && !child)
-  {
-    wxWindow *win = (wxWindow *)node->Data();
-
-    if ((win != frameToolBar) &&
-        (win->IsKindOf(CLASSINFO(wxPanel)) ||
-         win->IsKindOf(CLASSINFO(wxTextWindow)) ||
-         win->IsKindOf(CLASSINFO(wxCanvas))))
-      child = win;
-
-    node = node->Next();
-  }
-  if (!child)
-    return;
-
-  int frameWidth, frameHeight;
-  GetClientSize(&frameWidth, &frameHeight);
-
-  child->SetSize(0, (int)maxToolBarHeight, (int)frameWidth,
-		 (int)(frameHeight - maxToolBarHeight));
-  frameToolBar->SetSize(0, 0, (int)frameWidth, (int)maxToolBarHeight);
-}
-
-// Toolbar-handling frame constructor
 wxFrameWithStuff::wxFrameWithStuff(wxFrame *frame, char *title,
 				   int x, int y, int w, int h,
 				   long style)
@@ -113,7 +64,7 @@ void wxFrameWithStuff::OnSize(int, int) {
   }
   if (framePanel) {
     framePanel->Fit();
-    framePanel->GetClientSize(&width_pnl, &height_pnl);
+    framePanel->GetSize(&width_pnl, &height_pnl);
   } else {
     height_pnl = 0;
   }
@@ -157,14 +108,86 @@ void wxFrameWithStuff::OnSize(int, int) {
   if (frameCanvas) frameCanvas->SetSize(0, y_cnv, width_frm, height_cnv);
 }
 
+// Toolbar-handling frame constructor
+wxFrameWithStuffSized::wxFrameWithStuffSized(wxFrame *frame, char *title,
+					     int x, int y, long style)
+: wxFrameWithStuff(frame, title, x, y, 320, 200, style) {
+}
+
+// Reposition the toolbar and child subwindow
+void wxFrameWithStuffSized::OnSize(int, int) {
+  float maxToolBarWidth, maxToolBarHeight;
+  int width_frm, width_pnl, width_cnv;
+  int height_frm, height_tb, height_pnl, height_cnv;
+  int y_tb, y_pnl, y_cnv;
+
+  GetClientSize(&width_frm, &height_frm);
+
+  if (frameToolBar) {
+    frameToolBar->GetMaxSize(&maxToolBarWidth, &maxToolBarHeight);
+    height_tb = (int)maxToolBarHeight;
+  } else {
+    height_tb = 0;
+  }
+  if (framePanel) {
+    framePanel->Fit();
+    framePanel->GetSize(&width_pnl, &height_pnl);
+  } else {
+    height_pnl = 0;
+  }
+  if (frameCanvas) {
+    frameCanvas->GetSize(&width_cnv, &height_cnv);
+  } else {
+    width_cnv = 0;
+    height_cnv = 0;
+  }
+
+  switch (layout) {
+  case wxFRAMESTUFF_TB_PNL:
+    y_tb = 0;
+    y_pnl = height_tb;
+    y_cnv = height_tb + height_pnl;
+    break;
+  case wxFRAMESTUFF_TB_CNV:
+    y_tb = 0;
+    y_pnl = height_tb + height_cnv;
+    y_cnv = height_tb;
+    break;
+  case wxFRAMESTUFF_PNL_TB:
+    y_tb = height_pnl;
+    y_pnl = 0;
+    y_cnv = height_pnl + height_tb;
+    break;
+  case wxFRAMESTUFF_PNL_CNV:
+    y_tb = height_pnl + height_cnv;
+    y_pnl = 0;
+    y_cnv = height_pnl;
+    break;
+  case wxFRAMESTUFF_CNV_TB:
+    y_tb = height_cnv;
+    y_pnl = height_cnv + height_tb;
+    y_cnv = 0;
+    break;
+  case wxFRAMESTUFF_CNV_PNL:
+  default:
+    y_tb = height_cnv + height_pnl;
+    y_pnl = height_cnv;
+    y_cnv = 0;
+    break;
+  }
+  if (frameToolBar) frameToolBar->SetSize(0, y_tb, width_frm, height_tb);
+  if (framePanel) framePanel->SetSize(0, y_pnl, width_frm, height_pnl);
+  if (frameCanvas) frameCanvas->SetSize(0, y_cnv, width_cnv, height_cnv);
+}
+
 // Shrink frame to fit around a given canvas size
-void wxFrameWithStuff::Fit()
+void wxFrameWithStuffSized::Fit()
 {
   float maxToolBarWidth, maxToolBarHeight;
   int width_frm, width_tb, width_pnl, width_cnv;
   int height_frm, height_tb, height_pnl, height_cnv;
 
-  frameCanvas->GetClientSize(&width_cnv, &height_cnv);
+  frameCanvas->GetSize(&width_cnv, &height_cnv);
 
   if (frameToolBar) {
     frameToolBar->GetMaxSize(&maxToolBarWidth, &maxToolBarHeight);
@@ -185,6 +208,8 @@ void wxFrameWithStuff::Fit()
   height_frm = height_cnv + height_tb + height_pnl;
 
   SetClientSize(width_frm, height_frm);
+  GetSize(&width_frm, &height_frm);
+  SetSizeHints(width_frm, height_frm, width_frm, height_frm);
 
   OnSize(-1, -1);
 }
