@@ -52,6 +52,9 @@ class ShowModeStandard : public ShowMode
 public:
   ShowModeStandard(const char *nam, CC_coord bord1, CC_coord bord2,
 		   unsigned short whash, unsigned short ehash);
+  ShowModeStandard(const char *nam, CC_coord bord1, CC_coord bord2,
+		   CC_coord siz, CC_coord off,
+		   unsigned short whash, unsigned short ehash);
   virtual ~ShowModeStandard();
 
   virtual SHOW_TYPE GetType();
@@ -70,12 +73,12 @@ public:
   // Look at calchart.cfg for description of arguments
   ShowModeSprShow(const char *nam, CC_coord bord1, CC_coord bord2,
 		  unsigned char which, const char *file,
+		  short stps_x, short stps_y,
+		  short stps_w, short stps_h,
 		  short stg_x, short stg_y,
 		  short stg_w, short stg_h,
 		  short fld_x, short fld_y,
 		  short fld_w, short fld_h,
-		  short stps_x, short stps_y,
-		  short stps_w, short stps_h,
 		  short txt_l, short txt_r,
 		  short txt_tp, short txt_bm);
   virtual ~ShowModeSprShow();

@@ -189,7 +189,23 @@ float num_ratio = 1.2;
 float pline_ratio = 1.0;
 float sline_ratio = 1.0;
 float cont_ratio = 0.25;
-wxString yard_text[21] = {
+wxString yard_text[MAX_YARD_LINES] = {
+  "N",
+  "M",
+  "L",
+  "K",
+  "J",
+  "I",
+  "H",
+  "G",
+  "F",
+  "E",
+  "D",
+  "C",
+  "B",
+  "A",
+  "-10",
+  "-5",
   "0",
   "5",
   "10",
@@ -211,6 +227,22 @@ wxString yard_text[21] = {
   "10",
   "5",
   "0",
+  "-5",
+  "-10",
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N"
 };
 wxString spr_line_text[MAX_SPR_LINES] = {
   "A",
@@ -228,11 +260,12 @@ char *ReadConfig(const char *path) {
   int i;
   wxString com_buf;
   CC_coord bord1(INT2COORD(8),INT2COORD(8)), bord2(INT2COORD(8),INT2COORD(8));
+  CC_coord siz, off;
   char *retmsg = NULL;
   unsigned short whash, ehash;
+  short mode_steps_x, mode_steps_y, mode_steps_w, mode_steps_h;
   short eps_stage_x, eps_stage_y, eps_stage_w, eps_stage_h;
   short eps_field_x, eps_field_y, eps_field_w, eps_field_h;
-  short eps_steps_x, eps_steps_y, eps_steps_w, eps_steps_h;
   short eps_text_left, eps_text_right, eps_text_top, eps_text_bottom;
   unsigned char which_spr_yards;
   wxPathList tmp_configdirs;
@@ -325,8 +358,14 @@ char *ReadConfig(const char *path) {
 	bord1.y = INT2COORD(bord1.y);
 	bord2.x = INT2COORD(bord2.x);
 	bord2.y = INT2COORD(bord2.y);
+	fscanf(fp, " %hd %hd %hd %hd \n", &mode_steps_x, &mode_steps_y,
+	       &mode_steps_w, &mode_steps_h);
+	siz.x = INT2COORD(mode_steps_w);
+	siz.y = INT2COORD(mode_steps_h);
+	off.x = INT2COORD(-mode_steps_x);
+	off.y = INT2COORD(-mode_steps_y);
 	modelist->Add(new ShowModeStandard(com_buf, bord1, bord2,
-					   whash, ehash));
+					   siz, off, whash, ehash));
 	continue;
       }
       if (strcmp("DEFINE_SPRSHOW_MODE", com_buf) == 0) {
@@ -345,22 +384,22 @@ char *ReadConfig(const char *path) {
 	bord1.y = INT2COORD(bord1.y);
 	bord2.x = INT2COORD(bord2.x);
 	bord2.y = INT2COORD(bord2.y);
+	fscanf(fp, " %hd %hd %hd %hd \n", &mode_steps_x, &mode_steps_y,
+	       &mode_steps_w, &mode_steps_h);
 	fscanf(fp, " %hd %hd %hd %hd \n", &eps_stage_x, &eps_stage_y,
 	       &eps_stage_w, &eps_stage_h);
 	fscanf(fp, " %hd %hd %hd %hd \n", &eps_field_x, &eps_field_y,
 	       &eps_field_w, &eps_field_h);
-	fscanf(fp, " %hd %hd %hd %hd \n", &eps_steps_x, &eps_steps_y,
-	       &eps_steps_w, &eps_steps_h);
 	fscanf(fp, " %hd %hd %hd %hd \n", &eps_text_left, &eps_text_right,
 	       &eps_text_top, &eps_text_bottom);
 	modelist->Add(new ShowModeSprShow(mode_name.Chars(), bord1, bord2,
 					  which_spr_yards, com_buf,
+					  mode_steps_x, mode_steps_y,
+					  mode_steps_w, mode_steps_h,
 					  eps_stage_x, eps_stage_y,
 					  eps_stage_w, eps_stage_h,
 					  eps_field_x, eps_field_y,
 					  eps_field_w, eps_field_h,
-					  eps_steps_x, eps_steps_y,
-					  eps_steps_w, eps_steps_h,
 					  eps_text_left, eps_text_right,
 					  eps_text_top, eps_text_bottom));
 	continue;
@@ -447,7 +486,7 @@ char *ReadConfig(const char *path) {
       }
       if (strcmp("PRINT_YARDS", com_buf) == 0) {
 	char yardbuf[16];
-	for (i=0; i<21; i++) {
+	for (i=0; i<MAX_YARD_LINES; i++) {
 	  fscanf(fp, " %s ", yardbuf);
 	  yard_text[i] = yardbuf;
 	}

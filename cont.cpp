@@ -14,6 +14,28 @@
 #include <math.h>
 #include "parse.h"
 
+int float2int(const ContProcedure *proc,
+	      AnimateCompile *anim,
+	      float f) {
+  int v = (int)floor(f+0.5);
+  if (ABS(f - (float)v) >= COORD_DECIMAL) {
+    anim->RegisterError(ANIMERR_NONINT, proc);
+  }
+  return v;
+}
+
+unsigned float2unsigned(const ContProcedure *proc,
+			AnimateCompile *anim,
+			float f) {
+  int v = float2int(proc, anim, f);
+  if (v < 0) {
+    anim->RegisterError(ANIMERR_NEGINT, proc);
+    return 0;
+  } else {
+    return (unsigned)v;
+  }
+}
+
 void DoCounterMarch(const ContProcedure *proc,
 		    AnimateCompile* anim, ContPoint *pnt1, ContPoint *pnt2,
 		    ContValue *stps, ContValue *dir1, ContValue *dir2,
@@ -82,7 +104,8 @@ void DoCounterMarch(const ContProcedure *proc,
     c = v1.DM_Magnitude();
     if (c <= beats) {
       beats -= c;
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(c), v1), proc)) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(proc, anim, c),
+					       v1), proc)) {
 	return;
       }
     } else {
@@ -100,7 +123,8 @@ void DoCounterMarch(const ContProcedure *proc,
 	CreateVector(v1, d1+180.0, beats);
 	break;
       }
-      anim->Append(new AnimateCommandMove(float2unsigned(beats), v1), proc);
+      anim->Append(new AnimateCommandMove(float2unsigned(proc, anim, beats),
+					  v1), proc);
       return;
     }
     leg++;
@@ -478,8 +502,13 @@ void ContProcEven::Compile(AnimateCompile* anim) {
   CC_coord c;
 
   c = pnt->Get(anim) - anim->pt.pos;
-  anim->Append(new AnimateCommandMove(float2unsigned(stps->Get(anim)), c),
-	       this);
+  int steps = float2int(this, anim, stps->Get(anim));
+  if (steps < 0) {
+    anim->Append(new AnimateCommandMove((unsigned)-steps, c,
+					-c.Direction()), this);
+  } else {
+    anim->Append(new AnimateCommandMove((unsigned)steps, c), this);
+  }
 }
 
 ContProcEWNS::~ContProcEWNS() {
@@ -549,7 +578,8 @@ void ContProcFountain::Compile(AnimateCompile* anim) {
       } else {
 	f1 = e/a;
       }
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(f1), v), this)) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(this, anim, f1),
+					       v), this)) {
 	return;
       }
     } else {
@@ -561,7 +591,8 @@ void ContProcFountain::Compile(AnimateCompile* anim) {
     if (!IS_ZERO(f2)) {
       v.x = FLOAT2COORD(f2*a);
       v.y = FLOAT2COORD(f2*c);
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(f2), v), this)) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(this, anim, f2),
+					       v), this)) {
 	return;
       }
     }
@@ -569,7 +600,8 @@ void ContProcFountain::Compile(AnimateCompile* anim) {
     if (!IS_ZERO(f2)) {
       v.x = FLOAT2COORD(f2*b);
       v.y = FLOAT2COORD(f2*d);
-      if (!anim->Append(new AnimateCommandMove(float2unsigned(f2), v), this)) {
+      if (!anim->Append(new AnimateCommandMove(float2unsigned(this, anim, f2),
+					       v), this)) {
 	return;
       }
     }
@@ -583,13 +615,18 @@ ContProcFM::~ContProcFM() {
 
 void ContProcFM::Compile(AnimateCompile* anim) {
   CC_coord c;
-  unsigned b;
+  int b;
 
-  b = float2unsigned(stps->Get(anim));
+  b = float2int(this, anim, stps->Get(anim));
   if (b != 0) {
     CreateVector(c, dir->Get(anim), stps->Get(anim));
     if (c != 0) {
-      anim->Append(new AnimateCommandMove(b, c), this);
+      if (b < 0) {
+	anim->Append(new AnimateCommandMove((unsigned)-b, c,
+					    -c.Direction()), this);
+      } else {
+	anim->Append(new AnimateCommandMove((unsigned)b, c), this);
+      }
     }
   }
 }
@@ -603,7 +640,7 @@ void ContProcFMTO::Compile(AnimateCompile* anim) {
 
   c = pnt->Get(anim) - anim->pt.pos;
   if (c != 0) {
-    anim->Append(new AnimateCommandMove(float2unsigned(c.DM_Magnitude()), c),
+    anim->Append(new AnimateCommandMove((unsigned)c.DM_Magnitude(), c),
 		 this);
   }
 }
@@ -728,9 +765,9 @@ ContProcMarch::~ContProcMarch() {
 void ContProcMarch::Compile(AnimateCompile* anim) {
   CC_coord c;
   float rads, mag;
-  unsigned b;
+  int b;
 
-  b = float2unsigned(stps->Get(anim));
+  b = float2int(this, anim, stps->Get(anim));
   if (b != 0) {
     rads = DEG2RAD(dir->Get(anim));
     mag = stpsize->Get(anim) * stps->Get(anim);
@@ -738,9 +775,15 @@ void ContProcMarch::Compile(AnimateCompile* anim) {
     c.y = -(FLOAT2COORD(sin(rads)*mag));
     if (c != 0) {
       if (facedir)
-	anim->Append(new AnimateCommandMove(b, c, facedir->Get(anim)), this);
+	anim->Append(new AnimateCommandMove((unsigned)ABS(b), c,
+					    facedir->Get(anim)), this);
       else
-	anim->Append(new AnimateCommandMove(b, c), this);
+	if (b < 0) {
+	  anim->Append(new AnimateCommandMove((unsigned)-b, c,
+					      -c.Direction()), this);
+	} else {
+	  anim->Append(new AnimateCommandMove((unsigned)b, c), this);
+	}
     }
   }
 }
@@ -751,11 +794,11 @@ ContProcMT::~ContProcMT() {
 }
 
 void ContProcMT::Compile(AnimateCompile* anim) {
-  unsigned b;
+  int b;
 
-  b = float2unsigned(numbeats->Get(anim));
+  b = float2int(this, anim, numbeats->Get(anim));
   if (b != 0) {
-    anim->Append(new AnimateCommandMT(b, dir->Get(anim)), this);
+    anim->Append(new AnimateCommandMT((unsigned)ABS(b), dir->Get(anim)), this);
   }
 }
 
@@ -813,10 +856,17 @@ void ContProcRotate::Compile(AnimateCompile* anim) {
     start_ang = anim->GetVarValue(CONTVAR_DOH, this);
   else
     start_ang = c.Direction(anim->pt.pos);
-  anim->Append(new AnimateCommandRotate(float2unsigned(stps->Get(anim)), c,
+  int b = float2int(this, anim, stps->Get(anim));
+  float angle = ang->Get(anim);
+  Bool backwards = FALSE;
+  if (b < 0) {
+    backwards = TRUE;
+  }
+  anim->Append(new AnimateCommandRotate((unsigned)ABS(b), c,
 					// Don't use Magnitude() because
 					// we want Coord numbers
 					sqrt(rad.x*rad.x + rad.y*rad.y),
-					start_ang, start_ang+ang->Get(anim)),
+					start_ang, start_ang+angle,
+					backwards),
 	       this);
 }

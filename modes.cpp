@@ -60,6 +60,13 @@ ShowModeStandard::ShowModeStandard(const char *nam,
   hashw(hashw), hashe(hashe)
 {}
 
+ShowModeStandard::ShowModeStandard(const char *nam,
+				   CC_coord bord1, CC_coord bord2,
+				   CC_coord siz, CC_coord off,
+				   unsigned short hashw, unsigned short hashe)
+: ShowMode(nam, siz, off, bord1, bord2), hashw(hashw), hashe(hashe)
+{}
+
 ShowModeStandard::~ShowModeStandard() {}
 
 SHOW_TYPE ShowModeStandard::GetType() {
@@ -71,9 +78,10 @@ void ShowModeStandard::Draw(wxDC *dc) {
   Coord j, k;
   wxIntPoint points[5];
   float textw, texth, textd;
-  CC_coord fieldsize;
+  CC_coord fieldsize, fieldedge;
 
   fieldsize = size - border1 - border2;
+  fieldedge = offset - border1;
 
   points[0].x = 0;
   points[0].y = 0;
@@ -99,7 +107,7 @@ void ShowModeStandard::Draw(wxDC *dc) {
 
   for (j = 0; j < fieldsize.x; j+=INT2COORD(8)) {
     // Draw horizontal lines
-    for (i = 4; i < 84; i+=4) {
+    for (i = 4; i < COORD2INT(fieldsize.y); i+=4) {
       if ((i != hashw) && (i != hashe)) {
 	dc->DrawLine(j+border1.x, INT2COORD(i)+border1.y,
 		     j+INT2COORD(1)+border1.x, INT2COORD(i)+border1.y);
@@ -164,12 +172,12 @@ void ShowModeStandard::Draw(wxDC *dc) {
   }
 
   dc->SetFont(yardLabelFont);
-  for (i = 0; i < 21; i++) {
-    dc->GetTextExtent(yard_text[i], &textw, &texth, &textd);
-    dc->DrawText(yard_text[i],
+  for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
+    dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
+    dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
 		 INT2COORD(i*8) - textw/2 + border1.x,
 		 border1.y - texth);
-    dc->DrawText(yard_text[i],
+    dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
 		 INT2COORD(i*8) - textw/2 + border1.x,
 		 size.y - border2.y);
   }
@@ -178,9 +186,10 @@ void ShowModeStandard::Draw(wxDC *dc) {
 void ShowModeStandard::DrawAnim(wxDC *dc) {
   Coord j;
   wxIntPoint points[5];
-  CC_coord fieldsize;
+  CC_coord fieldsize, fieldedge;
 
   fieldsize = size - border1 - border2;
+  fieldedge = offset - border1;
 
   points[0].x = 0;
   points[0].y = 0;
@@ -225,12 +234,12 @@ void ShowModeStandard::DrawAnim(wxDC *dc) {
   unsigned short i;
   float textw, texth, textd;
   dc->SetFont(yardLabelFont);
-  for (i = 0; i < 21; i++) {
-    dc->GetTextExtent(yard_text[i], &textw, &texth, &textd);
-    dc->DrawText(yard_text[i],
+  for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
+    dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
+    dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
 		 INT2COORD(i*8) - textw/2 + border1.x,
 		 border1.y - texth);
-    dc->DrawText(yard_text[i],
+    dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
 		 INT2COORD(i*8) - textw/2 + border1.x,
 		 size.y - border2.y);
   }
@@ -240,12 +249,12 @@ void ShowModeStandard::DrawAnim(wxDC *dc) {
 ShowModeSprShow::ShowModeSprShow(const char *nam,
 				 CC_coord bord1, CC_coord bord2,
 				 unsigned char which, const char *file,
+				 short stps_x, short stps_y,
+				 short stps_w, short stps_h,
 				 short stg_x, short stg_y,
 				 short stg_w, short stg_h,
 				 short fld_x, short fld_y,
 				 short fld_w, short fld_h,
-				 short stps_x, short stps_y,
-				 short stps_w, short stps_h,
 				 short txt_l, short txt_r,
 				 short txt_tp, short txt_bm)
 : ShowMode(nam, CC_coord(INT2COORD(stps_w),INT2COORD(stps_h)),
@@ -307,13 +316,13 @@ void ShowModeSprShow::Draw(wxDC *dc) {
 
   dc->SetFont(yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
-    dc->GetTextExtent(yard_text[i+(steps_x+80)/8], &textw, &texth, &textd);
+    dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
     if (which_yards & SPR_YARD_ABOVE)
-      dc->DrawText(yard_text[i+(steps_x+80)/8],
+      dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
 		   INT2COORD(i*8) - textw/2 + border1.x,
 		   border1.y - texth);
     if (which_yards & SPR_YARD_BELOW)
-      dc->DrawText(yard_text[i+(steps_x+80)/8],
+      dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
 		   INT2COORD(i*8) - textw/2 + border1.x,
 		   size.y - border2.y);
   }
@@ -353,13 +362,13 @@ void ShowModeSprShow::DrawAnim(wxDC *dc) {
   float textw, texth, textd;
   dc->SetFont(yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
-    dc->GetTextExtent(yard_text[i+(steps_x+80)/8], &textw, &texth, &textd);
+    dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
     if (which_yards & SPR_YARD_ABOVE)
-      dc->DrawText(yard_text[i+(steps_x+80)/8],
+      dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
 		   INT2COORD(i*8) - textw/2 + border1.x,
 		   border1.y - texth);
     if (which_yards & SPR_YARD_BELOW)
-      dc->DrawText(yard_text[i+(steps_x+80)/8],
+      dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
 		   INT2COORD(i*8) - textw/2 + border1.x,
 		   size.y - border2.y);
   }

@@ -26,7 +26,9 @@ const char *animate_err_msgs[] = {
   "Invalid fountain",
   "Division by zero",
   "Undefined value",
-  "Syntax error"
+  "Syntax error",
+  "Non-integer value",
+  "Negative value",
 };
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector) {
@@ -211,8 +213,11 @@ void AnimateCommandMove::ClipBeats(unsigned beats) {
 }
 
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
-					   float rad, float ang1, float ang2)
+					   float rad, float ang1, float ang2,
+					   Bool backwards)
 : AnimateCommand(beats), origin(cntr), r(rad), ang_start(ang1), ang_end(ang2) {
+  if (backwards) face = -90;
+  else face = 90;
 }
 
 Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
@@ -255,9 +260,9 @@ AnimateDir AnimateCommandRotate::Direction() {
 float AnimateCommandRotate::RealDirection() {
   float curr_ang = (ang_end - ang_start) * beat / numbeats + ang_start;
   if (ang_end > ang_start) {
-    return curr_ang + 90;
+    return curr_ang + face;
   } else {
-    return curr_ang - 90;
+    return curr_ang - face;
   }
 }
 

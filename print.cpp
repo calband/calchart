@@ -601,7 +601,8 @@ char *CC_sheet::PrintStandard(FILE *fp) {
 		       step_size * j, step_size * j));
     CHECKPRINT(fprintf(fp, "/y %.2f def\n", field_h + (step_size / 2)));
     CHECKPRINT(fprintf(fp, "(%s) dup centerText\n",
-		       yard_text[(step_offset + j) / 8].Chars()));
+		       yard_text[(step_offset +
+				  (MAX_YARD_LINES-1)*4 - 80 + j)/8].Chars()));
     CHECKPRINT(fprintf(fp, "/y %.2f def\n", -(step_size * 2)));
     CHECKPRINT(fprintf(fp, "centerText\n"));
   }
@@ -679,8 +680,8 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 			     (modesprshow->TextTop()-modesprshow->StageX())/
 			     modesprshow->StageH()));
 	  CHECKPRINT(fprintf(fp, "(%s) centerText\n",
-			     yard_text[(modesprshow->StepsX() + 80 + j) / 8].
-			     Chars()));
+			     yard_text[(modesprshow->StepsX() +
+					(MAX_YARD_LINES-1)*4 + j)/8].Chars()));
 	}
 	if (modesprshow->WhichYards() & SPR_YARD_BELOW) {
 	  CHECKPRINT(fprintf(fp, "/y %.2f def\n",
@@ -689,8 +690,8 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 			      modesprshow->StageX()) /
 			     modesprshow->StageH() -(step_size*yards_size)));
 	  CHECKPRINT(fprintf(fp, "(%s) centerText\n",
-			     yard_text[(modesprshow->StepsX() + 80 + j) / 8].
-			     Chars()));
+			     yard_text[(modesprshow->StepsX() +
+					(MAX_YARD_LINES-1)*4 + j)/8].Chars()));
 	}
       }
     if (modesprshow->WhichYards() & (SPR_YARD_LEFT | SPR_YARD_RIGHT))

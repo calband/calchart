@@ -124,17 +124,25 @@ char *gridtext[] = {
   "None",
   "1",
   "2",
-  "4"
+  "4",
+  "Mil",
+  "2-Mil",
 };
 
 static char *file_wild = FILE_WILDCARDS;
 static char *file_save_wild = FILE_SAVE_WILDCARDS;
 
-Coord gridvalue[] = {
-  1,
-  INT2COORD(1),
-  INT2COORD(2),
-  INT2COORD(4)
+struct GridValue {
+  Coord num, sub;
+};
+
+GridValue gridvalue[] = {
+  {1,0},
+  {INT2COORD(1),0},
+  {INT2COORD(2),0},
+  {INT2COORD(4),0},
+  {INT2COORD(4),INT2COORD(4)/3},
+  {INT2COORD(8),INT2COORD(8)/3}
 };
 
 // This statement initializes the whole application and calls OnInit
@@ -1382,18 +1390,24 @@ void MainFrame::SaveShowAs() {
   }    
 }
 
+static inline Coord SNAPGRID(Coord a, Coord n, Coord s) {
+  Coord a2 = (a+(n>>1)) & (~(n-1));
+  Coord h = s>>1;
+  if ((a-a2) >= h) return a2+s;
+  else if ((a-a2) < -h) return a2-s;
+  else return a2;
+}
+
 void MainFrame::SnapToGrid(CC_coord& c) {
-  Coord gridc;
-  Coord gridmask;
-  Coord gridadjust;
+  Coord gridn, grids;
+  int n = grid_choice->GetSelection();
 
-  gridc = gridvalue[grid_choice->GetSelection()];
-  gridadjust = gridc >> 1; // Half of grid value
-  gridmask = ~(gridc-1); // Create mask to snap to this coord
+  gridn = gridvalue[n].num;
+  grids = gridvalue[n].sub;
 
-  c.x = (c.x+gridadjust) & gridmask;
+  c.x = SNAPGRID(c.x, gridn, grids);
   // Adjust so 4 step grid will be on visible grid
-  c.y = ((c.y + gridadjust - INT2COORD(2)) & gridmask) + INT2COORD(2);
+  c.y = SNAPGRID(c.y - INT2COORD(2), gridn, grids) + INT2COORD(2);
 }
 
 void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type) {

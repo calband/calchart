@@ -284,9 +284,6 @@ inline int operator != (const CC_coord& a, const short b) {
   return ((a.x != b) || (a.y != b));
 }
 
-// So we don't have icky macros to worry about
-unsigned float2unsigned(float f);
-
 float BoundDirection(float f);
 
 float BoundDirectionSigned(float f);

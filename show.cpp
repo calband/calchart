@@ -385,11 +385,6 @@ void CC_continuity::AppendText(const char* s) {
   text.Append(s);
 }
 
-// So we don't have icky macros to worry about
-unsigned float2unsigned(float f) {
-  return (unsigned)(ABS(f)/*+0.5*/);
-}
-
 float BoundDirection(float f) {
   while (f >= 360.0) f -= 360.0;
   while (f < 0.0) f += 360.0;
@@ -1236,7 +1231,7 @@ static char* load_show_REFP(INGLchunk* chunk) {
     data += 2;
     c.y = get_big_word(data);
     data += 2;
-    sheet->SetPosition(c, i, ref);
+    sheet->SetPositionQuick(c, i, ref); // don't clip
   }
 
   return NULL;

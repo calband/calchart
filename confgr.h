@@ -13,6 +13,7 @@
 #include <wxstring.h>
 
 #define MAX_SPR_LINES 5
+#define MAX_YARD_LINES 53
 
 enum CalChartColors {
   COLOR_FIELD,
@@ -79,7 +80,7 @@ extern float num_ratio;
 extern float pline_ratio;
 extern float sline_ratio;
 extern float cont_ratio;
-extern wxString yard_text[21];
+extern wxString yard_text[MAX_YARD_LINES];
 extern wxString spr_line_text[MAX_SPR_LINES];
 
 extern char *ReadConfig(const char *path);

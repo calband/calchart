@@ -43,6 +43,8 @@ enum AnimateError {
   ANIMERR_DIVISION_ZERO,
   ANIMERR_UNDEFINED,
   ANIMERR_SYNTAX,
+  ANIMERR_NONINT,
+  ANIMERR_NEGINT,
   NUM_ANIMERR
 };
 
@@ -113,7 +115,7 @@ private:
 class AnimateCommandRotate : public AnimateCommand {
 public:
   AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad,
-		       float ang1, float ang2);
+		       float ang1, float ang2, Bool backwards = FALSE);
 
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
@@ -127,6 +129,7 @@ public:
 private:
   CC_coord origin;
   float r, ang_start, ang_end;
+  float face;
 };
 
 class AnimateSheet {
