@@ -373,25 +373,6 @@ ending with a north-south trajectory.  EWNS is equivalent to:
 
 A similar procedure is \helpref{NSEW}{nsew}.
 
-\subsection{FOUNTAIN}\label{fountain}
-
-Format: FOUNTAIN \verb$<direction 1>$ \verb$<direction 2>$ \verb$<destination>$
-
-or FOUNTAIN \verb$<direction 1>$ \verb$<direction 2>$ \verb$<stepsize 1>$ \verb$<stepsize 2>$ \verb$<destination>$
-
-FOUNTAIN marches a two-part course, starting in \verb$<direction 1>$ and
-ending in \verb$<direction 2>$, and arriving at \verb$<destination>$.
-If necessary, the opposite of \verb$<direction 1>$ will be used instead
-of \verb$<direction 1>$, and the opposite of \verb$<direction 2>$ will
-be used instead of \verb$<direction 2>$.
-
-If the stepsizes are not given, a value of 1 will be used.
-
-Note that if either trajectory is unnecessary, it will be skipped.
-
-In most cases, \helpref{NSEW}{nsew}, \helpref{EWNS}{ewns},
-\helpref{DMHS}{dmhs}, or \helpref{HSDM}{hsdm} can be used more easily.
-
 \subsection{FM}\label{fm}
 
 Format: FM \verb$<steps>$ \verb$<direction>$
@@ -412,6 +393,25 @@ FMTO marches in a straight line to the point \verb$<destination>$.  It
 infers the stepsize and then determines how many steps to take using
 that stepsize.  (See the section on \helpref{STEPSIZES}{stepsizes} for
 more information on guessing).
+
+\subsection{FOUNTAIN}\label{fountain}
+
+Format: FOUNTAIN \verb$<direction 1>$ \verb$<direction 2>$ \verb$<destination>$
+
+or FOUNTAIN \verb$<direction 1>$ \verb$<direction 2>$ \verb$<stepsize 1>$ \verb$<stepsize 2>$ \verb$<destination>$
+
+FOUNTAIN marches a two-part course, starting in \verb$<direction 1>$ and
+ending in \verb$<direction 2>$, and arriving at \verb$<destination>$.
+If necessary, the opposite of \verb$<direction 1>$ will be used instead
+of \verb$<direction 1>$, and the opposite of \verb$<direction 2>$ will
+be used instead of \verb$<direction 2>$.
+
+If the stepsizes are not given, a value of 1 will be used.
+
+Note that if either trajectory is unnecessary, it will be skipped.
+
+In most cases, \helpref{NSEW}{nsew}, \helpref{EWNS}{ewns},
+\helpref{DMHS}{dmhs}, or \helpref{HSDM}{hsdm} can be used more easily.
 
 \subsection{GRID}\label{grid}
 
