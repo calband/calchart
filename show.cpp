@@ -12,7 +12,8 @@
 #pragma implementation
 #endif
 
-#include <wx_utils.h>
+#include <wx.h>
+#include <wx_timer.h>
 #include "show.h"
 #include "undo.h"
 #include "confgr.h"
@@ -46,6 +47,49 @@ static char *contnames[] = {
 };
 
 extern ShowModeList *modelist;
+
+static void ChangeExtension(const wxString& in, wxString& out,
+			    const wxString& ext) {
+  int i = in.Last('.');
+  out = in.Copy().SubString(0, i);
+  out.Append(ext);
+}
+		       
+class AutoSaveTimer: public wxTimer {
+public:
+  AutoSaveTimer(): untitled_number(1) {}
+  void Notify() {
+    wxNode *n;
+    CC_show *show;
+    
+    for (n = showlist.First(); n != NULL; n = n->Next()) {
+      show = (CC_show*)n->Data();
+      if (show->Modified()) {
+	char *s;
+	if ((s=show->Autosave()) != NULL) {
+	  (void)wxMessageBox(s, "Autosave Error");
+	}
+      }
+    }
+  }
+
+  inline void AddShow(const CC_show *show) {
+    showlist.Append((wxObject*)show);
+  }
+  inline void RemoveShow(const CC_show *show) {
+    showlist.DeleteObject((wxObject*)show);
+  }
+  inline int GetNumber() { return untitled_number++; }
+private:
+  wxList showlist;
+  int untitled_number;
+};
+
+static AutoSaveTimer autosaveTimer;
+void SetAutoSave(int secs) {
+  if (secs > 0)
+    autosaveTimer.Start(secs*1000);
+}
 
 CC_WinNode::CC_WinNode(CC_WinList *lst)
 : list(lst) {
@@ -900,6 +944,24 @@ void CC_sheet::SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref){
   }
 }
 
+Bool CC_sheet::ClearRefPositions(unsigned ref) {
+  unsigned i;
+  Bool change = FALSE;
+
+  if (GetNumSelectedPoints() <= 0) return FALSE;
+
+  // Create undo entry
+  show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
+
+  for (i = 0; i < show->GetNumPoints(); i++) {
+    if (show->IsSelected(i)) {
+      SetPosition(GetPosition(i), i, ref);
+      change = TRUE;
+    }
+  }
+  return change;
+}
+
 // Move points
 Bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref) {
   unsigned i;
@@ -972,6 +1034,10 @@ CC_show::CC_show(unsigned npoints)
 :numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
  modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
  print_do_cont_sheet(TRUE) {
+  wxString tmpname;
+
+  tmpname.sprintf("noname%d.shw", autosaveTimer.GetNumber());
+  SetAutosaveName(tmpname);
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
@@ -1001,6 +1067,7 @@ CC_show::CC_show(unsigned npoints)
   sheets->numanimcont = 1;
 
   error = NULL;
+  autosaveTimer.AddShow(this);
 }
 
 #define INGL_SHOW MakeINGLid('S','H','O','W')
@@ -1786,8 +1853,9 @@ CC_show::CC_show(const char *file)
       }
       fclose(fp);
     }
-    strcpy(namebuf+namelen-3, "shw");
-    SetName(namebuf);
+    wxString shwname;
+    ChangeExtension(namebuf, shwname, "shw");
+    SetName(shwname);
     delete namebuf;
   } else {
     INGLread readhnd(file);
@@ -1802,13 +1870,16 @@ CC_show::CC_show(const char *file)
   }
   if ((error == NULL) && (sheets == NULL)) {
     error = nosheets_str;
+    return;
   }
+  autosaveTimer.AddShow(this);
 }
 
 // Destroy a show
 CC_show::~CC_show() {
   CC_sheet *tmp;
 
+  autosaveTimer.RemoveShow(this);
 #if 0
   fprintf(stderr, "Deleting show...\n");
 #endif
@@ -1858,7 +1929,14 @@ void CC_show::Append(CC_sheet *newsheets) {
   winlist->AppendSheets();
 }
 
-char *CC_show::Save(const char *filename) {
+char *CC_show::SaveInternal(const char *filename) {
+  wxString bakfile;
+  if (wxFileExists(filename)) {
+    ChangeExtension(filename, bakfile, "bak");
+    if (!wxCopyFile((char*)filename, bakfile.GetData()))
+      return nofile_str;
+  }
+
   INGLwrite *handl = new INGLwrite(filename);
   INGLid id;
   unsigned i, j;
@@ -2044,7 +2122,36 @@ char *CC_show::Save(const char *filename) {
 
   delete handl;
 
+  if (!bakfile.Empty()) {
+    wxRemoveFile(bakfile.GetData());
+  }
   return NULL;
+}
+
+void CC_show::ClearAutosave() {
+  wxRemoveFile(autosave_name.GetData());
+}
+
+char *CC_show::Autosave() {
+  if (!autosave_name.Empty()) {
+    return SaveInternal(autosave_name);
+  } else {
+    return NULL;
+  }
+}
+
+char *CC_show::Save(const char *filename) {
+  char *s = SaveInternal(filename);
+  if (s == NULL) {
+    if (autosave_name) {
+      ClearAutosave();
+    }
+    SetModified(FALSE);
+    if (name.CompareTo(filename) != 0) {
+      UserSetName(filename);
+    }
+  }
+  return s;
 }
 
 const char *CC_show::UserGetName() {
@@ -2056,7 +2163,14 @@ void CC_show::SetName(const char *newname) {
   // make into a full path
   char *path = FullPath(newname);
   name = path;
+  SetAutosaveName(path);
   delete [] path;
+}
+
+void CC_show::SetAutosaveName(const char *realname) {
+  autosave_name = autosave_dir;
+  autosave_name.Append(PATH_SEPARATOR);
+  autosave_name.Append(wxFileNameFromPath((char*)realname));
 }
 
 void CC_show::UserSetDescr(const char *newdescr, wxWindow *win) {

@@ -425,7 +425,10 @@ static void ShowInfoSetNum(wxButton& button, wxEvent&) {
     if(wxMessageBox("Changing the number of points is not undoable.\nProceed?",
 		    "Change number of points", wxYES_NO, req) == wxYES) {
       if (num > req->show->GetNumPoints())
-	req->show->SetNumPoints(num, req->GetColumns());
+	if (num > 10)
+	  req->show->SetNumPoints(num, req->GetColumns());
+	else
+	  req->show->SetNumPoints(num, 10);
       else
 	req->show->SetNumPoints(num, 1);
       req->SetLabels();

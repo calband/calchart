@@ -56,11 +56,11 @@ static char* DefaultColors[COLOR_NUM] = {
   "WHITE",
   "YELLOW",
   "SKY BLUE",
-  "255 192 128",
-  "ORANGE",
-  "BROWN",
+  "RED",
+  "RED",
+  "RED",
   "PURPLE",
-  "GREY"
+  "RED"
 };
 
 static Bool DefaultMonoColors[COLOR_NUM] = {
@@ -157,9 +157,13 @@ wxBrush *CalChartBrushes[COLOR_NUM];
 
 wxString program_dir;
 wxString shows_dir;
+wxString autosave_dir;
+wxString autosave_dirname = AUTOSAVE_VAR;
 unsigned int window_default_width = 600;
 unsigned int window_default_height = 450;
 unsigned int undo_buffer_size = 50000;
+unsigned int autosave_interval = 300;
+unsigned int default_zoom = 5;
 wxString print_file = "LPT1";
 wxString print_cmd = "lpr";
 wxString print_opts = "";
@@ -262,6 +266,10 @@ char *ReadConfig(const char *path) {
 	ReadDOSline(fp, shows_dir);
 	continue;
       }
+      if (strcmp("AUTOSAVE_DIR", com_buf) == 0) {
+	ReadDOSline(fp, autosave_dirname);
+	continue;
+      }
       if (strcmp("RUNTIME_DIR", com_buf) == 0) {
 	ReadDOSline(fp, runtime_dir);
 	continue;
@@ -274,8 +282,16 @@ char *ReadConfig(const char *path) {
 	fscanf(fp, " %d \n", &window_default_height);
 	continue;
       }
+      if (strcmp("DEFAULT_ZOOM", com_buf) == 0) {
+	fscanf(fp, " %d \n", &default_zoom);
+	continue;
+      }
       if (strcmp("UNDO_BUF_SIZE", com_buf) == 0) {
 	fscanf(fp, " %d \n", &undo_buffer_size);
+	continue;
+      }
+      if (strcmp("AUTOSAVE_INTERVAL", com_buf) == 0) {
+	fscanf(fp, " %d \n", &autosave_interval);
 	continue;
       }
       if (strcmp("PRINT_FILE", com_buf) == 0) {
@@ -491,6 +507,17 @@ char *ReadConfig(const char *path) {
       }
     }
     fclose(fp);
+  }
+
+  if (autosave_dirname.Firstchar() == '$') {
+    const char *d;
+    if ((d = getenv(autosave_dirname.GetData()+1)) != NULL) {
+      autosave_dir = d;
+    } else {
+      autosave_dir = AUTOSAVE_DIR;
+    }
+  } else {
+    autosave_dir = autosave_dirname;
   }
 
   if (modelist->First() == NULL) {

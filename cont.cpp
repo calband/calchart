@@ -112,15 +112,20 @@ const CC_coord& ContPoint::Get(AnimateCompile* anim) const {
   return anim->pt.pos;
 }
 
+const CC_coord& ContStartPoint::Get(AnimateCompile* anim) const {
+  return anim->curr_sheet->GetPosition(anim->curr_pt);
+}
+
 const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const {
   CC_sheet *sheet = anim->curr_sheet->next; 
 
   while (1) {
     if (sheet == NULL) {
+      anim->RegisterError(ANIMERR_UNDEFINED);
       return ContPoint::Get(anim);
     }
     if (sheet->IsInAnimation()) {
-      return anim->curr_sheet->next->GetPosition(anim->curr_pt);
+      return sheet->GetPosition(anim->curr_pt);
     }
     sheet = sheet->next;
   }
@@ -176,6 +181,9 @@ float ContValueDefined::Get(AnimateCompile*) const {
   case CC_JS:
     f = 0.5;
     break;
+  case CC_GV:
+    f = 1.0;
+    break;
   case CC_M:
     f = 4.0/3;
     break;
@@ -223,7 +231,7 @@ float ContValueDiv::Get(AnimateCompile* anim) const {
 
   f = val2->Get(anim);
   if (IS_ZERO(f)) {
-    anim->SetStatus(FALSE);
+    anim->RegisterError(ANIMERR_DIVISION_ZERO);
     return 0.0;
   } else {
     return (val1->Get(anim) / f);
@@ -243,10 +251,13 @@ float ContValueREM::Get(AnimateCompile* anim) const {
 }
 
 float ContValueVar::Get(AnimateCompile* anim) const {
+  if (!anim->vars_valid[varnum])
+    anim->RegisterError(ANIMERR_UNDEFINED);
   return anim->vars[varnum];
 }
 
 void ContValueVar::Set(AnimateCompile* anim, float v) {
+  anim->vars_valid[varnum] = TRUE;
   anim->vars[varnum] = v;
 }
 
@@ -255,7 +266,11 @@ ContFuncDir::~ContFuncDir() {
 }
 
 float ContFuncDir::Get(AnimateCompile* anim) const {
-  return anim->pt.pos.Direction(pnt->Get(anim));
+  CC_coord c = pnt->Get(anim);
+  if (c == 0) {
+    anim->RegisterError(ANIMERR_UNDEFINED);
+  }
+  return anim->pt.pos.Direction(c);
 }
 
 ContFuncDirFrom::~ContFuncDirFrom() {
@@ -264,7 +279,12 @@ ContFuncDirFrom::~ContFuncDirFrom() {
 }
 
 float ContFuncDirFrom::Get(AnimateCompile* anim) const {
-  return pnt_start->Get(anim).Direction(pnt_end->Get(anim));
+  CC_coord start = pnt_start->Get(anim);
+  CC_coord end = pnt_end->Get(anim);
+  if (start == end) {
+    anim->RegisterError(ANIMERR_UNDEFINED);
+  }
+  return start.Direction(end);
 }
 
 ContFuncDist::~ContFuncDist() {
@@ -299,8 +319,11 @@ ContFuncEither::~ContFuncEither() {
 float ContFuncEither::Get(AnimateCompile* anim) const {
   float dir;
   float d1, d2;
+  CC_coord c = pnt->Get(anim);
 
-  dir = anim->pt.pos.Direction(pnt->Get(anim));
+  if (anim->pt.pos == c)
+    anim->RegisterError(ANIMERR_UNDEFINED);
+  dir = anim->pt.pos.Direction(c);
   d1 = dir1->Get(anim) - dir;
   d2 = dir2->Get(anim) - dir;
   while (d1 > 180) d1-=360;
@@ -557,10 +580,12 @@ void ContProcFM::Compile(AnimateCompile* anim) {
   CC_coord c;
   unsigned b;
 
-  CreateVector(c, dir->Get(anim), stps->Get(anim));
   b = float2unsigned(stps->Get(anim));
-  if ((b != 0) || (c != 0)) {
-    anim->Append(new AnimateCommandMove(b, c));
+  if (b != 0) {
+    CreateVector(c, dir->Get(anim), stps->Get(anim));
+    if (c != 0) {
+      anim->Append(new AnimateCommandMove(b, c));
+    }
   }
 }
 
@@ -691,13 +716,18 @@ void ContProcMarch::Compile(AnimateCompile* anim) {
   float rads, mag;
   unsigned b;
 
-  rads = DEG2RAD(dir->Get(anim));
-  mag = stpsize->Get(anim) * stps->Get(anim);
-  c.x = FLOAT2COORD(cos(rads)*mag);
-  c.y = -(FLOAT2COORD(sin(rads)*mag));
   b = float2unsigned(stps->Get(anim));
-  if ((b != 0) || (c != 0)) {
-    anim->Append(new AnimateCommandMove(b, c));
+  if (b != 0) {
+    rads = DEG2RAD(dir->Get(anim));
+    mag = stpsize->Get(anim) * stps->Get(anim);
+    c.x = FLOAT2COORD(cos(rads)*mag);
+    c.y = -(FLOAT2COORD(sin(rads)*mag));
+    if (c != 0) {
+      if (facedir)
+	anim->Append(new AnimateCommandMove(b, c, facedir->Get(anim)));
+      else
+	anim->Append(new AnimateCommandMove(b, c));
+    }
   }
 }
 
@@ -707,8 +737,12 @@ ContProcMT::~ContProcMT() {
 }
 
 void ContProcMT::Compile(AnimateCompile* anim) {
-  anim->Append(new AnimateCommandMT(float2unsigned(numbeats->Get(anim)),
-				    AnimGetDirFromAngle(dir->Get(anim))));
+  unsigned b;
+
+  b = float2unsigned(numbeats->Get(anim));
+  if (b != 0) {
+    anim->Append(new AnimateCommandMT(b, dir->Get(anim)));
+  }
 }
 
 ContProcMTRM::~ContProcMTRM() {
@@ -717,7 +751,7 @@ ContProcMTRM::~ContProcMTRM() {
 
 void ContProcMTRM::Compile(AnimateCompile* anim) {
   anim->Append(new AnimateCommandMT(anim->beats_rem,
-				    AnimGetDirFromAngle(dir->Get(anim))));
+				    dir->Get(anim)));
 }
 
 ContProcNSEW::~ContProcNSEW() {
@@ -761,6 +795,8 @@ void ContProcRotate::Compile(AnimateCompile* anim) {
   // Most of the work is converting to polar coordinates
   c = pnt->Get(anim);
   rad = anim->pt.pos - c;
+  if (c == anim->pt.pos)
+    anim->RegisterError(ANIMERR_UNDEFINED);
   start_ang = c.Direction(anim->pt.pos);
   anim->Append(new AnimateCommandRotate(float2unsigned(stps->Get(anim)), c,
 					// Don't use Magnitude() because

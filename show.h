@@ -39,7 +39,7 @@ typedef short Coord;
 #define BASICALLY_ZERO_BASICALLY 0.00001
 #define IS_ZERO(a) (ABS((a)) < BASICALLY_ZERO_BASICALLY)
 #define DEG2RAD(a) ((a) * PI / 180.0)
-#define SQRT2 1.4142136;
+#define SQRT2 1.4142136
 
 #define MAX_POINTS 1000
 #define NUM_REF_PNTS 3
@@ -370,6 +370,7 @@ public:
   void SetAllPositions(const CC_coord& val, unsigned i);
   void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
   void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
+  Bool ClearRefPositions(unsigned ref);
   Bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
   Bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
   Bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
@@ -411,6 +412,8 @@ public:
   void Append(CC_show *shw);
   void Append(CC_sheet *newsheets);
   char *Save(const char *filename);
+  char *Autosave();
+  void ClearAutosave();
 
   inline void FlushAllTextWindows() {
     winlist->FlushDescr(); winlist->FlushContinuity();
@@ -466,9 +469,12 @@ public:
 
 private:
   void PrintSheets(FILE *fp); // called by Print()
+  char *SaveInternal(const char *filename);
+  void SetAutosaveName(const char *realname);
 
   char *error;
   wxString name;
+  wxString autosave_name;
   wxString descr;
   unsigned short numpoints;
   unsigned short numsheets;
@@ -488,5 +494,7 @@ public:
   unsigned curr_ss;
   inline CC_sheet *CurrSheet() { return show->GetNthSheet(curr_ss); }
 };
+
+void SetAutoSave(int secs);
 
 #endif

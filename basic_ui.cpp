@@ -316,29 +316,15 @@ void AutoScrollCanvas::SetUserScale(float x, float y) {
   if (memdc) memdc->SetUserScale(x, y);
 }
 
-void AutoScrollCanvas::Move(float x, float y) {
-  int width, height;
-  int w, h;
-
-  x *= x_scale;
-  y *= y_scale;
-
+void AutoScrollCanvas::Move(float x, float y, Bool noscroll) {
   if (memdc) {
-    GetClientSize(&width, &height);
-    w = membm->GetWidth() - width;
-    h = membm->GetHeight() - height;
-
-    if (w > 0) {
-      x_off = -w * x / width;
-    } else {
-      x_off = 0;
-    }
-    if (h > 0) {
-      y_off = -h * y / height;
-    } else {
-      y_off = 0;
+    if (!noscroll) {
+      x_off += (x - last_pos.x) * x_scale;
+      y_off += (y - last_pos.y) * y_scale;
     }
   }
+  last_pos.x = x;
+  last_pos.y = y;
 }
 
 void AutoScrollCanvas::Blit() {

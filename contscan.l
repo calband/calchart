@@ -70,6 +70,7 @@ NEWLINE		[\n\f]
 "NP"		ReturnToken(rwNP);
 "R"		ReturnToken(rwR);
 "REM"		ReturnToken(rwREM);
+"SP"		ReturnToken(rwSP);
 "N"		yylval.d = CC_N; ReturnToken(DEFINECONST);
 "NW"		yylval.d = CC_NW; ReturnToken(DEFINECONST);
 "W"		yylval.d = CC_W; ReturnToken(DEFINECONST);
@@ -78,7 +79,7 @@ NEWLINE		[\n\f]
 "SE"		yylval.d = CC_SE; ReturnToken(DEFINECONST);
 "E"		yylval.d = CC_E; ReturnToken(DEFINECONST);
 "NE"		yylval.d = CC_NE; ReturnToken(DEFINECONST);
-"DOF"		{ yylval.v = '\0'; ReturnToken(VARIABLE); }
+"DOF"		ReturnToken(rwDOF);
 "+"		ReturnToken('+');
 "-"		ReturnToken('-');
 "*"		ReturnToken('*');
@@ -90,6 +91,7 @@ NEWLINE		[\n\f]
 "MM"		yylval.d = CC_MM; ReturnToken(DEFINECONST);
 "SH"		yylval.d = CC_SH; ReturnToken(DEFINECONST);
 "JS"		yylval.d = CC_JS; ReturnToken(DEFINECONST);
+"GV"		yylval.d = CC_GV; ReturnToken(DEFINECONST);
 "M"		yylval.d = CC_M; ReturnToken(DEFINECONST);
 "DM"		yylval.d = CC_DM; ReturnToken(DEFINECONST);
 "BLAM"		ReturnToken(pBLAM);

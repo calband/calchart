@@ -14,7 +14,7 @@ CONF_LIBS = -lribout
 DFLAGS = -g -Wall $(CONF_FLAGS)
 
 LEX = flex
-LFLAGS = -B
+LFLAGS = -B -i
 YACC = bison
 YFLAGS = -dv
 

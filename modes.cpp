@@ -49,7 +49,7 @@ CC_coord ShowMode::ClipPosition(const CC_coord& pos) {
   else clipped.x = pos.x;
   if (pos.y < min.y) clipped.y = min.y;
   else if (pos.y > max.y) clipped.y = max.y;
-  clipped.y = pos.y;
+  else clipped.y = pos.y;
   return clipped;
 }
 

@@ -17,6 +17,7 @@
 
 // Number of variables in continuity language (A B C D X Y Z DOF)
 #define NUMCONTVARS 8
+#define CONTVAR_DOF 7
 
 enum AnimateDir {
   ANIMDIR_N, ANIMDIR_NE, ANIMDIR_E, ANIMDIR_SE,
@@ -29,6 +30,8 @@ enum AnimateError {
   ANIMERR_WRONGPLACE,
   ANIMERR_INVALID_CM,
   ANIMERR_INVALID_FNTN,
+  ANIMERR_DIVISION_ZERO,
+  ANIMERR_UNDEFINED,
   NUM_ANIMERR
 };
 
@@ -58,6 +61,7 @@ public:
   virtual void ApplyBackward(AnimatePoint& pt);
 
   virtual AnimateDir Direction() = 0;
+  virtual float RealDirection() = 0;
   virtual void ClipBeats(unsigned beats);
 
   AnimateCommand *next, *prev;
@@ -68,16 +72,19 @@ protected:
 
 class AnimateCommandMT : public AnimateCommand {
 public:
-  AnimateCommandMT(unsigned beats, AnimateDir direction);
+  AnimateCommandMT(unsigned beats, float direction);
 
   virtual AnimateDir Direction();
+  virtual float RealDirection();
 protected:
   AnimateDir dir;
+  float realdir;
 };
 
 class AnimateCommandMove : public AnimateCommandMT {
 public:
   AnimateCommandMove(unsigned beats, CC_coord movement);
+  AnimateCommandMove(unsigned beats, CC_coord movement, float direction);
 
   virtual Bool NextBeat(AnimatePoint& pt);
   virtual Bool PrevBeat(AnimatePoint& pt);
@@ -102,6 +109,7 @@ public:
   virtual void ApplyBackward(AnimatePoint& pt);
 
   virtual AnimateDir Direction();
+  virtual float RealDirection();
   virtual void ClipBeats(unsigned beats);
 private:
   CC_coord origin;
@@ -184,6 +192,7 @@ public:
   void FreeErrorMarkers();
 
   float vars[NUMCONTVARS];
+  Bool vars_valid[NUMCONTVARS];
   AnimatePoint pt;
   AnimateCommand *cmds;
   AnimateCommand *curr_cmd;

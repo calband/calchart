@@ -18,7 +18,6 @@
 
 // Value of 10 translates to a canvas of 1760x1000.
 #define FIELD_MAXZOOM 10
-#define FIELD_DEFAULT_ZOOM 5
 
 enum CC_DRAG_TYPES { CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
 		     CC_DRAG_LASSO, CC_DRAG_LINE, CC_DRAG_CROSS };
@@ -43,6 +42,7 @@ enum {
   CALCHART__INSERT_AFTER,
   CALCHART__DELETE,
   CALCHART__RELABEL,
+  CALCHART__CLEAR_REF,
   CALCHART__EDIT_CONTINUITY,
   CALCHART__EDIT_PRINTCONT,
   CALCHART__SET_TITLE,
@@ -280,7 +280,7 @@ class FieldCanvas : public AutoScrollCanvas {
 public:
   // Basic functions
   FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
-	      int def_zoom = FIELD_DEFAULT_ZOOM,
+	      int def_zoom,
 	      FieldCanvas *from_canvas = NULL,
 	      int x = -1, int y = -1, int w = -1, int h = -1);
   ~FieldCanvas(void);

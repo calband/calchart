@@ -23,7 +23,9 @@ const char *animate_err_msgs[] = {
   "Not enough to do",
   "Didn't make it to position",
   "Invalid countermarch",
-  "Invalid fountain"
+  "Invalid fountain",
+  "Division by zero",
+  "Undefined value"
 };
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector) {
@@ -133,23 +135,31 @@ Bool AnimateCommand::PrevBeat(AnimatePoint&) {
 }
 
 void AnimateCommand::ApplyForward(AnimatePoint&) {
+  beat = numbeats;
 }
 
 void AnimateCommand::ApplyBackward(AnimatePoint&) {
+  beat = 0;
 }
 
 void AnimateCommand::ClipBeats(unsigned beats) {
   numbeats = beats;
 }
 
-AnimateCommandMT::AnimateCommandMT(unsigned beats, AnimateDir direction)
-: AnimateCommand(beats), dir(direction) {
+AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
+: AnimateCommand(beats), dir(AnimGetDirFromAngle(direction)), realdir(direction) {
 }
 
 AnimateDir AnimateCommandMT::Direction() { return dir; }
 
+float AnimateCommandMT::RealDirection() { return realdir; }
+
 AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
-: AnimateCommandMT(beats, AnimGetDirFromVector(movement)), vector(movement) {
+: AnimateCommandMT(beats, movement.Direction()), vector(movement) {
+}
+
+AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement, float direction)
+: AnimateCommandMT(beats, direction), vector(movement) {
 }
 
 Bool AnimateCommandMove::NextBeat(AnimatePoint& pt) {
@@ -178,10 +188,12 @@ Bool AnimateCommandMove::PrevBeat(AnimatePoint& pt) {
 }
 
 void AnimateCommandMove::ApplyForward(AnimatePoint& pt) {
+  AnimateCommand::ApplyForward(pt);
   pt.pos += vector;
 }
 
 void AnimateCommandMove::ApplyBackward(AnimatePoint& pt) {
+  AnimateCommand::ApplyBackward(pt);
   pt.pos -= vector;
 }
 
@@ -216,21 +228,27 @@ Bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
 }
 
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt) {
+  AnimateCommand::ApplyForward(pt);
   pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(ang_end*PI/180.0)*r);
   pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(ang_end*PI/180.0)*r);
 }
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt) {
+  AnimateCommand::ApplyBackward(pt);
   pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(ang_start*PI/180.0)*r);
   pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(ang_start*PI/180.0)*r);
 }
 
 AnimateDir AnimateCommandRotate::Direction() {
+  return AnimGetDirFromAngle(RealDirection());
+}
+
+float AnimateCommandRotate::RealDirection() {
   float curr_ang = (ang_end - ang_start) * beat / numbeats + ang_start;
   if (ang_end > ang_start) {
-    return AnimGetDirFromAngle(curr_ang + 90);
+    return curr_ang + 90;
   } else {
-    return AnimGetDirFromAngle(curr_ang - 90);
+    return curr_ang - 90;
   }
 }
 
@@ -539,6 +557,7 @@ void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
 
   for (i = 0; i < NUMCONTVARS; i++) {
     vars[i] = 0.0;
+    vars_valid[i] = FALSE;
   }
 
   pt.pos = curr_sheet->GetPosition(pt_num);
@@ -547,9 +566,22 @@ void AnimateCompile::Compile(unsigned pt_num, ContProcedure* proc) {
   beats_rem = curr_sheet->beats;
 
   if (proc == NULL) {
-    // no continuity was specified; use EVEN REM NP
-    ContProcEven defcont(new ContValueFloat(beats_rem), new ContNextPoint());
-    defcont.Compile(this);
+    // no continuity was specified
+    CC_sheet *s;
+    for (s = curr_sheet->next; s != NULL; s = s->next) {
+      if (s->IsInAnimation()) {
+	//use EVEN REM NP
+	ContProcEven defcont(new ContValueFloat(beats_rem),
+			     new ContNextPoint());
+	defcont.Compile(this);
+	break;
+      }
+    }
+    if (s == NULL) {
+      //use MTRM E
+      ContProcMTRM defcont(new ContValueDefined(CC_E));
+      defcont.Compile(this);
+    }
   }
 
   for (; proc; proc = proc->next) {
@@ -593,7 +625,8 @@ Bool AnimateCompile::Append(AnimateCommand *cmd) {
   beats_rem -= cmd->numbeats;
 
   cmd->ApplyForward(pt); // Move current point to new position
-
+  vars[CONTVAR_DOF] = cmd->RealDirection();
+  vars_valid[CONTVAR_DOF] = TRUE;
   return TRUE;
 }
 

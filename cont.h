@@ -16,12 +16,19 @@
 #include "animate.h"
 
 enum ContDefinedValue { CC_N, CC_NW, CC_W, CC_SW, CC_S, CC_SE, CC_E, CC_NE,
-			CC_HS, CC_MM, CC_SH, CC_JS, CC_M, CC_DM };
+			CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM };
 
 class ContPoint {
 public:
   ContPoint() {}
   virtual ~ContPoint();
+
+  virtual const CC_coord& Get(AnimateCompile* anim) const;
+};
+
+class ContStartPoint : public ContPoint {
+public:
+  ContStartPoint() {}
 
   virtual const CC_coord& Get(AnimateCompile* anim) const;
 };
@@ -391,14 +398,14 @@ private:
 
 class ContProcMarch : public ContProcedure {
 public:
-  ContProcMarch(ContValue *stepsize, ContValue *steps, ContValue *d)
-    : stpsize(stepsize), stps(steps), dir(d) {}
+  ContProcMarch(ContValue *stepsize, ContValue *steps, ContValue *d, ContValue *face)
+    : stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
   virtual ~ContProcMarch();
 
   virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *stpsize, *stps, *dir;
+  ContValue *stpsize, *stps, *dir, *facedir;
 };
 
 class ContProcMT : public ContProcedure {

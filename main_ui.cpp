@@ -380,6 +380,9 @@ wxFrame *CalChartApp::OnInit(void)
   if (!shows_dir.Empty()) {
     wxSetWorkingDirectory(shows_dir.GetData());
   }
+
+  SetAutoSave(autosave_interval);
+
   return topframe;
 }
 
@@ -821,6 +824,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet &After");
   edit_menu->Append(CALCHART__DELETE, "&Delete Sheet");
   edit_menu->Append(CALCHART__RELABEL, "&Relabel Sheets");
+  edit_menu->Append(CALCHART__CLEAR_REF, "&Clear Reference");
   edit_menu->Append(CALCHART__SETUP, "&Setup Show...");
   edit_menu->Append(CALCHART__POINTS, "&Point Selections...");
   edit_menu->Append(CALCHART__SET_TITLE, "Set &Title...");
@@ -866,7 +870,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
       setup = TRUE;
     }
     ss = 0;
-    def_zoom = FIELD_DEFAULT_ZOOM;
+    def_zoom = default_zoom;
     def_grid = 2;
     def_ref = 0;
     field = new FieldCanvas(show, ss, this, def_zoom);
@@ -1069,6 +1073,13 @@ void MainFrame::OnMenuCommand(int id)
 			 "Relabel sheets");
     }
     break;
+  case CALCHART__CLEAR_REF:
+    if (field->curr_ref > 0) {
+      if (field->show_descr.CurrSheet()->ClearRefPositions(field->curr_ref))
+	field->show_descr.show->winlist->
+	  UpdatePointsOnSheet(field->show_descr.curr_ss, field->curr_ref);
+    }
+    break;
   case CALCHART__EDIT_CONTINUITY:
     if (field->show_descr.show) {
       (void)new ContinuityEditor(&field->show_descr, &node->winlist, this,
@@ -1190,6 +1201,9 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__RELABEL:
     msg = "Relabel all stuntsheets after this one";
     break;
+  case CALCHART__CLEAR_REF:
+    msg = "Clear selected reference points";
+    break;
   case CALCHART__EDIT_CONTINUITY:
     msg = "Edit continuity for this stuntsheet";
     break;
@@ -1251,6 +1265,7 @@ Bool MainFrame::OkayToClearShow() {
 	break;
       }
     }
+    field->show_descr.show->ClearAutosave();
   }
   return TRUE;
 }
@@ -1305,12 +1320,11 @@ void MainFrame::SaveShow() {
   if (strcmp(s, "") == 0) {
     // No file name; use SaveAs instead
     SaveShowAs();
-  }
-  s = field->show_descr.show->Save(s);
-  if (s != NULL) {
-    (void)wxMessageBox((char *)s, "Save Error"); // should be const
   } else {
-    field->show_descr.show->SetModified(FALSE);
+    s = field->show_descr.show->Save(s);
+    if (s != NULL) {
+      (void)wxMessageBox((char *)s, "Save Error"); // should be const
+    }
   }
 }
 
@@ -1322,12 +1336,15 @@ void MainFrame::SaveShowAs() {
   s = wxFileSelector("Save show", NULL, NULL, NULL, file_save_wild,
 		     wxSAVE | wxOVERWRITE_PROMPT);
   if (s) {
-    err = field->show_descr.show->Save(s);
+    wxString str(s);
+    unsigned int i = str.Length();
+    if ((i < 4) ||
+	(str.SubString(i-4,i-1).CompareTo(".shw", wxString::ignoreCase)!=0)) {
+      str.Append(".shw");
+    }
+    err = field->show_descr.show->Save(str);
     if (err != NULL) {
       (void)wxMessageBox((char *)err, "Save Error"); // should be const
-    } else {
-      field->show_descr.show->SetModified(FALSE);
-      field->show_descr.show->UserSetName(s);
     }
   }    
 }
@@ -1449,9 +1466,13 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
       event.Position(&x, &y);
-      Move(x, y);
-      Blit();
-      dragon = FALSE; // since the canvas gets cleared
+      if (event.ControlDown()) {
+	Move(x, y);
+	Blit();
+	dragon = FALSE; // since the canvas gets cleared
+      } else {
+	Move(x, y, 1);
+      }
 
       pos = show_descr.show->mode->Offset();
       pos.x = Coord(x - GetPositionX() - pos.x);

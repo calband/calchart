@@ -36,7 +36,13 @@
 #define PATH_SEPARATOR "/"
 #endif
 
-#define AUTOSAVE_CHAR "#"
+#ifdef wx_msw
+#define AUTOSAVE_VAR "$TEMP"
+#define AUTOSAVE_DIR "C:"
+#else
+#define AUTOSAVE_VAR "$TMPDIR"
+#define AUTOSAVE_DIR "/tmp"
+#endif
 
 // Wildcard in file selector
 #ifdef wx_msw

@@ -130,7 +130,7 @@ public:
   inline float GetPositionX() { return x_off/x_scale; }
   inline float GetPositionY() { return y_off/y_scale; }
 
-  void Move(float x, float y);
+  void Move(float x, float y, Bool noscroll=0);
   void Blit();
 
 private:
@@ -141,6 +141,7 @@ private:
   float x_off, y_off;
   float x_scale, y_scale;
   wxColourMap *cmap;
+  wxPoint last_pos;
 };
 
 struct ToolBarEntry;

@@ -10,6 +10,7 @@
 #include <wx.h>
 #include "cont.h"
 #include "parse.h"
+#include "animate.h"
 
 //#define YYDEBUG 1
 
@@ -24,7 +25,7 @@ ContProcedure *ParsedContinuity = NULL;
 %{
 	/* Reserved word definitions */
 %}
-%token rwP rwNP rwR rwREM
+%token rwP rwNP rwR rwREM rwSP rwDOF
 %token pBLAM pCOUNTERMARCH pDMCM pDMHS pEVEN pEWNS pFOUNTAIN pFM pFMTO
 %token pGRID pHSDM pHSCM pMAGIC pMARCH pMT pMTRM pNSEW pROTATE
 %token fDIR fDIRFROM fDIST fDISTFROM fEITHER fOPP fSTEP
@@ -94,6 +95,8 @@ procedure
 		{ $$ = new ContProcEWNS($2); }
 	| pFOUNTAIN value value point
 		{ $$ = new ContProcFountain($2, $3, NULL, NULL, $4); }
+	| pFOUNTAIN value value value value point
+		{ $$ = new ContProcFountain($2, $3, $4, $5, $6); }
 	| pFM value value
 		{ $$ = new ContProcFM($2, $3); }
 	| pFMTO point
@@ -107,7 +110,9 @@ procedure
 	| pMAGIC point
 		{ $$ = new ContProcMagic($2); }
 	| pMARCH value value value
-		{ $$ = new ContProcMarch($2, $3, $4); }
+		{ $$ = new ContProcMarch($2, $3, $4, NULL); }
+	| pMARCH value value value value
+		{ $$ = new ContProcMarch($2, $3, $4, $5); }
 	| pMT value value
 		{ $$ = new ContProcMT($2, $3); }
 	| pMTRM value
@@ -121,6 +126,8 @@ procedure
 point
 	: rwP
 		{ $$ = new ContPoint(); }
+	| rwSP
+		{ $$ = new ContStartPoint(); }
 	| rwNP
 		{ $$ = new ContNextPoint(); }
 	| rwR FLOATCONST
@@ -146,6 +153,8 @@ value
 		{ $$ = $2; }
 	| rwREM
 		{ $$ = new ContValueREM(); }
+	| rwDOF
+		{ $$ = new ContValueVar(CONTVAR_DOF); }
 	| varvalue
 		{ $$ = $1; }
 	| function
@@ -174,28 +183,33 @@ varvalue
 		{ unsigned i;
 		  switch ($1) {
 		  case 'A':
+		  case 'a':
 		    i = 0;
 		    break;
 		  case 'B':
+		  case 'b':
 		    i = 1;
 		    break;
 		  case 'C':
+		  case 'c':
 		    i = 2;
 		    break;
 		  case 'D':
+		  case 'd':
 		    i = 3;
 		    break;
 		  case 'X':
+		  case 'x':
 		    i = 4;
 		    break;
 		  case 'Y':
+		  case 'y':
 		    i = 5;
 		    break;
 		  case 'Z':
-		    i = 6;
-		    break;
+		  case 'z':
 		  default:
-		    i = 7;
+		    i = 6;
 		    break;
 		  }
 		  $$ = new ContValueVar(i);

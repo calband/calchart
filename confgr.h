@@ -47,9 +47,13 @@ extern wxBrush *CalChartBrushes[COLOR_NUM];
 
 extern wxString program_dir;
 extern wxString shows_dir;
+extern wxString autosave_dir;
+extern wxString autosave_dirname;
 extern unsigned int window_default_width;
 extern unsigned int window_default_height;
+extern unsigned int default_zoom;
 extern unsigned int undo_buffer_size;
+extern unsigned int autosave_interval;
 extern wxString print_file;
 extern wxString print_cmd;
 extern wxString print_opts;
