@@ -205,6 +205,7 @@ To specify a point, one of these symbols MUST be used:
 
 \begin{tabular}{|l|p{9cm}|}\hline
 \row{{\bf NAME}&{\bf POINT}}\hline\hline
+\row{SP&location on the current stuntsheet}
 \row{P&current location}
 \row{NP&location on the next stuntsheet}
 \row{R1&first reference point defined on the current stuntsheet}
@@ -363,11 +364,15 @@ A similar procedure is \helpref{NSEW}{nsew}.
 
 Format: FOUNTAIN \verb$<direction 1>$ \verb$<direction 2>$ \verb$<destination>$
 
+or FOUNTAIN \verb$<direction 1>$ \verb$<direction 2>$ \verb$<stepsize 1>$ \verb$<stepsize 2>$ \verb$<destination>$
+
 FOUNTAIN marches a two-part course, starting in \verb$<direction 1>$ and
 ending in \verb$<direction 2>$, and arriving at \verb$<destination>$.
 If necessary, the opposite of \verb$<direction 1>$ will be used instead
 of \verb$<direction 1>$, and the opposite of \verb$<direction 2>$ will
 be used instead of \verb$<direction 2>$.
+
+If the stepsizes are not given, a value of 1 will be used.
 
 Note that if either trajectory is unnecessary, it will be skipped.
 
@@ -465,8 +470,13 @@ Cal) or is undesired.
 
 Format: MARCH \verb$<stepsize>$ \verb$<steps>$ \verb$<direction>$
 
+or MARCH \verb$<stepsize>$ \verb$<steps>$ \verb$<direction>$
+\verb$<face direction>$
+
 MARCH will move the current point (P) in the specified direction for the
-specified number of beats.  Each step will be of size \verb$<stepsize>$.
+specified number of beats.  Each step will be of size
+\verb$<stepsize>$.  The point will face the direction of movement unless
+a direction is given.
 
 An error will occur if there are not enough counts remaining.
 
@@ -543,6 +553,7 @@ are supplied step-sizes:
 \row{{\bf NAME}&{\bf STEPSIZE}&{\bf VALUE}}\hline\hline
 \row{HS&1 high-step&1}
 \row{MM&1 mini-military&1}
+\row{GV&1 grapevine-step&1}
 \row{SH&1 show-high&.5}
 \row{JS&1 jerky-step&.5}
 \row{M&1 military-step&1.333333 (8/6)}
