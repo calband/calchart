@@ -71,6 +71,7 @@ void CC_WinNode::GotoSheet(unsigned) {}
 void CC_WinNode::AddSheet(unsigned) {}
 void CC_WinNode::DeleteSheet(unsigned) {}
 void CC_WinNode::AppendSheets() {}
+void CC_WinNode::RemoveSheets(unsigned) {}
 void CC_WinNode::ChangeTitle(unsigned) {}
 void CC_WinNode::SelectSheet(wxWindow*, unsigned) {}
 void CC_WinNode::AddContinuity(unsigned, unsigned) {}
@@ -209,6 +210,13 @@ void CC_WinList::AppendSheets() {
 
   for (n = list; n != NULL; n = n->next) {
     n->AppendSheets();
+  }
+}
+void CC_WinList::RemoveSheets(unsigned num) {
+  CC_WinNode *n;
+
+  for (n = list; n != NULL; n = n->next) {
+    n->RemoveSheets(num);
   }
 }
 void CC_WinList::ChangeTitle(unsigned sht) {
@@ -485,6 +493,9 @@ Bool CC_sheet::SelectContinuity(unsigned i) {
 void CC_sheet::SetContinuity(unsigned i) {
   unsigned j;
 
+  // Create undo entry (sym also does continuity)
+  show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this, TRUE));
+
   for (j = 0; j < show->GetNumPoints(); j++) {
     if (show->IsSelected(j)) {
       pts[j].cont = i;
@@ -695,7 +706,7 @@ unsigned CC_sheet::FindContinuityByName(const char *name) {
   unsigned idx;
   CC_continuity *c;
 
-  for (idx = 0, c = animcont; c != NULL; idx++, c = c->next) {
+  for (idx = 1, c = animcont; c != NULL; idx++, c = c->next) {
     if (c->name.CompareTo(name, wxString::ignoreCase) == 0) {
       break;
     }
@@ -738,10 +749,12 @@ Bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym) {
 
   if (GetNumSelectedPoints() <= 0) return FALSE;
 
-  // Create undo entry
-  show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this));
-
+  // Create undo entries
+  show->undolist->StartMulti();
   c = GetStandardContinuity(sym);
+  show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this));
+  show->undolist->EndMulti();
+
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       if (pts[i].sym != sym) {
@@ -904,7 +917,7 @@ static char* load_show_LABL(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_MODE(INGLchunk* chunk) {
+static char* load_show_MODE(INGLchunk* /*chunk*/) {
   return NULL;
 }
 
@@ -1620,6 +1633,21 @@ void CC_show::Append(CC_show *shw) {
   }
 }
 
+void CC_show::Append(CC_sheet *newsheets) {
+  CC_sheet *sht;
+
+  if (sheets == NULL) {
+    sheets = newsheets;
+  } else {
+    for (sht = sheets; sht->next != NULL; sht = sht->next);
+    sht->next = newsheets;
+  }
+  for (sht = newsheets; sht != NULL; sht = sht->next) {
+    numsheets++;
+  }
+  winlist->AppendSheets();
+}
+
 char *CC_show::Save(const char *filename) {
   INGLwrite *handl = new INGLwrite(filename);
   INGLid id;
@@ -1834,6 +1862,27 @@ CC_sheet *CC_show::RemoveNthSheet(unsigned sheetidx) {
   numsheets--;
   sht->next = NULL;
   winlist->DeleteSheet(sheetidx);
+  return sht;
+}
+
+CC_sheet *CC_show::RemoveLastSheets(unsigned numtoremain) {
+  CC_sheet *sht = sheets;
+  CC_sheet *tmp;
+  unsigned idx;
+
+  if (numtoremain > 0) {
+    idx = numtoremain;
+    while (--idx) {
+      sht = sht->next;
+    }
+    tmp = sht->next;
+    sht->next = NULL;
+    sht = tmp;
+  } else {
+    sheets = NULL;
+  }
+  numsheets = numtoremain;
+  winlist->RemoveSheets(numtoremain);
   return sht;
 }
 

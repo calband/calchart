@@ -36,6 +36,10 @@ void CC_WinNodePicker::AppendSheets() {
   picker->Update();
 }
 
+void CC_WinNodePicker::RemoveSheets(unsigned) {
+  picker->Update();
+}
+
 void CC_WinNodePicker::ChangeTitle(unsigned) {
   picker->Update();
 }
@@ -419,7 +423,7 @@ static void ShowInfoSetNum(wxButton& button, wxEvent&) {
   num = req->GetNumPoints();
   if (num != req->show->GetNumPoints()) {
     if(wxMessageBox("Changing the number of points is not undoable.\nProceed?",
-		    "Change number of points", wxOK|wxCANCEL, req) == wxOK) {
+		    "Change number of points", wxYES_NO, req) == wxYES) {
       if (num > req->show->GetNumPoints())
 	req->show->SetNumPoints(num, req->GetColumns());
       else
@@ -469,7 +473,6 @@ static void CalculateLabels(CC_show *show, Bool letters[26],
     maxnum = 10;
     for (i = 0; i < 26; i++) letters[i] = TRUE;
   }
-
 }
 
 ShowInfoReq::ShowInfoReq(CC_show *shw, CC_WinList *lst,

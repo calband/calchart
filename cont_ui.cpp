@@ -55,6 +55,12 @@ void CC_WinNodeCont::DeleteSheet(unsigned sht) {
   }
 }
 
+void CC_WinNodeCont::RemoveSheets(unsigned num) {
+  if (num <= editor->GetShowDescr()->curr_ss) {
+    editor->DetachText();
+  }
+}
+
 void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont) {
   if (sht == editor->GetShowDescr()->curr_ss) {
     if (cont <= editor->GetCurrent()) {
@@ -407,10 +413,10 @@ void PrintContCanvas::OnPaint() {
   EndDrawing();
 }
 
-void PrintContCanvas::OnEvent(wxMouseEvent& event) {
+void PrintContCanvas::OnEvent(wxMouseEvent& /*event*/) {
 }
 
-void PrintContCanvas::OnChar(wxKeyEvent& event) {
+void PrintContCanvas::OnChar(wxKeyEvent& /*event*/) {
 }
 
 void PrintContClose(wxButton& button, wxEvent&) {
@@ -454,19 +460,19 @@ PrintContEditor::~PrintContEditor() {
   }
 }
 
-static void toolbar_printcont_sym0(CoolToolBar *tb) {
+static void toolbar_printcont_sym0(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym1(CoolToolBar *tb) {
+static void toolbar_printcont_sym1(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym2(CoolToolBar *tb) {
+static void toolbar_printcont_sym2(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym3(CoolToolBar *tb) {
+static void toolbar_printcont_sym3(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym4(CoolToolBar *tb) {
+static void toolbar_printcont_sym4(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym5(CoolToolBar *tb) {
+static void toolbar_printcont_sym5(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym6(CoolToolBar *tb) {
+static void toolbar_printcont_sym6(CoolToolBar */*tb*/) {
 }
-static void toolbar_printcont_sym7(CoolToolBar *tb) {
+static void toolbar_printcont_sym7(CoolToolBar */*tb*/) {
 }

@@ -185,6 +185,7 @@ void CC_WinNodeMain::AddSheet(unsigned sht) {
   winlist.AddSheet(sht);
 }
 void CC_WinNodeMain::DeleteSheet(unsigned sht) {
+  winlist.DeleteSheet(sht);
   if (sht < canvas->show_descr.curr_ss) {
     canvas->show_descr.curr_ss--;
   }
@@ -197,11 +198,16 @@ void CC_WinNodeMain::DeleteSheet(unsigned sht) {
       canvas->UpdatePanel();
     }
   }
-  winlist.DeleteSheet(sht);
 }
 void CC_WinNodeMain::AppendSheets() {
   canvas->UpdatePanel();
   winlist.AppendSheets();
+}
+void CC_WinNodeMain::RemoveSheets(unsigned num) {
+  winlist.RemoveSheets(num);
+  if (canvas->show_descr.curr_ss >= canvas->show_descr.show->GetNumSheets()) {
+    canvas->GotoSS(num-1);
+  }
 }
 void CC_WinNodeMain::ChangeTitle(unsigned sht) {
   if (sht == canvas->show_descr.curr_ss) canvas->UpdatePanel();
@@ -359,6 +365,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   wxMenu *edit_menu = new wxMenu;
   edit_menu->Append(CALCHART__UNDO, "Undo");
+  edit_menu->Append(CALCHART__REDO, "Redo");
   edit_menu->Append(CALCHART__INSERT_BEFORE, "Insert Sheet Before");
   edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet After");
   edit_menu->Append(CALCHART__DELETE, "Delete Sheet");
@@ -499,6 +506,11 @@ void MainFrame::OnMenuCommand(int id)
     if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
       field->GotoSS((unsigned)sheetnum);
     break;
+  case CALCHART__REDO:
+    sheetnum = field->show_descr.show->undolist->Redo(field->show_descr.show);
+    if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
+      field->GotoSS((unsigned)sheetnum);
+    break;
   case CALCHART__INSERT_BEFORE:
     sht = new CC_sheet(field->show_descr.CurrSheet());
     field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss);
@@ -516,12 +528,19 @@ void MainFrame::OnMenuCommand(int id)
     break;
   case CALCHART__RELABEL:
     if (field->show_descr.curr_ss+1 < field->show_descr.show->GetNumSheets()) {
-      if (!field->show_descr.show->RelabelSheets(field->show_descr.curr_ss))
-	(void)wxMessageBox("Stuntsheets don't match",
-			       "Relabel sheets");
+      if(wxMessageBox("Relabeling sheets is not undoable.\nProceed?",
+		      "Relabel sheets", wxYES_NO) == wxYES) {
+	if (!field->show_descr.show->RelabelSheets(field->show_descr.curr_ss))
+	  (void)wxMessageBox("Stuntsheets don't match",
+			     "Relabel sheets");
+	else {
+	  field->show_descr.show->undolist->EraseAll();
+	  field->show_descr.show->SetModified(TRUE);
+	}
+      }
     } else {
       (void)wxMessageBox("This can't used on the last stuntsheet",
-			     "Relabel sheets");
+			 "Relabel sheets");
     }
     break;
   case CALCHART__EDIT_CONTINUITY:
@@ -624,6 +643,9 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__UNDO:
     msg = field->show_descr.show->undolist->UndoDescription();
     break;
+  case CALCHART__REDO:
+    msg = field->show_descr.show->undolist->RedoDescription();
+    break;
   case CALCHART__INSERT_BEFORE:
     msg = "Insert a new stuntsheet before this one";
     break;
@@ -721,6 +743,7 @@ void MainFrame::AppendShow() {
     shw = new CC_show(s);
     if (shw->Ok()) {
       if (shw->GetNumPoints() == field->show_descr.show->GetNumPoints()) {
+	field->show_descr.show->undolist->Add(new ShowUndoAppendSheets(field->show_descr.show->GetNumSheets()));
 	field->show_descr.show->Append(shw);
       } else {
 	(void)wxMessageBox("The blocksize doesn't match", "Append Error");

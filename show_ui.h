@@ -27,6 +27,7 @@ public:
   virtual void SetShow(CC_show *shw);
   virtual void AddSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
+  virtual void RemoveSheets(unsigned num);
   virtual void AppendSheets();
   virtual void ChangeTitle(unsigned sht);
   virtual void SelectSheet(wxWindow* win, unsigned sht);

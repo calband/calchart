@@ -42,6 +42,7 @@ public:
   virtual void AddSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
   virtual void AppendSheets();
+  virtual void RemoveSheets(unsigned num);
   virtual void ChangeTitle(unsigned sht);
   virtual void SelectSheet(wxWindow* win, unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
@@ -187,6 +188,7 @@ enum {
   CALCHART__CLOSE,
   CALCHART__QUIT,
   CALCHART__UNDO,
+  CALCHART__REDO,
   CALCHART__INSERT_BEFORE,
   CALCHART__INSERT_AFTER,
   CALCHART__DELETE,

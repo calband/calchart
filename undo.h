@@ -17,19 +17,34 @@
 
 class ShowUndo {
 public:
-  ShowUndo(unsigned sheetnum): sheetidx(sheetnum) {}
+  ShowUndo(unsigned sheetnum): next(NULL), sheetidx(sheetnum) {}
   virtual ~ShowUndo();
 
   // returns the sheet to go to
-  virtual int Undo(CC_show *show) = 0;
+  virtual int Undo(CC_show *show, ShowUndo** newundo) = 0;
   // returns amount of memory used
   virtual unsigned Size() = 0;
   // returns description of this event
   virtual char *UndoDescription() = 0;
+  virtual char *RedoDescription() = 0;
 
   ShowUndo *next;
   unsigned sheetidx;
   Bool was_modified;
+};
+
+// Multiple undos in one entry
+class ShowUndoMany : public ShowUndo {
+public:
+  ShowUndoMany(ShowUndo *undolist);
+  virtual ~ShowUndoMany();
+
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+  virtual char *RedoDescription();
+private:
+  ShowUndo *list;
 };
 
 // Point movement
@@ -40,11 +55,13 @@ struct ShowUndoMoveElem {
 class ShowUndoMove : public ShowUndo {
 public:
   ShowUndoMove(unsigned sheetnum, CC_sheet *sheet);
-  ~ShowUndoMove();
+  ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet);
+  virtual ~ShowUndoMove();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   unsigned num;
   ShowUndoMoveElem *elems;
@@ -58,15 +75,18 @@ struct ShowUndoSymElem {
 };
 class ShowUndoSym : public ShowUndo {
 public:
-  ShowUndoSym(unsigned sheetnum, CC_sheet *sheet);
-  ~ShowUndoSym();
+  ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, Bool contchanged = FALSE);
+  ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet);
+  virtual ~ShowUndoSym();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   unsigned num;
   ShowUndoSymElem *elems;
+  Bool contchange;
 };
 
 // Point label changes
@@ -77,11 +97,13 @@ struct ShowUndoLblElem {
 class ShowUndoLbl : public ShowUndo {
 public:
   ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet);
-  ~ShowUndoLbl();
+  ShowUndoLbl(ShowUndoLbl* old, CC_sheet *sheet);
+  virtual ~ShowUndoLbl();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   unsigned num;
   ShowUndoLblElem *elems;
@@ -91,35 +113,64 @@ private:
 class ShowUndoCopy : public ShowUndo {
 public:
   ShowUndoCopy(unsigned sheetnum);
-  ~ShowUndoCopy();
+  virtual ~ShowUndoCopy();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 };
 
 // Deleted stuntsheet
 class ShowUndoDelete : public ShowUndo {
 public:
   ShowUndoDelete(unsigned sheetnum, CC_sheet *sheet);
-  ~ShowUndoDelete();
+  virtual ~ShowUndoDelete();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   CC_sheet *deleted_sheet;
+};
+
+// Appended sheets
+class ShowUndoAppendSheets : public ShowUndo {
+public:
+  ShowUndoAppendSheets(unsigned sheetnum);
+  virtual ~ShowUndoAppendSheets();
+
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+  virtual char *RedoDescription();
+};
+
+// Only for redoing append sheets
+class ShowUndoDeleteAppendSheets : public ShowUndo {
+public:
+  ShowUndoDeleteAppendSheets(CC_sheet *sheet);
+  virtual ~ShowUndoDeleteAppendSheets();
+
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
+  virtual unsigned Size();
+  virtual char *UndoDescription();
+  virtual char *RedoDescription();
+private:
+  CC_sheet *deleted_sheets;
 };
 
 // Stuntsheet name changes
 class ShowUndoName : public ShowUndo {
 public:
   ShowUndoName(unsigned sheetnum, CC_sheet *sheet);
-  ~ShowUndoName();
+  virtual ~ShowUndoName();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   wxString name;
 };
@@ -128,11 +179,12 @@ private:
 class ShowUndoBeat : public ShowUndo {
 public:
   ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet);
-  ~ShowUndoBeat();
+  virtual ~ShowUndoBeat();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   unsigned short beats;
 };
@@ -141,11 +193,12 @@ private:
 class ShowUndoCont : public ShowUndo {
 public:
   ShowUndoCont(unsigned sheetnum, unsigned contnum, CC_sheet *sheet);
-  ~ShowUndoCont();
+  virtual ~ShowUndoCont();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   unsigned cont;
   wxString conttext;
@@ -155,11 +208,12 @@ private:
 class ShowUndoAddContinuity : public ShowUndo {
 public:
   ShowUndoAddContinuity(unsigned sheetnum, unsigned contnum);
-  ~ShowUndoAddContinuity();
+  virtual ~ShowUndoAddContinuity();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   unsigned addcontnum;
 };
@@ -169,11 +223,12 @@ class ShowUndoDeleteContinuity : public ShowUndo {
 public:
   ShowUndoDeleteContinuity(unsigned sheetnum, unsigned contnum,
 			   CC_continuity *cont);
-  ~ShowUndoDeleteContinuity();
+  virtual ~ShowUndoDeleteContinuity();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   CC_continuity *deleted_cont;
   unsigned delcontnum;
@@ -183,11 +238,12 @@ private:
 class ShowUndoDescr : public ShowUndo {
 public:
   ShowUndoDescr(CC_show *show);
-  ~ShowUndoDescr();
+  virtual ~ShowUndoDescr();
 
-  virtual int Undo(CC_show *show);
+  virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
   virtual char *UndoDescription();
+  virtual char *RedoDescription();
 private:
   wxString descrtext;
 };
@@ -198,8 +254,15 @@ public:
   ~ShowUndoList();
 
   int Undo(CC_show *show);
+  int Redo(CC_show *show);
   void Add(ShowUndo *undo);
+
+  // For doing multiple actions in one entry
+  void StartMulti();
+  void EndMulti();
+
   char *UndoDescription();
+  char *RedoDescription();
   inline void Limit(int val) { limit=val; Clean(); }
   void EraseAll();
 
@@ -207,10 +270,17 @@ private:
   ShowUndo *Pop();
   void Push(ShowUndo *undo);
   void Clean();
+
+  ShowUndo *PopRedo();
+  void PushRedo(ShowUndo *undo);
+  void EraseAllRedo();
+
   friend ostream& operator<< (ostream&, const ShowUndoList&);
 
   CC_show *show;
   ShowUndo *list;
+  ShowUndo *redolist;
+  ShowUndo *oldlist; // For adding multiple entries
   int limit;
 };
 

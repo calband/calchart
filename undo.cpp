@@ -15,8 +15,61 @@
 
 ShowUndo::~ShowUndo() {}
 
+ShowUndoMany::ShowUndoMany(ShowUndo *undolist)
+  :ShowUndo(0), list(undolist) {}
+
+ShowUndoMany::~ShowUndoMany() {
+  ShowUndo *next;
+
+  while (list) {
+    next = list->next;
+    delete list;
+    list = next;
+  }
+}
+
+int ShowUndoMany::Undo(CC_show *show, ShowUndo** newundo) {
+  ShowUndo *undo;
+  ShowUndo *newnode;
+  ShowUndo *newlist;
+  int i;
+
+  newlist = newnode = NULL;
+  i = -1;
+  for (undo = list; undo != NULL; undo = undo->next) {
+    if (newlist) {
+      undo->Undo(show, &newnode->next);
+      if (newnode->next) newnode = newnode->next;
+    } else {
+      i = undo->Undo(show, &newlist);
+      newnode = newlist;
+    }
+  }
+  *newundo = new ShowUndoMany(newlist);
+  return i;
+}
+
+unsigned ShowUndoMany::Size() {
+  ShowUndo *undo;
+  unsigned i;
+
+  for (i = sizeof(*this), undo = list; undo != NULL; undo = undo->next) {
+    i += undo->Size();
+  }
+  return i;
+}
+
+char *ShowUndoMany::UndoDescription() {
+  if (list) return list->UndoDescription();
+  else return NULL;
+}
+char *ShowUndoMany::RedoDescription() {
+  if (list) return list->RedoDescription();
+  else return NULL;
+}
+
 ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum), num(0) {
+:ShowUndo(sheetnum) {
   unsigned i;
   
   num = sheet->GetNumSelectedPoints();
@@ -32,16 +85,31 @@ ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet)
   }
 }
 
+ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
+:ShowUndo(old->sheetidx), num(old->num) {
+  unsigned i;
+
+  if (num > 0) {
+    elems = new ShowUndoMoveElem[num];
+  }
+  for (i = 0; i < num; i++) {
+    elems[i].idx = old->elems[i].idx;
+    elems[i].pos = sheet->pts[elems[i].idx].pos;
+  }
+}
+    
 ShowUndoMove::~ShowUndoMove() {
   if (num) {
     delete [] elems;
   }
 }
 
-int ShowUndoMove::Undo(CC_show *show)
+int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
 {
   unsigned i;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
+
+  *newundo = new ShowUndoMove(this, sheet);
   for (i = 0; i < num; i++) {
     sheet->pts[elems[i].idx].pos = elems[i].pos;
   }
@@ -54,9 +122,10 @@ unsigned ShowUndoMove::Size() {
 }
 
 char *ShowUndoMove::UndoDescription() { return "Undo movement"; }
+char *ShowUndoMove::RedoDescription() { return "Redo movement"; }
 
-ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum), num(0) {
+ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, Bool contchanged)
+:ShowUndo(sheetnum), contchange(contchanged) {
   unsigned i;
   
   num = sheet->GetNumSelectedPoints();
@@ -73,16 +142,32 @@ ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet)
   }
 }
 
+ShowUndoSym::ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet)
+:ShowUndo(old->sheetidx), num(old->num), contchange(old->contchange) {
+  unsigned i;
+
+  if (num > 0) {
+    elems = new ShowUndoSymElem[num];
+  }
+  for (i = 0; i < num; i++) {
+    elems[i].idx = old->elems[i].idx;
+    elems[i].sym = sheet->pts[elems[i].idx].sym;
+    elems[i].cont = sheet->pts[elems[i].idx].cont;
+  }
+}
+    
 ShowUndoSym::~ShowUndoSym() {
   if (num) {
     delete [] elems;
   }
 }
 
-int ShowUndoSym::Undo(CC_show *show)
+int ShowUndoSym::Undo(CC_show *show, ShowUndo** newundo)
 {
   unsigned i;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
+
+  *newundo = new ShowUndoSym(this, sheet);
   for (i = 0; i < num; i++) {
     sheet->pts[elems[i].idx].sym = elems[i].sym;
     sheet->pts[elems[i].idx].cont = elems[i].cont;
@@ -95,10 +180,15 @@ unsigned ShowUndoSym::Size() {
   return sizeof(ShowUndoSymElem) * num + sizeof(*this);
 }
 
-char *ShowUndoSym::UndoDescription() { return "Undo symbol change"; }
+char *ShowUndoSym::UndoDescription() {
+  return contchange ? "Undo continuity assignment" : "Undo symbol change";
+}
+char *ShowUndoSym::RedoDescription() {
+  return contchange ? "Redo continuity assignment" : "Redo symbol change";
+}
 
 ShowUndoLbl::ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum), num(0) {
+:ShowUndo(sheetnum) {
   unsigned i;
   
   num = sheet->GetNumSelectedPoints();
@@ -114,16 +204,31 @@ ShowUndoLbl::ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet)
   }
 }
 
+ShowUndoLbl::ShowUndoLbl(ShowUndoLbl* old, CC_sheet *sheet)
+:ShowUndo(old->sheetidx), num(old->num) {
+  unsigned i;
+
+  if (num > 0) {
+    elems = new ShowUndoLblElem[num];
+  }
+  for (i = 0; i < num; i++) {
+    elems[i].idx = old->elems[i].idx;
+    elems[i].right = sheet->pts[elems[i].idx].GetFlip();
+  }
+}
+    
 ShowUndoLbl::~ShowUndoLbl() {
   if (num) {
     delete [] elems;
   }
 }
 
-int ShowUndoLbl::Undo(CC_show *show)
+int ShowUndoLbl::Undo(CC_show *show, ShowUndo** newundo)
 {
   unsigned i;
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
+
+  *newundo = new ShowUndoLbl(this, sheet);
   for (i = 0; i < num; i++) {
     sheet->pts[elems[i].idx].Flip(elems[i].right);
   }
@@ -136,6 +241,7 @@ unsigned ShowUndoLbl::Size() {
 }
 
 char *ShowUndoLbl::UndoDescription() { return "Undo label location"; }
+char *ShowUndoLbl::RedoDescription() { return "Redo label location"; }
 
 ShowUndoCopy::ShowUndoCopy(unsigned sheetnum)
 :ShowUndo(sheetnum) {
@@ -144,8 +250,9 @@ ShowUndoCopy::ShowUndoCopy(unsigned sheetnum)
 ShowUndoCopy::~ShowUndoCopy() {
 }
 
-int ShowUndoCopy::Undo(CC_show *show) {
-  show->DeleteNthSheet(sheetidx);
+int ShowUndoCopy::Undo(CC_show *show, ShowUndo** newundo) {
+  CC_sheet *sheet = show->RemoveNthSheet(sheetidx);
+  *newundo = new ShowUndoDelete(sheetidx, sheet);
   if (sheetidx > 0) {
     return (sheetidx-1);
   } else {
@@ -156,6 +263,7 @@ int ShowUndoCopy::Undo(CC_show *show) {
 unsigned ShowUndoCopy::Size() { return sizeof(*this); }
 
 char *ShowUndoCopy::UndoDescription() { return "Undo copy stuntsheet"; }
+char *ShowUndoCopy::RedoDescription() { return "Redo delete stuntsheet"; }
 
 ShowUndoDelete::ShowUndoDelete(unsigned sheetnum, CC_sheet *sheet)
 :ShowUndo(sheetnum), deleted_sheet(sheet) {
@@ -165,8 +273,9 @@ ShowUndoDelete::~ShowUndoDelete() {
   if (deleted_sheet) delete deleted_sheet;
 }
 
-int ShowUndoDelete::Undo(CC_show *show) {
+int ShowUndoDelete::Undo(CC_show *show, ShowUndo** newundo) {
   show->InsertSheet(deleted_sheet, sheetidx);
+  *newundo = new ShowUndoCopy(sheetidx);
   deleted_sheet = NULL; // So it isn't deleted
   return (int)sheetidx;
 }
@@ -176,6 +285,61 @@ unsigned ShowUndoDelete::Size() {
 }
 
 char *ShowUndoDelete::UndoDescription() { return "Undo delete stuntsheet"; }
+char *ShowUndoDelete::RedoDescription() { return "Redo copy stuntsheet"; }
+
+ShowUndoAppendSheets::ShowUndoAppendSheets(unsigned sheetnum)
+:ShowUndo(sheetnum) {
+}
+
+ShowUndoAppendSheets::~ShowUndoAppendSheets() {
+}
+
+int ShowUndoAppendSheets::Undo(CC_show *show, ShowUndo** newundo) {
+  CC_sheet *sheet = show->RemoveLastSheets(sheetidx);
+  *newundo = new ShowUndoDeleteAppendSheets(sheet);
+  return -1;
+}
+
+unsigned ShowUndoAppendSheets::Size() { return sizeof(*this); }
+
+char *ShowUndoAppendSheets::UndoDescription() { return "Undo append sheets"; }
+char *ShowUndoAppendSheets::RedoDescription() { return ""; }
+
+ShowUndoDeleteAppendSheets::ShowUndoDeleteAppendSheets(CC_sheet *sheet)
+:ShowUndo(0), deleted_sheets(sheet) {
+}
+
+ShowUndoDeleteAppendSheets::~ShowUndoDeleteAppendSheets() {
+  CC_sheet *sheet;
+
+  while (deleted_sheets) {
+    sheet = deleted_sheets->next;
+    delete deleted_sheets;
+    deleted_sheets = sheet;
+  }
+}
+
+int ShowUndoDeleteAppendSheets::Undo(CC_show *show, ShowUndo** newundo) {
+  *newundo = new ShowUndoAppendSheets(show->GetNumSheets());
+  show->Append(deleted_sheets);
+  deleted_sheets = NULL; // So they aren't deleted
+  return -1;
+}
+
+unsigned ShowUndoDeleteAppendSheets::Size() {
+  unsigned i;
+  CC_sheet *sheet;
+
+  for (i = sizeof(*this), sheet = deleted_sheets;
+       sheet != NULL;
+       sheet = sheet->next) {
+    i += sizeof(deleted_sheets);
+  }
+  return i;
+}
+
+char *ShowUndoDeleteAppendSheets::UndoDescription() { return ""; }
+char *ShowUndoDeleteAppendSheets::RedoDescription() { return "Redo append sheets"; }
 
 ShowUndoName::ShowUndoName(unsigned sheetnum, CC_sheet *sheet)
 :ShowUndo(sheetnum) {
@@ -186,9 +350,11 @@ ShowUndoName::ShowUndoName(unsigned sheetnum, CC_sheet *sheet)
 ShowUndoName::~ShowUndoName() {
 }
 
-int ShowUndoName::Undo(CC_show *show)
+int ShowUndoName::Undo(CC_show *show, ShowUndo** newundo)
 {
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
+
+  *newundo = new ShowUndoName(sheetidx, sheet);
   sheet->SetName(name);
   show->winlist->ChangeTitle(sheetidx);
   return (int)sheetidx;
@@ -199,15 +365,18 @@ unsigned ShowUndoName::Size() {
 }
 
 char *ShowUndoName::UndoDescription() { return "Undo change stuntsheet name"; }
+char *ShowUndoName::RedoDescription() { return "Redo change stuntsheet name"; }
 
 ShowUndoBeat::ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet)
 :ShowUndo(sheetnum), beats(sheet->beats) {}
 
 ShowUndoBeat::~ShowUndoBeat() {}
 
-int ShowUndoBeat::Undo(CC_show *show)
+int ShowUndoBeat::Undo(CC_show *show, ShowUndo** newundo)
 {
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
+
+  *newundo = new ShowUndoBeat(sheetidx, sheet);
   sheet->UserSetBeats(beats);
   return (int)sheetidx;
 }
@@ -217,6 +386,7 @@ unsigned ShowUndoBeat::Size() {
 }
 
 char *ShowUndoBeat::UndoDescription() { return "Undo set number of beats"; }
+char *ShowUndoBeat::RedoDescription() { return "Redo set number of beats"; }
 
 ShowUndoCont::ShowUndoCont(unsigned sheetnum, unsigned contnum,
 			   CC_sheet *sheet)
@@ -228,9 +398,11 @@ ShowUndoCont::ShowUndoCont(unsigned sheetnum, unsigned contnum,
 ShowUndoCont::~ShowUndoCont() {
 }
 
-int ShowUndoCont::Undo(CC_show *show)
+int ShowUndoCont::Undo(CC_show *show, ShowUndo** newundo)
 {
   CC_sheet *sheet = show->GetNthSheet(sheetidx);
+
+  *newundo = new ShowUndoCont(sheetidx, cont, sheet);
   sheet->SetNthContinuity(conttext, cont);
   show->winlist->SetContinuity(NULL, sheetidx, cont);
   return (int)sheetidx;
@@ -241,6 +413,7 @@ unsigned ShowUndoCont::Size() {
 }
 
 char *ShowUndoCont::UndoDescription() { return "Undo edit continuity"; }
+char *ShowUndoCont::RedoDescription() { return "Redo edit continuity"; }
 
 ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
 					     unsigned contnum)
@@ -250,8 +423,11 @@ ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
 ShowUndoAddContinuity::~ShowUndoAddContinuity() {
 }
 
-int ShowUndoAddContinuity::Undo(CC_show *show) {
-  delete show->GetNthSheet(sheetidx)->RemoveNthContinuity(addcontnum);
+int ShowUndoAddContinuity::Undo(CC_show *show, ShowUndo** newundo) {
+  CC_continuity *cont;
+
+  cont = show->GetNthSheet(sheetidx)->RemoveNthContinuity(addcontnum);
+  *newundo = new ShowUndoDeleteContinuity(sheetidx, addcontnum, cont);
   return (int)sheetidx;
 }
 
@@ -259,6 +435,9 @@ unsigned ShowUndoAddContinuity::Size() { return sizeof(*this); }
 
 char *ShowUndoAddContinuity::UndoDescription() {
   return "Undo add continuity";
+}
+char *ShowUndoAddContinuity::RedoDescription() {
+  return "Redo delete continuity";
 }
 
 ShowUndoDeleteContinuity::ShowUndoDeleteContinuity(unsigned sheetnum,
@@ -271,8 +450,9 @@ ShowUndoDeleteContinuity::~ShowUndoDeleteContinuity() {
   if (deleted_cont) delete deleted_cont;
 }
 
-int ShowUndoDeleteContinuity::Undo(CC_show *show) {
+int ShowUndoDeleteContinuity::Undo(CC_show *show, ShowUndo** newundo) {
   show->GetNthSheet(sheetidx)->InsertContinuity(deleted_cont, delcontnum);
+  *newundo = new ShowUndoAddContinuity(sheetidx, delcontnum);
   deleted_cont = NULL; // So it isn't deleted
   return (int)sheetidx;
 }
@@ -284,6 +464,9 @@ unsigned ShowUndoDeleteContinuity::Size() {
 char *ShowUndoDeleteContinuity::UndoDescription() {
   return "Undo delete continuity";
 }
+char *ShowUndoDeleteContinuity::RedoDescription() {
+  return "Redo add continuity";
+}
 
 ShowUndoDescr::ShowUndoDescr(CC_show *show)
 :ShowUndo(0) {
@@ -294,8 +477,9 @@ ShowUndoDescr::ShowUndoDescr(CC_show *show)
 ShowUndoDescr::~ShowUndoDescr() {
 }
 
-int ShowUndoDescr::Undo(CC_show *show)
+int ShowUndoDescr::Undo(CC_show *show, ShowUndo** newundo)
 {
+  *newundo = new ShowUndoDescr(show);
   show->SetDescr(descrtext);
   show->winlist->SetDescr(NULL);
   return -1; // don't goto another sheet
@@ -306,9 +490,10 @@ unsigned ShowUndoDescr::Size() {
 }
 
 char *ShowUndoDescr::UndoDescription() { return "Undo edit show description"; }
+char *ShowUndoDescr::RedoDescription() { return "Redo edit show description"; }
 
 ShowUndoList::ShowUndoList(CC_show *shw, int lim)
-:show(shw), list(NULL), limit(lim) {}
+:show(shw), list(NULL), redolist(NULL), limit(lim) {}
 
 ShowUndoList::~ShowUndoList() {
   EraseAll();
@@ -318,10 +503,31 @@ ShowUndoList::~ShowUndoList() {
 int ShowUndoList::Undo(CC_show *show) {
   unsigned i;
   ShowUndo *undo = Pop();
+  ShowUndo *redo;
 
   if (undo) {
-    i = undo->Undo(show);
+    redo = NULL;
+    i = undo->Undo(show, &redo);
+    if (redo) PushRedo(redo);
     show->SetModified(undo->was_modified);
+    delete undo;
+    return (int)i;
+  } else {
+    return -1;
+  }
+}
+
+// Execute one redo
+int ShowUndoList::Redo(CC_show *show) {
+  unsigned i;
+  ShowUndo *undo = PopRedo();
+  ShowUndo *newundo;
+
+  if (undo) {
+    newundo = NULL;
+    i = undo->Undo(show, &newundo);
+    if (newundo) Push(newundo);
+    show->SetModified(TRUE);
     delete undo;
     return (int)i;
   } else {
@@ -331,8 +537,32 @@ int ShowUndoList::Undo(CC_show *show) {
 
 // Add an entry to list and clean if necessary
 void ShowUndoList::Add(ShowUndo *undo) {
+  EraseAllRedo();
   Push(undo);
   Clean();
+}
+
+// Prepare to add multiple actions
+void ShowUndoList::StartMulti() {
+  oldlist = list;
+}
+
+// End adding multiple actions
+void ShowUndoList::EndMulti() {
+  ShowUndo *newlist, *tmplist;
+
+  newlist = NULL;
+  for (tmplist = list; tmplist != NULL; tmplist = tmplist->next) {
+    if (tmplist->next == oldlist) {
+      newlist = list;
+      list = oldlist;
+      tmplist->next = NULL;
+      break;
+    }
+  }
+  if (newlist) {
+    Add(new ShowUndoMany(newlist));
+  }
 }
 
 // Return description of undo stack
@@ -341,6 +571,15 @@ char *ShowUndoList::UndoDescription() {
     return list->UndoDescription();
   } else {
     return "No undo information";
+  }
+}
+
+// Return description of redo stack
+char *ShowUndoList::RedoDescription() {
+  if (redolist) {
+    return redolist->RedoDescription();
+  } else {
+    return "No redo information";
   }
 }
 
@@ -363,11 +602,39 @@ void ShowUndoList::Push(ShowUndo *undo) {
   list = undo;
 }
 
+// Pop one entry off list
+ShowUndo *ShowUndoList::PopRedo() {
+  ShowUndo *undo;
+
+  undo = redolist;
+  if (undo) {
+    redolist = redolist->next;
+  }
+  return undo;
+}
+
+// Push one entry onto list
+void ShowUndoList::PushRedo(ShowUndo *undo) {
+  undo->next = redolist;
+  undo->was_modified = TRUE; // Show will be modified
+  redolist = undo;
+}
+
 // Remove everything from list
 void ShowUndoList::EraseAll() {
   ShowUndo *undo;
 
+  EraseAllRedo();
   while ((undo = Pop()) != NULL) {
+    delete undo;
+  }
+}
+
+// Remove everything from list
+void ShowUndoList::EraseAllRedo() {
+  ShowUndo *undo;
+
+  while ((undo = PopRedo()) != NULL) {
     delete undo;
   }
 }
@@ -391,14 +658,15 @@ void ShowUndoList::Clean() {
       } else {
 	total = 0;
 	tmpptr = NULL;
+	list = NULL;
       }
       while (ptr != NULL) {
 	size = ptr->Size();
 	if ((total + size) <= (unsigned)limit) {
 	  total += size;
+	  tmpptr = ptr;
+	  ptr = ptr->next;
 	} else break;
-	tmpptr = ptr;
-	ptr = ptr->next;
       }
       if (tmpptr != NULL) {
 	tmpptr->next = NULL;
@@ -422,5 +690,11 @@ ostream& operator<< (ostream& s, const ShowUndoList& list) {
     elem = elem->next;
   }
   s << "*** End of undo stack." << endl;
+  elem = list.redolist;
+  while (elem) {
+    s << elem->RedoDescription() << endl;
+    elem = elem->next;
+  }
+  s << "*** End of redo stack." << endl;
   return s;
 }

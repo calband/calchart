@@ -63,6 +63,7 @@ public:
   virtual void AddSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
   virtual void AppendSheets();
+  virtual void RemoveSheets(unsigned num);
   virtual void ChangeTitle(unsigned sht);
   virtual void SelectSheet(wxWindow* win, unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
@@ -102,6 +103,7 @@ public:
   virtual void AddSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
   virtual void AppendSheets();
+  virtual void RemoveSheets(unsigned num);
   virtual void ChangeTitle(unsigned sht);
   virtual void SelectSheet(wxWindow* win, unsigned sht);
   virtual void AddContinuity(unsigned sht, unsigned cont);
@@ -366,6 +368,7 @@ public:
   inline Bool Ok() { return (error == NULL); }
 
   void Append(CC_show *shw);
+  void Append(CC_sheet *newsheets);
   char *Save(const char *filename);
 
   inline void FlushAllTextWindows() {
@@ -392,6 +395,7 @@ public:
   CC_sheet *GetNthSheet(unsigned n);
   unsigned GetSheetPos(CC_sheet *sheet);
   CC_sheet *RemoveNthSheet(unsigned sheetidx);
+  CC_sheet *RemoveLastSheets(unsigned numtoremain);
   void DeleteNthSheet(unsigned sheetidx);
   void UserDeleteSheet(unsigned sheetidx);
   void InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx);

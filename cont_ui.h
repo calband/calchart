@@ -26,6 +26,7 @@ public:
   virtual void SetShow(CC_show *shw);
   virtual void GotoSheet(unsigned sht);
   virtual void DeleteSheet(unsigned sht);
+  virtual void RemoveSheets(unsigned num);
   virtual void AddContinuity(unsigned sht, unsigned cont);
   virtual void DeleteContinuity(unsigned sht, unsigned cont);
   virtual void FlushContinuity();
