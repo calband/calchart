@@ -302,6 +302,7 @@ public:
   Bool SelectContinuity(unsigned i);
   void SetContinuity(unsigned i);
   void SetNumPoints(unsigned num, unsigned columns);
+  void RelabelSheet(unsigned *table);
 
   CC_continuity *GetNthContinuity(unsigned i);
   CC_continuity *UserGetNthContinuity(unsigned i);
@@ -364,6 +365,7 @@ public:
   inline char *GetError() { return error; }
   inline Bool Ok() { return (error == NULL); }
 
+  void Append(CC_show *shw);
   char *Save(const char *filename);
 
   inline void FlushAllTextWindows() {
@@ -397,8 +399,8 @@ public:
   void UserInsertSheet(CC_sheet *sht, unsigned sheetidx);
   inline unsigned short GetNumPoints() { return numpoints; }
   void SetNumPoints(unsigned num, unsigned columns);
-
   void SetNumPointsInternal(unsigned num); //Only for creating show class
+  Bool RelabelSheets(unsigned sht);
 
   inline char *GetPointLabel(unsigned i) { return pt_labels[i]; }
   inline Bool& GetBoolLandscape() { return print_landscape; }

@@ -23,7 +23,8 @@
 #define FIELD_MAXZOOM 10
 #define FIELD_DEFAULT_ZOOM 5
 
-enum CC_DRAG_TYPES { CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_LINE };
+enum CC_DRAG_TYPES { CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
+		     CC_DRAG_LASSO, CC_DRAG_LINE };
 
 class FieldCanvas;
 
@@ -80,6 +81,7 @@ public:
   Bool OkayToClearShow();
 
   void LoadShow();
+  void AppendShow();
   void SaveShow();
   void SaveShowAs();
 
@@ -157,6 +159,7 @@ public:
   // Variables
   MainFrame *ourframe;
   CC_descr show_descr;
+  CC_DRAG_TYPES curr_lasso;
 
 private:
   void DrawDrag();
@@ -190,6 +193,7 @@ enum {
   CALCHART__INSERT_BEFORE,
   CALCHART__INSERT_AFTER,
   CALCHART__DELETE,
+  CALCHART__RELABEL,
   CALCHART__EDIT_CONTINUITY,
   CALCHART__EDIT_PRINTCONT,
   CALCHART__SET_TITLE,

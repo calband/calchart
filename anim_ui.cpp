@@ -22,12 +22,12 @@ static void toolbar_anim_next_sheet(CoolToolBar *tb);
 static void slider_anim_tempo(wxObject &obj, wxEvent &ev);
 
 ToolBarEntry anim_tb[] = {
-  { NULL, "Stop", toolbar_anim_stop },
-  { NULL, "Play", toolbar_anim_play },
-  { NULL, "Previous beat", toolbar_anim_prev_beat },
-  { NULL, "Next beat", toolbar_anim_next_beat },
-  { NULL, "Previous stuntsheet", toolbar_anim_prev_sheet },
-  { NULL, "Next stuntsheet", toolbar_anim_next_sheet }
+  { 0, NULL, "Stop", toolbar_anim_stop },
+  { 0, NULL, "Play", toolbar_anim_play },
+  { 0, NULL, "Previous beat", toolbar_anim_prev_beat },
+  { 0, NULL, "Next beat", toolbar_anim_next_beat },
+  { 0, NULL, "Previous stuntsheet", toolbar_anim_prev_sheet },
+  { 0, NULL, "Next stuntsheet", toolbar_anim_next_sheet }
 };
 
 extern wxBrush *grassBrush;

@@ -3,6 +3,9 @@ calchart ICON calchart.ico
 
 tb_left BITMAP tb_left.bmp
 tb_right BITMAP tb_right.bmp
+tb_box BITMAP tb_box.bmp
+tb_poly BITMAP tb_poly.bmp
+tb_lasso BITMAP tb_lasso.bmp
 tb_lbl_l BITMAP tb_lbl_l.bmp
 tb_lbl_r BITMAP tb_lbl_r.bmp
 tb_lbl_f BITMAP tb_lbl_f.bmp

@@ -222,14 +222,13 @@ CoolToolBar::CoolToolBar(wxFrame *frame, int x, int y, int w, int h,
 void CoolToolBar::SetupBar(ToolBarEntry *tbe, int n)
 {
   entries = tbe;
-  SetMargins(TB_MARGIN,TB_MARGIN);
   GetDC()->SetBackground(wxGREY_BRUSH);
 
-  int toolx = TB_MARGIN;
   for (int i = 0; i < n; i++) {
-    AddTool(i, entries[i].bm, NULL, FALSE, (float)toolx, -1, NULL);
-    toolx += entries[i].bm->GetWidth() + TB_MARGIN;
+    AddTool(i, entries[i].bm, NULL, FALSE, -1, -1, NULL);
+    if (entries[i].flags & TOOLBAR_SPACE) AddSeparator();
   }
+  CreateTools();
   Layout();
 }
 

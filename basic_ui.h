@@ -28,7 +28,6 @@
 #else
 #define PlainToolBar wxToolBar
 #endif
-#define TB_MARGIN 5
 
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc);
@@ -101,7 +100,11 @@ public:
   ToolBarEntry *entries;
 };
 
+#define TOOLBAR_SPACE 1
+#define TOOLBAR_TOGGLE 2
+
 struct ToolBarEntry {
+  unsigned flags;
   wxBitmap *bm;
   char *desc;
   void (*func)(CoolToolBar *);

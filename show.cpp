@@ -521,6 +521,17 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
   pts = newpts;
 }
 
+void CC_sheet::RelabelSheet(unsigned *table) {
+  CC_point *newpts;
+
+  newpts = new CC_point[show->GetNumPoints()];
+  for (unsigned i = 0; i < show->GetNumPoints(); i++) {
+    newpts[i] = pts[table[i]];
+  }
+  delete [] pts;
+  pts = newpts;
+}
+
 CC_continuity *CC_sheet::GetNthContinuity(unsigned i) {
   CC_continuity *c;
 
@@ -1587,6 +1598,27 @@ CC_show::~CC_show() {
   }
 }
 
+void CC_show::Append(CC_show *shw) {
+  CC_sheet *sht;
+
+  if (numpoints == shw->GetNumPoints()) {
+    if (sheets == NULL) {
+      sheets = shw->sheets;
+    } else {
+      for (sht = sheets; sht->next != NULL; sht = sht->next);
+      sht->next = shw->sheets;
+    }
+    numsheets += shw->numsheets;
+    for (sht = shw->sheets; sht != NULL; sht = sht->next) {
+      sht->show = this;
+    }
+    shw->sheets = NULL;
+    shw->numsheets = 0;
+    delete shw;
+    winlist->AppendSheets();
+  }
+}
+
 char *CC_show::Save(const char *filename) {
   INGLwrite *handl = new INGLwrite(filename);
   INGLid id;
@@ -1880,6 +1912,45 @@ void CC_show::SetNumPointsInternal(unsigned num) {
   selections = new Bool[numpoints];
   for (unsigned i = 0; i < numpoints; i++) pt_labels[i][0] = 0;
   UnselectAll();
+}
+
+Bool CC_show::RelabelSheets(unsigned sht) {
+  CC_sheet *sheet;
+  unsigned i,j;
+  unsigned *table;
+  Bool *used_table;
+
+  sheet = GetNthSheet(sht);
+  if (sheet->next == NULL) return FALSE;
+  table = new unsigned[GetNumPoints()];
+  used_table = new Bool[GetNumPoints()];
+
+  for (i = 0; i < GetNumPoints(); i++) {
+    used_table[i] = FALSE;
+  }
+  for (i = 0; i < GetNumPoints(); i++) {
+    for (j = 0; j < GetNumPoints(); j++) {
+      if (!used_table[j]) {
+	if (sheet->pts[i].pos == sheet->next->pts[j].pos) {
+	  table[i] = j;
+	  used_table[j] = TRUE;
+	  break;
+	}
+      }
+    }
+    if (j == GetNumPoints()) {
+      // didn't find a match
+      delete [] table;
+      delete [] used_table;
+      return FALSE;
+    }
+  }
+  while ((sheet = sheet->next) != NULL) {
+    sheet->RelabelSheet(table);
+  }
+
+  delete [] table;
+  return TRUE;
 }
 
 Bool CC_show::UnselectAll() {

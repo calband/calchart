@@ -25,6 +25,9 @@
 #include "calchart.xpm"
 #include "tb_left.xbm"
 #include "tb_right.xbm"
+#include "tb_box.xbm"
+#include "tb_poly.xbm"
+#include "tb_lasso.xbm"
 #include "tb_lbl_l.xbm"
 #include "tb_lbl_r.xbm"
 #include "tb_lbl_f.xbm"
@@ -46,6 +49,9 @@
 
 static void toolbar_prev_ss(CoolToolBar *tb);
 static void toolbar_next_ss(CoolToolBar *tb);
+static void toolbar_box(CoolToolBar *tb);
+static void toolbar_poly(CoolToolBar *tb);
+static void toolbar_lasso(CoolToolBar *tb);
 static void toolbar_label_left(CoolToolBar *tb);
 static void toolbar_label_right(CoolToolBar *tb);
 static void toolbar_label_flip(CoolToolBar *tb);
@@ -60,19 +66,22 @@ static void toolbar_setsym7(CoolToolBar *tb);
 static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
 
 static ToolBarEntry main_tb[] = {
-  { NULL, "Previous stuntsheet", toolbar_prev_ss },
-  { NULL, "Next stuntsheet", toolbar_next_ss },
-  { NULL, "Label on left", toolbar_label_left },
-  { NULL, "Flip label", toolbar_label_flip },
-  { NULL, "Label on right", toolbar_label_right },
-  { NULL, "Change to plainmen", toolbar_setsym0 },
-  { NULL, "Change to solidmen", toolbar_setsym1 },
-  { NULL, "Change to backslash men", toolbar_setsym2 },
-  { NULL, "Change to slash men", toolbar_setsym3 },
-  { NULL, "Change to x men", toolbar_setsym4 },
-  { NULL, "Change to solid backslash men", toolbar_setsym5 },
-  { NULL, "Change to solid slash men", toolbar_setsym6 },
-  { NULL, "Change to solid x men", toolbar_setsym7 }
+  { 0, NULL, "Previous stuntsheet", toolbar_prev_ss },
+  { TOOLBAR_SPACE, NULL, "Next stuntsheet", toolbar_next_ss },
+  { 0, NULL, "Select points with box", toolbar_box },
+  { 0, NULL, "Select points with polygon", toolbar_poly },
+  { TOOLBAR_SPACE, NULL, "Select points with lasso", toolbar_lasso },
+  { 0, NULL, "Label on left", toolbar_label_left },
+  { 0, NULL, "Flip label", toolbar_label_flip },
+  { TOOLBAR_SPACE, NULL, "Label on right", toolbar_label_right },
+  { 0, NULL, "Change to plainmen", toolbar_setsym0 },
+  { 0, NULL, "Change to solidmen", toolbar_setsym1 },
+  { 0, NULL, "Change to backslash men", toolbar_setsym2 },
+  { 0, NULL, "Change to slash men", toolbar_setsym3 },
+  { 0, NULL, "Change to x men", toolbar_setsym4 },
+  { 0, NULL, "Change to solid backslash men", toolbar_setsym5 },
+  { 0, NULL, "Change to solid slash men", toolbar_setsym6 },
+  { 0, NULL, "Change to solid x men", toolbar_setsym7 }
 };
 
 extern ToolBarEntry anim_tb[];
@@ -240,6 +249,9 @@ wxFrame *CalChartApp::OnInit(void)
 
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_left));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_right));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_box));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_poly));
+  main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lasso));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
   main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
@@ -351,6 +363,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   edit_menu->Append(CALCHART__INSERT_BEFORE, "Insert Sheet Before");
   edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet After");
   edit_menu->Append(CALCHART__DELETE, "Delete Sheet");
+  edit_menu->Append(CALCHART__RELABEL, "Relabel Sheets");
   edit_menu->Append(CALCHART__EDIT_CONTINUITY, "Edit Continuity...");
   edit_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit Printed Continuity...");
   edit_menu->Append(CALCHART__SET_TITLE, "Set Title...");
@@ -454,6 +467,9 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__LOAD_FILE:
     LoadShow();
     break;
+  case CALCHART__APPEND_FILE:
+    AppendShow();
+    break;
   case CALCHART__SAVE:
     SaveShow();
     break;
@@ -496,6 +512,16 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__DELETE:
     if (field->show_descr.show->GetNumSheets() > 1) {
       field->show_descr.show->UserDeleteSheet(field->show_descr.curr_ss);
+    }
+    break;
+  case CALCHART__RELABEL:
+    if (field->show_descr.curr_ss+1 < field->show_descr.show->GetNumSheets()) {
+      if (!field->show_descr.show->RelabelSheets(field->show_descr.curr_ss))
+	(void)wxMessageBox("Stuntsheets don't match",
+			       "Relabel sheets");
+    } else {
+      (void)wxMessageBox("This can't used on the last stuntsheet",
+			     "Relabel sheets");
     }
     break;
   case CALCHART__EDIT_CONTINUITY:
@@ -555,9 +581,6 @@ void MainFrame::OnMenuCommand(int id)
     help_inst->LoadFile();
     help_inst->DisplayContents();
     break;
-  case CALCHART__APPEND_FILE:
-    (void)wxMessageBox("This option is currently unimplemented", "CalChart");
-    break;
   }
 }
 
@@ -574,6 +597,9 @@ void MainFrame::OnMenuSelect(int id)
     break;
   case CALCHART__LOAD_FILE:
     msg = "Load a saved show";
+    break;
+  case CALCHART__APPEND_FILE:
+    msg = "Append a show to the end";
     break;
   case CALCHART__SAVE:
     msg = field->show_descr.show->Modified() ?
@@ -607,6 +633,9 @@ void MainFrame::OnMenuSelect(int id)
   case CALCHART__DELETE:
     msg = "Delete this stuntsheet";
     break;
+  case CALCHART__RELABEL:
+    msg = "Relabel all stuntsheets after this one";
+    break;
   case CALCHART__EDIT_CONTINUITY:
     msg = "Edit continuity for this stuntsheet";
     break;
@@ -630,9 +659,6 @@ void MainFrame::OnMenuSelect(int id)
     break;
   case CALCHART__HELP:
     msg = "Help on using CalChart";
-    break;
-  case CALCHART__APPEND_FILE:
-    msg = "Currently does nothing";
     break;
   case -1:
     msg = "";
@@ -685,7 +711,29 @@ void MainFrame::LoadShow() {
   }
 }
 
-// Load a show with file selector
+// Append a show with file selector
+void MainFrame::AppendShow() {
+  const char *s;
+  CC_show *shw;
+
+  s = wxFileSelector("Append show", NULL, NULL, NULL, file_wild);
+  if (s) {
+    shw = new CC_show(s);
+    if (shw->Ok()) {
+      if (shw->GetNumPoints() == field->show_descr.show->GetNumPoints()) {
+	field->show_descr.show->Append(shw);
+      } else {
+	(void)wxMessageBox("The blocksize doesn't match", "Append Error");
+	delete shw;
+      }
+    } else {
+      (void)wxMessageBox(shw->GetError(), "Load Error");
+      delete shw;
+    }
+  }
+}
+
+// Save this show without file selector
 void MainFrame::SaveShow() {
   const char *s;
 
@@ -702,7 +750,7 @@ void MainFrame::SaveShow() {
   }
 }
 
-// Load a show with file selector
+// Save this show with file selector
 void MainFrame::SaveShowAs() {
   const char *s;
   const char *err;
@@ -737,7 +785,8 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int def_zoom, int x, int y, int w, int h, long style):
- wxCanvas(frame, x, y, w, h, style), ourframe(frame), drag(CC_DRAG_NONE)
+ wxCanvas(frame, x, y, w, h, style), ourframe(frame), curr_lasso(CC_DRAG_BOX),
+ drag(CC_DRAG_NONE)
 {
   show_descr.show = show;
   show_descr.curr_ss = ss;
@@ -839,7 +888,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  show_descr.show->winlist->UpdateSelections();
 	}
 	if (i < 0) {
-	  BeginDrag(CC_DRAG_BOX, pos);
+	  BeginDrag(curr_lasso, pos);
 	} else {
 	  BeginDrag(CC_DRAG_LINE, sheet->pts[i].pos);
 	}
@@ -934,6 +983,21 @@ static void toolbar_prev_ss(CoolToolBar *tb) {
 
 static void toolbar_next_ss(CoolToolBar *tb) {
   ((MainFrame *)tb->ourframe)->field->NextSS();
+}
+
+static void toolbar_box(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->field->curr_lasso = CC_DRAG_BOX;
+}
+
+static void toolbar_poly(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->field->curr_lasso = CC_DRAG_POLY;
+}
+
+static void toolbar_lasso(CoolToolBar *tb) {
+  MainFrame *mf = (MainFrame *)tb->ourframe;
+  mf->field->curr_lasso = CC_DRAG_LASSO;
 }
 
 static void toolbar_label_left(CoolToolBar *tb) {
