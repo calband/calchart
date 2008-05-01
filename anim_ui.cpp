@@ -1,10 +1,27 @@
-/* anim_ui.cc
+/* anim_ui.cpp
  * Animation user interface
  *
  * Modification history:
  * 1-4-96     Garrick Meeker              Created
  *
  */
+
+/*
+   Copyright (C) 1996-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifdef __GNUG__
 #pragma implementation
@@ -29,12 +46,12 @@ static void slider_gotosheet(wxObject &obj, wxEvent &ev);
 static void slider_gotobeat(wxObject &obj, wxEvent &ev);
 
 ToolBarEntry anim_tb[] = {
-  { 0, NULL, "Stop", toolbar_anim_stop },
-  { 0, NULL, "Play", toolbar_anim_play },
-  { 0, NULL, "Previous beat", toolbar_anim_prev_beat },
-  { 0, NULL, "Next beat", toolbar_anim_next_beat },
-  { 0, NULL, "Previous stuntsheet", toolbar_anim_prev_sheet },
-  { 0, NULL, "Next stuntsheet", toolbar_anim_next_sheet }
+  { 0, NULL, wxT("Stop"), toolbar_anim_stop },
+  { 0, NULL, wxT("Play"), toolbar_anim_play },
+  { 0, NULL, wxT("Previous beat"), toolbar_anim_prev_beat },
+  { 0, NULL, wxT("Next beat"), toolbar_anim_next_beat },
+  { 0, NULL, wxT("Previous stuntsheet"), toolbar_anim_prev_sheet },
+  { 0, NULL, wxT("Next stuntsheet"), toolbar_anim_next_sheet }
 };
 
 CC_WinNodeAnim::CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm)
@@ -427,7 +444,7 @@ static char *collis_text[] = {
 
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 			       CC_WinList *lst)
-: wxFrameWithStuffSized(frame, "Animation") {
+: wxFrameWithStuffSized(frame, wxT("Animation")) {
   // Give it an icon
   SetBandIcon(this);
 
@@ -435,19 +452,19 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 
   // Make a menubar
   wxMenu *anim_menu = new wxMenu;
-  anim_menu->Append(CALCHART__ANIM_REANIMATE, "&Reanimate Show");
-  anim_menu->Append(CALCHART__ANIM_SELECT_COLL, "&Select Collisions");
+  anim_menu->Append(CALCHART__ANIM_REANIMATE, wxT("&Reanimate Show"));
+  anim_menu->Append(CALCHART__ANIM_SELECT_COLL, wxT("&Select Collisions"));
 #ifdef ANIM_OUTPUT_POVRAY
-  anim_menu->Append(CALCHART__ANIM_POVRAY, "Output &POVRay Stubs");
+  anim_menu->Append(CALCHART__ANIM_POVRAY, wxT("Output &POVRay Stubs"));
 #endif
 #ifdef ANIM_OUTPUT_RIB
-  anim_menu->Append(CALCHART__ANIM_RIB_FRAME, "Output RenderMan RIB Frame");
-  anim_menu->Append(CALCHART__ANIM_RIB, "Output Render&Man RIB");
+  anim_menu->Append(CALCHART__ANIM_RIB_FRAME, wxT("Output RenderMan RIB Frame"));
+  anim_menu->Append(CALCHART__ANIM_RIB, wxT("Output Render&Man RIB"));
 #endif
-  anim_menu->Append(CALCHART__ANIM_CLOSE, "&Close Animation");
+  anim_menu->Append(CALCHART__ANIM_CLOSE, wxT("&Close Animation"));
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(anim_menu, "&Animate");
+  menu_bar->Append(anim_menu, wxT("&Animate"));
   SetMenuBar(menu_bar);
 
   // Add a toolbar
@@ -466,11 +483,11 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   framePanel->SetAutoLayout(true);
 
   collis = new wxChoice(framePanel, (wxFunction)collision_callback,
-			"&Collisions", -1, -1, -1, -1,
+			wxT("&Collisions"), -1, -1, -1, -1,
 			sizeof(collis_text)/sizeof(char*), collis_text);
 
   AnimationSlider *sldr =
-    new AnimationSlider(framePanel, slider_anim_tempo, "&Tempo",
+    new AnimationSlider(framePanel, slider_anim_tempo, wxT("&Tempo"),
 			canvas->GetTempo(), 10, 300, 150);
   sldr->canvas = canvas;
   wxLayoutConstraints *lc = new wxLayoutConstraints;
@@ -483,7 +500,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   framePanel->NewLine();
 
   // Sheet slider (will get set later with UpdatePanel())
-  sldr = new AnimationSlider(framePanel, slider_gotosheet, "&Sheet",
+  sldr = new AnimationSlider(framePanel, slider_gotosheet, wxT("&Sheet"),
 			     1, 1, 2, 150);
   sldr->canvas = canvas;
   sheet_slider = sldr;
@@ -495,7 +512,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   sldr->SetConstraints(lc);
 
   // Beat slider (will get set later with UpdatePanel())
-  sldr = new AnimationSlider(framePanel, slider_gotobeat, "&Beat",
+  sldr = new AnimationSlider(framePanel, slider_gotobeat, wxT("&Beat"),
 			     0, 0, 1, 150);
   sldr->canvas = canvas;
   beat_slider = sldr;
@@ -535,12 +552,12 @@ void AnimationFrame::OnMenuCommand(int id) {
     break;
 #ifdef ANIM_OUTPUT_POVRAY
   case CALCHART__ANIM_POVRAY:
-    s = wxFileSelector("Save POV Files", NULL, NULL, NULL, "*.*",
+    s = wxFileSelector(wxT("Save POV Files"), NULL, NULL, NULL, wxT("*.*"),
 		       wxSAVE);
     if (s) {
       err = canvas->GeneratePOVFiles(s);
       if (err != NULL) {
-	(void)wxMessageBox((char *)err, "Save Error"); // should be const
+	(void)wxMessageBox(err, wxT("Save Error")); // should be const
       }
     }
     break;
@@ -549,12 +566,12 @@ void AnimationFrame::OnMenuCommand(int id) {
   case CALCHART__ANIM_RIB_FRAME:
     allframes = false;
   case CALCHART__ANIM_RIB:
-    s = wxFileSelector("Save RIB File", NULL, NULL, NULL, "*.rib",
+    s = wxFileSelector(wxT("Save RIB File"), NULL, NULL, NULL, wxT("*.rib"),
 		       wxSAVE);
     if (s) {
       err = canvas->GenerateRIBFile(s, allframes);
       if (err != NULL) {
-	(void)wxMessageBox((char *)err, "Save Error"); // should be const
+	(void)wxMessageBox(err, wxT("Save Error")); // should be const
       }
     }
     break;
@@ -570,23 +587,23 @@ void AnimationFrame::OnMenuSelect(int id) {
 
   switch (id) {
   case CALCHART__ANIM_REANIMATE:
-    msg = "Regenerate animation";
+    msg = wxT("Regenerate animation");
     break;
   case CALCHART__ANIM_SELECT_COLL:
-    msg = "Select colliding points";
+    msg = wxT("Select colliding points");
     break;
 #ifdef ANIM_OUTPUT_POVRAY
   case CALCHART__ANIM_POVRAY:
-    msg = "Ouput files for rendering with POVRay";
+    msg = wxT("Ouput files for rendering with POVRay");
     break;
 #endif
 #ifdef ANIM_OUTPUT_RIB
   case CALCHART__ANIM_RIB:
-    msg = "Output RIB file for RenderMan rendering";
+    msg = wxT("Output RIB file for RenderMan rendering");
     break;
 #endif
   case CALCHART__ANIM_CLOSE:
-    msg = "Close window";
+    msg = wxT("Close window");
     break;
   }
   if (msg) SetStatusText(msg);
@@ -634,7 +651,7 @@ void AnimationFrame::UpdatePanel() {
 
 void AnimationCanvas::StartTimer() {
   if (!timer->Start(60000/GetTempo())) {
-    ourframe->SetStatusText("Could not get timer!");
+    ourframe->SetStatusText(wxT("Could not get timer!"));
     timeron = false;
   } else {
     timeron = true;
@@ -707,7 +724,7 @@ static void AnimErrorClick(wxListBox& list, wxCommandEvent&) {
 }
 
 AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
-			     unsigned num, wxFrame *frame, char *title,
+			     unsigned num, wxFrame *frame, const wxChar *title,
 			     int x, int y, int width, int height)
 : wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER), sheetnum(num) {
   unsigned i, j;
@@ -722,7 +739,7 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
   panel = new wxPanel(this);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)AnimErrorClose,
-				    "Close");
+				    wxT("Close"));
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -732,12 +749,12 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 
   closeBut->SetDefault();
 
-  list = new GoodListBox(panel, (wxFunction)AnimErrorClick, "",
+  list = new GoodListBox(panel, (wxFunction)AnimErrorClick, wxT(""),
 			 wxSINGLE, -1, -1, -1, -1);
 
   for (i = 0, j = 0; i < NUM_ANIMERR; i++) {
     if (comp->error_markers[i].pntgroup) {
-      list->Append((char*)animate_err_msgs[i]);
+      list->Append(animate_err_msgs[i]);
       pointsels[j++].StealErrorMarker(&comp->error_markers[i]);
     }
   }

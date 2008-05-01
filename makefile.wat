@@ -10,15 +10,15 @@ INSTPROG = $(WXDIR)\utils\winstall\bin\install.exe
 
 LNK = $(name).lnk
 
-.cc.obj: .AUTODEPEND
+.cpp.obj: .AUTODEPEND
 	*$(CCC) $(CPPFLAGS) /dMSDOS $(IFLAGS) $<
 
 OBJS = main_ui.obj basic_ui.obj show.obj draw.obj print.obj print_ui.obj &
 	show_ui.obj undo.obj modes.obj confgr.obj animate.obj anim_ui.obj &
 	cont.obj cont_ui.obj ingl.obj contscan.obj contgram.obj
-SRCS = main_ui.cc basic_ui.cc show.cc draw.cc print.cc print_ui.cc &
-	show_ui.cc undo.cc modes.cc confgr.cc animate.cc anim_ui.cc &
-	cont.cc cont_ui.cc ingl.cc contscan.cc contgram.cc
+SRCS = main_ui.cpp basic_ui.cpp show.cpp draw.cpp print.cpp print_ui.cpp &
+	show_ui.cpp undo.cpp modes.cpp confgr.cpp animate.cpp anim_ui.cpp &
+	cont.cpp cont_ui.cpp ingl.cpp contscan.cpp contgram.cpp
 HEADERS = main_ui.h basic_ui.h show.h print_ui.h show_ui.h undo.h &
 	modes.h confgr.h animate.h anim_ui.h cont.h cont_ui.h &
 	parse.h contgram.h ingl.h platconf.h

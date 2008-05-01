@@ -6,6 +6,23 @@
  *
  */
 
+/*
+   Copyright (C) 1995-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef _BASIC_UI_H_
 #define _BASIC_UI_H_
 
@@ -97,13 +114,13 @@ public:
 		   const wxPoint& pos = wxDefaultPosition,
 		   const wxSize& size = wxDefaultSize,
 		   long style = 0,
-		   const wxString& name = "canvas");
+		   const wxString& name = wxT("canvas"));
   ~AutoScrollCanvas();
 
   inline wxDC *GetMemDC() { return memdc; }
   void SetSize(const wxSize& size);
   void SetBackground(wxBrush *brush);
-  void SetColourMap(wxColourMap *colourMap);
+  void SetPalette(wxPalette *palette);
   void SetUserScale(float x, float y);
   inline void SetPosition(float x, float y) {
     x_off = x; y_off = y;
@@ -121,9 +138,11 @@ private:
   wxBitmap *membm;
   float x_off, y_off;
   float x_scale, y_scale;
-  wxColourMap *cmap;
+  wxPalette *palette;
   wxPoint last_pos;
 };
+
+typedef wxListBox GoodListBox;
 
 struct ToolBarEntry;
 class CoolToolBar: public wxToolBar
@@ -149,7 +168,7 @@ public:
 struct ToolBarEntry {
   unsigned flags;
   wxBitmap *bm;
-  char *desc;
+  const wxString desc;
   void (*func)(CoolToolBar *);
 };
 #endif

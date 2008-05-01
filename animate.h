@@ -6,6 +6,23 @@
  *
  */
 
+/*
+   Copyright (C) 1995-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef _ANIMATE_H_
 #define _ANIMATE_H_
 
@@ -14,6 +31,7 @@
 #endif
 
 #include "show.h"
+#include <wx/string.h>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
 enum {
@@ -136,13 +154,13 @@ class AnimateSheet {
 public:
   AnimateSheet(unsigned numpoints);
   ~AnimateSheet();
-  void SetName(const char *s);
+  void SetName(const wxChar *s);
 
   AnimateSheet *next, *prev;
   AnimatePoint *pts;
   AnimateCommand **commands;
   AnimateCommand **end_cmds;
-  char *name;
+  wxString name;
   unsigned numbeats;
 private:
   unsigned numpts;

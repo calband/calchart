@@ -1,10 +1,27 @@
-/* animate.cc
+/* animate.cpp
  * Classes for animating shows
  *
  * Modification history:
  * 12-29-95   Garrick Meeker              Created
  *
  */
+
+/*
+   Copyright (C) 1995-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifdef __GNUG__
 #pragma implementation
@@ -271,7 +288,7 @@ void AnimateCommandRotate::ClipBeats(unsigned beats) {
 }
 
 AnimateSheet::AnimateSheet(unsigned numpoints)
-: next(NULL), prev(NULL), name(NULL), numpts(numpoints) {
+: next(NULL), prev(NULL), numpts(numpoints) {
   unsigned i;
 
   pts = new AnimatePoint[numpts];
@@ -300,12 +317,10 @@ AnimateSheet::~AnimateSheet() {
     delete commands;
   }
   if (end_cmds) delete end_cmds;
-  if (name) delete name;
 }
 
-void AnimateSheet::SetName(const char *s) {
-  if (name) delete name;
-  name = copystring(s);
+void AnimateSheet::SetName(const wxChar *s) {
+  name = s;
 }
 
 Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
@@ -351,9 +366,9 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     int contnum = 0;
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
 	 currcont  = currcont->next, contnum++) {
-      if ((yyinputbuffer = currcont->text) != NULL) {
-	tempbuf.sprintf("Compiling \"%.32s\" %.32s...",
-			comp.curr_sheet->GetName(), currcont->name.GetData());
+      if ((yyinputbuffer = currcont->text.To8BitData()) != NULL) {
+	tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
+		       comp.curr_sheet->GetName(), currcont->name.GetData());
 	frame->SetStatusText(tempbuf.GetData());
 	int parseerr = parsecontinuity();
 	ContToken dummy; // get position of parse error
@@ -375,7 +390,7 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
       }
     }
     // Handle points that don't have continuity (shouldn't happen)
-    tempbuf.sprintf("Compiling \"%.32s\"...", comp.curr_sheet->GetName());
+    tempbuf.Printf(wxT("Compiling \"%.32s\"..."), comp.curr_sheet->GetName());
     frame->SetStatusText(tempbuf.GetData());
     for (j = 0; j < numpts; j++) {
       if (curr_sheet->commands[j] == NULL) {
@@ -385,10 +400,10 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
       }
     }
     if (!comp.Okay()) {
-      tempbuf.sprintf("Errors for \"%.32s\"", comp.curr_sheet->GetName());
+      tempbuf.Printf(wxT("Errors for \"%.32s\""), comp.curr_sheet->GetName());
       (void)new AnimErrorList(&comp, winlist, sheetnum,
 			      frame, tempbuf.GetData());
-      if (wxMessageBox("Ignore errors?", "Animate", wxYES_NO) != wxYES) {
+      if (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES) {
 	break;
       }
     }

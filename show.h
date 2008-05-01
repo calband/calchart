@@ -7,6 +7,23 @@
  *
  */
 
+/*
+   Copyright (C) 1994-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef _SHOW_H_
 #define _SHOW_H_
 
@@ -25,7 +42,7 @@
 #include "platconf.h"
 #include "linmath.h"
 
-typedef short Coord;
+typedef int16_t Coord;
 
 #define COORD_SHIFT 4
 #define COORD_DECIMAL (1<<COORD_SHIFT)
@@ -150,30 +167,30 @@ enum SYMBOL_TYPE {
 };
 
 struct cc_oldcoord {
-  unsigned short x;
-  unsigned short y;
+  uint16_t x;
+  uint16_t y;
 };
 
 /* Format of old calchart stuntsheet files */
 #define OLD_FLAG_FLIP 1
 struct cc_oldpoint {
-  unsigned char sym;
-  unsigned char flags;
+  uint8_t sym;
+  uint8_t flags;
   cc_oldcoord pos;
-  unsigned short color;
-  char code[2];
-  unsigned short cont;
+  uint16_t color;
+  int8_t code[2];
+  uint16_t cont;
   cc_oldcoord ref[3];
 };
 
 struct cc_reallyoldpoint {
-  unsigned char sym;
-  unsigned char flags;
+  uint8_t sym;
+  uint8_t flags;
   cc_oldcoord pos;
-  unsigned short color;
-  char code[2];
-  unsigned short cont;
-  short refnum;
+  uint16_t color;
+  int8_t code[2];
+  uint16_t cont;
+  int16_t refnum;
   cc_oldcoord ref;
 };
 
@@ -353,10 +370,10 @@ public:
   unsigned FindContinuityByName(const char *name);
   bool ContinuityInUse(unsigned idx);
 
-  inline const char *GetName() { return name; }
-  inline void SetName(const char *newname) { name = newname; }
-  inline const char *GetNumber() { return number; }
-  inline void SetNumber(const char *newnumber) { number = newnumber; }
+  inline const wxChar *GetName() { return name; }
+  inline void SetName(const wxChar *newname) { name = newname; }
+  inline const wxChar *GetNumber() { return number; }
+  inline void SetNumber(const wxChar *newnumber) { number = newnumber; }
   inline unsigned short GetBeats() { return beats; }
   inline void SetBeats(unsigned short b) { beats = b; }
   inline bool IsInAnimation() { return (beats != 0); }
@@ -411,7 +428,7 @@ public:
   int Print(FILE *fp, bool eps = false, bool overview = false,
 	    unsigned curr_ss = 0, int min_yards = 50);
 
-  inline const char *GetError() { return error; }
+  inline const wxChar *GetError() { return error; }
   inline bool Ok() { return okay; }
 
   void Append(CC_show *shw);
@@ -424,17 +441,17 @@ public:
     winlist->FlushDescr(); winlist->FlushContinuity();
   }
 
-  inline const char *GetName() { return name; }
-  const char *UserGetName();
-  void SetName(const char *newname);
-  inline void UserSetName(const char *newname) {
+  inline const wxChar *GetName() { return name; }
+  const wxChar *UserGetName();
+  void SetName(const wxChar *newname);
+  inline void UserSetName(const wxChar *newname) {
     SetName(newname); winlist->ChangeName();
   }
 
-  inline const char *GetDescr() { return descr; }
-  inline const char *UserGetDescr() { winlist->FlushDescr(); return descr; }
-  inline void SetDescr(const char *newdescr) { descr = newdescr; }
-  void UserSetDescr(const char *newdescr, wxWindow* win);
+  inline const wxChar *GetDescr() { return descr; }
+  inline const wxChar *UserGetDescr() { winlist->FlushDescr(); return descr; }
+  inline void SetDescr(const wxChar *newdescr) { descr = newdescr; }
+  void UserSetDescr(const wxChar *newdescr, wxWindow* win);
 
   inline bool Modified() { return modified; }
   inline void SetModified(bool b) { modified = b; winlist->UpdateStatusBar(); }

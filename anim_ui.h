@@ -6,6 +6,23 @@
  *
  */
 
+/*
+   Copyright (C) 1995-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef _ANIM_UI_H_
 #define _ANIM_UI_H_
 
@@ -127,9 +144,9 @@ private:
 
 class AnimationSlider: public wxSlider {
 public:
-  AnimationSlider(wxPanel *parent, wxFunction func, char *label,
+  AnimationSlider(wxPanel *parent, wxWindowID id,
 		  int value, int min_value, int max_value, int width):
-  wxSlider(parent, -1, value, min_value, max_value),
+  wxSlider(parent, id, value, min_value, max_value),
   canvas(NULL) {}
 
   AnimationCanvas *canvas;
@@ -155,7 +172,7 @@ private:
   wxSlider *sheet_slider;
   wxSlider *beat_slider;
 
-  friend AnimationCanvas;
+  friend class AnimationCanvas;
 };
 
 enum {
@@ -174,7 +191,7 @@ enum {
 class AnimErrorList: public wxFrame {
 public:
   AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
-		wxFrame *frame, char *title,
+		wxFrame *frame, const wxChar *title,
 		int x = -1, int y = -1, int width = 300, int height = 300);
   ~AnimErrorList();
   bool OnClose(void);

@@ -21,14 +21,14 @@ HEADERS = animate.h anim_ui.h basic_ui.h confgr.h cont.h cont_ui.h \
 	ingl.h linmath.h main_ui.h modes.h parse.h platconf.h print_ui.h \
 	show.h show_ui.h undo.h ccvers.h
 
-SRCS = animate.cc anim_ui.cc basic_ui.cc confgr.cc cont.cc cont_ui.cc \
-	draw.cc ingl.cc main_ui.cc modes.cc print.cc print_ui.cc show.cc \
-	show_ui.cc undo.cc
+SRCS = animate.cpp anim_ui.cpp basic_ui.cpp confgr.cpp cont.cpp cont_ui.cpp \
+	draw.cpp ingl.cpp main_ui.cpp modes.cpp print.cpp print_ui.cpp show.cpp \
+	show_ui.cpp undo.cpp
 
 SYNTHETIC_BASES = contscan.l contgram.y
-SYNTHETIC_SRCS = contscan.cc contgram.cc
+SYNTHETIC_SRCS = contscan.cpp contgram.cpp
 SYNTHETIC_FILES = $(SYNTHETIC_SRCS) contgram.h contgram.output
-OBJS = $(SRCS:.cc=.o) $(SYNTHETIC_SRCS:.cc=.o)
+OBJS = $(SRCS:.cpp=.o) $(SYNTHETIC_SRCS:.cpp=.o)
 
 PSFILES = postscript/calchart.ps postscript/setup.sh postscript/vmstatus.sh \
 	postscript/zllrbach.fig
@@ -64,16 +64,16 @@ MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 CXXFLAGS := `wx-config --cflags`
 CXX = c++
 
-%.o: %.cc
+%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
-%.cc %.h: %.y
+%.cpp %.h: %.y
 	$(YACC) $(YFLAGS) $*.y
-	mv -f $*.tab.c $*.cc
+	mv -f $*.tab.c $*.cpp
 	mv -f $*.tab.h $*.h
 
-%.cc: %.l
-	$(LEX) $(LFLAGS) -t $*.l > $*.cc
+%.cpp: %.l
+	$(LEX) $(LFLAGS) -t $*.l > $*.cpp
 
 %.bmp: %.xbm
 	rm -f $@

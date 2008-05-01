@@ -1,10 +1,27 @@
-/* basic_ui.cc
+/* basic_ui.cpp
  * Handle basic wxWindows classes
  *
  * Modification history:
  * 6-1-95     Garrick Meeker              Created
  *
  */
+
+/*
+   Copyright (C) 1995-2008  Garrick Brian Meeker
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifdef __GNUG__
 #pragma implementation
@@ -170,7 +187,7 @@ AutoScrollCanvas(wxWindow *parent, wxWindowID id,
 		 long style, const wxString& name)
 : wxWindow(parent, id, pos, size, style, name),
   memdc(NULL), membm(NULL),
-  x_scale(1.0), y_scale(1.0), cmap(NULL)
+  x_scale(1.0), y_scale(1.0), palette(NULL)
 {
   if (size.GetX() != wxDefaultSize.GetX() ||
       size.GetY() != wxDefaultSize.GetY()) {
@@ -199,7 +216,7 @@ void AutoScrollCanvas::SetSize(const wxSize& size) {
     } else {
       memdc->SelectObject(*membm);
       memdc->SetBackground(dc.GetBackground());
-      memdc->SetColourMap(cmap);
+      memdc->SetPalette(palette);
       memdc->SetUserScale(x_scale, y_scale);
       memdc->Clear();
     }
@@ -211,10 +228,10 @@ void AutoScrollCanvas::SetBackground(wxBrush *brush) {
   if (memdc) memdc->SetBackground(brush);
 }
 
-void AutoScrollCanvas::SetColourMap(wxColourMap *colourMap) {
-  cmap = colourMap;
-  wxWindow::SetColourMap(cmap);
-  if (memdc) memdc->SetColourMap(cmap);
+void AutoScrollCanvas::SetPalette(wxPalette *pal) {
+  palette = pal;
+  wxWindow::SetPalette(palette);
+  if (memdc) memdc->SetPalette(palette);
 }
 
 void AutoScrollCanvas::SetUserScale(float x, float y) {
