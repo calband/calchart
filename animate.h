@@ -63,11 +63,11 @@ class AnimateCommand {
 public:
   AnimateCommand(unsigned beats);
 
-  // returns FALSE if end of command
-  virtual Bool Begin(AnimatePoint& pt);
-  virtual Bool End(AnimatePoint& pt);
-  virtual Bool NextBeat(AnimatePoint& pt);
-  virtual Bool PrevBeat(AnimatePoint& pt);
+  // returns false if end of command
+  virtual bool Begin(AnimatePoint& pt);
+  virtual bool End(AnimatePoint& pt);
+  virtual bool NextBeat(AnimatePoint& pt);
+  virtual bool PrevBeat(AnimatePoint& pt);
 
   // go through all beats at once
   virtual void ApplyForward(AnimatePoint& pt);
@@ -100,8 +100,8 @@ public:
   AnimateCommandMove(unsigned beats, CC_coord movement);
   AnimateCommandMove(unsigned beats, CC_coord movement, float direction);
 
-  virtual Bool NextBeat(AnimatePoint& pt);
-  virtual Bool PrevBeat(AnimatePoint& pt);
+  virtual bool NextBeat(AnimatePoint& pt);
+  virtual bool PrevBeat(AnimatePoint& pt);
 
   virtual void ApplyForward(AnimatePoint& pt);
   virtual void ApplyBackward(AnimatePoint& pt);
@@ -115,10 +115,10 @@ private:
 class AnimateCommandRotate : public AnimateCommand {
 public:
   AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad,
-		       float ang1, float ang2, Bool backwards = FALSE);
+		       float ang1, float ang2, bool backwards = false);
 
-  virtual Bool NextBeat(AnimatePoint& pt);
-  virtual Bool PrevBeat(AnimatePoint& pt);
+  virtual bool NextBeat(AnimatePoint& pt);
+  virtual bool PrevBeat(AnimatePoint& pt);
 
   virtual void ApplyForward(AnimatePoint& pt);
   virtual void ApplyBackward(AnimatePoint& pt);
@@ -160,14 +160,14 @@ public:
   Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist);
   ~Animation();
 
-  // Returns TRUE if changes made
-  Bool PrevSheet();
-  Bool NextSheet();
+  // Returns true if changes made
+  bool PrevSheet();
+  bool NextSheet();
 
   void GotoBeat(unsigned i);
 
-  Bool PrevBeat();
-  Bool NextBeat();
+  bool PrevBeat();
+  bool NextBeat();
 
   void GotoSheet(unsigned i);
 
@@ -181,7 +181,7 @@ public:
   unsigned curr_beat;
   unsigned numpts;
   AnimateCommand **curr_cmds;
-  Bool *collisions;
+  bool *collisions;
 private:
   void BeginCmd(unsigned i);
   void EndCmd(unsigned i);
@@ -195,25 +195,25 @@ private:
 class AnimateVariable {
 private:
   float v;
-  Bool valid;
+  bool valid;
 public:
-  AnimateVariable(): v(0.0), valid(FALSE) {}
-  inline Bool IsValid() const { return valid; }
+  AnimateVariable(): v(0.0), valid(false) {}
+  inline bool IsValid() const { return valid; }
   inline float GetValue() const { return v; }
-  inline void SetValue(float newv) { v = newv; valid = TRUE; }
-  inline void ClearValue() { v = 0.0; valid = FALSE; }
+  inline void SetValue(float newv) { v = newv; valid = true; }
+  inline void ClearValue() { v = 0.0; valid = false; }
 };
 
 class ErrorMarker {
 public:
-  Bool *pntgroup; // which points have this error
+  bool *pntgroup; // which points have this error
   unsigned contnum; // which continuity
   int line, col; // where
   ErrorMarker(): pntgroup(NULL), contnum(0), line(-1), col(-1) {}
   ~ErrorMarker() {
     Free();
   }
-  inline Bool Defined() { return pntgroup != NULL; }
+  inline bool Defined() { return pntgroup != NULL; }
   void Free() {
     if (pntgroup != NULL) {
       delete [] pntgroup;
@@ -241,11 +241,11 @@ public:
 
   // Compile a point
   void Compile(unsigned pt_num, unsigned cont_num, ContProcedure* proc);
-  // TRUE if successful
-  Bool Append(AnimateCommand *cmd, const ContToken *token);
+  // true if successful
+  bool Append(AnimateCommand *cmd, const ContToken *token);
 
-  inline Bool Okay() { return okay; };
-  inline void SetStatus(Bool s) { okay = s; };
+  inline bool Okay() { return okay; };
+  inline void SetStatus(bool s) { okay = s; };
   void RegisterError(AnimateError err, const ContToken *token);
   void FreeErrorMarkers();
 
@@ -264,7 +264,7 @@ private:
   unsigned contnum;
   AnimateVariable *vars[NUMCONTVARS];
   void MakeErrorMarker(AnimateError err, const ContToken *token);
-  Bool okay;
+  bool okay;
 };
 
 #endif

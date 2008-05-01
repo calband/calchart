@@ -11,7 +11,7 @@
 #endif
 
 #include "undo.h"
-#include <wx_utils.h>
+#include <wx/utils.h>
 
 ShowUndo::~ShowUndo() {}
 
@@ -135,7 +135,7 @@ unsigned ShowUndoMove::Size() {
 char *ShowUndoMove::UndoDescription() { return "Undo movement"; }
 char *ShowUndoMove::RedoDescription() { return "Redo movement"; }
 
-ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, Bool contchanged)
+ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged)
 :ShowUndo(sheetnum), contchange(contchanged) {
   unsigned i;
   
@@ -539,7 +539,7 @@ int ShowUndoList::Redo(CC_show *show) {
     newundo = NULL;
     i = undo->Undo(show, &newundo);
     if (newundo) Push(newundo);
-    show->SetModified(TRUE);
+    show->SetModified(true);
     delete undo;
     return (int)i;
   } else {
@@ -610,7 +610,7 @@ ShowUndo *ShowUndoList::Pop() {
 void ShowUndoList::Push(ShowUndo *undo) {
   undo->next = list;
   undo->was_modified = show->Modified();
-  show->SetModified(TRUE); // Show is now modified
+  show->SetModified(true); // Show is now modified
   list = undo;
 }
 
@@ -628,7 +628,7 @@ ShowUndo *ShowUndoList::PopRedo() {
 // Push one entry onto list
 void ShowUndoList::PushRedo(ShowUndo *undo) {
   undo->next = redolist;
-  undo->was_modified = TRUE; // Show will be modified
+  undo->was_modified = true; // Show will be modified
   redolist = undo;
 }
 

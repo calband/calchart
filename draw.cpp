@@ -6,15 +6,15 @@
  *
  */
 
-#include <wx_dc.h>
+#include <wx/dc.h>
 #include "show.h"
 #include "confgr.h"
 #include "modes.h"
 
 extern wxFont *pointLabelFont;
 
-void CC_sheet::Draw(wxDC *dc, unsigned ref, Bool primary,
-		    Bool drawall, int point) {
+void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
+		    bool drawall, int point) {
   unsigned short i;
   unsigned firstpoint, lastpoint;
   wxBrush *fillBrush;

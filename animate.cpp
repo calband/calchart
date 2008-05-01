@@ -105,35 +105,35 @@ AnimateDir AnimGetDirFromAngle(float ang) {
 AnimateCommand::AnimateCommand(unsigned beats)
 : next(NULL), prev(NULL), numbeats(beats) {}
 
-Bool AnimateCommand::Begin(AnimatePoint& pt) {
+bool AnimateCommand::Begin(AnimatePoint& pt) {
   beat = 0;
   if (numbeats == 0) {
     ApplyForward(pt);
-    return FALSE;
+    return false;
   }
-  else return TRUE;
+  else return true;
 }
 
-Bool AnimateCommand::End(AnimatePoint& pt) {
+bool AnimateCommand::End(AnimatePoint& pt) {
   beat = numbeats;
   if (numbeats == 0) {
     ApplyBackward(pt);
-    return FALSE;
+    return false;
   }
-  else return TRUE;
+  else return true;
 }
 
-Bool AnimateCommand::NextBeat(AnimatePoint&) {
+bool AnimateCommand::NextBeat(AnimatePoint&) {
   beat++;
-  if (beat >= numbeats) return FALSE;
-  else return TRUE;
+  if (beat >= numbeats) return false;
+  else return true;
 }
 
-Bool AnimateCommand::PrevBeat(AnimatePoint&) {
-  if (beat == 0) return FALSE;
+bool AnimateCommand::PrevBeat(AnimatePoint&) {
+  if (beat == 0) return false;
   else {
     beat--;
-    return TRUE;
+    return true;
   }
 }
 
@@ -169,8 +169,8 @@ AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement, float 
 : AnimateCommandMT(beats, direction), vector(movement) {
 }
 
-Bool AnimateCommandMove::NextBeat(AnimatePoint& pt) {
-  Bool b = AnimateCommand::NextBeat(pt);
+bool AnimateCommandMove::NextBeat(AnimatePoint& pt) {
+  bool b = AnimateCommand::NextBeat(pt);
   pt.pos.x +=
     ((long)beat * vector.x / (short)numbeats) -
       ((long)(beat-1) * vector.x / (short)numbeats);
@@ -180,7 +180,7 @@ Bool AnimateCommandMove::NextBeat(AnimatePoint& pt) {
   return b;
 }
 
-Bool AnimateCommandMove::PrevBeat(AnimatePoint& pt) {
+bool AnimateCommandMove::PrevBeat(AnimatePoint& pt) {
   if (AnimateCommand::PrevBeat(pt)) {
     pt.pos.x +=
       ((long)beat * vector.x / (short)numbeats) -
@@ -188,9 +188,9 @@ Bool AnimateCommandMove::PrevBeat(AnimatePoint& pt) {
     pt.pos.y +=
       ((long)beat * vector.y / (short)numbeats) -
 	((long)(beat+1) * vector.y / (short)numbeats);
-    return TRUE;
+    return true;
   } else {
-    return FALSE;
+    return false;
   }
 }
 
@@ -214,14 +214,14 @@ void AnimateCommandMove::ClipBeats(unsigned beats) {
 
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
 					   float rad, float ang1, float ang2,
-					   Bool backwards)
+					   bool backwards)
 : AnimateCommand(beats), origin(cntr), r(rad), ang_start(ang1), ang_end(ang2) {
   if (backwards) face = -90;
   else face = 90;
 }
 
-Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
-  Bool b = AnimateCommand::NextBeat(pt);
+bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
+  bool b = AnimateCommand::NextBeat(pt);
   float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
     * PI / 180.0;
   pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
@@ -229,15 +229,15 @@ Bool AnimateCommandRotate::NextBeat(AnimatePoint& pt) {
   return b;
 }
 
-Bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
+bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt) {
   if (AnimateCommand::PrevBeat(pt)) {
     float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
       * PI / 180.0;
     pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
     pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
-    return TRUE;
+    return true;
   } else {
-    return FALSE;
+    return false;
   }
 }
 
@@ -318,9 +318,9 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
 
   pts = new AnimatePoint[numpts];
   curr_cmds = new AnimateCommand*[numpts];
-  collisions = new Bool[numpts];
+  collisions = new bool[numpts];
   for (i = 0; i < numpts; i++) {
-    collisions[i] = FALSE;
+    collisions[i] = false;
   }
 
   // Now compile
@@ -346,7 +346,7 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     }
 
     // Now parse continuity
-    comp.SetStatus(TRUE);
+    comp.SetStatus(true);
     comp.FreeErrorMarkers();
     int contnum = 0;
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
@@ -408,7 +408,7 @@ Animation::~Animation() {
   if (curr_cmds) delete curr_cmds;
 }
 
-Bool Animation::PrevSheet() {
+bool Animation::PrevSheet() {
   if (curr_beat == 0) {
     if (curr_sheet->prev) {
       curr_sheet = curr_sheet->prev;
@@ -417,10 +417,10 @@ Bool Animation::PrevSheet() {
   }
   RefreshSheet();
   CheckCollisions();
-  return TRUE;
+  return true;
 }
 
-Bool Animation::NextSheet() {
+bool Animation::NextSheet() {
   if (curr_sheet->next) {
     curr_sheet = curr_sheet->next;
     curr_sheetnum++;
@@ -434,16 +434,16 @@ Bool Animation::NextSheet() {
 	curr_beat = curr_sheet->numbeats-1;
       }
     }
-    return FALSE;
+    return false;
   }
-  return TRUE;
+  return true;
 }
 
-Bool Animation::PrevBeat() {
+bool Animation::PrevBeat() {
   unsigned i;
 
   if (curr_beat == 0) {
-    if (curr_sheet->prev == NULL) return FALSE;
+    if (curr_sheet->prev == NULL) return false;
     curr_sheet = curr_sheet->prev;
     curr_sheetnum--;
     for (i = 0; i < numpts; i++) {
@@ -459,7 +459,7 @@ Bool Animation::PrevBeat() {
 	curr_cmds[i] = curr_cmds[i]->prev;
 	EndCmd(i);
 	// Set to next-to-last beat of this command
-	// Should always return TRUE
+	// Should always return true
 	curr_cmds[i]->PrevBeat(pts[i]);
       }
     }
@@ -467,10 +467,10 @@ Bool Animation::PrevBeat() {
   if (curr_beat > 0)
     curr_beat--;
   CheckCollisions();
-  return TRUE;
+  return true;
 }
 
-Bool Animation::NextBeat() {
+bool Animation::NextBeat() {
   unsigned i;
 
   curr_beat++;
@@ -489,7 +489,7 @@ Bool Animation::NextBeat() {
     }
   }
   CheckCollisions();
-  return TRUE;
+  return true;
 }
 
 void Animation::GotoBeat(unsigned i) {
@@ -543,18 +543,18 @@ void Animation::RefreshSheet() {
 
 void Animation::CheckCollisions() {
   unsigned i, j;
-  Bool beep = FALSE;
+  bool beep = false;
 
   for (i = 0; i < numpts; i++) {
-    collisions[i] = FALSE;
+    collisions[i] = false;
   }
   if (check_collis != COLLISION_NONE) {
     for (i = 0; i < numpts; i++) {
       for (j = i+1; j < numpts; j++) {
 	if (pts[i].pos.Collides(pts[j].pos)) {
-	  collisions[i] = TRUE;
-	  collisions[j] = TRUE;
-	  beep = TRUE;
+	  collisions[i] = true;
+	  collisions[j] = true;
+	  beep = true;
 	}
       }
     }
@@ -565,7 +565,7 @@ void Animation::CheckCollisions() {
 }
 
 AnimateCompile::AnimateCompile()
-: okay(TRUE) {
+: okay(true) {
   unsigned i;
 
   for (i = 0; i < NUMCONTVARS; i++) {
@@ -631,19 +631,19 @@ void AnimateCompile::Compile(unsigned pt_num, unsigned cont_num,
   }
 }
 
-Bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token) {
-  Bool clipped;
+bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token) {
+  bool clipped;
 
   if (beats_rem < cmd->numbeats) {
     RegisterError(ANIMERR_OUTOFTIME, token);
     if (beats_rem == 0) {
       delete cmd;
-      return FALSE;
+      return false;
     }
     cmd->ClipBeats(beats_rem);
-    clipped = TRUE;
+    clipped = true;
   } else {
-    clipped = FALSE;
+    clipped = false;
   }
   if (curr_cmd) {
     curr_cmd->next = cmd;
@@ -657,13 +657,13 @@ Bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token) {
   cmd->ApplyForward(pt); // Move current point to new position
   SetVarValue(CONTVAR_DOF, cmd->MotionDirection());
   SetVarValue(CONTVAR_DOH, cmd->RealDirection());
-  return TRUE;
+  return true;
 }
 
 void AnimateCompile::RegisterError(AnimateError err, const ContToken *token) {
   MakeErrorMarker(err, token);
-  error_markers[err].pntgroup[curr_pt] = TRUE;
-  SetStatus(FALSE);
+  error_markers[err].pntgroup[curr_pt] = true;
+  SetStatus(false);
 }
 
 void AnimateCompile::FreeErrorMarkers() {
@@ -696,9 +696,9 @@ void AnimateCompile::MakeErrorMarker(AnimateError err,
   unsigned i;
 
   if (!error_markers[err].pntgroup) {
-    error_markers[err].pntgroup = new Bool[show->GetNumPoints()];
+    error_markers[err].pntgroup = new bool[show->GetNumPoints()];
     for (i = 0; i < show->GetNumPoints(); i++) {
-      error_markers[err].pntgroup[i] = FALSE;
+      error_markers[err].pntgroup[i] = false;
     }
     error_markers[err].contnum = contnum;
     if (token != NULL) {

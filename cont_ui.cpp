@@ -13,7 +13,7 @@
 #include "cont_ui.h"
 #include "confgr.h"
 
-#include <wx_help.h>
+#include <wx/help.h>
 
 extern wxFont *contPlainFont;
 extern wxFont *contBoldFont;
@@ -47,7 +47,7 @@ CC_WinNodeCont::CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req)
 
 void CC_WinNodeCont::SetShow(CC_show *) {
   editor->DetachText();
-  editor->Update(TRUE);
+  editor->Update(true);
 }
 
 void CC_WinNodeCont::GotoSheet(unsigned) {
@@ -104,7 +104,7 @@ void CC_WinNodeCont::SetContinuity(wxWindow *win,
 				   unsigned sht, unsigned cont) {
   if ((win != editor) && (sht == editor->GetShowDescr()->curr_ss) &&
       (cont == editor->GetCurrent())) {
-    editor->UpdateText(TRUE);
+    editor->UpdateText(true);
   }
 }
 
@@ -171,7 +171,7 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   SetMenuBar(menu_bar);
 
   OnSize(-1, -1);
-  Show(TRUE);
+  Show(true);
 
   Update();
 
@@ -196,9 +196,9 @@ void ContinuityEditor::OnSize(int, int) {
   text->SetSize(0, text_y, width, height-text_y);
 }
 
-Bool ContinuityEditor::OnClose(void) {
+bool ContinuityEditor::OnClose(void) {
   FlushText();
-  return TRUE;
+  return true;
 }
 
 void ContinuityEditor::OnMenuCommand(int id) {
@@ -253,7 +253,7 @@ void ContinuityEditor::OnMenuSelect(int id) {
   if (msg) SetStatusText(msg);
 }
 
-void ContinuityEditor::Update(Bool quick) {
+void ContinuityEditor::Update(bool quick) {
   CC_sheet *sht = descr->CurrSheet();
   CC_continuity *curranimcont;
 
@@ -273,7 +273,7 @@ void ContinuityEditor::UpdateContChoice() {
   conts->SetSelection(curr_cont);
 }
 
-void ContinuityEditor::UpdateText(Bool quick) {
+void ContinuityEditor::UpdateText(bool quick) {
   CC_sheet *sht = descr->CurrSheet();
   CC_continuity *c;
 
@@ -346,7 +346,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
   CC_textline *cont;
   CC_textchunk *c;
   CC_sheet *sht = show_descr->CurrSheet();
-  Bool do_tab;
+  bool do_tab;
   unsigned row, column;
   float x, y;
   float textw, texth, textd, maxtexth;
@@ -355,7 +355,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
   float tabw;
   float cur_posx, cur_posy, cur_height;
   wxString tmpstr;
-  Bool drawall;
+  bool drawall;
 
   drawall = ((firstrow == 0) && (lastrow < 0));
   cur_posx = cur_posy = cur_height = 0;
@@ -380,7 +380,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
       for (textnode = cont->chunks.First(); textnode != NULL;
 	   textnode = textnode->Next()) {
 	c = (CC_textchunk*)textnode->Data();
-	do_tab = FALSE;
+	do_tab = false;
 	switch (c->font) {
 	case PSFONT_SYMBOL:
 	  GetTextExtent("O", &textw, &texth, &textd);
@@ -399,7 +399,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	  SetFont(contBoldItalFont);
 	  break;
 	case PSFONT_TAB:
-	  do_tab = TRUE;
+	  do_tab = true;
 	  break;
 	}
 	if (!do_tab && (c->font != PSFONT_SYMBOL)) {
@@ -416,7 +416,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
     for (textnode = cont->chunks.First(); textnode != NULL;
 	 textnode = textnode->Next()) {
       c = (CC_textchunk*)textnode->Data();
-      do_tab = FALSE;
+      do_tab = false;
       switch (c->font) {
       case PSFONT_NORM:
       case PSFONT_SYMBOL:
@@ -440,7 +440,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	textw = tabnum * tabw;
 	if (textw >= x) x = textw;
 	else x += tabw/6;
-	do_tab = TRUE;
+	do_tab = true;
 	break;
       default:
 	break;
@@ -592,7 +592,7 @@ void PrintContCanvas::DrawCursor(float x, float y, float height) {
 void PrintContCanvas::InsertChar(unsigned onechar) {
 }
 
-void PrintContCanvas::DeleteChar(Bool backspace) {
+void PrintContCanvas::DeleteChar(bool backspace) {
 }
 
 void PrintContClose(wxButton& button, wxEvent&) {
@@ -628,7 +628,7 @@ PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
 
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   OnSize(-1, -1);
-  Show(TRUE);
+  Show(true);
 }
 
 PrintContEditor::~PrintContEditor() {
@@ -638,7 +638,7 @@ PrintContEditor::~PrintContEditor() {
   }
 }
 
-void PrintContEditor::OnActivate(Bool active) {
+void PrintContEditor::OnActivate(bool active) {
   if (active) {
     canvas->SetFocus();
   }

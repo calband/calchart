@@ -10,7 +10,7 @@
 #ifndef _CONFGR_H_
 #define _CONFGR_H_
 
-#include <wxstring.h>
+#include <wx/string.h>
 
 #define MAX_SPR_LINES 5
 #define MAX_YARD_LINES 53

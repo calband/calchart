@@ -45,7 +45,7 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
 #ifdef PRINT__RUN_CMD
   wxString buf;
 #endif
-  Bool overview;
+  bool overview;
   int minyards;
 
   ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
@@ -56,12 +56,12 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   StringToFloat(dialog->text_height->GetValue(), &page_height);
   StringToInt(dialog->text_minyards->GetValue(), &minyards);
 
-  dialog->show_descr->show->GetBoolLandscape() =
+  dialog->show_descr->show->GetboolLandscape() =
     (dialog->radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
 
-  dialog->show_descr->show->GetBoolDoCont() = dialog->check_cont->GetValue();
+  dialog->show_descr->show->GetboolDoCont() = dialog->check_cont->GetValue();
   if (!dialog->eps)
-    dialog->show_descr->show->GetBoolDoContSheet() =
+    dialog->show_descr->show->GetboolDoContSheet() =
       dialog->check_pages->GetValue();
   overview = dialog->check_overview->GetValue();
 
@@ -146,12 +146,12 @@ static void ShowPrintCancel(wxButton& button, wxEvent&) {
 static void ShowPrintSelect(wxButton& button, wxEvent&) {
   ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
   (void)new StuntSheetPicker(dialog->show_descr->show, dialog->node->GetList(),
-			     TRUE, dialog->frame, "Select stuntsheets");
+			     true, dialog->frame, "Select stuntsheets");
 }
 
 ShowPrintDialog::ShowPrintDialog(CC_descr *dcr, CC_WinList *lst,
-				 Bool printEPS, wxFrame *parent, char *title,
-				 Bool isModal, int x, int y,
+				 bool printEPS, wxFrame *parent, char *title,
+				 bool isModal, int x, int y,
 				 int width, int height):
 wxDialogBox(parent, title, isModal, x, y, width, height),
 show_descr(dcr), eps(printEPS), frame(parent) {
@@ -201,7 +201,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   orientation[1] = "Landscape";
   radio_orient = new wxRadioBox(this, (wxFunction)NULL, "&Orientation: ",
 		    -1,-1,-1,-1,2,orientation,2,wxHORIZONTAL|wxFLAT);
-  radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
+  radio_orient->SetSelection((int)show_descr->show->GetboolLandscape());
 
   char *print_modes[3];
   print_modes[0] = "Send to Printer";
@@ -221,12 +221,12 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   NewLine();
 
   check_overview = new wxCheckBox(this, (wxFunction)NULL, "Over&view");
-  check_overview->SetValue(FALSE);
+  check_overview->SetValue(false);
   check_cont = new wxCheckBox(this, (wxFunction)NULL, "Continuit&y");
-  check_cont->SetValue(show_descr->show->GetBoolDoCont());
+  check_cont->SetValue(show_descr->show->GetboolDoCont());
   if (!eps) {
     check_pages = new wxCheckBox(this, (wxFunction)NULL, "Cove&r pages");
-    check_pages->SetValue(show_descr->show->GetBoolDoContSheet());
+    check_pages->SetValue(show_descr->show->GetboolDoContSheet());
   }
 
   if (!eps) {
@@ -261,7 +261,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 
   Fit();
 
-  Show(TRUE);
+  Show(true);
 }
 
 ShowPrintDialog::~ShowPrintDialog() {
@@ -271,12 +271,12 @@ ShowPrintDialog::~ShowPrintDialog() {
   }
 }
 
-Bool ShowPrintDialog::OnClose(void) {
-  return TRUE;
+bool ShowPrintDialog::OnClose(void) {
+  return true;
 }
 
 void ShowPrintDialog::Update() {
-  radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
-  check_cont->SetValue(show_descr->show->GetBoolDoCont());
-  if (!eps) check_pages->SetValue(show_descr->show->GetBoolDoContSheet());
+  radio_orient->SetSelection((int)show_descr->show->GetboolLandscape());
+  check_cont->SetValue(show_descr->show->GetboolDoCont());
+  if (!eps) check_pages->SetValue(show_descr->show->GetboolDoContSheet());
 }

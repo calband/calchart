@@ -12,8 +12,8 @@
 #pragma implementation
 #endif
 
-#include <wx.h>
-#include <wx_timer.h>
+#include <wx/wx.h>
+#include <wx/timer.h>
 #include "show.h"
 #include "undo.h"
 #include "confgr.h"
@@ -51,7 +51,7 @@ extern ShowModeList *modelist;
 static void ChangeExtension(const wxString& in, wxString& out,
 			    const wxString& ext) {
   int i = in.Last('.');
-  out = in.Copy().SubString(0, i);
+  out = in.Mid(0, i);
   out.Append(ext);
 }
 		       
@@ -134,10 +134,10 @@ CC_WinList::CC_WinList()
 
 CC_WinList::~CC_WinList() {}
 
-Bool CC_WinList::MultipleWindows() {
-  if (list == NULL) return FALSE;
-  if (list->next == NULL) return FALSE;
-  return TRUE;
+bool CC_WinList::MultipleWindows() {
+  if (list == NULL) return false;
+  if (list->next == NULL) return false;
+  return true;
 }
 
 void CC_WinList::Add(CC_WinNode *node) {
@@ -346,7 +346,7 @@ void CC_WinListShow::Empty() {
 }
 
 CC_textline::CC_textline()
-  : center(FALSE), on_main(TRUE), on_sheet(TRUE) {}
+  : center(false), on_main(true), on_sheet(true) {}
 CC_textline::~CC_textline() {
   wxNode *node;
 
@@ -397,7 +397,7 @@ float BoundDirectionSigned(float f) {
   return f;
 }
 
-Bool IsDiagonalDirection(float f) {
+bool IsDiagonalDirection(float f) {
   f = BoundDirection(f);
   return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) ||
 	  IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
@@ -469,15 +469,15 @@ float CC_coord::Direction(const CC_coord& c) const {
   return vect.Direction();
 }
 
-// Returns TRUE if this coordinate is within 1 step of another
-Bool CC_coord::Collides(const CC_coord& c) const {
+// Returns true if this coordinate is within 1 step of another
+bool CC_coord::Collides(const CC_coord& c) const {
   Coord dx, dy;
 
   dx = x - c.x;
   dy = y - c.y;
   // Check for special cases to avoid multiplications
-  if (ABS(dx) > INT2COORD(1)) return FALSE;
-  if (ABS(dy) > INT2COORD(1)) return FALSE;
+  if (ABS(dx) > INT2COORD(1)) return false;
+  if (ABS(dy) > INT2COORD(1)) return false;
   return (((dx*dx)+(dy*dy)) <= (INT2COORD(1)*INT2COORD(1)));
 }
 
@@ -490,13 +490,13 @@ CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
 
 CC_sheet::CC_sheet(CC_show *shw)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), picked(TRUE), beats(1) {
+  numanimcont(0), picked(true), beats(1) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
 CC_sheet::CC_sheet(CC_show *shw, const char *newname)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), picked(TRUE), beats(1), pts(NULL), name(newname) {
+  numanimcont(0), picked(true), beats(1), pts(NULL), name(newname) {
     pts = new CC_point[show->GetNumPoints()];
 }
 
@@ -553,20 +553,20 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) {
   return -1;
 }
 
-Bool CC_sheet::SelectContinuity(unsigned i) {
+bool CC_sheet::SelectContinuity(unsigned i) {
   unsigned j;
-  Bool changed = FALSE;
+  bool changed = false;
 
   for (j = 0; j < show->GetNumPoints(); j++) {
     if (pts[j].cont == i) {
       if (!show->IsSelected(j)) {
-	show->Select(j, TRUE);
-	changed = TRUE;
+	show->Select(j, true);
+	changed = true;
       }
     } else {
       if (show->IsSelected(j)) {
-	show->Select(j, FALSE);
-	changed = TRUE;
+	show->Select(j, false);
+	changed = true;
       }
     }
   }
@@ -577,7 +577,7 @@ void CC_sheet::SetContinuity(unsigned i) {
   unsigned j;
 
   // Create undo entry (sym also does continuity)
-  show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this, TRUE));
+  show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this, true));
 
   for (j = 0; j < show->GetNumPoints(); j++) {
     if (show->IsSelected(j)) {
@@ -742,14 +742,14 @@ CC_continuity *CC_sheet::UserNewContinuity(const char *name) {
 
 unsigned CC_sheet::NextUnusedContinuityNum() {
   unsigned i = 0;
-  Bool found;
+  bool found;
   CC_continuity *c;
 
   do {
-    found = FALSE;
+    found = false;
     for (c = animcont; c != NULL; c = c->next) {
       if (c->num == i) {
-	found = TRUE;
+	found = true;
 	i++;
 	break;
       }
@@ -800,14 +800,14 @@ unsigned CC_sheet::FindContinuityByName(const char *name) {
   return idx;
 }
 
-Bool CC_sheet::ContinuityInUse(unsigned idx) {
+bool CC_sheet::ContinuityInUse(unsigned idx) {
   unsigned i;
   CC_continuity *c = GetNthContinuity(idx);
  
   for (i = 0; i < show->GetNumPoints(); i++) {
-    if (pts[i].cont == c->num) return TRUE;
+    if (pts[i].cont == c->num) return true;
   }
-  return FALSE;
+  return false;
 }
 
 void CC_sheet::UserSetName(const char *newname) {
@@ -825,12 +825,12 @@ void CC_sheet::UserSetBeats(unsigned short b) {
 }
 
 // Set point symbols
-Bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym) {
+bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym) {
   unsigned i;
-  Bool change = FALSE;
+  bool change = false;
   CC_continuity *c;
 
-  if (GetNumSelectedPoints() <= 0) return FALSE;
+  if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entries
   show->undolist->StartMulti();
@@ -843,7 +843,7 @@ Bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym) {
       if (pts[i].sym != sym) {
 	pts[i].sym = sym;
 	pts[i].cont = c->num;
-	change = TRUE;
+	change = true;
       }
     }
   }
@@ -851,11 +851,11 @@ Bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym) {
 }
 
 // Set point labels
-Bool CC_sheet::SetPointsLabel(Bool right) {
+bool CC_sheet::SetPointsLabel(bool right) {
   unsigned i;
-  Bool change = FALSE;
+  bool change = false;
 
-  if (GetNumSelectedPoints() <= 0) return FALSE;
+  if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoLbl(show->GetSheetPos(this), this));
@@ -863,18 +863,18 @@ Bool CC_sheet::SetPointsLabel(Bool right) {
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       pts[i].Flip(right);
-      change = TRUE;
+      change = true;
     }
   }
   return change;
 }
 
 // Set point labels
-Bool CC_sheet::SetPointsLabelFlip() {
+bool CC_sheet::SetPointsLabelFlip() {
   unsigned i;
-  Bool change = FALSE;
+  bool change = false;
 
-  if (GetNumSelectedPoints() <= 0) return FALSE;
+  if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoLbl(show->GetSheetPos(this), this));
@@ -882,7 +882,7 @@ Bool CC_sheet::SetPointsLabelFlip() {
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       pts[i].FlipToggle();
-      change = TRUE;
+      change = true;
     }
   }
   return change;
@@ -950,11 +950,11 @@ void CC_sheet::SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref){
   }
 }
 
-Bool CC_sheet::ClearRefPositions(unsigned ref) {
+bool CC_sheet::ClearRefPositions(unsigned ref) {
   unsigned i;
-  Bool change = FALSE;
+  bool change = false;
 
-  if (GetNumSelectedPoints() <= 0) return FALSE;
+  if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
@@ -962,19 +962,19 @@ Bool CC_sheet::ClearRefPositions(unsigned ref) {
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       SetPosition(GetPosition(i), i, ref);
-      change = TRUE;
+      change = true;
     }
   }
   return change;
 }
 
 // Move points
-Bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref) {
+bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref) {
   unsigned i;
-  Bool change = FALSE;
+  bool change = false;
 
   if (((delta.x == 0) && (delta.y == 0)) ||
-      (GetNumSelectedPoints() <= 0)) return FALSE;
+      (GetNumSelectedPoints() <= 0)) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
@@ -982,20 +982,20 @@ Bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref) {
   for (i = 0; i < show->GetNumPoints(); i++) {
     if (show->IsSelected(i)) {
       SetPosition(GetPosition(i, ref) + delta, i, ref);
-      change = TRUE;
+      change = true;
     }
   }
   return change;
 }
 
 // Move points
-Bool CC_sheet::TransformPoints(const Matrix& transmat, unsigned ref) {
+bool CC_sheet::TransformPoints(const Matrix& transmat, unsigned ref) {
   unsigned i;
-  Bool change = FALSE;
+  bool change = false;
   Vector v;
   CC_coord c;
 
-  if (GetNumSelectedPoints() <= 0) return FALSE;
+  if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
@@ -1008,20 +1008,20 @@ Bool CC_sheet::TransformPoints(const Matrix& transmat, unsigned ref) {
       v.Homogenize();
       c = CC_coord((Coord)CLIPFLOAT(v.GetX()), (Coord)CLIPFLOAT(v.GetY()));
       SetPosition(c, i, ref);
-      change = TRUE;
+      change = true;
     }
   }
   return change;
 }
 
 // Move points into a line (old smart move)
-Bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
+bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
 			       unsigned ref) {
   CC_coord curr_pos;
-  Bool change = FALSE;
+  bool change = false;
   wxNode *n;
 
-  if (GetNumSelectedPoints() <= 0) return FALSE;
+  if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
@@ -1030,16 +1030,16 @@ Bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
        n != NULL;
        n = n->Next(), curr_pos += second - start) {
     SetPosition(curr_pos, n->key.integer, ref);
-    change = TRUE;
+    change = true;
   }
   return change;
 }
 
 // Create a new show
 CC_show::CC_show(unsigned npoints)
-:okay(TRUE), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
- modified(FALSE), print_landscape(FALSE), print_do_cont(TRUE),
- print_do_cont_sheet(TRUE) {
+:okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
+ modified(false), print_landscape(false), print_do_cont(true),
+ print_do_cont_sheet(true) {
   wxString tmpname;
 
   tmpname.sprintf("noname%d.shw", autosaveTimer.GetNumber());
@@ -1057,7 +1057,7 @@ CC_show::CC_show(unsigned npoints)
     for (unsigned int i = 0; i < npoints; i++) {
       sprintf(pt_labels[i], "%u", i);
     }
-    selections = new Bool[npoints];
+    selections = new bool[npoints];
     if (selections == NULL) {
       // Out of mem!
       AddError(nomem_str);
@@ -1319,20 +1319,20 @@ enum CONT_PARSE_MODE {
 
 // Load a show
 CC_show::CC_show(const char *file)
-:okay(TRUE), numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL),
- selections(NULL), modified(FALSE), print_landscape(FALSE),
- print_do_cont(TRUE), print_do_cont_sheet(TRUE) {
+:okay(true), numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL),
+ selections(NULL), modified(false), print_landscape(false),
+ print_do_cont(true), print_do_cont_sheet(true) {
   cc_oldpoint *diskpts;
 
   // These are for really old reference point format
   cc_oldpoint conv_diskpt;
-  Bool reallyoldpnts;
+  bool reallyoldpnts;
   int record_len;
 
   int namelen;
   char *namebuf;
-  Bool old_format = FALSE;
-  Bool old_format_uppercase = FALSE;
+  bool old_format = false;
+  bool old_format_uppercase = false;
   FILE *fp;
   unsigned int i, j, k;
   unsigned int off;
@@ -1348,10 +1348,10 @@ CC_show::CC_show(const char *file)
 
   namelen = strlen(file);
   if (namelen > 4) {
-    if (strcmp(".mas", file+namelen-4) == 0) old_format = TRUE;
+    if (strcmp(".mas", file+namelen-4) == 0) old_format = true;
     if (strcmp(".MAS", file+namelen-4) == 0) {
-      old_format = TRUE;
-      old_format_uppercase = TRUE;
+      old_format = true;
+      old_format_uppercase = true;
     }
   }
 
@@ -1388,7 +1388,7 @@ CC_show::CC_show(const char *file)
       return;
     }
     pt_labels = new char[numpoints][4];
-    selections = new Bool[numpoints];
+    selections = new bool[numpoints];
     UnselectAll();
 
     for (i = 0; i < numsheets; i++) {
@@ -1447,9 +1447,9 @@ CC_show::CC_show(const char *file)
       }
       record_len = fread(diskpts, numpoints, sizeof(cc_oldpoint), fp);
       if (record_len == sizeof(cc_oldpoint)) {
-	reallyoldpnts = FALSE;
+	reallyoldpnts = false;
       } else if (record_len == sizeof(cc_reallyoldpoint)) {
-	reallyoldpnts = TRUE;
+	reallyoldpnts = true;
       } else {
 	AddError(badfile_pnt_str);
 	return;
@@ -1653,26 +1653,26 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
   CC_textline *line_text;
   CC_textchunk *new_text;
   unsigned pos;
-  Bool on_sheet, on_main, center, font_changed;
+  bool on_sheet, on_main, center, font_changed;
   enum CONT_PARSE_MODE parsemode;
   enum PSFONT_TYPE currfontnum, lastfontnum;
   wxString lineotext;
   char c;
-  Bool sheetmark;
+  bool sheetmark;
 
   fp = fopen(file, "r");
   if (fp) {
     curr_sheet = NULL;
     currfontnum = lastfontnum = PSFONT_NORM;
     line_text = NULL;
-    while (TRUE) {
+    while (true) {
       if (feof(fp)) break;
       ReadDOSline(fp, tempbuf);
-      sheetmark = FALSE;
+      sheetmark = false;
       line_text = NULL;
       if (tempbuf.Length() >= 2) {
-	if ((tempbuf.Elem(0) == '%') && (tempbuf.Elem(1) == '%')) {
-	  sheetmark = TRUE;
+	if ((tempbuf.GetChar(0) == '%') && (tempbuf.GetChar(1) == '%')) {
+	  sheetmark = true;
 	}
       }
       if (sheetmark) {
@@ -1680,49 +1680,49 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	else curr_sheet = sheets;
 	if (!curr_sheet) break;
 	if (tempbuf.Length() > 2) {
-	  curr_sheet->SetNumber(tempbuf.From(2).Chars());
+	  curr_sheet->SetNumber(tempbuf.Mid(2));
 	}
       } else {
 	if (curr_sheet == NULL) {
 	  // Continuity doesn't begin with a sheet header
 	  return new wxString(contnohead_str);
 	}
-	on_main = TRUE;
-	on_sheet = TRUE;
+	on_main = true;
+	on_sheet = true;
 	pos = 0;
 	if (pos < tempbuf.Length()) {
-	  if (tempbuf.Elem(pos) == '<') {
-	    on_sheet = FALSE;
+	  if (tempbuf.GetChar(pos) == '<') {
+	    on_sheet = false;
 	    pos++;
 	  } else {
-	    if (tempbuf.Elem(pos) == '>') {
-	      on_main = FALSE;
+	    if (tempbuf.GetChar(pos) == '>') {
+	      on_main = false;
 	      pos++;
 	    }
 	  }
 	}
-	center = FALSE;
+	center = false;
 	if (pos < tempbuf.Length()) {
-	  if (tempbuf.Elem(pos) == '~') {
-	    center = TRUE;
+	  if (tempbuf.GetChar(pos) == '~') {
+	    center = true;
 	    pos++;
 	  }
 	}
 	parsemode = CONT_PARSE_NORMAL;
 	do {
-	  font_changed = FALSE;
+	  font_changed = false;
 	  lineotext = "";
 	  while ((pos < tempbuf.Length()) && !font_changed) {
 	    switch (parsemode) {
 	    case CONT_PARSE_NORMAL:
-	      c = tempbuf.Elem(pos++);
+	      c = tempbuf.GetChar(pos++);
 	      switch (c) {
 	      case '\\':
 		parsemode = CONT_PARSE_BS;
 		break;
 	      case '\t':
 		parsemode = CONT_PARSE_TAB;
-		font_changed = TRUE;
+		font_changed = true;
 		break;
 	      default:
 		lineotext.Append(c);
@@ -1732,18 +1732,18 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	    case CONT_PARSE_TAB:
 	      parsemode = CONT_PARSE_NORMAL;
 	      currfontnum = PSFONT_TAB;
-	      font_changed = TRUE;
+	      font_changed = true;
 	      break;
 	    case CONT_PARSE_BS:
-	      c = tolower(tempbuf.Elem(pos++));
+	      c = tolower(tempbuf.GetChar(pos++));
 	      switch (c) {
 	      case 'p':
 		parsemode = CONT_PARSE_PLAIN;
-		font_changed = TRUE;
+		font_changed = true;
 		break;
 	      case 's':
 		parsemode = CONT_PARSE_SOLID;
-		font_changed = TRUE;
+		font_changed = true;
 		break;
 	      case 'b':
 		parsemode = CONT_PARSE_BOLD;
@@ -1759,9 +1759,9 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	      break;
 	    case CONT_PARSE_PLAIN:
 	      parsemode = CONT_PARSE_NORMAL;
-	      font_changed = TRUE;
+	      font_changed = true;
 	      currfontnum = PSFONT_SYMBOL;
-	      c = tolower(tempbuf.Elem(pos++));
+	      c = tolower(tempbuf.GetChar(pos++));
 	      switch (c) {
 	      case 'o':
 		lineotext.Append('A');
@@ -1782,9 +1782,9 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	      break;
 	    case CONT_PARSE_SOLID:
 	      parsemode = CONT_PARSE_NORMAL;
-	      font_changed = TRUE;
+	      font_changed = true;
 	      currfontnum = PSFONT_SYMBOL;
-	      c = tolower(tempbuf.Elem(pos++));
+	      c = tolower(tempbuf.GetChar(pos++));
 	      switch (c) {
 	      case 'o':
 		lineotext.Append('B');
@@ -1805,17 +1805,17 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	      break;
 	    case CONT_PARSE_BOLD:
 	      parsemode = CONT_PARSE_NORMAL;
-	      c = tolower(tempbuf.Elem(pos++));
+	      c = tolower(tempbuf.GetChar(pos++));
 	      switch (c) {
 	      case 's':
 		switch (currfontnum) {
 		case PSFONT_NORM:
 		  lastfontnum = PSFONT_BOLD;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		case PSFONT_ITAL:
 		  lastfontnum = PSFONT_BOLDITAL;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		default:
 		  break;
@@ -1825,11 +1825,11 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 		switch (currfontnum) {
 		case PSFONT_BOLD:
 		  lastfontnum = PSFONT_NORM;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		case PSFONT_BOLDITAL:
 		  lastfontnum = PSFONT_ITAL;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		default:
 		  break;
@@ -1842,17 +1842,17 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	      break;
 	    case CONT_PARSE_ITALIC:
 	      parsemode = CONT_PARSE_NORMAL;
-	      c = tolower(tempbuf.Elem(pos++));
+	      c = tolower(tempbuf.GetChar(pos++));
 	      switch (c) {
 	      case 's':
 		switch (currfontnum) {
 		case PSFONT_NORM:
 		  lastfontnum = PSFONT_ITAL;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		case PSFONT_BOLD:
 		  lastfontnum = PSFONT_BOLDITAL;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		default:
 		  break;
@@ -1862,11 +1862,11 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 		switch (currfontnum) {
 		case PSFONT_ITAL:
 		  lastfontnum = PSFONT_NORM;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		case PSFONT_BOLDITAL:
 		  lastfontnum = PSFONT_BOLD;
-		  font_changed = TRUE;
+		  font_changed = true;
 		  break;
 		default:
 		  break;
@@ -2101,9 +2101,9 @@ char *CC_show::SaveInternal(const char *filename) {
 	}
 	for (i = 0; i < GetNumPoints(); i++) {
 	  if (curr_sheet->GetPoint(i).GetFlip()) {
-	    c = TRUE;
+	    c = true;
 	  } else {
-	    c = FALSE;
+	    c = false;
 	  }
 	  if (!handl->Write(&c, 1)) {
 	    return writeerr_str;
@@ -2141,7 +2141,7 @@ char *CC_show::SaveInternal(const char *filename) {
 
   delete handl;
 
-  if (!bakfile.Empty()) {
+  if (!bakfile.IsEmpty()) {
     wxRemoveFile(bakfile.GetData());
   }
   return NULL;
@@ -2152,7 +2152,7 @@ void CC_show::ClearAutosave() {
 }
 
 char *CC_show::Autosave() {
-  if (!autosave_name.Empty()) {
+  if (!autosave_name.IsEmpty()) {
     return SaveInternal(autosave_name);
   } else {
     return NULL;
@@ -2165,7 +2165,7 @@ char *CC_show::Save(const char *filename) {
     if (autosave_name) {
       ClearAutosave();
     }
-    SetModified(FALSE);
+    SetModified(false);
     if (name.CompareTo(filename) != 0) {
       UserSetName(filename);
     }
@@ -2174,7 +2174,7 @@ char *CC_show::Save(const char *filename) {
 }
 
 const char *CC_show::UserGetName() {
-  if (name.Empty()) return "Untitled";
+  if (name.IsEmpty()) return "Untitled";
   else return wxFileNameFromPath((char *)name.GetData());
 }
 
@@ -2311,10 +2311,10 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
   undolist->EraseAll(); // Remove all previously avail undo
 
   delete selections;
-  selections = new Bool[num];
+  selections = new bool[num];
   new_labels = new char[num][4];
   for (i = 0; i < num; i++) {
-    selections[i] = FALSE;
+    selections[i] = false;
   }
   cpy = MIN(numpoints, num);
   for (i = 0; i < cpy; i++) {
@@ -2328,37 +2328,37 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
 
   numpoints = num;
 
-  SetModified(TRUE);
+  SetModified(true);
 }
 
 void CC_show::SetNumPointsInternal(unsigned num) {
   numpoints = num;
   pt_labels = new char[numpoints][4];
-  selections = new Bool[numpoints];
+  selections = new bool[numpoints];
   for (unsigned i = 0; i < numpoints; i++) pt_labels[i][0] = 0;
   UnselectAll();
 }
 
-Bool CC_show::RelabelSheets(unsigned sht) {
+bool CC_show::RelabelSheets(unsigned sht) {
   CC_sheet *sheet;
   unsigned i,j;
   unsigned *table;
-  Bool *used_table;
+  bool *used_table;
 
   sheet = GetNthSheet(sht);
-  if (sheet->next == NULL) return FALSE;
+  if (sheet->next == NULL) return false;
   table = new unsigned[GetNumPoints()];
-  used_table = new Bool[GetNumPoints()];
+  used_table = new bool[GetNumPoints()];
 
   for (i = 0; i < GetNumPoints(); i++) {
-    used_table[i] = FALSE;
+    used_table[i] = false;
   }
   for (i = 0; i < GetNumPoints(); i++) {
     for (j = 0; j < GetNumPoints(); j++) {
       if (!used_table[j]) {
 	if (sheet->GetPosition(i) == sheet->next->GetPosition(j)) {
 	  table[i] = j;
-	  used_table[j] = TRUE;
+	  used_table[j] = true;
 	  break;
 	}
       }
@@ -2367,7 +2367,7 @@ Bool CC_show::RelabelSheets(unsigned sht) {
       // didn't find a match
       delete [] table;
       delete [] used_table;
-      return FALSE;
+      return false;
     }
   }
   while ((sheet = sheet->next) != NULL) {
@@ -2375,21 +2375,21 @@ Bool CC_show::RelabelSheets(unsigned sht) {
   }
 
   delete [] table;
-  return TRUE;
+  return true;
 }
 
-Bool CC_show::UnselectAll() {
-  Bool changed = FALSE;
+bool CC_show::UnselectAll() {
+  bool changed = false;
   for (unsigned i=0; i<numpoints; i++) {
     if (IsSelected(i)) {
-      Select(i, FALSE);
-      changed = TRUE;
+      Select(i, false);
+      changed = true;
     }
   }
   return changed;
 }
 
-void CC_show::Select(unsigned i, Bool val) {
+void CC_show::Select(unsigned i, bool val) {
   wxNode *n;
 
   selections[i] = val;

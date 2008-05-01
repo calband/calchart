@@ -13,7 +13,7 @@
 #pragma interface
 #endif
 
-#include <wx.h>
+#include <wx/wx.h>
 #include "show.h"
 
 class ShowPrintDialog;
@@ -32,19 +32,19 @@ private:
 class ShowPrintDialog : public wxDialogBox
 {
 public:
-  ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, Bool printEPS,
+  ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, bool printEPS,
 		  wxFrame *parent, char *title,
-		  Bool isModal = FALSE,
+		  bool isModal = false,
 		  int x = -1, int y = -1,
 		  int width = -1, int height = -1);
   ~ShowPrintDialog();
-  Bool OnClose(void);
+  bool OnClose(void);
 
-  inline Bool Okay() { return ok; };
+  inline bool Okay() { return ok; };
   void Update();
 
   CC_descr *show_descr;
-  Bool eps;
+  bool eps;
   wxText *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
   wxText *text_x, *text_y, *text_width, *text_height;
   wxText *text_minyards;
@@ -54,7 +54,7 @@ public:
   CC_WinNodePrint *node;
 
 private:
-  Bool ok;
+  bool ok;
 };
 
 #endif

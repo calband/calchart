@@ -161,7 +161,7 @@ public:
   void Start(const CC_coord& p);
   void End();
   void Append(const CC_coord& p);
-  Bool Inside(const CC_coord& p) const;
+  bool Inside(const CC_coord& p) const;
   virtual void Draw(wxDC *dc, float x, float y) const;
   void Drag(const CC_coord& p);
   inline const wxPoint *FirstPoint() const {
@@ -171,7 +171,7 @@ public:
     else return NULL;
   }
 private:
-  Bool CrossesLine(const wxPoint* start, const wxPoint* end,
+  bool CrossesLine(const wxPoint* start, const wxPoint* end,
 		   const CC_coord& p) const;
   wxList pntlist;
 };
@@ -230,7 +230,7 @@ class TopFrame : public wxFrame {
 public:
   TopFrame(int width, int height);
   ~TopFrame();
-  Bool OnClose(void);
+  bool OnClose(void);
 #ifdef CC_USE_MDI
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
@@ -251,11 +251,11 @@ public:
 	    CC_show *show = NULL, MainFrame *other_frame = NULL);
   ~MainFrame();
 
-  Bool OnClose(void);
+  bool OnClose(void);
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
 
-  Bool OkayToClearShow();
+  bool OkayToClearShow();
 
   void LoadShow();
   void AppendShow();
@@ -294,7 +294,7 @@ public:
   void OnScroll(wxCommandEvent& event);
 
   // Misc show functions
-  void RefreshShow(Bool drawall = TRUE, int point = -1);
+  void RefreshShow(bool drawall = true, int point = -1);
   void UpdateBars();
   inline void UpdateSS() { RefreshShow(); ourframe->UpdatePanel(); }
   inline void GotoThisSS() {
@@ -316,14 +316,14 @@ public:
       } else --show_descr.curr_ss;
     }
   }
-  inline Bool SetZoomQuick(int factor) {
+  inline bool SetZoomQuick(int factor) {
     if (factor != zoomf) {
       zoomf = factor;
       float f = factor * COORD2FLOAT(1);
       SetUserScale(f, f);
-      return TRUE;
+      return true;
     }
-    return FALSE;
+    return false;
   }
   inline void SetZoom(int factor) {
     if (SetZoomQuick(factor)) {
@@ -347,16 +347,16 @@ public:
 
 private:
   void ClearShapes();
-  void DrawDrag(Bool on = TRUE);
+  void DrawDrag(bool on = true);
   void SelectOrdered(wxList& pointlist, const CC_coord& start);
-  Bool SelectWithLasso(const CC_lasso *lasso);
-  Bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+  bool SelectWithLasso(const CC_lasso *lasso);
+  bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 			  unsigned ref = 0);
 
   CC_DRAG_TYPES drag;
   wxList shape_list;
   CC_shape *curr_shape;
-  Bool dragon;
+  bool dragon;
   int zoomf;
 };
 
@@ -382,7 +382,7 @@ public:
 
 class MainFrameList: public wxList {
 public:
-  Bool CloseAllWindows();
+  bool CloseAllWindows();
 };
 
 #endif

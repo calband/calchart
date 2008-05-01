@@ -43,13 +43,13 @@ INGLread::~INGLread() {
   }
 }
 
-Bool INGLread::Okay() {
+bool INGLread::Okay() {
   INGLid id;
 
-  if (fp == NULL) return FALSE;
-  if (!ReadLong(&id)) return FALSE;
-  if (id != MakeINGLid('I','N','G','L')) return FALSE;
-  return TRUE;
+  if (fp == NULL) return false;
+  if (!ReadLong(&id)) return false;
+  if (id != MakeINGLid('I','N','G','L')) return false;
+  return true;
 }
 
 void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error,
@@ -77,17 +77,17 @@ void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error,
       PopChunk();
       data = PopChunk();
     } else {
-      Bool gurkchunk;
+      bool gurkchunk;
 
       if (cnk->name == MakeINGLid('G','U','R','K')) {
 	cnk->name = cnk->size;
-	gurkchunk = TRUE;
+	gurkchunk = true;
 	// Set first chunk to top level data
 	if (cnk->prev == NULL) {
 	  cnk->userdata = topdata;
 	}
       } else {
-	gurkchunk = FALSE;
+	gurkchunk = false;
       }
 
       hndl = NULL;
@@ -136,12 +136,12 @@ void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error,
   return data;
 }
 
-Bool INGLread::ReadLong(INGLid *d) {
+bool INGLread::ReadLong(INGLid *d) {
   INGLid rawd;
 
-  if (fread(&rawd, 4, 1, fp) != 1) return FALSE;
+  if (fread(&rawd, 4, 1, fp) != 1) return false;
   *d = get_big_long(&rawd);
-  return TRUE;
+  return true;
 }
 
 void *INGLread::PopChunk() {
@@ -170,52 +170,52 @@ INGLwrite::~INGLwrite() {
   if (fp) fclose(fp);
 }
 
-Bool INGLwrite::WriteHeader() {
+bool INGLwrite::WriteHeader() {
   return WriteLong(MakeINGLid('I','N','G','L'));
 }
 
-Bool INGLwrite::WriteGurk(INGLid name) {
-  if (!WriteLong(MakeINGLid('G','U','R','K'))) return FALSE;
+bool INGLwrite::WriteGurk(INGLid name) {
+  if (!WriteLong(MakeINGLid('G','U','R','K'))) return false;
   return WriteLong(name);
 }
 
-Bool INGLwrite::WriteChunkHeader(INGLid name, INGLid size) {
-  if (!WriteLong(name)) return FALSE;
-  if (!WriteLong(size)) return FALSE;
-  return TRUE;
+bool INGLwrite::WriteChunkHeader(INGLid name, INGLid size) {
+  if (!WriteLong(name)) return false;
+  if (!WriteLong(size)) return false;
+  return true;
 }
 
-Bool INGLwrite::WriteChunk(INGLid name, INGLid size, const void *data) {
-  if (!WriteLong(name)) return FALSE;
-  if (!WriteLong(size)) return FALSE;
+bool INGLwrite::WriteChunk(INGLid name, INGLid size, const void *data) {
+  if (!WriteLong(name)) return false;
+  if (!WriteLong(size)) return false;
   if (size > 0)
-    if (fwrite(data, size, 1, fp) != 1) return FALSE;
-  return TRUE;
+    if (fwrite(data, size, 1, fp) != 1) return false;
+  return true;
 }
 
-Bool INGLwrite::WriteChunkStr(INGLid name, const char *str) {
+bool INGLwrite::WriteChunkStr(INGLid name, const char *str) {
   return WriteChunk(name, strlen(str)+1, (unsigned char *)str);
 }
 
-Bool INGLwrite::WriteEnd(INGLid name) {
-  if (!WriteLong(MakeINGLid('E','N','D',' '))) return FALSE;
+bool INGLwrite::WriteEnd(INGLid name) {
+  if (!WriteLong(MakeINGLid('E','N','D',' '))) return false;
   return WriteLong(name);
 }
 
-Bool INGLwrite::WriteStr(const char *str) {
-  if (fwrite(str, strlen(str)+1, 1, fp) != 1) return FALSE;
-  return TRUE;
+bool INGLwrite::WriteStr(const char *str) {
+  if (fwrite(str, strlen(str)+1, 1, fp) != 1) return false;
+  return true;
 }
 
-Bool INGLwrite::Write(const void *data, INGLid size) {
-  if (fwrite(data, size, 1, fp) != 1) return FALSE;
-  return TRUE;
+bool INGLwrite::Write(const void *data, INGLid size) {
+  if (fwrite(data, size, 1, fp) != 1) return false;
+  return true;
 }
 
-Bool INGLwrite::WriteLong(INGLid d) {
+bool INGLwrite::WriteLong(INGLid d) {
   INGLid rawd;
 
   put_big_long(&rawd, d);
-  if (fwrite(&rawd, 4, 1, fp) != 1) return FALSE;
-  return TRUE;
+  if (fwrite(&rawd, 4, 1, fp) != 1) return false;
+  return true;
 }

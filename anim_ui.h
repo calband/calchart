@@ -16,7 +16,7 @@
 #include "basic_ui.h"
 #include "show.h"
 #include "animate.h"
-#include <wx_timer.h>
+#include <wx/timer.h>
 #define DEFAULT_ANIM_SIZE 3
 
 class AnimationCanvas;
@@ -80,25 +80,25 @@ public:
   // Select colliding points and redraw
   void SelectCollisions();
 
-  // TRUE if changes made
-  inline Bool PrevBeat() {
-    if (anim) { if (anim->PrevBeat()) { Refresh(); return TRUE; } }
-    return FALSE;
+  // true if changes made
+  inline bool PrevBeat() {
+    if (anim) { if (anim->PrevBeat()) { Refresh(); return true; } }
+    return false;
   }
-  inline Bool NextBeat() {
-    if (anim) { if (anim->NextBeat()) { Refresh(); return TRUE; } }
-    return FALSE;
+  inline bool NextBeat() {
+    if (anim) { if (anim->NextBeat()) { Refresh(); return true; } }
+    return false;
   }
   inline void GotoBeat(unsigned i) {
     if (anim) { anim->GotoBeat(i); Refresh(); }
   }
-  inline Bool PrevSheet() {
-    if (anim) { if (anim->PrevSheet()) { Refresh(); return TRUE; } }
-    return FALSE;
+  inline bool PrevSheet() {
+    if (anim) { if (anim->PrevSheet()) { Refresh(); return true; } }
+    return false;
   }
-  inline Bool NextSheet() {
-    if (anim) { if (anim->NextSheet()) { Refresh(); return TRUE; } }
-    return FALSE;
+  inline bool NextSheet() {
+    if (anim) { if (anim->NextSheet()) { Refresh(); return true; } }
+    return false;
   }
   inline void GotoSheet(unsigned i) {
     if (anim) { anim->GotoSheet(i); Refresh(); }
@@ -106,19 +106,19 @@ public:
 
   void StartTimer();
   inline void StopTimer() {
-    timer->Stop(); timeron = FALSE;
+    timer->Stop(); timeron = false;
   }
 #ifdef ANIM_OUTPUT_POVRAY
   const char * GeneratePOVFiles(const char *filebasename);
 #endif
 #ifdef ANIM_OUTPUT_RIB
   const char * GenerateRIBFrame();
-  const char * GenerateRIBFile(const char *filename, Bool all = TRUE);
+  const char * GenerateRIBFile(const char *filename, bool all = true);
 #endif
 
   Animation* anim;
   AnimationTimer* timer;
-  Bool timeron;
+  bool timeron;
 private:
   CC_descr *show_descr;
   AnimationFrame *ourframe;
@@ -129,7 +129,7 @@ class AnimationSlider: public wxSlider {
 public:
   AnimationSlider(wxPanel *parent, wxFunction func, char *label,
 		  int value, int min_value, int max_value, int width):
-  wxSlider(parent, func, label, value, min_value, max_value, width),
+  wxSlider(parent, -1, value, min_value, max_value),
   canvas(NULL) {}
 
   AnimationCanvas *canvas;
@@ -177,17 +177,17 @@ public:
 		wxFrame *frame, char *title,
 		int x = -1, int y = -1, int width = 300, int height = 300);
   ~AnimErrorList();
-  Bool OnClose(void);
+  bool OnClose(void);
   void OnSize(int w, int h);
 
-  inline Bool Okay() { return ok; };
+  inline bool Okay() { return ok; };
 
   void Unselect();
   void Update();
 
   CC_show *show;
 private:
-  Bool ok;
+  bool ok;
   unsigned sheetnum;
   wxPanel *panel;
   GoodListBox *list;

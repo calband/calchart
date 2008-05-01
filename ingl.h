@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <wx_defs.h> // For basic wx defines
+#include <wx/defs.h> // For basic wx defines
 
 #include "platconf.h"
 
@@ -49,13 +49,13 @@ public:
   INGLread(const char *filename);
   ~INGLread();
 
-  Bool Okay();
+  bool Okay();
 
   void *ParseFile(INGLhandler hndlr[], unsigned num, char **error,
 		  void *topdata = NULL);
 
 private:
-  Bool ReadLong(INGLid *d);
+  bool ReadLong(INGLid *d);
   void *PopChunk();
 
   FILE *fp;
@@ -68,20 +68,20 @@ public:
   INGLwrite(const char *filename);
   ~INGLwrite();
 
-  inline Bool Okay() { return (fp != NULL); }
+  inline bool Okay() { return (fp != NULL); }
 
-  Bool WriteHeader();
-  Bool WriteGurk(INGLid name);
-  Bool WriteChunkHeader(INGLid name, INGLid size);
-  Bool WriteChunk(INGLid name, INGLid size, const void *data);
-  Bool WriteChunkStr(INGLid name, const char *str);
-  Bool WriteEnd(INGLid name);
+  bool WriteHeader();
+  bool WriteGurk(INGLid name);
+  bool WriteChunkHeader(INGLid name, INGLid size);
+  bool WriteChunk(INGLid name, INGLid size, const void *data);
+  bool WriteChunkStr(INGLid name, const char *str);
+  bool WriteEnd(INGLid name);
 
   // Write raw data
-  Bool WriteStr(const char *str);
-  Bool Write(const void *data, INGLid size);
+  bool WriteStr(const char *str);
+  bool Write(const void *data, INGLid size);
 private:
-  Bool WriteLong(INGLid d);
+  bool WriteLong(INGLid d);
 
   FILE *fp;
 };

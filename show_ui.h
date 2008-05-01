@@ -68,16 +68,16 @@ class StuntSheetPicker : public wxFrame
 {
 public:
   StuntSheetPicker(CC_show *shw, CC_WinList *lst,
-		   Bool multi, wxFrame *frame, char *title,
+		   bool multi, wxFrame *frame, char *title,
 		   int x = -1, int y = -1, int width = 250, int height = 300);
   ~StuntSheetPicker();
-  Bool OnClose(void);
+  bool OnClose(void);
   void OnSize(int w, int h);
 
-  inline Bool Okay() { return ok; };
+  inline bool Okay() { return ok; };
 
-  inline Bool Get(unsigned n) { return list->Selected(n); }
-  inline void Set(unsigned n, Bool v = TRUE) {
+  inline bool Get(unsigned n) { return list->Selected(n); }
+  inline void Set(unsigned n, bool v = true) {
     list->SetSelection(n,v);
     show->GetNthSheet(n)->picked = v;
   }
@@ -87,7 +87,7 @@ public:
 private:
   void SetListBoxEntries();
 
-  Bool ok;
+  bool ok;
   wxPanel *panel;
   GoodListBox *list;
   CC_WinNodePicker *node;
@@ -97,16 +97,16 @@ class PointPicker : public wxFrame
 {
 public:
   PointPicker(CC_show *shw, CC_WinList *lst,
-	      Bool multi, wxFrame *frame, char *title,
+	      bool multi, wxFrame *frame, char *title,
 	      int x = -1, int y = -1, int width = 250, int height = 300);
   ~PointPicker();
-  Bool OnClose(void);
+  bool OnClose(void);
   void OnSize(int w, int h);
 
-  inline Bool Okay() { return ok; };
+  inline bool Okay() { return ok; };
 
-  inline Bool Get(unsigned n) { return list->Selected(n); }
-  inline void Set(unsigned n, Bool v = TRUE) {
+  inline bool Get(unsigned n) { return list->Selected(n); }
+  inline void Set(unsigned n, bool v = true) {
     list->SetSelection(n,v);
     show->Select(n,v);
   }
@@ -117,7 +117,7 @@ public:
 private:
   void SetListBoxEntries();
 
-  Bool ok;
+  bool ok;
   wxPanel *panel;
   GoodListBox *list;
   CC_WinNodePointPicker *node;
@@ -129,13 +129,13 @@ public:
 	      wxFrame *frame, char *title,
 	      int x = -1, int y = -1, int width = 400, int height = 450);
   ~ShowInfoReq();
-  Bool OnClose(void);
+  bool OnClose(void);
 
   void UpdateLabels();
   void UpdateNumPoints();
   void UpdateMode();
-  void UpdateDescr(Bool quick = FALSE); // quick doesn't flush other windows
-  void Update(Bool quick = FALSE, CC_show *shw = NULL);
+  void UpdateDescr(bool quick = false); // quick doesn't flush other windows
+  void Update(bool quick = false, CC_show *shw = NULL);
 
   void FlushDescr(); // Flush changes in description text window
 
@@ -145,7 +145,7 @@ public:
   unsigned GetColumns();
   inline int GetLabelType() { return label_type->GetSelection(); }
   inline int GetLetterSize() { return lettersize->GetValue(); }
-  inline Bool GetLetter(unsigned i) { return labels->Selected(i); }
+  inline bool GetLetter(unsigned i) { return labels->Selected(i); }
   void SetLabels();
 
   CC_show *show;

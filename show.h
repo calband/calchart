@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <common.h>  // For basic wx defines
-#include <wxstring.h>
-#include <wx_list.h>
+#include <wx/defs.h>  // For basic wx defines
+#include <wx/string.h>
+#include <wx/list.h>
 
 #include "platconf.h"
 #include "linmath.h"
@@ -94,7 +94,7 @@ public:
   CC_WinList();
   virtual ~CC_WinList();
 
-  Bool MultipleWindows();
+  bool MultipleWindows();
 
   void Add(CC_WinNode *node);
   void Remove(CC_WinNode *node);
@@ -189,9 +189,9 @@ public:
   ~CC_textline();
 
   wxList chunks;
-  Bool center;
-  Bool on_main;
-  Bool on_sheet;
+  bool center;
+  bool on_main;
+  bool on_sheet;
 };
 
 class CC_text {
@@ -230,7 +230,7 @@ public:
   float Direction() const;
   float Direction(const CC_coord& c) const;
 
-  Bool Collides(const CC_coord& c) const;
+  bool Collides(const CC_coord& c) const;
 
   CC_coord& operator = (const cc_oldcoord& old);
   inline CC_coord& operator = (const CC_coord& c) {
@@ -288,7 +288,7 @@ float BoundDirection(float f);
 
 float BoundDirectionSigned(float f);
 
-Bool IsDiagonalDirection(float f);
+bool IsDiagonalDirection(float f);
 
 void CreateVector(CC_coord& c, float dir, float mag);
 
@@ -300,12 +300,12 @@ public:
   CC_point()
     :flags(0), sym(SYMBOL_PLAIN), cont(0) {}
 
-  inline Bool GetFlip() { return (Bool)(flags & PNT_LABEL); }
-  inline void Flip(Bool val = TRUE) {
+  inline bool GetFlip() { return (bool)(flags & PNT_LABEL); }
+  inline void Flip(bool val = true) {
     if (val) flags |= PNT_LABEL;
     else flags &= ~PNT_LABEL;
   };
-  inline void FlipToggle() { Flip(GetFlip() ? FALSE:TRUE); }
+  inline void FlipToggle() { Flip(GetFlip() ? false:true); }
 
   unsigned short flags;
   SYMBOL_TYPE sym;
@@ -321,8 +321,8 @@ public:
   CC_sheet(CC_sheet *sht);
   ~CC_sheet();
 
-  void Draw(wxDC *dc, unsigned ref, Bool primary = TRUE,
-	    Bool drawall = TRUE, int point = -1);
+  void Draw(wxDC *dc, unsigned ref, bool primary = true,
+	    bool drawall = true, int point = -1);
 
   // internal use only
   char *PrintStandard(FILE *fp);
@@ -332,7 +332,7 @@ public:
 
   unsigned GetNumSelectedPoints();
   int FindPoint(Coord x, Coord y, unsigned ref = 0);
-  Bool SelectContinuity(unsigned i);
+  bool SelectContinuity(unsigned i);
   void SetContinuity(unsigned i);
   void SetNumPoints(unsigned num, unsigned columns);
   void RelabelSheet(unsigned *table);
@@ -351,7 +351,7 @@ public:
   CC_continuity *GetStandardContinuity(SYMBOL_TYPE sym);
   // return 0 if not found else index+1
   unsigned FindContinuityByName(const char *name);
-  Bool ContinuityInUse(unsigned idx);
+  bool ContinuityInUse(unsigned idx);
 
   inline const char *GetName() { return name; }
   inline void SetName(const char *newname) { name = newname; }
@@ -359,12 +359,12 @@ public:
   inline void SetNumber(const char *newnumber) { number = newnumber; }
   inline unsigned short GetBeats() { return beats; }
   inline void SetBeats(unsigned short b) { beats = b; }
-  inline Bool IsInAnimation() { return (beats != 0); }
+  inline bool IsInAnimation() { return (beats != 0); }
   void UserSetName(const char *newname);
   void UserSetBeats(unsigned short b);
-  Bool SetPointsSym(SYMBOL_TYPE sym);
-  Bool SetPointsLabel(Bool right);
-  Bool SetPointsLabelFlip();
+  bool SetPointsSym(SYMBOL_TYPE sym);
+  bool SetPointsLabel(bool right);
+  bool SetPointsLabelFlip();
 
   inline CC_point& GetPoint(unsigned i) { return pts[i]; }
   inline void SetPoint(const cc_oldpoint& val, unsigned i);
@@ -373,10 +373,10 @@ public:
   void SetAllPositions(const CC_coord& val, unsigned i);
   void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
   void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
-  Bool ClearRefPositions(unsigned ref);
-  Bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
-  Bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
-  Bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
+  bool ClearRefPositions(unsigned ref);
+  bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
+  bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
+  bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
 			unsigned ref);
 
   CC_sheet *next;
@@ -384,7 +384,7 @@ public:
   CC_continuity *animcont;
   CC_show *show;
   unsigned numanimcont;
-  Bool picked; /* for requestors like printing */
+  bool picked; /* for requestors like printing */
 private:
   unsigned short beats;
   CC_point *pts;
@@ -408,11 +408,11 @@ public:
 
   wxString* ImportContinuity(const wxString& file);
 
-  int Print(FILE *fp, Bool eps = FALSE, Bool overview = FALSE,
+  int Print(FILE *fp, bool eps = false, bool overview = false,
 	    unsigned curr_ss = 0, int min_yards = 50);
 
   inline const char *GetError() { return error; }
-  inline Bool Ok() { return okay; }
+  inline bool Ok() { return okay; }
 
   void Append(CC_show *shw);
   void Append(CC_sheet *newsheets);
@@ -436,8 +436,8 @@ public:
   inline void SetDescr(const char *newdescr) { descr = newdescr; }
   void UserSetDescr(const char *newdescr, wxWindow* win);
 
-  inline Bool Modified() { return modified; }
-  inline void SetModified(Bool b) { modified = b; winlist->UpdateStatusBar(); }
+  inline bool Modified() { return modified; }
+  inline void SetModified(bool b) { modified = b; winlist->UpdateStatusBar(); }
 
   inline unsigned short GetNumSheets() { return numsheets; }
   inline CC_sheet *GetSheet() { return sheets; }
@@ -453,18 +453,18 @@ public:
   inline unsigned short GetNumPoints() { return numpoints; }
   void SetNumPoints(unsigned num, unsigned columns);
   void SetNumPointsInternal(unsigned num); //Only for creating show class
-  Bool RelabelSheets(unsigned sht);
+  bool RelabelSheets(unsigned sht);
 
   inline char *GetPointLabel(unsigned i) { return pt_labels[i]; }
-  inline Bool& GetBoolLandscape() { return print_landscape; }
-  inline Bool& GetBoolDoCont() { return print_do_cont; }
-  inline Bool& GetBoolDoContSheet() { return print_do_cont_sheet; }
+  inline bool& GetboolLandscape() { return print_landscape; }
+  inline bool& GetboolDoCont() { return print_do_cont; }
+  inline bool& GetboolDoContSheet() { return print_do_cont_sheet; }
 
-  Bool UnselectAll();
-  inline Bool IsSelected(unsigned i) { return selections[i]; }
-  void Select(unsigned i, Bool val = TRUE);
+  bool UnselectAll();
+  inline bool IsSelected(unsigned i) { return selections[i]; }
+  void Select(unsigned i, bool val = true);
   inline void SelectToggle(unsigned i) {
-    selections[i] = selections[i] ? FALSE:TRUE;
+    selections[i] = selections[i] ? false:true;
   }
   inline wxList& GetSelectionList() { return selectionList; }
 
@@ -479,11 +479,11 @@ private:
 
   void AddError(const wxString& str) {
     error += str + '\n';
-    okay = FALSE;
+    okay = false;
   }
 
   wxString error;
-  Bool okay;
+  bool okay;
 
   wxString name;
   wxString autosave_name;
@@ -492,12 +492,12 @@ private:
   unsigned short numsheets;
   CC_sheet *sheets;
   char (*pt_labels)[4];
-  Bool *selections; // array for each point
+  bool *selections; // array for each point
   wxList selectionList; // order of selections
-  Bool modified;
-  Bool print_landscape;
-  Bool print_do_cont;
-  Bool print_do_cont_sheet;
+  bool modified;
+  bool print_landscape;
+  bool print_do_cont;
+  bool print_do_cont_sheet;
 };
 
 class CC_descr {

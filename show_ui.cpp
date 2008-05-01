@@ -81,7 +81,7 @@ CC_WinNodeInfo::CC_WinNodeInfo(CC_WinList *lst, ShowInfoReq *req)
 : CC_WinNode(lst), inforeq(req) {}
 
 void CC_WinNodeInfo::SetShow(CC_show *shw) {
-  inforeq->Update(TRUE, shw);
+  inforeq->Update(true, shw);
 }
 
 void CC_WinNodeInfo::ChangeNumPoints(wxWindow *win) {
@@ -111,7 +111,7 @@ void CC_WinNodeInfo::FlushDescr() {
 
 void CC_WinNodeInfo::SetDescr(wxWindow* win) {
   if (win != inforeq) {
-    inforeq->UpdateDescr(TRUE);
+    inforeq->UpdateDescr(true);
   }
 }
 
@@ -124,7 +124,7 @@ static void SheetPickerAll(wxButton& button, wxEvent&) {
     (StuntSheetPicker*)button.GetParent()->GetParent();
 
   for (unsigned i=0; i < picker->show->GetNumSheets(); i++) {
-    picker->Set(i, TRUE);
+    picker->Set(i, true);
     picker->show->winlist->SelectSheet(picker, i);
   }
 }
@@ -134,14 +134,14 @@ static void SheetPickerNone(wxButton& button, wxEvent&) {
     (StuntSheetPicker*)button.GetParent()->GetParent();
 
   for (unsigned i=0; i < picker->show->GetNumSheets(); i++) {
-    picker->Set(i, FALSE);
+    picker->Set(i, false);
     picker->show->winlist->SelectSheet(picker, i);
   }
 }
 
 static void SheetPickerClick(wxListBox& list, wxCommandEvent&) {
   unsigned n;
-  Bool sel;
+  bool sel;
   CC_sheet *sheet = NULL;
 
   StuntSheetPicker *picker = (StuntSheetPicker*)list.GetParent()->GetParent();
@@ -156,7 +156,7 @@ static void SheetPickerClick(wxListBox& list, wxCommandEvent&) {
 }
 
 StuntSheetPicker::StuntSheetPicker(CC_show *shw, CC_WinList *lst,
-				   Bool multi, wxFrame *frame,
+				   bool multi, wxFrame *frame,
 				   char *title,
 				   int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
@@ -164,7 +164,7 @@ show(shw) {
   // Give it an icon
   SetBandIcon(this);
 
-  SetAutoLayout(TRUE);
+  SetAutoLayout(true);
 
   panel = new wxPanel(this);
 
@@ -221,7 +221,7 @@ show(shw) {
 
   OnSize(-1,-1);
 
-  Show(TRUE);
+  Show(true);
 }
 
 StuntSheetPicker::~StuntSheetPicker()
@@ -236,8 +236,8 @@ void StuntSheetPicker::OnSize(int, int) {
   Layout();
 }
 
-Bool StuntSheetPicker::OnClose(void) {
-  return TRUE;
+bool StuntSheetPicker::OnClose(void) {
+  return true;
 }
 
 void StuntSheetPicker::Update() {
@@ -270,7 +270,7 @@ static void PointPickerAll(wxButton& button, wxEvent&) {
     (PointPicker*)button.GetParent()->GetParent();
 
   for (unsigned i=0; i < picker->show->GetNumPoints(); i++) {
-    picker->Set(i, TRUE);
+    picker->Set(i, true);
   }
   picker->show->winlist->UpdateSelections(picker);
 }
@@ -280,14 +280,14 @@ static void PointPickerNone(wxButton& button, wxEvent&) {
     (PointPicker*)button.GetParent()->GetParent();
 
   for (unsigned i=0; i < picker->show->GetNumPoints(); i++) {
-    picker->Set(i, FALSE);
+    picker->Set(i, false);
   }
   picker->show->winlist->UpdateSelections(picker);
 }
 
 static void PointPickerClick(wxListBox& list, wxCommandEvent&) {
   unsigned n;
-  Bool sel;
+  bool sel;
 
   PointPicker *picker = (PointPicker*)list.GetParent()->GetParent();
   for (n = 0; n < picker->show->GetNumPoints(); n++) {
@@ -300,7 +300,7 @@ static void PointPickerClick(wxListBox& list, wxCommandEvent&) {
 }
 
 PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
-			 Bool multi, wxFrame *frame,
+			 bool multi, wxFrame *frame,
 			 char *title,
 			 int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
@@ -308,7 +308,7 @@ show(shw) {
   // Give it an icon
   SetBandIcon(this);
 
-  SetAutoLayout(TRUE);
+  SetAutoLayout(true);
 
   panel = new wxPanel(this);
 
@@ -365,7 +365,7 @@ show(shw) {
 
   OnSize(-1,-1);
 
-  Show(TRUE);
+  Show(true);
 }
 
 PointPicker::~PointPicker()
@@ -380,8 +380,8 @@ void PointPicker::OnSize(int, int) {
   Layout();
 }
 
-Bool PointPicker::OnClose(void) {
-  return TRUE;
+bool PointPicker::OnClose(void) {
+  return true;
 }
 
 void PointPicker::Update() {
@@ -455,26 +455,26 @@ static void ShowInfoModeChoice(wxChoice& choice, wxCommandEvent&) {
   }
 }
 
-static void CalculateLabels(CC_show *show, Bool letters[26],
-			    Bool& use_letters, int& maxnum) {
+static void CalculateLabels(CC_show *show, bool letters[26],
+			    bool& use_letters, int& maxnum) {
   unsigned i;
   char *tmp;
 
-  for (i = 0; i < 26; i++) letters[i] = FALSE;
-  use_letters = FALSE;
+  for (i = 0; i < 26; i++) letters[i] = false;
+  use_letters = false;
   maxnum = 1;
   for (i = 0; i < show->GetNumPoints(); i++) {
     tmp = show->GetPointLabel(i);
     if (!isdigit(tmp[0])) {
-      letters[tmp[0]-'A'] = TRUE;
+      letters[tmp[0]-'A'] = true;
       if ((tmp[1]-'0') >= maxnum)
 	maxnum = tmp[1]-'0'+1;
-      use_letters = TRUE;
+      use_letters = true;
     }
   }
-  if (use_letters == FALSE) {
+  if (use_letters == false) {
     maxnum = 10;
-    for (i = 0; i < 26; i++) letters[i] = TRUE;
+    for (i = 0; i < 26; i++) letters[i] = true;
   }
 }
 
@@ -486,14 +486,14 @@ show(shw) {
   unsigned i;
   wxString buf;
   char *strs[2];
-  Bool letters[26];
-  Bool use_letters;
+  bool letters[26];
+  bool use_letters;
   int maxnum;
 
   // Give it an icon
   SetBandIcon(this);
 
-  SetAutoLayout(TRUE);
+  SetAutoLayout(true);
 
   CalculateLabels(show, letters, use_letters, maxnum);
 
@@ -611,7 +611,7 @@ show(shw) {
 
   OnSize(-1,-1);
 
-  Show(TRUE);
+  Show(true);
 }
 
 ShowInfoReq::~ShowInfoReq()
@@ -622,15 +622,15 @@ ShowInfoReq::~ShowInfoReq()
   }
 }
 
-Bool ShowInfoReq::OnClose(void) {
+bool ShowInfoReq::OnClose(void) {
   FlushDescr();
-  return TRUE;
+  return true;
 }
 
 void ShowInfoReq::UpdateLabels() {
   int i;
-  Bool letters[26];
-  Bool use_letters;
+  bool letters[26];
+  bool use_letters;
   int maxnum;
 
   CalculateLabels(show, letters, use_letters, maxnum);
@@ -656,7 +656,7 @@ void ShowInfoReq::UpdateMode() {
   choice->SetStringSelection((char*)show->mode->GetName());
 }
 
-void ShowInfoReq::UpdateDescr(Bool quick) {
+void ShowInfoReq::UpdateDescr(bool quick) {
   char *c;
 
   text->Clear();
@@ -669,7 +669,7 @@ void ShowInfoReq::UpdateDescr(Bool quick) {
   text->SetInsertionPoint(0);
 }
 
-void ShowInfoReq::Update(Bool quick, CC_show *shw) {
+void ShowInfoReq::Update(bool quick, CC_show *shw) {
   if (shw != NULL) show = shw;
   UpdateDescr(quick);
   UpdateMode();
@@ -722,7 +722,7 @@ unsigned ShowInfoReq::GetColumns() {
 
 void ShowInfoReq::SetLabels() {
   unsigned i, j, num, numlabels, letr;
-  Bool letters[26];
+  bool letters[26];
 
   if (GetLabelType() == 0) {
     // Numbers
@@ -736,10 +736,10 @@ void ShowInfoReq::SetLabels() {
     numlabels = 0;
     for (i = 0; i < 26; i++) {
       if (GetLetter(i)) {
-	letters[i] = TRUE;
+	letters[i] = true;
 	numlabels++;
       } else {
-	letters[i] = FALSE;
+	letters[i] = false;
       }
     }
     if (num*numlabels < show->GetNumPoints()) {

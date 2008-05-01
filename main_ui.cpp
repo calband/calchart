@@ -20,7 +20,7 @@
 #include "confgr.h"
 #include "ccvers.h"
 
-#include <wx_help.h>
+#include <wx/help.h>
 
 #ifdef wx_msw
 #include <direct.h>
@@ -182,7 +182,7 @@ void CC_WinNodeMain::ChangeName() {
 }
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
   if (frame->field->GetDC()->Colour) {
-    frame->field->RefreshShow(FALSE, point);
+    frame->field->RefreshShow(false, point);
   } else {
     // In mono we use different line widths, so must redraw everything
     frame->field->RefreshShow();
@@ -374,12 +374,12 @@ wxFrame *CalChartApp::OnInit(void)
   {
     wxString helpfile(program_dir);
     helpfile.Append(PATH_SEPARATOR "charthlp");
-    help_inst = new wxHelpInstance(TRUE);
+    help_inst = new wxHelpInstance(true);
     help_inst->Initialize(helpfile.GetData());
   }
 
   topframe = new TopFrame(300, 100);
-  topframe->Maximize(TRUE);
+  topframe->Maximize(true);
   for (i = 1; i < realargc; i++) {
     CC_show *shw;
 
@@ -608,8 +608,8 @@ void CC_lasso::Append(const CC_coord& p) {
 }
 
 // Test if inside polygon using odd-even rule
-Bool CC_lasso::Inside(const CC_coord& p) const {
-  Bool parity = FALSE;
+bool CC_lasso::Inside(const CC_coord& p) const {
+  bool parity = false;
   wxNode *last;
   wxNode *n = ((wxList*)&pntlist)->First();
   if (n != NULL) {
@@ -617,7 +617,7 @@ Bool CC_lasso::Inside(const CC_coord& p) const {
     n = n->Next();
     while (n != NULL) {
       if (CrossesLine((wxPoint*)last->Data(), (wxPoint*)n->Data(), p)) {
-	parity ^= TRUE;
+	parity ^= true;
       }
       last = n;
       n = n->Next();
@@ -642,22 +642,22 @@ void CC_lasso::Drag(const CC_coord& p) {
   }
 }
 
-Bool CC_lasso::CrossesLine(const wxPoint* start, const wxPoint* end,
+bool CC_lasso::CrossesLine(const wxPoint* start, const wxPoint* end,
 			   const CC_coord& p) const {
   if (start->y > end->y) {
     if (!((p.y <= start->y) && (p.y > end->y))) {
-      return FALSE;
+      return false;
     }
   } else {
     if (!((p.y <= end->y) && (p.y > start->y))) {
-      return FALSE;
+      return false;
     }
   }
   if (p.x >=
       ((end->x-start->x) * (p.y-start->y) / (end->y-start->y) + start->x)) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 CC_poly::CC_poly(const CC_coord &p)
@@ -723,14 +723,14 @@ TopFrame::TopFrame(int width, int height):
   SetSizeHints(w, h, w, h);
 #endif
 #endif
-  DragAcceptFiles(TRUE);
-  Show(TRUE);
+  DragAcceptFiles(true);
+  Show(true);
 }
 
 TopFrame::~TopFrame() {
 }
 
-Bool TopFrame::OnClose(void) {
+bool TopFrame::OnClose(void) {
   return window_list->CloseAllWindows();
 }
 
@@ -809,7 +809,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   unsigned def_zoom;
   unsigned def_grid;
   unsigned def_ref;
-  Bool setup;
+  bool setup;
 
   // Give it an icon
   SetBandIcon(this);
@@ -852,9 +852,9 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   wxMenu *select_menu = new wxMenu;
   // These items are checkable
-  select_menu->Append(CALCHART__ROWS, "Rows first", NULL, TRUE);
-  select_menu->Append(CALCHART__COLUMNS, "Columns first", NULL, TRUE);
-  select_menu->Append(CALCHART__NEAREST, "Nearest", NULL, TRUE);
+  select_menu->Append(CALCHART__ROWS, "Rows first", NULL, true);
+  select_menu->Append(CALCHART__COLUMNS, "Columns first", NULL, true);
+  select_menu->Append(CALCHART__NEAREST, "Nearest", NULL, true);
 
   wxMenu *options_menu = new wxMenu;
   options_menu->Append(CALCHART__SELECTION, "Selection Order", select_menu);
@@ -878,11 +878,11 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   SetToolBar(ribbon);
 
   // Add the field canvas
-  setup = FALSE;
+  setup = false;
   if (!other_frame) {
     if (!show) {
       show = new CC_show();
-      setup = TRUE;
+      setup = true;
     }
     ss = 0;
     def_zoom = default_zoom;
@@ -904,19 +904,19 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   node = new CC_WinNodeMain(show->winlist, this);
   switch(field->curr_select) {
   case CC_SELECT_ROWS:
-    menu_bar->Check(CALCHART__ROWS, TRUE);
+    menu_bar->Check(CALCHART__ROWS, true);
     break;
   case CC_SELECT_COLUMNS:
-    menu_bar->Check(CALCHART__COLUMNS, TRUE);
+    menu_bar->Check(CALCHART__COLUMNS, true);
     break;
   case CC_SELECT_NEAREST:
-    menu_bar->Check(CALCHART__NEAREST, TRUE);
+    menu_bar->Check(CALCHART__NEAREST, true);
     break;
   }
 
   // Add the controls
   framePanel = new wxPanel(this);
-  framePanel->SetAutoLayout(TRUE);
+  framePanel->SetAutoLayout(true);
 
   // Grid choice
   grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
@@ -978,7 +978,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   OnSize(-1, -1);
   field->RefreshShow();
-  Show(TRUE);
+  Show(true);
 
   if (setup) Setup();
 }
@@ -992,12 +992,12 @@ MainFrame::~MainFrame() {
 }
 
 // Define the behaviour for the frame closing
-Bool MainFrame::OnClose(void)
+bool MainFrame::OnClose(void)
 {
   // Save changes first
-  if (!OkayToClearShow()) return FALSE;
+  if (!OkayToClearShow()) return false;
 
-  return TRUE;
+  return true;
 }
 
 // Intercept menu commands
@@ -1034,13 +1034,13 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__PRINT:
     if (field->show_descr.show) {
       (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
-				FALSE, this, "Print show", FALSE);
+				false, this, "Print show", false);
     }
     break;
   case CALCHART__PRINT_EPS:
     if (field->show_descr.show) {
       (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
-				TRUE, this, "Print stuntsheet as EPS", FALSE);
+				true, this, "Print stuntsheet as EPS", false);
     }
     break;
   case CALCHART__CLOSE:
@@ -1083,7 +1083,7 @@ void MainFrame::OnMenuCommand(int id)
 			     "Relabel sheets");
 	else {
 	  field->show_descr.show->undolist->EraseAll();
-	  field->show_descr.show->SetModified(TRUE);
+	  field->show_descr.show->SetModified(true);
 	}
       }
     } else {
@@ -1139,7 +1139,7 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__POINTS:
     if (field->show_descr.show)
       (void)new PointPicker(field->show_descr.show, &node->winlist,
-			     TRUE, this, "Select points");
+			     true, this, "Select points");
     break;
   case CALCHART__ANIMATE:
     if (field->show_descr.show) {
@@ -1151,9 +1151,9 @@ void MainFrame::OnMenuCommand(int id)
   case CALCHART__ROWS:
   case CALCHART__COLUMNS:
   case CALCHART__NEAREST:
-    GetMenuBar()->Check(field->curr_select, FALSE);
+    GetMenuBar()->Check(field->curr_select, false);
     field->curr_select = (CC_SELECT_TYPES)id;
-    GetMenuBar()->Check(id, TRUE);
+    GetMenuBar()->Check(id, true);
     break;
   case CALCHART__ABOUT:
     topframe->About();
@@ -1267,7 +1267,7 @@ void MainFrame::OnMenuSelect(int id)
 }
 
 // Give the use a chance to save the current show
-Bool MainFrame::OkayToClearShow() {
+bool MainFrame::OkayToClearShow() {
   wxString buf;
 
   if (field->show_descr.show->Modified()) {
@@ -1282,13 +1282,13 @@ Bool MainFrame::OkayToClearShow() {
       case wxNO:
 	break;
       case wxCANCEL:
-	return FALSE;
+	return false;
 	break;
       }
     }
     field->show_descr.show->ClearAutosave();
   }
-  return TRUE;
+  return true;
 }
 
 // Load a show with file selector
@@ -1412,19 +1412,19 @@ void MainFrame::SnapToGrid(CC_coord& c) {
 
 void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type) {
   if (field->curr_lasso != CC_DRAG_NONE) {
-    frameToolBar->ToggleTool(TOOLBAR_BOX+field->curr_lasso-CC_DRAG_BOX, FALSE);
+    frameToolBar->ToggleTool(TOOLBAR_BOX+field->curr_lasso-CC_DRAG_BOX, false);
   }
   field->curr_lasso = type;
   if (field->curr_lasso != CC_DRAG_NONE) {
-    frameToolBar->ToggleTool(TOOLBAR_BOX + type - CC_DRAG_BOX, TRUE);
+    frameToolBar->ToggleTool(TOOLBAR_BOX + type - CC_DRAG_BOX, true);
   }
 }
 
 void MainFrame::SetCurrentMove(CC_MOVE_MODES type) {
   frameToolBar->ToggleTool(TOOLBAR_TRANS + field->curr_move - CC_MOVE_NORMAL,
-			   FALSE);
+			   false);
   field->curr_move = type;
-  frameToolBar->ToggleTool(TOOLBAR_TRANS + type - CC_MOVE_NORMAL, TRUE);
+  frameToolBar->ToggleTool(TOOLBAR_TRANS + type - CC_MOVE_NORMAL, true);
   field->EndDrag();
 }
 
@@ -1440,7 +1440,7 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int x, int y, int w, int h):
  AutoScrollCanvas(frame, x, y, w, h), ourframe(frame), curr_lasso(CC_DRAG_BOX),
  curr_move(CC_MOVE_NORMAL), curr_select(CC_SELECT_ROWS),
- curr_ref(0), drag(CC_DRAG_NONE), dragon(FALSE)
+ curr_ref(0), drag(CC_DRAG_NONE), dragon(false)
 {
   if (from_canvas) {
     curr_lasso = from_canvas->curr_lasso;
@@ -1473,7 +1473,7 @@ void FieldCanvas::ClearShapes() {
 }
 
 // Draw the current drag feedback
-void FieldCanvas::DrawDrag(Bool on)
+void FieldCanvas::DrawDrag(bool on)
 {
   wxDC *dc = GetDC();
   CC_coord origin;
@@ -1497,8 +1497,8 @@ void FieldCanvas::DrawDrag(Bool on)
 void FieldCanvas::OnPaint(void)
 {
   Blit();
-  dragon = FALSE; // since the canvas gets cleared
-  DrawDrag(TRUE);
+  dragon = false; // since the canvas gets cleared
+  DrawDrag(true);
 }
 
 // Allow clicking within pixels to close polygons
@@ -1516,7 +1516,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
       if (event.ControlDown()) {
 	Move(x, y);
 	Blit();
-	dragon = FALSE; // since the canvas gets cleared
+	dragon = false; // since the canvas gets cleared
       } else {
 	Move(x, y, 1);
       }
@@ -1594,13 +1594,13 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	    }
 	  break;
 	  default:
-	    Bool changed = FALSE;
+	    bool changed = false;
 	    if (!event.shiftDown) changed = show_descr.show->UnselectAll();
 	    i = sheet->FindPoint(pos.x, pos.y, curr_ref);
 	    if (i >= 0) {
 	      if (!(show_descr.show->IsSelected(i))) {
 		show_descr.show->Select(i);
-		changed = TRUE;
+		changed = true;
 	      }
 	    }
 	    if (changed) {
@@ -1835,7 +1835,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  break;
 	}
       }
-      DrawDrag(TRUE);
+      DrawDrag(true);
     }
   }
 }
@@ -1852,19 +1852,19 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
   wxCanvas::OnChar(event);
 }
 
-void FieldCanvas::RefreshShow(Bool drawall, int point) {
+void FieldCanvas::RefreshShow(bool drawall, int point) {
   if (show_descr.show) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
       if (curr_ref > 0) {
-	sheet->Draw(GetMemDC(), 0, FALSE, drawall, point);
-	sheet->Draw(GetMemDC(), curr_ref, TRUE, FALSE, point);
+	sheet->Draw(GetMemDC(), 0, false, drawall, point);
+	sheet->Draw(GetMemDC(), curr_ref, true, false, point);
       } else {
-	sheet->Draw(GetMemDC(), curr_ref, TRUE, drawall, point);
+	sheet->Draw(GetMemDC(), curr_ref, true, drawall, point);
       }
       Blit();
-      dragon = FALSE; // since the canvas gets cleared
-      DrawDrag(TRUE);
+      dragon = false; // since the canvas gets cleared
+      DrawDrag(true);
     }
   }
 }
@@ -1881,14 +1881,14 @@ void MainFrame::UpdatePanel() {
   SetStatusText(tempbuf.GetData(), 1);
 
   if (num > 1) {
-    sheet_slider->Enable(TRUE);
+    sheet_slider->Enable(true);
     if ((unsigned)sheet_slider->GetMax() != num)
       sheet_slider->SetValue(1); // So Motif doesn't complain about value
       sheet_slider->SetRange(1, num);
     if ((unsigned)sheet_slider->GetValue() != curr)
       sheet_slider->SetValue(curr);
   } else {
-    sheet_slider->Enable(FALSE);
+    sheet_slider->Enable(false);
   }
 }
 
@@ -1900,7 +1900,7 @@ void FieldCanvas::UpdateBars() {
 }
 
 void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
-  DrawDrag(FALSE);
+  DrawDrag(false);
   drag = type;
   ClearShapes();
   curr_shape = NULL;
@@ -1925,7 +1925,7 @@ void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start) {
 }
 
 void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_shape *shape) {
-  DrawDrag(FALSE);
+  DrawDrag(false);
   drag = type;
   ClearShapes();
   curr_shape = NULL;
@@ -1933,23 +1933,23 @@ void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_shape *shape) {
 }
 
 void FieldCanvas::AddDrag(CC_DRAG_TYPES type, CC_shape *shape) {
-  DrawDrag(FALSE);
+  DrawDrag(false);
   drag = type;
   shape_list.Append((wxObject*)shape);
   curr_shape = shape;
-  DrawDrag(TRUE);
+  DrawDrag(true);
 }
 
 void FieldCanvas::MoveDrag(CC_coord end) {
   if (curr_shape) {
-    DrawDrag(FALSE);
+    DrawDrag(false);
     curr_shape->OnMove(end, ourframe);
-    DrawDrag(TRUE);
+    DrawDrag(true);
   }
 }
 
 void FieldCanvas::EndDrag() {
-  DrawDrag(FALSE);
+  DrawDrag(false);
   ClearShapes();
   drag = CC_DRAG_NONE;
 }
@@ -2022,15 +2022,15 @@ void FieldCanvas::SelectOrdered(wxList& pointlist,
   }
 }
 
-Bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso) {
-  Bool changed = FALSE;
+bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso) {
+  bool changed = false;
   CC_sheet* sheet = show_descr.CurrSheet();
   wxList pointlist;
   const wxPoint *pnt;
 
   for (unsigned i = 0; i < show_descr.show->GetNumPoints(); i++) {
     if (lasso->Inside(sheet->GetPosition(i, curr_ref))) {
-      changed = TRUE;
+      changed = true;
       pointlist.Append(i, NULL);
     }
   }
@@ -2044,10 +2044,10 @@ Bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso) {
 }
 
 // Select points within rectangle
-Bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 				     unsigned ref) {
   unsigned i;
-  Bool changed = FALSE;
+  bool changed = false;
   CC_sheet* sheet = show_descr.CurrSheet();
   CC_coord top_left, bottom_right;
   const CC_coord *pos;
@@ -2073,7 +2073,7 @@ Bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 	(pos->y >= top_left.y) && (pos->y <= bottom_right.y)) {
       if (!show_descr.show->IsSelected(i)) {
 	pointlist.Append(i, NULL);
-	changed = TRUE;
+	changed = true;
       }
     }
   }
@@ -2085,7 +2085,7 @@ Bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
   return changed;
 }
 
-Bool MainFrameList::CloseAllWindows() {
+bool MainFrameList::CloseAllWindows() {
   wxNode *node, *node_tmp;
   MainFrame *mf;
 
@@ -2093,10 +2093,10 @@ Bool MainFrameList::CloseAllWindows() {
     mf = (MainFrame *)node->Data();
     // This node will be deleted by the window's deconstructor
     node_tmp = node->Next();
-    if (!mf->Close()) return FALSE;
+    if (!mf->Close()) return false;
     node = node_tmp;
   }
-  return TRUE;
+  return true;
 }
 
 static void toolbar_prev_ss(CoolToolBar *tb) {
@@ -2159,14 +2159,14 @@ static void toolbar_genius(CoolToolBar *tb) {
 
 static void toolbar_label_left(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsLabel(FALSE))
+  if (mf->field->show_descr.CurrSheet()->SetPointsLabel(false))
     mf->field->show_descr.show->winlist->
       UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void toolbar_label_right(CoolToolBar *tb) {
   MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsLabel(TRUE))
+  if (mf->field->show_descr.CurrSheet()->SetPointsLabel(true))
     mf->field->show_descr.show->winlist->
       UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }

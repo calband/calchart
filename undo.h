@@ -30,7 +30,7 @@ public:
 
   ShowUndo *next;
   unsigned sheetidx;
-  Bool was_modified;
+  bool was_modified;
 };
 
 // Multiple undos in one entry
@@ -75,7 +75,7 @@ struct ShowUndoSymElem {
 };
 class ShowUndoSym : public ShowUndo {
 public:
-  ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, Bool contchanged = FALSE);
+  ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged = false);
   ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet);
   virtual ~ShowUndoSym();
 
@@ -86,13 +86,13 @@ public:
 private:
   unsigned num;
   ShowUndoSymElem *elems;
-  Bool contchange;
+  bool contchange;
 };
 
 // Point label changes
 struct ShowUndoLblElem {
   unsigned idx;
-  Bool right;
+  bool right;
 };
 class ShowUndoLbl : public ShowUndo {
 public:

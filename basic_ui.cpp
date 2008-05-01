@@ -13,232 +13,133 @@
 #include "basic_ui.h"
 #include "confgr.h"
 
-#ifdef wx_x
+#ifdef __CC_INCLUDE_BITMAPS__
 #include "calchart.xpm"
 #endif
 
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc) {
-  dc->SetBrush(wxTRANSPARENT_BRUSH);
-  dc->SetPen(CalChartPens[COLOR_SHAPES]);
+  dc->SetBrush(*wxTRANSPARENT_BRUSH);
+  dc->SetPen(*CalChartPens[COLOR_SHAPES]);
   /*
   dc->SetPen(wxWHITE_PEN);
   dc->SetLogicalFunction(wxINVERT);
   */
 }
 
+#ifndef __WXMSW__
 // Set icon to band's insignia
 void SetBandIcon(wxFrame *frame) {
-  frame->SetIcon(new wxIcon(ICON_NAME(calchart)));
-}
-
-// Text subwindow that can respoind to drag-and-drop
-FancyTextWin::FancyTextWin(wxFrame *frame, int x, int y,
-			   int width, int height, long style)
-:wxTextWindow(frame, x, y, width, height, style) {
-  DragAcceptFiles(TRUE);
-}
-
-#ifdef TEXT_DOS_STYLE
-char *FancyTextWin::GetContents(void) {
-  char *src;
-  char *dest;
-  unsigned i, len;
-
-  // Copy string but not carriage returns
-  src = wxTextWindow::GetContents();
-  for (i = 0, len = 0; src[i]; i++) {
-    if (src[i] != '\r') len++;
-  }
-  dest = new char[len+1];
-  for (i = 0, len = 0; src[i]; i++) {
-    if (src[i] != '\r') dest[len++] = src[i];
-  }
-  dest[len] = 0;
-
-  delete src;
-  return dest;
+  wxIcon icon(ICON_NAME(calchart));
+  frame->SetIcon(icon);
 }
 #endif
 
+// Text subwindow that can respoind to drag-and-drop
+FancyTextWin::FancyTextWin(wxWindow* parent, wxWindowID id,
+			   const wxString& value = wxEmptyString,
+			   const wxPoint& pos = wxDefaultPosition,
+			   const wxSize& size = wxDefaultSize,
+			   long style = wxTE_MULTILINE|wxHSCROLL,
+			   const wxValidator& validator = wxDefaultValidator,
+			   const wxString& name = wxTextCtrlNameStr)
+:wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
+  //  DragAcceptFiles(true);
+}
+
+#ifdef TEXT_DOS_STYLE
+wxString FancyTextWin::GetValue(void) const {
+  wxString result;
+  unsigned i;
+
+  // Remove carriage returns
+  result = wxTextCntl::GetValue();
+  for (i = 0; i < result.length();) {
+    if (result[i] != '\r') i++;
+    else result.erase(i,1);
+  }
+
+  return result;
+}
+#endif
+
+/*
 void FancyTextWin::OnDropFiles(int, char *files[], int, int) {
   LoadFile(files[0]);
 }
-
-GoodListBox::GoodListBox(wxPanel *panel, wxFunction func, char *Title,
-			 Bool Multiple, int x, int y, int width, int height,
-			 int N, char **Choices, long style, char *name)
-  : wxListBox(panel, func, Title, Multiple, x, y, width, height,
-	      N, Choices, style, name) {}
-
-void GoodListBox::SetSelection(int N, Bool select) {
-  // so Motif version works
-  if (!select || !Selected(N)) {
-    wxListBox::SetSelection(N, select);
-  }
-}
+*/
 
 // Toolbar-handling frame constructor
-wxFrameWithStuff::wxFrameWithStuff(wxFrame *frame, char *title,
-				   int x, int y, int w, int h,
-				   long style)
-: wxFrame(frame, title, x, y, w, h, style) {
+wxFrameWithStuff::
+wxFrameWithStuff(wxWindow *parent, wxWindowID id,
+		 const wxString& title,
+		 const wxPoint& pos, const wxSize& size,
+		 long style, const wxString& name)
+: wxFrame(parent, id, title, pos, size, style, name) {
   frameToolBar = NULL;
   framePanel = NULL;
   frameCanvas = NULL;
-  layout = wxFRAMESTUFF_TB_PNL;
-}
-
-Bool wxFrameWithStuff::OnClose(void) {
-  return TRUE;
+  SetAutoLayout(true);
 }
 
 // Reposition the toolbar and child subwindow
-void wxFrameWithStuff::OnSize(int, int) {
-  float maxToolBarWidth, maxToolBarHeight;
-  int width_frm, width_pnl;
-  int height_frm, height_tb, height_pnl, height_cnv;
-  int y_tb, y_pnl, y_cnv;
+void wxFrameWithStuff::DoLayout() {
+  wxSize maxToolBarSize;
+  wxLayoutConstraints *lcTb, *lcPnl, *lcCnv;
 
-  GetClientSize(&width_frm, &height_frm);
-
-  if (frameToolBar) {
-    frameToolBar->GetMaxSize(&maxToolBarWidth, &maxToolBarHeight);
-    height_tb = (int)maxToolBarHeight;
-  } else {
-    height_tb = 0;
-  }
   if (framePanel) {
     framePanel->Fit();
+    int width_pnl, height_pnl;
     framePanel->GetSize(&width_pnl, &height_pnl);
-  } else {
-    height_pnl = 0;
+    lcPnl = new wxLayoutConstraints;
+    lcPnl->width.Absolute(width_pnl);
+    lcPnl->height.Absolute(height_pnl);
+    lcPnl->top.SameAs(this, wxTop, 0);
   }
-  height_cnv = height_frm - height_tb - height_pnl;
-
-  switch (layout) {
-  case wxFRAMESTUFF_TB_PNL:
-    y_tb = 0;
-    y_pnl = height_tb;
-    y_cnv = height_tb + height_pnl;
-    break;
-  case wxFRAMESTUFF_TB_CNV:
-    y_tb = 0;
-    y_pnl = height_tb + height_cnv;
-    y_cnv = height_tb;
-    break;
-  case wxFRAMESTUFF_PNL_TB:
-    y_tb = height_pnl;
-    y_pnl = 0;
-    y_cnv = height_pnl + height_tb;
-    break;
-  case wxFRAMESTUFF_PNL_CNV:
-    y_tb = height_pnl + height_cnv;
-    y_pnl = 0;
-    y_cnv = height_pnl;
-    break;
-  case wxFRAMESTUFF_CNV_TB:
-    y_tb = height_cnv;
-    y_pnl = height_cnv + height_tb;
-    y_cnv = 0;
-    break;
-  case wxFRAMESTUFF_CNV_PNL:
-  default:
-    y_tb = height_cnv + height_pnl;
-    y_pnl = height_cnv;
-    y_cnv = 0;
-    break;
+  if (frameToolBar) {
+    maxToolBarSize = frameToolBar->GetMaxSize();
+    lcTb = new wxLayoutConstraints;
+    lcTb->width.Absolute(maxToolBarSize.GetX());
+    lcTb->height.Absolute(maxToolBarSize.GetY());
+    if (frameToolBar)
+      lcTb->top.Below(framePanel, 0);
+    else
+      lcTb->top.SameAs(this, wxTop, 0);
   }
-  if (frameToolBar) frameToolBar->SetSize(0, y_tb, width_frm, height_tb);
-  if (framePanel) framePanel->SetSize(0, y_pnl, width_frm, height_pnl);
-  if (frameCanvas) frameCanvas->SetSize(0, y_cnv, width_frm, height_cnv);
+  if (frameCanvas) {
+    lcCnv = new wxLayoutConstraints;
+    lcCnv->right.SameAs(this, wxRight, 0);
+    if (framePanel)
+      lcCnv->top.Below(framePanel, 0);
+    else if (frameToolBar)
+      lcCnv->top.Below(frameToolBar, 0);
+    else
+      lcCnv->top.SameAs(this, wxTop, 0);
+  }
 }
 
 // Toolbar-handling frame constructor
-wxFrameWithStuffSized::wxFrameWithStuffSized(wxFrame *frame, char *title,
-					     int x, int y, long style)
-: wxFrameWithStuff(frame, title, x, y, 320, 200, style) {
-}
-
-// Reposition the toolbar and child subwindow
-void wxFrameWithStuffSized::OnSize(int, int) {
-  float maxToolBarWidth, maxToolBarHeight;
-  int width_frm, width_pnl, width_cnv;
-  int height_frm, height_tb, height_pnl, height_cnv;
-  int y_tb, y_pnl, y_cnv;
-
-  GetClientSize(&width_frm, &height_frm);
-
-  if (frameToolBar) {
-    frameToolBar->GetMaxSize(&maxToolBarWidth, &maxToolBarHeight);
-    height_tb = (int)maxToolBarHeight;
-  } else {
-    height_tb = 0;
-  }
-  if (framePanel) {
-    framePanel->Fit();
-    framePanel->GetSize(&width_pnl, &height_pnl);
-  } else {
-    height_pnl = 0;
-  }
-  if (frameCanvas) {
-    frameCanvas->GetSize(&width_cnv, &height_cnv);
-  } else {
-    width_cnv = 0;
-    height_cnv = 0;
-  }
-
-  switch (layout) {
-  case wxFRAMESTUFF_TB_PNL:
-    y_tb = 0;
-    y_pnl = height_tb;
-    y_cnv = height_tb + height_pnl;
-    break;
-  case wxFRAMESTUFF_TB_CNV:
-    y_tb = 0;
-    y_pnl = height_tb + height_cnv;
-    y_cnv = height_tb;
-    break;
-  case wxFRAMESTUFF_PNL_TB:
-    y_tb = height_pnl;
-    y_pnl = 0;
-    y_cnv = height_pnl + height_tb;
-    break;
-  case wxFRAMESTUFF_PNL_CNV:
-    y_tb = height_pnl + height_cnv;
-    y_pnl = 0;
-    y_cnv = height_pnl;
-    break;
-  case wxFRAMESTUFF_CNV_TB:
-    y_tb = height_cnv;
-    y_pnl = height_cnv + height_tb;
-    y_cnv = 0;
-    break;
-  case wxFRAMESTUFF_CNV_PNL:
-  default:
-    y_tb = height_cnv + height_pnl;
-    y_pnl = height_cnv;
-    y_cnv = 0;
-    break;
-  }
-  if (frameToolBar) frameToolBar->SetSize(0, y_tb, width_frm, height_tb);
-  if (framePanel) framePanel->SetSize(0, y_pnl, width_frm, height_pnl);
-  if (frameCanvas) frameCanvas->SetSize(0, y_cnv, width_cnv, height_cnv);
+wxFrameWithStuffSized::
+wxFrameWithStuffSized(wxWindow *parent, wxWindowID id,
+		      const wxString& title,
+		      const wxPoint& pos, const wxSize& size,
+		      long style, const wxString& name)
+: wxFrameWithStuff(parent, id, title, pos, size, style, name) {
 }
 
 // Shrink frame to fit around a given canvas size
 void wxFrameWithStuffSized::Fit()
 {
-  float maxToolBarWidth, maxToolBarHeight;
+  wxSize maxToolBarSize;
   int width_frm, width_tb, width_pnl, width_cnv;
   int height_frm, height_tb, height_pnl, height_cnv;
 
   frameCanvas->GetSize(&width_cnv, &height_cnv);
 
   if (frameToolBar) {
-    frameToolBar->GetMaxSize(&maxToolBarWidth, &maxToolBarHeight);
-    width_tb = (int)maxToolBarWidth;
-    height_tb = (int)maxToolBarHeight;
+    maxToolBarSize = frameToolBar->GetMaxSize();
+    width_tb = maxToolBarSize.GetX();
+    height_tb = maxToolBarSize.GetY();
   } else {
     width_tb = 0;
     height_tb = 0;
@@ -257,21 +158,23 @@ void wxFrameWithStuffSized::Fit()
   height_frm = height_cnv + height_tb + height_pnl;
 
   SetClientSize(width_frm, height_frm);
-#ifndef BUGGY_SIZE_HINTS
   GetSize(&width_frm, &height_frm);
   SetSizeHints(width_frm, height_frm, width_frm, height_frm);
-#endif
 
-  OnSize(-1, -1);
+  Layout();
 }
 
-AutoScrollCanvas::AutoScrollCanvas(wxWindow *parent,
-				   int x, int y, int w, int h):
-  wxCanvas(parent, x, y, w, h, 0 /* not retained */), memdc(NULL), membm(NULL),
+AutoScrollCanvas::
+AutoScrollCanvas(wxWindow *parent, wxWindowID id,
+		 const wxPoint& pos, const wxSize& size,
+		 long style, const wxString& name)
+: wxWindow(parent, id, pos, size, style, name),
+  memdc(NULL), membm(NULL),
   x_scale(1.0), y_scale(1.0), cmap(NULL)
 {
-  if ((w > 0) && (h > 0)) {
-    SetSize(w, h);
+  if (size.GetX() != wxDefaultSize.GetX() ||
+      size.GetY() != wxDefaultSize.GetY()) {
+    SetSize(size);
   }
 }
 
@@ -279,21 +182,23 @@ AutoScrollCanvas::~AutoScrollCanvas() {
   FreeMem();
 }
 
-void AutoScrollCanvas::SetSize(int width, int height) {
-  GetDC()->SetLogicalFunction(wxCOPY);
+void AutoScrollCanvas::SetSize(const wxSize& size) {
+  wxWindowDC dc(this);
+
+  dc.SetLogicalFunction(wxCOPY);
   Clear();
   FreeMem();
   x_off = y_off = 0.0;
-  memdc = new wxMemoryDC(GetDC());
+  memdc = new wxMemoryDC();
   if (!memdc->Ok()) {
     FreeMem();
   } else {
-    membm = new wxBitmap(width, height);
+    membm = new wxBitmap(size.GetX(), size.GetY());
     if (!membm->Ok()) {
       FreeMem();
     } else {
-      memdc->SelectObject(membm);
-      memdc->SetBackground(GetDC()->GetBackground());
+      memdc->SelectObject(*membm);
+      memdc->SetBackground(dc.GetBackground());
       memdc->SetColourMap(cmap);
       memdc->SetUserScale(x_scale, y_scale);
       memdc->Clear();
@@ -302,24 +207,25 @@ void AutoScrollCanvas::SetSize(int width, int height) {
 }
 
 void AutoScrollCanvas::SetBackground(wxBrush *brush) {
-  wxCanvas::SetBackground(brush);
+  wxWindow::SetBackground(brush);
   if (memdc) memdc->SetBackground(brush);
 }
 
 void AutoScrollCanvas::SetColourMap(wxColourMap *colourMap) {
   cmap = colourMap;
-  wxCanvas::SetColourMap(cmap);
+  wxWindow::SetColourMap(cmap);
   if (memdc) memdc->SetColourMap(cmap);
 }
 
 void AutoScrollCanvas::SetUserScale(float x, float y) {
+  wxWindowDC dc(this);
   x_scale = x;
   y_scale = y;
-  GetDC()->SetUserScale(x, y);
+  dc.SetUserScale(x, y);
   if (memdc) memdc->SetUserScale(x, y);
 }
 
-void AutoScrollCanvas::Move(float x, float y, Bool noscroll) {
+void AutoScrollCanvas::Move(float x, float y, bool noscroll) {
   if (memdc) {
     if (!noscroll) {
       x_off += (x - last_pos.x) * x_scale;
@@ -332,21 +238,21 @@ void AutoScrollCanvas::Move(float x, float y, Bool noscroll) {
 
 void AutoScrollCanvas::Blit() {
   if (memdc) {
-    wxDC *dc = GetDC();
-    dc->SetUserScale(1.0, 1.0);
+    wxWindowDC dc(this);
+    dc.SetUserScale(1.0, 1.0);
     memdc->SetUserScale(1.0, 1.0);
-    if (!dc->Colour) {
+    if (!dc.Colour) {
       // Source is a mono bitmap, so we must set the fg and bg colors
-      dc->SetPen(wxWHITE_PEN);
-      dc->SetBackground(wxBLACK_BRUSH);
+      dc.SetPen(wxWHITE_PEN);
+      dc.SetBackground(wxBLACK_BRUSH);
     }
-    dc->Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
-	     memdc, 0, 0, wxCOPY);
-    if (!dc->Colour) {
+    dc.Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
+	    memdc, 0, 0, wxCOPY);
+    if (!dc.Colour) {
       // Restore original background
-      dc->SetBackground(memdc->GetBackground());
+      dc.SetBackground(memdc->GetBackground());
     }
-    dc->SetUserScale(x_scale, y_scale);
+    dc.SetUserScale(x_scale, y_scale);
     memdc->SetUserScale(x_scale, y_scale);
   }
 }
@@ -362,18 +268,22 @@ void AutoScrollCanvas::FreeMem() {
   }
 }
 
-CoolToolBar::CoolToolBar(wxFrame *frame, int x, int y, int w, int h,
-			 long style, int direction, int RowsOrColumns):
-  PlainToolBar(frame, x, y, w, h, style, direction, RowsOrColumns),
+CoolToolBar::CoolToolBar(wxFrame *frame, wxWindowID id,
+			 const wxPoint& pos = wxDefaultPosition,
+			 const wxSize& size = wxDefaultSize,
+			 long style = wxTB_HORIZONTAL | wxNO_BORDER,
+			 const wxString& name = wxPanelNameStr)
+: wxToolBar(frame, id, pos, size, style, name),
   ourframe(frame) {}
 
 void CoolToolBar::SetupBar(ToolBarEntry *tbe, int n)
 {
   entries = tbe;
-  GetDC()->SetBackground(wxGREY_BRUSH);
+  GetDC()->SetBackground(*wxGREY_BRUSH);
 
   for (int i = 0; i < n; i++) {
-    AddTool(i, entries[i].bm, NULL, (entries[i].flags & TOOLBAR_TOGGLE),
+    AddTool(i, *(entries[i].bm), wxNullBitmap,
+	    (entries[i].flags & TOOLBAR_TOGGLE),
 	    -1, -1, NULL);
     if (entries[i].flags & TOOLBAR_SPACE) AddSeparator();
   }
@@ -381,9 +291,9 @@ void CoolToolBar::SetupBar(ToolBarEntry *tbe, int n)
   Layout();
 }
 
-Bool CoolToolBar::OnLeftClick(int toolIndex, Bool) {
+bool CoolToolBar::OnLeftClick(int toolIndex, bool) {
   if (entries[toolIndex].func) entries[toolIndex].func(this);
-  return TRUE;
+  return true;
 }
 
 void CoolToolBar::OnMouseEnter(int toolIndex) {

@@ -7,7 +7,7 @@
  *
  */
 
-#include <wx.h>
+#include <wx/wx.h>
 #include "cont.h"
 #include "parse.h"
 #include "animate.h"

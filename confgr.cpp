@@ -9,8 +9,8 @@
  *
  */
 
-#include <wx_utils.h>
-#include <wx_gdi.h>
+#include <wx/utils.h>
+#include <wx/gdi.h>
 #include "show.h"
 #include <ctype.h>
 
@@ -63,7 +63,7 @@ static char* DefaultColors[COLOR_NUM] = {
   "RED"
 };
 
-static Bool DefaultMonoColors[COLOR_NUM] = {
+static bool DefaultMonoColors[COLOR_NUM] = {
   1,
   0,
   0,

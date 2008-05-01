@@ -57,14 +57,14 @@ public:
   ~ContinuityEditor();
   void OnSize(int w, int h);
 
-  Bool OnClose(void);
+  bool OnClose(void);
   void OnMenuCommand(int id);
   void OnMenuSelect(int id);
 
-  void Update(Bool quick = FALSE); // Refresh all window controls
+  void Update(bool quick = false); // Refresh all window controls
   // Update text window to current continuity
   // quick doesn't flush other windows
-  void UpdateText(Bool quick = FALSE);
+  void UpdateText(bool quick = false);
 
   void FlushText(); // Flush changes in text window
   inline void DetachText() { text_sheet = NULL; } // When sheet goes away
@@ -113,7 +113,7 @@ private:
   void MoveCursor(unsigned column, unsigned row);
   void DrawCursor(float x, float y, float height);
   void InsertChar(unsigned onechar);
-  void DeleteChar(Bool backspace = TRUE);
+  void DeleteChar(bool backspace = true);
 
   CC_descr *show_descr;
   wxFrame *ourframe;
@@ -130,7 +130,7 @@ public:
 		  int x = -1, int y = -1, int width = 400, int height = 400);
   ~PrintContEditor();
 
-  void OnActivate(Bool active);
+  void OnActivate(bool active);
 
   PrintContCanvas *canvas;
 private:

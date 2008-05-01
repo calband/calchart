@@ -10,8 +10,8 @@
 #pragma implementation
 #endif
 
-#include <wx_dc.h>
-#include <wx_utils.h>
+#include <wx/dc.h>
+#include <wx/utils.h>
 #include "modes.h"
 #include "confgr.h"
 

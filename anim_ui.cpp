@@ -243,7 +243,7 @@ void AnimationCanvas::SelectCollisions() {
       if (anim->collisions[i]) {
 	show_descr->show->Select(i);
       } else {
-	show_descr->show->Select(i, FALSE);
+	show_descr->show->Select(i, false);
       }
     }
     show_descr->show->winlist->UpdateSelections();
@@ -257,7 +257,7 @@ const char *AnimationCanvas::GeneratePOVFiles(const char *filebasename) {
   wxString filename;
   FILE *fp;
   float x, y;
-  Bool east = 1;
+  bool east = 1;
   wxPen *pen;
 
   if (anim) {
@@ -320,7 +320,7 @@ static char *texturefile = "memorial.tif";
 const char * AnimationCanvas::GenerateRIBFrame() {
   unsigned pt;
   float x, y;
-  Bool east = 1;
+  bool east = 1;
   wxPen *pen;
   RtColor color;
   static RtFloat amb_intensity = 0.2, dist_intensity = 0.9;
@@ -391,7 +391,7 @@ const char * AnimationCanvas::GenerateRIBFrame() {
 }
 
 const char * AnimationCanvas::GenerateRIBFile(const char *filename,
-					      Bool allframes) {
+					      bool allframes) {
   unsigned framenum;
   const char *err;
 
@@ -463,7 +463,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 
   // Add the controls
   SetPanel(new wxPanel(this));
-  framePanel->SetAutoLayout(TRUE);
+  framePanel->SetAutoLayout(true);
 
   collis = new wxChoice(framePanel, (wxFunction)collision_callback,
 			"&Collisions", -1, -1, -1, -1,
@@ -511,7 +511,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   UpdatePanel();
   SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   Fit();
-  Show(TRUE);
+  Show(true);
 }
 
 AnimationFrame::~AnimationFrame() {
@@ -524,7 +524,7 @@ AnimationFrame::~AnimationFrame() {
 void AnimationFrame::OnMenuCommand(int id) {
   const char *s;
   const char *err;
-  Bool allframes = TRUE;
+  bool allframes = true;
 
   switch (id) {
   case CALCHART__ANIM_REANIMATE:
@@ -547,7 +547,7 @@ void AnimationFrame::OnMenuCommand(int id) {
 #endif
 #ifdef ANIM_OUTPUT_RIB
   case CALCHART__ANIM_RIB_FRAME:
-    allframes = FALSE;
+    allframes = false;
   case CALCHART__ANIM_RIB:
     s = wxFileSelector("Save RIB File", NULL, NULL, NULL, "*.rib",
 		       wxSAVE);
@@ -603,14 +603,14 @@ void AnimationFrame::UpdatePanel() {
     curr = 1;
   }
   if (num > 1) {
-    sheet_slider->Enable(TRUE);
+    sheet_slider->Enable(true);
     if (sheet_slider->GetMax() != num)
       sheet_slider->SetValue(1); // So Motif doesn't complain about value
       sheet_slider->SetRange(1, num);
     if (sheet_slider->GetValue() != curr)
       sheet_slider->SetValue(curr);
   } else {
-    sheet_slider->Enable(FALSE);
+    sheet_slider->Enable(false);
   }
 
   if (canvas->anim) {
@@ -621,23 +621,23 @@ void AnimationFrame::UpdatePanel() {
     curr = 0;
   }
   if (num > 0) {
-    beat_slider->Enable(TRUE);
+    beat_slider->Enable(true);
     if (beat_slider->GetMax() != num)
       beat_slider->SetValue(0); // So Motif doesn't complain about value
       beat_slider->SetRange(0, num);
     if (beat_slider->GetValue() != curr)
       beat_slider->SetValue(curr);
   } else {
-    beat_slider->Enable(FALSE);
+    beat_slider->Enable(false);
   }
 }
 
 void AnimationCanvas::StartTimer() {
   if (!timer->Start(60000/GetTempo())) {
     ourframe->SetStatusText("Could not get timer!");
-    timeron = FALSE;
+    timeron = false;
   } else {
-    timeron = TRUE;
+    timeron = true;
   }
 }
 
@@ -715,7 +715,7 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
   // Give it an icon
   SetBandIcon(this);
 
-  SetAutoLayout(TRUE);
+  SetAutoLayout(true);
 
   show = comp->show;
 
@@ -760,7 +760,7 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 
   OnSize(-1,-1);
 
-  Show(TRUE);
+  Show(true);
 }
 
 AnimErrorList::~AnimErrorList() {
@@ -774,8 +774,8 @@ void AnimErrorList::OnSize(int, int) {
   Layout();
 }
 
-Bool AnimErrorList::OnClose(void) {
-  return TRUE;
+bool AnimErrorList::OnClose(void) {
+  return true;
 }
 
 void AnimErrorList::Unselect() {

@@ -858,9 +858,9 @@ void ContProcRotate::Compile(AnimateCompile* anim) {
     start_ang = c.Direction(anim->pt.pos);
   int b = float2int(this, anim, stps->Get(anim));
   float angle = ang->Get(anim);
-  Bool backwards = FALSE;
+  bool backwards = false;
   if (b < 0) {
-    backwards = TRUE;
+    backwards = true;
   }
   anim->Append(new AnimateCommandRotate((unsigned)ABS(b), c,
 					// Don't use Magnitude() because

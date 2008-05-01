@@ -1,8 +1,5 @@
 # Makefile for calchart (UNIX).
 
-top_srcdir = $(WXDIR)
-include $(WXDIR)/make.tmpl
-
 PROG = calchart
 
 #MAKEDEP = makedepend
@@ -64,6 +61,9 @@ ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) $(PSFILES) Makefile xbm2xpm \
 MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 	makefile.wat calchart.rc install.inf
 
+CXXFLAGS := `wx-config --cflags`
+CXX = c++
+
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
@@ -87,9 +87,7 @@ runtime/%.eps: postscript/%.fig
 all: calchart $(PS_SYNTH_FILES) charthlp.xlp
 
 $(PROG): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ \
-	$(link_dir) $(wx_lib) $(gui_libraries) $(extra_lib) \
-	$(CONF_LIBS) $(math_lib)
+	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ `wx-config --libs`
 
 contscan.o: contgram.h
 

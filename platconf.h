@@ -9,34 +9,33 @@
 #ifndef _PLATCONF_H_
 #define _PLATCONF_H_
 
-#define CC_USE_BTNBAR
-
 #define cpp_cat(a,b) a ## b
 
 // For creating icons and bitmaps
 // There are separate macros because XPM is used for icons
-#ifdef wx_x
+#ifdef __WXMOTIF__
+#define __CC_INCLUDE_BITMAPS__
 #define ICON_NAME(name) cpp_cat(name,_xpm)
 #define BITMAP_NAME(name) (char *)cpp_cat(name,_bits), cpp_cat(name,_width), cpp_cat(name,_height)
 #endif
-#ifdef wx_msw
+#ifdef __WXMSW__
 #define ICON_NAME(name) #name
 #define BITMAP_NAME(name) #name
 #endif
 
 // Run external programs to print or just write to files
-#ifdef wx_x
+#ifdef __WXMOTIF__
 #define PRINT__RUN_CMD
 #endif
 
 // Character used in paths
-#ifdef wx_msw
+#ifdef __WXMSW__
 #define PATH_SEPARATOR "\\"
 #else
 #define PATH_SEPARATOR "/"
 #endif
 
-#ifdef wx_msw
+#ifdef __WXMSW__
 #define AUTOSAVE_VAR "$TEMP"
 #define AUTOSAVE_DIR "C:"
 #else
@@ -45,7 +44,7 @@
 #endif
 
 // Wildcard in file selector
-#ifdef wx_msw
+#ifdef __WXMSW__
 #define FILE_WILDCARDS "All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas"
 #define FILE_SAVE_WILDCARDS "New shows (*.shw)|*.shw"
 #else
@@ -54,15 +53,8 @@
 #endif
 
 // Need to handle DOS-style text
-#ifdef wx_msw
+#ifdef __WXMSW__
 #define TEXT_DOS_STYLE
-#endif
-
-// SetSizeHints doesn't work in Watcom for Win 3.1
-#ifdef wx_msw
-#ifndef WIN32
-#define BUGGY_SIZE_HINTS
-#endif
 #endif
 
 /*****************************************
