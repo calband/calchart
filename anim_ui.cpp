@@ -34,25 +34,52 @@
 #include <ri.h>
 #endif
 
-static void toolbar_anim_stop(CoolToolBar *tb);
-static void toolbar_anim_play(CoolToolBar *tb);
-static void toolbar_anim_prev_beat(CoolToolBar *tb);
-static void toolbar_anim_next_beat(CoolToolBar *tb);
-static void toolbar_anim_prev_sheet(CoolToolBar *tb);
-static void toolbar_anim_next_sheet(CoolToolBar *tb);
-static void collision_callback(wxChoice &ch, wxEvent &ev);
-static void slider_anim_tempo(wxObject &obj, wxEvent &ev);
-static void slider_gotosheet(wxObject &obj, wxEvent &ev);
-static void slider_gotobeat(wxObject &obj, wxEvent &ev);
-
 ToolBarEntry anim_tb[] = {
-  { 0, NULL, wxT("Stop"), toolbar_anim_stop },
-  { 0, NULL, wxT("Play"), toolbar_anim_play },
-  { 0, NULL, wxT("Previous beat"), toolbar_anim_prev_beat },
-  { 0, NULL, wxT("Next beat"), toolbar_anim_next_beat },
-  { 0, NULL, wxT("Previous stuntsheet"), toolbar_anim_prev_sheet },
-  { 0, NULL, wxT("Next stuntsheet"), toolbar_anim_next_sheet }
+  { 0, NULL, wxT("Stop"), CALCHART__anim_stop },
+  { 0, NULL, wxT("Play"), CALCHART__anim_play },
+  { 0, NULL, wxT("Previous beat"), CALCHART__anim_prev_beat },
+  { 0, NULL, wxT("Next beat"), CALCHART__anim_next_beat },
+  { 0, NULL, wxT("Previous stuntsheet"), CALCHART__anim_prev_sheet },
+  { 0, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
 };
+
+BEGIN_EVENT_TABLE(AnimationCanvas, AutoScrollCanvas)
+  EVT_CHAR(AnimationCanvas::OnChar)
+  EVT_LEFT_DOWN(AnimationCanvas::OnLeftMouseEvent)
+  EVT_RIGHT_DOWN(AnimationCanvas::OnRightMouseEvent)
+  EVT_ERASE_BACKGROUND(AnimationCanvas::OnEraseBackground)
+  EVT_PAINT(AnimationCanvas::OnPaint)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
+  EVT_MENU(CALCHART__ANIM_REANIMATE, AnimationFrame::OnCmdReanimate)
+  EVT_MENU(CALCHART__ANIM_SELECT_COLL, AnimationFrame::OnCmdSelectCollisions)
+#ifdef ANIM_OUTPUT_POVRAY
+  EVT_MENU(CALCHART__ANIM_POVRAY, AnimationFrame::OnCmdPOV)
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  EVT_MENU(CALCHART__ANIM_RIB_FRAME, AnimationFrame::OnCmdRIBFrame)
+  EVT_MENU(CALCHART__ANIM_RIB, AnimationFrame::OnCmdRIBAll)
+#endif
+  EVT_MENU(wxID_CLOSE, AnimationFrame::OnCmdClose)
+  EVT_MENU(CALCHART__anim_stop, AnimationFrame::OnCmd_anim_stop)
+  EVT_MENU(CALCHART__anim_play, AnimationFrame::OnCmd_anim_play)
+  EVT_MENU(CALCHART__anim_prev_beat, AnimationFrame::OnCmd_anim_prev_beat)
+  EVT_MENU(CALCHART__anim_next_beat, AnimationFrame::OnCmd_anim_next_beat)
+  EVT_MENU(CALCHART__anim_prev_sheet, AnimationFrame::OnCmd_anim_prev_sheet)
+  EVT_MENU(CALCHART__anim_next_sheet, AnimationFrame::OnCmd_anim_next_sheet)
+  EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
+  EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
+  EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
+  EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(AnimErrorList, wxFrame)
+  EVT_CLOSE(AnimErrorList::OnCloseWindow)
+  EVT_SIZE(AnimErrorList::OnSize)
+  EVT_BUTTON(wxID_CLOSE, AnimErrorList::OnCmdClose)
+  EVT_LISTBOX(CALCHART__anim_update, AnimErrorList::OnCmdUpdate)
+END_EVENT_TABLE()
 
 CC_WinNodeAnim::CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
@@ -91,17 +118,16 @@ void AnimationTimer::Notify() {
 }
 
 AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_descr *dcr)
-: AutoScrollCanvas(frame, -1, -1,
-	   COORD2INT(dcr->show->mode->Size().x)*DEFAULT_ANIM_SIZE,
-	   COORD2INT(dcr->show->mode->Size().y)*DEFAULT_ANIM_SIZE),
+: AutoScrollCanvas(frame, wxID_ANY, wxDefaultPosition,
+		   wxSize(COORD2INT(dcr->show->mode->Size().x)*DEFAULT_ANIM_SIZE,
+			  COORD2INT(dcr->show->mode->Size().y)*DEFAULT_ANIM_SIZE)),
   anim(NULL), show_descr(dcr), ourframe(frame), tempo(120) {
   float f;
 
-  SetColourMap(CalChartColorMap);
+  SetPalette(CalChartPalette);
 
   timer = new AnimationTimer(this);
 
-  SetBackground(CalChartBrushes[COLOR_FIELD]);
   f = DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0);
   SetUserScale(f, f);
 }
@@ -111,8 +137,13 @@ AnimationCanvas::~AnimationCanvas() {
   if (anim) delete anim;
 }
 
-void AnimationCanvas::OnPaint() {
-  Blit();
+void AnimationCanvas::OnEraseBackground(wxEraseEvent& event) {
+}
+
+void AnimationCanvas::OnPaint(wxPaintEvent& event) {
+  wxPaintDC dc(this);
+  dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+  Blit(dc);
 }
 
 void AnimationCanvas::RedrawBuffer() {
@@ -120,38 +151,36 @@ void AnimationCanvas::RedrawBuffer() {
   unsigned i;
   wxDC *dc = GetMemDC();
 
-  dc->BeginDrawing();
-
   dc->Clear();
-  dc->SetPen(CalChartPens[COLOR_FIELD_DETAIL]);
+  dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
   show_descr->show->mode->DrawAnim(dc);
   if (anim)
   for (i = 0; i < anim->numpts; i++) {
     if (anim->collisions[i]) {
-      dc->SetPen(CalChartPens[COLOR_POINT_ANIM_COLLISION]);
-      dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
+      dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
+      dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
     } else if (show_descr->show->IsSelected(i)) {
       if (anim->curr_cmds[i]) {
 	switch (anim->curr_cmds[i]->Direction()) {
 	case ANIMDIR_SW:
 	case ANIMDIR_W:
 	case ANIMDIR_NW:
-	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
-	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
+	  dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
+	  dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
 	  break;
 	case ANIMDIR_SE:
 	case ANIMDIR_E:
 	case ANIMDIR_NE:
-	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
-	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
+	  dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
+	  dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
 	  break;
 	default:
-	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
-	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
+	  dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
+	  dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
 	}
       } else {
-	dc->SetPen(CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
-	dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
+	dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
+	dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
       }
     } else {
       if (anim->curr_cmds[i]) {
@@ -159,22 +188,22 @@ void AnimationCanvas::RedrawBuffer() {
 	case ANIMDIR_SW:
 	case ANIMDIR_W:
 	case ANIMDIR_NW:
-	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_BACK]);
-	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_BACK]);
+	  dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_BACK]);
+	  dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_BACK]);
 	  break;
 	case ANIMDIR_SE:
 	case ANIMDIR_E:
 	case ANIMDIR_NE:
-	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_FRONT]);
-	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
+	  dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
+	  dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
 	  break;
 	default:
-	  dc->SetPen(CalChartPens[COLOR_POINT_ANIM_SIDE]);
-	  dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
+	  dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_SIDE]);
+	  dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
 	}
       } else {
-	dc->SetPen(CalChartPens[COLOR_POINT_ANIM_FRONT]);
-	dc->SetBrush(CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
+	dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
+	dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
       }
     }
     x = anim->pts[i].pos.x+show_descr->show->mode->Offset().x;
@@ -182,16 +211,18 @@ void AnimationCanvas::RedrawBuffer() {
     dc->DrawRectangle(x - INT2COORD(1)/2, y - INT2COORD(1)/2,
 		      INT2COORD(1), INT2COORD(1));
   }
-
-  dc->EndDrawing();
 }
 
-void AnimationCanvas::OnEvent(wxMouseEvent& event) {
-  if (event.LeftDown()) PrevBeat();
-  if (event.RightDown()) NextBeat();
+void AnimationCanvas::OnLeftMouseEvent(wxMouseEvent& event) {
+  PrevBeat();
 }
 
-void AnimationCanvas::OnChar(wxKeyEvent&) {
+void AnimationCanvas::OnRightMouseEvent(wxMouseEvent& event) {
+  NextBeat();
+}
+
+void AnimationCanvas::OnChar(wxKeyEvent& event) {
+  event.Skip();
 }
 
 void AnimationCanvas::SetTempo(unsigned t) {
@@ -205,13 +236,13 @@ void AnimationCanvas::UpdateText() {
   wxString tempbuf;
 
   if (anim) {
-    tempbuf.sprintf("Beat %u of %u  Sheet %d of %d \"%.32s\"",
-		    anim->curr_beat, anim->curr_sheet->numbeats,
-		    anim->curr_sheetnum+1, anim->numsheets,
-		    anim->curr_sheet->name);
-    ourframe->SetStatusText(tempbuf.GetData(), 1);
+    tempbuf.Printf(wxT("Beat %u of %u  Sheet %d of %d \"%.32s\""),
+		   anim->curr_beat, anim->curr_sheet->numbeats,
+		   anim->curr_sheetnum+1, anim->numsheets,
+		   anim->curr_sheet->name.c_str());
+    ourframe->SetStatusText(tempbuf, 1);
   } else {
-    ourframe->SetStatusText("No animation available", 1);
+    ourframe->SetStatusText(wxT("No animation available"), 1);
   }
 }
 
@@ -223,7 +254,7 @@ void AnimationCanvas::Refresh() {
 
 void AnimationCanvas::Generate() {
   StopTimer();
-  ourframe->SetStatusText("Compiling...");
+  ourframe->SetStatusText(wxT("Compiling..."));
   if (anim) {
     delete anim;
     anim = NULL;
@@ -241,7 +272,7 @@ void AnimationCanvas::Generate() {
   }
   ourframe->UpdatePanel();
   Refresh();
-  ourframe->SetStatusText("Ready");
+  ourframe->SetStatusText(wxT("Ready"));
 }
 
 void AnimationCanvas::FreeAnim() {
@@ -269,7 +300,7 @@ void AnimationCanvas::SelectCollisions() {
 
 #ifdef ANIM_OUTPUT_POVRAY
 #define POV_SCALE 16
-const char *AnimationCanvas::GeneratePOVFiles(const char *filebasename) {
+wxString AnimationCanvas::GeneratePOVFiles(const wxString& filebasename) {
   unsigned framenum, pt;
   wxString filename;
   FILE *fp;
@@ -281,10 +312,10 @@ const char *AnimationCanvas::GeneratePOVFiles(const char *filebasename) {
     GotoSheet(0);
     framenum = 1;
     do {
-      filename.sprintf("%s%05d.pov", filebasename, framenum);
-      fp = fopen(filename.Chars(), "w");
+      filename.Printf(wxT("%s%05d.pov"), filebasename.c_str(), framenum);
+      fp = CC_fopen(filename.fn_str(), "w");
       if (fp == NULL) {
-	return "Error opening file";
+	return wxT("Error opening file");
       }
       for (pt = 0; pt < anim->numpts; pt++) {
 	x = COORD2FLOAT(anim->pts[pt].pos.x) * POV_SCALE;
@@ -327,14 +358,14 @@ const char *AnimationCanvas::GeneratePOVFiles(const char *filebasename) {
       framenum++;
     } while (NextBeat());
   }
-  return NULL;
+  return wxT("");
 }
 #endif
 
 #ifdef ANIM_OUTPUT_RIB
 
-static char *texturefile = "memorial.tif";
-const char * AnimationCanvas::GenerateRIBFrame() {
+static const char *texturefile = "memorial.tif";
+wxString AnimationCanvas::GenerateRIBFrame() {
   unsigned pt;
   float x, y;
   bool east = 1;
@@ -343,7 +374,7 @@ const char * AnimationCanvas::GenerateRIBFrame() {
   static RtFloat amb_intensity = 0.2, dist_intensity = 0.9;
   RtPoint field[4];
 
-  if (!anim) return NULL;
+  if (!anim) return wxT("");
 
   field[0][0] = -1408;
   field[0][1] = 400;
@@ -404,13 +435,13 @@ const char * AnimationCanvas::GenerateRIBFrame() {
   }
   RiAttributeEnd();
   RiWorldEnd();
-  return NULL;
+  return wxT("");
 }
 
-const char * AnimationCanvas::GenerateRIBFile(const char *filename,
-					      bool allframes) {
+wxString AnimationCanvas::GenerateRIBFile(const wxString& filename,
+					  bool allframes) {
   unsigned framenum;
-  const char *err;
+  wxString err;
 
   if (anim) {
     if (allframes) {
@@ -434,99 +465,91 @@ const char * AnimationCanvas::GenerateRIBFile(const char *filename,
     }
     RiEnd();
   }
-  return NULL;
+  return wxT("");
 }
 #endif
 
-static char *collis_text[] = {
-  "Ignore", "Show", "Beep"
+static const wxString collis_text[] = {
+  wxT("Ignore"), wxT("Show"), wxT("Beep")
 };
 
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
 			       CC_WinList *lst)
-: wxFrameWithStuffSized(frame, wxT("Animation")) {
+: wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, CC_FRAME_OTHER, wxT("anim")) {
   // Give it an icon
   SetBandIcon(this);
 
-  CreateStatusLine(2);
+  CreateStatusBar();
 
   // Make a menubar
   wxMenu *anim_menu = new wxMenu;
-  anim_menu->Append(CALCHART__ANIM_REANIMATE, wxT("&Reanimate Show"));
-  anim_menu->Append(CALCHART__ANIM_SELECT_COLL, wxT("&Select Collisions"));
+  anim_menu->Append(CALCHART__ANIM_REANIMATE, wxT("&Reanimate Show"), wxT("Regenerate animation"));
+  anim_menu->Append(CALCHART__ANIM_SELECT_COLL, wxT("&Select Collisions"), wxT("Select colliding points"));
 #ifdef ANIM_OUTPUT_POVRAY
-  anim_menu->Append(CALCHART__ANIM_POVRAY, wxT("Output &POVRay Stubs"));
+  anim_menu->Append(CALCHART__ANIM_POVRAY, wxT("Output &POVRay Stubs"), wxT("Output files for rendering with POVRay"));
 #endif
 #ifdef ANIM_OUTPUT_RIB
-  anim_menu->Append(CALCHART__ANIM_RIB_FRAME, wxT("Output RenderMan RIB Frame"));
-  anim_menu->Append(CALCHART__ANIM_RIB, wxT("Output Render&Man RIB"));
+  anim_menu->Append(CALCHART__ANIM_RIB_FRAME, wxT("Output RenderMan RIB Frame"), wxT("Output RIB frame for RenderMan rendering"));
+  anim_menu->Append(CALCHART__ANIM_RIB, wxT("Output Render&Man RIB"), wxT("Output RIB file for RenderMan rendering"));
 #endif
-  anim_menu->Append(CALCHART__ANIM_CLOSE, wxT("&Close Animation"));
+  anim_menu->Append(wxID_CLOSE, wxT("&Close Animation"), wxT("Close window"));
 
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(anim_menu, wxT("&Animate"));
   SetMenuBar(menu_bar);
 
   // Add a toolbar
-  CoolToolBar *ribbon = new CoolToolBar(this, 0, 0, -1, -1, 0,
-					wxHORIZONTAL, 20);
-  ribbon->SetupBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry));
-  SetToolBar(ribbon);
+  CoolToolBar ribbon(this, wxID_ANY);
+  ribbon.SetupBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry));
 
   // Add the field canvas
   canvas = new AnimationCanvas(this, dcr);
-  SetCanvas(canvas);
   canvas->UpdateText();
 
   // Add the controls
-  SetPanel(new wxPanel(this));
-  framePanel->SetAutoLayout(true);
+  wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+  topsizer->Add(canvas, wxSizerFlags().Expand().Border(5));
 
-  collis = new wxChoice(framePanel, (wxFunction)collision_callback,
-			wxT("&Collisions"), -1, -1, -1, -1,
-			sizeof(collis_text)/sizeof(char*), collis_text);
+  wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
+  sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")),
+	      wxSizerFlags());
+  collis = new wxChoice(this, CALCHART__anim_collisions,
+			wxDefaultPosition, wxDefaultSize,
+			sizeof(collis_text)/sizeof(const wxString), collis_text);
+  sizer1->Add(collis, wxSizerFlags().Expand().Border(5));
 
-  AnimationSlider *sldr =
-    new AnimationSlider(framePanel, slider_anim_tempo, wxT("&Tempo"),
-			canvas->GetTempo(), 10, 300, 150);
-  sldr->canvas = canvas;
-  wxLayoutConstraints *lc = new wxLayoutConstraints;
-  lc->left.AsIs();
-  lc->top.AsIs();
-  lc->right.SameAs(framePanel, wxRight, 5);
-  lc->height.AsIs();
-  sldr->SetConstraints(lc);
+  (void)new wxStaticText(this, wxID_ANY, wxT("&Tempo"));
+  wxSlider *sldr =
+    new wxSlider(this, CALCHART__anim_tempo,
+		 canvas->GetTempo(), 10, 300);
+  sizer1->Add(sldr, wxSizerFlags().Expand().Border(5));
 
-  framePanel->NewLine();
-
+  wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
   // Sheet slider (will get set later with UpdatePanel())
-  sldr = new AnimationSlider(framePanel, slider_gotosheet, wxT("&Sheet"),
-			     1, 1, 2, 150);
-  sldr->canvas = canvas;
-  sheet_slider = sldr;
-  lc = new wxLayoutConstraints;
-  lc->left.AsIs();
-  lc->top.AsIs();
-  lc->right.PercentOf(framePanel, wxWidth, 50);
-  lc->height.AsIs();
-  sldr->SetConstraints(lc);
+  sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")),
+	      wxSizerFlags());
+  sheet_slider = new wxSlider(this, CALCHART__anim_gotosheet,
+			      1, 1, 2);
+  sizer2->Add(sheet_slider, wxSizerFlags().Expand().Border(5));
 
   // Beat slider (will get set later with UpdatePanel())
-  sldr = new AnimationSlider(framePanel, slider_gotobeat, wxT("&Beat"),
-			     0, 0, 1, 150);
-  sldr->canvas = canvas;
-  beat_slider = sldr;
-  lc = new wxLayoutConstraints;
-  lc->left.RightOf(sheet_slider, 5);
-  lc->top.AsIs();
-  lc->right.SameAs(framePanel, wxRight, 5);
-  lc->height.AsIs();
-  sldr->SetConstraints(lc);
+  sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")),
+	      wxSizerFlags());
+  beat_slider = new wxSlider(this, CALCHART__anim_gotobeat,
+			     0, 0, 1);
+  sizer2->Add(beat_slider, wxSizerFlags().Expand().Border(5));
+
+  //create a sizer with no border and centered horizontally
+  topsizer->Add(sizer1, wxSizerFlags(0).Left());
+  topsizer->Add(sizer2, wxSizerFlags(0).Left());
+
+  SetSizer(topsizer); // use the sizer for layout
+
+  topsizer->SetSizeHints(this); // set size hints to honour minimum size
 
   node = new CC_WinNodeAnim(lst, this);
 
   UpdatePanel();
-  SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
   Fit();
   Show(true);
 }
@@ -538,75 +561,98 @@ AnimationFrame::~AnimationFrame() {
   }
 }
 
-void AnimationFrame::OnMenuCommand(int id) {
-  const char *s;
-  const char *err;
-  bool allframes = true;
+void AnimationFrame::OnCmdReanimate(wxCommandEvent& event) {
+  canvas->Generate();
+}
 
-  switch (id) {
-  case CALCHART__ANIM_REANIMATE:
-    canvas->Generate();
-    break;
-  case CALCHART__ANIM_SELECT_COLL:
-    canvas->SelectCollisions();
-    break;
+void AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event) {
+  canvas->SelectCollisions();
+}
+
 #ifdef ANIM_OUTPUT_POVRAY
-  case CALCHART__ANIM_POVRAY:
-    s = wxFileSelector(wxT("Save POV Files"), NULL, NULL, NULL, wxT("*.*"),
-		       wxSAVE);
-    if (s) {
-      err = canvas->GeneratePOVFiles(s);
-      if (err != NULL) {
-	(void)wxMessageBox(err, wxT("Save Error")); // should be const
-      }
+void AnimationFrame::OnCmdPOV(wxCommandEvent& event) {
+  wxString s;
+  wxString err;
+  s = wxFileSelector(wxT("Save POV Files"), NULL, NULL, NULL, wxT("*.*"),
+		     wxSAVE);
+  if (!s.empty()) {
+    err = canvas->GeneratePOVFiles(s);
+    if (!err.empty()) {
+      (void)wxMessageBox(err, wxT("Save Error"));
     }
-    break;
+  }
+}
 #endif
+
 #ifdef ANIM_OUTPUT_RIB
-  case CALCHART__ANIM_RIB_FRAME:
-    allframes = false;
-  case CALCHART__ANIM_RIB:
-    s = wxFileSelector(wxT("Save RIB File"), NULL, NULL, NULL, wxT("*.rib"),
-		       wxSAVE);
-    if (s) {
-      err = canvas->GenerateRIBFile(s, allframes);
-      if (err != NULL) {
-	(void)wxMessageBox(err, wxT("Save Error")); // should be const
-      }
+void AnimationFrame::OnCmdRIBFrame(wxCommandEvent& event) {
+  OnCmdRIB(event, false);
+}
+
+void AnimationFrame::OnCmdRIBAll(wxCommandEvent& event) {
+  OnCmdRIB(event, true);
+}
+
+void AnimationFrame::OnCmdRIB(wxCommandEvent& event, bool allframes) {
+  wxString s;
+  wxString err;
+  s = wxFileSelector(wxT("Save RIB File"), NULL, NULL, NULL, wxT("*.rib"),
+		     wxSAVE);
+  if (!s.empty()) {
+    err = canvas->GenerateRIBFile(s, allframes);
+    if (!err.empty()) {
+      (void)wxMessageBox(err, wxT("Save Error"));
     }
-    break;
+  }
+}
 #endif
-  case CALCHART__ANIM_CLOSE:
-    Close();
-    break;
+
+void AnimationFrame::OnCmdClose(wxCommandEvent& event) {
+  Close();
+}
+
+void AnimationFrame::OnCmd_anim_stop(wxCommandEvent& event) {
+  canvas->StopTimer();
+}
+
+void AnimationFrame::OnCmd_anim_play(wxCommandEvent& event) {
+  canvas->StartTimer();
+}
+
+void AnimationFrame::OnCmd_anim_prev_beat(wxCommandEvent& event) {
+  canvas->PrevBeat();
+}
+
+void AnimationFrame::OnCmd_anim_next_beat(wxCommandEvent& event) {
+  canvas->NextBeat();
+}
+
+void AnimationFrame::OnCmd_anim_prev_sheet(wxCommandEvent& event) {
+  canvas->PrevSheet();
+}
+
+void AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event) {
+  canvas->NextSheet();
+}
+
+void AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event) {
+  if (canvas->anim) {
+    canvas->anim->EnableCollisions((CollisionWarning)event.GetSelection());
+    canvas->anim->CheckCollisions();
+    canvas->Redraw();
   }
 }
 
-void AnimationFrame::OnMenuSelect(int id) {
-  char *msg = NULL;
+void AnimationFrame::OnSlider_anim_tempo(wxScrollEvent& event) {
+  canvas->SetTempo(event.GetPosition());
+}
 
-  switch (id) {
-  case CALCHART__ANIM_REANIMATE:
-    msg = wxT("Regenerate animation");
-    break;
-  case CALCHART__ANIM_SELECT_COLL:
-    msg = wxT("Select colliding points");
-    break;
-#ifdef ANIM_OUTPUT_POVRAY
-  case CALCHART__ANIM_POVRAY:
-    msg = wxT("Ouput files for rendering with POVRay");
-    break;
-#endif
-#ifdef ANIM_OUTPUT_RIB
-  case CALCHART__ANIM_RIB:
-    msg = wxT("Output RIB file for RenderMan rendering");
-    break;
-#endif
-  case CALCHART__ANIM_CLOSE:
-    msg = wxT("Close window");
-    break;
-  }
-  if (msg) SetStatusText(msg);
+void AnimationFrame::OnSlider_anim_gotosheet(wxScrollEvent& event) {
+  canvas->GotoSheet(event.GetPosition()-1);
+}
+
+void AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event) {
+  canvas->GotoBeat(event.GetPosition());
 }
 
 void AnimationFrame::UpdatePanel() {
@@ -658,75 +704,10 @@ void AnimationCanvas::StartTimer() {
   }
 }
 
-static void toolbar_anim_stop(CoolToolBar *tb) {
-  AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->StopTimer();
-}
-
-static void toolbar_anim_play(CoolToolBar *tb) {
-  AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->StartTimer();
-}
-
-static void toolbar_anim_prev_beat(CoolToolBar *tb) {
-  AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->PrevBeat();
-}
-
-static void toolbar_anim_next_beat(CoolToolBar *tb) {
-  AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->NextBeat();
-}
-
-static void toolbar_anim_prev_sheet(CoolToolBar *tb) {
-  AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->PrevSheet();
-}
-
-static void toolbar_anim_next_sheet(CoolToolBar *tb) {
-  AnimationFrame* af = (AnimationFrame*)tb->ourframe;
-  af->canvas->NextSheet();
-}
-
-static void collision_callback(wxChoice &ch, wxEvent&) {
-  AnimationCanvas* ac =
-    ((AnimationFrame*)(ch.GetParent()->GetParent()))->canvas;
-  if (ac->anim) {
-    ac->anim->EnableCollisions((CollisionWarning)ch.GetSelection());
-    ac->anim->CheckCollisions();
-    ac->Redraw();
-  }
-}
-
-static void slider_anim_tempo(wxObject &obj, wxEvent &) {
-  AnimationSlider *slider = (AnimationSlider*)&obj;
-  slider->canvas->SetTempo(slider->GetValue());
-}
-
-static void slider_gotosheet(wxObject &obj, wxEvent &) {
-  AnimationSlider *slider = (AnimationSlider*)&obj;
-  slider->canvas->GotoSheet(slider->GetValue()-1);
-}
-
-static void slider_gotobeat(wxObject &obj, wxEvent &) {
-  AnimationSlider *slider = (AnimationSlider*)&obj;
-  slider->canvas->GotoBeat(slider->GetValue());
-}
-
-static void AnimErrorClose(wxButton& button, wxEvent&) {
-  ((AnimErrorList*)button.GetParent()->GetParent())->Close();
-}
-
-static void AnimErrorClick(wxListBox& list, wxCommandEvent&) {
-  AnimErrorList *err = (AnimErrorList*)list.GetParent()->GetParent();
-
-  err->Update();
-}
-
 AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
-			     unsigned num, wxFrame *frame, const wxChar *title,
-			     int x, int y, int width, int height)
-: wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER), sheetnum(num) {
+			     unsigned num, wxFrame *frame, const wxString& title,
+			     const wxPoint& pos, const wxSize& size)
+: wxFrame(frame, wxID_ANY, title, pos, size, CC_FRAME_OTHER), sheetnum(num) {
   unsigned i, j;
 
   // Give it an icon
@@ -738,8 +719,7 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 
   panel = new wxPanel(this);
 
-  wxButton *closeBut = new wxButton(panel, (wxFunction)AnimErrorClose,
-				    wxT("Close"));
+  wxButton *closeBut = new wxButton(panel, wxID_CLOSE, wxT("Close"));
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -749,8 +729,7 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 
   closeBut->SetDefault();
 
-  list = new GoodListBox(panel, (wxFunction)AnimErrorClick, wxT(""),
-			 wxSINGLE, -1, -1, -1, -1);
+  list = new wxListBox(panel, CALCHART__anim_update, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
 
   for (i = 0, j = 0; i < NUM_ANIMERR; i++) {
     if (comp->error_markers[i].pntgroup) {
@@ -775,7 +754,7 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 
   node = new CC_WinNodeAnimErrors(lst, this);
 
-  OnSize(-1,-1);
+  Layout();
 
   Show(true);
 }
@@ -787,12 +766,20 @@ AnimErrorList::~AnimErrorList() {
   }
 }
 
-void AnimErrorList::OnSize(int, int) {
+void AnimErrorList::OnSize(wxSizeEvent& event) {
   Layout();
 }
 
-bool AnimErrorList::OnClose(void) {
-  return true;
+void AnimErrorList::OnCloseWindow(wxCloseEvent& event) {
+  Destroy();
+}
+
+void AnimErrorList::OnCmdClose(wxCommandEvent& event) {
+  Close();
+}
+
+void AnimErrorList::OnCmdUpdate(wxCommandEvent& event) {
+  Update(event.IsSelection() ? event.GetSelection() : -1);
 }
 
 void AnimErrorList::Unselect() {
@@ -804,8 +791,10 @@ void AnimErrorList::Unselect() {
 }
 
 void AnimErrorList::Update() {
-  int i = list->GetSelection();
-  
+  Update(list->GetSelection());
+}
+
+void AnimErrorList::Update(int i) {
   if (i >= 0) {
     for (unsigned j = 0; j < show->GetNumPoints(); j++) {
       show->Select(j, pointsels[i].pntgroup[j]);

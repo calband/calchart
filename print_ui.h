@@ -46,25 +46,25 @@ private:
   ShowPrintDialog *printreq;
 };
 
-class ShowPrintDialog : public wxDialogBox
+class ShowPrintDialog : public wxDialog
 {
 public:
   ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, bool printEPS,
-		  wxFrame *parent, char *title,
+		  wxFrame *parent, const wxString& title,
 		  bool isModal = false,
 		  int x = -1, int y = -1,
 		  int width = -1, int height = -1);
   ~ShowPrintDialog();
-  bool OnClose(void);
+  void OnCloseWindow(wxCloseEvent& event);
 
   inline bool Okay() { return ok; };
   void Update();
 
   CC_descr *show_descr;
   bool eps;
-  wxText *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
-  wxText *text_x, *text_y, *text_width, *text_height;
-  wxText *text_minyards;
+  wxTextCtrl *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
+  wxTextCtrl *text_x, *text_y, *text_width, *text_height;
+  wxTextCtrl *text_minyards;
   wxRadioBox *radio_orient, *radio_method;
   wxCheckBox *check_cont, *check_pages, *check_overview;
   wxFrame *frame;
@@ -72,6 +72,8 @@ public:
 
 private:
   bool ok;
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif

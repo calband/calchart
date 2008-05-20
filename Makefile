@@ -2,11 +2,10 @@
 
 PROG = calchart
 
-#MAKEDEP = makedepend
-MAKEDEP = ./makedep
+MAKEDEP = makedepend
 
-CONF_FLAGS = -DANIM_OUTPUT_POVRAY -DANIM_OUTPUT_RIB
-CONF_LIBS = -lribout
+CONF_FLAGS = #-DANIM_OUTPUT_POVRAY -DANIM_OUTPUT_RIB
+CONF_LIBS = #-lribout
 
 DFLAGS = -g -Wall $(CONF_FLAGS)
 
@@ -76,10 +75,9 @@ CXX = c++
 	$(LEX) $(LFLAGS) -t $*.l > $*.cpp
 
 %.bmp: %.xbm
+# use ImageMagick to convert
 	rm -f $@
-	chmod +x ./xbm2xpm
-	./xbm2xpm $< | xpmtoppm | ppmtobmp > $@
-#	cat $< | xbmtoppm | ppmtobmp > $@
+	convert $< $@
 
 runtime/%.eps: postscript/%.fig
 	$(FIG2EPS) $< $@

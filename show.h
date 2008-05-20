@@ -42,6 +42,8 @@
 #include "platconf.h"
 #include "linmath.h"
 
+#include <vector>
+
 typedef int16_t Coord;
 
 #define COORD_SHIFT 4
@@ -194,38 +196,42 @@ struct cc_reallyoldpoint {
   cc_oldcoord ref;
 };
 
-class CC_textchunk : public wxObject {
+class CC_textchunk {
 public:
   wxString text;
   enum PSFONT_TYPE font;
 };
 
-class CC_textline : public wxObject {
+typedef std::vector<CC_textchunk> CC_textchunk_list;
+
+class CC_textline {
 public:
   CC_textline();
   ~CC_textline();
 
-  wxList chunks;
+  CC_textchunk_list chunks;
   bool center;
   bool on_main;
   bool on_sheet;
 };
+
+typedef std::vector<CC_textline> CC_textline_list;
 
 class CC_text {
 public:
   CC_text();
   ~CC_text();
 
-  wxList lines;
+  CC_textline_list lines;
 };
 
 class CC_continuity {
 public:
   CC_continuity();
   ~CC_continuity();
-  void SetName(const char* s);
-  void SetText(const char* s);
-  void AppendText(const char* s);
+  void SetName(const wxChar* s);
+  void SetText(const wxChar* s);
+  void AppendText(const wxChar* s);
 
   CC_continuity *next;
   unsigned num;
@@ -317,7 +323,7 @@ public:
   CC_point()
     :flags(0), sym(SYMBOL_PLAIN), cont(0) {}
 
-  inline bool GetFlip() { return (bool)(flags & PNT_LABEL); }
+  inline bool GetFlip() const { return (bool)(flags & PNT_LABEL); }
   inline void Flip(bool val = true) {
     if (val) flags |= PNT_LABEL;
     else flags &= ~PNT_LABEL;
@@ -334,7 +340,7 @@ public:
 class CC_sheet {
 public:
   CC_sheet(CC_show *shw);
-  CC_sheet(CC_show *shw, const char *newname);
+  CC_sheet(CC_show *shw, const wxString& newname);
   CC_sheet(CC_sheet *sht);
   ~CC_sheet();
 
@@ -342,10 +348,10 @@ public:
 	    bool drawall = true, int point = -1);
 
   // internal use only
-  char *PrintStandard(FILE *fp);
-  char *PrintSpringshow(FILE *fp);
-  char *PrintOverview(FILE *fp);
-  char *PrintCont(FILE *fp);
+  const wxChar *PrintStandard(FILE *fp) const;
+  const wxChar *PrintSpringshow(FILE *fp) const;
+  const wxChar *PrintOverview(FILE *fp) const;
+  const wxChar *PrintCont(FILE *fp) const;
 
   unsigned GetNumSelectedPoints();
   int FindPoint(Coord x, Coord y, unsigned ref = 0);
@@ -356,33 +362,34 @@ public:
 
   CC_continuity *GetNthContinuity(unsigned i);
   CC_continuity *UserGetNthContinuity(unsigned i);
-  void SetNthContinuity(const char *text, unsigned i);
-  void UserSetNthContinuity(const char *text, unsigned i, wxWindow* win);
+  void SetNthContinuity(const wxString& text, unsigned i);
+  void UserSetNthContinuity(const wxString& text, unsigned i, wxWindow* win);
   CC_continuity *RemoveNthContinuity(unsigned i);
   void UserDeleteContinuity(unsigned i);
   void InsertContinuity(CC_continuity *newcont, unsigned i);
   void AppendContinuity(CC_continuity *newcont);
-  CC_continuity *UserNewContinuity(const char *name);
+  CC_continuity *UserNewContinuity(const wxString& name);
   unsigned NextUnusedContinuityNum();
   // creates if doesn't exist
   CC_continuity *GetStandardContinuity(SYMBOL_TYPE sym);
   // return 0 if not found else index+1
-  unsigned FindContinuityByName(const char *name);
+  unsigned FindContinuityByName(const wxString& name);
   bool ContinuityInUse(unsigned idx);
 
-  inline const wxChar *GetName() { return name; }
-  inline void SetName(const wxChar *newname) { name = newname; }
-  inline const wxChar *GetNumber() { return number; }
-  inline void SetNumber(const wxChar *newnumber) { number = newnumber; }
-  inline unsigned short GetBeats() { return beats; }
+  inline const wxString& GetName() const { return name; }
+  inline void SetName(const wxString& newname) { name = newname; }
+  inline const wxString& GetNumber() const { return number; }
+  inline void SetNumber(const wxString& newnumber) { number = newnumber; }
+  inline unsigned short GetBeats() const { return beats; }
   inline void SetBeats(unsigned short b) { beats = b; }
   inline bool IsInAnimation() { return (beats != 0); }
-  void UserSetName(const char *newname);
+  void UserSetName(const wxString& newname);
   void UserSetBeats(unsigned short b);
   bool SetPointsSym(SYMBOL_TYPE sym);
   bool SetPointsLabel(bool right);
   bool SetPointsLabelFlip();
 
+  inline const CC_point& GetPoint(unsigned i) const { return pts[i]; }
   inline CC_point& GetPoint(unsigned i) { return pts[i]; }
   inline void SetPoint(const cc_oldpoint& val, unsigned i);
 
@@ -420,46 +427,47 @@ class ShowMode;
 class CC_show {
 public:
   CC_show(unsigned npoints = 0);
-  CC_show(const char *file);
+  CC_show(const wxString& file);
   ~CC_show();
 
-  wxString* ImportContinuity(const wxString& file);
+  wxString ImportContinuity(const wxString& file);
 
   int Print(FILE *fp, bool eps = false, bool overview = false,
-	    unsigned curr_ss = 0, int min_yards = 50);
+	    unsigned curr_ss = 0, int min_yards = 50) const;
 
-  inline const wxChar *GetError() { return error; }
-  inline bool Ok() { return okay; }
+  inline const wxString& GetError() const { return error; }
+  inline bool Ok() const { return okay; }
 
   void Append(CC_show *shw);
   void Append(CC_sheet *newsheets);
-  char *Save(const char *filename);
-  char *Autosave();
-  void ClearAutosave();
+  wxString Save(const wxString& filename) const;
+  wxString Autosave() const;
+  void ClearAutosave() const;
 
-  inline void FlushAllTextWindows() {
+  inline void FlushAllTextWindows() const {
     winlist->FlushDescr(); winlist->FlushContinuity();
   }
 
-  inline const wxChar *GetName() { return name; }
-  const wxChar *UserGetName();
-  void SetName(const wxChar *newname);
-  inline void UserSetName(const wxChar *newname) {
+  inline const wxString& GetName() { return name; }
+  wxString UserGetName() const;
+  void SetName(const wxString& newname) const;
+  inline void UserSetName(const wxString& newname) const {
     SetName(newname); winlist->ChangeName();
   }
 
-  inline const wxChar *GetDescr() { return descr; }
-  inline const wxChar *UserGetDescr() { winlist->FlushDescr(); return descr; }
-  inline void SetDescr(const wxChar *newdescr) { descr = newdescr; }
-  void UserSetDescr(const wxChar *newdescr, wxWindow* win);
+  inline const wxString& GetDescr() const { return descr; }
+  inline const wxString& UserGetDescr() const { winlist->FlushDescr(); return descr; }
+  inline void SetDescr(const wxString& newdescr) { descr = newdescr; }
+  void UserSetDescr(const wxString& newdescr, wxWindow* win);
 
-  inline bool Modified() { return modified; }
-  inline void SetModified(bool b) { modified = b; winlist->UpdateStatusBar(); }
+  inline bool Modified() const { return modified; }
+  inline void SetModified(bool b) const { modified = b; winlist->UpdateStatusBar(); }
 
-  inline unsigned short GetNumSheets() { return numsheets; }
-  inline CC_sheet *GetSheet() { return sheets; }
+  inline unsigned short GetNumSheets() const { return numsheets; }
+  inline CC_sheet *GetSheet() const { return sheets; }
+  const CC_sheet *GetNthSheet(unsigned n) const;
   CC_sheet *GetNthSheet(unsigned n);
-  unsigned GetSheetPos(CC_sheet *sheet);
+  unsigned GetSheetPos(const CC_sheet *sheet) const;
   CC_sheet *RemoveNthSheet(unsigned sheetidx);
   CC_sheet *RemoveLastSheets(unsigned numtoremain);
   void DeleteNthSheet(unsigned sheetidx);
@@ -467,51 +475,58 @@ public:
   void InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx);
   void InsertSheet(CC_sheet *nsheet, unsigned sheetidx);
   void UserInsertSheet(CC_sheet *sht, unsigned sheetidx);
-  inline unsigned short GetNumPoints() { return numpoints; }
+  inline unsigned short GetNumPoints() const { return numpoints; }
   void SetNumPoints(unsigned num, unsigned columns);
   void SetNumPointsInternal(unsigned num); //Only for creating show class
   bool RelabelSheets(unsigned sht);
 
-  inline char *GetPointLabel(unsigned i) { return pt_labels[i]; }
-  inline bool& GetboolLandscape() { return print_landscape; }
-  inline bool& GetboolDoCont() { return print_do_cont; }
-  inline bool& GetboolDoContSheet() { return print_do_cont_sheet; }
+  inline const wxString& GetPointLabel(unsigned i) const { return pt_labels[i]; }
+  inline wxString& GetPointLabel(unsigned i) { return pt_labels[i]; }
+  inline const wxString* GetPointLabels() const { return pt_labels; }
+  inline wxString* GetPointLabels() { return pt_labels; }
+  inline bool GetBoolLandscape() const { return print_landscape; }
+  inline bool GetBoolDoCont() const { return print_do_cont; }
+  inline bool GetBoolDoContSheet() const { return print_do_cont_sheet; }
+  inline bool& GetBoolLandscape() { return print_landscape; }
+  inline bool& GetBoolDoCont() { return print_do_cont; }
+  inline bool& GetBoolDoContSheet() { return print_do_cont_sheet; }
 
   bool UnselectAll();
-  inline bool IsSelected(unsigned i) { return selections[i]; }
+  inline bool IsSelected(unsigned i) const { return selections[i]; }
   void Select(unsigned i, bool val = true);
   inline void SelectToggle(unsigned i) {
     selections[i] = selections[i] ? false:true;
   }
-  inline wxList& GetSelectionList() { return selectionList; }
+  typedef std::vector<unsigned> SelectionList;
+  inline SelectionList& GetSelectionList() { return selectionList; }
 
   CC_WinListShow *winlist;
   ShowUndoList *undolist;
   ShowMode *mode;
 
 private:
-  void PrintSheets(FILE *fp); // called by Print()
-  char *SaveInternal(const char *filename);
-  void SetAutosaveName(const char *realname);
+  void PrintSheets(FILE *fp) const; // called by Print()
+  wxString SaveInternal(const wxString& filename) const;
+  void SetAutosaveName(const wxString& realname) const;
 
-  void AddError(const wxString& str) {
+  void AddError(const wxString& str) const {
     error += str + '\n';
     okay = false;
   }
 
-  wxString error;
-  bool okay;
+  mutable wxString error;
+  mutable bool okay;
 
-  wxString name;
-  wxString autosave_name;
+  mutable wxString name;
+  mutable wxString autosave_name;
   wxString descr;
   unsigned short numpoints;
   unsigned short numsheets;
   CC_sheet *sheets;
-  char (*pt_labels)[4];
+  wxString *pt_labels;
   bool *selections; // array for each point
-  wxList selectionList; // order of selections
-  bool modified;
+  std::vector<unsigned> selectionList; // order of selections
+  mutable bool modified;
   bool print_landscape;
   bool print_do_cont;
   bool print_do_cont_sheet;

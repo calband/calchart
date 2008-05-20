@@ -38,14 +38,11 @@
 #include "ccvers.h"
 
 #include <wx/help.h>
-
-#ifdef wx_msw
-#include <direct.h>
-#else
-#include <dirent.h>
+#ifdef __WXMSW__
+#include <wx/helpwin.h>
 #endif
 
-#ifdef wx_x
+#ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
 #include "tb_right.xbm"
 #include "tb_box.xbm"
@@ -77,58 +74,35 @@
 #include "tb_nshet.xbm"
 #endif
 
-static void toolbar_prev_ss(CoolToolBar *tb);
-static void toolbar_next_ss(CoolToolBar *tb);
-static void toolbar_box(CoolToolBar *tb);
-static void toolbar_poly(CoolToolBar *tb);
-static void toolbar_lasso(CoolToolBar *tb);
-static void toolbar_move(CoolToolBar *tb);
-static void toolbar_line(CoolToolBar *tb);
-static void toolbar_rot(CoolToolBar *tb);
-static void toolbar_shear(CoolToolBar *tb);
-static void toolbar_reflect(CoolToolBar *tb);
-static void toolbar_size(CoolToolBar *tb);
-static void toolbar_genius(CoolToolBar *tb);
-static void toolbar_label_left(CoolToolBar *tb);
-static void toolbar_label_right(CoolToolBar *tb);
-static void toolbar_label_flip(CoolToolBar *tb);
-static void toolbar_setsym0(CoolToolBar *tb);
-static void toolbar_setsym1(CoolToolBar *tb);
-static void toolbar_setsym2(CoolToolBar *tb);
-static void toolbar_setsym3(CoolToolBar *tb);
-static void toolbar_setsym4(CoolToolBar *tb);
-static void toolbar_setsym5(CoolToolBar *tb);
-static void toolbar_setsym6(CoolToolBar *tb);
-static void toolbar_setsym7(CoolToolBar *tb);
 static void refnum_callback(wxObject &obj, wxEvent &ev);
 static void slider_sheet_callback(wxObject &obj, wxEvent &ev);
 static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
 
 static ToolBarEntry main_tb[] = {
-  { 0, NULL, "Previous stuntsheet", toolbar_prev_ss },
-  { TOOLBAR_SPACE, NULL, "Next stuntsheet", toolbar_next_ss },
-  { TOOLBAR_TOGGLE, NULL, "Select points with box", toolbar_box },
-  { TOOLBAR_TOGGLE, NULL, "Select points with polygon", toolbar_poly },
+  { 0, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
+  { TOOLBAR_SPACE, NULL, wxT("Next stuntsheet"), CALCHART__next_ss },
+  { TOOLBAR_TOGGLE, NULL, wxT("Select points with box"), CALCHART__box },
+  { TOOLBAR_TOGGLE, NULL, wxT("Select points with polygon"), CALCHART__poly },
   { TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL,
-    "Select points with lasso", toolbar_lasso },
-  { TOOLBAR_TOGGLE, NULL, "Translate points", toolbar_move },
-  { TOOLBAR_TOGGLE, NULL, "Move points into line", toolbar_line },
-  { TOOLBAR_TOGGLE, NULL, "Rotate block", toolbar_rot },
-  { TOOLBAR_TOGGLE, NULL, "Shear block", toolbar_shear },
-  { TOOLBAR_TOGGLE, NULL, "Reflect block", toolbar_reflect },
-  { TOOLBAR_TOGGLE, NULL, "Resize block", toolbar_size },
-  { TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL, "Genius move", toolbar_genius },
-  { 0, NULL, "Label on left", toolbar_label_left },
-  { 0, NULL, "Flip label", toolbar_label_flip },
-  { TOOLBAR_SPACE, NULL, "Label on right", toolbar_label_right },
-  { 0, NULL, "Change to plainmen", toolbar_setsym0 },
-  { 0, NULL, "Change to solidmen", toolbar_setsym1 },
-  { 0, NULL, "Change to backslash men", toolbar_setsym2 },
-  { 0, NULL, "Change to slash men", toolbar_setsym3 },
-  { 0, NULL, "Change to x men", toolbar_setsym4 },
-  { 0, NULL, "Change to solid backslash men", toolbar_setsym5 },
-  { 0, NULL, "Change to solid slash men", toolbar_setsym6 },
-  { 0, NULL, "Change to solid x men", toolbar_setsym7 }
+    wxT("Select points with lasso"), CALCHART__lasso },
+  { TOOLBAR_TOGGLE, NULL, wxT("Translate points"), CALCHART__move },
+  { TOOLBAR_TOGGLE, NULL, wxT("Move points into line"), CALCHART__line },
+  { TOOLBAR_TOGGLE, NULL, wxT("Rotate block"), CALCHART__rot },
+  { TOOLBAR_TOGGLE, NULL, wxT("Shear block"), CALCHART__shear },
+  { TOOLBAR_TOGGLE, NULL, wxT("Reflect block"), CALCHART__reflect },
+  { TOOLBAR_TOGGLE, NULL, wxT("Resize block"), CALCHART__size },
+  { TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL, wxT("Genius move"), CALCHART__genius },
+  { 0, NULL, wxT("Label on left"), CALCHART__label_left },
+  { 0, NULL, wxT("Flip label"), CALCHART__label_flip },
+  { TOOLBAR_SPACE, NULL, wxT("Label on right"), CALCHART__label_right },
+  { 0, NULL, wxT("Change to plainmen"), CALCHART__setsym0 },
+  { 0, NULL, wxT("Change to solidmen"), CALCHART__setsym1 },
+  { 0, NULL, wxT("Change to backslash men"), CALCHART__setsym2 },
+  { 0, NULL, wxT("Change to slash men"), CALCHART__setsym3 },
+  { 0, NULL, wxT("Change to x men"), CALCHART__setsym4 },
+  { 0, NULL, wxT("Change to solid backslash men"), CALCHART__setsym5 },
+  { 0, NULL, wxT("Change to solid slash men"), CALCHART__setsym6 },
+  { 0, NULL, wxT("Change to solid x men"), CALCHART__setsym7 }
 };
 
 #define TOOLBAR_BOX 2
@@ -137,17 +111,17 @@ static ToolBarEntry main_tb[] = {
 extern ToolBarEntry anim_tb[];
 extern ToolBarEntry printcont_tb[];
 
-char *gridtext[] = {
-  "None",
-  "1",
-  "2",
-  "4",
-  "Mil",
-  "2-Mil",
+const wxChar *gridtext[] = {
+  wxT("None"),
+  wxT("1"),
+  wxT("2"),
+  wxT("4"),
+  wxT("Mil"),
+  wxT("2-Mil"),
 };
 
-static char *file_wild = FILE_WILDCARDS;
-static char *file_save_wild = FILE_SAVE_WILDCARDS;
+static const wxChar *file_wild = FILE_WILDCARDS;
+static const wxChar *file_save_wild = FILE_SAVE_WILDCARDS;
 
 struct GridValue {
   Coord num, sub;
@@ -163,11 +137,11 @@ GridValue gridvalue[] = {
 };
 
 // This statement initializes the whole application and calls OnInit
-CalChartApp theApp;
+IMPLEMENT_APP(CalChartApp)
 
 static MainFrameList *window_list;
 
-wxHelpInstance *help_inst = NULL;
+wxHelpControllerBase *help_inst = NULL;
 
 TopFrame *topframe = NULL;
 
@@ -179,6 +153,87 @@ wxFont *pointLabelFont;
 wxFont *yardLabelFont;
 
 ShowModeList *modelist;
+
+BEGIN_EVENT_TABLE(TopFrame, wxFrame)
+  EVT_CLOSE(TopFrame::OnCloseWindow)
+#ifdef CC_USE_MDI
+  EVT_MENU(wxID_NEW, TopFrame::OnCmdNew)
+  EVT_MENU(wxID_OPEN, TopFrame::OnCmdLoad)
+  EVT_MENU(wxID_EXIT, TopFrame::OnCmdExit)
+  EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
+  EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
+#else
+  EVT_BUTTON(wxID_NEW, TopFrame::OnCmdNew)
+  EVT_BUTTON(wxID_OPEN, TopFrame::OnCmdLoad)
+  EVT_BUTTON(wxID_QUIT, TopFrame::OnCmdExit)
+#endif
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(MainFrame, CC_MDIChildFrame)
+  EVT_CLOSE(MainFrame::OnCloseWindow)
+  EVT_MENU(wxID_NEW, MainFrame::OnCmdNew)
+  EVT_MENU(CALCHART__NEW_WINDOW, MainFrame::OnCmdNewWindow)
+  EVT_MENU(wxID_OPEN, MainFrame::OnCmdLoad)
+  EVT_MENU(CALCHART__APPEND_FILE, MainFrame::OnCmdAppend)
+  EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
+  EVT_MENU(wxID_SAVE, MainFrame::OnCmdSave)
+  EVT_MENU(wxID_SAVEAS, MainFrame::OnCmdSaveAs)
+  EVT_MENU(wxID_PRINT, MainFrame::OnCmdPrint)
+  EVT_MENU(CALCHART__PRINT_EPS, MainFrame::OnCmdPrintEPS)
+  EVT_MENU(wxID_CLOSE, MainFrame::OnCmdClose)
+  EVT_MENU(wxID_EXIT, MainFrame::OnCmdExit)
+  EVT_MENU(wxID_UNDO, MainFrame::OnCmdUndo)
+  EVT_MENU(wxID_REDO, MainFrame::OnCmdRedo)
+  EVT_MENU(CALCHART__INSERT_BEFORE, MainFrame::OnCmdInsertBefore)
+  EVT_MENU(CALCHART__INSERT_AFTER, MainFrame::OnCmdInsertAfter)
+  EVT_MENU(wxID_DELETE, MainFrame::OnCmdDelete)
+  EVT_MENU(CALCHART__RELABEL, MainFrame::OnCmdRelabel)
+  EVT_MENU(CALCHART__CLEAR_REF, MainFrame::OnCmdClearRef)
+  EVT_MENU(CALCHART__EDIT_CONTINUITY, MainFrame::OnCmdEditCont)
+  EVT_MENU(CALCHART__EDIT_PRINTCONT, MainFrame::OnCmdEditPrintCont)
+  EVT_MENU(CALCHART__SET_TITLE, MainFrame::OnCmdSetTitle)
+  EVT_MENU(CALCHART__SET_BEATS, MainFrame::OnCmdSetBeats)
+  EVT_MENU(CALCHART__SETUP, MainFrame::OnCmdSetup)
+  EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
+  EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
+  EVT_MENU(CALCHART__ROWS, MainFrame::OnCmdRows)
+  EVT_MENU(CALCHART__COLUMNS, MainFrame::OnCmdColumns)
+  EVT_MENU(CALCHART__NEAREST, MainFrame::OnCmdNearest)
+  EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
+  EVT_MENU(wxID_HELP, MainFrame::OnCmdHelp)
+  EVT_MENU_HIGHLIGHT(wxID_SAVE, MainFrame::OnMenuSelect)
+  EVT_MENU_HIGHLIGHT(wxID_UNDO, MainFrame::OnMenuSelect)
+  EVT_MENU_HIGHLIGHT(wxID_REDO, MainFrame::OnMenuSelect)
+  EVT_MENU(CALCHART__prev_ss, MainFrame::OnCmd_prev_ss)
+  EVT_MENU(CALCHART__next_ss, MainFrame::OnCmd_next_ss)
+  EVT_MENU(CALCHART__box, MainFrame::OnCmd_box)
+  EVT_MENU(CALCHART__poly, MainFrame::OnCmd_poly)
+  EVT_MENU(CALCHART__lasso, MainFrame::OnCmd_lasso)
+  EVT_MENU(CALCHART__move, MainFrame::OnCmd_move)
+  EVT_MENU(CALCHART__line, MainFrame::OnCmd_line)
+  EVT_MENU(CALCHART__rot, MainFrame::OnCmd_rot)
+  EVT_MENU(CALCHART__shear, MainFrame::OnCmd_shear)
+  EVT_MENU(CALCHART__reflect, MainFrame::OnCmd_reflect)
+  EVT_MENU(CALCHART__size, MainFrame::OnCmd_size)
+  EVT_MENU(CALCHART__genius, MainFrame::OnCmd_genius)
+  EVT_MENU(CALCHART__label_left, MainFrame::OnCmd_label_left)
+  EVT_MENU(CALCHART__label_right, MainFrame::OnCmd_label_right)
+  EVT_MENU(CALCHART__label_flip, MainFrame::OnCmd_label_flip)
+  EVT_MENU(CALCHART__setsym0, MainFrame::OnCmd_setsym0)
+  EVT_MENU(CALCHART__setsym1, MainFrame::OnCmd_setsym1)
+  EVT_MENU(CALCHART__setsym2, MainFrame::OnCmd_setsym2)
+  EVT_MENU(CALCHART__setsym3, MainFrame::OnCmd_setsym3)
+  EVT_MENU(CALCHART__setsym4, MainFrame::OnCmd_setsym4)
+  EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
+  EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
+  EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(FieldCanvas, AutoScrollCanvas)
+  EVT_CHAR(FieldCanvas::OnChar)
+  EVT_MOUSE_EVENTS(FieldCanvas::OnMouseEvent)
+  EVT_PAINT(FieldCanvas::OnPaint)
+END_EVENT_TABLE()
 
 CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
@@ -194,7 +249,7 @@ void CC_WinNodeMain::SetShow(CC_show *shw) {
   ChangeName();
 }
 void CC_WinNodeMain::ChangeName() {
-  frame->SetTitle((char *)frame->field->show_descr.show->UserGetName());
+  frame->SetTitle(frame->field->show_descr.show->UserGetName());
   winlist.ChangeName();
 }
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
@@ -308,26 +363,25 @@ void CC_WinNodeMain::SetDescr(wxWindow* win) {
   winlist.SetDescr(win);
 }
 
-// Create windows and return main app frame
-wxFrame *CalChartApp::OnInit(void)
+// Create windows and initialize app
+bool CalChartApp::OnInit()
 {
-  char *runtimepath = "runtime";
+  wxString runtimepath(wxT("runtime"));
   int realargc = argc;
 
   modelist = new ShowModeList();
 
   if (argc > 1) {
-    DIR *d = opendir(argv[argc-1]);
-    if (d != NULL) {
-      runtimepath = argv[argc-1];
-      closedir(d);
+    wxString arg(argv[argc-1]);
+    if (wxDirExists(arg)) {
+      runtimepath = arg;
       realargc--;
     }
   }
 
-  char *s = ReadConfig(runtimepath);
-  if (s) {
-    (void)wxMessageBox(s, "CalChart");
+  wxString s = ReadConfig(runtimepath);
+  if (!s.empty()) {
+    (void)wxMessageBox(s, wxT("CalChart"));
   }
 
   //Create toolbar bitmaps
@@ -388,13 +442,6 @@ wxFrame *CalChartApp::OnInit(void)
 
   window_list = new MainFrameList();
 
-  {
-    wxString helpfile(program_dir);
-    helpfile.Append(PATH_SEPARATOR "charthlp");
-    help_inst = new wxHelpInstance(true);
-    help_inst->Initialize(helpfile.GetData());
-  }
-
   topframe = new TopFrame(300, 100);
   topframe->Maximize(true);
   for (i = 1; i < realargc; i++) {
@@ -404,20 +451,33 @@ wxFrame *CalChartApp::OnInit(void)
     if (shw->Ok()) {
       topframe->NewShow(shw);
     } else {
-      (void)wxMessageBox((char*)shw->GetError(), "Load Error");
+      (void)wxMessageBox(shw->GetError(), wxT("Load Error"));
       delete shw;
     }
   }
-  if (!shows_dir.Empty()) {
-    wxSetWorkingDirectory(shows_dir.GetData());
+
+  {
+    wxString helpfile(program_dir);
+    helpfile.Append(PATH_SEPARATOR wxT("charthlp"));
+#ifdef __WXMSW__
+    help_inst = new wxWinHelpController(topframe);
+#else
+    help_inst = new wxHelpController;
+#endif
+    help_inst->Initialize(helpfile);
+  }
+
+  if (!shows_dir.empty()) {
+    wxSetWorkingDirectory(shows_dir);
   }
 
   SetAutoSave(autosave_interval);
+  SetTopWindow(topframe);
 
-  return topframe;
+  return true;
 }
 
-int CalChartApp::OnExit(void) {
+int CalChartApp::OnExit() {
   if (modelist) delete modelist;
   if (help_inst) delete help_inst;
   if (window_list) delete window_list;
@@ -598,10 +658,7 @@ void CC_lasso::OnMove(const CC_coord& p, MainFrame *) {
 }
 
 void CC_lasso::Clear() {
-  for (wxNode *n = pntlist.First(); n != NULL; n = n->Next()) {
-    delete n->Data();
-  }
-  pntlist.Clear();
+  pntlist.clear();
 }
 
 void CC_lasso::Start(const CC_coord& p) {
@@ -611,67 +668,53 @@ void CC_lasso::Start(const CC_coord& p) {
 
 // Closes polygon
 void CC_lasso::End() {
-  wxNode *n = pntlist.Last();
-  wxPoint *first;
-  if (n) {
-    first = (wxPoint*)n->Data();
-    wxPoint *p = new wxPoint(first->x, first->y);
-    pntlist.Insert(p);
+  if (!pntlist.empty()) {
+    pntlist.push_back(pntlist[0]);
   }
 }
 
 void CC_lasso::Append(const CC_coord& p) {
-  pntlist.Insert(new wxPoint(p.x, p.y));
+  pntlist.push_back(wxPoint(p.x, p.y));
 }
 
 // Test if inside polygon using odd-even rule
 bool CC_lasso::Inside(const CC_coord& p) const {
   bool parity = false;
-  wxNode *last;
-  wxNode *n = ((wxList*)&pntlist)->First();
-  if (n != NULL) {
-    last = n;
-    n = n->Next();
-    while (n != NULL) {
-      if (CrossesLine((wxPoint*)last->Data(), (wxPoint*)n->Data(), p)) {
-	parity ^= true;
-      }
-      last = n;
-      n = n->Next();
+  for (PointList::const_iterator i=pntlist.begin();
+       i != pntlist.end();
+       ) {
+    PointList::const_iterator prev(i);
+    ++i;
+    if (CrossesLine(*prev, *i, p)) {
+      parity = !parity;
     }
   }
   return parity;
 }
 
 void CC_lasso::Draw(wxDC *dc, float x, float y) const {
-  dc->DrawLines((wxList*)&pntlist, x, y);
+  dc->DrawLines(pntlist.size(), const_cast<wxPoint*>(&pntlist[0]), x, y);
 }
 
 void CC_lasso::Drag(const CC_coord& p) {
-  wxNode *n1;
-  wxPoint *p1;
-
-  n1 = pntlist.First();
-  if (n1 != NULL) {
-    p1 = (wxPoint*)n1->Data();
-    p1->x = p.x;
-    p1->y = p.y;
+  if (!pntlist.empty()) {
+    pntlist.back() = wxPoint(p.x, p.y);
   }
 }
 
-bool CC_lasso::CrossesLine(const wxPoint* start, const wxPoint* end,
+bool CC_lasso::CrossesLine(const wxPoint& start, const wxPoint& end,
 			   const CC_coord& p) const {
-  if (start->y > end->y) {
-    if (!((p.y <= start->y) && (p.y > end->y))) {
+  if (start.y > end.y) {
+    if (!((p.y <= start.y) && (p.y > end.y))) {
       return false;
     }
   } else {
-    if (!((p.y <= end->y) && (p.y > start->y))) {
+    if (!((p.y <= end.y) && (p.y > start.y))) {
       return false;
     }
   }
   if (p.x >=
-      ((end->x-start->x) * (p.y-start->y) / (end->y-start->y) + start->x)) {
+      ((end.x-start.x) * (p.y-start.y) / (end.y-start.y) + start.x)) {
     return true;
   }
   return false;
@@ -687,41 +730,24 @@ void CC_poly::OnMove(const CC_coord& p, MainFrame *) {
   Drag(p);
 }
 
-#ifndef CC_USE_MDI
-static void new_window(wxButton& button, wxEvent&) {
-  TopFrame *f = (TopFrame*)button.GetParent()->GetParent();
-  f->NewShow();
-}
-
-static void open_window(wxButton& button, wxEvent&) {
-  TopFrame *f = (TopFrame*)button.GetParent()->GetParent();
-  f->OpenShow();
-}
-
-static void quit_callback(wxButton &button, wxEvent &) {
-  TopFrame *f = (TopFrame*)button.GetParent()->GetParent();
-  f->Quit();
-}
-#endif
-
 TopFrame::TopFrame(int width, int height):
-  wxFrame(NULL, "CalChart", 0, 0, width, height, CC_FRAME_TOP) {
+  CC_MDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(width, height), CC_FRAME_TOP) {
   // Give it an icon
   SetBandIcon(this);
 
 #ifdef CC_USE_MDI
   wxMenu *file_menu = new wxMenu;
-  file_menu->Append(CALCHART__NEW, "&New Show");
-  file_menu->Append(CALCHART__LOAD_FILE, "&Open...");
-  file_menu->Append(CALCHART__QUIT, "&Quit");
+  file_menu->Append(wxID_NEW, wxT("&New Show"), wxT("Create a new show"));
+  file_menu->Append(wxID_OPEN, wxT("&Open..."), wxT("Load a saved show"));
+  file_menu->Append(wxID_EXIT, wxT("&Quit"), wxT("Quit CalChart"));
 
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(CALCHART__ABOUT, "&About CalChart...");
-  help_menu->Append(CALCHART__HELP, "&Help on CalChart...");
+  help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
+  help_menu->Append(wxID_HELP, wxT("&Help on CalChart..."), wxT("Help on using CalChart"));
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, "&File");
-  menu_bar->Append(help_menu, "&Help");
+  menu_bar->Append(file_menu, wxT("&File"));
+  menu_bar->Append(help_menu, wxT("&Help"));
   SetMenuBar(menu_bar);
 #else
   int w, h;
@@ -729,9 +755,9 @@ TopFrame::TopFrame(int width, int height):
   wxPanel *p = new wxPanel(this);
   p->SetHorizontalSpacing(0);
   p->SetVerticalSpacing(0);
-  (void)new wxButton(p, (wxFunction)new_window, "&New");
-  (void)new wxButton(p, (wxFunction)open_window, "&Open");
-  (void)new wxButton(p, (wxFunction)quit_callback, "&Quit");
+  (void)new wxButton(p, wxID_NEW, wxT("&New"));
+  (void)new wxButton(p, wxID_OPEN, wxT("&Open"));
+  (void)new wxButton(p, wxID_QUIT, wxT("&Quit"));
   p->Fit();
   p->GetSize(&w, &h);
   SetClientSize(w, h);
@@ -740,64 +766,56 @@ TopFrame::TopFrame(int width, int height):
   SetSizeHints(w, h, w, h);
 #endif
 #endif
-  DragAcceptFiles(true);
+  SetDropTarget(new TopFrameDropTarget(this));
   Show(true);
 }
 
 TopFrame::~TopFrame() {
 }
 
-bool TopFrame::OnClose(void) {
-  return window_list->CloseAllWindows();
+void TopFrame::OnCloseWindow(wxCloseEvent& event) {
+  window_list->CloseAllWindows();
 }
 
 #ifdef CC_USE_MDI
-void TopFrame::OnMenuCommand(int id) {
-  switch (id) {
-  case CALCHART__NEW:
-    NewShow();
-    break;
-  case CALCHART__LOAD_FILE:
-    OpenShow();
-    break;
-  case CALCHART__QUIT:
-    Quit();
-    break;
-  case CALCHART__ABOUT:
-    About();
-    break;
-  case CALCHART__HELP:
-    Help();
-    break;
-  }
+void TopFrame::OnCmdNew(wxCommandEvent& event) {
+  NewShow();
 }
 
-void TopFrame::OnMenuSelect(int id) {
+void TopFrame::OnCmdLoad(wxCommandEvent& event) {
+  OpenShow();
+}
+
+void TopFrame::OnCmdExit(wxCommandEvent& event) {
+  Quit();
+}
+
+void TopFrame::OnCmdAbout(wxCommandEvent& event) {
+  About();
+}
+
+void TopFrame::OnCmdHelp(wxCommandEvent& event) {
+  Help();
 }
 #endif
-
-void TopFrame::OnDropFiles(int n, char *files[], int, int) {
-  for (int i = 0; i < n; i++) {
-    OpenShow(files[i]);
-  }
-}
 
 void TopFrame::NewShow(CC_show *shw) {
   (void)new MainFrame(this, 50, 50,
 		      window_default_width, window_default_height, shw);
 }
 
-void TopFrame::OpenShow(const char *filename) {
+void TopFrame::OpenShow(const wxString& filename) {
   CC_show *shw;
 
-  if (filename == NULL)
-    filename = wxFileSelector("Load show", NULL, NULL, NULL, file_wild);
-  if (filename) {
-    shw = new CC_show(filename);
+  wxString s(filename);
+  if (s.empty())
+    s = wxFileSelector(wxT("Load show"), NULL, NULL, NULL, file_wild);
+  if (!s.empty()) {
+    shw = new CC_show(s);
     if (shw->Ok()) {
       NewShow(shw);
     } else {
-      (void)wxMessageBox((char*)shw->GetError(), "Load Error");
+      (void)wxMessageBox(shw->GetError(), wxT("Load Error"));
       delete shw;
     }
   }
@@ -808,25 +826,25 @@ void TopFrame::Quit() {
 }
 
 void TopFrame::About() {
-  (void)wxMessageBox("CalChart " CC_VERSION "\nAuthor: Gurk, aka Garrick Meeker\n"
-		     "http://www.calband.berkeley.edu/calchart\n"
-		     "Copyright (c) 1994-2008 Garrick Meeker\n"
-		     "\n"
-		     "This program is free software: you can redistribute it and/or modify\n"
-		     "it under the terms of the GNU General Public License as published by\n"
-		     "the Free Software Foundation, either version 3 of the License, or\n"
-		     "(at your option) any later version.\n"
-		     "\n"
-		     "This program is distributed in the hope that it will be useful,\n"
-		     "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-		     "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-		     "GNU General Public License for more details.\n"
-		     "\n"
-		     "You should have received a copy of the GNU General Public License\n"
-		     "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n"
-		     "\n"
-		     "Compiled on " __DATE__ " at " __TIME__,
-		     "About CalChart");
+  (void)wxMessageBox(wxT("CalChart ") wxT(CC_VERSION) wxT("\nAuthor: Gurk Meeker\n")
+		     wxT("http://calchart.sourceforge.net\n")
+		     wxT("Copyright (c) 1994-2008 Garrick Meeker\n")
+		     wxT("\n")
+		     wxT("This program is free software: you can redistribute it and/or modify\n")
+		     wxT("it under the terms of the GNU General Public License as published by\n")
+		     wxT("the Free Software Foundation, either version 3 of the License, or\n")
+		     wxT("(at your option) any later version.\n")
+		     wxT("\n")
+		     wxT("This program is distributed in the hope that it will be useful,\n")
+		     wxT("but WITHOUT ANY WARRANTY; without even the implied warranty of\n")
+		     wxT("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n")
+		     wxT("GNU General Public License for more details.\n")
+		     wxT("\n")
+		     wxT("You should have received a copy of the GNU General Public License\n")
+		     wxT("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n")
+		     wxT("\n")
+		     wxT("Compiled on ") __TDATE__ wxT(" at ") __TTIME__,
+		     wxT("About CalChart"));
 }
 
 void TopFrame::Help() {
@@ -834,10 +852,17 @@ void TopFrame::Help() {
   help_inst->DisplayContents();
 }
 
+bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
+  for (size_t i = 0; i < filenames.Count(); i++) {
+    frame->OpenShow(filenames[i]);
+  }
+  return true;
+}
+
 // Main frame constructor
 MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 		     CC_show *show, MainFrame *other_frame):
-  wxFrameWithStuff(frame, "CalChart", x, y, w, h, CC_FRAME_CHILD),
+  CC_MDIChildFrame(frame, wxT("CalChart"), x, y, w, h, CC_FRAME_CHILD),
   field(NULL)
 {
   unsigned ss;
@@ -850,67 +875,65 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
   SetBandIcon(this);
 
   // Give it a status line
-  CreateStatusLine(2);
-  SetStatusText("Welcome to Calchart 3.0");
+  CreateStatusBar();
+  SetStatusText(wxT("Welcome to Calchart 3.0"));
 
   // Make a menubar
   wxMenu *file_menu = new wxMenu;
-  file_menu->Append(CALCHART__NEW, "&New Show");
-  file_menu->Append(CALCHART__NEW_WINDOW, "New &Window");
-  file_menu->Append(CALCHART__LOAD_FILE, "&Open...");
-  file_menu->Append(CALCHART__APPEND_FILE, "&Append...");
-  file_menu->Append(CALCHART__IMPORT_CONT_FILE, "&Import Continuity...");
-  file_menu->Append(CALCHART__SAVE, "&Save");
-  file_menu->Append(CALCHART__SAVE_AS, "Save &As...");
-  file_menu->Append(CALCHART__PRINT, "&Print...");
-  file_menu->Append(CALCHART__PRINT_EPS, "Print &EPS...");
-  file_menu->Append(CALCHART__CLOSE, "&Close Window");
-  file_menu->Append(CALCHART__QUIT, "&Quit");
+  file_menu->Append(wxID_NEW, wxT("&New Show"), wxT("Create a new show"));
+  file_menu->Append(CALCHART__NEW_WINDOW, wxT("New &Window"), wxT("Open a new window"));
+  file_menu->Append(wxID_OPEN, wxT("&Open..."), wxT("Load a saved show"));
+  file_menu->Append(CALCHART__APPEND_FILE, wxT("&Append..."), wxT("Append a show to the end"));
+  file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity..."), wxT("Import continuity text"));
+  file_menu->Append(wxID_SAVE, wxT("&Save"), wxT("Save show"));
+  file_menu->Append(wxID_SAVEAS, wxT("Save &As..."), wxT("Save show as a new name"));
+  file_menu->Append(wxID_PRINT, wxT("&Print..."), wxT("Print this show"));
+  file_menu->Append(CALCHART__PRINT_EPS, wxT("Print &EPS..."), wxT("Print a stuntsheet in EPS"));
+  file_menu->Append(wxID_CLOSE, wxT("&Close Window"), wxT("Close this window"));
+  file_menu->Append(wxID_EXIT, wxT("&Quit"), wxT("Quit CalChart"));
 
   wxMenu *edit_menu = new wxMenu;
-  edit_menu->Append(CALCHART__UNDO, "&Undo");
-  edit_menu->Append(CALCHART__REDO, "&Redo");
-  edit_menu->Append(CALCHART__INSERT_BEFORE, "&Insert Sheet Before");
-  edit_menu->Append(CALCHART__INSERT_AFTER, "Insert Sheet &After");
-  edit_menu->Append(CALCHART__DELETE, "&Delete Sheet");
-  edit_menu->Append(CALCHART__RELABEL, "&Relabel Sheets");
-  edit_menu->Append(CALCHART__CLEAR_REF, "&Clear Reference");
-  edit_menu->Append(CALCHART__SETUP, "&Setup Show...");
-  edit_menu->Append(CALCHART__POINTS, "&Point Selections...");
-  edit_menu->Append(CALCHART__SET_TITLE, "Set &Title...");
-  edit_menu->Append(CALCHART__SET_BEATS, "Set &Beats...");
+  edit_menu->Append(wxID_UNDO, wxT("&Undo"));
+  edit_menu->Append(wxID_REDO, wxT("&Redo"));
+  edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before"), wxT("Insert a new stuntsheet before this one"));
+  edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After"), wxT("Insert a new stuntsheet after this one"));
+  edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet"), wxT("Delete this stuntsheet"));
+  edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets"), wxT("Relabel all stuntsheets after this one"));
+  edit_menu->Append(CALCHART__CLEAR_REF, wxT("&Clear Reference"), wxT("Clear selected reference points"));
+  edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show..."), wxT("Setup basic show information"));
+  edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
+  edit_menu->Append(CALCHART__SET_TITLE, wxT("Set &Title..."), wxT("Change the title of this stuntsheet"));
+  edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats..."), wxT("Change the number of beats for this stuntsheet"));
 
   wxMenu *anim_menu = new wxMenu;
-  anim_menu->Append(CALCHART__EDIT_CONTINUITY, "&Edit Continuity...");
-  anim_menu->Append(CALCHART__EDIT_PRINTCONT, "Edit &Printed Continuity...");
-  anim_menu->Append(CALCHART__ANIMATE, "&Animate...");
+  anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity..."), wxT("Edit continuity for this stuntsheet"));
+  anim_menu->Append(CALCHART__EDIT_PRINTCONT, wxT("Edit &Printed Continuity..."), wxT("Edit printed continuity for this stuntsheet"));
+  anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate..."), wxT("Open animation window"));
 
   wxMenu *select_menu = new wxMenu;
-  // These items are checkable
-  select_menu->Append(CALCHART__ROWS, "Rows first", NULL, true);
-  select_menu->Append(CALCHART__COLUMNS, "Columns first", NULL, true);
-  select_menu->Append(CALCHART__NEAREST, "Nearest", NULL, true);
+  // These items are a radio group
+  select_menu->Append(CALCHART__ROWS, wxT("Rows first"), wxT("Select points by rows"), wxITEM_RADIO);
+  select_menu->Append(CALCHART__COLUMNS, wxT("Columns first"), wxT("Select points by columns"), wxITEM_RADIO);
+  select_menu->Append(CALCHART__NEAREST, wxT("Nearest"), wxT("Select points in nearest order"), wxITEM_RADIO);
 
   wxMenu *options_menu = new wxMenu;
-  options_menu->Append(CALCHART__SELECTION, "Selection Order", select_menu);
+  options_menu->Append(CALCHART__SELECTION, wxT("Selection Order"), select_menu);
 
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(CALCHART__ABOUT, "&About CalChart...");
-  help_menu->Append(CALCHART__HELP, "&Help on CalChart...");
+  help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
+  help_menu->Append(wxID_HELP, wxT("&Help on CalChart..."), wxT("Help on using CalChart"));
 
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(file_menu, "&File");
-  menu_bar->Append(edit_menu, "&Edit");
-  menu_bar->Append(anim_menu, "&Animation");
-  menu_bar->Append(options_menu, "&Options");
-  menu_bar->Append(help_menu, "&Help");
+  menu_bar->Append(file_menu, wxT("&File"));
+  menu_bar->Append(edit_menu, wxT("&Edit"));
+  menu_bar->Append(anim_menu, wxT("&Animation"));
+  menu_bar->Append(options_menu, wxT("&Options"));
+  menu_bar->Append(help_menu, wxT("&Help"));
   SetMenuBar(menu_bar);
 
   // Add a toolbar
-  CoolToolBar *ribbon = new CoolToolBar(this, 0, 0, -1, -1, 0,
-					wxHORIZONTAL, 23);
-  ribbon->SetupBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry));
-  SetToolBar(ribbon);
+  CoolToolBar ribbon(this, wxID_ANY);
+  ribbon.SetupBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry));
 
   // Add the field canvas
   setup = false;
@@ -933,7 +956,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
     field = new FieldCanvas(show, ss, this, def_zoom, other_frame->field);
   }
 
-  SetTitle((char *)show->UserGetName());
+  SetTitle(show->UserGetName());
   field->curr_ref = def_ref;
   frameCanvas = field;
   node = new CC_WinNodeMain(show->winlist, this);
@@ -955,14 +978,14 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   // Grid choice
   grid_choice = new wxChoice(framePanel, (wxFunction)NULL,
-			     "&Grid", -1, -1, -1, -1,
-			     sizeof(gridtext)/sizeof(char*),
+			     wxT("&Grid"), -1, -1, -1, -1,
+			     sizeof(gridtext)/sizeof(const wxChar*),
 			     gridtext);
   grid_choice->SetSelection(def_grid);
 
   // Zoom slider
   SliderWithField *sldr = new SliderWithField(framePanel, slider_zoom_callback,
-					      "&Zoom", def_zoom,
+					      wxT("&Zoom"), def_zoom,
 					      1, FIELD_MAXZOOM, 150);
   sldr->field = field;
   zoom_slider = sldr;
@@ -981,11 +1004,11 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
     unsigned i;
 
     ref_choice = new ChoiceWithField(framePanel, (wxFunction)refnum_callback,
-				     "&Ref Group");
-    ref_choice->Append("Off");
+				     wxT("&Ref Group"));
+    ref_choice->Append(wxT("Off"));
     for (i = 1; i <= NUM_REF_PNTS; i++) {
-      buf.sprintf("%u", i);
-      ref_choice->Append(buf.GetData());
+      buf.sprintf(wxT("%u"), i);
+      ref_choice->Append(buf);
     }
   }
   ((ChoiceWithField*)ref_choice)->field = field;
@@ -993,7 +1016,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   // Sheet slider (will get set later with UpdatePanel())
   sldr = new SliderWithField(framePanel, slider_sheet_callback,
-			     "&Sheet", 1, 1, 2, 150);
+			     wxT("&Sheet"), 1, 1, 2, 150);
   sldr->field = field;
   sheet_slider = sldr;
   wxLayoutConstraints *sl1 = new wxLayoutConstraints;
@@ -1009,9 +1032,8 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 
   // Show the frame
   UpdatePanel();
-  window_list->Insert(this);
-  SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
-  OnSize(-1, -1);
+  window_list->push_back(this);
+  Layout();
   field->RefreshShow();
   Show(true);
 
@@ -1019,7 +1041,7 @@ MainFrame::MainFrame(wxFrame *frame, int x, int y, int w, int h,
 }
 
 MainFrame::~MainFrame() {
-  window_list->DeleteObject(this);
+  window_list->remove(this);
   if (node) {
     node->Remove();
     delete node;
@@ -1027,278 +1049,358 @@ MainFrame::~MainFrame() {
 }
 
 // Define the behaviour for the frame closing
-bool MainFrame::OnClose(void)
+void MainFrame::OnCloseWindow(wxCloseEvent& event)
 {
   // Save changes first
-  if (!OkayToClearShow()) return false;
-
-  return true;
-}
-
-// Intercept menu commands
-void MainFrame::OnMenuCommand(int id)
-{
-  char *s;
-  MainFrame *frame;
-  CC_sheet *sht;
-  int sheetnum;
-
-  switch (id) {
-  case CALCHART__NEW:
-    topframe->NewShow();
-    break;
-  case CALCHART__NEW_WINDOW:
-    frame = new MainFrame(topframe, 50, 50, window_default_width,
-			  window_default_height, NULL, this);
-    break;
-  case CALCHART__LOAD_FILE:
-    topframe->OpenShow();
-    break;
-  case CALCHART__APPEND_FILE:
-    AppendShow();
-    break;
-  case CALCHART__IMPORT_CONT_FILE:
-    ImportContFile();
-    break;
-  case CALCHART__SAVE:
-    SaveShow();
-    break;
-  case CALCHART__SAVE_AS:
-    SaveShowAs();
-    break;
-  case CALCHART__PRINT:
-    if (field->show_descr.show) {
-      (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
-				false, this, "Print show", false);
-    }
-    break;
-  case CALCHART__PRINT_EPS:
-    if (field->show_descr.show) {
-      (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
-				true, this, "Print stuntsheet as EPS", false);
-    }
-    break;
-  case CALCHART__CLOSE:
-    Close();
-    break;
-  case CALCHART__QUIT:
-    topframe->Quit();
-    break;
-  case CALCHART__UNDO:
-    sheetnum = field->show_descr.show->undolist->Undo(field->show_descr.show);
-    if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
-      field->GotoSS((unsigned)sheetnum);
-    break;
-  case CALCHART__REDO:
-    sheetnum = field->show_descr.show->undolist->Redo(field->show_descr.show);
-    if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
-      field->GotoSS((unsigned)sheetnum);
-    break;
-  case CALCHART__INSERT_BEFORE:
-    sht = new CC_sheet(field->show_descr.CurrSheet());
-    field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss);
-    field->PrevSS();
-    break;
-  case CALCHART__INSERT_AFTER:
-    sht = new CC_sheet(field->show_descr.CurrSheet());
-    field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss+1);
-    field->NextSS();
-    break;
-  case CALCHART__DELETE:
-    if (field->show_descr.show->GetNumSheets() > 1) {
-      field->show_descr.show->UserDeleteSheet(field->show_descr.curr_ss);
-    }
-    break;
-  case CALCHART__RELABEL:
-    if (field->show_descr.curr_ss+1 < field->show_descr.show->GetNumSheets()) {
-      if(wxMessageBox("Relabeling sheets is not undoable.\nProceed?",
-		      "Relabel sheets", wxYES_NO) == wxYES) {
-	if (!field->show_descr.show->RelabelSheets(field->show_descr.curr_ss))
-	  (void)wxMessageBox("Stuntsheets don't match",
-			     "Relabel sheets");
-	else {
-	  field->show_descr.show->undolist->EraseAll();
-	  field->show_descr.show->SetModified(true);
-	}
-      }
+  if (!OkayToClearShow()) {
+    if (event.CanVeto()) {
+      event.Veto(); // don't delete the frame
     } else {
-      (void)wxMessageBox("This can't used on the last stuntsheet",
-			 "Relabel sheets");
+      Destroy();
     }
-    break;
-  case CALCHART__CLEAR_REF:
-    if (field->curr_ref > 0) {
-      if (field->show_descr.CurrSheet()->ClearRefPositions(field->curr_ref))
-	field->show_descr.show->winlist->
-	  UpdatePointsOnSheet(field->show_descr.curr_ss, field->curr_ref);
-    }
-    break;
-  case CALCHART__EDIT_CONTINUITY:
-    if (field->show_descr.show) {
-      (void)new ContinuityEditor(&field->show_descr, &node->winlist, this,
-				      "Animation Continuity");
-    }
-    break;
-  case CALCHART__EDIT_PRINTCONT:
-    if (field->show_descr.show) {
-      (void)new PrintContEditor(&field->show_descr, &node->winlist, this,
-				"Printed Continuity");
-    }
-    break;
-  case CALCHART__SET_TITLE:
-    if (field->show_descr.show) {
-      s = wxGetTextFromUser("Enter the new title",
-			    (char *)field->show_descr.CurrSheet()->GetName(),
-			    (char *)field->show_descr.CurrSheet()->GetName(),
-			    this);
-      if (s) {
-	field->show_descr.CurrSheet()->UserSetName(s);
-      }
-    }
-    break;
-  case CALCHART__SET_BEATS:
-    if (field->show_descr.show) {
-      wxString buf;
-      buf.sprintf("%u", field->show_descr.CurrSheet()->GetBeats());
-      s = wxGetTextFromUser("Enter the number of beats",
-			    (char *)field->show_descr.CurrSheet()->GetName(),
-			    buf.GetData(), this);
-      if (s) {
-	field->show_descr.CurrSheet()->UserSetBeats(atoi(s));
-      }
-    }
-    break;
-  case CALCHART__SETUP:
-    Setup();
-    break;
-  case CALCHART__POINTS:
-    if (field->show_descr.show)
-      (void)new PointPicker(field->show_descr.show, &node->winlist,
-			     true, this, "Select points");
-    break;
-  case CALCHART__ANIMATE:
-    if (field->show_descr.show) {
-      AnimationFrame *anim =
-	new AnimationFrame(this, &field->show_descr, &node->winlist);
-      anim->canvas->Generate();
-    }
-    break;
-  case CALCHART__ROWS:
-  case CALCHART__COLUMNS:
-  case CALCHART__NEAREST:
-    GetMenuBar()->Check(field->curr_select, false);
-    field->curr_select = (CC_SELECT_TYPES)id;
-    GetMenuBar()->Check(id, true);
-    break;
-  case CALCHART__ABOUT:
-    topframe->About();
-    break;
-  case CALCHART__HELP:
-    topframe->Help();
-    break;
+  } else {
+    Destroy();
   }
 }
 
 // Intercept menu commands
-void MainFrame::OnMenuSelect(int id)
+
+void MainFrame::OnCmdNew(wxCommandEvent& event) {
+  topframe->NewShow();
+}
+
+void MainFrame::OnCmdNewWindow(wxCommandEvent& event) {
+  MainFrame *frame;
+  frame = new MainFrame(topframe, 50, 50, window_default_width,
+			window_default_height, NULL, this);
+}
+
+void MainFrame::OnCmdLoad(wxCommandEvent& event) {
+  topframe->OpenShow();
+}
+
+void MainFrame::OnCmdAppend(wxCommandEvent& event) {
+  AppendShow();
+}
+
+void MainFrame::OnCmdImportCont(wxCommandEvent& event) {
+  ImportContFile();
+}
+
+void MainFrame::OnCmdSave(wxCommandEvent& event) {
+  SaveShow();
+}
+
+void MainFrame::OnCmdSaveAs(wxCommandEvent& event) {
+  SaveShowAs();
+}
+
+void MainFrame::OnCmdPrint(wxCommandEvent& event) {
+  if (field->show_descr.show) {
+    (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
+			      false, this, wxT("Print show"), false);
+  }
+}
+
+void MainFrame::OnCmdPrintEPS(wxCommandEvent& event) {
+  if (field->show_descr.show) {
+    (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
+			      true, this, wxT("Print stuntsheet as EPS"), false);
+  }
+}
+
+void MainFrame::OnCmdClose(wxCommandEvent& event) {
+  Close();
+}
+
+void MainFrame::OnCmdExit(wxCommandEvent& event) {
+  topframe->Quit();
+}
+
+void MainFrame::OnCmdUndo(wxCommandEvent& event) {
+  int sheetnum;
+  sheetnum = field->show_descr.show->undolist->Undo(field->show_descr.show);
+  if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
+    field->GotoSS((unsigned)sheetnum);
+}
+
+void MainFrame::OnCmdRedo(wxCommandEvent& event) {
+  int sheetnum;
+  sheetnum = field->show_descr.show->undolist->Redo(field->show_descr.show);
+  if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
+    field->GotoSS((unsigned)sheetnum);
+}
+
+void MainFrame::OnCmdInsertBefore(wxCommandEvent& event) {
+  CC_sheet *sht;
+  sht = new CC_sheet(field->show_descr.CurrSheet());
+  field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss);
+  field->PrevSS();
+}
+
+void MainFrame::OnCmdInsertAfter(wxCommandEvent& event) {
+  CC_sheet *sht;
+  sht = new CC_sheet(field->show_descr.CurrSheet());
+  field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss+1);
+  field->NextSS();
+}
+
+void MainFrame::OnCmdDelete(wxCommandEvent& event) {
+  if (field->show_descr.show->GetNumSheets() > 1) {
+    field->show_descr.show->UserDeleteSheet(field->show_descr.curr_ss);
+  }
+}
+
+void MainFrame::OnCmdRelabel(wxCommandEvent& event) {
+  if (field->show_descr.curr_ss+1 < field->show_descr.show->GetNumSheets()) {
+    if(wxMessageBox(wxT("Relabeling sheets is not undoable.\nProceed?"),
+		    wxT("Relabel sheets"), wxYES_NO) == wxYES) {
+      if (!field->show_descr.show->RelabelSheets(field->show_descr.curr_ss))
+	(void)wxMessageBox(wxT("Stuntsheets don't match"),
+			   wxT("Relabel sheets"));
+      else {
+	field->show_descr.show->undolist->EraseAll();
+	field->show_descr.show->SetModified(true);
+      }
+    }
+  } else {
+    (void)wxMessageBox(wxT("This can't used on the last stuntsheet"),
+		       wxT("Relabel sheets"));
+  }
+}
+
+void MainFrame::OnCmdClearRef(wxCommandEvent& event) {
+  if (field->curr_ref > 0) {
+    if (field->show_descr.CurrSheet()->ClearRefPositions(field->curr_ref))
+      field->show_descr.show->winlist->
+	UpdatePointsOnSheet(field->show_descr.curr_ss, field->curr_ref);
+  }
+}
+
+void MainFrame::OnCmdEditCont(wxCommandEvent& event) {
+  if (field->show_descr.show) {
+    (void)new ContinuityEditor(&field->show_descr, &node->winlist, this,
+			       wxT("Animation Continuity"));
+  }
+}
+
+void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event) {
+  if (field->show_descr.show) {
+    (void)new PrintContEditor(&field->show_descr, &node->winlist, this,
+			      wxT("Printed Continuity"));
+  }
+}
+
+void MainFrame::OnCmdSetTitle(wxCommandEvent& event) {
+  wxString s;
+  if (field->show_descr.show) {
+    s = wxGetTextFromUser(wxT("Enter the new title"),
+			  field->show_descr.CurrSheet()->GetName(),
+			  field->show_descr.CurrSheet()->GetName(),
+			  this);
+    if (s) {
+      field->show_descr.CurrSheet()->UserSetName(s);
+    }
+  }
+}
+
+void MainFrame::OnCmdSetBeats(wxCommandEvent& event) {
+  wxString s;
+  if (field->show_descr.show) {
+    wxString buf;
+    buf.sprintf(wxT("%u"), field->show_descr.CurrSheet()->GetBeats());
+    s = wxGetTextFromUser(wxT("Enter the number of beats"),
+			  field->show_descr.CurrSheet()->GetName(),
+			  buf, this);
+    if (!s.empty()) {
+      long val;
+      if (s.ToLong(&val)) {
+	field->show_descr.CurrSheet()->UserSetBeats(val);
+      }
+    }
+  }
+}
+
+void MainFrame::OnCmdSetup(wxCommandEvent& event) {
+  Setup();
+}
+
+void MainFrame::OnCmdPoints(wxCommandEvent& event) {
+  if (field->show_descr.show)
+    (void)new PointPicker(field->show_descr.show, &node->winlist,
+			  true, this, wxT("Select points"));
+}
+
+void MainFrame::OnCmdAnimate(wxCommandEvent& event) {
+  if (field->show_descr.show) {
+    AnimationFrame *anim =
+      new AnimationFrame(this, &field->show_descr, &node->winlist);
+    anim->canvas->Generate();
+  }
+}
+
+void MainFrame::OnCmdSelect(int id) {
+  GetMenuBar()->Check(field->curr_select, false);
+  field->curr_select = (CC_SELECT_TYPES)id;
+  GetMenuBar()->Check(id, true);
+}
+
+void MainFrame::OnCmdRows(wxCommandEvent& event) {
+  OnCmdSelect(CALCHART__ROWS);
+}
+
+void MainFrame::OnCmdColumns(wxCommandEvent& event) {
+  OnCmdSelect(CALCHART__COLUMNS);
+}
+
+void MainFrame::OnCmdNearest(wxCommandEvent& event) {
+  OnCmdSelect(CALCHART__NEAREST);
+}
+
+void MainFrame::OnCmdAbout(wxCommandEvent& event) {
+  topframe->About();
+}
+
+void MainFrame::OnCmdHelp(wxCommandEvent& event) {
+  topframe->Help();
+}
+
+// Intercept menu commands
+void MainFrame::OnMenuSelect(wxMenuEvent& event)
 {
-  char *msg = NULL;
-  switch (id) {
-  case CALCHART__NEW:
-    msg = "Create a new show";
-    break;
-  case CALCHART__NEW_WINDOW:
-    msg = "Open a new window";
-    break;
-  case CALCHART__LOAD_FILE:
-    msg = "Load a saved show";
-    break;
-  case CALCHART__APPEND_FILE:
-    msg = "Append a show to the end";
-    break;
-  case CALCHART__IMPORT_CONT_FILE:
-    msg = "Import continuity text";
-    break;
-  case CALCHART__SAVE:
+  wxString msg;
+  switch (event.GetMenuId()) {
+  case wxID_SAVE:
     msg = field->show_descr.show->Modified() ?
-      "Save show (needed)" :
-	"Save show (not needed)";
+      wxT("Save show (needed)") :
+	wxT("Save show (not needed)");
     break;
-  case CALCHART__SAVE_AS:
-    msg = "Save show as a new name";
-    break;
-  case CALCHART__PRINT:
-    msg = "Print this show";
-    break;
-  case CALCHART__PRINT_EPS:
-    msg = "Print a stuntsheet in EPS";
-    break;
-  case CALCHART__CLOSE:
-    msg = "Close this window";
-    break;
-  case CALCHART__QUIT:
-    msg = "Quit CalChart";
-    break;
-  case CALCHART__UNDO:
+  case wxID_UNDO:
     msg = field->show_descr.show->undolist->UndoDescription();
     break;
-  case CALCHART__REDO:
+  case wxID_REDO:
     msg = field->show_descr.show->undolist->RedoDescription();
     break;
-  case CALCHART__INSERT_BEFORE:
-    msg = "Insert a new stuntsheet before this one";
-    break;
-  case CALCHART__INSERT_AFTER:
-    msg = "Insert a new stuntsheet after this one";
-    break;
-  case CALCHART__DELETE:
-    msg = "Delete this stuntsheet";
-    break;
-  case CALCHART__RELABEL:
-    msg = "Relabel all stuntsheets after this one";
-    break;
-  case CALCHART__CLEAR_REF:
-    msg = "Clear selected reference points";
-    break;
-  case CALCHART__EDIT_CONTINUITY:
-    msg = "Edit continuity for this stuntsheet";
-    break;
-  case CALCHART__EDIT_PRINTCONT:
-    msg = "Edit printed continuity for this stuntsheet";
-    break;
-  case CALCHART__SET_TITLE:
-    msg = "Change the title of this stuntsheet";
-    break;
-  case CALCHART__SET_BEATS:
-    msg = "Change the number of beats for this stuntsheet";
-    break;
-  case CALCHART__SETUP:
-    msg = "Setup basic show information";
-    break;
-  case CALCHART__ANIMATE:
-    msg = "Open animation window";
-    break;
-  case CALCHART__ROWS:
-    msg = "Select points by rows";
-    break;
-  case CALCHART__COLUMNS:
-    msg = "Select points by columns";
-    break;
-  case CALCHART__NEAREST:
-    msg = "Select points in nearest order";
-    break;
-  case CALCHART__ABOUT:
-    msg = "Information about the program";
-    break;
-  case CALCHART__HELP:
-    msg = "Help on using CalChart";
-    break;
-  case -1:
-    msg = "";
+  default:
+    event.Skip();
     break;
   }
-  if (msg)
+  if (!msg.empty())
     SetStatusText(msg);
+}
+
+void MainFrame::OnCmd_prev_ss(wxCommandEvent& event) {
+  field->PrevSS();
+}
+
+void MainFrame::OnCmd_next_ss(wxCommandEvent& event) {
+  field->NextSS();
+}
+
+void MainFrame::OnCmd_box(wxCommandEvent& event) {
+  SetCurrentLasso(CC_DRAG_BOX);
+}
+
+void MainFrame::OnCmd_poly(wxCommandEvent& event) {
+  SetCurrentLasso(CC_DRAG_POLY);
+}
+
+void MainFrame::OnCmd_lasso(wxCommandEvent& event) {
+  SetCurrentLasso(CC_DRAG_LASSO);
+}
+
+void MainFrame::OnCmd_move(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_NORMAL);
+}
+
+void MainFrame::OnCmd_line(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_LINE);
+}
+
+void MainFrame::OnCmd_rot(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_ROTATE);
+}
+
+void MainFrame::OnCmd_shear(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_SHEAR);
+}
+
+void MainFrame::OnCmd_reflect(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_REFL);
+}
+
+void MainFrame::OnCmd_size(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_SIZE);
+}
+
+void MainFrame::OnCmd_genius(wxCommandEvent& event) {
+  SetCurrentMove(CC_MOVE_GENIUS);
+}
+
+void MainFrame::OnCmd_label_left(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsLabel(false))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_label_right(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsLabel(true))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_label_flip(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsLabelFlip())
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym0(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_PLAIN))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym1(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOL))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym2(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_BKSL))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym3(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SL))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym4(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_X))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym5(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLBKSL))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym6(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLSL))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+void MainFrame::OnCmd_setsym7(wxCommandEvent& event) {
+  if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
+    field->show_descr.show->winlist->
+      UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
 // Give the use a chance to save the current show
@@ -1307,9 +1409,9 @@ bool MainFrame::OkayToClearShow() {
 
   if (field->show_descr.show->Modified()) {
     if (!field->show_descr.show->winlist->MultipleWindows()) {
-      buf.sprintf("Save changes to '%s'?",
-		  field->show_descr.show->UserGetName());
-      switch (wxMessageBox(buf.GetData(), "Unsaved changes",
+      buf.sprintf(wxT("Save changes to '%s'?"),
+		  field->show_descr.show->UserGetName().c_str());
+      switch (wxMessageBox(buf, wxT("Unsaved changes"),
 			   wxYES_NO | wxCANCEL, this)) {
       case wxYES:
 	SaveShowAs();
@@ -1328,17 +1430,17 @@ bool MainFrame::OkayToClearShow() {
 
 // Load a show with file selector
 void MainFrame::LoadShow() {
-  const char *s;
+  wxString s;
   CC_show *shw;
 
   if (OkayToClearShow()) {
-    s = wxFileSelector("Load show", NULL, NULL, NULL, file_wild);
-    if (s) {
+    s = wxFileSelector(wxT("Load show"), NULL, NULL, NULL, file_wild);
+    if (!s.empty()) {
       shw = new CC_show(s);
       if (shw->Ok()) {
 	node->SetShow(shw);
       } else {
-	(void)wxMessageBox((char*)shw->GetError(), "Load Error");
+	(void)wxMessageBox(shw->GetError(), wxT("Load Error"));
 	delete shw;
       }
     }
@@ -1347,12 +1449,12 @@ void MainFrame::LoadShow() {
 
 // Append a show with file selector
 void MainFrame::AppendShow() {
-  const char *s;
+  wxString s;
   CC_show *shw;
   unsigned currend;
 
-  s = wxFileSelector("Append show", NULL, NULL, NULL, file_wild);
-  if (s) {
+  s = wxFileSelector(wxT("Append show"), NULL, NULL, NULL, file_wild);
+  if (!s.empty()) {
     shw = new CC_show(s);
     if (shw->Ok()) {
       if (shw->GetNumPoints() == field->show_descr.show->GetNumPoints()) {
@@ -1360,14 +1462,14 @@ void MainFrame::AppendShow() {
 	field->show_descr.show->undolist->Add(new ShowUndoAppendSheets(currend));
 	field->show_descr.show->Append(shw);
 	if (!field->show_descr.show->RelabelSheets(currend-1))
-	  (void)wxMessageBox("Stuntsheets don't match",
-			     "Append Error");
+	  (void)wxMessageBox(wxT("Stuntsheets don't match"),
+			     wxT("Append Error"));
       } else {
-	(void)wxMessageBox("The blocksize doesn't match", "Append Error");
+	(void)wxMessageBox(wxT("The blocksize doesn't match"), wxT("Append Error"));
 	delete shw;
       }
     } else {
-      (void)wxMessageBox((char*)shw->GetError(), "Load Error");
+      (void)wxMessageBox(shw->GetError(), wxT("Load Error"));
       delete shw;
     }
   }
@@ -1375,14 +1477,14 @@ void MainFrame::AppendShow() {
 
 // Append a show with file selector
 void MainFrame::ImportContFile() {
-  const char *s;
-  wxString *err;
+  wxString s;
+  wxString err;
 
-  s = wxFileSelector("Import Continuity", NULL, NULL, NULL, "*.txt");
-  if (s) {
+  s = wxFileSelector(wxT("Import Continuity"), NULL, NULL, NULL, wxT("*.txt"));
+  if (!s.empty()) {
     err = field->show_descr.show->ImportContinuity(s);
-    if (err) {
-      (void)wxMessageBox(err->GetData(), "Load Error");
+    if (!err.empty()) {
+      (void)wxMessageBox(err, wxT("Load Error"));
       delete err;
     }
   }
@@ -1390,37 +1492,37 @@ void MainFrame::ImportContFile() {
 
 // Save this show without file selector
 void MainFrame::SaveShow() {
-  const char *s;
+  wxString s;
 
   s = field->show_descr.show->GetName();
-  if (strcmp(s, "") == 0) {
+  if (s.empty()) {
     // No file name; use SaveAs instead
     SaveShowAs();
   } else {
     s = field->show_descr.show->Save(s);
-    if (s != NULL) {
-      (void)wxMessageBox((char *)s, "Save Error"); // should be const
+    if (!s.empty()) {
+      (void)wxMessageBox(s, wxT("Save Error"));
     }
   }
 }
 
 // Save this show with file selector
 void MainFrame::SaveShowAs() {
-  const char *s;
-  const char *err;
+  wxString s;
+  wxString err;
 
-  s = wxFileSelector("Save show", NULL, NULL, NULL, file_save_wild,
+  s = wxFileSelector(wxT("Save show"), NULL, NULL, NULL, file_save_wild,
 		     wxSAVE | wxOVERWRITE_PROMPT);
-  if (s) {
+  if (!s.empty()) {
     wxString str(s);
     unsigned int i = str.Length();
     if ((i < 4) ||
-	(str.SubString(i-4,i-1).CompareTo(".shw", wxString::ignoreCase)!=0)) {
-      str.Append(".shw");
+	(str.SubString(i-4,i-1).CompareTo(wxT(".shw"), wxString::ignoreCase)!=0)) {
+      str.Append(wxT(".shw"));
     }
     err = field->show_descr.show->Save(str);
-    if (err != NULL) {
-      (void)wxMessageBox((char *)err, "Save Error"); // should be const
+    if (!err.empty()) {
+      (void)wxMessageBox(err, wxT("Save Error"));
     }
   }    
 }
@@ -1466,7 +1568,7 @@ void MainFrame::SetCurrentMove(CC_MOVE_MODES type) {
 void MainFrame::Setup() {
   if (field->show_descr.show)
     (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
-			  "Setup Show");
+			  wxT("Setup Show"));
 }
 
 // Define a constructor for field canvas
@@ -1483,14 +1585,12 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
     curr_select = from_canvas->curr_select;
   }
 
-  SetColourMap(CalChartColorMap);
+  SetPalette(CalChartPalette);
 
   show_descr.show = show;
   show_descr.curr_ss = ss;
 
   SetZoomQuick(def_zoom);
-
-  SetBackground(CalChartBrushes[COLOR_FIELD]);
 
   UpdateBars();
 }
@@ -1500,10 +1600,12 @@ FieldCanvas::~FieldCanvas(void) {
 }
 
 void FieldCanvas::ClearShapes() {
-  for (wxNode *n = shape_list.First(); n != NULL; n = n->Next()) {
-    delete (CC_shape*)(n->Data());
+  for (ShapeList::iterator i=shape_list.begin();
+       i != shape_list.end();
+       ++i) {
+    delete *i;
   }
-  shape_list.Clear();
+  shape_list.clear();
   curr_shape = NULL;
 }
 
@@ -1518,27 +1620,32 @@ void FieldCanvas::DrawDrag(bool on)
     if (on) {
       SetXOR(dc);
       origin = show_descr.show->mode->Offset();
-      for (wxNode *n = shape_list.First(); n != NULL; n = n->Next()) {
-	((CC_shape*)(n->Data()))->Draw(dc, origin.x+GetPositionX(),
-				       origin.y+GetPositionY());
+      for (ShapeList::const_iterator i=shape_list.begin();
+	   i != shape_list.end();
+	   ++i) {
+	(*i)->Draw(dc, origin.x+GetPositionX(),
+		   origin.y+GetPositionY());
       }
     } else {
-      Blit();
+      Blit(*dc);
     }
   }
 }
 
 // Define the repainting behaviour
-void FieldCanvas::OnPaint(void)
+void FieldCanvas::OnPaint(wxPaintEvent& event)
 {
-  Blit();
+  wxPaintDC dc(this);
+  DoPrepareDC(dc);
+  dc.SetBackground(CalChartBrushes[COLOR_FIELD]);
+  Blit(dc);
   dragon = false; // since the canvas gets cleared
   DrawDrag(true);
 }
 
 // Allow clicking within pixels to close polygons
 #define CLOSE_ENOUGH_TO_CLOSE 10
-void FieldCanvas::OnEvent(wxMouseEvent& event)
+void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 {
   float x,y;
   int i;
@@ -1550,7 +1657,7 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
       event.Position(&x, &y);
       if (event.ControlDown()) {
 	Move(x, y);
-	Blit();
+	Blit(dc);
 	dragon = false; // since the canvas gets cleared
       } else {
 	Move(x, y, 1);
@@ -1662,8 +1769,8 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 	  break;
 	case CC_MOVE_ROTATE:
-	  if (shape_list.Number() > 1) {
-	    origin = (CC_shape_1point*)shape_list.First()->Data();
+	  if (shape_list.size() > 1) {
+	    origin = (CC_shape_1point*)shape_list[0];
 	    if (shape->GetOrigin() == shape->GetPoint()) {
 	      BeginDrag(CC_DRAG_CROSS, pos);
 	    } else {
@@ -1683,8 +1790,8 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  }
 	  break;
 	case CC_MOVE_SHEAR:
-	  if (shape_list.Number() > 1) {
-	    origin = (CC_shape_1point*)shape_list.First()->Data();
+	  if (shape_list.size() > 1) {
+	    origin = (CC_shape_1point*)shape_list[0];
 	    if (shape->GetOrigin() == shape->GetPoint()) {
 	      BeginDrag(CC_DRAG_CROSS, pos);
 	    } else {
@@ -1737,8 +1844,8 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 	  break;
 	case CC_MOVE_SIZE:
-	  if (shape_list.Number() > 1) {
-	    origin = (CC_shape_1point*)shape_list.First()->Data();
+	  if (shape_list.size() > 1) {
+	    origin = (CC_shape_1point*)shape_list[0];
 	    if (shape->GetOrigin() == shape->GetPoint()) {
 	      BeginDrag(CC_DRAG_CROSS, pos);
 	    } else {
@@ -1775,12 +1882,10 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	  }
 	  break;
 	case CC_MOVE_GENIUS:
-	  if (shape_list.Number() >= 3) {
-	    CC_shape_2point* v1 = (CC_shape_2point*)shape_list.First()->Data();
-	    CC_shape_2point* v2 = (CC_shape_2point*)
-	      shape_list.First()->Next()->Data();
-	    CC_shape_2point* v3 = (CC_shape_2point*)
-	      shape_list.First()->Next()->Next()->Data();
+	  if (shape_list.size() >= 3) {
+	    CC_shape_2point* v1 = (CC_shape_2point*)shape_list[0];
+	    CC_shape_2point* v2 = (CC_shape_2point*)shape_list[1];
+	    CC_shape_2point* v3 = (CC_shape_2point*)shape_list[2];
 	    CC_coord s1, s2, s3;
 	    CC_coord e1, e2, e3;
 	    float d;
@@ -1796,8 +1901,8 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 	      (float)s3.x*(float)s1.y - (float)s1.x*(float)s3.y +
 	      (float)s2.x*(float)s3.y - (float)s3.x*(float)s2.y;
 	    if (IS_ZERO(d)) {
-	      (void)wxMessageBox("Invalid genius move definition",
-				 "Genius Move");
+	      (void)wxMessageBox(wxT("Invalid genius move definition"),
+				 wxT("Genius Move"));
 	    } else {
 	      Matrix A = Matrix(Vector(e1.x,e2.x,0,e3.x),
 				Vector(e1.y,e2.y,0,e3.y),
@@ -1877,14 +1982,14 @@ void FieldCanvas::OnEvent(wxMouseEvent& event)
 
 void FieldCanvas::OnScroll(wxCommandEvent& event)
 {
-  wxCanvas::OnScroll(event);
+  event.Skip();
 }
 
 // Intercept character input
 void FieldCanvas::OnChar(wxKeyEvent& event)
 {
   // Process the default behaviour
-  wxCanvas::OnChar(event);
+  event.Skip();
 }
 
 void FieldCanvas::RefreshShow(bool drawall, int point) {
@@ -1897,7 +2002,7 @@ void FieldCanvas::RefreshShow(bool drawall, int point) {
       } else {
 	sheet->Draw(GetMemDC(), curr_ref, true, drawall, point);
       }
-      Blit();
+      Blit(dc);
       dragon = false; // since the canvas gets cleared
       DrawDrag(true);
     }
@@ -1910,10 +2015,10 @@ void MainFrame::UpdatePanel() {
   unsigned num = field->show_descr.show->GetNumSheets();
   unsigned curr = field->show_descr.curr_ss+1;
 
-  tempbuf.sprintf("%s%d of %d \"%.32s\" %d beats",
-		  field->show_descr.show->Modified() ? "* ":"", curr,
-		  num, sht->GetName(), sht->GetBeats());
-  SetStatusText(tempbuf.GetData(), 1);
+  tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
+		  field->show_descr.show->Modified() ? wxT("* "):wxT(""), curr,
+		  num, sht->GetName().c_str(), sht->GetBeats());
+  SetStatusText(tempbuf, 1);
 
   if (num > 1) {
     sheet_slider->Enable(true);
@@ -1970,7 +2075,7 @@ void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_shape *shape) {
 void FieldCanvas::AddDrag(CC_DRAG_TYPES type, CC_shape *shape) {
   DrawDrag(false);
   drag = type;
-  shape_list.Append((wxObject*)shape);
+  shape_list.push_back(shape);
   curr_shape = shape;
   DrawDrag(true);
 }
@@ -1989,22 +2094,22 @@ void FieldCanvas::EndDrag() {
   drag = CC_DRAG_NONE;
 }
 
-void FieldCanvas::SelectOrdered(wxList& pointlist,
+void FieldCanvas::SelectOrdered(PointList& pointlist,
 				const CC_coord& start) {
-  wxNode *pnt, *n;
   CC_coord c1, c2, last;
   Coord v1, v2;
   float f1, f2, fx, fy;
   CC_sheet* sheet = show_descr.CurrSheet();
 
   last = start;
-  while ((pnt = pointlist.First()) != NULL) {
-    c1 = sheet->GetPosition((unsigned)pnt->key.integer, curr_ref);
-    for (n = pnt->Next(); n != NULL; n = n->Next()) {
+  while (!pointlist.empty()) {
+    PointList::iterator pnt(pointlist.begin());
+    c1 = sheet->GetPosition(*pnt, curr_ref);
+    for (PointList::iterator n=pnt+1; n != pointlist.end(); ++n) {
       switch (curr_select) {
       case CC_SELECT_ROWS:
 	v1 = ABS(start.y - c1.y);
-	c2 = sheet->GetPosition((unsigned)n->key.integer, curr_ref);
+	c2 = sheet->GetPosition(*n, curr_ref);
 	v2 = ABS(start.y - c2.y);
 	if (v2 < v1) {
 	  pnt = n;
@@ -2021,7 +2126,7 @@ void FieldCanvas::SelectOrdered(wxList& pointlist,
 	break;
       case CC_SELECT_COLUMNS:
 	v1 = ABS(start.x - c1.x);
-	c2 = sheet->GetPosition((unsigned)n->key.integer, curr_ref);
+	c2 = sheet->GetPosition(*n, curr_ref);
 	v2 = ABS(start.x - c2.x);
 	if (v2 < v1) {
 	  pnt = n;
@@ -2040,7 +2145,7 @@ void FieldCanvas::SelectOrdered(wxList& pointlist,
 	fx = (float)(last.x - c1.x);
 	fy = (float)(last.y - c1.y);
 	f1 = fx*fx+fy*fy;
-	c2 = sheet->GetPosition((unsigned)n->key.integer, curr_ref);
+	c2 = sheet->GetPosition(*n, curr_ref);
 	fx = (float)(last.x - c2.x);
 	fy = (float)(last.y - c2.y);
 	f2 = fx*fx+fy*fy;
@@ -2051,22 +2156,22 @@ void FieldCanvas::SelectOrdered(wxList& pointlist,
 	break;
       }
     }
-    show_descr.show->Select((unsigned)pnt->key.integer);
+    show_descr.show->Select(*pnt);
     last = c1;
-    pointlist.DeleteNode(pnt);
+    pointlist.erase(pnt);
   }
 }
 
 bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso) {
   bool changed = false;
   CC_sheet* sheet = show_descr.CurrSheet();
-  wxList pointlist;
+  PointList pointlist;
   const wxPoint *pnt;
 
   for (unsigned i = 0; i < show_descr.show->GetNumPoints(); i++) {
     if (lasso->Inside(sheet->GetPosition(i, curr_ref))) {
       changed = true;
-      pointlist.Append(i, NULL);
+      pointlist.push_back(i);
     }
   }
   pnt = lasso->FirstPoint();
@@ -2086,7 +2191,7 @@ bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
   CC_sheet* sheet = show_descr.CurrSheet();
   CC_coord top_left, bottom_right;
   const CC_coord *pos;
-  wxList pointlist;
+  PointList pointlist;
 
   if (c1.x > c2.x) {
     top_left.x = c2.x;
@@ -2107,7 +2212,7 @@ bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
     if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
 	(pos->y >= top_left.y) && (pos->y <= bottom_right.y)) {
       if (!show_descr.show->IsSelected(i)) {
-	pointlist.Append(i, NULL);
+	pointlist.push_back(i);
 	changed = true;
       }
     }
@@ -2121,152 +2226,17 @@ bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 }
 
 bool MainFrameList::CloseAllWindows() {
-  wxNode *node, *node_tmp;
   MainFrame *mf;
 
-  for (node = First(); node != NULL; ) {
-    mf = (MainFrame *)node->Data();
+  for (MainFrameList::iterator i = begin(); i != end(); ) {
+    mf = *i;
     // This node will be deleted by the window's deconstructor
-    node_tmp = node->Next();
+    MainFrameList::iterator i_tmp(i);
+    ++i_tmp;
     if (!mf->Close()) return false;
-    node = node_tmp;
+    i = i_tmp;
   }
   return true;
-}
-
-static void toolbar_prev_ss(CoolToolBar *tb) {
-  ((MainFrame *)tb->ourframe)->field->PrevSS();
-}
-
-static void toolbar_next_ss(CoolToolBar *tb) {
-  ((MainFrame *)tb->ourframe)->field->NextSS();
-}
-
-static void toolbar_box(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentLasso(CC_DRAG_BOX);
-}
-
-static void toolbar_poly(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentLasso(CC_DRAG_POLY);
-}
-
-static void toolbar_lasso(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentLasso(CC_DRAG_LASSO);
-}
-
-static void toolbar_move(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_NORMAL);
-}
-
-static void toolbar_line(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_LINE);
-}
-
-static void toolbar_rot(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_ROTATE);
-}
-
-static void toolbar_shear(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_SHEAR);
-}
-
-static void toolbar_reflect(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_REFL);
-}
-
-static void toolbar_size(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_SIZE);
-}
-
-static void toolbar_genius(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  mf->SetCurrentMove(CC_MOVE_GENIUS);
-}
-
-static void toolbar_label_left(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsLabel(false))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_label_right(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsLabel(true))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_label_flip(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsLabelFlip())
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym0(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_PLAIN))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym1(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOL))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym2(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_BKSL))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym3(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SL))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym4(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_X))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym5(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLBKSL))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym6(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLSL))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
-}
-
-static void toolbar_setsym7(CoolToolBar *tb) {
-  MainFrame *mf = (MainFrame *)tb->ourframe;
-  if (mf->field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
-    mf->field->show_descr.show->winlist->
-      UpdatePointsOnSheet(mf->field->show_descr.curr_ss);
 }
 
 static void refnum_callback(wxObject &obj, wxEvent &) {

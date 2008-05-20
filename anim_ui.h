@@ -80,14 +80,16 @@ public:
   AnimationCanvas(AnimationFrame *frame, CC_descr *dcr);
   ~AnimationCanvas();
 
-  void OnPaint();
-  void OnEvent(wxMouseEvent& event);
+  void OnEraseBackground(wxEraseEvent& event);
+  void OnPaint(wxPaintEvent& event);
+  void OnLeftMouseEvent(wxMouseEvent& event);
+  void OnRightMouseEvent(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
 
   inline unsigned GetTempo() { return tempo; }
   void SetTempo(unsigned t);
 
-  inline void Redraw() { RedrawBuffer(); OnPaint(); }
+  inline void Redraw() { RedrawBuffer(); Refresh(); }
   void RedrawBuffer();
   void UpdateText();
   void Refresh();
@@ -126,11 +128,11 @@ public:
     timer->Stop(); timeron = false;
   }
 #ifdef ANIM_OUTPUT_POVRAY
-  const char * GeneratePOVFiles(const char *filebasename);
+  wxString GeneratePOVFiles(const wxString& filebasename);
 #endif
 #ifdef ANIM_OUTPUT_RIB
-  const char * GenerateRIBFrame();
-  const char * GenerateRIBFile(const char *filename, bool all = true);
+  wxString GenerateRIBFrame();
+  wxString GenerateRIBFile(const wxString& filename, bool all = true);
 #endif
 
   Animation* anim;
@@ -140,25 +142,37 @@ private:
   CC_descr *show_descr;
   AnimationFrame *ourframe;
   unsigned tempo;
+
+  DECLARE_EVENT_TABLE()
 };
 
-class AnimationSlider: public wxSlider {
-public:
-  AnimationSlider(wxPanel *parent, wxWindowID id,
-		  int value, int min_value, int max_value, int width):
-  wxSlider(parent, id, value, min_value, max_value),
-  canvas(NULL) {}
-
-  AnimationCanvas *canvas;
-};
-
-class AnimationFrame: public wxFrameWithStuffSized {
+class AnimationFrame: public wxFrame {
 public:
   AnimationFrame(wxFrame *frame, CC_descr *dcr, CC_WinList *lst);
   ~AnimationFrame();
 
-  void OnMenuCommand(int id);
-  void OnMenuSelect(int id);
+  void OnCmdReanimate(wxCommandEvent& event);
+  void OnCmdSelectCollisions(wxCommandEvent& event);
+#ifdef ANIM_OUTPUT_POVRAY
+  void OnCmdPOV(wxCommandEvent& event);
+#endif
+#ifdef ANIM_OUTPUT_RIB
+  void OnCmdRIBFrame(wxCommandEvent& event);
+  void OnCmdRIBAll(wxCommandEvent& event);
+  void OnCmdRIB(wxCommandEvent& event, bool allframes);
+#endif
+  void OnCmdClose(wxCommandEvent& event);
+
+  void OnCmd_anim_stop(wxCommandEvent& event);
+  void OnCmd_anim_play(wxCommandEvent& event);
+  void OnCmd_anim_prev_beat(wxCommandEvent& event);
+  void OnCmd_anim_next_beat(wxCommandEvent& event);
+  void OnCmd_anim_prev_sheet(wxCommandEvent& event);
+  void OnCmd_anim_next_sheet(wxCommandEvent& event);
+  void OnCmd_anim_collisions(wxCommandEvent& event);
+  void OnSlider_anim_tempo(wxScrollEvent& event);
+  void OnSlider_anim_gotosheet(wxScrollEvent& event);
+  void OnSlider_anim_gotobeat(wxScrollEvent& event);
 
   void UpdatePanel();
 
@@ -173,10 +187,12 @@ private:
   wxSlider *beat_slider;
 
   friend class AnimationCanvas;
+
+  DECLARE_EVENT_TABLE()
 };
 
 enum {
-  CALCHART__ANIM_REANIMATE = 100,
+  CALCHART__ANIM_REANIMATE = 1,
   CALCHART__ANIM_SELECT_COLL,
 #ifdef ANIM_OUTPUT_POVRAY
   CALCHART__ANIM_POVRAY,
@@ -185,31 +201,48 @@ enum {
   CALCHART__ANIM_RIB_FRAME,
   CALCHART__ANIM_RIB,
 #endif
-  CALCHART__ANIM_CLOSE
+
+  CALCHART__anim_stop,
+  CALCHART__anim_play,
+  CALCHART__anim_prev_beat,
+  CALCHART__anim_next_beat,
+  CALCHART__anim_prev_sheet,
+  CALCHART__anim_next_sheet,
+  CALCHART__anim_collisions,
+  CALCHART__anim_tempo,
+  CALCHART__anim_gotosheet,
+  CALCHART__anim_gotobeat,
+
+  CALCHART__anim_update
 };
 
 class AnimErrorList: public wxFrame {
 public:
   AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
-		wxFrame *frame, const wxChar *title,
-		int x = -1, int y = -1, int width = 300, int height = 300);
+		wxFrame *frame, const wxString& title,
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(300, 300));
   ~AnimErrorList();
-  bool OnClose(void);
-  void OnSize(int w, int h);
+  void OnCloseWindow(wxCloseEvent& event);
+  void OnSize(wxSizeEvent& event);
+  void OnCmdClose(wxCommandEvent& event);
+  void OnCmdUpdate(wxCommandEvent& event);
 
   inline bool Okay() { return ok; };
 
   void Unselect();
   void Update();
+  void Update(int i);
 
   CC_show *show;
 private:
   bool ok;
   unsigned sheetnum;
   wxPanel *panel;
-  GoodListBox *list;
+  wxListBox *list;
   ErrorMarker pointsels[NUM_ANIMERR];
   CC_WinNodeAnimErrors *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif

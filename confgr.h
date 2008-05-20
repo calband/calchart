@@ -55,13 +55,13 @@ enum CalChartColors {
   COLOR_NUM
 };
 
-class wxColourMap;
-extern wxColourMap *CalChartColorMap;
+class wxPalette;
+extern wxPalette *CalChartPalette;
 
 class wxPen;
 extern wxPen *CalChartPens[COLOR_NUM];
 class wxBrush;
-extern wxBrush *CalChartBrushes[COLOR_NUM];
+extern const wxBrush *CalChartBrushes[COLOR_NUM];
 
 extern wxString program_dir;
 extern wxString shows_dir;
@@ -100,11 +100,11 @@ extern float cont_ratio;
 extern wxString yard_text[MAX_YARD_LINES];
 extern wxString spr_line_text[MAX_SPR_LINES];
 
-extern char *ReadConfig(const char *path);
+extern wxString ReadConfig(const wxString& path);
 class wxPathList;
-extern FILE *OpenFileInDir(const char *name, const char *modes,
+extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
 			   wxPathList *list = NULL);
-extern char *FullPath(const char *path);
+extern wxString FullPath(const wxString& path);
 extern int ReadDOSline(FILE *fp, wxString& str);
 
 #endif

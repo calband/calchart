@@ -76,11 +76,11 @@ unsigned ShowUndoMany::Size() {
   return i;
 }
 
-char *ShowUndoMany::UndoDescription() {
+const wxChar *ShowUndoMany::UndoDescription() {
   if (list) return list->UndoDescription();
   else return NULL;
 }
-char *ShowUndoMany::RedoDescription() {
+const wxChar *ShowUndoMany::RedoDescription() {
   if (list) return list->RedoDescription();
   else return NULL;
 }
@@ -149,8 +149,8 @@ unsigned ShowUndoMove::Size() {
   return sizeof(ShowUndoMoveElem) * num + sizeof(*this);
 }
 
-char *ShowUndoMove::UndoDescription() { return "Undo movement"; }
-char *ShowUndoMove::RedoDescription() { return "Redo movement"; }
+const wxChar *ShowUndoMove::UndoDescription() { return wxT("Undo movement"); }
+const wxChar *ShowUndoMove::RedoDescription() { return wxT("Redo movement"); }
 
 ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged)
 :ShowUndo(sheetnum), contchange(contchanged) {
@@ -208,11 +208,11 @@ unsigned ShowUndoSym::Size() {
   return sizeof(ShowUndoSymElem) * num + sizeof(*this);
 }
 
-char *ShowUndoSym::UndoDescription() {
-  return contchange ? "Undo continuity assignment" : "Undo symbol change";
+const wxChar *ShowUndoSym::UndoDescription() {
+  return contchange ? wxT("Undo continuity assignment") : wxT("Undo symbol change");
 }
-char *ShowUndoSym::RedoDescription() {
-  return contchange ? "Redo continuity assignment" : "Redo symbol change";
+const wxChar *ShowUndoSym::RedoDescription() {
+  return contchange ? wxT("Redo continuity assignment") : wxT("Redo symbol change");
 }
 
 ShowUndoLbl::ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet)
@@ -268,8 +268,8 @@ unsigned ShowUndoLbl::Size() {
   return sizeof(ShowUndoLblElem) * num + sizeof(*this);
 }
 
-char *ShowUndoLbl::UndoDescription() { return "Undo label location"; }
-char *ShowUndoLbl::RedoDescription() { return "Redo label location"; }
+const wxChar *ShowUndoLbl::UndoDescription() { return wxT("Undo label location"); }
+const wxChar *ShowUndoLbl::RedoDescription() { return wxT("Redo label location"); }
 
 ShowUndoCopy::ShowUndoCopy(unsigned sheetnum)
 :ShowUndo(sheetnum) {
@@ -290,8 +290,8 @@ int ShowUndoCopy::Undo(CC_show *show, ShowUndo** newundo) {
 
 unsigned ShowUndoCopy::Size() { return sizeof(*this); }
 
-char *ShowUndoCopy::UndoDescription() { return "Undo copy stuntsheet"; }
-char *ShowUndoCopy::RedoDescription() { return "Redo delete stuntsheet"; }
+const wxChar *ShowUndoCopy::UndoDescription() { return wxT("Undo copy stuntsheet"); }
+const wxChar *ShowUndoCopy::RedoDescription() { return wxT("Redo delete stuntsheet"); }
 
 ShowUndoDelete::ShowUndoDelete(unsigned sheetnum, CC_sheet *sheet)
 :ShowUndo(sheetnum), deleted_sheet(sheet) {
@@ -312,8 +312,8 @@ unsigned ShowUndoDelete::Size() {
   return sizeof(*this) + sizeof(*deleted_sheet);
 }
 
-char *ShowUndoDelete::UndoDescription() { return "Undo delete stuntsheet"; }
-char *ShowUndoDelete::RedoDescription() { return "Redo copy stuntsheet"; }
+const wxChar *ShowUndoDelete::UndoDescription() { return wxT("Undo delete stuntsheet"); }
+const wxChar *ShowUndoDelete::RedoDescription() { return wxT("Redo copy stuntsheet"); }
 
 ShowUndoAppendSheets::ShowUndoAppendSheets(unsigned sheetnum)
 :ShowUndo(sheetnum) {
@@ -330,8 +330,8 @@ int ShowUndoAppendSheets::Undo(CC_show *show, ShowUndo** newundo) {
 
 unsigned ShowUndoAppendSheets::Size() { return sizeof(*this); }
 
-char *ShowUndoAppendSheets::UndoDescription() { return "Undo append sheets"; }
-char *ShowUndoAppendSheets::RedoDescription() { return ""; }
+const wxChar *ShowUndoAppendSheets::UndoDescription() { return wxT("Undo append sheets"); }
+const wxChar *ShowUndoAppendSheets::RedoDescription() { return wxT(""); }
 
 ShowUndoDeleteAppendSheets::ShowUndoDeleteAppendSheets(CC_sheet *sheet)
 :ShowUndo(0), deleted_sheets(sheet) {
@@ -366,8 +366,8 @@ unsigned ShowUndoDeleteAppendSheets::Size() {
   return i;
 }
 
-char *ShowUndoDeleteAppendSheets::UndoDescription() { return ""; }
-char *ShowUndoDeleteAppendSheets::RedoDescription() { return "Redo append sheets"; }
+const wxChar *ShowUndoDeleteAppendSheets::UndoDescription() { return wxT(""); }
+const wxChar *ShowUndoDeleteAppendSheets::RedoDescription() { return wxT("Redo append sheets"); }
 
 ShowUndoName::ShowUndoName(unsigned sheetnum, CC_sheet *sheet)
 :ShowUndo(sheetnum) {
@@ -389,11 +389,11 @@ int ShowUndoName::Undo(CC_show *show, ShowUndo** newundo)
 }
 
 unsigned ShowUndoName::Size() {
-  return strlen(name) + sizeof(*this);
+  return name.length()*sizeof(wxChar) + sizeof(*this);
 }
 
-char *ShowUndoName::UndoDescription() { return "Undo change stuntsheet name"; }
-char *ShowUndoName::RedoDescription() { return "Redo change stuntsheet name"; }
+const wxChar *ShowUndoName::UndoDescription() { return wxT("Undo change stuntsheet name"); }
+const wxChar *ShowUndoName::RedoDescription() { return wxT("Redo change stuntsheet name"); }
 
 ShowUndoBeat::ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet)
 :ShowUndo(sheetnum), beats(sheet->GetBeats()) {}
@@ -414,8 +414,8 @@ unsigned ShowUndoBeat::Size() {
   return sizeof(*this);
 }
 
-char *ShowUndoBeat::UndoDescription() { return "Undo set number of beats"; }
-char *ShowUndoBeat::RedoDescription() { return "Redo set number of beats"; }
+const wxChar *ShowUndoBeat::UndoDescription() { return wxT("Undo set number of beats"); }
+const wxChar *ShowUndoBeat::RedoDescription() { return wxT("Redo set number of beats"); }
 
 ShowUndoCont::ShowUndoCont(unsigned sheetnum, unsigned contnum,
 			   CC_sheet *sheet)
@@ -438,11 +438,11 @@ int ShowUndoCont::Undo(CC_show *show, ShowUndo** newundo)
 }
 
 unsigned ShowUndoCont::Size() {
-  return strlen(conttext) + sizeof(*this);
+  return conttext.length()*sizeof(wxChar) + sizeof(*this);
 }
 
-char *ShowUndoCont::UndoDescription() { return "Undo edit continuity"; }
-char *ShowUndoCont::RedoDescription() { return "Redo edit continuity"; }
+const wxChar *ShowUndoCont::UndoDescription() { return wxT("Undo edit continuity"); }
+const wxChar *ShowUndoCont::RedoDescription() { return wxT("Redo edit continuity"); }
 
 ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
 					     unsigned contnum)
@@ -462,11 +462,11 @@ int ShowUndoAddContinuity::Undo(CC_show *show, ShowUndo** newundo) {
 
 unsigned ShowUndoAddContinuity::Size() { return sizeof(*this); }
 
-char *ShowUndoAddContinuity::UndoDescription() {
-  return "Undo add continuity";
+const wxChar *ShowUndoAddContinuity::UndoDescription() {
+  return wxT("Undo add continuity");
 }
-char *ShowUndoAddContinuity::RedoDescription() {
-  return "Redo delete continuity";
+const wxChar *ShowUndoAddContinuity::RedoDescription() {
+  return wxT("Redo delete continuity");
 }
 
 ShowUndoDeleteContinuity::ShowUndoDeleteContinuity(unsigned sheetnum,
@@ -490,11 +490,11 @@ unsigned ShowUndoDeleteContinuity::Size() {
   return sizeof(*this) + sizeof(*deleted_cont);
 }
 
-char *ShowUndoDeleteContinuity::UndoDescription() {
-  return "Undo delete continuity";
+const wxChar *ShowUndoDeleteContinuity::UndoDescription() {
+  return wxT("Undo delete continuity");
 }
-char *ShowUndoDeleteContinuity::RedoDescription() {
-  return "Redo add continuity";
+const wxChar *ShowUndoDeleteContinuity::RedoDescription() {
+  return wxT("Redo add continuity");
 }
 
 ShowUndoDescr::ShowUndoDescr(CC_show *show)
@@ -515,11 +515,11 @@ int ShowUndoDescr::Undo(CC_show *show, ShowUndo** newundo)
 }
 
 unsigned ShowUndoDescr::Size() {
-  return strlen(descrtext) + sizeof(*this);
+  return descrtext.length()*sizeof(wxChar) + sizeof(*this);
 }
 
-char *ShowUndoDescr::UndoDescription() { return "Undo edit show description"; }
-char *ShowUndoDescr::RedoDescription() { return "Redo edit show description"; }
+const wxChar *ShowUndoDescr::UndoDescription() { return wxT("Undo edit show description"); }
+const wxChar *ShowUndoDescr::RedoDescription() { return wxT("Redo edit show description"); }
 
 ShowUndoList::ShowUndoList(CC_show *shw, int lim)
 :show(shw), list(NULL), redolist(NULL), limit(lim) {}
@@ -595,20 +595,20 @@ void ShowUndoList::EndMulti() {
 }
 
 // Return description of undo stack
-char *ShowUndoList::UndoDescription() {
+const wxChar *ShowUndoList::UndoDescription() {
   if (list) {
     return list->UndoDescription();
   } else {
-    return "No undo information";
+    return wxT("No undo information");
   }
 }
 
 // Return description of redo stack
-char *ShowUndoList::RedoDescription() {
+const wxChar *ShowUndoList::RedoDescription() {
   if (redolist) {
     return redolist->RedoDescription();
   } else {
-    return "No redo information";
+    return wxT("No redo information");
   }
 }
 
@@ -710,20 +710,20 @@ void ShowUndoList::Clean() {
   }
 }
 
-ostream& operator<< (ostream& s, const ShowUndoList& list) {
+std::ostream& operator<< (std::ostream& s, const ShowUndoList& list) {
   ShowUndo *elem;
 
   elem = list.list;
   while (elem) {
-    s << elem->UndoDescription() << endl;
+    s << elem->UndoDescription() << std::endl;
     elem = elem->next;
   }
-  s << "*** End of undo stack." << endl;
+  s << "*** End of undo stack." << std::endl;
   elem = list.redolist;
   while (elem) {
-    s << elem->RedoDescription() << endl;
+    s << elem->RedoDescription() << std::endl;
     elem = elem->next;
   }
-  s << "*** End of redo stack." << endl;
+  s << "*** End of redo stack." << std::endl;
   return s;
 }

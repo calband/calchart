@@ -33,6 +33,20 @@
 
 extern ShowModeList *modelist;
 
+BEGIN_EVENT_TABLE(StuntSheetPicker, wxFrame)
+  EVT_CLOSE(StuntSheetPicker::OnCloseWindow)
+  EVT_SIZE(StuntSheetPicker::OnSize)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(PointPicker, wxFrame)
+  EVT_CLOSE(PointPicker::OnCloseWindow)
+  EVT_SIZE(PointPicker::OnSize)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(ShowInfoReq, wxFrame)
+  EVT_CLOSE(ShowInfoReq::OnCloseWindow)
+END_EVENT_TABLE()
+
 CC_WinNodePicker::CC_WinNodePicker(CC_WinList *lst, StuntSheetPicker *req)
 : CC_WinNode(lst), picker(req) {}
 
@@ -174,7 +188,7 @@ static void SheetPickerClick(wxListBox& list, wxCommandEvent&) {
 
 StuntSheetPicker::StuntSheetPicker(CC_show *shw, CC_WinList *lst,
 				   bool multi, wxFrame *frame,
-				   char *title,
+				   const wxString& title,
 				   int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
 show(shw) {
@@ -186,7 +200,7 @@ show(shw) {
   panel = new wxPanel(this);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)SheetPickerClose,
-				    "&Close");
+				    wxT("&Close"));
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -196,7 +210,7 @@ show(shw) {
 
   if (multi) {
     wxButton *allBut = new wxButton(panel, (wxFunction)SheetPickerAll,
-				    "&All");
+				    wxT("&All"));
     wxLayoutConstraints *bt1 = new wxLayoutConstraints;
     bt1->left.RightOf(closeBut, 5);
     bt1->top.SameAs(closeBut, wxTop);
@@ -205,7 +219,7 @@ show(shw) {
     allBut->SetConstraints(bt1);
 
     wxButton *noneBut = new wxButton(panel, (wxFunction)SheetPickerNone,
-				     "&None");
+				     wxT("&None"));
     wxLayoutConstraints *bt2 = new wxLayoutConstraints;
     bt2->left.RightOf(allBut, 5);
     bt2->top.SameAs(closeBut, wxTop);
@@ -216,9 +230,9 @@ show(shw) {
 
   closeBut->SetDefault();
 
-  list = new GoodListBox(panel, (wxFunction)SheetPickerClick, "",
-			 multi ? wxMULTIPLE:wxSINGLE,
-			 -1, -1, -1, -1);
+  list = new wxListBox(panel, (wxFunction)SheetPickerClick, wxT(""),
+		       multi ? wxMULTIPLE:wxSINGLE,
+		       -1, -1, -1, -1);
   SetListBoxEntries();
   wxLayoutConstraints *b1 = new wxLayoutConstraints;
   b1->left.SameAs(panel, wxLeft, 5);
@@ -236,7 +250,7 @@ show(shw) {
 
   node = new CC_WinNodePicker(lst, this);
 
-  OnSize(-1,-1);
+  Layout();
 
   Show(true);
 }
@@ -249,12 +263,12 @@ StuntSheetPicker::~StuntSheetPicker()
   }
 }
 
-void StuntSheetPicker::OnSize(int, int) {
+void StuntSheetPicker::OnSize(wxSizeEvent& event) {
   Layout();
 }
 
-bool StuntSheetPicker::OnClose(void) {
-  return true;
+void StuntSheetPicker::OnCloseWindow(wxCloseEvent& event) {
+  Destroy();
 }
 
 void StuntSheetPicker::Update() {
@@ -264,18 +278,18 @@ void StuntSheetPicker::Update() {
 
 void StuntSheetPicker::SetListBoxEntries() {
   CC_sheet *sheet;
-  char **text;
+  wxString *text;
   unsigned n;
 
-  text = new char*[show->GetNumSheets()];
+  text = new wxString[show->GetNumSheets()];
   for (n = 0, sheet = show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next) {
-    text[n] = (char *)sheet->GetName();
+    text[n] = sheet->GetName();
   }
   list->Set(show->GetNumSheets(), text);
   for (n = 0, sheet = show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next) {
     list->SetSelection(n, sheet->picked);
   }
-  delete text;
+  delete [] text;
 }
 
 static void PointPickerClose(wxButton& button, wxEvent&) {
@@ -318,7 +332,7 @@ static void PointPickerClick(wxListBox& list, wxCommandEvent&) {
 
 PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
 			 bool multi, wxFrame *frame,
-			 char *title,
+			 const wxString& title,
 			 int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
 show(shw) {
@@ -330,7 +344,7 @@ show(shw) {
   panel = new wxPanel(this);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)PointPickerClose,
-				    "&Close");
+				    wxT("&Close"));
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -340,7 +354,7 @@ show(shw) {
 
   if (multi) {
     wxButton *allBut = new wxButton(panel, (wxFunction)PointPickerAll,
-				    "&All");
+				    wxT("&All"));
     wxLayoutConstraints *bt1 = new wxLayoutConstraints;
     bt1->left.RightOf(closeBut, 5);
     bt1->top.SameAs(closeBut, wxTop);
@@ -349,7 +363,7 @@ show(shw) {
     allBut->SetConstraints(bt1);
 
     wxButton *noneBut = new wxButton(panel, (wxFunction)PointPickerNone,
-				     "&None");
+				     wxT("&None"));
     wxLayoutConstraints *bt2 = new wxLayoutConstraints;
     bt2->left.RightOf(allBut, 5);
     bt2->top.SameAs(closeBut, wxTop);
@@ -360,9 +374,9 @@ show(shw) {
 
   closeBut->SetDefault();
 
-  list = new GoodListBox(panel, (wxFunction)PointPickerClick, "",
-			 multi ? wxMULTIPLE:wxSINGLE,
-			 -1, -1, -1, -1);
+  list = new wxListBox(panel, (wxFunction)PointPickerClick, wxT(""),
+		       multi ? wxMULTIPLE:wxSINGLE,
+		       -1, -1, -1, -1);
   SetListBoxEntries();
   wxLayoutConstraints *b1 = new wxLayoutConstraints;
   b1->left.SameAs(panel, wxLeft, 5);
@@ -380,7 +394,7 @@ show(shw) {
 
   node = new CC_WinNodePointPicker(lst, this);
 
-  OnSize(-1,-1);
+  Layout();
 
   Show(true);
 }
@@ -393,12 +407,12 @@ PointPicker::~PointPicker()
   }
 }
 
-void PointPicker::OnSize(int, int) {
+void PointPicker::OnSize(wxSizeEvent& event) {
   Layout();
 }
 
-bool PointPicker::OnClose(void) {
-  return true;
+void PointPicker::OnCloseWindow(wxCloseEvent& event) {
+  Destroy();
 }
 
 void PointPicker::Update() {
@@ -415,18 +429,12 @@ void PointPicker::UpdateSelections() {
 }
 
 void PointPicker::SetListBoxEntries() {
-  char **text;
   unsigned n;
 
-  text = new char*[show->GetNumPoints()];
-  for (n = 0; n < show->GetNumPoints(); n++) {
-    text[n] = (char *)show->GetPointLabel(n);
-  }
-  list->Set(show->GetNumPoints(), text);
+  list->Set(show->GetNumPoints(), show->GetPointLabels());
   for (n = 0; n < show->GetNumPoints(); n++) {
     list->SetSelection(n, show->IsSelected(n));
   }
-  delete text;
 }
 
 static void ShowInfoClose(wxButton& button, wxEvent&) {
@@ -439,8 +447,8 @@ static void ShowInfoSetNum(wxButton& button, wxEvent&) {
 
   num = req->GetNumPoints();
   if (num != req->show->GetNumPoints()) {
-    if(wxMessageBox("Changing the number of points is not undoable.\nProceed?",
-		    "Change number of points", wxYES_NO, req) == wxYES) {
+    if(wxMessageBox(wxT("Changing the number of points is not undoable.\nProceed?"),
+		    wxT("Change number of points"), wxYES_NO, req) == wxYES) {
       if (num > req->show->GetNumPoints())
 	if (num > 10)
 	  req->show->SetNumPoints(num, req->GetColumns());
@@ -475,13 +483,12 @@ static void ShowInfoModeChoice(wxChoice& choice, wxCommandEvent&) {
 static void CalculateLabels(CC_show *show, bool letters[26],
 			    bool& use_letters, int& maxnum) {
   unsigned i;
-  char *tmp;
 
   for (i = 0; i < 26; i++) letters[i] = false;
   use_letters = false;
   maxnum = 1;
   for (i = 0; i < show->GetNumPoints(); i++) {
-    tmp = show->GetPointLabel(i);
+    const wxString& tmp = show->GetPointLabel(i);
     if (!isdigit(tmp[0])) {
       letters[tmp[0]-'A'] = true;
       if ((tmp[1]-'0') >= maxnum)
@@ -496,13 +503,13 @@ static void CalculateLabels(CC_show *show, bool letters[26],
 }
 
 ShowInfoReq::ShowInfoReq(CC_show *shw, CC_WinList *lst,
-			 wxFrame *frame, char *title,
+			 wxFrame *frame, const wxString& title,
 			 int x, int y, int width, int height):
 wxFrame(frame, title, x, y, width, height, CC_FRAME_OTHER),
 show(shw) {
   unsigned i;
   wxString buf;
-  char *strs[2];
+  wxString strs[2];
   bool letters[26];
   bool use_letters;
   int maxnum;
@@ -518,7 +525,7 @@ show(shw) {
   panel->SetLabelPosition(wxVERTICAL);
 
   wxButton *closeBut = new wxButton(panel, (wxFunction)ShowInfoClose,
-				    "&Close");
+				    wxT("&Close"));
   wxLayoutConstraints *bt0 = new wxLayoutConstraints;
   bt0->left.SameAs(panel, wxLeft, 5);
   bt0->top.SameAs(panel, wxTop, 5);
@@ -527,7 +534,7 @@ show(shw) {
   closeBut->SetConstraints(bt0);
 
   wxButton *setnumBut = new wxButton(panel, (wxFunction)ShowInfoSetNum,
-				     "Set &Num Points");
+				     wxT("Set &Num Points"));
   wxLayoutConstraints *bt1 = new wxLayoutConstraints;
   bt1->left.RightOf(closeBut, 5);
   bt1->top.SameAs(closeBut, wxTop);
@@ -536,7 +543,7 @@ show(shw) {
   setnumBut->SetConstraints(bt1);
 
   wxButton *setlabBut = new wxButton(panel, (wxFunction)ShowInfoSetLabels,
-				     "&Set Labels");
+				     wxT("&Set Labels"));
   wxLayoutConstraints *bt2 = new wxLayoutConstraints;
   bt2->left.RightOf(setnumBut, 5);
   bt2->top.SameAs(closeBut, wxTop);
@@ -546,7 +553,7 @@ show(shw) {
 
   closeBut->SetDefault();
 
-  lettersize = new wxSlider(panel, (wxFunction)NULL, "P&oints per letter",
+  lettersize = new wxSlider(panel, (wxFunction)NULL, wxT("P&oints per letter"),
 			    maxnum, 1, 10, -1);
   wxLayoutConstraints *b0 = new wxLayoutConstraints;
   b0->left.SameAs(panel, wxLeft, 5);
@@ -555,11 +562,11 @@ show(shw) {
   b0->height.AsIs();
   lettersize->SetConstraints(b0);
 
-  labels = new GoodListBox(panel, (wxFunction)NULL, "&Letters",
-			   wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
+  labels = new wxListBox(panel, (wxFunction)NULL, wxT("&Letters"),
+			 wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);
   for (i = 0; i < 26; i++) {
     buf = (char)(i + 'A');
-    labels->Append(buf.GetData());
+    labels->Append(buf);
     labels->SetSelection(i, letters[i]);
   }
 
@@ -570,8 +577,8 @@ show(shw) {
   b1->bottom.Above(lettersize, 5);
   labels->SetConstraints(b1);
 
-  buf.sprintf("%u", show->GetNumPoints());
-  numpnts = new wxText(panel, (wxFunction)NULL, "&Points", buf.GetData());
+  buf.sprintf(wxT("%u"), show->GetNumPoints());
+  numpnts = new wxText(panel, (wxFunction)NULL, wxT("&Points"), buf);
 
   wxLayoutConstraints *b2 = new wxLayoutConstraints;
   b2->left.RightOf(labels, 5);
@@ -580,9 +587,9 @@ show(shw) {
   b2->height.AsIs();
   numpnts->SetConstraints(b2);
 
-  strs[0] = "Numbers";
-  strs[1] = "Letters";
-  label_type = new wxRadioBox(panel, (wxFunction)NULL, "&Labels",
+  strs[0] = wxT("Numbers");
+  strs[1] = wxT("Letters");
+  label_type = new wxRadioBox(panel, (wxFunction)NULL, wxT("&Labels"),
 			      -1, -1, -1, -1, 2, strs, 2, wxHORIZONTAL|wxFLAT);
   label_type->SetSelection(use_letters);
 
@@ -593,10 +600,10 @@ show(shw) {
   b3->height.AsIs();
   label_type->SetConstraints(b3);
 
-  choice = new wxChoice(panel, (wxFunction)ShowInfoModeChoice, "Show &mode");
+  choice = new wxChoice(panel, (wxFunction)ShowInfoModeChoice, wxT("Show &mode"));
   ShowMode *mode = modelist->First();
   while (mode != NULL) {
-    choice->Append((char*)mode->GetName());
+    choice->Append(mode->GetName());
     mode = mode->next;
   }
   UpdateMode();
@@ -626,7 +633,7 @@ show(shw) {
 
   node = new CC_WinNodeInfo(lst, this);
 
-  OnSize(-1,-1);
+  Layout();
 
   Show(true);
 }
@@ -639,9 +646,9 @@ ShowInfoReq::~ShowInfoReq()
   }
 }
 
-bool ShowInfoReq::OnClose(void) {
+void ShowInfoReq::OnCloseWindow(wxCloseEvent& event) {
   FlushDescr();
-  return true;
+  Destroy();
 }
 
 void ShowInfoReq::UpdateLabels() {
@@ -655,7 +662,7 @@ void ShowInfoReq::UpdateLabels() {
   label_type->SetSelection(use_letters);
   lettersize->SetValue(maxnum);
   for (i = 0; i < 26; i++) {
-    if (!letters[i] || !labels->Selected(i)) { // so Motif version works
+    if (!letters[i] || !labels->IsSelected(i)) { // so Motif version works
       labels->SetSelection(i, letters[i]);
     }
   }
@@ -664,23 +671,23 @@ void ShowInfoReq::UpdateLabels() {
 void ShowInfoReq::UpdateNumPoints() {
   wxString buf;
 
-  buf.sprintf("%u", show->GetNumPoints());
-  numpnts->SetValue(buf.GetData());
+  buf.sprintf(wxT("%u"), show->GetNumPoints());
+  numpnts->SetValue(buf);
   UpdateLabels();
 }
 
 void ShowInfoReq::UpdateMode() {
-  choice->SetStringSelection((char*)show->mode->GetName());
+  choice->SetStringSelection(show->mode->GetName());
 }
 
 void ShowInfoReq::UpdateDescr(bool quick) {
-  char *c;
+  wxString c;
 
   text->Clear();
   if (quick) {
-    c = (char *)show->GetDescr();
+    c = show->GetDescr();
   } else {
-    c = (char *)show->UserGetDescr();
+    c = show->UserGetDescr();
   }
   text->WriteText(c);
   text->SetInsertionPoint(0);
@@ -694,41 +701,37 @@ void ShowInfoReq::Update(bool quick, CC_show *shw) {
 }
 
 void ShowInfoReq::FlushDescr() {
-  char *descr;
+  wxString descr;
 
   descr = text->GetContents();
-  if (strcmp(descr,show->GetDescr()) != 0) {
+  if (descr != show->GetDescr()) {
     show->UserSetDescr(descr, this);
   }
-  delete descr;
 }
 
 unsigned ShowInfoReq::GetNumPoints() {
-  int i;
+  long i;
   wxString buf;
 
-  StringToInt(numpnts->GetValue(), &i);
-  if (i < 0) {
-    numpnts->SetValue("0");
+  if (!numpnts->GetValue().ToLong(&i) || i < 0) {
+    numpnts->SetValue(wxT("0"));
     i = 0;
   }
   if (i > MAX_POINTS) {
-    buf.sprintf("%u", MAX_POINTS);
-    numpnts->SetValue(buf.GetData());
+    buf.sprintf(wxT("%u"), MAX_POINTS);
+    numpnts->SetValue(buf);
     i = MAX_POINTS;
   }
   return (unsigned)i;
 }
 
 unsigned ShowInfoReq::GetColumns() {
-  char *s;
-  int i;
+  wxString s;
+  long i;
 
-  s = wxGetTextFromUser("Enter the number of columns for new points",
-			"New points", "10", this);
-  if (s) {
-    StringToInt(s, &i);
-  } else {
+  s = wxGetTextFromUser(wxT("Enter the number of columns for new points"),
+			wxT("New points"), wxT("10"), this);
+  if (s.empty() || !s.ToLong(&i)) {
     i = 10;
   }
   if (i < 1) {
@@ -745,7 +748,7 @@ void ShowInfoReq::SetLabels() {
     // Numbers
     for (i = 0; i < show->GetNumPoints(); i++) {
       // Begin with 1, not 0
-      sprintf(show->GetPointLabel(i), "%u", i+1);
+      show->GetPointLabel(i).Printf(wxT("%u"), i+1);
     }
   } else {
     // Letters
@@ -760,7 +763,7 @@ void ShowInfoReq::SetLabels() {
       }
     }
     if (num*numlabels < show->GetNumPoints()) {
-      wxMessageBox("There are not enough labels defined.", "Set labels");
+      wxMessageBox(wxT("There are not enough labels defined."), wxT("Set labels"));
     } else {
       j = 0;
       letr = 0;
@@ -772,7 +775,7 @@ void ShowInfoReq::SetLabels() {
 	    letr++;
 	  } while (!letters[letr]);
 	}
-	sprintf(show->GetPointLabel(i), "%c%u", letr+'A', j);
+	show->GetPointLabel(i).Printf(wxT("%c%u"), letr+'A', j);
       }
     }
   }

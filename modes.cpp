@@ -32,28 +32,27 @@
 #include "modes.h"
 #include "confgr.h"
 
-extern wxFont *yardLabelFont;
+extern wxFont yardLabelFont;
 
-ShowMode::ShowMode(const char *nam, CC_coord siz, CC_coord off,
+ShowMode::ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
 		   CC_coord bord1, CC_coord bord2)
 : next(NULL), offset(off), size(siz), border1(bord1), border2(bord2)
 {
   size += border1 + border2;
   offset += border1;
-  name = copystring(nam);
+  name = nam;
 }
 
-ShowMode::ShowMode(const char *nam, CC_coord siz,
+ShowMode::ShowMode(const wxString& nam, CC_coord siz,
 		   CC_coord bord1, CC_coord bord2)
 : next(NULL), offset(siz/2), size(siz), border1(bord1), border2(bord2)
 {
   size += border1 + border2;
   offset += border1;
-  name = copystring(nam);
+  name = nam;
 }
 
 ShowMode::~ShowMode() {
-  delete name;
 }
 
 CC_coord ShowMode::ClipPosition(const CC_coord& pos) {
@@ -70,14 +69,14 @@ CC_coord ShowMode::ClipPosition(const CC_coord& pos) {
   return clipped;
 }
 
-ShowModeStandard::ShowModeStandard(const char *nam,
+ShowModeStandard::ShowModeStandard(const wxString& nam,
 				   CC_coord bord1, CC_coord bord2,
 				   unsigned short hashw, unsigned short hashe)
 : ShowMode(nam, CC_coord(INT2COORD(160),INT2COORD(84)),bord1, bord2),
   hashw(hashw), hashe(hashe)
 {}
 
-ShowModeStandard::ShowModeStandard(const char *nam,
+ShowModeStandard::ShowModeStandard(const wxString& nam,
 				   CC_coord bord1, CC_coord bord2,
 				   CC_coord siz, CC_coord off,
 				   unsigned short hashw, unsigned short hashe)
@@ -93,8 +92,8 @@ SHOW_TYPE ShowModeStandard::GetType() {
 void ShowModeStandard::Draw(wxDC *dc) {
   unsigned short i;
   Coord j, k;
-  wxIntPoint points[5];
-  float textw, texth, textd;
+  wxPoint points[5];
+  wxCoord textw, texth, textd;
   CC_coord fieldsize, fieldedge;
 
   fieldsize = size - border1 - border2;
@@ -202,7 +201,7 @@ void ShowModeStandard::Draw(wxDC *dc) {
 
 void ShowModeStandard::DrawAnim(wxDC *dc) {
   Coord j;
-  wxIntPoint points[5];
+  wxPoint points[5];
   CC_coord fieldsize, fieldedge;
 
   fieldsize = size - border1 - border2;
@@ -249,7 +248,7 @@ void ShowModeStandard::DrawAnim(wxDC *dc) {
 
 #ifdef TEXT_ON_ANIM
   unsigned short i;
-  float textw, texth, textd;
+  wxCoord textw, texth, textd;
   dc->SetFont(yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
     dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
@@ -263,9 +262,9 @@ void ShowModeStandard::DrawAnim(wxDC *dc) {
 #endif
 }
 
-ShowModeSprShow::ShowModeSprShow(const char *nam,
+ShowModeSprShow::ShowModeSprShow(const wxString& nam,
 				 CC_coord bord1, CC_coord bord2,
-				 unsigned char which, const char *file,
+				 unsigned char which, const wxString& file,
 				 short stps_x, short stps_y,
 				 short stps_w, short stps_h,
 				 short stg_x, short stg_y,
@@ -282,11 +281,10 @@ ShowModeSprShow::ShowModeSprShow(const char *nam,
   steps_x(stps_x), steps_y(stps_y), steps_w(stps_w), steps_h(stps_h),
   text_left(txt_l), text_right(txt_r), text_top(txt_tp), text_bottom(txt_bm)
 {
-  stagefile = copystring(file);
+  stagefile = file;
 }
 
 ShowModeSprShow::~ShowModeSprShow() {
-  delete stagefile;
 }
 
 SHOW_TYPE ShowModeSprShow::GetType() {
@@ -296,7 +294,7 @@ SHOW_TYPE ShowModeSprShow::GetType() {
 void ShowModeSprShow::Draw(wxDC *dc) {
   unsigned short i;
   Coord j, k;
-  float textw, texth, textd;
+  wxCoord textw, texth, textd;
   CC_coord fieldsize;
 
   fieldsize = size - border1 - border2;
@@ -376,7 +374,7 @@ void ShowModeSprShow::DrawAnim(wxDC *dc) {
 
 #ifdef TEXT_ON_ANIM
   unsigned short i;
-  float textw, texth, textd;
+  wxCoord textw, texth, textd;
   dc->SetFont(yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
     dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
@@ -432,11 +430,11 @@ void ShowModeList::Add(ShowMode *mode) {
   }
 }
 
-ShowMode *ShowModeList::Find(char *name) {
+ShowMode *ShowModeList::Find(const wxString& name) {
   ShowMode *mode = list;
 
   while (mode != NULL) {
-    if (strcmp(mode->GetName(), name) == 0) break;
+    if (mode->GetName() == name) break;
     mode = mode->next;
   }
   return mode;

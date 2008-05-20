@@ -58,7 +58,7 @@ public:
 struct INGLhandler {
   INGLid id;
   INGLid previd;
-  char* (*func) (INGLchunk* chunk);
+  const char* (*func) (INGLchunk* chunk);
 };
 
 class INGLread {
@@ -69,7 +69,8 @@ public:
 
   bool Okay();
 
-  void *ParseFile(INGLhandler hndlr[], unsigned num, char **error,
+  typedef const char* StringPtr;
+  void *ParseFile(INGLhandler hndlr[], unsigned num, StringPtr *error,
 		  void *topdata = NULL);
 
 private:

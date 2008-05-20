@@ -66,7 +66,7 @@ enum AnimateError {
   NUM_ANIMERR
 };
 
-extern const char *animate_err_msgs[];
+extern const wxChar *animate_err_msgs[];
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector);
 AnimateDir AnimGetDirFromAngle(float ang);

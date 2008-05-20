@@ -31,6 +31,7 @@
 #endif
 
 #include "show.h"
+#include <ostream>
 
 class ShowUndo {
 public:
@@ -42,8 +43,8 @@ public:
   // returns amount of memory used
   virtual unsigned Size() = 0;
   // returns description of this event
-  virtual char *UndoDescription() = 0;
-  virtual char *RedoDescription() = 0;
+  virtual const wxChar *UndoDescription() = 0;
+  virtual const wxChar *RedoDescription() = 0;
 
   ShowUndo *next;
   unsigned sheetidx;
@@ -58,8 +59,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   ShowUndo *list;
 };
@@ -77,8 +78,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   unsigned num, refnum;
   ShowUndoMoveElem *elems;
@@ -98,8 +99,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   unsigned num;
   ShowUndoSymElem *elems;
@@ -119,8 +120,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   unsigned num;
   ShowUndoLblElem *elems;
@@ -134,8 +135,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 };
 
 // Deleted stuntsheet
@@ -146,8 +147,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   CC_sheet *deleted_sheet;
 };
@@ -160,8 +161,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 };
 
 // Only for redoing append sheets
@@ -172,8 +173,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   CC_sheet *deleted_sheets;
 };
@@ -186,8 +187,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   wxString name;
 };
@@ -200,8 +201,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   unsigned short beats;
 };
@@ -214,8 +215,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   unsigned cont;
   wxString conttext;
@@ -229,8 +230,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   unsigned addcontnum;
 };
@@ -244,8 +245,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   CC_continuity *deleted_cont;
   unsigned delcontnum;
@@ -259,8 +260,8 @@ public:
 
   virtual int Undo(CC_show *show, ShowUndo** newundo);
   virtual unsigned Size();
-  virtual char *UndoDescription();
-  virtual char *RedoDescription();
+  virtual const wxChar *UndoDescription();
+  virtual const wxChar *RedoDescription();
 private:
   wxString descrtext;
 };
@@ -278,8 +279,8 @@ public:
   void StartMulti();
   void EndMulti();
 
-  char *UndoDescription();
-  char *RedoDescription();
+  const wxChar *UndoDescription();
+  const wxChar *RedoDescription();
   inline void Limit(int val) { limit=val; Clean(); }
   void EraseAll();
 
@@ -292,7 +293,7 @@ private:
   void PushRedo(ShowUndo *undo);
   void EraseAllRedo();
 
-  friend ostream& operator<< (ostream&, const ShowUndoList&);
+  friend std::ostream& operator<< (std::ostream&, const ShowUndoList&);
 
   CC_show *show;
   ShowUndo *list;
@@ -301,6 +302,6 @@ private:
   int limit;
 };
 
-ostream& operator<< (ostream&, const ShowUndoList&);
+std::ostream& operator<< (std::ostream&, const ShowUndoList&);
 
 #endif

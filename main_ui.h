@@ -33,6 +33,9 @@
 #include "basic_ui.h"
 #include "show.h"
 
+#include <list>
+#include <vector>
+
 // Value of 10 translates to a canvas of 1760x1000.
 #define FIELD_MAXZOOM 10
 
@@ -43,22 +46,12 @@ enum CC_MOVE_MODES { CC_MOVE_NORMAL, CC_MOVE_LINE, CC_MOVE_ROTATE,
 		     CC_MOVE_GENIUS};
 
 enum {
-  CALCHART__NEW = 100,
-  CALCHART__NEW_WINDOW,
-  CALCHART__LOAD_FILE,
+  CALCHART__NEW_WINDOW = 1,
   CALCHART__APPEND_FILE,
   CALCHART__IMPORT_CONT_FILE,
-  CALCHART__SAVE,
-  CALCHART__SAVE_AS,
-  CALCHART__PRINT,
   CALCHART__PRINT_EPS,
-  CALCHART__CLOSE,
-  CALCHART__QUIT,
-  CALCHART__UNDO,
-  CALCHART__REDO,
   CALCHART__INSERT_BEFORE,
   CALCHART__INSERT_AFTER,
-  CALCHART__DELETE,
   CALCHART__RELABEL,
   CALCHART__CLEAR_REF,
   CALCHART__EDIT_CONTINUITY,
@@ -72,8 +65,30 @@ enum {
   CALCHART__ROWS,
   CALCHART__COLUMNS,
   CALCHART__NEAREST,
-  CALCHART__ABOUT,
-  CALCHART__HELP
+
+  CALCHART__prev_ss,
+  CALCHART__next_ss,
+  CALCHART__box,
+  CALCHART__poly,
+  CALCHART__lasso,
+  CALCHART__move,
+  CALCHART__line,
+  CALCHART__rot,
+  CALCHART__shear,
+  CALCHART__reflect,
+  CALCHART__size,
+  CALCHART__genius,
+  CALCHART__label_left,
+  CALCHART__label_right,
+  CALCHART__label_flip,
+  CALCHART__setsym0,
+  CALCHART__setsym1,
+  CALCHART__setsym2,
+  CALCHART__setsym3,
+  CALCHART__setsym4,
+  CALCHART__setsym5,
+  CALCHART__setsym6,
+  CALCHART__setsym7,
 };
 enum CC_SELECT_TYPES {
   CC_SELECT_ROWS = CALCHART__ROWS,
@@ -182,15 +197,13 @@ public:
   virtual void Draw(wxDC *dc, float x, float y) const;
   void Drag(const CC_coord& p);
   inline const wxPoint *FirstPoint() const {
-    wxNode *n = ((wxList*)&pntlist)->Last();
-    if (n != NULL)
-      return (wxPoint*)n->Data();
-    else return NULL;
+    return pntlist.empty() ? NULL : &pntlist.back();
   }
 private:
-  bool CrossesLine(const wxPoint* start, const wxPoint* end,
+  bool CrossesLine(const wxPoint& start, const wxPoint& end,
 		   const CC_coord& p) const;
-  wxList pntlist;
+  typedef std::vector<wxPoint> PointList;
+  PointList pntlist;
 };
 
 class CC_poly: public CC_lasso {
@@ -238,39 +251,105 @@ private:
 // Define a new application
 class CalChartApp : public wxApp {
 public:
-  wxFrame *OnInit(void);
-  int OnExit(void);
+  virtual bool OnInit();
+  int OnExit();
 };
 
 // Top-level frame
-class TopFrame : public wxFrame {
+class TopFrame : public CC_MDIParentFrame {
 public:
   TopFrame(int width, int height);
   ~TopFrame();
-  bool OnClose(void);
+  void OnCloseWindow(wxCloseEvent& event);
 #ifdef CC_USE_MDI
-  void OnMenuCommand(int id);
-  void OnMenuSelect(int id);
+  void OnCmdNew(wxCommandEvent& event);
+  void OnCmdLoad(wxCommandEvent& event);
+  void OnCmdExit(wxCommandEvent& event);
+  void OnCmdAbout(wxCommandEvent& event);
+  void OnCmdHelp(wxCommandEvent& event);
 #endif
-  void OnDropFiles(int n, char *files[], int x, int y);
   void NewShow(CC_show *shw = NULL);
-  void OpenShow(const char *filename = NULL);
+  void OpenShow(const wxString& filename = wxT(""));
   void Quit();
   void About();
   void Help();
+
+  DECLARE_EVENT_TABLE()
+};
+
+class TopFrameDropTarget : public wxFileDropTarget {
+public:
+  TopFrameDropTarget(TopFrame *f) : frame(f) {}
+  virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
+private:
+  TopFrame *frame;
 };
 
 class FieldCanvas;
 // Define the main editing frame
-class MainFrame : public wxFrameWithStuff {
+class MainFrame : public CC_MDIChildFrame {
 public:
   MainFrame(wxFrame *frame, int x, int y, int w, int h,
 	    CC_show *show = NULL, MainFrame *other_frame = NULL);
   ~MainFrame();
 
-  bool OnClose(void);
-  void OnMenuCommand(int id);
-  void OnMenuSelect(int id);
+  void OnCloseWindow(wxCloseEvent& event);
+  void OnCmdNew(wxCommandEvent& event);
+  void OnCmdNewWindow(wxCommandEvent& event);
+  void OnCmdLoad(wxCommandEvent& event);
+  void OnCmdAppend(wxCommandEvent& event);
+  void OnCmdImportCont(wxCommandEvent& event);
+  void OnCmdSave(wxCommandEvent& event);
+  void OnCmdSaveAs(wxCommandEvent& event);
+  void OnCmdPrint(wxCommandEvent& event);
+  void OnCmdPrintEPS(wxCommandEvent& event);
+  void OnCmdClose(wxCommandEvent& event);
+  void OnCmdExit(wxCommandEvent& event);
+  void OnCmdUndo(wxCommandEvent& event);
+  void OnCmdRedo(wxCommandEvent& event);
+  void OnCmdInsertBefore(wxCommandEvent& event);
+  void OnCmdInsertAfter(wxCommandEvent& event);
+  void OnCmdDelete(wxCommandEvent& event);
+  void OnCmdRelabel(wxCommandEvent& event);
+  void OnCmdClearRef(wxCommandEvent& event);
+  void OnCmdEditCont(wxCommandEvent& event);
+  void OnCmdEditPrintCont(wxCommandEvent& event);
+  void OnCmdSetTitle(wxCommandEvent& event);
+  void OnCmdSetBeats(wxCommandEvent& event);
+  void OnCmdSetup(wxCommandEvent& event);
+  void OnCmdPoints(wxCommandEvent& event);
+  void OnCmdAnimate(wxCommandEvent& event);
+  void OnCmdSelect(int id);
+  void OnCmdRows(wxCommandEvent& event);
+  void OnCmdColumns(wxCommandEvent& event);
+  void OnCmdNearest(wxCommandEvent& event);
+  void OnCmdAbout(wxCommandEvent& event);
+  void OnCmdHelp(wxCommandEvent& event);
+  void OnMenuSelect(wxMenuEvent& event);
+
+  void OnCmd_prev_ss(wxCommandEvent& event);
+  void OnCmd_next_ss(wxCommandEvent& event);
+  void OnCmd_box(wxCommandEvent& event);
+  void OnCmd_poly(wxCommandEvent& event);
+  void OnCmd_lasso(wxCommandEvent& event);
+  void OnCmd_move(wxCommandEvent& event);
+  void OnCmd_line(wxCommandEvent& event);
+  void OnCmd_rot(wxCommandEvent& event);
+  void OnCmd_shear(wxCommandEvent& event);
+  void OnCmd_reflect(wxCommandEvent& event);
+  void OnCmd_size(wxCommandEvent& event);
+  void OnCmd_genius(wxCommandEvent& event);
+  void OnCmd_label_left(wxCommandEvent& event);
+  void OnCmd_label_right(wxCommandEvent& event);
+  void OnCmd_label_flip(wxCommandEvent& event);
+  void OnCmd_setsym0(wxCommandEvent& event);
+  void OnCmd_setsym1(wxCommandEvent& event);
+  void OnCmd_setsym2(wxCommandEvent& event);
+  void OnCmd_setsym3(wxCommandEvent& event);
+  void OnCmd_setsym4(wxCommandEvent& event);
+  void OnCmd_setsym5(wxCommandEvent& event);
+  void OnCmd_setsym6(wxCommandEvent& event);
+  void OnCmd_setsym7(wxCommandEvent& event);
 
   bool OkayToClearShow();
 
@@ -295,6 +374,8 @@ public:
 
   FieldCanvas *field;
   CC_WinNodeMain *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
 class FieldCanvas : public AutoScrollCanvas {
@@ -305,8 +386,8 @@ public:
 	      FieldCanvas *from_canvas = NULL,
 	      int x = -1, int y = -1, int w = -1, int h = -1);
   ~FieldCanvas(void);
-  void OnPaint(void);
-  void OnEvent(wxMouseEvent& event);
+  void OnPaint(wxPaintEvent& event);
+  void OnMouseEvent(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
   void OnScroll(wxCommandEvent& event);
 
@@ -363,41 +444,50 @@ public:
   unsigned curr_ref;
 
 private:
+  typedef std::vector<unsigned> PointList;
   void ClearShapes();
   void DrawDrag(bool on = true);
-  void SelectOrdered(wxList& pointlist, const CC_coord& start);
+  void SelectOrdered(PointList& pointlist, const CC_coord& start);
   bool SelectWithLasso(const CC_lasso *lasso);
   bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 			  unsigned ref = 0);
 
   CC_DRAG_TYPES drag;
-  wxList shape_list;
+  typedef std::vector<CC_shape*> ShapeList;
+  ShapeList shape_list;
   CC_shape *curr_shape;
   bool dragon;
   int zoomf;
+
+  DECLARE_EVENT_TABLE()
 };
 
 class ChoiceWithField: public wxChoice {
 public:
   FieldCanvas *field;
-  ChoiceWithField(wxPanel *panel, wxFunction func, char *Title,
-		  int x = -1, int y = -1, int width = -1, int height = -1,
-		  int N = 0, char **Choices = NULL,
-		  long style = 0, char *name = "choice"):
-    wxChoice(panel, func, Title, x, y, width, height, N, Choices, style, name),
-    field(NULL) {};
+  ChoiceWithField(wxPanel *panel, wxWindowID id,
+		  const wxPoint& pos, const wxSize& size,
+		  int n, const wxString choices[],
+		  long style = 0, const wxValidator& validator = wxDefaultValidator,
+		  const wxString& name = wxT("choice")):
+    wxChoice(panel, id, pos, size, n, choices, style, validator, name),
+    field(NULL) {}
 };
 
 class SliderWithField: public wxSlider {
 public:
   FieldCanvas *field;
-  SliderWithField(wxPanel *parent, wxFunction func, char *label,
-	     int value, int min_value, int max_value, int width):
-  wxSlider(parent, func, label, value, min_value, max_value, width),
-  field(NULL) {};
+  SliderWithField(wxPanel *parent, wxWindowID id,
+		  int value, int minValue, int maxValue,
+		  const wxPoint& point = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		  long style = wxSL_HORIZONTAL, const wxValidator& validator = wxDefaultValidator,
+		  const wxString& name = wxT("slider")):
+    wxSlider(parent, id, value, minValue, maxValue, point, size, style, validator, name),
+    field(NULL) {}
 };
 
-class MainFrameList: public wxList {
+// we must use a list here so iterators aren't invalidated.
+class MainFrameList: public std::list<MainFrame*> {
 public:
   bool CloseAllWindows();
 };

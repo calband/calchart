@@ -34,27 +34,26 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
 		    bool drawall, int point) {
   unsigned short i;
   unsigned firstpoint, lastpoint;
-  wxBrush *fillBrush;
+  const wxBrush *fillBrush;
   unsigned long x, y;
   float offset, plineoff, slineoff, textoff;
-  float textw, texth, textd;
+  wxCoord textw, texth, textd;
   float circ_r;
   CC_coord origin;
 
-  dc->BeginDrawing();
   dc->SetBackgroundMode(wxTRANSPARENT);
 
   if (drawall) {
     dc->Clear();
-    dc->SetPen(CalChartPens[COLOR_FIELD_DETAIL]);
-    dc->SetTextForeground(&CalChartPens[COLOR_FIELD_TEXT]->GetColour());
+    dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
+    dc->SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
     dc->SetLogicalFunction(wxCOPY);
     show->mode->Draw(dc);
   }
 
   if (pts) {
-    dc->SetFont(pointLabelFont);
-    dc->SetTextForeground(&CalChartPens[COLOR_POINT_TEXT]->GetColour());
+    dc->SetFont(*pointLabelFont);
+    dc->SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
     circ_r = FLOAT2COORD(dot_ratio);
     offset = circ_r / 2;
     plineoff = offset * pline_ratio;
@@ -73,18 +72,18 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
 	if ((show->IsSelected(i) != 0) == (selectd != 0)) {
 	  if (selectd) {
 	    if (primary) {
-	      dc->SetPen(CalChartPens[COLOR_POINT_HILIT]);
+	      dc->SetPen(*CalChartPens[COLOR_POINT_HILIT]);
 	      fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
 	    } else {
-	      dc->SetPen(CalChartPens[COLOR_REF_POINT_HILIT]);
+	      dc->SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
 	      fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
 	    }
 	  } else {
 	    if (primary) {
-	      dc->SetPen(CalChartPens[COLOR_POINT]);
+	      dc->SetPen(*CalChartPens[COLOR_POINT]);
 	      fillBrush = CalChartBrushes[COLOR_POINT];
 	    } else {
-	      dc->SetPen(CalChartPens[COLOR_REF_POINT]);
+	      dc->SetPen(*CalChartPens[COLOR_REF_POINT]);
 	      fillBrush = CalChartBrushes[COLOR_REF_POINT];
 	    }
 	  }
@@ -95,10 +94,10 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
 	  case SYMBOL_SOLBKSL:
 	  case SYMBOL_SOLSL:
 	  case SYMBOL_SOLX:
-	    dc->SetBrush(fillBrush);
+	    dc->SetBrush(*fillBrush);
 	    break;
 	  default:
-	    dc->SetBrush(wxTRANSPARENT_BRUSH);
+	    dc->SetBrush(*wxTRANSPARENT_BRUSH);
 	  }
 	  dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
 	  switch (pts[i].sym) {
@@ -137,6 +136,5 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
       }
     }
   }
-  dc->EndDrawing();
-  dc->SetFont(NULL);
+  dc->SetFont(wxNullFont);
 }

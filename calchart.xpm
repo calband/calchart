@@ -1,5 +1,5 @@
 /* XPM */
-static char * calchart_xpm[] = {
+static const char * calchart_xpm[] = {
 "64 64 5 1",
 " 	c #FFFFFFFFFFFF",
 ".	c #000000000000",

@@ -69,7 +69,7 @@ bool INGLread::Okay() {
   return true;
 }
 
-void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, char **error,
+void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, StringPtr *error,
 			  void *topdata) {
   void *data = NULL;
   INGLchunk *cnk;

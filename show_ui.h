@@ -85,15 +85,15 @@ class StuntSheetPicker : public wxFrame
 {
 public:
   StuntSheetPicker(CC_show *shw, CC_WinList *lst,
-		   bool multi, wxFrame *frame, char *title,
+		   bool multi, wxFrame *frame, const wxString& title,
 		   int x = -1, int y = -1, int width = 250, int height = 300);
   ~StuntSheetPicker();
-  bool OnClose(void);
-  void OnSize(int w, int h);
+  void OnCloseWindow(wxCloseEvent& event);
+  void OnSize(wxSizeEvent& event);
 
   inline bool Okay() { return ok; };
 
-  inline bool Get(unsigned n) { return list->Selected(n); }
+  inline bool Get(unsigned n) { return list->IsSelected(n); }
   inline void Set(unsigned n, bool v = true) {
     list->SetSelection(n,v);
     show->GetNthSheet(n)->picked = v;
@@ -106,23 +106,25 @@ private:
 
   bool ok;
   wxPanel *panel;
-  GoodListBox *list;
+  wxListBox *list;
   CC_WinNodePicker *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
 class PointPicker : public wxFrame
 {
 public:
   PointPicker(CC_show *shw, CC_WinList *lst,
-	      bool multi, wxFrame *frame, char *title,
+	      bool multi, wxFrame *frame, const wxString& title,
 	      int x = -1, int y = -1, int width = 250, int height = 300);
   ~PointPicker();
-  bool OnClose(void);
-  void OnSize(int w, int h);
+  void OnCloseWindow(wxCloseEvent& event);
+  void OnSize(wxSizeEvent& event);
 
   inline bool Okay() { return ok; };
 
-  inline bool Get(unsigned n) { return list->Selected(n); }
+  inline bool Get(unsigned n) { return list->IsSelected(n); }
   inline void Set(unsigned n, bool v = true) {
     list->SetSelection(n,v);
     show->Select(n,v);
@@ -136,17 +138,19 @@ private:
 
   bool ok;
   wxPanel *panel;
-  GoodListBox *list;
+  wxListBox *list;
   CC_WinNodePointPicker *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
 class ShowInfoReq : public wxFrame {
 public:
   ShowInfoReq(CC_show *shw, CC_WinList *lst,
-	      wxFrame *frame, char *title,
+	      wxFrame *frame, const wxString& title,
 	      int x = -1, int y = -1, int width = 400, int height = 450);
   ~ShowInfoReq();
-  bool OnClose(void);
+  void OnCloseWindow(wxCloseEvent& event);
 
   void UpdateLabels();
   void UpdateNumPoints();
@@ -156,25 +160,27 @@ public:
 
   void FlushDescr(); // Flush changes in description text window
 
-  inline char *GetChoiceStrSelection() { return choice->GetStringSelection(); }
+  inline wxString GetChoiceStrSelection() { return choice->GetStringSelection(); }
   inline int GetChoiceSelection() { return choice->GetSelection(); }
   unsigned GetNumPoints();
   unsigned GetColumns();
   inline int GetLabelType() { return label_type->GetSelection(); }
   inline int GetLetterSize() { return lettersize->GetValue(); }
-  inline bool GetLetter(unsigned i) { return labels->Selected(i); }
+  inline bool GetLetter(unsigned i) { return labels->IsSelected(i); }
   void SetLabels();
 
   CC_show *show;
 private:
   wxPanel *panel;
-  wxText *numpnts;
+  wxTextCtrl *numpnts;
   wxRadioBox *label_type;
-  GoodListBox *labels;
+  wxListBox *labels;
   wxChoice *choice;
   wxSlider *lettersize;
   FancyTextWin *text;
   CC_WinNodeInfo *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif

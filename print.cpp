@@ -41,7 +41,7 @@ static short split_sheet;
 
 #define DPI 72
 
-static char *dot_routines[] = {
+static const char *dot_routines[] = {
   "dotplain",
   "dotsolid",
   "dotbs",
@@ -52,7 +52,7 @@ static char *dot_routines[] = {
   "dotsolx",
 };
 
-static char *fontnames[] = {
+static const char *fontnames[] = {
   "CalChart",
   "contfont",
   "boldfont",
@@ -60,28 +60,36 @@ static char *fontnames[] = {
   "bolditalfont",
 };
 
-static char nofile[] = "Unable to open print config files";
-static char badfile[] = "Error writing to print file";
+static const wxChar *nofile = wxT("Unable to open print config files");
+static const wxChar *badfile = wxT("Error writing to print file");
 
-static char *gen_cont_line(CC_textline *line, PSFONT_TYPE *currfontnum,
-			   float fontsize, FILE *fp);
-static char *print_start_page(FILE *fp, bool landscape);
-static bool copy_ps_file(const char *name, FILE *fp);
+static const wxChar *gen_cont_line(const CC_textline& line, PSFONT_TYPE *currfontnum,
+				   float fontsize, FILE *fp);
+static const wxChar *print_start_page(FILE *fp, bool landscape);
+static bool copy_ps_file(const wxString& name, FILE *fp);
 
 #define CHECKPRINT0(a) if ((a) < 0) { error = badfile; return 0; }
 #define CHECKPRINT1(a) if ((a) < 0) { error = badfile; return; }
 #define CHECKPRINT(a) if ((a) < 0) return badfile;
 
 int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
-		   int min_yards) {
+		   int min_yards) const {
   time_t t;
-  CC_sheet *curr_sheet;
+  const CC_sheet *curr_sheet;
   CC_coord fullsize = mode->Size();
   CC_coord fieldsize = mode->FieldSize();
   float fullwidth = COORD2FLOAT(fullsize.x);
   float fullheight = COORD2FLOAT(fullsize.y);
   float fieldwidth = COORD2FLOAT(fieldsize.x);
   float fieldheight = COORD2FLOAT(fieldsize.y);
+
+  std::string head_font_str(head_font.utf8_str());
+  std::string main_font_str(main_font.utf8_str());
+  std::string number_font_str(number_font.utf8_str());
+  std::string cont_font_str(cont_font.utf8_str());
+  std::string bold_font_str(bold_font.utf8_str());
+  std::string ital_font_str(ital_font.utf8_str());
+  std::string bold_ital_font_str(bold_ital_font.utf8_str());
 
   num_pages = 0;
   /* first, calculate dimensions */
@@ -218,23 +226,24 @@ int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
 	  (paper_length - page_offset_y) * DPI));
   time(&t);
   CHECKPRINT0(fprintf(fp, "%%%%CreationDate: %s", ctime(&t)));
-  CHECKPRINT0(fprintf(fp, "%%%%Title: %s\n", (const char *)name));
+  std::string namestr(name.utf8_str());
+  CHECKPRINT0(fprintf(fp, "%%%%Title: %s\n", namestr.c_str()));
   CHECKPRINT0(fprintf(fp, "%%%%Creator: CalChart\n"));
   CHECKPRINT0(fprintf(fp, "%%%%Pages: (atend)\n"));
   CHECKPRINT0(fprintf(fp, "%%%%PageOrder: Ascend\n"));
   if (!overview) {
     CHECKPRINT0(fprintf(fp,"%%%%DocumentNeededResources: font %s %s %s %s %s %s %s\n",
-			head_font.c_str(), main_font.c_str(),
-			number_font.c_str(), cont_font.c_str(),
-			bold_font.c_str(), ital_font.c_str(),
-			bold_ital_font.c_str()));
+			head_font_str.c_str(), main_font_str.c_str(),
+			number_font_str.c_str(), cont_font_str.c_str(),
+			bold_font_str.c_str(), ital_font_str.c_str(),
+			bold_ital_font_str.c_str()));
     CHECKPRINT0(fprintf(fp, "%%%%DocumentSuppliedResources: font CalChart\n"));
     CHECKPRINT0(fprintf(fp, "%%%%BeginDefaults\n"));
     CHECKPRINT0(fprintf(fp, "%%%%PageResources: font %s %s %s %s %s %s %s CalChart\n",
-			head_font.c_str(), main_font.c_str(),
-			number_font.c_str(), cont_font.c_str(),
-			bold_font.c_str(), ital_font.c_str(),
-			bold_ital_font.c_str()));
+			head_font_str.c_str(), main_font_str.c_str(),
+			number_font_str.c_str(), cont_font_str.c_str(),
+			bold_font_str.c_str(), ital_font_str.c_str(),
+			bold_ital_font_str.c_str()));
     CHECKPRINT0(fprintf(fp, "%%%%EndDefaults\n"));
   }
   CHECKPRINT0(fprintf(fp, "%%%%EndComments\n"));
@@ -252,26 +261,26 @@ int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
 			  ((ShowModeStandard *)mode)->HashE()));
       CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", header_size));
       CHECKPRINT0(fprintf(fp, "/yardsize %.2f def\n", yards_size));
-      if (!copy_ps_file("prolog0.ps", fp)) {
+      if (!copy_ps_file(wxT("prolog0.ps"), fp)) {
 	error = nofile;
 	return 0;
       }
       CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
       CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
       CHECKPRINT0(fprintf(fp, "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
-			  head_font.c_str(), main_font.c_str(),
-			  number_font.c_str(), cont_font.c_str(),
-			  bold_font.c_str(), ital_font.c_str(),
-			  bold_ital_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/headfont0 /%s def\n", head_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/mainfont0 /%s def\n", main_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/numberfont0 /%s def\n", number_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/contfont0 /%s def\n", cont_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/boldfont0 /%s def\n", bold_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font.c_str()));
+			  head_font_str.c_str(), main_font_str.c_str(),
+			  number_font_str.c_str(), cont_font_str.c_str(),
+			  bold_font_str.c_str(), ital_font_str.c_str(),
+			  bold_ital_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/headfont0 /%s def\n", head_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/mainfont0 /%s def\n", main_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/numberfont0 /%s def\n", number_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/contfont0 /%s def\n", cont_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/boldfont0 /%s def\n", bold_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font_str.c_str()));
       CHECKPRINT0(fprintf(fp, "/bolditalfont0 /%s def\n",
-			  bold_ital_font.c_str()));
-      if (!copy_ps_file("setup0.ps", fp)) {
+			  bold_ital_font_str.c_str()));
+      if (!copy_ps_file(wxT("setup0.ps"), fp)) {
 	error = nofile;
 	return 0;
       }
@@ -293,26 +302,26 @@ int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
       CHECKPRINT0(fprintf(fp, "/nfieldh %hd def\n",
 			  ((ShowModeSprShow*)mode)->StepsH()));
       CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", header_size));
-      if (!copy_ps_file("prolog1.ps", fp)) {
+      if (!copy_ps_file(wxT("prolog1.ps"), fp)) {
 	error = nofile;
 	return 0;
       }
       CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
       CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
       CHECKPRINT0(fprintf(fp, "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
-			  head_font.c_str(), main_font.c_str(),
-			  number_font.c_str(), cont_font.c_str(),
-			  bold_font.c_str(), ital_font.c_str(),
-			  bold_ital_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/headfont0 /%s def\n", head_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/mainfont0 /%s def\n", main_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/numberfont0 /%s def\n", number_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/contfont0 /%s def\n", cont_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/boldfont0 /%s def\n", bold_font.c_str()));
-      CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font.c_str()));
+			  head_font_str.c_str(), main_font_str.c_str(),
+			  number_font_str.c_str(), cont_font_str.c_str(),
+			  bold_font_str.c_str(), ital_font_str.c_str(),
+			  bold_ital_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/headfont0 /%s def\n", head_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/mainfont0 /%s def\n", main_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/numberfont0 /%s def\n", number_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/contfont0 /%s def\n", cont_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/boldfont0 /%s def\n", bold_font_str.c_str()));
+      CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font_str.c_str()));
       CHECKPRINT0(fprintf(fp, "/bolditalfont0 /%s def\n",
-			  bold_ital_font.c_str()));
-      if (!copy_ps_file("setup1.ps", fp)) {
+			  bold_ital_font_str.c_str()));
+      if (!copy_ps_file(wxT("setup1.ps"), fp)) {
 	error = nofile;
 	return 0;
       }
@@ -327,13 +336,13 @@ int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
 			((ShowModeStandard *)mode)->HashE()));
     CHECKPRINT0(fprintf(fp, "/fieldw %.2f def\n", width));
     CHECKPRINT0(fprintf(fp, "/fieldh %.2f def\n", height));
-    if (!copy_ps_file("prolog2.ps", fp)) {
+    if (!copy_ps_file(wxT("prolog2.ps"), fp)) {
       error = nofile;
       return 0;
     }
     CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
     CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
-    if (!copy_ps_file("setup2.ps", fp)) {
+    if (!copy_ps_file(wxT("setup2.ps"), fp)) {
       error = nofile;
       return 0;
     }
@@ -388,18 +397,16 @@ int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
   return num_pages;
 }
 
-void CC_show::PrintSheets(FILE *fp) {
-  wxNode *textnode;
-  CC_textline *text;
+void CC_show::PrintSheets(FILE *fp) const {
   enum PSFONT_TYPE currfontnum = PSFONT_NORM;
   short lines_left = 0;
   short need_eject = false;
-  CC_sheet *sheet;
+  const CC_sheet *sheet;
 
   for (sheet = sheets; sheet != NULL; sheet = sheet->next) {
-    for (textnode = sheet->continuity.lines.First(); textnode != NULL;
-	 textnode = textnode->Next()) {
-      text = (CC_textline*)textnode->Data();
+    for (CC_textline_list::const_iterator text = sheet->continuity.lines.begin();
+	 text != sheet->continuity.lines.end();
+	 ++text) {
       if (!text->on_main) continue;
       if (lines_left <= 0) {
 	if (num_pages > 0) {
@@ -427,7 +434,7 @@ void CC_show::PrintSheets(FILE *fp) {
 	CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
       }
 
-      error = gen_cont_line(text, &currfontnum, text_size, fp);
+      error = gen_cont_line(*text, &currfontnum, text_size, fp);
       if (!Ok()) return;
 
       CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
@@ -441,18 +448,16 @@ void CC_show::PrintSheets(FILE *fp) {
   }
 }
 
-char *CC_sheet::PrintCont(FILE *fp) {
-  wxNode *textnode;
-  CC_textline *text;
+const wxChar *CC_sheet::PrintCont(FILE *fp) const {
   enum PSFONT_TYPE currfontnum = PSFONT_NORM;
   short cont_len = 0;
   float cont_height, this_size;
-  char *error;
+  const wxChar *error;
 
   cont_height = field_y - step_size*10;
-  for (textnode = continuity.lines.First(); textnode != NULL;
-       textnode = textnode->Next()) {
-    text = (CC_textline*)textnode->Data();
+  for (CC_textline_list::const_iterator text = continuity.lines.begin();
+       text != continuity.lines.end();
+       ++text) {
     if (text->on_sheet) cont_len++;
   }
   if (cont_len == 0) return NULL;
@@ -465,13 +470,13 @@ char *CC_sheet::PrintCont(FILE *fp) {
 		     width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5));
   CHECKPRINT(fprintf(fp, "/contfont findfont %.2f scalefont setfont\n",
 		     this_size));
-  for (textnode = continuity.lines.First(); textnode != NULL;
-       textnode = textnode->Next()) {
-    text = (CC_textline*)textnode->Data();
+  for (CC_textline_list::const_iterator text = continuity.lines.begin();
+       text != continuity.lines.end();
+       ++text) {
     if (!text->on_sheet) continue;
     CHECKPRINT(fprintf(fp, "/x lmargin def\n"));
 
-    error = gen_cont_line(text, &currfontnum, this_size, fp);
+    error = gen_cont_line(*text, &currfontnum, this_size, fp);
     if (error) return error;
 
     CHECKPRINT(fprintf(fp, "/y y h sub def\n"));
@@ -479,18 +484,16 @@ char *CC_sheet::PrintCont(FILE *fp) {
   return NULL;
 }
 
-char *gen_cont_line(CC_textline *line, PSFONT_TYPE *currfontnum,
-		    float fontsize, FILE *fp) {
-  wxNode *textnode;
-  CC_textchunk *part;
+const wxChar *gen_cont_line(const CC_textline& line, PSFONT_TYPE *currfontnum,
+			    float fontsize, FILE *fp) {
   const char *text;
   short tabstop;
-  wxString temp_buf;
+  std::string temp_buf;
 
   tabstop = 0;
-  for (textnode = line->chunks.First(); textnode != NULL;
-       textnode = textnode->Next()) {
-    part = (CC_textchunk*)textnode->Data();
+  for (CC_textchunk_list::const_iterator part = line.chunks.begin();
+       part != line.chunks.end();
+       ++part) {
     if (part->font == PSFONT_TAB) {
       if (++tabstop > 3) {
 	CHECKPRINT(fprintf(fp, "space_over\n"));
@@ -503,19 +506,20 @@ char *gen_cont_line(CC_textline *line, PSFONT_TYPE *currfontnum,
 			    fontnames[part->font], fontsize));
 	*currfontnum = part->font;
       }
-      text = part->text;
+      std::string textstr(part->text.utf8_str());
+      text = textstr.c_str();
       while (*text != 0) {
 	temp_buf = "";
 	while (*text != 0) {
 	  // Need backslash before parenthesis
 	  if ((*text == '(') || (*text == ')')) {
-	    temp_buf.Append('\\');
+	    temp_buf += "\\";
 	  }
-	  temp_buf.Append(*(text++));
+	  temp_buf += *(text++);
 	}
 	
-	if (!temp_buf.IsEmpty()) {
-	  if (line->center) {
+	if (!temp_buf.empty()) {
+	  if (line.center) {
 	    CHECKPRINT(fprintf(fp, "(%s) centerText\n", temp_buf.c_str()));
 	  } else {
 	    CHECKPRINT(fprintf(fp, "(%s) leftText\n", temp_buf.c_str()));
@@ -527,7 +531,7 @@ char *gen_cont_line(CC_textline *line, PSFONT_TYPE *currfontnum,
   return NULL;
 }
 
-char *print_start_page(FILE *fp, bool landscape) {
+const wxChar *print_start_page(FILE *fp, bool landscape) {
   CHECKPRINT(fprintf(fp, "0 setgray\n"));
   CHECKPRINT(fprintf(fp, "0.25 setlinewidth\n"));
   CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n",
@@ -539,12 +543,12 @@ char *print_start_page(FILE *fp, bool landscape) {
   return NULL;
 }
 
-char *CC_sheet::PrintStandard(FILE *fp) {
+const wxChar *CC_sheet::PrintStandard(FILE *fp) const {
   float dot_x, dot_y, dot_w;
   short x_s, x_n;
   unsigned short i;
   short j;
-  char *error;
+  const wxChar *error;
   CC_coord fieldsize = show->mode->FieldSize();
   CC_coord fieldoff = show->mode->FieldOffset();
   Coord pmin = show->mode->MinPosition().x;
@@ -556,10 +560,13 @@ char *CC_sheet::PrintStandard(FILE *fp) {
   float fieldoffx = COORD2FLOAT(fieldoff.x);
   float fieldoffy = COORD2FLOAT(fieldoff.y);
 
+  std::string namestr(name.utf8_str());
+  std::string numberstr(number.utf8_str());
+
   if (split_sheet) {
-    CHECKPRINT(fprintf(fp, "%%%%Page: %s(N)\n", (const char *)name));
+    CHECKPRINT(fprintf(fp, "%%%%Page: %s(N)\n", namestr.c_str()));
     if (number) {
-      CHECKPRINT(fprintf(fp, "/pagenumtext (%sN) def\n",(const char *)number));
+      CHECKPRINT(fprintf(fp, "/pagenumtext (%sN) def\n",numberstr.c_str()));
     }
     else {
       CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
@@ -585,10 +592,10 @@ char *CC_sheet::PrintStandard(FILE *fp) {
 		  ((max_s+fmin) % INT2COORD(8)))
 	  > step_width) {
       /* Need to split into two pages */
-      CHECKPRINT(fprintf(fp, "%%%%Page: %s(S)\n", (const char *)name));
+      CHECKPRINT(fprintf(fp, "%%%%Page: %s(S)\n", namestr.c_str()));
       if (number) {
 	CHECKPRINT(fprintf(fp, "/pagenumtext (%sS) def\n",
-			   (const char *)number));
+			   numberstr.c_str()));
       } else {
 	CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
       }
@@ -597,10 +604,10 @@ char *CC_sheet::PrintStandard(FILE *fp) {
       clip_s = pmin;
       clip_n = INT2COORD(step_width) + fmin; /* north yardline */
     } else {
-      CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", (const char *)name));
+      CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
       if (number) {
 	CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n",
-			   (const char *)number));
+			   numberstr.c_str()));
       } else {
 	CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
       }
@@ -621,7 +628,7 @@ char *CC_sheet::PrintStandard(FILE *fp) {
       }
     }
   }
-  error = print_start_page(fp, show->GetboolLandscape());
+  error = print_start_page(fp, show->GetBoolLandscape());
   if (error) return error;
 
   CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
@@ -634,10 +641,10 @@ char *CC_sheet::PrintStandard(FILE *fp) {
     CHECKPRINT(fprintf(fp, "/lmargin %.2f def /rmargin %.2f def\n",
 		       step_size * j, step_size * j));
     CHECKPRINT(fprintf(fp, "/y %.2f def\n", field_h + (step_size / 2)));
-    CHECKPRINT(fprintf(fp, "(%s) dup centerText\n",
-		       yard_text[(step_offset +
-				  (MAX_YARD_LINES-1)*4 +
-				  COORD2INT(fieldoff.x) + j)/8].c_str()));
+    std::string yardstr(yard_text[(step_offset +
+				   (MAX_YARD_LINES-1)*4 +
+				   COORD2INT(fieldoff.x) + j)/8].utf8_str());
+    CHECKPRINT(fprintf(fp, "(%s) dup centerText\n", yardstr.c_str()));
     CHECKPRINT(fprintf(fp, "/y %.2f def\n", -(step_size * 2)));
     CHECKPRINT(fprintf(fp, "centerText\n"));
   }
@@ -659,7 +666,7 @@ char *CC_sheet::PrintStandard(FILE *fp) {
 		       show->GetPointLabel(i), dot_x, dot_y,
 		       pts[i].GetFlip() ? "donumber2" : "donumber"));
   }
-  if (show->GetboolDoCont()) {
+  if (show->GetBoolDoCont()) {
     CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", -field_x, -field_y));
     error = PrintCont(fp);
     if (error) return error;
@@ -667,21 +674,24 @@ char *CC_sheet::PrintStandard(FILE *fp) {
   return NULL;
 }
 
-char *CC_sheet::PrintSpringshow(FILE *fp) {
+const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const {
   float dot_x, dot_y, dot_w;
   unsigned short i;
   short j;
-  char *error;
+  const wxChar *error;
   ShowModeSprShow *modesprshow = (ShowModeSprShow *)show->mode;
 
-  CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", (const char *)name));
+  std::string namestr(name.utf8_str());
+  std::string numberstr(number.utf8_str());
+
+  CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
   if (number) {
-    CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n", (const char *)number));
+    CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n", numberstr.c_str()));
   } else {
     CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
   }
 
-  error = print_start_page(fp, show->GetboolLandscape());
+  error = print_start_page(fp, show->GetBoolLandscape());
   if (error) return error;
 
   CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
@@ -693,7 +703,8 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 		     field_h / modesprshow->StageH()));
   CHECKPRINT(fprintf(fp, "   %hd %hd translate\n",
 		     -modesprshow->StageX(), -modesprshow->StageY()));
-  CHECKPRINT(fprintf(fp, "%%%%BeginDocument: %s\n", modesprshow->StageFile()));
+  std::string stagefilestr(modesprshow->StageFile().utf8_str());
+  CHECKPRINT(fprintf(fp, "%%%%BeginDocument: %s\n", stagefilestr.c_str()));
   if (!copy_ps_file(modesprshow->StageFile(), fp)) {
     return nofile;
   }
@@ -714,9 +725,9 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 			     field_h*
 			     (modesprshow->TextTop()-modesprshow->StageX())/
 			     modesprshow->StageH()));
-	  CHECKPRINT(fprintf(fp, "(%s) centerText\n",
-			     yard_text[(modesprshow->StepsX() +
-					(MAX_YARD_LINES-1)*4 + j)/8].c_str()));
+	  std::string yardstr(yard_text[(modesprshow->StepsX() +
+					 (MAX_YARD_LINES-1)*4 + j)/8].utf8_str());
+	  CHECKPRINT(fprintf(fp, "(%s) centerText\n", yardstr.c_str()));
 	}
 	if (modesprshow->WhichYards() & SPR_YARD_BELOW) {
 	  CHECKPRINT(fprintf(fp, "/y %.2f def\n",
@@ -724,9 +735,9 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 			     (modesprshow->TextBottom() -
 			      modesprshow->StageX()) /
 			     modesprshow->StageH() -(step_size*yards_size)));
-	  CHECKPRINT(fprintf(fp, "(%s) centerText\n",
-			     yard_text[(modesprshow->StepsX() +
-					(MAX_YARD_LINES-1)*4 + j)/8].c_str()));
+	  std::string yardstr(yard_text[(modesprshow->StepsX() +
+					 (MAX_YARD_LINES-1)*4 + j)/8].utf8_str());
+	  CHECKPRINT(fprintf(fp, "(%s) centerText\n", yardstr.c_str()));
 	}
       }
     if (modesprshow->WhichYards() & (SPR_YARD_LEFT | SPR_YARD_RIGHT))
@@ -742,13 +753,12 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 			   field_w*
 			   (modesprshow->TextLeft()-modesprshow->StageX()) /
 			   modesprshow->StageW()));
+	std::string spr_text_str(spr_line_text[j / 8].utf8_str());
 	if (modesprshow->WhichYards() & SPR_YARD_RIGHT) {
-	  CHECKPRINT(fprintf(fp, "(%s) leftText\n",
-			     spr_line_text[j / 8].c_str()));
+	  CHECKPRINT(fprintf(fp, "(%s) leftText\n", spr_text_str.c_str()));
 	}
 	if (modesprshow->WhichYards() & SPR_YARD_LEFT) {
-	  CHECKPRINT(fprintf(fp, "(%s) rightText\n",
-			     spr_line_text[j / 8].c_str()));
+	  CHECKPRINT(fprintf(fp, "(%s) rightText\n", spr_text_str.c_str()));
 	}
       }
   }
@@ -773,7 +783,7 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
 		       show->GetPointLabel(i), dot_x, dot_y,
 		       (pts[i].flags & PNT_LABEL) ? "donumber2" : "donumber"));
   }
-  if (show->GetboolDoCont()) {
+  if (show->GetBoolDoCont()) {
     CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", -field_x, -field_y));
     error = PrintCont(fp);
     if (error) return error;
@@ -781,9 +791,9 @@ char *CC_sheet::PrintSpringshow(FILE *fp) {
   return NULL;
 }
 
-char *CC_sheet::PrintOverview(FILE *fp) {
+const wxChar *CC_sheet::PrintOverview(FILE *fp) const {
   unsigned short i;
-  char *error;
+  const wxChar *error;
   CC_coord fieldoff = show->mode->FieldOffset();
   CC_coord fieldsize = show->mode->FieldSize();
   float fieldx = COORD2FLOAT(fieldoff.x);
@@ -791,9 +801,11 @@ char *CC_sheet::PrintOverview(FILE *fp) {
   float fieldwidth = COORD2FLOAT(fieldsize.x);
   float fieldheight = COORD2FLOAT(fieldsize.y);
 
-  CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", (const char *)name));
+  std::string namestr(name.utf8_str());
 
-  error = print_start_page(fp, show->GetboolLandscape());
+  CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
+
+  error = print_start_page(fp, show->GetBoolLandscape());
   if (error) return error;
 
   CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
@@ -808,11 +820,11 @@ char *CC_sheet::PrintOverview(FILE *fp) {
   return NULL;
 }
 
-bool copy_ps_file(const char *name, FILE *fp) {
+bool copy_ps_file(const wxString& name, FILE *fp) {
   char cpbuf[1024];
   FILE *infile;
  
-  infile = OpenFileInDir(name, "r");
+  infile = OpenFileInDir(name, wxT("r"));
   if (infile == NULL) return false;
   while (fgets(cpbuf, 1024, infile)) {
     if (fputs(cpbuf, fp) == EOF) {

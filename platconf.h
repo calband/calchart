@@ -61,45 +61,52 @@ typedef unsigned char uint8_t;
 
 #define cpp_cat(a,b) a ## b
 
+#if wxUSE_UNICODE
+#define CC_sscanf swscanf
+#else
+#define CC_sscanf sscanf
+#endif
+#define CC_fopen fopen
+
 // For creating icons and bitmaps
 // There are separate macros because XPM is used for icons
-#ifdef __WXMOTIF__
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXCOCOA__)
+#define ICON_NAME(name) #name
+#define BITMAP_NAME(name) #name
+#else
 #define __CC_INCLUDE_BITMAPS__
+#define __CC_SET_ICON__
 #define ICON_NAME(name) cpp_cat(name,_xpm)
 #define BITMAP_NAME(name) (char *)cpp_cat(name,_bits), cpp_cat(name,_width), cpp_cat(name,_height)
 #endif
-#ifdef __WXMSW__
-#define ICON_NAME(name) #name
-#define BITMAP_NAME(name) #name
-#endif
 
 // Run external programs to print or just write to files
-#ifdef __WXMOTIF__
+#ifndef __WXMSW__
 #define PRINT__RUN_CMD
 #endif
 
 // Character used in paths
 #ifdef __WXMSW__
-#define PATH_SEPARATOR "\\"
+#define PATH_SEPARATOR wxT("\\")
 #else
-#define PATH_SEPARATOR "/"
+#define PATH_SEPARATOR wxT("/")
 #endif
 
 #ifdef __WXMSW__
-#define AUTOSAVE_VAR "$TEMP"
-#define AUTOSAVE_DIR "C:"
+#define AUTOSAVE_VAR wxT("$TEMP")
+#define AUTOSAVE_DIR wxT("C:")
 #else
-#define AUTOSAVE_VAR "$TMPDIR"
-#define AUTOSAVE_DIR "/tmp"
+#define AUTOSAVE_VAR wxT("$TMPDIR")
+#define AUTOSAVE_DIR wxT("/tmp")
 #endif
 
 // Wildcard in file selector
 #ifdef __WXMSW__
-#define FILE_WILDCARDS "All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas"
-#define FILE_SAVE_WILDCARDS "New shows (*.shw)|*.shw"
+#define FILE_WILDCARDS wxT("All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas")
+#define FILE_SAVE_WILDCARDS wxT("New shows (*.shw)|*.shw")
 #else
-#define FILE_WILDCARDS "*.shw"
-#define FILE_SAVE_WILDCARDS "*.shw"
+#define FILE_WILDCARDS wxT("*.shw")
+#define FILE_SAVE_WILDCARDS wxT("*.shw")
 #endif
 
 // Need to handle DOS-style text

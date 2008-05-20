@@ -69,14 +69,16 @@ private:
 class ContinuityEditor : public wxFrame {
 public:
   ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
-		   wxFrame *parent, char *title,
+		   wxFrame *parent, const wxString& title,
 		   int x = -1, int y = -1, int width = 400, int height = 300);
   ~ContinuityEditor();
-  void OnSize(int w, int h);
+  void OnSize(wxSizeEvent& event);
 
-  bool OnClose(void);
-  void OnMenuCommand(int id);
-  void OnMenuSelect(int id);
+  void OnCloseWindow(wxCloseEvent& event);
+  void OnCmdNew(wxCommandEvent& event);
+  void OnCmdDelete(wxCommandEvent& event);
+  void OnCmdClose(wxCommandEvent& event);
+  void OnCmdHelp(wxCommandEvent& event);
 
   void Update(bool quick = false); // Refresh all window controls
   // Update text window to current continuity
@@ -111,24 +113,26 @@ private:
   CC_sheet *text_sheet;
   unsigned text_contnum;
   CC_WinNodeCont *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
-class PrintContCanvas : public wxCanvas {
+class PrintContCanvas : public wxScrolledWindow {
 public:
   PrintContCanvas(wxFrame *frame, CC_descr *dcr);
   ~PrintContCanvas();
 
-  void Draw(int firstrow = 0, int lastrow = -1);
+  void Draw(wxDC *dc, int firstrow = 0, int lastrow = -1);
 
-  void OnPaint();
-  void OnEvent(wxMouseEvent& event);
+  void OnPaint(wxPaintEvent& event);
+  void OnMouseEvent(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
-  inline void Update() { topline = 0; OnPaint(); UpdateBars(); }
+  inline void Update() { topline = 0; Refresh(); UpdateBars(); }
   void UpdateBars();
 
 private:
   void MoveCursor(unsigned column, unsigned row);
-  void DrawCursor(float x, float y, float height);
+  void DrawCursor(wxDC *dc, float x, float y, float height);
   void InsertChar(unsigned onechar);
   void DeleteChar(bool backspace = true);
 
@@ -138,20 +142,24 @@ private:
   float width, height;
   unsigned cursorx, cursory;
   unsigned maxlines, maxcolumns;
+
+  DECLARE_EVENT_TABLE()
 };
 
-class PrintContEditor : public wxFrameWithStuff {
+class PrintContEditor : public wxFrame {
 public:
   PrintContEditor(CC_descr *dcr, CC_WinList *lst,
-		  wxFrame *parent, char *title,
+		  wxFrame *parent, const wxString& title,
 		  int x = -1, int y = -1, int width = 400, int height = 400);
   ~PrintContEditor();
 
-  void OnActivate(bool active);
+  void OnActivate(wxActivateEvent& event);
 
   PrintContCanvas *canvas;
 private:
   CC_WinNodePrintCont *node;
+
+  DECLARE_EVENT_TABLE()
 };
 
 enum {

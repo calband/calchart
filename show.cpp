@@ -40,27 +40,28 @@
 
 #include <ctype.h>
 #include <math.h>
+#include <list>
 
-static char nomem_str[] = "Out of memory!";
-static char nofile_str[] = "Unable to open file";
-static char badfile_mas_str[] = "Error reading master file";
-static char badfile_pnt_str[] = "Error reading points file";
-static char badfile_cnt_str[] = "Error reading animation continuity file";
-static char badanimcont_str[] = "Error in animation continuity file";
-static char badcont_str[] = "Error in continuity file";
-static char contnohead_str[] = "Continuity file doesn't begin with header";
-static char nosheets_str[] = "No sheets found";
-static char writeerr_str[] = "Write error: check disk media";
+static const wxChar *nomem_str = wxT("Out of memory!");
+static const wxChar *nofile_str = wxT("Unable to open file");
+static const wxChar *badfile_mas_str = wxT("Error reading master file");
+static const wxChar *badfile_pnt_str = wxT("Error reading points file");
+static const wxChar *badfile_cnt_str = wxT("Error reading animation continuity file");
+static const wxChar *badanimcont_str = wxT("Error in animation continuity file");
+static const wxChar *badcont_str = wxT("Error in continuity file");
+static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
+static const wxChar *nosheets_str = wxT("No sheets found");
+static const wxChar *writeerr_str = wxT("Write error: check disk media");
 
-static char *contnames[] = {
-  "Plain",
-  "Sol",
-  "Bksl",
-  "Sl",
-  "X",
-  "Solbksl",
-  "Solsl",
-  "Solx"
+static const wxChar *contnames[] = {
+  wxT("Plain"),
+  wxT("Sol"),
+  wxT("Bksl"),
+  wxT("Sl"),
+  wxT("X"),
+  wxT("Solbksl"),
+  wxT("Solsl"),
+  wxT("Solx")
 };
 
 extern ShowModeList *modelist;
@@ -76,29 +77,28 @@ class AutoSaveTimer: public wxTimer {
 public:
   AutoSaveTimer(): untitled_number(1) {}
   void Notify() {
-    wxNode *n;
-    CC_show *show;
+    const CC_show *show;
     
-    for (n = showlist.First(); n != NULL; n = n->Next()) {
-      show = (CC_show*)n->Data();
+    for (std::list<const CC_show*>::const_iterator i = showlist.begin(); i != showlist.end(); ++i) {
+      show = *i;
       if (show->Modified()) {
-	char *s;
-	if ((s=show->Autosave()) != NULL) {
-	  (void)wxMessageBox(s, "Autosave Error");
+	wxString s;
+	if (!(s=show->Autosave()).empty()) {
+	  (void)wxMessageBox(s, wxT("Autosave Error"));
 	}
       }
     }
   }
 
   inline void AddShow(const CC_show *show) {
-    showlist.Append((wxObject*)show);
+    showlist.push_back(show);
   }
   inline void RemoveShow(const CC_show *show) {
-    showlist.DeleteObject((wxObject*)show);
+    showlist.remove(show);
   }
   inline int GetNumber() { return untitled_number++; }
 private:
-  wxList showlist;
+  std::list<const CC_show*> showlist;
   int untitled_number;
 };
 
@@ -365,22 +365,20 @@ void CC_WinListShow::Empty() {
 CC_textline::CC_textline()
   : center(false), on_main(true), on_sheet(true) {}
 CC_textline::~CC_textline() {
-  wxNode *node;
-
-  for (node = chunks.First(); node != NULL; node = node->Next()) {
-    delete (CC_textchunk*)node->Data();
-  }
 }
 
 CC_text::CC_text() {
 }
 
 CC_text::~CC_text() {
-  wxNode *node;
+}
 
-  for (node = lines.First(); node != NULL; node = node->Next()) {
-    delete (CC_textline*)node->Data();
-  }
+wxString Capitalize(const wxString &str) {
+  wxString Result = str.Lower();
+  if (Result.Length() > 0)
+    Result[0] = toupper(Result.c_str()[0]);
+
+  return Result;
 }
 
 CC_continuity::CC_continuity()
@@ -389,16 +387,16 @@ CC_continuity::CC_continuity()
 CC_continuity::~CC_continuity() {
 }
 
-void CC_continuity::SetName(const char* s) {
+void CC_continuity::SetName(const wxChar* s) {
   name = s;
-  name.Capitalize();
+  name = Capitalize(name);
 }
 
-void CC_continuity::SetText(const char* s) {
+void CC_continuity::SetText(const wxChar* s) {
   text = s;
 }
 
-void CC_continuity::AppendText(const char* s) {
+void CC_continuity::AppendText(const wxChar* s) {
   text.Append(s);
 }
 
@@ -511,7 +509,7 @@ CC_sheet::CC_sheet(CC_show *shw)
     pts = new CC_point[show->GetNumPoints()];
 }
 
-CC_sheet::CC_sheet(CC_show *shw, const char *newname)
+CC_sheet::CC_sheet(CC_show *shw, const wxString& newname)
 : next(NULL), animcont(NULL), show(shw),
   numanimcont(0), picked(true), beats(1), pts(NULL), name(newname) {
     pts = new CC_point[show->GetNumPoints()];
@@ -660,7 +658,7 @@ CC_continuity *CC_sheet::UserGetNthContinuity(unsigned i) {
   return GetNthContinuity(i);
 }
 
-void CC_sheet::SetNthContinuity(const char *text, unsigned i) {
+void CC_sheet::SetNthContinuity(const wxString& text, unsigned i) {
   CC_continuity *c;
 
   c = GetNthContinuity(i);
@@ -669,7 +667,7 @@ void CC_sheet::SetNthContinuity(const char *text, unsigned i) {
   }
 }
 
-void CC_sheet::UserSetNthContinuity(const char *text, unsigned i,
+void CC_sheet::UserSetNthContinuity(const wxString& text, unsigned i,
 				    wxWindow *win) {
   CC_continuity *c;
 
@@ -742,7 +740,7 @@ void CC_sheet::AppendContinuity(CC_continuity *newcont) {
   numanimcont++;
 }
 
-CC_continuity *CC_sheet::UserNewContinuity(const char *name) {
+CC_continuity *CC_sheet::UserNewContinuity(const wxString& name) {
   CC_continuity *newcont;
   unsigned newcontnum;
 
@@ -802,7 +800,7 @@ CC_continuity *CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym) {
   return c;
 }
 
-unsigned CC_sheet::FindContinuityByName(const char *name) {
+unsigned CC_sheet::FindContinuityByName(const wxString& name) {
   unsigned idx;
   CC_continuity *c;
 
@@ -827,7 +825,7 @@ bool CC_sheet::ContinuityInUse(unsigned idx) {
   return false;
 }
 
-void CC_sheet::UserSetName(const char *newname) {
+void CC_sheet::UserSetName(const wxString& newname) {
   // Create undo entry
   show->undolist->Add(new ShowUndoName(show->GetSheetPos(this), this));
   SetName(newname);
@@ -1036,17 +1034,17 @@ bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
 			       unsigned ref) {
   CC_coord curr_pos;
   bool change = false;
-  wxNode *n;
 
   if (GetNumSelectedPoints() <= 0) return false;
 
   // Create undo entry
   show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
 
-  for (n = show->GetSelectionList().First(), curr_pos = start;
-       n != NULL;
-       n = n->Next(), curr_pos += second - start) {
-    SetPosition(curr_pos, n->key.integer, ref);
+  curr_pos = start;
+  for (CC_show::SelectionList::const_iterator n = show->GetSelectionList().begin();
+       n != show->GetSelectionList().end();
+       ++n, curr_pos += second - start) {
+    SetPosition(curr_pos, *n, ref);
     change = true;
   }
   return change;
@@ -1054,25 +1052,25 @@ bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
 
 // Create a new show
 CC_show::CC_show(unsigned npoints)
-:okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, "1")),
+:okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, wxT("1"))),
  modified(false), print_landscape(false), print_do_cont(true),
  print_do_cont_sheet(true) {
   wxString tmpname;
 
-  tmpname.sprintf("noname%d.shw", autosaveTimer.GetNumber());
+  tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
   SetAutosaveName(tmpname);
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
   if (npoints) {
-    pt_labels = new char[npoints][4];
+    pt_labels = new wxString[npoints];
     if (pt_labels == NULL) {
       // Out of mem!
       AddError(nomem_str);
       return;
     }
     for (unsigned int i = 0; i < npoints; i++) {
-      sprintf(pt_labels[i], "%u", i);
+      pt_labels[i].Printf(wxT("%u"), i);
     }
     selections = new bool[npoints];
     if (selections == NULL) {
@@ -1108,11 +1106,11 @@ CC_show::CC_show(unsigned npoints)
 #define INGL_PCNT MakeINGLid('P','C','N','T')
 
 // Only exists so SHOW chunk is recognized
-static char* load_show_SHOW(INGLchunk*) {
+static const char* load_show_SHOW(INGLchunk*) {
   return NULL;
 }
 
-static char* load_show_SHET(INGLchunk* chunk) {
+static const char* load_show_SHET(INGLchunk* chunk) {
   CC_show *show = (CC_show*)chunk->prev->userdata;
   CC_sheet *sheet = new CC_sheet(show);
 
@@ -1122,7 +1120,7 @@ static char* load_show_SHET(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_SIZE(INGLchunk* chunk) {
+static const char* load_show_SIZE(INGLchunk* chunk) {
   CC_show *show = (CC_show*)chunk->prev->userdata;
   
   if ((show->GetNumPoints() > 0) || (show->GetSheet() != NULL)) {
@@ -1135,39 +1133,40 @@ static char* load_show_SIZE(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_LABL(INGLchunk* chunk) {
+static const char* load_show_LABL(INGLchunk* chunk) {
   unsigned i;
-  char *str = (char*)chunk->data;
+  const char *str = (const char*)chunk->data;
   CC_show *show = (CC_show*)chunk->prev->userdata;
   for (i = 0; i < show->GetNumPoints(); i++) {
-    strncpy(show->GetPointLabel(i), str, 3);
-    show->GetPointLabel(i)[3] = 0;
+    show->GetPointLabel(i) = wxString::FromUTF8(str);
     str += strlen(str)+1;
   }
   return NULL;
 }
 
-static char* load_show_MODE(INGLchunk* /*chunk*/) {
+static const char* load_show_MODE(INGLchunk* /*chunk*/) {
   return NULL;
 }
 
-static char* load_show_DESC(INGLchunk* chunk) {
+static const char* load_show_DESC(INGLchunk* chunk) {
   CC_show *show = (CC_show*)chunk->prev->userdata;
 
-  show->SetDescr((char*)chunk->data);
+  wxString s(wxString::FromUTF8((const char*)chunk->data));
+  show->SetDescr(s);
 
   return NULL;
 }
 
-static char* load_show_NAME(INGLchunk* chunk) {
+static const char* load_show_NAME(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   
-  sheet->SetName((char*)chunk->data);
+  wxString s(wxString::FromUTF8((const char*)chunk->data));
+  sheet->SetName(s);
 
   return NULL;
 }
 
-static char* load_show_DURA(INGLchunk* chunk) {
+static const char* load_show_DURA(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   
   if (chunk->size != 4) {
@@ -1178,16 +1177,16 @@ static char* load_show_DURA(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_POS(INGLchunk* chunk) {
+static const char* load_show_POS(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   unsigned i;
-  unsigned char *data;
+  uint8_t *data;
   CC_coord c;
 
   if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4) {
     return "Bad POS chunk";
   }
-  data = (unsigned char*)chunk->data;
+  data = (uint8_t*)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     c.x = get_big_word(data);
     data += 2;
@@ -1199,15 +1198,15 @@ static char* load_show_POS(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_SYMB(INGLchunk* chunk) {
+static const char* load_show_SYMB(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   unsigned i;
-  unsigned char *data;
+  uint8_t *data;
 
   if (chunk->size != sheet->show->GetNumPoints()) {
     return "Bad SYMB chunk";
   }
-  data = (unsigned char *)chunk->data;
+  data = (uint8_t *)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(data++));
   }
@@ -1215,15 +1214,15 @@ static char* load_show_SYMB(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_TYPE(INGLchunk* chunk) {
+static const char* load_show_TYPE(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   unsigned i;
-  unsigned char *data;
+  uint8_t *data;
 
   if (chunk->size != sheet->show->GetNumPoints()) {
     return "Bad TYPE chunk";
   }
-  data = (unsigned char *)chunk->data;
+  data = (uint8_t *)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     sheet->GetPoint(i).cont = *(data++);
   }
@@ -1231,16 +1230,16 @@ static char* load_show_TYPE(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_REFP(INGLchunk* chunk) {
+static const char* load_show_REFP(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   unsigned i, ref;
-  unsigned char *data;
+  uint8_t *data;
   CC_coord c;
 
   if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4+2) {
     return "Bad REFP chunk";
   }
-  data = (unsigned char*)chunk->data;
+  data = (uint8_t*)chunk->data;
   ref = get_big_word(data);
   data += 2;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
@@ -1254,15 +1253,15 @@ static char* load_show_REFP(INGLchunk* chunk) {
   return NULL;
 }
 
-static char* load_show_SHET_LABL(INGLchunk* chunk) {
+static const char* load_show_SHET_LABL(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   unsigned i;
-  unsigned char *data;
+  uint8_t *data;
 
   if (chunk->size != sheet->show->GetNumPoints()) {
     return "Bad LABL chunk";
   }
-  data = (unsigned char *)chunk->data;
+  data = (uint8_t *)chunk->data;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     if (*(data++)) {
       sheet->GetPoint(i).Flip();
@@ -1272,37 +1271,39 @@ static char* load_show_SHET_LABL(INGLchunk* chunk) {
   return NULL;
 }
 
-static char badcontchunk[] = "Bad CONT chunk";
-static char* load_show_CONT(INGLchunk* chunk) {
+static const char* badcontchunk = "Bad CONT chunk";
+static const char* load_show_CONT(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   CC_continuity *newcont;
   unsigned num;
-  char *name;
-  char *text;
+  const char *name;
+  const char *text;
 
   if (chunk->size < 3) { // one byte num + two nils minimum
     return badcontchunk;
   }
-  if (((char*)chunk->data)[chunk->size-1] != '\0') { // make sure we have a nil
+  if (((const char*)chunk->data)[chunk->size-1] != '\0') { // make sure we have a nil
     return badcontchunk;
   }
-  name = (char *)chunk->data + 1;
+  name = (const char *)chunk->data + 1;
   num = strlen(name);
   if (chunk->size < num + 3) { // check for room for text string
     return badcontchunk;
   }
-  text = (char *)chunk->data + 2 + strlen(name);
+  text = (const char *)chunk->data + 2 + strlen(name);
 
   newcont = new CC_continuity;
-  newcont->num = *((unsigned char *)chunk->data);
-  newcont->SetName(name);
-  newcont->SetText(text);
+  newcont->num = *((uint8_t *)chunk->data);
+  wxString namestr(wxString::FromUTF8(name));
+  newcont->SetName(namestr);
+  wxString textstr(wxString::FromUTF8(text));
+  newcont->SetText(textstr);
   sheet->AppendContinuity(newcont);
 
   return NULL;
 }
 
-static char* load_show_PCNT(INGLchunk* /*chunk*/) {
+static const char* load_show_PCNT(INGLchunk* /*chunk*/) {
   return NULL;
 }
 
@@ -1335,7 +1336,7 @@ enum CONT_PARSE_MODE {
 };
 
 // Load a show
-CC_show::CC_show(const char *file)
+CC_show::CC_show(const wxString& filestr)
 :okay(true), numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL),
  selections(NULL), modified(false), print_landscape(false),
  print_do_cont(true), print_do_cont_sheet(true) {
@@ -1363,6 +1364,7 @@ CC_show::CC_show(const char *file)
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
 
+  const char *file = filestr.utf8_str();
   namelen = strlen(file);
   if (namelen > 4) {
     if (strcmp(".mas", file+namelen-4) == 0) old_format = true;
@@ -1373,7 +1375,7 @@ CC_show::CC_show(const char *file)
   }
 
   if (old_format) {
-    namebuf = copystring(file);
+    namebuf = strdup(file);
     if (!namebuf) {
       AddError(nomem_str);
       return;
@@ -1387,7 +1389,7 @@ CC_show::CC_show(const char *file)
       AddError(badfile_mas_str);
       return;
     }
-    if (sscanf(tempbuf, " %u ", &i) != 1) {
+    if (CC_sscanf(tempbuf.c_str(), wxT(" %u "), &i) != 1) {
       AddError(badfile_mas_str);
       return;
     }
@@ -1400,11 +1402,11 @@ CC_show::CC_show(const char *file)
       AddError(badfile_mas_str);
       return;
     }
-    if (sscanf(tempbuf, " %hu , %hu ", &numsheets, &numpoints) != 2) {
+    if (CC_sscanf(tempbuf.c_str(), wxT(" %hu , %hu "), &numsheets, &numpoints) != 2) {
       AddError(badfile_mas_str);
       return;
     }
-    pt_labels = new char[numpoints][4];
+    pt_labels = new wxString[numpoints];
     selections = new bool[numpoints];
     UnselectAll();
 
@@ -1413,8 +1415,8 @@ CC_show::CC_show(const char *file)
 	AddError(badfile_mas_str);
 	return;
       }
-      if (sscanf(tempbuf, " \"%[^\"]\" , %u , %u\n",
-		 sheetnamebuf, &j, &off) != 3) {
+      if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
+		    sheetnamebuf, &j, &off) != 3) {
 	AddError(badfile_mas_str);
 	return;
       }
@@ -1428,15 +1430,17 @@ CC_show::CC_show(const char *file)
 	}
       }
 
+      // For old format, use ISO-8859-1 not UTF8
+      wxString sheetnamestr(wxString::From8BitData(sheetnamebuf));
       if (curr_sheet == NULL) {
-	sheets = new CC_sheet(this, sheetnamebuf);
+	sheets = new CC_sheet(this, sheetnamestr);
 	if (!sheets) {
 	  AddError(nomem_str);
 	  return;
 	}
 	curr_sheet = sheets;
       } else {
-	curr_sheet->next = new CC_sheet(this, sheetnamebuf);
+	curr_sheet->next = new CC_sheet(this, sheetnamestr);
 	if (!sheets) {
 	  AddError(nomem_str);
 	  return;
@@ -1512,26 +1516,28 @@ CC_show::CC_show(const char *file)
 	if (k == 1) {
 	  // Build table for point labels
 	  unsigned int label_idx = 0;
+	  char pt_buf[4];
 	  for (j = 0; j < 2; j++) {
 	    // Convert to ascii
 	    if ((diskpts[i].code[j] >= '0') && (diskpts[i].code[j] != '?')) {
 	      if (diskpts[i].code[j] <= 'Z') {
 		// normal ascii
-		pt_labels[i][label_idx++] = diskpts[i].code[j];
+		pt_buf[label_idx++] = diskpts[i].code[j];
 	      } else {
 		if (diskpts[i].code[j] > 100) {
 		  // digit (0-9)
-		  pt_labels[i][label_idx++] = diskpts[i].code[j] - 101 + '0';
+		  pt_buf[label_idx++] = diskpts[i].code[j] - 101 + '0';
 		} else {
 		  // '10' to '19' range
-		  sprintf(&pt_labels[i][label_idx], "%u",
+		  sprintf(&pt_buf[label_idx], "%u",
 			  diskpts[i].code[j] - 81);
-		  label_idx = strlen(pt_labels[i]);
+		  label_idx = strlen(pt_buf);
 		}
 	      }
 	    }
 	  }
-	  pt_labels[i][label_idx] = 0;
+	  pt_buf[label_idx] = 0;
+	  pt_labels[i] = wxString::FromAscii(pt_buf);
 	}
       }
       // Now load animation continuity
@@ -1547,7 +1553,7 @@ CC_show::CC_show(const char *file)
 	AddError(badfile_cnt_str);
 	return;
       }
-      if (tempbuf != "'NEW") {
+      if (tempbuf != wxT("'NEW")) {
 	AddError(badanimcont_str);
 	return;
       }
@@ -1555,7 +1561,7 @@ CC_show::CC_show(const char *file)
 	AddError(badanimcont_str);
 	return;
       }
-      if (sscanf(tempbuf, " %u", &numanimcont) != 1) {
+      if (CC_sscanf(tempbuf.c_str(), wxT(" %u"), &numanimcont) != 1) {
 	AddError(badanimcont_str);
 	return;
       }
@@ -1572,12 +1578,13 @@ CC_show::CC_show(const char *file)
 	  AddError(badanimcont_str);
 	  return;
 	}
-	if (sscanf(tempbuf, " \"%[^\"]\" , %u , %u\n",
-		   sheetnamebuf, &newanimcont->num, &j) != 3) {
+	if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
+		      sheetnamebuf, &newanimcont->num, &j) != 3) {
 	  AddError(badanimcont_str);
 	  return;
 	}
-	newanimcont->SetName(sheetnamebuf);
+	wxString sheetnamestr(wxString::From8BitData(sheetnamebuf));
+	newanimcont->SetName(sheetnamestr);
 	while (j > 0) {
 	  j--;
 	  if (feof(fp)) {
@@ -1594,30 +1601,30 @@ CC_show::CC_show(const char *file)
 
     // now load continuity file if it exists
     strcpy(namebuf+namelen-3, old_format_uppercase ? "TXT":"txt");
-    if (wxFileExists(namebuf)) {
-      wxString* conterr = ImportContinuity(namebuf);
-      if (conterr) {
-	AddError(*conterr);
-	delete conterr;
+    wxString namestr(namebuf, *wxConvFileName);
+    if (wxFileExists(namestr)) {
+      wxString conterr = ImportContinuity(namestr);
+      if (!conterr.empty()) {
+	AddError(conterr);
       }
     }
 
     wxString shwname;
-    ChangeExtension(namebuf, shwname, "shw");
+    ChangeExtension(namestr, shwname, wxT("shw"));
     SetName(shwname);
-    delete namebuf;
+    free(namebuf);
   } else {
-    INGLread readhnd(file);
+    INGLread readhnd(CC_fopen(filestr.fn_str(), "rb"));
     if (!readhnd.Okay()) {
       AddError(nofile_str);
     } else {
-      char *parseerror = NULL;
+      const char *parseerror = NULL;
       readhnd.ParseFile(load_show_handlers,
 			sizeof(load_show_handlers)/sizeof(INGLhandler),
 			&parseerror, this);
       if (parseerror != NULL)
-	AddError(parseerror);
-      SetName(file);
+	AddError(wxString(parseerror, wxConvUTF8));
+      SetName(wxString(parseerror, *wxConvFileName));
     }
   }
   if (okay && (sheets == NULL)) {
@@ -1637,7 +1644,7 @@ CC_show::~CC_show() {
 #endif
   if (winlist) delete winlist;
   if (undolist) delete undolist;
-  if (pt_labels) delete pt_labels;
+  if (pt_labels) delete [] pt_labels;
   while (sheets) {
     tmp = sheets->next;
     delete sheets;
@@ -1645,7 +1652,7 @@ CC_show::~CC_show() {
   }
 }
 
-wxString* CC_show::ImportContinuity(const wxString& file) {
+wxString CC_show::ImportContinuity(const wxString& file) {
   /* This is the format for each sheet:
    * %%str      where str is the string printed for the stuntsheet number
    * normal ascii text possibly containing the following codes:
@@ -1668,7 +1675,6 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
   CC_sheet *curr_sheet;
   wxString tempbuf;
   CC_textline *line_text;
-  CC_textchunk *new_text;
   unsigned pos;
   bool on_sheet, on_main, center, font_changed;
   enum CONT_PARSE_MODE parsemode;
@@ -1677,7 +1683,7 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
   char c;
   bool sheetmark;
 
-  fp = fopen(file, "r");
+  fp = CC_fopen(file.fn_str(), "r");
   if (fp) {
     curr_sheet = NULL;
     currfontnum = lastfontnum = PSFONT_NORM;
@@ -1702,7 +1708,7 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
       } else {
 	if (curr_sheet == NULL) {
 	  // Continuity doesn't begin with a sheet header
-	  return new wxString(contnohead_str);
+	  return wxString(contnohead_str);
 	}
 	on_main = true;
 	on_sheet = true;
@@ -1728,7 +1734,7 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 	parsemode = CONT_PARSE_NORMAL;
 	do {
 	  font_changed = false;
-	  lineotext = "";
+	  lineotext = wxT("");
 	  while ((pos < tempbuf.Length()) && !font_changed) {
 	    switch (parsemode) {
 	    case CONT_PARSE_NORMAL:
@@ -1794,7 +1800,7 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 		break;
 	      default:
 		// code not recognized
-		return new wxString(badcont_str);
+		return wxString(badcont_str);
 	      }
 	      break;
 	    case CONT_PARSE_SOLID:
@@ -1817,7 +1823,7 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 		break;
 	      default:
 		// code not recognized
-		return new wxString(badcont_str);
+		return wxString(badcont_str);
 	      }
 	      break;
 	    case CONT_PARSE_BOLD:
@@ -1854,7 +1860,7 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 		break;
 	      default:
 		// code not recognized
-		return new wxString(badcont_str);
+		return wxString(badcont_str);
 	      }
 	      break;
 	    case CONT_PARSE_ITALIC:
@@ -1891,31 +1897,28 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
 		break;
 	      default:
 		// code not recognized
-		return new wxString(badcont_str);
+		return wxString(badcont_str);
 	      }
 	      break;
 	    }
 	  }
 	  // Add any remaining text
 	  // Empty text only okay if line is blank
-	  if ((!lineotext.Empty()) ||
+	  if ((!lineotext.empty()) ||
 	      (currfontnum == PSFONT_TAB) ||
 	      // Empty line
-	      ((pos >= tempbuf.Length()) && (line_text == NULL))) {
-	    new_text = new CC_textchunk;
-	    if (new_text == NULL) {
-	      return new wxString(nomem_str);
-	    }
+	      ((pos >= tempbuf.length()) && (line_text == NULL))) {
+	    CC_textchunk new_text;
 	    if (line_text == NULL) {
-	      line_text = new CC_textline();
+	      curr_sheet->continuity.lines.push_back(CC_textline());
+	      line_text = &curr_sheet->continuity.lines.back();
 	      line_text->on_main = on_main;
 	      line_text->on_sheet = on_sheet;
 	      line_text->center = center;
-	      curr_sheet->continuity.lines.Append(line_text);
 	    }
-	    new_text->font = currfontnum;
-	    new_text->text = lineotext;
-	    line_text->chunks.Append(new_text);
+	    new_text.font = currfontnum;
+	    new_text.text = lineotext;
+	    line_text->chunks.push_back(new_text);
 	  }
 	  // restore to previous font (used for symbols and tabs)
 	  currfontnum = lastfontnum;
@@ -1924,9 +1927,9 @@ wxString* CC_show::ImportContinuity(const wxString& file) {
     }
     fclose(fp);
   } else {
-    return new wxString(nofile_str);
+    return wxString(nofile_str);
   }
-  return NULL;
+  return wxT("");
 }
 
 void CC_show::Append(CC_show *shw) {
@@ -1965,20 +1968,19 @@ void CC_show::Append(CC_sheet *newsheets) {
   winlist->AppendSheets();
 }
 
-char *CC_show::SaveInternal(const char *filename) {
+wxString CC_show::SaveInternal(const wxString& filename) const {
   wxString bakfile;
   if (wxFileExists(filename)) {
-    ChangeExtension(filename, bakfile, "bak");
-    if (!wxCopyFile((char*)filename, bakfile.GetData()))
+    ChangeExtension(filename, bakfile, wxT("bak"));
+    if (!wxCopyFile(filename, bakfile))
       return nofile_str;
   }
 
-  INGLwrite *handl = new INGLwrite(filename);
+  INGLwrite *handl = new INGLwrite(CC_fopen(filename.fn_str(), "wb"));
   INGLid id;
   unsigned i, j;
   Coord crd;
   unsigned char c;
-  const char *str;
   CC_continuity *curranimcont;
 
   FlushAllTextWindows();
@@ -2003,14 +2005,14 @@ char *CC_show::SaveInternal(const char *filename) {
 
   id = 0;
   for (i = 0; i < GetNumPoints(); i++) {
-    id += strlen(GetPointLabel(i))+1;
+    id += strlen(GetPointLabel(i).utf8_str())+1;
   }
   if (id > 0) {
     if (!handl->WriteChunkHeader(INGL_LABL, id)) {
       return writeerr_str;
     }
     for (i = 0; i < GetNumPoints(); i++) {
-      if (!handl->WriteStr(GetPointLabel(i))) {
+      if (!handl->WriteStr(GetPointLabel(i).utf8_str())) {
 	return writeerr_str;
       }
     }
@@ -2019,22 +2021,21 @@ char *CC_show::SaveInternal(const char *filename) {
   //handl->WriteChunkStr(INGL_MODE, mode->Name());
 
   // Description
-  str = UserGetDescr();
-  if (str[0] != '\0') {
-    if (!handl->WriteChunkStr(INGL_DESC, str)) {
+  if (!UserGetDescr().empty()) {
+    if (!handl->WriteChunkStr(INGL_DESC, UserGetDescr().utf8_str())) {
       return writeerr_str;
     }
   }
 
   // Handle sheets
-  for (CC_sheet *curr_sheet = GetSheet();
+  for (const CC_sheet *curr_sheet = GetSheet();
        curr_sheet != NULL;
        curr_sheet = curr_sheet->next) {
     if (!handl->WriteGurk(INGL_SHET)) {
       return writeerr_str;
     }
     // Name
-    if (!handl->WriteChunkStr(INGL_NAME, curr_sheet->GetName())) {
+    if (!handl->WriteChunkStr(INGL_NAME, curr_sheet->GetName().utf8_str())) {
       return writeerr_str;
     }
     // Beats
@@ -2140,10 +2141,10 @@ char *CC_show::SaveInternal(const char *filename) {
       if (!handl->Write(&curranimcont->num, 1)) {
 	return writeerr_str;
       }
-      if (!handl->WriteStr(curranimcont->name)) {
+      if (!handl->WriteStr(curranimcont->name.utf8_str())) {
 	return writeerr_str;
       }
-      if (!handl->WriteStr(curranimcont->text)) {
+      if (!handl->WriteStr(curranimcont->text.utf8_str())) {
 	return writeerr_str;
       }
     }
@@ -2159,26 +2160,26 @@ char *CC_show::SaveInternal(const char *filename) {
   delete handl;
 
   if (!bakfile.IsEmpty()) {
-    wxRemoveFile(bakfile.GetData());
+    wxRemoveFile(bakfile);
   }
-  return NULL;
+  return wxT("");
 }
 
-void CC_show::ClearAutosave() {
-  wxRemoveFile(autosave_name.GetData());
+void CC_show::ClearAutosave() const {
+  wxRemoveFile(autosave_name);
 }
 
-char *CC_show::Autosave() {
+wxString CC_show::Autosave() const {
   if (!autosave_name.IsEmpty()) {
     return SaveInternal(autosave_name);
   } else {
-    return NULL;
+    return wxT("");
   }
 }
 
-char *CC_show::Save(const char *filename) {
-  char *s = SaveInternal(filename);
-  if (s == NULL) {
+wxString CC_show::Save(const wxString& filename) const {
+  wxString s = SaveInternal(filename);
+  if (s.empty()) {
     if (autosave_name) {
       ClearAutosave();
     }
@@ -2190,30 +2191,38 @@ char *CC_show::Save(const char *filename) {
   return s;
 }
 
-const char *CC_show::UserGetName() {
-  if (name.IsEmpty()) return "Untitled";
-  else return wxFileNameFromPath((char *)name.GetData());
+wxString CC_show::UserGetName() const {
+  if (name.empty()) return wxT("Untitled");
+  else return wxFileNameFromPath(name);
 }
 
-void CC_show::SetName(const char *newname) {
+void CC_show::SetName(const wxString& newname) const {
   // make into a full path
-  char *path = FullPath(newname);
+  wxString path = FullPath(newname);
   name = path;
   SetAutosaveName(path);
-  delete [] path;
 }
 
-void CC_show::SetAutosaveName(const char *realname) {
+void CC_show::SetAutosaveName(const wxString& realname) const {
   autosave_name = autosave_dir;
   autosave_name.Append(PATH_SEPARATOR);
-  autosave_name.Append(wxFileNameFromPath((char*)realname));
+  autosave_name.Append(wxFileNameFromPath(realname));
 }
 
-void CC_show::UserSetDescr(const char *newdescr, wxWindow *win) {
+void CC_show::UserSetDescr(const wxString& newdescr, wxWindow *win) {
   // Create undo entry
   undolist->Add(new ShowUndoDescr(this));
   descr = newdescr;
   winlist->SetDescr(win);
+}
+
+const CC_sheet *CC_show::GetNthSheet(unsigned n) const {
+  const CC_sheet *nsheet = sheets;
+  while (n && nsheet) {
+    n--;
+    nsheet = nsheet->next;
+  }
+  return nsheet;
 }
 
 CC_sheet *CC_show::GetNthSheet(unsigned n) {
@@ -2225,8 +2234,8 @@ CC_sheet *CC_show::GetNthSheet(unsigned n) {
   return nsheet;
 }
 
-unsigned CC_show::GetSheetPos(CC_sheet *sheet) {
-  CC_sheet *nsheet = sheets;
+unsigned CC_show::GetSheetPos(const CC_sheet *sheet) const {
+  const CC_sheet *nsheet = sheets;
   unsigned n = 0;
   while (nsheet!=sheet) {
     if (nsheet == NULL) return 0;
@@ -2319,7 +2328,7 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
   unsigned i, cpy;
   CC_sheet *sht;
 
-  char (*new_labels)[4];
+  wxString *new_labels;
 
   for (sht = sheets; sht != NULL; sht = sht->next) {
     sht->SetNumPoints(num, columns);
@@ -2329,18 +2338,18 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
 
   delete selections;
   selections = new bool[num];
-  new_labels = new char[num][4];
+  new_labels = new wxString[num];
   for (i = 0; i < num; i++) {
     selections[i] = false;
   }
   cpy = MIN(numpoints, num);
   for (i = 0; i < cpy; i++) {
-    strcpy(new_labels[i], pt_labels[i]);
+    new_labels[i] = pt_labels[i];
   }
   for (; i < num; i++) {
-    strcpy(new_labels[i], "");
+    new_labels[i] = wxT("");
   }
-  delete pt_labels;
+  delete [] pt_labels;
   pt_labels = new_labels;
 
   numpoints = num;
@@ -2350,9 +2359,8 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
 
 void CC_show::SetNumPointsInternal(unsigned num) {
   numpoints = num;
-  pt_labels = new char[numpoints][4];
+  pt_labels = new wxString[numpoints];
   selections = new bool[numpoints];
-  for (unsigned i = 0; i < numpoints; i++) pt_labels[i][0] = 0;
   UnselectAll();
 }
 
@@ -2407,14 +2415,10 @@ bool CC_show::UnselectAll() {
 }
 
 void CC_show::Select(unsigned i, bool val) {
-  wxNode *n;
-
   selections[i] = val;
   if (val) {
-    selectionList.Append(i, NULL);
+    selectionList.push_back(i);
   } else {
-    if ((n = selectionList.Find(i)) != NULL) {
-      selectionList.DeleteNode(n);
-    }
+    selectionList.erase(std::find(selectionList.begin(), selectionList.end(), i));
   }
 }

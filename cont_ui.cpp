@@ -37,7 +37,7 @@ extern wxFont *contBoldFont;
 extern wxFont *contItalFont;
 extern wxFont *contBoldItalFont;
 
-extern wxHelpInstance *help_inst;
+extern wxHelpControllerBase *help_inst;
 
 static void toolbar_printcont_sym0(CoolToolBar *tb);
 static void toolbar_printcont_sym1(CoolToolBar *tb);
@@ -49,15 +49,34 @@ static void toolbar_printcont_sym6(CoolToolBar *tb);
 static void toolbar_printcont_sym7(CoolToolBar *tb);
 
 ToolBarEntry printcont_tb[] = {
-  { 0, NULL, "Insert plainman", toolbar_printcont_sym0 },
-  { 0, NULL, "Insert solidman", toolbar_printcont_sym1 },
-  { 0, NULL, "Insert backslash man", toolbar_printcont_sym2 },
-  { 0, NULL, "Insert slash man", toolbar_printcont_sym3 },
-  { 0, NULL, "Insert x man", toolbar_printcont_sym4 },
-  { 0, NULL, "Insert solid backslash man", toolbar_printcont_sym5 },
-  { 0, NULL, "Insert solid slash man", toolbar_printcont_sym6 },
-  { 0, NULL, "Insert solid x man", toolbar_printcont_sym7 }
+  { 0, NULL, wxT("Insert plainman"), toolbar_printcont_sym0 },
+  { 0, NULL, wxT("Insert solidman"), toolbar_printcont_sym1 },
+  { 0, NULL, wxT("Insert backslash man"), toolbar_printcont_sym2 },
+  { 0, NULL, wxT("Insert slash man"), toolbar_printcont_sym3 },
+  { 0, NULL, wxT("Insert x man"), toolbar_printcont_sym4 },
+  { 0, NULL, wxT("Insert solid backslash man"), toolbar_printcont_sym5 },
+  { 0, NULL, wxT("Insert solid slash man"), toolbar_printcont_sym6 },
+  { 0, NULL, wxT("Insert solid x man"), toolbar_printcont_sym7 }
 };
+
+BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
+  EVT_CLOSE(ContinuityEditor::OnCloseWindow)
+  EVT_SIZE(ContinuityEditor::OnSize)
+  EVT_MENU(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
+  EVT_MENU(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
+  EVT_MENU(CALCHART__CONT_CLOSE, ContinuityEditor::OnCmdClose)
+  EVT_MENU(CALCHART__CONT_HELP, ContinuityEditor::OnCmdHelp)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(PrintContCanvas, wxScrolledWindow)
+  EVT_CHAR(PrintContCanvas::OnChar)
+  EVT_MOUSE_EVENTS(PrintContCanvas::OnMouseEvent)
+  EVT_PAINT(PrintContCanvas::OnPaint)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(PrintContEditor, wxFrame)
+  EVT_ACTIVATE(PrintContEditor::OnActivate)
+END_EVENT_TABLE()
 
 CC_WinNodeCont::CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req)
 : CC_WinNode(lst), editor(req) {}
@@ -158,36 +177,36 @@ static void ContEditCurrent(wxChoice& choice, wxEvent&) {
 }
 
 ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
-				   wxFrame *parent, char *title,
+				   wxFrame *parent, const wxString& title,
 				   int x, int y, int width, int height):
 wxFrame(parent, title, x, y, width, height, CC_FRAME_OTHER),
 descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   // Give it an icon
   SetBandIcon(this);
 
-  CreateStatusLine();
+  CreateStatusBar();
 
   panel = new wxPanel(this);
 
-  (void)new wxButton(panel, (wxFunction)ContEditSet, "&Set Points");
-  (void)new wxButton(panel, (wxFunction)ContEditSelect, "Select &Points");
+  (void)new wxButton(panel, (wxFunction)ContEditSet, wxT("&Set Points"));
+  (void)new wxButton(panel, (wxFunction)ContEditSelect, wxT("Select &Points"));
 
-  conts = new wxChoice(panel, (wxFunction)ContEditCurrent, "");
+  conts = new wxChoice(panel, (wxFunction)ContEditCurrent, wxT(""));
 
   text = new FancyTextWin(this);
   
   wxMenu *cont_menu = new wxMenu;
-  cont_menu->Append(CALCHART__CONT_NEW, "&New");
-  cont_menu->Append(CALCHART__CONT_DELETE, "&Delete");
-  cont_menu->Append(CALCHART__CONT_CLOSE, "&Close window");
+  cont_menu->Append(CALCHART__CONT_NEW, wxT("&New"), wxT("Add new continuity"));
+  cont_menu->Append(CALCHART__CONT_DELETE, wxT("&Delete"), wxT("Delete this continuity"));
+  cont_menu->Append(CALCHART__CONT_CLOSE, wxT("&Close window"), wxT("Close window"));
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(CALCHART__CONT_HELP, "&Help on Continuity...");
+  help_menu->Append(CALCHART__CONT_HELP, wxT("&Help on Continuity..."), wxT("Help on continuity commands"));
   wxMenuBar *menu_bar = new wxMenuBar;
-  menu_bar->Append(cont_menu, "&Continuity");
-  menu_bar->Append(help_menu, "&Help");
+  menu_bar->Append(cont_menu, wxT("&Continuity"));
+  menu_bar->Append(help_menu, wxT("&Help"));
   SetMenuBar(menu_bar);
 
-  OnSize(-1, -1);
+  Layout();
   Show(true);
 
   Update();
@@ -202,7 +221,7 @@ ContinuityEditor::~ContinuityEditor() {
   }
 }
 
-void ContinuityEditor::OnSize(int, int) {
+void ContinuityEditor::OnSize(wxSizeEvent& event) {
   int width, height;
   int text_x, text_y;
 
@@ -213,61 +232,37 @@ void ContinuityEditor::OnSize(int, int) {
   text->SetSize(0, text_y, width, height-text_y);
 }
 
-bool ContinuityEditor::OnClose(void) {
+void ContinuityEditor::OnCloseWindow(wxCloseEvent& event) {
   FlushText();
-  return true;
+  Destroy();
 }
 
-void ContinuityEditor::OnMenuCommand(int id) {
-  CC_sheet *sht;
-  char *contname;
-
-  switch(id) {
-  case CALCHART__CONT_NEW:
-    sht = descr->CurrSheet();
-    contname = wxGetTextFromUser("Enter the new continuity's name",
-				 "New Continuity",
-				 NULL, this);
-    if (contname) {
-      sht->UserNewContinuity(contname);
-    }
-    break;
-  case CALCHART__CONT_DELETE:
-    sht = descr->CurrSheet();
-    if (sht->ContinuityInUse(curr_cont)) {
-      (void)wxMessageBox("This continuity is being used.\nSet these points to a different continuity first.", "Delete continuity");
-    } else {
-      sht->UserDeleteContinuity(curr_cont);
-    }
-    break;
-  case CALCHART__CONT_CLOSE:
-    Close();
-    break;
-  case CALCHART__CONT_HELP:
-    help_inst->LoadFile();
-    help_inst->KeywordSearch("Animation Commands");
-    break;
+void ContinuityEditor::OnCmdNew(wxCommandEvent& event) {
+  CC_sheet *sht = descr->CurrSheet();
+  wxString contname(wxGetTextFromUser(wxT("Enter the new continuity's name"),
+				      wxT("New Continuity"),
+				      wxT(""), this));
+  if (!contname.empty()) {
+    sht->UserNewContinuity(contname);
   }
 }
 
-void ContinuityEditor::OnMenuSelect(int id) {
-  char *msg = NULL;
-
-  switch (id) {
-  case CALCHART__CONT_NEW:
-    msg = "Add new continuity";
-    break;
-  case CALCHART__CONT_DELETE:
-    msg = "Delete this continuity";
-    break;
-  case CALCHART__CONT_CLOSE:
-    msg = "Close window";
-    break;
-  case CALCHART__CONT_HELP:
-    msg = "Help on continuity commands";
-    break;
+void ContinuityEditor::OnCmdDelete(wxCommandEvent& event) {
+  CC_sheet *sht = descr->CurrSheet();
+  if (sht->ContinuityInUse(curr_cont)) {
+    (void)wxMessageBox(wxT("This continuity is being used.\nSet these points to a different continuity first."), wxT("Delete continuity"));
+  } else {
+    sht->UserDeleteContinuity(curr_cont);
   }
-  if (msg) SetStatusText(msg);
+}
+
+void ContinuityEditor::OnCmdClose(wxCommandEvent& event) {
+  Close();
+}
+
+void ContinuityEditor::OnCmdHelp(wxCommandEvent& event) {
+  help_inst->LoadFile();
+  help_inst->KeywordSearch(wxT("Animation Commands"));
 }
 
 void ContinuityEditor::Update(bool quick) {
@@ -277,7 +272,7 @@ void ContinuityEditor::Update(bool quick) {
   conts->Clear();
   for (curranimcont = sht->animcont; curranimcont != NULL;
        curranimcont = curranimcont->next) {
-    conts->Append((char *)((const char *)curranimcont->name));
+    conts->Append(curranimcont->name);
   }
   UpdateContChoice();
   UpdateText(quick);
@@ -304,21 +299,21 @@ void ContinuityEditor::UpdateText(bool quick) {
   text->Clear();
   if (c != NULL) {
     if (c->text) {
-      text->WriteText((char *)((const char *)c->text));
+      text->WriteText(c->text);
       text->SetInsertionPoint(0);
     }
   }
 }
 
 void ContinuityEditor::FlushText() {
-  char *conttext;
+  wxString conttext;
   CC_continuity *cont;
 
   if (text_sheet) {
     cont = text_sheet->GetNthContinuity(text_contnum);
     if (cont != NULL) {
       conttext = text->GetContents();
-      if (strcmp(conttext, cont->text) != 0) {
+      if (conttext != cont->text) {
 	text_sheet->UserSetNthContinuity(conttext, text_contnum, this);
       }
       delete conttext;
@@ -349,24 +344,19 @@ void ContinuityEditor::SetPoints() {
 }
 
 PrintContCanvas::PrintContCanvas(wxFrame *frame, CC_descr *dcr):
-wxCanvas(frame, -1, -1, -1, -1, 0), show_descr(dcr), ourframe(frame),
+wxScrolledWindow(frame, -1, -1, -1, -1, 0), show_descr(dcr), ourframe(frame),
 topline(0), width(0), height(0), cursorx(0), cursory(0),
 maxlines(0), maxcolumns(0) {
-  GetDC()->SetMapMode(MM_TEXT);
-  GetDC()->SetBackground(wxWHITE_BRUSH);
 }
 
 PrintContCanvas::~PrintContCanvas() {}
 
-void PrintContCanvas::Draw(int firstrow, int lastrow) {
-  wxNode *linenode, *textnode;
-  CC_textline *cont;
-  CC_textchunk *c;
-  CC_sheet *sht = show_descr->CurrSheet();
+void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow) {
+  const CC_sheet *sht = show_descr->CurrSheet();
   bool do_tab;
   unsigned row, column;
   float x, y;
-  float textw, texth, textd, maxtexth;
+  wxCoord textw, texth, textd, maxtexth;
   int devx, devy;
   unsigned tabnum;
   float tabw;
@@ -378,49 +368,48 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
   cur_posx = cur_posy = cur_height = 0;
   maxlines = maxcolumns = 0;
 
-  BeginDrawing();
-  if (drawall) Clear();
-  SetTextForeground(wxBLACK);
+  if (drawall) dc->Clear();
+  dc->SetTextForeground(*wxBLACK);
 
   width = 0;
-  linenode = sht->continuity.lines.First();
-  for (row = 0; (row < topline) && (linenode != NULL);
-       row++, linenode = linenode->Next());
+  CC_textline_list::const_iterator cont(sht->continuity.lines.begin());
+  for (row = 0; (row < topline) && (cont != sht->continuity.lines.end());
+       row++, ++cont);
   y = 0.0;
-  SetFont(contPlainFont);
+  dc->SetFont(*contPlainFont);
   tabw = GetCharWidth() * 6; // Size of tab
-  while (linenode) {
-    cont = (CC_textline*)linenode->Data();
+  while (cont != sht->continuity.lines.end()) {
+    CC_textchunk_list::const_iterator c;
     x = 0.0;
     column = 0;
     if (cont->center) {
-      for (textnode = cont->chunks.First(); textnode != NULL;
-	   textnode = textnode->Next()) {
-	c = (CC_textchunk*)textnode->Data();
+      for (c = cont->chunks.begin();
+	   c != cont->chunks.end();
+	   ++c) {
 	do_tab = false;
 	switch (c->font) {
 	case PSFONT_SYMBOL:
-	  GetTextExtent("O", &textw, &texth, &textd);
-	  x += textw * strlen(c->text);
+	  dc->GetTextExtent(wxT("O"), &textw, &texth, &textd);
+	  x += textw * c->text.length();
 	  break;
 	case PSFONT_NORM:
-	  SetFont(contPlainFont);
+	  dc->SetFont(*contPlainFont);
 	  break;
 	case PSFONT_BOLD:
-	  SetFont(contBoldFont);
+	  dc->SetFont(*contBoldFont);
 	  break;
 	case PSFONT_ITAL:
-	  SetFont(contItalFont);
+	  dc->SetFont(*contItalFont);
 	  break;
 	case PSFONT_BOLDITAL:
-	  SetFont(contBoldItalFont);
+	  dc->SetFont(*contBoldItalFont);
 	  break;
 	case PSFONT_TAB:
 	  do_tab = true;
 	  break;
 	}
 	if (!do_tab && (c->font != PSFONT_SYMBOL)) {
-	  GetTextExtent(c->text, &textw, &texth, &textd);
+	  dc->GetTextExtent(c->text, &textw, &texth, &textd);
 	  x += textw;
 	}
       }
@@ -430,23 +419,23 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
     }
     maxtexth = contPlainFont->GetPointSize();
     tabnum = 0;
-    for (textnode = cont->chunks.First(); textnode != NULL;
-	 textnode = textnode->Next()) {
-      c = (CC_textchunk*)textnode->Data();
+    for (c = cont->chunks.begin();
+	 c != cont->chunks.end();
+	 ++c) {
       do_tab = false;
       switch (c->font) {
       case PSFONT_NORM:
       case PSFONT_SYMBOL:
-	SetFont(contPlainFont);
+	dc->SetFont(*contPlainFont);
 	break;
       case PSFONT_BOLD:
-	SetFont(contBoldFont);
+	dc->SetFont(*contBoldFont);
 	break;
       case PSFONT_ITAL:
-	SetFont(contItalFont);
+	dc->SetFont(*contItalFont);
 	break;
       case PSFONT_BOLDITAL:
-	SetFont(contBoldItalFont);
+	dc->SetFont(*contBoldItalFont);
 	break;
       case PSFONT_TAB:
 	if ((row == cursory) && (column <= cursorx)) {
@@ -463,13 +452,13 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	break;
       }
       if (c->font == PSFONT_SYMBOL) {
-	GetTextExtent("O", &textw, &texth, &textd);
+	dc->GetTextExtent(wxT("O"), &textw, &texth, &textd);
 	float d = textw;
 	SYMBOL_TYPE sym;
 
 	float top_y = y + texth - textd - d;
 
-	for (const char *s = c->text; *s; s++, column++) {
+	for (const wxChar *s = c->text; *s; s++, column++) {
 	  if ((row == cursory) && (column <= cursorx)) {
 	    cur_posx = x;
 	  }
@@ -477,25 +466,25 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	  if (drawall ||
 	      ((row >= (unsigned)firstrow) && (lastrow >= 0) &&
 	       (row <= (unsigned)lastrow))) {
-	    SetPen(wxBLACK_PEN);
+	    dc->SetPen(*wxBLACK_PEN);
 	    sym = (SYMBOL_TYPE)(*s - 'A');
 	    switch (sym) {
 	    case SYMBOL_SOL:
 	    case SYMBOL_SOLBKSL:
 	    case SYMBOL_SOLSL:
 	    case SYMBOL_SOLX:
-	      SetBrush(wxBLACK_BRUSH);
+	      dc->SetBrush(*wxBLACK_BRUSH);
 	      break;
 	    default:
-	      SetBrush(wxTRANSPARENT_BRUSH);
+	      dc->SetBrush(*wxTRANSPARENT_BRUSH);
 	    }
-	    DrawEllipse(x, top_y, d, d);
+	    dc->DrawEllipse(x, top_y, d, d);
 	    switch (sym) {
 	    case SYMBOL_SL:
 	    case SYMBOL_X:
 	    case SYMBOL_SOLSL:
 	    case SYMBOL_SOLX:
-	      DrawLine(x, top_y + d, x + d, top_y);
+	      dc->DrawLine(x, top_y + d, x + d, top_y);
 	      break;
 	    default:
 	      break;
@@ -505,7 +494,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	    case SYMBOL_X:
 	    case SYMBOL_SOLBKSL:
 	    case SYMBOL_SOLX:
-	      DrawLine(x, top_y, x + d, top_y + d);
+	      dc->DrawLine(x, top_y, x + d, top_y + d);
 	      break;
 	    default:
 	      break;
@@ -516,13 +505,13 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	if (texth > maxtexth) maxtexth = texth;
       } else {
 	if (!do_tab) {
-	  int len = strlen(c->text);
-	  GetTextExtent(c->text, &textw, &texth, &textd);
+	  int len = (int)c->text.length();
+	  dc->GetTextExtent(c->text, &textw, &texth, &textd);
 	  if (texth > maxtexth) maxtexth = texth;
 	  if (drawall ||
 	      ((row >= (unsigned)firstrow) && (lastrow >= 0) &&
 	       (row <= (unsigned)lastrow)))
-	    DrawText(c->text, x, y);
+	    dc->DrawText(c->text, x, y);
 	  if (row == cursory) {
 	    if (column == cursorx) {
 	      cur_posx = x;
@@ -531,7 +520,7 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
 	    } else if (column < cursorx) {
 	      float w;
 	      tmpstr = c->text.SubString(0, (cursorx - column - 1));
-	      GetTextExtent(tmpstr.GetData(), &w, &texth, &textd);
+	      dc->GetTextExtent(tmpstr, &w, &texth, &textd);
 	      cur_posx = x+w;
 	    }
 	  }
@@ -547,23 +536,26 @@ void PrintContCanvas::Draw(int firstrow, int lastrow) {
     }
     if (x > width) width = x;
     y += maxtexth;
-    linenode = linenode->Next();
+    ++cont;
     maxlines++;
     row++;
   }
   height = y;
 
-  DrawCursor(cur_posx, cur_posy, cur_height);
+  DrawCursor(dc, cur_posx, cur_posy, cur_height);
 
-  SetFont(NULL);
-  EndDrawing();
+  dc->SetFont(wxNullFont);
 }
 
-void PrintContCanvas::OnPaint() {
-  Draw();
+void PrintContCanvas::OnPaint(wxPaintEvent& event) {
+  wxPaintDC dc(this);
+  DoPrepareDC(dc);
+  dc.SetMapMode(MM_TEXT);
+  dc.SetBackground(*wxWHITE_BRUSH);
+  Draw(&dc);
 }
 
-void PrintContCanvas::OnEvent(wxMouseEvent& /*event*/) {
+void PrintContCanvas::OnMouseEvent(wxMouseEvent& /*event*/) {
 }
 
 void PrintContCanvas::OnChar(wxKeyEvent& event) {
@@ -588,6 +580,9 @@ void PrintContCanvas::OnChar(wxKeyEvent& event) {
       MoveCursor(cursorx, cursory+1);
     }
     break;
+  default:
+    event.Skip();
+    break;
   }
 }
 
@@ -601,9 +596,9 @@ void PrintContCanvas::MoveCursor(unsigned column, unsigned row) {
   OnPaint();
 }
 
-void PrintContCanvas::DrawCursor(float x, float y, float height) {
-  SetPen(wxRED_PEN);
-  DrawLine(x, y, x, y+height-1);
+void PrintContCanvas::DrawCursor(wxDC *dc, float x, float y, float height) {
+  dc->SetPen(*wxRED_PEN);
+  dc->DrawLine(x, y, x, y+height-1);
 }
 
 void PrintContCanvas::InsertChar(unsigned onechar) {
@@ -617,19 +612,17 @@ void PrintContClose(wxButton& button, wxEvent&) {
 }
 
 PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
-				 wxFrame *parent, char *title,
+				 wxFrame *parent, const wxString& title,
 				 int x, int y, int width, int height)
-: wxFrameWithStuff(parent, title, x, y, width, height) {
+: wxFrame(parent, title, x, y, width, height) {
   // Give it an icon
   SetBandIcon(this);
 
-  CreateStatusLine(1);
+  CreateStatusBar();
 
   // Add a toolbar
-  CoolToolBar *ribbon = new CoolToolBar(this, 0, 0, -1, -1, 0,
-					wxHORIZONTAL, 20);
-  ribbon->SetupBar(printcont_tb, sizeof(printcont_tb)/sizeof(ToolBarEntry));
-  SetToolBar(ribbon);
+  CoolToolBar ribbon(this, wxID_ANY);
+  ribbon.SetupBar(printcont_tb, sizeof(printcont_tb)/sizeof(ToolBarEntry));
 
   // Add the canvas
   canvas = new PrintContCanvas(this, dcr);
@@ -637,14 +630,13 @@ PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
 
   // Add the buttons
   SetPanel(new wxPanel(this));
-  (void)new wxButton(framePanel, (wxFunction)PrintContClose, "&Close");
+  (void)new wxButton(framePanel, (wxFunction)PrintContClose, wxT("&Close"));
 
   node = new CC_WinNodePrintCont(lst, this);
 
   canvas->Update();
 
-  SetLayoutMethod(wxFRAMESTUFF_PNL_TB);
-  OnSize(-1, -1);
+  Layout();
   Show(true);
 }
 
@@ -655,8 +647,8 @@ PrintContEditor::~PrintContEditor() {
   }
 }
 
-void PrintContEditor::OnActivate(bool active) {
-  if (active) {
+void PrintContEditor::OnActivate(wxActivateEvent& event) {
+  if (event.GetActive()) {
     canvas->SetFocus();
   }
 }

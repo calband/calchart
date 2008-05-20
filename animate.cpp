@@ -35,17 +35,17 @@ extern int parsecontinuity();
 extern const char *yyinputbuffer;
 extern ContProcedure *ParsedContinuity;
 
-const char *animate_err_msgs[] = {
-  "Ran out of time",
-  "Not enough to do",
-  "Didn't make it to position",
-  "Invalid countermarch",
-  "Invalid fountain",
-  "Division by zero",
-  "Undefined value",
-  "Syntax error",
-  "Non-integer value",
-  "Negative value",
+const wxChar *animate_err_msgs[] = {
+  wxT("Ran out of time"),
+  wxT("Not enough to do"),
+  wxT("Didn't make it to position"),
+  wxT("Invalid countermarch"),
+  wxT("Invalid fountain"),
+  wxT("Division by zero"),
+  wxT("Undefined value"),
+  wxT("Syntax error"),
+  wxT("Non-integer value"),
+  wxT("Negative value"),
 };
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector) {
@@ -368,8 +368,8 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
 	 currcont  = currcont->next, contnum++) {
       if ((yyinputbuffer = currcont->text.To8BitData()) != NULL) {
 	tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
-		       comp.curr_sheet->GetName(), currcont->name.GetData());
-	frame->SetStatusText(tempbuf.GetData());
+		       comp.curr_sheet->GetName().c_str(), currcont->name.c_str());
+	frame->SetStatusText(tempbuf);
 	int parseerr = parsecontinuity();
 	ContToken dummy; // get position of parse error
 	for (j = 0; j < numpts; j++) {
@@ -390,8 +390,8 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
       }
     }
     // Handle points that don't have continuity (shouldn't happen)
-    tempbuf.Printf(wxT("Compiling \"%.32s\"..."), comp.curr_sheet->GetName());
-    frame->SetStatusText(tempbuf.GetData());
+    tempbuf.Printf(wxT("Compiling \"%.32s\"..."), comp.curr_sheet->GetName().c_str());
+    frame->SetStatusText(tempbuf);
     for (j = 0; j < numpts; j++) {
       if (curr_sheet->commands[j] == NULL) {
 	comp.Compile(j, 0, NULL);
@@ -400,9 +400,9 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
       }
     }
     if (!comp.Okay()) {
-      tempbuf.Printf(wxT("Errors for \"%.32s\""), comp.curr_sheet->GetName());
+      tempbuf.Printf(wxT("Errors for \"%.32s\""), comp.curr_sheet->GetName().c_str());
       (void)new AnimErrorList(&comp, winlist, sheetnum,
-			      frame, tempbuf.GetData());
+			      frame, tempbuf);
       if (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES) {
 	break;
       }

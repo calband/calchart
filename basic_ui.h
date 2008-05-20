@@ -31,31 +31,31 @@
 #endif
 
 #include <wx/wx.h>
+#include <wx/dnd.h>
+#include <wx/toolbar.h>
 
 #include "platconf.h"
 
-#include <wx/toolbar.h>
-
 #define CC_USE_MDI
 #ifdef CC_USE_MDI
-#define CC_FRAME_TOP (wxMDI_PARENT | wxMAXIMIZE | wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_CHILD (wxMDI_CHILD | wxDEFAULT_FRAME_STYLE)
+typedef wxMDIParentFrame CC_MDIParentFrame;
+typedef wxMDIChildFrame CC_MDIChildFrame;
+#define CC_FRAME_TOP (wxMAXIMIZE | wxDEFAULT_FRAME_STYLE)
+#define CC_FRAME_CHILD (wxDEFAULT_FRAME_STYLE)
 #define CC_FRAME_OTHER (wxDEFAULT_FRAME_STYLE)
 #else
-#define CC_FRAME_TOP (wxSDI | wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_CHILD (wxSDI | wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_OTHER (wxSDI | wxDEFAULT_FRAME_STYLE)
+typedef wxFrame CC_MDIParentFrame;
+typedef wxFrame CC_MDIChildFrame;
+#define CC_FRAME_TOP (wxDEFAULT_FRAME_STYLE)
+#define CC_FRAME_CHILD (wxDEFAULT_FRAME_STYLE)
+#define CC_FRAME_OTHER (wxDEFAULT_FRAME_STYLE)
 #endif
 
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc);
 
 // Set icon to band's insignia
-#ifdef __WXMSW__
-inline void SetBandIcon(wxFrame *) {}
-#else
 void SetBandIcon(wxFrame *frame);
-#endif
 
 // Define a text subwindow that can respond to drag-and-drop
 class FancyTextWin : public wxTextCtrl {
@@ -70,41 +70,14 @@ public:
 #ifdef TEXT_DOS_STYLE
   wxString GetValue(void) const;
 #endif
-  //  void OnDropFiles(int n, char *files[], int x, int y);
 };
 
-// Define a frame with a toolbar and a panel and canvas
-class wxFrameWithStuff: public wxFrame
-{
+class FancyTextWinDropTarget : public wxFileDropTarget {
 public:
-  wxToolBar *frameToolBar;
-  wxPanel *framePanel;
-  wxWindow *frameCanvas;
-
-  wxFrameWithStuff(wxWindow *parent, wxWindowID id, const wxString& title,
-		   const wxPoint& pos = wxDefaultPosition,
-		   const wxSize& size = wxDefaultSize,
-		   long style = CC_FRAME_OTHER,
-		   const wxString& name = wxFrameNameStr);
-  inline void SetToolBar(wxToolBar *tb) { frameToolBar = tb; }
-  inline void SetPanel(wxPanel *pnl) { framePanel = pnl; }
-  inline void SetCanvas(wxWindow *cnv) { frameCanvas = cnv; }
-  inline wxToolBar *GetFrameToolBar(void) { return frameToolBar; }
-  inline wxPanel *GetFramePanel(void) { return framePanel; }
-  inline wxWindow *GetFrameCanvas(void) { return frameCanvas; }
-  void DoLayout();
-};
-
-// Define a frame with a toolbar and a panel and fixed size canvas
-class wxFrameWithStuffSized: public wxFrameWithStuff
-{
-public:
-  wxFrameWithStuffSized(wxWindow *parent, wxWindowID id, const wxString& title,
-			const wxPoint& pos = wxDefaultPosition,
-			const wxSize& size = wxDefaultSize,
-			long style = CC_FRAME_OTHER,
-			const wxString& name = wxFrameNameStr);
-  void Fit();  // Shrinks frame to fit around a given canvas size
+  FancyTextWinDropTarget(FancyTextWin *w) : win(w) {}
+  virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
+private:
+  FancyTextWin *win;
 };
 
 class AutoScrollCanvas: public wxWindow
@@ -119,7 +92,7 @@ public:
 
   inline wxDC *GetMemDC() { return memdc; }
   void SetSize(const wxSize& size);
-  void SetBackground(wxBrush *brush);
+  void SetBackground(const wxBrush& brush);
   void SetPalette(wxPalette *palette);
   void SetUserScale(float x, float y);
   inline void SetPosition(float x, float y) {
@@ -129,7 +102,7 @@ public:
   inline float GetPositionY() const { return y_off/y_scale; }
 
   void Move(float x, float y, bool noscroll=0);
-  void Blit();
+  void Blit(wxDC& dc);
 
 private:
   void FreeMem();
@@ -142,24 +115,14 @@ private:
   wxPoint last_pos;
 };
 
-typedef wxListBox GoodListBox;
-
 struct ToolBarEntry;
-class CoolToolBar: public wxToolBar
-{
+class CoolToolBar {
 public:
   CoolToolBar(wxFrame *frame, wxWindowID id,
-	      const wxPoint& pos = wxDefaultPosition,
-	      const wxSize& size = wxDefaultSize,
-	      long style = wxTB_HORIZONTAL | wxNO_BORDER,
 	      const wxString& name = wxPanelNameStr);
-  void SetupBar(ToolBarEntry *tbe, int n);
-
-  bool OnLeftClick(int toolIndex, bool toggled);
-  void OnMouseEnter(int toolIndex);
-
-  wxFrame *ourframe;
-  ToolBarEntry *entries;
+  void SetupBar(ToolBarEntry *tbe, size_t n);
+private:
+  wxToolBar *tb;
 };
 
 #define TOOLBAR_SPACE 1
@@ -169,6 +132,6 @@ struct ToolBarEntry {
   unsigned flags;
   wxBitmap *bm;
   const wxString desc;
-  void (*func)(CoolToolBar *);
+  int id;
 };
 #endif

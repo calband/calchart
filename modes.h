@@ -38,9 +38,9 @@ enum SHOW_TYPE { SHOW_STANDARD, SHOW_SPRINGSHOW };
 class ShowMode
 {
 public:
-  ShowMode(const char *nam, CC_coord siz, CC_coord off,
+  ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
 	   CC_coord bord1, CC_coord bord2);
-  ShowMode(const char *nam, CC_coord siz, CC_coord bord1, CC_coord bord2);
+  ShowMode(const wxString& nam, CC_coord siz, CC_coord bord1, CC_coord bord2);
   virtual ~ShowMode();
 
   virtual SHOW_TYPE GetType() = 0;
@@ -52,7 +52,7 @@ public:
   inline CC_coord FieldSize() { return size-border1-border2; }
   inline CC_coord MinPosition() { return -offset; }
   inline CC_coord MaxPosition() { return size-offset; }
-  inline const char *GetName() { return name; };
+  inline const wxString& GetName() { return name; };
   CC_coord ClipPosition(const CC_coord& pos);
 
   ShowMode *next;
@@ -61,15 +61,15 @@ protected:
   CC_coord offset, size;
   CC_coord border1, border2;
 private:
-  char *name;
+  wxString name;
 };
 
 class ShowModeStandard : public ShowMode
 {
 public:
-  ShowModeStandard(const char *nam, CC_coord bord1, CC_coord bord2,
+  ShowModeStandard(const wxString& nam, CC_coord bord1, CC_coord bord2,
 		   unsigned short whash, unsigned short ehash);
-  ShowModeStandard(const char *nam, CC_coord bord1, CC_coord bord2,
+  ShowModeStandard(const wxString& nam, CC_coord bord1, CC_coord bord2,
 		   CC_coord siz, CC_coord off,
 		   unsigned short whash, unsigned short ehash);
   virtual ~ShowModeStandard();
@@ -88,8 +88,8 @@ class ShowModeSprShow : public ShowMode
 {
 public:
   // Look at calchart.cfg for description of arguments
-  ShowModeSprShow(const char *nam, CC_coord bord1, CC_coord bord2,
-		  unsigned char which, const char *file,
+  ShowModeSprShow(const wxString& nam, CC_coord bord1, CC_coord bord2,
+		  unsigned char which, const wxString& file,
 		  short stps_x, short stps_y,
 		  short stps_w, short stps_h,
 		  short stg_x, short stg_y,
@@ -103,7 +103,7 @@ public:
   virtual SHOW_TYPE GetType();
   virtual void Draw(wxDC *dc);
   virtual void DrawAnim(wxDC *dc);
-  inline const char *StageFile() { return stagefile; }
+  inline const wxString& StageFile() { return stagefile; }
   inline unsigned char WhichYards() { return which_yards; }
   inline short StageX() { return stage_x; }
   inline short StageY() { return stage_y; }
@@ -123,7 +123,7 @@ public:
   inline short TextBottom() { return text_bottom; }
 
 private:
-  char *stagefile;
+  wxString stagefile;
   unsigned char which_yards;
   short stage_x, stage_y, stage_w, stage_h;
   short field_x, field_y, field_w, field_h;
@@ -138,7 +138,7 @@ public:
   ~ShowModeList();
 
   void Add(ShowMode *mode);
-  ShowMode *Find(char *name);
+  ShowMode *Find(const wxString& name);
   ShowMode *Default();
   inline ShowMode *First() { return list; }
 
