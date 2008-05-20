@@ -1,0 +1,28 @@
+The usage for calrender is:
+calrender nummen numsheets inbase outbase [e]
+where nummen is the blocksize, numsheets is the number of stunt sheets,
+inbase is the name of the animation files without the .a## extension,
+outbase is the base of the output pov files, and 'e' denotes a show charted
+to the east.
+
+The render scripts will render each pov file passed as an argument.  To
+render a still frame, use renderstill or renderstille (for shows to the
+east).  This will produce Targa files which can be viewed with xv.  To
+render the frames for an animation:
+
+render.csh *.pov
+or
+rendere.csh *.pov
+
+This is the most time consuming step.  It will produce gzip'd QRT files
+and remove the pov files.
+
+To generate the FLI animation, use the makeanim script:
+
+makeanim.csh *.qrt.gz
+
+This will remove all the QRT files and produce a file called test.fli, which
+is a 320x200 FLI animation.
+
+The scripts render2.csh and makeanim2.csh are for higher resolution (640x400)
+animations.  These haven't been used.
