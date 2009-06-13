@@ -33,6 +33,7 @@
 #include <wx/pen.h>
 #include "show.h"
 #include <ctype.h>
+#include <string>
 
 #include "confgr.h"
 #include "modes.h"
