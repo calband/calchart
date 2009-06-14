@@ -28,6 +28,7 @@
 #include "confgr.h"
 #include "modes.h"
 #include <time.h>
+#include <string>
 
 static float width, height, real_width, real_height;
 static float field_x, field_y, field_w, field_h;

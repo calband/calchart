@@ -168,10 +168,12 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
 
 static void ShowPrintCancel(wxButton& button, wxEvent&) {
   ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
+#if 0
   if (dialog->IsModal())
     dialog->EndModal();
   else
     dialog->Close();
+#endif
 }
 
 static void ShowPrintSelect(wxButton& button, wxEvent&) {
@@ -184,38 +186,30 @@ ShowPrintDialog::ShowPrintDialog(CC_descr *dcr, CC_WinList *lst,
 				 bool printEPS, wxFrame *parent, const wxString& title,
 				 bool isModal, int x, int y,
 				 int width, int height):
-wxDialog(parent, title, isModal, x, y, width, height),
+wxDialog(parent, -1, title, wxPoint(x, y), wxSize(width, height)),
 show_descr(dcr), eps(printEPS), frame(parent) {
   wxString buf;
 
   node = new CC_WinNodePrint(lst, this);
 
-  SetLabelPosition(wxVERTICAL);
+//  SetLabelPosition(wxVERTICAL);
 
-  wxButton *okBut = new wxButton(this, (wxFunction)ShowPrintOk, wxT("&Print"));
-  (void) new wxButton(this, (wxFunction)ShowPrintCancel, wxT("&Close"));
-  NewLine();
-  NewLine();
+  wxButton *okBut = new wxButton(this, wxID_ANY, wxT("&Print"));
+  (void) new wxButton(this, wxID_ANY, wxT("&Close"));
+  //NewLine();
+  //NewLine();
   okBut->SetDefault();
 
 #ifdef PRINT__RUN_CMD
-  text_cmd = new wxTextCtrl(this, (wxFunction)NULL, wxT("Printer Command: "),
-			    print_cmd,
-			    -1, -1, 100, -1);
+  text_cmd = new wxTextCtrl(this, -1, wxT("Printer Command: "));
 
-  text_opts = new wxTextCtrl(this, (wxFunction)NULL, wxT("Printer Options: "),
-			     print_opts,
-			     -1, -1, 150, -1);
-  NewLine();
-  text_view_cmd = new wxTextCtrl(this, (wxFunction)NULL, wxT("Preview Command: "),
-				 print_view_cmd,
-				 -1, -1, 100, -1);
+  text_opts = new wxTextCtrl(this, -1, wxT("Printer Options: "));
+  //NewLine();
+  text_view_cmd = new wxTextCtrl(this, -1, wxT("Preview Command: "));
 
-  text_view_opts = new wxTextCtrl(this, (wxFunction)NULL, wxT("Preview Options: "),
-				  print_view_opts,
-				  -1, -1, 150, -1);
-  NewLine();
-  NewLine();
+  text_view_opts = new wxTextCtrl(this, -1, wxT("Preview Options: "));
+  //NewLine();
+  //NewLine();
 #endif
 
 #ifndef PRINT__RUN_CMD
@@ -223,15 +217,15 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 			    print_file,
 			    -1, -1, 100, -1);
 
-  NewLine();
-  NewLine();
+  //NewLine();
+  //NewLine();
 #endif
 
   wxString orientation[2];
   orientation[0] = wxT("Portrait");
   orientation[1] = wxT("Landscape");
-  radio_orient = new wxRadioBox(this, (wxFunction)NULL, wxT("&Orientation: "),
-		    -1,-1,-1,-1,2,orientation,2,wxHORIZONTAL|wxFLAT);
+  radio_orient = new wxRadioBox(this, -1, wxT("&Orientation: "),
+		    wxPoint(-1,-1),wxSize(-1,-1),2,orientation,2);
   radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
 
   wxString print_modes[3];
@@ -243,52 +237,47 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 #else
   int features = 2;
 #endif
-  radio_method = new wxRadioBox(this, (wxFunction)NULL, wxT("Post&Script:"),
-				-1,-1,-1,-1, features, print_modes,
-				features, wxHORIZONTAL|wxFLAT);
+  radio_method = new wxRadioBox(this, -1, wxT("Post&Script:"),
+				wxPoint(-1,-1),wxSize(-1,-1), features, print_modes,
+				features);
   radio_method->SetSelection(0);
   
-  NewLine();
-  NewLine();
+  //NewLine();
+  //NewLine();
 
-  check_overview = new wxCheckBox(this, (wxFunction)NULL, wxT("Over&view"));
+  check_overview = new wxCheckBox(this, -1, wxT("Over&view"));
   check_overview->SetValue(false);
-  check_cont = new wxCheckBox(this, (wxFunction)NULL, wxT("Continuit&y"));
+  check_cont = new wxCheckBox(this, -1, wxT("Continuit&y"));
   check_cont->SetValue(show_descr->show->GetBoolDoCont());
   if (!eps) {
-    check_pages = new wxCheckBox(this, (wxFunction)NULL, wxT("Cove&r pages"));
+    check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
     check_pages->SetValue(show_descr->show->GetBoolDoContSheet());
   }
 
   if (!eps) {
-    NewLine();
-    (void) new wxButton(this, (wxFunction)ShowPrintSelect,wxT("S&elect sheets..."));
+    //NewLine();
+    (void) new wxButton(this, -1,wxT("S&elect sheets..."));
   }
 
-  NewLine();
-  NewLine();
+  //NewLine();
+  //NewLine();
 
   buf.sprintf(wxT("%.2f"), page_width);
-  text_width = new wxTextCtrl(this, (wxFunction)NULL, wxT("Page &width: "),
-			      buf, -1, -1, 100, -1);
+  text_width = new wxTextCtrl(this, -1, wxT("Page &width: "));
 
   buf.sprintf(wxT("%.2f"), page_height);
-  text_height = new wxTextCtrl(this, (wxFunction)NULL, wxT("Page &height: "),
-			       buf, -1, -1, 100, -1);
+  text_height = new wxTextCtrl(this, -1, wxT("Page &height: "));
 
   buf.sprintf(wxT("%.2f"), page_offset_x);
-  text_x = new wxTextCtrl(this, (wxFunction)NULL, wxT("&Left margin: "),
-			  buf, -1, -1, 100, -1);
+  text_x = new wxTextCtrl(this, -1, wxT("&Left margin: "));
   
   buf.sprintf(wxT("%.2f"), page_offset_y);
-  text_y = new wxTextCtrl(this, (wxFunction)NULL, wxT("&Top margin: "),
-			  buf, -1, -1, 100, -1);
+  text_y = new wxTextCtrl(this, -1, wxT("&Top margin: "));
 
-  text_minyards = new wxTextCtrl(this, (wxFunction)NULL, wxT("Yards: "),
-				 wxT("50"), -1, -1, 100, -1);
+  text_minyards = new wxTextCtrl(this, -1, wxT("Yards: "));
 
-  NewLine();
-  NewLine();
+  //NewLine();
+  //NewLine();
 
   Fit();
 

@@ -289,7 +289,7 @@ class FieldCanvas;
 // Define the main editing frame
 class MainFrame : public CC_MDIChildFrame {
 public:
-  MainFrame(wxFrame *frame, int x, int y, int w, int h,
+  MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
 	    CC_show *show = NULL, MainFrame *other_frame = NULL);
   ~MainFrame();
 

@@ -71,8 +71,8 @@ typedef unsigned char uint8_t;
 // For creating icons and bitmaps
 // There are separate macros because XPM is used for icons
 #if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXCOCOA__)
-#define ICON_NAME(name) #name
-#define BITMAP_NAME(name) #name
+#define ICON_NAME(name) wxT( #name )
+#define BITMAP_NAME(name) wxT( #name )
 #else
 #define __CC_INCLUDE_BITMAPS__
 #define __CC_SET_ICON__

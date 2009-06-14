@@ -1591,7 +1591,7 @@ CC_show::CC_show(const wxString& filestr)
 	    AddError(badanimcont_str);
 	  }
 	  ReadDOSline(fp, tempbuf);
-	  newanimcont->AppendText(tempbuf.Strip() + '\n');
+	  newanimcont->AppendText(tempbuf.Strip() + wxT("\n"));
 	}
 	curr_sheet->AppendContinuity(newanimcont);
       }

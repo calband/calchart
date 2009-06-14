@@ -133,5 +133,6 @@ struct ToolBarEntry {
   wxBitmap *bm;
   const wxString desc;
   int id;
+  ~ToolBarEntry() {}
 };
 #endif

@@ -47,16 +47,26 @@ static void toolbar_printcont_sym4(CoolToolBar *tb);
 static void toolbar_printcont_sym5(CoolToolBar *tb);
 static void toolbar_printcont_sym6(CoolToolBar *tb);
 static void toolbar_printcont_sym7(CoolToolBar *tb);
+enum {
+ktoolbar_printcont_sym0,
+ktoolbar_printcont_sym1,
+ktoolbar_printcont_sym2,
+ktoolbar_printcont_sym3,
+ktoolbar_printcont_sym4,
+ktoolbar_printcont_sym5,
+ktoolbar_printcont_sym6,
+ktoolbar_printcont_sym7,
+};
 
 ToolBarEntry printcont_tb[] = {
-  { 0, NULL, wxT("Insert plainman"), toolbar_printcont_sym0 },
-  { 0, NULL, wxT("Insert solidman"), toolbar_printcont_sym1 },
-  { 0, NULL, wxT("Insert backslash man"), toolbar_printcont_sym2 },
-  { 0, NULL, wxT("Insert slash man"), toolbar_printcont_sym3 },
-  { 0, NULL, wxT("Insert x man"), toolbar_printcont_sym4 },
-  { 0, NULL, wxT("Insert solid backslash man"), toolbar_printcont_sym5 },
-  { 0, NULL, wxT("Insert solid slash man"), toolbar_printcont_sym6 },
-  { 0, NULL, wxT("Insert solid x man"), toolbar_printcont_sym7 }
+  { 0, NULL, wxT("Insert plainman"), ktoolbar_printcont_sym0 },
+  { 0, NULL, wxT("Insert solidman"), ktoolbar_printcont_sym1 },
+  { 0, NULL, wxT("Insert backslash man"), ktoolbar_printcont_sym2 },
+  { 0, NULL, wxT("Insert slash man"), ktoolbar_printcont_sym3 },
+  { 0, NULL, wxT("Insert x man"), ktoolbar_printcont_sym4 },
+  { 0, NULL, wxT("Insert solid backslash man"), ktoolbar_printcont_sym5 },
+  { 0, NULL, wxT("Insert solid slash man"), ktoolbar_printcont_sym6 },
+  { 0, NULL, wxT("Insert solid x man"), ktoolbar_printcont_sym7 }
 };
 
 BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
@@ -179,7 +189,7 @@ static void ContEditCurrent(wxChoice& choice, wxEvent&) {
 ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
 				   wxFrame *parent, const wxString& title,
 				   int x, int y, int width, int height):
-wxFrame(parent, title, x, y, width, height, CC_FRAME_OTHER),
+wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height)),
 descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   // Give it an icon
   SetBandIcon(this);
@@ -188,12 +198,12 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
 
   panel = new wxPanel(this);
 
-  (void)new wxButton(panel, (wxFunction)ContEditSet, wxT("&Set Points"));
-  (void)new wxButton(panel, (wxFunction)ContEditSelect, wxT("Select &Points"));
+//  (void)new wxButton(panel, (wxFunction)ContEditSet, wxT("&Set Points"));
+//  (void)new wxButton(panel, (wxFunction)ContEditSelect, wxT("Select &Points"));
 
-  conts = new wxChoice(panel, (wxFunction)ContEditCurrent, wxT(""));
+//  conts = new wxChoice(panel, (wxFunction)ContEditCurrent, wxT(""));
 
-  text = new FancyTextWin(this);
+//  text = new FancyTextWin(this);
   
   wxMenu *cont_menu = new wxMenu;
   cont_menu->Append(CALCHART__CONT_NEW, wxT("&New"), wxT("Add new continuity"));
@@ -312,7 +322,7 @@ void ContinuityEditor::FlushText() {
   if (text_sheet) {
     cont = text_sheet->GetNthContinuity(text_contnum);
     if (cont != NULL) {
-      conttext = text->GetContents();
+//      conttext = text->GetContents();
       if (conttext != cont->text) {
 	text_sheet->UserSetNthContinuity(conttext, text_contnum, this);
       }
@@ -344,7 +354,7 @@ void ContinuityEditor::SetPoints() {
 }
 
 PrintContCanvas::PrintContCanvas(wxFrame *frame, CC_descr *dcr):
-wxScrolledWindow(frame, -1, -1, -1, -1, 0), show_descr(dcr), ourframe(frame),
+wxScrolledWindow(frame), show_descr(dcr), ourframe(frame),
 topline(0), width(0), height(0), cursorx(0), cursory(0),
 maxlines(0), maxcolumns(0) {
 }
@@ -414,7 +424,8 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow) {
 	}
       }
       GetVirtualSize(&devx, &devy);
-      x = (GetDC()->DeviceToLogicalX(devx) - x) / 2;
+		wxPaintDC dc(this);
+      x = (dc.DeviceToLogicalX(devx) - x) / 2;
       if (x < 0.0) x = 0.0;
     }
     maxtexth = contPlainFont->GetPointSize();
@@ -520,7 +531,7 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow) {
 	    } else if (column < cursorx) {
 	      float w;
 	      tmpstr = c->text.SubString(0, (cursorx - column - 1));
-	      dc->GetTextExtent(tmpstr, &w, &texth, &textd);
+	      //dc->GetTextExtent(tmpstr, &w, &texth, &textd);
 	      cur_posx = x+w;
 	    }
 	  }
@@ -593,7 +604,7 @@ void PrintContCanvas::UpdateBars() {
 void PrintContCanvas::MoveCursor(unsigned column, unsigned row) {
   cursorx = column;
   cursory = row;
-  OnPaint();
+//  OnPaint();
 }
 
 void PrintContCanvas::DrawCursor(wxDC *dc, float x, float y, float height) {
@@ -614,7 +625,7 @@ void PrintContClose(wxButton& button, wxEvent&) {
 PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
 				 wxFrame *parent, const wxString& title,
 				 int x, int y, int width, int height)
-: wxFrame(parent, title, x, y, width, height) {
+: wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height)) {
   // Give it an icon
   SetBandIcon(this);
 
@@ -626,11 +637,11 @@ PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
 
   // Add the canvas
   canvas = new PrintContCanvas(this, dcr);
-  SetCanvas(canvas);
+//  SetCanvas(canvas);
 
   // Add the buttons
-  SetPanel(new wxPanel(this));
-  (void)new wxButton(framePanel, (wxFunction)PrintContClose, wxT("&Close"));
+//  SetPanel(new wxPanel(this));
+//  (void)new wxButton(framePanel, (wxFunction)PrintContClose, wxT("&Close"));
 
   node = new CC_WinNodePrintCont(lst, this);
 

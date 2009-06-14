@@ -705,18 +705,11 @@ int ReadDOSline(FILE *fp, wxString& str) {
   if (fgets(buf, sizeof(buf), fp) == NULL)
     return 0;
   int c = strlen(buf);
-  if (c > 1) {
-    if (buf[c-2] == '\r') {
-      buf[c-2] = buf[c-1];
-      buf[c-1] = 0;
-      c--;
-    }
-  }
-  if (c > 0) {
-    if (buf[c-1] == '\r') {
-      buf[c-1] = 0;
-      c--;
-    }
+  // chomp like, keep removing \r and \n from the end of a line
+  while(c && ((buf[c-1] == '\r') || (buf[c-1] == '\n')))
+  {
+    buf[c-1] = '\0';
+    c--;
   }
   str = wxString::FromUTF8(buf);
   return c;

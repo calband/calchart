@@ -510,7 +510,7 @@ private:
   void SetAutosaveName(const wxString& realname) const;
 
   void AddError(const wxString& str) const {
-    error += str + '\n';
+    error += str + wxT("\n");
     okay = false;
   }
 
