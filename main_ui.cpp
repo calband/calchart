@@ -109,7 +109,7 @@ static ToolBarEntry main_tb[] = {
 #define TOOLBAR_TRANS 5
 
 extern ToolBarEntry anim_tb[];
-//extern ToolBarEntry printcont_tb[];
+extern ToolBarEntry printcont_tb[];
 
 const wxString gridtext[] = {
   wxT("None"),
@@ -424,7 +424,6 @@ bool CalChartApp::OnInit()
 
   i = 0;
 
-/*
   printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym0));
   printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym1));
   printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym2));
@@ -433,7 +432,6 @@ bool CalChartApp::OnInit()
   printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym5));
   printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym6));
   printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym7));
-*/
 
   contPlainFont = new wxFont(11, wxMODERN, wxNORMAL, wxNORMAL);
   contBoldFont = new wxFont(11, wxMODERN, wxNORMAL, wxBOLD);
