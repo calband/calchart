@@ -31,7 +31,7 @@
 /* Globals to communicate with parser */
 extern YYSTYPE yylval;	/* lexical value of current token */
 YYLTYPE yylloc;		/* line and column of token */
-int yylineno;
+//int yylineno;
 int yycolno;
 
 const char *yyinputbuffer;
