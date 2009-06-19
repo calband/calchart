@@ -73,6 +73,9 @@
 #include "tb_pshet.xbm"
 #include "tb_nshet.xbm"
 #endif
+#if defined(__APPLE__) && (__APPLE__)
+#include <ApplicationServices/ApplicationServices.h>
+#endif // defined(__APPLE__) && (__APPLE__)
 
 static void refnum_callback(wxObject &obj, wxEvent &ev);
 static void slider_sheet_callback(wxObject &obj, wxEvent &ev);
@@ -368,6 +371,13 @@ void CC_WinNodeMain::SetDescr(wxWindow* win) {
 // Create windows and initialize app
 bool CalChartApp::OnInit()
 {
+#if defined(__APPLE__) && (__APPLE__)
+	ProcessSerialNumber PSN;
+	GetCurrentProcess(&PSN);
+	TransformProcessType(&PSN,kProcessTransformToForegroundApplication);
+#endif // defined(__APPLE__) && (__APPLE__)
+
+
   wxString runtimepath(wxT("runtime"));
   int realargc = argc;
 
