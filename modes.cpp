@@ -32,7 +32,7 @@
 #include "modes.h"
 #include "confgr.h"
 
-extern wxFont yardLabelFont;
+extern wxFont* yardLabelFont;
 
 ShowMode::ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
 		   CC_coord bord1, CC_coord bord2)
@@ -187,7 +187,7 @@ void ShowModeStandard::Draw(wxDC *dc) {
 		 FLOAT2COORD(hashe+(.2*8))+border1.y);
   }
 
-  dc->SetFont(yardLabelFont);
+  dc->SetFont(*yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
     dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
     dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
@@ -249,7 +249,7 @@ void ShowModeStandard::DrawAnim(wxDC *dc) {
 #ifdef TEXT_ON_ANIM
   unsigned short i;
   wxCoord textw, texth, textd;
-  dc->SetFont(yardLabelFont);
+  dc->SetFont(*yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
     dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
     dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
@@ -329,7 +329,7 @@ void ShowModeSprShow::Draw(wxDC *dc) {
 		 fieldsize.x+border1.x, k+border1.y);
   }
 
-  dc->SetFont(yardLabelFont);
+  dc->SetFont(*yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
     dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
     if (which_yards & SPR_YARD_ABOVE)
@@ -375,7 +375,7 @@ void ShowModeSprShow::DrawAnim(wxDC *dc) {
 #ifdef TEXT_ON_ANIM
   unsigned short i;
   wxCoord textw, texth, textd;
-  dc->SetFont(yardLabelFont);
+  dc->SetFont(*yardLabelFont);
   for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++) {
     dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
     if (which_yards & SPR_YARD_ABOVE)
