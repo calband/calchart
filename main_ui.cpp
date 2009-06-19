@@ -970,7 +970,6 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
 
   SetTitle(show->UserGetName());
   field->curr_ref = def_ref;
-//  frameCanvas = field;
   node = new CC_WinNodeMain(show->winlist, this);
   switch(field->curr_select) {
   case CC_SELECT_ROWS:
@@ -2029,10 +2028,10 @@ void FieldCanvas::RefreshShow(bool drawall, int point) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
       if (curr_ref > 0) {
-	sheet->Draw(GetMemDC(), 0, false, drawall, point);
-	sheet->Draw(GetMemDC(), curr_ref, true, false, point);
+	sheet->Draw(&dc, 0, false, drawall, point);
+	sheet->Draw(&dc, curr_ref, true, false, point);
       } else {
-	sheet->Draw(GetMemDC(), curr_ref, true, drawall, point);
+	sheet->Draw(&dc, curr_ref, true, drawall, point);
       }
       Blit(dc);
       dragon = false; // since the canvas gets cleared
