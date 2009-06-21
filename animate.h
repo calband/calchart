@@ -80,6 +80,7 @@ public:
 class AnimateCommand {
 public:
   AnimateCommand(unsigned beats);
+  virtual ~AnimateCommand() {}
 
   // returns false if end of command
   virtual bool Begin(AnimatePoint& pt);
@@ -105,6 +106,7 @@ protected:
 class AnimateCommandMT : public AnimateCommand {
 public:
   AnimateCommandMT(unsigned beats, float direction);
+	virtual ~AnimateCommandMT() {}
 
   virtual AnimateDir Direction();
   virtual float RealDirection();
@@ -117,6 +119,7 @@ class AnimateCommandMove : public AnimateCommandMT {
 public:
   AnimateCommandMove(unsigned beats, CC_coord movement);
   AnimateCommandMove(unsigned beats, CC_coord movement, float direction);
+	virtual ~AnimateCommandMove() {}
 
   virtual bool NextBeat(AnimatePoint& pt);
   virtual bool PrevBeat(AnimatePoint& pt);
@@ -134,6 +137,7 @@ class AnimateCommandRotate : public AnimateCommand {
 public:
   AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad,
 		       float ang1, float ang2, bool backwards = false);
+	virtual ~AnimateCommandRotate() {}
 
   virtual bool NextBeat(AnimatePoint& pt);
   virtual bool PrevBeat(AnimatePoint& pt);
