@@ -91,7 +91,7 @@ AutoScrollCanvas::
 AutoScrollCanvas(wxWindow *parent, wxWindowID id,
 		 const wxPoint& pos, const wxSize& size,
 		 long style, const wxString& name)
-: wxWindow(parent, id, pos, size, style, name),
+: wxPanel(parent, id, pos, size, style, name),
   memdc(NULL), membm(NULL),
   x_scale(1.0), y_scale(1.0), palette(NULL)
 {
@@ -112,14 +112,14 @@ void AutoScrollCanvas::SetSize(const wxSize& size) {
   Refresh();
   FreeMem();
   x_off = y_off = 0.0;
-  memdc = new wxMemoryDC();
-  if (!memdc->Ok()) {
-    FreeMem();
+  membm = new wxBitmap(size.GetX(), size.GetY());
+  if (!membm->Ok()) {
+	FreeMem();
   } else {
-    membm = new wxBitmap(size.GetX(), size.GetY());
-    if (!membm->Ok()) {
-      FreeMem();
-    } else {
+	  memdc = new wxMemoryDC(*membm);
+	  if (!memdc->IsOk()) {
+		  FreeMem();
+	  } else {
       memdc->SelectObject(*membm);
       memdc->SetBackground(dc.GetBackground());
       memdc->SetPalette(*palette);

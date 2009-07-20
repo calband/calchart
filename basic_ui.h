@@ -80,7 +80,7 @@ private:
   FancyTextWin *win;
 };
 
-class AutoScrollCanvas: public wxWindow
+class AutoScrollCanvas: public wxPanel
 {
 public:
   AutoScrollCanvas(wxWindow *parent, wxWindowID id,
