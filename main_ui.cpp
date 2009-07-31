@@ -968,6 +968,12 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
     field = new FieldCanvas(show, ss, this, def_zoom, other_frame->field);
   }
 
+	// set up a sizer for the field panel
+	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+	sizer->Add(field, 1, wxEXPAND);
+	SetSizer(sizer);
+	SetAutoLayout(true);
+	
   SetTitle(show->UserGetName());
   field->curr_ref = def_ref;
   node = new CC_WinNodeMain(show->winlist, this);
@@ -984,19 +990,19 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   }
 
   // Add the controls
-  wxPanel* framePanel = new wxPanel(this);
-  framePanel->SetAutoLayout(true);
 
   // Grid choice
-  grid_choice = new wxChoice(framePanel, -1, wxPoint(-1, -1), wxSize(-1, -1),
+  grid_choice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1),
 			     sizeof(gridtext)/sizeof(const wxChar*),
 			     gridtext);
   grid_choice->SetSelection(def_grid);
 
   // Zoom slider
-  SliderWithField *sldr = new SliderWithField(framePanel, -1, 50, 0, 100);
+  SliderWithField *sldr = new SliderWithField(this, -1, 50, 0, 100);
   sldr->field = field;
   zoom_slider = sldr;
+  sheet_slider = sldr;
+#if 0
   wxLayoutConstraints *sl0 = new wxLayoutConstraints;
   sl0->left.AsIs();
   sl0->top.AsIs();
@@ -1004,7 +1010,6 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   sl0->height.AsIs();
   sldr->SetConstraints(sl0);
 
-#if 0
   framePanel->NewLine();
 
   // Reference choice
@@ -1023,7 +1028,6 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   ((ChoiceWithField*)ref_choice)->field = field;
   ref_choice->SetSelection(def_ref);
 
-#endif
   {
   // Sheet slider (will get set later with UpdatePanel())
   SliderWithField *sldr = new SliderWithField(framePanel, -1, 50, 0, 100);
@@ -1037,6 +1041,7 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   sl1->right.SameAs(framePanel, wxRight, 5);
   sl1->height.AsIs();
   sldr->SetConstraints(sl1);
+#endif
 
   // Update the tool bar
   SetCurrentLasso(field->curr_lasso);
@@ -1640,22 +1645,22 @@ void FieldCanvas::ClearShapes() {
 // Draw the current drag feedback
 void FieldCanvas::DrawDrag(bool on)
 {
-  wxPaintDC dc(this);
+  wxDC *dc = GetMemDC();
   CC_coord origin;
 
   if ((on != dragon) && curr_shape) {
     dragon = on;
     if (on) {
-      SetXOR(&dc);
+      SetXOR(dc);
       origin = show_descr.show->mode->Offset();
       for (ShapeList::const_iterator i=shape_list.begin();
 	   i != shape_list.end();
 	   ++i) {
-	(*i)->Draw(&dc, origin.x+GetPositionX(),
+	(*i)->Draw(dc, origin.x+GetPositionX(),
 		   origin.y+GetPositionY());
       }
     } else {
-      Blit(dc);
+      Blit(*dc);
     }
   }
 }
@@ -1664,8 +1669,8 @@ void FieldCanvas::DrawDrag(bool on)
 void FieldCanvas::OnPaint(wxPaintEvent& event)
 {
   wxPaintDC dc(this);
-  //DoPrepareDC(dc);
-  //dc.SetBackground(CalChartBrushes[COLOR_FIELD]);
+  dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+  dc.Clear();
   Blit(dc);
   dragon = false; // since the canvas gets cleared
   DrawDrag(true);
@@ -1675,8 +1680,6 @@ void FieldCanvas::OnPaint(wxPaintEvent& event)
 #define CLOSE_ENOUGH_TO_CLOSE 10
 void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 {
-  wxPaintDC dc(this);
-
   long x,y;
   int i;
   CC_coord pos;
@@ -1687,6 +1690,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
       event.GetPosition(&x, &y);
       if (event.ControlDown()) {
 	Move(x, y);
+	wxPaintDC dc(this);
 	Blit(dc);
 	dragon = false; // since the canvas gets cleared
       } else {
@@ -1751,7 +1755,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 	      float d;
 	      if (p != NULL) {
 		Coord polydist =
-		  (Coord)dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
+		  (Coord)GetMemDC()->DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
 		d = p->x - pos.x;
 		if (ABS(d) < polydist) {
 		  d = p->y - pos.y;
@@ -2028,10 +2032,10 @@ void FieldCanvas::RefreshShow(bool drawall, int point) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
       if (curr_ref > 0) {
-	sheet->Draw(&dc, 0, false, drawall, point);
-	sheet->Draw(&dc, curr_ref, true, false, point);
+	sheet->Draw(GetMemDC(), 0, false, drawall, point);
+	sheet->Draw(GetMemDC(), curr_ref, true, false, point);
       } else {
-	sheet->Draw(&dc, curr_ref, true, drawall, point);
+	sheet->Draw(GetMemDC(), curr_ref, true, drawall, point);
       }
       Blit(dc);
       dragon = false; // since the canvas gets cleared

@@ -477,7 +477,7 @@ public:
 class SliderWithField: public wxSlider {
 public:
   FieldCanvas *field;
-  SliderWithField(wxPanel *parent, wxWindowID id,
+  SliderWithField(wxWindow *parent, wxWindowID id,
 		  int value, int minValue, int maxValue,
 		  const wxPoint& point = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		  long style = wxSL_HORIZONTAL, const wxValidator& validator = wxDefaultValidator,
