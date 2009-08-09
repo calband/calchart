@@ -144,6 +144,12 @@ private:
   DECLARE_EVENT_TABLE()
 };
 
+enum { 
+	ShowInfoReq_ShowInfoClose=1000,
+	ShowInfoReq_ShowInfoSetNum,
+	ShowInfoReq_ShowInfoSetLabels,
+	ShowInfoReq_ShowInfoModeChoice,
+};
 class ShowInfoReq : public wxFrame {
 public:
   ShowInfoReq(CC_show *shw, CC_WinList *lst,
@@ -172,6 +178,10 @@ public:
   CC_show *show;
 private:
   wxPanel *panel;
+	void ShowInfoClose(wxCommandEvent&);
+	void ShowInfoSetNum(wxCommandEvent&);
+	void ShowInfoSetLabels(wxCommandEvent&);
+	void ShowInfoModeChoice(wxCommandEvent&);
   wxTextCtrl *numpnts;
   wxRadioBox *label_type;
   wxListBox *labels;

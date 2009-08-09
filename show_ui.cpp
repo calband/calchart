@@ -45,6 +45,10 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(ShowInfoReq, wxFrame)
   EVT_CLOSE(ShowInfoReq::OnCloseWindow)
+  EVT_BUTTON(ShowInfoReq_ShowInfoClose,ShowInfoReq::ShowInfoClose)
+  EVT_BUTTON(ShowInfoReq_ShowInfoSetNum,ShowInfoReq::ShowInfoSetNum)
+  EVT_BUTTON(ShowInfoReq_ShowInfoSetLabels,ShowInfoReq::ShowInfoSetLabels)
+  EVT_CHOICE(ShowInfoReq_ShowInfoModeChoice,ShowInfoReq::ShowInfoModeChoice)
 END_EVENT_TABLE()
 
 CC_WinNodePicker::CC_WinNodePicker(CC_WinList *lst, StuntSheetPicker *req)
@@ -433,46 +437,42 @@ void PointPicker::SetListBoxEntries() {
   }
 }
 
-static void ShowInfoClose(wxButton& button, wxEvent&) {
-  ((ShowInfoReq*)button.GetParent()->GetParent())->Close();
+void ShowInfoReq::ShowInfoClose(wxCommandEvent& ) {
+  Close();
 }
 
-static void ShowInfoSetNum(wxButton& button, wxEvent&) {
+void ShowInfoReq::ShowInfoSetNum(wxCommandEvent& ) {
   unsigned num;
-  ShowInfoReq *req = (ShowInfoReq *)button.GetParent()->GetParent();
 
-  num = req->GetNumPoints();
-  if (num != req->show->GetNumPoints()) {
+  num = GetNumPoints();
+  if (num != show->GetNumPoints()) {
     if(wxMessageBox(wxT("Changing the number of points is not undoable.\nProceed?"),
-		    wxT("Change number of points"), wxYES_NO, req) == wxYES) {
-      if (num > req->show->GetNumPoints())
+		    wxT("Change number of points"), wxYES_NO) == wxYES) {
+      if (num > show->GetNumPoints())
 	if (num > 10)
-	  req->show->SetNumPoints(num, req->GetColumns());
+	  show->SetNumPoints(num, GetColumns());
 	else
-	  req->show->SetNumPoints(num, 10);
+	  show->SetNumPoints(num, 10);
       else
-	req->show->SetNumPoints(num, 1);
-      req->SetLabels();
-      req->show->winlist->ChangeNumPoints(req);
+	show->SetNumPoints(num, 1);
+      SetLabels();
+      show->winlist->ChangeNumPoints(this);
     }
   }
 }
 
-static void ShowInfoSetLabels(wxButton& button, wxEvent&) {
-  ShowInfoReq *req = (ShowInfoReq*)button.GetParent()->GetParent();
-
-  req->SetLabels();
-  req->show->winlist->ChangePointLabels(req);
+void ShowInfoReq::ShowInfoSetLabels(wxCommandEvent&) {
+  SetLabels();
+  show->winlist->ChangePointLabels(this);
 }
 
-static void ShowInfoModeChoice(wxChoice& choice, wxCommandEvent&) {
+void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&) {
   ShowMode *newmode;
-  ShowInfoReq *req = (ShowInfoReq *)choice.GetParent()->GetParent();
 
-  newmode = modelist->Find(req->GetChoiceStrSelection());
+  newmode = modelist->Find(GetChoiceStrSelection());
   if (newmode) {
-    req->show->mode = newmode;
-    req->show->winlist->ChangeShowMode(req);
+    show->mode = newmode;
+    show->winlist->ChangeShowMode(this);
   }
 }
 
@@ -503,134 +503,99 @@ ShowInfoReq::ShowInfoReq(CC_show *shw, CC_WinList *lst,
 			 int x, int y, int width, int height):
 wxFrame(frame, -1, title, wxPoint(x, y), wxSize(width, height)),
 show(shw) {
-  unsigned i;
-  wxString buf;
-  wxString strs[2];
-  bool letters[26];
-  bool use_letters;
-  int maxnum;
+	unsigned i;
+	wxString buf;
+	wxString strs[2];
+	bool letters[26];
+	bool use_letters;
+	int maxnum;
+	wxStaticBoxSizer *boxsizer;
 
-  // Give it an icon
-  SetBandIcon(this);
+	// Give it an icon
+	SetBandIcon(this);
 
-  SetAutoLayout(true);
+	CalculateLabels(show, letters, use_letters, maxnum);
 
-  CalculateLabels(show, letters, use_letters, maxnum);
+	panel = new wxPanel(this, -1);
+	
+	// create a sizer for laying things out top down:
+	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
-  panel = new wxPanel(this);
-//  panel->SetLabelPosition(wxVERTICAL);
+	// add buttons to the top row
+	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxButton *closeBut = new wxButton(panel, ShowInfoReq_ShowInfoClose, wxT("&Close"));
+	closeBut->SetDefault();
+	top_button_sizer->Add(closeBut, 0, wxALL, 10 );
 
-  wxButton *closeBut = new wxButton(panel, -1,
-				    wxT("&Close"));
-  wxLayoutConstraints *bt0 = new wxLayoutConstraints;
-  bt0->left.SameAs(panel, wxLeft, 5);
-  bt0->top.SameAs(panel, wxTop, 5);
-  bt0->width.AsIs();
-  bt0->height.AsIs();
-  closeBut->SetConstraints(bt0);
+	wxButton *setnumBut = new wxButton(panel, ShowInfoReq_ShowInfoSetNum, wxT("Set &Num Points"));
+	top_button_sizer->Add(setnumBut, 0, wxALL, 10 );
 
-  wxButton *setnumBut = new wxButton(panel, -1,
-				     wxT("Set &Num Points"));
-  wxLayoutConstraints *bt1 = new wxLayoutConstraints;
-  bt1->left.RightOf(closeBut, 5);
-  bt1->top.SameAs(closeBut, wxTop);
-  bt1->width.AsIs();
-  bt1->height.AsIs();
-  setnumBut->SetConstraints(bt1);
+	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
+	wxButton *setlabBut = new wxButton(panel, ShowInfoReq_ShowInfoSetLabels, wxT("&Set Labels"));
+	top_button_sizer->Add(setlabBut, 0, wxALL, 10 );
 
-  wxButton *setlabBut = new wxButton(panel, -1,
-				     wxT("&Set Labels"));
-  wxLayoutConstraints *bt2 = new wxLayoutConstraints;
-  bt2->left.RightOf(setnumBut, 5);
-  bt2->top.SameAs(closeBut, wxTop);
-  bt2->width.AsIs();
-  bt2->height.AsIs();
-  setlabBut->SetConstraints(bt2);
+	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
 
-  closeBut->SetDefault();
+	// now we add a left and a right side, putting boxes around things
+	// special attention about box sizers
+	// "the order in which you create
+	// new controls is important. Create your wxStaticBox control before any 
+	// siblings that are to appear inside the wxStaticBox in order to preserve 
+	// the correct Z-Order of controls."
+	wxBoxSizer *middle_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer *left_middle_sizer = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer *right_middle_sizer = new wxBoxSizer( wxVERTICAL );
+	boxsizer = new wxStaticBoxSizer(new wxStaticBox(panel, -1, wxT("&Letters")), wxHORIZONTAL);
+	labels = new wxListBox(panel, -1);
+	for (i = 0; i < 26; i++) {
+		buf = wxT("A");
+		buf.SetChar(0, buf.GetChar(0)+i);
+		labels->InsertItems(1, &buf, i);
+	}
+	labels->Select(0);
+	boxsizer->Add(labels, 0, wxALL, 0 );
+	left_middle_sizer->Add(boxsizer, 0, wxALL, 0 );
 
-  lettersize = new wxSlider(panel, -1, maxnum, 1, 10 );
-  wxLayoutConstraints *b0 = new wxLayoutConstraints;
-  b0->left.SameAs(panel, wxLeft, 5);
-  b0->right.SameAs(panel, wxRight, 5);
-  b0->bottom.SameAs(panel, wxBottom, 5);
-  b0->height.AsIs();
-  lettersize->SetConstraints(b0);
+	middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER );
 
-	labels = new wxListBox(panel, -1);/*, wxT("&Letters"),
-			 wxMULTIPLE | wxALWAYS_SB, -1, -1, 150, 150);*/
-//  for (i = 0; i < 26; i++) {
-//    buf = (char)(i + 'A');
-//    labels->Append(buf);
-//    labels->SetSelection(i, letters[i]);
-//  }
+	// now add right side
+	buf.sprintf(wxT("%u"), show->GetNumPoints());
+	boxsizer = new wxStaticBoxSizer(new wxStaticBox(panel, -1, wxT("&Points")), wxHORIZONTAL);
+	numpnts = new wxTextCtrl(panel, -1, buf);
+	boxsizer->Add(numpnts, 0, wxALL, 0 );
+	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
 
-  wxLayoutConstraints *b1 = new wxLayoutConstraints;
-  b1->left.SameAs(panel, wxLeft, 5);
-  b1->top.Below(closeBut, 5);
-  b1->width.PercentOf(panel, wxWidth, 40);
-  b1->bottom.Above(lettersize, 5);
-  labels->SetConstraints(b1);
+	strs[0] = wxT("Numbers");
+	strs[1] = wxT("Letters");
+	label_type = new wxRadioBox(panel, -1, wxT("&Labels"), wxDefaultPosition, wxDefaultSize, 2, strs, 2);
+	label_type->SetSelection(use_letters);
+	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
 
-  buf.sprintf(wxT("%u"), show->GetNumPoints());
-	numpnts = NULL;// new wxText(panel, (wxFunction)NULL, wxT("&Points"), buf);
+	wxArrayString modeStrings;
+	ShowMode *mode = modelist->First();
+	while (mode != NULL) {
+		modeStrings.Add(mode->GetName());
+		mode = mode->next;
+	}
+	boxsizer = new wxStaticBoxSizer( new wxStaticBox(panel, -1, wxT("Show &mode")), wxHORIZONTAL);
+	choice = new wxChoice(panel, ShowInfoReq_ShowInfoModeChoice, wxDefaultPosition, wxDefaultSize, modeStrings, wxCAPTION, wxDefaultValidator, wxT("Show &mode"));
+	UpdateMode();
+	boxsizer->Add(choice, 0, wxALL, 0 );
+	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
 
-  wxLayoutConstraints *b2 = new wxLayoutConstraints;
-  b2->left.RightOf(labels, 5);
-  b2->top.SameAs(labels, wxTop);
-  b2->right.SameAs(panel, wxRight, 5);
-  b2->height.AsIs();
-  numpnts->SetConstraints(b2);
+	middle_sizer->Add(right_middle_sizer, 0, wxALIGN_CENTER );
+	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
 
-  strs[0] = wxT("Numbers");
-  strs[1] = wxT("Letters");
-	label_type = NULL;/*new wxRadioBox(panel, (wxFunction)NULL, wxT("&Labels"),
-			      -1, -1, -1, -1, 2, strs, 2, wxHORIZONTAL|wxFLAT);*/
-  label_type->SetSelection(use_letters);
+	boxsizer = new wxStaticBoxSizer( new wxStaticBox(panel, -1, wxT("P&oints per letter")), wxHORIZONTAL);
+	lettersize = new wxSlider(panel, -1, maxnum, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
+	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
+	topsizer->Add(boxsizer, 0, wxALIGN_CENTER );
 
-  wxLayoutConstraints *b3 = new wxLayoutConstraints;
-  b3->left.RightOf(labels, 5);
-  b3->top.Below(numpnts, 5);
-  b3->width.AsIs();
-  b3->height.AsIs();
-  label_type->SetConstraints(b3);
-
-	choice = NULL;/*new wxChoice(panel, (wxFunction)ShowInfoModeChoice, wxT("Show &mode"));*/
-  ShowMode *mode = modelist->First();
-  while (mode != NULL) {
-    choice->Append(mode->GetName());
-    mode = mode->next;
-  }
-  UpdateMode();
-
-  wxLayoutConstraints *b4 = new wxLayoutConstraints;
-  b4->left.RightOf(labels, 5);
-  b4->top.Below(label_type, 5);
-  b4->width.AsIs();
-  b4->height.AsIs();
-  choice->SetConstraints(b4);
-
-  wxLayoutConstraints *c1 = new wxLayoutConstraints;
-  c1->left.SameAs(this, wxLeft);
-  c1->top.SameAs(this, wxTop);
-  c1->right.SameAs(this, wxRight);
-  c1->height.PercentOf(this, wxHeight, 70);
-  panel->SetConstraints(c1);
-
-	text = NULL;//new FancyTextWin(this);
-  wxLayoutConstraints *c2 = new wxLayoutConstraints;
-  c2->left.SameAs(this, wxLeft);
-  c2->top.Below(panel);
-  c2->right.SameAs(this, wxRight);
-  c2->bottom.SameAs(this, wxBottom);
-  text->SetConstraints(c2);
-  UpdateDescr();
-
-  node = new CC_WinNodeInfo(lst, this);
-
-  Layout();
-
-  Show(true);
+	node = new CC_WinNodeInfo(lst, this);
+	panel->SetSizer( topsizer );
+	
+	Center();
+	Show(true);
 }
 
 ShowInfoReq::~ShowInfoReq()
