@@ -530,7 +530,6 @@ show(shw) {
 	wxButton *setnumBut = new wxButton(panel, ShowInfoReq_ShowInfoSetNum, wxT("Set &Num Points"));
 	top_button_sizer->Add(setnumBut, 0, wxALL, 10 );
 
-	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
 	wxButton *setlabBut = new wxButton(panel, ShowInfoReq_ShowInfoSetLabels, wxT("&Set Labels"));
 	top_button_sizer->Add(setlabBut, 0, wxALL, 10 );
 
@@ -546,7 +545,7 @@ show(shw) {
 	wxBoxSizer *left_middle_sizer = new wxBoxSizer( wxVERTICAL );
 	wxBoxSizer *right_middle_sizer = new wxBoxSizer( wxVERTICAL );
 	boxsizer = new wxStaticBoxSizer(new wxStaticBox(panel, -1, wxT("&Letters")), wxHORIZONTAL);
-	labels = new wxListBox(panel, -1);
+	labels = new wxListBox(panel, -1, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
 	for (i = 0; i < 26; i++) {
 		buf = wxT("A");
 		buf.SetChar(0, buf.GetChar(0)+i);
