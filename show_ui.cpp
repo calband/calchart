@@ -40,7 +40,9 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(PointPicker, wxFrame)
   EVT_CLOSE(PointPicker::OnCloseWindow)
-  EVT_SIZE(PointPicker::OnSize)
+  EVT_BUTTON(PointPicker_PointPickerClose,PointPicker::PointPickerClose)
+  EVT_BUTTON(PointPicker_PointPickerAll,PointPicker::PointPickerAll)
+  EVT_BUTTON(PointPicker_PointPickerNone,PointPicker::PointPickerNone)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(ShowInfoReq, wxFrame)
@@ -164,6 +166,10 @@ static void SheetPickerAll(wxButton& button, wxEvent&) {
   }
 }
 
+void StuntSheetPicker::OnSize(wxSizeEvent& event) {
+	Layout();
+}
+
 static void SheetPickerNone(wxButton& button, wxEvent&) {
   StuntSheetPicker* picker =
     (StuntSheetPicker*)button.GetParent()->GetParent();
@@ -265,10 +271,6 @@ StuntSheetPicker::~StuntSheetPicker()
   }
 }
 
-void StuntSheetPicker::OnSize(wxSizeEvent& event) {
-  Layout();
-}
-
 void StuntSheetPicker::OnCloseWindow(wxCloseEvent& event) {
   Destroy();
 }
@@ -294,28 +296,22 @@ void StuntSheetPicker::SetListBoxEntries() {
   delete [] text;
 }
 
-static void PointPickerClose(wxButton& button, wxEvent&) {
-  ((PointPicker*)button.GetParent()->GetParent())->Close();
+void PointPicker::PointPickerClose(wxCommandEvent&) {
+  Close();
 }
 
-static void PointPickerAll(wxButton& button, wxEvent&) {
-  PointPicker* picker =
-    (PointPicker*)button.GetParent()->GetParent();
-
-  for (unsigned i=0; i < picker->show->GetNumPoints(); i++) {
-    picker->Set(i, true);
+void PointPicker::PointPickerAll(wxCommandEvent&) {
+  for (unsigned i=0; i < show->GetNumPoints(); i++) {
+    Set(i, true);
   }
-  picker->show->winlist->UpdateSelections(picker);
+  show->winlist->UpdateSelections(this);
 }
 
-static void PointPickerNone(wxButton& button, wxEvent&) {
-  PointPicker* picker =
-    (PointPicker*)button.GetParent()->GetParent();
-
-  for (unsigned i=0; i < picker->show->GetNumPoints(); i++) {
-    picker->Set(i, false);
+void PointPicker::PointPickerNone(wxCommandEvent&) {
+  for (unsigned i=0; i < show->GetNumPoints(); i++) {
+    Set(i, false);
   }
-  picker->show->winlist->UpdateSelections(picker);
+  show->winlist->UpdateSelections(this);
 }
 
 static void PointPickerClick(wxListBox& list, wxCommandEvent&) {
@@ -341,62 +337,36 @@ show(shw) {
   // Give it an icon
   SetBandIcon(this);
 
-  SetAutoLayout(true);
-
   panel = new wxPanel(this);
 
-  wxButton *closeBut = new wxButton(panel, -1,
-				    wxT("&Close"));
-  wxLayoutConstraints *bt0 = new wxLayoutConstraints;
-  bt0->left.SameAs(panel, wxLeft, 5);
-  bt0->top.SameAs(panel, wxTop, 5);
-  bt0->width.AsIs();
-  bt0->height.AsIs();
-  closeBut->SetConstraints(bt0);
+	// create a sizer for laying things out top down:
+	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+	
+	// add buttons to the top row
+	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxButton *closeBut = new wxButton(panel, PointPicker_PointPickerClose, wxT("&Close"));
+	closeBut->SetDefault();
+	top_button_sizer->Add(closeBut, 0, wxALL, 5 );
+	
+	if (multi) {
+		wxButton *setnumBut = new wxButton(panel, PointPicker_PointPickerAll, wxT("&All"));
+		top_button_sizer->Add(setnumBut, 0, wxALL, 5 );
+		
+		wxButton *setlabBut = new wxButton(panel, PointPicker_PointPickerNone, wxT("&None"));
+		top_button_sizer->Add(setlabBut, 0, wxALL, 5 );
+	}
+	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
 
-  if (multi) {
-    wxButton *allBut = new wxButton(panel, -1,
-				    wxT("&All"));
-    wxLayoutConstraints *bt1 = new wxLayoutConstraints;
-    bt1->left.RightOf(closeBut, 5);
-    bt1->top.SameAs(closeBut, wxTop);
-    bt1->width.AsIs();
-    bt1->height.AsIs();
-    allBut->SetConstraints(bt1);
+	list = new wxListBox(panel, -1, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+	topsizer->Add(list, 0, wxALL, 0 );
+	  SetListBoxEntries();
 
-    wxButton *noneBut = new wxButton(panel, -1,
-				     wxT("&None"));
-    wxLayoutConstraints *bt2 = new wxLayoutConstraints;
-    bt2->left.RightOf(allBut, 5);
-    bt2->top.SameAs(closeBut, wxTop);
-    bt2->width.AsIs();
-    bt2->height.AsIs();
-    noneBut->SetConstraints(bt2);
-  }
+	node = new CC_WinNodePointPicker(lst, this);
 
-  closeBut->SetDefault();
-
-  list = new wxListBox(panel, -1);
-  SetListBoxEntries();
-  wxLayoutConstraints *b1 = new wxLayoutConstraints;
-  b1->left.SameAs(panel, wxLeft, 5);
-  b1->top.Below(closeBut, 5);
-  b1->right.SameAs(panel, wxRight, 5);
-  b1->bottom.SameAs(panel, wxBottom, 5);
-  list->SetConstraints(b1);
-
-  wxLayoutConstraints *c1 = new wxLayoutConstraints;
-  c1->left.SameAs(this, wxLeft);
-  c1->top.SameAs(this, wxTop);
-  c1->right.SameAs(this, wxRight);
-  c1->bottom.SameAs(this, wxBottom);
-  panel->SetConstraints(c1);
-
-  node = new CC_WinNodePointPicker(lst, this);
-
-  Layout();
-
-  Show(true);
+	panel->SetSizer( topsizer );
+	
+	Center();
+	Show(true);
 }
 
 PointPicker::~PointPicker()
@@ -405,10 +375,6 @@ PointPicker::~PointPicker()
     node->Remove();
     delete node;
   }
-}
-
-void PointPicker::OnSize(wxSizeEvent& event) {
-  Layout();
 }
 
 void PointPicker::OnCloseWindow(wxCloseEvent& event) {

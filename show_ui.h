@@ -112,6 +112,12 @@ private:
   DECLARE_EVENT_TABLE()
 };
 
+enum { 
+	PointPicker_PointPickerClose=1100,
+	PointPicker_PointPickerAll,
+	PointPicker_PointPickerNone,
+};
+
 class PointPicker : public wxFrame
 {
 public:
@@ -120,7 +126,6 @@ public:
 	      int x = -1, int y = -1, int width = 250, int height = 300);
   ~PointPicker();
   void OnCloseWindow(wxCloseEvent& event);
-  void OnSize(wxSizeEvent& event);
 
   inline bool Okay() { return ok; };
 
@@ -135,6 +140,9 @@ public:
   CC_show *show;
 private:
   void SetListBoxEntries();
+	void PointPicker::PointPickerClose(wxCommandEvent&);
+	void PointPicker::PointPickerAll(wxCommandEvent&);
+	void PointPicker::PointPickerNone(wxCommandEvent&);
 
   bool ok;
   wxPanel *panel;
