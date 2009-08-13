@@ -89,6 +89,9 @@ enum {
   CALCHART__setsym5,
   CALCHART__setsym6,
   CALCHART__setsym7,
+	CALCHART__slider_zoom,
+	CALCHART__slider_sheet_callback,
+	CALCHART__refnum_callback,
 };
 enum CC_SELECT_TYPES {
   CC_SELECT_ROWS = CALCHART__ROWS,
@@ -364,6 +367,9 @@ public:
 
   void SetCurrentLasso(CC_DRAG_TYPES type);
   void SetCurrentMove(CC_MOVE_MODES type);
+	void slider_zoom_callback(wxScrollEvent &ev);
+	void slider_sheet_callback(wxScrollEvent &);
+	void refnum_callback(wxCommandEvent &);
 
   void Setup();
 
@@ -389,7 +395,7 @@ public:
   void OnPaint(wxPaintEvent& event);
   void OnMouseEvent(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
-  void OnScroll(wxCommandEvent& event);
+  void OnScroll(wxScrollEvent& event);
 
   // Misc show functions
   void RefreshShow(bool drawall = true, int point = -1);
@@ -460,30 +466,6 @@ private:
   int zoomf;
 
   DECLARE_EVENT_TABLE()
-};
-
-class ChoiceWithField: public wxChoice {
-public:
-  FieldCanvas *field;
-  ChoiceWithField(wxPanel *panel, wxWindowID id,
-		  const wxPoint& pos, const wxSize& size,
-		  int n, const wxString choices[],
-		  long style = 0, const wxValidator& validator = wxDefaultValidator,
-		  const wxString& name = wxT("choice")):
-    wxChoice(panel, id, pos, size, n, choices, style, validator, name),
-    field(NULL) {}
-};
-
-class SliderWithField: public wxSlider {
-public:
-  FieldCanvas *field;
-  SliderWithField(wxWindow *parent, wxWindowID id,
-		  int value, int minValue, int maxValue,
-		  const wxPoint& point = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-		  long style = wxSL_HORIZONTAL, const wxValidator& validator = wxDefaultValidator,
-		  const wxString& name = wxT("slider")):
-    wxSlider(parent, id, value, minValue, maxValue, point, size, style, validator, name),
-    field(NULL) {}
 };
 
 // we must use a list here so iterators aren't invalidated.

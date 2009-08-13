@@ -77,10 +77,6 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif // defined(__APPLE__) && (__APPLE__)
 
-static void refnum_callback(wxObject &obj, wxEvent &ev);
-static void slider_sheet_callback(wxObject &obj, wxEvent &ev);
-static void slider_zoom_callback(wxObject &obj, wxEvent &ev);
-
 static ToolBarEntry main_tb[] = {
   { 0, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
   { TOOLBAR_SPACE, NULL, wxT("Next stuntsheet"), CALCHART__next_ss },
@@ -230,6 +226,9 @@ BEGIN_EVENT_TABLE(MainFrame, CC_MDIChildFrame)
   EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
   EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
   EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
+  EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
+  EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
+  EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(FieldCanvas, AutoScrollCanvas)
@@ -256,15 +255,13 @@ void CC_WinNodeMain::ChangeName() {
   winlist.ChangeName();
 }
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point) {
-#if 0
-  if (frame->field->GetDC()->Colour) {
+  if (wxColourDisplay()) {
     frame->field->RefreshShow(false, point);
   } else {
     // In mono we use different line widths, so must redraw everything
     frame->field->RefreshShow();
   }
   winlist.UpdateSelections(win, point);
-#endif
 }
 void CC_WinNodeMain::UpdatePoints() {
   frame->field->RefreshShow();
@@ -967,12 +964,6 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
     def_ref = other_frame->field->curr_ref;
     field = new FieldCanvas(show, ss, this, def_zoom, other_frame->field);
   }
-
-	// set up a sizer for the field panel
-	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(field, 1, wxEXPAND);
-	SetSizer(sizer);
-	SetAutoLayout(true);
 	
   SetTitle(show->UserGetName());
   field->curr_ref = def_ref;
@@ -990,6 +981,7 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   }
 
   // Add the controls
+	wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
 
   // Grid choice
   grid_choice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1),
@@ -998,50 +990,34 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   grid_choice->SetSelection(def_grid);
 
   // Zoom slider
-  SliderWithField *sldr = new SliderWithField(this, -1, 50, 0, 100);
-  sldr->field = field;
-  zoom_slider = sldr;
-  sheet_slider = sldr;
-#if 0
-  wxLayoutConstraints *sl0 = new wxLayoutConstraints;
-  sl0->left.AsIs();
-  sl0->top.AsIs();
-  sl0->right.SameAs(framePanel, wxRight, 5);
-  sl0->height.AsIs();
-  sldr->SetConstraints(sl0);
+  zoom_slider = new wxSlider(this, CALCHART__slider_zoom, def_zoom, 1, FIELD_MAXZOOM);
 
-  framePanel->NewLine();
-
+	// set up a sizer for the field panel
+	wxBoxSizer* rowsizer = new wxBoxSizer(wxHORIZONTAL);
+	rowsizer->Add(grid_choice, 1, wxALL);
+	rowsizer->Add(zoom_slider, 1, wxEXPAND);
+	fullsizer->Add(rowsizer);
   // Reference choice
   {
     wxString buf;
     unsigned i;
 
-    ref_choice = new ChoiceWithField(framePanel, (wxFunction)refnum_callback,
-				     wxT("&Ref Group"));
+    ref_choice = new wxChoice(this, CALCHART__refnum_callback);
     ref_choice->Append(wxT("Off"));
     for (i = 1; i <= NUM_REF_PNTS; i++) {
       buf.sprintf(wxT("%u"), i);
       ref_choice->Append(buf);
     }
   }
-  ((ChoiceWithField*)ref_choice)->field = field;
   ref_choice->SetSelection(def_ref);
 
-  {
   // Sheet slider (will get set later with UpdatePanel())
-  SliderWithField *sldr = new SliderWithField(framePanel, -1, 50, 0, 100);
-  sldr = new SliderWithField(framePanel, -1, 1, 2, 150);
-  sldr->field = field;
-  sheet_slider = sldr;
-  }
-  wxLayoutConstraints *sl1 = new wxLayoutConstraints;
-  sl1->left.AsIs();
-  sl1->top.AsIs();
-  sl1->right.SameAs(framePanel, wxRight, 5);
-  sl1->height.AsIs();
-  sldr->SetConstraints(sl1);
-#endif
+  sheet_slider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2);
+
+	rowsizer = new wxBoxSizer(wxHORIZONTAL);
+	rowsizer->Add(ref_choice, 0, wxALL);
+	rowsizer->Add(sheet_slider, 0, wxEXPAND);
+	fullsizer->Add(rowsizer);
 
   // Update the tool bar
   SetCurrentLasso(field->curr_lasso);
@@ -1050,8 +1026,10 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   // Show the frame
   UpdatePanel();
   window_list->push_back(this);
-  Layout();
   field->RefreshShow();
+
+	fullsizer->Add(field, 1, wxEXPAND);
+	SetSizer(fullsizer);
   Show(true);
 
   if (setup) Setup();
@@ -1113,21 +1091,17 @@ void MainFrame::OnCmdSaveAs(wxCommandEvent& event) {
 }
 
 void MainFrame::OnCmdPrint(wxCommandEvent& event) {
-#if 0
   if (field->show_descr.show) {
     (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
 			      false, this, wxT("Print show"), false);
   }
-#endif
 }
 
 void MainFrame::OnCmdPrintEPS(wxCommandEvent& event) {
-#if 0
   if (field->show_descr.show) {
     (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
 			      true, this, wxT("Print stuntsheet as EPS"), false);
   }
-#endif
 }
 
 void MainFrame::OnCmdClose(wxCommandEvent& event) {
@@ -1199,20 +1173,16 @@ void MainFrame::OnCmdClearRef(wxCommandEvent& event) {
 }
 
 void MainFrame::OnCmdEditCont(wxCommandEvent& event) {
-#if 0
   if (field->show_descr.show) {
     (void)new ContinuityEditor(&field->show_descr, &node->winlist, this,
 			       wxT("Animation Continuity"));
   }
-#endif
 }
 
 void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event) {
   if (field->show_descr.show) {
-#if 0
     (void)new PrintContEditor(&field->show_descr, &node->winlist, this,
 			      wxT("Printed Continuity"));
-#endif
   }
 }
 
@@ -1251,11 +1221,9 @@ void MainFrame::OnCmdSetup(wxCommandEvent& event) {
 }
 
 void MainFrame::OnCmdPoints(wxCommandEvent& event) {
-#if 0
   if (field->show_descr.show)
     (void)new PointPicker(field->show_descr.show, &node->winlist,
 			  true, this, wxT("Select points"));
-#endif
 }
 
 void MainFrame::OnCmdAnimate(wxCommandEvent& event) {
@@ -1579,7 +1547,9 @@ void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type) {
   if (field->curr_lasso != CC_DRAG_NONE) {
     frameToolBar->ToggleTool(TOOLBAR_BOX+field->curr_lasso-CC_DRAG_BOX, false);
   }
+#endif
   field->curr_lasso = type;
+#if 0
   if (field->curr_lasso != CC_DRAG_NONE) {
     frameToolBar->ToggleTool(TOOLBAR_BOX + type - CC_DRAG_BOX, true);
   }
@@ -1590,18 +1560,18 @@ void MainFrame::SetCurrentMove(CC_MOVE_MODES type) {
 #if 0
   frameToolBar->ToggleTool(TOOLBAR_TRANS + field->curr_move - CC_MOVE_NORMAL,
 			   false);
-  field->curr_move = type;
-  frameToolBar->ToggleTool(TOOLBAR_TRANS + type - CC_MOVE_NORMAL, true);
-  field->EndDrag();
 #endif
+  field->curr_move = type;
+#if 0
+  frameToolBar->ToggleTool(TOOLBAR_TRANS + type - CC_MOVE_NORMAL, true);
+#endif
+  field->EndDrag();
 }
 
 void MainFrame::Setup() {
-#if 0
   if (field->show_descr.show)
     (void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
 			  wxT("Setup Show"));
-#endif
 }
 
 // Define a constructor for field canvas
@@ -1610,7 +1580,7 @@ FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
 			 int x, int y, int w, int h):
  AutoScrollCanvas(frame, -1, wxPoint(x, y), wxSize(w, h)), ourframe(frame), curr_lasso(CC_DRAG_BOX),
  curr_move(CC_MOVE_NORMAL), curr_select(CC_SELECT_ROWS),
- curr_ref(0), drag(CC_DRAG_NONE), dragon(false)
+ curr_ref(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 {
   if (from_canvas) {
     curr_lasso = from_canvas->curr_lasso;
@@ -2014,7 +1984,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
   }
 }
 
-void FieldCanvas::OnScroll(wxCommandEvent& event)
+void FieldCanvas::OnScroll(wxScrollEvent& event)
 {
   event.Skip();
 }
@@ -2274,18 +2244,15 @@ bool MainFrameList::CloseAllWindows() {
   return true;
 }
 
-static void refnum_callback(wxObject &obj, wxEvent &) {
-  ChoiceWithField *choice = (ChoiceWithField *)&obj;
-  choice->field->curr_ref = (unsigned)choice->GetSelection();
-  choice->field->RefreshShow();
+void MainFrame::refnum_callback(wxCommandEvent &) {
+  field->curr_ref = ref_choice->GetSelection();
+  field->RefreshShow();
 }
 
-static void slider_sheet_callback(wxObject &obj, wxEvent &) {
-  SliderWithField *slider = (SliderWithField *)&obj;
-  slider->field->GotoSS(slider->GetValue()-1);
+void MainFrame::slider_sheet_callback(wxScrollEvent &) {
+  field->GotoSS(sheet_slider->GetValue()-1);
 }
 
-static void slider_zoom_callback(wxObject &obj, wxEvent &) {
-  SliderWithField *slider = (SliderWithField *)&obj;
-  slider->field->SetZoom(slider->GetValue());
+void MainFrame::slider_zoom_callback(wxScrollEvent &) {
+  field->SetZoom(zoom_slider->GetValue());
 }
