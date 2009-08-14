@@ -1668,8 +1668,8 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
       }
 
       pos = show_descr.show->mode->Offset();
-      pos.x = Coord(x - GetPositionX() - pos.x);
-      pos.y = Coord(y - GetPositionY() - pos.y);
+      pos.x = Coord((x/GetScaleX()) - pos.x);
+      pos.y = Coord((y/GetScaleY()) - pos.y);
 
       if (event.LeftDown()) {
 	switch (curr_move) {

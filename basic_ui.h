@@ -100,6 +100,8 @@ public:
   }
   inline float GetPositionX() const { return x_off/x_scale; }
   inline float GetPositionY() const { return y_off/y_scale; }
+  inline float GetScaleX() const { return x_scale; }
+  inline float GetScaleY() const { return y_scale; }
 
   void Move(float x, float y, bool noscroll=0);
   void Blit(wxDC& dc);
