@@ -57,6 +57,11 @@ ktoolbar_printcont_sym5,
 ktoolbar_printcont_sym6,
 ktoolbar_printcont_sym7,
 };
+enum {
+	ContinuityEditor_ContEditSet,
+	ContinuityEditor_ContEditSelect,
+	ContinuityEditor_ContEditCurrent,
+};
 
 ToolBarEntry printcont_tb[] = {
   { 0, NULL, wxT("Insert plainman"), ktoolbar_printcont_sym0 },
@@ -76,6 +81,9 @@ BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
   EVT_MENU(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
   EVT_MENU(CALCHART__CONT_CLOSE, ContinuityEditor::OnCmdClose)
   EVT_MENU(CALCHART__CONT_HELP, ContinuityEditor::OnCmdHelp)
+  EVT_BUTTON(ContinuityEditor_ContEditSet,ContinuityEditor::ContEditSet)
+  EVT_BUTTON(ContinuityEditor_ContEditSelect,ContinuityEditor::ContEditSelect)
+  EVT_CHOICE(ContinuityEditor_ContEditCurrent,ContinuityEditor::ContEditCurrent)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(PrintContCanvas, wxScrolledWindow)
@@ -166,24 +174,16 @@ void CC_WinNodePrintCont::GotoSheet(unsigned) {
   editor->canvas->Update();
 }
 
-static void ContEditSet(wxButton& button, wxEvent&) {
-  ContinuityEditor* editor =
-    (ContinuityEditor*)(button.GetParent()->GetParent());
-
-  editor->SetPoints();
+void ContinuityEditor::ContEditSet(wxCommandEvent&) {
+  SetPoints();
 }
 
-static void ContEditSelect(wxButton& button, wxEvent&) {
-  ContinuityEditor* editor =
-    (ContinuityEditor*)(button.GetParent()->GetParent());
-
-  editor->SelectPoints();
+void ContinuityEditor::ContEditSelect(wxCommandEvent&) {
+  SelectPoints();
 }
 
-static void ContEditCurrent(wxChoice& choice, wxEvent&) {
-  ContinuityEditor *editor =
-    (ContinuityEditor*)(choice.GetParent()->GetParent());
-  editor->SetCurrent(choice.GetSelection());
+void ContinuityEditor::ContEditCurrent(wxCommandEvent&) {
+  SetCurrent(conts->GetSelection());
 }
 
 ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
@@ -198,12 +198,23 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
 
   panel = new wxPanel(this);
 
-//  (void)new wxButton(panel, (wxFunction)ContEditSet, wxT("&Set Points"));
-//  (void)new wxButton(panel, (wxFunction)ContEditSelect, wxT("Select &Points"));
+	// create a sizer for laying things out top down:
+	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+	
+	// add buttons to the top row
+	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxButton *button = new wxButton(panel, ContinuityEditor_ContEditSet, wxT("&Set Points"));
+	top_button_sizer->Add(button, 0, wxALL, 5 );
+	button = new wxButton(panel, ContinuityEditor_ContEditSelect, wxT("Select &Points"));
+	top_button_sizer->Add(button, 0, wxALL, 5 );
+	conts = new wxChoice(panel, ContinuityEditor_ContEditCurrent, wxDefaultPosition, wxDefaultSize, 0, NULL);
+	top_button_sizer->Add(conts, 0, wxALL, 5 );
+	topsizer->Add(top_button_sizer);
 
-//  conts = new wxChoice(panel, (wxFunction)ContEditCurrent, wxT(""));
-
-//  text = new FancyTextWin(this);
+	text = new FancyTextWin(panel, -1);
+	topsizer->Add(text, 0, wxEXPAND);
+	panel->SetSizer( topsizer );
+	topsizer->SetSizeHints( panel );
   
   wxMenu *cont_menu = new wxMenu;
   cont_menu->Append(CALCHART__CONT_NEW, wxT("&New"), wxT("Add new continuity"));
@@ -216,7 +227,6 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
   menu_bar->Append(help_menu, wxT("&Help"));
   SetMenuBar(menu_bar);
 
-  Layout();
   Show(true);
 
   Update();
@@ -239,7 +249,8 @@ void ContinuityEditor::OnSize(wxSizeEvent& event) {
   panel->Fit();
   panel->GetSize(&text_x, &text_y);
   panel->SetSize(0, 0, width, text_y);
-  text->SetSize(0, text_y, width, height-text_y);
+	// this is done by the sizer
+//  text->SetSize(0, text_y, width, height-text_y);
 }
 
 void ContinuityEditor::OnCloseWindow(wxCloseEvent& event) {
@@ -322,11 +333,10 @@ void ContinuityEditor::FlushText() {
   if (text_sheet) {
     cont = text_sheet->GetNthContinuity(text_contnum);
     if (cont != NULL) {
-//      conttext = text->GetContents();
+      conttext = text->GetValue();
       if (conttext != cont->text) {
 	text_sheet->UserSetNthContinuity(conttext, text_contnum, this);
       }
-      delete conttext;
     }
   }
 }

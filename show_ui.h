@@ -140,9 +140,9 @@ public:
   CC_show *show;
 private:
   void SetListBoxEntries();
-	void PointPicker::PointPickerClose(wxCommandEvent&);
-	void PointPicker::PointPickerAll(wxCommandEvent&);
-	void PointPicker::PointPickerNone(wxCommandEvent&);
+	void PointPickerClose(wxCommandEvent&);
+	void PointPickerAll(wxCommandEvent&);
+	void PointPickerNone(wxCommandEvent&);
 
   bool ok;
   wxPanel *panel;

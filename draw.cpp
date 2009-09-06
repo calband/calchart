@@ -42,6 +42,7 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
   CC_coord origin;
 
   dc->SetBackgroundMode(wxTRANSPARENT);
+  dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
 
   if (drawall) {
     dc->Clear();

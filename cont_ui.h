@@ -105,6 +105,9 @@ public:
     text->SetFocus();
   }
 private:
+	void ContEditSet(wxCommandEvent&);
+	void ContEditSelect(wxCommandEvent&);
+	void ContEditCurrent(wxCommandEvent&);
   CC_descr *descr;
   unsigned curr_cont;
   wxPanel *panel;

@@ -1982,6 +1982,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
       DrawDrag(true);
     }
   }
+  Refresh();
 }
 
 void FieldCanvas::OnScroll(wxScrollEvent& event)
