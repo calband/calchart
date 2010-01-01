@@ -2419,6 +2419,7 @@ void CC_show::Select(unsigned i, bool val) {
   if (val) {
     selectionList.push_back(i);
   } else {
-    selectionList.erase(std::find(selectionList.begin(), selectionList.end(), i));
+    if (std::find(selectionList.begin(), selectionList.end(), i) != selectionList.end())
+      selectionList.erase(std::find(selectionList.begin(), selectionList.end(), i));
   }
 }
