@@ -107,4 +107,11 @@ extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
 extern wxString FullPath(const wxString& path);
 extern int ReadDOSline(FILE *fp, wxString& str);
 
+// DEBUG printing facilities
+#ifndef NDEBUG
+#define DEBUG_LOG(format, ...) fprintf(stderr, format, ## __VA_ARGS__)
+#else
+#define DEBUG_LOG(format, ...)
+#endif
+
 #endif
