@@ -143,6 +143,7 @@ void AnimationCanvas::OnEraseBackground(wxEraseEvent& event) {
 void AnimationCanvas::OnPaint(wxPaintEvent& event) {
   wxPaintDC dc(this);
   dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+  dc.Clear();
   Blit(dc);
 }
 
@@ -246,7 +247,7 @@ void AnimationCanvas::UpdateText() {
   }
 }
 
-void AnimationCanvas::Refresh() {
+void AnimationCanvas::RefreshCanvas() {
   Redraw();
   UpdateText();
   ourframe->UpdatePanel();
@@ -258,7 +259,7 @@ void AnimationCanvas::Generate() {
   if (anim) {
     delete anim;
     anim = NULL;
-    Refresh();
+    RefreshCanvas();
   }
   anim = new Animation(show_descr->show, ourframe,
 		       ((AnimationFrame*)ourframe)->node->GetList());
@@ -271,7 +272,7 @@ void AnimationCanvas::Generate() {
     anim->GotoSheet(show_descr->curr_ss);
   }
   ourframe->UpdatePanel();
-  Refresh();
+  RefreshCanvas();
   ourframe->SetStatusText(wxT("Ready"));
 }
 
@@ -279,7 +280,7 @@ void AnimationCanvas::FreeAnim() {
   if (anim) {
     delete anim;
     anim = NULL;
-    Refresh();
+    RefreshCanvas();
   }
 }
 
@@ -712,24 +713,15 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 
   // Give it an icon
   SetBandIcon(this);
-
-  SetAutoLayout(true);
-
   show = comp->show;
 
-  panel = new wxPanel(this);
+  // create a sizer for laying things out top down:
+  wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 
-  wxButton *closeBut = new wxButton(panel, wxID_CLOSE, wxT("Close"));
-  wxLayoutConstraints *bt0 = new wxLayoutConstraints;
-  bt0->left.SameAs(panel, wxLeft, 5);
-  bt0->top.SameAs(panel, wxTop, 5);
-  bt0->width.AsIs();
-  bt0->height.AsIs();
-  closeBut->SetConstraints(bt0);
+  wxButton *closeBut = new wxButton(this, wxID_CLOSE, wxT("Close"));
+  topsizer->Add(closeBut);
 
-  closeBut->SetDefault();
-
-  list = new wxListBox(panel, CALCHART__anim_update, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
+  list = new wxListBox(this, CALCHART__anim_update, wxDefaultPosition, wxSize(200,200), 0, NULL, wxLB_SINGLE);
 
   for (i = 0, j = 0; i < NUM_ANIMERR; i++) {
     if (comp->error_markers[i].pntgroup) {
@@ -737,24 +729,13 @@ AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
       pointsels[j++].StealErrorMarker(&comp->error_markers[i]);
     }
   }
-
-  wxLayoutConstraints *b1 = new wxLayoutConstraints;
-  b1->left.SameAs(panel, wxLeft, 5);
-  b1->top.Below(closeBut, 5);
-  b1->right.SameAs(panel, wxRight, 5);
-  b1->bottom.SameAs(panel, wxBottom, 5);
-  list->SetConstraints(b1);
-
-  wxLayoutConstraints *c1 = new wxLayoutConstraints;
-  c1->left.SameAs(this, wxLeft);
-  c1->top.SameAs(this, wxTop);
-  c1->right.SameAs(this, wxRight);
-  c1->bottom.SameAs(this, wxBottom);
-  panel->SetConstraints(c1);
+  topsizer->Add(list, wxSizerFlags().Expand().Border(5) );
 
   node = new CC_WinNodeAnimErrors(lst, this);
 
-  Layout();
+  SetSizer(topsizer); // use the sizer for layout
+
+  topsizer->SetSizeHints(this); // set size hints to honour minimum size
 
   Show(true);
 }

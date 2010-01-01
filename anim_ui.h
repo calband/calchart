@@ -92,7 +92,7 @@ public:
   inline void Redraw() { RedrawBuffer(); Refresh(); }
   void RedrawBuffer();
   void UpdateText();
-  void Refresh();
+  void RefreshCanvas();
   void Generate();
   void FreeAnim();
 
@@ -101,22 +101,22 @@ public:
 
   // true if changes made
   inline bool PrevBeat() {
-    if (anim) { if (anim->PrevBeat()) { Refresh(); return true; } }
+    if (anim) { if (anim->PrevBeat()) { RefreshCanvas(); return true; } }
     return false;
   }
   inline bool NextBeat() {
-    if (anim) { if (anim->NextBeat()) { Refresh(); return true; } }
+    if (anim) { if (anim->NextBeat()) { RefreshCanvas(); return true; } }
     return false;
   }
   inline void GotoBeat(unsigned i) {
-    if (anim) { anim->GotoBeat(i); Refresh(); }
+    if (anim) { anim->GotoBeat(i); RefreshCanvas(); }
   }
   inline bool PrevSheet() {
-    if (anim) { if (anim->PrevSheet()) { Refresh(); return true; } }
+    if (anim) { if (anim->PrevSheet()) { RefreshCanvas(); return true; } }
     return false;
   }
   inline bool NextSheet() {
-    if (anim) { if (anim->NextSheet()) { Refresh(); return true; } }
+    if (anim) { if (anim->NextSheet()) { RefreshCanvas(); return true; } }
     return false;
   }
   inline void GotoSheet(unsigned i) {
@@ -237,7 +237,6 @@ public:
 private:
   bool ok;
   unsigned sheetnum;
-  wxPanel *panel;
   wxListBox *list;
   ErrorMarker pointsels[NUM_ANIMERR];
   CC_WinNodeAnimErrors *node;
