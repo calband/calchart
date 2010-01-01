@@ -207,7 +207,7 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0) {
 	top_button_sizer->Add(button, 0, wxALL, 5 );
 	button = new wxButton(panel, ContinuityEditor_ContEditSelect, wxT("Select &Points"));
 	top_button_sizer->Add(button, 0, wxALL, 5 );
-	conts = new wxChoice(panel, ContinuityEditor_ContEditCurrent, wxDefaultPosition, wxDefaultSize, 0, NULL);
+	conts = new wxChoice(panel, ContinuityEditor_ContEditCurrent);
 	top_button_sizer->Add(conts, 0, wxALL, 5 );
 	topsizer->Add(top_button_sizer);
 
