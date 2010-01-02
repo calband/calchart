@@ -480,7 +480,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
   // Give it an icon
   SetBandIcon(this);
 
-  CreateStatusBar();
+  CreateStatusBar(2);
 
   // Make a menubar
   wxMenu *anim_menu = new wxMenu;

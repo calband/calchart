@@ -884,7 +884,7 @@ MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
   SetBandIcon(this);
 
   // Give it a status line
-  CreateStatusBar();
+  CreateStatusBar(2);
   SetStatusText(wxT("Welcome to Calchart 3.0"));
 
   // Make a menubar
