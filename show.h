@@ -498,7 +498,7 @@ public:
     selections[i] = selections[i] ? false:true;
   }
   typedef std::vector<unsigned> SelectionList;
-  inline SelectionList& GetSelectionList() { return selectionList; }
+  inline const SelectionList& GetSelectionList() const { return selectionList; }
 
   CC_WinListShow *winlist;
   ShowUndoList *undolist;
