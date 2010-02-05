@@ -152,6 +152,7 @@ void AnimationCanvas::RedrawBuffer() {
   unsigned i;
   wxDC *dc = GetMemDC();
 
+  dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
   dc->Clear();
   dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
   show_descr->show->mode->DrawAnim(dc);
