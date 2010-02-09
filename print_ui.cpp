@@ -44,8 +44,17 @@ enum {
   CC_PRINT_ACTION_PREVIEW
 };
 
+enum {
+  CC_PRINT_BUTTON_PRINT = 1000,
+  CC_PRINT_BUTTON_CLOSE,
+  CC_PRINT_BUTTON_SELECT,
+};
+
 BEGIN_EVENT_TABLE(ShowPrintDialog, wxDialog)
   EVT_CLOSE(ShowPrintDialog::OnCloseWindow)
+  EVT_BUTTON(CC_PRINT_BUTTON_CLOSE,ShowPrintDialog::ShowPrintClose)
+  EVT_BUTTON(CC_PRINT_BUTTON_PRINT,ShowPrintDialog::ShowPrintOk)
+  EVT_BUTTON(CC_PRINT_BUTTON_SELECT,ShowPrintDialog::ShowPrintSelect)
 END_EVENT_TABLE()
 
 CC_WinNodePrint::CC_WinNodePrint(CC_WinList *lst, ShowPrintDialog *req)
@@ -63,7 +72,7 @@ void CC_WinNodePrint::ChangePrint(wxWindow* win) {
   }
 }
 
-static void ShowPrintOk(wxButton& button, wxEvent&) {
+void ShowPrintDialog::ShowPrintOk(wxCommandEvent&) {
   wxString s;
 #ifdef PRINT__RUN_CMD
   wxString buf;
@@ -71,50 +80,48 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   bool overview;
   long minyards;
 
-  ShowPrintDialog* dialog = (ShowPrintDialog*)button.GetParent();
-
   double dval;
-  dialog->text_x->GetValue().ToDouble(&dval);
+  text_x->GetValue().ToDouble(&dval);
   page_offset_x = (float)dval;
-  dialog->text_y->GetValue().ToDouble(&dval);
+  text_y->GetValue().ToDouble(&dval);
   page_offset_y = (float)dval;
-  dialog->text_width->GetValue().ToDouble(&dval);
+  text_width->GetValue().ToDouble(&dval);
   page_width = (float)dval;
-  dialog->text_height->GetValue().ToDouble(&dval);
+  text_height->GetValue().ToDouble(&dval);
   page_height = (float)dval;
-  dialog->text_minyards->GetValue().ToLong(&minyards);
+  text_minyards->GetValue().ToLong(&minyards);
 
-  dialog->show_descr->show->GetBoolLandscape() =
-    (dialog->radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
+  show_descr->show->GetBoolLandscape() =
+    (radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
 
-  dialog->show_descr->show->GetBoolDoCont() = dialog->check_cont->GetValue();
-  if (!dialog->eps)
-    dialog->show_descr->show->GetBoolDoContSheet() =
-      dialog->check_pages->GetValue();
-  overview = dialog->check_overview->GetValue();
+  show_descr->show->GetBoolDoCont() = check_cont->GetValue();
+  if (!eps)
+    show_descr->show->GetBoolDoContSheet() =
+      check_pages->GetValue();
+  overview = check_overview->GetValue();
 
-  switch (dialog->radio_method->GetSelection()) {
+  switch (radio_method->GetSelection()) {
   case CC_PRINT_ACTION_PREVIEW:
 #ifdef PRINT__RUN_CMD
-    print_view_cmd = dialog->text_view_cmd->GetValue();
-    print_view_opts = dialog->text_view_opts->GetValue();
+    print_view_cmd = text_view_cmd->GetValue();
+    print_view_opts = text_view_opts->GetValue();
     s = wxFileName::CreateTempFileName(wxT("cc_"));
     buf.sprintf(wxT("%s %s \"%s\""), print_view_cmd.c_str(), print_view_opts.c_str(), s.c_str());
 #endif
     break;
   case CC_PRINT_ACTION_FILE:
     s = wxFileSelector(wxT("Print to file"), NULL, NULL, NULL,
-		       dialog->eps ? wxT("*.eps"):wxT("*.ps"));
+		       eps ? wxT("*.eps"):wxT("*.ps"));
     if (s.empty()) return;
     break;
   case CC_PRINT_ACTION_PRINTER:
 #ifdef PRINT__RUN_CMD
-    print_cmd = dialog->text_cmd->GetValue();
-    print_opts = dialog->text_opts->GetValue();
+    print_cmd = text_cmd->GetValue();
+    print_opts = text_opts->GetValue();
     s = wxFileName::CreateTempFileName(wxT("cc_"));
     buf.sprintf(wxT("%s %s \"%s\""), print_cmd.c_str(), print_opts.c_str(), s.c_str());
 #else
-    s = dialog->text_cmd->GetValue();
+    s = text_cmd->GetValue();
     print_file = s;
 #endif
     break;
@@ -123,7 +130,7 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
   }
   
   // Update other windows
-  dialog->show_descr->show->winlist->ChangePrint(dialog);
+  show_descr->show->winlist->ChangePrint(this);
 
   FILE *fp;
 
@@ -133,17 +140,17 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
     wxString tempbuf;
 
     wxBeginBusyCursor();
-    n = dialog->show_descr->show->Print(fp, dialog->eps, overview,
-					dialog->show_descr->curr_ss, minyards);
+    n = show_descr->show->Print(fp, eps, overview,
+					show_descr->curr_ss, minyards);
     fflush(fp);
     fclose(fp);
 
 #ifdef PRINT__RUN_CMD
-    switch (dialog->radio_method->GetSelection()) {
+    switch (radio_method->GetSelection()) {
     case CC_PRINT_ACTION_FILE:
       break;
     default:
-      if (dialog->show_descr->show->Ok()) {
+      if (show_descr->show->Ok()) {
 	system(buf.utf8_str());
       }
       wxRemoveFile(s);
@@ -152,34 +159,23 @@ static void ShowPrintOk(wxButton& button, wxEvent&) {
 #endif
     wxEndBusyCursor();
 
-    if (dialog->show_descr->show->Ok()) {
+    if (show_descr->show->Ok()) {
       tempbuf.sprintf(wxT("Printed %d pages."), n);
       (void)wxMessageBox(tempbuf,
-			 dialog->show_descr->show->GetName());
+			 show_descr->show->GetName());
     } else {
-      (void)wxMessageBox(dialog->show_descr->show->GetError(),
-			 dialog->show_descr->show->GetName());
+      (void)wxMessageBox(show_descr->show->GetError(),
+			 show_descr->show->GetName());
     }
   } else {
     (void)wxMessageBox(wxT("Unable to open print file for writing!"),
-		       dialog->show_descr->show->GetName());
+		       show_descr->show->GetName());
   }
 }
 
-static void ShowPrintCancel(wxButton& button, wxEvent&) {
-  ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
-#if 0
-  if (dialog->IsModal())
-    dialog->EndModal();
-  else
-    dialog->Close();
-#endif
-}
-
-static void ShowPrintSelect(wxButton& button, wxEvent&) {
-  ShowPrintDialog* dialog = (ShowPrintDialog*) button.GetParent();
-  (void)new StuntSheetPicker(dialog->show_descr->show, dialog->node->GetList(),
-			     true, dialog->frame, wxT("Select stuntsheets"));
+void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&) {
+  (void)new StuntSheetPicker(show_descr->show, node->GetList(),
+			     true, frame, wxT("Select stuntsheets"));
 }
 
 ShowPrintDialog::ShowPrintDialog(CC_descr *dcr, CC_WinList *lst,
@@ -192,33 +188,38 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 
   node = new CC_WinNodePrint(lst, this);
 
-//  SetLabelPosition(wxVERTICAL);
+	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 
-  wxButton *okBut = new wxButton(this, wxID_ANY, wxT("&Print"));
-  (void) new wxButton(this, wxID_ANY, wxT("&Close"));
-  //NewLine();
-  //NewLine();
-  okBut->SetDefault();
+	wxButton *button = new wxButton(this, CC_PRINT_BUTTON_PRINT, wxT("&Print"));
+	horizontalsizer->Add(button, 0, wxALL, 5 );
+	button = new wxButton(this, CC_PRINT_BUTTON_CLOSE, wxT("&Close"));
+	button->SetDefault();
+	horizontalsizer->Add(button, 0, wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
 #ifdef PRINT__RUN_CMD
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
   text_cmd = new wxTextCtrl(this, -1, wxT("Printer Command: "));
-
+	horizontalsizer->Add(text_cmd, 0, wxALL, 5 );
   text_opts = new wxTextCtrl(this, -1, wxT("Printer Options: "));
-  //NewLine();
+	horizontalsizer->Add(text_opts, 0, wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
   text_view_cmd = new wxTextCtrl(this, -1, wxT("Preview Command: "));
-
+	horizontalsizer->Add(text_view_cmd, 0, wxALL, 5 );
   text_view_opts = new wxTextCtrl(this, -1, wxT("Preview Options: "));
-  //NewLine();
-  //NewLine();
+	horizontalsizer->Add(text_view_opts, 0, wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 #endif
 
 #ifndef PRINT__RUN_CMD
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
   text_cmd = new wxTextCtrl(this, (wxFunction)NULL, wxT("Printer &Device: "),
 			    print_file,
 			    -1, -1, 100, -1);
-
-  //NewLine();
-  //NewLine();
+	horizontalsizer->Add(text_cmd, 0, wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 #endif
 
   wxString orientation[2];
@@ -227,6 +228,7 @@ show_descr(dcr), eps(printEPS), frame(parent) {
   radio_orient = new wxRadioBox(this, -1, wxT("&Orientation: "),
 		    wxPoint(-1,-1),wxSize(-1,-1),2,orientation,2);
   radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
+	topsizer->Add(radio_orient, 0, wxALL, 5 );
 
   wxString print_modes[3];
   print_modes[0] = wxT("Send to Printer");
@@ -241,45 +243,51 @@ show_descr(dcr), eps(printEPS), frame(parent) {
 				wxPoint(-1,-1),wxSize(-1,-1), features, print_modes,
 				features);
   radio_method->SetSelection(0);
-  
-  //NewLine();
-  //NewLine();
+	topsizer->Add(radio_method, 0, wxALL, 5 );
 
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
   check_overview = new wxCheckBox(this, -1, wxT("Over&view"));
   check_overview->SetValue(false);
+	horizontalsizer->Add(check_overview, 0, wxALL, 5 );
+
   check_cont = new wxCheckBox(this, -1, wxT("Continuit&y"));
   check_cont->SetValue(show_descr->show->GetBoolDoCont());
+	horizontalsizer->Add(check_cont, 0, wxALL, 5 );
+
   if (!eps) {
     check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
     check_pages->SetValue(show_descr->show->GetBoolDoContSheet());
+	horizontalsizer->Add(check_pages, 0, wxALL, 5 );
   }
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
   if (!eps) {
-    //NewLine();
-    (void) new wxButton(this, -1,wxT("S&elect sheets..."));
+    button = new wxButton(this, CC_PRINT_BUTTON_SELECT,wxT("S&elect sheets..."));
+	topsizer->Add(button, 0, wxALL, 5 );
   }
 
-  //NewLine();
-  //NewLine();
-
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
   buf.sprintf(wxT("%.2f"), page_width);
   text_width = new wxTextCtrl(this, -1, wxT("Page &width: "));
+	horizontalsizer->Add(text_width, 0, wxALL, 5 );
 
   buf.sprintf(wxT("%.2f"), page_height);
   text_height = new wxTextCtrl(this, -1, wxT("Page &height: "));
+	horizontalsizer->Add(text_height, 0, wxALL, 5 );
 
   buf.sprintf(wxT("%.2f"), page_offset_x);
   text_x = new wxTextCtrl(this, -1, wxT("&Left margin: "));
+	horizontalsizer->Add(text_x, 0, wxALL, 5 );
   
   buf.sprintf(wxT("%.2f"), page_offset_y);
   text_y = new wxTextCtrl(this, -1, wxT("&Top margin: "));
+	horizontalsizer->Add(text_y, 0, wxALL, 5 );
 
   text_minyards = new wxTextCtrl(this, -1, wxT("Yards: "));
+	horizontalsizer->Add(text_minyards, 0, wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
-  //NewLine();
-  //NewLine();
-
-  Fit();
+	SetSizer( topsizer );
 
   if (isModal)
     ShowModal();
@@ -296,6 +304,10 @@ ShowPrintDialog::~ShowPrintDialog() {
 
 void ShowPrintDialog::OnCloseWindow(wxCloseEvent& event) {
   Destroy();
+}
+
+void ShowPrintDialog::ShowPrintClose(wxCommandEvent& event) {
+  Close();
 }
 
 void ShowPrintDialog::Update() {

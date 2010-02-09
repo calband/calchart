@@ -53,12 +53,15 @@ public:
 		  wxFrame *parent, const wxString& title,
 		  bool isModal = false,
 		  int x = -1, int y = -1,
-		  int width = -1, int height = -1);
+		  int width = 600, int height = -1);
   ~ShowPrintDialog();
   void OnCloseWindow(wxCloseEvent& event);
 
   inline bool Okay() { return ok; };
   void Update();
+	void ShowPrintOk(wxCommandEvent&);
+	void ShowPrintClose(wxCommandEvent&);
+	void ShowPrintSelect(wxCommandEvent&);
 
   CC_descr *show_descr;
   bool eps;

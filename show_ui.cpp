@@ -36,6 +36,9 @@ extern ShowModeList *modelist;
 BEGIN_EVENT_TABLE(StuntSheetPicker, wxFrame)
   EVT_CLOSE(StuntSheetPicker::OnCloseWindow)
   EVT_SIZE(StuntSheetPicker::OnSize)
+  EVT_BUTTON(StuntSheetPicker_Close,StuntSheetPicker::SheetPickerClose)
+  EVT_BUTTON(StuntSheetPicker_All,StuntSheetPicker::SheetPickerAll)
+  EVT_BUTTON(StuntSheetPicker_None,StuntSheetPicker::SheetPickerNone)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(PointPicker, wxFrame)
@@ -152,17 +155,14 @@ void CC_WinNodeInfo::SetDescr(wxWindow* win) {
   }
 }
 
-static void SheetPickerClose(wxButton& button, wxEvent&) {
-  ((StuntSheetPicker*)button.GetParent()->GetParent())->Close();
+void StuntSheetPicker::SheetPickerClose(wxCommandEvent&) {
+  Close();
 }
 
-static void SheetPickerAll(wxButton& button, wxEvent&) {
-  StuntSheetPicker* picker =
-    (StuntSheetPicker*)button.GetParent()->GetParent();
-
-  for (unsigned i=0; i < picker->show->GetNumSheets(); i++) {
-    picker->Set(i, true);
-    picker->show->winlist->SelectSheet(picker, i);
+void StuntSheetPicker::SheetPickerAll(wxCommandEvent&) {
+  for (unsigned i=0; i < show->GetNumSheets(); i++) {
+    Set(i, true);
+    show->winlist->SelectSheet(this, i);
   }
 }
 
@@ -170,28 +170,24 @@ void StuntSheetPicker::OnSize(wxSizeEvent& event) {
 	Layout();
 }
 
-static void SheetPickerNone(wxButton& button, wxEvent&) {
-  StuntSheetPicker* picker =
-    (StuntSheetPicker*)button.GetParent()->GetParent();
-
-  for (unsigned i=0; i < picker->show->GetNumSheets(); i++) {
-    picker->Set(i, false);
-    picker->show->winlist->SelectSheet(picker, i);
+void StuntSheetPicker::SheetPickerNone(wxCommandEvent&) {
+  for (unsigned i=0; i < show->GetNumSheets(); i++) {
+    Set(i, false);
+    show->winlist->SelectSheet(this, i);
   }
 }
 
-static void SheetPickerClick(wxListBox& list, wxCommandEvent&) {
+void StuntSheetPicker::SheetPickerClick(wxCommandEvent&) {
   unsigned n;
   bool sel;
   CC_sheet *sheet = NULL;
 
-  StuntSheetPicker *picker = (StuntSheetPicker*)list.GetParent()->GetParent();
-  for (n = 0, sheet = picker->show->GetSheet(); sheet != NULL;
+  for (n = 0, sheet = show->GetSheet(); sheet != NULL;
        n++, sheet = sheet->next) {
-    sel = picker->Get(n);
+    sel = Get(n);
     if (sheet->picked != sel) {
       sheet->picked = sel;
-      picker->show->winlist->SelectSheet(picker, n);
+      show->winlist->SelectSheet(this, n);
     }
   }
 }
@@ -205,60 +201,31 @@ show(shw) {
   // Give it an icon
   SetBandIcon(this);
 
-  SetAutoLayout(true);
-
-  panel = new wxPanel(this);
-
-  wxButton *closeBut = new wxButton(panel, -1,
+	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* horizontalsizer = new wxBoxSizer(wxVERTICAL);
+  wxButton *closeBut = new wxButton(this, StuntSheetPicker_Close,
 				    wxT("&Close"));
-  wxLayoutConstraints *bt0 = new wxLayoutConstraints;
-  bt0->left.SameAs(panel, wxLeft, 5);
-  bt0->top.SameAs(panel, wxTop, 5);
-  bt0->width.AsIs();
-  bt0->height.AsIs();
-  closeBut->SetConstraints(bt0);
+  closeBut->SetDefault();
+	horizontalsizer->Add(closeBut, 0, wxALL, 5 );
 
   if (multi) {
-    wxButton *allBut = new wxButton(panel, -1,
+    wxButton *allBut = new wxButton(this, StuntSheetPicker_All,
 				    wxT("&All"));
-    wxLayoutConstraints *bt1 = new wxLayoutConstraints;
-    bt1->left.RightOf(closeBut, 5);
-    bt1->top.SameAs(closeBut, wxTop);
-    bt1->width.AsIs();
-    bt1->height.AsIs();
-    allBut->SetConstraints(bt1);
-
-    wxButton *noneBut = new wxButton(panel, -1,
+	horizontalsizer->Add(allBut, 0, wxALL, 5 );
+    wxButton *noneBut = new wxButton(this, StuntSheetPicker_None,
 				     wxT("&None"));
-    wxLayoutConstraints *bt2 = new wxLayoutConstraints;
-    bt2->left.RightOf(allBut, 5);
-    bt2->top.SameAs(closeBut, wxTop);
-    bt2->width.AsIs();
-    bt2->height.AsIs();
-    noneBut->SetConstraints(bt2);
+	horizontalsizer->Add(noneBut, 0, wxALL, 5 );
   }
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
-  closeBut->SetDefault();
 
-  list = new wxListBox(panel, -1);
+  list = new wxListBox(this, -1);
   SetListBoxEntries();
-  wxLayoutConstraints *b1 = new wxLayoutConstraints;
-  b1->left.SameAs(panel, wxLeft, 5);
-  b1->top.Below(closeBut, 5);
-  b1->right.SameAs(panel, wxRight, 5);
-  b1->bottom.SameAs(panel, wxBottom, 5);
-  list->SetConstraints(b1);
-
-  wxLayoutConstraints *c1 = new wxLayoutConstraints;
-  c1->left.SameAs(this, wxLeft);
-  c1->top.SameAs(this, wxTop);
-  c1->right.SameAs(this, wxRight);
-  c1->bottom.SameAs(this, wxBottom);
-  panel->SetConstraints(c1);
+	topsizer->Add(list, 0, wxALL, 5 );
 
   node = new CC_WinNodePicker(lst, this);
 
-  Layout();
+	SetSizer(topsizer);
 
   Show(true);
 }

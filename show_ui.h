@@ -81,6 +81,12 @@ private:
   ShowInfoReq *inforeq;
 };
 
+enum { 
+	StuntSheetPicker_Close = 1200,
+	StuntSheetPicker_All,
+	StuntSheetPicker_None,
+	StuntSheetPicker_Click,
+};
 class StuntSheetPicker : public wxFrame
 {
 public:
@@ -89,6 +95,7 @@ public:
 		   int x = -1, int y = -1, int width = 250, int height = 300);
   ~StuntSheetPicker();
   void OnCloseWindow(wxCloseEvent& event);
+  void OnClose(wxCommandEvent& event);
   void OnSize(wxSizeEvent& event);
 
   inline bool Okay() { return ok; };
@@ -102,10 +109,13 @@ public:
 
   CC_show *show;
 private:
+	void SheetPickerClose(wxCommandEvent&);
+	void SheetPickerAll(wxCommandEvent&);
+	void SheetPickerNone(wxCommandEvent&);
+	void SheetPickerClick(wxCommandEvent&);
   void SetListBoxEntries();
 
   bool ok;
-  wxPanel *panel;
   wxListBox *list;
   CC_WinNodePicker *node;
 
