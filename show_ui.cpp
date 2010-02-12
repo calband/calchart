@@ -33,14 +33,6 @@
 
 extern ShowModeList *modelist;
 
-BEGIN_EVENT_TABLE(StuntSheetPicker, wxFrame)
-  EVT_CLOSE(StuntSheetPicker::OnCloseWindow)
-  EVT_SIZE(StuntSheetPicker::OnSize)
-  EVT_BUTTON(StuntSheetPicker_Close,StuntSheetPicker::SheetPickerClose)
-  EVT_BUTTON(StuntSheetPicker_All,StuntSheetPicker::SheetPickerAll)
-  EVT_BUTTON(StuntSheetPicker_None,StuntSheetPicker::SheetPickerNone)
-END_EVENT_TABLE()
-
 BEGIN_EVENT_TABLE(PointPicker, wxFrame)
   EVT_CLOSE(PointPicker::OnCloseWindow)
   EVT_BUTTON(PointPicker_PointPickerClose,PointPicker::PointPickerClose)
@@ -55,40 +47,6 @@ BEGIN_EVENT_TABLE(ShowInfoReq, wxFrame)
   EVT_BUTTON(ShowInfoReq_ShowInfoSetLabels,ShowInfoReq::ShowInfoSetLabels)
   EVT_CHOICE(ShowInfoReq_ShowInfoModeChoice,ShowInfoReq::ShowInfoModeChoice)
 END_EVENT_TABLE()
-
-CC_WinNodePicker::CC_WinNodePicker(CC_WinList *lst, StuntSheetPicker *req)
-: CC_WinNode(lst), picker(req) {}
-
-void CC_WinNodePicker::SetShow(CC_show *shw) {
-  picker->show = shw;
-  picker->Update();
-}
-
-void CC_WinNodePicker::AddSheet(unsigned) {
-  picker->Update();
-}
-
-void CC_WinNodePicker::DeleteSheet(unsigned) {
-  picker->Update();
-}
-
-void CC_WinNodePicker::AppendSheets() {
-  picker->Update();
-}
-
-void CC_WinNodePicker::RemoveSheets(unsigned) {
-  picker->Update();
-}
-
-void CC_WinNodePicker::ChangeTitle(unsigned) {
-  picker->Update();
-}
-
-void CC_WinNodePicker::SelectSheet(wxWindow *win, unsigned sht) {
-  if (win != picker) {
-    picker->Set(sht, picker->show->GetNthSheet(sht)->picked);
-  }
-}
 
 CC_WinNodePointPicker::CC_WinNodePointPicker(CC_WinList *lst,
 					     PointPicker *req)
@@ -153,114 +111,6 @@ void CC_WinNodeInfo::SetDescr(wxWindow* win) {
   if (win != inforeq) {
     inforeq->UpdateDescr(true);
   }
-}
-
-void StuntSheetPicker::SheetPickerClose(wxCommandEvent&) {
-  Close();
-}
-
-void StuntSheetPicker::SheetPickerAll(wxCommandEvent&) {
-  for (unsigned i=0; i < show->GetNumSheets(); i++) {
-    Set(i, true);
-    show->winlist->SelectSheet(this, i);
-  }
-}
-
-void StuntSheetPicker::OnSize(wxSizeEvent& event) {
-	Layout();
-}
-
-void StuntSheetPicker::SheetPickerNone(wxCommandEvent&) {
-  for (unsigned i=0; i < show->GetNumSheets(); i++) {
-    Set(i, false);
-    show->winlist->SelectSheet(this, i);
-  }
-}
-
-void StuntSheetPicker::SheetPickerClick(wxCommandEvent&) {
-  unsigned n;
-  bool sel;
-  CC_sheet *sheet = NULL;
-
-  for (n = 0, sheet = show->GetSheet(); sheet != NULL;
-       n++, sheet = sheet->next) {
-    sel = Get(n);
-    if (sheet->picked != sel) {
-      sheet->picked = sel;
-      show->winlist->SelectSheet(this, n);
-    }
-  }
-}
-
-StuntSheetPicker::StuntSheetPicker(CC_show *shw, CC_WinList *lst,
-				   bool multi, wxFrame *frame,
-				   const wxString& title,
-				   int x, int y, int width, int height):
-wxFrame(frame, -1, title, wxPoint(x, y), wxSize(width, height)),
-show(shw) {
-  // Give it an icon
-  SetBandIcon(this);
-
-	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-	wxBoxSizer* horizontalsizer = new wxBoxSizer(wxVERTICAL);
-  wxButton *closeBut = new wxButton(this, StuntSheetPicker_Close,
-				    wxT("&Close"));
-  closeBut->SetDefault();
-	horizontalsizer->Add(closeBut, 0, wxALL, 5 );
-
-  if (multi) {
-    wxButton *allBut = new wxButton(this, StuntSheetPicker_All,
-				    wxT("&All"));
-	horizontalsizer->Add(allBut, 0, wxALL, 5 );
-    wxButton *noneBut = new wxButton(this, StuntSheetPicker_None,
-				     wxT("&None"));
-	horizontalsizer->Add(noneBut, 0, wxALL, 5 );
-  }
-	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
-
-
-  list = new wxListBox(this, -1);
-  SetListBoxEntries();
-	topsizer->Add(list, 0, wxALL, 5 );
-
-  node = new CC_WinNodePicker(lst, this);
-
-	SetSizer(topsizer);
-
-  Show(true);
-}
-
-StuntSheetPicker::~StuntSheetPicker()
-{
-  if (node) {
-    node->Remove();
-    delete node;
-  }
-}
-
-void StuntSheetPicker::OnCloseWindow(wxCloseEvent& event) {
-  Destroy();
-}
-
-void StuntSheetPicker::Update() {
-  list->Clear();
-  SetListBoxEntries();
-}
-
-void StuntSheetPicker::SetListBoxEntries() {
-  CC_sheet *sheet;
-  wxString *text;
-  unsigned n;
-
-  text = new wxString[show->GetNumSheets()];
-  for (n = 0, sheet = show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next) {
-    text[n] = sheet->GetName();
-  }
-  list->Set(show->GetNumSheets(), text);
-  for (n = 0, sheet = show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next) {
-    list->SetSelection(n, sheet->picked);
-  }
-  delete [] text;
 }
 
 void PointPicker::PointPickerClose(wxCommandEvent&) {

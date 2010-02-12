@@ -420,7 +420,6 @@ private:
 #define DEF_HASH_E 52
 
 class ShowUndoList;
-class StuntSheetPicker;
 class ShowInfoReq;
 class ShowMode;
 

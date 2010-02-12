@@ -30,6 +30,7 @@
 #include "print_ui.h"
 #include "show_ui.h"
 #include "confgr.h"
+#include <set>
 
 #include <wx/filename.h>
 
@@ -174,8 +175,35 @@ void ShowPrintDialog::ShowPrintOk(wxCommandEvent&) {
 }
 
 void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&) {
-  (void)new StuntSheetPicker(show_descr->show, node->GetList(),
-			     true, frame, wxT("Select stuntsheets"));
+	wxArrayString choices;
+	CC_sheet *sheet;
+	size_t n;
+	for (sheet = show_descr->show->GetSheet(); sheet!=NULL; sheet = sheet->next)
+	{
+		choices.Add(sheet->GetName());
+	}
+	wxMultiChoiceDialog dialog(this,
+		wxT("Choose which pages to print"),
+		wxT("Pagest to Print"),
+		choices);
+	wxArrayInt markedChoices;
+	for (n = 0, sheet = show_descr->show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
+	{
+		if (sheet->picked)
+			markedChoices.Add(n);
+	}
+	dialog.SetSelections(markedChoices);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxArrayInt selections = dialog.GetSelections();
+		// build up a set of what's been selected:
+		std::set<int> selected;
+		for (n = 0; n < selections.GetCount(); ++n)
+			selected.insert(selections[n]);
+		// now mark the sheets
+		for (n = 0, sheet = show_descr->show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
+			sheet->picked = (selected.find(n) != selected.end());
+	}
 }
 
 ShowPrintDialog::ShowPrintDialog(CC_descr *dcr, CC_WinList *lst,

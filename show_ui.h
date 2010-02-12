@@ -33,25 +33,8 @@
 #include "show.h"
 #include "basic_ui.h"
 
-class StuntSheetPicker;
 class PointPicker;
 class ShowInfoReq;
-
-class CC_WinNodePicker : public CC_WinNode {
-public:
-  CC_WinNodePicker(CC_WinList *lst, StuntSheetPicker *req);
-
-  virtual void SetShow(CC_show *shw);
-  virtual void AddSheet(unsigned sht);
-  virtual void DeleteSheet(unsigned sht);
-  virtual void RemoveSheets(unsigned num);
-  virtual void AppendSheets();
-  virtual void ChangeTitle(unsigned sht);
-  virtual void SelectSheet(wxWindow* win, unsigned sht);
-
-private:
-  StuntSheetPicker *picker;
-};
 
 class CC_WinNodePointPicker : public CC_WinNode {
 public:
@@ -79,47 +62,6 @@ public:
 
 private:
   ShowInfoReq *inforeq;
-};
-
-enum { 
-	StuntSheetPicker_Close = 1200,
-	StuntSheetPicker_All,
-	StuntSheetPicker_None,
-	StuntSheetPicker_Click,
-};
-class StuntSheetPicker : public wxFrame
-{
-public:
-  StuntSheetPicker(CC_show *shw, CC_WinList *lst,
-		   bool multi, wxFrame *frame, const wxString& title,
-		   int x = -1, int y = -1, int width = 250, int height = 300);
-  ~StuntSheetPicker();
-  void OnCloseWindow(wxCloseEvent& event);
-  void OnClose(wxCommandEvent& event);
-  void OnSize(wxSizeEvent& event);
-
-  inline bool Okay() { return ok; };
-
-  inline bool Get(unsigned n) { return list->IsSelected(n); }
-  inline void Set(unsigned n, bool v = true) {
-    list->SetSelection(n,v);
-    show->GetNthSheet(n)->picked = v;
-  }
-  void Update();
-
-  CC_show *show;
-private:
-	void SheetPickerClose(wxCommandEvent&);
-	void SheetPickerAll(wxCommandEvent&);
-	void SheetPickerNone(wxCommandEvent&);
-	void SheetPickerClick(wxCommandEvent&);
-  void SetListBoxEntries();
-
-  bool ok;
-  wxListBox *list;
-  CC_WinNodePicker *node;
-
-  DECLARE_EVENT_TABLE()
 };
 
 enum { 
