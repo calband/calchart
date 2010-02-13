@@ -664,7 +664,7 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const {
     CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
 		       dot_x, dot_y, dot_routines[pts[i].sym]));
     CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
-		       show->GetPointLabel(i), dot_x, dot_y,
+		       static_cast<const char*>(show->GetPointLabel(i).mb_str()), dot_x, dot_y,
 		       pts[i].GetFlip() ? "donumber2" : "donumber"));
   }
   if (show->GetBoolDoCont()) {
@@ -781,7 +781,7 @@ const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const {
     CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
 		       dot_x, dot_y, dot_routines[pts[i].sym]));
     CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
-		       show->GetPointLabel(i), dot_x, dot_y,
+		       static_cast<const char*>(show->GetPointLabel(i).mb_str()), dot_x, dot_y,
 		       (pts[i].flags & PNT_LABEL) ? "donumber2" : "donumber"));
   }
   if (show->GetBoolDoCont()) {
