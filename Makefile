@@ -27,7 +27,11 @@ SRCS = animate.cpp anim_ui.cpp basic_ui.cpp confgr.cpp cont.cpp cont_ui.cpp \
 SYNTHETIC_BASES = contscan.l contgram.y
 SYNTHETIC_SRCS = contscan.cpp contgram.cpp
 SYNTHETIC_FILES = $(SYNTHETIC_SRCS) contgram.h contgram.output
-OBJS = $(SRCS:.cpp=.o) $(SYNTHETIC_SRCS:.cpp=.o)
+
+OBJDIR = build
+
+OBJS += $(patsubst %.cpp, $(OBJDIR)/%.o, $(SRCS)) 
+OBJS += $(patsubst %.cpp, $(OBJDIR)/%.o, $(SYNTHETIC_SRCS))
 
 PSFILES = postscript/calchart.ps postscript/setup.sh postscript/vmstatus.sh \
 	postscript/zllrbach.fig
@@ -63,7 +67,8 @@ MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 CXXFLAGS := `wx-config --cflags` $(USER_CXXFLAGS)
 CXX = c++
 
-%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
 %.cpp %.h: %.y
@@ -87,7 +92,7 @@ all: calchart $(PS_SYNTH_FILES) charthlp.xlp
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ `wx-config --libs`
 
-contscan.o: contgram.h
+$(OBJDIR)/contscan.o: contgram.h
 
 TAGS: $(SRCS) $(HEADERS)
 	etags $(SRCS) $(HEADERS)
@@ -166,6 +171,7 @@ zip:: chartsrc.zip
 
 clean::
 	rm -f $(OBJS) $(SYNTHETIC_FILES) $(PS_SYNTH_FILES) $(IMAGES_SYNTH) calchart core *~ runtime/*~ *.bak TAGS
+	rm -rf $(OBJDIR)
 
 depend::
 	rm -f depend
