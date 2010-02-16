@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8DD76F6A0486A84900D96B5E /* calchart.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* calchart.1 */; };
 		C70D22E20FEEC12200383D23 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70D22C20FEEC12200383D23 /* anim_ui.cpp */; };
 		C70D22E40FEEC12200383D23 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70D22C60FEEC12200383D23 /* basic_ui.cpp */; };
 		C70D22E50FEEC12200383D23 /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70D22C90FEEC12200383D23 /* confgr.cpp */; };
@@ -34,7 +33,6 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				8DD76F6A0486A84900D96B5E /* calchart.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
