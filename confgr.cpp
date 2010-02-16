@@ -586,7 +586,6 @@ wxString ReadConfig(const wxString& path) {
   }
 
   if (wxColourDisplay()) {
-    unsigned char *rd, *gd, *bd;
     int j;
     int n = 0;
     const wxColour *c1, *c2;
@@ -607,9 +606,7 @@ wxString ReadConfig(const wxString& path) {
 	CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
       }
     }
-    rd = new unsigned char[COLOR_NUM];
-    gd = new unsigned char[COLOR_NUM];
-    bd = new unsigned char[COLOR_NUM];
+    unsigned char rd[COLOR_NUM], gd[COLOR_NUM], bd[COLOR_NUM];
     CalChartPalette = new wxPalette();
     for (i = 0; i < COLOR_NUM; i++) {
       /* old code to prevent white and black from being allocated
@@ -650,9 +647,6 @@ wxString ReadConfig(const wxString& path) {
       }
     }
     CalChartPalette->Create(n, rd, gd, bd);
-    delete [] rd;
-    delete [] gd;
-    delete [] bd;
   } else {
     for (i=0; i<COLOR_NUM; i++) {
       if (CalChartPens[i] == NULL) {

@@ -505,23 +505,23 @@ CC_coord& CC_coord::operator = (const cc_oldcoord& old) {
 
 CC_sheet::CC_sheet(CC_show *shw)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), picked(true), beats(1) {
-    pts = new CC_point[show->GetNumPoints()];
+  numanimcont(0), picked(true), beats(1), pts(show->GetNumPoints())
+{
 }
 
 CC_sheet::CC_sheet(CC_show *shw, const wxString& newname)
 : next(NULL), animcont(NULL), show(shw),
-  numanimcont(0), picked(true), beats(1), pts(NULL), name(newname) {
-    pts = new CC_point[show->GetNumPoints()];
+  numanimcont(0), picked(true), beats(1), pts(show->GetNumPoints()), name(newname)
+{
 }
 
 CC_sheet::CC_sheet(CC_sheet *sht)
 : next(NULL), show(sht->show),
-  picked(sht->picked), beats(1), name(sht->name), number(sht->number)
+  picked(sht->picked), beats(1), pts(show->GetNumPoints()), name(sht->name), number(sht->number)
 {
   int i;
 
-  pts = new CC_point[show->GetNumPoints()];
+
   for (i = 0; i < show->GetNumPoints(); i++) {
     pts[i] = sht->pts[i];
     pts[i].sym = SYMBOL_PLAIN;
@@ -535,7 +535,6 @@ CC_sheet::CC_sheet(CC_sheet *sht)
 CC_sheet::~CC_sheet() {
   CC_continuity *conttmp;
 
-  if (pts) delete [] pts;
   if (animcont) {
     while (animcont) {
       conttmp = animcont->next;
@@ -602,12 +601,11 @@ void CC_sheet::SetContinuity(unsigned i) {
 }
 
 void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
-  CC_point *newpts;
   unsigned i, j, cpy, col;
   CC_coord c, coff(show->mode->FieldOffset());
   CC_continuity *plaincont;
 
-  newpts = new CC_point[num];
+  std::vector<CC_point> newpts(num);
   cpy = MIN(show->GetNumPoints(), num);
   for (i = 0; i < cpy; i++) {
     newpts[i] = pts[i];
@@ -627,18 +625,14 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
       newpts[i].ref[j] = newpts[i].pos;
     }
   }
-  delete [] pts;
   pts = newpts;
 }
 
 void CC_sheet::RelabelSheet(unsigned *table) {
-  CC_point *newpts;
-
-  newpts = new CC_point[show->GetNumPoints()];
+  std::vector<CC_point> newpts(show->GetNumPoints());
   for (unsigned i = 0; i < show->GetNumPoints(); i++) {
     newpts[i] = pts[table[i]];
   }
-  delete [] pts;
   pts = newpts;
 }
 

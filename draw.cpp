@@ -52,7 +52,7 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
     show->mode->Draw(dc);
   }
 
-  if (pts) {
+  if (!pts.empty()) {
     dc->SetFont(*pointLabelFont);
     dc->SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
     circ_r = FLOAT2COORD(dot_ratio);

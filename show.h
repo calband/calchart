@@ -411,7 +411,7 @@ public:
   bool picked; /* for requestors like printing */
 private:
   unsigned short beats;
-  CC_point *pts;
+  std::vector<CC_point> pts;
   wxString name;
   wxString number;
 };
