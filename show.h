@@ -481,8 +481,8 @@ public:
 
   inline const wxString& GetPointLabel(unsigned i) const { return pt_labels[i]; }
   inline wxString& GetPointLabel(unsigned i) { return pt_labels[i]; }
-  inline const wxString* GetPointLabels() const { return pt_labels; }
-  inline wxString* GetPointLabels() { return pt_labels; }
+  inline const wxString* GetPointLabels() const { return &pt_labels[0]; }
+  inline wxString* GetPointLabels() { return &pt_labels[0]; }
   inline bool GetBoolLandscape() const { return print_landscape; }
   inline bool GetBoolDoCont() const { return print_do_cont; }
   inline bool GetBoolDoContSheet() const { return print_do_cont_sheet; }
@@ -522,7 +522,7 @@ private:
   unsigned short numpoints;
   unsigned short numsheets;
   CC_sheet *sheets;
-  wxString *pt_labels;
+  std::vector<wxString> pt_labels;
   bool *selections; // array for each point
   std::vector<unsigned> selectionList; // order of selections
   mutable bool modified;

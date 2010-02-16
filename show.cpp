@@ -1047,6 +1047,7 @@ bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
 // Create a new show
 CC_show::CC_show(unsigned npoints)
 :okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, wxT("1"))),
+	pt_labels(npoints),
  modified(false), print_landscape(false), print_do_cont(true),
  print_do_cont_sheet(true) {
   wxString tmpname;
@@ -1057,12 +1058,6 @@ CC_show::CC_show(unsigned npoints)
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = modelist->Default();
   if (npoints) {
-    pt_labels = new wxString[npoints];
-    if (pt_labels == NULL) {
-      // Out of mem!
-      AddError(nomem_str);
-      return;
-    }
     for (unsigned int i = 0; i < npoints; i++) {
       pt_labels[i].Printf(wxT("%u"), i);
     }
@@ -1074,7 +1069,6 @@ CC_show::CC_show(unsigned npoints)
     }
     UnselectAll();
   } else {
-    pt_labels = NULL;
     selections = NULL;
   }
   sheets->animcont = new CC_continuity;
@@ -1331,7 +1325,7 @@ enum CONT_PARSE_MODE {
 
 // Load a show
 CC_show::CC_show(const wxString& filestr)
-:okay(true), numpoints(0), numsheets(0), sheets(NULL), pt_labels(NULL),
+:okay(true), numpoints(0), numsheets(0), sheets(NULL),
  selections(NULL), modified(false), print_landscape(false),
  print_do_cont(true), print_do_cont_sheet(true) {
   cc_oldpoint *diskpts;
@@ -1400,7 +1394,7 @@ CC_show::CC_show(const wxString& filestr)
       AddError(badfile_mas_str);
       return;
     }
-    pt_labels = new wxString[numpoints];
+    pt_labels.assign(numpoints, wxString());
     selections = new bool[numpoints];
     UnselectAll();
 
@@ -1638,7 +1632,6 @@ CC_show::~CC_show() {
 #endif
   if (winlist) delete winlist;
   if (undolist) delete undolist;
-  if (pt_labels) delete [] pt_labels;
   while (sheets) {
     tmp = sheets->next;
     delete sheets;
@@ -2322,8 +2315,6 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
   unsigned i, cpy;
   CC_sheet *sht;
 
-  wxString *new_labels;
-
   for (sht = sheets; sht != NULL; sht = sht->next) {
     sht->SetNumPoints(num, columns);
   }
@@ -2332,7 +2323,7 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
 
   delete selections;
   selections = new bool[num];
-  new_labels = new wxString[num];
+  std::vector<wxString> new_labels(num);
   for (i = 0; i < num; i++) {
     selections[i] = false;
   }
@@ -2343,7 +2334,6 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
   for (; i < num; i++) {
     new_labels[i] = wxT("");
   }
-  delete [] pt_labels;
   pt_labels = new_labels;
 
   numpoints = num;
@@ -2353,7 +2343,7 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns) {
 
 void CC_show::SetNumPointsInternal(unsigned num) {
   numpoints = num;
-  pt_labels = new wxString[numpoints];
+  pt_labels.assign(numpoints, wxString());
   selections = new bool[numpoints];
   UnselectAll();
 }
