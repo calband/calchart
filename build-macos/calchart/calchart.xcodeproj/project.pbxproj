@@ -40,7 +40,6 @@
 
 /* Begin PBXFileReference section */
 		8DD76F6C0486A84900D96B5E /* calchart */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = calchart; sourceTree = BUILT_PRODUCTS_DIR; };
-		C6859E8B029090EE04C91782 /* calchart.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = calchart.1; sourceTree = "<group>"; };
 		C70D22C20FEEC12200383D23 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = anim_ui.cpp; path = ../../anim_ui.cpp; sourceTree = SOURCE_ROOT; };
 		C70D22C30FEEC12200383D23 /* anim_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = anim_ui.h; path = ../../anim_ui.h; sourceTree = SOURCE_ROOT; };
 		C70D22C50FEEC12200383D23 /* animate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animate.h; path = ../../animate.h; sourceTree = SOURCE_ROOT; };
@@ -149,7 +148,6 @@
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
-				C6859E8B029090EE04C91782 /* calchart.1 */,
 			);
 			name = Documentation;
 			sourceTree = "<group>";
