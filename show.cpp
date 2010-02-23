@@ -1117,13 +1117,13 @@ static const char* load_show_SIZE(INGLchunk* chunk) {
   if (chunk->size != 4) {
     return "Bad SIZE chunk";
   }
-  show->SetNumPointsInternal(get_big_long(chunk->data));
+  show->SetNumPointsInternal(get_big_long(&chunk->data[0]));
   return NULL;
 }
 
 static const char* load_show_LABL(INGLchunk* chunk) {
   unsigned i;
-  const char *str = (const char*)chunk->data;
+  const char *str = (const char*)&chunk->data[0];
   CC_show *show = (CC_show*)chunk->prev->userdata;
   for (i = 0; i < show->GetNumPoints(); i++) {
     show->GetPointLabel(i) = wxString::FromUTF8(str);
@@ -1139,7 +1139,7 @@ static const char* load_show_MODE(INGLchunk* /*chunk*/) {
 static const char* load_show_DESC(INGLchunk* chunk) {
   CC_show *show = (CC_show*)chunk->prev->userdata;
 
-  wxString s(wxString::FromUTF8((const char*)chunk->data));
+  wxString s(wxString::FromUTF8((const char*)&chunk->data[0]));
   show->SetDescr(s);
 
   return NULL;
@@ -1148,7 +1148,7 @@ static const char* load_show_DESC(INGLchunk* chunk) {
 static const char* load_show_NAME(INGLchunk* chunk) {
   CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
   
-  wxString s(wxString::FromUTF8((const char*)chunk->data));
+  wxString s(wxString::FromUTF8((const char*)&chunk->data[0]));
   sheet->SetName(s);
 
   return NULL;
@@ -1160,7 +1160,7 @@ static const char* load_show_DURA(INGLchunk* chunk) {
   if (chunk->size != 4) {
     return "Bad DURA chunk";
   }
-  sheet->SetBeats(get_big_long(chunk->data));
+  sheet->SetBeats(get_big_long(&chunk->data[0]));
 
   return NULL;
 }
@@ -1174,7 +1174,7 @@ static const char* load_show_POS(INGLchunk* chunk) {
   if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4) {
     return "Bad POS chunk";
   }
-  data = (uint8_t*)chunk->data;
+  data = (uint8_t*)&chunk->data[0];
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     c.x = get_big_word(data);
     data += 2;
@@ -1194,7 +1194,7 @@ static const char* load_show_SYMB(INGLchunk* chunk) {
   if (chunk->size != sheet->show->GetNumPoints()) {
     return "Bad SYMB chunk";
   }
-  data = (uint8_t *)chunk->data;
+  data = (uint8_t *)&chunk->data[0];
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(data++));
   }
@@ -1210,7 +1210,7 @@ static const char* load_show_TYPE(INGLchunk* chunk) {
   if (chunk->size != sheet->show->GetNumPoints()) {
     return "Bad TYPE chunk";
   }
-  data = (uint8_t *)chunk->data;
+  data = (uint8_t *)&chunk->data[0];
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     sheet->GetPoint(i).cont = *(data++);
   }
@@ -1227,7 +1227,7 @@ static const char* load_show_REFP(INGLchunk* chunk) {
   if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4+2) {
     return "Bad REFP chunk";
   }
-  data = (uint8_t*)chunk->data;
+  data = (uint8_t*)&chunk->data[0];
   ref = get_big_word(data);
   data += 2;
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
@@ -1249,7 +1249,7 @@ static const char* load_show_SHET_LABL(INGLchunk* chunk) {
   if (chunk->size != sheet->show->GetNumPoints()) {
     return "Bad LABL chunk";
   }
-  data = (uint8_t *)chunk->data;
+  data = (uint8_t *)&chunk->data[0];
   for (i = 0; i < sheet->show->GetNumPoints(); i++) {
     if (*(data++)) {
       sheet->GetPoint(i).Flip();
@@ -1270,18 +1270,18 @@ static const char* load_show_CONT(INGLchunk* chunk) {
   if (chunk->size < 3) { // one byte num + two nils minimum
     return badcontchunk;
   }
-  if (((const char*)chunk->data)[chunk->size-1] != '\0') { // make sure we have a nil
+  if (((const char*)&chunk->data[0])[chunk->size-1] != '\0') { // make sure we have a nil
     return badcontchunk;
   }
-  name = (const char *)chunk->data + 1;
+  name = (const char *)&chunk->data[0] + 1;
   num = strlen(name);
   if (chunk->size < num + 3) { // check for room for text string
     return badcontchunk;
   }
-  text = (const char *)chunk->data + 2 + strlen(name);
+  text = (const char *)&chunk->data[0] + 2 + strlen(name);
 
   newcont = new CC_continuity;
-  newcont->num = *((uint8_t *)chunk->data);
+  newcont->num = *((uint8_t *)&chunk->data[0]);
   wxString namestr(wxString::FromUTF8(name));
   newcont->SetName(namestr);
   wxString textstr(wxString::FromUTF8(text));

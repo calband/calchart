@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #include <wx/defs.h> // For basic wx defines
 
@@ -51,7 +52,7 @@ public:
   INGLchunk *prev;
   INGLid name;
   INGLid size;
-  void *data;
+  std::vector<uint8_t> data;
   void *userdata;
 };
 

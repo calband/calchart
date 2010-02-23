@@ -288,10 +288,9 @@ void AnimateCommandRotate::ClipBeats(unsigned beats) {
 }
 
 AnimateSheet::AnimateSheet(unsigned numpoints)
-: next(NULL), prev(NULL), numpts(numpoints) {
+: next(NULL), prev(NULL), pts(numpoints), numpts(numpoints) {
   unsigned i;
 
-  pts = new AnimatePoint[numpts];
   commands = new AnimateCommand*[numpts];
   end_cmds = new AnimateCommand*[numpts];
   for (i = 0; i < numpts; i++) {
@@ -304,7 +303,6 @@ AnimateSheet::~AnimateSheet() {
   AnimateCommand *cmd, *tmp;
   unsigned i;
 
-  if (pts) delete [] pts;
   if (commands) {
     for (i = 0; i < numpts; i++) {
       cmd = commands[i];

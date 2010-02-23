@@ -90,9 +90,7 @@ ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref)
   unsigned i, j;
   
   num = sheet->GetNumSelectedPoints();
-  if (num > 0) {
-    elems = new ShowUndoMoveElem[num];
-  }
+  elems.assign(num, ShowUndoMoveElem());
   for (num=0,i=0; i < sheet->show->GetNumPoints(); i++) {
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
@@ -112,9 +110,7 @@ ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
 :ShowUndo(old->sheetidx), num(old->num), refnum(old->refnum) {
   unsigned i;
 
-  if (num > 0) {
-    elems = new ShowUndoMoveElem[num];
-  }
+  elems.assign(num, ShowUndoMoveElem());
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
     elems[i].refmask = old->elems[i].refmask;
@@ -122,10 +118,8 @@ ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
   }
 }
     
-ShowUndoMove::~ShowUndoMove() {
-  if (num) {
-    delete [] elems;
-  }
+ShowUndoMove::~ShowUndoMove()
+{
 }
 
 int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
@@ -157,9 +151,7 @@ ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged)
   unsigned i;
   
   num = sheet->GetNumSelectedPoints();
-  if (num > 0) {
-    elems = new ShowUndoSymElem[num];
-  }
+  elems.assign(num, ShowUndoSymElem());
   for (num=0,i=0; i < sheet->show->GetNumPoints(); i++) {
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
@@ -174,9 +166,7 @@ ShowUndoSym::ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet)
 :ShowUndo(old->sheetidx), num(old->num), contchange(old->contchange) {
   unsigned i;
 
-  if (num > 0) {
-    elems = new ShowUndoSymElem[num];
-  }
+  elems.assign(num, ShowUndoSymElem());
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
     elems[i].sym = sheet->GetPoint(elems[i].idx).sym;
@@ -184,10 +174,8 @@ ShowUndoSym::ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet)
   }
 }
     
-ShowUndoSym::~ShowUndoSym() {
-  if (num) {
-    delete [] elems;
-  }
+ShowUndoSym::~ShowUndoSym()
+{
 }
 
 int ShowUndoSym::Undo(CC_show *show, ShowUndo** newundo)
@@ -220,9 +208,7 @@ ShowUndoLbl::ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet)
   unsigned i;
   
   num = sheet->GetNumSelectedPoints();
-  if (num > 0) {
-    elems = new ShowUndoLblElem[num];
-  }
+  elems.assign(num, ShowUndoLblElem());
   for (num=0,i=0; i < sheet->show->GetNumPoints(); i++) {
     if (sheet->show->IsSelected(i)) {
       elems[num].idx = i;
@@ -236,19 +222,15 @@ ShowUndoLbl::ShowUndoLbl(ShowUndoLbl* old, CC_sheet *sheet)
 :ShowUndo(old->sheetidx), num(old->num) {
   unsigned i;
 
-  if (num > 0) {
-    elems = new ShowUndoLblElem[num];
-  }
+  elems.assign(num, ShowUndoLblElem());
   for (i = 0; i < num; i++) {
     elems[i].idx = old->elems[i].idx;
     elems[i].right = sheet->GetPoint(elems[i].idx).GetFlip();
   }
 }
     
-ShowUndoLbl::~ShowUndoLbl() {
-  if (num) {
-    delete [] elems;
-  }
+ShowUndoLbl::~ShowUndoLbl()
+{
 }
 
 int ShowUndoLbl::Undo(CC_show *show, ShowUndo** newundo)

@@ -161,7 +161,7 @@ public:
   void SetName(const wxChar *s);
 
   AnimateSheet *next, *prev;
-  AnimatePoint *pts;
+  std::vector<AnimatePoint> pts;
   AnimateCommand **commands;
   AnimateCommand **end_cmds;
   wxString name;

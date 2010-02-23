@@ -35,10 +35,10 @@ static char readerr_str[] = "Read error: check disk media";
 static char seekerr_str[] = "Seek error: file is corrupted";
 
 INGLchunk::INGLchunk()
-  : prev(NULL), data(NULL), userdata(NULL) {}
+  : prev(NULL), userdata(NULL) {}
 
-INGLchunk::~INGLchunk() {
-  if (data) delete data;
+INGLchunk::~INGLchunk()
+{
 }
 
 INGLread::INGLread(FILE *file)
@@ -130,8 +130,8 @@ void *INGLread::ParseFile(INGLhandler hndlrs[], unsigned num, StringPtr *error,
       } else {
 	if (hndl) {
 	  if (cnk->size > 0) {
-	    cnk->data = new unsigned char[cnk->size];
-	    if (fread(cnk->data, cnk->size, 1, fp) != 1) {
+	    cnk->data.assign(cnk->size, 0);
+	    if (fread(&cnk->data[0], cnk->size, 1, fp) != 1) {
 	      *error = readerr_str;
 	      return NULL;
 	    }

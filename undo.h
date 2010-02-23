@@ -32,6 +32,7 @@
 
 #include "show.h"
 #include <ostream>
+#include <deque>
 
 class ShowUndo {
 public:
@@ -82,7 +83,7 @@ public:
   virtual const wxChar *RedoDescription();
 private:
   unsigned num, refnum;
-  ShowUndoMoveElem *elems;
+  std::deque<ShowUndoMoveElem> elems;
 };
 
 // Point symbol changes
@@ -103,7 +104,7 @@ public:
   virtual const wxChar *RedoDescription();
 private:
   unsigned num;
-  ShowUndoSymElem *elems;
+  std::deque<ShowUndoSymElem> elems;
   bool contchange;
 };
 
@@ -124,7 +125,7 @@ public:
   virtual const wxChar *RedoDescription();
 private:
   unsigned num;
-  ShowUndoLblElem *elems;
+  std::deque<ShowUndoLblElem> elems;
 };
 
 // Copied stuntsheet
