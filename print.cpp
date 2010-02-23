@@ -556,7 +556,6 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const {
   Coord pmax = show->mode->MaxPosition().x;
   Coord fmin = show->mode->FieldOffset().x;
   Coord fmax = show->mode->FieldSize().x + fmin;
-  float fieldwidth = COORD2FLOAT(fieldsize.x);
   float fieldheight = COORD2FLOAT(fieldsize.y);
   float fieldoffx = COORD2FLOAT(fieldoff.x);
   float fieldoffy = COORD2FLOAT(fieldoff.y);

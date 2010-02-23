@@ -580,7 +580,7 @@ void PrintContCanvas::OnMouseEvent(wxMouseEvent& /*event*/) {
 }
 
 void PrintContCanvas::OnChar(wxKeyEvent& event) {
-  switch (event.KeyCode()) {
+  switch (event.GetKeyCode()) {
   case WXK_LEFT:
     if (cursorx > 0) {
       MoveCursor(MIN(maxcolumns-1,cursorx-1), cursory);
