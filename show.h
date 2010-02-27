@@ -43,6 +43,7 @@
 #include "linmath.h"
 
 #include <vector>
+#include <deque>
 
 typedef int16_t Coord;
 
@@ -103,7 +104,6 @@ public:
   virtual void FlushDescr();
   virtual void SetDescr(wxWindow* win);
 
-  CC_WinNode *next;
 protected:
   CC_WinList *list;
 };
@@ -146,7 +146,9 @@ public:
   virtual void SetDescr(wxWindow* win);
 
 private:
-  CC_WinNode *list;
+  std::deque<CC_WinNode*> list;
+  typedef std::deque<CC_WinNode*>::iterator NodeIter;
+  typedef std::deque<CC_WinNode*>::iterator NodeCIter;
 };
 
 class CC_WinListShow : public CC_WinList {
@@ -241,11 +243,7 @@ public:
 
 class CC_coord {
 public:
-  CC_coord(Coord xval = 0, Coord yval = 0) {
-    x = xval;
-    y = yval;
-  }
-  CC_coord(const CC_coord& c) { *this = c; }
+  CC_coord(Coord xval = 0, Coord yval = 0) : x(xval), y(yval) {}
   CC_coord(const cc_oldcoord& old) { *this = old; }
 
   float Magnitude() const;
@@ -256,10 +254,6 @@ public:
   bool Collides(const CC_coord& c) const;
 
   CC_coord& operator = (const cc_oldcoord& old);
-  inline CC_coord& operator = (const CC_coord& c) {
-    x = c.x; y = c.y;
-    return *this;
-  }
   inline CC_coord& operator += (const CC_coord& c) {
     x += c.x; y += c.y;
     return *this;
