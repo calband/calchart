@@ -153,7 +153,7 @@ wxFont *yardLabelFont;
 
 ShowModeList *modelist;
 
-BEGIN_EVENT_TABLE(TopFrame, wxFrame)
+BEGIN_EVENT_TABLE(TopFrame, CC_MDIChildFrame)
   EVT_CLOSE(TopFrame::OnCloseWindow)
 #ifdef CC_USE_MDI
   EVT_MENU(wxID_NEW, TopFrame::OnCmdNew)
@@ -784,6 +784,7 @@ TopFrame::~TopFrame() {
 
 void TopFrame::OnCloseWindow(wxCloseEvent& event) {
   window_list->CloseAllWindows();
+  Destroy();
 }
 
 #ifdef CC_USE_MDI
