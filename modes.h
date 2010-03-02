@@ -27,6 +27,7 @@
 #define _MODES_H_
 
 #include "show.h"
+#include <list>
 
 enum SHOW_TYPE { SHOW_STANDARD, SHOW_SPRINGSHOW };
 
@@ -54,8 +55,6 @@ public:
   inline CC_coord MaxPosition() { return size-offset; }
   inline const wxString& GetName() { return name; };
   CC_coord ClipPosition(const CC_coord& pos);
-
-  ShowMode *next;
 
 protected:
   CC_coord offset, size;
@@ -134,16 +133,22 @@ private:
 class ShowModeList
 {
 public:
+  typedef std::list<ShowMode*> Container;
+  typedef Container::iterator Iter;
+  typedef Container::const_iterator CIter;
   ShowModeList();
   ~ShowModeList();
 
-  void Add(ShowMode *mode);
-  ShowMode *Find(const wxString& name);
-  ShowMode *Default();
-  inline ShowMode *First() { return list; }
+  void Add(ShowMode *mode) { list.push_back(mode); }
+  ShowMode *Find (const wxString& name) const;
+  bool Empty() const { return list.empty(); }
+  CIter Begin() const { return list.begin(); }
+  Iter Begin() { return list.begin(); }
+  CIter End() const { return list.end(); }
+  Iter End() { return list.end(); }
 
 private:
-  ShowMode *list;
+  Container list;
 };
 
 #endif

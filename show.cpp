@@ -1046,7 +1046,7 @@ CC_show::CC_show(unsigned npoints)
   SetAutosaveName(tmpname);
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
-  mode = modelist->Default();
+  mode = *modelist->Begin();
   if (npoints) {
     for (unsigned int i = 0; i < npoints; i++) {
       pt_labels[i].Printf(wxT("%u"), i);
@@ -1340,7 +1340,7 @@ CC_show::CC_show(const wxString& filestr)
 
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
-  mode = modelist->Default();
+  mode = *modelist->Begin();
 
   const char *file = filestr.utf8_str();
   namelen = strlen(file);

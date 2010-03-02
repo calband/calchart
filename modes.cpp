@@ -32,11 +32,13 @@
 #include "modes.h"
 #include "confgr.h"
 
+#include <algorithm>
+
 extern wxFont* yardLabelFont;
 
 ShowMode::ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
 		   CC_coord bord1, CC_coord bord2)
-: next(NULL), offset(off), size(siz), border1(bord1), border2(bord2)
+: offset(off), size(siz), border1(bord1), border2(bord2)
 {
   size += border1 + border2;
   offset += border1;
@@ -45,7 +47,7 @@ ShowMode::ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
 
 ShowMode::ShowMode(const wxString& nam, CC_coord siz,
 		   CC_coord bord1, CC_coord bord2)
-: next(NULL), offset(siz/2), size(siz), border1(bord1), border2(bord2)
+: offset(siz/2), size(siz), border1(bord1), border2(bord2)
 {
   size += border1 + border2;
   offset += border1;
@@ -402,44 +404,26 @@ void ShowModeSprShow::DrawAnim(wxDC *dc) {
 }
 
 ShowModeList::ShowModeList()
-: list(NULL) {}
+{}
 
-ShowModeList::~ShowModeList() {
-  ShowMode *mode, *temp;
+struct DeleteObject
+{
+	template <typename T>
+	void operator()(const T* ptr) const
+	{
+		delete ptr;
+	}
+};
 
-  mode = list;
-
-  while (mode != NULL) {
-    temp = mode->next;
-    delete mode;
-    mode = temp;
-  }
+ShowModeList::~ShowModeList()
+{
+	std::for_each(list.begin(), list.end(), DeleteObject());
 }
 
-void ShowModeList::Add(ShowMode *mode) {
-  ShowMode *prev;
-
-  if (list) {
-    prev = list;
-    while (prev->next != NULL) {
-      prev = prev->next;
-    }
-    prev->next = mode;
-  } else {
-    list = mode;
-  }
-}
-
-ShowMode *ShowModeList::Find(const wxString& name) {
-  ShowMode *mode = list;
-
-  while (mode != NULL) {
-    if (mode->GetName() == name) break;
-    mode = mode->next;
-  }
-  return mode;
-}
-
-ShowMode *ShowModeList::Default() {
-  return list;
+ShowMode *ShowModeList::Find(const wxString& name) const
+{
+	for (CIter i = list.begin(); i != list.end(); ++i)
+		if ((*i)->GetName() == name)
+			return *i;
+	return NULL;
 }

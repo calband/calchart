@@ -579,7 +579,7 @@ wxString ReadConfig(const wxString& path) {
     autosave_dir = autosave_dirname;
   }
 
-  if (modelist->First() == NULL) {
+  if (!modelist->Empty()) {
     // No modes were defined.  Add a default
     modelist->Add(new ShowModeStandard(wxT("Standard"), bord1, bord2,
 				       DEF_HASH_W, DEF_HASH_E));

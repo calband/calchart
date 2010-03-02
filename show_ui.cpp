@@ -354,10 +354,10 @@ show(shw) {
 	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
 
 	wxArrayString modeStrings;
-	ShowMode *mode = modelist->First();
-	while (mode != NULL) {
-		modeStrings.Add(mode->GetName());
-		mode = mode->next;
+	ShowModeList::Iter mode = modelist->Begin();
+	while (mode != modelist->End()) {
+		modeStrings.Add((*mode)->GetName());
+		++mode;
 	}
 	boxsizer = new wxStaticBoxSizer( new wxStaticBox(panel, -1, wxT("Show &mode")), wxHORIZONTAL);
 	choice = new wxChoice(panel, ShowInfoReq_ShowInfoModeChoice, wxDefaultPosition, wxDefaultSize, modeStrings, wxCAPTION, wxDefaultValidator, wxT("Show &mode"));
