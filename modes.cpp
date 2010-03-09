@@ -57,7 +57,7 @@ ShowMode::ShowMode(const wxString& nam, CC_coord siz,
 ShowMode::~ShowMode() {
 }
 
-CC_coord ShowMode::ClipPosition(const CC_coord& pos) {
+CC_coord ShowMode::ClipPosition(const CC_coord& pos) const {
   CC_coord clipped;
   CC_coord min = MinPosition();
   CC_coord max = MaxPosition();
@@ -87,11 +87,11 @@ ShowModeStandard::ShowModeStandard(const wxString& nam,
 
 ShowModeStandard::~ShowModeStandard() {}
 
-SHOW_TYPE ShowModeStandard::GetType() {
+SHOW_TYPE ShowModeStandard::GetType() const {
   return SHOW_STANDARD;
 }
 
-void ShowModeStandard::Draw(wxDC *dc) {
+void ShowModeStandard::Draw(wxDC *dc) const {
   unsigned short i;
   Coord j, k;
   wxPoint points[5];
@@ -201,7 +201,7 @@ void ShowModeStandard::Draw(wxDC *dc) {
   }
 }
 
-void ShowModeStandard::DrawAnim(wxDC *dc) {
+void ShowModeStandard::DrawAnim(wxDC *dc) const {
   Coord j;
   wxPoint points[5];
   CC_coord fieldsize, fieldedge;
@@ -289,11 +289,11 @@ ShowModeSprShow::ShowModeSprShow(const wxString& nam,
 ShowModeSprShow::~ShowModeSprShow() {
 }
 
-SHOW_TYPE ShowModeSprShow::GetType() {
+SHOW_TYPE ShowModeSprShow::GetType() const {
   return SHOW_SPRINGSHOW;
 }
 
-void ShowModeSprShow::Draw(wxDC *dc) {
+void ShowModeSprShow::Draw(wxDC *dc) const {
   unsigned short i;
   Coord j, k;
   wxCoord textw, texth, textd;
@@ -356,7 +356,7 @@ void ShowModeSprShow::Draw(wxDC *dc) {
   }
 }
 
-void ShowModeSprShow::DrawAnim(wxDC *dc) {
+void ShowModeSprShow::DrawAnim(wxDC *dc) const {
   Coord j;
   CC_coord fieldsize;
 

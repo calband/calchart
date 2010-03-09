@@ -44,17 +44,17 @@ public:
   ShowMode(const wxString& nam, CC_coord siz, CC_coord bord1, CC_coord bord2);
   virtual ~ShowMode();
 
-  virtual SHOW_TYPE GetType() = 0;
-  virtual void Draw(wxDC *dc) = 0;
-  virtual void DrawAnim(wxDC *dc) = 0;
-  inline CC_coord& Offset() { return offset; };
-  inline CC_coord FieldOffset() { return -(offset-border1); }
-  inline CC_coord& Size() { return size; };
-  inline CC_coord FieldSize() { return size-border1-border2; }
-  inline CC_coord MinPosition() { return -offset; }
-  inline CC_coord MaxPosition() { return size-offset; }
-  inline const wxString& GetName() { return name; };
-  CC_coord ClipPosition(const CC_coord& pos);
+  virtual SHOW_TYPE GetType() const = 0;
+  virtual void Draw(wxDC *dc) const = 0;
+  virtual void DrawAnim(wxDC *dc) const = 0;
+  inline const CC_coord& Offset() const { return offset; };
+  inline CC_coord FieldOffset() const { return -(offset-border1); }
+  inline const CC_coord& Size() const { return size; };
+  inline CC_coord FieldSize() const { return size-border1-border2; }
+  inline CC_coord MinPosition() const { return -offset; }
+  inline CC_coord MaxPosition() const { return size-offset; }
+  inline const wxString& GetName() const { return name; };
+  CC_coord ClipPosition(const CC_coord& pos) const;
 
 protected:
   CC_coord offset, size;
@@ -73,11 +73,11 @@ public:
 		   unsigned short whash, unsigned short ehash);
   virtual ~ShowModeStandard();
 
-  virtual SHOW_TYPE GetType();
-  virtual void Draw(wxDC *dc);
-  virtual void DrawAnim(wxDC *dc);
-  inline unsigned short HashW() { return hashw; }
-  inline unsigned short HashE() { return hashe; }
+  virtual SHOW_TYPE GetType() const;
+  virtual void Draw(wxDC *dc) const;
+  virtual void DrawAnim(wxDC *dc) const;
+  inline unsigned short HashW() const { return hashw; }
+  inline unsigned short HashE() const { return hashe; }
 
 private:
   unsigned short hashw, hashe;
@@ -99,27 +99,27 @@ public:
 		  short txt_tp, short txt_bm);
   virtual ~ShowModeSprShow();
 
-  virtual SHOW_TYPE GetType();
-  virtual void Draw(wxDC *dc);
-  virtual void DrawAnim(wxDC *dc);
-  inline const wxString& StageFile() { return stagefile; }
-  inline unsigned char WhichYards() { return which_yards; }
-  inline short StageX() { return stage_x; }
-  inline short StageY() { return stage_y; }
-  inline short StageW() { return stage_w; }
-  inline short StageH() { return stage_h; }
-  inline short FieldX() { return field_x; }
-  inline short FieldY() { return field_y; }
-  inline short FieldW() { return field_w; }
-  inline short FieldH() { return field_h; }
-  inline short StepsX() { return steps_x; }
-  inline short StepsY() { return steps_y; }
-  inline short StepsW() { return steps_w; }
-  inline short StepsH() { return steps_h; }
-  inline short TextLeft() { return text_left; }
-  inline short TextRight() { return text_right; }
-  inline short TextTop() { return text_top; }
-  inline short TextBottom() { return text_bottom; }
+  virtual SHOW_TYPE GetType() const;
+  virtual void Draw(wxDC *dc) const;
+  virtual void DrawAnim(wxDC *dc) const;
+  inline const wxString& StageFile() const { return stagefile; }
+  inline unsigned char WhichYards() const { return which_yards; }
+  inline short StageX() const { return stage_x; }
+  inline short StageY() const { return stage_y; }
+  inline short StageW() const { return stage_w; }
+  inline short StageH() const { return stage_h; }
+  inline short FieldX() const { return field_x; }
+  inline short FieldY() const { return field_y; }
+  inline short FieldW() const { return field_w; }
+  inline short FieldH() const { return field_h; }
+  inline short StepsX() const { return steps_x; }
+  inline short StepsY() const { return steps_y; }
+  inline short StepsW() const { return steps_w; }
+  inline short StepsH() const { return steps_h; }
+  inline short TextLeft() const { return text_left; }
+  inline short TextRight() const { return text_right; }
+  inline short TextTop() const { return text_top; }
+  inline short TextBottom() const { return text_bottom; }
 
 private:
   wxString stagefile;
