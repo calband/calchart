@@ -73,9 +73,6 @@
 #include "tb_pshet.xbm"
 #include "tb_nshet.xbm"
 #endif
-#if defined(__APPLE__) && (__APPLE__)
-#include <ApplicationServices/ApplicationServices.h>
-#endif // defined(__APPLE__) && (__APPLE__)
 
 static ToolBarEntry main_tb[] = {
   { 0, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
@@ -369,13 +366,11 @@ void CC_WinNodeMain::SetDescr(wxWindow* win) {
 bool CalChartApp::OnInit()
 {
 #if defined(__APPLE__) && (__APPLE__)
-	ProcessSerialNumber PSN;
-	GetCurrentProcess(&PSN);
-	TransformProcessType(&PSN,kProcessTransformToForegroundApplication);
-#endif // defined(__APPLE__) && (__APPLE__)
-
-
+  wxString runtimepath(wxT("CalChart.app/runtime"));
+#else
   wxString runtimepath(wxT("runtime"));
+#endif
+
   int realargc = argc;
 
   modelist = new ShowModeList();
