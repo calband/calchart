@@ -35,34 +35,34 @@
 
 class ShowPrintDialog;
 
-class CC_WinNodePrint : public CC_WinNode {
-public:
-  CC_WinNodePrint(CC_WinList *lst, ShowPrintDialog *req);
-
-  virtual void SetShow(CC_show *shw);
-  virtual void ChangePrint(wxWindow* win);
-
-private:
-  ShowPrintDialog *printreq;
-};
-
 class ShowPrintDialog : public wxDialog
 {
-public:
-  ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, bool printEPS,
-		  wxFrame *parent, const wxString& title,
-		  bool isModal = false,
-		  int x = -1, int y = -1,
-		  int width = 600, int height = -1);
-  ~ShowPrintDialog();
-  void OnCloseWindow(wxCloseEvent& event);
+	DECLARE_CLASS( ShowPrintDialog )
+	DECLARE_EVENT_TABLE()
 
-  inline bool Okay() { return ok; };
-  void Update();
-	void ShowPrintOk(wxCommandEvent&);
-	void ShowPrintClose(wxCommandEvent&);
+public:
+	ShowPrintDialog( );
+	ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, bool printEPS,
+		  wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
+		  const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		  long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+	~ShowPrintDialog( );
+
+	void Init();
+
+	bool Create(CC_descr *dcr, CC_WinList *lst, bool printEPS,
+		  wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
+		  const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		  long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
+
 	void ShowPrintSelect(wxCommandEvent&);
 
+	// to print a show, call this function
+	void PrintShow();
+
+private:
   CC_descr *show_descr;
   bool eps;
   wxTextCtrl *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
@@ -70,13 +70,7 @@ public:
   wxTextCtrl *text_minyards;
   wxRadioBox *radio_orient, *radio_method;
   wxCheckBox *check_cont, *check_pages, *check_overview;
-  wxFrame *frame;
-  CC_WinNodePrint *node;
 
-private:
-  bool ok;
-
-  DECLARE_EVENT_TABLE()
 };
 
 #endif

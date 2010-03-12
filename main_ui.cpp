@@ -1088,15 +1088,21 @@ void MainFrame::OnCmdSaveAs(wxCommandEvent& event) {
 
 void MainFrame::OnCmdPrint(wxCommandEvent& event) {
   if (field->show_descr.show) {
-    (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
-			      false, this, wxT("Print show"), false);
+	ShowPrintDialog dialog(&field->show_descr, &node->winlist, false, this);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		dialog.PrintShow();
+	}
   }
 }
 
 void MainFrame::OnCmdPrintEPS(wxCommandEvent& event) {
   if (field->show_descr.show) {
-    (void)new ShowPrintDialog(&field->show_descr, &node->winlist,
-			      true, this, wxT("Print stuntsheet as EPS"), false);
+	ShowPrintDialog dialog(&field->show_descr, &node->winlist, true, this);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		dialog.PrintShow();
+	}
   }
 }
 
