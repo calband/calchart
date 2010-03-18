@@ -434,8 +434,7 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow) {
 	}
       }
       GetVirtualSize(&devx, &devy);
-		wxPaintDC dc(this);
-      x = (dc.DeviceToLogicalX(devx) - x) / 2;
+      x = (dc->DeviceToLogicalX(devx) - x) / 2;
       if (x < 0.0) x = 0.0;
     }
     maxtexth = contPlainFont->GetPointSize();

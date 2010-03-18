@@ -1662,8 +1662,6 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
       event.GetPosition(&x, &y);
       if (event.ControlDown()) {
 	Move(x, y);
-	wxPaintDC dc(this);
-	Blit(dc);
 	dragon = false; // since the canvas gets cleared
       } else {
 	Move(x, y, 1);
@@ -2000,7 +1998,6 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
 }
 
 void FieldCanvas::RefreshShow(bool drawall, int point) {
-  wxPaintDC dc(this);
   if (show_descr.show) {
     CC_sheet *sheet = show_descr.CurrSheet();
     if (sheet) {
@@ -2010,7 +2007,6 @@ void FieldCanvas::RefreshShow(bool drawall, int point) {
       } else {
 	sheet->Draw(GetMemDC(), curr_ref, true, drawall, point);
       }
-      Blit(dc);
       dragon = false; // since the canvas gets cleared
       DrawDrag(true);
     }
