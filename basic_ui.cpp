@@ -70,7 +70,7 @@ wxString FancyTextWin::GetValue(void) const {
   unsigned i;
 
   // Remove carriage returns
-  result = GetValue();
+  result = wxTextCtrl::GetValue();
   for (i = 0; i < result.length();) {
     if (result[i] != '\r') i++;
     else result.erase(i,1);
