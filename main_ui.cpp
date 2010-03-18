@@ -150,7 +150,7 @@ wxFont *yardLabelFont;
 
 ShowModeList *modelist;
 
-BEGIN_EVENT_TABLE(TopFrame, CC_MDIChildFrame)
+BEGIN_EVENT_TABLE(TopFrame, CC_MDIParentFrame)
   EVT_CLOSE(TopFrame::OnCloseWindow)
 #ifdef CC_USE_MDI
   EVT_MENU(wxID_NEW, TopFrame::OnCmdNew)
