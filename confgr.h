@@ -103,7 +103,7 @@ extern wxString spr_line_text[MAX_SPR_LINES];
 extern wxString ReadConfig(const wxString& path);
 class wxPathList;
 extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
-			   wxPathList *list = NULL);
+			   const wxPathList *list = NULL);
 extern wxString FullPath(const wxString& path);
 extern int ReadDOSline(FILE *fp, wxString& str);
 

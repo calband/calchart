@@ -670,7 +670,7 @@ wxString ReadConfig(const wxString& path) {
 }
 
 // Open a file in the specified dir.
-FILE *OpenFileInDir(const wxString& name, const wxString& modes, wxPathList *list) {
+FILE *OpenFileInDir(const wxString& name, const wxString& modes, const wxPathList *list) {
   FILE *fp;
   wxString fullpath;
 
