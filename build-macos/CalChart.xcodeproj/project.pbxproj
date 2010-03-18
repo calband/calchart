@@ -393,6 +393,7 @@
 				OTHER_LDFLAGS = "-lwx_macud-2.8";
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
+				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
 		};
@@ -416,6 +417,7 @@
 				OTHER_LDFLAGS = "-lwx_macud-2.8";
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
+				WARNING_CFLAGS = "-Wall";
 			};
 			name = Release;
 		};

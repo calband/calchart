@@ -672,20 +672,3 @@ void PrintContEditor::OnActivate(wxActivateEvent& event) {
     canvas->SetFocus();
   }
 }
-
-static void toolbar_printcont_sym0(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym1(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym2(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym3(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym4(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym5(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym6(CoolToolBar */*tb*/) {
-}
-static void toolbar_printcont_sym7(CoolToolBar */*tb*/) {
-}

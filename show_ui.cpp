@@ -131,20 +131,6 @@ void PointPicker::PointPickerNone(wxCommandEvent&) {
   show->winlist->UpdateSelections(this);
 }
 
-static void PointPickerClick(wxListBox& list, wxCommandEvent&) {
-  unsigned n;
-  bool sel;
-
-  PointPicker *picker = (PointPicker*)list.GetParent()->GetParent();
-  for (n = 0; n < picker->show->GetNumPoints(); n++) {
-    sel = picker->Get(n);
-    if (picker->show->IsSelected(n) != sel) {
-      picker->show->Select(n, sel);
-      picker->show->winlist->UpdateSelections(picker, n);
-    }
-  }
-}
-
 PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
 			 bool multi, wxFrame *frame,
 			 const wxString& title,
