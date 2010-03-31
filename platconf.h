@@ -96,13 +96,8 @@ typedef unsigned char uint8_t;
 #endif
 
 // Wildcard in file selector
-#ifdef __WXMSW__
 #define FILE_WILDCARDS wxT("All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas")
 #define FILE_SAVE_WILDCARDS wxT("New shows (*.shw)|*.shw")
-#else
-#define FILE_WILDCARDS wxT("*.shw")
-#define FILE_SAVE_WILDCARDS wxT("*.shw")
-#endif
 
 // Need to handle DOS-style text
 #ifdef __WXMSW__
