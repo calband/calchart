@@ -1314,64 +1314,47 @@ enum CONT_PARSE_MODE {
 };
 
 // Load a show
-CC_show::CC_show(const wxString& filestr)
-:okay(true), numpoints(0), numsheets(0), sheets(NULL),
- selections(NULL), modified(false), print_landscape(false),
- print_do_cont(true), print_do_cont_sheet(true) {
-  cc_oldpoint *diskpts;
-
-  // These are for really old reference point format
-  cc_oldpoint conv_diskpt;
-  bool reallyoldpnts;
-  int record_len;
-
-  int namelen;
-  char *namebuf;
-  bool old_format = false;
-  bool old_format_uppercase = false;
-  FILE *fp;
-  unsigned int i, j, k;
-  unsigned int off;
-  CC_sheet *curr_sheet = NULL;
-  CC_continuity *newanimcont;
-  unsigned numanimcont;
-  wxString tempbuf;
-  char sheetnamebuf[16];
+CC_show::CC_show(const wxString& filestr) :
+okay(true),
+numpoints(0),
+numsheets(0),
+sheets(NULL),
+selections(NULL),
+modified(false),
+print_landscape(false),
+print_do_cont(true),
+print_do_cont_sheet(true)
+{
 
   winlist = new CC_WinListShow(this);
   undolist = new ShowUndoList(this, undo_buffer_size);
   mode = *modelist->Begin();
 
-  const char *file = filestr.utf8_str();
-  namelen = strlen(file);
-  if (namelen > 4) {
-    if (strcmp(".mas", file+namelen-4) == 0) old_format = true;
-    if (strcmp(".MAS", file+namelen-4) == 0) {
-      old_format = true;
+  wxString ext = filestr.AfterLast('.');
+  if (!ext.CmpNoCase(wxT("mas")))
+  {
+    bool old_format_uppercase = false;
+    if (!ext.Cmp(wxT("MAS")))
+    {
       old_format_uppercase = true;
     }
-  }
 
-  if (old_format) {
-    namebuf = strdup(file);
-    if (!namebuf) {
-      AddError(nomem_str);
-      return;
-    }
-    fp = fopen(namebuf, "r");
+    FILE *fp = fopen(filestr.fn_str(), "r");
     if (!fp) {
       AddError(nofile_str);
       return;
     }
+    wxString tempbuf;
     if (ReadDOSline(fp, tempbuf) <= 0) {
       AddError(badfile_mas_str);
       return;
     }
-    if (CC_sscanf(tempbuf.c_str(), wxT(" %u "), &i) != 1) {
+    uint32_t keyvalue;
+    if (CC_sscanf(tempbuf.c_str(), wxT(" %u "), &keyvalue) != 1) {
       AddError(badfile_mas_str);
       return;
     }
-    if (i != 1024) {
+    if (keyvalue != 1024) {
       AddError(badfile_mas_str);
       return;
     }
@@ -1388,11 +1371,15 @@ CC_show::CC_show(const wxString& filestr)
     selections = new bool[numpoints];
     UnselectAll();
 
-    for (i = 0; i < numsheets; i++) {
+    CC_sheet *curr_sheet = NULL;
+    for (uint32_t i = 0; i < numsheets; ++i) {
       if (ReadDOSline(fp, tempbuf) <= 0) {
 	AddError(badfile_mas_str);
 	return;
       }
+      char sheetnamebuf[16];
+      uint32_t j;
+      uint32_t off;
       if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
 		    sheetnamebuf, &j, &off) != 3) {
 	AddError(badfile_mas_str);
@@ -1429,22 +1416,22 @@ CC_show::CC_show(const wxString& filestr)
     }
     fclose(fp);
 
-    diskpts = new cc_oldpoint[numpoints];
-    if (!diskpts) {
-      AddError(nomem_str);
-      return;
-    }
-    for (k = 1, curr_sheet = sheets;
+    std::vector<cc_oldpoint> diskpts(numpoints);
+    curr_sheet = sheets;
+    for (size_t k = 1;
 	 k <= numsheets;
 	 k++, curr_sheet = curr_sheet->next) {
-      sprintf(namebuf+namelen-3, "%c%u",
-	      old_format_uppercase ? 'S':'s', k);
-      fp = fopen(namebuf, "rb");
+      ext.Printf(wxT("%c%u"), old_format_uppercase ? 'S':'s', k);
+      wxString namebuf; namebuf = filestr.BeforeLast('.');
+      namebuf.Append('.');
+      namebuf.Append(ext);
+      fp = fopen(namebuf.fn_str(), "rb");
       if (!fp) {
 	AddError(nofile_str);
 	return;
       }
-      record_len = fread(diskpts, numpoints, sizeof(cc_oldpoint), fp);
+      bool reallyoldpnts = false;
+      int record_len = fread(&diskpts[0], numpoints, sizeof(cc_oldpoint), fp);
       if (record_len == sizeof(cc_oldpoint)) {
 	reallyoldpnts = false;
       } else if (record_len == sizeof(cc_reallyoldpoint)) {
@@ -1455,28 +1442,29 @@ CC_show::CC_show(const wxString& filestr)
       }
       fclose(fp);
 
-      for (i = 0; i < numpoints; i++) {
+      for (size_t i = 0; i < numpoints; i++) {
 	if (reallyoldpnts) {
 	  short refidx;
 	  unsigned short refloc;
 
-	  conv_diskpt.sym = ((cc_reallyoldpoint*)diskpts)[i].sym;
-	  conv_diskpt.flags = ((cc_reallyoldpoint*)diskpts)[i].flags;
-	  conv_diskpt.pos = ((cc_reallyoldpoint*)diskpts)[i].pos;
-	  conv_diskpt.color = ((cc_reallyoldpoint*)diskpts)[i].color;
-	  conv_diskpt.code[0] = ((cc_reallyoldpoint*)diskpts)[i].code[0];
-	  conv_diskpt.code[1] = ((cc_reallyoldpoint*)diskpts)[i].code[1];
-	  conv_diskpt.cont = ((cc_reallyoldpoint*)diskpts)[i].cont;
-	  refidx = get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].refnum);
+	  cc_oldpoint conv_diskpt;
+	  conv_diskpt.sym = ((cc_reallyoldpoint*)&diskpts[0])[i].sym;
+	  conv_diskpt.flags = ((cc_reallyoldpoint*)&diskpts[0])[i].flags;
+	  conv_diskpt.pos = ((cc_reallyoldpoint*)&diskpts[0])[i].pos;
+	  conv_diskpt.color = ((cc_reallyoldpoint*)&diskpts[0])[i].color;
+	  conv_diskpt.code[0] = ((cc_reallyoldpoint*)&diskpts[0])[i].code[0];
+	  conv_diskpt.code[1] = ((cc_reallyoldpoint*)&diskpts[0])[i].code[1];
+	  conv_diskpt.cont = ((cc_reallyoldpoint*)&diskpts[0])[i].cont;
+	  refidx = get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[i].refnum);
 	  if (refidx >= 0) {
 	    refloc =
-	      get_lil_word(&((cc_reallyoldpoint*)diskpts)[refidx].pos.x) +
-	      (short)get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].ref.x);
+	      get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[refidx].pos.x) +
+	      (short)get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[i].ref.x);
 	    put_lil_word(&conv_diskpt.ref[0].x, refloc);
 
 	    refloc =
-	      get_lil_word(&((cc_reallyoldpoint*)diskpts)[refidx].pos.y) +
-	      (short)get_lil_word(&((cc_reallyoldpoint*)diskpts)[i].ref.y);
+	      get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[refidx].pos.y) +
+	      (short)get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[i].ref.y);
 	    put_lil_word(&conv_diskpt.ref[0].y, refloc);
 	  } else {
 	    conv_diskpt.ref[0].x = 0xFFFF;
@@ -1495,7 +1483,7 @@ CC_show::CC_show(const wxString& filestr)
 	  // Build table for point labels
 	  unsigned int label_idx = 0;
 	  char pt_buf[4];
-	  for (j = 0; j < 2; j++) {
+	  for (size_t j = 0; j < 2; j++) {
 	    // Convert to ascii
 	    if ((diskpts[i].code[j] >= '0') && (diskpts[i].code[j] != '?')) {
 	      if (diskpts[i].code[j] <= 'Z') {
@@ -1520,9 +1508,11 @@ CC_show::CC_show(const wxString& filestr)
       }
       // Now load animation continuity
       // We need to use fgets and sscanf so blank lines aren't skipped
-      sprintf(namebuf+namelen-3, "%c%u",
-	      old_format_uppercase ? 'F':'f', k);
-      fp = fopen(namebuf, "r");
+      ext.Printf(wxT("%c%u"), old_format_uppercase ? 'F':'f', k);
+      namebuf = filestr.BeforeLast('.');
+      namebuf.Append('.');
+      namebuf.Append(ext);
+      fp = fopen(namebuf.fn_str(), "r");
       if (!fp) {
 	AddError(nofile_str);
 	return;
@@ -1539,12 +1529,13 @@ CC_show::CC_show(const wxString& filestr)
 	AddError(badanimcont_str);
 	return;
       }
+      unsigned numanimcont;
       if (CC_sscanf(tempbuf.c_str(), wxT(" %u"), &numanimcont) != 1) {
 	AddError(badanimcont_str);
 	return;
       }
-      for (i = 0; i < numanimcont; i++) {
-	newanimcont = new CC_continuity;
+      for (size_t i = 0; i < numanimcont; i++) {
+        CC_continuity *newanimcont = new CC_continuity;
 
 	// Skip blank line
 	if (feof(fp)) {
@@ -1556,6 +1547,8 @@ CC_show::CC_show(const wxString& filestr)
 	  AddError(badanimcont_str);
 	  return;
 	}
+        char sheetnamebuf[16];
+	uint32_t j;
 	if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
 		      sheetnamebuf, &newanimcont->num, &j) != 3) {
 	  AddError(badanimcont_str);
@@ -1575,11 +1568,14 @@ CC_show::CC_show(const wxString& filestr)
       }
       fclose(fp);
     }
-    delete diskpts;
 
     // now load continuity file if it exists
-    strcpy(namebuf+namelen-3, old_format_uppercase ? "TXT":"txt");
-    wxString namestr(namebuf, *wxConvFileName);
+    ext = old_format_uppercase ? wxT("TXT") : wxT("txt");
+      wxString namebuf; 
+      namebuf = filestr.BeforeLast('.');
+      namebuf.Append('.');
+      namebuf.Append(ext);
+    wxString namestr(namebuf.fn_str(), *wxConvFileName);
     if (wxFileExists(namestr)) {
       wxString conterr = ImportContinuity(namestr);
       if (!conterr.empty()) {
@@ -1590,7 +1586,6 @@ CC_show::CC_show(const wxString& filestr)
     wxString shwname;
     ChangeExtension(namestr, shwname, wxT("shw"));
     SetName(shwname);
-    free(namebuf);
   } else {
     INGLread readhnd(CC_fopen(filestr.fn_str(), "rb"));
     if (!readhnd.Okay()) {
