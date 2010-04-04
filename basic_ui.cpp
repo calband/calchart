@@ -122,7 +122,7 @@ void AutoScrollCanvas::SetSize(const wxSize& size) {
 	  } else {
       memdc->SelectObject(*membm);
       memdc->SetBackground(dc.GetBackground());
-      memdc->SetPalette(*palette);
+      if (palette) memdc->SetPalette(*palette);
       memdc->SetUserScale(x_scale, y_scale);
       memdc->Clear();
     }
