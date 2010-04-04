@@ -240,7 +240,7 @@ void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&) {
 
   newmode = modelist->Find(GetChoiceStrSelection());
   if (newmode) {
-    show->mode = newmode;
+    show->SetMode(newmode);
     show->winlist->ChangeShowMode(this);
   }
 }
@@ -405,7 +405,7 @@ void ShowInfoReq::UpdateNumPoints() {
 }
 
 void ShowInfoReq::UpdateMode() {
-  choice->SetStringSelection(show->mode->GetName());
+  choice->SetStringSelection(show->GetMode().GetName());
 }
 
 void ShowInfoReq::UpdateDescr(bool quick) {

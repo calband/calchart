@@ -550,12 +550,12 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const {
   unsigned short i;
   short j;
   const wxChar *error;
-  CC_coord fieldsize = show->mode->FieldSize();
-  CC_coord fieldoff = show->mode->FieldOffset();
-  Coord pmin = show->mode->MinPosition().x;
-  Coord pmax = show->mode->MaxPosition().x;
-  Coord fmin = show->mode->FieldOffset().x;
-  Coord fmax = show->mode->FieldSize().x + fmin;
+  CC_coord fieldsize = show->GetMode().FieldSize();
+  CC_coord fieldoff = show->GetMode().FieldOffset();
+  Coord pmin = show->GetMode().MinPosition().x;
+  Coord pmax = show->GetMode().MaxPosition().x;
+  Coord fmin = show->GetMode().FieldOffset().x;
+  Coord fmax = show->GetMode().FieldSize().x + fmin;
   float fieldheight = COORD2FLOAT(fieldsize.y);
   float fieldoffx = COORD2FLOAT(fieldoff.x);
   float fieldoffy = COORD2FLOAT(fieldoff.y);
@@ -611,7 +611,7 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const {
       } else {
 	CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
       }
-      step_offset = (COORD2INT(show->mode->FieldSize().x) - step_width) / 2;
+      step_offset = (COORD2INT(show->GetMode().FieldSize().x) - step_width) / 2;
       step_offset = (step_offset / 8) * 8;
       clip_s = pmin;
       clip_n = pmax;
@@ -622,8 +622,8 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const {
 	step_offset = x_s - (step_width-(x_n-x_s))/2;
 	if (step_offset < 0) step_offset = 0;
 	else if ((step_offset + step_width) >
-		 COORD2INT(show->mode->FieldSize().x))
-	  step_offset = COORD2INT(show->mode->FieldSize().x) - step_width;
+		 COORD2INT(show->GetMode().FieldSize().x))
+	  step_offset = COORD2INT(show->GetMode().FieldSize().x) - step_width;
 	step_offset = (step_offset / 8) * 8;
       }
     }
@@ -679,7 +679,7 @@ const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const {
   unsigned short i;
   short j;
   const wxChar *error;
-  ShowModeSprShow *modesprshow = (ShowModeSprShow *)show->mode;
+  const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&show->GetMode());
 
   std::string namestr(name.utf8_str());
   std::string numberstr(number.utf8_str());
@@ -794,8 +794,8 @@ const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const {
 const wxChar *CC_sheet::PrintOverview(FILE *fp) const {
   unsigned short i;
   const wxChar *error;
-  CC_coord fieldoff = show->mode->FieldOffset();
-  CC_coord fieldsize = show->mode->FieldSize();
+  CC_coord fieldoff = show->GetMode().FieldOffset();
+  CC_coord fieldsize = show->GetMode().FieldSize();
   float fieldx = COORD2FLOAT(fieldoff.x);
   float fieldy = COORD2FLOAT(fieldoff.y);
   float fieldwidth = COORD2FLOAT(fieldsize.x);

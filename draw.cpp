@@ -49,7 +49,7 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
     dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
     dc->SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
     dc->SetLogicalFunction(wxCOPY);
-    show->mode->Draw(dc);
+    show->GetMode().Draw(dc);
   }
 
   if (!pts.empty()) {
@@ -60,7 +60,7 @@ void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
     plineoff = offset * pline_ratio;
     slineoff = offset * sline_ratio;
     textoff = offset * 1.25;
-    origin = show->mode->Offset();
+    origin = show->GetMode().Offset();
     if (point < 0) {
       firstpoint = 0;
       lastpoint = show->GetNumPoints();

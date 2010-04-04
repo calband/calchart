@@ -592,7 +592,7 @@ void CC_sheet::SetContinuity(unsigned i) {
 
 void CC_sheet::SetNumPoints(unsigned num, unsigned columns) {
   unsigned i, j, cpy, col;
-  CC_coord c, coff(show->mode->FieldOffset());
+  CC_coord c, coff(show->GetMode().FieldOffset());
   CC_continuity *plaincont;
 
   std::vector<CC_point> newpts(num);
@@ -926,7 +926,7 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i) {
 // Set position of point
 void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref) {
   unsigned j;
-  CC_coord clippedval = show->mode->ClipPosition(val);
+  CC_coord clippedval = show->GetMode().ClipPosition(val);
   if (ref == 0) {
     for (j=0; j<NUM_REF_PNTS; j++) {
       if (pts[i].ref[j] == pts[i].pos) {
@@ -941,7 +941,7 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref) {
 
 // Set position of point and don't touch reference points
 void CC_sheet::SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref){
-  CC_coord clippedval = show->mode->ClipPosition(val);
+  CC_coord clippedval = show->GetMode().ClipPosition(val);
   if (ref == 0) {
     pts[i].pos = clippedval;
   } else {

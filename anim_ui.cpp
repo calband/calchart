@@ -119,8 +119,8 @@ void AnimationTimer::Notify() {
 
 AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_descr *dcr)
 : AutoScrollCanvas(frame, wxID_ANY, wxDefaultPosition,
-		   wxSize(COORD2INT(dcr->show->mode->Size().x)*DEFAULT_ANIM_SIZE,
-			  COORD2INT(dcr->show->mode->Size().y)*DEFAULT_ANIM_SIZE)),
+		   wxSize(COORD2INT(dcr->show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
+			  COORD2INT(dcr->show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
   anim(NULL), show_descr(dcr), ourframe(frame), tempo(120) {
   float f;
 
@@ -155,7 +155,7 @@ void AnimationCanvas::RedrawBuffer() {
   dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
   dc->Clear();
   dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-  show_descr->show->mode->DrawAnim(dc);
+  show_descr->show->GetMode().DrawAnim(dc);
   if (anim)
   for (i = 0; i < anim->numpts; i++) {
     if (anim->collisions[i]) {
@@ -208,8 +208,8 @@ void AnimationCanvas::RedrawBuffer() {
 	dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
       }
     }
-    x = anim->pts[i].pos.x+show_descr->show->mode->Offset().x;
-    y = anim->pts[i].pos.y+show_descr->show->mode->Offset().y;
+    x = anim->pts[i].pos.x+show_descr->show->GetMode().Offset().x;
+    y = anim->pts[i].pos.y+show_descr->show->GetMode().Offset().y;
     dc->DrawRectangle(x - INT2COORD(1)/2, y - INT2COORD(1)/2,
 		      INT2COORD(1), INT2COORD(1));
   }

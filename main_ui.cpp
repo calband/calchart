@@ -1624,7 +1624,7 @@ void FieldCanvas::DrawDrag(bool on)
     dragon = on;
     if (on) {
       SetXOR(dc);
-      origin = show_descr.show->mode->Offset();
+      origin = show_descr.show->GetMode().Offset();
       for (ShapeList::const_iterator i=shape_list.begin();
 	   i != shape_list.end();
 	   ++i) {
@@ -1667,7 +1667,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 	Move(x, y, 1);
       }
 
-      pos = show_descr.show->mode->Offset();
+      pos = show_descr.show->GetMode().Offset();
       pos.x = Coord((x/GetScaleX()) - pos.x);
       pos.y = Coord((y/GetScaleY()) - pos.y);
 
@@ -2038,8 +2038,8 @@ void MainFrame::UpdatePanel() {
 
 void FieldCanvas::UpdateBars() {
   if (show_descr.show) {
-    SetSize(wxSize(COORD2INT(show_descr.show->mode->Size().x) * zoomf,
-	    COORD2INT(show_descr.show->mode->Size().y) * zoomf));
+    SetSize(wxSize(COORD2INT(show_descr.show->GetMode().Size().x) * zoomf,
+	    COORD2INT(show_descr.show->GetMode().Size().y) * zoomf));
   }
 }
 

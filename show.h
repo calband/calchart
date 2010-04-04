@@ -492,9 +492,12 @@ public:
   }
   typedef std::vector<unsigned> SelectionList;
   inline const SelectionList& GetSelectionList() const { return selectionList; }
+  const ShowMode& GetMode() const { return *mode; };
+  void SetMode(ShowMode* m) { mode = m; };
 
   CC_WinListShow *winlist;
   ShowUndoList *undolist;
+private:
   ShowMode *mode;
 
 private:
