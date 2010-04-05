@@ -30,6 +30,7 @@
 #include "anim_ui.h"
 #include "cont.h"
 #include <math.h>
+#include <string>
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
@@ -364,7 +365,9 @@ Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
     int contnum = 0;
     for (currcont = comp.curr_sheet->animcont; currcont != NULL;
 	 currcont  = currcont->next, contnum++) {
-      if ((yyinputbuffer = currcont->text.To8BitData()) != NULL) {
+      if (currcont->text.mb_str() != NULL) {
+	 std::string tmpBuffer(currcont->text.mb_str());
+        yyinputbuffer = tmpBuffer.c_str();
 	tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
 		       comp.curr_sheet->GetName().c_str(), currcont->name.c_str());
 	frame->SetStatusText(tempbuf);
