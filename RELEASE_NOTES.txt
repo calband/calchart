@@ -1,0 +1,11 @@
+Release notes for 3.1.1:
+
+Bugs Fixed in this release
+
+2981574 hold-shift moving mouse scrolling scale is off
+2981973 Animation different on windows/mac
+2977399 Animation doesn't work
+2976306 Adding the ability to open old mas files on mac.
+
+Build tested by quickly animating guns2.shw on mac and windows.
+
