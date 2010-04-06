@@ -95,9 +95,6 @@ public:
   void SetBackground(const wxBrush& brush);
   void SetPalette(wxPalette *palette);
   void SetUserScale(float x, float y);
-  inline void SetPosition(float x, float y) {
-    x_off = x; y_off = y;
-  }
   inline float GetPositionX() const { return x_off/x_scale; }
   inline float GetPositionY() const { return y_off/y_scale; }
   inline float GetScaleX() const { return x_scale; }
@@ -106,12 +103,14 @@ public:
   void Move(float x, float y, bool noscroll=0);
   void Blit(wxDC& dc);
 
+protected:
+  float x_off, y_off;
+
 private:
   void FreeMem();
 
   wxMemoryDC *memdc;
   wxBitmap *membm;
-  float x_off, y_off;
   float x_scale, y_scale;
   wxPalette *palette;
   wxPoint last_pos;

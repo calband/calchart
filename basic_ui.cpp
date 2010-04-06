@@ -151,8 +151,8 @@ void AutoScrollCanvas::SetUserScale(float x, float y) {
 void AutoScrollCanvas::Move(float x, float y, bool noscroll) {
   if (memdc) {
     if (!noscroll) {
-      x_off += (x - last_pos.x) * x_scale;
-      y_off += (y - last_pos.y) * y_scale;
+      x_off += (x - last_pos.x);
+      y_off += (y - last_pos.y);
     }
   }
   last_pos.x = x;

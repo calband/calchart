@@ -1628,8 +1628,8 @@ void FieldCanvas::DrawDrag(bool on)
       for (ShapeList::const_iterator i=shape_list.begin();
 	   i != shape_list.end();
 	   ++i) {
-	(*i)->Draw(dc, origin.x+GetPositionX(),
-		   origin.y+GetPositionY());
+	(*i)->Draw(dc, origin.x,
+		   origin.y);
       }
     } else {
       Blit(*dc);
@@ -1668,8 +1668,8 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
       }
 
       pos = show_descr.show->GetMode().Offset();
-      pos.x = Coord((x/GetScaleX()) - pos.x);
-      pos.y = Coord((y/GetScaleY()) - pos.y);
+      pos.x = Coord(((x-x_off)/GetScaleX()) - pos.x);
+      pos.y = Coord(((y-y_off)/GetScaleY()) - pos.y);
 
       if (event.LeftDown()) {
 	switch (curr_move) {
