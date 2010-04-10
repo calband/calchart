@@ -17,10 +17,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _PRINT_UI_H_
@@ -40,37 +40,36 @@ class ShowPrintDialog : public wxDialog
 	DECLARE_CLASS( ShowPrintDialog )
 	DECLARE_EVENT_TABLE()
 
-public:
+	public:
 	ShowPrintDialog( );
 	ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, bool printEPS,
-		  wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
-		  const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-		  long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
 	~ShowPrintDialog( );
 
 	void Init();
 
 	bool Create(CC_descr *dcr, CC_WinList *lst, bool printEPS,
-		  wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
-		  const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-		  long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
 
 	void CreateControls();
 
 	void ShowPrintSelect(wxCommandEvent&);
 
-	// to print a show, call this function
+// to print a show, call this function
 	void PrintShow();
 
 private:
-  CC_descr *show_descr;
-  bool eps;
-  wxTextCtrl *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
-  wxTextCtrl *text_x, *text_y, *text_width, *text_height;
-  wxTextCtrl *text_minyards;
-  wxRadioBox *radio_orient, *radio_method;
-  wxCheckBox *check_cont, *check_pages, *check_overview;
+	CC_descr *show_descr;
+	bool eps;
+	wxTextCtrl *text_cmd, *text_opts, *text_view_cmd, *text_view_opts;
+	wxTextCtrl *text_x, *text_y, *text_width, *text_height;
+	wxTextCtrl *text_minyards;
+	wxRadioBox *radio_orient, *radio_method;
+	wxCheckBox *check_cont, *check_pages, *check_overview;
 
 };
-
 #endif

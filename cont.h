@@ -17,10 +17,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _CONT_H_
@@ -32,454 +32,497 @@
 
 #include "animate.h"
 
-enum ContDefinedValue { CC_N, CC_NW, CC_W, CC_SW, CC_S, CC_SE, CC_E, CC_NE,
-			CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM };
-
-class ContToken {
-public:
-  ContToken();
-  virtual ~ContToken();
-  int line, col;
+enum ContDefinedValue
+{
+	CC_N, CC_NW, CC_W, CC_SW, CC_S, CC_SE, CC_E, CC_NE,
+	CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM
 };
 
-class ContPoint: public ContToken {
+class ContToken
+{
 public:
-  ContPoint() {}
-  virtual ~ContPoint();
-
-  virtual const CC_coord& Get(AnimateCompile* anim) const;
+	ContToken();
+	virtual ~ContToken();
+	int line, col;
 };
 
-class ContStartPoint : public ContPoint {
+class ContPoint: public ContToken
+{
 public:
-  ContStartPoint() {}
+	ContPoint() {}
+	virtual ~ContPoint();
 
-  virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual const CC_coord& Get(AnimateCompile* anim) const;
 };
 
-class ContNextPoint : public ContPoint {
+class ContStartPoint : public ContPoint
+{
 public:
-  ContNextPoint() {}
+	ContStartPoint() {}
 
-  virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual const CC_coord& Get(AnimateCompile* anim) const;
 };
 
-class ContRefPoint : public ContPoint {
+class ContNextPoint : public ContPoint
+{
 public:
-  ContRefPoint(unsigned n): refnum(n) {}
+	ContNextPoint() {}
 
-  virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual const CC_coord& Get(AnimateCompile* anim) const;
+};
+
+class ContRefPoint : public ContPoint
+{
+public:
+	ContRefPoint(unsigned n): refnum(n) {}
+
+	virtual const CC_coord& Get(AnimateCompile* anim) const;
 private:
-  unsigned refnum;
+	unsigned refnum;
 };
 
-class ContValue: public ContToken {
+class ContValue: public ContToken
+{
 public:
-  ContValue() {}
-  virtual ~ContValue();
+	ContValue() {}
+	virtual ~ContValue();
 
-  virtual float Get(AnimateCompile* anim) const = 0;
+	virtual float Get(AnimateCompile* anim) const = 0;
 };
 
-class ContValueFloat : public ContValue {
+class ContValueFloat : public ContValue
+{
 public:
-  ContValueFloat(float v): val(v) {}
+	ContValueFloat(float v): val(v) {}
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  float val;
+	float val;
 };
 
-class ContValueDefined : public ContValue {
+class ContValueDefined : public ContValue
+{
 public:
-  ContValueDefined(ContDefinedValue v): val(v) {}
+	ContValueDefined(ContDefinedValue v): val(v) {}
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContDefinedValue val;
+	ContDefinedValue val;
 };
 
-class ContValueAdd : public ContValue {
+class ContValueAdd : public ContValue
+{
 public:
-  ContValueAdd(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-  virtual ~ContValueAdd();
+	ContValueAdd(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
+	virtual ~ContValueAdd();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *val1, *val2;
+	ContValue *val1, *val2;
 };
 
-class ContValueSub : public ContValue {
+class ContValueSub : public ContValue
+{
 public:
-  ContValueSub(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-  virtual ~ContValueSub();
+	ContValueSub(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
+	virtual ~ContValueSub();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *val1, *val2;
+	ContValue *val1, *val2;
 };
 
-class ContValueMult : public ContValue {
+class ContValueMult : public ContValue
+{
 public:
-  ContValueMult(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-  virtual ~ContValueMult();
+	ContValueMult(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
+	virtual ~ContValueMult();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *val1, *val2;
+	ContValue *val1, *val2;
 };
 
-class ContValueDiv : public ContValue {
+class ContValueDiv : public ContValue
+{
 public:
-  ContValueDiv(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-  virtual ~ContValueDiv();
+	ContValueDiv(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
+	virtual ~ContValueDiv();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *val1, *val2;
+	ContValue *val1, *val2;
 };
 
-class ContValueNeg : public ContValue {
+class ContValueNeg : public ContValue
+{
 public:
-  ContValueNeg(ContValue *v) : val(v) {}
-  virtual ~ContValueNeg();
+	ContValueNeg(ContValue *v) : val(v) {}
+	virtual ~ContValueNeg();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *val;
+	ContValue *val;
 };
 
-class ContValueREM : public ContValue {
+class ContValueREM : public ContValue
+{
 public:
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 };
 
-class ContValueVar : public ContValue {
+class ContValueVar : public ContValue
+{
 public:
-  ContValueVar(unsigned num): varnum(num) {}
-  
-  virtual float Get(AnimateCompile* anim) const;
-  void Set(AnimateCompile* anim, float v);
+	ContValueVar(unsigned num): varnum(num) {}
+
+	virtual float Get(AnimateCompile* anim) const;
+	void Set(AnimateCompile* anim, float v);
 private:
-  unsigned varnum;
+	unsigned varnum;
 };
 
-class ContFuncDir : public ContValue {
+class ContFuncDir : public ContValue
+{
 public:
-  ContFuncDir(ContPoint *p): pnt(p) {}
-  virtual ~ContFuncDir();
+	ContFuncDir(ContPoint *p): pnt(p) {}
+	virtual ~ContFuncDir();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContPoint *pnt;
+	ContPoint *pnt;
 };
 
-class ContFuncDirFrom : public ContValue {
+class ContFuncDirFrom : public ContValue
+{
 public:
-  ContFuncDirFrom(ContPoint *start, ContPoint *end)
-    : pnt_start(start), pnt_end(end) {}
-  virtual ~ContFuncDirFrom();
+	ContFuncDirFrom(ContPoint *start, ContPoint *end)
+		: pnt_start(start), pnt_end(end) {}
+	virtual ~ContFuncDirFrom();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContPoint *pnt_start, *pnt_end;
+	ContPoint *pnt_start, *pnt_end;
 };
 
-class ContFuncDist : public ContValue {
+class ContFuncDist : public ContValue
+{
 public:
-  ContFuncDist(ContPoint *p): pnt(p) {}
-  virtual ~ContFuncDist();
+	ContFuncDist(ContPoint *p): pnt(p) {}
+	virtual ~ContFuncDist();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContPoint *pnt;
+	ContPoint *pnt;
 };
 
-class ContFuncDistFrom : public ContValue {
+class ContFuncDistFrom : public ContValue
+{
 public:
-  ContFuncDistFrom(ContPoint *start, ContPoint *end)
-    : pnt_start(start), pnt_end(end) {}
-  virtual ~ContFuncDistFrom();
+	ContFuncDistFrom(ContPoint *start, ContPoint *end)
+		: pnt_start(start), pnt_end(end) {}
+	virtual ~ContFuncDistFrom();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContPoint *pnt_start, *pnt_end;
+	ContPoint *pnt_start, *pnt_end;
 };
 
-class ContFuncEither : public ContValue {
+class ContFuncEither : public ContValue
+{
 public:
-  ContFuncEither(ContValue *d1, ContValue *d2, ContPoint *p)
-    : dir1(d1), dir2(d2), pnt(p) {}
-  virtual ~ContFuncEither();
+	ContFuncEither(ContValue *d1, ContValue *d2, ContPoint *p)
+		: dir1(d1), dir2(d2), pnt(p) {}
+	virtual ~ContFuncEither();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *dir1, *dir2;
-  ContPoint *pnt;
+	ContValue *dir1, *dir2;
+	ContPoint *pnt;
 };
 
-class ContFuncOpp : public ContValue {
+class ContFuncOpp : public ContValue
+{
 public:
-  ContFuncOpp(ContValue *d): dir(d) {}
-  virtual ~ContFuncOpp();
+	ContFuncOpp(ContValue *d): dir(d) {}
+	virtual ~ContFuncOpp();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *dir;
+	ContValue *dir;
 };
 
-class ContFuncStep : public ContValue {
+class ContFuncStep : public ContValue
+{
 public:
-  ContFuncStep(ContValue *beats, ContValue *blocksize, ContPoint *p)
-    : numbeats(beats), blksize(blocksize), pnt(p) {}
-  virtual ~ContFuncStep();
+	ContFuncStep(ContValue *beats, ContValue *blocksize, ContPoint *p)
+		: numbeats(beats), blksize(blocksize), pnt(p) {}
+	virtual ~ContFuncStep();
 
-  virtual float Get(AnimateCompile* anim) const;
+	virtual float Get(AnimateCompile* anim) const;
 private:
-  ContValue *numbeats, *blksize;
-  ContPoint *pnt;
+	ContValue *numbeats, *blksize;
+	ContPoint *pnt;
 };
 
-class ContProcedure: public ContToken {
+class ContProcedure: public ContToken
+{
 public:
-  ContProcedure(): next(NULL) {}
-  virtual ~ContProcedure();
+	ContProcedure(): next(NULL) {}
+	virtual ~ContProcedure();
 
-  virtual void Compile(AnimateCompile* anim) = 0;
+	virtual void Compile(AnimateCompile* anim) = 0;
 
-  ContProcedure *next;
+	ContProcedure *next;
 };
 
-class ContProcSet : public ContProcedure {
+class ContProcSet : public ContProcedure
+{
 public:
-  ContProcSet(ContValueVar *vr, ContValue *v)
-    : var(vr), val(v) {}
-  virtual ~ContProcSet();
+	ContProcSet(ContValueVar *vr, ContValue *v)
+		: var(vr), val(v) {}
+	virtual ~ContProcSet();
 
-  virtual void Compile(AnimateCompile* anim);
-
-private:
-  ContValueVar *var;
-  ContValue *val;
-};
-
-class ContProcBlam : public ContProcedure {
-public:
-  virtual void Compile(AnimateCompile* anim);
-};
-
-class ContProcCM : public ContProcedure {
-public:
-  ContProcCM(ContPoint *p1, ContPoint *p2, ContValue *steps, ContValue *d1,
-	     ContValue *d2, ContValue *beats)
-    : pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
-  virtual ~ContProcCM();
-
-  virtual void Compile(AnimateCompile* anim);
-
-private:
-  ContPoint *pnt1, *pnt2;
-  ContValue *stps, *dir1, *dir2, *numbeats;
-};
-
-class ContProcDMCM : public ContProcedure {
-public:
-  ContProcDMCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
-    : pnt1(p1), pnt2(p2), numbeats(beats) {}
-  virtual ~ContProcDMCM();
-
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt1, *pnt2;
-  ContValue *numbeats;
+	ContValueVar *var;
+	ContValue *val;
 };
 
-class ContProcDMHS : public ContProcedure {
+class ContProcBlam : public ContProcedure
+{
 public:
-  ContProcDMHS(ContPoint *p)
-    : pnt(p) {}
-  virtual ~ContProcDMHS();
+	virtual void Compile(AnimateCompile* anim);
+};
 
-  virtual void Compile(AnimateCompile* anim);
+class ContProcCM : public ContProcedure
+{
+public:
+	ContProcCM(ContPoint *p1, ContPoint *p2, ContValue *steps, ContValue *d1,
+		ContValue *d2, ContValue *beats)
+		: pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
+	virtual ~ContProcCM();
+
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt;
+	ContPoint *pnt1, *pnt2;
+	ContValue *stps, *dir1, *dir2, *numbeats;
 };
 
-class ContProcEven : public ContProcedure {
+class ContProcDMCM : public ContProcedure
+{
 public:
-  ContProcEven(ContValue *steps, ContPoint *p)
-    : stps(steps), pnt(p) {}
-  virtual ~ContProcEven();
+	ContProcDMCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
+		: pnt1(p1), pnt2(p2), numbeats(beats) {}
+	virtual ~ContProcDMCM();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *stps;
-  ContPoint *pnt;
+	ContPoint *pnt1, *pnt2;
+	ContValue *numbeats;
 };
 
-class ContProcEWNS : public ContProcedure {
+class ContProcDMHS : public ContProcedure
+{
 public:
-  ContProcEWNS(ContPoint *p)
-    : pnt(p) {}
-  virtual ~ContProcEWNS();
+	ContProcDMHS(ContPoint *p)
+		: pnt(p) {}
+	virtual ~ContProcDMHS();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt;
+	ContPoint *pnt;
 };
 
-class ContProcFountain : public ContProcedure {
+class ContProcEven : public ContProcedure
+{
 public:
-  ContProcFountain(ContValue *d1, ContValue *d2, ContValue *s1, ContValue *s2,
-		   ContPoint *p)
-    : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
-  virtual ~ContProcFountain();
+	ContProcEven(ContValue *steps, ContPoint *p)
+		: stps(steps), pnt(p) {}
+	virtual ~ContProcEven();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *dir1, *dir2;
-  ContValue *stepsize1, *stepsize2;
-  ContPoint *pnt;
+	ContValue *stps;
+	ContPoint *pnt;
 };
 
-class ContProcFM : public ContProcedure {
+class ContProcEWNS : public ContProcedure
+{
 public:
-  ContProcFM(ContValue *steps, ContValue *d)
-    : stps(steps), dir(d) {}
-  virtual ~ContProcFM();
+	ContProcEWNS(ContPoint *p)
+		: pnt(p) {}
+	virtual ~ContProcEWNS();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *stps, *dir;
+	ContPoint *pnt;
 };
 
-class ContProcFMTO : public ContProcedure {
+class ContProcFountain : public ContProcedure
+{
 public:
-  ContProcFMTO(ContPoint *p)
-    : pnt(p) {}
-  virtual ~ContProcFMTO();
+	ContProcFountain(ContValue *d1, ContValue *d2, ContValue *s1, ContValue *s2,
+		ContPoint *p)
+		: dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
+	virtual ~ContProcFountain();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt;
+	ContValue *dir1, *dir2;
+	ContValue *stepsize1, *stepsize2;
+	ContPoint *pnt;
 };
 
-class ContProcGrid : public ContProcedure {
+class ContProcFM : public ContProcedure
+{
 public:
-  ContProcGrid(ContValue *g)
-    : grid(g) {}
-  virtual ~ContProcGrid();
+	ContProcFM(ContValue *steps, ContValue *d)
+		: stps(steps), dir(d) {}
+	virtual ~ContProcFM();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *grid;
+	ContValue *stps, *dir;
 };
 
-class ContProcHSCM : public ContProcedure {
+class ContProcFMTO : public ContProcedure
+{
 public:
-  ContProcHSCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
-    : pnt1(p1), pnt2(p2), numbeats(beats) {}
-  virtual ~ContProcHSCM();
+	ContProcFMTO(ContPoint *p)
+		: pnt(p) {}
+	virtual ~ContProcFMTO();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt1, *pnt2;
-  ContValue *numbeats;
+	ContPoint *pnt;
 };
 
-class ContProcHSDM : public ContProcedure {
+class ContProcGrid : public ContProcedure
+{
 public:
-  ContProcHSDM(ContPoint *p)
-    : pnt(p) {}
-  virtual ~ContProcHSDM();
+	ContProcGrid(ContValue *g)
+		: grid(g) {}
+	virtual ~ContProcGrid();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt;
+	ContValue *grid;
 };
 
-class ContProcMagic : public ContProcedure {
+class ContProcHSCM : public ContProcedure
+{
 public:
-  ContProcMagic(ContPoint *p)
-    : pnt(p) {}
-  virtual ~ContProcMagic();
+	ContProcHSCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
+		: pnt1(p1), pnt2(p2), numbeats(beats) {}
+	virtual ~ContProcHSCM();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt;
+	ContPoint *pnt1, *pnt2;
+	ContValue *numbeats;
 };
 
-class ContProcMarch : public ContProcedure {
+class ContProcHSDM : public ContProcedure
+{
 public:
-  ContProcMarch(ContValue *stepsize, ContValue *steps, ContValue *d, ContValue *face)
-    : stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
-  virtual ~ContProcMarch();
+	ContProcHSDM(ContPoint *p)
+		: pnt(p) {}
+	virtual ~ContProcHSDM();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *stpsize, *stps, *dir, *facedir;
+	ContPoint *pnt;
 };
 
-class ContProcMT : public ContProcedure {
+class ContProcMagic : public ContProcedure
+{
 public:
-  ContProcMT(ContValue *beats, ContValue *d)
-    : numbeats(beats), dir(d) {}
-  virtual ~ContProcMT();
+	ContProcMagic(ContPoint *p)
+		: pnt(p) {}
+	virtual ~ContProcMagic();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *numbeats, *dir;
+	ContPoint *pnt;
 };
 
-class ContProcMTRM : public ContProcedure {
+class ContProcMarch : public ContProcedure
+{
 public:
-  ContProcMTRM(ContValue *d)
-    : dir(d) {}
-  virtual ~ContProcMTRM();
+	ContProcMarch(ContValue *stepsize, ContValue *steps, ContValue *d, ContValue *face)
+		: stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
+	virtual ~ContProcMarch();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *dir;
+	ContValue *stpsize, *stps, *dir, *facedir;
 };
 
-class ContProcNSEW : public ContProcedure {
+class ContProcMT : public ContProcedure
+{
 public:
-  ContProcNSEW(ContPoint *p)
-    : pnt(p) {}
-  virtual ~ContProcNSEW();
+	ContProcMT(ContValue *beats, ContValue *d)
+		: numbeats(beats), dir(d) {}
+	virtual ~ContProcMT();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContPoint *pnt;
+	ContValue *numbeats, *dir;
 };
 
-class ContProcRotate : public ContProcedure {
+class ContProcMTRM : public ContProcedure
+{
 public:
-  ContProcRotate(ContValue *angle, ContValue *steps, ContPoint *p)
-    : ang(angle), stps(steps), pnt(p) {}
-  virtual ~ContProcRotate();
+	ContProcMTRM(ContValue *d)
+		: dir(d) {}
+	virtual ~ContProcMTRM();
 
-  virtual void Compile(AnimateCompile* anim);
+	virtual void Compile(AnimateCompile* anim);
 
 private:
-  ContValue *ang, *stps;
-  ContPoint *pnt;
+	ContValue *dir;
 };
 
+class ContProcNSEW : public ContProcedure
+{
+public:
+	ContProcNSEW(ContPoint *p)
+		: pnt(p) {}
+	virtual ~ContProcNSEW();
+
+	virtual void Compile(AnimateCompile* anim);
+
+private:
+	ContPoint *pnt;
+};
+
+class ContProcRotate : public ContProcedure
+{
+public:
+	ContProcRotate(ContValue *angle, ContValue *steps, ContPoint *p)
+		: ang(angle), stps(steps), pnt(p) {}
+	virtual ~ContProcRotate();
+
+	virtual void Compile(AnimateCompile* anim);
+
+private:
+	ContValue *ang, *stps;
+	ContPoint *pnt;
+};
 #endif
-

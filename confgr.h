@@ -18,10 +18,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _CONFGR_H_
@@ -32,27 +32,28 @@
 #define MAX_SPR_LINES 5
 #define MAX_YARD_LINES 53
 
-enum CalChartColors {
-  COLOR_FIELD,
-  COLOR_FIELD_DETAIL,
-  COLOR_FIELD_TEXT,
-  COLOR_POINT,
-  COLOR_POINT_TEXT,
-  COLOR_POINT_HILIT,
-  COLOR_POINT_HILIT_TEXT,
-  COLOR_REF_POINT,
-  COLOR_REF_POINT_TEXT,
-  COLOR_REF_POINT_HILIT,
-  COLOR_REF_POINT_HILIT_TEXT,
-  COLOR_POINT_ANIM_FRONT,
-  COLOR_POINT_ANIM_BACK,
-  COLOR_POINT_ANIM_SIDE,
-  COLOR_POINT_ANIM_HILIT_FRONT,
-  COLOR_POINT_ANIM_HILIT_BACK,
-  COLOR_POINT_ANIM_HILIT_SIDE,
-  COLOR_POINT_ANIM_COLLISION,
-  COLOR_SHAPES,
-  COLOR_NUM
+enum CalChartColors
+{
+	COLOR_FIELD,
+	COLOR_FIELD_DETAIL,
+	COLOR_FIELD_TEXT,
+	COLOR_POINT,
+	COLOR_POINT_TEXT,
+	COLOR_POINT_HILIT,
+	COLOR_POINT_HILIT_TEXT,
+	COLOR_REF_POINT,
+	COLOR_REF_POINT_TEXT,
+	COLOR_REF_POINT_HILIT,
+	COLOR_REF_POINT_HILIT_TEXT,
+	COLOR_POINT_ANIM_FRONT,
+	COLOR_POINT_ANIM_BACK,
+	COLOR_POINT_ANIM_SIDE,
+	COLOR_POINT_ANIM_HILIT_FRONT,
+	COLOR_POINT_ANIM_HILIT_BACK,
+	COLOR_POINT_ANIM_HILIT_SIDE,
+	COLOR_POINT_ANIM_COLLISION,
+	COLOR_SHAPES,
+	COLOR_NUM
 };
 
 class wxPalette;
@@ -103,7 +104,7 @@ extern wxString spr_line_text[MAX_SPR_LINES];
 extern wxString ReadConfig(const wxString& path);
 class wxPathList;
 extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
-			   const wxPathList *list = NULL);
+const wxPathList *list = NULL);
 extern wxString FullPath(const wxString& path);
 extern int ReadDOSline(FILE *fp, wxString& str);
 
@@ -113,5 +114,4 @@ extern int ReadDOSline(FILE *fp, wxString& str);
 #else
 #define DEBUG_LOG(format, ...)
 #endif
-
 #endif

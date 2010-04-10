@@ -18,10 +18,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _INGL_H_
@@ -36,7 +36,7 @@
 #include <string.h>
 #include <vector>
 
-#include <wx/defs.h> // For basic wx defines
+#include <wx/defs.h>							  // For basic wx defines
 
 #include "platconf.h"
 
@@ -44,66 +44,69 @@ typedef uint32_t INGLid;
 
 #define MakeINGLid(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
 
-class INGLchunk {
+class INGLchunk
+{
 public:
-  INGLchunk();
-  ~INGLchunk();
+	INGLchunk();
+	~INGLchunk();
 
-  INGLchunk *prev;
-  INGLid name;
-  INGLid size;
-  std::vector<uint8_t> data;
-  void *userdata;
+	INGLchunk *prev;
+	INGLid name;
+	INGLid size;
+	std::vector<uint8_t> data;
+	void *userdata;
 };
 
-struct INGLhandler {
-  INGLid id;
-  INGLid previd;
-  const char* (*func) (INGLchunk* chunk);
+struct INGLhandler
+{
+	INGLid id;
+	INGLid previd;
+	const char* (*func) (INGLchunk* chunk);
 };
 
-class INGLread {
+class INGLread
+{
 public:
-  INGLread(FILE *file);
-  INGLread(const char *filename);
-  ~INGLread();
+	INGLread(FILE *file);
+	INGLread(const char *filename);
+	~INGLread();
 
-  bool Okay();
+	bool Okay();
 
-  typedef const char* StringPtr;
-  void *ParseFile(INGLhandler hndlr[], unsigned num, StringPtr *error,
-		  void *topdata = NULL);
+	typedef const char* StringPtr;
+	void *ParseFile(INGLhandler hndlr[], unsigned num, StringPtr *error,
+		void *topdata = NULL);
 
 private:
-  bool ReadLong(INGLid *d);
-  void *PopChunk();
+	bool ReadLong(INGLid *d);
+	void *PopChunk();
 
-  FILE *fp;
-  INGLchunk* chunks;
+	FILE *fp;
+	INGLchunk* chunks;
 };
 
-class INGLwrite {
+class INGLwrite
+{
 public:
-  INGLwrite(FILE *file);
-  INGLwrite(const char *filename);
-  ~INGLwrite();
+	INGLwrite(FILE *file);
+	INGLwrite(const char *filename);
+	~INGLwrite();
 
-  inline bool Okay() { return (fp != NULL); }
+	inline bool Okay() { return (fp != NULL); }
 
-  bool WriteHeader();
-  bool WriteGurk(INGLid name);
-  bool WriteChunkHeader(INGLid name, INGLid size);
-  bool WriteChunk(INGLid name, INGLid size, const void *data);
-  bool WriteChunkStr(INGLid name, const char *str);
-  bool WriteEnd(INGLid name);
+	bool WriteHeader();
+	bool WriteGurk(INGLid name);
+	bool WriteChunkHeader(INGLid name, INGLid size);
+	bool WriteChunk(INGLid name, INGLid size, const void *data);
+	bool WriteChunkStr(INGLid name, const char *str);
+	bool WriteEnd(INGLid name);
 
-  // Write raw data
-  bool WriteStr(const char *str);
-  bool Write(const void *data, INGLid size);
+// Write raw data
+	bool WriteStr(const char *str);
+	bool Write(const void *data, INGLid size);
 private:
-  bool WriteLong(INGLid d);
+	bool WriteLong(INGLid d);
 
-  FILE *fp;
+	FILE *fp;
 };
-
 #endif

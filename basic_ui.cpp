@@ -17,10 +17,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifdef __GNUG__
@@ -35,169 +35,212 @@
 #endif
 
 // Function for allowing XOR drawing
-void SetXOR(wxDC *dc) {
-  dc->SetBrush(*wxTRANSPARENT_BRUSH);
-  dc->SetPen(*CalChartPens[COLOR_SHAPES]);
-  /*
-  dc->SetPen(wxWHITE_PEN);
-  dc->SetLogicalFunction(wxINVERT);
-  */
+void SetXOR(wxDC *dc)
+{
+	dc->SetBrush(*wxTRANSPARENT_BRUSH);
+	dc->SetPen(*CalChartPens[COLOR_SHAPES]);
+/*
+dc->SetPen(wxWHITE_PEN);
+dc->SetLogicalFunction(wxINVERT);
+*/
 }
 
+
 // Set icon to band's insignia
-void SetBandIcon(wxFrame *frame) {
+void SetBandIcon(wxFrame *frame)
+{
 #ifdef __CC_SET_ICON__
-  wxIcon icon(ICON_NAME(calchart));
-  frame->SetIcon(icon);
+	wxIcon icon(ICON_NAME(calchart));
+	frame->SetIcon(icon);
 #endif
 }
+
 
 // Text subwindow that can respond to drag-and-drop
 FancyTextWin::FancyTextWin(wxWindow* parent, wxWindowID id,
-			   const wxString& value,
-			   const wxPoint& pos,
-			   const wxSize& size,
-			   long style,
-			   const wxValidator& validator,
-			   const wxString& name)
-:wxTextCtrl(parent, id, value, pos, size, style, validator, name) {
-  SetDropTarget(new FancyTextWinDropTarget(this));
+const wxString& value,
+const wxPoint& pos,
+const wxSize& size,
+long style,
+const wxValidator& validator,
+const wxString& name)
+:wxTextCtrl(parent, id, value, pos, size, style, validator, name)
+{
+	SetDropTarget(new FancyTextWinDropTarget(this));
 }
 
+
 #ifdef TEXT_DOS_STYLE
-wxString FancyTextWin::GetValue(void) const {
-  wxString result;
-  unsigned i;
+wxString FancyTextWin::GetValue(void) const
+{
+	wxString result;
+	unsigned i;
 
-  // Remove carriage returns
-  result = wxTextCtrl::GetValue();
-  for (i = 0; i < result.length();) {
-    if (result[i] != '\r') i++;
-    else result.erase(i,1);
-  }
+// Remove carriage returns
+	result = wxTextCtrl::GetValue();
+	for (i = 0; i < result.length();)
+	{
+		if (result[i] != '\r') i++;
+		else result.erase(i,1);
+	}
 
-  return result;
+	return result;
 }
 #endif
 
-bool FancyTextWinDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) {
-  if (filenames.Count() > 0) {
-    win->LoadFile(filenames[0]);
-  }
-  return true;
+bool FancyTextWinDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
+{
+	if (filenames.Count() > 0)
+	{
+		win->LoadFile(filenames[0]);
+	}
+	return true;
 }
+
 
 AutoScrollCanvas::
 AutoScrollCanvas(wxWindow *parent, wxWindowID id,
-		 const wxPoint& pos, const wxSize& size,
-		 long style, const wxString& name)
+const wxPoint& pos, const wxSize& size,
+long style, const wxString& name)
 : wxPanel(parent, id, pos, size, style, name),
-  memdc(NULL), membm(NULL),
-  x_scale(1.0), y_scale(1.0), palette(NULL)
+memdc(NULL), membm(NULL),
+x_scale(1.0), y_scale(1.0), palette(NULL)
 {
-  if (size.GetX() != wxDefaultSize.GetX() ||
-      size.GetY() != wxDefaultSize.GetY()) {
-    SetSize(size);
-  }
+	if (size.GetX() != wxDefaultSize.GetX() ||
+		size.GetY() != wxDefaultSize.GetY())
+	{
+		SetSize(size);
+	}
 }
 
-AutoScrollCanvas::~AutoScrollCanvas() {
-  FreeMem();
-}
 
-void AutoScrollCanvas::SetSize(const wxSize& size) {
-  wxWindowDC dc(this);
-
-  dc.SetLogicalFunction(wxCOPY);
-  Refresh();
-  FreeMem();
-  x_off = y_off = 0.0;
-  membm = new wxBitmap(size.GetX(), size.GetY());
-  if (!membm->Ok()) {
+AutoScrollCanvas::~AutoScrollCanvas()
+{
 	FreeMem();
-  } else {
-	  memdc = new wxMemoryDC(*membm);
-	  if (!memdc->IsOk()) {
-		  FreeMem();
-	  } else {
-      memdc->SelectObject(*membm);
-      memdc->SetBackground(dc.GetBackground());
-      if (palette) memdc->SetPalette(*palette);
-      memdc->SetUserScale(x_scale, y_scale);
-      memdc->Clear();
-    }
-  }
 }
 
-void AutoScrollCanvas::SetBackground(const wxBrush& brush) {
-  wxWindow::SetBackgroundColour(brush.GetColour());
-  if (memdc) memdc->SetBackground(brush);
+
+void AutoScrollCanvas::SetSize(const wxSize& size)
+{
+	wxWindowDC dc(this);
+
+	dc.SetLogicalFunction(wxCOPY);
+	Refresh();
+	FreeMem();
+	x_off = y_off = 0.0;
+	membm = new wxBitmap(size.GetX(), size.GetY());
+	if (!membm->Ok())
+	{
+		FreeMem();
+	}
+	else
+	{
+		memdc = new wxMemoryDC(*membm);
+		if (!memdc->IsOk())
+		{
+			FreeMem();
+		}
+		else
+		{
+			memdc->SelectObject(*membm);
+			memdc->SetBackground(dc.GetBackground());
+			if (palette) memdc->SetPalette(*palette);
+			memdc->SetUserScale(x_scale, y_scale);
+			memdc->Clear();
+		}
+	}
 }
 
-void AutoScrollCanvas::SetPalette(wxPalette *pal) {
-  palette = pal;
-  wxWindow::SetPalette(*palette);
-  if (memdc) memdc->SetPalette(*palette);
+
+void AutoScrollCanvas::SetBackground(const wxBrush& brush)
+{
+	wxWindow::SetBackgroundColour(brush.GetColour());
+	if (memdc) memdc->SetBackground(brush);
 }
 
-void AutoScrollCanvas::SetUserScale(float x, float y) {
-  wxWindowDC dc(this);
-  x_scale = x;
-  y_scale = y;
-  dc.SetUserScale(x, y);
-  if (memdc) memdc->SetUserScale(x, y);
+
+void AutoScrollCanvas::SetPalette(wxPalette *pal)
+{
+	palette = pal;
+	wxWindow::SetPalette(*palette);
+	if (memdc) memdc->SetPalette(*palette);
 }
 
-void AutoScrollCanvas::Move(float x, float y, bool noscroll) {
-  if (memdc) {
-    if (!noscroll) {
-      x_off += (x - last_pos.x);
-      y_off += (y - last_pos.y);
-    }
-  }
-  last_pos.x = x;
-  last_pos.y = y;
+
+void AutoScrollCanvas::SetUserScale(float x, float y)
+{
+	wxWindowDC dc(this);
+	x_scale = x;
+	y_scale = y;
+	dc.SetUserScale(x, y);
+	if (memdc) memdc->SetUserScale(x, y);
 }
 
-void AutoScrollCanvas::Blit(wxDC& dc) {
-  if (memdc) {
-    dc.SetUserScale(1.0, 1.0);
-    memdc->SetUserScale(1.0, 1.0);
-    // Set the fg and bg colors in case source is a mono bitmap
-    dc.SetPen(*wxWHITE_PEN);
-    dc.SetBackground(*wxBLACK_BRUSH);
-    dc.Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
-	    memdc, 0, 0, wxCOPY);
-    // Restore original background
-    dc.SetBackground(memdc->GetBackground());
-    dc.SetUserScale(x_scale, y_scale);
-    memdc->SetUserScale(x_scale, y_scale);
-  }
+
+void AutoScrollCanvas::Move(float x, float y, bool noscroll)
+{
+	if (memdc)
+	{
+		if (!noscroll)
+		{
+			x_off += (x - last_pos.x);
+			y_off += (y - last_pos.y);
+		}
+	}
+	last_pos.x = x;
+	last_pos.y = y;
 }
 
-void AutoScrollCanvas::FreeMem() {
-  if (memdc) {
-    delete memdc;
-    memdc = NULL;
-  }
-  if (membm) {
-    delete membm;
-    membm = NULL;
-  }
+
+void AutoScrollCanvas::Blit(wxDC& dc)
+{
+	if (memdc)
+	{
+		dc.SetUserScale(1.0, 1.0);
+		memdc->SetUserScale(1.0, 1.0);
+// Set the fg and bg colors in case source is a mono bitmap
+		dc.SetPen(*wxWHITE_PEN);
+		dc.SetBackground(*wxBLACK_BRUSH);
+		dc.Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
+			memdc, 0, 0, wxCOPY);
+// Restore original background
+		dc.SetBackground(memdc->GetBackground());
+		dc.SetUserScale(x_scale, y_scale);
+		memdc->SetUserScale(x_scale, y_scale);
+	}
 }
+
+
+void AutoScrollCanvas::FreeMem()
+{
+	if (memdc)
+	{
+		delete memdc;
+		memdc = NULL;
+	}
+	if (membm)
+	{
+		delete membm;
+		membm = NULL;
+	}
+}
+
 
 CoolToolBar::CoolToolBar(wxFrame *frame, wxWindowID id,
-			 const wxString& name) {
-  tb = frame->CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL, id, name);
+const wxString& name)
+{
+	tb = frame->CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL, id, name);
 }
+
 
 void CoolToolBar::SetupBar(ToolBarEntry *entries, size_t n)
 {
-  for (size_t i = 0; i < n; i++) {
-    tb->AddTool(entries[i].id, wxT(""), *(entries[i].bm),
-		entries[i].desc,
-		((entries[i].flags & TOOLBAR_TOGGLE) != 0) ? wxITEM_CHECK : wxITEM_NORMAL);
-    if (entries[i].flags & TOOLBAR_SPACE) tb->AddSeparator();
-  }
-  tb->Realize();
+	for (size_t i = 0; i < n; i++)
+	{
+		tb->AddTool(entries[i].id, wxT(""), *(entries[i].bm),
+			entries[i].desc,
+			((entries[i].flags & TOOLBAR_TOGGLE) != 0) ? wxITEM_CHECK : wxITEM_NORMAL);
+		if (entries[i].flags & TOOLBAR_SPACE) tb->AddSeparator();
+	}
+	tb->Realize();
 }

@@ -17,10 +17,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _PLATCONF_H_
@@ -38,15 +38,15 @@ typedef short int16_t;
 typedef unsigned short uint16_t;
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
-#define INT8_MIN		(-128)
-#define INT16_MIN		(-32767-1)
-#define INT32_MIN		(-2147483647-1)
-#define INT8_MAX		(127)
-#define INT16_MAX		(32767)
-#define INT32_MAX		(2147483647)
-#define UINT8_MAX		(255)
-#define UINT16_MAX		(65535)
-#define UINT32_MAX		(4294967295U)
+#define INT8_MIN        (-128)
+#define INT16_MIN       (-32767-1)
+#define INT32_MIN       (-2147483647-1)
+#define INT8_MAX        (127)
+#define INT16_MAX       (32767)
+#define INT32_MAX       (2147483647)
+#define UINT8_MAX       (255)
+#define UINT16_MAX      (65535)
+#define UINT32_MAX      (4294967295U)
 #endif
 #elif sgi
 #include <sys/types.h>
@@ -142,5 +142,4 @@ typedef unsigned char uint8_t;
 
 #define put_lil_word(a,v) {((uint8_t *)(a))[0]=((uint16_t)(v));((uint8_t *)(a))[1]=((uint16_t)(v))>>8;}
 #define get_lil_word(a) ((((uint8_t *)(a))[0] & 0xFF) | ((((uint8_t *)(a))[1] & 0xFF) << 8))
-
 #endif

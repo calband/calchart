@@ -17,10 +17,10 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _BASIC_UI_H_
@@ -58,82 +58,86 @@ void SetXOR(wxDC *dc);
 void SetBandIcon(wxFrame *frame);
 
 // Define a text subwindow that can respond to drag-and-drop
-class FancyTextWin : public wxTextCtrl {
+class FancyTextWin : public wxTextCtrl
+{
 public:
-  FancyTextWin(wxWindow* parent, wxWindowID id,
-	       const wxString& value = wxEmptyString,
-	       const wxPoint& pos = wxDefaultPosition,
-	       const wxSize& size = wxDefaultSize,
-	       long style = wxTE_MULTILINE|wxHSCROLL,
-	       const wxValidator& validator = wxDefaultValidator,
-	       const wxString& name = wxTextCtrlNameStr);
+	FancyTextWin(wxWindow* parent, wxWindowID id,
+		const wxString& value = wxEmptyString,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxTE_MULTILINE|wxHSCROLL,
+		const wxValidator& validator = wxDefaultValidator,
+		const wxString& name = wxTextCtrlNameStr);
 #ifdef TEXT_DOS_STYLE
-  wxString GetValue(void) const;
+	wxString GetValue(void) const;
 #endif
 };
 
-class FancyTextWinDropTarget : public wxFileDropTarget {
+class FancyTextWinDropTarget : public wxFileDropTarget
+{
 public:
-  FancyTextWinDropTarget(FancyTextWin *w) : win(w) {}
-  virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
+	FancyTextWinDropTarget(FancyTextWin *w) : win(w) {}
+	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
 private:
-  FancyTextWin *win;
+	FancyTextWin *win;
 };
 
 class AutoScrollCanvas: public wxPanel
 {
 public:
-  AutoScrollCanvas(wxWindow *parent, wxWindowID id,
-		   const wxPoint& pos = wxDefaultPosition,
-		   const wxSize& size = wxDefaultSize,
-		   long style = 0,
-		   const wxString& name = wxT("canvas"));
-  ~AutoScrollCanvas();
+	AutoScrollCanvas(wxWindow *parent, wxWindowID id,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0,
+		const wxString& name = wxT("canvas"));
+	~AutoScrollCanvas();
 
-  inline wxDC *GetMemDC() { return memdc; }
-  void SetSize(const wxSize& size);
-  void SetBackground(const wxBrush& brush);
-  void SetPalette(wxPalette *palette);
-  void SetUserScale(float x, float y);
-  inline float GetPositionX() const { return x_off/x_scale; }
-  inline float GetPositionY() const { return y_off/y_scale; }
-  inline float GetScaleX() const { return x_scale; }
-  inline float GetScaleY() const { return y_scale; }
+	inline wxDC *GetMemDC() { return memdc; }
+	void SetSize(const wxSize& size);
+	void SetBackground(const wxBrush& brush);
+	void SetPalette(wxPalette *palette);
+	void SetUserScale(float x, float y);
+	inline float GetPositionX() const { return x_off/x_scale; }
+	inline float GetPositionY() const { return y_off/y_scale; }
+	inline float GetScaleX() const { return x_scale; }
+	inline float GetScaleY() const { return y_scale; }
 
-  void Move(float x, float y, bool noscroll=0);
-  void Blit(wxDC& dc);
+	void Move(float x, float y, bool noscroll=0);
+	void Blit(wxDC& dc);
 
 protected:
-  float x_off, y_off;
+	float x_off, y_off;
 
 private:
-  void FreeMem();
+	void FreeMem();
 
-  wxMemoryDC *memdc;
-  wxBitmap *membm;
-  float x_scale, y_scale;
-  wxPalette *palette;
-  wxPoint last_pos;
+	wxMemoryDC *memdc;
+	wxBitmap *membm;
+	float x_scale, y_scale;
+	wxPalette *palette;
+	wxPoint last_pos;
 };
 
 struct ToolBarEntry;
-class CoolToolBar {
+class CoolToolBar
+{
 public:
-  CoolToolBar(wxFrame *frame, wxWindowID id,
-	      const wxString& name = wxPanelNameStr);
-  void SetupBar(ToolBarEntry *tbe, size_t n);
+	CoolToolBar(wxFrame *frame, wxWindowID id,
+		const wxString& name = wxPanelNameStr);
+	void SetupBar(ToolBarEntry *tbe, size_t n);
 private:
-  wxToolBar *tb;
+	wxToolBar *tb;
 };
 
 #define TOOLBAR_SPACE 1
 #define TOOLBAR_TOGGLE 2
 
-struct ToolBarEntry {
-  unsigned flags;
-  wxBitmap *bm;
-  const wxString desc;
-  int id;
-  ~ToolBarEntry() {}
+struct ToolBarEntry
+{
+	unsigned flags;
+	wxBitmap *bm;
+	const wxString desc;
+	int id;
+	~ToolBarEntry() {}
 };
 #endif
