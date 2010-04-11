@@ -218,7 +218,7 @@ public:
 	void Drag(const CC_coord& p);
 	inline const wxPoint *FirstPoint() const
 	{
-		return pntlist.empty() ? NULL : &pntlist.back();
+		return pntlist.empty() ? NULL : &pntlist.front();
 	}
 private:
 	bool CrossesLine(const wxPoint& start, const wxPoint& end,
