@@ -118,26 +118,15 @@ private:
 	wxPoint last_pos;
 };
 
-struct ToolBarEntry;
-class CoolToolBar
-{
-public:
-	CoolToolBar(wxFrame *frame, wxWindowID id,
-		const wxString& name = wxPanelNameStr);
-	void SetupBar(ToolBarEntry *tbe, size_t n);
-private:
-	wxToolBar *tb;
-};
-
-#define TOOLBAR_SPACE 1
-#define TOOLBAR_TOGGLE 2
-
 struct ToolBarEntry
 {
-	unsigned flags;
+	wxItemKind kind;
 	wxBitmap *bm;
 	const wxString desc;
 	int id;
-	~ToolBarEntry() {}
+	bool space;
 };
+
+wxToolBar* CreateCoolToolBar(const ToolBarEntry *entries, size_t n, wxFrame *frame, wxWindowID id = -1, const wxString& name = wxToolBarNameStr);
+
 #endif

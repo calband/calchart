@@ -36,12 +36,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ToolBarEntry anim_tb[] =
 {
-	{ 0, NULL, wxT("Stop"), CALCHART__anim_stop },
-	{ 0, NULL, wxT("Play"), CALCHART__anim_play },
-	{ 0, NULL, wxT("Previous beat"), CALCHART__anim_prev_beat },
-	{ 0, NULL, wxT("Next beat"), CALCHART__anim_next_beat },
-	{ 0, NULL, wxT("Previous stuntsheet"), CALCHART__anim_prev_sheet },
-	{ 0, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
+	{ wxITEM_NORMAL, NULL, wxT("Stop"), CALCHART__anim_stop },
+	{ wxITEM_NORMAL, NULL, wxT("Play"), CALCHART__anim_play },
+	{ wxITEM_NORMAL, NULL, wxT("Previous beat"), CALCHART__anim_prev_beat },
+	{ wxITEM_NORMAL, NULL, wxT("Next beat"), CALCHART__anim_next_beat },
+	{ wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"), CALCHART__anim_prev_sheet },
+	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
 };
 
 BEGIN_EVENT_TABLE(AnimationCanvas, AutoScrollCanvas)
@@ -601,8 +601,7 @@ CC_WinList *lst)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
-	CoolToolBar ribbon(this, wxID_ANY);
-	ribbon.SetupBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry));
+	CreateCoolToolBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
 	canvas = new AnimationCanvas(this, dcr);

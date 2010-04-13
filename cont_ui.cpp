@@ -39,14 +39,6 @@ extern wxFont *contBoldItalFont;
 
 extern wxHelpControllerBase *help_inst;
 
-static void toolbar_printcont_sym0(CoolToolBar *tb);
-static void toolbar_printcont_sym1(CoolToolBar *tb);
-static void toolbar_printcont_sym2(CoolToolBar *tb);
-static void toolbar_printcont_sym3(CoolToolBar *tb);
-static void toolbar_printcont_sym4(CoolToolBar *tb);
-static void toolbar_printcont_sym5(CoolToolBar *tb);
-static void toolbar_printcont_sym6(CoolToolBar *tb);
-static void toolbar_printcont_sym7(CoolToolBar *tb);
 enum
 {
 	ktoolbar_printcont_sym0,
@@ -67,14 +59,14 @@ enum
 
 ToolBarEntry printcont_tb[] =
 {
-	{ 0, NULL, wxT("Insert plainman"), ktoolbar_printcont_sym0 },
-	{ 0, NULL, wxT("Insert solidman"), ktoolbar_printcont_sym1 },
-	{ 0, NULL, wxT("Insert backslash man"), ktoolbar_printcont_sym2 },
-	{ 0, NULL, wxT("Insert slash man"), ktoolbar_printcont_sym3 },
-	{ 0, NULL, wxT("Insert x man"), ktoolbar_printcont_sym4 },
-	{ 0, NULL, wxT("Insert solid backslash man"), ktoolbar_printcont_sym5 },
-	{ 0, NULL, wxT("Insert solid slash man"), ktoolbar_printcont_sym6 },
-	{ 0, NULL, wxT("Insert solid x man"), ktoolbar_printcont_sym7 }
+	{ wxITEM_NORMAL, NULL, wxT("Insert plainman"), ktoolbar_printcont_sym0 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert solidman"), ktoolbar_printcont_sym1 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert backslash man"), ktoolbar_printcont_sym2 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert slash man"), ktoolbar_printcont_sym3 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert x man"), ktoolbar_printcont_sym4 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert solid backslash man"), ktoolbar_printcont_sym5 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert solid slash man"), ktoolbar_printcont_sym6 },
+	{ wxITEM_NORMAL, NULL, wxT("Insert solid x man"), ktoolbar_printcont_sym7 }
 };
 
 BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
@@ -778,8 +770,7 @@ int x, int y, int width, int height)
 	CreateStatusBar();
 
 // Add a toolbar
-	CoolToolBar ribbon(this, wxID_ANY);
-	ribbon.SetupBar(printcont_tb, sizeof(printcont_tb)/sizeof(ToolBarEntry));
+	CreateCoolToolBar(printcont_tb, sizeof(printcont_tb)/sizeof(ToolBarEntry), this);
 
 // Add the canvas
 	canvas = new PrintContCanvas(this, dcr);

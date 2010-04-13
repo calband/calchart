@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C7713C7011725F1700DDE734 /* color_select_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7713C6E11725F1700DDE734 /* color_select_ui.cpp */; };
 		C77EA0DA1146192B00656227 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0B71146192B00656227 /* anim_ui.cpp */; };
 		C77EA0DB1146192B00656227 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0B91146192B00656227 /* animate.cpp */; };
 		C77EA0DC1146192B00656227 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0BB1146192B00656227 /* basic_ui.cpp */; };
@@ -72,6 +73,8 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7713C6E11725F1700DDE734 /* color_select_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = color_select_ui.cpp; path = ../color_select_ui.cpp; sourceTree = SOURCE_ROOT; };
+		C7713C6F11725F1700DDE734 /* color_select_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = color_select_ui.h; path = ../color_select_ui.h; sourceTree = SOURCE_ROOT; };
 		C77EA0B71146192B00656227 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = anim_ui.cpp; path = ../anim_ui.cpp; sourceTree = SOURCE_ROOT; };
 		C77EA0B81146192B00656227 /* anim_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = anim_ui.h; path = ../anim_ui.h; sourceTree = SOURCE_ROOT; };
 		C77EA0B91146192B00656227 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animate.cpp; path = ../animate.cpp; sourceTree = SOURCE_ROOT; };
@@ -196,6 +199,8 @@
 				C77EA0BB1146192B00656227 /* basic_ui.cpp */,
 				C77EA0BC1146192B00656227 /* basic_ui.h */,
 				C77EA0BD1146192B00656227 /* ccvers.h */,
+				C7713C6E11725F1700DDE734 /* color_select_ui.cpp */,
+				C7713C6F11725F1700DDE734 /* color_select_ui.h */,
 				C77EA0BE1146192B00656227 /* confgr.cpp */,
 				C77EA0BF1146192B00656227 /* confgr.h */,
 				C77EA0C01146192B00656227 /* cont_ui.cpp */,
@@ -325,6 +330,7 @@
 				C77EA0E81146192B00656227 /* show_ui.cpp in Sources */,
 				C77EA0E91146192B00656227 /* show.cpp in Sources */,
 				C77EA0EA1146192B00656227 /* undo.cpp in Sources */,
+				C7713C7011725F1700DDE734 /* color_select_ui.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern ShowModeList *modelist;
 
-static const wxChar* ColorNames[COLOR_NUM] =
+const wxString ColorNames[COLOR_NUM] =
 {
 	wxT("FIELD"),
 	wxT("FIELD DETAIL"),
@@ -179,7 +179,7 @@ static int DefaultMonoPenDotted[COLOR_NUM] =
 };
 
 wxPalette *CalChartPalette;
-wxPen *CalChartPens[COLOR_NUM];
+const wxPen *CalChartPens[COLOR_NUM];
 const wxBrush *CalChartBrushes[COLOR_NUM];
 
 wxString program_dir;

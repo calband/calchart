@@ -69,6 +69,7 @@ enum
 	CALCHART__POINTS,
 	CALCHART__ANIMATE,
 	CALCHART__SELECTION,
+	CALCHART__COLORS,
 	CALCHART__ROWS,
 	CALCHART__COLUMNS,
 	CALCHART__NEAREST,
@@ -330,6 +331,7 @@ public:
 	void OnCmdSaveAs(wxCommandEvent& event);
 	void OnCmdPrint(wxCommandEvent& event);
 	void OnCmdPrintEPS(wxCommandEvent& event);
+	void OnCmdSelectColors(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event);
 	void OnCmdExit(wxCommandEvent& event);
 	void OnCmdUndo(wxCommandEvent& event);

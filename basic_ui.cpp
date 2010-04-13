@@ -226,21 +226,18 @@ void AutoScrollCanvas::FreeMem()
 }
 
 
-CoolToolBar::CoolToolBar(wxFrame *frame, wxWindowID id,
-const wxString& name)
+wxToolBar* CreateCoolToolBar(const ToolBarEntry *entries, size_t n, wxFrame *frame, wxWindowID id, const wxString& name)
 {
-	tb = frame->CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL, id, name);
-}
-
-
-void CoolToolBar::SetupBar(ToolBarEntry *entries, size_t n)
-{
+	wxToolBar* tb = frame->CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL, id, name);
+	
 	for (size_t i = 0; i < n; i++)
 	{
 		tb->AddTool(entries[i].id, wxT(""), *(entries[i].bm),
 			entries[i].desc,
-			((entries[i].flags & TOOLBAR_TOGGLE) != 0) ? wxITEM_CHECK : wxITEM_NORMAL);
-		if (entries[i].flags & TOOLBAR_SPACE) tb->AddSeparator();
+			entries[i].kind);
+		if (entries[i].space) tb->AddSeparator();
 	}
 	tb->Realize();
+
+	return tb;
 }

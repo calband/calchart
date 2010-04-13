@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show_ui.h"
 #include "anim_ui.h"
 #include "cont_ui.h"
+#include "color_select_ui.h"
 #include "undo.h"
 #include "modes.h"
 #include "confgr.h"
@@ -41,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef __WXMSW__
 #include <wx/helpwin.h>
 #endif
+#include <wx/colordlg.h>
 
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
@@ -76,36 +78,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 static ToolBarEntry main_tb[] =
 {
-	{ 0, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
-	{ TOOLBAR_SPACE, NULL, wxT("Next stuntsheet"), CALCHART__next_ss },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Select points with box"), CALCHART__box },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Select points with polygon"), CALCHART__poly },
-	{
-		TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL,
-		wxT("Select points with lasso"), CALCHART__lasso
-	},
-	{ TOOLBAR_TOGGLE, NULL, wxT("Translate points"), CALCHART__move },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Move points into line"), CALCHART__line },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Rotate block"), CALCHART__rot },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Shear block"), CALCHART__shear },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Reflect block"), CALCHART__reflect },
-	{ TOOLBAR_TOGGLE, NULL, wxT("Resize block"), CALCHART__size },
-	{ TOOLBAR_SPACE | TOOLBAR_TOGGLE, NULL, wxT("Genius move"), CALCHART__genius },
-	{ 0, NULL, wxT("Label on left"), CALCHART__label_left },
-	{ 0, NULL, wxT("Flip label"), CALCHART__label_flip },
-	{ TOOLBAR_SPACE, NULL, wxT("Label on right"), CALCHART__label_right },
-	{ 0, NULL, wxT("Change to plainmen"), CALCHART__setsym0 },
-	{ 0, NULL, wxT("Change to solidmen"), CALCHART__setsym1 },
-	{ 0, NULL, wxT("Change to backslash men"), CALCHART__setsym2 },
-	{ 0, NULL, wxT("Change to slash men"), CALCHART__setsym3 },
-	{ 0, NULL, wxT("Change to x men"), CALCHART__setsym4 },
-	{ 0, NULL, wxT("Change to solid backslash men"), CALCHART__setsym5 },
-	{ 0, NULL, wxT("Change to solid slash men"), CALCHART__setsym6 },
-	{ 0, NULL, wxT("Change to solid x men"), CALCHART__setsym7 }
+	{ wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
+	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
+	{ wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
+	{ wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
+	{ wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso, true },
+	{ wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
+	{ wxITEM_RADIO, NULL, wxT("Move points into line"), CALCHART__line },
+	{ wxITEM_RADIO, NULL, wxT("Rotate block"), CALCHART__rot },
+	{ wxITEM_RADIO, NULL, wxT("Shear block"), CALCHART__shear },
+	{ wxITEM_RADIO, NULL, wxT("Reflect block"), CALCHART__reflect },
+	{ wxITEM_RADIO, NULL, wxT("Resize block"), CALCHART__size },
+	{ wxITEM_RADIO, NULL, wxT("Genius move"), CALCHART__genius, true },
+	{ wxITEM_NORMAL, NULL, wxT("Label on left"), CALCHART__label_left },
+	{ wxITEM_NORMAL, NULL, wxT("Flip label"), CALCHART__label_flip },
+	{ wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
+	{ wxITEM_NORMAL, NULL, wxT("Change to plainmen"), CALCHART__setsym0 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to solidmen"), CALCHART__setsym1 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to backslash men"), CALCHART__setsym2 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to slash men"), CALCHART__setsym3 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to x men"), CALCHART__setsym4 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to solid backslash men"), CALCHART__setsym5 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to solid slash men"), CALCHART__setsym6 },
+	{ wxITEM_NORMAL, NULL, wxT("Change to solid x men"), CALCHART__setsym7 }
 };
-
-#define TOOLBAR_BOX 2
-#define TOOLBAR_TRANS 5
 
 extern ToolBarEntry anim_tb[];
 extern ToolBarEntry printcont_tb[];
@@ -229,6 +225,7 @@ EVT_MENU(CALCHART__setsym4, MainFrame::OnCmd_setsym4)
 EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
 EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
+EVT_MENU(CALCHART__COLORS, MainFrame::OnCmdSelectColors)
 EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
 EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
@@ -846,24 +843,35 @@ void CC_lasso::Append(const CC_coord& p)
 bool CC_lasso::Inside(const CC_coord& p) const
 {
 	bool parity = false;
-	for (PointList::const_iterator i=pntlist.begin();
-		i != pntlist.end();
-		)
+	if (pntlist.size() < 2)
 	{
-		PointList::const_iterator prev(i);
-		++i;
-		if (CrossesLine(*prev, *i, p))
+		return parity;
+	}
+	for (PointList::const_iterator prev=pntlist.begin(), next=prev+1;
+		next != pntlist.end();
+		++prev, ++next)
+	{
+		if (CrossesLine(*prev, *next, p))
 		{
 			parity = !parity;
 		}
 	}
+	// don't forget the first one:
+	if (CrossesLine(pntlist.back(), pntlist.front(), p))
+	{
+		parity = !parity;
+	}
+	
 	return parity;
 }
 
 
 void CC_lasso::Draw(wxDC *dc, float x, float y) const
 {
-	dc->DrawLines(pntlist.size(), const_cast<wxPoint*>(&pntlist[0]), x, y);
+	if (pntlist.size() > 1)
+	{
+		dc->DrawLines(pntlist.size(), const_cast<wxPoint*>(&pntlist[0]), x, y);
+	}
 }
 
 
@@ -1137,6 +1145,7 @@ field(NULL)
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(CALCHART__SELECTION, wxT("Selection Order"), select_menu);
+	options_menu->Append(CALCHART__COLORS, wxT("Select Colors"));
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
@@ -1151,8 +1160,7 @@ field(NULL)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
-	CoolToolBar ribbon(this, wxID_ANY);
-	ribbon.SetupBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry));
+	CreateCoolToolBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
 	setup = false;
@@ -1353,6 +1361,15 @@ void MainFrame::OnCmdPrintEPS(wxCommandEvent& event)
 		{
 			dialog.PrintShow();
 		}
+	}
+}
+
+
+void MainFrame::OnCmdSelectColors(wxCommandEvent& event)
+{
+	ColorSelectDialog dialog1(this);
+	if (dialog1.ShowModal() == wxID_OK)
+	{
 	}
 }
 
@@ -1944,32 +1961,13 @@ void MainFrame::SnapToGrid(CC_coord& c)
 
 void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
-#if 0
-	if (field->curr_lasso != CC_DRAG_NONE)
-	{
-		frameToolBar->ToggleTool(TOOLBAR_BOX+field->curr_lasso-CC_DRAG_BOX, false);
-	}
-#endif
 	field->curr_lasso = type;
-#if 0
-	if (field->curr_lasso != CC_DRAG_NONE)
-	{
-		frameToolBar->ToggleTool(TOOLBAR_BOX + type - CC_DRAG_BOX, true);
-	}
-#endif
 }
 
 
 void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
 {
-#if 0
-	frameToolBar->ToggleTool(TOOLBAR_TRANS + field->curr_move - CC_MOVE_NORMAL,
-		false);
-#endif
 	field->curr_move = type;
-#if 0
-	frameToolBar->ToggleTool(TOOLBAR_TRANS + type - CC_MOVE_NORMAL, true);
-#endif
 	field->EndDrag();
 }
 
@@ -2502,6 +2500,7 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 			DrawDrag(true);
 		}
 	}
+	Refresh();
 }
 
 
