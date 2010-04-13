@@ -16,11 +16,11 @@ YFLAGS = -dv
 
 FIG2EPS = fig2dev -L ps # -P for non-encapsulated
 
-HEADERS = animate.h anim_ui.h basic_ui.h confgr.h cont.h cont_ui.h \
+HEADERS = animate.h anim_ui.h basic_ui.h color_select_ui.h confgr.h cont.h cont_ui.h \
 	ingl.h linmath.h main_ui.h modes.h parse.h platconf.h print_ui.h \
 	show.h show_ui.h undo.h ccvers.h
 
-SRCS = animate.cpp anim_ui.cpp basic_ui.cpp confgr.cpp cont.cpp cont_ui.cpp \
+SRCS = animate.cpp anim_ui.cpp basic_ui.cpp color_select_ui.cpp confgr.cpp cont.cpp cont_ui.cpp \
 	draw.cpp ingl.cpp main_ui.cpp modes.cpp print.cpp print_ui.cpp show.cpp \
 	show_ui.cpp undo.cpp
 
