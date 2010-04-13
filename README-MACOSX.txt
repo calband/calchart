@@ -34,6 +34,8 @@ $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/
 Make Calchart's generated files.  I just do a preliminary version of make to
 get it work
 $ cd ~/calchart/trunk
+$ export CPPFLAGS="-arch i386"
+$ export CXXFLAGS="-arch i386"
 $ make
 
 
