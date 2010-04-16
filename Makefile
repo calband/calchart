@@ -17,6 +17,7 @@ YFLAGS = -dv
 FIG2EPS = fig2dev -L ps # -P for non-encapsulated
 
 SRCDIR = ./src
+GENDIR = ./generated
 
 HEADERS = $(SRCDIR)/animate.h $(SRCDIR)/anim_ui.h $(SRCDIR)/basic_ui.h $(SRCDIR)/color_select_ui.h $(SRCDIR)/confgr.h $(SRCDIR)/cont.h $(SRCDIR)/cont_ui.h \
 	$(SRCDIR)/ingl.h $(SRCDIR)/linmath.h $(SRCDIR)/main_ui.h $(SRCDIR)/modes.h $(SRCDIR)/parse.h $(SRCDIR)/platconf.h $(SRCDIR)/print_ui.h \
@@ -26,14 +27,14 @@ SRCS = $(SRCDIR)/animate.cpp $(SRCDIR)/anim_ui.cpp $(SRCDIR)/basic_ui.cpp $(SRCD
 	$(SRCDIR)/draw.cpp $(SRCDIR)/ingl.cpp $(SRCDIR)/main_ui.cpp $(SRCDIR)/modes.cpp $(SRCDIR)/print.cpp $(SRCDIR)/print_ui.cpp $(SRCDIR)/show.cpp \
 	$(SRCDIR)/show_ui.cpp $(SRCDIR)/undo.cpp
 
-SYNTHETIC_BASES = contscan.l contgram.y
-SYNTHETIC_SRCS = contscan.cpp contgram.cpp
-SYNTHETIC_FILES = $(SYNTHETIC_SRCS) contgram.h contgram.output
+SYNTHETIC_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
+SYNTHETIC_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
+SYNTHETIC_FILES = $(SYNTHETIC_SRCS) $(GENDIR)/contgram.h $(GENDIR)/contgram.output
 
 OBJDIR = build
 
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
-OBJS += $(patsubst %.cpp, $(OBJDIR)/%.o, $(SYNTHETIC_SRCS))
+OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(SYNTHETIC_SRCS))
 
 PSFILES = postscript/calchart.ps postscript/setup.sh postscript/vmstatus.sh \
 	postscript/zllrbach.fig
@@ -73,12 +74,16 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
+$(OBJDIR)/%.o: $(GENDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
+	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
+
 %.cpp %.h: %.y
 	$(YACC) $(YFLAGS) $*.y
 	mv -f $*.tab.c $*.cpp
 	mv -f $*.tab.h $*.h
 
-%.cpp: %.l
+$(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	$(LEX) $(LFLAGS) -t $*.l > $*.cpp
 
 %.bmp: %.xbm
@@ -94,7 +99,7 @@ all: calchart $(PS_SYNTH_FILES) charthlp.xlp
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ `wx-config --libs`
 
-$(OBJDIR)/contscan.o: contgram.h
+$(OBJDIR)/contscan.o: $(GENDIR)/contgram.h
 
 TAGS: $(SRCS) $(HEADERS)
 	etags $(SRCS) $(HEADERS)
