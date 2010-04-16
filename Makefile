@@ -67,7 +67,7 @@ ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) $(PSFILES) Makefile xbm2xpm \
 MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 	makefile.wat calchart.rc install.inf
 
-CXXFLAGS += `wx-config --cflags` $(USER_CXXFLAGS) -Iresources
+CXXFLAGS += `wx-config --cflags` $(USER_CXXFLAGS) -Iresources -I$(SRCDIR)
 CXX = c++
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
@@ -79,14 +79,17 @@ $(OBJDIR)/%.o: $(GENDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
 $(GENDIR)/%.cpp: $(SRCDIR)/%.y
+	@mkdir -p $(GENDIR)
 	$(YACC) $(YFLAGS) $<
 	mv -f $*.tab.c $@
 
 $(GENDIR)/%.h: $(SRCDIR)/%.y
+	@mkdir -p $(GENDIR)
 	$(YACC) $(YFLAGS) $<
 	mv -f $*.tab.h $@
 
 $(GENDIR)/%.cpp: $(SRCDIR)/%.l
+	@mkdir -p $(GENDIR)
 	$(LEX) $(LFLAGS) -t $< > $@
 
 %.bmp: %.xbm
