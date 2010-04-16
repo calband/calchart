@@ -78,13 +78,16 @@ $(OBJDIR)/%.o: $(GENDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
-%.cpp %.h: %.y
-	$(YACC) $(YFLAGS) $*.y
-	mv -f $*.tab.c $*.cpp
-	mv -f $*.tab.h $*.h
+$(GENDIR)/%.cpp: $(SRCDIR)/%.y
+	$(YACC) $(YFLAGS) $<
+	mv -f $*.tab.c $@
+
+$(GENDIR)/%.h: $(SRCDIR)/%.y
+	$(YACC) $(YFLAGS) $<
+	mv -f $*.tab.h $@
 
 $(GENDIR)/%.cpp: $(SRCDIR)/%.l
-	$(LEX) $(LFLAGS) -t $*.l > $*.cpp
+	$(LEX) $(LFLAGS) -t $< > $@
 
 %.bmp: %.xbm
 # use ImageMagick to convert
