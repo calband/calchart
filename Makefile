@@ -16,13 +16,15 @@ YFLAGS = -dv
 
 FIG2EPS = fig2dev -L ps # -P for non-encapsulated
 
-HEADERS = animate.h anim_ui.h basic_ui.h color_select_ui.h confgr.h cont.h cont_ui.h \
-	ingl.h linmath.h main_ui.h modes.h parse.h platconf.h print_ui.h \
-	show.h show_ui.h undo.h ccvers.h
+SRCDIR = ./src
 
-SRCS = animate.cpp anim_ui.cpp basic_ui.cpp color_select_ui.cpp confgr.cpp cont.cpp cont_ui.cpp \
-	draw.cpp ingl.cpp main_ui.cpp modes.cpp print.cpp print_ui.cpp show.cpp \
-	show_ui.cpp undo.cpp
+HEADERS = $(SRCDIR)/animate.h $(SRCDIR)/anim_ui.h $(SRCDIR)/basic_ui.h $(SRCDIR)/color_select_ui.h $(SRCDIR)/confgr.h $(SRCDIR)/cont.h $(SRCDIR)/cont_ui.h \
+	$(SRCDIR)/ingl.h $(SRCDIR)/linmath.h $(SRCDIR)/main_ui.h $(SRCDIR)/modes.h $(SRCDIR)/parse.h $(SRCDIR)/platconf.h $(SRCDIR)/print_ui.h \
+	$(SRCDIR)/show.h $(SRCDIR)/show_ui.h $(SRCDIR)/undo.h $(SRCDIR)/ccvers.h
+
+SRCS = $(SRCDIR)/animate.cpp $(SRCDIR)/anim_ui.cpp $(SRCDIR)/basic_ui.cpp $(SRCDIR)/color_select_ui.cpp $(SRCDIR)/confgr.cpp $(SRCDIR)/cont.cpp $(SRCDIR)/cont_ui.cpp \
+	$(SRCDIR)/draw.cpp $(SRCDIR)/ingl.cpp $(SRCDIR)/main_ui.cpp $(SRCDIR)/modes.cpp $(SRCDIR)/print.cpp $(SRCDIR)/print_ui.cpp $(SRCDIR)/show.cpp \
+	$(SRCDIR)/show_ui.cpp $(SRCDIR)/undo.cpp
 
 SYNTHETIC_BASES = contscan.l contgram.y
 SYNTHETIC_SRCS = contscan.cpp contgram.cpp
@@ -30,7 +32,7 @@ SYNTHETIC_FILES = $(SYNTHETIC_SRCS) contgram.h contgram.output
 
 OBJDIR = build
 
-OBJS += $(patsubst %.cpp, $(OBJDIR)/%.o, $(SRCS)) 
+OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
 OBJS += $(patsubst %.cpp, $(OBJDIR)/%.o, $(SYNTHETIC_SRCS))
 
 PSFILES = postscript/calchart.ps postscript/setup.sh postscript/vmstatus.sh \
@@ -67,7 +69,7 @@ MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 CXXFLAGS += `wx-config --cflags` $(USER_CXXFLAGS)
 CXX = c++
 
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
 
