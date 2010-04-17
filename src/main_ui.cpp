@@ -154,17 +154,11 @@ ShowModeList *modelist;
 
 BEGIN_EVENT_TABLE(TopFrame, CC_MDIParentFrame)
 EVT_CLOSE(TopFrame::OnCloseWindow)
-#ifdef CC_USE_MDI
 EVT_MENU(wxID_NEW, TopFrame::OnCmdNew)
 EVT_MENU(wxID_OPEN, TopFrame::OnCmdLoad)
 EVT_MENU(wxID_EXIT, TopFrame::OnCmdExit)
 EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
-#else
-EVT_BUTTON(wxID_NEW, TopFrame::OnCmdNew)
-EVT_BUTTON(wxID_OPEN, TopFrame::OnCmdLoad)
-EVT_BUTTON(wxID_QUIT, TopFrame::OnCmdExit)
-#endif
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MainFrame, CC_MDIChildFrame)
@@ -930,7 +924,6 @@ CC_MDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(wid
 // Give it an icon
 	SetBandIcon(this);
 
-#ifdef CC_USE_MDI
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(wxID_NEW, wxT("&New Show"), wxT("Create a new show"));
 	file_menu->Append(wxID_OPEN, wxT("&Open..."), wxT("Load a saved show"));
@@ -944,23 +937,6 @@ CC_MDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(wid
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
-#else
-	int w, h;
-
-	wxPanel *p = new wxPanel(this);
-	p->SetHorizontalSpacing(0);
-	p->SetVerticalSpacing(0);
-	(void)new wxButton(p, wxID_NEW, wxT("&New"));
-	(void)new wxButton(p, wxID_OPEN, wxT("&Open"));
-	(void)new wxButton(p, wxID_QUIT, wxT("&Quit"));
-	p->Fit();
-	p->GetSize(&w, &h);
-	SetClientSize(w, h);
-#ifndef BUGGY_SIZE_HINTS
-	GetSize(&w, &h);
-	SetSizeHints(w, h, w, h);
-#endif
-#endif
 	SetDropTarget(new TopFrameDropTarget(this));
 	Show(true);
 }
@@ -978,7 +954,6 @@ void TopFrame::OnCloseWindow(wxCloseEvent& event)
 }
 
 
-#ifdef CC_USE_MDI
 void TopFrame::OnCmdNew(wxCommandEvent& event)
 {
 	NewShow();
@@ -1007,7 +982,6 @@ void TopFrame::OnCmdHelp(wxCommandEvent& event)
 {
 	Help();
 }
-#endif
 
 void TopFrame::NewShow(CC_show *shw)
 {

@@ -36,20 +36,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "platconf.h"
 
-#define CC_USE_MDI
-#ifdef CC_USE_MDI
 typedef wxMDIParentFrame CC_MDIParentFrame;
 typedef wxMDIChildFrame CC_MDIChildFrame;
 #define CC_FRAME_TOP (wxMAXIMIZE | wxDEFAULT_FRAME_STYLE)
 #define CC_FRAME_CHILD (wxDEFAULT_FRAME_STYLE)
 #define CC_FRAME_OTHER (wxDEFAULT_FRAME_STYLE)
-#else
-typedef wxFrame CC_MDIParentFrame;
-typedef wxFrame CC_MDIChildFrame;
-#define CC_FRAME_TOP (wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_CHILD (wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_OTHER (wxDEFAULT_FRAME_STYLE)
-#endif
 
 // Function for allowing XOR drawing
 void SetXOR(wxDC *dc);

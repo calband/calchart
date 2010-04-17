@@ -287,13 +287,11 @@ public:
 	TopFrame(int width, int height);
 	~TopFrame();
 	void OnCloseWindow(wxCloseEvent& event);
-#ifdef CC_USE_MDI
 	void OnCmdNew(wxCommandEvent& event);
 	void OnCmdLoad(wxCommandEvent& event);
 	void OnCmdExit(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
-#endif
 	void NewShow(CC_show *shw = NULL);
 	void OpenShow(const wxString& filename = wxT(""));
 	void Quit();
