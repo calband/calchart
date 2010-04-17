@@ -9,6 +9,7 @@ CONF_LIBS = #-lribout
 
 DFLAGS = -g -Wall $(CONF_FLAGS)
 
+#### TOOLS ####
 LEX = flex
 LFLAGS = -B -i
 YACC = bison
@@ -16,16 +17,14 @@ YFLAGS = -dv
 
 FIG2EPS = fig2dev -L ps # -P for non-encapsulated
 
+#### Directories ####
 SRCDIR = ./src
 GENDIR = ./generated
+RESDIR = ./resources
 
-HEADERS = $(SRCDIR)/animate.h $(SRCDIR)/anim_ui.h $(SRCDIR)/basic_ui.h $(SRCDIR)/color_select_ui.h $(SRCDIR)/confgr.h $(SRCDIR)/cont.h $(SRCDIR)/cont_ui.h \
-	$(SRCDIR)/ingl.h $(SRCDIR)/linmath.h $(SRCDIR)/main_ui.h $(SRCDIR)/modes.h $(SRCDIR)/parse.h $(SRCDIR)/platconf.h $(SRCDIR)/print_ui.h \
-	$(SRCDIR)/show.h $(SRCDIR)/show_ui.h $(SRCDIR)/undo.h $(SRCDIR)/ccvers.h
+HEADERS = $(wildcard $(SRCDIR)/*.h)
 
-SRCS = $(SRCDIR)/animate.cpp $(SRCDIR)/anim_ui.cpp $(SRCDIR)/basic_ui.cpp $(SRCDIR)/color_select_ui.cpp $(SRCDIR)/confgr.cpp $(SRCDIR)/cont.cpp $(SRCDIR)/cont_ui.cpp \
-	$(SRCDIR)/draw.cpp $(SRCDIR)/ingl.cpp $(SRCDIR)/main_ui.cpp $(SRCDIR)/modes.cpp $(SRCDIR)/print.cpp $(SRCDIR)/print_ui.cpp $(SRCDIR)/show.cpp \
-	$(SRCDIR)/show_ui.cpp $(SRCDIR)/undo.cpp
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
 
 SYNTHETIC_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
 SYNTHETIC_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
@@ -42,17 +41,10 @@ RUNTIME = runtime/config runtime/prolog0.ps runtime/prolog1.ps \
 	runtime/prolog2.ps runtime/setup2.ps
 RUNTIME_ALL = $(RUNTIME) runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps
 PS_SYNTH_FILES = runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps postscript/vmstatus.ps
-IMAGES = tb_left.xbm tb_right.xbm tb_box.xbm tb_poly.xbm tb_lasso.xbm \
-	tb_mv.xbm tb_line.xbm tb_rot.xbm tb_shr.xbm tb_ref.xbm tb_siz.xbm \
-	tb_gen.xbm tb_lbl_l.xbm tb_lbl_r.xbm tb_lbl_f.xbm \
-	tb_sym0.xbm tb_sym1.xbm tb_sym2.xbm tb_sym3.xbm \
-	tb_sym4.xbm tb_sym5.xbm tb_sym6.xbm tb_sym7.xbm \
-	tb_stop.xbm tb_play.xbm tb_pbeat.xbm tb_nbeat.xbm \
-	tb_pshet.xbm tb_nshet.xbm
-IMAGES_X = $(IMAGES) calchart.xbm calchart.xpm
+IMAGES = $(wildcard $(RESDIR)/*.xbm) $(wildcard $(RESDIR)/*.xpm)
 IMAGES_BMP = $(IMAGES:.xbm=.bmp)
 IMAGES_MSW = $(IMAGES_BMP) calchart.ico
-IMAGES_ALL = $(IMAGES) calchart.xbm calchart.xpm calchart.ico
+IMAGES_ALL = $(IMAGES) calchart.ico
 IMAGES_SYNTH = $(IMAGES_BMP)
 
 TEXDOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
@@ -67,7 +59,7 @@ ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) $(PSFILES) Makefile xbm2xpm \
 MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
 	makefile.wat calchart.rc install.inf
 
-CXXFLAGS += `wx-config --cflags` $(USER_CXXFLAGS) -Iresources -I$(SRCDIR)
+CXXFLAGS += `wx-config --cflags` $(USER_CXXFLAGS) -I$(RESDIR) -I$(SRCDIR)
 CXX = c++
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp

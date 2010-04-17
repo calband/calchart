@@ -9,24 +9,24 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C7713C7011725F1700DDE734 /* color_select_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7713C6E11725F1700DDE734 /* color_select_ui.cpp */; };
-		C77EA0DA1146192B00656227 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0B71146192B00656227 /* anim_ui.cpp */; };
-		C77EA0DB1146192B00656227 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0B91146192B00656227 /* animate.cpp */; };
-		C77EA0DC1146192B00656227 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0BB1146192B00656227 /* basic_ui.cpp */; };
-		C77EA0DD1146192B00656227 /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0BE1146192B00656227 /* confgr.cpp */; };
-		C77EA0DE1146192B00656227 /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0C01146192B00656227 /* cont_ui.cpp */; };
-		C77EA0DF1146192B00656227 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0C21146192B00656227 /* cont.cpp */; };
-		C77EA0E01146192B00656227 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0C41146192B00656227 /* contgram.cpp */; };
-		C77EA0E11146192B00656227 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0C61146192B00656227 /* contscan.cpp */; };
-		C77EA0E21146192B00656227 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0C71146192B00656227 /* draw.cpp */; };
-		C77EA0E31146192B00656227 /* ingl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0C81146192B00656227 /* ingl.cpp */; };
-		C77EA0E41146192B00656227 /* main_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0CB1146192B00656227 /* main_ui.cpp */; };
-		C77EA0E51146192B00656227 /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0CD1146192B00656227 /* modes.cpp */; };
-		C77EA0E61146192B00656227 /* print_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0D11146192B00656227 /* print_ui.cpp */; };
-		C77EA0E71146192B00656227 /* print.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0D31146192B00656227 /* print.cpp */; };
-		C77EA0E81146192B00656227 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0D41146192B00656227 /* show_ui.cpp */; };
-		C77EA0E91146192B00656227 /* show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0D61146192B00656227 /* show.cpp */; };
-		C77EA0EA1146192B00656227 /* undo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C77EA0D81146192B00656227 /* undo.cpp */; };
+		C7AFA98E117A6DBA00CC53E2 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */; };
+		C7AFA98F117A6DBA00CC53E2 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96C117A6DBA00CC53E2 /* animate.cpp */; };
+		C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
+		C7AFA991117A6DBA00CC53E2 /* color_select_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA971117A6DBA00CC53E2 /* color_select_ui.cpp */; };
+		C7AFA992117A6DBA00CC53E2 /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA973117A6DBA00CC53E2 /* confgr.cpp */; };
+		C7AFA993117A6DBA00CC53E2 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA975117A6DBA00CC53E2 /* cont.cpp */; };
+		C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */; };
+		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
+		C7AFA998117A6DBA00CC53E2 /* ingl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97C117A6DBA00CC53E2 /* ingl.cpp */; };
+		C7AFA999117A6DBA00CC53E2 /* main_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */; };
+		C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA981117A6DBA00CC53E2 /* modes.cpp */; };
+		C7AFA99B117A6DBA00CC53E2 /* print.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA985117A6DBA00CC53E2 /* print.cpp */; };
+		C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */; };
+		C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA988117A6DBA00CC53E2 /* show.cpp */; };
+		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
+		C7AFA99F117A6DBA00CC53E2 /* undo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98C117A6DBA00CC53E2 /* undo.cpp */; };
+		C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
+		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		C7CB75BF114625CF000DBBB6 /* prolog0.ps in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75B8114625C7000DBBB6 /* prolog0.ps */; };
 		C7CB75C0114625D8000DBBB6 /* prolog0.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75B8114625C7000DBBB6 /* prolog0.ps */; };
 		C7CB75C1114625DF000DBBB6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75B7114625C7000DBBB6 /* config */; };
@@ -73,43 +73,45 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C7713C6E11725F1700DDE734 /* color_select_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = color_select_ui.cpp; path = ../color_select_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C7713C6F11725F1700DDE734 /* color_select_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = color_select_ui.h; path = ../color_select_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0B71146192B00656227 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = anim_ui.cpp; path = ../anim_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0B81146192B00656227 /* anim_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = anim_ui.h; path = ../anim_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0B91146192B00656227 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = animate.cpp; path = ../animate.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0BA1146192B00656227 /* animate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = animate.h; path = ../animate.h; sourceTree = SOURCE_ROOT; };
-		C77EA0BB1146192B00656227 /* basic_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = basic_ui.cpp; path = ../basic_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0BC1146192B00656227 /* basic_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basic_ui.h; path = ../basic_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0BD1146192B00656227 /* ccvers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ccvers.h; path = ../ccvers.h; sourceTree = SOURCE_ROOT; };
-		C77EA0BE1146192B00656227 /* confgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = confgr.cpp; path = ../confgr.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0BF1146192B00656227 /* confgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = confgr.h; path = ../confgr.h; sourceTree = SOURCE_ROOT; };
-		C77EA0C01146192B00656227 /* cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cont_ui.cpp; path = ../cont_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0C11146192B00656227 /* cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cont_ui.h; path = ../cont_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0C21146192B00656227 /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cont.cpp; path = ../cont.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0C31146192B00656227 /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cont.h; path = ../cont.h; sourceTree = SOURCE_ROOT; };
-		C77EA0C41146192B00656227 /* contgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = contgram.cpp; path = ../contgram.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0C51146192B00656227 /* contgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = contgram.h; path = ../contgram.h; sourceTree = SOURCE_ROOT; };
-		C77EA0C61146192B00656227 /* contscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = contscan.cpp; path = ../contscan.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0C71146192B00656227 /* draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = draw.cpp; path = ../draw.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0C81146192B00656227 /* ingl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ingl.cpp; path = ../ingl.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0C91146192B00656227 /* ingl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ingl.h; path = ../ingl.h; sourceTree = SOURCE_ROOT; };
-		C77EA0CA1146192B00656227 /* linmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = linmath.h; path = ../linmath.h; sourceTree = SOURCE_ROOT; };
-		C77EA0CB1146192B00656227 /* main_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main_ui.cpp; path = ../main_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0CC1146192B00656227 /* main_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main_ui.h; path = ../main_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0CD1146192B00656227 /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modes.cpp; path = ../modes.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0CE1146192B00656227 /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = modes.h; path = ../modes.h; sourceTree = SOURCE_ROOT; };
-		C77EA0CF1146192B00656227 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parse.h; path = ../parse.h; sourceTree = SOURCE_ROOT; };
-		C77EA0D01146192B00656227 /* platconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = platconf.h; path = ../platconf.h; sourceTree = SOURCE_ROOT; };
-		C77EA0D11146192B00656227 /* print_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = print_ui.cpp; path = ../print_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0D21146192B00656227 /* print_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = print_ui.h; path = ../print_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0D31146192B00656227 /* print.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = print.cpp; path = ../print.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0D41146192B00656227 /* show_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = show_ui.cpp; path = ../show_ui.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0D51146192B00656227 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = show_ui.h; path = ../show_ui.h; sourceTree = SOURCE_ROOT; };
-		C77EA0D61146192B00656227 /* show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = show.cpp; path = ../show.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0D71146192B00656227 /* show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = show.h; path = ../show.h; sourceTree = SOURCE_ROOT; };
-		C77EA0D81146192B00656227 /* undo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = undo.cpp; path = ../undo.cpp; sourceTree = SOURCE_ROOT; };
-		C77EA0D91146192B00656227 /* undo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = undo.h; path = ../undo.h; sourceTree = SOURCE_ROOT; };
+		C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = anim_ui.cpp; sourceTree = "<group>"; };
+		C7AFA96B117A6DBA00CC53E2 /* anim_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = anim_ui.h; sourceTree = "<group>"; };
+		C7AFA96C117A6DBA00CC53E2 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animate.cpp; sourceTree = "<group>"; };
+		C7AFA96D117A6DBA00CC53E2 /* animate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animate.h; sourceTree = "<group>"; };
+		C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = basic_ui.cpp; sourceTree = "<group>"; };
+		C7AFA96F117A6DBA00CC53E2 /* basic_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = basic_ui.h; sourceTree = "<group>"; };
+		C7AFA970117A6DBA00CC53E2 /* ccvers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccvers.h; sourceTree = "<group>"; };
+		C7AFA971117A6DBA00CC53E2 /* color_select_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = color_select_ui.cpp; sourceTree = "<group>"; };
+		C7AFA972117A6DBA00CC53E2 /* color_select_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = color_select_ui.h; sourceTree = "<group>"; };
+		C7AFA973117A6DBA00CC53E2 /* confgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = confgr.cpp; sourceTree = "<group>"; };
+		C7AFA974117A6DBA00CC53E2 /* confgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = confgr.h; sourceTree = "<group>"; };
+		C7AFA975117A6DBA00CC53E2 /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
+		C7AFA976117A6DBA00CC53E2 /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
+		C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont_ui.cpp; sourceTree = "<group>"; };
+		C7AFA978117A6DBA00CC53E2 /* cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont_ui.h; sourceTree = "<group>"; };
+		C7AFA979117A6DBA00CC53E2 /* contgram.y */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; path = contgram.y; sourceTree = "<group>"; };
+		C7AFA97A117A6DBA00CC53E2 /* contscan.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = contscan.l; sourceTree = "<group>"; };
+		C7AFA97B117A6DBA00CC53E2 /* draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = draw.cpp; sourceTree = "<group>"; };
+		C7AFA97C117A6DBA00CC53E2 /* ingl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ingl.cpp; sourceTree = "<group>"; };
+		C7AFA97D117A6DBA00CC53E2 /* ingl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ingl.h; sourceTree = "<group>"; };
+		C7AFA97E117A6DBA00CC53E2 /* linmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linmath.h; sourceTree = "<group>"; };
+		C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_ui.cpp; sourceTree = "<group>"; };
+		C7AFA980117A6DBA00CC53E2 /* main_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main_ui.h; sourceTree = "<group>"; };
+		C7AFA981117A6DBA00CC53E2 /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modes.cpp; sourceTree = "<group>"; };
+		C7AFA982117A6DBA00CC53E2 /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
+		C7AFA983117A6DBA00CC53E2 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parse.h; sourceTree = "<group>"; };
+		C7AFA984117A6DBA00CC53E2 /* platconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platconf.h; sourceTree = "<group>"; };
+		C7AFA985117A6DBA00CC53E2 /* print.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print.cpp; sourceTree = "<group>"; };
+		C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_ui.cpp; sourceTree = "<group>"; };
+		C7AFA987117A6DBA00CC53E2 /* print_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_ui.h; sourceTree = "<group>"; };
+		C7AFA988117A6DBA00CC53E2 /* show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = show.cpp; sourceTree = "<group>"; };
+		C7AFA989117A6DBA00CC53E2 /* show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show.h; sourceTree = "<group>"; };
+		C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = show_ui.cpp; sourceTree = "<group>"; };
+		C7AFA98B117A6DBA00CC53E2 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show_ui.h; sourceTree = "<group>"; };
+		C7AFA98C117A6DBA00CC53E2 /* undo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = undo.cpp; sourceTree = "<group>"; };
+		C7AFA98D117A6DBA00CC53E2 /* undo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = undo.h; sourceTree = "<group>"; };
+		C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contgram.cpp; sourceTree = "<group>"; };
+		C7AFA9A2117A6E7200CC53E2 /* contgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contgram.h; sourceTree = "<group>"; };
+		C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contscan.cpp; sourceTree = "<group>"; };
 		C7CB75B6114625C7000DBBB6 /* .cvsignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .cvsignore; sourceTree = "<group>"; };
 		C7CB75B7114625C7000DBBB6 /* config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config; sourceTree = "<group>"; };
 		C7CB75B8114625C7000DBBB6 /* prolog0.ps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prolog0.ps; sourceTree = "<group>"; };
@@ -162,8 +164,9 @@
 		29B97314FDCFA39411CA2CEA /* CalChart */ = {
 			isa = PBXGroup;
 			children = (
+				C7AFA9A0117A6E7200CC53E2 /* generated */,
+				C7AFA969117A6DBA00CC53E2 /* src */,
 				C7CB75B5114625C7000DBBB6 /* runtime */,
-				C77EA0B6114618DA00656227 /* Source */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -189,49 +192,60 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		C77EA0B6114618DA00656227 /* Source */ = {
+		C7AFA969117A6DBA00CC53E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				C77EA0B71146192B00656227 /* anim_ui.cpp */,
-				C77EA0B81146192B00656227 /* anim_ui.h */,
-				C77EA0B91146192B00656227 /* animate.cpp */,
-				C77EA0BA1146192B00656227 /* animate.h */,
-				C77EA0BB1146192B00656227 /* basic_ui.cpp */,
-				C77EA0BC1146192B00656227 /* basic_ui.h */,
-				C77EA0BD1146192B00656227 /* ccvers.h */,
-				C7713C6E11725F1700DDE734 /* color_select_ui.cpp */,
-				C7713C6F11725F1700DDE734 /* color_select_ui.h */,
-				C77EA0BE1146192B00656227 /* confgr.cpp */,
-				C77EA0BF1146192B00656227 /* confgr.h */,
-				C77EA0C01146192B00656227 /* cont_ui.cpp */,
-				C77EA0C11146192B00656227 /* cont_ui.h */,
-				C77EA0C21146192B00656227 /* cont.cpp */,
-				C77EA0C31146192B00656227 /* cont.h */,
-				C77EA0C41146192B00656227 /* contgram.cpp */,
-				C77EA0C51146192B00656227 /* contgram.h */,
-				C77EA0C61146192B00656227 /* contscan.cpp */,
-				C77EA0C71146192B00656227 /* draw.cpp */,
-				C77EA0C81146192B00656227 /* ingl.cpp */,
-				C77EA0C91146192B00656227 /* ingl.h */,
-				C77EA0CA1146192B00656227 /* linmath.h */,
-				C77EA0CB1146192B00656227 /* main_ui.cpp */,
-				C77EA0CC1146192B00656227 /* main_ui.h */,
-				C77EA0CD1146192B00656227 /* modes.cpp */,
-				C77EA0CE1146192B00656227 /* modes.h */,
-				C77EA0CF1146192B00656227 /* parse.h */,
-				C77EA0D01146192B00656227 /* platconf.h */,
-				C77EA0D11146192B00656227 /* print_ui.cpp */,
-				C77EA0D21146192B00656227 /* print_ui.h */,
-				C77EA0D31146192B00656227 /* print.cpp */,
-				C77EA0D41146192B00656227 /* show_ui.cpp */,
-				C77EA0D51146192B00656227 /* show_ui.h */,
-				C77EA0D61146192B00656227 /* show.cpp */,
-				C77EA0D71146192B00656227 /* show.h */,
-				C77EA0D81146192B00656227 /* undo.cpp */,
-				C77EA0D91146192B00656227 /* undo.h */,
+				C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */,
+				C7AFA96B117A6DBA00CC53E2 /* anim_ui.h */,
+				C7AFA96C117A6DBA00CC53E2 /* animate.cpp */,
+				C7AFA96D117A6DBA00CC53E2 /* animate.h */,
+				C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */,
+				C7AFA96F117A6DBA00CC53E2 /* basic_ui.h */,
+				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
+				C7AFA971117A6DBA00CC53E2 /* color_select_ui.cpp */,
+				C7AFA972117A6DBA00CC53E2 /* color_select_ui.h */,
+				C7AFA973117A6DBA00CC53E2 /* confgr.cpp */,
+				C7AFA974117A6DBA00CC53E2 /* confgr.h */,
+				C7AFA975117A6DBA00CC53E2 /* cont.cpp */,
+				C7AFA976117A6DBA00CC53E2 /* cont.h */,
+				C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */,
+				C7AFA978117A6DBA00CC53E2 /* cont_ui.h */,
+				C7AFA979117A6DBA00CC53E2 /* contgram.y */,
+				C7AFA97A117A6DBA00CC53E2 /* contscan.l */,
+				C7AFA97B117A6DBA00CC53E2 /* draw.cpp */,
+				C7AFA97C117A6DBA00CC53E2 /* ingl.cpp */,
+				C7AFA97D117A6DBA00CC53E2 /* ingl.h */,
+				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
+				C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */,
+				C7AFA980117A6DBA00CC53E2 /* main_ui.h */,
+				C7AFA981117A6DBA00CC53E2 /* modes.cpp */,
+				C7AFA982117A6DBA00CC53E2 /* modes.h */,
+				C7AFA983117A6DBA00CC53E2 /* parse.h */,
+				C7AFA984117A6DBA00CC53E2 /* platconf.h */,
+				C7AFA985117A6DBA00CC53E2 /* print.cpp */,
+				C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */,
+				C7AFA987117A6DBA00CC53E2 /* print_ui.h */,
+				C7AFA988117A6DBA00CC53E2 /* show.cpp */,
+				C7AFA989117A6DBA00CC53E2 /* show.h */,
+				C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */,
+				C7AFA98B117A6DBA00CC53E2 /* show_ui.h */,
+				C7AFA98C117A6DBA00CC53E2 /* undo.cpp */,
+				C7AFA98D117A6DBA00CC53E2 /* undo.h */,
 			);
-			name = Source;
-			sourceTree = "<group>";
+			name = src;
+			path = ../src;
+			sourceTree = SOURCE_ROOT;
+		};
+		C7AFA9A0117A6E7200CC53E2 /* generated */ = {
+			isa = PBXGroup;
+			children = (
+				C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */,
+				C7AFA9A2117A6E7200CC53E2 /* contgram.h */,
+				C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */,
+			);
+			name = generated;
+			path = ../generated;
+			sourceTree = SOURCE_ROOT;
 		};
 		C7CB75B5114625C7000DBBB6 /* runtime */ = {
 			isa = PBXGroup;
@@ -313,24 +327,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C77EA0DA1146192B00656227 /* anim_ui.cpp in Sources */,
-				C77EA0DB1146192B00656227 /* animate.cpp in Sources */,
-				C77EA0DC1146192B00656227 /* basic_ui.cpp in Sources */,
-				C77EA0DD1146192B00656227 /* confgr.cpp in Sources */,
-				C77EA0DE1146192B00656227 /* cont_ui.cpp in Sources */,
-				C77EA0DF1146192B00656227 /* cont.cpp in Sources */,
-				C77EA0E01146192B00656227 /* contgram.cpp in Sources */,
-				C77EA0E11146192B00656227 /* contscan.cpp in Sources */,
-				C77EA0E21146192B00656227 /* draw.cpp in Sources */,
-				C77EA0E31146192B00656227 /* ingl.cpp in Sources */,
-				C77EA0E41146192B00656227 /* main_ui.cpp in Sources */,
-				C77EA0E51146192B00656227 /* modes.cpp in Sources */,
-				C77EA0E61146192B00656227 /* print_ui.cpp in Sources */,
-				C77EA0E71146192B00656227 /* print.cpp in Sources */,
-				C77EA0E81146192B00656227 /* show_ui.cpp in Sources */,
-				C77EA0E91146192B00656227 /* show.cpp in Sources */,
-				C77EA0EA1146192B00656227 /* undo.cpp in Sources */,
-				C7713C7011725F1700DDE734 /* color_select_ui.cpp in Sources */,
+				C7AFA98E117A6DBA00CC53E2 /* anim_ui.cpp in Sources */,
+				C7AFA98F117A6DBA00CC53E2 /* animate.cpp in Sources */,
+				C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */,
+				C7AFA991117A6DBA00CC53E2 /* color_select_ui.cpp in Sources */,
+				C7AFA992117A6DBA00CC53E2 /* confgr.cpp in Sources */,
+				C7AFA993117A6DBA00CC53E2 /* cont.cpp in Sources */,
+				C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */,
+				C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */,
+				C7AFA998117A6DBA00CC53E2 /* ingl.cpp in Sources */,
+				C7AFA999117A6DBA00CC53E2 /* main_ui.cpp in Sources */,
+				C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */,
+				C7AFA99B117A6DBA00CC53E2 /* print.cpp in Sources */,
+				C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */,
+				C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */,
+				C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */,
+				C7AFA99F117A6DBA00CC53E2 /* undo.cpp in Sources */,
+				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
+				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,13 +406,14 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../resources,
 					"/usr/include/wx-2.8",
 					"/usr/lib/wx/include/mac-unicode-debug-2.8",
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lwx_macud-2.8";
 				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.5;
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
@@ -417,12 +432,13 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../resources,
 					"/usr/include/wx-2.8",
 					"/usr/lib/wx/include/mac-unicode-debug-2.8",
 				);
 				OTHER_LDFLAGS = "-lwx_macud-2.8";
 				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.5;
 				WARNING_CFLAGS = "-Wall";
 			};
 			name = Release;
