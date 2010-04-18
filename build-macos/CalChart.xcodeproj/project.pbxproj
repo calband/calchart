@@ -43,6 +43,7 @@
 		C7CB75CC114625E9000DBBB6 /* setup1.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BC114625C7000DBBB6 /* setup1.ps */; };
 		C7CB75CD114625E9000DBBB6 /* setup2.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BD114625C7000DBBB6 /* setup2.ps */; };
 		C7CB75CE114625E9000DBBB6 /* zllrbach.eps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BE114625C7000DBBB6 /* zllrbach.eps */; };
+		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -121,6 +122,7 @@
 		C7CB75BC114625C7000DBBB6 /* setup1.ps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = setup1.ps; sourceTree = "<group>"; };
 		C7CB75BD114625C7000DBBB6 /* setup2.ps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = setup2.ps; sourceTree = "<group>"; };
 		C7CB75BE114625C7000DBBB6 /* zllrbach.eps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zllrbach.eps; sourceTree = "<group>"; };
+		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,6 +179,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */,
 				8D1107310486CEB800E47090 /* CalChart-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 			);
@@ -317,6 +320,7 @@
 				C7CB75C5114625E2000DBBB6 /* setup1.ps in Resources */,
 				C7CB75C6114625E2000DBBB6 /* setup2.ps in Resources */,
 				C7CB75C7114625E3000DBBB6 /* zllrbach.eps in Resources */,
+				C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
