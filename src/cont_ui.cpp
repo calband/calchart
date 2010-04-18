@@ -41,7 +41,7 @@ extern wxHelpControllerBase *help_inst;
 
 enum
 {
-	ktoolbar_printcont_sym0,
+	ktoolbar_printcont_sym0 = 1000,
 	ktoolbar_printcont_sym1,
 	ktoolbar_printcont_sym2,
 	ktoolbar_printcont_sym3,
@@ -719,6 +719,7 @@ void PrintContCanvas::OnChar(wxKeyEvent& event)
 			event.Skip();
 			break;
 	}
+	Refresh();
 }
 
 

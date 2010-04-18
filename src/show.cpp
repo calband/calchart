@@ -711,7 +711,7 @@ CC_sheet::~CC_sheet()
 
 
 // Return the number of selected points
-unsigned CC_sheet::GetNumSelectedPoints()
+unsigned CC_sheet::GetNumSelectedPoints() const
 {
 	unsigned i,num;
 	for (i=0,num=0; i<show->GetNumPoints(); i++)

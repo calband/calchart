@@ -1077,7 +1077,7 @@ field(NULL)
 
 // Give it a status line
 	CreateStatusBar(2);
-	SetStatusText(wxT("Welcome to Calchart 3.0"));
+	SetStatusText(wxT("Welcome to Calchart " CC_VERSION));
 
 // Make a menubar
 	wxMenu *file_menu = new wxMenu;

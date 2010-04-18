@@ -137,10 +137,8 @@ void ColorSelectDialog::OnCmdSelectColors(wxCommandEvent&)
 	{
 		wxColourData retdata = dialog.GetColourData();
 		wxColour c = retdata.GetColour();
-//		delete CalChartPens[selection];
-//		delete CalChartBrushes[selection];
-		CalChartPens[selection] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID); /*new wxPen(retdata.GetColour());*/
-		CalChartBrushes[selection] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID); /*new wxBrush(retdata.GetColour());*/
+		CalChartPens[selection] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
+		CalChartBrushes[selection] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
 	} 
 }
 

@@ -393,7 +393,7 @@ public:
 	const wxChar *PrintOverview(FILE *fp) const;
 	const wxChar *PrintCont(FILE *fp) const;
 
-	unsigned GetNumSelectedPoints();
+	unsigned GetNumSelectedPoints() const;
 	int FindPoint(Coord x, Coord y, unsigned ref = 0);
 	bool SelectContinuity(unsigned i);
 	void SetContinuity(unsigned i);
