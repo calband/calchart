@@ -571,6 +571,10 @@ bool CalChartApp::OnInit()
 	return true;
 }
 
+void CalChartApp::MacOpenFile(const wxString &fileName)
+{
+	topframe->OpenShow(fileName);
+}
 
 int CalChartApp::OnExit()
 {

@@ -277,6 +277,7 @@ class CalChartApp : public wxApp
 {
 public:
 	virtual bool OnInit();
+	virtual void MacOpenFile(const wxString &fileName);
 	int OnExit();
 };
 
