@@ -925,13 +925,13 @@ CC_MDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(wid
 	SetBandIcon(this);
 
 	wxMenu *file_menu = new wxMenu;
-	file_menu->Append(wxID_NEW, wxT("&New Show"), wxT("Create a new show"));
-	file_menu->Append(wxID_OPEN, wxT("&Open..."), wxT("Load a saved show"));
-	file_menu->Append(wxID_EXIT, wxT("&Quit"), wxT("Quit CalChart"));
+	file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
+	file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
+	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
 	wxMenu *help_menu = new wxMenu;
-	help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
-	help_menu->Append(wxID_HELP, wxT("&Help on CalChart..."), wxT("Help on using CalChart"));
+	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
+	help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, wxT("&File"));
@@ -1081,35 +1081,35 @@ field(NULL)
 
 // Make a menubar
 	wxMenu *file_menu = new wxMenu;
-	file_menu->Append(wxID_NEW, wxT("&New Show"), wxT("Create a new show"));
-	file_menu->Append(CALCHART__NEW_WINDOW, wxT("New &Window"), wxT("Open a new window"));
-	file_menu->Append(wxID_OPEN, wxT("&Open..."), wxT("Load a saved show"));
+	file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
+	file_menu->Append(CALCHART__NEW_WINDOW, wxT("New &Window\tCTRL-SHIFT-N"), wxT("Open a new window"));
+	file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
 	file_menu->Append(CALCHART__APPEND_FILE, wxT("&Append..."), wxT("Append a show to the end"));
-	file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity..."), wxT("Import continuity text"));
-	file_menu->Append(wxID_SAVE, wxT("&Save"), wxT("Save show"));
-	file_menu->Append(wxID_SAVEAS, wxT("Save &As..."), wxT("Save show as a new name"));
-	file_menu->Append(wxID_PRINT, wxT("&Print..."), wxT("Print this show"));
-	file_menu->Append(CALCHART__PRINT_EPS, wxT("Print &EPS..."), wxT("Print a stuntsheet in EPS"));
-	file_menu->Append(wxID_CLOSE, wxT("&Close Window"), wxT("Close this window"));
-	file_menu->Append(wxID_EXIT, wxT("&Quit"), wxT("Quit CalChart"));
+	file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity...\tCTRL-I"), wxT("Import continuity text"));
+	file_menu->Append(wxID_SAVE, wxT("&Save\tCTRL-S"), wxT("Save show"));
+	file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"), wxT("Save show as a new name"));
+	file_menu->Append(wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
+	file_menu->Append(CALCHART__PRINT_EPS, wxT("Print &EPS...\tCTRL-SHIFT-P"), wxT("Print a stuntsheet in EPS"));
+	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
+	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
 	wxMenu *edit_menu = new wxMenu;
-	edit_menu->Append(wxID_UNDO, wxT("&Undo"));
-	edit_menu->Append(wxID_REDO, wxT("&Redo"));
-	edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before"), wxT("Insert a new stuntsheet before this one"));
-	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After"), wxT("Insert a new stuntsheet after this one"));
-	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet"), wxT("Delete this stuntsheet"));
-	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets"), wxT("Relabel all stuntsheets after this one"));
+	edit_menu->Append(wxID_UNDO, wxT("&Undo\tCTRL-Z"));
+	edit_menu->Append(wxID_REDO, wxT("&Redo\tCTRL-SHIFT-Z"));
+	edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before\tCTRL-["), wxT("Insert a new stuntsheet before this one"));
+	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
+	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
+	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
 	edit_menu->Append(CALCHART__CLEAR_REF, wxT("&Clear Reference"), wxT("Clear selected reference points"));
-	edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show..."), wxT("Setup basic show information"));
+	edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show...\tCTRL-U"), wxT("Setup basic show information"));
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
-	edit_menu->Append(CALCHART__SET_TITLE, wxT("Set &Title..."), wxT("Change the title of this stuntsheet"));
-	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats..."), wxT("Change the number of beats for this stuntsheet"));
+	edit_menu->Append(CALCHART__SET_TITLE, wxT("Set &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
+	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
 
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity..."), wxT("Edit continuity for this stuntsheet"));
 	anim_menu->Append(CALCHART__EDIT_PRINTCONT, wxT("Edit &Printed Continuity..."), wxT("Edit printed continuity for this stuntsheet"));
-	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate..."), wxT("Open animation window"));
+	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-SPACE"), wxT("Open animation window"));
 
 	wxMenu *select_menu = new wxMenu;
 // These items are a radio group
@@ -1122,8 +1122,8 @@ field(NULL)
 	options_menu->Append(CALCHART__COLORS, wxT("Select Colors"));
 
 	wxMenu *help_menu = new wxMenu;
-	help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
-	help_menu->Append(wxID_HELP, wxT("&Help on CalChart..."), wxT("Help on using CalChart"));
+	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
+	help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, wxT("&File"));
@@ -2157,11 +2157,8 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								i = sheet->FindPoint(pos.x, pos.y, curr_ref);
 								if (i >= 0)
 								{
-									if (!(show_descr.show->IsSelected(i)))
-									{
-										show_descr.show->Select(i);
-										changed = true;
-									}
+									show_descr.show->Select(i, !show_descr.show->IsSelected(i));
+									changed = true;
 								}
 								if (changed)
 								{
@@ -2658,7 +2655,7 @@ const CC_coord& start)
 					break;
 			}
 		}
-		show_descr.show->Select(*pnt);
+		show_descr.show->Select(*pnt, !show_descr.show->IsSelected(*pnt));
 		last = c1;
 		pointlist.erase(pnt);
 	}
@@ -2728,11 +2725,8 @@ unsigned ref)
 		if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
 			(pos->y >= top_left.y) && (pos->y <= bottom_right.y))
 		{
-			if (!show_descr.show->IsSelected(i))
-			{
-				pointlist.push_back(i);
-				changed = true;
-			}
+			pointlist.push_back(i);
+			changed = true;
 		}
 	}
 	if (changed)
