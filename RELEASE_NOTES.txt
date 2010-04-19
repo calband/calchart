@@ -1,3 +1,18 @@
+Release notes for 3.1.2:
+
+Beautified and reorganized code.  Fixed up lasso and polygon selector.
+
+Bugs Fixed in this release
+
+2977400, adding some hot-keys
+2965264, make it so when you select something again, it unselects it.
+2981576, Adding an icon for MAC (not a very good one...)
+2964628, support for Leopard
+
+Build tested by quickly animating guns2.shw on mac and windows.
+
+----------
+
 Release notes for 3.1.1:
 
 Bugs Fixed in this release
