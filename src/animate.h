@@ -207,14 +207,14 @@ public:
 	inline void EnableCollisions(CollisionWarning col) { check_collis = col; }
 	void CheckCollisions();
 
-	AnimatePoint *pts;
+	unsigned numpts;
+	std::vector<AnimatePoint> pts;
+	std::vector<AnimateCommand*> curr_cmds;
+	std::vector<int> collisions; // avoid using vector bool
 	AnimateSheet *curr_sheet;
 	unsigned curr_sheetnum;
 	unsigned numsheets;
 	unsigned curr_beat;
-	unsigned numpts;
-	AnimateCommand **curr_cmds;
-	bool *collisions;
 private:
 	void BeginCmd(unsigned i);
 	void EndCmd(unsigned i);

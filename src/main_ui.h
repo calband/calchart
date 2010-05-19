@@ -125,7 +125,6 @@ public:
 	virtual void ChangePointLabels(wxWindow *win);
 	virtual void ChangeShowMode(wxWindow *win);
 	virtual void UpdateStatusBar();
-	virtual void GotoSheet(unsigned sht);
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,
 		int line = -1, int col = -1);
 	virtual void AddSheet(unsigned sht);
@@ -133,16 +132,7 @@ public:
 	virtual void AppendSheets();
 	virtual void RemoveSheets(unsigned num);
 	virtual void ChangeTitle(unsigned sht);
-	virtual void SelectSheet(wxWindow* win, unsigned sht);
-	virtual void AddContinuity(unsigned sht, unsigned cont);
-	virtual void DeleteContinuity(unsigned sht, unsigned cont);
-	virtual void FlushContinuity();
-	virtual void SetContinuity(wxWindow* win, unsigned sht, unsigned cont);
-	virtual void ChangePrint(wxWindow* win);
-	virtual void FlushDescr();
-	virtual void SetDescr(wxWindow* win);
 
-	CC_WinList winlist;
 private:
 	MainFrame *frame;
 };

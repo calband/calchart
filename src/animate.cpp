@@ -444,21 +444,14 @@ void AnimateSheet::SetName(const wxChar *s)
 
 
 Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
-: curr_sheet(NULL), numsheets(0), numpts(show->GetNumPoints()), sheets(NULL)
+: numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts), collisions(numpts),
+curr_sheet(NULL), numsheets(0), sheets(NULL)
 {
 	unsigned i, j;
 	ContProcedure* curr_proc;
 	AnimateCompile comp;
 	CC_continuity *currcont;
 	wxString tempbuf;
-
-	pts = new AnimatePoint[numpts];
-	curr_cmds = new AnimateCommand*[numpts];
-	collisions = new bool[numpts];
-	for (i = 0; i < numpts; i++)
-	{
-		collisions[i] = false;
-	}
 
 // Now compile
 	comp.show = show;
@@ -554,7 +547,6 @@ Animation::~Animation()
 {
 	AnimateSheet *sht, *tmp;
 
-	if (pts) delete pts;
 	sht = sheets;
 	while (sht)
 	{
@@ -562,7 +554,6 @@ Animation::~Animation()
 		delete sht;
 		sht = tmp;
 	}
-	if (curr_cmds) delete curr_cmds;
 }
 
 

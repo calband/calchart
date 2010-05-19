@@ -238,9 +238,8 @@ void CC_WinNodeMain::SetShow(CC_show *shw)
 {
 	Remove();
 	list = shw->winlist;
-	shw->winlist->Add(this);
+	list->Add(this);
 	frame->field->show_descr.show = shw;
-	winlist.SetShow(shw);						  // Must set new show before redrawing
 	frame->field->UpdateBars();
 	frame->field->GotoSS(0);
 	ChangeName();
@@ -250,7 +249,6 @@ void CC_WinNodeMain::SetShow(CC_show *shw)
 void CC_WinNodeMain::ChangeName()
 {
 	frame->SetTitle(frame->field->show_descr.show->UserGetName());
-	winlist.ChangeName();
 }
 
 
@@ -265,14 +263,12 @@ void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
 // In mono we use different line widths, so must redraw everything
 		frame->field->RefreshShow();
 	}
-	winlist.UpdateSelections(win, point);
 }
 
 
 void CC_WinNodeMain::UpdatePoints()
 {
 	frame->field->RefreshShow();
-	winlist.UpdatePoints();
 }
 
 
@@ -286,21 +282,18 @@ void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht, int ref)
 			frame->field->RefreshShow();
 		}
 	}
-	winlist.UpdatePointsOnSheet(sht, ref);
 }
 
 
 void CC_WinNodeMain::ChangeNumPoints(wxWindow *win)
 {
 	frame->field->UpdateSS();
-	winlist.ChangeNumPoints(win);
 }
 
 
 void CC_WinNodeMain::ChangePointLabels(wxWindow *win)
 {
 	frame->field->UpdateSS();
-	winlist.ChangePointLabels(win);
 }
 
 
@@ -308,20 +301,12 @@ void CC_WinNodeMain::ChangeShowMode(wxWindow *win)
 {
 	frame->field->UpdateBars();
 	frame->field->UpdateSS();
-	winlist.ChangeShowMode(win);
 }
 
 
 void CC_WinNodeMain::UpdateStatusBar()
 {
 	frame->UpdatePanel();
-	winlist.UpdateStatusBar();
-}
-
-
-void CC_WinNodeMain::GotoSheet(unsigned sht)
-{
-	winlist.GotoSheet(sht);
 }
 
 
@@ -329,7 +314,6 @@ void CC_WinNodeMain::GotoContLocation(unsigned sht, unsigned contnum,
 int line, int col)
 {
 	frame->field->GotoSS(sht);
-	winlist.GotoContLocation(sht,contnum,line,col);
 }
 
 
@@ -340,13 +324,11 @@ void CC_WinNodeMain::AddSheet(unsigned sht)
 		frame->field->show_descr.curr_ss++;
 	}
 	frame->UpdatePanel();
-	winlist.AddSheet(sht);
 }
 
 
 void CC_WinNodeMain::DeleteSheet(unsigned sht)
 {
-	winlist.DeleteSheet(sht);
 	if (sht < frame->field->show_descr.curr_ss)
 	{
 		frame->field->show_descr.curr_ss--;
@@ -373,13 +355,11 @@ void CC_WinNodeMain::DeleteSheet(unsigned sht)
 void CC_WinNodeMain::AppendSheets()
 {
 	frame->UpdatePanel();
-	winlist.AppendSheets();
 }
 
 
 void CC_WinNodeMain::RemoveSheets(unsigned num)
 {
-	winlist.RemoveSheets(num);
 	if (frame->field->show_descr.curr_ss >=
 		frame->field->show_descr.show->GetNumSheets())
 	{
@@ -391,56 +371,6 @@ void CC_WinNodeMain::RemoveSheets(unsigned num)
 void CC_WinNodeMain::ChangeTitle(unsigned sht)
 {
 	if (sht == frame->field->show_descr.curr_ss) frame->UpdatePanel();
-	winlist.ChangeTitle(sht);
-}
-
-
-void CC_WinNodeMain::SelectSheet(wxWindow* win, unsigned sht)
-{
-	winlist.SelectSheet(win, sht);
-}
-
-
-void CC_WinNodeMain::AddContinuity(unsigned sht, unsigned cont)
-{
-	winlist.AddContinuity(sht, cont);
-}
-
-
-void CC_WinNodeMain::DeleteContinuity(unsigned sht, unsigned cont)
-{
-	winlist.DeleteContinuity(sht, cont);
-}
-
-
-void CC_WinNodeMain::FlushContinuity()
-{
-	winlist.FlushContinuity();
-}
-
-
-void CC_WinNodeMain::SetContinuity(wxWindow* win,
-unsigned sht, unsigned cont)
-{
-	winlist.SetContinuity(win, sht, cont);
-}
-
-
-void CC_WinNodeMain::ChangePrint(wxWindow* win)
-{
-	winlist.ChangePrint(win);
-}
-
-
-void CC_WinNodeMain::FlushDescr()
-{
-	winlist.FlushDescr();
-}
-
-
-void CC_WinNodeMain::SetDescr(wxWindow* win)
-{
-	winlist.SetDescr(win);
 }
 
 
@@ -985,7 +915,7 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	if (field->show_descr.show)
 	{
-		ShowPrintDialog dialog(&field->show_descr, &node->winlist, false, this);
+		ShowPrintDialog dialog(&field->show_descr, node->GetList(), false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -998,7 +928,7 @@ void MainFrame::OnCmdPrintEPS(wxCommandEvent& event)
 {
 	if (field->show_descr.show)
 	{
-		ShowPrintDialog dialog(&field->show_descr, &node->winlist, true, this);
+		ShowPrintDialog dialog(&field->show_descr, node->GetList(), true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -1113,7 +1043,7 @@ void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 {
 	if (field->show_descr.show)
 	{
-		(void)new ContinuityEditor(&field->show_descr, &node->winlist, this,
+		(void)new ContinuityEditor(&field->show_descr, node->GetList(), this,
 			wxT("Animation Continuity"));
 	}
 }
@@ -1123,7 +1053,7 @@ void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event)
 {
 	if (field->show_descr.show)
 	{
-		(void)new PrintContEditor(&field->show_descr, &node->winlist, this,
+		(void)new PrintContEditor(&field->show_descr, node->GetList(), this,
 			wxT("Printed Continuity"));
 	}
 }
@@ -1177,7 +1107,7 @@ void MainFrame::OnCmdSetup(wxCommandEvent& event)
 void MainFrame::OnCmdPoints(wxCommandEvent& event)
 {
 	if (field->show_descr.show)
-		(void)new PointPicker(field->show_descr.show, &node->winlist,
+		(void)new PointPicker(field->show_descr.show, node->GetList(),
 			true, this, wxT("Select points"));
 }
 
@@ -1187,7 +1117,7 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 	if (field->show_descr.show)
 	{
 		AnimationFrame *anim =
-			new AnimationFrame(this, &field->show_descr, &node->winlist);
+			new AnimationFrame(this, &field->show_descr, node->GetList());
 		anim->canvas->Generate();
 	}
 }
@@ -1617,7 +1547,7 @@ void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
 void MainFrame::Setup()
 {
 	if (field->show_descr.show)
-		(void)new ShowInfoReq(field->show_descr.show, &node->winlist, this,
+		(void)new ShowInfoReq(field->show_descr.show, node->GetList(), this,
 			wxT("Setup Show"));
 }
 

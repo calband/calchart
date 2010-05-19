@@ -453,6 +453,8 @@ PrintContCanvas::~PrintContCanvas() {}
 void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 {
 	const CC_sheet *sht = show_descr->CurrSheet();
+	if (!sht)
+		return;
 	bool do_tab;
 	unsigned row, column;
 	float x, y;
