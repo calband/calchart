@@ -44,12 +44,13 @@ ToolBarEntry anim_tb[] =
 	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
 };
 
-BEGIN_EVENT_TABLE(AnimationCanvas, AutoScrollCanvas)
+BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
 EVT_CHAR(AnimationCanvas::OnChar)
 EVT_LEFT_DOWN(AnimationCanvas::OnLeftMouseEvent)
 EVT_RIGHT_DOWN(AnimationCanvas::OnRightMouseEvent)
 EVT_ERASE_BACKGROUND(AnimationCanvas::OnEraseBackground)
 EVT_PAINT(AnimationCanvas::OnPaint)
+EVT_SIZE(AnimationCanvas::OnSize)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
@@ -134,19 +135,13 @@ void AnimationTimer::Notify()
 
 
 AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_descr *dcr)
-: AutoScrollCanvas(frame, wxID_ANY, wxDefaultPosition,
+: wxPanel(frame, wxID_ANY, wxDefaultPosition,
 wxSize(COORD2INT(dcr->show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
 COORD2INT(dcr->show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
-anim(NULL), show_descr(dcr), ourframe(frame), tempo(120)
+anim(NULL), show_descr(dcr), ourframe(frame), tempo(120),
+mUserScale(DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0))
 {
-	float f;
-
-	SetPalette(CalChartPalette);
-
 	timer = new AnimationTimer(this);
-
-	f = DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0);
-	SetUserScale(f, f);
 }
 
 
@@ -164,19 +159,12 @@ void AnimationCanvas::OnEraseBackground(wxEraseEvent& event)
 
 void AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
-	wxPaintDC dc(this);
-	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
-	dc.Clear();
-	Blit(dc);
-}
-
-
-void AnimationCanvas::RedrawBuffer()
-{
 	unsigned long x, y;
 	unsigned i;
-	wxDC *dc = GetMemDC();
+	wxPaintDC rdc(this);
+	wxDC *dc = &rdc;
 
+	dc->SetUserScale(mUserScale, mUserScale);
 	dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
 	dc->Clear();
 	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
@@ -254,6 +242,30 @@ void AnimationCanvas::RedrawBuffer()
 	}
 }
 
+
+void AnimationCanvas::OnSize(wxSizeEvent& event)
+{
+	float x = show_descr->show->GetMode().Size().x;
+	float y = show_descr->show->GetMode().Size().y;
+	float newX = event.GetSize().x;
+	float newY = event.GetSize().y;
+	
+	float showAspectRatio = x/y;
+	float newSizeRatio = newX/newY;
+	float newvalue = 1.0;
+	// always choose x when the new aspect ratio is smaller than the show.
+	// This will keep the whole field on in the canvas
+	if (newSizeRatio < showAspectRatio)
+	{
+		newvalue = newX / (float)COORD2INT(x);
+	}
+	else
+	{
+		newvalue = newY / (float)COORD2INT(y);
+	}
+	mUserScale = (newvalue * (COORD2INT(1 << 16)/65536.0));
+	return wxPanel::OnSize(event);
+}
 
 void AnimationCanvas::OnLeftMouseEvent(wxMouseEvent& event)
 {
@@ -609,7 +621,7 @@ CC_WinList *lst)
 
 // Add the controls
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
-	topsizer->Add(canvas, wxSizerFlags().Expand().Border(5));
+	topsizer->Add(canvas, 1, wxEXPAND | wxBORDER, 5);
 
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")),

@@ -78,7 +78,7 @@ private:
 };
 
 class AnimationFrame;
-class AnimationCanvas: public AutoScrollCanvas
+class AnimationCanvas: public wxPanel
 {
 public:
 	AnimationCanvas(AnimationFrame *frame, CC_descr *dcr);
@@ -89,12 +89,12 @@ public:
 	void OnLeftMouseEvent(wxMouseEvent& event);
 	void OnRightMouseEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& event);
+	void OnSize(wxSizeEvent& event);
 
 	inline unsigned GetTempo() { return tempo; }
 	void SetTempo(unsigned t);
 
-	inline void Redraw() { RedrawBuffer(); Refresh(); }
-	void RedrawBuffer();
+	inline void Redraw() { Refresh(); }
 	void UpdateText();
 	void RefreshCanvas();
 	void Generate();
@@ -177,6 +177,7 @@ private:
 	CC_descr *show_descr;
 	AnimationFrame *ourframe;
 	unsigned tempo;
+	float mUserScale;
 
 	DECLARE_EVENT_TABLE()
 };

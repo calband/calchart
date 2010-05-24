@@ -529,6 +529,7 @@ CC_MDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(wid
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
+	// this comes up as a leak on Mac?
 	help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
