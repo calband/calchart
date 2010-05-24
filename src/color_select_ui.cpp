@@ -35,11 +35,17 @@ enum
 {
 	BUTTON_SELECT = 1000,
 	BUTTON_RESTORE,
+	BUTTON_RESTORE_ALL,
+	SPIN_WIDTH,
+	NEW_COLOR_CHOICE
 };
 
 BEGIN_EVENT_TABLE(ColorSelectDialog, wxDialog)
 EVT_BUTTON(BUTTON_SELECT,ColorSelectDialog::OnCmdSelectColors)
-EVT_BUTTON(BUTTON_RESTORE,ColorSelectDialog::OnCmdSelectColors)
+EVT_BUTTON(BUTTON_RESTORE,ColorSelectDialog::OnCmdResetColors)
+EVT_BUTTON(BUTTON_RESTORE_ALL,ColorSelectDialog::OnCmdResetAll)
+EVT_SPINCTRL(SPIN_WIDTH,ColorSelectDialog::OnCmdSelectWidth)
+EVT_COMBOBOX(NEW_COLOR_CHOICE,ColorSelectDialog::OnCmdChooseNewColor)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( ColorSelectDialog, wxDialog )
@@ -100,22 +106,36 @@ void ColorSelectDialog::CreateControls()
 {
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 	SetSizer( topsizer );
-
+	
 	wxBoxSizer *verticalsizer = NULL;
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
-	nameBox = new wxComboBox(this, wxID_STATIC, wxT("Items"), wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_DROPDOWN);
-	nameBox->SetSelection(0,1);
-	verticalsizer->Add(nameBox);
+	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
+	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_READONLY|wxCB_DROPDOWN);	
+	horizontalsizer->Add(nameBox, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	
+	for (int i = 0; i < COLOR_NUM; ++i)
+	{
+		wxBitmap temp_bitmap(16, 16);
+		wxMemoryDC temp_dc;
+		temp_dc.SelectObject(temp_bitmap);
+		temp_dc.SetBackground(*CalChartBrushes[i]);
+		temp_dc.Clear();
+		nameBox->SetItemBitmap(i, temp_bitmap);
+	}
+	nameBox->SetSelection(0);
+
+	spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, CalChartPens[nameBox->GetSelection()]->GetWidth());
+	spin->SetValue(CalChartPens[nameBox->GetSelection()]->GetWidth());
+	horizontalsizer->Add(spin, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	verticalsizer->Add(horizontalsizer );
 
 	topsizer->Add(verticalsizer, 0, wxALL, 5 );
 
-	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 
-	wxButton *congfig = new wxButton(this, BUTTON_SELECT, wxT("&Change Color"));
-	horizontalsizer->Add(congfig, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	wxButton *restoreDefaults = new wxButton(this, BUTTON_RESTORE, wxT("&Restore Default"));
-	horizontalsizer->Add(restoreDefaults, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")), 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")), 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE_ALL, wxT("&Reset All")), 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	wxButton *close = new wxButton(this, wxID_CANCEL, wxT("&Done"));
 	horizontalsizer->Add(close, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
@@ -125,9 +145,25 @@ void ColorSelectDialog::CreateControls()
 
 }
 
+void ColorSelectDialog::SetColor(int selection, int width, const wxColour& color)
+{
+	CalChartPens[selection] = wxThePenList->FindOrCreatePen(color, width, wxSOLID);
+	CalChartBrushes[selection] = wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
+
+	// update the namebox list
+	{
+		wxBitmap test_bitmap(16, 16);
+		wxMemoryDC temp_dc;
+		temp_dc.SelectObject(test_bitmap);
+		temp_dc.SetBackground(*CalChartBrushes[selection]);
+		temp_dc.Clear();
+		nameBox->SetItemBitmap(selection, test_bitmap);
+	}
+}
+
 void ColorSelectDialog::OnCmdSelectColors(wxCommandEvent&)
 {
-	int selection = nameBox->GetCurrentSelection();
+	int selection = nameBox->GetSelection();
 	wxColourData data;
 	data.SetChooseFull(true);
 	const wxBrush* brush = CalChartBrushes[selection];
@@ -137,8 +173,32 @@ void ColorSelectDialog::OnCmdSelectColors(wxCommandEvent&)
 	{
 		wxColourData retdata = dialog.GetColourData();
 		wxColour c = retdata.GetColour();
-		CalChartPens[selection] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
-		CalChartBrushes[selection] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
-	} 
+		SetColor(selection, CalChartPens[selection]->GetWidth(), c);
+	}
+}
+
+void ColorSelectDialog::OnCmdSelectWidth(wxSpinEvent& e)
+{
+	int selection = nameBox->GetSelection();
+	SetColor(selection, e.GetPosition(), CalChartPens[selection]->GetColour());
+}
+
+void ColorSelectDialog::OnCmdResetColors(wxCommandEvent&)
+{
+	int selection = nameBox->GetSelection();
+	SetColor(selection, DefaultPenWidth[selection], DefaultColors[selection]);
+}
+
+void ColorSelectDialog::OnCmdResetAll(wxCommandEvent&)
+{
+	for (int i = 0; i < COLOR_NUM; ++i)
+	{
+		SetColor(i, DefaultPenWidth[i], DefaultColors[i]);
+	}
+}
+
+void ColorSelectDialog::OnCmdChooseNewColor(wxCommandEvent&)
+{
+	spin->SetValue(CalChartPens[nameBox->GetSelection()]->GetWidth());
 }
 

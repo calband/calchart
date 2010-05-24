@@ -63,7 +63,7 @@ const wxString ColorNames[COLOR_NUM] =
 	wxT("SHAPES")
 };
 
-static const wxChar* DefaultColors[COLOR_NUM] =
+const wxString DefaultColors[COLOR_NUM] =
 {
 	wxT("FOREST GREEN"),
 	wxT("WHITE"),
@@ -84,6 +84,29 @@ static const wxChar* DefaultColors[COLOR_NUM] =
 	wxT("RED"),
 	wxT("PURPLE"),
 	wxT("RED")
+};
+
+const int DefaultPenWidth[COLOR_NUM] =
+{
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
 };
 
 wxPalette *CalChartPalette;
@@ -505,7 +528,7 @@ wxString ReadConfig(const wxString& path)
 						{
 							c = wxColour(wxString::FromUTF8(colname_buf));
 						}
-						CalChartPens[i] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
+						CalChartPens[i] = wxThePenList->FindOrCreatePen(c, DefaultPenWidth[i], wxSOLID);
 						CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c,
 							wxSOLID);
 						break;
@@ -576,7 +599,7 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (CalChartPens[i] == NULL)
 			{
-				CalChartPens[i] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
+				CalChartPens[i] = wxThePenList->FindOrCreatePen(c, DefaultPenWidth[i], wxSOLID);
 			}
 			if (CalChartBrushes[i] == NULL)
 			{

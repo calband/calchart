@@ -64,6 +64,8 @@ class wxBrush;
 extern const wxPen *CalChartPens[COLOR_NUM];
 extern const wxBrush *CalChartBrushes[COLOR_NUM];
 extern const wxString ColorNames[COLOR_NUM];
+extern const wxString DefaultColors[COLOR_NUM];
+extern const int DefaultPenWidth[COLOR_NUM];
 
 extern wxString program_dir;
 extern wxString shows_dir;

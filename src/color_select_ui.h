@@ -31,6 +31,8 @@
 #endif
 
 #include <wx/wx.h>
+#include <wx/bmpcbox.h>
+#include <wx/spinctrl.h>
 
 class ColorSelectDialog : public wxDialog
 {
@@ -59,6 +61,13 @@ class ColorSelectDialog : public wxDialog
 	void CreateControls();
 private:
 	void OnCmdSelectColors(wxCommandEvent&);
-	wxComboBox* nameBox;
+	void OnCmdSelectWidth(wxSpinEvent&);
+	void OnCmdResetColors(wxCommandEvent&);
+	void OnCmdResetAll(wxCommandEvent&);
+	void OnCmdChooseNewColor(wxCommandEvent&);
+
+	void SetColor(int selection, int width, const wxColour& color);
+	wxBitmapComboBox* nameBox;
+	wxSpinCtrl* spin;
 };
 #endif
