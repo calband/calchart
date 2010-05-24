@@ -254,15 +254,7 @@ void CC_WinNodeMain::ChangeName()
 
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
 {
-	if (wxColourDisplay())
-	{
-		frame->field->RefreshShow(false, point);
-	}
-	else
-	{
-// In mono we use different line widths, so must redraw everything
-		frame->field->RefreshShow();
-	}
+	frame->field->RefreshShow(false, point);
 }
 
 

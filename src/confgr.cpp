@@ -86,98 +86,6 @@ static const wxChar* DefaultColors[COLOR_NUM] =
 	wxT("RED")
 };
 
-static bool DefaultMonoColors[COLOR_NUM] =
-{
-	1,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0
-};
-
-static int DefaultMonoPenHollow[COLOR_NUM] =
-{
-	0,
-	0,
-	0,
-	0,
-	0,
-	1,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	1,
-	1,
-	1,
-	1,
-	0
-};
-
-static int DefaultMonoPenWidth[COLOR_NUM] =
-{
-	1,
-	1,
-	1,
-	1,
-	1,
-	3,
-	1,
-	1,
-	1,
-	3,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1
-};
-
-static int DefaultMonoPenDotted[COLOR_NUM] =
-{
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	1,
-	0,
-	1,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	0
-};
-
 wxPalette *CalChartPalette;
 const wxPen *CalChartPens[COLOR_NUM];
 const wxBrush *CalChartBrushes[COLOR_NUM];
@@ -586,31 +494,20 @@ wxString ReadConfig(const wxString& path)
 				{
 					if (coltype_str == ColorNames[i])
 					{
-						if (wxColourDisplay())
-						{
-							unsigned r, g, b;
-							wxColour c;
+						unsigned r, g, b;
+						wxColour c;
 
-							if (sscanf(colname_buf, " %u %u %u ", &r, &g, &b) == 3)
-							{
-								c = wxColour(r, g, b);
-							}
-							else
-							{
-								c = wxColour(wxString::FromUTF8(colname_buf));
-							}
-							CalChartPens[i] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
-							CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c,
-								wxSOLID);
+						if (sscanf(colname_buf, " %u %u %u ", &r, &g, &b) == 3)
+						{
+							c = wxColour(r, g, b);
 						}
 						else
 						{
-							CalChartPens[i] =
-								wxThePenList->FindOrCreatePen(*(mono ? wxWHITE:wxBLACK), width,
-								dotted ? wxDOT:wxSOLID);
-							CalChartBrushes[i] = hollow ? wxTRANSPARENT_BRUSH :
-							(mono ? wxWHITE_BRUSH:wxBLACK_BRUSH);
+							c = wxColour(wxString::FromUTF8(colname_buf));
 						}
+						CalChartPens[i] = wxThePenList->FindOrCreatePen(c, 1, wxSOLID);
+						CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c,
+							wxSOLID);
 						break;
 					}
 				}
@@ -659,7 +556,6 @@ wxString ReadConfig(const wxString& path)
 			DEF_HASH_W, DEF_HASH_E));
 	}
 
-	if (wxColourDisplay())
 	{
 		int j;
 		int n = 0;
@@ -691,19 +587,6 @@ wxString ReadConfig(const wxString& path)
 		CalChartPalette = new wxPalette();
 		for (i = 0; i < COLOR_NUM; i++)
 		{
-/* old code to prevent white and black from being allocated
-for (j = -2; j < i; j++) {
-c1 = &CalChartPens[i]->GetColour();
-if (j >= 0) {
-c2 = &CalChartPens[j]->GetColour();
-} else {
-if (j < -1) {
-  c2 = wxBLACK;
-} else {
-  c2 = wxWHITE;
-}
-}
-*/
 			for (j = 0; j < i; j++)
 			{
 				c1 = &CalChartPens[i]->GetColour();
@@ -738,25 +621,6 @@ if (j < -1) {
 			}
 		}
 		CalChartPalette->Create(n, rd, gd, bd);
-	}
-	else
-	{
-		for (i=0; i<COLOR_NUM; i++)
-		{
-			if (CalChartPens[i] == NULL)
-			{
-				CalChartPens[i] =
-					wxThePenList->FindOrCreatePen(*(DefaultMonoColors[i] ? wxWHITE:wxBLACK),
-					DefaultMonoPenWidth[i],
-					DefaultMonoPenDotted[i]?wxDOT:wxSOLID);
-			}
-			if (CalChartBrushes[i] == NULL)
-			{
-				CalChartBrushes[i] =
-					DefaultMonoPenHollow[i] ? wxTRANSPARENT_BRUSH :
-				(DefaultMonoColors[i] ? wxWHITE_BRUSH:wxBLACK_BRUSH);
-			}
-		}
 	}
 // Set search path for files
 	configdirs.AddEnvList(wxT("CALCHART_RT"));
