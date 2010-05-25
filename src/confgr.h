@@ -104,7 +104,11 @@ extern float cont_ratio;
 extern wxString yard_text[MAX_YARD_LINES];
 extern wxString spr_line_text[MAX_SPR_LINES];
 
+extern void ReadConfig();
 extern wxString ReadConfig(const wxString& path);
+void SetConfigColor(size_t selection);
+void ClearConfigColor(size_t selection);
+
 class wxPathList;
 extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
 const wxPathList *list = NULL);

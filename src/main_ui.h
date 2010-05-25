@@ -137,9 +137,11 @@ private:
 	MainFrame *frame;
 };
 
+class wxConfigBase;
 // Define a new application
 class CalChartApp : public wxApp
 {
+	wxConfigBase *mConfig;
 public:
 	virtual bool OnInit();
 	virtual void MacOpenFile(const wxString &fileName);

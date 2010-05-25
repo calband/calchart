@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/helpwin.h>
 #endif
 #include <wx/colordlg.h>
+#include <wx/config.h>
 
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
@@ -389,6 +390,11 @@ bool CalChartApp::OnInit()
 		}
 	}
 
+	// setup the configuration.
+	mConfig = new wxConfig();
+	wxConfigBase::Set(mConfig);
+	ReadConfig();
+	
 	wxString s = ReadConfig(runtimepath);
 	if (!s.empty())
 	{
@@ -503,6 +509,7 @@ int CalChartApp::OnExit()
 	if (modelist) delete modelist;
 	if (help_inst) delete help_inst;
 	if (window_list) delete window_list;
+	delete mConfig;
 
 	return 0;
 }

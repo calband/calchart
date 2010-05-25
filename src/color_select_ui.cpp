@@ -174,6 +174,7 @@ void ColorSelectDialog::OnCmdSelectColors(wxCommandEvent&)
 		wxColourData retdata = dialog.GetColourData();
 		wxColour c = retdata.GetColour();
 		SetColor(selection, CalChartPens[selection]->GetWidth(), c);
+		SetConfigColor(selection);
 	}
 }
 
@@ -181,12 +182,14 @@ void ColorSelectDialog::OnCmdSelectWidth(wxSpinEvent& e)
 {
 	int selection = nameBox->GetSelection();
 	SetColor(selection, e.GetPosition(), CalChartPens[selection]->GetColour());
+	SetConfigColor(selection);
 }
 
 void ColorSelectDialog::OnCmdResetColors(wxCommandEvent&)
 {
 	int selection = nameBox->GetSelection();
 	SetColor(selection, DefaultPenWidth[selection], DefaultColors[selection]);
+	ClearConfigColor(selection);
 }
 
 void ColorSelectDialog::OnCmdResetAll(wxCommandEvent&)
@@ -194,6 +197,7 @@ void ColorSelectDialog::OnCmdResetAll(wxCommandEvent&)
 	for (int i = 0; i < COLOR_NUM; ++i)
 	{
 		SetColor(i, DefaultPenWidth[i], DefaultColors[i]);
+		ClearConfigColor(i);
 	}
 }
 

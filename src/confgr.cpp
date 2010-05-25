@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/colour.h>
 #include <wx/palette.h>
 #include <wx/pen.h>
+#include <wx/config.h>
+#include <wx/confbase.h>
 #include "show.h"
 #include <ctype.h>
 #include <string>
@@ -214,6 +216,69 @@ wxString spr_line_text[MAX_SPR_LINES] =
 
 static wxPathList configdirs;
 static wxString runtime_dir;
+
+void ReadConfig()
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	
+	// read out the color configuration:
+	config->SetPath(wxT("/COLORS"));
+	for (size_t i=0; i<COLOR_NUM; i++)
+	{
+		wxString colorName = DefaultColors[i];
+		config->Read(ColorNames[i], &colorName);
+		unsigned r, g, b;
+		wxColour c;
+
+		if (CC_sscanf(colorName, wxT("%u %u %u"), &r, &g, &b) == 3)
+		{
+			c = wxColour(r, g, b);
+		}
+		else
+		{
+			c = wxColour(colorName);
+		}
+		CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
+		// store widths in a subgroup
+		config->SetPath(wxT("WIDTH"));
+		long width = DefaultPenWidth[i];
+		config->Read(ColorNames[i], &width);
+		if (CalChartPens[i] == NULL)
+		{
+			CalChartPens[i] = wxThePenList->FindOrCreatePen(c, width, wxSOLID);
+		}
+		config->SetPath(wxT(".."));
+	}
+}
+
+void SetConfigColor(size_t selection)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	
+	// read out the color configuration:
+	config->SetPath(wxT("/COLORS"));
+	wxString buf;
+	buf.Printf(wxT("%u %u %u"), 
+		CalChartBrushes[selection]->GetColour().Red(),
+		CalChartBrushes[selection]->GetColour().Green(),
+		CalChartBrushes[selection]->GetColour().Blue()
+	);
+	config->Write(ColorNames[selection], buf);
+	config->SetPath(wxT("WIDTH"));
+	config->Write(ColorNames[selection], CalChartPens[selection]->GetWidth());
+}
+
+void ClearConfigColor(size_t selection)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	
+	// read out the color configuration:
+	config->SetPath(wxT("/COLORS"));
+	// delete width first so that it clears out the entire color config if empty
+	config->DeleteEntry(ColorNames[selection]);
+	config->SetPath(wxT("WIDTH"));
+	config->DeleteEntry(ColorNames[selection]);
+}
 
 wxString ReadConfig(const wxString& path)
 {
@@ -504,45 +569,6 @@ wxString ReadConfig(const wxString& path)
 				}
 				continue;
 			}
-			if (com_buf == wxT("COLOR"))
-			{
-				int mono, hollow, width, dotted;
-				char coltype_buf[256];
-				char colname_buf[256];
-
-				fscanf(fp, " \"%[^\"]\" \"%[^\"]\" %d %d %d %d ",
-					coltype_buf, colname_buf, &mono, &hollow, &width, &dotted);
-				wxString coltype_str(wxString::FromUTF8(coltype_buf));
-				for (i=0; i<COLOR_NUM; i++)
-				{
-					if (coltype_str == ColorNames[i])
-					{
-						unsigned r, g, b;
-						wxColour c;
-
-						if (sscanf(colname_buf, " %u %u %u ", &r, &g, &b) == 3)
-						{
-							c = wxColour(r, g, b);
-						}
-						else
-						{
-							c = wxColour(wxString::FromUTF8(colname_buf));
-						}
-						CalChartPens[i] = wxThePenList->FindOrCreatePen(c, DefaultPenWidth[i], wxSOLID);
-						CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c,
-							wxSOLID);
-						break;
-					}
-				}
-				if (i == COLOR_NUM)
-				{
-					wxString tmpbuf;
-					tmpbuf.Printf(wxT("Warning: color '%hs' in config file is not recognized.\n"),
-						coltype_buf);
-					retmsg = tmpbuf;
-				}
-				continue;
-			}
 			if (!retmsg)
 			{
 				wxString tmpbuf;
@@ -584,28 +610,6 @@ wxString ReadConfig(const wxString& path)
 		int n = 0;
 		const wxColour *c1, *c2;
 
-		for (i=0; i<COLOR_NUM; i++)
-		{
-			unsigned r, g, b;
-			wxColour c;
-
-			if (CC_sscanf(DefaultColors[i], wxT(" %u %u %u "), &r, &g, &b) == 3)
-			{
-				c = wxColour(r, g, b);
-			}
-			else
-			{
-				c = wxColour(DefaultColors[i]);
-			}
-			if (CalChartPens[i] == NULL)
-			{
-				CalChartPens[i] = wxThePenList->FindOrCreatePen(c, DefaultPenWidth[i], wxSOLID);
-			}
-			if (CalChartBrushes[i] == NULL)
-			{
-				CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
-			}
-		}
 		unsigned char rd[COLOR_NUM], gd[COLOR_NUM], bd[COLOR_NUM];
 		CalChartPalette = new wxPalette();
 		for (i = 0; i < COLOR_NUM; i++)
