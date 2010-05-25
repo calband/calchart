@@ -41,7 +41,7 @@ RUNTIME = runtime/config runtime/prolog0.ps runtime/prolog1.ps \
 	runtime/prolog2.ps runtime/setup2.ps
 RUNTIME_ALL = $(RUNTIME) runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps
 PS_SYNTH_FILES = runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps postscript/vmstatus.ps
-IMAGES = $(wildcard $(RESDIR)/*.xbm) $(wildcard $(RESDIR)/*.xpm)
+IMAGES = $(wildcard $(RESDIR)/*.xbm)
 IMAGES_X = $(wildcard $(RESDIR)/*.xpm)
 IMAGES_BMP = $(IMAGES:.xbm=.bmp)
 IMAGES_MSW = $(IMAGES_BMP) calchart.ico
