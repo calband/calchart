@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/helpwin.h>
 #endif
 #include <wx/colordlg.h>
+#include <wx/dcbuffer.h>
 #include <wx/config.h>
 
 #ifdef __CC_INCLUDE_BITMAPS__
@@ -230,6 +231,7 @@ BEGIN_EVENT_TABLE(FieldCanvas, AutoScrollCanvas)
 EVT_CHAR(FieldCanvas::OnChar)
 EVT_MOUSE_EVENTS(FieldCanvas::OnMouseEvent)
 EVT_PAINT(FieldCanvas::OnPaint)
+EVT_ERASE_BACKGROUND(FieldCanvas::OnErase)
 END_EVENT_TABLE()
 
 CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
@@ -1629,12 +1631,16 @@ void FieldCanvas::DrawDrag(bool on)
 // Define the repainting behaviour
 void FieldCanvas::OnPaint(wxPaintEvent& event)
 {
-	wxPaintDC dc(this);
+	wxBufferedPaintDC dc(this);
 	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
 	dc.Clear();
 	Blit(dc);
 	dragon = false;								  // since the canvas gets cleared
 	DrawDrag(true);
+}
+
+void FieldCanvas::OnErase(wxEraseEvent& event)
+{
 }
 
 

@@ -286,6 +286,7 @@ public:
 		int x = -1, int y = -1, int w = -1, int h = -1);
 	~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
+	void OnErase(wxEraseEvent& event);
 	void OnMouseEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& event);
 	void OnScroll(wxScrollEvent& event);

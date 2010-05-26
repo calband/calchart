@@ -169,10 +169,8 @@ void AutoScrollCanvas::SetPalette(wxPalette *pal)
 
 void AutoScrollCanvas::SetUserScale(float x, float y)
 {
-	wxWindowDC dc(this);
 	x_scale = x;
 	y_scale = y;
-	dc.SetUserScale(x, y);
 	if (memdc) memdc->SetUserScale(x, y);
 }
 
@@ -196,7 +194,6 @@ void AutoScrollCanvas::Blit(wxDC& dc)
 {
 	if (memdc)
 	{
-		dc.SetUserScale(1.0, 1.0);
 		memdc->SetUserScale(1.0, 1.0);
 // Set the fg and bg colors in case source is a mono bitmap
 		dc.SetPen(*wxWHITE_PEN);
@@ -205,7 +202,6 @@ void AutoScrollCanvas::Blit(wxDC& dc)
 			memdc, 0, 0, wxCOPY);
 // Restore original background
 		dc.SetBackground(memdc->GetBackground());
-		dc.SetUserScale(x_scale, y_scale);
 		memdc->SetUserScale(x_scale, y_scale);
 	}
 }
