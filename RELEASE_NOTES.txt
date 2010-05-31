@@ -1,6 +1,17 @@
 Release notes for :
+
 Features added:
 2965266, Make color contrast better
+2965265, Make animation screen scalable
+2947102, Print directly to Printers, PDF
+
+Bugs Fixed in this release
+
+3006744, Window flickers when drawing on Windows.
+2977400, adding some hot-keys
+2965264, make it so when you select something again, it unselects it
+
+
 
 Release notes for 3.1.2:
 

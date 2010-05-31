@@ -257,14 +257,8 @@ public:
 
 		int size = gPrintDialogData->GetPrintData().GetOrientation();
 
-		if (2 == size)
-		{
-			sheet->DrawForPrintingLandscape(dc, 0);
-		}
-		else
-		{
-			sheet->DrawForPrinting(dc, 0);
-		}
+		sheet->DrawForPrinting(dc, 0, 2 == size);
+
 		return true;
 	}
 	CC_show *show;
