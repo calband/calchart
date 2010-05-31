@@ -287,6 +287,7 @@ void CC_WinNodeMain::ChangeName()
 
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
 {
+	UpdateStatusBar();
 	frame->field->RefreshShow(false, point);
 }
 
@@ -708,7 +709,7 @@ field(NULL)
 	SetBandIcon(this);
 
 // Give it a status line
-	CreateStatusBar(2);
+	CreateStatusBar(3);
 	SetStatusText(wxT("Welcome to Calchart " CC_VERSION));
 
 // Make a menubar
@@ -2163,6 +2164,9 @@ void MainFrame::UpdatePanel()
 		field->show_descr.show->Modified() ? wxT("* "):wxT(""), curr,
 		num, sht->GetName().c_str(), sht->GetBeats());
 	SetStatusText(tempbuf, 1);
+	tempbuf.sprintf(wxT("%d of %d selected"),
+		sht->GetNumSelectedPoints(), field->show_descr.show->GetNumPoints());
+	SetStatusText(tempbuf, 2);
 
 	if (num > 1)
 	{
