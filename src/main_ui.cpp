@@ -153,6 +153,7 @@ wxFont *pointLabelFont;
 wxFont *yardLabelFont;
 
 ShowModeList *modelist;
+wxPrintDialogData *gPrintDialogData;
 
 BEGIN_EVENT_TABLE(TopFrame, CC_MDIParentFrame)
 EVT_CLOSE(TopFrame::OnCloseWindow)
@@ -173,7 +174,9 @@ EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
 EVT_MENU(wxID_SAVE, MainFrame::OnCmdSave)
 EVT_MENU(wxID_SAVEAS, MainFrame::OnCmdSaveAs)
 EVT_MENU(wxID_PRINT, MainFrame::OnCmdPrint)
-EVT_MENU(CALCHART__PRINT_EPS, MainFrame::OnCmdPrintEPS)
+EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
+EVT_MENU(CALCHART__LEGACY_PRINT, MainFrame::OnCmdLegacyPrint)
+EVT_MENU(CALCHART__LEGACY_PRINT_EPS, MainFrame::OnCmdLegacyPrintEPS)
 EVT_MENU(wxID_CLOSE, MainFrame::OnCmdClose)
 EVT_MENU(wxID_EXIT, MainFrame::OnCmdExit)
 EVT_MENU(wxID_UNDO, MainFrame::OnCmdUndo)
@@ -233,6 +236,39 @@ EVT_MOUSE_EVENTS(FieldCanvas::OnMouseEvent)
 EVT_PAINT(FieldCanvas::OnPaint)
 EVT_ERASE_BACKGROUND(FieldCanvas::OnErase)
 END_EVENT_TABLE()
+
+class MyPrintout : public wxPrintout
+{
+public:
+	MyPrintout(const wxString& title, CC_show* shw) : wxPrintout(title), show(shw) {}
+	virtual ~MyPrintout() {}
+	virtual bool HasPage(int pageNum) { return pageNum <= show->GetNumSheets(); }
+	virtual void GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo)
+	{
+		*minPage = 1;
+		*maxPage = show->GetNumSheets();
+		*pageFrom = 1;
+		*pageTo = show->GetNumSheets();
+	}
+	virtual bool OnPrintPage(int pageNum)
+	{
+		wxDC* dc = wxPrintout::GetDC();
+		CC_sheet *sheet = show->GetNthSheet(pageNum-1);
+
+		int size = gPrintDialogData->GetPrintData().GetOrientation();
+
+		if (2 == size)
+		{
+			sheet->DrawForPrintingLandscape(dc, 0);
+		}
+		else
+		{
+			sheet->DrawForPrinting(dc, 0);
+		}
+		return true;
+	}
+	CC_show *show;
+};
 
 CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
@@ -381,6 +417,7 @@ bool CalChartApp::OnInit()
 	int realargc = argc;
 
 	modelist = new ShowModeList();
+	gPrintDialogData = new wxPrintDialogData();
 
 	if (argc > 1)
 	{
@@ -509,6 +546,7 @@ void CalChartApp::MacOpenFile(const wxString &fileName)
 int CalChartApp::OnExit()
 {
 	if (modelist) delete modelist;
+	if (gPrintDialogData) delete gPrintDialogData;
 	if (help_inst) delete help_inst;
 	if (window_list) delete window_list;
 	delete mConfig;
@@ -689,7 +727,9 @@ field(NULL)
 	file_menu->Append(wxID_SAVE, wxT("&Save\tCTRL-S"), wxT("Save show"));
 	file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"), wxT("Save show as a new name"));
 	file_menu->Append(wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
-	file_menu->Append(CALCHART__PRINT_EPS, wxT("Print &EPS...\tCTRL-SHIFT-P"), wxT("Print a stuntsheet in EPS"));
+	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-P"), wxT("Setup Pages"));
+	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Legacy Print..."), wxT("Legacy Print this show"));
+	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Legacy Print EPS..."), wxT("Legacy Print a stuntsheet in EPS"));
 	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
@@ -915,6 +955,46 @@ void MainFrame::OnCmdSaveAs(wxCommandEvent& event)
 
 void MainFrame::OnCmdPrint(wxCommandEvent& event)
 {
+	// grab our current page setup.
+	wxPrinter printer(gPrintDialogData);
+	MyPrintout printout(wxT("My Printout"), field->show_descr.show);
+	wxPrintDialogData& printDialog = printer.GetPrintDialogData();
+
+	int minPage, maxPage, pageFrom, pageTo;
+	printout.GetPageInfo(&minPage, &maxPage, &pageFrom, &pageTo);
+	printDialog.SetMinPage(minPage);
+	printDialog.SetMaxPage(maxPage);
+
+	if (!printer.Print(this, &printout, true))
+	{
+		if (wxPrinter::GetLastError() == wxPRINTER_ERROR)
+		{
+			wxMessageBox(wxT("A problem was encountered when trying to print"), wxT("Printing"), wxOK);
+		}
+		else
+		{
+			wxMessageBox(wxT("Printing cancelled"), wxT("Printing"), wxOK);
+		}
+	}
+	else
+	{
+		*gPrintDialogData = printer.GetPrintDialogData();
+	}
+}
+
+void MainFrame::OnCmdPageSetup(wxCommandEvent& event)
+{
+	wxPageSetupData mPageSetupData;
+
+	wxPageSetupDialog pageSetupDialog(this, &mPageSetupData);
+	if (pageSetupDialog.ShowModal() == wxID_OK)
+		mPageSetupData = pageSetupDialog.GetPageSetupData();
+	// pass the print data to our global print dialog
+	gPrintDialogData->SetPrintData(mPageSetupData.GetPrintData());
+}
+
+void MainFrame::OnCmdLegacyPrint(wxCommandEvent& event)
+{
 	if (field->show_descr.show)
 	{
 		ShowPrintDialog dialog(&field->show_descr, node->GetList(), false, this);
@@ -925,8 +1005,7 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 	}
 }
 
-
-void MainFrame::OnCmdPrintEPS(wxCommandEvent& event)
+void MainFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
 	if (field->show_descr.show)
 	{

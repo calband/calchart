@@ -57,7 +57,8 @@ enum
 	CALCHART__NEW_WINDOW = 1,
 	CALCHART__APPEND_FILE,
 	CALCHART__IMPORT_CONT_FILE,
-	CALCHART__PRINT_EPS,
+	CALCHART__LEGACY_PRINT,
+	CALCHART__LEGACY_PRINT_EPS,
 	CALCHART__INSERT_BEFORE,
 	CALCHART__INSERT_AFTER,
 	CALCHART__RELABEL,
@@ -196,7 +197,9 @@ public:
 	void OnCmdSave(wxCommandEvent& event);
 	void OnCmdSaveAs(wxCommandEvent& event);
 	void OnCmdPrint(wxCommandEvent& event);
-	void OnCmdPrintEPS(wxCommandEvent& event);
+	void OnCmdLegacyPrint(wxCommandEvent& event);
+	void OnCmdLegacyPrintEPS(wxCommandEvent& event);
+	void OnCmdPageSetup(wxCommandEvent& event);
 	void OnCmdSelectColors(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event);
 	void OnCmdExit(wxCommandEvent& event);
@@ -272,7 +275,7 @@ public:
 
 	FieldCanvas *field;
 	CC_WinNodeMain *node;
-
+	
 	DECLARE_EVENT_TABLE()
 };
 

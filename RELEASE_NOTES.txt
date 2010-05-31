@@ -1,3 +1,7 @@
+Release notes for :
+Features added:
+2965266, Make color contrast better
+
 Release notes for 3.1.2:
 
 Beautified and reorganized code.  Fixed up lasso and polygon selector.
