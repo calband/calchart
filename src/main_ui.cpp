@@ -744,7 +744,7 @@ field(NULL)
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity..."), wxT("Edit continuity for this stuntsheet"));
 	anim_menu->Append(CALCHART__EDIT_PRINTCONT, wxT("Edit &Printed Continuity..."), wxT("Edit printed continuity for this stuntsheet"));
-	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-SPACE"), wxT("Open animation window"));
+	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
 
 	wxMenu *select_menu = new wxMenu;
 // These items are a radio group
@@ -822,12 +822,15 @@ field(NULL)
 	grid_choice->SetSelection(def_grid);
 
 // Zoom slider
-	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, def_zoom, 1, FIELD_MAXZOOM);
+	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, def_zoom, 1, FIELD_MAXZOOM, wxDefaultPosition,
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 
 // set up a sizer for the field panel
 	wxBoxSizer* rowsizer = new wxBoxSizer(wxHORIZONTAL);
-	rowsizer->Add(grid_choice, 1, wxALL);
-	rowsizer->Add(zoom_slider, 1, wxEXPAND);
+	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Grid")), 0, wxALL, 5);
+	rowsizer->Add(grid_choice, 0, wxALL, 5);
+	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Zoom")), 0, wxALL, 5);
+	rowsizer->Add(zoom_slider, 1, wxEXPAND, 5);
 	fullsizer->Add(rowsizer);
 // Reference choice
 	{
@@ -845,11 +848,14 @@ field(NULL)
 	ref_choice->SetSelection(def_ref);
 
 // Sheet slider (will get set later with UpdatePanel())
-	sheet_slider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2);
+	sheet_slider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2, wxDefaultPosition,
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 
 	rowsizer = new wxBoxSizer(wxHORIZONTAL);
-	rowsizer->Add(ref_choice, 0, wxALL);
-	rowsizer->Add(sheet_slider, 0, wxEXPAND);
+	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Ref Group")), 0, wxALL, 5);
+	rowsizer->Add(ref_choice, 0, wxALL, 5);
+	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Sheet")), 0, wxALL, 5);
+	rowsizer->Add(sheet_slider, 1, wxEXPAND, 5);
 	fullsizer->Add(rowsizer);
 
 // Update the tool bar
