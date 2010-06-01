@@ -822,8 +822,9 @@ field(NULL)
 	grid_choice->SetSelection(def_grid);
 
 // Zoom slider
+	// on Mac using wxSL_LABELS will cause a crash?
 	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, def_zoom, 1, FIELD_MAXZOOM, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
 // set up a sizer for the field panel
 	wxBoxSizer* rowsizer = new wxBoxSizer(wxHORIZONTAL);
@@ -848,8 +849,9 @@ field(NULL)
 	ref_choice->SetSelection(def_ref);
 
 // Sheet slider (will get set later with UpdatePanel())
+	// on Mac using wxSL_LABELS will cause a crash?
 	sheet_slider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
 	rowsizer = new wxBoxSizer(wxHORIZONTAL);
 	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Ref Group")), 0, wxALL, 5);
