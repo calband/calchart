@@ -40,14 +40,6 @@ EVT_BUTTON(PointPicker_PointPickerAll,PointPicker::PointPickerAll)
 EVT_BUTTON(PointPicker_PointPickerNone,PointPicker::PointPickerNone)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(ShowInfoReq, wxFrame)
-EVT_CLOSE(ShowInfoReq::OnCloseWindow)
-EVT_BUTTON(ShowInfoReq_ShowInfoClose,ShowInfoReq::ShowInfoClose)
-EVT_BUTTON(ShowInfoReq_ShowInfoSetNum,ShowInfoReq::ShowInfoSetNum)
-EVT_BUTTON(ShowInfoReq_ShowInfoSetLabels,ShowInfoReq::ShowInfoSetLabels)
-EVT_CHOICE(ShowInfoReq_ShowInfoModeChoice,ShowInfoReq::ShowInfoModeChoice)
-END_EVENT_TABLE()
-
 CC_WinNodePointPicker::CC_WinNodePointPicker(CC_WinList *lst,
 PointPicker *req)
 : CC_WinNode(lst), picker(req) {}
@@ -83,60 +75,6 @@ void CC_WinNodePointPicker::UpdateSelections(wxWindow *win, int point)
 		{
 			picker->Set(point, picker->show->IsSelected(point));
 		}
-	}
-}
-
-
-CC_WinNodeInfo::CC_WinNodeInfo(CC_WinList *lst, ShowInfoReq *req)
-: CC_WinNode(lst), inforeq(req) {}
-
-void CC_WinNodeInfo::SetShow(CC_show *shw)
-{
-	inforeq->Update(true, shw);
-}
-
-
-void CC_WinNodeInfo::ChangeNumPoints(wxWindow *win)
-{
-	if (win != inforeq)
-	{
-// make sure changes came from a different window
-		inforeq->UpdateNumPoints();
-	}
-}
-
-
-void CC_WinNodeInfo::ChangePointLabels(wxWindow *win)
-{
-	if (win != inforeq)
-	{
-// make sure changes came from a different window
-		inforeq->UpdateLabels();
-	}
-}
-
-
-void CC_WinNodeInfo::ChangeShowMode(wxWindow *win)
-{
-	if (win != inforeq)
-	{
-// make sure changes came from a different window
-		inforeq->UpdateMode();
-	}
-}
-
-
-void CC_WinNodeInfo::FlushDescr()
-{
-	inforeq->FlushDescr();
-}
-
-
-void CC_WinNodeInfo::SetDescr(wxWindow* win)
-{
-	if (win != inforeq)
-	{
-		inforeq->UpdateDescr(true);
 	}
 }
 
@@ -257,9 +195,193 @@ void PointPicker::SetListBoxEntries()
 }
 
 
-void ShowInfoReq::ShowInfoClose(wxCommandEvent& )
+static void CalculateLabels(CC_show *show, bool letters[26],
+bool& use_letters, int& maxnum)
 {
-	Close();
+	unsigned i;
+
+	for (i = 0; i < 26; i++) letters[i] = false;
+	use_letters = false;
+	maxnum = 1;
+	for (i = 0; i < show->GetNumPoints(); i++)
+	{
+		const wxString& tmp = show->GetPointLabel(i);
+		if (!isdigit(tmp[0]))
+		{
+			letters[tmp[0]-'A'] = true;
+			if ((tmp[1]-'0') >= maxnum)
+				maxnum = tmp[1]-'0'+1;
+			use_letters = true;
+		}
+	}
+	if (use_letters == false)
+	{
+		maxnum = 10;
+		for (i = 0; i < 26; i++) letters[i] = true;
+	}
+}
+
+
+enum
+{
+	ShowInfoReq_ShowInfoSetNum=1000,
+	ShowInfoReq_ShowInfoSetLabels,
+	ShowInfoReq_ShowInfoModeChoice,
+	ShowInfoReq_ShowInfoSetDescription,
+};
+
+BEGIN_EVENT_TABLE(ShowInfoReq, wxDialog)
+EVT_BUTTON(ShowInfoReq_ShowInfoSetNum,ShowInfoReq::ShowInfoSetNum)
+EVT_BUTTON(ShowInfoReq_ShowInfoSetLabels,ShowInfoReq::ShowInfoSetLabels)
+EVT_CHOICE(ShowInfoReq_ShowInfoModeChoice,ShowInfoReq::ShowInfoModeChoice)
+EVT_BUTTON(ShowInfoReq_ShowInfoSetDescription,ShowInfoReq::ShowInfoSetDescription)
+END_EVENT_TABLE()
+
+IMPLEMENT_CLASS( ShowInfoReq, wxDialog )
+
+ShowInfoReq::ShowInfoReq()
+{
+	Init();
+}
+
+ShowInfoReq::ShowInfoReq(CC_show *shw,
+	wxWindow *parent, wxWindowID id,
+	const wxString& caption,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style )
+{
+	Init();
+	
+	Create(shw, parent, id, caption, pos, size, style);
+}
+
+ShowInfoReq::~ShowInfoReq()
+{
+}
+
+void ShowInfoReq::Init()
+{
+}
+
+
+bool ShowInfoReq::Create(CC_show *shw,
+		wxWindow *parent, wxWindowID id,
+		const wxString& caption,
+		const wxPoint& pos,
+		const wxSize& size,
+		long style )
+{
+	if (!wxDialog::Create(parent, id, caption, pos, size, style))
+		return false;
+	
+	show = shw;
+	CreateControls();
+
+// This fits the dalog to the minimum size dictated by the sizers
+	GetSizer()->Fit(this);
+// This ensures that the dialog cannot be smaller than the minimum size
+	GetSizer()->SetSizeHints(this);
+
+	Center();
+
+	return true;
+}
+
+void ShowInfoReq::CreateControls()
+{
+	unsigned i;
+	wxString buf;
+	wxString strs[2];
+	bool letters[26];
+	bool use_letters;
+	int maxnum;
+	wxStaticBoxSizer *boxsizer;
+
+	CalculateLabels(show, letters, use_letters, maxnum);
+
+//	panel = new wxPanel(this, -1);
+
+// create a sizer for laying things out top down:
+	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+	SetSizer( topsizer );
+
+// add buttons to the top row
+	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxButton *closeBut = new wxButton(this, wxID_OK, wxT("&Done"));
+	closeBut->SetDefault();
+	top_button_sizer->Add(closeBut, 0, wxALL, 10 );
+
+	wxButton *setnumBut = new wxButton(this, ShowInfoReq_ShowInfoSetNum, wxT("Set &Num Points"));
+	top_button_sizer->Add(setnumBut, 0, wxALL, 10 );
+
+	wxButton *setlabBut = new wxButton(this, ShowInfoReq_ShowInfoSetLabels, wxT("&Set Labels"));
+	top_button_sizer->Add(setlabBut, 0, wxALL, 10 );
+
+	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
+
+// now we add a left and a right side, putting boxes around things
+// special attention about box sizers
+// "the order in which you create
+// new controls is important. Create your wxStaticBox control before any
+// siblings that are to appear inside the wxStaticBox in order to preserve
+// the correct Z-Order of controls."
+	wxBoxSizer *middle_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer *left_middle_sizer = new wxBoxSizer( wxVERTICAL );
+	wxBoxSizer *right_middle_sizer = new wxBoxSizer( wxVERTICAL );
+	boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("&Letters")), wxHORIZONTAL);
+	labels = new wxListBox(this, -1, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+	for (i = 0; i < 26; i++)
+	{
+		buf = wxT("A");
+		buf.SetChar(0, buf.GetChar(0)+i);
+		labels->InsertItems(1, &buf, i);
+	}
+	labels->Select(0);
+	boxsizer->Add(labels, 0, wxALL, 0 );
+	left_middle_sizer->Add(boxsizer, 0, wxALL, 0 );
+
+	middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER );
+
+// now add right side
+	buf.sprintf(wxT("%u"), show->GetNumPoints());
+	boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("&Points")), wxHORIZONTAL);
+	numpnts = new wxTextCtrl(this, -1, buf);
+	boxsizer->Add(numpnts, 0, wxALL, 0 );
+	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
+
+	strs[0] = wxT("Numbers");
+	strs[1] = wxT("Letters");
+	label_type = new wxRadioBox(this, -1, wxT("&Labels"), wxDefaultPosition, wxDefaultSize, 2, strs, 2);
+	label_type->SetSelection(use_letters);
+	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
+
+	wxArrayString modeStrings;
+	ShowModeList::Iter mode = modelist->Begin();
+	while (mode != modelist->End())
+	{
+		modeStrings.Add((*mode)->GetName());
+		++mode;
+	}
+	boxsizer = new wxStaticBoxSizer( new wxStaticBox(this, -1, wxT("Show &mode")), wxHORIZONTAL);
+	choice = new wxChoice(this, ShowInfoReq_ShowInfoModeChoice, wxDefaultPosition, wxDefaultSize, modeStrings, wxCAPTION, wxDefaultValidator, wxT("Show &mode"));
+	UpdateMode();
+	boxsizer->Add(choice, 0, wxALL, 0 );
+	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
+
+	middle_sizer->Add(right_middle_sizer, 0, wxALIGN_CENTER );
+	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
+
+	boxsizer = new wxStaticBoxSizer( new wxStaticBox(this, -1, wxT("P&oints per letter")), wxHORIZONTAL);
+	lettersize = new wxSlider(this, -1, maxnum, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
+	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
+	topsizer->Add(boxsizer, 0, wxALL, 10);
+
+	// add text
+	topsizer->Add(new wxButton(this, ShowInfoReq_ShowInfoSetDescription, wxT("Set Description")), 0, wxALL, 10);
+	text = new FancyTextWin(this, -1, wxEmptyString, wxDefaultPosition, wxSize(240, 100));
+	UpdateDescr();
+	topsizer->Add(text, 1, wxALL, 10);
 }
 
 
@@ -307,150 +429,9 @@ void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&)
 }
 
 
-static void CalculateLabels(CC_show *show, bool letters[26],
-bool& use_letters, int& maxnum)
-{
-	unsigned i;
-
-	for (i = 0; i < 26; i++) letters[i] = false;
-	use_letters = false;
-	maxnum = 1;
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		const wxString& tmp = show->GetPointLabel(i);
-		if (!isdigit(tmp[0]))
-		{
-			letters[tmp[0]-'A'] = true;
-			if ((tmp[1]-'0') >= maxnum)
-				maxnum = tmp[1]-'0'+1;
-			use_letters = true;
-		}
-	}
-	if (use_letters == false)
-	{
-		maxnum = 10;
-		for (i = 0; i < 26; i++) letters[i] = true;
-	}
-}
-
-
-ShowInfoReq::ShowInfoReq(CC_show *shw, CC_WinList *lst,
-wxFrame *frame, const wxString& title,
-int x, int y, int width, int height):
-wxFrame(frame, -1, title, wxPoint(x, y), wxSize(width, height)),
-show(shw)
-{
-	unsigned i;
-	wxString buf;
-	wxString strs[2];
-	bool letters[26];
-	bool use_letters;
-	int maxnum;
-	wxStaticBoxSizer *boxsizer;
-
-// Give it an icon
-	SetBandIcon(this);
-
-	CalculateLabels(show, letters, use_letters, maxnum);
-
-	panel = new wxPanel(this, -1);
-
-// create a sizer for laying things out top down:
-	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-
-// add buttons to the top row
-	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
-	wxButton *closeBut = new wxButton(panel, ShowInfoReq_ShowInfoClose, wxT("&Close"));
-	closeBut->SetDefault();
-	top_button_sizer->Add(closeBut, 0, wxALL, 10 );
-
-	wxButton *setnumBut = new wxButton(panel, ShowInfoReq_ShowInfoSetNum, wxT("Set &Num Points"));
-	top_button_sizer->Add(setnumBut, 0, wxALL, 10 );
-
-	wxButton *setlabBut = new wxButton(panel, ShowInfoReq_ShowInfoSetLabels, wxT("&Set Labels"));
-	top_button_sizer->Add(setlabBut, 0, wxALL, 10 );
-
-	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
-
-// now we add a left and a right side, putting boxes around things
-// special attention about box sizers
-// "the order in which you create
-// new controls is important. Create your wxStaticBox control before any
-// siblings that are to appear inside the wxStaticBox in order to preserve
-// the correct Z-Order of controls."
-	wxBoxSizer *middle_sizer = new wxBoxSizer( wxHORIZONTAL );
-	wxBoxSizer *left_middle_sizer = new wxBoxSizer( wxVERTICAL );
-	wxBoxSizer *right_middle_sizer = new wxBoxSizer( wxVERTICAL );
-	boxsizer = new wxStaticBoxSizer(new wxStaticBox(panel, -1, wxT("&Letters")), wxHORIZONTAL);
-	labels = new wxListBox(panel, -1, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-	for (i = 0; i < 26; i++)
-	{
-		buf = wxT("A");
-		buf.SetChar(0, buf.GetChar(0)+i);
-		labels->InsertItems(1, &buf, i);
-	}
-	labels->Select(0);
-	boxsizer->Add(labels, 0, wxALL, 0 );
-	left_middle_sizer->Add(boxsizer, 0, wxALL, 0 );
-
-	middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER );
-
-// now add right side
-	buf.sprintf(wxT("%u"), show->GetNumPoints());
-	boxsizer = new wxStaticBoxSizer(new wxStaticBox(panel, -1, wxT("&Points")), wxHORIZONTAL);
-	numpnts = new wxTextCtrl(panel, -1, buf);
-	boxsizer->Add(numpnts, 0, wxALL, 0 );
-	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
-
-	strs[0] = wxT("Numbers");
-	strs[1] = wxT("Letters");
-	label_type = new wxRadioBox(panel, -1, wxT("&Labels"), wxDefaultPosition, wxDefaultSize, 2, strs, 2);
-	label_type->SetSelection(use_letters);
-	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
-
-	wxArrayString modeStrings;
-	ShowModeList::Iter mode = modelist->Begin();
-	while (mode != modelist->End())
-	{
-		modeStrings.Add((*mode)->GetName());
-		++mode;
-	}
-	boxsizer = new wxStaticBoxSizer( new wxStaticBox(panel, -1, wxT("Show &mode")), wxHORIZONTAL);
-	choice = new wxChoice(panel, ShowInfoReq_ShowInfoModeChoice, wxDefaultPosition, wxDefaultSize, modeStrings, wxCAPTION, wxDefaultValidator, wxT("Show &mode"));
-	UpdateMode();
-	boxsizer->Add(choice, 0, wxALL, 0 );
-	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
-
-	middle_sizer->Add(right_middle_sizer, 0, wxALIGN_CENTER );
-	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
-
-	boxsizer = new wxStaticBoxSizer( new wxStaticBox(panel, -1, wxT("P&oints per letter")), wxHORIZONTAL);
-	lettersize = new wxSlider(panel, -1, maxnum, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
-	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
-	topsizer->Add(boxsizer, 0, wxALIGN_CENTER );
-
-	node = new CC_WinNodeInfo(lst, this);
-	panel->SetSizer( topsizer );
-
-	Center();
-	Show(true);
-}
-
-
-ShowInfoReq::~ShowInfoReq()
-{
-	if (node)
-	{
-		node->Remove();
-		delete node;
-	}
-}
-
-
-void ShowInfoReq::OnCloseWindow(wxCloseEvent& event)
+void ShowInfoReq::ShowInfoSetDescription(wxCommandEvent&)
 {
 	FlushDescr();
-	Destroy();
 }
 
 
@@ -491,38 +472,20 @@ void ShowInfoReq::UpdateMode()
 }
 
 
-void ShowInfoReq::UpdateDescr(bool quick)
+void ShowInfoReq::UpdateDescr()
 {
 	wxString c;
 
 	text->Clear();
-	if (quick)
-	{
-		c = show->GetDescr();
-	}
-	else
-	{
-		c = show->UserGetDescr();
-	}
+	c = show->UserGetDescr();
 	text->WriteText(c);
 	text->SetInsertionPoint(0);
 }
 
 
-void ShowInfoReq::Update(bool quick, CC_show *shw)
-{
-	if (shw != NULL) show = shw;
-	UpdateDescr(quick);
-	UpdateMode();
-	UpdateNumPoints();
-}
-
-
 void ShowInfoReq::FlushDescr()
 {
-	wxString descr;
-
-//  descr = text->GetContents();
+	wxString descr = text->GetValue();
 	if (descr != show->GetDescr())
 	{
 		show->UserSetDescr(descr, this);

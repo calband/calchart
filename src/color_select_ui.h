@@ -39,7 +39,7 @@ class ColorSelectDialog : public wxDialog
 	DECLARE_CLASS( ColorSelectDialog )
 	DECLARE_EVENT_TABLE()
 
-	public:
+public:
 	ColorSelectDialog( );
 	ColorSelectDialog( wxWindow *parent,
 		wxWindowID id = wxID_ANY,

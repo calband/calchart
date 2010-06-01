@@ -1629,8 +1629,12 @@ void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
 void MainFrame::Setup()
 {
 	if (field->show_descr.show)
-		(void)new ShowInfoReq(field->show_descr.show, node->GetList(), this,
-			wxT("Setup Show"));
+	{
+		ShowInfoReq dialog1(field->show_descr.show, this);
+		if (dialog1.ShowModal() == wxID_OK)
+		{
+		}
+	}
 }
 
 

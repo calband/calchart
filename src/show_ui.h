@@ -50,22 +50,6 @@ private:
 	PointPicker *picker;
 };
 
-class CC_WinNodeInfo : public CC_WinNode
-{
-public:
-	CC_WinNodeInfo(CC_WinList *lst, ShowInfoReq *req);
-
-	virtual void SetShow(CC_show *shw);
-	virtual void ChangeNumPoints(wxWindow *win);
-	virtual void ChangePointLabels(wxWindow *win);
-	virtual void ChangeShowMode(wxWindow *win);
-	virtual void FlushDescr();
-	virtual void SetDescr(wxWindow *win);
-
-private:
-	ShowInfoReq *inforeq;
-};
-
 enum
 {
 	PointPicker_PointPickerClose=1100,
@@ -108,27 +92,36 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-enum
+class ShowInfoReq : public wxDialog
 {
-	ShowInfoReq_ShowInfoClose=1000,
-	ShowInfoReq_ShowInfoSetNum,
-	ShowInfoReq_ShowInfoSetLabels,
-	ShowInfoReq_ShowInfoModeChoice,
-};
-class ShowInfoReq : public wxFrame
-{
+	DECLARE_CLASS( ShowInfoReq )
+	DECLARE_EVENT_TABLE()
+
 public:
-	ShowInfoReq(CC_show *shw, CC_WinList *lst,
-		wxFrame *frame, const wxString& title,
-		int x = -1, int y = -1, int width = 400, int height = 450);
-	~ShowInfoReq();
-	void OnCloseWindow(wxCloseEvent& event);
+	ShowInfoReq();
+	ShowInfoReq(CC_show *shw,
+		wxWindow *parent, wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Show Info"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+	~ShowInfoReq( );
+
+	void Init();
+
+	bool Create(CC_show *shw,
+		wxWindow *parent, wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Show Info"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
 
 	void UpdateLabels();
 	void UpdateNumPoints();
 	void UpdateMode();
-	void UpdateDescr(bool quick = false);	  // quick doesn't flush other windows
-	void Update(bool quick = false, CC_show *shw = NULL);
+	void UpdateDescr();	  // quick doesn't flush other windows
 
 	void FlushDescr();						  // Flush changes in description text window
 
@@ -144,18 +137,15 @@ public:
 	CC_show *show;
 private:
 	wxPanel *panel;
-	void ShowInfoClose(wxCommandEvent&);
 	void ShowInfoSetNum(wxCommandEvent&);
 	void ShowInfoSetLabels(wxCommandEvent&);
 	void ShowInfoModeChoice(wxCommandEvent&);
+	void ShowInfoSetDescription(wxCommandEvent&);
 	wxTextCtrl *numpnts;
 	wxRadioBox *label_type;
 	wxListBox *labels;
 	wxChoice *choice;
 	wxSlider *lettersize;
 	FancyTextWin *text;
-	CC_WinNodeInfo *node;
-
-	DECLARE_EVENT_TABLE()
 };
 #endif
