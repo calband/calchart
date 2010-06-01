@@ -36,10 +36,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ToolBarEntry anim_tb[] =
 {
-	{ wxITEM_NORMAL, NULL, wxT("Stop"), CALCHART__anim_stop },
-	{ wxITEM_NORMAL, NULL, wxT("Play"), CALCHART__anim_play },
-	{ wxITEM_NORMAL, NULL, wxT("Previous beat"), CALCHART__anim_prev_beat },
-	{ wxITEM_NORMAL, NULL, wxT("Next beat"), CALCHART__anim_next_beat },
+	{ wxITEM_NORMAL, NULL, wxT("Stop (space toggle)"), CALCHART__anim_stop },
+	{ wxITEM_NORMAL, NULL, wxT("Play (space toggle)"), CALCHART__anim_play },
+	{ wxITEM_NORMAL, NULL, wxT("Previous beat (left arrow)"), CALCHART__anim_prev_beat },
+	{ wxITEM_NORMAL, NULL, wxT("Next beat (right arrow)"), CALCHART__anim_next_beat },
 	{ wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"), CALCHART__anim_prev_sheet },
 	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
 };
@@ -281,7 +281,19 @@ void AnimationCanvas::OnRightMouseEvent(wxMouseEvent& event)
 
 void AnimationCanvas::OnChar(wxKeyEvent& event)
 {
-	event.Skip();
+	if (event.GetKeyCode() == WXK_LEFT)
+		PrevBeat();
+	else if (event.GetKeyCode() == WXK_RIGHT)
+		NextBeat();
+	else if (event.GetKeyCode() == WXK_SPACE)
+	{
+		if (timeron)
+			StopTimer();
+		else
+			StartTimer();
+	}
+	else
+		event.Skip();
 }
 
 
@@ -606,7 +618,7 @@ CC_WinList *lst)
 	anim_menu->Append(CALCHART__ANIM_RIB_FRAME, wxT("Output RenderMan RIB Frame"), wxT("Output RIB frame for RenderMan rendering"));
 	anim_menu->Append(CALCHART__ANIM_RIB, wxT("Output Render&Man RIB"), wxT("Output RIB file for RenderMan rendering"));
 #endif
-	anim_menu->Append(wxID_CLOSE, wxT("&Close Animation"), wxT("Close window"));
+	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(anim_menu, wxT("&Animate"));
@@ -631,10 +643,12 @@ CC_WinList *lst)
 		sizeof(collis_text)/sizeof(const wxString), collis_text);
 	sizer1->Add(collis, wxSizerFlags().Expand().Border(5));
 
-	(void)new wxStaticText(this, wxID_ANY, wxT("&Tempo"));
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Tempo")),
+		wxSizerFlags());
 	wxSlider *sldr =
 		new wxSlider(this, CALCHART__anim_tempo,
-		canvas->GetTempo(), 10, 300);
+		canvas->GetTempo(), 10, 300, wxDefaultPosition,
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 	sizer1->Add(sldr, wxSizerFlags().Expand().Border(5));
 
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
@@ -642,14 +656,16 @@ CC_WinList *lst)
 	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")),
 		wxSizerFlags());
 	sheet_slider = new wxSlider(this, CALCHART__anim_gotosheet,
-		1, 1, 2);
+		1, 1, 2, wxDefaultPosition,
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 	sizer2->Add(sheet_slider, wxSizerFlags().Expand().Border(5));
 
 // Beat slider (will get set later with UpdatePanel())
 	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")),
 		wxSizerFlags());
 	beat_slider = new wxSlider(this, CALCHART__anim_gotobeat,
-		0, 0, 1);
+		0, 0, 1, wxDefaultPosition,
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 	sizer2->Add(beat_slider, wxSizerFlags().Expand().Border(5));
 
 //create a sizer with no border and centered horizontally
