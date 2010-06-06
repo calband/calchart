@@ -400,13 +400,9 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 
 
 AnimateSheet::AnimateSheet(unsigned numpoints)
-: next(NULL), prev(NULL), pts(numpoints), numpts(numpoints)
+: next(NULL), prev(NULL), pts(numpoints), commands(numpoints), end_cmds(numpoints), numpts(numpoints)
 {
-	unsigned i;
-
-	commands = new AnimateCommand*[numpts];
-	end_cmds = new AnimateCommand*[numpts];
-	for (i = 0; i < numpts; i++)
+	for (size_t i = 0; i < numpts; i++)
 	{
 		commands[i] = NULL;
 		end_cmds[i] = NULL;
@@ -419,21 +415,16 @@ AnimateSheet::~AnimateSheet()
 	AnimateCommand *cmd, *tmp;
 	unsigned i;
 
-	if (commands)
+	for (i = 0; i < numpts; i++)
 	{
-		for (i = 0; i < numpts; i++)
+		cmd = commands[i];
+		while (cmd)
 		{
-			cmd = commands[i];
-			while (cmd)
-			{
-				tmp = cmd->next;
-				delete cmd;
-				cmd = tmp;
-			}
+			tmp = cmd->next;
+			delete cmd;
+			cmd = tmp;
 		}
-		delete commands;
 	}
-	if (end_cmds) delete end_cmds;
 }
 
 
@@ -769,12 +760,6 @@ void Animation::CheckCollisions()
 AnimateCompile::AnimateCompile()
 : okay(true)
 {
-	unsigned i;
-
-	for (i = 0; i < NUMCONTVARS; i++)
-	{
-		vars[i] = NULL;
-	}
 }
 
 
@@ -783,14 +768,6 @@ AnimateCompile::~AnimateCompile()
 	unsigned i;
 
 	FreeErrorMarkers();
-	for (i = 0; i < NUMCONTVARS; i++)
-	{
-		if (vars[i] != NULL)
-		{
-			delete [] vars[i];
-			vars[i] = NULL;
-		}
-	}
 }
 
 
@@ -909,12 +886,9 @@ void AnimateCompile::FreeErrorMarkers()
 
 float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 {
-	if (vars[varnum])
+	if (vars[varnum][curr_pt].IsValid())
 	{
-		if (vars[varnum][curr_pt].IsValid())
-		{
-			return vars[varnum][curr_pt].GetValue();
-		}
+		return vars[varnum][curr_pt].GetValue();
 	}
 	RegisterError(ANIMERR_UNDEFINED, token);
 	return 0.0;
@@ -923,10 +897,6 @@ float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 
 void AnimateCompile::SetVarValue(int varnum, float value)
 {
-	if (!vars[varnum])
-	{
-		vars[varnum] = new AnimateVariable[show->GetNumPoints()];
-	}
 	vars[varnum][curr_pt].SetValue(value);
 }
 

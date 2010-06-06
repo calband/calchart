@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "show.h"
 #include <wx/string.h>
+#include <map>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
 enum
@@ -171,8 +172,8 @@ public:
 
 	AnimateSheet *next, *prev;
 	std::vector<AnimatePoint> pts;
-	AnimateCommand **commands;
-	AnimateCommand **end_cmds;
+	std::vector<AnimateCommand*> commands;
+	std::vector<AnimateCommand*> end_cmds;
 	wxString name;
 	unsigned numbeats;
 private:
@@ -302,7 +303,7 @@ public:
 	ErrorMarker error_markers[NUM_ANIMERR];
 private:
 	unsigned contnum;
-	AnimateVariable *vars[NUMCONTVARS];
+	std::map<unsigned,AnimateVariable> vars[NUMCONTVARS];
 	void MakeErrorMarker(AnimateError err, const ContToken *token);
 	bool okay;
 };
