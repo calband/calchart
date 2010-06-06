@@ -45,6 +45,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/colordlg.h>
 #include <wx/dcbuffer.h>
 #include <wx/config.h>
+#include <wx/print.h>
+#include <wx/printdlg.h>
 
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
