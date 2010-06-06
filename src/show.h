@@ -387,7 +387,7 @@ public:
 	void Draw(wxDC *dc, unsigned ref, bool primary = true,
 		bool drawall = true, int point = -1);
 	void DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const;
-	void DrawCont(wxDC *dc, wxCoord yStart, bool landscape) const;
+	void DrawCont(wxDC& dc, wxCoord yStart, bool landscape) const;
 
 // internal use only
 	const wxChar *PrintStandard(FILE *fp) const;

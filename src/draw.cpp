@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <wx/dc.h>
+#include <wx/dcmemory.h>
 #include "show.h"
 #include "confgr.h"
 #include "modes.h"
@@ -216,13 +217,15 @@ size_t TabStops(size_t which, bool landscape)
 }
 
 // these are the sizes that the page is set up to do.
+static const double kBitmapScale = 2.0; // the factor to scale the bitmap
+static const double kContinuityScale = 2.0; // the factor to scale the continuity
 static const double kSizeX = 576, kSizeY = 734;
 static const double kSizeXLandscape = 917, kSizeYLandscape = 720;
 static const double kHeaderLocation[2][2] = { { 0.5, 18/kSizeY }, { 0.5, 22/kSizeYLandscape } };
 static const wxString kHeader = wxT("UNIVERSITY OF CALIFORNIA MARCHING BAND");
 static const double kUpperNumberPosition[2][2] = { { 1.0 - 62/kSizeX, 36/kSizeY }, { 1.0 - 96/kSizeXLandscape, 36/kSizeYLandscape } };
-static const double kLowerNumberPosition[2][2] = { { 1.0 - 62/kSizeX, 720/kSizeY }, { 1.0 - 96/kSizeXLandscape, 680/kSizeYLandscape } };
-static const double kLowerNumberBox[2][4] = { { 1.0 - 90/kSizeX, 714/kSizeY, 56/kSizeX, 28/kSizeY }, { 1.0 - 124/kSizeXLandscape, 674/kSizeYLandscape, 56/kSizeXLandscape, 28/kSizeYLandscape } };
+static const double kLowerNumberPosition[2][2] = { { 1.0 - 62/kSizeX, 714/kSizeY }, { 1.0 - 96/kSizeXLandscape, 680/kSizeYLandscape } };
+static const double kLowerNumberBox[2][4] = { { 1.0 - 90/kSizeX, 708/kSizeY, 56/kSizeX, 22/kSizeY }, { 1.0 - 124/kSizeXLandscape, 674/kSizeYLandscape, 56/kSizeXLandscape, 28/kSizeYLandscape } };
 static const double kMusicLabelPosition[2][3] = { { 0.5, 60/kSizeY, 240/kSizeX }, { 0.5, 60/kSizeYLandscape, 400/kSizeXLandscape } };
 static const wxString kMusicLabel = wxT("Music");
 static const double kFormationLabelPosition[2][3] = { { 0.5, 82/kSizeY, 240/kSizeX }, { 0.5, 82/kSizeYLandscape, 400/kSizeXLandscape } };
@@ -249,8 +252,10 @@ static const double kLowerNorthPosition[2][2] = { { 1.0 - 52/kSizeX, (570+8)/kSi
 static const wxString kLowerNorthLabel = wxT("north");
 static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 40/kSizeX }, { 1.0 - 76/kSizeXLandscape, (536)/kSizeYLandscape, 40/kSizeXLandscape } };
 
+static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
+
 // draw the continuity starting at a specific offset
-void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
+void CC_sheet::DrawCont(wxDC& dc, const wxCoord yStart, bool landscape) const
 {
 	float x, y;
 	wxCoord textw, texth, textd, maxtexth;
@@ -258,10 +263,10 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 	wxCoord origX, origY;
 	double origXscale, origYscale;
 
-	dc->GetDeviceOrigin(&origX, &origY);
-	dc->GetUserScale(&origXscale, &origYscale);
-	const wxColour& origForegroundColor = dc->GetTextForeground();
-	const wxFont& origFont = dc->GetFont();
+	dc.GetDeviceOrigin(&origX, &origY);
+	dc.GetUserScale(&origXscale, &origYscale);
+	const wxColour& origForegroundColor = dc.GetTextForeground();
+	const wxFont& origFont = dc.GetFont();
 
 	// we set the font large then scale down to give fine detail on the page
 	wxFont *contPlainFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxNORMAL, wxNORMAL);
@@ -269,18 +274,25 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 	wxFont *contItalFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxITALIC, wxNORMAL);
 	wxFont *contBoldItalFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxITALIC, wxBOLD);
 
-	dc->SetDeviceOrigin(20, yStart);
-	dc->SetUserScale(0.42, 0.42);
-	dc->SetTextForeground(*wxBLACK);
-	dc->SetFont(*contPlainFont);
+	dc.SetDeviceOrigin(20, yStart);
+	dc.SetTextForeground(*wxBLACK);
+	dc.SetFont(*contPlainFont);
 	
 	int pageW, pageH;
-	dc->GetSize(&pageW, &pageH);
-	int pageMiddle = pageW/2 - 20;
-	pageMiddle /= 0.42;
-
+	dc.GetSize(&pageW, &pageH);
+	int pageMiddle;
+	if (landscape)
+	{
+		dc.SetUserScale((pageW/kSizeXLandscape)/kContinuityScale, (pageH/kSizeYLandscape)/kContinuityScale);
+		pageMiddle = (pageW * (1.0/((pageW/kSizeXLandscape)/kContinuityScale)))/2 - 20;
+	}
+	else
+	{
+		dc.SetUserScale((pageW/kSizeX)/kContinuityScale, (pageH/kSizeY)/kContinuityScale);
+		pageMiddle = (pageW * (1.0/((pageW/kSizeX)/kContinuityScale)))/2 - 20;
+	}
 	y = 0.0;
-	const wxCoord charWidth = dc->GetCharWidth();
+	const wxCoord charWidth = dc.GetCharWidth();
 	CC_textline_list::const_iterator cont(continuity.lines.begin());
 	while (cont != continuity.lines.end())
 	{
@@ -298,20 +310,20 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 				switch (c->font)
 				{
 					case PSFONT_SYMBOL:
-						dc->GetTextExtent(wxT("O"), &textw, &texth, &textd);
+						dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
 						x += textw * c->text.length();
 						break;
 					case PSFONT_NORM:
-						dc->SetFont(*contPlainFont);
+						dc.SetFont(*contPlainFont);
 						break;
 					case PSFONT_BOLD:
-						dc->SetFont(*contBoldFont);
+						dc.SetFont(*contBoldFont);
 						break;
 					case PSFONT_ITAL:
-						dc->SetFont(*contItalFont);
+						dc.SetFont(*contItalFont);
 						break;
 					case PSFONT_BOLDITAL:
-						dc->SetFont(*contBoldItalFont);
+						dc.SetFont(*contBoldItalFont);
 						break;
 					case PSFONT_TAB:
 						do_tab = true;
@@ -319,7 +331,7 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 				}
 				if (!do_tab && (c->font != PSFONT_SYMBOL))
 				{
-					dc->GetTextExtent(c->text, &textw, &texth, &textd);
+					dc.GetTextExtent(c->text, &textw, &texth, &textd);
 					x -= textw/2;
 				}
 			}
@@ -335,16 +347,16 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 			{
 				case PSFONT_NORM:
 				case PSFONT_SYMBOL:
-					dc->SetFont(*contPlainFont);
+					dc.SetFont(*contPlainFont);
 					break;
 				case PSFONT_BOLD:
-					dc->SetFont(*contBoldFont);
+					dc.SetFont(*contBoldFont);
 					break;
 				case PSFONT_ITAL:
-					dc->SetFont(*contItalFont);
+					dc.SetFont(*contItalFont);
 					break;
 				case PSFONT_BOLDITAL:
-					dc->SetFont(*contBoldItalFont);
+					dc.SetFont(*contBoldItalFont);
 					break;
 				case PSFONT_TAB:
 					tabnum++;
@@ -358,7 +370,7 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 			}
 			if (c->font == PSFONT_SYMBOL)
 			{
-				dc->GetTextExtent(wxT("O"), &textw, &texth, &textd);
+				dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
 				float d = textw;
 				SYMBOL_TYPE sym;
 
@@ -367,7 +379,7 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 				for (const wxChar *s = c->text; *s; s++)
 				{
 					{
-						dc->SetPen(*wxBLACK_PEN);
+						dc.SetPen(*wxBLACK_PEN);
 						sym = (SYMBOL_TYPE)(*s - 'A');
 						switch (sym)
 						{
@@ -375,19 +387,19 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 							case SYMBOL_SOLBKSL:
 							case SYMBOL_SOLSL:
 							case SYMBOL_SOLX:
-								dc->SetBrush(*wxBLACK_BRUSH);
+								dc.SetBrush(*wxBLACK_BRUSH);
 								break;
 							default:
-								dc->SetBrush(*wxTRANSPARENT_BRUSH);
+								dc.SetBrush(*wxTRANSPARENT_BRUSH);
 						}
-						dc->DrawEllipse(x, top_y, d, d);
+						dc.DrawEllipse(x, top_y, d, d);
 						switch (sym)
 						{
 							case SYMBOL_SL:
 							case SYMBOL_X:
 							case SYMBOL_SOLSL:
 							case SYMBOL_SOLX:
-								dc->DrawLine(x-1, top_y + d+1, x + d+1, top_y-1);
+								dc.DrawLine(x-1, top_y + d+1, x + d+1, top_y-1);
 								break;
 							default:
 								break;
@@ -398,7 +410,7 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 							case SYMBOL_X:
 							case SYMBOL_SOLBKSL:
 							case SYMBOL_SOLX:
-								dc->DrawLine(x-1, top_y-1, x + d+1, top_y + d+1);
+								dc.DrawLine(x-1, top_y-1, x + d+1, top_y + d+1);
 								break;
 							default:
 								break;
@@ -411,8 +423,8 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 			{
 				if (!do_tab)
 				{
-					dc->GetTextExtent(c->text, &textw, &texth, &textd);
-					dc->DrawText(c->text, x, y);
+					dc.GetTextExtent(c->text, &textw, &texth, &textd);
+					dc.DrawText(c->text, x, y);
 					x += textw;
 				}
 			}
@@ -422,13 +434,11 @@ void CC_sheet::DrawCont(wxDC *dc, const wxCoord yStart, bool landscape) const
 	}
 
 	// restore everything
-	dc->SetUserScale(origXscale, origYscale);
-	dc->SetDeviceOrigin(origX, origY);
-	dc->SetTextForeground(origForegroundColor);
-	dc->SetFont(origFont);
+	dc.SetUserScale(origXscale, origYscale);
+	dc.SetDeviceOrigin(origX, origY);
+	dc.SetTextForeground(origForegroundColor);
+	dc.SetFont(origFont);
 }
-
-static const double kContinuityStart[2] = { 606/kSizeY, 464/kSizeYLandscape };
 
 static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 {
@@ -448,13 +458,15 @@ static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), bord1, bord2, siz, off, whash, ehash));
 }
 
-void CC_sheet::DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const
+void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) const
 {
 	unsigned short i;
 	unsigned long x, y;
 	float circ_r;
 	CC_coord origin;
 
+	std::auto_ptr<wxBitmap> membm(new wxBitmap((landscape?kSizeXLandscape:kSizeX)*kBitmapScale, (landscape?kSizeYLandscape:kSizeY)*kBitmapScale));
+	std::auto_ptr<wxDC> dc(new wxMemoryDC(*membm));
 	wxCoord origX, origY;
 	double origXscale, origYscale;
 	dc->GetDeviceOrigin(&origX, &origY);
@@ -479,7 +491,7 @@ void CC_sheet::DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const
 	dc->SetPen(*wxBLACK_PEN);
 	dc->SetTextForeground(*wxBLACK);
 	dc->SetLogicalFunction(wxCOPY);
-	mode->Draw(dc);
+	mode->Draw(dc.get());
 
 	if (!pts.empty())
 	{
@@ -591,11 +603,15 @@ void CC_sheet::DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const
 	DrawCenteredText(*dc, kLowerNorthLabel, wxPoint(pageW*kLowerNorthPosition[landscape][0], pageH*kLowerNorthPosition[landscape][1]));
 	DrawArrow(*dc, wxPoint(pageW*kLowerNorthArrow[landscape][0], pageH*kLowerNorthArrow[landscape][1]), pageW*kLowerNorthArrow[landscape][2], true);
 
+	DrawCont(*dc, kBitmapScale*pageH*kContinuityStart[landscape], landscape);
+
 	dc->SetUserScale(origXscale, origYscale);
 	dc->SetDeviceOrigin(origX, origY);
 
-	DrawCont(dc, pageH*kContinuityStart[landscape], landscape);
-
 	dc->SetFont(wxNullFont);
 	
+	int printerW, printerH;
+	printerdc->GetSize(&printerW, &printerH);
+	printerdc->SetUserScale(printerW/((landscape?kSizeXLandscape:kSizeX)*kBitmapScale), printerH/((landscape?kSizeYLandscape:kSizeY)*kBitmapScale));
+	printerdc->Blit(0, 0, membm->GetWidth(), membm->GetHeight(), dc.get(), 0, 0);
 }

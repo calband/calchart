@@ -174,6 +174,7 @@ EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
 EVT_MENU(wxID_SAVE, MainFrame::OnCmdSave)
 EVT_MENU(wxID_SAVEAS, MainFrame::OnCmdSaveAs)
 EVT_MENU(wxID_PRINT, MainFrame::OnCmdPrint)
+EVT_MENU(wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, MainFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, MainFrame::OnCmdLegacyPrintEPS)
@@ -722,7 +723,8 @@ field(NULL)
 	file_menu->Append(wxID_SAVE, wxT("&Save\tCTRL-S"), wxT("Save show"));
 	file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"), wxT("Save show as a new name"));
 	file_menu->Append(wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
-	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-P"), wxT("Setup Pages"));
+	file_menu->Append(wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"), wxT("Preview this show"));
+	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
 	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Legacy Print..."), wxT("Legacy Print this show"));
 	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Legacy Print EPS..."), wxT("Legacy Print a stuntsheet in EPS"));
 	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
@@ -985,9 +987,29 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 	}
 }
 
+void MainFrame::OnCmdPrintPreview(wxCommandEvent& event)
+{
+	// grab our current page setup.
+	wxPrintPreview *preview = new wxPrintPreview(
+		new MyPrintout(wxT("My Printout"), field->show_descr.show),
+		new MyPrintout(wxT("My Printout"), field->show_descr.show),
+		gPrintDialogData);
+	if (!preview->Ok())
+	{
+		delete preview;
+		wxMessageBox(wxT("There was a problem previewing.\nPerhaps your current printer is not set correctly?"), wxT("Previewing"), wxOK);
+		return;
+	}
+	wxPreviewFrame *frame = new wxPreviewFrame(preview, this, wxT("Show Print Preview"));
+	frame->Centre(wxBOTH);
+	frame->Initialize();
+	frame->Show(true);
+}
+
 void MainFrame::OnCmdPageSetup(wxCommandEvent& event)
 {
 	wxPageSetupData mPageSetupData;
+	mPageSetupData.EnableOrientation(true);
 
 	wxPageSetupDialog pageSetupDialog(this, &mPageSetupData);
 	if (pageSetupDialog.ShowModal() == wxID_OK)
