@@ -1854,7 +1854,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 										d = p->y - pos.y;
 										if (ABS(d) < polydist)
 										{
-											SelectWithLasso((CC_lasso*)curr_shape);
+											SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
 											EndDrag();
 											break;
 										}
@@ -1865,24 +1865,22 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							break;
 							default:
 								bool changed = false;
-								if (!event.ShiftDown()) changed = show_descr.show->UnselectAll();
+								if (!(event.ShiftDown() || event.AltDown())) changed = show_descr.show->UnselectAll();
 								i = sheet->FindPoint(pos.x, pos.y, curr_ref);
-								if (i >= 0)
-								{
-									show_descr.show->Select(i, !show_descr.show->IsSelected(i));
-									changed = true;
-								}
-								if (changed)
-								{
-									show_descr.show->winlist->UpdateSelections();
-								}
 								if (i < 0)
 								{
+									// if no point selected, we grab using the current lasso
 									BeginDrag(curr_lasso, pos);
 								}
 								else
 								{
+									show_descr.show->Select(i, event.AltDown() ? !show_descr.show->IsSelected(i) : true);
+									changed = true;
 									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
+								}
+								if (changed)
+								{
+									show_descr.show->winlist->UpdateSelections();
 								}
 						}
 						break;
@@ -2094,7 +2092,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 						{
 							case CC_DRAG_BOX:
 								SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(),
-									curr_ref);
+									curr_ref, event.AltDown());
 								EndDrag();
 								break;
 							case CC_DRAG_LINE:
@@ -2106,7 +2104,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								break;
 							case CC_DRAG_LASSO:
 								((CC_lasso*)curr_shape)->End();
-								SelectWithLasso((CC_lasso*)curr_shape);
+								SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
 								EndDrag();
 								break;
 							default:
@@ -2120,7 +2118,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				switch (drag)
 				{
 					case CC_DRAG_POLY:
-						SelectWithLasso((CC_lasso*)curr_shape);
+						SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
 						EndDrag();
 						break;
 					default:
@@ -2295,8 +2293,10 @@ void FieldCanvas::EndDrag()
 }
 
 
+// toggle selection means toggle it as selected to unselected
+// otherwise, always select it
 void FieldCanvas::SelectOrdered(PointList& pointlist,
-const CC_coord& start)
+const CC_coord& start, bool toggleSelected)
 {
 	CC_coord c1, c2, last;
 	Coord v1, v2;
@@ -2370,14 +2370,14 @@ const CC_coord& start)
 					break;
 			}
 		}
-		show_descr.show->Select(*pnt, !show_descr.show->IsSelected(*pnt));
+		show_descr.show->Select(*pnt, toggleSelected ? !show_descr.show->IsSelected(*pnt) : true);
 		last = c1;
 		pointlist.erase(pnt);
 	}
 }
 
 
-bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso)
+bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
 	bool changed = false;
 	CC_sheet* sheet = show_descr.CurrSheet();
@@ -2395,7 +2395,7 @@ bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso)
 	pnt = lasso->FirstPoint();
 	if (changed && pnt)
 	{
-		SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y));
+		SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y), toggleSelected);
 		show_descr.show->winlist->UpdateSelections();
 	}
 
@@ -2405,7 +2405,7 @@ bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso)
 
 // Select points within rectangle
 bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
-unsigned ref)
+unsigned ref, bool toggleSelected)
 {
 	unsigned i;
 	bool changed = false;
@@ -2446,7 +2446,7 @@ unsigned ref)
 	}
 	if (changed)
 	{
-		SelectOrdered(pointlist, c1);
+		SelectOrdered(pointlist, c1, toggleSelected);
 		show_descr.show->winlist->UpdateSelections();
 	}
 

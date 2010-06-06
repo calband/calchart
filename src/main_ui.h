@@ -362,10 +362,10 @@ private:
 	typedef std::vector<unsigned> PointList;
 	void ClearShapes();
 	void DrawDrag(bool on = true);
-	void SelectOrdered(PointList& pointlist, const CC_coord& start);
-	bool SelectWithLasso(const CC_lasso *lasso);
+	void SelectOrdered(PointList& pointlist, const CC_coord& start, bool toggleSelected);
+	bool SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
-		unsigned ref = 0);
+		unsigned ref, bool toggleSelected);
 
 	CC_DRAG_TYPES drag;
 	typedef std::vector<CC_shape*> ShapeList;
