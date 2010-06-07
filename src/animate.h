@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 #include <wx/string.h>
 #include <map>
+#include <set>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
 enum
@@ -242,33 +243,16 @@ public:
 class ErrorMarker
 {
 public:
-	bool *pntgroup;							  // which points have this error
+	std::set<unsigned> pntgroup;			  // which points have this error
 	unsigned contnum;						  // which continuity
 	int line, col;							  // where
-	ErrorMarker(): pntgroup(NULL), contnum(0), line(-1), col(-1) {}
-	~ErrorMarker()
+	ErrorMarker(): contnum(0), line(-1), col(-1) {}
+	~ErrorMarker() {}
+	void Reset()
 	{
-		Free();
-	}
-	inline bool Defined() { return pntgroup != NULL; }
-	void Free()
-	{
-		if (pntgroup != NULL)
-		{
-			delete [] pntgroup;
-			pntgroup = NULL;
-		}
+		pntgroup.clear();
 		contnum = 0;
 		line = col = -1;
-	}
-	void StealErrorMarker(ErrorMarker *other)
-	{
-		Free();
-		pntgroup = other->pntgroup;
-		other->pntgroup = NULL;
-		contnum = other->contnum;
-		line = other->line;
-		col = other->col;
 	}
 };
 

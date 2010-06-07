@@ -914,10 +914,10 @@ const wxPoint& pos, const wxSize& size)
 
 	for (i = 0, j = 0; i < NUM_ANIMERR; i++)
 	{
-		if (comp->error_markers[i].pntgroup)
+		if (!comp->error_markers[i].pntgroup.empty())
 		{
 			list->Append(animate_err_msgs[i]);
-			pointsels[j++].StealErrorMarker(&comp->error_markers[i]);
+			pointsels[j++] = comp->error_markers[i];
 		}
 	}
 	topsizer->Add(list, wxSizerFlags().Expand().Border(5) );
@@ -989,7 +989,7 @@ void AnimErrorList::Update(int i)
 	{
 		for (unsigned j = 0; j < show->GetNumPoints(); j++)
 		{
-			show->Select(j, pointsels[i].pntgroup[j]);
+			show->Select(j, pointsels[i].pntgroup.count(j));
 		}
 		show->winlist->UpdateSelections(this);
 	}

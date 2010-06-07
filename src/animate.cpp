@@ -765,8 +765,6 @@ AnimateCompile::AnimateCompile()
 
 AnimateCompile::~AnimateCompile()
 {
-	unsigned i;
-
 	FreeErrorMarkers();
 }
 
@@ -868,18 +866,16 @@ bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token)
 void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 {
 	MakeErrorMarker(err, token);
-	error_markers[err].pntgroup[curr_pt] = true;
+	error_markers[err].pntgroup.insert(curr_pt);
 	SetStatus(false);
 }
 
 
 void AnimateCompile::FreeErrorMarkers()
 {
-	unsigned i;
-
-	for (i = 0; i < NUM_ANIMERR; i++)
+	for (unsigned i = 0; i < NUM_ANIMERR; i++)
 	{
-		error_markers[i].Free();
+		error_markers[i].Reset();
 	}
 }
 
@@ -904,20 +900,10 @@ void AnimateCompile::SetVarValue(int varnum, float value)
 void AnimateCompile::MakeErrorMarker(AnimateError err,
 const ContToken *token)
 {
-	unsigned i;
-
-	if (!error_markers[err].pntgroup)
+	error_markers[err].contnum = contnum;
+	if (token != NULL)
 	{
-		error_markers[err].pntgroup = new bool[show->GetNumPoints()];
-		for (i = 0; i < show->GetNumPoints(); i++)
-		{
-			error_markers[err].pntgroup[i] = false;
-		}
-		error_markers[err].contnum = contnum;
-		if (token != NULL)
-		{
-			error_markers[err].line = token->line;
-			error_markers[err].col = token->col;
-		}
+		error_markers[err].line = token->line;
+		error_markers[err].col = token->col;
 	}
 }
