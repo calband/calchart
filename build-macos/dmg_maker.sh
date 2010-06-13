@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT=CalChart
-VERSION=3.1.0
+VERSION=3.1.3
 APP=CalChart.app
 
 echo Making a disk image...
