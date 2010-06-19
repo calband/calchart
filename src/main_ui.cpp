@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/config.h>
 #include <wx/print.h>
 #include <wx/printdlg.h>
+#include <wx/fs_zip.h>
 
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
@@ -143,7 +144,7 @@ IMPLEMENT_APP(CalChartApp)
 
 static MainFrameList *window_list;
 
-wxHelpControllerBase *help_inst = NULL;
+wxHtmlHelpController *help_inst = NULL;
 
 TopFrame *topframe = NULL;
 
@@ -515,14 +516,24 @@ bool CalChartApp::OnInit()
 	}
 
 	{
-		wxString helpfile(program_dir);
-		helpfile.Append(PATH_SEPARATOR wxT("charthlp"));
-#ifdef __WXMSW__
-		help_inst = new wxWinHelpController(topframe);
+		// Required for images in the online documentation
+		wxImage::AddHandler(new wxGIFHandler);
+
+		// Required for advanced HTML help
+		wxFileSystem::AddHandler(new wxZipFSHandler);
+		wxFileSystem::AddHandler(new wxArchiveFSHandler);
+
+#if defined(__APPLE__) && (__APPLE__)
+		wxString helpfile(wxT("CalChart.app/docs"));
 #else
-		help_inst = new wxHelpController;
+		wxString helpfile(wxT("docs"));
 #endif
-		help_inst->Initialize(helpfile);
+		helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
+		help_inst = new wxHtmlHelpController;
+		if ( !help_inst->AddBook(wxFileName(helpfile) ))
+		{
+			wxLogError(wxT("Cannot find the help system."));
+		}
 	}
 
 	if (!shows_dir.empty())
