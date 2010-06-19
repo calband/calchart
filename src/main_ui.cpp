@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ccvers.h"
 
 #include <wx/help.h>
+#include <wx/html/helpctrl.h>
 #ifdef __WXMSW__
 #include <wx/helpwin.h>
 #endif
