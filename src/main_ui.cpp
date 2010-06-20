@@ -159,7 +159,7 @@ wxFont *yardLabelFont;
 ShowModeList *modelist;
 wxPrintDialogData *gPrintDialogData;
 
-BEGIN_EVENT_TABLE(TopFrame, CC_MDIParentFrame)
+BEGIN_EVENT_TABLE(TopFrame, wxMDIParentFrame)
 EVT_CLOSE(TopFrame::OnCloseWindow)
 EVT_MENU(wxID_NEW, TopFrame::OnCmdNew)
 EVT_MENU(wxID_OPEN, TopFrame::OnCmdLoad)
@@ -168,7 +168,7 @@ EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(MainFrame, CC_MDIChildFrame)
+BEGIN_EVENT_TABLE(MainFrame, wxMDIChildFrame)
 EVT_CLOSE(MainFrame::OnCloseWindow)
 EVT_MENU(wxID_NEW, MainFrame::OnCmdNew)
 EVT_MENU(CALCHART__NEW_WINDOW, MainFrame::OnCmdNewWindow)
@@ -566,7 +566,7 @@ int CalChartApp::OnExit()
 
 
 TopFrame::TopFrame(int width, int height):
-CC_MDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(width, height), CC_FRAME_TOP)
+wxMDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(width, height), CC_FRAME_TOP)
 {
 // Give it an icon
 	SetBandIcon(this);
@@ -711,7 +711,7 @@ bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& 
 // Main frame constructor
 MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
 CC_show *show, MainFrame *other_frame):
-CC_MDIChildFrame(frame, -1, wxT("CalChart"), wxPoint(x, y), wxSize(w, h), CC_FRAME_CHILD),
+wxMDIChildFrame(frame, -1, wxT("CalChart"), wxPoint(x, y), wxSize(w, h), CC_FRAME_CHILD),
 field(NULL)
 {
 	unsigned ss;

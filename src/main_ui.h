@@ -150,7 +150,7 @@ public:
 };
 
 // Top-level frame
-class TopFrame : public CC_MDIParentFrame
+class TopFrame : public wxMDIParentFrame
 {
 public:
 	TopFrame(int width, int height);
@@ -181,7 +181,7 @@ private:
 
 class FieldCanvas;
 // Define the main editing frame
-class MainFrame : public CC_MDIChildFrame
+class MainFrame : public wxMDIChildFrame
 {
 public:
 	MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
