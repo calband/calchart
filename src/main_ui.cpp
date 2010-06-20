@@ -1511,7 +1511,7 @@ void MainFrame::LoadShow()
 			shw = new CC_show(s);
 			if (shw->Ok())
 			{
-				node->SetShow(shw);
+				node->GetList()->SetShow(shw);
 			}
 			else
 			{

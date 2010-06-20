@@ -244,15 +244,16 @@ descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0)
 	top_button_sizer->Add(conts, 0, wxALL, 5 );
 	topsizer->Add(top_button_sizer);
 
-	text = new FancyTextWin(panel, -1);
-	topsizer->Add(text, 0, wxEXPAND);
+	text = new FancyTextWin(panel, -1, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
+	
+	topsizer->Add(text, 1, wxEXPAND);
 	panel->SetSizer( topsizer );
 	topsizer->SetSizeHints( panel );
 
 	wxMenu *cont_menu = new wxMenu;
-	cont_menu->Append(CALCHART__CONT_NEW, wxT("&New"), wxT("Add new continuity"));
-	cont_menu->Append(CALCHART__CONT_DELETE, wxT("&Delete"), wxT("Delete this continuity"));
-	cont_menu->Append(CALCHART__CONT_CLOSE, wxT("&Close window"), wxT("Close window"));
+	cont_menu->Append(CALCHART__CONT_NEW, wxT("&New\tCTRL-N"), wxT("Add new continuity"));
+	cont_menu->Append(CALCHART__CONT_DELETE, wxT("&Delete\tCTRL-DEL"), wxT("Delete this continuity"));
+	cont_menu->Append(CALCHART__CONT_CLOSE, wxT("&Close window\tCTRL-W"), wxT("Close window"));
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(CALCHART__CONT_HELP, wxT("&Help on Continuity..."), wxT("Help on continuity commands"));
 	wxMenuBar *menu_bar = new wxMenuBar;

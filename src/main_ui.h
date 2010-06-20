@@ -302,7 +302,7 @@ public:
 	inline void GotoThisSS()
 	{
 		UpdateSS();
-		ourframe->node->GotoSheet(show_descr.curr_ss);
+		ourframe->node->GetList()->GotoSheet(show_descr.curr_ss);
 	}
 	inline void GotoSS(unsigned n)
 	{
