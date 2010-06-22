@@ -44,6 +44,7 @@
 		C7CB75CC114625E9000DBBB6 /* setup1.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BC114625C7000DBBB6 /* setup1.ps */; };
 		C7CB75CD114625E9000DBBB6 /* setup2.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BD114625C7000DBBB6 /* setup2.ps */; };
 		C7CB75CE114625E9000DBBB6 /* zllrbach.eps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BE114625C7000DBBB6 /* zllrbach.eps */; };
+		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
 		C7ED502411CD5A51001A4FA2 /* anim.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC711CD594E001A4FA2 /* anim.tex */; };
 		C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
@@ -315,6 +316,8 @@
 		C7CB75BC114625C7000DBBB6 /* setup1.ps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = setup1.ps; sourceTree = "<group>"; };
 		C7CB75BD114625C7000DBBB6 /* setup2.ps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = setup2.ps; sourceTree = "<group>"; };
 		C7CB75BE114625C7000DBBB6 /* zllrbach.eps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zllrbach.eps; sourceTree = "<group>"; };
+		C7D4E2C211D087CD007D3587 /* calchartapp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartapp.cpp; sourceTree = "<group>"; };
+		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
 		C7ED4FC611CD594E001A4FA2 /* .cvsignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .cvsignore; sourceTree = "<group>"; };
 		C7ED4FC711CD594E001A4FA2 /* anim.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = anim.tex; sourceTree = "<group>"; };
@@ -489,6 +492,8 @@
 				C7AFA96D117A6DBA00CC53E2 /* animate.h */,
 				C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */,
 				C7AFA96F117A6DBA00CC53E2 /* basic_ui.h */,
+				C7D4E2C211D087CD007D3587 /* calchartapp.cpp */,
+				C7D4E2C311D087CD007D3587 /* calchartapp.h */,
 				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
 				C75A5FB91180072C0047B87D /* cc_shapes.cpp */,
 				C75A5FBA1180072C0047B87D /* cc_shapes.h */,
@@ -737,6 +742,7 @@
 				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
 				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
 				C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */,
+				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
