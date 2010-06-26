@@ -37,10 +37,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <ctype.h>
 #include <string>
 
+#include "calchartapp.h"
 #include "confgr.h"
 #include "modes.h"
-
-extern ShowModeList *modelist;
 
 const wxString ColorNames[COLOR_NUM] =
 {
@@ -405,7 +404,7 @@ wxString ReadConfig(const wxString& path)
 				siz.y = INT2COORD(mode_steps_h);
 				off.x = INT2COORD(-mode_steps_x);
 				off.y = INT2COORD(-mode_steps_y);
-				modelist->Add(new ShowModeStandard(com_buf, bord1, bord2,
+				gTheApp->GetModeList().Add(new ShowModeStandard(com_buf, bord1, bord2,
 					siz, off, whash, ehash));
 				continue;
 			}
@@ -437,7 +436,7 @@ wxString ReadConfig(const wxString& path)
 					&eps_field_w, &eps_field_h);
 				fscanf(fp, " %hd %hd %hd %hd \n", &eps_text_left, &eps_text_right,
 					&eps_text_top, &eps_text_bottom);
-				modelist->Add(new ShowModeSprShow(mode_name, bord1, bord2,
+				gTheApp->GetModeList().Add(new ShowModeSprShow(mode_name, bord1, bord2,
 					which_spr_yards, com_buf,
 					mode_steps_x, mode_steps_y,
 					mode_steps_w, mode_steps_h,
@@ -598,10 +597,10 @@ wxString ReadConfig(const wxString& path)
 		autosave_dir = autosave_dirname;
 	}
 
-	if (!modelist->Empty())
+	if (!gTheApp->GetModeList().Empty())
 	{
 // No modes were defined.  Add a default
-		modelist->Add(new ShowModeStandard(wxT("Standard"), bord1, bord2,
+		gTheApp->GetModeList().Add(new ShowModeStandard(wxT("Standard"), bord1, bord2,
 			DEF_HASH_W, DEF_HASH_E));
 	}
 

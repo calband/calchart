@@ -28,10 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "show_ui.h"
-#include "modes.h"
+#include "calchartapp.h"
 #include <ctype.h>
-
-extern ShowModeList *modelist;
 
 BEGIN_EVENT_TABLE(PointPicker, wxFrame)
 EVT_CLOSE(PointPicker::OnCloseWindow)
@@ -357,8 +355,8 @@ void ShowInfoReq::CreateControls()
 	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
 
 	wxArrayString modeStrings;
-	ShowModeList::Iter mode = modelist->Begin();
-	while (mode != modelist->End())
+	ShowModeList::Iter mode = gTheApp->GetModeList().Begin();
+	while (mode != gTheApp->GetModeList().End())
 	{
 		modeStrings.Add((*mode)->GetName());
 		++mode;
@@ -420,7 +418,7 @@ void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&)
 {
 	ShowMode *newmode;
 
-	newmode = modelist->Find(GetChoiceStrSelection());
+	newmode = gTheApp->GetModeList().Find(GetChoiceStrSelection());
 	if (newmode)
 	{
 		show->SetMode(newmode);

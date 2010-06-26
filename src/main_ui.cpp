@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma implementation
 #endif
 
+#include "calchartapp.h"
 #include "main_ui.h"
 #include "print_ui.h"
 #include "show_ui.h"
@@ -107,8 +108,6 @@ GridValue gridvalue[] =
 	{INT2COORD(4),INT2COORD(4)/3},
 	{INT2COORD(8),INT2COORD(8)/3}
 };
-
-extern MainFrameList *window_list;
 
 extern wxHtmlHelpController *help_inst;
 
@@ -395,7 +394,7 @@ TopFrame::~TopFrame()
 
 void TopFrame::OnCloseWindow(wxCloseEvent& event)
 {
-	window_list->CloseAllWindows();
+	gTheApp->GetWindowList().CloseAllWindows();
 	Destroy();
 }
 
@@ -680,7 +679,7 @@ field(NULL)
 
 // Show the frame
 	UpdatePanel();
-	window_list->push_back(this);
+	gTheApp->GetWindowList().push_back(this);
 	field->RefreshShow();
 
 	fullsizer->Add(field, 1, wxEXPAND);
@@ -693,7 +692,7 @@ field(NULL)
 
 MainFrame::~MainFrame()
 {
-	window_list->remove(this);
+	gTheApp->GetWindowList().remove(this);
 	if (node)
 	{
 		node->Remove();

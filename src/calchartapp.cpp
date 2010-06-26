@@ -66,7 +66,6 @@
 #include "tb_nshet.xbm"
 #endif
 
-ShowModeList *modelist;
 wxPrintDialogData *gPrintDialogData;
 
 extern ToolBarEntry main_tb[];
@@ -80,11 +79,11 @@ wxFont *contBoldItalFont;
 wxFont *pointLabelFont;
 wxFont *yardLabelFont;
 
-MainFrameList *window_list;
-
 wxHtmlHelpController *help_inst = NULL;
 
 TopFrame *topframe = NULL;
+
+CalChartApp* gTheApp = NULL;
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
@@ -92,6 +91,7 @@ IMPLEMENT_APP(CalChartApp)
 // Create windows and initialize app
 bool CalChartApp::OnInit()
 {
+	gTheApp = this;
 #if defined(__APPLE__) && (__APPLE__)
 	wxString runtimepath(wxT("CalChart.app/runtime"));
 #else
@@ -100,7 +100,6 @@ bool CalChartApp::OnInit()
 
 	int realargc = argc;
 
-	modelist = new ShowModeList();
 	gPrintDialogData = new wxPrintDialogData();
 
 	if (argc > 1)
@@ -114,8 +113,6 @@ bool CalChartApp::OnInit()
 	}
 
 	// setup the configuration.
-	mConfig = new wxConfig();
-	wxConfigBase::Set(mConfig);
 	ReadConfig();
 	
 	wxString s = ReadConfig(runtimepath);
@@ -180,8 +177,6 @@ bool CalChartApp::OnInit()
 	yardLabelFont = new wxFont((int)FLOAT2NUM(yards_size),
 		wxSWISS, wxNORMAL, wxNORMAL);
 
-	window_list = new MainFrameList();
-
 	topframe = new TopFrame(300, 100);
 	topframe->Maximize(true);
 	for (i = 1; i < realargc; i++)
@@ -239,11 +234,8 @@ void CalChartApp::MacOpenFile(const wxString &fileName)
 
 int CalChartApp::OnExit()
 {
-	if (modelist) delete modelist;
 	if (gPrintDialogData) delete gPrintDialogData;
 	if (help_inst) delete help_inst;
-	if (window_list) delete window_list;
-	delete mConfig;
 
 	return 0;
 }

@@ -27,17 +27,30 @@
 #pragma interface
 #endif
 
+#include "modes.h"
+#include "main_ui.h"
+
 #include <wx/wx.h>
 
-class wxConfigBase;
+class CalChartApp;
+
+extern CalChartApp* gTheApp;
+
+class ShowModeList;
+
 // Define a new application
 class CalChartApp : public wxApp
 {
-	wxConfigBase *mConfig;
 public:
 	virtual bool OnInit();
 	virtual void MacOpenFile(const wxString &fileName);
 	int OnExit();
+
+	ShowModeList& GetModeList() { return mModeList; }
+	MainFrameList& GetWindowList() { return mWindowList; }
+private:
+	ShowModeList mModeList;
+	MainFrameList mWindowList;
 };
 
 #endif // _CALCHARTAPP_H_
