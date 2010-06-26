@@ -16,5 +16,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef CC_VERSION
-#define CC_VERSION "v3.1.3"
+#define CC_VERSION "v3.1.4"
 #endif
