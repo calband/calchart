@@ -50,12 +50,10 @@
 		C7ED502411CD5A51001A4FA2 /* anim.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC711CD594E001A4FA2 /* anim.tex */; };
 		C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
 		C7ED502611CD5A51001A4FA2 /* bugs.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC911CD594E001A4FA2 /* bugs.tex */; };
-		C7ED502711CD5A51001A4FA2 /* charthlp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCA11CD594E001A4FA2 /* charthlp */; };
 		C7ED502811CD5A51001A4FA2 /* charthlp.con in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCB11CD594E001A4FA2 /* charthlp.con */; };
 		C7ED502911CD5A51001A4FA2 /* charthlp.hhc in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */; };
 		C7ED502A11CD5A51001A4FA2 /* charthlp.hhk in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */; };
 		C7ED502B11CD5A51001A4FA2 /* charthlp.hhp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */; };
-		C7ED502C11CD5A51001A4FA2 /* charthlp.htb in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCF11CD594E001A4FA2 /* charthlp.htb */; };
 		C7ED502D11CD5A51001A4FA2 /* charthlp.ref in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD011CD594E001A4FA2 /* charthlp.ref */; };
 		C7ED502E11CD5A51001A4FA2 /* charthlp.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD111CD594E001A4FA2 /* charthlp.tex */; };
 		C7ED502F11CD5A51001A4FA2 /* charthlp.xlp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD211CD594E001A4FA2 /* charthlp.xlp */; };
@@ -166,12 +164,10 @@
 				C7ED502411CD5A51001A4FA2 /* anim.tex in Copy Docs */,
 				C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */,
 				C7ED502611CD5A51001A4FA2 /* bugs.tex in Copy Docs */,
-				C7ED502711CD5A51001A4FA2 /* charthlp in Copy Docs */,
 				C7ED502811CD5A51001A4FA2 /* charthlp.con in Copy Docs */,
 				C7ED502911CD5A51001A4FA2 /* charthlp.hhc in Copy Docs */,
 				C7ED502A11CD5A51001A4FA2 /* charthlp.hhk in Copy Docs */,
 				C7ED502B11CD5A51001A4FA2 /* charthlp.hhp in Copy Docs */,
-				C7ED502C11CD5A51001A4FA2 /* charthlp.htb in Copy Docs */,
 				C7ED502D11CD5A51001A4FA2 /* charthlp.ref in Copy Docs */,
 				C7ED502E11CD5A51001A4FA2 /* charthlp.tex in Copy Docs */,
 				C7ED502F11CD5A51001A4FA2 /* charthlp.xlp in Copy Docs */,
@@ -322,16 +318,13 @@
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
 		C7ECFF8411D5A4C20043B2FD /* cc_winlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_winlist.cpp; sourceTree = "<group>"; };
 		C7ECFF8511D5A4C30043B2FD /* cc_winlist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_winlist.h; sourceTree = "<group>"; };
-		C7ED4FC611CD594E001A4FA2 /* .cvsignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .cvsignore; sourceTree = "<group>"; };
 		C7ED4FC711CD594E001A4FA2 /* anim.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = anim.tex; sourceTree = "<group>"; };
 		C7ED4FC811CD594E001A4FA2 /* back.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = back.gif; sourceTree = "<group>"; };
 		C7ED4FC911CD594E001A4FA2 /* bugs.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bugs.tex; sourceTree = "<group>"; };
-		C7ED4FCA11CD594E001A4FA2 /* charthlp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp; sourceTree = "<group>"; };
 		C7ED4FCB11CD594E001A4FA2 /* charthlp.con */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.con; sourceTree = "<group>"; };
 		C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhc; sourceTree = "<group>"; };
 		C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhk; sourceTree = "<group>"; };
 		C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhp; sourceTree = "<group>"; };
-		C7ED4FCF11CD594E001A4FA2 /* charthlp.htb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.htb; sourceTree = "<group>"; };
 		C7ED4FD011CD594E001A4FA2 /* charthlp.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.ref; sourceTree = "<group>"; };
 		C7ED4FD111CD594E001A4FA2 /* charthlp.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.tex; sourceTree = "<group>"; };
 		C7ED4FD211CD594E001A4FA2 /* charthlp.xlp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.xlp; sourceTree = "<group>"; };
@@ -567,16 +560,13 @@
 		C7ED4FC511CD594E001A4FA2 /* docs */ = {
 			isa = PBXGroup;
 			children = (
-				C7ED4FC611CD594E001A4FA2 /* .cvsignore */,
 				C7ED4FC711CD594E001A4FA2 /* anim.tex */,
 				C7ED4FC811CD594E001A4FA2 /* back.gif */,
 				C7ED4FC911CD594E001A4FA2 /* bugs.tex */,
-				C7ED4FCA11CD594E001A4FA2 /* charthlp */,
 				C7ED4FCB11CD594E001A4FA2 /* charthlp.con */,
 				C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */,
 				C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */,
 				C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */,
-				C7ED4FCF11CD594E001A4FA2 /* charthlp.htb */,
 				C7ED4FD011CD594E001A4FA2 /* charthlp.ref */,
 				C7ED4FD111CD594E001A4FA2 /* charthlp.tex */,
 				C7ED4FD211CD594E001A4FA2 /* charthlp.xlp */,
