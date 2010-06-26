@@ -89,6 +89,7 @@ public:
 	void OnLeftMouseEvent(wxMouseEvent& event);
 	void OnRightMouseEvent(wxMouseEvent& event);
 	void OnSize(wxSizeEvent& event);
+	void OnChar(wxKeyEvent& event);
 
 	inline unsigned GetTempo() { return tempo; }
 	void SetTempo(unsigned t);

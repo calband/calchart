@@ -1267,14 +1267,8 @@ void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 
 void MainFrame::OnChar(wxKeyEvent& event)
 {
-	if (event.GetKeyCode() == WXK_LEFT)
-		field->PrevSS();
-	else if (event.GetKeyCode() == WXK_RIGHT)
-		field->NextSS();
-	else
-		event.Skip();
+	field->OnChar(event);
 }
-
 
 // Give the use a chance to save the current show
 bool MainFrame::OkayToClearShow()
@@ -1979,8 +1973,12 @@ void FieldCanvas::OnScroll(wxScrollEvent& event)
 // Intercept character input
 void FieldCanvas::OnChar(wxKeyEvent& event)
 {
-// Process the default behaviour
-	event.Skip();
+	if (event.GetKeyCode() == WXK_LEFT)
+		PrevSS();
+	else if (event.GetKeyCode() == WXK_RIGHT)
+		NextSS();
+	else
+		event.Skip();
 }
 
 
