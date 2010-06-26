@@ -264,6 +264,7 @@ void AnimationCanvas::OnSize(wxSizeEvent& event)
 		newvalue = newY / (float)COORD2INT(y);
 	}
 	mUserScale = (newvalue * (COORD2INT(1 << 16)/65536.0));
+	Refresh();
 	return wxPanel::OnSize(event);
 }
 
