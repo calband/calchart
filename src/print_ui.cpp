@@ -302,22 +302,24 @@ void ShowPrintDialog::CreateControls()
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
-#endif
 
-#ifndef PRINT__RUN_CMD
+#else // PRINT__RUN_CMD
+
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Printer &Device:"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
 	text_cmd = new wxTextCtrl(this, wxID_ANY);
 	verticalsizer->Add(text_cmd, 0, wxGROW|wxALL, 5 );
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 #endif
 
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	wxString orientation[] = { wxT("Portrait"), wxT("Landscape") };
 	radio_orient = new wxRadioBox(this, wxID_ANY, wxT("&Orientation:"),wxDefaultPosition,wxDefaultSize,
 		sizeof(orientation)/sizeof(wxString),orientation);
 	radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
-	topsizer->Add(radio_orient, 0, wxALL, 5 );
+	horizontalsizer->Add(radio_orient, 0, wxALL, 5 );
 
 #ifdef PRINT__RUN_CMD
 	wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File"), wxT("Preview Only") };
@@ -327,7 +329,8 @@ void ShowPrintDialog::CreateControls()
 	radio_method = new wxRadioBox(this, -1, wxT("Post&Script:"),wxDefaultPosition,wxDefaultSize,
 		sizeof(print_modes)/sizeof(wxString), print_modes);
 	radio_method->SetSelection(0);
-	topsizer->Add(radio_method, 0, wxALL, 5 );
+	horizontalsizer->Add(radio_method, 0, wxALL, 5 );
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	check_overview = new wxCheckBox(this, -1, wxT("Over&view"));
