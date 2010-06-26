@@ -238,6 +238,7 @@ public:
 	void OnCmd_setsym5(wxCommandEvent& event);
 	void OnCmd_setsym6(wxCommandEvent& event);
 	void OnCmd_setsym7(wxCommandEvent& event);
+	void OnChar(wxKeyEvent& event);
 
 	bool OkayToClearShow();
 

@@ -88,7 +88,6 @@ public:
 	void OnPaint(wxPaintEvent& event);
 	void OnLeftMouseEvent(wxMouseEvent& event);
 	void OnRightMouseEvent(wxMouseEvent& event);
-	void OnChar(wxKeyEvent& event);
 	void OnSize(wxSizeEvent& event);
 
 	inline unsigned GetTempo() { return tempo; }
@@ -210,6 +209,7 @@ public:
 	void OnSlider_anim_tempo(wxScrollEvent& event);
 	void OnSlider_anim_gotosheet(wxScrollEvent& event);
 	void OnSlider_anim_gotobeat(wxScrollEvent& event);
+	void OnChar(wxKeyEvent& event);
 
 	void UpdatePanel();
 

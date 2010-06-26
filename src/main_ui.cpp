@@ -125,6 +125,7 @@ EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MainFrame, wxMDIChildFrame)
+EVT_CHAR(MainFrame::OnChar)
 EVT_CLOSE(MainFrame::OnCloseWindow)
 EVT_MENU(wxID_NEW, MainFrame::OnCmdNew)
 EVT_MENU(CALCHART__NEW_WINDOW, MainFrame::OnCmdNewWindow)
@@ -1261,6 +1262,17 @@ void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
 		field->show_descr.show->winlist->
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
+}
+
+
+void MainFrame::OnChar(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_LEFT)
+		field->PrevSS();
+	else if (event.GetKeyCode() == WXK_RIGHT)
+		field->NextSS();
+	else
+		event.Skip();
 }
 
 

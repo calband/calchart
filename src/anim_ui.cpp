@@ -45,7 +45,6 @@ ToolBarEntry anim_tb[] =
 };
 
 BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
-EVT_CHAR(AnimationCanvas::OnChar)
 EVT_LEFT_DOWN(AnimationCanvas::OnLeftMouseEvent)
 EVT_RIGHT_DOWN(AnimationCanvas::OnRightMouseEvent)
 EVT_ERASE_BACKGROUND(AnimationCanvas::OnEraseBackground)
@@ -54,6 +53,7 @@ EVT_SIZE(AnimationCanvas::OnSize)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
+EVT_CHAR(AnimationFrame::OnChar)
 EVT_MENU(CALCHART__ANIM_REANIMATE, AnimationFrame::OnCmdReanimate)
 EVT_MENU(CALCHART__ANIM_SELECT_COLL, AnimationFrame::OnCmdSelectCollisions)
 #ifdef ANIM_OUTPUT_POVRAY
@@ -276,24 +276,6 @@ void AnimationCanvas::OnLeftMouseEvent(wxMouseEvent& event)
 void AnimationCanvas::OnRightMouseEvent(wxMouseEvent& event)
 {
 	NextBeat();
-}
-
-
-void AnimationCanvas::OnChar(wxKeyEvent& event)
-{
-	if (event.GetKeyCode() == WXK_LEFT)
-		PrevBeat();
-	else if (event.GetKeyCode() == WXK_RIGHT)
-		NextBeat();
-	else if (event.GetKeyCode() == WXK_SPACE)
-	{
-		if (timeron)
-			StopTimer();
-		else
-			StartTimer();
-	}
-	else
-		event.Skip();
 }
 
 
@@ -876,6 +858,24 @@ void AnimationFrame::UpdatePanel()
 	{
 		beat_slider->Enable(false);
 	}
+}
+
+
+void AnimationFrame::OnChar(wxKeyEvent& event)
+{
+	if (event.GetKeyCode() == WXK_LEFT)
+		canvas->PrevBeat();
+	else if (event.GetKeyCode() == WXK_RIGHT)
+		canvas->NextBeat();
+	else if (event.GetKeyCode() == WXK_SPACE)
+	{
+		if (canvas->timeron)
+			canvas->StopTimer();
+		else
+			canvas->StartTimer();
+	}
+	else
+		event.Skip();
 }
 
 
