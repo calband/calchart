@@ -45,7 +45,7 @@ ToolBarEntry anim_tb[] =
 };
 
 BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
-EVT_CHAR(AnimationFrame::OnChar)
+EVT_CHAR(AnimationCanvas::OnChar)
 EVT_LEFT_DOWN(AnimationCanvas::OnLeftMouseEvent)
 EVT_RIGHT_DOWN(AnimationCanvas::OnRightMouseEvent)
 EVT_ERASE_BACKGROUND(AnimationCanvas::OnEraseBackground)
