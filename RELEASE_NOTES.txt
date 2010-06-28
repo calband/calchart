@@ -55,5 +55,61 @@ Build tested by quickly animating guns2.shw on mac and windows.
 
 ~=~=~=~=~=~=~=~=~=~=~
 
+How to release calchart:
+
+Increment the version in ccvers.h
+
+1. copy trunk to a tag:
+$ svn copy -m "copying trunk to tag for version 3.1.4" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.1.4
+
+2. get that tag on your computer
+$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.1.4 calchart-3.1.4
+
+3. Build the product:
+---
+For windows:
+
+w1. make calchart
+$ make
+
+w2. Put the project in a directory
+$ mkdir CalChart-3.1.4
+$ cp -r calchart runtime docs CalChart-3.1.4
+
+w3. Compress the folder (I use compress, but make sure to fix up the extension).
+$ mv CalChart-3.1.zip CalChart.3.1.4.zip
+
+The final product is CalChart-3.1.4.zip
+
+---
+For Mac:
+m1. pre-build so we have all the files we need:
+$ export CXXFLAGS="-arch i386"
+$ make
+$ make html
 
 
+m2. build the project with xcode
+$ cd build-macos
+$ xcodebuild -configuration Debug
+
+m3. Edit the dmg_maker.sh to have the right version
+
+m4. Run dmg_maker.sh
+$ bash -f dmg_maker.sh
+
+The final product is CalChart-3.1.4.dmg
+
+---
+4. Go to the sourceforge page at http://sourceforge.net/projects/calchart
+You'll need to be logged in to modify the files.
+
+5. Go to Project Admin -> File Manager
+
+6. Make a new directory for this version (click on the * next to root)
+
+7. Upload the RELEASE_NOTES.txt to the new folder.  Click on RELEASE_NOTES.txt and edit the file details to signify it's a release notes.
+
+8. Upload the CalChart-3.1.4.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
+
+9. Repeat for CalChart-3.1.4.zip.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
