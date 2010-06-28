@@ -29,6 +29,7 @@
 
 #include "modes.h"
 #include "main_ui.h"
+#include "cc_winlist.h"
 
 #include <wx/wx.h>
 
@@ -47,10 +48,12 @@ public:
 	int OnExit();
 
 	ShowModeList& GetModeList() { return mModeList; }
-	MainFrameList& GetWindowList() { return mWindowList; }
+	MainFrameList& GetFrameList() { return mFrameList; }
+	CC_WinList& GetWindowList() { return mWinList; }
 private:
 	ShowModeList mModeList;
-	MainFrameList mWindowList;
+	MainFrameList mFrameList;
+	CC_WinList mWinList;
 };
 
 #endif // _CALCHARTAPP_H_

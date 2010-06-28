@@ -69,16 +69,6 @@ class wxWindow;
 class wxDC;
 class CC_show;
 
-class CC_WinListShow : public CC_WinList
-{
-public:
-	CC_WinListShow(CC_show *shw);
-
-	virtual void Empty();
-private:
-	CC_show *show;
-};
-
 enum PSFONT_TYPE
 {
 	PSFONT_SYMBOL, PSFONT_NORM, PSFONT_BOLD, PSFONT_ITAL, PSFONT_BOLDITAL,
@@ -401,27 +391,20 @@ public:
 	wxString Save(const wxString& filename) const;
 	wxString Autosave() const;
 	void ClearAutosave() const;
-
-	inline void FlushAllTextWindows() const
-	{
-		winlist->FlushDescr(); winlist->FlushContinuity();
-	}
+	void FlushAllTextWindows() const;
 
 	inline const wxString& GetName() { return name; }
 	wxString UserGetName() const;
 	void SetName(const wxString& newname) const;
-	inline void UserSetName(const wxString& newname) const
-	{
-		SetName(newname); winlist->ChangeName();
-	}
+	void UserSetName(const wxString& newname) const;
 
 	inline const wxString& GetDescr() const { return descr; }
-	inline const wxString& UserGetDescr() const { winlist->FlushDescr(); return descr; }
+	const wxString& UserGetDescr() const;
 	inline void SetDescr(const wxString& newdescr) { descr = newdescr; }
 	void UserSetDescr(const wxString& newdescr, wxWindow* win);
 
 	inline bool Modified() const { return modified; }
-	inline void SetModified(bool b) const { modified = b; winlist->UpdateStatusBar(); }
+	void SetModified(bool b) const;
 
 	inline unsigned short GetNumSheets() const { return numsheets; }
 	inline CC_sheet *GetSheet() const { return sheets; }
@@ -463,7 +446,6 @@ public:
 	const ShowMode& GetMode() const { return *mode; };
 	void SetMode(ShowMode* m) { mode = m; };
 
-	CC_WinListShow *winlist;
 	ShowUndoList *undolist;
 private:
 	ShowMode *mode;

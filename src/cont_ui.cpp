@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "cont_ui.h"
 #include "confgr.h"
+#include "calchartapp.h"
 
 #include <wx/help.h>
 
@@ -422,7 +423,7 @@ void ContinuityEditor::SelectPoints()
 	{
 		if (sht->SelectContinuity(c->num))
 		{
-			descr->show->winlist->UpdateSelections();
+			gTheApp->GetWindowList().UpdateSelections();
 		}
 	}
 }

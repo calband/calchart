@@ -119,15 +119,6 @@ void SetAutoSave(int secs)
 }
 
 
-CC_WinListShow::CC_WinListShow(CC_show *shw)
-: show(shw) {}
-
-void CC_WinListShow::Empty()
-{
-	delete show;
-}
-
-
 CC_textline::CC_textline()
 : center(false), on_main(true), on_sheet(true) {}
 CC_textline::~CC_textline()
@@ -500,7 +491,7 @@ CC_continuity *CC_sheet::GetNthContinuity(unsigned i)
 
 CC_continuity *CC_sheet::UserGetNthContinuity(unsigned i)
 {
-	show->winlist->FlushContinuity();
+	gTheApp->GetWindowList().FlushContinuity();
 	return GetNthContinuity(i);
 }
 
@@ -528,7 +519,7 @@ wxWindow *win)
 // Create undo entry
 		show->undolist->Add(new ShowUndoCont(show->GetSheetPos(this), i, this));
 		c->SetText(text);
-		show->winlist->SetContinuity(win, show->GetSheetPos(this), i);
+		gTheApp->GetWindowList().SetContinuity(win, show->GetSheetPos(this), i);
 	}
 }
 
@@ -556,7 +547,7 @@ CC_continuity *CC_sheet::RemoveNthContinuity(unsigned i)
 	}
 	numanimcont--;
 	cont->next = NULL;
-	show->winlist->DeleteContinuity(show->GetSheetPos(this), i);
+	gTheApp->GetWindowList().DeleteContinuity(show->GetSheetPos(this), i);
 	return cont;
 }
 
@@ -590,7 +581,7 @@ void CC_sheet::InsertContinuity(CC_continuity *newcont, unsigned i)
 		animcont = newcont;
 	}
 	numanimcont++;
-	show->winlist->AddContinuity(show->GetSheetPos(this), i);
+	gTheApp->GetWindowList().AddContinuity(show->GetSheetPos(this), i);
 }
 
 
@@ -622,7 +613,7 @@ CC_continuity *CC_sheet::UserNewContinuity(const wxString& name)
 	newcontnum = NextUnusedContinuityNum();
 	newcont->num = newcontnum;
 	AppendContinuity(newcont);
-	show->winlist->AddContinuity(show->GetSheetPos(this), numanimcont-1);
+	gTheApp->GetWindowList().AddContinuity(show->GetSheetPos(this), numanimcont-1);
 	show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
 		numanimcont-1));
 	return newcont;
@@ -723,7 +714,7 @@ void CC_sheet::UserSetName(const wxString& newname)
 // Create undo entry
 	show->undolist->Add(new ShowUndoName(show->GetSheetPos(this), this));
 	SetName(newname);
-	show->winlist->ChangeTitle(show->GetSheetPos(this));
+	gTheApp->GetWindowList().ChangeTitle(show->GetSheetPos(this));
 }
 
 
@@ -732,7 +723,7 @@ void CC_sheet::UserSetBeats(unsigned short b)
 // Create undo entry
 	show->undolist->Add(new ShowUndoBeat(show->GetSheetPos(this), this));
 	SetBeats(b);
-	show->winlist->ChangeTitle(show->GetSheetPos(this));
+	gTheApp->GetWindowList().ChangeTitle(show->GetSheetPos(this));
 }
 
 
@@ -1009,7 +1000,6 @@ print_do_cont_sheet(true)
 
 	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
 	SetAutosaveName(tmpname);
-	winlist = new CC_WinListShow(this);
 	undolist = new ShowUndoList(this, undo_buffer_size);
 	mode = *gTheApp->GetModeList().Begin();
 	if (npoints)
@@ -1346,7 +1336,6 @@ print_do_cont(true),
 print_do_cont_sheet(true)
 {
 
-	winlist = new CC_WinListShow(this);
 	undolist = new ShowUndoList(this, undo_buffer_size);
 	mode = *gTheApp->GetModeList().Begin();
 
@@ -1695,7 +1684,6 @@ CC_show::~CC_show()
 #if 0
 	fprintf(stderr, "Deleting show...\n");
 #endif
-	if (winlist) delete winlist;
 	if (undolist) delete undolist;
 	while (sheets)
 	{
@@ -2044,7 +2032,7 @@ void CC_show::Append(CC_show *shw)
 		shw->sheets = NULL;
 		shw->numsheets = 0;
 		delete shw;
-		winlist->AppendSheets();
+		gTheApp->GetWindowList().AppendSheets();
 	}
 }
 
@@ -2066,7 +2054,7 @@ void CC_show::Append(CC_sheet *newsheets)
 	{
 		numsheets++;
 	}
-	winlist->AppendSheets();
+	gTheApp->GetWindowList().AppendSheets();
 }
 
 
@@ -2329,6 +2317,34 @@ void CC_show::ClearAutosave() const
 }
 
 
+void CC_show::FlushAllTextWindows() const
+{
+	gTheApp->GetWindowList().FlushDescr(); 
+	gTheApp->GetWindowList().FlushContinuity();
+}
+
+
+void CC_show::UserSetName(const wxString& newname) const
+{
+	SetName(newname);
+	gTheApp->GetWindowList().ChangeName();
+}
+
+
+const wxString& CC_show::UserGetDescr() const
+{
+	gTheApp->GetWindowList().FlushDescr();
+	return descr;
+}
+
+
+void CC_show::SetModified(bool b) const
+{
+	modified = b;
+	gTheApp->GetWindowList().UpdateStatusBar();
+}
+
+
 wxString CC_show::Autosave() const
 {
 	if (!autosave_name.IsEmpty())
@@ -2390,7 +2406,7 @@ void CC_show::UserSetDescr(const wxString& newdescr, wxWindow *win)
 // Create undo entry
 	undolist->Add(new ShowUndoDescr(this));
 	descr = newdescr;
-	winlist->SetDescr(win);
+	gTheApp->GetWindowList().SetDescr(win);
 }
 
 
@@ -2454,7 +2470,7 @@ CC_sheet *CC_show::RemoveNthSheet(unsigned sheetidx)
 	}
 	numsheets--;
 	sht->next = NULL;
-	winlist->DeleteSheet(sheetidx);
+	gTheApp->GetWindowList().DeleteSheet(sheetidx);
 	return sht;
 }
 
@@ -2481,7 +2497,7 @@ CC_sheet *CC_show::RemoveLastSheets(unsigned numtoremain)
 		sheets = NULL;
 	}
 	numsheets = numtoremain;
-	winlist->RemoveSheets(numtoremain);
+	gTheApp->GetWindowList().RemoveSheets(numtoremain);
 	return sht;
 }
 
@@ -2526,7 +2542,7 @@ void CC_show::InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx)
 void CC_show::InsertSheet(CC_sheet *nsheet, unsigned sheetidx)
 {
 	InsertSheetInternal(nsheet, sheetidx);
-	winlist->AddSheet(sheetidx);
+	gTheApp->GetWindowList().AddSheet(sheetidx);
 }
 
 

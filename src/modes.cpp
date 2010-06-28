@@ -36,8 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern wxFont* yardLabelFont;
 
-ShowMode::ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
-CC_coord bord1, CC_coord bord2)
+ShowMode::ShowMode(const wxString& nam, const CC_coord& siz, const CC_coord& off,
+const CC_coord& bord1, const CC_coord& bord2)
 : offset(off), size(siz), border1(bord1), border2(bord2)
 {
 	size += border1 + border2;
@@ -46,8 +46,8 @@ CC_coord bord1, CC_coord bord2)
 }
 
 
-ShowMode::ShowMode(const wxString& nam, CC_coord siz,
-CC_coord bord1, CC_coord bord2)
+ShowMode::ShowMode(const wxString& nam, const CC_coord& siz,
+const CC_coord& bord1, const CC_coord& bord2)
 : offset(siz/2), size(siz), border1(bord1), border2(bord2)
 {
 	size += border1 + border2;

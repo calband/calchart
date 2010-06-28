@@ -55,7 +55,6 @@ ColorSelectDialog::ColorSelectDialog()
 	Init();
 }
 
-
 ColorSelectDialog::ColorSelectDialog( wxWindow *parent,
 		wxWindowID id,
 		const wxString& caption,
@@ -68,16 +67,13 @@ ColorSelectDialog::ColorSelectDialog( wxWindow *parent,
 	Create(parent, id, caption, pos, size, style);
 }
 
-
 ColorSelectDialog::~ColorSelectDialog()
 {
 }
 
-
 void ColorSelectDialog::Init()
 {
 }
-
 
 bool ColorSelectDialog::Create( wxWindow *parent,
 		wxWindowID id,
@@ -100,7 +96,6 @@ bool ColorSelectDialog::Create( wxWindow *parent,
 
 	return true;
 }
-
 
 void ColorSelectDialog::CreateControls()
 {
@@ -142,7 +137,6 @@ void ColorSelectDialog::CreateControls()
 	close->SetDefault();
 
 	topsizer->Add(horizontalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
 }
 
 void ColorSelectDialog::SetColor(int selection, int width, const wxColour& color)

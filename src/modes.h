@@ -36,12 +36,14 @@ enum SHOW_TYPE { SHOW_STANDARD, SHOW_SPRINGSHOW };
 #define SPR_YARD_ABOVE 2
 #define SPR_YARD_BELOW 1
 
+class CC_coord;
+
 class ShowMode
 {
 public:
-	ShowMode(const wxString& nam, CC_coord siz, CC_coord off,
-		CC_coord bord1, CC_coord bord2);
-	ShowMode(const wxString& nam, CC_coord siz, CC_coord bord1, CC_coord bord2);
+	ShowMode(const wxString& nam, const CC_coord& siz, const CC_coord& off,
+		const CC_coord& bord1, const CC_coord& bord2);
+	ShowMode(const wxString& nam, const CC_coord& siz, const CC_coord& bord1, const CC_coord& bord2);
 	virtual ~ShowMode();
 
 	virtual SHOW_TYPE GetType() const = 0;

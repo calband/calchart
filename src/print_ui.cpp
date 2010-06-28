@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "print_ui.h"
 #include "show_ui.h"
 #include "confgr.h"
+#include "calchartapp.h"
 #include <set>
 
 #include <wx/filename.h>
@@ -117,7 +118,7 @@ void ShowPrintDialog::PrintShow()
 	}
 
 // Update other windows
-	show_descr->show->winlist->ChangePrint(this);
+	gTheApp->GetWindowList().ChangePrint(this);
 
 	FILE *fp;
 

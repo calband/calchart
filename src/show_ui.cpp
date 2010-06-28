@@ -89,7 +89,7 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 	{
 		Set(i, true);
 	}
-	show->winlist->UpdateSelections(this);
+	gTheApp->GetWindowList().UpdateSelections(this);
 }
 
 
@@ -99,7 +99,7 @@ void PointPicker::PointPickerNone(wxCommandEvent&)
 	{
 		Set(i, false);
 	}
-	show->winlist->UpdateSelections(this);
+	gTheApp->GetWindowList().UpdateSelections(this);
 }
 
 
@@ -401,7 +401,7 @@ void ShowInfoReq::ShowInfoSetNum(wxCommandEvent& )
 			else
 				show->SetNumPoints(num, 1);
 			SetLabels();
-			show->winlist->ChangeNumPoints(this);
+			gTheApp->GetWindowList().ChangeNumPoints(this);
 		}
 	}
 }
@@ -410,7 +410,7 @@ void ShowInfoReq::ShowInfoSetNum(wxCommandEvent& )
 void ShowInfoReq::ShowInfoSetLabels(wxCommandEvent&)
 {
 	SetLabels();
-	show->winlist->ChangePointLabels(this);
+	gTheApp->GetWindowList().ChangePointLabels(this);
 }
 
 
@@ -422,7 +422,7 @@ void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&)
 	if (newmode)
 	{
 		show->SetMode(newmode);
-		show->winlist->ChangeShowMode(this);
+		gTheApp->GetWindowList().ChangeShowMode(this);
 	}
 }
 

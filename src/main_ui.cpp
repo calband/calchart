@@ -128,7 +128,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxMDIChildFrame)
 EVT_CHAR(MainFrame::OnChar)
 EVT_CLOSE(MainFrame::OnCloseWindow)
 EVT_MENU(wxID_NEW, MainFrame::OnCmdNew)
-EVT_MENU(CALCHART__NEW_WINDOW, MainFrame::OnCmdNewWindow)
 EVT_MENU(wxID_OPEN, MainFrame::OnCmdLoad)
 EVT_MENU(CALCHART__APPEND_FILE, MainFrame::OnCmdAppend)
 EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
@@ -232,7 +231,7 @@ CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 void CC_WinNodeMain::SetShow(CC_show *shw)
 {
 	Remove();
-	list = shw->winlist;
+	list = &gTheApp->GetWindowList();
 	list->Add(this);
 	frame->field->show_descr.show = shw;
 	frame->field->UpdateBars();
@@ -395,7 +394,7 @@ TopFrame::~TopFrame()
 
 void TopFrame::OnCloseWindow(wxCloseEvent& event)
 {
-	gTheApp->GetWindowList().CloseAllWindows();
+	gTheApp->GetFrameList().CloseAllWindows();
 	Destroy();
 }
 
@@ -508,7 +507,7 @@ bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& 
 
 // Main frame constructor
 MainFrame::MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
-CC_show *show, MainFrame *other_frame):
+CC_show *show):
 wxMDIChildFrame(frame, -1, wxT("CalChart"), wxPoint(x, y), wxSize(w, h), CC_FRAME_CHILD),
 field(NULL)
 {
@@ -528,7 +527,6 @@ field(NULL)
 // Make a menubar
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
-	file_menu->Append(CALCHART__NEW_WINDOW, wxT("New &Window\tCTRL-SHIFT-N"), wxT("Open a new window"));
 	file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
 	file_menu->Append(CALCHART__APPEND_FILE, wxT("&Append..."), wxT("Append a show to the end"));
 	file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity...\tCTRL-I"), wxT("Import continuity text"));
@@ -587,32 +585,20 @@ field(NULL)
 
 // Add the field canvas
 	setup = false;
-	if (!other_frame)
+	if (!show)
 	{
-		if (!show)
-		{
-			show = new CC_show();
-			setup = true;
-		}
-		ss = 0;
-		def_zoom = default_zoom;
-		def_grid = 2;
-		def_ref = 0;
-		field = new FieldCanvas(show, ss, this, def_zoom);
+		show = new CC_show();
+		setup = true;
 	}
-	else
-	{
-		show = other_frame->field->show_descr.show;
-		ss = other_frame->field->show_descr.curr_ss;
-		def_zoom = other_frame->zoom_slider->GetValue();
-		def_grid = other_frame->grid_choice->GetSelection();
-		def_ref = other_frame->field->curr_ref;
-		field = new FieldCanvas(show, ss, this, def_zoom, other_frame->field);
-	}
+	ss = 0;
+	def_zoom = default_zoom;
+	def_grid = 2;
+	def_ref = 0;
+	field = new FieldCanvas(show, ss, this, def_zoom);
 
 	SetTitle(show->UserGetName());
 	field->curr_ref = def_ref;
-	node = new CC_WinNodeMain(show->winlist, this);
+	node = new CC_WinNodeMain(&gTheApp->GetWindowList(), this);
 	switch(field->curr_select)
 	{
 		case CC_SELECT_ROWS:
@@ -680,7 +666,7 @@ field(NULL)
 
 // Show the frame
 	UpdatePanel();
-	gTheApp->GetWindowList().push_back(this);
+	gTheApp->GetFrameList().push_back(this);
 	field->RefreshShow();
 
 	fullsizer->Add(field, 1, wxEXPAND);
@@ -693,7 +679,7 @@ field(NULL)
 
 MainFrame::~MainFrame()
 {
-	gTheApp->GetWindowList().remove(this);
+	gTheApp->GetFrameList().remove(this);
 	if (node)
 	{
 		node->Remove();
@@ -729,14 +715,6 @@ void MainFrame::OnCloseWindow(wxCloseEvent& event)
 void MainFrame::OnCmdNew(wxCommandEvent& event)
 {
 	topframe->NewShow();
-}
-
-
-void MainFrame::OnCmdNewWindow(wxCommandEvent& event)
-{
-	MainFrame *frame;
-	frame = new MainFrame(topframe, 50, 50, window_default_width,
-		window_default_height, NULL, this);
 }
 
 
@@ -951,7 +929,7 @@ void MainFrame::OnCmdClearRef(wxCommandEvent& event)
 	if (field->curr_ref > 0)
 	{
 		if (field->show_descr.CurrSheet()->ClearRefPositions(field->curr_ref))
-			field->show_descr.show->winlist->
+			gTheApp->GetWindowList().
 				UpdatePointsOnSheet(field->show_descr.curr_ss, field->curr_ref);
 	}
 }
@@ -1180,7 +1158,7 @@ void MainFrame::OnCmd_genius(wxCommandEvent& event)
 void MainFrame::OnCmd_label_left(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsLabel(false))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1188,7 +1166,7 @@ void MainFrame::OnCmd_label_left(wxCommandEvent& event)
 void MainFrame::OnCmd_label_right(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsLabel(true))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1196,7 +1174,7 @@ void MainFrame::OnCmd_label_right(wxCommandEvent& event)
 void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsLabelFlip())
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1204,7 +1182,7 @@ void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_PLAIN))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1212,7 +1190,7 @@ void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOL))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1220,7 +1198,7 @@ void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_BKSL))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1228,7 +1206,7 @@ void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SL))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1236,7 +1214,7 @@ void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_X))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1244,7 +1222,7 @@ void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLBKSL))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1252,7 +1230,7 @@ void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLSL))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1260,7 +1238,7 @@ void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
 void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
 	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
-		field->show_descr.show->winlist->
+		gTheApp->GetWindowList().
 			UpdatePointsOnSheet(field->show_descr.curr_ss);
 }
 
@@ -1277,7 +1255,7 @@ bool MainFrame::OkayToClearShow()
 
 	if (field->show_descr.show->Modified())
 	{
-		if (!field->show_descr.show->winlist->MultipleWindows())
+		if (!gTheApp->GetWindowList().MultipleWindows())
 		{
 			buf.sprintf(wxT("Save changes to '%s'?"),
 				field->show_descr.show->UserGetName().c_str());
@@ -1697,7 +1675,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								}
 								if (changed)
 								{
-									show_descr.show->winlist->UpdateSelections();
+									gTheApp->GetWindowList().UpdateSelections();
 								}
 						}
 						break;
@@ -1712,7 +1690,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 					case CC_MOVE_LINE:
 						if (sheet->MovePointsInLine(shape->GetOrigin(), shape->GetPoint(),
 							curr_ref))
-							show_descr.show->winlist->
+							gTheApp->GetWindowList().
 								UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1735,7 +1713,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									ZRotationMatrix(r) *
 									TranslationMatrix(Vector(c1.x, c1.y, 0));
 								if (sheet->TransformPoints(m, curr_ref))
-									show_descr.show->winlist->
+									gTheApp->GetWindowList().
 										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1772,7 +1750,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									ZRotationMatrix(ang) *
 									TranslationMatrix(Vector(o.x, o.y, 0));
 								if (sheet->TransformPoints(m, curr_ref))
-									show_descr.show->winlist->
+									gTheApp->GetWindowList().
 										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1795,7 +1773,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								ZRotationMatrix(ang) *
 								TranslationMatrix(Vector(c1.x, c1.y, 0));
 							if (sheet->TransformPoints(m, curr_ref))
-								show_descr.show->winlist->
+								gTheApp->GetWindowList().
 									UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 						}
 						EndDrag();
@@ -1842,7 +1820,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 										ScaleMatrix(Vector(sx, sy, 0)) *
 										TranslationMatrix(Vector(c1.x, c1.y, 0));
 									if (sheet->TransformPoints(m, curr_ref))
-										show_descr.show->winlist->
+										gTheApp->GetWindowList().
 											UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 								}
 								EndDrag();
@@ -1897,7 +1875,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								Binv /= d;
 								m = Binv*A;
 								if (sheet->TransformPoints(m, curr_ref))
-									show_descr.show->winlist->
+									gTheApp->GetWindowList().
 										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 							}
 							EndDrag();
@@ -1915,7 +1893,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							case CC_DRAG_LINE:
 								pos = shape->GetPoint() - shape->GetOrigin();
 								if (sheet->TranslatePoints(pos, curr_ref))
-									show_descr.show->winlist->
+									gTheApp->GetWindowList().
 										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
 								EndDrag();
 								break;
@@ -2217,7 +2195,7 @@ bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 	if (changed && pnt)
 	{
 		SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y), toggleSelected);
-		show_descr.show->winlist->UpdateSelections();
+		gTheApp->GetWindowList().UpdateSelections();
 	}
 
 	return changed;
@@ -2268,7 +2246,7 @@ unsigned ref, bool toggleSelected)
 	if (changed)
 	{
 		SelectOrdered(pointlist, c1, toggleSelected);
-		show_descr.show->winlist->UpdateSelections();
+		gTheApp->GetWindowList().UpdateSelections();
 	}
 
 	return changed;

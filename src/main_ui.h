@@ -173,13 +173,13 @@ class FieldCanvas;
 class MainFrame : public wxMDIChildFrame
 {
 public:
+	// MainFrame will own the show that is passed in
 	MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
-		CC_show *show = NULL, MainFrame *other_frame = NULL);
+		CC_show *show = NULL);
 	~MainFrame();
 
 	void OnCloseWindow(wxCloseEvent& event);
 	void OnCmdNew(wxCommandEvent& event);
-	void OnCmdNewWindow(wxCommandEvent& event);
 	void OnCmdLoad(wxCommandEvent& event);
 	void OnCmdAppend(wxCommandEvent& event);
 	void OnCmdImportCont(wxCommandEvent& event);

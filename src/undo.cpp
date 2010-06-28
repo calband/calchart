@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "undo.h"
+#include "calchartapp.h"
 #include <wx/utils.h>
 
 ShowUndo::~ShowUndo() {}
@@ -165,7 +166,7 @@ int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
 			}
 		}
 	}
-	show->winlist->UpdatePointsOnSheet(sheetidx, refnum);
+	gTheApp->GetWindowList().UpdatePointsOnSheet(sheetidx, refnum);
 	return (int)sheetidx;
 }
 
@@ -230,7 +231,7 @@ int ShowUndoSym::Undo(CC_show *show, ShowUndo** newundo)
 		sheet->GetPoint(elems[i].idx).sym = elems[i].sym;
 		sheet->GetPoint(elems[i].idx).cont = elems[i].cont;
 	}
-	show->winlist->UpdatePointsOnSheet(sheetidx);
+	gTheApp->GetWindowList().UpdatePointsOnSheet(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -301,7 +302,7 @@ int ShowUndoLbl::Undo(CC_show *show, ShowUndo** newundo)
 	{
 		sheet->GetPoint(elems[i].idx).Flip(elems[i].right);
 	}
-	show->winlist->UpdatePointsOnSheet(sheetidx);
+	gTheApp->GetWindowList().UpdatePointsOnSheet(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -465,7 +466,7 @@ int ShowUndoName::Undo(CC_show *show, ShowUndo** newundo)
 
 	*newundo = new ShowUndoName(sheetidx, sheet);
 	sheet->SetName(name);
-	show->winlist->ChangeTitle(sheetidx);
+	gTheApp->GetWindowList().ChangeTitle(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -490,7 +491,7 @@ int ShowUndoBeat::Undo(CC_show *show, ShowUndo** newundo)
 
 	*newundo = new ShowUndoBeat(sheetidx, sheet);
 	sheet->SetBeats(beats);
-	show->winlist->ChangeTitle(sheetidx);
+	gTheApp->GetWindowList().ChangeTitle(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -524,7 +525,7 @@ int ShowUndoCont::Undo(CC_show *show, ShowUndo** newundo)
 
 	*newundo = new ShowUndoCont(sheetidx, cont, sheet);
 	sheet->SetNthContinuity(conttext, cont);
-	show->winlist->SetContinuity(NULL, sheetidx, cont);
+	gTheApp->GetWindowList().SetContinuity(NULL, sheetidx, cont);
 	return (int)sheetidx;
 }
 
@@ -632,7 +633,7 @@ int ShowUndoDescr::Undo(CC_show *show, ShowUndo** newundo)
 {
 	*newundo = new ShowUndoDescr(show);
 	show->SetDescr(descrtext);
-	show->winlist->SetDescr(NULL);
+	gTheApp->GetWindowList().SetDescr(NULL);
 	return -1;									  // don't goto another sheet
 }
 

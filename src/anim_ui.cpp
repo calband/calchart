@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "anim_ui.h"
 #include "modes.h"
 #include "confgr.h"
+#include "calchartapp.h"
 #ifdef ANIM_OUTPUT_RIB
 #include <ri.h>
 #endif
@@ -374,7 +375,7 @@ void AnimationCanvas::SelectCollisions()
 				show_descr->show->Select(i, false);
 			}
 		}
-		show_descr->show->winlist->UpdateSelections();
+		gTheApp->GetWindowList().UpdateSelections();
 	}
 }
 
@@ -999,9 +1000,9 @@ void AnimErrorList::Update(int i)
 		{
 			show->Select(j, pointsels[i].pntgroup.count(j));
 		}
-		show->winlist->UpdateSelections(this);
+		gTheApp->GetWindowList().UpdateSelections(this);
 	}
-	show->winlist->GotoContLocation(sheetnum > show->GetNumSheets() ?
+	gTheApp->GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
 		show->GetNumSheets()-1 : sheetnum,
 		pointsels[i].contnum,
 		pointsels[i].line, pointsels[i].col);
