@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/string.h>
 #include <wx/list.h>
 
+#include "cc_types.h"
 #include "cc_winlist.h"
 #include "platconf.h"
 #include "linmath.h"
@@ -46,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <deque>
 
-typedef int16_t Coord;
+class CC_sheet;
 
 #define COORD_SHIFT 4
 #define COORD_DECIMAL (1<<COORD_SHIFT)
@@ -68,18 +69,6 @@ typedef int16_t Coord;
 class wxWindow;
 class wxDC;
 class CC_show;
-
-enum PSFONT_TYPE
-{
-	PSFONT_SYMBOL, PSFONT_NORM, PSFONT_BOLD, PSFONT_ITAL, PSFONT_BOLDITAL,
-	PSFONT_TAB
-};
-
-enum SYMBOL_TYPE
-{
-	SYMBOL_PLAIN = 0, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
-};
 
 struct cc_oldcoord
 {
@@ -112,6 +101,8 @@ struct cc_reallyoldpoint
 	cc_oldcoord ref;
 };
 
+extern const wxChar *contnames[];
+
 class CC_textchunk
 {
 public:
@@ -131,17 +122,6 @@ public:
 	bool center;
 	bool on_main;
 	bool on_sheet;
-};
-
-typedef std::vector<CC_textline> CC_textline_list;
-
-class CC_text
-{
-public:
-	CC_text();
-	~CC_text();
-
-	CC_textline_list lines;
 };
 
 class CC_continuity
@@ -280,88 +260,6 @@ public:
 	unsigned char cont;
 	CC_coord pos;
 	CC_coord ref[NUM_REF_PNTS];
-};
-
-class CC_sheet
-{
-public:
-	CC_sheet(CC_show *shw);
-	CC_sheet(CC_show *shw, const wxString& newname);
-	CC_sheet(CC_sheet *sht);
-	~CC_sheet();
-
-	void Draw(wxDC *dc, unsigned ref, bool primary = true,
-		bool drawall = true, int point = -1);
-	void DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const;
-	void DrawCont(wxDC& dc, wxCoord yStart, bool landscape) const;
-
-// internal use only
-	const wxChar *PrintStandard(FILE *fp) const;
-	const wxChar *PrintSpringshow(FILE *fp) const;
-	const wxChar *PrintOverview(FILE *fp) const;
-	const wxChar *PrintCont(FILE *fp) const;
-
-	unsigned GetNumSelectedPoints() const;
-	int FindPoint(Coord x, Coord y, unsigned ref = 0);
-	bool SelectContinuity(unsigned i);
-	void SetContinuity(unsigned i);
-	void SetNumPoints(unsigned num, unsigned columns);
-	void RelabelSheet(unsigned *table);
-
-	CC_continuity *GetNthContinuity(unsigned i);
-	CC_continuity *UserGetNthContinuity(unsigned i);
-	void SetNthContinuity(const wxString& text, unsigned i);
-	void UserSetNthContinuity(const wxString& text, unsigned i, wxWindow* win);
-	CC_continuity *RemoveNthContinuity(unsigned i);
-	void UserDeleteContinuity(unsigned i);
-	void InsertContinuity(CC_continuity *newcont, unsigned i);
-	void AppendContinuity(CC_continuity *newcont);
-	CC_continuity *UserNewContinuity(const wxString& name);
-	unsigned NextUnusedContinuityNum();
-// creates if doesn't exist
-	CC_continuity *GetStandardContinuity(SYMBOL_TYPE sym);
-// return 0 if not found else index+1
-	unsigned FindContinuityByName(const wxString& name);
-	bool ContinuityInUse(unsigned idx);
-
-	inline const wxString& GetName() const { return name; }
-	inline void SetName(const wxString& newname) { name = newname; }
-	inline const wxString& GetNumber() const { return number; }
-	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
-	inline unsigned short GetBeats() const { return beats; }
-	inline void SetBeats(unsigned short b) { beats = b; }
-	inline bool IsInAnimation() { return (beats != 0); }
-	void UserSetName(const wxString& newname);
-	void UserSetBeats(unsigned short b);
-	bool SetPointsSym(SYMBOL_TYPE sym);
-	bool SetPointsLabel(bool right);
-	bool SetPointsLabelFlip();
-
-	inline const CC_point& GetPoint(unsigned i) const { return pts[i]; }
-	inline CC_point& GetPoint(unsigned i) { return pts[i]; }
-	inline void SetPoint(const cc_oldpoint& val, unsigned i);
-
-	const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
-	void SetAllPositions(const CC_coord& val, unsigned i);
-	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
-	void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
-	bool ClearRefPositions(unsigned ref);
-	bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
-	bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
-	bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
-		unsigned ref);
-
-	CC_sheet *next;
-	CC_text continuity;
-	CC_continuity *animcont;
-	CC_show *show;
-	unsigned numanimcont;
-	bool picked;							  /* for requestors like printing */
-private:
-	unsigned short beats;
-	std::vector<CC_point> pts;
-	wxString name;
-	wxString number;
 };
 
 #define DEF_HASH_W 32

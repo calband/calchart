@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cont_ui.h"
 #include "confgr.h"
 #include "calchartapp.h"
+#include "cc_sheet.h"
 
 #include <wx/help.h>
 
@@ -476,13 +477,13 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 	dc->SetTextForeground(*wxBLACK);
 
 	width = 0;
-	CC_textline_list::const_iterator cont(sht->continuity.lines.begin());
-	for (row = 0; (row < topline) && (cont != sht->continuity.lines.end());
+	CC_textline_list::const_iterator cont(sht->continuity.begin());
+	for (row = 0; (row < topline) && (cont != sht->continuity.end());
 		row++, ++cont);
 	y = 0.0;
 	dc->SetFont(*contPlainFont);
 	tabw = GetCharWidth() * 6;					  // Size of tab
-	while (cont != sht->continuity.lines.end())
+	while (cont != sht->continuity.end())
 	{
 		CC_textchunk_list::const_iterator c;
 		x = 0.0;

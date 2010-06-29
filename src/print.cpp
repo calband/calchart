@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 #include "confgr.h"
 #include "modes.h"
+#include "cc_sheet.h"
 #include <time.h>
 #include <string>
 
@@ -473,8 +474,8 @@ void CC_show::PrintSheets(FILE *fp) const
 
 	for (sheet = sheets; sheet != NULL; sheet = sheet->next)
 	{
-		for (CC_textline_list::const_iterator text = sheet->continuity.lines.begin();
-			text != sheet->continuity.lines.end();
+		for (CC_textline_list::const_iterator text = sheet->continuity.begin();
+			text != sheet->continuity.end();
 			++text)
 		{
 			if (!text->on_main) continue;
@@ -530,8 +531,8 @@ const wxChar *CC_sheet::PrintCont(FILE *fp) const
 	const wxChar *error;
 
 	cont_height = field_y - step_size*10;
-	for (CC_textline_list::const_iterator text = continuity.lines.begin();
-		text != continuity.lines.end();
+	for (CC_textline_list::const_iterator text = continuity.begin();
+		text != continuity.end();
 		++text)
 	{
 		if (text->on_sheet) cont_len++;
@@ -546,8 +547,8 @@ const wxChar *CC_sheet::PrintCont(FILE *fp) const
 		width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5));
 	CHECKPRINT(fprintf(fp, "/contfont findfont %.2f scalefont setfont\n",
 		this_size));
-	for (CC_textline_list::const_iterator text = continuity.lines.begin();
-		text != continuity.lines.end();
+	for (CC_textline_list::const_iterator text = continuity.begin();
+		text != continuity.end();
 		++text)
 	{
 		if (!text->on_sheet) continue;

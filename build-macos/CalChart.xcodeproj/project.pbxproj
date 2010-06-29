@@ -46,6 +46,7 @@
 		C7CB75CE114625E9000DBBB6 /* zllrbach.eps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BE114625C7000DBBB6 /* zllrbach.eps */; };
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
+		C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */; };
 		C7ECFF8611D5A4C30043B2FD /* cc_winlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7ECFF8411D5A4C20043B2FD /* cc_winlist.cpp */; };
 		C7ED502411CD5A51001A4FA2 /* anim.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC711CD594E001A4FA2 /* anim.tex */; };
 		C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
@@ -316,6 +317,9 @@
 		C7D4E2C211D087CD007D3587 /* calchartapp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartapp.cpp; sourceTree = "<group>"; };
 		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
+		C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_sheet.cpp; sourceTree = "<group>"; };
+		C7EC032811D9AD0E0043B2FD /* cc_sheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_sheet.h; sourceTree = "<group>"; };
+		C7EC035611D9B10C0043B2FD /* cc_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_types.h; sourceTree = "<group>"; };
 		C7ECFF8411D5A4C20043B2FD /* cc_winlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_winlist.cpp; sourceTree = "<group>"; };
 		C7ECFF8511D5A4C30043B2FD /* cc_winlist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_winlist.h; sourceTree = "<group>"; };
 		C7ED4FC711CD594E001A4FA2 /* anim.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = anim.tex; sourceTree = "<group>"; };
@@ -493,13 +497,16 @@
 				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
 				C75A5FB91180072C0047B87D /* cc_shapes.cpp */,
 				C75A5FBA1180072C0047B87D /* cc_shapes.h */,
+				C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */,
+				C7EC032811D9AD0E0043B2FD /* cc_sheet.h */,
+				C7EC035611D9B10C0043B2FD /* cc_types.h */,
 				C7ECFF8411D5A4C20043B2FD /* cc_winlist.cpp */,
 				C7ECFF8511D5A4C30043B2FD /* cc_winlist.h */,
 				C7AFA971117A6DBA00CC53E2 /* color_select_ui.cpp */,
 				C7AFA972117A6DBA00CC53E2 /* color_select_ui.h */,
 				C7AFA973117A6DBA00CC53E2 /* confgr.cpp */,
-				C7AFA974117A6DBA00CC53E2 /* confgr.h */,
 				C7AFA975117A6DBA00CC53E2 /* cont.cpp */,
+				C7AFA974117A6DBA00CC53E2 /* confgr.h */,
 				C7AFA976117A6DBA00CC53E2 /* cont.h */,
 				C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */,
 				C7AFA978117A6DBA00CC53E2 /* cont_ui.h */,
@@ -739,6 +746,7 @@
 				C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */,
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
 				C7ECFF8611D5A4C30043B2FD /* cc_winlist.cpp in Sources */,
+				C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

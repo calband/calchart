@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 #include "confgr.h"
 #include "modes.h"
+#include "cc_sheet.h"
 #include <memory>
 
 extern wxFont *pointLabelFont;
@@ -293,8 +294,8 @@ void CC_sheet::DrawCont(wxDC& dc, const wxCoord yStart, bool landscape) const
 	}
 	y = 0.0;
 	const wxCoord charWidth = dc.GetCharWidth();
-	CC_textline_list::const_iterator cont(continuity.lines.begin());
-	while (cont != continuity.lines.end())
+	CC_textline_list::const_iterator cont(continuity.begin());
+	while (cont != continuity.end())
 	{
 		bool do_tab;
 		CC_textchunk_list::const_iterator c;

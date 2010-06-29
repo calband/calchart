@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "anim_ui.h"
 #include "cont.h"
 #include "calchartapp.h"
+#include "cc_sheet.h"
 #include <math.h>
 #include <string>
 

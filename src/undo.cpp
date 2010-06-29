@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "undo.h"
 #include "calchartapp.h"
+#include "cc_sheet.h"
 #include <wx/utils.h>
 
 ShowUndo::~ShowUndo() {}
