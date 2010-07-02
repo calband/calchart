@@ -1,3 +1,10 @@
+Release notes for 3.1.5:
+
+3023650: Does not prompt to save when you quit
+fixing crash when pressing next on the Animation window.
+
+----------
+
 Release notes for 3.1.4:
 
 Bugs Fixed in this release
@@ -57,7 +64,7 @@ Build tested by quickly animating guns2.shw on mac and windows.
 
 How to release calchart:
 
-Increment the version in ccvers.h
+0. Increment the version in ccvers.h
 
 1. copy trunk to a tag:
 $ svn copy -m "copying trunk to tag for version 3.1.4" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.1.4
