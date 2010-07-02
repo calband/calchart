@@ -42,13 +42,10 @@ INGLchunk::~INGLchunk()
 }
 
 
-INGLread::INGLread(FILE *file)
-: fp(file), chunks(NULL) {}
-
 INGLread::INGLread(const char *filename)
+:	fp(fopen(filename, "rb")),
+	chunks(NULL)
 {
-	fp = fopen(filename, "rb");
-	chunks = NULL;
 }
 
 
@@ -219,12 +216,9 @@ void *INGLread::PopChunk()
 }
 
 
-INGLwrite::INGLwrite(FILE *file)
-: fp(file) {}
-
 INGLwrite::INGLwrite(const char *filename)
+:	fp(fopen(filename, "wb"))
 {
-	fp = fopen(filename, "wb");
 }
 
 

@@ -67,7 +67,6 @@ struct INGLhandler
 class INGLread
 {
 public:
-	INGLread(FILE *file);
 	INGLread(const char *filename);
 	~INGLread();
 
@@ -88,7 +87,6 @@ private:
 class INGLwrite
 {
 public:
-	INGLwrite(FILE *file);
 	INGLwrite(const char *filename);
 	~INGLwrite();
 

@@ -959,7 +959,7 @@ print_do_cont_sheet(true)
 	}
 	else
 	{
-		INGLread readhnd(CC_fopen(filestr.fn_str(), "rb"));
+		INGLread readhnd(filestr.fn_str());
 		if (!readhnd.Okay())
 		{
 			AddError(nofile_str);
@@ -972,7 +972,7 @@ print_do_cont_sheet(true)
 				&parseerror, this);
 			if (parseerror != NULL)
 				AddError(wxString(parseerror, wxConvUTF8));
-			SetName(wxString(parseerror, *wxConvFileName));
+			SetName(filestr);
 		}
 	}
 	if (okay && (sheets == NULL))
@@ -1377,7 +1377,7 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 			return nofile_str;
 	}
 
-	INGLwrite *handl = new INGLwrite(CC_fopen(filename.fn_str(), "wb"));
+	INGLwrite *handl = new INGLwrite(filename.fn_str());
 	INGLid id;
 	unsigned i, j;
 	Coord crd;
