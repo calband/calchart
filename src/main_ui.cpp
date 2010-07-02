@@ -250,7 +250,7 @@ void CC_WinNodeMain::ChangeName()
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
 {
 	UpdateStatusBar();
-	frame->field->RefreshShow(false, point);
+	frame->field->RefreshShow(true, point);
 }
 
 
@@ -1256,22 +1256,19 @@ bool MainFrame::OkayToClearShow()
 
 	if (field->show_descr.show->Modified())
 	{
-		if (!gTheApp->GetWindowList().MultipleWindows())
+		buf.sprintf(wxT("Save changes to '%s'?"),
+			field->show_descr.show->UserGetName().c_str());
+		switch (wxMessageBox(buf, wxT("Unsaved changes"),
+			wxYES_NO | wxCANCEL, this))
 		{
-			buf.sprintf(wxT("Save changes to '%s'?"),
-				field->show_descr.show->UserGetName().c_str());
-			switch (wxMessageBox(buf, wxT("Unsaved changes"),
-				wxYES_NO | wxCANCEL, this))
-			{
-				case wxYES:
-					SaveShowAs();
-					break;
-				case wxNO:
-					break;
-				case wxCANCEL:
-					return false;
-					break;
-			}
+			case wxYES:
+				SaveShowAs();
+				break;
+			case wxNO:
+				break;
+			case wxCANCEL:
+				return false;
+				break;
 		}
 		field->show_descr.show->ClearAutosave();
 	}
