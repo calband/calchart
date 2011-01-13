@@ -25,6 +25,7 @@
 #endif
 
 #include "cc_sheet.h"
+#include "cc_show.h"
 #include "show.h"
 #include "undo.h"
 #include "modes.h"

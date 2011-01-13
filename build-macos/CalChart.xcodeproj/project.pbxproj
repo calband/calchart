@@ -10,6 +10,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
+		C78241F412BEC69200BE680F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78241F212BEC69200BE680F /* cc_show.cpp */; };
 		C7AFA98E117A6DBA00CC53E2 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */; };
 		C7AFA98F117A6DBA00CC53E2 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96C117A6DBA00CC53E2 /* animate.cpp */; };
 		C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
@@ -266,6 +267,8 @@
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C75A5FB91180072C0047B87D /* cc_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_shapes.cpp; sourceTree = "<group>"; };
 		C75A5FBA1180072C0047B87D /* cc_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_shapes.h; sourceTree = "<group>"; };
+		C78241F212BEC69200BE680F /* cc_show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_show.cpp; sourceTree = "<group>"; };
+		C78241F312BEC69200BE680F /* cc_show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_show.h; sourceTree = "<group>"; };
 		C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = anim_ui.cpp; sourceTree = "<group>"; };
 		C7AFA96B117A6DBA00CC53E2 /* anim_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = anim_ui.h; sourceTree = "<group>"; };
 		C7AFA96C117A6DBA00CC53E2 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animate.cpp; sourceTree = "<group>"; };
@@ -499,6 +502,8 @@
 				C75A5FBA1180072C0047B87D /* cc_shapes.h */,
 				C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */,
 				C7EC032811D9AD0E0043B2FD /* cc_sheet.h */,
+				C78241F212BEC69200BE680F /* cc_show.cpp */,
+				C78241F312BEC69200BE680F /* cc_show.h */,
 				C7EC035611D9B10C0043B2FD /* cc_types.h */,
 				C7ECFF8411D5A4C20043B2FD /* cc_winlist.cpp */,
 				C7ECFF8511D5A4C30043B2FD /* cc_winlist.h */,
@@ -690,7 +695,14 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "CalChart" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CalChart */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -747,6 +759,7 @@
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
 				C7ECFF8611D5A4C30043B2FD /* cc_winlist.cpp in Sources */,
 				C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */,
+				C78241F412BEC69200BE680F /* cc_show.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
