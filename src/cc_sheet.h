@@ -51,7 +51,7 @@ public:
 	~CC_sheet();
 
 	void Draw(wxDC *dc, unsigned ref, bool primary = true,
-		bool drawall = true, int point = -1);
+		bool drawall = true, int point = -1) const;
 	void DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const;
 	void DrawCont(wxDC& dc, wxCoord yStart, bool landscape) const;
 
@@ -62,14 +62,14 @@ public:
 	const wxChar *PrintCont(FILE *fp) const;
 
 	unsigned GetNumSelectedPoints() const;
-	int FindPoint(Coord x, Coord y, unsigned ref = 0);
-	bool SelectContinuity(unsigned i);
+	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
+	bool SelectContinuity(unsigned i) const;
 	void SetContinuity(unsigned i);
 	void SetNumPoints(unsigned num, unsigned columns);
 	void RelabelSheet(unsigned *table);
 
-	CC_continuity *GetNthContinuity(unsigned i);
-	CC_continuity *UserGetNthContinuity(unsigned i);
+	CC_continuity *GetNthContinuity(unsigned i) const;
+	CC_continuity *UserGetNthContinuity(unsigned i) const;
 	void SetNthContinuity(const wxString& text, unsigned i);
 	void UserSetNthContinuity(const wxString& text, unsigned i, wxWindow* win);
 	CC_continuity *RemoveNthContinuity(unsigned i);
@@ -81,8 +81,8 @@ public:
 // creates if doesn't exist
 	CC_continuity *GetStandardContinuity(SYMBOL_TYPE sym);
 // return 0 if not found else index+1
-	unsigned FindContinuityByName(const wxString& name);
-	bool ContinuityInUse(unsigned idx);
+	unsigned FindContinuityByName(const wxString& name) const;
+	bool ContinuityInUse(unsigned idx) const;
 
 	inline const wxString& GetName() const { return name; }
 	inline void SetName(const wxString& newname) { name = newname; }
@@ -90,7 +90,7 @@ public:
 	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
 	inline unsigned short GetBeats() const { return beats; }
 	inline void SetBeats(unsigned short b) { beats = b; }
-	inline bool IsInAnimation() { return (beats != 0); }
+	inline bool IsInAnimation() const { return (beats != 0); }
 	void UserSetName(const wxString& newname);
 	void UserSetBeats(unsigned short b);
 	bool SetPointsSym(SYMBOL_TYPE sym);

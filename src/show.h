@@ -272,7 +272,7 @@ class CC_descr
 public:
 	CC_show *show;
 	unsigned curr_ss;
-	inline CC_sheet *CurrSheet() { return show->GetNthSheet(curr_ss); }
+	inline CC_sheet *CurrSheet() const { return show->GetNthSheet(curr_ss); }
 };
 
 void SetAutoSave(int secs);

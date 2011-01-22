@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern wxFont *pointLabelFont;
 
 void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
-bool drawall, int point)
+bool drawall, int point) const
 {
 	unsigned short i;
 	unsigned firstpoint, lastpoint;

@@ -93,7 +93,7 @@ unsigned CC_sheet::GetNumSelectedPoints() const
 
 
 // Find point at certain coords
-int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref)
+int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 {
 	unsigned i;
 	CC_coord c;
@@ -110,7 +110,7 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref)
 }
 
 
-bool CC_sheet::SelectContinuity(unsigned i)
+bool CC_sheet::SelectContinuity(unsigned i) const
 {
 	unsigned j;
 	bool changed = false;
@@ -200,7 +200,7 @@ void CC_sheet::RelabelSheet(unsigned *table)
 }
 
 
-CC_continuity *CC_sheet::GetNthContinuity(unsigned i)
+CC_continuity *CC_sheet::GetNthContinuity(unsigned i) const
 {
 	CC_continuity *c;
 
@@ -214,7 +214,7 @@ CC_continuity *CC_sheet::GetNthContinuity(unsigned i)
 }
 
 
-CC_continuity *CC_sheet::UserGetNthContinuity(unsigned i)
+CC_continuity *CC_sheet::UserGetNthContinuity(unsigned i) const
 {
 	gTheApp->GetWindowList().FlushContinuity();
 	return GetNthContinuity(i);
@@ -401,7 +401,7 @@ CC_continuity *CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 }
 
 
-unsigned CC_sheet::FindContinuityByName(const wxString& name)
+unsigned CC_sheet::FindContinuityByName(const wxString& name) const
 {
 	unsigned idx;
 	CC_continuity *c;
@@ -421,7 +421,7 @@ unsigned CC_sheet::FindContinuityByName(const wxString& name)
 }
 
 
-bool CC_sheet::ContinuityInUse(unsigned idx)
+bool CC_sheet::ContinuityInUse(unsigned idx) const
 {
 	unsigned i;
 	CC_continuity *c = GetNthContinuity(idx);
