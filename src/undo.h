@@ -34,6 +34,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <ostream>
 #include <deque>
 
+class CC_continuity;
+
 class ShowUndo
 {
 public:

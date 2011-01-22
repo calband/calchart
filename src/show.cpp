@@ -51,43 +51,6 @@ CC_textline::~CC_textline()
 }
 
 
-wxString Capitalize(const wxString &str)
-{
-	wxString Result = str.Lower();
-	if (Result.Length() > 0)
-		Result[0] = toupper(Result.c_str()[0]);
-
-	return Result;
-}
-
-
-CC_continuity::CC_continuity()
-: next(NULL), num(0) {}
-
-CC_continuity::~CC_continuity()
-{
-}
-
-
-void CC_continuity::SetName(const wxChar* s)
-{
-	name = s;
-	name = Capitalize(name);
-}
-
-
-void CC_continuity::SetText(const wxChar* s)
-{
-	text = s;
-}
-
-
-void CC_continuity::AppendText(const wxChar* s)
-{
-	text.Append(s);
-}
-
-
 float BoundDirection(float f)
 {
 	while (f >= 360.0) f -= 360.0;

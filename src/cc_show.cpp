@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "confgr.h"
 #include "calchartapp.h"
 #include "cc_sheet.h"
+#include "cc_continuity.h"
 #include "ingl.h"
 
 static const wxChar *nomem_str = wxT("Out of memory!");

@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "confgr.h"
 #include "calchartapp.h"
 #include "cc_sheet.h"
+#include "cc_continuity.h"
 
 #include <wx/help.h>
 

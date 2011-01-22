@@ -126,21 +126,6 @@ public:
 	bool on_sheet;
 };
 
-class CC_continuity
-{
-public:
-	CC_continuity();
-	~CC_continuity();
-	void SetName(const wxChar* s);
-	void SetText(const wxChar* s);
-	void AppendText(const wxChar* s);
-
-	CC_continuity *next;
-	unsigned num;
-	wxString name;
-	wxString text;
-};
-
 class CC_coord
 {
 public:
