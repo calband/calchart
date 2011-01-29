@@ -28,12 +28,12 @@
 #endif
 
 #include "cc_types.h"
+#include "cc_continuity.h"
 
 #include <wx/wx.h>
 #include <vector>
 
 class CC_show;
-class CC_continuity;
 class CC_point;
 class CC_coord;
 class Matrix;
@@ -68,18 +68,20 @@ public:
 	void SetNumPoints(unsigned num, unsigned columns);
 	void RelabelSheet(unsigned *table);
 
-	CC_continuity *GetNthContinuity(unsigned i) const;
-	CC_continuity *UserGetNthContinuity(unsigned i) const;
+	const CC_continuity_ptr GetNthContinuity(unsigned i) const;
+	CC_continuity_ptr GetNthContinuity(unsigned i);
+	const CC_continuity_ptr UserGetNthContinuity(unsigned i) const;
+	CC_continuity_ptr UserGetNthContinuity(unsigned i);
 	void SetNthContinuity(const wxString& text, unsigned i);
 	void UserSetNthContinuity(const wxString& text, unsigned i, wxWindow* win);
-	CC_continuity *RemoveNthContinuity(unsigned i);
+	CC_continuity_ptr RemoveNthContinuity(unsigned i);
 	void UserDeleteContinuity(unsigned i);
-	void InsertContinuity(CC_continuity *newcont, unsigned i);
-	void AppendContinuity(CC_continuity *newcont);
-	CC_continuity *UserNewContinuity(const wxString& name);
+	void InsertContinuity(CC_continuity_ptr newcont, unsigned i);
+	void AppendContinuity(CC_continuity_ptr newcont);
+	CC_continuity_ptr UserNewContinuity(const wxString& name);
 	unsigned NextUnusedContinuityNum();
 // creates if doesn't exist
-	CC_continuity *GetStandardContinuity(SYMBOL_TYPE sym);
+	CC_continuity_ptr GetStandardContinuity(SYMBOL_TYPE sym);
 // return 0 if not found else index+1
 	unsigned FindContinuityByName(const wxString& name) const;
 	bool ContinuityInUse(unsigned idx) const;
@@ -113,9 +115,9 @@ public:
 
 	CC_sheet *next;
 	CC_textline_list continuity;
-	CC_continuity *animcont;
+	typedef std::vector<CC_continuity_ptr> ContContainer;
+	ContContainer animcont;
 	CC_show *show;
-	unsigned numanimcont;
 	bool picked;							  /* for requestors like printing */
 private:
 	unsigned short beats;

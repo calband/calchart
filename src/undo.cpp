@@ -512,7 +512,7 @@ CC_sheet *sheet)
 :ShowUndo(sheetnum), cont(contnum)
 {
 
-	conttext = sheet->GetNthContinuity(cont)->text;
+	conttext = sheet->GetNthContinuity(cont)->GetText();
 }
 
 
@@ -555,9 +555,7 @@ ShowUndoAddContinuity::~ShowUndoAddContinuity()
 
 int ShowUndoAddContinuity::Undo(CC_show *show, ShowUndo** newundo)
 {
-	CC_continuity *cont;
-
-	cont = show->GetNthSheet(sheetidx)->RemoveNthContinuity(addcontnum);
+	CC_continuity_ptr cont = show->GetNthSheet(sheetidx)->RemoveNthContinuity(addcontnum);
 	*newundo = new ShowUndoDeleteContinuity(sheetidx, addcontnum, cont);
 	return (int)sheetidx;
 }
@@ -579,7 +577,7 @@ const wxChar *ShowUndoAddContinuity::RedoDescription()
 
 ShowUndoDeleteContinuity::ShowUndoDeleteContinuity(unsigned sheetnum,
 unsigned contnum,
-CC_continuity *cont)
+CC_continuity_ptr cont)
 :ShowUndo(sheetnum), deleted_cont(cont), delcontnum(contnum)
 {
 }
@@ -587,7 +585,6 @@ CC_continuity *cont)
 
 ShowUndoDeleteContinuity::~ShowUndoDeleteContinuity()
 {
-	if (deleted_cont) delete deleted_cont;
 }
 
 
@@ -595,7 +592,6 @@ int ShowUndoDeleteContinuity::Undo(CC_show *show, ShowUndo** newundo)
 {
 	show->GetNthSheet(sheetidx)->InsertContinuity(deleted_cont, delcontnum);
 	*newundo = new ShowUndoAddContinuity(sheetidx, delcontnum);
-	deleted_cont = NULL;						  // So it isn't deleted
 	return (int)sheetidx;
 }
 

@@ -346,13 +346,12 @@ void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 void ContinuityEditor::Update(bool quick)
 {
 	CC_sheet *sht = descr->CurrSheet();
-	CC_continuity *curranimcont;
 
 	conts->Clear();
-	for (curranimcont = sht->animcont; curranimcont != NULL;
-		curranimcont = curranimcont->next)
+	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
+		++curranimcont)
 	{
-		conts->Append(curranimcont->name);
+		conts->Append((*curranimcont)->GetName());
 	}
 	UpdateContChoice();
 	UpdateText(quick);
@@ -362,8 +361,8 @@ void ContinuityEditor::Update(bool quick)
 void ContinuityEditor::UpdateContChoice()
 {
 	CC_sheet *sht = descr->CurrSheet();
-	if (curr_cont >= sht->numanimcont && sht->numanimcont > 0)
-		curr_cont = sht->numanimcont-1;
+	if (curr_cont >= sht->animcont.size() && sht->animcont.size() > 0)
+		curr_cont = sht->animcont.size()-1;
 	conts->SetSelection(curr_cont);
 }
 
@@ -371,7 +370,7 @@ void ContinuityEditor::UpdateContChoice()
 void ContinuityEditor::UpdateText(bool quick)
 {
 	CC_sheet *sht = descr->CurrSheet();
-	CC_continuity *c;
+	CC_continuity_ptr c;
 
 	if (quick)
 	{
@@ -386,9 +385,9 @@ void ContinuityEditor::UpdateText(bool quick)
 	text->Clear();
 	if (c != NULL)
 	{
-		if (c->text)
+		if (c->GetText())
 		{
-			text->WriteText(c->text);
+			text->WriteText(c->GetText());
 			text->SetInsertionPoint(0);
 		}
 	}
@@ -398,15 +397,14 @@ void ContinuityEditor::UpdateText(bool quick)
 void ContinuityEditor::FlushText()
 {
 	wxString conttext;
-	CC_continuity *cont;
 
 	if (text_sheet)
 	{
-		cont = text_sheet->GetNthContinuity(text_contnum);
+		CC_continuity_ptr cont = text_sheet->GetNthContinuity(text_contnum);
 		if (cont != NULL)
 		{
 			conttext = text->GetValue();
-			if (conttext != cont->text)
+			if (conttext != cont->GetText())
 			{
 				text_sheet->UserSetNthContinuity(conttext, text_contnum, this);
 			}
@@ -418,12 +416,10 @@ void ContinuityEditor::FlushText()
 void ContinuityEditor::SelectPoints()
 {
 	CC_sheet *sht = descr->CurrSheet();
-	CC_continuity *c;
-
-	c = sht->GetNthContinuity(curr_cont);
+	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
 	if (c != NULL)
 	{
-		if (sht->SelectContinuity(c->num))
+		if (sht->SelectContinuity(c->GetNum()))
 		{
 			gTheApp->GetWindowList().UpdateSelections();
 		}
@@ -434,12 +430,10 @@ void ContinuityEditor::SelectPoints()
 void ContinuityEditor::SetPoints()
 {
 	CC_sheet *sht = descr->CurrSheet();
-	CC_continuity *c;
-
-	c = sht->GetNthContinuity(curr_cont);
+	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
 	if (c != NULL)
 	{
-		sht->SetContinuity(c->num);
+		sht->SetContinuity(c->GetNum());
 	}
 }
 

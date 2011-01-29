@@ -41,29 +41,36 @@ wxString Capitalize(const wxString &str)
 	return Result;
 }
 
-
-CC_continuity::CC_continuity()
-: next(NULL), num(0) {}
+CC_continuity::CC_continuity(const wxString& s, unsigned n)
+: num(n), name(Capitalize(s))
+{
+}
 
 CC_continuity::~CC_continuity()
 {
 }
 
-
-void CC_continuity::SetName(const wxChar* s)
+const wxString& CC_continuity::GetName() const
 {
-	name = s;
-	name = Capitalize(name);
+	return name;
 }
 
+unsigned CC_continuity::GetNum() const
+{
+	return num;
+}
 
-void CC_continuity::SetText(const wxChar* s)
+void CC_continuity::SetText(const wxString& s)
 {
 	text = s;
 }
 
+const wxString& CC_continuity::GetText() const
+{
+	return text;
+}
 
-void CC_continuity::AppendText(const wxChar* s)
+void CC_continuity::AppendText(const wxString& s)
 {
 	text.Append(s);
 }

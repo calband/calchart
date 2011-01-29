@@ -147,9 +147,7 @@ print_do_cont_sheet(true)
 	{
 		selections = NULL;
 	}
-	sheets->animcont = new CC_continuity;
-	sheets->animcont->SetName(contnames[0]);
-	sheets->numanimcont = 1;
+	sheets->animcont.push_back(CC_continuity_ptr(new CC_continuity(contnames[0], 0)));
 
 	autosaveTimer.AddShow(this);
 }
@@ -380,7 +378,6 @@ static const char* badcontchunk = "Bad CONT chunk";
 static const char* load_show_CONT(INGLchunk* chunk)
 {
 	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	CC_continuity *newcont;
 	unsigned num;
 	const char *name;
 	const char *text;
@@ -402,10 +399,8 @@ static const char* load_show_CONT(INGLchunk* chunk)
 	}
 	text = (const char *)&chunk->data[0] + 2 + strlen(name);
 
-	newcont = new CC_continuity;
-	newcont->num = *((uint8_t *)&chunk->data[0]);
 	wxString namestr(wxString::FromUTF8(name));
-	newcont->SetName(namestr);
+	CC_continuity_ptr newcont(new CC_continuity(namestr, *((uint8_t *)&chunk->data[0])));
 	wxString textstr(wxString::FromUTF8(text));
 	newcont->SetText(textstr);
 	sheet->AppendContinuity(newcont);
@@ -715,8 +710,6 @@ print_do_cont_sheet(true)
 			}
 			for (size_t i = 0; i < numanimcont; i++)
 			{
-				CC_continuity *newanimcont = new CC_continuity;
-
 // Skip blank line
 				if (feof(fp))
 				{
@@ -731,14 +724,15 @@ print_do_cont_sheet(true)
 				}
 				char sheetnamebuf[16];
 				uint32_t j;
+				unsigned tnum;
 				if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
-					sheetnamebuf, &newanimcont->num, &j) != 3)
+					sheetnamebuf, &tnum, &j) != 3)
 				{
 					AddError(badanimcont_str);
 					return;
 				}
 				wxString sheetnamestr(wxString::From8BitData(sheetnamebuf));
-				newanimcont->SetName(sheetnamestr);
+				CC_continuity_ptr newanimcont(new CC_continuity(sheetnamestr, tnum));
 				while (j > 0)
 				{
 					j--;
@@ -1199,7 +1193,6 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 	unsigned i, j;
 	Coord crd;
 	unsigned char c;
-	CC_continuity *curranimcont;
 
 	FlushAllTextWindows();
 
@@ -1394,24 +1387,25 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 			}
 		}
 // Continuity text
-		for (curranimcont = curr_sheet->animcont; curranimcont != NULL;
-			curranimcont  = curranimcont->next)
+		for (CC_sheet::ContContainer::const_iterator curranimcont = curr_sheet->animcont.begin(); curranimcont != curr_sheet->animcont.end();
+			++curranimcont)
 		{
 			if (!handl->WriteChunkHeader(INGL_CONT,
-				1+curranimcont->name.Length()+1+
-				curranimcont->text.Length()+1))
+				1+(*curranimcont)->GetName().Length()+1+
+				(*curranimcont)->GetText().Length()+1))
 			{
 				return writeerr_str;
 			}
-			if (!handl->Write(&curranimcont->num, 1))
+			unsigned tnum = (*curranimcont)->GetNum();
+			if (!handl->Write(&tnum, 1))
 			{
 				return writeerr_str;
 			}
-			if (!handl->WriteStr(curranimcont->name.utf8_str()))
+			if (!handl->WriteStr((*curranimcont)->GetName().utf8_str()))
 			{
 				return writeerr_str;
 			}
-			if (!handl->WriteStr(curranimcont->text.utf8_str()))
+			if (!handl->WriteStr((*curranimcont)->GetText().utf8_str()))
 			{
 				return writeerr_str;
 			}

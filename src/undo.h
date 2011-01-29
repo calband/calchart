@@ -31,10 +31,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "show.h"
+#include "cc_continuity.h"
 #include <ostream>
 #include <deque>
-
-class CC_continuity;
 
 class ShowUndo
 {
@@ -260,7 +259,7 @@ class ShowUndoDeleteContinuity : public ShowUndo
 {
 public:
 	ShowUndoDeleteContinuity(unsigned sheetnum, unsigned contnum,
-		CC_continuity *cont);
+		CC_continuity_ptr cont);
 	virtual ~ShowUndoDeleteContinuity();
 
 	virtual int Undo(CC_show *show, ShowUndo** newundo);
@@ -268,7 +267,7 @@ public:
 	virtual const wxChar *UndoDescription();
 	virtual const wxChar *RedoDescription();
 private:
-	CC_continuity *deleted_cont;
+	CC_continuity_ptr deleted_cont;
 	unsigned delcontnum;
 };
 

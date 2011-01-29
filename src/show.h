@@ -243,6 +243,8 @@ public:
 	inline void FlipToggle() { Flip(GetFlip() ? false:true); }
 
 	unsigned short flags;
+	// by having both a sym type and cont index, we can have several
+	// points share the same symbol but have different continuities.
 	SYMBOL_TYPE sym;
 	unsigned char cont;
 	CC_coord pos;

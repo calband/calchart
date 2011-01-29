@@ -444,7 +444,6 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 	unsigned i, j;
 	ContProcedure* curr_proc;
 	AnimateCompile comp;
-	CC_continuity *currcont;
 	wxString tempbuf;
 
 // Now compile
@@ -478,21 +477,21 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 		comp.SetStatus(true);
 		comp.FreeErrorMarkers();
 		int contnum = 0;
-		for (currcont = comp.curr_sheet->animcont; currcont != NULL;
-			currcont  = currcont->next, contnum++)
+		for (CC_sheet::ContContainer::const_iterator currcont = comp.curr_sheet->animcont.begin(); currcont != comp.curr_sheet->animcont.end();
+			++currcont, contnum++)
 		{
-			if (currcont->text.mb_str() != NULL)
+			if ((*currcont)->GetText().mb_str() != NULL)
 			{
-				std::string tmpBuffer(currcont->text.mb_str());
+				std::string tmpBuffer((*currcont)->GetText().mb_str());
 				yyinputbuffer = tmpBuffer.c_str();
 				tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
-					comp.curr_sheet->GetName().c_str(), currcont->name.c_str());
+					comp.curr_sheet->GetName().c_str(), (*currcont)->GetName().c_str());
 				frame->SetStatusText(tempbuf);
 				int parseerr = parsecontinuity();
 				ContToken dummy;				  // get position of parse error
 				for (j = 0; j < numpts; j++)
 				{
-					if (comp.curr_sheet->GetPoint(j).cont == currcont->num)
+					if (comp.curr_sheet->GetPoint(j).cont == (*currcont)->GetNum())
 					{
 						comp.Compile(j, contnum, ParsedContinuity);
 						curr_sheet->commands[j] = comp.cmds;

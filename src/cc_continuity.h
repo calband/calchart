@@ -32,20 +32,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <wx/wx.h>
+#include <boost/shared_ptr.hpp>
 
 class CC_continuity
 {
 public:
-	CC_continuity();
+	CC_continuity(const wxString& s, unsigned n);
 	~CC_continuity();
-	void SetName(const wxChar* s);
-	void SetText(const wxChar* s);
-	void AppendText(const wxChar* s);
 
-	CC_continuity *next;
+	const wxString& GetName() const;
+	unsigned GetNum() const;
+
+	void SetText(const wxString& s);
+	const wxString& GetText() const;
+	void AppendText(const wxString& s);
+
+private:
 	unsigned num;
 	wxString name;
 	wxString text;
 };
+
+typedef boost::shared_ptr<CC_continuity> CC_continuity_ptr;
 
 #endif
