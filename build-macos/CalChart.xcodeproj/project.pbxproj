@@ -830,6 +830,7 @@
 					../resources,
 					"/usr/include/wx-2.8",
 					"/usr/lib/wx/include/mac-unicode-debug-2.8",
+					/opt/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lwx_macud-2.8";
@@ -856,6 +857,7 @@
 					../resources,
 					"/usr/include/wx-2.8",
 					"/usr/lib/wx/include/mac-unicode-debug-2.8",
+					/opt/local/include,
 				);
 				OTHER_LDFLAGS = "-lwx_macud-2.8";
 				PREBINDING = NO;
