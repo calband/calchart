@@ -85,6 +85,8 @@ TopFrame *topframe = NULL;
 
 CalChartApp* gTheApp = NULL;
 
+void CC_continuity_UnitTests();
+
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
 
@@ -223,6 +225,8 @@ bool CalChartApp::OnInit()
 
 	SetAutoSave(autosave_interval);
 	SetTopWindow(topframe);
+	
+	CC_continuity_UnitTests();
 
 	return true;
 }

@@ -431,18 +431,18 @@ int min_yards) const
 				switch (mode->GetType())
 				{
 					case SHOW_STANDARD:
-						error = curr_sheet->PrintStandard(fp);
+						error = PrintStandard(fp, *curr_sheet);
 						if (!Ok()) return 0;
 						break;
 					case SHOW_SPRINGSHOW:
-						error = curr_sheet->PrintSpringshow(fp);
+						error = PrintSpringshow(fp, *curr_sheet);
 						if (!Ok()) return 0;
 						break;
 				}
 			}
 			else
 			{
-				error = curr_sheet->PrintOverview(fp);
+				error = PrintOverview(fp, *curr_sheet);
 				if (!Ok()) return 0;
 			}
 			if (eps) break;
@@ -523,7 +523,7 @@ void CC_show::PrintSheets(FILE *fp) const
 }
 
 
-const wxChar *CC_sheet::PrintCont(FILE *fp) const
+const wxChar *PrintCont(FILE *fp, const CC_sheet& sheet)
 {
 	enum PSFONT_TYPE currfontnum = PSFONT_NORM;
 	short cont_len = 0;
@@ -531,8 +531,8 @@ const wxChar *CC_sheet::PrintCont(FILE *fp) const
 	const wxChar *error;
 
 	cont_height = field_y - step_size*10;
-	for (CC_textline_list::const_iterator text = continuity.begin();
-		text != continuity.end();
+	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
+		text != sheet.continuity.end();
 		++text)
 	{
 		if (text->on_sheet) cont_len++;
@@ -547,8 +547,8 @@ const wxChar *CC_sheet::PrintCont(FILE *fp) const
 		width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5));
 	CHECKPRINT(fprintf(fp, "/contfont findfont %.2f scalefont setfont\n",
 		this_size));
-	for (CC_textline_list::const_iterator text = continuity.begin();
-		text != continuity.end();
+	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
+		text != sheet.continuity.end();
 		++text)
 	{
 		if (!text->on_sheet) continue;
@@ -642,30 +642,30 @@ const wxChar *print_start_page(FILE *fp, bool landscape)
 }
 
 
-const wxChar *CC_sheet::PrintStandard(FILE *fp) const
+const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 {
 	float dot_x, dot_y, dot_w;
 	short x_s, x_n;
 	unsigned short i;
 	short j;
 	const wxChar *error;
-	CC_coord fieldsize = show->GetMode().FieldSize();
-	CC_coord fieldoff = show->GetMode().FieldOffset();
-	Coord pmin = show->GetMode().MinPosition().x;
-	Coord pmax = show->GetMode().MaxPosition().x;
-	Coord fmin = show->GetMode().FieldOffset().x;
-	Coord fmax = show->GetMode().FieldSize().x + fmin;
+	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
+	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
+	Coord pmin = sheet.show->GetMode().MinPosition().x;
+	Coord pmax = sheet.show->GetMode().MaxPosition().x;
+	Coord fmin = sheet.show->GetMode().FieldOffset().x;
+	Coord fmax = sheet.show->GetMode().FieldSize().x + fmin;
 	float fieldheight = COORD2FLOAT(fieldsize.y);
 	float fieldoffx = COORD2FLOAT(fieldoff.x);
 	float fieldoffy = COORD2FLOAT(fieldoff.y);
 
-	std::string namestr(name.utf8_str());
-	std::string numberstr(number.utf8_str());
+	std::string namestr(sheet.name.utf8_str());
+	std::string numberstr(sheet.number.utf8_str());
 
 	if (split_sheet)
 	{
 		CHECKPRINT(fprintf(fp, "%%%%Page: %s(N)\n", namestr.c_str()));
-		if (number)
+		if (sheet.number)
 		{
 			CHECKPRINT(fprintf(fp, "/pagenumtext (%sN) def\n",numberstr.c_str()));
 		}
@@ -684,10 +684,10 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const
 /* find bounds */
 		max_s = fmax;
 		max_n = fmin;
-		for (i=0; i < show->GetNumPoints(); i++)
+		for (i=0; i < sheet.show->GetNumPoints(); i++)
 		{
-			if (pts[i].pos.x < max_s) max_s = pts[i].pos.x;
-			if (pts[i].pos.x > max_n) max_n = pts[i].pos.x;
+			if (sheet.pts[i].pos.x < max_s) max_s = sheet.pts[i].pos.x;
+			if (sheet.pts[i].pos.x > max_n) max_n = sheet.pts[i].pos.x;
 		}
 /* make sure bounds are on field */
 		if (max_s < fmin) max_s = fmin;
@@ -699,7 +699,7 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const
 		{
 /* Need to split into two pages */
 			CHECKPRINT(fprintf(fp, "%%%%Page: %s(S)\n", namestr.c_str()));
-			if (number)
+			if (sheet.number)
 			{
 				CHECKPRINT(fprintf(fp, "/pagenumtext (%sS) def\n",
 					numberstr.c_str()));
@@ -716,7 +716,7 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const
 		else
 		{
 			CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
-			if (number)
+			if (sheet.number)
 			{
 				CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n",
 					numberstr.c_str()));
@@ -725,7 +725,7 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const
 			{
 				CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
 			}
-			step_offset = (COORD2INT(show->GetMode().FieldSize().x) - step_width) / 2;
+			step_offset = (COORD2INT(sheet.show->GetMode().FieldSize().x) - step_width) / 2;
 			step_offset = (step_offset / 8) * 8;
 			clip_s = pmin;
 			clip_n = pmax;
@@ -737,13 +737,13 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const
 				step_offset = x_s - (step_width-(x_n-x_s))/2;
 				if (step_offset < 0) step_offset = 0;
 				else if ((step_offset + step_width) >
-					COORD2INT(show->GetMode().FieldSize().x))
-					step_offset = COORD2INT(show->GetMode().FieldSize().x) - step_width;
+					COORD2INT(sheet.show->GetMode().FieldSize().x))
+					step_offset = COORD2INT(sheet.show->GetMode().FieldSize().x) - step_width;
 				step_offset = (step_offset / 8) * 8;
 			}
 		}
 	}
-	error = print_start_page(fp, show->GetBoolLandscape());
+	error = print_start_page(fp, sheet.show->GetBoolLandscape());
 	if (error) return error;
 
 	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
@@ -771,41 +771,41 @@ const wxChar *CC_sheet::PrintStandard(FILE *fp) const
 	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * sline_ratio));
 	CHECKPRINT(fprintf(fp, "/numberfont findfont %.2f scalefont setfont\n",
 		dot_w * 2 * num_ratio));
-	for (i = 0; i < show->GetNumPoints(); i++)
+	for (i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
-		if ((pts[i].pos.x > clip_n) || (pts[i].pos.x < clip_s)) continue;
-		dot_x = (COORD2FLOAT(pts[i].pos.x) - fieldoffx - step_offset) /
+		if ((sheet.pts[i].pos.x > clip_n) || (sheet.pts[i].pos.x < clip_s)) continue;
+		dot_x = (COORD2FLOAT(sheet.pts[i].pos.x) - fieldoffx - step_offset) /
 			step_width * field_w;
-		dot_y = (1.0 - (COORD2FLOAT(pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
+		dot_y = (1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
 		CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[pts[i].sym]));
+			dot_x, dot_y, dot_routines[sheet.pts[i].sym]));
 		CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
-			static_cast<const char*>(show->GetPointLabel(i).mb_str()), dot_x, dot_y,
-			pts[i].GetFlip() ? "donumber2" : "donumber"));
+			static_cast<const char*>(sheet.show->GetPointLabel(i).mb_str()), dot_x, dot_y,
+			sheet.pts[i].GetFlip() ? "donumber2" : "donumber"));
 	}
-	if (show->GetBoolDoCont())
+	if (sheet.show->GetBoolDoCont())
 	{
 		CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", -field_x, -field_y));
-		error = PrintCont(fp);
+		error = PrintCont(fp, sheet);
 		if (error) return error;
 	}
 	return NULL;
 }
 
 
-const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const
+const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 {
 	float dot_x, dot_y, dot_w;
 	unsigned short i;
 	short j;
 	const wxChar *error;
-	const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&show->GetMode());
+	const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&sheet.show->GetMode());
 
-	std::string namestr(name.utf8_str());
-	std::string numberstr(number.utf8_str());
+	std::string namestr(sheet.name.utf8_str());
+	std::string numberstr(sheet.number.utf8_str());
 
 	CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
-	if (number)
+	if (sheet.number)
 	{
 		CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n", numberstr.c_str()));
 	}
@@ -814,7 +814,7 @@ const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const
 		CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
 	}
 
-	error = print_start_page(fp, show->GetBoolLandscape());
+	error = print_start_page(fp, sheet.show->GetBoolLandscape());
 	if (error) return error;
 
 	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
@@ -900,57 +900,57 @@ const wxChar *CC_sheet::PrintSpringshow(FILE *fp) const
 	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * sline_ratio));
 	CHECKPRINT(fprintf(fp, "/numberfont findfont %.2f scalefont setfont\n",
 		dot_w * 2 * num_ratio));
-	for (i = 0; i < show->GetNumPoints(); i++)
+	for (i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		dot_x = stage_field_x +
-			(COORD2FLOAT(pts[i].pos.x) - modesprshow->StepsX()) /
+			(COORD2FLOAT(sheet.pts[i].pos.x) - modesprshow->StepsX()) /
 			modesprshow->StepsW() * stage_field_w;
 		dot_y = stage_field_y + stage_field_h * (1.0 -
-			(COORD2FLOAT(pts[i].pos.y)-
+			(COORD2FLOAT(sheet.pts[i].pos.y)-
 			modesprshow->StepsY())/
 			modesprshow->StepsH());
 		CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[pts[i].sym]));
+			dot_x, dot_y, dot_routines[sheet.pts[i].sym]));
 		CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
-			static_cast<const char*>(show->GetPointLabel(i).mb_str()), dot_x, dot_y,
-			(pts[i].flags & PNT_LABEL) ? "donumber2" : "donumber"));
+			static_cast<const char*>(sheet.show->GetPointLabel(i).mb_str()), dot_x, dot_y,
+			(sheet.pts[i].flags & PNT_LABEL) ? "donumber2" : "donumber"));
 	}
-	if (show->GetBoolDoCont())
+	if (sheet.show->GetBoolDoCont())
 	{
 		CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", -field_x, -field_y));
-		error = PrintCont(fp);
+		error = PrintCont(fp, sheet);
 		if (error) return error;
 	}
 	return NULL;
 }
 
 
-const wxChar *CC_sheet::PrintOverview(FILE *fp) const
+const wxChar *PrintOverview(FILE *fp, const CC_sheet& sheet)
 {
 	unsigned short i;
 	const wxChar *error;
-	CC_coord fieldoff = show->GetMode().FieldOffset();
-	CC_coord fieldsize = show->GetMode().FieldSize();
+	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
+	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
 	float fieldx = COORD2FLOAT(fieldoff.x);
 	float fieldy = COORD2FLOAT(fieldoff.y);
 	float fieldwidth = COORD2FLOAT(fieldsize.x);
 	float fieldheight = COORD2FLOAT(fieldsize.y);
 
-	std::string namestr(name.utf8_str());
+	std::string namestr(sheet.name.utf8_str());
 
 	CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
 
-	error = print_start_page(fp, show->GetBoolLandscape());
+	error = print_start_page(fp, sheet.show->GetBoolLandscape());
 	if (error) return error;
 
 	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
 	CHECKPRINT(fprintf(fp, "drawfield\n"));
 	CHECKPRINT(fprintf(fp, "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0));
-	for (i = 0; i < show->GetNumPoints(); i++)
+	for (i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		CHECKPRINT(fprintf(fp, "%.2f %.2f dotbox\n",
-			(COORD2FLOAT(pts[i].pos.x)-fieldx) / fieldwidth * width,
-			(1.0 - (COORD2FLOAT(pts[i].pos.y)-
+			(COORD2FLOAT(sheet.pts[i].pos.x)-fieldx) / fieldwidth * width,
+			(1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-
 			fieldy)/fieldheight) * height));
 	}
 	return NULL;

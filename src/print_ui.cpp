@@ -79,13 +79,11 @@ void ShowPrintDialog::PrintShow()
 	page_height = (float)dval;
 	text_minyards->GetValue().ToLong(&minyards);
 
-	show_descr->show->GetBoolLandscape() =
-		(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
+	show_descr->show->SetBoolLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
 
-	show_descr->show->GetBoolDoCont() = check_cont->GetValue();
+	show_descr->show->SetBoolDoCont(check_cont->GetValue());
 	if (!eps)
-		show_descr->show->GetBoolDoContSheet() =
-			check_pages->GetValue();
+		show_descr->show->SetBoolDoContSheet(check_pages->GetValue());
 	overview = check_overview->GetValue();
 
 	switch (radio_method->GetSelection())

@@ -33,8 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern wxFont *pointLabelFont;
 
-void CC_sheet::Draw(wxDC *dc, unsigned ref, bool primary,
-bool drawall, int point) const
+void Draw(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool primary,
+bool drawall, int point)
 {
 	unsigned short i;
 	unsigned firstpoint, lastpoint;
@@ -54,10 +54,10 @@ bool drawall, int point) const
 		dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
 		dc->SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
 		dc->SetLogicalFunction(wxCOPY);
-		show->GetMode().Draw(dc);
+		sheet.show->GetMode().Draw(dc);
 	}
 
-	if (!pts.empty())
+	if (!sheet.pts.empty())
 	{
 		dc->SetFont(*pointLabelFont);
 		dc->SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
@@ -66,11 +66,11 @@ bool drawall, int point) const
 		plineoff = offset * pline_ratio;
 		slineoff = offset * sline_ratio;
 		textoff = offset * 1.25;
-		origin = show->GetMode().Offset();
+		origin = sheet.show->GetMode().Offset();
 		if (point < 0)
 		{
 			firstpoint = 0;
-			lastpoint = show->GetNumPoints();
+			lastpoint = sheet.show->GetNumPoints();
 		}
 		else
 		{
@@ -81,7 +81,7 @@ bool drawall, int point) const
 		{
 			for (i = firstpoint; i < lastpoint; i++)
 			{
-				if ((show->IsSelected(i) != 0) == (selectd != 0))
+				if ((sheet.show->IsSelected(i) != 0) == (selectd != 0))
 				{
 					if (selectd)
 					{
@@ -109,9 +109,9 @@ bool drawall, int point) const
 							fillBrush = CalChartBrushes[COLOR_REF_POINT];
 						}
 					}
-					x = GetPosition(i, ref).x+origin.x;
-					y = GetPosition(i, ref).y+origin.y;
-					switch (pts[i].sym)
+					x = sheet.GetPosition(i, ref).x+origin.x;
+					y = sheet.GetPosition(i, ref).y+origin.y;
+					switch (sheet.pts[i].sym)
 					{
 						case SYMBOL_SOL:
 						case SYMBOL_SOLBKSL:
@@ -123,7 +123,7 @@ bool drawall, int point) const
 							dc->SetBrush(*wxTRANSPARENT_BRUSH);
 					}
 					dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
-					switch (pts[i].sym)
+					switch (sheet.pts[i].sym)
 					{
 						case SYMBOL_SL:
 						case SYMBOL_X:
@@ -138,7 +138,7 @@ bool drawall, int point) const
 						default:
 							break;
 					}
-					switch (pts[i].sym)
+					switch (sheet.pts[i].sym)
 					{
 						case SYMBOL_BKSL:
 						case SYMBOL_X:
@@ -153,9 +153,9 @@ bool drawall, int point) const
 						default:
 							break;
 					}
-					dc->GetTextExtent(show->GetPointLabel(i), &textw, &texth, &textd);
-					dc->DrawText(show->GetPointLabel(i),
-						pts[i].GetFlip() ? x : (x - textw),
+					dc->GetTextExtent(sheet.show->GetPointLabel(i), &textw, &texth, &textd);
+					dc->DrawText(sheet.show->GetPointLabel(i),
+						sheet.pts[i].GetFlip() ? x : (x - textw),
 						y - textoff - texth + textd);
 				}
 			}
@@ -256,7 +256,7 @@ static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 
 static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
 
 // draw the continuity starting at a specific offset
-void CC_sheet::DrawCont(wxDC& dc, const wxCoord yStart, bool landscape) const
+void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landscape)
 {
 	float x, y;
 	wxCoord textw, texth, textd, maxtexth;
@@ -294,8 +294,8 @@ void CC_sheet::DrawCont(wxDC& dc, const wxCoord yStart, bool landscape) const
 	}
 	y = 0.0;
 	const wxCoord charWidth = dc.GetCharWidth();
-	CC_textline_list::const_iterator cont(continuity.begin());
-	while (cont != continuity.end())
+	CC_textline_list::const_iterator cont(sheet.continuity.begin());
+	while (cont != sheet.continuity.end())
 	{
 		bool do_tab;
 		CC_textchunk_list::const_iterator c;
@@ -459,7 +459,7 @@ static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), bord1, bord2, siz, off, whash, ehash));
 }
 
-void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) const
+void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool landscape)
 {
 	unsigned short i;
 	unsigned long x, y;
@@ -494,7 +494,7 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 	dc->SetLogicalFunction(wxCOPY);
 	mode->Draw(dc.get());
 
-	if (!pts.empty())
+	if (!sheet.pts.empty())
 	{
 		dc->SetFont(*pointLabelFont);
 		circ_r = FLOAT2COORD(dot_ratio);
@@ -505,11 +505,11 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 		origin = mode->Offset();
 		for (int selectd = 0; selectd < 2; selectd++)
 		{
-			for (i = 0; i < show->GetNumPoints(); i++)
+			for (i = 0; i < sheet.show->GetNumPoints(); i++)
 			{
-				x = GetPosition(i, ref).x+origin.x;
-				y = GetPosition(i, ref).y+origin.y;
-				switch (pts[i].sym)
+				x = sheet.GetPosition(i, ref).x+origin.x;
+				y = sheet.GetPosition(i, ref).y+origin.y;
+				switch (sheet.pts[i].sym)
 				{
 					case SYMBOL_SOL:
 					case SYMBOL_SOLBKSL:
@@ -521,7 +521,7 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 						dc->SetBrush(*wxTRANSPARENT_BRUSH);
 				}
 				dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
-				switch (pts[i].sym)
+				switch (sheet.pts[i].sym)
 				{
 					case SYMBOL_SL:
 					case SYMBOL_X:
@@ -536,7 +536,7 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 					default:
 						break;
 				}
-				switch (pts[i].sym)
+				switch (sheet.pts[i].sym)
 				{
 					case SYMBOL_BKSL:
 					case SYMBOL_X:
@@ -552,9 +552,9 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 						break;
 				}
 				wxCoord textw, texth, textd;
-				dc->GetTextExtent(show->GetPointLabel(i), &textw, &texth, &textd);
-				dc->DrawText(show->GetPointLabel(i),
-					pts[i].GetFlip() ? x : (x - textw),
+				dc->GetTextExtent(sheet.show->GetPointLabel(i), &textw, &texth, &textd);
+				dc->DrawText(sheet.show->GetPointLabel(i),
+					sheet.pts[i].GetFlip() ? x : (x - textw),
 					y - textoff - texth + textd);
 			}
 		}
@@ -582,8 +582,8 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 
 	DrawCenteredText(*dc, kHeader, wxPoint(pageW*kHeaderLocation[landscape][0], pageH*kHeaderLocation[landscape][1]));
 
-	DrawCenteredText(*dc, GetNumber(), wxPoint(pageW*kUpperNumberPosition[landscape][0], pageH*kUpperNumberPosition[landscape][1]));
-	DrawCenteredText(*dc, GetNumber(), wxPoint(pageW*kLowerNumberPosition[landscape][0], pageH*kLowerNumberPosition[landscape][1]));
+	DrawCenteredText(*dc, sheet.GetNumber(), wxPoint(pageW*kUpperNumberPosition[landscape][0], pageH*kUpperNumberPosition[landscape][1]));
+	DrawCenteredText(*dc, sheet.GetNumber(), wxPoint(pageW*kLowerNumberPosition[landscape][0], pageH*kLowerNumberPosition[landscape][1]));
 	dc->DrawRectangle(pageW*kLowerNumberBox[landscape][0], pageH*kLowerNumberBox[landscape][1], pageW*kLowerNumberBox[landscape][2], pageH*kLowerNumberBox[landscape][3]);
 
 	dc->SetFont(*wxTheFontList->FindOrCreateFont(8, wxSWISS, wxNORMAL, wxNORMAL));
@@ -604,7 +604,7 @@ void CC_sheet::DrawForPrinting(wxDC *printerdc, unsigned ref, bool landscape) co
 	DrawCenteredText(*dc, kLowerNorthLabel, wxPoint(pageW*kLowerNorthPosition[landscape][0], pageH*kLowerNorthPosition[landscape][1]));
 	DrawArrow(*dc, wxPoint(pageW*kLowerNorthArrow[landscape][0], pageH*kLowerNorthArrow[landscape][1]), pageW*kLowerNorthArrow[landscape][2], true);
 
-	DrawCont(*dc, kBitmapScale*pageH*kContinuityStart[landscape], landscape);
+	DrawCont(*dc, sheet, kBitmapScale*pageH*kContinuityStart[landscape], landscape);
 
 	dc->SetUserScale(origXscale, origYscale);
 	dc->SetDeviceOrigin(origX, origY);

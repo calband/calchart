@@ -50,17 +50,6 @@ public:
 	CC_sheet(CC_sheet *sht);
 	~CC_sheet();
 
-	void Draw(wxDC *dc, unsigned ref, bool primary = true,
-		bool drawall = true, int point = -1) const;
-	void DrawForPrinting(wxDC *dc, unsigned ref, bool landscape) const;
-	void DrawCont(wxDC& dc, wxCoord yStart, bool landscape) const;
-
-// internal use only
-	const wxChar *PrintStandard(FILE *fp) const;
-	const wxChar *PrintSpringshow(FILE *fp) const;
-	const wxChar *PrintOverview(FILE *fp) const;
-	const wxChar *PrintCont(FILE *fp) const;
-
 	unsigned GetNumSelectedPoints() const;
 	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
 	bool SelectContinuity(unsigned i) const;
@@ -124,6 +113,16 @@ private:
 	std::vector<CC_point> pts;
 	wxString name;
 	wxString number;
+
+friend void Draw(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool primary, bool drawall, int point);
+friend void DrawForPrinting(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool landscape);
+friend void DrawCont(wxDC& dc, const CC_sheet& sheet, wxCoord yStart, bool landscape);
+
+friend const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet);
+friend const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet);
+friend const wxChar *PrintOverview(FILE *fp, const CC_sheet& sheet);
+friend const wxChar *PrintCont(FILE *fp, const CC_sheet& sheet);
+
 };
 
 #endif

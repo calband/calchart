@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_continuity.h"
 
 
-wxString Capitalize(const wxString &str)
+static wxString Capitalize(const wxString &str)
 {
 	wxString Result = str.Lower();
 	if (Result.Length() > 0)
@@ -42,7 +42,7 @@ wxString Capitalize(const wxString &str)
 }
 
 CC_continuity::CC_continuity(const wxString& s, unsigned n)
-: num(n), name(Capitalize(s))
+: name(Capitalize(s)), num(n)
 {
 }
 
@@ -65,13 +65,93 @@ void CC_continuity::SetText(const wxString& s)
 	text = s;
 }
 
-const wxString& CC_continuity::GetText() const
-{
-	return text;
-}
-
 void CC_continuity::AppendText(const wxString& s)
 {
 	text.Append(s);
 }
 
+const wxString& CC_continuity::GetText() const
+{
+	return text;
+}
+
+
+// Test Suite stuff
+struct CC_continuity_values
+{
+	wxString name;
+	unsigned num;
+	wxString text;
+	wxString GetName;
+	unsigned GetNum;
+	wxString GetText;
+};
+
+
+bool Check_CC_continuity(const CC_continuity& underTest, const CC_continuity_values& values)
+{
+	return (underTest.num == values.num)
+		&& (underTest.name == values.name)
+		&& (underTest.text == values.text)
+		&& (underTest.GetName() == values.GetName)
+		&& (underTest.GetNum() == values.GetNum)
+		&& (underTest.GetText() == values.GetText)
+		;
+}
+
+void CC_continuity_UnitTests()
+{
+	// test some defaults:
+	CC_continuity_values values;
+	values.num = 0;
+	values.name = wxT("Unittests");
+	values.text = wxT("");
+	values.GetName = values.name;
+	values.GetNum = values.num;
+	values.GetText = values.text;
+
+	// test defaults
+	CC_continuity underTest(wxT("UNITTESTS"), 0);
+	assert(Check_CC_continuity(underTest, values));
+
+	// test defaults with different init
+	CC_continuity underTest2(wxT("uNITTEST2"), 10);
+	values.num = 10;
+	values.name = wxT("Unittest2");
+	values.GetName = values.name;
+	values.GetNum = values.num;
+	values.GetText = values.text;
+	assert(Check_CC_continuity(underTest2, values));
+
+	// Set some text
+	underTest2.SetText(wxT("this is some text"));
+	values.text = wxT("this is some text");
+	values.GetName = values.name;
+	values.GetNum = values.num;
+	values.GetText = values.text;
+	assert(Check_CC_continuity(underTest2, values));
+
+	// Append some more text
+	underTest2.AppendText(wxT("Adding more"));
+	values.text = wxT("this is some textAdding more");
+	values.GetName = values.name;
+	values.GetNum = values.num;
+	values.GetText = values.text;
+	assert(Check_CC_continuity(underTest2, values));
+
+	// Set some text
+	underTest2.SetText(wxT("different words"));
+	values.text = wxT("different words");
+	values.GetName = values.name;
+	values.GetNum = values.num;
+	values.GetText = values.text;
+	assert(Check_CC_continuity(underTest2, values));
+
+	// Reset text
+	underTest2.SetText(wxT(""));
+	values.text = wxT("");
+	values.GetName = values.name;
+	values.GetNum = values.num;
+	values.GetText = values.text;
+	assert(Check_CC_continuity(underTest2, values));
+}

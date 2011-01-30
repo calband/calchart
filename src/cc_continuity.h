@@ -44,15 +44,21 @@ public:
 	unsigned GetNum() const;
 
 	void SetText(const wxString& s);
-	const wxString& GetText() const;
 	void AppendText(const wxString& s);
+	const wxString& GetText() const;
 
 private:
-	unsigned num;
 	wxString name;
+	unsigned num;
 	wxString text;
+
+friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
 };
 
 typedef boost::shared_ptr<CC_continuity> CC_continuity_ptr;
+
+bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
+
+void CC_continuity_UnitTests();
 
 #endif

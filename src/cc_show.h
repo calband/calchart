@@ -67,15 +67,15 @@ public:
 
 	void Append(CC_show *shw);
 	void Append(CC_sheet *newsheets);
-	wxString Save(const wxString& filename) const;
+	wxString Save(const wxString& filename);
 	wxString Autosave() const;
 	void ClearAutosave() const;
 	void FlushAllTextWindows() const;
 
-	inline const wxString& GetName() { return name; }
+	inline const wxString& GetName() const { return name; }
 	wxString UserGetName() const;
-	void SetName(const wxString& newname) const;
-	void UserSetName(const wxString& newname) const;
+	void SetName(const wxString& newname);
+	void UserSetName(const wxString& newname);
 
 	inline const wxString& GetDescr() const { return descr; }
 	const wxString& UserGetDescr() const;
@@ -83,7 +83,7 @@ public:
 	void UserSetDescr(const wxString& newdescr, wxWindow* win);
 
 	inline bool Modified() const { return modified; }
-	void SetModified(bool b) const;
+	void SetModified(bool b);
 
 	inline unsigned short GetNumSheets() const { return numsheets; }
 	inline CC_sheet *GetSheet() const { return sheets; }
@@ -109,9 +109,9 @@ public:
 	inline bool GetBoolLandscape() const { return print_landscape; }
 	inline bool GetBoolDoCont() const { return print_do_cont; }
 	inline bool GetBoolDoContSheet() const { return print_do_cont_sheet; }
-	inline bool& GetBoolLandscape() { return print_landscape; }
-	inline bool& GetBoolDoCont() { return print_do_cont; }
-	inline bool& GetBoolDoContSheet() { return print_do_cont_sheet; }
+	inline void SetBoolLandscape(bool v) { print_landscape = v; }
+	inline void SetBoolDoCont(bool v) { print_do_cont = v; }
+	inline void SetBoolDoContSheet(bool v) { print_do_cont_sheet = v; }
 
 	bool UnselectAll();
 	inline bool IsSelected(unsigned i) const { return selections[i]; }
@@ -132,19 +132,19 @@ private:
 private:
 	void PrintSheets(FILE *fp) const;		  // called by Print()
 	wxString SaveInternal(const wxString& filename) const;
-	void SetAutosaveName(const wxString& realname) const;
+	void SetAutosaveName(const wxString& realname);
 
-	void AddError(const wxString& str) const
+	void AddError(const wxString& str)
 	{
 		error += str + wxT("\n");
 		okay = false;
 	}
 
 	mutable wxString error;
-	mutable bool okay;
+	bool okay;
 
-	mutable wxString name;
-	mutable wxString autosave_name;
+	wxString name;
+	wxString autosave_name;
 	wxString descr;
 	unsigned short numpoints;
 	unsigned short numsheets;
@@ -152,7 +152,7 @@ private:
 	std::vector<wxString> pt_labels;
 	bool *selections;						  // array for each point
 	std::vector<unsigned> selectionList;	  // order of selections
-	mutable bool modified;
+	bool modified;
 	bool print_landscape;
 	bool print_do_cont;
 	bool print_do_cont_sheet;

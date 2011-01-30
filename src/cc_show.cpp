@@ -1444,7 +1444,7 @@ void CC_show::FlushAllTextWindows() const
 }
 
 
-void CC_show::UserSetName(const wxString& newname) const
+void CC_show::UserSetName(const wxString& newname)
 {
 	SetName(newname);
 	gTheApp->GetWindowList().ChangeName();
@@ -1458,7 +1458,7 @@ const wxString& CC_show::UserGetDescr() const
 }
 
 
-void CC_show::SetModified(bool b) const
+void CC_show::SetModified(bool b)
 {
 	modified = b;
 	gTheApp->GetWindowList().UpdateStatusBar();
@@ -1478,7 +1478,7 @@ wxString CC_show::Autosave() const
 }
 
 
-wxString CC_show::Save(const wxString& filename) const
+wxString CC_show::Save(const wxString& filename)
 {
 	wxString s = SaveInternal(filename);
 	if (s.empty())
@@ -1504,7 +1504,7 @@ wxString CC_show::UserGetName() const
 }
 
 
-void CC_show::SetName(const wxString& newname) const
+void CC_show::SetName(const wxString& newname)
 {
 // make into a full path
 	wxString path = FullPath(newname);
@@ -1513,7 +1513,7 @@ void CC_show::SetName(const wxString& newname) const
 }
 
 
-void CC_show::SetAutosaveName(const wxString& realname) const
+void CC_show::SetAutosaveName(const wxString& realname)
 {
 	autosave_name = autosave_dir;
 	autosave_name.Append(PATH_SEPARATOR);
@@ -1794,3 +1794,43 @@ void CC_show::Select(unsigned i, bool val)
 			selectionList.erase(std::find(selectionList.begin(), selectionList.end(), i));
 	}
 }
+
+#include <iostream>
+using std::cout;
+
+struct ShowTestData
+{
+	bool Ok;
+	
+};
+void UnitTests()
+{
+	boost::shared_ptr<CC_show> test(new CC_show);
+	cout<<"ok "<<test->Ok()<<"\n";
+//	assert(test.Ok() == true);
+	cout<<"GetError "<<(wchar_t*)test->GetError().c_str()<<"\n";
+//	assert(test.Ok() == true);
+	cout<<"GetName "<<(wchar_t*)test->GetName().c_str()<<"\n";
+	cout<<"UserGetName "<<(wchar_t*)test->UserGetName().c_str()<<"\n";
+	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";
+	cout<<"UserGetDescr "<<(wchar_t*)test->UserGetDescr().c_str()<<"\n";
+	cout<<"Modified "<<test->Modified()<<"\n";
+	cout<<"GetNumSheets "<<test->GetNumSheets()<<"\n";
+	cout<<"GetSheet "<<test->GetSheet()<<"\n";
+	cout<<"GetSheetPos "<<test->GetSheetPos(NULL)<<"\n";
+	cout<<"GetNumPoints "<<test->GetNumPoints()<<"\n";
+	for (unsigned i = 0; i < test->GetNumSheets(); ++i)
+	{
+		cout<<"GetNthSheet "<<i<<" "<<test->GetNthSheet(i)<<"\n";
+		cout<<"GetBoolLandscape "<<i<<" "<<test->GetBoolLandscape()<<"\n";
+		cout<<"GetBoolDoCont "<<i<<" "<<test->GetBoolDoCont()<<"\n";
+		cout<<"GetBoolDoContSheet "<<i<<" "<<test->GetBoolDoContSheet()<<"\n";
+	}
+	for (unsigned i = 0; i < test->GetNumPoints(); ++i)
+	{
+		cout<<"GetPointLabel "<<i<<" "<<(wchar_t*)test->GetPointLabel(i).c_str()<<"\n";
+	}
+	cout<<"GetMode "<<(void*)&test->GetMode()<<"\n";
+}
+
+

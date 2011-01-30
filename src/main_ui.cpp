@@ -219,7 +219,7 @@ public:
 
 		int size = gPrintDialogData->GetPrintData().GetOrientation();
 
-		sheet->DrawForPrinting(dc, 0, 2 == size);
+		DrawForPrinting(dc, *sheet, 0, 2 == size);
 
 		return true;
 	}
@@ -1967,12 +1967,12 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 		{
 			if (curr_ref > 0)
 			{
-				sheet->Draw(GetMemDC(), 0, false, drawall, point);
-				sheet->Draw(GetMemDC(), curr_ref, true, false, point);
+				Draw(GetMemDC(), *sheet, 0, false, drawall, point);
+				Draw(GetMemDC(), *sheet, curr_ref, true, false, point);
 			}
 			else
 			{
-				sheet->Draw(GetMemDC(), curr_ref, true, drawall, point);
+				Draw(GetMemDC(), *sheet, curr_ref, true, drawall, point);
 			}
 			dragon = false;						  // since the canvas gets cleared
 			DrawDrag(true);
