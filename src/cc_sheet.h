@@ -29,12 +29,12 @@
 
 #include "cc_types.h"
 #include "cc_continuity.h"
+#include "cc_point.h"
 
 #include <wx/wx.h>
 #include <vector>
 
 class CC_show;
-class CC_point;
 class CC_coord;
 class Matrix;
 class CC_textline;

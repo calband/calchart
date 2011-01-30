@@ -227,30 +227,6 @@ void CreateVector(CC_coord& c, float dir, float mag);
 
 void CreateUnitVector(float& a, float& b, float dir);
 
-#define PNT_LABEL 1
-class CC_point
-{
-public:
-	CC_point()
-		:flags(0), sym(SYMBOL_PLAIN), cont(0) {}
-
-	inline bool GetFlip() const { return (bool)(flags & PNT_LABEL); }
-	inline void Flip(bool val = true)
-	{
-		if (val) flags |= PNT_LABEL;
-		else flags &= ~PNT_LABEL;
-	};
-	inline void FlipToggle() { Flip(GetFlip() ? false:true); }
-
-	unsigned short flags;
-	// by having both a sym type and cont index, we can have several
-	// points share the same symbol but have different continuities.
-	SYMBOL_TYPE sym;
-	unsigned char cont;
-	CC_coord pos;
-	CC_coord ref[NUM_REF_PNTS];
-};
-
 #define DEF_HASH_W 32
 #define DEF_HASH_E 52
 

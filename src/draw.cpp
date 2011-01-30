@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "confgr.h"
 #include "modes.h"
 #include "cc_sheet.h"
+#include "cc_point.h"
 #include <memory>
 
 extern wxFont *pointLabelFont;

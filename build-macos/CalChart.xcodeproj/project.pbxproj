@@ -11,6 +11,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		C74DE4A412EAC0B900A20B8A /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C74DE4A212EAC0B900A20B8A /* cc_continuity.cpp */; };
 		C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
+		C75C5DE712F5E7E200CBFD3A /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */; };
 		C78241F412BEC69200BE680F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78241F212BEC69200BE680F /* cc_show.cpp */; };
 		C7AFA98E117A6DBA00CC53E2 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */; };
 		C7AFA98F117A6DBA00CC53E2 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96C117A6DBA00CC53E2 /* animate.cpp */; };
@@ -270,6 +271,8 @@
 		C74DE4A312EAC0B900A20B8A /* cc_continuity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_continuity.h; sourceTree = "<group>"; };
 		C75A5FB91180072C0047B87D /* cc_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_shapes.cpp; sourceTree = "<group>"; };
 		C75A5FBA1180072C0047B87D /* cc_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_shapes.h; sourceTree = "<group>"; };
+		C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_point.cpp; sourceTree = "<group>"; };
+		C75C5DE612F5E7E200CBFD3A /* cc_point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_point.h; sourceTree = "<group>"; };
 		C78241F212BEC69200BE680F /* cc_show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_show.cpp; sourceTree = "<group>"; };
 		C78241F312BEC69200BE680F /* cc_show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_show.h; sourceTree = "<group>"; };
 		C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = anim_ui.cpp; sourceTree = "<group>"; };
@@ -503,6 +506,8 @@
 				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
 				C74DE4A212EAC0B900A20B8A /* cc_continuity.cpp */,
 				C74DE4A312EAC0B900A20B8A /* cc_continuity.h */,
+				C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */,
+				C75C5DE612F5E7E200CBFD3A /* cc_point.h */,
 				C75A5FB91180072C0047B87D /* cc_shapes.cpp */,
 				C75A5FBA1180072C0047B87D /* cc_shapes.h */,
 				C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */,
@@ -766,6 +771,7 @@
 				C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */,
 				C78241F412BEC69200BE680F /* cc_show.cpp in Sources */,
 				C74DE4A412EAC0B900A20B8A /* cc_continuity.cpp in Sources */,
+				C75C5DE712F5E7E200CBFD3A /* cc_point.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
