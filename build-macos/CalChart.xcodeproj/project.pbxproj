@@ -139,6 +139,7 @@
 		C7ED507B11CD5A51001A4FA2 /* tex2rtf.ini in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501E11CD594E001A4FA2 /* tex2rtf.ini */; };
 		C7ED507C11CD5A51001A4FA2 /* texhelp.sty in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501F11CD594E001A4FA2 /* texhelp.sty */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
+		C7FC7B7E130746C100F22854 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7FC7B7C130746C100F22854 /* cc_coord.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -419,6 +420,8 @@
 		C7ED501E11CD594E001A4FA2 /* tex2rtf.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tex2rtf.ini; sourceTree = "<group>"; };
 		C7ED501F11CD594E001A4FA2 /* texhelp.sty */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = texhelp.sty; sourceTree = "<group>"; };
 		C7ED502011CD594E001A4FA2 /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
+		C7FC7B7C130746C100F22854 /* cc_coord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_coord.cpp; sourceTree = "<group>"; };
+		C7FC7B7D130746C100F22854 /* cc_coord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_coord.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -506,6 +509,8 @@
 				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
 				C74DE4A212EAC0B900A20B8A /* cc_continuity.cpp */,
 				C74DE4A312EAC0B900A20B8A /* cc_continuity.h */,
+				C7FC7B7C130746C100F22854 /* cc_coord.cpp */,
+				C7FC7B7D130746C100F22854 /* cc_coord.h */,
 				C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */,
 				C75C5DE612F5E7E200CBFD3A /* cc_point.h */,
 				C75A5FB91180072C0047B87D /* cc_shapes.cpp */,
@@ -772,6 +777,7 @@
 				C78241F412BEC69200BE680F /* cc_show.cpp in Sources */,
 				C74DE4A412EAC0B900A20B8A /* cc_continuity.cpp in Sources */,
 				C75C5DE712F5E7E200CBFD3A /* cc_point.cpp in Sources */,
+				C7FC7B7E130746C100F22854 /* cc_coord.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

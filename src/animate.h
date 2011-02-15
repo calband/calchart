@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "show.h"
+#include "cc_coord.h"
 #include <wx/string.h>
 #include <map>
 #include <set>
