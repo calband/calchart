@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma implementation
 #endif
 
+#include <fstream>
+
 #include "cc_show.h"
 
 #include "undo.h"
@@ -37,14 +39,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
-#include "ingl.h"
 
 static const wxChar *nomem_str = wxT("Out of memory!");
 static const wxChar *nofile_str = wxT("Unable to open file");
-static const wxChar *badfile_mas_str = wxT("Error reading master file");
-static const wxChar *badfile_pnt_str = wxT("Error reading points file");
-static const wxChar *badfile_cnt_str = wxT("Error reading animation continuity file");
-static const wxChar *badanimcont_str = wxT("Error in animation continuity file");
 static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
 static const wxChar *nosheets_str = wxT("No sheets found");
@@ -77,11 +74,9 @@ class AutoSaveTimer: public wxTimer
 		AutoSaveTimer(): untitled_number(1) {}
 		void Notify()
 		{
-			const CC_show *show;
-
-			for (std::list<const CC_show*>::const_iterator i = showlist.begin(); i != showlist.end(); ++i)
+			for (std::list<CC_show*>::iterator i = showlist.begin(); i != showlist.end(); ++i)
 			{
-				show = *i;
+				CC_show *show = *i;
 				if (show->Modified())
 				{
 					wxString s;
@@ -93,17 +88,17 @@ class AutoSaveTimer: public wxTimer
 			}
 		}
 
-		inline void AddShow(const CC_show *show)
+		inline void AddShow(CC_show *show)
 		{
 			showlist.push_back(show);
 		}
-		inline void RemoveShow(const CC_show *show)
+		inline void RemoveShow(CC_show *show)
 		{
 			showlist.remove(show);
 		}
 		inline int GetNumber() { return untitled_number++; }
 	private:
-		std::list<const CC_show*> showlist;
+		std::list<CC_show*> showlist;
 		int untitled_number;
 };
 
@@ -115,6 +110,7 @@ void SetAutoSave(int secs)
 		autosaveTimer.Start(secs*1000);
 }
 
+IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 
 // Create a new show
 CC_show::CC_show(unsigned npoints)
@@ -153,286 +149,25 @@ print_do_cont_sheet(true)
 	autosaveTimer.AddShow(this);
 }
 
+#define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
 
-#define INGL_SHOW MakeINGLid('S','H','O','W')
-#define INGL_SHET MakeINGLid('S','H','E','T')
-#define INGL_SIZE MakeINGLid('S','I','Z','E')
-#define INGL_LABL MakeINGLid('L','A','B','L')
-#define INGL_MODE MakeINGLid('M','O','D','E')
-#define INGL_DESC MakeINGLid('D','E','S','C')
-#define INGL_NAME MakeINGLid('N','A','M','E')
-#define INGL_DURA MakeINGLid('D','U','R','A')
-#define INGL_POS  MakeINGLid('P','O','S',' ')
-#define INGL_SYMB MakeINGLid('S','Y','M','B')
-#define INGL_TYPE MakeINGLid('T','Y','P','E')
-#define INGL_REFP MakeINGLid('R','E','F','P')
-#define INGL_CONT MakeINGLid('C','O','N','T')
-#define INGL_PCNT MakeINGLid('P','C','N','T')
-
-// Only exists so SHOW chunk is recognized
-static const char* load_show_SHOW(INGLchunk*)
-{
-	return NULL;
-}
-
-
-static const char* load_show_SHET(INGLchunk* chunk)
-{
-	CC_show *show = (CC_show*)chunk->prev->userdata;
-	CC_sheet *sheet = new CC_sheet(show);
-
-	show->InsertSheetInternal(sheet, show->GetNumSheets());
-	chunk->userdata = sheet;
-
-	return NULL;
-}
-
-
-static const char* load_show_SIZE(INGLchunk* chunk)
-{
-	CC_show *show = (CC_show*)chunk->prev->userdata;
-
-	if ((show->GetNumPoints() > 0) || (show->GetSheet() != NULL))
-	{
-		return "Duplicate SIZE chunks in file";
-	}
-	if (chunk->size != 4)
-	{
-		return "Bad SIZE chunk";
-	}
-	show->SetNumPointsInternal(get_big_long(&chunk->data[0]));
-	return NULL;
-}
-
-
-static const char* load_show_LABL(INGLchunk* chunk)
-{
-	unsigned i;
-	const char *str = (const char*)&chunk->data[0];
-	CC_show *show = (CC_show*)chunk->prev->userdata;
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		show->GetPointLabel(i) = wxString::FromUTF8(str);
-		str += strlen(str)+1;
-	}
-	return NULL;
-}
-
-
-static const char* load_show_MODE(INGLchunk* /*chunk*/) {
-return NULL;
-}
-
-
-static const char* load_show_DESC(INGLchunk* chunk)
-{
-	CC_show *show = (CC_show*)chunk->prev->userdata;
-
-	wxString s(wxString::FromUTF8((const char*)&chunk->data[0]));
-	show->SetDescr(s);
-
-	return NULL;
-}
-
-
-static const char* load_show_NAME(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-
-	wxString s(wxString::FromUTF8((const char*)&chunk->data[0]));
-	sheet->SetName(s);
-
-	return NULL;
-}
-
-
-static const char* load_show_DURA(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-
-	if (chunk->size != 4)
-	{
-		return "Bad DURA chunk";
-	}
-	sheet->SetBeats(get_big_long(&chunk->data[0]));
-
-	return NULL;
-}
-
-
-static const char* load_show_POS(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	unsigned i;
-	uint8_t *data;
-	CC_coord c;
-
-	if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4)
-	{
-		return "Bad POS chunk";
-	}
-	data = (uint8_t*)&chunk->data[0];
-	for (i = 0; i < sheet->show->GetNumPoints(); i++)
-	{
-		c.x = get_big_word(data);
-		data += 2;
-		c.y = get_big_word(data);
-		data += 2;
-		sheet->SetAllPositions(c, i);
-	}
-
-	return NULL;
-}
-
-
-static const char* load_show_SYMB(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	unsigned i;
-	uint8_t *data;
-
-	if (chunk->size != sheet->show->GetNumPoints())
-	{
-		return "Bad SYMB chunk";
-	}
-	data = (uint8_t *)&chunk->data[0];
-	for (i = 0; i < sheet->show->GetNumPoints(); i++)
-	{
-		sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(data++));
-	}
-
-	return NULL;
-}
-
-
-static const char* load_show_TYPE(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	unsigned i;
-	uint8_t *data;
-
-	if (chunk->size != sheet->show->GetNumPoints())
-	{
-		return "Bad TYPE chunk";
-	}
-	data = (uint8_t *)&chunk->data[0];
-	for (i = 0; i < sheet->show->GetNumPoints(); i++)
-	{
-		sheet->GetPoint(i).cont = *(data++);
-	}
-
-	return NULL;
-}
-
-
-static const char* load_show_REFP(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	unsigned i, ref;
-	uint8_t *data;
-	CC_coord c;
-
-	if (chunk->size != (unsigned long)sheet->show->GetNumPoints()*4+2)
-	{
-		return "Bad REFP chunk";
-	}
-	data = (uint8_t*)&chunk->data[0];
-	ref = get_big_word(data);
-	data += 2;
-	for (i = 0; i < sheet->show->GetNumPoints(); i++)
-	{
-		c.x = get_big_word(data);
-		data += 2;
-		c.y = get_big_word(data);
-		data += 2;
-		sheet->SetPositionQuick(c, i, ref);		  // don't clip
-	}
-
-	return NULL;
-}
-
-
-static const char* load_show_SHET_LABL(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	unsigned i;
-	uint8_t *data;
-
-	if (chunk->size != sheet->show->GetNumPoints())
-	{
-		return "Bad LABL chunk";
-	}
-	data = (uint8_t *)&chunk->data[0];
-	for (i = 0; i < sheet->show->GetNumPoints(); i++)
-	{
-		if (*(data++))
-		{
-			sheet->GetPoint(i).Flip();
-		}
-	}
-
-	return NULL;
-}
-
-
-static const char* badcontchunk = "Bad CONT chunk";
-static const char* load_show_CONT(INGLchunk* chunk)
-{
-	CC_sheet *sheet = (CC_sheet*)chunk->prev->userdata;
-	unsigned num;
-	const char *name;
-	const char *text;
-
-	if (chunk->size < 3)						  // one byte num + two nils minimum
-	{
-		return badcontchunk;
-	}
-												  // make sure we have a nil
-	if (((const char*)&chunk->data[0])[chunk->size-1] != '\0')
-	{
-		return badcontchunk;
-	}
-	name = (const char *)&chunk->data[0] + 1;
-	num = strlen(name);
-	if (chunk->size < num + 3)					  // check for room for text string
-	{
-		return badcontchunk;
-	}
-	text = (const char *)&chunk->data[0] + 2 + strlen(name);
-
-	wxString namestr(wxString::FromUTF8(name));
-	CC_continuity_ptr newcont(new CC_continuity(namestr, *((uint8_t *)&chunk->data[0])));
-	wxString textstr(wxString::FromUTF8(text));
-	newcont->SetText(textstr);
-	sheet->AppendContinuity(newcont);
-
-	return NULL;
-}
-
-
-static const char* load_show_PCNT(INGLchunk* /*chunk*/) {
-return NULL;
-}
-
-
-static INGLhandler load_show_handlers[] =
-{
-	{ INGL_SHOW, 0, load_show_SHOW },
-	{ INGL_SHET, INGL_SHOW, load_show_SHET },
-	{ INGL_SIZE, INGL_SHOW, load_show_SIZE },
-	{ INGL_LABL, INGL_SHOW, load_show_LABL },
-	{ INGL_MODE, INGL_SHOW, load_show_MODE },
-	{ INGL_DESC, INGL_SHOW, load_show_DESC },
-	{ INGL_NAME, INGL_SHET, load_show_NAME },
-	{ INGL_DURA, INGL_SHET, load_show_DURA },
-	{ INGL_POS , INGL_SHET, load_show_POS  },
-	{ INGL_SYMB, INGL_SHET, load_show_SYMB },
-	{ INGL_TYPE, INGL_SHET, load_show_TYPE },
-	{ INGL_REFP, INGL_SHET, load_show_REFP },
-	{ INGL_LABL, INGL_SHET, load_show_SHET_LABL },
-	{ INGL_CONT, INGL_SHET, load_show_CONT },
-	{ INGL_PCNT, INGL_SHET, load_show_PCNT }
-};
+#define INGL_INGL Make4CharWord('I','N','G','L')
+#define INGL_GURK Make4CharWord('G','U','R','K')
+#define INGL_SHOW Make4CharWord('S','H','O','W')
+#define INGL_SHET Make4CharWord('S','H','E','T')
+#define INGL_SIZE Make4CharWord('S','I','Z','E')
+#define INGL_LABL Make4CharWord('L','A','B','L')
+#define INGL_MODE Make4CharWord('M','O','D','E')
+#define INGL_DESC Make4CharWord('D','E','S','C')
+#define INGL_NAME Make4CharWord('N','A','M','E')
+#define INGL_DURA Make4CharWord('D','U','R','A')
+#define INGL_POS  Make4CharWord('P','O','S',' ')
+#define INGL_SYMB Make4CharWord('S','Y','M','B')
+#define INGL_TYPE Make4CharWord('T','Y','P','E')
+#define INGL_REFP Make4CharWord('R','E','F','P')
+#define INGL_CONT Make4CharWord('C','O','N','T')
+#define INGL_PCNT Make4CharWord('P','C','N','T')
+#define INGL_END  Make4CharWord('E','N','D',' ')
 
 enum CONT_PARSE_MODE
 {
@@ -444,6 +179,128 @@ enum CONT_PARSE_MODE
 	CONT_PARSE_BOLD,
 	CONT_PARSE_ITALIC
 };
+
+void ReadLong(std::istream& stream, uint32_t& d)
+{
+	std::istream::char_type rawd[4];
+	stream.read(rawd, sizeof(rawd));
+	d = get_big_long(&rawd);
+}
+
+void ReadData(std::istream& stream, std::istream::char_type* data, uint32_t size)
+{
+	stream.read(data, size);
+}
+
+// return false if you don't read the inname
+bool ReadAndCheckID(std::istream& stream, uint32_t inname)
+{
+	uint32_t name;
+	ReadLong(stream, name);
+	if (inname != name)
+	{
+		stream.clear(std::ios_base::badbit);
+		return false;
+	}
+	return true;
+}
+
+// return false if you don't read the inname
+bool ReadCheckIDandSize(std::istream& stream, uint32_t inname, uint32_t &size)
+{
+	uint32_t name;
+	ReadLong(stream, name);
+	if (inname != name)
+	{
+		stream.clear(std::ios_base::badbit);
+		return false;
+	}
+	ReadLong(stream, name);
+	if (4 != name)
+	{
+		stream.clear(std::ios_base::badbit);
+		return stream;
+	}
+	ReadLong(stream, size);
+	return true;
+}
+
+// return false if you don't read the inname
+bool ReadCheckIDandFillData(std::istream& stream, uint32_t inname, std::vector<std::istream::char_type> &data)
+{
+	uint32_t name;
+	ReadLong(stream, name);
+	if (inname != name)
+	{
+		stream.clear(std::ios_base::badbit);
+		return false;
+	}
+	ReadLong(stream, name);
+	data.resize(name);
+	ReadData(stream, &data[0], name);
+	return true;
+}
+
+void WriteLong(std::ostream& stream, uint32_t d)
+{
+	std::ostream::char_type rawd[4];
+	put_big_long(rawd, d);
+	stream.write(rawd, sizeof(rawd));
+}
+
+void WriteHeader(std::ostream& stream)
+{
+	WriteLong(stream, INGL_INGL);
+}
+
+
+void WriteGurk(std::ostream& stream, uint32_t name)
+{
+	WriteLong(stream, INGL_GURK);
+	WriteLong(stream, name);
+}
+
+
+void WriteChunkHeader(std::ostream& stream, uint32_t name, uint32_t size)
+{
+	WriteLong(stream, name);
+	WriteLong(stream, size);
+}
+
+
+void WriteChunk(std::ostream& stream, uint32_t name, uint32_t size, const void *data)
+{
+	WriteLong(stream, name);
+	WriteLong(stream, size);
+	if (size > 0)
+		stream.write(static_cast<const std::ostream::char_type*>(data), size);
+}
+
+
+void WriteChunkStr(std::ostream& stream, uint32_t name, const char *str)
+{
+	WriteChunk(stream, name, strlen(str)+1, (unsigned char *)str);
+}
+
+
+void WriteEnd(std::ostream& stream, uint32_t name)
+{
+	WriteLong(stream, INGL_END);
+	WriteLong(stream, name);
+}
+
+
+void WriteStr(std::ostream& stream, const char *str)
+{
+	stream.write(str, strlen(str)+1);
+}
+
+
+void Write(std::ostream& stream, const void *data, uint32_t size)
+{
+	stream.write(static_cast<const std::ostream::char_type*>(data), size);
+}
+
 
 // Load a show
 CC_show::CC_show(const wxString& filestr) :
@@ -461,332 +318,13 @@ print_do_cont_sheet(true)
 	undolist = new ShowUndoList(this, undo_buffer_size);
 	mode = *gTheApp->GetModeList().Begin();
 
-	wxString ext = filestr.AfterLast('.');
-	if (!ext.CmpNoCase(wxT("mas")))
+	std::ifstream stream(filestr.fn_str());
+	LoadObject(stream);
+	if (!stream.good())
 	{
-		bool old_format_uppercase = false;
-		if (!ext.Cmp(wxT("MAS")))
-		{
-			old_format_uppercase = true;
-		}
-
-		FILE *fp = fopen(filestr.fn_str(), "r");
-		if (!fp)
-		{
-			AddError(nofile_str);
-			return;
-		}
-		wxString tempbuf;
-		if (ReadDOSline(fp, tempbuf) <= 0)
-		{
-			AddError(badfile_mas_str);
-			return;
-		}
-		uint32_t keyvalue;
-		if (CC_sscanf(tempbuf.c_str(), wxT(" %u "), &keyvalue) != 1)
-		{
-			AddError(badfile_mas_str);
-			return;
-		}
-		if (keyvalue != 1024)
-		{
-			AddError(badfile_mas_str);
-			return;
-		}
-
-		if (ReadDOSline(fp, tempbuf) <= 0)
-		{
-			AddError(badfile_mas_str);
-			return;
-		}
-		if (CC_sscanf(tempbuf.c_str(), wxT(" %hu , %hu "), &numsheets, &numpoints) != 2)
-		{
-			AddError(badfile_mas_str);
-			return;
-		}
-		pt_labels.assign(numpoints, wxString());
-		selections = new bool[numpoints];
-		UnselectAll();
-
-		CC_sheet *curr_sheet = NULL;
-		for (uint32_t i = 0; i < numsheets; ++i)
-		{
-			if (ReadDOSline(fp, tempbuf) <= 0)
-			{
-				AddError(badfile_mas_str);
-				return;
-			}
-			char sheetnamebuf[16];
-			uint32_t j;
-			uint32_t off;
-			if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
-				sheetnamebuf, &j, &off) != 3)
-			{
-				AddError(badfile_mas_str);
-				return;
-			}
-			if (j == 0) j=1;
-			off = strlen(sheetnamebuf);
-			while (off > 0)
-			{
-				off--;
-				if (sheetnamebuf[off] != ' ')
-				{
-					sheetnamebuf[off+1] = 0;
-					break;
-				}
-			}
-
-// For old format, use ISO-8859-1 not UTF8
-			wxString sheetnamestr(wxString::From8BitData(sheetnamebuf));
-			if (curr_sheet == NULL)
-			{
-				sheets = new CC_sheet(this, sheetnamestr);
-				if (!sheets)
-				{
-					AddError(nomem_str);
-					return;
-				}
-				curr_sheet = sheets;
-			}
-			else
-			{
-				curr_sheet->next = new CC_sheet(this, sheetnamestr);
-				if (!sheets)
-				{
-					AddError(nomem_str);
-					return;
-				}
-				curr_sheet = curr_sheet->next;
-			}
-			curr_sheet->SetBeats(j);
-		}
-		fclose(fp);
-
-		std::vector<cc_oldpoint> diskpts(numpoints);
-		curr_sheet = sheets;
-		for (size_t k = 1;
-			k <= numsheets;
-			k++, curr_sheet = curr_sheet->next)
-		{
-			ext.Printf(wxT("%c%u"), old_format_uppercase ? 'S':'s', k);
-			wxString namebuf; namebuf = filestr.BeforeLast('.');
-			namebuf.Append('.');
-			namebuf.Append(ext);
-			fp = fopen(namebuf.fn_str(), "rb");
-			if (!fp)
-			{
-				AddError(nofile_str);
-				return;
-			}
-			bool reallyoldpnts = false;
-			int record_len = fread(&diskpts[0], numpoints, sizeof(cc_oldpoint), fp);
-			if (record_len == sizeof(cc_oldpoint))
-			{
-				reallyoldpnts = false;
-			}
-			else if (record_len == sizeof(cc_reallyoldpoint))
-			{
-				reallyoldpnts = true;
-			}
-			else
-			{
-				AddError(badfile_pnt_str);
-				return;
-			}
-			fclose(fp);
-
-			for (size_t i = 0; i < numpoints; i++)
-			{
-				if (reallyoldpnts)
-				{
-					short refidx;
-					unsigned short refloc;
-
-					cc_oldpoint conv_diskpt;
-					conv_diskpt.sym = ((cc_reallyoldpoint*)&diskpts[0])[i].sym;
-					conv_diskpt.flags = ((cc_reallyoldpoint*)&diskpts[0])[i].flags;
-					conv_diskpt.pos = ((cc_reallyoldpoint*)&diskpts[0])[i].pos;
-					conv_diskpt.color = ((cc_reallyoldpoint*)&diskpts[0])[i].color;
-					conv_diskpt.code[0] = ((cc_reallyoldpoint*)&diskpts[0])[i].code[0];
-					conv_diskpt.code[1] = ((cc_reallyoldpoint*)&diskpts[0])[i].code[1];
-					conv_diskpt.cont = ((cc_reallyoldpoint*)&diskpts[0])[i].cont;
-					refidx = get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[i].refnum);
-					if (refidx >= 0)
-					{
-						refloc =
-							get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[refidx].pos.x) +
-							(short)get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[i].ref.x);
-						put_lil_word(&conv_diskpt.ref[0].x, refloc);
-
-						refloc =
-							get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[refidx].pos.y) +
-							(short)get_lil_word(&((cc_reallyoldpoint*)&diskpts[0])[i].ref.y);
-						put_lil_word(&conv_diskpt.ref[0].y, refloc);
-					}
-					else
-					{
-						conv_diskpt.ref[0].x = 0xFFFF;
-						conv_diskpt.ref[0].x = 0xFFFF;
-					}
-					conv_diskpt.ref[1].x = 0xFFFF;
-					conv_diskpt.ref[1].x = 0xFFFF;
-					conv_diskpt.ref[2].x = 0xFFFF;
-					conv_diskpt.ref[2].x = 0xFFFF;
-					curr_sheet->SetPoint(conv_diskpt, i);
-				}
-				else
-				{
-					curr_sheet->SetPoint(diskpts[i], i);
-				}
-
-				if (k == 1)
-				{
-// Build table for point labels
-					unsigned int label_idx = 0;
-					char pt_buf[4];
-					for (size_t j = 0; j < 2; j++)
-					{
-// Convert to ascii
-						if ((diskpts[i].code[j] >= '0') && (diskpts[i].code[j] != '?'))
-						{
-							if (diskpts[i].code[j] <= 'Z')
-							{
-// normal ascii
-								pt_buf[label_idx++] = diskpts[i].code[j];
-							}
-							else
-							{
-								if (diskpts[i].code[j] > 100)
-								{
-// digit (0-9)
-									pt_buf[label_idx++] = diskpts[i].code[j] - 101 + '0';
-								}
-								else
-								{
-// '10' to '19' range
-									sprintf(&pt_buf[label_idx], "%u",
-										diskpts[i].code[j] - 81);
-									label_idx = strlen(pt_buf);
-								}
-							}
-						}
-					}
-					pt_buf[label_idx] = 0;
-					pt_labels[i] = wxString::FromAscii(pt_buf);
-				}
-			}
-// Now load animation continuity
-// We need to use fgets and sscanf so blank lines aren't skipped
-			ext.Printf(wxT("%c%u"), old_format_uppercase ? 'F':'f', k);
-			namebuf = filestr.BeforeLast('.');
-			namebuf.Append('.');
-			namebuf.Append(ext);
-			fp = fopen(namebuf.fn_str(), "r");
-			if (!fp)
-			{
-				AddError(nofile_str);
-				return;
-			}
-			if (ReadDOSline(fp, tempbuf) <= 0)
-			{
-				AddError(badfile_cnt_str);
-				return;
-			}
-			if (tempbuf != wxT("'NEW"))
-			{
-				AddError(badanimcont_str);
-				return;
-			}
-			if (ReadDOSline(fp, tempbuf) <= 0)
-			{
-				AddError(badanimcont_str);
-				return;
-			}
-			unsigned numanimcont;
-			if (CC_sscanf(tempbuf.c_str(), wxT(" %u"), &numanimcont) != 1)
-			{
-				AddError(badanimcont_str);
-				return;
-			}
-			for (size_t i = 0; i < numanimcont; i++)
-			{
-// Skip blank line
-				if (feof(fp))
-				{
-					AddError(badanimcont_str);
-					return;
-				}
-				ReadDOSline(fp, tempbuf);
-				if (ReadDOSline(fp, tempbuf) <= 0)
-				{
-					AddError(badanimcont_str);
-					return;
-				}
-				char sheetnamebuf[16];
-				uint32_t j;
-				unsigned tnum;
-				if (CC_sscanf(tempbuf.c_str(), wxT(" \"%[^\"]\" , %u , %u\n"),
-					sheetnamebuf, &tnum, &j) != 3)
-				{
-					AddError(badanimcont_str);
-					return;
-				}
-				wxString sheetnamestr(wxString::From8BitData(sheetnamebuf));
-				CC_continuity_ptr newanimcont(new CC_continuity(sheetnamestr, tnum));
-				while (j > 0)
-				{
-					j--;
-					if (feof(fp))
-					{
-						AddError(badanimcont_str);
-					}
-					ReadDOSline(fp, tempbuf);
-					newanimcont->AppendText(tempbuf.Strip() + wxT("\n"));
-				}
-				curr_sheet->AppendContinuity(newanimcont);
-			}
-			fclose(fp);
-		}
-
-// now load continuity file if it exists
-		ext = old_format_uppercase ? wxT("TXT") : wxT("txt");
-		wxString namebuf;
-		namebuf = filestr.BeforeLast('.');
-		namebuf.Append('.');
-		namebuf.Append(ext);
-		wxString namestr(namebuf.fn_str(), *wxConvFileName);
-		if (wxFileExists(namestr))
-		{
-			wxString conterr = ImportContinuity(namestr);
-			if (!conterr.empty())
-			{
-				AddError(conterr);
-			}
-		}
-
-		wxString shwname;
-		ChangeExtension(namestr, shwname, wxT("shw"));
-		SetName(shwname);
+		AddError(nofile_str);
 	}
-	else
-	{
-		INGLread readhnd(filestr.fn_str());
-		if (!readhnd.Okay())
-		{
-			AddError(nofile_str);
-		}
-		else
-		{
-			const char *parseerror = NULL;
-			readhnd.ParseFile(load_show_handlers,
-				sizeof(load_show_handlers)/sizeof(INGLhandler),
-				&parseerror, this);
-			if (parseerror != NULL)
-				AddError(wxString(parseerror, wxConvUTF8));
-			SetName(filestr);
-		}
-	}
+	SetName(filestr);
 	if (okay && (sheets == NULL))
 	{
 		AddError(nosheets_str);
@@ -1179,45 +717,22 @@ void CC_show::Append(CC_sheet *newsheets)
 }
 
 
-wxString CC_show::SaveInternal(const wxString& filename) const
+std::ostream& CC_show::SaveObject(std::ostream& stream)
 {
-	wxString bakfile;
-	if (wxFileExists(filename))
-	{
-		ChangeExtension(filename, bakfile, wxT("bak"));
-		if (!wxCopyFile(filename, bakfile))
-			return nofile_str;
-	}
-
-	INGLwrite *handl = new INGLwrite(filename.fn_str());
-	INGLid id;
+	uint32_t id;
 	unsigned i, j;
 	Coord crd;
 	unsigned char c;
 
 	FlushAllTextWindows();
 
-	if (!handl->Okay())
-	{
-		delete handl;
-		return nofile_str;
-	}
-	if (!handl->WriteHeader())
-	{
-		return writeerr_str;
-	}
-	if (!handl->WriteGurk(INGL_SHOW))
-	{
-		return writeerr_str;
-	}
+	WriteHeader(stream);
+	WriteGurk(stream, INGL_SHOW);
 
 // Handle show info
 	i = GetNumPoints();
 	put_big_long(&id, i);
-	if (!handl->WriteChunk(INGL_SIZE, 4, &id))
-	{
-		return writeerr_str;
-	}
+	WriteChunk(stream, INGL_SIZE, 4, &id);
 
 	id = 0;
 	for (i = 0; i < GetNumPoints(); i++)
@@ -1226,16 +741,10 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 	}
 	if (id > 0)
 	{
-		if (!handl->WriteChunkHeader(INGL_LABL, id))
-		{
-			return writeerr_str;
-		}
+		WriteChunkHeader(stream, INGL_LABL, id);
 		for (i = 0; i < GetNumPoints(); i++)
 		{
-			if (!handl->WriteStr(GetPointLabel(i).utf8_str()))
-			{
-				return writeerr_str;
-			}
+			WriteStr(stream, GetPointLabel(i).utf8_str());
 		}
 	}
 
@@ -1244,10 +753,7 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 // Description
 	if (!UserGetDescr().empty())
 	{
-		if (!handl->WriteChunkStr(INGL_DESC, UserGetDescr().utf8_str()))
-		{
-			return writeerr_str;
-		}
+		WriteChunkStr(stream, INGL_DESC, UserGetDescr().utf8_str());
 	}
 
 // Handle sheets
@@ -1255,39 +761,21 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 		curr_sheet != NULL;
 		curr_sheet = curr_sheet->next)
 	{
-		if (!handl->WriteGurk(INGL_SHET))
-		{
-			return writeerr_str;
-		}
+		WriteGurk(stream, INGL_SHET);
 // Name
-		if (!handl->WriteChunkStr(INGL_NAME, curr_sheet->GetName().utf8_str()))
-		{
-			return writeerr_str;
-		}
+		WriteChunkStr(stream, INGL_NAME, curr_sheet->GetName().utf8_str());
 // Beats
 		put_big_long(&id, curr_sheet->GetBeats());
-		if (!handl->WriteChunk(INGL_DURA, 4, &id))
-		{
-			return writeerr_str;
-		}
+		WriteChunk(stream, INGL_DURA, 4, &id);
 
 // Point positions
-		if (!handl->WriteChunkHeader(INGL_POS, GetNumPoints()*4))
-		{
-			return writeerr_str;
-		}
+		WriteChunkHeader(stream, INGL_POS, GetNumPoints()*4);
 		for (i = 0; i < GetNumPoints(); i++)
 		{
 			put_big_word(&crd, curr_sheet->GetPosition(i).x);
-			if (!handl->Write(&crd, 2))
-			{
-				return writeerr_str;
-			}
+			Write(stream, &crd, 2);
 			put_big_word(&crd, curr_sheet->GetPosition(i).y);
-			if (!handl->Write(&crd, 2))
-			{
-				return writeerr_str;
-			}
+			Write(stream, &crd, 2);
 		}
 // Ref point positions
 		for (j = 1; j <= NUM_REF_PNTS; j++)
@@ -1296,27 +784,15 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 			{
 				if (curr_sheet->GetPosition(i) != curr_sheet->GetPosition(i, j))
 				{
-					if (!handl->WriteChunkHeader(INGL_REFP, GetNumPoints()*4+2))
-					{
-						return writeerr_str;
-					}
+					WriteChunkHeader(stream, INGL_REFP, GetNumPoints()*4+2);
 					put_big_word(&crd, j);
-					if (!handl->Write(&crd, 2))
-					{
-						return writeerr_str;
-					}
+					Write(stream, &crd, 2);
 					for (i = 0; i < GetNumPoints(); i++)
 					{
 						put_big_word(&crd, curr_sheet->GetPosition(i, j).x);
-						if (!handl->Write(&crd, 2))
-						{
-							return writeerr_str;
-						}
+						Write(stream, &crd, 2);
 						put_big_word(&crd, curr_sheet->GetPosition(i, j).y);
-						if (!handl->Write(&crd, 2))
-						{
-							return writeerr_str;
-						}
+						Write(stream, &crd, 2);
 					}
 					break;
 				}
@@ -1327,16 +803,10 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 		{
 			if (curr_sheet->GetPoint(i).sym != 0)
 			{
-				if (!handl->WriteChunkHeader(INGL_SYMB, GetNumPoints()))
-				{
-					return writeerr_str;
-				}
+				WriteChunkHeader(stream, INGL_SYMB, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					if (!handl->Write(&curr_sheet->GetPoint(i).sym, 1))
-					{
-						return writeerr_str;
-					}
+					Write(stream, &curr_sheet->GetPoint(i).sym, 1);
 				}
 				break;
 			}
@@ -1346,16 +816,10 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 		{
 			if (curr_sheet->GetPoint(i).cont != 0)
 			{
-				if (!handl->WriteChunkHeader(INGL_TYPE, GetNumPoints()))
-				{
-					return writeerr_str;
-				}
+				WriteChunkHeader(stream, INGL_TYPE, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					if (!handl->Write(&curr_sheet->GetPoint(i).cont, 1))
-					{
-						return writeerr_str;
-					}
+					Write(stream, &curr_sheet->GetPoint(i).cont, 1);
 				}
 				break;
 			}
@@ -1365,10 +829,7 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 		{
 			if (curr_sheet->GetPoint(i).GetFlip())
 			{
-				if (!handl->WriteChunkHeader(INGL_LABL, GetNumPoints()))
-				{
-					return writeerr_str;
-				}
+				WriteChunkHeader(stream, INGL_LABL, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
 					if (curr_sheet->GetPoint(i).GetFlip())
@@ -1379,10 +840,7 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 					{
 						c = false;
 					}
-					if (!handl->Write(&c, 1))
-					{
-						return writeerr_str;
-					}
+					Write(stream, &c, 1);
 				}
 				break;
 			}
@@ -1391,38 +849,297 @@ wxString CC_show::SaveInternal(const wxString& filename) const
 		for (CC_sheet::ContContainer::const_iterator curranimcont = curr_sheet->animcont.begin(); curranimcont != curr_sheet->animcont.end();
 			++curranimcont)
 		{
-			if (!handl->WriteChunkHeader(INGL_CONT,
+			WriteChunkHeader(stream, INGL_CONT,
 				1+(*curranimcont)->GetName().Length()+1+
-				(*curranimcont)->GetText().Length()+1))
-			{
-				return writeerr_str;
-			}
+				(*curranimcont)->GetText().Length()+1);
 			unsigned tnum = (*curranimcont)->GetNum();
-			if (!handl->Write(&tnum, 1))
-			{
-				return writeerr_str;
-			}
-			if (!handl->WriteStr((*curranimcont)->GetName().utf8_str()))
-			{
-				return writeerr_str;
-			}
-			if (!handl->WriteStr((*curranimcont)->GetText().utf8_str()))
-			{
-				return writeerr_str;
-			}
+			Write(stream, &tnum, 1);
+			WriteStr(stream, (*curranimcont)->GetName().utf8_str());
+			WriteStr(stream, (*curranimcont)->GetText().utf8_str());
 		}
-		if (!handl->WriteEnd(INGL_SHET))
-		{
-			return writeerr_str;
-		}
+		WriteEnd(stream, INGL_SHET);
 	}
 
-	if (!handl->WriteEnd(INGL_SHOW))
+	WriteEnd(stream, INGL_SHOW);
+	
+	// TODO: if an error occurred, notify user here:
+
+	return stream;
+}
+
+std::istream& CC_show::LoadObject(std::istream& stream)
+{
+	uint32_t name;
+	uint32_t size;
+	std::vector<std::istream::char_type> data;
+
+	if (!ReadAndCheckID(stream, INGL_INGL) || !ReadAndCheckID(stream, INGL_GURK) || !ReadAndCheckID(stream, INGL_SHOW))
+	{
+		return stream;
+	}
+
+// Handle show info
+	// read in the size:
+	// <INGL_SIZE><4><# points>
+	if (!ReadCheckIDandSize(stream, INGL_SIZE, size))
+	{
+		return stream;
+	}
+	SetNumPointsInternal(size);
+
+	// Optional: read in the point labels
+	// <INGL_LABL><SIZE>
+	ReadLong(stream, name);
+	if (INGL_LABL == name)
+	{
+		ReadLong(stream, size);
+		data.resize(size);
+		ReadData(stream, &data[0], size);
+		const char *str = (const char*)&data[0];
+		for (unsigned i = 0; i < GetNumPoints(); i++)
+		{
+			GetPointLabel(i) = wxString::FromUTF8(str);
+			str += strlen(str)+1;
+		}
+		// read the next name
+		ReadLong(stream, name);
+	}
+
+	// Optional: read in the point labels
+	// <INGL_DESC><SIZE>
+	if (INGL_DESC == name)
+	{
+		ReadLong(stream, size);
+		data.resize(size);
+		ReadData(stream, &data[0], size);
+		wxString s(wxString::FromUTF8((const char*)&data[0]));
+		SetDescr(s);
+		ReadLong(stream, name);
+	}
+
+	// Read in sheets
+	// <INGL_GURK><INGL_SHET>
+	while (INGL_GURK == name)
+	{
+		if (!ReadAndCheckID(stream, INGL_SHET))
+			return stream;
+
+		CC_sheet *sheet = new CC_sheet(this);
+		InsertSheetInternal(sheet, GetNumSheets());
+
+		// Read in sheet name
+		// <INGL_NAME><size><string + 1>
+		if (!ReadCheckIDandFillData(stream, INGL_NAME, data))
+			return stream;
+		sheet->SetName(wxString::FromUTF8((const char*)&data[0]));
+
+		// read in the duration:
+		// <INGL_DURA><4><duration>
+		if (!ReadCheckIDandSize(stream, INGL_DURA, size))
+			return stream;
+		sheet->SetBeats(size);
+
+		// Point positions
+		// <INGL_DURA><size><data>
+		if (!ReadCheckIDandFillData(stream, INGL_POS, data))
+			return stream;
+		if (data.size() != size_t(sheet->show->GetNumPoints()*4))
+		{
+			// "Bad POS chunk";
+			stream.clear(std::ios_base::badbit);
+			return stream;
+		}
+		{
+			uint8_t *d;
+			d = (uint8_t*)&data[0];
+			for (unsigned i = 0; i < sheet->show->GetNumPoints(); ++i)
+			{
+				CC_coord c;
+				c.x = get_big_word(d);
+				d += 2;
+				c.y = get_big_word(d);
+				d += 2;
+				sheet->SetAllPositions(c, i);
+			}
+		}
+
+		ReadLong(stream, name);
+
+		// read all the reference points
+		while (INGL_REFP == name)
+		{
+			ReadLong(stream, size);
+			if (size != (unsigned long)sheet->show->GetNumPoints()*4+2)
+			{
+				// "Bad REFP chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+			data.resize(size);
+			ReadData(stream, &data[0], size);
+			uint8_t *d = (uint8_t*)&data[0];
+			unsigned ref = get_big_word(d);
+			d += 2;
+			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			{
+				CC_coord c;
+				c.x = get_big_word(d);
+				d += 2;
+				c.y = get_big_word(d);
+				d += 2;
+				sheet->SetPositionQuick(c, i, ref);		  // don't clip
+			}
+			ReadLong(stream, name);
+		}
+		// Point symbols
+		while (INGL_SYMB == name)
+		{
+			ReadLong(stream, size);
+			if (size != (unsigned long)sheet->show->GetNumPoints())
+			{
+				// "Bad SYMB chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+			data.resize(size);
+			ReadData(stream, &data[0], size);
+			uint8_t *d = (uint8_t *)&data[0];
+			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			{
+				sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
+			}
+			ReadLong(stream, name);
+		}
+		// Point continuity types
+		while (INGL_TYPE == name)
+		{
+			ReadLong(stream, size);
+			if (size != (unsigned long)sheet->show->GetNumPoints())
+			{
+				// "Bad TYPE chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+			data.resize(size);
+			ReadData(stream, &data[0], size);
+			uint8_t *d = (uint8_t *)&data[0];
+			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			{
+				sheet->GetPoint(i).cont = *(d++);
+			}
+			ReadLong(stream, name);
+		}
+		// Point labels (left or right)
+		while (INGL_LABL == name)
+		{
+			ReadLong(stream, size);
+			if (size != (unsigned long)sheet->show->GetNumPoints())
+			{
+				// "Bad SYMB chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+			data.resize(size);
+			ReadData(stream, &data[0], size);
+			uint8_t *d = (uint8_t *)&data[0];
+			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			{
+				if (*(d++))
+				{
+					sheet->GetPoint(i).Flip();
+				}
+			}
+			ReadLong(stream, name);
+		}
+		// Continuity text
+		while (INGL_CONT == name)
+		{
+			ReadLong(stream, size);
+			if (size < 3)						  // one byte num + two nils minimum
+			{
+				// "Bad cont chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+			data.resize(size);
+			ReadData(stream, &data[0], size);
+			const char *d = (const char *)&data[0];
+			if (d[size-1] != '\0')
+			{
+				// "Bad cont chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+
+			const char* text = d + 1;
+			size_t num = strlen(text);
+			if (size < num + 3)					  // check for room for text string
+			{
+				// "Bad cont chunk";
+				stream.clear(std::ios_base::badbit);
+				return stream;
+			}
+			wxString namestr(wxString::FromUTF8(text));
+			text = d + 2 + strlen(text);
+			CC_continuity_ptr newcont(new CC_continuity(namestr, *((uint8_t *)&data[0])));
+			wxString textstr(wxString::FromUTF8(text));
+			newcont->SetText(textstr);
+			sheet->AppendContinuity(newcont);
+
+			ReadLong(stream, name);
+		}
+		if (INGL_END != name)
+		{
+			// should have hit an end
+			stream.clear(std::ios_base::badbit);
+			return stream;
+		}
+		
+		ReadLong(stream, name);
+		if (INGL_SHET != name)
+		{
+			// should have hit an end
+			stream.clear(std::ios_base::badbit);
+			return stream;
+		}
+		ReadLong(stream, name);
+
+	}
+	if (INGL_END != name)
+	{
+		// should have hit an end
+		stream.clear(std::ios_base::badbit);
+		return stream;
+	}
+	
+	ReadLong(stream, name);
+	if (INGL_SHOW != name)
+	{
+		// should have hit an end
+		stream.clear(std::ios_base::badbit);
+		return stream;
+	}
+	return stream;
+}
+
+wxString CC_show::SaveInternal(const wxString& filename)
+{
+	wxString bakfile;
+	if (wxFileExists(filename))
+	{
+		ChangeExtension(filename, bakfile, wxT("bak"));
+		if (!wxCopyFile(filename, bakfile))
+			return nofile_str;
+	}
+
+	FlushAllTextWindows();
+
+	std::ofstream test_save(filename.fn_str());
+	SaveObject(test_save);
+	if (!test_save.good())
 	{
 		return writeerr_str;
 	}
-
-	delete handl;
 
 	if (!bakfile.IsEmpty())
 	{
@@ -1466,7 +1183,7 @@ void CC_show::SetModified(bool b)
 }
 
 
-wxString CC_show::Autosave() const
+wxString CC_show::Autosave()
 {
 	if (!autosave_name.IsEmpty())
 	{

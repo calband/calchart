@@ -32,6 +32,8 @@
 #include "cc_winlist.h"
 
 #include <wx/wx.h>
+#include <wx/docview.h>
+#include <boost/shared_ptr.hpp>
 
 class CalChartApp;
 
@@ -54,6 +56,8 @@ private:
 	ShowModeList mModeList;
 	MainFrameList mFrameList;
 	CC_WinList mWinList;
+
+	boost::shared_ptr<wxDocManager> mDocManager;
 };
 
 #endif // _CALCHARTAPP_H_

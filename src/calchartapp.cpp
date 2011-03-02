@@ -94,6 +94,7 @@ IMPLEMENT_APP(CalChartApp)
 // Create windows and initialize app
 bool CalChartApp::OnInit()
 {
+	mDocManager.reset(new wxDocManager);
 	gTheApp = this;
 #if defined(__APPLE__) && (__APPLE__)
 	wxString runtimepath(wxT("CalChart.app/runtime"));

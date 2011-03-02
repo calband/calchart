@@ -32,30 +32,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma interface
 #endif
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-//
 #include <wx/wx.h>							  // For basic wx defines
+#include <wx/docview.h>							  // For basic wx defines
 
-//#include "cc_types.h"
-//#include "cc_winlist.h"
-//#include "platconf.h"
-//#include "linmath.h"
-//
 #include <vector>
-//#include <deque>
 
 class CC_sheet;
 class ShowMode;
 class ShowUndoList;
 
-class CC_show
+class CC_show : public wxDocument
 {
+	DECLARE_DYNAMIC_CLASS(CC_show)
 public:
 	CC_show(unsigned npoints = 0);
 	CC_show(const wxString& file);
 	~CC_show();
+
+// overriding the default implementation:
+	virtual std::ostream& SaveObject(std::ostream& stream);
+	virtual std::istream& LoadObject(std::istream& stream);
 
 	wxString ImportContinuity(const wxString& file);
 
@@ -68,7 +64,7 @@ public:
 	void Append(CC_show *shw);
 	void Append(CC_sheet *newsheets);
 	wxString Save(const wxString& filename);
-	wxString Autosave() const;
+	wxString Autosave();
 	void ClearAutosave() const;
 	void FlushAllTextWindows() const;
 
@@ -131,7 +127,7 @@ private:
 
 private:
 	void PrintSheets(FILE *fp) const;		  // called by Print()
-	wxString SaveInternal(const wxString& filename) const;
+	wxString SaveInternal(const wxString& filename);
 	void SetAutosaveName(const wxString& realname);
 
 	void AddError(const wxString& str)
