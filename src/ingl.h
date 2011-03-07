@@ -37,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <wx/defs.h>							  // For basic wx defines
+#include <wx/wx.h>
 
 #include "platconf.h"
 
@@ -107,4 +108,20 @@ private:
 
 	FILE *fp;
 };
+
+class INGL_exception
+{
+public:
+	INGL_exception(const wxString& reason) : mError(reason) {}
+	INGL_exception(uint32_t nameID)
+	{
+		uint8_t rawd[4];
+		put_big_long(rawd, nameID);
+		mError.Printf(wxT("Wrong ID read:  Read %c%c%c%c"), rawd[0], rawd[1], rawd[2], rawd[3]);
+	}
+	wxString WhatError() const { return mError; } 
+private:
+	wxString mError;
+};
+
 #endif

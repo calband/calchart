@@ -187,8 +187,8 @@ bool CalChartApp::OnInit()
 	{
 		CC_show *shw;
 
-		shw = new CC_show(argv[i]);
-		if (shw->Ok())
+		shw = new CC_show();
+		if (shw->OnOpenDocument(argv[i]))
 		{
 			topframe->NewShow(shw);
 		}

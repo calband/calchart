@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
+#include "ingl.h"
 
 static const wxChar *nomem_str = wxT("Out of memory!");
 static const wxChar *nofile_str = wxT("Unable to open file");
@@ -58,15 +59,6 @@ const wxChar *contnames[] =
 	wxT("Solsl"),
 	wxT("Solx")
 };
-
-static void ChangeExtension(const wxString& in, wxString& out,
-const wxString& ext)
-{
-	int i = in.Last('.');
-	out = in.Mid(0, i);
-	out.Append(ext);
-}
-
 
 class AutoSaveTimer: public wxTimer
 {
@@ -180,157 +172,124 @@ enum CONT_PARSE_MODE
 	CONT_PARSE_ITALIC
 };
 
-void ReadLong(std::istream& stream, uint32_t& d)
+void PeekLong(wxInputStream& stream, uint32_t& d)
 {
-	std::istream::char_type rawd[4];
-	stream.read(rawd, sizeof(rawd));
+	uint8_t rawd[4];
+	stream.Read(rawd, sizeof(rawd));
+	d = get_big_long(&rawd);
+	stream.Ungetch(rawd, sizeof(rawd));
+}
+
+void ReadLong(wxInputStream& stream, uint32_t& d)
+{
+	uint8_t rawd[4];
+	stream.Read(rawd, sizeof(rawd));
 	d = get_big_long(&rawd);
 }
 
-void ReadData(std::istream& stream, std::istream::char_type* data, uint32_t size)
-{
-	stream.read(data, size);
-}
-
 // return false if you don't read the inname
-bool ReadAndCheckID(std::istream& stream, uint32_t inname)
+void ReadAndCheckID(wxInputStream& stream, uint32_t inname)
 {
 	uint32_t name;
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		stream.clear(std::ios_base::badbit);
-		return false;
+		throw INGL_exception(inname);
 	}
-	return true;
 }
 
 // return false if you don't read the inname
-bool ReadCheckIDandSize(std::istream& stream, uint32_t inname, uint32_t &size)
+void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
 {
 	uint32_t name;
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		stream.clear(std::ios_base::badbit);
-		return false;
+		throw INGL_exception(inname);
 	}
 	ReadLong(stream, name);
 	if (4 != name)
 	{
-		stream.clear(std::ios_base::badbit);
-		return stream;
+		uint8_t rawd[4];
+		put_big_long(rawd, inname);
+		wxString s; s.Printf(wxT("Wrong size %d for name %c%c%c%c"), name, rawd[0], rawd[1], rawd[2], rawd[3]);
+		throw INGL_exception(s);
 	}
 	ReadLong(stream, size);
-	return true;
 }
 
 // return false if you don't read the inname
-bool ReadCheckIDandFillData(std::istream& stream, uint32_t inname, std::vector<std::istream::char_type> &data)
+void ReadCheckIDandFillData(wxInputStream& stream, uint32_t inname, std::vector<uint8_t>& data)
 {
 	uint32_t name;
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		stream.clear(std::ios_base::badbit);
-		return false;
+		throw INGL_exception(inname);
 	}
 	ReadLong(stream, name);
 	data.resize(name);
-	ReadData(stream, &data[0], name);
-	return true;
+	stream.Read(&data[0], name);
 }
 
-void WriteLong(std::ostream& stream, uint32_t d)
+void WriteLong(wxOutputStream& stream, uint32_t d)
 {
-	std::ostream::char_type rawd[4];
+	uint8_t rawd[4];
 	put_big_long(rawd, d);
-	stream.write(rawd, sizeof(rawd));
+	stream.Write(rawd, sizeof(rawd));
 }
 
-void WriteHeader(std::ostream& stream)
+void WriteHeader(wxOutputStream& stream)
 {
 	WriteLong(stream, INGL_INGL);
 }
 
 
-void WriteGurk(std::ostream& stream, uint32_t name)
+void WriteGurk(wxOutputStream& stream, uint32_t name)
 {
 	WriteLong(stream, INGL_GURK);
 	WriteLong(stream, name);
 }
 
 
-void WriteChunkHeader(std::ostream& stream, uint32_t name, uint32_t size)
+void WriteChunkHeader(wxOutputStream& stream, uint32_t name, uint32_t size)
 {
 	WriteLong(stream, name);
 	WriteLong(stream, size);
 }
 
 
-void WriteChunk(std::ostream& stream, uint32_t name, uint32_t size, const void *data)
+void WriteChunk(wxOutputStream& stream, uint32_t name, uint32_t size, const void *data)
 {
 	WriteLong(stream, name);
 	WriteLong(stream, size);
 	if (size > 0)
-		stream.write(static_cast<const std::ostream::char_type*>(data), size);
+		stream.Write(data, size);
 }
 
 
-void WriteChunkStr(std::ostream& stream, uint32_t name, const char *str)
+void WriteChunkStr(wxOutputStream& stream, uint32_t name, const char *str)
 {
 	WriteChunk(stream, name, strlen(str)+1, (unsigned char *)str);
 }
 
 
-void WriteEnd(std::ostream& stream, uint32_t name)
+void WriteEnd(wxOutputStream& stream, uint32_t name)
 {
 	WriteLong(stream, INGL_END);
 	WriteLong(stream, name);
 }
 
 
-void WriteStr(std::ostream& stream, const char *str)
+void WriteStr(wxOutputStream& stream, const char *str)
 {
-	stream.write(str, strlen(str)+1);
+	stream.Write(str, strlen(str)+1);
 }
 
 
-void Write(std::ostream& stream, const void *data, uint32_t size)
+void Write(wxOutputStream& stream, const void *data, uint32_t size)
 {
-	stream.write(static_cast<const std::ostream::char_type*>(data), size);
-}
-
-
-// Load a show
-CC_show::CC_show(const wxString& filestr) :
-okay(true),
-numpoints(0),
-numsheets(0),
-sheets(NULL),
-selections(NULL),
-modified(false),
-print_landscape(false),
-print_do_cont(true),
-print_do_cont_sheet(true)
-{
-
-	undolist = new ShowUndoList(this, undo_buffer_size);
-	mode = *gTheApp->GetModeList().Begin();
-
-	std::ifstream stream(filestr.fn_str());
-	LoadObject(stream);
-	if (!stream.good())
-	{
-		AddError(nofile_str);
-	}
-	SetName(filestr);
-	if (okay && (sheets == NULL))
-	{
-		AddError(nosheets_str);
-		return;
-	}
-	autosaveTimer.AddShow(this);
+	stream.Write(data, size);
 }
 
 
@@ -717,7 +676,7 @@ void CC_show::Append(CC_sheet *newsheets)
 }
 
 
-std::ostream& CC_show::SaveObject(std::ostream& stream)
+wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 {
 	uint32_t id;
 	unsigned i, j;
@@ -867,87 +826,76 @@ std::ostream& CC_show::SaveObject(std::ostream& stream)
 	return stream;
 }
 
-std::istream& CC_show::LoadObject(std::istream& stream)
+wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 {
 	uint32_t name;
-	uint32_t size;
-	std::vector<std::istream::char_type> data;
+	std::vector<uint8_t> data;
 
-	if (!ReadAndCheckID(stream, INGL_INGL) || !ReadAndCheckID(stream, INGL_GURK) || !ReadAndCheckID(stream, INGL_SHOW))
+	try
 	{
-		return stream;
-	}
+	ReadAndCheckID(stream, INGL_INGL);
+	ReadAndCheckID(stream, INGL_GURK);
+	ReadAndCheckID(stream, INGL_SHOW);
 
 // Handle show info
 	// read in the size:
 	// <INGL_SIZE><4><# points>
-	if (!ReadCheckIDandSize(stream, INGL_SIZE, size))
-	{
-		return stream;
-	}
-	SetNumPointsInternal(size);
+	ReadCheckIDandSize(stream, INGL_SIZE, name);
+	SetNumPointsInternal(name);
 
+	PeekLong(stream, name);
 	// Optional: read in the point labels
 	// <INGL_LABL><SIZE>
-	ReadLong(stream, name);
 	if (INGL_LABL == name)
 	{
-		ReadLong(stream, size);
-		data.resize(size);
-		ReadData(stream, &data[0], size);
+		ReadCheckIDandFillData(stream, INGL_LABL, data);
 		const char *str = (const char*)&data[0];
 		for (unsigned i = 0; i < GetNumPoints(); i++)
 		{
 			GetPointLabel(i) = wxString::FromUTF8(str);
 			str += strlen(str)+1;
 		}
-		// read the next name
-		ReadLong(stream, name);
+		// peek for the next name
+		PeekLong(stream, name);
 	}
 
 	// Optional: read in the point labels
 	// <INGL_DESC><SIZE>
 	if (INGL_DESC == name)
 	{
-		ReadLong(stream, size);
-		data.resize(size);
-		ReadData(stream, &data[0], size);
+		ReadCheckIDandFillData(stream, INGL_LABL, data);
 		wxString s(wxString::FromUTF8((const char*)&data[0]));
 		SetDescr(s);
-		ReadLong(stream, name);
+		// peek for the next name
+		PeekLong(stream, name);
 	}
 
 	// Read in sheets
 	// <INGL_GURK><INGL_SHET>
 	while (INGL_GURK == name)
 	{
-		if (!ReadAndCheckID(stream, INGL_SHET))
-			return stream;
+		ReadAndCheckID(stream, INGL_GURK);
+		ReadAndCheckID(stream, INGL_SHET);
 
 		CC_sheet *sheet = new CC_sheet(this);
 		InsertSheetInternal(sheet, GetNumSheets());
 
 		// Read in sheet name
 		// <INGL_NAME><size><string + 1>
-		if (!ReadCheckIDandFillData(stream, INGL_NAME, data))
-			return stream;
+		ReadCheckIDandFillData(stream, INGL_NAME, data);
 		sheet->SetName(wxString::FromUTF8((const char*)&data[0]));
 
 		// read in the duration:
 		// <INGL_DURA><4><duration>
-		if (!ReadCheckIDandSize(stream, INGL_DURA, size))
-			return stream;
-		sheet->SetBeats(size);
+		ReadCheckIDandSize(stream, INGL_DURA, name);
+		sheet->SetBeats(name);
 
 		// Point positions
 		// <INGL_DURA><size><data>
-		if (!ReadCheckIDandFillData(stream, INGL_POS, data))
-			return stream;
+		ReadCheckIDandFillData(stream, INGL_POS, data);
 		if (data.size() != size_t(sheet->show->GetNumPoints()*4))
 		{
-			// "Bad POS chunk";
-			stream.clear(std::ios_base::badbit);
-			return stream;
+			throw INGL_exception(wxT("bad POS chunk"));
 		}
 		{
 			uint8_t *d;
@@ -963,20 +911,15 @@ std::istream& CC_show::LoadObject(std::istream& stream)
 			}
 		}
 
-		ReadLong(stream, name);
-
+		PeekLong(stream, name);
 		// read all the reference points
 		while (INGL_REFP == name)
 		{
-			ReadLong(stream, size);
-			if (size != (unsigned long)sheet->show->GetNumPoints()*4+2)
+			ReadCheckIDandFillData(stream, INGL_REFP, data);
+			if (data.size() != (unsigned long)sheet->show->GetNumPoints()*4+2)
 			{
-				// "Bad REFP chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad REFP chunk"));
 			}
-			data.resize(size);
-			ReadData(stream, &data[0], size);
 			uint8_t *d = (uint8_t*)&data[0];
 			unsigned ref = get_big_word(d);
 			d += 2;
@@ -989,58 +932,46 @@ std::istream& CC_show::LoadObject(std::istream& stream)
 				d += 2;
 				sheet->SetPositionQuick(c, i, ref);		  // don't clip
 			}
-			ReadLong(stream, name);
+			PeekLong(stream, name);
 		}
 		// Point symbols
 		while (INGL_SYMB == name)
 		{
-			ReadLong(stream, size);
-			if (size != (unsigned long)sheet->show->GetNumPoints())
+			ReadCheckIDandFillData(stream, INGL_SYMB, data);
+			if (data.size() != (unsigned long)sheet->show->GetNumPoints())
 			{
-				// "Bad SYMB chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad SYMB chunk"));
 			}
-			data.resize(size);
-			ReadData(stream, &data[0], size);
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
 			{
 				sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
 			}
-			ReadLong(stream, name);
+			PeekLong(stream, name);
 		}
 		// Point continuity types
 		while (INGL_TYPE == name)
 		{
-			ReadLong(stream, size);
-			if (size != (unsigned long)sheet->show->GetNumPoints())
+			ReadCheckIDandFillData(stream, INGL_TYPE, data);
+			if (data.size() != (unsigned long)sheet->show->GetNumPoints())
 			{
-				// "Bad TYPE chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad TYPE chunk"));
 			}
-			data.resize(size);
-			ReadData(stream, &data[0], size);
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
 			{
 				sheet->GetPoint(i).cont = *(d++);
 			}
-			ReadLong(stream, name);
+			PeekLong(stream, name);
 		}
 		// Point labels (left or right)
 		while (INGL_LABL == name)
 		{
-			ReadLong(stream, size);
-			if (size != (unsigned long)sheet->show->GetNumPoints())
+			ReadCheckIDandFillData(stream, INGL_LABL, data);
+			if (data.size() != (unsigned long)sheet->show->GetNumPoints())
 			{
-				// "Bad SYMB chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad SYMB chunk"));
 			}
-			data.resize(size);
-			ReadData(stream, &data[0], size);
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
 			{
@@ -1049,35 +980,27 @@ std::istream& CC_show::LoadObject(std::istream& stream)
 					sheet->GetPoint(i).Flip();
 				}
 			}
-			ReadLong(stream, name);
+			PeekLong(stream, name);
 		}
 		// Continuity text
 		while (INGL_CONT == name)
 		{
-			ReadLong(stream, size);
-			if (size < 3)						  // one byte num + two nils minimum
+			ReadCheckIDandFillData(stream, INGL_CONT, data);
+			if (data.size() < 3)						  // one byte num + two nils minimum
 			{
-				// "Bad cont chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad cont chunk"));
 			}
-			data.resize(size);
-			ReadData(stream, &data[0], size);
 			const char *d = (const char *)&data[0];
-			if (d[size-1] != '\0')
+			if (d[data.size()-1] != '\0')
 			{
-				// "Bad cont chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad cont chunk"));
 			}
 
 			const char* text = d + 1;
 			size_t num = strlen(text);
-			if (size < num + 3)					  // check for room for text string
+			if (data.size() < num + 3)					  // check for room for text string
 			{
-				// "Bad cont chunk";
-				stream.clear(std::ios_base::badbit);
-				return stream;
+				throw INGL_exception(wxT("Bad cont chunk"));
 			}
 			wxString namestr(wxString::FromUTF8(text));
 			text = d + 2 + strlen(text);
@@ -1086,68 +1009,21 @@ std::istream& CC_show::LoadObject(std::istream& stream)
 			newcont->SetText(textstr);
 			sheet->AppendContinuity(newcont);
 
-			ReadLong(stream, name);
+			PeekLong(stream, name);
 		}
-		if (INGL_END != name)
-		{
-			// should have hit an end
-			stream.clear(std::ios_base::badbit);
-			return stream;
-		}
-		
-		ReadLong(stream, name);
-		if (INGL_SHET != name)
-		{
-			// should have hit an end
-			stream.clear(std::ios_base::badbit);
-			return stream;
-		}
-		ReadLong(stream, name);
-
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_SHET);
+		// peek for the next name
+		PeekLong(stream, name);
 	}
-	if (INGL_END != name)
-	{
-		// should have hit an end
-		stream.clear(std::ios_base::badbit);
-		return stream;
+	ReadAndCheckID(stream, INGL_END);
+	ReadAndCheckID(stream, INGL_SHOW);
 	}
-	
-	ReadLong(stream, name);
-	if (INGL_SHOW != name)
-	{
-		// should have hit an end
-		stream.clear(std::ios_base::badbit);
-		return stream;
+	catch (INGL_exception& e) {
+		AddError(e.WhatError());
 	}
 	return stream;
 }
-
-wxString CC_show::SaveInternal(const wxString& filename)
-{
-	wxString bakfile;
-	if (wxFileExists(filename))
-	{
-		ChangeExtension(filename, bakfile, wxT("bak"));
-		if (!wxCopyFile(filename, bakfile))
-			return nofile_str;
-	}
-
-	FlushAllTextWindows();
-
-	std::ofstream test_save(filename.fn_str());
-	SaveObject(test_save);
-	if (!test_save.good())
-	{
-		return writeerr_str;
-	}
-
-	if (!bakfile.IsEmpty())
-	{
-		wxRemoveFile(bakfile);
-	}
-	return wxT("");
-}
-
 
 void CC_show::ClearAutosave() const
 {
@@ -1185,35 +1061,15 @@ void CC_show::SetModified(bool b)
 
 wxString CC_show::Autosave()
 {
-	if (!autosave_name.IsEmpty())
+	if (!autosave_name.IsEmpty() && !OnSaveDocument(autosave_name))
 	{
-		return SaveInternal(autosave_name);
+		return writeerr_str;
 	}
 	else
 	{
 		return wxT("");
 	}
 }
-
-
-wxString CC_show::Save(const wxString& filename)
-{
-	wxString s = SaveInternal(filename);
-	if (s.empty())
-	{
-		if (autosave_name)
-		{
-			ClearAutosave();
-		}
-		SetModified(false);
-		if (name.CompareTo(filename) != 0)
-		{
-			UserSetName(filename);
-		}
-	}
-	return s;
-}
-
 
 wxString CC_show::UserGetName() const
 {

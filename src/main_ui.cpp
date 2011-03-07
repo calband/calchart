@@ -445,8 +445,8 @@ void TopFrame::OpenShow(const wxString& filename)
 		s = wxFileSelector(wxT("Load show"), NULL, NULL, NULL, file_wild);
 	if (!s.empty())
 	{
-		shw = new CC_show(s);
-		if (shw->Ok())
+		shw = new CC_show();
+		if (shw->OnOpenDocument(s))
 		{
 			NewShow(shw);
 		}
@@ -1287,8 +1287,8 @@ void MainFrame::LoadShow()
 		s = wxFileSelector(wxT("Load show"), NULL, NULL, NULL, file_wild);
 		if (!s.empty())
 		{
-			shw = new CC_show(s);
-			if (shw->Ok())
+			shw = new CC_show();
+			if (shw->OnOpenDocument(s))
 			{
 				node->GetList()->SetShow(shw);
 			}
@@ -1312,8 +1312,8 @@ void MainFrame::AppendShow()
 	s = wxFileSelector(wxT("Append show"), NULL, NULL, NULL, file_wild);
 	if (!s.empty())
 	{
-		shw = new CC_show(s);
-		if (shw->Ok())
+		shw = new CC_show();
+		if (shw->OnOpenDocument(s))
 		{
 			if (shw->GetNumPoints() == field->show_descr.show->GetNumPoints())
 			{
@@ -1371,10 +1371,9 @@ void MainFrame::SaveShow()
 	}
 	else
 	{
-		s = field->show_descr.show->Save(s);
-		if (!s.empty())
+		if (!field->show_descr.show->OnSaveDocument(s))
 		{
-			(void)wxMessageBox(s, wxT("Save Error"));
+			(void)wxMessageBox(field->show_descr.show->GetError(), wxT("Save Error"));
 		}
 	}
 }
@@ -1397,10 +1396,9 @@ void MainFrame::SaveShowAs()
 		{
 			str.Append(wxT(".shw"));
 		}
-		err = field->show_descr.show->Save(str);
-		if (!err.empty())
+		if (!field->show_descr.show->OnSaveDocument(str))
 		{
-			(void)wxMessageBox(err, wxT("Save Error"));
+			(void)wxMessageBox(field->show_descr.show->GetError(), wxT("Save Error"));
 		}
 	}
 }

@@ -46,12 +46,13 @@ class CC_show : public wxDocument
 	DECLARE_DYNAMIC_CLASS(CC_show)
 public:
 	CC_show(unsigned npoints = 0);
-	CC_show(const wxString& file);
 	~CC_show();
 
-// overriding the default implementation:
-	virtual std::ostream& SaveObject(std::ostream& stream);
-	virtual std::istream& LoadObject(std::istream& stream);
+	// Need to override OnOpenDoc so we can report errors
+	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
+
+	virtual wxOutputStream& SaveObject(wxOutputStream& stream);
+	virtual wxInputStream& LoadObject(wxInputStream& stream);
 
 	wxString ImportContinuity(const wxString& file);
 
@@ -63,7 +64,6 @@ public:
 
 	void Append(CC_show *shw);
 	void Append(CC_sheet *newsheets);
-	wxString Save(const wxString& filename);
 	wxString Autosave();
 	void ClearAutosave() const;
 	void FlushAllTextWindows() const;
@@ -127,7 +127,6 @@ private:
 
 private:
 	void PrintSheets(FILE *fp) const;		  // called by Print()
-	wxString SaveInternal(const wxString& filename);
 	void SetAutosaveName(const wxString& realname);
 
 	void AddError(const wxString& str)
