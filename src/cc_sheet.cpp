@@ -199,13 +199,13 @@ CC_continuity_ptr CC_sheet::GetNthContinuity(unsigned i)
 
 const CC_continuity_ptr CC_sheet::UserGetNthContinuity(unsigned i) const
 {
-	gTheApp->GetWindowList().FlushContinuity();
+	wxGetApp().GetWindowList().FlushContinuity();
 	return GetNthContinuity(i);
 }
 
 CC_continuity_ptr CC_sheet::UserGetNthContinuity(unsigned i)
 {
-	gTheApp->GetWindowList().FlushContinuity();
+	wxGetApp().GetWindowList().FlushContinuity();
 	return GetNthContinuity(i);
 }
 
@@ -233,7 +233,7 @@ wxWindow *win)
 // Create undo entry
 		show->undolist->Add(new ShowUndoCont(show->GetSheetPos(this), i, this));
 		c->SetText(text);
-		gTheApp->GetWindowList().SetContinuity(win, show->GetSheetPos(this), i);
+		wxGetApp().GetWindowList().SetContinuity(win, show->GetSheetPos(this), i);
 	}
 }
 
@@ -242,7 +242,7 @@ CC_continuity_ptr CC_sheet::RemoveNthContinuity(unsigned i)
 {
 	CC_continuity_ptr cont = animcont.at(i);
 	animcont.erase(animcont.begin()+i);
-	gTheApp->GetWindowList().DeleteContinuity(show->GetSheetPos(this), i);
+	wxGetApp().GetWindowList().DeleteContinuity(show->GetSheetPos(this), i);
 	return cont;
 }
 
@@ -258,7 +258,7 @@ void CC_sheet::UserDeleteContinuity(unsigned i)
 void CC_sheet::InsertContinuity(CC_continuity_ptr newcont, unsigned i)
 {
 	animcont.insert(animcont.begin() + i, newcont);
-	gTheApp->GetWindowList().AddContinuity(show->GetSheetPos(this), i);
+	wxGetApp().GetWindowList().AddContinuity(show->GetSheetPos(this), i);
 }
 
 
@@ -272,7 +272,7 @@ CC_continuity_ptr CC_sheet::UserNewContinuity(const wxString& name)
 {
 	CC_continuity_ptr newcont(new CC_continuity(name, NextUnusedContinuityNum()));
 	AppendContinuity(newcont);
-	gTheApp->GetWindowList().AddContinuity(show->GetSheetPos(this), animcont.size()-1);
+	wxGetApp().GetWindowList().AddContinuity(show->GetSheetPos(this), animcont.size()-1);
 	show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
 		animcont.size()-1));
 	return newcont;
@@ -367,7 +367,7 @@ void CC_sheet::UserSetName(const wxString& newname)
 // Create undo entry
 	show->undolist->Add(new ShowUndoName(show->GetSheetPos(this), this));
 	SetName(newname);
-	gTheApp->GetWindowList().ChangeTitle(show->GetSheetPos(this));
+	wxGetApp().GetWindowList().ChangeTitle(show->GetSheetPos(this));
 }
 
 
@@ -376,7 +376,7 @@ void CC_sheet::UserSetBeats(unsigned short b)
 // Create undo entry
 	show->undolist->Add(new ShowUndoBeat(show->GetSheetPos(this), this));
 	SetBeats(b);
-	gTheApp->GetWindowList().ChangeTitle(show->GetSheetPos(this));
+	wxGetApp().GetWindowList().ChangeTitle(show->GetSheetPos(this));
 }
 
 

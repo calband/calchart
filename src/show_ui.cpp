@@ -89,7 +89,7 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 	{
 		Set(i, true);
 	}
-	gTheApp->GetWindowList().UpdateSelections(this);
+	wxGetApp().GetWindowList().UpdateSelections(this);
 }
 
 
@@ -99,7 +99,7 @@ void PointPicker::PointPickerNone(wxCommandEvent&)
 	{
 		Set(i, false);
 	}
-	gTheApp->GetWindowList().UpdateSelections(this);
+	wxGetApp().GetWindowList().UpdateSelections(this);
 }
 
 
@@ -355,8 +355,8 @@ void ShowInfoReq::CreateControls()
 	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
 
 	wxArrayString modeStrings;
-	ShowModeList::Iter mode = gTheApp->GetModeList().Begin();
-	while (mode != gTheApp->GetModeList().End())
+	ShowModeList::Iter mode = wxGetApp().GetModeList().Begin();
+	while (mode != wxGetApp().GetModeList().End())
 	{
 		modeStrings.Add((*mode)->GetName());
 		++mode;
@@ -401,7 +401,7 @@ void ShowInfoReq::ShowInfoSetNum(wxCommandEvent& )
 			else
 				show->SetNumPoints(num, 1);
 			SetLabels();
-			gTheApp->GetWindowList().ChangeNumPoints(this);
+			wxGetApp().GetWindowList().ChangeNumPoints(this);
 		}
 	}
 }
@@ -410,7 +410,7 @@ void ShowInfoReq::ShowInfoSetNum(wxCommandEvent& )
 void ShowInfoReq::ShowInfoSetLabels(wxCommandEvent&)
 {
 	SetLabels();
-	gTheApp->GetWindowList().ChangePointLabels(this);
+	wxGetApp().GetWindowList().ChangePointLabels(this);
 }
 
 
@@ -418,11 +418,11 @@ void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&)
 {
 	ShowMode *newmode;
 
-	newmode = gTheApp->GetModeList().Find(GetChoiceStrSelection());
+	newmode = wxGetApp().GetModeList().Find(GetChoiceStrSelection());
 	if (newmode)
 	{
 		show->SetMode(newmode);
-		gTheApp->GetWindowList().ChangeShowMode(this);
+		wxGetApp().GetWindowList().ChangeShowMode(this);
 	}
 }
 

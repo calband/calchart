@@ -449,7 +449,7 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 
 // Now compile
 	comp.show = show;
-	gTheApp->GetWindowList().FlushContinuity();		  // get all changes in text windows
+	wxGetApp().GetWindowList().FlushContinuity();		  // get all changes in text windows
 
 	unsigned sheetnum = 0;
 	for (comp.curr_sheet = show->GetSheet(); comp.curr_sheet;

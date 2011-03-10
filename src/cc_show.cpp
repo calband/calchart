@@ -116,7 +116,7 @@ print_do_cont_sheet(true)
 	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
 	SetAutosaveName(tmpname);
 	undolist = new ShowUndoList(this, undo_buffer_size);
-	mode = *gTheApp->GetModeList().Begin();
+	mode = *wxGetApp().GetModeList().Begin();
 	autosaveTimer.AddShow(this);
 }
 
@@ -132,7 +132,7 @@ print_do_cont_sheet(true)
 	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
 	SetAutosaveName(tmpname);
 	undolist = new ShowUndoList(this, undo_buffer_size);
-	mode = *gTheApp->GetModeList().Begin();
+	mode = *wxGetApp().GetModeList().Begin();
 	if (npoints)
 	{
 		for (unsigned int i = 0; i < npoints; i++)
@@ -666,7 +666,7 @@ void CC_show::Append(CC_show *shw)
 		shw->sheets = NULL;
 		shw->numsheets = 0;
 		delete shw;
-		gTheApp->GetWindowList().AppendSheets();
+		wxGetApp().GetWindowList().AppendSheets();
 	}
 }
 
@@ -688,7 +688,7 @@ void CC_show::Append(CC_sheet *newsheets)
 	{
 		numsheets++;
 	}
-	gTheApp->GetWindowList().AppendSheets();
+	wxGetApp().GetWindowList().AppendSheets();
 }
 
 
@@ -1049,21 +1049,21 @@ void CC_show::ClearAutosave() const
 
 void CC_show::FlushAllTextWindows() const
 {
-	gTheApp->GetWindowList().FlushDescr(); 
-	gTheApp->GetWindowList().FlushContinuity();
+	wxGetApp().GetWindowList().FlushDescr(); 
+	wxGetApp().GetWindowList().FlushContinuity();
 }
 
 
 void CC_show::UserSetName(const wxString& newname)
 {
 	SetName(newname);
-	gTheApp->GetWindowList().ChangeName();
+	wxGetApp().GetWindowList().ChangeName();
 }
 
 
 const wxString& CC_show::UserGetDescr() const
 {
-	gTheApp->GetWindowList().FlushDescr();
+	wxGetApp().GetWindowList().FlushDescr();
 	return descr;
 }
 
@@ -1071,7 +1071,7 @@ const wxString& CC_show::UserGetDescr() const
 void CC_show::SetModified(bool b)
 {
 	modified = b;
-	gTheApp->GetWindowList().UpdateStatusBar();
+	wxGetApp().GetWindowList().UpdateStatusBar();
 }
 
 
@@ -1116,7 +1116,7 @@ void CC_show::UserSetDescr(const wxString& newdescr, wxWindow *win)
 // Create undo entry
 	undolist->Add(new ShowUndoDescr(this));
 	descr = newdescr;
-	gTheApp->GetWindowList().SetDescr(win);
+	wxGetApp().GetWindowList().SetDescr(win);
 }
 
 
@@ -1180,7 +1180,7 @@ CC_sheet *CC_show::RemoveNthSheet(unsigned sheetidx)
 	}
 	numsheets--;
 	sht->next = NULL;
-	gTheApp->GetWindowList().DeleteSheet(sheetidx);
+	wxGetApp().GetWindowList().DeleteSheet(sheetidx);
 	return sht;
 }
 
@@ -1207,7 +1207,7 @@ CC_sheet *CC_show::RemoveLastSheets(unsigned numtoremain)
 		sheets = NULL;
 	}
 	numsheets = numtoremain;
-	gTheApp->GetWindowList().RemoveSheets(numtoremain);
+	wxGetApp().GetWindowList().RemoveSheets(numtoremain);
 	return sht;
 }
 
@@ -1252,7 +1252,7 @@ void CC_show::InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx)
 void CC_show::InsertSheet(CC_sheet *nsheet, unsigned sheetidx)
 {
 	InsertSheetInternal(nsheet, sheetidx);
-	gTheApp->GetWindowList().AddSheet(sheetidx);
+	wxGetApp().GetWindowList().AddSheet(sheetidx);
 }
 
 

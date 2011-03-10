@@ -168,7 +168,7 @@ int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
 			}
 		}
 	}
-	gTheApp->GetWindowList().UpdatePointsOnSheet(sheetidx, refnum);
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(sheetidx, refnum);
 	return (int)sheetidx;
 }
 
@@ -233,7 +233,7 @@ int ShowUndoSym::Undo(CC_show *show, ShowUndo** newundo)
 		sheet->GetPoint(elems[i].idx).sym = elems[i].sym;
 		sheet->GetPoint(elems[i].idx).cont = elems[i].cont;
 	}
-	gTheApp->GetWindowList().UpdatePointsOnSheet(sheetidx);
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -304,7 +304,7 @@ int ShowUndoLbl::Undo(CC_show *show, ShowUndo** newundo)
 	{
 		sheet->GetPoint(elems[i].idx).Flip(elems[i].right);
 	}
-	gTheApp->GetWindowList().UpdatePointsOnSheet(sheetidx);
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -468,7 +468,7 @@ int ShowUndoName::Undo(CC_show *show, ShowUndo** newundo)
 
 	*newundo = new ShowUndoName(sheetidx, sheet);
 	sheet->SetName(name);
-	gTheApp->GetWindowList().ChangeTitle(sheetidx);
+	wxGetApp().GetWindowList().ChangeTitle(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -493,7 +493,7 @@ int ShowUndoBeat::Undo(CC_show *show, ShowUndo** newundo)
 
 	*newundo = new ShowUndoBeat(sheetidx, sheet);
 	sheet->SetBeats(beats);
-	gTheApp->GetWindowList().ChangeTitle(sheetidx);
+	wxGetApp().GetWindowList().ChangeTitle(sheetidx);
 	return (int)sheetidx;
 }
 
@@ -527,7 +527,7 @@ int ShowUndoCont::Undo(CC_show *show, ShowUndo** newundo)
 
 	*newundo = new ShowUndoCont(sheetidx, cont, sheet);
 	sheet->SetNthContinuity(conttext, cont);
-	gTheApp->GetWindowList().SetContinuity(NULL, sheetidx, cont);
+	wxGetApp().GetWindowList().SetContinuity(NULL, sheetidx, cont);
 	return (int)sheetidx;
 }
 
@@ -631,7 +631,7 @@ int ShowUndoDescr::Undo(CC_show *show, ShowUndo** newundo)
 {
 	*newundo = new ShowUndoDescr(show);
 	show->SetDescr(descrtext);
-	gTheApp->GetWindowList().SetDescr(NULL);
+	wxGetApp().GetWindowList().SetDescr(NULL);
 	return -1;									  // don't goto another sheet
 }
 

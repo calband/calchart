@@ -174,7 +174,7 @@ class MainFrame : public wxMDIChildFrame
 {
 public:
 	// MainFrame will own the show that is passed in
-	MainFrame(wxMDIParentFrame *frame, int x, int y, int w, int h,
+	MainFrame(wxMDIParentFrame *frame, const wxPoint& pos, const wxSize& size,
 		CC_show *show = NULL);
 	~MainFrame();
 

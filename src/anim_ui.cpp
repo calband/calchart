@@ -375,7 +375,7 @@ void AnimationCanvas::SelectCollisions()
 				show_descr->show->Select(i, false);
 			}
 		}
-		gTheApp->GetWindowList().UpdateSelections();
+		wxGetApp().GetWindowList().UpdateSelections();
 	}
 }
 
@@ -1000,9 +1000,9 @@ void AnimErrorList::Update(int i)
 		{
 			show->Select(j, pointsels[i].pntgroup.count(j));
 		}
-		gTheApp->GetWindowList().UpdateSelections(this);
+		wxGetApp().GetWindowList().UpdateSelections(this);
 	}
-	gTheApp->GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
+	wxGetApp().GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
 		show->GetNumSheets()-1 : sheetnum,
 		pointsels[i].contnum,
 		pointsels[i].line, pointsels[i].col);

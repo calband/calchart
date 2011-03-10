@@ -37,9 +37,9 @@
 
 class CalChartApp;
 
-extern CalChartApp* gTheApp;
-
 class ShowModeList;
+
+DECLARE_APP(CalChartApp)
 
 // Define a new application
 class CalChartApp : public wxApp

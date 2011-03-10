@@ -421,7 +421,7 @@ void ContinuityEditor::SelectPoints()
 	{
 		if (sht->SelectContinuity(c->GetNum()))
 		{
-			gTheApp->GetWindowList().UpdateSelections();
+			wxGetApp().GetWindowList().UpdateSelections();
 		}
 	}
 }

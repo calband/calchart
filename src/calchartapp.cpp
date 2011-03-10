@@ -83,8 +83,6 @@ wxHtmlHelpController *help_inst = NULL;
 
 TopFrame *topframe = NULL;
 
-CalChartApp* gTheApp = NULL;
-
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
 
@@ -95,7 +93,6 @@ IMPLEMENT_APP(CalChartApp)
 bool CalChartApp::OnInit()
 {
 	mDocManager.reset(new wxDocManager);
-	gTheApp = this;
 #if defined(__APPLE__) && (__APPLE__)
 	wxString runtimepath(wxT("CalChart.app/runtime"));
 #else

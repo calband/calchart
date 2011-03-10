@@ -117,7 +117,7 @@ void ShowPrintDialog::PrintShow()
 	}
 
 // Update other windows
-	gTheApp->GetWindowList().ChangePrint(this);
+	wxGetApp().GetWindowList().ChangePrint(this);
 
 	FILE *fp;
 
