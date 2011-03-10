@@ -105,6 +105,22 @@ void SetAutoSave(int secs)
 IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 
 // Create a new show
+CC_show::CC_show()
+:okay(true), numpoints(0), numsheets(0), sheets(NULL),
+selections(NULL),
+modified(false), print_landscape(false), print_do_cont(true),
+print_do_cont_sheet(true)
+{
+	wxString tmpname;
+
+	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
+	SetAutosaveName(tmpname);
+	undolist = new ShowUndoList(this, undo_buffer_size);
+	mode = *gTheApp->GetModeList().Begin();
+	autosaveTimer.AddShow(this);
+}
+
+// Create a new show
 CC_show::CC_show(unsigned npoints)
 :okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, wxT("1"))),
 pt_labels(npoints),

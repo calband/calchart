@@ -45,7 +45,8 @@ class CC_show : public wxDocument
 {
 	DECLARE_DYNAMIC_CLASS(CC_show)
 public:
-	CC_show(unsigned npoints = 0);
+	CC_show();
+	CC_show(unsigned npoints);
 	~CC_show();
 
 	// Need to override OnOpenDoc so we can report errors
