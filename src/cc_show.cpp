@@ -124,7 +124,7 @@ print_do_cont_sheet(true)
 CC_show::CC_show(unsigned npoints)
 :okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, wxT("1"))),
 pt_labels(npoints),
-modified(false), print_landscape(false), print_do_cont(true),
+print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true)
 {
 	wxString tmpname;
@@ -1070,7 +1070,7 @@ const wxString& CC_show::UserGetDescr() const
 
 void CC_show::SetModified(bool b)
 {
-	modified = b;
+	Modify(modified);
 	wxGetApp().GetWindowList().UpdateStatusBar();
 }
 
@@ -1404,7 +1404,7 @@ void UnitTests()
 	cout<<"UserGetName "<<(wchar_t*)test->UserGetName().c_str()<<"\n";
 	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";
 	cout<<"UserGetDescr "<<(wchar_t*)test->UserGetDescr().c_str()<<"\n";
-	cout<<"Modified "<<test->Modified()<<"\n";
+	cout<<"Modified "<<test->IsModified()<<"\n";
 	cout<<"GetNumSheets "<<test->GetNumSheets()<<"\n";
 	cout<<"GetSheet "<<test->GetSheet()<<"\n";
 	cout<<"GetSheetPos "<<test->GetSheetPos(NULL)<<"\n";

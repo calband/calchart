@@ -34,6 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 #include "cc_shapes.h"
 
+#include <wx/mdi.h>
+#include <wx/docview.h>
+#include <wx/docmdi.h>
+
 #include <list>
 #include <vector>
 
@@ -139,20 +143,15 @@ private:
 };
 
 // Top-level frame
-class TopFrame : public wxMDIParentFrame
+class TopFrame : public wxDocMDIParentFrame
 {
+	DECLARE_CLASS(TopFrame)
 public:
-	TopFrame(int width, int height);
+	TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
 	~TopFrame();
-	void OnCloseWindow(wxCloseEvent& event);
-	void OnCmdNew(wxCommandEvent& event);
-	void OnCmdLoad(wxCommandEvent& event);
-	void OnCmdExit(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
-	void NewShow(CC_show *shw = NULL);
-	void OpenShow(const wxString& filename = wxT(""));
-	void Quit();
 	void About();
 	void Help();
 
@@ -162,25 +161,22 @@ public:
 class TopFrameDropTarget : public wxFileDropTarget
 {
 public:
-	TopFrameDropTarget(TopFrame *f) : frame(f) {}
+	TopFrameDropTarget(wxDocManager *manager, TopFrame *f) : mManager(manager), frame(f) {}
 	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
 private:
+	wxDocManager *mManager;
 	TopFrame *frame;
 };
 
 class FieldCanvas;
 // Define the main editing frame
-class MainFrame : public wxMDIChildFrame
+class MainFrame : public wxDocMDIChildFrame
 {
 public:
 	// MainFrame will own the show that is passed in
-	MainFrame(wxMDIParentFrame *frame, const wxPoint& pos, const wxSize& size,
-		CC_show *show = NULL);
+	MainFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size);
 	~MainFrame();
 
-	void OnCloseWindow(wxCloseEvent& event);
-	void OnCmdNew(wxCommandEvent& event);
-	void OnCmdLoad(wxCommandEvent& event);
 	void OnCmdAppend(wxCommandEvent& event);
 	void OnCmdImportCont(wxCommandEvent& event);
 	void OnCmdSave(wxCommandEvent& event);
@@ -192,7 +188,6 @@ public:
 	void OnCmdPageSetup(wxCommandEvent& event);
 	void OnCmdSelectColors(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event);
-	void OnCmdExit(wxCommandEvent& event);
 	void OnCmdUndo(wxCommandEvent& event);
 	void OnCmdRedo(wxCommandEvent& event);
 	void OnCmdInsertBefore(wxCommandEvent& event);
@@ -274,7 +269,7 @@ class FieldCanvas : public AutoScrollCanvas
 {
 public:
 // Basic functions
-	FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
+	FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 		int def_zoom,
 		FieldCanvas *from_canvas = NULL,
 		int x = -1, int y = -1, int w = -1, int h = -1);
@@ -373,4 +368,22 @@ class MainFrameList: public std::list<MainFrame*>
 public:
 	bool CloseAllWindows();
 };
+
+class MainFrameView : public wxView
+{
+public:
+    wxDocMDIChildFrame *frame;
+  
+    MainFrameView() : frame(NULL) {}
+    ~MainFrameView() {}
+
+    bool OnCreate(wxDocument *doc, long flags);
+    void OnDraw(wxDC *dc);
+    void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    bool OnClose(bool deleteWindow = true);
+
+private:
+    DECLARE_DYNAMIC_CLASS(MainFrameView)
+};
+
 #endif

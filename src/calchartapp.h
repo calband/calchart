@@ -41,6 +41,9 @@ class ShowModeList;
 
 DECLARE_APP(CalChartApp)
 
+class TopFrame;
+TopFrame *GetMainFrame(void);
+
 // Define a new application
 class CalChartApp : public wxApp
 {

@@ -116,20 +116,15 @@ extern TopFrame *topframe;
 
 extern wxPrintDialogData *gPrintDialogData;
 
-BEGIN_EVENT_TABLE(TopFrame, wxMDIParentFrame)
-EVT_CLOSE(TopFrame::OnCloseWindow)
-EVT_MENU(wxID_NEW, TopFrame::OnCmdNew)
-EVT_MENU(wxID_OPEN, TopFrame::OnCmdLoad)
-EVT_MENU(wxID_EXIT, TopFrame::OnCmdExit)
+IMPLEMENT_CLASS(TopFrame, wxDocMDIParentFrame)
+
+BEGIN_EVENT_TABLE(TopFrame, wxDocMDIParentFrame)
 EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(MainFrame, wxMDIChildFrame)
+BEGIN_EVENT_TABLE(MainFrame, wxDocMDIChildFrame)
 EVT_CHAR(MainFrame::OnChar)
-EVT_CLOSE(MainFrame::OnCloseWindow)
-EVT_MENU(wxID_NEW, MainFrame::OnCmdNew)
-EVT_MENU(wxID_OPEN, MainFrame::OnCmdLoad)
 EVT_MENU(CALCHART__APPEND_FILE, MainFrame::OnCmdAppend)
 EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
 EVT_MENU(wxID_SAVE, MainFrame::OnCmdSave)
@@ -139,8 +134,6 @@ EVT_MENU(wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, MainFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, MainFrame::OnCmdLegacyPrintEPS)
-EVT_MENU(wxID_CLOSE, MainFrame::OnCmdClose)
-EVT_MENU(wxID_EXIT, MainFrame::OnCmdExit)
 EVT_MENU(wxID_UNDO, MainFrame::OnCmdUndo)
 EVT_MENU(wxID_REDO, MainFrame::OnCmdRedo)
 EVT_MENU(CALCHART__INSERT_BEFORE, MainFrame::OnCmdInsertBefore)
@@ -362,9 +355,8 @@ void CC_WinNodeMain::ChangeTitle(unsigned sht)
 }
 
 
-
-TopFrame::TopFrame(int width, int height):
-wxMDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(width, height), CC_FRAME_TOP)
+TopFrame::TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
+wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
 {
 // Give it an icon
 	SetBandIcon(this);
@@ -373,6 +365,9 @@ wxMDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(widt
 	file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
 	file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
+
+	// A nice touch: a history of files visited. Use this menu.
+	manager->FileHistoryUseMenu(file_menu);
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
@@ -383,38 +378,13 @@ wxMDIParentFrame(NULL, wxID_ANY, wxT("CalChart"), wxDefaultPosition, wxSize(widt
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
-	SetDropTarget(new TopFrameDropTarget(this));
+	SetDropTarget(new TopFrameDropTarget(manager, this));
 	Show(true);
 }
 
 
 TopFrame::~TopFrame()
 {
-}
-
-
-void TopFrame::OnCloseWindow(wxCloseEvent& event)
-{
-	wxGetApp().GetFrameList().CloseAllWindows();
-	Destroy();
-}
-
-
-void TopFrame::OnCmdNew(wxCommandEvent& event)
-{
-	NewShow();
-}
-
-
-void TopFrame::OnCmdLoad(wxCommandEvent& event)
-{
-	OpenShow();
-}
-
-
-void TopFrame::OnCmdExit(wxCommandEvent& event)
-{
-	Quit();
 }
 
 
@@ -428,42 +398,6 @@ void TopFrame::OnCmdHelp(wxCommandEvent& event)
 {
 	Help();
 }
-
-void TopFrame::NewShow(CC_show *shw)
-{
-	(void)new MainFrame(this, wxPoint(50, 50),
-		wxSize(window_default_width, window_default_height), shw);
-}
-
-
-void TopFrame::OpenShow(const wxString& filename)
-{
-	CC_show *shw;
-
-	wxString s(filename);
-	if (s.empty())
-		s = wxFileSelector(wxT("Load show"), NULL, NULL, NULL, file_wild);
-	if (!s.empty())
-	{
-		shw = new CC_show();
-		if (shw->OnOpenDocument(s))
-		{
-			NewShow(shw);
-		}
-		else
-		{
-			(void)wxMessageBox(shw->GetError(), wxT("Load Error"));
-			delete shw;
-		}
-	}
-}
-
-
-void TopFrame::Quit()
-{
-	Close();
-}
-
 
 void TopFrame::About()
 {
@@ -500,16 +434,15 @@ bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& 
 {
 	for (size_t i = 0; i < filenames.Count(); i++)
 	{
-		frame->OpenShow(filenames[i]);
+		mManager->CreateDocument(filenames[i], wxDOC_SILENT);
 	}
 	return true;
 }
 
 
 // Main frame constructor
-MainFrame::MainFrame(wxMDIParentFrame *frame, const wxPoint& pos, const wxSize& size,
-CC_show *show):
-wxMDIChildFrame(frame, -1, wxT("CalChart"), pos, size),
+MainFrame::MainFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size):
+wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 field(NULL)
 {
 	unsigned ss;
@@ -540,6 +473,10 @@ field(NULL)
 	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Legacy Print EPS..."), wxT("Legacy Print a stuntsheet in EPS"));
 	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
+
+	// A nice touch: a history of files visited. Use this menu.
+	// causes a crash :(
+	//view->GetDocumentManager()->FileHistoryUseMenu(file_menu);
 
 	wxMenu *edit_menu = new wxMenu;
 	edit_menu->Append(wxID_UNDO, wxT("&Undo\tCTRL-Z"));
@@ -586,17 +523,13 @@ field(NULL)
 
 // Add the field canvas
 	setup = false;
-	if (!show)
-	{
-		show = new CC_show();
-		setup = true;
-	}
 	ss = 0;
 	def_zoom = default_zoom;
 	def_grid = 2;
 	def_ref = 0;
-	field = new FieldCanvas(show, ss, this, def_zoom);
+	field = new FieldCanvas(view, ss, this, def_zoom);
 
+	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->UserGetName());
 	field->curr_ref = def_ref;
 	node = new CC_WinNodeMain(&wxGetApp().GetWindowList(), this);
@@ -689,41 +622,7 @@ MainFrame::~MainFrame()
 }
 
 
-// Define the behaviour for the frame closing
-void MainFrame::OnCloseWindow(wxCloseEvent& event)
-{
-// Save changes first
-	if (!OkayToClearShow())
-	{
-		if (event.CanVeto())
-		{
-			event.Veto();						  // don't delete the frame
-		}
-		else
-		{
-			Destroy();
-		}
-	}
-	else
-	{
-		Destroy();
-	}
-}
-
-
 // Intercept menu commands
-
-void MainFrame::OnCmdNew(wxCommandEvent& event)
-{
-	topframe->NewShow();
-}
-
-
-void MainFrame::OnCmdLoad(wxCommandEvent& event)
-{
-	topframe->OpenShow();
-}
-
 
 void MainFrame::OnCmdAppend(wxCommandEvent& event)
 {
@@ -840,18 +739,6 @@ void MainFrame::OnCmdSelectColors(wxCommandEvent& event)
 	if (dialog1.ShowModal() == wxID_OK)
 	{
 	}
-}
-
-
-void MainFrame::OnCmdClose(wxCommandEvent& event)
-{
-	Close();
-}
-
-
-void MainFrame::OnCmdExit(wxCommandEvent& event)
-{
-	topframe->Quit();
 }
 
 
@@ -1454,7 +1341,7 @@ void MainFrame::Setup()
 
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(CC_show *show, unsigned ss, MainFrame *frame,
+FieldCanvas::FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 int def_zoom, FieldCanvas *from_canvas,
 int x, int y, int w, int h):
 AutoScrollCanvas(frame, -1, wxPoint(x, y), wxSize(w, h)), ourframe(frame), curr_lasso(CC_DRAG_BOX),
@@ -1470,7 +1357,7 @@ curr_ref(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 
 	SetPalette(CalChartPalette);
 
-	show_descr.show = show;
+	show_descr.show = static_cast<CC_show*>(view->GetDocument());
 	show_descr.curr_ss = ss;
 
 	SetZoomQuick(def_zoom);
@@ -1989,10 +1876,10 @@ void MainFrame::UpdatePanel()
 
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
 		field->show_descr.show->Modified() ? wxT("* "):wxT(""), curr,
-		num, sht->GetName().c_str(), sht->GetBeats());
+		num, (sht)?sht->GetName().c_str():wxT(""), (sht)?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
 	tempbuf.sprintf(wxT("%d of %d selected"),
-		sht->GetNumSelectedPoints(), field->show_descr.show->GetNumPoints());
+		(sht)?sht->GetNumSelectedPoints():0, field->show_descr.show->GetNumPoints());
 	SetStatusText(tempbuf, 2);
 
 	if (num > 1)
@@ -2283,3 +2170,49 @@ void MainFrame::slider_zoom_callback(wxScrollEvent &)
 {
 	field->SetZoom(zoom_slider->GetValue());
 }
+
+IMPLEMENT_DYNAMIC_CLASS(MainFrameView, wxView)
+
+// What to do when a view is created. Creates actual
+// windows for displaying the view.
+bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
+{
+	frame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
+		wxSize(window_default_width, window_default_height));
+
+	frame->Show(true);
+	Activate(true);
+	return true;
+}
+
+// Sneakily gets used for default print/preview
+// as well as drawing on the screen.
+void MainFrameView::OnDraw(wxDC *dc)
+{
+}
+
+void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
+{
+}
+
+// Clean up windows used for displaying the view.
+bool MainFrameView::OnClose(bool deleteWindow)
+{
+	if (!GetDocument()->Close())
+		return false;
+
+	wxString s(wxTheApp->GetAppName());
+	if (frame)
+		frame->SetTitle(s);
+
+	SetFrame((wxFrame*)NULL);
+
+	Activate(false);
+
+	if (deleteWindow)
+	{
+		delete frame;
+	}
+	return true;
+}
+

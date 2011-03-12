@@ -34,6 +34,10 @@
 #include <wx/html/helpctrl.h>
 #include <wx/fs_zip.h>
 
+#include <wx/mdi.h>
+#include <wx/docview.h>
+#include <wx/docmdi.h>
+
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
 #include "tb_right.xbm"
@@ -68,6 +72,8 @@
 
 wxPrintDialogData *gPrintDialogData;
 
+#define DOCVIEW_ABOUT   wxID_ABOUT
+
 extern ToolBarEntry main_tb[];
 extern ToolBarEntry anim_tb[];
 extern ToolBarEntry printcont_tb[];
@@ -83,16 +89,32 @@ wxHtmlHelpController *help_inst = NULL;
 
 TopFrame *topframe = NULL;
 
+TopFrame *GetMainFrame(void)
+{
+  return topframe;
+}
+
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
 
+
 // Create windows and initialize app
 bool CalChartApp::OnInit()
 {
+	//// Create a document manager
 	mDocManager.reset(new wxDocManager);
+
+	//// Create a template relating drawing documents to their views
+	(void) new wxDocTemplate(mDocManager.get(), _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
+			CLASSINFO(CC_show), CLASSINFO(MainFrameView));
+
+#ifdef __WXMAC__
+	wxFileName::MacRegisterDefaultTypeAndCreator( wxT("shw"), 'WXMB', 'WXMA' );
+#endif
+
 #if defined(__APPLE__) && (__APPLE__)
 	wxString runtimepath(wxT("CalChart.app/runtime"));
 #else
@@ -178,23 +200,9 @@ bool CalChartApp::OnInit()
 	yardLabelFont = new wxFont((int)FLOAT2NUM(yards_size),
 		wxSWISS, wxNORMAL, wxNORMAL);
 
-	topframe = new TopFrame(300, 100);
-	topframe->Maximize(true);
-	for (i = 1; i < realargc; i++)
-	{
-		CC_show *shw;
 
-		shw = new CC_show();
-		if (shw->OnOpenDocument(argv[i]))
-		{
-			topframe->NewShow(shw);
-		}
-		else
-		{
-			(void)wxMessageBox(shw->GetError(), wxT("Load Error"));
-			delete shw;
-		}
-	}
+	//// Create the main frame window
+	topframe = new TopFrame((wxDocManager *) mDocManager.get(), (wxFrame *) NULL, _T("CalChart"));
 
 	{
 		// Required for images in the online documentation
@@ -223,6 +231,9 @@ bool CalChartApp::OnInit()
 	}
 
 	SetAutoSave(autosave_interval);
+#ifndef __WXMAC__
+	frame->Show(true);
+#endif //ndef __WXMAC__
 	SetTopWindow(topframe);
 	
 	CC_continuity_UnitTests();
@@ -233,7 +244,7 @@ bool CalChartApp::OnInit()
 
 void CalChartApp::MacOpenFile(const wxString &fileName)
 {
-	topframe->OpenShow(fileName);
+	mDocManager->CreateDocument(fileName, wxDOC_SILENT);
 }
 
 int CalChartApp::OnExit()
