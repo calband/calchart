@@ -45,7 +45,6 @@ static const wxChar *nomem_str = wxT("Out of memory!");
 static const wxChar *nofile_str = wxT("Unable to open file");
 static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
-static const wxChar *nosheets_str = wxT("No sheets found");
 static const wxChar *writeerr_str = wxT("Write error: check disk media");
 
 const wxChar *contnames[] =
@@ -69,7 +68,7 @@ class AutoSaveTimer: public wxTimer
 			for (std::list<CC_show*>::iterator i = showlist.begin(); i != showlist.end(); ++i)
 			{
 				CC_show *show = *i;
-				if (show->Modified())
+				if (show->IsModified())
 				{
 					wxString s;
 					if (!(s=show->Autosave()).empty())
@@ -108,7 +107,7 @@ IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 CC_show::CC_show()
 :okay(true), numpoints(0), numsheets(0), sheets(NULL),
 selections(NULL),
-modified(false), print_landscape(false), print_do_cont(true),
+print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true)
 {
 	wxString tmpname;
@@ -1068,9 +1067,9 @@ const wxString& CC_show::UserGetDescr() const
 }
 
 
-void CC_show::SetModified(bool b)
+void CC_show::Modify(bool b)
 {
-	Modify(modified);
+	wxDocument::Modify(b);
 	wxGetApp().GetWindowList().UpdateStatusBar();
 }
 
@@ -1295,7 +1294,7 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns)
 
 	numpoints = num;
 
-	SetModified(true);
+	Modify(true);
 }
 
 

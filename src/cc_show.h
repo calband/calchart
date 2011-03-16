@@ -79,8 +79,7 @@ public:
 	inline void SetDescr(const wxString& newdescr) { descr = newdescr; }
 	void UserSetDescr(const wxString& newdescr, wxWindow* win);
 
-	inline bool Modified() const { return modified; }
-	void SetModified(bool b);
+	virtual void Modify(bool b);
 
 	inline unsigned short GetNumSheets() const { return numsheets; }
 	inline CC_sheet *GetSheet() const { return sheets; }
@@ -148,7 +147,6 @@ private:
 	std::vector<wxString> pt_labels;
 	bool *selections;						  // array for each point
 	std::vector<unsigned> selectionList;	  // order of selections
-	bool modified;
 	bool print_landscape;
 	bool print_do_cont;
 	bool print_do_cont_sheet;

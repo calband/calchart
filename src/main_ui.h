@@ -253,6 +253,8 @@ public:
 	void refnum_callback(wxCommandEvent &);
 
 	void Setup();
+	const FieldCanvas * GetCanvas() const { return field; }
+	FieldCanvas * GetCanvas() { return field; }
 
 	wxChoice *grid_choice;
 	wxChoice *ref_choice;
@@ -372,9 +374,9 @@ public:
 class MainFrameView : public wxView
 {
 public:
-    wxDocMDIChildFrame *frame;
+    MainFrame *mFrame;
   
-    MainFrameView() : frame(NULL) {}
+    MainFrameView() : mFrame(NULL) {}
     ~MainFrameView() {}
 
     bool OnCreate(wxDocument *doc, long flags);

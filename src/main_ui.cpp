@@ -800,7 +800,7 @@ void MainFrame::OnCmdRelabel(wxCommandEvent& event)
 			else
 			{
 				field->show_descr.show->undolist->EraseAll();
-				field->show_descr.show->SetModified(true);
+				field->show_descr.show->Modify(true);
 			}
 		}
 	}
@@ -952,7 +952,7 @@ void MainFrame::OnMenuSelect(wxMenuEvent& event)
 	switch (event.GetMenuId())
 	{
 		case wxID_SAVE:
-			msg = field->show_descr.show->Modified() ?
+			msg = field->show_descr.show->IsModified() ?
 				wxT("Save show (needed)") :
 			wxT("Save show (not needed)");
 			break;
@@ -1141,7 +1141,7 @@ bool MainFrame::OkayToClearShow()
 {
 	wxString buf;
 
-	if (field->show_descr.show->Modified())
+	if (field->show_descr.show->IsModified())
 	{
 		buf.sprintf(wxT("Save changes to '%s'?"),
 			field->show_descr.show->UserGetName().c_str());
@@ -1875,7 +1875,7 @@ void MainFrame::UpdatePanel()
 	unsigned curr = field->show_descr.curr_ss+1;
 
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
-		field->show_descr.show->Modified() ? wxT("* "):wxT(""), curr,
+		field->show_descr.show->IsModified() ? wxT("* "):wxT(""), curr,
 		num, (sht)?sht->GetName().c_str():wxT(""), (sht)?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
 	tempbuf.sprintf(wxT("%d of %d selected"),
@@ -2177,10 +2177,10 @@ IMPLEMENT_DYNAMIC_CLASS(MainFrameView, wxView)
 // windows for displaying the view.
 bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
-	frame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
+	mFrame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
 		wxSize(window_default_width, window_default_height));
 
-	frame->Show(true);
+	mFrame->Show(true);
 	Activate(true);
 	return true;
 }
@@ -2193,6 +2193,8 @@ void MainFrameView::OnDraw(wxDC *dc)
 
 void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
+	if (mFrame && mFrame->GetCanvas())
+		mFrame->GetCanvas()->Refresh();
 }
 
 // Clean up windows used for displaying the view.
@@ -2202,8 +2204,8 @@ bool MainFrameView::OnClose(bool deleteWindow)
 		return false;
 
 	wxString s(wxTheApp->GetAppName());
-	if (frame)
-		frame->SetTitle(s);
+	if (mFrame)
+		mFrame->SetTitle(s);
 
 	SetFrame((wxFrame*)NULL);
 
@@ -2211,7 +2213,7 @@ bool MainFrameView::OnClose(bool deleteWindow)
 
 	if (deleteWindow)
 	{
-		delete frame;
+		delete mFrame;
 	}
 	return true;
 }

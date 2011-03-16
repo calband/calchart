@@ -666,7 +666,7 @@ int ShowUndoList::Undo(CC_show *show)
 		redo = NULL;
 		i = undo->Undo(show, &redo);
 		if (redo) PushRedo(redo);
-		show->SetModified(undo->was_modified);
+		show->Modify(undo->was_modified);
 		delete undo;
 		return (int)i;
 	}
@@ -689,7 +689,7 @@ int ShowUndoList::Redo(CC_show *show)
 		newundo = NULL;
 		i = undo->Undo(show, &newundo);
 		if (newundo) Push(newundo);
-		show->SetModified(true);
+		show->Modify(true);
 		delete undo;
 		return (int)i;
 	}
@@ -785,8 +785,8 @@ ShowUndo *ShowUndoList::Pop()
 void ShowUndoList::Push(ShowUndo *undo)
 {
 	undo->next = list;
-	undo->was_modified = show->Modified();
-	show->SetModified(true);					  // Show is now modified
+	undo->was_modified = show->IsModified();
+	show->Modify(true);					  // Show is now modified
 	list = undo;
 }
 
