@@ -235,13 +235,8 @@ public:
 	void OnCmd_setsym7(wxCommandEvent& event);
 	void OnChar(wxKeyEvent& event);
 
-	bool OkayToClearShow();
-
-	void LoadShow();
 	void AppendShow();
 	void ImportContFile();
-	void SaveShow();
-	void SaveShowAs();
 
 	void SnapToGrid(CC_coord& c);
 	void UpdatePanel();

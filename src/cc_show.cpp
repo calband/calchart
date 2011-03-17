@@ -1053,13 +1053,6 @@ void CC_show::FlushAllTextWindows() const
 }
 
 
-void CC_show::UserSetName(const wxString& newname)
-{
-	SetName(newname);
-	wxGetApp().GetWindowList().ChangeName();
-}
-
-
 const wxString& CC_show::UserGetDescr() const
 {
 	wxGetApp().GetWindowList().FlushDescr();
@@ -1085,22 +1078,6 @@ wxString CC_show::Autosave()
 		return wxT("");
 	}
 }
-
-wxString CC_show::UserGetName() const
-{
-	if (name.empty()) return wxT("Untitled");
-	else return wxFileNameFromPath(name);
-}
-
-
-void CC_show::SetName(const wxString& newname)
-{
-// make into a full path
-	wxString path = FullPath(newname);
-	name = path;
-	SetAutosaveName(path);
-}
-
 
 void CC_show::SetAutosaveName(const wxString& realname)
 {
@@ -1399,8 +1376,7 @@ void UnitTests()
 //	assert(test.Ok() == true);
 	cout<<"GetError "<<(wchar_t*)test->GetError().c_str()<<"\n";
 //	assert(test.Ok() == true);
-	cout<<"GetName "<<(wchar_t*)test->GetName().c_str()<<"\n";
-	cout<<"UserGetName "<<(wchar_t*)test->UserGetName().c_str()<<"\n";
+	cout<<"GetTitle "<<(wchar_t*)test->GetTitle().c_str()<<"\n";
 	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";
 	cout<<"UserGetDescr "<<(wchar_t*)test->UserGetDescr().c_str()<<"\n";
 	cout<<"Modified "<<test->IsModified()<<"\n";

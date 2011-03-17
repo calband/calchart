@@ -270,7 +270,7 @@ int min_yards) const
 		(paper_length - page_offset_y) * DPI));
 	time(&t);
 	CHECKPRINT0(fprintf(fp, "%%%%CreationDate: %s", ctime(&t)));
-	std::string namestr(name.utf8_str());
+	std::string namestr(GetTitle().utf8_str());
 	CHECKPRINT0(fprintf(fp, "%%%%Title: %s\n", namestr.c_str()));
 	CHECKPRINT0(fprintf(fp, "%%%%Creator: CalChart\n"));
 	CHECKPRINT0(fprintf(fp, "%%%%Pages: (atend)\n"));

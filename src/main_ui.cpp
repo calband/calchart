@@ -127,8 +127,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxDocMDIChildFrame)
 EVT_CHAR(MainFrame::OnChar)
 EVT_MENU(CALCHART__APPEND_FILE, MainFrame::OnCmdAppend)
 EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
-EVT_MENU(wxID_SAVE, MainFrame::OnCmdSave)
-EVT_MENU(wxID_SAVEAS, MainFrame::OnCmdSaveAs)
 EVT_MENU(wxID_PRINT, MainFrame::OnCmdPrint)
 EVT_MENU(wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
@@ -236,7 +234,7 @@ void CC_WinNodeMain::SetShow(CC_show *shw)
 
 void CC_WinNodeMain::ChangeName()
 {
-	frame->SetTitle(frame->field->show_descr.show->UserGetName());
+	frame->SetTitle(frame->field->show_descr.show->GetTitle());
 }
 
 
@@ -530,7 +528,7 @@ field(NULL)
 	field = new FieldCanvas(view, ss, this, def_zoom);
 
 	CC_show* show = static_cast<CC_show*>(doc);
-	SetTitle(show->UserGetName());
+	SetTitle(show->GetTitle());
 	field->curr_ref = def_ref;
 	node = new CC_WinNodeMain(&wxGetApp().GetWindowList(), this);
 	switch(field->curr_select)
@@ -633,18 +631,6 @@ void MainFrame::OnCmdAppend(wxCommandEvent& event)
 void MainFrame::OnCmdImportCont(wxCommandEvent& event)
 {
 	ImportContFile();
-}
-
-
-void MainFrame::OnCmdSave(wxCommandEvent& event)
-{
-	SaveShow();
-}
-
-
-void MainFrame::OnCmdSaveAs(wxCommandEvent& event)
-{
-	SaveShowAs();
 }
 
 
@@ -1136,59 +1122,6 @@ void MainFrame::OnChar(wxKeyEvent& event)
 	field->OnChar(event);
 }
 
-// Give the use a chance to save the current show
-bool MainFrame::OkayToClearShow()
-{
-	wxString buf;
-
-	if (field->show_descr.show->IsModified())
-	{
-		buf.sprintf(wxT("Save changes to '%s'?"),
-			field->show_descr.show->UserGetName().c_str());
-		switch (wxMessageBox(buf, wxT("Unsaved changes"),
-			wxYES_NO | wxCANCEL, this))
-		{
-			case wxYES:
-				SaveShowAs();
-				break;
-			case wxNO:
-				break;
-			case wxCANCEL:
-				return false;
-				break;
-		}
-		field->show_descr.show->ClearAutosave();
-	}
-	return true;
-}
-
-
-// Load a show with file selector
-void MainFrame::LoadShow()
-{
-	wxString s;
-	CC_show *shw;
-
-	if (OkayToClearShow())
-	{
-		s = wxFileSelector(wxT("Load show"), NULL, NULL, NULL, file_wild);
-		if (!s.empty())
-		{
-			shw = new CC_show();
-			if (shw->OnOpenDocument(s))
-			{
-				node->GetList()->SetShow(shw);
-			}
-			else
-			{
-				(void)wxMessageBox(shw->GetError(), wxT("Load Error"));
-				delete shw;
-			}
-		}
-	}
-}
-
-
 // Append a show with file selector
 void MainFrame::AppendShow()
 {
@@ -1240,52 +1173,6 @@ void MainFrame::ImportContFile()
 		{
 			(void)wxMessageBox(err, wxT("Load Error"));
 			delete err;
-		}
-	}
-}
-
-
-// Save this show without file selector
-void MainFrame::SaveShow()
-{
-	wxString s;
-
-	s = field->show_descr.show->GetName();
-	if (s.empty())
-	{
-// No file name; use SaveAs instead
-		SaveShowAs();
-	}
-	else
-	{
-		if (!field->show_descr.show->OnSaveDocument(s))
-		{
-			(void)wxMessageBox(field->show_descr.show->GetError(), wxT("Save Error"));
-		}
-	}
-}
-
-
-// Save this show with file selector
-void MainFrame::SaveShowAs()
-{
-	wxString s;
-	wxString err;
-
-	s = wxFileSelector(wxT("Save show"), NULL, NULL, NULL, file_save_wild,
-		wxSAVE | wxOVERWRITE_PROMPT);
-	if (!s.empty())
-	{
-		wxString str(s);
-		unsigned int i = str.Length();
-		if ((i < 4) ||
-			(str.SubString(i-4,i-1).CompareTo(wxT(".shw"), wxString::ignoreCase)!=0))
-		{
-			str.Append(wxT(".shw"));
-		}
-		if (!field->show_descr.show->OnSaveDocument(str))
-		{
-			(void)wxMessageBox(field->show_descr.show->GetError(), wxT("Save Error"));
 		}
 	}
 }

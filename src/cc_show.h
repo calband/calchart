@@ -69,11 +69,7 @@ public:
 	void ClearAutosave() const;
 	void FlushAllTextWindows() const;
 
-	inline const wxString& GetName() const { return name; }
-	wxString UserGetName() const;
-	void SetName(const wxString& newname);
-	void UserSetName(const wxString& newname);
-
+public:
 	inline const wxString& GetDescr() const { return descr; }
 	const wxString& UserGetDescr() const;
 	inline void SetDescr(const wxString& newdescr) { descr = newdescr; }
@@ -138,7 +134,6 @@ private:
 	mutable wxString error;
 	bool okay;
 
-	wxString name;
 	wxString autosave_name;
 	wxString descr;
 	unsigned short numpoints;

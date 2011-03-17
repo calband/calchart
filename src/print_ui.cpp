@@ -153,18 +153,18 @@ void ShowPrintDialog::PrintShow()
 		{
 			tempbuf.sprintf(wxT("Printed %d pages."), n);
 			(void)wxMessageBox(tempbuf,
-				show_descr->show->GetName());
+				show_descr->show->GetTitle());
 		}
 		else
 		{
 			(void)wxMessageBox(show_descr->show->GetError(),
-				show_descr->show->GetName());
+				show_descr->show->GetTitle());
 		}
 	}
 	else
 	{
 		(void)wxMessageBox(wxT("Unable to open print file for writing!"),
-			show_descr->show->GetName());
+			show_descr->show->GetTitle());
 	}
 }
 
