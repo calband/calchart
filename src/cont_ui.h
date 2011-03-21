@@ -71,7 +71,7 @@ private:
 class ContinuityEditor : public wxFrame
 {
 public:
-	ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
+	ContinuityEditor(CC_show *dcr, CC_WinList *lst,
 		wxFrame *parent, const wxString& title,
 		int x = -1, int y = -1, int width = 400, int height = 300);
 	~ContinuityEditor();
@@ -101,7 +101,7 @@ public:
 	inline void IncCurrent() { curr_cont++; text_contnum++; }
 	inline void DecCurrent() { curr_cont--; text_contnum--; }
 
-	inline CC_descr *GetShowDescr() { return descr; }
+	const CC_show *GetShow() { return mShow; }
 
 	void SelectPoints();
 	void SetPoints();
@@ -115,7 +115,7 @@ private:
 	void ContEditSet(wxCommandEvent&);
 	void ContEditSelect(wxCommandEvent&);
 	void ContEditCurrent(wxCommandEvent&);
-	CC_descr *descr;
+	CC_show *mShow;
 	unsigned curr_cont;
 	wxPanel *panel;
 	wxChoice *conts;
@@ -130,7 +130,7 @@ private:
 class PrintContCanvas : public wxScrolledWindow
 {
 public:
-	PrintContCanvas(wxFrame *frame, CC_descr *dcr);
+	PrintContCanvas(wxFrame *frame, CC_show *show);
 	~PrintContCanvas();
 
 	void Draw(wxDC *dc, int firstrow = 0, int lastrow = -1);
@@ -147,7 +147,7 @@ private:
 	void InsertChar(unsigned onechar);
 	void DeleteChar(bool backspace = true);
 
-	CC_descr *show_descr;
+	CC_show *mShow;
 	wxFrame *ourframe;
 	unsigned topline;
 	float width, height;
@@ -160,7 +160,7 @@ private:
 class PrintContEditor : public wxFrame
 {
 public:
-	PrintContEditor(CC_descr *dcr, CC_WinList *lst,
+	PrintContEditor(CC_show *show, CC_WinList *lst,
 		wxFrame *parent, const wxString& title,
 		int x = -1, int y = -1, int width = 400, int height = 400);
 	~PrintContEditor();

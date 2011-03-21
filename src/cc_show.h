@@ -79,8 +79,14 @@ public:
 
 	inline unsigned short GetNumSheets() const { return numsheets; }
 	inline CC_sheet *GetSheet() const { return sheets; }
+
 	const CC_sheet *GetNthSheet(unsigned n) const;
 	CC_sheet *GetNthSheet(unsigned n);
+	const CC_sheet *GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
+	CC_sheet *GetCurrentSheet() { return GetNthSheet(mSheetNum); }
+	unsigned GetCurrentSheetNum() const { return mSheetNum; }
+	void SetCurrentSheet(unsigned n) { mSheetNum = n; }
+
 	unsigned GetSheetPos(const CC_sheet *sheet) const;
 	CC_sheet *RemoveNthSheet(unsigned sheetidx);
 	CC_sheet *RemoveLastSheets(unsigned numtoremain);
@@ -145,6 +151,7 @@ private:
 	bool print_landscape;
 	bool print_do_cont;
 	bool print_do_cont_sheet;
+	unsigned mSheetNum;
 };
 
 #endif // _CC_SHOW_H_

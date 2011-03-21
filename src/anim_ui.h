@@ -81,7 +81,7 @@ class AnimationFrame;
 class AnimationCanvas: public wxPanel
 {
 public:
-	AnimationCanvas(AnimationFrame *frame, CC_descr *dcr);
+	AnimationCanvas(AnimationFrame *frame, CC_show *show);
 	~AnimationCanvas();
 
 	void OnEraseBackground(wxEraseEvent& event);
@@ -174,7 +174,7 @@ public:
 	AnimationTimer* timer;
 	bool timeron;
 private:
-	CC_descr *show_descr;
+	CC_show *mShow;
 	AnimationFrame *ourframe;
 	unsigned tempo;
 	float mUserScale;
@@ -185,7 +185,7 @@ private:
 class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxFrame *frame, CC_descr *dcr, CC_WinList *lst);
+	AnimationFrame(wxFrame *frame, CC_show *show, CC_WinList *lst);
 	~AnimationFrame();
 
 	void OnCmdReanimate(wxCommandEvent& event);

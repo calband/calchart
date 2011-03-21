@@ -97,13 +97,5 @@ void CreateUnitVector(float& a, float& b, float dir);
 #define DEF_HASH_W 32
 #define DEF_HASH_E 52
 
-class CC_descr
-{
-public:
-	CC_show *show;
-	unsigned curr_ss;
-	inline CC_sheet *CurrSheet() const { return show->GetNthSheet(curr_ss); }
-};
-
 void SetAutoSave(int secs);
 #endif

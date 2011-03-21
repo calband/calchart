@@ -136,11 +136,11 @@ void AnimationTimer::Notify()
 }
 
 
-AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_descr *dcr)
+AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_show *show)
 : wxPanel(frame, wxID_ANY, wxDefaultPosition,
-wxSize(COORD2INT(dcr->show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
-COORD2INT(dcr->show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
-anim(NULL), show_descr(dcr), ourframe(frame), tempo(120),
+wxSize(COORD2INT(show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
+COORD2INT(show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
+anim(NULL), mShow(show), ourframe(frame), tempo(120),
 mUserScale(DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0))
 {
 	timer = new AnimationTimer(this);
@@ -170,7 +170,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 	dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
 	dc->Clear();
 	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-	show_descr->show->GetMode().DrawAnim(dc);
+	mShow->GetMode().DrawAnim(dc);
 	if (anim)
 		for (i = 0; i < anim->numpts; i++)
 	{
@@ -179,7 +179,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 			dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
 			dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
 		}
-		else if (show_descr->show->IsSelected(i))
+		else if (mShow->IsSelected(i))
 		{
 			if (anim->curr_cmds[i])
 			{
@@ -237,8 +237,8 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 				dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
 			}
 		}
-		x = anim->pts[i].pos.x+show_descr->show->GetMode().Offset().x;
-		y = anim->pts[i].pos.y+show_descr->show->GetMode().Offset().y;
+		x = anim->pts[i].pos.x+mShow->GetMode().Offset().x;
+		y = anim->pts[i].pos.y+mShow->GetMode().Offset().y;
 		dc->DrawRectangle(x - INT2COORD(1)/2, y - INT2COORD(1)/2,
 			INT2COORD(1), INT2COORD(1));
 	}
@@ -247,8 +247,8 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 
 void AnimationCanvas::OnSize(wxSizeEvent& event)
 {
-	float x = show_descr->show->GetMode().Size().x;
-	float y = show_descr->show->GetMode().Size().y;
+	float x = mShow->GetMode().Size().x;
+	float y = mShow->GetMode().Size().y;
 	float newX = event.GetSize().x;
 	float newY = event.GetSize().y;
 	
@@ -329,7 +329,7 @@ void AnimationCanvas::Generate()
 		anim = NULL;
 		RefreshCanvas();
 	}
-	anim = new Animation(show_descr->show, ourframe,
+	anim = new Animation(mShow, ourframe,
 		((AnimationFrame*)ourframe)->node->GetList());
 	if (anim && (anim->numsheets == 0))
 	{
@@ -339,7 +339,7 @@ void AnimationCanvas::Generate()
 	if (anim)
 	{
 		anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionType());
-		anim->GotoSheet(show_descr->curr_ss);
+		anim->GotoSheet(mShow->GetCurrentSheetNum());
 	}
 	ourframe->UpdatePanel();
 	RefreshCanvas();
@@ -368,11 +368,11 @@ void AnimationCanvas::SelectCollisions()
 		{
 			if (anim->collisions[i])
 			{
-				show_descr->show->Select(i);
+				mShow->Select(i);
 			}
 			else
 			{
-				show_descr->show->Select(i, false);
+				mShow->Select(i, false);
 			}
 		}
 		wxGetApp().GetWindowList().UpdateSelections();
@@ -583,7 +583,7 @@ static const wxString collis_text[] =
 	wxT("Ignore"), wxT("Show"), wxT("Beep")
 };
 
-AnimationFrame::AnimationFrame(wxFrame *frame, CC_descr *dcr,
+AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show,
 CC_WinList *lst)
 : wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, CC_FRAME_OTHER, wxT("anim"))
 {
@@ -613,7 +613,7 @@ CC_WinList *lst)
 	CreateCoolToolBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
-	canvas = new AnimationCanvas(this, dcr);
+	canvas = new AnimationCanvas(this, show);
 	canvas->UpdateText();
 
 // Add the controls

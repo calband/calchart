@@ -108,7 +108,8 @@ CC_show::CC_show()
 :okay(true), numpoints(0), numsheets(0), sheets(NULL),
 selections(NULL),
 print_landscape(false), print_do_cont(true),
-print_do_cont_sheet(true)
+print_do_cont_sheet(true),
+mSheetNum(0)
 {
 	wxString tmpname;
 
@@ -124,7 +125,8 @@ CC_show::CC_show(unsigned npoints)
 :okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, wxT("1"))),
 pt_labels(npoints),
 print_landscape(false), print_do_cont(true),
-print_do_cont_sheet(true)
+print_do_cont_sheet(true),
+mSheetNum(0)
 {
 	wxString tmpname;
 
@@ -836,8 +838,6 @@ wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 
 	WriteEnd(stream, INGL_SHOW);
 	
-	// TODO: if an error occurred, notify user here:
-
 	return stream;
 }
 
@@ -1033,6 +1033,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	}
 	ReadAndCheckID(stream, INGL_END);
 	ReadAndCheckID(stream, INGL_SHOW);
+	mSheetNum = 0;
 	}
 	catch (INGL_exception& e) {
 		AddError(e.WhatError());
@@ -1157,6 +1158,17 @@ CC_sheet *CC_show::RemoveNthSheet(unsigned sheetidx)
 	numsheets--;
 	sht->next = NULL;
 	wxGetApp().GetWindowList().DeleteSheet(sheetidx);
+
+	if (sheetidx < GetCurrentSheetNum())
+	{
+		SetCurrentSheet(GetCurrentSheetNum()-1);
+	}
+	if (GetCurrentSheetNum() >=
+		GetNumSheets())
+	{
+		SetCurrentSheet(GetNumSheets()-1);
+	}
+
 	return sht;
 }
 
@@ -1222,6 +1234,8 @@ void CC_show::InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx)
 		sheets = nsheet;
 	}
 	numsheets++;
+	if (sheetidx <= GetCurrentSheetNum())
+		SetCurrentSheet(GetCurrentSheetNum()+1);
 }
 
 

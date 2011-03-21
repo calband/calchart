@@ -93,7 +93,6 @@ const wxString gridtext[] =
 };
 
 static const wxChar *file_wild = FILE_WILDCARDS;
-static const wxChar *file_save_wild = FILE_SAVE_WILDCARDS;
 
 struct GridValue
 {
@@ -225,7 +224,7 @@ void CC_WinNodeMain::SetShow(CC_show *shw)
 	Remove();
 	list = &wxGetApp().GetWindowList();
 	list->Add(this);
-	frame->field->show_descr.show = shw;
+	frame->field->mShow = shw;
 	frame->field->UpdateBars();
 	frame->field->GotoSS(0);
 	ChangeName();
@@ -234,7 +233,7 @@ void CC_WinNodeMain::SetShow(CC_show *shw)
 
 void CC_WinNodeMain::ChangeName()
 {
-	frame->SetTitle(frame->field->show_descr.show->GetTitle());
+	frame->SetTitle(frame->field->mShow->GetTitle());
 }
 
 
@@ -253,7 +252,7 @@ void CC_WinNodeMain::UpdatePoints()
 
 void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht, int ref)
 {
-	if (sht == frame->field->show_descr.curr_ss)
+	if (sht == frame->field->mShow->GetCurrentSheetNum())
 	{
 // ref = 0 means that any points could move
 		if ((ref <= 0) || (ref == (int)frame->field->curr_ref))
@@ -298,36 +297,13 @@ int line, int col)
 
 void CC_WinNodeMain::AddSheet(unsigned sht)
 {
-	if (sht <= frame->field->show_descr.curr_ss)
-	{
-		frame->field->show_descr.curr_ss++;
-	}
 	frame->UpdatePanel();
 }
 
 
 void CC_WinNodeMain::DeleteSheet(unsigned sht)
 {
-	if (sht < frame->field->show_descr.curr_ss)
-	{
-		frame->field->show_descr.curr_ss--;
-	}
-	if (frame->field->show_descr.curr_ss >=
-		frame->field->show_descr.show->GetNumSheets())
-	{
-		frame->field->PrevSS();
-	}
-	else
-	{
-		if (sht == frame->field->show_descr.curr_ss)
-		{
-			frame->field->GotoThisSS();
-		}
-		else
-		{
-			frame->UpdatePanel();
-		}
-	}
+	frame->UpdatePanel();
 }
 
 
@@ -339,17 +315,13 @@ void CC_WinNodeMain::AppendSheets()
 
 void CC_WinNodeMain::RemoveSheets(unsigned num)
 {
-	if (frame->field->show_descr.curr_ss >=
-		frame->field->show_descr.show->GetNumSheets())
-	{
-		frame->field->GotoSS(num-1);
-	}
+	frame->UpdatePanel();
 }
 
 
 void CC_WinNodeMain::ChangeTitle(unsigned sht)
 {
-	if (sht == frame->field->show_descr.curr_ss) frame->UpdatePanel();
+	if (sht == frame->field->mShow->GetCurrentSheetNum()) frame->UpdatePanel();
 }
 
 
@@ -638,7 +610,7 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrinter printer(gPrintDialogData);
-	MyPrintout printout(wxT("My Printout"), field->show_descr.show);
+	MyPrintout printout(wxT("My Printout"), field->mShow);
 	wxPrintDialogData& printDialog = printer.GetPrintDialogData();
 
 	int minPage, maxPage, pageFrom, pageTo;
@@ -667,8 +639,8 @@ void MainFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrintPreview *preview = new wxPrintPreview(
-		new MyPrintout(wxT("My Printout"), field->show_descr.show),
-		new MyPrintout(wxT("My Printout"), field->show_descr.show),
+		new MyPrintout(wxT("My Printout"), field->mShow),
+		new MyPrintout(wxT("My Printout"), field->mShow),
 		gPrintDialogData);
 	if (!preview->Ok())
 	{
@@ -696,9 +668,9 @@ void MainFrame::OnCmdPageSetup(wxCommandEvent& event)
 
 void MainFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
-		ShowPrintDialog dialog(&field->show_descr, node->GetList(), false, this);
+		ShowPrintDialog dialog(field->mShow, node->GetList(), false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -708,9 +680,9 @@ void MainFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 
 void MainFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
-		ShowPrintDialog dialog(&field->show_descr, node->GetList(), true, this);
+		ShowPrintDialog dialog(field->mShow, node->GetList(), true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -731,8 +703,8 @@ void MainFrame::OnCmdSelectColors(wxCommandEvent& event)
 void MainFrame::OnCmdUndo(wxCommandEvent& event)
 {
 	int sheetnum;
-	sheetnum = field->show_descr.show->undolist->Undo(field->show_descr.show);
-	if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
+	sheetnum = field->mShow->undolist->Undo(field->mShow);
+	if ((sheetnum >= 0) && ((unsigned)sheetnum != field->mShow->GetCurrentSheetNum()))
 		field->GotoSS((unsigned)sheetnum);
 }
 
@@ -740,8 +712,8 @@ void MainFrame::OnCmdUndo(wxCommandEvent& event)
 void MainFrame::OnCmdRedo(wxCommandEvent& event)
 {
 	int sheetnum;
-	sheetnum = field->show_descr.show->undolist->Redo(field->show_descr.show);
-	if ((sheetnum >= 0) && ((unsigned)sheetnum != field->show_descr.curr_ss))
+	sheetnum = field->mShow->undolist->Redo(field->mShow);
+	if ((sheetnum >= 0) && ((unsigned)sheetnum != field->mShow->GetCurrentSheetNum()))
 		field->GotoSS((unsigned)sheetnum);
 }
 
@@ -749,8 +721,8 @@ void MainFrame::OnCmdRedo(wxCommandEvent& event)
 void MainFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
 	CC_sheet *sht;
-	sht = new CC_sheet(field->show_descr.CurrSheet());
-	field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss);
+	sht = new CC_sheet(field->mShow->GetCurrentSheet());
+	field->mShow->UserInsertSheet(sht, field->mShow->GetCurrentSheetNum());
 	field->PrevSS();
 }
 
@@ -758,35 +730,35 @@ void MainFrame::OnCmdInsertBefore(wxCommandEvent& event)
 void MainFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
 	CC_sheet *sht;
-	sht = new CC_sheet(field->show_descr.CurrSheet());
-	field->show_descr.show->UserInsertSheet(sht, field->show_descr.curr_ss+1);
+	sht = new CC_sheet(field->mShow->GetCurrentSheet());
+	field->mShow->UserInsertSheet(sht, field->mShow->GetCurrentSheetNum()+1);
 	field->NextSS();
 }
 
 
 void MainFrame::OnCmdDelete(wxCommandEvent& event)
 {
-	if (field->show_descr.show->GetNumSheets() > 1)
+	if (field->mShow->GetNumSheets() > 1)
 	{
-		field->show_descr.show->UserDeleteSheet(field->show_descr.curr_ss);
+		field->mShow->UserDeleteSheet(field->mShow->GetCurrentSheetNum());
 	}
 }
 
 
 void MainFrame::OnCmdRelabel(wxCommandEvent& event)
 {
-	if (field->show_descr.curr_ss+1 < field->show_descr.show->GetNumSheets())
+	if (field->mShow->GetCurrentSheetNum()+1 < field->mShow->GetNumSheets())
 	{
 		if(wxMessageBox(wxT("Relabeling sheets is not undoable.\nProceed?"),
 			wxT("Relabel sheets"), wxYES_NO) == wxYES)
 		{
-			if (!field->show_descr.show->RelabelSheets(field->show_descr.curr_ss))
+			if (!field->mShow->RelabelSheets(field->mShow->GetCurrentSheetNum()))
 				(void)wxMessageBox(wxT("Stuntsheets don't match"),
 					wxT("Relabel sheets"));
 			else
 			{
-				field->show_descr.show->undolist->EraseAll();
-				field->show_descr.show->Modify(true);
+				field->mShow->undolist->EraseAll();
+				field->mShow->Modify(true);
 			}
 		}
 	}
@@ -802,18 +774,18 @@ void MainFrame::OnCmdClearRef(wxCommandEvent& event)
 {
 	if (field->curr_ref > 0)
 	{
-		if (field->show_descr.CurrSheet()->ClearRefPositions(field->curr_ref))
+		if (field->mShow->GetCurrentSheet()->ClearRefPositions(field->curr_ref))
 			wxGetApp().GetWindowList().
-				UpdatePointsOnSheet(field->show_descr.curr_ss, field->curr_ref);
+				UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum(), field->curr_ref);
 	}
 }
 
 
 void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 {
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
-		(void)new ContinuityEditor(&field->show_descr, node->GetList(), this,
+		(void)new ContinuityEditor(field->mShow, node->GetList(), this,
 			wxT("Animation Continuity"));
 	}
 }
@@ -821,9 +793,9 @@ void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 
 void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event)
 {
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
-		(void)new PrintContEditor(&field->show_descr, node->GetList(), this,
+		(void)new PrintContEditor(field->mShow, node->GetList(), this,
 			wxT("Printed Continuity"));
 	}
 }
@@ -832,15 +804,15 @@ void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event)
 void MainFrame::OnCmdSetTitle(wxCommandEvent& event)
 {
 	wxString s;
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
 		s = wxGetTextFromUser(wxT("Enter the new title"),
-			field->show_descr.CurrSheet()->GetName(),
-			field->show_descr.CurrSheet()->GetName(),
+			field->mShow->GetCurrentSheet()->GetName(),
+			field->mShow->GetCurrentSheet()->GetName(),
 			this);
 		if (s)
 		{
-			field->show_descr.CurrSheet()->UserSetName(s);
+			field->mShow->GetCurrentSheet()->UserSetName(s);
 		}
 	}
 }
@@ -849,19 +821,19 @@ void MainFrame::OnCmdSetTitle(wxCommandEvent& event)
 void MainFrame::OnCmdSetBeats(wxCommandEvent& event)
 {
 	wxString s;
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
 		wxString buf;
-		buf.sprintf(wxT("%u"), field->show_descr.CurrSheet()->GetBeats());
+		buf.sprintf(wxT("%u"), field->mShow->GetCurrentSheet()->GetBeats());
 		s = wxGetTextFromUser(wxT("Enter the number of beats"),
-			field->show_descr.CurrSheet()->GetName(),
+			field->mShow->GetCurrentSheet()->GetName(),
 			buf, this);
 		if (!s.empty())
 		{
 			long val;
 			if (s.ToLong(&val))
 			{
-				field->show_descr.CurrSheet()->UserSetBeats(val);
+				field->mShow->GetCurrentSheet()->UserSetBeats(val);
 			}
 		}
 	}
@@ -876,18 +848,18 @@ void MainFrame::OnCmdSetup(wxCommandEvent& event)
 
 void MainFrame::OnCmdPoints(wxCommandEvent& event)
 {
-	if (field->show_descr.show)
-		(void)new PointPicker(field->show_descr.show, node->GetList(),
+	if (field->mShow)
+		(void)new PointPicker(field->mShow, node->GetList(),
 			true, this, wxT("Select points"));
 }
 
 
 void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 {
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
 		AnimationFrame *anim =
-			new AnimationFrame(this, &field->show_descr, node->GetList());
+			new AnimationFrame(this, field->mShow, node->GetList());
 		anim->canvas->Generate();
 	}
 }
@@ -938,15 +910,15 @@ void MainFrame::OnMenuSelect(wxMenuEvent& event)
 	switch (event.GetMenuId())
 	{
 		case wxID_SAVE:
-			msg = field->show_descr.show->IsModified() ?
+			msg = field->mShow->IsModified() ?
 				wxT("Save show (needed)") :
 			wxT("Save show (not needed)");
 			break;
 		case wxID_UNDO:
-			msg = field->show_descr.show->undolist->UndoDescription();
+			msg = field->mShow->undolist->UndoDescription();
 			break;
 		case wxID_REDO:
-			msg = field->show_descr.show->undolist->RedoDescription();
+			msg = field->mShow->undolist->RedoDescription();
 			break;
 		default:
 			event.Skip();
@@ -1031,89 +1003,89 @@ void MainFrame::OnCmd_genius(wxCommandEvent& event)
 
 void MainFrame::OnCmd_label_left(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsLabel(false))
+	if (field->mShow->GetCurrentSheet()->SetPointsLabel(false))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_label_right(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsLabel(true))
+	if (field->mShow->GetCurrentSheet()->SetPointsLabel(true))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsLabelFlip())
+	if (field->mShow->GetCurrentSheet()->SetPointsLabelFlip())
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_PLAIN))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_PLAIN))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOL))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOL))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_BKSL))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_BKSL))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SL))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SL))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_X))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_X))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLBKSL))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOLBKSL))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLSL))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOLSL))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
 void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
-	if (field->show_descr.CurrSheet()->SetPointsSym(SYMBOL_SOLX))
+	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOLX))
 		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->show_descr.curr_ss);
+			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
 
 
@@ -1135,12 +1107,12 @@ void MainFrame::AppendShow()
 		shw = new CC_show();
 		if (shw->OnOpenDocument(s))
 		{
-			if (shw->GetNumPoints() == field->show_descr.show->GetNumPoints())
+			if (shw->GetNumPoints() == field->mShow->GetNumPoints())
 			{
-				currend = field->show_descr.show->GetNumSheets();
-				field->show_descr.show->undolist->Add(new ShowUndoAppendSheets(currend));
-				field->show_descr.show->Append(shw);
-				if (!field->show_descr.show->RelabelSheets(currend-1))
+				currend = field->mShow->GetNumSheets();
+				field->mShow->undolist->Add(new ShowUndoAppendSheets(currend));
+				field->mShow->Append(shw);
+				if (!field->mShow->RelabelSheets(currend-1))
 					(void)wxMessageBox(wxT("Stuntsheets don't match"),
 						wxT("Append Error"));
 			}
@@ -1168,7 +1140,7 @@ void MainFrame::ImportContFile()
 	s = wxFileSelector(wxT("Import Continuity"), NULL, NULL, NULL, wxT("*.txt"));
 	if (!s.empty())
 	{
-		err = field->show_descr.show->ImportContinuity(s);
+		err = field->mShow->ImportContinuity(s);
 		if (!err.empty())
 		{
 			(void)wxMessageBox(err, wxT("Load Error"));
@@ -1217,9 +1189,9 @@ void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
 
 void MainFrame::Setup()
 {
-	if (field->show_descr.show)
+	if (field->mShow)
 	{
-		ShowInfoReq dialog1(field->show_descr.show, this);
+		ShowInfoReq dialog1(field->mShow, this);
 		if (dialog1.ShowModal() == wxID_OK)
 		{
 		}
@@ -1244,8 +1216,8 @@ curr_ref(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 
 	SetPalette(CalChartPalette);
 
-	show_descr.show = static_cast<CC_show*>(view->GetDocument());
-	show_descr.curr_ss = ss;
+	mShow = static_cast<CC_show*>(view->GetDocument());
+	mShow->SetCurrentSheet(ss);
 
 	SetZoomQuick(def_zoom);
 
@@ -1284,7 +1256,7 @@ void FieldCanvas::DrawDrag(bool on)
 		if (on)
 		{
 			SetXOR(dc);
-			origin = show_descr.show->GetMode().Offset();
+			origin = mShow->GetMode().Offset();
 			for (ShapeList::const_iterator i=shape_list.begin();
 				i != shape_list.end();
 				++i)
@@ -1325,9 +1297,9 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 	int i;
 	CC_coord pos;
 
-	if (show_descr.show)
+	if (mShow)
 	{
-		CC_sheet *sheet = show_descr.CurrSheet();
+		CC_sheet *sheet = mShow->GetCurrentSheet();
 		if (sheet)
 		{
 			event.GetPosition(&x, &y);
@@ -1341,7 +1313,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				Move(x, y, 1);
 			}
 
-			pos = show_descr.show->GetMode().Offset();
+			pos = mShow->GetMode().Offset();
 			pos.x = Coord(((x-x_off)/GetScaleX()) - pos.x);
 			pos.y = Coord(((y-y_off)/GetScaleY()) - pos.y);
 
@@ -1430,7 +1402,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							break;
 							default:
 								bool changed = false;
-								if (!(event.ShiftDown() || event.AltDown())) changed = show_descr.show->UnselectAll();
+								if (!(event.ShiftDown() || event.AltDown())) changed = mShow->UnselectAll();
 								i = sheet->FindPoint(pos.x, pos.y, curr_ref);
 								if (i < 0)
 								{
@@ -1439,7 +1411,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								}
 								else
 								{
-									show_descr.show->Select(i, event.AltDown() ? !show_descr.show->IsSelected(i) : true);
+									mShow->Select(i, event.AltDown() ? !mShow->IsSelected(i) : true);
 									changed = true;
 									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
 								}
@@ -1461,7 +1433,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 						if (sheet->MovePointsInLine(shape->GetOrigin(), shape->GetPoint(),
 							curr_ref))
 							wxGetApp().GetWindowList().
-								UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+								UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 						break;
@@ -1484,7 +1456,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									TranslationMatrix(Vector(c1.x, c1.y, 0));
 								if (sheet->TransformPoints(m, curr_ref))
 									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1521,7 +1493,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									TranslationMatrix(Vector(o.x, o.y, 0));
 								if (sheet->TransformPoints(m, curr_ref))
 									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1544,7 +1516,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								TranslationMatrix(Vector(c1.x, c1.y, 0));
 							if (sheet->TransformPoints(m, curr_ref))
 								wxGetApp().GetWindowList().
-									UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+									UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 						}
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1591,7 +1563,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 										TranslationMatrix(Vector(c1.x, c1.y, 0));
 									if (sheet->TransformPoints(m, curr_ref))
 										wxGetApp().GetWindowList().
-											UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+											UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								}
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1646,7 +1618,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								m = Binv*A;
 								if (sheet->TransformPoints(m, curr_ref))
 									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 							}
 							EndDrag();
 							ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1664,7 +1636,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								pos = shape->GetPoint() - shape->GetOrigin();
 								if (sheet->TranslatePoints(pos, curr_ref))
 									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(show_descr.curr_ss, curr_ref);
+										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								EndDrag();
 								break;
 							case CC_DRAG_LASSO:
@@ -1732,9 +1704,9 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
 
 void FieldCanvas::RefreshShow(bool drawall, int point)
 {
-	if (show_descr.show)
+	if (mShow)
 	{
-		CC_sheet *sheet = show_descr.CurrSheet();
+		CC_sheet *sheet = mShow->GetCurrentSheet();
 		if (sheet)
 		{
 			if (curr_ref > 0)
@@ -1757,16 +1729,16 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 void MainFrame::UpdatePanel()
 {
 	wxString tempbuf;
-	CC_sheet *sht = field->show_descr.CurrSheet();
-	unsigned num = field->show_descr.show->GetNumSheets();
-	unsigned curr = field->show_descr.curr_ss+1;
+	CC_sheet *sht = field->mShow->GetCurrentSheet();
+	unsigned num = field->mShow->GetNumSheets();
+	unsigned curr = field->mShow->GetCurrentSheetNum()+1;
 
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
-		field->show_descr.show->IsModified() ? wxT("* "):wxT(""), curr,
+		field->mShow->IsModified() ? wxT("* "):wxT(""), curr,
 		num, (sht)?sht->GetName().c_str():wxT(""), (sht)?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
 	tempbuf.sprintf(wxT("%d of %d selected"),
-		(sht)?sht->GetNumSelectedPoints():0, field->show_descr.show->GetNumPoints());
+		(sht)?sht->GetNumSelectedPoints():0, field->mShow->GetNumPoints());
 	SetStatusText(tempbuf, 2);
 
 	if (num > 1)
@@ -1787,10 +1759,10 @@ void MainFrame::UpdatePanel()
 
 void FieldCanvas::UpdateBars()
 {
-	if (show_descr.show)
+	if (mShow)
 	{
-		SetSize(wxSize(COORD2INT(show_descr.show->GetMode().Size().x) * zoomf,
-			COORD2INT(show_descr.show->GetMode().Size().y) * zoomf));
+		SetSize(wxSize(COORD2INT(mShow->GetMode().Size().x) * zoomf,
+			COORD2INT(mShow->GetMode().Size().y) * zoomf));
 	}
 }
 
@@ -1870,7 +1842,7 @@ const CC_coord& start, bool toggleSelected)
 	CC_coord c1, c2, last;
 	Coord v1, v2;
 	float f1, f2, fx, fy;
-	CC_sheet* sheet = show_descr.CurrSheet();
+	CC_sheet* sheet = mShow->GetCurrentSheet();
 
 	last = start;
 	while (!pointlist.empty())
@@ -1939,7 +1911,7 @@ const CC_coord& start, bool toggleSelected)
 					break;
 			}
 		}
-		show_descr.show->Select(*pnt, toggleSelected ? !show_descr.show->IsSelected(*pnt) : true);
+		mShow->Select(*pnt, toggleSelected ? !mShow->IsSelected(*pnt) : true);
 		last = c1;
 		pointlist.erase(pnt);
 	}
@@ -1949,11 +1921,11 @@ const CC_coord& start, bool toggleSelected)
 bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
 	bool changed = false;
-	CC_sheet* sheet = show_descr.CurrSheet();
+	CC_sheet* sheet = mShow->GetCurrentSheet();
 	PointList pointlist;
 	const wxPoint *pnt;
 
-	for (unsigned i = 0; i < show_descr.show->GetNumPoints(); i++)
+	for (unsigned i = 0; i < mShow->GetNumPoints(); i++)
 	{
 		if (lasso->Inside(sheet->GetPosition(i, curr_ref)))
 		{
@@ -1978,7 +1950,7 @@ unsigned ref, bool toggleSelected)
 {
 	unsigned i;
 	bool changed = false;
-	CC_sheet* sheet = show_descr.CurrSheet();
+	CC_sheet* sheet = mShow->GetCurrentSheet();
 	CC_coord top_left, bottom_right;
 	const CC_coord *pos;
 	PointList pointlist;
@@ -2003,7 +1975,7 @@ unsigned ref, bool toggleSelected)
 		top_left.y = c1.y;
 		bottom_right.y = c2.y;
 	}
-	for (i = 0; i < show_descr.show->GetNumPoints(); i++)
+	for (i = 0; i < mShow->GetNumPoints(); i++)
 	{
 		pos = &sheet->GetPosition(i, ref);
 		if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
@@ -2104,4 +2076,3 @@ bool MainFrameView::OnClose(bool deleteWindow)
 	}
 	return true;
 }
-

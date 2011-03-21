@@ -79,11 +79,11 @@ void ShowPrintDialog::PrintShow()
 	page_height = (float)dval;
 	text_minyards->GetValue().ToLong(&minyards);
 
-	show_descr->show->SetBoolLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
+	mShow->SetBoolLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
 
-	show_descr->show->SetBoolDoCont(check_cont->GetValue());
+	mShow->SetBoolDoCont(check_cont->GetValue());
 	if (!eps)
-		show_descr->show->SetBoolDoContSheet(check_pages->GetValue());
+		mShow->SetBoolDoContSheet(check_pages->GetValue());
 	overview = check_overview->GetValue();
 
 	switch (radio_method->GetSelection())
@@ -128,8 +128,8 @@ void ShowPrintDialog::PrintShow()
 		wxString tempbuf;
 
 		wxBeginBusyCursor();
-		n = show_descr->show->Print(fp, eps, overview,
-			show_descr->curr_ss, minyards);
+		n = mShow->Print(fp, eps, overview,
+			mShow->GetCurrentSheetNum(), minyards);
 		fflush(fp);
 		fclose(fp);
 
@@ -139,7 +139,7 @@ void ShowPrintDialog::PrintShow()
 			case CC_PRINT_ACTION_FILE:
 				break;
 			default:
-				if (show_descr->show->Ok())
+				if (mShow->Ok())
 				{
 					system(buf.utf8_str());
 				}
@@ -149,22 +149,22 @@ void ShowPrintDialog::PrintShow()
 #endif
 		wxEndBusyCursor();
 
-		if (show_descr->show->Ok())
+		if (mShow->Ok())
 		{
 			tempbuf.sprintf(wxT("Printed %d pages."), n);
 			(void)wxMessageBox(tempbuf,
-				show_descr->show->GetTitle());
+				mShow->GetTitle());
 		}
 		else
 		{
-			(void)wxMessageBox(show_descr->show->GetError(),
-				show_descr->show->GetTitle());
+			(void)wxMessageBox(mShow->GetError(),
+				mShow->GetTitle());
 		}
 	}
 	else
 	{
 		(void)wxMessageBox(wxT("Unable to open print file for writing!"),
-			show_descr->show->GetTitle());
+			mShow->GetTitle());
 	}
 }
 
@@ -174,7 +174,7 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 	wxArrayString choices;
 	CC_sheet *sheet;
 	size_t n;
-	for (sheet = show_descr->show->GetSheet(); sheet!=NULL; sheet = sheet->next)
+	for (sheet = mShow->GetSheet(); sheet!=NULL; sheet = sheet->next)
 	{
 		choices.Add(sheet->GetName());
 	}
@@ -183,7 +183,7 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 		wxT("Pagest to Print"),
 		choices);
 	wxArrayInt markedChoices;
-	for (n = 0, sheet = show_descr->show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
+	for (n = 0, sheet = mShow->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
 	{
 		if (sheet->picked)
 			markedChoices.Add(n);
@@ -197,7 +197,7 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 		for (n = 0; n < selections.GetCount(); ++n)
 			selected.insert(selections[n]);
 // now mark the sheets
-		for (n = 0, sheet = show_descr->show->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
+		for (n = 0, sheet = mShow->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
 			sheet->picked = (selected.find(n) != selected.end());
 	}
 }
@@ -211,14 +211,14 @@ ShowPrintDialog::ShowPrintDialog()
 }
 
 
-ShowPrintDialog::ShowPrintDialog(CC_descr *dcr, CC_WinList *lst, bool printEPS,
+ShowPrintDialog::ShowPrintDialog(CC_show *show, CC_WinList *lst, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)
 {
 	Init();
 
-	Create(dcr, lst, printEPS, parent, id, caption, pos, size, style);
+	Create(show, lst, printEPS, parent, id, caption, pos, size, style);
 }
 
 
@@ -232,14 +232,14 @@ void ShowPrintDialog::Init()
 }
 
 
-bool ShowPrintDialog::Create(CC_descr *dcr, CC_WinList *lst, bool printEPS,
+bool ShowPrintDialog::Create(CC_show *show, CC_WinList *lst, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)
 {
 	if (!wxDialog::Create(parent, id, caption, pos, size, style))
 		return false;
-	show_descr= dcr;
+	mShow = show;
 	eps = printEPS;
 
 	CreateControls();
@@ -318,7 +318,7 @@ void ShowPrintDialog::CreateControls()
 	wxString orientation[] = { wxT("Portrait"), wxT("Landscape") };
 	radio_orient = new wxRadioBox(this, wxID_ANY, wxT("&Orientation:"),wxDefaultPosition,wxDefaultSize,
 		sizeof(orientation)/sizeof(wxString),orientation);
-	radio_orient->SetSelection((int)show_descr->show->GetBoolLandscape());
+	radio_orient->SetSelection((int)mShow->GetBoolLandscape());
 	horizontalsizer->Add(radio_orient, 0, wxALL, 5 );
 
 #ifdef PRINT__RUN_CMD
@@ -338,13 +338,13 @@ void ShowPrintDialog::CreateControls()
 	horizontalsizer->Add(check_overview, 0, wxALL, 5 );
 
 	check_cont = new wxCheckBox(this, -1, wxT("Continuit&y"));
-	check_cont->SetValue(show_descr->show->GetBoolDoCont());
+	check_cont->SetValue(mShow->GetBoolDoCont());
 	horizontalsizer->Add(check_cont, 0, wxALL, 5 );
 
 	if (!eps)
 	{
 		check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
-		check_pages->SetValue(show_descr->show->GetBoolDoContSheet());
+		check_pages->SetValue(mShow->GetBoolDoContSheet());
 		horizontalsizer->Add(check_pages, 0, wxALL, 5 );
 	}
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );

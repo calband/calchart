@@ -124,7 +124,7 @@ int line, int col)
 
 void CC_WinNodeCont::DeleteSheet(unsigned sht)
 {
-	if (sht == editor->GetShowDescr()->curr_ss)
+	if (sht == editor->GetShow()->GetCurrentSheetNum())
 	{
 		editor->DetachText();
 	}
@@ -133,7 +133,7 @@ void CC_WinNodeCont::DeleteSheet(unsigned sht)
 
 void CC_WinNodeCont::RemoveSheets(unsigned num)
 {
-	if (num <= editor->GetShowDescr()->curr_ss)
+	if (num <= editor->GetShow()->GetCurrentSheetNum())
 	{
 		editor->DetachText();
 	}
@@ -142,7 +142,7 @@ void CC_WinNodeCont::RemoveSheets(unsigned num)
 
 void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont)
 {
-	if (sht == editor->GetShowDescr()->curr_ss)
+	if (sht == editor->GetShow()->GetCurrentSheetNum())
 	{
 		if (cont <= editor->GetCurrent())
 		{
@@ -155,7 +155,7 @@ void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont)
 
 void CC_WinNodeCont::DeleteContinuity(unsigned sht, unsigned cont)
 {
-	if (sht == editor->GetShowDescr()->curr_ss)
+	if (sht == editor->GetShow()->GetCurrentSheetNum())
 	{
 		if (cont == editor->GetCurrent()) editor->DetachText();
 		if (editor->GetCurrent() > 0)
@@ -179,7 +179,7 @@ void CC_WinNodeCont::FlushContinuity()
 void CC_WinNodeCont::SetContinuity(wxWindow *win,
 unsigned sht, unsigned cont)
 {
-	if ((win != editor) && (sht == editor->GetShowDescr()->curr_ss) &&
+	if ((win != editor) && (sht == editor->GetShow()->GetCurrentSheetNum()) &&
 		(cont == editor->GetCurrent()))
 	{
 		editor->UpdateText(true);
@@ -221,11 +221,11 @@ void ContinuityEditor::ContEditCurrent(wxCommandEvent&)
 }
 
 
-ContinuityEditor::ContinuityEditor(CC_descr *dcr, CC_WinList *lst,
+ContinuityEditor::ContinuityEditor(CC_show *show, CC_WinList *lst,
 wxFrame *parent, const wxString& title,
 int x, int y, int width, int height):
 wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height)),
-descr(dcr), curr_cont(0), text_sheet(NULL), text_contnum(0)
+mShow(show), curr_cont(0), text_sheet(NULL), text_contnum(0)
 {
 // Give it an icon
 	SetBandIcon(this);
@@ -305,7 +305,7 @@ void ContinuityEditor::OnCloseWindow(wxCloseEvent& event)
 
 void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 	wxString contname(wxGetTextFromUser(wxT("Enter the new continuity's name"),
 		wxT("New Continuity"),
 		wxT(""), this));
@@ -318,7 +318,7 @@ void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 
 void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 	if (sht->ContinuityInUse(curr_cont))
 	{
 		(void)wxMessageBox(wxT("This continuity is being used.\nSet these points to a different continuity first."), wxT("Delete continuity"));
@@ -345,7 +345,7 @@ void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 
 void ContinuityEditor::Update(bool quick)
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 
 	conts->Clear();
 	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
@@ -360,7 +360,7 @@ void ContinuityEditor::Update(bool quick)
 
 void ContinuityEditor::UpdateContChoice()
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 	if (curr_cont >= sht->animcont.size() && sht->animcont.size() > 0)
 		curr_cont = sht->animcont.size()-1;
 	conts->SetSelection(curr_cont);
@@ -369,7 +369,7 @@ void ContinuityEditor::UpdateContChoice()
 
 void ContinuityEditor::UpdateText(bool quick)
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 	CC_continuity_ptr c;
 
 	if (quick)
@@ -415,7 +415,7 @@ void ContinuityEditor::FlushText()
 
 void ContinuityEditor::SelectPoints()
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
 	if (c != NULL)
 	{
@@ -429,7 +429,7 @@ void ContinuityEditor::SelectPoints()
 
 void ContinuityEditor::SetPoints()
 {
-	CC_sheet *sht = descr->CurrSheet();
+	CC_sheet *sht = mShow->GetCurrentSheet();
 	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
 	if (c != NULL)
 	{
@@ -438,8 +438,8 @@ void ContinuityEditor::SetPoints()
 }
 
 
-PrintContCanvas::PrintContCanvas(wxFrame *frame, CC_descr *dcr):
-wxScrolledWindow(frame), show_descr(dcr), ourframe(frame),
+PrintContCanvas::PrintContCanvas(wxFrame *frame, CC_show *show):
+wxScrolledWindow(frame), mShow(show), ourframe(frame),
 topline(0), width(0), height(0), cursorx(0), cursory(0),
 maxlines(0), maxcolumns(0)
 {
@@ -450,7 +450,7 @@ PrintContCanvas::~PrintContCanvas() {}
 
 void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 {
-	const CC_sheet *sht = show_descr->CurrSheet();
+	const CC_sheet *sht = mShow->GetCurrentSheet();
 	if (!sht)
 		return;
 	bool do_tab;
@@ -760,7 +760,7 @@ void PrintContClose(wxButton& button, wxEvent&)
 }
 
 
-PrintContEditor::PrintContEditor(CC_descr *dcr, CC_WinList *lst,
+PrintContEditor::PrintContEditor(CC_show *show, CC_WinList *lst,
 wxFrame *parent, const wxString& title,
 int x, int y, int width, int height)
 : wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height))
@@ -774,7 +774,7 @@ int x, int y, int width, int height)
 	CreateCoolToolBar(printcont_tb, sizeof(printcont_tb)/sizeof(ToolBarEntry), this);
 
 // Add the canvas
-	canvas = new PrintContCanvas(this, dcr);
+	canvas = new PrintContCanvas(this, show);
 //  SetCanvas(canvas);
 
 // Add the buttons

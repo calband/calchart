@@ -284,27 +284,28 @@ public:
 	inline void GotoThisSS()
 	{
 		UpdateSS();
-		ourframe->node->GetList()->GotoSheet(show_descr.curr_ss);
+		ourframe->node->GetList()->GotoSheet(mShow->GetCurrentSheetNum());
 	}
 	inline void GotoSS(unsigned n)
 	{
-		show_descr.curr_ss = n; GotoThisSS();
+		mShow->SetCurrentSheet(n); GotoThisSS();
 	}
 	inline void PrevSS()
 	{
-		if (show_descr.curr_ss > 0)
+		if (mShow->GetCurrentSheetNum() > 0)
 		{
-			show_descr.curr_ss--; GotoThisSS();
+			mShow->SetCurrentSheet(mShow->GetCurrentSheetNum()-1); GotoThisSS();
 		}
 	}
 	inline void NextSS()
 	{
-		if (show_descr.show)
+		if (mShow)
 		{
-			if (++show_descr.curr_ss < show_descr.show->GetNumSheets())
+			if ((mShow->GetCurrentSheetNum()+1) < mShow->GetNumSheets())
 			{
+				mShow->SetCurrentSheet(mShow->GetCurrentSheetNum()+1);
 				GotoThisSS();
-			} else --show_descr.curr_ss;
+			}
 		}
 	}
 	inline bool SetZoomQuick(int factor)
@@ -334,7 +335,7 @@ public:
 
 // Variables
 	MainFrame *ourframe;
-	CC_descr show_descr;
+	CC_show* mShow;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
 	CC_SELECT_TYPES curr_select;
