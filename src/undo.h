@@ -33,8 +33,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 #include "cc_continuity.h"
 #include "cc_coord.h"
+#include "cc_show.h"
 #include <ostream>
 #include <deque>
+#include <map>
+#include <wx/cmdproc.h>
 
 class ShowUndo
 {
@@ -90,6 +93,34 @@ public:
 private:
 	unsigned num, refnum;
 	std::deque<ShowUndoMoveElem> elems;
+};
+
+// this command is to move points around on a sheet
+// position is a mapping of which point to two positions, the original and new.
+// When you do/undo the command, the show will be set to the sheet, and the selection
+// list will revert to that selection list.
+class MovePointsOnSheetCommand : public wxCommand
+{
+public:
+	MovePointsOnSheetCommand(CC_show& show, unsigned ref);
+	virtual ~MovePointsOnSheetCommand();
+
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	std::map<unsigned, std::pair<CC_coord,CC_coord> > mPositions;
+	const CC_show::SelectionList mPoints;
+	const unsigned mRef;
+};
+
+class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
+{
+public:
+	TranslatePointsByDeltaCommand(CC_show& show, const CC_coord& delta, unsigned ref);
+	virtual ~TranslatePointsByDeltaCommand();
 };
 
 // Point symbol changes

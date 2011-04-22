@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/docview.h>							  // For basic wx defines
 
 #include <vector>
+#include <set>
 
 class CC_sheet;
 class ShowMode;
@@ -112,13 +113,13 @@ public:
 	inline void SetBoolDoContSheet(bool v) { print_do_cont_sheet = v; }
 
 	bool UnselectAll();
-	inline bool IsSelected(unsigned i) const { return selections[i]; }
+	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
 	void Select(unsigned i, bool val = true);
 	inline void SelectToggle(unsigned i)
 	{
-		selections[i] = selections[i] ? false:true;
+		Select(i, !IsSelected(i));
 	}
-	typedef std::vector<unsigned> SelectionList;
+	typedef std::set<unsigned> SelectionList;
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
 	const ShowMode& GetMode() const { return *mode; };
 	void SetMode(ShowMode* m) { mode = m; };
@@ -146,8 +147,7 @@ private:
 	unsigned short numsheets;
 	CC_sheet *sheets;
 	std::vector<wxString> pt_labels;
-	bool *selections;						  // array for each point
-	std::vector<unsigned> selectionList;	  // order of selections
+	SelectionList selectionList;	  // order of selections
 	bool print_landscape;
 	bool print_do_cont;
 	bool print_do_cont_sheet;

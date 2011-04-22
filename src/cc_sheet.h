@@ -90,6 +90,7 @@ public:
 
 	inline const CC_point& GetPoint(unsigned i) const { return pts[i]; }
 	inline CC_point& GetPoint(unsigned i) { return pts[i]; }
+	std::vector<CC_point> GetPoints() const { return pts; }
 	void SetPoint(const cc_oldpoint& val, unsigned i);
 
 	const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
@@ -97,7 +98,6 @@ public:
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 	void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
 	bool ClearRefPositions(unsigned ref);
-	bool TranslatePoints(const CC_coord& delta, unsigned ref = 0);
 	bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
 	bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
 		unsigned ref);

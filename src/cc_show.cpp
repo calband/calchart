@@ -106,7 +106,6 @@ IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 // Create a new show
 CC_show::CC_show()
 :okay(true), numpoints(0), numsheets(0), sheets(NULL),
-selections(NULL),
 print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true),
 mSheetNum(0)
@@ -140,18 +139,7 @@ mSheetNum(0)
 		{
 			pt_labels[i].Printf(wxT("%u"), i);
 		}
-		selections = new bool[npoints];
-		if (selections == NULL)
-		{
-// Out of mem!
-			AddError(nomem_str);
-			return;
-		}
 		UnselectAll();
-	}
-	else
-	{
-		selections = NULL;
 	}
 	sheets->animcont.push_back(CC_continuity_ptr(new CC_continuity(contnames[0], 0)));
 
@@ -1265,13 +1253,7 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns)
 
 	undolist->EraseAll();						  // Remove all previously avail undo
 
-	delete selections;
-	selections = new bool[num];
 	std::vector<wxString> new_labels(num);
-	for (i = 0; i < num; i++)
-	{
-		selections[i] = false;
-	}
 	cpy = MIN(numpoints, num);
 	for (i = 0; i < cpy; i++)
 	{
@@ -1293,7 +1275,6 @@ void CC_show::SetNumPointsInternal(unsigned num)
 {
 	numpoints = num;
 	pt_labels.assign(numpoints, wxString());
-	selections = new bool[numpoints];
 	UnselectAll();
 }
 
@@ -1348,30 +1329,21 @@ bool CC_show::RelabelSheets(unsigned sht)
 
 bool CC_show::UnselectAll()
 {
-	bool changed = false;
-	for (unsigned i=0; i<numpoints; i++)
-	{
-		if (IsSelected(i))
-		{
-			Select(i, false);
-			changed = true;
-		}
-	}
+	bool changed = selectionList.size();
+	selectionList.clear();
 	return changed;
 }
 
 
 void CC_show::Select(unsigned i, bool val)
 {
-	selections[i] = val;
 	if (val)
 	{
-		selectionList.push_back(i);
+		selectionList.insert(i);
 	}
 	else
 	{
-		if (std::find(selectionList.begin(), selectionList.end(), i) != selectionList.end())
-			selectionList.erase(std::find(selectionList.begin(), selectionList.end(), i));
+		selectionList.erase(i);
 	}
 }
 

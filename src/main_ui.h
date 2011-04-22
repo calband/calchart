@@ -115,6 +115,7 @@ enum CC_SELECT_TYPES
 };
 
 class MainFrame;
+class MainFrameView;
 
 class CC_WinNodeMain : public CC_WinNode
 {
@@ -268,8 +269,7 @@ public:
 // Basic functions
 	FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 		int def_zoom,
-		FieldCanvas *from_canvas = NULL,
-		int x = -1, int y = -1, int w = -1, int h = -1);
+		const wxPoint& pos, const wxSize& size);
 	~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
@@ -336,6 +336,7 @@ public:
 // Variables
 	MainFrame *ourframe;
 	CC_show* mShow;
+	MainFrameView* mView;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
 	CC_SELECT_TYPES curr_select;
@@ -380,7 +381,10 @@ public:
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
     bool OnClose(bool deleteWindow = true);
 
+	bool DoTranslatePoints(const CC_coord& pos, unsigned curr_ref);
+
 private:
+	CC_show* mShow;
     DECLARE_DYNAMIC_CLASS(MainFrameView)
 };
 

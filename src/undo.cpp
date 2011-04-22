@@ -182,6 +182,65 @@ unsigned ShowUndoMove::Size()
 const wxChar *ShowUndoMove::UndoDescription() { return wxT("Undo movement"); }
 const wxChar *ShowUndoMove::RedoDescription() { return wxT("Redo movement"); }
 
+MovePointsOnSheetCommand::MovePointsOnSheetCommand(CC_show& show, unsigned ref)
+: wxCommand(true, wxT("Moving points")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList()), mRef(ref)
+{
+}
+
+MovePointsOnSheetCommand::~MovePointsOnSheetCommand()
+{
+}
+
+
+bool MovePointsOnSheetCommand::Do()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<CC_coord,CC_coord> >::const_iterator i = mPositions.begin(); i != mPositions.end(); ++i)
+	{
+		sheet->SetPosition(i->second.second, i->first, mRef);
+	}
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum, mRef);
+	return true;
+}
+
+bool MovePointsOnSheetCommand::Undo()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+	for (std::map<unsigned, std::pair<CC_coord,CC_coord> >::const_iterator i = mPositions.begin(); i != mPositions.end(); ++i)
+	{
+		sheet->SetPosition(i->second.first, i->first, mRef);
+	}
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum, mRef);
+	return true;
+}
+
+TranslatePointsByDeltaCommand::TranslatePointsByDeltaCommand(CC_show& show, const CC_coord& delta, unsigned ref)
+: MovePointsOnSheetCommand(show, ref)
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+	{
+		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), sheet->GetPosition(*i, mRef) + delta);
+	}
+}
+
+TranslatePointsByDeltaCommand::~TranslatePointsByDeltaCommand()
+{
+}
+
+
 ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged)
 :ShowUndo(sheetnum), contchange(contchanged)
 {

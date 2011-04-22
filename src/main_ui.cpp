@@ -497,7 +497,7 @@ field(NULL)
 	def_zoom = default_zoom;
 	def_grid = 2;
 	def_ref = 0;
-	field = new FieldCanvas(view, ss, this, def_zoom);
+	field = new FieldCanvas(view, ss, this, def_zoom, pos, size);
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
@@ -1201,22 +1201,13 @@ void MainFrame::Setup()
 
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
-int def_zoom, FieldCanvas *from_canvas,
-int x, int y, int w, int h):
-AutoScrollCanvas(frame, -1, wxPoint(x, y), wxSize(w, h)), ourframe(frame), curr_lasso(CC_DRAG_BOX),
+int def_zoom, const wxPoint& pos, const wxSize& size):
+AutoScrollCanvas(frame, -1, pos, size), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
 curr_move(CC_MOVE_NORMAL), curr_select(CC_SELECT_ROWS),
 curr_ref(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 {
-	if (from_canvas)
-	{
-		curr_lasso = from_canvas->curr_lasso;
-		curr_move = from_canvas->curr_move;
-		curr_select = from_canvas->curr_select;
-	}
-
 	SetPalette(CalChartPalette);
 
-	mShow = static_cast<CC_show*>(view->GetDocument());
 	mShow->SetCurrentSheet(ss);
 
 	SetZoomQuick(def_zoom);
@@ -1634,7 +1625,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								break;
 							case CC_DRAG_LINE:
 								pos = shape->GetPoint() - shape->GetOrigin();
-								if (sheet->TranslatePoints(pos, curr_ref))
+								if (mView->DoTranslatePoints(pos, curr_ref))
 									wxGetApp().GetWindowList().
 										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								EndDrag();
@@ -2036,6 +2027,7 @@ IMPLEMENT_DYNAMIC_CLASS(MainFrameView, wxView)
 // windows for displaying the view.
 bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
+	mShow = static_cast<CC_show*>(doc);
 	mFrame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
 		wxSize(window_default_width, window_default_height));
 
@@ -2074,5 +2066,15 @@ bool MainFrameView::OnClose(bool deleteWindow)
 	{
 		delete mFrame;
 	}
+	return true;
+}
+
+bool MainFrameView::DoTranslatePoints(const CC_coord& delta, unsigned ref)
+{
+
+	if (((delta.x == 0) && (delta.y == 0)) ||
+		(mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0))
+		return false;
+	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, ref), true);
 	return true;
 }

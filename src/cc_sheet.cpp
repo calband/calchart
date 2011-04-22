@@ -564,30 +564,6 @@ bool CC_sheet::ClearRefPositions(unsigned ref)
 
 
 // Move points
-bool CC_sheet::TranslatePoints(const CC_coord& delta, unsigned ref)
-{
-	unsigned i;
-	bool change = false;
-
-	if (((delta.x == 0) && (delta.y == 0)) ||
-		(GetNumSelectedPoints() <= 0)) return false;
-
-// Create undo entry
-	show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
-
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		if (show->IsSelected(i))
-		{
-			SetPosition(GetPosition(i, ref) + delta, i, ref);
-			change = true;
-		}
-	}
-	return change;
-}
-
-
-// Move points
 bool CC_sheet::TransformPoints(const Matrix& transmat, unsigned ref)
 {
 	unsigned i;
