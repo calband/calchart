@@ -1445,7 +1445,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 									ZRotationMatrix(r) *
 									TranslationMatrix(Vector(c1.x, c1.y, 0));
-								if (sheet->TransformPoints(m, curr_ref))
+								if (mView->DoTransformPoints(m, curr_ref))
 									wxGetApp().GetWindowList().
 										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								EndDrag();
@@ -1482,7 +1482,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									YXShearMatrix(amount) *
 									ZRotationMatrix(ang) *
 									TranslationMatrix(Vector(o.x, o.y, 0));
-								if (sheet->TransformPoints(m, curr_ref))
+								if (mView->DoTransformPoints(m, curr_ref))
 									wxGetApp().GetWindowList().
 										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								EndDrag();
@@ -1505,7 +1505,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								YReflectionMatrix() *
 								ZRotationMatrix(ang) *
 								TranslationMatrix(Vector(c1.x, c1.y, 0));
-							if (sheet->TransformPoints(m, curr_ref))
+							if (mView->DoTransformPoints(m, curr_ref))
 								wxGetApp().GetWindowList().
 									UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 						}
@@ -1552,7 +1552,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 										ScaleMatrix(Vector(sx, sy, 0)) *
 										TranslationMatrix(Vector(c1.x, c1.y, 0));
-									if (sheet->TransformPoints(m, curr_ref))
+									if (mView->DoTransformPoints(m, curr_ref))
 										wxGetApp().GetWindowList().
 											UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 								}
@@ -1607,7 +1607,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									(float)s2.x*(float)s1.y));
 								Binv /= d;
 								m = Binv*A;
-								if (sheet->TransformPoints(m, curr_ref))
+								if (mView->DoTransformPoints(m, curr_ref))
 									wxGetApp().GetWindowList().
 										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
 							}
@@ -2071,10 +2071,16 @@ bool MainFrameView::OnClose(bool deleteWindow)
 
 bool MainFrameView::DoTranslatePoints(const CC_coord& delta, unsigned ref)
 {
-
 	if (((delta.x == 0) && (delta.y == 0)) ||
 		(mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0))
 		return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, ref), true);
+	return true;
+}
+
+bool MainFrameView::DoTransformPoints(const Matrix& transmat, unsigned ref)
+{
+	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, ref), true);
 	return true;
 }

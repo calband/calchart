@@ -241,6 +241,27 @@ TranslatePointsByDeltaCommand::~TranslatePointsByDeltaCommand()
 }
 
 
+// Move points
+TransformPointsCommand::TransformPointsCommand(CC_show& show, const Matrix& transmat, unsigned ref)
+: MovePointsOnSheetCommand(show, ref)
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+	{
+		CC_coord c = sheet->GetPosition(*i, ref);
+		Vector v = Vector(c.x, c.y, 0);
+		v = transmat * v;
+		v.Homogenize();
+		c = CC_coord((Coord)CLIPFLOAT(v.GetX()), (Coord)CLIPFLOAT(v.GetY()));
+		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), c);
+	}
+}
+
+TransformPointsCommand::~TransformPointsCommand()
+{
+}
+
+
 ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged)
 :ShowUndo(sheetnum), contchange(contchanged)
 {

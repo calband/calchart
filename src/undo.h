@@ -123,6 +123,13 @@ public:
 	virtual ~TranslatePointsByDeltaCommand();
 };
 
+class TransformPointsCommand : public MovePointsOnSheetCommand
+{
+public:
+	TransformPointsCommand(CC_show& show, const Matrix& transmat, unsigned ref);
+	virtual ~TransformPointsCommand();
+};
+
 // Point symbol changes
 struct ShowUndoSymElem
 {

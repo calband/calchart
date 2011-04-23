@@ -98,7 +98,6 @@ public:
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 	void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
 	bool ClearRefPositions(unsigned ref);
-	bool TransformPoints(const Matrix& transmat, unsigned ref = 0);
 	bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
 		unsigned ref);
 

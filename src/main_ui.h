@@ -382,6 +382,7 @@ public:
     bool OnClose(bool deleteWindow = true);
 
 	bool DoTranslatePoints(const CC_coord& pos, unsigned curr_ref);
+	bool DoTransformPoints(const Matrix& transmat, unsigned ref);
 
 private:
 	CC_show* mShow;

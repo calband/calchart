@@ -563,36 +563,6 @@ bool CC_sheet::ClearRefPositions(unsigned ref)
 }
 
 
-// Move points
-bool CC_sheet::TransformPoints(const Matrix& transmat, unsigned ref)
-{
-	unsigned i;
-	bool change = false;
-	Vector v;
-	CC_coord c;
-
-	if (GetNumSelectedPoints() <= 0) return false;
-
-// Create undo entry
-	show->undolist->Add(new ShowUndoMove(show->GetSheetPos(this), this, ref));
-
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		if (show->IsSelected(i))
-		{
-			c = GetPosition(i, ref);
-			v = Vector(c.x, c.y, 0);
-			v = transmat * v;
-			v.Homogenize();
-			c = CC_coord((Coord)CLIPFLOAT(v.GetX()), (Coord)CLIPFLOAT(v.GetY()));
-			SetPosition(c, i, ref);
-			change = true;
-		}
-	}
-	return change;
-}
-
-
 // Move points into a line (old smart move)
 bool CC_sheet::MovePointsInLine(const CC_coord& start, const CC_coord& second,
 unsigned ref)
