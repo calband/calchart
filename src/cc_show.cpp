@@ -1037,14 +1037,12 @@ void CC_show::ClearAutosave() const
 
 void CC_show::FlushAllTextWindows() const
 {
-	wxGetApp().GetWindowList().FlushDescr(); 
 	wxGetApp().GetWindowList().FlushContinuity();
 }
 
 
 const wxString& CC_show::UserGetDescr() const
 {
-	wxGetApp().GetWindowList().FlushDescr();
 	return descr;
 }
 
@@ -1081,7 +1079,6 @@ void CC_show::UserSetDescr(const wxString& newdescr, wxWindow *win)
 // Create undo entry
 	undolist->Add(new ShowUndoDescr(this));
 	descr = newdescr;
-	wxGetApp().GetWindowList().SetDescr(win);
 }
 
 
@@ -1331,6 +1328,7 @@ bool CC_show::UnselectAll()
 {
 	bool changed = selectionList.size();
 	selectionList.clear();
+	UpdateAllViews();
 	return changed;
 }
 
@@ -1345,6 +1343,7 @@ void CC_show::Select(unsigned i, bool val)
 	{
 		selectionList.erase(i);
 	}
+	UpdateAllViews();
 }
 
 #include <iostream>

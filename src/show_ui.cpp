@@ -42,13 +42,6 @@ CC_WinNodePointPicker::CC_WinNodePointPicker(CC_WinList *lst,
 PointPicker *req)
 : CC_WinNode(lst), picker(req) {}
 
-void CC_WinNodePointPicker::SetShow(CC_show *shw)
-{
-	picker->show = shw;
-	picker->Update();
-}
-
-
 void CC_WinNodePointPicker::ChangeNumPoints(wxWindow*)
 {
 	picker->Update();
@@ -89,7 +82,6 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 	{
 		Set(i, true);
 	}
-	wxGetApp().GetWindowList().UpdateSelections(this);
 }
 
 
@@ -99,9 +91,17 @@ void PointPicker::PointPickerNone(wxCommandEvent&)
 	{
 		Set(i, false);
 	}
-	wxGetApp().GetWindowList().UpdateSelections(this);
 }
 
+
+PointPickerView::PointPickerView() {}
+PointPickerView::~PointPickerView() {}
+
+void PointPickerView::OnDraw(wxDC *dc) {}
+void PointPickerView::OnUpdate(wxView *sender, wxObject *hint)
+{
+	static_cast<PointPicker*>(GetFrame())->Update();
+}
 
 PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
 bool multi, wxFrame *frame,
@@ -110,6 +110,9 @@ int x, int y, int width, int height):
 wxFrame(frame, -1, title, wxPoint(x, y), wxSize(width, height)),
 show(shw)
 {
+	mView = new PointPickerView;
+	mView->SetDocument(show);
+	mView->SetFrame(this);
 // Give it an icon
 	SetBandIcon(this);
 
@@ -149,6 +152,7 @@ show(shw)
 
 PointPicker::~PointPicker()
 {
+	delete mView;
 	if (node)
 	{
 		node->Remove();

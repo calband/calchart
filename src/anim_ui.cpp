@@ -88,17 +88,6 @@ END_EVENT_TABLE()
 CC_WinNodeAnim::CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
 
-void CC_WinNodeAnim::SetShow(CC_show *)
-{
-	frame->canvas->FreeAnim();
-}
-
-
-void CC_WinNodeAnim::UpdateSelections(wxWindow*, int)
-{
-	frame->canvas->Redraw();
-}
-
 
 void CC_WinNodeAnim::ChangeNumPoints(wxWindow *)
 {
@@ -108,20 +97,6 @@ void CC_WinNodeAnim::ChangeNumPoints(wxWindow *)
 
 CC_WinNodeAnimErrors::CC_WinNodeAnimErrors(CC_WinList *lst, AnimErrorList *err)
 : CC_WinNode(lst), errlist(err) {}
-
-void CC_WinNodeAnimErrors::SetShow(CC_show *)
-{
-	errlist->Close();
-}
-
-
-void CC_WinNodeAnimErrors::UpdateSelections(wxWindow *win, int)
-{
-	if (win != errlist)
-	{
-		errlist->Unselect();
-	}
-}
 
 
 void CC_WinNodeAnimErrors::ChangeNumPoints(wxWindow *)
@@ -366,16 +341,8 @@ void AnimationCanvas::SelectCollisions()
 	{
 		for (i = 0; i < anim->numpts; i++)
 		{
-			if (anim->collisions[i])
-			{
-				mShow->Select(i);
-			}
-			else
-			{
-				mShow->Select(i, false);
-			}
+			mShow->Select(i, anim->collisions[i]);
 		}
-		wxGetApp().GetWindowList().UpdateSelections();
 	}
 }
 
@@ -583,10 +550,22 @@ static const wxString collis_text[] =
 	wxT("Ignore"), wxT("Show"), wxT("Beep")
 };
 
+AnimationView::AnimationView() {}
+AnimationView::~AnimationView() {}
+
+void AnimationView::OnDraw(wxDC *dc) {}
+void AnimationView::OnUpdate(wxView *sender, wxObject *hint)
+{
+	static_cast<AnimationFrame*>(GetFrame())->canvas->RefreshCanvas();
+}
+
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show,
 CC_WinList *lst)
 : wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, CC_FRAME_OTHER, wxT("anim"))
 {
+	mView = new AnimationView;
+	mView->SetDocument(show);
+	mView->SetFrame(this);
 // Give it an icon
 	SetBandIcon(this);
 
@@ -671,6 +650,7 @@ CC_WinList *lst)
 
 AnimationFrame::~AnimationFrame()
 {
+	delete mView;
 	if (node)
 	{
 		node->Remove();
@@ -902,6 +882,15 @@ void AnimationCanvas::OnChar(wxKeyEvent& event)
 }
 
 
+AnimErrorListView::AnimErrorListView() {}
+AnimErrorListView::~AnimErrorListView() {}
+
+void AnimErrorListView::OnDraw(wxDC *dc) {}
+void AnimErrorListView::OnUpdate(wxView *sender, wxObject *hint)
+{
+	static_cast<AnimErrorList*>(GetFrame())->Unselect();
+}
+
 AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
 unsigned num, wxFrame *frame, const wxString& title,
 const wxPoint& pos, const wxSize& size)
@@ -909,6 +898,9 @@ const wxPoint& pos, const wxSize& size)
 {
 	unsigned i, j;
 
+	mView = new AnimErrorListView;
+	mView->SetDocument(show);
+	mView->SetFrame(this);
 // Give it an icon
 	SetBandIcon(this);
 	show = comp->show;
@@ -943,6 +935,7 @@ const wxPoint& pos, const wxSize& size)
 
 AnimErrorList::~AnimErrorList()
 {
+	delete mView;
 	if (node)
 	{
 		node->Remove();
@@ -1000,7 +993,6 @@ void AnimErrorList::Update(int i)
 		{
 			show->Select(j, pointsels[i].pntgroup.count(j));
 		}
-		wxGetApp().GetWindowList().UpdateSelections(this);
 	}
 	wxGetApp().GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
 		show->GetNumSheets()-1 : sheetnum,

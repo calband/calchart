@@ -71,38 +71,12 @@ void CC_WinList::Remove(CC_WinNode *node)
 
 void CC_WinList::Empty() {}
 
-void CC_WinList::SetShow(CC_show *shw)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->SetShow(shw);
-	}
-}
-
-
-void CC_WinList::ChangeName()
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->ChangeName();
-	}
-}
-
 
 void CC_WinList::UpdateSelections(wxWindow* win, int point)
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
 	{
 		(*n)->UpdateSelections(win, point);
-	}
-}
-
-
-void CC_WinList::UpdatePoints()
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->UpdatePoints();
 	}
 }
 
@@ -256,33 +230,6 @@ void CC_WinList::SetContinuity(wxWindow* win, unsigned sht, unsigned cont)
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
 	{
 		(*n)->SetContinuity(win, sht, cont);
-	}
-}
-
-
-void CC_WinList::ChangePrint(wxWindow* win)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->ChangePrint(win);
-	}
-}
-
-
-void CC_WinList::FlushDescr()
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->FlushDescr();
-	}
-}
-
-
-void CC_WinList::SetDescr(wxWindow* win)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->SetDescr(win);
 	}
 }
 

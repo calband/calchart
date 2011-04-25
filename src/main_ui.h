@@ -66,7 +66,6 @@ enum
 	CALCHART__INSERT_BEFORE,
 	CALCHART__INSERT_AFTER,
 	CALCHART__RELABEL,
-	CALCHART__CLEAR_REF,
 	CALCHART__EDIT_CONTINUITY,
 	CALCHART__EDIT_PRINTCONT,
 	CALCHART__SET_TITLE,
@@ -122,10 +121,7 @@ class CC_WinNodeMain : public CC_WinNode
 public:
 	CC_WinNodeMain(CC_WinList *lst, MainFrame *frm);
 
-	virtual void SetShow(CC_show *shw);
-	virtual void ChangeName();
 	virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
-	virtual void UpdatePoints();
 	virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1);
 	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
@@ -195,7 +191,6 @@ public:
 	void OnCmdInsertAfter(wxCommandEvent& event);
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdRelabel(wxCommandEvent& event);
-	void OnCmdClearRef(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);
 	void OnCmdEditPrintCont(wxCommandEvent& event);
 	void OnCmdSetTitle(wxCommandEvent& event);
@@ -383,6 +378,7 @@ public:
 
 	bool DoTranslatePoints(const CC_coord& pos, unsigned curr_ref);
 	bool DoTransformPoints(const Matrix& transmat, unsigned ref);
+	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref);
 
 private:
 	CC_show* mShow;

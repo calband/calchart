@@ -48,10 +48,7 @@ public:
 	void Remove();
 	inline CC_WinList* GetList() { return list; }
 
-	virtual void SetShow(CC_show *shw) {}
-	virtual void ChangeName() {}
 	virtual void UpdateSelections(wxWindow* win = NULL, int point = -1) {}
-	virtual void UpdatePoints() {}
 	virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1) {}
 	virtual void ChangeNumPoints(wxWindow *win) {}
 	virtual void ChangePointLabels(wxWindow *win)  {}
@@ -69,9 +66,6 @@ public:
 	virtual void DeleteContinuity(unsigned sht, unsigned cont) {}
 	virtual void FlushContinuity() {}
 	virtual void SetContinuity(wxWindow* win, unsigned sht, unsigned cont) {}
-	virtual void ChangePrint(wxWindow* win) {}
-	virtual void FlushDescr() {}
-	virtual void SetDescr(wxWindow* win) {}
 
 protected:
 	CC_WinList *list;
@@ -89,10 +83,7 @@ public:
 	void Remove(CC_WinNode *node);
 	virtual void Empty();
 
-	virtual void SetShow(CC_show *shw);
-	virtual void ChangeName();
 	virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
-	virtual void UpdatePoints();
 	virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1);
 	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
@@ -111,9 +102,6 @@ public:
 	virtual void DeleteContinuity(unsigned sht, unsigned cont);
 	virtual void FlushContinuity();
 	virtual void SetContinuity(wxWindow* win, unsigned sht, unsigned cont);
-	virtual void ChangePrint(wxWindow* win);
-	virtual void FlushDescr();
-	virtual void SetDescr(wxWindow* win);
 
 private:
 	typedef std::deque<CC_WinNode*> WinNodeList;

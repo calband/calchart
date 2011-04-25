@@ -137,7 +137,6 @@ EVT_MENU(CALCHART__INSERT_BEFORE, MainFrame::OnCmdInsertBefore)
 EVT_MENU(CALCHART__INSERT_AFTER, MainFrame::OnCmdInsertAfter)
 EVT_MENU(wxID_DELETE, MainFrame::OnCmdDelete)
 EVT_MENU(CALCHART__RELABEL, MainFrame::OnCmdRelabel)
-EVT_MENU(CALCHART__CLEAR_REF, MainFrame::OnCmdClearRef)
 EVT_MENU(CALCHART__EDIT_CONTINUITY, MainFrame::OnCmdEditCont)
 EVT_MENU(CALCHART__EDIT_PRINTCONT, MainFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_TITLE, MainFrame::OnCmdSetTitle)
@@ -219,34 +218,10 @@ public:
 CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
 
-void CC_WinNodeMain::SetShow(CC_show *shw)
-{
-	Remove();
-	list = &wxGetApp().GetWindowList();
-	list->Add(this);
-	frame->field->mShow = shw;
-	frame->field->UpdateBars();
-	frame->field->GotoSS(0);
-	ChangeName();
-}
-
-
-void CC_WinNodeMain::ChangeName()
-{
-	frame->SetTitle(frame->field->mShow->GetTitle());
-}
-
-
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
 {
 	UpdateStatusBar();
 	frame->field->RefreshShow(true, point);
-}
-
-
-void CC_WinNodeMain::UpdatePoints()
-{
-	frame->field->RefreshShow();
 }
 
 
@@ -455,7 +430,6 @@ field(NULL)
 	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
 	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
-	edit_menu->Append(CALCHART__CLEAR_REF, wxT("&Clear Reference"), wxT("Clear selected reference points"));
 	edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show...\tCTRL-U"), wxT("Setup basic show information"));
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
 	edit_menu->Append(CALCHART__SET_TITLE, wxT("Set &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
@@ -766,17 +740,6 @@ void MainFrame::OnCmdRelabel(wxCommandEvent& event)
 	{
 		(void)wxMessageBox(wxT("This can't used on the last stuntsheet"),
 			wxT("Relabel sheets"));
-	}
-}
-
-
-void MainFrame::OnCmdClearRef(wxCommandEvent& event)
-{
-	if (field->curr_ref > 0)
-	{
-		if (field->mShow->GetCurrentSheet()->ClearRefPositions(field->curr_ref))
-			wxGetApp().GetWindowList().
-				UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum(), field->curr_ref);
 	}
 }
 
@@ -1406,10 +1369,6 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									changed = true;
 									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
 								}
-								if (changed)
-								{
-									wxGetApp().GetWindowList().UpdateSelections();
-								}
 						}
 						break;
 				}
@@ -1421,7 +1380,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				switch (curr_move)
 				{
 					case CC_MOVE_LINE:
-						if (sheet->MovePointsInLine(shape->GetOrigin(), shape->GetPoint(),
+						if (mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint(),
 							curr_ref))
 							wxGetApp().GetWindowList().
 								UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
@@ -1928,7 +1887,6 @@ bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 	if (changed && pnt)
 	{
 		SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y), toggleSelected);
-		wxGetApp().GetWindowList().UpdateSelections();
 	}
 
 	return changed;
@@ -1979,7 +1937,6 @@ unsigned ref, bool toggleSelected)
 	if (changed)
 	{
 		SelectOrdered(pointlist, c1, toggleSelected);
-		wxGetApp().GetWindowList().UpdateSelections();
 	}
 
 	return changed;
@@ -2082,5 +2039,12 @@ bool MainFrameView::DoTransformPoints(const Matrix& transmat, unsigned ref)
 {
 	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, ref), true);
+	return true;
+}
+
+bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref)
+{
+	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, ref), true);
 	return true;
 }

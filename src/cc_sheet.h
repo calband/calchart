@@ -97,9 +97,6 @@ public:
 	void SetAllPositions(const CC_coord& val, unsigned i);
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 	void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
-	bool ClearRefPositions(unsigned ref);
-	bool MovePointsInLine(const CC_coord& start, const CC_coord& second,
-		unsigned ref);
 
 	CC_sheet *next;
 	CC_textline_list continuity;

@@ -116,9 +116,6 @@ void ShowPrintDialog::PrintShow()
 			break;
 	}
 
-// Update other windows
-	wxGetApp().GetWindowList().ChangePrint(this);
-
 	FILE *fp;
 
 	fp = CC_fopen(s.fn_str(), "w");

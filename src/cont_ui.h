@@ -41,7 +41,6 @@ class CC_WinNodeCont : public CC_WinNode
 public:
 	CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req);
 
-	virtual void SetShow(CC_show *shw);
 	virtual void GotoSheet(unsigned sht);
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,
 		int line = -1, int col = -1);
@@ -61,11 +60,19 @@ class CC_WinNodePrintCont : public CC_WinNode
 public:
 	CC_WinNodePrintCont(CC_WinList *lst, PrintContEditor *req);
 
-	virtual void SetShow(CC_show *shw);
 	virtual void GotoSheet(unsigned sht);
 
 private:
 	PrintContEditor *editor;
+};
+
+class ContinuityEditorView : public wxView
+{
+public:
+	ContinuityEditorView();
+	~ContinuityEditorView();
+    virtual void OnDraw(wxDC *dc);
+    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 };
 
 class ContinuityEditor : public wxFrame
@@ -155,6 +162,15 @@ private:
 	unsigned maxlines, maxcolumns;
 
 	DECLARE_EVENT_TABLE()
+};
+
+class PrintContEditorView : public wxView
+{
+public:
+	PrintContEditorView();
+	~PrintContEditorView();
+    virtual void OnDraw(wxDC *dc);
+    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 };
 
 class PrintContEditor : public wxFrame

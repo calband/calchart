@@ -97,13 +97,6 @@ END_EVENT_TABLE()
 CC_WinNodeCont::CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req)
 : CC_WinNode(lst), editor(req) {}
 
-void CC_WinNodeCont::SetShow(CC_show *)
-{
-	editor->DetachText();
-	editor->Update(true);
-}
-
-
 void CC_WinNodeCont::GotoSheet(unsigned)
 {
 	editor->Update();
@@ -191,12 +184,6 @@ CC_WinNodePrintCont::CC_WinNodePrintCont(CC_WinList *lst,
 PrintContEditor *req)
 : CC_WinNode(lst), editor(req) {}
 
-void CC_WinNodePrintCont::SetShow(CC_show *)
-{
-	editor->canvas->Update();
-}
-
-
 void CC_WinNodePrintCont::GotoSheet(unsigned)
 {
 	editor->canvas->Update();
@@ -220,6 +207,15 @@ void ContinuityEditor::ContEditCurrent(wxCommandEvent&)
 	SetCurrent(conts->GetSelection());
 }
 
+
+ContinuityEditorView::ContinuityEditorView() {}
+ContinuityEditorView::~ContinuityEditorView() {}
+
+void ContinuityEditorView::OnDraw(wxDC *dc) {}
+void ContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
+{
+	static_cast<ContinuityEditor*>(GetFrame())->Update();
+}
 
 ContinuityEditor::ContinuityEditor(CC_show *show, CC_WinList *lst,
 wxFrame *parent, const wxString& title,
@@ -419,10 +415,7 @@ void ContinuityEditor::SelectPoints()
 	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
 	if (c != NULL)
 	{
-		if (sht->SelectContinuity(c->GetNum()))
-		{
-			wxGetApp().GetWindowList().UpdateSelections();
-		}
+		sht->SelectContinuity(c->GetNum());
 	}
 }
 
@@ -759,6 +752,15 @@ void PrintContClose(wxButton& button, wxEvent&)
 	((PrintContEditor*)(button.GetParent()->GetParent()))->Close();
 }
 
+
+PrintContEditorView::PrintContEditorView() {}
+PrintContEditorView::~PrintContEditorView() {}
+
+void PrintContEditorView::OnDraw(wxDC *dc) {}
+void PrintContEditorView::OnUpdate(wxView *sender, wxObject *hint)
+{
+	static_cast<PrintContEditor*>(GetFrame())->canvas->Update();
+}
 
 PrintContEditor::PrintContEditor(CC_show *show, CC_WinList *lst,
 wxFrame *parent, const wxString& title,

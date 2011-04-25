@@ -73,28 +73,6 @@ private:
 	ShowUndo *list;
 };
 
-// Point movement
-struct ShowUndoMoveElem
-{
-unsigned short idx, refmask;
-CC_coord pos;
-};
-class ShowUndoMove : public ShowUndo
-{
-public:
-	ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref = 0);
-	ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet);
-	virtual ~ShowUndoMove();
-
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	unsigned num, refnum;
-	std::deque<ShowUndoMoveElem> elems;
-};
-
 // this command is to move points around on a sheet
 // position is a mapping of which point to two positions, the original and new.
 // When you do/undo the command, the show will be set to the sheet, and the selection
@@ -128,6 +106,33 @@ class TransformPointsCommand : public MovePointsOnSheetCommand
 public:
 	TransformPointsCommand(CC_show& show, const Matrix& transmat, unsigned ref);
 	virtual ~TransformPointsCommand();
+};
+
+class TransformPointsInALineCommand : public MovePointsOnSheetCommand
+{
+public:
+	TransformPointsInALineCommand(CC_show& show, const CC_coord& start, const CC_coord& second, unsigned ref);
+	virtual ~TransformPointsInALineCommand();
+};
+
+// this command is to move points around on a sheet
+// position is a mapping of which point to two positions, the original and new.
+// When you do/undo the command, the show will be set to the sheet, and the selection
+// list will revert to that selection list.
+class SetContinuityCommand : public wxCommand
+{
+public:
+	SetContinuityCommand(CC_show& show, unsigned i);
+	virtual ~SetContinuityCommand();
+
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	const CC_show::SelectionList mPoints;
+	std::map<unsigned, std::pair<unsigned,unsigned> > mContinuity;
 };
 
 // Point symbol changes

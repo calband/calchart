@@ -44,8 +44,6 @@ class CC_WinNodeAnim : public CC_WinNode
 	public:
 		CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm);
 
-		virtual void SetShow(CC_show *shw);
-		virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
 		virtual void ChangeNumPoints(wxWindow *win);
 
 	private:
@@ -59,8 +57,6 @@ class CC_WinNodeAnimErrors : public CC_WinNode
 public:
 	CC_WinNodeAnimErrors(CC_WinList *lst, AnimErrorList *err);
 
-	virtual void SetShow(CC_show *shw);
-	virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
 	virtual void ChangeNumPoints(wxWindow *win);
 
 private:
@@ -182,6 +178,15 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
+class AnimationView : public wxView
+{
+public:
+	AnimationView();
+	~AnimationView();
+    virtual void OnDraw(wxDC *dc);
+    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+};
+
 class AnimationFrame: public wxFrame
 {
 public:
@@ -221,6 +226,7 @@ public:
 
 	AnimationCanvas *canvas;
 private:
+	AnimationView *mView;
 	CC_WinNodeAnim *node;
 	wxChoice *collis;
 	wxSlider *sheet_slider;
@@ -257,6 +263,15 @@ enum
 	CALCHART__anim_update
 };
 
+class AnimErrorListView : public wxView
+{
+public:
+	AnimErrorListView();
+	~AnimErrorListView();
+    virtual void OnDraw(wxDC *dc);
+    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+};
+
 class AnimErrorList: public wxFrame
 {
 public:
@@ -277,6 +292,7 @@ public:
 
 	CC_show *show;
 private:
+	AnimErrorListView *mView;
 	bool ok;
 	unsigned sheetnum;
 	wxListBox *list;

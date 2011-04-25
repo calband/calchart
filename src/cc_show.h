@@ -50,6 +50,9 @@ public:
 	CC_show(unsigned npoints);
 	~CC_show();
 
+	virtual bool AddView(wxView *view) { return wxDocument::AddView(view); }
+	virtual bool RemoveView(wxView *view) { return wxDocument::RemoveView(view); }
+
 	// Need to override OnOpenDoc so we can report errors
 	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
 

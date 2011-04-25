@@ -41,7 +41,6 @@ class CC_WinNodePointPicker : public CC_WinNode
 public:
 	CC_WinNodePointPicker(CC_WinList *lst, PointPicker *req);
 
-	virtual void SetShow(CC_show *shw);
 	virtual void UpdateSelections(wxWindow* win, int point = -1);
 	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
@@ -55,6 +54,15 @@ enum
 	PointPicker_PointPickerClose=1100,
 	PointPicker_PointPickerAll,
 	PointPicker_PointPickerNone,
+};
+
+class PointPickerView : public wxView
+{
+public:
+	PointPickerView();
+	~PointPickerView();
+    virtual void OnDraw(wxDC *dc);
+    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 };
 
 class PointPicker : public wxFrame
@@ -79,6 +87,7 @@ public:
 
 	CC_show *show;
 private:
+	PointPickerView *mView;
 	void SetListBoxEntries();
 	void PointPickerClose(wxCommandEvent&);
 	void PointPickerAll(wxCommandEvent&);

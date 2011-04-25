@@ -105,83 +105,6 @@ const wxChar *ShowUndoMany::RedoDescription()
 }
 
 
-ShowUndoMove::ShowUndoMove(unsigned sheetnum, CC_sheet *sheet, unsigned ref)
-:ShowUndo(sheetnum), refnum(ref)
-{
-	unsigned i, j;
-
-	num = sheet->GetNumSelectedPoints();
-	elems.assign(num, ShowUndoMoveElem());
-	for (num=0,i=0; i < sheet->show->GetNumPoints(); i++)
-	{
-		if (sheet->show->IsSelected(i))
-		{
-			elems[num].idx = i;
-			elems[num].pos = sheet->GetPosition(i, refnum);
-			elems[num].refmask = 1<<ref;
-			if (refnum == 0) for (j = 1; j <= NUM_REF_PNTS; j++)
-			{
-				if (sheet->GetPosition(i, j) == sheet->GetPosition(i, 0))
-				{
-					elems[num].refmask |= 1<<j;
-				}
-			}
-			num++;
-		}
-	}
-}
-
-
-ShowUndoMove::ShowUndoMove(ShowUndoMove* old, CC_sheet *sheet)
-:ShowUndo(old->sheetidx), num(old->num), refnum(old->refnum)
-{
-	unsigned i;
-
-	elems.assign(num, ShowUndoMoveElem());
-	for (i = 0; i < num; i++)
-	{
-		elems[i].idx = old->elems[i].idx;
-		elems[i].refmask = old->elems[i].refmask;
-		elems[i].pos = sheet->GetPosition(elems[i].idx, refnum);
-	}
-}
-
-
-ShowUndoMove::~ShowUndoMove()
-{
-}
-
-
-int ShowUndoMove::Undo(CC_show *show, ShowUndo** newundo)
-{
-	unsigned i, j;
-	CC_sheet *sheet = show->GetNthSheet(sheetidx);
-
-	*newundo = new ShowUndoMove(this, sheet);
-	for (i = 0; i < num; i++)
-	{
-		for (j = 0; j <= NUM_REF_PNTS; j++)
-		{
-			if (elems[i].refmask & (1<<j))
-			{
-				sheet->SetPositionQuick(elems[i].pos, elems[i].idx, j);
-			}
-		}
-	}
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(sheetidx, refnum);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoMove::Size()
-{
-	return sizeof(ShowUndoMoveElem) * num + sizeof(*this);
-}
-
-
-const wxChar *ShowUndoMove::UndoDescription() { return wxT("Undo movement"); }
-const wxChar *ShowUndoMove::RedoDescription() { return wxT("Redo movement"); }
-
 MovePointsOnSheetCommand::MovePointsOnSheetCommand(CC_show& show, unsigned ref)
 : wxCommand(true, wxT("Moving points")),
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList()), mRef(ref)
@@ -259,6 +182,72 @@ TransformPointsCommand::TransformPointsCommand(CC_show& show, const Matrix& tran
 
 TransformPointsCommand::~TransformPointsCommand()
 {
+}
+
+// Move points into a line (old smart move)
+TransformPointsInALineCommand::TransformPointsInALineCommand(CC_show& show, const CC_coord& start, const CC_coord& second, unsigned ref)
+: MovePointsOnSheetCommand(show, ref)
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	CC_coord curr_pos = start;
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i, curr_pos += second - start)
+	{
+		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), curr_pos);
+	}
+}
+
+TransformPointsInALineCommand::~TransformPointsInALineCommand()
+{
+}
+
+
+SetContinuityCommand::SetContinuityCommand(CC_show& show, unsigned i)
+: wxCommand(true, wxT("Moving points")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList())
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+	{
+		mContinuity[*i] = std::pair<unsigned,unsigned>(sheet->GetPoint(*i).cont, *i);
+	}
+}
+
+SetContinuityCommand::~SetContinuityCommand()
+{
+}
+
+bool SetContinuityCommand::Do()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<unsigned,unsigned> >::const_iterator i = mContinuity.begin(); i != mContinuity.end(); ++i)
+	{
+		sheet->GetPoint(i->first).cont = i->second.second;
+	}
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	return true;
+}
+
+bool SetContinuityCommand::Undo()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<unsigned,unsigned> >::const_iterator i = mContinuity.begin(); i != mContinuity.end(); ++i)
+	{
+		sheet->GetPoint(i->first).cont = i->second.first;
+	}
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	return true;
 }
 
 
@@ -711,7 +700,6 @@ int ShowUndoDescr::Undo(CC_show *show, ShowUndo** newundo)
 {
 	*newundo = new ShowUndoDescr(show);
 	show->SetDescr(descrtext);
-	wxGetApp().GetWindowList().SetDescr(NULL);
 	return -1;									  // don't goto another sheet
 }
 
