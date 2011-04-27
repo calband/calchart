@@ -117,15 +117,6 @@ void CC_WinList::ChangeShowMode(wxWindow *win)
 }
 
 
-void CC_WinList::UpdateStatusBar()
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->UpdateStatusBar();
-	}
-}
-
-
 void CC_WinList::GotoSheet(unsigned sht)
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
@@ -224,12 +215,4 @@ void CC_WinList::FlushContinuity()
 	}
 }
 
-
-void CC_WinList::SetContinuity(wxWindow* win, unsigned sht, unsigned cont)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->SetContinuity(win, sht, cont);
-	}
-}
 

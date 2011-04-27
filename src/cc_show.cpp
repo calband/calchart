@@ -1050,7 +1050,7 @@ const wxString& CC_show::UserGetDescr() const
 void CC_show::Modify(bool b)
 {
 	wxDocument::Modify(b);
-	wxGetApp().GetWindowList().UpdateStatusBar();
+	UpdateAllViews();
 }
 
 

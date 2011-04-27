@@ -129,6 +129,7 @@ bool MovePointsOnSheetCommand::Do()
 	{
 		sheet->SetPosition(i->second.second, i->first, mRef);
 	}
+	mShow.Modify(true);
 	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum, mRef);
 	return true;
 }
@@ -145,6 +146,7 @@ bool MovePointsOnSheetCommand::Undo()
 	{
 		sheet->SetPosition(i->second.first, i->first, mRef);
 	}
+	mShow.Modify(true);
 	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum, mRef);
 	return true;
 }
@@ -201,8 +203,8 @@ TransformPointsInALineCommand::~TransformPointsInALineCommand()
 }
 
 
-SetContinuityCommand::SetContinuityCommand(CC_show& show, unsigned i)
-: wxCommand(true, wxT("Moving points")),
+SetContinuityIndexCommand::SetContinuityIndexCommand(CC_show& show, unsigned i)
+: wxCommand(true, wxT("Setting Continuity Index")),
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList())
 {
 	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
@@ -212,11 +214,11 @@ mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList
 	}
 }
 
-SetContinuityCommand::~SetContinuityCommand()
+SetContinuityIndexCommand::~SetContinuityIndexCommand()
 {
 }
 
-bool SetContinuityCommand::Do()
+bool SetContinuityIndexCommand::Do()
 {
 	mShow.UnselectAll();
 	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
@@ -233,7 +235,7 @@ bool SetContinuityCommand::Do()
 	return true;
 }
 
-bool SetContinuityCommand::Undo()
+bool SetContinuityIndexCommand::Undo()
 {
 	mShow.UnselectAll();
 	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
@@ -247,6 +249,45 @@ bool SetContinuityCommand::Undo()
 		sheet->GetPoint(i->first).cont = i->second.first;
 	}
 	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	return true;
+}
+
+
+SetContinuityTextCommand::SetContinuityTextCommand(CC_show& show, unsigned i, const wxString& text)
+: wxCommand(true, wxT("Setting Continuity Text")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList()), mWhichCont(i)
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	mContinuity = std::pair<wxString,wxString>(sheet->GetNthContinuity(mWhichCont)->GetText(), text);
+}
+
+SetContinuityTextCommand::~SetContinuityTextCommand()
+{
+}
+
+bool SetContinuityTextCommand::Do()
+{
+//	mShow.UnselectAll();
+//	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+//		mShow.Select(*i, true);
+//
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	sheet->SetNthContinuity(mContinuity.second, mWhichCont);
+	return true;
+}
+
+bool SetContinuityTextCommand::Undo()
+{
+//	mShow.UnselectAll();
+//	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+//		mShow.Select(*i, true);
+//
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	sheet->SetNthContinuity(mContinuity.first, mWhichCont);
 	return true;
 }
 
@@ -575,40 +616,6 @@ unsigned ShowUndoBeat::Size()
 
 const wxChar *ShowUndoBeat::UndoDescription() { return wxT("Undo set number of beats"); }
 const wxChar *ShowUndoBeat::RedoDescription() { return wxT("Redo set number of beats"); }
-
-ShowUndoCont::ShowUndoCont(unsigned sheetnum, unsigned contnum,
-CC_sheet *sheet)
-:ShowUndo(sheetnum), cont(contnum)
-{
-
-	conttext = sheet->GetNthContinuity(cont)->GetText();
-}
-
-
-ShowUndoCont::~ShowUndoCont()
-{
-}
-
-
-int ShowUndoCont::Undo(CC_show *show, ShowUndo** newundo)
-{
-	CC_sheet *sheet = show->GetNthSheet(sheetidx);
-
-	*newundo = new ShowUndoCont(sheetidx, cont, sheet);
-	sheet->SetNthContinuity(conttext, cont);
-	wxGetApp().GetWindowList().SetContinuity(NULL, sheetidx, cont);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoCont::Size()
-{
-	return conttext.length()*sizeof(wxChar) + sizeof(*this);
-}
-
-
-const wxChar *ShowUndoCont::UndoDescription() { return wxT("Undo edit continuity"); }
-const wxChar *ShowUndoCont::RedoDescription() { return wxT("Redo edit continuity"); }
 
 ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
 unsigned contnum)

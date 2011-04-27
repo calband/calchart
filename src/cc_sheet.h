@@ -53,16 +53,13 @@ public:
 	unsigned GetNumSelectedPoints() const;
 	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
 	bool SelectContinuity(unsigned i) const;
-	void SetContinuity(unsigned i);
+	void SetContinuityIndex(unsigned i);
 	void SetNumPoints(unsigned num, unsigned columns);
 	void RelabelSheet(unsigned *table);
 
 	const CC_continuity_ptr GetNthContinuity(unsigned i) const;
 	CC_continuity_ptr GetNthContinuity(unsigned i);
-	const CC_continuity_ptr UserGetNthContinuity(unsigned i) const;
-	CC_continuity_ptr UserGetNthContinuity(unsigned i);
 	void SetNthContinuity(const wxString& text, unsigned i);
-	void UserSetNthContinuity(const wxString& text, unsigned i, wxWindow* win);
 	CC_continuity_ptr RemoveNthContinuity(unsigned i);
 	void UserDeleteContinuity(unsigned i);
 	void InsertContinuity(CC_continuity_ptr newcont, unsigned i);

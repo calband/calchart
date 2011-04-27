@@ -125,7 +125,7 @@ bool CC_sheet::SelectContinuity(unsigned i) const
 }
 
 
-void CC_sheet::SetContinuity(unsigned i)
+void CC_sheet::SetContinuityIndex(unsigned i)
 {
 	unsigned j;
 
@@ -197,18 +197,6 @@ CC_continuity_ptr CC_sheet::GetNthContinuity(unsigned i)
 	return animcont.at(i);
 }
 
-const CC_continuity_ptr CC_sheet::UserGetNthContinuity(unsigned i) const
-{
-	wxGetApp().GetWindowList().FlushContinuity();
-	return GetNthContinuity(i);
-}
-
-CC_continuity_ptr CC_sheet::UserGetNthContinuity(unsigned i)
-{
-	wxGetApp().GetWindowList().FlushContinuity();
-	return GetNthContinuity(i);
-}
-
 
 void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
 {
@@ -219,22 +207,7 @@ void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
 	{
 		c->SetText(text);
 	}
-}
-
-
-void CC_sheet::UserSetNthContinuity(const wxString& text, unsigned i,
-wxWindow *win)
-{
-	CC_continuity_ptr c;
-
-	c = GetNthContinuity(i);
-	if (c)
-	{
-// Create undo entry
-		show->undolist->Add(new ShowUndoCont(show->GetSheetPos(this), i, this));
-		c->SetText(text);
-		wxGetApp().GetWindowList().SetContinuity(win, show->GetSheetPos(this), i);
-	}
+	show->UpdateAllViews();
 }
 
 

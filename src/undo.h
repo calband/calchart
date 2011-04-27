@@ -119,11 +119,11 @@ public:
 // position is a mapping of which point to two positions, the original and new.
 // When you do/undo the command, the show will be set to the sheet, and the selection
 // list will revert to that selection list.
-class SetContinuityCommand : public wxCommand
+class SetContinuityIndexCommand : public wxCommand
 {
 public:
-	SetContinuityCommand(CC_show& show, unsigned i);
-	virtual ~SetContinuityCommand();
+	SetContinuityIndexCommand(CC_show& show, unsigned i);
+	virtual ~SetContinuityIndexCommand();
 
 	virtual bool Do();
 	virtual bool Undo();
@@ -267,20 +267,25 @@ private:
 	unsigned short beats;
 };
 
-// Stuntsheet animation continuity changes
-class ShowUndoCont : public ShowUndo
+// this command is to move points around on a sheet
+// position is a mapping of which point to two positions, the original and new.
+// When you do/undo the command, the show will be set to the sheet, and the selection
+// list will revert to that selection list.
+class SetContinuityTextCommand : public wxCommand
 {
 public:
-	ShowUndoCont(unsigned sheetnum, unsigned contnum, CC_sheet *sheet);
-	virtual ~ShowUndoCont();
+	SetContinuityTextCommand(CC_show& show, unsigned i, const wxString& text);
+	virtual ~SetContinuityTextCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	unsigned cont;
-	wxString conttext;
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	const CC_show::SelectionList mPoints;
+	unsigned mWhichCont;
+	std::pair<wxString,wxString> mContinuity;
 };
 
 // Added continuity

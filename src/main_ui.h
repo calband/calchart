@@ -126,7 +126,6 @@ public:
 	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
 	virtual void ChangeShowMode(wxWindow *win);
-	virtual void UpdateStatusBar();
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,
 		int line = -1, int col = -1);
 	virtual void AddSheet(unsigned sht);

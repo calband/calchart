@@ -220,7 +220,6 @@ CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 
 void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
 {
-	UpdateStatusBar();
 	frame->field->RefreshShow(true, point);
 }
 
@@ -254,12 +253,6 @@ void CC_WinNodeMain::ChangeShowMode(wxWindow *win)
 {
 	frame->field->UpdateBars();
 	frame->field->UpdateSS();
-}
-
-
-void CC_WinNodeMain::UpdateStatusBar()
-{
-	frame->UpdatePanel();
 }
 
 
@@ -2001,6 +1994,8 @@ void MainFrameView::OnDraw(wxDC *dc)
 
 void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 {
+	if (mFrame)
+		mFrame->UpdatePanel();
 	if (mFrame && mFrame->GetCanvas())
 		mFrame->GetCanvas()->Refresh();
 }

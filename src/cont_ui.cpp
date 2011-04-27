@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "calchartapp.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"
+#include "undo.h"
 
 #include <wx/help.h>
 
@@ -57,6 +58,7 @@ enum
 {
 	ContinuityEditor_ContEditSet,
 	ContinuityEditor_ContEditSelect,
+	ContinuityEditor_ContEditSave,
 	ContinuityEditor_ContEditCurrent,
 };
 
@@ -74,13 +76,12 @@ ToolBarEntry printcont_tb[] =
 
 BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
 EVT_CLOSE(ContinuityEditor::OnCloseWindow)
-EVT_SIZE(ContinuityEditor::OnSize)
 EVT_MENU(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
 EVT_MENU(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
-EVT_MENU(CALCHART__CONT_CLOSE, ContinuityEditor::OnCmdClose)
 EVT_MENU(CALCHART__CONT_HELP, ContinuityEditor::OnCmdHelp)
 EVT_BUTTON(ContinuityEditor_ContEditSet,ContinuityEditor::ContEditSet)
 EVT_BUTTON(ContinuityEditor_ContEditSelect,ContinuityEditor::ContEditSelect)
+EVT_BUTTON(ContinuityEditor_ContEditSave,ContinuityEditor::ContEditSave)
 EVT_CHOICE(ContinuityEditor_ContEditCurrent,ContinuityEditor::ContEditCurrent)
 END_EVENT_TABLE()
 
@@ -169,17 +170,6 @@ void CC_WinNodeCont::FlushContinuity()
 }
 
 
-void CC_WinNodeCont::SetContinuity(wxWindow *win,
-unsigned sht, unsigned cont)
-{
-	if ((win != editor) && (sht == editor->GetShow()->GetCurrentSheetNum()) &&
-		(cont == editor->GetCurrent()))
-	{
-		editor->UpdateText(true);
-	}
-}
-
-
 CC_WinNodePrintCont::CC_WinNodePrintCont(CC_WinList *lst,
 PrintContEditor *req)
 : CC_WinNode(lst), editor(req) {}
@@ -201,10 +191,14 @@ void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 	SelectPoints();
 }
 
+void ContinuityEditor::ContEditSave(wxCommandEvent&)
+{
+	FlushText();
+}
 
 void ContinuityEditor::ContEditCurrent(wxCommandEvent&)
 {
-	SetCurrent(conts->GetSelection());
+	SetCurrent(mContinuityChoices->GetSelection());
 }
 
 
@@ -217,12 +211,25 @@ void ContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 	static_cast<ContinuityEditor*>(GetFrame())->Update();
 }
 
+void ContinuityEditorView::DoSetContinuityIndex(unsigned cont)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityIndexCommand(*static_cast<CC_show*>(GetDocument()), cont), true);
+}
+
+void ContinuityEditorView::DoSetNthContinuity(const wxString& text, unsigned i)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityTextCommand(*static_cast<CC_show*>(GetDocument()), i, text), true);
+}
+
 ContinuityEditor::ContinuityEditor(CC_show *show, CC_WinList *lst,
 wxFrame *parent, const wxString& title,
 int x, int y, int width, int height):
 wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height)),
-mShow(show), curr_cont(0), text_sheet(NULL), text_contnum(0)
+mShow(show), mCurrentContinuityChoice(0), mSheetUnderEdit(NULL)
 {
+	mView = new ContinuityEditorView;
+	mView->SetDocument(show);
+	mView->SetFrame(this);
 // Give it an icon
 	SetBandIcon(this);
 
@@ -239,20 +246,21 @@ mShow(show), curr_cont(0), text_sheet(NULL), text_contnum(0)
 	top_button_sizer->Add(button, 0, wxALL, 5 );
 	button = new wxButton(panel, ContinuityEditor_ContEditSelect, wxT("Select &Points"));
 	top_button_sizer->Add(button, 0, wxALL, 5 );
-	conts = new wxChoice(panel, ContinuityEditor_ContEditCurrent);
-	top_button_sizer->Add(conts, 0, wxALL, 5 );
+	button = new wxButton(panel, ContinuityEditor_ContEditSave, wxT("Save &Edits"));
+	top_button_sizer->Add(button, 0, wxALL, 5 );
+	mContinuityChoices = new wxChoice(panel, ContinuityEditor_ContEditCurrent);
+	top_button_sizer->Add(mContinuityChoices, 0, wxALL, 5 );
 	topsizer->Add(top_button_sizer);
 
-	text = new FancyTextWin(panel, -1, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
+	mUserInput = new FancyTextWin(panel, -1, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
 	
-	topsizer->Add(text, 1, wxEXPAND);
+	topsizer->Add(mUserInput, 1, wxEXPAND);
 	panel->SetSizer( topsizer );
 	topsizer->SetSizeHints( panel );
 
 	wxMenu *cont_menu = new wxMenu;
 	cont_menu->Append(CALCHART__CONT_NEW, wxT("&New\tCTRL-N"), wxT("Add new continuity"));
 	cont_menu->Append(CALCHART__CONT_DELETE, wxT("&Delete\tCTRL-DEL"), wxT("Delete this continuity"));
-	cont_menu->Append(CALCHART__CONT_CLOSE, wxT("&Close window\tCTRL-W"), wxT("Close window"));
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(CALCHART__CONT_HELP, wxT("&Help on Continuity..."), wxT("Help on continuity commands"));
 	wxMenuBar *menu_bar = new wxMenuBar;
@@ -270,25 +278,12 @@ mShow(show), curr_cont(0), text_sheet(NULL), text_contnum(0)
 
 ContinuityEditor::~ContinuityEditor()
 {
+	delete mView;
 	if (node)
 	{
 		node->Remove();
 		delete node;
 	}
-}
-
-
-void ContinuityEditor::OnSize(wxSizeEvent& event)
-{
-	int width, height;
-	int text_x, text_y;
-
-	GetClientSize(&width, &height);
-	panel->Fit();
-	panel->GetSize(&text_x, &text_y);
-	panel->SetSize(0, 0, width, text_y);
-// this is done by the sizer
-//  text->SetSize(0, text_y, width, height-text_y);
 }
 
 
@@ -298,7 +293,8 @@ void ContinuityEditor::OnCloseWindow(wxCloseEvent& event)
 	Destroy();
 }
 
-
+// Add a new continuity that we can modify.  It will be given an name and added to
+// the list of names and the next available number
 void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
@@ -312,23 +308,18 @@ void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 }
 
 
+// remove a continuity.  Don't allow the user to delete a continuity that has dots associated with it.
 void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
-	if (sht->ContinuityInUse(curr_cont))
+	if (sht->ContinuityInUse(mCurrentContinuityChoice))
 	{
 		(void)wxMessageBox(wxT("This continuity is being used.\nSet these points to a different continuity first."), wxT("Delete continuity"));
 	}
 	else
 	{
-		sht->UserDeleteContinuity(curr_cont);
+		sht->UserDeleteContinuity(mCurrentContinuityChoice);
 	}
-}
-
-
-void ContinuityEditor::OnCmdClose(wxCommandEvent& event)
-{
-	Close();
 }
 
 
@@ -339,52 +330,41 @@ void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 }
 
 
-void ContinuityEditor::Update(bool quick)
+void ContinuityEditor::Update()
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
 
-	conts->Clear();
+	mContinuityChoices->Clear();
 	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
 		++curranimcont)
 	{
-		conts->Append((*curranimcont)->GetName());
+		mContinuityChoices->Append((*curranimcont)->GetName());
 	}
 	UpdateContChoice();
-	UpdateText(quick);
+	UpdateText();
 }
 
 
 void ContinuityEditor::UpdateContChoice()
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
-	if (curr_cont >= sht->animcont.size() && sht->animcont.size() > 0)
-		curr_cont = sht->animcont.size()-1;
-	conts->SetSelection(curr_cont);
+	if (mCurrentContinuityChoice >= sht->animcont.size() && sht->animcont.size() > 0)
+		mCurrentContinuityChoice = sht->animcont.size()-1;
+	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
 }
 
 
-void ContinuityEditor::UpdateText(bool quick)
+void ContinuityEditor::UpdateText()
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
-	CC_continuity_ptr c;
-
-	if (quick)
-	{
-		c = sht->GetNthContinuity(curr_cont);
-	}
-	else
-	{
-		c = sht->UserGetNthContinuity(curr_cont);
-	}
-	text_sheet = sht;
-	text_contnum = curr_cont;
-	text->Clear();
+	mUserInput->Clear();
+	mSheetUnderEdit = mShow->GetCurrentSheet();
+	CC_continuity_ptr c = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
 	if (c != NULL)
 	{
 		if (c->GetText())
 		{
-			text->WriteText(c->GetText());
-			text->SetInsertionPoint(0);
+			mUserInput->WriteText(c->GetText());
+			mUserInput->SetInsertionPoint(0);
 		}
 	}
 }
@@ -394,25 +374,31 @@ void ContinuityEditor::FlushText()
 {
 	wxString conttext;
 
-	if (text_sheet)
+	if (mSheetUnderEdit)
 	{
-		CC_continuity_ptr cont = text_sheet->GetNthContinuity(text_contnum);
+		CC_continuity_ptr cont = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
 		if (cont != NULL)
 		{
-			conttext = text->GetValue();
+			conttext = mUserInput->GetValue();
 			if (conttext != cont->GetText())
 			{
-				text_sheet->UserSetNthContinuity(conttext, text_contnum, this);
+				mView->DoSetNthContinuity(conttext, mCurrentContinuityChoice);
 			}
 		}
 	}
 }
 
 
+void ContinuityEditor::DetachText()
+{
+	mSheetUnderEdit = NULL;
+}
+
+
 void ContinuityEditor::SelectPoints()
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
-	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
+	CC_continuity_ptr c = sht->GetNthContinuity(mCurrentContinuityChoice);
 	if (c != NULL)
 	{
 		sht->SelectContinuity(c->GetNum());
@@ -423,10 +409,10 @@ void ContinuityEditor::SelectPoints()
 void ContinuityEditor::SetPoints()
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
-	CC_continuity_ptr c = sht->GetNthContinuity(curr_cont);
+	CC_continuity_ptr c = sht->GetNthContinuity(mCurrentContinuityChoice);
 	if (c != NULL)
 	{
-		sht->SetContinuity(c->GetNum());
+		mView->DoSetContinuityIndex(c->GetNum());
 	}
 }
 
@@ -767,6 +753,9 @@ wxFrame *parent, const wxString& title,
 int x, int y, int width, int height)
 : wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height))
 {
+	mView = new PrintContEditorView;
+	mView->SetDocument(show);
+	mView->SetFrame(this);
 // Give it an icon
 	SetBandIcon(this);
 

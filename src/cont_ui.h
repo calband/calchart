@@ -49,7 +49,6 @@ public:
 	virtual void AddContinuity(unsigned sht, unsigned cont);
 	virtual void DeleteContinuity(unsigned sht, unsigned cont);
 	virtual void FlushContinuity();
-	virtual void SetContinuity(wxWindow *win, unsigned sht, unsigned cont);
 
 private:
 	ContinuityEditor *editor;
@@ -66,6 +65,7 @@ private:
 	PrintContEditor *editor;
 };
 
+// View for linking CC_show with ContinuityEditor
 class ContinuityEditorView : public wxView
 {
 public:
@@ -73,8 +73,13 @@ public:
 	~ContinuityEditorView();
     virtual void OnDraw(wxDC *dc);
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+
+	void DoSetContinuityIndex(unsigned cont);
+	void DoSetNthContinuity(const wxString& text, unsigned i);
 };
 
+// ContinuityEditor
+// The way you edit the continuity for individual marchers
 class ContinuityEditor : public wxFrame
 {
 public:
@@ -82,31 +87,26 @@ public:
 		wxFrame *parent, const wxString& title,
 		int x = -1, int y = -1, int width = 400, int height = 300);
 	~ContinuityEditor();
-	void OnSize(wxSizeEvent& event);
 
 	void OnCloseWindow(wxCloseEvent& event);
 	void OnCmdNew(wxCommandEvent& event);
 	void OnCmdDelete(wxCommandEvent& event);
-	void OnCmdClose(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
 
-	void Update(bool quick = false);		  // Refresh all window controls
+	void Update();		  // Refresh all window controls
 // Update text window to current continuity
 // quick doesn't flush other windows
-	void UpdateText(bool quick = false);
+	void UpdateText();
 
 	void FlushText();						  // Flush changes in text window
-	inline void DetachText()				  // When sheet goes away
-	{
-		text_sheet = NULL;
-	}
+	void DetachText();				  // When sheet goes away
 
-	inline unsigned GetCurrent() { return curr_cont; }
-	inline void SetCurrent(unsigned i) { curr_cont = i; UpdateText(); }
+	inline unsigned GetCurrent() { return mCurrentContinuityChoice; }
+	inline void SetCurrent(unsigned i) { mCurrentContinuityChoice = i; UpdateText(); }
 	void UpdateContChoice();
 
-	inline void IncCurrent() { curr_cont++; text_contnum++; }
-	inline void DecCurrent() { curr_cont--; text_contnum--; }
+	inline void IncCurrent() { mCurrentContinuityChoice++; }
+	inline void DecCurrent() { mCurrentContinuityChoice--; }
 
 	const CC_show *GetShow() { return mShow; }
 
@@ -115,20 +115,21 @@ public:
 
 	inline void SetInsertionPoint(int x, int y)
 	{
-		text->SetInsertionPoint(text->XYToPosition((long)x-1,(long)y-1));
-		text->SetFocus();
+		mUserInput->SetInsertionPoint(mUserInput->XYToPosition((long)x-1,(long)y-1));
+		mUserInput->SetFocus();
 	}
 private:
 	void ContEditSet(wxCommandEvent&);
 	void ContEditSelect(wxCommandEvent&);
+	void ContEditSave(wxCommandEvent&);
 	void ContEditCurrent(wxCommandEvent&);
 	CC_show *mShow;
-	unsigned curr_cont;
+	ContinuityEditorView *mView;
 	wxPanel *panel;
-	wxChoice *conts;
-	FancyTextWin *text;
-	CC_sheet *text_sheet;
-	unsigned text_contnum;
+	wxChoice *mContinuityChoices;
+	unsigned mCurrentContinuityChoice;
+	FancyTextWin *mUserInput;
+	CC_sheet *mSheetUnderEdit;
 	CC_WinNodeCont *node;
 
 	DECLARE_EVENT_TABLE()
@@ -185,6 +186,7 @@ public:
 
 	PrintContCanvas *canvas;
 private:
+	PrintContEditorView *mView;
 	CC_WinNodePrintCont *node;
 
 	DECLARE_EVENT_TABLE()
