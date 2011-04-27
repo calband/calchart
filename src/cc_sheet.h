@@ -53,7 +53,6 @@ public:
 	unsigned GetNumSelectedPoints() const;
 	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
 	bool SelectContinuity(unsigned i) const;
-	void SetContinuityIndex(unsigned i);
 	void SetNumPoints(unsigned num, unsigned columns);
 	void RelabelSheet(unsigned *table);
 
@@ -81,7 +80,6 @@ public:
 	inline bool IsInAnimation() const { return (beats != 0); }
 	void UserSetName(const wxString& newname);
 	void UserSetBeats(unsigned short b);
-	bool SetPointsSym(SYMBOL_TYPE sym);
 	bool SetPointsLabel(bool right);
 	bool SetPointsLabelFlip();
 

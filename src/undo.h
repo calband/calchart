@@ -58,21 +58,6 @@ public:
 	bool was_modified;
 };
 
-// Multiple undos in one entry
-class ShowUndoMany : public ShowUndo
-{
-public:
-	ShowUndoMany(ShowUndo *undolist);
-	virtual ~ShowUndoMany();
-
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	ShowUndo *list;
-};
-
 // this command is to move points around on a sheet
 // position is a mapping of which point to two positions, the original and new.
 // When you do/undo the command, the show will be set to the sheet, and the selection
@@ -122,7 +107,7 @@ public:
 class SetContinuityIndexCommand : public wxCommand
 {
 public:
-	SetContinuityIndexCommand(CC_show& show, unsigned i);
+	SetContinuityIndexCommand(CC_show& show, unsigned index);
 	virtual ~SetContinuityIndexCommand();
 
 	virtual bool Do();
@@ -135,28 +120,25 @@ protected:
 	std::map<unsigned, std::pair<unsigned,unsigned> > mContinuity;
 };
 
-// Point symbol changes
-struct ShowUndoSymElem
-{
-	unsigned idx;
-	SYMBOL_TYPE sym;
-	unsigned char cont;
-};
-class ShowUndoSym : public ShowUndo
+// this command is to move points around on a sheet
+// position is a mapping of which point to two positions, the original and new.
+// When you do/undo the command, the show will be set to the sheet, and the selection
+// list will revert to that selection list.
+class SetSymbolAndContCommand : public wxCommand
 {
 public:
-	ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged = false);
-	ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet);
-	virtual ~ShowUndoSym();
+	SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym, unsigned cont);
+	virtual ~SetSymbolAndContCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	unsigned num;
-	std::deque<ShowUndoSymElem> elems;
-	bool contchange;
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	const CC_show::SelectionList mPoints;
+	typedef std::pair<SYMBOL_TYPE,unsigned> sym_cont_t;
+	std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> > mSymsAndCont;
 };
 
 // Point label changes
@@ -344,10 +326,6 @@ public:
 	int Undo(CC_show *show);
 	int Redo(CC_show *show);
 	void Add(ShowUndo *undo);
-
-// For doing multiple actions in one entry
-	void StartMulti();
-	void EndMulti();
 
 	const wxChar *UndoDescription();
 	const wxChar *RedoDescription();

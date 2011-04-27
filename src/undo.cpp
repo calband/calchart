@@ -35,76 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ShowUndo::~ShowUndo() {}
 
-ShowUndoMany::ShowUndoMany(ShowUndo *undolist)
-:ShowUndo(0), list(undolist) {}
-
-ShowUndoMany::~ShowUndoMany()
-{
-	ShowUndo *next;
-
-	while (list)
-	{
-		next = list->next;
-		delete list;
-		list = next;
-	}
-}
-
-
-int ShowUndoMany::Undo(CC_show *show, ShowUndo** newundo)
-{
-	ShowUndo *undo;
-	ShowUndo *newnode;
-	ShowUndo *newlist;
-	int i;
-
-	newlist = newnode = NULL;
-	i = -1;
-	for (undo = list; undo != NULL; undo = undo->next)
-	{
-		if (newlist)
-		{
-			undo->Undo(show, &newnode->next);
-			if (newnode->next) newnode = newnode->next;
-		}
-		else
-		{
-			i = undo->Undo(show, &newlist);
-			newnode = newlist;
-		}
-	}
-	*newundo = new ShowUndoMany(newlist);
-	return i;
-}
-
-
-unsigned ShowUndoMany::Size()
-{
-	ShowUndo *undo;
-	unsigned i;
-
-	for (i = sizeof(*this), undo = list; undo != NULL; undo = undo->next)
-	{
-		i += undo->Size();
-	}
-	return i;
-}
-
-
-const wxChar *ShowUndoMany::UndoDescription()
-{
-	if (list) return list->UndoDescription();
-	else return NULL;
-}
-
-
-const wxChar *ShowUndoMany::RedoDescription()
-{
-	if (list) return list->RedoDescription();
-	else return NULL;
-}
-
-
 MovePointsOnSheetCommand::MovePointsOnSheetCommand(CC_show& show, unsigned ref)
 : wxCommand(true, wxT("Moving points")),
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList()), mRef(ref)
@@ -203,14 +133,14 @@ TransformPointsInALineCommand::~TransformPointsInALineCommand()
 }
 
 
-SetContinuityIndexCommand::SetContinuityIndexCommand(CC_show& show, unsigned i)
+SetContinuityIndexCommand::SetContinuityIndexCommand(CC_show& show, unsigned index)
 : wxCommand(true, wxT("Setting Continuity Index")),
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList())
 {
 	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
 	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		mContinuity[*i] = std::pair<unsigned,unsigned>(sheet->GetPoint(*i).cont, *i);
+		mContinuity[*i] = std::pair<unsigned,unsigned>(sheet->GetPoint(*i).cont, index);
 	}
 }
 
@@ -253,6 +183,62 @@ bool SetContinuityIndexCommand::Undo()
 }
 
 
+SetSymbolAndContCommand::SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym, unsigned cont)
+: wxCommand(true, wxT("Setting Continuity Index")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList())
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+	{
+		// Only do work on points that have different symbols
+		if (sym != sheet->GetPoint(*i).sym)
+		{
+			mSymsAndCont[*i] = std::pair<sym_cont_t,sym_cont_t>(sym_cont_t(sheet->GetPoint(*i).sym, sheet->GetPoint(*i).cont), sym_cont_t(sym, cont));
+		}
+	}
+}
+
+SetSymbolAndContCommand::~SetSymbolAndContCommand()
+{
+}
+
+bool SetSymbolAndContCommand::Do()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
+	{
+		sheet->GetPoint(i->first).sym = i->second.second.first;
+		sheet->GetPoint(i->first).cont = i->second.second.second;
+	}
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	return true;
+}
+
+bool SetSymbolAndContCommand::Undo()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
+	{
+		sheet->GetPoint(i->first).sym = i->second.first.first;
+		sheet->GetPoint(i->first).cont = i->second.first.second;
+	}
+	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	return true;
+}
+
+
 SetContinuityTextCommand::SetContinuityTextCommand(CC_show& show, unsigned i, const wxString& text)
 : wxCommand(true, wxT("Setting Continuity Text")),
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList()), mWhichCont(i)
@@ -289,80 +275,6 @@ bool SetContinuityTextCommand::Undo()
 
 	sheet->SetNthContinuity(mContinuity.first, mWhichCont);
 	return true;
-}
-
-
-ShowUndoSym::ShowUndoSym(unsigned sheetnum, CC_sheet *sheet, bool contchanged)
-:ShowUndo(sheetnum), contchange(contchanged)
-{
-	unsigned i;
-
-	num = sheet->GetNumSelectedPoints();
-	elems.assign(num, ShowUndoSymElem());
-	for (num=0,i=0; i < sheet->show->GetNumPoints(); i++)
-	{
-		if (sheet->show->IsSelected(i))
-		{
-			elems[num].idx = i;
-			elems[num].sym = sheet->GetPoint(i).sym;
-			elems[num].cont = sheet->GetPoint(i).cont;
-			num++;
-		}
-	}
-}
-
-
-ShowUndoSym::ShowUndoSym(ShowUndoSym* old, CC_sheet *sheet)
-:ShowUndo(old->sheetidx), num(old->num), contchange(old->contchange)
-{
-	unsigned i;
-
-	elems.assign(num, ShowUndoSymElem());
-	for (i = 0; i < num; i++)
-	{
-		elems[i].idx = old->elems[i].idx;
-		elems[i].sym = sheet->GetPoint(elems[i].idx).sym;
-		elems[i].cont = sheet->GetPoint(elems[i].idx).cont;
-	}
-}
-
-
-ShowUndoSym::~ShowUndoSym()
-{
-}
-
-
-int ShowUndoSym::Undo(CC_show *show, ShowUndo** newundo)
-{
-	unsigned i;
-	CC_sheet *sheet = show->GetNthSheet(sheetidx);
-
-	*newundo = new ShowUndoSym(this, sheet);
-	for (i = 0; i < num; i++)
-	{
-		sheet->GetPoint(elems[i].idx).sym = elems[i].sym;
-		sheet->GetPoint(elems[i].idx).cont = elems[i].cont;
-	}
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(sheetidx);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoSym::Size()
-{
-	return sizeof(ShowUndoSymElem) * num + sizeof(*this);
-}
-
-
-const wxChar *ShowUndoSym::UndoDescription()
-{
-	return contchange ? wxT("Undo continuity assignment") : wxT("Undo symbol change");
-}
-
-
-const wxChar *ShowUndoSym::RedoDescription()
-{
-	return contchange ? wxT("Redo continuity assignment") : wxT("Redo symbol change");
 }
 
 
@@ -781,36 +693,6 @@ void ShowUndoList::Add(ShowUndo *undo)
 	EraseAllRedo();
 	Push(undo);
 	Clean();
-}
-
-
-// Prepare to add multiple actions
-void ShowUndoList::StartMulti()
-{
-	oldlist = list;
-}
-
-
-// End adding multiple actions
-void ShowUndoList::EndMulti()
-{
-	ShowUndo *newlist, *tmplist;
-
-	newlist = NULL;
-	for (tmplist = list; tmplist != NULL; tmplist = tmplist->next)
-	{
-		if (tmplist->next == oldlist)
-		{
-			newlist = list;
-			list = oldlist;
-			tmplist->next = NULL;
-			break;
-		}
-	}
-	if (newlist)
-	{
-		Add(new ShowUndoMany(newlist));
-	}
 }
 
 

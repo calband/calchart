@@ -378,6 +378,7 @@ public:
 	bool DoTranslatePoints(const CC_coord& pos, unsigned curr_ref);
 	bool DoTransformPoints(const Matrix& transmat, unsigned ref);
 	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref);
+	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
 
 private:
 	CC_show* mShow;

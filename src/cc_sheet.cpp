@@ -125,23 +125,6 @@ bool CC_sheet::SelectContinuity(unsigned i) const
 }
 
 
-void CC_sheet::SetContinuityIndex(unsigned i)
-{
-	unsigned j;
-
-// Create undo entry (sym also does continuity)
-	show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this, true));
-
-	for (j = 0; j < show->GetNumPoints(); j++)
-	{
-		if (show->IsSelected(j))
-		{
-			pts[j].cont = i;
-		}
-	}
-}
-
-
 void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 {
 	unsigned i, j, cpy, col;
@@ -350,36 +333,6 @@ void CC_sheet::UserSetBeats(unsigned short b)
 	show->undolist->Add(new ShowUndoBeat(show->GetSheetPos(this), this));
 	SetBeats(b);
 	wxGetApp().GetWindowList().ChangeTitle(show->GetSheetPos(this));
-}
-
-
-// Set point symbols
-bool CC_sheet::SetPointsSym(SYMBOL_TYPE sym)
-{
-	unsigned i;
-	bool change = false;
-
-	if (GetNumSelectedPoints() <= 0) return false;
-
-// Create undo entries
-	show->undolist->StartMulti();
-	CC_continuity_ptr c = GetStandardContinuity(sym);
-	show->undolist->Add(new ShowUndoSym(show->GetSheetPos(this), this));
-	show->undolist->EndMulti();
-
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		if (show->IsSelected(i))
-		{
-			if (pts[i].sym != sym)
-			{
-				pts[i].sym = sym;
-				pts[i].cont = c->GetNum();
-				change = true;
-			}
-		}
-	}
-	return change;
 }
 
 

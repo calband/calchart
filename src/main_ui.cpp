@@ -983,7 +983,7 @@ void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_PLAIN))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_PLAIN))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -991,7 +991,7 @@ void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOL))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOL))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -999,7 +999,7 @@ void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_BKSL))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_BKSL))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -1007,7 +1007,7 @@ void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SL))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SL))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -1015,7 +1015,7 @@ void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_X))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_X))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -1023,7 +1023,7 @@ void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOLBKSL))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLBKSL))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -1031,7 +1031,7 @@ void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOLSL))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLSL))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -1039,7 +1039,7 @@ void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
 
 void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsSym(SYMBOL_SOLX))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLX))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -2041,5 +2041,12 @@ bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& se
 {
 	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, ref), true);
+	return true;
+}
+
+bool MainFrameView::DoSetPointsSymbol(SYMBOL_TYPE sym)
+{
+	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym, mShow->GetCurrentSheet()->GetStandardContinuity(sym)->GetNum()), true);
 	return true;
 }
