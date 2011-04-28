@@ -71,15 +71,13 @@ public:
 	unsigned FindContinuityByName(const wxString& name) const;
 	bool ContinuityInUse(unsigned idx) const;
 
-	inline const wxString& GetName() const { return name; }
-	inline void SetName(const wxString& newname) { name = newname; }
+	const wxString& GetName() const;
+	void SetName(const wxString& newname);
 	inline const wxString& GetNumber() const { return number; }
 	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
-	inline unsigned short GetBeats() const { return beats; }
-	inline void SetBeats(unsigned short b) { beats = b; }
+	unsigned short GetBeats() const;
+	void SetBeats(unsigned short b);
 	inline bool IsInAnimation() const { return (beats != 0); }
-	void UserSetName(const wxString& newname);
-	void UserSetBeats(unsigned short b);
 	bool SetPointsLabel(bool right);
 	bool SetPointsLabelFlip();
 

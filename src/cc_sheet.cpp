@@ -318,21 +318,26 @@ bool CC_sheet::ContinuityInUse(unsigned idx) const
 }
 
 
-void CC_sheet::UserSetName(const wxString& newname)
+const wxString& CC_sheet::GetName() const
 {
-// Create undo entry
-	show->undolist->Add(new ShowUndoName(show->GetSheetPos(this), this));
-	SetName(newname);
-	wxGetApp().GetWindowList().ChangeTitle(show->GetSheetPos(this));
+	return name;
+}
+
+void CC_sheet::SetName(const wxString& newname)
+{
+	name = newname;
 }
 
 
-void CC_sheet::UserSetBeats(unsigned short b)
+unsigned short CC_sheet::GetBeats() const
 {
-// Create undo entry
-	show->undolist->Add(new ShowUndoBeat(show->GetSheetPos(this), this));
-	SetBeats(b);
-	wxGetApp().GetWindowList().ChangeTitle(show->GetSheetPos(this));
+	return beats;
+}
+
+
+void CC_sheet::SetBeats(unsigned short b)
+{
+	beats = b;
 }
 
 

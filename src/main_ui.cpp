@@ -139,9 +139,10 @@ EVT_MENU(wxID_DELETE, MainFrame::OnCmdDelete)
 EVT_MENU(CALCHART__RELABEL, MainFrame::OnCmdRelabel)
 EVT_MENU(CALCHART__EDIT_CONTINUITY, MainFrame::OnCmdEditCont)
 EVT_MENU(CALCHART__EDIT_PRINTCONT, MainFrame::OnCmdEditPrintCont)
-EVT_MENU(CALCHART__SET_TITLE, MainFrame::OnCmdSetTitle)
+EVT_MENU(CALCHART__SET_SHEET_TITLE, MainFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, MainFrame::OnCmdSetBeats)
 EVT_MENU(CALCHART__SETUP, MainFrame::OnCmdSetup)
+EVT_MENU(CALCHART__SETDESCRIPTION, MainFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
 EVT_MENU(CALCHART__ROWS, MainFrame::OnCmdRows)
@@ -287,12 +288,6 @@ void CC_WinNodeMain::RemoveSheets(unsigned num)
 }
 
 
-void CC_WinNodeMain::ChangeTitle(unsigned sht)
-{
-	if (sht == frame->field->mShow->GetCurrentSheetNum()) frame->UpdatePanel();
-}
-
-
 TopFrame::TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
 wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
 {
@@ -424,8 +419,9 @@ field(NULL)
 	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
 	edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show...\tCTRL-U"), wxT("Setup basic show information"));
+	edit_menu->Append(CALCHART__SETDESCRIPTION, wxT("Set Show &Description..."), wxT("Set the show description"));
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
-	edit_menu->Append(CALCHART__SET_TITLE, wxT("Set &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
+	edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
 	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
 
 	wxMenu *anim_menu = new wxMenu;
@@ -757,18 +753,18 @@ void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdSetTitle(wxCommandEvent& event)
+void MainFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 {
 	wxString s;
 	if (field->mShow)
 	{
-		s = wxGetTextFromUser(wxT("Enter the new title"),
+		s = wxGetTextFromUser(wxT("Enter the sheet title"),
 			field->mShow->GetCurrentSheet()->GetName(),
 			field->mShow->GetCurrentSheet()->GetName(),
 			this);
 		if (s)
 		{
-			field->mShow->GetCurrentSheet()->UserSetName(s);
+			static_cast<MainFrameView*>(GetView())->DoSetSheetTitle(s);
 		}
 	}
 }
@@ -789,7 +785,7 @@ void MainFrame::OnCmdSetBeats(wxCommandEvent& event)
 			long val;
 			if (s.ToLong(&val))
 			{
-				field->mShow->GetCurrentSheet()->UserSetBeats(val);
+				static_cast<MainFrameView*>(GetView())->DoSetSheetBeats(val);
 			}
 		}
 	}
@@ -799,6 +795,12 @@ void MainFrame::OnCmdSetBeats(wxCommandEvent& event)
 void MainFrame::OnCmdSetup(wxCommandEvent& event)
 {
 	Setup();
+}
+
+
+void MainFrame::OnCmdSetDescription(wxCommandEvent& event)
+{
+	SetDescription();
 }
 
 
@@ -1150,6 +1152,24 @@ void MainFrame::Setup()
 		ShowInfoReq dialog1(field->mShow, this);
 		if (dialog1.ShowModal() == wxID_OK)
 		{
+		}
+	}
+}
+
+
+void MainFrame::SetDescription()
+{
+	if (field->mShow)
+	{
+		wxTextEntryDialog dialog(this,
+			wxT("Please modify the show description\n"),
+			wxT("Edit show description\n"),
+			field->mShow->GetDescr(),
+			wxOK | wxCANCEL);
+		ShowInfoReq dialog1(field->mShow, this);
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			static_cast<MainFrameView*>(GetView())->DoSetDescription(dialog.GetValue());
 		}
 	}
 }
@@ -2048,5 +2068,23 @@ bool MainFrameView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
 	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym, mShow->GetCurrentSheet()->GetStandardContinuity(sym)->GetNum()), true);
+	return true;
+}
+
+bool MainFrameView::DoSetDescription(const wxString& descr)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetDescriptionCommand(*mShow, descr), true);
+	return true;
+}
+
+bool MainFrameView::DoSetSheetTitle(const wxString& descr)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetSheetTitleCommand(*mShow, descr), true);
+	return true;
+}
+
+bool MainFrameView::DoSetSheetBeats(unsigned short beats)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetSheetBeatsCommand(*mShow, beats), true);
 	return true;
 }

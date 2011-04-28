@@ -219,36 +219,6 @@ private:
 	CC_sheet *deleted_sheets;
 };
 
-// Stuntsheet name changes
-class ShowUndoName : public ShowUndo
-{
-public:
-	ShowUndoName(unsigned sheetnum, CC_sheet *sheet);
-	virtual ~ShowUndoName();
-
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	wxString name;
-};
-
-// Stuntsheet # of beat changes
-class ShowUndoBeat : public ShowUndo
-{
-public:
-	ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet);
-	virtual ~ShowUndoBeat();
-
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	unsigned short beats;
-};
-
 // this command is to move points around on a sheet
 // position is a mapping of which point to two positions, the original and new.
 // When you do/undo the command, the show will be set to the sheet, and the selection
@@ -303,18 +273,49 @@ private:
 };
 
 // Show description changes
-class ShowUndoDescr : public ShowUndo
+class SetSheetTitleCommand : public wxCommand
 {
 public:
-	ShowUndoDescr(CC_show *show);
-	virtual ~ShowUndoDescr();
+	SetSheetTitleCommand(CC_show& show, const wxString& newname);
+	virtual ~SetSheetTitleCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	wxString descrtext;
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	std::pair<wxString,wxString> mDescription;
+};
+
+class SetSheetBeatsCommand : public wxCommand
+{
+public:
+	SetSheetBeatsCommand(CC_show& show, unsigned short beats);
+	virtual ~SetSheetBeatsCommand();
+
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	std::pair<unsigned short,unsigned short> mBeats;
+};
+
+// Show description changes
+class SetDescriptionCommand : public wxCommand
+{
+public:
+	SetDescriptionCommand(CC_show& show, const wxString& newdescr);
+	virtual ~SetDescriptionCommand();
+
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	std::pair<wxString,wxString> mDescription;
 };
 
 class ShowUndoList

@@ -59,7 +59,6 @@ public:
 	virtual void DeleteSheet(unsigned sht) {}
 	virtual void AppendSheets() {}
 	virtual void RemoveSheets(unsigned num) {}
-	virtual void ChangeTitle(unsigned sht) {}
 	virtual void SelectSheet(wxWindow* win, unsigned sht) {}
 	virtual void AddContinuity(unsigned sht, unsigned cont) {}
 	virtual void DeleteContinuity(unsigned sht, unsigned cont) {}
@@ -93,7 +92,6 @@ public:
 	virtual void DeleteSheet(unsigned sht);
 	virtual void AppendSheets();
 	virtual void RemoveSheets(unsigned num);
-	virtual void ChangeTitle(unsigned sht);
 	virtual void SelectSheet(wxWindow* win, unsigned sht);
 	virtual void AddContinuity(unsigned sht, unsigned cont);
 	virtual void DeleteContinuity(unsigned sht, unsigned cont);

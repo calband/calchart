@@ -715,9 +715,9 @@ wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 //handl->WriteChunkStr(INGL_MODE, mode->Name());
 
 // Description
-	if (!UserGetDescr().empty())
+	if (!GetDescr().empty())
 	{
-		WriteChunkStr(stream, INGL_DESC, UserGetDescr().utf8_str());
+		WriteChunkStr(stream, INGL_DESC, GetDescr().utf8_str());
 	}
 
 // Handle sheets
@@ -1041,7 +1041,7 @@ void CC_show::FlushAllTextWindows() const
 }
 
 
-const wxString& CC_show::UserGetDescr() const
+const wxString& CC_show::GetDescr() const
 {
 	return descr;
 }
@@ -1074,10 +1074,8 @@ void CC_show::SetAutosaveName(const wxString& realname)
 }
 
 
-void CC_show::UserSetDescr(const wxString& newdescr, wxWindow *win)
+void CC_show::SetDescr(const wxString& newdescr)
 {
-// Create undo entry
-	undolist->Add(new ShowUndoDescr(this));
 	descr = newdescr;
 }
 
@@ -1363,7 +1361,6 @@ void UnitTests()
 //	assert(test.Ok() == true);
 	cout<<"GetTitle "<<(wchar_t*)test->GetTitle().c_str()<<"\n";
 	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";
-	cout<<"UserGetDescr "<<(wchar_t*)test->UserGetDescr().c_str()<<"\n";
 	cout<<"Modified "<<test->IsModified()<<"\n";
 	cout<<"GetNumSheets "<<test->GetNumSheets()<<"\n";
 	cout<<"GetSheet "<<test->GetSheet()<<"\n";

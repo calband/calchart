@@ -74,10 +74,8 @@ public:
 	void FlushAllTextWindows() const;
 
 public:
-	inline const wxString& GetDescr() const { return descr; }
-	const wxString& UserGetDescr() const;
-	inline void SetDescr(const wxString& newdescr) { descr = newdescr; }
-	void UserSetDescr(const wxString& newdescr, wxWindow* win);
+	const wxString& GetDescr() const;
+	void SetDescr(const wxString& newdescr);
 
 	virtual void Modify(bool b);
 

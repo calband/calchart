@@ -130,9 +130,6 @@ public:
 	void UpdateLabels();
 	void UpdateNumPoints();
 	void UpdateMode();
-	void UpdateDescr();	  // quick doesn't flush other windows
-
-	void FlushDescr();						  // Flush changes in description text window
 
 	inline wxString GetChoiceStrSelection() { return choice->GetStringSelection(); }
 	inline int GetChoiceSelection() { return choice->GetSelection(); }
@@ -155,6 +152,5 @@ private:
 	wxListBox *labels;
 	wxChoice *choice;
 	wxSlider *lettersize;
-	FancyTextWin *text;
 };
 #endif

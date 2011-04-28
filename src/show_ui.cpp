@@ -229,14 +229,12 @@ enum
 	ShowInfoReq_ShowInfoSetNum=1000,
 	ShowInfoReq_ShowInfoSetLabels,
 	ShowInfoReq_ShowInfoModeChoice,
-	ShowInfoReq_ShowInfoSetDescription,
 };
 
 BEGIN_EVENT_TABLE(ShowInfoReq, wxDialog)
 EVT_BUTTON(ShowInfoReq_ShowInfoSetNum,ShowInfoReq::ShowInfoSetNum)
 EVT_BUTTON(ShowInfoReq_ShowInfoSetLabels,ShowInfoReq::ShowInfoSetLabels)
 EVT_CHOICE(ShowInfoReq_ShowInfoModeChoice,ShowInfoReq::ShowInfoModeChoice)
-EVT_BUTTON(ShowInfoReq_ShowInfoSetDescription,ShowInfoReq::ShowInfoSetDescription)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( ShowInfoReq, wxDialog )
@@ -378,12 +376,6 @@ void ShowInfoReq::CreateControls()
 	lettersize = new wxSlider(this, -1, maxnum, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
 	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
 	topsizer->Add(boxsizer, 0, wxALL, 10);
-
-	// add text
-	topsizer->Add(new wxButton(this, ShowInfoReq_ShowInfoSetDescription, wxT("Set Description")), 0, wxALL, 10);
-	text = new FancyTextWin(this, -1, wxEmptyString, wxDefaultPosition, wxSize(240, 100));
-	UpdateDescr();
-	topsizer->Add(text, 1, wxALL, 10);
 }
 
 
@@ -431,12 +423,6 @@ void ShowInfoReq::ShowInfoModeChoice(wxCommandEvent&)
 }
 
 
-void ShowInfoReq::ShowInfoSetDescription(wxCommandEvent&)
-{
-	FlushDescr();
-}
-
-
 void ShowInfoReq::UpdateLabels()
 {
 	int i;
@@ -471,27 +457,6 @@ void ShowInfoReq::UpdateNumPoints()
 void ShowInfoReq::UpdateMode()
 {
 	choice->SetStringSelection(show->GetMode().GetName());
-}
-
-
-void ShowInfoReq::UpdateDescr()
-{
-	wxString c;
-
-	text->Clear();
-	c = show->UserGetDescr();
-	text->WriteText(c);
-	text->SetInsertionPoint(0);
-}
-
-
-void ShowInfoReq::FlushDescr()
-{
-	wxString descr = text->GetValue();
-	if (descr != show->GetDescr())
-	{
-		show->UserSetDescr(descr, this);
-	}
 }
 
 

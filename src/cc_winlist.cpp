@@ -171,15 +171,6 @@ void CC_WinList::RemoveSheets(unsigned num)
 }
 
 
-void CC_WinList::ChangeTitle(unsigned sht)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->ChangeTitle(sht);
-	}
-}
-
-
 void CC_WinList::SelectSheet(wxWindow* win, unsigned sht)
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)

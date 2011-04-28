@@ -68,9 +68,10 @@ enum
 	CALCHART__RELABEL,
 	CALCHART__EDIT_CONTINUITY,
 	CALCHART__EDIT_PRINTCONT,
-	CALCHART__SET_TITLE,
+	CALCHART__SET_SHEET_TITLE,
 	CALCHART__SET_BEATS,
 	CALCHART__SETUP,
+	CALCHART__SETDESCRIPTION,
 	CALCHART__POINTS,
 	CALCHART__ANIMATE,
 	CALCHART__SELECTION,
@@ -132,7 +133,6 @@ public:
 	virtual void DeleteSheet(unsigned sht);
 	virtual void AppendSheets();
 	virtual void RemoveSheets(unsigned num);
-	virtual void ChangeTitle(unsigned sht);
 
 private:
 	MainFrame *frame;
@@ -192,9 +192,10 @@ public:
 	void OnCmdRelabel(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);
 	void OnCmdEditPrintCont(wxCommandEvent& event);
-	void OnCmdSetTitle(wxCommandEvent& event);
+	void OnCmdSetSheetTitle(wxCommandEvent& event);
 	void OnCmdSetBeats(wxCommandEvent& event);
 	void OnCmdSetup(wxCommandEvent& event);
+	void OnCmdSetDescription(wxCommandEvent& event);
 	void OnCmdPoints(wxCommandEvent& event);
 	void OnCmdAnimate(wxCommandEvent& event);
 	void OnCmdSelect(int id);
@@ -243,6 +244,7 @@ public:
 	void refnum_callback(wxCommandEvent &);
 
 	void Setup();
+	void SetDescription();
 	const FieldCanvas * GetCanvas() const { return field; }
 	FieldCanvas * GetCanvas() { return field; }
 
@@ -379,6 +381,9 @@ public:
 	bool DoTransformPoints(const Matrix& transmat, unsigned ref);
 	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref);
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
+	bool DoSetDescription(const wxString& descr);
+	bool DoSetSheetTitle(const wxString& descr);
+	bool DoSetSheetBeats(unsigned short beats);
 
 private:
 	CC_show* mShow;

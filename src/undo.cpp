@@ -471,64 +471,6 @@ unsigned ShowUndoDeleteAppendSheets::Size()
 const wxChar *ShowUndoDeleteAppendSheets::UndoDescription() { return wxT(""); }
 const wxChar *ShowUndoDeleteAppendSheets::RedoDescription() { return wxT("Redo append sheets"); }
 
-ShowUndoName::ShowUndoName(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum)
-{
-
-	name = sheet->GetName();
-}
-
-
-ShowUndoName::~ShowUndoName()
-{
-}
-
-
-int ShowUndoName::Undo(CC_show *show, ShowUndo** newundo)
-{
-	CC_sheet *sheet = show->GetNthSheet(sheetidx);
-
-	*newundo = new ShowUndoName(sheetidx, sheet);
-	sheet->SetName(name);
-	wxGetApp().GetWindowList().ChangeTitle(sheetidx);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoName::Size()
-{
-	return name.length()*sizeof(wxChar) + sizeof(*this);
-}
-
-
-const wxChar *ShowUndoName::UndoDescription() { return wxT("Undo change stuntsheet name"); }
-const wxChar *ShowUndoName::RedoDescription() { return wxT("Redo change stuntsheet name"); }
-
-ShowUndoBeat::ShowUndoBeat(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum), beats(sheet->GetBeats()) {}
-
-ShowUndoBeat::~ShowUndoBeat() {}
-
-int ShowUndoBeat::Undo(CC_show *show, ShowUndo** newundo)
-{
-	CC_sheet *sheet = show->GetNthSheet(sheetidx);
-
-	*newundo = new ShowUndoBeat(sheetidx, sheet);
-	sheet->SetBeats(beats);
-	wxGetApp().GetWindowList().ChangeTitle(sheetidx);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoBeat::Size()
-{
-	return sizeof(*this);
-}
-
-
-const wxChar *ShowUndoBeat::UndoDescription() { return wxT("Undo set number of beats"); }
-const wxChar *ShowUndoBeat::RedoDescription() { return wxT("Redo set number of beats"); }
-
 ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
 unsigned contnum)
 :ShowUndo(sheetnum), addcontnum(contnum)
@@ -602,35 +544,89 @@ const wxChar *ShowUndoDeleteContinuity::RedoDescription()
 }
 
 
-ShowUndoDescr::ShowUndoDescr(CC_show *show)
-:ShowUndo(0)
+SetSheetTitleCommand::SetSheetTitleCommand(CC_show& show, const wxString& newname)
+: wxCommand(true, wxT("Moving points")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum())
 {
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	mDescription = std::pair<wxString,wxString>(sheet->GetName(), newname);
+}
 
-	descrtext = show->GetDescr();
+SetSheetTitleCommand::~SetSheetTitleCommand()
+{
 }
 
 
-ShowUndoDescr::~ShowUndoDescr()
+bool SetSheetTitleCommand::Do()
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	sheet->SetName(mDescription.second);
+	mShow.Modify(true);
+	return true;
+}
+
+bool SetSheetTitleCommand::Undo()
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	sheet->SetName(mDescription.first);
+	mShow.Modify(true);
+	return true;
+}
+
+SetSheetBeatsCommand::SetSheetBeatsCommand(CC_show& show, unsigned short beats)
+: wxCommand(true, wxT("setting beats")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum())
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	mBeats = std::pair<unsigned short,unsigned short>(sheet->GetBeats(), beats);
+}
+
+SetSheetBeatsCommand::~SetSheetBeatsCommand()
 {
 }
 
 
-int ShowUndoDescr::Undo(CC_show *show, ShowUndo** newundo)
+bool SetSheetBeatsCommand::Do()
 {
-	*newundo = new ShowUndoDescr(show);
-	show->SetDescr(descrtext);
-	return -1;									  // don't goto another sheet
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	sheet->SetBeats(mBeats.second);
+	mShow.Modify(true);
+	return true;
+}
+
+bool SetSheetBeatsCommand::Undo()
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	sheet->SetBeats(mBeats.first);
+	mShow.Modify(true);
+	return true;
+}
+
+SetDescriptionCommand::SetDescriptionCommand(CC_show& show, const wxString& newdescr)
+: wxCommand(true, wxT("Moving points")),
+mShow(show)
+{
+	mDescription = std::pair<wxString,wxString>(show.GetDescr(), newdescr);
+}
+
+SetDescriptionCommand::~SetDescriptionCommand()
+{
 }
 
 
-unsigned ShowUndoDescr::Size()
+bool SetDescriptionCommand::Do()
 {
-	return descrtext.length()*sizeof(wxChar) + sizeof(*this);
+	mShow.SetDescr(mDescription.second);
+	mShow.Modify(true);
+	return true;
 }
 
-
-const wxChar *ShowUndoDescr::UndoDescription() { return wxT("Undo edit show description"); }
-const wxChar *ShowUndoDescr::RedoDescription() { return wxT("Redo edit show description"); }
+bool SetDescriptionCommand::Undo()
+{
+	mShow.SetDescr(mDescription.first);
+	mShow.Modify(true);
+	return true;
+}
 
 ShowUndoList::ShowUndoList(CC_show *shw, int lim)
 :show(shw), list(NULL), redolist(NULL), limit(lim) {}
