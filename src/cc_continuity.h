@@ -34,6 +34,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/wx.h>
 #include <boost/shared_ptr.hpp>
 
+class CC_continuity;
+
+// points have a symbol index and a continuity index.  The continuity
+// numbers is the way that the points know what continity they use.
+// This allows multiple points to have different symbols but the same continuity.
 class CC_continuity
 {
 public:
@@ -54,8 +59,6 @@ private:
 
 friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
 };
-
-typedef boost::shared_ptr<CC_continuity> CC_continuity_ptr;
 
 bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
 

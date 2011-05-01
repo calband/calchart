@@ -134,36 +134,6 @@ void CC_WinNodeCont::RemoveSheets(unsigned num)
 }
 
 
-void CC_WinNodeCont::AddContinuity(unsigned sht, unsigned cont)
-{
-	if (sht == editor->GetShow()->GetCurrentSheetNum())
-	{
-		if (cont <= editor->GetCurrent())
-		{
-			editor->IncCurrent();
-		}
-		editor->Update();
-	}
-}
-
-
-void CC_WinNodeCont::DeleteContinuity(unsigned sht, unsigned cont)
-{
-	if (sht == editor->GetShow()->GetCurrentSheetNum())
-	{
-		if (cont == editor->GetCurrent()) editor->DetachText();
-		if (editor->GetCurrent() > 0)
-		{
-			if (cont <= editor->GetCurrent())
-			{
-				editor->DecCurrent();
-			}
-		}
-		editor->Update();
-	}
-}
-
-
 void CC_WinNodeCont::FlushContinuity()
 {
 	editor->FlushText();
@@ -219,6 +189,16 @@ void ContinuityEditorView::DoSetContinuityIndex(unsigned cont)
 void ContinuityEditorView::DoSetNthContinuity(const wxString& text, unsigned i)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityTextCommand(*static_cast<CC_show*>(GetDocument()), i, text), true);
+}
+
+void ContinuityEditorView::DoNewContinuity(const wxString& cont)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new AddContinuityCommand(*static_cast<CC_show*>(GetDocument()), cont), true);
+}
+
+void ContinuityEditorView::DoDeleteContinuity(unsigned i)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new RemoveContinuityCommand(*static_cast<CC_show*>(GetDocument()), i), true);
 }
 
 ContinuityEditor::ContinuityEditor(CC_show *show, CC_WinList *lst,
@@ -297,13 +277,12 @@ void ContinuityEditor::OnCloseWindow(wxCloseEvent& event)
 // the list of names and the next available number
 void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
 	wxString contname(wxGetTextFromUser(wxT("Enter the new continuity's name"),
 		wxT("New Continuity"),
 		wxT(""), this));
 	if (!contname.empty())
 	{
-		sht->UserNewContinuity(contname);
+		mView->DoNewContinuity(contname);
 	}
 }
 
@@ -318,7 +297,7 @@ void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 	}
 	else
 	{
-		sht->UserDeleteContinuity(mCurrentContinuityChoice);
+		mView->DoDeleteContinuity(mCurrentContinuityChoice);
 	}
 }
 
@@ -338,7 +317,7 @@ void ContinuityEditor::Update()
 	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
 		++curranimcont)
 	{
-		mContinuityChoices->Append((*curranimcont)->GetName());
+		mContinuityChoices->Append(curranimcont->GetName());
 	}
 	UpdateContChoice();
 	UpdateText();
@@ -358,14 +337,11 @@ void ContinuityEditor::UpdateText()
 {
 	mUserInput->Clear();
 	mSheetUnderEdit = mShow->GetCurrentSheet();
-	CC_continuity_ptr c = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
-	if (c != NULL)
+	const CC_continuity& c = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
+	if (c.GetText())
 	{
-		if (c->GetText())
-		{
-			mUserInput->WriteText(c->GetText());
-			mUserInput->SetInsertionPoint(0);
-		}
+		mUserInput->WriteText(c.GetText());
+		mUserInput->SetInsertionPoint(0);
 	}
 }
 
@@ -376,14 +352,11 @@ void ContinuityEditor::FlushText()
 
 	if (mSheetUnderEdit)
 	{
-		CC_continuity_ptr cont = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
-		if (cont != NULL)
+		conttext = mUserInput->GetValue();
+		const CC_continuity& cont = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
+		if (conttext != cont.GetText())
 		{
-			conttext = mUserInput->GetValue();
-			if (conttext != cont->GetText())
-			{
-				mView->DoSetNthContinuity(conttext, mCurrentContinuityChoice);
-			}
+			mView->DoSetNthContinuity(conttext, mCurrentContinuityChoice);
 		}
 	}
 }
@@ -398,22 +371,16 @@ void ContinuityEditor::DetachText()
 void ContinuityEditor::SelectPoints()
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
-	CC_continuity_ptr c = sht->GetNthContinuity(mCurrentContinuityChoice);
-	if (c != NULL)
-	{
-		sht->SelectContinuity(c->GetNum());
-	}
+	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
+	sht->SelectContinuity(c.GetNum());
 }
 
 
 void ContinuityEditor::SetPoints()
 {
 	CC_sheet *sht = mShow->GetCurrentSheet();
-	CC_continuity_ptr c = sht->GetNthContinuity(mCurrentContinuityChoice);
-	if (c != NULL)
-	{
-		mView->DoSetContinuityIndex(c->GetNum());
-	}
+	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
+	mView->DoSetContinuityIndex(c.GetNum());
 }
 
 

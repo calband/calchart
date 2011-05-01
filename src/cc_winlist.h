@@ -60,8 +60,6 @@ public:
 	virtual void AppendSheets() {}
 	virtual void RemoveSheets(unsigned num) {}
 	virtual void SelectSheet(wxWindow* win, unsigned sht) {}
-	virtual void AddContinuity(unsigned sht, unsigned cont) {}
-	virtual void DeleteContinuity(unsigned sht, unsigned cont) {}
 	virtual void FlushContinuity() {}
 
 protected:
@@ -93,8 +91,6 @@ public:
 	virtual void AppendSheets();
 	virtual void RemoveSheets(unsigned num);
 	virtual void SelectSheet(wxWindow* win, unsigned sht);
-	virtual void AddContinuity(unsigned sht, unsigned cont);
-	virtual void DeleteContinuity(unsigned sht, unsigned cont);
 	virtual void FlushContinuity();
 
 private:

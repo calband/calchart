@@ -141,7 +141,7 @@ mSheetNum(0)
 		}
 		UnselectAll();
 	}
-	sheets->animcont.push_back(CC_continuity_ptr(new CC_continuity(contnames[0], 0)));
+	sheets->animcont.push_back(CC_continuity(contnames[0], 0));
 
 	autosaveTimer.AddShow(this);
 }
@@ -814,12 +814,12 @@ wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 			++curranimcont)
 		{
 			WriteChunkHeader(stream, INGL_CONT,
-				1+(*curranimcont)->GetName().Length()+1+
-				(*curranimcont)->GetText().Length()+1);
-			unsigned tnum = (*curranimcont)->GetNum();
+				1+curranimcont->GetName().Length()+1+
+				curranimcont->GetText().Length()+1);
+			unsigned tnum = curranimcont->GetNum();
 			Write(stream, &tnum, 1);
-			WriteStr(stream, (*curranimcont)->GetName().utf8_str());
-			WriteStr(stream, (*curranimcont)->GetText().utf8_str());
+			WriteStr(stream, curranimcont->GetName().utf8_str());
+			WriteStr(stream, curranimcont->GetText().utf8_str());
 		}
 		WriteEnd(stream, INGL_SHET);
 	}
@@ -1007,9 +1007,9 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			}
 			wxString namestr(wxString::FromUTF8(text));
 			text = d + 2 + strlen(text);
-			CC_continuity_ptr newcont(new CC_continuity(namestr, *((uint8_t *)&data[0])));
+			CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
 			wxString textstr(wxString::FromUTF8(text));
-			newcont->SetText(textstr);
+			newcont.SetText(textstr);
 			sheet->AppendContinuity(newcont);
 
 			PeekLong(stream, name);

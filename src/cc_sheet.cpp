@@ -58,7 +58,7 @@ picked(sht->picked), beats(1), pts(show->GetNumPoints()), name(sht->name), numbe
 		pts[i].sym = SYMBOL_PLAIN;
 		pts[i].cont = 0;
 	}
-	animcont.push_back(CC_continuity_ptr(new CC_continuity(contnames[0], 0)));
+	animcont.push_back(CC_continuity(contnames[0], 0));
 }
 
 
@@ -129,7 +129,6 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 {
 	unsigned i, j, cpy, col;
 	CC_coord c, coff(show->GetMode().FieldOffset());
-	CC_continuity_ptr plaincont;
 
 	std::vector<CC_point> newpts(num);
 	cpy = MIN(show->GetNumPoints(), num);
@@ -139,7 +138,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 	}
 	for (c = coff, col = 0; i < num; i++, col++, c.x += INT2COORD(2))
 	{
-		plaincont = GetStandardContinuity(SYMBOL_PLAIN);
+		const CC_continuity& plaincont = GetStandardContinuity(SYMBOL_PLAIN);
 		if (col >= columns)
 		{
 			c.x = coff.x;
@@ -148,7 +147,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 		}
 		newpts[i].flags = 0;
 		newpts[i].sym = SYMBOL_PLAIN;
-		newpts[i].cont = plaincont->GetNum();
+		newpts[i].cont = plaincont.GetNum();
 		newpts[i].pos = c;
 		for (j = 0; j < NUM_REF_PNTS; j++)
 		{
@@ -170,12 +169,12 @@ void CC_sheet::RelabelSheet(unsigned *table)
 }
 
 
-const CC_continuity_ptr CC_sheet::GetNthContinuity(unsigned i) const
+const CC_continuity& CC_sheet::GetNthContinuity(unsigned i) const
 {
 	return animcont.at(i);
 }
 
-CC_continuity_ptr CC_sheet::GetNthContinuity(unsigned i)
+CC_continuity& CC_sheet::GetNthContinuity(unsigned i)
 {
 	return animcont.at(i);
 }
@@ -183,55 +182,29 @@ CC_continuity_ptr CC_sheet::GetNthContinuity(unsigned i)
 
 void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
 {
-	CC_continuity_ptr c;
-
-	c = GetNthContinuity(i);
-	if (c)
-	{
-		c->SetText(text);
-	}
+	CC_continuity& c = GetNthContinuity(i);
+	c.SetText(text);
 	show->UpdateAllViews();
 }
 
 
-CC_continuity_ptr CC_sheet::RemoveNthContinuity(unsigned i)
+CC_continuity CC_sheet::RemoveNthContinuity(unsigned i)
 {
-	CC_continuity_ptr cont = animcont.at(i);
+	CC_continuity cont = animcont.at(i);
 	animcont.erase(animcont.begin()+i);
-	wxGetApp().GetWindowList().DeleteContinuity(show->GetSheetPos(this), i);
 	return cont;
 }
 
 
-void CC_sheet::UserDeleteContinuity(unsigned i)
-{
-	CC_continuity_ptr cont = RemoveNthContinuity(i);
-	show->undolist->Add(new ShowUndoDeleteContinuity(show->GetSheetPos(this),
-		i, cont));
-}
-
-
-void CC_sheet::InsertContinuity(CC_continuity_ptr newcont, unsigned i)
+void CC_sheet::InsertContinuity(const CC_continuity& newcont, unsigned i)
 {
 	animcont.insert(animcont.begin() + i, newcont);
-	wxGetApp().GetWindowList().AddContinuity(show->GetSheetPos(this), i);
 }
 
 
-void CC_sheet::AppendContinuity(CC_continuity_ptr newcont)
+void CC_sheet::AppendContinuity(const CC_continuity& newcont)
 {
 	animcont.push_back(newcont);
-}
-
-
-CC_continuity_ptr CC_sheet::UserNewContinuity(const wxString& name)
-{
-	CC_continuity_ptr newcont(new CC_continuity(name, NextUnusedContinuityNum()));
-	AppendContinuity(newcont);
-	wxGetApp().GetWindowList().AddContinuity(show->GetSheetPos(this), animcont.size()-1);
-	show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
-		animcont.size()-1));
-	return newcont;
 }
 
 
@@ -245,7 +218,7 @@ unsigned CC_sheet::NextUnusedContinuityNum()
 		found = false;
 		for (ContContainer::const_iterator c = animcont.begin(); c != animcont.end(); ++c)
 		{
-			if ((*c)->GetNum() == i)
+			if (c->GetNum() == i)
 			{
 				found = true;
 				i++;
@@ -257,12 +230,13 @@ unsigned CC_sheet::NextUnusedContinuityNum()
 }
 
 
-CC_continuity_ptr CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
+// not undoable
+const CC_continuity& CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 {
 
 	for (ContContainer::const_iterator c = animcont.begin(); c != animcont.end(); ++c)
 	{
-		if ((*c)->GetName().CompareTo(contnames[sym], wxString::ignoreCase) == 0)
+		if (c->GetName().CompareTo(contnames[sym], wxString::ignoreCase) == 0)
 		{
 			return *c;
 		}
@@ -277,11 +251,8 @@ CC_continuity_ptr CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 		idx = FindContinuityByName(contnames[--i]);
 		if (idx != 0) break;
 	}
-	CC_continuity_ptr c(new CC_continuity(contnames[sym], NextUnusedContinuityNum()));
-	InsertContinuity(c, idx);
-	show->undolist->Add(new ShowUndoAddContinuity(show->GetSheetPos(this),
-		idx));
-	return c;
+	InsertContinuity(CC_continuity(contnames[sym], NextUnusedContinuityNum()), idx);
+	return GetNthContinuity(idx);
 }
 
 
@@ -292,7 +263,7 @@ unsigned CC_sheet::FindContinuityByName(const wxString& name) const
 
 	for (idx = 1; c != animcont.end(); idx++, ++c)
 	{
-		if ((*c)->GetName().CompareTo(name, wxString::ignoreCase) == 0)
+		if (c->GetName().CompareTo(name, wxString::ignoreCase) == 0)
 		{
 			break;
 		}
@@ -308,11 +279,11 @@ unsigned CC_sheet::FindContinuityByName(const wxString& name) const
 bool CC_sheet::ContinuityInUse(unsigned idx) const
 {
 	unsigned i;
-	const CC_continuity_ptr c = GetNthContinuity(idx);
+	const CC_continuity& c = GetNthContinuity(idx);
 
 	for (i = 0; i < show->GetNumPoints(); i++)
 	{
-		if (pts[i].cont == c->GetNum()) return true;
+		if (pts[i].cont == c.GetNum()) return true;
 	}
 	return false;
 }

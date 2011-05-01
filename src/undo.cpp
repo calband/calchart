@@ -183,17 +183,21 @@ bool SetContinuityIndexCommand::Undo()
 }
 
 
-SetSymbolAndContCommand::SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym, unsigned cont)
+SetSymbolAndContCommand::SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym)
 : wxCommand(true, wxT("Setting Continuity Index")),
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList())
 {
 	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	// because getting the standard continuity can create one, we need to make it so we can undo
+	// the modification of the continuity list.
+	mOrigAnimcont = sheet->animcont;
+	
 	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
 		// Only do work on points that have different symbols
 		if (sym != sheet->GetPoint(*i).sym)
 		{
-			mSymsAndCont[*i] = std::pair<sym_cont_t,sym_cont_t>(sym_cont_t(sheet->GetPoint(*i).sym, sheet->GetPoint(*i).cont), sym_cont_t(sym, cont));
+			mSymsAndCont[*i] = std::pair<sym_cont_t,sym_cont_t>(sym_cont_t(sheet->GetPoint(*i).sym, sheet->GetPoint(*i).cont), sym_cont_t(sym, sheet->GetPoint(*i).cont));
 		}
 	}
 }
@@ -211,10 +215,11 @@ bool SetSymbolAndContCommand::Do()
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_sheet *sheet = mShow.GetCurrentSheet();
 
+// possible optimization:  Don't save as map, since they all get moved to new symbol...
 	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
 	{
 		sheet->GetPoint(i->first).sym = i->second.second.first;
-		sheet->GetPoint(i->first).cont = i->second.second.second;
+		sheet->GetPoint(i->first).cont = sheet->GetStandardContinuity(i->second.second.first).GetNum();
 	}
 	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
 	return true;
@@ -234,6 +239,7 @@ bool SetSymbolAndContCommand::Undo()
 		sheet->GetPoint(i->first).sym = i->second.first.first;
 		sheet->GetPoint(i->first).cont = i->second.first.second;
 	}
+	sheet->animcont = mOrigAnimcont;
 	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
 	return true;
 }
@@ -244,7 +250,7 @@ SetContinuityTextCommand::SetContinuityTextCommand(CC_show& show, unsigned i, co
 mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList()), mWhichCont(i)
 {
 	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
-	mContinuity = std::pair<wxString,wxString>(sheet->GetNthContinuity(mWhichCont)->GetText(), text);
+	mContinuity = std::pair<wxString,wxString>(sheet->GetNthContinuity(mWhichCont).GetText(), text);
 }
 
 SetContinuityTextCommand::~SetContinuityTextCommand()
@@ -471,76 +477,65 @@ unsigned ShowUndoDeleteAppendSheets::Size()
 const wxChar *ShowUndoDeleteAppendSheets::UndoDescription() { return wxT(""); }
 const wxChar *ShowUndoDeleteAppendSheets::RedoDescription() { return wxT("Redo append sheets"); }
 
-ShowUndoAddContinuity::ShowUndoAddContinuity(unsigned sheetnum,
-unsigned contnum)
-:ShowUndo(sheetnum), addcontnum(contnum)
+// Added or remove continuity base class
+AddRemoveContinuityCommand::AddRemoveContinuityCommand(CC_show& show)
+: wxCommand(true, wxT("Adding or removing continuity")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum())
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	mOrigAnimcont = sheet->animcont;
+}
+
+AddRemoveContinuityCommand::~AddRemoveContinuityCommand()
 {
 }
 
+bool AddRemoveContinuityCommand::Undo()
+{
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+	sheet->animcont = mOrigAnimcont;
+	mShow.Modify(true);
+	return true;
+}
 
-ShowUndoAddContinuity::~ShowUndoAddContinuity()
+AddContinuityCommand::AddContinuityCommand(CC_show& show, const wxString& text)
+: AddRemoveContinuityCommand(show),
+mContName(text)
 {
 }
 
-
-int ShowUndoAddContinuity::Undo(CC_show *show, ShowUndo** newundo)
-{
-	CC_continuity_ptr cont = show->GetNthSheet(sheetidx)->RemoveNthContinuity(addcontnum);
-	*newundo = new ShowUndoDeleteContinuity(sheetidx, addcontnum, cont);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoAddContinuity::Size() { return sizeof(*this); }
-
-const wxChar *ShowUndoAddContinuity::UndoDescription()
-{
-	return wxT("Undo add continuity");
-}
-
-
-const wxChar *ShowUndoAddContinuity::RedoDescription()
-{
-	return wxT("Redo delete continuity");
-}
-
-
-ShowUndoDeleteContinuity::ShowUndoDeleteContinuity(unsigned sheetnum,
-unsigned contnum,
-CC_continuity_ptr cont)
-:ShowUndo(sheetnum), deleted_cont(cont), delcontnum(contnum)
+AddContinuityCommand::~AddContinuityCommand()
 {
 }
 
+bool AddContinuityCommand::Do()
+{
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+	CC_continuity newcont(mContName, sheet->NextUnusedContinuityNum());
+	sheet->AppendContinuity(newcont);
+	mShow.Modify(true);
+	return true;
+}
 
-ShowUndoDeleteContinuity::~ShowUndoDeleteContinuity()
+RemoveContinuityCommand::RemoveContinuityCommand(CC_show& show, unsigned index)
+: AddRemoveContinuityCommand(show),
+mIndexToRemove(index)
 {
 }
 
-
-int ShowUndoDeleteContinuity::Undo(CC_show *show, ShowUndo** newundo)
+RemoveContinuityCommand::~RemoveContinuityCommand()
 {
-	show->GetNthSheet(sheetidx)->InsertContinuity(deleted_cont, delcontnum);
-	*newundo = new ShowUndoAddContinuity(sheetidx, delcontnum);
-	return (int)sheetidx;
 }
 
-
-unsigned ShowUndoDeleteContinuity::Size()
+bool RemoveContinuityCommand::Do()
 {
-	return sizeof(*this) + sizeof(*deleted_cont);
-}
-
-
-const wxChar *ShowUndoDeleteContinuity::UndoDescription()
-{
-	return wxT("Undo delete continuity");
-}
-
-
-const wxChar *ShowUndoDeleteContinuity::RedoDescription()
-{
-	return wxT("Redo add continuity");
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+	sheet->RemoveNthContinuity(mIndexToRemove);
+	mShow.Modify(true);
+	return true;
 }
 
 

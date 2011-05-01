@@ -180,24 +180,6 @@ void CC_WinList::SelectSheet(wxWindow* win, unsigned sht)
 }
 
 
-void CC_WinList::AddContinuity(unsigned sht, unsigned cont)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->AddContinuity(sht, cont);
-	}
-}
-
-
-void CC_WinList::DeleteContinuity(unsigned sht, unsigned cont)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->DeleteContinuity(sht, cont);
-	}
-}
-
-
 void CC_WinList::FlushContinuity()
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)

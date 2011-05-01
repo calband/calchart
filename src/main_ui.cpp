@@ -2067,7 +2067,7 @@ bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& se
 bool MainFrameView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
 	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym, mShow->GetCurrentSheet()->GetStandardContinuity(sym)->GetNum()), true);
+	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym), true);
 	return true;
 }
 

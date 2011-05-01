@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_continuity.h"
 #include "cc_coord.h"
 #include "cc_show.h"
+#include "cc_sheet.h"
 #include <ostream>
 #include <deque>
 #include <map>
@@ -127,7 +128,7 @@ protected:
 class SetSymbolAndContCommand : public wxCommand
 {
 public:
-	SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym, unsigned cont);
+	SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym);
 	virtual ~SetSymbolAndContCommand();
 
 	virtual bool Do();
@@ -137,6 +138,7 @@ protected:
 	CC_show& mShow;
 	const unsigned mSheetNum;
 	const CC_show::SelectionList mPoints;
+	CC_sheet::ContContainer mOrigAnimcont;
 	typedef std::pair<SYMBOL_TYPE,unsigned> sym_cont_t;
 	std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> > mSymsAndCont;
 };
@@ -240,36 +242,45 @@ protected:
 	std::pair<wxString,wxString> mContinuity;
 };
 
-// Added continuity
-class ShowUndoAddContinuity : public ShowUndo
+// Added or remove continuity base class
+class AddRemoveContinuityCommand : public wxCommand
 {
 public:
-	ShowUndoAddContinuity(unsigned sheetnum, unsigned contnum);
-	virtual ~ShowUndoAddContinuity();
+	AddRemoveContinuityCommand(CC_show& show);
+	virtual ~AddRemoveContinuityCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	unsigned addcontnum;
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	CC_sheet::ContContainer mOrigAnimcont;
 };
 
-// Deleted continuity
-class ShowUndoDeleteContinuity : public ShowUndo
+// Added continuity
+class AddContinuityCommand : public AddRemoveContinuityCommand
 {
 public:
-	ShowUndoDeleteContinuity(unsigned sheetnum, unsigned contnum,
-		CC_continuity_ptr cont);
-	virtual ~ShowUndoDeleteContinuity();
+	AddContinuityCommand(CC_show& show, const wxString& text);
+	virtual ~AddContinuityCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	CC_continuity_ptr deleted_cont;
-	unsigned delcontnum;
+	virtual bool Do();
+
+protected:
+	const wxString mContName;
+};
+
+// Added continuity
+class RemoveContinuityCommand : public AddRemoveContinuityCommand
+{
+public:
+	RemoveContinuityCommand(CC_show& show, unsigned i);
+	virtual ~RemoveContinuityCommand();
+
+	virtual bool Do();
+
+protected:
+	const unsigned mIndexToRemove;
 };
 
 // Show description changes

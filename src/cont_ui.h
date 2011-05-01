@@ -46,8 +46,6 @@ public:
 		int line = -1, int col = -1);
 	virtual void DeleteSheet(unsigned sht);
 	virtual void RemoveSheets(unsigned num);
-	virtual void AddContinuity(unsigned sht, unsigned cont);
-	virtual void DeleteContinuity(unsigned sht, unsigned cont);
 	virtual void FlushContinuity();
 
 private:
@@ -76,6 +74,8 @@ public:
 
 	void DoSetContinuityIndex(unsigned cont);
 	void DoSetNthContinuity(const wxString& text, unsigned i);
+	void DoNewContinuity(const wxString& text);
+	void DoDeleteContinuity(unsigned cont);
 };
 
 // ContinuityEditor
@@ -104,9 +104,6 @@ public:
 	inline unsigned GetCurrent() { return mCurrentContinuityChoice; }
 	inline void SetCurrent(unsigned i) { mCurrentContinuityChoice = i; UpdateText(); }
 	void UpdateContChoice();
-
-	inline void IncCurrent() { mCurrentContinuityChoice++; }
-	inline void DecCurrent() { mCurrentContinuityChoice--; }
 
 	const CC_show *GetShow() { return mShow; }
 
