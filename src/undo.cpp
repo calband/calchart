@@ -284,67 +284,80 @@ bool SetContinuityTextCommand::Undo()
 }
 
 
-ShowUndoLbl::ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet)
-:ShowUndo(sheetnum)
+SetLabelCommand::SetLabelCommand(CC_show& show)
+: wxCommand(true, wxT("Moving points")),
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mPoints(show.GetSelectionList())
 {
-	unsigned i;
+}
 
-	num = sheet->GetNumSelectedPoints();
-	elems.assign(num, ShowUndoLblElem());
-	for (num=0,i=0; i < sheet->show->GetNumPoints(); i++)
+SetLabelCommand::~SetLabelCommand()
+{
+}
+
+
+bool SetLabelCommand::Do()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<bool,bool> >::const_iterator i = mLabelPos.begin(); i != mLabelPos.end(); ++i)
 	{
-		if (sheet->show->IsSelected(i))
-		{
-			elems[num].idx = i;
-			elems[num].right = sheet->GetPoint(i).GetFlip();
-			num++;
-		}
+		sheet->GetPoint(i->first).Flip(i->second.second);
+	}
+	mShow.Modify(true);
+	return true;
+}
+
+bool SetLabelCommand::Undo()
+{
+	mShow.UnselectAll();
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+		mShow.Select(*i, true);
+
+	mShow.SetCurrentSheet(mSheetNum);
+	CC_sheet *sheet = mShow.GetCurrentSheet();
+
+	for (std::map<unsigned, std::pair<bool,bool> >::const_iterator i = mLabelPos.begin(); i != mLabelPos.end(); ++i)
+	{
+		sheet->GetPoint(i->first).Flip(i->second.first);
+	}
+	mShow.Modify(true);
+	return true;
+}
+
+SetLabelRightCommand::SetLabelRightCommand(CC_show& show, bool right)
+: SetLabelCommand(show)
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
+	{
+		mLabelPos[*i] = std::pair<bool,bool>(sheet->GetPoint(*i).GetFlip(), right);
 	}
 }
 
-
-ShowUndoLbl::ShowUndoLbl(ShowUndoLbl* old, CC_sheet *sheet)
-:ShowUndo(old->sheetidx), num(old->num)
+SetLabelRightCommand::~SetLabelRightCommand()
 {
-	unsigned i;
+}
 
-	elems.assign(num, ShowUndoLblElem());
-	for (i = 0; i < num; i++)
+
+SetLabelFlipCommand::SetLabelFlipCommand(CC_show& show)
+: SetLabelCommand(show)
+{
+	CC_sheet *sheet = mShow.GetNthSheet(mSheetNum);
+	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		elems[i].idx = old->elems[i].idx;
-		elems[i].right = sheet->GetPoint(elems[i].idx).GetFlip();
+		mLabelPos[*i] = std::pair<bool,bool>(sheet->GetPoint(*i).GetFlip(), !sheet->GetPoint(*i).GetFlip());
 	}
 }
 
-
-ShowUndoLbl::~ShowUndoLbl()
+SetLabelFlipCommand::~SetLabelFlipCommand()
 {
 }
 
-
-int ShowUndoLbl::Undo(CC_show *show, ShowUndo** newundo)
-{
-	unsigned i;
-	CC_sheet *sheet = show->GetNthSheet(sheetidx);
-
-	*newundo = new ShowUndoLbl(this, sheet);
-	for (i = 0; i < num; i++)
-	{
-		sheet->GetPoint(elems[i].idx).Flip(elems[i].right);
-	}
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(sheetidx);
-	return (int)sheetidx;
-}
-
-
-unsigned ShowUndoLbl::Size()
-{
-	return sizeof(ShowUndoLblElem) * num + sizeof(*this);
-}
-
-
-const wxChar *ShowUndoLbl::UndoDescription() { return wxT("Undo label location"); }
-const wxChar *ShowUndoLbl::RedoDescription() { return wxT("Redo label location"); }
 
 ShowUndoCopy::ShowUndoCopy(unsigned sheetnum)
 :ShowUndo(sheetnum)

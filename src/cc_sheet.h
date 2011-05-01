@@ -76,8 +76,6 @@ public:
 	unsigned short GetBeats() const;
 	void SetBeats(unsigned short b);
 	inline bool IsInAnimation() const { return (beats != 0); }
-	bool SetPointsLabel(bool right);
-	bool SetPointsLabelFlip();
 
 	inline const CC_point& GetPoint(unsigned i) const { return pts[i]; }
 	inline CC_point& GetPoint(unsigned i) { return pts[i]; }

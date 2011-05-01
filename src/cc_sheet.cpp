@@ -312,52 +312,6 @@ void CC_sheet::SetBeats(unsigned short b)
 }
 
 
-// Set point labels
-bool CC_sheet::SetPointsLabel(bool right)
-{
-	unsigned i;
-	bool change = false;
-
-	if (GetNumSelectedPoints() <= 0) return false;
-
-// Create undo entry
-	show->undolist->Add(new ShowUndoLbl(show->GetSheetPos(this), this));
-
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		if (show->IsSelected(i))
-		{
-			pts[i].Flip(right);
-			change = true;
-		}
-	}
-	return change;
-}
-
-
-// Set point labels
-bool CC_sheet::SetPointsLabelFlip()
-{
-	unsigned i;
-	bool change = false;
-
-	if (GetNumSelectedPoints() <= 0) return false;
-
-// Create undo entry
-	show->undolist->Add(new ShowUndoLbl(show->GetSheetPos(this), this));
-
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		if (show->IsSelected(i))
-		{
-			pts[i].FlipToggle();
-			change = true;
-		}
-	}
-	return change;
-}
-
-
 // Set a point from an old format disk point
 void CC_sheet::SetPoint(const cc_oldpoint& val, unsigned i)
 {

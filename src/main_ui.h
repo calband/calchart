@@ -384,6 +384,8 @@ public:
 	bool DoSetDescription(const wxString& descr);
 	bool DoSetSheetTitle(const wxString& descr);
 	bool DoSetSheetBeats(unsigned short beats);
+	bool DoSetPointsLabel(bool right);
+	bool DoSetPointsLabelFlip();
 
 private:
 	CC_show* mShow;

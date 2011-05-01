@@ -143,26 +143,35 @@ protected:
 	std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> > mSymsAndCont;
 };
 
-// Point label changes
-struct ShowUndoLblElem
-{
-	unsigned idx;
-	bool right;
-};
-class ShowUndoLbl : public ShowUndo
+// this command is to move points labels
+class SetLabelCommand : public wxCommand
 {
 public:
-	ShowUndoLbl(unsigned sheetnum, CC_sheet *sheet);
-	ShowUndoLbl(ShowUndoLbl* old, CC_sheet *sheet);
-	virtual ~ShowUndoLbl();
+	SetLabelCommand(CC_show& show);
+	virtual ~SetLabelCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	unsigned num;
-	std::deque<ShowUndoLblElem> elems;
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	const unsigned mSheetNum;
+	const CC_show::SelectionList mPoints;
+	std::map<unsigned, std::pair<bool,bool> > mLabelPos;
+};
+
+class SetLabelRightCommand : public SetLabelCommand
+{
+public:
+	SetLabelRightCommand(CC_show& show, bool right);
+	virtual ~SetLabelRightCommand();
+};
+
+class SetLabelFlipCommand : public SetLabelCommand
+{
+public:
+	SetLabelFlipCommand(CC_show& show);
+	virtual ~SetLabelFlipCommand();
 };
 
 // Copied stuntsheet

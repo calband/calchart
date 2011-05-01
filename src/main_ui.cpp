@@ -961,7 +961,7 @@ void MainFrame::OnCmd_genius(wxCommandEvent& event)
 
 void MainFrame::OnCmd_label_left(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsLabel(false))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(false))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -969,7 +969,7 @@ void MainFrame::OnCmd_label_left(wxCommandEvent& event)
 
 void MainFrame::OnCmd_label_right(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsLabel(true))
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(true))
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -977,7 +977,7 @@ void MainFrame::OnCmd_label_right(wxCommandEvent& event)
 
 void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheet()->SetPointsLabelFlip())
+	if (static_cast<MainFrameView*>(GetView())->DoSetPointsLabelFlip())
 		wxGetApp().GetWindowList().
 			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
 }
@@ -2086,5 +2086,19 @@ bool MainFrameView::DoSetSheetTitle(const wxString& descr)
 bool MainFrameView::DoSetSheetBeats(unsigned short beats)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetSheetBeatsCommand(*mShow, beats), true);
+	return true;
+}
+
+bool MainFrameView::DoSetPointsLabel(bool right)
+{
+	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new SetLabelRightCommand(*mShow, right), true);
+	return true;
+}
+
+bool MainFrameView::DoSetPointsLabelFlip()
+{
+	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow), true);
 	return true;
 }

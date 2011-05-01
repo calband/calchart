@@ -41,7 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_point.h"
 #include "ingl.h"
 
-static const wxChar *nomem_str = wxT("Out of memory!");
 static const wxChar *nofile_str = wxT("Unable to open file");
 static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
