@@ -33,7 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "cc_types.h"
 #include "cc_coord.h"
-#include "show.h"
 
 #define NUM_REF_PNTS 3
 

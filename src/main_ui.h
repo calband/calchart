@@ -76,9 +76,6 @@ enum
 	CALCHART__ANIMATE,
 	CALCHART__SELECTION,
 	CALCHART__COLORS,
-	CALCHART__ROWS,
-	CALCHART__COLUMNS,
-	CALCHART__NEAREST,
 
 	CALCHART__prev_ss,
 	CALCHART__next_ss,
@@ -106,12 +103,6 @@ enum
 	CALCHART__slider_zoom,
 	CALCHART__slider_sheet_callback,
 	CALCHART__refnum_callback,
-};
-enum CC_SELECT_TYPES
-{
-	CC_SELECT_ROWS = CALCHART__ROWS,
-	CC_SELECT_COLUMNS = CALCHART__COLUMNS,
-	CC_SELECT_NEAREST = CALCHART__NEAREST,
 };
 
 class MainFrame;
@@ -184,7 +175,6 @@ public:
 	void OnCmdPageSetup(wxCommandEvent& event);
 	void OnCmdSelectColors(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event);
-	void OnCmdUndo(wxCommandEvent& event);
 	void OnCmdRedo(wxCommandEvent& event);
 	void OnCmdInsertBefore(wxCommandEvent& event);
 	void OnCmdInsertAfter(wxCommandEvent& event);
@@ -198,10 +188,6 @@ public:
 	void OnCmdSetDescription(wxCommandEvent& event);
 	void OnCmdPoints(wxCommandEvent& event);
 	void OnCmdAnimate(wxCommandEvent& event);
-	void OnCmdSelect(int id);
-	void OnCmdRows(wxCommandEvent& event);
-	void OnCmdColumns(wxCommandEvent& event);
-	void OnCmdNearest(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
 	void OnMenuSelect(wxMenuEvent& event);
@@ -335,7 +321,6 @@ public:
 	MainFrameView* mView;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
-	CC_SELECT_TYPES curr_select;
 	unsigned curr_ref;
 
 private:
@@ -386,6 +371,8 @@ public:
 	bool DoSetSheetBeats(unsigned short beats);
 	bool DoSetPointsLabel(bool right);
 	bool DoSetPointsLabelFlip();
+	bool DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where);
+	bool DoDeleteSheet(unsigned where);
 
 private:
 	CC_show* mShow;

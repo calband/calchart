@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma interface
 #endif
 
+#include "cc_sheet.h"
+
 #include <wx/wx.h>							  // For basic wx defines
 #include <wx/docview.h>							  // For basic wx defines
 
@@ -46,12 +48,14 @@ class CC_show : public wxDocument
 {
 	DECLARE_DYNAMIC_CLASS(CC_show)
 public:
+
+	typedef std::vector<CC_sheet> CC_sheet_container_t;
+	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
+	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
+
 	CC_show();
 	CC_show(unsigned npoints);
 	~CC_show();
-
-	virtual bool AddView(wxView *view) { return wxDocument::AddView(view); }
-	virtual bool RemoveView(wxView *view) { return wxDocument::RemoveView(view); }
 
 	// Need to override OnOpenDoc so we can report errors
 	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
@@ -67,8 +71,7 @@ public:
 	inline const wxString& GetError() const { return error; }
 	inline bool Ok() const { return okay; }
 
-	void Append(CC_show *shw);
-	void Append(CC_sheet *newsheets);
+	void Append(CC_sheet_container_t newsheets);
 	wxString Autosave();
 	void ClearAutosave() const;
 	void FlushAllTextWindows() const;
@@ -79,24 +82,26 @@ public:
 
 	virtual void Modify(bool b);
 
-	inline unsigned short GetNumSheets() const { return numsheets; }
-	inline CC_sheet *GetSheet() const { return sheets; }
+	inline unsigned short GetNumSheets() const { return sheets.size(); }
 
-	const CC_sheet *GetNthSheet(unsigned n) const;
-	CC_sheet *GetNthSheet(unsigned n);
-	const CC_sheet *GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
-	CC_sheet *GetCurrentSheet() { return GetNthSheet(mSheetNum); }
+	CC_sheet_iterator_t GetSheetBegin() { return sheets.begin(); }
+	const_CC_sheet_iterator_t GetSheetBegin() const { return sheets.begin(); }
+	CC_sheet_iterator_t GetSheetEnd() { return sheets.end(); }
+	const_CC_sheet_iterator_t GetSheetEnd() const { return sheets.end(); }
+
+	const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
+	CC_sheet_iterator_t GetNthSheet(unsigned n);
+	const_CC_sheet_iterator_t GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
+	CC_sheet_iterator_t GetCurrentSheet() { return GetNthSheet(mSheetNum); }
 	unsigned GetCurrentSheetNum() const { return mSheetNum; }
 	void SetCurrentSheet(unsigned n) { mSheetNum = n; }
 
-	unsigned GetSheetPos(const CC_sheet *sheet) const;
-	CC_sheet *RemoveNthSheet(unsigned sheetidx);
-	CC_sheet *RemoveLastSheets(unsigned numtoremain);
+	CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
+	CC_sheet_container_t RemoveLastSheets(unsigned numtoremain);
 	void DeleteNthSheet(unsigned sheetidx);
-	void UserDeleteSheet(unsigned sheetidx);
-	void InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx);
-	void InsertSheet(CC_sheet *nsheet, unsigned sheetidx);
-	void UserInsertSheet(CC_sheet *sht, unsigned sheetidx);
+	void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
+	void InsertSheetInternal(const CC_sheet_container_t& nsheet, unsigned sheetidx);
+	void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
 	inline unsigned short GetNumPoints() const { return numpoints; }
 	void SetNumPoints(unsigned num, unsigned columns);
 	void SetNumPointsInternal(unsigned num);  //Only for creating show class
@@ -113,19 +118,19 @@ public:
 	inline void SetBoolDoCont(bool v) { print_do_cont = v; }
 	inline void SetBoolDoContSheet(bool v) { print_do_cont_sheet = v; }
 
-	bool UnselectAll();
-	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
-	void Select(unsigned i, bool val = true);
-	inline void SelectToggle(unsigned i)
-	{
-		Select(i, !IsSelected(i));
-	}
+	// how to select points:
+	// Always select or unselect in groups
 	typedef std::set<unsigned> SelectionList;
+	bool UnselectAll();
+	void AddToSelection(const SelectionList& sl);
+	void RemoveFromSelection(const SelectionList& sl);
+	void ToggleSelection(const SelectionList& sl);
+	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
+
 	const ShowMode& GetMode() const { return *mode; };
 	void SetMode(ShowMode* m) { mode = m; };
 
-	ShowUndoList *undolist;
 private:
 	ShowMode *mode;
 
@@ -145,8 +150,7 @@ private:
 	wxString autosave_name;
 	wxString descr;
 	unsigned short numpoints;
-	unsigned short numsheets;
-	CC_sheet *sheets;
+	CC_sheet_container_t sheets;
 	std::vector<wxString> pt_labels;
 	SelectionList selectionList;	  // order of selections
 	bool print_landscape;

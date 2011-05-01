@@ -40,25 +40,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <wx/cmdproc.h>
 
-class ShowUndo
-{
-public:
-	ShowUndo(unsigned sheetnum): next(NULL), sheetidx(sheetnum) {}
-	virtual ~ShowUndo();
-
-// returns the sheet to go to
-	virtual int Undo(CC_show *show, ShowUndo** newundo) = 0;
-// returns amount of memory used
-	virtual unsigned Size() = 0;
-// returns description of this event
-	virtual const wxChar *UndoDescription() = 0;
-	virtual const wxChar *RedoDescription() = 0;
-
-	ShowUndo *next;
-	unsigned sheetidx;
-	bool was_modified;
-};
-
 // this command is to move points around on a sheet
 // position is a mapping of which point to two positions, the original and new.
 // When you do/undo the command, the show will be set to the sheet, and the selection
@@ -174,60 +155,36 @@ public:
 	virtual ~SetLabelFlipCommand();
 };
 
-// Copied stuntsheet
-class ShowUndoCopy : public ShowUndo
+// For adding a single or container of sheets
+class AddSheetsCommand : public wxCommand
 {
 public:
-	ShowUndoCopy(unsigned sheetnum);
-	virtual ~ShowUndoCopy();
+	AddSheetsCommand(CC_show& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
+	virtual ~AddSheetsCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	CC_show::CC_sheet_container_t mSheets;
+	const unsigned mWhere;
 };
 
-// Deleted stuntsheet
-class ShowUndoDelete : public ShowUndo
+// For removing a single
+class RemoveSheetsCommand : public wxCommand
 {
 public:
-	ShowUndoDelete(unsigned sheetnum, CC_sheet *sheet);
-	virtual ~ShowUndoDelete();
+	RemoveSheetsCommand(CC_show& show, unsigned where);
+	virtual ~RemoveSheetsCommand();
 
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	CC_sheet *deleted_sheet;
-};
+	virtual bool Do();
+	virtual bool Undo();
 
-// Appended sheets
-class ShowUndoAppendSheets : public ShowUndo
-{
-public:
-	ShowUndoAppendSheets(unsigned sheetnum);
-	virtual ~ShowUndoAppendSheets();
-
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-};
-
-// Only for redoing append sheets
-class ShowUndoDeleteAppendSheets : public ShowUndo
-{
-public:
-	ShowUndoDeleteAppendSheets(CC_sheet *sheet);
-	virtual ~ShowUndoDeleteAppendSheets();
-
-	virtual int Undo(CC_show *show, ShowUndo** newundo);
-	virtual unsigned Size();
-	virtual const wxChar *UndoDescription();
-	virtual const wxChar *RedoDescription();
-private:
-	CC_sheet *deleted_sheets;
+protected:
+	CC_show& mShow;
+	CC_show::CC_sheet_container_t mSheets;
+	const unsigned mWhere;
 };
 
 // this command is to move points around on a sheet
@@ -338,38 +295,4 @@ protected:
 	std::pair<wxString,wxString> mDescription;
 };
 
-class ShowUndoList
-{
-public:
-	ShowUndoList(CC_show *shw, int lim = -1);
-	~ShowUndoList();
-
-	int Undo(CC_show *show);
-	int Redo(CC_show *show);
-	void Add(ShowUndo *undo);
-
-	const wxChar *UndoDescription();
-	const wxChar *RedoDescription();
-	inline void Limit(int val) { limit=val; Clean(); }
-	void EraseAll();
-
-private:
-	ShowUndo *Pop();
-	void Push(ShowUndo *undo);
-	void Clean();
-
-	ShowUndo *PopRedo();
-	void PushRedo(ShowUndo *undo);
-	void EraseAllRedo();
-
-	friend std::ostream& operator<< (std::ostream&, const ShowUndoList&);
-
-	CC_show *show;
-	ShowUndo *list;
-	ShowUndo *redolist;
-	ShowUndo *oldlist;						  // For adding multiple entries
-	int limit;
-};
-
-std::ostream& operator<< (std::ostream&, const ShowUndoList&);
 #endif

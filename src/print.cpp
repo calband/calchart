@@ -80,7 +80,6 @@ int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
 int min_yards) const
 {
 	time_t t;
-	const CC_sheet *curr_sheet;
 	CC_coord fullsize = mode->Size();
 	CC_coord fieldsize = mode->FieldSize();
 	float fullwidth = COORD2FLOAT(fullsize.x);
@@ -413,15 +412,12 @@ int min_yards) const
 
 /* do stuntsheet pages now */
 	split_sheet = false;
+	CC_show::const_CC_sheet_iterator_t curr_sheet = GetSheetBegin();
 	if (eps)
 	{
-		curr_sheet = GetNthSheet(curr_ss);
+		curr_sheet += curr_ss;
 	}
-	else
-	{
-		curr_sheet = sheets;
-	}
-	while (curr_sheet != NULL)
+	while (curr_sheet != GetSheetEnd())
 	{
 		if (curr_sheet->picked || eps)
 		{
@@ -453,7 +449,7 @@ int min_yards) const
 		}
 		if (!split_sheet)
 		{
-			curr_sheet = curr_sheet->next;
+			++curr_sheet;
 		}
 	}
 /* finally, write trailer */
@@ -470,9 +466,8 @@ void CC_show::PrintSheets(FILE *fp) const
 	enum PSFONT_TYPE currfontnum = PSFONT_NORM;
 	short lines_left = 0;
 	short need_eject = false;
-	const CC_sheet *sheet;
 
-	for (sheet = sheets; sheet != NULL; sheet = sheet->next)
+	for (CC_show::const_CC_sheet_iterator_t sheet = GetSheetBegin(); sheet != GetSheetEnd(); ++sheet)
 	{
 		for (CC_textline_list::const_iterator text = sheet->continuity.begin();
 			text != sheet->continuity.end();

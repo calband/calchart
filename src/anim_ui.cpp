@@ -339,10 +339,16 @@ void AnimationCanvas::SelectCollisions()
 
 	if (anim)
 	{
+		CC_show::SelectionList select;
 		for (i = 0; i < anim->numpts; i++)
 		{
-			mShow->Select(i, anim->collisions[i]);
+			if (anim->collisions[i])
+			{
+				select.insert(i);
+			}
 		}
+		mShow->UnselectAll();
+		mShow->AddToSelection(select);
 	}
 }
 
@@ -989,10 +995,16 @@ void AnimErrorList::Update(int i)
 {
 	if (i >= 0)
 	{
+		CC_show::SelectionList select;
 		for (unsigned j = 0; j < show->GetNumPoints(); j++)
 		{
-			show->Select(j, pointsels[i].pntgroup.count(j));
+			if (pointsels[i].pntgroup.count(j))
+			{
+				select.insert(i);
+			}
 		}
+		show->UnselectAll();
+		show->AddToSelection(select);
 	}
 	wxGetApp().GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
 		show->GetNumSheets()-1 : sheetnum,

@@ -169,9 +169,7 @@ void ShowPrintDialog::PrintShow()
 void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 {
 	wxArrayString choices;
-	CC_sheet *sheet;
-	size_t n;
-	for (sheet = mShow->GetSheet(); sheet!=NULL; sheet = sheet->next)
+	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet)
 	{
 		choices.Add(sheet->GetName());
 	}
@@ -180,7 +178,8 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 		wxT("Pagest to Print"),
 		choices);
 	wxArrayInt markedChoices;
-	for (n = 0, sheet = mShow->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
+	size_t n = 0;
+	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet, ++n)
 	{
 		if (sheet->picked)
 			markedChoices.Add(n);
@@ -194,7 +193,8 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 		for (n = 0; n < selections.GetCount(); ++n)
 			selected.insert(selections[n]);
 // now mark the sheets
-		for (n = 0, sheet = mShow->GetSheet(); sheet!=NULL; n++, sheet=sheet->next)
+		n = 0;
+		for (CC_show::CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet, ++n)
 			sheet->picked = (selected.find(n) != selected.end());
 	}
 }

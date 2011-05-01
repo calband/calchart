@@ -199,11 +199,11 @@ const CC_coord& ContStartPoint::Get(AnimateCompile* anim) const
 
 const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const
 {
-	CC_sheet *sheet = anim->curr_sheet->next;
+	CC_show::const_CC_sheet_iterator_t sheet = anim->curr_sheet + 1;
 
 	while (1)
 	{
-		if (sheet == NULL)
+		if (sheet == anim->show->GetSheetEnd())
 		{
 			anim->RegisterError(ANIMERR_UNDEFINED, this);
 			return ContPoint::Get(anim);
@@ -212,7 +212,7 @@ const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const
 		{
 			return sheet->GetPosition(anim->curr_pt);
 		}
-		sheet = sheet->next;
+		++sheet;
 	}
 }
 

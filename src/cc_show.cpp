@@ -104,7 +104,7 @@ IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 
 // Create a new show
 CC_show::CC_show()
-:okay(true), numpoints(0), numsheets(0), sheets(NULL),
+:okay(true), numpoints(0),
 print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true),
 mSheetNum(0)
@@ -113,14 +113,13 @@ mSheetNum(0)
 
 	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
 	SetAutosaveName(tmpname);
-	undolist = new ShowUndoList(this, undo_buffer_size);
 	mode = *wxGetApp().GetModeList().Begin();
 	autosaveTimer.AddShow(this);
 }
 
 // Create a new show
 CC_show::CC_show(unsigned npoints)
-:okay(true), numpoints(npoints), numsheets(1), sheets(new CC_sheet(this, wxT("1"))),
+:okay(true), numpoints(npoints), sheets(1, CC_sheet(this, wxT("1"))),
 pt_labels(npoints),
 print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true),
@@ -130,7 +129,6 @@ mSheetNum(0)
 
 	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
 	SetAutosaveName(tmpname);
-	undolist = new ShowUndoList(this, undo_buffer_size);
 	mode = *wxGetApp().GetModeList().Begin();
 	if (npoints)
 	{
@@ -140,7 +138,7 @@ mSheetNum(0)
 		}
 		UnselectAll();
 	}
-	sheets->animcont.push_back(CC_continuity(contnames[0], 0));
+	sheets.front().animcont.push_back(CC_continuity(contnames[0], 0));
 
 	autosaveTimer.AddShow(this);
 }
@@ -300,19 +298,10 @@ void Write(wxOutputStream& stream, const void *data, uint32_t size)
 // Destroy a show
 CC_show::~CC_show()
 {
-	CC_sheet *tmp;
-
 	autosaveTimer.RemoveShow(this);
 #if 0
 	fprintf(stderr, "Deleting show...\n");
 #endif
-	if (undolist) delete undolist;
-	while (sheets)
-	{
-		tmp = sheets->next;
-		delete sheets;
-		sheets = tmp;
-	}
 }
 
 
@@ -337,7 +326,6 @@ wxString CC_show::ImportContinuity(const wxString& file)
  * also, there are three tab stops set for standard continuity format
  */
 	FILE *fp;
-	CC_sheet *curr_sheet;
 	wxString tempbuf;
 	CC_textline *line_text;
 	unsigned pos;
@@ -351,7 +339,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 	fp = CC_fopen(file.fn_str(), "r");
 	if (fp)
 	{
-		curr_sheet = NULL;
+		CC_sheet_iterator_t curr_sheet = CC_sheet_iterator_t(NULL);
 		currfontnum = lastfontnum = PSFONT_NORM;
 		line_text = NULL;
 		while (true)
@@ -369,9 +357,9 @@ wxString CC_show::ImportContinuity(const wxString& file)
 			}
 			if (sheetmark)
 			{
-				if (curr_sheet) curr_sheet = curr_sheet->next;
-				else curr_sheet = sheets;
-				if (!curr_sheet) break;
+				if (curr_sheet != CC_sheet_iterator_t(NULL)) ++curr_sheet;
+				else curr_sheet = GetSheetBegin();
+				if (curr_sheet == GetSheetEnd()) break;
 				if (tempbuf.Length() > 2)
 				{
 					curr_sheet->SetNumber(tempbuf.Mid(2));
@@ -379,7 +367,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 			}
 			else
 			{
-				if (curr_sheet == NULL)
+				if (curr_sheet == CC_sheet_iterator_t(NULL))
 				{
 // Continuity doesn't begin with a sheet header
 					return wxString(contnohead_str);
@@ -631,51 +619,9 @@ wxString CC_show::ImportContinuity(const wxString& file)
 }
 
 
-void CC_show::Append(CC_show *shw)
+void CC_show::Append(CC_sheet_container_t newsheets)
 {
-	CC_sheet *sht;
-
-	if (numpoints == shw->GetNumPoints())
-	{
-		if (sheets == NULL)
-		{
-			sheets = shw->sheets;
-		}
-		else
-		{
-			for (sht = sheets; sht->next != NULL; sht = sht->next);
-			sht->next = shw->sheets;
-		}
-		numsheets += shw->numsheets;
-		for (sht = shw->sheets; sht != NULL; sht = sht->next)
-		{
-			sht->show = this;
-		}
-		shw->sheets = NULL;
-		shw->numsheets = 0;
-		delete shw;
-		wxGetApp().GetWindowList().AppendSheets();
-	}
-}
-
-
-void CC_show::Append(CC_sheet *newsheets)
-{
-	CC_sheet *sht;
-
-	if (sheets == NULL)
-	{
-		sheets = newsheets;
-	}
-	else
-	{
-		for (sht = sheets; sht->next != NULL; sht = sht->next);
-		sht->next = newsheets;
-	}
-	for (sht = newsheets; sht != NULL; sht = sht->next)
-	{
-		numsheets++;
-	}
+	sheets.insert(sheets.end(), newsheets.begin(), newsheets.end());
 	wxGetApp().GetWindowList().AppendSheets();
 }
 
@@ -720,9 +666,9 @@ wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 	}
 
 // Handle sheets
-	for (const CC_sheet *curr_sheet = GetSheet();
-		curr_sheet != NULL;
-		curr_sheet = curr_sheet->next)
+	for (const_CC_sheet_iterator_t curr_sheet = GetSheetBegin();
+		curr_sheet != GetSheetEnd();
+		++curr_sheet)
 	{
 		WriteGurk(stream, INGL_SHET);
 // Name
@@ -879,37 +825,36 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		ReadAndCheckID(stream, INGL_GURK);
 		ReadAndCheckID(stream, INGL_SHET);
 
-		CC_sheet *sheet = new CC_sheet(this);
-		InsertSheetInternal(sheet, GetNumSheets());
+		CC_sheet sheet(this);
 
 		// Read in sheet name
 		// <INGL_NAME><size><string + 1>
 		ReadCheckIDandFillData(stream, INGL_NAME, data);
-		sheet->SetName(wxString::FromUTF8((const char*)&data[0]));
+		sheet.SetName(wxString::FromUTF8((const char*)&data[0]));
 
 		// read in the duration:
 		// <INGL_DURA><4><duration>
 		ReadCheckIDandSize(stream, INGL_DURA, name);
-		sheet->SetBeats(name);
+		sheet.SetBeats(name);
 
 		// Point positions
 		// <INGL_DURA><size><data>
 		ReadCheckIDandFillData(stream, INGL_POS, data);
-		if (data.size() != size_t(sheet->show->GetNumPoints()*4))
+		if (data.size() != size_t(sheet.show->GetNumPoints()*4))
 		{
 			throw INGL_exception(wxT("bad POS chunk"));
 		}
 		{
 			uint8_t *d;
 			d = (uint8_t*)&data[0];
-			for (unsigned i = 0; i < sheet->show->GetNumPoints(); ++i)
+			for (unsigned i = 0; i < sheet.show->GetNumPoints(); ++i)
 			{
 				CC_coord c;
 				c.x = get_big_word(d);
 				d += 2;
 				c.y = get_big_word(d);
 				d += 2;
-				sheet->SetAllPositions(c, i);
+				sheet.SetAllPositions(c, i);
 			}
 		}
 
@@ -918,21 +863,21 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_REFP == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_REFP, data);
-			if (data.size() != (unsigned long)sheet->show->GetNumPoints()*4+2)
+			if (data.size() != (unsigned long)sheet.show->GetNumPoints()*4+2)
 			{
 				throw INGL_exception(wxT("Bad REFP chunk"));
 			}
 			uint8_t *d = (uint8_t*)&data[0];
 			unsigned ref = get_big_word(d);
 			d += 2;
-			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 			{
 				CC_coord c;
 				c.x = get_big_word(d);
 				d += 2;
 				c.y = get_big_word(d);
 				d += 2;
-				sheet->SetPositionQuick(c, i, ref);		  // don't clip
+				sheet.SetPositionQuick(c, i, ref);		  // don't clip
 			}
 			PeekLong(stream, name);
 		}
@@ -940,14 +885,14 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_SYMB == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_SYMB, data);
-			if (data.size() != (unsigned long)sheet->show->GetNumPoints())
+			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
 			{
 				throw INGL_exception(wxT("Bad SYMB chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 			{
-				sheet->GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
+				sheet.GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
 			}
 			PeekLong(stream, name);
 		}
@@ -955,14 +900,14 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_TYPE == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_TYPE, data);
-			if (data.size() != (unsigned long)sheet->show->GetNumPoints())
+			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
 			{
 				throw INGL_exception(wxT("Bad TYPE chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 			{
-				sheet->GetPoint(i).cont = *(d++);
+				sheet.GetPoint(i).cont = *(d++);
 			}
 			PeekLong(stream, name);
 		}
@@ -970,16 +915,16 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_LABL == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_LABL, data);
-			if (data.size() != (unsigned long)sheet->show->GetNumPoints())
+			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
 			{
 				throw INGL_exception(wxT("Bad SYMB chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < sheet->show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 			{
 				if (*(d++))
 				{
-					sheet->GetPoint(i).Flip();
+					sheet.GetPoint(i).Flip();
 				}
 			}
 			PeekLong(stream, name);
@@ -1009,10 +954,12 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
 			wxString textstr(wxString::FromUTF8(text));
 			newcont.SetText(textstr);
-			sheet->AppendContinuity(newcont);
+			sheet.AppendContinuity(newcont);
 
 			PeekLong(stream, name);
 		}
+		InsertSheetInternal(sheet, GetNumSheets());
+
 		ReadAndCheckID(stream, INGL_END);
 		ReadAndCheckID(stream, INGL_SHET);
 		// peek for the next name
@@ -1079,66 +1026,23 @@ void CC_show::SetDescr(const wxString& newdescr)
 }
 
 
-const CC_sheet *CC_show::GetNthSheet(unsigned n) const
+CC_show::const_CC_sheet_iterator_t CC_show::GetNthSheet(unsigned n) const
 {
-	const CC_sheet *nsheet = sheets;
-	while (n && nsheet)
-	{
-		n--;
-		nsheet = nsheet->next;
-	}
-	return nsheet;
+	return GetSheetBegin() + n;
 }
 
 
-CC_sheet *CC_show::GetNthSheet(unsigned n)
+CC_show::CC_sheet_iterator_t CC_show::GetNthSheet(unsigned n)
 {
-	CC_sheet *nsheet = sheets;
-	while (n && nsheet)
-	{
-		n--;
-		nsheet = nsheet->next;
-	}
-	return nsheet;
+	return GetSheetBegin() + n;
 }
 
 
-unsigned CC_show::GetSheetPos(const CC_sheet *sheet) const
+CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
 {
-	const CC_sheet *nsheet = sheets;
-	unsigned n = 0;
-	while (nsheet!=sheet)
-	{
-		if (nsheet == NULL) return 0;
-		nsheet = nsheet->next; n++;
-	}
-	return n;
-}
-
-
-CC_sheet *CC_show::RemoveNthSheet(unsigned sheetidx)
-{
-	CC_sheet *sht = sheets;
-	CC_sheet *tmp;
-	unsigned idx;
-
-	if (sheetidx > 0)
-	{
-		idx = sheetidx;
-		while (--idx)
-		{
-			sht = sht->next;
-		}
-		tmp = sht->next;
-		sht->next = tmp->next;
-		sht = tmp;
-	}
-	else
-	{
-		sheets = sheets->next;
-	}
-	numsheets--;
-	sht->next = NULL;
+	CC_sheet_iterator_t i = GetNthSheet(sheetidx);
+	CC_sheet_container_t shts(1, *i);
+	sheets.erase(i);
 	wxGetApp().GetWindowList().DeleteSheet(sheetidx);
 
 	if (sheetidx < GetCurrentSheetNum())
@@ -1151,101 +1055,51 @@ CC_sheet *CC_show::RemoveNthSheet(unsigned sheetidx)
 		SetCurrentSheet(GetNumSheets()-1);
 	}
 
-	return sht;
+	return shts;
 }
 
 
-CC_sheet *CC_show::RemoveLastSheets(unsigned numtoremain)
+CC_show::CC_sheet_container_t CC_show::RemoveLastSheets(unsigned numtoremain)
 {
-	CC_sheet *sht = sheets;
-	CC_sheet *tmp;
-	unsigned idx;
-
-	if (numtoremain > 0)
-	{
-		idx = numtoremain;
-		while (--idx)
-		{
-			sht = sht->next;
-		}
-		tmp = sht->next;
-		sht->next = NULL;
-		sht = tmp;
-	}
-	else
-	{
-		sheets = NULL;
-	}
-	numsheets = numtoremain;
+	if (numtoremain > sheets.size()) return CC_sheet_container_t();
+	CC_sheet_container_t sht(sheets.begin() + numtoremain, sheets.end());
+	sheets.erase(sheets.begin() + numtoremain, sheets.end());
 	wxGetApp().GetWindowList().RemoveSheets(numtoremain);
 	return sht;
 }
 
 
-void CC_show::DeleteNthSheet(unsigned sheetidx)
+void CC_show::InsertSheetInternal(const CC_sheet& sheet, unsigned sheetidx)
 {
-	delete RemoveNthSheet(sheetidx);
-}
-
-
-void CC_show::UserDeleteSheet(unsigned sheetidx)
-{
-	CC_sheet *sht = RemoveNthSheet(sheetidx);
-	undolist->Add(new ShowUndoDelete(sheetidx, sht));
-}
-
-
-void CC_show::InsertSheetInternal(CC_sheet *nsheet, unsigned sheetidx)
-{
-	CC_sheet *sht = sheets;
-	unsigned idx;
-
-	if (sheetidx > 0)
-	{
-		idx = sheetidx;
-		while (--idx)
-		{
-			sht = sht->next;
-		}
-		nsheet->next = sht->next;
-		sht->next = nsheet;
-	}
-	else
-	{
-		nsheet->next = sheets;
-		sheets = nsheet;
-	}
-	numsheets++;
+	sheets.insert(sheets.begin() + sheetidx, sheet);
 	if (sheetidx <= GetCurrentSheetNum())
 		SetCurrentSheet(GetCurrentSheetNum()+1);
 }
 
 
-void CC_show::InsertSheet(CC_sheet *nsheet, unsigned sheetidx)
+void CC_show::InsertSheetInternal(const CC_sheet_container_t& sheet, unsigned sheetidx)
+{
+	sheets.insert(sheets.begin() + sheetidx, sheet.begin(), sheet.end());
+	if (sheetidx <= GetCurrentSheetNum())
+		SetCurrentSheet(GetCurrentSheetNum()+1);
+}
+
+
+void CC_show::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 {
 	InsertSheetInternal(nsheet, sheetidx);
 	wxGetApp().GetWindowList().AddSheet(sheetidx);
 }
 
 
-void CC_show::UserInsertSheet(CC_sheet *sht, unsigned sheetidx)
-{
-	InsertSheet(sht, sheetidx);
-	undolist->Add(new ShowUndoCopy(sheetidx));
-}
-
-
 void CC_show::SetNumPoints(unsigned num, unsigned columns)
 {
 	unsigned i, cpy;
-	CC_sheet *sht;
 
-	for (sht = sheets; sht != NULL; sht = sht->next)
+	for (CC_sheet_iterator_t sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht)
 	{
 		sht->SetNumPoints(num, columns);
 	}
-
-	undolist->EraseAll();						  // Remove all previously avail undo
 
 	std::vector<wxString> new_labels(num);
 	cpy = MIN(numpoints, num);
@@ -1275,27 +1129,21 @@ void CC_show::SetNumPointsInternal(unsigned num)
 
 bool CC_show::RelabelSheets(unsigned sht)
 {
-	CC_sheet *sheet;
 	unsigned i,j;
-	unsigned *table;
-	bool *used_table;
 
-	sheet = GetNthSheet(sht);
-	if (sheet->next == NULL) return false;
-	table = new unsigned[GetNumPoints()];
-	used_table = new bool[GetNumPoints()];
+	CC_sheet_iterator_t sheet = GetNthSheet(sht);
+	CC_sheet_iterator_t sheet_next = GetNthSheet(sht+1);
+	if (sheet_next == GetSheetEnd()) return false;
+	std::vector<unsigned> table(GetNumPoints());
+	std::vector<unsigned> used_table(GetNumPoints());
 
-	for (i = 0; i < GetNumPoints(); i++)
-	{
-		used_table[i] = false;
-	}
 	for (i = 0; i < GetNumPoints(); i++)
 	{
 		for (j = 0; j < GetNumPoints(); j++)
 		{
 			if (!used_table[j])
 			{
-				if (sheet->GetPosition(i) == sheet->next->GetPosition(j))
+				if (sheet->GetPosition(i) == sheet_next->GetPosition(j))
 				{
 					table[i] = j;
 					used_table[j] = true;
@@ -1306,17 +1154,14 @@ bool CC_show::RelabelSheets(unsigned sht)
 		if (j == GetNumPoints())
 		{
 // didn't find a match
-			delete [] table;
-			delete [] used_table;
 			return false;
 		}
 	}
-	while ((sheet = sheet->next) != NULL)
+	while ((++sheet) != GetSheetEnd())
 	{
-		sheet->RelabelSheet(table);
+		sheet->RelabelSheet(&table[0]);
 	}
 
-	delete [] table;
 	return true;
 }
 
@@ -1330,15 +1175,31 @@ bool CC_show::UnselectAll()
 }
 
 
-void CC_show::Select(unsigned i, bool val)
+void CC_show::AddToSelection(const SelectionList& sl)
 {
-	if (val)
+	selectionList.insert(sl.begin(), sl.end());
+	UpdateAllViews();
+}
+
+void CC_show::RemoveFromSelection(const SelectionList& sl)
+{
+	selectionList.erase(sl.begin(), sl.end());
+	UpdateAllViews();
+}
+
+void CC_show::ToggleSelection(const SelectionList& sl)
+{
+	for (SelectionList::const_iterator i = sl.begin(); i != sl.end(); ++i)
 	{
-		selectionList.insert(i);
-	}
-	else
-	{
-		selectionList.erase(i);
+		if (selectionList.count(*i))
+		{
+			selectionList.erase(*i);
+		}
+		else
+		{
+			selectionList.insert(*i);
+		}
+
 	}
 	UpdateAllViews();
 }
@@ -1362,12 +1223,9 @@ void UnitTests()
 	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";
 	cout<<"Modified "<<test->IsModified()<<"\n";
 	cout<<"GetNumSheets "<<test->GetNumSheets()<<"\n";
-	cout<<"GetSheet "<<test->GetSheet()<<"\n";
-	cout<<"GetSheetPos "<<test->GetSheetPos(NULL)<<"\n";
 	cout<<"GetNumPoints "<<test->GetNumPoints()<<"\n";
 	for (unsigned i = 0; i < test->GetNumSheets(); ++i)
 	{
-		cout<<"GetNthSheet "<<i<<" "<<test->GetNthSheet(i)<<"\n";
 		cout<<"GetBoolLandscape "<<i<<" "<<test->GetBoolLandscape()<<"\n";
 		cout<<"GetBoolDoCont "<<i<<" "<<test->GetBoolDoCont()<<"\n";
 		cout<<"GetBoolDoContSheet "<<i<<" "<<test->GetBoolDoContSheet()<<"\n";

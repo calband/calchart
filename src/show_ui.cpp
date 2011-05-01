@@ -167,6 +167,22 @@ void PointPicker::OnCloseWindow(wxCloseEvent& event)
 }
 
 
+void PointPicker::Set(unsigned n, bool v)
+{
+	list->SetSelection(n,v);
+	CC_show::SelectionList select;
+	select.insert(n);
+	if (v)
+	{
+		show->AddToSelection(select);
+	}
+	else
+	{
+		show->RemoveFromSelection(select);
+	}
+}
+
+
 void PointPicker::Update()
 {
 	list->Clear();

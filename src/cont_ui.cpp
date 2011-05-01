@@ -290,7 +290,7 @@ void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 // remove a continuity.  Don't allow the user to delete a continuity that has dots associated with it.
 void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	if (sht->ContinuityInUse(mCurrentContinuityChoice))
 	{
 		(void)wxMessageBox(wxT("This continuity is being used.\nSet these points to a different continuity first."), wxT("Delete continuity"));
@@ -311,7 +311,7 @@ void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 
 void ContinuityEditor::Update()
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 
 	mContinuityChoices->Clear();
 	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
@@ -326,7 +326,7 @@ void ContinuityEditor::Update()
 
 void ContinuityEditor::UpdateContChoice()
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	if (mCurrentContinuityChoice >= sht->animcont.size() && sht->animcont.size() > 0)
 		mCurrentContinuityChoice = sht->animcont.size()-1;
 	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
@@ -350,7 +350,7 @@ void ContinuityEditor::FlushText()
 {
 	wxString conttext;
 
-	if (mSheetUnderEdit)
+	if (mSheetUnderEdit != CC_show::const_CC_sheet_iterator_t(NULL))
 	{
 		conttext = mUserInput->GetValue();
 		const CC_continuity& cont = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
@@ -364,13 +364,13 @@ void ContinuityEditor::FlushText()
 
 void ContinuityEditor::DetachText()
 {
-	mSheetUnderEdit = NULL;
+	mSheetUnderEdit = CC_show::const_CC_sheet_iterator_t(NULL);
 }
 
 
 void ContinuityEditor::SelectPoints()
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
 	sht->SelectContinuity(c.GetNum());
 }
@@ -378,7 +378,7 @@ void ContinuityEditor::SelectPoints()
 
 void ContinuityEditor::SetPoints()
 {
-	CC_sheet *sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
 	mView->DoSetContinuityIndex(c.GetNum());
 }
@@ -396,8 +396,8 @@ PrintContCanvas::~PrintContCanvas() {}
 
 void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 {
-	const CC_sheet *sht = mShow->GetCurrentSheet();
-	if (!sht)
+	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
+	if (sht == mShow->GetSheetEnd())
 		return;
 	bool do_tab;
 	unsigned row, column;

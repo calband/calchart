@@ -87,7 +87,6 @@ public:
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 	void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
 
-	CC_sheet *next;
 	CC_textline_list continuity;
 	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer animcont;

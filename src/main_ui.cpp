@@ -131,8 +131,6 @@ EVT_MENU(wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, MainFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, MainFrame::OnCmdLegacyPrintEPS)
-EVT_MENU(wxID_UNDO, MainFrame::OnCmdUndo)
-EVT_MENU(wxID_REDO, MainFrame::OnCmdRedo)
 EVT_MENU(CALCHART__INSERT_BEFORE, MainFrame::OnCmdInsertBefore)
 EVT_MENU(CALCHART__INSERT_AFTER, MainFrame::OnCmdInsertAfter)
 EVT_MENU(wxID_DELETE, MainFrame::OnCmdDelete)
@@ -145,9 +143,6 @@ EVT_MENU(CALCHART__SETUP, MainFrame::OnCmdSetup)
 EVT_MENU(CALCHART__SETDESCRIPTION, MainFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
-EVT_MENU(CALCHART__ROWS, MainFrame::OnCmdRows)
-EVT_MENU(CALCHART__COLUMNS, MainFrame::OnCmdColumns)
-EVT_MENU(CALCHART__NEAREST, MainFrame::OnCmdNearest)
 EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, MainFrame::OnCmdHelp)
 EVT_MENU_HIGHLIGHT(wxID_SAVE, MainFrame::OnMenuSelect)
@@ -205,7 +200,7 @@ public:
 	virtual bool OnPrintPage(int pageNum)
 	{
 		wxDC* dc = wxPrintout::GetDC();
-		CC_sheet *sheet = show->GetNthSheet(pageNum-1);
+		CC_show::const_CC_sheet_iterator_t sheet = show->GetNthSheet(pageNum-1);
 
 		int size = gPrintDialogData->GetPrintData().GetOrientation();
 
@@ -430,10 +425,6 @@ field(NULL)
 	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
 
 	wxMenu *select_menu = new wxMenu;
-// These items are a radio group
-	select_menu->Append(CALCHART__ROWS, wxT("Rows first"), wxT("Select points by rows"), wxITEM_RADIO);
-	select_menu->Append(CALCHART__COLUMNS, wxT("Columns first"), wxT("Select points by columns"), wxITEM_RADIO);
-	select_menu->Append(CALCHART__NEAREST, wxT("Nearest"), wxT("Select points in nearest order"), wxITEM_RADIO);
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(CALCHART__SELECTION, wxT("Selection Order"), select_menu);
@@ -466,18 +457,6 @@ field(NULL)
 	SetTitle(show->GetTitle());
 	field->curr_ref = def_ref;
 	node = new CC_WinNodeMain(&wxGetApp().GetWindowList(), this);
-	switch(field->curr_select)
-	{
-		case CC_SELECT_ROWS:
-			menu_bar->Check(CALCHART__ROWS, true);
-			break;
-		case CC_SELECT_COLUMNS:
-			menu_bar->Check(CALCHART__COLUMNS, true);
-			break;
-		case CC_SELECT_NEAREST:
-			menu_bar->Check(CALCHART__NEAREST, true);
-			break;
-	}
 
 // Add the controls
 	wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
@@ -663,38 +642,18 @@ void MainFrame::OnCmdSelectColors(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdUndo(wxCommandEvent& event)
-{
-	int sheetnum;
-	sheetnum = field->mShow->undolist->Undo(field->mShow);
-	if ((sheetnum >= 0) && ((unsigned)sheetnum != field->mShow->GetCurrentSheetNum()))
-		field->GotoSS((unsigned)sheetnum);
-}
-
-
-void MainFrame::OnCmdRedo(wxCommandEvent& event)
-{
-	int sheetnum;
-	sheetnum = field->mShow->undolist->Redo(field->mShow);
-	if ((sheetnum >= 0) && ((unsigned)sheetnum != field->mShow->GetCurrentSheetNum()))
-		field->GotoSS((unsigned)sheetnum);
-}
-
-
 void MainFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
-	CC_sheet *sht;
-	sht = new CC_sheet(field->mShow->GetCurrentSheet());
-	field->mShow->UserInsertSheet(sht, field->mShow->GetCurrentSheetNum());
+	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
+	static_cast<MainFrameView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum());
 	field->PrevSS();
 }
 
 
 void MainFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
-	CC_sheet *sht;
-	sht = new CC_sheet(field->mShow->GetCurrentSheet());
-	field->mShow->UserInsertSheet(sht, field->mShow->GetCurrentSheetNum()+1);
+	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
+	static_cast<MainFrameView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum()+1);
 	field->NextSS();
 }
 
@@ -703,7 +662,7 @@ void MainFrame::OnCmdDelete(wxCommandEvent& event)
 {
 	if (field->mShow->GetNumSheets() > 1)
 	{
-		field->mShow->UserDeleteSheet(field->mShow->GetCurrentSheetNum());
+		static_cast<MainFrameView*>(GetView())->DoDeleteSheet(field->mShow->GetCurrentSheetNum());
 	}
 }
 
@@ -720,7 +679,6 @@ void MainFrame::OnCmdRelabel(wxCommandEvent& event)
 					wxT("Relabel sheets"));
 			else
 			{
-				field->mShow->undolist->EraseAll();
 				field->mShow->Modify(true);
 			}
 		}
@@ -823,32 +781,6 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdSelect(int id)
-{
-	GetMenuBar()->Check(field->curr_select, false);
-	field->curr_select = (CC_SELECT_TYPES)id;
-	GetMenuBar()->Check(id, true);
-}
-
-
-void MainFrame::OnCmdRows(wxCommandEvent& event)
-{
-	OnCmdSelect(CALCHART__ROWS);
-}
-
-
-void MainFrame::OnCmdColumns(wxCommandEvent& event)
-{
-	OnCmdSelect(CALCHART__COLUMNS);
-}
-
-
-void MainFrame::OnCmdNearest(wxCommandEvent& event)
-{
-	OnCmdSelect(CALCHART__NEAREST);
-}
-
-
 void MainFrame::OnCmdAbout(wxCommandEvent& event)
 {
 	topframe->About();
@@ -871,12 +803,6 @@ void MainFrame::OnMenuSelect(wxMenuEvent& event)
 			msg = field->mShow->IsModified() ?
 				wxT("Save show (needed)") :
 			wxT("Save show (not needed)");
-			break;
-		case wxID_UNDO:
-			msg = field->mShow->undolist->UndoDescription();
-			break;
-		case wxID_REDO:
-			msg = field->mShow->undolist->RedoDescription();
 			break;
 		default:
 			event.Skip();
@@ -1068,8 +994,8 @@ void MainFrame::AppendShow()
 			if (shw->GetNumPoints() == field->mShow->GetNumPoints())
 			{
 				currend = field->mShow->GetNumSheets();
-				field->mShow->undolist->Add(new ShowUndoAppendSheets(currend));
-				field->mShow->Append(shw);
+				static_cast<MainFrameView*>(GetView())->DoInsertSheets(CC_show::CC_sheet_container_t(shw->GetSheetBegin(), shw->GetSheetEnd()), currend);
+				// This is bad, we are relabeling outside of adding sheets...
 				if (!field->mShow->RelabelSheets(currend-1))
 					(void)wxMessageBox(wxT("Stuntsheets don't match"),
 						wxT("Append Error"));
@@ -1077,14 +1003,13 @@ void MainFrame::AppendShow()
 			else
 			{
 				(void)wxMessageBox(wxT("The blocksize doesn't match"), wxT("Append Error"));
-				delete shw;
 			}
 		}
 		else
 		{
 			(void)wxMessageBox(shw->GetError(), wxT("Load Error"));
-			delete shw;
 		}
+		delete shw;
 	}
 }
 
@@ -1179,7 +1104,7 @@ void MainFrame::SetDescription()
 FieldCanvas::FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 int def_zoom, const wxPoint& pos, const wxSize& size):
 AutoScrollCanvas(frame, -1, pos, size), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
-curr_move(CC_MOVE_NORMAL), curr_select(CC_SELECT_ROWS),
+curr_move(CC_MOVE_NORMAL),
 curr_ref(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 {
 	SetPalette(CalChartPalette);
@@ -1266,8 +1191,8 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 
 	if (mShow)
 	{
-		CC_sheet *sheet = mShow->GetCurrentSheet();
-		if (sheet)
+		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+		if (sheet != mShow->GetSheetEnd())
 		{
 			event.GetPosition(&x, &y);
 			if (event.ControlDown())
@@ -1378,7 +1303,17 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								}
 								else
 								{
-									mShow->Select(i, event.AltDown() ? !mShow->IsSelected(i) : true);
+									CC_show::SelectionList select;
+									select.insert(i);
+									if (event.AltDown())
+									{
+										mShow->ToggleSelection(select);
+									}
+									else
+									{
+										mShow->AddToSelection(select);
+									}
+
 									changed = true;
 									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
 								}
@@ -1669,8 +1604,8 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 {
 	if (mShow)
 	{
-		CC_sheet *sheet = mShow->GetCurrentSheet();
-		if (sheet)
+		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+		if (sheet != mShow->GetSheetEnd())
 		{
 			if (curr_ref > 0)
 			{
@@ -1692,16 +1627,16 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 void MainFrame::UpdatePanel()
 {
 	wxString tempbuf;
-	CC_sheet *sht = field->mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = field->mShow->GetCurrentSheet();
 	unsigned num = field->mShow->GetNumSheets();
 	unsigned curr = field->mShow->GetCurrentSheetNum()+1;
 
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
 		field->mShow->IsModified() ? wxT("* "):wxT(""), curr,
-		num, (sht)?sht->GetName().c_str():wxT(""), (sht)?sht->GetBeats():0);
+		num, (sht != field->mShow->GetSheetEnd())?sht->GetName().c_str():wxT(""), (sht != field->mShow->GetSheetEnd())?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
 	tempbuf.sprintf(wxT("%d of %d selected"),
-		(sht)?sht->GetNumSelectedPoints():0, field->mShow->GetNumPoints());
+		(sht != field->mShow->GetSheetEnd())?sht->GetNumSelectedPoints():0, field->mShow->GetNumPoints());
 	SetStatusText(tempbuf, 2);
 
 	if (num > 1)
@@ -1799,84 +1734,17 @@ void FieldCanvas::EndDrag()
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
+
 void FieldCanvas::SelectOrdered(PointList& pointlist,
 const CC_coord& start, bool toggleSelected)
 {
-	CC_coord c1, c2, last;
-	Coord v1, v2;
-	float f1, f2, fx, fy;
-	CC_sheet* sheet = mShow->GetCurrentSheet();
-
-	last = start;
-	while (!pointlist.empty())
+	if (toggleSelected)
 	{
-		PointList::iterator pnt(pointlist.begin());
-		c1 = sheet->GetPosition(*pnt, curr_ref);
-		for (PointList::iterator n=pnt+1; n != pointlist.end(); ++n)
-		{
-			switch (curr_select)
-			{
-				case CC_SELECT_ROWS:
-					v1 = ABS(start.y - c1.y);
-					c2 = sheet->GetPosition(*n, curr_ref);
-					v2 = ABS(start.y - c2.y);
-					if (v2 < v1)
-					{
-						pnt = n;
-						c1 = c2;
-					}
-					else if ((v2 == v1) && ((c1.y == c2.y) || (c2.y < start.y)))
-					{
-// make sure we keep rows together
-						v1 = ABS(start.x - c1.x);
-						v2 = ABS(start.x - c2.x);
-						if (v2 < v1)
-						{
-							pnt = n;
-							c1 = c2;
-						}
-					}
-					break;
-				case CC_SELECT_COLUMNS:
-					v1 = ABS(start.x - c1.x);
-					c2 = sheet->GetPosition(*n, curr_ref);
-					v2 = ABS(start.x - c2.x);
-					if (v2 < v1)
-					{
-						pnt = n;
-						c1 = c2;
-					}
-					else if ((v2 == v1) && ((c1.x == c2.x) || (c2.x < start.x)))
-					{
-// make sure we keep columns together
-						v1 = ABS(start.y - c1.y);
-						v2 = ABS(start.y - c2.y);
-						if (v2 < v1)
-						{
-							pnt = n;
-							c1 = c2;
-						}
-					}
-					break;
-				case CC_SELECT_NEAREST:
-					fx = (float)(last.x - c1.x);
-					fy = (float)(last.y - c1.y);
-					f1 = fx*fx+fy*fy;
-					c2 = sheet->GetPosition(*n, curr_ref);
-					fx = (float)(last.x - c2.x);
-					fy = (float)(last.y - c2.y);
-					f2 = fx*fx+fy*fy;
-					if (f2 < f1)
-					{
-						pnt = n;
-						c1 = c2;
-					}
-					break;
-			}
-		}
-		mShow->Select(*pnt, toggleSelected ? !mShow->IsSelected(*pnt) : true);
-		last = c1;
-		pointlist.erase(pnt);
+		mShow->ToggleSelection(CC_show::SelectionList(pointlist.begin(), pointlist.end()));
+	}
+	else
+	{
+		mShow->AddToSelection(CC_show::SelectionList(pointlist.begin(), pointlist.end()));
 	}
 }
 
@@ -1884,7 +1752,7 @@ const CC_coord& start, bool toggleSelected)
 bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
 	bool changed = false;
-	CC_sheet* sheet = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 	PointList pointlist;
 	const wxPoint *pnt;
 
@@ -1912,7 +1780,7 @@ unsigned ref, bool toggleSelected)
 {
 	unsigned i;
 	bool changed = false;
-	CC_sheet* sheet = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 	CC_coord top_left, bottom_right;
 	const CC_coord *pos;
 	PointList pointlist;
@@ -2100,5 +1968,17 @@ bool MainFrameView::DoSetPointsLabelFlip()
 {
 	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow), true);
+	return true;
+}
+
+bool MainFrameView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new AddSheetsCommand(*mShow, sht, where), true);
+	return true;
+}
+
+bool MainFrameView::DoDeleteSheet(unsigned where)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new RemoveSheetsCommand(*mShow, where), true);
 	return true;
 }

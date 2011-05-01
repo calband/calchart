@@ -33,21 +33,21 @@
 #include "calchartapp.h"
 
 CC_sheet::CC_sheet(CC_show *shw)
-: next(NULL), show(shw),
+: show(shw),
 picked(true), beats(1), pts(show->GetNumPoints())
 {
 }
 
 
 CC_sheet::CC_sheet(CC_show *shw, const wxString& newname)
-: next(NULL), show(shw),
+: show(shw),
 picked(true), beats(1), pts(show->GetNumPoints()), name(newname)
 {
 }
 
 
 CC_sheet::CC_sheet(CC_sheet *sht)
-: next(NULL), show(sht->show),
+: show(sht->show),
 picked(sht->picked), beats(1), pts(show->GetNumPoints()), name(sht->name), number(sht->number)
 {
 	int i;
@@ -100,28 +100,18 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 bool CC_sheet::SelectContinuity(unsigned i) const
 {
 	unsigned j;
-	bool changed = false;
 
+	CC_show::SelectionList select;
 	for (j = 0; j < show->GetNumPoints(); j++)
 	{
 		if (pts[j].cont == i)
 		{
-			if (!show->IsSelected(j))
-			{
-				show->Select(j, true);
-				changed = true;
-			}
-		}
-		else
-		{
-			if (show->IsSelected(j))
-			{
-				show->Select(j, false);
-				changed = true;
-			}
+			select.insert(i);
 		}
 	}
-	return changed;
+	show->UnselectAll();
+	show->AddToSelection(select);
+	return true;
 }
 
 

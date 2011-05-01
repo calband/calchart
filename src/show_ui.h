@@ -77,11 +77,7 @@ public:
 	inline bool Okay() { return ok; };
 
 	inline bool Get(unsigned n) { return list->IsSelected(n); }
-	inline void Set(unsigned n, bool v = true)
-	{
-		list->SetSelection(n,v);
-		show->Select(n,v);
-	}
+	void Set(unsigned n, bool v = true);
 	void Update();
 	void UpdateSelections();
 

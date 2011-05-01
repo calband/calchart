@@ -282,7 +282,7 @@ public:
 	AnimateCommand *cmds;
 	AnimateCommand *curr_cmd;
 	CC_show *show;
-	CC_sheet *curr_sheet;
+	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;
 	unsigned beats_rem;
 	ErrorMarker error_markers[NUM_ANIMERR];

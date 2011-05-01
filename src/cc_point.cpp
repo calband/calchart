@@ -31,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "cc_point.h"
 
+#include <assert.h>
+
 // Test Suite stuff
 struct CC_point_values
 {

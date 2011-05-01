@@ -452,8 +452,8 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 	wxGetApp().GetWindowList().FlushContinuity();		  // get all changes in text windows
 
 	unsigned sheetnum = 0;
-	for (comp.curr_sheet = show->GetSheet(); comp.curr_sheet;
-		comp.curr_sheet = comp.curr_sheet->next, sheetnum++)
+	for (comp.curr_sheet = show->GetSheetBegin(); comp.curr_sheet != show->GetSheetEnd();
+		++comp.curr_sheet, sheetnum++)
 	{
 		if (! comp.curr_sheet->IsInAnimation()) continue;
 		if (curr_sheet)
@@ -786,8 +786,8 @@ ContProcedure* proc)
 	if (proc == NULL)
 	{
 // no continuity was specified
-		CC_sheet *s;
-		for (s = curr_sheet->next; s != NULL; s = s->next)
+		CC_show::const_CC_sheet_iterator_t s;
+		for (s = curr_sheet + 1; s != show->GetSheetEnd(); ++s)
 		{
 			if (s->IsInAnimation())
 			{
@@ -798,7 +798,7 @@ ContProcedure* proc)
 				break;
 			}
 		}
-		if (s == NULL)
+		if (s == show->GetSheetEnd())
 		{
 //use MTRM E
 			ContProcMTRM defcont(new ContValueDefined(CC_E));
@@ -810,12 +810,13 @@ ContProcedure* proc)
 	{
 		proc->Compile(this);
 	}
-	if (curr_sheet->next)
+	if ((curr_sheet + 1) != show->GetSheetEnd())
 	{
+		CC_show::const_CC_sheet_iterator_t curr_sheet_next = curr_sheet+1;
 		if (pt.pos !=
-			curr_sheet->next->GetPosition(curr_pt))
+			curr_sheet_next->GetPosition(curr_pt))
 		{
-			c = curr_sheet->next->GetPosition(curr_pt) - pt.pos;
+			c = curr_sheet_next->GetPosition(curr_pt) - pt.pos;
 			RegisterError(ANIMERR_WRONGPLACE, NULL);
 			Append(new AnimateCommandMove(beats_rem, c), NULL);
 		}
