@@ -72,24 +72,6 @@ void CC_WinList::Remove(CC_WinNode *node)
 void CC_WinList::Empty() {}
 
 
-void CC_WinList::UpdateSelections(wxWindow* win, int point)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->UpdateSelections(win, point);
-	}
-}
-
-
-void CC_WinList::UpdatePointsOnSheet(unsigned sht, int ref)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->UpdatePointsOnSheet(sht, ref);
-	}
-}
-
-
 void CC_WinList::ChangeNumPoints(wxWindow *win)
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
@@ -149,15 +131,6 @@ void CC_WinList::DeleteSheet(unsigned sht)
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
 	{
 		(*n)->DeleteSheet(sht);
-	}
-}
-
-
-void CC_WinList::AppendSheets()
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->AppendSheets();
 	}
 }
 

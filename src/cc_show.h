@@ -71,7 +71,6 @@ public:
 	inline const wxString& GetError() const { return error; }
 	inline bool Ok() const { return okay; }
 
-	void Append(CC_sheet_container_t newsheets);
 	wxString Autosave();
 	void ClearAutosave() const;
 	void FlushAllTextWindows() const;
@@ -104,13 +103,11 @@ public:
 	void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
 	inline unsigned short GetNumPoints() const { return numpoints; }
 	void SetNumPoints(unsigned num, unsigned columns);
-	void SetNumPointsInternal(unsigned num);  //Only for creating show class
 	bool RelabelSheets(unsigned sht);
 
 	inline const wxString& GetPointLabel(unsigned i) const { return pt_labels[i]; }
-	inline wxString& GetPointLabel(unsigned i) { return pt_labels[i]; }
-	inline const wxString* GetPointLabels() const { return &pt_labels[0]; }
-	inline wxString* GetPointLabels() { return &pt_labels[0]; }
+	void SetPointLabel(const std::vector<wxString>& labels) { pt_labels = labels; }
+	inline const std::vector<wxString>& GetPointLabels() const { return pt_labels; }
 	inline bool GetBoolLandscape() const { return print_landscape; }
 	inline bool GetBoolDoCont() const { return print_do_cont; }
 	inline bool GetBoolDoContSheet() const { return print_do_cont_sheet; }
@@ -135,6 +132,7 @@ private:
 	ShowMode *mode;
 
 private:
+	
 	void PrintSheets(FILE *fp) const;		  // called by Print()
 	void SetAutosaveName(const wxString& realname);
 

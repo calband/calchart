@@ -619,13 +619,6 @@ wxString CC_show::ImportContinuity(const wxString& file)
 }
 
 
-void CC_show::Append(CC_sheet_container_t newsheets)
-{
-	sheets.insert(sheets.end(), newsheets.begin(), newsheets.end());
-	wxGetApp().GetWindowList().AppendSheets();
-}
-
-
 wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 {
 	uint32_t id;
@@ -789,7 +782,8 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	// read in the size:
 	// <INGL_SIZE><4><# points>
 	ReadCheckIDandSize(stream, INGL_SIZE, name);
-	SetNumPointsInternal(name);
+	numpoints = name;
+	pt_labels.assign(numpoints, wxString());
 
 	PeekLong(stream, name);
 	// Optional: read in the point labels
@@ -797,12 +791,15 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	if (INGL_LABL == name)
 	{
 		ReadCheckIDandFillData(stream, INGL_LABL, data);
+		std::vector<wxString> labels;
 		const char *str = (const char*)&data[0];
 		for (unsigned i = 0; i < GetNumPoints(); i++)
 		{
-			GetPointLabel(i) = wxString::FromUTF8(str);
+			wxString buf = wxString::FromUTF8(str);
+			labels.push_back(buf);
 			str += strlen(str)+1;
 		}
+		SetPointLabel(labels);
 		// peek for the next name
 		PeekLong(stream, name);
 	}
@@ -1092,38 +1089,15 @@ void CC_show::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 }
 
 
+// warning, the labels might not match up
 void CC_show::SetNumPoints(unsigned num, unsigned columns)
 {
-	unsigned i, cpy;
-
 	for (CC_sheet_iterator_t sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht)
 	{
 		sht->SetNumPoints(num, columns);
 	}
-
-	std::vector<wxString> new_labels(num);
-	cpy = MIN(numpoints, num);
-	for (i = 0; i < cpy; i++)
-	{
-		new_labels[i] = pt_labels[i];
-	}
-	for (; i < num; i++)
-	{
-		new_labels[i] = wxT("");
-	}
-	pt_labels = new_labels;
-
 	numpoints = num;
-
 	Modify(true);
-}
-
-
-void CC_show::SetNumPointsInternal(unsigned num)
-{
-	numpoints = num;
-	pt_labels.assign(numpoints, wxString());
-	UnselectAll();
 }
 
 

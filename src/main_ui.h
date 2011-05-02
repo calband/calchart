@@ -72,6 +72,7 @@ enum
 	CALCHART__SET_BEATS,
 	CALCHART__SETUP,
 	CALCHART__SETDESCRIPTION,
+	CALCHART__SETMODE,
 	CALCHART__POINTS,
 	CALCHART__ANIMATE,
 	CALCHART__SELECTION,
@@ -113,8 +114,6 @@ class CC_WinNodeMain : public CC_WinNode
 public:
 	CC_WinNodeMain(CC_WinList *lst, MainFrame *frm);
 
-	virtual void UpdateSelections(wxWindow* win = NULL, int point = -1);
-	virtual void UpdatePointsOnSheet(unsigned sht, int ref = -1);
 	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
 	virtual void ChangeShowMode(wxWindow *win);
@@ -122,7 +121,6 @@ public:
 		int line = -1, int col = -1);
 	virtual void AddSheet(unsigned sht);
 	virtual void DeleteSheet(unsigned sht);
-	virtual void AppendSheets();
 	virtual void RemoveSheets(unsigned num);
 
 private:
@@ -186,6 +184,7 @@ public:
 	void OnCmdSetBeats(wxCommandEvent& event);
 	void OnCmdSetup(wxCommandEvent& event);
 	void OnCmdSetDescription(wxCommandEvent& event);
+	void OnCmdSetMode(wxCommandEvent& event);
 	void OnCmdPoints(wxCommandEvent& event);
 	void OnCmdAnimate(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
@@ -231,6 +230,7 @@ public:
 
 	void Setup();
 	void SetDescription();
+	void SetMode();
 	const FieldCanvas * GetCanvas() const { return field; }
 	FieldCanvas * GetCanvas() { return field; }
 
@@ -367,6 +367,8 @@ public:
 	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref);
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
 	bool DoSetDescription(const wxString& descr);
+	void DoSetMode(const wxString& mode);
+	void DoSetShowInfo(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
 	bool DoSetSheetTitle(const wxString& descr);
 	bool DoSetSheetBeats(unsigned short beats);
 	bool DoSetPointsLabel(bool right);

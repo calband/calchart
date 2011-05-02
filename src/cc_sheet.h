@@ -80,6 +80,7 @@ public:
 	inline const CC_point& GetPoint(unsigned i) const { return pts[i]; }
 	inline CC_point& GetPoint(unsigned i) { return pts[i]; }
 	std::vector<CC_point> GetPoints() const { return pts; }
+	void SetPoints(const std::vector<CC_point>& points) { pts = points; }
 	void SetPoint(const cc_oldpoint& val, unsigned i);
 
 	const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;

@@ -57,7 +57,6 @@ bool MovePointsOnSheetCommand::Do()
 		sheet->SetPosition(i->second.second, i->first, mRef);
 	}
 	mShow.Modify(true);
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum, mRef);
 	return true;
 }
 
@@ -73,7 +72,6 @@ bool MovePointsOnSheetCommand::Undo()
 		sheet->SetPosition(i->second.first, i->first, mRef);
 	}
 	mShow.Modify(true);
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum, mRef);
 	return true;
 }
 
@@ -156,7 +154,7 @@ bool SetContinuityIndexCommand::Do()
 	{
 		sheet->GetPoint(i->first).cont = i->second.second;
 	}
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	mShow.Modify(true);
 	return true;
 }
 
@@ -172,7 +170,7 @@ bool SetContinuityIndexCommand::Undo()
 	{
 		sheet->GetPoint(i->first).cont = i->second.first;
 	}
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	mShow.Modify(true);
 	return true;
 }
 
@@ -214,7 +212,7 @@ bool SetSymbolAndContCommand::Do()
 		sheet->GetPoint(i->first).sym = i->second.second.first;
 		sheet->GetPoint(i->first).cont = sheet->GetStandardContinuity(i->second.second.first).GetNum();
 	}
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	mShow.Modify(true);
 	return true;
 }
 
@@ -232,7 +230,7 @@ bool SetSymbolAndContCommand::Undo()
 		sheet->GetPoint(i->first).cont = i->second.first.second;
 	}
 	sheet->animcont = mOrigAnimcont;
-	wxGetApp().GetWindowList().UpdatePointsOnSheet(mSheetNum);
+	mShow.Modify(true);
 	return true;
 }
 
@@ -259,6 +257,7 @@ bool SetContinuityTextCommand::Do()
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
 
 	sheet->SetNthContinuity(mContinuity.second, mWhichCont);
+	mShow.Modify(true);
 	return true;
 }
 
@@ -272,6 +271,7 @@ bool SetContinuityTextCommand::Undo()
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
 
 	sheet->SetNthContinuity(mContinuity.first, mWhichCont);
+	mShow.Modify(true);
 	return true;
 }
 
@@ -540,6 +540,78 @@ bool SetDescriptionCommand::Do()
 bool SetDescriptionCommand::Undo()
 {
 	mShow.SetDescr(mDescription.first);
+	mShow.Modify(true);
+	return true;
+}
+
+SetModeCommand::SetModeCommand(CC_show& show, const wxString& newmode)
+: wxCommand(true, wxT("Set Mode")),
+mShow(show)
+{
+	mMode = std::pair<wxString,wxString>(show.GetMode().GetName(), newmode);
+}
+
+SetModeCommand::~SetModeCommand()
+{
+}
+
+
+bool SetModeCommand::Do()
+{
+	ShowMode *newmode = wxGetApp().GetModeList().Find(mMode.second);
+	if (newmode)
+	{
+		mShow.SetMode(newmode);
+	}
+	mShow.Modify(true);
+	return true;
+}
+
+bool SetModeCommand::Undo()
+{
+	ShowMode *newmode = wxGetApp().GetModeList().Find(mMode.first);
+	if (newmode)
+	{
+		mShow.SetMode(newmode);
+	}
+	mShow.Modify(true);
+	return true;
+}
+
+SetShowInfoCommand::SetShowInfoCommand(CC_show& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels)
+: wxCommand(true, wxT("Set show info")),
+mShow(show), mNumPoints(numPoints), mNumColumns(numColumns)
+{
+	for (CC_show::CC_sheet_iterator_t sht = mShow.GetSheetBegin(); sht != mShow.GetSheetEnd(); ++sht)
+	{
+		mOriginalPoints.push_back(sht->GetPoints());
+	}
+	mOriginalNumPoints = mShow.GetNumPoints();
+	mLabels = std::pair<std::vector<wxString>,std::vector<wxString> >(mShow.GetPointLabels(), labels);
+}
+
+SetShowInfoCommand::~SetShowInfoCommand()
+{
+}
+
+
+bool SetShowInfoCommand::Do()
+{
+	mShow.SetNumPoints(mNumPoints, mNumColumns);
+	mShow.SetPointLabel(mLabels.second);
+	mShow.Modify(true);
+	return true;
+}
+
+bool SetShowInfoCommand::Undo()
+{
+	size_t i = 0; 
+	mShow.SetNumPoints(mOriginalNumPoints, 1);
+	for (CC_show::CC_sheet_iterator_t sht = mShow.GetSheetBegin(); sht != mShow.GetSheetEnd(); ++sht, ++i)
+	{
+		sht->SetPoints(mOriginalPoints.at(i));
+	}
+	mShow.SetPointLabel(mLabels.first);
 	mShow.Modify(true);
 	return true;
 }

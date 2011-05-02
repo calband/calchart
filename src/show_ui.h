@@ -34,14 +34,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "basic_ui.h"
 
 class PointPicker;
-class ShowInfoReq;
 
 class CC_WinNodePointPicker : public CC_WinNode
 {
 public:
 	CC_WinNodePointPicker(CC_WinList *lst, PointPicker *req);
 
-	virtual void UpdateSelections(wxWindow* win, int point = -1);
 	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
 
@@ -79,7 +77,6 @@ public:
 	inline bool Get(unsigned n) { return list->IsSelected(n); }
 	void Set(unsigned n, bool v = true);
 	void Update();
-	void UpdateSelections();
 
 	CC_show *show;
 private:
@@ -123,30 +120,24 @@ public:
 
 	void CreateControls();
 
-	void UpdateLabels();
-	void UpdateNumPoints();
-	void UpdateMode();
+    virtual bool Validate();
+    virtual bool TransferDataToWindow();
+    virtual bool TransferDataFromWindow();
 
-	inline wxString GetChoiceStrSelection() { return choice->GetStringSelection(); }
-	inline int GetChoiceSelection() { return choice->GetSelection(); }
-	unsigned GetNumPoints();
-	unsigned GetColumns();
-	inline int GetLabelType() { return label_type->GetSelection(); }
-	inline int GetLetterSize() { return lettersize->GetValue(); }
-	inline bool GetLetter(unsigned i) { return labels->IsSelected(i); }
-	void SetLabels();
-
-	CC_show *show;
+	// The data this dialog sets for the user
 private:
-	wxPanel *panel;
-	void ShowInfoSetNum(wxCommandEvent&);
-	void ShowInfoSetLabels(wxCommandEvent&);
-	void ShowInfoModeChoice(wxCommandEvent&);
-	void ShowInfoSetDescription(wxCommandEvent&);
-	wxTextCtrl *numpnts;
-	wxRadioBox *label_type;
-	wxListBox *labels;
-	wxChoice *choice;
-	wxSlider *lettersize;
+	unsigned mNumberPoints;
+	unsigned mNumberColumns;
+	std::vector<wxString> mLabels;
+
+public:
+	unsigned GetNumberPoints() const { return mNumberPoints; }
+	unsigned GetNumberColumns() const { return mNumberColumns; }
+	std::vector<wxString> GetLabels() { return mLabels; }
+
+private:
+	CC_show *mShow;
+	void OnReset(wxCommandEvent&);
 };
+
 #endif

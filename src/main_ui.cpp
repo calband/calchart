@@ -141,6 +141,7 @@ EVT_MENU(CALCHART__SET_SHEET_TITLE, MainFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, MainFrame::OnCmdSetBeats)
 EVT_MENU(CALCHART__SETUP, MainFrame::OnCmdSetup)
 EVT_MENU(CALCHART__SETDESCRIPTION, MainFrame::OnCmdSetDescription)
+EVT_MENU(CALCHART__SETMODE, MainFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
@@ -214,24 +215,6 @@ public:
 CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
 
-void CC_WinNodeMain::UpdateSelections(wxWindow* win, int point)
-{
-	frame->field->RefreshShow(true, point);
-}
-
-
-void CC_WinNodeMain::UpdatePointsOnSheet(unsigned sht, int ref)
-{
-	if (sht == frame->field->mShow->GetCurrentSheetNum())
-	{
-// ref = 0 means that any points could move
-		if ((ref <= 0) || (ref == (int)frame->field->curr_ref))
-		{
-			frame->field->RefreshShow();
-		}
-	}
-}
-
 
 void CC_WinNodeMain::ChangeNumPoints(wxWindow *win)
 {
@@ -266,12 +249,6 @@ void CC_WinNodeMain::AddSheet(unsigned sht)
 
 
 void CC_WinNodeMain::DeleteSheet(unsigned sht)
-{
-	frame->UpdatePanel();
-}
-
-
-void CC_WinNodeMain::AppendSheets()
 {
 	frame->UpdatePanel();
 }
@@ -415,6 +392,7 @@ field(NULL)
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
 	edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show...\tCTRL-U"), wxT("Setup basic show information"));
 	edit_menu->Append(CALCHART__SETDESCRIPTION, wxT("Set Show &Description..."), wxT("Set the show description"));
+	edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."), wxT("Set the show mode"));
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
 	edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
 	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
@@ -762,6 +740,12 @@ void MainFrame::OnCmdSetDescription(wxCommandEvent& event)
 }
 
 
+void MainFrame::OnCmdSetMode(wxCommandEvent& event)
+{
+	SetMode();
+}
+
+
 void MainFrame::OnCmdPoints(wxCommandEvent& event)
 {
 	if (field->mShow)
@@ -887,89 +871,67 @@ void MainFrame::OnCmd_genius(wxCommandEvent& event)
 
 void MainFrame::OnCmd_label_left(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(false))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(false);
 }
 
 
 void MainFrame::OnCmd_label_right(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(true))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(true);
 }
 
 
 void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsLabelFlip())
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsLabelFlip();
 }
 
 
 void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_PLAIN))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_PLAIN);
 }
 
 
 void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOL))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOL);
 }
 
 
 void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_BKSL))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_BKSL);
 }
 
 
 void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SL))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SL);
 }
 
 
 void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_X))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_X);
 }
 
 
 void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLBKSL))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLBKSL);
 }
 
 
 void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLSL))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLSL);
 }
 
 
 void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
-	if (static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLX))
-		wxGetApp().GetWindowList().
-			UpdatePointsOnSheet(field->mShow->GetCurrentSheetNum());
+	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLX);
 }
 
 
@@ -1074,9 +1036,10 @@ void MainFrame::Setup()
 {
 	if (field->mShow)
 	{
-		ShowInfoReq dialog1(field->mShow, this);
-		if (dialog1.ShowModal() == wxID_OK)
+		ShowInfoReq dialog(field->mShow, this);
+		if (dialog.ShowModal() == wxID_OK)
 		{
+			static_cast<MainFrameView*>(GetView())->DoSetShowInfo(dialog.GetNumberPoints(), dialog.GetNumberColumns(), dialog.GetLabels());
 		}
 	}
 }
@@ -1091,10 +1054,34 @@ void MainFrame::SetDescription()
 			wxT("Edit show description\n"),
 			field->mShow->GetDescr(),
 			wxOK | wxCANCEL);
-		ShowInfoReq dialog1(field->mShow, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			static_cast<MainFrameView*>(GetView())->DoSetDescription(dialog.GetValue());
+		}
+	}
+}
+
+
+void MainFrame::SetMode()
+{
+	if (field->mShow)
+	{
+		wxArrayString modeStrings;
+		unsigned whichMode = 0, tmode = 0;
+		for (ShowModeList::Iter mode = wxGetApp().GetModeList().Begin(); mode != wxGetApp().GetModeList().End(); ++mode, ++tmode)
+		{
+			modeStrings.Add((*mode)->GetName());
+			if ((*mode)->GetName() == field->mShow->GetMode().GetName())
+				whichMode = tmode;
+		}
+		wxSingleChoiceDialog dialog(this,
+			wxT("Please select the show mode\n"),
+			wxT("Set show mode\n"),
+			modeStrings);
+		dialog.SetSelection(whichMode);
+		if (dialog.ShowModal() == wxID_OK)
+		{
+			static_cast<MainFrameView*>(GetView())->DoSetMode(dialog.GetStringSelection());
 		}
 	}
 }
@@ -1328,10 +1315,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				switch (curr_move)
 				{
 					case CC_MOVE_LINE:
-						if (mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint(),
-							curr_ref))
-							wxGetApp().GetWindowList().
-								UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+						mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint(), curr_ref);
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 						break;
@@ -1352,9 +1336,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 									ZRotationMatrix(r) *
 									TranslationMatrix(Vector(c1.x, c1.y, 0));
-								if (mView->DoTransformPoints(m, curr_ref))
-									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+								mView->DoTransformPoints(m, curr_ref);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1389,9 +1371,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									YXShearMatrix(amount) *
 									ZRotationMatrix(ang) *
 									TranslationMatrix(Vector(o.x, o.y, 0));
-								if (mView->DoTransformPoints(m, curr_ref))
-									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+								mView->DoTransformPoints(m, curr_ref);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1412,9 +1392,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								YReflectionMatrix() *
 								ZRotationMatrix(ang) *
 								TranslationMatrix(Vector(c1.x, c1.y, 0));
-							if (mView->DoTransformPoints(m, curr_ref))
-								wxGetApp().GetWindowList().
-									UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+							mView->DoTransformPoints(m, curr_ref);
 						}
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1459,9 +1437,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 										ScaleMatrix(Vector(sx, sy, 0)) *
 										TranslationMatrix(Vector(c1.x, c1.y, 0));
-									if (mView->DoTransformPoints(m, curr_ref))
-										wxGetApp().GetWindowList().
-											UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+									mView->DoTransformPoints(m, curr_ref);
 								}
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1514,9 +1490,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									(float)s2.x*(float)s1.y));
 								Binv /= d;
 								m = Binv*A;
-								if (mView->DoTransformPoints(m, curr_ref))
-									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+								mView->DoTransformPoints(m, curr_ref);
 							}
 							EndDrag();
 							ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1532,9 +1506,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								break;
 							case CC_DRAG_LINE:
 								pos = shape->GetPoint() - shape->GetOrigin();
-								if (mView->DoTranslatePoints(pos, curr_ref))
-									wxGetApp().GetWindowList().
-										UpdatePointsOnSheet(mShow->GetCurrentSheetNum(), curr_ref);
+								mView->DoTranslatePoints(pos, curr_ref);
 								EndDrag();
 								break;
 							case CC_DRAG_LASSO:
@@ -1885,7 +1857,7 @@ void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
 	if (mFrame)
 		mFrame->UpdatePanel();
 	if (mFrame && mFrame->GetCanvas())
-		mFrame->GetCanvas()->Refresh();
+		mFrame->GetCanvas()->RefreshShow();
 }
 
 // Clean up windows used for displaying the view.
@@ -1943,6 +1915,16 @@ bool MainFrameView::DoSetDescription(const wxString& descr)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetDescriptionCommand(*mShow, descr), true);
 	return true;
+}
+
+void MainFrameView::DoSetMode(const wxString& mode)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetModeCommand(*mShow, mode), true);
+}
+
+void MainFrameView::DoSetShowInfo(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetShowInfoCommand(*mShow, numPoints, numColumns, labels), true);
 }
 
 bool MainFrameView::DoSetSheetTitle(const wxString& descr)

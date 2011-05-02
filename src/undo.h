@@ -295,4 +295,38 @@ protected:
 	std::pair<wxString,wxString> mDescription;
 };
 
+// Show description changes
+class SetModeCommand : public wxCommand
+{
+public:
+	SetModeCommand(CC_show& show, const wxString& newdescr);
+	virtual ~SetModeCommand();
+
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	std::pair<wxString,wxString> mMode;
+};
+
+// Show info 
+class SetShowInfoCommand : public wxCommand
+{
+public:
+	SetShowInfoCommand(CC_show& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
+	virtual ~SetShowInfoCommand();
+
+	virtual bool Do();
+	virtual bool Undo();
+
+protected:
+	CC_show& mShow;
+	unsigned mNumPoints;
+	unsigned mNumColumns;
+	unsigned mOriginalNumPoints;
+	std::pair<std::vector<wxString>,std::vector<wxString> > mLabels;
+	std::vector<std::vector<CC_point> > mOriginalPoints;
+};
+
 #endif
