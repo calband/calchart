@@ -1140,12 +1140,29 @@ bool CC_show::RelabelSheets(unsigned sht)
 }
 
 
+bool CC_show::SelectAll()
+{
+	bool changed = selectionList.size() != numpoints;
+	for (size_t i = 0; i < numpoints; ++i)
+		selectionList.insert(i);
+	UpdateAllViews();
+	return changed;
+}
+
+
 bool CC_show::UnselectAll()
 {
 	bool changed = selectionList.size();
 	selectionList.clear();
 	UpdateAllViews();
 	return changed;
+}
+
+
+void CC_show::SetSelection(const SelectionList& sl)
+{
+	selectionList = sl;
+	UpdateAllViews();
 }
 
 

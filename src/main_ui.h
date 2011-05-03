@@ -114,7 +114,6 @@ class CC_WinNodeMain : public CC_WinNode
 public:
 	CC_WinNodeMain(CC_WinList *lst, MainFrame *frm);
 
-	virtual void ChangeNumPoints(wxWindow *win);
 	virtual void ChangePointLabels(wxWindow *win);
 	virtual void ChangeShowMode(wxWindow *win);
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,

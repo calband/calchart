@@ -118,8 +118,10 @@ public:
 	// how to select points:
 	// Always select or unselect in groups
 	typedef std::set<unsigned> SelectionList;
+	bool SelectAll();
 	bool UnselectAll();
 	void AddToSelection(const SelectionList& sl);
+	void SetSelection(const SelectionList& sl);
 	void RemoveFromSelection(const SelectionList& sl);
 	void ToggleSelection(const SelectionList& sl);
 	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }

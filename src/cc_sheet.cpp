@@ -109,8 +109,7 @@ bool CC_sheet::SelectContinuity(unsigned i) const
 			select.insert(i);
 		}
 	}
-	show->UnselectAll();
-	show->AddToSelection(select);
+	show->SetSelection(select);
 	return true;
 }
 

@@ -216,12 +216,6 @@ CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
 
 
-void CC_WinNodeMain::ChangeNumPoints(wxWindow *win)
-{
-	frame->field->UpdateSS();
-}
-
-
 void CC_WinNodeMain::ChangePointLabels(wxWindow *win)
 {
 	frame->field->UpdateSS();
@@ -749,8 +743,11 @@ void MainFrame::OnCmdSetMode(wxCommandEvent& event)
 void MainFrame::OnCmdPoints(wxCommandEvent& event)
 {
 	if (field->mShow)
-		(void)new PointPicker(field->mShow, node->GetList(),
-			true, this, wxT("Select points"));
+	{
+		PointPicker* pp = new PointPicker(field->mShow, node->GetList(), this);
+		// make it modeless:
+		pp->Show();
+	}
 }
 
 

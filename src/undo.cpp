@@ -46,8 +46,7 @@ MovePointsOnSheetCommand::~MovePointsOnSheetCommand()
 
 bool MovePointsOnSheetCommand::Do()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -62,8 +61,7 @@ bool MovePointsOnSheetCommand::Do()
 
 bool MovePointsOnSheetCommand::Undo()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -144,8 +142,7 @@ SetContinuityIndexCommand::~SetContinuityIndexCommand()
 
 bool SetContinuityIndexCommand::Do()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -160,8 +157,7 @@ bool SetContinuityIndexCommand::Do()
 
 bool SetContinuityIndexCommand::Undo()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -200,8 +196,7 @@ SetSymbolAndContCommand::~SetSymbolAndContCommand()
 
 bool SetSymbolAndContCommand::Do()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -218,8 +213,7 @@ bool SetSymbolAndContCommand::Do()
 
 bool SetSymbolAndContCommand::Undo()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -289,8 +283,7 @@ SetLabelCommand::~SetLabelCommand()
 
 bool SetLabelCommand::Do()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
@@ -305,8 +298,7 @@ bool SetLabelCommand::Do()
 
 bool SetLabelCommand::Undo()
 {
-	mShow.UnselectAll();
-	mShow.AddToSelection(mPoints);
+	mShow.SetSelection(mPoints);
 
 	mShow.SetCurrentSheet(mSheetNum);
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();

@@ -347,8 +347,7 @@ void AnimationCanvas::SelectCollisions()
 				select.insert(i);
 			}
 		}
-		mShow->UnselectAll();
-		mShow->AddToSelection(select);
+		mShow->SetSelection(select);
 	}
 }
 
@@ -1003,8 +1002,7 @@ void AnimErrorList::Update(int i)
 				select.insert(i);
 			}
 		}
-		show->UnselectAll();
-		show->AddToSelection(select);
+		show->SetSelection(select);
 	}
 	wxGetApp().GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
 		show->GetNumSheets()-1 : sheetnum,

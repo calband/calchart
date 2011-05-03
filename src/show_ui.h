@@ -33,27 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 #include "basic_ui.h"
 
-class PointPicker;
-
-class CC_WinNodePointPicker : public CC_WinNode
-{
-public:
-	CC_WinNodePointPicker(CC_WinList *lst, PointPicker *req);
-
-	virtual void ChangeNumPoints(wxWindow *win);
-	virtual void ChangePointLabels(wxWindow *win);
-
-private:
-	PointPicker *picker;
-};
-
-enum
-{
-	PointPicker_PointPickerClose=1100,
-	PointPicker_PointPickerAll,
-	PointPicker_PointPickerNone,
-};
-
 class PointPickerView : public wxView
 {
 public:
@@ -63,33 +42,42 @@ public:
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 };
 
-class PointPicker : public wxFrame
+class PointPicker : public wxDialog
 {
 public:
+	PointPicker();
 	PointPicker(CC_show *shw, CC_WinList *lst,
-		bool multi, wxFrame *frame, const wxString& title,
-		int x = -1, int y = -1, int width = 250, int height = 300);
+		wxWindow *parent, wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Select Points"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
 	~PointPicker();
-	void OnCloseWindow(wxCloseEvent& event);
 
-	inline bool Okay() { return ok; };
-
-	inline bool Get(unsigned n) { return list->IsSelected(n); }
-	void Set(unsigned n, bool v = true);
 	void Update();
 
-	CC_show *show;
 private:
+	CC_show *show;
 	PointPickerView *mView;
-	void SetListBoxEntries();
-	void PointPickerClose(wxCommandEvent&);
+	wxListBox *mList;
+	std::vector<wxString> mCachedLabels;
+	CC_show::SelectionList mCachedSelection;
+
+	void Init();
+
+	bool Create(CC_show *shw, CC_WinList *lst,
+		wxWindow *parent, wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Select Points"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
+
+
 	void PointPickerAll(wxCommandEvent&);
 	void PointPickerNone(wxCommandEvent&);
-
-	bool ok;
-	wxPanel *panel;
-	wxListBox *list;
-	CC_WinNodePointPicker *node;
+	void PointPickerSelect(wxCommandEvent&);
 
 	DECLARE_EVENT_TABLE()
 };

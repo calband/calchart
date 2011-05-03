@@ -33,52 +33,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/statline.h>
 #include <wx/spinctrl.h>
 
-BEGIN_EVENT_TABLE(PointPicker, wxFrame)
-EVT_CLOSE(PointPicker::OnCloseWindow)
-EVT_BUTTON(PointPicker_PointPickerClose,PointPicker::PointPickerClose)
+enum
+{
+	PointPicker_PointPickerAll=1100,
+	PointPicker_PointPickerNone,
+	PointPicker_PointPickerList,
+};
+
+
+BEGIN_EVENT_TABLE(PointPicker, wxDialog)
 EVT_BUTTON(PointPicker_PointPickerAll,PointPicker::PointPickerAll)
 EVT_BUTTON(PointPicker_PointPickerNone,PointPicker::PointPickerNone)
+EVT_LISTBOX(PointPicker_PointPickerList,PointPicker::PointPickerSelect)
+EVT_LISTBOX_DCLICK(PointPicker_PointPickerList,PointPicker::PointPickerAll)
 END_EVENT_TABLE()
-
-CC_WinNodePointPicker::CC_WinNodePointPicker(CC_WinList *lst,
-PointPicker *req)
-: CC_WinNode(lst), picker(req) {}
-
-void CC_WinNodePointPicker::ChangeNumPoints(wxWindow*)
-{
-	picker->Update();
-}
-
-
-void CC_WinNodePointPicker::ChangePointLabels(wxWindow*)
-{
-	picker->Update();
-}
-
-
-void PointPicker::PointPickerClose(wxCommandEvent&)
-{
-	Close();
-}
-
-
-void PointPicker::PointPickerAll(wxCommandEvent&)
-{
-	for (unsigned i=0; i < show->GetNumPoints(); ++i)
-	{
-		Set(i, true);
-	}
-}
-
-
-void PointPicker::PointPickerNone(wxCommandEvent&)
-{
-	for (unsigned i=0; i < show->GetNumPoints(); ++i)
-	{
-		Set(i, false);
-	}
-}
-
 
 PointPickerView::PointPickerView() {}
 PointPickerView::~PointPickerView() {}
@@ -89,101 +57,132 @@ void PointPickerView::OnUpdate(wxView *sender, wxObject *hint)
 	static_cast<PointPicker*>(GetFrame())->Update();
 }
 
-PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
-bool multi, wxFrame *frame,
-const wxString& title,
-int x, int y, int width, int height):
-wxFrame(frame, -1, title, wxPoint(x, y), wxSize(width, height)),
-show(shw)
+PointPicker::PointPicker()
 {
-	mView = new PointPickerView;
-	mView->SetDocument(show);
-	mView->SetFrame(this);
-// Give it an icon
-	SetBandIcon(this);
-
-	panel = new wxPanel(this);
-
-// create a sizer for laying things out top down:
-	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-
-// add buttons to the top row
-	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
-	wxButton *closeBut = new wxButton(panel, PointPicker_PointPickerClose, wxT("&Close"));
-	closeBut->SetDefault();
-	top_button_sizer->Add(closeBut, 0, wxALL, 5 );
-
-	if (multi)
-	{
-		wxButton *setnumBut = new wxButton(panel, PointPicker_PointPickerAll, wxT("&All"));
-		top_button_sizer->Add(setnumBut, 0, wxALL, 5 );
-
-		wxButton *setlabBut = new wxButton(panel, PointPicker_PointPickerNone, wxT("&None"));
-		top_button_sizer->Add(setlabBut, 0, wxALL, 5 );
-	}
-	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
-
-	list = new wxListBox(panel, -1, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-	topsizer->Add(list, 0, wxALL, 0 );
-	SetListBoxEntries();
-
-	node = new CC_WinNodePointPicker(lst, this);
-
-	panel->SetSizer( topsizer );
-
-	Center();
-	Show(true);
+	Init();
 }
 
+PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
+	wxWindow *parent, wxWindowID id,
+	const wxString& caption,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style )
+{
+	Init();
+	
+	Create(shw, lst, parent, id, caption, pos, size, style);
+}
 
 PointPicker::~PointPicker()
 {
-	delete mView;
-	if (node)
-	{
-		node->Remove();
-		delete node;
-	}
+	if (mView)
+		delete mView;
+}
+
+void PointPicker::Init()
+{
 }
 
 
-void PointPicker::OnCloseWindow(wxCloseEvent& event)
+bool PointPicker::Create(CC_show *shw,
+		CC_WinList *lst,
+		wxWindow *parent, wxWindowID id,
+		const wxString& caption,
+		const wxPoint& pos,
+		const wxSize& size,
+		long style)
 {
-	Destroy();
+	if (!wxDialog::Create(parent, id, caption, pos, size, style))
+		return false;
+
+	show = shw;
+
+	// give this a view so it can pick up document changes
+	mView = new PointPickerView;
+	mView->SetDocument(show);
+	mView->SetFrame(this);
+
+	CreateControls();
+
+// This fits the dalog to the minimum size dictated by the sizers
+	GetSizer()->Fit(this);
+// This ensures that the dialog cannot be smaller than the minimum size
+	GetSizer()->SetSizeHints(this);
+
+	Center();
+
+	return true;
+}
+
+void PointPicker::CreateControls()
+{
+// Give it an icon
+// create a sizer for laying things out top down:
+	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+	SetSizer( topsizer );
+
+// add buttons to the top row
+	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	wxButton *closeBut = new wxButton(this, wxID_OK, wxT("&Close"));
+	closeBut->SetDefault();
+	top_button_sizer->Add(closeBut, 0, wxALL, 5 );
+
+	wxButton *setnumBut = new wxButton(this, PointPicker_PointPickerAll, wxT("&All"));
+	top_button_sizer->Add(setnumBut, 0, wxALL, 5 );
+
+	wxButton *setlabBut = new wxButton(this, PointPicker_PointPickerNone, wxT("&None"));
+	top_button_sizer->Add(setlabBut, 0, wxALL, 5 );
+
+	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
+
+	mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+	topsizer->Add(mList, 0, wxGROW|wxALL, 0 );
+	Update();
 }
 
 
-void PointPicker::Set(unsigned n, bool v)
+void PointPicker::PointPickerAll(wxCommandEvent&)
 {
-	list->SetSelection(n,v);
-	CC_show::SelectionList select;
-	select.insert(n);
-	if (v)
-	{
-		show->AddToSelection(select);
-	}
-	else
-	{
-		show->RemoveFromSelection(select);
-	}
+	show->SelectAll();
+}
+
+
+void PointPicker::PointPickerNone(wxCommandEvent&)
+{
+	show->UnselectAll();
+}
+
+
+void PointPicker::PointPickerSelect(wxCommandEvent&)
+{
+	wxArrayInt selections;
+	size_t n = mList->GetSelections(selections);
+
+	CC_show::SelectionList sl;
+	for (size_t i = 0; i < n; ++i)
+		sl.insert(selections[i]);
+	show->SetSelection(sl);
 }
 
 
 void PointPicker::Update()
 {
-	list->Clear();
-	SetListBoxEntries();
-}
-
-
-void PointPicker::SetListBoxEntries()
-{
-	unsigned n;
-
-	list->Set(show->GetNumPoints(), &show->GetPointLabels()[0]);
-	for (n = 0; n < show->GetNumPoints(); ++n)
+	std::vector<wxString> showLabels = show->GetPointLabels();
+	if (mCachedLabels != showLabels)
 	{
-		list->SetSelection(n, show->IsSelected(n));
+		mCachedLabels = showLabels;
+		mList->Clear();
+		mList->Set(mCachedLabels.size(), &mCachedLabels[0]);
+	}
+	CC_show::SelectionList showSelectionList = show->GetSelectionList();
+	if (mCachedSelection != showSelectionList)
+	{
+		mCachedSelection = showSelectionList;
+		for (unsigned n = 0; n < show->GetNumPoints(); ++n)
+		{
+			mList->SetSelection(n, mCachedSelection.count(n));
+		}
 	}
 }
 
