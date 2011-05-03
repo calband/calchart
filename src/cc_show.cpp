@@ -1085,7 +1085,6 @@ void CC_show::InsertSheetInternal(const CC_sheet_container_t& sheet, unsigned sh
 void CC_show::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 {
 	InsertSheetInternal(nsheet, sheetidx);
-	wxGetApp().GetWindowList().AddSheet(sheetidx);
 }
 
 

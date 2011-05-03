@@ -49,11 +49,8 @@ public:
 	inline CC_WinList* GetList() { return list; }
 
 	virtual void ChangeNumPoints(wxWindow *win) {}
-	virtual void ChangePointLabels(wxWindow *win)  {}
-	virtual void ChangeShowMode(wxWindow *win) {}
 	virtual void GotoSheet(unsigned sht) {}
 	virtual void GotoContLocation(unsigned sht, unsigned contnum, int line = -1, int col = -1) { GotoSheet(sht); }
-	virtual void AddSheet(unsigned sht) {}
 	virtual void DeleteSheet(unsigned sht) {}
 	virtual void RemoveSheets(unsigned num) {}
 	virtual void SelectSheet(wxWindow* win, unsigned sht) {}
@@ -76,12 +73,9 @@ public:
 	virtual void Empty();
 
 	virtual void ChangeNumPoints(wxWindow *win);
-	virtual void ChangePointLabels(wxWindow *win);
-	virtual void ChangeShowMode(wxWindow *win);
 	virtual void GotoSheet(unsigned sht);
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,
 		int line = -1, int col = -1);
-	virtual void AddSheet(unsigned sht);
 	virtual void DeleteSheet(unsigned sht);
 	virtual void RemoveSheets(unsigned num);
 	virtual void SelectSheet(wxWindow* win, unsigned sht);

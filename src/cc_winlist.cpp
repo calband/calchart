@@ -81,24 +81,6 @@ void CC_WinList::ChangeNumPoints(wxWindow *win)
 }
 
 
-void CC_WinList::ChangePointLabels(wxWindow *win)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->ChangePointLabels(win);
-	}
-}
-
-
-void CC_WinList::ChangeShowMode(wxWindow *win)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->ChangeShowMode(win);
-	}
-}
-
-
 void CC_WinList::GotoSheet(unsigned sht)
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
@@ -113,15 +95,6 @@ void CC_WinList::GotoContLocation(unsigned sht, unsigned contnum, int line, int 
 	for (NodeIter n = list.begin(); n != list.end(); ++n)
 	{
 		(*n)->GotoContLocation(sht, contnum, line, col);
-	}
-}
-
-
-void CC_WinList::AddSheet(unsigned sht)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->AddSheet(sht);
 	}
 }
 

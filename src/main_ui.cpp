@@ -216,29 +216,10 @@ CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
 : CC_WinNode(lst), frame(frm) {}
 
 
-void CC_WinNodeMain::ChangePointLabels(wxWindow *win)
-{
-	frame->field->UpdateSS();
-}
-
-
-void CC_WinNodeMain::ChangeShowMode(wxWindow *win)
-{
-	frame->field->UpdateBars();
-	frame->field->UpdateSS();
-}
-
-
 void CC_WinNodeMain::GotoContLocation(unsigned sht, unsigned contnum,
 int line, int col)
 {
 	frame->field->GotoSS(sht);
-}
-
-
-void CC_WinNodeMain::AddSheet(unsigned sht)
-{
-	frame->UpdatePanel();
 }
 
 
