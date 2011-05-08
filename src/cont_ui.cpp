@@ -116,24 +116,6 @@ int line, int col)
 }
 
 
-void CC_WinNodeCont::DeleteSheet(unsigned sht)
-{
-	if (sht == editor->GetShow()->GetCurrentSheetNum())
-	{
-		editor->DetachText();
-	}
-}
-
-
-void CC_WinNodeCont::RemoveSheets(unsigned num)
-{
-	if (num <= editor->GetShow()->GetCurrentSheetNum())
-	{
-		editor->DetachText();
-	}
-}
-
-
 void CC_WinNodeCont::FlushContinuity()
 {
 	editor->FlushText();
@@ -399,18 +381,13 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	if (sht == mShow->GetSheetEnd())
 		return;
-	bool do_tab;
 	unsigned row, column;
 	float x, y;
 	wxCoord textw, texth, textd, maxtexth;
-	int devx, devy;
 	unsigned tabnum;
 	float tabw;
 	float cur_posx, cur_posy, cur_height;
-	wxString tmpstr;
-	bool drawall;
-
-	drawall = ((firstrow == 0) && (lastrow < 0));
+	bool drawall = ((firstrow == 0) && (lastrow < 0));
 	cur_posx = cur_posy = cur_height = 0;
 	maxlines = maxcolumns = 0;
 
@@ -435,7 +412,7 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 				c != cont->chunks.end();
 				++c)
 			{
-				do_tab = false;
+				bool do_tab = false;
 				switch (c->font)
 				{
 					case PSFONT_SYMBOL:
@@ -464,6 +441,7 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 					x += textw;
 				}
 			}
+			int devx, devy;
 			GetVirtualSize(&devx, &devy);
 			x = (dc->DeviceToLogicalX(devx) - x) / 2;
 			if (x < 0.0) x = 0.0;
@@ -474,7 +452,7 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 			c != cont->chunks.end();
 			++c)
 		{
-			do_tab = false;
+			bool do_tab = false;
 			switch (c->font)
 			{
 				case PSFONT_NORM:
@@ -588,9 +566,9 @@ void PrintContCanvas::Draw(wxDC *dc, int firstrow, int lastrow)
 						}
 						else if (column < cursorx)
 						{
-							float w;
-							tmpstr = c->text.SubString(0, (cursorx - column - 1));
-//dc->GetTextExtent(tmpstr, &w, &texth, &textd);
+							wxCoord w;
+							wxString tmpstr = c->text.SubString(0, (cursorx - column - 1));
+							dc->GetTextExtent(tmpstr, &w, &texth, &textd);
 							cur_posx = x+w;
 						}
 					}

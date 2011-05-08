@@ -54,8 +54,7 @@ public:
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
 	CC_show();
-	CC_show(unsigned npoints);
-	~CC_show();
+	virtual ~CC_show();
 
 	// Need to override OnOpenDoc so we can report errors
 	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
@@ -96,7 +95,6 @@ public:
 	void SetCurrentSheet(unsigned n) { mSheetNum = n; }
 
 	CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
-	CC_sheet_container_t RemoveLastSheets(unsigned numtoremain);
 	void DeleteNthSheet(unsigned sheetidx);
 	void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
 	void InsertSheetInternal(const CC_sheet_container_t& nsheet, unsigned sheetidx);

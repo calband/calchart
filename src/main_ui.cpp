@@ -223,18 +223,6 @@ int line, int col)
 }
 
 
-void CC_WinNodeMain::DeleteSheet(unsigned sht)
-{
-	frame->UpdatePanel();
-}
-
-
-void CC_WinNodeMain::RemoveSheets(unsigned num)
-{
-	frame->UpdatePanel();
-}
-
-
 TopFrame::TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
 wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
 {
@@ -565,7 +553,7 @@ void MainFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		ShowPrintDialog dialog(field->mShow, node->GetList(), false, this);
+		ShowPrintDialog dialog(field->mShow, false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -577,7 +565,7 @@ void MainFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		ShowPrintDialog dialog(field->mShow, node->GetList(), true, this);
+		ShowPrintDialog dialog(field->mShow, true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();

@@ -116,8 +116,6 @@ public:
 
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,
 		int line = -1, int col = -1);
-	virtual void DeleteSheet(unsigned sht);
-	virtual void RemoveSheets(unsigned num);
 
 private:
 	MainFrame *frame;

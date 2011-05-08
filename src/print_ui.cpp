@@ -208,14 +208,14 @@ ShowPrintDialog::ShowPrintDialog()
 }
 
 
-ShowPrintDialog::ShowPrintDialog(CC_show *show, CC_WinList *lst, bool printEPS,
+ShowPrintDialog::ShowPrintDialog(CC_show *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)
 {
 	Init();
 
-	Create(show, lst, printEPS, parent, id, caption, pos, size, style);
+	Create(show, printEPS, parent, id, caption, pos, size, style);
 }
 
 
@@ -229,7 +229,7 @@ void ShowPrintDialog::Init()
 }
 
 
-bool ShowPrintDialog::Create(CC_show *show, CC_WinList *lst, bool printEPS,
+bool ShowPrintDialog::Create(CC_show *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)

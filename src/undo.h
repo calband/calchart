@@ -167,6 +167,7 @@ public:
 
 protected:
 	CC_show& mShow;
+	const unsigned mSheetNum;
 	CC_show::CC_sheet_container_t mSheets;
 	const unsigned mWhere;
 };
@@ -183,6 +184,7 @@ public:
 
 protected:
 	CC_show& mShow;
+	const unsigned mSheetNum;
 	CC_show::CC_sheet_container_t mSheets;
 	const unsigned mWhere;
 };

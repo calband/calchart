@@ -42,7 +42,7 @@ class ShowPrintDialog : public wxDialog
 
 	public:
 	ShowPrintDialog( );
-	ShowPrintDialog(CC_show *show, CC_WinList *lst, bool printEPS,
+	ShowPrintDialog(CC_show *show, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -50,7 +50,7 @@ class ShowPrintDialog : public wxDialog
 
 	void Init();
 
-	bool Create(CC_show *show, CC_WinList *lst, bool printEPS,
+	bool Create(CC_show *show, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );

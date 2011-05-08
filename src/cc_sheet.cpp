@@ -106,7 +106,7 @@ bool CC_sheet::SelectContinuity(unsigned i) const
 	{
 		if (pts[j].cont == i)
 		{
-			select.insert(i);
+			select.insert(j);
 		}
 	}
 	show->SetSelection(select);

@@ -343,7 +343,7 @@ SetLabelFlipCommand::~SetLabelFlipCommand()
 // For adding a single or container of sheets
 AddSheetsCommand::AddSheetsCommand(CC_show& show, const CC_show::CC_sheet_container_t& sheets, unsigned where)
 : wxCommand(true, wxT("Moving points")),
-mShow(show), mSheets(sheets), mWhere(where)
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mSheets(sheets), mWhere(where)
 {
 }
 
@@ -353,6 +353,7 @@ AddSheetsCommand::~AddSheetsCommand()
 
 bool AddSheetsCommand::Do()
 {
+	mShow.SetCurrentSheet(mSheetNum);
 	mShow.InsertSheetInternal(mSheets, mWhere);
 	mShow.Modify(true);
 	return true;
@@ -361,6 +362,7 @@ bool AddSheetsCommand::Do()
 bool AddSheetsCommand::Undo()
 {
 	mShow.RemoveNthSheet(mWhere);
+	mShow.SetCurrentSheet(mSheetNum);
 	mShow.Modify(true);
 	return true;
 }
@@ -368,7 +370,7 @@ bool AddSheetsCommand::Undo()
 // For removing a single
 RemoveSheetsCommand::RemoveSheetsCommand(CC_show& show, unsigned where)
 : wxCommand(true, wxT("Moving points")),
-mShow(show), mWhere(where)
+mShow(show), mSheetNum(show.GetCurrentSheetNum()), mWhere(where)
 {
 }
 
@@ -378,6 +380,7 @@ RemoveSheetsCommand::~RemoveSheetsCommand()
 
 bool RemoveSheetsCommand::Do()
 {
+	mShow.SetCurrentSheet(mSheetNum);
 	mSheets = mShow.RemoveNthSheet(mWhere);
 	mShow.Modify(true);
 	return true;
@@ -386,6 +389,7 @@ bool RemoveSheetsCommand::Do()
 bool RemoveSheetsCommand::Undo()
 {
 	mShow.InsertSheetInternal(mSheets, mWhere);
+	mShow.SetCurrentSheet(mSheetNum);
 	mShow.Modify(true);
 	return true;
 }

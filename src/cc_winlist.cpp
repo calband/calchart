@@ -99,33 +99,6 @@ void CC_WinList::GotoContLocation(unsigned sht, unsigned contnum, int line, int 
 }
 
 
-void CC_WinList::DeleteSheet(unsigned sht)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->DeleteSheet(sht);
-	}
-}
-
-
-void CC_WinList::RemoveSheets(unsigned num)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->RemoveSheets(num);
-	}
-}
-
-
-void CC_WinList::SelectSheet(wxWindow* win, unsigned sht)
-{
-	for (NodeIter n = list.begin(); n != list.end(); ++n)
-	{
-		(*n)->SelectSheet(win, sht);
-	}
-}
-
-
 void CC_WinList::FlushContinuity()
 {
 	for (NodeIter n = list.begin(); n != list.end(); ++n)

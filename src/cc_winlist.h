@@ -51,9 +51,6 @@ public:
 	virtual void ChangeNumPoints(wxWindow *win) {}
 	virtual void GotoSheet(unsigned sht) {}
 	virtual void GotoContLocation(unsigned sht, unsigned contnum, int line = -1, int col = -1) { GotoSheet(sht); }
-	virtual void DeleteSheet(unsigned sht) {}
-	virtual void RemoveSheets(unsigned num) {}
-	virtual void SelectSheet(wxWindow* win, unsigned sht) {}
 	virtual void FlushContinuity() {}
 
 protected:
@@ -76,9 +73,6 @@ public:
 	virtual void GotoSheet(unsigned sht);
 	virtual void GotoContLocation(unsigned sht, unsigned contnum,
 		int line = -1, int col = -1);
-	virtual void DeleteSheet(unsigned sht);
-	virtual void RemoveSheets(unsigned num);
-	virtual void SelectSheet(wxWindow* win, unsigned sht);
 	virtual void FlushContinuity();
 
 private:

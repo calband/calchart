@@ -117,32 +117,6 @@ mSheetNum(0)
 	autosaveTimer.AddShow(this);
 }
 
-// Create a new show
-CC_show::CC_show(unsigned npoints)
-:okay(true), numpoints(npoints), sheets(1, CC_sheet(this, wxT("1"))),
-pt_labels(npoints),
-print_landscape(false), print_do_cont(true),
-print_do_cont_sheet(true),
-mSheetNum(0)
-{
-	wxString tmpname;
-
-	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
-	SetAutosaveName(tmpname);
-	mode = *wxGetApp().GetModeList().Begin();
-	if (npoints)
-	{
-		for (unsigned int i = 0; i < npoints; i++)
-		{
-			pt_labels[i].Printf(wxT("%u"), i);
-		}
-		UnselectAll();
-	}
-	sheets.front().animcont.push_back(CC_continuity(contnames[0], 0));
-
-	autosaveTimer.AddShow(this);
-}
-
 #define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
 
 #define INGL_INGL Make4CharWord('I','N','G','L')
@@ -1040,7 +1014,6 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
 	CC_sheet_iterator_t i = GetNthSheet(sheetidx);
 	CC_sheet_container_t shts(1, *i);
 	sheets.erase(i);
-	wxGetApp().GetWindowList().DeleteSheet(sheetidx);
 
 	if (sheetidx < GetCurrentSheetNum())
 	{
@@ -1053,16 +1026,6 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
 	}
 
 	return shts;
-}
-
-
-CC_show::CC_sheet_container_t CC_show::RemoveLastSheets(unsigned numtoremain)
-{
-	if (numtoremain > sheets.size()) return CC_sheet_container_t();
-	CC_sheet_container_t sht(sheets.begin() + numtoremain, sheets.end());
-	sheets.erase(sheets.begin() + numtoremain, sheets.end());
-	wxGetApp().GetWindowList().RemoveSheets(numtoremain);
-	return sht;
 }
 
 
