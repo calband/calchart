@@ -76,7 +76,6 @@ wxPrintDialogData *gPrintDialogData;
 
 extern ToolBarEntry main_tb[];
 extern ToolBarEntry anim_tb[];
-extern ToolBarEntry printcont_tb[];
 
 wxFont *contPlainFont;
 wxFont *contBoldFont;
@@ -179,17 +178,6 @@ bool CalChartApp::OnInit()
 	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_nbeat));
 	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_pshet));
 	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_nshet));
-
-	i = 0;
-
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym0));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym1));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym2));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym3));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym4));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym5));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym6));
-	printcont_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym7));
 
 	contPlainFont = new wxFont(11, wxMODERN, wxNORMAL, wxNORMAL);
 	contBoldFont = new wxFont(11, wxMODERN, wxNORMAL, wxBOLD);

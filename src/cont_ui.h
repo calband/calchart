@@ -34,7 +34,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "show.h"
 
 class ContinuityEditor;
-class PrintContEditor;
 
 class CC_WinNodeCont : public CC_WinNode
 {
@@ -48,17 +47,6 @@ public:
 
 private:
 	ContinuityEditor *editor;
-};
-
-class CC_WinNodePrintCont : public CC_WinNode
-{
-public:
-	CC_WinNodePrintCont(CC_WinList *lst, PrintContEditor *req);
-
-	virtual void GotoSheet(unsigned sht);
-
-private:
-	PrintContEditor *editor;
 };
 
 // View for linking CC_show with ContinuityEditor
@@ -126,63 +114,6 @@ private:
 	FancyTextWin *mUserInput;
 	CC_show::const_CC_sheet_iterator_t mSheetUnderEdit;
 	CC_WinNodeCont *node;
-
-	DECLARE_EVENT_TABLE()
-};
-
-class PrintContCanvas : public wxScrolledWindow
-{
-public:
-	PrintContCanvas(wxFrame *frame, CC_show *show);
-	~PrintContCanvas();
-
-	void Draw(wxDC *dc, int firstrow = 0, int lastrow = -1);
-
-	void OnPaint(wxPaintEvent& event);
-	void OnMouseEvent(wxMouseEvent& event);
-	void OnChar(wxKeyEvent& event);
-	inline void Update() { topline = 0; Refresh(); UpdateBars(); }
-	void UpdateBars();
-
-private:
-	void MoveCursor(unsigned column, unsigned row);
-	void DrawCursor(wxDC *dc, float x, float y, float height);
-	void InsertChar(unsigned onechar);
-	void DeleteChar(bool backspace = true);
-
-	CC_show *mShow;
-	wxFrame *ourframe;
-	unsigned topline;
-	float width, height;
-	unsigned cursorx, cursory;
-	unsigned maxlines, maxcolumns;
-
-	DECLARE_EVENT_TABLE()
-};
-
-class PrintContEditorView : public wxView
-{
-public:
-	PrintContEditorView();
-	~PrintContEditorView();
-    virtual void OnDraw(wxDC *dc);
-    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
-};
-
-class PrintContEditor : public wxFrame
-{
-public:
-	PrintContEditor(CC_show *show, CC_WinList *lst,
-		wxFrame *parent, const wxString& title,
-		int x = -1, int y = -1, int width = 400, int height = 400);
-	~PrintContEditor();
-
-	void OnActivate(wxActivateEvent& event);
-
-	PrintContCanvas *canvas;
-private:
-	PrintContEditorView *mView;
-	CC_WinNodePrintCont *node;
 
 	DECLARE_EVENT_TABLE()
 };

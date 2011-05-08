@@ -272,16 +272,29 @@ public:
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 };
 
-class AnimErrorList: public wxFrame
+class AnimErrorList : public wxDialog
 {
+//	DECLARE_CLASS( AnimErrorList )
+	DECLARE_EVENT_TABLE()
+	
 public:
+	AnimErrorList();
 	AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
-		wxFrame *frame, const wxString& title,
-		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(300, 300));
-	~AnimErrorList();
-	void OnCloseWindow(wxCloseEvent& event);
-	void OnSize(wxSizeEvent& event);
-	void OnCmdClose(wxCommandEvent& event);
+		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+	virtual ~AnimErrorList();
+
+	void Init();
+
+	bool Create(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
+	bool TransferDataToWindow();
+
 	void OnCmdUpdate(wxCommandEvent& event);
 
 	inline bool Okay() { return ok; };
@@ -296,9 +309,8 @@ private:
 	bool ok;
 	unsigned sheetnum;
 	wxListBox *list;
+	ErrorMarker mErrorMarkers[NUM_ANIMERR];
 	ErrorMarker pointsels[NUM_ANIMERR];
 	CC_WinNodeAnimErrors *node;
-
-	DECLARE_EVENT_TABLE()
 };
 #endif

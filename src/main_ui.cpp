@@ -136,7 +136,6 @@ EVT_MENU(CALCHART__INSERT_AFTER, MainFrame::OnCmdInsertAfter)
 EVT_MENU(wxID_DELETE, MainFrame::OnCmdDelete)
 EVT_MENU(CALCHART__RELABEL, MainFrame::OnCmdRelabel)
 EVT_MENU(CALCHART__EDIT_CONTINUITY, MainFrame::OnCmdEditCont)
-EVT_MENU(CALCHART__EDIT_PRINTCONT, MainFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_SHEET_TITLE, MainFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, MainFrame::OnCmdSetBeats)
 EVT_MENU(CALCHART__SETUP, MainFrame::OnCmdSetup)
@@ -362,7 +361,6 @@ field(NULL)
 
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
-	anim_menu->Append(CALCHART__EDIT_PRINTCONT, wxT("Edit &Printed Continuity..."), wxT("Edit printed continuity for this stuntsheet"));
 	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
 
 	wxMenu *select_menu = new wxMenu;
@@ -638,16 +636,6 @@ void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 	{
 		(void)new ContinuityEditor(field->mShow, node->GetList(), this,
 			wxT("Animation Continuity"));
-	}
-}
-
-
-void MainFrame::OnCmdEditPrintCont(wxCommandEvent& event)
-{
-	if (field->mShow)
-	{
-		(void)new PrintContEditor(field->mShow, node->GetList(), this,
-			wxT("Printed Continuity"));
 	}
 }
 

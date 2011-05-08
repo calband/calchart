@@ -78,10 +78,7 @@ EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotos
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(AnimErrorList, wxFrame)
-EVT_CLOSE(AnimErrorList::OnCloseWindow)
-EVT_SIZE(AnimErrorList::OnSize)
-EVT_BUTTON(wxID_CLOSE, AnimErrorList::OnCmdClose)
+BEGIN_EVENT_TABLE(AnimErrorList, wxDialog)
 EVT_LISTBOX(CALCHART__anim_update, AnimErrorList::OnCmdUpdate)
 END_EVENT_TABLE()
 
@@ -893,50 +890,84 @@ AnimErrorListView::~AnimErrorListView() {}
 void AnimErrorListView::OnDraw(wxDC *dc) {}
 void AnimErrorListView::OnUpdate(wxView *sender, wxObject *hint)
 {
-	static_cast<AnimErrorList*>(GetFrame())->Unselect();
+	static_cast<AnimErrorList*>(GetFrame())->Close();
 }
 
-AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst,
-unsigned num, wxFrame *frame, const wxString& title,
-const wxPoint& pos, const wxSize& size)
-: wxFrame(frame, wxID_ANY, title, pos, size, CC_FRAME_OTHER), sheetnum(num)
+AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+		wxWindow *parent, wxWindowID id, const wxString& caption,
+		const wxPoint& pos, const wxSize& size,
+		long style)
 {
-	unsigned i, j;
+	Init();
+	
+	Create(comp, lst, num, parent, id, caption, pos, size, style);
+}
 
+
+bool AnimErrorList::Create(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+		wxWindow *parent, wxWindowID id, const wxString& caption,
+		const wxPoint& pos, const wxSize& size,
+		long style)
+{
+	if (!wxDialog::Create(parent, id, caption, pos, size, style))
+		return false;
+
+	node = NULL;//new CC_WinNodeAnim(lst, this);
+	show = comp->show;
+	for (size_t i = 0; i < NUM_ANIMERR; ++i)
+		mErrorMarkers[i] = comp->error_markers[i];
+
+	// give this a view so it can pick up document changes
 	mView = new AnimErrorListView;
 	mView->SetDocument(show);
 	mView->SetFrame(this);
-// Give it an icon
-	SetBandIcon(this);
-	show = comp->show;
 
+	CreateControls();
+
+// This fits the dalog to the minimum size dictated by the sizers
+	GetSizer()->Fit(this);
+// This ensures that the dialog cannot be smaller than the minimum size
+	GetSizer()->SetSizeHints(this);
+
+	Center();
+
+	return true;
+}
+
+
+void AnimErrorList::Init()
+{
+}
+
+
+void AnimErrorList::CreateControls()
+{
 // create a sizer for laying things out top down:
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+	SetSizer(topsizer);
 
-	wxButton *closeBut = new wxButton(this, wxID_CLOSE, wxT("Close"));
+	wxButton *closeBut = new wxButton(this, wxID_OK, wxT("Close"));
 	topsizer->Add(closeBut);
 
 	list = new wxListBox(this, CALCHART__anim_update, wxDefaultPosition, wxSize(200,200), 0, NULL, wxLB_SINGLE);
 
-	for (i = 0, j = 0; i < NUM_ANIMERR; i++)
-	{
-		if (!comp->error_markers[i].pntgroup.empty())
-		{
-			list->Append(animate_err_msgs[i]);
-			pointsels[j++] = comp->error_markers[i];
-		}
-	}
 	topsizer->Add(list, wxSizerFlags().Expand().Border(5) );
-
-	node = new CC_WinNodeAnimErrors(lst, this);
-
-	SetSizer(topsizer);							  // use the sizer for layout
-
-	topsizer->SetSizeHints(this);				  // set size hints to honour minimum size
-
-	Show(true);
 }
 
+bool AnimErrorList::TransferDataToWindow()
+{
+	wxListBox* lst = (wxListBox*)FindWindow(CALCHART__anim_update);
+
+	for (unsigned i = 0, j = 0; i < NUM_ANIMERR; i++)
+	{
+		if (!mErrorMarkers[i].pntgroup.empty())
+		{
+			lst->Append(animate_err_msgs[i]);
+			pointsels[j++] = mErrorMarkers[i];
+		}
+	}
+	return true;
+}
 
 AnimErrorList::~AnimErrorList()
 {
@@ -946,24 +977,6 @@ AnimErrorList::~AnimErrorList()
 		node->Remove();
 		delete node;
 	}
-}
-
-
-void AnimErrorList::OnSize(wxSizeEvent& event)
-{
-	Layout();
-}
-
-
-void AnimErrorList::OnCloseWindow(wxCloseEvent& event)
-{
-	Destroy();
-}
-
-
-void AnimErrorList::OnCmdClose(wxCommandEvent& event)
-{
-	Close();
 }
 
 

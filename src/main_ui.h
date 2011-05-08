@@ -67,7 +67,6 @@ enum
 	CALCHART__INSERT_AFTER,
 	CALCHART__RELABEL,
 	CALCHART__EDIT_CONTINUITY,
-	CALCHART__EDIT_PRINTCONT,
 	CALCHART__SET_SHEET_TITLE,
 	CALCHART__SET_BEATS,
 	CALCHART__SETUP,
@@ -173,7 +172,6 @@ public:
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdRelabel(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);
-	void OnCmdEditPrintCont(wxCommandEvent& event);
 	void OnCmdSetSheetTitle(wxCommandEvent& event);
 	void OnCmdSetBeats(wxCommandEvent& event);
 	void OnCmdSetup(wxCommandEvent& event);

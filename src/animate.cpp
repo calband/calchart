@@ -526,8 +526,9 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 		if (!comp.Okay())
 		{
 			tempbuf.Printf(wxT("Errors for \"%.32s\""), comp.curr_sheet->GetName().c_str());
-			(void)new AnimErrorList(&comp, winlist, sheetnum,
-				frame, tempbuf);
+			AnimErrorList* errorList = new AnimErrorList(&comp, winlist, sheetnum,
+				frame, wxID_ANY, tempbuf);
+			errorList->Show();
 			if (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES)
 			{
 				break;
