@@ -100,6 +100,10 @@ void SetAutoSave(int secs)
 		autosaveTimer.Start(secs*1000);
 }
 
+IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
+IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
+IMPLEMENT_DYNAMIC_CLASS(CC_show_AllViewsGoToCont, wxObject)
+
 IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 
 // Create a new show
@@ -952,9 +956,10 @@ void CC_show::ClearAutosave() const
 }
 
 
-void CC_show::FlushAllTextWindows() const
+void CC_show::FlushAllTextWindows()
 {
-	wxGetApp().GetWindowList().FlushContinuity();
+	CC_show_FlushAllViews flushMod;
+	UpdateAllViews(NULL, &flushMod);
 }
 
 
@@ -967,7 +972,8 @@ const wxString& CC_show::GetDescr() const
 void CC_show::Modify(bool b)
 {
 	wxDocument::Modify(b);
-	UpdateAllViews();
+	CC_show_modified showMod;
+	UpdateAllViews(NULL, &showMod);
 }
 
 
@@ -1026,6 +1032,13 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
 	}
 
 	return shts;
+}
+
+
+void CC_show::SetCurrentSheet(unsigned n)
+{
+	mSheetNum = n;
+	UpdateAllViews();
 }
 
 
@@ -1156,6 +1169,13 @@ void CC_show::ToggleSelection(const SelectionList& sl)
 	}
 	UpdateAllViews();
 }
+
+void CC_show::AllViewGoToCont(unsigned contnum, int line, int col)
+{
+	CC_show_AllViewsGoToCont goToMod(contnum, line, col);
+	UpdateAllViews(NULL, &goToMod);
+}
+
 
 #include <iostream>
 using std::cout;

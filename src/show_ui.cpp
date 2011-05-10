@@ -62,7 +62,7 @@ PointPicker::PointPicker()
 	Init();
 }
 
-PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
+PointPicker::PointPicker(CC_show *shw,
 	wxWindow *parent, wxWindowID id,
 	const wxString& caption,
 	const wxPoint& pos,
@@ -71,7 +71,7 @@ PointPicker::PointPicker(CC_show *shw, CC_WinList *lst,
 {
 	Init();
 	
-	Create(shw, lst, parent, id, caption, pos, size, style);
+	Create(shw, parent, id, caption, pos, size, style);
 }
 
 PointPicker::~PointPicker()
@@ -86,7 +86,6 @@ void PointPicker::Init()
 
 
 bool PointPicker::Create(CC_show *shw,
-		CC_WinList *lst,
 		wxWindow *parent, wxWindowID id,
 		const wxString& caption,
 		const wxPoint& pos,

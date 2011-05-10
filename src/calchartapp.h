@@ -54,11 +54,9 @@ public:
 
 	ShowModeList& GetModeList() { return mModeList; }
 	MainFrameList& GetFrameList() { return mFrameList; }
-	CC_WinList& GetWindowList() { return mWinList; }
 private:
 	ShowModeList mModeList;
 	MainFrameList mFrameList;
-	CC_WinList mWinList;
 
 	boost::shared_ptr<wxDocManager> mDocManager;
 };

@@ -173,7 +173,7 @@ void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
 {
 	CC_continuity& c = GetNthContinuity(i);
 	c.SetText(text);
-	show->UpdateAllViews();
+	show->Modify(true);
 }
 
 

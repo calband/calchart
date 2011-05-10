@@ -105,21 +105,6 @@ enum
 	CALCHART__refnum_callback,
 };
 
-class MainFrame;
-class MainFrameView;
-
-class CC_WinNodeMain : public CC_WinNode
-{
-public:
-	CC_WinNodeMain(CC_WinList *lst, MainFrame *frm);
-
-	virtual void GotoContLocation(unsigned sht, unsigned contnum,
-		int line = -1, int col = -1);
-
-private:
-	MainFrame *frame;
-};
-
 // Top-level frame
 class TopFrame : public wxDocMDIParentFrame
 {
@@ -147,6 +132,8 @@ private:
 };
 
 class FieldCanvas;
+class MainFrameView;
+
 // Define the main editing frame
 class MainFrame : public wxDocMDIChildFrame
 {
@@ -232,7 +219,6 @@ public:
 	wxSlider *sheet_slider;
 
 	FieldCanvas *field;
-	CC_WinNodeMain *node;
 	
 	DECLARE_EVENT_TABLE()
 };
@@ -258,7 +244,6 @@ public:
 	inline void GotoThisSS()
 	{
 		UpdateSS();
-		ourframe->node->GetList()->GotoSheet(mShow->GetCurrentSheetNum());
 	}
 	inline void GotoSS(unsigned n)
 	{

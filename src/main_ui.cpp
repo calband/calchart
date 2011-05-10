@@ -211,17 +211,6 @@ public:
 	CC_show *show;
 };
 
-CC_WinNodeMain::CC_WinNodeMain(CC_WinList *lst, MainFrame *frm)
-: CC_WinNode(lst), frame(frm) {}
-
-
-void CC_WinNodeMain::GotoContLocation(unsigned sht, unsigned contnum,
-int line, int col)
-{
-	frame->field->GotoSS(sht);
-}
-
-
 TopFrame::TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
 wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
 {
@@ -395,7 +384,6 @@ field(NULL)
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
 	field->curr_ref = def_ref;
-	node = new CC_WinNodeMain(&wxGetApp().GetWindowList(), this);
 
 // Add the controls
 	wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
@@ -465,11 +453,6 @@ field(NULL)
 MainFrame::~MainFrame()
 {
 	wxGetApp().GetFrameList().remove(this);
-	if (node)
-	{
-		node->Remove();
-		delete node;
-	}
 }
 
 
@@ -634,7 +617,7 @@ void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		(void)new ContinuityEditor(field->mShow, node->GetList(), this,
+		(void)new ContinuityEditor(field->mShow, this,
 			wxT("Animation Continuity"));
 	}
 }
@@ -701,7 +684,7 @@ void MainFrame::OnCmdPoints(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		PointPicker* pp = new PointPicker(field->mShow, node->GetList(), this);
+		PointPicker* pp = new PointPicker(field->mShow, this);
 		// make it modeless:
 		pp->Show();
 	}
@@ -713,7 +696,7 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 	if (field->mShow)
 	{
 		AnimationFrame *anim =
-			new AnimationFrame(this, field->mShow, node->GetList());
+			new AnimationFrame(this, field->mShow);
 		anim->canvas->Generate();
 	}
 }

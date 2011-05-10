@@ -39,30 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class AnimationCanvas;
 class AnimationFrame;
 
-class CC_WinNodeAnim : public CC_WinNode
-{
-	public:
-		CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm);
-
-		virtual void ChangeNumPoints(wxWindow *win);
-
-	private:
-		AnimationFrame *frame;
-};
-
-class AnimErrorList;
-
-class CC_WinNodeAnimErrors : public CC_WinNode
-{
-public:
-	CC_WinNodeAnimErrors(CC_WinList *lst, AnimErrorList *err);
-
-	virtual void ChangeNumPoints(wxWindow *win);
-
-private:
-	AnimErrorList *errlist;
-};
-
 class AnimationTimer: public wxTimer
 {
 public:
@@ -190,7 +166,7 @@ public:
 class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxFrame *frame, CC_show *show, CC_WinList *lst);
+	AnimationFrame(wxFrame *frame, CC_show *show);
 	~AnimationFrame();
 
 	void OnCmdReanimate(wxCommandEvent& event);
@@ -227,7 +203,6 @@ public:
 	AnimationCanvas *canvas;
 private:
 	AnimationView *mView;
-	CC_WinNodeAnim *node;
 	wxChoice *collis;
 	wxSlider *sheet_slider;
 	wxSlider *beat_slider;
@@ -274,12 +249,12 @@ public:
 
 class AnimErrorList : public wxDialog
 {
-//	DECLARE_CLASS( AnimErrorList )
+	DECLARE_CLASS( AnimErrorList )
 	DECLARE_EVENT_TABLE()
 	
 public:
 	AnimErrorList();
-	AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+	AnimErrorList(AnimateCompile *comp, unsigned num,
 		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -287,7 +262,7 @@ public:
 
 	void Init();
 
-	bool Create(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+	bool Create(AnimateCompile *comp, unsigned num,
 		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -308,9 +283,7 @@ private:
 	AnimErrorListView *mView;
 	bool ok;
 	unsigned sheetnum;
-	wxListBox *list;
 	ErrorMarker mErrorMarkers[NUM_ANIMERR];
 	ErrorMarker pointsels[NUM_ANIMERR];
-	CC_WinNodeAnimErrors *node;
 };
 #endif

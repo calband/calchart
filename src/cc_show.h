@@ -44,6 +44,30 @@ class CC_sheet;
 class ShowMode;
 class ShowUndoList;
 
+// The CC_show_modified class is used for indicating to views if the show has been modified
+// some views behave differently if the show has been modified
+class CC_show_modified : public wxObject
+{
+DECLARE_DYNAMIC_CLASS(CC_show_modified)
+};
+
+// The CC_show_modified class is used for indicating to views to save any text
+class CC_show_FlushAllViews : public wxObject
+{
+DECLARE_DYNAMIC_CLASS(CC_show_FlushAllViews)
+};
+
+// The CC_show_modified class is used for indicating to views to save any text
+class CC_show_AllViewsGoToCont : public wxObject
+{
+DECLARE_DYNAMIC_CLASS(CC_show_AllViewsGoToCont)
+public:
+	CC_show_AllViewsGoToCont(unsigned contnum = 0, int line = 0, int col = -1) : mContnum(contnum), mLine(line), mCol(col) {}
+	unsigned mContnum;
+	int mLine;
+	int mCol;
+};
+
 class CC_show : public wxDocument
 {
 	DECLARE_DYNAMIC_CLASS(CC_show)
@@ -72,7 +96,7 @@ public:
 
 	wxString Autosave();
 	void ClearAutosave() const;
-	void FlushAllTextWindows() const;
+	void FlushAllTextWindows();
 
 public:
 	const wxString& GetDescr() const;
@@ -92,7 +116,7 @@ public:
 	const_CC_sheet_iterator_t GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
 	CC_sheet_iterator_t GetCurrentSheet() { return GetNthSheet(mSheetNum); }
 	unsigned GetCurrentSheetNum() const { return mSheetNum; }
-	void SetCurrentSheet(unsigned n) { mSheetNum = n; }
+	void SetCurrentSheet(unsigned n);
 
 	CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
 	void DeleteNthSheet(unsigned sheetidx);
@@ -128,6 +152,7 @@ public:
 	const ShowMode& GetMode() const { return *mode; };
 	void SetMode(ShowMode* m) { mode = m; };
 
+	void AllViewGoToCont(unsigned contnum, int line, int col);
 private:
 	ShowMode *mode;
 

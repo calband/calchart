@@ -438,7 +438,7 @@ void AnimateSheet::SetName(const wxChar *s)
 }
 
 
-Animation::Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist)
+Animation::Animation(CC_show *show, wxFrame *frame)
 : numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts), collisions(numpts),
 curr_sheet(NULL), numsheets(0), sheets(NULL)
 {
@@ -449,7 +449,7 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 
 // Now compile
 	comp.show = show;
-	wxGetApp().GetWindowList().FlushContinuity();		  // get all changes in text windows
+	show->FlushAllTextWindows();		  // get all changes in text windows
 
 	unsigned sheetnum = 0;
 	for (comp.curr_sheet = show->GetSheetBegin(); comp.curr_sheet != show->GetSheetEnd();
@@ -526,7 +526,7 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 		if (!comp.Okay())
 		{
 			tempbuf.Printf(wxT("Errors for \"%.32s\""), comp.curr_sheet->GetName().c_str());
-			AnimErrorList* errorList = new AnimErrorList(&comp, winlist, sheetnum,
+			AnimErrorList* errorList = new AnimErrorList(&comp, sheetnum,
 				frame, wxID_ANY, tempbuf);
 			errorList->Show();
 			if (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES)

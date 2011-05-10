@@ -193,7 +193,7 @@ class wxFrame;
 class Animation
 {
 public:
-	Animation(CC_show *show, wxFrame *frame, CC_WinList *winlist);
+	Animation(CC_show *show, wxFrame *frame);
 	~Animation();
 
 // Returns true if changes made

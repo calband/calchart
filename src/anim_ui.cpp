@@ -78,29 +78,11 @@ EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotos
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
 END_EVENT_TABLE()
 
+IMPLEMENT_DYNAMIC_CLASS(AnimErrorList, wxDialog)
+
 BEGIN_EVENT_TABLE(AnimErrorList, wxDialog)
 EVT_LISTBOX(CALCHART__anim_update, AnimErrorList::OnCmdUpdate)
 END_EVENT_TABLE()
-
-CC_WinNodeAnim::CC_WinNodeAnim(CC_WinList *lst, AnimationFrame *frm)
-: CC_WinNode(lst), frame(frm) {}
-
-
-void CC_WinNodeAnim::ChangeNumPoints(wxWindow *)
-{
-	frame->canvas->FreeAnim();
-}
-
-
-CC_WinNodeAnimErrors::CC_WinNodeAnimErrors(CC_WinList *lst, AnimErrorList *err)
-: CC_WinNode(lst), errlist(err) {}
-
-
-void CC_WinNodeAnimErrors::ChangeNumPoints(wxWindow *)
-{
-	errlist->Close();
-}
-
 
 void AnimationTimer::Notify()
 {
@@ -301,8 +283,7 @@ void AnimationCanvas::Generate()
 		anim = NULL;
 		RefreshCanvas();
 	}
-	anim = new Animation(mShow, ourframe,
-		((AnimationFrame*)ourframe)->node->GetList());
+	anim = new Animation(mShow, ourframe);
 	if (anim && (anim->numsheets == 0))
 	{
 		delete anim;
@@ -558,11 +539,13 @@ AnimationView::~AnimationView() {}
 void AnimationView::OnDraw(wxDC *dc) {}
 void AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 {
-	static_cast<AnimationFrame*>(GetFrame())->canvas->RefreshCanvas();
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+	{
+		static_cast<AnimationFrame*>(GetFrame())->canvas->FreeAnim();
+	}
 }
 
-AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show,
-CC_WinList *lst)
+AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 : wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, CC_FRAME_OTHER, wxT("anim"))
 {
 	mView = new AnimationView;
@@ -642,8 +625,6 @@ CC_WinList *lst)
 
 	topsizer->SetSizeHints(this);				  // set size hints to honour minimum size
 
-	node = new CC_WinNodeAnim(lst, this);
-
 	UpdatePanel();
 	Fit();
 	Show(true);
@@ -653,11 +634,6 @@ CC_WinList *lst)
 AnimationFrame::~AnimationFrame()
 {
 	delete mView;
-	if (node)
-	{
-		node->Remove();
-		delete node;
-	}
 }
 
 
@@ -890,21 +866,30 @@ AnimErrorListView::~AnimErrorListView() {}
 void AnimErrorListView::OnDraw(wxDC *dc) {}
 void AnimErrorListView::OnUpdate(wxView *sender, wxObject *hint)
 {
-	static_cast<AnimErrorList*>(GetFrame())->Close();
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+	{
+		static_cast<AnimErrorList*>(GetFrame())->Close();
+	}
 }
 
-AnimErrorList::AnimErrorList(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+AnimErrorList::AnimErrorList()
+{
+	Init();
+}
+
+
+AnimErrorList::AnimErrorList(AnimateCompile *comp, unsigned num,
 		wxWindow *parent, wxWindowID id, const wxString& caption,
 		const wxPoint& pos, const wxSize& size,
 		long style)
 {
 	Init();
 	
-	Create(comp, lst, num, parent, id, caption, pos, size, style);
+	Create(comp, num, parent, id, caption, pos, size, style);
 }
 
 
-bool AnimErrorList::Create(AnimateCompile *comp, CC_WinList *lst, unsigned num,
+bool AnimErrorList::Create(AnimateCompile *comp, unsigned num,
 		wxWindow *parent, wxWindowID id, const wxString& caption,
 		const wxPoint& pos, const wxSize& size,
 		long style)
@@ -912,7 +897,6 @@ bool AnimErrorList::Create(AnimateCompile *comp, CC_WinList *lst, unsigned num,
 	if (!wxDialog::Create(parent, id, caption, pos, size, style))
 		return false;
 
-	node = NULL;//new CC_WinNodeAnim(lst, this);
 	show = comp->show;
 	for (size_t i = 0; i < NUM_ANIMERR; ++i)
 		mErrorMarkers[i] = comp->error_markers[i];
@@ -949,9 +933,9 @@ void AnimErrorList::CreateControls()
 	wxButton *closeBut = new wxButton(this, wxID_OK, wxT("Close"));
 	topsizer->Add(closeBut);
 
-	list = new wxListBox(this, CALCHART__anim_update, wxDefaultPosition, wxSize(200,200), 0, NULL, wxLB_SINGLE);
+	wxListBox* lst = new wxListBox(this, CALCHART__anim_update, wxDefaultPosition, wxSize(200,200), 0, NULL, wxLB_SINGLE);
 
-	topsizer->Add(list, wxSizerFlags().Expand().Border(5) );
+	topsizer->Add(lst, wxSizerFlags().Expand().Border(5) );
 }
 
 bool AnimErrorList::TransferDataToWindow()
@@ -972,11 +956,6 @@ bool AnimErrorList::TransferDataToWindow()
 AnimErrorList::~AnimErrorList()
 {
 	delete mView;
-	if (node)
-	{
-		node->Remove();
-		delete node;
-	}
 }
 
 
@@ -988,18 +967,20 @@ void AnimErrorList::OnCmdUpdate(wxCommandEvent& event)
 
 void AnimErrorList::Unselect()
 {
-	int i = list->GetSelection();
+	wxListBox* lst = (wxListBox*)FindWindow(CALCHART__anim_update);
+	int i = lst->GetSelection();
 
 	if (i >= 0)
 	{
-		list->Deselect(i);
+		lst->Deselect(i);
 	}
 }
 
 
 void AnimErrorList::Update()
 {
-	Update(list->GetSelection());
+	wxListBox* lst = (wxListBox*)FindWindow(CALCHART__anim_update);
+	Update(lst->GetSelection());
 }
 
 
@@ -1012,13 +993,11 @@ void AnimErrorList::Update(int i)
 		{
 			if (pointsels[i].pntgroup.count(j))
 			{
-				select.insert(i);
+				select.insert(j);
 			}
 		}
 		show->SetSelection(select);
 	}
-	wxGetApp().GetWindowList().GotoContLocation(sheetnum > show->GetNumSheets() ?
-		show->GetNumSheets()-1 : sheetnum,
-		pointsels[i].contnum,
-		pointsels[i].line, pointsels[i].col);
+	show->SetCurrentSheet(sheetnum > show->GetNumSheets() ? show->GetNumSheets()-1 : sheetnum);
+	show->AllViewGoToCont(pointsels[i].contnum, pointsels[i].line, pointsels[i].col);
 }

@@ -62,33 +62,6 @@ EVT_BUTTON(ContinuityEditor_ContEditSave,ContinuityEditor::ContEditSave)
 EVT_CHOICE(ContinuityEditor_ContEditCurrent,ContinuityEditor::ContEditCurrent)
 END_EVENT_TABLE()
 
-CC_WinNodeCont::CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req)
-: CC_WinNode(lst), editor(req) {}
-
-void CC_WinNodeCont::GotoSheet(unsigned)
-{
-	editor->Update();
-}
-
-
-void CC_WinNodeCont::GotoContLocation(unsigned, unsigned contnum,
-int line, int col)
-{
-	editor->SetCurrent(contnum);
-	editor->UpdateContChoice();
-	if ((line > 0) && (col > 0))
-	{
-		editor->SetInsertionPoint(col, line);
-	}
-}
-
-
-void CC_WinNodeCont::FlushContinuity()
-{
-	editor->FlushText();
-}
-
-
 void ContinuityEditor::ContEditSet(wxCommandEvent&)
 {
 	SetPoints();
@@ -117,7 +90,28 @@ ContinuityEditorView::~ContinuityEditorView() {}
 void ContinuityEditorView::OnDraw(wxDC *dc) {}
 void ContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 {
-	static_cast<ContinuityEditor*>(GetFrame())->Update();
+	ContinuityEditor* editor = static_cast<ContinuityEditor*>(GetFrame());
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_FlushAllViews)))
+	{
+		editor->FlushText();
+	}
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_AllViewsGoToCont)))
+	{
+		CC_show_AllViewsGoToCont* goToCont = dynamic_cast<CC_show_AllViewsGoToCont*>(hint);
+		if (hint)
+		{
+			editor->SetCurrent(goToCont->mContnum);
+			editor->UpdateContChoice();
+			if ((goToCont->mLine > 0) && (goToCont->mCol > 0))
+			{
+				editor->SetInsertionPoint(goToCont->mCol, goToCont->mLine);
+			}
+		}
+	}
+	else
+	{
+		editor->Update();
+	}
 }
 
 void ContinuityEditorView::DoSetContinuityIndex(unsigned cont)
@@ -140,7 +134,7 @@ void ContinuityEditorView::DoDeleteContinuity(unsigned i)
 	GetDocument()->GetCommandProcessor()->Submit(new RemoveContinuityCommand(*static_cast<CC_show*>(GetDocument()), i), true);
 }
 
-ContinuityEditor::ContinuityEditor(CC_show *show, CC_WinList *lst,
+ContinuityEditor::ContinuityEditor(CC_show *show,
 wxFrame *parent, const wxString& title,
 int x, int y, int width, int height):
 wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height)),
@@ -190,19 +184,12 @@ mShow(show), mCurrentContinuityChoice(0), mSheetUnderEdit(NULL)
 	Show(true);
 
 	Update();
-
-	node = new CC_WinNodeCont(lst, this);
 }
 
 
 ContinuityEditor::~ContinuityEditor()
 {
 	delete mView;
-	if (node)
-	{
-		node->Remove();
-		delete node;
-	}
 }
 
 

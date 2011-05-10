@@ -35,20 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class ContinuityEditor;
 
-class CC_WinNodeCont : public CC_WinNode
-{
-public:
-	CC_WinNodeCont(CC_WinList *lst, ContinuityEditor *req);
-
-	virtual void GotoSheet(unsigned sht);
-	virtual void GotoContLocation(unsigned sht, unsigned contnum,
-		int line = -1, int col = -1);
-	virtual void FlushContinuity();
-
-private:
-	ContinuityEditor *editor;
-};
-
 // View for linking CC_show with ContinuityEditor
 class ContinuityEditorView : public wxView
 {
@@ -69,7 +55,7 @@ public:
 class ContinuityEditor : public wxFrame
 {
 public:
-	ContinuityEditor(CC_show *dcr, CC_WinList *lst,
+	ContinuityEditor(CC_show *dcr,
 		wxFrame *parent, const wxString& title,
 		int x = -1, int y = -1, int width = 400, int height = 300);
 	~ContinuityEditor();
@@ -113,7 +99,6 @@ private:
 	unsigned mCurrentContinuityChoice;
 	FancyTextWin *mUserInput;
 	CC_show::const_CC_sheet_iterator_t mSheetUnderEdit;
-	CC_WinNodeCont *node;
 
 	DECLARE_EVENT_TABLE()
 };

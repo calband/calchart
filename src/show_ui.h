@@ -46,7 +46,7 @@ class PointPicker : public wxDialog
 {
 public:
 	PointPicker();
-	PointPicker(CC_show *shw, CC_WinList *lst,
+	PointPicker(CC_show *shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -65,7 +65,7 @@ private:
 
 	void Init();
 
-	bool Create(CC_show *shw, CC_WinList *lst,
+	bool Create(CC_show *shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
 		const wxPoint& pos = wxDefaultPosition,
