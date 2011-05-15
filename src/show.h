@@ -40,7 +40,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/list.h>
 
 #include "cc_types.h"
-#include "cc_winlist.h"
 #include "platconf.h"
 #include "linmath.h"
 #include "cc_show.h"

@@ -29,7 +29,6 @@
 
 #include "modes.h"
 #include "main_ui.h"
-#include "cc_winlist.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
