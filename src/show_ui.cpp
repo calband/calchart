@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "show_ui.h"
-#include "calchartapp.h"
+#include "show.h"
 #include <ctype.h>
 #include <wx/statline.h>
 #include <wx/spinctrl.h>

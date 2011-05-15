@@ -1,5 +1,5 @@
-/* show.h
- * Definitions for the show classes
+/* cc_show.h
+ * Definitions for the cc_show classes
  *
  * Modification history:
  * 1-2-95     Garrick Meeker              Created from previous CalPrint

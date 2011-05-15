@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "confgr.h"
 #include "ccvers.h"
 #include "cc_sheet.h"
+#include "show.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>

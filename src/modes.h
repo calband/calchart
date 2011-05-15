@@ -26,8 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODES_H_
 #define _MODES_H_
 
-#include "show.h"
 #include "cc_coord.h"
+
+#include <wx/wx.h>
 #include <list>
 
 enum SHOW_TYPE { SHOW_STANDARD, SHOW_SPRINGSHOW };

@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "print_ui.h"
 #include "show_ui.h"
 #include "confgr.h"
-#include "calchartapp.h"
 #include "cc_sheet.h"
 #include <set>
 

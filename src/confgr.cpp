@@ -33,13 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/pen.h>
 #include <wx/config.h>
 #include <wx/confbase.h>
-#include "show.h"
 #include <ctype.h>
 #include <string>
 
 #include "calchartapp.h"
 #include "confgr.h"
 #include "modes.h"
+#include "show.h"
 
 const wxString ColorNames[COLOR_NUM] =
 {

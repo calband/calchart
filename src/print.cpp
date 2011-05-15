@@ -24,9 +24,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "show.h"
 #include "confgr.h"
 #include "modes.h"
+#include "show.h"
+#include "cc_show.h"
 #include "cc_sheet.h"
 #include <time.h>
 #include <string>

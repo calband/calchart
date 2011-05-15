@@ -31,9 +31,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <wx/wx.h>
-#include "show.h"
+#include <wx/dialog.h>
 
 class ShowPrintDialog;
+class CC_show;
 
 class ShowPrintDialog : public wxDialog
 {

@@ -29,6 +29,7 @@
 #include "confgr.h"
 #include "basic_ui.h"
 #include "main_ui.h"
+#include "show.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>

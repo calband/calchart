@@ -31,7 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "basic_ui.h"
-#include "show.h"
 #include "animate.h"
 #include <wx/timer.h>
 #define DEFAULT_ANIM_SIZE 3

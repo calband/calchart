@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma interface
 #endif
 
-#include "show.h"
 #include "cc_continuity.h"
 #include "cc_coord.h"
 #include "cc_show.h"

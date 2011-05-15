@@ -1,5 +1,5 @@
-/* show.h
- * Definitions for the show classes
+/* cc_continuity.h
+ * Definitions for the continuity classes
  *
  * Modification history:
  * 1-2-95     Garrick Meeker              Created from previous CalPrint

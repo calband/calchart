@@ -31,8 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include "basic_ui.h"
-#include "show.h"
 #include "cc_shapes.h"
+#include "cc_show.h"
 
 #include <wx/mdi.h>
 #include <wx/docview.h>

@@ -23,10 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _CC_SHAPES_H_
 #define _CC_SHAPES_H_
 
-#include "show.h"
 #include "cc_coord.h"
 
 #include <wx/wx.h>
+
+#include <vector>
 
 class MainFrame;
 

@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cont.h"
 #include <math.h>
 #include "parse.h"
+#include "show.h"
 
 int float2int(const ContProcedure *proc,
 AnimateCompile *anim,

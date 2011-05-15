@@ -30,9 +30,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma interface
 #endif
 
-#include "show.h"
 #include "basic_ui.h"
+#include "cc_show.h"
 #include <wx/wizard.h>
+#include <wx/docview.h>
+
+#include <vector>
 
 class PointPickerView : public wxView
 {

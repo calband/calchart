@@ -39,7 +39,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
+#include "show.h"
 
+#include <list>
 
 static const wxChar *nofile_str = wxT("Unable to open file");
 static const wxChar *badcont_str = wxT("Error in continuity file");

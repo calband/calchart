@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "anim_ui.h"
 #include "modes.h"
 #include "confgr.h"
-#include "calchartapp.h"
 #ifdef ANIM_OUTPUT_RIB
 #include <ri.h>
 #endif

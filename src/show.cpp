@@ -31,12 +31,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <wx/wx.h>
 #include <wx/timer.h>
-#include "show.h"
 #include "undo.h"
 #include "confgr.h"
 #include "modes.h"
-#include "calchartapp.h"
 #include "cc_sheet.h"
+#include "show.h"
 
 #include <ctype.h>
 #include <math.h>

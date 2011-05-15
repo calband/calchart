@@ -30,7 +30,6 @@
 #include "undo.h"
 #include "modes.h"
 #include "confgr.h"
-#include "calchartapp.h"
 
 CC_sheet::CC_sheet(CC_show *shw)
 : show(shw),
