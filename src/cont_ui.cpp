@@ -35,54 +35,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "undo.h"
 
 #include <wx/help.h>
+#include <wx/statline.h>
+#include <wx/msgdlg.h>
 
-extern wxFont *contPlainFont;
-extern wxFont *contBoldFont;
-extern wxFont *contItalFont;
-extern wxFont *contBoldItalFont;
-
-extern wxHelpControllerBase *help_inst;
+extern wxHelpControllerBase *gHelpController;
 
 enum
 {
+	CALCHART__CONT_NEW = 100,
+	CALCHART__CONT_DELETE,
+	CALCHART__CONT_CLOSE,
+	CALCHART__CONT_HELP,
 	ContinuityEditor_ContEditSet,
 	ContinuityEditor_ContEditSelect,
-	ContinuityEditor_ContEditSave,
+	ContinuityEditor_Save,
+	ContinuityEditor_Discard,
 	ContinuityEditor_ContEditCurrent,
+	ContinuityEditor_KeyPress,
 };
 
-BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
+BEGIN_EVENT_TABLE(ContinuityEditor, wxDialog)
 EVT_CLOSE(ContinuityEditor::OnCloseWindow)
-EVT_MENU(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
-EVT_MENU(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
-EVT_MENU(CALCHART__CONT_HELP, ContinuityEditor::OnCmdHelp)
+EVT_BUTTON(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
+EVT_BUTTON(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
+EVT_BUTTON(CALCHART__CONT_HELP, ContinuityEditor::OnCmdHelp)
 EVT_BUTTON(ContinuityEditor_ContEditSet,ContinuityEditor::ContEditSet)
 EVT_BUTTON(ContinuityEditor_ContEditSelect,ContinuityEditor::ContEditSelect)
-EVT_BUTTON(ContinuityEditor_ContEditSave,ContinuityEditor::ContEditSave)
+EVT_BUTTON(ContinuityEditor_Save,ContinuityEditor::OnSave)
+EVT_BUTTON(ContinuityEditor_Discard,ContinuityEditor::OnDiscard)
 EVT_CHOICE(ContinuityEditor_ContEditCurrent,ContinuityEditor::ContEditCurrent)
+EVT_TEXT(ContinuityEditor_KeyPress,ContinuityEditor::OnKeyPress)
 END_EVENT_TABLE()
-
-void ContinuityEditor::ContEditSet(wxCommandEvent&)
-{
-	SetPoints();
-}
-
-
-void ContinuityEditor::ContEditSelect(wxCommandEvent&)
-{
-	SelectPoints();
-}
-
-void ContinuityEditor::ContEditSave(wxCommandEvent&)
-{
-	FlushText();
-}
-
-void ContinuityEditor::ContEditCurrent(wxCommandEvent&)
-{
-	SetCurrent(mContinuityChoices->GetSelection());
-}
-
 
 ContinuityEditorView::ContinuityEditorView() {}
 ContinuityEditorView::~ContinuityEditorView() {}
@@ -134,62 +117,112 @@ void ContinuityEditorView::DoDeleteContinuity(unsigned i)
 	GetDocument()->GetCommandProcessor()->Submit(new RemoveContinuityCommand(*static_cast<CC_show*>(GetDocument()), i), true);
 }
 
-ContinuityEditor::ContinuityEditor(CC_show *show,
-wxFrame *parent, const wxString& title,
-int x, int y, int width, int height):
-wxFrame(parent, -1, title, wxPoint(x, y), wxSize(width, height)),
-mShow(show), mCurrentContinuityChoice(0), mSheetUnderEdit(NULL)
+ContinuityEditor::ContinuityEditor()
 {
+	Init();
+}
+
+ContinuityEditor::ContinuityEditor(CC_show *show,
+		wxWindow *parent, wxWindowID id,
+		const wxString& caption,
+		const wxPoint& pos,
+		const wxSize& size,
+		long style )
+{
+	Init();
+	
+	Create(show, parent, id, caption, pos, size, style);
+}
+
+void ContinuityEditor::Init()
+{
+}
+
+bool ContinuityEditor::Create(CC_show *show,
+		wxWindow *parent, wxWindowID id,
+		const wxString& caption,
+		const wxPoint& pos,
+		const wxSize& size,
+		long style )
+{
+	if (!wxDialog::Create(parent, id, caption, pos, size, style))
+		return false;
+
+	mShow = show;
+	mCurrentContinuityChoice = 0;
+	mSheetUnderEdit = CC_show::const_CC_sheet_iterator_t(NULL);
 	mView = new ContinuityEditorView;
 	mView->SetDocument(show);
 	mView->SetFrame(this);
-// Give it an icon
-	SetBandIcon(this);
 
-	CreateStatusBar();
+	CreateControls();
 
-	panel = new wxPanel(this);
+// This fits the dalog to the minimum size dictated by the sizers
+	GetSizer()->Fit(this);
+// This ensures that the dialog cannot be smaller than the minimum size
+	GetSizer()->SetSizeHints(this);
 
+	Center();
+
+	// now update the current screen
+	Update();
+
+	return true;
+}
+
+void ContinuityEditor::CreateControls()
+{
 // create a sizer for laying things out top down:
 	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+	SetSizer( topsizer );
 
 // add buttons to the top row
+	// New, delete, choices
 	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
-	wxButton *button = new wxButton(panel, ContinuityEditor_ContEditSet, wxT("&Set Points"));
-	top_button_sizer->Add(button, 0, wxALL, 5 );
-	button = new wxButton(panel, ContinuityEditor_ContEditSelect, wxT("Select &Points"));
-	top_button_sizer->Add(button, 0, wxALL, 5 );
-	button = new wxButton(panel, ContinuityEditor_ContEditSave, wxT("Save &Edits"));
-	top_button_sizer->Add(button, 0, wxALL, 5 );
-	mContinuityChoices = new wxChoice(panel, ContinuityEditor_ContEditCurrent);
-	top_button_sizer->Add(mContinuityChoices, 0, wxALL, 5 );
+	wxButton *button = new wxButton(this, CALCHART__CONT_NEW, wxT("&New"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	button = new wxButton(this, CALCHART__CONT_DELETE, wxT("&Delete"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	mContinuityChoices = new wxChoice(this, ContinuityEditor_ContEditCurrent);
+	top_button_sizer->Add(mContinuityChoices, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	topsizer->Add(top_button_sizer);
 
-	mUserInput = new FancyTextWin(panel, -1, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
+	// Set, select
+	top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	button = new wxButton(this, ContinuityEditor_ContEditSet, wxT("&Set Points"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	button = new wxButton(this, ContinuityEditor_ContEditSelect, wxT("Select &Points"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	topsizer->Add(top_button_sizer);
+
+
+	mUserInput = new FancyTextWin(this, ContinuityEditor_KeyPress, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
 	
-	topsizer->Add(mUserInput, 1, wxEXPAND);
-	panel->SetSizer( topsizer );
-	topsizer->SetSizeHints( panel );
+	topsizer->Add(mUserInput, 0, wxGROW|wxALL, 5 );
 
-	wxMenu *cont_menu = new wxMenu;
-	cont_menu->Append(CALCHART__CONT_NEW, wxT("&New\tCTRL-N"), wxT("Add new continuity"));
-	cont_menu->Append(CALCHART__CONT_DELETE, wxT("&Delete\tCTRL-DEL"), wxT("Delete this continuity"));
-	wxMenu *help_menu = new wxMenu;
-	help_menu->Append(CALCHART__CONT_HELP, wxT("&Help on Continuity..."), wxT("Help on continuity commands"));
-	wxMenuBar *menu_bar = new wxMenuBar;
-	menu_bar->Append(cont_menu, wxT("&Continuity"));
-	menu_bar->Append(help_menu, wxT("&Help"));
-	SetMenuBar(menu_bar);
-
-	Show(true);
-
-	Update();
+	// add a horizontal bar to make things clear:
+	wxStaticLine* line = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	topsizer->Add(line, 0, wxGROW|wxALL, 5);
+	
+	// add a save, discard, close, and help
+	top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	button = new wxButton(this, ContinuityEditor_Save, wxT("&Save"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	button = new wxButton(this, ContinuityEditor_Discard, wxT("&Discard"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	button = new wxButton(this, wxID_CANCEL, wxT("&Close"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	button = new wxButton(this, CALCHART__CONT_HELP, wxT("&Help"));
+	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	topsizer->Add(top_button_sizer);
 }
 
 
 ContinuityEditor::~ContinuityEditor()
 {
-	delete mView;
+	if (mView)
+		delete mView;
 }
 
 
@@ -230,8 +263,8 @@ void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 
 void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 {
-	help_inst->LoadFile();
-	help_inst->KeywordSearch(wxT("Animation Commands"));
+	gHelpController->LoadFile();
+	gHelpController->KeywordSearch(wxT("Animation Commands"));
 }
 
 
@@ -262,6 +295,7 @@ void ContinuityEditor::UpdateContChoice()
 void ContinuityEditor::UpdateText()
 {
 	mUserInput->Clear();
+	mUserInput->DiscardEdits();
 	mSheetUnderEdit = mShow->GetCurrentSheet();
 	const CC_continuity& c = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
 	if (c.GetText())
@@ -269,9 +303,16 @@ void ContinuityEditor::UpdateText()
 		mUserInput->WriteText(c.GetText());
 		mUserInput->SetInsertionPoint(0);
 	}
+	// disable the save and discard buttons as they are not active.
+	wxButton* button = (wxButton*) FindWindow(ContinuityEditor_Save);
+	button->Disable();
+	button = (wxButton*) FindWindow(ContinuityEditor_Discard);
+	button->Disable();
 }
 
 
+// flush out the text to the show.  This will treat the text box as unedited
+// it is assumed that the user has already been notified that this will modify the show
 void ContinuityEditor::FlushText()
 {
 	wxString conttext;
@@ -285,16 +326,19 @@ void ContinuityEditor::FlushText()
 			mView->DoSetNthContinuity(conttext, mCurrentContinuityChoice);
 		}
 	}
+	mUserInput->DiscardEdits();
 }
 
 
-void ContinuityEditor::DetachText()
+void ContinuityEditor::SetCurrent(unsigned i)
 {
-	mSheetUnderEdit = CC_show::const_CC_sheet_iterator_t(NULL);
+	mCurrentContinuityChoice = i;
+	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
+	UpdateText();
 }
 
 
-void ContinuityEditor::SelectPoints()
+void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 {
 	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
@@ -302,10 +346,70 @@ void ContinuityEditor::SelectPoints()
 }
 
 
-void ContinuityEditor::SetPoints()
+void ContinuityEditor::ContEditSet(wxCommandEvent&)
 {
 	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
 	mView->DoSetContinuityIndex(c.GetNum());
+}
+
+
+void ContinuityEditor::OnSave(wxCommandEvent&)
+{
+	Save();
+}
+
+
+void ContinuityEditor::Save()
+{
+	FlushText();
+}
+
+
+void ContinuityEditor::OnDiscard(wxCommandEvent&)
+{
+	Discard();
+}
+
+
+void ContinuityEditor::Discard()
+{
+	UpdateText();
+}
+
+
+void ContinuityEditor::ContEditCurrent(wxCommandEvent&)
+{
+	// which value did we choose
+	int newSelection = mContinuityChoices->GetSelection();
+	// if the current field is modified, then do something
+	if (mUserInput->IsModified())
+	{
+		// give the user a chance to save, discard, or cancle the action
+		int userchoice = wxMessageBox(wxT("Continuity modified.  Save changes or cancel?"), wxT("Save changes?"), wxYES_NO|wxCANCEL);
+		if (userchoice == wxYES)
+		{
+			Save();
+		}
+		if (userchoice == wxNO)
+		{
+			Discard();
+		}
+		if (userchoice == wxCANCEL)
+		{
+			mContinuityChoices->SetSelection(mCurrentContinuityChoice);
+			return;
+		}
+	}
+	SetCurrent(newSelection);
+}
+
+
+void ContinuityEditor::OnKeyPress(wxCommandEvent&)
+{
+	wxButton* button = (wxButton*) FindWindow(ContinuityEditor_Save);
+	button->Enable();
+	button = (wxButton*) FindWindow(ContinuityEditor_Discard);
+	button->Enable();
 }
 

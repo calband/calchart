@@ -103,6 +103,7 @@ void SetAutoSave(int secs)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_AllViewsGoToCont, wxObject)
+IMPLEMENT_DYNAMIC_CLASS(CC_show_setup, wxObject)
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 
@@ -119,6 +120,14 @@ mSheetNum(0)
 	SetAutosaveName(tmpname);
 	mode = *wxGetApp().GetModeList().Begin();
 	autosaveTimer.AddShow(this);
+}
+
+bool CC_show::OnNewDocument()
+{
+	// notify the views that we are a new document.  That should prompt a wizard to set up the show
+	CC_show_setup show_setup;
+	UpdateAllViews(NULL, &show_setup);
+	return true;
 }
 
 #define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))

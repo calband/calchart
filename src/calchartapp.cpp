@@ -84,7 +84,7 @@ wxFont *contBoldItalFont;
 wxFont *pointLabelFont;
 wxFont *yardLabelFont;
 
-wxHtmlHelpController *help_inst = NULL;
+wxHtmlHelpController *gHelpController = NULL;
 
 TopFrame *topframe = NULL;
 
@@ -206,8 +206,8 @@ bool CalChartApp::OnInit()
 		wxString helpfile(wxT("docs"));
 #endif
 		helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
-		help_inst = new wxHtmlHelpController;
-		if ( !help_inst->AddBook(wxFileName(helpfile) ))
+		gHelpController = new wxHtmlHelpController;
+		if ( !gHelpController->AddBook(wxFileName(helpfile) ))
 		{
 			wxLogError(wxT("Cannot find the help system."));
 		}
@@ -238,7 +238,7 @@ void CalChartApp::MacOpenFile(const wxString &fileName)
 int CalChartApp::OnExit()
 {
 	if (gPrintDialogData) delete gPrintDialogData;
-	if (help_inst) delete help_inst;
+	if (gHelpController) delete gHelpController;
 
 	return 0;
 }

@@ -52,12 +52,18 @@ public:
 
 // ContinuityEditor
 // The way you edit the continuity for individual marchers
-class ContinuityEditor : public wxFrame
+// This dialog should notify the user to save if there are any outstanding edits.
+class ContinuityEditor : public wxDialog
 {
+	friend class ContinuityEditorView;
 public:
+	ContinuityEditor();
 	ContinuityEditor(CC_show *dcr,
-		wxFrame *parent, const wxString& title,
-		int x = -1, int y = -1, int width = 400, int height = 300);
+		wxWindow *parent, wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Edit Continuity"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
 	~ContinuityEditor();
 
 	void OnCloseWindow(wxCloseEvent& event);
@@ -71,16 +77,8 @@ public:
 	void UpdateText();
 
 	void FlushText();						  // Flush changes in text window
-	void DetachText();				  // When sheet goes away
 
-	inline unsigned GetCurrent() { return mCurrentContinuityChoice; }
-	inline void SetCurrent(unsigned i) { mCurrentContinuityChoice = i; UpdateText(); }
 	void UpdateContChoice();
-
-	const CC_show *GetShow() { return mShow; }
-
-	void SelectPoints();
-	void SetPoints();
 
 	inline void SetInsertionPoint(int x, int y)
 	{
@@ -88,13 +86,30 @@ public:
 		mUserInput->SetFocus();
 	}
 private:
+	void Init();
+
+	bool Create(CC_show *shw,
+		wxWindow *parent, wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Select Points"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
+
 	void ContEditSet(wxCommandEvent&);
 	void ContEditSelect(wxCommandEvent&);
-	void ContEditSave(wxCommandEvent&);
+	void OnSave(wxCommandEvent&);
+	void OnDiscard(wxCommandEvent&);
 	void ContEditCurrent(wxCommandEvent&);
+	void OnKeyPress(wxCommandEvent&);
+
+	void Save();
+	void Discard();
+	void SetCurrent(unsigned i);
+
 	CC_show *mShow;
 	ContinuityEditorView *mView;
-	wxPanel *panel;
 	wxChoice *mContinuityChoices;
 	unsigned mCurrentContinuityChoice;
 	FancyTextWin *mUserInput;
@@ -103,11 +118,4 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-enum
-{
-	CALCHART__CONT_NEW = 100,
-	CALCHART__CONT_DELETE,
-	CALCHART__CONT_CLOSE,
-	CALCHART__CONT_HELP
-};
 #endif

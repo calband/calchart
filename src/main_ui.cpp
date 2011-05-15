@@ -51,6 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/print.h>
 #include <wx/printdlg.h>
 #include <wx/fs_zip.h>
+#include <wx/wizard.h>
 
 ToolBarEntry main_tb[] =
 {
@@ -109,7 +110,7 @@ GridValue gridvalue[] =
 	{INT2COORD(8),INT2COORD(8)/3}
 };
 
-extern wxHtmlHelpController *help_inst;
+extern wxHtmlHelpController *gHelpController;
 
 extern TopFrame *topframe;
 
@@ -281,8 +282,8 @@ void TopFrame::About()
 
 void TopFrame::Help()
 {
-	help_inst->LoadFile();
-	help_inst->DisplayContents();
+	gHelpController->LoadFile();
+	gHelpController->DisplayContents();
 }
 
 
@@ -617,8 +618,10 @@ void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		(void)new ContinuityEditor(field->mShow, this,
+		ContinuityEditor* ce = new ContinuityEditor(field->mShow, this, wxID_ANY,
 			wxT("Animation Continuity"));
+		// make it modeless:
+		ce->Show();
 	}
 }
 
@@ -1789,12 +1792,29 @@ void MainFrameView::OnDraw(wxDC *dc)
 {
 }
 
-void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint))
+void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 {
-	if (mFrame)
-		mFrame->UpdatePanel();
-	if (mFrame && mFrame->GetCanvas())
-		mFrame->GetCanvas()->RefreshShow();
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_setup)))
+	{
+		// set up new show wizard!
+		wxWizard *wizard = new wxWizard(mFrame, wxID_ANY, wxT("Absolutely Uselss Wizard"));
+		wxWizardPageSimple *page1 = new wxWizardPageSimple(wizard);
+		wxStaticText *text = new wxStaticText(page1, wxID_ANY, wxT("blank"), wxPoint(5,5));
+		wizard->GetPageAreaSizer()->Add(page1);
+		if (wizard->RunWizard(page1))
+		{
+			wxMessageBox(wxT("The wizard successfully completed"), wxT("That's all"), wxICON_INFORMATION|wxOK);
+		}
+		wizard->Destroy();
+
+	}
+	else
+	{
+		if (mFrame)
+			mFrame->UpdatePanel();
+		if (mFrame && mFrame->GetCanvas())
+			mFrame->GetCanvas()->RefreshShow();
+	}
 }
 
 // Clean up windows used for displaying the view.

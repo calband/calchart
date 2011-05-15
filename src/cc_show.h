@@ -68,6 +68,12 @@ public:
 	int mCol;
 };
 
+// The CC_show_setup class is used for indicating to views to set up a new show
+class CC_show_setup : public wxObject
+{
+DECLARE_DYNAMIC_CLASS(CC_show_setup)
+};
+
 class CC_show : public wxDocument
 {
 	DECLARE_DYNAMIC_CLASS(CC_show)
@@ -82,6 +88,8 @@ public:
 
 	// Need to override OnOpenDoc so we can report errors
 	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
+	virtual bool OnCreate(const wxString& filename, long flags) { return wxDocument::OnCreate(filename, flags); }
+	virtual bool OnNewDocument();
 
 	virtual wxOutputStream& SaveObject(wxOutputStream& stream);
 	virtual wxInputStream& LoadObject(wxInputStream& stream);
