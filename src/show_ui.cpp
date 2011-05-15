@@ -218,7 +218,7 @@ enum
 };
 
 BEGIN_EVENT_TABLE(ShowInfoReq, wxDialog)
-EVT_BUTTON( ShowInfoReq_ID_RESET, ShowInfoReq::OnReset)
+EVT_BUTTON( wxID_RESET, ShowInfoReq::OnReset)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( ShowInfoReq, wxDialog )
@@ -272,15 +272,15 @@ bool ShowInfoReq::Create(CC_show *shw,
 	return true;
 }
 
-void ShowInfoReq::CreateControls()
-{
-	unsigned i;
-	wxString buf;
-	wxString strs[2];
 
+// Layout is to give a consistent show layout to both wizard and dialog
+// layout requires a parent
+//  wxSlider *lettersize;
+void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
+{
 // create a sizer for laying things out top down:
 	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-	SetSizer( topsizer );
+	parent->SetSizer( topsizer );
 
 // now we add a left and a right side, putting boxes around things
 // special attention about box sizers
@@ -293,15 +293,15 @@ void ShowInfoReq::CreateControls()
 	wxBoxSizer *right_middle_sizer = new wxBoxSizer( wxVERTICAL );
 	wxStaticBoxSizer *boxsizer;
 
-	boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("&Letters")), wxHORIZONTAL);
-	wxListBox *labels = new wxListBox(this, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-	for (i = 0; i < 26; ++i)
+	boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, wxT("&Letters")), wxHORIZONTAL);
+	wxListBox *labels = new wxListBox(parent, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+	for (int i = 0; i < 26; ++i)
 	{
-		buf = wxT("A");
+		wxString buf = wxT("A");
 		buf.SetChar(0, buf.GetChar(0)+i);
 		labels->InsertItems(1, &buf, i);
 	}
-	boxsizer->Add(labels, 0, wxALL, 0 );
+	boxsizer->Add(labels, 0, wxGROW|wxALL, 0 );
 	left_middle_sizer->Add(boxsizer, 0, wxALL, 5 );
 
 	middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER );
@@ -309,49 +309,55 @@ void ShowInfoReq::CreateControls()
 // now add right side
 	wxBoxSizer *horizontal_sizer = new wxBoxSizer( wxHORIZONTAL );
 	right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10 );
-	wxStaticText* pointLabel = new wxStaticText(this, wxID_STATIC, wxT("&Points:"), wxDefaultPosition, wxDefaultSize, 0);
+	wxStaticText* pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Points:"), wxDefaultPosition, wxDefaultSize, 0);
 	horizontal_sizer->Add(pointLabel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	wxSpinCtrl* numPoints = new wxSpinCtrl(this, ShowInfoReq_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, MAX_POINTS, 10);
+	wxSpinCtrl* numPoints = new wxSpinCtrl(parent, ShowInfoReq_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, MAX_POINTS, 10);
 	horizontal_sizer->Add(numPoints, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
 	horizontal_sizer = new wxBoxSizer( wxHORIZONTAL );
 	right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10 );
-	pointLabel = new wxStaticText(this, wxID_STATIC, wxT("&Columns:"), wxDefaultPosition, wxDefaultSize, 0);
+	pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Columns:"), wxDefaultPosition, wxDefaultSize, 0);
 	horizontal_sizer->Add(pointLabel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	wxSpinCtrl* mNumberColumns = new wxSpinCtrl(this, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, MAX_POINTS, 10);
-	horizontal_sizer->Add(mNumberColumns, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+	wxSpinCtrl* numberColumns = new wxSpinCtrl(parent, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, MAX_POINTS, 10);
+	horizontal_sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
-	strs[0] = wxT("Numbers");
-	strs[1] = wxT("Letters");
-	wxRadioBox* label_type = new wxRadioBox(this, ShowInfoReq_ID_LABEL_TYPE, wxT("&Labels"), wxDefaultPosition, wxDefaultSize, 2, strs, 2);
+	wxString strs[2] = { wxT("Numbers"), wxT("Letters") };
+	wxRadioBox* label_type = new wxRadioBox(parent, ShowInfoReq_ID_LABEL_TYPE, wxT("&Labels"), wxDefaultPosition, wxDefaultSize, 2, strs, 2);
 	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
 
 	middle_sizer->Add(right_middle_sizer, 0, wxALIGN_CENTER );
 	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
 
-	boxsizer = new wxStaticBoxSizer( new wxStaticBox(this, wxID_STATIC, wxT("P&oints per letter")), wxHORIZONTAL);
-	wxSlider *lettersize = new wxSlider(this, ShowInfoReq_ID_POINTS_PER_LETTER, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
+	boxsizer = new wxStaticBoxSizer( new wxStaticBox(parent, wxID_STATIC, wxT("P&oints per letter")), wxHORIZONTAL);
+	wxSlider* lettersize = new wxSlider(parent, ShowInfoReq_ID_POINTS_PER_LETTER, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
 	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
 	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
-//	topsizer->Add(boxsizer, 0, wxALL, 10);
 
-	// put a line between the controls and the buttons
-	wxStaticLine* line = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-	topsizer->Add(line, 0, wxGROW|wxALL, 5);
+	if (putLastRowButtons)
+	{
+		// put a line between the controls and the buttons
+		wxStaticLine* line = new wxStaticLine(parent, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+		topsizer->Add(line, 0, wxGROW|wxALL, 5);
 
-	// the buttons on the bottom
-	wxBoxSizer *okCancelBox = new wxBoxSizer( wxHORIZONTAL );
-	topsizer->Add(okCancelBox, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
+		// the buttons on the bottom
+		wxBoxSizer *okCancelBox = new wxBoxSizer( wxHORIZONTAL );
+		topsizer->Add(okCancelBox, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
-	wxButton *reset = new wxButton(this, ShowInfoReq_ID_RESET, wxT("&Reset"), wxDefaultPosition, wxDefaultSize, 0);
-	okCancelBox->Add(reset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+		wxButton *reset = new wxButton(parent, wxID_RESET, wxT("&Reset"));
+		okCancelBox->Add(reset, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	wxButton *ok = new wxButton(this, wxID_OK, wxT("&OK"), wxDefaultPosition, wxDefaultSize, 0);
-	ok->SetDefault();
-	okCancelBox->Add(ok, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+		wxButton *ok = new wxButton(parent, wxID_OK);
+		ok->SetDefault();
+		okCancelBox->Add(ok, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	wxButton *cancel = new wxButton(this, wxID_CANCEL, wxT("&Cancel"), wxDefaultPosition, wxDefaultSize, 0);
-	okCancelBox->Add(cancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+		wxButton *cancel = new wxButton(parent, wxID_CANCEL);
+		okCancelBox->Add(cancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+	}
+}
+
+void ShowInfoReq::CreateControls()
+{
+	LayoutShowInfo(this, true);
 }
 
 
@@ -465,3 +471,112 @@ void ShowInfoReq::OnReset(wxCommandEvent&)
 	Init();
 	TransferDataToWindow();
 }
+
+
+IMPLEMENT_CLASS( ShowInfoReqWizard, wxWizardPageSimple )
+
+ShowInfoReqWizard::ShowInfoReqWizard(wxWizard *parent) : wxWizardPageSimple(parent),
+mTransferDataToWindowFirstTime(true),
+mNumberPoints(1),
+mNumberColumns(1)
+{
+	LayoutShowInfo(this, false);
+	GetSizer()->Fit(this);
+}
+
+bool ShowInfoReqWizard::TransferDataToWindow()
+{
+	// on first time, we need to set up values
+	if (mTransferDataToWindowFirstTime)
+	{
+		wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
+		wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
+		wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+		wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+		wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
+
+		pointsCtrl->SetValue(mNumberPoints);
+		columnsCtrl->SetValue(mNumberColumns);
+		labelType->SetSelection(false);
+		pointsPerLine->SetValue(1);
+		label_letters->DeselectAll();
+		mTransferDataToWindowFirstTime = false;
+	}
+	return true;
+}
+
+bool ShowInfoReqWizard::TransferDataFromWindow()
+{
+	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
+	wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
+	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
+
+	mNumberPoints = pointsCtrl->GetValue();
+	mNumberColumns = columnsCtrl->GetValue();
+	mLabels.clear();
+
+	if (labelType->GetSelection() == 0)
+	{
+// Numbers
+		for (unsigned i = 0; i < mNumberPoints; ++i)
+		{
+// Begin with 1, not 0
+			wxString buffer;
+			buffer.Printf(wxT("%u"), i);
+			mLabels.push_back(buffer);
+		}
+	}
+	else
+	{
+// Letters
+		int numPerLetter = pointsPerLine->GetValue();
+		int num = pointsCtrl->GetValue();
+		unsigned letr = 0;
+		while (num > 0)
+		{
+			if (label_letters->IsSelected(letr))
+			{
+				int n = std::min(num, numPerLetter);
+				for (int i = 0; i < n; ++i)
+				{
+					wxString buffer;
+					buffer.Printf(wxT("%c%u"), letr+'A', i);
+					mLabels.push_back(buffer);
+				}
+				num -= n;
+			}
+			++letr;
+		}
+	}
+	return true;
+}
+
+
+bool ShowInfoReqWizard::Validate()
+{
+	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	if (labelType->GetSelection() == 0)
+	{
+		return true;
+	}
+	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
+	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
+
+	int num = pointsPerLine->GetValue();
+	int numlabels = 0;
+	for (unsigned i = 0; i < 26; i++)
+	{
+		if (label_letters->IsSelected(i))
+		{
+			++numlabels;
+		}
+	}
+	bool canDo = (num*numlabels >= pointsCtrl->GetValue());
+	if (!canDo)
+		wxMessageBox(wxT("There are not enough labels defined."), wxT("Set labels"));
+	return canDo;
+}
+

@@ -39,12 +39,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
-#include "ingl.h"
+
 
 static const wxChar *nofile_str = wxT("Unable to open file");
 static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
 static const wxChar *writeerr_str = wxT("Write error: check disk media");
+
+
+class FileReadException
+{
+public:
+	FileReadException(const wxString& reason) : mError(reason) {}
+	FileReadException(uint32_t nameID)
+	{
+		uint8_t rawd[4];
+		put_big_long(rawd, nameID);
+		mError.Printf(wxT("Wrong ID read:  Read %c%c%c%c"), rawd[0], rawd[1], rawd[2], rawd[3]);
+	}
+	wxString WhatError() const { return mError; } 
+private:
+	wxString mError;
+};
+
 
 const wxChar *contnames[] =
 {
@@ -183,7 +200,7 @@ void ReadAndCheckID(wxInputStream& stream, uint32_t inname)
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		throw INGL_exception(inname);
+		throw FileReadException(inname);
 	}
 }
 
@@ -194,7 +211,7 @@ void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		throw INGL_exception(inname);
+		throw FileReadException(inname);
 	}
 	ReadLong(stream, name);
 	if (4 != name)
@@ -202,7 +219,7 @@ void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
 		uint8_t rawd[4];
 		put_big_long(rawd, inname);
 		wxString s; s.Printf(wxT("Wrong size %d for name %c%c%c%c"), name, rawd[0], rawd[1], rawd[2], rawd[3]);
-		throw INGL_exception(s);
+		throw FileReadException(s);
 	}
 	ReadLong(stream, size);
 }
@@ -214,7 +231,7 @@ void ReadCheckIDandFillData(wxInputStream& stream, uint32_t inname, std::vector<
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		throw INGL_exception(inname);
+		throw FileReadException(inname);
 	}
 	ReadLong(stream, name);
 	data.resize(name);
@@ -826,7 +843,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		ReadCheckIDandFillData(stream, INGL_POS, data);
 		if (data.size() != size_t(sheet.show->GetNumPoints()*4))
 		{
-			throw INGL_exception(wxT("bad POS chunk"));
+			throw FileReadException(wxT("bad POS chunk"));
 		}
 		{
 			uint8_t *d;
@@ -849,7 +866,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			ReadCheckIDandFillData(stream, INGL_REFP, data);
 			if (data.size() != (unsigned long)sheet.show->GetNumPoints()*4+2)
 			{
-				throw INGL_exception(wxT("Bad REFP chunk"));
+				throw FileReadException(wxT("Bad REFP chunk"));
 			}
 			uint8_t *d = (uint8_t*)&data[0];
 			unsigned ref = get_big_word(d);
@@ -871,7 +888,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			ReadCheckIDandFillData(stream, INGL_SYMB, data);
 			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
 			{
-				throw INGL_exception(wxT("Bad SYMB chunk"));
+				throw FileReadException(wxT("Bad SYMB chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
@@ -886,7 +903,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			ReadCheckIDandFillData(stream, INGL_TYPE, data);
 			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
 			{
-				throw INGL_exception(wxT("Bad TYPE chunk"));
+				throw FileReadException(wxT("Bad TYPE chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
@@ -901,7 +918,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			ReadCheckIDandFillData(stream, INGL_LABL, data);
 			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
 			{
-				throw INGL_exception(wxT("Bad SYMB chunk"));
+				throw FileReadException(wxT("Bad SYMB chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
@@ -919,19 +936,19 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			ReadCheckIDandFillData(stream, INGL_CONT, data);
 			if (data.size() < 3)						  // one byte num + two nils minimum
 			{
-				throw INGL_exception(wxT("Bad cont chunk"));
+				throw FileReadException(wxT("Bad cont chunk"));
 			}
 			const char *d = (const char *)&data[0];
 			if (d[data.size()-1] != '\0')
 			{
-				throw INGL_exception(wxT("Bad cont chunk"));
+				throw FileReadException(wxT("Bad cont chunk"));
 			}
 
 			const char* text = d + 1;
 			size_t num = strlen(text);
 			if (data.size() < num + 3)					  // check for room for text string
 			{
-				throw INGL_exception(wxT("Bad cont chunk"));
+				throw FileReadException(wxT("Bad cont chunk"));
 			}
 			wxString namestr(wxString::FromUTF8(text));
 			text = d + 2 + strlen(text);
@@ -953,7 +970,7 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	ReadAndCheckID(stream, INGL_SHOW);
 	mSheetNum = 0;
 	}
-	catch (INGL_exception& e) {
+	catch (FileReadException& e) {
 		AddError(e.WhatError());
 	}
 	return stream;
@@ -1121,6 +1138,14 @@ bool CC_show::RelabelSheets(unsigned sht)
 	}
 
 	return true;
+}
+
+
+wxString CC_show::GetPointLabel(unsigned i) const
+{
+	if (i >= pt_labels.size())
+		return wxT("");
+	return pt_labels.at(i);
 }
 
 

@@ -106,7 +106,11 @@ long style, const wxString& name)
 memdc(NULL), membm(NULL),
 x_scale(1.0), y_scale(1.0), palette(NULL)
 {
-	SetSize(GetSize());
+	if (size.GetX() != wxDefaultSize.GetX() ||
+		size.GetY() != wxDefaultSize.GetY())
+	{
+		SetSize(size);
+	}
 }
 
 

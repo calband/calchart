@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "show.h"
 #include "basic_ui.h"
+#include <wx/wizard.h>
 
 class PointPickerView : public wxView
 {
@@ -126,6 +127,29 @@ public:
 private:
 	CC_show *mShow;
 	void OnReset(wxCommandEvent&);
+};
+
+class ShowInfoReqWizard : public wxWizardPageSimple
+{
+	DECLARE_CLASS( ShowInfoReqWizard )
+public:
+	ShowInfoReqWizard(wxWizard *parent);
+
+	virtual bool TransferDataToWindow();
+	virtual bool TransferDataFromWindow();
+	virtual bool Validate();
+
+	// The data this dialog sets for the user
+private:
+	bool mTransferDataToWindowFirstTime;
+	unsigned mNumberPoints;
+	unsigned mNumberColumns;
+	std::vector<wxString> mLabels;
+
+public:
+	unsigned GetNumberPoints() const { return mNumberPoints; }
+	unsigned GetNumberColumns() const { return mNumberColumns; }
+	std::vector<wxString> GetLabels() { return mLabels; }
 };
 
 #endif

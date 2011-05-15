@@ -88,7 +88,6 @@ public:
 
 	// Need to override OnOpenDoc so we can report errors
 	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
-	virtual bool OnCreate(const wxString& filename, long flags) { return wxDocument::OnCreate(filename, flags); }
 	virtual bool OnNewDocument();
 
 	virtual wxOutputStream& SaveObject(wxOutputStream& stream);
@@ -135,7 +134,7 @@ public:
 	void SetNumPoints(unsigned num, unsigned columns);
 	bool RelabelSheets(unsigned sht);
 
-	inline const wxString& GetPointLabel(unsigned i) const { return pt_labels[i]; }
+	wxString GetPointLabel(unsigned i) const;
 	void SetPointLabel(const std::vector<wxString>& labels) { pt_labels = labels; }
 	inline const std::vector<wxString>& GetPointLabels() const { return pt_labels; }
 	inline bool GetBoolLandscape() const { return print_landscape; }

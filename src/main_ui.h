@@ -58,8 +58,10 @@ enum CC_MOVE_MODES
 
 enum
 {
-	CALCHART__NEW_WINDOW = 1,
-	CALCHART__APPEND_FILE,
+	CALCHART__APPEND_FILE = wxID_HIGHEST,
+	// the wxView print is wrong, doesn't do landscape.  rolling our own
+	CALCHART__wxID_PRINT,
+	CALCHART__wxID_PREVIEW,
 	CALCHART__IMPORT_CONT_FILE,
 	CALCHART__LEGACY_PRINT,
 	CALCHART__LEGACY_PRINT_EPS,
@@ -229,7 +231,7 @@ public:
 // Basic functions
 	FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 		int def_zoom,
-		const wxPoint& pos, const wxSize& size);
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 	~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
 	void OnErase(wxEraseEvent& event);
@@ -338,6 +340,8 @@ public:
     void OnDraw(wxDC *dc);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
     bool OnClose(bool deleteWindow = true);
+
+	void OnWizardSetup(CC_show& show);
 
 	bool DoTranslatePoints(const CC_coord& pos, unsigned curr_ref);
 	bool DoTransformPoints(const Matrix& transmat, unsigned ref);

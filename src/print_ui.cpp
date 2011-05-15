@@ -98,7 +98,7 @@ void ShowPrintDialog::PrintShow()
 			break;
 		case CC_PRINT_ACTION_FILE:
 			s = wxFileSelector(wxT("Print to file"), NULL, NULL, NULL,
-				eps ? wxT("*.eps"):wxT("*.ps"));
+				eps ? wxT("*.eps"):wxT("*.ps"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 			if (s.empty()) return;
 			break;
 		case CC_PRINT_ACTION_PRINTER:

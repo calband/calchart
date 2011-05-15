@@ -52,6 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <wx/printdlg.h>
 #include <wx/fs_zip.h>
 #include <wx/wizard.h>
+#include <wx/statline.h>
 
 ToolBarEntry main_tb[] =
 {
@@ -127,8 +128,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxDocMDIChildFrame)
 EVT_CHAR(MainFrame::OnChar)
 EVT_MENU(CALCHART__APPEND_FILE, MainFrame::OnCmdAppend)
 EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
-EVT_MENU(wxID_PRINT, MainFrame::OnCmdPrint)
-EVT_MENU(wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
+EVT_MENU(CALCHART__wxID_PRINT, MainFrame::OnCmdPrint)
+EVT_MENU(CALCHART__wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, MainFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, MainFrame::OnCmdLegacyPrintEPS)
@@ -323,8 +324,8 @@ field(NULL)
 	file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity...\tCTRL-I"), wxT("Import continuity text"));
 	file_menu->Append(wxID_SAVE, wxT("&Save\tCTRL-S"), wxT("Save show"));
 	file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"), wxT("Save show as a new name"));
-	file_menu->Append(wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
-	file_menu->Append(wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"), wxT("Preview this show"));
+	file_menu->Append(CALCHART__wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
+	file_menu->Append(CALCHART__wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"), wxT("Preview this show"));
 	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
 	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Legacy Print..."), wxT("Legacy Print this show"));
 	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Legacy Print EPS..."), wxT("Legacy Print a stuntsheet in EPS"));
@@ -342,7 +343,7 @@ field(NULL)
 	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
 	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
-	edit_menu->Append(CALCHART__SETUP, wxT("&Setup Show...\tCTRL-U"), wxT("Setup basic show information"));
+	edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"), wxT("Setup number of marchers"));
 	edit_menu->Append(CALCHART__SETDESCRIPTION, wxT("Set Show &Description..."), wxT("Set the show description"));
 	edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."), wxT("Set the show mode"));
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
@@ -380,7 +381,7 @@ field(NULL)
 	def_zoom = default_zoom;
 	def_grid = 2;
 	def_ref = 0;
-	field = new FieldCanvas(view, ss, this, def_zoom, pos, size);
+	field = new FieldCanvas(view, ss, this, def_zoom);
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
@@ -471,6 +472,7 @@ void MainFrame::OnCmdImportCont(wxCommandEvent& event)
 }
 
 
+// the default wxView print doesn't handle landscape.  rolling our own
 void MainFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	// grab our current page setup.
@@ -500,6 +502,7 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 	}
 }
 
+// the default wxView print doesn't handle landscape.  rolling our own
 void MainFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
 	// grab our current page setup.
@@ -1792,26 +1795,127 @@ void MainFrameView::OnDraw(wxDC *dc)
 {
 }
 
+
+// page for deciding the field type
+class ChooseShowModeWizard : public wxWizardPageSimple
+{
+public:
+	ChooseShowModeWizard(wxWizard *parent) : wxWizardPageSimple(parent)
+	{
+		for (ShowModeList::Iter mode = wxGetApp().GetModeList().Begin(); mode != wxGetApp().GetModeList().End(); ++mode)
+		{
+			modeStrings.Add((*mode)->GetName());
+		}
+
+		wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+		SetSizer( topsizer );
+		wxStaticText* label = new wxStaticText(this, wxID_STATIC, 
+			wxT("Choose a field to set your show:"), wxDefaultPosition, wxDefaultSize, 0);
+		topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+		mChoice = new wxChoice(this, wxID_ANY, wxPoint(5,5), wxDefaultSize, modeStrings);
+		topsizer->Add(mChoice, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+		topsizer->Fit(this);
+	}
+	wxString GetValue()
+	{
+		return modeStrings[mChoice->GetSelection()];
+	}
+
+private:
+	wxArrayString modeStrings;
+	wxChoice *mChoice;
+};
+
+// page for giving a description
+class SetDescriptionWizard : public wxWizardPageSimple
+{
+public:
+	SetDescriptionWizard(wxWizard *parent) : wxWizardPageSimple(parent)
+	{
+		wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+		SetSizer( topsizer );
+		wxStaticText* label = new wxStaticText(this, wxID_STATIC, 
+			wxT("Enter a show description for your show:"), wxDefaultPosition, wxDefaultSize, 0);
+		topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+		mText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(240, 100));
+		topsizer->Add(mText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+		topsizer->Fit(this);
+	}
+	wxString GetValue()
+	{
+		return mText->GetValue();
+	}
+
+private:
+	wxArrayString modeStrings;
+	FancyTextWin *mText;
+};
+
+void MainFrameView::OnWizardSetup(CC_show& show)
+{
+	wxWizard *wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
+	// page 1:
+	// set the number of points and the labels
+	ShowInfoReqWizard *page1 = new ShowInfoReqWizard(wizard);
+
+	// page 2:
+	// choose the show mode
+	ChooseShowModeWizard *page2 = new ChooseShowModeWizard(wizard);
+
+	// page 3:
+	// and maybe a description
+	SetDescriptionWizard *page3 = new SetDescriptionWizard(wizard);
+	// page 4:
+
+	wxWizardPageSimple::Chain(page1, page2);
+	wxWizardPageSimple::Chain(page2, page3);
+
+	wizard->GetPageAreaSizer()->Add(page1);
+	if (wizard->RunWizard(page1))
+	{
+		show.SetNumPoints(page1->GetNumberPoints(), page1->GetNumberColumns());
+		show.SetPointLabel(page1->GetLabels());
+		ShowMode *newmode = wxGetApp().GetModeList().Find(page2->GetValue());
+		if (newmode)
+		{
+			show.SetMode(newmode);
+		}
+		show.SetDescr(page3->GetValue());
+	}
+	else
+	{
+		wxMessageBox(
+			wxT("Show setup not completed.\n")
+			wxT("You can change the number of marchers\n")
+			wxT("and show mode via the menu options"), wxT("Show not setup"), wxICON_INFORMATION|wxOK);
+	}
+	wizard->Destroy();
+}
+
 void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 {
 	if (hint && hint->IsKindOf(CLASSINFO(CC_show_setup)))
 	{
-		// set up new show wizard!
-		wxWizard *wizard = new wxWizard(mFrame, wxID_ANY, wxT("Absolutely Uselss Wizard"));
-		wxWizardPageSimple *page1 = new wxWizardPageSimple(wizard);
-		wxStaticText *text = new wxStaticText(page1, wxID_ANY, wxT("blank"), wxPoint(5,5));
-		wizard->GetPageAreaSizer()->Add(page1);
-		if (wizard->RunWizard(page1))
-		{
-			wxMessageBox(wxT("The wizard successfully completed"), wxT("That's all"), wxICON_INFORMATION|wxOK);
-		}
-		wizard->Destroy();
+		// give our show a first page
+		CC_show* show = static_cast<CC_show*>(GetDocument());
+		show->InsertSheetInternal(CC_sheet(show, wxT("1")), 0);
+		show->SetCurrentSheet(0);
 
+		// Set up everything else
+		OnWizardSetup(*show);
+
+		// make the show modified so it gets repainted
+		show->Modify(true);
 	}
 	else
 	{
 		if (mFrame)
+		{
 			mFrame->UpdatePanel();
+			wxString buf;
+			GetDocument()->GetPrintableName(buf);
+			mFrame->SetTitle(buf);
+		}
 		if (mFrame && mFrame->GetCanvas())
 			mFrame->GetCanvas()->RefreshShow();
 	}
