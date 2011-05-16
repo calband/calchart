@@ -1,13 +1,10 @@
-/* color_select_ui.h
+/*
+ * color_select_ui.h
  * Dialox box for selecting colors
- *
- * Modification history:
- * 3-11-10    Richard Powell              Created
- *
  */
 
 /*
-   Copyright (C) 1995-2010  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,10 +22,6 @@
 
 #ifndef _COLOR_SELECT_UI_H_
 #define _COLOR_SELECT_UI_H_
-
-#ifdef __GNUG__
-#pragma interface
-#endif
 
 #include <wx/wx.h>
 #include <wx/bmpcbox.h>

@@ -1,10 +1,10 @@
-/* cc_sheet.h
- * Definitions for the sheet classes
- *
+/*
+ * cc_sheet.h
+ * Definitions for the calchart sheet classes
  */
 
 /*
-   Copyright (C) 1995-2010  Richard Powell
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,10 +22,6 @@
 
 #ifndef _CC_SHEET_H_
 #define _CC_SHEET_H_
-
-#ifdef __GNUG__
-#pragma interface
-#endif
 
 #include "cc_types.h"
 #include "cc_continuity.h"

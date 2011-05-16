@@ -1,14 +1,11 @@
 %{
-/* contscan.l
+/*
+ * contscan.l
  * Lex scanner for continuity
- *
- * Modification history:
- * 10-18-95   Garrick Meeker              Created
- *
  */
 
 /*
-   Copyright (C) 1995-2008  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

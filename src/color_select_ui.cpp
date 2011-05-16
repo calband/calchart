@@ -1,13 +1,10 @@
-/* color_select_ui.cpp
+/*
+ * color_select_ui.cpp
  * Dialox box for selecting colors
- *
- * Modification history:
- * 3-11-10    Richard Powell              Created
- *
  */
 
 /*
-   Copyright (C) 1995-2010  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,10 +19,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
 
 #include "color_select_ui.h"
 #include "confgr.h"

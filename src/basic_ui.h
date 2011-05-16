@@ -1,13 +1,10 @@
-/* basic_ui.h
+/*
+ * basic_ui.h
  * Header for basic wxWindows classes
- *
- * Modification history:
- * 6-1-95     Garrick Meeker              Created
- *
  */
 
 /*
-   Copyright (C) 1995-2008  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,31 +14,19 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _BASIC_UI_H_
 #define _BASIC_UI_H_
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 #include <wx/wx.h>
 #include <wx/dnd.h>
 #include <wx/toolbar.h>
 
-#include "platconf.h"
-
-#define CC_FRAME_TOP (wxMAXIMIZE | wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_CHILD (wxDEFAULT_FRAME_STYLE)
-#define CC_FRAME_OTHER (wxDEFAULT_FRAME_STYLE)
-
-// Function for allowing XOR drawing
-void SetXOR(wxDC *dc);
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame *frame);
@@ -60,15 +45,6 @@ public:
 #ifdef TEXT_DOS_STYLE
 	wxString GetValue(void) const;
 #endif
-};
-
-class FancyTextWinDropTarget : public wxFileDropTarget
-{
-public:
-	FancyTextWinDropTarget(FancyTextWin *w) : win(w) {}
-	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
-private:
-	FancyTextWin *win;
 };
 
 class AutoScrollCanvas: public wxPanel

@@ -1,10 +1,10 @@
-/* cc_types.h
+/*
+ * cc_types.h
  * Definitions for the types
- *
  */
 
 /*
-   Copyright (C) 1995-2010  Richard Powell
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,10 +22,6 @@
 
 #ifndef _CC_TYPES_H_
 #define _CC_TYPES_H_
-
-#ifdef __GNUG__
-#pragma interface
-#endif
 
 #include <stdint.h>
 

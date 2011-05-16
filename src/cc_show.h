@@ -1,15 +1,10 @@
-/* cc_show.h
- * Definitions for the cc_show classes
- *
- * Modification history:
- * 1-2-95     Garrick Meeker              Created from previous CalPrint
- * 4-16-95    Garrick Meeker              Converted to C++
- * 12-19-10    Richard Powell             Broken into own file
- *
+/*
+ * cc_show.h
+ * Definitions for the calchart show classes
  */
 
 /*
-   Copyright (C) 1994-2008  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,18 +14,14 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef _CC_SHOW_H_
 #define _CC_SHOW_H_
-
-#ifdef __GNUG__
-#pragma interface
-#endif
 
 #include "cc_sheet.h"
 

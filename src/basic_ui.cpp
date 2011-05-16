@@ -1,13 +1,10 @@
-/* basic_ui.cpp
+/* 
+ * basic_ui.cpp
  * Handle basic wxWindows classes
- *
- * Modification history:
- * 6-1-95     Garrick Meeker              Created
- *
  */
 
 /*
-   Copyright (C) 1995-2008  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,15 +14,11 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
 
 #include "basic_ui.h"
 #include "confgr.h"
@@ -33,18 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "calchart.xpm"
 #endif
-
-// Function for allowing XOR drawing
-void SetXOR(wxDC *dc)
-{
-	dc->SetBrush(*wxTRANSPARENT_BRUSH);
-	dc->SetPen(*CalChartPens[COLOR_SHAPES]);
-/*
-dc->SetPen(wxWHITE_PEN);
-dc->SetLogicalFunction(wxINVERT);
-*/
-}
-
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame *frame)
@@ -54,6 +35,24 @@ void SetBandIcon(wxFrame *frame)
 	frame->SetIcon(icon);
 #endif
 }
+
+
+class FancyTextWinDropTarget : public wxFileDropTarget
+{
+public:
+	FancyTextWinDropTarget(FancyTextWin *w) : win(w) {}
+	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
+	{
+		if (filenames.Count() > 0)
+		{
+			win->LoadFile(filenames[0]);
+		}
+		return true;
+	}
+
+private:
+	FancyTextWin *win;
+};
 
 
 // Text subwindow that can respond to drag-and-drop
@@ -87,15 +86,6 @@ wxString FancyTextWin::GetValue(void) const
 	return result;
 }
 #endif
-
-bool FancyTextWinDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
-{
-	if (filenames.Count() > 0)
-	{
-		win->LoadFile(filenames[0]);
-	}
-	return true;
-}
 
 
 AutoScrollCanvas::

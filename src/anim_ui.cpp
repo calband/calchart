@@ -1,13 +1,10 @@
-/* anim_ui.cpp
+/*
+ * anim_ui.cpp
  * Animation user interface
- *
- * Modification history:
- * 1-4-96     Garrick Meeker              Created
- *
  */
 
 /*
-   Copyright (C) 1996-2008  Garrick Brian Meeker
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,15 +14,11 @@
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
 
 #include "anim_ui.h"
 #include "modes.h"
@@ -545,7 +538,7 @@ void AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 }
 
 AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
-: wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, CC_FRAME_OTHER, wxT("anim"))
+: wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, wxT("anim"))
 {
 	mView = new AnimationView;
 	mView->SetDocument(show);

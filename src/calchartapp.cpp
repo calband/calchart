@@ -1,10 +1,10 @@
-/* CalChartApp.cpp
+/*
+ * calchartapp.cpp
  * Central App for CalChart
- *
  */
 
 /*
-   Copyright (C) 1995-2010  Richard Powell
+   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,10 +19,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
 
 #include "calchartapp.h"
 #include "modes.h"
