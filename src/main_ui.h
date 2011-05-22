@@ -190,6 +190,8 @@ public:
 	void OnCmd_setsym7(wxCommandEvent& event);
 	void OnChar(wxKeyEvent& event);
 
+	void OnSize(wxSizeEvent& event);
+
 	void AppendShow();
 	void ImportContFile();
 

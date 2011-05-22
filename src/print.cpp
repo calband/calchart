@@ -108,34 +108,34 @@ int min_yards) const
 			case SHOW_STANDARD:
 				if (print_landscape)
 				{
-					width = page_height * DPI;
+					width = GetPageHeight() * DPI;
 					if (print_do_cont)
 					{
-						height = page_width * (1.0 - cont_ratio) * DPI;
-						field_y = page_width * cont_ratio * DPI;
+						height = GetPageWidth() * (1.0 - cont_ratio) * DPI;
+						field_y = GetPageWidth() * cont_ratio * DPI;
 					}
 					else
 					{
-						height = page_width * DPI;
+						height = GetPageWidth() * DPI;
 						field_y = 0;
 					}
 				}
 				else
 				{
-					width = page_width * DPI;
+					width = GetPageWidth() * DPI;
 					if (print_do_cont)
 					{
-						height = page_height * (1.0 - cont_ratio) * DPI;
-						field_y = page_height * cont_ratio * DPI;
+						height = GetPageHeight() * (1.0 - cont_ratio) * DPI;
+						field_y = GetPageHeight() * cont_ratio * DPI;
 					}
 					else
 					{
-						height = page_height * DPI;
+						height = GetPageHeight() * DPI;
 						field_y = 0;
 					}
 				}
-				real_width = page_width * DPI;
-				real_height = page_height * DPI;
+				real_width = GetPageWidth() * DPI;
+				real_height = GetPageHeight() * DPI;
 				step_width = (short)(width / (height / (fullheight+8.0)));
 				if (step_width > COORD2INT(fieldsize.x))
 					step_width = COORD2INT(fieldsize.x);
@@ -167,34 +167,34 @@ int min_yards) const
 			case SHOW_SPRINGSHOW:
 				if (print_landscape)
 				{
-					width = page_height * DPI;
+					width = GetPageHeight() * DPI;
 					if (print_do_cont)
 					{
-						height = page_width * (1.0 - cont_ratio) * DPI;
-						field_y = page_width * cont_ratio * DPI;
+						height = GetPageWidth() * (1.0 - cont_ratio) * DPI;
+						field_y = GetPageWidth() * cont_ratio * DPI;
 					}
 					else
 					{
-						height = page_width * DPI;
+						height = GetPageWidth() * DPI;
 						field_y = 0;
 					}
 				}
 				else
 				{
-					width = page_width * DPI;
+					width = GetPageWidth() * DPI;
 					if (print_do_cont)
 					{
-						height = page_height * (1.0 - cont_ratio) * DPI;
-						field_y = page_height * cont_ratio * DPI;
+						height = GetPageHeight() * (1.0 - cont_ratio) * DPI;
+						field_y = GetPageHeight() * cont_ratio * DPI;
 					}
 					else
 					{
-						height = page_height * DPI;
+						height = GetPageHeight() * DPI;
 						field_y = 0;
 					}
 				}
-				real_width = page_width * DPI;
-				real_height = page_height * DPI;
+				real_width = GetPageWidth() * DPI;
+				real_height = GetPageHeight() * DPI;
 				field_h = height / (1 + 16*((ShowModeSprShow*)mode)->FieldW()/
 					((float)((ShowModeSprShow*)mode)->StageW()*80));
 				field_w = field_h/((ShowModeSprShow*)mode)->StageH() *
@@ -224,13 +224,13 @@ int min_yards) const
 	{
 		if (print_landscape)
 		{
-			width = page_height * DPI;
-			height = page_width * DPI;
+			width = GetPageHeight() * DPI;
+			height = GetPageWidth() * DPI;
 		}
 		else
 		{
-			width = page_width * DPI;
-			height = page_height * DPI;
+			width = GetPageWidth() * DPI;
+			height = GetPageHeight() * DPI;
 		}
 		if ((width * (fullheight / fullwidth)) > height)
 		{
@@ -267,10 +267,10 @@ int min_yards) const
 		CHECKPRINT0(fprintf(fp, "%%!PS-Adobe-3.0\n"));
 	}
 	CHECKPRINT0(fprintf(fp, "%%%%BoundingBox: %.0f %.0f %.0f %.0f\n",
-		page_offset_x * DPI,
-		(paper_length - page_offset_y) * DPI - real_height,
-		page_offset_x * DPI + real_width,
-		(paper_length - page_offset_y) * DPI));
+		GetPageOffsetX() * DPI,
+		(paper_length - GetPageOffsetY()) * DPI - real_height,
+		GetPageOffsetX() * DPI + real_width,
+		(paper_length - GetPageOffsetY()) * DPI));
 	time(&t);
 	CHECKPRINT0(fprintf(fp, "%%%%CreationDate: %s", ctime(&t)));
 	std::string namestr(GetTitle().utf8_str());
@@ -471,8 +471,8 @@ void CC_show::PrintSheets(FILE *fp) const
 				CHECKPRINT1(fprintf(fp, "0 setgray\n"));
 				CHECKPRINT1(fprintf(fp, "0.25 setlinewidth\n"));
 				CHECKPRINT1(fprintf(fp, "%.2f %.2f translate\n",
-					page_offset_x * DPI,
-					(paper_length-page_offset_y)*DPI - real_height));
+					GetPageOffsetX() * DPI,
+					(paper_length-GetPageOffsetY())*DPI - real_height));
 				lines_left = (short)(real_height / text_size - 0.5);
 				CHECKPRINT1(fprintf(fp,
 					"/contfont findfont %.2f scalefont setfont\n",
@@ -613,8 +613,8 @@ const wxChar *print_start_page(FILE *fp, bool landscape)
 	CHECKPRINT(fprintf(fp, "0 setgray\n"));
 	CHECKPRINT(fprintf(fp, "0.25 setlinewidth\n"));
 	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n",
-		page_offset_x * DPI,
-		(paper_length - page_offset_y) * DPI - real_height));
+		GetPageOffsetX() * DPI,
+		(paper_length - GetPageOffsetY()) * DPI - real_height));
 	if (landscape)
 	{
 		CHECKPRINT(fprintf(fp, "%.2f 0 translate 90 rotate\n", real_width));

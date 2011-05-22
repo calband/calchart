@@ -104,6 +104,33 @@ const int DefaultPenWidth[COLOR_NUM] =
 	1,
 };
 
+// constants for behavior:
+static const wxString kDefaultZoomKey = wxT("MainFrameZoom");
+static const long kDefaultZoom = 5;
+static const wxString kWindowDefaultWidthKey = wxT("MainFrameWidth");
+static const unsigned int kWindowDefaultWidth = 600;
+static const wxString kWindowDefaultHeightKey = wxT("MainFrameHeight");
+static const unsigned int kWindowDefaultHeight = 450;
+static const wxString kPrintFileKey = wxT("PrintFile");
+static const wxString kPrintFile = wxT("LPT1");
+static const wxString kPrintCmdKey = wxT("PrintCmd");
+static const wxString kPrintCmd = wxT("lpr");
+static const wxString kPrintOptsKey = wxT("PrintOpts");
+static const wxString kPrintOpts = wxT("");
+static const wxString kPrintViewCmdKey = wxT("PrintViewCmd");
+static const wxString kPrintViewCmd = wxT("ghostview");
+static const wxString kPrintViewOptsKey = wxT("PrintViewOpts");
+static const wxString kPrintViewOpts = wxT("");
+
+static const wxString kPageWidthKey = wxT("PageWidth");
+static const float kPageWidth = 7.5;
+static const wxString kPageHeightKey = wxT("PageHeight");
+static const float kPageHeight = 10.0;
+static const wxString kPageOffsetXKey = wxT("PageOffsetX");
+static const float kPageOffsetX = 0.5;
+static const wxString kPageOffsetYKey = wxT("PageOffsetY");
+static const float kPageOffsetY = 0.5;
+
 wxPalette *CalChartPalette;
 const wxPen *CalChartPens[COLOR_NUM];
 const wxBrush *CalChartBrushes[COLOR_NUM];
@@ -112,16 +139,7 @@ wxString program_dir;
 wxString shows_dir;
 wxString autosave_dir;
 wxString autosave_dirname(AUTOSAVE_VAR);
-unsigned int window_default_width = 600;
-unsigned int window_default_height = 450;
-unsigned int undo_buffer_size = 50000;
 unsigned int autosave_interval = 300;
-unsigned int default_zoom = 5;
-wxString print_file(wxT("LPT1"));
-wxString print_cmd(wxT("lpr"));
-wxString print_opts(wxT(""));
-wxString print_view_cmd(wxT("ghostview"));
-wxString print_view_opts(wxT(""));
 wxString head_font(wxT("Helvetica-Bold"));
 wxString main_font(wxT("Helvetica"));
 wxString number_font(wxT("Helvetica"));
@@ -129,11 +147,7 @@ wxString cont_font(wxT("Courier"));
 wxString bold_font(wxT("Courier-Bold"));
 wxString ital_font(wxT("Courier-Italic"));
 wxString bold_ital_font(wxT("Courier-BoldItalic"));
-float page_width = 7.5;
-float page_height = 10.0;
 float paper_length = 11.0;
-float page_offset_x = 0.5;
-float page_offset_y = 0.5;
 float header_size = 3.0;
 float yards_size = 1.5;
 float text_size = 10.0;
@@ -210,7 +224,7 @@ wxString spr_line_text[MAX_SPR_LINES] =
 static wxPathList configdirs;
 static wxString runtime_dir;
 
-void ReadConfig()
+void ReadConfigColor()
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	
@@ -218,18 +232,20 @@ void ReadConfig()
 	config->SetPath(wxT("/COLORS"));
 	for (size_t i=0; i<COLOR_NUM; i++)
 	{
-		wxString colorName = DefaultColors[i];
-		config->Read(ColorNames[i], &colorName);
-		unsigned r, g, b;
 		wxColour c;
-
-		if (CC_sscanf(colorName, wxT("%u %u %u"), &r, &g, &b) == 3)
+		wxString rbuf = ColorNames[i] + wxT("_Red");
+		wxString gbuf = ColorNames[i] + wxT("_Green");
+		wxString bbuf = ColorNames[i] + wxT("_Blue");
+		if (config->Exists(rbuf) && config->Exists(gbuf) && config->Exists(bbuf))
 		{
+			long r = config->Read(rbuf, 0l);
+			long g = config->Read(gbuf, 0l);
+			long b = config->Read(bbuf, 0l);
 			c = wxColour(r, g, b);
 		}
 		else
 		{
-			c = wxColour(colorName);
+			c = wxColour(DefaultColors[i]);
 		}
 		CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
 		// store widths in a subgroup
@@ -250,28 +266,109 @@ void SetConfigColor(size_t selection)
 	
 	// read out the color configuration:
 	config->SetPath(wxT("/COLORS"));
-	wxString buf;
-	buf.Printf(wxT("%u %u %u"), 
-		CalChartBrushes[selection]->GetColour().Red(),
-		CalChartBrushes[selection]->GetColour().Green(),
-		CalChartBrushes[selection]->GetColour().Blue()
-	);
-	config->Write(ColorNames[selection], buf);
+	wxString rbuf = ColorNames[selection] + wxT("_Red");
+	config->Write(rbuf, static_cast<long>(CalChartBrushes[selection]->GetColour().Red()));
+	wxString gbuf = ColorNames[selection] + wxT("_Green");
+	config->Write(gbuf, static_cast<long>(CalChartBrushes[selection]->GetColour().Green()));
+	wxString bbuf = ColorNames[selection] + wxT("_Blue");
+	config->Write(bbuf, static_cast<long>(CalChartBrushes[selection]->GetColour().Blue()));
 	config->SetPath(wxT("WIDTH"));
 	config->Write(ColorNames[selection], CalChartPens[selection]->GetWidth());
+	config->Flush();
 }
 
 void ClearConfigColor(size_t selection)
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	
-	// read out the color configuration:
 	config->SetPath(wxT("/COLORS"));
-	// delete width first so that it clears out the entire color config if empty
-	config->DeleteEntry(ColorNames[selection]);
+	wxString rbuf = ColorNames[selection] + wxT("_Red");
+	config->DeleteEntry(rbuf);
+	wxString gbuf = ColorNames[selection] + wxT("_Green");
+	config->DeleteEntry(gbuf);
+	wxString bbuf = ColorNames[selection] + wxT("_Blue");
+	config->DeleteEntry(bbuf);
 	config->SetPath(wxT("WIDTH"));
 	config->DeleteEntry(ColorNames[selection]);
+	config->Flush();
 }
+
+void ReadConfig()
+{
+	ReadConfigColor();
+}
+
+template <typename T>
+T GetConfigValue(const wxString& key, const T& def)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/CalChart"));
+	return config->Read(key, def);
+}
+
+template <typename T>
+void SetConfigValue(const wxString& key, const T& value)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/CalChart"));
+	config->Write(key, value);
+	config->Flush();
+}
+
+template <typename T>
+void ClearConfigValue(const wxString& key)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/CalChart"));
+	config->DeleteEntry(key);
+	config->Flush();
+}
+
+wxSize GetDefaultSize()
+{
+	long width = GetConfigValue<long>(kWindowDefaultWidthKey, kWindowDefaultWidth);
+	long height = GetConfigValue<long>(kWindowDefaultHeightKey, kWindowDefaultHeight);
+	return wxSize(width, height);
+}
+
+void SetDefaultSize(const wxSize& size)
+{
+	SetConfigValue<long>(kWindowDefaultWidthKey, size.GetWidth());
+	SetConfigValue<long>(kWindowDefaultHeightKey, size.GetHeight());
+}
+
+long GetDefaultZoom() { return GetConfigValue<long>(kDefaultZoomKey, kDefaultZoom); }
+void SetDefaultZoom(long zoom) { SetConfigValue<long>(kDefaultZoomKey, zoom); }
+
+wxString GetPrintFile() { return GetConfigValue<wxString>(kPrintFileKey, kPrintFile); }
+void SetPrintFile(const wxString& str) { SetConfigValue<wxString>(kPrintFileKey, str); }
+void ClearPrintFile() { ClearConfigValue<wxString>(kPrintFileKey); }
+wxString GetPrintCmd() { return GetConfigValue<wxString>(kPrintCmdKey, kPrintCmd); }
+void SetPrintCmd(const wxString& str) { SetConfigValue<wxString>(kPrintCmdKey, str); }
+void ClearPrintCmd() { ClearConfigValue<wxString>(kPrintCmdKey); }
+wxString GetPrintOpts() { return GetConfigValue<wxString>(kPrintOptsKey, kPrintOpts); }
+void SetPrintOpts(const wxString& str) { SetConfigValue<wxString>(kPrintOptsKey, str); }
+void ClearPrintOpts() { ClearConfigValue<wxString>(kPrintOptsKey); }
+wxString GetPrintViewCmd() { return GetConfigValue<wxString>(kPrintViewCmdKey, kPrintViewCmd); }
+void SetPrintViewCmd(const wxString& str) { SetConfigValue<wxString>(kPrintViewCmdKey, str); }
+void ClearPrintViewCmd() { ClearConfigValue<wxString>(kPrintViewCmdKey); }
+wxString GetPrintViewOpts() { return GetConfigValue<wxString>(kPrintViewOptsKey, kPrintViewOpts); }
+void SetPrintViewOpts(const wxString& str) { SetConfigValue<wxString>(kPrintViewOptsKey, str); }
+void ClearPrintViewOpts() { ClearConfigValue<wxString>(kPrintViewOptsKey); }
+
+float GetPageWidth() { return GetConfigValue<float>(kPageWidthKey, kPageWidth); }
+void SetPageWidth(float f) { SetConfigValue<float>(kPageWidthKey, f); }
+void ClearPageWidth() { ClearConfigValue<float>(kPageWidthKey); }
+float GetPageHeight() { return GetConfigValue<float>(kPageHeightKey, kPageHeight); }
+void SetPageHeight(float f) { SetConfigValue<float>(kPageHeightKey, f); }
+void ClearPageHeight() { ClearConfigValue<float>(kPageHeightKey); }
+float GetPageOffsetX() { return GetConfigValue<float>(kPageOffsetXKey, kPageOffsetX); }
+void SetPageOffsetX(float f) { SetConfigValue<float>(kPageOffsetXKey, f); }
+void ClearPageOffsetX() { ClearConfigValue<float>(kPageOffsetXKey); }
+float GetPageOffsetY() { return GetConfigValue<float>(kPageOffsetYKey, kPageOffsetY); }
+void SetPageOffsetY(float f) { SetConfigValue<float>(kPageOffsetYKey, f); }
+void ClearPageOffsetY() { ClearConfigValue<float>(kPageOffsetYKey); }
+
 
 wxString ReadConfig(const wxString& path)
 {
@@ -334,21 +431,25 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (com_buf == wxT("WINDOW_WIDTH"))
 			{
+				unsigned int window_default_width;
 				fscanf(fp, " %d \n", &window_default_width);
 				continue;
 			}
 			if (com_buf == wxT("WINDOW_HEIGHT"))
 			{
+				unsigned int window_default_height;
 				fscanf(fp, " %d \n", &window_default_height);
 				continue;
 			}
 			if (com_buf == wxT("DEFAULT_ZOOM"))
 			{
+				unsigned default_zoom;
 				fscanf(fp, " %d \n", &default_zoom);
 				continue;
 			}
 			if (com_buf == wxT("UNDO_BUF_SIZE"))
 			{
+				unsigned undo_buffer_size;
 				fscanf(fp, " %d \n", &undo_buffer_size);
 				continue;
 			}
@@ -359,26 +460,31 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (com_buf == wxT("PRINT_FILE"))
 			{
+				wxString print_file;
 				ReadDOSline(fp, print_file);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_CMD"))
 			{
+				wxString print_cmd;
 				ReadDOSline(fp, print_cmd);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_OPTS"))
 			{
+				wxString print_opts;
 				ReadDOSline(fp, print_opts);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_VIEW_CMD"))
 			{
+				wxString print_view_cmd;
 				ReadDOSline(fp, print_view_cmd);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_VIEW_OPTS"))
 			{
+				wxString print_view_opts;
 				ReadDOSline(fp, print_view_opts);
 				continue;
 			}
@@ -444,26 +550,31 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (com_buf == wxT("PRINT_PAGE_WIDTH"))
 			{
+				float page_width;
 				fscanf(fp, " %f \n", &page_width);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_PAGE_HEIGHT"))
 			{
+				float page_height;
 				fscanf(fp, " %f \n", &page_height);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_PAPER_LENGTH"))
 			{
+				float paper_length;
 				fscanf(fp, " %f \n", &paper_length);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_LEFT_MARGIN"))
 			{
+				float page_offset_x;
 				fscanf(fp, " %f \n", &page_offset_x);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_TOP_MARGIN"))
 			{
+				float page_offset_y;
 				fscanf(fp, " %f \n", &page_offset_y);
 				continue;
 			}

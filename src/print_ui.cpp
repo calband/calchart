@@ -46,10 +46,12 @@ enum
 {
 	CC_PRINT_BUTTON_PRINT = 1000,
 	CC_PRINT_BUTTON_SELECT,
+	CC_PRINT_BUTTON_RESET_DEFAULTS
 };
 
 BEGIN_EVENT_TABLE(ShowPrintDialog, wxDialog)
 EVT_BUTTON(CC_PRINT_BUTTON_SELECT,ShowPrintDialog::ShowPrintSelect)
+EVT_BUTTON(CC_PRINT_BUTTON_RESET_DEFAULTS,ShowPrintDialog::ResetDefaults)
 END_EVENT_TABLE()
 
 void ShowPrintDialog::PrintShow()
@@ -61,15 +63,6 @@ void ShowPrintDialog::PrintShow()
 	bool overview;
 	long minyards;
 
-	double dval;
-	text_x->GetValue().ToDouble(&dval);
-	page_offset_x = (float)dval;
-	text_y->GetValue().ToDouble(&dval);
-	page_offset_y = (float)dval;
-	text_width->GetValue().ToDouble(&dval);
-	page_width = (float)dval;
-	text_height->GetValue().ToDouble(&dval);
-	page_height = (float)dval;
 	text_minyards->GetValue().ToLong(&minyards);
 
 	mShow->SetBoolLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
@@ -82,12 +75,12 @@ void ShowPrintDialog::PrintShow()
 	switch (radio_method->GetSelection())
 	{
 		case CC_PRINT_ACTION_PREVIEW:
+		{
 #ifdef PRINT__RUN_CMD
-			print_view_cmd = text_view_cmd->GetValue();
-			print_view_opts = text_view_opts->GetValue();
 			s = wxFileName::CreateTempFileName(wxT("cc_"));
-			buf.sprintf(wxT("%s %s \"%s\""), print_view_cmd.c_str(), print_view_opts.c_str(), s.c_str());
+			buf.sprintf(wxT("%s %s \"%s\""), GetPrintViewCmd().c_str(), GetPrintViewCmd().c_str(), s.c_str());
 #endif
+		}
 			break;
 		case CC_PRINT_ACTION_FILE:
 			s = wxFileSelector(wxT("Print to file"), NULL, NULL, NULL,
@@ -95,15 +88,13 @@ void ShowPrintDialog::PrintShow()
 			if (s.empty()) return;
 			break;
 		case CC_PRINT_ACTION_PRINTER:
+		{
 #ifdef PRINT__RUN_CMD
-			print_cmd = text_cmd->GetValue();
-			print_opts = text_opts->GetValue();
 			s = wxFileName::CreateTempFileName(wxT("cc_"));
-			buf.sprintf(wxT("%s %s \"%s\""), print_cmd.c_str(), print_opts.c_str(), s.c_str());
+			buf.sprintf(wxT("%s %s \"%s\""), GetPrintCmd().c_str(), GetPrintOpts().c_str(), s.c_str());
 #else
-			s = text_cmd->GetValue();
-			print_file = s;
 #endif
+		}
 			break;
 		default:
 			break;
@@ -193,6 +184,27 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 }
 
 
+void ShowPrintDialog::ResetDefaults(wxCommandEvent&)
+{
+#ifdef PRINT__RUN_CMD
+	ClearPrintCmd();
+	ClearPrintOpts();
+#else
+	ClearPrintFile();
+#endif
+	ClearPrintViewCmd();
+	ClearPrintViewOpts();
+
+	ClearPageOffsetX();
+	ClearPageOffsetY();
+	ClearPageWidth();
+	ClearPageHeight();
+
+	// re-read values
+	TransferDataToWindow();
+}
+
+
 IMPLEMENT_CLASS( ShowPrintDialog, wxDialog )
 
 ShowPrintDialog::ShowPrintDialog()
@@ -258,6 +270,9 @@ void ShowPrintDialog::CreateControls()
 	wxButton *close = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
 	horizontalsizer->Add(close, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	close->SetDefault();
+
+	wxButton *resetdefaults = new wxButton(this, CC_PRINT_BUTTON_RESET_DEFAULTS, wxT("&Reset Values"));
+	horizontalsizer->Add(resetdefaults, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	topsizer->Add(horizontalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
@@ -344,34 +359,28 @@ void ShowPrintDialog::CreateControls()
 		topsizer->Add(new wxButton(this, CC_PRINT_BUTTON_SELECT,wxT("S&elect sheets...")), 0, wxALL, 5 );
 	}
 
-	wxString buf;
-
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Page &width: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	buf.sprintf(wxT("%.2f"), page_width);
-	text_width = new wxTextCtrl(this, wxID_ANY, buf);
+	text_width = new wxTextCtrl(this, wxID_ANY);
 	verticalsizer->Add(text_width, 0, wxGROW|wxALL, 5 );
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Page &height: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	buf.sprintf(wxT("%.2f"), page_height);
-	text_height = new wxTextCtrl(this, wxID_ANY, buf);
+	text_height = new wxTextCtrl(this, wxID_ANY);
 	verticalsizer->Add(text_height, 0, wxGROW|wxALL, 5 );
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Left margin: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	buf.sprintf(wxT("%.2f"), page_offset_x);
-	text_x = new wxTextCtrl(this, wxID_ANY, buf);
+	text_x = new wxTextCtrl(this, wxID_ANY);
 	verticalsizer->Add(text_x, 0, wxGROW|wxALL, 5 );
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Top margin: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	buf.sprintf(wxT("%.2f"), page_offset_y);
-	text_y = new wxTextCtrl(this, wxID_ANY, buf);
+	text_y = new wxTextCtrl(this, wxID_ANY);
 	verticalsizer->Add(text_y, 0, wxGROW|wxALL, 5 );
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
@@ -382,4 +391,50 @@ void ShowPrintDialog::CreateControls()
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
+}
+
+bool ShowPrintDialog::TransferDataToWindow()
+{
+#ifdef PRINT__RUN_CMD
+	text_cmd->SetValue(GetPrintCmd());
+	text_opts->SetValue(GetPrintOpts());
+#else
+	text_cmd->SetValue(GetPrintFile());
+#endif
+	text_view_cmd->SetValue(GetPrintViewCmd());
+	text_view_opts->SetValue(GetPrintViewOpts());
+	wxString buf;
+	buf.Printf(wxT("%.2f"),GetPageOffsetX());
+	text_x->SetValue(buf);
+	buf.Printf(wxT("%.2f"),GetPageOffsetY());
+	text_y->SetValue(buf);
+	buf.Printf(wxT("%.2f"),GetPageWidth());
+	text_width->SetValue(buf);
+	buf.Printf(wxT("%.2f"),GetPageHeight());
+	text_height->SetValue(buf);
+	return true;
+}
+
+bool ShowPrintDialog::TransferDataFromWindow()
+{
+#ifdef PRINT__RUN_CMD
+	SetPrintCmd(text_cmd->GetValue());
+	SetPrintOpts(text_opts->GetValue());
+#else
+	SetPrintFile(text_cmd->GetValue());
+#endif
+	SetPrintViewCmd(text_view_cmd->GetValue());
+	SetPrintViewOpts(text_view_opts->GetValue());
+
+	double dval;
+	text_x->GetValue().ToDouble(&dval);
+	SetPageOffsetX(dval);
+	text_y->GetValue().ToDouble(&dval);
+	SetPageOffsetY(dval);
+	text_width->GetValue().ToDouble(&dval);
+	SetPageWidth(dval);
+	text_height->GetValue().ToDouble(&dval);
+	SetPageHeight(dval);
+
+	return true;
 }

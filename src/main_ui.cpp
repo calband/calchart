@@ -171,6 +171,7 @@ EVT_MENU(CALCHART__COLORS, MainFrame::OnCmdSelectColors)
 EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
 EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
+EVT_SIZE( MainFrame::OnSize)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(FieldCanvas, AutoScrollCanvas)
@@ -298,7 +299,6 @@ wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 field(NULL)
 {
 	unsigned ss;
-	unsigned def_zoom;
 	unsigned def_grid;
 	unsigned def_ref;
 	bool setup;
@@ -372,10 +372,9 @@ field(NULL)
 // Add the field canvas
 	setup = false;
 	ss = 0;
-	def_zoom = default_zoom;
 	def_grid = 2;
 	def_ref = 0;
-	field = new FieldCanvas(view, ss, this, def_zoom);
+	field = new FieldCanvas(view, ss, this, GetDefaultZoom());
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
@@ -392,7 +391,7 @@ field(NULL)
 
 // Zoom slider
 	// on Mac using wxSL_LABELS will cause a crash?
-	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, def_zoom, 1, FIELD_MAXZOOM, wxDefaultPosition,
+	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, GetDefaultZoom(), 1, FIELD_MAXZOOM, wxDefaultPosition,
                     wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
 // set up a sizer for the field panel
@@ -875,6 +874,12 @@ void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
 void MainFrame::OnChar(wxKeyEvent& event)
 {
 	field->OnChar(event);
+}
+
+void MainFrame::OnSize(wxSizeEvent& event)
+{
+	SetDefaultSize(event.GetSize());
+	wxDocMDIChildFrame::OnSize(event);
 }
 
 // Append a show with file selector
@@ -1766,6 +1771,7 @@ void MainFrame::slider_sheet_callback(wxScrollEvent &)
 
 void MainFrame::slider_zoom_callback(wxScrollEvent &)
 {
+	SetDefaultZoom(zoom_slider->GetValue());
 	field->SetZoom(zoom_slider->GetValue());
 }
 
@@ -1777,7 +1783,7 @@ bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
 	mShow = static_cast<CC_show*>(doc);
 	mFrame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
-		wxSize(window_default_width, window_default_height));
+		GetDefaultSize());
 
 	mFrame->Show(true);
 	Activate(true);

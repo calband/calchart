@@ -1,6 +1,6 @@
 /*
  * config.h
- * Declarations for the configuration routines
+ * Functions for manipulating configuration Settings
  */
 
 /*
@@ -24,6 +24,13 @@
 #define _CONFGR_H_
 
 #include <wx/string.h>
+#include <wx/gdicmn.h>
+
+// forward declare
+class wxPalette;
+class wxPen;
+class wxBrush;
+class wxPathList;
 
 #define MAX_SPR_LINES 5
 #define MAX_YARD_LINES 53
@@ -52,31 +59,58 @@ enum CalChartColors
 	COLOR_NUM
 };
 
-class wxPalette;
 extern wxPalette *CalChartPalette;
 
-class wxPen;
-class wxBrush;
 extern const wxPen *CalChartPens[COLOR_NUM];
 extern const wxBrush *CalChartBrushes[COLOR_NUM];
 extern const wxString ColorNames[COLOR_NUM];
 extern const wxString DefaultColors[COLOR_NUM];
 extern const int DefaultPenWidth[COLOR_NUM];
 
+// directory and file setup:
 extern wxString program_dir;
 extern wxString shows_dir;
 extern wxString autosave_dir;
 extern wxString autosave_dirname;
-extern unsigned int window_default_width;
-extern unsigned int window_default_height;
-extern unsigned int default_zoom;
-extern unsigned int undo_buffer_size;
 extern unsigned int autosave_interval;
-extern wxString print_file;
-extern wxString print_cmd;
-extern wxString print_opts;
-extern wxString print_view_cmd;
-extern wxString print_view_opts;
+
+// page setup and zoom
+wxSize GetDefaultSize();
+void SetDefaultSize(const wxSize& size);
+
+long GetDefaultZoom();
+void SetDefaultZoom(long zoom);
+
+// printing
+wxString GetPrintFile();
+void SetPrintFile(const wxString& str);
+void ClearPrintFile();
+wxString GetPrintCmd();
+void SetPrintCmd(const wxString& str);
+void ClearPrintCmd();
+wxString GetPrintOpts();
+void SetPrintOpts(const wxString& str);
+void ClearPrintOpts();
+wxString GetPrintViewCmd();
+void SetPrintViewCmd(const wxString& str);
+void ClearPrintViewCmd();
+wxString GetPrintViewOpts();
+void SetPrintViewOpts(const wxString& str);
+void ClearPrintViewOpts();
+
+float GetPageWidth();
+void SetPageWidth(float f);
+void ClearPageWidth();
+float GetPageHeight();
+void SetPageHeight(float f);
+void ClearPageHeight();
+float GetPageOffsetX();
+void SetPageOffsetX(float f);
+void ClearPageOffsetX();
+float GetPageOffsetY();
+void SetPageOffsetY(float f);
+void ClearPageOffsetY();
+
 extern wxString head_font;
 extern wxString main_font;
 extern wxString number_font;
@@ -84,11 +118,7 @@ extern wxString cont_font;
 extern wxString bold_font;
 extern wxString ital_font;
 extern wxString bold_ital_font;
-extern float page_width;
-extern float page_height;
 extern float paper_length;
-extern float page_offset_x;
-extern float page_offset_y;
 extern float header_size;
 extern float yards_size;
 extern float text_size;
@@ -102,10 +132,10 @@ extern wxString spr_line_text[MAX_SPR_LINES];
 
 extern void ReadConfig();
 extern wxString ReadConfig(const wxString& path);
+
 void SetConfigColor(size_t selection);
 void ClearConfigColor(size_t selection);
 
-class wxPathList;
 extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
 const wxPathList *list = NULL);
 extern wxString FullPath(const wxString& path);

@@ -52,6 +52,12 @@ class ShowPrintDialog : public wxDialog
 	void CreateControls();
 
 	void ShowPrintSelect(wxCommandEvent&);
+	// because we modify setting, we need some way to reset them
+	void ResetDefaults(wxCommandEvent&);
+
+	// use these to get and set default values
+	virtual bool TransferDataToWindow();
+	virtual bool TransferDataFromWindow();
 
 // to print a show, call this function
 	void PrintShow();
