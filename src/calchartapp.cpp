@@ -92,6 +92,7 @@ TopFrame *GetMainFrame(void)
 
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
+void CC_coord_UnitTests();
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
@@ -223,6 +224,7 @@ bool CalChartApp::OnInit()
 	
 	CC_continuity_UnitTests();
 	CC_point_UnitTests();
+	CC_coord_UnitTests();
 	
 	return true;
 }

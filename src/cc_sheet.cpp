@@ -296,30 +296,6 @@ void CC_sheet::SetBeats(unsigned short b)
 }
 
 
-// Set a point from an old format disk point
-void CC_sheet::SetPoint(const cc_oldpoint& val, unsigned i)
-{
-	pts[i].flags = (val.flags & OLD_FLAG_FLIP) ? PNT_LABEL:0;
-	if ((val.sym < 111) || (val.sym > 118))
-		pts[i].sym = SYMBOL_PLAIN;
-	else pts[i].sym = (SYMBOL_TYPE)(val.sym - 111);
-	pts[i].cont = get_lil_word(&val.cont);
-	SetAllPositions(val.pos, i);
-	for (unsigned j = 0; j < 3; j++)
-	{
-// -1 means undefined (endian doesn't matter)
-		if ((val.ref[j].x == 0xFFFF) && (val.ref[j].y == 0xFFFF))
-		{
-			SetPosition(val.pos, i, j+1);
-		}
-		else
-		{
-			SetPosition(val.ref[j], i, j+1);
-		}
-	}
-}
-
-
 // Get position of point
 const CC_coord& CC_sheet::GetPosition(unsigned i, unsigned ref) const
 {

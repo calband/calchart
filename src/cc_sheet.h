@@ -34,7 +34,6 @@ class CC_show;
 class CC_coord;
 class Matrix;
 class CC_textline;
-struct cc_oldpoint;
 
 typedef std::vector<CC_textline> CC_textline_list;
 
@@ -77,7 +76,6 @@ public:
 	inline CC_point& GetPoint(unsigned i) { return pts[i]; }
 	std::vector<CC_point> GetPoints() const { return pts; }
 	void SetPoints(const std::vector<CC_point>& points) { pts = points; }
-	void SetPoint(const cc_oldpoint& val, unsigned i);
 
 	const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
 	void SetAllPositions(const CC_coord& val, unsigned i);

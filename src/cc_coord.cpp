@@ -88,11 +88,100 @@ bool CC_coord::Collides(const CC_coord& c) const
 }
 
 
-// Set a coordinate from an old format disk coord
-CC_coord& CC_coord::operator = (const cc_oldcoord& old)
+
+#include <assert.h>
+
+// Test Suite stuff
+struct CC_coord_values
 {
-	x = ((get_lil_word(&old.x)+2) << (COORD_SHIFT-3)) - INT2COORD(88);
-	y = (((get_lil_word(&old.y)+2) << COORD_SHIFT) / 6) - INT2COORD(50);
-	return *this;
+	Coord x, y;
+};
+
+
+bool Check_CC_coord(const CC_coord& underTest, const CC_coord_values& values)
+{
+	return (underTest.x == values.x)
+		&& (underTest.y == values.y);
 }
 
+void CC_coord_UnitTests()
+{
+	static const size_t kNumRand = 10;
+	// test some defaults:
+	{
+		CC_coord undertest;
+		assert(0.0 == undertest.Magnitude());
+		assert(0.0 == undertest.DM_Magnitude());
+		assert(0.0 == undertest.Direction());
+	}
+
+	// test equality:
+	for (size_t i = 0; i < kNumRand; ++i)
+	{
+		CC_coord_values values1, values2;
+		Coord x1, y1, x2, y2;
+		x1 = rand(); y1 = rand();
+		x2 = rand(); y2 = rand();
+		CC_coord undertest1(x1, y1);
+		CC_coord undertest2(x2, y2);
+		assert(x1 == undertest1.x);
+		assert(y1 == undertest1.y);
+		assert(x2 == undertest2.x);
+		assert(y2 == undertest2.y);
+		assert(CC_coord(x1,y1) == undertest1);
+		assert(CC_coord(x2,y2) == undertest2);
+		assert(!(CC_coord(x1,y1) != undertest1));
+		assert(!(CC_coord(x2,y2) != undertest2));
+
+		CC_coord newValue;
+
+		Coord x3, y3;
+
+		newValue = undertest1 + undertest2;
+		x3 = undertest1.x + undertest2.x;
+		y3 = undertest1.y + undertest2.y;
+		assert((x3) == newValue.x);
+		assert((y3) == newValue.y);
+		newValue = undertest1;
+		newValue += undertest2;
+		assert((x3) == newValue.x);
+		assert((y3) == newValue.y);
+		newValue = undertest1 - undertest2;
+		x3 = undertest1.x - undertest2.x;
+		y3 = undertest1.y - undertest2.y;
+		assert((x3) == newValue.x);
+		assert((y3) == newValue.y);
+		newValue = undertest1;
+		newValue -= undertest2;
+		assert((x3) == newValue.x);
+		assert((y3) == newValue.y);
+
+		newValue = -undertest1;
+		assert((-undertest1.x) == newValue.x);
+		assert((-undertest1.y) == newValue.y);
+
+		short factor = rand();
+		newValue = undertest1 * factor;
+		x3 = undertest1.x * factor;
+		y3 = undertest1.y * factor;
+		assert((x3) == newValue.x);
+		assert((y3) == newValue.y);
+		newValue = undertest1;
+		newValue *= factor;
+		assert((x3) == newValue.x);
+		assert((y3) == newValue.y);
+		// avoid div by 0
+		if (factor)
+		{
+			newValue = undertest1 / factor;
+			x3 = undertest1.x / factor;
+			y3 = undertest1.y / factor;
+			assert((x3) == newValue.x);
+			assert((y3) == newValue.y);
+			newValue = undertest1;
+			newValue /= factor;
+			assert((x3) == newValue.x);
+			assert((y3) == newValue.y);
+		}
+	}
+}

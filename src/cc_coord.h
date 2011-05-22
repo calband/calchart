@@ -36,42 +36,10 @@
 #define COORD2FLOAT(a) ((a) / ((float)(1 << COORD_SHIFT)))
 #define CLIPFLOAT(a) (((a) < 0) ? ((a) - 0.5) : ((a) + 0.5))
 
-struct cc_oldcoord
-{
-	uint16_t x;
-	uint16_t y;
-};
-
-/* Format of old calchart stuntsheet files */
-#define OLD_FLAG_FLIP 1
-struct cc_oldpoint
-{
-	uint8_t sym;
-	uint8_t flags;
-	cc_oldcoord pos;
-	uint16_t color;
-	int8_t code[2];
-	uint16_t cont;
-	cc_oldcoord ref[3];
-};
-
-struct cc_reallyoldpoint
-{
-	uint8_t sym;
-	uint8_t flags;
-	cc_oldcoord pos;
-	uint16_t color;
-	int8_t code[2];
-	uint16_t cont;
-	int16_t refnum;
-	cc_oldcoord ref;
-};
-
 class CC_coord
 {
 public:
 	CC_coord(Coord xval = 0, Coord yval = 0) : x(xval), y(yval) {}
-	CC_coord(const cc_oldcoord& old) { *this = old; }
 
 	float Magnitude() const;
 	float DM_Magnitude() const;				  // check for diagonal military also
@@ -80,7 +48,6 @@ public:
 
 	bool Collides(const CC_coord& c) const;
 
-	CC_coord& operator = (const cc_oldcoord& old);
 	inline CC_coord& operator += (const CC_coord& c)
 	{
 		x += c.x; y += c.y;
@@ -140,22 +107,12 @@ inline int operator == (const CC_coord& a, const CC_coord& b)
 }
 
 
-inline int operator == (const CC_coord& a, const short b)
-{
-	return ((a.x == b) && (a.y == b));
-}
-
-
 inline int operator != (const CC_coord& a, const CC_coord& b)
 {
 	return ((a.x != b.x) || (a.y != b.y));
 }
 
 
-inline int operator != (const CC_coord& a, const short b)
-{
-	return ((a.x != b) || (a.y != b));
-}
-
+void CC_coord_UnitTests();
 
 #endif

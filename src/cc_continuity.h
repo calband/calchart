@@ -26,8 +26,6 @@
 #include <wx/wx.h>
 #include <boost/shared_ptr.hpp>
 
-class CC_continuity;
-
 // points have a symbol index and a continuity index.  The continuity
 // numbers is the way that the points know what continity they use.
 // This allows multiple points to have different symbols but the same continuity.

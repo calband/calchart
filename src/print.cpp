@@ -25,6 +25,14 @@
 #include "show.h"
 #include "cc_show.h"
 #include "cc_sheet.h"
+
+#include "prolog0.h"
+#include "prolog1.h"
+#include "prolog2.h"
+#include "setup0.h"
+#include "setup1.h"
+#include "setup2.h"
+
 #include <time.h>
 #include <string>
 
@@ -304,11 +312,8 @@ int min_yards) const
 					((ShowModeStandard *)mode)->HashE()));
 				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", header_size));
 				CHECKPRINT0(fprintf(fp, "/yardsize %.2f def\n", yards_size));
-				if (!copy_ps_file(wxT("prolog0.ps"), fp))
-				{
-					error = nofile;
-					return 0;
-				}
+				// subtract 1 because we don't want to write the '\0' at the end
+				CHECKPRINT0(fwrite(prolog0_ps, sizeof(char), sizeof(prolog0_ps)-1, fp));
 				CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
 				CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
 				CHECKPRINT0(fprintf(fp, "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
@@ -324,11 +329,8 @@ int min_yards) const
 				CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font_str.c_str()));
 				CHECKPRINT0(fprintf(fp, "/bolditalfont0 /%s def\n",
 					bold_ital_font_str.c_str()));
-				if (!copy_ps_file(wxT("setup0.ps"), fp))
-				{
-					error = nofile;
-					return 0;
-				}
+				// subtract 1 because we don't want to write the '\0' at the end
+				CHECKPRINT0(fwrite(setup0_ps, sizeof(char), sizeof(setup0_ps)-1, fp));
 				CHECKPRINT0(fprintf(fp, "%%%%EndSetup\n"));
 				break;
 			case SHOW_SPRINGSHOW:
@@ -347,11 +349,8 @@ int min_yards) const
 				CHECKPRINT0(fprintf(fp, "/nfieldh %hd def\n",
 					((ShowModeSprShow*)mode)->StepsH()));
 				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", header_size));
-				if (!copy_ps_file(wxT("prolog1.ps"), fp))
-				{
-					error = nofile;
-					return 0;
-				}
+				// subtract 1 because we don't want to write the '\0' at the end
+				CHECKPRINT0(fwrite(prolog1_ps, sizeof(char), sizeof(prolog1_ps)-1, fp));
 				CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
 				CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
 				CHECKPRINT0(fprintf(fp, "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
@@ -367,11 +366,8 @@ int min_yards) const
 				CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font_str.c_str()));
 				CHECKPRINT0(fprintf(fp, "/bolditalfont0 /%s def\n",
 					bold_ital_font_str.c_str()));
-				if (!copy_ps_file(wxT("setup1.ps"), fp))
-				{
-					error = nofile;
-					return 0;
-				}
+				// subtract 1 because we don't want to write the '\0' at the end
+				CHECKPRINT0(fwrite(setup1_ps, sizeof(char), sizeof(setup1_ps)-1, fp));
 				CHECKPRINT0(fprintf(fp, "%%%%EndSetup\n"));
 				break;
 		}
@@ -385,18 +381,12 @@ int min_yards) const
 			((ShowModeStandard *)mode)->HashE()));
 		CHECKPRINT0(fprintf(fp, "/fieldw %.2f def\n", width));
 		CHECKPRINT0(fprintf(fp, "/fieldh %.2f def\n", height));
-		if (!copy_ps_file(wxT("prolog2.ps"), fp))
-		{
-			error = nofile;
-			return 0;
-		}
+		// subtract 1 because we don't want to write the '\0' at the end
+		CHECKPRINT0(fwrite(prolog2_ps, sizeof(char), sizeof(prolog2_ps)-1, fp));
 		CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
 		CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
-		if (!copy_ps_file(wxT("setup2.ps"), fp))
-		{
-			error = nofile;
-			return 0;
-		}
+		// subtract 1 because we don't want to write the '\0' at the end
+		CHECKPRINT0(fwrite(setup2_ps, sizeof(char), sizeof(setup2_ps)-1, fp));
 		CHECKPRINT0(fprintf(fp, "%%%%EndSetup\n"));
 	}
 
