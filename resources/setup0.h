@@ -1,3 +1,8 @@
+#ifndef _SETUP0_H_
+#define _SETUP0_H_
+// file generated via the command:
+// cat file.ps | sed 's/^/"/' | sed 's/$/\\n"/' 
+static char setup0_ps[] = 
 "% run vmstatus.ps to get these values if changes made\n"
 "%%BeginResource: font CalChart 5007 4717\n"
 "8 dict begin\n"
@@ -153,4 +158,5 @@
 "/contfont Enc-iso8859 contfont0 ReencodeFont\n"
 "/boldfont Enc-iso8859 boldfont0 ReencodeFont\n"
 "/italfont Enc-iso8859 italfont0 ReencodeFont\n"
-"/bolditalfont Enc-iso8859 bolditalfont0 ReencodeFont\n"
+"/bolditalfont Enc-iso8859 bolditalfont0 ReencodeFont\n";
+#endif // _SETUP0_H_

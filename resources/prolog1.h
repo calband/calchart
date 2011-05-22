@@ -1,3 +1,8 @@
+#ifndef _PROLOG1_H_
+#define _PROLOG1_H_
+// file generated via the command:
+// cat file.ps | sed 's/^/"/' | sed 's/$/\\n"/' 
+static char prolog1_ps[] = 
 "/smoveto { transform round exch round exch itransform moveto } def\n"
 "/slineto { transform round exch round exch itransform lineto } def\n"
 "/dotplain {\n"
@@ -224,4 +229,5 @@
 "   count op_count sub {pop} repeat\n"
 "   countdictstack dict_count sub {end} repeat\n"
 "   b4_Inc_state restore\n"
-"} bind def\n"
+"} bind def\n";
+#endif // _PROLOG1_H_

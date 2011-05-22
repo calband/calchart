@@ -1,3 +1,8 @@
+#ifndef _PROLOG0_H_
+#define _PROLOG0_H_
+// file generated via the command:
+// cat file.ps | sed 's/^/"/' | sed 's/$/\\n"/'
+static char prolog0_ps[] =
 "/smoveto { transform round exch round exch itransform moveto } def\n"
 "/slineto { transform round exch round exch itransform lineto } def\n"
 "/dotplain {\n"
@@ -227,4 +232,5 @@
 "      currentdict\n"
 "   end\n"
 "   definefont pop\n"
-"} bind def\n"
+"} bind def\n";
+#endif // _PROLOG0_H_

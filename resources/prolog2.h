@@ -1,3 +1,8 @@
+#ifndef _PROLOG2_H_
+#define _PROLOG2_H_
+// file generated via the command:
+// cat file.ps | sed 's/^/"/' | sed 's/$/\\n"/' 
+static char prolog2_ps[] = 
 "/smoveto { transform round exch round exch itransform moveto } def\n"
 "/slineto { transform round exch round exch itransform lineto } def\n"
 "/dotbox {\n"
@@ -32,4 +37,5 @@
 "      dup .2 sub fieldw mul 20 div 84 whash sub fieldh mul 84 div smoveto\n"
 "      .2 add fieldw mul 20 div 84 whash sub fieldh mul 84 div slineto stroke\n"
 "   } for\n"
-"} bind def\n"
+"} bind def\n";
+#endif // _PROLOG2_H_

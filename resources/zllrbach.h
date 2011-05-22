@@ -1,3 +1,8 @@
+#ifndef _ZLLRBACH_H_
+#define _ZLLRBACH_H_
+// file generated via the command:
+// cat file.ps | sed 's/^/"/' | sed 's/$/\\n"/' 
+static char zllrbach_eps[] = 
 "%!PS-Adobe-3.0\n"
 "%%Title: postscript/zllrbach.fig\n"
 "%%Creator: fig2dev Version 3.2 Patchlevel 5d\n"
@@ -520,4 +525,5 @@
 "showpage\n"
 "%%Trailer\n"
 "end\n"
-"%EOF\n"
+"%EOF\n";
+#endif // _ZLLRBACH_H_
