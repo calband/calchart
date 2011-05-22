@@ -15,8 +15,6 @@ LFLAGS = -B -i
 YACC = bison
 YFLAGS = -dv
 
-FIG2EPS = fig2dev -L ps # -P for non-encapsulated
-
 #### Directories ####
 SRCDIR = ./src
 GENDIR = ./generated
@@ -35,12 +33,7 @@ OBJDIR = build
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
 OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(SYNTHETIC_SRCS))
 
-PSFILES = postscript/calchart.ps postscript/setup.sh postscript/vmstatus.sh \
-	postscript/zllrbach.fig
-RUNTIME = runtime/config runtime/prolog0.ps runtime/prolog1.ps \
-	runtime/prolog2.ps runtime/setup2.ps
-RUNTIME_ALL = $(RUNTIME) runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps
-PS_SYNTH_FILES = runtime/setup0.ps runtime/setup1.ps runtime/zllrbach.eps postscript/vmstatus.ps
+RUNTIME = runtime/config
 IMAGES = $(wildcard $(RESDIR)/*.xbm)
 IMAGES_X = $(wildcard $(RESDIR)/*.xpm)
 IMAGES_BMP = $(IMAGES:.xbm=.bmp)
@@ -55,9 +48,9 @@ DOCS = $(TEXDOCS) \
 	docs/contents.gif docs/up.gif docs/back.gif docs/forward.gif
 
 MOSTSRCS = $(SRCS) $(SYNTHETIC_BASES) $(HEADERS) $(DOCS)
-ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) $(PSFILES) Makefile xbm2xpm \
+ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) Makefile xbm2xpm \
 	makefile.wat calchart.rc install.inf
-MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME_ALL) $(SYNTHETIC_SRCS) \
+MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME) $(SYNTHETIC_SRCS) \
 	makefile.wat calchart.rc install.inf
 
 BOOSTDIR = /opt/local/include
@@ -91,10 +84,7 @@ $(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	rm -f $@
 	convert $< $@
 
-runtime/%.eps: postscript/%.fig
-	$(FIG2EPS) $< $@
-
-all: calchart $(PS_SYNTH_FILES) charthlp.xlp
+all: calchart charthlp.xlp
 
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ `wx-config --libs`
@@ -136,19 +126,6 @@ ps: docs/charthlp.ps
 html: docs/charthlp_contents.html
 xlp: charthlp.xlp
 
-# Stuff to make changing the calchart ps font easier
-runtime/setup0.ps: postscript/calchart.ps postscript/setup.sh
-	rm -f $@
-	cd postscript; chmod +x setup.sh; ./setup.sh > ../$@
-
-runtime/setup1.ps: postscript/calchart.ps postscript/setup.sh
-	rm -f $@
-	cd postscript; chmod +x setup.sh; ./setup.sh > ../$@
-
-postscript/vmstatus.ps: postscript/calchart.ps postscript/vmstatus.sh
-	rm -f $@
-	cd postscript; chmod +x vmstatus.sh; ./vmstatus.sh > ../$@
-
 chartsrc.tar.gz: $(ALLSRCS)
 	rm -f $@
 	mv -f Makefile Makefile.bak
@@ -156,9 +133,9 @@ chartsrc.tar.gz: $(ALLSRCS)
 	tar cf - $(ALLSRCS) | gzip -9 > $@
 	mv -f Makefile.bak Makefile
 
-chartbin.tar.gz: calchart $(RUNTIME_ALL) charthlp.xlp
+chartbin.tar.gz: calchart $(RUNTIME) charthlp.xlp
 	rm -f $@
-	tar cf - calchart $(RUNTIME_ALL) charthlp.xlp | gzip -9 > $@
+	tar cf - calchart $(RUNTIME) charthlp.xlp | gzip -9 > $@
 
 chartsrc.zip: $(MSWSRCS) $(IMAGES_MSW)
 	rm -f $@
@@ -167,7 +144,6 @@ chartsrc.zip: $(MSWSRCS) $(IMAGES_MSW)
 
 length::
 	@echo `cat $(HEADERS) $(SRCS) $(SYNTHETIC_BASES) | wc -l` C++ lines in $(HEADERS) $(SRCS) $(SYNTHETIC_BASES)
-	@echo `cat $(PSFILES) | wc -l` PS lines in $(PSFILES)
 
 tar:: chartsrc.tar.gz
 
@@ -177,7 +153,7 @@ distrib:: chartbin.tar.gz docs/charthlp.ps.gz docs/charthlp.html.tar.gz \
 zip:: chartsrc.zip
 
 clean::
-	rm -f $(OBJS) $(SYNTHETIC_FILES) $(PS_SYNTH_FILES) $(IMAGES_SYNTH) calchart core *~ runtime/*~ *.bak TAGS
+	rm -f $(OBJS) $(SYNTHETIC_FILES) $(IMAGES_SYNTH) calchart core *~ runtime/*~ *.bak TAGS
 	rm -rf $(OBJDIR)
 
 depend::

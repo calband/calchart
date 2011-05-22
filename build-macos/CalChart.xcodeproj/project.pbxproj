@@ -31,7 +31,6 @@
 		C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
 		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		C7CB75BF114625CF000DBBB6 /* prolog0.ps in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75B8114625C7000DBBB6 /* prolog0.ps */; };
-		C7CB75C0114625D8000DBBB6 /* prolog0.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75B8114625C7000DBBB6 /* prolog0.ps */; };
 		C7CB75C1114625DF000DBBB6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75B7114625C7000DBBB6 /* config */; };
 		C7CB75C2114625E0000DBBB6 /* prolog1.ps in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75B9114625C7000DBBB6 /* prolog1.ps */; };
 		C7CB75C3114625E1000DBBB6 /* prolog2.ps in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75BA114625C7000DBBB6 /* prolog2.ps */; };
@@ -40,12 +39,6 @@
 		C7CB75C6114625E2000DBBB6 /* setup2.ps in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75BD114625C7000DBBB6 /* setup2.ps */; };
 		C7CB75C7114625E3000DBBB6 /* zllrbach.eps in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75BE114625C7000DBBB6 /* zllrbach.eps */; };
 		C7CB75C8114625E9000DBBB6 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75B7114625C7000DBBB6 /* config */; };
-		C7CB75C9114625E9000DBBB6 /* prolog1.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75B9114625C7000DBBB6 /* prolog1.ps */; };
-		C7CB75CA114625E9000DBBB6 /* prolog2.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BA114625C7000DBBB6 /* prolog2.ps */; };
-		C7CB75CB114625E9000DBBB6 /* setup0.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BB114625C7000DBBB6 /* setup0.ps */; };
-		C7CB75CC114625E9000DBBB6 /* setup1.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BC114625C7000DBBB6 /* setup1.ps */; };
-		C7CB75CD114625E9000DBBB6 /* setup2.ps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BD114625C7000DBBB6 /* setup2.ps */; };
-		C7CB75CE114625E9000DBBB6 /* zllrbach.eps in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75BE114625C7000DBBB6 /* zllrbach.eps */; };
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
 		C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */; };
@@ -148,13 +141,6 @@
 			dstSubfolderSpec = 1;
 			files = (
 				C7CB75C8114625E9000DBBB6 /* config in CopyFiles */,
-				C7CB75C0114625D8000DBBB6 /* prolog0.ps in CopyFiles */,
-				C7CB75C9114625E9000DBBB6 /* prolog1.ps in CopyFiles */,
-				C7CB75CA114625E9000DBBB6 /* prolog2.ps in CopyFiles */,
-				C7CB75CB114625E9000DBBB6 /* setup0.ps in CopyFiles */,
-				C7CB75CC114625E9000DBBB6 /* setup1.ps in CopyFiles */,
-				C7CB75CD114625E9000DBBB6 /* setup2.ps in CopyFiles */,
-				C7CB75CE114625E9000DBBB6 /* zllrbach.eps in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

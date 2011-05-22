@@ -118,7 +118,6 @@ void CC_coord_UnitTests()
 	// test equality:
 	for (size_t i = 0; i < kNumRand; ++i)
 	{
-		CC_coord_values values1, values2;
 		Coord x1, y1, x2, y2;
 		x1 = rand(); y1 = rand();
 		x2 = rand(); y2 = rand();

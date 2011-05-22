@@ -32,6 +32,7 @@
 #include "setup0.h"
 #include "setup1.h"
 #include "setup2.h"
+#include "zllrbach.h"
 
 #include <time.h>
 #include <string>
@@ -69,13 +70,11 @@ static const char *fontnames[] =
 	"bolditalfont",
 };
 
-static const wxChar *nofile = wxT("Unable to open print config files");
 static const wxChar *badfile = wxT("Error writing to print file");
 
 static const wxChar *gen_cont_line(const CC_textline& line, PSFONT_TYPE *currfontnum,
 float fontsize, FILE *fp);
 static const wxChar *print_start_page(FILE *fp, bool landscape);
-static bool copy_ps_file(const wxString& name, FILE *fp);
 
 #define CHECKPRINT0(a) if ((a) < 0) { error = badfile; return 0; }
 #define CHECKPRINT1(a) if ((a) < 0) { error = badfile; return; }
@@ -810,10 +809,9 @@ const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 		-modesprshow->StageX(), -modesprshow->StageY()));
 	std::string stagefilestr(modesprshow->StageFile().utf8_str());
 	CHECKPRINT(fprintf(fp, "%%%%BeginDocument: %s\n", stagefilestr.c_str()));
-	if (!copy_ps_file(modesprshow->StageFile(), fp))
-	{
-		return nofile;
-	}
+	// sprint show is special.  We put down the special stage:
+	// subtract 1 because we don't want to write the '\0' at the end
+	CHECKPRINT0(fwrite(zllrbach_eps, sizeof(char), sizeof(zllrbach_eps)-1, fp));
 	CHECKPRINT(fprintf(fp, "%%%%EndDocument\n"));
 	CHECKPRINT(fprintf(fp, "EndEPSF\n"));
 /* Draw field */
@@ -938,23 +936,3 @@ const wxChar *PrintOverview(FILE *fp, const CC_sheet& sheet)
 	return NULL;
 }
 
-
-bool copy_ps_file(const wxString& name, FILE *fp)
-{
-	char cpbuf[1024];
-	FILE *infile;
-
-	infile = OpenFileInDir(name, wxT("r"));
-	if (infile == NULL) return false;
-	while (fgets(cpbuf, 1024, infile))
-	{
-		if (fputs(cpbuf, fp) == EOF)
-		{
-/* Error copying file */
-			fclose(infile);
-			return false;
-		}
-	}
-	fclose(infile);
-	return true;
-}
