@@ -167,7 +167,7 @@ EVT_MENU(CALCHART__setsym4, MainFrame::OnCmd_setsym4)
 EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
 EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
-EVT_MENU(CALCHART__COLORS, MainFrame::OnCmdSelectColors)
+EVT_MENU(CALCHART__PREFERENCES, MainFrame::OnCmdPreferences)
 EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
 EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
@@ -323,6 +323,7 @@ field(NULL)
 	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
 	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Legacy Print..."), wxT("Legacy Print this show"));
 	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Legacy Print EPS..."), wxT("Legacy Print a stuntsheet in EPS"));
+	file_menu->Append(CALCHART__PREFERENCES, wxT("&Preferences\tCTRL-,"));
 	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
@@ -352,7 +353,6 @@ field(NULL)
 
 	wxMenu *options_menu = new wxMenu;
 	options_menu->Append(CALCHART__SELECTION, wxT("Selection Order"), select_menu);
-	options_menu->Append(CALCHART__COLORS, wxT("Select Colors"));
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
@@ -374,7 +374,7 @@ field(NULL)
 	ss = 0;
 	def_grid = 2;
 	def_ref = 0;
-	field = new FieldCanvas(view, ss, this, GetDefaultZoom());
+	field = new FieldCanvas(view, ss, this, GetConfiguration_MainFrameZoom());
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
@@ -391,7 +391,7 @@ field(NULL)
 
 // Zoom slider
 	// on Mac using wxSL_LABELS will cause a crash?
-	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, GetDefaultZoom(), 1, FIELD_MAXZOOM, wxDefaultPosition,
+	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, GetConfiguration_MainFrameZoom(), 1, FIELD_MAXZOOM, wxDefaultPosition,
                     wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS);
 
 // set up a sizer for the field panel
@@ -552,12 +552,16 @@ void MainFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdSelectColors(wxCommandEvent& event)
+void MainFrame::OnCmdPreferences(wxCommandEvent& event)
 {
-	ColorSelectDialog dialog1(this);
+	CalChartPreferences dialog1(this);
 	if (dialog1.ShowModal() == wxID_OK)
 	{
 	}
+//	wxNotebook* notebook = CreateCalChartPreferences(this);
+//	if (notebook->ShowModal() == wxID_OK)
+//	{
+//	}
 }
 
 
@@ -878,7 +882,11 @@ void MainFrame::OnChar(wxKeyEvent& event)
 
 void MainFrame::OnSize(wxSizeEvent& event)
 {
-	SetDefaultSize(event.GetSize());
+	// HACK: Prevent width and height from growing out of control
+	if ( event.GetSize().GetWidth() < 1200 )
+		SetConfiguration_MainFrameWidth(event.GetSize().GetWidth());
+	if ( event.GetSize().GetHeight() < 900 )
+		SetConfiguration_MainFrameHeight(event.GetSize().GetHeight());
 	wxDocMDIChildFrame::OnSize(event);
 }
 
@@ -1771,7 +1779,7 @@ void MainFrame::slider_sheet_callback(wxScrollEvent &)
 
 void MainFrame::slider_zoom_callback(wxScrollEvent &)
 {
-	SetDefaultZoom(zoom_slider->GetValue());
+	SetConfiguration_MainFrameZoom(zoom_slider->GetValue());
 	field->SetZoom(zoom_slider->GetValue());
 }
 
@@ -1783,7 +1791,7 @@ bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
 	mShow = static_cast<CC_show*>(doc);
 	mFrame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
-		GetDefaultSize());
+		wxSize(GetConfiguration_MainFrameWidth(), GetConfiguration_MainFrameHeight()));
 
 	mFrame->Show(true);
 	Activate(true);

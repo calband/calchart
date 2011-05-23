@@ -26,8 +26,9 @@
 #include <wx/wx.h>
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>
+#include <wx/notebook.h>
 
-class ColorSelectDialog : public wxDialog
+class ColorSelectDialog : public wxPanel
 {
 	DECLARE_CLASS( ColorSelectDialog )
 	DECLARE_EVENT_TABLE()
@@ -63,4 +64,66 @@ private:
 	wxBitmapComboBox* nameBox;
 	wxSpinCtrl* spin;
 };
+
+class SetUpPrintingValues : public wxPanel
+{
+	DECLARE_CLASS( SetUpPrintingValues )
+	DECLARE_EVENT_TABLE()
+
+public:
+	SetUpPrintingValues( );
+	SetUpPrintingValues( wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Printing Values"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+	~SetUpPrintingValues( );
+
+	void Init();
+
+	bool Create(wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("Printing Values"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
+
+	// use these to get and set default values
+	virtual bool TransferDataToWindow();
+	virtual bool TransferDataFromWindow();
+private:
+	void OnCmdReset(wxCommandEvent&);
+};
+
+
+class CalChartPreferences : public wxDialog
+{
+	DECLARE_CLASS( CalChartPreferences )
+	DECLARE_EVENT_TABLE()
+
+public:
+	CalChartPreferences( );
+	CalChartPreferences( wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("CalChart Preferences"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+	~CalChartPreferences( );
+
+	void Init();
+
+	bool Create(wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxString& caption = wxT("CalChart Preferences"),
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+
+	void CreateControls();
+};
+
 #endif

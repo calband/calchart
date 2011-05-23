@@ -79,7 +79,7 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 {
 	unsigned i;
 	CC_coord c;
-	Coord w = FLOAT2COORD(dot_ratio);
+	Coord w = FLOAT2COORD(GetConfiguration_DotRatio());
 	for (i = 0; i < show->GetNumPoints(); i++)
 	{
 		c = GetPosition(i, ref);

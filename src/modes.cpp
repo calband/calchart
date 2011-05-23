@@ -280,7 +280,7 @@ void ShowModeStandard::DrawAnim(wxDC *dc) const
 
 ShowModeSprShow::ShowModeSprShow(const wxString& nam,
 CC_coord bord1, CC_coord bord2,
-unsigned char which, const wxString& file,
+unsigned char which,
 short stps_x, short stps_y,
 short stps_w, short stps_h,
 short stg_x, short stg_y,
@@ -297,7 +297,6 @@ field_x(fld_x), field_y(fld_y), field_w(fld_w), field_h(fld_h),
 steps_x(stps_x), steps_y(stps_y), steps_w(stps_w), steps_h(stps_h),
 text_left(txt_l), text_right(txt_r), text_top(txt_tp), text_bottom(txt_bm)
 {
-	stagefile = file;
 }
 
 

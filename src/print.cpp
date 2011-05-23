@@ -91,13 +91,13 @@ int min_yards) const
 	float fieldwidth = COORD2FLOAT(fieldsize.x);
 	float fieldheight = COORD2FLOAT(fieldsize.y);
 
-	std::string head_font_str(head_font.utf8_str());
-	std::string main_font_str(main_font.utf8_str());
-	std::string number_font_str(number_font.utf8_str());
-	std::string cont_font_str(cont_font.utf8_str());
-	std::string bold_font_str(bold_font.utf8_str());
-	std::string ital_font_str(ital_font.utf8_str());
-	std::string bold_ital_font_str(bold_ital_font.utf8_str());
+	std::string head_font_str(GetConfiguration_HeadFont().utf8_str());
+	std::string main_font_str(GetConfiguration_MainFont().utf8_str());
+	std::string number_font_str(GetConfiguration_NumberFont().utf8_str());
+	std::string cont_font_str(GetConfiguration_ContFont().utf8_str());
+	std::string bold_font_str(GetConfiguration_BoldFont().utf8_str());
+	std::string ital_font_str(GetConfiguration_ItalFont().utf8_str());
+	std::string bold_ital_font_str(GetConfiguration_BoldItalFont().utf8_str());
 
 	num_pages = 0;
 /* first, calculate dimensions */
@@ -108,34 +108,34 @@ int min_yards) const
 			case SHOW_STANDARD:
 				if (print_landscape)
 				{
-					width = GetPageHeight() * DPI;
+					width = GetConfiguration_PageHeight() * DPI;
 					if (print_do_cont)
 					{
-						height = GetPageWidth() * (1.0 - cont_ratio) * DPI;
-						field_y = GetPageWidth() * cont_ratio * DPI;
+						height = GetConfiguration_PageWidth() * (1.0 - GetConfiguration_ContRatio()) * DPI;
+						field_y = GetConfiguration_PageWidth() * GetConfiguration_ContRatio() * DPI;
 					}
 					else
 					{
-						height = GetPageWidth() * DPI;
+						height = GetConfiguration_PageWidth() * DPI;
 						field_y = 0;
 					}
 				}
 				else
 				{
-					width = GetPageWidth() * DPI;
+					width = GetConfiguration_PageWidth() * DPI;
 					if (print_do_cont)
 					{
-						height = GetPageHeight() * (1.0 - cont_ratio) * DPI;
-						field_y = GetPageHeight() * cont_ratio * DPI;
+						height = GetConfiguration_PageHeight() * (1.0 - GetConfiguration_ContRatio()) * DPI;
+						field_y = GetConfiguration_PageHeight() * GetConfiguration_ContRatio() * DPI;
 					}
 					else
 					{
-						height = GetPageHeight() * DPI;
+						height = GetConfiguration_PageHeight() * DPI;
 						field_y = 0;
 					}
 				}
-				real_width = GetPageWidth() * DPI;
-				real_height = GetPageHeight() * DPI;
+				real_width = GetConfiguration_PageWidth() * DPI;
+				real_height = GetConfiguration_PageHeight() * DPI;
 				step_width = (short)(width / (height / (fullheight+8.0)));
 				if (step_width > COORD2INT(fieldsize.x))
 					step_width = COORD2INT(fieldsize.x);
@@ -167,34 +167,34 @@ int min_yards) const
 			case SHOW_SPRINGSHOW:
 				if (print_landscape)
 				{
-					width = GetPageHeight() * DPI;
+					width = GetConfiguration_PageHeight() * DPI;
 					if (print_do_cont)
 					{
-						height = GetPageWidth() * (1.0 - cont_ratio) * DPI;
-						field_y = GetPageWidth() * cont_ratio * DPI;
+						height = GetConfiguration_PageWidth() * (1.0 - GetConfiguration_ContRatio()) * DPI;
+						field_y = GetConfiguration_PageWidth() * GetConfiguration_ContRatio() * DPI;
 					}
 					else
 					{
-						height = GetPageWidth() * DPI;
+						height = GetConfiguration_PageWidth() * DPI;
 						field_y = 0;
 					}
 				}
 				else
 				{
-					width = GetPageWidth() * DPI;
+					width = GetConfiguration_PageWidth() * DPI;
 					if (print_do_cont)
 					{
-						height = GetPageHeight() * (1.0 - cont_ratio) * DPI;
-						field_y = GetPageHeight() * cont_ratio * DPI;
+						height = GetConfiguration_PageHeight() * (1.0 - GetConfiguration_ContRatio()) * DPI;
+						field_y = GetConfiguration_PageHeight() * GetConfiguration_ContRatio() * DPI;
 					}
 					else
 					{
-						height = GetPageHeight() * DPI;
+						height = GetConfiguration_PageHeight() * DPI;
 						field_y = 0;
 					}
 				}
-				real_width = GetPageWidth() * DPI;
-				real_height = GetPageHeight() * DPI;
+				real_width = GetConfiguration_PageWidth() * DPI;
+				real_height = GetConfiguration_PageHeight() * DPI;
 				field_h = height / (1 + 16*((ShowModeSprShow*)mode)->FieldW()/
 					((float)((ShowModeSprShow*)mode)->StageW()*80));
 				field_w = field_h/((ShowModeSprShow*)mode)->StageH() *
@@ -224,13 +224,13 @@ int min_yards) const
 	{
 		if (print_landscape)
 		{
-			width = GetPageHeight() * DPI;
-			height = GetPageWidth() * DPI;
+			width = GetConfiguration_PageHeight() * DPI;
+			height = GetConfiguration_PageWidth() * DPI;
 		}
 		else
 		{
-			width = GetPageWidth() * DPI;
-			height = GetPageHeight() * DPI;
+			width = GetConfiguration_PageWidth() * DPI;
+			height = GetConfiguration_PageHeight() * DPI;
 		}
 		if ((width * (fullheight / fullwidth)) > height)
 		{
@@ -267,10 +267,10 @@ int min_yards) const
 		CHECKPRINT0(fprintf(fp, "%%!PS-Adobe-3.0\n"));
 	}
 	CHECKPRINT0(fprintf(fp, "%%%%BoundingBox: %.0f %.0f %.0f %.0f\n",
-		GetPageOffsetX() * DPI,
-		(paper_length - GetPageOffsetY()) * DPI - real_height,
-		GetPageOffsetX() * DPI + real_width,
-		(paper_length - GetPageOffsetY()) * DPI));
+		GetConfiguration_PageOffsetX() * DPI,
+		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI - real_height,
+		GetConfiguration_PageOffsetX() * DPI + real_width,
+		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI));
 	time(&t);
 	CHECKPRINT0(fprintf(fp, "%%%%CreationDate: %s", ctime(&t)));
 	std::string namestr(GetTitle().utf8_str());
@@ -309,8 +309,8 @@ int min_yards) const
 					((ShowModeStandard *)mode)->HashW()));
 				CHECKPRINT0(fprintf(fp, "/ehash %hd def\n",
 					((ShowModeStandard *)mode)->HashE()));
-				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", header_size));
-				CHECKPRINT0(fprintf(fp, "/yardsize %.2f def\n", yards_size));
+				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", GetConfiguration_HeaderSize()));
+				CHECKPRINT0(fprintf(fp, "/yardsize %.2f def\n", GetConfiguration_YardsSize()));
 				// subtract 1 because we don't want to write the '\0' at the end
 				CHECKPRINT0(fwrite(prolog0_ps, sizeof(char), sizeof(prolog0_ps)-1, fp));
 				CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
@@ -347,7 +347,7 @@ int min_yards) const
 					((ShowModeSprShow*)mode)->StepsW()));
 				CHECKPRINT0(fprintf(fp, "/nfieldh %hd def\n",
 					((ShowModeSprShow*)mode)->StepsH()));
-				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", header_size));
+				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", GetConfiguration_HeaderSize()));
 				// subtract 1 because we don't want to write the '\0' at the end
 				CHECKPRINT0(fwrite(prolog1_ps, sizeof(char), sizeof(prolog1_ps)-1, fp));
 				CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
@@ -471,14 +471,14 @@ void CC_show::PrintSheets(FILE *fp) const
 				CHECKPRINT1(fprintf(fp, "0 setgray\n"));
 				CHECKPRINT1(fprintf(fp, "0.25 setlinewidth\n"));
 				CHECKPRINT1(fprintf(fp, "%.2f %.2f translate\n",
-					GetPageOffsetX() * DPI,
-					(paper_length-GetPageOffsetY())*DPI - real_height));
-				lines_left = (short)(real_height / text_size - 0.5);
+					GetConfiguration_PageOffsetX() * DPI,
+					(GetConfiguration_PaperLength()-GetConfiguration_PageOffsetY())*DPI - real_height));
+				lines_left = (short)(real_height / GetConfiguration_TextSize() - 0.5);
 				CHECKPRINT1(fprintf(fp,
 					"/contfont findfont %.2f scalefont setfont\n",
-					text_size));
-				CHECKPRINT1(fprintf(fp, "/y %.2f def\n", real_height - text_size));
-				CHECKPRINT1(fprintf(fp, "/h %.2f def\n", text_size));
+					GetConfiguration_TextSize()));
+				CHECKPRINT1(fprintf(fp, "/y %.2f def\n", real_height - GetConfiguration_TextSize()));
+				CHECKPRINT1(fprintf(fp, "/h %.2f def\n", GetConfiguration_TextSize()));
 				CHECKPRINT1(fprintf(fp, "/lmargin 0 def /rmargin %.2f def\n",
 					real_width));
 				CHECKPRINT1(fprintf(fp,
@@ -488,7 +488,7 @@ void CC_show::PrintSheets(FILE *fp) const
 				CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
 			}
 
-			error = gen_cont_line(*text, &currfontnum, text_size, fp);
+			error = gen_cont_line(*text, &currfontnum, GetConfiguration_TextSize(), fp);
 			if (!Ok()) return;
 
 			CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
@@ -520,7 +520,7 @@ const wxChar *PrintCont(FILE *fp, const CC_sheet& sheet)
 	}
 	if (cont_len == 0) return NULL;
 	this_size = cont_height / (cont_len + 0.5);
-	if (this_size > text_size) this_size = text_size;
+	if (this_size > GetConfiguration_TextSize()) this_size = GetConfiguration_TextSize();
 	CHECKPRINT(fprintf(fp, "/y %.2f def\n", cont_height - this_size));
 	CHECKPRINT(fprintf(fp, "/h %.2f def\n", this_size));
 	CHECKPRINT(fprintf(fp, "/lmargin 0 def /rmargin %.2f def\n", width));
@@ -613,8 +613,8 @@ const wxChar *print_start_page(FILE *fp, bool landscape)
 	CHECKPRINT(fprintf(fp, "0 setgray\n"));
 	CHECKPRINT(fprintf(fp, "0.25 setlinewidth\n"));
 	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n",
-		GetPageOffsetX() * DPI,
-		(paper_length - GetPageOffsetY()) * DPI - real_height));
+		GetConfiguration_PageOffsetX() * DPI,
+		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI - real_height));
 	if (landscape)
 	{
 		CHECKPRINT(fprintf(fp, "%.2f 0 translate 90 rotate\n", real_width));
@@ -732,7 +732,7 @@ const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 /* Draw field */
 	CHECKPRINT(fprintf(fp, "drawfield\n"));
 	CHECKPRINT(fprintf(fp, "/mainfont findfont %.2f scalefont setfont\n",
-		step_size * yards_size));
+		step_size * GetConfiguration_YardsSize()));
 	for (j=0; j <= step_width; j+=8)
 	{
 		CHECKPRINT(fprintf(fp, "/lmargin %.2f def /rmargin %.2f def\n",
@@ -746,12 +746,12 @@ const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 		CHECKPRINT(fprintf(fp, "centerText\n"));
 	}
 
-	dot_w = step_size / 2 * dot_ratio;
+	dot_w = step_size / 2 * GetConfiguration_DotRatio();
 	CHECKPRINT(fprintf(fp, "/w %.4f def\n", dot_w));
-	CHECKPRINT(fprintf(fp, "/plinew %.4f def\n", dot_w * pline_ratio));
-	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * sline_ratio));
+	CHECKPRINT(fprintf(fp, "/plinew %.4f def\n", dot_w * GetConfiguration_PLineRatio()));
+	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * GetConfiguration_SLineRatio()));
 	CHECKPRINT(fprintf(fp, "/numberfont findfont %.2f scalefont setfont\n",
-		dot_w * 2 * num_ratio));
+		dot_w * 2 * GetConfiguration_NumRatio()));
 	for (i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		if ((sheet.pts[i].pos.x > clip_n) || (sheet.pts[i].pos.x < clip_s)) continue;
@@ -807,8 +807,7 @@ const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 		field_h / modesprshow->StageH()));
 	CHECKPRINT(fprintf(fp, "   %hd %hd translate\n",
 		-modesprshow->StageX(), -modesprshow->StageY()));
-	std::string stagefilestr(modesprshow->StageFile().utf8_str());
-	CHECKPRINT(fprintf(fp, "%%%%BeginDocument: %s\n", stagefilestr.c_str()));
+	CHECKPRINT(fprintf(fp, "%%%%BeginDocument\n"));
 	// sprint show is special.  We put down the special stage:
 	// subtract 1 because we don't want to write the '\0' at the end
 	CHECKPRINT0(fwrite(zllrbach_eps, sizeof(char), sizeof(zllrbach_eps)-1, fp));
@@ -819,7 +818,7 @@ const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 	if (modesprshow->WhichYards())
 	{
 		CHECKPRINT(fprintf(fp, "/mainfont findfont %.2f scalefont setfont\n",
-			step_size * yards_size));
+			step_size * GetConfiguration_YardsSize()));
 		if (modesprshow->WhichYards() & (SPR_YARD_ABOVE | SPR_YARD_BELOW))
 			for (j=0; j <= modesprshow->StepsW(); j+=8)
 		{
@@ -842,7 +841,7 @@ const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 					field_h *
 					(modesprshow->TextBottom() -
 					modesprshow->StageX()) /
-					modesprshow->StageH() -(step_size*yards_size)));
+					modesprshow->StageH() -(step_size*GetConfiguration_YardsSize())));
 				std::string yardstr(yard_text[(modesprshow->StepsX() +
 					(MAX_YARD_LINES-1)*4 + j)/8].utf8_str());
 				CHECKPRINT(fprintf(fp, "(%s) centerText\n", yardstr.c_str()));
@@ -853,7 +852,7 @@ const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 		{
 			CHECKPRINT(fprintf(fp, "/y %.2f def\n",
 				stage_field_y + stage_field_h *
-				(modesprshow->StepsH()-j-yards_size/2) /
+				(modesprshow->StepsH()-j-GetConfiguration_YardsSize()/2) /
 				modesprshow->StepsH()));
 			CHECKPRINT(fprintf(fp, "/x %.2f def /rmargin %.2f def\n",
 				field_w*
@@ -874,12 +873,12 @@ const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
 		}
 	}
 
-	dot_w = step_size / 2 * dot_ratio;
+	dot_w = step_size / 2 * GetConfiguration_DotRatio();
 	CHECKPRINT(fprintf(fp, "/w %.4f def\n", dot_w));
-	CHECKPRINT(fprintf(fp, "/plinew %.4f def\n", dot_w * pline_ratio));
-	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * sline_ratio));
+	CHECKPRINT(fprintf(fp, "/plinew %.4f def\n", dot_w * GetConfiguration_PLineRatio()));
+	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * GetConfiguration_SLineRatio()));
 	CHECKPRINT(fprintf(fp, "/numberfont findfont %.2f scalefont setfont\n",
-		dot_w * 2 * num_ratio));
+		dot_w * 2 * GetConfiguration_NumRatio()));
 	for (i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		dot_x = stage_field_x +

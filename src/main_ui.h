@@ -70,7 +70,7 @@ enum
 	CALCHART__POINTS,
 	CALCHART__ANIMATE,
 	CALCHART__SELECTION,
-	CALCHART__COLORS,
+	CALCHART__PREFERENCES,
 
 	CALCHART__prev_ss,
 	CALCHART__next_ss,
@@ -146,7 +146,7 @@ public:
 	void OnCmdLegacyPrint(wxCommandEvent& event);
 	void OnCmdLegacyPrintEPS(wxCommandEvent& event);
 	void OnCmdPageSetup(wxCommandEvent& event);
-	void OnCmdSelectColors(wxCommandEvent& event);
+	void OnCmdPreferences(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event);
 	void OnCmdRedo(wxCommandEvent& event);
 	void OnCmdInsertBefore(wxCommandEvent& event);

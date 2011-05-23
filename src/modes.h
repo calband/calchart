@@ -89,7 +89,7 @@ class ShowModeSprShow : public ShowMode
 public:
 // Look at calchart.cfg for description of arguments
 	ShowModeSprShow(const wxString& nam, CC_coord bord1, CC_coord bord2,
-		unsigned char which, const wxString& file,
+		unsigned char which,
 		short stps_x, short stps_y,
 		short stps_w, short stps_h,
 		short stg_x, short stg_y,
@@ -103,7 +103,6 @@ public:
 	virtual SHOW_TYPE GetType() const;
 	virtual void Draw(wxDC *dc) const;
 	virtual void DrawAnim(wxDC *dc) const;
-	inline const wxString& StageFile() const { return stagefile; }
 	inline unsigned char WhichYards() const { return which_yards; }
 	inline short StageX() const { return stage_x; }
 	inline short StageY() const { return stage_y; }
@@ -123,7 +122,6 @@ public:
 	inline short TextBottom() const { return text_bottom; }
 
 private:
-	wxString stagefile;
 	unsigned char which_yards;
 	short stage_x, stage_y, stage_w, stage_h;
 	short field_x, field_y, field_w, field_h;

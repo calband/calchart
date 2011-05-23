@@ -60,10 +60,10 @@ bool drawall, int point)
 	{
 		dc->SetFont(*pointLabelFont);
 		dc->SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
-		circ_r = FLOAT2COORD(dot_ratio);
+		circ_r = FLOAT2COORD(GetConfiguration_DotRatio());
 		offset = circ_r / 2;
-		plineoff = offset * pline_ratio;
-		slineoff = offset * sline_ratio;
+		plineoff = offset * GetConfiguration_PLineRatio();
+		slineoff = offset * GetConfiguration_SLineRatio();
 		textoff = offset * 1.25;
 		origin = sheet.show->GetMode().Offset();
 		if (point < 0)
@@ -496,10 +496,10 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 	if (!sheet.pts.empty())
 	{
 		dc->SetFont(*pointLabelFont);
-		circ_r = FLOAT2COORD(dot_ratio);
+		circ_r = FLOAT2COORD(GetConfiguration_DotRatio());
 		const float offset = circ_r / 2;
-		const float plineoff = offset * pline_ratio;
-		const float slineoff = offset * sline_ratio;
+		const float plineoff = offset * GetConfiguration_PLineRatio();
+		const float slineoff = offset * GetConfiguration_SLineRatio();
 		const float textoff = offset * 1.25;
 		origin = mode->Offset();
 		for (int selectd = 0; selectd < 2; selectd++)

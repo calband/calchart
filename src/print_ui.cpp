@@ -78,7 +78,7 @@ void ShowPrintDialog::PrintShow()
 		{
 #ifdef PRINT__RUN_CMD
 			s = wxFileName::CreateTempFileName(wxT("cc_"));
-			buf.sprintf(wxT("%s %s \"%s\""), GetPrintViewCmd().c_str(), GetPrintViewCmd().c_str(), s.c_str());
+			buf.sprintf(wxT("%s %s \"%s\""), GetConfiguration_PrintViewCmd().c_str(), GetConfiguration_PrintViewCmd().c_str(), s.c_str());
 #endif
 		}
 			break;
@@ -91,7 +91,7 @@ void ShowPrintDialog::PrintShow()
 		{
 #ifdef PRINT__RUN_CMD
 			s = wxFileName::CreateTempFileName(wxT("cc_"));
-			buf.sprintf(wxT("%s %s \"%s\""), GetPrintCmd().c_str(), GetPrintOpts().c_str(), s.c_str());
+			buf.sprintf(wxT("%s %s \"%s\""), GetConfiguration_PrintCmd().c_str(), GetConfiguration_PrintOpts().c_str(), s.c_str());
 #else
 #endif
 		}
@@ -187,18 +187,18 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 void ShowPrintDialog::ResetDefaults(wxCommandEvent&)
 {
 #ifdef PRINT__RUN_CMD
-	ClearPrintCmd();
-	ClearPrintOpts();
+	ClearConfiguration_PrintCmd();
+	ClearConfiguration_PrintOpts();
 #else
-	ClearPrintFile();
+	ClearConfiguration_PrintFile();
 #endif
-	ClearPrintViewCmd();
-	ClearPrintViewOpts();
+	ClearConfiguration_PrintViewCmd();
+	ClearConfiguration_PrintViewOpts();
 
-	ClearPageOffsetX();
-	ClearPageOffsetY();
-	ClearPageWidth();
-	ClearPageHeight();
+	ClearConfiguration_PageOffsetX();
+	ClearConfiguration_PageOffsetY();
+	ClearConfiguration_PageWidth();
+	ClearConfiguration_PageHeight();
 
 	// re-read values
 	TransferDataToWindow();
@@ -385,6 +385,15 @@ void ShowPrintDialog::CreateControls()
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
+	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Paper &length: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
+	text_length = new wxTextCtrl(this, wxID_ANY);
+	verticalsizer->Add(text_length, 0, wxGROW|wxALL, 5 );
+	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
+
+	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
+	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Yards: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
 	text_minyards = new wxTextCtrl(this, wxID_ANY);
 	verticalsizer->Add(text_minyards, 0, wxGROW|wxALL, 5 );
@@ -396,45 +405,49 @@ void ShowPrintDialog::CreateControls()
 bool ShowPrintDialog::TransferDataToWindow()
 {
 #ifdef PRINT__RUN_CMD
-	text_cmd->SetValue(GetPrintCmd());
-	text_opts->SetValue(GetPrintOpts());
+	text_cmd->SetValue(GetConfiguration_PrintCmd());
+	text_opts->SetValue(GetConfiguration_PrintOpts());
 #else
-	text_cmd->SetValue(GetPrintFile());
+	text_cmd->SetValue(GetConfiguration_PrintFile());
 #endif
-	text_view_cmd->SetValue(GetPrintViewCmd());
-	text_view_opts->SetValue(GetPrintViewOpts());
+	text_view_cmd->SetValue(GetConfiguration_PrintViewCmd());
+	text_view_opts->SetValue(GetConfiguration_PrintViewOpts());
 	wxString buf;
-	buf.Printf(wxT("%.2f"),GetPageOffsetX());
+	buf.Printf(wxT("%.2f"),GetConfiguration_PageOffsetX());
 	text_x->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetPageOffsetY());
+	buf.Printf(wxT("%.2f"),GetConfiguration_PageOffsetY());
 	text_y->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetPageWidth());
+	buf.Printf(wxT("%.2f"),GetConfiguration_PageWidth());
 	text_width->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetPageHeight());
+	buf.Printf(wxT("%.2f"),GetConfiguration_PageHeight());
 	text_height->SetValue(buf);
+	buf.Printf(wxT("%.2f"),GetConfiguration_PaperLength());
+	text_length->SetValue(buf);
 	return true;
 }
 
 bool ShowPrintDialog::TransferDataFromWindow()
 {
 #ifdef PRINT__RUN_CMD
-	SetPrintCmd(text_cmd->GetValue());
-	SetPrintOpts(text_opts->GetValue());
+	SetConfiguration_PrintCmd(text_cmd->GetValue());
+	SetConfiguration_PrintOpts(text_opts->GetValue());
 #else
-	SetPrintFile(text_cmd->GetValue());
+	SetConfiguration_PrintFile(text_cmd->GetValue());
 #endif
-	SetPrintViewCmd(text_view_cmd->GetValue());
-	SetPrintViewOpts(text_view_opts->GetValue());
+	SetConfiguration_PrintViewCmd(text_view_cmd->GetValue());
+	SetConfiguration_PrintViewOpts(text_view_opts->GetValue());
 
 	double dval;
 	text_x->GetValue().ToDouble(&dval);
-	SetPageOffsetX(dval);
+	SetConfiguration_PageOffsetX(dval);
 	text_y->GetValue().ToDouble(&dval);
-	SetPageOffsetY(dval);
+	SetConfiguration_PageOffsetY(dval);
 	text_width->GetValue().ToDouble(&dval);
-	SetPageWidth(dval);
+	SetConfiguration_PageWidth(dval);
 	text_height->GetValue().ToDouble(&dval);
-	SetPageHeight(dval);
+	SetConfiguration_PageHeight(dval);
+	text_length->GetValue().ToDouble(&dval);
+	SetConfiguration_PaperLength(dval);
 
 	return true;
 }

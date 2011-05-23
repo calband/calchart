@@ -105,125 +105,412 @@ const int DefaultPenWidth[COLOR_NUM] =
 };
 
 // constants for behavior:
-static const wxString kDefaultZoomKey = wxT("MainFrameZoom");
-static const long kDefaultZoom = 5;
-static const wxString kWindowDefaultWidthKey = wxT("MainFrameWidth");
-static const unsigned int kWindowDefaultWidth = 600;
-static const wxString kWindowDefaultHeightKey = wxT("MainFrameHeight");
-static const unsigned int kWindowDefaultHeight = 450;
+// Autosave
+static const wxString kAutosaveIntervalKey = wxT("AutosaveInterval");
+static const int kAutosaveIntervalValue = 300;
+static const wxString kAutosaveDirKey = wxT("AutosaveDir");
+static const wxString kAutosaveDirValue = AUTOSAVE_VAR;
+
+static const wxString kMainFrameZoomKey = wxT("MainFrameZoom");
+static const long kMainFrameZoomValue = 5;
+static const wxString kMainFrameWidthKey = wxT("MainFrameWidth");
+static const unsigned int kMainFrameWidthValue = 600;
+static const wxString kMainFrameHeightKey = wxT("MainFrameHeight");
+static const unsigned int kMainFrameHeightValue = 450;
 static const wxString kPrintFileKey = wxT("PrintFile");
-static const wxString kPrintFile = wxT("LPT1");
+static const wxString kPrintFileValue = wxT("LPT1");
 static const wxString kPrintCmdKey = wxT("PrintCmd");
-static const wxString kPrintCmd = wxT("lpr");
+static const wxString kPrintCmdValue = wxT("lpr");
 static const wxString kPrintOptsKey = wxT("PrintOpts");
-static const wxString kPrintOpts = wxT("");
+static const wxString kPrintOptsValue = wxT("");
 static const wxString kPrintViewCmdKey = wxT("PrintViewCmd");
-static const wxString kPrintViewCmd = wxT("ghostview");
+static const wxString kPrintViewCmdValue = wxT("ghostview");
 static const wxString kPrintViewOptsKey = wxT("PrintViewOpts");
-static const wxString kPrintViewOpts = wxT("");
+static const wxString kPrintViewOptsValue = wxT("");
 
 static const wxString kPageWidthKey = wxT("PageWidth");
-static const float kPageWidth = 7.5;
+static const float kPageWidthValue = 7.5;
 static const wxString kPageHeightKey = wxT("PageHeight");
-static const float kPageHeight = 10.0;
+static const float kPageHeightValue = 10.0;
 static const wxString kPageOffsetXKey = wxT("PageOffsetX");
-static const float kPageOffsetX = 0.5;
+static const float kPageOffsetXValue = 0.5;
 static const wxString kPageOffsetYKey = wxT("PageOffsetY");
-static const float kPageOffsetY = 0.5;
+static const float kPageOffsetYValue = 0.5;
 
+// printing controls
+static const wxString kHeadFontKey = wxT("HeadFont");
+static const wxString kHeadFontValue = wxT("Helvetica-Bold");
+static const wxString kMainFontKey = wxT("MainFont");
+static const wxString kMainFontValue = wxT("Helvetica");
+static const wxString kNumberFontKey = wxT("NumberFont");
+static const wxString kNumberFontValue = wxT("Helvetica");
+static const wxString kContFontKey = wxT("ContFont");
+static const wxString kContFontValue = wxT("Courier");
+static const wxString kBoldFontKey = wxT("BoldFont");
+static const wxString kBoldFontValue = wxT("Courier-Bold");
+static const wxString kItalFontKey = wxT("ItalFont");
+static const wxString kItalFontValue = wxT("Courier-Italic");
+static const wxString kBoldItalFontKey = wxT("BoldItalFont");
+static const wxString kBoldItalFontValue = wxT("Courier-BoldItalic");
+static const wxString kPaperLengthKey = wxT("PaperLength");
+static const float kPaperLengthValue = 11.0;
+static const wxString kHeaderSizeKey = wxT("HeaderSize");
+static const float kHeaderSizeValue = 3.0;
+static const wxString kYardsSizeKey = wxT("YardsSize");
+static const float kYardsSizeValue = 1.5;
+static const wxString kTextSizeKey = wxT("TextSize");
+static const float kTextSizeValue = 10.0;
+static const wxString kDotRatioKey = wxT("DotRatio");
+static const float kDotRatioValue = 1.0;
+static const wxString kNumRatioKey = wxT("NumRatio");
+static const float kNumRatioValue = 1.2;
+static const wxString kPLineRatioKey = wxT("PLineRatio");
+static const float kPLineRatioValue = 1.0;
+static const wxString kSLineRatioKey = wxT("SLineRatio");
+static const float kSLineRatioValue = 1.0;
+static const wxString kContRatioKey = wxT("ContRatio");
+static const float kContRatioValue = 0.25;
+
+template <typename T>
+T GetConfigValue(const wxString& key, const T& def)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/CalChart"));
+	return config->Read(key, def);
+}
+
+// default value need to check if we need to set a value
+template <typename T>
+void SetConfigValue(const wxString& key, const T& value, const T& def)
+{
+	// don't write if we don't have to
+	if (GetConfigValue<T>(key, def) == value)
+		return;
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/CalChart"));
+	config->Write(key, value);
+	config->Flush();
+}
+
+template <typename T>
+void ClearConfigValue(const wxString& key)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/CalChart"));
+	config->DeleteEntry(key);
+	config->Flush();
+}
+
+#define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type ) \
+Type GetConfiguration_ ## KeyName () { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
+void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
+void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
+
+// printing controls
+wxString yard_text[MAX_YARD_LINES] =
+{
+	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
+	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
+	wxT("45"), wxT("40"), wxT("35"), wxT("30"), wxT("25"), wxT("20"), wxT("15"), wxT("10"), wxT("5"), wxT("0"), wxT("-5"), wxT("-10"),
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
+};
+
+const wxString yard_text_index[MAX_YARD_LINES] =
+{
+	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
+	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
+	wxT("45"), wxT("40"), wxT("35"), wxT("30"), wxT("25"), wxT("20"), wxT("15"), wxT("10"), wxT("5"), wxT("0"), wxT("-5"), wxT("-10"),
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
+};
+
+wxString spr_line_text[MAX_SPR_LINES] =
+{
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
+};
+
+wxString spr_line_text_index[MAX_SPR_LINES] =
+{
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
+};
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveDir, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameWidth, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long);
+
+// printing
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintFile, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintCmd, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintOpts, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewCmd, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewOpts, wxString);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageWidth, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageHeight, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetX, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetY, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PaperLength, float);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( HeadFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( NumberFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ContFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ItalFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldItalFont, wxString);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( HeaderSize, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( YardsSize, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( TextSize, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( DotRatio, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( NumRatio, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PLineRatio, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, float);
+
+// Color is more complicated, we use functions for setting that
 wxPalette *CalChartPalette;
 const wxPen *CalChartPens[COLOR_NUM];
 const wxBrush *CalChartBrushes[COLOR_NUM];
 
-wxString program_dir;
-wxString shows_dir;
-wxString autosave_dir;
-wxString autosave_dirname(AUTOSAVE_VAR);
-unsigned int autosave_interval = 300;
-wxString head_font(wxT("Helvetica-Bold"));
-wxString main_font(wxT("Helvetica"));
-wxString number_font(wxT("Helvetica"));
-wxString cont_font(wxT("Courier"));
-wxString bold_font(wxT("Courier-Bold"));
-wxString ital_font(wxT("Courier-Italic"));
-wxString bold_ital_font(wxT("Courier-BoldItalic"));
-float paper_length = 11.0;
-float header_size = 3.0;
-float yards_size = 1.5;
-float text_size = 10.0;
-float dot_ratio = 1.0;
-float num_ratio = 1.2;
-float pline_ratio = 1.0;
-float sline_ratio = 1.0;
-float cont_ratio = 0.25;
-wxString yard_text[MAX_YARD_LINES] =
-{
-	wxT("N"),
-	wxT("M"),
-	wxT("L"),
-	wxT("K"),
-	wxT("J"),
-	wxT("I"),
-	wxT("H"),
-	wxT("G"),
-	wxT("F"),
-	wxT("E"),
-	wxT("D"),
-	wxT("C"),
-	wxT("B"),
-	wxT("A"),
-	wxT("-10"),
-	wxT("-5"),
-	wxT("0"),
-	wxT("5"),
-	wxT("10"),
-	wxT("15"),
-	wxT("20"),
-	wxT("25"),
-	wxT("30"),
-	wxT("35"),
-	wxT("40"),
-	wxT("45"),
-	wxT("50"),
-	wxT("45"),
-	wxT("40"),
-	wxT("35"),
-	wxT("30"),
-	wxT("25"),
-	wxT("20"),
-	wxT("15"),
-	wxT("10"),
-	wxT("5"),
-	wxT("0"),
-	wxT("-5"),
-	wxT("-10"),
-	wxT("A"),
-	wxT("B"),
-	wxT("C"),
-	wxT("D"),
-	wxT("E"),
-	wxT("F"),
-	wxT("G"),
-	wxT("H"),
-	wxT("I"),
-	wxT("J"),
-	wxT("K"),
-	wxT("L"),
-	wxT("M"),
-	wxT("N")
-};
-wxString spr_line_text[MAX_SPR_LINES] =
-{
-	wxT("A"),
-	wxT("B"),
-	wxT("C"),
-	wxT("D"),
-	wxT("E"),
-};
-
 static wxPathList configdirs;
 static wxString runtime_dir;
 
+///// Show mode configuration /////
+
+const wxString kShowModeStrings[SHOWMODE_NUM] =
+{
+	wxT("Standard"),
+	wxT("Full Field"),
+	wxT("Tunnel"),
+	wxT("Old Field"),
+	wxT("Pro Field")
+};
+
+// What values mean:
+// whash ehash (steps from west sideline)
+// left top right bottom (border in steps)
+// x y w h (region of the field to use, in steps)
+const long kShowModeDefaultValues[SHOWMODE_NUM][10] =
+{
+	{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
+	{ 32, 52, 8, 8, 8, 8, -96, -42, 192, 84 },
+	{ 32, 52, 8, 8, 8, 8, 16, -42, 192, 84 },
+	{ 28, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
+	{ 36, 48, 8, 8, 8, 8, -80, -42, 160, 84 }
+};
+
+const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] =
+{
+	wxT("Zellerbach"),
+};
+
+// what values mean
+// X (hex digit of which yard lines to print:
+//   8 = left, 4 = right, 2 = above, 1 = below)
+// left top right bottom (border in steps)
+// x y w h (region of the field to use, in steps)
+// x y w h (size of stage EPS file as per BoundingBox)
+// x y w h (where to put the field on the stage, depends on the EPS file)
+// l r t b (location of yard line text's inside edge, depends on the EPS file)
+const long kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM][21] =
+{
+	{ 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232, 153, 438, 270, 12 }
+};
+
+void GetConfigurationShowMode(size_t which, long values[10])
+{
+	for (size_t i = 0; i < 10; ++i)
+	{
+		values[i] = kShowModeDefaultValues[which][i];
+	}
+
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/SHOWMODES"));
+	if (!config->Exists(kShowModeStrings[which]))
+	{
+		config->SetPath(kShowModeStrings[which]);
+		values[0] = config->Read(wxT("whash"), values[0]);
+		values[1] = config->Read(wxT("ehash"), values[1]);
+		values[2] = config->Read(wxT("bord1_x"), values[2]);
+		values[3] = config->Read(wxT("bord1_y"), values[3]);
+		values[4] = config->Read(wxT("bord2_x"), values[4]);
+		values[5] = config->Read(wxT("bord2_y"), values[5]);
+		values[6] = config->Read(wxT("size_x"), values[6]);
+		values[7] = config->Read(wxT("size_y"), values[7]);
+		values[8] = config->Read(wxT("offset_x"), values[8]);
+		values[9] = config->Read(wxT("offset_y"), values[9]);
+	}
+}
+
+void ReadConfigurationShowMode()
+{
+	for (size_t i=0; i<SHOWMODE_NUM; ++i)
+	{
+		long values[10];
+		GetConfigurationShowMode(i, values);
+		unsigned short whash = values[0];
+		unsigned short ehash = values[1];
+		CC_coord bord1, bord2;
+		bord1.x = INT2COORD(values[2]);
+		bord1.y = INT2COORD(values[3]);
+		bord2.x = INT2COORD(values[4]);
+		bord2.y = INT2COORD(values[5]);
+		CC_coord size, offset;
+		offset.x = INT2COORD(-values[6]);
+		offset.y = INT2COORD(-values[7]);
+		size.x = INT2COORD(values[8]);
+		size.y = INT2COORD(values[9]);
+
+		wxGetApp().GetModeList().Add(new ShowModeStandard(kShowModeStrings[i], bord1, bord2, size, offset, whash, ehash));
+	}
+}
+
+void GetConfigurationSpringShowMode(size_t which, long values[21])
+{
+	for (size_t i = 0; i < 21; ++i)
+	{
+		values[i] = kSpringShowModeDefaultValues[which][i];
+	}
+
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/SPRINGSHOWMODES"));
+	if (!config->Exists(kSpringShowModeStrings[which]))
+	{
+		config->SetPath(kSpringShowModeStrings[which]);
+		values[0] = config->Read(wxT("which_spr_yards"), values[0]);
+		values[1] = config->Read(wxT("bord1_x"), values[1]);
+		values[2] = config->Read(wxT("bord1_y"), values[2]);
+		values[3] = config->Read(wxT("bord2_x"), values[3]);
+		values[4] = config->Read(wxT("bord2_y"), values[4]);
+
+		values[5] = config->Read(wxT("mode_steps_x"), values[5]);
+		values[6] = config->Read(wxT("mode_steps_y"), values[6]);
+		values[7] = config->Read(wxT("mode_steps_w"), values[7]);
+		values[8] = config->Read(wxT("mode_steps_h"), values[8]);
+		values[9] = config->Read(wxT("eps_stage_x"), values[9]);
+		values[10] = config->Read(wxT("eps_stage_y"), values[10]);
+		values[11] = config->Read(wxT("eps_stage_w"), values[11]);
+		values[12] = config->Read(wxT("eps_stage_h"), values[12]);
+		values[13] = config->Read(wxT("eps_field_x"), values[13]);
+		values[14] = config->Read(wxT("eps_field_y"), values[14]);
+		values[15] = config->Read(wxT("eps_field_w"), values[15]);
+		values[16] = config->Read(wxT("eps_field_h"), values[16]);
+		values[17] = config->Read(wxT("eps_text_left"), values[17]);
+		values[18] = config->Read(wxT("eps_text_right"), values[18]);
+		values[19] = config->Read(wxT("eps_text_top"), values[19]);
+		values[21] = config->Read(wxT("eps_text_bottom"), values[20]);
+	}
+}
+
+void ReadConfigurationSpringShowMode()
+{
+	for (size_t i=0; i<SPRINGSHOWMODE_NUM; ++i)
+	{
+		long values[21];
+		GetConfigurationSpringShowMode(i, values);
+		unsigned char which_spr_yards = values[0];
+		CC_coord bord1, bord2;
+		bord1.x = INT2COORD(values[1]);
+		bord1.y = INT2COORD(values[2]);
+		bord2.x = INT2COORD(values[3]);
+		bord2.y = INT2COORD(values[4]);
+
+		short mode_steps_x = values[5];
+		short mode_steps_y = values[6];
+		short mode_steps_w = values[7];
+		short mode_steps_h = values[8];
+		short eps_stage_x = values[9];
+		short eps_stage_y = values[10];
+		short eps_stage_w = values[11];
+		short eps_stage_h = values[12];
+		short eps_field_x = values[13];
+		short eps_field_y = values[14];
+		short eps_field_w = values[15];
+		short eps_field_h = values[16];
+		short eps_text_left = values[17];
+		short eps_text_right = values[18];
+		short eps_text_top = values[19];
+		short eps_text_bottom = values[20];
+		wxGetApp().GetModeList().Add(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
+					which_spr_yards,
+					mode_steps_x, mode_steps_y,
+					mode_steps_w, mode_steps_h,
+					eps_stage_x, eps_stage_y,
+					eps_stage_w, eps_stage_h,
+					eps_field_x, eps_field_y,
+					eps_field_w, eps_field_h,
+					eps_text_left, eps_text_right,
+					eps_text_top, eps_text_bottom));
+
+	}
+}
+
+void SetConfigurationShowMode(size_t which, const long values[10])
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/SHOWMODES"));
+	config->SetPath(kShowModeStrings[which]);
+	config->Write(wxT("whash"), values[0]);
+	config->Write(wxT("ehash"), values[1]);
+	config->Write(wxT("bord1_x"), COORD2INT(values[2]));
+	config->Write(wxT("bord1_y"), COORD2INT(values[3]));
+	config->Write(wxT("bord2_x"), COORD2INT(values[4]));
+	config->Write(wxT("bord2_y"), COORD2INT(values[5]));
+	config->Write(wxT("size_x"), -COORD2INT(values[6]));
+	config->Write(wxT("size_y"), -COORD2INT(values[7]));
+	config->Write(wxT("offset_x"), COORD2INT(values[8]));
+	config->Write(wxT("offset_y"), COORD2INT(values[9]));
+	config->Flush();
+}
+
+void SetConfigurationSpringShowMode(size_t which, const long values[21])
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/SPRINGSHOWMODES"));
+	config->SetPath(kSpringShowModeStrings[which]);
+	config->Write(wxT("which_spr_yards"), values[0]);
+	config->Write(wxT("bord1_x"), COORD2INT(values[1]));
+	config->Write(wxT("bord1_y"), COORD2INT(values[2]));
+	config->Write(wxT("bord2_x"), COORD2INT(values[3]));
+	config->Write(wxT("bord2_y"), COORD2INT(values[4]));
+
+	config->Write(wxT("mode_steps_x"), values[5]);
+	config->Write(wxT("mode_steps_y"), values[6]);
+	config->Write(wxT("mode_steps_w"), values[7]);
+	config->Write(wxT("mode_steps_h"), values[8]);
+	config->Write(wxT("eps_stage_x"), values[9]);
+	config->Write(wxT("eps_stage_y"), values[10]);
+	config->Write(wxT("eps_stage_w"), values[11]);
+	config->Write(wxT("eps_stage_h"), values[12]);
+	config->Write(wxT("eps_field_x"), values[13]);
+	config->Write(wxT("eps_field_y"), values[14]);
+	config->Write(wxT("eps_field_w"), values[15]);
+	config->Write(wxT("eps_field_h"), values[16]);
+	config->Write(wxT("eps_text_left"), values[17]);
+	config->Write(wxT("eps_text_right"), values[18]);
+	config->Write(wxT("eps_text_top"), values[19]);
+	config->Write(wxT("eps_text_bottom"), values[20]);
+	config->Flush();
+}
+
+void ClearConfigurationShowMode(size_t which)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/SHOWMODES"));
+	config->DeleteEntry(kShowModeStrings[which]);
+}
+
+void ClearConfigurationSpringShowMode(size_t which)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/SPRINGSHOWMODES"));
+	config->DeleteEntry(kSpringShowModeStrings[which]);
+}
+
+///// Color Configuration /////
 void ReadConfigColor()
 {
 	wxConfigBase *config = wxConfigBase::Get();
@@ -296,79 +583,9 @@ void ClearConfigColor(size_t selection)
 void ReadConfig()
 {
 	ReadConfigColor();
+	ReadConfigurationShowMode();
+	ReadConfigurationSpringShowMode();
 }
-
-template <typename T>
-T GetConfigValue(const wxString& key, const T& def)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/CalChart"));
-	return config->Read(key, def);
-}
-
-template <typename T>
-void SetConfigValue(const wxString& key, const T& value)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/CalChart"));
-	config->Write(key, value);
-	config->Flush();
-}
-
-template <typename T>
-void ClearConfigValue(const wxString& key)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/CalChart"));
-	config->DeleteEntry(key);
-	config->Flush();
-}
-
-wxSize GetDefaultSize()
-{
-	long width = GetConfigValue<long>(kWindowDefaultWidthKey, kWindowDefaultWidth);
-	long height = GetConfigValue<long>(kWindowDefaultHeightKey, kWindowDefaultHeight);
-	return wxSize(width, height);
-}
-
-void SetDefaultSize(const wxSize& size)
-{
-	SetConfigValue<long>(kWindowDefaultWidthKey, size.GetWidth());
-	SetConfigValue<long>(kWindowDefaultHeightKey, size.GetHeight());
-}
-
-long GetDefaultZoom() { return GetConfigValue<long>(kDefaultZoomKey, kDefaultZoom); }
-void SetDefaultZoom(long zoom) { SetConfigValue<long>(kDefaultZoomKey, zoom); }
-
-wxString GetPrintFile() { return GetConfigValue<wxString>(kPrintFileKey, kPrintFile); }
-void SetPrintFile(const wxString& str) { SetConfigValue<wxString>(kPrintFileKey, str); }
-void ClearPrintFile() { ClearConfigValue<wxString>(kPrintFileKey); }
-wxString GetPrintCmd() { return GetConfigValue<wxString>(kPrintCmdKey, kPrintCmd); }
-void SetPrintCmd(const wxString& str) { SetConfigValue<wxString>(kPrintCmdKey, str); }
-void ClearPrintCmd() { ClearConfigValue<wxString>(kPrintCmdKey); }
-wxString GetPrintOpts() { return GetConfigValue<wxString>(kPrintOptsKey, kPrintOpts); }
-void SetPrintOpts(const wxString& str) { SetConfigValue<wxString>(kPrintOptsKey, str); }
-void ClearPrintOpts() { ClearConfigValue<wxString>(kPrintOptsKey); }
-wxString GetPrintViewCmd() { return GetConfigValue<wxString>(kPrintViewCmdKey, kPrintViewCmd); }
-void SetPrintViewCmd(const wxString& str) { SetConfigValue<wxString>(kPrintViewCmdKey, str); }
-void ClearPrintViewCmd() { ClearConfigValue<wxString>(kPrintViewCmdKey); }
-wxString GetPrintViewOpts() { return GetConfigValue<wxString>(kPrintViewOptsKey, kPrintViewOpts); }
-void SetPrintViewOpts(const wxString& str) { SetConfigValue<wxString>(kPrintViewOptsKey, str); }
-void ClearPrintViewOpts() { ClearConfigValue<wxString>(kPrintViewOptsKey); }
-
-float GetPageWidth() { return GetConfigValue<float>(kPageWidthKey, kPageWidth); }
-void SetPageWidth(float f) { SetConfigValue<float>(kPageWidthKey, f); }
-void ClearPageWidth() { ClearConfigValue<float>(kPageWidthKey); }
-float GetPageHeight() { return GetConfigValue<float>(kPageHeightKey, kPageHeight); }
-void SetPageHeight(float f) { SetConfigValue<float>(kPageHeightKey, f); }
-void ClearPageHeight() { ClearConfigValue<float>(kPageHeightKey); }
-float GetPageOffsetX() { return GetConfigValue<float>(kPageOffsetXKey, kPageOffsetX); }
-void SetPageOffsetX(float f) { SetConfigValue<float>(kPageOffsetXKey, f); }
-void ClearPageOffsetX() { ClearConfigValue<float>(kPageOffsetXKey); }
-float GetPageOffsetY() { return GetConfigValue<float>(kPageOffsetYKey, kPageOffsetY); }
-void SetPageOffsetY(float f) { SetConfigValue<float>(kPageOffsetYKey, f); }
-void ClearPageOffsetY() { ClearConfigValue<float>(kPageOffsetYKey); }
-
 
 wxString ReadConfig(const wxString& path)
 {
@@ -386,7 +603,7 @@ wxString ReadConfig(const wxString& path)
 	unsigned char which_spr_yards;
 	wxPathList tmp_configdirs;
 
-	program_dir = wxGetCwd();
+	wxString program_dir = wxGetCwd();
 
 // Get default path
 	runtime_dir = FullPath(path);
@@ -416,11 +633,13 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (com_buf == wxT("SHOWS_DIR"))
 			{
+				wxString shows_dir;
 				ReadDOSline(fp, shows_dir);
 				continue;
 			}
 			if (com_buf == wxT("AUTOSAVE_DIR"))
 			{
+				wxString autosave_dirname;
 				ReadDOSline(fp, autosave_dirname);
 				continue;
 			}
@@ -455,6 +674,7 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (com_buf == wxT("AUTOSAVE_INTERVAL"))
 			{
+				unsigned int autosave_interval;
 				fscanf(fp, " %d \n", &autosave_interval);
 				continue;
 			}
@@ -504,8 +724,8 @@ wxString ReadConfig(const wxString& path)
 				siz.y = INT2COORD(mode_steps_h);
 				off.x = INT2COORD(-mode_steps_x);
 				off.y = INT2COORD(-mode_steps_y);
-				wxGetApp().GetModeList().Add(new ShowModeStandard(com_buf, bord1, bord2,
-					siz, off, whash, ehash));
+//				wxGetApp().GetModeList().Add(new ShowModeStandard(com_buf, bord1, bord2,
+//					siz, off, whash, ehash));
 				continue;
 			}
 			if (com_buf == wxT("DEFINE_SPRSHOW_MODE"))
@@ -536,16 +756,16 @@ wxString ReadConfig(const wxString& path)
 					&eps_field_w, &eps_field_h);
 				fscanf(fp, " %hd %hd %hd %hd \n", &eps_text_left, &eps_text_right,
 					&eps_text_top, &eps_text_bottom);
-				wxGetApp().GetModeList().Add(new ShowModeSprShow(mode_name, bord1, bord2,
-					which_spr_yards, com_buf,
-					mode_steps_x, mode_steps_y,
-					mode_steps_w, mode_steps_h,
-					eps_stage_x, eps_stage_y,
-					eps_stage_w, eps_stage_h,
-					eps_field_x, eps_field_y,
-					eps_field_w, eps_field_h,
-					eps_text_left, eps_text_right,
-					eps_text_top, eps_text_bottom));
+//				wxGetApp().GetModeList().Add(new ShowModeSprShow(mode_name, bord1, bord2,
+//					which_spr_yards, com_buf,
+//					mode_steps_x, mode_steps_y,
+//					mode_steps_w, mode_steps_h,
+//					eps_stage_x, eps_stage_y,
+//					eps_stage_w, eps_stage_h,
+//					eps_field_x, eps_field_y,
+//					eps_field_w, eps_field_h,
+//					eps_text_left, eps_text_right,
+//					eps_text_top, eps_text_bottom));
 				continue;
 			}
 			if (com_buf == wxT("PRINT_PAGE_WIDTH"))
@@ -580,76 +800,91 @@ wxString ReadConfig(const wxString& path)
 			}
 			if (com_buf == wxT("PRINT_HEADER_SIZE"))
 			{
+				float header_size;
 				fscanf(fp, " %f \n", &header_size);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_YARDS_SIZE"))
 			{
+				float yards_size;
 				fscanf(fp, " %f \n", &yards_size);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_TEXT_SIZE"))
 			{
+				float text_size;
 				fscanf(fp, " %f \n", &text_size);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_DOT_RATIO"))
 			{
+				float dot_ratio;
 				fscanf(fp, " %f \n", &dot_ratio);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_NUM_RATIO"))
 			{
+				float num_ratio;
 				fscanf(fp, " %f \n", &num_ratio);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_PLAIN_LINE"))
 			{
+				float pline_ratio;
 				fscanf(fp, " %f \n", &pline_ratio);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_SOLID_LINE"))
 			{
+				float sline_ratio;
 				fscanf(fp, " %f \n", &sline_ratio);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_CONT_RATIO"))
 			{
+				float cont_ratio;
 				fscanf(fp, " %f \n", &cont_ratio);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_HEADER_FONT"))
 			{
+				wxString head_font;
 				ReadDOSline(fp, head_font);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_NUMBER_FONT"))
 			{
+				wxString number_font;
 				ReadDOSline(fp, number_font);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_ANNO_FONT"))
 			{
+				wxString main_font;
 				ReadDOSline(fp, main_font);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_FONT"))
 			{
+				wxString cont_font;
 				ReadDOSline(fp, cont_font);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_BOLD_FONT"))
 			{
+				wxString bold_font;
 				ReadDOSline(fp, bold_font);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_ITALIC_FONT"))
 			{
+				wxString ital_font;
 				ReadDOSline(fp, ital_font);
 				continue;
 			}
 			if (com_buf == wxT("PRINT_BOLD_ITALIC_FONT"))
 			{
+				wxString bold_ital_font;
 				ReadDOSline(fp, bold_ital_font);
 				continue;
 			}
@@ -682,24 +917,6 @@ wxString ReadConfig(const wxString& path)
 			}
 		}
 		fclose(fp);
-	}
-
-	if (autosave_dirname[0] == '$')
-	{
-		const char *d;
-		std::string s(autosave_dirname.utf8_str());
-		if ((d = getenv(s.c_str()+1)) != NULL)
-		{
-			autosave_dir = wxString::FromUTF8(d);
-		}
-		else
-		{
-			autosave_dir = AUTOSAVE_DIR;
-		}
-	}
-	else
-	{
-		autosave_dir = autosave_dirname;
 	}
 
 	if (!wxGetApp().GetModeList().Empty())
@@ -808,3 +1025,4 @@ int ReadDOSline(FILE *fp, wxString& str)
 	str = wxString::FromUTF8(buf);
 	return c;
 }
+

@@ -181,9 +181,9 @@ bool CalChartApp::OnInit()
 	contBoldFont = new wxFont(11, wxMODERN, wxNORMAL, wxBOLD);
 	contItalFont = new wxFont(11, wxMODERN, wxITALIC, wxNORMAL);
 	contBoldItalFont = new wxFont(11, wxMODERN, wxITALIC, wxBOLD);
-	pointLabelFont = new wxFont((int)FLOAT2NUM(dot_ratio * num_ratio),
+	pointLabelFont = new wxFont((int)FLOAT2NUM(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
 		wxSWISS, wxNORMAL, wxNORMAL);
-	yardLabelFont = new wxFont((int)FLOAT2NUM(yards_size),
+	yardLabelFont = new wxFont((int)FLOAT2NUM(GetConfiguration_YardsSize()),
 		wxSWISS, wxNORMAL, wxNORMAL);
 
 
@@ -211,12 +211,7 @@ bool CalChartApp::OnInit()
 		}
 	}
 
-	if (!shows_dir.empty())
-	{
-		wxSetWorkingDirectory(shows_dir);
-	}
-
-	SetAutoSave(autosave_interval);
+	SetAutoSave(GetConfiguration_AutosaveInterval());
 #ifndef __WXMAC__
 	frame->Show(true);
 #endif //ndef __WXMAC__

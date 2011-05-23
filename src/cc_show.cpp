@@ -1010,7 +1010,26 @@ wxString CC_show::Autosave()
 
 void CC_show::SetAutosaveName(const wxString& realname)
 {
-	autosave_name = autosave_dir;
+	wxString autosave_name;
+	wxString autosave_dirname = GetConfiguration_AutosaveDir();
+	if (autosave_dirname[0] == '$')
+	{
+		std::string s(autosave_dirname.utf8_str());
+		const char *d;
+		if ((d = getenv(s.c_str()+1)) != NULL)
+		{
+			autosave_name = wxString::FromUTF8(d);
+		}
+		else
+		{
+			autosave_name = AUTOSAVE_DIR;
+		}
+	}
+	else
+	{
+		autosave_name = autosave_dirname;
+	}
+
 	autosave_name.Append(PATH_SEPARATOR);
 	autosave_name.Append(wxFileNameFromPath(realname));
 }

@@ -67,71 +67,85 @@ extern const wxString ColorNames[COLOR_NUM];
 extern const wxString DefaultColors[COLOR_NUM];
 extern const int DefaultPenWidth[COLOR_NUM];
 
-// directory and file setup:
-extern wxString program_dir;
-extern wxString shows_dir;
-extern wxString autosave_dir;
-extern wxString autosave_dirname;
-extern unsigned int autosave_interval;
+enum CalChartShowModes
+{
+	STANDARD,
+	FULL_FIELD,
+	TUNNEL,
+	OLD_FIELD,
+	PRO_FIELD,
+	SHOWMODE_NUM
+};
+
+extern const wxString kShowModeStrings[SHOWMODE_NUM];
+
+enum CalChartSpringShowModes
+{
+	ZELLERBACH,
+	SPRINGSHOWMODE_NUM
+};
+
+extern const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM];
+
+// macro for declaring configuration settings
+#define DECLARE_CONFIGURATION_FUNCTIONS( Key, Type ) \
+Type GetConfiguration_ ## Key () ; \
+void SetConfiguration_ ## Key (const Type& v) ; \
+void ClearConfiguration_ ## Key () ;
+
+DECLARE_CONFIGURATION_FUNCTIONS( AutosaveDir, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
 // page setup and zoom
-wxSize GetDefaultSize();
-void SetDefaultSize(const wxSize& size);
+DECLARE_CONFIGURATION_FUNCTIONS( MainFrameZoom, long);
+DECLARE_CONFIGURATION_FUNCTIONS( MainFrameWidth, long);
+DECLARE_CONFIGURATION_FUNCTIONS( MainFrameHeight, long);
 
-long GetDefaultZoom();
-void SetDefaultZoom(long zoom);
+// printing configurations
+DECLARE_CONFIGURATION_FUNCTIONS( PrintFile, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintCmd, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintOpts, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintViewCmd, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintViewOpts, wxString);
 
-// printing
-wxString GetPrintFile();
-void SetPrintFile(const wxString& str);
-void ClearPrintFile();
-wxString GetPrintCmd();
-void SetPrintCmd(const wxString& str);
-void ClearPrintCmd();
-wxString GetPrintOpts();
-void SetPrintOpts(const wxString& str);
-void ClearPrintOpts();
-wxString GetPrintViewCmd();
-void SetPrintViewCmd(const wxString& str);
-void ClearPrintViewCmd();
-wxString GetPrintViewOpts();
-void SetPrintViewOpts(const wxString& str);
-void ClearPrintViewOpts();
+DECLARE_CONFIGURATION_FUNCTIONS( PageWidth, float);
+DECLARE_CONFIGURATION_FUNCTIONS( PageHeight, float);
+DECLARE_CONFIGURATION_FUNCTIONS( PageOffsetX, float);
+DECLARE_CONFIGURATION_FUNCTIONS( PageOffsetY, float);
+DECLARE_CONFIGURATION_FUNCTIONS( PaperLength, float);
 
-float GetPageWidth();
-void SetPageWidth(float f);
-void ClearPageWidth();
-float GetPageHeight();
-void SetPageHeight(float f);
-void ClearPageHeight();
-float GetPageOffsetX();
-void SetPageOffsetX(float f);
-void ClearPageOffsetX();
-float GetPageOffsetY();
-void SetPageOffsetY(float f);
-void ClearPageOffsetY();
+DECLARE_CONFIGURATION_FUNCTIONS( HeadFont, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( MainFont, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( NumberFont, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( ContFont, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( BoldFont, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( ItalFont, wxString);
+DECLARE_CONFIGURATION_FUNCTIONS( BoldItalFont, wxString);
 
-extern wxString head_font;
-extern wxString main_font;
-extern wxString number_font;
-extern wxString cont_font;
-extern wxString bold_font;
-extern wxString ital_font;
-extern wxString bold_ital_font;
-extern float paper_length;
-extern float header_size;
-extern float yards_size;
-extern float text_size;
-extern float dot_ratio;
-extern float num_ratio;
-extern float pline_ratio;
-extern float sline_ratio;
-extern float cont_ratio;
+DECLARE_CONFIGURATION_FUNCTIONS( HeaderSize, float);
+DECLARE_CONFIGURATION_FUNCTIONS( YardsSize, float);
+DECLARE_CONFIGURATION_FUNCTIONS( TextSize, float);
+DECLARE_CONFIGURATION_FUNCTIONS( DotRatio, float);
+DECLARE_CONFIGURATION_FUNCTIONS( NumRatio, float);
+DECLARE_CONFIGURATION_FUNCTIONS( PLineRatio, float);
+DECLARE_CONFIGURATION_FUNCTIONS( SLineRatio, float);
+DECLARE_CONFIGURATION_FUNCTIONS( ContRatio, float);
+
 extern wxString yard_text[MAX_YARD_LINES];
+extern const wxString yard_text_index[MAX_YARD_LINES];
 extern wxString spr_line_text[MAX_SPR_LINES];
+extern wxString spr_line_text_index[MAX_SPR_LINES];
 
 extern void ReadConfig();
 extern wxString ReadConfig(const wxString& path);
+
+void GetConfigurationShowMode(size_t which, long values[10]);
+void SetConfigurationShowMode(size_t which, const long values[10]);
+void ClearConfigurationShowMode(size_t which);
+
+void GetConfigurationSpringShowMode(size_t which, long values[21]);
+void SetConfigurationSpringShowMode(size_t which, const long values[21]);
+void ClearConfigurationSpringShowMode(size_t which);
 
 void SetConfigColor(size_t selection);
 void ClearConfigColor(size_t selection);
