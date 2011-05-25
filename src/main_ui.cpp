@@ -883,10 +883,8 @@ void MainFrame::OnChar(wxKeyEvent& event)
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	// HACK: Prevent width and height from growing out of control
-	if ( event.GetSize().GetWidth() < 1200 )
-		SetConfiguration_MainFrameWidth(event.GetSize().GetWidth());
-	if ( event.GetSize().GetHeight() < 900 )
-		SetConfiguration_MainFrameHeight(event.GetSize().GetHeight());
+	SetConfiguration_MainFrameWidth((event.GetSize().GetWidth() > 1200) ? 1200 : event.GetSize().GetWidth());
+	SetConfiguration_MainFrameHeight((event.GetSize().GetHeight() > 700) ? 700 : event.GetSize().GetHeight());
 	wxDocMDIChildFrame::OnSize(event);
 }
 

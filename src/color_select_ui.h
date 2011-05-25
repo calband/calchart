@@ -28,43 +28,6 @@
 #include <wx/spinctrl.h>
 #include <wx/notebook.h>
 
-class ColorSelectDialog : public wxPanel
-{
-	DECLARE_CLASS( ColorSelectDialog )
-	DECLARE_EVENT_TABLE()
-
-public:
-	ColorSelectDialog( );
-	ColorSelectDialog( wxWindow *parent,
-		wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Color Select"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~ColorSelectDialog( );
-
-	void Init();
-
-	bool Create(wxWindow *parent,
-		wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Color Select"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-
-	void CreateControls();
-private:
-	void OnCmdSelectColors(wxCommandEvent&);
-	void OnCmdSelectWidth(wxSpinEvent&);
-	void OnCmdResetColors(wxCommandEvent&);
-	void OnCmdResetAll(wxCommandEvent&);
-	void OnCmdChooseNewColor(wxCommandEvent&);
-
-	void SetColor(int selection, int width, const wxColour& color);
-	wxBitmapComboBox* nameBox;
-	wxSpinCtrl* spin;
-};
-
 class SetUpPrintingValues : public wxPanel
 {
 	DECLARE_CLASS( SetUpPrintingValues )
