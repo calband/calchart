@@ -228,10 +228,16 @@ wxString spr_line_text[MAX_SPR_LINES] =
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
 
-wxString spr_line_text_index[MAX_SPR_LINES] =
+const wxString spr_line_text_index[MAX_SPR_LINES] =
 {
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
+
+#define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type ) \
+Type GetConfiguration_ ## KeyName () { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
+void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
+void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
+
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveDir, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
@@ -275,9 +281,6 @@ wxPalette *CalChartPalette;
 const wxPen *CalChartPens[COLOR_NUM];
 const wxBrush *CalChartBrushes[COLOR_NUM];
 
-static wxPathList configdirs;
-static wxString runtime_dir;
-
 ///// Show mode configuration /////
 
 const wxString kShowModeStrings[SHOWMODE_NUM] =
@@ -293,7 +296,7 @@ const wxString kShowModeStrings[SHOWMODE_NUM] =
 // whash ehash (steps from west sideline)
 // left top right bottom (border in steps)
 // x y w h (region of the field to use, in steps)
-const long kShowModeDefaultValues[SHOWMODE_NUM][10] =
+const long kShowModeDefaultValues[SHOWMODE_NUM][kShowModeValues] =
 {
 	{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
 	{ 32, 52, 8, 8, 8, 8, -96, -42, 192, 84 },
@@ -315,14 +318,14 @@ const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] =
 // x y w h (size of stage EPS file as per BoundingBox)
 // x y w h (where to put the field on the stage, depends on the EPS file)
 // l r t b (location of yard line text's inside edge, depends on the EPS file)
-const long kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM][21] =
+const long kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM][kSpringShowModeValues] =
 {
 	{ 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232, 153, 438, 270, 12 }
 };
 
-void GetConfigurationShowMode(size_t which, long values[10])
+void GetConfigurationShowMode(size_t which, long values[kShowModeValues])
 {
-	for (size_t i = 0; i < 10; ++i)
+	for (size_t i = 0; i < kShowModeValues; ++i)
 	{
 		values[i] = kShowModeDefaultValues[which][i];
 	}
@@ -349,7 +352,7 @@ void ReadConfigurationShowMode()
 {
 	for (size_t i=0; i<SHOWMODE_NUM; ++i)
 	{
-		long values[10];
+		long values[kShowModeValues];
 		GetConfigurationShowMode(i, values);
 		unsigned short whash = values[0];
 		unsigned short ehash = values[1];
@@ -368,9 +371,9 @@ void ReadConfigurationShowMode()
 	}
 }
 
-void GetConfigurationSpringShowMode(size_t which, long values[21])
+void GetConfigurationSpringShowMode(size_t which, long values[kShowModeValues])
 {
-	for (size_t i = 0; i < 21; ++i)
+	for (size_t i = 0; i < kShowModeValues; ++i)
 	{
 		values[i] = kSpringShowModeDefaultValues[which][i];
 	}
@@ -409,7 +412,7 @@ void ReadConfigurationSpringShowMode()
 {
 	for (size_t i=0; i<SPRINGSHOWMODE_NUM; ++i)
 	{
-		long values[21];
+		long values[kSpringShowModeValues];
 		GetConfigurationSpringShowMode(i, values);
 		unsigned char which_spr_yards = values[0];
 		CC_coord bord1, bord2;
@@ -448,7 +451,7 @@ void ReadConfigurationSpringShowMode()
 	}
 }
 
-void SetConfigurationShowMode(size_t which, const long values[10])
+void SetConfigurationShowMode(size_t which, const long values[kShowModeValues])
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/SHOWMODES"));
@@ -466,7 +469,7 @@ void SetConfigurationShowMode(size_t which, const long values[10])
 	config->Flush();
 }
 
-void SetConfigurationSpringShowMode(size_t which, const long values[21])
+void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowModeValues])
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/SPRINGSHOWMODES"));
@@ -580,433 +583,122 @@ void ClearConfigColor(size_t selection)
 	config->Flush();
 }
 
+void ReadConfigYardlines()
+{
+	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
+	{
+		wxString key;
+		key.Printf(wxT("YardLines_%d"), i);
+		yard_text[i] = GetConfigValue<wxString>(key, yard_text_index[i]);
+	}
+}
+
+void SetConfigShowYardline()
+{
+	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
+	{
+		wxString key;
+		key.Printf(wxT("YardLines_%d"), i);
+		SetConfigValue<wxString>(key, yard_text[i], yard_text_index[i]);
+	}
+}
+
+void ClearConfigShowYardline()
+{
+	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
+	{
+		wxString key;
+		key.Printf(wxT("YardLines_%d"), i);
+		ClearConfigValue<wxString>(key);
+	}
+	ReadConfigYardlines();
+}
+
+void ReadConfigSpringYardlines()
+{
+	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
+	{
+		wxString key;
+		key.Printf(wxT("SpringShowYardLines_%d"), i);
+		spr_line_text[i] = GetConfigValue<wxString>(key, spr_line_text_index[i]);
+	}
+}
+
+void SetConfigSpringShowYardline()
+{
+	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
+	{
+		wxString key;
+		key.Printf(wxT("SpringShowYardLines_%d"), i);
+		SetConfigValue<wxString>(key, spr_line_text[i], spr_line_text_index[i]);
+	}
+}
+
+void ClearConfigSpringShowYardline()
+{
+	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
+	{
+		wxString key;
+		key.Printf(wxT("SpringShowYardLines_%d"), i);
+		ClearConfigValue<wxString>(key);
+	}
+	ReadConfigSpringYardlines();
+}
+
+void InitializeColorePalette()
+{
+	// create a color palette
+	int i, j;
+	int n = 0;
+	unsigned char rd[COLOR_NUM], gd[COLOR_NUM], bd[COLOR_NUM];
+	CalChartPalette = new wxPalette();
+	for (i = 0; i < COLOR_NUM; i++)
+	{
+		for (j = 0; j < i; j++)
+		{
+			const wxColour *c1, *c2;
+			c1 = &CalChartPens[i]->GetColour();
+			if (j >= 0)
+			{
+				c2 = &CalChartPens[j]->GetColour();
+			}
+			else
+			{
+				if (j < -1)
+				{
+					c2 = wxBLACK;
+				}
+				else
+				{
+					c2 = wxWHITE;
+				}
+			}
+			if ((c1->Red() == c2->Red()) &&
+				(c1->Green() == c2->Green()) &&
+				(c1->Blue() == c2->Blue()))
+			{
+				break;
+			}
+		}
+		if (i == j)
+		{
+			rd[n] = CalChartPens[i]->GetColour().Red();
+			gd[n] = CalChartPens[i]->GetColour().Green();
+			bd[n] = CalChartPens[i]->GetColour().Blue();
+			n++;
+		}
+	}
+	CalChartPalette->Create(n, rd, gd, bd);
+}
+
 void ReadConfig()
 {
 	ReadConfigColor();
 	ReadConfigurationShowMode();
 	ReadConfigurationSpringShowMode();
-}
-
-wxString ReadConfig(const wxString& path)
-{
-	FILE *fp;
-	int i;
-	wxString com_buf;
-	CC_coord bord1(INT2COORD(8),INT2COORD(8)), bord2(INT2COORD(8),INT2COORD(8));
-	CC_coord siz, off;
-	wxString retmsg;
-	unsigned short whash, ehash;
-	short mode_steps_x, mode_steps_y, mode_steps_w, mode_steps_h;
-	short eps_stage_x, eps_stage_y, eps_stage_w, eps_stage_h;
-	short eps_field_x, eps_field_y, eps_field_w, eps_field_h;
-	short eps_text_left, eps_text_right, eps_text_top, eps_text_bottom;
-	unsigned char which_spr_yards;
-	wxPathList tmp_configdirs;
-
-	wxString program_dir = wxGetCwd();
-
-// Get default path
-	runtime_dir = FullPath(path);
-
-// Set search path for files
-	tmp_configdirs.AddEnvList(wxT("CALCHART_RT"));
-	tmp_configdirs.Add(runtime_dir);
-
-	fp = OpenFileInDir(wxT("config"), wxT("r"), &tmp_configdirs);
-	if (fp == NULL)
-	{
-		retmsg = wxT("Unable to open config file.  Using default values.\n");
-	}
-	else
-	{
-		while (!feof(fp))
-		{
-			ReadDOSline(fp, com_buf);
-
-			if (com_buf.empty()) continue;
-/* check for comment */
-			if (com_buf[0] == '#') continue;
-			if (com_buf == wxT("PROGRAM_DIR"))
-			{
-				ReadDOSline(fp, program_dir);
-				continue;
-			}
-			if (com_buf == wxT("SHOWS_DIR"))
-			{
-				wxString shows_dir;
-				ReadDOSline(fp, shows_dir);
-				continue;
-			}
-			if (com_buf == wxT("AUTOSAVE_DIR"))
-			{
-				wxString autosave_dirname;
-				ReadDOSline(fp, autosave_dirname);
-				continue;
-			}
-			if (com_buf == wxT("RUNTIME_DIR"))
-			{
-				ReadDOSline(fp, runtime_dir);
-				continue;
-			}
-			if (com_buf == wxT("WINDOW_WIDTH"))
-			{
-				unsigned int window_default_width;
-				fscanf(fp, " %d \n", &window_default_width);
-				continue;
-			}
-			if (com_buf == wxT("WINDOW_HEIGHT"))
-			{
-				unsigned int window_default_height;
-				fscanf(fp, " %d \n", &window_default_height);
-				continue;
-			}
-			if (com_buf == wxT("DEFAULT_ZOOM"))
-			{
-				unsigned default_zoom;
-				fscanf(fp, " %d \n", &default_zoom);
-				continue;
-			}
-			if (com_buf == wxT("UNDO_BUF_SIZE"))
-			{
-				unsigned undo_buffer_size;
-				fscanf(fp, " %d \n", &undo_buffer_size);
-				continue;
-			}
-			if (com_buf == wxT("AUTOSAVE_INTERVAL"))
-			{
-				unsigned int autosave_interval;
-				fscanf(fp, " %d \n", &autosave_interval);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_FILE"))
-			{
-				wxString print_file;
-				ReadDOSline(fp, print_file);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_CMD"))
-			{
-				wxString print_cmd;
-				ReadDOSline(fp, print_cmd);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_OPTS"))
-			{
-				wxString print_opts;
-				ReadDOSline(fp, print_opts);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_VIEW_CMD"))
-			{
-				wxString print_view_cmd;
-				ReadDOSline(fp, print_view_cmd);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_VIEW_OPTS"))
-			{
-				wxString print_view_opts;
-				ReadDOSline(fp, print_view_opts);
-				continue;
-			}
-			if (com_buf == wxT("DEFINE_STANDARD_MODE"))
-			{
-				ReadDOSline(fp, com_buf);
-				fscanf(fp, " %hu %hu \n", &whash, &ehash);
-				fscanf(fp, " %hu %hu %hu %hu \n",
-					&bord1.x, &bord1.y, &bord2.x, &bord2.y);
-				bord1.x = INT2COORD(bord1.x);
-				bord1.y = INT2COORD(bord1.y);
-				bord2.x = INT2COORD(bord2.x);
-				bord2.y = INT2COORD(bord2.y);
-				fscanf(fp, " %hd %hd %hd %hd \n", &mode_steps_x, &mode_steps_y,
-					&mode_steps_w, &mode_steps_h);
-				siz.x = INT2COORD(mode_steps_w);
-				siz.y = INT2COORD(mode_steps_h);
-				off.x = INT2COORD(-mode_steps_x);
-				off.y = INT2COORD(-mode_steps_y);
-//				wxGetApp().GetModeList().Add(new ShowModeStandard(com_buf, bord1, bord2,
-//					siz, off, whash, ehash));
-				continue;
-			}
-			if (com_buf == wxT("DEFINE_SPRSHOW_MODE"))
-			{
-				wxString mode_name;
-				ReadDOSline(fp, mode_name);
-				ReadDOSline(fp, com_buf);
-				fscanf(fp, " %c \n", &which_spr_yards);
-				if (which_spr_yards <= '9')
-				{
-					which_spr_yards -= '0';
-				}
-				else
-				{
-					which_spr_yards = toupper(which_spr_yards) - 'A' + 10;
-				}
-				fscanf(fp, " %hu %hu %hu %hu \n",
-					&bord1.x, &bord1.y, &bord2.x, &bord2.y);
-				bord1.x = INT2COORD(bord1.x);
-				bord1.y = INT2COORD(bord1.y);
-				bord2.x = INT2COORD(bord2.x);
-				bord2.y = INT2COORD(bord2.y);
-				fscanf(fp, " %hd %hd %hd %hd \n", &mode_steps_x, &mode_steps_y,
-					&mode_steps_w, &mode_steps_h);
-				fscanf(fp, " %hd %hd %hd %hd \n", &eps_stage_x, &eps_stage_y,
-					&eps_stage_w, &eps_stage_h);
-				fscanf(fp, " %hd %hd %hd %hd \n", &eps_field_x, &eps_field_y,
-					&eps_field_w, &eps_field_h);
-				fscanf(fp, " %hd %hd %hd %hd \n", &eps_text_left, &eps_text_right,
-					&eps_text_top, &eps_text_bottom);
-//				wxGetApp().GetModeList().Add(new ShowModeSprShow(mode_name, bord1, bord2,
-//					which_spr_yards, com_buf,
-//					mode_steps_x, mode_steps_y,
-//					mode_steps_w, mode_steps_h,
-//					eps_stage_x, eps_stage_y,
-//					eps_stage_w, eps_stage_h,
-//					eps_field_x, eps_field_y,
-//					eps_field_w, eps_field_h,
-//					eps_text_left, eps_text_right,
-//					eps_text_top, eps_text_bottom));
-				continue;
-			}
-			if (com_buf == wxT("PRINT_PAGE_WIDTH"))
-			{
-				float page_width;
-				fscanf(fp, " %f \n", &page_width);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_PAGE_HEIGHT"))
-			{
-				float page_height;
-				fscanf(fp, " %f \n", &page_height);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_PAPER_LENGTH"))
-			{
-				float paper_length;
-				fscanf(fp, " %f \n", &paper_length);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_LEFT_MARGIN"))
-			{
-				float page_offset_x;
-				fscanf(fp, " %f \n", &page_offset_x);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_TOP_MARGIN"))
-			{
-				float page_offset_y;
-				fscanf(fp, " %f \n", &page_offset_y);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_HEADER_SIZE"))
-			{
-				float header_size;
-				fscanf(fp, " %f \n", &header_size);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_YARDS_SIZE"))
-			{
-				float yards_size;
-				fscanf(fp, " %f \n", &yards_size);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_TEXT_SIZE"))
-			{
-				float text_size;
-				fscanf(fp, " %f \n", &text_size);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_DOT_RATIO"))
-			{
-				float dot_ratio;
-				fscanf(fp, " %f \n", &dot_ratio);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_NUM_RATIO"))
-			{
-				float num_ratio;
-				fscanf(fp, " %f \n", &num_ratio);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_PLAIN_LINE"))
-			{
-				float pline_ratio;
-				fscanf(fp, " %f \n", &pline_ratio);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_SOLID_LINE"))
-			{
-				float sline_ratio;
-				fscanf(fp, " %f \n", &sline_ratio);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_CONT_RATIO"))
-			{
-				float cont_ratio;
-				fscanf(fp, " %f \n", &cont_ratio);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_HEADER_FONT"))
-			{
-				wxString head_font;
-				ReadDOSline(fp, head_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_NUMBER_FONT"))
-			{
-				wxString number_font;
-				ReadDOSline(fp, number_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_ANNO_FONT"))
-			{
-				wxString main_font;
-				ReadDOSline(fp, main_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_FONT"))
-			{
-				wxString cont_font;
-				ReadDOSline(fp, cont_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_BOLD_FONT"))
-			{
-				wxString bold_font;
-				ReadDOSline(fp, bold_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_ITALIC_FONT"))
-			{
-				wxString ital_font;
-				ReadDOSline(fp, ital_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_BOLD_ITALIC_FONT"))
-			{
-				wxString bold_ital_font;
-				ReadDOSline(fp, bold_ital_font);
-				continue;
-			}
-			if (com_buf == wxT("PRINT_YARDS"))
-			{
-				char yardbuf[16];
-				for (i=0; i<MAX_YARD_LINES; i++)
-				{
-					fscanf(fp, " %s ", yardbuf);
-					yard_text[i] = wxString::FromUTF8(yardbuf);
-				}
-				continue;
-			}
-			if (com_buf == wxT("PRINT_SPR_LINES"))
-			{
-				char yardbuf[16];
-				for (i=0; i<MAX_SPR_LINES; i++)
-				{
-					fscanf(fp, " %s ", yardbuf);
-					spr_line_text[i] = wxString::FromUTF8(yardbuf);
-				}
-				continue;
-			}
-			if (!retmsg)
-			{
-				wxString tmpbuf;
-				tmpbuf.Printf(wxT("Warning: '%s' is not recognized in config file.\n"),
-					com_buf.c_str());
-				retmsg = tmpbuf;
-			}
-		}
-		fclose(fp);
-	}
-
-	if (!wxGetApp().GetModeList().Empty())
-	{
-// No modes were defined.  Add a default
-		wxGetApp().GetModeList().Add(new ShowModeStandard(wxT("Standard"), bord1, bord2,
-			DEF_HASH_W, DEF_HASH_E));
-	}
-
-	{
-		int j;
-		int n = 0;
-		const wxColour *c1, *c2;
-
-		unsigned char rd[COLOR_NUM], gd[COLOR_NUM], bd[COLOR_NUM];
-		CalChartPalette = new wxPalette();
-		for (i = 0; i < COLOR_NUM; i++)
-		{
-			for (j = 0; j < i; j++)
-			{
-				c1 = &CalChartPens[i]->GetColour();
-				if (j >= 0)
-				{
-					c2 = &CalChartPens[j]->GetColour();
-				}
-				else
-				{
-					if (j < -1)
-					{
-						c2 = wxBLACK;
-					}
-					else
-					{
-						c2 = wxWHITE;
-					}
-				}
-				if ((c1->Red() == c2->Red()) &&
-					(c1->Green() == c2->Green()) &&
-					(c1->Blue() == c2->Blue()))
-				{
-					break;
-				}
-			}
-			if (i == j)
-			{
-				rd[n] = CalChartPens[i]->GetColour().Red();
-				gd[n] = CalChartPens[i]->GetColour().Green();
-				bd[n] = CalChartPens[i]->GetColour().Blue();
-				n++;
-			}
-		}
-		CalChartPalette->Create(n, rd, gd, bd);
-	}
-// Set search path for files
-	configdirs.AddEnvList(wxT("CALCHART_RT"));
-	configdirs.Add(runtime_dir);
-
-	return retmsg;
-}
-
-
-// Open a file in the specified dir.
-FILE *OpenFileInDir(const wxString& name, const wxString& modes, const wxPathList *list)
-{
-	FILE *fp;
-	wxString fullpath;
-
-	if (!list) list = &configdirs;
-	fullpath = list->FindValidPath(name);
-	if (fullpath.empty()) return NULL;
-
-	fp = CC_fopen(fullpath.fn_str(), modes.fn_str());
-	return fp;
-}
-
-
-wxString FullPath(const wxString& path)
-{
-	if (wxIsAbsolutePath(path))
-	{
-		return path;
-	}
-	else
-	{
-// make into a full path
-		wxString newpath(wxGetCwd());
-		newpath.Append(PATH_SEPARATOR);
-		newpath.Append(path);
-		return newpath;
-	}
+	ReadConfigYardlines();
+	ReadConfigSpringYardlines();
+	InitializeColorePalette();
 }
 
 

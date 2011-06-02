@@ -34,6 +34,7 @@
 class CC_sheet;
 class ShowMode;
 class ShowUndoList;
+class CC_show;
 
 // The CC_show_modified class is used for indicating to views if the show has been modified
 // some views behave differently if the show has been modified
@@ -65,11 +66,24 @@ class CC_show_setup : public wxObject
 DECLARE_DYNAMIC_CLASS(CC_show_setup)
 };
 
+
+class CC_FileException
+{
+public:
+	CC_FileException(const wxString& reason) : mError(reason) {}
+	CC_FileException(uint32_t nameID);
+	wxString WhatError() const { return mError; } 
+private:
+	wxString mError;
+};
+
+
+
+// CalChart Show
 class CC_show : public wxDocument
 {
 	DECLARE_DYNAMIC_CLASS(CC_show)
 public:
-
 	typedef std::vector<CC_sheet> CC_sheet_container_t;
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
@@ -77,30 +91,34 @@ public:
 	CC_show();
 	virtual ~CC_show();
 
-	// Need to override OnOpenDoc so we can report errors
-	virtual bool OnOpenDocument(const wxString& filename) { return wxDocument::OnOpenDocument(filename) && Ok(); }
+	// Override the wxDocument functions:
+	// Need to override OnOpenDoc so we can report errors, handle recovery file
+	virtual bool OnOpenDocument(const wxString& filename);
+	// Need to override OnNewDoc so we can start the setup wizard
 	virtual bool OnNewDocument();
+	// Need to override OnSaveDoc so we can handle recovery files
+	virtual bool OnSaveDocument(const wxString& filename);
+	// Update the views that the doc been modified
+	virtual void Modify(bool b);
 
+	// How we save and load a show:
 	virtual wxOutputStream& SaveObject(wxOutputStream& stream);
 	virtual wxInputStream& LoadObject(wxInputStream& stream);
 
 	wxString ImportContinuity(const wxString& file);
 
-	int Print(FILE *fp, bool eps = false, bool overview = false,
+	// may throw CC_FileException
+	int PrintShowToPS(FILE *fp, bool eps = false, bool overview = false,
 		unsigned curr_ss = 0, int min_yards = 50) const;
 
 	inline const wxString& GetError() const { return error; }
 	inline bool Ok() const { return okay; }
 
-	wxString Autosave();
-	void ClearAutosave() const;
 	void FlushAllTextWindows();
 
 public:
 	const wxString& GetDescr() const;
 	void SetDescr(const wxString& newdescr);
-
-	virtual void Modify(bool b);
 
 	inline unsigned short GetNumSheets() const { return sheets.size(); }
 
@@ -157,7 +175,6 @@ private:
 private:
 	
 	void PrintSheets(FILE *fp) const;		  // called by Print()
-	void SetAutosaveName(const wxString& realname);
 
 	void AddError(const wxString& str)
 	{
@@ -165,10 +182,11 @@ private:
 		okay = false;
 	}
 
+	wxOutputStream& SaveObjectInternal(wxOutputStream& stream);
+
 	mutable wxString error;
 	bool okay;
 
-	wxString autosave_name;
 	wxString descr;
 	unsigned short numpoints;
 	CC_sheet_container_t sheets;
@@ -178,6 +196,33 @@ private:
 	bool print_do_cont;
 	bool print_do_cont_sheet;
 	unsigned mSheetNum;
+
+private:
+	// Autosaving:
+	// goal is to allow the user to have a recoverable file.
+	// 
+	// When the timer goes off, and if the show is modified,
+	// we will write the file to a version of the file that the same
+	// but with the extension .shw~, to indicate that there is a recovery
+	// file at that location.
+	// When a file is opened, we first check to see if there is a temporary 
+	// file, and if there is, prompt the user to see if they would like use
+	// that file instead.
+	// When we save a file, the recovery file should be removed to prevent
+	// a false detection that the file writing failed.
+	wxString TranslateNameToAutosaveName(const wxString& name);
+	void Autosave();
+	
+	class AutoSaveTimer: public wxTimer
+	{
+	public:
+		AutoSaveTimer(CC_show& show) : mShow(show) {}
+		void Notify();
+	private:
+		CC_show& mShow;
+	};
+
+	AutoSaveTimer mTimer;
 };
 
 #endif // _CC_SHOW_H_

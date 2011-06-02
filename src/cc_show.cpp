@@ -32,28 +32,12 @@
 #include "cc_point.h"
 #include "show.h"
 
+#include <wx/wfstream.h>
 #include <list>
 
 static const wxChar *nofile_str = wxT("Unable to open file");
 static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
-static const wxChar *writeerr_str = wxT("Write error: check disk media");
-
-
-class FileReadException
-{
-public:
-	FileReadException(const wxString& reason) : mError(reason) {}
-	FileReadException(uint32_t nameID)
-	{
-		uint8_t rawd[4];
-		put_big_long(rawd, nameID);
-		mError.Printf(wxT("Wrong ID read:  Read %c%c%c%c"), rawd[0], rawd[1], rawd[2], rawd[3]);
-	}
-	wxString WhatError() const { return mError; } 
-private:
-	wxString mError;
-};
 
 
 const wxChar *contnames[] =
@@ -68,46 +52,12 @@ const wxChar *contnames[] =
 	wxT("Solx")
 };
 
-class AutoSaveTimer: public wxTimer
+
+CC_FileException::CC_FileException(uint32_t nameID)
 {
-	public:
-		AutoSaveTimer(): untitled_number(1) {}
-		void Notify()
-		{
-			for (std::list<CC_show*>::iterator i = showlist.begin(); i != showlist.end(); ++i)
-			{
-				CC_show *show = *i;
-				if (show->IsModified())
-				{
-					wxString s;
-					if (!(s=show->Autosave()).empty())
-					{
-						(void)wxMessageBox(s, wxT("Autosave Error"));
-					}
-				}
-			}
-		}
-
-		inline void AddShow(CC_show *show)
-		{
-			showlist.push_back(show);
-		}
-		inline void RemoveShow(CC_show *show)
-		{
-			showlist.remove(show);
-		}
-		inline int GetNumber() { return untitled_number++; }
-	private:
-		std::list<CC_show*> showlist;
-		int untitled_number;
-};
-
-static AutoSaveTimer autosaveTimer;
-
-void SetAutoSave(int secs)
-{
-	if (secs > 0)
-		autosaveTimer.Start(secs*1000);
+	uint8_t rawd[4];
+	put_big_long(rawd, nameID);
+	mError.Printf(wxT("Wrong ID read:  Read %c%c%c%c"), rawd[0], rawd[1], rawd[2], rawd[3]);
 }
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
@@ -122,21 +72,74 @@ CC_show::CC_show()
 :okay(true), numpoints(0),
 print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true),
-mSheetNum(0)
+mSheetNum(0),
+mTimer(*this)
 {
-	wxString tmpname;
-
-	tmpname.Printf(wxT("noname%d.shw"), autosaveTimer.GetNumber());
-	SetAutosaveName(tmpname);
+	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
 	mode = *wxGetApp().GetModeList().Begin();
-	autosaveTimer.AddShow(this);
+}
+
+// When a file is opened, we first check to see if there is a temporary 
+// file, and if there is, prompt the user to see if they would like use
+// that file instead.
+bool CC_show::OnOpenDocument(const wxString& filename)
+{
+	// first check to see if there is a recover file:
+	wxString recoveryFile = TranslateNameToAutosaveName(filename);
+	if (wxFileExists(recoveryFile))
+	{
+		// prompt the user to find out if they would like to use the recovery file
+		int userchoice = wxMessageBox(
+			wxT("CalChart has detected a recovery file (possibly from a previous crash).  ")
+			wxT("Would you like to use the recovery file (Warning: choosing recover will ")
+			wxT("destroy the original file)?"), wxT("Recovery File Detected"), wxYES_NO|wxCANCEL);
+		if (userchoice == wxYES)
+		{
+			// move the recovery file to the filename, destroying the file and using the recovery
+			wxCopyFile(recoveryFile, filename);
+		}
+		if (userchoice == wxNO)
+		{
+		}
+		if (userchoice == wxCANCEL)
+		{
+			return false;
+		}
+	}
+	bool success = wxDocument::OnOpenDocument(filename) && Ok();
+	if (success)
+	{
+		// at this point the recover file is no longer useful.
+		if (wxFileExists(recoveryFile))
+		{
+			wxRemoveFile(recoveryFile);
+		}
+	}
+	return success;
 }
 
 bool CC_show::OnNewDocument()
 {
-	// notify the views that we are a new document.  That should prompt a wizard to set up the show
-	CC_show_setup show_setup;
-	UpdateAllViews(NULL, &show_setup);
+	bool success = wxDocument::OnNewDocument();
+	if (success)
+	{
+		// notify the views that we are a new document.  That should prompt a wizard to set up the show
+		CC_show_setup show_setup;
+		UpdateAllViews(NULL, &show_setup);
+	}
+	return success;
+}
+
+// When we save a file, the recovery file should be removed to prevent
+// a false detection that the file writing failed.
+bool CC_show::OnSaveDocument(const wxString& filename)
+{
+	bool result = wxDocument::OnSaveDocument(filename);
+	wxString recoveryFile = TranslateNameToAutosaveName(filename);
+	if (result && wxFileExists(recoveryFile))
+	{
+		wxRemoveFile(recoveryFile);
+	}
 	return true;
 }
 
@@ -193,7 +196,7 @@ void ReadAndCheckID(wxInputStream& stream, uint32_t inname)
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		throw FileReadException(inname);
+		throw CC_FileException(inname);
 	}
 }
 
@@ -204,7 +207,7 @@ void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		throw FileReadException(inname);
+		throw CC_FileException(inname);
 	}
 	ReadLong(stream, name);
 	if (4 != name)
@@ -212,7 +215,7 @@ void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
 		uint8_t rawd[4];
 		put_big_long(rawd, inname);
 		wxString s; s.Printf(wxT("Wrong size %d for name %c%c%c%c"), name, rawd[0], rawd[1], rawd[2], rawd[3]);
-		throw FileReadException(s);
+		throw CC_FileException(s);
 	}
 	ReadLong(stream, size);
 }
@@ -224,7 +227,7 @@ void ReadCheckIDandFillData(wxInputStream& stream, uint32_t inname, std::vector<
 	ReadLong(stream, name);
 	if (inname != name)
 	{
-		throw FileReadException(inname);
+		throw CC_FileException(inname);
 	}
 	ReadLong(stream, name);
 	data.resize(name);
@@ -294,12 +297,7 @@ void Write(wxOutputStream& stream, const void *data, uint32_t size)
 
 // Destroy a show
 CC_show::~CC_show()
-{
-	autosaveTimer.RemoveShow(this);
-#if 0
-	fprintf(stderr, "Deleting show...\n");
-#endif
-}
+{}
 
 
 wxString CC_show::ImportContinuity(const wxString& file)
@@ -618,12 +616,15 @@ wxString CC_show::ImportContinuity(const wxString& file)
 
 wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 {
-	uint32_t id;
-	unsigned i, j;
-	Coord crd;
-	unsigned char c;
-
+	// flush out the text before we save a file.
 	FlushAllTextWindows();
+	return SaveObjectInternal(stream);
+}
+
+wxOutputStream& CC_show::SaveObjectInternal(wxOutputStream& stream)
+{
+	uint32_t id;
+	unsigned i;
 
 	WriteHeader(stream);
 	WriteGurk(stream, INGL_SHOW);
@@ -671,18 +672,20 @@ wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 		WriteChunkHeader(stream, INGL_POS, GetNumPoints()*4);
 		for (i = 0; i < GetNumPoints(); i++)
 		{
+			Coord crd;
 			put_big_word(&crd, curr_sheet->GetPosition(i).x);
 			Write(stream, &crd, 2);
 			put_big_word(&crd, curr_sheet->GetPosition(i).y);
 			Write(stream, &crd, 2);
 		}
 // Ref point positions
-		for (j = 1; j <= NUM_REF_PNTS; j++)
+		for (int j = 1; j <= NUM_REF_PNTS; j++)
 		{
 			for (i = 0; i < GetNumPoints(); i++)
 			{
 				if (curr_sheet->GetPosition(i) != curr_sheet->GetPosition(i, j))
 				{
+					Coord crd;
 					WriteChunkHeader(stream, INGL_REFP, GetNumPoints()*4+2);
 					put_big_word(&crd, j);
 					Write(stream, &crd, 2);
@@ -731,14 +734,7 @@ wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 				WriteChunkHeader(stream, INGL_LABL, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					if (curr_sheet->GetPoint(i).GetFlip())
-					{
-						c = true;
-					}
-					else
-					{
-						c = false;
-					}
+					char c = (curr_sheet->GetPoint(i).GetFlip()) ? true : false;
 					Write(stream, &c, 1);
 				}
 				break;
@@ -834,14 +830,14 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		// Point positions
 		// <INGL_DURA><size><data>
 		ReadCheckIDandFillData(stream, INGL_POS, data);
-		if (data.size() != size_t(sheet.show->GetNumPoints()*4))
+		if (data.size() != size_t(GetNumPoints()*4))
 		{
-			throw FileReadException(wxT("bad POS chunk"));
+			throw CC_FileException(wxT("bad POS chunk"));
 		}
 		{
 			uint8_t *d;
 			d = (uint8_t*)&data[0];
-			for (unsigned i = 0; i < sheet.show->GetNumPoints(); ++i)
+			for (unsigned i = 0; i < GetNumPoints(); ++i)
 			{
 				CC_coord c;
 				c.x = get_big_word(d);
@@ -857,21 +853,21 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_REFP == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_REFP, data);
-			if (data.size() != (unsigned long)sheet.show->GetNumPoints()*4+2)
+			if (data.size() != (unsigned long)GetNumPoints()*4+2)
 			{
-				throw FileReadException(wxT("Bad REFP chunk"));
+				throw CC_FileException(wxT("Bad REFP chunk"));
 			}
 			uint8_t *d = (uint8_t*)&data[0];
 			unsigned ref = get_big_word(d);
 			d += 2;
-			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
 				CC_coord c;
 				c.x = get_big_word(d);
 				d += 2;
 				c.y = get_big_word(d);
 				d += 2;
-				sheet.SetPositionQuick(c, i, ref);		  // don't clip
+				sheet.SetPosition(c, i, ref);		  // don't clip
 			}
 			PeekLong(stream, name);
 		}
@@ -879,12 +875,12 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_SYMB == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_SYMB, data);
-			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
+			if (data.size() != (unsigned long)GetNumPoints())
 			{
-				throw FileReadException(wxT("Bad SYMB chunk"));
+				throw CC_FileException(wxT("Bad SYMB chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
 				sheet.GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
 			}
@@ -894,12 +890,12 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_TYPE == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_TYPE, data);
-			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
+			if (data.size() != (unsigned long)GetNumPoints())
 			{
-				throw FileReadException(wxT("Bad TYPE chunk"));
+				throw CC_FileException(wxT("Bad TYPE chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
 				sheet.GetPoint(i).cont = *(d++);
 			}
@@ -909,12 +905,12 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 		while (INGL_LABL == name)
 		{
 			ReadCheckIDandFillData(stream, INGL_LABL, data);
-			if (data.size() != (unsigned long)sheet.show->GetNumPoints())
+			if (data.size() != (unsigned long)GetNumPoints())
 			{
-				throw FileReadException(wxT("Bad SYMB chunk"));
+				throw CC_FileException(wxT("Bad SYMB chunk"));
 			}
 			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
 				if (*(d++))
 				{
@@ -929,19 +925,19 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 			ReadCheckIDandFillData(stream, INGL_CONT, data);
 			if (data.size() < 3)						  // one byte num + two nils minimum
 			{
-				throw FileReadException(wxT("Bad cont chunk"));
+				throw CC_FileException(wxT("Bad cont chunk"));
 			}
 			const char *d = (const char *)&data[0];
 			if (d[data.size()-1] != '\0')
 			{
-				throw FileReadException(wxT("Bad cont chunk"));
+				throw CC_FileException(wxT("Bad cont chunk"));
 			}
 
 			const char* text = d + 1;
 			size_t num = strlen(text);
 			if (data.size() < num + 3)					  // check for room for text string
 			{
-				throw FileReadException(wxT("Bad cont chunk"));
+				throw CC_FileException(wxT("Bad cont chunk"));
 			}
 			wxString namestr(wxString::FromUTF8(text));
 			text = d + 2 + strlen(text);
@@ -963,17 +959,11 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	ReadAndCheckID(stream, INGL_SHOW);
 	mSheetNum = 0;
 	}
-	catch (FileReadException& e) {
+	catch (CC_FileException& e) {
 		AddError(e.WhatError());
 	}
 	return stream;
 }
-
-void CC_show::ClearAutosave() const
-{
-	wxRemoveFile(autosave_name);
-}
-
 
 void CC_show::FlushAllTextWindows()
 {
@@ -996,44 +986,35 @@ void CC_show::Modify(bool b)
 }
 
 
-wxString CC_show::Autosave()
+void CC_show::AutoSaveTimer::Notify()
 {
-	if (!autosave_name.IsEmpty() && !OnSaveDocument(autosave_name))
-	{
-		return writeerr_str;
-	}
-	else
-	{
-		return wxT("");
-	}
+	mShow.Autosave();
 }
 
-void CC_show::SetAutosaveName(const wxString& realname)
+wxString CC_show::TranslateNameToAutosaveName(const wxString& name)
 {
-	wxString autosave_name;
-	wxString autosave_dirname = GetConfiguration_AutosaveDir();
-	if (autosave_dirname[0] == '$')
-	{
-		std::string s(autosave_dirname.utf8_str());
-		const char *d;
-		if ((d = getenv(s.c_str()+1)) != NULL)
-		{
-			autosave_name = wxString::FromUTF8(d);
-		}
-		else
-		{
-			autosave_name = AUTOSAVE_DIR;
-		}
-	}
-	else
-	{
-		autosave_name = autosave_dirname;
-	}
-
-	autosave_name.Append(PATH_SEPARATOR);
-	autosave_name.Append(wxFileNameFromPath(realname));
+	return name + wxT("~");
 }
 
+// When the timer goes off, and if the show has a name and is modified,
+// we will write the file to a version of the file that the same
+// but with the extension .shw~, to indicate that there is a recovery
+// file at that location.
+void CC_show::Autosave()
+{
+	if (GetFilename() != wxT("") && IsModified())
+	{
+		wxFFileOutputStream outputStream(TranslateNameToAutosaveName(GetFilename()));
+		if (outputStream.IsOk())
+		{
+			SaveObjectInternal(outputStream);
+		}
+		if (!outputStream.IsOk())
+		{
+			wxMessageBox(wxT("Error creating recovery file.  Take heed, save often!"), wxT("Recovery Error"));
+		}
+	}
+}
 
 void CC_show::SetDescr(const wxString& newdescr)
 {
@@ -1110,7 +1091,6 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns)
 		sht->SetNumPoints(num, columns);
 	}
 	numpoints = num;
-	Modify(true);
 }
 
 

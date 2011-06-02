@@ -32,27 +32,259 @@
 #include <map>
 #include <wx/cmdproc.h>
 
-// this command is to move points around on a sheet
-// position is a mapping of which point to two positions, the original and new.
-// When you do/undo the command, the show will be set to the sheet, and the selection
-// list will revert to that selection list.
-class MovePointsOnSheetCommand : public wxCommand
+// We assume that all commands are issued as soon as they are created.
+// This is important because the commands may "snap-shot" the system to know
+// how to do the 'undo'.
+
+// We implement our command in the base class, and each of the commands
+// needs to implement a "DoAction" and "UndoAction".  This allows the
+// base class to control the preamble and postamble of the calls.
+ 
+// BasicCalChartCommand
+// The low level command all other commands should inherit from.
+// Holds the show reference, and handles setting the modify-ness of the show.
+class BasicCalChartCommand : public wxCommand
 {
 public:
-	MovePointsOnSheetCommand(CC_show& show, unsigned ref);
-	virtual ~MovePointsOnSheetCommand();
+	BasicCalChartCommand(CC_show& show, const wxString cmdName);
+	// make destructor virtual and implement it to force abstract base class
+	virtual ~BasicCalChartCommand() = 0;
 
 	virtual bool Do();
 	virtual bool Undo();
 
 protected:
 	CC_show& mShow;
+
+private:
+	virtual void DoAction() = 0;
+	virtual void UndoAction() = 0;
+	bool mShowModified;
+};
+
+///// Global show commands.  Changes settings to a whole show.
+
+// SetDescriptionCommand
+// Set the description of this show
+class SetDescriptionCommand : public BasicCalChartCommand
+{
+public:
+	SetDescriptionCommand(CC_show& show, const wxString& newdescr);
+	virtual ~SetDescriptionCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	std::pair<wxString,wxString> mDescription;
+};
+
+
+// SetModeCommand
+// Set show mode
+class SetModeCommand : public BasicCalChartCommand
+{
+public:
+	SetModeCommand(CC_show& show, const wxString& newdescr);
+	virtual ~SetModeCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	std::pair<wxString,wxString> mMode;
+};
+
+
+// SetShowInfoCommand
+// Sets the shows number of points and labels 
+class SetShowInfoCommand : public BasicCalChartCommand
+{
+public:
+	SetShowInfoCommand(CC_show& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
+	virtual ~SetShowInfoCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	unsigned mNumPoints;
+	unsigned mNumColumns;
+	unsigned mOriginalNumPoints;
+	std::pair<std::vector<wxString>,std::vector<wxString> > mLabels;
+	std::vector<std::vector<CC_point> > mOriginalPoints;
+};
+
+
+///// Sheet commands.  Changes settings on a sheet
+
+// SetSheetCommand:
+// Base class for other commands.  Will set sheet to the page they were
+// when command was created.
+class SetSheetCommand : public BasicCalChartCommand
+{
+public:
+	SetSheetCommand(CC_show& show, const wxString cmdName);
+	// make destructor virtual and implement it to force abstract base class
+	virtual ~SetSheetCommand() = 0;
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
 	const unsigned mSheetNum;
-	std::map<unsigned, std::pair<CC_coord,CC_coord> > mPositions;
+};
+
+
+// SetSheetTitleCommand
+// Set the description of the current sheet
+class SetSheetTitleCommand : public SetSheetCommand
+{
+public:
+	SetSheetTitleCommand(CC_show& show, const wxString& newname);
+	virtual ~SetSheetTitleCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	std::pair<wxString,wxString> mDescription;
+};
+
+
+// SetSheetBeatsCommand
+// Set the beats of the current sheet
+class SetSheetBeatsCommand : public SetSheetCommand
+{
+public:
+	SetSheetBeatsCommand(CC_show& show, unsigned short beats);
+	virtual ~SetSheetBeatsCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	std::pair<unsigned short,unsigned short> mBeats;
+};
+
+
+// AddSheetsCommand
+// For adding a container of sheets
+class AddSheetsCommand : public SetSheetCommand
+{
+public:
+	AddSheetsCommand(CC_show& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
+	virtual ~AddSheetsCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	CC_show::CC_sheet_container_t mSheets;
+	const unsigned mWhere;
+};
+
+// RemoveSheetsCommand
+// For removing a sheets
+class RemoveSheetsCommand : public SetSheetCommand
+{
+public:
+	RemoveSheetsCommand(CC_show& show, unsigned where);
+	virtual ~RemoveSheetsCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	CC_show::CC_sheet_container_t mSheets;
+	const unsigned mWhere;
+};
+
+
+// AddRemoveContinuityCommand
+// Base for both adding and removing a continuity
+class AddRemoveContinuityCommand : public SetSheetCommand
+{
+public:
+	AddRemoveContinuityCommand(CC_show& show);
+	virtual ~AddRemoveContinuityCommand();
+
+protected:
+	virtual void UndoAction();
+
+	CC_sheet::ContContainer mOrigAnimcont;
+};
+
+// AddContinuityCommand
+// Adding a continuity
+class AddContinuityCommand : public AddRemoveContinuityCommand
+{
+public:
+	AddContinuityCommand(CC_show& show, const wxString& text);
+	virtual ~AddContinuityCommand();
+
+protected:
+	virtual void DoAction();
+
+	const wxString mContName;
+};
+
+// RemoveContinuityCommand
+// Removing a continuity
+class RemoveContinuityCommand : public AddRemoveContinuityCommand
+{
+public:
+	RemoveContinuityCommand(CC_show& show, unsigned i);
+	virtual ~RemoveContinuityCommand();
+
+protected:
+	virtual void DoAction();
+
+	const unsigned mIndexToRemove;
+};
+
+
+///// Sheet and point commands.  Changes for points selected on a sheet
+// SetSheetAndSelectCommand:
+// Base class for other commands.  Will set selection and page to the state they were
+// when command was created.
+class SetSheetAndSelectCommand : public SetSheetCommand
+{
+public:
+	SetSheetAndSelectCommand(CC_show& show, const wxString cmdName);
+	// make destructor virtual and implement it to force abstract base class
+	virtual ~SetSheetAndSelectCommand() = 0;
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
 	const CC_show::SelectionList mPoints;
+};
+
+
+// MovePointsOnSheetCommand:
+// Move points around on a sheet.  mPosition is a mapping of which point to two positions,
+// the original and new.  Do will move points to the new position, and undo will move them back.
+// Fill out the mPosition in the constructor.
+class MovePointsOnSheetCommand : public SetSheetAndSelectCommand
+{
+public:
+	MovePointsOnSheetCommand(CC_show& show, unsigned ref);
+	// make destructor virtual and implement it to force abstract base class
+	virtual ~MovePointsOnSheetCommand() = 0;
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	std::map<unsigned, std::pair<CC_coord,CC_coord> > mPositions;
 	const unsigned mRef;
 };
 
+
+// TranslatePointsByDeltaCommand:
+// Move the selected points by a fixed delta
 class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
 {
 public:
@@ -60,6 +292,9 @@ public:
 	virtual ~TranslatePointsByDeltaCommand();
 };
 
+
+// TransformPointsCommand:
+// Move the selected points by a matrix function
 class TransformPointsCommand : public MovePointsOnSheetCommand
 {
 public:
@@ -67,6 +302,9 @@ public:
 	virtual ~TransformPointsCommand();
 };
 
+
+// TransformPointsInALineCommand:
+// Move the selected points by a line function
 class TransformPointsInALineCommand : public MovePointsOnSheetCommand
 {
 public:
@@ -74,65 +312,77 @@ public:
 	virtual ~TransformPointsInALineCommand();
 };
 
-// this command is to move points around on a sheet
-// position is a mapping of which point to two positions, the original and new.
-// When you do/undo the command, the show will be set to the sheet, and the selection
-// list will revert to that selection list.
-class SetContinuityIndexCommand : public wxCommand
+
+// SetContinuityIndexCommand:
+// Sets the continuity index of the selected points.
+class SetContinuityIndexCommand : public SetSheetAndSelectCommand
 {
 public:
 	SetContinuityIndexCommand(CC_show& show, unsigned index);
 	virtual ~SetContinuityIndexCommand();
 
-	virtual bool Do();
-	virtual bool Undo();
-
 protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	const CC_show::SelectionList mPoints;
+	virtual void DoAction();
+	virtual void UndoAction();
+
 	std::map<unsigned, std::pair<unsigned,unsigned> > mContinuity;
 };
 
-// this command is to move points around on a sheet
-// position is a mapping of which point to two positions, the original and new.
-// When you do/undo the command, the show will be set to the sheet, and the selection
-// list will revert to that selection list.
-class SetSymbolAndContCommand : public wxCommand
+
+// SetContinuityIndexCommand:
+// Sets the symbol for the selected points, creating one if it doesn't exist
+class SetSymbolAndContCommand : public SetSheetAndSelectCommand
 {
 public:
 	SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym);
 	virtual ~SetSymbolAndContCommand();
 
-	virtual bool Do();
-	virtual bool Undo();
-
 protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	const CC_show::SelectionList mPoints;
+	virtual void DoAction();
+	virtual void UndoAction();
+
 	CC_sheet::ContContainer mOrigAnimcont;
 	typedef std::pair<SYMBOL_TYPE,unsigned> sym_cont_t;
 	std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> > mSymsAndCont;
 };
 
-// this command is to move points labels
-class SetLabelCommand : public wxCommand
+
+// SetContinuityTextCommand
+// Sets the continuity text
+class SetContinuityTextCommand : public SetSheetAndSelectCommand
+{
+public:
+	SetContinuityTextCommand(CC_show& show, unsigned i, const wxString& text);
+	virtual ~SetContinuityTextCommand();
+
+protected:
+	virtual void DoAction();
+	virtual void UndoAction();
+
+	unsigned mWhichCont;
+	std::pair<wxString,wxString> mContinuity;
+};
+
+
+// SetLabelCommand
+// Base class for setting the labels.  Set the mLabelPos with values
+class SetLabelCommand : public SetSheetAndSelectCommand
 {
 public:
 	SetLabelCommand(CC_show& show);
-	virtual ~SetLabelCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
+	// make destructor virtual and implement it to force abstract base class
+	virtual ~SetLabelCommand() = 0;
 
 protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	const CC_show::SelectionList mPoints;
+	virtual void DoAction();
+	virtual void UndoAction();
+
 	std::map<unsigned, std::pair<bool,bool> > mLabelPos;
 };
 
+
+// SetLabelRightCommand
+// Set label on right
 class SetLabelRightCommand : public SetLabelCommand
 {
 public:
@@ -140,187 +390,14 @@ public:
 	virtual ~SetLabelRightCommand();
 };
 
+
+// SetLabelFlipCommand
+// Set label on left
 class SetLabelFlipCommand : public SetLabelCommand
 {
 public:
 	SetLabelFlipCommand(CC_show& show);
 	virtual ~SetLabelFlipCommand();
-};
-
-// For adding a single or container of sheets
-class AddSheetsCommand : public wxCommand
-{
-public:
-	AddSheetsCommand(CC_show& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
-	virtual ~AddSheetsCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	CC_show::CC_sheet_container_t mSheets;
-	const unsigned mWhere;
-};
-
-// For removing a single
-class RemoveSheetsCommand : public wxCommand
-{
-public:
-	RemoveSheetsCommand(CC_show& show, unsigned where);
-	virtual ~RemoveSheetsCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	CC_show::CC_sheet_container_t mSheets;
-	const unsigned mWhere;
-};
-
-// this command is to move points around on a sheet
-// position is a mapping of which point to two positions, the original and new.
-// When you do/undo the command, the show will be set to the sheet, and the selection
-// list will revert to that selection list.
-class SetContinuityTextCommand : public wxCommand
-{
-public:
-	SetContinuityTextCommand(CC_show& show, unsigned i, const wxString& text);
-	virtual ~SetContinuityTextCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	const CC_show::SelectionList mPoints;
-	unsigned mWhichCont;
-	std::pair<wxString,wxString> mContinuity;
-};
-
-// Added or remove continuity base class
-class AddRemoveContinuityCommand : public wxCommand
-{
-public:
-	AddRemoveContinuityCommand(CC_show& show);
-	virtual ~AddRemoveContinuityCommand();
-
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	CC_sheet::ContContainer mOrigAnimcont;
-};
-
-// Added continuity
-class AddContinuityCommand : public AddRemoveContinuityCommand
-{
-public:
-	AddContinuityCommand(CC_show& show, const wxString& text);
-	virtual ~AddContinuityCommand();
-
-	virtual bool Do();
-
-protected:
-	const wxString mContName;
-};
-
-// Added continuity
-class RemoveContinuityCommand : public AddRemoveContinuityCommand
-{
-public:
-	RemoveContinuityCommand(CC_show& show, unsigned i);
-	virtual ~RemoveContinuityCommand();
-
-	virtual bool Do();
-
-protected:
-	const unsigned mIndexToRemove;
-};
-
-// Show description changes
-class SetSheetTitleCommand : public wxCommand
-{
-public:
-	SetSheetTitleCommand(CC_show& show, const wxString& newname);
-	virtual ~SetSheetTitleCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	std::pair<wxString,wxString> mDescription;
-};
-
-class SetSheetBeatsCommand : public wxCommand
-{
-public:
-	SetSheetBeatsCommand(CC_show& show, unsigned short beats);
-	virtual ~SetSheetBeatsCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	const unsigned mSheetNum;
-	std::pair<unsigned short,unsigned short> mBeats;
-};
-
-// Show description changes
-class SetDescriptionCommand : public wxCommand
-{
-public:
-	SetDescriptionCommand(CC_show& show, const wxString& newdescr);
-	virtual ~SetDescriptionCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	std::pair<wxString,wxString> mDescription;
-};
-
-// Show description changes
-class SetModeCommand : public wxCommand
-{
-public:
-	SetModeCommand(CC_show& show, const wxString& newdescr);
-	virtual ~SetModeCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	std::pair<wxString,wxString> mMode;
-};
-
-// Show info 
-class SetShowInfoCommand : public wxCommand
-{
-public:
-	SetShowInfoCommand(CC_show& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
-	virtual ~SetShowInfoCommand();
-
-	virtual bool Do();
-	virtual bool Undo();
-
-protected:
-	CC_show& mShow;
-	unsigned mNumPoints;
-	unsigned mNumColumns;
-	unsigned mOriginalNumPoints;
-	std::pair<std::vector<wxString>,std::vector<wxString> > mLabels;
-	std::vector<std::vector<CC_point> > mOriginalPoints;
 };
 
 #endif

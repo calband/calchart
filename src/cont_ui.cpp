@@ -334,7 +334,7 @@ void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 {
 	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
-	sht->SelectContinuity(c.GetNum());
+	sht->SelectPointsOfContinuity(c.GetNum());
 }
 
 

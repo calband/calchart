@@ -109,7 +109,7 @@ void ShowPrintDialog::PrintShow()
 		wxString tempbuf;
 
 		wxBeginBusyCursor();
-		n = mShow->Print(fp, eps, overview,
+		n = mShow->PrintShowToPS(fp, eps, overview,
 			mShow->GetCurrentSheetNum(), minyards);
 		fflush(fp);
 		fclose(fp);
@@ -165,7 +165,7 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 	size_t n = 0;
 	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet, ++n)
 	{
-		if (sheet->picked)
+		if (sheet->IsPicked())
 			markedChoices.Add(n);
 	}
 	dialog.SetSelections(markedChoices);
@@ -179,7 +179,7 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 // now mark the sheets
 		n = 0;
 		for (CC_show::CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet, ++n)
-			sheet->picked = (selected.find(n) != selected.end());
+			sheet->SetPicked(selected.find(n) != selected.end());
 	}
 }
 

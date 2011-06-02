@@ -62,18 +62,6 @@ CC_sheet::~CC_sheet()
 }
 
 
-// Return the number of selected points
-unsigned CC_sheet::GetNumSelectedPoints() const
-{
-	unsigned i,num;
-	for (i=0,num=0; i<show->GetNumPoints(); i++)
-	{
-		if (show->IsSelected(i)) num++;
-	}
-	return num;
-}
-
-
 // Find point at certain coords
 int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 {
@@ -92,7 +80,7 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 }
 
 
-bool CC_sheet::SelectContinuity(unsigned i) const
+bool CC_sheet::SelectPointsOfContinuity(unsigned i) const
 {
 	unsigned j;
 
@@ -158,17 +146,10 @@ const CC_continuity& CC_sheet::GetNthContinuity(unsigned i) const
 	return animcont.at(i);
 }
 
-CC_continuity& CC_sheet::GetNthContinuity(unsigned i)
-{
-	return animcont.at(i);
-}
-
 
 void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
 {
-	CC_continuity& c = GetNthContinuity(i);
-	c.SetText(text);
-	show->Modify(true);
+	animcont.at(i).SetText(text);
 }
 
 
@@ -340,20 +321,3 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 		pts[i].ref[ref-1] = clippedval;
 	}
 }
-
-
-// Set position of point and don't touch reference points
-void CC_sheet::SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref)
-{
-	CC_coord clippedval = show->GetMode().ClipPosition(val);
-	if (ref == 0)
-	{
-		pts[i].pos = clippedval;
-	}
-	else
-	{
-		pts[i].ref[ref-1] = clippedval;
-	}
-}
-
-

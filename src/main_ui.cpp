@@ -300,8 +300,6 @@ field(NULL)
 {
 	unsigned ss;
 	unsigned def_grid;
-	unsigned def_ref;
-	bool setup;
 
 // Give it an icon
 	SetBandIcon(this);
@@ -349,11 +347,6 @@ field(NULL)
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
 	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
 
-	wxMenu *select_menu = new wxMenu;
-
-	wxMenu *options_menu = new wxMenu;
-	options_menu->Append(CALCHART__SELECTION, wxT("Selection Order"), select_menu);
-
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
 	help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
@@ -362,7 +355,6 @@ field(NULL)
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(edit_menu, wxT("&Edit"));
 	menu_bar->Append(anim_menu, wxT("&Animation"));
-	menu_bar->Append(options_menu, wxT("&Options"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
 
@@ -370,15 +362,12 @@ field(NULL)
 	CreateCoolToolBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
-	setup = false;
 	ss = 0;
 	def_grid = 2;
-	def_ref = 0;
 	field = new FieldCanvas(view, ss, this, GetConfiguration_MainFrameZoom());
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
-	field->curr_ref = def_ref;
 
 // Add the controls
 	wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
@@ -414,7 +403,6 @@ field(NULL)
 			ref_choice->Append(buf);
 		}
 	}
-	ref_choice->SetSelection(def_ref);
 
 // Sheet slider (will get set later with UpdatePanel())
 	// on Mac using wxSL_LABELS will cause a crash?
@@ -434,21 +422,16 @@ field(NULL)
 
 // Show the frame
 	UpdatePanel();
-	wxGetApp().GetFrameList().push_back(this);
 	field->RefreshShow();
 
 	fullsizer->Add(field, 1, wxEXPAND);
 	SetSizer(fullsizer);
 	Show(true);
-
-	if (setup) Setup();
 }
 
 
 MainFrame::~MainFrame()
-{
-	wxGetApp().GetFrameList().remove(this);
-}
+{}
 
 
 // Intercept menu commands
@@ -1040,7 +1023,7 @@ FieldCanvas::FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 int def_zoom, const wxPoint& pos, const wxSize& size):
 AutoScrollCanvas(frame, -1, pos, size), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
 curr_move(CC_MOVE_NORMAL),
-curr_ref(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
+mCurrentReferencePoint(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 {
 	SetPalette(CalChartPalette);
 
@@ -1231,7 +1214,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							default:
 								bool changed = false;
 								if (!(event.ShiftDown() || event.AltDown())) changed = mShow->UnselectAll();
-								i = sheet->FindPoint(pos.x, pos.y, curr_ref);
+								i = sheet->FindPoint(pos.x, pos.y, mCurrentReferencePoint);
 								if (i < 0)
 								{
 									// if no point selected, we grab using the current lasso
@@ -1251,7 +1234,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									}
 
 									changed = true;
-									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, curr_ref));
+									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, mCurrentReferencePoint));
 								}
 						}
 						break;
@@ -1264,7 +1247,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				switch (curr_move)
 				{
 					case CC_MOVE_LINE:
-						mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint(), curr_ref);
+						mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint(), mCurrentReferencePoint);
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 						break;
@@ -1285,7 +1268,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 									ZRotationMatrix(r) *
 									TranslationMatrix(Vector(c1.x, c1.y, 0));
-								mView->DoTransformPoints(m, curr_ref);
+								mView->DoTransformPoints(m, mCurrentReferencePoint);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1320,7 +1303,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									YXShearMatrix(amount) *
 									ZRotationMatrix(ang) *
 									TranslationMatrix(Vector(o.x, o.y, 0));
-								mView->DoTransformPoints(m, curr_ref);
+								mView->DoTransformPoints(m, mCurrentReferencePoint);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1341,7 +1324,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								YReflectionMatrix() *
 								ZRotationMatrix(ang) *
 								TranslationMatrix(Vector(c1.x, c1.y, 0));
-							mView->DoTransformPoints(m, curr_ref);
+							mView->DoTransformPoints(m, mCurrentReferencePoint);
 						}
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1386,7 +1369,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 										ScaleMatrix(Vector(sx, sy, 0)) *
 										TranslationMatrix(Vector(c1.x, c1.y, 0));
-									mView->DoTransformPoints(m, curr_ref);
+									mView->DoTransformPoints(m, mCurrentReferencePoint);
 								}
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1439,7 +1422,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									(float)s2.x*(float)s1.y));
 								Binv /= d;
 								m = Binv*A;
-								mView->DoTransformPoints(m, curr_ref);
+								mView->DoTransformPoints(m, mCurrentReferencePoint);
 							}
 							EndDrag();
 							ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1450,12 +1433,12 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 						{
 							case CC_DRAG_BOX:
 								SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(),
-									curr_ref, event.AltDown());
+									mCurrentReferencePoint, event.AltDown());
 								EndDrag();
 								break;
 							case CC_DRAG_LINE:
 								pos = shape->GetPoint() - shape->GetOrigin();
-								mView->DoTranslatePoints(pos, curr_ref);
+								mView->DoTranslatePoints(pos, mCurrentReferencePoint);
 								EndDrag();
 								break;
 							case CC_DRAG_LASSO:
@@ -1528,14 +1511,14 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
-			if (curr_ref > 0)
+			if (mCurrentReferencePoint > 0)
 			{
 				Draw(GetMemDC(), *sheet, 0, false, drawall, point);
-				Draw(GetMemDC(), *sheet, curr_ref, true, false, point);
+				Draw(GetMemDC(), *sheet, mCurrentReferencePoint, true, false, point);
 			}
 			else
 			{
-				Draw(GetMemDC(), *sheet, curr_ref, true, drawall, point);
+				Draw(GetMemDC(), *sheet, mCurrentReferencePoint, true, drawall, point);
 			}
 			dragon = false;						  // since the canvas gets cleared
 			DrawDrag(true);
@@ -1557,7 +1540,7 @@ void MainFrame::UpdatePanel()
 		num, (sht != field->mShow->GetSheetEnd())?sht->GetName().c_str():wxT(""), (sht != field->mShow->GetSheetEnd())?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
 	tempbuf.sprintf(wxT("%d of %d selected"),
-		(sht != field->mShow->GetSheetEnd())?sht->GetNumSelectedPoints():0, field->mShow->GetNumPoints());
+		field->mShow->GetSelectionList().size(), field->mShow->GetNumPoints());
 	SetStatusText(tempbuf, 2);
 
 	if (num > 1)
@@ -1679,7 +1662,7 @@ bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 
 	for (unsigned i = 0; i < mShow->GetNumPoints(); i++)
 	{
-		if (lasso->Inside(sheet->GetPosition(i, curr_ref)))
+		if (lasso->Inside(sheet->GetPosition(i, mCurrentReferencePoint)))
 		{
 			changed = true;
 			pointlist.push_back(i);
@@ -1745,26 +1728,9 @@ unsigned ref, bool toggleSelected)
 }
 
 
-bool MainFrameList::CloseAllWindows()
-{
-	MainFrame *mf;
-
-	for (MainFrameList::iterator i = begin(); i != end(); )
-	{
-		mf = *i;
-// This node will be deleted by the window's deconstructor
-		MainFrameList::iterator i_tmp(i);
-		++i_tmp;
-		if (!mf->Close()) return false;
-		i = i_tmp;
-	}
-	return true;
-}
-
-
 void MainFrame::refnum_callback(wxCommandEvent &)
 {
-	field->curr_ref = ref_choice->GetSelection();
+	field->mCurrentReferencePoint = ref_choice->GetSelection();
 	field->RefreshShow();
 }
 
@@ -1952,7 +1918,7 @@ bool MainFrameView::OnClose(bool deleteWindow)
 bool MainFrameView::DoTranslatePoints(const CC_coord& delta, unsigned ref)
 {
 	if (((delta.x == 0) && (delta.y == 0)) ||
-		(mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0))
+		(mShow->GetSelectionList().size() == 0))
 		return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, ref), true);
 	return true;
@@ -1960,21 +1926,21 @@ bool MainFrameView::DoTranslatePoints(const CC_coord& delta, unsigned ref)
 
 bool MainFrameView::DoTransformPoints(const Matrix& transmat, unsigned ref)
 {
-	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, ref), true);
 	return true;
 }
 
 bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref)
 {
-	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, ref), true);
 	return true;
 }
 
 bool MainFrameView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
-	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym), true);
 	return true;
 }
@@ -2009,14 +1975,14 @@ bool MainFrameView::DoSetSheetBeats(unsigned short beats)
 
 bool MainFrameView::DoSetPointsLabel(bool right)
 {
-	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelRightCommand(*mShow, right), true);
 	return true;
 }
 
 bool MainFrameView::DoSetPointsLabelFlip()
 {
-	if (mShow->GetCurrentSheet()->GetNumSelectedPoints() <= 0) return false;
+	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow), true);
 	return true;
 }

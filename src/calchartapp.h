@@ -48,10 +48,8 @@ public:
 	int OnExit();
 
 	ShowModeList& GetModeList() { return mModeList; }
-	MainFrameList& GetFrameList() { return mFrameList; }
 private:
 	ShowModeList mModeList;
-	MainFrameList mFrameList;
 
 	boost::shared_ptr<wxDocManager> mDocManager;
 };

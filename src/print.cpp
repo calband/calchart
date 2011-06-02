@@ -80,7 +80,7 @@ static const wxChar *print_start_page(FILE *fp, bool landscape);
 #define CHECKPRINT1(a) if ((a) < 0) { error = badfile; return; }
 #define CHECKPRINT(a) if ((a) < 0) return badfile;
 
-int CC_show::Print(FILE *fp, bool eps, bool overview, unsigned curr_ss,
+int CC_show::PrintShowToPS(FILE *fp, bool eps, bool overview, unsigned curr_ss,
 int min_yards) const
 {
 	time_t t;
@@ -405,7 +405,7 @@ int min_yards) const
 	}
 	while (curr_sheet != GetSheetEnd())
 	{
-		if (curr_sheet->picked || eps)
+		if (curr_sheet->IsPicked() || eps)
 		{
 			num_pages++;
 			if (!overview)

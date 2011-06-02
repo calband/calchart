@@ -88,5 +88,4 @@ void CreateUnitVector(float& a, float& b, float dir);
 #define DEF_HASH_W 32
 #define DEF_HASH_E 52
 
-void SetAutoSave(int secs);
 #endif

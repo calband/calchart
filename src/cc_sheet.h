@@ -45,30 +45,40 @@ public:
 	CC_sheet(CC_sheet *sht);
 	~CC_sheet();
 
-	unsigned GetNumSelectedPoints() const;
-	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
-	bool SelectContinuity(unsigned i) const;
+	// setting values on the stunt sheet
+	// * needs to be through command only *
 	void SetNumPoints(unsigned num, unsigned columns);
-	void RelabelSheet(unsigned *table);
 
+	// continuity:
+	bool SelectPointsOfContinuity(unsigned i) const;
 	const CC_continuity& GetNthContinuity(unsigned i) const;
-	CC_continuity& GetNthContinuity(unsigned i);
+	// * needs to be through command only *
 	void SetNthContinuity(const wxString& text, unsigned i);
+	// * needs to be through command only *
 	CC_continuity RemoveNthContinuity(unsigned i);
+	// * needs to be through command only *
 	void InsertContinuity(const CC_continuity& newcont, unsigned i);
+	// * needs to be through command only *
 	void AppendContinuity(const CC_continuity& newcont);
+	// * needs to be through command only *
 	unsigned NextUnusedContinuityNum();
 // creates if doesn't exist
+	// * needs to be through command only * //
 	const CC_continuity& GetStandardContinuity(SYMBOL_TYPE sym);
 // return 0 if not found else index+1
 	unsigned FindContinuityByName(const wxString& name) const;
 	bool ContinuityInUse(unsigned idx) const;
+	
+	// points:
+	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
+	void RelabelSheet(unsigned *table);
 
 	const wxString& GetName() const;
 	void SetName(const wxString& newname);
 	inline const wxString& GetNumber() const { return number; }
 	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
 	unsigned short GetBeats() const;
+	// * needs to be through command only * //
 	void SetBeats(unsigned short b);
 	inline bool IsInAnimation() const { return (beats != 0); }
 
@@ -80,14 +90,17 @@ public:
 	const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
 	void SetAllPositions(const CC_coord& val, unsigned i);
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
-	void SetPositionQuick(const CC_coord& val, unsigned i, unsigned ref = 0);
 
 	CC_textline_list continuity;
 	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer animcont;
-	CC_show *show;
-	bool picked;							  /* for requestors like printing */
+	
+	/* for requestors like printing */
+	bool IsPicked() const { return picked; }
+	void SetPicked(bool p) { picked = p; }
 private:
+	CC_show *show;
+	bool picked;							  
 	unsigned short beats;
 	std::vector<CC_point> pts;
 	wxString name;

@@ -69,8 +69,6 @@
 
 wxPrintDialogData *gPrintDialogData;
 
-#define DOCVIEW_ABOUT   wxID_ABOUT
-
 extern ToolBarEntry main_tb[];
 extern ToolBarEntry anim_tb[];
 
@@ -112,35 +110,11 @@ bool CalChartApp::OnInit()
 	wxFileName::MacRegisterDefaultTypeAndCreator( wxT("shw"), 'WXMB', 'WXMA' );
 #endif
 
-#if defined(__APPLE__) && (__APPLE__)
-	wxString runtimepath(wxT("CalChart.app/runtime"));
-#else
-	wxString runtimepath(wxT("runtime"));
-#endif
-
-	int realargc = argc;
-
 	gPrintDialogData = new wxPrintDialogData();
-
-	if (argc > 1)
-	{
-		wxString arg(argv[argc-1]);
-		if (wxDirExists(arg))
-		{
-			runtimepath = arg;
-			realargc--;
-		}
-	}
 
 	// setup the configuration.
 	ReadConfig();
 	
-	wxString s = ReadConfig(runtimepath);
-	if (!s.empty())
-	{
-		(void)wxMessageBox(s, wxT("CalChart"));
-	}
-
 //Create toolbar bitmaps
 	int i = 0;
 
@@ -211,7 +185,6 @@ bool CalChartApp::OnInit()
 		}
 	}
 
-	SetAutoSave(GetConfiguration_AutosaveInterval());
 #ifndef __WXMAC__
 	frame->Show(true);
 #endif //ndef __WXMAC__

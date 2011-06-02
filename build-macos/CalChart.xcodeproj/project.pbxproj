@@ -30,8 +30,6 @@
 		C7AFA99F117A6DBA00CC53E2 /* undo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98C117A6DBA00CC53E2 /* undo.cpp */; };
 		C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
 		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
-		C7CB75C1114625DF000DBBB6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = C7CB75B7114625C7000DBBB6 /* config */; };
-		C7CB75C8114625E9000DBBB6 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7CB75B7114625C7000DBBB6 /* config */; };
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
 		C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */; };
@@ -127,16 +125,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		C7CB7595114624DE000DBBB6 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = runtime;
-			dstSubfolderSpec = 1;
-			files = (
-				C7CB75C8114625E9000DBBB6 /* config in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C7ED502211CD5A41001A4FA2 /* Copy Docs */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -290,8 +278,6 @@
 		C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contgram.cpp; sourceTree = "<group>"; };
 		C7AFA9A2117A6E7200CC53E2 /* contgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contgram.h; sourceTree = "<group>"; };
 		C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contscan.cpp; sourceTree = "<group>"; };
-		C7CB75B6114625C7000DBBB6 /* .cvsignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .cvsignore; sourceTree = "<group>"; };
-		C7CB75B7114625C7000DBBB6 /* config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config; sourceTree = "<group>"; };
 		C7D4E2C211D087CD007D3587 /* calchartapp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartapp.cpp; sourceTree = "<group>"; };
 		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
@@ -434,7 +420,6 @@
 				C7ED4FC511CD594E001A4FA2 /* docs */,
 				C7AFA9A0117A6E7200CC53E2 /* generated */,
 				C7AFA969117A6DBA00CC53E2 /* src */,
-				C7CB75B5114625C7000DBBB6 /* runtime */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -489,8 +474,8 @@
 				C7AFA971117A6DBA00CC53E2 /* color_select_ui.cpp */,
 				C7AFA972117A6DBA00CC53E2 /* color_select_ui.h */,
 				C7AFA973117A6DBA00CC53E2 /* confgr.cpp */,
-				C7AFA975117A6DBA00CC53E2 /* cont.cpp */,
 				C7AFA974117A6DBA00CC53E2 /* confgr.h */,
+				C7AFA975117A6DBA00CC53E2 /* cont.cpp */,
 				C7AFA976117A6DBA00CC53E2 /* cont.h */,
 				C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */,
 				C7AFA978117A6DBA00CC53E2 /* cont_ui.h */,
@@ -527,16 +512,6 @@
 			);
 			name = generated;
 			path = ../generated;
-			sourceTree = SOURCE_ROOT;
-		};
-		C7CB75B5114625C7000DBBB6 /* runtime */ = {
-			isa = PBXGroup;
-			children = (
-				C7CB75B6114625C7000DBBB6 /* .cvsignore */,
-				C7CB75B7114625C7000DBBB6 /* config */,
-			);
-			name = runtime;
-			path = ../runtime;
 			sourceTree = SOURCE_ROOT;
 		};
 		C7ED4FC511CD594E001A4FA2 /* docs */ = {
@@ -643,7 +618,6 @@
 			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "CalChart" */;
 			buildPhases = (
 				8D1107290486CEB800E47090 /* Resources */,
-				C7CB7595114624DE000DBBB6 /* CopyFiles */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				C7ED502211CD5A41001A4FA2 /* Copy Docs */,
@@ -688,7 +662,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
-				C7CB75C1114625DF000DBBB6 /* config in Resources */,
 				C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

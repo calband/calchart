@@ -134,25 +134,29 @@ DECLARE_CONFIGURATION_FUNCTIONS( ContRatio, float);
 extern wxString yard_text[MAX_YARD_LINES];
 extern const wxString yard_text_index[MAX_YARD_LINES];
 extern wxString spr_line_text[MAX_SPR_LINES];
-extern wxString spr_line_text_index[MAX_SPR_LINES];
+extern const wxString spr_line_text_index[MAX_SPR_LINES];
 
 extern void ReadConfig();
-extern wxString ReadConfig(const wxString& path);
 
-void GetConfigurationShowMode(size_t which, long values[10]);
-void SetConfigurationShowMode(size_t which, const long values[10]);
+const size_t kShowModeValues = 10;
+void GetConfigurationShowMode(size_t which, long values[kShowModeValues]);
+void SetConfigurationShowMode(size_t which, const long values[kShowModeValues]);
 void ClearConfigurationShowMode(size_t which);
 
-void GetConfigurationSpringShowMode(size_t which, long values[21]);
-void SetConfigurationSpringShowMode(size_t which, const long values[21]);
+const size_t kSpringShowModeValues = 21;
+void GetConfigurationSpringShowMode(size_t which, long values[kSpringShowModeValues]);
+void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowModeValues]);
 void ClearConfigurationSpringShowMode(size_t which);
 
 void SetConfigColor(size_t selection);
 void ClearConfigColor(size_t selection);
 
-extern FILE *OpenFileInDir(const wxString& name, const wxString& modes,
-const wxPathList *list = NULL);
-extern wxString FullPath(const wxString& path);
+// TODO: Setup linenumbers
+void SetConfigShowYardline();
+void ClearConfigShowYardline();
+void SetConfigSpringShowYardline();
+void ClearConfigSpringShowYardline();
+
 extern int ReadDOSline(FILE *fp, wxString& str);
 
 // DEBUG printing facilities

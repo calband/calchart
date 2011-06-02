@@ -295,7 +295,7 @@ public:
 	MainFrameView* mView;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
-	unsigned curr_ref;
+	unsigned mCurrentReferencePoint;
 
 private:
 	typedef std::vector<unsigned> PointList;
@@ -314,13 +314,6 @@ private:
 	int zoomf;
 
 	DECLARE_EVENT_TABLE()
-};
-
-// we must use a list here so iterators aren't invalidated.
-class MainFrameList: public std::list<MainFrame*>
-{
-public:
-	bool CloseAllWindows();
 };
 
 class MainFrameView : public wxView
