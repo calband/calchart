@@ -1,6 +1,6 @@
 /*
- * color_select_ui.cpp
- * Dialox box for selecting colors
+ * cc_preferences_ui.cpp
+ * Dialox box for preferences
  */
 
 /*

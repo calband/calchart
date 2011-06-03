@@ -1,6 +1,6 @@
 /*
- * color_select_ui.h
- * Dialox box for selecting colors
+ * cc_preferences.h
+ * Dialox box for preferences
  */
 
 /*
