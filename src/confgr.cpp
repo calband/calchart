@@ -107,7 +107,7 @@ const int DefaultPenWidth[COLOR_NUM] =
 // constants for behavior:
 // Autosave
 static const wxString kAutosaveIntervalKey = wxT("AutosaveInterval");
-static const int kAutosaveIntervalValue = 300;
+static const int kAutosaveIntervalValue = 60;
 static const wxString kAutosaveDirKey = wxT("AutosaveDir");
 static const wxString kAutosaveDirValue = AUTOSAVE_VAR;
 
