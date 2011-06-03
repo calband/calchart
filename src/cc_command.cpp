@@ -1,5 +1,5 @@
 /*
- * undo.cpp
+ * cc_command.cpp
  * Handle commands from view to doc
  */
 
