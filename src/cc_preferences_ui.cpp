@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "color_select_ui.h"
+#include "cc_preferences_ui.h"
 #include "confgr.h"
 #include <wx/colordlg.h>
 #include <wx/stattext.h>

@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "undo.h"
+#include "cc_command.h"
 #include "show.h"
 #include "calchartapp.h"
 #include "cc_sheet.h"
