@@ -13,6 +13,7 @@
 		C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
 		C75C5DE712F5E7E200CBFD3A /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */; };
 		C78241F412BEC69200BE680F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78241F212BEC69200BE680F /* cc_show.cpp */; };
+		C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A845071398E7D8003AD23E /* cc_command.cpp */; };
 		C7AFA98E117A6DBA00CC53E2 /* anim_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */; };
 		C7AFA98F117A6DBA00CC53E2 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96C117A6DBA00CC53E2 /* animate.cpp */; };
 		C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
@@ -27,7 +28,6 @@
 		C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */; };
 		C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA988117A6DBA00CC53E2 /* show.cpp */; };
 		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
-		C7AFA99F117A6DBA00CC53E2 /* undo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98C117A6DBA00CC53E2 /* undo.cpp */; };
 		C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
 		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
@@ -241,6 +241,8 @@
 		C75C5DE612F5E7E200CBFD3A /* cc_point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_point.h; sourceTree = "<group>"; };
 		C78241F212BEC69200BE680F /* cc_show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_show.cpp; sourceTree = "<group>"; };
 		C78241F312BEC69200BE680F /* cc_show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_show.h; sourceTree = "<group>"; };
+		C7A845071398E7D8003AD23E /* cc_command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_command.cpp; sourceTree = "<group>"; };
+		C7A845081398E7D8003AD23E /* cc_command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_command.h; sourceTree = "<group>"; };
 		C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = anim_ui.cpp; sourceTree = "<group>"; };
 		C7AFA96B117A6DBA00CC53E2 /* anim_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = anim_ui.h; sourceTree = "<group>"; };
 		C7AFA96C117A6DBA00CC53E2 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animate.cpp; sourceTree = "<group>"; };
@@ -273,8 +275,6 @@
 		C7AFA989117A6DBA00CC53E2 /* show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show.h; sourceTree = "<group>"; };
 		C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = show_ui.cpp; sourceTree = "<group>"; };
 		C7AFA98B117A6DBA00CC53E2 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show_ui.h; sourceTree = "<group>"; };
-		C7AFA98C117A6DBA00CC53E2 /* undo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = undo.cpp; sourceTree = "<group>"; };
-		C7AFA98D117A6DBA00CC53E2 /* undo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = undo.h; sourceTree = "<group>"; };
 		C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contgram.cpp; sourceTree = "<group>"; };
 		C7AFA9A2117A6E7200CC53E2 /* contgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contgram.h; sourceTree = "<group>"; };
 		C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contscan.cpp; sourceTree = "<group>"; };
@@ -458,6 +458,8 @@
 				C7D4E2C211D087CD007D3587 /* calchartapp.cpp */,
 				C7D4E2C311D087CD007D3587 /* calchartapp.h */,
 				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
+				C7A845071398E7D8003AD23E /* cc_command.cpp */,
+				C7A845081398E7D8003AD23E /* cc_command.h */,
 				C74DE4A212EAC0B900A20B8A /* cc_continuity.cpp */,
 				C74DE4A312EAC0B900A20B8A /* cc_continuity.h */,
 				C7FC7B7C130746C100F22854 /* cc_coord.cpp */,
@@ -496,8 +498,6 @@
 				C7AFA989117A6DBA00CC53E2 /* show.h */,
 				C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */,
 				C7AFA98B117A6DBA00CC53E2 /* show_ui.h */,
-				C7AFA98C117A6DBA00CC53E2 /* undo.cpp */,
-				C7AFA98D117A6DBA00CC53E2 /* undo.h */,
 			);
 			name = src;
 			path = ../src;
@@ -687,7 +687,6 @@
 				C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */,
 				C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */,
 				C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */,
-				C7AFA99F117A6DBA00CC53E2 /* undo.cpp in Sources */,
 				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
 				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
 				C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */,
@@ -697,6 +696,7 @@
 				C74DE4A412EAC0B900A20B8A /* cc_continuity.cpp in Sources */,
 				C75C5DE712F5E7E200CBFD3A /* cc_point.cpp in Sources */,
 				C7FC7B7E130746C100F22854 /* cc_coord.cpp in Sources */,
+				C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
