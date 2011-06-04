@@ -22,7 +22,7 @@
 
 #include <wx/wx.h>
 #include <wx/timer.h>
-#include "undo.h"
+#include "cc_command.h"
 #include "confgr.h"
 #include "modes.h"
 #include "cc_sheet.h"

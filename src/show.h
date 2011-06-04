@@ -49,7 +49,6 @@ class CC_show;
 #define SQRT2 1.4142136
 
 #define MAX_POINTS 1000
-#define NUM_REF_PNTS 3
 
 extern const wxChar *contnames[];
 

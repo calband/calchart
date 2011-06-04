@@ -26,8 +26,8 @@
 #include "show_ui.h"
 #include "anim_ui.h"
 #include "cont_ui.h"
-#include "color_select_ui.h"
-#include "undo.h"
+#include "cc_preferences_ui.h"
+#include "cc_command.h"
 #include "modes.h"
 #include "confgr.h"
 #include "ccvers.h"
@@ -397,7 +397,7 @@ field(NULL)
 
 		ref_choice = new wxChoice(this, CALCHART__refnum_callback);
 		ref_choice->Append(wxT("Off"));
-		for (i = 1; i <= NUM_REF_PNTS; i++)
+		for (i = 1; i <= CC_point::kNumRefPoints; i++)
 		{
 			buf.sprintf(wxT("%u"), i);
 			ref_choice->Append(buf);

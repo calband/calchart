@@ -23,7 +23,7 @@
 #include "cc_sheet.h"
 #include "cc_show.h"
 #include "show.h"
-#include "undo.h"
+#include "cc_command.h"
 #include "modes.h"
 #include "confgr.h"
 
@@ -121,7 +121,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 		newpts[i].sym = SYMBOL_PLAIN;
 		newpts[i].cont = plaincont.GetNum();
 		newpts[i].pos = c;
-		for (j = 0; j < NUM_REF_PNTS; j++)
+		for (j = 0; j < CC_point::kNumRefPoints; j++)
 		{
 			newpts[i].ref[j] = newpts[i].pos;
 		}
@@ -293,7 +293,7 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
 	unsigned j;
 
 	pts[i].pos = val;
-	for (j = 0; j < NUM_REF_PNTS; j++)
+	for (j = 0; j < CC_point::kNumRefPoints; j++)
 	{
 		pts[i].ref[j] = val;
 	}
@@ -307,7 +307,7 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 	CC_coord clippedval = show->GetMode().ClipPosition(val);
 	if (ref == 0)
 	{
-		for (j=0; j<NUM_REF_PNTS; j++)
+		for (j=0; j<CC_point::kNumRefPoints; j++)
 		{
 			if (pts[i].ref[j] == pts[i].pos)
 			{

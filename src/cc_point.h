@@ -26,12 +26,12 @@
 #include "cc_types.h"
 #include "cc_coord.h"
 
-#define NUM_REF_PNTS 3
 
 #define PNT_LABEL 1
 class CC_point
 {
 public:
+	static const unsigned kNumRefPoints = 3;
 	CC_point()
 		:flags(0), sym(SYMBOL_PLAIN), cont(0) {}
 
@@ -49,7 +49,7 @@ public:
 	SYMBOL_TYPE sym;
 	unsigned char cont;
 	CC_coord pos;
-	CC_coord ref[NUM_REF_PNTS];
+	CC_coord ref[kNumRefPoints];
 
 friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
 };

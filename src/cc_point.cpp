@@ -31,7 +31,7 @@ struct CC_point_values
 	SYMBOL_TYPE sym;
 	unsigned char cont;
 	CC_coord pos;
-	CC_coord ref[NUM_REF_PNTS];
+	CC_coord ref[CC_point::kNumRefPoints];
 	bool GetFlip;
 };
 
@@ -39,7 +39,7 @@ struct CC_point_values
 bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
 {
 	bool running_value = true;
-	for (unsigned i = 0; i < NUM_REF_PNTS; ++i)
+	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		running_value = running_value && (underTest.ref[i] == values.ref[i]);
 	return running_value
 		&& (underTest.flags == values.flags)
@@ -58,7 +58,7 @@ void CC_point_UnitTests()
 	values.sym = SYMBOL_PLAIN;
 	values.cont = 0;
 	values.pos = CC_coord();
-	for (unsigned i = 0; i < NUM_REF_PNTS; ++i)
+	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		values.ref[i] = CC_coord();
 	values.GetFlip = false;
 

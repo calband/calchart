@@ -24,7 +24,7 @@
 #include "confgr.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"
-#include "undo.h"
+#include "cc_command.h"
 
 #include <wx/help.h>
 #include <wx/statline.h>

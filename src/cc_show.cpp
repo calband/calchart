@@ -24,7 +24,7 @@
 
 #include "cc_show.h"
 
-#include "undo.h"
+#include "cc_command.h"
 #include "confgr.h"
 #include "calchartapp.h"
 #include "cc_sheet.h"
@@ -679,7 +679,7 @@ wxOutputStream& CC_show::SaveObjectInternal(wxOutputStream& stream)
 			Write(stream, &crd, 2);
 		}
 // Ref point positions
-		for (int j = 1; j <= NUM_REF_PNTS; j++)
+		for (size_t j = 1; j <= CC_point::kNumRefPoints; j++)
 		{
 			for (i = 0; i < GetNumPoints(); i++)
 			{
