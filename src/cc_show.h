@@ -94,6 +94,8 @@ public:
 	// Override the wxDocument functions:
 	// Need to override OnOpenDoc so we can report errors, handle recovery file
 	virtual bool OnOpenDocument(const wxString& filename);
+	// Need to override OnOpenDoc so we can report errors, handle recovery file
+	virtual bool OnCloseDocument();
 	// Need to override OnNewDoc so we can start the setup wizard
 	virtual bool OnNewDocument();
 	// Need to override OnSaveDoc so we can handle recovery files
@@ -108,11 +110,8 @@ public:
 	wxString ImportContinuity(const wxString& file);
 
 	// may throw CC_FileException
-	int PrintShowToPS(FILE *fp, bool eps = false, bool overview = false,
+	int PrintShowToPS(std::ostream& buffer, bool eps = false, bool overview = false,
 		unsigned curr_ss = 0, int min_yards = 50) const;
-
-	inline const wxString& GetError() const { return error; }
-	inline bool Ok() const { return okay; }
 
 	void FlushAllTextWindows();
 
@@ -174,18 +173,11 @@ private:
 
 private:
 	
-	void PrintSheets(FILE *fp) const;		  // called by Print()
-
-	void AddError(const wxString& str)
-	{
-		error += str + wxT("\n");
-		okay = false;
-	}
+	void PrintSheets(std::ostream& buffer) const;		  // called by Print()
 
 	wxOutputStream& SaveObjectInternal(wxOutputStream& stream);
 
-	mutable wxString error;
-	bool okay;
+	bool mOkay; // error for when we are loading shows
 
 	wxString descr;
 	unsigned short numpoints;

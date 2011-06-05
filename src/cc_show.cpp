@@ -69,7 +69,7 @@ IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 
 // Create a new show
 CC_show::CC_show()
-:okay(true), numpoints(0),
+:mOkay(true), numpoints(0),
 print_landscape(false), print_do_cont(true),
 print_do_cont_sheet(true),
 mSheetNum(0),
@@ -106,7 +106,7 @@ bool CC_show::OnOpenDocument(const wxString& filename)
 			return false;
 		}
 	}
-	bool success = wxDocument::OnOpenDocument(filename) && Ok();
+	bool success = wxDocument::OnOpenDocument(filename) && mOkay;
 	if (success)
 	{
 		// at this point the recover file is no longer useful.
@@ -114,6 +114,20 @@ bool CC_show::OnOpenDocument(const wxString& filename)
 		{
 			wxRemoveFile(recoveryFile);
 		}
+	}
+	return success;
+}
+
+// If we close a file and decide not to save the changes, don't create a recovery
+// file, it may confuse the user.
+bool CC_show::OnCloseDocument()
+{
+	bool success = wxDocument::OnCloseDocument();
+	// first check to see if there is a recover file:
+	wxString recoveryFile = TranslateNameToAutosaveName(GetFilename());
+	if (!IsModified() && wxFileExists(recoveryFile))
+	{
+		wxRemoveFile(recoveryFile);
 	}
 	return success;
 }
@@ -960,7 +974,10 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	mSheetNum = 0;
 	}
 	catch (CC_FileException& e) {
-		AddError(e.WhatError());
+		wxString message = wxT("Error encountered:\n");
+		message += e.WhatError();
+		wxMessageBox(message, wxT("Error!"));
+		mOkay = false;
 	}
 	return stream;
 }
@@ -1214,9 +1231,9 @@ struct ShowTestData
 void UnitTests()
 {
 	boost::shared_ptr<CC_show> test(new CC_show);
-	cout<<"ok "<<test->Ok()<<"\n";
+//	cout<<"ok "<<test->mOkay<<"\n";
 //	assert(test.Ok() == true);
-	cout<<"GetError "<<(wchar_t*)test->GetError().c_str()<<"\n";
+//	cout<<"GetError "<<(wchar_t*)test->GetError().c_str()<<"\n";
 //	assert(test.Ok() == true);
 	cout<<"GetTitle "<<(wchar_t*)test->GetTitle().c_str()<<"\n";
 	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";

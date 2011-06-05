@@ -129,21 +129,21 @@ static const wxString kPrintViewOptsKey = wxT("PrintViewOpts");
 static const wxString kPrintViewOptsValue = wxT("");
 
 static const wxString kPageWidthKey = wxT("PageWidth");
-static const float kPageWidthValue = 7.5;
+static const double kPageWidthValue = 7.5;
 static const wxString kPageHeightKey = wxT("PageHeight");
-static const float kPageHeightValue = 10.0;
+static const double kPageHeightValue = 10.0;
 static const wxString kPageOffsetXKey = wxT("PageOffsetX");
-static const float kPageOffsetXValue = 0.5;
+static const double kPageOffsetXValue = 0.5;
 static const wxString kPageOffsetYKey = wxT("PageOffsetY");
-static const float kPageOffsetYValue = 0.5;
+static const double kPageOffsetYValue = 0.5;
 
 // printing controls
 static const wxString kHeadFontKey = wxT("HeadFont");
-static const wxString kHeadFontValue = wxT("Helvetica-Bold");
+static const wxString kHeadFontValue = wxT("Palatino-Bold");
 static const wxString kMainFontKey = wxT("MainFont");
 static const wxString kMainFontValue = wxT("Helvetica");
 static const wxString kNumberFontKey = wxT("NumberFont");
-static const wxString kNumberFontValue = wxT("Helvetica");
+static const wxString kNumberFontValue = wxT("Helvetica-Bold");
 static const wxString kContFontKey = wxT("ContFont");
 static const wxString kContFontValue = wxT("Courier");
 static const wxString kBoldFontKey = wxT("BoldFont");
@@ -153,30 +153,32 @@ static const wxString kItalFontValue = wxT("Courier-Italic");
 static const wxString kBoldItalFontKey = wxT("BoldItalFont");
 static const wxString kBoldItalFontValue = wxT("Courier-BoldItalic");
 static const wxString kPaperLengthKey = wxT("PaperLength");
-static const float kPaperLengthValue = 11.0;
+static const double kPaperLengthValue = 11.0;
 static const wxString kHeaderSizeKey = wxT("HeaderSize");
-static const float kHeaderSizeValue = 3.0;
+static const double kHeaderSizeValue = 3.0;
 static const wxString kYardsSizeKey = wxT("YardsSize");
-static const float kYardsSizeValue = 1.5;
+static const double kYardsSizeValue = 1.5;
 static const wxString kTextSizeKey = wxT("TextSize");
-static const float kTextSizeValue = 10.0;
+static const double kTextSizeValue = 10.0;
 static const wxString kDotRatioKey = wxT("DotRatio");
-static const float kDotRatioValue = 1.0;
+static const double kDotRatioValue = 0.9;
 static const wxString kNumRatioKey = wxT("NumRatio");
-static const float kNumRatioValue = 1.2;
+static const double kNumRatioValue = 1.35;
 static const wxString kPLineRatioKey = wxT("PLineRatio");
-static const float kPLineRatioValue = 1.0;
+static const double kPLineRatioValue = 1.2;
 static const wxString kSLineRatioKey = wxT("SLineRatio");
-static const float kSLineRatioValue = 1.0;
+static const double kSLineRatioValue = 1.2;
 static const wxString kContRatioKey = wxT("ContRatio");
-static const float kContRatioValue = 0.25;
+static const double kContRatioValue = 0.2;
 
 template <typename T>
 T GetConfigValue(const wxString& key, const T& def)
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/CalChart"));
-	return config->Read(key, def);
+	T value = def;
+	config->Read(key, &value);
+	return value;
 }
 
 // default value need to check if we need to set a value
@@ -253,11 +255,11 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintOpts, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewCmd, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewOpts, wxString);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageWidth, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageHeight, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetX, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetY, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PaperLength, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageWidth, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageHeight, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetX, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetY, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PaperLength, double);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( HeadFont, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFont, wxString);
@@ -267,14 +269,14 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldFont, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( ItalFont, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldItalFont, wxString);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( HeaderSize, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( YardsSize, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( TextSize, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( DotRatio, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( NumRatio, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PLineRatio, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( HeaderSize, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( YardsSize, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( TextSize, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( DotRatio, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( NumRatio, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PLineRatio, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, double);
 
 // Color is more complicated, we use functions for setting that
 wxPalette *CalChartPalette;
@@ -332,7 +334,7 @@ void GetConfigurationShowMode(size_t which, long values[kShowModeValues])
 
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/SHOWMODES"));
-	if (!config->Exists(kShowModeStrings[which]))
+	if (config->Exists(kShowModeStrings[which]))
 	{
 		config->SetPath(kShowModeStrings[which]);
 		values[0] = config->Read(wxT("whash"), values[0]);
@@ -373,14 +375,14 @@ void ReadConfigurationShowMode()
 
 void GetConfigurationSpringShowMode(size_t which, long values[kShowModeValues])
 {
-	for (size_t i = 0; i < kShowModeValues; ++i)
+	for (size_t i = 0; i < kSpringShowModeValues; ++i)
 	{
 		values[i] = kSpringShowModeDefaultValues[which][i];
 	}
 
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/SPRINGSHOWMODES"));
-	if (!config->Exists(kSpringShowModeStrings[which]))
+	if (config->Exists(kSpringShowModeStrings[which]))
 	{
 		config->SetPath(kSpringShowModeStrings[which]);
 		values[0] = config->Read(wxT("which_spr_yards"), values[0]);
@@ -404,7 +406,7 @@ void GetConfigurationSpringShowMode(size_t which, long values[kShowModeValues])
 		values[17] = config->Read(wxT("eps_text_left"), values[17]);
 		values[18] = config->Read(wxT("eps_text_right"), values[18]);
 		values[19] = config->Read(wxT("eps_text_top"), values[19]);
-		values[21] = config->Read(wxT("eps_text_bottom"), values[20]);
+		values[20] = config->Read(wxT("eps_text_bottom"), values[20]);
 	}
 }
 
@@ -458,14 +460,14 @@ void SetConfigurationShowMode(size_t which, const long values[kShowModeValues])
 	config->SetPath(kShowModeStrings[which]);
 	config->Write(wxT("whash"), values[0]);
 	config->Write(wxT("ehash"), values[1]);
-	config->Write(wxT("bord1_x"), COORD2INT(values[2]));
-	config->Write(wxT("bord1_y"), COORD2INT(values[3]));
-	config->Write(wxT("bord2_x"), COORD2INT(values[4]));
-	config->Write(wxT("bord2_y"), COORD2INT(values[5]));
-	config->Write(wxT("size_x"), -COORD2INT(values[6]));
-	config->Write(wxT("size_y"), -COORD2INT(values[7]));
-	config->Write(wxT("offset_x"), COORD2INT(values[8]));
-	config->Write(wxT("offset_y"), COORD2INT(values[9]));
+	config->Write(wxT("bord1_x"), values[2]);
+	config->Write(wxT("bord1_y"), values[3]);
+	config->Write(wxT("bord2_x"), values[4]);
+	config->Write(wxT("bord2_y"), values[5]);
+	config->Write(wxT("size_x"), values[6]);
+	config->Write(wxT("size_y"), values[7]);
+	config->Write(wxT("offset_x"), values[8]);
+	config->Write(wxT("offset_y"), values[9]);
 	config->Flush();
 }
 
@@ -475,10 +477,10 @@ void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowM
 	config->SetPath(wxT("/SPRINGSHOWMODES"));
 	config->SetPath(kSpringShowModeStrings[which]);
 	config->Write(wxT("which_spr_yards"), values[0]);
-	config->Write(wxT("bord1_x"), COORD2INT(values[1]));
-	config->Write(wxT("bord1_y"), COORD2INT(values[2]));
-	config->Write(wxT("bord2_x"), COORD2INT(values[3]));
-	config->Write(wxT("bord2_y"), COORD2INT(values[4]));
+	config->Write(wxT("bord1_x"), values[1]);
+	config->Write(wxT("bord1_y"), values[2]);
+	config->Write(wxT("bord2_x"), values[3]);
+	config->Write(wxT("bord2_y"), values[4]);
 
 	config->Write(wxT("mode_steps_x"), values[5]);
 	config->Write(wxT("mode_steps_y"), values[6]);

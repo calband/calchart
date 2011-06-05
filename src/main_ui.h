@@ -163,7 +163,6 @@ public:
 	void OnCmdAnimate(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
-	void OnMenuSelect(wxMenuEvent& event);
 
 	void OnCmd_prev_ss(wxCommandEvent& event);
 	void OnCmd_next_ss(wxCommandEvent& event);

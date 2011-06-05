@@ -151,10 +151,10 @@ void PointPicker::PointPickerSelect(wxCommandEvent&)
 	wxArrayInt selections;
 	size_t n = mList->GetSelections(selections);
 
-	CC_show::SelectionList sl;
+	mCachedSelection.clear();
 	for (size_t i = 0; i < n; ++i)
-		sl.insert(selections[i]);
-	show->SetSelection(sl);
+		mCachedSelection.insert(selections[i]);
+	show->SetSelection(mCachedSelection);
 }
 
 
@@ -170,10 +170,11 @@ void PointPicker::Update()
 	CC_show::SelectionList showSelectionList = show->GetSelectionList();
 	if (mCachedSelection != showSelectionList)
 	{
+		mList->DeselectAll();
 		mCachedSelection = showSelectionList;
-		for (unsigned n = 0; n < show->GetNumPoints(); ++n)
+		for (CC_show::SelectionList::const_iterator n = mCachedSelection.begin(); n != mCachedSelection.end(); ++n)
 		{
-			mList->SetSelection(n, mCachedSelection.count(n));
+			mList->SetSelection(*n);
 		}
 	}
 }

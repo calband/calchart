@@ -16,5 +16,5 @@
 */
 
 #ifndef CC_VERSION
-#define CC_VERSION "v3.1.5"
+#define CC_VERSION "v3.2.0"
 #endif

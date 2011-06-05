@@ -28,6 +28,8 @@
 #include <set>
 
 #include <wx/filename.h>
+#include <wx/wfstream.h>
+#include <sstream>
 
 enum
 {
@@ -100,53 +102,29 @@ void ShowPrintDialog::PrintShow()
 			break;
 	}
 
-	FILE *fp;
-
-	fp = CC_fopen(s.fn_str(), "w");
-	if (fp)
+	std::ostringstream buffer;
+	int n = mShow->PrintShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards);
+	// stream to file:
 	{
-		int n;
-		wxString tempbuf;
-
-		wxBeginBusyCursor();
-		n = mShow->PrintShowToPS(fp, eps, overview,
-			mShow->GetCurrentSheetNum(), minyards);
-		fflush(fp);
-		fclose(fp);
+		wxFFileOutputStream outstream(s);
+		outstream.Write(buffer.str().c_str(), buffer.str().size());
+	}
 
 #ifdef PRINT__RUN_CMD
-		switch (radio_method->GetSelection())
-		{
-			case CC_PRINT_ACTION_FILE:
-				break;
-			default:
-				if (mShow->Ok())
-				{
-					system(buf.utf8_str());
-				}
-				wxRemoveFile(s);
-				break;
-		}
-#endif
-		wxEndBusyCursor();
-
-		if (mShow->Ok())
-		{
-			tempbuf.sprintf(wxT("Printed %d pages."), n);
-			(void)wxMessageBox(tempbuf,
-				mShow->GetTitle());
-		}
-		else
-		{
-			(void)wxMessageBox(mShow->GetError(),
-				mShow->GetTitle());
-		}
-	}
-	else
+	switch (radio_method->GetSelection())
 	{
-		(void)wxMessageBox(wxT("Unable to open print file for writing!"),
-			mShow->GetTitle());
+		case CC_PRINT_ACTION_FILE:
+			break;
+		default:
+			system(buf.utf8_str());
+			wxRemoveFile(s);
+			break;
 	}
+#endif
+
+	wxString tempbuf;
+	tempbuf.sprintf(wxT("Printed %d pages."), n);
+	(void)wxMessageBox(tempbuf, mShow->GetTitle());
 }
 
 

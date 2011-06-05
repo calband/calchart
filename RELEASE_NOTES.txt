@@ -1,3 +1,21 @@
+Release notes for 3.2.0:
+
+Major changes under the hood.  Switching to the wxDocument/wxView paradigm.
+
+Features added:
+3018591: move from config file to internal settings
+
+Bugs Fixed in this release
+
+3288634: Make sure go to pages works for all views
+3218824: Titles are blank
+3024169: Leaking CC_show with ever open and new shows
+3018566: Ugly grey on the bottom of animation window
+3018571: Dialog appears: Autosave error
+3022228: Leaking CC_show with ever open and new shows
+
+----------
+
 Release notes for 3.1.5:
 
 3023650: Does not prompt to save when you quit

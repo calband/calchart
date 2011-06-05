@@ -3,7 +3,7 @@
 // file generated via the command:
 // cat file.ps | sed 's/^/"/' | sed 's/$/\\n"/' 
 static char zllrbach_eps[] = 
-"%!PS-Adobe-3.0\n"
+"%!PS-Adobe-2.0\n"
 "%%Title: postscript/zllrbach.fig\n"
 "%%Creator: fig2dev Version 3.2 Patchlevel 5d\n"
 "%%CreationDate: Sun Jan 30 10:38:31 2011\n"
@@ -12,8 +12,6 @@ static char zllrbach_eps[] =
 "%%Pages: 1\n"
 "%%BoundingBox: 0 0 612 792\n"
 "%%DocumentPaperSizes: letter\n"
-"%Magnification: 1.0000\n"
-"%%EndComments\n"
 "%%BeginSetup\n"
 "[{\n"
 "%%BeginFeature: *PageRegion Letter\n"
@@ -21,6 +19,8 @@ static char zllrbach_eps[] =
 "%%EndFeature\n"
 "} stopped cleartomark\n"
 "%%EndSetup\n"
+"%Magnification: 1.0000\n"
+"%%EndComments\n"
 "%%BeginProlog\n"
 "/MyAppDict 100 dict dup begin def\n"
 "/$F2psDict 200 dict def\n"

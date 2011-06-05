@@ -141,9 +141,6 @@ EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, MainFrame::OnCmdHelp)
-EVT_MENU_HIGHLIGHT(wxID_SAVE, MainFrame::OnMenuSelect)
-EVT_MENU_HIGHLIGHT(wxID_UNDO, MainFrame::OnMenuSelect)
-EVT_MENU_HIGHLIGHT(wxID_REDO, MainFrame::OnMenuSelect)
 EVT_MENU(CALCHART__prev_ss, MainFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, MainFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, MainFrame::OnCmd_box)
@@ -319,8 +316,8 @@ field(NULL)
 	file_menu->Append(CALCHART__wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
 	file_menu->Append(CALCHART__wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"), wxT("Preview this show"));
 	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
-	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Legacy Print..."), wxT("Legacy Print this show"));
-	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Legacy Print EPS..."), wxT("Legacy Print a stuntsheet in EPS"));
+	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."), wxT("Print show to PostScript"));
+	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."), wxT("Print show to Encapsulated PostScript"));
 	file_menu->Append(CALCHART__PREFERENCES, wxT("&Preferences\tCTRL-,"));
 	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
@@ -700,26 +697,6 @@ void MainFrame::OnCmdHelp(wxCommandEvent& event)
 }
 
 
-// Intercept menu commands
-void MainFrame::OnMenuSelect(wxMenuEvent& event)
-{
-	wxString msg;
-	switch (event.GetMenuId())
-	{
-		case wxID_SAVE:
-			msg = field->mShow->IsModified() ?
-				wxT("Save show (needed)") :
-			wxT("Save show (not needed)");
-			break;
-		default:
-			event.Skip();
-			break;
-	}
-	if (!msg.empty())
-		SetStatusText(msg);
-}
-
-
 void MainFrame::OnCmd_prev_ss(wxCommandEvent& event)
 {
 	field->PrevSS();
@@ -900,7 +877,7 @@ void MainFrame::AppendShow()
 		}
 		else
 		{
-			(void)wxMessageBox(shw->GetError(), wxT("Load Error"));
+			(void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
 		}
 		delete shw;
 	}

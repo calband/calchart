@@ -28,7 +28,6 @@
 
 #include <wx/wx.h>
 #include <wx/docview.h>
-#include <boost/shared_ptr.hpp>
 
 class CalChartApp;
 
@@ -51,7 +50,7 @@ public:
 private:
 	ShowModeList mModeList;
 
-	boost::shared_ptr<wxDocManager> mDocManager;
+	wxDocManager mDocManager;
 };
 
 #endif // _CALCHARTAPP_H_

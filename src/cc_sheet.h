@@ -29,6 +29,7 @@
 
 #include <wx/wx.h>
 #include <vector>
+#include <iosfwd>
 
 class CC_show;
 class CC_coord;
@@ -110,10 +111,10 @@ friend void Draw(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool primary, bo
 friend void DrawForPrinting(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool landscape);
 friend void DrawCont(wxDC& dc, const CC_sheet& sheet, wxCoord yStart, bool landscape);
 
-friend const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet);
-friend const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet);
-friend const wxChar *PrintOverview(FILE *fp, const CC_sheet& sheet);
-friend const wxChar *PrintCont(FILE *fp, const CC_sheet& sheet);
+friend void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);
+friend void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet);
+friend void PrintOverview(std::ostream& buffer, const CC_sheet& sheet);
+friend void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
 
 };
 

@@ -99,11 +99,8 @@ IMPLEMENT_APP(CalChartApp)
 // Create windows and initialize app
 bool CalChartApp::OnInit()
 {
-	//// Create a document manager
-	mDocManager.reset(new wxDocManager);
-
 	//// Create a template relating drawing documents to their views
-	(void) new wxDocTemplate(mDocManager.get(), _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
+	(void) new wxDocTemplate(&mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
 			CLASSINFO(CC_show), CLASSINFO(MainFrameView));
 
 #ifdef __WXMAC__
@@ -162,7 +159,7 @@ bool CalChartApp::OnInit()
 
 
 	//// Create the main frame window
-	topframe = new TopFrame((wxDocManager *) mDocManager.get(), (wxFrame *) NULL, _T("CalChart"));
+	topframe = new TopFrame(&mDocManager, (wxFrame *) NULL, _T("CalChart"));
 
 	{
 		// Required for images in the online documentation
@@ -199,7 +196,7 @@ bool CalChartApp::OnInit()
 
 void CalChartApp::MacOpenFile(const wxString &fileName)
 {
-	mDocManager->CreateDocument(fileName, wxDOC_SILENT);
+	mDocManager.CreateDocument(fileName, wxDOC_SILENT);
 }
 
 int CalChartApp::OnExit()

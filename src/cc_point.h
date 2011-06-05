@@ -27,7 +27,6 @@
 #include "cc_coord.h"
 
 
-#define PNT_LABEL 1
 class CC_point
 {
 public:
@@ -35,11 +34,11 @@ public:
 	CC_point()
 		:flags(0), sym(SYMBOL_PLAIN), cont(0) {}
 
-	inline bool GetFlip() const { return (bool)(flags & PNT_LABEL); }
+	inline bool GetFlip() const { return (bool)(flags & kPointLabel); }
 	inline void Flip(bool val = true)
 	{
-		if (val) flags |= PNT_LABEL;
-		else flags &= ~PNT_LABEL;
+		if (val) flags |= kPointLabel;
+		else flags &= ~kPointLabel;
 	};
 	inline void FlipToggle() { Flip(GetFlip() ? false:true); }
 
@@ -50,6 +49,9 @@ public:
 	unsigned char cont;
 	CC_coord pos;
 	CC_coord ref[kNumRefPoints];
+
+private:
+	static const unsigned kPointLabel = 1;
 
 friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
 };

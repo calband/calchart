@@ -36,6 +36,7 @@
 
 #include <time.h>
 #include <string>
+#include <sstream>
 
 static float width, height, real_width, real_height;
 static float field_x, field_y, field_w, field_h;
@@ -70,19 +71,14 @@ static const char *fontnames[] =
 	"bolditalfont",
 };
 
-static const wxChar *badfile = wxT("Error writing to print file");
+static const size_t kBufferSize = 256;
 
-static const wxChar *gen_cont_line(const CC_textline& line, PSFONT_TYPE *currfontnum,
-float fontsize, FILE *fp);
-static const wxChar *print_start_page(FILE *fp, bool landscape);
+void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize);
+void print_start_page(std::ostream& buffer, bool landscape);
 
-#define CHECKPRINT0(a) if ((a) < 0) { error = badfile; return 0; }
-#define CHECKPRINT1(a) if ((a) < 0) { error = badfile; return; }
-#define CHECKPRINT(a) if ((a) < 0) return badfile;
-
-int CC_show::PrintShowToPS(FILE *fp, bool eps, bool overview, unsigned curr_ss,
-int min_yards) const
+int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards) const
 {
+	char buf[kBufferSize];
 	time_t t;
 	CC_coord fullsize = mode->Size();
 	CC_coord fieldsize = mode->FieldSize();
@@ -260,140 +256,198 @@ int min_yards) const
 /* Now write postscript header */
 	if (eps)
 	{
-		CHECKPRINT0(fprintf(fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"));
+		buffer<<"%!PS-Adobe-3.0 EPSF-3.0\n";
 	}
 	else
 	{
-		CHECKPRINT0(fprintf(fp, "%%!PS-Adobe-3.0\n"));
+		buffer<<"%!PS-Adobe-3.0\n";
 	}
-	CHECKPRINT0(fprintf(fp, "%%%%BoundingBox: %.0f %.0f %.0f %.0f\n",
+	snprintf(buf, sizeof(buf), "%%%%BoundingBox: %.0f %.0f %.0f %.0f\n",
 		GetConfiguration_PageOffsetX() * DPI,
 		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI - real_height,
 		GetConfiguration_PageOffsetX() * DPI + real_width,
-		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI));
+		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI);
+	buffer<<buf;
 	time(&t);
-	CHECKPRINT0(fprintf(fp, "%%%%CreationDate: %s", ctime(&t)));
-	std::string namestr(GetTitle().utf8_str());
-	CHECKPRINT0(fprintf(fp, "%%%%Title: %s\n", namestr.c_str()));
-	CHECKPRINT0(fprintf(fp, "%%%%Creator: CalChart\n"));
-	CHECKPRINT0(fprintf(fp, "%%%%Pages: (atend)\n"));
-	CHECKPRINT0(fprintf(fp, "%%%%PageOrder: Ascend\n"));
+	buffer<<"%%CreationDate: "<<ctime(&t);
+	buffer<<"%%Title: "<<GetTitle().utf8_str()<<"\n";
+	buffer<<"%%Creator: CalChart\n";
+	buffer<<"%%Pages: (atend)\n";
+	buffer<<"%%PageOrder: Ascend\n";
 	if (!overview)
 	{
-		CHECKPRINT0(fprintf(fp,"%%%%DocumentNeededResources: font %s %s %s %s %s %s %s\n",
+		snprintf(buf, sizeof(buf), "%%%%DocumentNeededResources: font %s %s %s %s %s %s %s\n",
 			head_font_str.c_str(), main_font_str.c_str(),
 			number_font_str.c_str(), cont_font_str.c_str(),
 			bold_font_str.c_str(), ital_font_str.c_str(),
-			bold_ital_font_str.c_str()));
-		CHECKPRINT0(fprintf(fp, "%%%%DocumentSuppliedResources: font CalChart\n"));
-		CHECKPRINT0(fprintf(fp, "%%%%BeginDefaults\n"));
-		CHECKPRINT0(fprintf(fp, "%%%%PageResources: font %s %s %s %s %s %s %s CalChart\n",
+			bold_ital_font_str.c_str());
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "%%%%DocumentSuppliedResources: font CalChart\n");
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "%%%%BeginDefaults\n");
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "%%%%PageResources: font %s %s %s %s %s %s %s CalChart\n",
 			head_font_str.c_str(), main_font_str.c_str(),
 			number_font_str.c_str(), cont_font_str.c_str(),
 			bold_font_str.c_str(), ital_font_str.c_str(),
-			bold_ital_font_str.c_str()));
-		CHECKPRINT0(fprintf(fp, "%%%%EndDefaults\n"));
+			bold_ital_font_str.c_str());
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "%%%%EndDefaults\n");
+		buffer<<buf;
 	}
-	CHECKPRINT0(fprintf(fp, "%%%%EndComments\n"));
+	snprintf(buf, sizeof(buf), "%%%%EndComments\n");
+	buffer<<buf;
 	if (!overview)
 	{
 		switch (mode->GetType())
 		{
 			case SHOW_STANDARD:
-				CHECKPRINT0(fprintf(fp, "%%%%BeginProlog\n"));
-				CHECKPRINT0(fprintf(fp, "/fieldw %.2f def\n", field_w));
-				CHECKPRINT0(fprintf(fp, "/fieldh %.2f def\n", field_h));
-				CHECKPRINT0(fprintf(fp, "/fieldy %.2f def\n", field_y));
-				CHECKPRINT0(fprintf(fp, "/stepw %hd def\n", step_width));
-				CHECKPRINT0(fprintf(fp, "/whash %hd def\n",
-					((ShowModeStandard *)mode)->HashW()));
-				CHECKPRINT0(fprintf(fp, "/ehash %hd def\n",
-					((ShowModeStandard *)mode)->HashE()));
-				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", GetConfiguration_HeaderSize()));
-				CHECKPRINT0(fprintf(fp, "/yardsize %.2f def\n", GetConfiguration_YardsSize()));
+				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/fieldh %.2f def\n", field_h);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/fieldy %.2f def\n", field_y);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/stepw %hd def\n", step_width);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/whash %hd def\n",
+					((ShowModeStandard *)mode)->HashW());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/ehash %hd def\n",
+					((ShowModeStandard *)mode)->HashE());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/headsize %.2f def\n", GetConfiguration_HeaderSize());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/yardsize %.2f def\n", GetConfiguration_YardsSize());
+				buffer<<buf;
 				// subtract 1 because we don't want to write the '\0' at the end
-				CHECKPRINT0(fwrite(prolog0_ps, sizeof(char), sizeof(prolog0_ps)-1, fp));
-				CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
-				CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
-				CHECKPRINT0(fprintf(fp, "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
+				buffer<<prolog0_ps;
+				snprintf(buf, sizeof(buf), "%%%%EndProlog\n");
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "%%%%BeginSetup\n");
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
 					head_font_str.c_str(), main_font_str.c_str(),
 					number_font_str.c_str(), cont_font_str.c_str(),
 					bold_font_str.c_str(), ital_font_str.c_str(),
-					bold_ital_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/headfont0 /%s def\n", head_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/mainfont0 /%s def\n", main_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/numberfont0 /%s def\n", number_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/contfont0 /%s def\n", cont_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/boldfont0 /%s def\n", bold_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/bolditalfont0 /%s def\n",
-					bold_ital_font_str.c_str()));
+					bold_ital_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/headfont0 /%s def\n", head_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/mainfont0 /%s def\n", main_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/numberfont0 /%s def\n", number_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/contfont0 /%s def\n", cont_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/boldfont0 /%s def\n", bold_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/italfont0 /%s def\n", ital_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/bolditalfont0 /%s def\n",
+					bold_ital_font_str.c_str());
+				buffer<<buf;
 				// subtract 1 because we don't want to write the '\0' at the end
-				CHECKPRINT0(fwrite(setup0_ps, sizeof(char), sizeof(setup0_ps)-1, fp));
-				CHECKPRINT0(fprintf(fp, "%%%%EndSetup\n"));
+				buffer<<setup0_ps;
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
+				buffer<<buf;
 				break;
 			case SHOW_SPRINGSHOW:
-				CHECKPRINT0(fprintf(fp, "%%%%BeginProlog\n"));
-				CHECKPRINT0(fprintf(fp, "/fieldw %.2f def\n", field_w));
-				CHECKPRINT0(fprintf(fp, "/fieldh %.2f def\n", field_h));
-				CHECKPRINT0(fprintf(fp, "/fieldy %.2f def\n", field_y));
-				CHECKPRINT0(fprintf(fp, "/sfieldw %.2f def\n", stage_field_w));
-				CHECKPRINT0(fprintf(fp, "/sfieldh %.2f def\n", stage_field_h));
-				CHECKPRINT0(fprintf(fp, "/sfieldx %.2f def\n", stage_field_x));
-				CHECKPRINT0(fprintf(fp, "/sfieldy %.2f def\n", stage_field_y));
-				CHECKPRINT0(fprintf(fp, "/stepsize %.6f def\n", step_size));
-				CHECKPRINT0(fprintf(fp, "/sprstepsize %.6f def\n", spr_step_size));
-				CHECKPRINT0(fprintf(fp, "/nfieldw %hd def\n",
-					((ShowModeSprShow*)mode)->StepsW()));
-				CHECKPRINT0(fprintf(fp, "/nfieldh %hd def\n",
-					((ShowModeSprShow*)mode)->StepsH()));
-				CHECKPRINT0(fprintf(fp, "/headsize %.2f def\n", GetConfiguration_HeaderSize()));
+				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/fieldh %.2f def\n", field_h);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/fieldy %.2f def\n", field_y);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/sfieldw %.2f def\n", stage_field_w);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/sfieldh %.2f def\n", stage_field_h);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/sfieldx %.2f def\n", stage_field_x);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/sfieldy %.2f def\n", stage_field_y);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/stepsize %.6f def\n", step_size);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/sprstepsize %.6f def\n", spr_step_size);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/nfieldw %hd def\n",
+					((ShowModeSprShow*)mode)->StepsW());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/nfieldh %hd def\n",
+					((ShowModeSprShow*)mode)->StepsH());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/headsize %.2f def\n", GetConfiguration_HeaderSize());
+				buffer<<buf;
 				// subtract 1 because we don't want to write the '\0' at the end
-				CHECKPRINT0(fwrite(prolog1_ps, sizeof(char), sizeof(prolog1_ps)-1, fp));
-				CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
-				CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
-				CHECKPRINT0(fprintf(fp, "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
+				buffer<<prolog1_ps;
+				snprintf(buf, sizeof(buf), "%%%%EndProlog\n");
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "%%%%BeginSetup\n");
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
 					head_font_str.c_str(), main_font_str.c_str(),
 					number_font_str.c_str(), cont_font_str.c_str(),
 					bold_font_str.c_str(), ital_font_str.c_str(),
-					bold_ital_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/headfont0 /%s def\n", head_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/mainfont0 /%s def\n", main_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/numberfont0 /%s def\n", number_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/contfont0 /%s def\n", cont_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/boldfont0 /%s def\n", bold_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/italfont0 /%s def\n", ital_font_str.c_str()));
-				CHECKPRINT0(fprintf(fp, "/bolditalfont0 /%s def\n",
-					bold_ital_font_str.c_str()));
+					bold_ital_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/headfont0 /%s def\n", head_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/mainfont0 /%s def\n", main_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/numberfont0 /%s def\n", number_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/contfont0 /%s def\n", cont_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/boldfont0 /%s def\n", bold_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/italfont0 /%s def\n", ital_font_str.c_str());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/bolditalfont0 /%s def\n",
+					bold_ital_font_str.c_str());
+				buffer<<buf;
 				// subtract 1 because we don't want to write the '\0' at the end
-				CHECKPRINT0(fwrite(setup1_ps, sizeof(char), sizeof(setup1_ps)-1, fp));
-				CHECKPRINT0(fprintf(fp, "%%%%EndSetup\n"));
+				buffer<<setup1_ps;
+				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
+				buffer<<buf;
 				break;
 		}
 	}
 	else
 	{
-		CHECKPRINT0(fprintf(fp, "%%%%BeginProlog\n"));
-		CHECKPRINT0(fprintf(fp, "/whash %hd def\n",
-			((ShowModeStandard *)mode)->HashW()));
-		CHECKPRINT0(fprintf(fp, "/ehash %hd def\n",
-			((ShowModeStandard *)mode)->HashE()));
-		CHECKPRINT0(fprintf(fp, "/fieldw %.2f def\n", width));
-		CHECKPRINT0(fprintf(fp, "/fieldh %.2f def\n", height));
+		snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "/whash %hd def\n",
+			((ShowModeStandard *)mode)->HashW());
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "/ehash %hd def\n",
+			((ShowModeStandard *)mode)->HashE());
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", width);
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "/fieldh %.2f def\n", height);
+		buffer<<buf;
 		// subtract 1 because we don't want to write the '\0' at the end
-		CHECKPRINT0(fwrite(prolog2_ps, sizeof(char), sizeof(prolog2_ps)-1, fp));
-		CHECKPRINT0(fprintf(fp, "%%%%EndProlog\n"));
-		CHECKPRINT0(fprintf(fp, "%%%%BeginSetup\n"));
+		buffer<<prolog2_ps;
+		snprintf(buf, sizeof(buf), "%%%%EndProlog\n");
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "%%%%BeginSetup\n");
+		buffer<<buf;
 		// subtract 1 because we don't want to write the '\0' at the end
-		CHECKPRINT0(fwrite(setup2_ps, sizeof(char), sizeof(setup2_ps)-1, fp));
-		CHECKPRINT0(fprintf(fp, "%%%%EndSetup\n"));
+		buffer<<setup2_ps;
+		snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
+		buffer<<buf;
 	}
 
 /* print continuity sheets first */
 	if (print_do_cont_sheet && !eps && !overview)
 	{
-		PrintSheets(fp);
-		if (!Ok()) return 0;
+		PrintSheets(buffer);
 	}
 
 /* do stuntsheet pages now */
@@ -413,24 +467,22 @@ int min_yards) const
 				switch (mode->GetType())
 				{
 					case SHOW_STANDARD:
-						error = PrintStandard(fp, *curr_sheet);
-						if (!Ok()) return 0;
+						PrintStandard(buffer, *curr_sheet);
 						break;
 					case SHOW_SPRINGSHOW:
-						error = PrintSpringshow(fp, *curr_sheet);
-						if (!Ok()) return 0;
+						PrintSpringshow(buffer, *curr_sheet);
 						break;
 				}
 			}
 			else
 			{
-				error = PrintOverview(fp, *curr_sheet);
-				if (!Ok()) return 0;
+				PrintOverview(buffer, *curr_sheet);
 			}
 			if (eps) break;
 			else
 			{
-				CHECKPRINT0(fprintf(fp, "showpage\n"));
+				snprintf(buf, sizeof(buf), "showpage\n");
+				buffer<<buf;
 			}
 		}
 		if (!split_sheet)
@@ -439,20 +491,22 @@ int min_yards) const
 		}
 	}
 /* finally, write trailer */
-	CHECKPRINT0(fprintf(fp, "%%%%Trailer\n"));
-	CHECKPRINT0(fprintf(fp, "%%%%Pages: %hd\n", num_pages));
-	CHECKPRINT0(fprintf(fp, "%%%%EOF\n"));
+	snprintf(buf, sizeof(buf), "%%%%Trailer\n");
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "%%%%Pages: %hd\n", num_pages);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "%%%%EOF\n");
+	buffer<<buf;
 
 	return num_pages;
 }
 
 
-void CC_show::PrintSheets(FILE *fp) const
+void CC_show::PrintSheets(std::ostream& buffer) const
 {
-	enum PSFONT_TYPE currfontnum = PSFONT_NORM;
+	char buf[kBufferSize];
 	short lines_left = 0;
-	short need_eject = false;
-
+	bool need_eject = false;
 	for (CC_show::const_CC_sheet_iterator_t sheet = GetSheetBegin(); sheet != GetSheetEnd(); ++sheet)
 	{
 		for (CC_textline_list::const_iterator text = sheet->continuity.begin();
@@ -464,94 +518,104 @@ void CC_show::PrintSheets(FILE *fp) const
 			{
 				if (num_pages > 0)
 				{
-					CHECKPRINT1(fprintf(fp, "showpage\n"));
+					buffer<<"showpage\n";
 				}
 				num_pages++;
-				CHECKPRINT1(fprintf(fp, "%%%%Page: CONT%hd\n", num_pages));
-				CHECKPRINT1(fprintf(fp, "0 setgray\n"));
-				CHECKPRINT1(fprintf(fp, "0.25 setlinewidth\n"));
-				CHECKPRINT1(fprintf(fp, "%.2f %.2f translate\n",
+				snprintf(buf, sizeof(buf), "%%%%Page: CONT%hd\n", num_pages);
+				buffer<<buf;
+				buffer<<"0 setgray\n";
+				buffer<<"0.25 setlinewidth\n";
+				snprintf(buf, sizeof(buf), "%.2f %.2f translate\n",
 					GetConfiguration_PageOffsetX() * DPI,
-					(GetConfiguration_PaperLength()-GetConfiguration_PageOffsetY())*DPI - real_height));
+					(GetConfiguration_PaperLength()-GetConfiguration_PageOffsetY())*DPI - real_height);
+				buffer<<buf;
 				lines_left = (short)(real_height / GetConfiguration_TextSize() - 0.5);
-				CHECKPRINT1(fprintf(fp,
+				snprintf(buf, sizeof(buf),
 					"/contfont findfont %.2f scalefont setfont\n",
-					GetConfiguration_TextSize()));
-				CHECKPRINT1(fprintf(fp, "/y %.2f def\n", real_height - GetConfiguration_TextSize()));
-				CHECKPRINT1(fprintf(fp, "/h %.2f def\n", GetConfiguration_TextSize()));
-				CHECKPRINT1(fprintf(fp, "/lmargin 0 def /rmargin %.2f def\n",
-					real_width));
-				CHECKPRINT1(fprintf(fp,
+					GetConfiguration_TextSize());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/y %.2f def\n", real_height - GetConfiguration_TextSize());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/h %.2f def\n", GetConfiguration_TextSize());
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/lmargin 0 def /rmargin %.2f def\n",
+					real_width);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), 
 					"/tab1 %.2f def /tab2 %.2f def /tab3 %.2f def\n",
 					real_width * 0.5 / 7.5, real_width * 1.5 / 7.5,
-					real_width * 2.0 / 7.5));
-				CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
+					real_width * 2.0 / 7.5);
+				buffer<<buf;
+				snprintf(buf, sizeof(buf), "/x lmargin def\n");
+				buffer<<buf;
 			}
 
-			error = gen_cont_line(*text, &currfontnum, GetConfiguration_TextSize(), fp);
-			if (!Ok()) return;
+			enum PSFONT_TYPE currfontnum = PSFONT_NORM;
+			gen_cont_line(buffer, *text, &currfontnum, GetConfiguration_TextSize());
 
-			CHECKPRINT1(fprintf(fp, "/x lmargin def\n"));
-			CHECKPRINT1(fprintf(fp, "/y y h sub def\n"));
+			buffer<<"/x lmargin def\n";
+			buffer<<"/y y h sub def\n";
 			lines_left--;
 			need_eject = true;
 		}
 	}
 	if (need_eject)
 	{
-		CHECKPRINT1(fprintf(fp, "showpage\n"));
+		buffer<<"showpage\n";
 	}
 }
 
 
-const wxChar *PrintCont(FILE *fp, const CC_sheet& sheet)
+void PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 {
-	enum PSFONT_TYPE currfontnum = PSFONT_NORM;
+	char buf[kBufferSize];
 	short cont_len = 0;
-	float cont_height, this_size;
-	const wxChar *error;
 
-	cont_height = field_y - step_size*10;
+	float cont_height = field_y - step_size*10;
 	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
 		text != sheet.continuity.end();
 		++text)
 	{
 		if (text->on_sheet) cont_len++;
 	}
-	if (cont_len == 0) return NULL;
-	this_size = cont_height / (cont_len + 0.5);
+	if (cont_len == 0) return;
+	float this_size = cont_height / (cont_len + 0.5);
 	if (this_size > GetConfiguration_TextSize()) this_size = GetConfiguration_TextSize();
-	CHECKPRINT(fprintf(fp, "/y %.2f def\n", cont_height - this_size));
-	CHECKPRINT(fprintf(fp, "/h %.2f def\n", this_size));
-	CHECKPRINT(fprintf(fp, "/lmargin 0 def /rmargin %.2f def\n", width));
-	CHECKPRINT(fprintf(fp, "/tab1 %.2f def /tab2 %.2f def /tab3 %.2f def\n",
-		width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5));
-	CHECKPRINT(fprintf(fp, "/contfont findfont %.2f scalefont setfont\n",
-		this_size));
+	snprintf(buf, sizeof(buf), "/y %.2f def\n", cont_height - this_size);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/h %.2f def\n", this_size);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/lmargin 0 def /rmargin %.2f def\n", width);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/tab1 %.2f def /tab2 %.2f def /tab3 %.2f def\n",
+		width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/contfont findfont %.2f scalefont setfont\n",
+		this_size);
+	buffer<<buf;
 	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
 		text != sheet.continuity.end();
 		++text)
 	{
 		if (!text->on_sheet) continue;
-		CHECKPRINT(fprintf(fp, "/x lmargin def\n"));
+		snprintf(buf, sizeof(buf), "/x lmargin def\n");
+		buffer<<buf;
 
-		error = gen_cont_line(*text, &currfontnum, this_size, fp);
-		if (error) return error;
+		enum PSFONT_TYPE currfontnum = PSFONT_NORM;
+		gen_cont_line(buffer, *text, &currfontnum, this_size);
 
-		CHECKPRINT(fprintf(fp, "/y y h sub def\n"));
+		snprintf(buf, sizeof(buf), "/y y h sub def\n");
+		buffer<<buf;
 	}
-	return NULL;
 }
 
 
-const wxChar *gen_cont_line(const CC_textline& line, PSFONT_TYPE *currfontnum,
-float fontsize, FILE *fp)
+void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum,
+float fontsize)
 {
-	const char *text;
-	short tabstop;
-	std::string temp_buf;
+	char buf[kBufferSize];
 
-	tabstop = 0;
+	short tabstop = 0;
 	for (CC_textchunk_list::const_iterator part = line.chunks.begin();
 		part != line.chunks.end();
 		++part)
@@ -560,26 +624,27 @@ float fontsize, FILE *fp)
 		{
 			if (++tabstop > 3)
 			{
-				CHECKPRINT(fprintf(fp, "space_over\n"));
+				buffer<<"space_over\n";
 			}
 			else
 			{
-				CHECKPRINT(fprintf(fp, "tab%hd do_tab\n", tabstop));
+				buffer<<"tab"<<tabstop<<" do_tab\n";
 			}
 		}
 		else
 		{
 			if (part->font != *currfontnum)
 			{
-				CHECKPRINT(fprintf(fp, "/%s findfont %.2f scalefont setfont\n",
-					fontnames[part->font], fontsize));
+				buffer<<"/"<<fontnames[part->font];
+				snprintf(buf, sizeof(buf), " findfont %.2f scalefont setfont\n", fontsize);
+				buffer<<buf;
 				*currfontnum = part->font;
 			}
 			std::string textstr(part->text.utf8_str());
-			text = textstr.c_str();
+			const char *text = textstr.c_str();
 			while (*text != 0)
 			{
-				temp_buf = "";
+				std::string temp_buf = "";
 				while (*text != 0)
 				{
 // Need backslash before parenthesis
@@ -594,65 +659,61 @@ float fontsize, FILE *fp)
 				{
 					if (line.center)
 					{
-						CHECKPRINT(fprintf(fp, "(%s) centerText\n", temp_buf.c_str()));
+						buffer<<"("<<temp_buf<<") centerText\n";
 					}
 					else
 					{
-						CHECKPRINT(fprintf(fp, "(%s) leftText\n", temp_buf.c_str()));
+						buffer<<"("<<temp_buf<<") leftText\n";
 					}
 				}
 			}
 		}
 	}
-	return NULL;
 }
 
 
-const wxChar *print_start_page(FILE *fp, bool landscape)
+void print_start_page(std::ostream& buffer, bool landscape)
 {
-	CHECKPRINT(fprintf(fp, "0 setgray\n"));
-	CHECKPRINT(fprintf(fp, "0.25 setlinewidth\n"));
-	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n",
+	char buf[kBufferSize];
+
+	buffer<<"0 setgray\n";
+	buffer<<"0.25 setlinewidth\n";
+	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n",
 		GetConfiguration_PageOffsetX() * DPI,
-		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI - real_height));
+		(GetConfiguration_PaperLength() - GetConfiguration_PageOffsetY()) * DPI - real_height);
+	buffer<<buf;
 	if (landscape)
 	{
-		CHECKPRINT(fprintf(fp, "%.2f 0 translate 90 rotate\n", real_width));
+		snprintf(buf, sizeof(buf), "%.2f 0 translate 90 rotate\n", real_width);
+		buffer<<buf;
 	}
-	return NULL;
 }
 
 
-const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
+void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 {
-	float dot_x, dot_y, dot_w;
-	short x_s, x_n;
-	unsigned short i;
-	short j;
-	const wxChar *error;
+	char buf[kBufferSize];
+
 	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
 	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
 	Coord pmin = sheet.show->GetMode().MinPosition().x;
 	Coord pmax = sheet.show->GetMode().MaxPosition().x;
 	Coord fmin = sheet.show->GetMode().FieldOffset().x;
 	Coord fmax = sheet.show->GetMode().FieldSize().x + fmin;
-	float fieldheight = COORD2FLOAT(fieldsize.y);
-	float fieldoffx = COORD2FLOAT(fieldoff.x);
-	float fieldoffy = COORD2FLOAT(fieldoff.y);
 
 	std::string namestr(sheet.name.utf8_str());
 	std::string numberstr(sheet.number.utf8_str());
 
 	if (split_sheet)
 	{
-		CHECKPRINT(fprintf(fp, "%%%%Page: %s(N)\n", namestr.c_str()));
+		buffer<<"%%Page: "<<namestr<<"(N)\n";
 		if (sheet.number)
 		{
-			CHECKPRINT(fprintf(fp, "/pagenumtext (%sN) def\n",numberstr.c_str()));
+			buffer<<"/pagenumtext ("<<numberstr<<"N) def\n";
 		}
 		else
 		{
-			CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
+			buffer<<"/pagenumtext () def\n";
 		}
 		step_offset = COORD2INT(fieldsize.x) - step_width;
 /* south yardline */
@@ -665,7 +726,7 @@ const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 /* find bounds */
 		max_s = fmax;
 		max_n = fmin;
-		for (i=0; i < sheet.show->GetNumPoints(); i++)
+		for (unsigned i=0; i < sheet.show->GetNumPoints(); i++)
 		{
 			if (sheet.pts[i].pos.x < max_s) max_s = sheet.pts[i].pos.x;
 			if (sheet.pts[i].pos.x > max_n) max_n = sheet.pts[i].pos.x;
@@ -679,15 +740,14 @@ const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 			> step_width)
 		{
 /* Need to split into two pages */
-			CHECKPRINT(fprintf(fp, "%%%%Page: %s(S)\n", namestr.c_str()));
+			buffer<<"%%Page: "<<namestr<<"(S)\n";
 			if (sheet.number)
 			{
-				CHECKPRINT(fprintf(fp, "/pagenumtext (%sS) def\n",
-					numberstr.c_str()));
+				buffer<<"/pagenumtext ("<<numberstr<<"S) def\n";
 			}
 			else
 			{
-				CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
+				buffer<<"/pagenumtext () def\n";
 			}
 			step_offset = 0;
 			split_sheet = true;
@@ -696,22 +756,21 @@ const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 		}
 		else
 		{
-			CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
+			buffer<<"%%Page: "<<namestr<<"\n";
 			if (sheet.number)
 			{
-				CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n",
-					numberstr.c_str()));
+				buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 			}
 			else
 			{
-				CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
+				buffer<<"/pagenumtext () def\n";
 			}
 			step_offset = (COORD2INT(sheet.show->GetMode().FieldSize().x) - step_width) / 2;
 			step_offset = (step_offset / 8) * 8;
 			clip_s = pmin;
 			clip_n = pmax;
-			x_s = COORD2INT(max_s) - COORD2INT(fmin);
-			x_n = COORD2INT(max_n) - COORD2INT(fmin);
+			short x_s = COORD2INT(max_s) - COORD2INT(fmin);
+			short x_n = COORD2INT(max_n) - COORD2INT(fmin);
 			if ((x_s < step_offset) || (x_n > (step_offset + step_width)))
 			{
 /* Recenter formation */
@@ -724,214 +783,236 @@ const wxChar *PrintStandard(FILE *fp, const CC_sheet& sheet)
 			}
 		}
 	}
-	error = print_start_page(fp, sheet.show->GetBoolLandscape());
-	if (error) return error;
+	print_start_page(buffer, sheet.show->GetBoolLandscape());
 
-	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
+	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
+	buffer<<buf;
 
 /* Draw field */
-	CHECKPRINT(fprintf(fp, "drawfield\n"));
-	CHECKPRINT(fprintf(fp, "/mainfont findfont %.2f scalefont setfont\n",
-		step_size * GetConfiguration_YardsSize()));
-	for (j=0; j <= step_width; j+=8)
+	buffer<<"drawfield\n";
+	snprintf(buf, sizeof(buf), "/mainfont findfont %.2f scalefont setfont\n", step_size * GetConfiguration_YardsSize());
+	buffer<<buf;
+
+	for (short j=0; j <= step_width; j+=8)
 	{
-		CHECKPRINT(fprintf(fp, "/lmargin %.2f def /rmargin %.2f def\n",
-			step_size * j, step_size * j));
-		CHECKPRINT(fprintf(fp, "/y %.2f def\n", field_h + (step_size / 2)));
+		snprintf(buf, sizeof(buf), "/lmargin %.2f def /rmargin %.2f def\n",
+			step_size * j, step_size * j);
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "/y %.2f def\n", field_h + (step_size / 2));
+		buffer<<buf;
 		std::string yardstr(yard_text[(step_offset +
 			(MAX_YARD_LINES-1)*4 +
 			COORD2INT(fieldoff.x) + j)/8].utf8_str());
-		CHECKPRINT(fprintf(fp, "(%s) dup centerText\n", yardstr.c_str()));
-		CHECKPRINT(fprintf(fp, "/y %.2f def\n", -(step_size * 2)));
-		CHECKPRINT(fprintf(fp, "centerText\n"));
+		buffer<<"("<<yardstr<<") dup centerText\n";
+		snprintf(buf, sizeof(buf), "/y %.2f def\n", -(step_size * 2));
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "centerText\n");
+		buffer<<buf;
 	}
 
-	dot_w = step_size / 2 * GetConfiguration_DotRatio();
-	CHECKPRINT(fprintf(fp, "/w %.4f def\n", dot_w));
-	CHECKPRINT(fprintf(fp, "/plinew %.4f def\n", dot_w * GetConfiguration_PLineRatio()));
-	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * GetConfiguration_SLineRatio()));
-	CHECKPRINT(fprintf(fp, "/numberfont findfont %.2f scalefont setfont\n",
-		dot_w * 2 * GetConfiguration_NumRatio()));
-	for (i = 0; i < sheet.show->GetNumPoints(); i++)
+
+	float dot_w = step_size / 2 * GetConfiguration_DotRatio();
+	snprintf(buf, sizeof(buf), "/w %.4f def\n", dot_w);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/plinew %.4f def\n", dot_w * GetConfiguration_PLineRatio());
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/slinew %.4f def\n", dot_w * GetConfiguration_SLineRatio());
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/numberfont findfont %.2f scalefont setfont\n",
+		dot_w * 2 * GetConfiguration_NumRatio());
+	buffer<<buf;
+	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		if ((sheet.pts[i].pos.x > clip_n) || (sheet.pts[i].pos.x < clip_s)) continue;
-		dot_x = (COORD2FLOAT(sheet.pts[i].pos.x) - fieldoffx - step_offset) /
+		float fieldheight = COORD2FLOAT(fieldsize.y);
+		float fieldoffx = COORD2FLOAT(fieldoff.x);
+		float fieldoffy = COORD2FLOAT(fieldoff.y);
+		float dot_x = (COORD2FLOAT(sheet.pts[i].pos.x) - fieldoffx - step_offset) /
 			step_width * field_w;
-		dot_y = (1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
-		CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.pts[i].sym]));
-		CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
+		float dot_y = (1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
+		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
+			dot_x, dot_y, dot_routines[sheet.pts[i].sym]);
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
 			static_cast<const char*>(sheet.show->GetPointLabel(i).mb_str()), dot_x, dot_y,
-			sheet.pts[i].GetFlip() ? "donumber2" : "donumber"));
+			sheet.pts[i].GetFlip() ? "donumber2" : "donumber");
+		buffer<<buf;
 	}
 	if (sheet.show->GetBoolDoCont())
 	{
-		CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", -field_x, -field_y));
-		error = PrintCont(fp, sheet);
-		if (error) return error;
+		snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", -field_x, -field_y);
+		buffer<<buf;
+		PrintCont(buffer, sheet);
 	}
-	return NULL;
 }
 
 
-const wxChar *PrintSpringshow(FILE *fp, const CC_sheet& sheet)
+void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 {
-	float dot_x, dot_y, dot_w;
-	unsigned short i;
-	short j;
-	const wxChar *error;
-	const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&sheet.show->GetMode());
-
+	char buf[kBufferSize];
 	std::string namestr(sheet.name.utf8_str());
 	std::string numberstr(sheet.number.utf8_str());
 
-	CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
+	buffer<<"%%Page: "<<namestr<<"\n";
 	if (sheet.number)
 	{
-		CHECKPRINT(fprintf(fp, "/pagenumtext (%s) def\n", numberstr.c_str()));
+		buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 	}
 	else
 	{
-		CHECKPRINT(fprintf(fp, "/pagenumtext () def\n"));
+		buffer<<"/pagenumtext () def\n";
 	}
 
-	error = print_start_page(fp, sheet.show->GetBoolLandscape());
-	if (error) return error;
+	print_start_page(buffer, sheet.show->GetBoolLandscape());
 
-	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
+	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
+	buffer<<buf;
 
-/* Draw stage */
-	CHECKPRINT(fprintf(fp, "   BeginEPSF\n"));
-	CHECKPRINT(fprintf(fp, "   %.2f %.2f scale\n",
+	const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&sheet.show->GetMode());
+	buffer<<"   BeginEPSF\n";
+	snprintf(buf, sizeof(buf), "   %.2f %.2f scale\n",
 		field_w / modesprshow->StageW(),
-		field_h / modesprshow->StageH()));
-	CHECKPRINT(fprintf(fp, "   %hd %hd translate\n",
-		-modesprshow->StageX(), -modesprshow->StageY()));
-	CHECKPRINT(fprintf(fp, "%%%%BeginDocument\n"));
+		field_h / modesprshow->StageH());
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "   %hd %hd translate\n",
+		-modesprshow->StageX(), -modesprshow->StageY());
+	buffer<<buf;
+	buffer<<"%%BeginDocument: zllrbach.eps\n";
 	// sprint show is special.  We put down the special stage:
 	// subtract 1 because we don't want to write the '\0' at the end
-	CHECKPRINT0(fwrite(zllrbach_eps, sizeof(char), sizeof(zllrbach_eps)-1, fp));
-	CHECKPRINT(fprintf(fp, "%%%%EndDocument\n"));
-	CHECKPRINT(fprintf(fp, "EndEPSF\n"));
+	buffer<<zllrbach_eps;
+	buffer<<"%%EndDocument\n";
+	buffer<<"EndEPSF\n";
 /* Draw field */
-	CHECKPRINT(fprintf(fp, "drawfield\n"));
+	buffer<<"drawfield\n";
 	if (modesprshow->WhichYards())
 	{
-		CHECKPRINT(fprintf(fp, "/mainfont findfont %.2f scalefont setfont\n",
-			step_size * GetConfiguration_YardsSize()));
+		snprintf(buf, sizeof(buf), "/mainfont findfont %.2f scalefont setfont\n",
+			step_size * GetConfiguration_YardsSize());
+		buffer<<buf;
 		if (modesprshow->WhichYards() & (SPR_YARD_ABOVE | SPR_YARD_BELOW))
-			for (j=0; j <= modesprshow->StepsW(); j+=8)
+			for (short j=0; j <= modesprshow->StepsW(); j+=8)
 		{
-			CHECKPRINT(fprintf(fp, "/lmargin %.2f def /rmargin %.2f def\n",
+			snprintf(buf, sizeof(buf), "/lmargin %.2f def /rmargin %.2f def\n",
 				stage_field_x + step_size * j,
-				stage_field_x + step_size * j));
+				stage_field_x + step_size * j);
+			buffer<<buf;
 			if (modesprshow->WhichYards() & SPR_YARD_ABOVE)
 			{
-				CHECKPRINT(fprintf(fp, "/y %.2f def\n",
+				snprintf(buf, sizeof(buf), "/y %.2f def\n",
 					field_h*
 					(modesprshow->TextTop()-modesprshow->StageX())/
-					modesprshow->StageH()));
+					modesprshow->StageH());
+				buffer<<buf;
 				std::string yardstr(yard_text[(modesprshow->StepsX() +
 					(MAX_YARD_LINES-1)*4 + j)/8].utf8_str());
-				CHECKPRINT(fprintf(fp, "(%s) centerText\n", yardstr.c_str()));
+				snprintf(buf, sizeof(buf), "(%s) centerText\n", yardstr.c_str());
+				buffer<<buf;
 			}
 			if (modesprshow->WhichYards() & SPR_YARD_BELOW)
 			{
-				CHECKPRINT(fprintf(fp, "/y %.2f def\n",
+				snprintf(buf, sizeof(buf), "/y %.2f def\n",
 					field_h *
 					(modesprshow->TextBottom() -
 					modesprshow->StageX()) /
-					modesprshow->StageH() -(step_size*GetConfiguration_YardsSize())));
+					modesprshow->StageH() -(step_size*GetConfiguration_YardsSize()));
+				buffer<<buf;
 				std::string yardstr(yard_text[(modesprshow->StepsX() +
 					(MAX_YARD_LINES-1)*4 + j)/8].utf8_str());
-				CHECKPRINT(fprintf(fp, "(%s) centerText\n", yardstr.c_str()));
+				snprintf(buf, sizeof(buf), "(%s) centerText\n", yardstr.c_str());
+				buffer<<buf;
 			}
 		}
 		if (modesprshow->WhichYards() & (SPR_YARD_LEFT | SPR_YARD_RIGHT))
-			for (j=0; j <= modesprshow->StepsH(); j+=8)
+			for (short j=0; j <= modesprshow->StepsH(); j+=8)
 		{
-			CHECKPRINT(fprintf(fp, "/y %.2f def\n",
+			snprintf(buf, sizeof(buf), "/y %.2f def\n",
 				stage_field_y + stage_field_h *
 				(modesprshow->StepsH()-j-GetConfiguration_YardsSize()/2) /
-				modesprshow->StepsH()));
-			CHECKPRINT(fprintf(fp, "/x %.2f def /rmargin %.2f def\n",
+				modesprshow->StepsH());
+			buffer<<buf;
+			snprintf(buf, sizeof(buf), "/x %.2f def /rmargin %.2f def\n",
 				field_w*
 				(modesprshow->TextRight()-modesprshow->StageX()) /
 				modesprshow->StageW(),
 				field_w*
 				(modesprshow->TextLeft()-modesprshow->StageX()) /
-				modesprshow->StageW()));
+				modesprshow->StageW());
+			buffer<<buf;
 			std::string spr_text_str(spr_line_text[j / 8].utf8_str());
 			if (modesprshow->WhichYards() & SPR_YARD_RIGHT)
 			{
-				CHECKPRINT(fprintf(fp, "(%s) leftText\n", spr_text_str.c_str()));
+				buffer<<"("<<spr_text_str<<") leftText\n";
 			}
 			if (modesprshow->WhichYards() & SPR_YARD_LEFT)
 			{
-				CHECKPRINT(fprintf(fp, "(%s) rightText\n", spr_text_str.c_str()));
+				buffer<<"("<<spr_text_str<<") rightText\n";
 			}
 		}
 	}
 
-	dot_w = step_size / 2 * GetConfiguration_DotRatio();
-	CHECKPRINT(fprintf(fp, "/w %.4f def\n", dot_w));
-	CHECKPRINT(fprintf(fp, "/plinew %.4f def\n", dot_w * GetConfiguration_PLineRatio()));
-	CHECKPRINT(fprintf(fp, "/slinew %.4f def\n", dot_w * GetConfiguration_SLineRatio()));
-	CHECKPRINT(fprintf(fp, "/numberfont findfont %.2f scalefont setfont\n",
-		dot_w * 2 * GetConfiguration_NumRatio()));
-	for (i = 0; i < sheet.show->GetNumPoints(); i++)
+	float dot_w = step_size / 2 * GetConfiguration_DotRatio();
+	snprintf(buf, sizeof(buf), "/w %.4f def\n", dot_w);
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/plinew %.4f def\n", dot_w * GetConfiguration_PLineRatio());
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/slinew %.4f def\n", dot_w * GetConfiguration_SLineRatio());
+	buffer<<buf;
+	snprintf(buf, sizeof(buf), "/numberfont findfont %.2f scalefont setfont\n",
+		dot_w * 2 * GetConfiguration_NumRatio());
+	buffer<<buf;
+	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
-		dot_x = stage_field_x +
+		float dot_x = stage_field_x +
 			(COORD2FLOAT(sheet.pts[i].pos.x) - modesprshow->StepsX()) /
 			modesprshow->StepsW() * stage_field_w;
-		dot_y = stage_field_y + stage_field_h * (1.0 -
+		float dot_y = stage_field_y + stage_field_h * (1.0 -
 			(COORD2FLOAT(sheet.pts[i].pos.y)-
 			modesprshow->StepsY())/
 			modesprshow->StepsH());
-		CHECKPRINT(fprintf(fp, "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.pts[i].sym]));
-		CHECKPRINT(fprintf(fp, "(%s) %.2f %.2f %s\n",
+		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
+			dot_x, dot_y, dot_routines[sheet.pts[i].sym]);
+		buffer<<buf;
+		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
 			static_cast<const char*>(sheet.show->GetPointLabel(i).mb_str()), dot_x, dot_y,
-			(sheet.pts[i].flags & PNT_LABEL) ? "donumber2" : "donumber"));
+			(sheet.pts[i].GetFlip()) ? "donumber2" : "donumber");
+		buffer<<buf;
 	}
 	if (sheet.show->GetBoolDoCont())
 	{
-		CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", -field_x, -field_y));
-		error = PrintCont(fp, sheet);
-		if (error) return error;
+		snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", -field_x, -field_y);
+		buffer<<buf;
+		PrintCont(buffer, sheet);
 	}
-	return NULL;
 }
 
 
-const wxChar *PrintOverview(FILE *fp, const CC_sheet& sheet)
+void PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 {
-	unsigned short i;
-	const wxChar *error;
+	char buf[kBufferSize];
+	buffer<<"%%Page: "<<sheet.name.utf8_str()<<"\n";
+
+	print_start_page(buffer, sheet.show->GetBoolLandscape());
+	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
+	buffer<<buf;
+	buffer<<"drawfield\n";
 	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
 	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
+	float fieldwidth = COORD2FLOAT(fieldsize.x);
+	snprintf(buf, sizeof(buf), "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0);
+	buffer<<buf;
+
 	float fieldx = COORD2FLOAT(fieldoff.x);
 	float fieldy = COORD2FLOAT(fieldoff.y);
-	float fieldwidth = COORD2FLOAT(fieldsize.x);
 	float fieldheight = COORD2FLOAT(fieldsize.y);
 
-	std::string namestr(sheet.name.utf8_str());
-
-	CHECKPRINT(fprintf(fp, "%%%%Page: %s\n", namestr.c_str()));
-
-	error = print_start_page(fp, sheet.show->GetBoolLandscape());
-	if (error) return error;
-
-	CHECKPRINT(fprintf(fp, "%.2f %.2f translate\n", field_x, field_y));
-	CHECKPRINT(fprintf(fp, "drawfield\n"));
-	CHECKPRINT(fprintf(fp, "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0));
-	for (i = 0; i < sheet.show->GetNumPoints(); i++)
+	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
-		CHECKPRINT(fprintf(fp, "%.2f %.2f dotbox\n",
+		snprintf(buf, sizeof(buf), "%.2f %.2f dotbox\n",
 			(COORD2FLOAT(sheet.pts[i].pos.x)-fieldx) / fieldwidth * width,
 			(1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-
-			fieldy)/fieldheight) * height));
+			fieldy)/fieldheight) * height);
+		buffer<<buf;
 	}
-	return NULL;
 }
 
