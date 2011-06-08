@@ -116,6 +116,7 @@ IMPLEMENT_CLASS(TopFrame, wxDocMDIParentFrame)
 BEGIN_EVENT_TABLE(TopFrame, wxDocMDIParentFrame)
 EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
+EVT_MENU(wxID_PREFERENCES, TopFrame::OnCmdPreferences)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(MainFrame, wxDocMDIChildFrame)
@@ -164,7 +165,7 @@ EVT_MENU(CALCHART__setsym4, MainFrame::OnCmd_setsym4)
 EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
 EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
-EVT_MENU(CALCHART__PREFERENCES, MainFrame::OnCmdPreferences)
+EVT_MENU(wxID_PREFERENCES, MainFrame::OnCmdPreferences)
 EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
 EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
@@ -214,6 +215,7 @@ wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
 	wxMenu *file_menu = new wxMenu;
 	file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
 	file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
+	file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
 	// A nice touch: a history of files visited. Use this menu.
@@ -279,6 +281,13 @@ void TopFrame::Help()
 	gHelpController->DisplayContents();
 }
 
+void TopFrame::OnCmdPreferences(wxCommandEvent& event)
+{
+	CalChartPreferences dialog1(this);
+	if (dialog1.ShowModal() == wxID_OK)
+	{
+	}
+}
 
 bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
 {
@@ -318,7 +327,7 @@ field(NULL)
 	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
 	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."), wxT("Print show to PostScript"));
 	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."), wxT("Print show to Encapsulated PostScript"));
-	file_menu->Append(CALCHART__PREFERENCES, wxT("&Preferences\tCTRL-,"));
+	file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
 	file_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
@@ -538,10 +547,6 @@ void MainFrame::OnCmdPreferences(wxCommandEvent& event)
 	if (dialog1.ShowModal() == wxID_OK)
 	{
 	}
-//	wxNotebook* notebook = CreateCalChartPreferences(this);
-//	if (notebook->ShowModal() == wxID_OK)
-//	{
-//	}
 }
 
 

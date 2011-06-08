@@ -36,6 +36,12 @@
 				<string>mas</string>
 				<string>shw</string>
 			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>calchart.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>CalChart Show</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 		</dict>

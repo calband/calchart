@@ -70,7 +70,6 @@ enum
 	CALCHART__POINTS,
 	CALCHART__ANIMATE,
 	CALCHART__SELECTION,
-	CALCHART__PREFERENCES,
 
 	CALCHART__prev_ss,
 	CALCHART__next_ss,
@@ -110,6 +109,7 @@ public:
 	~TopFrame();
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
+	void OnCmdPreferences(wxCommandEvent& event);
 	void About();
 	void Help();
 
