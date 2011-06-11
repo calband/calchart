@@ -189,27 +189,6 @@ enum CONT_PARSE_MODE
 };
 
 template <typename T>
-void PeekLong(T& stream, uint32_t& d)
-{
-	uint8_t rawd[4];
-	stream.Read(rawd, sizeof(rawd));
-	d = get_big_long(&rawd);
-	stream.Ungetch(rawd, sizeof(rawd));
-}
-
-template <>
-void PeekLong<wxSTD istream>(wxSTD istream& stream, uint32_t& d)
-{
-	char rawd[4];
-	stream.read(rawd, sizeof(rawd));
-	d = get_big_long(&rawd);
-	stream.putback(rawd[0]);
-	stream.putback(rawd[1]);
-	stream.putback(rawd[2]);
-	stream.putback(rawd[3]);
-}
-
-template <typename T>
 void ReadLong(T& stream, uint32_t& d)
 {
 	uint8_t rawd[4];
@@ -282,6 +261,25 @@ void ReadCheckIDandFillData<wxSTD istream>(wxSTD istream& stream, uint32_t innam
 	{
 		throw CC_FileException(inname);
 	}
+	ReadLong(stream, name);
+	data.resize(name);
+	stream.read(reinterpret_cast<char*>(&data[0]), name);
+}
+
+// Just fill the data
+template <typename T>
+void FillData(T& stream, std::vector<uint8_t>& data)
+{
+	uint32_t name;
+	ReadLong(stream, name);
+	data.resize(name);
+	stream.Read(&data[0], name);
+}
+
+template <>
+void FillData<wxSTD istream>(wxSTD istream& stream, std::vector<uint8_t>& data)
+{
+	uint32_t name;
 	ReadLong(stream, name);
 	data.resize(name);
 	stream.read(reinterpret_cast<char*>(&data[0]), name);
@@ -880,12 +878,12 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	numpoints = name;
 	pt_labels.assign(numpoints, wxString());
 
-	PeekLong(stream, name);
+	ReadLong(stream, name);
 	// Optional: read in the point labels
 	// <INGL_LABL><SIZE>
 	if (INGL_LABL == name)
 	{
-		ReadCheckIDandFillData(stream, INGL_LABL, data);
+		FillData(stream, data);
 		std::vector<wxString> labels;
 		const char *str = (const char*)&data[0];
 		for (unsigned i = 0; i < GetNumPoints(); i++)
@@ -896,25 +894,24 @@ T& CC_show::LoadObjectGeneric(T& stream)
 		}
 		SetPointLabel(labels);
 		// peek for the next name
-		PeekLong(stream, name);
+		ReadLong(stream, name);
 	}
 
 	// Optional: read in the point labels
 	// <INGL_DESC><SIZE>
 	if (INGL_DESC == name)
 	{
-		ReadCheckIDandFillData(stream, INGL_LABL, data);
+		FillData(stream, data);
 		wxString s(wxString::FromUTF8((const char*)&data[0]));
 		SetDescr(s);
 		// peek for the next name
-		PeekLong(stream, name);
+		ReadLong(stream, name);
 	}
 
 	// Read in sheets
 	// <INGL_GURK><INGL_SHET>
 	while (INGL_GURK == name)
 	{
-		ReadAndCheckID(stream, INGL_GURK);
 		ReadAndCheckID(stream, INGL_SHET);
 
 		CC_sheet sheet(this);
@@ -950,11 +947,11 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			}
 		}
 
-		PeekLong(stream, name);
+		ReadLong(stream, name);
 		// read all the reference points
 		while (INGL_REFP == name)
 		{
-			ReadCheckIDandFillData(stream, INGL_REFP, data);
+			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints()*4+2)
 			{
 				throw CC_FileException(wxT("Bad REFP chunk"));
@@ -971,12 +968,12 @@ T& CC_show::LoadObjectGeneric(T& stream)
 				d += 2;
 				sheet.SetPosition(c, i, ref);		  // don't clip
 			}
-			PeekLong(stream, name);
+			ReadLong(stream, name);
 		}
 		// Point symbols
 		while (INGL_SYMB == name)
 		{
-			ReadCheckIDandFillData(stream, INGL_SYMB, data);
+			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints())
 			{
 				throw CC_FileException(wxT("Bad SYMB chunk"));
@@ -986,12 +983,12 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			{
 				sheet.GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
 			}
-			PeekLong(stream, name);
+			ReadLong(stream, name);
 		}
 		// Point continuity types
 		while (INGL_TYPE == name)
 		{
-			ReadCheckIDandFillData(stream, INGL_TYPE, data);
+			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints())
 			{
 				throw CC_FileException(wxT("Bad TYPE chunk"));
@@ -1001,12 +998,12 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			{
 				sheet.GetPoint(i).cont = *(d++);
 			}
-			PeekLong(stream, name);
+			ReadLong(stream, name);
 		}
 		// Point labels (left or right)
 		while (INGL_LABL == name)
 		{
-			ReadCheckIDandFillData(stream, INGL_LABL, data);
+			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints())
 			{
 				throw CC_FileException(wxT("Bad SYMB chunk"));
@@ -1019,12 +1016,12 @@ T& CC_show::LoadObjectGeneric(T& stream)
 					sheet.GetPoint(i).Flip();
 				}
 			}
-			PeekLong(stream, name);
+			ReadLong(stream, name);
 		}
 		// Continuity text
 		while (INGL_CONT == name)
 		{
-			ReadCheckIDandFillData(stream, INGL_CONT, data);
+			FillData(stream, data);
 			if (data.size() < 3)						  // one byte num + two nils minimum
 			{
 				throw CC_FileException(wxT("Bad cont chunk"));
@@ -1048,16 +1045,16 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			newcont.SetText(textstr);
 			sheet.AppendContinuity(newcont);
 
-			PeekLong(stream, name);
+			ReadLong(stream, name);
 		}
 		InsertSheetInternal(sheet, GetNumSheets());
 
-		ReadAndCheckID(stream, INGL_END);
+		//ReadAndCheckID(stream, INGL_END);
 		ReadAndCheckID(stream, INGL_SHET);
 		// peek for the next name
-		PeekLong(stream, name);
+		ReadLong(stream, name);
 	}
-	ReadAndCheckID(stream, INGL_END);
+	//ReadAndCheckID(stream, INGL_END);
 	ReadAndCheckID(stream, INGL_SHOW);
 	mSheetNum = 0;
 	}
