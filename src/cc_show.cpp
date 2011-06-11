@@ -188,7 +188,8 @@ enum CONT_PARSE_MODE
 	CONT_PARSE_ITALIC
 };
 
-void PeekLong(wxInputStream& stream, uint32_t& d)
+template <typename T>
+void PeekLong(T& stream, uint32_t& d)
 {
 	uint8_t rawd[4];
 	stream.Read(rawd, sizeof(rawd));
@@ -196,15 +197,37 @@ void PeekLong(wxInputStream& stream, uint32_t& d)
 	stream.Ungetch(rawd, sizeof(rawd));
 }
 
-void ReadLong(wxInputStream& stream, uint32_t& d)
+template <>
+void PeekLong<wxSTD istream>(wxSTD istream& stream, uint32_t& d)
+{
+	char rawd[4];
+	stream.read(rawd, sizeof(rawd));
+	d = get_big_long(&rawd);
+	stream.putback(rawd[0]);
+	stream.putback(rawd[1]);
+	stream.putback(rawd[2]);
+	stream.putback(rawd[3]);
+}
+
+template <typename T>
+void ReadLong(T& stream, uint32_t& d)
 {
 	uint8_t rawd[4];
 	stream.Read(rawd, sizeof(rawd));
 	d = get_big_long(&rawd);
 }
 
+template <>
+void ReadLong<wxSTD istream>(wxSTD istream& stream, uint32_t& d)
+{
+	char rawd[4];
+	stream.read(rawd, sizeof(rawd));
+	d = get_big_long(&rawd);
+}
+
 // return false if you don't read the inname
-void ReadAndCheckID(wxInputStream& stream, uint32_t inname)
+template <typename T>
+void ReadAndCheckID(T& stream, uint32_t inname)
 {
 	uint32_t name;
 	ReadLong(stream, name);
@@ -215,7 +238,8 @@ void ReadAndCheckID(wxInputStream& stream, uint32_t inname)
 }
 
 // return false if you don't read the inname
-void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
+template <typename T>
+void ReadCheckIDandSize(T& stream, uint32_t inname, uint32_t& size)
 {
 	uint32_t name;
 	ReadLong(stream, name);
@@ -235,7 +259,8 @@ void ReadCheckIDandSize(wxInputStream& stream, uint32_t inname, uint32_t& size)
 }
 
 // return false if you don't read the inname
-void ReadCheckIDandFillData(wxInputStream& stream, uint32_t inname, std::vector<uint8_t>& data)
+template <typename T>
+void ReadCheckIDandFillData(T& stream, uint32_t inname, std::vector<uint8_t>& data)
 {
 	uint32_t name;
 	ReadLong(stream, name);
@@ -248,34 +273,61 @@ void ReadCheckIDandFillData(wxInputStream& stream, uint32_t inname, std::vector<
 	stream.Read(&data[0], name);
 }
 
-void WriteLong(wxOutputStream& stream, uint32_t d)
+template <>
+void ReadCheckIDandFillData<wxSTD istream>(wxSTD istream& stream, uint32_t inname, std::vector<uint8_t>& data)
+{
+	uint32_t name;
+	ReadLong(stream, name);
+	if (inname != name)
+	{
+		throw CC_FileException(inname);
+	}
+	ReadLong(stream, name);
+	data.resize(name);
+	stream.read(reinterpret_cast<char*>(&data[0]), name);
+}
+
+template <typename T>
+void WriteLong(T& stream, uint32_t d)
 {
 	uint8_t rawd[4];
 	put_big_long(rawd, d);
 	stream.Write(rawd, sizeof(rawd));
 }
 
-void WriteHeader(wxOutputStream& stream)
+template <>
+void WriteLong<wxSTD ostream>(wxSTD ostream& stream, uint32_t d)
+{
+	char rawd[4];
+	put_big_long(rawd, d);
+	stream.write(rawd, sizeof(rawd));
+}
+
+template <typename T>
+void WriteHeader(T& stream)
 {
 	WriteLong(stream, INGL_INGL);
 }
 
 
-void WriteGurk(wxOutputStream& stream, uint32_t name)
+template <typename T>
+void WriteGurk(T& stream, uint32_t name)
 {
 	WriteLong(stream, INGL_GURK);
 	WriteLong(stream, name);
 }
 
 
-void WriteChunkHeader(wxOutputStream& stream, uint32_t name, uint32_t size)
+template <typename T>
+void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
 {
 	WriteLong(stream, name);
 	WriteLong(stream, size);
 }
 
 
-void WriteChunk(wxOutputStream& stream, uint32_t name, uint32_t size, const void *data)
+template <typename T>
+void WriteChunk(T& stream, uint32_t name, uint32_t size, const void *data)
 {
 	WriteLong(stream, name);
 	WriteLong(stream, size);
@@ -283,31 +335,52 @@ void WriteChunk(wxOutputStream& stream, uint32_t name, uint32_t size, const void
 		stream.Write(data, size);
 }
 
-
-void WriteChunkStr(wxOutputStream& stream, uint32_t name, const char *str)
+template <>
+void WriteChunk<wxSTD ostream>(wxSTD ostream& stream, uint32_t name, uint32_t size, const void *data)
 {
-	WriteChunk(stream, name, strlen(str)+1, (unsigned char *)str);
+	WriteLong(stream, name);
+	WriteLong(stream, size);
+	if (size > 0)
+		stream.write(reinterpret_cast<const char*>(data), size);
 }
 
+template <typename T>
+void WriteChunkStr(T& stream, uint32_t name, const char *str)
+{
+	WriteChunk(stream, name, strlen(str)+1, reinterpret_cast<const unsigned char *>(str));
+}
 
-void WriteEnd(wxOutputStream& stream, uint32_t name)
+template <typename T>
+void WriteEnd(T& stream, uint32_t name)
 {
 	WriteLong(stream, INGL_END);
 	WriteLong(stream, name);
 }
 
 
-void WriteStr(wxOutputStream& stream, const char *str)
+template <typename T>
+void WriteStr(T& stream, const char *str)
 {
 	stream.Write(str, strlen(str)+1);
 }
 
+template <>
+void WriteStr<wxSTD ostream>(wxSTD ostream& stream, const char *str)
+{
+	stream.write(str, strlen(str)+1);
+}
 
-void Write(wxOutputStream& stream, const void *data, uint32_t size)
+template <typename T>
+void Write(T& stream, const void *data, uint32_t size)
 {
 	stream.Write(data, size);
 }
 
+template <>
+void Write<wxSTD ostream>(wxSTD ostream& stream, const void *data, uint32_t size)
+{
+	stream.write(reinterpret_cast<const char*>(data), size);
+}
 
 // Destroy a show
 CC_show::~CC_show()
@@ -628,14 +701,28 @@ wxString CC_show::ImportContinuity(const wxString& file)
 }
 
 
-wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
+template <typename T>
+T& CC_show::SaveObjectGeneric(T& stream)
 {
 	// flush out the text before we save a file.
 	FlushAllTextWindows();
 	return SaveObjectInternal(stream);
 }
 
-wxOutputStream& CC_show::SaveObjectInternal(wxOutputStream& stream)
+#if wxUSE_STD_IOSTREAM
+wxSTD ostream& CC_show::SaveObject(wxSTD ostream& stream)
+{
+	return SaveObjectGeneric<wxSTD ostream>(stream);
+}
+#else
+wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
+{
+	return SaveObjectGeneric<wxOutputStream>(stream);
+}
+#endif
+
+template <typename T>
+T& CC_show::SaveObjectInternal(T& stream)
 {
 	uint32_t id;
 	unsigned i;
@@ -774,7 +861,8 @@ wxOutputStream& CC_show::SaveObjectInternal(wxOutputStream& stream)
 	return stream;
 }
 
-wxInputStream& CC_show::LoadObject(wxInputStream& stream)
+template <typename T>
+T& CC_show::LoadObjectGeneric(T& stream)
 {
 	uint32_t name;
 	std::vector<uint8_t> data;
@@ -981,6 +1069,18 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 	}
 	return stream;
 }
+
+#if wxUSE_STD_IOSTREAM
+wxSTD istream& CC_show::LoadObject(wxSTD istream& stream)
+{
+	return LoadObjectGeneric<wxSTD istream>(stream);
+}
+#else
+wxInputStream& CC_show::LoadObject(wxInputStream& stream)
+{
+	return LoadObjectGeneric<wxInputStream>(stream);
+}
+#endif
 
 void CC_show::FlushAllTextWindows()
 {

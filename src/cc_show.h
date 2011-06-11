@@ -104,8 +104,22 @@ public:
 	virtual void Modify(bool b);
 
 	// How we save and load a show:
-	virtual wxOutputStream& SaveObject(wxOutputStream& stream);
-	virtual wxInputStream& LoadObject(wxInputStream& stream);
+#if wxUSE_STD_IOSTREAM
+    virtual wxSTD ostream& SaveObject(wxSTD ostream& stream);
+    virtual wxSTD istream& LoadObject(wxSTD istream& stream);
+#else
+    virtual wxOutputStream& SaveObject(wxOutputStream& stream);
+    virtual wxInputStream& LoadObject(wxInputStream& stream);
+#endif
+private:
+	template <typename T>
+	T& LoadObjectGeneric(T& stream);
+	template <typename T>
+	T& SaveObjectGeneric(T& stream);
+	template <typename T>
+	T& SaveObjectInternal(T& stream);
+
+public:
 
 	wxString ImportContinuity(const wxString& file);
 
@@ -174,8 +188,6 @@ private:
 private:
 	
 	void PrintSheets(std::ostream& buffer) const;		  // called by Print()
-
-	wxOutputStream& SaveObjectInternal(wxOutputStream& stream);
 
 	bool mOkay; // error for when we are loading shows
 
