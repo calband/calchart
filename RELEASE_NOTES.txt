@@ -85,10 +85,10 @@ How to release calchart:
 0. Increment the version in ccvers.h
 
 1. copy trunk to a tag:
-$ svn copy -m "copying trunk to tag for version 3.1.4" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.1.4
+$ svn copy -m "copying trunk to tag for version 3.2.0" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.2.0
 
 2. get that tag on your computer
-$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.1.4 calchart-3.1.4
+$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.2.0 calchart-3.2.0
 
 3. Build the product:
 ---
@@ -98,13 +98,13 @@ w1. make calchart
 $ make
 
 w2. Put the project in a directory
-$ mkdir CalChart-3.1.4
-$ cp -r calchart runtime docs CalChart-3.1.4
+$ mkdir CalChart-3.2.0
+$ cp -r calchart runtime docs CalChart-3.2.0
 
 w3. Compress the folder (I use compress, but make sure to fix up the extension).
-$ mv CalChart-3.1.zip CalChart.3.1.4.zip
+$ mv CalChart-3.1.zip CalChart.3.2.0.zip
 
-The final product is CalChart-3.1.4.zip
+The final product is CalChart-3.2.0.zip
 
 ---
 For Mac:
@@ -123,7 +123,7 @@ m3. Edit the dmg_maker.sh to have the right version
 m4. Run dmg_maker.sh
 $ bash -f dmg_maker.sh
 
-The final product is CalChart-3.1.4.dmg
+The final product is CalChart-3.2.0.dmg
 
 ---
 4. Go to the sourceforge page at http://sourceforge.net/projects/calchart
@@ -135,6 +135,6 @@ You'll need to be logged in to modify the files.
 
 7. Upload the RELEASE_NOTES.txt to the new folder.  Click on RELEASE_NOTES.txt and edit the file details to signify it's a release notes.
 
-8. Upload the CalChart-3.1.4.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
+8. Upload the CalChart-3.2.0.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
 
-9. Repeat for CalChart-3.1.4.zip.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
+9. Repeat for CalChart-3.2.0.zip.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
