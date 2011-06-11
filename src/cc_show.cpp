@@ -1327,27 +1327,27 @@ struct ShowTestData
 };
 void UnitTests()
 {
-	boost::shared_ptr<CC_show> test(new CC_show);
-//	cout<<"ok "<<test->mOkay<<"\n";
+	CC_show test;
+//	cout<<"ok "<<test.mOkay<<"\n";
 //	assert(test.Ok() == true);
-//	cout<<"GetError "<<(wchar_t*)test->GetError().c_str()<<"\n";
+//	cout<<"GetError "<<(wchar_t*)test.GetError().c_str()<<"\n";
 //	assert(test.Ok() == true);
-	cout<<"GetTitle "<<(wchar_t*)test->GetTitle().c_str()<<"\n";
-	cout<<"GetDescr "<<(wchar_t*)test->GetDescr().c_str()<<"\n";
-	cout<<"Modified "<<test->IsModified()<<"\n";
-	cout<<"GetNumSheets "<<test->GetNumSheets()<<"\n";
-	cout<<"GetNumPoints "<<test->GetNumPoints()<<"\n";
-	for (unsigned i = 0; i < test->GetNumSheets(); ++i)
+	cout<<"GetTitle "<<(wchar_t*)test.GetTitle().c_str()<<"\n";
+	cout<<"GetDescr "<<(wchar_t*)test.GetDescr().c_str()<<"\n";
+	cout<<"Modified "<<test.IsModified()<<"\n";
+	cout<<"GetNumSheets "<<test.GetNumSheets()<<"\n";
+	cout<<"GetNumPoints "<<test.GetNumPoints()<<"\n";
+	for (unsigned i = 0; i < test.GetNumSheets(); ++i)
 	{
-		cout<<"GetBoolLandscape "<<i<<" "<<test->GetBoolLandscape()<<"\n";
-		cout<<"GetBoolDoCont "<<i<<" "<<test->GetBoolDoCont()<<"\n";
-		cout<<"GetBoolDoContSheet "<<i<<" "<<test->GetBoolDoContSheet()<<"\n";
+		cout<<"GetBoolLandscape "<<i<<" "<<test.GetBoolLandscape()<<"\n";
+		cout<<"GetBoolDoCont "<<i<<" "<<test.GetBoolDoCont()<<"\n";
+		cout<<"GetBoolDoContSheet "<<i<<" "<<test.GetBoolDoContSheet()<<"\n";
 	}
-	for (unsigned i = 0; i < test->GetNumPoints(); ++i)
+	for (unsigned i = 0; i < test.GetNumPoints(); ++i)
 	{
-		cout<<"GetPointLabel "<<i<<" "<<(wchar_t*)test->GetPointLabel(i).c_str()<<"\n";
+		cout<<"GetPointLabel "<<i<<" "<<(wchar_t*)test.GetPointLabel(i).c_str()<<"\n";
 	}
-	cout<<"GetMode "<<(void*)&test->GetMode()<<"\n";
+	cout<<"GetMode "<<(void*)&test.GetMode()<<"\n";
 }
 
 

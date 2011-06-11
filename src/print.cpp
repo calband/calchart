@@ -270,7 +270,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	buffer<<buf;
 	time(&t);
 	buffer<<"%%CreationDate: "<<ctime(&t);
-	buffer<<"%%Title: "<<GetTitle().utf8_str()<<"\n";
+	buffer<<"%%Title: "<<std::string(GetTitle().utf8_str())<<"\n";
 	buffer<<"%%Creator: CalChart\n";
 	buffer<<"%%Pages: (atend)\n";
 	buffer<<"%%PageOrder: Ascend\n";
@@ -990,7 +990,7 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 void PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
-	buffer<<"%%Page: "<<sheet.name.utf8_str()<<"\n";
+	buffer<<"%%Page: "<<std::string(sheet.name.utf8_str())<<"\n";
 
 	print_start_page(buffer, sheet.show->GetBoolLandscape());
 	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);

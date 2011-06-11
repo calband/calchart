@@ -440,7 +440,7 @@ void ShowModeSprShow::DrawAnim(wxDC *dc) const
 ShowModeList::ShowModeList()
 {}
 
-struct DeleteObject
+struct DeleteObjectFunct
 {
 	template <typename T>
 		void operator()(const T* ptr) const
@@ -451,7 +451,7 @@ struct DeleteObject
 
 ShowModeList::~ShowModeList()
 {
-	std::for_each(list.begin(), list.end(), DeleteObject());
+	std::for_each(list.begin(), list.end(), DeleteObjectFunct());
 }
 
 

@@ -183,7 +183,7 @@ bool CalChartApp::OnInit()
 	}
 
 #ifndef __WXMAC__
-	frame->Show(true);
+	topframe->Show(true);
 #endif //ndef __WXMAC__
 	SetTopWindow(topframe);
 	

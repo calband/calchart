@@ -24,6 +24,7 @@
 #include "platconf.h"
 
 #include <math.h>
+#include <stdlib.h>
 
 // Get magnitude of vector
 float CC_coord::Magnitude() const
