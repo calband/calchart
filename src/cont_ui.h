@@ -49,7 +49,7 @@ public:
 // ContinuityEditor
 // The way you edit the continuity for individual marchers
 // This dialog should notify the user to save if there are any outstanding edits.
-class ContinuityEditor : public wxDialog
+class ContinuityEditor : public wxFrame
 {
 	friend class ContinuityEditorView;
 public:
@@ -62,7 +62,7 @@ public:
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
 	~ContinuityEditor();
 
-	void OnCloseWindow(wxCloseEvent& event);
+	void OnCloseWindow(wxCommandEvent& event);
 	void OnCmdNew(wxCommandEvent& event);
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);

@@ -37,7 +37,6 @@ enum
 	CALCHART__CONT_NEW = 100,
 	CALCHART__CONT_DELETE,
 	CALCHART__CONT_CLOSE,
-	CALCHART__CONT_HELP,
 	ContinuityEditor_ContEditSet,
 	ContinuityEditor_ContEditSelect,
 	ContinuityEditor_Save,
@@ -46,11 +45,18 @@ enum
 	ContinuityEditor_KeyPress,
 };
 
-BEGIN_EVENT_TABLE(ContinuityEditor, wxDialog)
-EVT_CLOSE(ContinuityEditor::OnCloseWindow)
+BEGIN_EVENT_TABLE(ContinuityEditor, wxFrame)
+EVT_MENU(wxID_CLOSE, ContinuityEditor::OnCloseWindow)
+EVT_MENU(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
+EVT_MENU(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
+EVT_MENU(wxID_HELP, ContinuityEditor::OnCmdHelp)
+EVT_MENU(ContinuityEditor_ContEditSet,ContinuityEditor::ContEditSet)
+EVT_MENU(ContinuityEditor_ContEditSelect,ContinuityEditor::ContEditSelect)
+EVT_MENU(ContinuityEditor_Save,ContinuityEditor::OnSave)
+EVT_MENU(ContinuityEditor_Discard,ContinuityEditor::OnDiscard)
 EVT_BUTTON(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
 EVT_BUTTON(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
-EVT_BUTTON(CALCHART__CONT_HELP, ContinuityEditor::OnCmdHelp)
+EVT_BUTTON(wxID_HELP, ContinuityEditor::OnCmdHelp)
 EVT_BUTTON(ContinuityEditor_ContEditSet,ContinuityEditor::ContEditSet)
 EVT_BUTTON(ContinuityEditor_ContEditSelect,ContinuityEditor::ContEditSelect)
 EVT_BUTTON(ContinuityEditor_Save,ContinuityEditor::OnSave)
@@ -137,7 +143,7 @@ bool ContinuityEditor::Create(CC_show *show,
 		const wxSize& size,
 		long style )
 {
-	if (!wxDialog::Create(parent, id, caption, pos, size, style))
+	if (!wxFrame::Create(parent, id, caption, pos, size, style))
 		return false;
 
 	mShow = show;
@@ -164,6 +170,23 @@ bool ContinuityEditor::Create(CC_show *show,
 
 void ContinuityEditor::CreateControls()
 {
+	// menu bar
+	wxMenu *cont_menu = new wxMenu;
+	cont_menu->Append(CALCHART__CONT_NEW, wxT("&New Continuity\tCTRL-N"), wxT("Add new contiuity"));
+	cont_menu->Append(ContinuityEditor_Save, wxT("&Save Continuity\tCTRL-S"), wxT("Save continuity"));
+	cont_menu->Append(ContinuityEditor_ContEditSet, wxT("S&et Points\tCTRL-E"), wxT("Set points"));
+	cont_menu->Append(ContinuityEditor_ContEditSelect, wxT("Select &Points\tCTRL-P"), wxT("Select Points"));
+	cont_menu->Append(CALCHART__CONT_DELETE, wxT("&Delete Continuity\tCTRL-DEL"), wxT("Delete continuity"));
+	cont_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
+
+	wxMenu *help_menu = new wxMenu;
+	help_menu->Append(wxID_HELP, wxT("&Help on Continuity...\tCTRL-H"), wxT("Help on Continuity"));
+
+	wxMenuBar *menu_bar = new wxMenuBar;
+	menu_bar->Append(cont_menu, wxT("&File"));
+	menu_bar->Append(help_menu, wxT("&Help"));
+	SetMenuBar(menu_bar);
+
 // create a sizer for laying things out top down:
 	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 	SetSizer( topsizer );
@@ -182,7 +205,7 @@ void ContinuityEditor::CreateControls()
 
 	// Set, select
 	top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
-	button = new wxButton(this, ContinuityEditor_ContEditSet, wxT("&Set Points"));
+	button = new wxButton(this, ContinuityEditor_ContEditSet, wxT("S&et Points"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	button = new wxButton(this, ContinuityEditor_ContEditSelect, wxT("Select &Points"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
@@ -205,7 +228,7 @@ void ContinuityEditor::CreateControls()
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	button = new wxButton(this, wxID_CANCEL, wxT("&Close"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	button = new wxButton(this, CALCHART__CONT_HELP, wxT("&Help"));
+	button = new wxButton(this, wxID_HELP, wxT("&Help"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	topsizer->Add(top_button_sizer);
 }
@@ -218,10 +241,31 @@ ContinuityEditor::~ContinuityEditor()
 }
 
 
-void ContinuityEditor::OnCloseWindow(wxCloseEvent& event)
+void ContinuityEditor::OnCloseWindow(wxCommandEvent& event)
 {
+	// if the current field is modified, then do something
+	if (mUserInput->IsModified())
+	{
+		// give the user a chance to save, discard, or cancle the action
+		int userchoice = wxMessageBox(wxT("Continuity modified.  Save changes or cancel?"), wxT("Save changes?"), wxYES_NO|wxCANCEL);
+		if (userchoice == wxYES)
+		{
+			Save();
+		}
+		if (userchoice == wxNO)
+		{
+			Discard();
+		}
+		if (userchoice == wxCANCEL)
+		{
+			wxString message = wxT("Close cancelled.");
+			wxMessageBox(message, message);
+			return;
+		}
+	}
+
 	FlushText();
-	Destroy();
+	Close();
 }
 
 // Add a new continuity that we can modify.  It will be given an name and added to
