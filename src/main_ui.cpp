@@ -432,6 +432,8 @@ field(NULL)
 
 	fullsizer->Add(field, 1, wxEXPAND);
 	SetSizer(fullsizer);
+	// re-set the size
+	SetSize(size);
 	Show(true);
 }
 
@@ -848,8 +850,10 @@ void MainFrame::OnChar(wxKeyEvent& event)
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	// HACK: Prevent width and height from growing out of control
-	SetConfiguration_MainFrameWidth((event.GetSize().GetWidth() > 1200) ? 1200 : event.GetSize().GetWidth());
-	SetConfiguration_MainFrameHeight((event.GetSize().GetHeight() > 700) ? 700 : event.GetSize().GetHeight());
+	int w = event.GetSize().GetWidth();
+	int h = event.GetSize().GetHeight();
+	SetConfiguration_MainFrameWidth((w > 1200) ? 1200 : w);
+	SetConfiguration_MainFrameHeight((h > 700) ? 700 : h);
 	wxDocMDIChildFrame::OnSize(event);
 }
 
