@@ -582,6 +582,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 	collis = new wxChoice(this, CALCHART__anim_collisions,
 		wxDefaultPosition, wxDefaultSize,
 		sizeof(collis_text)/sizeof(const wxString), collis_text);
+	collis->SetSelection(1);
 	sizer1->Add(collis, wxSizerFlags().Expand().Border(5));
 
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Tempo")),
