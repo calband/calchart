@@ -620,6 +620,9 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 
 	UpdatePanel();
 	Fit();
+
+	// make animation screen large by default.
+	Maximize(true);
 	Show(true);
 }
 
