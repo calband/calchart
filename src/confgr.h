@@ -93,7 +93,6 @@ Type GetConfiguration_ ## Key () ; \
 void SetConfiguration_ ## Key (const Type& v) ; \
 void ClearConfiguration_ ## Key () ;
 
-DECLARE_CONFIGURATION_FUNCTIONS( AutosaveDir, wxString);
 DECLARE_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
 // page setup and zoom

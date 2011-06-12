@@ -108,8 +108,6 @@ const int DefaultPenWidth[COLOR_NUM] =
 // Autosave
 static const wxString kAutosaveIntervalKey = wxT("AutosaveInterval");
 static const int kAutosaveIntervalValue = 60;
-static const wxString kAutosaveDirKey = wxT("AutosaveDir");
-static const wxString kAutosaveDirValue = AUTOSAVE_VAR;
 
 static const wxString kMainFrameZoomKey = wxT("MainFrameZoom");
 static const long kMainFrameZoomValue = 5;
@@ -241,7 +239,6 @@ void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>(
 void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
 
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveDir, wxString);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, long);

@@ -137,14 +137,12 @@ private:
 	const wxPen *mCalChartPens[COLOR_NUM];
 	const wxBrush *mCalChartBrushes[COLOR_NUM];
 
-	wxString mAutoSave_Dir;
 	wxString mAutoSave_Interval;
 };
 
 enum
 {
-	AUTOSAVE_DIR = 1000,
-	AUTOSAVE_INTERVAL,
+	AUTOSAVE_INTERVAL = 1000,
 	BUTTON_SELECT,
 	BUTTON_RESTORE,
 	SPIN_WIDTH,
@@ -171,7 +169,6 @@ void GeneralSetup::CreateControls()
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxVERTICAL);
 	boxsizer->Add(sizer1, sLeftBasicSizerFlags);
 
-	AddTextboxWithCaption(this, sizer1, AUTOSAVE_DIR, wxT("Autosave Directory"));
 	AddTextboxWithCaption(this, sizer1, AUTOSAVE_INTERVAL, wxT("Autosave Interval"));
 
 	boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Color settings")), wxVERTICAL);
@@ -216,15 +213,12 @@ void GeneralSetup::Init()
 		mCalChartBrushes[i] = CalChartBrushes[i];
 	}
 
-	mAutoSave_Dir = GetConfiguration_AutosaveDir();
 	mAutoSave_Interval.Printf(wxT("%d"), GetConfiguration_AutosaveInterval());
 }
 
 bool GeneralSetup::TransferDataToWindow()
 {
-	wxTextCtrl* text = (wxTextCtrl*) FindWindow(AUTOSAVE_DIR);
-	text->SetValue(mAutoSave_Dir);
-	text = (wxTextCtrl*) FindWindow(AUTOSAVE_INTERVAL);
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(AUTOSAVE_INTERVAL);
 	text->SetValue(mAutoSave_Interval);
 	return true;
 }
@@ -232,9 +226,7 @@ bool GeneralSetup::TransferDataToWindow()
 bool GeneralSetup::TransferDataFromWindow()
 {
 	// read out the values from the window
-	wxTextCtrl* text = (wxTextCtrl*) FindWindow(AUTOSAVE_DIR);
-	mAutoSave_Dir = text->GetValue();
-	text = (wxTextCtrl*) FindWindow(AUTOSAVE_INTERVAL);
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(AUTOSAVE_INTERVAL);
 	mAutoSave_Interval = text->GetValue();
 
 	// write out the values defaults:
@@ -247,7 +239,6 @@ bool GeneralSetup::TransferDataFromWindow()
 			SetConfigColor(i);
 		}
 	}
-	SetConfiguration_AutosaveDir(mAutoSave_Dir);
 	long val;
 	mAutoSave_Interval.ToLong(&val);
 	SetConfiguration_AutosaveInterval(val);
@@ -261,7 +252,6 @@ bool GeneralSetup::ClearValuesToDefault()
 		SetColor(i, DefaultPenWidth[i], DefaultColors[i]);
 		ClearConfigColor(i);
 	}
-	ClearConfiguration_AutosaveDir();
 	ClearConfiguration_AutosaveInterval();
 	Init();
 	TransferDataToWindow();

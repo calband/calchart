@@ -84,14 +84,6 @@ typedef unsigned char uint8_t;
 #define PATH_SEPARATOR wxT("/")
 #endif
 
-#ifdef __WXMSW__
-#define AUTOSAVE_VAR wxT("$TEMP")
-#define AUTOSAVE_DIR wxT("C:")
-#else
-#define AUTOSAVE_VAR wxT("$TMPDIR")
-#define AUTOSAVE_DIR wxT("/tmp")
-#endif
-
 // Wildcard in file selector
 #define FILE_WILDCARDS wxT("All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas")
 #define FILE_SAVE_WILDCARDS wxT("New shows (*.shw)|*.shw")
