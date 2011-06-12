@@ -187,6 +187,11 @@ bool CalChartApp::OnInit()
 #endif //ndef __WXMAC__
 	SetTopWindow(topframe);
 	
+	// Get the file history
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/FileHistory"));
+	mDocManager.FileHistoryLoad(*config);
+
 	CC_continuity_UnitTests();
 	CC_point_UnitTests();
 	CC_coord_UnitTests();
@@ -201,6 +206,12 @@ void CalChartApp::MacOpenFile(const wxString &fileName)
 
 int CalChartApp::OnExit()
 {
+	// Get the file history
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/FileHistory"));
+	mDocManager.FileHistorySave(*config);
+	config->Flush();
+
 	if (gPrintDialogData) delete gPrintDialogData;
 	if (gHelpController) delete gHelpController;
 
