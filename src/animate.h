@@ -26,6 +26,7 @@
 #include "cc_coord.h"
 #include "cc_show.h"
 #include <wx/string.h>
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <set>
 #include <vector>
@@ -75,7 +76,6 @@ class AnimatePoint
 {
 public:
 	CC_coord pos;
-	int dir;
 };
 
 class AnimateCommand
@@ -99,7 +99,6 @@ public:
 	virtual float MotionDirection();
 	virtual void ClipBeats(unsigned beats);
 
-	AnimateCommand *next, *prev;
 	unsigned numbeats;
 protected:
 	unsigned beat;
@@ -159,21 +158,18 @@ private:
 	float face;
 };
 
+// An animation sheet is a collection of commands for each of the points.
 class AnimateSheet
 {
 public:
-	AnimateSheet(unsigned numpoints);
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints);
 	~AnimateSheet();
 	void SetName(const wxChar *s);
 
-	AnimateSheet *next, *prev;
-	std::vector<AnimatePoint> pts;
-	std::vector<AnimateCommand*> commands;
-	std::vector<AnimateCommand*> end_cmds;
+	std::vector<AnimatePoint> pts; // should probably be const
+	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
 	wxString name;
 	unsigned numbeats;
-private:
-	unsigned numpts;
 };
 
 enum CollisionWarning
@@ -204,21 +200,31 @@ public:
 	inline void EnableCollisions(CollisionWarning col) { check_collis = col; }
 	void CheckCollisions();
 
-	unsigned numpts;
-	std::vector<AnimatePoint> pts;
-	std::vector<AnimateCommand*> curr_cmds;
-	std::vector<int> collisions; // avoid using vector bool
-	AnimateSheet *curr_sheet;
-	unsigned curr_sheetnum;
-	unsigned numsheets;
-	unsigned curr_beat;
+	// For drawing:
+	bool IsCollision(unsigned which) const;
+	AnimateDir Direction(unsigned which) const;
+	CC_coord Position(unsigned which) const;
+
+	int GetNumberSheets() const;
+	int GetCurrentSheet() const;
+	int GetNumberBeats() const;
+	int GetCurrentBeat() const;
+	const wxString& GetCurrentSheetName() const;
+
 private:
+	const unsigned numpts;
+	std::vector<AnimatePoint> pts;
+	std::vector<std::vector<boost::shared_ptr<AnimateCommand> >::iterator > curr_cmds; // pointer to the current command
+	std::set<int> mCollisions;
+	unsigned curr_sheetnum;
+	unsigned curr_beat;
+
 	void BeginCmd(unsigned i);
 	void EndCmd(unsigned i);
 
 	void RefreshSheet();
 
-	AnimateSheet *sheets;
+	std::vector<AnimateSheet> sheets;
 	CollisionWarning check_collis;
 };
 
@@ -262,8 +268,9 @@ public:
 // Compile a point
 	void Compile(unsigned pt_num, unsigned cont_num, ContProcedure* proc);
 // true if successful
-	bool Append(AnimateCommand *cmd, const ContToken *token);
+	bool Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 
+public:
 	inline bool Okay() { return okay; };
 	inline void SetStatus(bool s) { okay = s; };
 	void RegisterError(AnimateError err, const ContToken *token);
@@ -273,8 +280,7 @@ public:
 	void SetVarValue(int varnum, float value);
 
 	AnimatePoint pt;
-	AnimateCommand *cmds;
-	AnimateCommand *curr_cmd;
+	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
 	CC_show *show;
 	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;

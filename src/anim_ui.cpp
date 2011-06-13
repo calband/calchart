@@ -118,73 +118,58 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
 	mShow->GetMode().DrawAnim(dc);
 	if (anim)
-		for (i = 0; i < anim->numpts; i++)
+		for (i = 0; i < mShow->GetNumPoints(); i++)
 	{
-		if (anim->collisions[i])
+		if (anim->IsCollision(i))
 		{
 			dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
 			dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
 		}
 		else if (mShow->IsSelected(i))
 		{
-			if (anim->curr_cmds[i])
+			switch (anim->Direction(i))
 			{
-				switch (anim->curr_cmds[i]->Direction())
-				{
-					case ANIMDIR_SW:
-					case ANIMDIR_W:
-					case ANIMDIR_NW:
-						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
-						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
-						break;
-					case ANIMDIR_SE:
-					case ANIMDIR_E:
-					case ANIMDIR_NE:
-						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
-						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
-						break;
-					default:
-						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
-						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
-				}
-			}
-			else
-			{
-				dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
-				dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
+				case ANIMDIR_SW:
+				case ANIMDIR_W:
+				case ANIMDIR_NW:
+					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
+					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
+					break;
+				case ANIMDIR_SE:
+				case ANIMDIR_E:
+				case ANIMDIR_NE:
+					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
+					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
+					break;
+				default:
+					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
+					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
 			}
 		}
 		else
 		{
-			if (anim->curr_cmds[i])
+			switch (anim->Direction(i))
 			{
-				switch (anim->curr_cmds[i]->Direction())
-				{
-					case ANIMDIR_SW:
-					case ANIMDIR_W:
-					case ANIMDIR_NW:
-						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_BACK]);
-						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_BACK]);
-						break;
-					case ANIMDIR_SE:
-					case ANIMDIR_E:
-					case ANIMDIR_NE:
-						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
-						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
-						break;
-					default:
-						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_SIDE]);
-						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
-				}
-			}
-			else
-			{
-				dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
-				dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
+				case ANIMDIR_SW:
+				case ANIMDIR_W:
+				case ANIMDIR_NW:
+					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_BACK]);
+					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_BACK]);
+					break;
+				case ANIMDIR_SE:
+				case ANIMDIR_E:
+				case ANIMDIR_NE:
+					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
+					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
+					break;
+				default:
+					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_SIDE]);
+					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
 			}
 		}
-		x = anim->pts[i].pos.x+mShow->GetMode().Offset().x;
-		y = anim->pts[i].pos.y+mShow->GetMode().Offset().y;
+		CC_coord position = anim->Position(i);
+		x = position.x+mShow->GetMode().Offset().x;
+		y = position.y+mShow->GetMode().Offset().y;
 		dc->DrawRectangle(x - INT2COORD(1)/2, y - INT2COORD(1)/2,
 			INT2COORD(1), INT2COORD(1));
 	}
@@ -238,6 +223,27 @@ void AnimationCanvas::SetTempo(unsigned t)
 }
 
 
+int AnimationCanvas::GetNumberSheets() const
+{
+	return (anim) ? anim->GetNumberSheets() : 0;
+}
+
+int AnimationCanvas::GetCurrentSheet() const
+{
+	return (anim) ? anim->GetCurrentSheet() : 0;
+}
+
+int AnimationCanvas::GetNumberBeats() const
+{
+	return (anim) ? anim->GetNumberBeats() : 0;
+}
+
+int AnimationCanvas::GetCurrentBeat() const
+{
+	return (anim) ? anim->GetCurrentBeat() : 0;
+}
+
+
 void AnimationCanvas::UpdateText()
 {
 	wxString tempbuf;
@@ -245,9 +251,9 @@ void AnimationCanvas::UpdateText()
 	if (anim)
 	{
 		tempbuf.Printf(wxT("Beat %u of %u  Sheet %d of %d \"%.32s\""),
-			anim->curr_beat, anim->curr_sheet->numbeats,
-			anim->curr_sheetnum+1, anim->numsheets,
-			anim->curr_sheet->name.c_str());
+			anim->GetCurrentBeat(), anim->GetNumberBeats(),
+			anim->GetCurrentSheet()+1, anim->GetNumberSheets(),
+			anim->GetCurrentSheetName().c_str());
 		ourframe->SetStatusText(tempbuf, 1);
 	}
 	else
@@ -276,7 +282,7 @@ void AnimationCanvas::Generate()
 		RefreshCanvas();
 	}
 	anim = new Animation(mShow, ourframe);
-	if (anim && (anim->numsheets == 0))
+	if (anim && (anim->GetNumberSheets() == 0))
 	{
 		delete anim;
 		anim = NULL;
@@ -303,6 +309,22 @@ void AnimationCanvas::FreeAnim()
 }
 
 
+void AnimationCanvas::EnableCollisions(CollisionWarning col)
+{
+	if (anim)
+	{
+		anim->EnableCollisions(col);
+	}
+}
+
+void AnimationCanvas::CheckCollisions()
+{
+	if (anim)
+	{
+		anim->CheckCollisions();
+	}
+}
+
 void AnimationCanvas::SelectCollisions()
 {
 	unsigned i;
@@ -310,9 +332,9 @@ void AnimationCanvas::SelectCollisions()
 	if (anim)
 	{
 		CC_show::SelectionList select;
-		for (i = 0; i < anim->numpts; i++)
+		for (i = 0; i < mShow->GetNumPoints(); i++)
 		{
-			if (anim->collisions[i])
+			if (anim->IsCollision(i))
 			{
 				select.insert(i);
 			}
@@ -345,7 +367,7 @@ wxString AnimationCanvas::GeneratePOVFiles(const wxString& filebasename)
 			{
 				return wxT("Error opening file");
 			}
-			for (pt = 0; pt < anim->numpts; pt++)
+			for (pt = 0; pt < mShow->GetNumPoints(); pt++)
 			{
 				x = COORD2FLOAT(anim->pts[pt].pos.x) * POV_SCALE;
 				y = COORD2FLOAT(anim->pts[pt].pos.y) * POV_SCALE;
@@ -433,7 +455,7 @@ wxString AnimationCanvas::GenerateRIBFrame()
 	RiDeclare("tmap", "uniform string");
 	RiSurface("fieldtexture", "tmap", &texturefile, RI_NULL);
 	RiPolygon(4, RI_P, (RtPointer)field, RI_NULL);
-	for (pt = 0; pt < anim->numpts; pt++)
+	for (pt = 0; pt < mShow->GetNumPoints(); pt++)
 	{
 		if (anim->curr_cmds[pt])
 		{
@@ -737,12 +759,9 @@ void AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event)
 
 void AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 {
-	if (canvas->anim)
-	{
-		canvas->anim->EnableCollisions((CollisionWarning)event.GetSelection());
-		canvas->anim->CheckCollisions();
-		canvas->Redraw();
-	}
+	canvas->EnableCollisions((CollisionWarning)event.GetSelection());
+	canvas->CheckCollisions();
+	canvas->Redraw();
 }
 
 
@@ -768,16 +787,9 @@ void AnimationFrame::UpdatePanel()
 {
 	int num, curr;
 
-	if (canvas->anim)
-	{
-		num = (int)canvas->anim->numsheets;
-		curr = (int)canvas->anim->curr_sheetnum+1;
-	}
-	else
-	{
-		num = 1;
-		curr = 1;
-	}
+	num = canvas->GetNumberSheets();
+	curr = canvas->GetCurrentSheet()+1;
+
 	if (num > 1)
 	{
 		sheet_slider->Enable(true);
@@ -792,16 +804,9 @@ void AnimationFrame::UpdatePanel()
 		sheet_slider->Enable(false);
 	}
 
-	if (canvas->anim)
-	{
-		num = ((int)canvas->anim->curr_sheet->numbeats)-1;
-		curr = (int)canvas->anim->curr_beat;
-	}
-	else
-	{
-		num = 0;
-		curr = 0;
-	}
+	num = canvas->GetNumberBeats()-1;
+	curr = canvas->GetCurrentBeat();
+
 	if (num > 0)
 	{
 		beat_slider->Enable(true);

@@ -58,6 +58,11 @@ public:
 	inline unsigned GetTempo() { return tempo; }
 	void SetTempo(unsigned t);
 
+	int GetNumberSheets() const;
+	int GetCurrentSheet() const;
+	int GetNumberBeats() const;
+	int GetCurrentBeat() const;
+
 	inline void Redraw() { Refresh(); }
 	void UpdateText();
 	void RefreshCanvas();
@@ -65,6 +70,8 @@ public:
 	void FreeAnim();
 
 // Select colliding points and redraw
+	void EnableCollisions(CollisionWarning col);
+	void CheckCollisions();
 	void SelectCollisions();
 
 // true if changes made
@@ -134,10 +141,11 @@ public:
 	wxString GenerateRIBFile(const wxString& filename, bool all = true);
 #endif
 
+private:
 	Animation* anim;
 	AnimationTimer* timer;
 	bool timeron;
-private:
+
 	CC_show *mShow;
 	AnimationFrame *ourframe;
 	unsigned tempo;

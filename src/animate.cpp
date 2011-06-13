@@ -167,7 +167,7 @@ AnimateDir AnimGetDirFromAngle(float ang)
 
 
 AnimateCommand::AnimateCommand(unsigned beats)
-: next(NULL), prev(NULL), numbeats(beats) {}
+: numbeats(beats) {}
 
 bool AnimateCommand::Begin(AnimatePoint& pt)
 {
@@ -396,33 +396,13 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 }
 
 
-AnimateSheet::AnimateSheet(unsigned numpoints)
-: next(NULL), prev(NULL), pts(numpoints), commands(numpoints), end_cmds(numpoints), numpts(numpoints)
-{
-	for (size_t i = 0; i < numpts; i++)
-	{
-		commands[i] = NULL;
-		end_cmds[i] = NULL;
-	}
-}
+AnimateSheet::AnimateSheet(const std::vector<AnimatePoint>& thePoints)
+: pts(thePoints), commands(thePoints.size())
+{}
 
 
 AnimateSheet::~AnimateSheet()
-{
-	AnimateCommand *cmd, *tmp;
-	unsigned i;
-
-	for (i = 0; i < numpts; i++)
-	{
-		cmd = commands[i];
-		while (cmd)
-		{
-			tmp = cmd->next;
-			delete cmd;
-			cmd = tmp;
-		}
-	}
-}
+{}
 
 
 void AnimateSheet::SetName(const wxChar *s)
@@ -432,10 +412,10 @@ void AnimateSheet::SetName(const wxChar *s)
 
 
 Animation::Animation(CC_show *show, wxFrame *frame)
-: numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts), collisions(numpts),
-curr_sheet(NULL), numsheets(0), sheets(NULL)
+: numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts),
+curr_sheetnum(0)
 {
-	unsigned i, j;
+	unsigned j;
 	ContProcedure* curr_proc;
 	AnimateCompile comp;
 	wxString tempbuf;
@@ -449,23 +429,14 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 		++comp.curr_sheet, sheetnum++)
 	{
 		if (! comp.curr_sheet->IsInAnimation()) continue;
-		if (curr_sheet)
+		std::vector<AnimatePoint> thePoints(numpts);
+		for (unsigned i = 0; i < numpts; i++)
 		{
-			curr_sheet->next = new AnimateSheet(numpts);
-			curr_sheet->next->prev = curr_sheet;
-			curr_sheet = curr_sheet->next;
+			thePoints.at(i).pos = comp.curr_sheet->GetPosition(i);
 		}
-		else
-		{
-			sheets = curr_sheet = new AnimateSheet(numpts);
-		}
-		numsheets++;
-		curr_sheet->SetName(comp.curr_sheet->GetName());
-		curr_sheet->numbeats = comp.curr_sheet->GetBeats();
-		for (i = 0; i < numpts; i++)
-		{
-			curr_sheet->pts[i].pos = comp.curr_sheet->GetPosition(i);
-		}
+		AnimateSheet new_sheet(thePoints);
+		new_sheet.SetName(comp.curr_sheet->GetName());
+		new_sheet.numbeats = comp.curr_sheet->GetBeats();
 
 // Now parse continuity
 		comp.SetStatus(true);
@@ -488,8 +459,7 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 					if (comp.curr_sheet->GetPoint(j).cont == currcont->GetNum())
 					{
 						comp.Compile(j, contnum, ParsedContinuity);
-						curr_sheet->commands[j] = comp.cmds;
-						curr_sheet->end_cmds[j] = comp.curr_cmd;
+						new_sheet.commands[j] = comp.cmds;
 						if (parseerr != 0)
 						{
 							comp.RegisterError(ANIMERR_SYNTAX, &dummy);
@@ -509,11 +479,10 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 		frame->SetStatusText(tempbuf);
 		for (j = 0; j < numpts; j++)
 		{
-			if (curr_sheet->commands[j] == NULL)
+			if (new_sheet.commands[j].empty())
 			{
 				comp.Compile(j, 0, NULL);
-				curr_sheet->commands[j] = comp.cmds;
-				curr_sheet->end_cmds[j] = comp.curr_cmd;
+				new_sheet.commands[j] = comp.cmds;
 			}
 		}
 		if (!comp.Okay())
@@ -527,31 +496,21 @@ curr_sheet(NULL), numsheets(0), sheets(NULL)
 				break;
 			}
 		}
+		sheets.push_back(new_sheet);
 	}
 }
 
 
 Animation::~Animation()
-{
-	AnimateSheet *sht, *tmp;
-
-	sht = sheets;
-	while (sht)
-	{
-		tmp = sht->next;
-		delete sht;
-		sht = tmp;
-	}
-}
+{}
 
 
 bool Animation::PrevSheet()
 {
 	if (curr_beat == 0)
 	{
-		if (curr_sheet->prev)
+		if (curr_sheetnum > 0)
 		{
-			curr_sheet = curr_sheet->prev;
 			curr_sheetnum--;
 		}
 	}
@@ -563,24 +522,23 @@ bool Animation::PrevSheet()
 
 bool Animation::NextSheet()
 {
-	if (curr_sheet->next)
+	if ((curr_sheetnum + 1) != sheets.size())
 	{
-		curr_sheet = curr_sheet->next;
 		curr_sheetnum++;
 		RefreshSheet();
 		CheckCollisions();
 	}
 	else
 	{
-		if (curr_beat >= curr_sheet->numbeats)
+		if (curr_beat >= sheets.at(curr_sheetnum).numbeats)
 		{
-			if (curr_sheet->numbeats == 0)
+			if (sheets.at(curr_sheetnum).numbeats == 0)
 			{
 				curr_beat = 0;
 			}
 			else
 			{
-				curr_beat = curr_sheet->numbeats-1;
+				curr_beat = sheets.at(curr_sheetnum).numbeats-1;
 			}
 		}
 		return false;
@@ -595,28 +553,27 @@ bool Animation::PrevBeat()
 
 	if (curr_beat == 0)
 	{
-		if (curr_sheet->prev == NULL) return false;
-		curr_sheet = curr_sheet->prev;
+		if (curr_sheetnum == 0) return false;
 		curr_sheetnum--;
 		for (i = 0; i < numpts; i++)
 		{
-			curr_cmds[i] = curr_sheet->end_cmds[i];
+			curr_cmds[i] = sheets.at(curr_sheetnum).commands[i].end() - 1;
 			EndCmd(i);
 		}
-		curr_beat = curr_sheet->numbeats;
+		curr_beat = sheets.at(curr_sheetnum).numbeats;
 	}
 	for (i = 0; i < numpts; i++)
 	{
-		if (!curr_cmds[i]->PrevBeat(pts[i]))
+		if (!(*curr_cmds.at(i))->PrevBeat(pts[i]))
 		{
 // Advance to prev command, skipping zero beat commands
-			if (curr_cmds[i]->prev)
+			if (curr_cmds[i] != sheets.at(curr_sheetnum).commands[i].begin())
 			{
-				curr_cmds[i] = curr_cmds[i]->prev;
+				--curr_cmds[i];
 				EndCmd(i);
 // Set to next-to-last beat of this command
 // Should always return true
-				curr_cmds[i]->PrevBeat(pts[i]);
+				(*curr_cmds[i])->PrevBeat(pts[i]);
 			}
 		}
 	}
@@ -632,22 +589,19 @@ bool Animation::NextBeat()
 	unsigned i;
 
 	curr_beat++;
-	if (curr_beat >= curr_sheet->numbeats)
+	if (curr_beat >= sheets.at(curr_sheetnum).numbeats)
 	{
 		return NextSheet();
 	}
 	for (i = 0; i < numpts; i++)
 	{
-		if (curr_cmds[i])
+		if (!(*curr_cmds.at(i))->NextBeat(pts[i]))
 		{
-			if (!curr_cmds[i]->NextBeat(pts[i]))
-			{
 // Advance to next command, skipping zero beat commands
-				if (curr_cmds[i]->next)
-				{
-					curr_cmds[i] = curr_cmds[i]->next;
-					BeginCmd(i);
-				}
+			if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).commands.at(i).end())
+			{
+				++curr_cmds[i];
+				BeginCmd(i);
 			}
 		}
 	}
@@ -672,12 +626,6 @@ void Animation::GotoBeat(unsigned i)
 void Animation::GotoSheet(unsigned i)
 {
 	curr_sheetnum = i;
-	curr_sheet = sheets;
-	while (i > 0)
-	{
-		curr_sheet = curr_sheet->next;
-		i--;
-	}
 	RefreshSheet();
 	CheckCollisions();
 }
@@ -685,26 +633,22 @@ void Animation::GotoSheet(unsigned i)
 
 void Animation::BeginCmd(unsigned i)
 {
-	if (curr_cmds[i] != NULL)
+	while (!(*curr_cmds.at(i))->Begin(pts[i]))
 	{
-		while (!curr_cmds[i]->Begin(pts[i]))
-		{
-			if (curr_cmds[i]->next == NULL) return;
-			curr_cmds[i] = curr_cmds[i]->next;
-		}
+		if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).commands.at(i).end())
+			return;
+		++curr_cmds[i];
 	}
 }
 
 
 void Animation::EndCmd(unsigned i)
 {
-	if (curr_cmds[i] != NULL)
+	while (!(*curr_cmds.at(i))->End(pts[i]))
 	{
-		while (!curr_cmds[i]->End(pts[i]))
-		{
-			if (curr_cmds[i]->prev == NULL) return;
-			curr_cmds[i] = curr_cmds[i]->prev;
-		}
+		if ((curr_cmds[i]) == sheets.at(curr_sheetnum).commands.at(i).begin())
+			return;
+		--curr_cmds[i];
 	}
 }
 
@@ -715,8 +659,8 @@ void Animation::RefreshSheet()
 
 	for (i = 0; i < numpts; i++)
 	{
-		pts[i].pos = curr_sheet->pts[i].pos;
-		curr_cmds[i] = curr_sheet->commands[i];
+		pts[i].pos = sheets.at(curr_sheetnum).pts[i].pos;
+		curr_cmds[i] = sheets.at(curr_sheetnum).commands[i].begin();
 		BeginCmd(i);
 	}
 	curr_beat = 0;
@@ -725,23 +669,18 @@ void Animation::RefreshSheet()
 
 void Animation::CheckCollisions()
 {
-	unsigned i, j;
-	bool beep = false;
-
-	for (i = 0; i < numpts; i++)
-	{
-		collisions[i] = false;
-	}
+	mCollisions.clear();
 	if (check_collis != COLLISION_NONE)
 	{
-		for (i = 0; i < numpts; i++)
+		bool beep = false;
+		for (unsigned i = 0; i < numpts; i++)
 		{
-			for (j = i+1; j < numpts; j++)
+			for (unsigned j = i+1; j < numpts; j++)
 			{
 				if (pts[i].pos.Collides(pts[j].pos))
 				{
-					collisions[i] = true;
-					collisions[j] = true;
+					mCollisions.insert(i);
+					mCollisions.insert(j);
 					beep = true;
 				}
 			}
@@ -751,6 +690,48 @@ void Animation::CheckCollisions()
 			wxBell();
 		}
 	}
+}
+
+
+bool Animation::IsCollision(unsigned which) const
+{
+	return mCollisions.count(which);
+}
+
+AnimateDir Animation::Direction(unsigned which) const
+{
+	return (*curr_cmds.at(which))->Direction();
+	return ANIMDIR_E;
+}
+
+CC_coord Animation::Position(unsigned which) const
+{
+	return pts.at(which).pos;
+}
+
+int Animation::GetNumberSheets() const
+{
+	return sheets.size();
+}
+
+int Animation::GetCurrentSheet() const
+{
+	return curr_sheetnum;
+}
+
+int Animation::GetNumberBeats() const
+{
+	return sheets.at(curr_sheetnum).numbeats;
+}
+
+int Animation::GetCurrentBeat() const
+{
+	return curr_beat;
+}
+
+const wxString& Animation::GetCurrentSheetName() const
+{
+	return sheets.at(curr_sheetnum).name;
 }
 
 
@@ -773,7 +754,7 @@ ContProcedure* proc)
 
 	contnum = cont_num;
 	pt.pos = curr_sheet->GetPosition(pt_num);
-	cmds = curr_cmd = NULL;
+	cmds.clear();
 	curr_pt = pt_num;
 	beats_rem = curr_sheet->GetBeats();
 
@@ -812,18 +793,18 @@ ContProcedure* proc)
 		{
 			c = curr_sheet_next->GetPosition(curr_pt) - pt.pos;
 			RegisterError(ANIMERR_WRONGPLACE, NULL);
-			Append(new AnimateCommandMove(beats_rem, c), NULL);
+			Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(beats_rem, c)), NULL);
 		}
 	}
 	if (beats_rem)
 	{
 		RegisterError(ANIMERR_EXTRATIME, NULL);
-		Append(new AnimateCommandMT(beats_rem, ANIMDIR_E), NULL);
+		Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT(beats_rem, ANIMDIR_E)), NULL);
 	}
 }
 
 
-bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token)
+bool AnimateCompile::Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token)
 {
 	bool clipped;
 
@@ -832,7 +813,6 @@ bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token)
 		RegisterError(ANIMERR_OUTOFTIME, token);
 		if (beats_rem == 0)
 		{
-			delete cmd;
 			return false;
 		}
 		cmd->ClipBeats(beats_rem);
@@ -842,16 +822,7 @@ bool AnimateCompile::Append(AnimateCommand *cmd, const ContToken *token)
 	{
 		clipped = false;
 	}
-	if (curr_cmd)
-	{
-		curr_cmd->next = cmd;
-		cmd->prev = curr_cmd;
-		curr_cmd = cmd;
-	}
-	else
-	{
-		cmds = curr_cmd = cmd;
-	}
+	cmds.push_back(cmd);
 	beats_rem -= cmd->numbeats;
 
 	cmd->ApplyForward(pt);						  // Move current point to new position
