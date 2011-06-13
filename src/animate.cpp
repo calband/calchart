@@ -261,10 +261,10 @@ AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement, float 
 bool AnimateCommandMove::NextBeat(AnimatePoint& pt)
 {
 	bool b = AnimateCommand::NextBeat(pt);
-	pt.pos.x +=
+	pt.x +=
 		((long)beat * vector.x / (short)numbeats) -
 		((long)(beat-1) * vector.x / (short)numbeats);
-	pt.pos.y +=
+	pt.y +=
 		((long)beat * vector.y / (short)numbeats) -
 		((long)(beat-1) * vector.y / (short)numbeats);
 	return b;
@@ -275,10 +275,10 @@ bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
 {
 	if (AnimateCommand::PrevBeat(pt))
 	{
-		pt.pos.x +=
+		pt.x +=
 			((long)beat * vector.x / (short)numbeats) -
 			((long)(beat+1) * vector.x / (short)numbeats);
-		pt.pos.y +=
+		pt.y +=
 			((long)beat * vector.y / (short)numbeats) -
 			((long)(beat+1) * vector.y / (short)numbeats);
 		return true;
@@ -293,14 +293,14 @@ bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
 void AnimateCommandMove::ApplyForward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyForward(pt);
-	pt.pos += vector;
+	pt += vector;
 }
 
 
 void AnimateCommandMove::ApplyBackward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyBackward(pt);
-	pt.pos -= vector;
+	pt -= vector;
 }
 
 
@@ -331,8 +331,8 @@ bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
 	bool b = AnimateCommand::NextBeat(pt);
 	float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
 		* PI / 180.0;
-	pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
-	pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
+	pt.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
+	pt.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
 	return b;
 }
 
@@ -343,8 +343,8 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 	{
 		float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
 			* PI / 180.0;
-		pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
-		pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
+		pt.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
+		pt.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
 		return true;
 	}
 	else
@@ -357,16 +357,16 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyForward(pt);
-	pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(ang_end*PI/180.0)*r);
-	pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(ang_end*PI/180.0)*r);
+	pt.x = (Coord)CLIPFLOAT(origin.x + cos(ang_end*PI/180.0)*r);
+	pt.y = (Coord)CLIPFLOAT(origin.y - sin(ang_end*PI/180.0)*r);
 }
 
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyBackward(pt);
-	pt.pos.x = (Coord)CLIPFLOAT(origin.x + cos(ang_start*PI/180.0)*r);
-	pt.pos.y = (Coord)CLIPFLOAT(origin.y - sin(ang_start*PI/180.0)*r);
+	pt.x = (Coord)CLIPFLOAT(origin.x + cos(ang_start*PI/180.0)*r);
+	pt.y = (Coord)CLIPFLOAT(origin.y - sin(ang_start*PI/180.0)*r);
 }
 
 
@@ -416,33 +416,31 @@ Animation::Animation(CC_show *show, wxFrame *frame)
 curr_sheetnum(0)
 {
 	unsigned j;
-	ContProcedure* curr_proc;
-	AnimateCompile comp;
+	AnimateCompile comp(show);
 	wxString tempbuf;
 
 // Now compile
-	comp.show = show;
 	show->FlushAllTextWindows();		  // get all changes in text windows
 
 	unsigned sheetnum = 0;
-	for (comp.curr_sheet = show->GetSheetBegin(); comp.curr_sheet != show->GetSheetEnd();
-		++comp.curr_sheet, sheetnum++)
+	for (CC_show::const_CC_sheet_iterator_t curr_sheet = show->GetSheetBegin(); curr_sheet != show->GetSheetEnd();
+		++curr_sheet, sheetnum++)
 	{
-		if (! comp.curr_sheet->IsInAnimation()) continue;
+		if (! curr_sheet->IsInAnimation()) continue;
 		std::vector<AnimatePoint> thePoints(numpts);
 		for (unsigned i = 0; i < numpts; i++)
 		{
-			thePoints.at(i).pos = comp.curr_sheet->GetPosition(i);
+			thePoints.at(i) = curr_sheet->GetPosition(i);
 		}
 		AnimateSheet new_sheet(thePoints);
-		new_sheet.SetName(comp.curr_sheet->GetName());
-		new_sheet.numbeats = comp.curr_sheet->GetBeats();
+		new_sheet.SetName(curr_sheet->GetName());
+		new_sheet.numbeats = curr_sheet->GetBeats();
 
 // Now parse continuity
 		comp.SetStatus(true);
 		comp.FreeErrorMarkers();
 		int contnum = 0;
-		for (CC_sheet::ContContainer::const_iterator currcont = comp.curr_sheet->animcont.begin(); currcont != comp.curr_sheet->animcont.end();
+		for (CC_sheet::ContContainer::const_iterator currcont = curr_sheet->animcont.begin(); currcont != curr_sheet->animcont.end();
 			++currcont, contnum++)
 		{
 			if (currcont->GetText().mb_str() != NULL)
@@ -450,15 +448,15 @@ curr_sheetnum(0)
 				std::string tmpBuffer(currcont->GetText().mb_str());
 				yyinputbuffer = tmpBuffer.c_str();
 				tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
-					comp.curr_sheet->GetName().c_str(), currcont->GetName().c_str());
+					curr_sheet->GetName().c_str(), currcont->GetName().c_str());
 				frame->SetStatusText(tempbuf);
 				int parseerr = parsecontinuity();
 				ContToken dummy;				  // get position of parse error
 				for (j = 0; j < numpts; j++)
 				{
-					if (comp.curr_sheet->GetPoint(j).cont == currcont->GetNum())
+					if (curr_sheet->GetPoint(j).cont == currcont->GetNum())
 					{
-						comp.Compile(j, contnum, ParsedContinuity);
+						comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
 						new_sheet.commands[j] = comp.cmds;
 						if (parseerr != 0)
 						{
@@ -468,27 +466,27 @@ curr_sheetnum(0)
 				}
 				while (ParsedContinuity)
 				{
-					curr_proc = ParsedContinuity->next;
+					ContProcedure* curr_proc = ParsedContinuity->next;
 					delete ParsedContinuity;
 					ParsedContinuity = curr_proc;
 				}
 			}
 		}
 // Handle points that don't have continuity (shouldn't happen)
-		tempbuf.Printf(wxT("Compiling \"%.32s\"..."), comp.curr_sheet->GetName().c_str());
+		tempbuf.Printf(wxT("Compiling \"%.32s\"..."), curr_sheet->GetName().c_str());
 		frame->SetStatusText(tempbuf);
 		for (j = 0; j < numpts; j++)
 		{
 			if (new_sheet.commands[j].empty())
 			{
-				comp.Compile(j, 0, NULL);
+				comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
 				new_sheet.commands[j] = comp.cmds;
 			}
 		}
 		if (!comp.Okay())
 		{
-			tempbuf.Printf(wxT("Errors for \"%.32s\""), comp.curr_sheet->GetName().c_str());
-			AnimErrorList* errorList = new AnimErrorList(&comp, sheetnum,
+			tempbuf.Printf(wxT("Errors for \"%.32s\""), curr_sheet->GetName().c_str());
+			AnimErrorList* errorList = new AnimErrorList(show, comp.error_markers, sheetnum,
 				frame, wxID_ANY, tempbuf);
 			errorList->Show();
 			if (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES)
@@ -659,7 +657,7 @@ void Animation::RefreshSheet()
 
 	for (i = 0; i < numpts; i++)
 	{
-		pts[i].pos = sheets.at(curr_sheetnum).pts[i].pos;
+		pts[i] = sheets.at(curr_sheetnum).pts[i];
 		curr_cmds[i] = sheets.at(curr_sheetnum).commands[i].begin();
 		BeginCmd(i);
 	}
@@ -677,7 +675,7 @@ void Animation::CheckCollisions()
 		{
 			for (unsigned j = i+1; j < numpts; j++)
 			{
-				if (pts[i].pos.Collides(pts[j].pos))
+				if (pts[i].Collides(pts[j]))
 				{
 					mCollisions.insert(i);
 					mCollisions.insert(j);
@@ -706,7 +704,7 @@ AnimateDir Animation::Direction(unsigned which) const
 
 CC_coord Animation::Position(unsigned which) const
 {
-	return pts.at(which).pos;
+	return pts.at(which);
 }
 
 int Animation::GetNumberSheets() const
@@ -735,25 +733,24 @@ const wxString& Animation::GetCurrentSheetName() const
 }
 
 
-AnimateCompile::AnimateCompile()
-: okay(true)
+AnimateCompile::AnimateCompile(CC_show* show)
+: mShow(show), okay(true)
 {
 }
 
 
 AnimateCompile::~AnimateCompile()
 {
-	FreeErrorMarkers();
 }
 
 
-void AnimateCompile::Compile(unsigned pt_num, unsigned cont_num,
-ContProcedure* proc)
+void AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc)
 {
 	CC_coord c;
 
 	contnum = cont_num;
-	pt.pos = curr_sheet->GetPosition(pt_num);
+	curr_sheet = c_sheet;
+	pt = curr_sheet->GetPosition(pt_num);
 	cmds.clear();
 	curr_pt = pt_num;
 	beats_rem = curr_sheet->GetBeats();
@@ -762,7 +759,7 @@ ContProcedure* proc)
 	{
 // no continuity was specified
 		CC_show::const_CC_sheet_iterator_t s;
-		for (s = curr_sheet + 1; s != show->GetSheetEnd(); ++s)
+		for (s = curr_sheet + 1; s != mShow->GetSheetEnd(); ++s)
 		{
 			if (s->IsInAnimation())
 			{
@@ -773,7 +770,7 @@ ContProcedure* proc)
 				break;
 			}
 		}
-		if (s == show->GetSheetEnd())
+		if (s == mShow->GetSheetEnd())
 		{
 //use MTRM E
 			ContProcMTRM defcont(new ContValueDefined(CC_E));
@@ -785,13 +782,13 @@ ContProcedure* proc)
 	{
 		proc->Compile(this);
 	}
-	if ((curr_sheet + 1) != show->GetSheetEnd())
+	if ((curr_sheet + 1) != mShow->GetSheetEnd())
 	{
 		CC_show::const_CC_sheet_iterator_t curr_sheet_next = curr_sheet+1;
-		if (pt.pos !=
+		if (pt !=
 			curr_sheet_next->GetPosition(curr_pt))
 		{
-			c = curr_sheet_next->GetPosition(curr_pt) - pt.pos;
+			c = curr_sheet_next->GetPosition(curr_pt) - pt;
 			RegisterError(ANIMERR_WRONGPLACE, NULL);
 			Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(beats_rem, c)), NULL);
 		}
@@ -834,7 +831,12 @@ bool AnimateCompile::Append(boost::shared_ptr<AnimateCommand> cmd, const ContTok
 
 void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 {
-	MakeErrorMarker(err, token);
+	error_markers[err].contnum = contnum;
+	if (token != NULL)
+	{
+		error_markers[err].line = token->line;
+		error_markers[err].col = token->col;
+	}
 	error_markers[err].pntgroup.insert(curr_pt);
 	SetStatus(false);
 }
@@ -865,14 +867,3 @@ void AnimateCompile::SetVarValue(int varnum, float value)
 	vars[varnum][curr_pt].SetValue(value);
 }
 
-
-void AnimateCompile::MakeErrorMarker(AnimateError err,
-const ContToken *token)
-{
-	error_markers[err].contnum = contnum;
-	if (token != NULL)
-	{
-		error_markers[err].line = token->line;
-		error_markers[err].col = token->col;
-	}
-}

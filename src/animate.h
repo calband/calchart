@@ -72,11 +72,7 @@ extern const wxChar *animate_err_msgs[];
 AnimateDir AnimGetDirFromVector(CC_coord& vector);
 AnimateDir AnimGetDirFromAngle(float ang);
 
-class AnimatePoint
-{
-public:
-	CC_coord pos;
-};
+typedef CC_coord AnimatePoint;
 
 class AnimateCommand
 {
@@ -262,11 +258,12 @@ class ContToken;
 class AnimateCompile
 {
 public:
-	AnimateCompile();
+// Compile a point
+	AnimateCompile(CC_show *show);
 	~AnimateCompile();
 
 // Compile a point
-	void Compile(unsigned pt_num, unsigned cont_num, ContProcedure* proc);
+	void Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc);
 // true if successful
 	bool Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 
@@ -281,7 +278,7 @@ public:
 
 	AnimatePoint pt;
 	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
-	CC_show *show;
+	CC_show *mShow;
 	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;
 	unsigned beats_rem;
@@ -289,7 +286,6 @@ public:
 private:
 	unsigned contnum;
 	std::map<unsigned,AnimateVariable> vars[NUMCONTVARS];
-	void MakeErrorMarker(AnimateError err, const ContToken *token);
 	bool okay;
 };
 #endif

@@ -254,7 +254,7 @@ class AnimErrorList : public wxDialog
 	
 public:
 	AnimErrorList();
-	AnimErrorList(AnimateCompile *comp, unsigned num,
+	AnimErrorList(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -262,7 +262,7 @@ public:
 
 	void Init();
 
-	bool Create(AnimateCompile *comp, unsigned num,
+	bool Create(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -278,8 +278,8 @@ public:
 	void Update();
 	void Update(int i);
 
-	CC_show *show;
 private:
+	CC_show *mShow;
 	AnimErrorListView *mView;
 	bool ok;
 	unsigned sheetnum;

@@ -879,18 +879,18 @@ AnimErrorList::AnimErrorList()
 }
 
 
-AnimErrorList::AnimErrorList(AnimateCompile *comp, unsigned num,
+AnimErrorList::AnimErrorList(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id, const wxString& caption,
 		const wxPoint& pos, const wxSize& size,
 		long style)
 {
 	Init();
 	
-	Create(comp, num, parent, id, caption, pos, size, style);
+	Create(show, error_markers, num, parent, id, caption, pos, size, style);
 }
 
 
-bool AnimErrorList::Create(AnimateCompile *comp, unsigned num,
+bool AnimErrorList::Create(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id, const wxString& caption,
 		const wxPoint& pos, const wxSize& size,
 		long style)
@@ -898,13 +898,13 @@ bool AnimErrorList::Create(AnimateCompile *comp, unsigned num,
 	if (!wxDialog::Create(parent, id, caption, pos, size, style))
 		return false;
 
-	show = comp->show;
+	mShow = show;
 	for (size_t i = 0; i < NUM_ANIMERR; ++i)
-		mErrorMarkers[i] = comp->error_markers[i];
+		mErrorMarkers[i] = error_markers[i];
 
 	// give this a view so it can pick up document changes
 	mView = new AnimErrorListView;
-	mView->SetDocument(show);
+	mView->SetDocument(mShow);
 	mView->SetFrame(this);
 
 	CreateControls();
@@ -990,15 +990,15 @@ void AnimErrorList::Update(int i)
 	if (i >= 0)
 	{
 		CC_show::SelectionList select;
-		for (unsigned j = 0; j < show->GetNumPoints(); j++)
+		for (unsigned j = 0; j < mShow->GetNumPoints(); j++)
 		{
 			if (pointsels[i].pntgroup.count(j))
 			{
 				select.insert(j);
 			}
 		}
-		show->SetSelection(select);
+		mShow->SetSelection(select);
 	}
-	show->SetCurrentSheet(sheetnum > show->GetNumSheets() ? show->GetNumSheets()-1 : sheetnum);
-	show->AllViewGoToCont(pointsels[i].contnum, pointsels[i].line, pointsels[i].col);
+	mShow->SetCurrentSheet(sheetnum > mShow->GetNumSheets() ? mShow->GetNumSheets()-1 : sheetnum);
+	mShow->AllViewGoToCont(pointsels[i].contnum, pointsels[i].line, pointsels[i].col);
 }
