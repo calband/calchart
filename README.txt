@@ -1,6 +1,6 @@
 
 --- CalChart README.txt ---
-Created on 3/22/2010 by Richard Powell
+Updated on 6/12/2011 by Richard Powell
 ---
 
 ---
@@ -16,6 +16,101 @@ continuity (poop sheets).
 CalChart makes use of several opensource projects.  It uses wxWidgets version
 2.8.0.  Also, it uses bison, flex, and transfig projects, and also the tex2rtf
 project that is part of wxWidgets.
+
+---
+
+Release notes for 3.2.1:
+
+Bugs and features fixed in this release
+
+3315271: When the show gets closed and opened, it keeps growing?
+3315318: Don't allow Edit Continuity to close without saving.
+3315319: Show collision by default
+3315320: full screen by default for animation window 
+3315323: Autosave Path doesn't matter anymore, remove
+3315337: Add show open history.
+
+----------
+
+Release notes for 3.2.0:
+
+Major changes under the hood.  Switching to the wxDocument/wxView paradigm.
+
+Features added:
+3018591: move from config file to internal settings
+
+Bugs Fixed in this release
+
+3288634: Make sure go to pages works for all views
+3218824: Titles are blank
+3024169: Leaking CC_show with ever open and new shows
+3018566: Ugly grey on the bottom of animation window
+3018571: Dialog appears: Autosave error
+3022228: Leaking CC_show with ever open and new shows
+
+----------
+
+Release notes for 3.1.5:
+
+3023650: Does not prompt to save when you quit
+fixing crash when pressing next on the Animation window.
+
+----------
+
+Release notes for 3.1.4:
+
+Bugs Fixed in this release
+
+2975951, Add help menu
+3018568, Animation continuity input box to small
+3018576, next/previous field hot-keys.
+3018567, arrow keys not work in animation window (windows only)
+3018565: stretching animation needs to refresh window
+3018573, window legacy print is screwed up on windows
+
+----------
+
+Release notes for 3.1.3:
+
+Features added:
+2965268, selectable color palettes
+2960367, Dot Count Feature
+2965265, Make animation screen scalable
+2947102, Print directly to Printers, PDF
+
+Bugs Fixed in this release
+
+3006744, Window flickers when drawing on Windows.
+2977400, adding some hot-keys
+2965264, make it so when you select something again, it unselects it
+
+----------
+
+Release notes for 3.1.2:
+
+Beautified and reorganized code.  Fixed up lasso and polygon selector.
+
+Bugs Fixed in this release
+
+2977400, adding some hot-keys
+2965264, make it so when you select something again, it unselects it.
+2981576, Adding an icon for MAC (not a very good one...)
+2964628, support for Leopard
+
+Build tested by quickly animating guns2.shw on mac and windows.
+
+----------
+
+Release notes for 3.1.1:
+
+Bugs Fixed in this release
+
+2981574 hold-shift moving mouse scrolling scale is off
+2981973 Animation different on windows/mac
+2977399 Animation doesn't work
+2976306 Adding the ability to open old mas files on mac.
+
+Build tested by quickly animating guns2.shw on mac and windows.
 
 ---
 Helping Develop CalChart:
