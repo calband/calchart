@@ -33,7 +33,7 @@ extern int parsecontinuity();
 extern const char *yyinputbuffer;
 extern ContProcedure *ParsedContinuity;
 
-const wxChar *animate_err_msgs[] =
+const wxString animate_err_msgs[] =
 {
 	wxT("Ran out of time"),
 	wxT("Not enough to do"),
@@ -405,13 +405,13 @@ AnimateSheet::~AnimateSheet()
 {}
 
 
-void AnimateSheet::SetName(const wxChar *s)
+void AnimateSheet::SetName(const wxString& s)
 {
 	name = s;
 }
 
 
-Animation::Animation(CC_show *show, wxFrame *frame)
+Animation::Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
 : numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts),
 curr_sheetnum(0)
 {
@@ -449,7 +449,10 @@ curr_sheetnum(0)
 				yyinputbuffer = tmpBuffer.c_str();
 				tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
 					curr_sheet->GetName().c_str(), currcont->GetName().c_str());
-				frame->SetStatusText(tempbuf);
+				if (notifyStatus)
+				{
+					notifyStatus(tempbuf);
+				}
 				int parseerr = parsecontinuity();
 				ContToken dummy;				  // get position of parse error
 				for (j = 0; j < numpts; j++)
@@ -474,7 +477,10 @@ curr_sheetnum(0)
 		}
 // Handle points that don't have continuity (shouldn't happen)
 		tempbuf.Printf(wxT("Compiling \"%.32s\"..."), curr_sheet->GetName().c_str());
-		frame->SetStatusText(tempbuf);
+		if (notifyStatus)
+		{
+			notifyStatus(tempbuf);
+		}
 		for (j = 0; j < numpts; j++)
 		{
 			if (new_sheet.commands[j].empty())
@@ -483,13 +489,10 @@ curr_sheetnum(0)
 				new_sheet.commands[j] = comp.cmds;
 			}
 		}
-		if (!comp.Okay())
+		if (!comp.Okay() && notifyErrorList)
 		{
 			tempbuf.Printf(wxT("Errors for \"%.32s\""), curr_sheet->GetName().c_str());
-			AnimErrorList* errorList = new AnimErrorList(show, comp.error_markers, sheetnum,
-				frame, wxID_ANY, tempbuf);
-			errorList->Show();
-			if (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES)
+			if (notifyErrorList(comp.error_markers, sheetnum, tempbuf))
 			{
 				break;
 			}

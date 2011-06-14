@@ -142,6 +142,9 @@ public:
 #endif
 
 private:
+	void OnNotifyStatus(const wxString& status);
+	bool OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message);
+
 	Animation* anim;
 	AnimationTimer* timer;
 	bool timeron;
@@ -254,7 +257,7 @@ class AnimErrorList : public wxDialog
 	
 public:
 	AnimErrorList();
-	AnimErrorList(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
+	AnimErrorList(CC_show *show, const ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -262,7 +265,7 @@ public:
 
 	void Init();
 
-	bool Create(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
+	bool Create(CC_show *show, const ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Animation Error"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );

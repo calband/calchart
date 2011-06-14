@@ -27,6 +27,7 @@
 #include "cc_show.h"
 #include <wx/string.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include <map>
 #include <set>
 #include <vector>
@@ -67,7 +68,7 @@ enum AnimateError
 	NUM_ANIMERR
 };
 
-extern const wxChar *animate_err_msgs[];
+extern const wxString animate_err_msgs[];
 
 AnimateDir AnimGetDirFromVector(CC_coord& vector);
 AnimateDir AnimGetDirFromAngle(float ang);
@@ -160,7 +161,7 @@ class AnimateSheet
 public:
 	AnimateSheet(const std::vector<AnimatePoint>& thePoints);
 	~AnimateSheet();
-	void SetName(const wxChar *s);
+	void SetName(const wxString& s);
 
 	std::vector<AnimatePoint> pts; // should probably be const
 	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
@@ -175,11 +176,29 @@ enum CollisionWarning
 	COLLISION_BEEP
 };
 
-class wxFrame;
+class ErrorMarker
+{
+public:
+	std::set<unsigned> pntgroup;			  // which points have this error
+	unsigned contnum;						  // which continuity
+	int line, col;							  // where
+	ErrorMarker(): contnum(0), line(-1), col(-1) {}
+	~ErrorMarker() {}
+	void Reset()
+	{
+		pntgroup.clear();
+		contnum = 0;
+		line = col = -1;
+	}
+};
+
+typedef boost::function<void (const wxString& notice)> NotifyStatus;
+typedef boost::function<bool (const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)> NotifyErrorList;
+
 class Animation
 {
 public:
-	Animation(CC_show *show, wxFrame *frame);
+	Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
 	~Animation();
 
 // Returns true if changes made
@@ -235,22 +254,6 @@ public:
 	inline float GetValue() const { return v; }
 	inline void SetValue(float newv) { v = newv; valid = true; }
 	inline void ClearValue() { v = 0.0; valid = false; }
-};
-
-class ErrorMarker
-{
-public:
-	std::set<unsigned> pntgroup;			  // which points have this error
-	unsigned contnum;						  // which continuity
-	int line, col;							  // where
-	ErrorMarker(): contnum(0), line(-1), col(-1) {}
-	~ErrorMarker() {}
-	void Reset()
-	{
-		pntgroup.clear();
-		contnum = 0;
-		line = col = -1;
-	}
 };
 
 class ContProcedure;

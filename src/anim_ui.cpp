@@ -26,6 +26,7 @@
 #ifdef ANIM_OUTPUT_RIB
 #include <ri.h>
 #endif
+#include <boost/bind.hpp>
 
 ToolBarEntry anim_tb[] =
 {
@@ -271,6 +272,19 @@ void AnimationCanvas::RefreshCanvas()
 }
 
 
+void AnimationCanvas::OnNotifyStatus(const wxString& status)
+{
+	ourframe->SetStatusText(status);
+}
+
+bool AnimationCanvas::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
+{
+	AnimErrorList* errorList = new AnimErrorList(mShow, error_markers, sheetnum,
+				ourframe, wxID_ANY, message);
+	errorList->Show();
+	return (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
+}
+
 void AnimationCanvas::Generate()
 {
 	StopTimer();
@@ -281,7 +295,9 @@ void AnimationCanvas::Generate()
 		anim = NULL;
 		RefreshCanvas();
 	}
-	anim = new Animation(mShow, ourframe);
+	NotifyStatus notifyStatus = boost::bind(&AnimationCanvas::OnNotifyStatus, this, _1);
+	NotifyErrorList notifyErrorList = boost::bind(&AnimationCanvas::OnNotifyErrorList, this, _1, _2, _3);
+	anim = new Animation(mShow, notifyStatus, notifyErrorList);
 	if (anim && (anim->GetNumberSheets() == 0))
 	{
 		delete anim;
@@ -879,7 +895,7 @@ AnimErrorList::AnimErrorList()
 }
 
 
-AnimErrorList::AnimErrorList(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
+AnimErrorList::AnimErrorList(CC_show *show, const ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id, const wxString& caption,
 		const wxPoint& pos, const wxSize& size,
 		long style)
@@ -890,7 +906,7 @@ AnimErrorList::AnimErrorList(CC_show *show, ErrorMarker error_markers[NUM_ANIMER
 }
 
 
-bool AnimErrorList::Create(CC_show *show, ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
+bool AnimErrorList::Create(CC_show *show, const ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
 		wxWindow *parent, wxWindowID id, const wxString& caption,
 		const wxPoint& pos, const wxSize& size,
 		long style)
