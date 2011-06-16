@@ -33,6 +33,8 @@
 
 #include <list>
 #include <vector>
+#include <boost/shared_ptr.hpp>
+class Animation;
 
 // Value of 10 translates to a canvas of 1760x1000.
 #define FIELD_MAXZOOM 10
@@ -288,6 +290,9 @@ public:
 	void MoveDrag(CC_coord end);
 	void EndDrag();
 
+	// regenerate marcher's paths
+	void GeneratePaths();
+
 // Variables
 	MainFrame *ourframe;
 	CC_show* mShow;
@@ -304,6 +309,9 @@ private:
 	bool SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 		unsigned ref, bool toggleSelected);
+
+	boost::shared_ptr<Animation> mAnimation;
+	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 
 	CC_DRAG_TYPES drag;
 	typedef std::vector<CC_shape*> ShapeList;

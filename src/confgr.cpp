@@ -55,6 +55,7 @@ const wxString ColorNames[COLOR_NUM] =
 	wxT("HILIT ANIM BACK"),
 	wxT("HILIT ANIM SIDE"),
 	wxT("ANIM COLLISION"),
+	wxT("CONTINUITY PATHS"),
 	wxT("SHAPES")
 };
 
@@ -78,7 +79,8 @@ const wxString DefaultColors[COLOR_NUM] =
 	wxT("RED"),
 	wxT("RED"),
 	wxT("PURPLE"),
-	wxT("RED")
+	wxT("RED"),
+	wxT("ORANGE")
 };
 
 const int DefaultPenWidth[COLOR_NUM] =
@@ -102,6 +104,7 @@ const int DefaultPenWidth[COLOR_NUM] =
 	1,
 	1,
 	1,
+	2,
 };
 
 // constants for behavior:

@@ -96,6 +96,9 @@ public:
 	virtual float MotionDirection();
 	virtual void ClipBeats(unsigned beats);
 
+	// when we want to have the path drawn:
+	virtual void DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const {}
+
 	unsigned numbeats;
 protected:
 	unsigned beat;
@@ -129,6 +132,9 @@ public:
 
 	virtual float MotionDirection();
 	virtual void ClipBeats(unsigned beats);
+
+	virtual void DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const;
+
 private:
 	CC_coord vector;
 };
@@ -149,6 +155,9 @@ public:
 	virtual AnimateDir Direction();
 	virtual float RealDirection();
 	virtual void ClipBeats(unsigned beats);
+
+	virtual void DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const;
+
 private:
 	CC_coord origin;
 	float r, ang_start, ang_end;
@@ -225,6 +234,8 @@ public:
 	int GetNumberBeats() const;
 	int GetCurrentBeat() const;
 	const wxString& GetCurrentSheetName() const;
+
+	void DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const;
 
 private:
 	const unsigned numpts;

@@ -26,6 +26,7 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "platconf.h"
+#include "confgr.h"
 #include <math.h>
 #include <string>
 
@@ -316,6 +317,12 @@ void AnimateCommandMove::ClipBeats(unsigned beats)
 }
 
 
+void AnimateCommandMove::DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const
+{
+	dc.DrawLine(pt.x + offset.x, pt.y + offset.y, pt.x + vector.x + offset.x, pt.y + vector.y + offset.y);
+}
+
+
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
 float rad, float ang1, float ang2,
 bool backwards)
@@ -396,6 +403,19 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 }
 
 
+void AnimateCommandRotate::DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const
+{
+	float start = (ang_start < ang_end) ? ang_start : ang_end;
+	float end = (ang_start < ang_end) ? ang_end : ang_start;
+	wxCoord x_start = (Coord)CLIPFLOAT(origin.x + cos(start*PI/180.0)*r) + offset.x;
+	wxCoord y_start = (Coord)CLIPFLOAT(origin.y - sin(start*PI/180.0)*r) + offset.y;
+	wxCoord x_end = (Coord)CLIPFLOAT(origin.x + cos(end*PI/180.0)*r) + offset.x;
+	wxCoord y_end = (Coord)CLIPFLOAT(origin.y - sin(end*PI/180.0)*r) + offset.y;
+
+	dc.DrawArc(x_start, y_start, x_end, y_end, origin.x + offset.x, origin.y + offset.y);
+}
+
+
 AnimateSheet::AnimateSheet(const std::vector<AnimatePoint>& thePoints)
 : pts(thePoints), commands(thePoints.size())
 {}
@@ -418,9 +438,6 @@ curr_sheetnum(0)
 	unsigned j;
 	AnimateCompile comp(show);
 	wxString tempbuf;
-
-// Now compile
-	show->FlushAllTextWindows();		  // get all changes in text windows
 
 	unsigned sheetnum = 0;
 	for (CC_show::const_CC_sheet_iterator_t curr_sheet = show->GetSheetBegin(); curr_sheet != show->GetSheetEnd();
@@ -735,6 +752,23 @@ const wxString& Animation::GetCurrentSheetName() const
 	return sheets.at(curr_sheetnum).name;
 }
 
+void Animation::DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const
+{
+	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	dc.SetPen(*CalChartPens[COLOR_PATHS]);
+	// get the point we want to draw:
+	const AnimateSheet& sheet = sheets.at(curr_sheetnum);
+	AnimatePoint point = sheet.pts.at(whichPoint);
+	for (std::vector<boost::shared_ptr<AnimateCommand> >::const_iterator commands = sheet.commands.at(whichPoint).begin(); commands != sheet.commands.at(whichPoint).end(); ++commands)
+	{
+		(*commands)->DrawCommand(dc, point, offset);
+		(*commands)->ApplyForward(point);
+	}
+	dc.SetBrush(*CalChartBrushes[COLOR_PATHS]);
+	float circ_r = FLOAT2COORD(GetConfiguration_DotRatio());
+	dc.DrawEllipse(point.x - circ_r/2 + offset.x, point.y - circ_r/2 + offset.y, circ_r, circ_r);
+	return ;
+}
 
 AnimateCompile::AnimateCompile(CC_show* show)
 : mShow(show), okay(true)

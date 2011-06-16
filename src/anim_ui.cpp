@@ -295,6 +295,10 @@ void AnimationCanvas::Generate()
 		anim = NULL;
 		RefreshCanvas();
 	}
+
+	// flush out the show
+	mShow->FlushAllTextWindows();		  // get all changes in text windows
+
 	NotifyStatus notifyStatus = boost::bind(&AnimationCanvas::OnNotifyStatus, this, _1);
 	NotifyErrorList notifyErrorList = boost::bind(&AnimationCanvas::OnNotifyErrorList, this, _1, _2, _3);
 	anim = new Animation(mShow, notifyStatus, notifyErrorList);

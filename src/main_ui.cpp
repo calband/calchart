@@ -33,6 +33,7 @@
 #include "ccvers.h"
 #include "cc_sheet.h"
 #include "show.h"
+#include "animate.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -1489,6 +1490,23 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
 		event.Skip();
 }
 
+void FieldCanvas::GeneratePaths()
+{
+	mAnimation.reset(new Animation(mShow, NotifyStatus(), NotifyErrorList()));
+}
+
+void FieldCanvas::DrawPaths(wxDC& dc, const CC_sheet& sheet)
+{
+	if (mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum()))
+	{
+		CC_coord origin = mShow->GetMode().Offset();
+		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
+		for (CC_show::SelectionList::const_iterator point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
+		{
+			mAnimation->DrawPath(dc, *point, origin);
+		}
+	}
+}
 
 void FieldCanvas::RefreshShow(bool drawall, int point)
 {
@@ -1506,6 +1524,7 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 			{
 				Draw(GetMemDC(), *sheet, mCurrentReferencePoint, true, drawall, point);
 			}
+			DrawPaths(*GetMemDC(), *sheet);
 			dragon = false;						  // since the canvas gets cleared
 			DrawDrag(true);
 		}
@@ -1876,7 +1895,13 @@ void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 			mFrame->SetTitle(buf);
 		}
 		if (mFrame && mFrame->GetCanvas())
+		{
+			if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+			{
+				mFrame->GetCanvas()->GeneratePaths();
+			}
 			mFrame->GetCanvas()->RefreshShow();
+		}
 	}
 }
 
