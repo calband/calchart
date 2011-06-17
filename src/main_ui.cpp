@@ -170,6 +170,7 @@ EVT_MENU(wxID_PREFERENCES, MainFrame::OnCmdPreferences)
 EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
 EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
+EVT_CHECKBOX(CALCHART__draw_paths, MainFrame::draw_paths)
 EVT_SIZE( MainFrame::OnSize)
 END_EVENT_TABLE()
 
@@ -411,6 +412,9 @@ field(NULL)
 		}
 	}
 
+	wxCheckBox* checkbox = new wxCheckBox(this, CALCHART__draw_paths, wxT("Draw &Paths"));
+	checkbox->SetValue(false);
+	rowsizer->Add(checkbox, 1, wxEXPAND, 5);
 // Sheet slider (will get set later with UpdatePanel())
 	// on Mac using wxSL_LABELS will cause a crash?
 	sheet_slider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2, wxDefaultPosition,
@@ -1010,7 +1014,7 @@ FieldCanvas::FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
 int def_zoom, const wxPoint& pos, const wxSize& size):
 AutoScrollCanvas(frame, -1, pos, size), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
 curr_move(CC_MOVE_NORMAL),
-mCurrentReferencePoint(0), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
+mCurrentReferencePoint(0), mDrawPaths(false), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
 {
 	SetPalette(CalChartPalette);
 
@@ -1524,7 +1528,10 @@ void FieldCanvas::RefreshShow(bool drawall, int point)
 			{
 				Draw(GetMemDC(), *sheet, mCurrentReferencePoint, true, drawall, point);
 			}
-			DrawPaths(*GetMemDC(), *sheet);
+			if (mDrawPaths)
+			{
+				DrawPaths(*GetMemDC(), *sheet);
+			}
 			dragon = false;						  // since the canvas gets cleared
 			DrawDrag(true);
 		}
@@ -1736,6 +1743,12 @@ unsigned ref, bool toggleSelected)
 void MainFrame::refnum_callback(wxCommandEvent &)
 {
 	field->mCurrentReferencePoint = ref_choice->GetSelection();
+	field->RefreshShow();
+}
+
+void MainFrame::draw_paths(wxCommandEvent &event)
+{
+	field->mDrawPaths = event.IsChecked();
 	field->RefreshShow();
 }
 

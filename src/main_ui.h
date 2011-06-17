@@ -99,6 +99,7 @@ enum
 	CALCHART__slider_zoom,
 	CALCHART__slider_sheet_callback,
 	CALCHART__refnum_callback,
+	CALCHART__draw_paths,
 };
 
 // Top-level frame
@@ -204,6 +205,7 @@ public:
 	void slider_zoom_callback(wxScrollEvent &ev);
 	void slider_sheet_callback(wxScrollEvent &);
 	void refnum_callback(wxCommandEvent &);
+	void draw_paths(wxCommandEvent &);
 
 	void Setup();
 	void SetDescription();
@@ -300,6 +302,7 @@ public:
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
 	unsigned mCurrentReferencePoint;
+	bool mDrawPaths;
 
 private:
 	typedef std::vector<unsigned> PointList;
