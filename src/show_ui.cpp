@@ -323,7 +323,7 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
 
 	boxsizer = new wxStaticBoxSizer( new wxStaticBox(parent, wxID_STATIC, wxT("P&oints per letter")), wxHORIZONTAL);
-	wxSlider* lettersize = new wxSlider(parent, ShowInfoReq_ID_POINTS_PER_LETTER, 1, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
+	wxSlider* lettersize = new wxSlider(parent, ShowInfoReq_ID_POINTS_PER_LETTER, 10, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
 	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
 	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
 
@@ -492,7 +492,7 @@ bool ShowInfoReqWizard::TransferDataToWindow()
 		pointsCtrl->SetValue(mNumberPoints);
 		columnsCtrl->SetValue(mNumberColumns);
 		labelType->SetSelection(false);
-		pointsPerLine->SetValue(1);
+		pointsPerLine->SetValue(10);
 		label_letters->DeselectAll();
 		mTransferDataToWindowFirstTime = false;
 	}
