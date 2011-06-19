@@ -54,6 +54,7 @@ EVT_MENU(ContinuityEditor_ContEditSet,ContinuityEditor::ContEditSet)
 EVT_MENU(ContinuityEditor_ContEditSelect,ContinuityEditor::ContEditSelect)
 EVT_MENU(ContinuityEditor_Save,ContinuityEditor::OnSave)
 EVT_MENU(ContinuityEditor_Discard,ContinuityEditor::OnDiscard)
+EVT_BUTTON(wxID_CLOSE, ContinuityEditor::OnCloseWindow)
 EVT_BUTTON(CALCHART__CONT_NEW, ContinuityEditor::OnCmdNew)
 EVT_BUTTON(CALCHART__CONT_DELETE, ContinuityEditor::OnCmdDelete)
 EVT_BUTTON(wxID_HELP, ContinuityEditor::OnCmdHelp)
@@ -226,7 +227,7 @@ void ContinuityEditor::CreateControls()
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	button = new wxButton(this, ContinuityEditor_Discard, wxT("&Discard"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	button = new wxButton(this, wxID_CANCEL, wxT("&Close"));
+	button = new wxButton(this, wxID_CLOSE, wxT("&Close"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	button = new wxButton(this, wxID_HELP, wxT("&Help"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );

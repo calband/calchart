@@ -943,12 +943,21 @@ void MainFrame::SnapToGrid(CC_coord& c)
 
 void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
+	// retoggle the tool because we want it to draw as selected
+	int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : CALCHART__box;
+	wxToolBar* tb = GetToolBar();
+	tb->ToggleTool(toggleID, true);
+
 	field->curr_lasso = type;
 }
 
 
 void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
 {
+	// retoggle the tool because we want it to draw as selected
+	wxToolBar* tb = GetToolBar();
+	tb->ToggleTool(CALCHART__move + type, true);
+
 	field->curr_move = type;
 	field->EndDrag();
 }
