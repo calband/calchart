@@ -17,7 +17,16 @@ CalChart makes use of several opensource projects.  It uses wxWidgets version
 2.8.0.  Also, it uses bison, flex, and transfig projects, and also the tex2rtf
 project that is part of wxWidgets.
 
----
+----------
+
+Release notes for 3.2.2:
+
+Bugs and features fixed in this release
+
+3315322: Show animation path
+3018574: Need a better icon
+
+----------
 
 Release notes for 3.2.1:
 
