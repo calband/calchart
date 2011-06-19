@@ -40,14 +40,15 @@ $ export CXXFLAGS="-arch i386"
 $ make
 $ make html
 
+m2. Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, 3.2.1
 
-m2. build the project with xcode
+m3. build the project with xcode
 $ cd build-macos
 $ xcodebuild -configuration Debug
 
-m3. Edit the dmg_maker.sh to have the right version
+m4. Edit the dmg_maker.sh to have the right version
 
-m4. Run dmg_maker.sh
+m5. Run dmg_maker.sh
 $ bash -f dmg_maker.sh
 
 The final product is CalChart-3.2.1.dmg
