@@ -84,7 +84,7 @@ $(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	rm -f $@
 	convert $< $@
 
-all: calchart charthlp.xlp
+all: calchart charthlp.xlp html
 
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ `wx-config --libs`
@@ -101,7 +101,7 @@ charthlp.xlp: docs/charthlp.xlp
 	cp docs/charthlp.xlp charthlp.xlp
 
 docs/charthlp.xlp: $(DOCS)
-	cd docs; tex2rtf charthlp.tex charthlp.xlp -twice -xlp
+	-cd docs; tex2rtf charthlp.tex charthlp.xlp -twice -xlp
 
 docs/charthlp.dvi: $(DOCS)
 	cd docs; latex charthlp; latex charthlp; makeindex charthlp; latex charthlp
@@ -113,7 +113,7 @@ docs/charthlp.ps.gz: docs/charthlp.ps
 	gzip -c9 $< > $@
 
 docs/charthlp_contents.html: $(DOCS)
-	cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
+	-cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
 docs/charthlp.html.tar.gz: docs/charthlp_contents.html
 	rm -f $@
 	tar cf - docs/*.html | gzip -9 > $@
