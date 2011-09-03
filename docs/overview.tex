@@ -1,27 +1,27 @@
 \chapter{Overview}\label{overview}
 
-CalChart Version 3 is a complete rewrite of CalChart Version 2 (the version
-that has been used by the Cal Band from 1991 to the present).  The major
-improvements are a completely new mouse-driven windows-based interface and
-a number of significant internal changes that are only relevant to
-programmers and system administrators.  The internal changes include a
-drastic improvement in the way the program saves data, the use of a 
-more modern programming language, and the ability to work with Novell
-networks and Windows NT.
+CalChart Version 3.2 is a update of of CalChart Version 3 (the version
+that has been used by the Cal Band from 1991 to the 2008).  The major
+improvements have been to port it to the MacOS X platform, integrating closer
+with the native windowing system functionality like file history and printing.
+It retains backward compatility with CalChart Version 3 files, though older
+CalChart version are not supported.
 
-Version 3 has reached a point in its development where it is ready for
-large-scale testing.  There are still many bugs, some of which are already
-known but most of which are not, and there are still some features that
-are not completed.
+CalChart, like all software, may contain issues and bugs.  And like all 
+software will greatly benefit from feedback from
+users.  Please document any bugs that you encounter on the CalChart developer 
+website at:
 
-The finalization of this version will greatly benefit from feedback from
-users.  Please document any bugs that you encounter and send them to
-gurk@calband.berkeley.edu.  Also, we would very much like to hear any
-suggestions you may have to make CalChart even more useful.
+\begin{verbatim}
+http://sourceforge.net/projects/calchart
+\end{verbatim}
 
-This chapter gives some hints on getting to know Version 3.  Much is
-self-explanatory for a user already familiar with Version 2, but much is
-new.
+Also, we would very much like to hear any suggestions you may have to make
+CalChart even more useful.
+
+This chapter gives some hints on getting to know Version 3.2.  Much is
+very similar to Version 3, and for users already familiar with Version 3 may 
+not even notice a difference.
 
 \section{Basics}\label{basics}
 
@@ -33,22 +33,22 @@ and it is possible to have different windows displaying different shows
 simultaneously.
 
 To scroll the stuntsheet viewer, just move the mouse around the field
-display area of the window; scrolling happens automatically.
+display area of the window while holding the control key; scrolling happens
+automatically.
 
 Various operations can be performed by either clicking on an icon just
 above the stuntsheet display area or by using a pull-down menu.  Some
 features have keystroke commands also.
 
 Left-drag the cursor in the stuntsheet editor to select a set of points.
-Unlike Version 2, nothing will happen immediately except that the
-selected points will change color.  Once points are selected many
-features can be applied to them.  Use Shift-left-drag to add points to
-an already selected block.
+Once points are selected many features can be applied to them.
+Use Shift-left-drag to add points to an already selected block.
+Use Alt-left-drag to toggle a points selection.
 
 Use the Undo feature under the Edit pull-down menu to undo actions.
 Repeating this causes older and older actions to be undone.  The user
 can retrace his steps all the way back to the most recent save
-(providing that the undo buffer, which defaults to 50K, is big enough).
+(providing that the undo buffer, which defaults to 100 items, is big enough).
 
 Use the icons just above the stuntsheet display area to navigate through
 the show.  Use the slider to adjust the magnification of the display.
@@ -58,31 +58,92 @@ around.
 
 \section{Creating a Show}\label{newshow}
 
-Starting the program causes a small window to appear.  You may either
-load an existing show or create a new one from this window.  You may
-also use the File pull-down menu from an open show to load, save, clear,
-etc. in the obvious way.  After creating a new show, you'll need to pull
-up an Information window (under the Window pull-down menu).
+Starting the program causes a small window to appear.  From the File pull-down
+menu you may open an existing show via the "Open..." item (or the Alt-O hotkey),
+or you may create a new show via the "New" item (or the Alt-N hotkey).  You may 
+also choose from the list of files to quickly load a previous open filed.
 
-The Information window can be used to determine the number of points, the
-kind of labels, and the kind of background.  In order for changes to be
-enacted, you must click on the button at the top.  Note this window can be
-used even after the show is first created.
+Creating a new show will start the "New Show Setup Wizard", which is intended
+to make creating your new show easier.  The wizard can be used to determine the
+number of points, the kind of labels, and the kind of background.  You must
+press finish to have the changes take effect, but you choose cancel and 
+then modify any of these settings later on.
 
 \section{Moving Points}\label{movement}
 
-Smart move and genius move are not yet implemented, so the only tools for
-moving points are individual move, block move, and smart move.  To
-individual move, left-drag on a point, then move the cursor to the
-destination, then release the left button.  To block move, first select
+There are several move methods of moving points around the field.  You select
+different move methods by clicking their toolbar icon.  After a move has been
+completed, the move method will default back to Translate Points.
+
+\subsection{Translate Points}\label{translatepoints}
+
+This movement command is used to move individuals or blocks to a new location
+on the field.
+
+To individual move, left-drag on a point, then move the cursor
+to the destination, then release the left button.
+
+To block move, first select
 the block, then hold shift and move any one point of the block as if it
-were an individual move.  To smart move, first select the appropriate
-selection order from the options menu.  {\it Nearest} can be used to
-selecting winding chains of points.  Select the points, beginning the
-drag near the first point.  Any additional selections will be appended to
-the end of the selection list.  Click on the smart move icon in the
-toolbar and drag a line from the first location to the second.  The
-other points will be placed with equal spacing.
+were an individual move.
+
+\subsection{Move Points Into a Line}\label{movepointsintoaline}
+
+This movement command is used to move a block into a straight line.
+
+First select the block of points you wish to have placed in a line.  Then
+left-click the point where the first point in the line should start.  While
+holding down the left-button, drag the mouse to where the second point in the
+line should be.  Release the mouse button and CalChart will move all of the 
+points into a straight line from that point.
+
+\subsection{Rotate Block}\label{rotateblock}
+
+This movement command is used to move rotate a block around a point.
+
+First select the block of points you wish to have rotated.  Left-click the 
+pivot point where the block should be rotated around.  On the second left-click
+a guiding circle should appear.  While holding the left-button, drag around
+the circle to choose the desired angle.  Release the mouse button and CalChart
+will rotate the block around the pivot point by the desired angle.
+
+\subsection{Shear Block}\label{shearblock}
+
+This movement command is used to shear a block across around a point.
+
+First select the block of points you wish to have sheared.  Left-click the 
+pivot point where the block should be sheared around.  On the second left-click
+a guiding line should appear.  The line must extented at a 90 degree angle 
+from the start point to the pivot point.   While holding the left-button, drag
+the line to the desired shearing amount.  Release the mouse button and CalChart
+will shear the block around the pivot point by the desired amount.
+
+\subsection{Reflect Block}\label{reflectblock}
+
+This movement command is used to reflect a block around a line.
+
+First select the block of points you wish to have reflected.  Left-click and
+drag a reflection line.  Release the mouse button and CalChart
+will reflect all the points their mirror location on the other side of the line.
+
+\subsection{Resize Block}\label{resizeblock}
+
+This movement command is used to resize a block, to make it larger or smaller.
+
+First select the block of points you wish to have resized.  Left-click the 
+central point where the block should be resized around.  Left-click and
+drag a resizing line.  Release the mouse button and CalChart
+will resize the block around the central point by the desired amount.
+
+\subsection{Genius Move}\label{geniusmove}
+
+This movement command is used to translate a block of points by describing the
+general shape you wish the block to attend.
+
+First select the block of points you wish to have moved.  Left-click and drag
+3 lines that generally describe the shape you wish the block to take.
+Release the mouse button and CalChart will check to see if it is a valid move,
+and if so, will apply a genious move to the block.
 
 \section{Labels and Symbols}\label{symbols}
 
