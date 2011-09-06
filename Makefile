@@ -1,37 +1,35 @@
 # Makefile for calchart (UNIX).
 
-PROG = calchart
-
-MAKEDEP = makedepend
-
-CONF_FLAGS = #-DANIM_OUTPUT_POVRAY -DANIM_OUTPUT_RIB
-CONF_LIBS = #-lribout
-
-DFLAGS = -g -Wall $(CONF_FLAGS)
-
 #### TOOLS ####
+WXCONFIG = wx-config
 LEX = flex
 LFLAGS = -B -i
 YACC = bison
 YFLAGS = -dv
 
+CXXFLAGS += `$(WXCONFIG) --cxxflags`
+CXXFLAGS += -I$(RESDIR) -I$(SRCDIR) -I$(BOOSTDIR)
+CXXFLAGS += -g -Wall $(CONF_FLAGS)
+CXX = `$(WXCONFIG) --cxx`
+LIBS = `$(WXCONFIG) --libs`
+
 #### Directories ####
+BOOSTDIR = /opt/local/include
 SRCDIR = ./src
 GENDIR = ./generated
 RESDIR = ./resources
-
-HEADERS = $(wildcard $(SRCDIR)/*.h)
-
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
-
-SYNTHETIC_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
-SYNTHETIC_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
-SYNTHETIC_FILES = $(SYNTHETIC_SRCS) $(GENDIR)/contgram.h $(GENDIR)/contgram.output
-
 OBJDIR = build
 
+#### Files ####
+HEADERS = $(wildcard $(SRCDIR)/*.h)
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+
+GENERATED_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
+GENERATED_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
+GENERATED_FILES = $(GENERATED_SRCS) $(GENDIR)/contgram.h
+
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
-OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(SYNTHETIC_SRCS))
+OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(GENERATED_SRCS))
 
 RUNTIME = runtime/config
 IMAGES = $(wildcard $(RESDIR)/*.xbm)
@@ -47,23 +45,22 @@ TEXDOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
 DOCS = $(TEXDOCS) \
 	docs/contents.gif docs/up.gif docs/back.gif docs/forward.gif
 
-MOSTSRCS = $(SRCS) $(SYNTHETIC_BASES) $(HEADERS) $(DOCS)
+MOSTSRCS = $(SRCS) $(GENERATED_BASES) $(HEADERS) $(DOCS)
 ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) Makefile xbm2xpm \
 	makefile.wat calchart.rc install.inf
-MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME) $(SYNTHETIC_SRCS) \
+MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME) $(GENERATED_SRCS) \
 	makefile.wat calchart.rc install.inf
 
-BOOSTDIR = /opt/local/include
-CXXFLAGS += `wx-config --cflags` $(USER_CXXFLAGS) -I$(RESDIR) -I$(SRCDIR) -I$(BOOSTDIR)
-CXX = c++
+#### Targets ####
+all: calchart charthlp.xlp html
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: $(GENDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(DFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(GENDIR)/%.cpp: $(SRCDIR)/%.y
 	@mkdir -p $(GENDIR)
@@ -84,10 +81,10 @@ $(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	rm -f $@
 	convert $< $@
 
-all: calchart charthlp.xlp html
+generate: $(GENERATED_FILES)
 
-$(PROG): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(DFLAGS) $(OBJS) -o $@ `wx-config --libs`
+calchart: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS)
 
 $(OBJDIR)/contscan.o: $(GENDIR)/contgram.h
 
@@ -143,7 +140,7 @@ chartsrc.zip: $(MSWSRCS) $(IMAGES_MSW)
 	zip -q9 $@ $(IMAGES_MSW)
 
 length::
-	@echo `cat $(HEADERS) $(SRCS) $(SYNTHETIC_BASES) | wc -l` C++ lines in $(HEADERS) $(SRCS) $(SYNTHETIC_BASES)
+	@echo `cat $(HEADERS) $(SRCS) $(GENERATED_BASES) | wc -l` C++ lines in $(HEADERS) $(SRCS) $(GENERATED_BASES)
 
 tar:: chartsrc.tar.gz
 
@@ -153,13 +150,12 @@ distrib:: chartbin.tar.gz docs/charthlp.ps.gz docs/charthlp.html.tar.gz \
 zip:: chartsrc.zip
 
 clean::
-	rm -f $(OBJS) $(SYNTHETIC_FILES) $(IMAGES_SYNTH) calchart core *~ runtime/*~ *.bak TAGS
+	rm -f $(OBJS) $(GENERATED_FILES) $(IMAGES_SYNTH) calchart core *~ runtime/*~ *.bak TAGS
 	rm -rf $(OBJDIR)
 
 depend::
 	rm -f depend
-	gcc -MM $(CXXFLAGS) $(SRCS) $(SYNTHETIC_SRCS) > depend
-#	$(MAKEDEP) -- $(CXXFLAGS) $(DFLAGS) -- $(SRCS) $(SYNTHETIC_SRCS)
+	gcc -MM $(CXXFLAGS) $(SRCS) $(GENERATED_SRCS) > depend
 
 ifeq (depend,$(wildcard depend))
 include depend
