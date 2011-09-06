@@ -1,32 +1,29 @@
+My steps for building for MacOSX.  Updated for Lion (10.7)
 
-my log of steps for building for MacOSX.
-I've built with Snowleopard (10.6).
+These steps require having Lion 10.7 and XCode 4.1.  Both should be on the app store.
 
-You need to have xcode installed (the developer DVD).
-
-You will need the following projects from macports (or fink)
-subversion
-cvs
-bison
-flex
+Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
+boost
 transfig
 
-MacOSX should come with a version of wxWidgets built in.  10.6 comes with 
-version 2.8.
+Download 2.9.2 of wxWidgets to build the library:
+$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_2 ~/wxWidgets-2.9.2
 
-But you will need the project, at least for tex2rtf which calchart uses
-Download 2.8.10 of wxWidgets (I used the svn version by open cygwin and running
-the command):
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_8_10 ~/wxWidgets-2.8.10
+$ cd wxWidgets-2.9.2
+$ mkdir build-release
+$ cd build-release
 
-$ cd wxWidgets-2.8.10
-$ ./configure --with-msw --enable-debug --enable-debug_gdb --disable-shared
+$ ../configure --with-cocoa --with-macosx-version-min=10.5 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk --enable-debug --enable-debug_info --disable-shared
+$ make
+
+put into the /usr/local/bin (if you wanted to put somewhere different, use the --prefix option in configure and you're on your own)
+$ make install
 
 CalChart uses the tex2rtf project that comes with wxWidgets:
 Need to build the utilities too!
-$ cd /cygdrive/c/wxWidget-2.8.10/utils
+$ cd build-debug/utils
 $ make tex2rtf
-$ cp tex2rtf/src/tex2rtf.exe /usr/local/bin
+$ sudo install tex2rtf/src/tex2rtf.exe /usr/local/bin
 
 Get calchart (you'll need to log in with your source forge account):
 $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/trunk
@@ -34,11 +31,14 @@ $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/
 Make Calchart's generated files.  I just do a preliminary version of make to
 get it work
 $ cd ~/calchart/trunk
-$ export CPPFLAGS="-arch i386"
-$ export CXXFLAGS="-arch i386"
 $ make
 
 
 Now open the xcode project in build-macosx/CalChart.xcodeproj
 Build and run the project
+
+I modify the project to match up with the results of theses commands:
+$ wx-config --cxxflags
+$ wx-config --libs
+
 

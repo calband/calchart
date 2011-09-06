@@ -7,7 +7,7 @@ Packages to install:
 $ sudo apt-get install subversion bison flex transfig
 
 Packages for wxwidgets: (from http://wiki.wxwidgets.org/Installing_and_configuring_under_Ubuntu)
-$ sudo apt-get install libwxgtk2.8-dev libwxgtk2.8-dbg
+$ sudo apt-get install libwxgtk2.9.2-dev libwxgtk2.9.2-dbg
 
 Boost libraries:
 $ sudo apt-get install libboost-all-dev
