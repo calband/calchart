@@ -460,7 +460,7 @@ curr_sheetnum(0)
 		for (CC_sheet::ContContainer::const_iterator currcont = curr_sheet->animcont.begin(); currcont != curr_sheet->animcont.end();
 			++currcont, contnum++)
 		{
-			if (currcont->GetText().mb_str() != NULL)
+			if (!currcont->GetText().IsEmpty())
 			{
 				std::string tmpBuffer(currcont->GetText().mb_str());
 				yyinputbuffer = tmpBuffer.c_str();

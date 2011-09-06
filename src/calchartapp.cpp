@@ -99,13 +99,12 @@ IMPLEMENT_APP(CalChartApp)
 // Create windows and initialize app
 bool CalChartApp::OnInit()
 {
-	//// Create a template relating drawing documents to their views
-	(void) new wxDocTemplate(&mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
-			CLASSINFO(CC_show), CLASSINFO(MainFrameView));
+    //// Create a document manager
+    mDocManager = new wxDocManager;
 
-#ifdef __WXMAC__
-	wxFileName::MacRegisterDefaultTypeAndCreator( wxT("shw"), 'WXMB', 'WXMA' );
-#endif
+	//// Create a template relating drawing documents to their views
+	(void) new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
+			CLASSINFO(CC_show), CLASSINFO(MainFrameView));
 
 	gPrintDialogData = new wxPrintDialogData();
 
@@ -159,7 +158,7 @@ bool CalChartApp::OnInit()
 
 
 	//// Create the main frame window
-	topframe = new TopFrame(&mDocManager, (wxFrame *) NULL, _T("CalChart"));
+	topframe = new TopFrame(mDocManager, (wxFrame *) NULL, _T("CalChart"));
 
 	{
 		// Required for images in the online documentation
@@ -190,7 +189,7 @@ bool CalChartApp::OnInit()
 	// Get the file history
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/FileHistory"));
-	mDocManager.FileHistoryLoad(*config);
+	mDocManager->FileHistoryLoad(*config);
 
 	CC_continuity_UnitTests();
 	CC_point_UnitTests();
@@ -201,7 +200,7 @@ bool CalChartApp::OnInit()
 
 void CalChartApp::MacOpenFile(const wxString &fileName)
 {
-	mDocManager.CreateDocument(fileName, wxDOC_SILENT);
+	mDocManager->CreateDocument(fileName, wxDOC_SILENT);
 }
 
 int CalChartApp::OnExit()
@@ -209,12 +208,15 @@ int CalChartApp::OnExit()
 	// Get the file history
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/FileHistory"));
-	mDocManager.FileHistorySave(*config);
+	mDocManager->FileHistorySave(*config);
 	config->Flush();
 
 	if (gPrintDialogData) delete gPrintDialogData;
 	if (gHelpController) delete gHelpController;
 
-	return 0;
+    // delete the doc manager
+    delete wxDocManager::GetDocumentManager();
+    
+	return wxApp::OnExit();
 }
 

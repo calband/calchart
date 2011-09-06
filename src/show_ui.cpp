@@ -291,8 +291,7 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 	wxListBox *labels = new wxListBox(parent, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
 	for (int i = 0; i < 26; ++i)
 	{
-		wxString buf = wxT("A");
-		buf.SetChar(0, buf.GetChar(0)+i);
+		wxString buf(static_cast<char>('A' + i));
 		labels->InsertItems(1, &buf, i);
 	}
 	boxsizer->Add(labels, 0, wxGROW|wxALL, 0 );

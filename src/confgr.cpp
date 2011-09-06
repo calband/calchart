@@ -590,7 +590,7 @@ void ReadConfigYardlines()
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
 		wxString key;
-		key.Printf(wxT("YardLines_%d"), i);
+		key.Printf(wxT("YardLines_%ld"), i);
 		yard_text[i] = GetConfigValue<wxString>(key, yard_text_index[i]);
 	}
 }
@@ -600,7 +600,7 @@ void SetConfigShowYardline()
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
 		wxString key;
-		key.Printf(wxT("YardLines_%d"), i);
+		key.Printf(wxT("YardLines_%ld"), i);
 		SetConfigValue<wxString>(key, yard_text[i], yard_text_index[i]);
 	}
 }
@@ -610,7 +610,7 @@ void ClearConfigShowYardline()
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
 		wxString key;
-		key.Printf(wxT("YardLines_%d"), i);
+		key.Printf(wxT("YardLines_%ld"), i);
 		ClearConfigValue<wxString>(key);
 	}
 	ReadConfigYardlines();
@@ -621,7 +621,7 @@ void ReadConfigSpringYardlines()
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
 		wxString key;
-		key.Printf(wxT("SpringShowYardLines_%d"), i);
+		key.Printf(wxT("SpringShowYardLines_%ld"), i);
 		spr_line_text[i] = GetConfigValue<wxString>(key, spr_line_text_index[i]);
 	}
 }
@@ -631,7 +631,7 @@ void SetConfigSpringShowYardline()
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
 		wxString key;
-		key.Printf(wxT("SpringShowYardLines_%d"), i);
+		key.Printf(wxT("SpringShowYardLines_%ld"), i);
 		SetConfigValue<wxString>(key, spr_line_text[i], spr_line_text_index[i]);
 	}
 }
@@ -641,7 +641,7 @@ void ClearConfigSpringShowYardline()
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
 		wxString key;
-		key.Printf(wxT("SpringShowYardLines_%d"), i);
+		key.Printf(wxT("SpringShowYardLines_%ld"), i);
 		ClearConfigValue<wxString>(key);
 	}
 	ReadConfigSpringYardlines();
@@ -658,26 +658,11 @@ void InitializeColorePalette()
 	{
 		for (j = 0; j < i; j++)
 		{
-			const wxColour *c1, *c2;
-			c1 = &CalChartPens[i]->GetColour();
-			if (j >= 0)
-			{
-				c2 = &CalChartPens[j]->GetColour();
-			}
-			else
-			{
-				if (j < -1)
-				{
-					c2 = wxBLACK;
-				}
-				else
-				{
-					c2 = wxWHITE;
-				}
-			}
-			if ((c1->Red() == c2->Red()) &&
-				(c1->Green() == c2->Green()) &&
-				(c1->Blue() == c2->Blue()))
+			const wxColour& c1 = CalChartPens[i]->GetColour();
+			const wxColour& c2 = (j >= 0) ? CalChartPens[j]->GetColour() : (j < -1) ? *wxBLACK : *wxWHITE;
+			if ((c1.Red() == c2.Red()) &&
+				(c1.Green() == c2.Green()) &&
+				(c1.Blue() == c2.Blue()))
 			{
 				break;
 			}

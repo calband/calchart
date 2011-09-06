@@ -382,7 +382,7 @@ field(NULL)
 
 // Grid choice
 	grid_choice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1),
-		sizeof(gridtext)/sizeof(const wxChar*),
+		sizeof(gridtext)/sizeof(wxString),
 		gridtext);
 	grid_choice->SetSelection(def_grid);
 
@@ -627,7 +627,7 @@ void MainFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 			field->mShow->GetCurrentSheet()->GetName(),
 			field->mShow->GetCurrentSheet()->GetName(),
 			this);
-		if (s)
+		if (!s.IsEmpty())
 		{
 			static_cast<MainFrameView*>(GetView())->DoSetSheetTitle(s);
 		}
@@ -869,8 +869,8 @@ void MainFrame::AppendShow()
 	CC_show *shw;
 	unsigned currend;
 
-	s = wxFileSelector(wxT("Append show"), NULL, NULL, NULL, file_wild);
-	if (!s.empty())
+	s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
+	if (!s.IsEmpty())
 	{
 		shw = new CC_show();
 		if (shw->OnOpenDocument(s))
@@ -902,16 +902,14 @@ void MainFrame::AppendShow()
 void MainFrame::ImportContFile()
 {
 	wxString s;
-	wxString err;
 
-	s = wxFileSelector(wxT("Import Continuity"), NULL, NULL, NULL, wxT("*.txt"));
+	s = wxFileSelector(wxT("Import Continuity"), wxEmptyString, wxEmptyString, wxEmptyString, wxT("*.txt"));
 	if (!s.empty())
 	{
-		err = field->mShow->ImportContinuity(s);
-		if (!err.empty())
+        wxString err = field->mShow->ImportContinuity(s);
+		if (!err.IsEmpty())
 		{
 			(void)wxMessageBox(err, wxT("Load Error"));
-			delete err;
 		}
 	}
 }
@@ -1560,8 +1558,8 @@ void MainFrame::UpdatePanel()
 		field->mShow->IsModified() ? wxT("* "):wxT(""), curr,
 		num, (sht != field->mShow->GetSheetEnd())?sht->GetName().c_str():wxT(""), (sht != field->mShow->GetSheetEnd())?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
-	tempbuf.sprintf(wxT("%d of %d selected"),
-		field->mShow->GetSelectionList().size(), field->mShow->GetNumPoints());
+    tempbuf.Clear();
+    tempbuf << field->mShow->GetSelectionList().size() << wxT(" of ") << field->mShow->GetNumPoints() << wxT(" selected");
 	SetStatusText(tempbuf, 2);
 
 	if (num > 1)

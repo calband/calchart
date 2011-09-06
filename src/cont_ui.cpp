@@ -335,7 +335,7 @@ void ContinuityEditor::UpdateText()
 	mUserInput->DiscardEdits();
 	mSheetUnderEdit = mShow->GetCurrentSheet();
 	const CC_continuity& c = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
-	if (c.GetText())
+	if (!c.GetText().IsEmpty())
 	{
 		mUserInput->WriteText(c.GetText());
 		mUserInput->SetInsertionPoint(0);

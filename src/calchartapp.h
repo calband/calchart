@@ -50,7 +50,7 @@ public:
 private:
 	ShowModeList mModeList;
 
-	wxDocManager mDocManager;
+	wxDocManager* mDocManager;
 };
 
 #endif // _CALCHARTAPP_H_

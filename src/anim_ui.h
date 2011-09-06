@@ -154,7 +154,7 @@ private:
 	unsigned tempo;
 	float mUserScale;
 
-	DECLARE_EVENT_TABLE()
+	wxDECLARE_EVENT_TABLE();
 };
 
 class AnimationView : public wxView
@@ -212,7 +212,7 @@ private:
 
 	friend class AnimationCanvas;
 
-	DECLARE_EVENT_TABLE()
+	wxDECLARE_EVENT_TABLE();
 };
 
 enum
@@ -252,8 +252,8 @@ public:
 
 class AnimErrorList : public wxDialog
 {
-	DECLARE_CLASS( AnimErrorList )
-	DECLARE_EVENT_TABLE()
+	wxDECLARE_DYNAMIC_CLASS( AnimErrorList );
+	wxDECLARE_EVENT_TABLE();
 	
 public:
 	AnimErrorList();

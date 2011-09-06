@@ -71,7 +71,7 @@ EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotos
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
 END_EVENT_TABLE()
 
-IMPLEMENT_DYNAMIC_CLASS(AnimErrorList, wxDialog)
+wxIMPLEMENT_DYNAMIC_CLASS(AnimErrorList, wxDialog)
 
 BEGIN_EVENT_TABLE(AnimErrorList, wxDialog)
 EVT_LISTBOX(CALCHART__anim_update, AnimErrorList::OnCmdUpdate)
@@ -199,7 +199,6 @@ void AnimationCanvas::OnSize(wxSizeEvent& event)
 	}
 	mUserScale = (newvalue * (COORD2INT(1 << 16)/65536.0));
 	Refresh();
-	return wxPanel::OnSize(event);
 }
 
 void AnimationCanvas::OnLeftMouseEvent(wxMouseEvent& event)

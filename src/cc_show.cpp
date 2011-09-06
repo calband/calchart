@@ -1332,8 +1332,8 @@ void UnitTests()
 //	assert(test.Ok() == true);
 //	cout<<"GetError "<<(wchar_t*)test.GetError().c_str()<<"\n";
 //	assert(test.Ok() == true);
-	cout<<"GetTitle "<<(wchar_t*)test.GetTitle().c_str()<<"\n";
-	cout<<"GetDescr "<<(wchar_t*)test.GetDescr().c_str()<<"\n";
+	cout<<"GetTitle "<<test.GetTitle().c_str()<<"\n";
+	cout<<"GetDescr "<<test.GetDescr().c_str()<<"\n";
 	cout<<"Modified "<<test.IsModified()<<"\n";
 	cout<<"GetNumSheets "<<test.GetNumSheets()<<"\n";
 	cout<<"GetNumPoints "<<test.GetNumPoints()<<"\n";
@@ -1345,7 +1345,7 @@ void UnitTests()
 	}
 	for (unsigned i = 0; i < test.GetNumPoints(); ++i)
 	{
-		cout<<"GetPointLabel "<<i<<" "<<(wchar_t*)test.GetPointLabel(i).c_str()<<"\n";
+		cout<<"GetPointLabel "<<i<<" "<<test.GetPointLabel(i).c_str()<<"\n";
 	}
 	cout<<"GetMode "<<(void*)&test.GetMode()<<"\n";
 }

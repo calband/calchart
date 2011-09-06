@@ -707,7 +707,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 	if (split_sheet)
 	{
 		buffer<<"%%Page: "<<namestr<<"(N)\n";
-		if (sheet.number)
+		if (!sheet.number.IsEmpty())
 		{
 			buffer<<"/pagenumtext ("<<numberstr<<"N) def\n";
 		}
@@ -741,7 +741,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		{
 /* Need to split into two pages */
 			buffer<<"%%Page: "<<namestr<<"(S)\n";
-			if (sheet.number)
+			if (!sheet.number.IsEmpty())
 			{
 				buffer<<"/pagenumtext ("<<numberstr<<"S) def\n";
 			}
@@ -757,7 +757,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		else
 		{
 			buffer<<"%%Page: "<<namestr<<"\n";
-			if (sheet.number)
+			if (!sheet.number.IsEmpty())
 			{
 				buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 			}
@@ -854,7 +854,7 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 	std::string numberstr(sheet.number.utf8_str());
 
 	buffer<<"%%Page: "<<namestr<<"\n";
-	if (sheet.number)
+	if (!sheet.number.IsEmpty())
 	{
 		buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 	}
