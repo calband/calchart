@@ -102,36 +102,6 @@ enum
 	CALCHART__draw_paths,
 };
 
-// Top-level frame
-class TopFrame : public wxDocMDIParentFrame
-{
-	DECLARE_CLASS(TopFrame)
-public:
-	TopFrame(wxDocManager *manager,
-			 wxFrame *frame,
-			 const wxString& title);
-	~TopFrame();
-
-	void OnCmdAbout(wxCommandEvent& event);
-	void OnCmdHelp(wxCommandEvent& event);
-	void OnCmdPreferences(wxCommandEvent& event);
-
-	static void About();
-	static void Help();
-
-	DECLARE_EVENT_TABLE()
-};
-
-class TopFrameDropTarget : public wxFileDropTarget
-{
-public:
-	TopFrameDropTarget(wxDocManager *manager, TopFrame *f) : mManager(manager), frame(f) {}
-	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
-private:
-	wxDocManager *mManager;
-	TopFrame *frame;
-};
-
 class FieldCanvas;
 class MainFrameView;
 

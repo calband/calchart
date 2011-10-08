@@ -23,6 +23,8 @@
 #include "basic_ui.h"
 #include "confgr.h"
 
+#include <wx/dnd.h>
+
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "calchart.xpm"
 #endif

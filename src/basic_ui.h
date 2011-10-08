@@ -24,7 +24,6 @@
 #define _BASIC_UI_H_
 
 #include <wx/wx.h>
-#include <wx/dnd.h>
 #include <wx/toolbar.h>
 
 

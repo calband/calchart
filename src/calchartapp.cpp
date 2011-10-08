@@ -21,6 +21,7 @@
 */
 
 #include "calchartapp.h"
+#include "top_frame.h"
 #include "modes.h"
 #include "confgr.h"
 #include "basic_ui.h"
