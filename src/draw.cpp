@@ -324,7 +324,7 @@ static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 	off.x = Int2Coord((landscape)?80:48);
 	off.y = Int2Coord(42);
 
-	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), bord1, bord2, siz, off, whash, ehash));
+	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), siz, off, bord1, bord2, whash, ehash));
 }
 
 void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool landscape)

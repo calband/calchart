@@ -189,20 +189,20 @@ END_EVENT_TABLE()
 class MyPrintout : public wxPrintout
 {
 public:
-	MyPrintout(const wxString& title, CC_show* shw) : wxPrintout(title), show(shw) {}
+	MyPrintout(const wxString& title, const CC_show& show) : wxPrintout(title), mShow(show) {}
 	virtual ~MyPrintout() {}
-	virtual bool HasPage(int pageNum) { return pageNum <= show->GetNumSheets(); }
+	virtual bool HasPage(int pageNum) { return pageNum <= mShow.GetNumSheets(); }
 	virtual void GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo)
 	{
 		*minPage = 1;
-		*maxPage = show->GetNumSheets();
+		*maxPage = mShow.GetNumSheets();
 		*pageFrom = 1;
-		*pageTo = show->GetNumSheets();
+		*pageTo = mShow.GetNumSheets();
 	}
 	virtual bool OnPrintPage(int pageNum)
 	{
 		wxDC* dc = wxPrintout::GetDC();
-		CC_show::const_CC_sheet_iterator_t sheet = show->GetNthSheet(pageNum-1);
+		CC_show::const_CC_sheet_iterator_t sheet = mShow.GetNthSheet(pageNum-1);
 
 		int size = gPrintDialogData->GetPrintData().GetOrientation();
 
@@ -210,7 +210,7 @@ public:
 
 		return true;
 	}
-	CC_show *show;
+	const CC_show& mShow;
 };
 
 TopFrame::TopFrame(wxDocManager *manager,
@@ -497,7 +497,7 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrinter printer(gPrintDialogData);
-	MyPrintout printout(wxT("My Printout"), field->mShow);
+	MyPrintout printout(wxT("My Printout"), *static_cast<CC_show*>(GetDocument()));
 	wxPrintDialogData& printDialog = printer.GetPrintDialogData();
 
 	int minPage, maxPage, pageFrom, pageTo;
@@ -527,8 +527,8 @@ void MainFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrintPreview *preview = new wxPrintPreview(
-		new MyPrintout(wxT("My Printout"), field->mShow),
-		new MyPrintout(wxT("My Printout"), field->mShow),
+		new MyPrintout(wxT("My Printout"), *static_cast<CC_show*>(GetDocument())),
+		new MyPrintout(wxT("My Printout"), *static_cast<CC_show*>(GetDocument())),
 		gPrintDialogData);
 	if (!preview->Ok())
 	{

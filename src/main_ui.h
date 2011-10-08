@@ -317,8 +317,8 @@ private:
 public:
 	// call this when we need to generate the marcher's paths.
 	void OnEnableDrawPaths(bool enable);
-	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 private:
+	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 	void GeneratePaths();
 	boost::shared_ptr<Animation> mAnimation;
 	bool mDrawPaths;
