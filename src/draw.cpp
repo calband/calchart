@@ -32,137 +32,6 @@
 
 extern wxFont *pointLabelFont;
 
-void Draw(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool primary,
-bool drawall, int point)
-{
-	unsigned short i;
-	unsigned firstpoint, lastpoint;
-	const wxBrush *fillBrush;
-	unsigned long x, y;
-	float offset, plineoff, slineoff, textoff;
-	wxCoord textw, texth, textd;
-	float circ_r;
-	CC_coord origin;
-
-	dc->SetBackgroundMode(wxTRANSPARENT);
-	dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
-
-	if (drawall)
-	{
-		dc->Clear();
-		dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-		dc->SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
-		dc->SetLogicalFunction(wxCOPY);
-		sheet.show->GetMode().Draw(dc);
-	}
-
-	if (!sheet.pts.empty())
-	{
-		dc->SetFont(*pointLabelFont);
-		dc->SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
-		circ_r = FLOAT2COORD(GetConfiguration_DotRatio());
-		offset = circ_r / 2;
-		plineoff = offset * GetConfiguration_PLineRatio();
-		slineoff = offset * GetConfiguration_SLineRatio();
-		textoff = offset * 1.25;
-		origin = sheet.show->GetMode().Offset();
-		if (point < 0)
-		{
-			firstpoint = 0;
-			lastpoint = sheet.show->GetNumPoints();
-		}
-		else
-		{
-			firstpoint = (unsigned)point;
-			lastpoint = (unsigned)point + 1;
-		}
-		for (int selectd = 0; selectd < 2; selectd++)
-		{
-			for (i = firstpoint; i < lastpoint; i++)
-			{
-				if ((sheet.show->IsSelected(i) != 0) == (selectd != 0))
-				{
-					if (selectd)
-					{
-						if (primary)
-						{
-							dc->SetPen(*CalChartPens[COLOR_POINT_HILIT]);
-							fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
-						}
-						else
-						{
-							dc->SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
-							fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
-						}
-					}
-					else
-					{
-						if (primary)
-						{
-							dc->SetPen(*CalChartPens[COLOR_POINT]);
-							fillBrush = CalChartBrushes[COLOR_POINT];
-						}
-						else
-						{
-							dc->SetPen(*CalChartPens[COLOR_REF_POINT]);
-							fillBrush = CalChartBrushes[COLOR_REF_POINT];
-						}
-					}
-					x = sheet.GetPosition(i, ref).x+origin.x;
-					y = sheet.GetPosition(i, ref).y+origin.y;
-					switch (sheet.pts[i].sym)
-					{
-						case SYMBOL_SOL:
-						case SYMBOL_SOLBKSL:
-						case SYMBOL_SOLSL:
-						case SYMBOL_SOLX:
-							dc->SetBrush(*fillBrush);
-							break;
-						default:
-							dc->SetBrush(*wxTRANSPARENT_BRUSH);
-					}
-					dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
-					switch (sheet.pts[i].sym)
-					{
-						case SYMBOL_SL:
-						case SYMBOL_X:
-							dc->DrawLine(x - plineoff, y + plineoff,
-								x + plineoff, y - plineoff);
-							break;
-						case SYMBOL_SOLSL:
-						case SYMBOL_SOLX:
-							dc->DrawLine(x - slineoff, y + slineoff,
-								x + slineoff, y - slineoff);
-							break;
-						default:
-							break;
-					}
-					switch (sheet.pts[i].sym)
-					{
-						case SYMBOL_BKSL:
-						case SYMBOL_X:
-							dc->DrawLine(x - plineoff, y - plineoff,
-								x + plineoff, y + plineoff);
-							break;
-						case SYMBOL_SOLBKSL:
-						case SYMBOL_SOLX:
-							dc->DrawLine(x - slineoff, y - slineoff,
-								x + slineoff, y + slineoff);
-							break;
-						default:
-							break;
-					}
-					dc->GetTextExtent(sheet.show->GetPointLabel(i), &textw, &texth, &textd);
-					dc->DrawText(sheet.show->GetPointLabel(i),
-						sheet.pts[i].GetFlip() ? x : (x - textw),
-						y - textoff - texth + textd);
-				}
-			}
-		}
-	}
-	dc->SetFont(wxNullFont);
-}
-
 // draw text centered around x (though still at y down)
 void DrawCenteredText(wxDC& dc, const wxString& text, const wxPoint& pt)
 {
@@ -442,18 +311,18 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 
 static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 {
-	CC_coord bord1(INT2COORD(8),INT2COORD(8)), bord2(INT2COORD(8),INT2COORD(8));
+	CC_coord bord1(Int2Coord(8),Int2Coord(8)), bord2(Int2Coord(8),Int2Coord(8));
 	CC_coord siz, off;
 	uint32_t whash = 32;
 	uint32_t ehash = 52;
-	bord1.x = INT2COORD((landscape)?12:6);
-	bord1.y = INT2COORD((landscape)?21:19);
-	bord2.x = INT2COORD((landscape)?12:6);
-	bord2.y = INT2COORD((landscape)?12:6);
-	siz.x = INT2COORD((landscape)?160:96);
-	siz.y = INT2COORD(84);
-	off.x = INT2COORD((landscape)?80:48);
-	off.y = INT2COORD(42);
+	bord1.x = Int2Coord((landscape)?12:6);
+	bord1.y = Int2Coord((landscape)?21:19);
+	bord2.x = Int2Coord((landscape)?12:6);
+	bord2.y = Int2Coord((landscape)?12:6);
+	siz.x = Int2Coord((landscape)?160:96);
+	siz.y = Int2Coord(84);
+	off.x = Int2Coord((landscape)?80:48);
+	off.y = Int2Coord(42);
 
 	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), bord1, bord2, siz, off, whash, ehash));
 }
@@ -491,12 +360,12 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 	dc->SetPen(*wxBLACK_PEN);
 	dc->SetTextForeground(*wxBLACK);
 	dc->SetLogicalFunction(wxCOPY);
-	mode->Draw(dc.get());
+	mode->Draw(*dc);
 
 	if (!sheet.pts.empty())
 	{
 		dc->SetFont(*pointLabelFont);
-		circ_r = FLOAT2COORD(GetConfiguration_DotRatio());
+		circ_r = Float2Coord(GetConfiguration_DotRatio());
 		const float offset = circ_r / 2;
 		const float plineoff = offset * GetConfiguration_PLineRatio();
 		const float slineoff = offset * GetConfiguration_SLineRatio();

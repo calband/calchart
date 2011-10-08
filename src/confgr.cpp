@@ -23,7 +23,6 @@
 #include <wx/utils.h>
 #include <wx/brush.h>
 #include <wx/colour.h>
-#include <wx/palette.h>
 #include <wx/pen.h>
 #include <wx/config.h>
 #include <wx/confbase.h>
@@ -112,8 +111,10 @@ const int DefaultPenWidth[COLOR_NUM] =
 static const wxString kAutosaveIntervalKey = wxT("AutosaveInterval");
 static const int kAutosaveIntervalValue = 60;
 
-static const wxString kMainFrameZoomKey = wxT("MainFrameZoom");
-static const long kMainFrameZoomValue = 5;
+// "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
+//static const wxString kMainFrameZoomKey = wxT("MainFrameZoom");
+static const wxString kMainFrameZoomKey = wxT("MainFrameZoom2");
+static const float kMainFrameZoomValue = 0.5;
 static const wxString kMainFrameWidthKey = wxT("MainFrameWidth");
 static const unsigned int kMainFrameWidthValue = 600;
 static const wxString kMainFrameHeightKey = wxT("MainFrameHeight");
@@ -244,7 +245,7 @@ void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## Key
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, double);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameWidth, long);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long);
 
@@ -279,7 +280,6 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, double);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, double);
 
 // Color is more complicated, we use functions for setting that
-wxPalette *CalChartPalette;
 const wxPen *CalChartPens[COLOR_NUM];
 const wxBrush *CalChartBrushes[COLOR_NUM];
 
@@ -359,17 +359,17 @@ void ReadConfigurationShowMode()
 		unsigned short whash = values[0];
 		unsigned short ehash = values[1];
 		CC_coord bord1, bord2;
-		bord1.x = INT2COORD(values[2]);
-		bord1.y = INT2COORD(values[3]);
-		bord2.x = INT2COORD(values[4]);
-		bord2.y = INT2COORD(values[5]);
+		bord1.x = Int2Coord(values[2]);
+		bord1.y = Int2Coord(values[3]);
+		bord2.x = Int2Coord(values[4]);
+		bord2.y = Int2Coord(values[5]);
 		CC_coord size, offset;
-		offset.x = INT2COORD(-values[6]);
-		offset.y = INT2COORD(-values[7]);
-		size.x = INT2COORD(values[8]);
-		size.y = INT2COORD(values[9]);
+		offset.x = Int2Coord(-values[6]);
+		offset.y = Int2Coord(-values[7]);
+		size.x = Int2Coord(values[8]);
+		size.y = Int2Coord(values[9]);
 
-		wxGetApp().GetModeList().Add(new ShowModeStandard(kShowModeStrings[i], bord1, bord2, size, offset, whash, ehash));
+		wxGetApp().GetModeList().push_back(boost::shared_ptr<ShowMode>(new ShowModeStandard(kShowModeStrings[i], size, offset, bord1, bord2, whash, ehash)));
 	}
 }
 
@@ -418,10 +418,10 @@ void ReadConfigurationSpringShowMode()
 		GetConfigurationSpringShowMode(i, values);
 		unsigned char which_spr_yards = values[0];
 		CC_coord bord1, bord2;
-		bord1.x = INT2COORD(values[1]);
-		bord1.y = INT2COORD(values[2]);
-		bord2.x = INT2COORD(values[3]);
-		bord2.y = INT2COORD(values[4]);
+		bord1.x = Int2Coord(values[1]);
+		bord1.y = Int2Coord(values[2]);
+		bord2.x = Int2Coord(values[3]);
+		bord2.y = Int2Coord(values[4]);
 
 		short mode_steps_x = values[5];
 		short mode_steps_y = values[6];
@@ -439,7 +439,7 @@ void ReadConfigurationSpringShowMode()
 		short eps_text_right = values[18];
 		short eps_text_top = values[19];
 		short eps_text_bottom = values[20];
-		wxGetApp().GetModeList().Add(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
+		wxGetApp().GetModeList().push_back(boost::shared_ptr<ShowMode>(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
 					which_spr_yards,
 					mode_steps_x, mode_steps_y,
 					mode_steps_w, mode_steps_h,
@@ -448,7 +448,7 @@ void ReadConfigurationSpringShowMode()
 					eps_field_x, eps_field_y,
 					eps_field_w, eps_field_h,
 					eps_text_left, eps_text_right,
-					eps_text_top, eps_text_bottom));
+					eps_text_top, eps_text_bottom)));
 
 	}
 }
@@ -647,37 +647,6 @@ void ClearConfigSpringShowYardline()
 	ReadConfigSpringYardlines();
 }
 
-void InitializeColorePalette()
-{
-	// create a color palette
-	int i, j;
-	int n = 0;
-	unsigned char rd[COLOR_NUM], gd[COLOR_NUM], bd[COLOR_NUM];
-	CalChartPalette = new wxPalette();
-	for (i = 0; i < COLOR_NUM; i++)
-	{
-		for (j = 0; j < i; j++)
-		{
-			const wxColour& c1 = CalChartPens[i]->GetColour();
-			const wxColour& c2 = (j >= 0) ? CalChartPens[j]->GetColour() : (j < -1) ? *wxBLACK : *wxWHITE;
-			if ((c1.Red() == c2.Red()) &&
-				(c1.Green() == c2.Green()) &&
-				(c1.Blue() == c2.Blue()))
-			{
-				break;
-			}
-		}
-		if (i == j)
-		{
-			rd[n] = CalChartPens[i]->GetColour().Red();
-			gd[n] = CalChartPens[i]->GetColour().Green();
-			bd[n] = CalChartPens[i]->GetColour().Blue();
-			n++;
-		}
-	}
-	CalChartPalette->Create(n, rd, gd, bd);
-}
-
 void ReadConfig()
 {
 	ReadConfigColor();
@@ -685,7 +654,6 @@ void ReadConfig()
 	ReadConfigurationSpringShowMode();
 	ReadConfigYardlines();
 	ReadConfigSpringYardlines();
-	InitializeColorePalette();
 }
 
 

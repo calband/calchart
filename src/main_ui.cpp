@@ -89,6 +89,13 @@ const wxString gridtext[] =
 	wxT("2-Mil"),
 };
 
+
+const int zoom_amounts[] =
+{
+	500, 200, 150, 100, 75, 50, 25, 10,
+};
+
+
 static const wxChar *file_wild = FILE_WILDCARDS;
 
 struct GridValue
@@ -99,16 +106,14 @@ struct GridValue
 GridValue gridvalue[] =
 {
 	{1,0},
-	{INT2COORD(1),0},
-	{INT2COORD(2),0},
-	{INT2COORD(4),0},
-	{INT2COORD(4),INT2COORD(4)/3},
-	{INT2COORD(8),INT2COORD(8)/3}
+	{Int2Coord(1),0},
+	{Int2Coord(2),0},
+	{Int2Coord(4),0},
+	{Int2Coord(4),Int2Coord(4)/3},
+	{Int2Coord(8),Int2Coord(8)/3}
 };
 
 extern wxHtmlHelpController *gHelpController;
-
-extern TopFrame *topframe;
 
 extern wxPrintDialogData *gPrintDialogData;
 
@@ -167,18 +172,18 @@ EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
 EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
 EVT_MENU(wxID_PREFERENCES, MainFrame::OnCmdPreferences)
-EVT_COMMAND_SCROLL(CALCHART__slider_zoom, MainFrame::slider_zoom_callback)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
+EVT_COMBOBOX(CALCHART__slider_zoom, MainFrame::zoom_callback)
+EVT_TEXT_ENTER(CALCHART__slider_zoom, MainFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
-EVT_CHECKBOX(CALCHART__draw_paths, MainFrame::draw_paths)
+EVT_CHECKBOX(CALCHART__draw_paths, MainFrame::OnEnableDrawPaths)
 EVT_SIZE( MainFrame::OnSize)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(FieldCanvas, AutoScrollCanvas)
+BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
 EVT_CHAR(FieldCanvas::OnChar)
 EVT_MOUSE_EVENTS(FieldCanvas::OnMouseEvent)
 EVT_PAINT(FieldCanvas::OnPaint)
-EVT_ERASE_BACKGROUND(FieldCanvas::OnErase)
 END_EVENT_TABLE()
 
 class MyPrintout : public wxPrintout
@@ -208,8 +213,10 @@ public:
 	CC_show *show;
 };
 
-TopFrame::TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
-wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
+TopFrame::TopFrame(wxDocManager *manager,
+				   wxFrame *frame,
+				   const wxString& title):
+wxDocMDIParentFrame(manager, frame, wxID_ANY, title)
 {
 // Give it an icon
 	SetBandIcon(this);
@@ -232,6 +239,7 @@ wxDocMDIParentFrame(manager, frame, wxID_ANY, title, pos, size, style, name)
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
+
 	SetDropTarget(new TopFrameDropTarget(manager, this));
 	Show(true);
 }
@@ -244,20 +252,20 @@ TopFrame::~TopFrame()
 
 void TopFrame::OnCmdAbout(wxCommandEvent& event)
 {
-	About();
+	TopFrame::About();
 }
 
 
 void TopFrame::OnCmdHelp(wxCommandEvent& event)
 {
-	Help();
+	TopFrame::Help();
 }
 
 void TopFrame::About()
 {
-	(void)wxMessageBox(wxT("CalChart ") wxT(CC_VERSION) wxT("\nAuthor: Gurk Meeker\n")
+	(void)wxMessageBox(wxT("CalChart ") wxT(CC_VERSION) wxT("\nAuthor: Gurk Meeker, Richard Michael Powell\n")
 		wxT("http://calchart.sourceforge.net\n")
-		wxT("Copyright (c) 1994-2008 Garrick Meeker\n")
+		wxT("Copyright (c) 1994-2011 Garrick Meeker, Richard Michael Powell\n")
 		wxT("\n")
 		wxT("This program is free software: you can redistribute it and/or modify\n")
 		wxT("it under the terms of the GNU General Public License as published by\n")
@@ -283,6 +291,7 @@ void TopFrame::Help()
 	gHelpController->DisplayContents();
 }
 
+
 void TopFrame::OnCmdPreferences(wxCommandEvent& event)
 {
 	CalChartPreferences dialog1(this);
@@ -306,9 +315,6 @@ MainFrame::MainFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, 
 wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 field(NULL)
 {
-	unsigned ss;
-	unsigned def_grid;
-
 // Give it an icon
 	SetBandIcon(this);
 
@@ -370,9 +376,11 @@ field(NULL)
 	CreateCoolToolBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
-	ss = 0;
-	def_grid = 2;
-	field = new FieldCanvas(view, ss, this, GetConfiguration_MainFrameZoom());
+	field = new FieldCanvas(view, this, GetConfiguration_MainFrameZoom());
+	// I don't think we need to do this here.  Should be taken care of already
+//	field->SetVirtualSize(1000, 1000);
+	// set scroll rate 1 to 1, so we can have even scrolling of whole field
+	field->SetScrollRate(1, 1);
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
@@ -384,19 +392,36 @@ field(NULL)
 	grid_choice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1),
 		sizeof(gridtext)/sizeof(wxString),
 		gridtext);
+	unsigned def_grid = 2;
 	grid_choice->SetSelection(def_grid);
 
 // Zoom slider
-	// on Mac using wxSL_LABELS will cause a crash?
-	zoom_slider = new wxSlider(this, CALCHART__slider_zoom, GetConfiguration_MainFrameZoom(), 1, FIELD_MAXZOOM, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+	wxArrayString zoomtext;
+	for (size_t i = 0; i < sizeof(zoom_amounts)/(sizeof(zoom_amounts[0])); ++i)
+	{
+		wxString buf;
+		buf.sprintf(wxT("%d%%"), zoom_amounts[i]);
+		zoomtext.Add(buf);
+	}
+	zoomtext.Add(wxT("Fit"));
+	zoom_box = new wxComboBox(this, CALCHART__slider_zoom, wxEmptyString,
+							  wxDefaultPosition, wxDefaultSize,
+							  zoomtext,
+							  wxTE_PROCESS_ENTER);
+	// set the text to the default zoom level
+	if (zoom_box)
+	{
+		wxString zoomtxt;
+		zoomtxt.sprintf("%d%%", (int)(GetConfiguration_MainFrameZoom()*100));
+		zoom_box->SetValue(zoomtxt);
+	}
 
 // set up a sizer for the field panel
 	wxBoxSizer* rowsizer = new wxBoxSizer(wxHORIZONTAL);
 	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Grid")), 0, wxALL, 5);
 	rowsizer->Add(grid_choice, 0, wxALL, 5);
 	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Zoom")), 0, wxALL, 5);
-	rowsizer->Add(zoom_slider, 1, wxEXPAND, 5);
+	rowsizer->Add(zoom_box, 1, wxEXPAND, 5);
 	fullsizer->Add(rowsizer);
 // Reference choice
 	{
@@ -427,13 +452,19 @@ field(NULL)
 	rowsizer->Add(sheet_slider, 1, wxEXPAND, 5);
 	fullsizer->Add(rowsizer);
 
+// Update the command processor with the undo/redo menu items
+	edit_menu->FindItem(wxID_UNDO)->Enable(false);
+	edit_menu->FindItem(wxID_REDO)->Enable(false);
+	doc->GetCommandProcessor()->SetEditMenu(edit_menu);
+	doc->GetCommandProcessor()->Initialize();
+	
 // Update the tool bar
 	SetCurrentLasso(field->curr_lasso);
 	SetCurrentMove(field->curr_move);
 
 // Show the frame
 	UpdatePanel();
-	field->RefreshShow();
+	field->Refresh();
 
 	fullsizer->Add(field, 1, wxEXPAND);
 	SetSizer(fullsizer);
@@ -561,7 +592,7 @@ void MainFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
 	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
 	static_cast<MainFrameView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum());
-	field->PrevSS();
+	static_cast<MainFrameView*>(GetView())->GoToPrevSheet();
 }
 
 
@@ -569,7 +600,7 @@ void MainFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
 	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
 	static_cast<MainFrameView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum()+1);
-	field->NextSS();
+	static_cast<MainFrameView*>(GetView())->GoToNextSheet();
 }
 
 
@@ -699,25 +730,25 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 
 void MainFrame::OnCmdAbout(wxCommandEvent& event)
 {
-	topframe->About();
+	TopFrame::About();
 }
 
 
 void MainFrame::OnCmdHelp(wxCommandEvent& event)
 {
-	topframe->Help();
+	TopFrame::Help();
 }
 
 
 void MainFrame::OnCmd_prev_ss(wxCommandEvent& event)
 {
-	field->PrevSS();
+	static_cast<MainFrameView*>(GetView())->GoToPrevSheet();
 }
 
 
 void MainFrame::OnCmd_next_ss(wxCommandEvent& event)
 {
-	field->NextSS();
+	static_cast<MainFrameView*>(GetView())->GoToNextSheet();
 }
 
 
@@ -935,7 +966,7 @@ void MainFrame::SnapToGrid(CC_coord& c)
 
 	c.x = SNAPGRID(c.x, gridn, grids);
 // Adjust so 4 step grid will be on visible grid
-	c.y = SNAPGRID(c.y - INT2COORD(2), gridn, grids) + INT2COORD(2);
+	c.y = SNAPGRID(c.y - Int2Coord(2), gridn, grids) + Int2Coord(2);
 }
 
 
@@ -997,7 +1028,7 @@ void MainFrame::SetMode()
 	{
 		wxArrayString modeStrings;
 		unsigned whichMode = 0, tmode = 0;
-		for (ShowModeList::Iter mode = wxGetApp().GetModeList().Begin(); mode != wxGetApp().GetModeList().End(); ++mode, ++tmode)
+		for (ShowModeList::const_iterator mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode, ++tmode)
 		{
 			modeStrings.Add((*mode)->GetName());
 			if ((*mode)->GetName() == field->mShow->GetMode().GetName())
@@ -1017,19 +1048,12 @@ void MainFrame::SetMode()
 
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
-int def_zoom, const wxPoint& pos, const wxSize& size):
-AutoScrollCanvas(frame, -1, pos, size), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
-curr_move(CC_MOVE_NORMAL),
-mCurrentReferencePoint(0), mDrawPaths(false), drag(CC_DRAG_NONE), curr_shape(NULL), dragon(false)
+FieldCanvas::FieldCanvas(wxView *view, MainFrame *frame, float def_zoom):
+CtrlScrollCanvas(frame, wxID_ANY), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
+curr_move(CC_MOVE_NORMAL), drag(CC_DRAG_NONE), curr_shape(NULL)
 {
-	SetPalette(CalChartPalette);
-
-	mShow->SetCurrentSheet(ss);
-
-	SetZoomQuick(def_zoom);
-
-	UpdateBars();
+	mShow->SetCurrentSheet(0);
+	SetZoom(def_zoom);
 }
 
 
@@ -1052,51 +1076,29 @@ void FieldCanvas::ClearShapes()
 }
 
 
-// Draw the current drag feedback
-void FieldCanvas::DrawDrag(bool on)
-{
-	wxDC *dc = GetMemDC();
-	CC_coord origin;
-
-	if ((on != dragon) && curr_shape)
-	{
-		dragon = on;
-		if (on)
-		{
-			dc->SetBrush(*wxTRANSPARENT_BRUSH);
-			dc->SetPen(*CalChartPens[COLOR_SHAPES]);
-			origin = mShow->GetMode().Offset();
-			for (ShapeList::const_iterator i=shape_list.begin();
-				i != shape_list.end();
-				++i)
-			{
-				(*i)->Draw(dc, origin.x,
-					origin.y);
-			}
-		}
-		else
-		{
-			Blit(*dc);
-		}
-	}
-}
-
-
 // Define the repainting behaviour
 void FieldCanvas::OnPaint(wxPaintEvent& event)
 {
-	wxBufferedPaintDC dc(this);
-	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
-	dc.Clear();
-	Blit(dc);
-	dragon = false;								  // since the canvas gets cleared
-	DrawDrag(true);
-}
+	wxPaintDC dc(this);
+	PrepareDC(dc);
 
-void FieldCanvas::OnErase(wxEraseEvent& event)
-{
+	// draw the view
+	mView->OnDraw(&dc);
+	
+	if (curr_shape)
+	{
+		dc.SetBrush(*wxTRANSPARENT_BRUSH);
+		dc.SetPen(*CalChartPens[COLOR_SHAPES]);
+		CC_coord origin = mShow->GetMode().Offset();
+		for (ShapeList::const_iterator i=shape_list.begin();
+			 i != shape_list.end();
+			 ++i)
+		{
+			(*i)->Draw(&dc, origin.x,
+					   origin.y);
+		}
+	}
 }
-
 
 // Allow clicking within pixels to close polygons
 #define CLOSE_ENOUGH_TO_CLOSE 10
@@ -1106,25 +1108,24 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 	int i;
 	CC_coord pos;
 
+	CtrlScrollCanvas::OnMouseMove(event);
+
 	if (mShow)
 	{
+		wxClientDC dc(this);
+		PrepareDC(dc);
+
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
 			event.GetPosition(&x, &y);
-			if (event.ControlDown())
-			{
-				Move(x, y);
-				dragon = false;					  // since the canvas gets cleared
-			}
-			else
-			{
-				Move(x, y, 1);
-			}
+
+			x = dc.DeviceToLogicalX( x );
+			y = dc.DeviceToLogicalY( y );
 
 			pos = mShow->GetMode().Offset();
-			pos.x = Coord(((x-x_off)/GetScaleX()) - pos.x);
-			pos.y = Coord(((y-y_off)/GetScaleY()) - pos.y);
+			pos.x = (x - pos.x);
+			pos.y = (y - pos.y);
 
 			if (event.LeftDown())
 			{
@@ -1192,15 +1193,18 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								float d;
 								if (p != NULL)
 								{
+									// need to know where the scale is, so we need the device.
+									wxClientDC dc(this);
+									PrepareDC(dc);
 									Coord polydist =
-										(Coord)GetMemDC()->DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
+										dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
 									d = p->x - pos.x;
 									if (ABS(d) < polydist)
 									{
 										d = p->y - pos.y;
 										if (ABS(d) < polydist)
 										{
-											SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+											mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
 											EndDrag();
 											break;
 										}
@@ -1212,7 +1216,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							default:
 								bool changed = false;
 								if (!(event.ShiftDown() || event.AltDown())) changed = mShow->UnselectAll();
-								i = sheet->FindPoint(pos.x, pos.y, mCurrentReferencePoint);
+								i = mView->FindPoint(pos);
 								if (i < 0)
 								{
 									// if no point selected, we grab using the current lasso
@@ -1232,7 +1236,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									}
 
 									changed = true;
-									BeginDrag(CC_DRAG_LINE, sheet->GetPosition(i, mCurrentReferencePoint));
+									BeginDrag(CC_DRAG_LINE, mView->PointPosition(i));
 								}
 						}
 						break;
@@ -1245,7 +1249,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				switch (curr_move)
 				{
 					case CC_MOVE_LINE:
-						mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint(), mCurrentReferencePoint);
+						mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint());
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 						break;
@@ -1266,7 +1270,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 									ZRotationMatrix(r) *
 									TranslationMatrix(Vector(c1.x, c1.y, 0));
-								mView->DoTransformPoints(m, mCurrentReferencePoint);
+								mView->DoTransformPoints(m);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1301,7 +1305,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									YXShearMatrix(amount) *
 									ZRotationMatrix(ang) *
 									TranslationMatrix(Vector(o.x, o.y, 0));
-								mView->DoTransformPoints(m, mCurrentReferencePoint);
+								mView->DoTransformPoints(m);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
 							}
@@ -1322,7 +1326,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								YReflectionMatrix() *
 								ZRotationMatrix(ang) *
 								TranslationMatrix(Vector(c1.x, c1.y, 0));
-							mView->DoTransformPoints(m, mCurrentReferencePoint);
+							mView->DoTransformPoints(m);
 						}
 						EndDrag();
 						ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1367,7 +1371,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 										ScaleMatrix(Vector(sx, sy, 0)) *
 										TranslationMatrix(Vector(c1.x, c1.y, 0));
-									mView->DoTransformPoints(m, mCurrentReferencePoint);
+									mView->DoTransformPoints(m);
 								}
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1420,7 +1424,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 									(float)s2.x*(float)s1.y));
 								Binv /= d;
 								m = Binv*A;
-								mView->DoTransformPoints(m, mCurrentReferencePoint);
+								mView->DoTransformPoints(m);
 							}
 							EndDrag();
 							ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1430,18 +1434,17 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 						switch (drag)
 						{
 							case CC_DRAG_BOX:
-								SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(),
-									mCurrentReferencePoint, event.AltDown());
+								mView->SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(), event.AltDown());
 								EndDrag();
 								break;
 							case CC_DRAG_LINE:
 								pos = shape->GetPoint() - shape->GetOrigin();
-								mView->DoTranslatePoints(pos, mCurrentReferencePoint);
+								mView->DoTranslatePoints(pos);
 								EndDrag();
 								break;
 							case CC_DRAG_LASSO:
 								((CC_lasso*)curr_shape)->End();
-								SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+								mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
 								EndDrag();
 								break;
 							default:
@@ -1455,7 +1458,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 				switch (drag)
 				{
 					case CC_DRAG_POLY:
-						SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+						mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
 						EndDrag();
 						break;
 					default:
@@ -1477,7 +1480,6 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 						break;
 				}
 			}
-			RefreshShow();
 		}
 	}
 	Refresh();
@@ -1494,56 +1496,11 @@ void FieldCanvas::OnScroll(wxScrollEvent& event)
 void FieldCanvas::OnChar(wxKeyEvent& event)
 {
 	if (event.GetKeyCode() == WXK_LEFT)
-		PrevSS();
+		mView->GoToPrevSheet();
 	else if (event.GetKeyCode() == WXK_RIGHT)
-		NextSS();
+		mView->GoToNextSheet();
 	else
 		event.Skip();
-}
-
-void FieldCanvas::GeneratePaths()
-{
-	mAnimation.reset(new Animation(mShow, NotifyStatus(), NotifyErrorList()));
-}
-
-void FieldCanvas::DrawPaths(wxDC& dc, const CC_sheet& sheet)
-{
-	if (mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum()))
-	{
-		CC_coord origin = mShow->GetMode().Offset();
-		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
-		for (CC_show::SelectionList::const_iterator point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
-		{
-			mAnimation->DrawPath(dc, *point, origin);
-		}
-	}
-}
-
-void FieldCanvas::RefreshShow(bool drawall, int point)
-{
-	if (mShow)
-	{
-		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
-		if (sheet != mShow->GetSheetEnd())
-		{
-			if (mCurrentReferencePoint > 0)
-			{
-				Draw(GetMemDC(), *sheet, 0, false, drawall, point);
-				Draw(GetMemDC(), *sheet, mCurrentReferencePoint, true, false, point);
-			}
-			else
-			{
-				Draw(GetMemDC(), *sheet, mCurrentReferencePoint, true, drawall, point);
-			}
-			if (mDrawPaths)
-			{
-				DrawPaths(*GetMemDC(), *sheet);
-			}
-			dragon = false;						  // since the canvas gets cleared
-			DrawDrag(true);
-		}
-	}
-	Refresh();
 }
 
 
@@ -1578,19 +1535,22 @@ void MainFrame::UpdatePanel()
 }
 
 
-void FieldCanvas::UpdateBars()
+void FieldCanvas::SetZoom(float factor)
 {
+	CtrlScrollCanvas::SetZoom(factor);
 	if (mShow)
 	{
-		SetSize(wxSize(COORD2INT(mShow->GetMode().Size().x) * zoomf,
-			COORD2INT(mShow->GetMode().Size().y) * zoomf));
+		float f = GetZoom();
+		long newx = mShow->GetMode().Size().x * f;
+		long newy = mShow->GetMode().Size().y * f;
+		SetVirtualSize(newx, newy);
 	}
+	Refresh();
 }
 
 
 void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start)
 {
-	DrawDrag(false);
 	drag = type;
 	ClearShapes();
 	curr_shape = NULL;
@@ -1609,30 +1569,18 @@ void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start)
 			AddDrag(type, new CC_shape_line(start));
 			break;
 		case CC_DRAG_CROSS:
-			AddDrag(type, new CC_shape_cross(start, INT2COORD(2)));
+			AddDrag(type, new CC_shape_cross(start, Int2Coord(2)));
 		default:
 			break;
 	}
 }
 
 
-void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_shape *shape)
-{
-	DrawDrag(false);
-	drag = type;
-	ClearShapes();
-	curr_shape = NULL;
-	AddDrag(type, shape);
-}
-
-
 void FieldCanvas::AddDrag(CC_DRAG_TYPES type, CC_shape *shape)
 {
-	DrawDrag(false);
 	drag = type;
 	shape_list.push_back(shape);
 	curr_shape = shape;
-	DrawDrag(true);
 }
 
 
@@ -1640,16 +1588,15 @@ void FieldCanvas::MoveDrag(CC_coord end)
 {
 	if (curr_shape)
 	{
-		DrawDrag(false);
-		curr_shape->OnMove(end, ourframe);
-		DrawDrag(true);
+		CC_coord snapped = end;
+		ourframe->SnapToGrid(snapped);
+		curr_shape->OnMove(end, snapped);
 	}
 }
 
 
 void FieldCanvas::EndDrag()
 {
-	DrawDrag(false);
 	ClearShapes();
 	drag = CC_DRAG_NONE;
 }
@@ -1658,8 +1605,7 @@ void FieldCanvas::EndDrag()
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
 
-void FieldCanvas::SelectOrdered(PointList& pointlist,
-const CC_coord& start, bool toggleSelected)
+void MainFrameView::SelectOrdered(PointList& pointlist, bool toggleSelected)
 {
 	if (toggleSelected)
 	{
@@ -1672,104 +1618,105 @@ const CC_coord& start, bool toggleSelected)
 }
 
 
-bool FieldCanvas::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
+void MainFrameView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
-	bool changed = false;
 	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 	PointList pointlist;
-	const wxPoint *pnt;
 
 	for (unsigned i = 0; i < mShow->GetNumPoints(); i++)
 	{
 		if (lasso->Inside(sheet->GetPosition(i, mCurrentReferencePoint)))
 		{
-			changed = true;
 			pointlist.push_back(i);
 		}
 	}
-	pnt = lasso->FirstPoint();
-	if (changed && pnt)
+	if (lasso->FirstPoint())
 	{
-		SelectOrdered(pointlist, CC_coord((Coord)pnt->x, (Coord)pnt->y), toggleSelected);
+		SelectOrdered(pointlist, toggleSelected);
 	}
-
-	return changed;
 }
 
 
 // Select points within rectangle
-bool FieldCanvas::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
-unsigned ref, bool toggleSelected)
+void MainFrameView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected)
 {
-	unsigned i;
-	bool changed = false;
-	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
-	CC_coord top_left, bottom_right;
-	const CC_coord *pos;
-	PointList pointlist;
-
-	if (c1.x > c2.x)
-	{
-		top_left.x = c2.x;
-		bottom_right.x = c1.x;
-	}
-	else
-	{
-		top_left.x = c1.x;
-		bottom_right.x = c2.x;
-	}
-	if (c1.y > c2.y)
-	{
-		top_left.y = c2.y;
-		bottom_right.y = c1.y;
-	}
-	else
-	{
-		top_left.y = c1.y;
-		bottom_right.y = c2.y;
-	}
-	for (i = 0; i < mShow->GetNumPoints(); i++)
-	{
-		pos = &sheet->GetPosition(i, ref);
-		if ((pos->x >= top_left.x) && (pos->x <= bottom_right.x) &&
-			(pos->y >= top_left.y) && (pos->y <= bottom_right.y))
-		{
-			pointlist.push_back(i);
-			changed = true;
-		}
-	}
-	if (changed)
-	{
-		SelectOrdered(pointlist, c1, toggleSelected);
-	}
-
-	return changed;
+	CC_lasso lasso(c1);
+	lasso.Append(CC_coord(c1.x, c2.y));
+	lasso.Append(c2);
+	lasso.Append(CC_coord(c2.x, c1.y));
+	lasso.End();
+	SelectWithLasso(&lasso, toggleSelected);
 }
 
 
 void MainFrame::refnum_callback(wxCommandEvent &)
 {
-	field->mCurrentReferencePoint = ref_choice->GetSelection();
-	field->RefreshShow();
+	field->mView->SetReferencePoint(ref_choice->GetSelection());
 }
 
-void MainFrame::draw_paths(wxCommandEvent &event)
+void MainFrame::OnEnableDrawPaths(wxCommandEvent &event)
 {
-	field->mDrawPaths = event.IsChecked();
-	field->RefreshShow();
+	static_cast<MainFrameView*>(GetView())->OnEnableDrawPaths(event.IsChecked());
 }
 
 
 void MainFrame::slider_sheet_callback(wxScrollEvent &)
 {
-	field->GotoSS(sheet_slider->GetValue()-1);
+	static_cast<MainFrameView*>(GetView())->GoToSheet(sheet_slider->GetValue()-1);
 }
 
 
-void MainFrame::slider_zoom_callback(wxScrollEvent &)
+float CalculateFitZoom()
 {
-	SetConfiguration_MainFrameZoom(zoom_slider->GetValue());
-	field->SetZoom(zoom_slider->GetValue());
+	return 1.0;
+}
+
+void MainFrame::zoom_callback(wxCommandEvent& event)
+{
+	size_t sel = event.GetInt();
+	float zoom_amount = 1.0;
+	if (sel < sizeof(zoom_amounts)/sizeof(zoom_amounts[0]))
+	{
+		zoom_amount = zoom_amounts[sel]/100.0;
+	}
+	else if (sel == sizeof(zoom_amounts)/sizeof(zoom_amounts[0]))
+	{
+		zoom_amount = CalculateFitZoom();
+	}
+	SetConfiguration_MainFrameZoom(zoom_amount);
+	field->SetZoom(zoom_amount);
+}
+
+void MainFrame::zoom_callback_textenter(wxCommandEvent& event)
+{
+	wxString zoomtxt = zoom_box->GetValue();
+	// strip the trailing '%' if it exists
+	if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%')))
+	{
+		zoomtxt.RemoveLast();
+	}
+	long zoomnum = 100;
+	float zoom_amount = 1.0;
+	int zoommax = zoom_amounts[0];
+	int zoommin = zoom_amounts[sizeof(zoom_amounts)/sizeof(zoom_amounts[0])-1];
+	if (zoomtxt.ToLong(&zoomnum) && (zoomnum >= zoommin && zoomnum <= zoommax))
+	{
+		zoom_amount = zoomnum/100.0;
+	}
+	else
+	{
+		wxString msg;
+		msg.sprintf(wxT("Please enter a valid number between %d and %d\n"), zoommin, zoommax);
+		wxMessageBox(msg, wxT("Invalid number"), wxICON_INFORMATION|wxOK);
+		zoom_box->SetValue(wxT(""));
+		// return if not valid
+		return;
+	}
+	SetConfiguration_MainFrameZoom(zoom_amount);
+	// set the text to have '%' appended
+	zoomtxt += wxT("%");
+	zoom_box->SetValue(zoomtxt);
+	field->SetZoom(zoom_amount);
 }
 
 IMPLEMENT_DYNAMIC_CLASS(MainFrameView, wxView)
@@ -1791,8 +1738,55 @@ bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 // as well as drawing on the screen.
 void MainFrameView::OnDraw(wxDC *dc)
 {
+	dc->Clear();
+	dc->SetBackgroundMode(wxTRANSPARENT);
+	if (mShow)
+	{
+		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+		if (sheet != mShow->GetSheetEnd())
+		{
+			if (mCurrentReferencePoint > 0)
+			{
+				mShow->Draw(*dc, 0, false, true);
+				mShow->Draw(*dc, mCurrentReferencePoint, true, false);
+			}
+			else
+			{
+				mShow->Draw(*dc, mCurrentReferencePoint, true, true);
+			}
+			DrawPaths(*dc, *sheet);
+		}
+	}
 }
 
+
+void MainFrameView::GeneratePaths()
+{
+	mAnimation.reset(new Animation(mShow, NotifyStatus(), NotifyErrorList()));
+}
+
+void MainFrameView::OnEnableDrawPaths(bool enable)
+{
+	mDrawPaths = enable;
+	if (mDrawPaths)
+	{
+		GeneratePaths();
+	}
+	mFrame->Refresh();
+}
+
+void MainFrameView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
+{
+	if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum()))
+	{
+		CC_coord origin = mShow->GetMode().Offset();
+		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
+		for (CC_show::SelectionList::const_iterator point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
+		{
+			mAnimation->DrawPath(dc, *point, origin);
+		}
+	}
+}
 
 // page for deciding the field type
 class ChooseShowModeWizard : public wxWizardPageSimple
@@ -1800,7 +1794,7 @@ class ChooseShowModeWizard : public wxWizardPageSimple
 public:
 	ChooseShowModeWizard(wxWizard *parent) : wxWizardPageSimple(parent)
 	{
-		for (ShowModeList::Iter mode = wxGetApp().GetModeList().Begin(); mode != wxGetApp().GetModeList().End(); ++mode)
+		for (ShowModeList::const_iterator mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode)
 		{
 			modeStrings.Add((*mode)->GetName());
 		}
@@ -1873,7 +1867,7 @@ void MainFrameView::OnWizardSetup(CC_show& show)
 	{
 		show.SetNumPoints(page1->GetNumberPoints(), page1->GetNumberColumns());
 		show.SetPointLabel(page1->GetLabels());
-		ShowMode *newmode = wxGetApp().GetModeList().Find(page2->GetValue());
+		ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), page2->GetValue());
 		if (newmode)
 		{
 			show.SetMode(newmode);
@@ -1918,9 +1912,9 @@ void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 		{
 			if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
 			{
-				mFrame->GetCanvas()->GeneratePaths();
+				GeneratePaths();
 			}
-			mFrame->GetCanvas()->RefreshShow();
+			mFrame->GetCanvas()->Refresh();
 		}
 	}
 }
@@ -1928,17 +1922,13 @@ void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 // Clean up windows used for displaying the view.
 bool MainFrameView::OnClose(bool deleteWindow)
 {
-	if (!GetDocument()->Close())
-		return false;
-
-	wxString s(wxTheApp->GetAppName());
-	if (mFrame)
-		mFrame->SetTitle(s);
-
 	SetFrame((wxFrame*)NULL);
 
 	Activate(false);
 
+	if (!GetDocument()->Close())
+		return false;
+	
 	if (deleteWindow)
 	{
 		delete mFrame;
@@ -1946,26 +1936,26 @@ bool MainFrameView::OnClose(bool deleteWindow)
 	return true;
 }
 
-bool MainFrameView::DoTranslatePoints(const CC_coord& delta, unsigned ref)
+bool MainFrameView::DoTranslatePoints(const CC_coord& delta)
 {
 	if (((delta.x == 0) && (delta.y == 0)) ||
 		(mShow->GetSelectionList().size() == 0))
 		return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, ref), true);
+	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, mCurrentReferencePoint), true);
 	return true;
 }
 
-bool MainFrameView::DoTransformPoints(const Matrix& transmat, unsigned ref)
+bool MainFrameView::DoTransformPoints(const Matrix& transmat)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, ref), true);
+	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, mCurrentReferencePoint), true);
 	return true;
 }
 
-bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref)
+bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, ref), true);
+	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, mCurrentReferencePoint), true);
 	return true;
 }
 
@@ -2028,4 +2018,38 @@ bool MainFrameView::DoDeleteSheet(unsigned where)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new RemoveSheetsCommand(*mShow, where), true);
 	return true;
+}
+
+void MainFrameView::GoToSheet(size_t which)
+{
+	if (which < mShow->GetNumSheets())
+	{
+		mShow->SetCurrentSheet(which);
+	}
+}
+
+void MainFrameView::GoToNextSheet()
+{
+	GoToSheet(mShow->GetCurrentSheetNum() + 1);
+}
+
+void MainFrameView::GoToPrevSheet()
+{
+	GoToSheet(mShow->GetCurrentSheetNum() - 1);
+}
+
+int MainFrameView::FindPoint(CC_coord pos) const
+{
+	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, mCurrentReferencePoint);
+}
+
+CC_coord MainFrameView::PointPosition(int which) const
+{
+	return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
+}
+
+void MainFrameView::SetReferencePoint(unsigned which)
+{
+	mCurrentReferencePoint = which;
+	OnUpdate(this);
 }

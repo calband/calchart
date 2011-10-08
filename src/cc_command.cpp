@@ -91,7 +91,7 @@ SetModeCommand::~SetModeCommand()
 
 void SetModeCommand::DoAction()
 {
-	ShowMode *newmode = wxGetApp().GetModeList().Find(mMode.second);
+	ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), mMode.second);
 	if (newmode)
 	{
 		mShow.SetMode(newmode);
@@ -100,7 +100,7 @@ void SetModeCommand::DoAction()
 
 void SetModeCommand::UndoAction()
 {
-	ShowMode *newmode = wxGetApp().GetModeList().Find(mMode.first);
+	ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), mMode.first);
 	if (newmode)
 	{
 		mShow.SetMode(newmode);
@@ -404,7 +404,7 @@ TransformPointsCommand::TransformPointsCommand(CC_show& show, const Matrix& tran
 		Vector v = Vector(c.x, c.y, 0);
 		v = transmat * v;
 		v.Homogenize();
-		c = CC_coord((Coord)CLIPFLOAT(v.GetX()), (Coord)CLIPFLOAT(v.GetY()));
+		c = CC_coord(RoundToCoord(v.GetX()), RoundToCoord(v.GetY()));
 		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), c);
 	}
 }

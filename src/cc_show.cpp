@@ -76,7 +76,7 @@ mSheetNum(0),
 mTimer(*this)
 {
 	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
-	mode = *wxGetApp().GetModeList().Begin();
+	mode = wxGetApp().GetModeList().front().get();
 }
 
 // When a file is opened, we first check to see if there is a temporary 
@@ -1350,4 +1350,19 @@ void UnitTests()
 	cout<<"GetMode "<<(void*)&test.GetMode()<<"\n";
 }
 
+
+void CC_show::Draw(wxDC& dc, unsigned ref, bool primary, bool drawall)
+{
+	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+	
+	if (drawall)
+	{
+		dc.Clear();
+		dc.SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
+		dc.SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
+		GetMode().Draw(dc);
+	}
+	
+	GetCurrentSheet()->Draw(dc, ref, primary);
+}
 

@@ -23,7 +23,6 @@
 #ifndef _SHOW_UI_H_
 #define _SHOW_UI_H_
 
-#include "basic_ui.h"
 #include "cc_show.h"
 #include <wx/wizard.h>
 #include <wx/docview.h>

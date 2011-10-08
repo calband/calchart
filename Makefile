@@ -31,13 +31,11 @@ GENERATED_FILES = $(GENERATED_SRCS) $(GENDIR)/contgram.h
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
 OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(GENERATED_SRCS))
 
-RUNTIME = runtime/config
 IMAGES = $(wildcard $(RESDIR)/*.xbm)
 IMAGES_X = $(wildcard $(RESDIR)/*.xpm)
 IMAGES_BMP = $(IMAGES:.xbm=.bmp)
 IMAGES_MSW = $(IMAGES_BMP) calchart.ico
 IMAGES_ALL = $(IMAGES) $(IMAGES_X) calchart.ico
-IMAGES_SYNTH = $(IMAGES_BMP)
 
 TEXDOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
 	docs/overview.tex docs/refer.tex docs/tex2rtf.ini docs/texhelp.sty
@@ -46,13 +44,13 @@ DOCS = $(TEXDOCS) \
 	docs/contents.gif docs/up.gif docs/back.gif docs/forward.gif
 
 MOSTSRCS = $(SRCS) $(GENERATED_BASES) $(HEADERS) $(DOCS)
-ALLSRCS = $(MOSTSRCS) $(RUNTIME) $(IMAGES_ALL) Makefile xbm2xpm \
+ALLSRCS = $(MOSTSRCS) $(IMAGES_ALL) Makefile xbm2xpm \
 	makefile.wat calchart.rc install.inf
-MSWSRCS = $(MOSTSRCS) contgram.h $(RUNTIME) $(GENERATED_SRCS) \
+MSWSRCS = $(MOSTSRCS) contgram.h $(GENERATED_SRCS) \
 	makefile.wat calchart.rc install.inf
 
 #### Targets ####
-all: calchart charthlp.xlp html
+all: calchart html
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
@@ -94,23 +92,19 @@ TAGS: $(SRCS) $(HEADERS)
 tags:: TAGS
 
 # Stuff for help files
-charthlp.xlp: docs/charthlp.xlp
-	cp docs/charthlp.xlp charthlp.xlp
-
-docs/charthlp.xlp: $(DOCS)
-	-cd docs; tex2rtf charthlp.tex charthlp.xlp -twice -xlp
-
 docs/charthlp.dvi: $(DOCS)
 	cd docs; latex charthlp; latex charthlp; makeindex charthlp; latex charthlp
 
 docs/charthlp.ps: docs/charthlp.dvi
 	cd docs; dvips -f -r < charthlp.dvi > charthlp.ps
+
 docs/charthlp.ps.gz: docs/charthlp.ps
 	rm -f $@
 	gzip -c9 $< > $@
 
 docs/charthlp_contents.html: $(DOCS)
 	-cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
+
 docs/charthlp.html.tar.gz: docs/charthlp_contents.html
 	rm -f $@
 	tar cf - docs/*.html | gzip -9 > $@
@@ -121,7 +115,6 @@ docs/charthlp.tex.tar.gz: $(TEXDOCS)
 
 ps: docs/charthlp.ps
 html: docs/charthlp_contents.html
-xlp: charthlp.xlp
 
 chartsrc.tar.gz: $(ALLSRCS)
 	rm -f $@
@@ -130,9 +123,9 @@ chartsrc.tar.gz: $(ALLSRCS)
 	tar cf - $(ALLSRCS) | gzip -9 > $@
 	mv -f Makefile.bak Makefile
 
-chartbin.tar.gz: calchart $(RUNTIME) charthlp.xlp
+chartbin.tar.gz: calchart
 	rm -f $@
-	tar cf - calchart $(RUNTIME) charthlp.xlp | gzip -9 > $@
+	tar cf - calchart | gzip -9 > $@
 
 chartsrc.zip: $(MSWSRCS) $(IMAGES_MSW)
 	rm -f $@
@@ -150,7 +143,7 @@ distrib:: chartbin.tar.gz docs/charthlp.ps.gz docs/charthlp.html.tar.gz \
 zip:: chartsrc.zip
 
 clean::
-	rm -f $(OBJS) $(GENERATED_FILES) $(IMAGES_SYNTH) calchart core *~ runtime/*~ *.bak TAGS
+	rm -f $(OBJS) $(GENERATED_FILES) calchart core *~ *.bak TAGS
 	rm -rf $(OBJDIR)
 
 depend::

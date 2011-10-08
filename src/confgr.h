@@ -27,7 +27,6 @@
 #include <wx/gdicmn.h>
 
 // forward declare
-class wxPalette;
 class wxPen;
 class wxBrush;
 class wxPathList;
@@ -59,8 +58,6 @@ enum CalChartColors
 	COLOR_PATHS,
 	COLOR_NUM
 };
-
-extern wxPalette *CalChartPalette;
 
 extern const wxPen *CalChartPens[COLOR_NUM];
 extern const wxBrush *CalChartBrushes[COLOR_NUM];
@@ -97,7 +94,7 @@ void ClearConfiguration_ ## Key () ;
 DECLARE_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
 // page setup and zoom
-DECLARE_CONFIGURATION_FUNCTIONS( MainFrameZoom, long);
+DECLARE_CONFIGURATION_FUNCTIONS( MainFrameZoom, double);
 DECLARE_CONFIGURATION_FUNCTIONS( MainFrameWidth, long);
 DECLARE_CONFIGURATION_FUNCTIONS( MainFrameHeight, long);
 

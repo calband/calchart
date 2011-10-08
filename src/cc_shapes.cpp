@@ -21,7 +21,6 @@
 */
 
 #include "cc_shapes.h"
-#include "main_ui.h"
 #include "platconf.h"
 
 CC_shape::CC_shape() {}
@@ -30,7 +29,7 @@ CC_shape::~CC_shape() {}
 CC_shape_1point::CC_shape_1point(const CC_coord& p)
 : origin(p.x, p.y) {}
 
-void CC_shape_1point::OnMove(const CC_coord& p, MainFrame *)
+void CC_shape_1point::OnMove(const CC_coord& p, const CC_coord&)
 {
 	MoveOrigin(p);
 }
@@ -52,12 +51,9 @@ CC_coord CC_shape_1point::GetOrigin() const
 CC_shape_cross::CC_shape_cross(const CC_coord& p, Coord width)
 : CC_shape_1point(p), cross_width(width) {}
 
-void CC_shape_cross::OnMove(const CC_coord& p, MainFrame *frame)
+void CC_shape_cross::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
-	CC_coord p1 = p;
-
-	frame->SnapToGrid(p1);
-	MoveOrigin(p1);
+	MoveOrigin(snapped_p);
 }
 
 
@@ -76,7 +72,7 @@ CC_shape_2point::CC_shape_2point(const CC_coord& p)
 CC_shape_2point::CC_shape_2point(const CC_coord& p1, const CC_coord& p2)
 : CC_shape_1point(p1), point(p2.x, p2.y) {}
 
-void CC_shape_2point::OnMove(const CC_coord& p, MainFrame *)
+void CC_shape_2point::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
 	MovePoint(p);
 }
@@ -101,12 +97,9 @@ CC_shape_line::CC_shape_line(const CC_coord& p)
 CC_shape_line::CC_shape_line(const CC_coord& p1, const CC_coord& p2)
 : CC_shape_2point(p1, p2) {}
 
-void CC_shape_line::OnMove(const CC_coord& p, MainFrame *frame)
+void CC_shape_line::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
-	CC_coord p1 = p;
-
-	frame->SnapToGrid(p1);
-	MovePoint(p1);
+	MovePoint(snapped_p);
 }
 
 
@@ -123,16 +116,15 @@ CC_shape_angline::CC_shape_angline(const CC_coord& p, const CC_coord& refvect)
 }
 
 
-void CC_shape_angline::OnMove(const CC_coord& p, MainFrame *frame)
+void CC_shape_angline::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
 	CC_coord o = GetOrigin();
-	CC_coord p1 = p;
+	CC_coord p1 = snapped_p;
 	float d;
 
-	frame->SnapToGrid(p1);
 	p1 -= o;
-	d = (COORD2FLOAT(p1.x) * COORD2FLOAT(vect.x) +
-		COORD2FLOAT(p1.y) * COORD2FLOAT(vect.y)) / (mag*mag);
+	d = (Coord2Float(p1.x) * Coord2Float(vect.x) +
+		Coord2Float(p1.y) * Coord2Float(vect.y)) / (mag*mag);
 	p1.x = (Coord)(o.x + vect.x * d);
 	p1.y = (Coord)(o.y + vect.y * d);
 	MovePoint(p1);
@@ -161,11 +153,10 @@ const CC_coord& p1, const CC_coord& p2)
 }
 
 
-void CC_shape_arc::OnMove(const CC_coord& p, MainFrame *frame)
+void CC_shape_arc::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
-	CC_coord p1 = p;
+	CC_coord p1 = snapped_p;
 
-	frame->SnapToGrid(p1);
 	r = GetOrigin().Direction(p1)*PI/180.0;
 	p1.x = Coord(origin.x + d*cos(r));
 	p1.y = Coord(origin.y + -d*sin(r));
@@ -240,7 +231,7 @@ CC_lasso::~CC_lasso()
 }
 
 
-void CC_lasso::OnMove(const CC_coord& p, MainFrame *)
+void CC_lasso::OnMove(const CC_coord& p, const CC_coord&)
 {
 	Append(p);
 }
@@ -354,7 +345,7 @@ CC_poly::CC_poly(const CC_coord &p)
 }
 
 
-void CC_poly::OnMove(const CC_coord& p, MainFrame *)
+void CC_poly::OnMove(const CC_coord& p, const CC_coord&)
 {
 	Drag(p);
 }

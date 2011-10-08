@@ -29,12 +29,23 @@
 
 #define COORD_SHIFT 4
 #define COORD_DECIMAL (1<<COORD_SHIFT)
-#define INT2COORD(a) ((a) * COORD_DECIMAL)
-#define COORD2INT(a) ((a) / COORD_DECIMAL)
-#define FLOAT2NUM(a) CLIPFLOAT((a) * (1 << COORD_SHIFT))
-#define FLOAT2COORD(a) (Coord)FLOAT2NUM((a))
-#define COORD2FLOAT(a) ((a) / ((float)(1 << COORD_SHIFT)))
-#define CLIPFLOAT(a) (((a) < 0) ? ((a) - 0.5) : ((a) + 0.5))
+
+// RoundToCoord: Use when number is already in Coord format, just needs to be rounded
+static inline Coord RoundToCoord(float inCoord) { return (inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5); }
+
+// Float2Coord, Coord2Float
+//  Use when we want to convert to Coord system
+template <typename T>
+static inline Coord Float2Coord(T a) { return RoundToCoord(a * COORD_DECIMAL); }
+template <typename T>
+static inline float Coord2Float(T a) { return a / (float)COORD_DECIMAL; }
+
+// Int2Coord, Coord2Int
+//  Use when we want to convert to Coord system
+template <typename T>
+static inline Coord Int2Coord(T a) { return a * COORD_DECIMAL; }
+template <typename T>
+static inline int Coord2Int(T a) { return a / COORD_DECIMAL; }
 
 class CC_coord
 {

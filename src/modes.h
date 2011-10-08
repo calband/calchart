@@ -27,68 +27,82 @@
 
 #include <wx/wx.h>
 #include <list>
-
-enum SHOW_TYPE { SHOW_STANDARD, SHOW_SPRINGSHOW };
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 #define SPR_YARD_LEFT 8
 #define SPR_YARD_RIGHT 4
 #define SPR_YARD_ABOVE 2
 #define SPR_YARD_BELOW 1
 
-class CC_coord;
-
 class ShowMode
 {
 public:
-	ShowMode(const wxString& nam, const CC_coord& siz, const CC_coord& off,
-		const CC_coord& bord1, const CC_coord& bord2);
-	ShowMode(const wxString& nam, const CC_coord& siz, const CC_coord& bord1, const CC_coord& bord2);
+	typedef enum { SHOW_STANDARD, SHOW_SPRINGSHOW } ShowType;
+	
+	ShowMode(const wxString& name,
+			 const CC_coord& size,
+			 const CC_coord& offset,
+			 const CC_coord& border1,
+			 const CC_coord& border2);
+	ShowMode(const wxString& name,
+			 const CC_coord& size,
+			 const CC_coord& border1,
+			 const CC_coord& border2);
 	virtual ~ShowMode();
 
-	virtual SHOW_TYPE GetType() const = 0;
-	virtual void Draw(wxDC *dc) const = 0;
-	virtual void DrawAnim(wxDC *dc) const = 0;
-	inline const CC_coord& Offset() const { return offset; };
-	inline CC_coord FieldOffset() const { return -(offset-border1); }
-	inline const CC_coord& Size() const { return size; };
-	inline CC_coord FieldSize() const { return size-border1-border2; }
-	inline CC_coord MinPosition() const { return -offset; }
-	inline CC_coord MaxPosition() const { return size-offset; }
-	inline const wxString& GetName() const { return name; };
+	virtual ShowType GetType() const = 0;
+	inline const CC_coord& Offset() const { return mOffset; };
+	inline CC_coord FieldOffset() const { return -(mOffset-mBorder1); }
+	inline const CC_coord& Size() const { return mSize; };
+	inline CC_coord FieldSize() const { return mSize-mBorder1-mBorder2; }
+	inline CC_coord MinPosition() const { return -mOffset; }
+	inline CC_coord MaxPosition() const { return mSize-mOffset; }
+	inline const wxString& GetName() const { return mName; };
 	CC_coord ClipPosition(const CC_coord& pos) const;
 
+	void Draw(wxDC& dc) const { DrawHelper(dc, false); }
+	void DrawAnim(wxDC& dc) const { DrawHelper(dc, true); }
+
 protected:
-	CC_coord offset, size;
-	CC_coord border1, border2;
+	virtual void DrawHelper(wxDC& dc, bool animation) const = 0;
+
+	CC_coord mOffset;
+	CC_coord mSize;
+	CC_coord mBorder1;
+	CC_coord mBorder2;
 private:
-	wxString name;
+	wxString mName;
 };
 
 class ShowModeStandard : public ShowMode
 {
 public:
-	ShowModeStandard(const wxString& nam, CC_coord bord1, CC_coord bord2,
-		unsigned short whash, unsigned short ehash);
-	ShowModeStandard(const wxString& nam, CC_coord bord1, CC_coord bord2,
-		CC_coord siz, CC_coord off,
-		unsigned short whash, unsigned short ehash);
+	ShowModeStandard(const wxString& name,
+					 CC_coord size,
+					 CC_coord offset,
+					 CC_coord border1,
+					 CC_coord border2,
+					 unsigned short whash,
+					 unsigned short ehash);
 	virtual ~ShowModeStandard();
 
-	virtual SHOW_TYPE GetType() const;
-	virtual void Draw(wxDC *dc) const;
-	virtual void DrawAnim(wxDC *dc) const;
-	inline unsigned short HashW() const { return hashw; }
-	inline unsigned short HashE() const { return hashe; }
+	virtual ShowType GetType() const;
+	inline unsigned short HashW() const { return mHashW; }
+	inline unsigned short HashE() const { return mHashE; }
+
+protected:
+	virtual void DrawHelper(wxDC& dc, bool animation) const;
 
 private:
-	unsigned short hashw, hashe;
+	unsigned short mHashW, mHashE;
 };
 
 class ShowModeSprShow : public ShowMode
 {
 public:
 // Look at calchart.cfg for description of arguments
-	ShowModeSprShow(const wxString& nam, CC_coord bord1, CC_coord bord2,
+	ShowModeSprShow(const wxString& name, CC_coord border1, CC_coord border2,
 		unsigned char which,
 		short stps_x, short stps_y,
 		short stps_w, short stps_h,
@@ -100,9 +114,7 @@ public:
 		short txt_tp, short txt_bm);
 	virtual ~ShowModeSprShow();
 
-	virtual SHOW_TYPE GetType() const;
-	virtual void Draw(wxDC *dc) const;
-	virtual void DrawAnim(wxDC *dc) const;
+	virtual ShowType GetType() const;
 	inline unsigned char WhichYards() const { return which_yards; }
 	inline short StageX() const { return stage_x; }
 	inline short StageY() const { return stage_y; }
@@ -121,6 +133,9 @@ public:
 	inline short TextTop() const { return text_top; }
 	inline short TextBottom() const { return text_bottom; }
 
+protected:
+	virtual void DrawHelper(wxDC& dc, bool animation) const;
+	
 private:
 	unsigned char which_yards;
 	short stage_x, stage_y, stage_w, stage_h;
@@ -129,24 +144,9 @@ private:
 	short text_left, text_right, text_top, text_bottom;
 };
 
-class ShowModeList
-{
-public:
-	typedef std::list<ShowMode*> Container;
-	typedef Container::iterator Iter;
-	typedef Container::const_iterator CIter;
-	ShowModeList();
-	~ShowModeList();
+typedef std::list<boost::shared_ptr<ShowMode> > ShowModeList;
 
-	void Add(ShowMode *mode) { list.push_back(mode); }
-	ShowMode *Find (const wxString& name) const;
-	bool Empty() const { return list.empty(); }
-	CIter Begin() const { return list.begin(); }
-	Iter Begin() { return list.begin(); }
-	CIter End() const { return list.end(); }
-	Iter End() { return list.end(); }
+ShowMode*
+ShowModeList_Find(const ShowModeList& showModes, const wxString& which);
 
-private:
-	Container list;
-};
 #endif

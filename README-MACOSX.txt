@@ -10,29 +10,47 @@ Download 2.9.2 of wxWidgets to build the library:
 $ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_2 ~/wxWidgets-2.9.2
 
 $ cd wxWidgets-2.9.2
-$ mkdir build-release
-$ cd build-release
+
+Apply patch for issue:
+[wxOSX-Cocoa] wxHtmlHelpWindow asserts about unsupported wxCB_SORT (issue 12419)
+Go to http://trac.wxwidgets.org/ticket/12419
+Download the patch (there is a link to the patch, and download in the "Original Format")
+Patch via the patch command:
+$ patch -p0 < ~/Downloads/helpwnd_combobox.patch 
+(update to the location of the downloaded patch file)
+
+$ mkdir build-results
+$ cd build-results
 
 $ ../configure --with-cocoa --with-macosx-version-min=10.5 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk --enable-debug --enable-debug_info --disable-shared
 $ make
 
 put into the /usr/local/bin (if you wanted to put somewhere different, use the --prefix option in configure and you're on your own)
-$ make install
-
-CalChart uses the tex2rtf project that comes with wxWidgets:
-Need to build the utilities too!
-$ cd build-debug/utils
-$ make tex2rtf
-$ sudo install tex2rtf/src/tex2rtf.exe /usr/local/bin
+$ sudo make install
 
 Get calchart (you'll need to log in with your source forge account):
 $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/trunk
 
+CalChart uses the tex2rtf project.  Unfortunately, tex2rtf is no longer supported in wxWidgets.
+Download 2.9.2 of wxWidgets to build the library:
+$ svn co https://tex2rtf.svn.sourceforge.net/svnroot/tex2rtf/trunk ~/tex2rtf/trunk
+$ cd ~/tex2rtf/trunk
+Because there are slight issues with the version in trunk, you'll need to patch up the trunk
+
+$ patch -p0 < ~/calchart/trunk/tex2rtf_changes.diff
+
+Configure and build tex2rtf
+$ autoreconf --install
+$ mkdir build-results
+$ cd build-results
+$ ../configure
+$ make
+$ sudo install ./src/tex2rtf /usr/local/bin
+
 Make Calchart's generated files.  I just do a preliminary version of make to
 get it work
 $ cd ~/calchart/trunk
-$ make
-
+$ make generate
 
 Now open the xcode project in build-macosx/CalChart.xcodeproj
 Build and run the project

@@ -23,13 +23,13 @@
 #ifndef _CONT_UI_H_
 #define _CONT_UI_H_
 
-#include "basic_ui.h"
 #include "cc_show.h"
 
 #include <wx/docview.h>
 #include <wx/dialog.h>
 
 class ContinuityEditor;
+class FancyTextWin;
 
 // View for linking CC_show with ContinuityEditor
 class ContinuityEditorView : public wxView
@@ -76,11 +76,8 @@ public:
 
 	void UpdateContChoice();
 
-	inline void SetInsertionPoint(int x, int y)
-	{
-		mUserInput->SetInsertionPoint(mUserInput->XYToPosition((long)x-1,(long)y-1));
-		mUserInput->SetFocus();
-	}
+	void SetInsertionPoint(int x, int y);
+
 private:
 	void Init();
 

@@ -82,10 +82,10 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	time_t t;
 	CC_coord fullsize = mode->Size();
 	CC_coord fieldsize = mode->FieldSize();
-	float fullwidth = COORD2FLOAT(fullsize.x);
-	float fullheight = COORD2FLOAT(fullsize.y);
-	float fieldwidth = COORD2FLOAT(fieldsize.x);
-	float fieldheight = COORD2FLOAT(fieldsize.y);
+	float fullwidth = Coord2Float(fullsize.x);
+	float fullheight = Coord2Float(fullsize.y);
+	float fieldwidth = Coord2Float(fieldsize.x);
+	float fieldheight = Coord2Float(fieldsize.y);
 
 	std::string head_font_str(GetConfiguration_HeadFont().utf8_str());
 	std::string main_font_str(GetConfiguration_MainFont().utf8_str());
@@ -101,7 +101,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	{
 		switch (mode->GetType())
 		{
-			case SHOW_STANDARD:
+			case ShowMode::SHOW_STANDARD:
 				if (print_landscape)
 				{
 					width = GetConfiguration_PageHeight() * DPI;
@@ -133,8 +133,8 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				real_width = GetConfiguration_PageWidth() * DPI;
 				real_height = GetConfiguration_PageHeight() * DPI;
 				step_width = (short)(width / (height / (fullheight+8.0)));
-				if (step_width > COORD2INT(fieldsize.x))
-					step_width = COORD2INT(fieldsize.x);
+				if (step_width > Coord2Int(fieldsize.x))
+					step_width = Coord2Int(fieldsize.x);
 				min_yards = min_yards*16/10;
 				if (step_width > min_yards)
 				{
@@ -160,7 +160,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				field_x = (width - field_w) / 2;
 				field_y += height - (field_h + step_size*16);
 				break;
-			case SHOW_SPRINGSHOW:
+			case ShowMode::SHOW_SPRINGSHOW:
 				if (print_landscape)
 				{
 					width = GetConfiguration_PageHeight() * DPI;
@@ -301,7 +301,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	{
 		switch (mode->GetType())
 		{
-			case SHOW_STANDARD:
+			case ShowMode::SHOW_STANDARD:
 				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
@@ -355,7 +355,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
 				buffer<<buf;
 				break;
-			case SHOW_SPRINGSHOW:
+			case ShowMode::SHOW_SPRINGSHOW:
 				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
@@ -466,10 +466,10 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 			{
 				switch (mode->GetType())
 				{
-					case SHOW_STANDARD:
+					case ShowMode::SHOW_STANDARD:
 						PrintStandard(buffer, *curr_sheet);
 						break;
-					case SHOW_SPRINGSHOW:
+					case ShowMode::SHOW_SPRINGSHOW:
 						PrintSpringshow(buffer, *curr_sheet);
 						break;
 				}
@@ -715,9 +715,9 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		{
 			buffer<<"/pagenumtext () def\n";
 		}
-		step_offset = COORD2INT(fieldsize.x) - step_width;
+		step_offset = Coord2Int(fieldsize.x) - step_width;
 /* south yardline */
-		clip_s = INT2COORD(step_offset) + fmin;
+		clip_s = Int2Coord(step_offset) + fmin;
 		clip_n = pmax;
 		split_sheet = false;
 	}
@@ -735,8 +735,8 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		if (max_s < fmin) max_s = fmin;
 		if (max_n > fmax) max_n = fmax;
 
-		if (COORD2INT((max_n-max_s) +
-			((max_s+fmin) % INT2COORD(8)))
+		if (Coord2Int((max_n-max_s) +
+			((max_s+fmin) % Int2Coord(8)))
 			> step_width)
 		{
 /* Need to split into two pages */
@@ -752,7 +752,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 			step_offset = 0;
 			split_sheet = true;
 			clip_s = pmin;
-			clip_n = INT2COORD(step_width) + fmin;/* north yardline */
+			clip_n = Int2Coord(step_width) + fmin;/* north yardline */
 		}
 		else
 		{
@@ -765,20 +765,20 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 			{
 				buffer<<"/pagenumtext () def\n";
 			}
-			step_offset = (COORD2INT(sheet.show->GetMode().FieldSize().x) - step_width) / 2;
+			step_offset = (Coord2Int(sheet.show->GetMode().FieldSize().x) - step_width) / 2;
 			step_offset = (step_offset / 8) * 8;
 			clip_s = pmin;
 			clip_n = pmax;
-			short x_s = COORD2INT(max_s) - COORD2INT(fmin);
-			short x_n = COORD2INT(max_n) - COORD2INT(fmin);
+			short x_s = Coord2Int(max_s) - Coord2Int(fmin);
+			short x_n = Coord2Int(max_n) - Coord2Int(fmin);
 			if ((x_s < step_offset) || (x_n > (step_offset + step_width)))
 			{
 /* Recenter formation */
 				step_offset = x_s - (step_width-(x_n-x_s))/2;
 				if (step_offset < 0) step_offset = 0;
 				else if ((step_offset + step_width) >
-					COORD2INT(sheet.show->GetMode().FieldSize().x))
-					step_offset = COORD2INT(sheet.show->GetMode().FieldSize().x) - step_width;
+					Coord2Int(sheet.show->GetMode().FieldSize().x))
+					step_offset = Coord2Int(sheet.show->GetMode().FieldSize().x) - step_width;
 				step_offset = (step_offset / 8) * 8;
 			}
 		}
@@ -802,7 +802,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		buffer<<buf;
 		std::string yardstr(yard_text[(step_offset +
 			(MAX_YARD_LINES-1)*4 +
-			COORD2INT(fieldoff.x) + j)/8].utf8_str());
+			Coord2Int(fieldoff.x) + j)/8].utf8_str());
 		buffer<<"("<<yardstr<<") dup centerText\n";
 		snprintf(buf, sizeof(buf), "/y %.2f def\n", -(step_size * 2));
 		buffer<<buf;
@@ -824,12 +824,12 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		if ((sheet.pts[i].pos.x > clip_n) || (sheet.pts[i].pos.x < clip_s)) continue;
-		float fieldheight = COORD2FLOAT(fieldsize.y);
-		float fieldoffx = COORD2FLOAT(fieldoff.x);
-		float fieldoffy = COORD2FLOAT(fieldoff.y);
-		float dot_x = (COORD2FLOAT(sheet.pts[i].pos.x) - fieldoffx - step_offset) /
+		float fieldheight = Coord2Float(fieldsize.y);
+		float fieldoffx = Coord2Float(fieldoff.x);
+		float fieldoffy = Coord2Float(fieldoff.y);
+		float dot_x = (Coord2Float(sheet.pts[i].pos.x) - fieldoffx - step_offset) /
 			step_width * field_w;
-		float dot_y = (1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
+		float dot_y = (1.0 - (Coord2Float(sheet.pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
 		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
 			dot_x, dot_y, dot_routines[sheet.pts[i].sym]);
 		buffer<<buf;
@@ -964,10 +964,10 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		float dot_x = stage_field_x +
-			(COORD2FLOAT(sheet.pts[i].pos.x) - modesprshow->StepsX()) /
+			(Coord2Float(sheet.pts[i].pos.x) - modesprshow->StepsX()) /
 			modesprshow->StepsW() * stage_field_w;
 		float dot_y = stage_field_y + stage_field_h * (1.0 -
-			(COORD2FLOAT(sheet.pts[i].pos.y)-
+			(Coord2Float(sheet.pts[i].pos.y)-
 			modesprshow->StepsY())/
 			modesprshow->StepsH());
 		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
@@ -998,19 +998,19 @@ void PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 	buffer<<"drawfield\n";
 	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
 	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
-	float fieldwidth = COORD2FLOAT(fieldsize.x);
+	float fieldwidth = Coord2Float(fieldsize.x);
 	snprintf(buf, sizeof(buf), "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0);
 	buffer<<buf;
 
-	float fieldx = COORD2FLOAT(fieldoff.x);
-	float fieldy = COORD2FLOAT(fieldoff.y);
-	float fieldheight = COORD2FLOAT(fieldsize.y);
+	float fieldx = Coord2Float(fieldoff.x);
+	float fieldy = Coord2Float(fieldoff.y);
+	float fieldheight = Coord2Float(fieldsize.y);
 
 	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
 	{
 		snprintf(buf, sizeof(buf), "%.2f %.2f dotbox\n",
-			(COORD2FLOAT(sheet.pts[i].pos.x)-fieldx) / fieldwidth * width,
-			(1.0 - (COORD2FLOAT(sheet.pts[i].pos.y)-
+			(Coord2Float(sheet.pts[i].pos.x)-fieldx) / fieldwidth * width,
+			(1.0 - (Coord2Float(sheet.pts[i].pos.y)-
 			fieldy)/fieldheight) * height);
 		buffer<<buf;
 	}

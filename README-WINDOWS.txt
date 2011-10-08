@@ -18,6 +18,8 @@ make
 bison
 flex
 transfig
+boost
+libboost
 
 Download 2.9.2 of wxWidgets (I used the svn version by open cygwin and running
 the command):
@@ -30,13 +32,13 @@ $ cd build-debug
 
 Configure wxWidgets.  I use mingw64-i686-gcc family (from http://wxwidgets.blogspot.com/2011_06_01_archive.html) to build without requiring cygwin.dll:
 $ export LDFLAGS="-static-libgcc -static-libstdc++"
-$ ../configure --host=i686-w64-mingw32 --build=i686-pc-cygwin --with-msw --enable-debug --enable-debug_gdb --disable-shared
+$ ../configure --host=i686-w64-mingw32 --build=i686-pc-cygwin --with-msw --enable-debug --enable-debug_info --disable-shared
 
 Make wxWidgets:
 $ make
 
 Add wxWidgets to your path:
-$ export PATH=/cygdrive/c/wxWidgets-2.9.2/build-debug:$PATH
+$ export PATH=$PATH:/cygdrive/c/wxWidgets-2.9.2/build-debug
 
 CalChart uses the tex2rtf project that comes with wxWidgets:
 Need to build the utilities too!

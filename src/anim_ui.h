@@ -23,7 +23,6 @@
 #ifndef _ANIM_UI_H_
 #define _ANIM_UI_H_
 
-#include "basic_ui.h"
 #include "animate.h"
 #include <wx/timer.h>
 #define DEFAULT_ANIM_SIZE 3

@@ -338,8 +338,8 @@ bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
 	bool b = AnimateCommand::NextBeat(pt);
 	float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
 		* PI / 180.0;
-	pt.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
-	pt.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
+	pt.x = RoundToCoord(origin.x + cos(curr_ang)*r);
+	pt.y = RoundToCoord(origin.y - sin(curr_ang)*r);
 	return b;
 }
 
@@ -350,8 +350,8 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 	{
 		float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
 			* PI / 180.0;
-		pt.x = (Coord)CLIPFLOAT(origin.x + cos(curr_ang)*r);
-		pt.y = (Coord)CLIPFLOAT(origin.y - sin(curr_ang)*r);
+		pt.x = RoundToCoord(origin.x + cos(curr_ang)*r);
+		pt.y = RoundToCoord(origin.y - sin(curr_ang)*r);
 		return true;
 	}
 	else
@@ -364,16 +364,16 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyForward(pt);
-	pt.x = (Coord)CLIPFLOAT(origin.x + cos(ang_end*PI/180.0)*r);
-	pt.y = (Coord)CLIPFLOAT(origin.y - sin(ang_end*PI/180.0)*r);
+	pt.x = RoundToCoord(origin.x + cos(ang_end*PI/180.0)*r);
+	pt.y = RoundToCoord(origin.y - sin(ang_end*PI/180.0)*r);
 }
 
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyBackward(pt);
-	pt.x = (Coord)CLIPFLOAT(origin.x + cos(ang_start*PI/180.0)*r);
-	pt.y = (Coord)CLIPFLOAT(origin.y - sin(ang_start*PI/180.0)*r);
+	pt.x = RoundToCoord(origin.x + cos(ang_start*PI/180.0)*r);
+	pt.y = RoundToCoord(origin.y - sin(ang_start*PI/180.0)*r);
 }
 
 
@@ -407,10 +407,10 @@ void AnimateCommandRotate::DrawCommand(wxDC& dc, const AnimatePoint& pt, const C
 {
 	float start = (ang_start < ang_end) ? ang_start : ang_end;
 	float end = (ang_start < ang_end) ? ang_end : ang_start;
-	wxCoord x_start = (Coord)CLIPFLOAT(origin.x + cos(start*PI/180.0)*r) + offset.x;
-	wxCoord y_start = (Coord)CLIPFLOAT(origin.y - sin(start*PI/180.0)*r) + offset.y;
-	wxCoord x_end = (Coord)CLIPFLOAT(origin.x + cos(end*PI/180.0)*r) + offset.x;
-	wxCoord y_end = (Coord)CLIPFLOAT(origin.y - sin(end*PI/180.0)*r) + offset.y;
+	wxCoord x_start = RoundToCoord(origin.x + cos(start*PI/180.0)*r) + offset.x;
+	wxCoord y_start = RoundToCoord(origin.y - sin(start*PI/180.0)*r) + offset.y;
+	wxCoord x_end = RoundToCoord(origin.x + cos(end*PI/180.0)*r) + offset.x;
+	wxCoord y_end = RoundToCoord(origin.y - sin(end*PI/180.0)*r) + offset.y;
 
 	dc.DrawArc(x_start, y_start, x_end, y_end, origin.x + offset.x, origin.y + offset.y);
 }
@@ -765,7 +765,7 @@ void Animation::DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const
 		(*commands)->ApplyForward(point);
 	}
 	dc.SetBrush(*CalChartBrushes[COLOR_PATHS]);
-	float circ_r = FLOAT2COORD(GetConfiguration_DotRatio());
+	float circ_r = Float2Coord(GetConfiguration_DotRatio());
 	dc.DrawEllipse(point.x - circ_r/2 + offset.x, point.y - circ_r/2 + offset.y, circ_r, circ_r);
 	return ;
 }

@@ -48,7 +48,6 @@
 		C7ED502A11CD5A51001A4FA2 /* charthlp.hhk in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */; };
 		C7ED502B11CD5A51001A4FA2 /* charthlp.hhp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */; };
 		C7ED502D11CD5A51001A4FA2 /* charthlp.ref in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD011CD594E001A4FA2 /* charthlp.ref */; };
-		C7ED502F11CD5A51001A4FA2 /* charthlp.xlp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD211CD594E001A4FA2 /* charthlp.xlp */; };
 		C7ED503011CD5A51001A4FA2 /* charthlp_acknowledge.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */; };
 		C7ED503211CD5A51001A4FA2 /* charthlp_animcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */; };
 		C7ED503311CD5A51001A4FA2 /* charthlp_animwin.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */; };
@@ -114,9 +113,6 @@
 		C7ED507311CD5A51001A4FA2 /* charthlp_winprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */; };
 		C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501711CD594E001A4FA2 /* contents.gif */; };
 		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
-		C7ED507A11CD5A51001A4FA2 /* t2rtf32.ini in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501D11CD594E001A4FA2 /* t2rtf32.ini */; };
-		C7ED507B11CD5A51001A4FA2 /* tex2rtf.ini in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501E11CD594E001A4FA2 /* tex2rtf.ini */; };
-		C7ED507C11CD5A51001A4FA2 /* texhelp.sty in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501F11CD594E001A4FA2 /* texhelp.sty */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
 		C7FC7B7E130746C100F22854 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7FC7B7C130746C100F22854 /* cc_coord.cpp */; };
 /* End PBXBuildFile section */
@@ -143,7 +139,6 @@
 				C7ED502A11CD5A51001A4FA2 /* charthlp.hhk in Copy Docs */,
 				C7ED502B11CD5A51001A4FA2 /* charthlp.hhp in Copy Docs */,
 				C7ED502D11CD5A51001A4FA2 /* charthlp.ref in Copy Docs */,
-				C7ED502F11CD5A51001A4FA2 /* charthlp.xlp in Copy Docs */,
 				C7ED503011CD5A51001A4FA2 /* charthlp_acknowledge.html in Copy Docs */,
 				C7ED503211CD5A51001A4FA2 /* charthlp_animcont.html in Copy Docs */,
 				C7ED503311CD5A51001A4FA2 /* charthlp_animwin.html in Copy Docs */,
@@ -209,9 +204,6 @@
 				C7ED507311CD5A51001A4FA2 /* charthlp_winprinter.html in Copy Docs */,
 				C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */,
 				C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */,
-				C7ED507A11CD5A51001A4FA2 /* t2rtf32.ini in Copy Docs */,
-				C7ED507B11CD5A51001A4FA2 /* tex2rtf.ini in Copy Docs */,
-				C7ED507C11CD5A51001A4FA2 /* texhelp.sty in Copy Docs */,
 				C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */,
 			);
 			name = "Copy Docs";
@@ -287,16 +279,12 @@
 		C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_sheet.cpp; sourceTree = "<group>"; };
 		C7EC032811D9AD0E0043B2FD /* cc_sheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_sheet.h; sourceTree = "<group>"; };
 		C7EC035611D9B10C0043B2FD /* cc_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_types.h; sourceTree = "<group>"; };
-		C7ED4FC711CD594E001A4FA2 /* anim.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = anim.tex; sourceTree = "<group>"; };
 		C7ED4FC811CD594E001A4FA2 /* back.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = back.gif; sourceTree = "<group>"; };
-		C7ED4FC911CD594E001A4FA2 /* bugs.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bugs.tex; sourceTree = "<group>"; };
 		C7ED4FCB11CD594E001A4FA2 /* charthlp.con */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.con; sourceTree = "<group>"; };
 		C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhc; sourceTree = "<group>"; };
 		C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhk; sourceTree = "<group>"; };
 		C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhp; sourceTree = "<group>"; };
 		C7ED4FD011CD594E001A4FA2 /* charthlp.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.ref; sourceTree = "<group>"; };
-		C7ED4FD111CD594E001A4FA2 /* charthlp.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.tex; sourceTree = "<group>"; };
-		C7ED4FD211CD594E001A4FA2 /* charthlp.xlp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.xlp; sourceTree = "<group>"; };
 		C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_acknowledge.html; sourceTree = "<group>"; };
 		C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_animcont.html; sourceTree = "<group>"; };
 		C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_animwin.html; sourceTree = "<group>"; };
@@ -362,13 +350,6 @@
 		C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_winprinter.html; sourceTree = "<group>"; };
 		C7ED501711CD594E001A4FA2 /* contents.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = contents.gif; sourceTree = "<group>"; };
 		C7ED501811CD594E001A4FA2 /* forward.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = forward.gif; sourceTree = "<group>"; };
-		C7ED501911CD594E001A4FA2 /* gpl.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gpl.tex; sourceTree = "<group>"; };
-		C7ED501A11CD594E001A4FA2 /* install.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = install.tex; sourceTree = "<group>"; };
-		C7ED501B11CD594E001A4FA2 /* overview.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = overview.tex; sourceTree = "<group>"; };
-		C7ED501C11CD594E001A4FA2 /* refer.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = refer.tex; sourceTree = "<group>"; };
-		C7ED501D11CD594E001A4FA2 /* t2rtf32.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = t2rtf32.ini; sourceTree = "<group>"; };
-		C7ED501E11CD594E001A4FA2 /* tex2rtf.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tex2rtf.ini; sourceTree = "<group>"; };
-		C7ED501F11CD594E001A4FA2 /* texhelp.sty */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = texhelp.sty; sourceTree = "<group>"; };
 		C7ED502011CD594E001A4FA2 /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
 		C7FC7B7C130746C100F22854 /* cc_coord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_coord.cpp; sourceTree = "<group>"; };
 		C7FC7B7D130746C100F22854 /* cc_coord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_coord.h; sourceTree = "<group>"; };
@@ -522,16 +503,12 @@
 				C7D1782213B7C6E800F65F4C /* charthlp_rotateblock.html */,
 				C7D1782313B7C6E800F65F4C /* charthlp_shearblock.html */,
 				C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */,
-				C7ED4FC711CD594E001A4FA2 /* anim.tex */,
 				C7ED4FC811CD594E001A4FA2 /* back.gif */,
-				C7ED4FC911CD594E001A4FA2 /* bugs.tex */,
 				C7ED4FCB11CD594E001A4FA2 /* charthlp.con */,
 				C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */,
 				C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */,
 				C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */,
 				C7ED4FD011CD594E001A4FA2 /* charthlp.ref */,
-				C7ED4FD111CD594E001A4FA2 /* charthlp.tex */,
-				C7ED4FD211CD594E001A4FA2 /* charthlp.xlp */,
 				C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */,
 				C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */,
 				C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */,
@@ -599,13 +576,6 @@
 				C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */,
 				C7ED501711CD594E001A4FA2 /* contents.gif */,
 				C7ED501811CD594E001A4FA2 /* forward.gif */,
-				C7ED501911CD594E001A4FA2 /* gpl.tex */,
-				C7ED501A11CD594E001A4FA2 /* install.tex */,
-				C7ED501B11CD594E001A4FA2 /* overview.tex */,
-				C7ED501C11CD594E001A4FA2 /* refer.tex */,
-				C7ED501D11CD594E001A4FA2 /* t2rtf32.ini */,
-				C7ED501E11CD594E001A4FA2 /* tex2rtf.ini */,
-				C7ED501F11CD594E001A4FA2 /* texhelp.sty */,
 				C7ED502011CD594E001A4FA2 /* up.gif */,
 			);
 			name = docs;

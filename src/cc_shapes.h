@@ -29,8 +29,6 @@
 
 #include <vector>
 
-class MainFrame;
-
 class CC_shape
 {
 public:
@@ -38,7 +36,7 @@ public:
 	virtual ~CC_shape();
 
 	virtual void Draw(wxDC *dc, float x, float y) const = 0;
-	virtual void OnMove(const CC_coord& p, MainFrame *frame) = 0;
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p) = 0;
 };
 
 class CC_shape_1point: public CC_shape
@@ -46,7 +44,7 @@ class CC_shape_1point: public CC_shape
 public:
 	CC_shape_1point(const CC_coord& p);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 	void MoveOrigin(const CC_coord& p);
 	CC_coord GetOrigin() const;
 
@@ -59,7 +57,7 @@ class CC_shape_cross: public CC_shape_1point
 public:
 	CC_shape_cross(const CC_coord& p, Coord width);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 	virtual void Draw(wxDC *dc, float x, float y) const;
 
 protected:
@@ -72,7 +70,7 @@ public:
 	CC_shape_2point(const CC_coord& p);
 	CC_shape_2point(const CC_coord& p1, const CC_coord& p2);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 	void MovePoint(const CC_coord& p);
 	CC_coord GetPoint() const;
 
@@ -86,7 +84,7 @@ public:
 	CC_shape_line(const CC_coord& p);
 	CC_shape_line(const CC_coord& p1, const CC_coord& p2);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 	virtual void Draw(wxDC *dc, float x, float y) const;
 };
 
@@ -95,7 +93,7 @@ class CC_shape_angline: public CC_shape_line
 public:
 	CC_shape_angline(const CC_coord& p, const CC_coord& refvect);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 private:
 	CC_coord vect;
 	float mag;
@@ -107,7 +105,7 @@ public:
 	CC_shape_arc(const CC_coord& c, const CC_coord& p);
 	CC_shape_arc(const CC_coord& c, const CC_coord& p1, const CC_coord& p2);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 	virtual void Draw(wxDC *dc, float x, float y) const;
 
 	inline float GetAngle() const { return r-r0; }
@@ -130,7 +128,7 @@ public:
 	CC_lasso(const CC_coord& p);
 	virtual ~CC_lasso();
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 	void Clear();
 	void Start(const CC_coord& p);
 	void End();
@@ -154,7 +152,7 @@ class CC_poly: public CC_lasso
 public:
 	CC_poly(const CC_coord& p);
 
-	virtual void OnMove(const CC_coord& p, MainFrame *frame);
+	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 };
 
 #endif

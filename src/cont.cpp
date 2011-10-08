@@ -559,7 +559,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 	r1 = pnt1->Get(anim);
 	r2 = pnt2->Get(anim);
 	c = r2.x - r1.x;
-	if (c == (r2.y - r1.y + INT2COORD(2)))
+	if (c == (r2.y - r1.y + Int2Coord(2)))
 	{
 		if (c >= 0)
 		{
@@ -569,7 +569,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 			return;
 		}
 	}
-	else if (c == (r1.y - r2.y - INT2COORD(2)))
+	else if (c == (r1.y - r2.y - Int2Coord(2)))
 	{
 		if (c >= 0)
 		{
@@ -579,7 +579,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 			return;
 		}
 	}
-	else if (c == (r1.y - r2.y + INT2COORD(2)))
+	else if (c == (r1.y - r2.y + Int2Coord(2)))
 	{
 		if (c <= 0)
 		{
@@ -589,7 +589,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 			return;
 		}
 	}
-	else if (c == (r2.y - r1.y - INT2COORD(2)))
+	else if (c == (r2.y - r1.y - Int2Coord(2)))
 	{
 		if (c <= 0)
 		{
@@ -623,7 +623,7 @@ void ContProcDMHS::Compile(AnimateCompile* anim)
 												  // adjust sign
 		c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y;
 		c_dm.y = c.y;
-		b_hs = COORD2INT(c_hs.x);
+		b_hs = Coord2Int(c_hs.x);
 	}
 	else
 	{
@@ -633,11 +633,11 @@ void ContProcDMHS::Compile(AnimateCompile* anim)
 		c_dm.x = c.x;
 												  // adjust sign
 		c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x;
-		b_hs = COORD2INT(c_hs.y);
+		b_hs = Coord2Int(c_hs.y);
 	}
 	if (c_dm != 0)
 	{
-		b = COORD2INT(c_dm.x);
+		b = Coord2Int(c_dm.x);
 		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c_dm)), this))
 		{
 			return;
@@ -691,7 +691,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim)
 	{
 		c2.x = 0;
 		c2.y = c1.y;
-		b = COORD2INT(c2.y);
+		b = Coord2Int(c2.y);
 		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
 		{
 			return;
@@ -701,7 +701,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim)
 	{
 		c2.x = c1.x;
 		c2.y = 0;
-		b = COORD2INT(c2.x);
+		b = Coord2Int(c2.x);
 		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
 		{
 			return;
@@ -748,8 +748,8 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 		CreateUnitVector(b, d, f1);
 	}
 	v = pnt->Get(anim) - anim->pt;
-	e = COORD2FLOAT(v.x);
-	f = COORD2FLOAT(v.y);
+	e = Coord2Float(v.x);
+	f = Coord2Float(v.y);
 	f1 = a*d - b*c;
 	if (IS_ZERO(f1))
 	{
@@ -781,8 +781,8 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 		f2 = (d*e - b*f) / f1;
 		if (!IS_ZERO(f2))
 		{
-			v.x = FLOAT2COORD(f2*a);
-			v.y = FLOAT2COORD(f2*c);
+			v.x = Float2Coord(f2*a);
+			v.y = Float2Coord(f2*c);
 			if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(float2unsigned(this, anim, f2),
 				v)), this))
 			{
@@ -792,8 +792,8 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 		f2 = (a*f - c*e) / f1;
 		if (!IS_ZERO(f2))
 		{
-			v.x = FLOAT2COORD(f2*b);
-			v.y = FLOAT2COORD(f2*d);
+			v.x = Float2Coord(f2*b);
+			v.y = Float2Coord(f2*d);
 			if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(float2unsigned(this, anim, f2),
 				v)), this))
 			{
@@ -884,11 +884,11 @@ void ContProcGrid::Compile(AnimateCompile* anim)
 	Coord gridc;
 	CC_coord c;
 
-	gridc = FLOAT2COORD(grid->Get(anim));
+	gridc = Float2Coord(grid->Get(anim));
 
 	c.x = roundcoord(anim->pt.x, gridc);
 // Adjust so 4 step grid will be on visible grid
-	c.y = roundcoord(anim->pt.y-INT2COORD(2), gridc) + INT2COORD(2);
+	c.y = roundcoord(anim->pt.y-Int2Coord(2), gridc) + Int2Coord(2);
 
 	c -= anim->pt;
 	if (c != 0)
@@ -913,28 +913,25 @@ void ContProcHSCM::Compile(AnimateCompile* anim)
 
 	r1 = pnt1->Get(anim);
 	r2 = pnt2->Get(anim);
-	switch (r1.y - r2.y)
+	if ((r1.y - r2.y) == Int2Coord(2))
 	{
-		case INT2COORD(2):
-			if (r2.x >= r1.x)
-			{
-				ContValueDefined dirs(CC_S);
-				ContValueDefined dirw(CC_W);
-				DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirs, &dirw, numbeats);
-				return;
-			}
-			break;
-		case -INT2COORD(2):
-			if (r1.x >= r2.x)
-			{
-				ContValueDefined dirn(CC_N);
-				ContValueDefined dire(CC_E);
-				DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirn, &dire, numbeats);
-				return;
-			}
-			break;
-		default:
-			break;
+		if (r2.x >= r1.x)
+		{
+			ContValueDefined dirs(CC_S);
+			ContValueDefined dirw(CC_W);
+			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirs, &dirw, numbeats);
+			return;
+		}
+	}
+	else if ((r1.y - r2.y) == -Int2Coord(2))
+	{
+		if (r1.x >= r2.x)
+		{
+			ContValueDefined dirn(CC_N);
+			ContValueDefined dire(CC_E);
+			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirn, &dire, numbeats);
+			return;
+		}
 	}
 	anim->RegisterError(ANIMERR_INVALID_CM, this);
 }
@@ -960,7 +957,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 												  // adjust sign
 		c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y;
 		c_dm.y = c.y;
-		b = COORD2INT(c_hs.x);
+		b = Coord2Int(c_hs.x);
 	}
 	else
 	{
@@ -970,7 +967,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 		c_dm.x = c.x;
 												  // adjust sign
 		c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x;
-		b = COORD2INT(c_hs.y);
+		b = Coord2Int(c_hs.y);
 	}
 	if (c_hs != 0)
 	{
@@ -981,7 +978,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 	}
 	if (c_dm != 0)
 	{
-		b = COORD2INT(c_dm.x);
+		b = Coord2Int(c_dm.x);
 		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c_dm)), this);
 	}
 }
@@ -1021,8 +1018,8 @@ void ContProcMarch::Compile(AnimateCompile* anim)
 	{
 		rads = DEG2RAD(dir->Get(anim));
 		mag = stpsize->Get(anim) * stps->Get(anim);
-		c.x = FLOAT2COORD(cos(rads)*mag);
-		c.y = -(FLOAT2COORD(sin(rads)*mag));
+		c.x = Float2Coord(cos(rads)*mag);
+		c.y = -(Float2Coord(sin(rads)*mag));
 		if (c != 0)
 		{
 			if (facedir)
@@ -1091,7 +1088,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim)
 	{
 		c2.x = c1.x;
 		c2.y = 0;
-		b = COORD2INT(c2.x);
+		b = Coord2Int(c2.x);
 		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
 		{
 			return;
@@ -1101,7 +1098,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim)
 	{
 		c2.x = 0;
 		c2.y = c1.y;
-		b = COORD2INT(c2.y);
+		b = Coord2Int(c2.y);
 		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
 		{
 			return;

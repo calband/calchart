@@ -47,40 +47,39 @@ public:
 #endif
 };
 
-class AutoScrollCanvas: public wxPanel
+
+///// CtrlScrollCanvas /////
+// A canvas that does zooming and ctrlScrolling
+// ctrlScrolling scrolls when you hold the ctrl key and move the mouse
+// To use, call PrepareDC on your OnPaint routines with the dc.
+// Call OnMouseMove on the MouseMove handler to inform the Canvas a move has occurred.
+//////////
+class CtrlScrollCanvas : public wxScrolledWindow
 {
+private:
+	typedef wxScrolledWindow super;
 public:
-	AutoScrollCanvas(wxWindow *parent, wxWindowID id,
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = 0,
-		const wxString& name = wxT("canvas"));
-	~AutoScrollCanvas();
-
-	inline wxDC *GetMemDC() { return memdc; }
-	void SetSize(const wxSize& size);
-	void SetBackground(const wxBrush& brush);
-	void SetPalette(wxPalette *palette);
-	void SetUserScale(float x, float y);
-	inline float GetPositionX() const { return x_off/x_scale; }
-	inline float GetPositionY() const { return y_off/y_scale; }
-	inline float GetScaleX() const { return x_scale; }
-	inline float GetScaleY() const { return y_scale; }
-
-	void Move(float x, float y, bool noscroll=0);
-	void Blit(wxDC& dc);
+	CtrlScrollCanvas(wxWindow *parent,
+					 wxWindowID id = wxID_ANY,
+					 const wxPoint& pos = wxDefaultPosition,
+					 const wxSize& size = wxDefaultSize,
+					 long style = 0);
+	virtual ~CtrlScrollCanvas();
 
 protected:
-	float x_off, y_off;
+	void PrepareDC(wxDC&);
+
+public:
+	void SetZoom(float z);
+	float GetZoom() const;
+
+	// Inform the ctrl scrolling when the mouse moves
+    void OnMouseMove(wxMouseEvent &event);
 
 private:
-	void FreeMem();
-
-	wxMemoryDC *memdc;
-	wxBitmap *membm;
-	float x_scale, y_scale;
-	wxPalette *palette;
-	wxPoint last_pos;
+	wxPoint mOffset;
+	wxPoint mLastPos;
+	float mZoomFactor;
 };
 
 struct ToolBarEntry

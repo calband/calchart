@@ -107,14 +107,17 @@ class TopFrame : public wxDocMDIParentFrame
 {
 	DECLARE_CLASS(TopFrame)
 public:
-	TopFrame(wxDocManager *manager, wxFrame *frame, const wxString& title, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
+	TopFrame(wxDocManager *manager,
+			 wxFrame *frame,
+			 const wxString& title);
 	~TopFrame();
+
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
 	void OnCmdPreferences(wxCommandEvent& event);
-	void About();
-	void Help();
+
+	static void About();
+	static void Help();
 
 	DECLARE_EVENT_TABLE()
 };
@@ -202,20 +205,22 @@ public:
 
 	void SetCurrentLasso(CC_DRAG_TYPES type);
 	void SetCurrentMove(CC_MOVE_MODES type);
-	void slider_zoom_callback(wxScrollEvent &ev);
+	void zoom_callback(wxCommandEvent &);
+	void zoom_callback_textenter(wxCommandEvent &);
 	void slider_sheet_callback(wxScrollEvent &);
 	void refnum_callback(wxCommandEvent &);
-	void draw_paths(wxCommandEvent &);
+	void OnEnableDrawPaths(wxCommandEvent &);
 
 	void Setup();
 	void SetDescription();
 	void SetMode();
+
 	const FieldCanvas * GetCanvas() const { return field; }
 	FieldCanvas * GetCanvas() { return field; }
 
 	wxChoice *grid_choice;
 	wxChoice *ref_choice;
-	wxSlider *zoom_slider;
+	wxComboBox *zoom_box;
 	wxSlider *sheet_slider;
 
 	FieldCanvas *field;
@@ -223,77 +228,24 @@ public:
 	DECLARE_EVENT_TABLE()
 };
 
-class FieldCanvas : public AutoScrollCanvas
+class FieldCanvas : public CtrlScrollCanvas
 {
 public:
 // Basic functions
-	FieldCanvas(wxView *view, unsigned ss, MainFrame *frame,
-		int def_zoom,
-		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
+	FieldCanvas(wxView *view, MainFrame *frame, float def_zoom);
 	~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
-	void OnErase(wxEraseEvent& event);
 	void OnMouseEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& event);
 	void OnScroll(wxScrollEvent& event);
 
 // Misc show functions
-	void RefreshShow(bool drawall = true, int point = -1);
-	void UpdateBars();
-	inline void UpdateSS() { RefreshShow(); ourframe->UpdatePanel(); }
-	inline void GotoThisSS()
-	{
-		UpdateSS();
-	}
-	inline void GotoSS(unsigned n)
-	{
-		mShow->SetCurrentSheet(n); GotoThisSS();
-	}
-	inline void PrevSS()
-	{
-		if (mShow->GetCurrentSheetNum() > 0)
-		{
-			mShow->SetCurrentSheet(mShow->GetCurrentSheetNum()-1); GotoThisSS();
-		}
-	}
-	inline void NextSS()
-	{
-		if (mShow)
-		{
-			if ((mShow->GetCurrentSheetNum()+1) < mShow->GetNumSheets())
-			{
-				mShow->SetCurrentSheet(mShow->GetCurrentSheetNum()+1);
-				GotoThisSS();
-			}
-		}
-	}
-	inline bool SetZoomQuick(int factor)
-	{
-		if (factor != zoomf)
-		{
-			zoomf = factor;
-			float f = factor * COORD2FLOAT(1);
-			SetUserScale(f, f);
-			return true;
-		}
-		return false;
-	}
-	inline void SetZoom(int factor)
-	{
-		if (SetZoomQuick(factor))
-		{
-			UpdateBars(); RefreshShow();
-		}
-	}
+	void SetZoom(float factor);
 
 	void BeginDrag(CC_DRAG_TYPES type, CC_coord start);
-	void BeginDrag(CC_DRAG_TYPES type, CC_shape *shape);
 	void AddDrag(CC_DRAG_TYPES type, CC_shape *shape);
 	void MoveDrag(CC_coord end);
 	void EndDrag();
-
-	// regenerate marcher's paths
-	void GeneratePaths();
 
 // Variables
 	MainFrame *ourframe;
@@ -301,27 +253,14 @@ public:
 	MainFrameView* mView;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
-	unsigned mCurrentReferencePoint;
-	bool mDrawPaths;
 
 private:
-	typedef std::vector<unsigned> PointList;
 	void ClearShapes();
-	void DrawDrag(bool on = true);
-	void SelectOrdered(PointList& pointlist, const CC_coord& start, bool toggleSelected);
-	bool SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
-	bool SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
-		unsigned ref, bool toggleSelected);
-
-	boost::shared_ptr<Animation> mAnimation;
-	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 
 	CC_DRAG_TYPES drag;
 	typedef std::vector<CC_shape*> ShapeList;
 	ShapeList shape_list;
 	CC_shape *curr_shape;
-	bool dragon;
-	int zoomf;
 
 	DECLARE_EVENT_TABLE()
 };
@@ -331,7 +270,8 @@ class MainFrameView : public wxView
 public:
     MainFrame *mFrame;
   
-    MainFrameView() : mFrame(NULL) {}
+    MainFrameView() : mFrame(NULL), mDrawPaths(false),
+	mCurrentReferencePoint(0) {}
     ~MainFrameView() {}
 
     bool OnCreate(wxDocument *doc, long flags);
@@ -341,9 +281,10 @@ public:
 
 	void OnWizardSetup(CC_show& show);
 
-	bool DoTranslatePoints(const CC_coord& pos, unsigned curr_ref);
-	bool DoTransformPoints(const Matrix& transmat, unsigned ref);
-	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second, unsigned ref);
+	///// Modify the show /////
+	bool DoTranslatePoints(const CC_coord& pos);
+	bool DoTransformPoints(const Matrix& transmat);
+	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second);
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
 	bool DoSetDescription(const wxString& descr);
 	void DoSetMode(const wxString& mode);
@@ -355,8 +296,37 @@ public:
 	bool DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where);
 	bool DoDeleteSheet(unsigned where);
 
+	int FindPoint(CC_coord pos) const;
+	CC_coord PointPosition(int which) const;
+
+	///// Change show attributes /////
+	void GoToSheet(size_t which);
+	void GoToNextSheet();
+	void GoToPrevSheet();
+
+	void SetReferencePoint(unsigned which);
+
+	///// Select /////
+	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
+	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
+private:
+	typedef std::vector<unsigned> PointList;
+	void SelectOrdered(PointList& pointlist, bool toggleSelected);
+
+	///// Drawing marcher's paths /////
+public:
+	// call this when we need to generate the marcher's paths.
+	void OnEnableDrawPaths(bool enable);
+	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
+private:
+	void GeneratePaths();
+	boost::shared_ptr<Animation> mAnimation;
+	bool mDrawPaths;
+	
 private:
 	CC_show* mShow;
+	unsigned mCurrentReferencePoint;
+
     DECLARE_DYNAMIC_CLASS(MainFrameView)
 };
 

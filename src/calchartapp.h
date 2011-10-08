@@ -31,7 +31,7 @@
 
 class CalChartApp;
 
-class ShowModeList;
+class ShowMode;
 
 DECLARE_APP(CalChartApp)
 

@@ -67,7 +67,7 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 {
 	unsigned i;
 	CC_coord c;
-	Coord w = FLOAT2COORD(GetConfiguration_DotRatio());
+	Coord w = Float2Coord(GetConfiguration_DotRatio());
 	for (i = 0; i < show->GetNumPoints(); i++)
 	{
 		c = GetPosition(i, ref);
@@ -108,13 +108,13 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 	{
 		newpts[i] = pts[i];
 	}
-	for (c = coff, col = 0; i < num; i++, col++, c.x += INT2COORD(2))
+	for (c = coff, col = 0; i < num; i++, col++, c.x += Int2Coord(2))
 	{
 		const CC_continuity& plaincont = GetStandardContinuity(SYMBOL_PLAIN);
 		if (col >= columns)
 		{
 			c.x = coff.x;
-			c.y += INT2COORD(2);
+			c.y += Int2Coord(2);
 			col = 0;
 		}
 		newpts[i].flags = 0;
@@ -321,3 +321,43 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 		pts[i].ref[ref-1] = clippedval;
 	}
 }
+
+
+extern wxFont *pointLabelFont;
+
+void CC_sheet::Draw(wxDC& dc, unsigned ref, bool primary)
+{
+	if (!pts.empty())
+	{
+		dc.SetFont(*pointLabelFont);
+		dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
+		CC_coord origin = show->GetMode().Offset();
+		for (size_t i = 0; i < show->GetNumPoints(); i++)
+		{
+			const wxBrush *fillBrush;
+			if (show->IsSelected(i) && primary)
+			{
+				dc.SetPen(*CalChartPens[COLOR_POINT_HILIT]);
+				fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
+			}
+			else if (show->IsSelected(i) && !primary)
+			{
+				dc.SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
+				fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
+			}
+			else if (!show->IsSelected(i) && primary)
+			{
+				dc.SetPen(*CalChartPens[COLOR_POINT]);
+				fillBrush = CalChartBrushes[COLOR_POINT];
+			}
+			else
+			{
+				dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
+				fillBrush = CalChartBrushes[COLOR_REF_POINT];
+			}
+			pts[i].Draw(dc, ref, origin, fillBrush, show->GetPointLabel(i));
+		}
+	}
+	dc.SetFont(wxNullFont);
+}
+

@@ -70,16 +70,16 @@ void CreateVector(CC_coord& c, float dir, float mag)
 	dir = BoundDirection(dir);
 	if (IsDiagonalDirection(dir))
 	{
-		c.x = c.y = FLOAT2COORD(mag);
+		c.x = c.y = Float2Coord(mag);
 		if ((dir > 50.0) && (dir < 310.0)) c.x = -c.x;
 		if (dir < 180.0) c.y = -c.y;
 	}
 	else
 	{
 		f = mag * cos(DEG2RAD(dir));
-		c.x = FLOAT2COORD(f);
+		c.x = Float2Coord(f);
 		f = mag * -sin(DEG2RAD(dir));
-		c.y = FLOAT2COORD(f);
+		c.y = Float2Coord(f);
 	}
 }
 

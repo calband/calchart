@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "basic_ui.h"
 #include "cont_ui.h"
 #include "confgr.h"
 #include "cc_sheet.h"
@@ -326,6 +327,13 @@ void ContinuityEditor::UpdateContChoice()
 	if (mCurrentContinuityChoice >= sht->animcont.size() && sht->animcont.size() > 0)
 		mCurrentContinuityChoice = sht->animcont.size()-1;
 	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
+}
+
+
+void ContinuityEditor::SetInsertionPoint(int x, int y)
+{
+	mUserInput->SetInsertionPoint(mUserInput->XYToPosition((long)x-1,(long)y-1));
+	mUserInput->SetFocus();
 }
 
 

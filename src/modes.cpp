@@ -20,32 +20,42 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/dc.h>
-#include <wx/utils.h>
 #include "modes.h"
 #include "confgr.h"
+#include <wx/dc.h>
 
 #include <algorithm>
 
 extern wxFont* yardLabelFont;
 
-ShowMode::ShowMode(const wxString& nam, const CC_coord& siz, const CC_coord& off,
-const CC_coord& bord1, const CC_coord& bord2)
-: offset(off), size(siz), border1(bord1), border2(bord2)
+ShowMode::ShowMode(const wxString& name,
+				   const CC_coord& size,
+				   const CC_coord& offset,
+				   const CC_coord& border1,
+				   const CC_coord& border2) :
+mOffset(offset),
+mSize(size),
+mBorder1(border1),
+mBorder2(border2),
+mName(name)
 {
-	size += border1 + border2;
-	offset += border1;
-	name = nam;
+	mSize += mBorder1 + mBorder2;
+	mOffset += mBorder1;
 }
 
 
-ShowMode::ShowMode(const wxString& nam, const CC_coord& siz,
-const CC_coord& bord1, const CC_coord& bord2)
-: offset(siz/2), size(siz), border1(bord1), border2(bord2)
+ShowMode::ShowMode(const wxString& name,
+				   const CC_coord& size,
+				   const CC_coord& border1,
+				   const CC_coord& border2) :
+mOffset(size/2),
+mSize(size),
+mBorder1(border1),
+mBorder2(border2),
+mName(name)
 {
-	size += border1 + border2;
-	offset += border1;
-	name = nam;
+	mSize += mBorder1 + mBorder2;
+	mOffset += mBorder1;
 }
 
 
@@ -54,7 +64,8 @@ ShowMode::~ShowMode()
 }
 
 
-CC_coord ShowMode::ClipPosition(const CC_coord& pos) const
+CC_coord
+ShowMode::ClipPosition(const CC_coord& pos) const
 {
 	CC_coord clipped;
 	CC_coord min = MinPosition();
@@ -70,211 +81,111 @@ CC_coord ShowMode::ClipPosition(const CC_coord& pos) const
 }
 
 
-ShowModeStandard::ShowModeStandard(const wxString& nam,
-CC_coord bord1, CC_coord bord2,
-unsigned short hashw, unsigned short hashe)
-: ShowMode(nam, CC_coord(INT2COORD(160),INT2COORD(84)),bord1, bord2),
-hashw(hashw), hashe(hashe)
-{}
-
-ShowModeStandard::ShowModeStandard(const wxString& nam,
-CC_coord bord1, CC_coord bord2,
-CC_coord siz, CC_coord off,
-unsigned short hashw, unsigned short hashe)
-: ShowMode(nam, siz, off, bord1, bord2), hashw(hashw), hashe(hashe)
+ShowModeStandard::ShowModeStandard(const wxString& name,
+								   CC_coord size,
+								   CC_coord offset,
+								   CC_coord border1,
+								   CC_coord border2,
+								   unsigned short hashw,
+								   unsigned short hashe) :
+ShowMode(name, size, offset, border1, border2),
+mHashW(hashw),
+mHashE(hashe)
 {}
 
 ShowModeStandard::~ShowModeStandard() {}
 
-SHOW_TYPE ShowModeStandard::GetType() const
+ShowMode::ShowType ShowModeStandard::GetType() const
 {
 	return SHOW_STANDARD;
 }
 
-
-void ShowModeStandard::Draw(wxDC *dc) const
+void ShowModeStandard::DrawHelper(wxDC& dc, bool animation) const
 {
-	unsigned short i;
-	Coord j, k;
 	wxPoint points[5];
-	wxCoord textw, texth, textd;
-	CC_coord fieldsize, fieldedge;
-
-	fieldsize = size - border1 - border2;
-	fieldedge = offset - border1;
-
-	points[0].x = 0;
-	points[0].y = 0;
-	points[1].x = fieldsize.x;
-	points[1].y = 0;
-	points[2].x = fieldsize.x;
-	points[2].y = fieldsize.y;
-	points[3].x = 0;
-	points[3].y = fieldsize.y;
-	points[4].x = 0;
-	points[4].y = 0;
-
-// Draw vertical lines
-	dc->DrawLines(5, points, border1.x, border1.y);
-	for (j = 0; j < fieldsize.x; j+=INT2COORD(8))
+	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
+	
+	points[0] = wxPoint(0, 0);
+	points[1] = wxPoint(fieldsize.x, 0);
+	points[2] = wxPoint(fieldsize.x, fieldsize.y);
+	points[3] = wxPoint(0, fieldsize.y);
+	points[4] = points[0];
+	
+	// Draw outline
+	dc.DrawLines(5, points, mBorder1.x, mBorder1.y);
+	
+	// Draw vertical lines
+	for (Coord j = Int2Coord(8); j < fieldsize.x; j += Int2Coord(8))
 	{
-		dc->DrawLine(j+border1.x, border1.y,
-			j+border1.x, size.y - border2.y);
-		for (k = 0; k < fieldsize.y; k+=INT2COORD(2))
+		// draw solid yardlines
+		points[0] = wxPoint(j, 0);
+		points[1] = wxPoint(j, fieldsize.y);
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+	}
+	
+	for (Coord j = Int2Coord(4); !animation && j < fieldsize.x; j += Int2Coord(8))
+	{
+		// draw mid-dotted lines
+		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
 		{
-			dc->DrawLine(j+INT2COORD(4)+border1.x, k+border1.y,
-				j+INT2COORD(4)+border1.x, k+INT2COORD(1)+border1.y);
+			points[0] = wxPoint(j, k);
+			points[1] = wxPoint(j, k + Int2Coord(1));
+			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
 		}
 	}
-
-	for (j = 0; j < fieldsize.x; j+=INT2COORD(8))
+	
+	// Draw horizontal mid-dotted lines
+	for (Coord j = Int2Coord(4); !animation && j < fieldsize.y; j += Int2Coord(4))
 	{
-// Draw horizontal lines
-		for (i = 4; i < COORD2INT(fieldsize.y); i+=4)
+		if ((j == Int2Coord(mHashW)) || j == Int2Coord(mHashE))
+			continue;
+		for (Coord k = 0; k < fieldsize.x; k += Int2Coord(2))
 		{
-			if ((i != hashw) && (i != hashe))
-			{
-				dc->DrawLine(j+border1.x, INT2COORD(i)+border1.y,
-					j+INT2COORD(1)+border1.x, INT2COORD(i)+border1.y);
-				dc->DrawLine(j+INT2COORD(2)+border1.x, INT2COORD(i)+border1.y,
-					j+INT2COORD(3)+border1.x, INT2COORD(i)+border1.y);
-				dc->DrawLine(j+INT2COORD(4)+border1.x, INT2COORD(i)+border1.y,
-					j+INT2COORD(5)+border1.x, INT2COORD(i)+border1.y);
-				dc->DrawLine(j+INT2COORD(6)+border1.x, INT2COORD(i)+border1.y,
-					j+INT2COORD(7)+border1.x, INT2COORD(i)+border1.y);
-			}
+			points[0] = wxPoint(k, j);
+			points[1] = wxPoint(k + Int2Coord(1), j);
+			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
 		}
-// Draw hashes
-		dc->DrawLine(j+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+FLOAT2COORD(.1*8)+border1.x,
-			INT2COORD(hashw)+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+INT2COORD(8)+border1.x,
-			INT2COORD(hashw)+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.2*8)+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+FLOAT2COORD(.2*8)+border1.x,
-			FLOAT2COORD(hashw-(.2*8))+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.4*8)+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+FLOAT2COORD(.4*8)+border1.x,
-			FLOAT2COORD(hashw-(.2*8))+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.6*8)+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+FLOAT2COORD(.6*8)+border1.x,
-			FLOAT2COORD(hashw-(.2*8))+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.8*8)+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+FLOAT2COORD(.8*8)+border1.x,
-			FLOAT2COORD(hashw-(.2*8))+border1.y);
-
-		dc->DrawLine(j+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+FLOAT2COORD(.1*8)+border1.x,
-			INT2COORD(hashe)+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+INT2COORD(8)+border1.x,
-			INT2COORD(hashe)+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.2*8)+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+FLOAT2COORD(.2*8)+border1.x,
-			FLOAT2COORD(hashe+(.2*8))+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.4*8)+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+FLOAT2COORD(.4*8)+border1.x,
-			FLOAT2COORD(hashe+(.2*8))+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.6*8)+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+FLOAT2COORD(.6*8)+border1.x,
-			FLOAT2COORD(hashe+(.2*8))+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.8*8)+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+FLOAT2COORD(.8*8)+border1.x,
-			FLOAT2COORD(hashe+(.2*8))+border1.y);
 	}
-
-	dc->SetFont(*yardLabelFont);
-	for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++)
+	
+	// Draw hashes
+	for (Coord j = Int2Coord(0); j < fieldsize.x; j += Int2Coord(8))
 	{
-		dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
-		dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
-			INT2COORD(i*8) - textw/2 + border1.x,
-			border1.y - texth);
-		dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
-			INT2COORD(i*8) - textw/2 + border1.x,
-			size.y - border2.y);
+		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashW));
+		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashW));
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashW));
+		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashW));
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		
+		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashE));
+		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashE));
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashE));
+		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashE));
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		
+		for (size_t midhash = 1; !animation && midhash < 5; ++midhash)
+		{
+			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashW));
+			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashW-(0.2*8)));
+			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+			
+			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashE));
+			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashE+(0.2*8)));
+			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		}
 	}
-}
-
-
-void ShowModeStandard::DrawAnim(wxDC *dc) const
-{
-	Coord j;
-	wxPoint points[5];
-	CC_coord fieldsize, fieldedge;
-
-	fieldsize = size - border1 - border2;
-	fieldedge = offset - border1;
-
-	points[0].x = 0;
-	points[0].y = 0;
-	points[1].x = fieldsize.x;
-	points[1].y = 0;
-	points[2].x = fieldsize.x;
-	points[2].y = fieldsize.y;
-	points[3].x = 0;
-	points[3].y = fieldsize.y;
-	points[4].x = 0;
-	points[4].y = 0;
-
-// Draw vertical lines
-	dc->DrawLines(5, points, border1.x, border1.y);
-	for (j = INT2COORD(8); j < fieldsize.x; j+=INT2COORD(8))
+	
+	// Draw labels
+	dc.SetFont(*yardLabelFont);
+	for (int i = 0; !animation && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
-		dc->DrawLine(j+border1.x, border1.y,
-			j+border1.x, size.y - border2.y);
+		CC_coord fieldedge = mOffset - mBorder1;
+		wxCoord textw, texth, textd;
+		dc.GetTextExtent(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
+		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
+		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
 	}
-
-	for (j = 0; j < fieldsize.x; j+=INT2COORD(8))
-	{
-// Draw hashes
-		dc->DrawLine(j+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+FLOAT2COORD(.1*8)+border1.x,
-			INT2COORD(hashw)+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
-			INT2COORD(hashw)+border1.y,
-			j+INT2COORD(8)+border1.x,
-			INT2COORD(hashw)+border1.y);
-
-		dc->DrawLine(j+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+FLOAT2COORD(.1*8)+border1.x,
-			INT2COORD(hashe)+border1.y);
-		dc->DrawLine(j+FLOAT2COORD(.9*8)+border1.x,
-			INT2COORD(hashe)+border1.y,
-			j+INT2COORD(8)+border1.x,
-			INT2COORD(hashe)+border1.y);
-	}
-
-#ifdef TEXT_ON_ANIM
-	unsigned short i;
-	wxCoord textw, texth, textd;
-	dc->SetFont(*yardLabelFont);
-	for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++)
-	{
-		dc->GetTextExtent(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
-		dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
-			INT2COORD(i*8) - textw/2 + border1.x,
-			border1.y - texth);
-		dc->DrawText(yard_text[i+(-COORD2INT(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8],
-			INT2COORD(i*8) - textw/2 + border1.x,
-			size.y - border2.y);
-	}
-#endif
 }
 
 
@@ -289,8 +200,8 @@ short fld_x, short fld_y,
 short fld_w, short fld_h,
 short txt_l, short txt_r,
 short txt_tp, short txt_bm)
-: ShowMode(nam, CC_coord(INT2COORD(stps_w),INT2COORD(stps_h)),
-CC_coord(INT2COORD(-stps_x),INT2COORD(-stps_y)), bord1, bord2),
+: ShowMode(nam, CC_coord(Int2Coord(stps_w),Int2Coord(stps_h)),
+CC_coord(Int2Coord(-stps_x),Int2Coord(-stps_y)), bord1, bord2),
 which_yards(which),
 stage_x(stg_x), stage_y(stg_y), stage_w(stg_w), stage_h(stg_h),
 field_x(fld_x), field_y(fld_y), field_w(fld_w), field_h(fld_h),
@@ -305,160 +216,94 @@ ShowModeSprShow::~ShowModeSprShow()
 }
 
 
-SHOW_TYPE ShowModeSprShow::GetType() const
+ShowMode::ShowType ShowModeSprShow::GetType() const
 {
 	return SHOW_SPRINGSHOW;
 }
 
 
-void ShowModeSprShow::Draw(wxDC *dc) const
+void ShowModeSprShow::DrawHelper(wxDC& dc, bool animation) const
 {
-	unsigned short i;
-	Coord j, k;
-	wxCoord textw, texth, textd;
-	CC_coord fieldsize;
+	wxPoint points[2];
+	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
 
-	fieldsize = size - border1 - border2;
-
-// Draw vertical lines
-	for (j = 0; j <= fieldsize.x; j+=INT2COORD(8))
+	// Draw vertical lines
+	for (Coord j = 0; j <= fieldsize.x; j+=Int2Coord(8))
 	{
-		dc->DrawLine(j+border1.x, border1.y,
-			j+border1.x, size.y - border2.y);
+		// draw solid yardlines
+		points[0] = wxPoint(j, 0);
+		points[1] = wxPoint(j, fieldsize.y);
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
 	}
-	for (j = INT2COORD(4); j <= fieldsize.x; j+=INT2COORD(8))
+
+	for (Coord j = Int2Coord(4); !animation && j < fieldsize.x; j += Int2Coord(8))
 	{
-		for (k = 0; k < fieldsize.y; k+=INT2COORD(2))
+		// draw mid-dotted lines
+		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
 		{
-			dc->DrawLine(j+border1.x, k+border1.y,
-				j+border1.x, k+INT2COORD(1)+border1.y);
+			points[0] = wxPoint(j, k);
+			points[1] = wxPoint(j, k + Int2Coord(1));
+			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		}
+	}
+	
+	// Draw horizontal lines
+	for (Coord j = 0; j <= fieldsize.y; j+=Int2Coord(8))
+	{
+		// draw solid yardlines
+		points[0] = wxPoint(0, j);
+		points[1] = wxPoint(fieldsize.x, j);
+		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+	}
+	
+	// Draw horizontal mid-dotted lines
+	for (Coord j = Int2Coord(4); !animation && j <= fieldsize.y; j += Int2Coord(8))
+	{
+		for (Coord k = 0; k < fieldsize.x; k += Int2Coord(2))
+		{
+			points[0] = wxPoint(k, j);
+			points[1] = wxPoint(k + Int2Coord(1), j);
+			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
 		}
 	}
 
-	for (j = 0; j < fieldsize.x; j+=INT2COORD(8))
+	// Draw labels
+	dc.SetFont(*yardLabelFont);
+	for (int i = 0; !animation && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
-// Draw horizontal lines
-		for (k = INT2COORD(4); k <= fieldsize.y; k+=INT2COORD(8))
-		{
-			dc->DrawLine(j+border1.x, k+border1.y,
-				j+INT2COORD(1)+border1.x, k+border1.y);
-			dc->DrawLine(j+INT2COORD(2)+border1.x, k+border1.y,
-				j+INT2COORD(3)+border1.x, k+border1.y);
-			dc->DrawLine(j+INT2COORD(4)+border1.x, k+border1.y,
-				j+INT2COORD(5)+border1.x, k+border1.y);
-			dc->DrawLine(j+INT2COORD(6)+border1.x, k+border1.y,
-				j+INT2COORD(7)+border1.x, k+border1.y);
-		}
-	}
-	for (k = 0; k <= fieldsize.y; k+=INT2COORD(8))
-	{
-		dc->DrawLine(border1.x, k+border1.y,
-			fieldsize.x+border1.x, k+border1.y);
-	}
-
-	dc->SetFont(*yardLabelFont);
-	for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++)
-	{
-		dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
+		wxCoord textw, texth, textd;
+		dc.GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
 		if (which_yards & SPR_YARD_ABOVE)
-			dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
-				INT2COORD(i*8) - textw/2 + border1.x,
-				border1.y - texth);
+			dc.DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
 		if (which_yards & SPR_YARD_BELOW)
-			dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
-				INT2COORD(i*8) - textw/2 + border1.x,
-				size.y - border2.y);
+			dc.DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
 	}
-	for (i = 0; i <= COORD2INT(fieldsize.y); i+=8)
+	for (int i = 0; !animation && i <= Coord2Int(fieldsize.y); i+=8)
 	{
-		dc->GetTextExtent(spr_line_text[i/8], &textw, &texth, &textd);
+		wxCoord textw, texth, textd;
+		dc.GetTextExtent(spr_line_text[i/8], &textw, &texth, &textd);
 		if (which_yards & SPR_YARD_LEFT)
-			dc->DrawText(spr_line_text[i/8],
-				border1.x - textw,
-				border1.y - texth/2 + INT2COORD(i));
+			dc.DrawText(spr_line_text[i/8], mBorder1.x - textw, mBorder1.y - texth/2 + Int2Coord(i));
 		if (which_yards & SPR_YARD_RIGHT)
-			dc->DrawText(spr_line_text[i/8],
-				fieldsize.x + border1.x,
-				border1.y - texth/2 + INT2COORD(i));
+			dc.DrawText(spr_line_text[i/8], fieldsize.x + mBorder1.x, mBorder1.y - texth/2 + Int2Coord(i));
 	}
 }
 
-
-void ShowModeSprShow::DrawAnim(wxDC *dc) const
+class FindByName
 {
-	Coord j;
-	CC_coord fieldsize;
-
-	fieldsize = size - border1 - border2;
-
-// Draw vertical lines
-	for (j = 0; j <= fieldsize.x; j+=INT2COORD(8))
-	{
-		dc->DrawLine(j+border1.x, border1.y,
-			j+border1.x, size.y - border2.y);
-	}
-
-// Draw horizontal lines
-	for (j = 0; j <= fieldsize.y; j+=INT2COORD(8))
-	{
-		dc->DrawLine(border1.x, j+border1.y,
-			fieldsize.x+border1.x, j+border1.y);
-	}
-
-#ifdef TEXT_ON_ANIM
-	unsigned short i;
-	wxCoord textw, texth, textd;
-	dc->SetFont(*yardLabelFont);
-	for (i = 0; i < COORD2INT(fieldsize.x)/8+1; i++)
-	{
-		dc->GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
-		if (which_yards & SPR_YARD_ABOVE)
-			dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
-				INT2COORD(i*8) - textw/2 + border1.x,
-				border1.y - texth);
-		if (which_yards & SPR_YARD_BELOW)
-			dc->DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8],
-				INT2COORD(i*8) - textw/2 + border1.x,
-				size.y - border2.y);
-	}
-	for (i = 0; i <= COORD2INT(fieldsize.y); i+=8)
-	{
-		dc->GetTextExtent(spr_line_text[i/8], &textw, &texth, &textd);
-		if (which_yards & SPR_YARD_LEFT)
-			dc->DrawText(spr_line_text[i/8],
-				border1.x - textw,
-				border1.y - texth/2 + INT2COORD(i));
-		if (which_yards & SPR_YARD_RIGHT)
-			dc->DrawText(spr_line_text[i/8],
-				fieldsize.x + border1.x,
-				border1.y - texth/2 + INT2COORD(i));
-	}
-#endif
-}
-
-
-ShowModeList::ShowModeList()
-{}
-
-struct DeleteObjectFunct
-{
+public:
+	FindByName(wxString name) : mName(name) {}
 	template <typename T>
-		void operator()(const T* ptr) const
-	{
-		delete ptr;
-	}
+	bool operator()(const T& a) { return mName == a->GetName(); }
+private:
+	wxString mName;
 };
 
-ShowModeList::~ShowModeList()
+ShowMode*
+ShowModeList_Find(const ShowModeList& showModes, const wxString& which)
 {
-	std::for_each(list.begin(), list.end(), DeleteObjectFunct());
-}
-
-
-ShowMode *ShowModeList::Find(const wxString& name) const
-{
-	for (CIter i = list.begin(); i != list.end(); ++i)
-		if ((*i)->GetName() == name)
-			return *i;
+	ShowModeList::const_iterator i;
+	if ((i = std::find_if(showModes.begin(), showModes.end(), FindByName(which))) != showModes.end())
+		return (*i).get();
 	return NULL;
 }

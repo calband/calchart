@@ -46,6 +46,8 @@ public:
 	CC_sheet(CC_sheet *sht);
 	~CC_sheet();
 
+	void Draw(wxDC& dc, unsigned ref, bool primary);
+
 	// setting values on the stunt sheet
 	// * needs to be through command only *
 	void SetNumPoints(unsigned num, unsigned columns);
@@ -107,7 +109,6 @@ private:
 	wxString name;
 	wxString number;
 
-friend void Draw(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool primary, bool drawall, int point);
 friend void DrawForPrinting(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool landscape);
 friend void DrawCont(wxDC& dc, const CC_sheet& sheet, wxCoord yStart, bool landscape);
 

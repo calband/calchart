@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "basic_ui.h"
 #include "anim_ui.h"
 #include "modes.h"
 #include "confgr.h"
@@ -85,10 +86,10 @@ void AnimationTimer::Notify()
 
 AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_show *show)
 : wxPanel(frame, wxID_ANY, wxDefaultPosition,
-wxSize(COORD2INT(show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
-COORD2INT(show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
+wxSize(Coord2Int(show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
+Coord2Int(show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
 anim(NULL), mShow(show), ourframe(frame), tempo(120),
-mUserScale(DEFAULT_ANIM_SIZE * (COORD2INT(1 << 16)/65536.0))
+mUserScale(DEFAULT_ANIM_SIZE * (Coord2Int(1 << 16)/65536.0))
 {
 	timer = new AnimationTimer(this);
 }
@@ -117,7 +118,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 	dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
 	dc->Clear();
 	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-	mShow->GetMode().DrawAnim(dc);
+	mShow->GetMode().DrawAnim(*dc);
 	if (anim)
 		for (i = 0; i < mShow->GetNumPoints(); i++)
 	{
@@ -171,8 +172,8 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 		CC_coord position = anim->Position(i);
 		x = position.x+mShow->GetMode().Offset().x;
 		y = position.y+mShow->GetMode().Offset().y;
-		dc->DrawRectangle(x - INT2COORD(1)/2, y - INT2COORD(1)/2,
-			INT2COORD(1), INT2COORD(1));
+		dc->DrawRectangle(x - Int2Coord(1)/2, y - Int2Coord(1)/2,
+			Int2Coord(1), Int2Coord(1));
 	}
 }
 
@@ -191,13 +192,13 @@ void AnimationCanvas::OnSize(wxSizeEvent& event)
 	// This will keep the whole field on in the canvas
 	if (newSizeRatio < showAspectRatio)
 	{
-		newvalue = newX / (float)COORD2INT(x);
+		newvalue = newX / (float)Coord2Int(x);
 	}
 	else
 	{
-		newvalue = newY / (float)COORD2INT(y);
+		newvalue = newY / (float)Coord2Int(y);
 	}
-	mUserScale = (newvalue * (COORD2INT(1 << 16)/65536.0));
+	mUserScale = (newvalue * (Coord2Int(1 << 16)/65536.0));
 	Refresh();
 }
 
@@ -388,8 +389,8 @@ wxString AnimationCanvas::GeneratePOVFiles(const wxString& filebasename)
 			}
 			for (pt = 0; pt < mShow->GetNumPoints(); pt++)
 			{
-				x = COORD2FLOAT(anim->pts[pt].pos.x) * POV_SCALE;
-				y = COORD2FLOAT(anim->pts[pt].pos.y) * POV_SCALE;
+				x = Coord2Float(anim->pts[pt].pos.x) * POV_SCALE;
+				y = Coord2Float(anim->pts[pt].pos.y) * POV_SCALE;
 /* x is already flipped because of the different axises */
 				if (east)
 				{
@@ -502,8 +503,8 @@ wxString AnimationCanvas::GenerateRIBFrame()
 		color[1] = pen->GetColour().Green() / 255.0;
 		color[2] = pen->GetColour().Blue() / 255.0;
 		RiColor(color);
-		x = COORD2FLOAT(anim->pts[pt].pos.x) * POV_SCALE;
-		y = COORD2FLOAT(anim->pts[pt].pos.y) * POV_SCALE;
+		x = Coord2Float(anim->pts[pt].pos.x) * POV_SCALE;
+		y = Coord2Float(anim->pts[pt].pos.y) * POV_SCALE;
 /* x is already flipped because of the different axises */
 		if (east)
 		{
@@ -615,7 +616,7 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 
 // Add the controls
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
-	topsizer->Add(canvas, 1, wxEXPAND | wxBORDER, 5);
+	topsizer->Add(canvas, wxSizerFlags(1).Expand().Border(5));
 
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")),

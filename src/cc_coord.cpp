@@ -31,8 +31,8 @@ float CC_coord::Magnitude() const
 {
 	float x_f, y_f;
 
-	x_f = COORD2FLOAT(x);
-	y_f = COORD2FLOAT(y);
+	x_f = Coord2Float(x);
+	y_f = Coord2Float(y);
 	return sqrt(x_f*x_f + y_f*y_f);
 }
 
@@ -42,7 +42,7 @@ float CC_coord::DM_Magnitude() const
 {
 	if ((x == y) || (x == -y))
 	{
-		return COORD2FLOAT(ABS(x));
+		return Coord2Float(ABS(x));
 	}
 	else
 	{
@@ -58,7 +58,7 @@ float CC_coord::Direction() const
 
 	if (*this == 0) return 0.0;
 
-	ang = acos(COORD2FLOAT(x)/Magnitude());		  // normalize
+	ang = acos(Coord2Float(x)/Magnitude());		  // normalize
 	ang *= 180.0/PI;							  // convert to degrees
 	if (y > 0) ang = (-ang);					  // check for > PI
 
@@ -83,9 +83,9 @@ bool CC_coord::Collides(const CC_coord& c) const
 	dx = x - c.x;
 	dy = y - c.y;
 // Check for special cases to avoid multiplications
-	if (ABS(dx) > INT2COORD(1)) return false;
-	if (ABS(dy) > INT2COORD(1)) return false;
-	return (((dx*dx)+(dy*dy)) <= (INT2COORD(1)*INT2COORD(1)));
+	if (ABS(dx) > Int2Coord(1)) return false;
+	if (ABS(dy) > Int2Coord(1)) return false;
+	return (((dx*dx)+(dy*dy)) <= (Int2Coord(1)*Int2Coord(1)));
 }
 
 

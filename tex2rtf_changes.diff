@@ -1,0 +1,26 @@
+Index: src/htmlutil.cpp
+===================================================================
+--- src/htmlutil.cpp	(revision 18)
++++ src/htmlutil.cpp	(working copy)
+@@ -938,7 +938,7 @@
+             fflush(Sections);
+ 
+             // Read old .con file in at this point
+-            wxFileName FileName = CurrentSectionFile;
++            wxFileName FileName = wxString(CurrentSectionFile);
+             FileName.SetExt("con");
+             FILE* fd = wxFopen(FileName.GetFullName(), _T("r"));
+             if ( fd )
+Index: configure.ac
+===================================================================
+--- configure.ac	(revision 18)
++++ configure.ac	(working copy)
+@@ -103,7 +103,7 @@
+     AC_MSG_ERROR(unknown system type ${host}.)
+ esac
+ 
+-wx_config_args="--static=no"
++wx_config_args=""
+ if test x$ac_arg_debug = xyes ; then
+   wx_config_args="$wx_config_args --debug"
+ fi

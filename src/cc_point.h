@@ -26,6 +26,9 @@
 #include "cc_types.h"
 #include "cc_coord.h"
 
+class wxDC;
+class wxString;
+class wxBrush;
 
 class CC_point
 {
@@ -50,6 +53,9 @@ public:
 	CC_coord pos;
 	CC_coord ref[kNumRefPoints];
 
+	// Draw the point
+	void Draw(wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label);
+	
 private:
 	static const unsigned kPointLabel = 1;
 

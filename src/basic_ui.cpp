@@ -88,127 +88,56 @@ wxString FancyTextWin::GetValue(void) const
 #endif
 
 
-AutoScrollCanvas::
-AutoScrollCanvas(wxWindow *parent, wxWindowID id,
-const wxPoint& pos, const wxSize& size,
-long style, const wxString& name)
-: wxPanel(parent, id, pos, size, style, name),
-memdc(NULL), membm(NULL),
-x_scale(1.0), y_scale(1.0), palette(NULL)
+CtrlScrollCanvas::CtrlScrollCanvas(wxWindow *parent,
+								   wxWindowID id,
+								   const wxPoint& pos,
+								   const wxSize& size,
+								   long style) :
+wxScrolledWindow(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style),
+mZoomFactor(1.0)
 {
-	if (size.GetX() != wxDefaultSize.GetX() ||
-		size.GetY() != wxDefaultSize.GetY())
+}
+
+
+CtrlScrollCanvas::~CtrlScrollCanvas()
+{
+}
+
+
+void
+CtrlScrollCanvas::PrepareDC(wxDC& dc)
+{
+	super::PrepareDC(dc);
+	dc.SetUserScale(mZoomFactor, mZoomFactor);
+}
+
+
+void
+CtrlScrollCanvas::SetZoom(float z)
+{
+	mZoomFactor = z;
+}
+
+float
+CtrlScrollCanvas::GetZoom() const
+{
+	return mZoomFactor;
+}
+
+
+void
+CtrlScrollCanvas::OnMouseMove(wxMouseEvent &event)
+{
+	wxPoint thisPos = event.GetPosition();
+	if (event.ControlDown())
 	{
-		SetSize(size);
+		mOffset += thisPos - mLastPos;
+		Scroll(-mOffset);
+		// cap the offset by how much the view moved
+		wxPoint start = GetViewStart();
+		mOffset = -start;
 	}
-}
-
-
-AutoScrollCanvas::~AutoScrollCanvas()
-{
-	FreeMem();
-}
-
-
-void AutoScrollCanvas::SetSize(const wxSize& size)
-{
-	wxWindowDC dc(this);
-
-	dc.SetLogicalFunction(wxCOPY);
-	Refresh();
-	FreeMem();
-	x_off = y_off = 0.0;
-	membm = new wxBitmap(size.GetX(), size.GetY());
-	if (!membm->Ok())
-	{
-		FreeMem();
-	}
-	else
-	{
-		memdc = new wxMemoryDC(*membm);
-		if (!memdc->IsOk())
-		{
-			FreeMem();
-		}
-		else
-		{
-			memdc->SelectObject(*membm);
-			memdc->SetBackground(dc.GetBackground());
-			if (palette) memdc->SetPalette(*palette);
-			memdc->SetUserScale(x_scale, y_scale);
-			memdc->Clear();
-		}
-	}
-}
-
-
-void AutoScrollCanvas::SetBackground(const wxBrush& brush)
-{
-	wxWindow::SetBackgroundColour(brush.GetColour());
-	if (memdc) memdc->SetBackground(brush);
-}
-
-
-void AutoScrollCanvas::SetPalette(wxPalette *pal)
-{
-	palette = pal;
-	wxWindow::SetPalette(*palette);
-	if (memdc) memdc->SetPalette(*palette);
-}
-
-
-void AutoScrollCanvas::SetUserScale(float x, float y)
-{
-	x_scale = x;
-	y_scale = y;
-	if (memdc) memdc->SetUserScale(x, y);
-}
-
-
-void AutoScrollCanvas::Move(float x, float y, bool noscroll)
-{
-	if (memdc)
-	{
-		if (!noscroll)
-		{
-			x_off += (x - last_pos.x);
-			y_off += (y - last_pos.y);
-		}
-	}
-	last_pos.x = x;
-	last_pos.y = y;
-}
-
-
-void AutoScrollCanvas::Blit(wxDC& dc)
-{
-	if (memdc)
-	{
-		memdc->SetUserScale(1.0, 1.0);
-// Set the fg and bg colors in case source is a mono bitmap
-		dc.SetPen(*wxWHITE_PEN);
-		dc.SetBackground(*wxBLACK_BRUSH);
-		dc.Blit(x_off, y_off, membm->GetWidth(), membm->GetHeight(),
-			memdc, 0, 0, wxCOPY);
-// Restore original background
-		dc.SetBackground(memdc->GetBackground());
-		memdc->SetUserScale(x_scale, y_scale);
-	}
-}
-
-
-void AutoScrollCanvas::FreeMem()
-{
-	if (memdc)
-	{
-		delete memdc;
-		memdc = NULL;
-	}
-	if (membm)
-	{
-		delete membm;
-		membm = NULL;
-	}
+	mLastPos = thisPos;
 }
 
 
