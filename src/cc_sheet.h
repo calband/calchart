@@ -34,8 +34,7 @@
 class CC_show;
 class CC_coord;
 class Matrix;
-class CC_textline;
-
+struct CC_textline;
 typedef std::vector<CC_textline> CC_textline_list;
 
 class CC_sheet

@@ -32,12 +32,6 @@
 #include <math.h>
 #include <list>
 
-CC_textline::CC_textline()
-: center(false), on_main(true), on_sheet(true) {}
-CC_textline::~CC_textline()
-{
-}
-
 
 float BoundDirection(float f)
 {

@@ -61,11 +61,9 @@ public:
 
 typedef std::vector<CC_textchunk> CC_textchunk_list;
 
-class CC_textline
+struct CC_textline
 {
-public:
-	CC_textline();
-	~CC_textline();
+	CC_textline() : center(false), on_main(true), on_sheet(true) {}
 
 	CC_textchunk_list chunks;
 	bool center;
