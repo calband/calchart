@@ -203,11 +203,14 @@ class FieldCanvas : public CtrlScrollCanvas
 public:
 // Basic functions
 	FieldCanvas(wxView *view, MainFrame *frame, float def_zoom);
-	~FieldCanvas(void);
+	virtual ~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
-	void OnMouseEvent(wxMouseEvent& event);
+	virtual void OnMouseLeftDown(wxMouseEvent& event);
+	virtual void OnMouseLeftUp(wxMouseEvent& event);
+	virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);
+	virtual void OnMouseRightDown(wxMouseEvent& event);
+	virtual void OnMouseMove(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& event);
-	void OnScroll(wxScrollEvent& event);
 
 // Misc show functions
 	void SetZoom(float factor);

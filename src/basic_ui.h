@@ -73,7 +73,7 @@ public:
 	float GetZoom() const;
 
 	// Inform the ctrl scrolling when the mouse moves
-    void OnMouseMove(wxMouseEvent &event);
+    virtual void OnMouseMove(wxMouseEvent &event);
 
 private:
 	wxPoint mOffset;

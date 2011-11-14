@@ -175,7 +175,11 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
 EVT_CHAR(FieldCanvas::OnChar)
-EVT_MOUSE_EVENTS(FieldCanvas::OnMouseEvent)
+EVT_LEFT_DOWN(FieldCanvas::OnMouseLeftDown)
+EVT_LEFT_UP(FieldCanvas::OnMouseLeftUp)
+EVT_LEFT_DCLICK(FieldCanvas::OnMouseLeftDoubleClick)
+EVT_RIGHT_DOWN(FieldCanvas::OnMouseRightDown)
+EVT_MOTION(FieldCanvas::OnMouseMove)
 EVT_PAINT(FieldCanvas::OnPaint)
 END_EVENT_TABLE()
 
@@ -999,150 +1003,168 @@ void FieldCanvas::OnPaint(wxPaintEvent& event)
 
 // Allow clicking within pixels to close polygons
 #define CLOSE_ENOUGH_TO_CLOSE 10
-void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
+void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
-	long x,y;
-	int i;
-	CC_coord pos;
-
-	CtrlScrollCanvas::OnMouseMove(event);
-
 	if (mShow)
 	{
 		wxClientDC dc(this);
 		PrepareDC(dc);
-
+		
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
+			long x,y;
 			event.GetPosition(&x, &y);
-
+			
 			x = dc.DeviceToLogicalX( x );
 			y = dc.DeviceToLogicalY( y );
-
-			pos = mShow->GetMode().Offset();
+			
+			CC_coord pos = mShow->GetMode().Offset();
 			pos.x = (x - pos.x);
 			pos.y = (y - pos.y);
-
-			if (event.LeftDown())
+			
+			switch (curr_move)
 			{
-				switch (curr_move)
-				{
-					case CC_MOVE_LINE:
-						ourframe->SnapToGrid(pos);
-						BeginDrag(CC_DRAG_LINE, pos);
-						break;
-					case CC_MOVE_ROTATE:
-						ourframe->SnapToGrid(pos);
-						if (curr_shape &&
-							(((CC_shape_1point*)curr_shape)->GetOrigin() != pos))
-						{
-							AddDrag(CC_DRAG_LINE,
+				case CC_MOVE_LINE:
+					ourframe->SnapToGrid(pos);
+					BeginDrag(CC_DRAG_LINE, pos);
+					break;
+				case CC_MOVE_ROTATE:
+					ourframe->SnapToGrid(pos);
+					if (curr_shape &&
+						(((CC_shape_1point*)curr_shape)->GetOrigin() != pos))
+					{
+						AddDrag(CC_DRAG_LINE,
 								new CC_shape_arc(((CC_shape_1point*)
-								curr_shape)->GetOrigin(), pos));
-						}
-						else
-						{
-							BeginDrag(CC_DRAG_CROSS, pos);
-						}
-						break;
-					case CC_MOVE_SHEAR:
-						ourframe->SnapToGrid(pos);
-						if (curr_shape &&
-							(((CC_shape_1point*)curr_shape)->GetOrigin() != pos))
-						{
-							CC_coord vect(pos - ((CC_shape_1point*)curr_shape)->GetOrigin());
-// rotate vect 90 degrees
-							AddDrag(CC_DRAG_LINE,
+												  curr_shape)->GetOrigin(), pos));
+					}
+					else
+					{
+						BeginDrag(CC_DRAG_CROSS, pos);
+					}
+					break;
+				case CC_MOVE_SHEAR:
+					ourframe->SnapToGrid(pos);
+					if (curr_shape &&
+						(((CC_shape_1point*)curr_shape)->GetOrigin() != pos))
+					{
+						CC_coord vect(pos - ((CC_shape_1point*)curr_shape)->GetOrigin());
+						// rotate vect 90 degrees
+						AddDrag(CC_DRAG_LINE,
 								new CC_shape_angline(pos,CC_coord(-vect.y, vect.x)));
-						}
-						else
-						{
-							BeginDrag(CC_DRAG_CROSS, pos);
-						}
-						break;
-					case CC_MOVE_REFL:
-						ourframe->SnapToGrid(pos);
-						BeginDrag(CC_DRAG_LINE, pos);
-						break;
-					case CC_MOVE_SIZE:
-						ourframe->SnapToGrid(pos);
-						if (curr_shape &&
-							(((CC_shape_1point*)curr_shape)->GetOrigin() != pos))
-						{
-							AddDrag(CC_DRAG_LINE, new CC_shape_line(pos));
-						}
-						else
-						{
-							BeginDrag(CC_DRAG_CROSS, pos);
-						}
-						break;
-					case CC_MOVE_GENIUS:
-						ourframe->SnapToGrid(pos);
+					}
+					else
+					{
+						BeginDrag(CC_DRAG_CROSS, pos);
+					}
+					break;
+				case CC_MOVE_REFL:
+					ourframe->SnapToGrid(pos);
+					BeginDrag(CC_DRAG_LINE, pos);
+					break;
+				case CC_MOVE_SIZE:
+					ourframe->SnapToGrid(pos);
+					if (curr_shape &&
+						(((CC_shape_1point*)curr_shape)->GetOrigin() != pos))
+					{
 						AddDrag(CC_DRAG_LINE, new CC_shape_line(pos));
+					}
+					else
+					{
+						BeginDrag(CC_DRAG_CROSS, pos);
+					}
+					break;
+				case CC_MOVE_GENIUS:
+					ourframe->SnapToGrid(pos);
+					AddDrag(CC_DRAG_LINE, new CC_shape_line(pos));
+					break;
+				default:
+					switch (drag)
+				{
+					case CC_DRAG_POLY:
+					{
+						const wxPoint *p = ((CC_lasso*)curr_shape)->FirstPoint();
+						float d;
+						if (p != NULL)
+						{
+							// need to know where the scale is, so we need the device.
+							wxClientDC dc(this);
+							PrepareDC(dc);
+							Coord polydist =
+							dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
+							d = p->x - pos.x;
+							if (ABS(d) < polydist)
+							{
+								d = p->y - pos.y;
+								if (ABS(d) < polydist)
+								{
+									mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+									EndDrag();
+									break;
+								}
+							}
+						}
+						((CC_lasso*)curr_shape)->Append(pos);
+					}
 						break;
 					default:
-						switch (drag)
+						bool changed = false;
+						if (!(event.ShiftDown() || event.AltDown())) changed = mShow->UnselectAll();
+						int i = mView->FindPoint(pos);
+						if (i < 0)
 						{
-							case CC_DRAG_POLY:
-							{
-								const wxPoint *p = ((CC_lasso*)curr_shape)->FirstPoint();
-								float d;
-								if (p != NULL)
-								{
-									// need to know where the scale is, so we need the device.
-									wxClientDC dc(this);
-									PrepareDC(dc);
-									Coord polydist =
-										dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
-									d = p->x - pos.x;
-									if (ABS(d) < polydist)
-									{
-										d = p->y - pos.y;
-										if (ABS(d) < polydist)
-										{
-											mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
-											EndDrag();
-											break;
-										}
-									}
-								}
-								((CC_lasso*)curr_shape)->Append(pos);
-							}
-							break;
-							default:
-								bool changed = false;
-								if (!(event.ShiftDown() || event.AltDown())) changed = mShow->UnselectAll();
-								i = mView->FindPoint(pos);
-								if (i < 0)
-								{
-									// if no point selected, we grab using the current lasso
-									BeginDrag(curr_lasso, pos);
-								}
-								else
-								{
-									CC_show::SelectionList select;
-									select.insert(i);
-									if (event.AltDown())
-									{
-										mShow->ToggleSelection(select);
-									}
-									else
-									{
-										mShow->AddToSelection(select);
-									}
-
-									changed = true;
-									BeginDrag(CC_DRAG_LINE, mView->PointPosition(i));
-								}
+							// if no point selected, we grab using the current lasso
+							BeginDrag(curr_lasso, pos);
 						}
-						break;
+						else
+						{
+							CC_show::SelectionList select;
+							select.insert(i);
+							if (event.AltDown())
+							{
+								mShow->ToggleSelection(select);
+							}
+							else
+							{
+								mShow->AddToSelection(select);
+							}
+							
+							changed = true;
+							BeginDrag(CC_DRAG_LINE, mView->PointPosition(i));
+						}
 				}
+					break;
 			}
-			else if (event.LeftUp() && curr_shape)
+		}
+	}
+	Refresh();
+}
+
+// Allow clicking within pixels to close polygons
+void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
+{
+	if (mShow)
+	{
+		wxClientDC dc(this);
+		PrepareDC(dc);
+		
+		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+		if (sheet != mShow->GetSheetEnd())
+		{
+			long x,y;
+			event.GetPosition(&x, &y);
+			
+			x = dc.DeviceToLogicalX( x );
+			y = dc.DeviceToLogicalY( y );
+			
+			CC_coord pos = mShow->GetMode().Offset();
+			pos.x = (x - pos.x);
+			pos.y = (y - pos.y);
+			
+			const CC_shape_2point *shape = (CC_shape_2point*)curr_shape;
+			const CC_shape_1point *origin;
+			if (curr_shape)
 			{
-				const CC_shape_2point *shape = (CC_shape_2point*)curr_shape;
-				const CC_shape_1point *origin;
 				switch (curr_move)
 				{
 					case CC_MOVE_LINE:
@@ -1163,10 +1185,10 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								Matrix m;
 								CC_coord c1 = origin->GetOrigin();
 								float r = -((CC_shape_arc*)curr_shape)->GetAngle();
-
+								
 								m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-									ZRotationMatrix(r) *
-									TranslationMatrix(Vector(c1.x, c1.y, 0));
+								ZRotationMatrix(r) *
+								TranslationMatrix(Vector(c1.x, c1.y, 0));
 								mView->DoTransformPoints(m);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1189,19 +1211,19 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								CC_coord c2 = shape->GetPoint();
 								CC_coord v1, v2;
 								float ang, amount;
-
+								
 								v1 = c1 - o;
 								v2 = c2 - c1;
 								amount = v2.Magnitude() / v1.Magnitude();
 								if (BoundDirectionSigned(v1.Direction() -
-									(c2-o).Direction()) < 0)
+														 (c2-o).Direction()) < 0)
 									amount = -amount;
 								ang = -v1.Direction()*PI/180.0;
 								m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
-									ZRotationMatrix(-ang) *
-									YXShearMatrix(amount) *
-									ZRotationMatrix(ang) *
-									TranslationMatrix(Vector(o.x, o.y, 0));
+								ZRotationMatrix(-ang) *
+								YXShearMatrix(amount) *
+								ZRotationMatrix(ang) *
+								TranslationMatrix(Vector(o.x, o.y, 0));
 								mView->DoTransformPoints(m);
 								EndDrag();
 								ourframe->SetCurrentMove(CC_MOVE_NORMAL);
@@ -1215,14 +1237,14 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							CC_coord c1 = shape->GetOrigin();
 							CC_coord c2;
 							float ang;
-
+							
 							c2 = shape->GetPoint() - c1;
 							ang = -c2.Direction()*PI/180.0;
 							m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-								ZRotationMatrix(-ang) *
-								YReflectionMatrix() *
-								ZRotationMatrix(ang) *
-								TranslationMatrix(Vector(c1.x, c1.y, 0));
+							ZRotationMatrix(-ang) *
+							YReflectionMatrix() *
+							ZRotationMatrix(ang) *
+							TranslationMatrix(Vector(c1.x, c1.y, 0));
 							mView->DoTransformPoints(m);
 						}
 						EndDrag();
@@ -1242,7 +1264,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 								CC_coord c1 = origin->GetOrigin();
 								CC_coord c2;
 								float sx, sy;
-
+								
 								c2 = shape->GetPoint() - c1;
 								sx = c2.x;
 								sy = c2.y;
@@ -1266,8 +1288,8 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 										sy = 1;
 									}
 									m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-										ScaleMatrix(Vector(sx, sy, 0)) *
-										TranslationMatrix(Vector(c1.x, c1.y, 0));
+									ScaleMatrix(Vector(sx, sy, 0)) *
+									TranslationMatrix(Vector(c1.x, c1.y, 0));
 									mView->DoTransformPoints(m);
 								}
 								EndDrag();
@@ -1285,7 +1307,7 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							CC_coord e1, e2, e3;
 							float d;
 							Matrix m;
-
+							
 							s1 = v1->GetOrigin();
 							e1 = v1->GetPoint();
 							s2 = v2->GetOrigin();
@@ -1293,32 +1315,32 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 							s3 = v3->GetOrigin();
 							e3 = v3->GetPoint();
 							d = (float)s1.x*(float)s2.y - (float)s2.x*(float)s1.y +
-								(float)s3.x*(float)s1.y - (float)s1.x*(float)s3.y +
-								(float)s2.x*(float)s3.y - (float)s3.x*(float)s2.y;
+							(float)s3.x*(float)s1.y - (float)s1.x*(float)s3.y +
+							(float)s2.x*(float)s3.y - (float)s3.x*(float)s2.y;
 							if (IS_ZERO(d))
 							{
 								(void)wxMessageBox(wxT("Invalid genius move definition"),
-									wxT("Genius Move"));
+												   wxT("Genius Move"));
 							}
 							else
 							{
 								Matrix A = Matrix(Vector(e1.x,e2.x,0,e3.x),
-									Vector(e1.y,e2.y,0,e3.y),
-									Vector(0,0,0,0),
-									Vector(1,1,0,1));
+												  Vector(e1.y,e2.y,0,e3.y),
+												  Vector(0,0,0,0),
+												  Vector(1,1,0,1));
 								Matrix Binv = Matrix(Vector((float)s2.y-(float)s3.y,
-									(float)s3.x-(float)s2.x, 0,
-									(float)s2.x*(float)s3.y -
-									(float)s3.x*(float)s2.y),
-									Vector((float)s3.y-(float)s1.y,
-									(float)s1.x-(float)s3.x, 0,
-									(float)s3.x*(float)s1.y -
-									(float)s1.x*(float)s3.y),
-									Vector(0, 0, 0, 0),
-									Vector((float)s1.y-(float)s2.y,
-									(float)s2.x-(float)s1.x, 0,
-									(float)s1.x*(float)s2.y -
-									(float)s2.x*(float)s1.y));
+															(float)s3.x-(float)s2.x, 0,
+															(float)s2.x*(float)s3.y -
+															(float)s3.x*(float)s2.y),
+													 Vector((float)s3.y-(float)s1.y,
+															(float)s1.x-(float)s3.x, 0,
+															(float)s3.x*(float)s1.y -
+															(float)s1.x*(float)s3.y),
+													 Vector(0, 0, 0, 0),
+													 Vector((float)s1.y-(float)s2.y,
+															(float)s2.x-(float)s1.x, 0,
+															(float)s1.x*(float)s2.y -
+															(float)s2.x*(float)s1.y));
 								Binv /= d;
 								m = Binv*A;
 								mView->DoTransformPoints(m);
@@ -1329,51 +1351,24 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 						break;
 					default:
 						switch (drag)
-						{
-							case CC_DRAG_BOX:
-								mView->SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(), event.AltDown());
-								EndDrag();
-								break;
-							case CC_DRAG_LINE:
-								pos = shape->GetPoint() - shape->GetOrigin();
-								mView->DoTranslatePoints(pos);
-								EndDrag();
-								break;
-							case CC_DRAG_LASSO:
-								((CC_lasso*)curr_shape)->End();
-								mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
-								EndDrag();
-								break;
-							default:
-								break;
-						}
-						break;
-				}
-			}
-			else if (event.RightDown() && curr_shape)
-			{
-				switch (drag)
-				{
-					case CC_DRAG_POLY:
-						mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
-						EndDrag();
-						break;
-					default:
-						break;
-				}
-			}
-			else if (event.Dragging() && event.LeftIsDown() && curr_shape)
-			{
-				MoveDrag(pos);
-			}
-			else if (event.Moving() && curr_shape)
-			{
-				switch (drag)
-				{
-					case CC_DRAG_POLY:
-						MoveDrag(pos);
-						break;
-					default:
+					{
+						case CC_DRAG_BOX:
+							mView->SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(), event.AltDown());
+							EndDrag();
+							break;
+						case CC_DRAG_LINE:
+							pos = shape->GetPoint() - shape->GetOrigin();
+							mView->DoTranslatePoints(pos);
+							EndDrag();
+							break;
+						case CC_DRAG_LASSO:
+							((CC_lasso*)curr_shape)->End();
+							mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+							EndDrag();
+							break;
+						default:
+							break;
+					}
 						break;
 				}
 			}
@@ -1382,10 +1377,69 @@ void FieldCanvas::OnMouseEvent(wxMouseEvent& event)
 	Refresh();
 }
 
-
-void FieldCanvas::OnScroll(wxScrollEvent& event)
+// Allow clicking within pixels to close polygons
+void FieldCanvas::OnMouseLeftDoubleClick(wxMouseEvent& event)
 {
-	event.Skip();
+	if (mShow)
+	{
+		wxClientDC dc(this);
+		PrepareDC(dc);
+		
+		if (curr_shape && (CC_DRAG_POLY == drag))
+		{
+			mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+			EndDrag();
+		}
+	}
+	Refresh();
+}
+
+
+// Allow clicking within pixels to close polygons
+void FieldCanvas::OnMouseRightDown(wxMouseEvent& event)
+{
+	if (mShow)
+	{
+		wxClientDC dc(this);
+		PrepareDC(dc);
+		
+		if (curr_shape && (CC_DRAG_POLY == drag))
+		{
+			mView->SelectWithLasso((CC_lasso*)curr_shape, event.AltDown());
+			EndDrag();
+		}
+	}
+	Refresh();
+}
+
+
+// Allow clicking within pixels to close polygons
+void FieldCanvas::OnMouseMove(wxMouseEvent& event)
+{
+	CtrlScrollCanvas::OnMouseMove(event);
+
+	if (mShow)
+	{
+		wxClientDC dc(this);
+		PrepareDC(dc);
+
+		long x,y;
+		event.GetPosition(&x, &y);
+
+		x = dc.DeviceToLogicalX( x );
+		y = dc.DeviceToLogicalY( y );
+
+		CC_coord pos = mShow->GetMode().Offset();
+		pos.x = (x - pos.x);
+		pos.y = (y - pos.y);
+
+		if ((event.Dragging() && event.LeftIsDown() && curr_shape)
+			|| (event.Moving() && curr_shape && (CC_DRAG_POLY == drag)))
+		{
+			MoveDrag(pos);
+		}
+	}
+	Refresh();
 }
 
 
@@ -1410,7 +1464,7 @@ void MainFrame::UpdatePanel()
 
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
 		field->mShow->IsModified() ? wxT("* "):wxT(""), curr,
-		num, (sht != field->mShow->GetSheetEnd())?sht->GetName().c_str():wxT(""), (sht != field->mShow->GetSheetEnd())?sht->GetBeats():0);
+		num, (sht != field->mShow->GetSheetEnd()) ? sht->GetName() : wxT(""), (sht != field->mShow->GetSheetEnd())?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
     tempbuf.Clear();
     tempbuf << field->mShow->GetSelectionList().size() << wxT(" of ") << field->mShow->GetNumPoints() << wxT(" selected");
