@@ -213,7 +213,7 @@ void GeneralSetup::Init()
 		mCalChartBrushes[i] = CalChartBrushes[i];
 	}
 
-	mAutoSave_Interval.Printf(wxT("%d"), GetConfiguration_AutosaveInterval());
+	mAutoSave_Interval.Printf(wxT("%ld"), GetConfiguration_AutosaveInterval());
 }
 
 bool GeneralSetup::TransferDataToWindow()
@@ -669,7 +669,7 @@ bool ShowModeSetup::TransferDataToWindow()
 	{
 		wxString buf;
 		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + i);
-		buf.Printf(wxT("%d"), mShowModeValues[mWhichMode][i]);
+		buf.Printf(wxT("%ld"), mShowModeValues[mWhichMode][i]);
 		text->SetValue(buf);
 	}
 
@@ -899,7 +899,7 @@ bool SpringShowModeSetup::TransferDataToWindow()
 	{
 		wxString buf;
 		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + i - 1);
-		buf.Printf(wxT("%d"), mSpringShowModeValues[mWhichMode][i]);
+		buf.Printf(wxT("%ld"), mSpringShowModeValues[mWhichMode][i]);
 		text->SetValue(buf);
 	}
 
