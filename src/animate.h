@@ -80,12 +80,14 @@ class AnimateCommand;
 class AnimateSheet
 {
 public:
-	AnimateSheet(const std::vector<AnimatePoint>& thePoints);
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const wxString s, unsigned beats);
 	~AnimateSheet();
-	void SetName(const wxString& s);
+	wxString GetName() const { return name; }
+	unsigned GetNumBeats() const { return numbeats; }
 
 	std::vector<AnimatePoint> pts; // should probably be const
 	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
+private:
 	wxString name;
 	unsigned numbeats;
 };
@@ -145,7 +147,7 @@ public:
 	int GetCurrentSheet() const;
 	int GetNumberBeats() const;
 	int GetCurrentBeat() const;
-	const wxString& GetCurrentSheetName() const;
+	wxString GetCurrentSheetName() const;
 
 	void DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const;
 

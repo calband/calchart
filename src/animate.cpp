@@ -169,8 +169,10 @@ AnimateDir AnimGetDirFromAngle(float ang)
 }
 
 
-AnimateSheet::AnimateSheet(const std::vector<AnimatePoint>& thePoints)
-: pts(thePoints), commands(thePoints.size())
+AnimateSheet::AnimateSheet(const std::vector<AnimatePoint>& thePoints, const wxString s, unsigned beats)
+: pts(thePoints), commands(thePoints.size()),
+name(s),
+numbeats(beats)
 {}
 
 
@@ -178,17 +180,10 @@ AnimateSheet::~AnimateSheet()
 {}
 
 
-void AnimateSheet::SetName(const wxString& s)
-{
-	name = s;
-}
-
-
 Animation::Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
 : numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts),
 curr_sheetnum(0)
 {
-	unsigned j;
 	AnimateCompile comp(show);
 	wxString tempbuf;
 
@@ -202,9 +197,7 @@ curr_sheetnum(0)
 		{
 			thePoints.at(i) = curr_sheet->GetPosition(i);
 		}
-		AnimateSheet new_sheet(thePoints);
-		new_sheet.SetName(curr_sheet->GetName());
-		new_sheet.numbeats = curr_sheet->GetBeats();
+		AnimateSheet new_sheet(thePoints, curr_sheet->GetName(), curr_sheet->GetBeats());
 
 // Now parse continuity
 		comp.SetStatus(true);
@@ -225,7 +218,7 @@ curr_sheetnum(0)
 				}
 				int parseerr = parsecontinuity();
 				ContToken dummy;				  // get position of parse error
-				for (j = 0; j < numpts; j++)
+				for (unsigned j = 0; j < numpts; j++)
 				{
 					if (curr_sheet->GetPoint(j).cont == currcont->GetNum())
 					{
@@ -251,7 +244,7 @@ curr_sheetnum(0)
 		{
 			notifyStatus(tempbuf);
 		}
-		for (j = 0; j < numpts; j++)
+		for (unsigned j = 0; j < numpts; j++)
 		{
 			if (new_sheet.commands[j].empty())
 			{
@@ -301,15 +294,15 @@ bool Animation::NextSheet()
 	}
 	else
 	{
-		if (curr_beat >= sheets.at(curr_sheetnum).numbeats)
+		if (curr_beat >= sheets.at(curr_sheetnum).GetNumBeats())
 		{
-			if (sheets.at(curr_sheetnum).numbeats == 0)
+			if (sheets.at(curr_sheetnum).GetNumBeats() == 0)
 			{
 				curr_beat = 0;
 			}
 			else
 			{
-				curr_beat = sheets.at(curr_sheetnum).numbeats-1;
+				curr_beat = sheets.at(curr_sheetnum).GetNumBeats()-1;
 			}
 		}
 		return false;
@@ -331,7 +324,7 @@ bool Animation::PrevBeat()
 			curr_cmds[i] = sheets.at(curr_sheetnum).commands[i].end() - 1;
 			EndCmd(i);
 		}
-		curr_beat = sheets.at(curr_sheetnum).numbeats;
+		curr_beat = sheets.at(curr_sheetnum).GetNumBeats();
 	}
 	for (i = 0; i < numpts; i++)
 	{
@@ -360,7 +353,7 @@ bool Animation::NextBeat()
 	unsigned i;
 
 	curr_beat++;
-	if (curr_beat >= sheets.at(curr_sheetnum).numbeats)
+	if (curr_beat >= sheets.at(curr_sheetnum).GetNumBeats())
 	{
 		return NextSheet();
 	}
@@ -492,7 +485,7 @@ int Animation::GetCurrentSheet() const
 
 int Animation::GetNumberBeats() const
 {
-	return sheets.at(curr_sheetnum).numbeats;
+	return sheets.at(curr_sheetnum).GetNumBeats();
 }
 
 int Animation::GetCurrentBeat() const
@@ -500,9 +493,9 @@ int Animation::GetCurrentBeat() const
 	return curr_beat;
 }
 
-const wxString& Animation::GetCurrentSheetName() const
+wxString Animation::GetCurrentSheetName() const
 {
-	return sheets.at(curr_sheetnum).name;
+	return sheets.at(curr_sheetnum).GetName();
 }
 
 void Animation::DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const
@@ -511,7 +504,7 @@ void Animation::DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const
 	dc.SetPen(*CalChartPens[COLOR_PATHS]);
 	// get the point we want to draw:
 	const AnimateSheet& sheet = sheets.at(curr_sheetnum);
-	AnimatePoint point = sheet.pts.at(whichPoint);
+	AnimatePoint point = pts.at(whichPoint);
 	for (std::vector<boost::shared_ptr<AnimateCommand> >::const_iterator commands = sheet.commands.at(whichPoint).begin(); commands != sheet.commands.at(whichPoint).end(); ++commands)
 	{
 		(*commands)->DrawCommand(dc, point, offset);
