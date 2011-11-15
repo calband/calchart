@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "animate.h"
+#include "animatecommand.h"
 #include "anim_ui.h"
 #include "cont.h"
 #include "cc_sheet.h"
@@ -164,255 +166,6 @@ AnimateDir AnimGetDirFromAngle(float ang)
 	{
 		return ANIMDIR_N;
 	}
-}
-
-
-AnimateCommand::AnimateCommand(unsigned beats)
-: numbeats(beats) {}
-
-bool AnimateCommand::Begin(AnimatePoint& pt)
-{
-	beat = 0;
-	if (numbeats == 0)
-	{
-		ApplyForward(pt);
-		return false;
-	}
-	else return true;
-}
-
-
-bool AnimateCommand::End(AnimatePoint& pt)
-{
-	beat = numbeats;
-	if (numbeats == 0)
-	{
-		ApplyBackward(pt);
-		return false;
-	}
-	else return true;
-}
-
-
-bool AnimateCommand::NextBeat(AnimatePoint&)
-{
-	beat++;
-	if (beat >= numbeats) return false;
-	else return true;
-}
-
-
-bool AnimateCommand::PrevBeat(AnimatePoint&)
-{
-	if (beat == 0) return false;
-	else
-	{
-		beat--;
-		return true;
-	}
-}
-
-
-void AnimateCommand::ApplyForward(AnimatePoint&)
-{
-	beat = numbeats;
-}
-
-
-void AnimateCommand::ApplyBackward(AnimatePoint&)
-{
-	beat = 0;
-}
-
-
-float AnimateCommand::MotionDirection()
-{
-	return RealDirection();
-}
-
-
-void AnimateCommand::ClipBeats(unsigned beats)
-{
-	numbeats = beats;
-}
-
-
-AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
-: AnimateCommand(beats), dir(AnimGetDirFromAngle(direction)), realdir(direction)
-{
-}
-
-
-AnimateDir AnimateCommandMT::Direction() { return dir; }
-
-float AnimateCommandMT::RealDirection() { return realdir; }
-
-AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
-: AnimateCommandMT(beats, movement.Direction()), vector(movement)
-{
-}
-
-
-AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement, float direction)
-: AnimateCommandMT(beats, direction), vector(movement)
-{
-}
-
-
-bool AnimateCommandMove::NextBeat(AnimatePoint& pt)
-{
-	bool b = AnimateCommand::NextBeat(pt);
-	pt.x +=
-		((long)beat * vector.x / (short)numbeats) -
-		((long)(beat-1) * vector.x / (short)numbeats);
-	pt.y +=
-		((long)beat * vector.y / (short)numbeats) -
-		((long)(beat-1) * vector.y / (short)numbeats);
-	return b;
-}
-
-
-bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
-{
-	if (AnimateCommand::PrevBeat(pt))
-	{
-		pt.x +=
-			((long)beat * vector.x / (short)numbeats) -
-			((long)(beat+1) * vector.x / (short)numbeats);
-		pt.y +=
-			((long)beat * vector.y / (short)numbeats) -
-			((long)(beat+1) * vector.y / (short)numbeats);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-
-void AnimateCommandMove::ApplyForward(AnimatePoint& pt)
-{
-	AnimateCommand::ApplyForward(pt);
-	pt += vector;
-}
-
-
-void AnimateCommandMove::ApplyBackward(AnimatePoint& pt)
-{
-	AnimateCommand::ApplyBackward(pt);
-	pt -= vector;
-}
-
-
-float AnimateCommandMove::MotionDirection()
-{
-	return vector.Direction();
-}
-
-
-void AnimateCommandMove::ClipBeats(unsigned beats)
-{
-	AnimateCommand::ClipBeats(beats);
-}
-
-
-void AnimateCommandMove::DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const
-{
-	dc.DrawLine(pt.x + offset.x, pt.y + offset.y, pt.x + vector.x + offset.x, pt.y + vector.y + offset.y);
-}
-
-
-AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
-float rad, float ang1, float ang2,
-bool backwards)
-: AnimateCommand(beats), origin(cntr), r(rad), ang_start(ang1), ang_end(ang2)
-{
-	if (backwards) face = -90;
-	else face = 90;
-}
-
-
-bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
-{
-	bool b = AnimateCommand::NextBeat(pt);
-	float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
-		* PI / 180.0;
-	pt.x = RoundToCoord(origin.x + cos(curr_ang)*r);
-	pt.y = RoundToCoord(origin.y - sin(curr_ang)*r);
-	return b;
-}
-
-
-bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
-{
-	if (AnimateCommand::PrevBeat(pt))
-	{
-		float curr_ang = ((ang_end - ang_start) * beat / numbeats + ang_start)
-			* PI / 180.0;
-		pt.x = RoundToCoord(origin.x + cos(curr_ang)*r);
-		pt.y = RoundToCoord(origin.y - sin(curr_ang)*r);
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-
-void AnimateCommandRotate::ApplyForward(AnimatePoint& pt)
-{
-	AnimateCommand::ApplyForward(pt);
-	pt.x = RoundToCoord(origin.x + cos(ang_end*PI/180.0)*r);
-	pt.y = RoundToCoord(origin.y - sin(ang_end*PI/180.0)*r);
-}
-
-
-void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt)
-{
-	AnimateCommand::ApplyBackward(pt);
-	pt.x = RoundToCoord(origin.x + cos(ang_start*PI/180.0)*r);
-	pt.y = RoundToCoord(origin.y - sin(ang_start*PI/180.0)*r);
-}
-
-
-AnimateDir AnimateCommandRotate::Direction()
-{
-	return AnimGetDirFromAngle(RealDirection());
-}
-
-
-float AnimateCommandRotate::RealDirection()
-{
-	float curr_ang = (ang_end - ang_start) * beat / numbeats + ang_start;
-	if (ang_end > ang_start)
-	{
-		return curr_ang + face;
-	}
-	else
-	{
-		return curr_ang - face;
-	}
-}
-
-
-void AnimateCommandRotate::ClipBeats(unsigned beats)
-{
-	AnimateCommand::ClipBeats(beats);
-}
-
-
-void AnimateCommandRotate::DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const
-{
-	float start = (ang_start < ang_end) ? ang_start : ang_end;
-	float end = (ang_start < ang_end) ? ang_end : ang_start;
-	wxCoord x_start = RoundToCoord(origin.x + cos(start*PI/180.0)*r) + offset.x;
-	wxCoord y_start = RoundToCoord(origin.y - sin(start*PI/180.0)*r) + offset.y;
-	wxCoord x_end = RoundToCoord(origin.x + cos(end*PI/180.0)*r) + offset.x;
-	wxCoord y_end = RoundToCoord(origin.y - sin(end*PI/180.0)*r) + offset.y;
-
-	dc.DrawArc(x_start, y_start, x_end, y_end, origin.x + offset.x, origin.y + offset.y);
 }
 
 
@@ -842,7 +595,7 @@ bool AnimateCompile::Append(boost::shared_ptr<AnimateCommand> cmd, const ContTok
 {
 	bool clipped;
 
-	if (beats_rem < cmd->numbeats)
+	if (beats_rem < cmd->NumBeats())
 	{
 		RegisterError(ANIMERR_OUTOFTIME, token);
 		if (beats_rem == 0)
@@ -857,7 +610,7 @@ bool AnimateCompile::Append(boost::shared_ptr<AnimateCommand> cmd, const ContTok
 		clipped = false;
 	}
 	cmds.push_back(cmd);
-	beats_rem -= cmd->numbeats;
+	beats_rem -= cmd->NumBeats();
 
 	cmd->ApplyForward(pt);						  // Move current point to new position
 	SetVarValue(CONTVAR_DOF, cmd->MotionDirection());

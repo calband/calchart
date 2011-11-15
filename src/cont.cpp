@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "animatecommand.h"
 #include "cc_sheet.h"
 #include "cont.h"
 #include <math.h>
