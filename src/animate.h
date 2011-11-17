@@ -70,7 +70,6 @@ enum AnimateError
 
 extern const wxString animate_err_msgs[];
 
-AnimateDir AnimGetDirFromVector(CC_coord& vector);
 AnimateDir AnimGetDirFromAngle(float ang);
 
 typedef CC_coord AnimatePoint;

@@ -955,6 +955,12 @@ curr_move(CC_MOVE_NORMAL), drag(CC_DRAG_NONE), curr_shape(NULL)
 {
 	mShow->SetCurrentSheet(0);
 	SetZoom(def_zoom);
+#if TEST_BACKGROUND
+	wxImage image;
+	image.LoadFile(wxT("/tmp/horse.bmp"));
+	if (image.IsOk())
+		mBackgroundImage.reset(new BackgroundImage(image));
+#endif
 }
 
 
@@ -982,6 +988,17 @@ void FieldCanvas::OnPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
 	PrepareDC(dc);
+	
+	// draw the background
+	dc.SetBackgroundMode(wxTRANSPARENT);
+	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+	dc.Clear();
+
+	// draw Background Image
+	if (mBackgroundImage)
+	{
+		mBackgroundImage->OnPaint(dc);
+	}
 
 	// draw the view
 	mView->OnDraw(&dc);
@@ -1005,20 +1022,23 @@ void FieldCanvas::OnPaint(wxPaintEvent& event)
 #define CLOSE_ENOUGH_TO_CLOSE 10
 void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
-	if (mShow)
+	wxClientDC dc(this);
+	PrepareDC(dc);
+	long x,y;
+	event.GetPosition(&x, &y);
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+	
+	if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment())
 	{
-		wxClientDC dc(this);
-		PrepareDC(dc);
+		mBackgroundImage->OnMouseLeftDown(event, dc);
+	}
+	else if (mShow)
+	{
 		
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
-			long x,y;
-			event.GetPosition(&x, &y);
-			
-			x = dc.DeviceToLogicalX( x );
-			y = dc.DeviceToLogicalY( y );
-			
 			CC_coord pos = mShow->GetMode().Offset();
 			pos.x = (x - pos.x);
 			pos.y = (y - pos.y);
@@ -1143,19 +1163,22 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 // Allow clicking within pixels to close polygons
 void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 {
-	if (mShow)
+	wxClientDC dc(this);
+	PrepareDC(dc);
+	long x,y;
+	event.GetPosition(&x, &y);
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+
+	if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment())
 	{
-		wxClientDC dc(this);
-		PrepareDC(dc);
-		
+		mBackgroundImage->OnMouseLeftUp(event, dc);
+	}
+	else if (mShow)
+	{
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
-			long x,y;
-			event.GetPosition(&x, &y);
-			
-			x = dc.DeviceToLogicalX( x );
-			y = dc.DeviceToLogicalY( y );
 			
 			CC_coord pos = mShow->GetMode().Offset();
 			pos.x = (x - pos.x);
@@ -1418,17 +1441,19 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
 {
 	CtrlScrollCanvas::OnMouseMove(event);
 
-	if (mShow)
+	wxClientDC dc(this);
+	PrepareDC(dc);
+	long x,y;
+	event.GetPosition(&x, &y);
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+	
+	if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment())
 	{
-		wxClientDC dc(this);
-		PrepareDC(dc);
-
-		long x,y;
-		event.GetPosition(&x, &y);
-
-		x = dc.DeviceToLogicalX( x );
-		y = dc.DeviceToLogicalY( y );
-
+		mBackgroundImage->OnMouseMove(event, dc);
+	}
+	else if (mShow)
+	{
 		CC_coord pos = mShow->GetMode().Offset();
 		pos.x = (x - pos.x);
 		pos.y = (y - pos.y);
@@ -1672,6 +1697,17 @@ void MainFrame::zoom_callback_textenter(wxCommandEvent& event)
 
 IMPLEMENT_DYNAMIC_CLASS(MainFrameView, wxView)
 
+MainFrameView::MainFrameView() :
+mFrame(NULL),
+mDrawPaths(false),
+mCurrentReferencePoint(0)
+{
+}
+
+MainFrameView::~MainFrameView()
+{
+}
+
 // What to do when a view is created. Creates actual
 // windows for displaying the view.
 bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
@@ -1689,21 +1725,24 @@ bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 // as well as drawing on the screen.
 void MainFrameView::OnDraw(wxDC *dc)
 {
-	dc->Clear();
-	dc->SetBackgroundMode(wxTRANSPARENT);
 	if (mShow)
 	{
+		// draw the field
+		dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
+		dc->SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
+		mShow->GetMode().Draw(*dc);
+
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
 			if (mCurrentReferencePoint > 0)
 			{
-				mShow->Draw(*dc, 0, false, true);
-				mShow->Draw(*dc, mCurrentReferencePoint, true, false);
+				mShow->Draw(*dc, 0, false);
+				mShow->Draw(*dc, mCurrentReferencePoint, true);
 			}
 			else
 			{
-				mShow->Draw(*dc, mCurrentReferencePoint, true, true);
+				mShow->Draw(*dc, mCurrentReferencePoint, true);
 			}
 			DrawPaths(*dc, *sheet);
 		}

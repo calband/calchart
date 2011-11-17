@@ -1351,18 +1351,8 @@ void UnitTests()
 }
 
 
-void CC_show::Draw(wxDC& dc, unsigned ref, bool primary, bool drawall)
+void CC_show::Draw(wxDC& dc, unsigned ref, bool primary)
 {
-	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
-	
-	if (drawall)
-	{
-		dc.Clear();
-		dc.SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-		dc.SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
-		GetMode().Draw(dc);
-	}
-	
 	GetCurrentSheet()->Draw(dc, ref, primary);
 }
 

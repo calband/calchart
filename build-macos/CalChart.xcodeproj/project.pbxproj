@@ -31,6 +31,7 @@
 		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
 		C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
 		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
+		C7B669761474E20300E28B63 /* background_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7B669741474E20300E28B63 /* background_image.cpp */; };
 		C7BFBCFB14722689002385FB /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7BFBCF914722689002385FB /* animatecommand.cpp */; };
 		C7D177EA13B1A83700F65F4C /* charthlp_macosxinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */; };
 		C7D177EB13B1A83700F65F4C /* charthlp_macosxprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */; };
@@ -268,6 +269,8 @@
 		C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contgram.cpp; sourceTree = "<group>"; };
 		C7AFA9A2117A6E7200CC53E2 /* contgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contgram.h; sourceTree = "<group>"; };
 		C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contscan.cpp; sourceTree = "<group>"; };
+		C7B669741474E20300E28B63 /* background_image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = background_image.cpp; sourceTree = "<group>"; };
+		C7B669751474E20300E28B63 /* background_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = background_image.h; sourceTree = "<group>"; };
 		C7BFBCF914722689002385FB /* animatecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecommand.cpp; sourceTree = "<group>"; };
 		C7BFBCFA14722689002385FB /* animatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecommand.h; sourceTree = "<group>"; };
 		C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxinstall.html; sourceTree = "<group>"; };
@@ -440,6 +443,8 @@
 				C7AFA96D117A6DBA00CC53E2 /* animate.h */,
 				C7AFA96A117A6DBA00CC53E2 /* anim_ui.cpp */,
 				C7AFA96B117A6DBA00CC53E2 /* anim_ui.h */,
+				C7B669741474E20300E28B63 /* background_image.cpp */,
+				C7B669751474E20300E28B63 /* background_image.h */,
 				C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */,
 				C7AFA96F117A6DBA00CC53E2 /* basic_ui.h */,
 				C7D4E2C211D087CD007D3587 /* calchartapp.cpp */,
@@ -684,6 +689,7 @@
 				C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */,
 				C72E2B091441150400118C03 /* top_frame.cpp in Sources */,
 				C7BFBCFB14722689002385FB /* animatecommand.cpp in Sources */,
+				C7B669761474E20300E28B63 /* background_image.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

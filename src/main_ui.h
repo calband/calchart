@@ -26,6 +26,7 @@
 #include "basic_ui.h"
 #include "cc_shapes.h"
 #include "cc_show.h"
+#include "background_image.h"
 
 #include <wx/mdi.h>
 #include <wx/docview.h>
@@ -235,6 +236,9 @@ private:
 	ShapeList shape_list;
 	CC_shape *curr_shape;
 
+	// Background Picture
+	boost::shared_ptr<BackgroundImage> mBackgroundImage;
+	
 	DECLARE_EVENT_TABLE()
 };
 
@@ -243,9 +247,8 @@ class MainFrameView : public wxView
 public:
     MainFrame *mFrame;
   
-    MainFrameView() : mFrame(NULL), mDrawPaths(false),
-	mCurrentReferencePoint(0) {}
-    ~MainFrameView() {}
+    MainFrameView();
+    ~MainFrameView();
 
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);

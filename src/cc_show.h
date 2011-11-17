@@ -120,7 +120,7 @@ private:
 	T& SaveObjectInternal(T& stream);
 
 public:
-	void Draw(wxDC& dc, unsigned ref, bool primary, bool drawall);
+	void Draw(wxDC& dc, unsigned ref, bool primary);
 
 	wxString ImportContinuity(const wxString& file);
 

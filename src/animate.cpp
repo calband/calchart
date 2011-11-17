@@ -50,122 +50,32 @@ const wxString animate_err_msgs[] =
 	wxT("Negative value"),
 };
 
-AnimateDir AnimGetDirFromVector(CC_coord& vector)
-{
-	if (vector.y < vector.x/2)
-	{
-		if (vector.y < -vector.x/2)
-		{
-			if (vector.y/2 < vector.x)
-			{
-				if (-vector.y/2 < vector.x)
-				{
-					return ANIMDIR_W;
-				}
-				else
-				{
-					return ANIMDIR_SW;
-				}
-			}
-			else
-			{
-				return ANIMDIR_NW;
-			}
-		}
-		else
-		{
-			return ANIMDIR_S;
-		}
-	}
-	else
-	{
-		if (vector.y < -vector.x/2)
-		{
-			return ANIMDIR_N;
-		}
-		else
-		{
-			if (vector.y/2 < vector.x)
-			{
-				return ANIMDIR_SE;
-			}
-			else
-			{
-				if (-vector.y/2 < vector.x)
-				{
-					return ANIMDIR_NE;
-				}
-				else
-				{
-					return ANIMDIR_E;
-				}
-			}
-		}
-	}
-}
-
-
-AnimateDir AnimGetDirFromAngle(float ang)
+float NormalizeAngle(float ang)
 {
 	while (ang >= 360.0) ang -= 360.0;
 	while (ang < 0.0) ang += 360.0;
-	if (ang > 22.5)
+	return ang;
+}
+
+AnimateDir AnimGetDirFromAngle(float ang)
+{
+	ang = NormalizeAngle(ang);
+	// rotate angle by 22.5:
+	ang += 22.5;
+	size_t quadrant = ang/45.0;
+	switch (quadrant)
 	{
-		if (ang > 67.5)
-		{
-			if (ang > 112.5)
-			{
-				if (ang > 157.5)
-				{
-					if (ang > 202.5)
-					{
-						if (ang > 247.5)
-						{
-							if (ang > 292.5)
-							{
-								if (ang > 337.5)
-								{
-									return ANIMDIR_N;
-								}
-								else
-								{
-									return ANIMDIR_NE;
-								}
-							}
-							else
-							{
-								return ANIMDIR_E;
-							}
-						}
-						else
-						{
-							return ANIMDIR_SE;
-						}
-					}
-					else
-					{
-						return ANIMDIR_S;
-					}
-				}
-				else
-				{
-					return ANIMDIR_SW;
-				}
-			}
-			else
-			{
-				return ANIMDIR_W;
-			}
-		}
-		else
-		{
-			return ANIMDIR_NW;
-		}
+		case 0: return ANIMDIR_N;
+		case 1: return ANIMDIR_NW;
+		case 2: return ANIMDIR_W;
+		case 3: return ANIMDIR_SW;
+		case 4: return ANIMDIR_S;
+		case 5: return ANIMDIR_SE;
+		case 6: return ANIMDIR_E;
+		case 7: return ANIMDIR_NE;
+		case 8: return ANIMDIR_N;
 	}
-	else
-	{
-		return ANIMDIR_N;
-	}
+	return ANIMDIR_N;
 }
 
 
