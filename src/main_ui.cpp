@@ -141,6 +141,9 @@ EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, MainFrame::OnCmdHelp)
+EVT_MENU(CALCHART__AddBackgroundImage, MainFrame::OnCmd_AddBackgroundImage)
+EVT_MENU(CALCHART__AdjustBackgroundImage, MainFrame::OnCmd_AdjustBackgroundImage)
+EVT_MENU(CALCHART__RemoveBackgroundImage, MainFrame::OnCmd_RemoveBackgroundImage)
 EVT_MENU(CALCHART__prev_ss, MainFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, MainFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, MainFrame::OnCmd_box)
@@ -262,6 +265,14 @@ field(NULL)
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
 	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
 
+	wxMenu *backgroundimage_menu = new wxMenu;
+	backgroundimage_menu->Append(CALCHART__AddBackgroundImage, wxT("Add Background Image..."), wxT("Add a background image"));
+	backgroundimage_menu->Append(CALCHART__AdjustBackgroundImage, wxT("Adjust Background Image..."), wxT("Adjust a background image"));
+	backgroundimage_menu->Append(CALCHART__RemoveBackgroundImage, wxT("Remove Background Image..."), wxT("Remove a background image"));
+	backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
+	backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImage, false);
+	backgroundimage_menu->Enable(CALCHART__RemoveBackgroundImage, false);
+	
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
 	help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
@@ -270,6 +281,7 @@ field(NULL)
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(edit_menu, wxT("&Edit"));
 	menu_bar->Append(anim_menu, wxT("&Animation"));
+	menu_bar->Append(backgroundimage_menu, wxT("&Field Image"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
 
@@ -784,6 +796,40 @@ void MainFrame::OnChar(wxKeyEvent& event)
 	field->OnChar(event);
 }
 
+void MainFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
+{
+    wxString filename;
+    filename = wxLoadFileSelector(wxT("image"), wxEmptyString);
+    if ( !filename.empty() )
+    {
+		wxImage image;
+        if ( !image.LoadFile(filename) )
+        {
+            wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
+            return;
+        }
+		if (!field->SetBackgroundImage(image))
+		{
+			wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
+			return;
+		}
+		GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(true);
+		GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(true);
+    }
+}
+
+void MainFrame::OnCmd_AdjustBackgroundImage(wxCommandEvent& event)
+{
+	field->AdjustBackgroundImage(true);
+}
+
+void MainFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
+{
+	field->RemoveBackgroundImage();
+	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
+	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
+}
+
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	// HACK: Prevent width and height from growing out of control
@@ -955,12 +1001,6 @@ curr_move(CC_MOVE_NORMAL), drag(CC_DRAG_NONE), curr_shape(NULL)
 {
 	mShow->SetCurrentSheet(0);
 	SetZoom(def_zoom);
-#if TEST_BACKGROUND
-	wxImage image;
-	image.LoadFile(wxT("/tmp/horse.bmp"));
-	if (image.IsOk())
-		mBackgroundImage.reset(new BackgroundImage(image));
-#endif
 }
 
 
@@ -1577,6 +1617,30 @@ void FieldCanvas::EndDrag()
 	drag = CC_DRAG_NONE;
 }
 
+
+bool FieldCanvas::SetBackgroundImage(const wxImage& image)
+{
+	if (!image.IsOk())
+	{
+		return false;
+	}
+	mBackgroundImage.reset(new BackgroundImage(image));
+	Refresh();
+	return true;
+}
+
+void FieldCanvas::AdjustBackgroundImage(bool enable)
+{
+	if (mBackgroundImage)
+		mBackgroundImage->DoPictureAdjustment(enable);
+	Refresh();
+}
+
+void FieldCanvas::RemoveBackgroundImage()
+{
+	mBackgroundImage.reset();
+	Refresh();
+}
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it

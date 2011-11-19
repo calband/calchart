@@ -101,6 +101,9 @@ enum
 	CALCHART__slider_sheet_callback,
 	CALCHART__refnum_callback,
 	CALCHART__draw_paths,
+	CALCHART__AddBackgroundImage,
+	CALCHART__AdjustBackgroundImage,
+	CALCHART__RemoveBackgroundImage,
 };
 
 class FieldCanvas;
@@ -166,6 +169,10 @@ public:
 	void OnCmd_setsym7(wxCommandEvent& event);
 	void OnChar(wxKeyEvent& event);
 
+	void OnCmd_AddBackgroundImage(wxCommandEvent& event);
+	void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
+	void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
+
 	void OnSize(wxSizeEvent& event);
 
 	void AppendShow();
@@ -221,6 +228,11 @@ public:
 	void MoveDrag(CC_coord end);
 	void EndDrag();
 
+	// return true on success
+	bool SetBackgroundImage(const wxImage& image);
+	void AdjustBackgroundImage(bool enable);
+	void RemoveBackgroundImage();
+	
 // Variables
 	MainFrame *ourframe;
 	CC_show* mShow;
