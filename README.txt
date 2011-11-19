@@ -25,6 +25,8 @@ Bugs and features fixed in this release
 
 3315322: Show animation path
 3018574: Need a better icon
+3315313: Field view should have scrollbars
+3018579: Able to set background
 
 ----------
 
