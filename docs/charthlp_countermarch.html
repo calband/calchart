@@ -1,0 +1,39 @@
+<HTML>
+<head><title>COUNTERMARCH</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="countermarch"></A><CENTER>
+<A HREF="charthlp_contents.html"><img align=center src="contents.gif" BORDER=0 ALT="Contents"></A> <A HREF="charthlp_procedures.html"><img align=center src="up.gif" BORDER=0 ALT="Up"></A> <A HREF="charthlp_close.html"><img align=center src="back.gif" BORDER=0 ALT="Previous"></A> <A HREF="charthlp_dmcm.html"><img align=center src="forward.gif" BORDER=0 ALT="Next"></A> </CENTER><HR>
+
+<H3>COUNTERMARCH</H3>
+<P>
+Format: COUNTERMARCH <TT>&lt;point 1&gt;</TT> <TT>&lt;point 2&gt;</TT> <TT>&lt;steps&gt;</TT> <TT>&lt;dir 1&gt;</TT> <TT>&lt;dir 2&gt;</TT> <TT>&lt;beats&gt;</TT><P>
+COUNTERMARCH is a complicated procedure which implements a countermarch in
+the Cal band style.<P>
+The movement commences at <TT>&lt;point 1&gt;</TT> by moving <TT>&lt;steps&gt;</TT> in
+direction <TT>&lt;dir 1&gt;</TT>, then moving in direction <TT>&lt;dir 2&gt;</TT>, then
+moving the opposite of <TT>&lt;dir 1&gt;</TT> until reaching <TT>&lt;point 2&gt;</TT>,
+then continuing <TT>&lt;steps&gt;</TT> in the direction opposite of <TT>&lt;dir1&gt;</TT>,
+then moving the opposite of <TT>&lt;dir 2&gt;</TT>, then in direction <TT>&lt;dir 1&gt;</TT>
+until <TT>&lt;point 1&gt;</TT> is reached again.<P>
+This pattern is continued until the specified number of beats have been used.<P>
+A standard high-step countermarch of length 16 and R1 and R2 as the two
+corners would look like this:
+<PRE>
+  COUNTERMARCH R1 R2 1 N E 16
+</PRE>
+In most cases, <A HREF="charthlp_dmcm.html">DMCM</A> or <A HREF="charthlp_hscm.html">HSCM</A> can be used
+more easily.<P>
+A diagram follows:
+                                         
+<PRE>
+       &lt;dir 1&gt;
+       ---------&gt;
+
+------------------------------------------&gt;*-------&gt;        &lt;dir 2&gt;
+^                                      &lt;point 1&gt;   |           |
+|     &lt;point 2&gt;                                    V           |
+&lt;-------*&lt;------------------------------------------           V
+</PRE>
+
+</FONT></BODY></HTML>

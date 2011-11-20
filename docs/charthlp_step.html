@@ -1,0 +1,29 @@
+<HTML>
+<head><title>STEP</title></head>
+
+<BODY BGCOLOR=#FFFFFF>
+<A NAME="step"></A><CENTER>
+<A HREF="charthlp_contents.html"><img align=center src="contents.gif" BORDER=0 ALT="Contents"></A> <A HREF="charthlp_functions.html"><img align=center src="up.gif" BORDER=0 ALT="Up"></A> <A HREF="charthlp_opp.html"><img align=center src="back.gif" BORDER=0 ALT="Previous"></A> <A HREF="charthlp_numbers.html"><img align=center src="forward.gif" BORDER=0 ALT="Next"></A> </CENTER><HR>
+
+<H3>STEP</H3>
+<P>
+Format: STEP(<TT>&lt;beats&gt;</TT> <TT>&lt;blocksize&gt;</TT> <TT>&lt;start point&gt;</TT>)<P>
+STEP is used in conjunction with MT to implement step-drills,
+where one person starts, and then some steps (say x) later the next leaves,
+and x steps after that the next leaves, etc.  STEP returns the number of
+counts for the given person to marktime in relation to the given start
+point; however, it can be used for other things besides step-drills.<P>
+The <TT>&lt;beats&gt;</TT> parameter specifies how many beats are to elapse between
+people leaving, and the <TT>&lt;counts&gt;</TT> parameter specifies how far apart the
+people are from each other.<P>
+The <TT>&lt;start point&gt;</TT> is a point which is considered the beginning of
+the drill (e.g. the first to leave).<P>
+For example,
+<PRE>
+  MT STEP(2 4 R1) W
+</PRE>
+will make each person in a 4-step block leave 2 counts after his neighbor;
+the first person to leave is at the same location as R1.  While they are
+waiting to go, the people will marktime west.<P>
+
+</FONT></BODY></HTML>

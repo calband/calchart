@@ -1,0 +1,61 @@
+\chapter{Guide to Bugs}\label{bugs}
+
+\section{About Reporting Bugs}\label{reportingbugs}
+
+Mail bug reports to gurk@calband.berkeley.edu.  Please try to include
+helpful information to track down the bug.  Try to reproduce the bug,
+and give me instructions on how to duplicate it, or include a show that
+illustrates the problem.  Include the date from the About window so I
+know what version you're using.  Comments or suggestions are also
+appreciated and should be mailed to
+calchart-discussion@calband.berkeley.edu.
+
+\section{Known Problems}\label{problems}
+
+\begin{itemize}\itemsep=0pt
+\item Only prints to PostScript printers
+\item Edits in continuity are not immediately registered
+\item Documentation is sorely lacking
+\item Redrawing is slow
+\item Handling of points off the field (and in endzones) could be better
+\item Sheet bar should be a scroll bar
+\item Autosave doesn't use unique filenames or prompt to recover files
+\item Arc drawing for Rotatemove is incorrect sometimes
+\item Shearmove can't be specified as any direction
+\item Zero vectors for Geniusmove aren't displayed
+\item Order of move icons should be changed
+\item Large values of beats don't work
+\item Somehow points get set to multiple continuities (Dan's animation bug)
+\item Edit printed continuity menu item should be moved
+\item COUNTERMARCH (there are probably bugs)
+\end{itemize}
+
+\section{Unimplemented Features}\label{notdone}
+
+\begin{itemize}\itemsep=0pt
+\item Printed continuity is not saved
+\item Printed continuity is not editable
+\item Unused continuities are not automatically deleted
+\item Moving the pointer over a reference point doesn't highlight the
+corresponding point
+\item Yard lines can only be moved by editing the configuration file
+\item Snap points to grid
+\item Flow control commands in continuity (if, for, subroutines, etc.)
+\item Keyboard shortcuts
+\item Yardline ruler (to display yardlines at all times)
+\item View multiple reference sheets
+\item Handle negative beats (COUNTERMARCH, EVEN, FM, HSCM, MARCH, MT, ROTATE)
+\item Handle non-integer values
+\item FMMT (for FMTO NP; MTRM, we didn't decide on a name)
+\item EITHER should take a direction
+\item Improved scrolling
+\item Improved selecting
+\item Improved blockmove
+\item Title bars reflecting show name
+\item Default name for new sheets
+\item Point variables... SPOT, VECTOR, etc.
+\item Clear continuity text
+\item Display sheet number in continuity window
+\item More informative error messages (line numbers, etc.)
+\item Special cases of Geniusmove
+\end{itemize}

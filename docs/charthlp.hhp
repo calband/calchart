@@ -1,0 +1,86 @@
+[OPTIONS]
+Compatibility=1.1
+Full-text search=Yes
+Contents file=charthlp.hhc
+Compiled file=charthlp.chm
+Default Window=charthlpHelp
+Default topic=charthlp_contents.html
+Index file=charthlp.hhk
+Title=CalChart User's Manual 3.2.2
+
+[WINDOWS]
+charthlpHelp=,"charthlp.hhc","charthlp.hhk","charthlp_contents.html",,,,,,0x2420,,0x380e,,,,,0,,,
+
+[FILES]
+charthlp_contents.html
+charthlp_copyright.html
+charthlp_acknowledge.html
+charthlp_topic0.html
+charthlp_gpl.html
+charthlp_software.html
+charthlp_obtaining.html
+charthlp_installing.html
+charthlp_wininstall.html
+charthlp_easyinstall.html
+charthlp_winprinter.html
+charthlp_macosxinstall.html
+charthlp_macosxprinter.html
+charthlp_overview.html
+charthlp_basics.html
+charthlp_newshow.html
+charthlp_movement.html
+charthlp_translatepoints.html
+charthlp_movepointsintoaline.html
+charthlp_rotateblock.html
+charthlp_shearblock.html
+charthlp_reflectblock.html
+charthlp_resizeblock.html
+charthlp_geniusmove.html
+charthlp_symbols.html
+charthlp_editcont.html
+charthlp_printcont.html
+charthlp_animwin.html
+charthlp_refpoints.html
+charthlp_refer.html
+charthlp_pcontcodes.html
+charthlp_bugs.html
+charthlp_reportingbugs.html
+charthlp_problems.html
+charthlp_notdone.html
+charthlp_animcont.html
+charthlp_comments.html
+charthlp_directions.html
+charthlp_functions.html
+charthlp_dir.html
+charthlp_dirfrom.html
+charthlp_dist.html
+charthlp_distfrom.html
+charthlp_either.html
+charthlp_opp.html
+charthlp_step.html
+charthlp_numbers.html
+charthlp_points.html
+charthlp_procedures.html
+charthlp_blam.html
+charthlp_close.html
+charthlp_countermarch.html
+charthlp_dmcm.html
+charthlp_dmhs.html
+charthlp_even.html
+charthlp_ewns.html
+charthlp_fm.html
+charthlp_fmto.html
+charthlp_fountain.html
+charthlp_grid.html
+charthlp_hscm.html
+charthlp_hsdm.html
+charthlp_magic.html
+charthlp_march.html
+charthlp_mt.html
+charthlp_mtrm.html
+charthlp_nsew.html
+charthlp_rotate.html
+charthlp_steps.html
+charthlp_stepsizes.html
+charthlp_variables.html
+charthlp_future.html

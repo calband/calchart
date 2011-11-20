@@ -1,0 +1,299 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<head>
+<meta name="GENERATOR" content="tex2rtf">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+ <param name="ImageType" value="Folder">
+</OBJECT>
+<UL>
+<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="charthlp_contents.html">
+<param name="Name" value="Contents">
+</OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_copyright.html#copyright">
+  <param name="Name" value="Copyright Notice">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_acknowledge.html#acknowledge">
+  <param name="Name" value="Acknowledgments">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_topic0.html#topic0">
+  <param name="Name" value="Introduction">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_gpl.html#gpl">
+  <param name="Name" value="GNU GENERAL PUBLIC LICENSE">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_software.html#software">
+  <param name="Name" value="Obtaining and Installing CalChart">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_obtaining.html#obtaining">
+  <param name="Name" value="Obtaining the Software">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_installing.html#installing">
+  <param name="Name" value="Installing the Software">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_wininstall.html#wininstall">
+  <param name="Name" value="Windows Installation">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_easyinstall.html#easyinstall">
+  <param name="Name" value="Easy Installation">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_winprinter.html#winprinter">
+  <param name="Name" value="Printer Configuration">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_macosxinstall.html#macosxinstall">
+  <param name="Name" value="MacOSX Installation">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_macosxprinter.html#macosxprinter">
+  <param name="Name" value="Printer Configuration">
+  </OBJECT>
+</UL></UL></UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_overview.html#overview">
+  <param name="Name" value="Overview">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_basics.html#basics">
+  <param name="Name" value="Basics">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_newshow.html#newshow">
+  <param name="Name" value="Creating a Show">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_movement.html#movement">
+  <param name="Name" value="Moving Points">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_translatepoints.html#translatepoints">
+  <param name="Name" value="Translate Points">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_movepointsintoaline.html#movepointsintoaline">
+  <param name="Name" value="Move Points Into a Line">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_rotateblock.html#rotateblock">
+  <param name="Name" value="Rotate Block">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_shearblock.html#shearblock">
+  <param name="Name" value="Shear Block">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_reflectblock.html#reflectblock">
+  <param name="Name" value="Reflect Block">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_resizeblock.html#resizeblock">
+  <param name="Name" value="Resize Block">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_geniusmove.html#geniusmove">
+  <param name="Name" value="Genius Move">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_symbols.html#symbols">
+  <param name="Name" value="Labels and Symbols">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_editcont.html#editcont">
+  <param name="Name" value="Editing Continuity">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_printcont.html#printcont">
+  <param name="Name" value="Printed Continuity">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_animwin.html#animwin">
+  <param name="Name" value="Animation">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_refpoints.html#refpoints">
+  <param name="Name" value="Reference Points">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_refer.html#refer">
+  <param name="Name" value="Reference">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_pcontcodes.html#pcontcodes">
+  <param name="Name" value="Printed Continuity Codes">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_bugs.html#bugs">
+  <param name="Name" value="Guide to Bugs">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_reportingbugs.html#reportingbugs">
+  <param name="Name" value="About Reporting Bugs">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_problems.html#problems">
+  <param name="Name" value="Known Problems">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_notdone.html#notdone">
+  <param name="Name" value="Unimplemented Features">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_animcont.html#animcont">
+  <param name="Name" value="Animation Commands">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_comments.html#comments">
+  <param name="Name" value="COMMENTS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_directions.html#directions">
+  <param name="Name" value="DIRECTIONS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_functions.html#functions">
+  <param name="Name" value="FUNCTIONS">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_dir.html#dir">
+  <param name="Name" value="DIR">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_dirfrom.html#dirfrom">
+  <param name="Name" value="DIRFROM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_dist.html#dist">
+  <param name="Name" value="DIST">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_distfrom.html#distfrom">
+  <param name="Name" value="DISTFROM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_either.html#either">
+  <param name="Name" value="EITHER">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_opp.html#opp">
+  <param name="Name" value="OPP">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_step.html#step">
+  <param name="Name" value="STEP">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_numbers.html#numbers">
+  <param name="Name" value="NUMBERS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_points.html#points">
+  <param name="Name" value="POINTS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_procedures.html#procedures">
+  <param name="Name" value="PROCEDURES">
+  </OBJECT>
+<UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_blam.html#blam">
+  <param name="Name" value="BLAM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_close.html#close">
+  <param name="Name" value="CLOSE">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_countermarch.html#countermarch">
+  <param name="Name" value="COUNTERMARCH">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_dmcm.html#dmcm">
+  <param name="Name" value="DMCM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_dmhs.html#dmhs">
+  <param name="Name" value="DMHS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_even.html#even">
+  <param name="Name" value="EVEN">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_ewns.html#ewns">
+  <param name="Name" value="EWNS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_fm.html#fm">
+  <param name="Name" value="FM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_fmto.html#fmto">
+  <param name="Name" value="FMTO">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_fountain.html#fountain">
+  <param name="Name" value="FOUNTAIN">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_grid.html#grid">
+  <param name="Name" value="GRID">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_hscm.html#hscm">
+  <param name="Name" value="HSCM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_hsdm.html#hsdm">
+  <param name="Name" value="HSDM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_magic.html#magic">
+  <param name="Name" value="MAGIC">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_march.html#march">
+  <param name="Name" value="MARCH">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_mt.html#mt">
+  <param name="Name" value="MT">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_mtrm.html#mtrm">
+  <param name="Name" value="MTRM">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_nsew.html#nsew">
+  <param name="Name" value="NSEW">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_rotate.html#rotate">
+  <param name="Name" value="ROTATE">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_steps.html#steps">
+  <param name="Name" value="STEPS">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_stepsizes.html#stepsizes">
+  <param name="Name" value="STEPSIZES">
+  </OBJECT>
+ <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_variables.html#variables">
+  <param name="Name" value="VARIABLES">
+  </OBJECT>
+</UL> <LI> <OBJECT type="text/sitemap">
+  <param name="Local" value="charthlp_future.html#future">
+  <param name="Name" value="Future of CalChart">
+  </OBJECT>
+</UL>
