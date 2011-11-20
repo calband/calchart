@@ -37,13 +37,10 @@ IMAGES_BMP = $(IMAGES:.xbm=.bmp)
 IMAGES_MSW = $(IMAGES_BMP) calchart.ico
 IMAGES_ALL = $(IMAGES) $(IMAGES_X) calchart.ico
 
-TEXDOCS = docs/charthlp.tex docs/anim.tex docs/install.tex docs/bugs.tex \
-	docs/overview.tex docs/refer.tex docs/tex2rtf.ini docs/texhelp.sty
+DOCSRCDIR = doc_src
+DOCSRC = $(wildcard $(DOCSRCDIR)/*)
 
-DOCS = $(TEXDOCS) \
-	docs/contents.gif docs/up.gif docs/back.gif docs/forward.gif
-
-MOSTSRCS = $(SRCS) $(GENERATED_BASES) $(HEADERS) $(DOCS)
+MOSTSRCS = $(SRCS) $(GENERATED_BASES) $(HEADERS) $(DOCSRC)
 ALLSRCS = $(MOSTSRCS) $(IMAGES_ALL) Makefile xbm2xpm \
 	makefile.wat calchart.rc install.inf
 MSWSRCS = $(MOSTSRCS) contgram.h $(GENERATED_SRCS) \
@@ -92,7 +89,7 @@ TAGS: $(SRCS) $(HEADERS)
 tags:: TAGS
 
 # Stuff for help files
-docs/charthlp.dvi: $(DOCS)
+docs/charthlp.dvi: html $(DOCSRC)
 	cd docs; latex charthlp; latex charthlp; makeindex charthlp; latex charthlp
 
 docs/charthlp.ps: docs/charthlp.dvi
@@ -102,7 +99,9 @@ docs/charthlp.ps.gz: docs/charthlp.ps
 	rm -f $@
 	gzip -c9 $< > $@
 
-docs/charthlp_contents.html: $(DOCS)
+docs/charthlp_contents.html: $(DOCSRC)
+	mkdir -p docs
+	cp $(DOCSRC) docs
 	-cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
 
 docs/charthlp.html.tar.gz: docs/charthlp_contents.html
