@@ -405,7 +405,6 @@ wxString CC_show::ImportContinuity(const wxString& file)
  * ~ center this line
  * also, there are three tab stops set for standard continuity format
  */
-	FILE *fp;
 	wxString tempbuf;
 	CC_textline *line_text;
 	unsigned pos;
@@ -416,15 +415,15 @@ wxString CC_show::ImportContinuity(const wxString& file)
 	char c;
 	bool sheetmark;
 
-	fp = CC_fopen(file.fn_str(), "r");
-	if (fp)
+	wxFile fp(file, wxFile::read);
+	if (fp.IsOpened())
 	{
 		CC_sheet_iterator_t curr_sheet = CC_sheet_iterator_t(NULL);
 		currfontnum = lastfontnum = PSFONT_NORM;
 		line_text = NULL;
 		while (true)
 		{
-			if (feof(fp)) break;
+			if (fp.Eof()) break;
 			ReadDOSline(fp, tempbuf);
 			sheetmark = false;
 			line_text = NULL;
@@ -689,7 +688,6 @@ wxString CC_show::ImportContinuity(const wxString& file)
 				} while (pos < tempbuf.Length());
 			}
 		}
-		fclose(fp);
 	}
 	else
 	{

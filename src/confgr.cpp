@@ -657,10 +657,10 @@ void ReadConfig()
 }
 
 
-int ReadDOSline(FILE *fp, wxString& str)
+int ReadDOSline(wxFile& fp, wxString& str)
 {
 	char buf[1024];
-	if (fgets(buf, sizeof(buf), fp) == NULL)
+	if (fp.Read(buf, sizeof(buf)) == 0)
 		return 0;
 	int c = strlen(buf);
 // chomp like, keep removing \r and \n from the end of a line

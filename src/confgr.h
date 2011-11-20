@@ -154,7 +154,8 @@ void ClearConfigShowYardline();
 void SetConfigSpringShowYardline();
 void ClearConfigSpringShowYardline();
 
-extern int ReadDOSline(FILE *fp, wxString& str);
+class wxFile;
+extern int ReadDOSline(wxFile& fp, wxString& str);
 
 // DEBUG printing facilities
 #ifndef NDEBUG
