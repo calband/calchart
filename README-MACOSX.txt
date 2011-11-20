@@ -1,15 +1,15 @@
 My steps for building for MacOSX.  Updated for Lion (10.7)
 
-These steps require having Lion 10.7 and XCode 4.1.  Both should be on the app store.
+These steps require having Lion 10.7 and XCode 4.2.1.  Both should be on the app store.
 
 Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
 boost
 transfig
 
-Download 2.9.2 of wxWidgets to build the library:
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_2 ~/wxWidgets-2.9.2
+Download 2.9.1 of wxWidgets to build the library:
+$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_1 ~/wxWidgets-2.9.1
 
-$ cd wxWidgets-2.9.2
+$ cd wxWidgets-2.9.1
 
 Apply patch for issue:
 [wxOSX-Cocoa] wxHtmlHelpWindow asserts about unsupported wxCB_SORT (issue 12419)
@@ -25,14 +25,14 @@ $ cd build-results
 $ ../configure --with-cocoa --with-macosx-version-min=10.5 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk --enable-debug --enable-debug_info --disable-shared
 $ make
 
-put into the /usr/local/bin (if you wanted to put somewhere different, use the --prefix option in configure and you're on your own)
+put into the /usr/local/bin (if you wanted to put somewhere different, use the --prefix option in configure but you're on your own)
 $ sudo make install
 
 Get calchart (you'll need to log in with your source forge account):
 $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/trunk
 
 CalChart uses the tex2rtf project.  Unfortunately, tex2rtf is no longer supported in wxWidgets.
-Download 2.9.2 of wxWidgets to build the library:
+Download tex2rtf from sourceforge:
 $ svn co https://tex2rtf.svn.sourceforge.net/svnroot/tex2rtf/trunk ~/tex2rtf/trunk
 $ cd ~/tex2rtf/trunk
 Because there are slight issues with the version in trunk, you'll need to patch up the trunk
