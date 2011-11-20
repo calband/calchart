@@ -799,7 +799,25 @@ void MainFrame::OnChar(wxKeyEvent& event)
 void MainFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
 {
     wxString filename;
-    filename = wxLoadFileSelector(wxT("image"), wxEmptyString);
+    wxInitAllImageHandlers();
+    filename = wxLoadFileSelector(wxT("Select a background image"),
+								  wxT("BMP files (*.bmp)|*.bmp")
+#if wxUSE_LIBPNG
+								  wxT("|PNG files (*.png)|*.png")
+#endif
+#if wxUSE_LIBJPEG
+								  wxT("|JPEG files (*.jpg)|*.jpg")
+#endif
+#if wxUSE_GIF
+								  wxT("|GIF files (*.gif)|*.gif")
+#endif
+#if wxUSE_LIBTIFF
+								  wxT("|TIFF files (*.tif)|*.tif")
+#endif
+#if wxUSE_PCX
+								  wxT("|PCX files (*.pcx)|*.pcx")
+#endif
+								  );
     if ( !filename.empty() )
     {
 		wxImage image;
