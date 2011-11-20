@@ -187,6 +187,7 @@ implemented.
 Build CalChart
 ---
 
-For building on MacOSX platforms, see the README-MAC.txt.  For building on
+For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
+If you need to regenerate the help documentation, see the README-docs.txt

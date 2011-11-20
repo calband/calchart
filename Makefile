@@ -47,7 +47,7 @@ MSWSRCS = $(MOSTSRCS) contgram.h $(GENERATED_SRCS) \
 	makefile.wat calchart.rc install.inf
 
 #### Targets ####
-all: calchart html
+all: calchart
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(OBJDIR)
