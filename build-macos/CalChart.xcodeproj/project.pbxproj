@@ -33,6 +33,12 @@
 		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		C7B669761474E20300E28B63 /* background_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7B669741474E20300E28B63 /* background_image.cpp */; };
 		C7BFBCFB14722689002385FB /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7BFBCF914722689002385FB /* animatecommand.cpp */; };
+		C7C5FBD21479B356004E5C5B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD11479B356004E5C5B /* IOKit.framework */; };
+		C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
+		C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
+		C7C5FBD81479B385004E5C5B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD71479B385004E5C5B /* OpenGL.framework */; };
+		C7C5FBDA1479B39A004E5C5B /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD91479B39A004E5C5B /* QuickTime.framework */; };
+		C7C5FBDC1479B3F8004E5C5B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
 		C7D177EA13B1A83700F65F4C /* charthlp_macosxinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */; };
 		C7D177EB13B1A83700F65F4C /* charthlp_macosxprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */; };
 		C7D1782513B7C6E800F65F4C /* charthlp_geniusmove.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1781E13B7C6E800F65F4C /* charthlp_geniusmove.html */; };
@@ -273,6 +279,12 @@
 		C7B669751474E20300E28B63 /* background_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = background_image.h; sourceTree = "<group>"; };
 		C7BFBCF914722689002385FB /* animatecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecommand.cpp; sourceTree = "<group>"; };
 		C7BFBCFA14722689002385FB /* animatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecommand.h; sourceTree = "<group>"; };
+		C7C5FBD11479B356004E5C5B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		C7C5FBD31479B367004E5C5B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		C7C5FBD71479B385004E5C5B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		C7C5FBD91479B39A004E5C5B /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
+		C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxinstall.html; sourceTree = "<group>"; };
 		C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxprinter.html; sourceTree = "<group>"; };
 		C7D1781E13B7C6E800F65F4C /* charthlp_geniusmove.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_geniusmove.html; sourceTree = "<group>"; };
@@ -369,6 +381,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7C5FBDC1479B3F8004E5C5B /* WebKit.framework in Frameworks */,
+				C7C5FBDA1479B39A004E5C5B /* QuickTime.framework in Frameworks */,
+				C7C5FBD81479B385004E5C5B /* OpenGL.framework in Frameworks */,
+				C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */,
+				C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */,
+				C7C5FBD21479B356004E5C5B /* IOKit.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -405,6 +423,12 @@
 		29B97314FDCFA39411CA2CEA /* CalChart */ = {
 			isa = PBXGroup;
 			children = (
+				C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */,
+				C7C5FBD91479B39A004E5C5B /* QuickTime.framework */,
+				C7C5FBD71479B385004E5C5B /* OpenGL.framework */,
+				C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */,
+				C7C5FBD31479B367004E5C5B /* Carbon.framework */,
+				C7C5FBD11479B356004E5C5B /* IOKit.framework */,
 				C7ED4FC511CD594E001A4FA2 /* docs */,
 				C7AFA9A0117A6E7200CC53E2 /* generated */,
 				C7AFA969117A6DBA00CC53E2 /* src */,
@@ -625,7 +649,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0410;
+				LastUpgradeCheck = 0420;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "CalChart" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -715,6 +739,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = CalChart;
@@ -726,6 +751,7 @@
 			buildSettings = {
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = CalChart;
@@ -757,30 +783,14 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
-					"-framework",
-					IOKit,
-					"-framework",
-					Carbon,
-					"-framework",
-					Cocoa,
-					"-framework",
-					AudioToolbox,
-					"-framework",
-					System,
-					"-framework",
-					OpenGL,
-					"-framework",
-					QuickTime,
-					"/usr/local/lib/libwx_osx_cocoau_xrc-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_html-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_qa-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_adv-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_core-2.9.a",
-					"/usr/local/lib/libwx_baseu_xml-2.9.a",
-					"/usr/local/lib/libwx_baseu_net-2.9.a",
-					"/usr/local/lib/libwx_baseu-2.9.a",
-					"-framework",
-					WebKit,
+					"-lwx_osx_cocoau_xrc-2.9",
+					"-lwx_osx_cocoau_html-2.9",
+					"-lwx_osx_cocoau_qa-2.9",
+					"-lwx_osx_cocoau_adv-2.9",
+					"-lwx_osx_cocoau_core-2.9",
+					"-lwx_baseu_xml-2.9",
+					"-lwx_baseu_net-2.9",
+					"-lwx_baseu-2.9",
 					"-lexpat",
 					"-lwxregexu-2.9",
 					"-lwxtiff-2.9",
@@ -819,30 +829,14 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
-					"-framework",
-					IOKit,
-					"-framework",
-					Carbon,
-					"-framework",
-					Cocoa,
-					"-framework",
-					AudioToolbox,
-					"-framework",
-					System,
-					"-framework",
-					OpenGL,
-					"-framework",
-					QuickTime,
-					"/usr/local/lib/libwx_osx_cocoau_xrc-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_html-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_qa-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_adv-2.9.a",
-					"/usr/local/lib/libwx_osx_cocoau_core-2.9.a",
-					"/usr/local/lib/libwx_baseu_xml-2.9.a",
-					"/usr/local/lib/libwx_baseu_net-2.9.a",
-					"/usr/local/lib/libwx_baseu-2.9.a",
-					"-framework",
-					WebKit,
+					"-lwx_osx_cocoau_xrc-2.9",
+					"-lwx_osx_cocoau_html-2.9",
+					"-lwx_osx_cocoau_qa-2.9",
+					"-lwx_osx_cocoau_adv-2.9",
+					"-lwx_osx_cocoau_core-2.9",
+					"-lwx_baseu_xml-2.9",
+					"-lwx_baseu_net-2.9",
+					"-lwx_baseu-2.9",
 					"-lexpat",
 					"-lwxregexu-2.9",
 					"-lwxtiff-2.9",
