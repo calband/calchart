@@ -14,14 +14,14 @@ and how formations to flow.  It is used to animate a show, and to print out
 continuity (poop sheets).
 
 CalChart makes use of several opensource projects.  It uses wxWidgets version
-2.9.1.  Also, it uses bison, flex, and transfig projects, and also the tex2rtf
+2.9.2.  Also, it uses bison, flex, and transfig projects, and also the tex2rtf
 project that is part of wxWidgets.
 
 ----------
 
 Release notes for 3.2.2:
 
-Updated wxWidgets to use 2.9.1.
+Updated wxWidgets to use 2.9.2.
 
 Bugs and features fixed in this release
 
@@ -29,6 +29,7 @@ Bugs and features fixed in this release
 3018574: Need a better icon
 3315313: Field view should have scrollbars
 3018579: Able to set background
+3315321: Marchers in animation window should be selectable
 
 ----------
 

@@ -18,17 +18,22 @@ make
 bison
 flex
 transfig
-boost
-libboost
 patch
 autoconf
 
-Download 2.9.1 of wxWidgets (I used the svn version by opening cygwin and running
+
+Get Boost:
+Calchart doesn't like it when boost is in /usr/include, because it screws with the way that we set up mingw64.
+Go to boost.org and get the latest (should be boost 1.48).
+Put it at /cygdrive/c/boost_1_48
+
+
+Download 2.9.2 of wxWidgets (I used the svn version by opening cygwin and running
 the command):
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_1 /cygdrive/c/wxWidgets-2.9.1
+$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_2 /cygdrive/c/wxWidgets-2.9.2
 
 Make a sub-directory for building wxWidgets:
-$ cd /cygdrive/c/wxWidgets-2.9.1
+$ cd /cygdrive/c/wxWidgets-2.9.2
 $ mkdir build-results
 $ cd build-results
 
@@ -40,7 +45,7 @@ Make wxWidgets:
 $ make
 
 Add wxWidgets to your path:
-$ export PATH=$PATH:/cygdrive/c/wxWidgets-2.9.1/build-results
+$ export PATH=$PATH:/cygdrive/c/wxWidgets-2.9.2/build-results
 
 
 Get calchart (you'll need to log in with your source forge account):

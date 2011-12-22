@@ -6,10 +6,10 @@ Most tools will already be on your system, but you will need the following proje
 boost
 transfig
 
-Download 2.9.1 of wxWidgets to build the library:
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_1 ~/wxWidgets-2.9.1
+Download 2.9.2 of wxWidgets to build the library:
+$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_2 ~/wxWidgets-2.9.2
 
-$ cd wxWidgets-2.9.1
+$ cd wxWidgets-2.9.2
 
 Apply patch for issue:
 [wxOSX-Cocoa] wxHtmlHelpWindow asserts about unsupported wxCB_SORT (issue 12419)
@@ -18,6 +18,16 @@ Download the patch (there is a link to the patch, and download in the "Original 
 Patch via the patch command:
 $ patch -p0 < ~/Downloads/helpwnd_combobox.patch 
 (update to the location of the downloaded patch file)
+
+Apply patch for the issue:
+wxID_UNDO, wxID_REDO on wxCocoa (issue 13431)
+Go to http://trac.wxwidgets.org/changeset/69205
+Download the patch (there is called "Unified Diff", download to a file)
+Patch via the patch command:
+$ patch -p0 < ~/Downloads/changeset_r69205.diff
+(update to the location of the downloaded patch file)
+You may have to help patch out with the exact location of the file.
+
 
 $ mkdir build-results
 $ cd build-results
