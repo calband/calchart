@@ -22,13 +22,14 @@
 
 #include "background_image.h"
 
-BackgroundImage::BackgroundImage(const wxImage& image) :
+BackgroundImage::BackgroundImage(const wxImage& image, const wxCoord& x, const wxCoord& y) :
 mImage(image),
+mBitmapX(x),
+mBitmapY(y),
 mDoBackgroundPicAdjust(true), // always adjust when we get created
 mBackgroundAdjustType(kLast)
 {
 	mBitmap = wxBitmap(mImage);
-	mBitmapX = mBitmapY = 100;
 	mDoBackgroundPicAdjust = true;
 }
 

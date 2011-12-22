@@ -1642,7 +1642,15 @@ bool FieldCanvas::SetBackgroundImage(const wxImage& image)
 	{
 		return false;
 	}
-	mBackgroundImage.reset(new BackgroundImage(image));
+
+	wxClientDC dc(this);
+	PrepareDC(dc);
+	long x = 100;
+	long y = 100;
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+
+	mBackgroundImage.reset(new BackgroundImage(image, x, y));
 	Refresh();
 	return true;
 }

@@ -30,7 +30,7 @@
 class BackgroundImage
 {
 public:
-	BackgroundImage(const wxImage& image);
+	BackgroundImage(const wxImage& image, const wxCoord& x, const wxCoord& y);
 
 	void OnMouseLeftDown(const wxMouseEvent& event, const wxDC& dc);
 	void OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc);
