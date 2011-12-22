@@ -35,6 +35,7 @@ class CC_sheet;
 class ShowMode;
 class ShowUndoList;
 class CC_show;
+class CC_lasso;
 
 // The CC_show_modified class is used for indicating to views if the show has been modified
 // some views behave differently if the show has been modified
@@ -176,6 +177,7 @@ public:
 	void SetSelection(const SelectionList& sl);
 	void RemoveFromSelection(const SelectionList& sl);
 	void ToggleSelection(const SelectionList& sl);
+	void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref);
 	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
 

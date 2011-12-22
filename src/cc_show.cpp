@@ -31,6 +31,7 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "show.h"
+#include "cc_shapes.h"
 
 #include <wx/wfstream.h>
 #include <list>
@@ -1306,6 +1307,34 @@ void CC_show::ToggleSelection(const SelectionList& sl)
 
 	}
 	UpdateAllViews();
+}
+
+// toggle selection means toggle it as selected to unselected
+// otherwise, always select it
+void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref)
+{
+	if (!lasso.FirstPoint())
+	{
+		return;
+	}
+
+	SelectionList sl;
+	CC_show::const_CC_sheet_iterator_t sheet = GetCurrentSheet();
+	for (unsigned i = 0; i < GetNumPoints(); i++)
+	{
+		if (lasso.Inside(sheet->GetPosition(i, ref)))
+		{
+			sl.insert(i);
+		}
+	}
+	if (toggleSelected)
+	{
+		ToggleSelection(sl);
+	}
+	else
+	{
+		AddToSelection(sl);
+	}
 }
 
 void CC_show::AllViewGoToCont(unsigned contnum, int line, int col)

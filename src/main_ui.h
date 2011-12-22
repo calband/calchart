@@ -297,9 +297,6 @@ public:
 	///// Select /////
 	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
-private:
-	typedef std::vector<unsigned> PointList;
-	void SelectOrdered(PointList& pointlist, bool toggleSelected);
 
 	///// Drawing marcher's paths /////
 public:

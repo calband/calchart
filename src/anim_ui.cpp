@@ -24,6 +24,7 @@
 #include "anim_ui.h"
 #include "modes.h"
 #include "confgr.h"
+#include "cc_shapes.h"
 #ifdef ANIM_OUTPUT_RIB
 #include <ri.h>
 #endif
@@ -41,9 +42,11 @@ ToolBarEntry anim_tb[] =
 
 BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
 EVT_CHAR(AnimationCanvas::OnChar)
-EVT_LEFT_DOWN(AnimationCanvas::OnLeftMouseEvent)
-EVT_RIGHT_DOWN(AnimationCanvas::OnRightMouseEvent)
-EVT_ERASE_BACKGROUND(AnimationCanvas::OnEraseBackground)
+EVT_LEFT_DOWN(AnimationCanvas::OnLeftDownMouseEvent)
+EVT_LEFT_UP(AnimationCanvas::OnLeftUpMouseEvent)
+EVT_RIGHT_DOWN(AnimationCanvas::OnRightDownMouseEvent)
+EVT_RIGHT_UP(AnimationCanvas::OnRightUpMouseEvent)
+EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 EVT_SIZE(AnimationCanvas::OnSize)
 END_EVENT_TABLE()
@@ -52,13 +55,6 @@ BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
 EVT_CHAR(AnimationFrame::OnChar)
 EVT_MENU(CALCHART__ANIM_REANIMATE, AnimationFrame::OnCmdReanimate)
 EVT_MENU(CALCHART__ANIM_SELECT_COLL, AnimationFrame::OnCmdSelectCollisions)
-#ifdef ANIM_OUTPUT_POVRAY
-EVT_MENU(CALCHART__ANIM_POVRAY, AnimationFrame::OnCmdPOV)
-#endif
-#ifdef ANIM_OUTPUT_RIB
-EVT_MENU(CALCHART__ANIM_RIB_FRAME, AnimationFrame::OnCmdRIBFrame)
-EVT_MENU(CALCHART__ANIM_RIB, AnimationFrame::OnCmdRIBAll)
-#endif
 EVT_MENU(wxID_CLOSE, AnimationFrame::OnCmdClose)
 EVT_MENU(CALCHART__anim_stop, AnimationFrame::OnCmd_anim_stop)
 EVT_MENU(CALCHART__anim_play, AnimationFrame::OnCmd_anim_play)
@@ -102,11 +98,6 @@ AnimationCanvas::~AnimationCanvas()
 }
 
 
-void AnimationCanvas::OnEraseBackground(wxEraseEvent& event)
-{
-}
-
-
 void AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
 	unsigned long x, y;
@@ -117,6 +108,13 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 	dc->SetUserScale(mUserScale, mUserScale);
 	dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
 	dc->Clear();
+	if (mMouseDown)
+	{
+		dc->SetBrush(*wxTRANSPARENT_BRUSH);
+		dc->SetPen(*CalChartPens[COLOR_SHAPES]);
+		dc->DrawRectangle(mMouseXStart, mMouseYStart,
+						  mMouseXEnd - mMouseXStart, mMouseYEnd - mMouseYStart);
+	}
 	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
 	mShow->GetMode().DrawAnim(*dc);
 	if (anim)
@@ -202,13 +200,89 @@ void AnimationCanvas::OnSize(wxSizeEvent& event)
 	Refresh();
 }
 
-void AnimationCanvas::OnLeftMouseEvent(wxMouseEvent& event)
+void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 {
-	PrevBeat();
+	wxClientDC dc(this);
+	dc.SetUserScale(mUserScale, mUserScale);
+	long x,y;
+	event.GetPosition(&x, &y);
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+
+	mMouseXEnd = mMouseXStart = x;
+	mMouseYEnd = mMouseYStart = y;
+	mMouseDown = true;
 }
 
 
-void AnimationCanvas::OnRightMouseEvent(wxMouseEvent& event)
+void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
+{
+	wxClientDC dc(this);
+	dc.SetUserScale(mUserScale, mUserScale);
+	long x,y;
+	event.GetPosition(&x, &y);
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+	mMouseXEnd = x;
+	mMouseYEnd = y;
+	mMouseDown = false;
+
+	// if mouse lifted very close to where clicked, then it is a previous beat move
+	if ((abs(mMouseXEnd - mMouseXStart) < Int2Coord(1)/2) && (abs(mMouseYEnd - mMouseYStart) < Int2Coord(1)/2))
+	{
+		PrevBeat();
+	}
+	else
+	{
+		// otherwise, Select points within rectangle
+		Coord x_off = mShow->GetMode().Offset().x;
+		Coord y_off = mShow->GetMode().Offset().y;
+		CC_lasso lasso(CC_coord(mMouseXStart-x_off, mMouseYStart-y_off));
+		lasso.Append(CC_coord(mMouseXStart-x_off, mMouseYEnd-y_off));
+		lasso.Append(CC_coord(mMouseXEnd-x_off, mMouseYEnd-y_off));
+		lasso.Append(CC_coord(mMouseXEnd-x_off, mMouseYStart-y_off));
+		lasso.End();
+		CC_show::SelectionList pointlist;
+		for (unsigned i = 0; i < mShow->GetNumPoints(); ++i)
+		{
+			CC_coord position = anim->Position(i);
+			x = position.x+x_off;
+			y = position.y+y_off;
+			if (lasso.Inside(position))
+			{
+				pointlist.insert(i);
+			}
+		}
+		mShow->SetSelection(pointlist);
+	}
+	Refresh();
+}
+
+
+void
+AnimationCanvas::OnMouseMove(wxMouseEvent& event)
+{
+	wxClientDC dc(this);
+	dc.SetUserScale(mUserScale, mUserScale);
+	long x,y;
+	event.GetPosition(&x, &y);
+	x = dc.DeviceToLogicalX( x );
+	y = dc.DeviceToLogicalY( y );
+	mMouseXEnd = x;
+	mMouseYEnd = y;
+	if (event.Dragging())
+	{
+		Refresh();
+	}
+}
+
+
+void AnimationCanvas::OnRightDownMouseEvent(wxMouseEvent& event)
+{
+}
+
+
+void AnimationCanvas::OnRightUpMouseEvent(wxMouseEvent& event)
 {
 	NextBeat();
 }
@@ -364,204 +438,6 @@ void AnimationCanvas::SelectCollisions()
 }
 
 
-#ifdef ANIM_OUTPUT_POVRAY
-#define POV_SCALE 16
-wxString AnimationCanvas::GeneratePOVFiles(const wxString& filebasename)
-{
-	unsigned framenum, pt;
-	wxString filename;
-	FILE *fp;
-	float x, y;
-	bool east = 1;
-	wxPen *pen;
-
-	if (anim)
-	{
-		GotoSheet(0);
-		framenum = 1;
-		do
-		{
-			filename.Printf(wxT("%s%05d.pov"), filebasename.c_str(), framenum);
-			fp = CC_fopen(filename.fn_str(), "w");
-			if (fp == NULL)
-			{
-				return wxT("Error opening file");
-			}
-			for (pt = 0; pt < mShow->GetNumPoints(); pt++)
-			{
-				x = Coord2Float(anim->pts[pt].pos.x) * POV_SCALE;
-				y = Coord2Float(anim->pts[pt].pos.y) * POV_SCALE;
-/* x is already flipped because of the different axises */
-				if (east)
-				{
-					x = (-x);
-				}
-				else
-				{
-					y = (-y);
-				}
-				fprintf(fp, "cylinder { <%f, 0.0, %f>, <%f, %f, %f> %f\n",
-					x, y,
-					x, 4.0 * POV_SCALE, y,
-					0.75 * POV_SCALE);
-				if (anim->curr_cmds[pt])
-				{
-					switch (anim->curr_cmds[pt]->Direction())
-					{
-						case ANIMDIR_SW:
-						case ANIMDIR_W:
-						case ANIMDIR_NW:
-							pen = CalChartPens[COLOR_POINT_ANIM_BACK];
-							break;
-						case ANIMDIR_SE:
-						case ANIMDIR_E:
-						case ANIMDIR_NE:
-							pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
-							break;
-						default:
-							pen = CalChartPens[COLOR_POINT_ANIM_SIDE];
-					}
-				}
-				else
-				{
-					pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
-				}
-				fprintf(fp, "pigment { colour red %f green %f blue %f }\n",
-					pen->GetColour().Red() / 255.0,
-					pen->GetColour().Green() / 255.0,
-					pen->GetColour().Blue() / 255.0);
-				fprintf(fp, "}\n");
-			}
-			fclose(fp);
-			framenum++;
-		} while (NextBeat());
-	}
-	return wxT("");
-}
-#endif
-
-#ifdef ANIM_OUTPUT_RIB
-
-static const char *texturefile = "memorial.tif";
-wxString AnimationCanvas::GenerateRIBFrame()
-{
-	unsigned pt;
-	float x, y;
-	bool east = 1;
-	wxPen *pen;
-	RtColor color;
-	static RtFloat amb_intensity = 0.2, dist_intensity = 0.9;
-	RtPoint field[4];
-
-	if (!anim) return wxT("");
-
-	field[0][0] = -1408;
-	field[0][1] = 400;
-	field[0][2] = 0;
-	field[1][0] = 1408;
-	field[1][1] = 400;
-	field[1][2] = 0;
-	field[2][0] = 1408;
-	field[2][1] = -400;
-	field[2][2] = 0;
-	field[3][0] = -1408;
-	field[3][1] = -400;
-	field[3][2] = 0;
-
-	RiWorldBegin();
-	RiAttributeBegin();
-	RiLightSource(RI_AMBIENTLIGHT, RI_INTENSITY, &amb_intensity, RI_NULL);
-	RiLightSource(RI_DISTANTLIGHT, RI_INTENSITY, &dist_intensity, RI_NULL);
-	RiDeclare("tmap", "uniform string");
-	RiSurface("fieldtexture", "tmap", &texturefile, RI_NULL);
-	RiPolygon(4, RI_P, (RtPointer)field, RI_NULL);
-	for (pt = 0; pt < mShow->GetNumPoints(); pt++)
-	{
-		if (anim->curr_cmds[pt])
-		{
-			switch (anim->curr_cmds[pt]->Direction())
-			{
-				case ANIMDIR_SW:
-				case ANIMDIR_W:
-				case ANIMDIR_NW:
-					pen = CalChartPens[COLOR_POINT_ANIM_BACK];
-					break;
-				case ANIMDIR_SE:
-				case ANIMDIR_E:
-				case ANIMDIR_NE:
-					pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
-					break;
-				default:
-					pen = CalChartPens[COLOR_POINT_ANIM_SIDE];
-			}
-		}
-		else
-		{
-			pen = CalChartPens[COLOR_POINT_ANIM_FRONT];
-		}
-		color[0] = pen->GetColour().Red() / 255.0;
-		color[1] = pen->GetColour().Green() / 255.0;
-		color[2] = pen->GetColour().Blue() / 255.0;
-		RiColor(color);
-		x = Coord2Float(anim->pts[pt].pos.x) * POV_SCALE;
-		y = Coord2Float(anim->pts[pt].pos.y) * POV_SCALE;
-/* x is already flipped because of the different axises */
-		if (east)
-		{
-			x = (-x);
-		}
-		else
-		{
-			y = (-y);
-		}
-		RiTransformBegin();
-		RiTranslate(x, y, 0.0);
-		RiCylinder(0.75 * POV_SCALE, -4.0 * POV_SCALE, 0.0, 360.0, RI_NULL);
-		RiDisk(-4.0 * POV_SCALE, 0.75 * POV_SCALE, 360.0, RI_NULL);
-		RiTransformEnd();
-	}
-	RiAttributeEnd();
-	RiWorldEnd();
-	return wxT("");
-}
-
-
-wxString AnimationCanvas::GenerateRIBFile(const wxString& filename,
-bool allframes)
-{
-	unsigned framenum;
-	wxString err;
-
-	if (anim)
-	{
-		if (allframes)
-		{
-			GotoSheet(0);
-		}
-		framenum = 1;
-		RiBegin((char *)filename);
-		RiProjection(RI_PERSPECTIVE, RI_NULL);
-		RiRotate(45.0, 1.0, 0.0, 0.0);
-		RiTranslate(0.0, 1471.0, 1471.0);
-		if (allframes) do
-		{
-			RiFrameBegin(framenum);
-			err = GenerateRIBFrame();
-			if (err) return err;
-			RiFrameEnd();
-			framenum++;
-		} while (NextBeat());
-		else
-		{
-			err = GenerateRIBFrame();
-			if (err) return err;
-		}
-		RiEnd();
-	}
-	return wxT("");
-}
-#endif
-
 static const wxString collis_text[] =
 {
 	wxT("Ignore"), wxT("Show"), wxT("Beep")
@@ -594,13 +470,6 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__ANIM_REANIMATE, wxT("&Reanimate Show"), wxT("Regenerate animation"));
 	anim_menu->Append(CALCHART__ANIM_SELECT_COLL, wxT("&Select Collisions"), wxT("Select colliding points"));
-#ifdef ANIM_OUTPUT_POVRAY
-	anim_menu->Append(CALCHART__ANIM_POVRAY, wxT("Output &POVRay Stubs"), wxT("Output files for rendering with POVRay"));
-#endif
-#ifdef ANIM_OUTPUT_RIB
-	anim_menu->Append(CALCHART__ANIM_RIB_FRAME, wxT("Output RenderMan RIB Frame"), wxT("Output RIB frame for RenderMan rendering"));
-	anim_menu->Append(CALCHART__ANIM_RIB, wxT("Output Render&Man RIB"), wxT("Output RIB file for RenderMan rendering"));
-#endif
 	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
@@ -686,54 +555,6 @@ void AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event)
 	canvas->SelectCollisions();
 }
 
-
-#ifdef ANIM_OUTPUT_POVRAY
-void AnimationFrame::OnCmdPOV(wxCommandEvent& event)
-{
-	wxString s;
-	wxString err;
-	s = wxFileSelector(wxT("Save POV Files"), NULL, NULL, NULL, wxT("*.*"),
-		wxSAVE);
-	if (!s.empty())
-	{
-		err = canvas->GeneratePOVFiles(s);
-		if (!err.empty())
-		{
-			(void)wxMessageBox(err, wxT("Save Error"));
-		}
-	}
-}
-#endif
-
-#ifdef ANIM_OUTPUT_RIB
-void AnimationFrame::OnCmdRIBFrame(wxCommandEvent& event)
-{
-	OnCmdRIB(event, false);
-}
-
-
-void AnimationFrame::OnCmdRIBAll(wxCommandEvent& event)
-{
-	OnCmdRIB(event, true);
-}
-
-
-void AnimationFrame::OnCmdRIB(wxCommandEvent& event, bool allframes)
-{
-	wxString s;
-	wxString err;
-	s = wxFileSelector(wxT("Save RIB File"), NULL, NULL, NULL, wxT("*.rib"),
-		wxSAVE);
-	if (!s.empty())
-	{
-		err = canvas->GenerateRIBFile(s, allframes);
-		if (!err.empty())
-		{
-			(void)wxMessageBox(err, wxT("Save Error"));
-		}
-	}
-}
-#endif
 
 void AnimationFrame::OnCmdClose(wxCommandEvent& event)
 {

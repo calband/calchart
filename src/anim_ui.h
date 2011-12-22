@@ -41,16 +41,19 @@ private:
 };
 
 class AnimationFrame;
+// AnimationCanvas acts as both the controller and the view.
 class AnimationCanvas: public wxPanel
 {
 public:
 	AnimationCanvas(AnimationFrame *frame, CC_show *show);
 	~AnimationCanvas();
 
-	void OnEraseBackground(wxEraseEvent& event);
 	void OnPaint(wxPaintEvent& event);
-	void OnLeftMouseEvent(wxMouseEvent& event);
-	void OnRightMouseEvent(wxMouseEvent& event);
+	void OnLeftDownMouseEvent(wxMouseEvent& event);
+	void OnLeftUpMouseEvent(wxMouseEvent& event);
+	void OnRightDownMouseEvent(wxMouseEvent& event);
+	void OnRightUpMouseEvent(wxMouseEvent& event);
+	void OnMouseMove(wxMouseEvent& event);
 	void OnSize(wxSizeEvent& event);
 	void OnChar(wxKeyEvent& event);
 
@@ -132,13 +135,6 @@ public:
 	{
 		timer->Stop(); timeron = false;
 	}
-#ifdef ANIM_OUTPUT_POVRAY
-	wxString GeneratePOVFiles(const wxString& filebasename);
-#endif
-#ifdef ANIM_OUTPUT_RIB
-	wxString GenerateRIBFrame();
-	wxString GenerateRIBFile(const wxString& filename, bool all = true);
-#endif
 
 private:
 	void OnNotifyStatus(const wxString& status);
@@ -153,6 +149,11 @@ private:
 	unsigned tempo;
 	float mUserScale;
 
+	// for mouse and drawing
+	bool mMouseDown;
+	long mMouseXStart, mMouseYStart;
+	long mMouseXEnd, mMouseYEnd;
+	
 	wxDECLARE_EVENT_TABLE();
 };
 
@@ -173,14 +174,6 @@ public:
 
 	void OnCmdReanimate(wxCommandEvent& event);
 	void OnCmdSelectCollisions(wxCommandEvent& event);
-#ifdef ANIM_OUTPUT_POVRAY
-	void OnCmdPOV(wxCommandEvent& event);
-#endif
-#ifdef ANIM_OUTPUT_RIB
-	void OnCmdRIBFrame(wxCommandEvent& event);
-	void OnCmdRIBAll(wxCommandEvent& event);
-	void OnCmdRIB(wxCommandEvent& event, bool allframes);
-#endif
 	void OnCmdClose(wxCommandEvent& event);
 
 	void OnCmd_anim_stop(wxCommandEvent& event);
@@ -218,13 +211,6 @@ enum
 {
 	CALCHART__ANIM_REANIMATE = 1,
 	CALCHART__ANIM_SELECT_COLL,
-#ifdef ANIM_OUTPUT_POVRAY
-	CALCHART__ANIM_POVRAY,
-#endif
-#ifdef ANIM_OUTPUT_RIB
-	CALCHART__ANIM_RIB_FRAME,
-	CALCHART__ANIM_RIB,
-#endif
 
 	CALCHART__anim_stop,
 	CALCHART__anim_play,

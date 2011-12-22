@@ -1662,36 +1662,9 @@ void FieldCanvas::RemoveBackgroundImage()
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-
-void MainFrameView::SelectOrdered(PointList& pointlist, bool toggleSelected)
-{
-	if (toggleSelected)
-	{
-		mShow->ToggleSelection(CC_show::SelectionList(pointlist.begin(), pointlist.end()));
-	}
-	else
-	{
-		mShow->AddToSelection(CC_show::SelectionList(pointlist.begin(), pointlist.end()));
-	}
-}
-
-
 void MainFrameView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
-	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
-	PointList pointlist;
-
-	for (unsigned i = 0; i < mShow->GetNumPoints(); i++)
-	{
-		if (lasso->Inside(sheet->GetPosition(i, mCurrentReferencePoint)))
-		{
-			pointlist.push_back(i);
-		}
-	}
-	if (lasso->FirstPoint())
-	{
-		SelectOrdered(pointlist, toggleSelected);
-	}
+	mShow->SelectWithLasso(*lasso, toggleSelected, mCurrentReferencePoint);
 }
 
 
