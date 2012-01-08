@@ -1800,12 +1800,12 @@ void MainFrameView::OnDraw(wxDC *dc)
 		{
 			if (mCurrentReferencePoint > 0)
 			{
-				mShow->Draw(*dc, 0, false);
-				mShow->Draw(*dc, mCurrentReferencePoint, true);
+				mShow->DrawShow(*dc, 0, false);
+				mShow->DrawShow(*dc, mCurrentReferencePoint, true);
 			}
 			else
 			{
-				mShow->Draw(*dc, mCurrentReferencePoint, true);
+				mShow->DrawShow(*dc, mCurrentReferencePoint, true);
 			}
 			DrawPaths(*dc, *sheet);
 		}

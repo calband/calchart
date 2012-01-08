@@ -875,7 +875,7 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 		field_h / modesprshow->StageH());
 	buffer<<buf;
 	snprintf(buf, sizeof(buf), "   %hd %hd translate\n",
-		-modesprshow->StageX(), -modesprshow->StageY());
+		static_cast<short>(-modesprshow->StageX()), static_cast<short>(-modesprshow->StageY()));
 	buffer<<buf;
 	buffer<<"%%BeginDocument: zllrbach.eps\n";
 	// sprint show is special.  We put down the special stage:

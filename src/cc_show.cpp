@@ -1378,7 +1378,7 @@ void UnitTests()
 }
 
 
-void CC_show::Draw(wxDC& dc, unsigned ref, bool primary)
+void CC_show::DrawShow(wxDC& dc, unsigned ref, bool primary)
 {
 	GetCurrentSheet()->Draw(dc, ref, primary);
 }
