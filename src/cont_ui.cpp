@@ -150,7 +150,6 @@ bool ContinuityEditor::Create(CC_show *show,
 
 	mShow = show;
 	mCurrentContinuityChoice = 0;
-	mSheetUnderEdit = CC_show::const_CC_sheet_iterator_t(NULL);
 	mView = new ContinuityEditorView;
 	mView->SetDocument(show);
 	mView->SetFrame(this);
@@ -341,8 +340,8 @@ void ContinuityEditor::UpdateText()
 {
 	mUserInput->Clear();
 	mUserInput->DiscardEdits();
-	mSheetUnderEdit = mShow->GetCurrentSheet();
-	const CC_continuity& c = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
+	CC_show::const_CC_sheet_iterator_t current_sheet = mShow->GetCurrentSheet();
+	const CC_continuity& c = current_sheet->GetNthContinuity(mCurrentContinuityChoice);
 	if (!c.GetText().IsEmpty())
 	{
 		mUserInput->WriteText(c.GetText());
@@ -362,14 +361,12 @@ void ContinuityEditor::FlushText()
 {
 	wxString conttext;
 
-	if (mSheetUnderEdit != CC_show::const_CC_sheet_iterator_t(NULL))
+	conttext = mUserInput->GetValue();
+	CC_show::const_CC_sheet_iterator_t current_sheet = mShow->GetCurrentSheet();
+	const CC_continuity& cont = current_sheet->GetNthContinuity(mCurrentContinuityChoice);
+	if (conttext != cont.GetText())
 	{
-		conttext = mUserInput->GetValue();
-		const CC_continuity& cont = mSheetUnderEdit->GetNthContinuity(mCurrentContinuityChoice);
-		if (conttext != cont.GetText())
-		{
-			mView->DoSetNthContinuity(conttext, mCurrentContinuityChoice);
-		}
+		mView->DoSetNthContinuity(conttext, mCurrentContinuityChoice);
 	}
 	mUserInput->DiscardEdits();
 }

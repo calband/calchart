@@ -419,7 +419,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 	wxFile fp(file, wxFile::read);
 	if (fp.IsOpened())
 	{
-		CC_sheet_iterator_t curr_sheet = CC_sheet_iterator_t(NULL);
+		int curr_sheet = -1;
 		currfontnum = lastfontnum = PSFONT_NORM;
 		line_text = NULL;
 		while (true)
@@ -437,17 +437,17 @@ wxString CC_show::ImportContinuity(const wxString& file)
 			}
 			if (sheetmark)
 			{
-				if (curr_sheet != CC_sheet_iterator_t(NULL)) ++curr_sheet;
-				else curr_sheet = GetSheetBegin();
-				if (curr_sheet == GetSheetEnd()) break;
+				if (curr_sheet != -1) ++curr_sheet;
+				else curr_sheet = 0;
+				if (curr_sheet == GetNumSheets()) break;
 				if (tempbuf.Length() > 2)
 				{
-					curr_sheet->SetNumber(tempbuf.Mid(2));
+					GetNthSheet(curr_sheet)->SetNumber(tempbuf.Mid(2));
 				}
 			}
 			else
 			{
-				if (curr_sheet == CC_sheet_iterator_t(NULL))
+				if (curr_sheet == -1)
 				{
 // Continuity doesn't begin with a sheet header
 					return wxString(contnohead_str);
@@ -674,8 +674,8 @@ wxString CC_show::ImportContinuity(const wxString& file)
 						CC_textchunk new_text;
 						if (line_text == NULL)
 						{
-							curr_sheet->continuity.push_back(CC_textline());
-							line_text = &curr_sheet->continuity.back();
+							GetNthSheet(curr_sheet)->continuity.push_back(CC_textline());
+							line_text = &(GetNthSheet(curr_sheet)->continuity.back());
 							line_text->on_main = on_main;
 							line_text->on_sheet = on_sheet;
 							line_text->center = center;
