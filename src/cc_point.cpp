@@ -22,7 +22,7 @@
 
 #include "cc_point.h"
 
-#include <confgr.h>
+#include "confgr.h"
 #include <wx/wx.h>
 #include <assert.h>
 

@@ -26,6 +26,7 @@
 #include <wx/pen.h>
 #include <wx/config.h>
 #include <wx/confbase.h>
+#include <wx/file.h>
 #include <ctype.h>
 #include <string>
 

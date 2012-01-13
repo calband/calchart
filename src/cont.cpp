@@ -1139,7 +1139,7 @@ void ContProcRotate::Compile(AnimateCompile* anim)
 	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandRotate((unsigned)ABS(b), c,
 // Don't use Magnitude() because
 // we want Coord numbers
-		sqrt(rad.x*rad.x + rad.y*rad.y),
+		sqrt(static_cast<float>(rad.x*rad.x + rad.y*rad.y)),
 		start_ang, start_ang+angle,
 		backwards)),
 		this);
