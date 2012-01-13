@@ -38,6 +38,12 @@
 #include <string>
 #include <sstream>
 
+// from http://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
+// there is no snprint on visual c++ 2010
+#if _MSC_VER
+#define snprintf _snprintf
+#endif
+
 static float width, height, real_width, real_height;
 static float field_x, field_y, field_w, field_h;
 static float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
