@@ -1,4 +1,3 @@
-
 --- CalChart README.txt ---
 Updated on 1/8/2012 by Richard Powell
 ---
@@ -7,9 +6,9 @@ Updated on 1/8/2012 by Richard Powell
 What's new in this version?
 ---
 
-Now you can put a background picture on the field.  Neat-o!
-Marchers are selectable in the animation screen.
-Updated icon.  Now less ugly!
+* Now you can put a background picture on the field.  Neat-o!
+* Marchers are selectable in the animation screen.
+* Updated icon.  Now less ugly!
 
 ---
 What is CalChart?
@@ -36,20 +35,6 @@ group of tex files that are converted into HTML by some unsupported tools.  The
 tex files can be re-edited and used to regenerate the documentation, but the
 conversion tools are unsupported.  The generated HTML results are also
 distributed in the developer package.
-
-
-Updated wxWidgets to use 2.9.2.
-
-Bugs and features fixed in this release
-
-3315322: Show animation path
-3018574: Need a better icon
-3315313: Field view should have scrollbars
-3018579: Able to set background
-3315321: Marchers in animation window should be selectable
-3442097: Put background image in middle of view
-2943425: Need Installation steps for windows
-2981575: Icon should show up on windows executable
 
 ---
 Helping Develop CalChart:
@@ -122,9 +107,9 @@ If you need to regenerate the help documentation, see the README-docs.txt
 
 Release notes for 3.2.2:
 
-Updated wxWidgets to use 2.9.2.
+Updated wxWidgets to use 2.9.3.
 
-Bugs and features fixed in this release
+Bugs and features fixed in this release:
 
 3315322: Show animation path
 3018574: Need a better icon
@@ -132,6 +117,8 @@ Bugs and features fixed in this release
 3018579: Able to set background
 3315321: Marchers in animation window should be selectable
 3442097: Put background image in middle of view
+2943425: Need Installation steps for windows
+2981575: Icon should show up on windows executable
 
 ----------
 
