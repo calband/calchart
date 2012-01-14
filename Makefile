@@ -19,6 +19,7 @@ SRCDIR = ./src
 GENDIR = ./generated
 RESDIR = ./resources
 OBJDIR = build
+WINOBJDIR = build-win
 
 #### Files ####
 HEADERS = $(wildcard $(SRCDIR)/*.h)
@@ -26,7 +27,7 @@ SRCS = $(wildcard $(SRCDIR)/*.cpp)
 
 GENERATED_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
 GENERATED_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
-GENERATED_FILES = $(GENERATED_SRCS) $(GENDIR)/contgram.h
+GENERATED_FILES = $(GENERATED_SRCS) $(GENDIR)/contgram.h $(WINOBJDIR)/README.txt
 
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
 OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(GENERATED_SRCS))
@@ -114,6 +115,9 @@ docs/charthlp.tex.tar.gz: $(TEXDOCS)
 
 ps: docs/charthlp.ps
 html: docs/charthlp_contents.html
+
+$(WINOBJDIR)/README.txt : README.txt
+	sed 's/$$/\r/' $< > $@
 
 chartsrc.tar.gz: $(ALLSRCS)
 	rm -f $@
