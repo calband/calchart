@@ -1,7 +1,15 @@
 
 --- CalChart README.txt ---
-Updated on 11/19/2011 by Richard Powell
+Updated on 1/8/2012 by Richard Powell
 ---
+
+---
+What's new in this version?
+---
+
+Now you can put a background picture on the field.  Neat-o!
+Marchers are selectable in the animation screen.
+Updated icon.  Now less ugly!
 
 ---
 What is CalChart?
@@ -13,9 +21,100 @@ marching shows.  This program allows us to plot how we want marchers to move,
 and how formations to flow.  It is used to animate a show, and to print out
 continuity (poop sheets).
 
-CalChart makes use of several opensource projects.  It uses wxWidgets version
-2.9.2.  Also, it uses bison, flex, and transfig projects, and also the tex2rtf
-project that is part of wxWidgets.
+Calchart uses several open source tools for building an executable for a target
+system.  There are different UI windowing systems (like Cocoa for Mac, or GNOME
+for linux, or QT for cross platform), but wxWidgets was chosen as a good
+balance of features, cross-platform, and support.  This allows one version to
+be built on Windows/MacOS/Linux, but also means that proprietary UI Kits like
+iOS would be difficult to support, requiring a complete rewrite.  Currently,
+Calchart uses wxWidgets version 2.9.2.
+
+Calchart also has an internal compiling language for interpreting the
+continuity commands into movement.  This language description is converted into
+source code using bison and flex.  The Calchart documentation is done with a
+group of tex files that are converted into HTML by some unsupported tools.  The
+tex files can be re-edited and used to regenerate the documentation, but the
+conversion tools are unsupported.  The generated HTML results are also
+distributed in the developer package.
+
+
+Updated wxWidgets to use 2.9.2.
+
+Bugs and features fixed in this release
+
+3315322: Show animation path
+3018574: Need a better icon
+3315313: Field view should have scrollbars
+3018579: Able to set background
+3315321: Marchers in animation window should be selectable
+3442097: Put background image in middle of view
+
+---
+Helping Develop CalChart:
+---
+
+Visit the CalChart sourceforge.net page.
+
+SourceForge.net is the site that we host the source project for CalChart.
+SourceForge.net is a server that host many open source projects, allowing people
+from all over the world to work on them.  You can think of this as the home of
+calchart.
+
+http://sourceforge.net/projects/calchart/
+
+----
+Reporting a bug.
+----
+
+I recommend signing up for a SourceForge account.  When you log bugs or feature
+request to CalChart, it always helps to be logged in.  You *can* log your issues
+as a guest, but it makes it very hard for the person fixing the bug to
+communicate with you.
+
+From the CalChart project page (http://sourceforge.net/projects/calchart/),
+click on Develop, then Tracker, then Bugs.  This should list all of the bugs
+currently logged against CalChart.  Your bug may already be here.  If it is,
+then add any information to the bug.  If it is there, and it has been fixed,
+please reopen the bug and put more information on it.  Or click on "Add new" to
+add a new bug.
+
+This will bring up the new Bug page.  Please enter a summary and a description
+of the bug.  If you have any reproduction steps that will cause this bug to
+happen, please enter them.  The more details, the more likely it is to fix.  If
+you have a file that causes this to happen, or if you have any screen shots of
+the problem, attach them to the bug.
+
+---
+Requesting new features.
+---
+
+Sometimes what's wrong isn't a bug, but that there is a lack of a feature.  If
+there is something that you wanted or something that you think will make
+CalChart better, please create a Feature Request.
+
+I recommend signing up for a SourceForge account.  When you log bugs or feature
+request to CalChart, it always helps to be logged in.  You *can* log your issues
+as a guest, but it makes it very hard for the person fixing the bug to
+communicate with you.
+
+From the CalChart project page (http://sourceforge.net/projects/calchart/),
+click on Develop, then Tracker, then Feature Request.  This brings up all the
+feature requests logged against CalChart.  You may see that somebody has already
+entered the feature.  If so, please add your opinions to it.  If not, click on
+"Add new" to add a new Feature Request.
+
+This will bring up the new Feature Request page.  Please enter a summary and a
+description of the Feature.  The more details, the more likely it is to be
+implemented.
+
+---
+Build CalChart
+---
+
+For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
+Windows platforms, see the README-WINDOWS.txt.
+
+If you need to regenerate the help documentation, see the README-docs.txt
 
 ----------
 
@@ -127,69 +226,3 @@ Bugs Fixed in this release
 
 Build tested by quickly animating guns2.shw on mac and windows.
 
----
-Helping Develop CalChart:
----
-
-Visit the CalChart sourceforge.net page.
-
-SourceForge.net is the site that we host the source project for CalChart.
-SourceForge.net is a server that host many open source projects, allowing people
-from all over the world to work on them.  You can think of this as the home of
-calchart.
-
-http://sourceforge.net/projects/calchart/
-
-----
-Reporting a bug.
-----
-
-I recommend signing up for a SourceForge account.  When you log bugs or feature
-request to CalChart, it always helps to be logged in.  You *can* log your issues
-as a guest, but it makes it very hard for the person fixing the bug to
-communicate with you.
-
-From the CalChart project page (http://sourceforge.net/projects/calchart/),
-click on Develop, then Tracker, then Bugs.  This should list all of the bugs
-currently logged against CalChart.  Your bug may already be here.  If it is,
-then add any information to the bug.  If it is there, and it has been fixed,
-please reopen the bug and put more information on it.  Or click on "Add new" to
-add a new bug.
-
-This will bring up the new Bug page.  Please enter a summary and a description
-of the bug.  If you have any reproduction steps that will cause this bug to
-happen, please enter them.  The more details, the more likely it is to fix.  If
-you have a file that causes this to happen, or if you have any screen shots of
-the problem, attach them to the bug.
-
----
-Requesting new features.
----
-
-Sometimes what's wrong isn't a bug, but that there is a lack of a feature.  If
-there is something that you wanted or something that you think will make
-CalChart better, please create a Feature Request.
-
-I recommend signing up for a SourceForge account.  When you log bugs or feature
-request to CalChart, it always helps to be logged in.  You *can* log your issues
-as a guest, but it makes it very hard for the person fixing the bug to
-communicate with you.
-
-From the CalChart project page (http://sourceforge.net/projects/calchart/),
-click on Develop, then Tracker, then Feature Request.  This brings up all the
-feature requests logged against CalChart.  You may see that somebody has already
-entered the feature.  If so, please add your opinions to it.  If not, click on
-"Add new" to add a new Feature Request.
-
-This will bring up the new Feature Request page.  Please enter a summary and a
-description of the Feature.  The more details, the more likely it is to be
-implemented.
-
----
-Build CalChart
----
-
-For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
-Windows platforms, see the README-WINDOWS.txt.
-
-If you need to regenerate the help documentation, see the README-docs.txt
