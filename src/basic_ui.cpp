@@ -25,6 +25,7 @@
 #include "confgr.h"
 
 #include <wx/dnd.h>
+#include <wx/icon.h>
 
 #ifdef __CC_INCLUDE_BITMAPS__
 #include "calchart.xpm"
@@ -34,7 +35,7 @@
 void SetBandIcon(wxFrame *frame)
 {
 #ifdef __CC_SET_ICON__
-	wxIcon icon(wxICON(calchart));
+	wxIcon icon = wxICON(calchart);
 	frame->SetIcon(icon);
 #endif
 }
