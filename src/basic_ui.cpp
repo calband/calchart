@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "platconf.h"
 #include "basic_ui.h"
 #include "confgr.h"
 
@@ -33,7 +34,7 @@
 void SetBandIcon(wxFrame *frame)
 {
 #ifdef __CC_SET_ICON__
-	wxIcon icon(ICON_NAME(calchart));
+	wxIcon icon(wxICON(calchart));
 	frame->SetIcon(icon);
 #endif
 }

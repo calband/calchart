@@ -28,10 +28,11 @@
 #include "cc_command.h"
 
 #include <wx/help.h>
+#include <wx/html/helpctrl.h>
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
 
-extern wxHelpControllerBase *gHelpController;
+extern wxHtmlHelpController *gHelpController;
 
 enum
 {
