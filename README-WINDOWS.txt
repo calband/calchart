@@ -1,80 +1,51 @@
+My steps for building on Windows
 
-My log of steps for building for windows
-
-Install windows xp with at least 20 gigs space and 512 megs mem.
+Install windows with at least 20 gigs space and 512 megs mem.
 Install all updates until it's happy
 
-Get cygwin 1.7.9-1.  Set up with the standard instation, and add the following
+Get the latest cygwin (I used 1.7.9-1).  Set up with the standard instation, and add the following
 packages:
 
-gcc-core
-gcc-g++
-mingw64-i686-gcc
-mingw64-i686-gcc-core
-mingw64-i686-gcc-g++ 
-gdb
 subversion
 make
 bison
 flex
-transfig
 patch
 autoconf
 
-
 Get Boost:
-Calchart doesn't like it when boost is in /usr/include, because it screws with the way that we set up mingw64.
-Go to boost.org and get the latest (should be boost 1.48).
-Put it at /cygdrive/c/boost_1_48
+Go to boost.org and get the latest (I used boost 1.48).
+Put it at c:\boost_1_48_0
 
+Get Visual C++ 2010 Express:
+I use Visual C++ 2010 Express because it supports c99 and it is free.  If you have the Pro version, feel free to use that.
+Go to microsoft, download and install Visual C++ 2010 Express.
 
-Download 2.9.2 of wxWidgets (I used the svn version by opening cygwin and running
-the command):
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_2 /cygdrive/c/wxWidgets-2.9.2
-
-Make a sub-directory for building wxWidgets:
-$ cd /cygdrive/c/wxWidgets-2.9.2
-$ mkdir build-results
-$ cd build-results
-
-Configure wxWidgets.  I use mingw64-i686-gcc family (from http://wxwidgets.blogspot.com/2011_06_01_archive.html) to build without requiring cygwin.dll:
-$ export LDFLAGS="-static-libgcc -static-libstdc++"
-$ ../configure --host=i686-w64-mingw32 --build=i686-pc-cygwin --with-msw --enable-debug --enable-debug_info --disable-shared
+Download 2.9.3 of wxWidgets
+Go to wxwidgets.org and download the exe installer (which will put the source at c:\wxWidgets-2.9.3
 
 Make wxWidgets:
-$ make
+One issue is that Visual C++ 2010 Express doesn't support the dsw projects supplied with wxWidgets.  I use Visual Studio Command Prompt to build wxWidgets instead.
+Open Visual C++ 2010 Express.
+Go To Tools->Visual Studio Command Prompt
+From the prompt, go to the  wxWidgets directory, and invoke nmake:
+c:> cd \wxWidgets-2.9.3\build\msw
+c:\wxWidgets-2.9.3\build\msw> nmake -f makefile.vc BUILD=debug MONOLITHIC=0 SHARED=0 UNICODE=1
 
-Add wxWidgets to your path:
-$ export PATH=$PATH:/cygdrive/c/wxWidgets-2.9.2/build-results
-
+Add environment variables
+Go to Control Panel->System->Advanced System Settings->Environment Variables
+Add the following User variables:
+WXWIN=c:\wxWidgets-2.9.3
+BOOST_DIR=c:\boost_1_48_0
 
 Get calchart (you'll need to log in with your source forge account):
+Open cygwin and run the following:
 $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk /cygdrive/c/calchart/trunk
 
-
-CalChart uses the tex2rtf project.  Unfortunately, tex2rtf is no longer supported in wxWidgets.
-Download tex2rtf from sourceforge:
-$ svn co https://tex2rtf.svn.sourceforge.net/svnroot/tex2rtf/trunk /cygdrive/c/tex2rtf/trunk
-$ cd /cygdrive/c/tex2trf/trunk
-Because there are slight issues with the version in trunk, you'll need to patch up the trunk
-
-$ patch -p0 < /cygdrive/c/calchart/trunk/tex2rtf_changes.diff
-
-Configure and build tex2rtf
-$ autoreconf --install
-$ mkdir build-results
-$ cd build-results
-$ ../configure
-$ make
-$ sudo install ./src/tex2rtf /usr/local/bin
-
-
 Make Calchart
-Note: You must have the CFLAGS export as above (-mno-cygwin).  The calchart 
-makefiles uses that ENV variable
-$ cd /cygdrive/c/calchart/trunk
-$ make
+Open Visual C++ 2010 Express.
+Open the solution file:
+...\calchart\trunk\build-win\CalChart\CalChart.sln
+Build.  This will create the CalChart.exe.
 
-You should now have an calchart.exe and a runtime direct.  These must be in the
-same executable path.
 

@@ -2,56 +2,47 @@
 
 How to release calchart:
 
-0. Increment the version in ccvers.h
+The current calchart version is 3.2.1.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.2.1)
+
+0. Increment the version in ccvers.h to CCVER
 
 1. copy trunk to a tag:
-$ svn copy -m "copying trunk to tag for version 3.2.1" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.2.1
+$ svn copy -m "copying trunk to tag for version $CCVER" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER
 
 2. get that tag on your computer
-$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.2.1 calchart-3.2.1
+$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.2.1 calchart-$CCVER
 
 3. Build the product:
 ---
 For windows:
 
-Make sure your environment is set up for windows as in the README.
-$ export CFLAGS=-mno-cygwin
-$ export CPPFLAGS=-mno-cygwin
-$ export CXXFLAGS=-mno-cygwin
-$ export LDFLAGS="-mno-cygwin -mwindows"
-$ export PATH=/cygdrive/c/wxWidgets-2.8.10:$PATH
+w1. Follow the instructions in README-win.txt
 
-w1. make calchart
-$ make
+w2. Install InnoSetup
+I use InnoSetup for creating the installer.  Get it from:
+http://www.jrsoftware.org/isinfo.php
 
-w2. Put the project in a directory
-$ mkdir CalChart-3.2.1
-$ cp -r calchart runtime docs CalChart-3.2.1
+w3. Build the setup.exe installer:
+Open the file CalChartInstallScript.iss with InnoSetup Compiler.  Compile via Build->Compile.
 
-w3. Compress the folder (I use compress, but make sure to fix up the extension).
-$ mv CalChart-3.1.zip CalChart.3.2.1.zip
+w4. The installer is called setup.exe.  Rename to:
+$ cd build-win/InstallerFiles
+$ mv setup.exe Install-CalChart-$CCVER.exe
 
-The final product is CalChart-3.2.1.zip
+The final product is Install-CalChart-$CCVER.exe
 
 ---
 For Mac:
-m1. pre-build so we have all the files we need:
-$ export CXXFLAGS="-arch i386"
-$ make
-$ make html
+m1. Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, $CCVER
 
-m2. Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, 3.2.1
+m2. Follow the instructions in README-macos.txt
 
-m3. build the project with xcode
-$ cd build-macos
-$ xcodebuild -configuration Debug
+m3. Edit build-macos/dmg_maker.sh to have the right version
 
-m4. Edit the dmg_maker.sh to have the right version
-
-m5. Run dmg_maker.sh
+m4. Run dmg_maker.sh
 $ bash -f dmg_maker.sh
 
-The final product is CalChart-3.2.1.dmg
+The final product is CalChart-$CCVER.dmg
 
 ---
 4. Go to the sourceforge page at http://sourceforge.net/projects/calchart
@@ -61,8 +52,9 @@ You'll need to be logged in to modify the files.
 
 6. Make a new directory for this version (click on the * next to root)
 
-7. Upload the RELEASE_NOTES.txt to the new folder.  Click on RELEASE_NOTES.txt and edit the file details to signify it's a release notes.
+7. Upload the README.txt to the new folder.  Click on README.txt and edit the file details to signify it's a release notes.
 
-8. Upload the CalChart-3.2.1.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
+8. Upload the CalChart-$CCVER.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
 
-9. Repeat for CalChart-3.2.1.zip.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
+9. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
+

@@ -1,3 +1,5 @@
+Since the documentation for the calchart project is build from tex files, if you change them you must rebuild them.
+
 These steps require having Lion 10.7 and XCode 4.2.1.  Both should be on the app store.
 
 Follow the instructions for README-MACOSX.txt
