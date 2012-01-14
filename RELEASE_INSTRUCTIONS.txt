@@ -10,7 +10,7 @@ The current calchart version is 3.2.2.  In all commands below, substitute that n
 $ svn copy -m "copying trunk to tag for version $CCVER" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER
 
 2. get that tag on your computer
-$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-3.2.1 calchart-$CCVER
+$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER calchart-$CCVER
 
 3. Build the product:
 ---
@@ -22,10 +22,14 @@ w2. Install InnoSetup
 I use InnoSetup for creating the installer.  Get it from:
 http://www.jrsoftware.org/isinfo.php
 
-w3. Build the setup.exe installer:
-Open the file CalChartInstallScript.iss with InnoSetup Compiler.  Compile via Build->Compile.
+w3. Modify the release version in the install script:
+Open the file CalChartInstallScript.iss with InnoSetup Compiler.
+Modify the version in the script.
 
-w4. The installer is called setup.exe.  Rename to:
+w4. Build the setup.exe installer:
+Compile via Build->Compile.
+
+w5. The installer is called setup.exe.  Rename to:
 $ cd build-win/InstallerFiles
 $ mv setup.exe Install-CalChart-$CCVER.exe
 
