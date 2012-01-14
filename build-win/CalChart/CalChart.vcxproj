@@ -50,6 +50,12 @@
       <AdditionalDependencies>wxmsw29ud_core.lib;wxbase29ud.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <CustomBuildStep>
+      <Command>mkdir $(TargetDir)\docs</Command>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>xcopy /I /Y $(ProjectDir)\..\..\docs $(TargetDir)\docs</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -122,6 +128,11 @@
     <ClCompile Include="..\..\src\show.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\calchart.rc">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(WXWIN)\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
