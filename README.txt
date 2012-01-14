@@ -48,6 +48,8 @@ Bugs and features fixed in this release
 3018579: Able to set background
 3315321: Marchers in animation window should be selectable
 3442097: Put background image in middle of view
+2943425: Need Installation steps for windows
+2981575: Icon should show up on windows executable
 
 ---
 Helping Develop CalChart:
