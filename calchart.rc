@@ -5,7 +5,7 @@
 wxSTD_MDIPARENTFRAME    ICON    "calchart.ico"
 wxSTD_MDICHILDFRAME     ICON    "calchart.ico"
 calchart ICON calchart.ico
-#include <wx/msw/wx.rc>
+#include "wx/msw/wx.rc"
 
 tb_left BITMAP tb_left.bmp
 tb_right BITMAP tb_right.bmp
