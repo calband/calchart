@@ -11,6 +11,6 @@ UninstallDisplayName=Uninstall CalChart
 OutputDir=InstallerFiles
 
 [Files]
-Source: "CalChart\Debug\CalChart.exe"; DestDir: "{app}"
+Source: "CalChart\Release\CalChart.exe"; DestDir: "{app}"
 Source: "..\docs\*"; DestDir: "{app}\docs"
 Source: "README.txt"; DestDir: "{app}"; Flags: isreadme
