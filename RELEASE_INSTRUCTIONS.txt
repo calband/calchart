@@ -22,14 +22,17 @@ w2. Install InnoSetup
 I use InnoSetup for creating the installer.  Get it from:
 http://www.jrsoftware.org/isinfo.php
 
-w3. Modify the release version in the install script:
+w3. CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
+  w3.a. Google and find the vcredist_x86.exe for Visual C++ 2010.  Download and save to \calchart\trunk\build-win.
+
+w4. Modify the release version in the install script:
 Open the file CalChartInstallScript.iss with InnoSetup Compiler.
 Modify the version in the script.
 
-w4. Build the setup.exe installer:
+w5. Build the setup.exe installer:
 Compile via Build->Compile.
 
-w5. The installer is called setup.exe.  Rename to:
+w6. The installer is called setup.exe.  Rename to:
 $ cd build-win/InstallerFiles
 $ mv setup.exe Install-CalChart-$CCVER.exe
 
