@@ -213,6 +213,8 @@ public:
 	FieldCanvas(wxView *view, MainFrame *frame, float def_zoom);
 	virtual ~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
+	void PaintBackground(wxDC& dc);
+	void OnEraseBackground(wxEraseEvent& event);
 	virtual void OnMouseLeftDown(wxMouseEvent& event);
 	virtual void OnMouseLeftUp(wxMouseEvent& event);
 	virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);

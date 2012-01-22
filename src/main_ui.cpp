@@ -184,6 +184,7 @@ EVT_LEFT_DCLICK(FieldCanvas::OnMouseLeftDoubleClick)
 EVT_RIGHT_DOWN(FieldCanvas::OnMouseRightDown)
 EVT_MOTION(FieldCanvas::OnMouseMove)
 EVT_PAINT(FieldCanvas::OnPaint)
+EVT_ERASE_BACKGROUND(FieldCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
 class MyPrintout : public wxPrintout
@@ -1044,14 +1045,11 @@ void FieldCanvas::ClearShapes()
 // Define the repainting behaviour
 void FieldCanvas::OnPaint(wxPaintEvent& event)
 {
-	wxPaintDC dc(this);
+	wxBufferedPaintDC dc(this);
 	PrepareDC(dc);
 	
 	// draw the background
-	dc.SetBackgroundMode(wxTRANSPARENT);
-	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
-	dc.Clear();
-
+	PaintBackground(dc);
 	// draw Background Image
 	if (mBackgroundImage)
 	{
@@ -1074,6 +1072,19 @@ void FieldCanvas::OnPaint(wxPaintEvent& event)
 					   origin.y);
 		}
 	}
+}
+
+void FieldCanvas::PaintBackground(wxDC& dc)
+{
+	// draw the background
+	dc.SetBackgroundMode(wxTRANSPARENT);
+	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+	dc.Clear();
+}
+
+// We have a empty erase background to improve redraw performance.
+void FieldCanvas::OnEraseBackground(wxEraseEvent& event)
+{
 }
 
 // Allow clicking within pixels to close polygons
