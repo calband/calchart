@@ -35,6 +35,7 @@
 #include "cc_sheet.h"
 #include "show.h"
 #include "animate.h"
+#include "animation_frame.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
