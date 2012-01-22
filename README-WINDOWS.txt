@@ -42,6 +42,10 @@ Get calchart (you'll need to log in with your source forge account):
 Open cygwin and run the following:
 $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk /cygdrive/c/calchart/trunk
 
+Make Calchart's generated files:
+$ cd ~/calchart/trunk
+$ make generate
+
 Make Calchart
 Open Visual C++ 2010 Express.
 Open the solution file:
