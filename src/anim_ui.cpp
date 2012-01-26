@@ -1,5 +1,5 @@
 /*
- * anim_ui.cpp
+ * AnimationView.cpp
  * Animation user interface
  */
 
@@ -22,583 +22,395 @@
 
 #include "anim_ui.h"
 #include "animation_frame.h"
+#include "animation_error.h"
 #include "basic_ui.h"
 #include "modes.h"
 #include "confgr.h"
 #include "cc_shapes.h"
-#ifdef ANIM_OUTPUT_RIB
-#include <ri.h>
-#endif
+#include "calchartapp.h"
+#include "top_frame.h"
+
+#include <wx/dcbuffer.h>
+
 #include <boost/bind.hpp>
 
-BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
-EVT_CHAR(AnimationCanvas::OnChar)
-EVT_LEFT_DOWN(AnimationCanvas::OnLeftDownMouseEvent)
-EVT_LEFT_UP(AnimationCanvas::OnLeftUpMouseEvent)
-EVT_RIGHT_DOWN(AnimationCanvas::OnRightDownMouseEvent)
-EVT_RIGHT_UP(AnimationCanvas::OnRightUpMouseEvent)
-EVT_MOTION(AnimationCanvas::OnMouseMove)
-EVT_PAINT(AnimationCanvas::OnPaint)
-EVT_SIZE(AnimationCanvas::OnSize)
-END_EVENT_TABLE()
 
-wxIMPLEMENT_DYNAMIC_CLASS(AnimErrorList, wxDialog)
+//IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
 
-BEGIN_EVENT_TABLE(AnimErrorList, wxDialog)
-EVT_LISTBOX(CALCHART__anim_update, AnimErrorList::OnCmdUpdate)
-END_EVENT_TABLE()
 
-void AnimationTimer::Notify()
+AnimationView::AnimationView() :
+mAnimation(NULL)
 {
-	if (!canvas->NextBeat()) Stop();
 }
 
 
-AnimationCanvas::AnimationCanvas(AnimationFrame *frame, CC_show *show)
-: wxPanel(frame, wxID_ANY, wxDefaultPosition,
-wxSize(Coord2Int(show->GetMode().Size().x)*DEFAULT_ANIM_SIZE,
-Coord2Int(show->GetMode().Size().y)*DEFAULT_ANIM_SIZE)),
-anim(NULL), mShow(show), ourframe(frame), tempo(120),
-mUserScale(DEFAULT_ANIM_SIZE * (Coord2Int(1 << 16)/65536.0))
+AnimationView::~AnimationView()
 {
-	timer = new AnimationTimer(this);
-}
-
-
-AnimationCanvas::~AnimationCanvas()
-{
-	if (timer) delete timer;
-	if (anim) delete anim;
-}
-
-
-void AnimationCanvas::OnPaint(wxPaintEvent& event)
-{
-	unsigned long x, y;
-	unsigned i;
-	wxPaintDC rdc(this);
-	wxDC *dc = &rdc;
-
-	dc->SetUserScale(mUserScale, mUserScale);
-	dc->SetBackground(*CalChartBrushes[COLOR_FIELD]);
-	dc->Clear();
-	if (mMouseDown)
-	{
-		dc->SetBrush(*wxTRANSPARENT_BRUSH);
-		dc->SetPen(*CalChartPens[COLOR_SHAPES]);
-		dc->DrawRectangle(mMouseXStart, mMouseYStart,
-						  mMouseXEnd - mMouseXStart, mMouseYEnd - mMouseYStart);
-	}
-	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-	mShow->GetMode().DrawAnim(*dc);
-	if (anim)
-		for (i = 0; i < mShow->GetNumPoints(); i++)
-	{
-		if (anim->IsCollision(i))
-		{
-			dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
-			dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
-		}
-		else if (mShow->IsSelected(i))
-		{
-			switch (anim->Direction(i))
-			{
-				case ANIMDIR_SW:
-				case ANIMDIR_W:
-				case ANIMDIR_NW:
-					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
-					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
-					break;
-				case ANIMDIR_SE:
-				case ANIMDIR_E:
-				case ANIMDIR_NE:
-					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
-					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
-					break;
-				default:
-					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
-					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
-			}
-		}
-		else
-		{
-			switch (anim->Direction(i))
-			{
-				case ANIMDIR_SW:
-				case ANIMDIR_W:
-				case ANIMDIR_NW:
-					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_BACK]);
-					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_BACK]);
-					break;
-				case ANIMDIR_SE:
-				case ANIMDIR_E:
-				case ANIMDIR_NE:
-					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
-					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
-					break;
-				default:
-					dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_SIDE]);
-					dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
-			}
-		}
-		CC_coord position = anim->Position(i);
-		x = position.x+mShow->GetMode().Offset().x;
-		y = position.y+mShow->GetMode().Offset().y;
-		dc->DrawRectangle(x - Int2Coord(1)/2, y - Int2Coord(1)/2,
-			Int2Coord(1), Int2Coord(1));
-	}
-}
-
-
-void AnimationCanvas::OnSize(wxSizeEvent& event)
-{
-	float x = mShow->GetMode().Size().x;
-	float y = mShow->GetMode().Size().y;
-	float newX = event.GetSize().x;
-	float newY = event.GetSize().y;
-	
-	float showAspectRatio = x/y;
-	float newSizeRatio = newX/newY;
-	float newvalue = 1.0;
-	// always choose x when the new aspect ratio is smaller than the show.
-	// This will keep the whole field on in the canvas
-	if (newSizeRatio < showAspectRatio)
-	{
-		newvalue = newX / (float)Coord2Int(x);
-	}
-	else
-	{
-		newvalue = newY / (float)Coord2Int(y);
-	}
-	mUserScale = (newvalue * (Coord2Int(1 << 16)/65536.0));
-	Refresh();
-}
-
-void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
-{
-	wxClientDC dc(this);
-	dc.SetUserScale(mUserScale, mUserScale);
-	long x,y;
-	event.GetPosition(&x, &y);
-	x = dc.DeviceToLogicalX( x );
-	y = dc.DeviceToLogicalY( y );
-
-	mMouseXEnd = mMouseXStart = x;
-	mMouseYEnd = mMouseYStart = y;
-	mMouseDown = true;
-}
-
-
-void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
-{
-	wxClientDC dc(this);
-	dc.SetUserScale(mUserScale, mUserScale);
-	long x,y;
-	event.GetPosition(&x, &y);
-	x = dc.DeviceToLogicalX( x );
-	y = dc.DeviceToLogicalY( y );
-	mMouseXEnd = x;
-	mMouseYEnd = y;
-	mMouseDown = false;
-
-	// if mouse lifted very close to where clicked, then it is a previous beat move
-	if ((abs(mMouseXEnd - mMouseXStart) < Int2Coord(1)/2) && (abs(mMouseYEnd - mMouseYStart) < Int2Coord(1)/2))
-	{
-		PrevBeat();
-	}
-	else
-	{
-		// otherwise, Select points within rectangle
-		Coord x_off = mShow->GetMode().Offset().x;
-		Coord y_off = mShow->GetMode().Offset().y;
-		CC_lasso lasso(CC_coord(mMouseXStart-x_off, mMouseYStart-y_off));
-		lasso.Append(CC_coord(mMouseXStart-x_off, mMouseYEnd-y_off));
-		lasso.Append(CC_coord(mMouseXEnd-x_off, mMouseYEnd-y_off));
-		lasso.Append(CC_coord(mMouseXEnd-x_off, mMouseYStart-y_off));
-		lasso.End();
-		CC_show::SelectionList pointlist;
-		for (unsigned i = 0; i < mShow->GetNumPoints(); ++i)
-		{
-			CC_coord position = anim->Position(i);
-			x = position.x+x_off;
-			y = position.y+y_off;
-			if (lasso.Inside(position))
-			{
-				pointlist.insert(i);
-			}
-		}
-		mShow->SetSelection(pointlist);
-	}
-	Refresh();
+	if (mAnimation)
+		delete mAnimation;
 }
 
 
 void
-AnimationCanvas::OnMouseMove(wxMouseEvent& event)
+AnimationView::OnDraw(wxDC *dc)
 {
-	wxClientDC dc(this);
-	dc.SetUserScale(mUserScale, mUserScale);
-	long x,y;
-	event.GetPosition(&x, &y);
-	x = dc.DeviceToLogicalX( x );
-	y = dc.DeviceToLogicalY( y );
-	mMouseXEnd = x;
-	mMouseYEnd = y;
-	if (event.Dragging())
+	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
+	GetShow()->GetMode().DrawAnim(*dc);
+	if (mAnimation)
 	{
-		Refresh();
+		for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
+		{
+			if (mAnimation->IsCollision(i))
+			{
+				dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
+				dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
+			}
+			else if (GetShow()->IsSelected(i))
+			{
+				switch (mAnimation->Direction(i))
+				{
+					case ANIMDIR_SW:
+					case ANIMDIR_W:
+					case ANIMDIR_NW:
+						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_BACK]);
+						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_BACK]);
+						break;
+					case ANIMDIR_SE:
+					case ANIMDIR_E:
+					case ANIMDIR_NE:
+						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_FRONT]);
+						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_FRONT]);
+						break;
+					default:
+						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_HILIT_SIDE]);
+						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_HILIT_SIDE]);
+				}
+			}
+			else
+			{
+				switch (mAnimation->Direction(i))
+				{
+					case ANIMDIR_SW:
+					case ANIMDIR_W:
+					case ANIMDIR_NW:
+						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_BACK]);
+						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_BACK]);
+						break;
+					case ANIMDIR_SE:
+					case ANIMDIR_E:
+					case ANIMDIR_NE:
+						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_FRONT]);
+						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_FRONT]);
+						break;
+					default:
+						dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_SIDE]);
+						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
+				}
+			}
+			CC_coord position = mAnimation->Position(i);
+			unsigned long x = position.x+GetShow()->GetMode().Offset().x;
+			unsigned long y = position.y+GetShow()->GetMode().Offset().y;
+			dc->DrawRectangle(x - Int2Coord(1)/2, y - Int2Coord(1)/2, Int2Coord(1), Int2Coord(1));
+		}
 	}
 }
 
 
-void AnimationCanvas::OnRightDownMouseEvent(wxMouseEvent& event)
+void
+AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 {
-}
-
-
-void AnimationCanvas::OnRightUpMouseEvent(wxMouseEvent& event)
-{
-	NextBeat();
-}
-
-
-void AnimationCanvas::SetTempo(unsigned t)
-{
-	tempo = t;
-	if (timeron)
+    wxView::OnUpdate(sender, hint);
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
 	{
-		StartTimer();
+		if (mAnimation)
+		{
+			delete mAnimation;
+			mAnimation = NULL;
+			RefreshFrame();
+		}
 	}
 }
 
 
-int AnimationCanvas::GetNumberSheets() const
+void
+AnimationView::RefreshFrame()
 {
-	return (anim) ? anim->GetNumberSheets() : 0;
-}
-
-int AnimationCanvas::GetCurrentSheet() const
-{
-	return (anim) ? anim->GetCurrentSheet() : 0;
-}
-
-int AnimationCanvas::GetNumberBeats() const
-{
-	return (anim) ? anim->GetNumberBeats() : 0;
-}
-
-int AnimationCanvas::GetCurrentBeat() const
-{
-	return (anim) ? anim->GetCurrentBeat() : 0;
+	GetAnimationFrame()->UpdatePanel();
+	GetAnimationFrame()->Refresh();
 }
 
 
-void AnimationCanvas::UpdateText()
+void
+AnimationView::EnableCollisions(CollisionWarning col)
 {
-	wxString tempbuf;
-
-	if (anim)
+	if (mAnimation)
 	{
-		tempbuf.Printf(wxT("Beat %u of %u  Sheet %d of %d \"%.32s\""),
-			anim->GetCurrentBeat(), anim->GetNumberBeats(),
-			anim->GetCurrentSheet()+1, anim->GetNumberSheets(),
-			anim->GetCurrentSheetName().c_str());
-		ourframe->SetStatusText(tempbuf, 1);
-	}
-	else
-	{
-		ourframe->SetStatusText(wxT("No animation available"), 1);
+		mAnimation->EnableCollisions(col);
 	}
 }
 
 
-void AnimationCanvas::RefreshCanvas()
+void
+AnimationView::CheckCollisions()
 {
-	Redraw();
-	UpdateText();
-	ourframe->UpdatePanel();
-}
-
-
-void AnimationCanvas::OnNotifyStatus(const wxString& status)
-{
-	ourframe->SetStatusText(status);
-}
-
-bool AnimationCanvas::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
-{
-	AnimErrorList* errorList = new AnimErrorList(mShow, error_markers, sheetnum,
-				ourframe, wxID_ANY, message);
-	errorList->Show();
-	return (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
-}
-
-void AnimationCanvas::Generate()
-{
-	StopTimer();
-	ourframe->SetStatusText(wxT("Compiling..."));
-	if (anim)
+	if (mAnimation)
 	{
-		delete anim;
-		anim = NULL;
-		RefreshCanvas();
-	}
-
-	// flush out the show
-	mShow->FlushAllTextWindows();		  // get all changes in text windows
-
-	NotifyStatus notifyStatus = boost::bind(&AnimationCanvas::OnNotifyStatus, this, _1);
-	NotifyErrorList notifyErrorList = boost::bind(&AnimationCanvas::OnNotifyErrorList, this, _1, _2, _3);
-	anim = new Animation(mShow, notifyStatus, notifyErrorList);
-	if (anim && (anim->GetNumberSheets() == 0))
-	{
-		delete anim;
-		anim = NULL;
-	}
-	if (anim)
-	{
-		anim->EnableCollisions(((AnimationFrame*)ourframe)->CollisionType());
-		anim->GotoSheet(mShow->GetCurrentSheetNum());
-	}
-	ourframe->UpdatePanel();
-	RefreshCanvas();
-	ourframe->SetStatusText(wxT("Ready"));
-}
-
-
-void AnimationCanvas::FreeAnim()
-{
-	if (anim)
-	{
-		delete anim;
-		anim = NULL;
-		RefreshCanvas();
+		mAnimation->CheckCollisions();
 	}
 }
 
 
-void AnimationCanvas::EnableCollisions(CollisionWarning col)
+void
+AnimationView::SelectCollisions()
 {
-	if (anim)
-	{
-		anim->EnableCollisions(col);
-	}
-}
-
-void AnimationCanvas::CheckCollisions()
-{
-	if (anim)
-	{
-		anim->CheckCollisions();
-	}
-}
-
-void AnimationCanvas::SelectCollisions()
-{
-	unsigned i;
-
-	if (anim)
+	if (mAnimation)
 	{
 		CC_show::SelectionList select;
-		for (i = 0; i < mShow->GetNumPoints(); i++)
+		for (unsigned i = 0; i < GetShow()->GetNumPoints(); i++)
 		{
-			if (anim->IsCollision(i))
+			if (mAnimation->IsCollision(i))
 			{
 				select.insert(i);
 			}
 		}
-		mShow->SetSelection(select);
+		GetShow()->SetSelection(select);
 	}
 }
 
 
-static const wxString collis_text[] =
+void
+AnimationView::Generate()
 {
-	wxT("Ignore"), wxT("Show"), wxT("Beep")
-};
-
-AnimationView::AnimationView() {}
-AnimationView::~AnimationView() {}
-
-void AnimationView::OnDraw(wxDC *dc) {}
-void AnimationView::OnUpdate(wxView *sender, wxObject *hint)
-{
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+	GetAnimationFrame()->SetStatusText(wxT("Compiling..."));
+	if (mAnimation)
 	{
-		static_cast<AnimationFrame*>(GetFrame())->canvas->FreeAnim();
+		delete mAnimation;
+		mAnimation = NULL;
 	}
-}
-
-void AnimationCanvas::StartTimer()
-{
-	if (!timer->Start(60000/GetTempo()))
-	{
-		ourframe->SetStatusText(wxT("Could not get timer!"));
-		timeron = false;
-	}
-	else
-	{
-		timeron = true;
-	}
-}
-
-
-void AnimationCanvas::OnChar(wxKeyEvent& event)
-{
-	if (event.GetKeyCode() == WXK_LEFT)
-		PrevBeat();
-	else if (event.GetKeyCode() == WXK_RIGHT)
-		NextBeat();
-	else if (event.GetKeyCode() == WXK_SPACE)
-	{
-		if (timeron)
-			StopTimer();
-		else
-			StartTimer();
-	}
-	else
-		event.Skip();
-}
-
-
-AnimErrorListView::AnimErrorListView() {}
-AnimErrorListView::~AnimErrorListView() {}
-
-void AnimErrorListView::OnDraw(wxDC *dc) {}
-void AnimErrorListView::OnUpdate(wxView *sender, wxObject *hint)
-{
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
-	{
-		static_cast<AnimErrorList*>(GetFrame())->Close();
-	}
-}
-
-AnimErrorList::AnimErrorList()
-{
-	Init();
-}
-
-
-AnimErrorList::AnimErrorList(CC_show *show, const ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
-		wxWindow *parent, wxWindowID id, const wxString& caption,
-		const wxPoint& pos, const wxSize& size,
-		long style)
-{
-	Init();
 	
-	Create(show, error_markers, num, parent, id, caption, pos, size, style);
-}
-
-
-bool AnimErrorList::Create(CC_show *show, const ErrorMarker error_markers[NUM_ANIMERR], unsigned num,
-		wxWindow *parent, wxWindowID id, const wxString& caption,
-		const wxPoint& pos, const wxSize& size,
-		long style)
-{
-	if (!wxDialog::Create(parent, id, caption, pos, size, style))
-		return false;
-
-	mShow = show;
-	for (size_t i = 0; i < NUM_ANIMERR; ++i)
-		mErrorMarkers[i] = error_markers[i];
-
-	// give this a view so it can pick up document changes
-	mView = new AnimErrorListView;
-	mView->SetDocument(mShow);
-	mView->SetFrame(this);
-
-	CreateControls();
-
-// This fits the dalog to the minimum size dictated by the sizers
-	GetSizer()->Fit(this);
-// This ensures that the dialog cannot be smaller than the minimum size
-	GetSizer()->SetSizeHints(this);
-
-	Center();
-
-	return true;
-}
-
-
-void AnimErrorList::Init()
-{
-}
-
-
-void AnimErrorList::CreateControls()
-{
-// create a sizer for laying things out top down:
-	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
-	SetSizer(topsizer);
-
-	wxButton *closeBut = new wxButton(this, wxID_OK, wxT("Close"));
-	topsizer->Add(closeBut);
-
-	wxListBox* lst = new wxListBox(this, CALCHART__anim_update, wxDefaultPosition, wxSize(200,200), 0, NULL, wxLB_SINGLE);
-
-	topsizer->Add(lst, wxSizerFlags().Expand().Border(5) );
-}
-
-bool AnimErrorList::TransferDataToWindow()
-{
-	wxListBox* lst = (wxListBox*)FindWindow(CALCHART__anim_update);
-
-	for (unsigned i = 0, j = 0; i < NUM_ANIMERR; i++)
+	// flush out the show
+	GetShow()->FlushAllTextWindows();		  // get all changes in text windows
+	
+	NotifyStatus notifyStatus = boost::bind(&AnimationView::OnNotifyStatus, this, _1);
+	NotifyErrorList notifyErrorList = boost::bind(&AnimationView::OnNotifyErrorList, this, _1, _2, _3);
+	mAnimation = new Animation(GetShow(), notifyStatus, notifyErrorList);
+	if (mAnimation && (mAnimation->GetNumberSheets() == 0))
 	{
-		if (!mErrorMarkers[i].pntgroup.empty())
+		delete mAnimation;
+		mAnimation = NULL;
+	}
+	if (mAnimation)
+	{
+		mAnimation->EnableCollisions(GetAnimationFrame()->CollisionType());
+		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
+	}
+	GetAnimationFrame()->UpdatePanel();
+	GetAnimationFrame()->SetStatusText(wxT("Ready"));
+	GetAnimationFrame()->Refresh();
+}
+
+
+// true if changes made
+bool
+AnimationView::PrevBeat()
+{
+	if (mAnimation && mAnimation->PrevBeat())
+	{
+		RefreshFrame();
+		return true;
+	}
+	return false;
+}
+
+
+bool
+AnimationView::NextBeat()
+{
+	if (mAnimation && mAnimation->NextBeat())
+	{
+		RefreshFrame();
+		return true;
+	}
+	return false;
+}
+
+
+void
+AnimationView::GotoBeat(unsigned i)
+{
+	if (mAnimation)
+	{
+		mAnimation->GotoBeat(i);
+		RefreshFrame();
+	}
+}
+
+
+bool
+AnimationView::PrevSheet()
+{
+	if (mAnimation && mAnimation->PrevSheet())
+	{
+		RefreshFrame();
+		return true;
+	}
+	return false;
+}
+
+
+bool
+AnimationView::NextSheet()
+{
+	if (mAnimation && mAnimation->NextSheet())
+	{
+		RefreshFrame();
+		return true;
+	}
+	return false;
+}
+
+
+void
+AnimationView::GotoSheet(unsigned i)
+{
+	if (mAnimation)
+	{
+		mAnimation->GotoSheet(i);
+		RefreshFrame();
+	}
+}
+
+
+int
+AnimationView::GetNumberSheets() const
+{
+	return (mAnimation) ? mAnimation->GetNumberSheets() : 0;
+}
+
+
+int
+AnimationView::GetCurrentSheet() const
+{
+	return (mAnimation) ? mAnimation->GetCurrentSheet() : 0;
+}
+
+
+int
+AnimationView::GetNumberBeats() const
+{
+	return (mAnimation) ? mAnimation->GetNumberBeats() : 0;
+}
+
+
+int
+AnimationView::GetCurrentBeat() const
+{
+	return (mAnimation) ? mAnimation->GetCurrentBeat() : 0;
+}
+
+
+wxString
+AnimationView::GetStatusText() const
+{
+	wxString tempbuf;
+	
+	if (mAnimation)
+	{
+		tempbuf.Printf(wxT("Beat %u of %u  Sheet %d of %d \"%.32s\""),
+					   mAnimation->GetCurrentBeat(), mAnimation->GetNumberBeats(),
+					   mAnimation->GetCurrentSheet()+1, mAnimation->GetNumberSheets(),
+					   mAnimation->GetCurrentSheetName().c_str());
+	}
+	else
+	{
+		tempbuf = wxT("No animation available");
+	}
+	return tempbuf;
+}
+
+
+const CC_coord&
+AnimationView::GetShowSize() const
+{
+	return GetShow()->GetMode().Size();
+}
+
+
+void
+AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
+								   long mouseXEnd, long mouseYEnd)
+{
+	// otherwise, Select points within rectangle
+	Coord x_off = GetShow()->GetMode().Offset().x;
+	Coord y_off = GetShow()->GetMode().Offset().y;
+	CC_lasso lasso(CC_coord(mouseXStart-x_off, mouseYStart-y_off));
+	lasso.Append(CC_coord(mouseXStart-x_off, mouseYEnd-y_off));
+	lasso.Append(CC_coord(mouseXEnd-x_off, mouseYEnd-y_off));
+	lasso.Append(CC_coord(mouseXEnd-x_off, mouseYStart-y_off));
+	lasso.End();
+	CC_show::SelectionList pointlist;
+	for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
+	{
+		CC_coord position = mAnimation->Position(i);
+		if (lasso.Inside(position))
 		{
-			lst->Append(animate_err_msgs[i]);
-			pointsels[j++] = mErrorMarkers[i];
+			pointlist.insert(i);
 		}
 	}
-	return true;
+	GetShow()->SetSelection(pointlist);
 }
 
-AnimErrorList::~AnimErrorList()
+
+// Keystroke command toggles the timer, but the timer
+// lives in the Frame.  So we have this weird path...
+void
+AnimationView::ToggleTimer()
 {
-	delete mView;
+	GetAnimationFrame()->ToggleTimer();
 }
 
 
-void AnimErrorList::OnCmdUpdate(wxCommandEvent& event)
+void
+AnimationView::OnNotifyStatus(const wxString& status)
 {
-	Update(event.IsSelection() ? event.GetSelection() : -1);
+	GetAnimationFrame()->SetStatusText(status);
 }
 
 
-void AnimErrorList::Unselect()
+bool
+AnimationView::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
 {
-	wxListBox* lst = (wxListBox*)FindWindow(CALCHART__anim_update);
-	int i = lst->GetSelection();
-
-	if (i >= 0)
-	{
-		lst->Deselect(i);
-	}
+	AnimErrorList* errorList = new AnimErrorList(GetShow(), error_markers, sheetnum,
+				GetAnimationFrame(), wxID_ANY, message);
+	errorList->Show();
+	return (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
 }
 
 
-void AnimErrorList::Update()
+AnimationFrame*
+AnimationView::GetAnimationFrame()
 {
-	wxListBox* lst = (wxListBox*)FindWindow(CALCHART__anim_update);
-	Update(lst->GetSelection());
+	return static_cast<AnimationFrame*>(GetFrame());
 }
 
 
-void AnimErrorList::Update(int i)
+const AnimationFrame*
+AnimationView::GetAnimationFrame() const
 {
-	if (i >= 0)
-	{
-		CC_show::SelectionList select;
-		for (unsigned j = 0; j < mShow->GetNumPoints(); j++)
-		{
-			if (pointsels[i].pntgroup.count(j))
-			{
-				select.insert(j);
-			}
-		}
-		mShow->SetSelection(select);
-	}
-	mShow->SetCurrentSheet(sheetnum > mShow->GetNumSheets() ? mShow->GetNumSheets()-1 : sheetnum);
-	mShow->AllViewGoToCont(pointsels[i].contnum, pointsels[i].line, pointsels[i].col);
+	return static_cast<const AnimationFrame*>(GetFrame());
 }
+
+
+CC_show*
+AnimationView::GetShow()
+{
+	return static_cast<CC_show*>(GetDocument());
+}
+
+
+const CC_show*
+AnimationView::GetShow() const
+{
+	return static_cast<const CC_show*>(GetDocument());
+}
+

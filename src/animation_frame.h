@@ -26,35 +26,18 @@
 #include "animate.h"
 
 #include <wx/wx.h>
+#include <wx/docmdi.h>
 
-class AnimationCanvas;
 class AnimationView;
-class CC_show;
-
-enum
-{
-	CALCHART__ANIM_REANIMATE = 1,
-	CALCHART__ANIM_SELECT_COLL,
-	
-	CALCHART__anim_stop,
-	CALCHART__anim_play,
-	CALCHART__anim_prev_beat,
-	CALCHART__anim_next_beat,
-	CALCHART__anim_prev_sheet,
-	CALCHART__anim_next_sheet,
-	CALCHART__anim_collisions,
-	CALCHART__anim_tempo,
-	CALCHART__anim_gotosheet,
-	CALCHART__anim_gotobeat,
-	
-	CALCHART__anim_update
-};
+class AnimationCanvas;
 
 class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxFrame *frame, CC_show *show);
+	AnimationFrame(wxWindow *parent, wxDocument* doc, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 	~AnimationFrame();
+	
+	virtual void SetView(wxView *view);
 
 	void OnCmdReanimate(wxCommandEvent& event);
 	void OnCmdSelectCollisions(wxCommandEvent& event);
@@ -64,29 +47,33 @@ public:
 	void OnCmd_anim_play(wxCommandEvent& event);
 	void OnCmd_anim_prev_beat(wxCommandEvent& event);
 	void OnCmd_anim_next_beat(wxCommandEvent& event);
+	void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
 	void OnCmd_anim_prev_sheet(wxCommandEvent& event);
 	void OnCmd_anim_next_sheet(wxCommandEvent& event);
 	void OnCmd_anim_collisions(wxCommandEvent& event);
 	void OnSlider_anim_tempo(wxScrollEvent& event);
 	void OnSlider_anim_gotosheet(wxScrollEvent& event);
 	void OnSlider_anim_gotobeat(wxScrollEvent& event);
-	void OnChar(wxKeyEvent& event);
 
+	// Called by the view
+	void ToggleTimer();
 	void UpdatePanel();
+	CollisionWarning CollisionType();
 
-	inline CollisionWarning CollisionType()
-	{
-		return (CollisionWarning)collis->GetSelection();
-	}
-
-	AnimationCanvas *canvas;
 private:
 	AnimationView *mView;
-	wxChoice *collis;
-	wxSlider *sheet_slider;
-	wxSlider *beat_slider;
+	AnimationCanvas *mCanvas;
+	wxSlider *mSheetSlider;
+	wxSlider *mBeatSlider;
 
-	friend class AnimationCanvas;
+// timer stuff:
+	void StartTimer();
+	void StopTimer();
+	unsigned GetTempo() const;
+	void SetTempo(unsigned tempo);
+	wxTimer *mTimer;
+	unsigned mTempo;
+	bool mTimerOn;
 
 	wxDECLARE_EVENT_TABLE();
 };

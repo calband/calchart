@@ -636,9 +636,7 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		AnimationFrame *anim =
-			new AnimationFrame(this, field->mShow);
-		anim->canvas->Generate();
+		(void)new AnimationFrame(this, field->mShow);
 	}
 }
 

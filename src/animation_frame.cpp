@@ -21,12 +21,30 @@
 */
 
 #include "animation_frame.h"
-#include "basic_ui.h"
 #include "anim_ui.h"
-//#include "modes.h"
-//#include "confgr.h"
-//#include "cc_shapes.h"
-//#include <boost/bind.hpp>
+#include "animation_canvas.h"
+#include "basic_ui.h"
+
+#include <wx/timer.h>
+
+
+enum
+{
+	CALCHART__anim_reanimate = 1000,
+	CALCHART__anim_select_coll,
+	CALCHART__anim_stop,
+	CALCHART__anim_play,
+	CALCHART__anim_prev_beat,
+	CALCHART__anim_next_beat,
+	CALCHART__anim_next_beat_timer,
+	CALCHART__anim_prev_sheet,
+	CALCHART__anim_next_sheet,
+	CALCHART__anim_collisions,
+	CALCHART__anim_tempo,
+	CALCHART__anim_gotosheet,
+	CALCHART__anim_gotobeat,
+};
+
 
 ToolBarEntry anim_tb[] =
 {
@@ -38,10 +56,10 @@ ToolBarEntry anim_tb[] =
 	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
 };
 
+
 BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
-EVT_CHAR(AnimationFrame::OnChar)
-EVT_MENU(CALCHART__ANIM_REANIMATE, AnimationFrame::OnCmdReanimate)
-EVT_MENU(CALCHART__ANIM_SELECT_COLL, AnimationFrame::OnCmdSelectCollisions)
+EVT_MENU(CALCHART__anim_reanimate, AnimationFrame::OnCmdReanimate)
+EVT_MENU(CALCHART__anim_select_coll, AnimationFrame::OnCmdSelectCollisions)
 EVT_MENU(wxID_CLOSE, AnimationFrame::OnCmdClose)
 EVT_MENU(CALCHART__anim_stop, AnimationFrame::OnCmd_anim_stop)
 EVT_MENU(CALCHART__anim_play, AnimationFrame::OnCmd_anim_play)
@@ -53,28 +71,37 @@ EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
+EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationFrame::OnCmd_anim_next_beat_timer)
 END_EVENT_TABLE()
+
 
 static const wxString collis_text[] =
 {
 	wxT("Ignore"), wxT("Show"), wxT("Beep")
 };
 
-AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
-: wxFrame(frame, wxID_ANY, wxT("Animation"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, wxT("anim"))
+
+AnimationFrame::AnimationFrame(/*wxView* view, */wxWindow *parent, wxDocument* doc, const wxPoint& pos, const wxSize& size) :
+wxFrame(/*doc, view, */parent, wxID_ANY, wxT("Animation"), pos, size),
+//mView(static_cast<AnimationView*>(view)),
+mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
+mTempo(120),
+mTimerOn(false)
 {
-	mView = new AnimationView;
-	mView->SetDocument(show);
-	mView->SetFrame(this);
 // Give it an icon
+	// give this a view so it can pick up document changes
+	mView = new AnimationView();
+	mView->SetDocument(doc);
+	mView->SetFrame(this);
 	SetBandIcon(this);
 
+	// this frame has 2 status bars at the bottom
 	CreateStatusBar(2);
 
 // Make a menubar
 	wxMenu *anim_menu = new wxMenu;
-	anim_menu->Append(CALCHART__ANIM_REANIMATE, wxT("&Reanimate Show"), wxT("Regenerate animation"));
-	anim_menu->Append(CALCHART__ANIM_SELECT_COLL, wxT("&Select Collisions"), wxT("Select colliding points"));
+	anim_menu->Append(CALCHART__anim_reanimate, wxT("&Reanimate Show"), wxT("Regenerate animation"));
+	anim_menu->Append(CALCHART__anim_select_coll, wxT("&Select Collisions"), wxT("Select colliding points"));
 	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
 
 	wxMenuBar *menu_bar = new wxMenuBar;
@@ -85,46 +112,33 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 	CreateCoolToolBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
-	canvas = new AnimationCanvas(this, show);
-	canvas->UpdateText();
+	mCanvas = new AnimationCanvas(this, mView);
 
 // Add the controls
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
-	topsizer->Add(canvas, wxSizerFlags(1).Expand().Border(5));
+	topsizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
 
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")),
-		wxSizerFlags());
-	collis = new wxChoice(this, CALCHART__anim_collisions,
-		wxDefaultPosition, wxDefaultSize,
-		sizeof(collis_text)/sizeof(const wxString), collis_text);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")), wxSizerFlags());
+	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
 	collis->SetSelection(1);
 	sizer1->Add(collis, wxSizerFlags().Expand().Border(5));
 
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Tempo")),
-		wxSizerFlags());
-	wxSlider *sldr =
-		new wxSlider(this, CALCHART__anim_tempo,
-		canvas->GetTempo(), 10, 300, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Tempo")), wxSizerFlags());
+	wxSlider *sldr = new wxSlider(this, CALCHART__anim_tempo, GetTempo(), 10, 300, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 	sizer1->Add(sldr, wxSizerFlags().Expand().Border(5));
 
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 // Sheet slider (will get set later with UpdatePanel())
-	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")),
-		wxSizerFlags());
-	sheet_slider = new wxSlider(this, CALCHART__anim_gotosheet,
-		1, 1, 2, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer2->Add(sheet_slider, wxSizerFlags().Expand().Border(5));
+	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")), wxSizerFlags());
+	mSheetSlider = new wxSlider(this, CALCHART__anim_gotosheet, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+	sizer2->Add(mSheetSlider, wxSizerFlags().Expand().Border(5));
 
 // Beat slider (will get set later with UpdatePanel())
-	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")),
-		wxSizerFlags());
-	beat_slider = new wxSlider(this, CALCHART__anim_gotobeat,
-		0, 0, 1, wxDefaultPosition,
+	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")), wxSizerFlags());
+	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition,
                     wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer2->Add(beat_slider, wxSizerFlags().Expand().Border(5));
+	sizer2->Add(mBeatSlider, wxSizerFlags().Expand().Border(5));
 
 //create a sizer with no border and centered horizontally
 	topsizer->Add(sizer1, wxSizerFlags(0).Left());
@@ -134,143 +148,262 @@ AnimationFrame::AnimationFrame(wxFrame *frame, CC_show *show)
 
 	topsizer->SetSizeHints(this);				  // set size hints to honour minimum size
 
+	mView->Generate();
+
 	UpdatePanel();
 	Fit();
+	Show(true);
 
 	// make animation screen large by default.
 	Maximize(true);
-	Show(true);
 }
 
 
 AnimationFrame::~AnimationFrame()
 {
+	mCanvas->SetView(NULL);
+	mTimer->Stop();
 	delete mView;
 }
 
 
-void AnimationFrame::OnCmdReanimate(wxCommandEvent& event)
+void
+AnimationFrame::SetView(wxView *view)
 {
-	canvas->Generate();
+//	wxDocMDIChildFrame::SetView(view);
+	mCanvas->SetView(static_cast<AnimationView*>(view));
+	mView = static_cast<AnimationView*>(view);
 }
 
 
-void AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event)
+void
+AnimationFrame::OnCmdReanimate(wxCommandEvent& event)
 {
-	canvas->SelectCollisions();
+	StopTimer();
+	if (mView)
+	{
+		mView->Generate();
+	}
 }
 
 
-void AnimationFrame::OnCmdClose(wxCommandEvent& event)
+void
+AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event)
+{
+	if (mView)
+	{
+		mView->SelectCollisions();
+	}
+}
+
+
+void
+AnimationFrame::OnCmdClose(wxCommandEvent& event)
 {
 	Close();
 }
 
 
-void AnimationFrame::OnCmd_anim_stop(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_stop(wxCommandEvent& event)
 {
-	canvas->StopTimer();
+	StopTimer();
 }
 
 
-void AnimationFrame::OnCmd_anim_play(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_play(wxCommandEvent& event)
 {
-	canvas->StartTimer();
+	StartTimer();
 }
 
 
-void AnimationFrame::OnCmd_anim_prev_beat(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_prev_beat(wxCommandEvent& event)
 {
-	canvas->PrevBeat();
+	if (mView)
+	{
+		mView->PrevBeat();
+	}
 }
 
 
-void AnimationFrame::OnCmd_anim_next_beat(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_next_beat(wxCommandEvent& event)
 {
-	canvas->NextBeat();
+	if (mView)
+	{
+		mView->NextBeat();
+	}
 }
 
 
-void AnimationFrame::OnCmd_anim_prev_sheet(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 {
-	canvas->PrevSheet();
+	// next_beat could come from the timer.  If so, stop the timer.
+	if (mView && !mView->NextBeat())
+	{
+		StopTimer();
+	}
 }
 
 
-void AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_prev_sheet(wxCommandEvent& event)
 {
-	canvas->NextSheet();
+	if (mView)
+	{
+		mView->PrevSheet();
+	}
 }
 
 
-void AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
+void
+AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event)
 {
-	canvas->EnableCollisions((CollisionWarning)event.GetSelection());
-	canvas->CheckCollisions();
-	canvas->Redraw();
+	if (mView)
+	{
+		mView->NextSheet();
+	}
 }
 
 
-void AnimationFrame::OnSlider_anim_tempo(wxScrollEvent& event)
+void
+AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 {
-	canvas->SetTempo(event.GetPosition());
+	if (mView)
+	{
+		mView->EnableCollisions(static_cast<CollisionWarning>(event.GetSelection()));
+		mView->CheckCollisions();
+	}
+	Refresh();
 }
 
 
-void AnimationFrame::OnSlider_anim_gotosheet(wxScrollEvent& event)
+void
+AnimationFrame::OnSlider_anim_tempo(wxScrollEvent& event)
 {
-	canvas->GotoSheet(event.GetPosition()-1);
+	SetTempo(event.GetPosition());
+	StartTimer();
 }
 
 
-void AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
+void
+AnimationFrame::OnSlider_anim_gotosheet(wxScrollEvent& event)
 {
-	canvas->GotoBeat(event.GetPosition());
+	if (mView)
+	{
+		mView->GotoSheet(event.GetPosition()-1);
+	}
 }
 
 
-void AnimationFrame::UpdatePanel()
+void
+AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
 {
-	int num, curr;
+	if (mView)
+	{
+		mView->GotoBeat(event.GetPosition());
+	}
+}
 
-	num = canvas->GetNumberSheets();
-	curr = canvas->GetCurrentSheet()+1;
+
+void
+AnimationFrame::ToggleTimer()
+{
+	if (mTimerOn)
+		StopTimer();
+	else
+		StartTimer();
+}
+
+
+void
+AnimationFrame::UpdatePanel()
+{
+	int num = (mView) ? mView->GetNumberSheets() : 1;
+	int curr = (mView) ? mView->GetCurrentSheet()+1 : 1;
 
 	if (num > 1)
 	{
-		sheet_slider->Enable(true);
-		if (sheet_slider->GetMax() != num)
-			sheet_slider->SetValue(1);			  // So Motif doesn't complain about value
-		sheet_slider->SetRange(1, num);
-		if (sheet_slider->GetValue() != curr)
-			sheet_slider->SetValue(curr);
+		mSheetSlider->Enable(true);
+		if (mSheetSlider->GetMax() != num)
+			mSheetSlider->SetValue(1);			  // So Motif doesn't complain about value
+		mSheetSlider->SetRange(1, num);
+		if (mSheetSlider->GetValue() != curr)
+			mSheetSlider->SetValue(curr);
 	}
 	else
 	{
-		sheet_slider->Enable(false);
+		mSheetSlider->Enable(false);
 	}
 
-	num = canvas->GetNumberBeats()-1;
-	curr = canvas->GetCurrentBeat();
+	num = (mView) ? mView->GetNumberBeats()-1 : 1;
+	curr = (mView) ? mView->GetCurrentBeat() : 1;
 
 	if (num > 0)
 	{
-		beat_slider->Enable(true);
-		if (beat_slider->GetMax() != num)
-			beat_slider->SetValue(0);			  // So Motif doesn't complain about value
-		beat_slider->SetRange(0, num);
-		if (beat_slider->GetValue() != curr)
-			beat_slider->SetValue(curr);
+		mBeatSlider->Enable(true);
+		if (mBeatSlider->GetMax() != num)
+			mBeatSlider->SetValue(0);			  // So Motif doesn't complain about value
+		mBeatSlider->SetRange(0, num);
+		if (mBeatSlider->GetValue() != curr)
+			mBeatSlider->SetValue(curr);
 	}
 	else
 	{
-		beat_slider->Enable(false);
+		mBeatSlider->Enable(false);
+	}
+	if (mView)
+	{
+		SetStatusText(mView->GetStatusText(), 1);
 	}
 }
 
 
-void AnimationFrame::OnChar(wxKeyEvent& event)
+CollisionWarning
+AnimationFrame::CollisionType()
 {
-	canvas->OnChar(event);
+	wxChoice* choiceCtrl = static_cast<wxChoice*>(FindWindow(CALCHART__anim_collisions));
+
+	return static_cast<CollisionWarning>(choiceCtrl->GetSelection());
+}
+
+
+void
+AnimationFrame::StartTimer()
+{
+	if (!mTimer->Start(60000/GetTempo()))
+	{
+		SetStatusText(wxT("Could not set tempo!"));
+		mTimerOn = false;
+	}
+	else
+	{
+		mTimerOn = true;
+	}
+}
+
+
+void
+AnimationFrame::StopTimer()
+{
+	mTimer->Stop();
+	mTimerOn = false;
+}
+
+
+unsigned
+AnimationFrame::GetTempo() const
+{
+	return mTempo;
+}
+
+
+void
+AnimationFrame::SetTempo(unsigned tempo)
+{
+	mTempo = tempo;
 }
 
