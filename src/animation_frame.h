@@ -23,6 +23,8 @@
 #ifndef _ANIMATION_FRAME_H_
 #define _ANIMATION_FRAME_H_
 
+//#define CC_OMNIVIEW
+
 #include "animate.h"
 
 #include <wx/wx.h>
@@ -30,6 +32,9 @@
 
 class AnimationView;
 class AnimationCanvas;
+#ifdef CC_OMNIVIEW
+class CCOmniView_Canvas;
+#endif // CC_OMNIVIEW
 
 class AnimationFrame: public wxFrame
 {
@@ -62,7 +67,11 @@ public:
 
 private:
 	AnimationView *mView;
+#ifdef CC_OMNIVIEW
+	CCOmniView_Canvas *mCanvas;
+#else // CC_OMNIVIEW
 	AnimationCanvas *mCanvas;
+#endif // CC_OMNIVIEW
 	wxSlider *mSheetSlider;
 	wxSlider *mBeatSlider;
 

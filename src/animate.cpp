@@ -375,7 +375,11 @@ bool Animation::IsCollision(unsigned which) const
 AnimateDir Animation::Direction(unsigned which) const
 {
 	return (*curr_cmds.at(which))->Direction();
-	return ANIMDIR_E;
+}
+
+float Animation::RealDirection(unsigned which) const
+{
+	return (*curr_cmds.at(which))->RealDirection();
 }
 
 CC_coord Animation::Position(unsigned which) const

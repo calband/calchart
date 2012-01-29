@@ -24,6 +24,9 @@
 #include "anim_ui.h"
 #include "animation_canvas.h"
 #include "basic_ui.h"
+#ifdef CC_OMNIVIEW
+#include "cc_omniview_canvas.h"
+#endif // CC_OMNIVIEW
 
 #include <wx/timer.h>
 
@@ -112,7 +115,11 @@ mTimerOn(false)
 	CreateCoolToolBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry), this);
 
 // Add the field canvas
+#ifdef CC_OMNIVIEW
+	mCanvas = new CCOmniView_Canvas(this, mView);
+#else // CC_OMNIVIEW
 	mCanvas = new AnimationCanvas(this, mView);
+#endif // CC_OMNIVIEW
 
 // Add the controls
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);

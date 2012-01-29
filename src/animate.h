@@ -140,6 +140,7 @@ public:
 	// For drawing:
 	bool IsCollision(unsigned which) const;
 	AnimateDir Direction(unsigned which) const;
+	float RealDirection(unsigned which) const;
 	CC_coord Position(unsigned which) const;
 
 	int GetNumberSheets() const;

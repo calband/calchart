@@ -78,6 +78,8 @@ private:
 	CC_show *GetShow();
 
 	Animation *mAnimation;
+	friend class CCOmniView_Canvas;
+	friend class CCOmniView_Context;
 };
 
 #endif
