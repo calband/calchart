@@ -33,7 +33,24 @@
 #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
 #endif
 
-#define DO_CCVIEW 1
+// Note about drawing:
+// openGL uses a coordinate system that is like:
+//
+//    ^ y
+//    |  x
+// <--+--->
+//    |
+//    v -y
+//
+// where as calchart uses a system like:
+//
+//    ^ -y
+//    |  x
+// <--+--->
+//    |
+//    v y
+//
+// care must be taken to getting these correct
 
 typedef struct { WhichImageEnum mImageId; wxString mImageFilename; } id_string_t;
 
@@ -91,7 +108,8 @@ END_EVENT_TABLE()
 // helper functions
 // ----------------------------------------------------------------------------
 
-static void CheckGLError()
+static void
+CheckGLError()
 {
     GLenum errLast = GL_NO_ERROR;
 	
@@ -116,7 +134,22 @@ static void CheckGLError()
     }
 }
 
-bool LoadTexture(const wxString &filename, GLuint& texture)
+static float
+NormalizeAngle(float angle)
+{
+	while (angle > 2*M_PI)
+	{
+		angle -= 2*M_PI;
+	}
+	while (angle < 0.0)
+	{
+		angle += 2*M_PI;
+	}
+	return angle;
+}
+
+static bool
+LoadTexture(const wxString &filename, GLuint& texture)
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -129,7 +162,7 @@ bool LoadTexture(const wxString &filename, GLuint& texture)
 	wxImage image;
 	if ( !image.LoadFile(filename) )
 	{
-		wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
+		wxLogError(wxT("Couldn't load image from ") + filename + wxT("."));
 		return false;
 	}
 
@@ -158,66 +191,20 @@ bool LoadTexture(const wxString &filename, GLuint& texture)
 	return true;
 }
 
-
-CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas *canvas) :
-wxGLContext(canvas)
-{
-	SetCurrent(*canvas);
-	
-    // set up the parameters we want to use
-    glEnable(GL_TEXTURE_2D);
-	
-    // set viewing projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
-	
-    // create the textures to use for cube sides: they will be reused by all
-    // canvases (which is probably not critical in the case of simple textures
-    // we use here but could be really important for a real application where
-    // each texture could take many megabytes)
-    glGenTextures(WXSIZEOF(m_textures), m_textures);
-
-	wxInitAllImageHandlers();
-	for (size_t i = 0; i < sizeof(ListOfImageFiles)/sizeof(ListOfImageFiles[0]); ++i)
-	{
-		LoadTexture(kImageDir + ListOfImageFiles[i].mImageFilename, m_textures[ListOfImageFiles[i].mImageId]);
-	}
-
-	glEnable(GL_BLEND);			// to allow alpha values to be considered
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  // to allow alpha values to be considered
-	glClearColor(0.289,0.941,1.0,1.0);  // Default Background Color
-    CheckGLError();
-
-}
-
-
-void
-DrawBox(const std::pair<float,float> &start, const std::pair<float,float> &end, const std::pair<float,float> z)
-{
-	glBegin (GL_POLYGON);
-	glVertex3f(start.first, start.second, z.first);
-	glVertex3f(end.first, start.second, z.first);
-	glVertex3f(end.first, end.second, z.second);
-	glVertex3f(start.first, end.second, z.second);
-	glEnd ();
-}
-
-
-void
+// We always draw from the upper left, upper right, lower right, lower left
+static void
 DrawTextureOnBox(const float points[4][3], size_t repeat_x, size_t repeat_y, const GLuint &texture)
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
-	glTexCoord2f(0,repeat_y); glVertex3f(points[0][0], points[0][1], points[0][2]);
-	glTexCoord2f(repeat_x,repeat_y); glVertex3f(points[1][0], points[1][1], points[1][2]);
-	glTexCoord2f(repeat_x,0); glVertex3f(points[2][0], points[2][1], points[2][2]);
-	glTexCoord2f(0,0); glVertex3f(points[3][0], points[3][1], points[3][2]);
+	glTexCoord2f(0,0); glVertex3f(points[0][0], points[0][1], points[0][2]);
+	glTexCoord2f(repeat_x,0); glVertex3f(points[1][0], points[1][1], points[1][2]);
+	glTexCoord2f(repeat_x,repeat_y); glVertex3f(points[2][0], points[2][1], points[2][2]);
+	glTexCoord2f(0,repeat_y); glVertex3f(points[3][0], points[3][1], points[3][2]);
 	glEnd();
 }
 
-
-void
+static void
 DrawBox(const float points[4][3])
 {
 	glBegin(GL_QUADS);
@@ -228,96 +215,135 @@ DrawBox(const float points[4][3])
 	glEnd();
 }
 
+static WhichImageEnum
+GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirection, float &x1, float &x2, float &y1, float &y2)
+{
+	// Returns which direction they are facing in regards to the camera.
+	float relativeAngle = marcherDirection - cameraAngleToMarcher; // convert to relative angle;
+	relativeAngle = NormalizeAngle(relativeAngle);
+	
+	if (relativeAngle >= 1.0*M_PI/8.0 && relativeAngle < 3.0*M_PI/8.0) 
+	{
+		y1 += 0.45;
+		y2 -= 0.45;
+		x1 -= 0.45;
+		x2 += 0.45;
+		return kBR0;
+	}
+	else if (relativeAngle >= 3.0*M_PI/8.0 && relativeAngle < 5.0*M_PI/8.0)
+	{
+		x1 -= 0.45;
+		x2 += 0.45;
+		return kR0;
+	}
+	else if (relativeAngle >= 5.0*M_PI/8.0 && relativeAngle < 7.0*M_PI/8.0)
+	{
+		y1 -= 0.45;
+		y2 += 0.45;
+		x1 -= 0.45;
+		x2 += 0.45;
+		return kFR0;
+	}
+	else if (relativeAngle >= 7.0*M_PI/8.0 && relativeAngle < 9.0*M_PI/8.0)
+	{
+		y1 -= 0.45;
+		y2 += 0.45;
+		return kF0;
+	}
+	else if (relativeAngle >= 9.0*M_PI/8.0 && relativeAngle < 11.0*M_PI/8.0)
+	{
+		y1 -= 0.45;
+		y2 += 0.45;
+		x1 += 0.45;
+		x2 -= 0.45;
+		return kFL0;
+	}
+	else if (relativeAngle >= 11.0*M_PI/8.0 && relativeAngle < 13.0*M_PI/8.0)
+	{
+		x1 += 0.45;
+		x2 -= 0.45;
+		return kL0;
+	}
+	else if (relativeAngle >= 13.0*M_PI/8.0 && relativeAngle < 15.0*M_PI/8.0)
+	{
+		y1 += 0.45;
+		y2 -= 0.45;
+		x1 += 0.45;
+		x2 -= 0.45;
+		return kBL0;
+	}
+	else // if (relativeAngle >= 15.0*M_PI/8.0 || relativeAngle < 1.0*M_PI/8.0) // and everything else
+	{
+		y1 += 0.45;
+		y2 -= 0.45;
+		return kB0;
+	}
+}
+
+// Returns the angle in regards to the camera.
+static float
+GetAngle(float x, float y, const viewpoint_t &viewpoint)
+{
+	viewpoint_t v = viewpoint_t(x - viewpoint.x, y - viewpoint.y);
+	float mag = (sqrt(v.x*v.x + v.y*v.y));
+	float ang = acos(v.x/mag); // normalize
+	return (v.y < 0) ? -ang : ang;
+}
+
+
+CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas *canvas) :
+wxGLContext(canvas)
+{
+	SetCurrent(*canvas);
+	
+    // set up the parameters we want to use
+    glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);			// to allow alpha values to be considered
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  // to allow alpha values to be considered
+	glClearColor(0.289,0.941,1.0,1.0);  // Default Background Color
+	
+    glGenTextures(WXSIZEOF(m_textures), m_textures);
+
+	wxInitAllImageHandlers();
+	for (size_t i = 0; i < sizeof(ListOfImageFiles)/sizeof(ListOfImageFiles[0]); ++i)
+	{
+		if (!LoadTexture(kImageDir + ListOfImageFiles[i].mImageFilename, m_textures[ListOfImageFiles[i].mImageId]))
+		{
+			wxLogError(wxT("Could not load ") + ListOfImageFiles[i].mImageFilename);
+		}
+
+	}
+
+    CheckGLError();
+}
 
 void
-CCOmniView_GLContext::DrawField(float xangle, float yangle, const wxSize &ClientSize, bool crowdOn)
+CCOmniView_GLContext::DrawField(bool crowdOn)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
-#if 0//!DO_CCVIEW
-	
-//    glLoadIdentity();
-//    glTranslatef(0.0f, 0.0f, -2.0f);
-//    glRotatef(xangle, 1.0f, 0.0f, 0.0f);
-//    glRotatef(yangle, 0.0f, 1.0f, 0.0f);
-	
-    // draw six faces of a cube of size 1 centered at (0, 0, 0)
-    glBindTexture(GL_TEXTURE_2D, m_textures[0]);
-    glBegin(GL_QUADS);
-	glNormal3f( 0.0f, 0.0f, 1.0f);
-	glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-	glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f, 0.5f);
-	glTexCoord2f(1, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-	glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-    glEnd();
-	
-    glBindTexture(GL_TEXTURE_2D, m_textures[1]);
-    glBegin(GL_QUADS);
-	glNormal3f( 0.0f, 0.0f,-1.0f);
-	glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-	glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f,-0.5f);
-	glTexCoord2f(1, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-	glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-    glEnd();
-	
-    glBindTexture(GL_TEXTURE_2D, m_textures[2]);
-    glBegin(GL_QUADS);
-	glNormal3f( 0.0f, 1.0f, 0.0f);
-	glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-	glTexCoord2f(1, 0); glVertex3f( 0.5f, 0.5f,-0.5f);
-	glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-	glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glEnd();
-	
-    glBindTexture(GL_TEXTURE_2D, m_textures[3]);
-    glBegin(GL_QUADS);
-	glNormal3f( 0.0f,-1.0f, 0.0f);
-	glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-	glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f,-0.5f);
-	glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-	glTexCoord2f(0, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-    glEnd();
-	
-    glBindTexture(GL_TEXTURE_2D, m_textures[4]);
-    glBegin(GL_QUADS);
-	glNormal3f( 1.0f, 0.0f, 0.0f);
-	glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-	glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f, 0.5f);
-	glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-	glTexCoord2f(0, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-    glEnd();
-	
-    glBindTexture(GL_TEXTURE_2D, m_textures[5]);
-    glBegin(GL_QUADS);
-	glNormal3f(-1.0f, 0.0f, 0.0f);
-	glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-	glTexCoord2f(1, 0); glVertex3f(-0.5f,-0.5f, 0.5f);
-	glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-	glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-    glEnd();
-	
-#else
 	
 	float FieldEW = 80;
 	float FieldNS = 160;
 
-	const float points00[][3] = { { -1000, -1000, 30 }, { 1000, -1000, 30 }, { 1000, 1000, 30 }, { -1000, 1000, 30} };
-	DrawTextureOnBox(points00, 1, 1, m_textures[kSky]);
-	const float points01[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, FieldEW/2.0+10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0+10, 0 } };
-	DrawTextureOnBox(points01, 1, 1, m_textures[kField]);
-	const float points02[][3] = { { FieldNS/2.0, +FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { FieldNS/2.0+16, -FieldEW/2.0, 0 }, { FieldNS/2.0+16, +FieldEW/2.0, 0 } };
+	// because we look up to see the sky, make sure the texture is pointing down:
+	const float points00[][3] = { { 1000, -1000, 30 }, { -1000, -1000, 30 }, { -1000, 1000, 30 }, { 1000, 1000, 30} };
+	DrawTextureOnBox(points00, 20, 20, m_textures[kSky]);
+	const float points01[][3] = { { -1*(FieldNS/2.0+25), (FieldEW/2.0+10), 0 }, { (FieldNS/2.0+25), (FieldEW/2.0+10), 0 }, { (FieldNS/2.0+25), -1*(FieldEW/2.0+10), 0 }, { -1*(FieldNS/2.0+25), -1*(FieldEW/2.0+10), 0 } };
+	DrawTextureOnBox(points01, 2, 2, m_textures[kField]);
+	const float points02[][3] = { { FieldNS/2.0+16, +FieldEW/2.0, 0 }, { FieldNS/2.0+16, -FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 } };
 	DrawTextureOnBox(points02, 1, 1, m_textures[kCalifornia]);
-	const float points03[][3] = { { -FieldNS/2.0, -FieldEW/2.0, 0 }, { -FieldNS/2.0, +FieldEW/2.0, 0 }, { -FieldNS/2.0-16, +FieldEW/2.0, 0 }, { -FieldNS/2.0-16, -FieldEW/2.0, 0 } };
+	const float points03[][3] = { { -1*(FieldNS/2.0+16), -1*(FieldEW/2.0), 0 }, { -1*(FieldNS/2.0+16), -1*(-FieldEW/2.0), 0 }, { -1*(FieldNS/2.0), -1*(-FieldEW/2.0), 0 }, { -1*(FieldNS/2.0), -1*(FieldEW/2.0), 0 } };
 	DrawTextureOnBox(points03, 1, 1, m_textures[kEECS]);
-	const float points04[][3] = { { -FieldNS/2.0, -FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 }, { -FieldNS/2.0, FieldEW/2.0, 0 } };
+	const float points04[][3] = { { -FieldNS/2.0, FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { -FieldNS/2.0, -FieldEW/2.0, 0 } };
 	DrawTextureOnBox(points04, 1, 1, m_textures[kLines]);
-	const float points05[][3] = { { -10, -10, 0 }, { 10, -10, 0 }, { 10, 10, 0 }, { -10, 10, 0 } };
+	const float points05[][3] = { { -10, 10, 0 }, { 10, 10, 0 }, { 10, -10, 0 }, { -10, -10, 0 } };
 	DrawTextureOnBox(points05, 1, 1, m_textures[kCalband]);
 	
 	// stands:
-	const float points06[][3] = { { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 30, 25 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 30, 25 } };
+	const float points06[][3] = { { -FieldNS/2.0 - 25, FieldEW/2.0 + 30, 25 } , { FieldNS/2.0 + 25, FieldEW/2.0 + 30, 25 } , { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 } };
 	DrawTextureOnBox(points06, 5, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points07[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0 - 10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0 - 10, 0 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 30, 25 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 30, 25 } };
+	const float points07[][3] = { { -(-FieldNS/2.0 - 25), -(FieldEW/2.0 + 30), 25 } , { -(FieldNS/2.0 + 25), -(FieldEW/2.0 + 30), 25 } , { -(FieldNS/2.0 + 25), -(FieldEW/2.0 + 10), 0 }, { -(-FieldNS/2.0-25), -(FieldEW/2.0 + 10), 0 } };
 	DrawTextureOnBox(points07, 5, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
 	const float points08[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0-50, -FieldEW/2.0-10, 25 }, { -FieldNS/2.0-25, -FieldEW/2.0-30, 25 } };
 	DrawTextureOnBox(points08, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
@@ -327,9 +353,9 @@ CCOmniView_GLContext::DrawField(float xangle, float yangle, const wxSize &Client
 	DrawTextureOnBox(points10, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
 	const float points11[][3] = { { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+50, FieldEW/2.0 + 10, 25 }, { FieldNS/2.0+25, FieldEW/2.0 + 30, 25 } };
 	DrawTextureOnBox(points11, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points12[][3] = { { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 0 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0 - 50, FieldEW/2.0 + 10, 25 }, { -FieldNS/2.0 - 50, -FieldEW/2.0 - 10, 25 } };
+	const float points12[][3] = { { -FieldNS/2.0 - 50, -FieldEW/2.0 - 10, 25 }, { -FieldNS/2.0 - 50, FieldEW/2.0 + 10, 25 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 0 }  };
 	DrawTextureOnBox(points12, 4, 5, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points13[][3] = { { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 10, 0 }, { FieldNS/2.0 + 50, -FieldEW/2.0 - 10, 25 }, { FieldNS/2.0 + 50, +FieldEW/2.0 + 10, 25 } };
+	const float points13[][3] = { { -(-FieldNS/2.0 - 50), -(-FieldEW/2.0 - 10), 25 }, { -(-FieldNS/2.0 - 50), -(FieldEW/2.0 + 10), 25 }, { -(-FieldNS/2.0 - 25), -(FieldEW/2.0 + 10), 0 }, { -(-FieldNS/2.0 - 25), -(-FieldEW/2.0 - 10), 0 }  };
 	DrawTextureOnBox(points13, 4, 5, m_textures[crowdOn ? kCrowd : kBleachers]);
 
 	glColor3f(0.0,0.0,0.0);
@@ -339,10 +365,10 @@ CCOmniView_GLContext::DrawField(float xangle, float yangle, const wxSize &Client
 	DrawBox(points15); // South Tunnel
 	glColor3f(1.0,1.0,1.0);
 	
-	const float points16[][3] = { { -40, FieldEW/2.0 + 30, 25 }, { 40, FieldEW/2.0 + 30, 25 }, { 40, FieldEW/2.0 + 30, 35 }, { -40, FieldEW/2.0 + 30, 35 } };
+	const float points16[][3] = { { -40, FieldEW/2.0 + 30, 35 } , { 40, FieldEW/2.0 + 30, 35 }, { 40, FieldEW/2.0 + 30, 25 }, { -40, FieldEW/2.0 + 30, 25 } };
 	DrawTextureOnBox(points16, 1, 1, m_textures[kPressbox]);
 	
-	const float points17[][3] = { { +10, -FieldEW/2.0 - 10, 0 }, { -10, -FieldEW/2.0 - 10, 0 }, { -10, -FieldEW/2.0 - 30, 25 }, { +10, -FieldEW/2.0 - 30, 25 } };
+	const float points17[][3] = { { 10, -(FieldEW/2.0 + 30), 25 }, { -10, -(FieldEW/2.0 + 30), 25 },{ -10, -(FieldEW/2.0 + 10), 0 }, { 10, -(FieldEW/2.0 + 10), 0 } };
 	DrawTextureOnBox(points17, 1, 1, m_textures[kC]);
 
 	const float points18[][3] = { { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 3 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 3 } };
@@ -357,120 +383,39 @@ CCOmniView_GLContext::DrawField(float xangle, float yangle, const wxSize &Client
 	DrawTextureOnBox(points22, 2, 1, m_textures[kWall]);
 	const float points23[][3] = { { FieldNS/2.0 + 25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0 + 25, -8, 0 }, { FieldNS/2.0 + 25, -8, 3 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 10, 3 } };
 	DrawTextureOnBox(points23, 2, 1, m_textures[kWall]);
-	const float points24[][3] = { { +10, -FieldEW/2.0 - 10, 0 }, { -10, -FieldEW/2.0 - 10, 0 }, { -10, -FieldEW/2.0 - 30, 25 }, { +10, -FieldEW/2.0 - 30, 25 } };
-	DrawTextureOnBox(points24, 2, 1, m_textures[kWall]);
 	
-#endif
     glFlush();
 	
     CheckGLError();
 }
 
-WhichImageEnum
-CCOmniView_GLContext::GetMarcherTexture(float cameraAngleToMarcher, float marcherDirection)
-{
-	// Returns which direction they are facing in regards to the camera.
-	float relativeAngle = cameraAngleToMarcher - marcherDirection; // convert to relative angle;
-	while (relativeAngle < 0.0)
-		relativeAngle += 360.0;
-	while (relativeAngle > 360.0)
-		relativeAngle -= 360.0;
-	if (relativeAngle >= 22.5 && relativeAngle < 67.5) 
-		return kBR0;
-	else if (relativeAngle >= 67.5 && relativeAngle < 112.5)
-		return kR0;
-	else if (relativeAngle >= 112.5 && relativeAngle < 157.5)
-		return kFR0;
-	else if (relativeAngle >= 157.5 && relativeAngle < 202.5)
-		return kF0;
-	else if (relativeAngle >= 202.5 && relativeAngle < 247.5)
-		return kFL0;
-	else if (relativeAngle >= 247.5 && relativeAngle < 292.5)
-		return kL0;
-	else if (relativeAngle >= 292.5 && relativeAngle < 337.5)
-		return kBL0;
-	else if (relativeAngle >= 337.5 || relativeAngle < 22.5)
-		return kB0;
-	else {// Default in case something wacko... 
-		return kB0;
-	}
-}
-
-
-// Returns the angle in regards to the camera.
-float GetAngle(float x, float y, const viewpoint_t &viewpoint){
-	viewpoint_t v = viewpoint_t(x - viewpoint.x, y - viewpoint.y);
-	float mag = (sqrt(v.x*v.x + v.y*v.y));
-	float ang = acos(v.x/mag); // normalize
-	ang *= 180.0/M_PI; // convert to degrees
-	if (v.y > 0) ang = (-ang);
-	
-	// using GURK's coordinate system;
-	if (ang < 0.0)
-		ang = ang + 360;
-	return ang;
-}
-
 void
 CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &viewpoint)
 {
-	float ang = GetAngle(info.x, info.y, viewpoint);
+	float ang = NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
 	float dir = info.direction;
-	size_t face = GetMarcherTexture(ang, dir);
-	
-	glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-	
+
 	float x1, x2, y1, y2;
 	x1 = x2 = info.x;
 	y1 = y2 = info.y;
-	float z1 = 0, z2 = 3;
+	float z1 = 3, z2 = 0;
+
+	WhichImageEnum face = GetMarcherTextureAndPoints(ang, dir, x1, x2, y1, y2);
 	
-	if ((dir < 45 || dir > 315) || (dir > 135 && dir < 225)){ 
-		if (face == kF0 || face == kB0) {
-			y1 -= 0.45;
-			y2 += 0.45;
-		}
-		else {
-			x1 -= 0.45;
-			x2 += 0.45;
-		}
-		if (ang > 157.5 && ang < 337.5 ) {
-			const float points[][3] = { { x1, y1, z1 }, { x2, y2, z1 }, { x2, y2, z2 }, { x1, y1, z2 } };
-			DrawTextureOnBox(points, 1, 1, m_textures[face]);
-		}
-		else {
-			const float points[][3] = { { x2, y2, z1 }, { x1, y1, z1 }, { x1, y1, z2 }, { x2, y2, z2 } };
-			DrawTextureOnBox(points, 1, 1, m_textures[face]);
-		}
-	}
-	else {
-		if (face == kF0 || face == kB0) {
-			x1 -= 0.45;
-			x2 += 0.45;
-		}
-		else {
-			y1 -= 0.45;
-			y2 += 0.45;
-		}
-		if (ang > 112.5 && ang < 292.5 ) {
-			const float points[][3] = { { x1, y1, z1 }, { x2, y2, z1 }, { x2, y2, z2 }, { x1, y1, z2 } };
-			DrawTextureOnBox(points, 1, 1, m_textures[face]);
-		}
-		else {
-			const float points[][3] = { { x2, y2, z1 }, { x1, y1, z1 }, { x1, y1, z2 }, { x2, y2, z2 } };
-			DrawTextureOnBox(points, 1, 1, m_textures[face]);
-		}
-	}
+	glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+	
+	const float points[][3] = { { x1, y1, z1 }, { x2, y2, z1 }, { x2, y2, z2 }, { x1, y1, z2 } };
+	DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
 
 
 CCOmniView_Canvas::CCOmniView_Canvas(wxFrame *frame, AnimationView *view) :
 wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE),
-m_xangle(0), m_yangle(0),
-mViewPoint(-1, -1, 2),
+mViewPoint(0, 0, 2),
 mFollowMarcher(false),
 mCrowdOn(false),
+mShowOnlySelected(true),
 mViewAngle(M_PI/2),
 mViewAngleZ(0),
 mFOV(60)
@@ -482,7 +427,6 @@ mFOV(60)
 CCOmniView_Canvas::~CCOmniView_Canvas()
 {
 }
-
 
 void
 CCOmniView_Canvas::SetView(AnimationView *view)
@@ -510,16 +454,21 @@ std::multimap<double, MarcherInfo>
 CCOmniView_Canvas::ParseAndDraw3dMarchers()
 {
 	std::multimap<double, MarcherInfo> result;
-	for (size_t i = 0; i < mView->GetShow()->GetNumPoints(); ++i)
+	for (size_t i = 0; (i < mView->GetShow()->GetNumPoints()); ++i)
 	{
+		if (mShowOnlySelected && !mView->GetShow()->IsSelected(i))
+		{
+			continue;
+		}
 		MarcherInfo info;
-		info.direction = mView->mAnimation->RealDirection(i);
+		info.direction = NormalizeAngle((mView->mAnimation->RealDirection(i) * M_PI / 180.0));
 
 		CC_coord position = mView->mAnimation->Position(i);
-		float x = info.x = Coord2Float(position.x);//+mView->GetShow()->GetMode().Offset().x;
-		float y = info.y = Coord2Float(position.y);//+mView->GetShow()->GetMode().Offset().y;
+		info.x = Coord2Float(position.x);
+		// because the coordinate system for continuity and OpenGL are different, correct here.
+		info.y = -1.0 * Coord2Float(position.y);
 
-		float distance = sqrt(pow(mViewPoint.x-x,2)+pow(mViewPoint.y-y,2));
+		float distance = sqrt(pow(mViewPoint.x-info.x,2)+pow(mViewPoint.y-info.y,2));
 		result.insert(std::pair<double, MarcherInfo>(distance, info));
 	}
 	return result;
@@ -542,7 +491,6 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
     CCOmniView_GLContext& context = GetContext1(this);
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-#if DO_CCVIEW
 	float FieldEW = 80;
 	float FieldNS = 160;
 	
@@ -552,13 +500,11 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 	glLoadIdentity();
 	gluPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1 ,2*FieldNS);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();	
+	glLoadIdentity();
 	gluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z, mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle), mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
-
-#endif
 	
     // Render the graphics and swap the buffers.
-    context.DrawField(m_xangle, m_yangle, ClientSize, mCrowdOn);
+    context.DrawField(mCrowdOn);
 	if (mView && mView->mAnimation)
 	{
 		std::multimap<double, MarcherInfo> marchers = ParseAndDraw3dMarchers();
@@ -571,21 +517,11 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
     SwapBuffers();
 }
 
-
-void CCOmniView_Canvas::Spin(float xSpin, float ySpin)
+void
+CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 {
-    m_xangle += xSpin;
-    m_yangle += ySpin;
-	
-    Refresh(false);
-}
-
-
-#if DO_CCVIEW
-void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
-{
-	const float stepIncr = 10;
-	const float AngleStepIncr = 0.1;
+	const float stepIncr = 0.3 * 3;
+	const float AngleStepIncr = 0.1 * 3;
 	switch (event.GetKeyCode())
 	{
 		case 'f':
@@ -620,9 +556,11 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 			break;
 		case 'q':
 			mViewAngle -= AngleStepIncr;
+			mViewAngle = NormalizeAngle(mViewAngle);
 			break;
 		case 'w':
 			mViewAngle += AngleStepIncr;
+			mViewAngle = NormalizeAngle(mViewAngle);
 			break;
 		case 'a':
 			mViewAngleZ -= AngleStepIncr;
@@ -630,6 +568,23 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 		case 's':
 			mViewAngleZ += AngleStepIncr;
 			break;
+		case '>':
+			mFOV += 5;
+			mFOV = std::min<float>(mFOV, 160);
+			break;
+		case '<':
+			mFOV -= 5;
+			mFOV = std::max<float>(mFOV, 10);
+			break;
+
+		case 'o':
+			mCrowdOn = !mCrowdOn;
+			break;
+
+		case 't':
+			mShowOnlySelected = !mShowOnlySelected;
+			break;
+
 		case WXK_LEFT:
 			mViewPoint.x += -stepIncr*cos(mViewAngle - M_PI/2);
 			mViewPoint.y += -stepIncr*sin(mViewAngle - M_PI/2);
@@ -691,53 +646,5 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 	}
 
 	Refresh();
-//	if (move) {
-//		viewPoint->x = viewPoint->x+changeX;
-//		viewPoint->y = viewPoint->y+changeY;
-//		viewPoint->z = viewPoint->z+changeZ;
-//	}
 }
-
-
-#else
-void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
-{
-    float angle = 5.0;
-	if (mView)
-	{
-		if (event.GetKeyCode() == WXK_LEFT)
-		{
-            Spin( 0.0, angle );
-			mView->PrevBeat();
-		}
-		else if (event.GetKeyCode() == WXK_RIGHT)
-		{
-            Spin( 0.0, -angle );
-			mView->NextBeat();
-		}
-		else if (event.GetKeyCode() == WXK_UP)
-		{
-            Spin( angle, 0.0 );
-			mView->NextBeat();
-		}
-		else if (event.GetKeyCode() == WXK_DOWN)
-		{
-            Spin( -angle, 0.0 );
-			mView->NextBeat();
-		}
-		else if (event.GetKeyCode() == WXK_SPACE)
-		{
-			mView->ToggleTimer();
-		}
-		else
-		{
-			event.Skip();
-		}
-	}
-	else
-	{
-		event.Skip();
-	}
-}
-#endif
 

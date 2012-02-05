@@ -93,12 +93,10 @@ class CCOmniView_GLContext : public wxGLContext
 public:
     CCOmniView_GLContext(wxGLCanvas *canvas);
 	
-    void DrawField(float xangle, float yangle, const wxSize &ClientSize, bool crowdOn);
+    void DrawField(bool crowdOn);
 	void Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &viewpoint);
 	
 private:
-
-	WhichImageEnum GetMarcherTexture(float cameraAngleToMarcher, float marcherDirection);
     // textures for the cube faces
     GLuint m_textures[kImageLast];
 };
@@ -111,7 +109,6 @@ public:
 
 	void SetView(AnimationView *view);
 
-	void Spin(float xSpin, float ySpin);
 	void OnPaint(wxPaintEvent& event);
 	void OnChar(wxKeyEvent& event);
 
@@ -119,11 +116,11 @@ private:
 	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers();
 
 	AnimationView *mView;
-	float m_xangle, m_yangle;
 	viewpoint_t mViewPoint;
 
 	bool mFollowMarcher;
 	bool mCrowdOn;
+	bool mShowOnlySelected;
 	float mViewAngle, mViewAngleZ;
 	float mFOV;
 	
