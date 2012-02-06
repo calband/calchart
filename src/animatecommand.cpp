@@ -139,12 +139,12 @@ bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
 {
 	if (AnimateCommand::PrevBeat(pt))
 	{
-		pt.x +=
+		pt.x += mNumBeats ?
 			((long)mBeat * mVector.x / (short)mNumBeats) -
-			((long)(mBeat+1) * mVector.x / (short)mNumBeats);
-		pt.y +=
+			((long)(mBeat+1) * mVector.x / (short)mNumBeats) : 0;
+		pt.y += mNumBeats ?
 			((long)mBeat * mVector.y / (short)mNumBeats) -
-			((long)(mBeat+1) * mVector.y / (short)mNumBeats);
+			((long)(mBeat+1) * mVector.y / (short)mNumBeats) : 0;
 		return true;
 	}
 	else
@@ -199,7 +199,7 @@ bool backwards)
 bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
 {
 	bool b = AnimateCommand::NextBeat(pt);
-	float curr_ang = ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
+	float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart)
 		* PI / 180.0;
 	pt.x = RoundToCoord(mOrigin.x + cos(curr_ang)*mR);
 	pt.y = RoundToCoord(mOrigin.y - sin(curr_ang)*mR);
@@ -211,7 +211,7 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 {
 	if (AnimateCommand::PrevBeat(pt))
 	{
-		float curr_ang = ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
+		float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart)
 			* PI / 180.0;
 		pt.x = RoundToCoord(mOrigin.x + cos(curr_ang)*mR);
 		pt.y = RoundToCoord(mOrigin.y - sin(curr_ang)*mR);
@@ -248,7 +248,7 @@ AnimateDir AnimateCommandRotate::Direction() const
 
 float AnimateCommandRotate::RealDirection() const
 {
-	float curr_ang = (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart;
+	float curr_ang = mNumBeats ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart : mAngStart;
 	if (mAngEnd > mAngStart)
 	{
 		return curr_ang + mFace;
