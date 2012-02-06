@@ -72,6 +72,7 @@ enum
 	CALCHART__SETMODE,
 	CALCHART__POINTS,
 	CALCHART__ANIMATE,
+	CALCHART__OMNIVIEW,
 	CALCHART__SELECTION,
 
 	CALCHART__prev_ss,
@@ -141,6 +142,7 @@ public:
 	void OnCmdSetMode(wxCommandEvent& event);
 	void OnCmdPoints(wxCommandEvent& event);
 	void OnCmdAnimate(wxCommandEvent& event);
+	void OnCmdOmniView(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
 

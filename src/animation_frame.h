@@ -23,8 +23,6 @@
 #ifndef _ANIMATION_FRAME_H_
 #define _ANIMATION_FRAME_H_
 
-//#define CC_OMNIVIEW
-
 #include "animate.h"
 
 #include <wx/wx.h>
@@ -32,14 +30,12 @@
 
 class AnimationView;
 class AnimationCanvas;
-#ifdef CC_OMNIVIEW
 class CCOmniView_Canvas;
-#endif // CC_OMNIVIEW
 
 class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxWindow *parent, wxDocument* doc, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
+	AnimationFrame(wxWindow *parent, wxDocument* doc, bool OmniViewer = false, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 	~AnimationFrame();
 	
 	virtual void SetView(wxView *view);
@@ -60,18 +56,26 @@ public:
 	void OnSlider_anim_gotosheet(wxScrollEvent& event);
 	void OnSlider_anim_gotobeat(wxScrollEvent& event);
 
+	void OnCmd_FollowMarcher(wxCommandEvent& event);
+	void OnCmd_SaveCameraAngle(wxCommandEvent& event);
+	void OnCmd_GoToCameraAngle(wxCommandEvent& event);
+	void OnCmd_ShowKeyboardControls(wxCommandEvent& event);
+	void OnCmd_ToggleCrowd(wxCommandEvent& event);
+	void OnCmd_ToggleMarching(wxCommandEvent& event);
+	void OnCmd_ToggleShowOnlySelected(wxCommandEvent& event);
+
 	// Called by the view
 	void ToggleTimer();
 	void UpdatePanel();
 	CollisionWarning CollisionType();
+	
+	bool OnBeat() const;
 
 private:
 	AnimationView *mView;
-#ifdef CC_OMNIVIEW
-	CCOmniView_Canvas *mCanvas;
-#else // CC_OMNIVIEW
+	// we really do need one of each.  We can't do inheritance because they have different base classes 
 	AnimationCanvas *mCanvas;
-#endif // CC_OMNIVIEW
+	CCOmniView_Canvas *mOmniViewCanvas;
 	wxSlider *mSheetSlider;
 	wxSlider *mBeatSlider;
 

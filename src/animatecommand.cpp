@@ -125,12 +125,12 @@ AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement, float 
 bool AnimateCommandMove::NextBeat(AnimatePoint& pt)
 {
 	bool b = AnimateCommand::NextBeat(pt);
-	pt.x +=
+	pt.x += (mNumBeats) ?
 		((long)mBeat * mVector.x / (short)mNumBeats) -
-		((long)(mBeat-1) * mVector.x / (short)mNumBeats);
-	pt.y +=
+		((long)(mBeat-1) * mVector.x / (short)mNumBeats) : 0;
+	pt.y += (mNumBeats) ?
 		((long)mBeat * mVector.y / (short)mNumBeats) -
-		((long)(mBeat-1) * mVector.y / (short)mNumBeats);
+		((long)(mBeat-1) * mVector.y / (short)mNumBeats) : 0;
 	return b;
 }
 

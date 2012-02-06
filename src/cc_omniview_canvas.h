@@ -28,6 +28,7 @@
 #include <map>
 
 class AnimationView;
+class AnimationFrame;
 
 typedef enum
 {
@@ -74,6 +75,17 @@ typedef enum
 	kImageLast
 } WhichImageEnum;
 
+typedef enum
+{
+	kClosed,
+	kLeftHSHup,
+	kRightHSHup,
+	kLeftMilitaryPoof,
+	kRightMilitaryPoof,
+	kLeftGrapeVine,
+	kRightGrapeVine,
+} WhichMarchingStyle;
+
 struct viewpoint_t
 {
 	viewpoint_t(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) : x(x_), y(y_), z(z_) {}
@@ -82,6 +94,7 @@ struct viewpoint_t
 
 struct MarcherInfo
 {
+	MarcherInfo(float x_ = 0, float y_ = 0, float dir = 0) : direction(dir), x(x_), y(y_) {}
 	float direction;
 	float x;
 	float y;
@@ -93,9 +106,10 @@ class CCOmniView_GLContext : public wxGLContext
 public:
     CCOmniView_GLContext(wxGLCanvas *canvas);
 	
-    void DrawField(bool crowdOn);
-	void Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &viewpoint);
+    void DrawField(float FieldEW, float FieldNS, bool crowdOn);
+	void Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &viewpoint, WhichMarchingStyle style);
 	
+	bool UseForLines(const wxImage &lines);
 private:
     // textures for the cube faces
     GLuint m_textures[kImageLast];
@@ -111,18 +125,38 @@ public:
 
 	void OnPaint(wxPaintEvent& event);
 	void OnChar(wxKeyEvent& event);
+	void OnMouseMove(wxMouseEvent& event);
+
+	// negative -1 is to stop following
+	void OnCmd_FollowMarcher(int which);
+	void OnCmd_SaveCameraAngle(size_t which);
+	void OnCmd_GoToCameraAngle(size_t which);
+	void OnCmd_ToggleCrowd();
+	void OnCmd_ToggleMarching();
+	void OnCmd_ToggleShowOnlySelected();
 
 private:
+	CCOmniView_GLContext *m_glContext;
+	
+	MarcherInfo GetMarcherInfo(size_t which);
 	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers();
 
 	AnimationView *mView;
+	AnimationFrame *mFrame;
 	viewpoint_t mViewPoint;
 
-	bool mFollowMarcher;
+	// a -1 means not following any marcher
+	int mFollowMarcher;
 	bool mCrowdOn;
 	bool mShowOnlySelected;
+	bool mShowMarching;
 	float mViewAngle, mViewAngleZ;
 	float mFOV;
+	
+	// for mouse camera move:
+	bool mShiftMoving;
+	wxPoint mStartShiftMoveMousePosition;
+	float mStartShiftMoveViewAngle, mStartShiftMoveViewAngleZ;
 	
 	wxDECLARE_EVENT_TABLE();
 };

@@ -67,6 +67,7 @@ public:
 	void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd, long mouseYEnd);
 	
 	void ToggleTimer();
+	bool OnBeat() const;
 
 private:
 	void OnNotifyStatus(const wxString& status);
@@ -78,8 +79,10 @@ private:
 	CC_show *GetShow();
 
 	Animation *mAnimation;
+	// Don't like this, need to avoid friends
 	friend class CCOmniView_Canvas;
 	friend class CCOmniView_Context;
+	friend class AnimationFrame;
 };
 
 #endif

@@ -140,6 +140,7 @@ EVT_MENU(CALCHART__SETDESCRIPTION, MainFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__SETMODE, MainFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
+EVT_MENU(CALCHART__OMNIVIEW, MainFrame::OnCmdOmniView)
 EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, MainFrame::OnCmdHelp)
 EVT_MENU(CALCHART__AddBackgroundImage, MainFrame::OnCmd_AddBackgroundImage)
@@ -266,6 +267,7 @@ field(NULL)
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
 	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
+	anim_menu->Append(CALCHART__OMNIVIEW, wxT("&OmniView..."), wxT("Open CalChart Omniviewer"));
 
 	wxMenu *backgroundimage_menu = new wxMenu;
 	backgroundimage_menu->Append(CALCHART__AddBackgroundImage, wxT("Add Background Image..."), wxT("Add a background image"));
@@ -637,6 +639,15 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 	if (field->mShow)
 	{
 		(void)new AnimationFrame(this, field->mShow);
+	}
+}
+
+
+void MainFrame::OnCmdOmniView(wxCommandEvent& event)
+{
+	if (field->mShow)
+	{
+		(void)new AnimationFrame(this, field->mShow, true);
 	}
 }
 

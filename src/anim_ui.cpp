@@ -370,6 +370,13 @@ AnimationView::ToggleTimer()
 }
 
 
+bool
+AnimationView::OnBeat() const
+{
+	return GetAnimationFrame()->OnBeat();
+}
+
+
 void
 AnimationView::OnNotifyStatus(const wxString& status)
 {

@@ -61,11 +61,23 @@ public:
 	inline const wxString& GetName() const { return mName; };
 	CC_coord ClipPosition(const CC_coord& pos) const;
 
-	void Draw(wxDC& dc) const { DrawHelper(dc, false); }
-	void DrawAnim(wxDC& dc) const { DrawHelper(dc, true); }
+protected:
+	typedef enum
+	{
+		kFieldView,
+		kAnimation,
+		kOmniView
+	} HowToDraw;
+
+public:
+	void Draw(wxDC& dc) const { DrawHelper(dc, kFieldView); }
+	void DrawAnim(wxDC& dc) const { DrawHelper(dc, kAnimation); }
+	void DrawOmni(wxDC& dc) const { DrawHelper(dc, kOmniView); }
+
+	wxImage GetOmniLinesImage() const;
 
 protected:
-	virtual void DrawHelper(wxDC& dc, bool animation) const = 0;
+	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const = 0;
 
 	CC_coord mOffset;
 	CC_coord mSize;
@@ -92,7 +104,7 @@ public:
 	inline unsigned short HashE() const { return mHashE; }
 
 protected:
-	virtual void DrawHelper(wxDC& dc, bool animation) const;
+	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
 
 private:
 	unsigned short mHashW, mHashE;
@@ -134,7 +146,7 @@ public:
 	inline short TextBottom() const { return text_bottom; }
 
 protected:
-	virtual void DrawHelper(wxDC& dc, bool animation) const;
+	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
 	
 private:
 	unsigned char which_yards;

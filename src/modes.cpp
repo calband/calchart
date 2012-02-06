@@ -26,6 +26,10 @@
 
 #include <algorithm>
 
+// utility to convert from int to coord if needed
+template <typename T>
+static inline Coord Int2CoordIfNeeded(bool DoConvert, T a) { return DoConvert ? a * COORD_DECIMAL : a; }
+
 extern wxFont* yardLabelFont;
 
 ShowMode::ShowMode(const wxString& name,
@@ -81,6 +85,23 @@ ShowMode::ClipPosition(const CC_coord& pos) const
 }
 
 
+wxImage
+ShowMode::GetOmniLinesImage() const
+{
+	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
+	wxBitmap bmp(fieldsize.x, fieldsize.y, 32);
+    wxMemoryDC dc;
+    dc.SelectObject(bmp);
+    dc.SetBackground(*wxTRANSPARENT_BRUSH);
+    dc.Clear();
+	dc.SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
+	dc.SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
+	DrawOmni(dc);
+    dc.SelectObject(wxNullBitmap);
+    return bmp.ConvertToImage();
+}
+
+
 ShowModeStandard::ShowModeStandard(const wxString& name,
 								   CC_coord size,
 								   CC_coord offset,
@@ -100,10 +121,16 @@ ShowMode::ShowType ShowModeStandard::GetType() const
 	return SHOW_STANDARD;
 }
 
-void ShowModeStandard::DrawHelper(wxDC& dc, bool animation) const
+void ShowModeStandard::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 {
 	wxPoint points[5];
 	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
+	CC_coord border1 = mBorder1;
+	CC_coord border2 = mBorder2;
+	if (howToDraw == kOmniView)
+	{
+		border1 = border2 = CC_coord(0, 0);
+	}
 	
 	points[0] = wxPoint(0, 0);
 	points[1] = wxPoint(fieldsize.x, 0);
@@ -112,7 +139,7 @@ void ShowModeStandard::DrawHelper(wxDC& dc, bool animation) const
 	points[4] = points[0];
 	
 	// Draw outline
-	dc.DrawLines(5, points, mBorder1.x, mBorder1.y);
+	dc.DrawLines(5, points, border1.x, border1.y);
 	
 	// Draw vertical lines
 	for (Coord j = Int2Coord(8); j < fieldsize.x; j += Int2Coord(8))
@@ -120,22 +147,22 @@ void ShowModeStandard::DrawHelper(wxDC& dc, bool animation) const
 		// draw solid yardlines
 		points[0] = wxPoint(j, 0);
 		points[1] = wxPoint(j, fieldsize.y);
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		dc.DrawLines(2, points, border1.x, border1.y);
 	}
 	
-	for (Coord j = Int2Coord(4); !animation && j < fieldsize.x; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j < fieldsize.x; j += Int2Coord(8))
 	{
 		// draw mid-dotted lines
 		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
 		{
 			points[0] = wxPoint(j, k);
 			points[1] = wxPoint(j, k + Int2Coord(1));
-			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+			dc.DrawLines(2, points, border1.x, border1.y);
 		}
 	}
 	
 	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4); !animation && j < fieldsize.y; j += Int2Coord(4))
+	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j < fieldsize.y; j += Int2Coord(4))
 	{
 		if ((j == Int2Coord(mHashW)) || j == Int2Coord(mHashE))
 			continue;
@@ -143,7 +170,7 @@ void ShowModeStandard::DrawHelper(wxDC& dc, bool animation) const
 		{
 			points[0] = wxPoint(k, j);
 			points[1] = wxPoint(k + Int2Coord(1), j);
-			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+			dc.DrawLines(2, points, border1.x, border1.y);
 		}
 	}
 	
@@ -152,39 +179,39 @@ void ShowModeStandard::DrawHelper(wxDC& dc, bool animation) const
 	{
 		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashW));
 		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashW));
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		dc.DrawLines(2, points, border1.x, border1.y);
 		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashW));
 		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashW));
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		dc.DrawLines(2, points, border1.x, border1.y);
 		
 		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashE));
 		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashE));
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		dc.DrawLines(2, points, border1.x, border1.y);
 		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashE));
 		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashE));
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+		dc.DrawLines(2, points, border1.x, border1.y);
 		
-		for (size_t midhash = 1; !animation && midhash < 5; ++midhash)
+		for (size_t midhash = 1; howToDraw == kFieldView && midhash < 5; ++midhash)
 		{
 			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashW));
 			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashW-(0.2*8)));
-			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+			dc.DrawLines(2, points, border1.x, border1.y);
 			
 			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashE));
 			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashE+(0.2*8)));
-			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
+			dc.DrawLines(2, points, border1.x, border1.y);
 		}
 	}
 	
 	// Draw labels
 	dc.SetFont(*yardLabelFont);
-	for (int i = 0; !animation && i < Coord2Int(fieldsize.x)/8+1; i++)
+	for (int i = 0; (howToDraw == kFieldView || howToDraw == kOmniView) && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		CC_coord fieldedge = mOffset - mBorder1;
 		wxCoord textw, texth, textd;
 		dc.GetTextExtent(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
-		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
-		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
+		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + border1.x, border1.y - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + border1.x, border1.y + fieldsize.y - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
 	}
 }
 
@@ -222,7 +249,7 @@ ShowMode::ShowType ShowModeSprShow::GetType() const
 }
 
 
-void ShowModeSprShow::DrawHelper(wxDC& dc, bool animation) const
+void ShowModeSprShow::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 {
 	wxPoint points[2];
 	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
@@ -236,7 +263,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, bool animation) const
 		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
 	}
 
-	for (Coord j = Int2Coord(4); !animation && j < fieldsize.x; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j < fieldsize.x; j += Int2Coord(8))
 	{
 		// draw mid-dotted lines
 		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
@@ -257,7 +284,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, bool animation) const
 	}
 	
 	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4); !animation && j <= fieldsize.y; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j <= fieldsize.y; j += Int2Coord(8))
 	{
 		for (Coord k = 0; k < fieldsize.x; k += Int2Coord(2))
 		{
@@ -269,7 +296,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, bool animation) const
 
 	// Draw labels
 	dc.SetFont(*yardLabelFont);
-	for (int i = 0; !animation && i < Coord2Int(fieldsize.x)/8+1; i++)
+	for (int i = 0; howToDraw == kFieldView && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		wxCoord textw, texth, textd;
 		dc.GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
@@ -278,7 +305,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, bool animation) const
 		if (which_yards & SPR_YARD_BELOW)
 			dc.DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
 	}
-	for (int i = 0; !animation && i <= Coord2Int(fieldsize.y); i+=8)
+	for (int i = 0; howToDraw == kFieldView && i <= Coord2Int(fieldsize.y); i+=8)
 	{
 		wxCoord textw, texth, textd;
 		dc.GetTextExtent(spr_line_text[i/8], &textw, &texth, &textd);

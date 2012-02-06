@@ -24,9 +24,7 @@
 #include "anim_ui.h"
 #include "animation_canvas.h"
 #include "basic_ui.h"
-#ifdef CC_OMNIVIEW
 #include "cc_omniview_canvas.h"
-#endif // CC_OMNIVIEW
 
 #include <wx/timer.h>
 
@@ -46,6 +44,14 @@ enum
 	CALCHART__anim_tempo,
 	CALCHART__anim_gotosheet,
 	CALCHART__anim_gotobeat,
+
+	CALCHART__FollowMarcher,
+	CALCHART__SaveCameraAngle,
+	CALCHART__GoToCameraAngle,
+	CALCHART__ShowKeyboardControls,
+	CALCHART__ToggleCrowd,
+	CALCHART__ToggleMarching,
+	CALCHART__ToggleShowOnlySelected,
 };
 
 
@@ -70,6 +76,13 @@ EVT_MENU(CALCHART__anim_prev_beat, AnimationFrame::OnCmd_anim_prev_beat)
 EVT_MENU(CALCHART__anim_next_beat, AnimationFrame::OnCmd_anim_next_beat)
 EVT_MENU(CALCHART__anim_prev_sheet, AnimationFrame::OnCmd_anim_prev_sheet)
 EVT_MENU(CALCHART__anim_next_sheet, AnimationFrame::OnCmd_anim_next_sheet)
+EVT_MENU(CALCHART__FollowMarcher, AnimationFrame::OnCmd_FollowMarcher)
+EVT_MENU(CALCHART__SaveCameraAngle, AnimationFrame::OnCmd_SaveCameraAngle)
+EVT_MENU(CALCHART__GoToCameraAngle, AnimationFrame::OnCmd_GoToCameraAngle)
+EVT_MENU(CALCHART__ShowKeyboardControls, AnimationFrame::OnCmd_ShowKeyboardControls)
+EVT_MENU(CALCHART__ToggleCrowd, AnimationFrame::OnCmd_ToggleCrowd)
+EVT_MENU(CALCHART__ToggleMarching, AnimationFrame::OnCmd_ToggleMarching)
+EVT_MENU(CALCHART__ToggleShowOnlySelected, AnimationFrame::OnCmd_ToggleShowOnlySelected)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
@@ -84,9 +97,10 @@ static const wxString collis_text[] =
 };
 
 
-AnimationFrame::AnimationFrame(/*wxView* view, */wxWindow *parent, wxDocument* doc, const wxPoint& pos, const wxSize& size) :
-wxFrame(/*doc, view, */parent, wxID_ANY, wxT("Animation"), pos, size),
-//mView(static_cast<AnimationView*>(view)),
+AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc, bool OmniViewer, const wxPoint& pos, const wxSize& size) :
+wxFrame(parent, wxID_ANY, wxT("Animation"), pos, size),
+mCanvas(NULL),
+mOmniViewCanvas(NULL),
 mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
 mTempo(120),
 mTimerOn(false)
@@ -107,24 +121,40 @@ mTimerOn(false)
 	anim_menu->Append(CALCHART__anim_select_coll, wxT("&Select Collisions"), wxT("Select colliding points"));
 	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
 
+	
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(anim_menu, wxT("&Animate"));
+	
+	if (OmniViewer)
+	{
+		wxMenu *omni_menu = new wxMenu;
+		omni_menu->Append(CALCHART__FollowMarcher, wxT("&Follow Marcher"), wxT("Follow Marcher"));
+		omni_menu->Append(CALCHART__ToggleCrowd, wxT("&Toggle Crowd"), wxT("Toggle Crowd"));
+		omni_menu->Append(CALCHART__ToggleMarching, wxT("&Toggle Marching"), wxT("Toggle Marching"));
+		omni_menu->Append(CALCHART__ToggleShowOnlySelected, wxT("&Toggle Show Selected"), wxT("Toggle Show Selected"));
+		omni_menu->Append(CALCHART__ShowKeyboardControls, wxT("&Show Controls"), wxT("Show keyboard controls"));
+		menu_bar->Append(omni_menu, wxT("&OmniView"));
+	}
+
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
 	CreateCoolToolBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry), this);
 
-// Add the field canvas
-#ifdef CC_OMNIVIEW
-	mCanvas = new CCOmniView_Canvas(this, mView);
-#else // CC_OMNIVIEW
-	mCanvas = new AnimationCanvas(this, mView);
-#endif // CC_OMNIVIEW
-
-// Add the controls
+	// Add the field canvas
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
-	topsizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
+	if (OmniViewer)
+	{
+		mOmniViewCanvas = new CCOmniView_Canvas(this, mView);
+		topsizer->Add(mOmniViewCanvas, wxSizerFlags(1).Expand().Border(5));
+	}
+	else
+	{
+		mCanvas = new AnimationCanvas(this, mView);
+		topsizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
+	}
 
+	// Add the controls
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")), wxSizerFlags());
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
@@ -168,7 +198,10 @@ mTimerOn(false)
 
 AnimationFrame::~AnimationFrame()
 {
-	mCanvas->SetView(NULL);
+	if (mCanvas)
+		mCanvas->SetView(NULL);
+	if (mOmniViewCanvas)
+		mOmniViewCanvas->SetView(NULL);
 	mTimer->Stop();
 	delete mView;
 }
@@ -178,7 +211,10 @@ void
 AnimationFrame::SetView(wxView *view)
 {
 //	wxDocMDIChildFrame::SetView(view);
-	mCanvas->SetView(static_cast<AnimationView*>(view));
+	if (mCanvas)
+		mCanvas->SetView(static_cast<AnimationView*>(view));
+	if (mOmniViewCanvas)
+		mOmniViewCanvas->SetView(static_cast<AnimationView*>(view));
 	mView = static_cast<AnimationView*>(view);
 }
 
@@ -317,6 +353,100 @@ AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
 
 
 void
+AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
+{
+	wxTextEntryDialog dialog(this,
+							 wxT("Please enter a marcher to follow (or -1 to stop following)\n"),
+							 wxT("Follow Marcher"),
+							 wxT(""),
+							 wxOK | wxCANCEL);
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		wxString value = dialog.GetValue();
+		const std::vector<wxString>& labels = mView->GetShow()->GetPointLabels();
+		std::vector<wxString>::const_iterator which = std::find(labels.begin(), labels.end(), value);
+		if (which == labels.end())
+		{
+			wxString upper_value = value.Upper();
+			which = std::find(labels.begin(), labels.end(), upper_value);
+		}
+		if (which == labels.end())
+		{
+			wxMessageDialog dialog(this, wxT("Could not find marcher"), wxT("Could not find marcher ") + value, wxOK);
+			dialog.ShowModal();
+			return;
+		}
+		if (mOmniViewCanvas)
+		{
+			mOmniViewCanvas->OnCmd_FollowMarcher(std::distance(labels.begin(), which));
+		}
+	}
+}
+
+void
+AnimationFrame::OnCmd_SaveCameraAngle(wxCommandEvent& event)
+{
+}
+
+void
+AnimationFrame::OnCmd_GoToCameraAngle(wxCommandEvent& event)
+{
+}
+
+void
+AnimationFrame::OnCmd_ShowKeyboardControls(wxCommandEvent& event)
+{
+	wxMessageDialog dialog(this,
+						   wxT("Keyboard Commands"),
+						   wxT("1, 2, 3 : Select different camera angles (field, student, upper corner)\n")
+						   wxT("+ : Move camera up\n")
+						   wxT("- : Move camera down\n")
+						   wxT("up arrow : Move camera forward\n")
+						   wxT("down arrow : Move camera backward\n")
+						   wxT("left arrow : Move camera left\n")
+						   wxT("right arrow : Move camera rigth\n")
+						   wxT("q : Pan camera left\n")
+						   wxT("w : Pan camera right\n")
+						   wxT("a : Pan camera up\n")
+						   wxT("z : Pan camera down\n")
+						   wxT("< : Decrease Field Of View\n")
+						   wxT("> : Increase Field Of View\n")
+						   wxT("o : Toggle Crowd\n")
+						   wxT("t : Toggle show selected\n")
+						   wxT("space : Toggle Marching\n"),
+						   wxOK);
+	dialog.ShowModal();
+	return;
+}
+
+void
+AnimationFrame::OnCmd_ToggleCrowd(wxCommandEvent& event)
+{
+	if (mOmniViewCanvas)
+	{
+		mOmniViewCanvas->OnCmd_ToggleCrowd();
+	}
+}
+
+void
+AnimationFrame::OnCmd_ToggleMarching(wxCommandEvent& event)
+{
+	if (mOmniViewCanvas)
+	{
+		mOmniViewCanvas->OnCmd_ToggleMarching();
+	}
+}
+
+void
+AnimationFrame::OnCmd_ToggleShowOnlySelected(wxCommandEvent& event)
+{
+	if (mOmniViewCanvas)
+	{
+		mOmniViewCanvas->OnCmd_ToggleShowOnlySelected();
+	}
+}
+
+void
 AnimationFrame::ToggleTimer()
 {
 	if (mTimerOn)
@@ -375,6 +505,13 @@ AnimationFrame::CollisionType()
 	wxChoice* choiceCtrl = static_cast<wxChoice*>(FindWindow(CALCHART__anim_collisions));
 
 	return static_cast<CollisionWarning>(choiceCtrl->GetSelection());
+}
+
+
+bool
+AnimationFrame::OnBeat() const
+{
+	return mBeatSlider->GetValue() & 1;
 }
 
 
