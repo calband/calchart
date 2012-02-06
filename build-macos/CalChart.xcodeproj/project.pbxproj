@@ -14,6 +14,86 @@
 		C74DE4A412EAC0B900A20B8A /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C74DE4A212EAC0B900A20B8A /* cc_continuity.cpp */; };
 		C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
 		C75C5DE712F5E7E200CBFD3A /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */; };
+		C774E2CB14DF77A800558ABA /* b0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A314DF77A800558ABA /* b0.tga */; };
+		C774E2CC14DF77A800558ABA /* b1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A414DF77A800558ABA /* b1.tga */; };
+		C774E2CD14DF77A800558ABA /* b2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A514DF77A800558ABA /* b2.tga */; };
+		C774E2CE14DF77A800558ABA /* bl0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A614DF77A800558ABA /* bl0.tga */; };
+		C774E2CF14DF77A800558ABA /* bl1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A714DF77A800558ABA /* bl1.tga */; };
+		C774E2D014DF77A800558ABA /* bl2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A814DF77A800558ABA /* bl2.tga */; };
+		C774E2D114DF77A800558ABA /* bleachers.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A914DF77A800558ABA /* bleachers.tga */; };
+		C774E2D214DF77A800558ABA /* br0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AA14DF77A800558ABA /* br0.tga */; };
+		C774E2D314DF77A800558ABA /* br1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AB14DF77A800558ABA /* br1.tga */; };
+		C774E2D414DF77A800558ABA /* br2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AC14DF77A800558ABA /* br2.tga */; };
+		C774E2D514DF77A800558ABA /* C.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AD14DF77A800558ABA /* C.tga */; };
+		C774E2D614DF77A800558ABA /* cal.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AE14DF77A800558ABA /* cal.tga */; };
+		C774E2D714DF77A800558ABA /* calband.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AF14DF77A800558ABA /* calband.tga */; };
+		C774E2D814DF77A800558ABA /* california.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B014DF77A800558ABA /* california.tga */; };
+		C774E2D914DF77A800558ABA /* crowd.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B114DF77A800558ABA /* crowd.tga */; };
+		C774E2DA14DF77A800558ABA /* Direction.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B214DF77A800558ABA /* Direction.tga */; };
+		C774E2DB14DF77A800558ABA /* eecs.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B314DF77A800558ABA /* eecs.tga */; };
+		C774E2DC14DF77A800558ABA /* endofshow.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B414DF77A800558ABA /* endofshow.tga */; };
+		C774E2DD14DF77A800558ABA /* f0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B514DF77A800558ABA /* f0.tga */; };
+		C774E2DE14DF77A800558ABA /* f0big.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B614DF77A800558ABA /* f0big.tga */; };
+		C774E2DF14DF77A800558ABA /* f1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B714DF77A800558ABA /* f1.tga */; };
+		C774E2E014DF77A800558ABA /* f2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B814DF77A800558ABA /* f2.tga */; };
+		C774E2E114DF77A800558ABA /* field.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B914DF77A800558ABA /* field.tga */; };
+		C774E2E214DF77A800558ABA /* fl0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BA14DF77A800558ABA /* fl0.tga */; };
+		C774E2E314DF77A800558ABA /* fl1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BB14DF77A800558ABA /* fl1.tga */; };
+		C774E2E414DF77A800558ABA /* fl2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BC14DF77A800558ABA /* fl2.tga */; };
+		C774E2E514DF77A800558ABA /* fr0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BD14DF77A800558ABA /* fr0.tga */; };
+		C774E2E614DF77A800558ABA /* fr1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BE14DF77A800558ABA /* fr1.tga */; };
+		C774E2E714DF77A800558ABA /* fr2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BF14DF77A800558ABA /* fr2.tga */; };
+		C774E2E814DF77A800558ABA /* goalpost.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C014DF77A800558ABA /* goalpost.tga */; };
+		C774E2E914DF77A800558ABA /* l0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C114DF77A800558ABA /* l0.tga */; };
+		C774E2EA14DF77A800558ABA /* l1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C214DF77A800558ABA /* l1.tga */; };
+		C774E2EB14DF77A800558ABA /* l2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C314DF77A800558ABA /* l2.tga */; };
+		C774E2EC14DF77A800558ABA /* lines.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C414DF77A800558ABA /* lines.tga */; };
+		C774E2ED14DF77A800558ABA /* pressbox.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C514DF77A800558ABA /* pressbox.tga */; };
+		C774E2EE14DF77A800558ABA /* r0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C614DF77A800558ABA /* r0.tga */; };
+		C774E2EF14DF77A800558ABA /* r1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C714DF77A800558ABA /* r1.tga */; };
+		C774E2F014DF77A800558ABA /* r2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C814DF77A800558ABA /* r2.tga */; };
+		C774E2F114DF77A800558ABA /* sky.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C914DF77A800558ABA /* sky.tga */; };
+		C774E2F214DF77A800558ABA /* wall.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
+		C774E2F414DF77D300558ABA /* b0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A314DF77A800558ABA /* b0.tga */; };
+		C774E2F514DF77D300558ABA /* b1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A414DF77A800558ABA /* b1.tga */; };
+		C774E2F614DF77D300558ABA /* b2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A514DF77A800558ABA /* b2.tga */; };
+		C774E2F714DF77D300558ABA /* bl0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A614DF77A800558ABA /* bl0.tga */; };
+		C774E2F814DF77D300558ABA /* bl1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A714DF77A800558ABA /* bl1.tga */; };
+		C774E2F914DF77D300558ABA /* bl2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A814DF77A800558ABA /* bl2.tga */; };
+		C774E2FA14DF77D300558ABA /* bleachers.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A914DF77A800558ABA /* bleachers.tga */; };
+		C774E2FB14DF77D300558ABA /* br0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AA14DF77A800558ABA /* br0.tga */; };
+		C774E2FC14DF77D300558ABA /* br1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AB14DF77A800558ABA /* br1.tga */; };
+		C774E2FD14DF77D300558ABA /* br2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AC14DF77A800558ABA /* br2.tga */; };
+		C774E2FE14DF77D300558ABA /* C.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AD14DF77A800558ABA /* C.tga */; };
+		C774E2FF14DF77D300558ABA /* cal.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AE14DF77A800558ABA /* cal.tga */; };
+		C774E30014DF77D300558ABA /* calband.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AF14DF77A800558ABA /* calband.tga */; };
+		C774E30114DF77D300558ABA /* california.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B014DF77A800558ABA /* california.tga */; };
+		C774E30214DF77D300558ABA /* crowd.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B114DF77A800558ABA /* crowd.tga */; };
+		C774E30314DF77D300558ABA /* Direction.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B214DF77A800558ABA /* Direction.tga */; };
+		C774E30414DF77D300558ABA /* eecs.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B314DF77A800558ABA /* eecs.tga */; };
+		C774E30514DF77D300558ABA /* endofshow.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B414DF77A800558ABA /* endofshow.tga */; };
+		C774E30614DF77D300558ABA /* f0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B514DF77A800558ABA /* f0.tga */; };
+		C774E30714DF77D300558ABA /* f0big.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B614DF77A800558ABA /* f0big.tga */; };
+		C774E30814DF77D300558ABA /* f1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B714DF77A800558ABA /* f1.tga */; };
+		C774E30914DF77D300558ABA /* f2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B814DF77A800558ABA /* f2.tga */; };
+		C774E30A14DF77D300558ABA /* field.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B914DF77A800558ABA /* field.tga */; };
+		C774E30B14DF77D300558ABA /* fl0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BA14DF77A800558ABA /* fl0.tga */; };
+		C774E30C14DF77D300558ABA /* fl1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BB14DF77A800558ABA /* fl1.tga */; };
+		C774E30D14DF77D300558ABA /* fl2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BC14DF77A800558ABA /* fl2.tga */; };
+		C774E30E14DF77D300558ABA /* fr0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BD14DF77A800558ABA /* fr0.tga */; };
+		C774E30F14DF77D300558ABA /* fr1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BE14DF77A800558ABA /* fr1.tga */; };
+		C774E31014DF77D300558ABA /* fr2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BF14DF77A800558ABA /* fr2.tga */; };
+		C774E31114DF77D300558ABA /* goalpost.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C014DF77A800558ABA /* goalpost.tga */; };
+		C774E31214DF77D300558ABA /* l0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C114DF77A800558ABA /* l0.tga */; };
+		C774E31314DF77D300558ABA /* l1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C214DF77A800558ABA /* l1.tga */; };
+		C774E31414DF77D300558ABA /* l2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C314DF77A800558ABA /* l2.tga */; };
+		C774E31514DF77D300558ABA /* lines.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C414DF77A800558ABA /* lines.tga */; };
+		C774E31614DF77D300558ABA /* pressbox.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C514DF77A800558ABA /* pressbox.tga */; };
+		C774E31714DF77D300558ABA /* r0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C614DF77A800558ABA /* r0.tga */; };
+		C774E31814DF77D300558ABA /* r1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C714DF77A800558ABA /* r1.tga */; };
+		C774E31914DF77D300558ABA /* r2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C814DF77A800558ABA /* r2.tga */; };
+		C774E31A14DF77D300558ABA /* sky.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C914DF77A800558ABA /* sky.tga */; };
+		C774E31B14DF77D300558ABA /* wall.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
 		C78241F412BEC69200BE680F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78241F212BEC69200BE680F /* cc_show.cpp */; };
 		C785A90C14CFC5190038B6FE /* animation_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A90814CFC5180038B6FE /* animation_canvas.cpp */; };
 		C785A90D14CFC5190038B6FE /* animation_error.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A90A14CFC5180038B6FE /* animation_error.cpp */; };
@@ -132,6 +212,56 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		C774E2F314DF77B900558ABA /* Copy Images */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = image;
+			dstSubfolderSpec = 1;
+			files = (
+				C774E2F414DF77D300558ABA /* b0.tga in Copy Images */,
+				C774E2F514DF77D300558ABA /* b1.tga in Copy Images */,
+				C774E2F614DF77D300558ABA /* b2.tga in Copy Images */,
+				C774E2F714DF77D300558ABA /* bl0.tga in Copy Images */,
+				C774E2F814DF77D300558ABA /* bl1.tga in Copy Images */,
+				C774E2F914DF77D300558ABA /* bl2.tga in Copy Images */,
+				C774E2FA14DF77D300558ABA /* bleachers.tga in Copy Images */,
+				C774E2FB14DF77D300558ABA /* br0.tga in Copy Images */,
+				C774E2FC14DF77D300558ABA /* br1.tga in Copy Images */,
+				C774E2FD14DF77D300558ABA /* br2.tga in Copy Images */,
+				C774E2FE14DF77D300558ABA /* C.tga in Copy Images */,
+				C774E2FF14DF77D300558ABA /* cal.tga in Copy Images */,
+				C774E30014DF77D300558ABA /* calband.tga in Copy Images */,
+				C774E30114DF77D300558ABA /* california.tga in Copy Images */,
+				C774E30214DF77D300558ABA /* crowd.tga in Copy Images */,
+				C774E30314DF77D300558ABA /* Direction.tga in Copy Images */,
+				C774E30414DF77D300558ABA /* eecs.tga in Copy Images */,
+				C774E30514DF77D300558ABA /* endofshow.tga in Copy Images */,
+				C774E30614DF77D300558ABA /* f0.tga in Copy Images */,
+				C774E30714DF77D300558ABA /* f0big.tga in Copy Images */,
+				C774E30814DF77D300558ABA /* f1.tga in Copy Images */,
+				C774E30914DF77D300558ABA /* f2.tga in Copy Images */,
+				C774E30A14DF77D300558ABA /* field.tga in Copy Images */,
+				C774E30B14DF77D300558ABA /* fl0.tga in Copy Images */,
+				C774E30C14DF77D300558ABA /* fl1.tga in Copy Images */,
+				C774E30D14DF77D300558ABA /* fl2.tga in Copy Images */,
+				C774E30E14DF77D300558ABA /* fr0.tga in Copy Images */,
+				C774E30F14DF77D300558ABA /* fr1.tga in Copy Images */,
+				C774E31014DF77D300558ABA /* fr2.tga in Copy Images */,
+				C774E31114DF77D300558ABA /* goalpost.tga in Copy Images */,
+				C774E31214DF77D300558ABA /* l0.tga in Copy Images */,
+				C774E31314DF77D300558ABA /* l1.tga in Copy Images */,
+				C774E31414DF77D300558ABA /* l2.tga in Copy Images */,
+				C774E31514DF77D300558ABA /* lines.tga in Copy Images */,
+				C774E31614DF77D300558ABA /* pressbox.tga in Copy Images */,
+				C774E31714DF77D300558ABA /* r0.tga in Copy Images */,
+				C774E31814DF77D300558ABA /* r1.tga in Copy Images */,
+				C774E31914DF77D300558ABA /* r2.tga in Copy Images */,
+				C774E31A14DF77D300558ABA /* sky.tga in Copy Images */,
+				C774E31B14DF77D300558ABA /* wall.tga in Copy Images */,
+			);
+			name = "Copy Images";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C7ED502211CD5A41001A4FA2 /* Copy Docs */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -242,6 +372,46 @@
 		C75A5FBA1180072C0047B87D /* cc_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_shapes.h; sourceTree = "<group>"; };
 		C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_point.cpp; sourceTree = "<group>"; };
 		C75C5DE612F5E7E200CBFD3A /* cc_point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_point.h; sourceTree = "<group>"; };
+		C774E2A314DF77A800558ABA /* b0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = b0.tga; path = ../resources/image/b0.tga; sourceTree = "<group>"; };
+		C774E2A414DF77A800558ABA /* b1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = b1.tga; path = ../resources/image/b1.tga; sourceTree = "<group>"; };
+		C774E2A514DF77A800558ABA /* b2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = b2.tga; path = ../resources/image/b2.tga; sourceTree = "<group>"; };
+		C774E2A614DF77A800558ABA /* bl0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = bl0.tga; path = ../resources/image/bl0.tga; sourceTree = "<group>"; };
+		C774E2A714DF77A800558ABA /* bl1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = bl1.tga; path = ../resources/image/bl1.tga; sourceTree = "<group>"; };
+		C774E2A814DF77A800558ABA /* bl2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = bl2.tga; path = ../resources/image/bl2.tga; sourceTree = "<group>"; };
+		C774E2A914DF77A800558ABA /* bleachers.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = bleachers.tga; path = ../resources/image/bleachers.tga; sourceTree = "<group>"; };
+		C774E2AA14DF77A800558ABA /* br0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = br0.tga; path = ../resources/image/br0.tga; sourceTree = "<group>"; };
+		C774E2AB14DF77A800558ABA /* br1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = br1.tga; path = ../resources/image/br1.tga; sourceTree = "<group>"; };
+		C774E2AC14DF77A800558ABA /* br2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = br2.tga; path = ../resources/image/br2.tga; sourceTree = "<group>"; };
+		C774E2AD14DF77A800558ABA /* C.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = C.tga; path = ../resources/image/C.tga; sourceTree = "<group>"; };
+		C774E2AE14DF77A800558ABA /* cal.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = cal.tga; path = ../resources/image/cal.tga; sourceTree = "<group>"; };
+		C774E2AF14DF77A800558ABA /* calband.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = calband.tga; path = ../resources/image/calband.tga; sourceTree = "<group>"; };
+		C774E2B014DF77A800558ABA /* california.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = california.tga; path = ../resources/image/california.tga; sourceTree = "<group>"; };
+		C774E2B114DF77A800558ABA /* crowd.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = crowd.tga; path = ../resources/image/crowd.tga; sourceTree = "<group>"; };
+		C774E2B214DF77A800558ABA /* Direction.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = Direction.tga; path = ../resources/image/Direction.tga; sourceTree = "<group>"; };
+		C774E2B314DF77A800558ABA /* eecs.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = eecs.tga; path = ../resources/image/eecs.tga; sourceTree = "<group>"; };
+		C774E2B414DF77A800558ABA /* endofshow.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = endofshow.tga; path = ../resources/image/endofshow.tga; sourceTree = "<group>"; };
+		C774E2B514DF77A800558ABA /* f0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = f0.tga; path = ../resources/image/f0.tga; sourceTree = "<group>"; };
+		C774E2B614DF77A800558ABA /* f0big.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = f0big.tga; path = ../resources/image/f0big.tga; sourceTree = "<group>"; };
+		C774E2B714DF77A800558ABA /* f1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = f1.tga; path = ../resources/image/f1.tga; sourceTree = "<group>"; };
+		C774E2B814DF77A800558ABA /* f2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = f2.tga; path = ../resources/image/f2.tga; sourceTree = "<group>"; };
+		C774E2B914DF77A800558ABA /* field.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = field.tga; path = ../resources/image/field.tga; sourceTree = "<group>"; };
+		C774E2BA14DF77A800558ABA /* fl0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = fl0.tga; path = ../resources/image/fl0.tga; sourceTree = "<group>"; };
+		C774E2BB14DF77A800558ABA /* fl1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = fl1.tga; path = ../resources/image/fl1.tga; sourceTree = "<group>"; };
+		C774E2BC14DF77A800558ABA /* fl2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = fl2.tga; path = ../resources/image/fl2.tga; sourceTree = "<group>"; };
+		C774E2BD14DF77A800558ABA /* fr0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr0.tga; path = ../resources/image/fr0.tga; sourceTree = "<group>"; };
+		C774E2BE14DF77A800558ABA /* fr1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr1.tga; path = ../resources/image/fr1.tga; sourceTree = "<group>"; };
+		C774E2BF14DF77A800558ABA /* fr2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr2.tga; path = ../resources/image/fr2.tga; sourceTree = "<group>"; };
+		C774E2C014DF77A800558ABA /* goalpost.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = goalpost.tga; path = ../resources/image/goalpost.tga; sourceTree = "<group>"; };
+		C774E2C114DF77A800558ABA /* l0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = l0.tga; path = ../resources/image/l0.tga; sourceTree = "<group>"; };
+		C774E2C214DF77A800558ABA /* l1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = l1.tga; path = ../resources/image/l1.tga; sourceTree = "<group>"; };
+		C774E2C314DF77A800558ABA /* l2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = l2.tga; path = ../resources/image/l2.tga; sourceTree = "<group>"; };
+		C774E2C414DF77A800558ABA /* lines.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = lines.tga; path = ../resources/image/lines.tga; sourceTree = "<group>"; };
+		C774E2C514DF77A800558ABA /* pressbox.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = pressbox.tga; path = ../resources/image/pressbox.tga; sourceTree = "<group>"; };
+		C774E2C614DF77A800558ABA /* r0.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = r0.tga; path = ../resources/image/r0.tga; sourceTree = "<group>"; };
+		C774E2C714DF77A800558ABA /* r1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = r1.tga; path = ../resources/image/r1.tga; sourceTree = "<group>"; };
+		C774E2C814DF77A800558ABA /* r2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = r2.tga; path = ../resources/image/r2.tga; sourceTree = "<group>"; };
+		C774E2C914DF77A800558ABA /* sky.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = sky.tga; path = ../resources/image/sky.tga; sourceTree = "<group>"; };
+		C774E2CA14DF77A800558ABA /* wall.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = wall.tga; path = ../resources/image/wall.tga; sourceTree = "<group>"; };
 		C78241F212BEC69200BE680F /* cc_show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_show.cpp; sourceTree = "<group>"; };
 		C78241F312BEC69200BE680F /* cc_show.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_show.h; sourceTree = "<group>"; };
 		C785A90814CFC5180038B6FE /* animation_canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animation_canvas.cpp; sourceTree = "<group>"; };
@@ -447,6 +617,7 @@
 				C7C5FBD11479B356004E5C5B /* IOKit.framework */,
 				C7ED4FC511CD594E001A4FA2 /* docs */,
 				C7AFA9A0117A6E7200CC53E2 /* generated */,
+				C774E2A114DF777C00558ABA /* image */,
 				C7AFA969117A6DBA00CC53E2 /* src */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -472,6 +643,53 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C774E2A114DF777C00558ABA /* image */ = {
+			isa = PBXGroup;
+			children = (
+				C774E2A314DF77A800558ABA /* b0.tga */,
+				C774E2A414DF77A800558ABA /* b1.tga */,
+				C774E2A514DF77A800558ABA /* b2.tga */,
+				C774E2A614DF77A800558ABA /* bl0.tga */,
+				C774E2A714DF77A800558ABA /* bl1.tga */,
+				C774E2A814DF77A800558ABA /* bl2.tga */,
+				C774E2A914DF77A800558ABA /* bleachers.tga */,
+				C774E2AA14DF77A800558ABA /* br0.tga */,
+				C774E2AB14DF77A800558ABA /* br1.tga */,
+				C774E2AC14DF77A800558ABA /* br2.tga */,
+				C774E2AD14DF77A800558ABA /* C.tga */,
+				C774E2AE14DF77A800558ABA /* cal.tga */,
+				C774E2AF14DF77A800558ABA /* calband.tga */,
+				C774E2B014DF77A800558ABA /* california.tga */,
+				C774E2B114DF77A800558ABA /* crowd.tga */,
+				C774E2B214DF77A800558ABA /* Direction.tga */,
+				C774E2B314DF77A800558ABA /* eecs.tga */,
+				C774E2B414DF77A800558ABA /* endofshow.tga */,
+				C774E2B514DF77A800558ABA /* f0.tga */,
+				C774E2B614DF77A800558ABA /* f0big.tga */,
+				C774E2B714DF77A800558ABA /* f1.tga */,
+				C774E2B814DF77A800558ABA /* f2.tga */,
+				C774E2B914DF77A800558ABA /* field.tga */,
+				C774E2BA14DF77A800558ABA /* fl0.tga */,
+				C774E2BB14DF77A800558ABA /* fl1.tga */,
+				C774E2BC14DF77A800558ABA /* fl2.tga */,
+				C774E2BD14DF77A800558ABA /* fr0.tga */,
+				C774E2BE14DF77A800558ABA /* fr1.tga */,
+				C774E2BF14DF77A800558ABA /* fr2.tga */,
+				C774E2C014DF77A800558ABA /* goalpost.tga */,
+				C774E2C114DF77A800558ABA /* l0.tga */,
+				C774E2C214DF77A800558ABA /* l1.tga */,
+				C774E2C314DF77A800558ABA /* l2.tga */,
+				C774E2C414DF77A800558ABA /* lines.tga */,
+				C774E2C514DF77A800558ABA /* pressbox.tga */,
+				C774E2C614DF77A800558ABA /* r0.tga */,
+				C774E2C714DF77A800558ABA /* r1.tga */,
+				C774E2C814DF77A800558ABA /* r2.tga */,
+				C774E2C914DF77A800558ABA /* sky.tga */,
+				C774E2CA14DF77A800558ABA /* wall.tga */,
+			);
+			name = image;
 			sourceTree = "<group>";
 		};
 		C7AFA969117A6DBA00CC53E2 /* src */ = {
@@ -656,6 +874,7 @@
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
 				C7ED502211CD5A41001A4FA2 /* Copy Docs */,
+				C774E2F314DF77B900558ABA /* Copy Images */,
 			);
 			buildRules = (
 			);
@@ -701,6 +920,46 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */,
+				C774E2CB14DF77A800558ABA /* b0.tga in Resources */,
+				C774E2CC14DF77A800558ABA /* b1.tga in Resources */,
+				C774E2CD14DF77A800558ABA /* b2.tga in Resources */,
+				C774E2CE14DF77A800558ABA /* bl0.tga in Resources */,
+				C774E2CF14DF77A800558ABA /* bl1.tga in Resources */,
+				C774E2D014DF77A800558ABA /* bl2.tga in Resources */,
+				C774E2D114DF77A800558ABA /* bleachers.tga in Resources */,
+				C774E2D214DF77A800558ABA /* br0.tga in Resources */,
+				C774E2D314DF77A800558ABA /* br1.tga in Resources */,
+				C774E2D414DF77A800558ABA /* br2.tga in Resources */,
+				C774E2D514DF77A800558ABA /* C.tga in Resources */,
+				C774E2D614DF77A800558ABA /* cal.tga in Resources */,
+				C774E2D714DF77A800558ABA /* calband.tga in Resources */,
+				C774E2D814DF77A800558ABA /* california.tga in Resources */,
+				C774E2D914DF77A800558ABA /* crowd.tga in Resources */,
+				C774E2DA14DF77A800558ABA /* Direction.tga in Resources */,
+				C774E2DB14DF77A800558ABA /* eecs.tga in Resources */,
+				C774E2DC14DF77A800558ABA /* endofshow.tga in Resources */,
+				C774E2DD14DF77A800558ABA /* f0.tga in Resources */,
+				C774E2DE14DF77A800558ABA /* f0big.tga in Resources */,
+				C774E2DF14DF77A800558ABA /* f1.tga in Resources */,
+				C774E2E014DF77A800558ABA /* f2.tga in Resources */,
+				C774E2E114DF77A800558ABA /* field.tga in Resources */,
+				C774E2E214DF77A800558ABA /* fl0.tga in Resources */,
+				C774E2E314DF77A800558ABA /* fl1.tga in Resources */,
+				C774E2E414DF77A800558ABA /* fl2.tga in Resources */,
+				C774E2E514DF77A800558ABA /* fr0.tga in Resources */,
+				C774E2E614DF77A800558ABA /* fr1.tga in Resources */,
+				C774E2E714DF77A800558ABA /* fr2.tga in Resources */,
+				C774E2E814DF77A800558ABA /* goalpost.tga in Resources */,
+				C774E2E914DF77A800558ABA /* l0.tga in Resources */,
+				C774E2EA14DF77A800558ABA /* l1.tga in Resources */,
+				C774E2EB14DF77A800558ABA /* l2.tga in Resources */,
+				C774E2EC14DF77A800558ABA /* lines.tga in Resources */,
+				C774E2ED14DF77A800558ABA /* pressbox.tga in Resources */,
+				C774E2EE14DF77A800558ABA /* r0.tga in Resources */,
+				C774E2EF14DF77A800558ABA /* r1.tga in Resources */,
+				C774E2F014DF77A800558ABA /* r2.tga in Resources */,
+				C774E2F114DF77A800558ABA /* sky.tga in Resources */,
+				C774E2F214DF77A800558ABA /* wall.tga in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
