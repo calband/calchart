@@ -37,6 +37,7 @@
 #include "animate.h"
 #include "animation_frame.h"
 #include "toolbar.h"
+#include "ui_enums.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>

@@ -52,61 +52,6 @@ enum CC_MOVE_MODES
 	CC_MOVE_GENIUS
 };
 
-enum
-{
-	CALCHART__APPEND_FILE = wxID_HIGHEST,
-	// the wxView print is wrong, doesn't do landscape.  rolling our own
-	CALCHART__wxID_PRINT,
-	CALCHART__wxID_PREVIEW,
-	CALCHART__IMPORT_CONT_FILE,
-	CALCHART__LEGACY_PRINT,
-	CALCHART__LEGACY_PRINT_EPS,
-	CALCHART__INSERT_BEFORE,
-	CALCHART__INSERT_AFTER,
-	CALCHART__RELABEL,
-	CALCHART__EDIT_CONTINUITY,
-	CALCHART__SET_SHEET_TITLE,
-	CALCHART__SET_BEATS,
-	CALCHART__SETUP,
-	CALCHART__SETDESCRIPTION,
-	CALCHART__SETMODE,
-	CALCHART__POINTS,
-	CALCHART__ANIMATE,
-	CALCHART__OMNIVIEW,
-	CALCHART__SELECTION,
-
-	CALCHART__prev_ss,
-	CALCHART__next_ss,
-	CALCHART__box,
-	CALCHART__poly,
-	CALCHART__lasso,
-	CALCHART__move,
-	CALCHART__line,
-	CALCHART__rot,
-	CALCHART__shear,
-	CALCHART__reflect,
-	CALCHART__size,
-	CALCHART__genius,
-	CALCHART__label_left,
-	CALCHART__label_right,
-	CALCHART__label_flip,
-	CALCHART__setsym0,
-	CALCHART__setsym1,
-	CALCHART__setsym2,
-	CALCHART__setsym3,
-	CALCHART__setsym4,
-	CALCHART__setsym5,
-	CALCHART__setsym6,
-	CALCHART__setsym7,
-	CALCHART__slider_zoom,
-	CALCHART__slider_sheet_callback,
-	CALCHART__refnum_callback,
-	CALCHART__draw_paths,
-	CALCHART__AddBackgroundImage,
-	CALCHART__AdjustBackgroundImage,
-	CALCHART__RemoveBackgroundImage,
-};
-
 class FieldCanvas;
 class MainFrameView;
 
