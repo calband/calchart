@@ -36,42 +36,7 @@
 #include <wx/docview.h>
 #include <wx/docmdi.h>
 
-#ifdef __CC_INCLUDE_BITMAPS__
-#include "tb_left.xbm"
-#include "tb_right.xbm"
-#include "tb_box.xbm"
-#include "tb_poly.xbm"
-#include "tb_lasso.xbm"
-#include "tb_mv.xbm"
-#include "tb_line.xbm"
-#include "tb_rot.xbm"
-#include "tb_shr.xbm"
-#include "tb_ref.xbm"
-#include "tb_siz.xbm"
-#include "tb_gen.xbm"
-#include "tb_lbl_l.xbm"
-#include "tb_lbl_r.xbm"
-#include "tb_lbl_f.xbm"
-#include "tb_sym0.xbm"
-#include "tb_sym1.xbm"
-#include "tb_sym2.xbm"
-#include "tb_sym3.xbm"
-#include "tb_sym4.xbm"
-#include "tb_sym5.xbm"
-#include "tb_sym6.xbm"
-#include "tb_sym7.xbm"
-#include "tb_stop.xbm"
-#include "tb_play.xbm"
-#include "tb_pbeat.xbm"
-#include "tb_nbeat.xbm"
-#include "tb_pshet.xbm"
-#include "tb_nshet.xbm"
-#endif
-
 wxPrintDialogData *gPrintDialogData;
-
-extern ToolBarEntry main_tb[];
-extern ToolBarEntry anim_tb[];
 
 wxFont *contPlainFont;
 wxFont *contBoldFont;
@@ -86,7 +51,7 @@ TopFrame *topframe = NULL;
 
 TopFrame *GetMainFrame(void)
 {
-  return topframe;
+	return topframe;
 }
 
 void CC_continuity_UnitTests();
@@ -111,42 +76,6 @@ bool CalChartApp::OnInit()
 
 	// setup the configuration.
 	ReadConfig();
-	
-//Create toolbar bitmaps
-	int i = 0;
-
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_left));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_right));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_box));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_poly));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lasso));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_mv));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_line));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_rot));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_shr));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_ref));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_siz));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_gen));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym0));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym1));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym2));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym3));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym4));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym5));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym6));
-	main_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_sym7));
-
-	i = 0;
-
-	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_stop));
-	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_play));
-	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_pbeat));
-	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_nbeat));
-	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_pshet));
-	anim_tb[i++].bm = new wxBitmap(BITMAP_NAME(tb_nshet));
 
 	contPlainFont = new wxFont(11, wxMODERN, wxNORMAL, wxNORMAL);
 	contBoldFont = new wxFont(11, wxMODERN, wxNORMAL, wxBOLD);

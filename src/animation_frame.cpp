@@ -25,9 +25,18 @@
 #include "animation_canvas.h"
 #include "basic_ui.h"
 #include "cc_omniview_canvas.h"
+#include "platconf.h"
 
 #include <wx/timer.h>
 
+#ifdef __CC_INCLUDE_BITMAPS__
+#include "tb_stop.xbm"
+#include "tb_play.xbm"
+#include "tb_pbeat.xbm"
+#include "tb_nbeat.xbm"
+#include "tb_pshet.xbm"
+#include "tb_nshet.xbm"
+#endif
 
 enum
 {
@@ -55,15 +64,32 @@ enum
 };
 
 
-ToolBarEntry anim_tb[] =
+std::vector<ToolBarEntry>
+GetAnimationToolBar()
 {
+	static const ToolBarEntry anim_tb[] = {
 	{ wxITEM_NORMAL, NULL, wxT("Stop (space toggle)"), CALCHART__anim_stop },
 	{ wxITEM_NORMAL, NULL, wxT("Play (space toggle)"), CALCHART__anim_play },
 	{ wxITEM_NORMAL, NULL, wxT("Previous beat (left arrow)"), CALCHART__anim_prev_beat },
 	{ wxITEM_NORMAL, NULL, wxT("Next beat (right arrow)"), CALCHART__anim_next_beat },
 	{ wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"), CALCHART__anim_prev_sheet },
 	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
-};
+	};
+	static std::vector<ToolBarEntry> sAnimTB(anim_tb, anim_tb + sizeof(anim_tb)/sizeof(anim_tb[0]));
+	static bool sFirstTime = true;
+	if (sFirstTime)
+	{
+		sFirstTime = false;
+		std::vector<ToolBarEntry>::iterator i = sAnimTB.begin();
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_stop));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_play));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_pbeat));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_nbeat));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_pshet));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_nshet));
+	}
+	return sAnimTB;
+}
 
 
 BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
@@ -96,6 +122,8 @@ static const wxString collis_text[] =
 	wxT("Ignore"), wxT("Show"), wxT("Beep")
 };
 
+std::vector<ToolBarEntry>
+GetAnimationToolBar();
 
 AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc, bool OmniViewer, const wxPoint& pos, const wxSize& size) :
 wxFrame(parent, wxID_ANY, wxT("Animation"), pos, size),
@@ -139,7 +167,7 @@ mTimerOn(false)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
-	CreateCoolToolBar(anim_tb, sizeof(anim_tb)/sizeof(ToolBarEntry), this);
+	AddCoolToolBar(GetAnimationToolBar(), this);
 
 	// Add the field canvas
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);

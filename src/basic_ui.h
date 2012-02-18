@@ -26,6 +26,7 @@
 #include <wx/wx.h>
 #include <wx/toolbar.h>
 
+#include <vector>
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame *frame);
@@ -90,6 +91,7 @@ struct ToolBarEntry
 	bool space;
 };
 
-wxToolBar* CreateCoolToolBar(const ToolBarEntry *entries, size_t n, wxFrame *frame, wxWindowID id = -1, const wxString& name = wxToolBarNameStr);
+void
+AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame *frame);
 
 #endif

@@ -51,8 +51,37 @@
 #include <wx/wizard.h>
 #include <wx/statline.h>
 
-ToolBarEntry main_tb[] =
+#ifdef __CC_INCLUDE_BITMAPS__
+#include "tb_left.xbm"
+#include "tb_right.xbm"
+#include "tb_box.xbm"
+#include "tb_poly.xbm"
+#include "tb_lasso.xbm"
+#include "tb_mv.xbm"
+#include "tb_line.xbm"
+#include "tb_rot.xbm"
+#include "tb_shr.xbm"
+#include "tb_ref.xbm"
+#include "tb_siz.xbm"
+#include "tb_gen.xbm"
+#include "tb_lbl_l.xbm"
+#include "tb_lbl_r.xbm"
+#include "tb_lbl_f.xbm"
+#include "tb_sym0.xbm"
+#include "tb_sym1.xbm"
+#include "tb_sym2.xbm"
+#include "tb_sym3.xbm"
+#include "tb_sym4.xbm"
+#include "tb_sym5.xbm"
+#include "tb_sym6.xbm"
+#include "tb_sym7.xbm"
+#endif
+
+
+std::vector<ToolBarEntry>
+GetMainToolbar()
 {
+	static const ToolBarEntry main_tb[] = {
 	{ wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
 	{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
 	{ wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
@@ -76,10 +105,39 @@ ToolBarEntry main_tb[] =
 	{ wxITEM_NORMAL, NULL, wxT("Change to solid backslash men"), CALCHART__setsym5 },
 	{ wxITEM_NORMAL, NULL, wxT("Change to solid slash men"), CALCHART__setsym6 },
 	{ wxITEM_NORMAL, NULL, wxT("Change to solid x men"), CALCHART__setsym7 }
-};
-
-extern ToolBarEntry anim_tb[];
-extern ToolBarEntry printcont_tb[];
+	};
+	static std::vector<ToolBarEntry> sMainTB(main_tb, main_tb + sizeof(main_tb)/sizeof(main_tb[0]));
+	static bool sFirstTime = true;
+	if (sFirstTime)
+	{
+		sFirstTime = false;
+		std::vector<ToolBarEntry>::iterator i = sMainTB.begin();
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_left));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_right));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_box));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_poly));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lasso));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_mv));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_line));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_rot));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_shr));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_ref));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_siz));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_gen));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym0));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym1));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym2));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym3));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym4));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym5));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym6));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym7));
+	}
+	return sMainTB;
+}
 
 const wxString gridtext[] =
 {
@@ -290,7 +348,7 @@ field(NULL)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
-	CreateCoolToolBar(main_tb, sizeof(main_tb)/sizeof(ToolBarEntry), this);
+	AddCoolToolBar(GetMainToolbar(), this);
 
 // Add the field canvas
 	field = new FieldCanvas(view, this, GetConfiguration_MainFrameZoom());
