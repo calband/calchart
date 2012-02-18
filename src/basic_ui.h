@@ -82,16 +82,4 @@ private:
 	float mZoomFactor;
 };
 
-struct ToolBarEntry
-{
-	wxItemKind kind;
-	wxBitmap *bm;
-	const wxString desc;
-	int id;
-	bool space;
-};
-
-void
-AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame *frame);
-
 #endif

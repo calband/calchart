@@ -144,19 +144,3 @@ CtrlScrollCanvas::OnMouseMove(wxMouseEvent &event)
 	mLastPos = thisPos;
 }
 
-
-void
-AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame *frame)
-{
-	wxToolBar* tb = frame->CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
-	
-	for (std::vector<ToolBarEntry>::const_iterator i = entries.begin(); i != entries.end(); i++)
-	{
-		tb->AddTool(i->id, wxT(""), *(i->bm), i->desc, i->kind);
-		if (i->space)
-		{
-			tb->AddSeparator();
-		}
-	}
-	tb->Realize();
-}
