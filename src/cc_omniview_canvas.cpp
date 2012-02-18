@@ -21,7 +21,7 @@
 */
 
 #include "cc_omniview_canvas.h"
-#include "anim_ui.h"
+#include "animation_view.h"
 #include "confgr.h"
 #include "modes.h"
 #include "animation_frame.h"

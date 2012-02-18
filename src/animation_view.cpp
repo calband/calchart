@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "anim_ui.h"
+#include "animation_view.h"
 #include "animation_frame.h"
 #include "animation_error.h"
 #include "basic_ui.h"

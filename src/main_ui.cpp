@@ -25,7 +25,6 @@
 #include "top_frame.h"
 #include "print_ui.h"
 #include "show_ui.h"
-#include "anim_ui.h"
 #include "cont_ui.h"
 #include "cc_preferences_ui.h"
 #include "cc_command.h"

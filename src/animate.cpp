@@ -22,7 +22,6 @@
 
 #include "animate.h"
 #include "animatecommand.h"
-#include "anim_ui.h"
 #include "cont.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"

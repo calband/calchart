@@ -20,8 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIM_UI_H_
-#define _ANIM_UI_H_
+#ifndef _ANIMATION_VIEW_H_
+#define _ANIMATION_VIEW_H_
 
 #include "animate.h"
 
@@ -85,4 +85,4 @@ private:
 	friend class AnimationFrame;
 };
 
-#endif
+#endif // _ANIMATION_VIEW_H_

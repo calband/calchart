@@ -21,7 +21,7 @@
 */
 
 #include "animation_canvas.h"
-#include "anim_ui.h"
+#include "animation_view.h"
 #include "confgr.h"
 
 #include <wx/dcbuffer.h>
