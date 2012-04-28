@@ -170,6 +170,7 @@ public:
 	void OnChar(wxKeyEvent& event);
 
 // Misc show functions
+	float ZoomToFitFactor() const;
 	void SetZoom(float factor);
 
 	void BeginDrag(CC_DRAG_TYPES type, CC_coord start);

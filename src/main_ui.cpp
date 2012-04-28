@@ -1561,6 +1561,13 @@ void MainFrame::UpdatePanel()
 }
 
 
+// Zoom to fit length wise, seems best idea
+float FieldCanvas::ZoomToFitFactor() const
+{
+	const wxSize screenSize = GetSize();
+	return static_cast<float>(screenSize.GetX())/mShow->GetMode().Size().x;
+}
+
 void FieldCanvas::SetZoom(float factor)
 {
 	CtrlScrollCanvas::SetZoom(factor);
@@ -1697,11 +1704,6 @@ void MainFrame::slider_sheet_callback(wxScrollEvent &)
 }
 
 
-float CalculateFitZoom()
-{
-	return 1.0;
-}
-
 void MainFrame::zoom_callback(wxCommandEvent& event)
 {
 	size_t sel = event.GetInt();
@@ -1712,7 +1714,7 @@ void MainFrame::zoom_callback(wxCommandEvent& event)
 	}
 	else if (sel == sizeof(zoom_amounts)/sizeof(zoom_amounts[0]))
 	{
-		zoom_amount = CalculateFitZoom();
+		zoom_amount = field->ZoomToFitFactor();
 	}
 	SetConfiguration_MainFrameZoom(zoom_amount);
 	field->SetZoom(zoom_amount);
