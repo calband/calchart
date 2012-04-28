@@ -38,16 +38,13 @@
 //IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
 
 
-AnimationView::AnimationView() :
-mAnimation(NULL)
+AnimationView::AnimationView()
 {
 }
 
 
 AnimationView::~AnimationView()
 {
-	if (mAnimation)
-		delete mAnimation;
 }
 
 
@@ -124,8 +121,7 @@ AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 	{
 		if (mAnimation)
 		{
-			delete mAnimation;
-			mAnimation = NULL;
+			mAnimation.reset();
 			RefreshFrame();
 		}
 	}
@@ -182,22 +178,17 @@ void
 AnimationView::Generate()
 {
 	GetAnimationFrame()->SetStatusText(wxT("Compiling..."));
-	if (mAnimation)
-	{
-		delete mAnimation;
-		mAnimation = NULL;
-	}
+	mAnimation.reset();
 	
 	// flush out the show
 	GetShow()->FlushAllTextWindows();		  // get all changes in text windows
 	
 	NotifyStatus notifyStatus = boost::bind(&AnimationView::OnNotifyStatus, this, _1);
 	NotifyErrorList notifyErrorList = boost::bind(&AnimationView::OnNotifyErrorList, this, _1, _2, _3);
-	mAnimation = new Animation(GetShow(), notifyStatus, notifyErrorList);
+	mAnimation.reset(new Animation(GetShow(), notifyStatus, notifyErrorList));
 	if (mAnimation && (mAnimation->GetNumberSheets() == 0))
 	{
-		delete mAnimation;
-		mAnimation = NULL;
+		mAnimation.reset();
 	}
 	if (mAnimation)
 	{

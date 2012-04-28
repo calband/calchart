@@ -68,6 +68,16 @@ enum AnimateError
 	NUM_ANIMERR
 };
 
+enum MarchingStyle
+{
+	STYLE_HighStep,
+	STYLE_Military,
+	STYLE_ShowHigh,
+	STYLE_GrapeVine,
+	STYLE_JerkyStep,
+	STYLE_Close
+};
+
 extern const wxString animate_err_msgs[];
 
 AnimateDir AnimGetDirFromAngle(float ang);

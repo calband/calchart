@@ -25,6 +25,8 @@
 
 #include "animate.h"
 
+#include <boost/shared_ptr.hpp>
+
 class AnimationFrame;
 
 class AnimationView : public wxView
@@ -78,7 +80,7 @@ private:
 	const CC_show *GetShow() const;
 	CC_show *GetShow();
 
-	Animation *mAnimation;
+	boost::shared_ptr<Animation> mAnimation;
 	// Don't like this, need to avoid friends
 	friend class CCOmniView_Canvas;
 	friend class CCOmniView_Context;
