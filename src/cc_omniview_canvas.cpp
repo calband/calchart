@@ -26,8 +26,6 @@
 #include "modes.h"
 #include "animation_frame.h"
 
-#include <GLUT/glut.h>
-
 #include <wx/dcbuffer.h>
 
 #if !wxUSE_GLCANVAS
@@ -529,6 +527,77 @@ CCOmniView_Canvas::ParseAndDraw3dMarchers()
 	return result;
 }
 
+// rolling my own gluperspective http://nehe.gamedev.net/article/replacement_for_gluperspective/21002/
+static void myGLUPerspective( GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar )
+{
+	GLdouble fH = tan( fovY / 360.0 * M_PI ) * zNear;
+	GLdouble fW = fH * aspect;
+	glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+}
+
+static void NormalizeVector(float v[3])
+{
+	float mag = sqrt(pow(v[0], 2.0) + pow(v[1], 2.0) + pow(v[2], 2.0));
+	v[0] /= mag;
+	v[1] /= mag;
+	v[2] /= mag;
+}
+
+static void CrossVector(float dst[3], float a[3], float b[3])
+{
+	dst[0] = a[1]*b[2] - a[2]*b[1];
+	dst[1] = a[2]*b[0] - a[0]*b[2];
+	dst[2] = a[0]*b[1] - a[1]*b[1];
+}
+
+// rolling my own gluLookAt from http://www.opengl.org/wiki/GluLookAt_code
+static void mygluLookAt(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ)
+{
+	GLfloat m[16];
+	float forward[3];
+	//------------------
+	forward[0] = centerX - eyeX;
+	forward[1] = centerY - eyeY;
+	forward[2] = centerZ - eyeZ;
+	NormalizeVector(forward);
+
+	float upVector[3];
+	upVector[0] = upX;
+	upVector[1] = upY;
+	upVector[2] = upZ;
+
+	float side[3];
+	CrossVector(side, forward, upVector);
+	NormalizeVector(side);
+	
+	float up[3];
+	CrossVector(up, side, forward);
+	NormalizeVector(up);
+	
+	//------------------
+	m[0] = side[0];
+	m[4] = side[1];
+	m[8] = side[2];
+	m[12] = 0.0;
+	//------------------
+	m[1] = up[0];
+	m[5] = up[1];
+	m[9] = up[2];
+	m[13] = 0.0;
+	//------------------
+	m[2] = -forward[0];
+	m[6] = -forward[1];
+	m[10] = -forward[2];
+	m[14] = 0.0;
+	//------------------
+	m[3] = 0;
+	m[7] = 0;
+	m[11] = 0;
+	m[15] = 1.0;
+	glMultMatrixf(m);
+	glTranslated (-eyeX, -eyeY, -eyeZ);
+}
+
 void
 CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 {
@@ -554,7 +623,7 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 	// set our view point:
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1, 2*FieldNS);
+	myGLUPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1, 2*FieldNS);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	if (mFollowMarcher != -1)
@@ -566,7 +635,8 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 		mViewAngle = info.direction;
 		mViewAngleZ = 0;
 	}
-	gluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z, mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle), mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
+	
+	mygluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z, mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle), mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
 	
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
