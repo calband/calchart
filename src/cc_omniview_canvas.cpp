@@ -90,7 +90,9 @@ id_string_t ListOfImageFiles[] = {
 	{ kFR2, wxT("fr2.tga") },
 	{ kField, wxT("field.tga") },
 	// lines are created when needed for each show.
-//	{ kLines, wxT("lines.tga") },
+#if !(defined(__APPLE__) && (__APPLE__))
+	{ kLines, wxT("lines.tga") },
+#endif
 	{ kDirection, wxT("Direction.tga") },
 	{ kBleachers, wxT("bleachers.tga") },
 	{ kWall, wxT("wall.tga") },
@@ -478,7 +480,9 @@ mFOV(60),
 mShiftMoving(false)
 {
 	m_glContext = new CCOmniView_GLContext(this);
+#if defined(__APPLE__) && (__APPLE__)
     m_glContext->UseForLines(mView->GetShow()->GetMode().GetOmniLinesImage());
+#endif
 }
 
 
@@ -537,7 +541,7 @@ static void myGLUPerspective( GLdouble fovY, GLdouble aspect, GLdouble zNear, GL
 
 static void NormalizeVector(float v[3])
 {
-	float mag = sqrt(pow(v[0], 2.0) + pow(v[1], 2.0) + pow(v[2], 2.0));
+	float mag = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 	v[0] /= mag;
 	v[1] /= mag;
 	v[2] /= mag;
