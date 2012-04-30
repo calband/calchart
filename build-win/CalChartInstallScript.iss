@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=CalChart
-AppVersion=3.2.2
+AppVersion=3.3.0
 DefaultDirName={pf}\CalChart
 DefaultGroupName=CalChart
 UninstallDisplayIcon={app}\CalChart.exe
