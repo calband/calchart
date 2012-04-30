@@ -45,7 +45,7 @@ For Mac:
 m3.1 Follow the instructions in README-macos.txt
 
 m3.2 Run dmg_maker.sh
-$ bash -f dmg_maker.sh
+$ bash dmg_maker.sh
 
 The final product is CalChart-$CCVER.dmg
 
