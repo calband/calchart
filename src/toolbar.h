@@ -32,7 +32,7 @@ struct ToolBarEntry
 {
 	wxItemKind kind;
 	wxBitmap *bm;
-	const wxString desc;
+	wxString desc;
 	int id;
 	bool space;
 };
