@@ -1,14 +1,12 @@
 --- CalChart README.txt ---
-Updated on 1/8/2012 by Richard Powell
+Updated on 4/29/2012 by Richard Powell
 ---
 
 ---
 What's new in this version?
 ---
 
-* Now you can put a background picture on the field.  Neat-o!
-* Marchers are selectable in the animation screen.
-* Updated icon.  Now less ugly!
+* CalChart Omniview.  'nuff said.
 
 ---
 What is CalChart?
@@ -105,7 +103,25 @@ If you need to regenerate the help documentation, see the README-docs.txt
 
 ----------
 
+Release notes for 3.3.0:
+
+What's new:
+
+* CalChart Omniview.  'nuff said.
+
+Bugs and features fixed in this release:
+
+2965282: Integrate Omniviewer
+
+----------
+
 Release notes for 3.2.2:
+
+What's new:
+
+* Now you can put a background picture on the field.  Neat-o!
+* Marchers are selectable in the animation screen.
+* Updated icon.  Now less ugly!
 
 Updated wxWidgets to use 2.9.3.
 
