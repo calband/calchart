@@ -82,7 +82,10 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\animate.h" />
     <ClInclude Include="..\..\src\animatecommand.h" />
-    <ClInclude Include="..\..\src\anim_ui.h" />
+    <ClInclude Include="..\..\src\animation_canvas.h" />
+    <ClInclude Include="..\..\src\animation_error.h" />
+    <ClInclude Include="..\..\src\animation_frame.h" />
+    <ClInclude Include="..\..\src\animation_view.h" />
     <ClInclude Include="..\..\src\background_image.h" />
     <ClInclude Include="..\..\src\basic_ui.h" />
     <ClInclude Include="..\..\src\calchartapp.h" />
@@ -90,6 +93,7 @@
     <ClInclude Include="..\..\src\cc_command.h" />
     <ClInclude Include="..\..\src\cc_continuity.h" />
     <ClInclude Include="..\..\src\cc_coord.h" />
+    <ClInclude Include="..\..\src\cc_omniview_canvas.h" />
     <ClInclude Include="..\..\src\cc_point.h" />
     <ClInclude Include="..\..\src\cc_preferences_ui.h" />
     <ClInclude Include="..\..\src\cc_shapes.h" />
@@ -107,20 +111,26 @@
     <ClInclude Include="..\..\src\print_ui.h" />
     <ClInclude Include="..\..\src\show.h" />
     <ClInclude Include="..\..\src\show_ui.h" />
+    <ClInclude Include="..\..\src\toolbar.h" />
     <ClInclude Include="..\..\src\top_frame.h" />
+    <ClInclude Include="..\..\src\ui_enums.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\generated\contgram.cpp" />
     <ClCompile Include="..\..\generated\contscan.cpp" />
     <ClCompile Include="..\..\src\animate.cpp" />
     <ClCompile Include="..\..\src\animatecommand.cpp" />
-    <ClCompile Include="..\..\src\anim_ui.cpp" />
+    <ClCompile Include="..\..\src\animation_canvas.cpp" />
+    <ClCompile Include="..\..\src\animation_error.cpp" />
+    <ClCompile Include="..\..\src\animation_frame.cpp" />
+    <ClCompile Include="..\..\src\animation_view.cpp" />
     <ClCompile Include="..\..\src\background_image.cpp" />
     <ClCompile Include="..\..\src\basic_ui.cpp" />
     <ClCompile Include="..\..\src\calchartapp.cpp" />
     <ClCompile Include="..\..\src\cc_command.cpp" />
     <ClCompile Include="..\..\src\cc_continuity.cpp" />
     <ClCompile Include="..\..\src\cc_coord.cpp" />
+    <ClCompile Include="..\..\src\cc_omniview_canvas.cpp" />
     <ClCompile Include="..\..\src\cc_point.cpp" />
     <ClCompile Include="..\..\src\cc_preferences_ui.cpp" />
     <ClCompile Include="..\..\src\cc_shapes.cpp" />
@@ -136,6 +146,7 @@
     <ClCompile Include="..\..\src\print_ui.cpp" />
     <ClCompile Include="..\..\src\show.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
+    <ClCompile Include="..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
   </ItemGroup>
   <ItemGroup>

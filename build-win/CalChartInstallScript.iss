@@ -13,6 +13,7 @@ OutputDir=InstallerFiles
 [Files]
 Source: "CalChart\Release\CalChart.exe"; DestDir: "{app}"
 Source: "..\docs\*"; DestDir: "{app}\docs"
+Source: "..\resources\image\*"; DestDir: "{app}\image"
 Source: "README.txt"; DestDir: "{app}"; Flags: isreadme
 Source: "vcredist_x86.exe"; DestDir: "{app}\bin";
 
