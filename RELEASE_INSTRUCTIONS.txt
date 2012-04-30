@@ -2,9 +2,15 @@
 
 How to release calchart:
 
-The current calchart version is 3.2.2.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.2.2)
+The current calchart version is 3.3.0.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.3.0)
 
-0. Increment the version in ccvers.h to CCVER
+0.1 Increment the version in ccvers.h to CCVER
+
+0.2 Modify the release version in the install script, build-win/CalChartInstallScript.iss.
+
+0.3 Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, $CCVER
+
+0.4 Edit build-macos/dmg_maker.sh to have the right version
 
 1. copy trunk to a tag:
 $ svn copy -m "copying trunk to tag for version $CCVER" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER
@@ -16,23 +22,19 @@ $ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CC
 ---
 For windows:
 
-w1. Follow the instructions in README-win.txt
+w3.1 Follow the instructions in README-win.txt
 
-w2. Install InnoSetup
+w3.2 Install InnoSetup
 I use InnoSetup for creating the installer.  Get it from:
 http://www.jrsoftware.org/isinfo.php
 
-w3. CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
-  w3.a. Google and find the vcredist_x86.exe for Visual C++ 2010.  Download and save to \calchart\trunk\build-win.
+w3.3 CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
+  w3.3.a. Google and find the vcredist_x86.exe for Visual C++ 2010.  Download and save to \calchart\trunk\build-win.
 
-w4. Modify the release version in the install script:
-Open the file CalChartInstallScript.iss with InnoSetup Compiler.
-Modify the version in the script.
-
-w5. Build the setup.exe installer:
+w3.4 Build the setup.exe installer:
 Compile via Build->Compile.
 
-w6. The installer is called setup.exe.  Rename to:
+w3.5 The installer is called setup.exe.  Rename to:
 $ cd build-win/InstallerFiles
 $ mv setup.exe Install-CalChart-$CCVER.exe
 
@@ -40,13 +42,9 @@ The final product is Install-CalChart-$CCVER.exe
 
 ---
 For Mac:
-m1. Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, $CCVER
+m3.1 Follow the instructions in README-macos.txt
 
-m2. Follow the instructions in README-macos.txt
-
-m3. Edit build-macos/dmg_maker.sh to have the right version
-
-m4. Run dmg_maker.sh
+m3.2 Run dmg_maker.sh
 $ bash -f dmg_maker.sh
 
 The final product is CalChart-$CCVER.dmg
