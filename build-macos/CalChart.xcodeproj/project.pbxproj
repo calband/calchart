@@ -103,6 +103,7 @@
 		C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A845071398E7D8003AD23E /* cc_command.cpp */; };
 		C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */; };
 		C7AC49B014CCD51F00506C76 /* animation_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AC49AE14CCD51F00506C76 /* animation_frame.cpp */; };
+		C7AD22C815571CBB00AC1301 /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AD22C615571CBB00AC1301 /* print_ps.cpp */; };
 		C7AFA98F117A6DBA00CC53E2 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96C117A6DBA00CC53E2 /* animate.cpp */; };
 		C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
 		C7AFA992117A6DBA00CC53E2 /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA973117A6DBA00CC53E2 /* confgr.cpp */; };
@@ -111,7 +112,6 @@
 		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
 		C7AFA999117A6DBA00CC53E2 /* main_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */; };
 		C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA981117A6DBA00CC53E2 /* modes.cpp */; };
-		C7AFA99B117A6DBA00CC53E2 /* print.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA985117A6DBA00CC53E2 /* print.cpp */; };
 		C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */; };
 		C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA988117A6DBA00CC53E2 /* show.cpp */; };
 		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
@@ -432,6 +432,8 @@
 		C7A8451B1398E8D5003AD23E /* cc_preferences_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_preferences_ui.h; sourceTree = "<group>"; };
 		C7AC49AE14CCD51F00506C76 /* animation_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animation_frame.cpp; sourceTree = "<group>"; };
 		C7AC49AF14CCD51F00506C76 /* animation_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animation_frame.h; sourceTree = "<group>"; };
+		C7AD22C615571CBB00AC1301 /* print_ps.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_ps.cpp; sourceTree = "<group>"; };
+		C7AD22C715571CBB00AC1301 /* print_ps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_ps.h; sourceTree = "<group>"; };
 		C7AFA96C117A6DBA00CC53E2 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animate.cpp; sourceTree = "<group>"; };
 		C7AFA96D117A6DBA00CC53E2 /* animate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animate.h; sourceTree = "<group>"; };
 		C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = basic_ui.cpp; sourceTree = "<group>"; };
@@ -453,7 +455,6 @@
 		C7AFA982117A6DBA00CC53E2 /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
 		C7AFA983117A6DBA00CC53E2 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parse.h; sourceTree = "<group>"; };
 		C7AFA984117A6DBA00CC53E2 /* platconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platconf.h; sourceTree = "<group>"; };
-		C7AFA985117A6DBA00CC53E2 /* print.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print.cpp; sourceTree = "<group>"; };
 		C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_ui.cpp; sourceTree = "<group>"; };
 		C7AFA987117A6DBA00CC53E2 /* print_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_ui.h; sourceTree = "<group>"; };
 		C7AFA988117A6DBA00CC53E2 /* show.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = show.cpp; sourceTree = "<group>"; };
@@ -753,7 +754,8 @@
 				C7AFA982117A6DBA00CC53E2 /* modes.h */,
 				C7AFA983117A6DBA00CC53E2 /* parse.h */,
 				C7AFA984117A6DBA00CC53E2 /* platconf.h */,
-				C7AFA985117A6DBA00CC53E2 /* print.cpp */,
+				C7AD22C615571CBB00AC1301 /* print_ps.cpp */,
+				C7AD22C715571CBB00AC1301 /* print_ps.h */,
 				C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */,
 				C7AFA987117A6DBA00CC53E2 /* print_ui.h */,
 				C7AFA988117A6DBA00CC53E2 /* show.cpp */,
@@ -985,7 +987,6 @@
 				C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */,
 				C7AFA999117A6DBA00CC53E2 /* main_ui.cpp in Sources */,
 				C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */,
-				C7AFA99B117A6DBA00CC53E2 /* print.cpp in Sources */,
 				C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */,
 				C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */,
 				C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */,
@@ -1009,6 +1010,7 @@
 				C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */,
 				C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */,
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
+				C7AD22C815571CBB00AC1301 /* print_ps.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
