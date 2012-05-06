@@ -174,6 +174,17 @@ static const double kSLineRatioValue = 1.2;
 static const wxString kContRatioKey = wxT("ContRatio");
 static const double kContRatioValue = 0.2;
 
+static const wxString kPrintPSModesKey = wxT("PrintPSModes");
+static const long kPrintPSModesValue = 0;
+static const wxString kPrintPSLandscapeKey = wxT("PrintPSLandscape");
+static const long kPrintPSLandscapeValue = 0;
+static const wxString kPrintPSOverviewKey = wxT("PrintPSOverview");
+static const long kPrintPSOverviewValue = 0;
+static const wxString kPrintPSDoContKey = wxT("PrintPSDoCont");
+static const long kPrintPSDoContValue = 0;
+static const wxString kPrintPSDoContSheetKey = wxT("PrintPSDoContSheet");
+static const long kPrintPSDoContSheetValue = 0;
+
 template <typename T>
 T GetConfigValue(const wxString& key, const T& def)
 {
@@ -279,6 +290,12 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( NumRatio, double);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PLineRatio, double);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, double);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, double);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSModes, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSLandscape, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSOverview, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoCont, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, long);
 
 // Color is more complicated, we use functions for setting that
 const wxPen *CalChartPens[COLOR_NUM];

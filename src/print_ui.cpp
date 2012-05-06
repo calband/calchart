@@ -67,15 +67,9 @@ void ShowPrintDialog::PrintShow()
 	long minyards;
 
 	text_minyards->GetValue().ToLong(&minyards);
+	overview = GetConfiguration_PrintPSOverview();
 
-	mShow->SetBoolLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
-
-	mShow->SetBoolDoCont(check_cont->GetValue());
-	if (!eps)
-		mShow->SetBoolDoContSheet(check_pages->GetValue());
-	overview = check_overview->GetValue();
-
-	switch (radio_method->GetSelection())
+	switch (GetConfiguration_PrintPSModes())
 	{
 		case CC_PRINT_ACTION_PREVIEW:
 		{
@@ -104,7 +98,11 @@ void ShowPrintDialog::PrintShow()
 	}
 
 	std::ostringstream buffer;
-	PrintShowToPS printShowToPS(*mShow, mShow->GetBoolLandscape(), mShow->GetBoolDoCont(), mShow->GetBoolDoContSheet());
+	bool doLandscape = GetConfiguration_PrintPSLandscape();
+	bool doCont = GetConfiguration_PrintPSDoCont();
+	bool doContSheet = GetConfiguration_PrintPSDoContSheet();
+	
+	PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet);
 	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards);
 	// stream to file:
 	{
@@ -113,7 +111,7 @@ void ShowPrintDialog::PrintShow()
 	}
 
 #ifdef PRINT__RUN_CMD
-	switch (radio_method->GetSelection())
+	switch (GetConfiguration_PrintPSModes())
 	{
 		case CC_PRINT_ACTION_FILE:
 			break;
@@ -303,7 +301,6 @@ void ShowPrintDialog::CreateControls()
 	wxString orientation[] = { wxT("Portrait"), wxT("Landscape") };
 	radio_orient = new wxRadioBox(this, wxID_ANY, wxT("&Orientation:"),wxDefaultPosition,wxDefaultSize,
 		sizeof(orientation)/sizeof(wxString),orientation);
-	radio_orient->SetSelection((int)mShow->GetBoolLandscape());
 	horizontalsizer->Add(radio_orient, 0, wxALL, 5 );
 
 #ifdef PRINT__RUN_CMD
@@ -313,23 +310,19 @@ void ShowPrintDialog::CreateControls()
 #endif
 	radio_method = new wxRadioBox(this, -1, wxT("Post&Script:"),wxDefaultPosition,wxDefaultSize,
 		sizeof(print_modes)/sizeof(wxString), print_modes);
-	radio_method->SetSelection(0);
 	horizontalsizer->Add(radio_method, 0, wxALL, 5 );
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	check_overview = new wxCheckBox(this, -1, wxT("Over&view"));
-	check_overview->SetValue(false);
 	horizontalsizer->Add(check_overview, 0, wxALL, 5 );
 
 	check_cont = new wxCheckBox(this, -1, wxT("Continuit&y"));
-	check_cont->SetValue(mShow->GetBoolDoCont());
 	horizontalsizer->Add(check_cont, 0, wxALL, 5 );
 
 	if (!eps)
 	{
 		check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
-		check_pages->SetValue(mShow->GetBoolDoContSheet());
 		horizontalsizer->Add(check_pages, 0, wxALL, 5 );
 	}
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
@@ -392,6 +385,12 @@ bool ShowPrintDialog::TransferDataToWindow()
 #endif
 	text_view_cmd->SetValue(GetConfiguration_PrintViewCmd());
 	text_view_opts->SetValue(GetConfiguration_PrintViewOpts());
+	radio_orient->SetSelection(GetConfiguration_PrintPSLandscape());
+	radio_method->SetSelection(GetConfiguration_PrintPSModes());
+	check_overview->SetValue(GetConfiguration_PrintPSOverview());
+	check_cont->SetValue(GetConfiguration_PrintPSDoCont());
+	check_pages->SetValue(GetConfiguration_PrintPSDoContSheet());
+
 	wxString buf;
 	buf.Printf(wxT("%.2f"),GetConfiguration_PageOffsetX());
 	text_x->SetValue(buf);
@@ -416,6 +415,11 @@ bool ShowPrintDialog::TransferDataFromWindow()
 #endif
 	SetConfiguration_PrintViewCmd(text_view_cmd->GetValue());
 	SetConfiguration_PrintViewOpts(text_view_opts->GetValue());
+	SetConfiguration_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
+	SetConfiguration_PrintPSModes(radio_method->GetSelection());
+	SetConfiguration_PrintPSOverview(check_overview->GetValue());
+	SetConfiguration_PrintPSDoCont(check_cont->GetValue());
+	SetConfiguration_PrintPSDoContSheet(check_pages->GetValue());
 
 	double dval;
 	text_x->GetValue().ToDouble(&dval);

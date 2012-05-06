@@ -71,8 +71,6 @@ IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
 // Create a new show
 CC_show::CC_show()
 :mOkay(true), numpoints(0),
-print_landscape(false), print_do_cont(true),
-print_do_cont_sheet(true),
 mSheetNum(0),
 mTimer(*this)
 {
@@ -1364,12 +1362,6 @@ void UnitTests()
 	cout<<"Modified "<<test.IsModified()<<"\n";
 	cout<<"GetNumSheets "<<test.GetNumSheets()<<"\n";
 	cout<<"GetNumPoints "<<test.GetNumPoints()<<"\n";
-	for (unsigned i = 0; i < test.GetNumSheets(); ++i)
-	{
-		cout<<"GetBoolLandscape "<<i<<" "<<test.GetBoolLandscape()<<"\n";
-		cout<<"GetBoolDoCont "<<i<<" "<<test.GetBoolDoCont()<<"\n";
-		cout<<"GetBoolDoContSheet "<<i<<" "<<test.GetBoolDoContSheet()<<"\n";
-	}
 	for (unsigned i = 0; i < test.GetNumPoints(); ++i)
 	{
 		cout<<"GetPointLabel "<<i<<" "<<test.GetPointLabel(i).c_str()<<"\n";

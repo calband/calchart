@@ -128,6 +128,12 @@ DECLARE_CONFIGURATION_FUNCTIONS( PLineRatio, double);
 DECLARE_CONFIGURATION_FUNCTIONS( SLineRatio, double);
 DECLARE_CONFIGURATION_FUNCTIONS( ContRatio, double);
 
+DECLARE_CONFIGURATION_FUNCTIONS( PrintPSModes, long);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintPSLandscape, long);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintPSOverview, long);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintPSDoCont, long);
+DECLARE_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, long);
+
 extern wxString yard_text[MAX_YARD_LINES];
 extern const wxString yard_text_index[MAX_YARD_LINES];
 extern wxString spr_line_text[MAX_SPR_LINES];

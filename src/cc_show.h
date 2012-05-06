@@ -157,12 +157,6 @@ public:
 	wxString GetPointLabel(unsigned i) const;
 	void SetPointLabel(const std::vector<wxString>& labels) { pt_labels = labels; }
 	inline const std::vector<wxString>& GetPointLabels() const { return pt_labels; }
-	inline bool GetBoolLandscape() const { return print_landscape; }
-	inline bool GetBoolDoCont() const { return print_do_cont; }
-	inline bool GetBoolDoContSheet() const { return print_do_cont_sheet; }
-	inline void SetBoolLandscape(bool v) { print_landscape = v; }
-	inline void SetBoolDoCont(bool v) { print_do_cont = v; }
-	inline void SetBoolDoContSheet(bool v) { print_do_cont_sheet = v; }
 
 	// how to select points:
 	// Always select or unselect in groups
@@ -193,9 +187,6 @@ private:
 	CC_sheet_container_t sheets;
 	std::vector<wxString> pt_labels;
 	SelectionList selectionList;	  // order of selections
-	bool print_landscape;
-	bool print_do_cont;
-	bool print_do_cont_sheet;
 	unsigned mSheetNum;
 
 private:
