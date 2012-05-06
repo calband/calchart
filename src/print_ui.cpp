@@ -67,6 +67,11 @@ void ShowPrintDialog::PrintShow()
 	long minyards;
 
 	text_minyards->GetValue().ToLong(&minyards);
+	if (minyards < 10 || minyards > 100)
+	{
+		wxLogError(wxT("Yards entered invalid.  Please enter a number between 10 and 100."));
+		return;
+	}
 	overview = GetConfiguration_PrintPSOverview();
 
 	switch (GetConfiguration_PrintPSModes())
@@ -325,6 +330,10 @@ void ShowPrintDialog::CreateControls()
 		check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
 		horizontalsizer->Add(check_pages, 0, wxALL, 5 );
 	}
+	else
+	{
+		check_pages = NULL;
+	}
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 
 	if (!eps)
@@ -368,7 +377,7 @@ void ShowPrintDialog::CreateControls()
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	verticalsizer = new wxBoxSizer( wxVERTICAL );
 	verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Yards: "), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	text_minyards = new wxTextCtrl(this, wxID_ANY);
+	text_minyards = new wxTextCtrl(this, wxID_ANY, wxT("50"));
 	verticalsizer->Add(text_minyards, 0, wxGROW|wxALL, 5 );
 	horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
@@ -389,7 +398,10 @@ bool ShowPrintDialog::TransferDataToWindow()
 	radio_method->SetSelection(GetConfiguration_PrintPSModes());
 	check_overview->SetValue(GetConfiguration_PrintPSOverview());
 	check_cont->SetValue(GetConfiguration_PrintPSDoCont());
-	check_pages->SetValue(GetConfiguration_PrintPSDoContSheet());
+	if (check_pages)
+	{
+		check_pages->SetValue(GetConfiguration_PrintPSDoContSheet());
+	}
 
 	wxString buf;
 	buf.Printf(wxT("%.2f"),GetConfiguration_PageOffsetX());
@@ -419,7 +431,10 @@ bool ShowPrintDialog::TransferDataFromWindow()
 	SetConfiguration_PrintPSModes(radio_method->GetSelection());
 	SetConfiguration_PrintPSOverview(check_overview->GetValue());
 	SetConfiguration_PrintPSDoCont(check_cont->GetValue());
-	SetConfiguration_PrintPSDoContSheet(check_pages->GetValue());
+	if (check_pages)
+	{
+		SetConfiguration_PrintPSDoContSheet(check_pages->GetValue());
+	}
 
 	double dval;
 	text_x->GetValue().ToDouble(&dval);
