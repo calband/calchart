@@ -25,6 +25,7 @@
 #include "confgr.h"
 #include "cc_sheet.h"
 #include "platconf.h"
+#include "print_ps.h"
 #include <set>
 
 #include <wx/filename.h>
@@ -103,7 +104,8 @@ void ShowPrintDialog::PrintShow()
 	}
 
 	std::ostringstream buffer;
-	int n = mShow->PrintShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards);
+	PrintShowToPS printShowToPS(*mShow, mShow->GetBoolLandscape(), mShow->GetBoolDoCont(), mShow->GetBoolDoContSheet());
+	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards);
 	// stream to file:
 	{
 		wxFFileOutputStream outstream(s);

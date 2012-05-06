@@ -125,10 +125,6 @@ public:
 
 	wxString ImportContinuity(const wxString& file);
 
-	// may throw CC_FileException
-	int PrintShowToPS(std::ostream& buffer, bool eps = false, bool overview = false,
-		unsigned curr_ss = 0, int min_yards = 50) const;
-
 	void FlushAllTextWindows();
 
 public:
@@ -190,8 +186,6 @@ private:
 
 private:
 	
-	void PrintSheets(std::ostream& buffer) const;		  // called by Print()
-
 	bool mOkay; // error for when we are loading shows
 
 	wxString descr;

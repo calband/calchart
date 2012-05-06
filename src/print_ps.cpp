@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "print_ps.h"
+
 #include "confgr.h"
 #include "modes.h"
 #include "show.h"
@@ -34,6 +36,7 @@
 #include "setup2.h"
 #include "zllrbach.h"
 
+
 #include <time.h>
 #include <string>
 #include <sstream>
@@ -43,16 +46,6 @@
 #if _MSC_VER
 #define snprintf _snprintf
 #endif
-
-static float width, height, real_width, real_height;
-static float field_x, field_y, field_w, field_h;
-static float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
-static float step_size;
-static float spr_step_size;
-static short num_pages;
-static short step_width, step_offset;
-static Coord max_s, max_n, clip_s, clip_n;
-static short split_sheet;
 
 #define DPI 72
 
@@ -79,15 +72,21 @@ static const char *fontnames[] =
 
 static const size_t kBufferSize = 256;
 
-void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize);
-void print_start_page(std::ostream& buffer, bool landscape);
+PrintShowToPS::PrintShowToPS(const CC_show& show, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet) :
+mShow(show),
+mPrintLandscape(print_landscape),
+mPrintDoCont(print_do_cont),
+mPrintDoContSheet(print_do_cont_sheet)
+{
+}
 
-int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards) const
+int
+PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards)
 {
 	char buf[kBufferSize];
 	time_t t;
-	CC_coord fullsize = mode->Size();
-	CC_coord fieldsize = mode->FieldSize();
+	CC_coord fullsize = mShow.GetMode().Size();
+	CC_coord fieldsize = mShow.GetMode().FieldSize();
 	float fullwidth = Coord2Float(fullsize.x);
 	float fullheight = Coord2Float(fullsize.y);
 	float fieldwidth = Coord2Float(fieldsize.x);
@@ -101,17 +100,17 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	std::string ital_font_str(GetConfiguration_ItalFont().utf8_str());
 	std::string bold_ital_font_str(GetConfiguration_BoldItalFont().utf8_str());
 
-	num_pages = 0;
+	short num_pages = 0;
 /* first, calculate dimensions */
 	if (!overview)
 	{
-		switch (mode->GetType())
+		switch (mShow.GetMode().GetType())
 		{
 			case ShowMode::SHOW_STANDARD:
-				if (print_landscape)
+				if (mPrintLandscape)
 				{
 					width = GetConfiguration_PageHeight() * DPI;
-					if (print_do_cont)
+					if (mPrintDoCont)
 					{
 						height = GetConfiguration_PageWidth() * (1.0 - GetConfiguration_ContRatio()) * DPI;
 						field_y = GetConfiguration_PageWidth() * GetConfiguration_ContRatio() * DPI;
@@ -125,7 +124,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				else
 				{
 					width = GetConfiguration_PageWidth() * DPI;
-					if (print_do_cont)
+					if (mPrintDoCont)
 					{
 						height = GetConfiguration_PageHeight() * (1.0 - GetConfiguration_ContRatio()) * DPI;
 						field_y = GetConfiguration_PageHeight() * GetConfiguration_ContRatio() * DPI;
@@ -167,10 +166,14 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				field_y += height - (field_h + step_size*16);
 				break;
 			case ShowMode::SHOW_SPRINGSHOW:
-				if (print_landscape)
+			{
+				// this may throw if not doing spring show..
+				const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mShow.GetMode());
+
+				if (mPrintLandscape)
 				{
 					width = GetConfiguration_PageHeight() * DPI;
-					if (print_do_cont)
+					if (mPrintDoCont)
 					{
 						height = GetConfiguration_PageWidth() * (1.0 - GetConfiguration_ContRatio()) * DPI;
 						field_y = GetConfiguration_PageWidth() * GetConfiguration_ContRatio() * DPI;
@@ -184,7 +187,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				else
 				{
 					width = GetConfiguration_PageWidth() * DPI;
-					if (print_do_cont)
+					if (mPrintDoCont)
 					{
 						height = GetConfiguration_PageHeight() * (1.0 - GetConfiguration_ContRatio()) * DPI;
 						field_y = GetConfiguration_PageHeight() * GetConfiguration_ContRatio() * DPI;
@@ -197,34 +200,35 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				}
 				real_width = GetConfiguration_PageWidth() * DPI;
 				real_height = GetConfiguration_PageHeight() * DPI;
-				field_h = height / (1 + 16*((ShowModeSprShow*)mode)->FieldW()/
-					((float)((ShowModeSprShow*)mode)->StageW()*80));
-				field_w = field_h/((ShowModeSprShow*)mode)->StageH() *
-					((ShowModeSprShow*)mode)->StageW();
+				field_h = height / (1 + 16*springShow.FieldW()/
+					((float)springShow.StageW()*80));
+				field_w = field_h/springShow.StageH() *
+					springShow.StageW();
 				if (field_w > width)
 				{
 /* reduce stage to fit on page */
 					field_h *= width/field_w;
 					field_w = width;
 				}
-				stage_field_w = field_w * ((ShowModeSprShow*)mode)->FieldW() /
-					((ShowModeSprShow*)mode)->StageW();
-				stage_field_h = field_h * ((ShowModeSprShow*)mode)->FieldH() /
-					((ShowModeSprShow*)mode)->StageH();
-				step_size = stage_field_w / ((ShowModeSprShow*)mode)->StepsW();
+				stage_field_w = field_w * springShow.FieldW() /
+					springShow.StageW();
+				stage_field_h = field_h * springShow.FieldH() /
+					springShow.StageH();
+				step_size = stage_field_w / springShow.StepsW();
 				spr_step_size = (short)(field_w/80.0);
 				field_x = (width - field_w) / 2;
 				field_y += height - (field_h + spr_step_size*16);
-				stage_field_x = field_w * ((ShowModeSprShow*)mode)->FieldX() /
-					((ShowModeSprShow*)mode)->StageW();
-				stage_field_y = field_h * ((ShowModeSprShow*)mode)->FieldY() /
-					((ShowModeSprShow*)mode)->StageH();
+				stage_field_x = field_w * springShow.FieldX() /
+					springShow.StageW();
+				stage_field_y = field_h * springShow.FieldY() /
+					springShow.StageH();
+			}
 				break;
 		}
 	}
 	else
 	{
-		if (print_landscape)
+		if (mPrintLandscape)
 		{
 			width = GetConfiguration_PageHeight() * DPI;
 			height = GetConfiguration_PageWidth() * DPI;
@@ -243,7 +247,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 			height = width * (fullheight / fullwidth);
 		}
 		width--; height--;
-		if (print_landscape)
+		if (mPrintLandscape)
 		{
 			real_width = height;
 			real_height = width;
@@ -276,7 +280,7 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	buffer<<buf;
 	time(&t);
 	buffer<<"%%CreationDate: "<<ctime(&t);
-	buffer<<"%%Title: "<<std::string(GetTitle().utf8_str())<<"\n";
+	buffer<<"%%Title: "<<std::string(mShow.GetTitle().utf8_str())<<"\n";
 	buffer<<"%%Creator: CalChart\n";
 	buffer<<"%%Pages: (atend)\n";
 	buffer<<"%%PageOrder: Ascend\n";
@@ -305,9 +309,12 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	buffer<<buf;
 	if (!overview)
 	{
-		switch (mode->GetType())
+		switch (mShow.GetMode().GetType())
 		{
 			case ShowMode::SHOW_STANDARD:
+			{
+				// this may throw if not doing spring show..
+				const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mShow.GetMode());
 				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
@@ -319,10 +326,10 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				snprintf(buf, sizeof(buf), "/stepw %hd def\n", step_width);
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/whash %hd def\n",
-					((ShowModeStandard *)mode)->HashW());
+					standardShow.HashW());
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/ehash %hd def\n",
-					((ShowModeStandard *)mode)->HashE());
+					standardShow.HashE());
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/headsize %.2f def\n", GetConfiguration_HeaderSize());
 				buffer<<buf;
@@ -360,8 +367,12 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
 				buffer<<buf;
+			}
 				break;
 			case ShowMode::SHOW_SPRINGSHOW:
+			{
+				// this may throw if not doing spring show..
+				const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mShow.GetMode());
 				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
@@ -383,10 +394,10 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				snprintf(buf, sizeof(buf), "/sprstepsize %.6f def\n", spr_step_size);
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/nfieldw %hd def\n",
-					((ShowModeSprShow*)mode)->StepsW());
+					springShow.StepsW());
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/nfieldh %hd def\n",
-					((ShowModeSprShow*)mode)->StepsH());
+					springShow.StepsH());
 				buffer<<buf;
 				snprintf(buf, sizeof(buf), "/headsize %.2f def\n", GetConfiguration_HeaderSize());
 				buffer<<buf;
@@ -421,18 +432,21 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 				buffer<<setup1_ps;
 				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
 				buffer<<buf;
+			}
 				break;
 		}
 	}
 	else
 	{
+		// this may throw if not doing spring show..
+		const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mShow.GetMode());
 		snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "/whash %hd def\n",
-			((ShowModeStandard *)mode)->HashW());
+			standardShow.HashW());
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "/ehash %hd def\n",
-			((ShowModeStandard *)mode)->HashE());
+			standardShow.HashE());
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", width);
 		buffer<<buf;
@@ -451,26 +465,26 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 	}
 
 /* print continuity sheets first */
-	if (print_do_cont_sheet && !eps && !overview)
+	if (mPrintDoContSheet && !eps && !overview)
 	{
-		PrintSheets(buffer);
+		PrintSheets(buffer, num_pages);
 	}
 
 /* do stuntsheet pages now */
 	split_sheet = false;
-	CC_show::const_CC_sheet_iterator_t curr_sheet = GetSheetBegin();
+	CC_show::const_CC_sheet_iterator_t curr_sheet = mShow.GetSheetBegin();
 	if (eps)
 	{
 		curr_sheet += curr_ss;
 	}
-	while (curr_sheet != GetSheetEnd())
+	while (curr_sheet != mShow.GetSheetEnd())
 	{
 		if (curr_sheet->IsPicked() || eps)
 		{
 			num_pages++;
 			if (!overview)
 			{
-				switch (mode->GetType())
+				switch (mShow.GetMode().GetType())
 				{
 					case ShowMode::SHOW_STANDARD:
 						PrintStandard(buffer, *curr_sheet);
@@ -508,12 +522,12 @@ int CC_show::PrintShowToPS(std::ostream& buffer, bool eps, bool overview, unsign
 }
 
 
-void CC_show::PrintSheets(std::ostream& buffer) const
+void PrintShowToPS::PrintSheets(std::ostream& buffer, short& num_pages)
 {
 	char buf[kBufferSize];
 	short lines_left = 0;
 	bool need_eject = false;
-	for (CC_show::const_CC_sheet_iterator_t sheet = GetSheetBegin(); sheet != GetSheetEnd(); ++sheet)
+	for (CC_show::const_CC_sheet_iterator_t sheet = mShow.GetSheetBegin(); sheet != mShow.GetSheetEnd(); ++sheet)
 	{
 		for (CC_textline_list::const_iterator text = sheet->continuity.begin();
 			text != sheet->continuity.end();
@@ -572,7 +586,7 @@ void CC_show::PrintSheets(std::ostream& buffer) const
 }
 
 
-void PrintCont(std::ostream& buffer, const CC_sheet& sheet)
+void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
 	short cont_len = 0;
@@ -616,7 +630,7 @@ void PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 }
 
 
-void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum,
+void PrintShowToPS::gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum,
 float fontsize)
 {
 	char buf[kBufferSize];
@@ -678,7 +692,7 @@ float fontsize)
 }
 
 
-void print_start_page(std::ostream& buffer, bool landscape)
+void PrintShowToPS::print_start_page(std::ostream& buffer, bool landscape)
 {
 	char buf[kBufferSize];
 
@@ -696,24 +710,24 @@ void print_start_page(std::ostream& buffer, bool landscape)
 }
 
 
-void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
+void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
 
-	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
-	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
-	Coord pmin = sheet.show->GetMode().MinPosition().x;
-	Coord pmax = sheet.show->GetMode().MaxPosition().x;
-	Coord fmin = sheet.show->GetMode().FieldOffset().x;
-	Coord fmax = sheet.show->GetMode().FieldSize().x + fmin;
+	CC_coord fieldsize = mShow.GetMode().FieldSize();
+	CC_coord fieldoff = mShow.GetMode().FieldOffset();
+	Coord pmin = mShow.GetMode().MinPosition().x;
+	Coord pmax = mShow.GetMode().MaxPosition().x;
+	Coord fmin = mShow.GetMode().FieldOffset().x;
+	Coord fmax = mShow.GetMode().FieldSize().x + fmin;
 
-	std::string namestr(sheet.name.utf8_str());
-	std::string numberstr(sheet.number.utf8_str());
+	std::string namestr(sheet.GetName().utf8_str());
+	std::string numberstr(sheet.GetNumber().utf8_str());
 
 	if (split_sheet)
 	{
 		buffer<<"%%Page: "<<namestr<<"(N)\n";
-		if (!sheet.number.IsEmpty())
+		if (!sheet.GetNumber().IsEmpty())
 		{
 			buffer<<"/pagenumtext ("<<numberstr<<"N) def\n";
 		}
@@ -732,10 +746,10 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 /* find bounds */
 		max_s = fmax;
 		max_n = fmin;
-		for (unsigned i=0; i < sheet.show->GetNumPoints(); i++)
+		for (unsigned i=0; i < mShow.GetNumPoints(); i++)
 		{
-			if (sheet.pts[i].pos.x < max_s) max_s = sheet.pts[i].pos.x;
-			if (sheet.pts[i].pos.x > max_n) max_n = sheet.pts[i].pos.x;
+			if (sheet.GetPoint(i).pos.x < max_s) max_s = sheet.GetPoint(i).pos.x;
+			if (sheet.GetPoint(i).pos.x > max_n) max_n = sheet.GetPoint(i).pos.x;
 		}
 /* make sure bounds are on field */
 		if (max_s < fmin) max_s = fmin;
@@ -747,7 +761,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		{
 /* Need to split into two pages */
 			buffer<<"%%Page: "<<namestr<<"(S)\n";
-			if (!sheet.number.IsEmpty())
+			if (!sheet.GetNumber().IsEmpty())
 			{
 				buffer<<"/pagenumtext ("<<numberstr<<"S) def\n";
 			}
@@ -763,7 +777,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		else
 		{
 			buffer<<"%%Page: "<<namestr<<"\n";
-			if (!sheet.number.IsEmpty())
+			if (!sheet.GetNumber().IsEmpty())
 			{
 				buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 			}
@@ -771,7 +785,7 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 			{
 				buffer<<"/pagenumtext () def\n";
 			}
-			step_offset = (Coord2Int(sheet.show->GetMode().FieldSize().x) - step_width) / 2;
+			step_offset = (Coord2Int(mShow.GetMode().FieldSize().x) - step_width) / 2;
 			step_offset = (step_offset / 8) * 8;
 			clip_s = pmin;
 			clip_n = pmax;
@@ -783,13 +797,13 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 				step_offset = x_s - (step_width-(x_n-x_s))/2;
 				if (step_offset < 0) step_offset = 0;
 				else if ((step_offset + step_width) >
-					Coord2Int(sheet.show->GetMode().FieldSize().x))
-					step_offset = Coord2Int(sheet.show->GetMode().FieldSize().x) - step_width;
+					Coord2Int(mShow.GetMode().FieldSize().x))
+					step_offset = Coord2Int(mShow.GetMode().FieldSize().x) - step_width;
 				step_offset = (step_offset / 8) * 8;
 			}
 		}
 	}
-	print_start_page(buffer, sheet.show->GetBoolLandscape());
+	print_start_page(buffer, mPrintLandscape);
 
 	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
 	buffer<<buf;
@@ -827,24 +841,24 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 	snprintf(buf, sizeof(buf), "/numberfont findfont %.2f scalefont setfont\n",
 		dot_w * 2 * GetConfiguration_NumRatio());
 	buffer<<buf;
-	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
-		if ((sheet.pts[i].pos.x > clip_n) || (sheet.pts[i].pos.x < clip_s)) continue;
+		if ((sheet.GetPoint(i).pos.x > clip_n) || (sheet.GetPoint(i).pos.x < clip_s)) continue;
 		float fieldheight = Coord2Float(fieldsize.y);
 		float fieldoffx = Coord2Float(fieldoff.x);
 		float fieldoffy = Coord2Float(fieldoff.y);
-		float dot_x = (Coord2Float(sheet.pts[i].pos.x) - fieldoffx - step_offset) /
+		float dot_x = (Coord2Float(sheet.GetPoint(i).pos.x) - fieldoffx - step_offset) /
 			step_width * field_w;
-		float dot_y = (1.0 - (Coord2Float(sheet.pts[i].pos.y)-fieldoffy)/fieldheight)*field_h;
+		float dot_y = (1.0 - (Coord2Float(sheet.GetPoint(i).pos.y)-fieldoffy)/fieldheight)*field_h;
 		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.pts[i].sym]);
+			dot_x, dot_y, dot_routines[sheet.GetPoint(i).sym]);
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
-			static_cast<const char*>(sheet.show->GetPointLabel(i).mb_str()), dot_x, dot_y,
-			sheet.pts[i].GetFlip() ? "donumber2" : "donumber");
+			static_cast<const char*>(mShow.GetPointLabel(i).mb_str()), dot_x, dot_y,
+			sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber");
 		buffer<<buf;
 	}
-	if (sheet.show->GetBoolDoCont())
+	if (mPrintDoCont)
 	{
 		snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", -field_x, -field_y);
 		buffer<<buf;
@@ -853,14 +867,14 @@ void PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 }
 
 
-void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
+void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
-	std::string namestr(sheet.name.utf8_str());
-	std::string numberstr(sheet.number.utf8_str());
+	std::string namestr(sheet.GetName().utf8_str());
+	std::string numberstr(sheet.GetNumber().utf8_str());
 
 	buffer<<"%%Page: "<<namestr<<"\n";
-	if (!sheet.number.IsEmpty())
+	if (!sheet.GetNumber().IsEmpty())
 	{
 		buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 	}
@@ -869,12 +883,12 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 		buffer<<"/pagenumtext () def\n";
 	}
 
-	print_start_page(buffer, sheet.show->GetBoolLandscape());
+	print_start_page(buffer, mPrintLandscape);
 
 	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
 	buffer<<buf;
 
-	const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&sheet.show->GetMode());
+	const ShowModeSprShow *modesprshow = dynamic_cast<const ShowModeSprShow*>(&mShow.GetMode());
 	buffer<<"   BeginEPSF\n";
 	snprintf(buf, sizeof(buf), "   %.2f %.2f scale\n",
 		field_w / modesprshow->StageW(),
@@ -967,24 +981,24 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 	snprintf(buf, sizeof(buf), "/numberfont findfont %.2f scalefont setfont\n",
 		dot_w * 2 * GetConfiguration_NumRatio());
 	buffer<<buf;
-	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
 		float dot_x = stage_field_x +
-			(Coord2Float(sheet.pts[i].pos.x) - modesprshow->StepsX()) /
+			(Coord2Float(sheet.GetPoint(i).pos.x) - modesprshow->StepsX()) /
 			modesprshow->StepsW() * stage_field_w;
 		float dot_y = stage_field_y + stage_field_h * (1.0 -
-			(Coord2Float(sheet.pts[i].pos.y)-
+			(Coord2Float(sheet.GetPoint(i).pos.y)-
 			modesprshow->StepsY())/
 			modesprshow->StepsH());
 		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.pts[i].sym]);
+			dot_x, dot_y, dot_routines[sheet.GetPoint(i).sym]);
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
-			static_cast<const char*>(sheet.show->GetPointLabel(i).mb_str()), dot_x, dot_y,
-			(sheet.pts[i].GetFlip()) ? "donumber2" : "donumber");
+			static_cast<const char*>(mShow.GetPointLabel(i).mb_str()), dot_x, dot_y,
+			(sheet.GetPoint(i).GetFlip()) ? "donumber2" : "donumber");
 		buffer<<buf;
 	}
-	if (sheet.show->GetBoolDoCont())
+	if (mPrintDoCont)
 	{
 		snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", -field_x, -field_y);
 		buffer<<buf;
@@ -993,17 +1007,17 @@ void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 }
 
 
-void PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
+void PrintShowToPS::PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
-	buffer<<"%%Page: "<<std::string(sheet.name.utf8_str())<<"\n";
+	buffer<<"%%Page: "<<std::string(sheet.GetName().utf8_str())<<"\n";
 
-	print_start_page(buffer, sheet.show->GetBoolLandscape());
+	print_start_page(buffer, mPrintLandscape);
 	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
 	buffer<<buf;
 	buffer<<"drawfield\n";
-	CC_coord fieldoff = sheet.show->GetMode().FieldOffset();
-	CC_coord fieldsize = sheet.show->GetMode().FieldSize();
+	CC_coord fieldoff = mShow.GetMode().FieldOffset();
+	CC_coord fieldsize = mShow.GetMode().FieldSize();
 	float fieldwidth = Coord2Float(fieldsize.x);
 	snprintf(buf, sizeof(buf), "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0);
 	buffer<<buf;
@@ -1012,11 +1026,11 @@ void PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 	float fieldy = Coord2Float(fieldoff.y);
 	float fieldheight = Coord2Float(fieldsize.y);
 
-	for (unsigned i = 0; i < sheet.show->GetNumPoints(); i++)
+	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
 		snprintf(buf, sizeof(buf), "%.2f %.2f dotbox\n",
-			(Coord2Float(sheet.pts[i].pos.x)-fieldx) / fieldwidth * width,
-			(1.0 - (Coord2Float(sheet.pts[i].pos.y)-
+			(Coord2Float(sheet.GetPoint(i).pos.x)-fieldx) / fieldwidth * width,
+			(1.0 - (Coord2Float(sheet.GetPoint(i).pos.y)-
 			fieldy)/fieldheight) * height);
 		buffer<<buf;
 	}
