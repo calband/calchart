@@ -22,7 +22,6 @@
 
 #include "animation_view.h"
 #include "animation_frame.h"
-#include "animation_error.h"
 #include "basic_ui.h"
 #include "modes.h"
 #include "confgr.h"
@@ -38,7 +37,8 @@
 //IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
 
 
-AnimationView::AnimationView()
+AnimationView::AnimationView() :
+mErrorOccurred(false)
 {
 }
 
@@ -183,6 +183,9 @@ AnimationView::Generate()
 	// flush out the show
 	GetShow()->FlushAllTextWindows();		  // get all changes in text windows
 	
+	// set our error indicator:
+	mErrorOccurred = false;
+	// (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
 	NotifyStatus notifyStatus = boost::bind(&AnimationView::OnNotifyStatus, this, _1);
 	NotifyErrorList notifyErrorList = boost::bind(&AnimationView::OnNotifyErrorList, this, _1, _2, _3);
 	mAnimation.reset(new Animation(GetShow(), notifyStatus, notifyErrorList));
@@ -196,8 +199,12 @@ AnimationView::Generate()
 		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
 	}
 	GetAnimationFrame()->UpdatePanel();
-	GetAnimationFrame()->SetStatusText(wxT("Ready"));
+	GetAnimationFrame()->SetStatusText(mErrorOccurred ? wxT("Error during compilation") : wxT("Ready"));
 	GetAnimationFrame()->Refresh();
+	if (mErrorOccurred)
+	{
+		wxMessageBox(wxT("Error during compilation.  See Error pulldown below."), wxT("Errors occurred"), wxOK);
+	}
 }
 
 
@@ -269,6 +276,13 @@ AnimationView::GotoSheet(unsigned i)
 		mAnimation->GotoSheet(i);
 		RefreshFrame();
 	}
+}
+
+
+void
+AnimationView::SetSelection(const CC_show::SelectionList& sl)
+{
+	GetShow()->SetSelection(sl);
 }
 
 
@@ -378,10 +392,9 @@ AnimationView::OnNotifyStatus(const wxString& status)
 bool
 AnimationView::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
 {
-	AnimErrorList* errorList = new AnimErrorList(GetShow(), error_markers, sheetnum,
-				GetAnimationFrame(), wxID_ANY, message);
-	errorList->Show();
-	return (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
+	GetAnimationFrame()->OnNotifyErrorList(error_markers, sheetnum, message);
+	mErrorOccurred = true;
+	return false;
 }
 
 

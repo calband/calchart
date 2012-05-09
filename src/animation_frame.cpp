@@ -27,6 +27,7 @@
 #include "cc_omniview_canvas.h"
 #include "toolbar.h"
 #include "ui_enums.h"
+#include "basic_ui.h"
 
 #include <wx/timer.h>
 
@@ -49,6 +50,7 @@ EVT_MENU(CALCHART__ToggleCrowd, AnimationFrame::OnCmd_ToggleCrowd)
 EVT_MENU(CALCHART__ToggleMarching, AnimationFrame::OnCmd_ToggleMarching)
 EVT_MENU(CALCHART__ToggleShowOnlySelected, AnimationFrame::OnCmd_ToggleShowOnlySelected)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
+EVT_CHOICE(CALCHART__anim_errors, AnimationFrame::OnCmd_anim_errors)
 EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
@@ -129,6 +131,12 @@ mTimerOn(false)
 	wxSlider *sldr = new wxSlider(this, CALCHART__anim_tempo, GetTempo(), 10, 300, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 	sizer1->Add(sldr, wxSizerFlags().Expand().Border(5));
 
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Errors")), wxSizerFlags());
+	mErrorList = new wxChoice(this, CALCHART__anim_errors, wxDefaultPosition, wxDefaultSize, 0, NULL);
+	mErrorList->SetSelection(1);
+	mErrorList->Append(wxT("----------"));
+	sizer1->Add(mErrorList, wxSizerFlags().Expand().Border(5));
+
 	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
 // Sheet slider (will get set later with UpdatePanel())
 	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")), wxSizerFlags());
@@ -142,8 +150,15 @@ mTimerOn(false)
 	sizer2->Add(mBeatSlider, wxSizerFlags().Expand().Border(5));
 
 //create a sizer with no border and centered horizontally
-	topsizer->Add(sizer1, wxSizerFlags(0).Left());
-	topsizer->Add(sizer2, wxSizerFlags(0).Left());
+	wxBoxSizer *Sub2 = new wxBoxSizer(wxVERTICAL);
+	Sub2->Add(sizer1, wxSizerFlags(0).Left());
+	Sub2->Add(sizer2, wxSizerFlags(0).Left());
+	wxBoxSizer *Sub1 = new wxBoxSizer(wxHORIZONTAL);
+	Sub1->Add(Sub2, wxSizerFlags(0).Left());
+	mErrorText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(100, 100));
+	Sub1->Add(mErrorText, wxSizerFlags().Expand().Border(5));
+	
+	topsizer->Add(Sub1, wxSizerFlags(0).Left());
 
 	SetSizer(topsizer);							  // use the sizer for layout
 
@@ -187,6 +202,7 @@ void
 AnimationFrame::OnCmdReanimate(wxCommandEvent& event)
 {
 	StopTimer();
+	mErrorMarkers.clear();
 	if (mView)
 	{
 		mView->Generate();
@@ -285,6 +301,33 @@ AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 		mView->CheckCollisions();
 	}
 	Refresh();
+}
+
+
+void
+AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
+{
+	mErrorText->Clear();
+	size_t which = mErrorList->GetSelection() - 1;
+	if (which < mErrorMarkers.size())
+	{
+		mView->SetSelection(mErrorMarkers.at(which).first.pntgroup);
+		mView->GotoSheet(mErrorMarkers.at(which).second);
+
+		mErrorText->Clear();
+		CC_show::const_CC_sheet_iterator_t current_sheet = mView->GetShow()->GetNthSheet(mErrorMarkers.at(which).second);
+		const CC_continuity& c = current_sheet->GetNthContinuity(mErrorMarkers.at(which).first.contnum);
+		if (!c.GetText().IsEmpty())
+		{
+			mErrorText->WriteText(c.GetText());
+			mErrorText->SetEditable(false);
+		}
+		if (mErrorMarkers.at(which).first.line > 0 && mErrorMarkers.at(which).first.col > 0)
+		{
+			mErrorText->SetInsertionPoint(mErrorText->XYToPosition((long)mErrorMarkers.at(which).first.line-1,(long)mErrorMarkers.at(which).first.col-1));
+//			mErrorText->SetFocus();
+		}
+	}
 }
 
 
@@ -515,3 +558,17 @@ AnimationFrame::SetTempo(unsigned tempo)
 	mTempo = tempo;
 }
 
+void
+AnimationFrame::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
+{
+	for (unsigned i = 0; i < NUM_ANIMERR; i++)
+	{
+		if (!error_markers[i].pntgroup.empty())
+		{
+			wxString error_string;
+			error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, animate_err_msgs[i]);
+			mErrorList->Append(error_string);
+			mErrorMarkers.push_back(std::pair<ErrorMarker, unsigned>(error_markers[i], sheetnum));
+		}
+	}
+}

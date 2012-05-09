@@ -31,6 +31,7 @@
 class AnimationView;
 class AnimationCanvas;
 class CCOmniView_Canvas;
+class FancyTextWin;
 
 class AnimationFrame: public wxFrame
 {
@@ -52,6 +53,7 @@ public:
 	void OnCmd_anim_prev_sheet(wxCommandEvent& event);
 	void OnCmd_anim_next_sheet(wxCommandEvent& event);
 	void OnCmd_anim_collisions(wxCommandEvent& event);
+	void OnCmd_anim_errors(wxCommandEvent& event);
 	void OnSlider_anim_tempo(wxScrollEvent& event);
 	void OnSlider_anim_gotosheet(wxScrollEvent& event);
 	void OnSlider_anim_gotobeat(wxScrollEvent& event);
@@ -71,6 +73,8 @@ public:
 	
 	bool OnBeat() const;
 
+	void OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message);
+
 private:
 	AnimationView *mView;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 
@@ -79,6 +83,11 @@ private:
 	wxSlider *mSheetSlider;
 	wxSlider *mBeatSlider;
 
+	// continuity errors:
+	wxChoice *mErrorList;
+	std::vector<std::pair<ErrorMarker, unsigned> > mErrorMarkers;
+	FancyTextWin *mErrorText;
+	
 // timer stuff:
 	void StartTimer();
 	void StopTimer();

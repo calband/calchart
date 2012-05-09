@@ -50,17 +50,6 @@ class CC_show_FlushAllViews : public wxObject
 DECLARE_DYNAMIC_CLASS(CC_show_FlushAllViews)
 };
 
-// The CC_show_modified class is used for indicating to views to save any text
-class CC_show_AllViewsGoToCont : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CC_show_AllViewsGoToCont)
-public:
-	CC_show_AllViewsGoToCont(unsigned contnum = 0, int line = 0, int col = -1) : mContnum(contnum), mLine(line), mCol(col) {}
-	unsigned mContnum;
-	int mLine;
-	int mCol;
-};
-
 // The CC_show_setup class is used for indicating to views to set up a new show
 class CC_show_setup : public wxObject
 {

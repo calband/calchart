@@ -55,6 +55,7 @@ public:
 	bool PrevSheet();
 	bool NextSheet();
 	void GotoSheet(unsigned i);
+	void SetSelection(const CC_show::SelectionList& sl);
 
 	// info
 	int GetNumberSheets() const;
@@ -71,9 +72,11 @@ public:
 	void ToggleTimer();
 	bool OnBeat() const;
 
-private:
+//private:
 	void OnNotifyStatus(const wxString& status);
 	bool OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message);
+	
+	bool mErrorOccurred;
 	
 	const AnimationFrame *GetAnimationFrame() const;
 	AnimationFrame *GetAnimationFrame();

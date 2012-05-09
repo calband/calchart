@@ -63,7 +63,6 @@ CC_FileException::CC_FileException(uint32_t nameID)
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
-IMPLEMENT_DYNAMIC_CLASS(CC_show_AllViewsGoToCont, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_setup, wxObject)
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
@@ -1333,12 +1332,6 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsign
 	{
 		AddToSelection(sl);
 	}
-}
-
-void CC_show::AllViewGoToCont(unsigned contnum, int line, int col)
-{
-	CC_show_AllViewsGoToCont goToMod(contnum, line, col);
-	UpdateAllViews(NULL, &goToMod);
 }
 
 

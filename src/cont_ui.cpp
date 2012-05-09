@@ -79,19 +79,6 @@ void ContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 	{
 		editor->FlushText();
 	}
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_AllViewsGoToCont)))
-	{
-		CC_show_AllViewsGoToCont* goToCont = dynamic_cast<CC_show_AllViewsGoToCont*>(hint);
-		if (hint)
-		{
-			editor->SetCurrent(goToCont->mContnum);
-			editor->UpdateContChoice();
-			if ((goToCont->mLine > 0) && (goToCont->mCol > 0))
-			{
-				editor->SetInsertionPoint(goToCont->mCol, goToCont->mLine);
-			}
-		}
-	}
 	else
 	{
 		editor->Update();

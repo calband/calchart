@@ -1,12 +1,14 @@
 --- CalChart README.txt ---
-Updated on 4/29/2012 by Richard Powell
+Updated on 5/6/2012 by Richard Powell
 ---
 
 ---
 What's new in this version?
 ---
 
-* CalChart Omniview.  'nuff said.
+Bugs and features fixed in this release:
+
+3524205: printing to ps doesn't work on mac, file is corrupted
 
 ---
 What is CalChart?

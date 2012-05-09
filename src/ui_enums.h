@@ -87,6 +87,7 @@ enum
 	CALCHART__anim_prev_sheet,
 	CALCHART__anim_next_sheet,
 	CALCHART__anim_collisions,
+	CALCHART__anim_errors,
 	CALCHART__anim_tempo,
 	CALCHART__anim_gotosheet,
 	CALCHART__anim_gotobeat,
