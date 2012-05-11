@@ -363,6 +363,7 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C72C5FDF155CD16100194225 /* cc_omniview_constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_omniview_constants.h; sourceTree = "<group>"; };
 		C72E2B071441150400118C03 /* top_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = top_frame.cpp; sourceTree = "<group>"; };
 		C72E2B081441150400118C03 /* top_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = top_frame.h; sourceTree = "<group>"; };
 		C72F24B914D4976E00758A0E /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
@@ -722,6 +723,7 @@
 				C7FC7B7D130746C100F22854 /* cc_coord.h */,
 				C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */,
 				C785A91914D3D6620038B6FE /* cc_omniview_canvas.h */,
+				C72C5FDF155CD16100194225 /* cc_omniview_constants.h */,
 				C75C5DE512F5E7E200CBFD3A /* cc_point.cpp */,
 				C75C5DE612F5E7E200CBFD3A /* cc_point.h */,
 				C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */,

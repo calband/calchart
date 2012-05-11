@@ -25,6 +25,7 @@
 #include "confgr.h"
 #include "modes.h"
 #include "animation_frame.h"
+#include "cc_omniview_constants.h"
 
 #include <wx/dcbuffer.h>
 
@@ -666,23 +667,75 @@ CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 			// predetermined camera angles:
 		case '1':
 			OnCmd_FollowMarcher(-1);
-			mViewPoint = viewpoint_t(0, -16, 2.5);
-			mViewAngle = M_PI/2;
-			mViewAngleZ = 0;
+			mViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
+			mViewAngle = kViewAngle_1;
+			mViewAngleZ = kViewAngle_z_1;
 			break;
 		case '2':
 			OnCmd_FollowMarcher(-1);
-			mViewPoint = viewpoint_t(0, -60, 20);
-			mViewAngle = M_PI/2;
-			mViewAngleZ = -M_PI/8;
+			mViewPoint = viewpoint_t(kViewPoint_x_2, kViewPoint_y_2, kViewPoint_z_2);
+			mViewAngle = kViewAngle_2;
+			mViewAngleZ = kViewAngle_z_2;
 			break;
 		case '3':
 			OnCmd_FollowMarcher(-1);
-			mViewPoint = viewpoint_t(60, -55, 20);
-			mViewAngle = 11*M_PI/16;
-			mViewAngleZ = -M_PI/8;
+			mViewPoint = viewpoint_t(kViewPoint_x_3, kViewPoint_y_3, kViewPoint_z_3);
+			mViewAngle = kViewAngle_3;
+			mViewAngleZ = kViewAngle_z_3;
 			break;
 
+		case '4':
+			OnCmd_FollowMarcher(-1);
+			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_4(), GetConfiguration_OmniViewPoint_Y_4(), GetConfiguration_OmniViewPoint_Z_4());
+			mViewAngle = GetConfiguration_OmniViewAngle_4();
+			mViewAngleZ = GetConfiguration_OmniViewAngle_Z_4();
+			break;
+		case '5':
+			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_5(), GetConfiguration_OmniViewPoint_Y_5(), GetConfiguration_OmniViewPoint_Z_5());
+			mViewAngle = GetConfiguration_OmniViewAngle_5();
+			mViewAngleZ = GetConfiguration_OmniViewAngle_Z_5();
+			break;
+		case '6':
+			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_6(), GetConfiguration_OmniViewPoint_Y_6(), GetConfiguration_OmniViewPoint_Z_6());
+			mViewAngle = GetConfiguration_OmniViewAngle_6();
+			mViewAngleZ = GetConfiguration_OmniViewAngle_Z_6();
+			break;
+
+		case '$':
+			OnCmd_FollowMarcher(-1);
+			if (wxMessageBox(wxT("Set Custom Viewpoint 4?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES)
+			{
+				SetConfiguration_OmniViewPoint_X_4(mViewPoint.x);
+				SetConfiguration_OmniViewPoint_Y_4(mViewPoint.y);
+				SetConfiguration_OmniViewPoint_Z_4(mViewPoint.z);
+				SetConfiguration_OmniViewAngle_4(mViewAngle);
+				SetConfiguration_OmniViewAngle_Z_4(mViewAngleZ);
+			}
+			break;
+		case '%':
+			OnCmd_FollowMarcher(-1);
+			if (wxMessageBox(wxT("Set Custom Viewpoint 5?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES)
+			{
+				SetConfiguration_OmniViewPoint_X_5(mViewPoint.x);
+				SetConfiguration_OmniViewPoint_Y_5(mViewPoint.y);
+				SetConfiguration_OmniViewPoint_Z_5(mViewPoint.z);
+				SetConfiguration_OmniViewAngle_5(mViewAngle);
+				SetConfiguration_OmniViewAngle_Z_5(mViewAngleZ);
+			}
+			break;
+		case '^':
+			OnCmd_FollowMarcher(-1);
+			if (wxMessageBox(wxT("Set Custom Viewpoint 6?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES)
+			{
+				SetConfiguration_OmniViewPoint_X_6(mViewPoint.x);
+				SetConfiguration_OmniViewPoint_Y_6(mViewPoint.y);
+				SetConfiguration_OmniViewPoint_Z_6(mViewPoint.z);
+				SetConfiguration_OmniViewAngle_6(mViewAngle);
+				SetConfiguration_OmniViewAngle_Z_6(mViewAngleZ);
+			}
+			break;
+			
+			// up and down
 		case '-':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint.z -= stepIncr;
@@ -692,24 +745,27 @@ CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 			OnCmd_FollowMarcher(-1);
 			mViewPoint.z += stepIncr;
 			break;
+
+			// change view, do not move
 		case 'q':
 			OnCmd_FollowMarcher(-1);
 			mViewAngle += AngleStepIncr;
 			mViewAngle = NormalizeAngle(mViewAngle);
 			break;
-		case 'w':
+		case 'e':
 			OnCmd_FollowMarcher(-1);
 			mViewAngle -= AngleStepIncr;
 			mViewAngle = NormalizeAngle(mViewAngle);
 			break;
-		case 'a':
+		case 'r':
 			OnCmd_FollowMarcher(-1);
 			mViewAngleZ += AngleStepIncr;
 			break;
-		case 'z':
+		case 'f':
 			OnCmd_FollowMarcher(-1);
 			mViewAngleZ -= AngleStepIncr;
 			break;
+
 		case '>':
 			mFOV += 5;
 			mFOV = std::min<float>(mFOV, 160);
@@ -727,33 +783,42 @@ CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 			OnCmd_ToggleShowOnlySelected();
 			break;
 
-		case WXK_LEFT:
+			// move, following the FPS model
+		case 'a':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint.x += -stepIncr*cos(mViewAngle - M_PI/2);
 			mViewPoint.y += -stepIncr*sin(mViewAngle - M_PI/2);
 			break;
-		case WXK_RIGHT:
+		case 'd':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint.x += stepIncr*cos(mViewAngle - M_PI/2);
 			mViewPoint.y += stepIncr*sin(mViewAngle - M_PI/2);
 			break;
-		case WXK_DOWN:
+		case 's':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint.x += -stepIncr*cos(mViewAngle);
 			mViewPoint.y += -stepIncr*sin(mViewAngle);
 			mViewPoint.z += -stepIncr*sin(mViewAngleZ);
 			mViewPoint.z = std::max(mViewPoint.z, 0.3f);
 			break;
-		case WXK_UP:
+		case 'w':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint.x += stepIncr*cos(mViewAngle);
 			mViewPoint.y += stepIncr*sin(mViewAngle);
 			mViewPoint.z += stepIncr*sin(mViewAngleZ);
 			mViewPoint.z = std::max(mViewPoint.z, 0.3f);
 			break;
+
+		case WXK_LEFT:
+			mView->PrevBeat();
+			break;
+		case WXK_RIGHT:
+			mView->NextBeat();
+			break;
 		case WXK_SPACE:
 			mView->ToggleTimer();
 			break;
+
 		default:
 			event.Skip();
 	}

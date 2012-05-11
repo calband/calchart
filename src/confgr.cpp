@@ -34,6 +34,7 @@
 #include "confgr.h"
 #include "modes.h"
 #include "show.h"
+#include "cc_omniview_constants.h"
 
 const wxString ColorNames[COLOR_NUM] =
 {
@@ -185,6 +186,39 @@ static const long kPrintPSDoContValue = 0;
 static const wxString kPrintPSDoContSheetKey = wxT("PrintPSDoContSheet");
 static const long kPrintPSDoContSheetValue = 0;
 
+static const wxString kOmniViewPoint_X_4Key = wxT("OmniViewPoint_X_4");
+static const double kOmniViewPoint_X_4Value = kViewPoint_x_1;
+static const wxString kOmniViewPoint_Y_4Key = wxT("OmniViewPoint_Y_4");
+static const double kOmniViewPoint_Y_4Value = kViewPoint_y_1;
+static const wxString kOmniViewPoint_Z_4Key = wxT("OmniViewPoint_Z_4");
+static const double kOmniViewPoint_Z_4Value = kViewPoint_z_1;
+static const wxString kOmniViewAngle_4Key = wxT("OmniViewAngle_4");
+static const double kOmniViewAngle_4Value = kViewAngle_1;
+static const wxString kOmniViewAngle_Z_4Key = wxT("OmniViewAngle_Z_4");
+static const double kOmniViewAngle_Z_4Value = kViewAngle_z_1;
+
+static const wxString kOmniViewPoint_X_5Key = wxT("OmniViewPoint_X_5");
+static const double kOmniViewPoint_X_5Value = kViewPoint_x_2;
+static const wxString kOmniViewPoint_Y_5Key = wxT("OmniViewPoint_Y_5");
+static const double kOmniViewPoint_Y_5Value = kViewPoint_y_2;
+static const wxString kOmniViewPoint_Z_5Key = wxT("OmniViewPoint_Z_5");
+static const double kOmniViewPoint_Z_5Value = kViewPoint_z_2;
+static const wxString kOmniViewAngle_5Key = wxT("OmniViewAngle_5");
+static const double kOmniViewAngle_5Value = kViewAngle_2;
+static const wxString kOmniViewAngle_Z_5Key = wxT("OmniViewAngle_Z_5");
+static const double kOmniViewAngle_Z_5Value = kViewAngle_z_2;
+
+static const wxString kOmniViewPoint_X_6Key = wxT("OmniViewPoint_X_6");
+static const double kOmniViewPoint_X_6Value = kViewPoint_x_3;
+static const wxString kOmniViewPoint_Y_6Key = wxT("OmniViewPoint_Y_6");
+static const double kOmniViewPoint_Y_6Value = kViewPoint_y_3;
+static const wxString kOmniViewPoint_Z_6Key = wxT("OmniViewPoint_Z_6");
+static const double kOmniViewPoint_Z_6Value = kViewPoint_z_3;
+static const wxString kOmniViewAngle_6Key = wxT("OmniViewAngle_6");
+static const double kOmniViewAngle_6Value = kViewAngle_3;
+static const wxString kOmniViewAngle_Z_6Key = wxT("OmniViewAngle_Z_6");
+static const double kOmniViewAngle_Z_6Value = kViewAngle_z_3;
+
 template <typename T>
 T GetConfigValue(const wxString& key, const T& def)
 {
@@ -296,6 +330,24 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSLandscape, long);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSOverview, long);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoCont, long);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, long);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_4, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_4, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_4, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_4, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_4, float);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_5, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_5, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_5, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_5, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_5, float);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_6, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_6, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_6, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_6, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_6, float);
 
 // Color is more complicated, we use functions for setting that
 const wxPen *CalChartPens[COLOR_NUM];

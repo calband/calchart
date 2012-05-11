@@ -9,6 +9,12 @@ What's new in this version?
 Bugs and features fixed in this release:
 
 3524205: printing to ps doesn't work on mac, file is corrupted
+3524585: Rotate in omniview with q causes it to go upside-down	
+3524583: Fix camera angel 3.
+3524582: Adjust picture should be easier, seems to have issues.
+
+feature:
+3524594: add error as toolbars.
 
 ---
 What is CalChart?
