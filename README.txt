@@ -15,6 +15,8 @@ Bugs and features fixed in this release:
 
 feature:
 3524594: add error as toolbars.
+3524589: Change animation, comma, period for next/prev beat.
+3524584: Should be able to have custom camera angles
 
 ---
 What is CalChart?
