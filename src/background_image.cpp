@@ -59,7 +59,7 @@ BackgroundImage::OnMouseLeftDown(const wxMouseEvent& event, const wxDC& dc)
 			continue;
 		int offsetX = (where % 3)-1;
 		int offsetY = (where / 3)-1;
-		wxRect grabPoint(middleX + (offsetX * (width/2 + dc.DeviceToLogicalXRel(kCircleSize/3))) - dc.DeviceToLogicalXRel(kCircleSize), middleY + (offsetY * (height/2  + dc.DeviceToLogicalYRel(kCircleSize/3))) - dc.DeviceToLogicalXRel(kCircleSize), kCircleSize*2, kCircleSize*2);
+		wxRect grabPoint(middleX + (offsetX * (width/2 + dc.DeviceToLogicalXRel(kCircleSize/3))) - dc.DeviceToLogicalXRel(kCircleSize), middleY + (offsetY * (height/2  + dc.DeviceToLogicalYRel(kCircleSize/3))) - dc.DeviceToLogicalXRel(kCircleSize), dc.DeviceToLogicalXRel(kCircleSize*2), dc.DeviceToLogicalXRel(kCircleSize*2));
 		
 		if (grabPoint.Contains(x, y))
 		{
