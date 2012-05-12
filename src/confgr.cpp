@@ -115,12 +115,19 @@ static const int kAutosaveIntervalValue = 60;
 
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 //static const wxString kMainFrameZoomKey = wxT("MainFrameZoom");
-static const wxString kMainFrameZoomKey = wxT("MainFrameZoom2");
-static const float kMainFrameZoomValue = 0.5;
-static const wxString kMainFrameWidthKey = wxT("MainFrameWidth");
-static const unsigned int kMainFrameWidthValue = 600;
-static const wxString kMainFrameHeightKey = wxT("MainFrameHeight");
-static const unsigned int kMainFrameHeightValue = 450;
+// We have changed MainFrame to FieldFrame:
+//static const wxString kMainFrameZoomKey = wxT("MainFrameZoom2");
+//static const float kMainFrameZoomValue = 0.5;
+//static const wxString kMainFrameWidthKey = wxT("MainFrameWidth");
+//static const unsigned int kMainFrameWidthValue = 600;
+//static const wxString kMainFrameHeightKey = wxT("MainFrameHeight");
+//static const unsigned int kMainFrameHeightValue = 450;
+static const wxString kFieldFrameZoomKey = wxT("FieldFrameZoom");
+static const float kFieldFrameZoomValue = 0.5;
+static const wxString kFieldFrameWidthKey = wxT("FieldFrameWidth");
+static const unsigned int kFieldFrameWidthValue = 600;
+static const wxString kFieldFrameHeightKey = wxT("FieldFrameHeight");
+static const unsigned int kFieldFrameHeightValue = 450;
 static const wxString kPrintFileKey = wxT("PrintFile");
 static const wxString kPrintFileValue = wxT("LPT1");
 static const wxString kPrintCmdKey = wxT("PrintCmd");
@@ -291,9 +298,9 @@ void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## Key
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameWidth, long);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameZoom, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameWidth, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameHeight, long);
 
 // printing
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintFile, wxString);

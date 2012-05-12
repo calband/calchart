@@ -49,7 +49,7 @@ wxHtmlHelpController *gHelpController = NULL;
 
 TopFrame *topframe = NULL;
 
-TopFrame *GetMainFrame(void)
+TopFrame *GetTopFrame(void)
 {
 	return topframe;
 }
@@ -70,7 +70,7 @@ bool CalChartApp::OnInit()
 
 	//// Create a template relating drawing documents to their views
 	(void) new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
-			CLASSINFO(CC_show), CLASSINFO(MainFrameView));
+			CLASSINFO(CC_show), CLASSINFO(FieldView));
 
 	gPrintDialogData = new wxPrintDialogData();
 

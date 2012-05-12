@@ -90,63 +90,63 @@ extern wxHtmlHelpController *gHelpController;
 
 extern wxPrintDialogData *gPrintDialogData;
 
-BEGIN_EVENT_TABLE(MainFrame, wxDocMDIChildFrame)
-EVT_CHAR(MainFrame::OnChar)
-EVT_MENU(CALCHART__APPEND_FILE, MainFrame::OnCmdAppend)
-EVT_MENU(CALCHART__IMPORT_CONT_FILE, MainFrame::OnCmdImportCont)
-EVT_MENU(CALCHART__wxID_PRINT, MainFrame::OnCmdPrint)
-EVT_MENU(CALCHART__wxID_PREVIEW, MainFrame::OnCmdPrintPreview)
-EVT_MENU(wxID_PAGE_SETUP, MainFrame::OnCmdPageSetup)
-EVT_MENU(CALCHART__LEGACY_PRINT, MainFrame::OnCmdLegacyPrint)
-EVT_MENU(CALCHART__LEGACY_PRINT_EPS, MainFrame::OnCmdLegacyPrintEPS)
-EVT_MENU(CALCHART__INSERT_BEFORE, MainFrame::OnCmdInsertBefore)
-EVT_MENU(CALCHART__INSERT_AFTER, MainFrame::OnCmdInsertAfter)
-EVT_MENU(wxID_DELETE, MainFrame::OnCmdDelete)
-EVT_MENU(CALCHART__RELABEL, MainFrame::OnCmdRelabel)
-EVT_MENU(CALCHART__EDIT_CONTINUITY, MainFrame::OnCmdEditCont)
-EVT_MENU(CALCHART__SET_SHEET_TITLE, MainFrame::OnCmdSetSheetTitle)
-EVT_MENU(CALCHART__SET_BEATS, MainFrame::OnCmdSetBeats)
-EVT_MENU(CALCHART__SETUP, MainFrame::OnCmdSetup)
-EVT_MENU(CALCHART__SETDESCRIPTION, MainFrame::OnCmdSetDescription)
-EVT_MENU(CALCHART__SETMODE, MainFrame::OnCmdSetMode)
-EVT_MENU(CALCHART__POINTS, MainFrame::OnCmdPoints)
-EVT_MENU(CALCHART__ANIMATE, MainFrame::OnCmdAnimate)
-EVT_MENU(CALCHART__OMNIVIEW, MainFrame::OnCmdOmniView)
-EVT_MENU(wxID_ABOUT, MainFrame::OnCmdAbout)
-EVT_MENU(wxID_HELP, MainFrame::OnCmdHelp)
-EVT_MENU(CALCHART__AddBackgroundImage, MainFrame::OnCmd_AddBackgroundImage)
-EVT_MENU(CALCHART__AdjustBackgroundImage, MainFrame::OnCmd_AdjustBackgroundImage)
-EVT_MENU(CALCHART__RemoveBackgroundImage, MainFrame::OnCmd_RemoveBackgroundImage)
-EVT_MENU(CALCHART__prev_ss, MainFrame::OnCmd_prev_ss)
-EVT_MENU(CALCHART__next_ss, MainFrame::OnCmd_next_ss)
-EVT_MENU(CALCHART__box, MainFrame::OnCmd_box)
-EVT_MENU(CALCHART__poly, MainFrame::OnCmd_poly)
-EVT_MENU(CALCHART__lasso, MainFrame::OnCmd_lasso)
-EVT_MENU(CALCHART__move, MainFrame::OnCmd_move)
-EVT_MENU(CALCHART__line, MainFrame::OnCmd_line)
-EVT_MENU(CALCHART__rot, MainFrame::OnCmd_rot)
-EVT_MENU(CALCHART__shear, MainFrame::OnCmd_shear)
-EVT_MENU(CALCHART__reflect, MainFrame::OnCmd_reflect)
-EVT_MENU(CALCHART__size, MainFrame::OnCmd_size)
-EVT_MENU(CALCHART__genius, MainFrame::OnCmd_genius)
-EVT_MENU(CALCHART__label_left, MainFrame::OnCmd_label_left)
-EVT_MENU(CALCHART__label_right, MainFrame::OnCmd_label_right)
-EVT_MENU(CALCHART__label_flip, MainFrame::OnCmd_label_flip)
-EVT_MENU(CALCHART__setsym0, MainFrame::OnCmd_setsym0)
-EVT_MENU(CALCHART__setsym1, MainFrame::OnCmd_setsym1)
-EVT_MENU(CALCHART__setsym2, MainFrame::OnCmd_setsym2)
-EVT_MENU(CALCHART__setsym3, MainFrame::OnCmd_setsym3)
-EVT_MENU(CALCHART__setsym4, MainFrame::OnCmd_setsym4)
-EVT_MENU(CALCHART__setsym5, MainFrame::OnCmd_setsym5)
-EVT_MENU(CALCHART__setsym6, MainFrame::OnCmd_setsym6)
-EVT_MENU(CALCHART__setsym7, MainFrame::OnCmd_setsym7)
-EVT_MENU(wxID_PREFERENCES, MainFrame::OnCmdPreferences)
-EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, MainFrame::slider_sheet_callback)
-EVT_COMBOBOX(CALCHART__slider_zoom, MainFrame::zoom_callback)
-EVT_TEXT_ENTER(CALCHART__slider_zoom, MainFrame::zoom_callback_textenter)
-EVT_CHOICE(CALCHART__refnum_callback, MainFrame::refnum_callback)
-EVT_CHECKBOX(CALCHART__draw_paths, MainFrame::OnEnableDrawPaths)
-EVT_SIZE( MainFrame::OnSize)
+BEGIN_EVENT_TABLE(FieldFrame, wxDocMDIChildFrame)
+EVT_CHAR(FieldFrame::OnChar)
+EVT_MENU(CALCHART__APPEND_FILE, FieldFrame::OnCmdAppend)
+EVT_MENU(CALCHART__IMPORT_CONT_FILE, FieldFrame::OnCmdImportCont)
+EVT_MENU(CALCHART__wxID_PRINT, FieldFrame::OnCmdPrint)
+EVT_MENU(CALCHART__wxID_PREVIEW, FieldFrame::OnCmdPrintPreview)
+EVT_MENU(wxID_PAGE_SETUP, FieldFrame::OnCmdPageSetup)
+EVT_MENU(CALCHART__LEGACY_PRINT, FieldFrame::OnCmdLegacyPrint)
+EVT_MENU(CALCHART__LEGACY_PRINT_EPS, FieldFrame::OnCmdLegacyPrintEPS)
+EVT_MENU(CALCHART__INSERT_BEFORE, FieldFrame::OnCmdInsertBefore)
+EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
+EVT_MENU(wxID_DELETE, FieldFrame::OnCmdDelete)
+EVT_MENU(CALCHART__RELABEL, FieldFrame::OnCmdRelabel)
+EVT_MENU(CALCHART__EDIT_CONTINUITY, FieldFrame::OnCmdEditCont)
+EVT_MENU(CALCHART__SET_SHEET_TITLE, FieldFrame::OnCmdSetSheetTitle)
+EVT_MENU(CALCHART__SET_BEATS, FieldFrame::OnCmdSetBeats)
+EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
+EVT_MENU(CALCHART__SETDESCRIPTION, FieldFrame::OnCmdSetDescription)
+EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
+EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
+EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
+EVT_MENU(CALCHART__OMNIVIEW, FieldFrame::OnCmdOmniView)
+EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
+EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
+EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
+EVT_MENU(CALCHART__AdjustBackgroundImage, FieldFrame::OnCmd_AdjustBackgroundImage)
+EVT_MENU(CALCHART__RemoveBackgroundImage, FieldFrame::OnCmd_RemoveBackgroundImage)
+EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
+EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
+EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
+EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
+EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
+EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
+EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
+EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
+EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
+EVT_MENU(CALCHART__reflect, FieldFrame::OnCmd_reflect)
+EVT_MENU(CALCHART__size, FieldFrame::OnCmd_size)
+EVT_MENU(CALCHART__genius, FieldFrame::OnCmd_genius)
+EVT_MENU(CALCHART__label_left, FieldFrame::OnCmd_label_left)
+EVT_MENU(CALCHART__label_right, FieldFrame::OnCmd_label_right)
+EVT_MENU(CALCHART__label_flip, FieldFrame::OnCmd_label_flip)
+EVT_MENU(CALCHART__setsym0, FieldFrame::OnCmd_setsym0)
+EVT_MENU(CALCHART__setsym1, FieldFrame::OnCmd_setsym1)
+EVT_MENU(CALCHART__setsym2, FieldFrame::OnCmd_setsym2)
+EVT_MENU(CALCHART__setsym3, FieldFrame::OnCmd_setsym3)
+EVT_MENU(CALCHART__setsym4, FieldFrame::OnCmd_setsym4)
+EVT_MENU(CALCHART__setsym5, FieldFrame::OnCmd_setsym5)
+EVT_MENU(CALCHART__setsym6, FieldFrame::OnCmd_setsym6)
+EVT_MENU(CALCHART__setsym7, FieldFrame::OnCmd_setsym7)
+EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
+EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, FieldFrame::slider_sheet_callback)
+EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
+EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
+EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
+EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
+EVT_SIZE( FieldFrame::OnSize)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
@@ -189,7 +189,7 @@ public:
 
 
 // Main frame constructor
-MainFrame::MainFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size):
+FieldFrame::FieldFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size):
 wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 field(NULL)
 {
@@ -264,7 +264,7 @@ field(NULL)
 	AddCoolToolBar(GetMainToolBar(), this);
 
 // Add the field canvas
-	field = new FieldCanvas(view, this, GetConfiguration_MainFrameZoom());
+	field = new FieldCanvas(view, this, GetConfiguration_FieldFrameZoom());
 	// I don't think we need to do this here.  Should be taken care of already
 //	field->SetVirtualSize(1000, 1000);
 	// set scroll rate 1 to 1, so we can have even scrolling of whole field
@@ -300,7 +300,7 @@ field(NULL)
 	if (zoom_box)
 	{
 		wxString zoomtxt;
-		zoomtxt.sprintf("%d%%", (int)(GetConfiguration_MainFrameZoom()*100));
+		zoomtxt.sprintf("%d%%", (int)(GetConfiguration_FieldFrameZoom()*100));
 		zoom_box->SetValue(zoomtxt);
 	}
 
@@ -362,26 +362,26 @@ field(NULL)
 }
 
 
-MainFrame::~MainFrame()
+FieldFrame::~FieldFrame()
 {}
 
 
 // Intercept menu commands
 
-void MainFrame::OnCmdAppend(wxCommandEvent& event)
+void FieldFrame::OnCmdAppend(wxCommandEvent& event)
 {
 	AppendShow();
 }
 
 
-void MainFrame::OnCmdImportCont(wxCommandEvent& event)
+void FieldFrame::OnCmdImportCont(wxCommandEvent& event)
 {
 	ImportContFile();
 }
 
 
 // the default wxView print doesn't handle landscape.  rolling our own
-void MainFrame::OnCmdPrint(wxCommandEvent& event)
+void FieldFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrinter printer(gPrintDialogData);
@@ -411,7 +411,7 @@ void MainFrame::OnCmdPrint(wxCommandEvent& event)
 }
 
 // the default wxView print doesn't handle landscape.  rolling our own
-void MainFrame::OnCmdPrintPreview(wxCommandEvent& event)
+void FieldFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrintPreview *preview = new wxPrintPreview(
@@ -430,7 +430,7 @@ void MainFrame::OnCmdPrintPreview(wxCommandEvent& event)
 	frame->Show(true);
 }
 
-void MainFrame::OnCmdPageSetup(wxCommandEvent& event)
+void FieldFrame::OnCmdPageSetup(wxCommandEvent& event)
 {
 	wxPageSetupData mPageSetupData;
 	mPageSetupData.EnableOrientation(true);
@@ -442,7 +442,7 @@ void MainFrame::OnCmdPageSetup(wxCommandEvent& event)
 	gPrintDialogData->SetPrintData(mPageSetupData.GetPrintData());
 }
 
-void MainFrame::OnCmdLegacyPrint(wxCommandEvent& event)
+void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
@@ -454,7 +454,7 @@ void MainFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
+void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
@@ -467,7 +467,7 @@ void MainFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdPreferences(wxCommandEvent& event)
+void FieldFrame::OnCmdPreferences(wxCommandEvent& event)
 {
 	CalChartPreferences dialog1(this);
 	if (dialog1.ShowModal() == wxID_OK)
@@ -476,32 +476,32 @@ void MainFrame::OnCmdPreferences(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdInsertBefore(wxCommandEvent& event)
+void FieldFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
 	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
-	static_cast<MainFrameView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum());
-	static_cast<MainFrameView*>(GetView())->GoToPrevSheet();
+	static_cast<FieldView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum());
+	static_cast<FieldView*>(GetView())->GoToPrevSheet();
 }
 
 
-void MainFrame::OnCmdInsertAfter(wxCommandEvent& event)
+void FieldFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
 	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
-	static_cast<MainFrameView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum()+1);
-	static_cast<MainFrameView*>(GetView())->GoToNextSheet();
+	static_cast<FieldView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum()+1);
+	static_cast<FieldView*>(GetView())->GoToNextSheet();
 }
 
 
-void MainFrame::OnCmdDelete(wxCommandEvent& event)
+void FieldFrame::OnCmdDelete(wxCommandEvent& event)
 {
 	if (field->mShow->GetNumSheets() > 1)
 	{
-		static_cast<MainFrameView*>(GetView())->DoDeleteSheet(field->mShow->GetCurrentSheetNum());
+		static_cast<FieldView*>(GetView())->DoDeleteSheet(field->mShow->GetCurrentSheetNum());
 	}
 }
 
 
-void MainFrame::OnCmdRelabel(wxCommandEvent& event)
+void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 {
 	if (field->mShow->GetCurrentSheetNum()+1 < field->mShow->GetNumSheets())
 	{
@@ -525,7 +525,7 @@ void MainFrame::OnCmdRelabel(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdEditCont(wxCommandEvent& event)
+void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
@@ -537,7 +537,7 @@ void MainFrame::OnCmdEditCont(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
+void FieldFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 {
 	wxString s;
 	if (field->mShow)
@@ -548,13 +548,13 @@ void MainFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 			this);
 		if (!s.IsEmpty())
 		{
-			static_cast<MainFrameView*>(GetView())->DoSetSheetTitle(s);
+			static_cast<FieldView*>(GetView())->DoSetSheetTitle(s);
 		}
 	}
 }
 
 
-void MainFrame::OnCmdSetBeats(wxCommandEvent& event)
+void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
 {
 	wxString s;
 	if (field->mShow)
@@ -569,32 +569,32 @@ void MainFrame::OnCmdSetBeats(wxCommandEvent& event)
 			long val;
 			if (s.ToLong(&val))
 			{
-				static_cast<MainFrameView*>(GetView())->DoSetSheetBeats(val);
+				static_cast<FieldView*>(GetView())->DoSetSheetBeats(val);
 			}
 		}
 	}
 }
 
 
-void MainFrame::OnCmdSetup(wxCommandEvent& event)
+void FieldFrame::OnCmdSetup(wxCommandEvent& event)
 {
 	Setup();
 }
 
 
-void MainFrame::OnCmdSetDescription(wxCommandEvent& event)
+void FieldFrame::OnCmdSetDescription(wxCommandEvent& event)
 {
 	SetDescription();
 }
 
 
-void MainFrame::OnCmdSetMode(wxCommandEvent& event)
+void FieldFrame::OnCmdSetMode(wxCommandEvent& event)
 {
 	SetMode();
 }
 
 
-void MainFrame::OnCmdPoints(wxCommandEvent& event)
+void FieldFrame::OnCmdPoints(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
@@ -605,7 +605,7 @@ void MainFrame::OnCmdPoints(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdAnimate(wxCommandEvent& event)
+void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
@@ -614,7 +614,7 @@ void MainFrame::OnCmdAnimate(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdOmniView(wxCommandEvent& event)
+void FieldFrame::OnCmdOmniView(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
@@ -623,162 +623,162 @@ void MainFrame::OnCmdOmniView(wxCommandEvent& event)
 }
 
 
-void MainFrame::OnCmdAbout(wxCommandEvent& event)
+void FieldFrame::OnCmdAbout(wxCommandEvent& event)
 {
 	TopFrame::About();
 }
 
 
-void MainFrame::OnCmdHelp(wxCommandEvent& event)
+void FieldFrame::OnCmdHelp(wxCommandEvent& event)
 {
 	TopFrame::Help();
 }
 
 
-void MainFrame::OnCmd_prev_ss(wxCommandEvent& event)
+void FieldFrame::OnCmd_prev_ss(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->GoToPrevSheet();
+	static_cast<FieldView*>(GetView())->GoToPrevSheet();
 }
 
 
-void MainFrame::OnCmd_next_ss(wxCommandEvent& event)
+void FieldFrame::OnCmd_next_ss(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->GoToNextSheet();
+	static_cast<FieldView*>(GetView())->GoToNextSheet();
 }
 
 
-void MainFrame::OnCmd_box(wxCommandEvent& event)
+void FieldFrame::OnCmd_box(wxCommandEvent& event)
 {
 	SetCurrentLasso(CC_DRAG_BOX);
 }
 
 
-void MainFrame::OnCmd_poly(wxCommandEvent& event)
+void FieldFrame::OnCmd_poly(wxCommandEvent& event)
 {
 	SetCurrentLasso(CC_DRAG_POLY);
 }
 
 
-void MainFrame::OnCmd_lasso(wxCommandEvent& event)
+void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
 {
 	SetCurrentLasso(CC_DRAG_LASSO);
 }
 
 
-void MainFrame::OnCmd_move(wxCommandEvent& event)
+void FieldFrame::OnCmd_move(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_NORMAL);
 }
 
 
-void MainFrame::OnCmd_line(wxCommandEvent& event)
+void FieldFrame::OnCmd_line(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_LINE);
 }
 
 
-void MainFrame::OnCmd_rot(wxCommandEvent& event)
+void FieldFrame::OnCmd_rot(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_ROTATE);
 }
 
 
-void MainFrame::OnCmd_shear(wxCommandEvent& event)
+void FieldFrame::OnCmd_shear(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_SHEAR);
 }
 
 
-void MainFrame::OnCmd_reflect(wxCommandEvent& event)
+void FieldFrame::OnCmd_reflect(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_REFL);
 }
 
 
-void MainFrame::OnCmd_size(wxCommandEvent& event)
+void FieldFrame::OnCmd_size(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_SIZE);
 }
 
 
-void MainFrame::OnCmd_genius(wxCommandEvent& event)
+void FieldFrame::OnCmd_genius(wxCommandEvent& event)
 {
 	SetCurrentMove(CC_MOVE_GENIUS);
 }
 
 
-void MainFrame::OnCmd_label_left(wxCommandEvent& event)
+void FieldFrame::OnCmd_label_left(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(false);
+	static_cast<FieldView*>(GetView())->DoSetPointsLabel(false);
 }
 
 
-void MainFrame::OnCmd_label_right(wxCommandEvent& event)
+void FieldFrame::OnCmd_label_right(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsLabel(true);
+	static_cast<FieldView*>(GetView())->DoSetPointsLabel(true);
 }
 
 
-void MainFrame::OnCmd_label_flip(wxCommandEvent& event)
+void FieldFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsLabelFlip();
+	static_cast<FieldView*>(GetView())->DoSetPointsLabelFlip();
 }
 
 
-void MainFrame::OnCmd_setsym0(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_PLAIN);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_PLAIN);
 }
 
 
-void MainFrame::OnCmd_setsym1(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOL);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOL);
 }
 
 
-void MainFrame::OnCmd_setsym2(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_BKSL);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_BKSL);
 }
 
 
-void MainFrame::OnCmd_setsym3(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SL);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SL);
 }
 
 
-void MainFrame::OnCmd_setsym4(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_X);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_X);
 }
 
 
-void MainFrame::OnCmd_setsym5(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLBKSL);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLBKSL);
 }
 
 
-void MainFrame::OnCmd_setsym6(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLSL);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLSL);
 }
 
 
-void MainFrame::OnCmd_setsym7(wxCommandEvent& event)
+void FieldFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
-	static_cast<MainFrameView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLX);
+	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLX);
 }
 
 
-void MainFrame::OnChar(wxKeyEvent& event)
+void FieldFrame::OnChar(wxKeyEvent& event)
 {
 	field->OnChar(event);
 }
 
-void MainFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
+void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
 {
     wxString filename;
     wxInitAllImageHandlers();
@@ -818,30 +818,30 @@ void MainFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
     }
 }
 
-void MainFrame::OnCmd_AdjustBackgroundImage(wxCommandEvent& event)
+void FieldFrame::OnCmd_AdjustBackgroundImage(wxCommandEvent& event)
 {
 	field->AdjustBackgroundImage(true);
 }
 
-void MainFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
+void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 {
 	field->RemoveBackgroundImage();
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
 	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
 }
 
-void MainFrame::OnSize(wxSizeEvent& event)
+void FieldFrame::OnSize(wxSizeEvent& event)
 {
 	// HACK: Prevent width and height from growing out of control
 	int w = event.GetSize().GetWidth();
 	int h = event.GetSize().GetHeight();
-	SetConfiguration_MainFrameWidth((w > 1200) ? 1200 : w);
-	SetConfiguration_MainFrameHeight((h > 700) ? 700 : h);
+	SetConfiguration_FieldFrameWidth((w > 1200) ? 1200 : w);
+	SetConfiguration_FieldFrameHeight((h > 700) ? 700 : h);
 	wxDocMDIChildFrame::OnSize(event);
 }
 
 // Append a show with file selector
-void MainFrame::AppendShow()
+void FieldFrame::AppendShow()
 {
 	wxString s;
 	CC_show *shw;
@@ -856,7 +856,7 @@ void MainFrame::AppendShow()
 			if (shw->GetNumPoints() == field->mShow->GetNumPoints())
 			{
 				currend = field->mShow->GetNumSheets();
-				static_cast<MainFrameView*>(GetView())->DoInsertSheets(CC_show::CC_sheet_container_t(shw->GetSheetBegin(), shw->GetSheetEnd()), currend);
+				static_cast<FieldView*>(GetView())->DoInsertSheets(CC_show::CC_sheet_container_t(shw->GetSheetBegin(), shw->GetSheetEnd()), currend);
 				// This is bad, we are relabeling outside of adding sheets...
 				if (!field->mShow->RelabelSheets(currend-1))
 					(void)wxMessageBox(wxT("Stuntsheets don't match"),
@@ -877,7 +877,7 @@ void MainFrame::AppendShow()
 
 
 // Append a show with file selector
-void MainFrame::ImportContFile()
+void FieldFrame::ImportContFile()
 {
 	wxString s;
 
@@ -903,7 +903,7 @@ static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
 }
 
 
-void MainFrame::SnapToGrid(CC_coord& c)
+void FieldFrame::SnapToGrid(CC_coord& c)
 {
 	Coord gridn, grids;
 	int n = grid_choice->GetSelection();
@@ -917,7 +917,7 @@ void MainFrame::SnapToGrid(CC_coord& c)
 }
 
 
-void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type)
+void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
 	// retoggle the tool because we want it to draw as selected
 	int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : CALCHART__box;
@@ -928,7 +928,7 @@ void MainFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 }
 
 
-void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
+void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
 {
 	// retoggle the tool because we want it to draw as selected
 	wxToolBar* tb = GetToolBar();
@@ -939,20 +939,20 @@ void MainFrame::SetCurrentMove(CC_MOVE_MODES type)
 }
 
 
-void MainFrame::Setup()
+void FieldFrame::Setup()
 {
 	if (field->mShow)
 	{
 		ShowInfoReq dialog(field->mShow, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			static_cast<MainFrameView*>(GetView())->DoSetShowInfo(dialog.GetNumberPoints(), dialog.GetNumberColumns(), dialog.GetLabels());
+			static_cast<FieldView*>(GetView())->DoSetShowInfo(dialog.GetNumberPoints(), dialog.GetNumberColumns(), dialog.GetLabels());
 		}
 	}
 }
 
 
-void MainFrame::SetDescription()
+void FieldFrame::SetDescription()
 {
 	if (field->mShow)
 	{
@@ -963,13 +963,13 @@ void MainFrame::SetDescription()
 			wxOK | wxCANCEL);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			static_cast<MainFrameView*>(GetView())->DoSetDescription(dialog.GetValue());
+			static_cast<FieldView*>(GetView())->DoSetDescription(dialog.GetValue());
 		}
 	}
 }
 
 
-void MainFrame::SetMode()
+void FieldFrame::SetMode()
 {
 	if (field->mShow)
 	{
@@ -988,15 +988,15 @@ void MainFrame::SetMode()
 		dialog.SetSelection(whichMode);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			static_cast<MainFrameView*>(GetView())->DoSetMode(dialog.GetStringSelection());
+			static_cast<FieldView*>(GetView())->DoSetMode(dialog.GetStringSelection());
 		}
 	}
 }
 
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(wxView *view, MainFrame *frame, float def_zoom):
-CtrlScrollCanvas(frame, wxID_ANY), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<MainFrameView*>(view)), curr_lasso(CC_DRAG_BOX),
+FieldCanvas::FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom):
+CtrlScrollCanvas(frame, wxID_ANY), ourframe(frame), mShow(static_cast<CC_show*>(view->GetDocument())), mView(static_cast<FieldView*>(view)), curr_lasso(CC_DRAG_BOX),
 curr_move(CC_MOVE_NORMAL), drag(CC_DRAG_NONE), curr_shape(NULL)
 {
 	mShow->SetCurrentSheet(0);
@@ -1530,7 +1530,7 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
 }
 
 
-void MainFrame::UpdatePanel()
+void FieldFrame::UpdatePanel()
 {
 	wxString tempbuf;
 	CC_show::const_CC_sheet_iterator_t sht = field->mShow->GetCurrentSheet();
@@ -1669,14 +1669,14 @@ void FieldCanvas::RemoveBackgroundImage()
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-void MainFrameView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
+void FieldView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
 	mShow->SelectWithLasso(*lasso, toggleSelected, mCurrentReferencePoint);
 }
 
 
 // Select points within rectangle
-void MainFrameView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected)
+void FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected)
 {
 	CC_lasso lasso(c1);
 	lasso.Append(CC_coord(c1.x, c2.y));
@@ -1687,24 +1687,24 @@ void MainFrameView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, b
 }
 
 
-void MainFrame::refnum_callback(wxCommandEvent &)
+void FieldFrame::refnum_callback(wxCommandEvent &)
 {
 	field->mView->SetReferencePoint(ref_choice->GetSelection());
 }
 
-void MainFrame::OnEnableDrawPaths(wxCommandEvent &event)
+void FieldFrame::OnEnableDrawPaths(wxCommandEvent &event)
 {
-	static_cast<MainFrameView*>(GetView())->OnEnableDrawPaths(event.IsChecked());
+	static_cast<FieldView*>(GetView())->OnEnableDrawPaths(event.IsChecked());
 }
 
 
-void MainFrame::slider_sheet_callback(wxScrollEvent &)
+void FieldFrame::slider_sheet_callback(wxScrollEvent &)
 {
-	static_cast<MainFrameView*>(GetView())->GoToSheet(sheet_slider->GetValue()-1);
+	static_cast<FieldView*>(GetView())->GoToSheet(sheet_slider->GetValue()-1);
 }
 
 
-void MainFrame::zoom_callback(wxCommandEvent& event)
+void FieldFrame::zoom_callback(wxCommandEvent& event)
 {
 	size_t sel = event.GetInt();
 	float zoom_amount = 1.0;
@@ -1716,11 +1716,11 @@ void MainFrame::zoom_callback(wxCommandEvent& event)
 	{
 		zoom_amount = field->ZoomToFitFactor();
 	}
-	SetConfiguration_MainFrameZoom(zoom_amount);
+	SetConfiguration_FieldFrameZoom(zoom_amount);
 	field->SetZoom(zoom_amount);
 }
 
-void MainFrame::zoom_callback_textenter(wxCommandEvent& event)
+void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 {
 	wxString zoomtxt = zoom_box->GetValue();
 	// strip the trailing '%' if it exists
@@ -1745,33 +1745,33 @@ void MainFrame::zoom_callback_textenter(wxCommandEvent& event)
 		// return if not valid
 		return;
 	}
-	SetConfiguration_MainFrameZoom(zoom_amount);
+	SetConfiguration_FieldFrameZoom(zoom_amount);
 	// set the text to have '%' appended
 	zoomtxt += wxT("%");
 	zoom_box->SetValue(zoomtxt);
 	field->SetZoom(zoom_amount);
 }
 
-IMPLEMENT_DYNAMIC_CLASS(MainFrameView, wxView)
+IMPLEMENT_DYNAMIC_CLASS(FieldView, wxView)
 
-MainFrameView::MainFrameView() :
+FieldView::FieldView() :
 mFrame(NULL),
 mDrawPaths(false),
 mCurrentReferencePoint(0)
 {
 }
 
-MainFrameView::~MainFrameView()
+FieldView::~FieldView()
 {
 }
 
 // What to do when a view is created. Creates actual
 // windows for displaying the view.
-bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
+bool FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
 	mShow = static_cast<CC_show*>(doc);
-	mFrame = new MainFrame(doc, this, GetMainFrame(), wxPoint(50, 50),
-		wxSize(GetConfiguration_MainFrameWidth(), GetConfiguration_MainFrameHeight()));
+	mFrame = new FieldFrame(doc, this, GetTopFrame(), wxPoint(50, 50),
+		wxSize(GetConfiguration_FieldFrameWidth(), GetConfiguration_FieldFrameHeight()));
 
 	mFrame->Show(true);
 	Activate(true);
@@ -1780,7 +1780,7 @@ bool MainFrameView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 
 // Sneakily gets used for default print/preview
 // as well as drawing on the screen.
-void MainFrameView::OnDraw(wxDC *dc)
+void FieldView::OnDraw(wxDC *dc)
 {
 	if (mShow)
 	{
@@ -1807,12 +1807,12 @@ void MainFrameView::OnDraw(wxDC *dc)
 }
 
 
-void MainFrameView::GeneratePaths()
+void FieldView::GeneratePaths()
 {
 	mAnimation.reset(new Animation(mShow, NotifyStatus(), NotifyErrorList()));
 }
 
-void MainFrameView::OnEnableDrawPaths(bool enable)
+void FieldView::OnEnableDrawPaths(bool enable)
 {
 	mDrawPaths = enable;
 	if (mDrawPaths)
@@ -1822,7 +1822,7 @@ void MainFrameView::OnEnableDrawPaths(bool enable)
 	mFrame->Refresh();
 }
 
-void MainFrameView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
+void FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 {
 	if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum()))
 	{
@@ -1890,7 +1890,7 @@ private:
 	FancyTextWin *mText;
 };
 
-void MainFrameView::OnWizardSetup(CC_show& show)
+void FieldView::OnWizardSetup(CC_show& show)
 {
 	wxWizard *wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
 	// page 1:
@@ -1931,7 +1931,7 @@ void MainFrameView::OnWizardSetup(CC_show& show)
 	wizard->Destroy();
 }
 
-void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
+void FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 {
 	if (hint && hint->IsKindOf(CLASSINFO(CC_show_setup)))
 	{
@@ -1967,7 +1967,7 @@ void MainFrameView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 }
 
 // Clean up windows used for displaying the view.
-bool MainFrameView::OnClose(bool deleteWindow)
+bool FieldView::OnClose(bool deleteWindow)
 {
 	SetFrame((wxFrame*)NULL);
 
@@ -1983,7 +1983,7 @@ bool MainFrameView::OnClose(bool deleteWindow)
 	return true;
 }
 
-bool MainFrameView::DoTranslatePoints(const CC_coord& delta)
+bool FieldView::DoTranslatePoints(const CC_coord& delta)
 {
 	if (((delta.x == 0) && (delta.y == 0)) ||
 		(mShow->GetSelectionList().size() == 0))
@@ -1992,82 +1992,82 @@ bool MainFrameView::DoTranslatePoints(const CC_coord& delta)
 	return true;
 }
 
-bool MainFrameView::DoTransformPoints(const Matrix& transmat)
+bool FieldView::DoTransformPoints(const Matrix& transmat)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, mCurrentReferencePoint), true);
 	return true;
 }
 
-bool MainFrameView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second)
+bool FieldView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, mCurrentReferencePoint), true);
 	return true;
 }
 
-bool MainFrameView::DoSetPointsSymbol(SYMBOL_TYPE sym)
+bool FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym), true);
 	return true;
 }
 
-bool MainFrameView::DoSetDescription(const wxString& descr)
+bool FieldView::DoSetDescription(const wxString& descr)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetDescriptionCommand(*mShow, descr), true);
 	return true;
 }
 
-void MainFrameView::DoSetMode(const wxString& mode)
+void FieldView::DoSetMode(const wxString& mode)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetModeCommand(*mShow, mode), true);
 }
 
-void MainFrameView::DoSetShowInfo(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels)
+void FieldView::DoSetShowInfo(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetShowInfoCommand(*mShow, numPoints, numColumns, labels), true);
 }
 
-bool MainFrameView::DoSetSheetTitle(const wxString& descr)
+bool FieldView::DoSetSheetTitle(const wxString& descr)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetSheetTitleCommand(*mShow, descr), true);
 	return true;
 }
 
-bool MainFrameView::DoSetSheetBeats(unsigned short beats)
+bool FieldView::DoSetSheetBeats(unsigned short beats)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new SetSheetBeatsCommand(*mShow, beats), true);
 	return true;
 }
 
-bool MainFrameView::DoSetPointsLabel(bool right)
+bool FieldView::DoSetPointsLabel(bool right)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelRightCommand(*mShow, right), true);
 	return true;
 }
 
-bool MainFrameView::DoSetPointsLabelFlip()
+bool FieldView::DoSetPointsLabelFlip()
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow), true);
 	return true;
 }
 
-bool MainFrameView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where)
+bool FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new AddSheetsCommand(*mShow, sht, where), true);
 	return true;
 }
 
-bool MainFrameView::DoDeleteSheet(unsigned where)
+bool FieldView::DoDeleteSheet(unsigned where)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new RemoveSheetsCommand(*mShow, where), true);
 	return true;
 }
 
-void MainFrameView::GoToSheet(size_t which)
+void FieldView::GoToSheet(size_t which)
 {
 	if (which < mShow->GetNumSheets())
 	{
@@ -2075,27 +2075,27 @@ void MainFrameView::GoToSheet(size_t which)
 	}
 }
 
-void MainFrameView::GoToNextSheet()
+void FieldView::GoToNextSheet()
 {
 	GoToSheet(mShow->GetCurrentSheetNum() + 1);
 }
 
-void MainFrameView::GoToPrevSheet()
+void FieldView::GoToPrevSheet()
 {
 	GoToSheet(mShow->GetCurrentSheetNum() - 1);
 }
 
-int MainFrameView::FindPoint(CC_coord pos) const
+int FieldView::FindPoint(CC_coord pos) const
 {
 	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, mCurrentReferencePoint);
 }
 
-CC_coord MainFrameView::PointPosition(int which) const
+CC_coord FieldView::PointPosition(int which) const
 {
 	return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
 }
 
-void MainFrameView::SetReferencePoint(unsigned which)
+void FieldView::SetReferencePoint(unsigned which)
 {
 	mCurrentReferencePoint = which;
 	OnUpdate(this);

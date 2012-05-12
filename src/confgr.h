@@ -94,9 +94,9 @@ void ClearConfiguration_ ## Key () ;
 DECLARE_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
 // page setup and zoom
-DECLARE_CONFIGURATION_FUNCTIONS( MainFrameZoom, double);
-DECLARE_CONFIGURATION_FUNCTIONS( MainFrameWidth, long);
-DECLARE_CONFIGURATION_FUNCTIONS( MainFrameHeight, long);
+DECLARE_CONFIGURATION_FUNCTIONS( FieldFrameZoom, double);
+DECLARE_CONFIGURATION_FUNCTIONS( FieldFrameWidth, long);
+DECLARE_CONFIGURATION_FUNCTIONS( FieldFrameHeight, long);
 
 // printing configurations
 DECLARE_CONFIGURATION_FUNCTIONS( PrintFile, wxString);

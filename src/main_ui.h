@@ -53,15 +53,15 @@ enum CC_MOVE_MODES
 };
 
 class FieldCanvas;
-class MainFrameView;
+class FieldView;
 
 // Define the main editing frame
-class MainFrame : public wxDocMDIChildFrame
+class FieldFrame : public wxDocMDIChildFrame
 {
 public:
-	// MainFrame will own the show that is passed in
-	MainFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size);
-	~MainFrame();
+	// FieldFrame will own the show that is passed in
+	FieldFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size);
+	~FieldFrame();
 
 	void OnCmdAppend(wxCommandEvent& event);
 	void OnCmdImportCont(wxCommandEvent& event);
@@ -157,7 +157,7 @@ class FieldCanvas : public CtrlScrollCanvas
 {
 public:
 // Basic functions
-	FieldCanvas(wxView *view, MainFrame *frame, float def_zoom);
+	FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom);
 	virtual ~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
 	void PaintBackground(wxDC& dc);
@@ -184,9 +184,9 @@ public:
 	void RemoveBackgroundImage();
 	
 // Variables
-	MainFrame *ourframe;
+	FieldFrame *ourframe;
 	CC_show* mShow;
-	MainFrameView* mView;
+	FieldView* mView;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
 
@@ -204,13 +204,16 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-class MainFrameView : public wxView
+// Field:
+// Field is the editable overhead view of the marchers on the field.
+// This is where in the app you edit a marcher's location and continuity
+class FieldView : public wxView
 {
 public:
-    MainFrame *mFrame;
+    FieldFrame *mFrame;
   
-    MainFrameView();
-    ~MainFrameView();
+    FieldView();
+    ~FieldView();
 
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);
@@ -262,7 +265,7 @@ private:
 	CC_show* mShow;
 	unsigned mCurrentReferencePoint;
 
-    DECLARE_DYNAMIC_CLASS(MainFrameView)
+    DECLARE_DYNAMIC_CLASS(FieldView)
 };
 
 #endif
