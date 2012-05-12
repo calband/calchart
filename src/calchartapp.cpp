@@ -27,6 +27,7 @@
 #include "basic_ui.h"
 #include "main_ui.h"
 #include "show.h"
+#include "field_view.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
