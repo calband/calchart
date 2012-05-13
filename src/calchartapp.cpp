@@ -25,7 +25,6 @@
 #include "modes.h"
 #include "confgr.h"
 #include "basic_ui.h"
-//#include "main_ui.h"
 #include "show.h"
 #include "field_view.h"
 

@@ -24,7 +24,6 @@
 #define _CALCHARTAPP_H_
 
 #include "modes.h"
-//#include "main_ui.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>

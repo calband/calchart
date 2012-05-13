@@ -59,7 +59,7 @@ public:
 	void SetZoom(float factor);
 
 	void BeginDrag(CC_DRAG_TYPES type, CC_coord start);
-	void AddDrag(CC_DRAG_TYPES type, CC_shape *shape);
+	void AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape);
 	void MoveDrag(CC_coord end);
 	void EndDrag();
 
@@ -79,9 +79,9 @@ private:
 	void ClearShapes();
 
 	CC_DRAG_TYPES drag;
-	typedef std::vector<CC_shape*> ShapeList;
+	typedef std::vector<boost::shared_ptr<CC_shape> > ShapeList;
 	ShapeList shape_list;
-	CC_shape *curr_shape;
+	boost::shared_ptr<CC_shape> curr_shape;
 
 	// Background Picture
 	boost::shared_ptr<BackgroundImage> mBackgroundImage;
