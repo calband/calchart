@@ -1,10 +1,10 @@
 /*
- * main_ui.h
- * Header for wxWindows interface
+ * field_frame.h
+ * Frame for the field window
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,22 +20,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MAIN_UI_H_
-#define _MAIN_UI_H_
+#ifndef _FIELD_FRAME_H_
+#define _FIELD_FRAME_H_
 
-#include "basic_ui.h"
-#include "cc_shapes.h"
-#include "cc_show.h"
-#include "background_image.h"
-
-#include <wx/mdi.h>
-#include <wx/docview.h>
 #include <wx/docmdi.h>
 
-#include <list>
-#include <vector>
-#include <boost/shared_ptr.hpp>
 class Animation;
+class CC_coord;
+class wxComboBox;
+class wxSlider;
 
 // Value of 10 translates to a canvas of 1760x1000.
 #define FIELD_MAXZOOM 10

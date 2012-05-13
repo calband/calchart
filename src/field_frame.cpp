@@ -1,10 +1,10 @@
 /*
- * main_ui.cpp
- * Handle wxWindows interface
+ * field_frame.h
+ * Frame for the field window
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,39 +20,33 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "main_ui.h"
-#include "calchartapp.h"
+#include "field_frame.h"
+
+#include "platconf.h"
+#include "cc_coord.h"
+#include "field_canvas.h"
+#include "cc_show.h"
 #include "top_frame.h"
+#include "calchartapp.h"
 #include "print_ui.h"
-#include "show_ui.h"
-#include "cont_ui.h"
 #include "cc_preferences_ui.h"
-#include "cc_command.h"
 #include "modes.h"
 #include "confgr.h"
 #include "ccvers.h"
-#include "cc_sheet.h"
+#include "cont_ui.h"
+#include "show_ui.h"
 #include "show.h"
-#include "animate.h"
 #include "animation_frame.h"
 #include "toolbar.h"
 #include "ui_enums.h"
 #include "field_view.h"
-#include "field_canvas.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
 #ifdef __WXMSW__
 #include <wx/helpwin.h>
 #endif
-#include <wx/colordlg.h>
-#include <wx/dcbuffer.h>
-#include <wx/config.h>
-#include <wx/print.h>
-#include <wx/printdlg.h>
-#include <wx/fs_zip.h>
-#include <wx/wizard.h>
-#include <wx/statline.h>
+#include <wx/cmdproc.h>
 
 const wxString gridtext[] =
 {
@@ -149,17 +143,6 @@ EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
 EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
 EVT_SIZE( FieldFrame::OnSize)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
-EVT_CHAR(FieldCanvas::OnChar)
-EVT_LEFT_DOWN(FieldCanvas::OnMouseLeftDown)
-EVT_LEFT_UP(FieldCanvas::OnMouseLeftUp)
-EVT_LEFT_DCLICK(FieldCanvas::OnMouseLeftDoubleClick)
-EVT_RIGHT_DOWN(FieldCanvas::OnMouseRightDown)
-EVT_MOTION(FieldCanvas::OnMouseMove)
-EVT_PAINT(FieldCanvas::OnPaint)
-EVT_ERASE_BACKGROUND(FieldCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
 class MyPrintout : public wxPrintout

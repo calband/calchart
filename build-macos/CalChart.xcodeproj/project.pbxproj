@@ -704,8 +704,6 @@
 		C7AFA969117A6DBA00CC53E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				C7E047CD155F892400D8C71B /* field_frame.cpp */,
-				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7BFBCF914722689002385FB /* animatecommand.cpp */,
 				C7BFBCFA14722689002385FB /* animatecommand.h */,
 				C7AFA96C117A6DBA00CC53E2 /* animate.cpp */,
@@ -754,6 +752,8 @@
 				C7AFA97B117A6DBA00CC53E2 /* draw.cpp */,
 				C7E047CA155F7B8900D8C71B /* field_canvas.cpp */,
 				C7E047CB155F7B8A00D8C71B /* field_canvas.h */,
+				C7E047CD155F892400D8C71B /* field_frame.cpp */,
+				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,

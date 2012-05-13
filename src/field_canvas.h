@@ -24,12 +24,18 @@
 #define _FIELD_CANVAS_H_
 
 #include "basic_ui.h"
-#include "main_ui.h"
+#include "field_frame.h"
 
 #include <wx/docview.h>
 
+#include <vector>
+#include <boost/shared_ptr.hpp>
+
 class FieldView;
 class FieldFrame;
+class CC_shape;
+class CC_show;
+class BackgroundImage;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public CtrlScrollCanvas

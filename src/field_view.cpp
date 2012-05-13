@@ -25,11 +25,12 @@
 
 #include "calchartapp.h"
 #include "confgr.h"
-#include "main_ui.h"
+#include "field_frame.h"
 #include "top_frame.h"
 #include "animate.h"
 #include "show_ui.h"
 #include "cc_command.h"
+#include "cc_shapes.h"
 
 #include <wx/wizard.h>
 

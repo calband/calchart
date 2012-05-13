@@ -27,8 +27,21 @@
 #include "modes.h"
 #include "linmath.h"
 #include "show.h"
+#include "background_image.h"
+#include "cc_shapes.h"
 
 #include <wx/dcbuffer.h>
+
+BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
+EVT_CHAR(FieldCanvas::OnChar)
+EVT_LEFT_DOWN(FieldCanvas::OnMouseLeftDown)
+EVT_LEFT_UP(FieldCanvas::OnMouseLeftUp)
+EVT_LEFT_DCLICK(FieldCanvas::OnMouseLeftDoubleClick)
+EVT_RIGHT_DOWN(FieldCanvas::OnMouseRightDown)
+EVT_MOTION(FieldCanvas::OnMouseMove)
+EVT_PAINT(FieldCanvas::OnPaint)
+EVT_ERASE_BACKGROUND(FieldCanvas::OnEraseBackground)
+END_EVENT_TABLE()
 
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom) :
