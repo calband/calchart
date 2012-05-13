@@ -135,6 +135,7 @@
 		C7D1782B13B7C6E800F65F4C /* charthlp_translatepoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */; };
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E047C8155F279000D8C71B /* field_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047C6155F279000D8C71B /* field_view.cpp */; };
+		C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047CA155F7B8900D8C71B /* field_canvas.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
 		C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */; };
 		C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
@@ -486,6 +487,8 @@
 		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
 		C7E047C6155F279000D8C71B /* field_view.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_view.cpp; sourceTree = "<group>"; };
 		C7E047C7155F279000D8C71B /* field_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_view.h; sourceTree = "<group>"; };
+		C7E047CA155F7B8900D8C71B /* field_canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas.cpp; sourceTree = "<group>"; };
+		C7E047CB155F7B8A00D8C71B /* field_canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_canvas.h; sourceTree = "<group>"; };
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
 		C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_sheet.cpp; sourceTree = "<group>"; };
 		C7EC032811D9AD0E0043B2FD /* cc_sheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_sheet.h; sourceTree = "<group>"; };
@@ -747,6 +750,8 @@
 				C7AFA979117A6DBA00CC53E2 /* contgram.y */,
 				C7AFA97A117A6DBA00CC53E2 /* contscan.l */,
 				C7AFA97B117A6DBA00CC53E2 /* draw.cpp */,
+				C7E047CA155F7B8900D8C71B /* field_canvas.cpp */,
+				C7E047CB155F7B8A00D8C71B /* field_canvas.h */,
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
@@ -1013,6 +1018,7 @@
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
 				C7AD22C815571CBB00AC1301 /* print_ps.cpp in Sources */,
 				C7E047C8155F279000D8C71B /* field_view.cpp in Sources */,
+				C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

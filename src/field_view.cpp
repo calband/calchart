@@ -21,6 +21,7 @@
 */
 
 #include "field_view.h"
+#include "field_canvas.h"
 
 #include "calchartapp.h"
 #include "confgr.h"
