@@ -109,7 +109,6 @@
 		C7AFA993117A6DBA00CC53E2 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA975117A6DBA00CC53E2 /* cont.cpp */; };
 		C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */; };
 		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
-		C7AFA999117A6DBA00CC53E2 /* main_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */; };
 		C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA981117A6DBA00CC53E2 /* modes.cpp */; };
 		C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA986117A6DBA00CC53E2 /* print_ui.cpp */; };
 		C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA988117A6DBA00CC53E2 /* show.cpp */; };
@@ -136,6 +135,7 @@
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E047C8155F279000D8C71B /* field_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047C6155F279000D8C71B /* field_view.cpp */; };
 		C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047CA155F7B8900D8C71B /* field_canvas.cpp */; };
+		C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047CD155F892400D8C71B /* field_frame.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
 		C7EC032911D9AD0E0043B2FD /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */; };
 		C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
@@ -449,8 +449,6 @@
 		C7AFA97A117A6DBA00CC53E2 /* contscan.l */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.lex; path = contscan.l; sourceTree = "<group>"; };
 		C7AFA97B117A6DBA00CC53E2 /* draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = draw.cpp; sourceTree = "<group>"; };
 		C7AFA97E117A6DBA00CC53E2 /* linmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linmath.h; sourceTree = "<group>"; };
-		C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main_ui.cpp; sourceTree = "<group>"; };
-		C7AFA980117A6DBA00CC53E2 /* main_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main_ui.h; sourceTree = "<group>"; };
 		C7AFA981117A6DBA00CC53E2 /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modes.cpp; sourceTree = "<group>"; };
 		C7AFA982117A6DBA00CC53E2 /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
 		C7AFA983117A6DBA00CC53E2 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parse.h; sourceTree = "<group>"; };
@@ -489,6 +487,8 @@
 		C7E047C7155F279000D8C71B /* field_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_view.h; sourceTree = "<group>"; };
 		C7E047CA155F7B8900D8C71B /* field_canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas.cpp; sourceTree = "<group>"; };
 		C7E047CB155F7B8A00D8C71B /* field_canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_canvas.h; sourceTree = "<group>"; };
+		C7E047CD155F892400D8C71B /* field_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_frame.cpp; sourceTree = "<group>"; };
+		C7E047CE155F892400D8C71B /* field_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_frame.h; sourceTree = "<group>"; };
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
 		C7EC032711D9AD0E0043B2FD /* cc_sheet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_sheet.cpp; sourceTree = "<group>"; };
 		C7EC032811D9AD0E0043B2FD /* cc_sheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_sheet.h; sourceTree = "<group>"; };
@@ -704,6 +704,8 @@
 		C7AFA969117A6DBA00CC53E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C7E047CD155F892400D8C71B /* field_frame.cpp */,
+				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7BFBCF914722689002385FB /* animatecommand.cpp */,
 				C7BFBCFA14722689002385FB /* animatecommand.h */,
 				C7AFA96C117A6DBA00CC53E2 /* animate.cpp */,
@@ -755,8 +757,6 @@
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
-				C7AFA97F117A6DBA00CC53E2 /* main_ui.cpp */,
-				C7AFA980117A6DBA00CC53E2 /* main_ui.h */,
 				C7AFA981117A6DBA00CC53E2 /* modes.cpp */,
 				C7AFA982117A6DBA00CC53E2 /* modes.h */,
 				C7AFA983117A6DBA00CC53E2 /* parse.h */,
@@ -992,7 +992,6 @@
 				C7AFA993117A6DBA00CC53E2 /* cont.cpp in Sources */,
 				C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */,
 				C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */,
-				C7AFA999117A6DBA00CC53E2 /* main_ui.cpp in Sources */,
 				C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */,
 				C7AFA99C117A6DBA00CC53E2 /* print_ui.cpp in Sources */,
 				C7AFA99D117A6DBA00CC53E2 /* show.cpp in Sources */,
@@ -1019,6 +1018,7 @@
 				C7AD22C815571CBB00AC1301 /* print_ps.cpp in Sources */,
 				C7E047C8155F279000D8C71B /* field_view.cpp in Sources */,
 				C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */,
+				C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
