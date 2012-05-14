@@ -246,7 +246,7 @@ field(NULL)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
-	AddCoolToolBar(GetMainToolBar(), this);
+	AddCoolToolBar(GetMainToolBar(), *this);
 
 // Add the field canvas
 	field = new FieldCanvas(view, this, GetConfiguration_FieldFrameZoom());

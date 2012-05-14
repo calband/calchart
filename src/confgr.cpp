@@ -110,121 +110,6 @@ const int DefaultPenWidth[COLOR_NUM] =
 
 // constants for behavior:
 // Autosave
-static const wxString kAutosaveIntervalKey = wxT("AutosaveInterval");
-static const int kAutosaveIntervalValue = 60;
-
-// "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
-//static const wxString kMainFrameZoomKey = wxT("MainFrameZoom");
-// We have changed MainFrame to FieldFrame:
-//static const wxString kMainFrameZoomKey = wxT("MainFrameZoom2");
-//static const float kMainFrameZoomValue = 0.5;
-//static const wxString kMainFrameWidthKey = wxT("MainFrameWidth");
-//static const unsigned int kMainFrameWidthValue = 600;
-//static const wxString kMainFrameHeightKey = wxT("MainFrameHeight");
-//static const unsigned int kMainFrameHeightValue = 450;
-static const wxString kFieldFrameZoomKey = wxT("FieldFrameZoom");
-static const float kFieldFrameZoomValue = 0.5;
-static const wxString kFieldFrameWidthKey = wxT("FieldFrameWidth");
-static const unsigned int kFieldFrameWidthValue = 600;
-static const wxString kFieldFrameHeightKey = wxT("FieldFrameHeight");
-static const unsigned int kFieldFrameHeightValue = 450;
-static const wxString kPrintFileKey = wxT("PrintFile");
-static const wxString kPrintFileValue = wxT("LPT1");
-static const wxString kPrintCmdKey = wxT("PrintCmd");
-static const wxString kPrintCmdValue = wxT("lpr");
-static const wxString kPrintOptsKey = wxT("PrintOpts");
-static const wxString kPrintOptsValue = wxT("");
-static const wxString kPrintViewCmdKey = wxT("PrintViewCmd");
-static const wxString kPrintViewCmdValue = wxT("ghostview");
-static const wxString kPrintViewOptsKey = wxT("PrintViewOpts");
-static const wxString kPrintViewOptsValue = wxT("");
-
-static const wxString kPageWidthKey = wxT("PageWidth");
-static const double kPageWidthValue = 7.5;
-static const wxString kPageHeightKey = wxT("PageHeight");
-static const double kPageHeightValue = 10.0;
-static const wxString kPageOffsetXKey = wxT("PageOffsetX");
-static const double kPageOffsetXValue = 0.5;
-static const wxString kPageOffsetYKey = wxT("PageOffsetY");
-static const double kPageOffsetYValue = 0.5;
-
-// printing controls
-static const wxString kHeadFontKey = wxT("HeadFont");
-static const wxString kHeadFontValue = wxT("Palatino-Bold");
-static const wxString kMainFontKey = wxT("MainFont");
-static const wxString kMainFontValue = wxT("Helvetica");
-static const wxString kNumberFontKey = wxT("NumberFont");
-static const wxString kNumberFontValue = wxT("Helvetica-Bold");
-static const wxString kContFontKey = wxT("ContFont");
-static const wxString kContFontValue = wxT("Courier");
-static const wxString kBoldFontKey = wxT("BoldFont");
-static const wxString kBoldFontValue = wxT("Courier-Bold");
-static const wxString kItalFontKey = wxT("ItalFont");
-static const wxString kItalFontValue = wxT("Courier-Italic");
-static const wxString kBoldItalFontKey = wxT("BoldItalFont");
-static const wxString kBoldItalFontValue = wxT("Courier-BoldItalic");
-static const wxString kPaperLengthKey = wxT("PaperLength");
-static const double kPaperLengthValue = 11.0;
-static const wxString kHeaderSizeKey = wxT("HeaderSize");
-static const double kHeaderSizeValue = 3.0;
-static const wxString kYardsSizeKey = wxT("YardsSize");
-static const double kYardsSizeValue = 1.5;
-static const wxString kTextSizeKey = wxT("TextSize");
-static const double kTextSizeValue = 10.0;
-static const wxString kDotRatioKey = wxT("DotRatio");
-static const double kDotRatioValue = 0.9;
-static const wxString kNumRatioKey = wxT("NumRatio");
-static const double kNumRatioValue = 1.35;
-static const wxString kPLineRatioKey = wxT("PLineRatio");
-static const double kPLineRatioValue = 1.2;
-static const wxString kSLineRatioKey = wxT("SLineRatio");
-static const double kSLineRatioValue = 1.2;
-static const wxString kContRatioKey = wxT("ContRatio");
-static const double kContRatioValue = 0.2;
-
-static const wxString kPrintPSModesKey = wxT("PrintPSModes");
-static const long kPrintPSModesValue = 0;
-static const wxString kPrintPSLandscapeKey = wxT("PrintPSLandscape");
-static const long kPrintPSLandscapeValue = 0;
-static const wxString kPrintPSOverviewKey = wxT("PrintPSOverview");
-static const long kPrintPSOverviewValue = 0;
-static const wxString kPrintPSDoContKey = wxT("PrintPSDoCont");
-static const long kPrintPSDoContValue = 0;
-static const wxString kPrintPSDoContSheetKey = wxT("PrintPSDoContSheet");
-static const long kPrintPSDoContSheetValue = 0;
-
-static const wxString kOmniViewPoint_X_4Key = wxT("OmniViewPoint_X_4");
-static const double kOmniViewPoint_X_4Value = kViewPoint_x_1;
-static const wxString kOmniViewPoint_Y_4Key = wxT("OmniViewPoint_Y_4");
-static const double kOmniViewPoint_Y_4Value = kViewPoint_y_1;
-static const wxString kOmniViewPoint_Z_4Key = wxT("OmniViewPoint_Z_4");
-static const double kOmniViewPoint_Z_4Value = kViewPoint_z_1;
-static const wxString kOmniViewAngle_4Key = wxT("OmniViewAngle_4");
-static const double kOmniViewAngle_4Value = kViewAngle_1;
-static const wxString kOmniViewAngle_Z_4Key = wxT("OmniViewAngle_Z_4");
-static const double kOmniViewAngle_Z_4Value = kViewAngle_z_1;
-
-static const wxString kOmniViewPoint_X_5Key = wxT("OmniViewPoint_X_5");
-static const double kOmniViewPoint_X_5Value = kViewPoint_x_2;
-static const wxString kOmniViewPoint_Y_5Key = wxT("OmniViewPoint_Y_5");
-static const double kOmniViewPoint_Y_5Value = kViewPoint_y_2;
-static const wxString kOmniViewPoint_Z_5Key = wxT("OmniViewPoint_Z_5");
-static const double kOmniViewPoint_Z_5Value = kViewPoint_z_2;
-static const wxString kOmniViewAngle_5Key = wxT("OmniViewAngle_5");
-static const double kOmniViewAngle_5Value = kViewAngle_2;
-static const wxString kOmniViewAngle_Z_5Key = wxT("OmniViewAngle_Z_5");
-static const double kOmniViewAngle_Z_5Value = kViewAngle_z_2;
-
-static const wxString kOmniViewPoint_X_6Key = wxT("OmniViewPoint_X_6");
-static const double kOmniViewPoint_X_6Value = kViewPoint_x_3;
-static const wxString kOmniViewPoint_Y_6Key = wxT("OmniViewPoint_Y_6");
-static const double kOmniViewPoint_Y_6Value = kViewPoint_y_3;
-static const wxString kOmniViewPoint_Z_6Key = wxT("OmniViewPoint_Z_6");
-static const double kOmniViewPoint_Z_6Value = kViewPoint_z_3;
-static const wxString kOmniViewAngle_6Key = wxT("OmniViewAngle_6");
-static const double kOmniViewAngle_6Value = kViewAngle_3;
-static const wxString kOmniViewAngle_Z_6Key = wxT("OmniViewAngle_Z_6");
-static const double kOmniViewAngle_Z_6Value = kViewAngle_z_3;
 
 template <typename T>
 T GetConfigValue(const wxString& key, const T& def)
@@ -258,11 +143,6 @@ void ClearConfigValue(const wxString& key)
 	config->Flush();
 }
 
-#define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type ) \
-Type GetConfiguration_ ## KeyName () { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
-void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
-void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
-
 // printing controls
 wxString yard_text[MAX_YARD_LINES] =
 {
@@ -290,71 +170,82 @@ const wxString spr_line_text_index[MAX_SPR_LINES] =
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
 
-#define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type ) \
+#define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type, TheValue ) \
+static const wxString k ## KeyName ## Key = wxT( #KeyName ); \
+static const Type k ## KeyName ## Value = (TheValue); \
 Type GetConfiguration_ ## KeyName () { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
 void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
 void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
 
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long, 60);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameZoom, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameWidth, long);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameHeight, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameZoom, double, 0.5);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameWidth, long, 600);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( FieldFrameHeight, long, 450);
 
 // printing
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintFile, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintCmd, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintOpts, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewCmd, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewOpts, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintFile, wxString, wxT("LPT1"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintCmd, wxString, wxT("lpr"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintOpts, wxString, wxT(""));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewCmd, wxString, wxT("ghostview"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintViewOpts, wxString, wxT(""));
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageWidth, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageHeight, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetX, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetY, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PaperLength, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageWidth, double, 7.5);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageHeight, double, 10.0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetX, double, 0.5);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PageOffsetY, double, 0.5);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PaperLength, double, 11.0);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( HeadFont, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFont, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( NumberFont, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( ContFont, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldFont, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( ItalFont, wxString);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldItalFont, wxString);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( HeadFont, wxString, wxT("Palatino-Bold"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFont, wxString, wxT("Helvetica"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( NumberFont, wxString, wxT("Helvetica-Bold"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ContFont, wxString, wxT("Courier"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldFont, wxString, wxT("Courier-Bold"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ItalFont, wxString, wxT("Courier-Italic"));
+IMPLEMENT_CONFIGURATION_FUNCTIONS( BoldItalFont, wxString, wxT("Courier-BoldItalic"));
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( HeaderSize, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( YardsSize, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( TextSize, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( DotRatio, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( NumRatio, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PLineRatio, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, double);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, double);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( HeaderSize, double, 3.0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( YardsSize, double, 1.5);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( TextSize, double, 10.0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( DotRatio, double, 0.9);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( NumRatio, double, 1.35);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PLineRatio, double, 1.2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, double, 1.2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, double, 0.2);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSModes, long);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSLandscape, long);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSOverview, long);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoCont, long);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, long);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSModes, long, 0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSLandscape, long, 0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSOverview, long, 0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoCont, long, 0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, long, 0);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_4, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_4, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_4, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_4, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_4, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_4, float, kViewPoint_x_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_4, float, kViewPoint_y_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_4, float, kViewPoint_z_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_4, float, kViewAngle_1);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_4, float, kViewAngle_z_1);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_5, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_5, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_5, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_5, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_5, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_5, float, kViewPoint_x_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_5, float, kViewPoint_y_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_5, float, kViewPoint_z_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_5, float, kViewAngle_2);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_5, float, kViewAngle_z_2);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_6, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_6, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_6, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_6, float);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_6, float);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_6, float, kViewPoint_x_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_6, float, kViewPoint_y_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_6, float, kViewPoint_z_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_6, float, kViewAngle_3);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_6, float, kViewAngle_z_3);
+
+// OBSOLETE Settigns
+// "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
+//IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);
+// "MainFrameZoom", "MainFrameWidth", "MainFrameHeight" now obsolete with version post 3.3.1, use Field versions
+//IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom2, float, 0.5);
+//IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameWidth, long, 600);
+//IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long, 450);
+
 
 // Color is more complicated, we use functions for setting that
 const wxPen *CalChartPens[COLOR_NUM];

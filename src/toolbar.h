@@ -37,7 +37,7 @@ struct ToolBarEntry
 	bool space;
 };
 
-void AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame *frame);
+void AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame& frame);
 std::vector<ToolBarEntry> GetMainToolBar();
 std::vector<ToolBarEntry> GetAnimationToolBar();
 

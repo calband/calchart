@@ -47,13 +47,6 @@ wxFont *yardLabelFont;
 
 wxHtmlHelpController *gHelpController = NULL;
 
-TopFrame *topframe = NULL;
-
-TopFrame *GetTopFrame(void)
-{
-	return topframe;
-}
-
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
 void CC_coord_UnitTests();
@@ -88,7 +81,7 @@ bool CalChartApp::OnInit()
 
 
 	//// Create the main frame window
-	topframe = new TopFrame(mDocManager, (wxFrame *) NULL, _T("CalChart"));
+	wxFrame *frame = new TopFrame(mDocManager, (wxFrame *) NULL, _T("CalChart"));
 
 	{
 		// Required for images in the online documentation
@@ -112,9 +105,9 @@ bool CalChartApp::OnInit()
 	}
 
 #ifndef __WXMAC__
-	topframe->Show(true);
+	frame->Show(true);
 #endif //ndef __WXMAC__
-	SetTopWindow(topframe);
+	SetTopWindow(frame);
 	
 	// Get the file history
 	wxConfigBase *config = wxConfigBase::Get();

@@ -105,7 +105,7 @@ mTimerOn(false)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
-	AddCoolToolBar(GetAnimationToolBar(), this);
+	AddCoolToolBar(GetAnimationToolBar(), *this);
 
 	// Add the field canvas
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);

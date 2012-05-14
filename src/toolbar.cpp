@@ -58,9 +58,9 @@
 
 
 void
-AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame *frame)
+AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame& frame)
 {
-	wxToolBar* tb = frame->CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
+	wxToolBar* tb = frame.CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
 	
 	for (std::vector<ToolBarEntry>::const_iterator i = entries.begin(); i != entries.end(); i++)
 	{

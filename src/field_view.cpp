@@ -31,6 +31,7 @@
 #include "show_ui.h"
 #include "cc_command.h"
 #include "cc_shapes.h"
+#include "setup_wizards.h"
 
 #include <wx/wizard.h>
 
@@ -53,7 +54,7 @@ bool
 FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
 	mShow = static_cast<CC_show*>(doc);
-	mFrame = new FieldFrame(doc, this, GetTopFrame(), wxPoint(50, 50),
+	mFrame = new FieldFrame(doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocMDIParentFrame), wxPoint(50, 50),
 							wxSize(GetConfiguration_FieldFrameWidth(), GetConfiguration_FieldFrameHeight()));
 	
 	mFrame->Show(true);
@@ -144,61 +145,6 @@ FieldView::OnClose(bool deleteWindow)
 	return true;
 }
 
-
-// page for giving a description
-class SetDescriptionWizard : public wxWizardPageSimple
-{
-public:
-	SetDescriptionWizard(wxWizard *parent) : wxWizardPageSimple(parent)
-	{
-		wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-		SetSizer( topsizer );
-		wxStaticText* label = new wxStaticText(this, wxID_STATIC, 
-											   wxT("Enter a show description for your show:"), wxDefaultPosition, wxDefaultSize, 0);
-		topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-		mText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(240, 100));
-		topsizer->Add(mText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-		topsizer->Fit(this);
-	}
-	wxString GetValue()
-	{
-		return mText->GetValue();
-	}
-	
-private:
-	wxArrayString modeStrings;
-	FancyTextWin *mText;
-};
-
-// page for deciding the field type
-class ChooseShowModeWizard : public wxWizardPageSimple
-{
-public:
-	ChooseShowModeWizard(wxWizard *parent) : wxWizardPageSimple(parent)
-	{
-		for (ShowModeList::const_iterator mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode)
-		{
-			modeStrings.Add((*mode)->GetName());
-		}
-		
-		wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-		SetSizer( topsizer );
-		wxStaticText* label = new wxStaticText(this, wxID_STATIC, 
-											   wxT("Choose a field to set your show:"), wxDefaultPosition, wxDefaultSize, 0);
-		topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-		mChoice = new wxChoice(this, wxID_ANY, wxPoint(5,5), wxDefaultSize, modeStrings);
-		topsizer->Add(mChoice, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-		topsizer->Fit(this);
-	}
-	wxString GetValue()
-	{
-		return modeStrings[mChoice->GetSelection()];
-	}
-	
-private:
-	wxArrayString modeStrings;
-	wxChoice *mChoice;
-};
 
 void
 FieldView::OnWizardSetup(CC_show& show)
