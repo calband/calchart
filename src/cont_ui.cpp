@@ -26,13 +26,12 @@
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_command.h"
+#include "calchartapp.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
-
-extern wxHtmlHelpController *gHelpController;
 
 enum
 {
@@ -288,8 +287,8 @@ void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 
 void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 {
-	gHelpController->LoadFile();
-	gHelpController->KeywordSearch(wxT("Animation Commands"));
+	GetGlobalHelpController().LoadFile();
+	GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
 }
 
 

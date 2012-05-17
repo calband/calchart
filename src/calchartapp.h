@@ -29,8 +29,11 @@
 #include <wx/docview.h>
 
 class CalChartApp;
-
 class ShowMode;
+class wxHtmlHelpController;
+
+// the global help system:
+wxHtmlHelpController& GetGlobalHelpController();
 
 DECLARE_APP(CalChartApp)
 

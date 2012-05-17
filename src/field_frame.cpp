@@ -82,8 +82,6 @@ GridValue gridvalue[] =
 	{Int2Coord(8),Int2Coord(8)/3}
 };
 
-extern wxHtmlHelpController *gHelpController;
-
 extern wxPrintDialogData *gPrintDialogData;
 
 BEGIN_EVENT_TABLE(FieldFrame, wxDocMDIChildFrame)

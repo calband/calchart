@@ -45,7 +45,12 @@ wxFont *contBoldItalFont;
 wxFont *pointLabelFont;
 wxFont *yardLabelFont;
 
-wxHtmlHelpController *gHelpController = NULL;
+wxHtmlHelpController&
+GetGlobalHelpController()
+{
+	static wxHtmlHelpController sHelpController;
+	return sHelpController;
+}
 
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
@@ -97,8 +102,7 @@ bool CalChartApp::OnInit()
 		wxString helpfile(wxT("docs"));
 #endif
 		helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
-		gHelpController = new wxHtmlHelpController;
-		if ( !gHelpController->AddBook(wxFileName(helpfile) ))
+		if ( !GetGlobalHelpController().AddBook(wxFileName(helpfile) ))
 		{
 			wxLogError(wxT("Cannot find the help system."));
 		}
@@ -135,7 +139,6 @@ int CalChartApp::OnExit()
 	config->Flush();
 
 	if (gPrintDialogData) delete gPrintDialogData;
-	if (gHelpController) delete gHelpController;
 
     // delete the doc manager
     delete wxDocManager::GetDocumentManager();

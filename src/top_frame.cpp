@@ -24,6 +24,7 @@
 #include "basic_ui.h"
 #include "ccvers.h"
 #include "cc_preferences_ui.h"
+#include "calchartapp.h"
 
 #include <wx/dnd.h>
 #include <wx/html/helpctrl.h>
@@ -36,8 +37,6 @@ EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
 EVT_MENU(wxID_PREFERENCES, TopFrame::OnCmdPreferences)
 END_EVENT_TABLE()
 
-
-extern wxHtmlHelpController *gHelpController;
 
 class TopFrameDropTarget : public wxFileDropTarget
 {
@@ -139,8 +138,8 @@ TopFrame::About()
 void
 TopFrame::Help()
 {
-	gHelpController->LoadFile();
-	gHelpController->DisplayContents();
+	GetGlobalHelpController().LoadFile();
+	GetGlobalHelpController().DisplayContents();
 }
 
 
