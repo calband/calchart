@@ -21,7 +21,7 @@
 */
 
 #include "cc_command.h"
-#include "show.h"
+#include "linmath.h"
 #include "calchartapp.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"

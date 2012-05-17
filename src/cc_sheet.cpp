@@ -22,10 +22,12 @@
 
 #include "cc_sheet.h"
 #include "cc_show.h"
-#include "show.h"
+#include "platconf.h"
 #include "cc_command.h"
 #include "modes.h"
 #include "confgr.h"
+
+extern const wxChar *contnames[];
 
 CC_sheet::CC_sheet(CC_show *shw)
 : show(shw),

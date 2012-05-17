@@ -35,7 +35,6 @@
 #include "ccvers.h"
 #include "cont_ui.h"
 #include "show_ui.h"
-#include "show.h"
 #include "animation_frame.h"
 #include "toolbar.h"
 #include "ui_enums.h"

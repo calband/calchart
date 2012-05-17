@@ -21,10 +21,11 @@
 */
 
 #include "show_ui.h"
-#include "show.h"
 #include <ctype.h>
 #include <wx/statline.h>
 #include <wx/spinctrl.h>
+
+static const size_t kMaxPoints = 1000;
 
 enum
 {
@@ -304,14 +305,14 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 	right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10 );
 	wxStaticText* pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Points:"), wxDefaultPosition, wxDefaultSize, 0);
 	horizontal_sizer->Add(pointLabel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	wxSpinCtrl* numPoints = new wxSpinCtrl(parent, ShowInfoReq_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, MAX_POINTS, 10);
+	wxSpinCtrl* numPoints = new wxSpinCtrl(parent, ShowInfoReq_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, kMaxPoints, 10);
 	horizontal_sizer->Add(numPoints, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
 	horizontal_sizer = new wxBoxSizer( wxHORIZONTAL );
 	right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10 );
 	pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Columns:"), wxDefaultPosition, wxDefaultSize, 0);
 	horizontal_sizer->Add(pointLabel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	wxSpinCtrl* numberColumns = new wxSpinCtrl(parent, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, MAX_POINTS, 10);
+	wxSpinCtrl* numberColumns = new wxSpinCtrl(parent, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
 	horizontal_sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
 	wxString strs[2] = { wxT("Numbers"), wxT("Letters") };

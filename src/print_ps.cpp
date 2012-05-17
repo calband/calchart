@@ -24,7 +24,6 @@
 
 #include "confgr.h"
 #include "modes.h"
-#include "show.h"
 #include "cc_show.h"
 #include "cc_sheet.h"
 

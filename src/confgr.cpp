@@ -33,7 +33,6 @@
 #include "calchartapp.h"
 #include "confgr.h"
 #include "modes.h"
-#include "show.h"
 #include "cc_omniview_constants.h"
 
 const wxString ColorNames[COLOR_NUM] =

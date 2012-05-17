@@ -25,7 +25,7 @@
 #include "modes.h"
 #include "confgr.h"
 #include "basic_ui.h"
-#include "show.h"
+#include "platconf.h"
 #include "field_view.h"
 
 #include <wx/help.h>

@@ -23,34 +23,17 @@
 #ifndef _SHOW_H_
 #define _SHOW_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <wx/defs.h>							  // For basic wx defines
 #include <wx/string.h>
-#include <wx/list.h>
 
-#include "cc_types.h"
 #include "platconf.h"
 #include "linmath.h"
-#include "cc_show.h"
 
-#include <vector>
-#include <deque>
-
-class CC_sheet;
 class CC_coord;
-class CC_show;
 
 #define BASICALLY_ZERO_BASICALLY 0.00001
 #define IS_ZERO(a) (ABS((a)) < BASICALLY_ZERO_BASICALLY)
 #define DEG2RAD(a) ((a) * PI / 180.0)
 #define SQRT2 1.4142136
-
-#define MAX_POINTS 1000
-
-extern const wxChar *contnames[];
 
 float BoundDirection(float f);
 
@@ -61,8 +44,5 @@ bool IsDiagonalDirection(float f);
 void CreateVector(CC_coord& c, float dir, float mag);
 
 void CreateUnitVector(float& a, float& b, float dir);
-
-#define DEF_HASH_W 32
-#define DEF_HASH_E 52
 
 #endif
