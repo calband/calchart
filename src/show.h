@@ -52,26 +52,6 @@ class CC_show;
 
 extern const wxChar *contnames[];
 
-class CC_textchunk
-{
-public:
-	wxString text;
-	enum PSFONT_TYPE font;
-};
-
-typedef std::vector<CC_textchunk> CC_textchunk_list;
-
-struct CC_textline
-{
-	CC_textline() : center(false), on_main(true), on_sheet(true) {}
-
-	CC_textchunk_list chunks;
-	bool center;
-	bool on_main;
-	bool on_sheet;
-};
-
-
 float BoundDirection(float f);
 
 float BoundDirectionSigned(float f);

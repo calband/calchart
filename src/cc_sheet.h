@@ -26,6 +26,7 @@
 #include "cc_types.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
+#include "cc_text.h"
 
 #include <wx/wx.h>
 #include <vector>
@@ -34,7 +35,6 @@
 class CC_show;
 class CC_coord;
 class Matrix;
-struct CC_textline;
 typedef std::vector<CC_textline> CC_textline_list;
 
 class CC_sheet

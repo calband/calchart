@@ -370,6 +370,7 @@
 		C72E2B071441150400118C03 /* top_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = top_frame.cpp; sourceTree = "<group>"; };
 		C72E2B081441150400118C03 /* top_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = top_frame.h; sourceTree = "<group>"; };
 		C72F24B914D4976E00758A0E /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		C73C40681564C7BD00B86BE8 /* cc_text.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_text.h; sourceTree = "<group>"; };
 		C74DE4A212EAC0B900A20B8A /* cc_continuity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_continuity.cpp; sourceTree = "<group>"; };
 		C74DE4A312EAC0B900A20B8A /* cc_continuity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_continuity.h; sourceTree = "<group>"; };
 		C75A5FB91180072C0047B87D /* cc_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_shapes.cpp; sourceTree = "<group>"; };
@@ -743,6 +744,7 @@
 				C7EC032811D9AD0E0043B2FD /* cc_sheet.h */,
 				C78241F212BEC69200BE680F /* cc_show.cpp */,
 				C78241F312BEC69200BE680F /* cc_show.h */,
+				C73C40681564C7BD00B86BE8 /* cc_text.h */,
 				C7EC035611D9B10C0043B2FD /* cc_types.h */,
 				C7AFA973117A6DBA00CC53E2 /* confgr.cpp */,
 				C7AFA974117A6DBA00CC53E2 /* confgr.h */,

@@ -28,6 +28,7 @@
 #include "cc_show.h"
 #include "cc_sheet.h"
 #include "cc_point.h"
+#include "cc_text.h"
 #include <memory>
 
 extern wxFont *pointLabelFont;
