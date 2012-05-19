@@ -77,7 +77,7 @@ ContValue *numbeats)
 	d1 = dir1->Get(anim);
 	d2 = dir2->Get(anim);
 	beats = numbeats->Get(anim);
-	c = sin(DEG2RAD(d1 - d2));
+	c = sin(Deg2Rad(d1 - d2));
 	if (IS_ZERO(c))
 	{
 		anim->RegisterError(ANIMERR_INVALID_CM, proc);
@@ -85,7 +85,7 @@ ContValue *numbeats)
 	}
 	CreateVector(v1, d1, steps1);
 	p[1] = ref1 + v1;
-	steps2 = (ref2 - p[1]).Magnitude() * sin(DEG2RAD(ref2.Direction(p[1]) - d1))
+	steps2 = (ref2 - p[1]).Magnitude() * sin(Deg2Rad(ref2.Direction(p[1]) - d1))
 		/ c;
 	if (IsDiagonalDirection(d2))
 	{
@@ -731,8 +731,8 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 	if (stepsize1)
 	{
 		f2 = stepsize1->Get(anim);
-		a = f2 * cos(DEG2RAD(f1));
-		c = f2 * -sin(DEG2RAD(f1));
+		a = f2 * cos(Deg2Rad(f1));
+		c = f2 * -sin(Deg2Rad(f1));
 	}
 	else
 	{
@@ -742,8 +742,8 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 	if (stepsize2)
 	{
 		f2 = stepsize2->Get(anim);
-		b = f2 * cos(DEG2RAD(f1));
-		d = f2 * -sin(DEG2RAD(f1));
+		b = f2 * cos(Deg2Rad(f1));
+		d = f2 * -sin(Deg2Rad(f1));
 	}
 	else
 	{
@@ -1018,7 +1018,7 @@ void ContProcMarch::Compile(AnimateCompile* anim)
 	b = float2int(this, anim, stps->Get(anim));
 	if (b != 0)
 	{
-		rads = DEG2RAD(dir->Get(anim));
+		rads = Deg2Rad(dir->Get(anim));
 		mag = stpsize->Get(anim) * stps->Get(anim);
 		c.x = Float2Coord(cos(rads)*mag);
 		c.y = -(Float2Coord(sin(rads)*mag));

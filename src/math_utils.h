@@ -40,7 +40,12 @@ bool IS_ZERO(const T& a)
 	return std::abs(a) < kEpsilon;
 }
 
-#define DEG2RAD(a) ((a) * PI / 180.0)
+template <typename T>
+T Deg2Rad(const T& a)
+{
+	return a * M_PI/180.0;
+}
+
 #define SQRT2 1.4142136
 
 float BoundDirection(float f);

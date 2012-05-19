@@ -71,9 +71,9 @@ void CreateVector(CC_coord& c, float dir, float mag)
 	}
 	else
 	{
-		f = mag * cos(DEG2RAD(dir));
+		f = mag * cos(Deg2Rad(dir));
 		c.x = Float2Coord(f);
-		f = mag * -sin(DEG2RAD(dir));
+		f = mag * -sin(Deg2Rad(dir));
 		c.y = Float2Coord(f);
 	}
 }
@@ -90,8 +90,8 @@ void CreateUnitVector(float& a, float& b, float dir)
 	}
 	else
 	{
-		a = cos(DEG2RAD(dir));
-		b = -sin(DEG2RAD(dir));
+		a = cos(Deg2Rad(dir));
+		b = -sin(Deg2Rad(dir));
 	}
 }
 
