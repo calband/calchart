@@ -58,13 +58,6 @@ typedef unsigned char uint8_t;
 
 #define cpp_cat(a,b) a ## b
 
-#if wxUSE_UNICODE
-#define CC_sscanf swscanf
-#else
-#define CC_sscanf sscanf
-#endif
-#define CC_fopen fopen
-
 // For creating icons and bitmaps
 // There are separate macros because XPM is used for icons
 #define ICON_NAME(name) cpp_cat(name,_xpm)
@@ -94,15 +87,6 @@ typedef unsigned char uint8_t;
 /*****************************************
  * platform independent definitions follow
  *****************************************/
-
-// random definitions that might be missing
-
-#ifndef MIN
-#define MIN(a,b) ((a) > (b) ? (b):(a))
-#endif
-#ifndef MAX
-#define MAX(a,b) ((a) < (b) ? (b):(a))
-#endif
 
 // little/big endian conversion
 

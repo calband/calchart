@@ -22,7 +22,6 @@
 
 #include "cc_sheet.h"
 #include "cc_show.h"
-#include "platconf.h"
 #include "cc_command.h"
 #include "modes.h"
 #include "confgr.h"
@@ -105,7 +104,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 	CC_coord c, coff(show->GetMode().FieldOffset());
 
 	std::vector<CC_point> newpts(num);
-	cpy = MIN(show->GetNumPoints(), num);
+	cpy = std::min<unsigned>(show->GetNumPoints(), num);
 	for (i = 0; i < cpy; i++)
 	{
 		newpts[i] = pts[i];
