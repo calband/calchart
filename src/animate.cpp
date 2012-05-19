@@ -26,7 +26,6 @@
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
-#include "platconf.h"
 #include "confgr.h"
 #include <math.h>
 #include <string>

@@ -21,7 +21,6 @@
 */
 
 #include "cc_coord.h"
-#include "platconf.h"
 
 #include <cmath>
 #include <cstdlib>

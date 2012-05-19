@@ -24,7 +24,6 @@
 #include "show_ui.h"
 #include "confgr.h"
 #include "cc_sheet.h"
-#include "platconf.h"
 #include "print_ps.h"
 #include <set>
 

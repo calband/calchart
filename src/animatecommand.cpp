@@ -21,7 +21,6 @@
 */
 
 #include "animatecommand.h"
-#include "platconf.h"
 
 
 AnimateCommand::AnimateCommand(unsigned beats)

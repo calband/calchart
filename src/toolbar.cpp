@@ -24,7 +24,6 @@
 #include "ui_enums.h"
 #include "platconf.h"
 
-#ifdef __CC_INCLUDE_BITMAPS__
 #include "tb_left.xbm"
 #include "tb_right.xbm"
 #include "tb_box.xbm"
@@ -54,7 +53,6 @@
 #include "tb_nbeat.xbm"
 #include "tb_pshet.xbm"
 #include "tb_nshet.xbm"
-#endif
 
 
 void

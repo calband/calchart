@@ -25,7 +25,6 @@
 
 #include <wx/string.h>
 
-#include "platconf.h"
 #include "linmath.h"
 
 #include <cmath>

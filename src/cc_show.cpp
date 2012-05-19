@@ -32,6 +32,7 @@
 #include "cc_point.h"
 #include "math_utils.h"
 #include "cc_shapes.h"
+#include "platconf.h"
 
 #include <wx/wfstream.h>
 #include <list>

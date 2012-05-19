@@ -21,7 +21,6 @@
 */
 
 #include "cc_shapes.h"
-#include "platconf.h"
 
 CC_shape::CC_shape() {}
 CC_shape::~CC_shape() {}

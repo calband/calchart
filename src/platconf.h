@@ -67,8 +67,6 @@ typedef unsigned char uint8_t;
 
 // For creating icons and bitmaps
 // There are separate macros because XPM is used for icons
-#define __CC_INCLUDE_BITMAPS__
-#define __CC_SET_ICON__
 #define ICON_NAME(name) cpp_cat(name,_xpm)
 #define BITMAP_NAME(name) (char *)cpp_cat(name,_bits), cpp_cat(name,_width), cpp_cat(name,_height)
 
@@ -99,23 +97,11 @@ typedef unsigned char uint8_t;
 
 // random definitions that might be missing
 
-#ifndef ABS
-#define ABS(x) (((x) < 0) ? -(x):(x))
-#endif
 #ifndef MIN
 #define MIN(a,b) ((a) > (b) ? (b):(a))
 #endif
 #ifndef MAX
 #define MAX(a,b) ((a) < (b) ? (b):(a))
-#endif
-#ifndef SEEK_SET
-#define SEEK_SET 0
-#endif
-#ifndef SEEK_CUR
-#define SEEK_CUR 1
-#endif
-#ifndef SEEK_END
-#define SEEK_END 2
 #endif
 
 // little/big endian conversion
