@@ -27,7 +27,9 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "confgr.h"
-#include <math.h>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <string>
 
 extern int parsecontinuity();

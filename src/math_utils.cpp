@@ -22,15 +22,9 @@
 
 #include "math_utils.h"
 
-#include <wx/wx.h>
-#include <wx/timer.h>
-#include "cc_command.h"
-#include "confgr.h"
-#include "modes.h"
-#include "cc_sheet.h"
+#include "cc_coord.h"
 
 #include <ctype.h>
-#include <math.h>
 #include <list>
 
 

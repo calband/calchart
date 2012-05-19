@@ -22,6 +22,7 @@
 
 #include "cc_coord.h"
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <cstdlib>
 

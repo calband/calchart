@@ -1,5 +1,5 @@
 /*
- * cc_omniview_constants.cpp
+ * cc_omniview_constants.h
  * CalChart omniview constants
  */
 
@@ -23,7 +23,8 @@
 #ifndef __CC_OMNIVIEW_CONSTANTS_H__
 #define __CC_OMNIVIEW_CONSTANTS_H__
 
-#include <math.h>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 static const float kViewPoint_x_1 = 0.0;
 static const float kViewPoint_y_1 = -16.0;

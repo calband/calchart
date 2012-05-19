@@ -23,10 +23,7 @@
 #ifndef __MATH_UTILS_H__
 #define __MATH_UTILS_H__
 
-#include <wx/string.h>
-
-#include "linmath.h"
-
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <cstdlib>
 

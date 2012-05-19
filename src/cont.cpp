@@ -26,8 +26,6 @@
 #include "parse.h"
 #include "math_utils.h"
 
-#include <cmath>
-
 int float2int(const ContProcedure *proc,
 AnimateCompile *anim,
 float f)

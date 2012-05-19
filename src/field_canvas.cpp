@@ -32,8 +32,6 @@
 
 #include <wx/dcbuffer.h>
 
-#include <cmath>
-
 BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
 EVT_CHAR(FieldCanvas::OnChar)
 EVT_LEFT_DOWN(FieldCanvas::OnMouseLeftDown)
