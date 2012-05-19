@@ -200,7 +200,7 @@ bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
 {
 	bool b = AnimateCommand::NextBeat(pt);
 	float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart)
-		* PI / 180.0;
+		* M_PI / 180.0;
 	pt.x = RoundToCoord(mOrigin.x + cos(curr_ang)*mR);
 	pt.y = RoundToCoord(mOrigin.y - sin(curr_ang)*mR);
 	return b;
@@ -212,7 +212,7 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 	if (AnimateCommand::PrevBeat(pt))
 	{
 		float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart) : mAngStart)
-			* PI / 180.0;
+			* M_PI / 180.0;
 		pt.x = RoundToCoord(mOrigin.x + cos(curr_ang)*mR);
 		pt.y = RoundToCoord(mOrigin.y - sin(curr_ang)*mR);
 		return true;
@@ -227,16 +227,16 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyForward(pt);
-	pt.x = RoundToCoord(mOrigin.x + cos(mAngEnd*PI/180.0)*mR);
-	pt.y = RoundToCoord(mOrigin.y - sin(mAngEnd*PI/180.0)*mR);
+	pt.x = RoundToCoord(mOrigin.x + cos(mAngEnd*M_PI/180.0)*mR);
+	pt.y = RoundToCoord(mOrigin.y - sin(mAngEnd*M_PI/180.0)*mR);
 }
 
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt)
 {
 	AnimateCommand::ApplyBackward(pt);
-	pt.x = RoundToCoord(mOrigin.x + cos(mAngStart*PI/180.0)*mR);
-	pt.y = RoundToCoord(mOrigin.y - sin(mAngStart*PI/180.0)*mR);
+	pt.x = RoundToCoord(mOrigin.x + cos(mAngStart*M_PI/180.0)*mR);
+	pt.y = RoundToCoord(mOrigin.y - sin(mAngStart*M_PI/180.0)*mR);
 }
 
 
@@ -270,10 +270,10 @@ void AnimateCommandRotate::DrawCommand(wxDC& dc, const AnimatePoint& pt, const C
 {
 	float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
 	float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-	wxCoord x_start = RoundToCoord(mOrigin.x + cos(start*PI/180.0)*mR) + offset.x;
-	wxCoord y_start = RoundToCoord(mOrigin.y - sin(start*PI/180.0)*mR) + offset.y;
-	wxCoord x_end = RoundToCoord(mOrigin.x + cos(end*PI/180.0)*mR) + offset.x;
-	wxCoord y_end = RoundToCoord(mOrigin.y - sin(end*PI/180.0)*mR) + offset.y;
+	wxCoord x_start = RoundToCoord(mOrigin.x + cos(start*M_PI/180.0)*mR) + offset.x;
+	wxCoord y_start = RoundToCoord(mOrigin.y - sin(start*M_PI/180.0)*mR) + offset.y;
+	wxCoord x_end = RoundToCoord(mOrigin.x + cos(end*M_PI/180.0)*mR) + offset.x;
+	wxCoord y_end = RoundToCoord(mOrigin.y - sin(end*M_PI/180.0)*mR) + offset.y;
 
 	dc.DrawArc(x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y);
 }

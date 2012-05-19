@@ -108,9 +108,6 @@ typedef unsigned char uint8_t;
 #ifndef MAX
 #define MAX(a,b) ((a) < (b) ? (b):(a))
 #endif
-#ifndef PI
-#define PI 3.1415927
-#endif
 #ifndef SEEK_SET
 #define SEEK_SET 0
 #endif

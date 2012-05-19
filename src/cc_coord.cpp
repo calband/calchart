@@ -59,7 +59,7 @@ float CC_coord::Direction() const
 	if (*this == 0) return 0.0;
 
 	ang = acos(Coord2Float(x)/Magnitude());		  // normalize
-	ang *= 180.0/PI;							  // convert to degrees
+	ang *= 180.0/M_PI;							  // convert to degrees
 	if (y > 0) ang = (-ang);					  // check for > PI
 
 	return ang;

@@ -136,7 +136,7 @@ CC_shape_arc::CC_shape_arc(const CC_coord& c, const CC_coord& p)
 {
 	CC_coord p1 = p-c;
 
-	r = r0 = p1.Direction()*PI/180.0;
+	r = r0 = p1.Direction()*M_PI/180.0;
 	d = p1.Magnitude()*COORD_DECIMAL;
 }
 
@@ -157,7 +157,7 @@ void CC_shape_arc::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
 	CC_coord p1 = snapped_p;
 
-	r = GetOrigin().Direction(p1)*PI/180.0;
+	r = GetOrigin().Direction(p1)*M_PI/180.0;
 	p1.x = Coord(origin.x + d*cos(r));
 	p1.y = Coord(origin.y + -d*sin(r));
 	MovePoint(p1);

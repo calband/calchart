@@ -337,7 +337,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 								if (BoundDirectionSigned(v1.Direction() -
 														 (c2-o).Direction()) < 0)
 									amount = -amount;
-								ang = -v1.Direction()*PI/180.0;
+								ang = -v1.Direction()*M_PI/180.0;
 								m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
 								ZRotationMatrix(-ang) *
 								YXShearMatrix(amount) *
@@ -358,7 +358,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 							float ang;
 							
 							c2 = shape->GetPoint() - c1;
-							ang = -c2.Direction()*PI/180.0;
+							ang = -c2.Direction()*M_PI/180.0;
 							m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
 							ZRotationMatrix(-ang) *
 							YReflectionMatrix() *
