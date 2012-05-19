@@ -30,7 +30,7 @@
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
-#include "show.h"
+#include "math_utils.h"
 #include "cc_shapes.h"
 
 #include <wx/wfstream.h>

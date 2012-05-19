@@ -23,8 +23,8 @@
 #include "cc_coord.h"
 #include "platconf.h"
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 // Get magnitude of vector
 float CC_coord::Magnitude() const
@@ -42,7 +42,7 @@ float CC_coord::DM_Magnitude() const
 {
 	if ((x == y) || (x == -y))
 	{
-		return Coord2Float(ABS(x));
+		return Coord2Float(std::abs(x));
 	}
 	else
 	{
@@ -83,8 +83,8 @@ bool CC_coord::Collides(const CC_coord& c) const
 	dx = x - c.x;
 	dy = y - c.y;
 // Check for special cases to avoid multiplications
-	if (ABS(dx) > Int2Coord(1)) return false;
-	if (ABS(dy) > Int2Coord(1)) return false;
+	if (std::abs(dx) > Int2Coord(1)) return false;
+	if (std::abs(dy) > Int2Coord(1)) return false;
 	return (((dx*dx)+(dy*dy)) <= (Int2Coord(1)*Int2Coord(1)));
 }
 

@@ -1,10 +1,10 @@
 /*
- * show.cpp
- * Member functions for show classes
+ * math_utils.cpp
+ * math utility functions
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "show.h"
+#include "math_utils.h"
 
 #include <wx/wx.h>
 #include <wx/timer.h>

@@ -26,11 +26,13 @@
 #include "confgr.h"
 #include "modes.h"
 #include "linmath.h"
-#include "show.h"
+#include "math_utils.h"
 #include "background_image.h"
 #include "cc_shapes.h"
 
 #include <wx/dcbuffer.h>
+
+#include <cmath>
 
 BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
 EVT_CHAR(FieldCanvas::OnChar)
@@ -206,10 +208,10 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 							Coord polydist =
 							dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
 							d = p->x - pos.x;
-							if (ABS(d) < polydist)
+							if (std::abs(d) < polydist)
 							{
 								d = p->y - pos.y;
-								if (ABS(d) < polydist)
+								if (std::abs(d) < polydist)
 								{
 									mView->SelectWithLasso((CC_lasso*)curr_shape.get(), event.AltDown());
 									EndDrag();

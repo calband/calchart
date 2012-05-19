@@ -137,7 +137,7 @@ AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 	mMouseDown = false;
 
 	// if mouse lifted very close to where clicked, then it is a previous beat move
-	if ((abs(mMouseXEnd - mMouseXStart) < Int2Coord(1)/2) && (abs(mMouseYEnd - mMouseYStart) < Int2Coord(1)/2))
+	if ((std::abs(mMouseXEnd - mMouseXStart) < Int2Coord(1)/2) && (std::abs(mMouseYEnd - mMouseYStart) < Int2Coord(1)/2))
 	{
 		if (mView)
 		{

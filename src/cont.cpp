@@ -23,16 +23,17 @@
 #include "animatecommand.h"
 #include "cc_sheet.h"
 #include "cont.h"
-#include <math.h>
 #include "parse.h"
-#include "show.h"
+#include "math_utils.h"
+
+#include <cmath>
 
 int float2int(const ContProcedure *proc,
 AnimateCompile *anim,
 float f)
 {
 	int v = (int)floor(f+0.5);
-	if (ABS(f - (float)v) >= COORD_DECIMAL)
+	if (std::abs(f - (float)v) >= COORD_DECIMAL)
 	{
 		anim->RegisterError(ANIMERR_NONINT, proc);
 	}
@@ -468,7 +469,7 @@ float ContFuncEither::Get(AnimateCompile* anim) const
 	while (d1 < -180) d1+=360;
 	while (d2 > 180) d2-=360;
 	while (d2 < -180) d2+=360;
-	return (ABS(d1) > ABS(d2)) ? dir2->Get(anim) : dir1->Get(anim);
+	return (std::abs(d1) > std::abs(d2)) ? dir2->Get(anim) : dir1->Get(anim);
 }
 
 
@@ -616,7 +617,7 @@ void ContProcDMHS::Compile(AnimateCompile* anim)
 	short b, b_hs;
 
 	c = pnt->Get(anim) - anim->pt;
-	if (ABS(c.x) > ABS(c.y))
+	if (std::abs(c.x) > std::abs(c.y))
 	{
 												  // adjust sign
 		c_hs.x = ((c.x<0) != (c.y<0)) ? c.x+c.y : c.x-c.y;
@@ -639,14 +640,14 @@ void ContProcDMHS::Compile(AnimateCompile* anim)
 	if (c_dm != 0)
 	{
 		b = Coord2Int(c_dm.x);
-		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c_dm)), this))
+		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c_dm)), this))
 		{
 			return;
 		}
 	}
 	if (c_hs != 0)
 	{
-		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b_hs), c_hs)), this);
+		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b_hs), c_hs)), this);
 	}
 }
 
@@ -693,7 +694,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim)
 		c2.x = 0;
 		c2.y = c1.y;
 		b = Coord2Int(c2.y);
-		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
+		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c2)), this))
 		{
 			return;
 		}
@@ -703,7 +704,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim)
 		c2.x = c1.x;
 		c2.y = 0;
 		b = Coord2Int(c2.x);
-		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
+		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c2)), this))
 		{
 			return;
 		}
@@ -864,7 +865,7 @@ ContProcGrid::~ContProcGrid()
 
 static inline Coord roundcoord(Coord a, Coord mod)
 {
-	mod = ABS(mod);
+	mod = std::abs(mod);
 	if (mod > 0)
 	{
 		if (a < 0)
@@ -950,7 +951,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 	short b;
 
 	c = pnt->Get(anim) - anim->pt;
-	if (ABS(c.x) > ABS(c.y))
+	if (std::abs(c.x) > std::abs(c.y))
 	{
 												  // adjust sign
 		c_hs.x = ((c.x<0) != (c.y<0)) ? c.x+c.y : c.x-c.y;
@@ -972,7 +973,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 	}
 	if (c_hs != 0)
 	{
-		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c_hs)), this))
+		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c_hs)), this))
 		{
 			return;
 		}
@@ -980,7 +981,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 	if (c_dm != 0)
 	{
 		b = Coord2Int(c_dm.x);
-		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c_dm)), this);
+		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c_dm)), this);
 	}
 }
 
@@ -1024,7 +1025,7 @@ void ContProcMarch::Compile(AnimateCompile* anim)
 		if (c != 0)
 		{
 			if (facedir)
-				anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove((unsigned)ABS(b), c,
+				anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove((unsigned)std::abs(b), c,
 					facedir->Get(anim))), this);
 			else
 			if (b < 0)
@@ -1055,7 +1056,7 @@ void ContProcMT::Compile(AnimateCompile* anim)
 	b = float2int(this, anim, numbeats->Get(anim));
 	if (b != 0)
 	{
-		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT((unsigned)ABS(b), dir->Get(anim))), this);
+		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT((unsigned)std::abs(b), dir->Get(anim))), this);
 	}
 }
 
@@ -1090,7 +1091,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim)
 		c2.x = c1.x;
 		c2.y = 0;
 		b = Coord2Int(c2.x);
-		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
+		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c2)), this))
 		{
 			return;
 		}
@@ -1100,7 +1101,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim)
 		c2.x = 0;
 		c2.y = c1.y;
 		b = Coord2Int(c2.y);
-		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(ABS(b), c2)), this))
+		if (!anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(std::abs(b), c2)), this))
 		{
 			return;
 		}
@@ -1136,7 +1137,7 @@ void ContProcRotate::Compile(AnimateCompile* anim)
 	{
 		backwards = true;
 	}
-	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandRotate((unsigned)ABS(b), c,
+	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandRotate((unsigned)std::abs(b), c,
 // Don't use Magnitude() because
 // we want Coord numbers
 		sqrt(static_cast<float>(rad.x*rad.x + rad.y*rad.y)),
