@@ -428,7 +428,7 @@ void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		ShowPrintDialog dialog(field->mShow, false, this);
+		PrintPostScriptDialog dialog(field->mShow, false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -440,7 +440,7 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
 	if (field->mShow)
 	{
-		ShowPrintDialog dialog(field->mShow, true, this);
+		PrintPostScriptDialog dialog(field->mShow, true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();

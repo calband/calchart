@@ -26,21 +26,20 @@
 #include <wx/wx.h>
 #include <wx/dialog.h>
 
-class ShowPrintDialog;
 class CC_show;
 
-class ShowPrintDialog : public wxDialog
+class PrintPostScriptDialog : public wxDialog
 {
-	DECLARE_CLASS( ShowPrintDialog )
+	DECLARE_CLASS( PrintPostScriptDialog )
 	DECLARE_EVENT_TABLE()
 
 	public:
-	ShowPrintDialog( );
-	ShowPrintDialog(CC_show *show, bool printEPS,
+	PrintPostScriptDialog( );
+	PrintPostScriptDialog(CC_show *show, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~ShowPrintDialog( );
+	~PrintPostScriptDialog( );
 
 	void Init();
 

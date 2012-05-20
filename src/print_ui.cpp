@@ -51,12 +51,12 @@ enum
 	CC_PRINT_BUTTON_RESET_DEFAULTS
 };
 
-BEGIN_EVENT_TABLE(ShowPrintDialog, wxDialog)
-EVT_BUTTON(CC_PRINT_BUTTON_SELECT,ShowPrintDialog::ShowPrintSelect)
-EVT_BUTTON(CC_PRINT_BUTTON_RESET_DEFAULTS,ShowPrintDialog::ResetDefaults)
+BEGIN_EVENT_TABLE(PrintPostScriptDialog, wxDialog)
+EVT_BUTTON(CC_PRINT_BUTTON_SELECT,PrintPostScriptDialog::ShowPrintSelect)
+EVT_BUTTON(CC_PRINT_BUTTON_RESET_DEFAULTS,PrintPostScriptDialog::ResetDefaults)
 END_EVENT_TABLE()
 
-void ShowPrintDialog::PrintShow()
+void PrintPostScriptDialog::PrintShow()
 {
 	wxString s;
 #ifdef PRINT__RUN_CMD
@@ -132,7 +132,7 @@ void ShowPrintDialog::PrintShow()
 }
 
 
-void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
+void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 {
 	wxArrayString choices;
 	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet)
@@ -166,7 +166,7 @@ void ShowPrintDialog::ShowPrintSelect(wxCommandEvent&)
 }
 
 
-void ShowPrintDialog::ResetDefaults(wxCommandEvent&)
+void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
 {
 #ifdef PRINT__RUN_CMD
 	ClearConfiguration_PrintCmd();
@@ -187,15 +187,15 @@ void ShowPrintDialog::ResetDefaults(wxCommandEvent&)
 }
 
 
-IMPLEMENT_CLASS( ShowPrintDialog, wxDialog )
+IMPLEMENT_CLASS( PrintPostScriptDialog, wxDialog )
 
-ShowPrintDialog::ShowPrintDialog()
+PrintPostScriptDialog::PrintPostScriptDialog()
 {
 	Init();
 }
 
 
-ShowPrintDialog::ShowPrintDialog(CC_show *show, bool printEPS,
+PrintPostScriptDialog::PrintPostScriptDialog(CC_show *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)
@@ -206,17 +206,17 @@ long style)
 }
 
 
-ShowPrintDialog::~ShowPrintDialog()
+PrintPostScriptDialog::~PrintPostScriptDialog()
 {
 }
 
 
-void ShowPrintDialog::Init()
+void PrintPostScriptDialog::Init()
 {
 }
 
 
-bool ShowPrintDialog::Create(CC_show *show, bool printEPS,
+bool PrintPostScriptDialog::Create(CC_show *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)
@@ -239,7 +239,7 @@ long style)
 }
 
 
-void ShowPrintDialog::CreateControls()
+void PrintPostScriptDialog::CreateControls()
 {
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 	SetSizer( topsizer );
@@ -383,7 +383,7 @@ void ShowPrintDialog::CreateControls()
 	topsizer->Add(horizontalsizer, 0, wxALL, 5 );
 }
 
-bool ShowPrintDialog::TransferDataToWindow()
+bool PrintPostScriptDialog::TransferDataToWindow()
 {
 #ifdef PRINT__RUN_CMD
 	text_cmd->SetValue(GetConfiguration_PrintCmd());
@@ -416,7 +416,7 @@ bool ShowPrintDialog::TransferDataToWindow()
 	return true;
 }
 
-bool ShowPrintDialog::TransferDataFromWindow()
+bool PrintPostScriptDialog::TransferDataFromWindow()
 {
 #ifdef PRINT__RUN_CMD
 	SetConfiguration_PrintCmd(text_cmd->GetValue());
