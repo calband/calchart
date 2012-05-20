@@ -1,10 +1,10 @@
 /*
- * print_ui.cpp
- * Dialox box for printing
+ * print_ps_dialog.h
+ * Dialox box for printing postscript
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "print_ui.h"
+#include "print_ps_dialog.h"
+
 #include "show_ui.h"
 #include "confgr.h"
 #include "cc_sheet.h"

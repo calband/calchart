@@ -1,10 +1,10 @@
 /*
- * print_ui.h
- * Dialox box for printing
+ * print_ps_dialog.h
+ * Dialox box for printing postscript
  */
 
 /*
-   Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
+   Copyright (C) 1995-2012  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _PRINT_UI_H_
-#define _PRINT_UI_H_
+#ifndef __PRINT_PS_DIALOG_H__
+#define __PRINT_PS_DIALOG_H__
 
 #include <wx/wx.h>
 #include <wx/dialog.h>

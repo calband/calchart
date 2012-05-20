@@ -28,7 +28,7 @@
 #include "cc_show.h"
 #include "top_frame.h"
 #include "calchartapp.h"
-#include "print_ui.h"
+#include "print_ps_dialog.h"
 #include "cc_preferences_ui.h"
 #include "modes.h"
 #include "confgr.h"
