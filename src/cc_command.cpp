@@ -431,6 +431,25 @@ TransformPointsInALineCommand::~TransformPointsInALineCommand()
 }
 
 
+// SetReferencePointToRef0 :
+// Reset a reference point position to ref point 0.
+SetReferencePointToRef0::SetReferencePointToRef0(CC_show& show, unsigned ref) :
+MovePointsOnSheetCommand(show, ref)
+{
+	CC_show::const_CC_sheet_iterator_t sheet = mShow.GetNthSheet(mSheetNum);
+	// for all the points, set the reference point
+	const unsigned short numPoints = mShow.GetNumPoints();
+	for (unsigned short i = 0; i != numPoints; ++i)
+	{
+		mPositions[i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(i, mRef), sheet->GetPosition(i, 0));
+	}
+}
+
+SetReferencePointToRef0::~SetReferencePointToRef0()
+{
+}
+
+
 // SetContinuityIndexCommand:
 // Sets the continuity index of the selected points.
 SetContinuityIndexCommand::SetContinuityIndexCommand(CC_show& show, unsigned index)

@@ -55,6 +55,7 @@ public:
 	bool DoTranslatePoints(const CC_coord& pos);
 	bool DoTransformPoints(const Matrix& transmat);
 	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second);
+	bool DoResetReferencePoint();
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
 	bool DoSetDescription(const wxString& descr);
 	void DoSetMode(const wxString& mode);

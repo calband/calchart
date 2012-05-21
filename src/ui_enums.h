@@ -76,6 +76,7 @@ enum
 	CALCHART__AddBackgroundImage,
 	CALCHART__AdjustBackgroundImage,
 	CALCHART__RemoveBackgroundImage,
+	CALCHART__ResetReferencePoint,
 
 	CALCHART__anim_reanimate,
 	CALCHART__anim_select_coll,

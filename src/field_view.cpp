@@ -215,6 +215,13 @@ FieldView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second)
 }
 
 bool
+FieldView::DoResetReferencePoint()
+{
+	GetDocument()->GetCommandProcessor()->Submit(new SetReferencePointToRef0(*mShow, mCurrentReferencePoint), true);
+	return true;
+}
+
+bool
 FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;

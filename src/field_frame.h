@@ -113,6 +113,8 @@ public:
 	void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
 	void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
 
+	void OnCmd_ResetReferencePoint(wxCommandEvent& event);
+
 	void OnSize(wxSizeEvent& event);
 
 	void AppendShow();

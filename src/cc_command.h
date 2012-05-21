@@ -313,6 +313,16 @@ public:
 };
 
 
+// SetReferencePointToRef0 :
+// Reset a reference point position to ref point 0.
+class SetReferencePointToRef0 : public MovePointsOnSheetCommand
+{
+public:
+	SetReferencePointToRef0(CC_show& show, unsigned ref);
+	virtual ~SetReferencePointToRef0();
+};
+
+
 // SetContinuityIndexCommand:
 // Sets the continuity index of the selected points.
 class SetContinuityIndexCommand : public SetSheetAndSelectCommand

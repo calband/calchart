@@ -139,6 +139,8 @@ EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
 EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
 EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
+EVT_MENU(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
+EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_SIZE( FieldFrame::OnSize)
 END_EVENT_TABLE()
 
@@ -216,6 +218,7 @@ field(NULL)
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
 	edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
 	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
+	edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
 
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
@@ -318,6 +321,7 @@ field(NULL)
 	rowsizer = new wxBoxSizer(wxHORIZONTAL);
 	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Ref Group")), 0, wxALL, 5);
 	rowsizer->Add(ref_choice, 0, wxALL, 5);
+	rowsizer->Add(new wxButton(this, CALCHART__ResetReferencePoint, wxT("&Reset Ref")), 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Sheet")), 0, wxALL, 5);
 	rowsizer->Add(sheet_slider, 1, wxEXPAND, 5);
 	fullsizer->Add(rowsizer);
@@ -811,6 +815,13 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
 	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
 }
+
+
+void FieldFrame::OnCmd_ResetReferencePoint(wxCommandEvent &event)
+{
+	static_cast<FieldView*>(GetView())->DoResetReferencePoint();
+}
+
 
 void FieldFrame::OnSize(wxSizeEvent& event)
 {
