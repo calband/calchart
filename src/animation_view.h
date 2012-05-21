@@ -67,7 +67,8 @@ public:
 
 	const CC_coord& GetShowSize() const;
 
-	void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd, long mouseYEnd);
+	void UnselectMarchers();
+	void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd, long mouseYEnd, bool altDown);
 	
 	void ToggleTimer();
 	bool OnBeat() const;

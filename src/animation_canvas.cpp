@@ -117,6 +117,11 @@ AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 	x = dc.DeviceToLogicalX( x );
 	y = dc.DeviceToLogicalY( y );
 
+	if (!event.AltDown() && !event.ShiftDown())
+	{
+		mView->UnselectMarchers();
+	}
+
 	mMouseXEnd = mMouseXStart = x;
 	mMouseYEnd = mMouseYStart = y;
 	mMouseDown = true;
@@ -148,7 +153,7 @@ AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 	{
 		if (mView)
 		{
-			mView->SelectMarchersInBox(mMouseXStart, mMouseYStart, mMouseXEnd, mMouseYEnd);
+			mView->SelectMarchersInBox(mMouseXStart, mMouseYStart, mMouseXEnd, mMouseYEnd, event.AltDown());
 		}
 	}
 	Refresh();
