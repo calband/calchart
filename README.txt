@@ -17,6 +17,8 @@ feature:
 3524594: add error as toolbars.
 3524589: Change animation, comma, period for next/prev beat.
 3524584: Should be able to have custom camera angles
+3524592: Put Reset reference points back in
+3524587: selection should behave same in animation and field view
 
 ---
 What is CalChart?
