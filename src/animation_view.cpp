@@ -340,10 +340,15 @@ AnimationView::GetShowSize() const
 	return GetShow()->GetMode().Size();
 }
 
+void
+AnimationView::UnselectMarchers()
+{
+	GetShow()->UnselectAll();
+}
 
 void
 AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
-								   long mouseXEnd, long mouseYEnd)
+								   long mouseXEnd, long mouseYEnd, bool altDown)
 {
 	// otherwise, Select points within rectangle
 	Coord x_off = GetShow()->GetMode().Offset().x;
@@ -362,7 +367,14 @@ AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
 			pointlist.insert(i);
 		}
 	}
-	GetShow()->SetSelection(pointlist);
+	if (altDown)
+	{
+		GetShow()->ToggleSelection(pointlist);
+	}
+	else
+	{
+		GetShow()->AddToSelection(pointlist);
+	}
 }
 
 
