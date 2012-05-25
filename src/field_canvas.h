@@ -34,7 +34,6 @@
 class FieldView;
 class FieldFrame;
 class CC_shape;
-class CC_show;
 class BackgroundImage;
 
 // Field Canvas controls how to paint and the first line control of user input
@@ -45,7 +44,6 @@ public:
 	FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom);
 	virtual ~FieldCanvas(void);
 	void OnPaint(wxPaintEvent& event);
-	void PaintBackground(wxDC& dc);
 	void OnEraseBackground(wxEraseEvent& event);
 	virtual void OnMouseLeftDown(wxMouseEvent& event);
 	virtual void OnMouseLeftUp(wxMouseEvent& event);
@@ -56,34 +54,40 @@ public:
 
 // Misc show functions
 	float ZoomToFitFactor() const;
-	void SetZoom(float factor);
-
-	void BeginDrag(CC_DRAG_TYPES type, CC_coord start);
-	void AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape);
-	void MoveDrag(CC_coord end);
-	void EndDrag();
+	virtual void SetZoom(float factor);
 
 	// return true on success
 	bool SetBackgroundImage(const wxImage& image);
 	void AdjustBackgroundImage(bool enable);
 	void RemoveBackgroundImage();
 	
-// Variables
-	FieldFrame *ourframe;
-	CC_show* mShow;
+	CC_DRAG_TYPES GetCurrentLasso() const;
+	void SetCurrentLasso(CC_DRAG_TYPES lasso);
+	CC_MOVE_MODES GetCurrentMove() const;
+	// implies a call to EndDrag()
+	void SetCurrentMove(CC_MOVE_MODES move);
+	
+private:
+	// Variables
+	FieldFrame *mFrame;
 	FieldView* mView;
 	CC_DRAG_TYPES curr_lasso;
 	CC_MOVE_MODES curr_move;
 
-private:
 	void ClearShapes();
 
+	void BeginDrag(CC_DRAG_TYPES type, CC_coord start);
+	void AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape);
+	void MoveDrag(CC_coord end);
+	void EndDrag();
+	
 	CC_DRAG_TYPES drag;
 	typedef std::vector<boost::shared_ptr<CC_shape> > ShapeList;
 	ShapeList shape_list;
 	boost::shared_ptr<CC_shape> curr_shape;
 
 	// Background Picture
+	void PaintBackground(wxDC& dc);
 	boost::shared_ptr<BackgroundImage> mBackgroundImage;
 	
 	DECLARE_EVENT_TABLE()

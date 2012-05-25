@@ -70,8 +70,8 @@ protected:
 	void PrepareDC(wxDC&);
 
 public:
-	void SetZoom(float z);
-	float GetZoom() const;
+	virtual void SetZoom(float z);
+	virtual float GetZoom() const;
 
 	// Inform the ctrl scrolling when the mouse moves
     virtual void OnMouseMove(wxMouseEvent &event);

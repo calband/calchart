@@ -39,8 +39,6 @@ class Animation;
 class FieldView : public wxView
 {
 public:
-    FieldFrame *mFrame;
-  
     FieldView();
     ~FieldView();
 
@@ -67,8 +65,14 @@ public:
 	bool DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where);
 	bool DoDeleteSheet(unsigned where);
 
+	///// query show attributes /////
 	int FindPoint(CC_coord pos) const;
 	CC_coord PointPosition(int which) const;
+	unsigned GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
+	unsigned short GetNumSheets() const { return mShow->GetNumSheets(); }
+
+	CC_coord GetShowFieldOffset() const;
+	CC_coord GetShowFieldSize() const;
 
 	///// Change show attributes /////
 	void GoToSheet(size_t which);
@@ -78,6 +82,9 @@ public:
 	void SetReferencePoint(unsigned which);
 
 	///// Select /////
+	void UnselectAll() { mShow->UnselectAll(); }
+	void AddToSelection(const CC_show::SelectionList& sl);
+	void ToggleSelection(const CC_show::SelectionList& sl);
 	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
 
@@ -86,6 +93,8 @@ public:
 	void OnEnableDrawPaths(bool enable);
 
 private:
+	FieldFrame *mFrame;
+	
 	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 	void GeneratePaths();
 	boost::shared_ptr<Animation> mAnimation;

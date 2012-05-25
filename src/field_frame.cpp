@@ -175,7 +175,7 @@ public:
 // Main frame constructor
 FieldFrame::FieldFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size):
 wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
-field(NULL)
+mCanvas(NULL)
 {
 // Give it an icon
 	SetBandIcon(this);
@@ -249,14 +249,13 @@ field(NULL)
 	AddCoolToolBar(GetMainToolBar(), *this);
 
 // Add the field canvas
-	field = new FieldCanvas(view, this, GetConfiguration_FieldFrameZoom());
-	// I don't think we need to do this here.  Should be taken care of already
-//	field->SetVirtualSize(1000, 1000);
+	mCanvas = new FieldCanvas(view, this, GetConfiguration_FieldFrameZoom());
 	// set scroll rate 1 to 1, so we can have even scrolling of whole field
-	field->SetScrollRate(1, 1);
+	mCanvas->SetScrollRate(1, 1);
 
 	CC_show* show = static_cast<CC_show*>(doc);
 	SetTitle(show->GetTitle());
+	show->SetCurrentSheet(0);
 
 // Add the controls
 	wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
@@ -333,14 +332,14 @@ field(NULL)
 	doc->GetCommandProcessor()->Initialize();
 	
 // Update the tool bar
-	SetCurrentLasso(field->curr_lasso);
-	SetCurrentMove(field->curr_move);
+	SetCurrentLasso(mCanvas->GetCurrentLasso());
+	SetCurrentMove(mCanvas->GetCurrentMove());
 
 // Show the frame
 	UpdatePanel();
-	field->Refresh();
+	mCanvas->Refresh();
 
-	fullsizer->Add(field, 1, wxEXPAND);
+	fullsizer->Add(mCanvas, 1, wxEXPAND);
 	SetSizer(fullsizer);
 	// re-set the size
 	SetSize(size);
@@ -371,7 +370,7 @@ void FieldFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrinter printer(gPrintDialogData);
-	MyPrintout printout(wxT("My Printout"), *static_cast<CC_show*>(GetDocument()));
+	MyPrintout printout(wxT("My Printout"), *GetShow());
 	wxPrintDialogData& printDialog = printer.GetPrintDialogData();
 
 	int minPage, maxPage, pageFrom, pageTo;
@@ -401,8 +400,8 @@ void FieldFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrintPreview *preview = new wxPrintPreview(
-		new MyPrintout(wxT("My Printout"), *static_cast<CC_show*>(GetDocument())),
-		new MyPrintout(wxT("My Printout"), *static_cast<CC_show*>(GetDocument())),
+		new MyPrintout(wxT("My Printout"), *GetShow()),
+		new MyPrintout(wxT("My Printout"), *GetShow()),
 		gPrintDialogData);
 	if (!preview->Ok())
 	{
@@ -430,9 +429,9 @@ void FieldFrame::OnCmdPageSetup(wxCommandEvent& event)
 
 void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		PrintPostScriptDialog dialog(field->mShow, false, this);
+		PrintPostScriptDialog dialog(GetShow(), false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -442,9 +441,9 @@ void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 
 void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		PrintPostScriptDialog dialog(field->mShow, true, this);
+		PrintPostScriptDialog dialog(GetShow(), true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -464,42 +463,42 @@ void FieldFrame::OnCmdPreferences(wxCommandEvent& event)
 
 void FieldFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
-	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
-	static_cast<FieldView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum());
-	static_cast<FieldView*>(GetView())->GoToPrevSheet();
+	CC_show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
+	GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+	GetFieldView()->GoToPrevSheet();
 }
 
 
 void FieldFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
-	CC_show::CC_sheet_container_t sht(1, *field->mShow->GetCurrentSheet());
-	static_cast<FieldView*>(GetView())->DoInsertSheets(sht, field->mShow->GetCurrentSheetNum()+1);
-	static_cast<FieldView*>(GetView())->GoToNextSheet();
+	CC_show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
+	GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum()+1);
+	GetFieldView()->GoToNextSheet();
 }
 
 
 void FieldFrame::OnCmdDelete(wxCommandEvent& event)
 {
-	if (field->mShow->GetNumSheets() > 1)
+	if (GetFieldView()->GetNumSheets() > 1)
 	{
-		static_cast<FieldView*>(GetView())->DoDeleteSheet(field->mShow->GetCurrentSheetNum());
+		GetFieldView()->DoDeleteSheet(GetFieldView()->GetCurrentSheetNum());
 	}
 }
 
 
 void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 {
-	if (field->mShow->GetCurrentSheetNum()+1 < field->mShow->GetNumSheets())
+	if (GetFieldView()->GetCurrentSheetNum()+1 < GetFieldView()->GetNumSheets())
 	{
 		if(wxMessageBox(wxT("Relabeling sheets is not undoable.\nProceed?"),
 			wxT("Relabel sheets"), wxYES_NO) == wxYES)
 		{
-			if (!field->mShow->RelabelSheets(field->mShow->GetCurrentSheetNum()))
+			if (!GetShow()->RelabelSheets(GetFieldView()->GetCurrentSheetNum()))
 				(void)wxMessageBox(wxT("Stuntsheets don't match"),
 					wxT("Relabel sheets"));
 			else
 			{
-				field->mShow->Modify(true);
+				GetShow()->Modify(true);
 			}
 		}
 	}
@@ -513,9 +512,9 @@ void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 
 void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		ContinuityEditor* ce = new ContinuityEditor(field->mShow, this, wxID_ANY,
+		ContinuityEditor* ce = new ContinuityEditor(GetShow(), this, wxID_ANY,
 			wxT("Animation Continuity"));
 		// make it modeless:
 		ce->Show();
@@ -526,15 +525,15 @@ void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
 void FieldFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 {
 	wxString s;
-	if (field->mShow)
+	if (GetShow())
 	{
 		s = wxGetTextFromUser(wxT("Enter the sheet title"),
-			field->mShow->GetCurrentSheet()->GetName(),
-			field->mShow->GetCurrentSheet()->GetName(),
+			GetShow()->GetCurrentSheet()->GetName(),
+			GetShow()->GetCurrentSheet()->GetName(),
 			this);
 		if (!s.IsEmpty())
 		{
-			static_cast<FieldView*>(GetView())->DoSetSheetTitle(s);
+			GetFieldView()->DoSetSheetTitle(s);
 		}
 	}
 }
@@ -543,19 +542,19 @@ void FieldFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
 {
 	wxString s;
-	if (field->mShow)
+	if (GetShow())
 	{
 		wxString buf;
-		buf.sprintf(wxT("%u"), field->mShow->GetCurrentSheet()->GetBeats());
+		buf.sprintf(wxT("%u"), GetShow()->GetCurrentSheet()->GetBeats());
 		s = wxGetTextFromUser(wxT("Enter the number of beats"),
-			field->mShow->GetCurrentSheet()->GetName(),
+			GetShow()->GetCurrentSheet()->GetName(),
 			buf, this);
 		if (!s.empty())
 		{
 			long val;
 			if (s.ToLong(&val))
 			{
-				static_cast<FieldView*>(GetView())->DoSetSheetBeats(val);
+				GetFieldView()->DoSetSheetBeats(val);
 			}
 		}
 	}
@@ -582,9 +581,9 @@ void FieldFrame::OnCmdSetMode(wxCommandEvent& event)
 
 void FieldFrame::OnCmdPoints(wxCommandEvent& event)
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		PointPicker* pp = new PointPicker(field->mShow, this);
+		PointPicker* pp = new PointPicker(GetShow(), this);
 		// make it modeless:
 		pp->Show();
 	}
@@ -593,18 +592,18 @@ void FieldFrame::OnCmdPoints(wxCommandEvent& event)
 
 void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		(void)new AnimationFrame(this, field->mShow);
+		(void)new AnimationFrame(this, GetShow());
 	}
 }
 
 
 void FieldFrame::OnCmdOmniView(wxCommandEvent& event)
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		(void)new AnimationFrame(this, field->mShow, true);
+		(void)new AnimationFrame(this, GetShow(), true);
 	}
 }
 
@@ -623,13 +622,13 @@ void FieldFrame::OnCmdHelp(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_prev_ss(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->GoToPrevSheet();
+	GetFieldView()->GoToPrevSheet();
 }
 
 
 void FieldFrame::OnCmd_next_ss(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->GoToNextSheet();
+	GetFieldView()->GoToNextSheet();
 }
 
 
@@ -695,73 +694,73 @@ void FieldFrame::OnCmd_genius(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_label_left(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsLabel(false);
+	GetFieldView()->DoSetPointsLabel(false);
 }
 
 
 void FieldFrame::OnCmd_label_right(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsLabel(true);
+	GetFieldView()->DoSetPointsLabel(true);
 }
 
 
 void FieldFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsLabelFlip();
+	GetFieldView()->DoSetPointsLabelFlip();
 }
 
 
 void FieldFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_PLAIN);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_PLAIN);
 }
 
 
 void FieldFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOL);
 }
 
 
 void FieldFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_BKSL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_BKSL);
 }
 
 
 void FieldFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_SL);
 }
 
 
 void FieldFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_X);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_X);
 }
 
 
 void FieldFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLBKSL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLBKSL);
 }
 
 
 void FieldFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLSL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLSL);
 }
 
 
 void FieldFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
-	static_cast<FieldView*>(GetView())->DoSetPointsSymbol(SYMBOL_SOLX);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLX);
 }
 
 
 void FieldFrame::OnChar(wxKeyEvent& event)
 {
-	field->OnChar(event);
+	mCanvas->OnChar(event);
 }
 
 void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
@@ -794,7 +793,7 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
             wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
             return;
         }
-		if (!field->SetBackgroundImage(image))
+		if (!mCanvas->SetBackgroundImage(image))
 		{
 			wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
 			return;
@@ -806,12 +805,12 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_AdjustBackgroundImage(wxCommandEvent& event)
 {
-	field->AdjustBackgroundImage(true);
+	mCanvas->AdjustBackgroundImage(true);
 }
 
 void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 {
-	field->RemoveBackgroundImage();
+	mCanvas->RemoveBackgroundImage();
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
 	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
 }
@@ -819,7 +818,7 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_ResetReferencePoint(wxCommandEvent &event)
 {
-	static_cast<FieldView*>(GetView())->DoResetReferencePoint();
+	GetFieldView()->DoResetReferencePoint();
 }
 
 
@@ -846,12 +845,12 @@ void FieldFrame::AppendShow()
 		shw = new CC_show();
 		if (shw->OnOpenDocument(s))
 		{
-			if (shw->GetNumPoints() == field->mShow->GetNumPoints())
+			if (shw->GetNumPoints() == GetShow()->GetNumPoints())
 			{
-				currend = field->mShow->GetNumSheets();
-				static_cast<FieldView*>(GetView())->DoInsertSheets(CC_show::CC_sheet_container_t(shw->GetSheetBegin(), shw->GetSheetEnd()), currend);
+				currend = GetShow()->GetNumSheets();
+				GetFieldView()->DoInsertSheets(CC_show::CC_sheet_container_t(shw->GetSheetBegin(), shw->GetSheetEnd()), currend);
 				// This is bad, we are relabeling outside of adding sheets...
-				if (!field->mShow->RelabelSheets(currend-1))
+				if (!GetShow()->RelabelSheets(currend-1))
 					(void)wxMessageBox(wxT("Stuntsheets don't match"),
 						wxT("Append Error"));
 			}
@@ -877,7 +876,7 @@ void FieldFrame::ImportContFile()
 	s = wxFileSelector(wxT("Import Continuity"), wxEmptyString, wxEmptyString, wxEmptyString, wxT("*.txt"));
 	if (!s.empty())
 	{
-        wxString err = field->mShow->ImportContinuity(s);
+        wxString err = GetShow()->ImportContinuity(s);
 		if (!err.IsEmpty())
 		{
 			(void)wxMessageBox(err, wxT("Load Error"));
@@ -917,7 +916,7 @@ void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 	wxToolBar* tb = GetToolBar();
 	tb->ToggleTool(toggleID, true);
 
-	field->curr_lasso = type;
+	mCanvas->SetCurrentLasso(type);
 }
 
 
@@ -927,19 +926,18 @@ void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
 	wxToolBar* tb = GetToolBar();
 	tb->ToggleTool(CALCHART__move + type, true);
 
-	field->curr_move = type;
-	field->EndDrag();
+	mCanvas->SetCurrentMove(type);
 }
 
 
 void FieldFrame::Setup()
 {
-	if (field->mShow)
+	if (GetShow())
 	{
-		ShowInfoReq dialog(field->mShow, this);
+		ShowInfoReq dialog(GetShow(), this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			static_cast<FieldView*>(GetView())->DoSetShowInfo(dialog.GetNumberPoints(), dialog.GetNumberColumns(), dialog.GetLabels());
+			GetFieldView()->DoSetShowInfo(dialog.GetNumberPoints(), dialog.GetNumberColumns(), dialog.GetLabels());
 		}
 	}
 }
@@ -947,16 +945,16 @@ void FieldFrame::Setup()
 
 void FieldFrame::SetDescription()
 {
-	if (field->mShow)
+	if (GetShow())
 	{
 		wxTextEntryDialog dialog(this,
 			wxT("Please modify the show description\n"),
 			wxT("Edit show description\n"),
-			field->mShow->GetDescr(),
+			GetShow()->GetDescr(),
 			wxOK | wxCANCEL);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			static_cast<FieldView*>(GetView())->DoSetDescription(dialog.GetValue());
+			GetFieldView()->DoSetDescription(dialog.GetValue());
 		}
 	}
 }
@@ -964,14 +962,14 @@ void FieldFrame::SetDescription()
 
 void FieldFrame::SetMode()
 {
-	if (field->mShow)
+	if (GetShow())
 	{
 		wxArrayString modeStrings;
 		unsigned whichMode = 0, tmode = 0;
 		for (ShowModeList::const_iterator mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode, ++tmode)
 		{
 			modeStrings.Add((*mode)->GetName());
-			if ((*mode)->GetName() == field->mShow->GetMode().GetName())
+			if ((*mode)->GetName() == GetShow()->GetMode().GetName())
 				whichMode = tmode;
 		}
 		wxSingleChoiceDialog dialog(this,
@@ -981,7 +979,7 @@ void FieldFrame::SetMode()
 		dialog.SetSelection(whichMode);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			static_cast<FieldView*>(GetView())->DoSetMode(dialog.GetStringSelection());
+			GetFieldView()->DoSetMode(dialog.GetStringSelection());
 		}
 	}
 }
@@ -989,18 +987,18 @@ void FieldFrame::SetMode()
 
 void FieldFrame::refnum_callback(wxCommandEvent &)
 {
-	field->mView->SetReferencePoint(ref_choice->GetSelection());
+	GetFieldView()->SetReferencePoint(ref_choice->GetSelection());
 }
 
 void FieldFrame::OnEnableDrawPaths(wxCommandEvent &event)
 {
-	static_cast<FieldView*>(GetView())->OnEnableDrawPaths(event.IsChecked());
+	GetFieldView()->OnEnableDrawPaths(event.IsChecked());
 }
 
 
 void FieldFrame::slider_sheet_callback(wxScrollEvent &)
 {
-	static_cast<FieldView*>(GetView())->GoToSheet(sheet_slider->GetValue()-1);
+	GetFieldView()->GoToSheet(sheet_slider->GetValue()-1);
 }
 
 
@@ -1014,10 +1012,10 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
 	}
 	else if (sel == sizeof(zoom_amounts)/sizeof(zoom_amounts[0]))
 	{
-		zoom_amount = field->ZoomToFitFactor();
+		zoom_amount = mCanvas->ZoomToFitFactor();
 	}
 	SetConfiguration_FieldFrameZoom(zoom_amount);
-	field->SetZoom(zoom_amount);
+	mCanvas->SetZoom(zoom_amount);
 }
 
 void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
@@ -1049,23 +1047,23 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 	// set the text to have '%' appended
 	zoomtxt += wxT("%");
 	zoom_box->SetValue(zoomtxt);
-	field->SetZoom(zoom_amount);
+	mCanvas->SetZoom(zoom_amount);
 }
 
 void
 FieldFrame::UpdatePanel()
 {
 	wxString tempbuf;
-	CC_show::const_CC_sheet_iterator_t sht = field->mShow->GetCurrentSheet();
-	unsigned num = field->mShow->GetNumSheets();
-	unsigned curr = field->mShow->GetCurrentSheetNum()+1;
+	CC_show::const_CC_sheet_iterator_t sht = GetShow()->GetCurrentSheet();
+	unsigned num = GetShow()->GetNumSheets();
+	unsigned curr = GetFieldView()->GetCurrentSheetNum()+1;
 	
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
-					field->mShow->IsModified() ? wxT("* "):wxT(""), curr,
-					num, (sht != field->mShow->GetSheetEnd()) ? sht->GetName() : wxT(""), (sht != field->mShow->GetSheetEnd())?sht->GetBeats():0);
+					GetShow()->IsModified() ? wxT("* "):wxT(""), curr,
+					num, (sht != GetShow()->GetSheetEnd()) ? sht->GetName() : wxT(""), (sht != GetShow()->GetSheetEnd())?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
     tempbuf.Clear();
-    tempbuf << field->mShow->GetSelectionList().size() << wxT(" of ") << field->mShow->GetNumPoints() << wxT(" selected");
+    tempbuf << GetShow()->GetSelectionList().size() << wxT(" of ") << GetShow()->GetNumPoints() << wxT(" selected");
 	SetStatusText(tempbuf, 2);
 	
 	if (num > 1)
@@ -1081,5 +1079,32 @@ FieldFrame::UpdatePanel()
 	{
 		sheet_slider->Enable(false);
 	}
+}
+
+
+const FieldView *
+FieldFrame::GetFieldView() const
+{
+	return static_cast<const FieldView*>(GetView());
+}
+
+
+FieldView *
+FieldFrame::GetFieldView()
+{
+	return static_cast<FieldView*>(GetView());
+}
+
+const CC_show *
+FieldFrame::GetShow() const
+{
+	return static_cast<const CC_show*>(GetDocument());
+}
+
+
+CC_show *
+FieldFrame::GetShow()
+{
+	return static_cast<CC_show*>(GetDocument());
 }
 

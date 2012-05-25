@@ -29,6 +29,7 @@ class Animation;
 class CC_coord;
 class wxComboBox;
 class wxSlider;
+class CC_show;
 
 // Value of 10 translates to a canvas of 1760x1000.
 #define FIELD_MAXZOOM 10
@@ -135,15 +136,21 @@ public:
 	void SetDescription();
 	void SetMode();
 
-	const FieldCanvas * GetCanvas() const { return field; }
-	FieldCanvas * GetCanvas() { return field; }
+	const FieldCanvas * GetCanvas() const { return mCanvas; }
+	FieldCanvas * GetCanvas() { return mCanvas; }
 
+	const FieldView * GetFieldView() const;
+	FieldView * GetFieldView();
+
+	const CC_show * GetShow() const;
+	CC_show * GetShow();
+	
 	wxChoice *grid_choice;
 	wxChoice *ref_choice;
 	wxComboBox *zoom_box;
 	wxSlider *sheet_slider;
 
-	FieldCanvas *field;
+	FieldCanvas *mCanvas;
 	
 	DECLARE_EVENT_TABLE()
 };

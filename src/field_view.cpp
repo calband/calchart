@@ -22,10 +22,10 @@
 
 #include "field_view.h"
 #include "field_canvas.h"
+#include "field_frame.h"
 
 #include "calchartapp.h"
 #include "confgr.h"
-#include "field_frame.h"
 #include "top_frame.h"
 #include "animate.h"
 #include "show_ui.h"
@@ -304,6 +304,18 @@ FieldView::PointPosition(int which) const
 	return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
 }
 
+CC_coord
+FieldView::GetShowFieldOffset() const
+{
+	return mShow->GetMode().Offset();
+}
+
+CC_coord
+FieldView::GetShowFieldSize() const
+{
+	return mShow->GetMode().Size();
+}
+
 void
 FieldView::GoToSheet(size_t which)
 {
@@ -330,6 +342,18 @@ FieldView::SetReferencePoint(unsigned which)
 {
 	mCurrentReferencePoint = which;
 	OnUpdate(this);
+}
+
+void
+FieldView::AddToSelection(const CC_show::SelectionList& sl)
+{
+	mShow->AddToSelection(sl);
+}
+
+void
+FieldView::ToggleSelection(const CC_show::SelectionList& sl)
+{
+	mShow->ToggleSelection(sl);
 }
 
 // toggle selection means toggle it as selected to unselected
@@ -368,7 +392,7 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 {
 	if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum()))
 	{
-		CC_coord origin = mShow->GetMode().Offset();
+		CC_coord origin = GetShowFieldOffset();
 		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
 		for (CC_show::SelectionList::const_iterator point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
 		{

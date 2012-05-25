@@ -52,8 +52,6 @@
 //
 // care must be taken to getting these correct
 
-typedef struct { WhichImageEnum mImageId; wxString mImageFilename; } id_string_t;
-
 #if defined(__APPLE__) && (__APPLE__)
 const static wxString kImageDir = wxT("CalChart.app/image/");
 #else
@@ -63,6 +61,53 @@ const static wxString kImageDir = wxT("image/");
 static const viewpoint_t KStartingViewPoint = viewpoint_t(0, -16, 2.5);
 static const float kStartingViewAngle = M_PI/2;
 static const float kStartingViewAngleZ = 0;
+
+typedef enum
+{
+	kImageFirst = 0,
+	kF0 = kImageFirst,
+	kFL0,
+	kL0,
+	kBL0,
+	kB0,
+	kBR0,
+	kR0,
+	kFR0,
+	kF1,
+	kFL1,
+	kL1,
+	kBL1,
+	kB1,
+	kBR1,
+	kR1,
+	kFR1,
+	kF2,
+	kFL2,
+	kL2,
+	kBL2,
+	kB2,
+	kBR2,
+	kR2,
+	kFR2,
+	kField,
+	kLines,
+	kDirection,
+	kBleachers,
+	kWall,
+	kSky,
+	kCalband,
+	kC,
+	kCal,
+	kCalifornia,
+	kEECS,
+	kPressbox,
+	kCrowd,
+	kGoalpost,
+	kEndOfShow,
+	kImageLast
+} WhichImageEnum;
+
+typedef struct { WhichImageEnum mImageId; wxString mImageFilename; } id_string_t;
 
 id_string_t ListOfImageFiles[] = {
 	{ kF0, wxT("f0.tga") },
@@ -109,6 +154,16 @@ id_string_t ListOfImageFiles[] = {
 	{ kEndOfShow, wxT("endofshow.tga") }
 };
 
+typedef enum
+{
+	kClosed,
+	kLeftHSHup,
+	kRightHSHup,
+	kLeftMilitaryPoof,
+	kRightMilitaryPoof,
+	kLeftGrapeVine,
+	kRightGrapeVine,
+} WhichMarchingStyle;
 
 BEGIN_EVENT_TABLE(CCOmniView_Canvas, wxGLCanvas)
 EVT_CHAR(CCOmniView_Canvas::OnChar)
@@ -333,6 +388,22 @@ GetAngle(float x, float y, const viewpoint_t &viewpoint)
 }
 
 
+// the rendering context used by CCOmniView_Canvas
+class CCOmniView_GLContext : public wxGLContext
+{
+public:
+    CCOmniView_GLContext(wxGLCanvas *canvas);
+	
+    void DrawField(float FieldEW, float FieldNS, bool crowdOn);
+	void Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &viewpoint, WhichMarchingStyle style);
+	
+	bool UseForLines(const wxImage &lines);
+private:
+    // textures for the cube faces
+    GLuint m_textures[kImageLast];
+};
+
+
 CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas *canvas) :
 wxGLContext(canvas)
 {
@@ -468,8 +539,8 @@ CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &
 
 CCOmniView_Canvas::CCOmniView_Canvas(wxFrame *frame, AnimationView *view) :
 wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE),
+m_glContext(new CCOmniView_GLContext(this)),
 mView(view),
-mFrame(static_cast<AnimationFrame*>(frame)),
 mViewPoint(KStartingViewPoint),
 mFollowMarcher(-1),
 mCrowdOn(false),
@@ -480,7 +551,6 @@ mViewAngleZ(kStartingViewAngleZ),
 mFOV(60),
 mShiftMoving(false)
 {
-	m_glContext = new CCOmniView_GLContext(this);
 #if defined(__APPLE__) && (__APPLE__)
     m_glContext->UseForLines(mView->GetShow()->GetMode().GetOmniLinesImage());
 #endif
@@ -489,7 +559,6 @@ mShiftMoving(false)
 
 CCOmniView_Canvas::~CCOmniView_Canvas()
 {
-	delete m_glContext;
 }
 
 void
@@ -500,7 +569,7 @@ CCOmniView_Canvas::SetView(AnimationView *view)
 
 
 MarcherInfo
-CCOmniView_Canvas::GetMarcherInfo(size_t which)
+CCOmniView_Canvas::GetMarcherInfo(size_t which) const
 {
 	MarcherInfo info;
 	if (mView && mView->mAnimation)
@@ -516,7 +585,7 @@ CCOmniView_Canvas::GetMarcherInfo(size_t which)
 }
 
 std::multimap<double, MarcherInfo>
-CCOmniView_Canvas::ParseAndDraw3dMarchers()
+CCOmniView_Canvas::ParseAndDraw3dMarchers() const
 {
 	std::multimap<double, MarcherInfo> result;
 	for (size_t i = 0; (i < mView->GetShow()->GetNumPoints()); ++i)

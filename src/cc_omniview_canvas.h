@@ -25,66 +25,12 @@
 
 #include <wx/glcanvas.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include <map>
 
 class AnimationView;
-class AnimationFrame;
-
-typedef enum
-{
-	kImageFirst = 0,
-	kF0 = kImageFirst,
-	kFL0,
-	kL0,
-	kBL0,
-	kB0,
-	kBR0,
-	kR0,
-	kFR0,
-	kF1,
-	kFL1,
-	kL1,
-	kBL1,
-	kB1,
-	kBR1,
-	kR1,
-	kFR1,
-	kF2,
-	kFL2,
-	kL2,
-	kBL2,
-	kB2,
-	kBR2,
-	kR2,
-	kFR2,
-	kField,
-	kLines,
-	kDirection,
-	kBleachers,
-	kWall,
-	kSky,
-	kCalband,
-	kC,
-	kCal,
-	kCalifornia,
-	kEECS,
-	kPressbox,
-	kCrowd,
-	kGoalpost,
-	kEndOfShow,
-	kImageLast
-} WhichImageEnum;
-
-typedef enum
-{
-	kClosed,
-	kLeftHSHup,
-	kRightHSHup,
-	kLeftMilitaryPoof,
-	kRightMilitaryPoof,
-	kLeftGrapeVine,
-	kRightGrapeVine,
-} WhichMarchingStyle;
+class CCOmniView_GLContext;
 
 struct viewpoint_t
 {
@@ -98,21 +44,6 @@ struct MarcherInfo
 	float direction;
 	float x;
 	float y;
-};
-
-// the rendering context used by all GL canvases
-class CCOmniView_GLContext : public wxGLContext
-{
-public:
-    CCOmniView_GLContext(wxGLCanvas *canvas);
-	
-    void DrawField(float FieldEW, float FieldNS, bool crowdOn);
-	void Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &viewpoint, WhichMarchingStyle style);
-	
-	bool UseForLines(const wxImage &lines);
-private:
-    // textures for the cube faces
-    GLuint m_textures[kImageLast];
 };
 
 class CCOmniView_Canvas: public wxGLCanvas
@@ -136,13 +67,11 @@ public:
 	void OnCmd_ToggleShowOnlySelected();
 
 private:
-	CCOmniView_GLContext *m_glContext;
-	
-	MarcherInfo GetMarcherInfo(size_t which);
-	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers();
+	MarcherInfo GetMarcherInfo(size_t which) const;
+	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
 
+	boost::shared_ptr<CCOmniView_GLContext> m_glContext;
 	AnimationView *mView;
-	AnimationFrame *mFrame;
 	viewpoint_t mViewPoint;
 
 	// a -1 means not following any marcher
