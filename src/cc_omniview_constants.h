@@ -27,16 +27,16 @@
 #include <cmath>
 
 static const float kViewPoint_x_1 = 0.0;
-static const float kViewPoint_y_1 = -16.0;
-static const float kViewPoint_z_1 = 2.5;
+static const float kViewPoint_y_1 = -60.0;
+static const float kViewPoint_z_1 = 20;
 static const float kViewAngle_1 = M_PI/2;
-static const float kViewAngle_z_1 = 0.0;
+static const float kViewAngle_z_1 = -M_PI/8;
 
 static const float kViewPoint_x_2 = 0.0;
-static const float kViewPoint_y_2 = -60.0;
-static const float kViewPoint_z_2 = 20;
+static const float kViewPoint_y_2 = -16.0;
+static const float kViewPoint_z_2 = 2.5;
 static const float kViewAngle_2 = M_PI/2;
-static const float kViewAngle_z_2 = -M_PI/8;
+static const float kViewAngle_z_2 = 0.0;
 
 static const float kViewPoint_x_3 = 60.0;
 static const float kViewPoint_y_3 = -55.0;

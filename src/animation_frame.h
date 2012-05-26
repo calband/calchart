@@ -66,6 +66,8 @@ public:
 	void OnCmd_ToggleMarching(wxCommandEvent& event);
 	void OnCmd_ToggleShowOnlySelected(wxCommandEvent& event);
 
+	void OnCmd_ToggleWhichCanvas(wxCommandEvent& event);
+
 	// Called by the view
 	void ToggleTimer();
 	void UpdatePanel();
@@ -80,6 +82,9 @@ private:
 	// we really do need one of each.  We can't do inheritance because they have different base classes 
 	AnimationCanvas *mCanvas;
 	CCOmniView_Canvas *mOmniViewCanvas;
+	wxWindow *mCurrentCanvas;
+	wxBoxSizer *mMainCanvasSizer;
+	wxBoxSizer *mCoCanvasSizer;
 	wxSlider *mSheetSlider;
 	wxSlider *mBeatSlider;
 

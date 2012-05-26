@@ -49,7 +49,7 @@ struct MarcherInfo
 class CCOmniView_Canvas: public wxGLCanvas
 {
 public:
-	CCOmniView_Canvas(wxFrame *frame, AnimationView *view);
+	CCOmniView_Canvas(AnimationView *view, wxFrame *frame, const wxSize& size = wxDefaultSize);
 	~CCOmniView_Canvas();
 
 	void SetView(AnimationView *view);

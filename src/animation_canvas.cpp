@@ -38,12 +38,13 @@ EVT_SIZE(AnimationCanvas::OnSize)
 END_EVENT_TABLE()
 
 
-AnimationCanvas::AnimationCanvas(wxFrame *frame, AnimationView *view) :
-wxPanel(frame, wxID_ANY, wxDefaultPosition, wxSize(Coord2Int(view->GetShowSize().x)*kDefaultAnimSize, Coord2Int(view->GetShowSize().y)*kDefaultAnimSize)),
-mUserScale(kDefaultAnimSize * (Coord2Int(1 << 16)/65536.0)),
+AnimationCanvas::AnimationCanvas(AnimationView *view, wxWindow *parent,
+								 const wxSize& size) :
+wxPanel(parent, wxID_ANY, wxDefaultPosition, size),
+mView(view),
+mUserScale(CalcUserScale((view) ? view->GetShowSize() : CC_coord(0, 0), size)),
 mMouseDown(false)
 {
-	mView = view;
 }
 
 
@@ -81,13 +82,13 @@ AnimationCanvas::OnPaint(wxPaintEvent& event)
 }
 
 
-void
-AnimationCanvas::OnSize(wxSizeEvent& event)
+float
+AnimationCanvas::CalcUserScale(const CC_coord& showSize, const wxSize& windowSize)
 {
-	float newX = event.GetSize().x;
-	float newY = event.GetSize().y;
-	float x = (mView) ? mView->GetShowSize().x : newX;
-	float y = (mView) ? mView->GetShowSize().y : newY;
+	float newX = windowSize.x;
+	float newY = windowSize.y;
+	float x = (showSize.x) ? showSize.x : newX;
+	float y = (showSize.y) ? showSize.y : newY;
 	
 	float showAspectRatio = x/y;
 	float newSizeRatio = newX/newY;
@@ -102,7 +103,14 @@ AnimationCanvas::OnSize(wxSizeEvent& event)
 	{
 		newvalue = newY / (float)Coord2Int(y);
 	}
-	mUserScale = (newvalue * (Coord2Int(1 << 16)/65536.0));
+	return (newvalue * (Coord2Int(1 << 16)/65536.0));
+}
+
+
+void
+AnimationCanvas::OnSize(wxSizeEvent& event)
+{
+	mUserScale = CalcUserScale((mView) ? mView->GetShowSize() : CC_coord(0, 0), event.GetSize());
 	Refresh();
 }
 

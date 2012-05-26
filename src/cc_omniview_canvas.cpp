@@ -58,9 +58,9 @@ const static wxString kImageDir = wxT("CalChart.app/image/");
 const static wxString kImageDir = wxT("image/");
 #endif
 
-static const viewpoint_t KStartingViewPoint = viewpoint_t(0, -16, 2.5);
-static const float kStartingViewAngle = M_PI/2;
-static const float kStartingViewAngleZ = 0;
+static const viewpoint_t KStartingViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
+static const float kStartingViewAngle = kViewAngle_1;
+static const float kStartingViewAngleZ = kViewAngle_z_1;
 
 typedef enum
 {
@@ -537,8 +537,8 @@ CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &
 }
 
 
-CCOmniView_Canvas::CCOmniView_Canvas(wxFrame *frame, AnimationView *view) :
-wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE),
+CCOmniView_Canvas::CCOmniView_Canvas(AnimationView *view, wxFrame *frame, const wxSize& size) :
+wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE),
 m_glContext(new CCOmniView_GLContext(this)),
 mView(view),
 mViewPoint(KStartingViewPoint),

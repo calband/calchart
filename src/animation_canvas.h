@@ -26,11 +26,12 @@
 #include <wx/wx.h>
 
 class AnimationView;
+class CC_coord;
 
 class AnimationCanvas: public wxPanel
 {
 public:
-	AnimationCanvas(wxFrame *frame, AnimationView *view);
+	AnimationCanvas(AnimationView *view, wxWindow *parent, const wxSize& size = wxDefaultSize);
 	~AnimationCanvas();
 
 	void SetView(AnimationView *view);
@@ -48,6 +49,7 @@ private:
 
 	static const size_t kDefaultAnimSize = 3;
 	float mUserScale;
+	static float CalcUserScale(const CC_coord& showSize, const wxSize& windowSize);
 
 	// for mouse and drawing
 	bool mMouseDown;

@@ -100,6 +100,7 @@ enum
 	CALCHART__ToggleCrowd,
 	CALCHART__ToggleMarching,
 	CALCHART__ToggleShowOnlySelected,
+	CALCHART__ToggleWhichCanvas,
 };
 
 #endif // _UI_ENUMS_H_

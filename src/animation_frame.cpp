@@ -49,6 +49,7 @@ EVT_MENU(CALCHART__ShowKeyboardControls, AnimationFrame::OnCmd_ShowKeyboardContr
 EVT_MENU(CALCHART__ToggleCrowd, AnimationFrame::OnCmd_ToggleCrowd)
 EVT_MENU(CALCHART__ToggleMarching, AnimationFrame::OnCmd_ToggleMarching)
 EVT_MENU(CALCHART__ToggleShowOnlySelected, AnimationFrame::OnCmd_ToggleShowOnlySelected)
+EVT_MENU(CALCHART__ToggleWhichCanvas, AnimationFrame::OnCmd_ToggleWhichCanvas)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_CHOICE(CALCHART__anim_errors, AnimationFrame::OnCmd_anim_errors)
 EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
@@ -85,22 +86,20 @@ mTimerOn(false)
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__anim_reanimate, wxT("&Reanimate Show"), wxT("Regenerate animation"));
 	anim_menu->Append(CALCHART__anim_select_coll, wxT("&Select Collisions"), wxT("Select colliding points"));
+	anim_menu->Append(CALCHART__ToggleWhichCanvas, wxT("Toggle View\tCTRL-T"), wxT("Toggle View"));
 	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
 
 	
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(anim_menu, wxT("&Animate"));
 	
-	if (OmniViewer)
-	{
-		wxMenu *omni_menu = new wxMenu;
-		omni_menu->Append(CALCHART__FollowMarcher, wxT("&Follow Marcher"), wxT("Follow Marcher"));
-		omni_menu->Append(CALCHART__ToggleCrowd, wxT("&Toggle Crowd"), wxT("Toggle Crowd"));
-		omni_menu->Append(CALCHART__ToggleMarching, wxT("&Toggle Marching"), wxT("Toggle Marching"));
-		omni_menu->Append(CALCHART__ToggleShowOnlySelected, wxT("&Toggle Show Selected"), wxT("Toggle Show Selected"));
-		omni_menu->Append(CALCHART__ShowKeyboardControls, wxT("&Show Controls"), wxT("Show keyboard controls"));
-		menu_bar->Append(omni_menu, wxT("&OmniView"));
-	}
+	wxMenu *omni_menu = new wxMenu;
+	omni_menu->Append(CALCHART__FollowMarcher, wxT("&Follow Marcher"), wxT("Follow Marcher"));
+	omni_menu->Append(CALCHART__ToggleCrowd, wxT("&Toggle Crowd"), wxT("Toggle Crowd"));
+	omni_menu->Append(CALCHART__ToggleMarching, wxT("&Toggle Marching"), wxT("Toggle Marching"));
+	omni_menu->Append(CALCHART__ToggleShowOnlySelected, wxT("&Toggle Show Selected"), wxT("Toggle Show Selected"));
+	omni_menu->Append(CALCHART__ShowKeyboardControls, wxT("&Show Controls"), wxT("Show keyboard controls"));
+	menu_bar->Append(omni_menu, wxT("&OmniView"));
 
 	SetMenuBar(menu_bar);
 
@@ -108,17 +107,26 @@ mTimerOn(false)
 	AddCoolToolBar(GetAnimationToolBar(), *this);
 
 	// Add the field canvas
-	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+	mMainCanvasSizer = new wxBoxSizer(wxVERTICAL);
+	mCoCanvasSizer = new wxBoxSizer(wxVERTICAL);
 	if (OmniViewer)
 	{
-		mOmniViewCanvas = new CCOmniView_Canvas(this, mView);
-		topsizer->Add(mOmniViewCanvas, wxSizerFlags(1).Expand().Border(5));
+		mOmniViewCanvas = new CCOmniView_Canvas(mView, this);
+		mCanvas = new AnimationCanvas(mView, this, wxSize(190, 100));
+		mMainCanvasSizer->Add(mOmniViewCanvas, wxSizerFlags(1).Expand().Border(5));
+		mCoCanvasSizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
+		mCurrentCanvas = mOmniViewCanvas;
 	}
 	else
 	{
-		mCanvas = new AnimationCanvas(this, mView);
-		topsizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
+		mCanvas = new AnimationCanvas(mView, this);
+		mOmniViewCanvas = new CCOmniView_Canvas(mView, this, wxSize(190, 100));
+		mMainCanvasSizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
+		mCoCanvasSizer->Add(mOmniViewCanvas, wxSizerFlags(1).Expand().Border(5));
+		mCurrentCanvas = mCanvas;
 	}
+	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+	topsizer->Add(mMainCanvasSizer, wxSizerFlags(1).Expand().Border(5));
 
 	// Add the controls
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
@@ -157,6 +165,7 @@ mTimerOn(false)
 	Sub1->Add(Sub2, wxSizerFlags(0).Left());
 	mErrorText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(100, 100));
 	Sub1->Add(mErrorText, wxSizerFlags().Expand().Border(5));
+	Sub1->Add(mCoCanvasSizer, wxSizerFlags().Expand().Border(5));
 	
 	topsizer->Add(Sub1, wxSizerFlags(0).Left());
 
@@ -455,6 +464,25 @@ AnimationFrame::OnCmd_ToggleShowOnlySelected(wxCommandEvent& event)
 	{
 		mOmniViewCanvas->OnCmd_ToggleShowOnlySelected();
 	}
+}
+
+void
+AnimationFrame::OnCmd_ToggleWhichCanvas(wxCommandEvent& event)
+{
+	if (mCurrentCanvas == mOmniViewCanvas)
+	{
+		mMainCanvasSizer->Replace(mOmniViewCanvas, mCanvas);
+		mCoCanvasSizer->Replace(mCanvas, mOmniViewCanvas);
+		mCurrentCanvas = mCanvas;
+	}
+	else
+	{
+		mMainCanvasSizer->Replace(mCanvas, mOmniViewCanvas);
+		mCoCanvasSizer->Replace(mOmniViewCanvas, mCanvas);
+		mCurrentCanvas = mOmniViewCanvas;
+	}
+	mMainCanvasSizer->Layout();
+	mCoCanvasSizer->Layout();
 }
 
 void
