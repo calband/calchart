@@ -83,7 +83,6 @@
     <ClInclude Include="..\..\src\animate.h" />
     <ClInclude Include="..\..\src\animatecommand.h" />
     <ClInclude Include="..\..\src\animation_canvas.h" />
-    <ClInclude Include="..\..\src\animation_error.h" />
     <ClInclude Include="..\..\src\animation_frame.h" />
     <ClInclude Include="..\..\src\animation_view.h" />
     <ClInclude Include="..\..\src\background_image.h" />
@@ -94,22 +93,28 @@
     <ClInclude Include="..\..\src\cc_continuity.h" />
     <ClInclude Include="..\..\src\cc_coord.h" />
     <ClInclude Include="..\..\src\cc_omniview_canvas.h" />
+    <ClInclude Include="..\..\src\cc_omniview_constants.h" />
     <ClInclude Include="..\..\src\cc_point.h" />
     <ClInclude Include="..\..\src\cc_preferences_ui.h" />
     <ClInclude Include="..\..\src\cc_shapes.h" />
     <ClInclude Include="..\..\src\cc_sheet.h" />
     <ClInclude Include="..\..\src\cc_show.h" />
+    <ClInclude Include="..\..\src\cc_text.h" />
     <ClInclude Include="..\..\src\cc_types.h" />
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
+    <ClInclude Include="..\..\src\field_canvas.h" />
+    <ClInclude Include="..\..\src\field_frame.h" />
+    <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\linmath.h" />
-    <ClInclude Include="..\..\src\main_ui.h" />
+    <ClInclude Include="..\..\src\math_utils.h" />
     <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\parse.h" />
     <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\print_ps.h" />
     <ClInclude Include="..\..\src\print_ui.h" />
-    <ClInclude Include="..\..\src\show.h" />
+    <ClInclude Include="..\..\src\setup_wizards.h" />
     <ClInclude Include="..\..\src\show_ui.h" />
     <ClInclude Include="..\..\src\toolbar.h" />
     <ClInclude Include="..\..\src\top_frame.h" />
@@ -121,7 +126,6 @@
     <ClCompile Include="..\..\src\animate.cpp" />
     <ClCompile Include="..\..\src\animatecommand.cpp" />
     <ClCompile Include="..\..\src\animation_canvas.cpp" />
-    <ClCompile Include="..\..\src\animation_error.cpp" />
     <ClCompile Include="..\..\src\animation_frame.cpp" />
     <ClCompile Include="..\..\src\animation_view.cpp" />
     <ClCompile Include="..\..\src\background_image.cpp" />
@@ -140,11 +144,14 @@
     <ClCompile Include="..\..\src\cont.cpp" />
     <ClCompile Include="..\..\src\cont_ui.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
-    <ClCompile Include="..\..\src\main_ui.cpp" />
+    <ClCompile Include="..\..\src\field_canvas.cpp" />
+    <ClCompile Include="..\..\src\field_frame.cpp" />
+    <ClCompile Include="..\..\src\field_view.cpp" />
+    <ClCompile Include="..\..\src\math_utils.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
-    <ClCompile Include="..\..\src\print.cpp" />
+    <ClCompile Include="..\..\src\print_ps.cpp" />
     <ClCompile Include="..\..\src\print_ui.cpp" />
-    <ClCompile Include="..\..\src\show.cpp" />
+    <ClCompile Include="..\..\src\setup_wizards.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
     <ClCompile Include="..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
@@ -154,6 +161,10 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(WXWIN)\include</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(WXWIN)\include</AdditionalIncludeDirectories>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\contgram.y" />
+    <None Include="..\..\src\contscan.l" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
