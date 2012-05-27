@@ -537,7 +537,7 @@ CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &
 }
 
 
-CCOmniView_Canvas::CCOmniView_Canvas(AnimationView *view, wxFrame *frame, const wxSize& size) :
+CCOmniView_Canvas::CCOmniView_Canvas(AnimationView *view, wxWindow *frame, const wxSize& size) :
 wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE),
 m_glContext(new CCOmniView_GLContext(this)),
 mView(view),

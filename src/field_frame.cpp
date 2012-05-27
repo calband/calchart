@@ -104,7 +104,6 @@ EVT_MENU(CALCHART__SETDESCRIPTION, FieldFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
-EVT_MENU(CALCHART__OMNIVIEW, FieldFrame::OnCmdOmniView)
 EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
@@ -218,12 +217,11 @@ mCanvas(NULL)
 	edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
 	edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
 	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
+	edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
 
 	wxMenu *anim_menu = new wxMenu;
-	anim_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
-	anim_menu->Append(CALCHART__ANIMATE, wxT("&Animate...\tCTRL-RETURN"), wxT("Open animation window"));
-	anim_menu->Append(CALCHART__OMNIVIEW, wxT("&OmniView..."), wxT("Open CalChart Omniviewer"));
+	anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
 
 	wxMenu *backgroundimage_menu = new wxMenu;
 	backgroundimage_menu->Append(CALCHART__AddBackgroundImage, wxT("Add Background Image..."), wxT("Add a background image"));
@@ -240,8 +238,8 @@ mCanvas(NULL)
 	wxMenuBar *menu_bar = new wxMenuBar;
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(edit_menu, wxT("&Edit"));
-	menu_bar->Append(anim_menu, wxT("&Animation"));
 	menu_bar->Append(backgroundimage_menu, wxT("&Field Image"));
+	menu_bar->Append(anim_menu, wxT("&CalChart Viewer"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
 
@@ -595,15 +593,6 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 	if (GetShow())
 	{
 		(void)new AnimationFrame(this, GetShow());
-	}
-}
-
-
-void FieldFrame::OnCmdOmniView(wxCommandEvent& event)
-{
-	if (GetShow())
-	{
-		(void)new AnimationFrame(this, GetShow(), true);
 	}
 }
 

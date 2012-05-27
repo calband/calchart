@@ -32,11 +32,12 @@ class AnimationView;
 class AnimationCanvas;
 class CCOmniView_Canvas;
 class FancyTextWin;
+class wxSplitterWindow;
 
 class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxWindow *parent, wxDocument* doc, bool OmniViewer = false, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
+	AnimationFrame(wxWindow *parent, wxDocument* doc);
 	~AnimationFrame();
 	
 	virtual void SetView(wxView *view);
@@ -66,8 +67,6 @@ public:
 	void OnCmd_ToggleMarching(wxCommandEvent& event);
 	void OnCmd_ToggleShowOnlySelected(wxCommandEvent& event);
 
-	void OnCmd_ToggleWhichCanvas(wxCommandEvent& event);
-
 	// Called by the view
 	void ToggleTimer();
 	void UpdatePanel();
@@ -77,17 +76,30 @@ public:
 
 	void OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message);
 
+	// controlling how the screen splits between views
+	void OnCmd_SplitViewHorizontal(wxCommandEvent& event);
+	void OnCmd_SplitViewVertical(wxCommandEvent& event);
+	void OnCmd_SplitViewUnsplit(wxCommandEvent& event);
+	void OnCmd_SwapAnimateAndOmni(wxCommandEvent& event);
+
+	// update UI when these happen
+	void OnCmd_UpdateUIHorizontal(wxUpdateUIEvent& event);
+	void OnCmd_UpdateUIVertical(wxUpdateUIEvent& event);
+	void OnCmd_UpdateUIUnsplit(wxUpdateUIEvent& event);
+	
 private:
 	AnimationView *mView;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 
 	AnimationCanvas *mCanvas;
 	CCOmniView_Canvas *mOmniViewCanvas;
-	wxWindow *mCurrentCanvas;
-	wxBoxSizer *mMainCanvasSizer;
-	wxBoxSizer *mCoCanvasSizer;
 	wxSlider *mSheetSlider;
 	wxSlider *mBeatSlider;
 
+	wxSplitterWindow *mSplitter;
+	// these are just the observers we use to manipulate the split
+	wxWindow *mSplitA;
+	wxWindow *mSplitB;
+	
 	// continuity errors:
 	wxChoice *mErrorList;
 	std::vector<std::pair<ErrorMarker, unsigned> > mErrorMarkers;

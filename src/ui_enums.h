@@ -101,6 +101,10 @@ enum
 	CALCHART__ToggleMarching,
 	CALCHART__ToggleShowOnlySelected,
 	CALCHART__ToggleWhichCanvas,
+	CALCHART__SplitViewHorizontal,
+	CALCHART__SplitViewVertical,
+	CALCHART__SplitViewUnsplit,
+	CALCHART__SplitViewSwapAnimateAndOmni,
 };
 
 #endif // _UI_ENUMS_H_

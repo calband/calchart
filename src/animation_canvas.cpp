@@ -43,6 +43,7 @@ AnimationCanvas::AnimationCanvas(AnimationView *view, wxWindow *parent,
 wxPanel(parent, wxID_ANY, wxDefaultPosition, size),
 mView(view),
 mUserScale(CalcUserScale((view) ? view->GetShowSize() : CC_coord(0, 0), size)),
+mUserOriginX(CalcUserOriginX((view) ? view->GetShowSize() : CC_coord(0, 0), size)),
 mMouseDown(false)
 {
 }
@@ -65,9 +66,10 @@ AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
 	wxBufferedPaintDC dc(this);
 
-	dc.SetUserScale(mUserScale, mUserScale);
 	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
 	dc.Clear();
+	dc.SetUserScale(mUserScale, mUserScale);
+	dc.SetDeviceOrigin(mUserOriginX, 0);
 	if (mMouseDown)
 	{
 		dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -107,10 +109,19 @@ AnimationCanvas::CalcUserScale(const CC_coord& showSize, const wxSize& windowSiz
 }
 
 
+wxCoord
+AnimationCanvas::CalcUserOriginX(const CC_coord& showSize, const wxSize& windowSize)
+{
+	float userScale = CalcUserScale(showSize, windowSize);
+	return windowSize.x/2 - userScale * showSize.x/2;
+}
+
+
 void
 AnimationCanvas::OnSize(wxSizeEvent& event)
 {
 	mUserScale = CalcUserScale((mView) ? mView->GetShowSize() : CC_coord(0, 0), event.GetSize());
+	mUserOriginX = CalcUserOriginX((mView) ? mView->GetShowSize() : CC_coord(0, 0), event.GetSize());
 	Refresh();
 }
 
@@ -120,6 +131,7 @@ AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 {
 	wxClientDC dc(this);
 	dc.SetUserScale(mUserScale, mUserScale);
+	dc.SetDeviceOrigin(mUserOriginX, 0);
 	long x,y;
 	event.GetPosition(&x, &y);
 	x = dc.DeviceToLogicalX( x );
@@ -141,6 +153,7 @@ AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 {
 	wxClientDC dc(this);
 	dc.SetUserScale(mUserScale, mUserScale);
+	dc.SetDeviceOrigin(mUserOriginX, 0);
 	long x,y;
 	event.GetPosition(&x, &y);
 	x = dc.DeviceToLogicalX( x );
@@ -183,6 +196,7 @@ AnimationCanvas::OnMouseMove(wxMouseEvent& event)
 {
 	wxClientDC dc(this);
 	dc.SetUserScale(mUserScale, mUserScale);
+	dc.SetDeviceOrigin(mUserOriginX, 0);
 	long x,y;
 	event.GetPosition(&x, &y);
 	x = dc.DeviceToLogicalX( x );

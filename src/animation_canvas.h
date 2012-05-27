@@ -49,7 +49,9 @@ private:
 
 	static const size_t kDefaultAnimSize = 3;
 	float mUserScale;
+	wxCoord mUserOriginX;
 	static float CalcUserScale(const CC_coord& showSize, const wxSize& windowSize);
+	static wxCoord CalcUserOriginX(const CC_coord& showSize, const wxSize& windowSize);
 
 	// for mouse and drawing
 	bool mMouseDown;

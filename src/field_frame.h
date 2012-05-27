@@ -81,7 +81,6 @@ public:
 	void OnCmdSetMode(wxCommandEvent& event);
 	void OnCmdPoints(wxCommandEvent& event);
 	void OnCmdAnimate(wxCommandEvent& event);
-	void OnCmdOmniView(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
 

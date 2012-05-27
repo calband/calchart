@@ -30,6 +30,7 @@
 #include "basic_ui.h"
 
 #include <wx/timer.h>
+#include <wx/splitter.h>
 
 
 BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
@@ -42,6 +43,7 @@ EVT_MENU(CALCHART__anim_prev_beat, AnimationFrame::OnCmd_anim_prev_beat)
 EVT_MENU(CALCHART__anim_next_beat, AnimationFrame::OnCmd_anim_next_beat)
 EVT_MENU(CALCHART__anim_prev_sheet, AnimationFrame::OnCmd_anim_prev_sheet)
 EVT_MENU(CALCHART__anim_next_sheet, AnimationFrame::OnCmd_anim_next_sheet)
+// omniviewer:
 EVT_MENU(CALCHART__FollowMarcher, AnimationFrame::OnCmd_FollowMarcher)
 EVT_MENU(CALCHART__SaveCameraAngle, AnimationFrame::OnCmd_SaveCameraAngle)
 EVT_MENU(CALCHART__GoToCameraAngle, AnimationFrame::OnCmd_GoToCameraAngle)
@@ -49,23 +51,25 @@ EVT_MENU(CALCHART__ShowKeyboardControls, AnimationFrame::OnCmd_ShowKeyboardContr
 EVT_MENU(CALCHART__ToggleCrowd, AnimationFrame::OnCmd_ToggleCrowd)
 EVT_MENU(CALCHART__ToggleMarching, AnimationFrame::OnCmd_ToggleMarching)
 EVT_MENU(CALCHART__ToggleShowOnlySelected, AnimationFrame::OnCmd_ToggleShowOnlySelected)
-EVT_MENU(CALCHART__ToggleWhichCanvas, AnimationFrame::OnCmd_ToggleWhichCanvas)
+// How to view show:
+EVT_MENU(CALCHART__SplitViewHorizontal, AnimationFrame::OnCmd_SplitViewHorizontal)
+EVT_MENU(CALCHART__SplitViewVertical, AnimationFrame::OnCmd_SplitViewVertical)
+EVT_MENU(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_SplitViewUnsplit)
+EVT_MENU(CALCHART__SplitViewSwapAnimateAndOmni, AnimationFrame::OnCmd_SwapAnimateAndOmni)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_CHOICE(CALCHART__anim_errors, AnimationFrame::OnCmd_anim_errors)
 EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationFrame::OnCmd_anim_next_beat_timer)
+EVT_UPDATE_UI(CALCHART__SplitViewHorizontal, AnimationFrame::OnCmd_UpdateUIHorizontal)
+EVT_UPDATE_UI(CALCHART__SplitViewVertical, AnimationFrame::OnCmd_UpdateUIVertical)
+EVT_UPDATE_UI(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_UpdateUIUnsplit)
 END_EVENT_TABLE()
 
 
-static const wxString collis_text[] =
-{
-	wxT("Ignore"), wxT("Show"), wxT("Beep")
-};
-
-AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc, bool OmniViewer, const wxPoint& pos, const wxSize& size) :
-wxFrame(parent, wxID_ANY, wxT("Animation"), pos, size),
+AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc) :
+wxFrame(parent, wxID_ANY, wxT("CalChart Viewer")),
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
 mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
@@ -86,7 +90,6 @@ mTimerOn(false)
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__anim_reanimate, wxT("&Reanimate Show"), wxT("Regenerate animation"));
 	anim_menu->Append(CALCHART__anim_select_coll, wxT("&Select Collisions"), wxT("Select colliding points"));
-	anim_menu->Append(CALCHART__ToggleWhichCanvas, wxT("Toggle View\tCTRL-T"), wxT("Toggle View"));
 	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
 
 	
@@ -101,36 +104,27 @@ mTimerOn(false)
 	omni_menu->Append(CALCHART__ShowKeyboardControls, wxT("&Show Controls"), wxT("Show keyboard controls"));
 	menu_bar->Append(omni_menu, wxT("&OmniView"));
 
+	wxMenu *split_menu = new wxMenu;
+	split_menu->Append(CALCHART__SplitViewHorizontal, wxT("Split &Horizontally\tCtrl-H"), wxT("Split Horizontally"));
+	split_menu->Append(CALCHART__SplitViewVertical, wxT("Split &Vertically\tCtrl-V"), wxT("Split Vertically"));
+	split_menu->Append(CALCHART__SplitViewUnsplit, wxT("&Unsplit\tCtrl-U"), wxT("Unsplit"));
+	split_menu->Append(CALCHART__SplitViewSwapAnimateAndOmni, wxT("&Swap Views\tCtrl-S"), wxT("Swap Views"));
+	menu_bar->Append(split_menu, wxT("&Split"));
+	
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
 	AddCoolToolBar(GetAnimationToolBar(), *this);
 
-	// Add the field canvas
-	mMainCanvasSizer = new wxBoxSizer(wxVERTICAL);
-	mCoCanvasSizer = new wxBoxSizer(wxVERTICAL);
-	if (OmniViewer)
-	{
-		mOmniViewCanvas = new CCOmniView_Canvas(mView, this);
-		mCanvas = new AnimationCanvas(mView, this, wxSize(190, 100));
-		mMainCanvasSizer->Add(mOmniViewCanvas, wxSizerFlags(1).Expand().Border(5));
-		mCoCanvasSizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
-		mCurrentCanvas = mOmniViewCanvas;
-	}
-	else
-	{
-		mCanvas = new AnimationCanvas(mView, this);
-		mOmniViewCanvas = new CCOmniView_Canvas(mView, this, wxSize(190, 100));
-		mMainCanvasSizer->Add(mCanvas, wxSizerFlags(1).Expand().Border(5));
-		mCoCanvasSizer->Add(mOmniViewCanvas, wxSizerFlags(1).Expand().Border(5));
-		mCurrentCanvas = mCanvas;
-	}
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
-	topsizer->Add(mMainCanvasSizer, wxSizerFlags(1).Expand().Border(5));
 
 	// Add the controls
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")), wxSizerFlags());
+	static const wxString collis_text[] =
+	{
+		wxT("Ignore"), wxT("Show"), wxT("Beep")
+	};
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
 	collis->SetSelection(1);
 	sizer1->Add(collis, wxSizerFlags().Expand().Border(5));
@@ -139,35 +133,47 @@ mTimerOn(false)
 	wxSlider *sldr = new wxSlider(this, CALCHART__anim_tempo, GetTempo(), 10, 300, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
 	sizer1->Add(sldr, wxSizerFlags().Expand().Border(5));
 
+// Sheet slider (will get set later with UpdatePanel())
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")), wxSizerFlags());
+	mSheetSlider = new wxSlider(this, CALCHART__anim_gotosheet, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+	sizer1->Add(mSheetSlider, wxSizerFlags().Expand().Border(5));
+
+// Beat slider (will get set later with UpdatePanel())
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")), wxSizerFlags());
+	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition,
+                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
+	sizer1->Add(mBeatSlider, wxSizerFlags().Expand().Border(5));
+
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Errors")), wxSizerFlags());
 	mErrorList = new wxChoice(this, CALCHART__anim_errors, wxDefaultPosition, wxDefaultSize, 0, NULL);
 	mErrorList->SetSelection(1);
 	mErrorList->Append(wxT("----------"));
 	sizer1->Add(mErrorList, wxSizerFlags().Expand().Border(5));
 
-	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
-// Sheet slider (will get set later with UpdatePanel())
-	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")), wxSizerFlags());
-	mSheetSlider = new wxSlider(this, CALCHART__anim_gotosheet, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer2->Add(mSheetSlider, wxSizerFlags().Expand().Border(5));
-
-// Beat slider (will get set later with UpdatePanel())
-	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")), wxSizerFlags());
-	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer2->Add(mBeatSlider, wxSizerFlags().Expand().Border(5));
-
-//create a sizer with no border and centered horizontally
 	wxBoxSizer *Sub2 = new wxBoxSizer(wxVERTICAL);
 	Sub2->Add(sizer1, wxSizerFlags(0).Left());
-	Sub2->Add(sizer2, wxSizerFlags(0).Left());
 	wxBoxSizer *Sub1 = new wxBoxSizer(wxHORIZONTAL);
 	Sub1->Add(Sub2, wxSizerFlags(0).Left());
-	mErrorText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(100, 100));
-	Sub1->Add(mErrorText, wxSizerFlags().Expand().Border(5));
-	Sub1->Add(mCoCanvasSizer, wxSizerFlags().Expand().Border(5));
+	
+	mErrorText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(100, 50));
+	Sub1->Add(mErrorText, wxSizerFlags(1).Expand().Border(5));
 	
 	topsizer->Add(Sub1, wxSizerFlags(0).Left());
+
+	// Add the field canvas
+	mSplitter = new wxSplitterWindow(this, wxID_ANY);
+	mSplitter->SetSize(GetClientSize());
+	mSplitter->SetSashGravity(0.5);
+	mSplitter->SetMinimumPaneSize(20);
+	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
+	topsizer->Add(mSplitter, wxSizerFlags(1).Expand());
+
+	mOmniViewCanvas = new CCOmniView_Canvas(mView, mSplitter);
+	mCanvas = new AnimationCanvas(mView, mSplitter);
+
+	mSplitA = mOmniViewCanvas;
+	mSplitB = mCanvas;
+	mSplitter->SplitHorizontally(mSplitA, mSplitB, 100);
 
 	SetSizer(topsizer);							  // use the sizer for layout
 
@@ -396,7 +402,11 @@ AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
 		{
 			mOmniViewCanvas->OnCmd_FollowMarcher(std::distance(labels.begin(), which));
 		}
+		CC_show::SelectionList sl;
+		sl.insert(std::distance(labels.begin(), which));
+		mView->SetSelection(sl);
 	}
+	Refresh();
 }
 
 void
@@ -467,25 +477,6 @@ AnimationFrame::OnCmd_ToggleShowOnlySelected(wxCommandEvent& event)
 }
 
 void
-AnimationFrame::OnCmd_ToggleWhichCanvas(wxCommandEvent& event)
-{
-	if (mCurrentCanvas == mOmniViewCanvas)
-	{
-		mMainCanvasSizer->Replace(mOmniViewCanvas, mCanvas);
-		mCoCanvasSizer->Replace(mCanvas, mOmniViewCanvas);
-		mCurrentCanvas = mCanvas;
-	}
-	else
-	{
-		mMainCanvasSizer->Replace(mCanvas, mOmniViewCanvas);
-		mCoCanvasSizer->Replace(mOmniViewCanvas, mCanvas);
-		mCurrentCanvas = mOmniViewCanvas;
-	}
-	mMainCanvasSizer->Layout();
-	mCoCanvasSizer->Layout();
-}
-
-void
 AnimationFrame::ToggleTimer()
 {
 	if (mTimerOn)
@@ -551,6 +542,85 @@ bool
 AnimationFrame::OnBeat() const
 {
 	return mBeatSlider->GetValue() & 1;
+}
+
+
+// controlling how the screen splits between views
+void
+AnimationFrame::OnCmd_SplitViewHorizontal(wxCommandEvent& event)
+{
+	if (mSplitter->IsSplit())
+	{
+		mSplitter->Unsplit();
+	}
+	mSplitA->Show(true);
+	mSplitB->Show(true);
+	mSplitter->SplitHorizontally(mSplitA, mSplitB);
+}
+
+void
+AnimationFrame::OnCmd_SplitViewVertical(wxCommandEvent& event)
+{
+	if (mSplitter->IsSplit())
+	{
+		mSplitter->Unsplit();
+	}
+	mSplitA->Show(true);
+	mSplitB->Show(true);
+	mSplitter->SplitVertically(mSplitA, mSplitB);
+}
+
+void
+AnimationFrame::OnCmd_SplitViewUnsplit(wxCommandEvent& event)
+{
+	if (mSplitter->IsSplit())
+	{
+		mSplitter->Unsplit();
+	}
+}
+
+void
+AnimationFrame::OnCmd_SwapAnimateAndOmni(wxCommandEvent& event)
+{
+	bool isSplit = mSplitter->IsSplit();
+	wxSplitMode mode = mSplitter->GetSplitMode();
+	if (isSplit)
+	{
+		mSplitter->Unsplit();
+	}
+	std::swap(mSplitA, mSplitB);
+	if (mode == wxSPLIT_HORIZONTAL)
+	{
+		mSplitter->SplitHorizontally(mSplitA, mSplitB);
+	}
+	else if (mode == wxSPLIT_VERTICAL)
+	{
+		mSplitter->SplitVertically(mSplitA, mSplitB);
+	}
+	if (!isSplit)
+	{
+		mSplitter->Unsplit();
+	}
+}
+
+void
+AnimationFrame::OnCmd_UpdateUIHorizontal(wxUpdateUIEvent& event)
+{
+	wxSplitMode mode = mSplitter->GetSplitMode();
+	event.Enable( (!mSplitter->IsSplit()) || (mode != wxSPLIT_HORIZONTAL) );
+}
+
+void
+AnimationFrame::OnCmd_UpdateUIVertical(wxUpdateUIEvent& event)
+{
+	wxSplitMode mode = mSplitter->GetSplitMode();
+	event.Enable( (!mSplitter->IsSplit()) || (mode != wxSPLIT_VERTICAL) );
+}
+
+void
+AnimationFrame::OnCmd_UpdateUIUnsplit(wxUpdateUIEvent& event)
+{
+	event.Enable( mSplitter->IsSplit() );
 }
 
 
