@@ -31,6 +31,7 @@
 
 #include <wx/timer.h>
 #include <wx/splitter.h>
+#include <wx/spinctrl.h>
 
 
 BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
@@ -116,49 +117,59 @@ mTimerOn(false)
 // Add a toolbar
 	AddCoolToolBar(GetAnimationToolBar(), *this);
 
+	// set up the frame
+	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
+	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT));
+
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *toprow = new wxBoxSizer(wxHORIZONTAL);
+	wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
+	wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
 
 	// Add the controls
-	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Collisions")), wxSizerFlags());
+	wxBoxSizer *sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Collisions")), centerText);
 	static const wxString collis_text[] =
 	{
 		wxT("Ignore"), wxT("Show"), wxT("Beep")
 	};
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
 	collis->SetSelection(1);
-	sizer1->Add(collis, wxSizerFlags().Expand().Border(5));
+	sizer1->Add(collis, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	toprow->Add(sizer1, topRowSizerFlags);
 
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Tempo")), wxSizerFlags());
-	wxSlider *sldr = new wxSlider(this, CALCHART__anim_tempo, GetTempo(), 10, 300, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer1->Add(sldr, wxSizerFlags().Expand().Border(5));
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Tempo")), centerText);
+	wxSpinCtrl *tempo = new wxSpinCtrl(this, CALCHART__anim_tempo);
+	tempo->SetRange(10, 300);
+	tempo->SetValue(GetTempo());
+	sizer1->Add(tempo, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	toprow->Add(sizer1, topRowSizerFlags);
 
 // Sheet slider (will get set later with UpdatePanel())
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Sheet")), wxSizerFlags());
-	mSheetSlider = new wxSlider(this, CALCHART__anim_gotosheet, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer1->Add(mSheetSlider, wxSizerFlags().Expand().Border(5));
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Sheet")), centerText);
+	mSheetSlider = new wxSlider(this, CALCHART__anim_gotosheet, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+	sizer1->Add(mSheetSlider, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	toprow->Add(sizer1, topRowSizerFlags);
 
 // Beat slider (will get set later with UpdatePanel())
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("&Beat")), wxSizerFlags());
-	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS | wxSL_LABELS);
-	sizer1->Add(mBeatSlider, wxSizerFlags().Expand().Border(5));
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Beat")), centerText);
+	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+	sizer1->Add(mBeatSlider, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	toprow->Add(sizer1, topRowSizerFlags);
 
-	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Errors")), wxSizerFlags());
+	sizer1 = new wxBoxSizer(wxVERTICAL);
 	mErrorList = new wxChoice(this, CALCHART__anim_errors, wxDefaultPosition, wxDefaultSize, 0, NULL);
 	mErrorList->SetSelection(1);
-	mErrorList->Append(wxT("----------"));
-	sizer1->Add(mErrorList, wxSizerFlags().Expand().Border(5));
-
-	wxBoxSizer *Sub2 = new wxBoxSizer(wxVERTICAL);
-	Sub2->Add(sizer1, wxSizerFlags(0).Left());
-	wxBoxSizer *Sub1 = new wxBoxSizer(wxHORIZONTAL);
-	Sub1->Add(Sub2, wxSizerFlags(0).Left());
-	
+	mErrorList->Append(wxT("Errors..."));
+	sizer1->Add(mErrorList, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
 	mErrorText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(100, 50));
-	Sub1->Add(mErrorText, wxSizerFlags(1).Expand().Border(5));
+	sizer1->Add(mErrorText, wxSizerFlags(1).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	toprow->Add(sizer1, topRowSizerFlags);
 	
-	topsizer->Add(Sub1, wxSizerFlags(0).Left());
+	topsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));
 
 	// Add the field canvas
 	mSplitter = new wxSplitterWindow(this, wxID_ANY);
