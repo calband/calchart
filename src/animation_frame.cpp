@@ -34,7 +34,7 @@
 #include <wx/spinctrl.h>
 
 
-BEGIN_EVENT_TABLE(AnimationFrame, wxFrame)
+BEGIN_EVENT_TABLE(AnimationFrame, wxMDIChildFrame)
 EVT_MENU(CALCHART__anim_reanimate, AnimationFrame::OnCmdReanimate)
 EVT_MENU(CALCHART__anim_select_coll, AnimationFrame::OnCmdSelectCollisions)
 EVT_MENU(wxID_CLOSE, AnimationFrame::OnCmdClose)
@@ -69,8 +69,8 @@ EVT_UPDATE_UI(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_UpdateUIUnsplit)
 END_EVENT_TABLE()
 
 
-AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc) :
-wxFrame(parent, wxID_ANY, wxT("CalChart Viewer")),
+AnimationFrame::AnimationFrame(wxMDIParentFrame *parent, wxDocument* doc) :
+wxMDIChildFrame(parent, wxID_ANY, wxT("CalChart Viewer")),
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
 mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
