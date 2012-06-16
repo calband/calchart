@@ -113,7 +113,7 @@
     <ClInclude Include="..\..\src\parse.h" />
     <ClInclude Include="..\..\src\platconf.h" />
     <ClInclude Include="..\..\src\print_ps.h" />
-    <ClInclude Include="..\..\src\print_ui.h" />
+    <ClInclude Include="..\..\src\print_ps_dialog.h" />
     <ClInclude Include="..\..\src\setup_wizards.h" />
     <ClInclude Include="..\..\src\show_ui.h" />
     <ClInclude Include="..\..\src\toolbar.h" />
@@ -150,7 +150,7 @@
     <ClCompile Include="..\..\src\math_utils.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
     <ClCompile Include="..\..\src\print_ps.cpp" />
-    <ClCompile Include="..\..\src\print_ui.cpp" />
+    <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
     <ClCompile Include="..\..\src\setup_wizards.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
     <ClCompile Include="..\..\src\toolbar.cpp" />
