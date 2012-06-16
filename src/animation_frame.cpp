@@ -59,7 +59,7 @@ EVT_MENU(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_SplitViewUnsplit)
 EVT_MENU(CALCHART__SplitViewSwapAnimateAndOmni, AnimationFrame::OnCmd_SwapAnimateAndOmni)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_CHOICE(CALCHART__anim_errors, AnimationFrame::OnCmd_anim_errors)
-EVT_COMMAND_SCROLL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
+EVT_SPINCTRL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationFrame::OnCmd_anim_next_beat_timer)
@@ -361,7 +361,7 @@ AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
 
 
 void
-AnimationFrame::OnSlider_anim_tempo(wxScrollEvent& event)
+AnimationFrame::OnSlider_anim_tempo(wxSpinEvent& event)
 {
 	SetTempo(event.GetPosition());
 	StartTimer();

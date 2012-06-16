@@ -55,7 +55,7 @@ public:
 	void OnCmd_anim_next_sheet(wxCommandEvent& event);
 	void OnCmd_anim_collisions(wxCommandEvent& event);
 	void OnCmd_anim_errors(wxCommandEvent& event);
-	void OnSlider_anim_tempo(wxScrollEvent& event);
+	void OnSlider_anim_tempo(wxSpinEvent& event);
 	void OnSlider_anim_gotosheet(wxScrollEvent& event);
 	void OnSlider_anim_gotobeat(wxScrollEvent& event);
 
