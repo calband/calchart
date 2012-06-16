@@ -125,6 +125,7 @@ mTimerOn(false)
 	wxBoxSizer *toprow = new wxBoxSizer(wxHORIZONTAL);
 	wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
 	wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
+	wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
 	
 	// Add the controls
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxVERTICAL);
@@ -135,7 +136,7 @@ mTimerOn(false)
 	};
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
 	collis->SetSelection(1);
-	sizer1->Add(collis, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	sizer1->Add(collis, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
 	sizer1 = new wxBoxSizer(wxVERTICAL);
@@ -143,28 +144,28 @@ mTimerOn(false)
 	wxSpinCtrl *tempo = new wxSpinCtrl(this, CALCHART__anim_tempo);
 	tempo->SetRange(10, 300);
 	tempo->SetValue(GetTempo());
-	sizer1->Add(tempo, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	sizer1->Add(tempo, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
 // Sheet slider (will get set later with UpdatePanel())
 	sizer1 = new wxBoxSizer(wxVERTICAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Sheet")), centerText);
 	mSheetSlider = new wxSlider(this, CALCHART__anim_gotosheet, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-	sizer1->Add(mSheetSlider, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	sizer1->Add(mSheetSlider, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
 // Beat slider (will get set later with UpdatePanel())
 	sizer1 = new wxBoxSizer(wxVERTICAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Beat")), centerText);
 	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-	sizer1->Add(mBeatSlider, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	sizer1->Add(mBeatSlider, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
 	sizer1 = new wxBoxSizer(wxVERTICAL);
 	mErrorList = new wxChoice(this, CALCHART__anim_errors, wxDefaultPosition, wxDefaultSize, 0, NULL);
 	mErrorList->Append(wxT("Errors..."));
 	mErrorList->SetSelection(1);
-	sizer1->Add(mErrorList, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
+	sizer1->Add(mErrorList, centerWidget);
 	mErrorText = new FancyTextWin(this, wxID_ANY);
 	sizer1->Add(mErrorText, wxSizerFlags(1).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
 	toprow->Add(sizer1, topRowSizerFlags);
@@ -177,12 +178,11 @@ mTimerOn(false)
 	mSplitter->SetSashGravity(0.5);
 	mSplitter->SetMinimumPaneSize(20);
 	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
+	mSplitter->SetMinSize(wxSize(300, 400));
 	topsizer->Add(mSplitter, wxSizerFlags(1).Expand());
 
 	mOmniViewCanvas = new CCOmniView_Canvas(mView, mSplitter);
-	mOmniViewCanvas->SetMinSize(wxSize(300, 200));
 	mCanvas = new AnimationCanvas(mView, mSplitter);
-	mCanvas->SetMinSize(wxSize(300, 200));
 
 	mSplitA = mOmniViewCanvas;
 	mSplitB = mCanvas;

@@ -46,6 +46,7 @@
 #include <wx/helpwin.h>
 #endif
 #include <wx/cmdproc.h>
+#include <wx/tglbtn.h>
 
 const wxString gridtext[] =
 {
@@ -137,7 +138,7 @@ EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, FieldFrame::slider_sheet_cal
 EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
 EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
-EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
+EVT_TOGGLEBUTTON(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_SIZE( FieldFrame::OnSize)
@@ -256,16 +257,23 @@ mCanvas(NULL)
 	show->SetCurrentSheet(0);
 
 // Add the controls
+	wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
+	wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
+	wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
 	wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *toprow = new wxBoxSizer(wxHORIZONTAL);
 
 // Grid choice
-	grid_choice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1),
-		sizeof(gridtext)/sizeof(wxString),
-		gridtext);
-	unsigned def_grid = 2;
-	grid_choice->SetSelection(def_grid);
+	wxBoxSizer *sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Grid Spacing")), centerText);
+	mGridChoice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1), sizeof(gridtext)/sizeof(wxString), gridtext);
+	mGridChoice->SetSelection(2);
+	sizer1->Add(mGridChoice, centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
 
 // Zoom slider
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Zoom")), centerText);
 	wxArrayString zoomtext;
 	for (size_t i = 0; i < sizeof(zoom_amounts)/(sizeof(zoom_amounts[0])); ++i)
 	{
@@ -274,54 +282,55 @@ mCanvas(NULL)
 		zoomtext.Add(buf);
 	}
 	zoomtext.Add(wxT("Fit"));
-	zoom_box = new wxComboBox(this, CALCHART__slider_zoom, wxEmptyString,
-							  wxDefaultPosition, wxDefaultSize,
-							  zoomtext,
-							  wxTE_PROCESS_ENTER);
+	mZoomBox = new wxComboBox(this, CALCHART__slider_zoom, wxEmptyString, wxDefaultPosition, wxDefaultSize, zoomtext, wxTE_PROCESS_ENTER);
 	// set the text to the default zoom level
-	if (zoom_box)
+	if (mZoomBox)
 	{
 		wxString zoomtxt;
 		zoomtxt.sprintf("%d%%", (int)(GetConfiguration_FieldFrameZoom()*100));
-		zoom_box->SetValue(zoomtxt);
+		mZoomBox->SetValue(zoomtxt);
 	}
+	sizer1->Add(mZoomBox, centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
 
-// set up a sizer for the field panel
-	wxBoxSizer* rowsizer = new wxBoxSizer(wxHORIZONTAL);
-	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Grid")), 0, wxALL, 5);
-	rowsizer->Add(grid_choice, 0, wxALL, 5);
-	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Zoom")), 0, wxALL, 5);
-	rowsizer->Add(zoom_box, 1, wxEXPAND, 5);
-	fullsizer->Add(rowsizer);
 // Reference choice
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Ref Group")), centerText);
 	{
 		wxString buf;
 		unsigned i;
 
-		ref_choice = new wxChoice(this, CALCHART__refnum_callback);
-		ref_choice->Append(wxT("Off"));
+		mRefChoice = new wxChoice(this, CALCHART__refnum_callback);
+		mRefChoice->Append(wxT("Off"));
 		for (i = 1; i <= CC_point::kNumRefPoints; i++)
 		{
 			buf.sprintf(wxT("%u"), i);
-			ref_choice->Append(buf);
+			mRefChoice->Append(buf);
 		}
 	}
+	sizer1->Add(mRefChoice, centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
 
-	wxCheckBox* checkbox = new wxCheckBox(this, CALCHART__draw_paths, wxT("Draw &Paths"));
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxButton(this, CALCHART__ResetReferencePoint, wxT("Reset Ref Points")), centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
+	
+
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	wxToggleButton* checkbox = new wxToggleButton(this, CALCHART__draw_paths, wxT("Draw Paths"));
 	checkbox->SetValue(false);
-	rowsizer->Add(checkbox, 1, wxEXPAND, 5);
-// Sheet slider (will get set later with UpdatePanel())
-	// on Mac using wxSL_LABELS will cause a crash?
-	sheet_slider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2, wxDefaultPosition,
-                    wxDefaultSize, wxSL_HORIZONTAL | wxSL_AUTOTICKS);
+	sizer1->Add(checkbox, centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
 
-	rowsizer = new wxBoxSizer(wxHORIZONTAL);
-	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Ref Group")), 0, wxALL, 5);
-	rowsizer->Add(ref_choice, 0, wxALL, 5);
-	rowsizer->Add(new wxButton(this, CALCHART__ResetReferencePoint, wxT("&Reset Ref")), 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	rowsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Sheet")), 0, wxALL, 5);
-	rowsizer->Add(sheet_slider, 1, wxEXPAND, 5);
-	fullsizer->Add(rowsizer);
+// Sheet slider (will get set later with UpdatePanel())
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Sheet")), centerText);
+	// on Mac using wxSL_LABELS will cause a crash?
+	mSheetSlider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+	sizer1->Add(mSheetSlider, centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
+
+	fullsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));
 
 // Update the command processor with the undo/redo menu items
 	edit_menu->FindItem(wxID_UNDO)->Enable(false);
@@ -887,7 +896,7 @@ static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
 void FieldFrame::SnapToGrid(CC_coord& c)
 {
 	Coord gridn, grids;
-	int n = grid_choice->GetSelection();
+	int n = mGridChoice->GetSelection();
 
 	gridn = gridvalue[n].num;
 	grids = gridvalue[n].sub;
@@ -976,7 +985,7 @@ void FieldFrame::SetMode()
 
 void FieldFrame::refnum_callback(wxCommandEvent &)
 {
-	GetFieldView()->SetReferencePoint(ref_choice->GetSelection());
+	GetFieldView()->SetReferencePoint(mRefChoice->GetSelection());
 }
 
 void FieldFrame::OnEnableDrawPaths(wxCommandEvent &event)
@@ -987,7 +996,7 @@ void FieldFrame::OnEnableDrawPaths(wxCommandEvent &event)
 
 void FieldFrame::slider_sheet_callback(wxScrollEvent &)
 {
-	GetFieldView()->GoToSheet(sheet_slider->GetValue()-1);
+	GetFieldView()->GoToSheet(mSheetSlider->GetValue()-1);
 }
 
 
@@ -1009,7 +1018,7 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
 
 void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 {
-	wxString zoomtxt = zoom_box->GetValue();
+	wxString zoomtxt = mZoomBox->GetValue();
 	// strip the trailing '%' if it exists
 	if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%')))
 	{
@@ -1028,14 +1037,14 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 		wxString msg;
 		msg.sprintf(wxT("Please enter a valid number between %d and %d\n"), zoommin, zoommax);
 		wxMessageBox(msg, wxT("Invalid number"), wxICON_INFORMATION|wxOK);
-		zoom_box->SetValue(wxT(""));
+		mZoomBox->SetValue(wxT(""));
 		// return if not valid
 		return;
 	}
 	SetConfiguration_FieldFrameZoom(zoom_amount);
 	// set the text to have '%' appended
 	zoomtxt += wxT("%");
-	zoom_box->SetValue(zoomtxt);
+	mZoomBox->SetValue(zoomtxt);
 	mCanvas->SetZoom(zoom_amount);
 }
 
@@ -1057,16 +1066,16 @@ FieldFrame::UpdatePanel()
 	
 	if (num > 1)
 	{
-		sheet_slider->Enable(true);
-		if ((unsigned)sheet_slider->GetMax() != num)
-			sheet_slider->SetValue(1);			  // So Motif doesn't complain about value
-		sheet_slider->SetRange(1, num);
-		if ((unsigned)sheet_slider->GetValue() != curr)
-			sheet_slider->SetValue(curr);
+		mSheetSlider->Enable(true);
+		if ((unsigned)mSheetSlider->GetMax() != num)
+			mSheetSlider->SetValue(1);			  // So Motif doesn't complain about value
+		mSheetSlider->SetRange(1, num);
+		if ((unsigned)mSheetSlider->GetValue() != curr)
+			mSheetSlider->SetValue(curr);
 	}
 	else
 	{
-		sheet_slider->Enable(false);
+		mSheetSlider->Enable(false);
 	}
 }
 

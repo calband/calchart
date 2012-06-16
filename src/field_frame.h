@@ -144,10 +144,10 @@ public:
 	const CC_show * GetShow() const;
 	CC_show * GetShow();
 	
-	wxChoice *grid_choice;
-	wxChoice *ref_choice;
-	wxComboBox *zoom_box;
-	wxSlider *sheet_slider;
+	wxChoice *mGridChoice;
+	wxChoice *mRefChoice;
+	wxComboBox *mZoomBox;
+	wxSlider *mSheetSlider;
 
 	FieldCanvas *mCanvas;
 	
