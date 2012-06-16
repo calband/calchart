@@ -119,13 +119,13 @@ mTimerOn(false)
 
 	// set up the frame
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT));
+	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
 
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *toprow = new wxBoxSizer(wxHORIZONTAL);
 	wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
 	wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
-
+	
 	// Add the controls
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxVERTICAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Collisions")), centerText);
@@ -162,15 +162,15 @@ mTimerOn(false)
 
 	sizer1 = new wxBoxSizer(wxVERTICAL);
 	mErrorList = new wxChoice(this, CALCHART__anim_errors, wxDefaultPosition, wxDefaultSize, 0, NULL);
-	mErrorList->SetSelection(1);
 	mErrorList->Append(wxT("Errors..."));
+	mErrorList->SetSelection(1);
 	sizer1->Add(mErrorList, wxSizerFlags().Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
-	mErrorText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(100, 50));
+	mErrorText = new FancyTextWin(this, wxID_ANY);
 	sizer1->Add(mErrorText, wxSizerFlags(1).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));
 	toprow->Add(sizer1, topRowSizerFlags);
 	
 	topsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));
-
+	
 	// Add the field canvas
 	mSplitter = new wxSplitterWindow(this, wxID_ANY);
 	mSplitter->SetSize(GetClientSize());
@@ -180,24 +180,27 @@ mTimerOn(false)
 	topsizer->Add(mSplitter, wxSizerFlags(1).Expand());
 
 	mOmniViewCanvas = new CCOmniView_Canvas(mView, mSplitter);
+	mOmniViewCanvas->SetMinSize(wxSize(300, 200));
 	mCanvas = new AnimationCanvas(mView, mSplitter);
+	mCanvas->SetMinSize(wxSize(300, 200));
 
 	mSplitA = mOmniViewCanvas;
 	mSplitB = mCanvas;
 	mSplitter->SplitHorizontally(mSplitA, mSplitB, 100);
 
-	SetSizer(topsizer);							  // use the sizer for layout
-
+	SetSizer( topsizer );
 	topsizer->SetSizeHints(this);				  // set size hints to honour minimum size
+	this->Layout();
 
 	mView->Generate();
 
 	UpdatePanel();
+
 	Fit();
 	Show(true);
 
 	// make animation screen large by default.
-	Maximize(true);
+//	Maximize(true);
 }
 
 
