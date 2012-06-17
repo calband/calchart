@@ -248,6 +248,7 @@ mCanvas(NULL)
 	AddCoolToolBar(GetMainToolBar(), *this);
 
 // Add the field canvas
+	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
 	mCanvas = new FieldCanvas(view, this, GetConfiguration_FieldFrameZoom());
 	// set scroll rate 1 to 1, so we can have even scrolling of whole field
 	mCanvas->SetScrollRate(1, 1);
