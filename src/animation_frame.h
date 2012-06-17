@@ -36,14 +36,20 @@ class CCOmniView_Canvas;
 class FancyTextWin;
 class wxSplitterWindow;
 
-class AnimationFrame: public wxFrame
+#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
+typedef wxDocChildFrame AnimationFrameParent;
+#else
+typedef wxFrame AnimationFrameParent;
+#endif
+
+class AnimationFrame : public AnimationFrameParent
 {
 public:
-	AnimationFrame(wxWindow *parent, wxDocument* doc, boost::function<void (void)> onClose = NULL);
+	typedef AnimationFrameParent super;
+
+	AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent);
 	~AnimationFrame();
 	
-	virtual void SetView(wxView *view);
-
 	void OnCmdReanimate(wxCommandEvent& event);
 	void OnCmdSelectCollisions(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event) { Close(); }
@@ -91,7 +97,7 @@ public:
 	void OnCmd_UpdateUIUnsplit(wxUpdateUIEvent& event);
 	
 private:
-	AnimationView *mView;
+	AnimationView *mAnimationView;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 
 	AnimationCanvas *mCanvas;
 	CCOmniView_Canvas *mOmniViewCanvas;

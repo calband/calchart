@@ -32,6 +32,7 @@
 #include "cc_command.h"
 #include "cc_shapes.h"
 #include "setup_wizards.h"
+#include "animation_frame.h"
 
 #include <wx/wizard.h>
 
@@ -54,8 +55,11 @@ bool
 FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
 	mShow = static_cast<CC_show*>(doc);
-	mFrame = new FieldFrame(doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50),
-							wxSize(GetConfiguration_FieldFrameWidth(), GetConfiguration_FieldFrameHeight()));
+#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
+	mFrame = new AnimationFrame(NULL, doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame));
+#else
+	mFrame = new FieldFrame(doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50), wxSize(GetConfiguration_FieldFrameWidth(), GetConfiguration_FieldFrameHeight()));
+#endif
 	
 	mFrame->Show(true);
 	Activate(true);
@@ -109,12 +113,11 @@ FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 	}
 	else
 	{
+#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
+#else
 		if (mFrame)
 		{
 			mFrame->UpdatePanel();
-			wxString buf;
-			GetDocument()->GetPrintableName(buf);
-			mFrame->SetTitle(buf);
 		}
 		if (mFrame && mFrame->GetCanvas())
 		{
@@ -124,6 +127,7 @@ FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 			}
 			mFrame->GetCanvas()->Refresh();
 		}
+#endif
 	}
 }
 

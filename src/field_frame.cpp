@@ -610,7 +610,7 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 	}
 	else if (GetShow())
 	{
-		mAnimationFrame = new AnimationFrame(this, GetShow(), boost::bind(&FieldFrame::ClearAnimationFrame, this));
+		mAnimationFrame = new AnimationFrame(boost::bind(&FieldFrame::ClearAnimationFrame, this), GetShow(), GetView(), this);
 	}
 }
 
@@ -1090,6 +1090,10 @@ FieldFrame::UpdatePanel()
 	{
 		mSheetSlider->Enable(false);
 	}
+
+	wxString buf;
+	GetDocument()->GetPrintableName(buf);
+	SetTitle(buf);
 }
 
 

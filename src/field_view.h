@@ -93,7 +93,11 @@ public:
 	void OnEnableDrawPaths(bool enable);
 
 private:
+#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
+	wxWindow *mFrame;
+#else
 	FieldFrame *mFrame;
+#endif
 	
 	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 	void GeneratePaths();
