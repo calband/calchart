@@ -152,6 +152,9 @@ public:
 
 	FieldCanvas *mCanvas;
 	
+	wxWindow *mAnimationFrame;
+	void ClearAnimationFrame();
+	
 	DECLARE_EVENT_TABLE()
 };
 

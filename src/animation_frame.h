@@ -28,6 +28,8 @@
 #include <wx/wx.h>
 #include <wx/docview.h>
 
+#include <boost/function.hpp>
+
 class AnimationView;
 class AnimationCanvas;
 class CCOmniView_Canvas;
@@ -37,14 +39,15 @@ class wxSplitterWindow;
 class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxWindow *parent, wxDocument* doc);
+	AnimationFrame(wxWindow *parent, wxDocument* doc, boost::function<void (void)> onClose = NULL);
 	~AnimationFrame();
 	
 	virtual void SetView(wxView *view);
 
 	void OnCmdReanimate(wxCommandEvent& event);
 	void OnCmdSelectCollisions(wxCommandEvent& event);
-	void OnCmdClose(wxCommandEvent& event);
+	void OnCmdClose(wxCommandEvent& event) { Close(); }
+	void OnCmdClose(wxCloseEvent& event);
 
 	void OnCmd_anim_stop(wxCommandEvent& event);
 	void OnCmd_anim_play(wxCommandEvent& event);
@@ -114,6 +117,8 @@ private:
 	unsigned mTempo;
 	bool mTimerOn;
 
+	// when we go, let people know
+	boost::function<void ()> mWhenClosed;
 	wxDECLARE_EVENT_TABLE();
 };
 

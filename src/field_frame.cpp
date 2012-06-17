@@ -48,6 +48,8 @@
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
 
+#include <boost/bind.hpp>
+
 const wxString gridtext[] =
 {
 	wxT("None"),
@@ -175,7 +177,8 @@ public:
 // Main frame constructor
 FieldFrame::FieldFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size):
 wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
-mCanvas(NULL)
+mCanvas(NULL),
+mAnimationFrame(NULL)
 {
 // Give it an icon
 	SetBandIcon(this);
@@ -600,12 +603,21 @@ void FieldFrame::OnCmdPoints(wxCommandEvent& event)
 
 void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 {
-	if (GetShow())
+	// we want to have only animation frame at a time
+	if (mAnimationFrame)
 	{
-		(void)new AnimationFrame(this, GetShow());
+		mAnimationFrame->Raise();
+	}
+	else if (GetShow())
+	{
+		mAnimationFrame = new AnimationFrame(this, GetShow(), boost::bind(&FieldFrame::ClearAnimationFrame, this));
 	}
 }
 
+void FieldFrame::ClearAnimationFrame()
+{
+	mAnimationFrame = NULL;
+}
 
 void FieldFrame::OnCmdAbout(wxCommandEvent& event)
 {

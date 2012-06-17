@@ -66,16 +66,18 @@ EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationFrame::OnCmd_anim_next_beat_t
 EVT_UPDATE_UI(CALCHART__SplitViewHorizontal, AnimationFrame::OnCmd_UpdateUIHorizontal)
 EVT_UPDATE_UI(CALCHART__SplitViewVertical, AnimationFrame::OnCmd_UpdateUIVertical)
 EVT_UPDATE_UI(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_UpdateUIUnsplit)
+EVT_CLOSE(AnimationFrame::OnCmdClose)
 END_EVENT_TABLE()
 
 
-AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc) :
+AnimationFrame::AnimationFrame(wxWindow *parent, wxDocument* doc, boost::function<void ()> onClose) :
 wxFrame(parent, wxID_ANY, wxT("CalChart Viewer")),
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
 mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
 mTempo(120),
-mTimerOn(false)
+mTimerOn(false),
+mWhenClosed(onClose)
 {
 // Give it an icon
 	// give this a view so it can pick up document changes
@@ -249,11 +251,15 @@ AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event)
 
 
 void
-AnimationFrame::OnCmdClose(wxCommandEvent& event)
+AnimationFrame::OnCmdClose(wxCloseEvent& event)
 {
-	Close();
+	// we should inform the parent frame we are closing
+	if (mWhenClosed)
+	{
+		mWhenClosed();
+	}
+	Destroy();
 }
-
 
 void
 AnimationFrame::OnCmd_anim_stop(wxCommandEvent& event)
