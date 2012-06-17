@@ -218,7 +218,6 @@ AnimationFrame::~AnimationFrame()
 void
 AnimationFrame::SetView(wxView *view)
 {
-//	wxDocMDIChildFrame::SetView(view);
 	if (mCanvas)
 		mCanvas->SetView(static_cast<AnimationView*>(view));
 	if (mOmniViewCanvas)

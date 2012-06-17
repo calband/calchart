@@ -23,11 +23,11 @@
 #ifndef _TOP_FRAME_H_
 #define _TOP_FRAME_H_
 
-#include <wx/docmdi.h>
+#include <wx/docview.h>
 
 // TopFrame
 // Serves as the top frame that gets displayed when CalChart starts
-class TopFrame : public wxDocMDIParentFrame
+class TopFrame : public wxDocParentFrame
 {
 	DECLARE_CLASS(TopFrame)
 public:

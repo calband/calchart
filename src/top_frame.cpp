@@ -29,9 +29,9 @@
 #include <wx/dnd.h>
 #include <wx/html/helpctrl.h>
 
-IMPLEMENT_CLASS(TopFrame, wxDocMDIParentFrame)
+IMPLEMENT_CLASS(TopFrame, wxDocParentFrame)
 
-BEGIN_EVENT_TABLE(TopFrame, wxDocMDIParentFrame)
+BEGIN_EVENT_TABLE(TopFrame, wxDocParentFrame)
 EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
 EVT_MENU(wxID_PREFERENCES, TopFrame::OnCmdPreferences)
@@ -63,7 +63,7 @@ TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filen
 TopFrame::TopFrame(wxDocManager *manager,
 				   wxFrame *frame,
 				   const wxString& title) :
-wxDocMDIParentFrame(manager, frame, wxID_ANY, title)
+wxDocParentFrame(manager, frame, wxID_ANY, title)
 {
 // Give it an icon
 	SetBandIcon(this);

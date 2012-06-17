@@ -83,7 +83,7 @@ GridValue gridvalue[] =
 
 extern wxPrintDialogData *gPrintDialogData;
 
-BEGIN_EVENT_TABLE(HomeViewFrame, wxDocMDIChildFrame)
+BEGIN_EVENT_TABLE(HomeViewFrame, wxDocChildFrame)
 EVT_MENU(CALCHART__wxID_PRINT, HomeViewFrame::OnCmdPrint)
 EVT_MENU(CALCHART__wxID_PREVIEW, HomeViewFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, HomeViewFrame::OnCmdPageSetup)
@@ -126,8 +126,8 @@ public:
 
 
 // Main frame constructor
-HomeViewFrame::HomeViewFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size):
-wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size)
+HomeViewFrame::HomeViewFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size):
+wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size)
 {
 // Give it an icon
 	SetBandIcon(this);

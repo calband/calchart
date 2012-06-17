@@ -26,7 +26,7 @@
 #include "animate.h"
 
 #include <wx/wx.h>
-#include <wx/docmdi.h>
+#include <wx/docview.h>
 
 class AnimationView;
 class AnimationCanvas;

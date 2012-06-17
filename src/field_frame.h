@@ -23,7 +23,7 @@
 #ifndef _FIELD_FRAME_H_
 #define _FIELD_FRAME_H_
 
-#include <wx/docmdi.h>
+#include <wx/docview.h>
 
 class Animation;
 class CC_coord;
@@ -50,11 +50,12 @@ class FieldCanvas;
 class FieldView;
 
 // Define the main editing frame
-class FieldFrame : public wxDocMDIChildFrame
+class FieldFrame : public wxDocChildFrame
 {
+	typedef wxDocChildFrame super;
 public:
 	// FieldFrame will own the show that is passed in
-	FieldFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size);
+	FieldFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size);
 	~FieldFrame();
 
 	void OnCmdAppend(wxCommandEvent& event);

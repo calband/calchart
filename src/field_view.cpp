@@ -54,7 +54,7 @@ bool
 FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
 	mShow = static_cast<CC_show*>(doc);
-	mFrame = new FieldFrame(doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocMDIParentFrame), wxPoint(50, 50),
+	mFrame = new FieldFrame(doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50),
 							wxSize(GetConfiguration_FieldFrameWidth(), GetConfiguration_FieldFrameHeight()));
 	
 	mFrame->Show(true);

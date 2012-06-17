@@ -84,7 +84,7 @@ GridValue gridvalue[] =
 
 extern wxPrintDialogData *gPrintDialogData;
 
-BEGIN_EVENT_TABLE(FieldFrame, wxDocMDIChildFrame)
+BEGIN_EVENT_TABLE(FieldFrame, wxDocChildFrame)
 EVT_CHAR(FieldFrame::OnChar)
 EVT_MENU(CALCHART__APPEND_FILE, FieldFrame::OnCmdAppend)
 EVT_MENU(CALCHART__IMPORT_CONT_FILE, FieldFrame::OnCmdImportCont)
@@ -173,8 +173,8 @@ public:
 
 
 // Main frame constructor
-FieldFrame::FieldFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size):
-wxDocMDIChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
+FieldFrame::FieldFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size):
+wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 mCanvas(NULL)
 {
 // Give it an icon
@@ -828,7 +828,7 @@ void FieldFrame::OnSize(wxSizeEvent& event)
 	int h = event.GetSize().GetHeight();
 	SetConfiguration_FieldFrameWidth((w > 1200) ? 1200 : w);
 	SetConfiguration_FieldFrameHeight((h > 700) ? 700 : h);
-	wxDocMDIChildFrame::OnSize(event);
+	super::OnSize(event);
 }
 
 // Append a show with file selector

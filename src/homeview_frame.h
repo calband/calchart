@@ -23,14 +23,14 @@
 #ifndef __HOMEVIEW_FRAME_H__
 #define __HOMEVIEW_FRAME_H__
 
-#include <wx/docmdi.h>
+#include <wx/docview.h>
 
 // Define the main editing frame
-class HomeViewFrame : public wxDocMDIChildFrame
+class HomeViewFrame : public wxDocChildFrame
 {
 public:
 	// HomeViewFrame will own the show that is passed in
-	HomeViewFrame(wxDocument* doc, wxView* view, wxDocMDIParentFrame *frame, const wxPoint& pos, const wxSize& size);
+	HomeViewFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size);
 	~HomeViewFrame();
 
 	void OnCmdPrint(wxCommandEvent& event);

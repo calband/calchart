@@ -32,9 +32,7 @@
 #include <wx/html/helpctrl.h>
 #include <wx/fs_zip.h>
 
-#include <wx/mdi.h>
 #include <wx/docview.h>
-#include <wx/docmdi.h>
 
 wxPrintDialogData *gPrintDialogData;
 
