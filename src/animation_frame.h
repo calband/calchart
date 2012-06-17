@@ -34,10 +34,10 @@ class CCOmniView_Canvas;
 class FancyTextWin;
 class wxSplitterWindow;
 
-class AnimationFrame: public wxMDIChildFrame
+class AnimationFrame: public wxFrame
 {
 public:
-	AnimationFrame(wxMDIParentFrame *parent, wxDocument* doc);
+	AnimationFrame(wxWindow *parent, wxDocument* doc);
 	~AnimationFrame();
 	
 	virtual void SetView(wxView *view);

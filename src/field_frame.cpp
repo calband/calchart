@@ -602,7 +602,7 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 {
 	if (GetShow())
 	{
-		(void)new AnimationFrame(wxStaticCast(wxGetApp().GetTopWindow(), wxDocMDIParentFrame), GetShow());
+		(void)new AnimationFrame(this, GetShow());
 	}
 }
 
