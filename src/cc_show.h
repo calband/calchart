@@ -50,6 +50,12 @@ class CC_show_FlushAllViews : public wxObject
 DECLARE_DYNAMIC_CLASS(CC_show_FlushAllViews)
 };
 
+// The CC_show_FinishedLoading class is used for indicating to views that a new file has been loaded
+class CC_show_FinishedLoading : public wxObject
+{
+	DECLARE_DYNAMIC_CLASS(CC_show_FinishedLoading)
+};
+
 // The CC_show_setup class is used for indicating to views to set up a new show
 class CC_show_setup : public wxObject
 {

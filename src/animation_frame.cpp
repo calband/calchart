@@ -342,8 +342,7 @@ AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
 		mAnimationView->GotoSheet(mErrorMarkers.at(which).second);
 
 		mErrorText->Clear();
-		CC_show::const_CC_sheet_iterator_t current_sheet = mAnimationView->GetShow()->GetNthSheet(mErrorMarkers.at(which).second);
-		const CC_continuity& c = current_sheet->GetNthContinuity(mErrorMarkers.at(which).first.contnum);
+		CC_continuity c = mAnimationView->GetContinuityOnSheet(mErrorMarkers.at(which).second, mErrorMarkers.at(which).first.contnum);
 		if (!c.GetText().IsEmpty())
 		{
 			mErrorText->WriteText(c.GetText());

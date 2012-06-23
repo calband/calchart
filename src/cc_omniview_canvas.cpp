@@ -540,7 +540,7 @@ CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &
 CCOmniView_Canvas::CCOmniView_Canvas(AnimationView *view, wxWindow *frame, const wxSize& size) :
 wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE),
 m_glContext(new CCOmniView_GLContext(this)),
-mView(view),
+mAnimationView(view),
 mViewPoint(KStartingViewPoint),
 mFollowMarcher(-1),
 mCrowdOn(false),
@@ -552,7 +552,7 @@ mFOV(60),
 mShiftMoving(false)
 {
 #if defined(__APPLE__) && (__APPLE__)
-    m_glContext->UseForLines(mView->GetShow()->GetMode().GetOmniLinesImage());
+    m_glContext->UseForLines(mAnimationView->GetShow()->GetMode().GetOmniLinesImage());
 #endif
 }
 
@@ -564,7 +564,7 @@ CCOmniView_Canvas::~CCOmniView_Canvas()
 void
 CCOmniView_Canvas::SetView(AnimationView *view)
 {
-	mView = view;
+	mAnimationView = view;
 }
 
 
@@ -572,11 +572,11 @@ MarcherInfo
 CCOmniView_Canvas::GetMarcherInfo(size_t which) const
 {
 	MarcherInfo info;
-	if (mView && mView->mAnimation)
+	if (mAnimationView && mAnimationView->GetAnimation())
 	{
-		info.direction = NormalizeAngle((mView->mAnimation->RealDirection(which) * M_PI / 180.0));
+		info.direction = NormalizeAngle((mAnimationView->GetAnimation()->RealDirection(which) * M_PI / 180.0));
 		
-		CC_coord position = mView->mAnimation->Position(which);
+		CC_coord position = mAnimationView->GetAnimation()->Position(which);
 		info.x = Coord2Float(position.x);
 		// because the coordinate system for continuity and OpenGL are different, correct here.
 		info.y = -1.0 * Coord2Float(position.y);
@@ -588,9 +588,9 @@ std::multimap<double, MarcherInfo>
 CCOmniView_Canvas::ParseAndDraw3dMarchers() const
 {
 	std::multimap<double, MarcherInfo> result;
-	for (size_t i = 0; (i < mView->GetShow()->GetNumPoints()); ++i)
+	for (size_t i = 0; (i < mAnimationView->GetShow()->GetNumPoints()); ++i)
 	{
-		if (mShowOnlySelected && !mView->GetShow()->IsSelected(i))
+		if (mShowOnlySelected && !mAnimationView->GetShow()->IsSelected(i))
 		{
 			continue;
 		}
@@ -689,7 +689,7 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 	
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-	CC_coord fieldSize = mView ? mView->GetShow()->GetMode().FieldSize() : CC_coord(160, 80);
+	CC_coord fieldSize = mAnimationView ? mAnimationView->GetShow()->GetMode().FieldSize() : CC_coord(160, 80);
 	float FieldEW = Coord2Float(fieldSize.y);
 	float FieldNS = Coord2Float(fieldSize.x);
 	
@@ -714,12 +714,12 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 	
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
-	if (mView && mView->mAnimation)
+	if (mAnimationView)
 	{
 		std::multimap<double, MarcherInfo> marchers = ParseAndDraw3dMarchers();
 		for (std::multimap<double, MarcherInfo>::reverse_iterator i = marchers.rbegin(); i != marchers.rend(); ++i)
 		{
-			m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mView->OnBeat() ? kLeftHSHup : kRightHSHup) : kClosed);
+			m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mAnimationView->OnBeat() ? kLeftHSHup : kRightHSHup) : kClosed);
 		}
 	}
 
@@ -879,13 +879,13 @@ CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 			break;
 
 		case WXK_LEFT:
-			mView->PrevBeat();
+			mAnimationView->PrevBeat();
 			break;
 		case WXK_RIGHT:
-			mView->NextBeat();
+			mAnimationView->NextBeat();
 			break;
 		case WXK_SPACE:
-			mView->ToggleTimer();
+			mAnimationView->ToggleTimer();
 			break;
 
 		default:

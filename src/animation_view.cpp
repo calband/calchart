@@ -125,6 +125,10 @@ AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 			RefreshFrame();
 		}
 	}
+	if (hint && hint->IsKindOf(CLASSINFO(CC_show_FinishedLoading)))
+	{
+		Generate();
+	}
 }
 
 
@@ -393,6 +397,12 @@ AnimationView::OnBeat() const
 	return GetAnimationFrame()->OnBeat();
 }
 
+CC_continuity
+AnimationView::GetContinuityOnSheet(unsigned whichSheet, unsigned whichContinuity) const
+{
+	CC_show::const_CC_sheet_iterator_t current_sheet = GetShow()->GetNthSheet(whichSheet);
+	return current_sheet->GetNthContinuity(whichContinuity);
+}
 
 void
 AnimationView::OnNotifyStatus(const wxString& status)
@@ -409,6 +419,11 @@ AnimationView::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], u
 	return false;
 }
 
+boost::shared_ptr<Animation>
+AnimationView::GetAnimation()
+{
+	return mAnimation;
+}
 
 AnimationFrame*
 AnimationView::GetAnimationFrame()

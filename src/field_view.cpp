@@ -111,23 +111,17 @@ FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 		// make the show modified so it gets repainted
 		show->Modify(true);
 	}
+	else if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+	{
+		GeneratePaths();
+	}
 	else
 	{
-#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-#else
 		if (mFrame)
 		{
 			mFrame->UpdatePanel();
+			mFrame->Refresh();
 		}
-		if (mFrame && mFrame->GetCanvas())
-		{
-			if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
-			{
-				GeneratePaths();
-			}
-			mFrame->GetCanvas()->Refresh();
-		}
-#endif
 	}
 }
 

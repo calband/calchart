@@ -71,7 +71,7 @@ private:
 	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
 
 	boost::shared_ptr<CCOmniView_GLContext> m_glContext;
-	AnimationView *mView;
+	AnimationView *mAnimationView;
 	viewpoint_t mViewPoint;
 
 	// a -1 means not following any marcher

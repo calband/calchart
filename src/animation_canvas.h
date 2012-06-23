@@ -45,7 +45,7 @@ public:
 	void OnChar(wxKeyEvent& event);
 
 private:
-	AnimationView *mView;
+	AnimationView *mAnimationView;
 
 	static const size_t kDefaultAnimSize = 3;
 	float mUserScale;

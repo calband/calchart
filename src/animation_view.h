@@ -28,6 +28,7 @@
 #include <boost/shared_ptr.hpp>
 
 class AnimationFrame;
+class FieldView;
 
 class AnimationView : public wxView
 {
@@ -73,7 +74,16 @@ public:
 	void ToggleTimer();
 	bool OnBeat() const;
 
-//private:
+	CC_continuity GetContinuityOnSheet(unsigned whichSheet, unsigned whichContinuity) const;
+
+	const ShowMode& GetShowMode() const;
+
+	const CC_show *GetShow() const;
+	CC_show *GetShow();
+
+	boost::shared_ptr<Animation> GetAnimation();
+
+private:
 	void OnNotifyStatus(const wxString& status);
 	bool OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message);
 	
@@ -81,14 +91,8 @@ public:
 	
 	const AnimationFrame *GetAnimationFrame() const;
 	AnimationFrame *GetAnimationFrame();
-	const CC_show *GetShow() const;
-	CC_show *GetShow();
 
 	boost::shared_ptr<Animation> mAnimation;
-	// Don't like this, need to avoid friends
-	friend class CCOmniView_Canvas;
-	friend class CCOmniView_Context;
-	friend class AnimationFrame;
 };
 
 #endif // _ANIMATION_VIEW_H_

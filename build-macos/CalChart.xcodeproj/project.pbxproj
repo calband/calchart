@@ -82,7 +82,6 @@
 		C70C7AD6156ABC8800E14F1B /* setup_wizards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047D015609A1200D8C71B /* setup_wizards.cpp */; };
 		C70C7AD7156ABC8800E14F1B /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C73C406B156761CB00B86BE8 /* math_utils.cpp */; };
 		C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76B4EBA15694C770087FE94 /* print_ps_dialog.cpp */; };
-		C70C7AD9156ABC8800E14F1B /* homeview_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70C7A83156ABC5D00E14F1B /* homeview_frame.cpp */; };
 		C70C7ADC156ABC8800E14F1B /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
 		C70C7ADD156ABC8800E14F1B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
 		C70C7ADE156ABC8800E14F1B /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD91479B39A004E5C5B /* QuickTime.framework */; };
@@ -711,10 +710,6 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C70C7A83156ABC5D00E14F1B /* homeview_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homeview_frame.cpp; sourceTree = "<group>"; };
-		C70C7A84156ABC5D00E14F1B /* homeview_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homeview_frame.h; sourceTree = "<group>"; };
-		C70C7A85156ABC5D00E14F1B /* homeview_view.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homeview_view.cpp; sourceTree = "<group>"; };
-		C70C7A86156ABC5D00E14F1B /* homeview_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homeview_view.h; sourceTree = "<group>"; };
 		C70C7B62156ABC8800E14F1B /* CalChartViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChartViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C70C7B64156ABC8A00E14F1B /* CalChartViewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CalChartViewer-Info.plist"; path = "/Users/rmpowell77/Development/calchart/trunk/build-macos/CalChartViewer-Info.plist"; sourceTree = "<absolute>"; };
 		C72C5FDF155CD16100194225 /* cc_omniview_constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_omniview_constants.h; sourceTree = "<group>"; };
@@ -1129,10 +1124,6 @@
 				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
-				C70C7A83156ABC5D00E14F1B /* homeview_frame.cpp */,
-				C70C7A84156ABC5D00E14F1B /* homeview_frame.h */,
-				C70C7A85156ABC5D00E14F1B /* homeview_view.cpp */,
-				C70C7A86156ABC5D00E14F1B /* homeview_view.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
 				C73C406B156761CB00B86BE8 /* math_utils.cpp */,
 				C73C406C156761CD00B86BE8 /* math_utils.h */,
@@ -1507,7 +1498,6 @@
 				C70C7AD6156ABC8800E14F1B /* setup_wizards.cpp in Sources */,
 				C70C7AD7156ABC8800E14F1B /* math_utils.cpp in Sources */,
 				C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */,
-				C70C7AD9156ABC8800E14F1B /* homeview_frame.cpp in Sources */,
 				C713C8D9156C10A600776558 /* field_view.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1656,6 +1646,13 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_FILE_OFFSET_BITS=64",
+					__WXMAC__,
+					__WXOSX__,
+					__WXOSX_COCOA__,
+					"BUILD_FOR_VIEWER=1",
+				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChartViewer-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
@@ -1668,6 +1665,13 @@
 			buildSettings = {
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_FILE_OFFSET_BITS=64",
+					__WXMAC__,
+					__WXOSX__,
+					__WXOSX_COCOA__,
+					"BUILD_FOR_VIEWER=1",
+				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChartViewer-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;

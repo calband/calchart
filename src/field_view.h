@@ -31,6 +31,7 @@
 #include <boost/shared_ptr.hpp>
 
 class FieldFrame;
+class AnimationFrame;
 class Animation;
 
 // Field:
@@ -94,7 +95,7 @@ public:
 
 private:
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-	wxWindow *mFrame;
+	AnimationFrame *mFrame;
 #else
 	FieldFrame *mFrame;
 #endif

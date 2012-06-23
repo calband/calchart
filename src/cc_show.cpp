@@ -64,6 +64,7 @@ CC_FileException::CC_FileException(uint32_t nameID)
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
+IMPLEMENT_DYNAMIC_CLASS(CC_show_FinishedLoading, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_setup, wxObject)
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
@@ -1054,6 +1055,8 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	//ReadAndCheckID(stream, INGL_END);
 	ReadAndCheckID(stream, INGL_SHOW);
 	mSheetNum = 0;
+	CC_show_FinishedLoading finishedLoading;
+	UpdateAllViews(NULL, &finishedLoading);
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");

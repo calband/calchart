@@ -41,7 +41,7 @@ END_EVENT_TABLE()
 AnimationCanvas::AnimationCanvas(AnimationView *view, wxWindow *parent,
 								 const wxSize& size) :
 wxPanel(parent, wxID_ANY, wxDefaultPosition, size),
-mView(view),
+mAnimationView(view),
 mUserScale(CalcUserScale((view) ? view->GetShowSize() : CC_coord(0, 0), size)),
 mUserOriginX(CalcUserOriginX((view) ? view->GetShowSize() : CC_coord(0, 0), size)),
 mMouseDown(false)
@@ -57,7 +57,7 @@ AnimationCanvas::~AnimationCanvas()
 void
 AnimationCanvas::SetView(AnimationView *view)
 {
-	mView = view;
+	mAnimationView = view;
 }
 
 
@@ -77,9 +77,9 @@ AnimationCanvas::OnPaint(wxPaintEvent& event)
 		dc.DrawRectangle(mMouseXStart, mMouseYStart,
 						  mMouseXEnd - mMouseXStart, mMouseYEnd - mMouseYStart);
 	}
-	if (mView)
+	if (mAnimationView)
 	{
-		mView->OnDraw(&dc);
+		mAnimationView->OnDraw(&dc);
 	}
 }
 
@@ -120,8 +120,8 @@ AnimationCanvas::CalcUserOriginX(const CC_coord& showSize, const wxSize& windowS
 void
 AnimationCanvas::OnSize(wxSizeEvent& event)
 {
-	mUserScale = CalcUserScale((mView) ? mView->GetShowSize() : CC_coord(0, 0), event.GetSize());
-	mUserOriginX = CalcUserOriginX((mView) ? mView->GetShowSize() : CC_coord(0, 0), event.GetSize());
+	mUserScale = CalcUserScale((mAnimationView) ? mAnimationView->GetShowSize() : CC_coord(0, 0), event.GetSize());
+	mUserOriginX = CalcUserOriginX((mAnimationView) ? mAnimationView->GetShowSize() : CC_coord(0, 0), event.GetSize());
 	Refresh();
 }
 
@@ -139,7 +139,7 @@ AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 
 	if (!event.AltDown() && !event.ShiftDown())
 	{
-		mView->UnselectMarchers();
+		mAnimationView->UnselectMarchers();
 	}
 
 	mMouseXEnd = mMouseXStart = x;
@@ -165,16 +165,16 @@ AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 	// if mouse lifted very close to where clicked, then it is a previous beat move
 	if ((std::abs(mMouseXEnd - mMouseXStart) < Int2Coord(1)/2) && (std::abs(mMouseYEnd - mMouseYStart) < Int2Coord(1)/2))
 	{
-		if (mView)
+		if (mAnimationView)
 		{
-			mView->PrevBeat();
+			mAnimationView->PrevBeat();
 		}
 	}
 	else
 	{
-		if (mView)
+		if (mAnimationView)
 		{
-			mView->SelectMarchersInBox(mMouseXStart, mMouseYStart, mMouseXEnd, mMouseYEnd, event.AltDown());
+			mAnimationView->SelectMarchersInBox(mMouseXStart, mMouseYStart, mMouseXEnd, mMouseYEnd, event.AltDown());
 		}
 	}
 	Refresh();
@@ -184,9 +184,9 @@ AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 void
 AnimationCanvas::OnRightUpMouseEvent(wxMouseEvent& event)
 {
-	if (mView)
+	if (mAnimationView)
 	{
-		mView->NextBeat();
+		mAnimationView->NextBeat();
 	}
 }
 
@@ -212,15 +212,15 @@ AnimationCanvas::OnMouseMove(wxMouseEvent& event)
 
 void AnimationCanvas::OnChar(wxKeyEvent& event)
 {
-	if (mView)
+	if (mAnimationView)
 	{
 		if (event.GetKeyCode() == WXK_LEFT)
-			mView->PrevBeat();
+			mAnimationView->PrevBeat();
 		else if (event.GetKeyCode() == WXK_RIGHT)
-			mView->NextBeat();
+			mAnimationView->NextBeat();
 		else if (event.GetKeyCode() == WXK_SPACE)
 		{
-			mView->ToggleTimer();
+			mAnimationView->ToggleTimer();
 		}
 		else
 		{
