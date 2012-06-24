@@ -121,6 +121,21 @@ mWhenClosed(onClose)
 	SetMenuBar(menu_bar);
 
 // Add a toolbar
+	// Add the field canvas here so that it gets the focus when we switch to frame.
+	mSplitter = new wxSplitterWindow(this, wxID_ANY);
+	mSplitter->SetSize(GetClientSize());
+	mSplitter->SetSashGravity(0.5);
+	mSplitter->SetMinimumPaneSize(20);
+	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
+	mSplitter->SetMinSize(wxSize(300, 400));
+	
+	mOmniViewCanvas = new CCOmniView_Canvas(mAnimationView, mSplitter);
+	mCanvas = new AnimationCanvas(mAnimationView, mSplitter);
+	
+	mSplitA = mOmniViewCanvas;
+	mSplitB = mCanvas;
+	mSplitter->SplitHorizontally(mSplitA, mSplitB, 100);
+	
 	AddCoolToolBar(GetAnimationToolBar(), *this);
 
 	// set up the frame
@@ -179,20 +194,7 @@ mWhenClosed(onClose)
 	topsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));
 	
 	// Add the field canvas
-	mSplitter = new wxSplitterWindow(this, wxID_ANY);
-	mSplitter->SetSize(GetClientSize());
-	mSplitter->SetSashGravity(0.5);
-	mSplitter->SetMinimumPaneSize(20);
-	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
-	mSplitter->SetMinSize(wxSize(300, 400));
 	topsizer->Add(mSplitter, wxSizerFlags(1).Expand());
-
-	mOmniViewCanvas = new CCOmniView_Canvas(mAnimationView, mSplitter);
-	mCanvas = new AnimationCanvas(mAnimationView, mSplitter);
-
-	mSplitA = mOmniViewCanvas;
-	mSplitB = mCanvas;
-	mSplitter->SplitHorizontally(mSplitA, mSplitB, 100);
 
 	SetSizer( topsizer );
 	topsizer->SetSizeHints(this);				  // set size hints to honour minimum size
