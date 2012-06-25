@@ -42,22 +42,6 @@ picked(true), beats(1), pts(show->GetNumPoints()), name(newname)
 }
 
 
-CC_sheet::CC_sheet(CC_sheet *sht)
-: show(sht->show),
-picked(sht->picked), beats(1), pts(show->GetNumPoints()), name(sht->name), number(sht->number)
-{
-	int i;
-
-	for (i = 0; i < show->GetNumPoints(); i++)
-	{
-		pts[i] = sht->pts[i];
-		pts[i].sym = SYMBOL_PLAIN;
-		pts[i].cont = 0;
-	}
-	animcont.push_back(CC_continuity(contnames[0], 0));
-}
-
-
 CC_sheet::~CC_sheet()
 {
 }
@@ -88,7 +72,7 @@ bool CC_sheet::SelectPointsOfContinuity(unsigned i) const
 	CC_show::SelectionList select;
 	for (j = 0; j < show->GetNumPoints(); j++)
 	{
-		if (pts[j].cont == i)
+		if (pts[j].GetCont() == i)
 		{
 			select.insert(j);
 		}
@@ -100,7 +84,7 @@ bool CC_sheet::SelectPointsOfContinuity(unsigned i) const
 
 void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 {
-	unsigned i, j, cpy, col;
+	unsigned i, cpy, col;
 	CC_coord c, coff(show->GetMode().FieldOffset());
 
 	std::vector<CC_point> newpts(num);
@@ -118,14 +102,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 			c.y += Int2Coord(2);
 			col = 0;
 		}
-		newpts[i].flags = 0;
-		newpts[i].sym = SYMBOL_PLAIN;
-		newpts[i].cont = plaincont.GetNum();
-		newpts[i].pos = c;
-		for (j = 0; j < CC_point::kNumRefPoints; j++)
-		{
-			newpts[i].ref[j] = newpts[i].pos;
-		}
+		newpts[i] = CC_point(plaincont.GetNum(), c);
 	}
 	pts = newpts;
 }
@@ -249,7 +226,7 @@ bool CC_sheet::ContinuityInUse(unsigned idx) const
 
 	for (i = 0; i < show->GetNumPoints(); i++)
 	{
-		if (pts[i].cont == c.GetNum()) return true;
+		if (pts[i].GetCont() == c.GetNum()) return true;
 	}
 	return false;
 }
@@ -279,12 +256,12 @@ void CC_sheet::SetBeats(unsigned short b)
 
 
 // Get position of point
-const CC_coord& CC_sheet::GetPosition(unsigned i, unsigned ref) const
+CC_coord CC_sheet::GetPosition(unsigned i, unsigned ref) const
 {
 	if (ref == 0)
-		return pts[i].pos;
+		return pts[i].GetPos();
 	else
-		return pts[i].ref[ref-1];
+		return pts[i].GetRefPos(ref-1);
 }
 
 
@@ -293,10 +270,10 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
 {
 	unsigned j;
 
-	pts[i].pos = val;
+	pts[i].SetPos(val);
 	for (j = 0; j < CC_point::kNumRefPoints; j++)
 	{
-		pts[i].ref[j] = val;
+		pts[i].SetRefPos(val, j);
 	}
 }
 
@@ -310,16 +287,16 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 	{
 		for (j=0; j<CC_point::kNumRefPoints; j++)
 		{
-			if (pts[i].ref[j] == pts[i].pos)
+			if (pts[i].GetRefPos(j) == pts[i].GetPos())
 			{
-				pts[i].ref[j] = clippedval;
+				pts[i].SetRefPos(clippedval, j);
 			}
 		}
-		pts[i].pos = clippedval;
+		pts[i].SetPos(clippedval);
 	}
 	else
 	{
-		pts[i].ref[ref-1] = clippedval;
+		pts[i].SetRefPos(clippedval, ref-1);
 	}
 }
 
@@ -356,7 +333,7 @@ void CC_sheet::Draw(wxDC& dc, unsigned ref, bool primary)
 				dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
 				fillBrush = CalChartBrushes[COLOR_REF_POINT];
 			}
-			pts[i].Draw(dc, ref, origin, fillBrush, show->GetPointLabel(i));
+			DrawPoint(pts[i], dc, ref, origin, fillBrush, show->GetPointLabel(i));
 		}
 	}
 	dc.SetFont(wxNullFont);

@@ -377,7 +377,7 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 			{
 				x = sheet.GetPosition(i, ref).x+origin.x;
 				y = sheet.GetPosition(i, ref).y+origin.y;
-				switch (sheet.pts[i].sym)
+				switch (sheet.pts[i].GetSymbol())
 				{
 					case SYMBOL_SOL:
 					case SYMBOL_SOLBKSL:
@@ -389,7 +389,7 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 						dc->SetBrush(*wxTRANSPARENT_BRUSH);
 				}
 				dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
-				switch (sheet.pts[i].sym)
+				switch (sheet.pts[i].GetSymbol())
 				{
 					case SYMBOL_SL:
 					case SYMBOL_X:
@@ -404,7 +404,7 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 					default:
 						break;
 				}
-				switch (sheet.pts[i].sym)
+				switch (sheet.pts[i].GetSymbol())
 				{
 					case SYMBOL_BKSL:
 					case SYMBOL_X:

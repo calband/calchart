@@ -42,7 +42,6 @@ class CC_sheet
 public:
 	CC_sheet(CC_show *shw);
 	CC_sheet(CC_show *shw, const wxString& newname);
-	CC_sheet(CC_sheet *sht);
 	~CC_sheet();
 
 	void Draw(wxDC& dc, unsigned ref, bool primary);
@@ -89,7 +88,7 @@ public:
 	std::vector<CC_point> GetPoints() const { return pts; }
 	void SetPoints(const std::vector<CC_point>& points) { pts = points; }
 
-	const CC_coord& GetPosition(unsigned i, unsigned ref = 0) const;
+	CC_coord GetPosition(unsigned i, unsigned ref = 0) const;
 	void SetAllPositions(const CC_coord& val, unsigned i);
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 

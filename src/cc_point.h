@@ -30,37 +30,49 @@ class wxDC;
 class wxString;
 class wxBrush;
 
+// Perhaps this should be put in namespace?
+
 class CC_point
 {
 public:
 	static const unsigned kNumRefPoints = 3;
-	CC_point()
-		:flags(0), sym(SYMBOL_PLAIN), cont(0) {}
+	CC_point();
+	CC_point(unsigned char cont, const CC_coord& pos);
 
-	inline bool GetFlip() const { return (bool)(flags & kPointLabel); }
-	inline void Flip(bool val = true)
-	{
-		if (val) flags |= kPointLabel;
-		else flags &= ~kPointLabel;
-	};
-	inline void FlipToggle() { Flip(GetFlip() ? false:true); }
+	bool GetFlip() const;
+	void Flip(bool val = true);
+	void FlipToggle();
 
-	unsigned short flags;
+	SYMBOL_TYPE GetSymbol() const;
+	void SetSymbol(SYMBOL_TYPE sym);
+
+	unsigned char GetCont() const;
+	void SetCont(unsigned char cont);
+
+	CC_coord GetPos() const;
+	void SetPos(const CC_coord& c);
+
+	CC_coord GetRefPos(unsigned which) const;
+	void SetRefPos(const CC_coord& c, unsigned which);
+
+private:
+	unsigned short mFlags;
 	// by having both a sym type and cont index, we can have several
 	// points share the same symbol but have different continuities.
-	SYMBOL_TYPE sym;
-	unsigned char cont;
-	CC_coord pos;
-	CC_coord ref[kNumRefPoints];
+	SYMBOL_TYPE mSym;
+	unsigned char mCont;
+	CC_coord mPos;
+	CC_coord mRef[kNumRefPoints];
 
-	// Draw the point
-	void Draw(wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label);
-	
 private:
 	static const unsigned kPointLabel = 1;
 
 friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
 };
+
+// We break this out of the class to make CalChart internals more cross platform
+// Draw the point
+void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label);
 
 void CC_point_UnitTests();
 

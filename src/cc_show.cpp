@@ -800,12 +800,13 @@ T& CC_show::SaveObjectInternal(T& stream)
 // Point symbols
 		for (i = 0; i < GetNumPoints(); i++)
 		{
-			if (curr_sheet->GetPoint(i).sym != 0)
+			if (curr_sheet->GetPoint(i).GetSymbol() != 0)
 			{
 				WriteChunkHeader(stream, INGL_SYMB, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					Write(stream, &curr_sheet->GetPoint(i).sym, 1);
+					SYMBOL_TYPE tmp = curr_sheet->GetPoint(i).GetSymbol();
+					Write(stream, &tmp, 1);
 				}
 				break;
 			}
@@ -813,12 +814,13 @@ T& CC_show::SaveObjectInternal(T& stream)
 // Point continuity types
 		for (i = 0; i < GetNumPoints(); i++)
 		{
-			if (curr_sheet->GetPoint(i).cont != 0)
+			if (curr_sheet->GetPoint(i).GetCont() != 0)
 			{
 				WriteChunkHeader(stream, INGL_TYPE, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					Write(stream, &curr_sheet->GetPoint(i).cont, 1);
+					unsigned char tmp = curr_sheet->GetPoint(i).GetSymbol();
+					Write(stream, &tmp, 1);
 				}
 				break;
 			}
@@ -979,7 +981,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
-				sheet.GetPoint(i).sym = (SYMBOL_TYPE)(*(d++));
+				sheet.GetPoint(i).SetSymbol((SYMBOL_TYPE)(*(d++)));
 			}
 			ReadLong(stream, name);
 		}
@@ -994,7 +996,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
-				sheet.GetPoint(i).cont = *(d++);
+				sheet.GetPoint(i).SetCont(*(d++));
 			}
 			ReadLong(stream, name);
 		}

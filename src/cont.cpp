@@ -179,19 +179,19 @@ ContToken::~ContToken() {}
 
 ContPoint::~ContPoint() {}
 
-const CC_coord& ContPoint::Get(AnimateCompile* anim) const
+CC_coord ContPoint::Get(AnimateCompile* anim) const
 {
 	return anim->pt;
 }
 
 
-const CC_coord& ContStartPoint::Get(AnimateCompile* anim) const
+CC_coord ContStartPoint::Get(AnimateCompile* anim) const
 {
 	return anim->curr_sheet->GetPosition(anim->curr_pt);
 }
 
 
-const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const
+CC_coord ContNextPoint::Get(AnimateCompile* anim) const
 {
 	CC_show::const_CC_sheet_iterator_t sheet = anim->curr_sheet + 1;
 
@@ -211,7 +211,7 @@ const CC_coord& ContNextPoint::Get(AnimateCompile* anim) const
 }
 
 
-const CC_coord& ContRefPoint::Get(AnimateCompile* anim) const
+CC_coord ContRefPoint::Get(AnimateCompile* anim) const
 {
 	return anim->curr_sheet->GetPosition(anim->curr_pt, refnum+1);
 }

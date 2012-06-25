@@ -45,7 +45,7 @@ public:
 	ContPoint() {}
 	virtual ~ContPoint();
 
-	virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual CC_coord Get(AnimateCompile* anim) const;
 };
 
 class ContStartPoint : public ContPoint
@@ -53,7 +53,7 @@ class ContStartPoint : public ContPoint
 public:
 	ContStartPoint() {}
 
-	virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual CC_coord Get(AnimateCompile* anim) const;
 };
 
 class ContNextPoint : public ContPoint
@@ -61,7 +61,7 @@ class ContNextPoint : public ContPoint
 public:
 	ContNextPoint() {}
 
-	virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual CC_coord Get(AnimateCompile* anim) const;
 };
 
 class ContRefPoint : public ContPoint
@@ -69,7 +69,7 @@ class ContRefPoint : public ContPoint
 public:
 	ContRefPoint(unsigned n): refnum(n) {}
 
-	virtual const CC_coord& Get(AnimateCompile* anim) const;
+	virtual CC_coord Get(AnimateCompile* anim) const;
 private:
 	unsigned refnum;
 };

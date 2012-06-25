@@ -746,8 +746,8 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		max_n = fmin;
 		for (unsigned i=0; i < mShow.GetNumPoints(); i++)
 		{
-			if (sheet.GetPoint(i).pos.x < max_s) max_s = sheet.GetPoint(i).pos.x;
-			if (sheet.GetPoint(i).pos.x > max_n) max_n = sheet.GetPoint(i).pos.x;
+			if (sheet.GetPoint(i).GetPos().x < max_s) max_s = sheet.GetPoint(i).GetPos().x;
+			if (sheet.GetPoint(i).GetPos().x > max_n) max_n = sheet.GetPoint(i).GetPos().x;
 		}
 /* make sure bounds are on field */
 		if (max_s < fmin) max_s = fmin;
@@ -841,15 +841,15 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 	buffer<<buf;
 	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
-		if ((sheet.GetPoint(i).pos.x > clip_n) || (sheet.GetPoint(i).pos.x < clip_s)) continue;
+		if ((sheet.GetPoint(i).GetPos().x > clip_n) || (sheet.GetPoint(i).GetPos().x < clip_s)) continue;
 		float fieldheight = Coord2Float(fieldsize.y);
 		float fieldoffx = Coord2Float(fieldoff.x);
 		float fieldoffy = Coord2Float(fieldoff.y);
-		float dot_x = (Coord2Float(sheet.GetPoint(i).pos.x) - fieldoffx - step_offset) /
+		float dot_x = (Coord2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) /
 			step_width * field_w;
-		float dot_y = (1.0 - (Coord2Float(sheet.GetPoint(i).pos.y)-fieldoffy)/fieldheight)*field_h;
+		float dot_y = (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)-fieldoffy)/fieldheight)*field_h;
 		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.GetPoint(i).sym]);
+			dot_x, dot_y, dot_routines[sheet.GetPoint(i).GetSymbol()]);
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
 			static_cast<const char*>(mShow.GetPointLabel(i).mb_str()), dot_x, dot_y,
@@ -982,14 +982,14 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
 		float dot_x = stage_field_x +
-			(Coord2Float(sheet.GetPoint(i).pos.x) - modesprshow->StepsX()) /
+			(Coord2Float(sheet.GetPoint(i).GetPos().x) - modesprshow->StepsX()) /
 			modesprshow->StepsW() * stage_field_w;
 		float dot_y = stage_field_y + stage_field_h * (1.0 -
-			(Coord2Float(sheet.GetPoint(i).pos.y)-
+			(Coord2Float(sheet.GetPoint(i).GetPos().y)-
 			modesprshow->StepsY())/
 			modesprshow->StepsH());
 		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.GetPoint(i).sym]);
+			dot_x, dot_y, dot_routines[sheet.GetPoint(i).GetSymbol()]);
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
 			static_cast<const char*>(mShow.GetPointLabel(i).mb_str()), dot_x, dot_y,
@@ -1027,8 +1027,8 @@ void PrintShowToPS::PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
 		snprintf(buf, sizeof(buf), "%.2f %.2f dotbox\n",
-			(Coord2Float(sheet.GetPoint(i).pos.x)-fieldx) / fieldwidth * width,
-			(1.0 - (Coord2Float(sheet.GetPoint(i).pos.y)-
+			(Coord2Float(sheet.GetPoint(i).GetPos().x)-fieldx) / fieldwidth * width,
+			(1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)-
 			fieldy)/fieldheight) * height);
 		buffer<<buf;
 	}
