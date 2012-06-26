@@ -710,8 +710,8 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C70C7B62156ABC8800E14F1B /* CalChartViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChartViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C70C7B64156ABC8A00E14F1B /* CalChartViewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CalChartViewer-Info.plist"; path = "/Users/rmpowell77/Development/calchart/trunk/build-macos/CalChartViewer-Info.plist"; sourceTree = "<absolute>"; };
+		C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChartHomeView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C70C7B64156ABC8A00E14F1B /* CalChartHomeView-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CalChartHomeView-Info.plist"; path = "/Users/rmpowell77/Development/calchart/trunk/build-macos/CalChartHomeView-Info.plist"; sourceTree = "<absolute>"; };
 		C72C5FDF155CD16100194225 /* cc_omniview_constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_omniview_constants.h; sourceTree = "<group>"; };
 		C72E2B071441150400118C03 /* top_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = top_frame.cpp; sourceTree = "<group>"; };
 		C72E2B081441150400118C03 /* top_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = top_frame.h; sourceTree = "<group>"; };
@@ -975,7 +975,7 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* CalChart.app */,
-				C70C7B62156ABC8800E14F1B /* CalChartViewer.app */,
+				C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1006,7 +1006,7 @@
 			children = (
 				C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */,
 				8D1107310486CEB800E47090 /* CalChart-Info.plist */,
-				C70C7B64156ABC8A00E14F1B /* CalChartViewer-Info.plist */,
+				C70C7B64156ABC8A00E14F1B /* CalChartHomeView-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 			);
 			name = Resources;
@@ -1272,9 +1272,9 @@
 			productReference = 8D1107320486CEB800E47090 /* CalChart.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C70C7A8A156ABC8800E14F1B /* CalChartViewer */ = {
+		C70C7A8A156ABC8800E14F1B /* CalChartHomeView */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C70C7B5F156ABC8800E14F1B /* Build configuration list for PBXNativeTarget "CalChartViewer" */;
+			buildConfigurationList = C70C7B5F156ABC8800E14F1B /* Build configuration list for PBXNativeTarget "CalChartHomeView" */;
 			buildPhases = (
 				C70C7A8B156ABC8800E14F1B /* Resources */,
 				C70C7AB6156ABC8800E14F1B /* Sources */,
@@ -1286,10 +1286,10 @@
 			);
 			dependencies = (
 			);
-			name = CalChartViewer;
+			name = CalChartHomeView;
 			productInstallPath = "$(HOME)/Applications";
 			productName = CalChart;
-			productReference = C70C7B62156ABC8800E14F1B /* CalChartViewer.app */;
+			productReference = C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1315,7 +1315,7 @@
 			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* CalChart */,
-				C70C7A8A156ABC8800E14F1B /* CalChartViewer */,
+				C70C7A8A156ABC8800E14F1B /* CalChartHomeView */,
 			);
 		};
 /* End PBXProject section */
@@ -1654,9 +1654,9 @@
 					"BUILD_FOR_VIEWER=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "CalChartViewer-Info.plist";
+				INFOPLIST_FILE = "CalChartHomeView-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
-				PRODUCT_NAME = CalChartViewer;
+				PRODUCT_NAME = CalChartHomeView;
 			};
 			name = Debug;
 		};
@@ -1673,9 +1673,9 @@
 					"BUILD_FOR_VIEWER=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "CalChartViewer-Info.plist";
+				INFOPLIST_FILE = "CalChartHomeView-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
-				PRODUCT_NAME = CalChartViewer;
+				PRODUCT_NAME = CalChartHomeView;
 			};
 			name = Release;
 		};
@@ -1700,7 +1700,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C70C7B5F156ABC8800E14F1B /* Build configuration list for PBXNativeTarget "CalChartViewer" */ = {
+		C70C7B5F156ABC8800E14F1B /* Build configuration list for PBXNativeTarget "CalChartHomeView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C70C7B60156ABC8800E14F1B /* Debug */,
