@@ -180,6 +180,7 @@ wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 mCanvas(NULL),
 mAnimationFrame(NULL)
 {
+	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_MENU ) );
 // Give it an icon
 	SetBandIcon(this);
 
