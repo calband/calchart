@@ -2,11 +2,11 @@
 
 How to release calchart:
 
-The current calchart version is 3.3.0.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.3.0)
+The current calchart version is 3.3.1.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.3.1)
 
 0.1 Increment the version in ccvers.h to CCVER
 
-0.2 Modify the release version in the install script, build-win/CalChartInstallScript.iss.
+0.2 Modify the release version in the install script, build-win/CalChartInstallScript.iss and build-win/CalChartHomeViewInstallScript.iss.
 
 0.3 Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, $CCVER
 

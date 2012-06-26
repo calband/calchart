@@ -19,6 +19,8 @@ feature:
 3524584: Should be able to have custom camera angles
 3524592: Put Reset reference points back in
 3524587: selection should behave same in animation and field view
+3524588: Add short-cut for OmniView.
+3322611: Export to MOV, AVI or something home viewable
 
 ---
 What is CalChart?

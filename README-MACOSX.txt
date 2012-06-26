@@ -54,6 +54,7 @@ $ make generate
 
 Now open the xcode project in build-macosx/CalChart.xcodeproj
 Build and run the project
+Do the same for CalChartViewer
 
 I modify the project to match up with the results of theses commands:
 $ wx-config --cxxflags
