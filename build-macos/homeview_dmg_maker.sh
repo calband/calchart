@@ -8,9 +8,9 @@ WC_DMG=wc.dmg
 WC_DIR=wc
 
 echo Creating a working copy for our DMG
-bunzip2 -k calchart_template.dmg.bz2
-cp calchart_template.dmg $WC_DMG
-rm calchart_template.dmg
+bunzip2 -k calcharthomeview_template.dmg.bz2
+cp calcharthomeview_template.dmg $WC_DMG
+rm calcharthomeview_template.dmg
 
 echo Mounting the disk image...
 mkdir -p $WC_DIR
