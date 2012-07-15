@@ -167,6 +167,7 @@ mWhenClosed(onClose)
 	wxSpinCtrl *tempo = new wxSpinCtrl(this, CALCHART__anim_tempo);
 	tempo->SetRange(10, 300);
 	tempo->SetValue(tmp);
+	SetTempo(tmp);
 	sizer1->Add(tempo, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
