@@ -1,5 +1,5 @@
 --- CalChart README.txt ---
-Updated on 5/6/2012 by Richard Powell
+Updated on 7/15/2012 by Richard Powell
 ---
 
 ---
@@ -12,6 +12,7 @@ Bugs and features fixed in this release:
 3524585: Rotate in omniview with q causes it to go upside-down	
 3524583: Fix camera angel 3.
 3524582: Adjust picture should be easier, seems to have issues.
+3538572: tempo is 10 in Viewer on windows
 
 feature:
 3524594: add error as toolbars.
@@ -21,6 +22,7 @@ feature:
 3524587: selection should behave same in animation and field view
 3524588: Add short-cut for OmniView.
 3322611: Export to MOV, AVI or something home viewable
+3544446: continue marcher letters after 'Z' with  'AA' , 'BB'
 
 ---
 What is CalChart?
