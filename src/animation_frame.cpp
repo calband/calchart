@@ -162,9 +162,11 @@ mWhenClosed(onClose)
 
 	sizer1 = new wxBoxSizer(wxVERTICAL);
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Tempo")), centerText);
+	// defect 3538572: Callings set may update tempo, cache value before call.
+	unsigned tmp = GetTempo();
 	wxSpinCtrl *tempo = new wxSpinCtrl(this, CALCHART__anim_tempo);
 	tempo->SetRange(10, 300);
-	tempo->SetValue(GetTempo());
+	tempo->SetValue(tmp);
 	sizer1->Add(tempo, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
