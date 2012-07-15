@@ -187,12 +187,27 @@ static void CalculateLabels(const CC_show& show, std::set<unsigned>& letters, bo
 	maxnum = 1;
 	for (unsigned i = 0; i < show.GetNumPoints(); ++i)
 	{
-		const wxString& tmp = show.GetPointLabel(i);
+		wxString tmp = show.GetPointLabel(i);
+		size_t letterIndex = 0;
 		if (!isdigit(tmp[0]))
 		{
-			letters.insert(tmp[0]-'A');
-			maxnum = std::max(maxnum ,tmp[1]-'0'+1);
 			use_letters = true;
+			letterIndex += tmp[0]-'A';
+			tmp.Remove(0, 1);
+			if (!isdigit(tmp[0]))
+			{
+				tmp.Remove(0, 1);
+				letterIndex += 26;
+			}
+		}
+		long num = 0;
+		if (tmp.ToLong(&num))
+		{
+			maxnum = std::max<int>(maxnum,num + 1);
+		}
+		if (use_letters)
+		{
+			letters.insert(letterIndex);
 		}
 	}
 	if (use_letters == false)
@@ -288,19 +303,7 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 	wxBoxSizer *right_middle_sizer = new wxBoxSizer( wxVERTICAL );
 	wxStaticBoxSizer *boxsizer;
 
-	boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, wxT("&Letters")), wxHORIZONTAL);
-	wxListBox *labels = new wxListBox(parent, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-	for (int i = 0; i < 26; ++i)
-	{
-		wxString buf(static_cast<char>('A' + i));
-		labels->InsertItems(1, &buf, i);
-	}
-	boxsizer->Add(labels, 0, wxGROW|wxALL, 0 );
-	left_middle_sizer->Add(boxsizer, 0, wxALL, 5 );
-
-	middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER );
-
-// now add right side
+	// add the left side
 	wxBoxSizer *horizontal_sizer = new wxBoxSizer( wxHORIZONTAL );
 	right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10 );
 	wxStaticText* pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Points:"), wxDefaultPosition, wxDefaultSize, 0);
@@ -315,17 +318,41 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 	wxSpinCtrl* numberColumns = new wxSpinCtrl(parent, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
 	horizontal_sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
+	// changing from radio box to choice
 	wxString strs[2] = { wxT("Numbers"), wxT("Letters") };
-	wxRadioBox* label_type = new wxRadioBox(parent, ShowInfoReq_ID_LABEL_TYPE, wxT("&Labels"), wxDefaultPosition, wxDefaultSize, 2, strs, 2);
+	wxChoice* label_type = new wxChoice(parent, ShowInfoReq_ID_LABEL_TYPE, wxDefaultPosition, wxDefaultSize, 2, strs);
+	label_type->SetSelection(0);
 	right_middle_sizer->Add(label_type, 0, wxALL, 10 );
 
+	horizontal_sizer = new wxBoxSizer( wxHORIZONTAL );
+	right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10 );
+	wxStaticText* label = new wxStaticText(parent, wxID_STATIC, wxT("P&oints per letter"), wxDefaultPosition, wxDefaultSize, 0);
+	horizontal_sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+	wxSpinCtrl* lettersize = new wxSpinCtrl(parent, ShowInfoReq_ID_POINTS_PER_LETTER, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 99, 10);
+	horizontal_sizer->Add(lettersize, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+	
 	middle_sizer->Add(right_middle_sizer, 0, wxALIGN_CENTER );
-	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
 
-	boxsizer = new wxStaticBoxSizer( new wxStaticBox(parent, wxID_STATIC, wxT("P&oints per letter")), wxHORIZONTAL);
-	wxSlider* lettersize = new wxSlider(parent, ShowInfoReq_ID_POINTS_PER_LETTER, 10, 1, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL|wxSL_LABELS );
-	boxsizer->Add(lettersize, 0, wxALIGN_CENTER|wxEXPAND );
-	right_middle_sizer->Add(boxsizer, 0, wxALL, 10 );
+	// now add right side
+	boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, wxT("&Letters")), wxHORIZONTAL);
+	wxListBox *labels = new wxListBox(parent, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+	for (int i = 0; i < 26; ++i)
+	{
+		wxString buf(static_cast<char>('A' + i));
+		buf += wxString(static_cast<char>('A' + i));
+		labels->InsertItems(1, &buf, i);
+	}
+	for (int i = 0; i < 26; ++i)
+	{
+		wxString buf(static_cast<char>('A' + i));
+		labels->InsertItems(1, &buf, i);
+	}
+	boxsizer->Add(labels, 0, wxGROW|wxALL, 0 );
+	left_middle_sizer->Add(boxsizer, 0, wxALL, 5 );
+	
+	middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER );
+	
+	topsizer->Add(middle_sizer, 0, wxALIGN_CENTER );
 
 	if (putLastRowButtons)
 	{
@@ -364,8 +391,8 @@ bool ShowInfoReq::TransferDataToWindow()
 
 	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
 	wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
-	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
-	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxChoice* labelType = (wxChoice*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
 	pointsCtrl->SetValue(mShow->GetNumPoints());
@@ -373,7 +400,7 @@ bool ShowInfoReq::TransferDataToWindow()
 	labelType->SetSelection(use_letters);
 	pointsPerLine->SetValue(maxnum);
 	label_letters->DeselectAll();
-	for (unsigned i = 0; i < 26; ++i)
+	for (unsigned i = 0; i < label_letters->GetCount(); ++i)
 	{
 		if (letters.count(i))
 		{
@@ -388,8 +415,8 @@ bool ShowInfoReq::TransferDataFromWindow()
 {
 	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
 	wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
-	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
-	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxChoice* labelType = (wxChoice*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
 	mNumberPoints = pointsCtrl->GetValue();
@@ -421,7 +448,7 @@ bool ShowInfoReq::TransferDataFromWindow()
 				for (int i = 0; i < n; ++i)
 				{
 					wxString buffer;
-					buffer.Printf(wxT("%c%u"), letr+'A', i);
+					buffer.Printf(wxT("%s%u"), label_letters->GetString(letr), i);
 					mLabels.push_back(buffer);
 				}
 				num -= n;
@@ -435,18 +462,18 @@ bool ShowInfoReq::TransferDataFromWindow()
 
 bool ShowInfoReq::Validate()
 {
-	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	wxChoice* labelType = (wxChoice*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
 	if (labelType->GetSelection() == 0)
 	{
 		return true;
 	}
 	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
-	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
 	int num = pointsPerLine->GetValue();
 	int numlabels = 0;
-	for (unsigned i = 0; i < 26; i++)
+	for (unsigned i = 0; i < label_letters->GetCount(); i++)
 	{
 		if (label_letters->IsSelected(i))
 		{
@@ -485,8 +512,8 @@ bool ShowInfoReqWizard::TransferDataToWindow()
 	{
 		wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
 		wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
-		wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
-		wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+		wxChoice* labelType = (wxChoice*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+		wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 		wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
 		pointsCtrl->SetValue(mNumberPoints);
@@ -503,8 +530,8 @@ bool ShowInfoReqWizard::TransferDataFromWindow()
 {
 	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
 	wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
-	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
-	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxChoice* labelType = (wxChoice*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
 	mNumberPoints = pointsCtrl->GetValue();
@@ -536,7 +563,7 @@ bool ShowInfoReqWizard::TransferDataFromWindow()
 				for (int i = 0; i < n; ++i)
 				{
 					wxString buffer;
-					buffer.Printf(wxT("%c%u"), letr+'A', i);
+					buffer.Printf(wxT("%s%u"), label_letters->GetString(letr), i);
 					mLabels.push_back(buffer);
 				}
 				num -= n;
@@ -550,18 +577,18 @@ bool ShowInfoReqWizard::TransferDataFromWindow()
 
 bool ShowInfoReqWizard::Validate()
 {
-	wxRadioBox* labelType = (wxRadioBox*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
+	wxChoice* labelType = (wxChoice*) FindWindow(ShowInfoReq_ID_LABEL_TYPE);
 	if (labelType->GetSelection() == 0)
 	{
 		return true;
 	}
 	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
-	wxSlider* pointsPerLine = (wxSlider*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
+	wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
 	int num = pointsPerLine->GetValue();
 	int numlabels = 0;
-	for (unsigned i = 0; i < 26; i++)
+	for (unsigned i = 0; i < label_letters->GetCount(); i++)
 	{
 		if (label_letters->IsSelected(i))
 		{
