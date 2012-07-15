@@ -735,24 +735,45 @@ CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 	{
 			// predetermined camera angles:
 		case '1':
+		case '!':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
 			mViewAngle = kViewAngle_1;
 			mViewAngleZ = kViewAngle_z_1;
+			if (event.GetKeyCode() == '!')
+			{
+				mViewPoint.y *= -1;
+				mViewPoint.x *= -1;
+				mViewAngle = NormalizeAngle(mViewAngle + M_PI);
+			}
 			break;
 		case '2':
+		case '@':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint = viewpoint_t(kViewPoint_x_2, kViewPoint_y_2, kViewPoint_z_2);
 			mViewAngle = kViewAngle_2;
 			mViewAngleZ = kViewAngle_z_2;
+			if (event.GetKeyCode() == '@')
+			{
+				mViewPoint.y *= -1;
+				mViewPoint.x *= -1;
+				mViewAngle = NormalizeAngle(mViewAngle + M_PI);
+			}
 			break;
 		case '3':
+		case '#':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint = viewpoint_t(kViewPoint_x_3, kViewPoint_y_3, kViewPoint_z_3);
 			mViewAngle = kViewAngle_3;
 			mViewAngleZ = kViewAngle_z_3;
+			if (event.GetKeyCode() == '#')
+			{
+				mViewPoint.y *= -1;
+				mViewPoint.x *= -1;
+				mViewAngle = NormalizeAngle(mViewAngle + M_PI);
+			}
 			break;
-
+			
 		case '4':
 			OnCmd_FollowMarcher(-1);
 			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_4(), GetConfiguration_OmniViewPoint_Y_4(), GetConfiguration_OmniViewPoint_Z_4());

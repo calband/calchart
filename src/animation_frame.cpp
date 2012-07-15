@@ -440,8 +440,9 @@ AnimationFrame::OnCmd_ShowKeyboardControls(wxCommandEvent& event)
 {
 	wxMessageDialog dialog(this,
 						   wxT("Keyboard Commands"),
-						   wxT("1, 2, 3 : Select different camera angles (field, student, upper corner)\n")
-						   wxT("4, 5, 6 : Select custom camera angles (set to field, student, upper corner by default)\n")
+						   wxT("1, 2, 3 : Select different camera angles (student, field, upper corner)\n")
+						   wxT("shift-1, shift-2, shift-3 : Select ALUMNI different camera angles (Alumni, field viewing east, upper corner)\n")
+						   wxT("4, 5, 6 : Select custom camera angles (set to student, field, upper corner by default)\n")
 						   wxT("shift-4, shift-5, shift-6 : Set custom camera angle\n")
 						   wxT("+ : Move camera up\n")
 						   wxT("- : Move camera down\n")
