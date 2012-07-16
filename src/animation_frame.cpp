@@ -188,7 +188,7 @@ mWhenClosed(onClose)
 	sizer1 = new wxBoxSizer(wxVERTICAL);
 	mErrorList = new wxChoice(this, CALCHART__anim_errors, wxDefaultPosition, wxDefaultSize, 0, NULL);
 	mErrorList->Append(wxT("Errors..."));
-	mErrorList->SetSelection(1);
+	mErrorList->SetSelection(0);
 	sizer1->Add(mErrorList, centerWidget);
 	mErrorText = new FancyTextWin(this, wxID_ANY);
 	sizer1->Add(mErrorText, wxSizerFlags(1).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL));

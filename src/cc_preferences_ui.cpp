@@ -615,6 +615,7 @@ void ShowModeSetup::CreateControls()
 	SetSizer( topsizer );
 
 	wxChoice* modes = new wxChoice(this, MODE_CHOICE, wxDefaultPosition, wxDefaultSize, SHOWMODE_NUM, kShowModeStrings);
+	modes->SetSelection(0);
 	topsizer->Add(modes, sLeftBasicSizerFlags );
 
 	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
@@ -642,7 +643,9 @@ void ShowModeSetup::CreateControls()
 	wxBoxSizer* textsizer = new wxBoxSizer( wxHORIZONTAL );
 	sizer1->Add(textsizer, sBasicSizerFlags );
 	textsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Adjust yardline marker"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	textsizer->Add(new wxChoice(this, SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, MAX_YARD_LINES, yard_text_index));
+	wxChoice* textchoice = new wxChoice(this, SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, MAX_YARD_LINES, yard_text_index);
+	textchoice->SetSelection(0);
+	textsizer->Add(textchoice);
 	textsizer->Add(new wxTextCtrl(this, SHOW_LINE_VALUE), sBasicSizerFlags );
 
 	TransferDataToWindow();
@@ -816,6 +819,7 @@ void SpringShowModeSetup::CreateControls()
 	SetSizer( topsizer );
 
 	wxChoice* modes = new wxChoice(this, SPRING_MODE_CHOICE, wxDefaultPosition, wxDefaultSize, SPRINGSHOWMODE_NUM, kSpringShowModeStrings);
+	modes->SetSelection(0);
 	topsizer->Add(modes, sLeftBasicSizerFlags );
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
@@ -867,7 +871,9 @@ void SpringShowModeSetup::CreateControls()
 	wxBoxSizer* textsizer = new wxBoxSizer( wxHORIZONTAL );
 	sizer1->Add(textsizer, sBasicSizerFlags );
 	textsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Adjust yardline marker"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	textsizer->Add(new wxChoice(this, SPRING_SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, MAX_SPR_LINES, spr_line_text_index));
+	wxChoice* textchoice = new wxChoice(this, SPRING_SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, MAX_SPR_LINES, spr_line_text_index);
+	textchoice->SetSelection(0);
+	textsizer->Add(textchoice);
 	textsizer->Add(new wxTextCtrl(this, SPRING_SHOW_LINE_VALUE), sBasicSizerFlags );
 
 	TransferDataToWindow();
