@@ -389,11 +389,11 @@ bool PrintPostScriptDialog::TransferDataToWindow()
 #ifdef PRINT__RUN_CMD
 	text_cmd->SetValue(GetConfiguration_PrintCmd());
 	text_opts->SetValue(GetConfiguration_PrintOpts());
+	text_view_cmd->SetValue(GetConfiguration_PrintViewCmd());
+	text_view_opts->SetValue(GetConfiguration_PrintViewOpts());
 #else
 	text_cmd->SetValue(GetConfiguration_PrintFile());
 #endif
-	text_view_cmd->SetValue(GetConfiguration_PrintViewCmd());
-	text_view_opts->SetValue(GetConfiguration_PrintViewOpts());
 	radio_orient->SetSelection(GetConfiguration_PrintPSLandscape());
 	radio_method->SetSelection(GetConfiguration_PrintPSModes());
 	check_overview->SetValue(GetConfiguration_PrintPSOverview());
@@ -422,11 +422,11 @@ bool PrintPostScriptDialog::TransferDataFromWindow()
 #ifdef PRINT__RUN_CMD
 	SetConfiguration_PrintCmd(text_cmd->GetValue());
 	SetConfiguration_PrintOpts(text_opts->GetValue());
+	SetConfiguration_PrintViewCmd(text_view_cmd->GetValue());
+	SetConfiguration_PrintViewOpts(text_view_opts->GetValue());
 #else
 	SetConfiguration_PrintFile(text_cmd->GetValue());
 #endif
-	SetConfiguration_PrintViewCmd(text_view_cmd->GetValue());
-	SetConfiguration_PrintViewOpts(text_view_opts->GetValue());
 	SetConfiguration_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
 	SetConfiguration_PrintPSModes(radio_method->GetSelection());
 	SetConfiguration_PrintPSOverview(check_overview->GetValue());
