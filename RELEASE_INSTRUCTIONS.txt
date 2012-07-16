@@ -2,7 +2,7 @@
 
 How to release calchart:
 
-The current calchart version is 3.3.1.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.3.1)
+The current calchart version is 3.3.2.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.3.2)
 
 0.1 Increment the version in ccvers.h to CCVER
 
@@ -10,7 +10,7 @@ The current calchart version is 3.3.1.  In all commands below, substitute that n
 
 0.3 Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, $CCVER
 
-0.4 Edit build-macos/dmg_maker.sh to have the right version
+0.4 Edit build-macos/dmg_maker.sh and build-macos/homeview_dmg_maker.sh to have the right version
 
 1. copy trunk to a tag:
 $ svn copy -m "copying trunk to tag for version $CCVER" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER
