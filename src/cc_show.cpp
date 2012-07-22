@@ -35,6 +35,7 @@
 #include "platconf.h"
 
 #include <wx/wfstream.h>
+#include <wx/textfile.h>
 #include <list>
 
 static const wxChar *nofile_str = wxT("Unable to open file");
@@ -415,16 +416,16 @@ wxString CC_show::ImportContinuity(const wxString& file)
 	char c;
 	bool sheetmark;
 
-	wxFile fp(file, wxFile::read);
+	wxTextFile fp;
+	fp.Open(file);
 	if (fp.IsOpened())
 	{
 		int curr_sheet = -1;
 		currfontnum = lastfontnum = PSFONT_NORM;
 		line_text = NULL;
-		while (true)
+		for (size_t line = 0; line < fp.GetLineCount(); ++line)
 		{
-			if (fp.Eof()) break;
-			ReadDOSline(fp, tempbuf);
+			tempbuf = fp.GetLine(line);
 			sheetmark = false;
 			line_text = NULL;
 			if (tempbuf.Length() >= 2)

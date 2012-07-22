@@ -180,7 +180,6 @@ void SetConfigSpringShowYardline();
 void ClearConfigSpringShowYardline();
 
 class wxFile;
-extern int ReadDOSline(wxFile& fp, wxString& str);
 
 // DEBUG printing facilities
 #ifndef NDEBUG

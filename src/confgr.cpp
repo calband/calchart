@@ -623,20 +623,3 @@ void ReadConfig()
 	ReadConfigSpringYardlines();
 }
 
-
-int ReadDOSline(wxFile& fp, wxString& str)
-{
-	char buf[1024];
-	if (fp.Read(buf, sizeof(buf)) == 0)
-		return 0;
-	int c = strlen(buf);
-// chomp like, keep removing \r and \n from the end of a line
-	while(c && ((buf[c-1] == '\r') || (buf[c-1] == '\n')))
-	{
-		buf[c-1] = '\0';
-		c--;
-	}
-	str = wxString::FromUTF8(buf);
-	return c;
-}
-
