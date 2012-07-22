@@ -819,7 +819,7 @@ T& CC_show::SaveObjectInternal(T& stream)
 				WriteChunkHeader(stream, INGL_TYPE, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					unsigned char tmp = curr_sheet->GetPoint(i).GetSymbol();
+					unsigned char tmp = curr_sheet->GetPoint(i).GetCont();
 					Write(stream, &tmp, 1);
 				}
 				break;
