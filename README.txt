@@ -1,28 +1,15 @@
 --- CalChart README.txt ---
-Updated on 7/15/2012 by Richard Powell
+Updated on 7/22/2012 by Richard Powell
 ---
 
 ---
 What's new in this version?
 ---
 
-Bugs and features fixed in this release:
+Bugs fixed in this release:
 
-3524205: printing to ps doesn't work on mac, file is corrupted
-3524585: Rotate in omniview with q causes it to go upside-down	
-3524583: Fix camera angel 3.
-3524582: Adjust picture should be easier, seems to have issues.
-3538572: tempo is 10 in Viewer on windows
-
-feature:
-3524594: add error as toolbars.
-3524589: Change animation, comma, period for next/prev beat.
-3524584: Should be able to have custom camera angles
-3524592: Put Reset reference points back in
-3524587: selection should behave same in animation and field view
-3524588: Add short-cut for OmniView.
-3322611: Export to MOV, AVI or something home viewable
-3544446: continue marcher letters after 'Z' with  'AA' , 'BB'
+CalChart-3.3.2 corruption fixed
+3547345: continuity files do not import correctly
 
 ---
 What is CalChart?
@@ -116,6 +103,28 @@ For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
 If you need to regenerate the help documentation, see the README-docs.txt
+
+----------
+
+Release notes for 3.3.2:
+
+Bugs and features fixed in this release:
+
+3524205: printing to ps doesn't work on mac, file is corrupted
+3524585: Rotate in omniview with q causes it to go upside-down	
+3524583: Fix camera angel 3.
+3524582: Adjust picture should be easier, seems to have issues.
+3538572: tempo is 10 in Viewer on windows
+
+feature:
+3524594: add error as toolbars.
+3524589: Change animation, comma, period for next/prev beat.
+3524584: Should be able to have custom camera angles
+3524592: Put Reset reference points back in
+3524587: selection should behave same in animation and field view
+3524588: Add short-cut for OmniView.
+3322611: Export to MOV, AVI or something home viewable
+3544446: continue marcher letters after 'Z' with  'AA' , 'BB'
 
 ----------
 

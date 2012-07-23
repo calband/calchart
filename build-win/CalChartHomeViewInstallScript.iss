@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=CalChartHomeView
-AppVersion=3.3.2
+AppVersion=3.3.3
 DefaultDirName={pf}\CalChartHomeView
 DefaultGroupName=CalChartHomeView
 UninstallDisplayIcon={app}\CalChartHomeView.exe
