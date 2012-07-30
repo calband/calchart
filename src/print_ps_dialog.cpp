@@ -31,6 +31,7 @@
 #include <wx/filename.h>
 #include <wx/wfstream.h>
 #include <sstream>
+#include <iterator>
 
 enum
 {
@@ -108,7 +109,7 @@ void PrintPostScriptDialog::PrintShow()
 	bool doContSheet = GetConfiguration_PrintPSDoContSheet();
 	
 	PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet);
-	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards);
+	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards, mIsSheetPicked);
 	// stream to file:
 	{
 		wxFFileOutputStream outstream(s);
@@ -145,24 +146,21 @@ void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 		wxT("Pagest to Print"),
 		choices);
 	wxArrayInt markedChoices;
-	size_t n = 0;
-	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet, ++n)
+	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet)
 	{
-		if (sheet->IsPicked())
-			markedChoices.Add(n);
+		if (mIsSheetPicked.count(std::distance(mShow->GetSheetBegin(), sheet)))
+		{
+			markedChoices.Add(std::distance(mShow->GetSheetBegin(), sheet));
+		}
 	}
 	dialog.SetSelections(markedChoices);
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxArrayInt selections = dialog.GetSelections();
+		mIsSheetPicked.clear();
 // build up a set of what's been selected:
-		std::set<int> selected;
-		for (n = 0; n < selections.GetCount(); ++n)
-			selected.insert(selections[n]);
-// now mark the sheets
-		n = 0;
-		for (CC_show::CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet, ++n)
-			sheet->SetPicked(selected.find(n) != selected.end());
+		for (size_t n = 0; n < selections.GetCount(); ++n)
+			mIsSheetPicked.insert(selections[n]);
 	}
 }
 
@@ -196,10 +194,11 @@ PrintPostScriptDialog::PrintPostScriptDialog()
 }
 
 
-PrintPostScriptDialog::PrintPostScriptDialog(CC_show *show, bool printEPS,
+PrintPostScriptDialog::PrintPostScriptDialog(const CC_show *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
-long style)
+											 long style) :
+mShow(NULL)
 {
 	Init();
 
@@ -217,7 +216,7 @@ void PrintPostScriptDialog::Init()
 }
 
 
-bool PrintPostScriptDialog::Create(CC_show *show, bool printEPS,
+bool PrintPostScriptDialog::Create(const CC_show *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)
@@ -225,6 +224,10 @@ long style)
 	if (!wxDialog::Create(parent, id, caption, pos, size, style))
 		return false;
 	mShow = show;
+	for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin(); sheet!=mShow->GetSheetEnd(); ++sheet)
+	{
+		mIsSheetPicked.insert(std::distance(mShow->GetSheetBegin(), sheet));
+	}
 	eps = printEPS;
 
 	CreateControls();

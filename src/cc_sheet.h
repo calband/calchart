@@ -96,12 +96,8 @@ public:
 	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer animcont;
 	
-	/* for requestors like printing */
-	bool IsPicked() const { return picked; }
-	void SetPicked(bool p) { picked = p; }
 private:
 	CC_show *show;
-	bool picked;							  
 	unsigned short beats;
 	std::vector<CC_point> pts;
 	wxString name;

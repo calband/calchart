@@ -26,6 +26,7 @@
 #include "cc_types.h"
 
 #include <iostream>
+#include <set>
 
 class CC_sheet;
 class CC_show;
@@ -37,7 +38,7 @@ class PrintShowToPS
 public:
 	PrintShowToPS(const CC_show&, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet);
 
-	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards);
+	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked);
 
 private:
 	void PrintSheets(std::ostream& buffer, short& num_pages);

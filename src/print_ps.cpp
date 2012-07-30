@@ -79,7 +79,7 @@ mPrintDoContSheet(print_do_cont_sheet)
 }
 
 int
-PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards)
+PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked)
 {
 	char buf[kBufferSize];
 	time_t t;
@@ -477,7 +477,7 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 	}
 	while (curr_sheet != mShow.GetSheetEnd())
 	{
-		if (curr_sheet->IsPicked() || eps)
+		if ((isPicked.count(std::distance(mShow.GetSheetBegin(), curr_sheet)) != 0) || eps)
 		{
 			num_pages++;
 			if (!overview)

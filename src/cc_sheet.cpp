@@ -30,14 +30,14 @@ extern const wxChar *contnames[];
 
 CC_sheet::CC_sheet(CC_show *shw)
 : show(shw),
-picked(true), beats(1), pts(show->GetNumPoints())
+beats(1), pts(show->GetNumPoints())
 {
 }
 
 
 CC_sheet::CC_sheet(CC_show *shw, const wxString& newname)
 : show(shw),
-picked(true), beats(1), pts(show->GetNumPoints()), name(newname)
+beats(1), pts(show->GetNumPoints()), name(newname)
 {
 }
 

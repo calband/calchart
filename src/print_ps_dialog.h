@@ -25,6 +25,7 @@
 
 #include <wx/wx.h>
 #include <wx/dialog.h>
+#include <set>
 
 class CC_show;
 
@@ -35,7 +36,7 @@ class PrintPostScriptDialog : public wxDialog
 
 	public:
 	PrintPostScriptDialog( );
-	PrintPostScriptDialog(CC_show *show, bool printEPS,
+	PrintPostScriptDialog(const CC_show *show, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -43,7 +44,7 @@ class PrintPostScriptDialog : public wxDialog
 
 	void Init();
 
-	bool Create(CC_show *show, bool printEPS,
+	bool Create(const CC_show *show, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -62,7 +63,7 @@ class PrintPostScriptDialog : public wxDialog
 	void PrintShow();
 
 private:
-	CC_show *mShow;
+	const CC_show *mShow;
 	bool eps;
 	wxTextCtrl *text_cmd;
 #ifdef PRINT__RUN_CMD
@@ -72,6 +73,6 @@ private:
 	wxTextCtrl *text_minyards;
 	wxRadioBox *radio_orient, *radio_method;
 	wxCheckBox *check_cont, *check_pages, *check_overview;
-
+	std::set<size_t> mIsSheetPicked;
 };
 #endif
