@@ -137,15 +137,8 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 	const wxColour& origForegroundColor = dc.GetTextForeground();
 	const wxFont& origFont = dc.GetFont();
 
-	// we set the font large then scale down to give fine detail on the page
-	wxFont *contPlainFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxNORMAL, wxNORMAL);
-	wxFont *contBoldFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxNORMAL, wxBOLD);
-	wxFont *contItalFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxITALIC, wxNORMAL);
-	wxFont *contBoldItalFont = wxTheFontList->FindOrCreateFont(20, wxMODERN, wxITALIC, wxBOLD);
-
 	dc.SetDeviceOrigin(20, yStart);
 	dc.SetTextForeground(*wxBLACK);
-	dc.SetFont(*contPlainFont);
 	
 	int pageW, pageH;
 	dc.GetSize(&pageW, &pageH);
@@ -160,6 +153,28 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 		dc.SetUserScale((pageW/kSizeX)/kContinuityScale, (pageH/kSizeY)/kContinuityScale);
 		pageMiddle = (pageW * (1.0/((pageW/kSizeX)/kContinuityScale)))/2 - 20;
 	}
+
+	size_t numLines = 0;
+	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
+		 text != sheet.continuity.end();
+		 ++text)
+	{
+		if (text->on_sheet)
+		{
+			++numLines;
+		}
+	}
+	int font_size = ((pageH - yStart) - (numLines - 1)*2)/(numLines ? numLines : 1);
+	//font size, we scale to be no more than 256 pixels.
+	font_size = std::min(font_size, 20);
+
+	wxFont *contPlainFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxNORMAL, wxNORMAL);
+	wxFont *contBoldFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxNORMAL, wxBOLD);
+	wxFont *contItalFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxITALIC, wxNORMAL);
+	wxFont *contBoldItalFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxITALIC, wxBOLD);
+	
+	dc.SetFont(*contPlainFont);
+
 	y = 0.0;
 	const wxCoord charWidth = dc.GetCharWidth();
 	CC_textline_list::const_iterator cont(sheet.continuity.begin());
