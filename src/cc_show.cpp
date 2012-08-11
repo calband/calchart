@@ -33,6 +33,7 @@
 #include "math_utils.h"
 #include "cc_shapes.h"
 #include "platconf.h"
+#include "cc_fileformat.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
@@ -55,13 +56,6 @@ const wxChar *contnames[] =
 	wxT("Solx")
 };
 
-
-CC_FileException::CC_FileException(uint32_t nameID)
-{
-	uint8_t rawd[4];
-	put_big_long(rawd, nameID);
-	mError.Printf(wxT("Wrong ID read:  Read %c%c%c%c"), rawd[0], rawd[1], rawd[2], rawd[3]);
-}
 
 IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
@@ -158,26 +152,6 @@ bool CC_show::OnSaveDocument(const wxString& filename)
 	return true;
 }
 
-#define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
-
-#define INGL_INGL Make4CharWord('I','N','G','L')
-#define INGL_GURK Make4CharWord('G','U','R','K')
-#define INGL_SHOW Make4CharWord('S','H','O','W')
-#define INGL_SHET Make4CharWord('S','H','E','T')
-#define INGL_SIZE Make4CharWord('S','I','Z','E')
-#define INGL_LABL Make4CharWord('L','A','B','L')
-#define INGL_MODE Make4CharWord('M','O','D','E')
-#define INGL_DESC Make4CharWord('D','E','S','C')
-#define INGL_NAME Make4CharWord('N','A','M','E')
-#define INGL_DURA Make4CharWord('D','U','R','A')
-#define INGL_POS  Make4CharWord('P','O','S',' ')
-#define INGL_SYMB Make4CharWord('S','Y','M','B')
-#define INGL_TYPE Make4CharWord('T','Y','P','E')
-#define INGL_REFP Make4CharWord('R','E','F','P')
-#define INGL_CONT Make4CharWord('C','O','N','T')
-#define INGL_PCNT Make4CharWord('P','C','N','T')
-#define INGL_END  Make4CharWord('E','N','D',' ')
-
 enum CONT_PARSE_MODE
 {
 	CONT_PARSE_NORMAL,
@@ -189,197 +163,7 @@ enum CONT_PARSE_MODE
 	CONT_PARSE_ITALIC
 };
 
-template <typename T>
-void ReadLong(T& stream, uint32_t& d)
-{
-	uint8_t rawd[4];
-	stream.Read(rawd, sizeof(rawd));
-	d = get_big_long(&rawd);
-}
 
-template <>
-void ReadLong<wxSTD istream>(wxSTD istream& stream, uint32_t& d)
-{
-	char rawd[4];
-	stream.read(rawd, sizeof(rawd));
-	d = get_big_long(&rawd);
-}
-
-// return false if you don't read the inname
-template <typename T>
-void ReadAndCheckID(T& stream, uint32_t inname)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	if (inname != name)
-	{
-		throw CC_FileException(inname);
-	}
-}
-
-// return false if you don't read the inname
-template <typename T>
-void ReadCheckIDandSize(T& stream, uint32_t inname, uint32_t& size)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	if (inname != name)
-	{
-		throw CC_FileException(inname);
-	}
-	ReadLong(stream, name);
-	if (4 != name)
-	{
-		uint8_t rawd[4];
-		put_big_long(rawd, inname);
-		wxString s; s.Printf(wxT("Wrong size %d for name %c%c%c%c"), name, rawd[0], rawd[1], rawd[2], rawd[3]);
-		throw CC_FileException(s);
-	}
-	ReadLong(stream, size);
-}
-
-// return false if you don't read the inname
-template <typename T>
-void ReadCheckIDandFillData(T& stream, uint32_t inname, std::vector<uint8_t>& data)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	if (inname != name)
-	{
-		throw CC_FileException(inname);
-	}
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.Read(&data[0], name);
-}
-
-template <>
-void ReadCheckIDandFillData<wxSTD istream>(wxSTD istream& stream, uint32_t inname, std::vector<uint8_t>& data)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	if (inname != name)
-	{
-		throw CC_FileException(inname);
-	}
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.read(reinterpret_cast<char*>(&data[0]), name);
-}
-
-// Just fill the data
-template <typename T>
-void FillData(T& stream, std::vector<uint8_t>& data)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.Read(&data[0], name);
-}
-
-template <>
-void FillData<wxSTD istream>(wxSTD istream& stream, std::vector<uint8_t>& data)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.read(reinterpret_cast<char*>(&data[0]), name);
-}
-
-template <typename T>
-void WriteLong(T& stream, uint32_t d)
-{
-	uint8_t rawd[4];
-	put_big_long(rawd, d);
-	stream.Write(rawd, sizeof(rawd));
-}
-
-template <>
-void WriteLong<wxSTD ostream>(wxSTD ostream& stream, uint32_t d)
-{
-	char rawd[4];
-	put_big_long(rawd, d);
-	stream.write(rawd, sizeof(rawd));
-}
-
-template <typename T>
-void WriteHeader(T& stream)
-{
-	WriteLong(stream, INGL_INGL);
-}
-
-
-template <typename T>
-void WriteGurk(T& stream, uint32_t name)
-{
-	WriteLong(stream, INGL_GURK);
-	WriteLong(stream, name);
-}
-
-
-template <typename T>
-void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
-{
-	WriteLong(stream, name);
-	WriteLong(stream, size);
-}
-
-
-template <typename T>
-void WriteChunk(T& stream, uint32_t name, uint32_t size, const void *data)
-{
-	WriteLong(stream, name);
-	WriteLong(stream, size);
-	if (size > 0)
-		stream.Write(data, size);
-}
-
-template <>
-void WriteChunk<wxSTD ostream>(wxSTD ostream& stream, uint32_t name, uint32_t size, const void *data)
-{
-	WriteLong(stream, name);
-	WriteLong(stream, size);
-	if (size > 0)
-		stream.write(reinterpret_cast<const char*>(data), size);
-}
-
-template <typename T>
-void WriteChunkStr(T& stream, uint32_t name, const char *str)
-{
-	WriteChunk(stream, name, strlen(str)+1, reinterpret_cast<const unsigned char *>(str));
-}
-
-template <typename T>
-void WriteEnd(T& stream, uint32_t name)
-{
-	WriteLong(stream, INGL_END);
-	WriteLong(stream, name);
-}
-
-
-template <typename T>
-void WriteStr(T& stream, const char *str)
-{
-	stream.Write(str, strlen(str)+1);
-}
-
-template <>
-void WriteStr<wxSTD ostream>(wxSTD ostream& stream, const char *str)
-{
-	stream.write(str, strlen(str)+1);
-}
-
-template <typename T>
-void Write(T& stream, const void *data, uint32_t size)
-{
-	stream.Write(data, size);
-}
-
-template <>
-void Write<wxSTD ostream>(wxSTD ostream& stream, const void *data, uint32_t size)
-{
-	stream.write(reinterpret_cast<const char*>(data), size);
-}
 
 // Destroy a show
 CC_show::~CC_show()
@@ -897,6 +681,10 @@ T& CC_show::LoadObjectGeneric(T& stream)
 		// peek for the next name
 		ReadLong(stream, name);
 	}
+	else
+	{
+		// fail?
+	}
 
 	// Optional: read in the point labels
 	// <INGL_DESC><SIZE>
@@ -932,7 +720,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 		ReadCheckIDandFillData(stream, INGL_POS, data);
 		if (data.size() != size_t(GetNumPoints()*4))
 		{
-			throw CC_FileException(wxT("bad POS chunk"));
+			throw CC_FileException("bad POS chunk");
 		}
 		{
 			uint8_t *d;
@@ -955,7 +743,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints()*4+2)
 			{
-				throw CC_FileException(wxT("Bad REFP chunk"));
+				throw CC_FileException("Bad REFP chunk");
 			}
 			uint8_t *d = (uint8_t*)&data[0];
 			unsigned ref = get_big_word(d);
@@ -977,7 +765,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints())
 			{
-				throw CC_FileException(wxT("Bad SYMB chunk"));
+				throw CC_FileException("Bad SYMB chunk");
 			}
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < GetNumPoints(); i++)
@@ -992,7 +780,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints())
 			{
-				throw CC_FileException(wxT("Bad TYPE chunk"));
+				throw CC_FileException("Bad TYPE chunk");
 			}
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < GetNumPoints(); i++)
@@ -1007,7 +795,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			FillData(stream, data);
 			if (data.size() != (unsigned long)GetNumPoints())
 			{
-				throw CC_FileException(wxT("Bad SYMB chunk"));
+				throw CC_FileException("Bad SYMB chunk");
 			}
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < GetNumPoints(); i++)
@@ -1025,19 +813,19 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			FillData(stream, data);
 			if (data.size() < 3)						  // one byte num + two nils minimum
 			{
-				throw CC_FileException(wxT("Bad cont chunk"));
+				throw CC_FileException("Bad cont chunk");
 			}
 			const char *d = (const char *)&data[0];
 			if (d[data.size()-1] != '\0')
 			{
-				throw CC_FileException(wxT("Bad cont chunk"));
+				throw CC_FileException("Bad cont chunk");
 			}
 
 			const char* text = d + 1;
 			size_t num = strlen(text);
 			if (data.size() < num + 3)					  // check for room for text string
 			{
-				throw CC_FileException(wxT("Bad cont chunk"));
+				throw CC_FileException("Bad cont chunk");
 			}
 			wxString namestr(wxString::FromUTF8(text));
 			text = d + 2 + strlen(text);
@@ -1063,7 +851,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");
-		message += e.WhatError();
+		message += e.what();
 		wxMessageBox(message, wxT("Error!"));
 		mOkay = false;
 	}

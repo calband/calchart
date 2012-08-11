@@ -31,6 +31,7 @@
 
 struct CC_textchunk
 {
+	CC_textchunk() : text(), font(PSFONT_NORM) {}
 	wxString text;
 	enum PSFONT_TYPE font;
 };

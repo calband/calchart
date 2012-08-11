@@ -831,6 +831,7 @@
 		C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_translatepoints.html; sourceTree = "<group>"; };
 		C7D4E2C211D087CD007D3587 /* calchartapp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartapp.cpp; sourceTree = "<group>"; };
 		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
+		C7D4FD6615D62D000065799B /* cc_fileformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_fileformat.h; sourceTree = "<group>"; };
 		C7E047C6155F279000D8C71B /* field_view.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_view.cpp; sourceTree = "<group>"; };
 		C7E047C7155F279000D8C71B /* field_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_view.h; sourceTree = "<group>"; };
 		C7E047CA155F7B8900D8C71B /* field_canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas.cpp; sourceTree = "<group>"; };
@@ -1094,6 +1095,7 @@
 				C74DE4A312EAC0B900A20B8A /* cc_continuity.h */,
 				C7FC7B7C130746C100F22854 /* cc_coord.cpp */,
 				C7FC7B7D130746C100F22854 /* cc_coord.h */,
+				C7D4FD6615D62D000065799B /* cc_fileformat.h */,
 				C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */,
 				C785A91914D3D6620038B6FE /* cc_omniview_canvas.h */,
 				C72C5FDF155CD16100194225 /* cc_omniview_constants.h */,

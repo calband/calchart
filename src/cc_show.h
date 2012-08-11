@@ -63,17 +63,6 @@ DECLARE_DYNAMIC_CLASS(CC_show_setup)
 };
 
 
-class CC_FileException
-{
-public:
-	CC_FileException(const wxString& reason) : mError(reason) {}
-	CC_FileException(uint32_t nameID);
-	wxString WhatError() const { return mError; } 
-private:
-	wxString mError;
-};
-
-
 
 // CalChart Show
 class CC_show : public wxDocument
@@ -197,7 +186,7 @@ private:
 	// that file instead.
 	// When we save a file, the recovery file should be removed to prevent
 	// a false detection that the file writing failed.
-	wxString TranslateNameToAutosaveName(const wxString& name);
+	static wxString TranslateNameToAutosaveName(const wxString& name);
 	void Autosave();
 	
 	class AutoSaveTimer: public wxTimer
