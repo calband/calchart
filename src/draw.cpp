@@ -379,6 +379,8 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 
 	if (!sheet.pts.empty())
 	{
+		wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
+																 wxSWISS, wxNORMAL, wxNORMAL);
 		dc->SetFont(*pointLabelFont);
 		circ_r = Float2Coord(GetConfiguration_DotRatio());
 		const float offset = circ_r / 2;

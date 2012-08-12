@@ -81,7 +81,7 @@ CC_point::GetRefPos(unsigned which) const
 	{
 		throw std::range_error("GetRefPos() point out of range");
 	}
-	return mRef[which];
+	return mRef[which-1];
 }
 
 void
@@ -91,7 +91,7 @@ CC_point::SetRefPos(const CC_coord& c, unsigned which)
 	{
 		throw std::range_error("SetRefPos() point out of range");
 	}
-	mRef[which] = c;
+	mRef[which-1] = c;
 }
 
 SYMBOL_TYPE

@@ -204,6 +204,8 @@ void ShowModeStandard::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 	}
 	
 	// Draw labels
+	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_YardsSize()),
+															wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*yardLabelFont);
 	for (int i = 0; (howToDraw == kFieldView || howToDraw == kOmniView) && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
@@ -295,6 +297,8 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 	}
 
 	// Draw labels
+	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_YardsSize()),
+															wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*yardLabelFont);
 	for (int i = 0; howToDraw == kFieldView && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{

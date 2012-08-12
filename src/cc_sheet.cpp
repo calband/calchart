@@ -301,10 +301,10 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 }
 
 
-extern wxFont *pointLabelFont;
-
 void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary)
 {
+	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
+								wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*pointLabelFont);
 	dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
 	CC_coord origin = show.GetMode().Offset();

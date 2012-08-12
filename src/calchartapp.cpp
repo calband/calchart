@@ -36,13 +36,6 @@
 
 wxPrintDialogData *gPrintDialogData;
 
-wxFont *contPlainFont;
-wxFont *contBoldFont;
-wxFont *contItalFont;
-wxFont *contBoldItalFont;
-wxFont *pointLabelFont;
-wxFont *yardLabelFont;
-
 wxHtmlHelpController&
 GetGlobalHelpController()
 {
@@ -72,15 +65,6 @@ bool CalChartApp::OnInit()
 
 	// setup the configuration.
 	ReadConfig();
-
-	contPlainFont = new wxFont(11, wxMODERN, wxNORMAL, wxNORMAL);
-	contBoldFont = new wxFont(11, wxMODERN, wxNORMAL, wxBOLD);
-	contItalFont = new wxFont(11, wxMODERN, wxITALIC, wxNORMAL);
-	contBoldItalFont = new wxFont(11, wxMODERN, wxITALIC, wxBOLD);
-	pointLabelFont = new wxFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
-		wxSWISS, wxNORMAL, wxNORMAL);
-	yardLabelFont = new wxFont((int)Float2Coord(GetConfiguration_YardsSize()),
-		wxSWISS, wxNORMAL, wxNORMAL);
 
 
 	//// Create the main frame window
