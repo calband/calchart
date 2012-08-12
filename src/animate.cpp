@@ -130,7 +130,7 @@ curr_sheetnum(0)
 				ContToken dummy;				  // get position of parse error
 				for (unsigned j = 0; j < numpts; j++)
 				{
-					if (curr_sheet->GetPoint(j).GetCont() == currcont->GetNum())
+					if (curr_sheet->GetPoint(j).GetContinuityIndex() == currcont->GetNum())
 					{
 						comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
 						new_sheet.commands[j] = comp.cmds;

@@ -25,18 +25,17 @@
 #include "confgr.h"
 #include <wx/wx.h>
 #include <assert.h>
+#include <stdexcept>
 
 CC_point::CC_point() :
-mFlags(0),
 mSym(SYMBOL_PLAIN),
-mCont(0)
+mContinuityIndex(0)
 {
 }
 
-CC_point::CC_point(unsigned char c, const CC_coord& p) :
-mFlags(0),
+CC_point::CC_point(uint8_t c, const CC_coord& p) :
 mSym(SYMBOL_PLAIN),
-mCont(c),
+mContinuityIndex(c),
 mPos(p)
 {
 	for (unsigned j = 0; j < CC_point::kNumRefPoints; j++)
@@ -48,20 +47,19 @@ mPos(p)
 bool
 CC_point::GetFlip() const
 {
-	return (bool)(mFlags & kPointLabel);
+	return mFlags.test(kPointLabelFlipped);
 }
 
 void
 CC_point::Flip(bool val)
 {
-	if (val) mFlags |= kPointLabel;
-	else mFlags &= ~kPointLabel;
+	mFlags.set(kPointLabelFlipped, val);
 };
 
 void
 CC_point::FlipToggle()
 {
-	Flip(GetFlip() ? false:true);
+	mFlags.flip(kPointLabelFlipped);
 }
 
 CC_coord
@@ -79,12 +77,20 @@ CC_point::SetPos(const CC_coord& c)
 CC_coord
 CC_point::GetRefPos(unsigned which) const
 {
+	if (which < 1 || which > kNumRefPoints)
+	{
+		throw std::range_error("GetRefPos() point out of range");
+	}
 	return mRef[which];
 }
 
 void
 CC_point::SetRefPos(const CC_coord& c, unsigned which)
 {
+	if (which < 1 || which > kNumRefPoints)
+	{
+		throw std::range_error("SetRefPos() point out of range");
+	}
 	mRef[which] = c;
 }
 
@@ -100,16 +106,16 @@ CC_point::SetSymbol(SYMBOL_TYPE s)
 	mSym = s;
 }
 
-unsigned char
-CC_point::GetCont() const
+uint8_t
+CC_point::GetContinuityIndex() const
 {
-	return mCont;
+	return mContinuityIndex;
 }
 
 void
-CC_point::SetCont(unsigned char c)
+CC_point::SetContinuityIndex(uint8_t c)
 {
-	mCont = c;
+	mContinuityIndex = c;
 }
 
 
@@ -122,8 +128,8 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 	float slineoff = offset * GetConfiguration_SLineRatio();
 	float textoff = offset * 1.25;
 
-	long x = ((reference) ? point.GetRefPos(reference-1).x : point.GetPos().x) + origin.x;
-	long y = ((reference) ? point.GetRefPos(reference-1).y : point.GetPos().y) + origin.y;
+	long x = ((reference) ? point.GetRefPos(reference).x : point.GetPos().x) + origin.x;
+	long y = ((reference) ? point.GetRefPos(reference).y : point.GetPos().y) + origin.y;
 	switch (point.GetSymbol())
 	{
 		case SYMBOL_SOL:
@@ -176,9 +182,9 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 // Test Suite stuff
 struct CC_point_values
 {
-	unsigned short mFlags;
+	std::bitset<CC_point::kTotalBits> mFlags;
 	SYMBOL_TYPE mSym;
-	unsigned char mCont;
+	uint8_t mContinuityIndex;
 	CC_coord mPos;
 	CC_coord mRef[CC_point::kNumRefPoints];
 	bool GetFlip;
@@ -192,7 +198,7 @@ bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
 	return running_value
 		&& (underTest.mFlags == values.mFlags)
 		&& (underTest.mSym == values.mSym)
-		&& (underTest.mCont == values.mCont)
+		&& (underTest.mContinuityIndex == values.mContinuityIndex)
 		&& (underTest.mPos == values.mPos)
 		&& (underTest.GetFlip() == values.GetFlip)
 		;
@@ -204,7 +210,7 @@ void CC_point_UnitTests()
 	CC_point_values values;
 	values.mFlags = 0;
 	values.mSym = SYMBOL_PLAIN;
-	values.mCont = 0;
+	values.mContinuityIndex = 0;
 	values.mPos = CC_coord();
 	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		values.mRef[i] = CC_coord();

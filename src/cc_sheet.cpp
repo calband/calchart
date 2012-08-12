@@ -72,7 +72,7 @@ bool CC_sheet::SelectPointsOfContinuity(unsigned i) const
 	CC_show::SelectionList select;
 	for (j = 0; j < show->GetNumPoints(); j++)
 	{
-		if (pts[j].GetCont() == i)
+		if (pts[j].GetContinuityIndex() == i)
 		{
 			select.insert(j);
 		}
@@ -226,7 +226,7 @@ bool CC_sheet::ContinuityInUse(unsigned idx) const
 
 	for (i = 0; i < show->GetNumPoints(); i++)
 	{
-		if (pts[i].GetCont() == c.GetNum()) return true;
+		if (pts[i].GetContinuityIndex() == c.GetNum()) return true;
 	}
 	return false;
 }
@@ -261,7 +261,7 @@ CC_coord CC_sheet::GetPosition(unsigned i, unsigned ref) const
 	if (ref == 0)
 		return pts[i].GetPos();
 	else
-		return pts[i].GetRefPos(ref-1);
+		return pts[i].GetRefPos(ref);
 }
 
 
@@ -271,7 +271,7 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
 	unsigned j;
 
 	pts[i].SetPos(val);
-	for (j = 0; j < CC_point::kNumRefPoints; j++)
+	for (j = 1; j <= CC_point::kNumRefPoints; j++)
 	{
 		pts[i].SetRefPos(val, j);
 	}
@@ -285,7 +285,7 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 	CC_coord clippedval = show->GetMode().ClipPosition(val);
 	if (ref == 0)
 	{
-		for (j=0; j<CC_point::kNumRefPoints; j++)
+		for (j = 1; j <= CC_point::kNumRefPoints; j++)
 		{
 			if (pts[i].GetRefPos(j) == pts[i].GetPos())
 			{
@@ -296,45 +296,42 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 	}
 	else
 	{
-		pts[i].SetRefPos(clippedval, ref-1);
+		pts[i].SetRefPos(clippedval, ref);
 	}
 }
 
 
 extern wxFont *pointLabelFont;
 
-void CC_sheet::Draw(wxDC& dc, unsigned ref, bool primary)
+void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary)
 {
-	if (!pts.empty())
+	dc.SetFont(*pointLabelFont);
+	dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
+	CC_coord origin = show.GetMode().Offset();
+	for (size_t i = 0; i < show.GetNumPoints(); i++)
 	{
-		dc.SetFont(*pointLabelFont);
-		dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
-		CC_coord origin = show->GetMode().Offset();
-		for (size_t i = 0; i < show->GetNumPoints(); i++)
+		const wxBrush *fillBrush;
+		if (show.IsSelected(i) && primary)
 		{
-			const wxBrush *fillBrush;
-			if (show->IsSelected(i) && primary)
-			{
-				dc.SetPen(*CalChartPens[COLOR_POINT_HILIT]);
-				fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
-			}
-			else if (show->IsSelected(i) && !primary)
-			{
-				dc.SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
-				fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
-			}
-			else if (!show->IsSelected(i) && primary)
-			{
-				dc.SetPen(*CalChartPens[COLOR_POINT]);
-				fillBrush = CalChartBrushes[COLOR_POINT];
-			}
-			else
-			{
-				dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
-				fillBrush = CalChartBrushes[COLOR_REF_POINT];
-			}
-			DrawPoint(pts[i], dc, ref, origin, fillBrush, show->GetPointLabel(i));
+			dc.SetPen(*CalChartPens[COLOR_POINT_HILIT]);
+			fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
 		}
+		else if (show.IsSelected(i) && !primary)
+		{
+			dc.SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
+			fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
+		}
+		else if (!show.IsSelected(i) && primary)
+		{
+			dc.SetPen(*CalChartPens[COLOR_POINT]);
+			fillBrush = CalChartBrushes[COLOR_POINT];
+		}
+		else
+		{
+			dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
+			fillBrush = CalChartBrushes[COLOR_REF_POINT];
+		}
+		DrawPoint(sheet.GetPoint(i), dc, ref, origin, fillBrush, show.GetPointLabel(i));
 	}
 	dc.SetFont(wxNullFont);
 }

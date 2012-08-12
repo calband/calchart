@@ -599,12 +599,12 @@ T& CC_show::SaveObjectInternal(T& stream)
 // Point continuity types
 		for (i = 0; i < GetNumPoints(); i++)
 		{
-			if (curr_sheet->GetPoint(i).GetCont() != 0)
+			if (curr_sheet->GetPoint(i).GetContinuityIndex() != 0)
 			{
 				WriteChunkHeader(stream, INGL_TYPE, GetNumPoints());
 				for (i = 0; i < GetNumPoints(); i++)
 				{
-					unsigned char tmp = curr_sheet->GetPoint(i).GetCont();
+					unsigned char tmp = curr_sheet->GetPoint(i).GetContinuityIndex();
 					Write(stream, &tmp, 1);
 				}
 				break;
@@ -785,7 +785,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			uint8_t *d = (uint8_t *)&data[0];
 			for (unsigned i = 0; i < GetNumPoints(); i++)
 			{
-				sheet.GetPoint(i).SetCont(*(d++));
+				sheet.GetPoint(i).SetContinuityIndex(*(d++));
 			}
 			ReadLong(stream, name);
 		}
@@ -1160,6 +1160,6 @@ void UnitTests()
 
 void CC_show::DrawShow(wxDC& dc, unsigned ref, bool primary)
 {
-	GetCurrentSheet()->Draw(dc, ref, primary);
+	::Draw(dc, *this, *GetCurrentSheet(), ref, primary);
 }
 

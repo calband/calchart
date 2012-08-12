@@ -458,7 +458,7 @@ SetContinuityIndexCommand::SetContinuityIndexCommand(CC_show& show, unsigned ind
 	CC_show::const_CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
 	for (CC_show::SelectionList::const_iterator i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		mContinuity[*i] = std::pair<unsigned,unsigned>(sheet->GetPoint(*i).GetCont(), index);
+		mContinuity[*i] = std::pair<unsigned,unsigned>(sheet->GetPoint(*i).GetContinuityIndex(), index);
 	}
 }
 
@@ -471,7 +471,7 @@ void SetContinuityIndexCommand::DoAction()
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
 	for (std::map<unsigned, std::pair<unsigned,unsigned> >::const_iterator i = mContinuity.begin(); i != mContinuity.end(); ++i)
 	{
-		sheet->GetPoint(i->first).SetCont(i->second.second);
+		sheet->GetPoint(i->first).SetContinuityIndex(i->second.second);
 	}
 }
 
@@ -481,7 +481,7 @@ void SetContinuityIndexCommand::UndoAction()
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
 	for (std::map<unsigned, std::pair<unsigned,unsigned> >::const_iterator i = mContinuity.begin(); i != mContinuity.end(); ++i)
 	{
-		sheet->GetPoint(i->first).SetCont(i->second.first);
+		sheet->GetPoint(i->first).SetContinuityIndex(i->second.first);
 	}
 }
 
@@ -501,7 +501,7 @@ SetSymbolAndContCommand::SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym)
 		// Only do work on points that have different symbols
 		if (sym != sheet->GetPoint(*i).GetSymbol())
 		{
-			mSymsAndCont[*i] = std::pair<sym_cont_t,sym_cont_t>(sym_cont_t(sheet->GetPoint(*i).GetSymbol(), sheet->GetPoint(*i).GetCont()), sym_cont_t(sym, sheet->GetPoint(*i).GetCont()));
+			mSymsAndCont[*i] = std::pair<sym_cont_t,sym_cont_t>(sym_cont_t(sheet->GetPoint(*i).GetSymbol(), sheet->GetPoint(*i).GetContinuityIndex()), sym_cont_t(sym, sheet->GetPoint(*i).GetContinuityIndex()));
 		}
 	}
 }
@@ -517,7 +517,7 @@ void SetSymbolAndContCommand::DoAction()
 	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
 	{
 		sheet->GetPoint(i->first).SetSymbol(i->second.second.first);
-		sheet->GetPoint(i->first).SetCont(sheet->GetStandardContinuity(i->second.second.first).GetNum());
+		sheet->GetPoint(i->first).SetContinuityIndex(sheet->GetStandardContinuity(i->second.second.first).GetNum());
 	}
 }
 
@@ -528,7 +528,7 @@ void SetSymbolAndContCommand::UndoAction()
 	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
 	{
 		sheet->GetPoint(i->first).SetSymbol(i->second.first.first);
-		sheet->GetPoint(i->first).SetCont(i->second.first.second);
+		sheet->GetPoint(i->first).SetContinuityIndex(i->second.first.second);
 	}
 	sheet->animcont = mOrigAnimcont;
 }

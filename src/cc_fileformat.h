@@ -23,6 +23,8 @@
 #ifndef _CC_FILEFORMAT_H_
 #define _CC_FILEFORMAT_H_
 
+#include "platconf.h"
+
 #include <stdexcept>
 
 // Description of the CalChart file format layout, in modified Extended Backus–Naur Form

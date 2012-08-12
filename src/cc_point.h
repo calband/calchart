@@ -26,6 +26,8 @@
 #include "cc_types.h"
 #include "cc_coord.h"
 
+#include <bitset>
+
 class wxDC;
 class wxString;
 class wxBrush;
@@ -37,7 +39,7 @@ class CC_point
 public:
 	static const unsigned kNumRefPoints = 3;
 	CC_point();
-	CC_point(unsigned char cont, const CC_coord& pos);
+	CC_point(uint8_t cont, const CC_coord& pos);
 
 	bool GetFlip() const;
 	void Flip(bool val = true);
@@ -46,28 +48,32 @@ public:
 	SYMBOL_TYPE GetSymbol() const;
 	void SetSymbol(SYMBOL_TYPE sym);
 
-	unsigned char GetCont() const;
-	void SetCont(unsigned char cont);
+	uint8_t GetContinuityIndex() const;
+	void SetContinuityIndex(uint8_t cont);
 
 	CC_coord GetPos() const;
 	void SetPos(const CC_coord& c);
 
+	// reference points are [1, kNumRefPoints]
 	CC_coord GetRefPos(unsigned which) const;
 	void SetRefPos(const CC_coord& c, unsigned which);
 
 private:
-	unsigned short mFlags;
+	enum {
+		kPointLabelFlipped,
+		kTotalBits
+	};
+	
+	std::bitset<kTotalBits> mFlags;
 	// by having both a sym type and cont index, we can have several
 	// points share the same symbol but have different continuities.
 	SYMBOL_TYPE mSym;
-	unsigned char mCont;
+	uint8_t mContinuityIndex;
 	CC_coord mPos;
 	CC_coord mRef[kNumRefPoints];
 
-private:
-	static const unsigned kPointLabel = 1;
-
-friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
+	friend struct CC_point_values;
+	friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
 };
 
 // We break this out of the class to make CalChart internals more cross platform

@@ -44,8 +44,6 @@ public:
 	CC_sheet(CC_show *shw, const wxString& newname);
 	~CC_sheet();
 
-	void Draw(wxDC& dc, unsigned ref, bool primary);
-
 	// setting values on the stunt sheet
 	// * needs to be through command only *
 	void SetNumPoints(unsigned num, unsigned columns);
@@ -83,8 +81,7 @@ public:
 	void SetBeats(unsigned short b);
 	inline bool IsInAnimation() const { return (beats != 0); }
 
-	inline const CC_point& GetPoint(unsigned i) const { return pts[i]; }
-	inline CC_point& GetPoint(unsigned i) { return pts[i]; }
+	CC_point GetPoint(unsigned i) const { return pts[i]; }
 	std::vector<CC_point> GetPoints() const { return pts; }
 	void SetPoints(const std::vector<CC_point>& points) { pts = points; }
 
@@ -112,5 +109,7 @@ friend void PrintOverview(std::ostream& buffer, const CC_sheet& sheet);
 friend void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
 
 };
+
+void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary);
 
 #endif
