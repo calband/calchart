@@ -81,7 +81,8 @@ public:
 	void SetBeats(unsigned short b);
 	inline bool IsInAnimation() const { return (beats != 0); }
 
-	CC_point GetPoint(unsigned i) const { return pts[i]; }
+	const CC_point& GetPoint(unsigned i) const { return pts[i]; }
+	CC_point& GetPoint(unsigned i) { return pts[i]; }
 	std::vector<CC_point> GetPoints() const { return pts; }
 	void SetPoints(const std::vector<CC_point>& points) { pts = points; }
 
