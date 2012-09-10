@@ -38,7 +38,8 @@
 
 
 AnimationView::AnimationView() :
-mErrorOccurred(false)
+mErrorOccurred(false),
+mCollisionWarningType(COLLISION_SHOW)
 {
 }
 
@@ -53,11 +54,12 @@ AnimationView::OnDraw(wxDC *dc)
 {
 	dc->SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
 	GetShow()->GetMode().DrawAnim(*dc);
+	const bool checkForCollision = mCollisionWarningType != COLLISION_NONE;
 	if (mAnimation)
 	{
 		for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
 		{
-			if (mAnimation->IsCollision(i))
+			if (checkForCollision && mAnimation->IsCollision(i))
 			{
 				dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
 				dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
@@ -141,21 +143,12 @@ AnimationView::RefreshFrame()
 
 
 void
-AnimationView::EnableCollisions(CollisionWarning col)
+AnimationView::SetCollisionType(CollisionWarning col)
 {
+	mCollisionWarningType = col;
 	if (mAnimation)
 	{
-		mAnimation->EnableCollisions(col);
-	}
-}
-
-
-void
-AnimationView::CheckCollisions()
-{
-	if (mAnimation)
-	{
-		mAnimation->CheckCollisions();
+		mAnimation->SetCollisionAction(col == COLLISION_BEEP ? wxBell : NULL);
 	}
 }
 
@@ -199,7 +192,7 @@ AnimationView::Generate()
 	}
 	if (mAnimation)
 	{
-		mAnimation->EnableCollisions(GetAnimationFrame()->CollisionType());
+		mAnimation->SetCollisionAction(mCollisionWarningType == COLLISION_BEEP ? wxBell : NULL);
 		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
 	}
 	GetAnimationFrame()->UpdatePanel();

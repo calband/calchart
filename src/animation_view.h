@@ -43,8 +43,8 @@ public:
 
 	void RefreshFrame();
 
-	void EnableCollisions(CollisionWarning col);
-	void CheckCollisions();
+	void SetCollisionType(CollisionWarning col);
+	CollisionWarning GetCollisionType() const { return mCollisionWarningType; }
 	void SelectCollisions();
 	
 	void Generate();
@@ -93,6 +93,7 @@ private:
 	AnimationFrame *GetAnimationFrame();
 
 	boost::shared_ptr<Animation> mAnimation;
+	CollisionWarning mCollisionWarningType;
 };
 
 #endif // _ANIMATION_VIEW_H_

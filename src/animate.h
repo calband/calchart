@@ -84,22 +84,7 @@ AnimateDir AnimGetDirFromAngle(float ang);
 
 typedef CC_coord AnimatePoint;
 class AnimateCommand;
-
-// An animation sheet is a collection of commands for each of the points.
-class AnimateSheet
-{
-public:
-	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const wxString s, unsigned beats);
-	~AnimateSheet();
-	wxString GetName() const { return name; }
-	unsigned GetNumBeats() const { return numbeats; }
-
-	std::vector<AnimatePoint> pts; // should probably be const
-	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
-private:
-	wxString name;
-	unsigned numbeats;
-};
+class AnimateSheet;
 
 enum CollisionWarning
 {
@@ -144,8 +129,9 @@ public:
 
 	void GotoSheet(unsigned i);
 
-	inline void EnableCollisions(CollisionWarning col) { check_collis = col; }
-	void CheckCollisions();
+	typedef void (*CollisionAction_t)();
+	// set collision action returns the previous collision action
+	CollisionAction_t SetCollisionAction(CollisionAction_t col) { CollisionAction_t oldaction = mCollisionAction; mCollisionAction = col; return oldaction; }
 
 	// For drawing:
 	bool IsCollision(unsigned which) const;
@@ -175,7 +161,9 @@ private:
 	void RefreshSheet();
 
 	std::vector<AnimateSheet> sheets;
-	CollisionWarning check_collis;
+	
+	void CheckCollisions();
+	CollisionAction_t mCollisionAction;
 };
 
 class AnimateVariable

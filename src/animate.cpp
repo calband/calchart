@@ -79,20 +79,27 @@ AnimateDir AnimGetDirFromAngle(float ang)
 }
 
 
-AnimateSheet::AnimateSheet(const std::vector<AnimatePoint>& thePoints, const wxString s, unsigned beats)
-: pts(thePoints), commands(thePoints.size()),
-name(s),
-numbeats(beats)
-{}
-
-
-AnimateSheet::~AnimateSheet()
-{}
+// An animation sheet is a collection of commands for each of the points.
+class AnimateSheet
+{
+public:
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const wxString s, unsigned beats) : pts(thePoints), commands(thePoints.size()), name(s), numbeats(beats) {}
+	~AnimateSheet() {}
+	wxString GetName() const { return name; }
+	unsigned GetNumBeats() const { return numbeats; }
+	
+	std::vector<AnimatePoint> pts; // should probably be const
+	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
+private:
+	wxString name;
+	unsigned numbeats;
+};
 
 
 Animation::Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
 : numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts),
-curr_sheetnum(0)
+curr_sheetnum(0),
+mCollisionAction(NULL)
 {
 	AnimateCompile comp(show);
 	wxString tempbuf;
@@ -344,25 +351,20 @@ void Animation::RefreshSheet()
 void Animation::CheckCollisions()
 {
 	mCollisions.clear();
-	if (check_collis != COLLISION_NONE)
+	for (unsigned i = 0; i < numpts; i++)
 	{
-		bool beep = false;
-		for (unsigned i = 0; i < numpts; i++)
+		for (unsigned j = i+1; j < numpts; j++)
 		{
-			for (unsigned j = i+1; j < numpts; j++)
+			if (pts[i].Collides(pts[j]))
 			{
-				if (pts[i].Collides(pts[j]))
-				{
-					mCollisions.insert(i);
-					mCollisions.insert(j);
-					beep = true;
-				}
+				mCollisions.insert(i);
+				mCollisions.insert(j);
 			}
 		}
-		if (beep && (check_collis == COLLISION_BEEP))
-		{
-			wxBell();
-		}
+	}
+	if (!mCollisions.empty() && mCollisionAction)
+	{
+		mCollisionAction();
 	}
 }
 

@@ -156,7 +156,7 @@ mWhenClosed(onClose)
 		wxT("Ignore"), wxT("Show"), wxT("Beep")
 	};
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
-	collis->SetSelection(1);
+	collis->SetSelection(mAnimationView->GetCollisionType());
 	sizer1->Add(collis, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
@@ -329,8 +329,7 @@ AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->EnableCollisions(static_cast<CollisionWarning>(event.GetSelection()));
-		mAnimationView->CheckCollisions();
+		mAnimationView->SetCollisionType(static_cast<CollisionWarning>(event.GetSelection()));
 	}
 	Refresh();
 }
@@ -543,15 +542,6 @@ AnimationFrame::UpdatePanel()
 	{
 		SetStatusText(mAnimationView->GetStatusText(), 1);
 	}
-}
-
-
-CollisionWarning
-AnimationFrame::CollisionType()
-{
-	wxChoice* choiceCtrl = static_cast<wxChoice*>(FindWindow(CALCHART__anim_collisions));
-
-	return static_cast<CollisionWarning>(choiceCtrl->GetSelection());
 }
 
 

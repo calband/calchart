@@ -79,7 +79,6 @@ public:
 	// Called by the view
 	void ToggleTimer();
 	void UpdatePanel();
-	CollisionWarning CollisionType();
 	
 	bool OnBeat() const;
 
