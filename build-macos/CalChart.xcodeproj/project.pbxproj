@@ -415,6 +415,7 @@
 		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
 		C7FC7B7E130746C100F22854 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7FC7B7C130746C100F22854 /* cc_coord.cpp */; };
+		E8C4C0D715FEEE7100C1A8BC /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8C4C0D515FEEE7100C1A8BC /* animatecompile.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -918,6 +919,9 @@
 		C7ED502011CD594E001A4FA2 /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
 		C7FC7B7C130746C100F22854 /* cc_coord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_coord.cpp; sourceTree = "<group>"; };
 		C7FC7B7D130746C100F22854 /* cc_coord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_coord.h; sourceTree = "<group>"; };
+		E8C4C0D515FEEE7100C1A8BC /* animatecompile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecompile.cpp; sourceTree = "<group>"; };
+		E8C4C0D615FEEE7100C1A8BC /* animatecompile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecompile.h; sourceTree = "<group>"; };
+		E8C4C0D915FEF11300C1A8BC /* animate_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animate_types.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1072,10 +1076,13 @@
 		C7AFA969117A6DBA00CC53E2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				E8C4C0D915FEF11300C1A8BC /* animate_types.h */,
 				C7BFBCF914722689002385FB /* animatecommand.cpp */,
 				C7BFBCFA14722689002385FB /* animatecommand.h */,
 				C7AFA96C117A6DBA00CC53E2 /* animate.cpp */,
 				C7AFA96D117A6DBA00CC53E2 /* animate.h */,
+				E8C4C0D515FEEE7100C1A8BC /* animatecompile.cpp */,
+				E8C4C0D615FEEE7100C1A8BC /* animatecompile.h */,
 				C785A90814CFC5180038B6FE /* animation_canvas.cpp */,
 				C785A90914CFC5180038B6FE /* animation_canvas.h */,
 				C7AC49AE14CCD51F00506C76 /* animation_frame.cpp */,
@@ -1462,6 +1469,7 @@
 				C7E047D215609A1600D8C71B /* setup_wizards.cpp in Sources */,
 				C73C406D156761D000B86BE8 /* math_utils.cpp in Sources */,
 				C76B4EBC15694C770087FE94 /* print_ps_dialog.cpp in Sources */,
+				E8C4C0D715FEEE7100C1A8BC /* animatecompile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -23,6 +23,8 @@
 #ifndef _ANIMATE_H_
 #define _ANIMATE_H_
 
+#include "animate_types.h"
+
 #include "cc_coord.h"
 #include "cc_show.h"
 #include <wx/string.h>
@@ -32,66 +34,10 @@
 #include <set>
 #include <vector>
 
-// Number of variables in continuity language (A B C D X Y Z DOF DOH)
-enum
-{
-	CONTVAR_A,
-	CONTVAR_B,
-	CONTVAR_C,
-	CONTVAR_D,
-	CONTVAR_X,
-	CONTVAR_Y,
-	CONTVAR_Z,
-	CONTVAR_DOF,
-	CONTVAR_DOH,
-	NUMCONTVARS
-};
-
-enum AnimateDir
-{
-	ANIMDIR_N, ANIMDIR_NE, ANIMDIR_E, ANIMDIR_SE,
-	ANIMDIR_S, ANIMDIR_SW, ANIMDIR_W, ANIMDIR_NW
-};
-
-enum AnimateError
-{
-	ANIMERR_OUTOFTIME,
-	ANIMERR_EXTRATIME,
-	ANIMERR_WRONGPLACE,
-	ANIMERR_INVALID_CM,
-	ANIMERR_INVALID_FNTN,
-	ANIMERR_DIVISION_ZERO,
-	ANIMERR_UNDEFINED,
-	ANIMERR_SYNTAX,
-	ANIMERR_NONINT,
-	ANIMERR_NEGINT,
-	NUM_ANIMERR
-};
-
-enum MarchingStyle
-{
-	STYLE_HighStep,
-	STYLE_Military,
-	STYLE_ShowHigh,
-	STYLE_GrapeVine,
-	STYLE_JerkyStep,
-	STYLE_Close
-};
-
-extern const wxString animate_err_msgs[];
-
 AnimateDir AnimGetDirFromAngle(float ang);
 
-typedef CC_coord AnimatePoint;
 class AnimateCommand;
 class AnimateSheet;
-
-enum CollisionWarning
-{
-	COLLISION_NONE,
-	COLLISION_SHOW,
-	COLLISION_BEEP
-};
 
 class ErrorMarker
 {
@@ -166,52 +112,4 @@ private:
 	CollisionAction_t mCollisionAction;
 };
 
-class AnimateVariable
-{
-private:
-	float v;
-	bool valid;
-public:
-	AnimateVariable(): v(0.0), valid(false) {}
-	inline bool IsValid() const { return valid; }
-	inline float GetValue() const { return v; }
-	inline void SetValue(float newv) { v = newv; valid = true; }
-	inline void ClearValue() { v = 0.0; valid = false; }
-};
-
-class ContProcedure;
-class ContToken;
-class AnimateCompile
-{
-public:
-// Compile a point
-	AnimateCompile(CC_show *show);
-	~AnimateCompile();
-
-// Compile a point
-	void Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc);
-// true if successful
-	bool Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token);
-
-public:
-	inline bool Okay() { return okay; };
-	inline void SetStatus(bool s) { okay = s; };
-	void RegisterError(AnimateError err, const ContToken *token);
-	void FreeErrorMarkers();
-
-	float GetVarValue(int varnum, const ContToken *token);
-	void SetVarValue(int varnum, float value);
-
-	AnimatePoint pt;
-	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
-	CC_show *mShow;
-	CC_show::const_CC_sheet_iterator_t curr_sheet;
-	unsigned curr_pt;
-	unsigned beats_rem;
-	ErrorMarker error_markers[NUM_ANIMERR];
-private:
-	unsigned contnum;
-	std::map<unsigned,AnimateVariable> vars[NUMCONTVARS];
-	bool okay;
-};
 #endif
