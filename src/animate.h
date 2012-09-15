@@ -56,7 +56,7 @@ public:
 };
 
 typedef boost::function<void (const wxString& notice)> NotifyStatus;
-typedef boost::function<bool (const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)> NotifyErrorList;
+typedef boost::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)> NotifyErrorList;
 
 class Animation
 {
@@ -90,6 +90,9 @@ public:
 	int GetNumberBeats() const;
 	int GetCurrentBeat() const;
 	wxString GetCurrentSheetName() const;
+
+	// collection of position of each point, for debugging purposes
+	std::string GetCurrentInfo() const;
 
 	void DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const;
 

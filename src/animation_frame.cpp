@@ -668,9 +668,9 @@ AnimationFrame::SetTempo(unsigned tempo)
 }
 
 void
-AnimationFrame::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
+AnimationFrame::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
 {
-	for (unsigned i = 0; i < NUM_ANIMERR; i++)
+	for (unsigned i = 0; i < error_markers.size(); i++)
 	{
 		if (!error_markers[i].pntgroup.empty())
 		{

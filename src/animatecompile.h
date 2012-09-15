@@ -56,15 +56,18 @@ public:
 	float GetVarValue(int varnum, const ContToken *token);
 	void SetVarValue(int varnum, float value);
 
+	std::vector<boost::shared_ptr<AnimateCommand> > GetCommands() const { return cmds; }
+	std::vector<ErrorMarker> GetErrorMarkers() const { return error_markers; }
+
 	AnimatePoint pt;
-	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
 	CC_show *mShow;
 	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;
 	unsigned beats_rem;
-	ErrorMarker error_markers[NUM_ANIMERR];
 private:
 	unsigned contnum;
+	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
+	std::vector<ErrorMarker> error_markers;
 	std::map<unsigned,AnimateVariable> vars[NUMCONTVARS];
 	bool okay;
 };

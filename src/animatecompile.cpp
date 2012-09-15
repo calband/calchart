@@ -39,8 +39,10 @@ public:
 };
 
 
-AnimateCompile::AnimateCompile(CC_show* show)
-: mShow(show), okay(true)
+AnimateCompile::AnimateCompile(CC_show* show) :
+mShow(show),
+error_markers(NUM_ANIMERR),
+okay(true)
 {
 }
 

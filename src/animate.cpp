@@ -31,6 +31,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <string>
+#include <sstream>
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
@@ -140,7 +141,7 @@ mCollisionAction(NULL)
 					if (curr_sheet->GetPoint(j).GetContinuityIndex() == currcont->GetNum())
 					{
 						comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
-						new_sheet.commands[j] = comp.cmds;
+						new_sheet.commands[j] = comp.GetCommands();
 						if (parseerr != 0)
 						{
 							comp.RegisterError(ANIMERR_SYNTAX, &dummy);
@@ -166,13 +167,13 @@ mCollisionAction(NULL)
 			if (new_sheet.commands[j].empty())
 			{
 				comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
-				new_sheet.commands[j] = comp.cmds;
+				new_sheet.commands[j] = comp.GetCommands();
 			}
 		}
 		if (!comp.Okay() && notifyErrorList)
 		{
 			tempbuf.Printf(wxT("Errors for \"%.32s\""), curr_sheet->GetName().c_str());
-			if (notifyErrorList(comp.error_markers, sheetnum, tempbuf))
+			if (notifyErrorList(comp.GetErrorMarkers(), sheetnum, tempbuf))
 			{
 				break;
 			}
@@ -433,3 +434,15 @@ void Animation::DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const
 }
 
 
+std::string
+Animation::GetCurrentInfo() const
+{
+	std::ostringstream output;
+	output<< GetCurrentSheetName().ToStdString()<<" ("<<GetCurrentSheet()<<" of "<<GetNumberSheets()<<")\n";
+	output<<"beat "<<GetCurrentBeat() <<" of "<<GetNumberBeats()<<"\n";
+	for (size_t i = 0; i < numpts; ++i)
+	{
+		output<<"pt "<<i<<": ("<<Position(i).x<<", "<<Position(i).y<<"), dir="<<Direction(i)<<", realdir="<<RealDirection(i)<<(IsCollision(i) ? ", collision!" : "")<< "\n";
+	}
+	return output.str();
+}

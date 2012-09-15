@@ -85,7 +85,7 @@ public:
 
 private:
 	void OnNotifyStatus(const wxString& status);
-	bool OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message);
+	bool OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message);
 	
 	bool mErrorOccurred;
 	

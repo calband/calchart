@@ -32,6 +32,7 @@
 #include <wx/dcbuffer.h>
 
 #include <boost/bind.hpp>
+#include <fstream>
 
 
 //IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
@@ -192,6 +193,15 @@ AnimationView::Generate()
 	}
 	if (mAnimation)
 	{
+#if defined(GENERATE_SHOW_DUMP) && GENERATE_SHOW_DUMP
+		std::ofstream output("/tmp/animate.txt");
+		mAnimation->GotoSheet(0);
+		do
+		{
+			output<<mAnimation->GetCurrentInfo();
+		} while (mAnimation->NextBeat());
+#endif // GENERATE_SHOW_DUMP
+
 		mAnimation->SetCollisionAction(mCollisionWarningType == COLLISION_BEEP ? wxBell : NULL);
 		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
 	}
@@ -405,7 +415,7 @@ AnimationView::OnNotifyStatus(const wxString& status)
 
 
 bool
-AnimationView::OnNotifyErrorList(const ErrorMarker error_markers[NUM_ANIMERR], unsigned sheetnum, const wxString& message)
+AnimationView::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
 {
 	GetAnimationFrame()->OnNotifyErrorList(error_markers, sheetnum, message);
 	mErrorOccurred = true;
