@@ -94,7 +94,7 @@ ContValue *numbeats)
 	p[3] = ref2 - v1;
 	p[0] = p[3] - v2;
 
-	v1 = p[1] - anim->pt;
+	v1 = p[1] - anim->GetPointPosition();
 	c = BoundDirectionSigned(v1.Direction() - d1);
 	if ((v1 != 0) && (IS_ZERO(c)))
 	{
@@ -102,7 +102,7 @@ ContValue *numbeats)
 	}
 	else
 	{
-		v1 = p[2] - anim->pt;
+		v1 = p[2] - anim->GetPointPosition();
 		c = BoundDirectionSigned(v1.Direction() - d2);
 		if ((v1 != 0) && (IS_ZERO(c)))
 		{
@@ -110,7 +110,7 @@ ContValue *numbeats)
 		}
 		else
 		{
-			v1 = p[3] - anim->pt;
+			v1 = p[3] - anim->GetPointPosition();
 			c = BoundDirectionSigned(v1.Direction() - d1 - 180.0);
 			if ((v1 != 0) && (IS_ZERO(c)))
 			{
@@ -118,7 +118,7 @@ ContValue *numbeats)
 			}
 			else
 			{
-				v1 = p[0] - anim->pt;
+				v1 = p[0] - anim->GetPointPosition();
 				c = BoundDirectionSigned(v1.Direction() - d2 - 180.0);
 				if ((v1 != 0) && (IS_ZERO(c)))
 				{
@@ -136,7 +136,7 @@ ContValue *numbeats)
 
 	while (beats > 0)
 	{
-		v1 = p[leg] - anim->pt;
+		v1 = p[leg] - anim->GetPointPosition();
 		c = v1.DM_Magnitude();
 		if (c <= beats)
 		{
@@ -181,39 +181,25 @@ ContPoint::~ContPoint() {}
 
 CC_coord ContPoint::Get(AnimateCompile* anim) const
 {
-	return anim->pt;
+	return anim->GetPointPosition();
 }
 
 
 CC_coord ContStartPoint::Get(AnimateCompile* anim) const
 {
-	return anim->curr_sheet->GetPosition(anim->curr_pt);
+	return anim->GetStartingPosition();
 }
 
 
 CC_coord ContNextPoint::Get(AnimateCompile* anim) const
 {
-	CC_show::const_CC_sheet_iterator_t sheet = anim->curr_sheet + 1;
-
-	while (1)
-	{
-		if (sheet == anim->mShow->GetSheetEnd())
-		{
-			anim->RegisterError(ANIMERR_UNDEFINED, this);
-			return ContPoint::Get(anim);
-		}
-		if (sheet->IsInAnimation())
-		{
-			return sheet->GetPosition(anim->curr_pt);
-		}
-		++sheet;
-	}
+	return anim->GetEndingPosition(this);
 }
 
 
 CC_coord ContRefPoint::Get(AnimateCompile* anim) const
 {
-	return anim->curr_sheet->GetPosition(anim->curr_pt, refnum+1);
+	return anim->GetReferencePointPosition(refnum);
 }
 
 
@@ -358,7 +344,7 @@ float ContValueNeg::Get(AnimateCompile* anim) const
 
 float ContValueREM::Get(AnimateCompile* anim) const
 {
-	return anim->beats_rem;
+	return anim->GetBeatsRemaining();
 }
 
 
@@ -383,11 +369,11 @@ ContFuncDir::~ContFuncDir()
 float ContFuncDir::Get(AnimateCompile* anim) const
 {
 	CC_coord c = pnt->Get(anim);
-	if (c == anim->pt)
+	if (c == anim->GetPointPosition())
 	{
 		anim->RegisterError(ANIMERR_UNDEFINED, this);
 	}
-	return anim->pt.Direction(c);
+	return anim->GetPointPosition().Direction(c);
 }
 
 
@@ -420,7 +406,7 @@ float ContFuncDist::Get(AnimateCompile* anim) const
 {
 	CC_coord vector;
 
-	vector = pnt->Get(anim) - anim->pt;
+	vector = pnt->Get(anim) - anim->GetPointPosition();
 	return vector.DM_Magnitude();
 }
 
@@ -455,12 +441,12 @@ float ContFuncEither::Get(AnimateCompile* anim) const
 	float d1, d2;
 	CC_coord c = pnt->Get(anim);
 
-	if (anim->pt == c)
+	if (anim->GetPointPosition() == c)
 	{
 		anim->RegisterError(ANIMERR_UNDEFINED, this);
 		return dir1->Get(anim);
 	}
-	dir = anim->pt.Direction(c);
+	dir = anim->GetPointPosition().Direction(c);
 	d1 = dir1->Get(anim) - dir;
 	d2 = dir2->Get(anim) - dir;
 	while (d1 > 180) d1-=360;
@@ -495,7 +481,7 @@ float ContFuncStep::Get(AnimateCompile* anim) const
 {
 	CC_coord c;
 
-	c = pnt->Get(anim) - anim->pt;
+	c = pnt->Get(anim) - anim->GetPointPosition();
 	return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
 }
 
@@ -520,8 +506,8 @@ void ContProcBlam::Compile(AnimateCompile* anim)
 	ContNextPoint np;
 	CC_coord c;
 
-	c = np.Get(anim) - anim->pt;
-	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(anim->beats_rem, c)), this);
+	c = np.Get(anim) - anim->GetPointPosition();
+	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(anim->GetBeatsRemaining(), c)), this);
 }
 
 
@@ -614,7 +600,7 @@ void ContProcDMHS::Compile(AnimateCompile* anim)
 	CC_coord c, c_hs, c_dm;
 	short b, b_hs;
 
-	c = pnt->Get(anim) - anim->pt;
+	c = pnt->Get(anim) - anim->GetPointPosition();
 	if (std::abs(c.x) > std::abs(c.y))
 	{
 												  // adjust sign
@@ -661,7 +647,7 @@ void ContProcEven::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
 
-	c = pnt->Get(anim) - anim->pt;
+	c = pnt->Get(anim) - anim->GetPointPosition();
 	int steps = float2int(this, anim, stps->Get(anim));
 	if (steps < 0)
 	{
@@ -686,7 +672,7 @@ void ContProcEWNS::Compile(AnimateCompile* anim)
 	CC_coord c1, c2;
 	short b;
 
-	c1 = pnt->Get(anim) - anim->pt;
+	c1 = pnt->Get(anim) - anim->GetPointPosition();
 	if (c1.y != 0)
 	{
 		c2.x = 0;
@@ -747,7 +733,7 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 	{
 		CreateUnitVector(b, d, f1);
 	}
-	v = pnt->Get(anim) - anim->pt;
+	v = pnt->Get(anim) - anim->GetPointPosition();
 	e = Coord2Float(v.x);
 	f = Coord2Float(v.y);
 	f1 = a*d - b*c;
@@ -846,7 +832,7 @@ void ContProcFMTO::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
 
-	c = pnt->Get(anim) - anim->pt;
+	c = pnt->Get(anim) - anim->GetPointPosition();
 	if (c != 0)
 	{
 		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove((unsigned)c.DM_Magnitude(), c)),
@@ -886,11 +872,11 @@ void ContProcGrid::Compile(AnimateCompile* anim)
 
 	gridc = Float2Coord(grid->Get(anim));
 
-	c.x = roundcoord(anim->pt.x, gridc);
+	c.x = roundcoord(anim->GetPointPosition().x, gridc);
 // Adjust so 4 step grid will be on visible grid
-	c.y = roundcoord(anim->pt.y-Int2Coord(2), gridc) + Int2Coord(2);
+	c.y = roundcoord(anim->GetPointPosition().y-Int2Coord(2), gridc) + Int2Coord(2);
 
-	c -= anim->pt;
+	c -= anim->GetPointPosition();
 	if (c != 0)
 	{
 		anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(0, c)), this);
@@ -948,7 +934,7 @@ void ContProcHSDM::Compile(AnimateCompile* anim)
 	CC_coord c, c_hs, c_dm;
 	short b;
 
-	c = pnt->Get(anim) - anim->pt;
+	c = pnt->Get(anim) - anim->GetPointPosition();
 	if (std::abs(c.x) > std::abs(c.y))
 	{
 												  // adjust sign
@@ -994,7 +980,7 @@ void ContProcMagic::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
 
-	c = pnt->Get(anim) - anim->pt;
+	c = pnt->Get(anim) - anim->GetPointPosition();
 	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(0, c)), this);
 }
 
@@ -1067,7 +1053,7 @@ ContProcMTRM::~ContProcMTRM()
 
 void ContProcMTRM::Compile(AnimateCompile* anim)
 {
-	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT(anim->beats_rem,
+	anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT(anim->GetBeatsRemaining(),
 		dir->Get(anim))), this);
 }
 
@@ -1083,7 +1069,7 @@ void ContProcNSEW::Compile(AnimateCompile* anim)
 	CC_coord c1, c2;
 	short b;
 
-	c1 = pnt->Get(anim) - anim->pt;
+	c1 = pnt->Get(anim) - anim->GetPointPosition();
 	if (c1.x != 0)
 	{
 		c2.x = c1.x;
@@ -1123,11 +1109,11 @@ void ContProcRotate::Compile(AnimateCompile* anim)
 
 // Most of the work is converting to polar coordinates
 	c = pnt->Get(anim);
-	rad = anim->pt - c;
-	if (c == anim->pt)
+	rad = anim->GetPointPosition() - c;
+	if (c == anim->GetPointPosition())
 		start_ang = anim->GetVarValue(CONTVAR_DOH, this);
 	else
-		start_ang = c.Direction(anim->pt);
+		start_ang = c.Direction(anim->GetPointPosition());
 	int b = float2int(this, anim, stps->Get(anim));
 	float angle = ang->Get(anim);
 	bool backwards = false;

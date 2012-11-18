@@ -25,23 +25,27 @@
 #include "animatecommand.h"
 
 
-class AnimateVariable
+float AnimationVariables::GetVarValue(int varnum, unsigned whichPoint) const
 {
-private:
-	float v;
-	bool valid;
-public:
-	AnimateVariable(): v(0.0), valid(false) {}
-	inline bool IsValid() const { return valid; }
-	inline float GetValue() const { return v; }
-	inline void SetValue(float newv) { v = newv; valid = true; }
-	inline void ClearValue() { v = 0.0; valid = false; }
-};
+	std::map<unsigned,AnimateVariable>::const_iterator i = mVars[varnum].find(whichPoint);
+	if (i == mVars[varnum].end() || !i->second.IsValid())
+	{
+		throw AnimationVariableException();
+	}
+	return i->second.GetValue();
+}
 
 
-AnimateCompile::AnimateCompile(CC_show* show) :
+void AnimationVariables::SetVarValue(int varnum, unsigned whichPoint, float value)
+{
+	mVars[varnum][whichPoint].SetValue(value);
+}
+
+
+AnimateCompile::AnimateCompile(CC_show* show, AnimationVariables& variablesStates) :
 mShow(show),
 error_markers(NUM_ANIMERR),
+vars(variablesStates),
 okay(true)
 {
 }
@@ -150,20 +154,13 @@ void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 }
 
 
-void AnimateCompile::FreeErrorMarkers()
-{
-	for (unsigned i = 0; i < NUM_ANIMERR; i++)
-	{
-		error_markers[i].Reset();
-	}
-}
-
-
 float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 {
-	if (vars[varnum][curr_pt].IsValid())
+	try {
+		return vars.GetVarValue(varnum, curr_pt);
+	}
+	catch (AnimationVariables::AnimationVariableException&)
 	{
-		return vars[varnum][curr_pt].GetValue();
 	}
 	RegisterError(ANIMERR_UNDEFINED, token);
 	return 0.0;
@@ -172,6 +169,39 @@ float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 
 void AnimateCompile::SetVarValue(int varnum, float value)
 {
-	vars[varnum][curr_pt].SetValue(value);
+	vars.SetVarValue(varnum, curr_pt, value);
 }
+
+
+AnimatePoint AnimateCompile::GetStartingPosition() const
+{
+	return curr_sheet->GetPosition(GetCurrentPoint());
+}
+
+
+AnimatePoint AnimateCompile::GetEndingPosition(const ContToken *token)
+{
+	CC_show::const_CC_sheet_iterator_t sheet = curr_sheet + 1;
+	
+	while (1)
+	{
+		if (sheet == mShow->GetSheetEnd())
+		{
+			RegisterError(ANIMERR_UNDEFINED, token);
+			return GetPointPosition();
+		}
+		if (sheet->IsInAnimation())
+		{
+			return sheet->GetPosition(GetCurrentPoint());
+		}
+		++sheet;
+	}
+}
+
+
+AnimatePoint AnimateCompile::GetReferencePointPosition(unsigned refnum) const
+{
+	return curr_sheet->GetPosition(GetCurrentPoint(), refnum+1);
+}
+
 

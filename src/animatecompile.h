@@ -30,16 +30,40 @@
 
 class ContProcedure;
 class ContToken;
-class AnimateVariable;
 class AnimateCommand;
 class CC_show;
 class CC_sheet;
+
+class AnimateVariable
+{
+private:
+	float v;
+	bool valid;
+public:
+	AnimateVariable(): v(0.0), valid(false) {}
+	inline bool IsValid() const { return valid; }
+	inline float GetValue() const { return v; }
+	inline void SetValue(float newv) { v = newv; valid = true; }
+	inline void ClearValue() { v = 0.0; valid = false; }
+};
+
+
+class AnimationVariables
+{
+public:
+	struct AnimationVariableException {};
+	float GetVarValue(int varnum, unsigned whichPoint) const; // may throw AnimationVariableException if variable doesn't exist
+	void SetVarValue(int varnum, unsigned whichPoint, float value);
+private:
+	std::map<unsigned,AnimateVariable> mVars[NUMCONTVARS];
+};
 
 class AnimateCompile
 {
 public:
 // Compile a point
-	AnimateCompile(CC_show *show);
+	// give a copy of the variable state
+	AnimateCompile(CC_show *show, AnimationVariables& variablesStates);
 	~AnimateCompile();
 
 // Compile a point
@@ -49,9 +73,7 @@ public:
 
 public:
 	inline bool Okay() { return okay; };
-	inline void SetStatus(bool s) { okay = s; };
 	void RegisterError(AnimateError err, const ContToken *token);
-	void FreeErrorMarkers();
 
 	float GetVarValue(int varnum, const ContToken *token);
 	void SetVarValue(int varnum, float value);
@@ -59,16 +81,24 @@ public:
 	std::vector<boost::shared_ptr<AnimateCommand> > GetCommands() const { return cmds; }
 	std::vector<ErrorMarker> GetErrorMarkers() const { return error_markers; }
 
+	// helper functions to get information for building a command
+	AnimatePoint GetPointPosition() const { return pt; }
+	unsigned GetCurrentPoint() const { return curr_pt; }
+	unsigned GetBeatsRemaining() const { return beats_rem; }
+	AnimatePoint GetStartingPosition() const;
+	AnimatePoint GetEndingPosition(const ContToken *token);
+	AnimatePoint GetReferencePointPosition(unsigned refnum) const;
+private:
+	inline void SetStatus(bool s) { okay = s; };
 	AnimatePoint pt;
 	CC_show *mShow;
 	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;
 	unsigned beats_rem;
-private:
 	unsigned contnum;
 	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
 	std::vector<ErrorMarker> error_markers;
-	std::map<unsigned,AnimateVariable> vars[NUMCONTVARS];
+	AnimationVariables& vars;
 	bool okay;
 };
 

@@ -171,6 +171,7 @@ AnimationView::SelectCollisions()
 	}
 }
 
+//#define GENERATE_SHOW_DUMP 1
 
 void
 AnimationView::Generate()
@@ -194,7 +195,7 @@ AnimationView::Generate()
 	if (mAnimation)
 	{
 #if defined(GENERATE_SHOW_DUMP) && GENERATE_SHOW_DUMP
-		std::ofstream output("/tmp/animate.txt");
+		std::ofstream output((GetShow()->GetFilename() + wxT(".txt")).ToStdString().c_str());
 		mAnimation->GotoSheet(0);
 		do
 		{

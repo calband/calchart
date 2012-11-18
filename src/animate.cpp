@@ -102,7 +102,8 @@ Animation::Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList n
 curr_sheetnum(0),
 mCollisionAction(NULL)
 {
-	AnimateCompile comp(show);
+	// the variables are persistant through the entire compile process.
+	AnimationVariables variablesStates;
 	wxString tempbuf;
 
 	unsigned sheetnum = 0;
@@ -118,8 +119,7 @@ mCollisionAction(NULL)
 		AnimateSheet new_sheet(thePoints, curr_sheet->GetName(), curr_sheet->GetBeats());
 
 // Now parse continuity
-		comp.SetStatus(true);
-		comp.FreeErrorMarkers();
+		AnimateCompile comp(show, variablesStates);
 		int contnum = 0;
 		for (CC_sheet::ContContainer::const_iterator currcont = curr_sheet->animcont.begin(); currcont != curr_sheet->animcont.end();
 			++currcont, contnum++)
