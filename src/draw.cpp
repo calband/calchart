@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "draw.h"
+
 #include <wx/dc.h>
 #include <wx/dcmemory.h>
 #include "confgr.h"
@@ -260,7 +262,7 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 
 				float top_y = y + texth - textd - d;
 
-				for (const wxChar *s = c->text; *s; s++)
+				for (std::string::const_iterator s = c->text.begin(); s != c->text.end(); s++)
 				{
 					{
 						dc.SetPen(*wxBLACK_PEN);
@@ -501,3 +503,64 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 	printerdc->SetUserScale(printerW/((landscape?kSizeXLandscape:kSizeX)*kBitmapScale), printerH/((landscape?kSizeYLandscape:kSizeY)*kBitmapScale));
 	printerdc->Blit(0, 0, membm->GetWidth(), membm->GetHeight(), dc.get(), 0, 0);
 }
+
+void
+DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label)
+{
+	float circ_r = Float2Coord(GetConfiguration_DotRatio());
+	float offset = circ_r / 2;
+	float plineoff = offset * GetConfiguration_PLineRatio();
+	float slineoff = offset * GetConfiguration_SLineRatio();
+	float textoff = offset * 1.25;
+	
+	long x = ((reference) ? point.GetRefPos(reference).x : point.GetPos().x) + origin.x;
+	long y = ((reference) ? point.GetRefPos(reference).y : point.GetPos().y) + origin.y;
+	switch (point.GetSymbol())
+	{
+		case SYMBOL_SOL:
+		case SYMBOL_SOLBKSL:
+		case SYMBOL_SOLSL:
+		case SYMBOL_SOLX:
+			dc.SetBrush(*fillBrush);
+			break;
+		default:
+			dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	}
+	dc.DrawEllipse(x - offset, y - offset, circ_r, circ_r);
+	switch (point.GetSymbol())
+	{
+		case SYMBOL_SL:
+		case SYMBOL_X:
+			dc.DrawLine(x - plineoff, y + plineoff,
+						x + plineoff, y - plineoff);
+			break;
+		case SYMBOL_SOLSL:
+		case SYMBOL_SOLX:
+			dc.DrawLine(x - slineoff, y + slineoff,
+						x + slineoff, y - slineoff);
+			break;
+		default:
+			break;
+	}
+	switch (point.GetSymbol())
+	{
+		case SYMBOL_BKSL:
+		case SYMBOL_X:
+			dc.DrawLine(x - plineoff, y - plineoff,
+						x + plineoff, y + plineoff);
+			break;
+		case SYMBOL_SOLBKSL:
+		case SYMBOL_SOLX:
+			dc.DrawLine(x - slineoff, y - slineoff,
+						x + slineoff, y + slineoff);
+			break;
+		default:
+			break;
+	}
+	wxCoord textw, texth, textd;
+	dc.GetTextExtent(label, &textw, &texth, &textd);
+	dc.DrawText(label,
+				point.GetFlip() ? x : (x - textw),
+				y - textoff - texth + textd);
+}
+

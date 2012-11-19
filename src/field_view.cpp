@@ -402,6 +402,6 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 void
 FieldView::GeneratePaths()
 {
-	mAnimation.reset(new Animation(mShow, NotifyStatus(), NotifyErrorList()));
+	mAnimation.reset(new Animation(*mShow, NotifyStatus(), NotifyErrorList()));
 }
 

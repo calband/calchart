@@ -76,10 +76,6 @@ private:
 	friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
 };
 
-// We break this out of the class to make CalChart internals more cross platform
-// Draw the point
-void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label);
-
 void CC_point_UnitTests();
 
 #endif // _CC_POINT_H_

@@ -42,7 +42,7 @@ void AnimationVariables::SetVarValue(int varnum, unsigned whichPoint, float valu
 }
 
 
-AnimateCompile::AnimateCompile(CC_show* show, AnimationVariables& variablesStates) :
+AnimateCompile::AnimateCompile(const CC_show& show, AnimationVariables& variablesStates) :
 mShow(show),
 error_markers(NUM_ANIMERR),
 vars(variablesStates),
@@ -56,9 +56,10 @@ AnimateCompile::~AnimateCompile()
 }
 
 
-void AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc)
+std::vector<boost::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc)
 {
 	CC_coord c;
+	cmds.clear();
 
 	contnum = cont_num;
 	curr_sheet = c_sheet;
@@ -71,7 +72,7 @@ void AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigne
 	{
 // no continuity was specified
 		CC_show::const_CC_sheet_iterator_t s;
-		for (s = curr_sheet + 1; s != mShow->GetSheetEnd(); ++s)
+		for (s = curr_sheet + 1; s != mShow.GetSheetEnd(); ++s)
 		{
 			if (s->IsInAnimation())
 			{
@@ -82,7 +83,7 @@ void AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigne
 				break;
 			}
 		}
-		if (s == mShow->GetSheetEnd())
+		if (s == mShow.GetSheetEnd())
 		{
 //use MTRM E
 			ContProcMTRM defcont(new ContValueDefined(CC_E));
@@ -94,7 +95,7 @@ void AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigne
 	{
 		proc->Compile(this);
 	}
-	if ((curr_sheet + 1) != mShow->GetSheetEnd())
+	if ((curr_sheet + 1) != mShow.GetSheetEnd())
 	{
 		CC_show::const_CC_sheet_iterator_t curr_sheet_next = curr_sheet+1;
 		if (pt !=
@@ -110,6 +111,7 @@ void AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigne
 		RegisterError(ANIMERR_EXTRATIME, NULL);
 		Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT(beats_rem, ANIMDIR_E)), NULL);
 	}
+	return cmds;
 }
 
 
@@ -156,7 +158,8 @@ void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 
 float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 {
-	try {
+	try
+	{
 		return vars.GetVarValue(varnum, curr_pt);
 	}
 	catch (AnimationVariables::AnimationVariableException&)
@@ -185,7 +188,7 @@ AnimatePoint AnimateCompile::GetEndingPosition(const ContToken *token)
 	
 	while (1)
 	{
-		if (sheet == mShow->GetSheetEnd())
+		if (sheet == mShow.GetSheetEnd())
 		{
 			RegisterError(ANIMERR_UNDEFINED, token);
 			return GetPointPosition();

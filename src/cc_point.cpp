@@ -22,8 +22,6 @@
 
 #include "cc_point.h"
 
-#include "confgr.h"
-#include <wx/wx.h>
 #include <assert.h>
 #include <stdexcept>
 
@@ -118,66 +116,6 @@ CC_point::SetContinuityIndex(uint8_t c)
 	mContinuityIndex = c;
 }
 
-
-void
-DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label)
-{
-	float circ_r = Float2Coord(GetConfiguration_DotRatio());
-	float offset = circ_r / 2;
-	float plineoff = offset * GetConfiguration_PLineRatio();
-	float slineoff = offset * GetConfiguration_SLineRatio();
-	float textoff = offset * 1.25;
-
-	long x = ((reference) ? point.GetRefPos(reference).x : point.GetPos().x) + origin.x;
-	long y = ((reference) ? point.GetRefPos(reference).y : point.GetPos().y) + origin.y;
-	switch (point.GetSymbol())
-	{
-		case SYMBOL_SOL:
-		case SYMBOL_SOLBKSL:
-		case SYMBOL_SOLSL:
-		case SYMBOL_SOLX:
-			dc.SetBrush(*fillBrush);
-			break;
-		default:
-			dc.SetBrush(*wxTRANSPARENT_BRUSH);
-	}
-	dc.DrawEllipse(x - offset, y - offset, circ_r, circ_r);
-	switch (point.GetSymbol())
-	{
-		case SYMBOL_SL:
-		case SYMBOL_X:
-			dc.DrawLine(x - plineoff, y + plineoff,
-						x + plineoff, y - plineoff);
-			break;
-		case SYMBOL_SOLSL:
-		case SYMBOL_SOLX:
-			dc.DrawLine(x - slineoff, y + slineoff,
-						x + slineoff, y - slineoff);
-			break;
-		default:
-			break;
-	}
-	switch (point.GetSymbol())
-	{
-		case SYMBOL_BKSL:
-		case SYMBOL_X:
-			dc.DrawLine(x - plineoff, y - plineoff,
-						x + plineoff, y + plineoff);
-			break;
-		case SYMBOL_SOLBKSL:
-		case SYMBOL_SOLX:
-			dc.DrawLine(x - slineoff, y - slineoff,
-						x + slineoff, y + slineoff);
-			break;
-		default:
-			break;
-	}
-	wxCoord textw, texth, textd;
-	dc.GetTextExtent(label, &textw, &texth, &textd);
-	dc.DrawText(label,
-				point.GetFlip() ? x : (x - textw),
-				y - textoff - texth + textd);
-}
 
 // Test Suite stuff
 struct CC_point_values

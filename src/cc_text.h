@@ -25,14 +25,13 @@
 
 #include "cc_types.h"
 
-#include <wx/string.h>
-
+#include <string>
 #include <vector>
 
 struct CC_textchunk
 {
 	CC_textchunk() : text(), font(PSFONT_NORM) {}
-	wxString text;
+	std::string text;
 	enum PSFONT_TYPE font;
 };
 

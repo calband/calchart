@@ -61,7 +61,7 @@ typedef boost::function<bool (const std::vector<ErrorMarker>& error_markers, uns
 class Animation
 {
 public:
-	Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
+	Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
 	~Animation();
 
 // Returns true if changes made

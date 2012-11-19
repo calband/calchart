@@ -25,6 +25,7 @@
 #include "cc_command.h"
 #include "modes.h"
 #include "confgr.h"
+#include "draw.h"
 
 extern const wxChar *contnames[];
 

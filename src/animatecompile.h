@@ -63,11 +63,11 @@ class AnimateCompile
 public:
 // Compile a point
 	// give a copy of the variable state
-	AnimateCompile(CC_show *show, AnimationVariables& variablesStates);
+	AnimateCompile(const CC_show& show, AnimationVariables& variablesStates);
 	~AnimateCompile();
 
 // Compile a point
-	void Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc);
+	std::vector<boost::shared_ptr<AnimateCommand> > Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc);
 // true if successful
 	bool Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 
@@ -78,7 +78,6 @@ public:
 	float GetVarValue(int varnum, const ContToken *token);
 	void SetVarValue(int varnum, float value);
 
-	std::vector<boost::shared_ptr<AnimateCommand> > GetCommands() const { return cmds; }
 	std::vector<ErrorMarker> GetErrorMarkers() const { return error_markers; }
 
 	// helper functions to get information for building a command
@@ -91,7 +90,7 @@ public:
 private:
 	inline void SetStatus(bool s) { okay = s; };
 	AnimatePoint pt;
-	CC_show *mShow;
+	const CC_show& mShow;
 	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;
 	unsigned beats_rem;

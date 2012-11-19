@@ -329,7 +329,7 @@ void ContinuityEditor::UpdateText()
 	mUserInput->DiscardEdits();
 	CC_show::const_CC_sheet_iterator_t current_sheet = mShow->GetCurrentSheet();
 	const CC_continuity& c = current_sheet->GetNthContinuity(mCurrentContinuityChoice);
-	if (!c.GetText().IsEmpty())
+	if (!c.GetText().empty())
 	{
 		mUserInput->WriteText(c.GetText());
 		mUserInput->SetInsertionPoint(0);

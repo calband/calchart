@@ -66,7 +66,6 @@ bool CalChartApp::OnInit()
 	// setup the configuration.
 	ReadConfig();
 
-
 	//// Create the main frame window
 	wxFrame *frame = new TopFrame(mDocManager, (wxFrame *) NULL, _T("CalChart"));
 

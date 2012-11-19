@@ -187,7 +187,7 @@ AnimationView::Generate()
 	// (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
 	NotifyStatus notifyStatus = boost::bind(&AnimationView::OnNotifyStatus, this, _1);
 	NotifyErrorList notifyErrorList = boost::bind(&AnimationView::OnNotifyErrorList, this, _1, _2, _3);
-	mAnimation.reset(new Animation(GetShow(), notifyStatus, notifyErrorList));
+	mAnimation.reset(new Animation(*GetShow(), notifyStatus, notifyErrorList));
 	if (mAnimation && (mAnimation->GetNumberSheets() == 0))
 	{
 		mAnimation.reset();

@@ -658,7 +658,7 @@ float fontsize)
 				buffer<<buf;
 				*currfontnum = part->font;
 			}
-			std::string textstr(part->text.utf8_str());
+			std::string textstr(part->text);
 			const char *text = textstr.c_str();
 			while (*text != 0)
 			{

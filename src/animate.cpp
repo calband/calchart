@@ -97,17 +97,16 @@ private:
 };
 
 
-Animation::Animation(CC_show *show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
-: numpts(show->GetNumPoints()), pts(numpts), curr_cmds(numpts),
+Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
+: numpts(show.GetNumPoints()), pts(numpts), curr_cmds(numpts),
 curr_sheetnum(0),
 mCollisionAction(NULL)
 {
 	// the variables are persistant through the entire compile process.
 	AnimationVariables variablesStates;
-	wxString tempbuf;
 
 	unsigned sheetnum = 0;
-	for (CC_show::const_CC_sheet_iterator_t curr_sheet = show->GetSheetBegin(); curr_sheet != show->GetSheetEnd();
+	for (CC_show::const_CC_sheet_iterator_t curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd();
 		++curr_sheet, sheetnum++)
 	{
 		if (! curr_sheet->IsInAnimation()) continue;
@@ -124,28 +123,28 @@ mCollisionAction(NULL)
 		for (CC_sheet::ContContainer::const_iterator currcont = curr_sheet->animcont.begin(); currcont != curr_sheet->animcont.end();
 			++currcont, contnum++)
 		{
-			if (!currcont->GetText().IsEmpty())
+			if (!currcont->GetText().empty())
 			{
-				std::string tmpBuffer(currcont->GetText().mb_str());
+				std::string tmpBuffer(currcont->GetText());
 				yyinputbuffer = tmpBuffer.c_str();
-				tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."),
-					curr_sheet->GetName().c_str(), currcont->GetName().c_str());
 				if (notifyStatus)
 				{
+					wxString tempbuf;
+					tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."), curr_sheet->GetName().c_str(), currcont->GetName().c_str());
 					notifyStatus(tempbuf);
 				}
-				int parseerr = parsecontinuity();
-				ContToken dummy;				  // get position of parse error
+				// parse out the error
+				if (parsecontinuity() != 0)
+				{
+					// Supply a generic parse error
+					ContToken dummy;
+					comp.RegisterError(ANIMERR_SYNTAX, &dummy);
+				}
 				for (unsigned j = 0; j < numpts; j++)
 				{
 					if (curr_sheet->GetPoint(j).GetContinuityIndex() == currcont->GetNum())
 					{
-						comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
-						new_sheet.commands[j] = comp.GetCommands();
-						if (parseerr != 0)
-						{
-							comp.RegisterError(ANIMERR_SYNTAX, &dummy);
-						}
+						new_sheet.commands[j] = comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
 					}
 				}
 				while (ParsedContinuity)
@@ -157,21 +156,22 @@ mCollisionAction(NULL)
 			}
 		}
 // Handle points that don't have continuity (shouldn't happen)
-		tempbuf.Printf(wxT("Compiling \"%.32s\"..."), curr_sheet->GetName().c_str());
 		if (notifyStatus)
 		{
+			wxString tempbuf;
+			tempbuf.Printf(wxT("Compiling \"%.32s\"..."), curr_sheet->GetName().c_str());
 			notifyStatus(tempbuf);
 		}
 		for (unsigned j = 0; j < numpts; j++)
 		{
 			if (new_sheet.commands[j].empty())
 			{
-				comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
-				new_sheet.commands[j] = comp.GetCommands();
+				new_sheet.commands[j] = comp.Compile(curr_sheet, j, contnum, NULL);
 			}
 		}
 		if (!comp.Okay() && notifyErrorList)
 		{
+			wxString tempbuf;
 			tempbuf.Printf(wxT("Errors for \"%.32s\""), curr_sheet->GetName().c_str());
 			if (notifyErrorList(comp.GetErrorMarkers(), sheetnum, tempbuf))
 			{
