@@ -41,8 +41,7 @@ public:
 class PointPicker : public wxDialog
 {
 public:
-	PointPicker();
-	PointPicker(CC_show *shw,
+	PointPicker(CC_show& shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -53,16 +52,13 @@ public:
 	void Update();
 
 private:
-	CC_show *show;
+	CC_show& mShow;
 	PointPickerView *mView;
 	wxListBox *mList;
 	std::vector<wxString> mCachedLabels;
 	CC_show::SelectionList mCachedSelection;
 
-	void Init();
-
-	bool Create(CC_show *shw,
-		wxWindow *parent, wxWindowID id = wxID_ANY,
+	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -84,8 +80,7 @@ class ShowInfoReq : public wxDialog
 	DECLARE_EVENT_TABLE()
 
 public:
-	ShowInfoReq();
-	ShowInfoReq(CC_show *shw,
+	ShowInfoReq(CC_show& shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Show Info"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -93,10 +88,8 @@ public:
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
 	~ShowInfoReq( );
 
-	void Init();
-
-	bool Create(CC_show *shw,
-		wxWindow *parent, wxWindowID id = wxID_ANY,
+private:
+	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Show Info"),
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
@@ -120,7 +113,7 @@ public:
 	std::vector<wxString> GetLabels() { return mLabels; }
 
 private:
-	CC_show *mShow;
+	CC_show& mShow;
 	void OnReset(wxCommandEvent&);
 };
 

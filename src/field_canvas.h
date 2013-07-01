@@ -24,7 +24,7 @@
 #define _FIELD_CANVAS_H_
 
 #include "basic_ui.h"
-#include "field_frame.h"
+#include "cc_types.h"
 
 #include <wx/docview.h>
 
@@ -35,6 +35,7 @@ class FieldView;
 class FieldFrame;
 class CC_shape;
 class BackgroundImage;
+class CC_coord;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public CtrlScrollCanvas
@@ -76,9 +77,9 @@ private:
 
 	void ClearShapes();
 
-	void BeginDrag(CC_DRAG_TYPES type, CC_coord start);
+	void BeginDrag(CC_DRAG_TYPES type, const CC_coord& start);
 	void AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape);
-	void MoveDrag(CC_coord end);
+	void MoveDrag(const CC_coord& end);
 	void EndDrag();
 	
 	CC_DRAG_TYPES drag;

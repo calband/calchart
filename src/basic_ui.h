@@ -39,9 +39,7 @@ public:
 		const wxString& value = wxEmptyString,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = wxTE_MULTILINE|wxHSCROLL,
-		const wxValidator& validator = wxDefaultValidator,
-		const wxString& name = wxTextCtrlNameStr);
+		long style = wxTE_MULTILINE|wxHSCROLL);
 #ifdef TEXT_DOS_STYLE
 	wxString GetValue(void) const;
 #endif

@@ -28,10 +28,6 @@
 
 #include <bitset>
 
-class wxDC;
-class wxString;
-class wxBrush;
-
 // Perhaps this should be put in namespace?
 
 class CC_point

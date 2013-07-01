@@ -152,6 +152,14 @@ DECLARE_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_6, float);
 DECLARE_CONFIGURATION_FUNCTIONS( OmniViewAngle_6, float);
 DECLARE_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_6, float);
 
+DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameWidth, long);
+DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameHeight, long);
+
+DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameSashPosition, long);
+DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameOmniAnimation, bool);
+DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameSplitScreen, bool);
+DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool);
+
 
 extern wxString yard_text[MAX_YARD_LINES];
 extern const wxString yard_text_index[MAX_YARD_LINES];

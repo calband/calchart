@@ -51,21 +51,15 @@ void PointPickerView::OnUpdate(wxView *sender, wxObject *hint)
 	static_cast<PointPicker*>(GetFrame())->Update();
 }
 
-PointPicker::PointPicker()
-{
-	Init();
-}
-
-PointPicker::PointPicker(CC_show *shw,
+PointPicker::PointPicker(CC_show& shw,
 	wxWindow *parent, wxWindowID id,
 	const wxString& caption,
 	const wxPoint& pos,
 	const wxSize& size,
-	long style )
+	long style ) :
+mShow(shw)
 {
-	Init();
-	
-	Create(shw, parent, id, caption, pos, size, style);
+	Create(parent, id, caption, pos, size, style);
 }
 
 PointPicker::~PointPicker()
@@ -74,13 +68,7 @@ PointPicker::~PointPicker()
 		delete mView;
 }
 
-void PointPicker::Init()
-{
-}
-
-
-bool PointPicker::Create(CC_show *shw,
-		wxWindow *parent, wxWindowID id,
+bool PointPicker::Create(wxWindow *parent, wxWindowID id,
 		const wxString& caption,
 		const wxPoint& pos,
 		const wxSize& size,
@@ -89,11 +77,9 @@ bool PointPicker::Create(CC_show *shw,
 	if (!wxDialog::Create(parent, id, caption, pos, size, style))
 		return false;
 
-	show = shw;
-
 	// give this a view so it can pick up document changes
 	mView = new PointPickerView;
-	mView->SetDocument(show);
+	mView->SetDocument(&mShow);
 	mView->SetFrame(this);
 
 	CreateControls();
@@ -137,13 +123,13 @@ void PointPicker::CreateControls()
 
 void PointPicker::PointPickerAll(wxCommandEvent&)
 {
-	show->SelectAll();
+	mShow.SelectAll();
 }
 
 
 void PointPicker::PointPickerNone(wxCommandEvent&)
 {
-	show->UnselectAll();
+	mShow.UnselectAll();
 }
 
 
@@ -155,20 +141,20 @@ void PointPicker::PointPickerSelect(wxCommandEvent&)
 	mCachedSelection.clear();
 	for (size_t i = 0; i < n; ++i)
 		mCachedSelection.insert(selections[i]);
-	show->SetSelection(mCachedSelection);
+	mShow.SetSelection(mCachedSelection);
 }
 
 
 void PointPicker::Update()
 {
-	std::vector<wxString> showLabels = show->GetPointLabels();
+	std::vector<wxString> showLabels = mShow.GetPointLabels();
 	if (mCachedLabels != showLabels)
 	{
 		mCachedLabels = showLabels;
 		mList->Clear();
 		mList->Set(mCachedLabels.size(), &mCachedLabels[0]);
 	}
-	CC_show::SelectionList showSelectionList = show->GetSelectionList();
+	CC_show::SelectionList showSelectionList = mShow.GetSelectionList();
 	if (mCachedSelection != showSelectionList)
 	{
 		mList->DeselectAll();
@@ -233,34 +219,22 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( ShowInfoReq, wxDialog )
 
-ShowInfoReq::ShowInfoReq()
-{
-	Init();
-}
-
-ShowInfoReq::ShowInfoReq(CC_show *shw,
+ShowInfoReq::ShowInfoReq(CC_show& shw,
 	wxWindow *parent, wxWindowID id,
 	const wxString& caption,
 	const wxPoint& pos,
 	const wxSize& size,
-	long style )
+						 long style ) :
+mShow(shw)
 {
-	Init();
-	
-	Create(shw, parent, id, caption, pos, size, style);
+	Create(parent, id, caption, pos, size, style);
 }
 
 ShowInfoReq::~ShowInfoReq()
 {
 }
 
-void ShowInfoReq::Init()
-{
-}
-
-
-bool ShowInfoReq::Create(CC_show *shw,
-		wxWindow *parent, wxWindowID id,
+bool ShowInfoReq::Create(wxWindow *parent, wxWindowID id,
 		const wxString& caption,
 		const wxPoint& pos,
 		const wxSize& size,
@@ -269,7 +243,6 @@ bool ShowInfoReq::Create(CC_show *shw,
 	if (!wxDialog::Create(parent, id, caption, pos, size, style))
 		return false;
 	
-	mShow = shw;
 	CreateControls();
 
 // This fits the dalog to the minimum size dictated by the sizers
@@ -387,7 +360,7 @@ bool ShowInfoReq::TransferDataToWindow()
 	std::set<unsigned> letters;
 	bool use_letters;
 	int maxnum;
-	CalculateLabels(*mShow, letters, use_letters, maxnum);
+	CalculateLabels(mShow, letters, use_letters, maxnum);
 
 	wxSpinCtrl* pointsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_SPIN);
 	wxSpinCtrl* columnsCtrl = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_COLUMNS_SPIN);
@@ -395,7 +368,7 @@ bool ShowInfoReq::TransferDataToWindow()
 	wxSpinCtrl* pointsPerLine = (wxSpinCtrl*) FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER);
 	wxListBox* label_letters = (wxListBox*) FindWindow(ShowInfoReq_ID_LABEL_LETTERS);
 
-	pointsCtrl->SetValue(mShow->GetNumPoints());
+	pointsCtrl->SetValue(mShow.GetNumPoints());
 	columnsCtrl->SetValue(10);
 	labelType->SetSelection(use_letters);
 	pointsPerLine->SetValue(maxnum);
@@ -489,7 +462,6 @@ bool ShowInfoReq::Validate()
 
 void ShowInfoReq::OnReset(wxCommandEvent&)
 {
-	Init();
 	TransferDataToWindow();
 }
 

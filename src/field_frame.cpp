@@ -595,7 +595,7 @@ void FieldFrame::OnCmdPoints(wxCommandEvent& event)
 {
 	if (GetShow())
 	{
-		PointPicker* pp = new PointPicker(GetShow(), this);
+		PointPicker* pp = new PointPicker(*GetShow(), this);
 		// make it modeless:
 		pp->Show();
 	}
@@ -611,7 +611,7 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 	}
 	else if (GetShow())
 	{
-		mAnimationFrame = new AnimationFrame(boost::bind(&FieldFrame::ClearAnimationFrame, this), GetShow(), GetView(), this);
+		mAnimationFrame = new AnimationFrame(boost::bind(&FieldFrame::ClearAnimationFrame, this), GetShow(), GetView(), this, wxSize(GetConfiguration_AnimationFrameWidth(), GetConfiguration_AnimationFrameHeight()));
 	}
 }
 
@@ -946,7 +946,7 @@ void FieldFrame::Setup()
 {
 	if (GetShow())
 	{
-		ShowInfoReq dialog(GetShow(), this);
+		ShowInfoReq dialog(*GetShow(), this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			GetFieldView()->DoSetShowInfo(dialog.GetNumberPoints(), dialog.GetNumberColumns(), dialog.GetLabels());

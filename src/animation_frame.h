@@ -47,9 +47,11 @@ class AnimationFrame : public AnimationFrameParent
 public:
 	typedef AnimationFrameParent super;
 
-	AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent);
+	AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size);
 	~AnimationFrame();
 	
+	void OnSize(wxSizeEvent& event);
+
 	void OnCmdReanimate(wxCommandEvent& event);
 	void OnCmdSelectCollisions(wxCommandEvent& event);
 	void OnCmdClose(wxCommandEvent& event) { Close(); }

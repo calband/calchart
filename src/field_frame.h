@@ -23,28 +23,14 @@
 #ifndef _FIELD_FRAME_H_
 #define _FIELD_FRAME_H_
 
+#include "cc_types.h"
+
 #include <wx/docview.h>
 
-class Animation;
 class CC_coord;
 class wxComboBox;
 class wxSlider;
 class CC_show;
-
-// Value of 10 translates to a canvas of 1760x1000.
-#define FIELD_MAXZOOM 10
-
-enum CC_DRAG_TYPES
-{
-	CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
-	CC_DRAG_LASSO, CC_DRAG_LINE, CC_DRAG_CROSS
-};
-enum CC_MOVE_MODES
-{
-	CC_MOVE_NORMAL, CC_MOVE_LINE, CC_MOVE_ROTATE,
-	CC_MOVE_SHEAR, CC_MOVE_REFL, CC_MOVE_SIZE,
-	CC_MOVE_GENIUS
-};
 
 class FieldCanvas;
 class FieldView;

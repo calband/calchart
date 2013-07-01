@@ -237,6 +237,14 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Z_6, float, kViewPoint_z_3);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_6, float, kViewAngle_3);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewAngle_Z_6, float, kViewAngle_z_3);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameWidth, long, 600);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameHeight, long, 450);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameSashPosition, long, 100);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameOmniAnimation, bool, false);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameSplitScreen, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool, false);
+
 // OBSOLETE Settigns
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 //IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);

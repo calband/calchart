@@ -28,6 +28,7 @@
 #include "toolbar.h"
 #include "ui_enums.h"
 #include "basic_ui.h"
+#include "confgr.h"
 
 #include <wx/timer.h>
 #include <wx/splitter.h>
@@ -67,14 +68,15 @@ EVT_UPDATE_UI(CALCHART__SplitViewHorizontal, AnimationFrame::OnCmd_UpdateUIHoriz
 EVT_UPDATE_UI(CALCHART__SplitViewVertical, AnimationFrame::OnCmd_UpdateUIVertical)
 EVT_UPDATE_UI(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_UpdateUIUnsplit)
 EVT_CLOSE(AnimationFrame::OnCmdClose)
+EVT_SIZE(AnimationFrame::OnSize)
 END_EVENT_TABLE()
 
 
-AnimationFrame::AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent) :
+AnimationFrame::AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size) :
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-wxDocChildFrame(doc, view, parent, wxID_ANY, wxT("CalChart Viewer")),
+wxDocChildFrame(doc, view, parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #else
-wxFrame(parent, wxID_ANY, wxT("CalChart Viewer")),
+wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #endif
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
@@ -134,7 +136,24 @@ mWhenClosed(onClose)
 	
 	mSplitA = mOmniViewCanvas;
 	mSplitB = mCanvas;
-	mSplitter->SplitHorizontally(mSplitA, mSplitB, 100);
+	if (!GetConfiguration_AnimationFrameOmniAnimation())
+	{
+		std::swap(mSplitA, mSplitB);
+	}
+	mSplitter->Initialize(mSplitA);
+	if (GetConfiguration_AnimationFrameSplitScreen())
+	{
+		if (GetConfiguration_AnimationFrameSplitVertical())
+		{
+			mSplitter->SplitVertically(mSplitA, mSplitB);
+		}
+		else
+		{
+			mSplitter->SplitHorizontally(mSplitA, mSplitB);
+		}
+	}
+	mSplitter->SetSashPosition(GetConfiguration_AnimationFrameSashPosition());
+		
 	
 	AddCoolToolBar(GetAnimationToolBar(), *this);
 
@@ -144,7 +163,7 @@ mWhenClosed(onClose)
 
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *toprow = new wxBoxSizer(wxHORIZONTAL);
-	wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
+	wxSizerFlags topRowSizerFlags = wxSizerFlags(0).Expand().Border(0, 5);
 	wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
 	wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
 	
@@ -208,6 +227,7 @@ mWhenClosed(onClose)
 	UpdatePanel();
 
 	Fit();
+	SetSize(size);
 	Show(true);
 
 	// make animation screen large by default.
@@ -223,6 +243,18 @@ AnimationFrame::~AnimationFrame()
 		mOmniViewCanvas->SetView(NULL);
 	mTimer->Stop();
 	delete mAnimationView;
+}
+
+
+void
+AnimationFrame::OnSize(wxSizeEvent& event)
+{
+	// HACK: Prevent width and height from growing out of control
+	int w = event.GetSize().GetWidth();
+	int h = event.GetSize().GetHeight();
+	SetConfiguration_AnimationFrameWidth((w > 1200) ? 1200 : w);
+	SetConfiguration_AnimationFrameHeight((h > 700) ? 700 : h);
+	super::OnSize(event);
 }
 
 
@@ -251,6 +283,10 @@ AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event)
 void
 AnimationFrame::OnCmdClose(wxCloseEvent& event)
 {
+	if (mSplitter)
+	{
+		SetConfiguration_AnimationFrameSashPosition(mSplitter->GetSashPosition());
+	}
 	// we should inform the parent frame we are closing
 	if (mWhenClosed)
 	{
@@ -563,6 +599,8 @@ AnimationFrame::OnCmd_SplitViewHorizontal(wxCommandEvent& event)
 	mSplitA->Show(true);
 	mSplitB->Show(true);
 	mSplitter->SplitHorizontally(mSplitA, mSplitB);
+	SetConfiguration_AnimationFrameSplitScreen(true);
+	SetConfiguration_AnimationFrameSplitVertical(false);
 }
 
 void
@@ -575,6 +613,8 @@ AnimationFrame::OnCmd_SplitViewVertical(wxCommandEvent& event)
 	mSplitA->Show(true);
 	mSplitB->Show(true);
 	mSplitter->SplitVertically(mSplitA, mSplitB);
+	SetConfiguration_AnimationFrameSplitScreen(true);
+	SetConfiguration_AnimationFrameSplitVertical(true);
 }
 
 void
@@ -584,6 +624,7 @@ AnimationFrame::OnCmd_SplitViewUnsplit(wxCommandEvent& event)
 	{
 		mSplitter->Unsplit();
 	}
+	SetConfiguration_AnimationFrameSplitScreen(false);
 }
 
 void
@@ -596,6 +637,7 @@ AnimationFrame::OnCmd_SwapAnimateAndOmni(wxCommandEvent& event)
 		mSplitter->Unsplit();
 	}
 	std::swap(mSplitA, mSplitB);
+	SetConfiguration_AnimationFrameOmniAnimation(!GetConfiguration_AnimationFrameOmniAnimation());
 	if (mode == wxSPLIT_HORIZONTAL)
 	{
 		mSplitter->SplitHorizontally(mSplitA, mSplitB);

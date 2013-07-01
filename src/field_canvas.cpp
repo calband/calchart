@@ -23,6 +23,7 @@
 #include "field_canvas.h"
 
 #include "field_view.h"
+#include "field_frame.h"
 #include "confgr.h"
 #include "modes.h"
 #include "linmath.h"
@@ -571,7 +572,7 @@ FieldCanvas::SetZoom(float factor)
 }
 
 void
-FieldCanvas::BeginDrag(CC_DRAG_TYPES type, CC_coord start)
+FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
 {
 	drag = type;
 	ClearShapes();
@@ -606,7 +607,7 @@ FieldCanvas::AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape)
 }
 
 void
-FieldCanvas::MoveDrag(CC_coord end)
+FieldCanvas::MoveDrag(const CC_coord& end)
 {
 	if (curr_shape)
 	{
