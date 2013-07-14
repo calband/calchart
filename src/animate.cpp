@@ -370,24 +370,10 @@ void Animation::CheckCollisions()
 }
 
 
-bool Animation::IsCollision(unsigned which) const
+const Animation::animate_info_t
+Animation::GetAnimateInfo(unsigned which) const
 {
-	return mCollisions.count(which);
-}
-
-AnimateDir Animation::Direction(unsigned which) const
-{
-	return (*curr_cmds.at(which))->Direction();
-}
-
-float Animation::RealDirection(unsigned which) const
-{
-	return (*curr_cmds.at(which))->RealDirection();
-}
-
-CC_coord Animation::Position(unsigned which) const
-{
-	return pts.at(which);
+	return { mCollisions.count(which), (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which) };
 }
 
 int Animation::GetNumberSheets() const
@@ -442,7 +428,8 @@ Animation::GetCurrentInfo() const
 	output<<"beat "<<GetCurrentBeat() <<" of "<<GetNumberBeats()<<"\n";
 	for (size_t i = 0; i < numpts; ++i)
 	{
-		output<<"pt "<<i<<": ("<<Position(i).x<<", "<<Position(i).y<<"), dir="<<Direction(i)<<", realdir="<<RealDirection(i)<<(IsCollision(i) ? ", collision!" : "")<< "\n";
+		auto info = GetAnimateInfo(i);
+		output<<"pt "<<i<<": ("<<info.mPosition.x<<", "<<info.mPosition.y<<"), dir="<<info.mDirection<<", realdir="<<info.mRealDirection<<(info.mCollision ? ", collision!" : "")<< "\n";
 	}
 	return output.str();
 }

@@ -65,25 +65,27 @@ public:
 	~Animation();
 
 // Returns true if changes made
+	void GotoSheet(unsigned i);
 	bool PrevSheet();
 	bool NextSheet();
 
 	void GotoBeat(unsigned i);
-
 	bool PrevBeat();
 	bool NextBeat();
-
-	void GotoSheet(unsigned i);
 
 	typedef void (*CollisionAction_t)();
 	// set collision action returns the previous collision action
 	CollisionAction_t SetCollisionAction(CollisionAction_t col) { CollisionAction_t oldaction = mCollisionAction; mCollisionAction = col; return oldaction; }
 
 	// For drawing:
-	bool IsCollision(unsigned which) const;
-	AnimateDir Direction(unsigned which) const;
-	float RealDirection(unsigned which) const;
-	CC_coord Position(unsigned which) const;
+	struct animate_info_t
+	{
+		bool mCollision;
+		AnimateDir mDirection;
+		float mRealDirection;
+		CC_coord mPosition;
+	};
+	const animate_info_t GetAnimateInfo(unsigned which) const;
 
 	int GetNumberSheets() const;
 	int GetCurrentSheet() const;

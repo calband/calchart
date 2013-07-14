@@ -60,14 +60,16 @@ AnimationView::OnDraw(wxDC *dc)
 	{
 		for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
 		{
-			if (checkForCollision && mAnimation->IsCollision(i))
+			auto info = mAnimation->GetAnimateInfo(i);
+
+			if (checkForCollision && info.mCollision)
 			{
 				dc->SetPen(*CalChartPens[COLOR_POINT_ANIM_COLLISION]);
 				dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_COLLISION]);
 			}
 			else if (GetShow()->IsSelected(i))
 			{
-				switch (mAnimation->Direction(i))
+				switch (info.mDirection)
 				{
 					case ANIMDIR_SW:
 					case ANIMDIR_W:
@@ -88,7 +90,7 @@ AnimationView::OnDraw(wxDC *dc)
 			}
 			else
 			{
-				switch (mAnimation->Direction(i))
+				switch (info.mDirection)
 				{
 					case ANIMDIR_SW:
 					case ANIMDIR_W:
@@ -107,7 +109,7 @@ AnimationView::OnDraw(wxDC *dc)
 						dc->SetBrush(*CalChartBrushes[COLOR_POINT_ANIM_SIDE]);
 				}
 			}
-			CC_coord position = mAnimation->Position(i);
+			CC_coord position = info.mPosition;
 			unsigned long x = position.x+GetShow()->GetMode().Offset().x;
 			unsigned long y = position.y+GetShow()->GetMode().Offset().y;
 			dc->DrawRectangle(x - Int2Coord(1)/2, y - Int2Coord(1)/2, Int2Coord(1), Int2Coord(1));
@@ -162,7 +164,9 @@ AnimationView::SelectCollisions()
 		CC_show::SelectionList select;
 		for (unsigned i = 0; i < GetShow()->GetNumPoints(); i++)
 		{
-			if (mAnimation->IsCollision(i))
+			auto info = mAnimation->GetAnimateInfo(i);
+
+			if (info.mCollision)
 			{
 				select.insert(i);
 			}
@@ -369,7 +373,7 @@ AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
 	CC_show::SelectionList pointlist;
 	for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
 	{
-		CC_coord position = mAnimation->Position(i);
+		CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
 		if (lasso.Inside(position))
 		{
 			pointlist.insert(i);

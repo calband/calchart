@@ -574,9 +574,10 @@ CCOmniView_Canvas::GetMarcherInfo(size_t which) const
 	MarcherInfo info;
 	if (mAnimationView && mAnimationView->GetAnimation())
 	{
-		info.direction = NormalizeAngle((mAnimationView->GetAnimation()->RealDirection(which) * M_PI / 180.0));
+		auto anim_info = mAnimationView->GetAnimation()->GetAnimateInfo(which);
+		info.direction = NormalizeAngle((anim_info.mRealDirection * M_PI / 180.0));
 		
-		CC_coord position = mAnimationView->GetAnimation()->Position(which);
+		CC_coord position = anim_info.mPosition;
 		info.x = Coord2Float(position.x);
 		// because the coordinate system for continuity and OpenGL are different, correct here.
 		info.y = -1.0 * Coord2Float(position.y);
