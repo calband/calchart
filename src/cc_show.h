@@ -138,9 +138,9 @@ public:
 	void SetNumPoints(unsigned num, unsigned columns);
 	bool RelabelSheets(unsigned sht);
 
-	wxString GetPointLabel(unsigned i) const;
-	void SetPointLabel(const std::vector<wxString>& labels) { pt_labels = labels; }
-	inline const std::vector<wxString>& GetPointLabels() const { return pt_labels; }
+	std::string GetPointLabel(unsigned i) const;
+	void SetPointLabel(const std::vector<std::string>& labels) { pt_labels = labels; }
+	inline const std::vector<std::string>& GetPointLabels() const { return pt_labels; }
 
 	// how to select points:
 	// Always select or unselect in groups
@@ -169,7 +169,7 @@ private:
 	wxString descr;
 	unsigned short numpoints;
 	CC_sheet_container_t sheets;
-	std::vector<wxString> pt_labels;
+	std::vector<std::string> pt_labels;
 	SelectionList selectionList;	  // order of selections
 	unsigned mSheetNum;
 

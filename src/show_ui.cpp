@@ -147,7 +147,8 @@ void PointPicker::PointPickerSelect(wxCommandEvent&)
 
 void PointPicker::Update()
 {
-	std::vector<wxString> showLabels = mShow.GetPointLabels();
+	auto& tshowLabels = mShow.GetPointLabels();
+	std::vector<wxString> showLabels(tshowLabels.begin(), tshowLabels.end());
 	if (mCachedLabels != showLabels)
 	{
 		mCachedLabels = showLabels;

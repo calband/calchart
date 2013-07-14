@@ -519,14 +519,14 @@ T& CC_show::SaveObjectInternal(T& stream)
 	id = 0;
 	for (i = 0; i < GetNumPoints(); i++)
 	{
-		id += strlen(GetPointLabel(i).utf8_str())+1;
+		id += strlen(GetPointLabel(i).c_str())+1;
 	}
 	if (id > 0)
 	{
 		WriteChunkHeader(stream, INGL_LABL, id);
 		for (i = 0; i < GetNumPoints(); i++)
 		{
-			WriteStr(stream, GetPointLabel(i).utf8_str());
+			WriteStr(stream, GetPointLabel(i).c_str());
 		}
 	}
 
@@ -661,7 +661,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	// <INGL_SIZE><4><# points>
 	ReadCheckIDandSize(stream, INGL_SIZE, name);
 	numpoints = name;
-	pt_labels.assign(numpoints, wxString());
+	pt_labels.assign(numpoints, std::string());
 
 	ReadLong(stream, name);
 	// Optional: read in the point labels
@@ -669,12 +669,11 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	if (INGL_LABL == name)
 	{
 		FillData(stream, data);
-		std::vector<wxString> labels;
+		std::vector<std::string> labels;
 		const char *str = (const char*)&data[0];
 		for (unsigned i = 0; i < GetNumPoints(); i++)
 		{
-			wxString buf = wxString::FromUTF8(str);
-			labels.push_back(buf);
+			labels.push_back(str);
 			str += strlen(str)+1;
 		}
 		SetPointLabel(labels);
@@ -1038,10 +1037,10 @@ bool CC_show::RelabelSheets(unsigned sht)
 }
 
 
-wxString CC_show::GetPointLabel(unsigned i) const
+std::string CC_show::GetPointLabel(unsigned i) const
 {
 	if (i >= pt_labels.size())
-		return wxT("");
+		return "";
 	return pt_labels.at(i);
 }
 

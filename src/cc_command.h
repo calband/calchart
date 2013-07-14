@@ -111,7 +111,7 @@ protected:
 	unsigned mNumPoints;
 	unsigned mNumColumns;
 	unsigned mOriginalNumPoints;
-	std::pair<std::vector<wxString>,std::vector<wxString> > mLabels;
+	std::pair<std::vector<std::string>,std::vector<std::string> > mLabels;
 	std::vector<std::vector<CC_point> > mOriginalPoints;
 };
 

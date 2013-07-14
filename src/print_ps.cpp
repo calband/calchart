@@ -852,7 +852,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 			dot_x, dot_y, dot_routines[sheet.GetPoint(i).GetSymbol()]);
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
-			static_cast<const char*>(mShow.GetPointLabel(i).mb_str()), dot_x, dot_y,
+			mShow.GetPointLabel(i).c_str(), dot_x, dot_y,
 			sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber");
 		buffer<<buf;
 	}
@@ -992,7 +992,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 			dot_x, dot_y, dot_routines[sheet.GetPoint(i).GetSymbol()]);
 		buffer<<buf;
 		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
-			static_cast<const char*>(mShow.GetPointLabel(i).mb_str()), dot_x, dot_y,
+			mShow.GetPointLabel(i).c_str(), dot_x, dot_y,
 			(sheet.GetPoint(i).GetFlip()) ? "donumber2" : "donumber");
 		buffer<<buf;
 	}

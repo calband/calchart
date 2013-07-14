@@ -115,7 +115,8 @@ SetShowInfoCommand::SetShowInfoCommand(CC_show& show, unsigned numPoints, unsign
 mNumPoints(numPoints), mNumColumns(numColumns)
 {
 	mOriginalNumPoints = mShow.GetNumPoints();
-	mLabels = std::pair<std::vector<wxString>,std::vector<wxString> >(mShow.GetPointLabels(), labels);
+	std::vector<std::string> tlabels(labels.begin(), labels.end());
+	mLabels = std::pair<std::vector<std::string>,std::vector<std::string> >(mShow.GetPointLabels(), tlabels);
 	for (CC_show::CC_sheet_iterator_t sht = mShow.GetSheetBegin(); sht != mShow.GetSheetEnd(); ++sht)
 	{
 		mOriginalPoints.push_back(sht->GetPoints());

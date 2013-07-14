@@ -77,6 +77,7 @@ public:
 	inline const wxString& GetNumber() const { return number; }
 	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
 	unsigned short GetBeats() const;
+
 	// * needs to be through command only * //
 	void SetBeats(unsigned short b);
 	inline bool IsInAnimation() const { return (beats != 0); }

@@ -168,7 +168,9 @@ FieldView::OnWizardSetup(CC_show& show)
 	if (wizard->RunWizard(page1))
 	{
 		show.SetNumPoints(page1->GetNumberPoints(), page1->GetNumberColumns());
-		show.SetPointLabel(page1->GetLabels());
+		auto labels = page1->GetLabels();
+		std::vector<std::string> tlabels(labels.begin(), labels.end());
+		show.SetPointLabel(tlabels);
 		ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), page2->GetValue());
 		if (newmode)
 		{

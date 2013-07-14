@@ -436,8 +436,8 @@ AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString value = dialog.GetValue();
-		const std::vector<wxString>& labels = mAnimationView->GetShow()->GetPointLabels();
-		std::vector<wxString>::const_iterator which = std::find(labels.begin(), labels.end(), value);
+		auto& labels = mAnimationView->GetShow()->GetPointLabels();
+		auto which = std::find(labels.begin(), labels.end(), value);
 		if (which == labels.end())
 		{
 			wxString upper_value = value.Upper();
