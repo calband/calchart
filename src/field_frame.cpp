@@ -1072,7 +1072,7 @@ FieldFrame::UpdatePanel()
 	
 	tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
 					GetShow()->IsModified() ? wxT("* "):wxT(""), curr,
-					num, (sht != GetShow()->GetSheetEnd()) ? sht->GetName() : wxT(""), (sht != GetShow()->GetSheetEnd())?sht->GetBeats():0);
+					num, (sht != GetShow()->GetSheetEnd()) ? wxString(sht->GetName()) : wxT(""), (sht != GetShow()->GetSheetEnd())?sht->GetBeats():0);
 	SetStatusText(tempbuf, 1);
     tempbuf.Clear();
     tempbuf << GetShow()->GetSelectionList().size() << wxT(" of ") << GetShow()->GetNumPoints() << wxT(" selected");

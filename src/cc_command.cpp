@@ -115,8 +115,8 @@ SetShowInfoCommand::SetShowInfoCommand(CC_show& show, unsigned numPoints, unsign
 mNumPoints(numPoints), mNumColumns(numColumns)
 {
 	mOriginalNumPoints = mShow.GetNumPoints();
-	std::vector<std::string> tlabels(labels.begin(), labels.end());
-	mLabels = std::pair<std::vector<std::string>,std::vector<std::string> >(mShow.GetPointLabels(), tlabels);
+	std::vector<wxString> tlabels(mShow.GetPointLabels().begin(), mShow.GetPointLabels().end());
+	mLabels = std::pair<std::vector<wxString>,std::vector<wxString> >(tlabels, labels);
 	for (CC_show::CC_sheet_iterator_t sht = mShow.GetSheetBegin(); sht != mShow.GetSheetEnd(); ++sht)
 	{
 		mOriginalPoints.push_back(sht->GetPoints());
@@ -129,7 +129,7 @@ SetShowInfoCommand::~SetShowInfoCommand()
 void SetShowInfoCommand::DoAction()
 {
 	mShow.SetNumPoints(mNumPoints, mNumColumns);
-	mShow.SetPointLabel(mLabels.second);
+	mShow.SetPointLabel(std::vector<std::string>(mLabels.second.begin(), mLabels.second.end()));
 }
 
 void SetShowInfoCommand::UndoAction()
@@ -140,7 +140,7 @@ void SetShowInfoCommand::UndoAction()
 	{
 		sht->SetPoints(mOriginalPoints.at(i));
 	}
-	mShow.SetPointLabel(mLabels.first);
+	mShow.SetPointLabel(std::vector<std::string>(mLabels.first.begin(), mLabels.first.end()));
 }
 
 
@@ -182,14 +182,14 @@ void SetSheetTitleCommand::DoAction()
 {
 	SetSheetCommand::DoAction(); // sets page
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
-	sheet->SetName(mDescription.second);
+	sheet->SetName(std::string(mDescription.second));
 }
 
 void SetSheetTitleCommand::UndoAction()
 {
 	SetSheetCommand::UndoAction(); // sets page
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
-	sheet->SetName(mDescription.first);
+	sheet->SetName(std::string(mDescription.first));
 }
 
 

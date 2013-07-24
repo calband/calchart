@@ -102,7 +102,7 @@ FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 	{
 		// give our show a first page
 		CC_show* show = static_cast<CC_show*>(GetDocument());
-		show->InsertSheetInternal(CC_sheet(show, wxT("1")), 0);
+		show->InsertSheetInternal(CC_sheet(show, "1"), 0);
 		show->SetCurrentSheet(0);
 		
 		// Set up everything else

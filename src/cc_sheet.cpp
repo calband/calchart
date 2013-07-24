@@ -26,19 +26,23 @@
 #include "modes.h"
 #include "confgr.h"
 #include "draw.h"
+#include <wx/wx.h>
 
 extern const wxChar *contnames[];
 
-CC_sheet::CC_sheet(CC_show *shw)
-: show(shw),
-beats(1), pts(show->GetNumPoints())
+CC_sheet::CC_sheet(CC_show *shw) :
+show(shw),
+beats(1),
+pts(show->GetNumPoints())
 {
 }
 
 
-CC_sheet::CC_sheet(CC_show *shw, const wxString& newname)
-: show(shw),
-beats(1), pts(show->GetNumPoints()), name(newname)
+CC_sheet::CC_sheet(CC_show *shw, const std::string& newname) :
+show(shw),
+beats(1),
+pts(show->GetNumPoints()),
+name(newname)
 {
 }
 
@@ -66,7 +70,8 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 }
 
 
-bool CC_sheet::SelectPointsOfContinuity(unsigned i) const
+std::set<unsigned>
+CC_sheet::SelectPointsOfContinuity(unsigned i) const
 {
 	unsigned j;
 
@@ -78,8 +83,7 @@ bool CC_sheet::SelectPointsOfContinuity(unsigned i) const
 			select.insert(j);
 		}
 	}
-	show->SetSelection(select);
-	return true;
+	return select;
 }
 
 
@@ -128,7 +132,8 @@ const CC_continuity& CC_sheet::GetNthContinuity(unsigned i) const
 
 void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
 {
-	animcont.at(i).SetText(text);
+	std::string ttext = text.ToStdString();
+	animcont.at(i).SetText(ttext);
 }
 
 
@@ -233,12 +238,12 @@ bool CC_sheet::ContinuityInUse(unsigned idx) const
 }
 
 
-const wxString& CC_sheet::GetName() const
+std::string CC_sheet::GetName() const
 {
 	return name;
 }
 
-void CC_sheet::SetName(const wxString& newname)
+void CC_sheet::SetName(const std::string& newname)
 {
 	name = newname;
 }

@@ -30,6 +30,7 @@
 
 #include <wx/wx.h>
 #include <vector>
+#include <set>
 #include <iosfwd>
 
 class CC_show;
@@ -41,7 +42,7 @@ class CC_sheet
 {
 public:
 	CC_sheet(CC_show *shw);
-	CC_sheet(CC_show *shw, const wxString& newname);
+	CC_sheet(CC_show *shw, const std::string& newname);
 	~CC_sheet();
 
 	// setting values on the stunt sheet
@@ -49,7 +50,7 @@ public:
 	void SetNumPoints(unsigned num, unsigned columns);
 
 	// continuity:
-	bool SelectPointsOfContinuity(unsigned i) const;
+	std::set<unsigned> SelectPointsOfContinuity(unsigned i) const;
 	const CC_continuity& GetNthContinuity(unsigned i) const;
 	// * needs to be through command only *
 	void SetNthContinuity(const wxString& text, unsigned i);
@@ -72,8 +73,8 @@ public:
 	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
 	void RelabelSheet(unsigned *table);
 
-	const wxString& GetName() const;
-	void SetName(const wxString& newname);
+	std::string GetName() const;
+	void SetName(const std::string& newname);
 	inline const wxString& GetNumber() const { return number; }
 	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
 	unsigned short GetBeats() const;
@@ -99,7 +100,7 @@ private:
 	CC_show *show;
 	unsigned short beats;
 	std::vector<CC_point> pts;
-	wxString name;
+	std::string name;
 	wxString number;
 
 friend void DrawForPrinting(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool landscape);

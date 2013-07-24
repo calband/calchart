@@ -719,8 +719,8 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 	Coord fmin = mShow.GetMode().FieldOffset().x;
 	Coord fmax = mShow.GetMode().FieldSize().x + fmin;
 
-	std::string namestr(sheet.GetName().utf8_str());
-	std::string numberstr(sheet.GetNumber().utf8_str());
+	std::string namestr(sheet.GetName());
+	std::string numberstr(sheet.GetNumber());
 
 	if (split_sheet)
 	{
@@ -868,8 +868,8 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
-	std::string namestr(sheet.GetName().utf8_str());
-	std::string numberstr(sheet.GetNumber().utf8_str());
+	std::string namestr(sheet.GetName());
+	std::string numberstr(sheet.GetNumber());
 
 	buffer<<"%%Page: "<<namestr<<"\n";
 	if (!sheet.GetNumber().IsEmpty())
@@ -1008,7 +1008,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 void PrintShowToPS::PrintOverview(std::ostream& buffer, const CC_sheet& sheet)
 {
 	char buf[kBufferSize];
-	buffer<<"%%Page: "<<std::string(sheet.GetName().utf8_str())<<"\n";
+	buffer<<"%%Page: "<<sheet.GetName()<<"\n";
 
 	print_start_page(buffer, mPrintLandscape);
 	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);

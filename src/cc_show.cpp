@@ -545,7 +545,7 @@ T& CC_show::SaveObjectInternal(T& stream)
 	{
 		WriteGurk(stream, INGL_SHET);
 // Name
-		WriteChunkStr(stream, INGL_NAME, curr_sheet->GetName().utf8_str());
+		WriteChunkStr(stream, INGL_NAME, curr_sheet->GetName().c_str());
 // Beats
 		put_big_long(&id, curr_sheet->GetBeats());
 		WriteChunk(stream, INGL_DURA, 4, &id);
@@ -707,7 +707,7 @@ T& CC_show::LoadObjectGeneric(T& stream)
 		// Read in sheet name
 		// <INGL_NAME><size><string + 1>
 		ReadCheckIDandFillData(stream, INGL_NAME, data);
-		sheet.SetName(wxString::FromUTF8((const char*)&data[0]));
+		sheet.SetName((const char*)&data[0]);
 
 		// read in the duration:
 		// <INGL_DURA><4><duration>
