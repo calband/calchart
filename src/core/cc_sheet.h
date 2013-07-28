@@ -75,8 +75,8 @@ public:
 
 	std::string GetName() const;
 	void SetName(const std::string& newname);
-	inline const wxString& GetNumber() const { return number; }
-	inline void SetNumber(const wxString& newnumber) { number = newnumber; }
+	std::string GetNumber() const;
+	void SetNumber(const std::string& newnumber);
 	unsigned short GetBeats() const;
 
 	// * needs to be through command only * //
@@ -101,7 +101,7 @@ private:
 	unsigned short beats;
 	std::vector<CC_point> pts;
 	std::string name;
-	wxString number;
+	std::string number;
 
 friend void DrawForPrinting(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool landscape);
 friend void DrawCont(wxDC& dc, const CC_sheet& sheet, wxCoord yStart, bool landscape);

@@ -226,7 +226,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 				if (curr_sheet == GetNumSheets()) break;
 				if (tempbuf.Length() > 2)
 				{
-					GetNthSheet(curr_sheet)->SetNumber(tempbuf.Mid(2));
+					GetNthSheet(curr_sheet)->SetNumber(tempbuf.Mid(2).ToStdString());
 				}
 			}
 			else

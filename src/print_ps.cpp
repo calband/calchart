@@ -725,7 +725,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 	if (split_sheet)
 	{
 		buffer<<"%%Page: "<<namestr<<"(N)\n";
-		if (!sheet.GetNumber().IsEmpty())
+		if (!sheet.GetNumber().empty())
 		{
 			buffer<<"/pagenumtext ("<<numberstr<<"N) def\n";
 		}
@@ -759,7 +759,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		{
 /* Need to split into two pages */
 			buffer<<"%%Page: "<<namestr<<"(S)\n";
-			if (!sheet.GetNumber().IsEmpty())
+			if (!sheet.GetNumber().empty())
 			{
 				buffer<<"/pagenumtext ("<<numberstr<<"S) def\n";
 			}
@@ -775,7 +775,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		else
 		{
 			buffer<<"%%Page: "<<namestr<<"\n";
-			if (!sheet.GetNumber().IsEmpty())
+			if (!sheet.GetNumber().empty())
 			{
 				buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 			}
@@ -872,7 +872,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 	std::string numberstr(sheet.GetNumber());
 
 	buffer<<"%%Page: "<<namestr<<"\n";
-	if (!sheet.GetNumber().IsEmpty())
+	if (!sheet.GetNumber().empty())
 	{
 		buffer<<"/pagenumtext ("<<numberstr<<") def\n";
 	}

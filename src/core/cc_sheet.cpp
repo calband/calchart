@@ -248,6 +248,16 @@ void CC_sheet::SetName(const std::string& newname)
 	name = newname;
 }
 
+std::string CC_sheet::GetNumber() const
+{
+	return number;
+}
+
+void CC_sheet::SetNumber(const std::string& num)
+{
+	number = num;
+}
+
 
 unsigned short CC_sheet::GetBeats() const
 {
