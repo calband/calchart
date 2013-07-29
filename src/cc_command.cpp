@@ -324,7 +324,7 @@ void AddContinuityCommand::DoAction()
 {
 	SetSheetCommand::DoAction(); // sets page
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
-	CC_continuity newcont(mContName, sheet->NextUnusedContinuityNum());
+	CC_continuity newcont(mContName.ToStdString(), sheet->NextUnusedContinuityNum());
 	sheet->AppendContinuity(newcont);
 }
 

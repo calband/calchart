@@ -26,9 +26,21 @@
 #include "modes.h"
 #include "confgr.h"
 #include "draw.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <wx/wx.h>
 
-extern const wxChar *contnames[];
+const std::string contnames[] =
+{
+	"Plain",
+	"Sol",
+	"Bksl",
+	"Sl",
+	"X",
+	"Solbksl",
+	"Solsl",
+	"Solx"
+};
+
 
 CC_sheet::CC_sheet(CC_show *shw) :
 show(shw),
@@ -185,7 +197,7 @@ const CC_continuity& CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 
 	for (ContContainer::const_iterator c = animcont.begin(); c != animcont.end(); ++c)
 	{
-		if (c->GetName().CompareTo(contnames[sym], wxString::ignoreCase) == 0)
+		if (boost::iequals(c->GetName(), contnames[sym]))
 		{
 			return *c;
 		}
@@ -212,7 +224,7 @@ unsigned CC_sheet::FindContinuityByName(const wxString& name) const
 
 	for (idx = 1; c != animcont.end(); idx++, ++c)
 	{
-		if (c->GetName().CompareTo(name, wxString::ignoreCase) == 0)
+		if (boost::iequals(c->GetName(), name))
 		{
 			break;
 		}

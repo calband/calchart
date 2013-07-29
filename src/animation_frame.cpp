@@ -383,7 +383,7 @@ AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
 
 		mErrorText->Clear();
 		CC_continuity c = mAnimationView->GetContinuityOnSheet(mErrorMarkers.at(which).second, mErrorMarkers.at(which).first.contnum);
-		if (!c.GetText().IsEmpty())
+		if (!c.GetText().empty())
 		{
 			mErrorText->WriteText(c.GetText());
 			mErrorText->SetEditable(false);

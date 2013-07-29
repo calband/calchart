@@ -23,7 +23,7 @@
 #ifndef _CC_CONTINUITY_H_
 #define _CC_CONTINUITY_H_
 
-#include <wx/wx.h>
+#include <string>
 
 // points have a symbol index and a continuity index.  The continuity
 // numbers is the way that the points know what continity they use.
@@ -31,20 +31,20 @@
 class CC_continuity
 {
 public:
-	CC_continuity(const wxString& s, unsigned n);
+	CC_continuity(const std::string& s, unsigned n);
 	~CC_continuity();
 
-	const wxString& GetName() const;
+	const std::string& GetName() const;
 	unsigned GetNum() const;
 
-	void SetText(const wxString& s);
-	void AppendText(const wxString& s);
-	const wxString& GetText() const;
+	void SetText(const std::string& s);
+	void AppendText(const std::string& s);
+	const std::string& GetText() const;
 
 private:
-	wxString name;
+	std::string name;
 	unsigned num;
-	wxString text;
+	std::string text;
 
 friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
 };

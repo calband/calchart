@@ -45,19 +45,6 @@ static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
 
 
-const wxChar *contnames[] =
-{
-	wxT("Plain"),
-	wxT("Sol"),
-	wxT("Bksl"),
-	wxT("Sl"),
-	wxT("X"),
-	wxT("Solbksl"),
-	wxT("Solsl"),
-	wxT("Solx")
-};
-
-
 IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CC_show_FinishedLoading, wxObject)
@@ -630,12 +617,12 @@ T& CC_show::SaveObjectInternal(T& stream)
 			++curranimcont)
 		{
 			WriteChunkHeader(stream, INGL_CONT,
-				1+curranimcont->GetName().Length()+1+
-				curranimcont->GetText().Length()+1);
+				1+curranimcont->GetName().length()+1+
+				curranimcont->GetText().length()+1);
 			unsigned tnum = curranimcont->GetNum();
 			Write(stream, &tnum, 1);
-			WriteStr(stream, curranimcont->GetName().utf8_str());
-			WriteStr(stream, curranimcont->GetText().utf8_str());
+			WriteStr(stream, curranimcont->GetName().c_str());
+			WriteStr(stream, curranimcont->GetText().c_str());
 		}
 		WriteEnd(stream, INGL_SHET);
 	}
@@ -827,10 +814,10 @@ T& CC_show::LoadObjectGeneric(T& stream)
 			{
 				throw CC_FileException("Bad cont chunk");
 			}
-			wxString namestr(wxString::FromUTF8(text));
+			std::string namestr(text);
 			text = d + 2 + strlen(text);
 			CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
-			wxString textstr(wxString::FromUTF8(text));
+			std::string textstr(text);
 			newcont.SetText(textstr);
 			sheet.AppendContinuity(newcont);
 
