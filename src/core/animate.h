@@ -39,24 +39,17 @@ AnimateDir AnimGetDirFromAngle(float ang);
 class AnimateCommand;
 class AnimateSheet;
 
-class ErrorMarker
+struct ErrorMarker
 {
 public:
 	std::set<unsigned> pntgroup;			  // which points have this error
 	unsigned contnum;						  // which continuity
 	int line, col;							  // where
 	ErrorMarker(): contnum(0), line(-1), col(-1) {}
-	~ErrorMarker() {}
-	void Reset()
-	{
-		pntgroup.clear();
-		contnum = 0;
-		line = col = -1;
-	}
 };
 
-typedef boost::function<void (const wxString& notice)> NotifyStatus;
-typedef boost::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)> NotifyErrorList;
+typedef boost::function<void (const std::string& notice)> NotifyStatus;
+typedef boost::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
 
 class Animation
 {
@@ -91,7 +84,7 @@ public:
 	int GetCurrentSheet() const;
 	int GetNumberBeats() const;
 	int GetCurrentBeat() const;
-	wxString GetCurrentSheetName() const;
+	std::string GetCurrentSheetName() const;
 
 	// collection of position of each point, for debugging purposes
 	std::string GetCurrentInfo() const;

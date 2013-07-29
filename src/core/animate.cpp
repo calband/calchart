@@ -28,6 +28,8 @@
 #include "cc_point.h"
 #include "confgr.h"
 
+#include <boost/format.hpp>
+
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <string>
@@ -80,19 +82,19 @@ AnimateDir AnimGetDirFromAngle(float ang)
 }
 
 
-// An animation sheet is a collection of commands for each of the points.
+// AnimateSheet is a snapshot of CC_sheet
 class AnimateSheet
 {
 public:
-	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const wxString s, unsigned beats) : pts(thePoints), commands(thePoints.size()), name(s), numbeats(beats) {}
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::string& s, unsigned beats) : pts(thePoints), commands(thePoints.size()), name(s), numbeats(beats) {}
 	~AnimateSheet() {}
-	wxString GetName() const { return name; }
+	std::string GetName() const { return name; }
 	unsigned GetNumBeats() const { return numbeats; }
 	
 	std::vector<AnimatePoint> pts; // should probably be const
 	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
 private:
-	wxString name;
+	std::string name;
 	unsigned numbeats;
 };
 
@@ -129,9 +131,7 @@ mCollisionAction(NULL)
 				yyinputbuffer = tmpBuffer.c_str();
 				if (notifyStatus)
 				{
-					wxString tempbuf;
-					tempbuf.Printf(wxT("Compiling \"%.32s\" %.32s..."), curr_sheet->GetName().c_str(), currcont->GetName().c_str());
-					notifyStatus(tempbuf);
+					notifyStatus((boost::format("Compiling \"%1%\" %2%...") % curr_sheet->GetName().substr(0,32) % currcont->GetName().substr(0,32)).str());
 				}
 				// parse out the error
 				if (parsecontinuity() != 0)
@@ -158,9 +158,7 @@ mCollisionAction(NULL)
 // Handle points that don't have continuity (shouldn't happen)
 		if (notifyStatus)
 		{
-			wxString tempbuf;
-			tempbuf.Printf(wxT("Compiling \"%.32s\"..."), curr_sheet->GetName().c_str());
-			notifyStatus(tempbuf);
+			notifyStatus((boost::format("Compiling \"%1%\"...") % curr_sheet->GetName().substr(0,32)).str());
 		}
 		for (unsigned j = 0; j < numpts; j++)
 		{
@@ -173,7 +171,7 @@ mCollisionAction(NULL)
 		{
 			wxString tempbuf;
 			tempbuf.Printf(wxT("Errors for \"%.32s\""), curr_sheet->GetName().c_str());
-			if (notifyErrorList(comp.GetErrorMarkers(), sheetnum, tempbuf))
+			if (notifyErrorList(comp.GetErrorMarkers(), sheetnum, (boost::format("Errors for \"%1%\"") % curr_sheet->GetName().substr(0, 32)).str()))
 			{
 				break;
 			}
@@ -396,7 +394,7 @@ int Animation::GetCurrentBeat() const
 	return curr_beat;
 }
 
-wxString Animation::GetCurrentSheetName() const
+std::string Animation::GetCurrentSheetName() const
 {
 	return sheets.at(curr_sheetnum).GetName();
 }
@@ -424,7 +422,7 @@ std::string
 Animation::GetCurrentInfo() const
 {
 	std::ostringstream output;
-	output<< GetCurrentSheetName().ToStdString()<<" ("<<GetCurrentSheet()<<" of "<<GetNumberSheets()<<")\n";
+	output<<GetCurrentSheetName()<<" ("<<GetCurrentSheet()<<" of "<<GetNumberSheets()<<")\n";
 	output<<"beat "<<GetCurrentBeat() <<" of "<<GetNumberBeats()<<"\n";
 	for (size_t i = 0; i < numpts; ++i)
 	{
