@@ -61,35 +61,32 @@ CC_point::FlipToggle()
 }
 
 CC_coord
-CC_point::GetPos() const
+CC_point::GetPos(unsigned ref) const
 {
-	return mPos;
-}
-
-void
-CC_point::SetPos(const CC_coord& c)
-{
-	mPos = c;
-}
-
-CC_coord
-CC_point::GetRefPos(unsigned which) const
-{
-	if (which < 1 || which > kNumRefPoints)
+	if (ref == 0)
 	{
-		throw std::range_error("GetRefPos() point out of range");
+		return mPos;
 	}
-	return mRef[which-1];
+	if (ref > kNumRefPoints)
+	{
+		throw std::range_error("GetPos() point out of range");
+	}
+	return mRef[ref-1];
 }
 
 void
-CC_point::SetRefPos(const CC_coord& c, unsigned which)
+CC_point::SetPos(const CC_coord& c, unsigned ref)
 {
-	if (which < 1 || which > kNumRefPoints)
+	if (ref == 0)
+	{
+		mPos = c;
+		return;
+	}
+	if (ref > kNumRefPoints)
 	{
 		throw std::range_error("SetRefPos() point out of range");
 	}
-	mRef[which-1] = c;
+	mRef[ref-1] = c;
 }
 
 SYMBOL_TYPE

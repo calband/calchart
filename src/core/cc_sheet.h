@@ -103,16 +103,7 @@ private:
 	std::string name;
 	std::string number;
 
-friend void DrawForPrinting(wxDC *dc, const CC_sheet& sheet, unsigned ref, bool landscape);
-friend void DrawCont(wxDC& dc, const CC_sheet& sheet, wxCoord yStart, bool landscape);
-
-friend void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);
-friend void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet);
-friend void PrintOverview(std::ostream& buffer, const CC_sheet& sheet);
-friend void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
-
 };
 
-void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary);
 
 #endif

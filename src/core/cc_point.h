@@ -47,12 +47,9 @@ public:
 	uint8_t GetContinuityIndex() const;
 	void SetContinuityIndex(uint8_t cont);
 
-	CC_coord GetPos() const;
-	void SetPos(const CC_coord& c);
-
-	// reference points are [1, kNumRefPoints]
-	CC_coord GetRefPos(unsigned which) const;
-	void SetRefPos(const CC_coord& c, unsigned which);
+	// reference points 0 is the point, refs are [1, kNumRefPoints]
+	CC_coord GetPos(unsigned ref = 0) const;
+	void SetPos(const CC_coord& c, unsigned ref = 0);
 
 private:
 	enum {

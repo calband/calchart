@@ -125,6 +125,41 @@ static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 
 
 static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
 
+void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary)
+{
+	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
+															 wxSWISS, wxNORMAL, wxNORMAL);
+	dc.SetFont(*pointLabelFont);
+	dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
+	CC_coord origin = show.GetMode().Offset();
+	for (size_t i = 0; i < show.GetNumPoints(); i++)
+	{
+		const wxBrush *fillBrush;
+		if (show.IsSelected(i) && primary)
+		{
+			dc.SetPen(*CalChartPens[COLOR_POINT_HILIT]);
+			fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
+		}
+		else if (show.IsSelected(i) && !primary)
+		{
+			dc.SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
+			fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
+		}
+		else if (!show.IsSelected(i) && primary)
+		{
+			dc.SetPen(*CalChartPens[COLOR_POINT]);
+			fillBrush = CalChartBrushes[COLOR_POINT];
+		}
+		else
+		{
+			dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
+			fillBrush = CalChartBrushes[COLOR_REF_POINT];
+		}
+		DrawPoint(sheet.GetPoint(i), dc, ref, origin, fillBrush, show.GetPointLabel(i));
+	}
+	dc.SetFont(wxNullFont);
+}
+
 // draw the continuity starting at a specific offset
 void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landscape)
 {
@@ -344,7 +379,7 @@ static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), siz, off, bord1, bord2, whash, ehash));
 }
 
-void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool landscape)
+void DrawForPrinting(wxDC *printerdc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool landscape)
 {
 	unsigned short i;
 	unsigned long x, y;
@@ -379,7 +414,8 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 	dc->SetLogicalFunction(wxCOPY);
 	mode->Draw(*dc);
 
-	if (!sheet.pts.empty())
+	const std::vector<CC_point> pts = sheet.GetPoints();
+	if (!pts.empty())
 	{
 		wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
 																 wxSWISS, wxNORMAL, wxNORMAL);
@@ -392,11 +428,11 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 		origin = mode->Offset();
 		for (int selectd = 0; selectd < 2; selectd++)
 		{
-			for (i = 0; i < sheet.show->GetNumPoints(); i++)
+			for (i = 0; i < pts.size(); i++)
 			{
-				x = sheet.GetPosition(i, ref).x+origin.x;
-				y = sheet.GetPosition(i, ref).y+origin.y;
-				switch (sheet.pts[i].GetSymbol())
+				x = pts.at(i).GetPos(ref).x+origin.x;
+				y = pts.at(i).GetPos(ref).y+origin.y;
+				switch (pts.at(i).GetSymbol())
 				{
 					case SYMBOL_SOL:
 					case SYMBOL_SOLBKSL:
@@ -408,7 +444,7 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 						dc->SetBrush(*wxTRANSPARENT_BRUSH);
 				}
 				dc->DrawEllipse(x - offset, y - offset, circ_r, circ_r);
-				switch (sheet.pts[i].GetSymbol())
+				switch (pts.at(i).GetSymbol())
 				{
 					case SYMBOL_SL:
 					case SYMBOL_X:
@@ -423,7 +459,7 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 					default:
 						break;
 				}
-				switch (sheet.pts[i].GetSymbol())
+				switch (pts.at(i).GetSymbol())
 				{
 					case SYMBOL_BKSL:
 					case SYMBOL_X:
@@ -439,9 +475,9 @@ void DrawForPrinting(wxDC *printerdc, const CC_sheet& sheet, unsigned ref, bool 
 						break;
 				}
 				wxCoord textw, texth, textd;
-				dc->GetTextExtent(sheet.show->GetPointLabel(i), &textw, &texth, &textd);
-				dc->DrawText(sheet.show->GetPointLabel(i),
-					sheet.pts[i].GetFlip() ? x : (x - textw),
+				dc->GetTextExtent(show.GetPointLabel(i), &textw, &texth, &textd);
+				dc->DrawText(show.GetPointLabel(i),
+					pts.at(i).GetFlip() ? x : (x - textw),
 					y - textoff - texth + textd);
 			}
 		}
@@ -513,8 +549,8 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 	float slineoff = offset * GetConfiguration_SLineRatio();
 	float textoff = offset * 1.25;
 	
-	long x = ((reference) ? point.GetRefPos(reference).x : point.GetPos().x) + origin.x;
-	long y = ((reference) ? point.GetRefPos(reference).y : point.GetPos().y) + origin.y;
+	long x = point.GetPos(reference).x + origin.x;
+	long y = point.GetPos(reference).y + origin.y;
 	switch (point.GetSymbol())
 	{
 		case SYMBOL_SOL:

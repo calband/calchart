@@ -274,22 +274,16 @@ void CC_sheet::SetBeats(unsigned short b)
 // Get position of point
 CC_coord CC_sheet::GetPosition(unsigned i, unsigned ref) const
 {
-	if (ref == 0)
-		return pts[i].GetPos();
-	else
-		return pts[i].GetRefPos(ref);
+	return pts[i].GetPos(ref);
 }
 
 
 // Set position of point and all refs
 void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
 {
-	unsigned j;
-
-	pts[i].SetPos(val);
-	for (j = 1; j <= CC_point::kNumRefPoints; j++)
+	for (unsigned j = 0; j <= CC_point::kNumRefPoints; j++)
 	{
-		pts[i].SetRefPos(val, j);
+		pts[i].SetPos(val, j);
 	}
 }
 
@@ -303,52 +297,17 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 	{
 		for (j = 1; j <= CC_point::kNumRefPoints; j++)
 		{
-			if (pts[i].GetRefPos(j) == pts[i].GetPos())
+			if (pts[i].GetPos(j) == pts[i].GetPos(0))
 			{
-				pts[i].SetRefPos(clippedval, j);
+				pts[i].SetPos(clippedval, j);
 			}
 		}
 		pts[i].SetPos(clippedval);
 	}
 	else
 	{
-		pts[i].SetRefPos(clippedval, ref);
+		pts[i].SetPos(clippedval, ref);
 	}
 }
 
-
-void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary)
-{
-	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
-								wxSWISS, wxNORMAL, wxNORMAL);
-	dc.SetFont(*pointLabelFont);
-	dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
-	CC_coord origin = show.GetMode().Offset();
-	for (size_t i = 0; i < show.GetNumPoints(); i++)
-	{
-		const wxBrush *fillBrush;
-		if (show.IsSelected(i) && primary)
-		{
-			dc.SetPen(*CalChartPens[COLOR_POINT_HILIT]);
-			fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
-		}
-		else if (show.IsSelected(i) && !primary)
-		{
-			dc.SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
-			fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
-		}
-		else if (!show.IsSelected(i) && primary)
-		{
-			dc.SetPen(*CalChartPens[COLOR_POINT]);
-			fillBrush = CalChartBrushes[COLOR_POINT];
-		}
-		else
-		{
-			dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
-			fillBrush = CalChartBrushes[COLOR_REF_POINT];
-		}
-		DrawPoint(sheet.GetPoint(i), dc, ref, origin, fillBrush, show.GetPointLabel(i));
-	}
-	dc.SetFont(wxNullFont);
-}
 

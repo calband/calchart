@@ -39,6 +39,7 @@
 #include "toolbar.h"
 #include "ui_enums.h"
 #include "field_view.h"
+#include "draw.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -166,7 +167,7 @@ public:
 
 		int size = gPrintDialogData->GetPrintData().GetOrientation();
 
-		DrawForPrinting(dc, *sheet, 0, 2 == size);
+		DrawForPrinting(dc, mShow, *sheet, 0, 2 == size);
 
 		return true;
 	}

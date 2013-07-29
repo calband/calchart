@@ -34,6 +34,7 @@
 #include "cc_shapes.h"
 #include "platconf.h"
 #include "cc_fileformat.h"
+#include "draw.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
