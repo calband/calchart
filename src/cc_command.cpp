@@ -552,14 +552,14 @@ void SetContinuityTextCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
-	sheet->SetNthContinuity(mContinuity.second, mWhichCont);
+	sheet->SetNthContinuity(mContinuity.second.ToStdString(), mWhichCont);
 }
 
 void SetContinuityTextCommand::UndoAction()
 {
 	SetSheetAndSelectCommand::UndoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mShow.GetCurrentSheet();
-	sheet->SetNthContinuity(mContinuity.first, mWhichCont);
+	sheet->SetNthContinuity(mContinuity.first.ToStdString(), mWhichCont);
 }
 
 

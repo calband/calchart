@@ -28,7 +28,6 @@
 #include "cc_point.h"
 #include "cc_text.h"
 
-#include <wx/wx.h>
 #include <vector>
 #include <set>
 #include <iosfwd>
@@ -53,7 +52,7 @@ public:
 	std::set<unsigned> SelectPointsOfContinuity(unsigned i) const;
 	const CC_continuity& GetNthContinuity(unsigned i) const;
 	// * needs to be through command only *
-	void SetNthContinuity(const wxString& text, unsigned i);
+	void SetNthContinuity(const std::string& text, unsigned i);
 	// * needs to be through command only *
 	CC_continuity RemoveNthContinuity(unsigned i);
 	// * needs to be through command only *
@@ -66,7 +65,7 @@ public:
 	// * needs to be through command only * //
 	const CC_continuity& GetStandardContinuity(SYMBOL_TYPE sym);
 // return 0 if not found else index+1
-	unsigned FindContinuityByName(const wxString& name) const;
+	unsigned FindContinuityByName(const std::string& name) const;
 	bool ContinuityInUse(unsigned idx) const;
 	
 	// points:
@@ -77,11 +76,11 @@ public:
 	void SetName(const std::string& newname);
 	std::string GetNumber() const;
 	void SetNumber(const std::string& newnumber);
-	unsigned short GetBeats() const;
 
-	// * needs to be through command only * //
+	// beats
+	unsigned short GetBeats() const;
 	void SetBeats(unsigned short b);
-	inline bool IsInAnimation() const { return (beats != 0); }
+	bool IsInAnimation() const { return (GetBeats() != 0); }
 
 	const CC_point& GetPoint(unsigned i) const { return pts[i]; }
 	CC_point& GetPoint(unsigned i) { return pts[i]; }

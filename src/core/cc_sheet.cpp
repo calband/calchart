@@ -27,7 +27,6 @@
 #include "confgr.h"
 #include "draw.h"
 #include <boost/algorithm/string/predicate.hpp>
-#include <wx/wx.h>
 
 const std::string contnames[] =
 {
@@ -67,12 +66,10 @@ CC_sheet::~CC_sheet()
 // Find point at certain coords
 int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 {
-	unsigned i;
-	CC_coord c;
 	Coord w = Float2Coord(GetConfiguration_DotRatio());
-	for (i = 0; i < show->GetNumPoints(); i++)
+	for (size_t i = 0; i < pts.size(); i++)
 	{
-		c = GetPosition(i, ref);
+		CC_coord c = GetPosition(i, ref);
 		if (((x+w) >= c.x) && ((x-w) <= c.x) && ((y+w) >= c.y) && ((y-w) <= c.y))
 		{
 			return i;
@@ -85,12 +82,10 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 std::set<unsigned>
 CC_sheet::SelectPointsOfContinuity(unsigned i) const
 {
-	unsigned j;
-
 	CC_show::SelectionList select;
-	for (j = 0; j < show->GetNumPoints(); j++)
+	for (size_t j = 0; j < pts.size(); j++)
 	{
-		if (pts[j].GetContinuityIndex() == i)
+		if (pts.at(j).GetContinuityIndex() == i)
 		{
 			select.insert(j);
 		}
@@ -128,7 +123,7 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 void CC_sheet::RelabelSheet(unsigned *table)
 {
 	std::vector<CC_point> newpts(show->GetNumPoints());
-	for (unsigned i = 0; i < show->GetNumPoints(); i++)
+	for (size_t i = 0; i < newpts.size(); i++)
 	{
 		newpts[i] = pts[table[i]];
 	}
@@ -142,10 +137,9 @@ const CC_continuity& CC_sheet::GetNthContinuity(unsigned i) const
 }
 
 
-void CC_sheet::SetNthContinuity(const wxString& text, unsigned i)
+void CC_sheet::SetNthContinuity(const std::string& text, unsigned i)
 {
-	std::string ttext = text.ToStdString();
-	animcont.at(i).SetText(ttext);
+	animcont.at(i).SetText(text);
 }
 
 
@@ -217,7 +211,7 @@ const CC_continuity& CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 }
 
 
-unsigned CC_sheet::FindContinuityByName(const wxString& name) const
+unsigned CC_sheet::FindContinuityByName(const std::string& name) const
 {
 	unsigned idx;
 	ContContainer::const_iterator c = animcont.begin();
@@ -242,7 +236,7 @@ bool CC_sheet::ContinuityInUse(unsigned idx) const
 	unsigned i;
 	const CC_continuity& c = GetNthContinuity(idx);
 
-	for (i = 0; i < show->GetNumPoints(); i++)
+	for (i = 0; i < pts.size(); i++)
 	{
 		if (pts[i].GetContinuityIndex() == c.GetNum()) return true;
 	}
