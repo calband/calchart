@@ -33,6 +33,8 @@
 #include "cc_shapes.h"
 #include "setup_wizards.h"
 #include "animation_frame.h"
+#include "draw.h"
+#include "animatecommand.h"
 
 #include <wx/wizard.h>
 
@@ -396,7 +398,7 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
 		for (CC_show::SelectionList::const_iterator point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
 		{
-			mAnimation->DrawPath(dc, *point, origin);
+			DrawPath(dc, mAnimation->GenPathToDraw(*point, origin), mAnimation->EndPosition(*point, origin));
 		}
 	}
 }

@@ -27,6 +27,7 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "confgr.h"
+#include "math_utils.h"
 
 #include <boost/format.hpp>
 
@@ -39,25 +40,25 @@ extern int parsecontinuity();
 extern const char *yyinputbuffer;
 extern ContProcedure *ParsedContinuity;
 
-const wxString animate_err_msgs[] =
+std::string animate_err_msgs(size_t which)
 {
-	wxT("Ran out of time"),
-	wxT("Not enough to do"),
-	wxT("Didn't make it to position"),
-	wxT("Invalid countermarch"),
-	wxT("Invalid fountain"),
-	wxT("Division by zero"),
-	wxT("Undefined value"),
-	wxT("Syntax error"),
-	wxT("Non-integer value"),
-	wxT("Negative value"),
-};
-
-float NormalizeAngle(float ang)
-{
-	while (ang >= 360.0) ang -= 360.0;
-	while (ang < 0.0) ang += 360.0;
-	return ang;
+	const std::string s_animate_err_msgs[] = {
+		"Ran out of time",
+		"Not enough to do",
+		"Didn't make it to position",
+		"Invalid countermarch",
+		"Invalid fountain",
+		"Division by zero",
+		"Undefined value",
+		"Syntax error",
+		"Non-integer value",
+		"Negative value",
+	};
+	if (which < sizeof(s_animate_err_msgs)/sizeof(std::string))
+	{
+		return s_animate_err_msgs[which];
+	}
+	return "";
 }
 
 AnimateDir AnimGetDirFromAngle(float ang)
@@ -169,8 +170,6 @@ mCollisionAction(NULL)
 		}
 		if (!comp.Okay() && notifyErrorList)
 		{
-			wxString tempbuf;
-			tempbuf.Printf(wxT("Errors for \"%.32s\""), curr_sheet->GetName().c_str());
 			if (notifyErrorList(comp.GetErrorMarkers(), sheetnum, (boost::format("Errors for \"%1%\"") % curr_sheet->GetName().substr(0, 32)).str()))
 			{
 				break;
@@ -399,24 +398,39 @@ std::string Animation::GetCurrentSheetName() const
 	return sheets.at(curr_sheetnum).GetName();
 }
 
-void Animation::DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const
+std::vector<boost::shared_ptr<AnimateCommand> >
+Animation::GetCommands(unsigned whichPoint) const
 {
-	dc.SetBrush(*wxTRANSPARENT_BRUSH);
-	dc.SetPen(*CalChartPens[COLOR_PATHS]);
-	// get the point we want to draw:
-	const AnimateSheet& sheet = sheets.at(curr_sheetnum);
-	AnimatePoint point = pts.at(whichPoint);
-	for (std::vector<boost::shared_ptr<AnimateCommand> >::const_iterator commands = sheet.commands.at(whichPoint).begin(); commands != sheet.commands.at(whichPoint).end(); ++commands)
-	{
-		(*commands)->DrawCommand(dc, point, offset);
-		(*commands)->ApplyForward(point);
-	}
-	dc.SetBrush(*CalChartBrushes[COLOR_PATHS]);
-	float circ_r = Float2Coord(GetConfiguration_DotRatio());
-	dc.DrawEllipse(point.x - circ_r/2 + offset.x, point.y - circ_r/2 + offset.y, circ_r, circ_r);
-	return ;
+	return sheets.at(curr_sheetnum).commands.at(whichPoint);
 }
 
+
+std::vector<AnimateDraw>
+Animation::GenPathToDraw(unsigned point, const CC_coord& offset) const
+{
+	auto animation_commands = GetCommands(point);
+	auto position = pts.at(point);
+	std::vector<AnimateDraw> draw_commands;
+	for (auto commands = animation_commands.begin(); commands != animation_commands.end(); ++commands)
+	{
+		draw_commands.push_back((*commands)->GenAnimateDraw(position, offset));
+		(*commands)->ApplyForward(position);
+	}
+	return draw_commands;
+}
+
+AnimatePoint
+Animation::EndPosition(unsigned point, const CC_coord& offset) const
+{
+	auto animation_commands = GetCommands(point);
+	auto position = pts.at(point);
+	for (auto commands = animation_commands.begin(); commands != animation_commands.end(); ++commands)
+	{
+		(*commands)->ApplyForward(position);
+	}
+	position += offset;
+	return position;
+}
 
 std::string
 Animation::GetCurrentInfo() const

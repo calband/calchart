@@ -25,6 +25,20 @@
 
 #include "animate.h"
 
+struct AnimateDraw
+{
+	typedef enum { Ignore, Line, Arc } DrawType;
+	DrawType mType;
+	int x1, y1, x2, y2;
+	int xc, yc;
+	// nothing version
+	AnimateDraw();
+	// Line version
+	AnimateDraw(int startx, int starty, int endx, int endy);
+	// Arc version
+	AnimateDraw(int startx, int starty, int endx, int endy, int centerx, int centery);
+};
+
 class AnimateCommand
 {
 public:
@@ -52,7 +66,7 @@ public:
 	virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
 
 	// when we want to have the path drawn:
-	virtual void DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const {}
+	virtual AnimateDraw GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const { return AnimateDraw(); }
 
 protected:
 	unsigned mNumBeats;
@@ -88,7 +102,7 @@ public:
 	virtual float MotionDirection() const;
 	virtual void ClipBeats(unsigned beats);
 
-	virtual void DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const;
+	virtual AnimateDraw GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const;
 
 private:
 	CC_coord mVector;
@@ -111,7 +125,7 @@ public:
 	virtual float RealDirection() const;
 	virtual void ClipBeats(unsigned beats);
 
-	virtual void DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const;
+	virtual AnimateDraw GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const;
 
 private:
 	CC_coord mOrigin;

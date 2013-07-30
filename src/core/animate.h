@@ -27,7 +27,6 @@
 
 #include "cc_coord.h"
 #include "cc_show.h"
-#include <wx/string.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <map>
@@ -38,6 +37,7 @@ AnimateDir AnimGetDirFromAngle(float ang);
 
 class AnimateCommand;
 class AnimateSheet;
+class AnimateDraw;
 
 struct ErrorMarker
 {
@@ -89,7 +89,8 @@ public:
 	// collection of position of each point, for debugging purposes
 	std::string GetCurrentInfo() const;
 
-	void DrawPath(wxDC& dc, int whichPoint, const CC_coord& offset) const;
+	std::vector<AnimateDraw> GenPathToDraw(unsigned point, const CC_coord& offset) const;
+	AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
 private:
 	const unsigned numpts;
@@ -108,6 +109,8 @@ private:
 	
 	void CheckCollisions();
 	CollisionAction_t mCollisionAction;
+
+	std::vector<boost::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
 };
 
 #endif

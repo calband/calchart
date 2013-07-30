@@ -35,6 +35,11 @@ float BoundDirection(float f)
 	return f;
 }
 
+float NormalizeAngle(float ang)
+{
+	return BoundDirection(ang);
+}
+
 
 float BoundDirectionSigned(float f)
 {

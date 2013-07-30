@@ -24,7 +24,7 @@
 #define _ANIMATE_TYPES_H_
 
 #include "cc_coord.h"
-#include <wx/string.h>
+#include <string>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
 enum
@@ -79,7 +79,7 @@ enum CollisionWarning
 	COLLISION_BEEP
 };
 
-extern const wxString animate_err_msgs[];
+std::string animate_err_msgs(size_t which);
 
 typedef CC_coord AnimatePoint;
 

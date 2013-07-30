@@ -24,6 +24,7 @@
 #define __DRAW_H__
 
 #include <wx/dc.h>
+#include <vector>
 
 class wxBrush;
 class wxString;
@@ -31,6 +32,7 @@ class CC_show;
 class CC_sheet;
 class CC_point;
 class CC_coord;
+class AnimateDraw;
 
 // draw the continuity starting at a specific offset
 void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary);
@@ -46,5 +48,7 @@ void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
 // We break this out of the class to make CalChart internals more cross platform
 // Draw the point
 void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label);
+
+void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end);
 
 #endif // __DRAW_H__

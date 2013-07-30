@@ -45,6 +45,7 @@ T Deg2Rad(const T& a)
 #define SQRT2 1.4142136
 
 float BoundDirection(float f);
+float NormalizeAngle(float ang);
 
 float BoundDirectionSigned(float f);
 

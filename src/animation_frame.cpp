@@ -717,7 +717,7 @@ AnimationFrame::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers,
 		if (!error_markers[i].pntgroup.empty())
 		{
 			wxString error_string;
-			error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, animate_err_msgs[i]);
+			error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, animate_err_msgs(i));
 			mErrorList->Append(error_string);
 			mErrorMarkers.push_back(std::pair<ErrorMarker, unsigned>(error_markers[i], sheetnum));
 		}

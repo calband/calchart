@@ -22,6 +22,33 @@
 
 #include "animatecommand.h"
 
+// nothing version
+AnimateDraw::AnimateDraw() :
+mType(Ignore)
+{
+}
+
+// Line version
+AnimateDraw::AnimateDraw(int startx, int starty, int endx, int endy) :
+mType(Line),
+x1(startx),
+y1(starty),
+x2(endx),
+y2(endy)
+{
+}
+
+// Arc version
+AnimateDraw::AnimateDraw(int startx, int starty, int endx, int endy, int centerx, int centery) :
+mType(Arc),
+x1(startx),
+y1(starty),
+x2(endx),
+y2(endy),
+xc(centerx),
+yc(centery)
+{
+}
 
 AnimateCommand::AnimateCommand(unsigned beats)
 : mNumBeats(beats), mBeat(0)
@@ -179,9 +206,9 @@ void AnimateCommandMove::ClipBeats(unsigned beats)
 }
 
 
-void AnimateCommandMove::DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const
+AnimateDraw AnimateCommandMove::GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const
 {
-	dc.DrawLine(pt.x + offset.x, pt.y + offset.y, pt.x + mVector.x + offset.x, pt.y + mVector.y + offset.y);
+	return AnimateDraw(pt.x + offset.x, pt.y + offset.y, pt.x + mVector.x + offset.x, pt.y + mVector.y + offset.y);
 }
 
 
@@ -265,15 +292,15 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 }
 
 
-void AnimateCommandRotate::DrawCommand(wxDC& dc, const AnimatePoint& pt, const CC_coord& offset) const
+AnimateDraw AnimateCommandRotate::GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const
 {
 	float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
 	float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-	wxCoord x_start = RoundToCoord(mOrigin.x + cos(start*M_PI/180.0)*mR) + offset.x;
-	wxCoord y_start = RoundToCoord(mOrigin.y - sin(start*M_PI/180.0)*mR) + offset.y;
-	wxCoord x_end = RoundToCoord(mOrigin.x + cos(end*M_PI/180.0)*mR) + offset.x;
-	wxCoord y_end = RoundToCoord(mOrigin.y - sin(end*M_PI/180.0)*mR) + offset.y;
+	auto x_start = RoundToCoord(mOrigin.x + cos(start*M_PI/180.0)*mR) + offset.x;
+	auto y_start = RoundToCoord(mOrigin.y - sin(start*M_PI/180.0)*mR) + offset.y;
+	auto x_end = RoundToCoord(mOrigin.x + cos(end*M_PI/180.0)*mR) + offset.x;
+	auto y_end = RoundToCoord(mOrigin.y - sin(end*M_PI/180.0)*mR) + offset.y;
 
-	dc.DrawArc(x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y);
+	return AnimateDraw(x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y);
 }
 

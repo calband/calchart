@@ -30,6 +30,8 @@
 #include "cc_sheet.h"
 #include "cc_point.h"
 #include "cc_text.h"
+#include "animate.h"
+#include "animatecommand.h"
 #include <memory>
 
 extern wxFont *pointLabelFont;
@@ -599,4 +601,32 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 				point.GetFlip() ? x : (x - textw),
 				y - textoff - texth + textd);
 }
+
+
+void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end)
+{
+	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	dc.SetPen(*CalChartPens[COLOR_PATHS]);
+	int endX, endY;
+	for (auto iter = draw_commands.begin(); iter != draw_commands.end(); ++iter)
+	{
+		switch (iter->mType)
+		{
+			case AnimateDraw::Line:
+				dc.DrawLine(iter->x1, iter->y1, iter->x2, iter->y2);
+				endX = iter->x2; endY = iter->y2;
+				break;
+			case AnimateDraw::Arc:
+				dc.DrawArc(iter->x1, iter->y1, iter->x2, iter->y2, iter->xc, iter->yc);
+				endX = iter->x2; endY = iter->y2;
+				break;
+			case AnimateDraw::Ignore:
+				break;
+		}
+	}
+	dc.SetBrush(*CalChartBrushes[COLOR_PATHS]);
+	float circ_r = Float2Coord(GetConfiguration_DotRatio());
+	dc.DrawEllipse(end.x - circ_r/2, end.y - circ_r/2, circ_r, circ_r);
+}
+
 
