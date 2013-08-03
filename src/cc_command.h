@@ -25,6 +25,7 @@
 
 #include "cc_continuity.h"
 #include "cc_coord.h"
+#include "calchartdoc.h"
 #include "cc_show.h"
 #include "cc_sheet.h"
 #include <ostream>
@@ -46,7 +47,7 @@
 class BasicCalChartCommand : public wxCommand
 {
 public:
-	BasicCalChartCommand(CC_show& show, const wxString cmdName);
+	BasicCalChartCommand(CalChartDoc& doc, const wxString cmdName);
 	// make destructor virtual and implement it to force abstract base class
 	virtual ~BasicCalChartCommand() = 0;
 
@@ -54,12 +55,12 @@ public:
 	virtual bool Undo();
 
 protected:
-	CC_show& mShow;
+	CalChartDoc& mDoc;
 
 private:
 	virtual void DoAction() = 0;
 	virtual void UndoAction() = 0;
-	bool mShowModified;
+	bool mDocModified;
 };
 
 ///// Global show commands.  Changes settings to a whole show.
@@ -69,7 +70,7 @@ private:
 class SetDescriptionCommand : public BasicCalChartCommand
 {
 public:
-	SetDescriptionCommand(CC_show& show, const wxString& newdescr);
+	SetDescriptionCommand(CalChartDoc& show, const wxString& newdescr);
 	virtual ~SetDescriptionCommand();
 
 protected:
@@ -85,7 +86,7 @@ protected:
 class SetModeCommand : public BasicCalChartCommand
 {
 public:
-	SetModeCommand(CC_show& show, const wxString& newdescr);
+	SetModeCommand(CalChartDoc& show, const wxString& newdescr);
 	virtual ~SetModeCommand();
 
 protected:
@@ -101,7 +102,7 @@ protected:
 class SetShowInfoCommand : public BasicCalChartCommand
 {
 public:
-	SetShowInfoCommand(CC_show& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
+	SetShowInfoCommand(CalChartDoc& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
 	virtual ~SetShowInfoCommand();
 
 protected:
@@ -124,7 +125,7 @@ protected:
 class SetSheetCommand : public BasicCalChartCommand
 {
 public:
-	SetSheetCommand(CC_show& show, const wxString cmdName);
+	SetSheetCommand(CalChartDoc& show, const wxString cmdName);
 	// make destructor virtual and implement it to force abstract base class
 	virtual ~SetSheetCommand() = 0;
 
@@ -141,7 +142,7 @@ protected:
 class SetSheetTitleCommand : public SetSheetCommand
 {
 public:
-	SetSheetTitleCommand(CC_show& show, const wxString& newname);
+	SetSheetTitleCommand(CalChartDoc& show, const wxString& newname);
 	virtual ~SetSheetTitleCommand();
 
 protected:
@@ -157,7 +158,7 @@ protected:
 class SetSheetBeatsCommand : public SetSheetCommand
 {
 public:
-	SetSheetBeatsCommand(CC_show& show, unsigned short beats);
+	SetSheetBeatsCommand(CalChartDoc& show, unsigned short beats);
 	virtual ~SetSheetBeatsCommand();
 
 protected:
@@ -173,7 +174,7 @@ protected:
 class AddSheetsCommand : public SetSheetCommand
 {
 public:
-	AddSheetsCommand(CC_show& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
+	AddSheetsCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
 	virtual ~AddSheetsCommand();
 
 protected:
@@ -189,7 +190,7 @@ protected:
 class RemoveSheetsCommand : public SetSheetCommand
 {
 public:
-	RemoveSheetsCommand(CC_show& show, unsigned where);
+	RemoveSheetsCommand(CalChartDoc& show, unsigned where);
 	virtual ~RemoveSheetsCommand();
 
 protected:
@@ -206,7 +207,7 @@ protected:
 class AddRemoveContinuityCommand : public SetSheetCommand
 {
 public:
-	AddRemoveContinuityCommand(CC_show& show);
+	AddRemoveContinuityCommand(CalChartDoc& show);
 	virtual ~AddRemoveContinuityCommand();
 
 protected:
@@ -220,7 +221,7 @@ protected:
 class AddContinuityCommand : public AddRemoveContinuityCommand
 {
 public:
-	AddContinuityCommand(CC_show& show, const wxString& text);
+	AddContinuityCommand(CalChartDoc& show, const wxString& text);
 	virtual ~AddContinuityCommand();
 
 protected:
@@ -234,7 +235,7 @@ protected:
 class RemoveContinuityCommand : public AddRemoveContinuityCommand
 {
 public:
-	RemoveContinuityCommand(CC_show& show, unsigned i);
+	RemoveContinuityCommand(CalChartDoc& show, unsigned i);
 	virtual ~RemoveContinuityCommand();
 
 protected:
@@ -251,7 +252,7 @@ protected:
 class SetSheetAndSelectCommand : public SetSheetCommand
 {
 public:
-	SetSheetAndSelectCommand(CC_show& show, const wxString cmdName);
+	SetSheetAndSelectCommand(CalChartDoc& show, const wxString cmdName);
 	// make destructor virtual and implement it to force abstract base class
 	virtual ~SetSheetAndSelectCommand() = 0;
 
@@ -259,7 +260,7 @@ protected:
 	virtual void DoAction();
 	virtual void UndoAction();
 
-	const CC_show::SelectionList mPoints;
+	const SelectionList mPoints;
 };
 
 
@@ -270,7 +271,7 @@ protected:
 class MovePointsOnSheetCommand : public SetSheetAndSelectCommand
 {
 public:
-	MovePointsOnSheetCommand(CC_show& show, unsigned ref);
+	MovePointsOnSheetCommand(CalChartDoc& show, unsigned ref);
 	// make destructor virtual and implement it to force abstract base class
 	virtual ~MovePointsOnSheetCommand() = 0;
 
@@ -288,7 +289,7 @@ protected:
 class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
 {
 public:
-	TranslatePointsByDeltaCommand(CC_show& show, const CC_coord& delta, unsigned ref);
+	TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref);
 	virtual ~TranslatePointsByDeltaCommand();
 };
 
@@ -298,7 +299,7 @@ public:
 class TransformPointsCommand : public MovePointsOnSheetCommand
 {
 public:
-	TransformPointsCommand(CC_show& show, const Matrix& transmat, unsigned ref);
+	TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref);
 	virtual ~TransformPointsCommand();
 };
 
@@ -308,7 +309,7 @@ public:
 class TransformPointsInALineCommand : public MovePointsOnSheetCommand
 {
 public:
-	TransformPointsInALineCommand(CC_show& show, const CC_coord& start, const CC_coord& second, unsigned ref);
+	TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref);
 	virtual ~TransformPointsInALineCommand();
 };
 
@@ -318,7 +319,7 @@ public:
 class SetReferencePointToRef0 : public MovePointsOnSheetCommand
 {
 public:
-	SetReferencePointToRef0(CC_show& show, unsigned ref);
+	SetReferencePointToRef0(CalChartDoc& show, unsigned ref);
 	virtual ~SetReferencePointToRef0();
 };
 
@@ -328,7 +329,7 @@ public:
 class SetContinuityIndexCommand : public SetSheetAndSelectCommand
 {
 public:
-	SetContinuityIndexCommand(CC_show& show, unsigned index);
+	SetContinuityIndexCommand(CalChartDoc& show, unsigned index);
 	virtual ~SetContinuityIndexCommand();
 
 protected:
@@ -344,7 +345,7 @@ protected:
 class SetSymbolAndContCommand : public SetSheetAndSelectCommand
 {
 public:
-	SetSymbolAndContCommand(CC_show& show, SYMBOL_TYPE sym);
+	SetSymbolAndContCommand(CalChartDoc& show, SYMBOL_TYPE sym);
 	virtual ~SetSymbolAndContCommand();
 
 protected:
@@ -362,7 +363,7 @@ protected:
 class SetContinuityTextCommand : public SetSheetAndSelectCommand
 {
 public:
-	SetContinuityTextCommand(CC_show& show, unsigned i, const wxString& text);
+	SetContinuityTextCommand(CalChartDoc& show, unsigned i, const wxString& text);
 	virtual ~SetContinuityTextCommand();
 
 protected:
@@ -379,7 +380,7 @@ protected:
 class SetLabelCommand : public SetSheetAndSelectCommand
 {
 public:
-	SetLabelCommand(CC_show& show);
+	SetLabelCommand(CalChartDoc& show);
 	// make destructor virtual and implement it to force abstract base class
 	virtual ~SetLabelCommand() = 0;
 
@@ -396,7 +397,7 @@ protected:
 class SetLabelRightCommand : public SetLabelCommand
 {
 public:
-	SetLabelRightCommand(CC_show& show, bool right);
+	SetLabelRightCommand(CalChartDoc& show, bool right);
 	virtual ~SetLabelRightCommand();
 };
 
@@ -406,7 +407,7 @@ public:
 class SetLabelFlipCommand : public SetLabelCommand
 {
 public:
-	SetLabelFlipCommand(CC_show& show);
+	SetLabelFlipCommand(CalChartDoc& show);
 	virtual ~SetLabelFlipCommand();
 };
 

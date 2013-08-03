@@ -23,7 +23,7 @@
 #ifndef _SHOW_UI_H_
 #define _SHOW_UI_H_
 
-#include "cc_show.h"
+#include "calchartdoc.h"
 #include <wx/wizard.h>
 #include <wx/docview.h>
 
@@ -41,7 +41,7 @@ public:
 class PointPicker : public wxDialog
 {
 public:
-	PointPicker(CC_show& shw,
+	PointPicker(CalChartDoc& shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -52,11 +52,11 @@ public:
 	void Update();
 
 private:
-	CC_show& mShow;
+	CalChartDoc& mShow;
 	PointPickerView *mView;
 	wxListBox *mList;
 	std::vector<wxString> mCachedLabels;
-	CC_show::SelectionList mCachedSelection;
+	SelectionList mCachedSelection;
 
 	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
@@ -80,7 +80,7 @@ class ShowInfoReq : public wxDialog
 	DECLARE_EVENT_TABLE()
 
 public:
-	ShowInfoReq(CC_show& shw,
+	ShowInfoReq(CalChartDoc& shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Show Info"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -113,7 +113,7 @@ public:
 	std::vector<wxString> GetLabels() { return mLabels; }
 
 private:
-	CC_show& mShow;
+	CalChartDoc& mShow;
 	void OnReset(wxCommandEvent&);
 };
 

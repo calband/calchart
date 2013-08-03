@@ -33,11 +33,12 @@ class CC_sheet;
 class CC_point;
 class CC_coord;
 struct AnimateDraw;
+class CalChartDoc;
 
 // draw the continuity starting at a specific offset
-void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary);
+void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary);
 void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landscape);
-void DrawForPrinting(wxDC *dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool landscape);
+void DrawForPrinting(wxDC *dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);
 
 void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);
 void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet);

@@ -23,7 +23,7 @@
 #ifndef _CONT_UI_H_
 #define _CONT_UI_H_
 
-#include "cc_show.h"
+#include "calchartdoc.h"
 
 #include <wx/docview.h>
 #include <wx/dialog.h>
@@ -31,7 +31,7 @@
 class ContinuityEditor;
 class FancyTextWin;
 
-// View for linking CC_show with ContinuityEditor
+// View for linking CalChartDoc with ContinuityEditor
 class ContinuityEditorView : public wxView
 {
 public:
@@ -54,7 +54,7 @@ class ContinuityEditor : public wxFrame
 	friend class ContinuityEditorView;
 public:
 	ContinuityEditor();
-	ContinuityEditor(CC_show *dcr,
+	ContinuityEditor(CalChartDoc *dcr,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Edit Continuity"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -81,7 +81,7 @@ public:
 private:
 	void Init();
 
-	bool Create(CC_show *shw,
+	bool Create(CalChartDoc *shw,
 		wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Select Points"),
 		const wxPoint& pos = wxDefaultPosition,
@@ -101,7 +101,7 @@ private:
 	void Discard();
 	void SetCurrent(unsigned i);
 
-	CC_show *mShow;
+	CalChartDoc *mDoc;
 	ContinuityEditorView *mView;
 	wxChoice *mContinuityChoices;
 	unsigned mCurrentContinuityChoice;

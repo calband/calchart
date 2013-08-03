@@ -51,7 +51,7 @@ void PointPickerView::OnUpdate(wxView *sender, wxObject *hint)
 	static_cast<PointPicker*>(GetFrame())->Update();
 }
 
-PointPicker::PointPicker(CC_show& shw,
+PointPicker::PointPicker(CalChartDoc& shw,
 	wxWindow *parent, wxWindowID id,
 	const wxString& caption,
 	const wxPoint& pos,
@@ -155,12 +155,12 @@ void PointPicker::Update()
 		mList->Clear();
 		mList->Set(mCachedLabels.size(), &mCachedLabels[0]);
 	}
-	CC_show::SelectionList showSelectionList = mShow.GetSelectionList();
+	auto showSelectionList = mShow.GetSelectionList();
 	if (mCachedSelection != showSelectionList)
 	{
 		mList->DeselectAll();
 		mCachedSelection = showSelectionList;
-		for (CC_show::SelectionList::const_iterator n = mCachedSelection.begin(); n != mCachedSelection.end(); ++n)
+		for (auto n = mCachedSelection.begin(); n != mCachedSelection.end(); ++n)
 		{
 			mList->SetSelection(*n);
 		}
@@ -168,7 +168,7 @@ void PointPicker::Update()
 }
 
 
-static void CalculateLabels(const CC_show& show, std::set<unsigned>& letters, bool& use_letters, int& maxnum)
+static void CalculateLabels(const CalChartDoc& show, std::set<unsigned>& letters, bool& use_letters, int& maxnum)
 {
 	use_letters = false;
 	maxnum = 1;
@@ -220,7 +220,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( ShowInfoReq, wxDialog )
 
-ShowInfoReq::ShowInfoReq(CC_show& shw,
+ShowInfoReq::ShowInfoReq(CalChartDoc& shw,
 	wxWindow *parent, wxWindowID id,
 	const wxString& caption,
 	const wxPoint& pos,

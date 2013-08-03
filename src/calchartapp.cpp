@@ -21,6 +21,7 @@
 */
 
 #include "calchartapp.h"
+#include "calchartdoc.h"
 #include "top_frame.h"
 #include "modes.h"
 #include "confgr.h"
@@ -59,7 +60,7 @@ bool CalChartApp::OnInit()
 
 	//// Create a template relating drawing documents to their views
 	(void) new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
-			CLASSINFO(CC_show), CLASSINFO(FieldView));
+			CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
 
 	gPrintDialogData = new wxPrintDialogData();
 

@@ -26,6 +26,7 @@
 #include <wx/dcmemory.h>
 #include "confgr.h"
 #include "modes.h"
+#include "calchartdoc.h"
 #include "cc_show.h"
 #include "cc_sheet.h"
 #include "cc_point.h"
@@ -127,7 +128,7 @@ static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 
 
 static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
 
-void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary)
+void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary)
 {
 	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
 															 wxSWISS, wxNORMAL, wxNORMAL);
@@ -381,7 +382,7 @@ static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), siz, off, bord1, bord2, whash, ehash));
 }
 
-void DrawForPrinting(wxDC *printerdc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool landscape)
+void DrawForPrinting(wxDC *printerdc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape)
 {
 	unsigned short i;
 	unsigned long x, y;

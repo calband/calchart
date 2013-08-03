@@ -45,99 +45,13 @@ static const wxChar *badcont_str = wxT("Error in continuity file");
 static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
 
 
-IMPLEMENT_DYNAMIC_CLASS(CC_show_modified, wxObject)
-IMPLEMENT_DYNAMIC_CLASS(CC_show_FlushAllViews, wxObject)
-IMPLEMENT_DYNAMIC_CLASS(CC_show_FinishedLoading, wxObject)
-IMPLEMENT_DYNAMIC_CLASS(CC_show_setup, wxObject)
-
-IMPLEMENT_DYNAMIC_CLASS(CC_show, wxDocument);
-
 // Create a new show
-CC_show::CC_show()
-:mOkay(true), numpoints(0),
-mSheetNum(0),
-mTimer(*this)
+CC_show::CC_show() :
+mOkay(true),
+numpoints(0),
+mSheetNum(0)
 {
-	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
 	mode = wxGetApp().GetModeList().front().get();
-}
-
-// When a file is opened, we first check to see if there is a temporary 
-// file, and if there is, prompt the user to see if they would like use
-// that file instead.
-bool CC_show::OnOpenDocument(const wxString& filename)
-{
-	// first check to see if there is a recover file:
-	wxString recoveryFile = TranslateNameToAutosaveName(filename);
-	if (wxFileExists(recoveryFile))
-	{
-		// prompt the user to find out if they would like to use the recovery file
-		int userchoice = wxMessageBox(
-			wxT("CalChart has detected a recovery file (possibly from a previous crash).  ")
-			wxT("Would you like to use the recovery file (Warning: choosing recover will ")
-			wxT("destroy the original file)?"), wxT("Recovery File Detected"), wxYES_NO|wxCANCEL);
-		if (userchoice == wxYES)
-		{
-			// move the recovery file to the filename, destroying the file and using the recovery
-			wxCopyFile(recoveryFile, filename);
-		}
-		if (userchoice == wxNO)
-		{
-		}
-		if (userchoice == wxCANCEL)
-		{
-			return false;
-		}
-	}
-	bool success = wxDocument::OnOpenDocument(filename) && mOkay;
-	if (success)
-	{
-		// at this point the recover file is no longer useful.
-		if (wxFileExists(recoveryFile))
-		{
-			wxRemoveFile(recoveryFile);
-		}
-	}
-	return success;
-}
-
-// If we close a file and decide not to save the changes, don't create a recovery
-// file, it may confuse the user.
-bool CC_show::OnCloseDocument()
-{
-	bool success = wxDocument::OnCloseDocument();
-	// first check to see if there is a recover file:
-	wxString recoveryFile = TranslateNameToAutosaveName(GetFilename());
-	if (!IsModified() && wxFileExists(recoveryFile))
-	{
-		wxRemoveFile(recoveryFile);
-	}
-	return success;
-}
-
-bool CC_show::OnNewDocument()
-{
-	bool success = wxDocument::OnNewDocument();
-	if (success)
-	{
-		// notify the views that we are a new document.  That should prompt a wizard to set up the show
-		CC_show_setup show_setup;
-		UpdateAllViews(NULL, &show_setup);
-	}
-	return success;
-}
-
-// When we save a file, the recovery file should be removed to prevent
-// a false detection that the file writing failed.
-bool CC_show::OnSaveDocument(const wxString& filename)
-{
-	bool result = wxDocument::OnSaveDocument(filename);
-	wxString recoveryFile = TranslateNameToAutosaveName(filename);
-	if (result && wxFileExists(recoveryFile))
-	{
-		wxRemoveFile(recoveryFile);
-	}
-	return true;
 }
 
 enum CONT_PARSE_MODE
@@ -474,21 +388,21 @@ template <typename T>
 T& CC_show::SaveObjectGeneric(T& stream)
 {
 	// flush out the text before we save a file.
-	FlushAllTextWindows();
 	return SaveObjectInternal(stream);
 }
 
-#if wxUSE_STD_IOSTREAM
 wxSTD ostream& CC_show::SaveObject(wxSTD ostream& stream)
 {
 	return SaveObjectGeneric<wxSTD ostream>(stream);
 }
-#else
 wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
 {
 	return SaveObjectGeneric<wxOutputStream>(stream);
 }
-#endif
+wxFFileOutputStream& CC_show::SaveObject(wxFFileOutputStream& stream)
+{
+	return SaveObjectGeneric<wxFFileOutputStream>(stream);
+}
 
 template <typename T>
 T& CC_show::SaveObjectInternal(T& stream)
@@ -833,8 +747,6 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	//ReadAndCheckID(stream, INGL_END);
 	ReadAndCheckID(stream, INGL_SHOW);
 	mSheetNum = 0;
-	CC_show_FinishedLoading finishedLoading;
-	UpdateAllViews(NULL, &finishedLoading);
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");
@@ -857,13 +769,6 @@ wxInputStream& CC_show::LoadObject(wxInputStream& stream)
 }
 #endif
 
-void CC_show::FlushAllTextWindows()
-{
-	CC_show_FlushAllViews flushMod;
-	UpdateAllViews(NULL, &flushMod);
-}
-
-
 const std::string& CC_show::GetDescr() const
 {
 	return descr;
@@ -873,45 +778,6 @@ const std::string& CC_show::GetDescr() const
 void CC_show::SetDescr(const std::string& newdescr)
 {
 	descr = newdescr;
-}
-
-
-void CC_show::Modify(bool b)
-{
-	wxDocument::Modify(b);
-	CC_show_modified showMod;
-	UpdateAllViews(NULL, &showMod);
-}
-
-
-void CC_show::AutoSaveTimer::Notify()
-{
-	mShow.Autosave();
-}
-
-wxString CC_show::TranslateNameToAutosaveName(const wxString& name)
-{
-	return name + wxT("~");
-}
-
-// When the timer goes off, and if the show has a name and is modified,
-// we will write the file to a version of the file that the same
-// but with the extension .shw~, to indicate that there is a recovery
-// file at that location.
-void CC_show::Autosave()
-{
-	if (GetFilename() != wxT("") && IsModified())
-	{
-		wxFFileOutputStream outputStream(TranslateNameToAutosaveName(GetFilename()));
-		if (outputStream.IsOk())
-		{
-			SaveObjectInternal(outputStream);
-		}
-		if (!outputStream.IsOk())
-		{
-			wxMessageBox(wxT("Error creating recovery file.  Take heed, save often!"), wxT("Recovery Error"));
-		}
-	}
 }
 
 
@@ -950,9 +816,14 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
 void CC_show::SetCurrentSheet(unsigned n)
 {
 	mSheetNum = n;
-	UpdateAllViews();
 }
 
+
+void
+CC_show::SetupNewShow()
+{
+	InsertSheetInternal(CC_sheet(this, "1"), 0);
+}
 
 void CC_show::InsertSheetInternal(const CC_sheet& sheet, unsigned sheetidx)
 {
@@ -1039,7 +910,6 @@ bool CC_show::SelectAll()
 	bool changed = selectionList.size() != numpoints;
 	for (size_t i = 0; i < numpoints; ++i)
 		selectionList.insert(i);
-	UpdateAllViews();
 	return changed;
 }
 
@@ -1048,7 +918,7 @@ bool CC_show::UnselectAll()
 {
 	bool changed = selectionList.size();
 	selectionList.clear();
-	UpdateAllViews();
+//	UpdateAllViews();
 	return changed;
 }
 
@@ -1056,20 +926,20 @@ bool CC_show::UnselectAll()
 void CC_show::SetSelection(const SelectionList& sl)
 {
 	selectionList = sl;
-	UpdateAllViews();
+//	UpdateAllViews();
 }
 
 
 void CC_show::AddToSelection(const SelectionList& sl)
 {
 	selectionList.insert(sl.begin(), sl.end());
-	UpdateAllViews();
+//	UpdateAllViews();
 }
 
 void CC_show::RemoveFromSelection(const SelectionList& sl)
 {
 	selectionList.erase(sl.begin(), sl.end());
-	UpdateAllViews();
+//	UpdateAllViews();
 }
 
 void CC_show::ToggleSelection(const SelectionList& sl)
@@ -1084,9 +954,9 @@ void CC_show::ToggleSelection(const SelectionList& sl)
 		{
 			selectionList.insert(*i);
 		}
-
+		
 	}
-	UpdateAllViews();
+//	UpdateAllViews();
 }
 
 // toggle selection means toggle it as selected to unselected
@@ -1097,7 +967,7 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsign
 	{
 		return;
 	}
-
+	
 	SelectionList sl;
 	CC_show::const_CC_sheet_iterator_t sheet = GetCurrentSheet();
 	for (unsigned i = 0; i < GetNumPoints(); i++)
@@ -1126,16 +996,14 @@ struct ShowTestData
 	bool Ok;
 	
 };
-void UnitTests()
+void CC_show_UnitTests()
 {
 	CC_show test;
 //	cout<<"ok "<<test.mOkay<<"\n";
 //	assert(test.Ok() == true);
 //	cout<<"GetError "<<(wchar_t*)test.GetError().c_str()<<"\n";
 //	assert(test.Ok() == true);
-	cout<<"GetTitle "<<test.GetTitle().c_str()<<"\n";
 	cout<<"GetDescr "<<test.GetDescr().c_str()<<"\n";
-	cout<<"Modified "<<test.IsModified()<<"\n";
 	cout<<"GetNumSheets "<<test.GetNumSheets()<<"\n";
 	cout<<"GetNumPoints "<<test.GetNumPoints()<<"\n";
 	for (unsigned i = 0; i < test.GetNumPoints(); ++i)

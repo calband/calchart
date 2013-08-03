@@ -150,7 +150,7 @@ END_EVENT_TABLE()
 class MyPrintout : public wxPrintout
 {
 public:
-	MyPrintout(const wxString& title, const CC_show& show) : wxPrintout(title), mShow(show) {}
+	MyPrintout(const wxString& title, const CalChartDoc& show) : wxPrintout(title), mShow(show) {}
 	virtual ~MyPrintout() {}
 	virtual bool HasPage(int pageNum) { return pageNum <= mShow.GetNumSheets(); }
 	virtual void GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo)
@@ -171,7 +171,7 @@ public:
 
 		return true;
 	}
-	const CC_show& mShow;
+	const CalChartDoc& mShow;
 };
 
 
@@ -258,7 +258,7 @@ mAnimationFrame(NULL)
 	// set scroll rate 1 to 1, so we can have even scrolling of whole field
 	mCanvas->SetScrollRate(1, 1);
 
-	CC_show* show = static_cast<CC_show*>(doc);
+	CalChartDoc* show = static_cast<CalChartDoc*>(doc);
 	SetTitle(show->GetTitle());
 	show->SetCurrentSheet(0);
 
@@ -444,7 +444,7 @@ void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
 	if (GetShow())
 	{
-		PrintPostScriptDialog dialog(GetShow(), false, this);
+		PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -456,7 +456,7 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 {
 	if (GetShow())
 	{
-		PrintPostScriptDialog dialog(GetShow(), true, this);
+		PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
 			dialog.PrintShow();
@@ -511,7 +511,7 @@ void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 					wxT("Relabel sheets"));
 			else
 			{
-				GetShow()->Modify(true);
+				GetDocument()->Modify(true);
 			}
 		}
 	}
@@ -527,7 +527,7 @@ void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
 {
 	if (GetShow())
 	{
-		ContinuityEditor* ce = new ContinuityEditor(GetShow(), this, wxID_ANY,
+		ContinuityEditor* ce = new ContinuityEditor(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY,
 			wxT("Animation Continuity"));
 		// make it modeless:
 		ce->Show();
@@ -849,13 +849,12 @@ void FieldFrame::OnSize(wxSizeEvent& event)
 void FieldFrame::AppendShow()
 {
 	wxString s;
-	CC_show *shw;
 	unsigned currend;
 
 	s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
 	if (!s.IsEmpty())
 	{
-		shw = new CC_show();
+		CalChartDoc *shw = new CalChartDoc();
 		if (shw->OnOpenDocument(s))
 		{
 			if (shw->GetNumPoints() == GetShow()->GetNumPoints())
@@ -1112,16 +1111,16 @@ FieldFrame::GetFieldView()
 	return static_cast<FieldView*>(GetView());
 }
 
-const CC_show *
+const CalChartDoc *
 FieldFrame::GetShow() const
 {
-	return static_cast<const CC_show*>(GetDocument());
+	return static_cast<const CalChartDoc*>(GetDocument());
 }
 
 
-CC_show *
+CalChartDoc *
 FieldFrame::GetShow()
 {
-	return static_cast<CC_show*>(GetDocument());
+	return static_cast<CalChartDoc*>(GetDocument());
 }
 

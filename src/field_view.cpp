@@ -56,7 +56,7 @@ FieldView::~FieldView()
 bool
 FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 {
-	mShow = static_cast<CC_show*>(doc);
+	mShow = static_cast<CalChartDoc*>(doc);
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 	mFrame = new AnimationFrame(NULL, doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame));
 #else
@@ -100,20 +100,20 @@ FieldView::OnDraw(wxDC *dc)
 void
 FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 {
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_setup)))
+	if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_setup)))
 	{
 		// give our show a first page
-		CC_show* show = static_cast<CC_show*>(GetDocument());
-		show->InsertSheetInternal(CC_sheet(show, "1"), 0);
-		show->SetCurrentSheet(0);
+		CalChartDoc* show = static_cast<CalChartDoc*>(GetDocument());
 		
+		show->SetupNewShow();
+
 		// Set up everything else
 		OnWizardSetup(*show);
 		
 		// make the show modified so it gets repainted
 		show->Modify(true);
 	}
-	else if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+	else if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified)))
 	{
 		GeneratePaths();
 	}
@@ -147,7 +147,7 @@ FieldView::OnClose(bool deleteWindow)
 
 
 void
-FieldView::OnWizardSetup(CC_show& show)
+FieldView::OnWizardSetup(CalChartDoc& show)
 {
 	wxWizard *wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
 	// page 1:
@@ -347,13 +347,13 @@ FieldView::SetReferencePoint(unsigned which)
 }
 
 void
-FieldView::AddToSelection(const CC_show::SelectionList& sl)
+FieldView::AddToSelection(const SelectionList& sl)
 {
 	mShow->AddToSelection(sl);
 }
 
 void
-FieldView::ToggleSelection(const CC_show::SelectionList& sl)
+FieldView::ToggleSelection(const SelectionList& sl)
 {
 	mShow->ToggleSelection(sl);
 }
@@ -396,7 +396,7 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 	{
 		CC_coord origin = GetShowFieldOffset();
 		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
-		for (CC_show::SelectionList::const_iterator point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
+		for (auto point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
 		{
 			DrawPath(dc, mAnimation->GenPathToDraw(*point, origin), mAnimation->EndPosition(*point, origin));
 		}
@@ -406,6 +406,6 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 void
 FieldView::GeneratePaths()
 {
-	mAnimation.reset(new Animation(*mShow, NotifyStatus(), NotifyErrorList()));
+	mAnimation = mShow->NewAnimation(NotifyStatus(), NotifyErrorList());
 }
 

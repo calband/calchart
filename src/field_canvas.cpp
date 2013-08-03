@@ -228,7 +228,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					}
 					else
 					{
-						CC_show::SelectionList select;
+						SelectionList select;
 						select.insert(i);
 						if (event.AltDown())
 						{

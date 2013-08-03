@@ -34,6 +34,7 @@ class CC_show;
 
 class FieldCanvas;
 class FieldView;
+class CalChartDoc;
 
 // Define the main editing frame
 class FieldFrame : public wxDocChildFrame
@@ -128,8 +129,8 @@ public:
 	const FieldView * GetFieldView() const;
 	FieldView * GetFieldView();
 
-	const CC_show * GetShow() const;
-	CC_show * GetShow();
+	const CalChartDoc * GetShow() const;
+	CalChartDoc * GetShow();
 	
 	wxChoice *mGridChoice;
 	wxChoice *mRefChoice;

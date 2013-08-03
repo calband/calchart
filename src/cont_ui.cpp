@@ -27,6 +27,8 @@
 #include "cc_continuity.h"
 #include "cc_command.h"
 #include "calchartapp.h"
+#include "calchartdoc.h"
+#include "cc_show.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -74,7 +76,7 @@ void ContinuityEditorView::OnDraw(wxDC *dc) {}
 void ContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 {
 	ContinuityEditor* editor = static_cast<ContinuityEditor*>(GetFrame());
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_FlushAllViews)))
+	if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_FlushAllViews)))
 	{
 		editor->FlushText();
 	}
@@ -86,22 +88,22 @@ void ContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 
 void ContinuityEditorView::DoSetContinuityIndex(unsigned cont)
 {
-	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityIndexCommand(*static_cast<CC_show*>(GetDocument()), cont), true);
+	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityIndexCommand(*static_cast<CalChartDoc*>(GetDocument()), cont), true);
 }
 
 void ContinuityEditorView::DoSetNthContinuity(const wxString& text, unsigned i)
 {
-	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityTextCommand(*static_cast<CC_show*>(GetDocument()), i, text), true);
+	GetDocument()->GetCommandProcessor()->Submit(new SetContinuityTextCommand(*static_cast<CalChartDoc*>(GetDocument()), i, text), true);
 }
 
 void ContinuityEditorView::DoNewContinuity(const wxString& cont)
 {
-	GetDocument()->GetCommandProcessor()->Submit(new AddContinuityCommand(*static_cast<CC_show*>(GetDocument()), cont), true);
+	GetDocument()->GetCommandProcessor()->Submit(new AddContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()), cont), true);
 }
 
 void ContinuityEditorView::DoDeleteContinuity(unsigned i)
 {
-	GetDocument()->GetCommandProcessor()->Submit(new RemoveContinuityCommand(*static_cast<CC_show*>(GetDocument()), i), true);
+	GetDocument()->GetCommandProcessor()->Submit(new RemoveContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()), i), true);
 }
 
 ContinuityEditor::ContinuityEditor()
@@ -109,7 +111,7 @@ ContinuityEditor::ContinuityEditor()
 	Init();
 }
 
-ContinuityEditor::ContinuityEditor(CC_show *show,
+ContinuityEditor::ContinuityEditor(CalChartDoc *show,
 		wxWindow *parent, wxWindowID id,
 		const wxString& caption,
 		const wxPoint& pos,
@@ -125,7 +127,7 @@ void ContinuityEditor::Init()
 {
 }
 
-bool ContinuityEditor::Create(CC_show *show,
+bool ContinuityEditor::Create(CalChartDoc *show,
 		wxWindow *parent, wxWindowID id,
 		const wxString& caption,
 		const wxPoint& pos,
@@ -135,7 +137,7 @@ bool ContinuityEditor::Create(CC_show *show,
 	if (!wxFrame::Create(parent, id, caption, pos, size, style))
 		return false;
 
-	mShow = show;
+	mDoc = show;
 	mCurrentContinuityChoice = 0;
 	mView = new ContinuityEditorView;
 	mView->SetDocument(show);
@@ -273,7 +275,7 @@ void ContinuityEditor::OnCmdNew(wxCommandEvent& event)
 // remove a continuity.  Don't allow the user to delete a continuity that has dots associated with it.
 void ContinuityEditor::OnCmdDelete(wxCommandEvent& event)
 {
-	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 	if (sht->ContinuityInUse(mCurrentContinuityChoice))
 	{
 		(void)wxMessageBox(wxT("This continuity is being used.\nSet these points to a different continuity first."), wxT("Delete continuity"));
@@ -294,7 +296,7 @@ void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 
 void ContinuityEditor::Update()
 {
-	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 
 	mContinuityChoices->Clear();
 	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
@@ -309,7 +311,7 @@ void ContinuityEditor::Update()
 
 void ContinuityEditor::UpdateContChoice()
 {
-	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 	if (mCurrentContinuityChoice >= sht->animcont.size() && sht->animcont.size() > 0)
 		mCurrentContinuityChoice = sht->animcont.size()-1;
 	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
@@ -327,7 +329,7 @@ void ContinuityEditor::UpdateText()
 {
 	mUserInput->Clear();
 	mUserInput->DiscardEdits();
-	CC_show::const_CC_sheet_iterator_t current_sheet = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
 	const CC_continuity& c = current_sheet->GetNthContinuity(mCurrentContinuityChoice);
 	if (!c.GetText().empty())
 	{
@@ -349,7 +351,7 @@ void ContinuityEditor::FlushText()
 	wxString conttext;
 
 	conttext = mUserInput->GetValue();
-	CC_show::const_CC_sheet_iterator_t current_sheet = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
 	const CC_continuity& cont = current_sheet->GetNthContinuity(mCurrentContinuityChoice);
 	if (conttext != cont.GetText())
 	{
@@ -369,15 +371,15 @@ void ContinuityEditor::SetCurrent(unsigned i)
 
 void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 {
-	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
-	mShow->SetSelection(sht->SelectPointsOfContinuity(c.GetNum()));
+	mDoc->SetSelection(sht->SelectPointsOfContinuity(c.GetNum()));
 }
 
 
 void ContinuityEditor::ContEditSet(wxCommandEvent&)
 {
-	CC_show::const_CC_sheet_iterator_t sht = mShow->GetCurrentSheet();
+	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 	const CC_continuity& c = sht->GetNthContinuity(mCurrentContinuityChoice);
 	mView->DoSetContinuityIndex(c.GetNum());
 }

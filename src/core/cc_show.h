@@ -36,66 +36,27 @@ class ShowMode;
 class ShowUndoList;
 class CC_show;
 class CC_lasso;
-
-// The CC_show_modified class is used for indicating to views if the show has been modified
-// some views behave differently if the show has been modified
-class CC_show_modified : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CC_show_modified)
-};
-
-// The CC_show_modified class is used for indicating to views to save any text
-class CC_show_FlushAllViews : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CC_show_FlushAllViews)
-};
-
-// The CC_show_FinishedLoading class is used for indicating to views that a new file has been loaded
-class CC_show_FinishedLoading : public wxObject
-{
-	DECLARE_DYNAMIC_CLASS(CC_show_FinishedLoading)
-};
-
-// The CC_show_setup class is used for indicating to views to set up a new show
-class CC_show_setup : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CC_show_setup)
-};
-
-
+class CalChartDoc;
+class wxFFileOutputStream;
 
 // CalChart Show
-class CC_show : public wxDocument
+class CC_show
 {
-	DECLARE_DYNAMIC_CLASS(CC_show)
+	friend CalChartDoc;
 public:
 	typedef std::vector<CC_sheet> CC_sheet_container_t;
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
 	CC_show();
-	virtual ~CC_show();
-
-	// Override the wxDocument functions:
-	// Need to override OnOpenDoc so we can report errors, handle recovery file
-	virtual bool OnOpenDocument(const wxString& filename);
-	// Need to override OnOpenDoc so we can report errors, handle recovery file
-	virtual bool OnCloseDocument();
-	// Need to override OnNewDoc so we can start the setup wizard
-	virtual bool OnNewDocument();
-	// Need to override OnSaveDoc so we can handle recovery files
-	virtual bool OnSaveDocument(const wxString& filename);
-	// Update the views that the doc been modified
-	virtual void Modify(bool b);
+	~CC_show();
 
 	// How we save and load a show:
-#if wxUSE_STD_IOSTREAM
-    virtual wxSTD ostream& SaveObject(wxSTD ostream& stream);
-    virtual wxSTD istream& LoadObject(wxSTD istream& stream);
-#else
-    virtual wxOutputStream& SaveObject(wxOutputStream& stream);
-    virtual wxInputStream& LoadObject(wxInputStream& stream);
-#endif
+    wxSTD ostream& SaveObject(wxSTD ostream& stream);
+    wxSTD istream& LoadObject(wxSTD istream& stream);
+    wxOutputStream& SaveObject(wxOutputStream& stream);
+    wxInputStream& LoadObject(wxInputStream& stream);
+    wxFFileOutputStream& SaveObject(wxFFileOutputStream& stream);
 private:
 	template <typename T>
 	T& LoadObjectGeneric(T& stream);
@@ -107,12 +68,11 @@ private:
 public:
 	wxString ImportContinuity(const wxString& file);
 
-	void FlushAllTextWindows();
-
 public:
 	const std::string& GetDescr() const;
 	void SetDescr(const std::string& newdescr);
 
+	void SetupNewShow();
 	inline unsigned short GetNumSheets() const { return sheets.size(); }
 
 	CC_sheet_iterator_t GetSheetBegin() { return sheets.begin(); }
@@ -142,7 +102,6 @@ public:
 
 	// how to select points:
 	// Always select or unselect in groups
-	typedef std::set<unsigned> SelectionList;
 	bool SelectAll();
 	bool UnselectAll();
 	void AddToSelection(const SelectionList& sl);
@@ -168,33 +127,6 @@ private:
 	std::vector<std::string> pt_labels;
 	SelectionList selectionList;	  // order of selections
 	unsigned mSheetNum;
-
-private:
-	// Autosaving:
-	// goal is to allow the user to have a recoverable file.
-	// 
-	// When the timer goes off, and if the show is modified,
-	// we will write the file to a version of the file that the same
-	// but with the extension .shw~, to indicate that there is a recovery
-	// file at that location.
-	// When a file is opened, we first check to see if there is a temporary 
-	// file, and if there is, prompt the user to see if they would like use
-	// that file instead.
-	// When we save a file, the recovery file should be removed to prevent
-	// a false detection that the file writing failed.
-	static wxString TranslateNameToAutosaveName(const wxString& name);
-	void Autosave();
-	
-	class AutoSaveTimer: public wxTimer
-	{
-	public:
-		AutoSaveTimer(CC_show& show) : mShow(show) {}
-		void Notify();
-	private:
-		CC_show& mShow;
-	};
-
-	AutoSaveTimer mTimer;
 };
 
 #endif // _CC_SHOW_H_

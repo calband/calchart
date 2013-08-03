@@ -453,7 +453,7 @@ AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
 		{
 			mOmniViewCanvas->OnCmd_FollowMarcher(std::distance(labels.begin(), which));
 		}
-		CC_show::SelectionList sl;
+		SelectionList sl;
 		sl.insert(std::distance(labels.begin(), which));
 		mAnimationView->SetSelection(sl);
 	}

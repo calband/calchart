@@ -27,6 +27,7 @@
 #include "confgr.h"
 #include "cc_shapes.h"
 #include "calchartapp.h"
+#include "calchartdoc.h"
 #include "top_frame.h"
 
 #include <wx/dcbuffer.h>
@@ -122,7 +123,7 @@ void
 AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 {
     wxView::OnUpdate(sender, hint);
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_modified)))
+	if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified)))
 	{
 		if (mAnimation)
 		{
@@ -130,7 +131,7 @@ AnimationView::OnUpdate(wxView *sender, wxObject *hint)
 			RefreshFrame();
 		}
 	}
-	if (hint && hint->IsKindOf(CLASSINFO(CC_show_FinishedLoading)))
+	if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_FinishedLoading)))
 	{
 		Generate();
 	}
@@ -161,7 +162,7 @@ AnimationView::SelectCollisions()
 {
 	if (mAnimation)
 	{
-		CC_show::SelectionList select;
+		SelectionList select;
 		for (unsigned i = 0; i < GetShow()->GetNumPoints(); i++)
 		{
 			auto info = mAnimation->GetAnimateInfo(i);
@@ -191,7 +192,7 @@ AnimationView::Generate()
 	// (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
 	NotifyStatus notifyStatus = boost::bind(&AnimationView::OnNotifyStatus, this, _1);
 	NotifyErrorList notifyErrorList = boost::bind(&AnimationView::OnNotifyErrorList, this, _1, _2, _3);
-	mAnimation.reset(new Animation(*GetShow(), notifyStatus, notifyErrorList));
+	mAnimation = GetShow()->NewAnimation(notifyStatus, notifyErrorList);
 	if (mAnimation && (mAnimation->GetNumberSheets() == 0))
 	{
 		mAnimation.reset();
@@ -292,7 +293,7 @@ AnimationView::GotoSheet(unsigned i)
 
 
 void
-AnimationView::SetSelection(const CC_show::SelectionList& sl)
+AnimationView::SetSelection(const SelectionList& sl)
 {
 	GetShow()->SetSelection(sl);
 }
@@ -370,7 +371,7 @@ AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
 	lasso.Append(CC_coord(mouseXEnd-x_off, mouseYEnd-y_off));
 	lasso.Append(CC_coord(mouseXEnd-x_off, mouseYStart-y_off));
 	lasso.End();
-	CC_show::SelectionList pointlist;
+	SelectionList pointlist;
 	for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
 	{
 		CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
@@ -408,7 +409,7 @@ AnimationView::OnBeat() const
 CC_continuity
 AnimationView::GetContinuityOnSheet(unsigned whichSheet, unsigned whichContinuity) const
 {
-	CC_show::const_CC_sheet_iterator_t current_sheet = GetShow()->GetNthSheet(whichSheet);
+	auto current_sheet = GetShow()->GetNthSheet(whichSheet);
 	return current_sheet->GetNthContinuity(whichContinuity);
 }
 
@@ -447,16 +448,16 @@ AnimationView::GetAnimationFrame() const
 }
 
 
-CC_show*
+CalChartDoc*
 AnimationView::GetShow()
 {
-	return static_cast<CC_show*>(GetDocument());
+	return static_cast<CalChartDoc*>(GetDocument());
 }
 
 
-const CC_show*
+const CalChartDoc*
 AnimationView::GetShow() const
 {
-	return static_cast<const CC_show*>(GetDocument());
+	return static_cast<const CalChartDoc*>(GetDocument());
 }
 

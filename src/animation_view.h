@@ -24,6 +24,7 @@
 #define _ANIMATION_VIEW_H_
 
 #include "animate.h"
+#include "calchartdoc.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -56,7 +57,7 @@ public:
 	bool PrevSheet();
 	bool NextSheet();
 	void GotoSheet(unsigned i);
-	void SetSelection(const CC_show::SelectionList& sl);
+	void SetSelection(const SelectionList& sl);
 
 	// info
 	int GetNumberSheets() const;
@@ -78,8 +79,8 @@ public:
 
 	const ShowMode& GetShowMode() const;
 
-	const CC_show *GetShow() const;
-	CC_show *GetShow();
+	const CalChartDoc *GetShow() const;
+	CalChartDoc *GetShow();
 
 	boost::shared_ptr<Animation> GetAnimation();
 

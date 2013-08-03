@@ -82,7 +82,7 @@ int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
 std::set<unsigned>
 CC_sheet::SelectPointsOfContinuity(unsigned i) const
 {
-	CC_show::SelectionList select;
+	std::set<unsigned> select;
 	for (size_t j = 0; j < pts.size(); j++)
 	{
 		if (pts.at(j).GetContinuityIndex() == i)

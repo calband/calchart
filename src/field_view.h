@@ -23,7 +23,7 @@
 #ifndef _FIELD_UI_H_
 #define _FIELD_UI_H_
 
-#include "CC_show.h"
+#include "calchartdoc.h"
 #include "CC_coord.h"
 
 #include <wx/docview.h>
@@ -48,7 +48,7 @@ public:
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
     bool OnClose(bool deleteWindow = true);
 
-	void OnWizardSetup(CC_show& show);
+	void OnWizardSetup(CalChartDoc& show);
 
 	///// Modify the show /////
 	bool DoTranslatePoints(const CC_coord& pos);
@@ -63,7 +63,7 @@ public:
 	bool DoSetSheetBeats(unsigned short beats);
 	bool DoSetPointsLabel(bool right);
 	bool DoSetPointsLabelFlip();
-	bool DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where);
+	bool DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, unsigned where);
 	bool DoDeleteSheet(unsigned where);
 
 	///// query show attributes /////
@@ -84,8 +84,8 @@ public:
 
 	///// Select /////
 	void UnselectAll() { mShow->UnselectAll(); }
-	void AddToSelection(const CC_show::SelectionList& sl);
-	void ToggleSelection(const CC_show::SelectionList& sl);
+	void AddToSelection(const SelectionList& sl);
+	void ToggleSelection(const SelectionList& sl);
 	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
 
@@ -106,7 +106,7 @@ private:
 	bool mDrawPaths;
 	
 private:
-	CC_show* mShow;
+	CalChartDoc* mShow;
 	unsigned mCurrentReferencePoint;
 
     DECLARE_DYNAMIC_CLASS(FieldView)

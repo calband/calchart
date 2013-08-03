@@ -27,7 +27,7 @@
 #include <wx/dialog.h>
 #include <set>
 
-class CC_show;
+class CalChartDoc;
 
 class PrintPostScriptDialog : public wxDialog
 {
@@ -36,7 +36,7 @@ class PrintPostScriptDialog : public wxDialog
 
 	public:
 	PrintPostScriptDialog( );
-	PrintPostScriptDialog(const CC_show *show, bool printEPS,
+	PrintPostScriptDialog(const CalChartDoc *doc, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -44,7 +44,7 @@ class PrintPostScriptDialog : public wxDialog
 
 	void Init();
 
-	bool Create(const CC_show *show, bool printEPS,
+	bool Create(const CalChartDoc *show, bool printEPS,
 		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
 		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
@@ -63,7 +63,7 @@ class PrintPostScriptDialog : public wxDialog
 	void PrintShow();
 
 private:
-	const CC_show *mShow;
+	const CalChartDoc* mShow;
 	bool eps;
 	wxTextCtrl *text_cmd;
 #ifdef PRINT__RUN_CMD

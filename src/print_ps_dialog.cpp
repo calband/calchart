@@ -194,7 +194,7 @@ PrintPostScriptDialog::PrintPostScriptDialog()
 }
 
 
-PrintPostScriptDialog::PrintPostScriptDialog(const CC_show *show, bool printEPS,
+PrintPostScriptDialog::PrintPostScriptDialog(const CalChartDoc *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 											 long style) :
@@ -216,7 +216,7 @@ void PrintPostScriptDialog::Init()
 }
 
 
-bool PrintPostScriptDialog::Create(const CC_show *show, bool printEPS,
+bool PrintPostScriptDialog::Create(const CalChartDoc *show, bool printEPS,
 wxFrame *parent, wxWindowID id, const wxString& caption,
 const wxPoint& pos, const wxSize& size,
 long style)

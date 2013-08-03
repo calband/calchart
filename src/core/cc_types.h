@@ -24,6 +24,7 @@
 #define _CC_TYPES_H_
 
 #include <stdint.h>
+#include <set>
 
 typedef int16_t Coord;
 
@@ -50,6 +51,8 @@ enum CC_MOVE_MODES
 	CC_MOVE_SHEAR, CC_MOVE_REFL, CC_MOVE_SIZE,
 	CC_MOVE_GENIUS
 };
+
+typedef std::set<unsigned> SelectionList;
 
 
 #endif

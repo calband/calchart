@@ -30,13 +30,14 @@
 
 class CC_sheet;
 class CC_show;
+class CalChartDoc;
 struct CC_textline;
 
 // intented to print a show to a buffer.
 class PrintShowToPS
 {
 public:
-	PrintShowToPS(const CC_show&, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet);
+	PrintShowToPS(const CalChartDoc&, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet);
 
 	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked);
 
@@ -49,7 +50,7 @@ private:
 	void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize);
 	void print_start_page(std::ostream& buffer, bool landscape);
 
-	const CC_show& mShow;
+	const CalChartDoc& mShow;
 	bool mPrintLandscape;
 	bool mPrintDoCont;
 	bool mPrintDoContSheet;

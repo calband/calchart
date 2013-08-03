@@ -25,6 +25,7 @@
 #include "confgr.h"
 #include "modes.h"
 #include "cc_show.h"
+#include "calchartdoc.h"
 #include "cc_sheet.h"
 
 #include "prolog0.h"
@@ -70,7 +71,7 @@ static const char *fontnames[] =
 
 static const size_t kBufferSize = 256;
 
-PrintShowToPS::PrintShowToPS(const CC_show& show, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet) :
+PrintShowToPS::PrintShowToPS(const CalChartDoc& show, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet) :
 mShow(show),
 mPrintLandscape(print_landscape),
 mPrintDoCont(print_do_cont),
