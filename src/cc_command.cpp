@@ -69,12 +69,12 @@ SetDescriptionCommand::~SetDescriptionCommand()
 
 void SetDescriptionCommand::DoAction()
 {
-	mShow.SetDescr(mDescription.second);
+	mShow.SetDescr(mDescription.second.ToStdString());
 }
 
 void SetDescriptionCommand::UndoAction()
 {
-	mShow.SetDescr(mDescription.first);
+	mShow.SetDescr(mDescription.first.ToStdString());
 }
 
 

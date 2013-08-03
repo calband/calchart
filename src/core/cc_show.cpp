@@ -523,7 +523,7 @@ T& CC_show::SaveObjectInternal(T& stream)
 // Description
 	if (!GetDescr().empty())
 	{
-		WriteChunkStr(stream, INGL_DESC, GetDescr().utf8_str());
+		WriteChunkStr(stream, INGL_DESC, GetDescr().c_str());
 	}
 
 // Handle sheets
@@ -678,8 +678,8 @@ T& CC_show::LoadObjectGeneric(T& stream)
 	if (INGL_DESC == name)
 	{
 		FillData(stream, data);
-		wxString s(wxString::FromUTF8((const char*)&data[0]));
-		SetDescr(s);
+		auto str = (const char*)&data[0];
+		SetDescr(std::string(str, strlen(str)));
 		// peek for the next name
 		ReadLong(stream, name);
 	}
@@ -864,9 +864,15 @@ void CC_show::FlushAllTextWindows()
 }
 
 
-const wxString& CC_show::GetDescr() const
+const std::string& CC_show::GetDescr() const
 {
 	return descr;
+}
+
+
+void CC_show::SetDescr(const std::string& newdescr)
+{
+	descr = newdescr;
 }
 
 
@@ -906,11 +912,6 @@ void CC_show::Autosave()
 			wxMessageBox(wxT("Error creating recovery file.  Take heed, save often!"), wxT("Recovery Error"));
 		}
 	}
-}
-
-void CC_show::SetDescr(const wxString& newdescr)
-{
-	descr = newdescr;
 }
 
 
@@ -1145,8 +1146,4 @@ void UnitTests()
 }
 
 
-void CC_show::DrawShow(wxDC& dc, unsigned ref, bool primary)
-{
-	::Draw(dc, *this, *GetCurrentSheet(), ref, primary);
-}
 

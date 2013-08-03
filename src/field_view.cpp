@@ -85,12 +85,12 @@ FieldView::OnDraw(wxDC *dc)
 		{
 			if (mCurrentReferencePoint > 0)
 			{
-				mShow->DrawShow(*dc, 0, false);
-				mShow->DrawShow(*dc, mCurrentReferencePoint, true);
+				Draw(*dc, *mShow, *mShow->GetCurrentSheet(), 0, false);
+				Draw(*dc, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			else
 			{
-				mShow->DrawShow(*dc, mCurrentReferencePoint, true);
+				Draw(*dc, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			DrawPaths(*dc, *sheet);
 		}
@@ -178,7 +178,7 @@ FieldView::OnWizardSetup(CC_show& show)
 		{
 			show.SetMode(newmode);
 		}
-		show.SetDescr(page3->GetValue());
+		show.SetDescr(page3->GetValue().ToStdString());
 	}
 	else
 	{

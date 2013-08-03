@@ -37,7 +37,7 @@ AnimateDir AnimGetDirFromAngle(float ang);
 
 class AnimateCommand;
 class AnimateSheet;
-class AnimateDraw;
+struct AnimateDraw;
 
 struct ErrorMarker
 {

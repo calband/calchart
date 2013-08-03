@@ -105,15 +105,13 @@ private:
 	T& SaveObjectInternal(T& stream);
 
 public:
-	void DrawShow(wxDC& dc, unsigned ref, bool primary);
-
 	wxString ImportContinuity(const wxString& file);
 
 	void FlushAllTextWindows();
 
 public:
-	const wxString& GetDescr() const;
-	void SetDescr(const wxString& newdescr);
+	const std::string& GetDescr() const;
+	void SetDescr(const std::string& newdescr);
 
 	inline unsigned short GetNumSheets() const { return sheets.size(); }
 
@@ -158,15 +156,13 @@ public:
 	const ShowMode& GetMode() const { return *mode; };
 	void SetMode(ShowMode* m) { mode = m; };
 
-	void AllViewGoToCont(unsigned contnum, int line, int col);
 private:
 	ShowMode *mode;
 
 private:
-	
 	bool mOkay; // error for when we are loading shows
 
-	wxString descr;
+	std::string descr;
 	unsigned short numpoints;
 	CC_sheet_container_t sheets;
 	std::vector<std::string> pt_labels;

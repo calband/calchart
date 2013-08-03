@@ -53,7 +53,6 @@
 		C70C7AB5156ABC8800E14F1B /* wall.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
 		C70C7AB8156ABC8800E14F1B /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
 		C70C7AB9156ABC8800E14F1B /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA973117A6DBA00CC53E2 /* confgr.cpp */; };
-		C70C7ABA156ABC8800E14F1B /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA975117A6DBA00CC53E2 /* cont.cpp */; };
 		C70C7ABB156ABC8800E14F1B /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */; };
 		C70C7ABC156ABC8800E14F1B /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
 		C70C7ABD156ABC8800E14F1B /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA981117A6DBA00CC53E2 /* modes.cpp */; };
@@ -300,7 +299,6 @@
 		C7AD22C815571CBB00AC1301 /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AD22C615571CBB00AC1301 /* print_ps.cpp */; };
 		C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
 		C7AFA992117A6DBA00CC53E2 /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA973117A6DBA00CC53E2 /* confgr.cpp */; };
-		C7AFA993117A6DBA00CC53E2 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA975117A6DBA00CC53E2 /* cont.cpp */; };
 		C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */; };
 		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
 		C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA981117A6DBA00CC53E2 /* modes.cpp */; };
@@ -405,6 +403,8 @@
 		E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
 		E813C4AF17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
+		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
+		E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
 		E884F39117A5E60C00831301 /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
 		E884F39217A5E60C00831301 /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
@@ -786,8 +786,6 @@
 		C7AFA970117A6DBA00CC53E2 /* ccvers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccvers.h; sourceTree = "<group>"; };
 		C7AFA973117A6DBA00CC53E2 /* confgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = confgr.cpp; sourceTree = "<group>"; };
 		C7AFA974117A6DBA00CC53E2 /* confgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = confgr.h; sourceTree = "<group>"; };
-		C7AFA975117A6DBA00CC53E2 /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
-		C7AFA976117A6DBA00CC53E2 /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
 		C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont_ui.cpp; sourceTree = "<group>"; };
 		C7AFA978117A6DBA00CC53E2 /* cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont_ui.h; sourceTree = "<group>"; };
 		C7AFA979117A6DBA00CC53E2 /* contgram.y */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; path = contgram.y; sourceTree = "<group>"; };
@@ -909,6 +907,8 @@
 		E813C4A917A7886100705836 /* animatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecommand.h; sourceTree = "<group>"; };
 		E813C4AA17A7886200705836 /* animatecompile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecompile.cpp; sourceTree = "<group>"; };
 		E813C4AB17A7886200705836 /* animatecompile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecompile.h; sourceTree = "<group>"; };
+		E878CC9A17ACA6AC009B1F1C /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
+		E878CC9B17ACA6AC009B1F1C /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
 		E884F38817A5E60C00831301 /* cc_coord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_coord.cpp; sourceTree = "<group>"; };
 		E884F38917A5E60C00831301 /* cc_coord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_coord.h; sourceTree = "<group>"; };
 		E884F38A17A5E60C00831301 /* cc_point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_point.cpp; sourceTree = "<group>"; };
@@ -1104,8 +1104,6 @@
 				C75A5FBA1180072C0047B87D /* cc_shapes.h */,
 				C7AFA973117A6DBA00CC53E2 /* confgr.cpp */,
 				C7AFA974117A6DBA00CC53E2 /* confgr.h */,
-				C7AFA975117A6DBA00CC53E2 /* cont.cpp */,
-				C7AFA976117A6DBA00CC53E2 /* cont.h */,
 				C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */,
 				C7AFA978117A6DBA00CC53E2 /* cont_ui.h */,
 				C7AFA979117A6DBA00CC53E2 /* contgram.y */,
@@ -1265,6 +1263,8 @@
 				E884F38F17A5E60C00831301 /* cc_show.h */,
 				E884F39817A5EFD400831301 /* cc_text.h */,
 				E884F39B17A5F09100831301 /* cc_types.h */,
+				E878CC9A17ACA6AC009B1F1C /* cont.cpp */,
+				E878CC9B17ACA6AC009B1F1C /* cont.h */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -1448,7 +1448,6 @@
 			files = (
 				C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */,
 				C7AFA992117A6DBA00CC53E2 /* confgr.cpp in Sources */,
-				C7AFA993117A6DBA00CC53E2 /* cont.cpp in Sources */,
 				C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */,
 				C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */,
 				C7AFA99A117A6DBA00CC53E2 /* modes.cpp in Sources */,
@@ -1481,6 +1480,7 @@
 				E884F3A017A631AD00831301 /* animate.cpp in Sources */,
 				E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */,
 				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
+				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1490,7 +1490,6 @@
 			files = (
 				C70C7AB8156ABC8800E14F1B /* basic_ui.cpp in Sources */,
 				C70C7AB9156ABC8800E14F1B /* confgr.cpp in Sources */,
-				C70C7ABA156ABC8800E14F1B /* cont.cpp in Sources */,
 				C70C7ABB156ABC8800E14F1B /* cont_ui.cpp in Sources */,
 				C70C7ABC156ABC8800E14F1B /* draw.cpp in Sources */,
 				C70C7ABD156ABC8800E14F1B /* modes.cpp in Sources */,
@@ -1521,6 +1520,7 @@
 				E884F3A117A631AE00831301 /* animate.cpp in Sources */,
 				E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */,
 				E813C4AF17A7886200705836 /* animatecompile.cpp in Sources */,
+				E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

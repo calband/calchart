@@ -32,7 +32,7 @@ class CC_show;
 class CC_sheet;
 class CC_point;
 class CC_coord;
-class AnimateDraw;
+struct AnimateDraw;
 
 // draw the continuity starting at a specific offset
 void Draw(wxDC& dc, const CC_show& show, const CC_sheet& sheet, unsigned ref, bool primary);
