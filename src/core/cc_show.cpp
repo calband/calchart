@@ -177,274 +177,280 @@ std::string CC_show::ImportContinuity(const std::vector<std::string>& lines)
 	std::string lineotext;
 	char c;
 
-
-		int curr_sheet = -1;
-		currfontnum = lastfontnum = PSFONT_NORM;
-		for (auto line = lines.begin(); line != lines.end(); ++line)
+	// check to make sure the first line starts with %%
+	if (!lines.empty())
+	{
+		if ((lines.at(0).length() < 2) || !((lines.at(0).at(0) == '%') && (lines.at(0).at(1) == '%')))
 		{
-			bool sheetmark = false;
-			CC_textline* line_text = NULL;
-			if (line->length() >= 2)
-			{
-				if ((line->at(0) == '%') && (line->at(1) == '%'))
-				{
-					sheetmark = true;
-				}
-			}
-			if (sheetmark)
-			{
-				if (curr_sheet != -1) ++curr_sheet;
-				else curr_sheet = 0;
-				if (curr_sheet == GetNumSheets()) break;
-				if (line->length() > 2)
-				{
-					GetNthSheet(curr_sheet)->SetNumber(std::string(*line, 2));
-				}
-			}
-			else
-			{
-				if (curr_sheet == -1)
-				{
-// Continuity doesn't begin with a sheet header
-					return k_contnohead_str;
-				}
-				on_main = true;
-				on_sheet = true;
-				pos = 0;
-				if (pos < line->length())
-				{
-					if (line->at(pos) == '<')
-					{
-						on_sheet = false;
-						pos++;
-					}
-					else
-					{
-						if (line->at(pos) == '>')
-						{
-							on_main = false;
-							pos++;
-						}
-					}
-				}
-				center = false;
-				if (pos < line->length())
-				{
-					if (line->at(pos) == '~')
-					{
-						center = true;
-						pos++;
-					}
-				}
-				parsemode = CONT_PARSE_NORMAL;
-				do
-				{
-					font_changed = false;
-					lineotext = "";
-					while ((pos < line->length()) && !font_changed)
-					{
-						switch (parsemode)
-						{
-							case CONT_PARSE_NORMAL:
-								c = line->at(pos++);
-								switch (c)
-								{
-									case '\\':
-										parsemode = CONT_PARSE_BS;
-										break;
-									case '\t':
-										parsemode = CONT_PARSE_TAB;
-										font_changed = true;
-										break;
-									default:
-										lineotext.push_back(c);
-										break;
-								}
-								break;
-							case CONT_PARSE_TAB:
-								parsemode = CONT_PARSE_NORMAL;
-								currfontnum = PSFONT_TAB;
-								font_changed = true;
-								break;
-							case CONT_PARSE_BS:
-								c = tolower(line->at(pos++));
-								switch (c)
-								{
-									case 'p':
-										parsemode = CONT_PARSE_PLAIN;
-										font_changed = true;
-										break;
-									case 's':
-										parsemode = CONT_PARSE_SOLID;
-										font_changed = true;
-										break;
-									case 'b':
-										parsemode = CONT_PARSE_BOLD;
-										break;
-									case 'i':
-										parsemode = CONT_PARSE_ITALIC;
-										break;
-									default:
-										parsemode = CONT_PARSE_NORMAL;
-										lineotext.push_back(c);
-										break;
-								}
-								break;
-							case CONT_PARSE_PLAIN:
-								parsemode = CONT_PARSE_NORMAL;
-								font_changed = true;
-								currfontnum = PSFONT_SYMBOL;
-								c = tolower(line->at(pos++));
-								switch (c)
-								{
-									case 'o':
-										lineotext.push_back('A');
-										break;
-									case 'b':
-										lineotext.push_back('C');
-										break;
-									case 's':
-										lineotext.push_back('D');
-										break;
-									case 'x':
-										lineotext.push_back('E');
-										break;
-									default:
-// code not recognized
-										return k_badcont_str;
-								}
-								break;
-							case CONT_PARSE_SOLID:
-								parsemode = CONT_PARSE_NORMAL;
-								font_changed = true;
-								currfontnum = PSFONT_SYMBOL;
-								c = tolower(line->at(pos++));
-								switch (c)
-								{
-									case 'o':
-										lineotext.push_back('B');
-										break;
-									case 'b':
-										lineotext.push_back('F');
-										break;
-									case 's':
-										lineotext.push_back('G');
-										break;
-									case 'x':
-										lineotext.push_back('H');
-										break;
-									default:
-// code not recognized
-										return k_badcont_str;
-								}
-								break;
-							case CONT_PARSE_BOLD:
-								parsemode = CONT_PARSE_NORMAL;
-								c = tolower(line->at(pos++));
-								switch (c)
-								{
-									case 's':
-										switch (currfontnum)
-										{
-											case PSFONT_NORM:
-												lastfontnum = PSFONT_BOLD;
-												font_changed = true;
-												break;
-											case PSFONT_ITAL:
-												lastfontnum = PSFONT_BOLDITAL;
-												font_changed = true;
-												break;
-											default:
-												break;
-										}
-										break;
-									case 'e':
-										switch (currfontnum)
-										{
-											case PSFONT_BOLD:
-												lastfontnum = PSFONT_NORM;
-												font_changed = true;
-												break;
-											case PSFONT_BOLDITAL:
-												lastfontnum = PSFONT_ITAL;
-												font_changed = true;
-												break;
-											default:
-												break;
-										}
-										break;
-									default:
-// code not recognized
-										return k_badcont_str;
-								}
-								break;
-							case CONT_PARSE_ITALIC:
-								parsemode = CONT_PARSE_NORMAL;
-								c = tolower(line->at(pos++));
-								switch (c)
-								{
-									case 's':
-										switch (currfontnum)
-										{
-											case PSFONT_NORM:
-												lastfontnum = PSFONT_ITAL;
-												font_changed = true;
-												break;
-											case PSFONT_BOLD:
-												lastfontnum = PSFONT_BOLDITAL;
-												font_changed = true;
-												break;
-											default:
-												break;
-										}
-										break;
-									case 'e':
-										switch (currfontnum)
-										{
-											case PSFONT_ITAL:
-												lastfontnum = PSFONT_NORM;
-												font_changed = true;
-												break;
-											case PSFONT_BOLDITAL:
-												lastfontnum = PSFONT_BOLD;
-												font_changed = true;
-												break;
-											default:
-												break;
-										}
-										break;
-									default:
-// code not recognized
-										return k_badcont_str;
-								}
-								break;
-						}
-					}
-// Add any remaining text
-// Empty text only okay if line is blank
-					if ((!lineotext.empty()) ||
-						(currfontnum == PSFONT_TAB) ||
-// Empty line
-						((pos >= line->length()) && (line_text == NULL)))
-					{
-						CC_textchunk new_text;
-						if (line_text == NULL)
-						{
-							GetNthSheet(curr_sheet)->continuity.push_back(CC_textline());
-							line_text = &(GetNthSheet(curr_sheet)->continuity.back());
-							line_text->on_main = on_main;
-							line_text->on_sheet = on_sheet;
-							line_text->center = center;
-						}
-						new_text.font = currfontnum;
-						new_text.text = lineotext;
-						line_text->chunks.push_back(new_text);
-					}
-// restore to previous font (used for symbols and tabs)
-					currfontnum = lastfontnum;
-				} while (pos < line->length());
-			}
+			// Continuity doesn't begin with a sheet header
+			return k_contnohead_str;
 		}
+	}
+
+	typedef std::vector<std::string> sheet_lines_t;
+	
+	// first, split the lines into groups for each page
+	std::vector<sheet_lines_t> lines_data;
+	for (auto line = lines.begin(); line != lines.end(); ++line)
+	{
+		if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%'))
+		{
+			lines_data.push_back(sheet_lines_t());
+		}
+		lines_data.back().push_back(*line);
+	}
+	
+	currfontnum = lastfontnum = PSFONT_NORM;
+
+	auto line_data = lines_data.begin();
+	auto curr_sheet = GetSheetBegin();
+	for (; line_data != lines_data.end() && curr_sheet != GetSheetEnd(); ++line_data, ++curr_sheet)
+	{
+		for (auto line = line_data->begin(); line != line_data->end(); ++line)
+		{
+			if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%'))
+			{
+				curr_sheet->SetNumber(std::string(*line, 2));
+				continue;
+			}
+			CC_textline* line_text = NULL;
+			on_main = true;
+			on_sheet = true;
+			pos = 0;
+			if (pos < line->length())
+			{
+				if (line->at(pos) == '<')
+				{
+					on_sheet = false;
+					pos++;
+				}
+				else
+				{
+					if (line->at(pos) == '>')
+					{
+						on_main = false;
+						pos++;
+					}
+				}
+			}
+			center = false;
+			if (pos < line->length())
+			{
+				if (line->at(pos) == '~')
+				{
+					center = true;
+					pos++;
+				}
+			}
+			parsemode = CONT_PARSE_NORMAL;
+			do
+			{
+				font_changed = false;
+				lineotext = "";
+				while ((pos < line->length()) && !font_changed)
+				{
+					switch (parsemode)
+					{
+						case CONT_PARSE_NORMAL:
+							c = line->at(pos++);
+							switch (c)
+							{
+								case '\\':
+									parsemode = CONT_PARSE_BS;
+									break;
+								case '\t':
+									parsemode = CONT_PARSE_TAB;
+									font_changed = true;
+									break;
+								default:
+									lineotext.push_back(c);
+									break;
+							}
+							break;
+						case CONT_PARSE_TAB:
+							parsemode = CONT_PARSE_NORMAL;
+							currfontnum = PSFONT_TAB;
+							font_changed = true;
+							break;
+						case CONT_PARSE_BS:
+							c = tolower(line->at(pos++));
+							switch (c)
+							{
+								case 'p':
+									parsemode = CONT_PARSE_PLAIN;
+									font_changed = true;
+									break;
+								case 's':
+									parsemode = CONT_PARSE_SOLID;
+									font_changed = true;
+									break;
+								case 'b':
+									parsemode = CONT_PARSE_BOLD;
+									break;
+								case 'i':
+									parsemode = CONT_PARSE_ITALIC;
+									break;
+								default:
+									parsemode = CONT_PARSE_NORMAL;
+									lineotext.push_back(c);
+									break;
+							}
+							break;
+						case CONT_PARSE_PLAIN:
+							parsemode = CONT_PARSE_NORMAL;
+							font_changed = true;
+							currfontnum = PSFONT_SYMBOL;
+							c = tolower(line->at(pos++));
+							switch (c)
+							{
+								case 'o':
+									lineotext.push_back('A');
+									break;
+								case 'b':
+									lineotext.push_back('C');
+									break;
+								case 's':
+									lineotext.push_back('D');
+									break;
+								case 'x':
+									lineotext.push_back('E');
+									break;
+								default:
+	// code not recognized
+									return k_badcont_str;
+							}
+							break;
+						case CONT_PARSE_SOLID:
+							parsemode = CONT_PARSE_NORMAL;
+							font_changed = true;
+							currfontnum = PSFONT_SYMBOL;
+							c = tolower(line->at(pos++));
+							switch (c)
+							{
+								case 'o':
+									lineotext.push_back('B');
+									break;
+								case 'b':
+									lineotext.push_back('F');
+									break;
+								case 's':
+									lineotext.push_back('G');
+									break;
+								case 'x':
+									lineotext.push_back('H');
+									break;
+								default:
+	// code not recognized
+									return k_badcont_str;
+							}
+							break;
+						case CONT_PARSE_BOLD:
+							parsemode = CONT_PARSE_NORMAL;
+							c = tolower(line->at(pos++));
+							switch (c)
+							{
+								case 's':
+									switch (currfontnum)
+									{
+										case PSFONT_NORM:
+											lastfontnum = PSFONT_BOLD;
+											font_changed = true;
+											break;
+										case PSFONT_ITAL:
+											lastfontnum = PSFONT_BOLDITAL;
+											font_changed = true;
+											break;
+										default:
+											break;
+									}
+									break;
+								case 'e':
+									switch (currfontnum)
+									{
+										case PSFONT_BOLD:
+											lastfontnum = PSFONT_NORM;
+											font_changed = true;
+											break;
+										case PSFONT_BOLDITAL:
+											lastfontnum = PSFONT_ITAL;
+											font_changed = true;
+											break;
+										default:
+											break;
+									}
+									break;
+								default:
+	// code not recognized
+									return k_badcont_str;
+							}
+							break;
+						case CONT_PARSE_ITALIC:
+							parsemode = CONT_PARSE_NORMAL;
+							c = tolower(line->at(pos++));
+							switch (c)
+							{
+								case 's':
+									switch (currfontnum)
+									{
+										case PSFONT_NORM:
+											lastfontnum = PSFONT_ITAL;
+											font_changed = true;
+											break;
+										case PSFONT_BOLD:
+											lastfontnum = PSFONT_BOLDITAL;
+											font_changed = true;
+											break;
+										default:
+											break;
+									}
+									break;
+								case 'e':
+									switch (currfontnum)
+									{
+										case PSFONT_ITAL:
+											lastfontnum = PSFONT_NORM;
+											font_changed = true;
+											break;
+										case PSFONT_BOLDITAL:
+											lastfontnum = PSFONT_BOLD;
+											font_changed = true;
+											break;
+										default:
+											break;
+									}
+									break;
+								default:
+	// code not recognized
+									return k_badcont_str;
+							}
+							break;
+					}
+				}
+	// Add any remaining text
+	// Empty text only okay if line is blank
+				if ((!lineotext.empty()) ||
+					(currfontnum == PSFONT_TAB) ||
+	// Empty line
+					((pos >= line->length()) && (line_text == NULL)))
+				{
+					CC_textchunk new_text;
+					if (line_text == NULL)
+					{
+						curr_sheet->continuity.push_back(CC_textline());
+						line_text = &(curr_sheet->continuity.back());
+						line_text->on_main = on_main;
+						line_text->on_sheet = on_sheet;
+						line_text->center = center;
+					}
+					new_text.font = currfontnum;
+					new_text.text = lineotext;
+					line_text->chunks.push_back(new_text);
+				}
+	// restore to previous font (used for symbols and tabs)
+				currfontnum = lastfontnum;
+			} while (pos < line->length());
+		}
+	}
 	return "";
 }
 
