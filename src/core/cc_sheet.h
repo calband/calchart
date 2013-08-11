@@ -95,6 +95,9 @@ public:
 	void SetAllPositions(const CC_coord& val, unsigned i);
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 
+	// continuity that gets printed
+	bool ImportContinuity(const std::vector<std::string>& lines);
+	
 	CC_textline_list continuity;
 	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer animcont;
