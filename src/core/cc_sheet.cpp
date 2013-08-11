@@ -598,60 +598,50 @@ enum CONT_PARSE_MODE
 bool
 CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 {
-	unsigned pos;
-	bool on_sheet, on_main, center, font_changed;
+	bool font_changed;
 	enum CONT_PARSE_MODE parsemode;
 	enum PSFONT_TYPE currfontnum, lastfontnum;
-	std::string lineotext;
 	char c;
 	currfontnum = lastfontnum = PSFONT_NORM;
-	for (auto line = line_data.begin(); line != line_data.end(); ++line)
+	for (auto line_iter = line_data.begin(); line_iter != line_data.end(); ++line_iter)
 	{
-		if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%'))
+		if ((line_iter->length() >= 2) && (line_iter->at(0) == '%') && (line_iter->at(1) == '%'))
 		{
-			SetNumber(std::string(*line, 2));
+			SetNumber(std::string(*line_iter, 2));
 			continue;
 		}
-		CC_textline* line_text = NULL;
-		on_main = true;
-		on_sheet = true;
-		pos = 0;
-		if (pos < line->length())
+		// make a copy of the line
+		std::string line = *line_iter;
+		CC_textline line_text;
+		if (!line.empty() && line.at(0) == '<')
 		{
-			if (line->at(pos) == '<')
-			{
-				on_sheet = false;
-				pos++;
-			}
-			else
-			{
-				if (line->at(pos) == '>')
-				{
-					on_main = false;
-					pos++;
-				}
-			}
+			line_text.on_sheet = false;
+			line.erase(0, 1);
 		}
-		center = false;
-		if (pos < line->length())
+		if (!line.empty() && line.at(0) == '>')
 		{
-			if (line->at(pos) == '~')
-			{
-				center = true;
-				pos++;
-			}
+			line_text.on_main = false;
+			line.erase(0, 1);
 		}
+		if (!line.empty() && line.at(0) == '~')
+		{
+			line_text.center = true;
+			line.erase(0, 1);
+		}
+
+		bool firstTime = true;
+		int pos = 0;
 		parsemode = CONT_PARSE_NORMAL;
 		do
 		{
 			font_changed = false;
-			lineotext = "";
-			while ((pos < line->length()) && !font_changed)
+			std::string lineotext = "";
+			while ((pos < line.length()) && !font_changed)
 			{
 				switch (parsemode)
 				{
 					case CONT_PARSE_NORMAL:
-						c = line->at(pos++);
+						c = line.at(pos++);
 						switch (c)
 					{
 						case '\\':
@@ -672,7 +662,7 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 						font_changed = true;
 						break;
 					case CONT_PARSE_BS:
-						c = tolower(line->at(pos++));
+						c = tolower(line.at(pos++));
 						switch (c)
 					{
 						case 'p':
@@ -699,7 +689,7 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 						parsemode = CONT_PARSE_NORMAL;
 						font_changed = true;
 						currfontnum = PSFONT_SYMBOL;
-						c = tolower(line->at(pos++));
+						c = tolower(line.at(pos++));
 						switch (c)
 					{
 						case 'o':
@@ -723,7 +713,7 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 						parsemode = CONT_PARSE_NORMAL;
 						font_changed = true;
 						currfontnum = PSFONT_SYMBOL;
-						c = tolower(line->at(pos++));
+						c = tolower(line.at(pos++));
 						switch (c)
 					{
 						case 'o':
@@ -745,7 +735,7 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 						break;
 					case CONT_PARSE_BOLD:
 						parsemode = CONT_PARSE_NORMAL;
-						c = tolower(line->at(pos++));
+						c = tolower(line.at(pos++));
 						switch (c)
 					{
 						case 's':
@@ -785,7 +775,7 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 						break;
 					case CONT_PARSE_ITALIC:
 						parsemode = CONT_PARSE_NORMAL;
-						c = tolower(line->at(pos++));
+						c = tolower(line.at(pos++));
 						switch (c)
 					{
 						case 's':
@@ -830,24 +820,18 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 			if ((!lineotext.empty()) ||
 				(currfontnum == PSFONT_TAB) ||
 				// Empty line
-				((pos >= line->length()) && (line_text == NULL)))
+				((pos >= line.length()) && firstTime))
 			{
 				CC_textchunk new_text;
-				if (line_text == NULL)
-				{
-					continuity.push_back(CC_textline());
-					line_text = &(continuity.back());
-					line_text->on_main = on_main;
-					line_text->on_sheet = on_sheet;
-					line_text->center = center;
-				}
 				new_text.font = currfontnum;
 				new_text.text = lineotext;
-				line_text->chunks.push_back(new_text);
+				line_text.chunks.push_back(new_text);
+				firstTime = false;
 			}
 			// restore to previous font (used for symbols and tabs)
 			currfontnum = lastfontnum;
-		} while (pos < line->length());
+		} while (pos < line.length());
+		continuity.push_back(line_text);
 	}
 	return true;
 }
