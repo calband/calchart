@@ -27,6 +27,7 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "cc_text.h"
+#include "platconf.h"
 
 #include <vector>
 #include <set>
@@ -41,8 +42,11 @@ class CC_sheet
 {
 public:
 	CC_sheet(CC_show *shw);
+	CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream);
 	CC_sheet(CC_show *shw, const std::string& newname);
 	~CC_sheet();
+
+	std::vector<uint8_t> WriteSheet() const;
 
 	// setting values on the stunt sheet
 	// * needs to be through command only *
@@ -99,10 +103,9 @@ private:
 	CC_show *show;
 	unsigned short beats;
 	std::vector<CC_point> pts;
-	std::string name;
+	std::string mName;
 	std::string number;
 
 };
-
 
 #endif

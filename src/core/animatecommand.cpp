@@ -21,6 +21,9 @@
 */
 
 #include "animatecommand.h"
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 
 // nothing version
 AnimateDraw::AnimateDraw() :

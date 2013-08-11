@@ -25,9 +25,6 @@
 
 #include "cc_sheet.h"
 
-#include <wx/wx.h>							  // For basic wx defines
-#include <wx/docview.h>							  // For basic wx defines
-
 #include <vector>
 #include <set>
 
@@ -37,7 +34,6 @@ class ShowUndoList;
 class CC_show;
 class CC_lasso;
 class CalChartDoc;
-class wxFFileOutputStream;
 
 // CalChart Show
 class CC_show
@@ -48,25 +44,15 @@ public:
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
-	CC_show();
+	CC_show(const ShowMode* m);
+	CC_show(const ShowMode* m, std::istream& stream);
 	~CC_show();
 
 	// How we save and load a show:
-    wxSTD ostream& SaveObject(wxSTD ostream& stream);
-    wxSTD istream& LoadObject(wxSTD istream& stream);
-    wxOutputStream& SaveObject(wxOutputStream& stream);
-    wxInputStream& LoadObject(wxInputStream& stream);
-    wxFFileOutputStream& SaveObject(wxFFileOutputStream& stream);
-private:
-	template <typename T>
-	T& LoadObjectGeneric(T& stream);
-	template <typename T>
-	T& SaveObjectGeneric(T& stream);
-	template <typename T>
-	T& SaveObjectInternal(T& stream);
+	std::vector<uint8_t> WriteShow() const;
 
-public:
-	wxString ImportContinuity(const wxString& file);
+	// continuity that gets printed
+	std::string ImportContinuity(const std::vector<std::string>& file);
 
 public:
 	const std::string& GetDescr() const;
@@ -112,15 +98,11 @@ public:
 	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
 
-	const ShowMode& GetMode() const { return *mode; };
-	void SetMode(ShowMode* m) { mode = m; };
-
+	const ShowMode& GetMode() const;
+	void SetMode(const ShowMode* m);
+	
 private:
-	ShowMode *mode;
-
-private:
-	bool mOkay; // error for when we are loading shows
-
+	const ShowMode *mode;
 	std::string descr;
 	unsigned short numpoints;
 	CC_sheet_container_t sheets;

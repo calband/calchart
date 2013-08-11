@@ -91,27 +91,6 @@
 
 // version 0 to 3.1 unknown
 
-#define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
-
-#define INGL_INGL Make4CharWord('I','N','G','L')
-#define INGL_GURK Make4CharWord('G','U','R','K')
-#define INGL_SHOW Make4CharWord('S','H','O','W')
-#define INGL_SHET Make4CharWord('S','H','E','T')
-#define INGL_SIZE Make4CharWord('S','I','Z','E')
-#define INGL_LABL Make4CharWord('L','A','B','L')
-#define INGL_MODE Make4CharWord('M','O','D','E')
-#define INGL_DESC Make4CharWord('D','E','S','C')
-#define INGL_NAME Make4CharWord('N','A','M','E')
-#define INGL_DURA Make4CharWord('D','U','R','A')
-#define INGL_POS  Make4CharWord('P','O','S',' ')
-#define INGL_SYMB Make4CharWord('S','Y','M','B')
-#define INGL_TYPE Make4CharWord('T','Y','P','E')
-#define INGL_REFP Make4CharWord('R','E','F','P')
-#define INGL_CONT Make4CharWord('C','O','N','T')
-#define INGL_PCNT Make4CharWord('P','C','N','T')
-#define INGL_END  Make4CharWord('E','N','D',' ')
-
-
 class CC_FileException : public std::runtime_error
 {
 	static std::string GetErrorFromID(uint32_t nameID)
@@ -132,27 +111,18 @@ public:
 
 
 template <typename T>
-void ReadLong(T& stream, uint32_t& d)
-{
-	uint8_t rawd[4];
-	stream.Read(rawd, sizeof(rawd));
-	d = get_big_long(&rawd);
-}
-
-template <>
-void ReadLong<wxSTD istream>(wxSTD istream& stream, uint32_t& d)
+inline uint32_t ReadLong(T& stream)
 {
 	char rawd[4];
 	stream.read(rawd, sizeof(rawd));
-	d = get_big_long(&rawd);
+	return get_big_long(&rawd);
 }
 
 // return false if you don't read the inname
 template <typename T>
-void ReadAndCheckID(T& stream, uint32_t inname)
+inline void ReadAndCheckID(T& stream, uint32_t inname)
 {
-	uint32_t name;
-	ReadLong(stream, name);
+	uint32_t name = ReadLong(stream);
 	if (inname != name)
 	{
 		throw CC_FileException(inname);
@@ -161,15 +131,14 @@ void ReadAndCheckID(T& stream, uint32_t inname)
 
 // return false if you don't read the inname
 template <typename T>
-void ReadCheckIDandSize(T& stream, uint32_t inname, uint32_t& size)
+inline uint32_t ReadCheckIDandSize(T& stream, uint32_t inname)
 {
-	uint32_t name;
-	ReadLong(stream, name);
+	uint32_t name = ReadLong(stream);
 	if (inname != name)
 	{
 		throw CC_FileException(inname);
 	}
-	ReadLong(stream, name);
+	name = ReadLong(stream);
 	if (4 != name)
 	{
 		uint8_t rawd[4];
@@ -178,82 +147,56 @@ void ReadCheckIDandSize(T& stream, uint32_t inname, uint32_t& size)
 		snprintf(s, sizeof(s), "Wrong size %d for name %c%c%c%c", name, rawd[0], rawd[1], rawd[2], rawd[3]);
 		throw CC_FileException(s);
 	}
-	ReadLong(stream, size);
+	return ReadLong(stream);
 }
 
 // return false if you don't read the inname
 template <typename T>
-void ReadCheckIDandFillData(T& stream, uint32_t inname, std::vector<uint8_t>& data)
+inline std::vector<uint8_t> ReadCheckIDandFillData(T& stream, uint32_t inname)
 {
-	uint32_t name;
-	ReadLong(stream, name);
+	uint32_t name = ReadLong(stream);
 	if (inname != name)
 	{
 		throw CC_FileException(inname);
 	}
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.Read(&data[0], name);
-}
-
-template <>
-void ReadCheckIDandFillData<wxSTD istream>(wxSTD istream& stream, uint32_t inname, std::vector<uint8_t>& data)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	if (inname != name)
-	{
-		throw CC_FileException(inname);
-	}
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.read(reinterpret_cast<char*>(&data[0]), name);
+	std::vector<uint8_t> data(ReadLong(stream));
+	stream.read(reinterpret_cast<char*>(&data[0]), data.size());
+	return data;
 }
 
 // Just fill the data
 template <typename T>
-void FillData(T& stream, std::vector<uint8_t>& data)
+inline std::vector<uint8_t> FillData(T& stream)
 {
-	uint32_t name;
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.Read(&data[0], name);
-}
-
-template <>
-void FillData<wxSTD istream>(wxSTD istream& stream, std::vector<uint8_t>& data)
-{
-	uint32_t name;
-	ReadLong(stream, name);
-	data.resize(name);
-	stream.read(reinterpret_cast<char*>(&data[0]), name);
+	uint32_t name = ReadLong(stream);
+	std::vector<uint8_t> data(name);
+	stream.read(reinterpret_cast<char*>(&data[0]), data.size());
+	return data;
 }
 
 template <typename T>
-void WriteLong(T& stream, uint32_t d)
+inline void Write(T& stream, const void *data, uint32_t size)
 {
-	uint8_t rawd[4];
-	put_big_long(rawd, d);
-	stream.Write(rawd, sizeof(rawd));
+	stream.write(reinterpret_cast<const char*>(data), size);
 }
 
-template <>
-void WriteLong<wxSTD ostream>(wxSTD ostream& stream, uint32_t d)
+template <typename T>
+inline void WriteLong(T& stream, uint32_t d)
 {
 	char rawd[4];
 	put_big_long(rawd, d);
-	stream.write(rawd, sizeof(rawd));
+	Write(stream, rawd, sizeof(rawd));
 }
 
 template <typename T>
-void WriteHeader(T& stream)
+inline void WriteHeader(T& stream)
 {
 	WriteLong(stream, INGL_INGL);
 }
 
 
 template <typename T>
-void WriteGurk(T& stream, uint32_t name)
+inline void WriteGurk(T& stream, uint32_t name)
 {
 	WriteLong(stream, INGL_GURK);
 	WriteLong(stream, name);
@@ -261,7 +204,7 @@ void WriteGurk(T& stream, uint32_t name)
 
 
 template <typename T>
-void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
+inline void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
 {
 	WriteLong(stream, name);
 	WriteLong(stream, size);
@@ -269,59 +212,31 @@ void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
 
 
 template <typename T>
-void WriteChunk(T& stream, uint32_t name, uint32_t size, const void *data)
+inline void WriteChunk(T& stream, uint32_t name, uint32_t size, const void *data)
 {
 	WriteLong(stream, name);
 	WriteLong(stream, size);
 	if (size > 0)
-		stream.Write(data, size);
-}
-
-template <>
-void WriteChunk<wxSTD ostream>(wxSTD ostream& stream, uint32_t name, uint32_t size, const void *data)
-{
-	WriteLong(stream, name);
-	WriteLong(stream, size);
-	if (size > 0)
-		stream.write(reinterpret_cast<const char*>(data), size);
+		Write(stream, data, size);
 }
 
 template <typename T>
-void WriteChunkStr(T& stream, uint32_t name, const char *str)
+inline void WriteChunkStr(T& stream, uint32_t name, const char *str)
 {
 	WriteChunk(stream, name, strlen(str)+1, reinterpret_cast<const unsigned char *>(str));
 }
 
 template <typename T>
-void WriteEnd(T& stream, uint32_t name)
+inline void WriteEnd(T& stream, uint32_t name)
 {
 	WriteLong(stream, INGL_END);
 	WriteLong(stream, name);
 }
 
-
 template <typename T>
-void WriteStr(T& stream, const char *str)
+inline void WriteStr(T& stream, const char *str)
 {
-	stream.Write(str, strlen(str)+1);
-}
-
-template <>
-void WriteStr<wxSTD ostream>(wxSTD ostream& stream, const char *str)
-{
-	stream.write(str, strlen(str)+1);
-}
-
-template <typename T>
-void Write(T& stream, const void *data, uint32_t size)
-{
-	stream.Write(data, size);
-}
-
-template <>
-void Write<wxSTD ostream>(wxSTD ostream& stream, const void *data, uint32_t size)
-{
-	stream.write(reinterpret_cast<const char*>(data), size);
+	Write(stream, str, strlen(str)+1);
 }
 
 

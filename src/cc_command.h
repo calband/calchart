@@ -27,7 +27,6 @@
 #include "cc_coord.h"
 #include "calchartdoc.h"
 #include "cc_show.h"
-#include "cc_sheet.h"
 #include <ostream>
 #include <deque>
 #include <map>

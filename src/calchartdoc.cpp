@@ -34,14 +34,11 @@
 #include "cc_shapes.h"
 #include "platconf.h"
 #include "draw.h"
+#include "cc_fileformat.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
 #include <list>
-
-static const wxChar *nofile_str = wxT("Unable to open file");
-static const wxChar *badcont_str = wxT("Error in continuity file");
-static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
 
 
 IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_modified, wxObject)
@@ -53,6 +50,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 
 // Create a new show
 CalChartDoc::CalChartDoc() :
+mShow(new CC_show(wxGetApp().GetModeList().front().get())),
 mTimer(*this)
 {
 	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
@@ -85,7 +83,7 @@ bool CalChartDoc::OnOpenDocument(const wxString& filename)
 			return false;
 		}
 	}
-	bool success = wxDocument::OnOpenDocument(filename) && mShow.mOkay;
+	bool success = wxDocument::OnOpenDocument(filename) && mShow;
 	if (success)
 	{
 		// at this point the recover file is no longer useful.
@@ -144,7 +142,19 @@ CalChartDoc::~CalChartDoc()
 
 wxString CalChartDoc::ImportContinuity(const wxString& file)
 {
-	auto result = mShow.ImportContinuity(file);
+	wxTextFile fp;
+	fp.Open(file);
+	if (!fp.IsOpened())
+	{
+		return wxT("Unable to open file");
+	}
+	std::vector<std::string> lines;
+	for (size_t line = 0; line < fp.GetLineCount(); ++line)
+	{
+		lines.push_back(fp.GetLine(line).ToStdString());
+	}
+
+	auto result = mShow->ImportContinuity(lines);
 	UpdateAllViews();
 	return result;
 }
@@ -173,16 +183,34 @@ wxOutputStream& CalChartDoc::SaveObject(wxOutputStream& stream)
 template <typename T>
 T& CalChartDoc::SaveObjectInternal(T& stream)
 {
-	return mShow.SaveObject(stream);
+	auto data = mShow->WriteShow();
+	stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
+	return stream;
+}
+
+template <>
+wxFFileOutputStream& CalChartDoc::SaveObjectInternal<wxFFileOutputStream>(wxFFileOutputStream& stream)
+{
+	auto data = mShow->WriteShow();
+	stream.Write(&data[0], data.size());
+	return stream;
 }
 
 template <typename T>
 T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
-	auto& result = mShow.LoadObjectGeneric(stream);
+	try
+	{
+		mShow.reset(new CC_show(wxGetApp().GetModeList().front().get(), stream));
+	}
+	catch (CC_FileException& e) {
+		wxString message = wxT("Error encountered:\n");
+		message += e.what();
+		wxMessageBox(message, wxT("Error!"));
+	}
 	CalChartDoc_FinishedLoading finishedLoading;
 	UpdateAllViews(NULL, &finishedLoading);
-	return result;
+	return stream;
 }
 
 #if wxUSE_STD_IOSTREAM
@@ -206,13 +234,13 @@ void CalChartDoc::FlushAllTextWindows()
 
 const std::string& CalChartDoc::GetDescr() const
 {
-	return mShow.GetDescr();
+	return mShow->GetDescr();
 }
 
 
 void CalChartDoc::SetDescr(const std::string& newdescr)
 {
-	mShow.SetDescr(newdescr);
+	mShow->SetDescr(newdescr);
 	UpdateAllViews();
 }
 
@@ -258,19 +286,19 @@ void CalChartDoc::Autosave()
 
 CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetNthSheet(unsigned n) const
 {
-	return mShow.GetNthSheet(n);
+	return mShow->GetNthSheet(n);
 }
 
 
 CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetNthSheet(unsigned n)
 {
-	return mShow.GetNthSheet(n);
+	return mShow->GetNthSheet(n);
 }
 
 
 CC_show::CC_sheet_container_t CalChartDoc::RemoveNthSheet(unsigned sheetidx)
 {
-	auto result = mShow.RemoveNthSheet(sheetidx);
+	auto result = mShow->RemoveNthSheet(sheetidx);
 	UpdateAllViews();
 	return result;
 }
@@ -278,50 +306,50 @@ CC_show::CC_sheet_container_t CalChartDoc::RemoveNthSheet(unsigned sheetidx)
 
 void CalChartDoc::SetCurrentSheet(unsigned n)
 {
-	mShow.SetCurrentSheet(n);
+	mShow->SetCurrentSheet(n);
 	UpdateAllViews();
 }
 
-CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetCurrentSheet() const { return mShow.GetCurrentSheet(); }
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetCurrentSheet() { return mShow.GetCurrentSheet(); }
-unsigned short CalChartDoc::GetNumSheets() const { return mShow.GetNumSheets(); }
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetSheetBegin() { return mShow.GetSheetBegin(); }
-CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetBegin() const { return mShow.GetSheetBegin(); }
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetSheetEnd() { return mShow.GetSheetEnd(); }
-CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetEnd() const { return mShow.GetSheetEnd(); }
+CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
+CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetCurrentSheet() { return mShow->GetCurrentSheet(); }
+unsigned short CalChartDoc::GetNumSheets() const { return mShow->GetNumSheets(); }
+CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetSheetBegin() { return mShow->GetSheetBegin(); }
+CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetBegin() const { return mShow->GetSheetBegin(); }
+CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetSheetEnd() { return mShow->GetSheetEnd(); }
+CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetEnd() const { return mShow->GetSheetEnd(); }
 
 
-unsigned CalChartDoc::GetCurrentSheetNum() const { return mShow.GetCurrentSheetNum(); }
+unsigned CalChartDoc::GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
 
 boost::shared_ptr<Animation> CalChartDoc::NewAnimation(NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
 {
-	return boost::shared_ptr<Animation>(new Animation(mShow, notifyStatus, notifyErrorList));
+	return boost::shared_ptr<Animation>(new Animation(*mShow, notifyStatus, notifyErrorList));
 }
 
 void CalChartDoc::SetupNewShow()
 {
-	mShow.SetupNewShow();
+	mShow->SetupNewShow();
 	UpdateAllViews();
 }
 
 
 void CalChartDoc::InsertSheetInternal(const CC_sheet& sheet, unsigned sheetidx)
 {
-	mShow.InsertSheetInternal(sheet, sheetidx);
+	mShow->InsertSheetInternal(sheet, sheetidx);
 	UpdateAllViews();
 }
 
 
 void CalChartDoc::InsertSheetInternal(const CC_sheet_container_t& sheet, unsigned sheetidx)
 {
-	mShow.InsertSheetInternal(sheet, sheetidx);
+	mShow->InsertSheetInternal(sheet, sheetidx);
 	UpdateAllViews();
 }
 
 
 void CalChartDoc::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 {
-	mShow.InsertSheet(nsheet, sheetidx);
+	mShow->InsertSheet(nsheet, sheetidx);
 	UpdateAllViews();
 }
 
@@ -329,15 +357,15 @@ void CalChartDoc::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 // warning, the labels might not match up
 void CalChartDoc::SetNumPoints(unsigned num, unsigned columns)
 {
-	mShow.SetNumPoints(num, columns);
+	mShow->SetNumPoints(num, columns);
 	UpdateAllViews();
 }
 
-unsigned short CalChartDoc::GetNumPoints() const { return mShow.GetNumPoints(); }
+unsigned short CalChartDoc::GetNumPoints() const { return mShow->GetNumPoints(); }
 
 bool CalChartDoc::RelabelSheets(unsigned sht)
 {
-	auto result = mShow.RelabelSheets(sht);
+	auto result = mShow->RelabelSheets(sht);
 	UpdateAllViews();
 	return result;
 }
@@ -345,21 +373,21 @@ bool CalChartDoc::RelabelSheets(unsigned sht)
 
 std::string CalChartDoc::GetPointLabel(unsigned i) const
 {
-	return mShow.GetPointLabel(i);
+	return mShow->GetPointLabel(i);
 }
 
 
 void CalChartDoc::SetPointLabel(const std::vector<std::string>& labels)
 {
-	mShow.SetPointLabel(labels);
+	mShow->SetPointLabel(labels);
 	UpdateAllViews();
 }
 
-const std::vector<std::string>& CalChartDoc::GetPointLabels() const { return mShow.GetPointLabels(); }
+const std::vector<std::string>& CalChartDoc::GetPointLabels() const { return mShow->GetPointLabels(); }
 
 bool CalChartDoc::SelectAll()
 {
-	auto result = mShow.SelectAll();
+	auto result = mShow->SelectAll();
 	UpdateAllViews();
 	return result;
 }
@@ -367,7 +395,7 @@ bool CalChartDoc::SelectAll()
 
 bool CalChartDoc::UnselectAll()
 {
-	auto result = mShow.UnselectAll();
+	auto result = mShow->UnselectAll();
 	UpdateAllViews();
 	return result;
 }
@@ -375,42 +403,42 @@ bool CalChartDoc::UnselectAll()
 
 void CalChartDoc::SetSelection(const SelectionList& sl)
 {
-	mShow.SetSelection(sl);
+	mShow->SetSelection(sl);
 	UpdateAllViews();
 }
 
 
 void CalChartDoc::AddToSelection(const SelectionList& sl)
 {
-	mShow.AddToSelection(sl);
+	mShow->AddToSelection(sl);
 	UpdateAllViews();
 }
 
 void CalChartDoc::RemoveFromSelection(const SelectionList& sl)
 {
-	mShow.RemoveFromSelection(sl);
+	mShow->RemoveFromSelection(sl);
 	UpdateAllViews();
 }
 
 void CalChartDoc::ToggleSelection(const SelectionList& sl)
 {
-	mShow.ToggleSelection(sl);
+	mShow->ToggleSelection(sl);
 	UpdateAllViews();
 }
 
 void CalChartDoc::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref)
 {
-	mShow.SelectWithLasso(lasso, toggleSelected, ref);
+	mShow->SelectWithLasso(lasso, toggleSelected, ref);
 }
 
-bool CalChartDoc::IsSelected(unsigned i) const { return mShow.IsSelected(i); }
-const SelectionList& CalChartDoc::GetSelectionList() const { return mShow.GetSelectionList(); }
+bool CalChartDoc::IsSelected(unsigned i) const { return mShow->IsSelected(i); }
+const SelectionList& CalChartDoc::GetSelectionList() const { return mShow->GetSelectionList(); }
 
 
-const ShowMode& CalChartDoc::GetMode() const { return mShow.GetMode(); }
+const ShowMode& CalChartDoc::GetMode() const { return mShow->GetMode(); }
 void CalChartDoc::SetMode(ShowMode* m)
 {
-	mShow.SetMode(m);
+	mShow->SetMode(m);
 	UpdateAllViews();
 }
 

@@ -36,23 +36,13 @@
 #include "cc_fileformat.h"
 #include "draw.h"
 
-#include <wx/wfstream.h>
-#include <wx/textfile.h>
 #include <list>
+#include <sstream>
 
-static const wxChar *nofile_str = wxT("Unable to open file");
-static const wxChar *badcont_str = wxT("Error in continuity file");
-static const wxChar *contnohead_str = wxT("Continuity file doesn't begin with header");
+static const std::string k_nofile_str = "Unable to open file";
+static const std::string k_badcont_str = "Error in continuity file";
+static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
 
-
-// Create a new show
-CC_show::CC_show() :
-mOkay(true),
-numpoints(0),
-mSheetNum(0)
-{
-	mode = wxGetApp().GetModeList().front().get();
-}
 
 enum CONT_PARSE_MODE
 {
@@ -66,13 +56,101 @@ enum CONT_PARSE_MODE
 };
 
 
+// Create a new show
+CC_show::CC_show(const ShowMode* m) :
+mode(m),
+numpoints(0),
+mSheetNum(0)
+{
+	if (!m)
+	{
+		throw std::runtime_error("Cannot use NULL ShowMode");
+	}
+}
+
+
+CC_show::CC_show(const ShowMode* m, std::istream& stream) :
+mode(m),
+numpoints(0),
+mSheetNum(0)
+{
+	if (!m)
+	{
+		throw std::runtime_error("Cannot use NULL ShowMode");
+	}
+	uint32_t name;
+	
+	ReadAndCheckID(stream, INGL_INGL);
+	ReadAndCheckID(stream, INGL_GURK);
+	ReadAndCheckID(stream, INGL_SHOW);
+	
+	// Handle show info
+	// read in the size:
+	// <INGL_SIZE><4><# points>
+	name = ReadCheckIDandSize(stream, INGL_SIZE);
+	numpoints = name;
+	pt_labels.assign(numpoints, std::string());
+	
+	name = ReadLong(stream);
+	// Optional: read in the point labels
+	// <INGL_LABL><SIZE>
+	if (INGL_LABL == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		std::vector<std::string> labels;
+		const char *str = (const char*)&data[0];
+		for (unsigned i = 0; i < GetNumPoints(); i++)
+		{
+			labels.push_back(str);
+			str += strlen(str)+1;
+		}
+		SetPointLabel(labels);
+		// peek for the next name
+		name = ReadLong(stream);
+	}
+	else
+	{
+		// fail?
+	}
+	
+	// Optional: read in the point labels
+	// <INGL_DESC><SIZE>
+	if (INGL_DESC == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		auto str = (const char*)&data[0];
+		SetDescr(std::string(str, strlen(str)));
+		// peek for the next name
+		name = ReadLong(stream);
+	}
+	
+	// Read in sheets
+	// <INGL_GURK><INGL_SHET>
+	while (INGL_GURK == name)
+	{
+		ReadAndCheckID(stream, INGL_SHET);
+		
+		CC_sheet sheet(this, GetNumPoints(), stream);
+		InsertSheetInternal(sheet, GetNumSheets());
+		
+		//ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_SHET);
+		// peek for the next name
+		name = ReadLong(stream);
+	}
+	//ReadAndCheckID(stream, INGL_END);
+	ReadAndCheckID(stream, INGL_SHOW);
+
+	// now set the show to sheet 0
+	mSheetNum = 0;
+}
 
 // Destroy a show
 CC_show::~CC_show()
 {}
 
 
-wxString CC_show::ImportContinuity(const wxString& file)
+std::string CC_show::ImportContinuity(const std::vector<std::string>& lines)
 {
 /* This is the format for each sheet:
  * %%str      where str is the string printed for the stuntsheet number
@@ -92,31 +170,23 @@ wxString CC_show::ImportContinuity(const wxString& file)
  * ~ center this line
  * also, there are three tab stops set for standard continuity format
  */
-	wxString tempbuf;
-	CC_textline *line_text;
 	unsigned pos;
 	bool on_sheet, on_main, center, font_changed;
 	enum CONT_PARSE_MODE parsemode;
 	enum PSFONT_TYPE currfontnum, lastfontnum;
-	wxString lineotext;
+	std::string lineotext;
 	char c;
-	bool sheetmark;
 
-	wxTextFile fp;
-	fp.Open(file);
-	if (fp.IsOpened())
-	{
+
 		int curr_sheet = -1;
 		currfontnum = lastfontnum = PSFONT_NORM;
-		line_text = NULL;
-		for (size_t line = 0; line < fp.GetLineCount(); ++line)
+		for (auto line = lines.begin(); line != lines.end(); ++line)
 		{
-			tempbuf = fp.GetLine(line);
-			sheetmark = false;
-			line_text = NULL;
-			if (tempbuf.Length() >= 2)
+			bool sheetmark = false;
+			CC_textline* line_text = NULL;
+			if (line->length() >= 2)
 			{
-				if ((tempbuf.GetChar(0) == '%') && (tempbuf.GetChar(1) == '%'))
+				if ((line->at(0) == '%') && (line->at(1) == '%'))
 				{
 					sheetmark = true;
 				}
@@ -126,9 +196,9 @@ wxString CC_show::ImportContinuity(const wxString& file)
 				if (curr_sheet != -1) ++curr_sheet;
 				else curr_sheet = 0;
 				if (curr_sheet == GetNumSheets()) break;
-				if (tempbuf.Length() > 2)
+				if (line->length() > 2)
 				{
-					GetNthSheet(curr_sheet)->SetNumber(tempbuf.Mid(2).ToStdString());
+					GetNthSheet(curr_sheet)->SetNumber(std::string(*line, 2));
 				}
 			}
 			else
@@ -136,21 +206,21 @@ wxString CC_show::ImportContinuity(const wxString& file)
 				if (curr_sheet == -1)
 				{
 // Continuity doesn't begin with a sheet header
-					return wxString(contnohead_str);
+					return k_contnohead_str;
 				}
 				on_main = true;
 				on_sheet = true;
 				pos = 0;
-				if (pos < tempbuf.Length())
+				if (pos < line->length())
 				{
-					if (tempbuf.GetChar(pos) == '<')
+					if (line->at(pos) == '<')
 					{
 						on_sheet = false;
 						pos++;
 					}
 					else
 					{
-						if (tempbuf.GetChar(pos) == '>')
+						if (line->at(pos) == '>')
 						{
 							on_main = false;
 							pos++;
@@ -158,9 +228,9 @@ wxString CC_show::ImportContinuity(const wxString& file)
 					}
 				}
 				center = false;
-				if (pos < tempbuf.Length())
+				if (pos < line->length())
 				{
-					if (tempbuf.GetChar(pos) == '~')
+					if (line->at(pos) == '~')
 					{
 						center = true;
 						pos++;
@@ -170,13 +240,13 @@ wxString CC_show::ImportContinuity(const wxString& file)
 				do
 				{
 					font_changed = false;
-					lineotext = wxT("");
-					while ((pos < tempbuf.Length()) && !font_changed)
+					lineotext = "";
+					while ((pos < line->length()) && !font_changed)
 					{
 						switch (parsemode)
 						{
 							case CONT_PARSE_NORMAL:
-								c = tempbuf.GetChar(pos++);
+								c = line->at(pos++);
 								switch (c)
 								{
 									case '\\':
@@ -187,7 +257,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 										font_changed = true;
 										break;
 									default:
-										lineotext.Append(c);
+										lineotext.push_back(c);
 										break;
 								}
 								break;
@@ -197,7 +267,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 								font_changed = true;
 								break;
 							case CONT_PARSE_BS:
-								c = tolower(tempbuf.GetChar(pos++));
+								c = tolower(line->at(pos++));
 								switch (c)
 								{
 									case 'p':
@@ -216,7 +286,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 										break;
 									default:
 										parsemode = CONT_PARSE_NORMAL;
-										lineotext.Append(c);
+										lineotext.push_back(c);
 										break;
 								}
 								break;
@@ -224,53 +294,53 @@ wxString CC_show::ImportContinuity(const wxString& file)
 								parsemode = CONT_PARSE_NORMAL;
 								font_changed = true;
 								currfontnum = PSFONT_SYMBOL;
-								c = tolower(tempbuf.GetChar(pos++));
+								c = tolower(line->at(pos++));
 								switch (c)
 								{
 									case 'o':
-										lineotext.Append('A');
+										lineotext.push_back('A');
 										break;
 									case 'b':
-										lineotext.Append('C');
+										lineotext.push_back('C');
 										break;
 									case 's':
-										lineotext.Append('D');
+										lineotext.push_back('D');
 										break;
 									case 'x':
-										lineotext.Append('E');
+										lineotext.push_back('E');
 										break;
 									default:
 // code not recognized
-										return wxString(badcont_str);
+										return k_badcont_str;
 								}
 								break;
 							case CONT_PARSE_SOLID:
 								parsemode = CONT_PARSE_NORMAL;
 								font_changed = true;
 								currfontnum = PSFONT_SYMBOL;
-								c = tolower(tempbuf.GetChar(pos++));
+								c = tolower(line->at(pos++));
 								switch (c)
 								{
 									case 'o':
-										lineotext.Append('B');
+										lineotext.push_back('B');
 										break;
 									case 'b':
-										lineotext.Append('F');
+										lineotext.push_back('F');
 										break;
 									case 's':
-										lineotext.Append('G');
+										lineotext.push_back('G');
 										break;
 									case 'x':
-										lineotext.Append('H');
+										lineotext.push_back('H');
 										break;
 									default:
 // code not recognized
-										return wxString(badcont_str);
+										return k_badcont_str;
 								}
 								break;
 							case CONT_PARSE_BOLD:
 								parsemode = CONT_PARSE_NORMAL;
-								c = tolower(tempbuf.GetChar(pos++));
+								c = tolower(line->at(pos++));
 								switch (c)
 								{
 									case 's':
@@ -305,12 +375,12 @@ wxString CC_show::ImportContinuity(const wxString& file)
 										break;
 									default:
 // code not recognized
-										return wxString(badcont_str);
+										return k_badcont_str;
 								}
 								break;
 							case CONT_PARSE_ITALIC:
 								parsemode = CONT_PARSE_NORMAL;
-								c = tolower(tempbuf.GetChar(pos++));
+								c = tolower(line->at(pos++));
 								switch (c)
 								{
 									case 's':
@@ -345,7 +415,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 										break;
 									default:
 // code not recognized
-										return wxString(badcont_str);
+										return k_badcont_str;
 								}
 								break;
 						}
@@ -355,7 +425,7 @@ wxString CC_show::ImportContinuity(const wxString& file)
 					if ((!lineotext.empty()) ||
 						(currfontnum == PSFONT_TAB) ||
 // Empty line
-						((pos >= tempbuf.length()) && (line_text == NULL)))
+						((pos >= line->length()) && (line_text == NULL)))
 					{
 						CC_textchunk new_text;
 						if (line_text == NULL)
@@ -372,41 +442,17 @@ wxString CC_show::ImportContinuity(const wxString& file)
 					}
 // restore to previous font (used for symbols and tabs)
 					currfontnum = lastfontnum;
-				} while (pos < tempbuf.Length());
+				} while (pos < line->length());
 			}
 		}
-	}
-	else
-	{
-		return wxString(nofile_str);
-	}
-	return wxT("");
+	return "";
 }
 
 
-template <typename T>
-T& CC_show::SaveObjectGeneric(T& stream)
+std::vector<uint8_t>
+CC_show::WriteShow() const
 {
-	// flush out the text before we save a file.
-	return SaveObjectInternal(stream);
-}
-
-wxSTD ostream& CC_show::SaveObject(wxSTD ostream& stream)
-{
-	return SaveObjectGeneric<wxSTD ostream>(stream);
-}
-wxOutputStream& CC_show::SaveObject(wxOutputStream& stream)
-{
-	return SaveObjectGeneric<wxOutputStream>(stream);
-}
-wxFFileOutputStream& CC_show::SaveObject(wxFFileOutputStream& stream)
-{
-	return SaveObjectGeneric<wxFFileOutputStream>(stream);
-}
-
-template <typename T>
-T& CC_show::SaveObjectInternal(T& stream)
-{
+	std::ostringstream stream;
 	uint32_t id;
 	unsigned i;
 
@@ -445,329 +491,17 @@ T& CC_show::SaveObjectInternal(T& stream)
 		curr_sheet != GetSheetEnd();
 		++curr_sheet)
 	{
-		WriteGurk(stream, INGL_SHET);
-// Name
-		WriteChunkStr(stream, INGL_NAME, curr_sheet->GetName().c_str());
-// Beats
-		put_big_long(&id, curr_sheet->GetBeats());
-		WriteChunk(stream, INGL_DURA, 4, &id);
-
-// Point positions
-		WriteChunkHeader(stream, INGL_POS, GetNumPoints()*4);
-		for (i = 0; i < GetNumPoints(); i++)
-		{
-			Coord crd;
-			put_big_word(&crd, curr_sheet->GetPosition(i).x);
-			Write(stream, &crd, 2);
-			put_big_word(&crd, curr_sheet->GetPosition(i).y);
-			Write(stream, &crd, 2);
-		}
-// Ref point positions
-		for (size_t j = 1; j <= CC_point::kNumRefPoints; j++)
-		{
-			for (i = 0; i < GetNumPoints(); i++)
-			{
-				if (curr_sheet->GetPosition(i) != curr_sheet->GetPosition(i, j))
-				{
-					Coord crd;
-					WriteChunkHeader(stream, INGL_REFP, GetNumPoints()*4+2);
-					put_big_word(&crd, j);
-					Write(stream, &crd, 2);
-					for (i = 0; i < GetNumPoints(); i++)
-					{
-						put_big_word(&crd, curr_sheet->GetPosition(i, j).x);
-						Write(stream, &crd, 2);
-						put_big_word(&crd, curr_sheet->GetPosition(i, j).y);
-						Write(stream, &crd, 2);
-					}
-					break;
-				}
-			}
-		}
-// Point symbols
-		for (i = 0; i < GetNumPoints(); i++)
-		{
-			if (curr_sheet->GetPoint(i).GetSymbol() != 0)
-			{
-				WriteChunkHeader(stream, INGL_SYMB, GetNumPoints());
-				for (i = 0; i < GetNumPoints(); i++)
-				{
-					SYMBOL_TYPE tmp = curr_sheet->GetPoint(i).GetSymbol();
-					Write(stream, &tmp, 1);
-				}
-				break;
-			}
-		}
-// Point continuity types
-		for (i = 0; i < GetNumPoints(); i++)
-		{
-			if (curr_sheet->GetPoint(i).GetContinuityIndex() != 0)
-			{
-				WriteChunkHeader(stream, INGL_TYPE, GetNumPoints());
-				for (i = 0; i < GetNumPoints(); i++)
-				{
-					unsigned char tmp = curr_sheet->GetPoint(i).GetContinuityIndex();
-					Write(stream, &tmp, 1);
-				}
-				break;
-			}
-		}
-// Point labels (left or right)
-		for (i = 0; i < GetNumPoints(); i++)
-		{
-			if (curr_sheet->GetPoint(i).GetFlip())
-			{
-				WriteChunkHeader(stream, INGL_LABL, GetNumPoints());
-				for (i = 0; i < GetNumPoints(); i++)
-				{
-					char c = (curr_sheet->GetPoint(i).GetFlip()) ? true : false;
-					Write(stream, &c, 1);
-				}
-				break;
-			}
-		}
-// Continuity text
-		for (CC_sheet::ContContainer::const_iterator curranimcont = curr_sheet->animcont.begin(); curranimcont != curr_sheet->animcont.end();
-			++curranimcont)
-		{
-			WriteChunkHeader(stream, INGL_CONT,
-				1+curranimcont->GetName().length()+1+
-				curranimcont->GetText().length()+1);
-			unsigned tnum = curranimcont->GetNum();
-			Write(stream, &tnum, 1);
-			WriteStr(stream, curranimcont->GetName().c_str());
-			WriteStr(stream, curranimcont->GetText().c_str());
-		}
-		WriteEnd(stream, INGL_SHET);
+		auto data = curr_sheet->WriteSheet();
+		Write(stream, &data[0], data.size());
 	}
 
 	WriteEnd(stream, INGL_SHOW);
-	
-	return stream;
-}
-
-template <typename T>
-T& CC_show::LoadObjectGeneric(T& stream)
-{
-	uint32_t name;
+	auto sdata = stream.str();
 	std::vector<uint8_t> data;
-
-	try
-	{
-	ReadAndCheckID(stream, INGL_INGL);
-	ReadAndCheckID(stream, INGL_GURK);
-	ReadAndCheckID(stream, INGL_SHOW);
-
-// Handle show info
-	// read in the size:
-	// <INGL_SIZE><4><# points>
-	ReadCheckIDandSize(stream, INGL_SIZE, name);
-	numpoints = name;
-	pt_labels.assign(numpoints, std::string());
-
-	ReadLong(stream, name);
-	// Optional: read in the point labels
-	// <INGL_LABL><SIZE>
-	if (INGL_LABL == name)
-	{
-		FillData(stream, data);
-		std::vector<std::string> labels;
-		const char *str = (const char*)&data[0];
-		for (unsigned i = 0; i < GetNumPoints(); i++)
-		{
-			labels.push_back(str);
-			str += strlen(str)+1;
-		}
-		SetPointLabel(labels);
-		// peek for the next name
-		ReadLong(stream, name);
-	}
-	else
-	{
-		// fail?
-	}
-
-	// Optional: read in the point labels
-	// <INGL_DESC><SIZE>
-	if (INGL_DESC == name)
-	{
-		FillData(stream, data);
-		auto str = (const char*)&data[0];
-		SetDescr(std::string(str, strlen(str)));
-		// peek for the next name
-		ReadLong(stream, name);
-	}
-
-	// Read in sheets
-	// <INGL_GURK><INGL_SHET>
-	while (INGL_GURK == name)
-	{
-		ReadAndCheckID(stream, INGL_SHET);
-
-		CC_sheet sheet(this);
-
-		// Read in sheet name
-		// <INGL_NAME><size><string + 1>
-		ReadCheckIDandFillData(stream, INGL_NAME, data);
-		sheet.SetName((const char*)&data[0]);
-
-		// read in the duration:
-		// <INGL_DURA><4><duration>
-		ReadCheckIDandSize(stream, INGL_DURA, name);
-		sheet.SetBeats(name);
-
-		// Point positions
-		// <INGL_DURA><size><data>
-		ReadCheckIDandFillData(stream, INGL_POS, data);
-		if (data.size() != size_t(GetNumPoints()*4))
-		{
-			throw CC_FileException("bad POS chunk");
-		}
-		{
-			uint8_t *d;
-			d = (uint8_t*)&data[0];
-			for (unsigned i = 0; i < GetNumPoints(); ++i)
-			{
-				CC_coord c;
-				c.x = get_big_word(d);
-				d += 2;
-				c.y = get_big_word(d);
-				d += 2;
-				sheet.SetAllPositions(c, i);
-			}
-		}
-
-		ReadLong(stream, name);
-		// read all the reference points
-		while (INGL_REFP == name)
-		{
-			FillData(stream, data);
-			if (data.size() != (unsigned long)GetNumPoints()*4+2)
-			{
-				throw CC_FileException("Bad REFP chunk");
-			}
-			uint8_t *d = (uint8_t*)&data[0];
-			unsigned ref = get_big_word(d);
-			d += 2;
-			for (unsigned i = 0; i < GetNumPoints(); i++)
-			{
-				CC_coord c;
-				c.x = get_big_word(d);
-				d += 2;
-				c.y = get_big_word(d);
-				d += 2;
-				sheet.SetPosition(c, i, ref);		  // don't clip
-			}
-			ReadLong(stream, name);
-		}
-		// Point symbols
-		while (INGL_SYMB == name)
-		{
-			FillData(stream, data);
-			if (data.size() != (unsigned long)GetNumPoints())
-			{
-				throw CC_FileException("Bad SYMB chunk");
-			}
-			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < GetNumPoints(); i++)
-			{
-				sheet.GetPoint(i).SetSymbol((SYMBOL_TYPE)(*(d++)));
-			}
-			ReadLong(stream, name);
-		}
-		// Point continuity types
-		while (INGL_TYPE == name)
-		{
-			FillData(stream, data);
-			if (data.size() != (unsigned long)GetNumPoints())
-			{
-				throw CC_FileException("Bad TYPE chunk");
-			}
-			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < GetNumPoints(); i++)
-			{
-				sheet.GetPoint(i).SetContinuityIndex(*(d++));
-			}
-			ReadLong(stream, name);
-		}
-		// Point labels (left or right)
-		while (INGL_LABL == name)
-		{
-			FillData(stream, data);
-			if (data.size() != (unsigned long)GetNumPoints())
-			{
-				throw CC_FileException("Bad SYMB chunk");
-			}
-			uint8_t *d = (uint8_t *)&data[0];
-			for (unsigned i = 0; i < GetNumPoints(); i++)
-			{
-				if (*(d++))
-				{
-					sheet.GetPoint(i).Flip();
-				}
-			}
-			ReadLong(stream, name);
-		}
-		// Continuity text
-		while (INGL_CONT == name)
-		{
-			FillData(stream, data);
-			if (data.size() < 3)						  // one byte num + two nils minimum
-			{
-				throw CC_FileException("Bad cont chunk");
-			}
-			const char *d = (const char *)&data[0];
-			if (d[data.size()-1] != '\0')
-			{
-				throw CC_FileException("Bad cont chunk");
-			}
-
-			const char* text = d + 1;
-			size_t num = strlen(text);
-			if (data.size() < num + 3)					  // check for room for text string
-			{
-				throw CC_FileException("Bad cont chunk");
-			}
-			std::string namestr(text);
-			text = d + 2 + strlen(text);
-			CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
-			std::string textstr(text);
-			newcont.SetText(textstr);
-			sheet.AppendContinuity(newcont);
-
-			ReadLong(stream, name);
-		}
-		InsertSheetInternal(sheet, GetNumSheets());
-
-		//ReadAndCheckID(stream, INGL_END);
-		ReadAndCheckID(stream, INGL_SHET);
-		// peek for the next name
-		ReadLong(stream, name);
-	}
-	//ReadAndCheckID(stream, INGL_END);
-	ReadAndCheckID(stream, INGL_SHOW);
-	mSheetNum = 0;
-	}
-	catch (CC_FileException& e) {
-		wxString message = wxT("Error encountered:\n");
-		message += e.what();
-		wxMessageBox(message, wxT("Error!"));
-		mOkay = false;
-	}
-	return stream;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
 }
 
-#if wxUSE_STD_IOSTREAM
-wxSTD istream& CC_show::LoadObject(wxSTD istream& stream)
-{
-	return LoadObjectGeneric<wxSTD istream>(stream);
-}
-#else
-wxInputStream& CC_show::LoadObject(wxInputStream& stream)
-{
-	return LoadObjectGeneric<wxInputStream>(stream);
-}
-#endif
 
 const std::string& CC_show::GetDescr() const
 {
@@ -823,6 +557,7 @@ void
 CC_show::SetupNewShow()
 {
 	InsertSheetInternal(CC_sheet(this, "1"), 0);
+	SetCurrentSheet(0);
 }
 
 void CC_show::InsertSheetInternal(const CC_sheet& sheet, unsigned sheetidx)
@@ -987,31 +722,19 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsign
 	}
 }
 
-
-#include <iostream>
-using std::cout;
-
-struct ShowTestData
+const ShowMode&
+CC_show::GetMode() const
 {
-	bool Ok;
-	
-};
-void CC_show_UnitTests()
-{
-	CC_show test;
-//	cout<<"ok "<<test.mOkay<<"\n";
-//	assert(test.Ok() == true);
-//	cout<<"GetError "<<(wchar_t*)test.GetError().c_str()<<"\n";
-//	assert(test.Ok() == true);
-	cout<<"GetDescr "<<test.GetDescr().c_str()<<"\n";
-	cout<<"GetNumSheets "<<test.GetNumSheets()<<"\n";
-	cout<<"GetNumPoints "<<test.GetNumPoints()<<"\n";
-	for (unsigned i = 0; i < test.GetNumPoints(); ++i)
-	{
-		cout<<"GetPointLabel "<<i<<" "<<test.GetPointLabel(i).c_str()<<"\n";
-	}
-	cout<<"GetMode "<<(void*)&test.GetMode()<<"\n";
+	return *mode;
 }
 
-
+void
+CC_show::SetMode(const ShowMode* m)
+{
+	if (!m)
+	{
+		throw std::runtime_error("Cannot use NULL ShowMode");
+	}
+	mode = m;
+}
 

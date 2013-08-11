@@ -23,6 +23,8 @@
 #ifndef __PRINT_PS_DIALOG_H__
 #define __PRINT_PS_DIALOG_H__
 
+#include "platconf.h"
+
 #include <wx/wx.h>
 #include <wx/dialog.h>
 #include <set>

@@ -26,7 +26,10 @@
 #include "modes.h"
 #include "confgr.h"
 #include "draw.h"
+#include "cc_fileformat.h"
 #include <boost/algorithm/string/predicate.hpp>
+#include <sstream>
+#include <iostream>
 
 const std::string contnames[] =
 {
@@ -53,8 +56,253 @@ CC_sheet::CC_sheet(CC_show *shw, const std::string& newname) :
 show(shw),
 beats(1),
 pts(show->GetNumPoints()),
-name(newname)
+mName(newname)
 {
+}
+
+
+CC_sheet::CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream) :
+show(shw),
+pts(numPoints)
+{
+	// Read in sheet name
+	// <INGL_NAME><size><string + 1>
+	std::vector<uint8_t> data = ReadCheckIDandFillData(stream, INGL_NAME);
+	mName = (const char*)&data[0];
+	
+	// read in the duration:
+	// <INGL_DURA><4><duration>
+	auto chunk = ReadCheckIDandSize(stream, INGL_DURA);
+	beats = chunk;
+	
+	// Point positions
+	// <INGL_DURA><size><data>
+	data = ReadCheckIDandFillData(stream, INGL_POS);
+	if (data.size() != size_t(pts.size()*4))
+	{
+		throw CC_FileException("bad POS chunk");
+	}
+	{
+		uint8_t *d = &data[0];
+		for (unsigned i = 0; i < pts.size(); ++i)
+		{
+			CC_coord c;
+			c.x = get_big_word(d);
+			d += 2;
+			c.y = get_big_word(d);
+			d += 2;
+			for (unsigned j = 0; j <= CC_point::kNumRefPoints; j++)
+			{
+				pts[i].SetPos(c, j);
+			}
+		}
+	}
+	
+	uint32_t name = ReadLong(stream);
+	// read all the reference points
+	while (INGL_REFP == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		if (data.size() != pts.size()*4+2)
+		{
+			throw CC_FileException("Bad REFP chunk");
+		}
+		uint8_t *d = &data[0];
+		unsigned ref = get_big_word(d);
+		d += 2;
+		for (unsigned i = 0; i < pts.size(); i++)
+		{
+			CC_coord c;
+			c.x = get_big_word(d);
+			d += 2;
+			c.y = get_big_word(d);
+			d += 2;
+			pts[i].SetPos(c, ref);
+		}
+		name = ReadLong(stream);
+	}
+	// Point symbols
+	while (INGL_SYMB == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		if (data.size() != pts.size())
+		{
+			throw CC_FileException("Bad SYMB chunk");
+		}
+		uint8_t *d = &data[0];
+		for (unsigned i = 0; i < pts.size(); i++)
+		{
+			pts.at(i).SetSymbol((SYMBOL_TYPE)(*(d++)));
+		}
+		name = ReadLong(stream);
+	}
+	// Point continuity types
+	while (INGL_TYPE == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		if (data.size() != pts.size())
+		{
+			throw CC_FileException("Bad TYPE chunk");
+		}
+		uint8_t *d = &data[0];
+		for (unsigned i = 0; i < pts.size(); i++)
+		{
+			pts.at(i).SetContinuityIndex(*(d++));
+		}
+		name = ReadLong(stream);
+	}
+	// Point labels (left or right)
+	while (INGL_LABL == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		if (data.size() != pts.size())
+		{
+			throw CC_FileException("Bad SYMB chunk");
+		}
+		uint8_t *d = &data[0];
+		for (unsigned i = 0; i < pts.size(); i++)
+		{
+			if (*(d++))
+			{
+				pts.at(i).Flip();
+			}
+		}
+		name = ReadLong(stream);
+	}
+	// Continuity text
+	while (INGL_CONT == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		if (data.size() < 3)						  // one byte num + two nils minimum
+		{
+			throw CC_FileException("Bad cont chunk");
+		}
+		const char *d = (const char *)&data[0];
+		if (d[data.size()-1] != '\0')
+		{
+			throw CC_FileException("Bad cont chunk");
+		}
+		
+		const char* text = d + 1;
+		size_t num = strlen(text);
+		if (data.size() < num + 3)					  // check for room for text string
+		{
+			throw CC_FileException("Bad cont chunk");
+		}
+		std::string namestr(text);
+		text = d + 2 + strlen(text);
+		CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
+		std::string textstr(text);
+		newcont.SetText(textstr);
+		animcont.push_back(newcont);
+		
+		name = ReadLong(stream);
+	}
+}
+
+std::vector<uint8_t>
+CC_sheet::WriteSheet() const
+{
+	std::ostringstream stream("");
+	WriteGurk(stream, INGL_SHET);
+	// Name
+	WriteChunkStr(stream, INGL_NAME, GetName().c_str());
+	// Beats
+	uint32_t id;
+	put_big_long(&id, GetBeats());
+	WriteChunk(stream, INGL_DURA, 4, &id);
+	
+	// Point positions
+	WriteChunkHeader(stream, INGL_POS, pts.size()*4);
+	for (size_t i = 0; i < pts.size(); ++i)
+	{
+		Coord crd;
+		put_big_word(&crd, GetPosition(i).x);
+		Write(stream, &crd, 2);
+		put_big_word(&crd, GetPosition(i).y);
+		Write(stream, &crd, 2);
+	}
+	// Ref point positions
+	for (size_t j = 1; j <= CC_point::kNumRefPoints; j++)
+	{
+		for (size_t i = 0; i < pts.size(); i++)
+		{
+			if (GetPosition(i) != GetPosition(i, j))
+			{
+				Coord crd;
+				WriteChunkHeader(stream, INGL_REFP, pts.size()*4+2);
+				put_big_word(&crd, j);
+				Write(stream, &crd, 2);
+				for (i = 0; i < pts.size(); i++)
+				{
+					put_big_word(&crd, GetPosition(i, j).x);
+					Write(stream, &crd, 2);
+					put_big_word(&crd, GetPosition(i, j).y);
+					Write(stream, &crd, 2);
+				}
+				break;
+			}
+		}
+	}
+	// Point symbols
+	for (size_t i = 0; i < pts.size(); ++i)
+	{
+		if (GetPoint(i).GetSymbol() != 0)
+		{
+			WriteChunkHeader(stream, INGL_SYMB, pts.size());
+			for (i = 0; i < pts.size(); i++)
+			{
+				SYMBOL_TYPE tmp = GetPoint(i).GetSymbol();
+				Write(stream, &tmp, 1);
+			}
+			break;
+		}
+	}
+	// Point continuity types
+	for (size_t i = 0; i < pts.size(); ++i)
+	{
+		if (GetPoint(i).GetContinuityIndex() != 0)
+		{
+			WriteChunkHeader(stream, INGL_TYPE, pts.size());
+			for (i = 0; i < pts.size(); i++)
+			{
+				unsigned char tmp = GetPoint(i).GetContinuityIndex();
+				Write(stream, &tmp, 1);
+			}
+			break;
+		}
+	}
+	// Point labels (left or right)
+	for (size_t i = 0; i < pts.size(); ++i)
+	{
+		if (GetPoint(i).GetFlip())
+		{
+			WriteChunkHeader(stream, INGL_LABL, pts.size());
+			for (i = 0; i < pts.size(); i++)
+			{
+				char c = (GetPoint(i).GetFlip()) ? true : false;
+				Write(stream, &c, 1);
+			}
+			break;
+		}
+	}
+	// Continuity text
+	for (CC_sheet::ContContainer::const_iterator curranimcont = animcont.begin(); curranimcont != animcont.end();
+		 ++curranimcont)
+	{
+		WriteChunkHeader(stream, INGL_CONT,
+						 1+curranimcont->GetName().length()+1+
+						 curranimcont->GetText().length()+1);
+		unsigned tnum = curranimcont->GetNum();
+		Write(stream, &tnum, 1);
+		WriteStr(stream, curranimcont->GetName().c_str());
+		WriteStr(stream, curranimcont->GetText().c_str());
+	}
+	WriteEnd(stream, INGL_SHET);
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
 }
 
 
@@ -218,7 +466,7 @@ unsigned CC_sheet::FindContinuityByName(const std::string& name) const
 
 	for (idx = 1; c != animcont.end(); idx++, ++c)
 	{
-		if (boost::iequals(c->GetName(), name))
+		if (boost::iequals(c->GetName(), mName))
 		{
 			break;
 		}
@@ -246,12 +494,12 @@ bool CC_sheet::ContinuityInUse(unsigned idx) const
 
 std::string CC_sheet::GetName() const
 {
-	return name;
+	return mName;
 }
 
 void CC_sheet::SetName(const std::string& newname)
 {
-	name = newname;
+	mName = newname;
 }
 
 std::string CC_sheet::GetNumber() const
