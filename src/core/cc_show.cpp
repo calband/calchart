@@ -44,18 +44,6 @@ static const std::string k_badcont_str = "Error in continuity file";
 static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
 
 
-enum CONT_PARSE_MODE
-{
-	CONT_PARSE_NORMAL,
-	CONT_PARSE_TAB,
-	CONT_PARSE_BS,
-	CONT_PARSE_PLAIN,
-	CONT_PARSE_SOLID,
-	CONT_PARSE_BOLD,
-	CONT_PARSE_ITALIC
-};
-
-
 // Create a new show
 CC_show::CC_show(const ShowMode* m) :
 mode(m),
