@@ -195,9 +195,8 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 	}
 
 	size_t numLines = 0;
-	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
-		 text != sheet.continuity.end();
-		 ++text)
+	auto continuity = sheet.GetPrintableContinuity();
+	for (auto text = continuity.begin(); text != continuity.end(); ++text)
 	{
 		if (text->on_sheet)
 		{
@@ -217,8 +216,8 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 
 	y = 0.0;
 	const wxCoord charWidth = dc.GetCharWidth();
-	CC_textline_list::const_iterator cont(sheet.continuity.begin());
-	while (cont != sheet.continuity.end())
+	auto cont = continuity.begin();
+	while (cont != continuity.end())
 	{
 		bool do_tab;
 		CC_textchunk_list::const_iterator c;

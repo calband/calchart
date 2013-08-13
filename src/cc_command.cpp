@@ -360,7 +360,7 @@ void MovePointsOnSheetCommand::DoAction()
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 	for (std::map<unsigned, std::pair<CC_coord,CC_coord> >::const_iterator i = mPositions.begin(); i != mPositions.end(); ++i)
 	{
-		sheet->SetPosition(i->second.second, i->first, mRef);
+		sheet->SetPosition(mDoc.GetMode().ClipPosition(i->second.second), i->first, mRef);
 	}
 }
 
@@ -370,7 +370,7 @@ void MovePointsOnSheetCommand::UndoAction()
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 	for (std::map<unsigned, std::pair<CC_coord,CC_coord> >::const_iterator i = mPositions.begin(); i != mPositions.end(); ++i)
 	{
-		sheet->SetPosition(i->second.first, i->first, mRef);
+		sheet->SetPosition(mDoc.GetMode().ClipPosition(i->second.first), i->first, mRef);
 	}
 }
 

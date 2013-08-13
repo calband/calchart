@@ -44,8 +44,8 @@ public:
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
-	CC_show(const ShowMode* m);
-	CC_show(const ShowMode* m, std::istream& stream);
+	CC_show();
+	CC_show(std::istream& stream);
 	~CC_show();
 
 	// How we save and load a show:
@@ -79,7 +79,7 @@ public:
 	void InsertSheetInternal(const CC_sheet_container_t& nsheet, unsigned sheetidx);
 	void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
 	inline unsigned short GetNumPoints() const { return numpoints; }
-	void SetNumPoints(unsigned num, unsigned columns);
+	void SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position);
 	bool RelabelSheets(unsigned sht);
 
 	std::string GetPointLabel(unsigned i) const;
@@ -98,11 +98,7 @@ public:
 	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
 
-	const ShowMode& GetMode() const;
-	void SetMode(const ShowMode* m);
-	
 private:
-	const ShowMode *mode;
 	std::string descr;
 	unsigned short numpoints;
 	CC_sheet_container_t sheets;

@@ -45,27 +45,17 @@ static const std::string k_contnohead_str = "Continuity file doesn't begin with 
 
 
 // Create a new show
-CC_show::CC_show(const ShowMode* m) :
-mode(m),
+CC_show::CC_show() :
 numpoints(0),
 mSheetNum(0)
 {
-	if (!m)
-	{
-		throw std::runtime_error("Cannot use NULL ShowMode");
-	}
 }
 
 
-CC_show::CC_show(const ShowMode* m, std::istream& stream) :
-mode(m),
+CC_show::CC_show(std::istream& stream) :
 numpoints(0),
 mSheetNum(0)
 {
-	if (!m)
-	{
-		throw std::runtime_error("Cannot use NULL ShowMode");
-	}
 	uint32_t name;
 	
 	ReadAndCheckID(stream, INGL_INGL);
@@ -184,7 +174,7 @@ std::string CC_show::ImportContinuity(const std::vector<std::string>& lines)
 	auto curr_sheet = GetSheetBegin();
 	for (; line_data != lines_data.end() && curr_sheet != GetSheetEnd(); ++line_data, ++curr_sheet)
 	{
-		if (!curr_sheet->ImportContinuity(*line_data))
+		if (!curr_sheet->ImportPrintableContinuity(*line_data))
 		{
 			return k_badcont_str;
 		}
@@ -327,11 +317,11 @@ void CC_show::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 
 
 // warning, the labels might not match up
-void CC_show::SetNumPoints(unsigned num, unsigned columns)
+void CC_show::SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position)
 {
 	for (CC_sheet_iterator_t sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht)
 	{
-		sht->SetNumPoints(num, columns);
+		sht->SetNumPoints(num, columns, new_march_position);
 	}
 	numpoints = num;
 }
@@ -344,7 +334,7 @@ bool CC_show::RelabelSheets(unsigned sht)
 	CC_sheet_iterator_t sheet = GetNthSheet(sht);
 	CC_sheet_iterator_t sheet_next = GetNthSheet(sht+1);
 	if (sheet_next == GetSheetEnd()) return false;
-	std::vector<unsigned> table(GetNumPoints());
+	std::vector<size_t> table(GetNumPoints());
 	std::vector<unsigned> used_table(GetNumPoints());
 
 	for (i = 0; i < GetNumPoints(); i++)
@@ -369,7 +359,7 @@ bool CC_show::RelabelSheets(unsigned sht)
 	}
 	while ((++sheet) != GetSheetEnd())
 	{
-		sheet->RelabelSheet(&table[0]);
+		sheet->RelabelSheet(table);
 	}
 
 	return true;
@@ -464,21 +454,5 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsign
 	{
 		AddToSelection(sl);
 	}
-}
-
-const ShowMode&
-CC_show::GetMode() const
-{
-	return *mode;
-}
-
-void
-CC_show::SetMode(const ShowMode* m)
-{
-	if (!m)
-	{
-		throw std::runtime_error("Cannot use NULL ShowMode");
-	}
-	mode = m;
 }
 

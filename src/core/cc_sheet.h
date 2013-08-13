@@ -50,7 +50,7 @@ public:
 
 	// setting values on the stunt sheet
 	// * needs to be through command only *
-	void SetNumPoints(unsigned num, unsigned columns);
+	void SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position);
 
 	// continuity:
 	std::set<unsigned> SelectPointsOfContinuity(unsigned i) const;
@@ -74,7 +74,7 @@ public:
 	
 	// points:
 	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
-	void RelabelSheet(unsigned *table);
+	void RelabelSheet(const std::vector<size_t>& table);
 
 	std::string GetName() const;
 	void SetName(const std::string& newname);
@@ -96,14 +96,14 @@ public:
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 
 	// continuity that gets printed
-	bool ImportContinuity(const std::vector<std::string>& lines);
+	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
+	CC_textline_list GetPrintableContinuity() const;
 	
-	CC_textline_list continuity;
 	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer animcont;
 	
 private:
-	CC_show *show;
+	CC_textline_list mPrintableContinuity;
 	unsigned short beats;
 	std::vector<CC_point> pts;
 	std::string mName;

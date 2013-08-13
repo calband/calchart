@@ -35,6 +35,7 @@
 #include "platconf.h"
 #include "draw.h"
 #include "cc_fileformat.h"
+#include "modes.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
@@ -50,7 +51,8 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 
 // Create a new show
 CalChartDoc::CalChartDoc() :
-mShow(new CC_show(wxGetApp().GetModeList().front().get())),
+mShow(new CC_show()),
+mMode(wxGetApp().GetModeList().front().get()),
 mTimer(*this)
 {
 	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
@@ -201,7 +203,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
 	try
 	{
-		mShow.reset(new CC_show(wxGetApp().GetModeList().front().get(), stream));
+		mShow.reset(new CC_show(stream));
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");
@@ -357,7 +359,7 @@ void CalChartDoc::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
 // warning, the labels might not match up
 void CalChartDoc::SetNumPoints(unsigned num, unsigned columns)
 {
-	mShow->SetNumPoints(num, columns);
+	mShow->SetNumPoints(num, columns, mMode->FieldOffset());
 	UpdateAllViews();
 }
 
@@ -435,10 +437,20 @@ bool CalChartDoc::IsSelected(unsigned i) const { return mShow->IsSelected(i); }
 const SelectionList& CalChartDoc::GetSelectionList() const { return mShow->GetSelectionList(); }
 
 
-const ShowMode& CalChartDoc::GetMode() const { return mShow->GetMode(); }
-void CalChartDoc::SetMode(ShowMode* m)
+const ShowMode&
+CalChartDoc::GetMode() const
 {
-	mShow->SetMode(m);
+	return *mMode;
+}
+
+void
+CalChartDoc::SetMode(const ShowMode* m)
+{
+	if (!m)
+	{
+		throw std::runtime_error("Cannot use NULL ShowMode");
+	}
+	mMode = m;
 	UpdateAllViews();
 }
 

@@ -158,7 +158,7 @@ public:
 	const SelectionList& GetSelectionList() const;
 
 	const ShowMode& GetMode() const;
-	void SetMode(ShowMode* m);
+	void SetMode(const ShowMode* m);
 
 private:
 	// Autosaving:
@@ -186,6 +186,7 @@ private:
 	};
 
 	boost::shared_ptr<CC_show> mShow;
+	const ShowMode* mMode;
 	AutoSaveTimer mTimer;
 };
 

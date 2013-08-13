@@ -44,16 +44,14 @@ const std::string contnames[] =
 };
 
 
-CC_sheet::CC_sheet(CC_show *shw) :
-show(shw),
+CC_sheet::CC_sheet(CC_show *show) :
 beats(1),
 pts(show->GetNumPoints())
 {
 }
 
 
-CC_sheet::CC_sheet(CC_show *shw, const std::string& newname) :
-show(shw),
+CC_sheet::CC_sheet(CC_show *show, const std::string& newname) :
 beats(1),
 pts(show->GetNumPoints()),
 mName(newname)
@@ -61,8 +59,7 @@ mName(newname)
 }
 
 
-CC_sheet::CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream) :
-show(shw),
+CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream) :
 pts(numPoints)
 {
 	// Read in sheet name
@@ -342,23 +339,23 @@ CC_sheet::SelectPointsOfContinuity(unsigned i) const
 }
 
 
-void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
+void CC_sheet::SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position)
 {
 	unsigned i, cpy, col;
-	CC_coord c, coff(show->GetMode().FieldOffset());
+	CC_coord c;
 
 	std::vector<CC_point> newpts(num);
-	cpy = std::min<unsigned>(show->GetNumPoints(), num);
+	cpy = std::min<unsigned>(pts.size(), num);
 	for (i = 0; i < cpy; i++)
 	{
 		newpts[i] = pts[i];
 	}
-	for (c = coff, col = 0; i < num; i++, col++, c.x += Int2Coord(2))
+	for (c = new_march_position, col = 0; i < num; i++, col++, c.x += Int2Coord(2))
 	{
 		const CC_continuity& plaincont = GetStandardContinuity(SYMBOL_PLAIN);
 		if (col >= columns)
 		{
-			c.x = coff.x;
+			c.x = new_march_position.x;
 			c.y += Int2Coord(2);
 			col = 0;
 		}
@@ -368,9 +365,13 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns)
 }
 
 
-void CC_sheet::RelabelSheet(unsigned *table)
+void CC_sheet::RelabelSheet(const std::vector<size_t>& table)
 {
-	std::vector<CC_point> newpts(show->GetNumPoints());
+	if (pts.size() != table.size())
+	{
+		throw std::runtime_error("wrong size for Relabel");
+	}
+	std::vector<CC_point> newpts(pts.size());
 	for (size_t i = 0; i < newpts.size(); i++)
 	{
 		newpts[i] = pts[table[i]];
@@ -546,21 +547,20 @@ void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
 void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
 {
 	unsigned j;
-	CC_coord clippedval = show->GetMode().ClipPosition(val);
 	if (ref == 0)
 	{
 		for (j = 1; j <= CC_point::kNumRefPoints; j++)
 		{
 			if (pts[i].GetPos(j) == pts[i].GetPos(0))
 			{
-				pts[i].SetPos(clippedval, j);
+				pts[i].SetPos(val, j);
 			}
 		}
-		pts[i].SetPos(clippedval);
+		pts[i].SetPos(val);
 	}
 	else
 	{
-		pts[i].SetPos(clippedval, ref);
+		pts[i].SetPos(val, ref);
 	}
 }
 
@@ -584,7 +584,7 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
  */
 
 bool
-CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
+CC_sheet::ImportPrintableContinuity(const std::vector<std::string>& line_data)
 {
 	enum PSFONT_TYPE currfontnum;
 	currfontnum = PSFONT_NORM;
@@ -694,8 +694,14 @@ CC_sheet::ImportContinuity(const std::vector<std::string>& line_data)
 			line_text.chunks.push_back(new_text);
 			line.erase(0, pos);
 		}
-		continuity.push_back(line_text);
+		mPrintableContinuity.push_back(line_text);
 	}
 	return true;
+}
+
+CC_textline_list
+CC_sheet::GetPrintableContinuity() const
+{
+	return mPrintableContinuity;
 }
 

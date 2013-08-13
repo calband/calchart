@@ -528,9 +528,8 @@ void PrintShowToPS::PrintSheets(std::ostream& buffer, short& num_pages)
 	bool need_eject = false;
 	for (CC_show::const_CC_sheet_iterator_t sheet = mShow.GetSheetBegin(); sheet != mShow.GetSheetEnd(); ++sheet)
 	{
-		for (CC_textline_list::const_iterator text = sheet->continuity.begin();
-			text != sheet->continuity.end();
-			++text)
+		auto continuity = sheet->GetPrintableContinuity();
+		for (auto text = continuity.begin(); text != continuity.end(); ++text)
 		{
 			if (!text->on_main) continue;
 			if (lines_left <= 0)
@@ -591,9 +590,8 @@ void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 	short cont_len = 0;
 
 	float cont_height = field_y - step_size*10;
-	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
-		text != sheet.continuity.end();
-		++text)
+	auto continuity = sheet.GetPrintableContinuity();
+	for (auto text = continuity.begin(); text != continuity.end(); ++text)
 	{
 		if (text->on_sheet) cont_len++;
 	}
@@ -612,9 +610,7 @@ void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 	snprintf(buf, sizeof(buf), "/contfont findfont %.2f scalefont setfont\n",
 		this_size);
 	buffer<<buf;
-	for (CC_textline_list::const_iterator text = sheet.continuity.begin();
-		text != sheet.continuity.end();
-		++text)
+	for (CC_textline_list::const_iterator text = continuity.begin(); text != continuity.end(); ++text)
 	{
 		if (!text->on_sheet) continue;
 		snprintf(buf, sizeof(buf), "/x lmargin def\n");
