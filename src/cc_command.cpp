@@ -32,7 +32,9 @@
 // Holds the show reference, and handles setting the modify-ness of the show.
 BasicCalChartCommand::BasicCalChartCommand(CalChartDoc& doc, const wxString cmdName)
 : wxCommand(true, cmdName),
-mDoc(doc), mDocModified(doc.IsModified())
+mDoc(doc),
+mDocModified(doc.IsModified()),
+mSnapShot(doc.ShowSnapShot())
 {}
 
 BasicCalChartCommand::~BasicCalChartCommand()
@@ -41,6 +43,7 @@ BasicCalChartCommand::~BasicCalChartCommand()
 // applying a command modifies the show
 bool BasicCalChartCommand::Do()
 {
+	mSnapShot = mDoc.ShowSnapShot();
 	DoAction();
 	mDoc.Modify(true);
 	return true;
@@ -49,7 +52,7 @@ bool BasicCalChartCommand::Do()
 // undoing a command puts the state back to original
 bool BasicCalChartCommand::Undo()
 {
-	UndoAction();
+	mDoc.RestoreSnapShot(mSnapShot);
 	mDoc.Modify(mDocModified);
 	return true;
 }
@@ -58,49 +61,32 @@ bool BasicCalChartCommand::Undo()
 // SetDescriptionCommand
 // Set the description of this show
 SetDescriptionCommand::SetDescriptionCommand(CalChartDoc& show, const wxString& newdescr)
-: BasicCalChartCommand(show, wxT("Set Description"))
-{
-	mDescription = std::pair<wxString,wxString>(show.GetDescr(), newdescr);
-}
+: BasicCalChartCommand(show, wxT("Set Description")),
+mDescription(newdescr)
+{}
 
 SetDescriptionCommand::~SetDescriptionCommand()
 {}
 
-
 void SetDescriptionCommand::DoAction()
 {
-	mDoc.SetDescr(mDescription.second.ToStdString());
-}
-
-void SetDescriptionCommand::UndoAction()
-{
-	mDoc.SetDescr(mDescription.first.ToStdString());
+	mDoc.SetDescr(mDescription.ToStdString());
 }
 
 
-// SetDescriptionCommand
+// SetModeCommand
 // Set the show mode
 SetModeCommand::SetModeCommand(CalChartDoc& show, const wxString& newmode)
-: BasicCalChartCommand(show, wxT("Set Mode"))
-{
-	mMode = std::pair<wxString,wxString>(show.GetMode().GetName(), newmode);
-}
+: BasicCalChartCommand(show, wxT("Set Mode")),
+mMode(newmode)
+{}
 
 SetModeCommand::~SetModeCommand()
 {}
 
 void SetModeCommand::DoAction()
 {
-	ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), mMode.second);
-	if (newmode)
-	{
-		mDoc.SetMode(newmode);
-	}
-}
-
-void SetModeCommand::UndoAction()
-{
-	ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), mMode.first);
+	ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), mMode);
 	if (newmode)
 	{
 		mDoc.SetMode(newmode);
@@ -112,16 +98,9 @@ void SetModeCommand::UndoAction()
 // Sets the shows number of points and labels 
 SetShowInfoCommand::SetShowInfoCommand(CalChartDoc& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels)
 : BasicCalChartCommand(show, wxT("Set show info")),
-mNumPoints(numPoints), mNumColumns(numColumns)
-{
-	mOriginalNumPoints = mDoc.GetNumPoints();
-	std::vector<wxString> tlabels(mDoc.GetPointLabels().begin(), mDoc.GetPointLabels().end());
-	mLabels = std::pair<std::vector<wxString>,std::vector<wxString> >(tlabels, labels);
-	for (auto sht = mDoc.GetSheetBegin(); sht != mDoc.GetSheetEnd(); ++sht)
-	{
-		mOriginalPoints.push_back(sht->GetPoints());
-	}
-}
+mNumPoints(numPoints), mNumColumns(numColumns),
+mLabels(labels)
+{}
 
 SetShowInfoCommand::~SetShowInfoCommand()
 {}
@@ -129,18 +108,7 @@ SetShowInfoCommand::~SetShowInfoCommand()
 void SetShowInfoCommand::DoAction()
 {
 	mDoc.SetNumPoints(mNumPoints, mNumColumns);
-	mDoc.SetPointLabel(std::vector<std::string>(mLabels.second.begin(), mLabels.second.end()));
-}
-
-void SetShowInfoCommand::UndoAction()
-{
-	size_t i = 0; 
-	mDoc.SetNumPoints(mOriginalNumPoints, 1);
-	for (CC_show::CC_sheet_iterator_t sht = mDoc.GetSheetBegin(); sht != mDoc.GetSheetEnd(); ++sht, ++i)
-	{
-		sht->SetPoints(mOriginalPoints.at(i));
-	}
-	mDoc.SetPointLabel(std::vector<std::string>(mLabels.first.begin(), mLabels.first.end()));
+	mDoc.SetPointLabel(std::vector<std::string>(mLabels.begin(), mLabels.end()));
 }
 
 
@@ -160,20 +128,13 @@ void SetSheetCommand::DoAction()
 	mDoc.SetCurrentSheet(mSheetNum);
 }
 
-void SetSheetCommand::UndoAction()
-{
-	mDoc.SetCurrentSheet(mSheetNum);
-}
-
 
 // SetSheetTitleCommand
 // Set the description of the current sheet
 SetSheetTitleCommand::SetSheetTitleCommand(CalChartDoc& show, const wxString& newname)
-: SetSheetCommand(show, wxT("Set title"))
-{
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	mDescription = std::pair<wxString,wxString>(sheet->GetName(), newname);
-}
+: SetSheetCommand(show, wxT("Set title")),
+mDescription(newname)
+{}
 
 SetSheetTitleCommand::~SetSheetTitleCommand()
 {}
@@ -181,26 +142,16 @@ SetSheetTitleCommand::~SetSheetTitleCommand()
 void SetSheetTitleCommand::DoAction()
 {
 	SetSheetCommand::DoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->SetName(std::string(mDescription.second));
-}
-
-void SetSheetTitleCommand::UndoAction()
-{
-	SetSheetCommand::UndoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->SetName(std::string(mDescription.first));
+	mDoc.GetCurrentSheet()->SetName(std::string(mDescription));
 }
 
 
 // SetSheetBeatsCommand
 // Set the beats of the current sheet
 SetSheetBeatsCommand::SetSheetBeatsCommand(CalChartDoc& show, unsigned short beats)
-: SetSheetCommand(show, wxT("Set beats"))
-{
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	mBeats = std::pair<unsigned short,unsigned short>(sheet->GetBeats(), beats);
-}
+: SetSheetCommand(show, wxT("Set beats")),
+mBeats(beats)
+{}
 
 SetSheetBeatsCommand::~SetSheetBeatsCommand()
 {}
@@ -208,15 +159,7 @@ SetSheetBeatsCommand::~SetSheetBeatsCommand()
 void SetSheetBeatsCommand::DoAction()
 {
 	SetSheetCommand::DoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->SetBeats(mBeats.second);
-}
-
-void SetSheetBeatsCommand::UndoAction()
-{
-	SetSheetCommand::UndoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->SetBeats(mBeats.first);
+	mDoc.GetCurrentSheet()->SetBeats(mBeats);
 }
 
 
@@ -236,13 +179,6 @@ void AddSheetsCommand::DoAction()
 	mDoc.InsertSheetInternal(mSheets, mWhere);
 }
 
-void AddSheetsCommand::UndoAction()
-{
-	mDoc.RemoveNthSheet(mWhere);
-	// intentionally do this afterwards
-	SetSheetCommand::UndoAction(); // sets page
-}
-
 
 // RemoveSheetsCommand
 // For removing a sheets
@@ -257,14 +193,7 @@ RemoveSheetsCommand::~RemoveSheetsCommand()
 void RemoveSheetsCommand::DoAction()
 {
 	SetSheetCommand::DoAction(); // sets page
-	mSheets = mDoc.RemoveNthSheet(mWhere);
-}
-
-void RemoveSheetsCommand::UndoAction()
-{
-	mDoc.InsertSheetInternal(mSheets, mWhere);
-	// intentionally do this afterwards
-	SetSheetCommand::UndoAction(); // sets page
+	mDoc.RemoveNthSheet(mWhere);
 }
 
 
@@ -285,33 +214,9 @@ void SetSheetAndSelectCommand::DoAction()
 	mDoc.SetSelection(mPoints);
 }
 
-void SetSheetAndSelectCommand::UndoAction()
-{
-	SetSheetCommand::UndoAction(); // sets page
-	mDoc.SetSelection(mPoints);
-}
-
-
-// Added or remove continuity base class
-AddRemoveContinuityCommand::AddRemoveContinuityCommand(CalChartDoc& show)
-: SetSheetCommand(show, wxT("Adding or removing continuity"))
-{
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	mOrigAnimcont = sheet->animcont;
-}
-
-AddRemoveContinuityCommand::~AddRemoveContinuityCommand()
-{}
-
-void AddRemoveContinuityCommand::UndoAction()
-{
-	SetSheetCommand::UndoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->animcont = mOrigAnimcont;
-}
 
 AddContinuityCommand::AddContinuityCommand(CalChartDoc& show, const wxString& text)
-: AddRemoveContinuityCommand(show),
+: SetSheetCommand(show, wxT("Adding continuity command")),
 mContName(text)
 {}
 
@@ -328,7 +233,7 @@ void AddContinuityCommand::DoAction()
 
 
 RemoveContinuityCommand::RemoveContinuityCommand(CalChartDoc& show, unsigned index)
-: AddRemoveContinuityCommand(show),
+: SetSheetCommand(show, wxT("Remove continuity command")),
 mIndexToRemove(index)
 {}
 
@@ -358,19 +263,9 @@ void MovePointsOnSheetCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<CC_coord,CC_coord> >::const_iterator i = mPositions.begin(); i != mPositions.end(); ++i)
+	for (auto i = mPositions.begin(); i != mPositions.end(); ++i)
 	{
-		sheet->SetPosition(mDoc.GetMode().ClipPosition(i->second.second), i->first, mRef);
-	}
-}
-
-void MovePointsOnSheetCommand::UndoAction()
-{
-	SetSheetAndSelectCommand::UndoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<CC_coord,CC_coord> >::const_iterator i = mPositions.begin(); i != mPositions.end(); ++i)
-	{
-		sheet->SetPosition(mDoc.GetMode().ClipPosition(i->second.first), i->first, mRef);
+		sheet->SetPosition(mDoc.GetMode().ClipPosition(i->second), i->first, mRef);
 	}
 }
 
@@ -383,7 +278,7 @@ TranslatePointsByDeltaCommand::TranslatePointsByDeltaCommand(CalChartDoc& show, 
 	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), sheet->GetPosition(*i, mRef) + delta);
+		mPositions[*i] = sheet->GetPosition(*i, mRef) + delta;
 	}
 }
 
@@ -404,7 +299,7 @@ TransformPointsCommand::TransformPointsCommand(CalChartDoc& show, const Matrix& 
 		v = transmat * v;
 		v.Homogenize();
 		c = CC_coord(RoundToCoord(v.GetX()), RoundToCoord(v.GetY()));
-		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), c);
+		mPositions[*i] = c;
 	}
 }
 
@@ -417,17 +312,15 @@ TransformPointsCommand::~TransformPointsCommand()
 TransformPointsInALineCommand::TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref)
 : MovePointsOnSheetCommand(show, ref)
 {
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetNthSheet(mSheetNum);
 	CC_coord curr_pos = start;
 	for (auto i = mPoints.begin(); i != mPoints.end(); ++i, curr_pos += second - start)
 	{
-		mPositions[*i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(*i, mRef), curr_pos);
+		mPositions[*i] = curr_pos;
 	}
 }
 
 TransformPointsInALineCommand::~TransformPointsInALineCommand()
-{
-}
+{}
 
 
 // SetReferencePointToRef0 :
@@ -440,13 +333,12 @@ MovePointsOnSheetCommand(show, ref)
 	const unsigned short numPoints = mDoc.GetNumPoints();
 	for (unsigned short i = 0; i != numPoints; ++i)
 	{
-		mPositions[i] = std::pair<CC_coord,CC_coord>(sheet->GetPosition(i, mRef), sheet->GetPosition(i, 0));
+		mPositions[i] = sheet->GetPosition(i, 0);
 	}
 }
 
 SetReferencePointToRef0::~SetReferencePointToRef0()
-{
-}
+{}
 
 
 // SetContinuityIndexCommand:
@@ -454,10 +346,9 @@ SetReferencePointToRef0::~SetReferencePointToRef0()
 SetContinuityIndexCommand::SetContinuityIndexCommand(CalChartDoc& show, unsigned index)
 : SetSheetAndSelectCommand(show, wxT("Setting Continuity Index"))
 {
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		mContinuity[*i] = std::pair<unsigned,unsigned>(sheet->GetPoint(*i).GetContinuityIndex(), index);
+		mContinuity[*i] = index;
 	}
 }
 
@@ -468,19 +359,9 @@ void SetContinuityIndexCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<unsigned,unsigned> >::const_iterator i = mContinuity.begin(); i != mContinuity.end(); ++i)
+	for (auto i = mContinuity.begin(); i != mContinuity.end(); ++i)
 	{
-		sheet->GetPoint(i->first).SetContinuityIndex(i->second.second);
-	}
-}
-
-void SetContinuityIndexCommand::UndoAction()
-{
-	SetSheetAndSelectCommand::UndoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<unsigned,unsigned> >::const_iterator i = mContinuity.begin(); i != mContinuity.end(); ++i)
-	{
-		sheet->GetPoint(i->first).SetContinuityIndex(i->second.first);
+		sheet->GetPoint(i->first).SetContinuityIndex(i->second);
 	}
 }
 
@@ -491,16 +372,12 @@ SetSymbolAndContCommand::SetSymbolAndContCommand(CalChartDoc& show, SYMBOL_TYPE 
 : SetSheetAndSelectCommand(show, wxT("Setting Continuity Symbol"))
 {
 	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	// because getting the standard continuity can create one, we need to make it so we can undo
-	// the modification of the continuity list.
-	mOrigAnimcont = sheet->animcont;
-	
 	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
 		// Only do work on points that have different symbols
 		if (sym != sheet->GetPoint(*i).GetSymbol())
 		{
-			mSymsAndCont[*i] = std::pair<sym_cont_t,sym_cont_t>(sym_cont_t(sheet->GetPoint(*i).GetSymbol(), sheet->GetPoint(*i).GetContinuityIndex()), sym_cont_t(sym, sheet->GetPoint(*i).GetContinuityIndex()));
+			mSymsAndCont[*i] = sym_cont_t(sym, sheet->GetPoint(*i).GetContinuityIndex());
 		}
 	}
 }
@@ -513,23 +390,11 @@ void SetSymbolAndContCommand::DoAction()
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 // possible optimization:  Don't save as map, since they all get moved to new symbol...
-	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
+	for (auto i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
 	{
-		sheet->GetPoint(i->first).SetSymbol(i->second.second.first);
-		sheet->GetPoint(i->first).SetContinuityIndex(sheet->GetStandardContinuity(i->second.second.first).GetNum());
+		sheet->GetPoint(i->first).SetSymbol(i->second.first);
+		sheet->GetPoint(i->first).SetContinuityIndex(sheet->GetStandardContinuity(i->second.first).GetNum());
 	}
-}
-
-void SetSymbolAndContCommand::UndoAction()
-{
-	SetSheetAndSelectCommand::UndoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> >::const_iterator i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
-	{
-		sheet->GetPoint(i->first).SetSymbol(i->second.first.first);
-		sheet->GetPoint(i->first).SetContinuityIndex(i->second.first.second);
-	}
-	sheet->animcont = mOrigAnimcont;
 }
 
 
@@ -537,11 +402,9 @@ void SetSymbolAndContCommand::UndoAction()
 // Sets the continuity text
 SetContinuityTextCommand::SetContinuityTextCommand(CalChartDoc& show, unsigned i, const wxString& text)
 : SetSheetAndSelectCommand(show, wxT("Setting Continuity Text")),
-mWhichCont(i)
-{
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	mContinuity = std::pair<wxString,wxString>(sheet->GetNthContinuity(mWhichCont).GetText(), text);
-}
+mWhichCont(i),
+mContinuity(text)
+{}
 
 SetContinuityTextCommand::~SetContinuityTextCommand()
 {}
@@ -549,15 +412,7 @@ SetContinuityTextCommand::~SetContinuityTextCommand()
 void SetContinuityTextCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->SetNthContinuity(mContinuity.second.ToStdString(), mWhichCont);
-}
-
-void SetContinuityTextCommand::UndoAction()
-{
-	SetSheetAndSelectCommand::UndoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->SetNthContinuity(mContinuity.first.ToStdString(), mWhichCont);
+	mDoc.GetCurrentSheet()->SetNthContinuity(mContinuity.ToStdString(), mWhichCont);
 }
 
 
@@ -572,19 +427,9 @@ void SetLabelCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<bool,bool> >::const_iterator i = mLabelPos.begin(); i != mLabelPos.end(); ++i)
+	for (auto i = mLabelPos.begin(); i != mLabelPos.end(); ++i)
 	{
-		sheet->GetPoint(i->first).Flip(i->second.second);
-	}
-}
-
-void SetLabelCommand::UndoAction()
-{
-	SetSheetAndSelectCommand::UndoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (std::map<unsigned, std::pair<bool,bool> >::const_iterator i = mLabelPos.begin(); i != mLabelPos.end(); ++i)
-	{
-		sheet->GetPoint(i->first).Flip(i->second.first);
+		sheet->GetPoint(i->first).Flip(i->second);
 	}
 }
 
@@ -592,10 +437,9 @@ void SetLabelCommand::UndoAction()
 SetLabelRightCommand::SetLabelRightCommand(CalChartDoc& show, bool right)
 : SetLabelCommand(show)
 {
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		mLabelPos[*i] = std::pair<bool,bool>(sheet->GetPoint(*i).GetFlip(), right);
+		mLabelPos[*i] = right;
 	}
 }
 
@@ -609,7 +453,7 @@ SetLabelFlipCommand::SetLabelFlipCommand(CalChartDoc& show)
 	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
 	{
-		mLabelPos[*i] = std::pair<bool,bool>(sheet->GetPoint(*i).GetFlip(), !sheet->GetPoint(*i).GetFlip());
+		mLabelPos[*i] = !sheet->GetPoint(*i).GetFlip();
 	}
 }
 

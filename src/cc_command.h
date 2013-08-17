@@ -32,14 +32,12 @@
 #include <map>
 #include <wx/cmdproc.h>
 
-// We assume that all commands are issued as soon as they are created.
-// This is important because the commands may "snap-shot" the system to know
-// how to do the 'undo'.
+class Matrix;
 
-// We implement our command in the base class, and each of the commands
-// needs to implement a "DoAction" and "UndoAction".  This allows the
-// base class to control the preamble and postamble of the calls.
- 
+// We take a snapshot of the show when the command is created and also
+// when it's Do() is called.  This is a little bit unnecessary.
+// The Undo() command reverts the show to the original snapshot
+
 // BasicCalChartCommand
 // The low level command all other commands should inherit from.
 // Holds the show reference, and handles setting the modify-ness of the show.
@@ -58,8 +56,8 @@ protected:
 
 private:
 	virtual void DoAction() = 0;
-	virtual void UndoAction() = 0;
 	bool mDocModified;
+	CC_show mSnapShot;
 };
 
 ///// Global show commands.  Changes settings to a whole show.
@@ -74,9 +72,7 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	std::pair<wxString,wxString> mDescription;
+	wxString mDescription;
 };
 
 
@@ -85,14 +81,12 @@ protected:
 class SetModeCommand : public BasicCalChartCommand
 {
 public:
-	SetModeCommand(CalChartDoc& show, const wxString& newdescr);
+	SetModeCommand(CalChartDoc& show, const wxString& newmode);
 	virtual ~SetModeCommand();
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	std::pair<wxString,wxString> mMode;
+	wxString mMode;
 };
 
 
@@ -106,13 +100,9 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
 	unsigned mNumPoints;
 	unsigned mNumColumns;
-	unsigned mOriginalNumPoints;
-	std::pair<std::vector<wxString>,std::vector<wxString> > mLabels;
-	std::vector<std::vector<CC_point> > mOriginalPoints;
+	std::vector<wxString> mLabels;
 };
 
 
@@ -130,8 +120,6 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
 	const unsigned mSheetNum;
 };
 
@@ -146,9 +134,7 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	std::pair<wxString,wxString> mDescription;
+	wxString mDescription;
 };
 
 
@@ -162,9 +148,7 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	std::pair<unsigned short,unsigned short> mBeats;
+	unsigned short mBeats;
 };
 
 
@@ -178,8 +162,6 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
 	CC_show::CC_sheet_container_t mSheets;
 	const unsigned mWhere;
 };
@@ -194,30 +176,13 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	CC_show::CC_sheet_container_t mSheets;
 	const unsigned mWhere;
 };
 
 
-// AddRemoveContinuityCommand
-// Base for both adding and removing a continuity
-class AddRemoveContinuityCommand : public SetSheetCommand
-{
-public:
-	AddRemoveContinuityCommand(CalChartDoc& show);
-	virtual ~AddRemoveContinuityCommand();
-
-protected:
-	virtual void UndoAction();
-
-	CC_sheet::ContContainer mOrigAnimcont;
-};
-
 // AddContinuityCommand
 // Adding a continuity
-class AddContinuityCommand : public AddRemoveContinuityCommand
+class AddContinuityCommand : public SetSheetCommand
 {
 public:
 	AddContinuityCommand(CalChartDoc& show, const wxString& text);
@@ -225,13 +190,12 @@ public:
 
 protected:
 	virtual void DoAction();
-
 	const wxString mContName;
 };
 
 // RemoveContinuityCommand
 // Removing a continuity
-class RemoveContinuityCommand : public AddRemoveContinuityCommand
+class RemoveContinuityCommand : public SetSheetCommand
 {
 public:
 	RemoveContinuityCommand(CalChartDoc& show, unsigned i);
@@ -257,8 +221,6 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
 	const SelectionList mPoints;
 };
 
@@ -276,9 +238,8 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
 
-	std::map<unsigned, std::pair<CC_coord,CC_coord> > mPositions;
+	std::map<unsigned, CC_coord> mPositions;
 	const unsigned mRef;
 };
 
@@ -333,9 +294,7 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	std::map<unsigned, std::pair<unsigned,unsigned> > mContinuity;
+	std::map<unsigned, unsigned> mContinuity;
 };
 
 
@@ -349,11 +308,8 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
-	CC_sheet::ContContainer mOrigAnimcont;
 	typedef std::pair<SYMBOL_TYPE,unsigned> sym_cont_t;
-	std::map<unsigned, std::pair<sym_cont_t,sym_cont_t> > mSymsAndCont;
+	std::map<unsigned, sym_cont_t> mSymsAndCont;
 };
 
 
@@ -367,10 +323,8 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
-
 	unsigned mWhichCont;
-	std::pair<wxString,wxString> mContinuity;
+	wxString mContinuity;
 };
 
 
@@ -385,9 +339,8 @@ public:
 
 protected:
 	virtual void DoAction();
-	virtual void UndoAction();
 
-	std::map<unsigned, std::pair<bool,bool> > mLabelPos;
+	std::map<unsigned, bool> mLabelPos;
 };
 
 

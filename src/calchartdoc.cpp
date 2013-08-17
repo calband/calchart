@@ -454,33 +454,15 @@ CalChartDoc::SetMode(const ShowMode* m)
 	UpdateAllViews();
 }
 
-
-#include <iostream>
-using std::cout;
-
-struct ShowTestData
+CC_show
+CalChartDoc::ShowSnapShot() const
 {
-	bool Ok;
-	
-};
-void CalChartDoc_UnitTests()
-{
-	CalChartDoc test;
-//	cout<<"ok "<<test.mOkay<<"\n";
-//	assert(test.Ok() == true);
-//	cout<<"GetError "<<(wchar_t*)test.GetError().c_str()<<"\n";
-//	assert(test.Ok() == true);
-	cout<<"GetTitle "<<test.GetTitle().c_str()<<"\n";
-	cout<<"GetDescr "<<test.GetDescr().c_str()<<"\n";
-	cout<<"Modified "<<test.IsModified()<<"\n";
-	cout<<"GetNumSheets "<<test.GetNumSheets()<<"\n";
-	cout<<"GetNumPoints "<<test.GetNumPoints()<<"\n";
-	for (unsigned i = 0; i < test.GetNumPoints(); ++i)
-	{
-		cout<<"GetPointLabel "<<i<<" "<<test.GetPointLabel(i).c_str()<<"\n";
-	}
-	cout<<"GetMode "<<(void*)&test.GetMode()<<"\n";
+	return *mShow.get();
 }
 
-
+void
+CalChartDoc::RestoreSnapShot(const CC_show& snapshot)
+{
+	mShow.reset(new CC_show(snapshot));
+}
 

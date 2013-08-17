@@ -117,13 +117,11 @@ FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 	{
 		GeneratePaths();
 	}
-	else
+	
+	if (mFrame)
 	{
-		if (mFrame)
-		{
-			mFrame->UpdatePanel();
-			mFrame->Refresh();
-		}
+		mFrame->UpdatePanel();
+		mFrame->Refresh();
 	}
 }
 

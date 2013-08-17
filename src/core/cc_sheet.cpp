@@ -191,7 +191,7 @@ pts(numPoints)
 		CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
 		std::string textstr(text);
 		newcont.SetText(textstr);
-		animcont.push_back(newcont);
+		mAnimationContinuity.push_back(newcont);
 		
 		name = ReadLong(stream);
 	}
@@ -284,7 +284,7 @@ CC_sheet::WriteSheet() const
 		}
 	}
 	// Continuity text
-	for (CC_sheet::ContContainer::const_iterator curranimcont = animcont.begin(); curranimcont != animcont.end();
+	for (CC_sheet::ContContainer::const_iterator curranimcont = mAnimationContinuity.begin(); curranimcont != mAnimationContinuity.end();
 		 ++curranimcont)
 	{
 		WriteChunkHeader(stream, INGL_CONT,
@@ -382,33 +382,33 @@ void CC_sheet::RelabelSheet(const std::vector<size_t>& table)
 
 const CC_continuity& CC_sheet::GetNthContinuity(unsigned i) const
 {
-	return animcont.at(i);
+	return mAnimationContinuity.at(i);
 }
 
 
 void CC_sheet::SetNthContinuity(const std::string& text, unsigned i)
 {
-	animcont.at(i).SetText(text);
+	mAnimationContinuity.at(i).SetText(text);
 }
 
 
 CC_continuity CC_sheet::RemoveNthContinuity(unsigned i)
 {
-	CC_continuity cont = animcont.at(i);
-	animcont.erase(animcont.begin()+i);
+	CC_continuity cont = mAnimationContinuity.at(i);
+	mAnimationContinuity.erase(mAnimationContinuity.begin()+i);
 	return cont;
 }
 
 
 void CC_sheet::InsertContinuity(const CC_continuity& newcont, unsigned i)
 {
-	animcont.insert(animcont.begin() + i, newcont);
+	mAnimationContinuity.insert(mAnimationContinuity.begin() + i, newcont);
 }
 
 
 void CC_sheet::AppendContinuity(const CC_continuity& newcont)
 {
-	animcont.push_back(newcont);
+	mAnimationContinuity.push_back(newcont);
 }
 
 
@@ -420,7 +420,7 @@ unsigned CC_sheet::NextUnusedContinuityNum()
 	do
 	{
 		found = false;
-		for (ContContainer::const_iterator c = animcont.begin(); c != animcont.end(); ++c)
+		for (ContContainer::const_iterator c = mAnimationContinuity.begin(); c != mAnimationContinuity.end(); ++c)
 		{
 			if (c->GetNum() == i)
 			{
@@ -438,7 +438,7 @@ unsigned CC_sheet::NextUnusedContinuityNum()
 const CC_continuity& CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 {
 
-	for (ContContainer::const_iterator c = animcont.begin(); c != animcont.end(); ++c)
+	for (ContContainer::const_iterator c = mAnimationContinuity.begin(); c != mAnimationContinuity.end(); ++c)
 	{
 		if (boost::iequals(c->GetName(), contnames[sym]))
 		{
@@ -463,16 +463,16 @@ const CC_continuity& CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
 unsigned CC_sheet::FindContinuityByName(const std::string& name) const
 {
 	unsigned idx;
-	ContContainer::const_iterator c = animcont.begin();
+	ContContainer::const_iterator c = mAnimationContinuity.begin();
 
-	for (idx = 1; c != animcont.end(); idx++, ++c)
+	for (idx = 1; c != mAnimationContinuity.end(); idx++, ++c)
 	{
 		if (boost::iequals(c->GetName(), mName))
 		{
 			break;
 		}
 	}
-	if (c == animcont.end())
+	if (c == mAnimationContinuity.end())
 	{
 		idx = 0;
 	}
@@ -703,5 +703,11 @@ CC_textline_list
 CC_sheet::GetPrintableContinuity() const
 {
 	return mPrintableContinuity;
+}
+
+CC_sheet::ContContainer
+CC_sheet::GetAnimationContinuity() const
+{
+	return mAnimationContinuity;
 }
 

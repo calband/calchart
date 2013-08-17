@@ -35,7 +35,6 @@
 
 class CC_show;
 class CC_coord;
-class Matrix;
 typedef std::vector<CC_textline> CC_textline_list;
 
 class CC_sheet
@@ -98,11 +97,13 @@ public:
 	// continuity that gets printed
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
 	CC_textline_list GetPrintableContinuity() const;
-	
+
 	typedef std::vector<CC_continuity> ContContainer;
-	ContContainer animcont;
-	
+	ContContainer GetAnimationContinuity() const;
+
 private:
+	ContContainer mAnimationContinuity;
+
 	CC_textline_list mPrintableContinuity;
 	unsigned short beats;
 	std::vector<CC_point> pts;

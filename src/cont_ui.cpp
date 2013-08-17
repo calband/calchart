@@ -299,8 +299,8 @@ void ContinuityEditor::Update()
 	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 
 	mContinuityChoices->Clear();
-	for (CC_sheet::ContContainer::const_iterator curranimcont = sht->animcont.begin(); curranimcont != sht->animcont.end();
-		++curranimcont)
+	auto animcont = sht->GetAnimationContinuity();
+	for (auto curranimcont = animcont.begin(); curranimcont != animcont.end(); ++curranimcont)
 	{
 		mContinuityChoices->Append(curranimcont->GetName());
 	}
@@ -312,8 +312,9 @@ void ContinuityEditor::Update()
 void ContinuityEditor::UpdateContChoice()
 {
 	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
-	if (mCurrentContinuityChoice >= sht->animcont.size() && sht->animcont.size() > 0)
-		mCurrentContinuityChoice = sht->animcont.size()-1;
+	auto animcont = sht->GetAnimationContinuity();
+	if (mCurrentContinuityChoice >= animcont.size() && animcont.size() > 0)
+		mCurrentContinuityChoice = animcont.size()-1;
 	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
 }
 

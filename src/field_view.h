@@ -33,6 +33,7 @@
 class FieldFrame;
 class AnimationFrame;
 class Animation;
+class Matrix;
 
 // Field:
 // Field is the editable overhead view of the marchers on the field.

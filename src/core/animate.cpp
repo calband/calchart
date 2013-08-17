@@ -123,8 +123,8 @@ mCollisionAction(NULL)
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
 		int contnum = 0;
-		for (CC_sheet::ContContainer::const_iterator currcont = curr_sheet->animcont.begin(); currcont != curr_sheet->animcont.end();
-			++currcont, contnum++)
+		auto animcont = curr_sheet->GetAnimationContinuity();
+		for (auto currcont = animcont.begin(); currcont != animcont.end(); ++currcont, contnum++)
 		{
 			if (!currcont->GetText().empty())
 			{
