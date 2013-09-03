@@ -20,11 +20,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "math_utils.h"
 #include "animatecommand.h"
 #include "cc_sheet.h"
 #include "cont.h"
 #include "parse.h"
-#include "math_utils.h"
 
 int float2int(const ContProcedure *proc,
 AnimateCompile *anim,
@@ -87,7 +87,7 @@ ContValue *numbeats)
 		/ c;
 	if (IsDiagonalDirection(d2))
 	{
-		steps2 /= SQRT2;
+		steps2 /= static_cast<float>(SQRT2);
 	}
 	CreateVector(v2, d2, steps2);
 	p[2] = p[1] + v2;
@@ -111,7 +111,7 @@ ContValue *numbeats)
 		else
 		{
 			v1 = p[3] - anim->GetPointPosition();
-			c = BoundDirectionSigned(v1.Direction() - d1 - 180.0);
+			c = BoundDirectionSigned(v1.Direction() - d1 - 180.0f);
 			if ((v1 != 0) && (IS_ZERO(c)))
 			{
 				leg = 3;
@@ -119,7 +119,7 @@ ContValue *numbeats)
 			else
 			{
 				v1 = p[0] - anim->GetPointPosition();
-				c = BoundDirectionSigned(v1.Direction() - d2 - 180.0);
+				c = BoundDirectionSigned(v1.Direction() - d2 - 180.0f);
 				if ((v1 != 0) && (IS_ZERO(c)))
 				{
 					leg = 0;
@@ -152,7 +152,7 @@ ContValue *numbeats)
 			switch(leg)
 			{
 				case 0:
-					CreateVector(v1, d2+180.0, beats);
+					CreateVector(v1, d2+180.0f, beats);
 					break;
 				case 1:
 					CreateVector(v1, d1, beats);
@@ -161,7 +161,7 @@ ContValue *numbeats)
 					CreateVector(v1, d2, beats);
 					break;
 				default:
-					CreateVector(v1, d1+180.0, beats);
+					CreateVector(v1, d1+180.0f, beats);
 					break;
 			}
 			anim->Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(float2unsigned(proc, anim, beats),
@@ -257,10 +257,10 @@ float ContValueDefined::Get(AnimateCompile*) const
 			f = 1.0;
 			break;
 		case CC_M:
-			f = 4.0/3;
+			f = 4.0f/3;
 			break;
 		case CC_DM:
-			f = SQRT2;
+			f = static_cast<float>(SQRT2);
 			break;
 	}
 	return f;
@@ -465,7 +465,7 @@ ContFuncOpp::~ContFuncOpp()
 
 float ContFuncOpp::Get(AnimateCompile* anim) const
 {
-	return (dir->Get(anim) + 180.0);
+	return (dir->Get(anim) + 180.0f);
 }
 
 

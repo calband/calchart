@@ -95,7 +95,7 @@ public:
 	void RemoveFromSelection(const SelectionList& sl);
 	void ToggleSelection(const SelectionList& sl);
 	void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref);
-	inline bool IsSelected(unsigned i) const { return selectionList.count(i); }
+	inline bool IsSelected(unsigned i) const { return selectionList.count(i) != 0; }
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
 
 private:

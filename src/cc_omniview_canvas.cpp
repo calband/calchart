@@ -296,51 +296,51 @@ GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirection, f
 	
 	if (cameraAngleToMarcher >= 1.0*M_PI/8.0 && cameraAngleToMarcher < 3.0*M_PI/8.0) 
 	{
-		y1 += 0.45;
-		y2 -= 0.45;
-		x1 -= 0.45;
-		x2 += 0.45;
+		y1 += 0.45f;
+		y2 -= 0.45f;
+		x1 -= 0.45f;
+		x2 += 0.45f;
 	}
 	else if (cameraAngleToMarcher >= 3.0*M_PI/8.0 && cameraAngleToMarcher < 5.0*M_PI/8.0)
 	{
-		x1 -= 0.45;
-		x2 += 0.45;
+		x1 -= 0.45f;
+		x2 += 0.45f;
 	}
 	else if (cameraAngleToMarcher >= 5.0*M_PI/8.0 && cameraAngleToMarcher < 7.0*M_PI/8.0)
 	{
-		y1 -= 0.45;
-		y2 += 0.45;
-		x1 -= 0.45;
-		x2 += 0.45;
+		y1 -= 0.45f;
+		y2 += 0.45f;
+		x1 -= 0.45f;
+		x2 += 0.45f;
 	}
 	else if (cameraAngleToMarcher >= 7.0*M_PI/8.0 && cameraAngleToMarcher < 9.0*M_PI/8.0)
 	{
-		y1 -= 0.45;
-		y2 += 0.45;
+		y1 -= 0.45f;
+		y2 += 0.45f;
 	}
 	else if (cameraAngleToMarcher >= 9.0*M_PI/8.0 && cameraAngleToMarcher < 11.0*M_PI/8.0)
 	{
-		y1 -= 0.45;
-		y2 += 0.45;
-		x1 += 0.45;
-		x2 -= 0.45;
+		y1 -= 0.45f;
+		y2 += 0.45f;
+		x1 += 0.45f;
+		x2 -= 0.45f;
 	}
 	else if (cameraAngleToMarcher >= 11.0*M_PI/8.0 && cameraAngleToMarcher < 13.0*M_PI/8.0)
 	{
-		x1 += 0.45;
-		x2 -= 0.45;
+		x1 += 0.45f;
+		x2 -= 0.45f;
 	}
 	else if (cameraAngleToMarcher >= 13.0*M_PI/8.0 && relativeAngle < 15.0*M_PI/8.0)
 	{
-		y1 += 0.45;
-		y2 -= 0.45;
-		x1 += 0.45;
-		x2 -= 0.45;
+		y1 += 0.45f;
+		y2 -= 0.45f;
+		x1 += 0.45f;
+		x2 -= 0.45f;
 	}
 	else // if (cameraAngleToMarcher >= 15.0*M_PI/8.0 || cameraAngleToMarcher < 1.0*M_PI/8.0) // and everything else
 	{
-		y1 += 0.45;
-		y2 -= 0.45;
+		y1 += 0.45f;
+		y2 -= 0.45f;
 	}
 
 	if (relativeAngle >= 1.0*M_PI/8.0 && relativeAngle < 3.0*M_PI/8.0) 

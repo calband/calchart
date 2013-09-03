@@ -31,7 +31,8 @@
 #define COORD_DECIMAL (1<<COORD_SHIFT)
 
 // RoundToCoord: Use when number is already in Coord format, just needs to be rounded
-static inline Coord RoundToCoord(float inCoord) { return static_cast<Coord>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5)); }
+template <typename T>
+static inline Coord RoundToCoord(T inCoord) { return static_cast<Coord>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5)); }
 
 // Float2Coord, Coord2Float
 //  Use when we want to convert to Coord system

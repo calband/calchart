@@ -77,6 +77,7 @@ public:
 		AnimateDir mDirection;
 		float mRealDirection;
 		CC_coord mPosition;
+		animate_info_t(bool col, AnimateDir dir, float rdir, CC_coord pos) : mCollision(col), mDirection(dir), mRealDirection(rdir), mPosition(pos) {}
 	};
 	const animate_info_t GetAnimateInfo(unsigned which) const;
 

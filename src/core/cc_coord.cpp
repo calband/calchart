@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_coord.h"
-
 #define _USE_MATH_DEFINES
 #include <cmath>
+
+#include "cc_coord.h"
 #include <cstdlib>
 
 // Get magnitude of vector

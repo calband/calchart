@@ -370,7 +370,7 @@ void Animation::CheckCollisions()
 const Animation::animate_info_t
 Animation::GetAnimateInfo(unsigned which) const
 {
-	return { mCollisions.count(which), (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which) };
+	return Animation::animate_info_t( mCollisions.count(which), (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which) );
 }
 
 int Animation::GetNumberSheets() const
