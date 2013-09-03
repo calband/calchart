@@ -98,7 +98,7 @@ class CC_FileException : public std::runtime_error
 		uint8_t rawd[4];
 		put_big_long(rawd, nameID);
 		char s[128];
-		snprintf(s, sizeof(s), "Wrong ID read:  Read %c%c%c%c", rawd[0], rawd[1], rawd[2], rawd[3]);
+		_snprintf(s, sizeof(s), "Wrong ID read:  Read %c%c%c%c", rawd[0], rawd[1], rawd[2], rawd[3]);
 		return std::string(s);
 	}
 	
@@ -144,7 +144,7 @@ inline uint32_t ReadCheckIDandSize(T& stream, uint32_t inname)
 		uint8_t rawd[4];
 		put_big_long(rawd, inname);
 		char s[128];
-		snprintf(s, sizeof(s), "Wrong size %d for name %c%c%c%c", name, rawd[0], rawd[1], rawd[2], rawd[3]);
+		_snprintf(s, sizeof(s), "Wrong size %d for name %c%c%c%c", name, rawd[0], rawd[1], rawd[2], rawd[3]);
 		throw CC_FileException(s);
 	}
 	return ReadLong(stream);
