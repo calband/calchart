@@ -65,6 +65,7 @@ void initscanner() {
 %}
 
 %option noyywrap
+%option never-interactive
 
 DIGIT		[0-9]
 NUMBER		{DIGIT}+
