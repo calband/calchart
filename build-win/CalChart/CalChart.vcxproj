@@ -19,12 +19,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -41,7 +43,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;$(BOOST_DIR);..\..\resources;..\..\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;$(BOOST_DIR);..\..\resources;..\..\src;..\..\src\core</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -80,30 +82,33 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\animate.h" />
-    <ClInclude Include="..\..\src\animatecommand.h" />
     <ClInclude Include="..\..\src\animation_canvas.h" />
     <ClInclude Include="..\..\src\animation_frame.h" />
     <ClInclude Include="..\..\src\animation_view.h" />
     <ClInclude Include="..\..\src\background_image.h" />
     <ClInclude Include="..\..\src\basic_ui.h" />
     <ClInclude Include="..\..\src\calchartapp.h" />
+    <ClInclude Include="..\..\src\calchartdoc.h" />
     <ClInclude Include="..\..\src\ccvers.h" />
     <ClInclude Include="..\..\src\cc_command.h" />
-    <ClInclude Include="..\..\src\cc_continuity.h" />
-    <ClInclude Include="..\..\src\cc_coord.h" />
     <ClInclude Include="..\..\src\cc_omniview_canvas.h" />
     <ClInclude Include="..\..\src\cc_omniview_constants.h" />
-    <ClInclude Include="..\..\src\cc_point.h" />
     <ClInclude Include="..\..\src\cc_preferences_ui.h" />
     <ClInclude Include="..\..\src\cc_shapes.h" />
-    <ClInclude Include="..\..\src\cc_sheet.h" />
-    <ClInclude Include="..\..\src\cc_show.h" />
-    <ClInclude Include="..\..\src\cc_text.h" />
-    <ClInclude Include="..\..\src\cc_types.h" />
     <ClInclude Include="..\..\src\confgr.h" />
-    <ClInclude Include="..\..\src\cont.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
+    <ClInclude Include="..\..\src\core\animate.h" />
+    <ClInclude Include="..\..\src\core\animatecommand.h" />
+    <ClInclude Include="..\..\src\core\animatecompile.h" />
+    <ClInclude Include="..\..\src\core\animate_types.h" />
+    <ClInclude Include="..\..\src\core\cc_continuity.h" />
+    <ClInclude Include="..\..\src\core\cc_coord.h" />
+    <ClInclude Include="..\..\src\core\cc_point.h" />
+    <ClInclude Include="..\..\src\core\cc_sheet.h" />
+    <ClInclude Include="..\..\src\core\cc_show.h" />
+    <ClInclude Include="..\..\src\core\cc_text.h" />
+    <ClInclude Include="..\..\src\core\cc_types.h" />
+    <ClInclude Include="..\..\src\core\cont.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
@@ -123,26 +128,28 @@
   <ItemGroup>
     <ClCompile Include="..\..\generated\contgram.cpp" />
     <ClCompile Include="..\..\generated\contscan.cpp" />
-    <ClCompile Include="..\..\src\animate.cpp" />
-    <ClCompile Include="..\..\src\animatecommand.cpp" />
     <ClCompile Include="..\..\src\animation_canvas.cpp" />
     <ClCompile Include="..\..\src\animation_frame.cpp" />
     <ClCompile Include="..\..\src\animation_view.cpp" />
     <ClCompile Include="..\..\src\background_image.cpp" />
     <ClCompile Include="..\..\src\basic_ui.cpp" />
     <ClCompile Include="..\..\src\calchartapp.cpp" />
+    <ClCompile Include="..\..\src\calchartdoc.cpp" />
     <ClCompile Include="..\..\src\cc_command.cpp" />
-    <ClCompile Include="..\..\src\cc_continuity.cpp" />
-    <ClCompile Include="..\..\src\cc_coord.cpp" />
     <ClCompile Include="..\..\src\cc_omniview_canvas.cpp" />
-    <ClCompile Include="..\..\src\cc_point.cpp" />
     <ClCompile Include="..\..\src\cc_preferences_ui.cpp" />
     <ClCompile Include="..\..\src\cc_shapes.cpp" />
-    <ClCompile Include="..\..\src\cc_sheet.cpp" />
-    <ClCompile Include="..\..\src\cc_show.cpp" />
     <ClCompile Include="..\..\src\confgr.cpp" />
-    <ClCompile Include="..\..\src\cont.cpp" />
     <ClCompile Include="..\..\src\cont_ui.cpp" />
+    <ClCompile Include="..\..\src\core\animate.cpp" />
+    <ClCompile Include="..\..\src\core\animatecommand.cpp" />
+    <ClCompile Include="..\..\src\core\animatecompile.cpp" />
+    <ClCompile Include="..\..\src\core\cc_continuity.cpp" />
+    <ClCompile Include="..\..\src\core\cc_coord.cpp" />
+    <ClCompile Include="..\..\src\core\cc_point.cpp" />
+    <ClCompile Include="..\..\src\core\cc_sheet.cpp" />
+    <ClCompile Include="..\..\src\core\cc_show.cpp" />
+    <ClCompile Include="..\..\src\core\cont.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
