@@ -26,6 +26,7 @@
 #include "platconf.h"
 
 #include <stdexcept>
+#include <sstream>
 
 // Description of the CalChart file format layout, in modified Extended Backus–Naur Form
 // version 3.1.0 to current
@@ -97,9 +98,9 @@ class CC_FileException : public std::runtime_error
 	{
 		uint8_t rawd[4];
 		put_big_long(rawd, nameID);
-		char s[128];
-		_snprintf(s, sizeof(s), "Wrong ID read:  Read %c%c%c%c", rawd[0], rawd[1], rawd[2], rawd[3]);
-		return std::string(s);
+		std::stringstream buf;
+		buf<<"Wrong ID read:  Read "<<rawd[0]<<rawd[1]<<rawd[2]<<rawd[3];
+		return std::string(buf.str());
 	}
 	
 public:
@@ -143,9 +144,9 @@ inline uint32_t ReadCheckIDandSize(T& stream, uint32_t inname)
 	{
 		uint8_t rawd[4];
 		put_big_long(rawd, inname);
-		char s[128];
-		_snprintf(s, sizeof(s), "Wrong size %d for name %c%c%c%c", name, rawd[0], rawd[1], rawd[2], rawd[3]);
-		throw CC_FileException(s);
+		std::stringstream buf;
+		buf<<"Wrong size "<<name<<" for name "<<rawd[0]<<rawd[1]<<rawd[2]<<rawd[3];
+		throw CC_FileException(buf.str());
 	}
 	return ReadLong(stream);
 }
