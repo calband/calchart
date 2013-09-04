@@ -909,6 +909,7 @@
 		E813C4A917A7886100705836 /* animatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecommand.h; sourceTree = "<group>"; };
 		E813C4AA17A7886200705836 /* animatecompile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecompile.cpp; sourceTree = "<group>"; };
 		E813C4AB17A7886200705836 /* animatecompile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecompile.h; sourceTree = "<group>"; };
+		E86224C917C86369001E8063 /* animatedraw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatedraw.h; sourceTree = "<group>"; };
 		E878CC9A17ACA6AC009B1F1C /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
 		E878CC9B17ACA6AC009B1F1C /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
 		E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartdoc.cpp; sourceTree = "<group>"; };
@@ -1257,6 +1258,7 @@
 				E813C4A917A7886100705836 /* animatecommand.h */,
 				E813C4AA17A7886200705836 /* animatecompile.cpp */,
 				E813C4AB17A7886200705836 /* animatecompile.h */,
+				E86224C917C86369001E8063 /* animatedraw.h */,
 				E884F39917A5F09000831301 /* cc_continuity.cpp */,
 				E884F39A17A5F09000831301 /* cc_continuity.h */,
 				E884F38817A5E60C00831301 /* cc_coord.cpp */,

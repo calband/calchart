@@ -25,34 +25,6 @@
 
 #include "animatecommand.h"
 
-// nothing version
-AnimateDraw::AnimateDraw() :
-mType(Ignore)
-{
-}
-
-// Line version
-AnimateDraw::AnimateDraw(int startx, int starty, int endx, int endy) :
-mType(Line),
-x1(startx),
-y1(starty),
-x2(endx),
-y2(endy)
-{
-}
-
-// Arc version
-AnimateDraw::AnimateDraw(int startx, int starty, int endx, int endy, int centerx, int centery) :
-mType(Arc),
-x1(startx),
-y1(starty),
-x2(endx),
-y2(endy),
-xc(centerx),
-yc(centery)
-{
-}
-
 AnimateCommand::AnimateCommand(unsigned beats)
 : mNumBeats(beats), mBeat(0)
 {

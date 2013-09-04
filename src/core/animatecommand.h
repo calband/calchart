@@ -24,20 +24,7 @@
 #define _ANIMATECOMMAND_H_
 
 #include "animate.h"
-
-struct AnimateDraw
-{
-	typedef enum { Ignore, Line, Arc } DrawType;
-	DrawType mType;
-	int x1, y1, x2, y2;
-	int xc, yc;
-	// nothing version
-	AnimateDraw();
-	// Line version
-	AnimateDraw(int startx, int starty, int endx, int endy);
-	// Arc version
-	AnimateDraw(int startx, int starty, int endx, int endy, int centerx, int centery);
-};
+#include "animatedraw.h"
 
 class AnimateCommand
 {
