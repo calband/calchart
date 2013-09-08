@@ -82,7 +82,7 @@ FieldCanvas::OnPaint(wxPaintEvent& event)
 	if (curr_shape)
 	{
 		dc.SetBrush(*wxTRANSPARENT_BRUSH);
-		dc.SetPen(*CalChartPens[COLOR_SHAPES]);
+		dc.SetPen(GetCalChartPen(COLOR_SHAPES));
 		CC_coord origin = mView->GetShowFieldOffset();
 		for (ShapeList::const_iterator i=shape_list.begin();
 			 i != shape_list.end();
@@ -99,7 +99,7 @@ FieldCanvas::PaintBackground(wxDC& dc)
 {
 	// draw the background
 	dc.SetBackgroundMode(wxTRANSPARENT);
-	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+	dc.SetBackground(GetCalChartBrush(COLOR_FIELD));
 	dc.Clear();
 }
 

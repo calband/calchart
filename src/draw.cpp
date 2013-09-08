@@ -133,30 +133,30 @@ void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref
 	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
 															 wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*pointLabelFont);
-	dc.SetTextForeground(CalChartPens[COLOR_POINT_TEXT]->GetColour());
+	dc.SetTextForeground(GetCalChartPen(COLOR_POINT_TEXT).GetColour());
 	CC_coord origin = show.GetMode().Offset();
 	for (size_t i = 0; i < show.GetNumPoints(); i++)
 	{
 		const wxBrush *fillBrush;
 		if (show.IsSelected(i) && primary)
 		{
-			dc.SetPen(*CalChartPens[COLOR_POINT_HILIT]);
-			fillBrush = CalChartBrushes[COLOR_POINT_HILIT];
+			dc.SetPen(GetCalChartPen(COLOR_POINT_HILIT));
+			fillBrush = &GetCalChartBrush(COLOR_POINT_HILIT);
 		}
 		else if (show.IsSelected(i) && !primary)
 		{
-			dc.SetPen(*CalChartPens[COLOR_REF_POINT_HILIT]);
-			fillBrush = CalChartBrushes[COLOR_REF_POINT_HILIT];
+			dc.SetPen(GetCalChartPen(COLOR_REF_POINT_HILIT));
+			fillBrush = &GetCalChartBrush(COLOR_REF_POINT_HILIT);
 		}
 		else if (!show.IsSelected(i) && primary)
 		{
-			dc.SetPen(*CalChartPens[COLOR_POINT]);
-			fillBrush = CalChartBrushes[COLOR_POINT];
+			dc.SetPen(GetCalChartPen(COLOR_POINT));
+			fillBrush = &GetCalChartBrush(COLOR_POINT);
 		}
 		else
 		{
-			dc.SetPen(*CalChartPens[COLOR_REF_POINT]);
-			fillBrush = CalChartBrushes[COLOR_REF_POINT];
+			dc.SetPen(GetCalChartPen(COLOR_REF_POINT));
+			fillBrush = &GetCalChartBrush(COLOR_REF_POINT);
 		}
 		DrawPoint(sheet.GetPoint(i), dc, ref, origin, fillBrush, show.GetPointLabel(i));
 	}
@@ -606,7 +606,7 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end)
 {
 	dc.SetBrush(*wxTRANSPARENT_BRUSH);
-	dc.SetPen(*CalChartPens[COLOR_PATHS]);
+	dc.SetPen(GetCalChartPen(COLOR_PATHS));
 	int endX, endY;
 	for (auto iter = draw_commands.begin(); iter != draw_commands.end(); ++iter)
 	{
@@ -624,7 +624,7 @@ void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_
 				break;
 		}
 	}
-	dc.SetBrush(*CalChartBrushes[COLOR_PATHS]);
+	dc.SetBrush(GetCalChartBrush(COLOR_PATHS));
 	float circ_r = Float2Coord(GetConfiguration_DotRatio());
 	dc.DrawEllipse(end.x - circ_r/2, end.y - circ_r/2, circ_r, circ_r);
 }

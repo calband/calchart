@@ -66,14 +66,14 @@ AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
 	wxBufferedPaintDC dc(this);
 
-	dc.SetBackground(*CalChartBrushes[COLOR_FIELD]);
+	dc.SetBackground(GetCalChartBrush(COLOR_FIELD));
 	dc.Clear();
 	dc.SetUserScale(mUserScale, mUserScale);
 	dc.SetDeviceOrigin(mUserOriginX, 0);
 	if (mMouseDown)
 	{
 		dc.SetBrush(*wxTRANSPARENT_BRUSH);
-		dc.SetPen(*CalChartPens[COLOR_SHAPES]);
+		dc.SetPen(GetCalChartPen(COLOR_SHAPES));
 		dc.DrawRectangle(mMouseXStart, mMouseYStart,
 						  mMouseXEnd - mMouseXStart, mMouseYEnd - mMouseYStart);
 	}

@@ -59,8 +59,10 @@ enum CalChartColors
 	COLOR_NUM
 };
 
-extern const wxPen *CalChartPens[COLOR_NUM];
-extern const wxBrush *CalChartBrushes[COLOR_NUM];
+const wxPen& GetCalChartPen(CalChartColors c);
+void SetCalChartPen(CalChartColors c, const wxPen* pen);
+const wxBrush& GetCalChartBrush(CalChartColors c);
+void SetCalChartBrush(CalChartColors c, const wxBrush* brush);
 extern const wxString ColorNames[COLOR_NUM];
 extern const wxString DefaultColors[COLOR_NUM];
 extern const int DefaultPenWidth[COLOR_NUM];

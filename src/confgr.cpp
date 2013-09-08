@@ -631,3 +631,27 @@ void ReadConfig()
 	ReadConfigSpringYardlines();
 }
 
+const wxPen&
+GetCalChartPen(CalChartColors c)
+{
+	return *CalChartPens[c];
+}
+
+void
+SetCalChartPen(CalChartColors c, const wxPen* pen)
+{
+	CalChartPens[c] = pen;
+}
+
+const wxBrush&
+GetCalChartBrush(CalChartColors c)
+{
+	return *CalChartBrushes[c];
+}
+
+void
+SetCalChartBrush(CalChartColors c, const wxBrush* brush)
+{
+	CalChartBrushes[c] = brush;
+}
+

@@ -94,8 +94,8 @@ ShowMode::GetOmniLinesImage() const
     dc.SelectObject(bmp);
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
-	dc.SetPen(*CalChartPens[COLOR_FIELD_DETAIL]);
-	dc.SetTextForeground(CalChartPens[COLOR_FIELD_TEXT]->GetColour());
+	dc.SetPen(GetCalChartPen(COLOR_FIELD_DETAIL));
+	dc.SetTextForeground(GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
 	DrawOmni(dc);
     dc.SelectObject(wxNullBitmap);
     return bmp.ConvertToImage();

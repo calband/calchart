@@ -178,12 +178,12 @@ void GeneralSetup::CreateControls()
 	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_READONLY|wxCB_DROPDOWN);	
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
 	
-	for (int i = 0; i < COLOR_NUM; ++i)
+	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
 	{
 		wxBitmap temp_bitmap(16, 16);
 		wxMemoryDC temp_dc;
 		temp_dc.SelectObject(temp_bitmap);
-		temp_dc.SetBackground(*CalChartBrushes[i]);
+		temp_dc.SetBackground(GetCalChartBrush(i));
 		temp_dc.Clear();
 		nameBox->SetItemBitmap(i, temp_bitmap);
 	}
@@ -207,10 +207,10 @@ void GeneralSetup::CreateControls()
 void GeneralSetup::Init()
 {
 	// first read out the defaults:
-	for (size_t i = 0; i < COLOR_NUM; ++i)
+	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
 	{
-		mCalChartPens[i] = CalChartPens[i];
-		mCalChartBrushes[i] = CalChartBrushes[i];
+		mCalChartPens[i] = &GetCalChartPen(i);
+		mCalChartBrushes[i] = &GetCalChartBrush(i);
 	}
 
 	mAutoSave_Interval.Printf(wxT("%ld"), GetConfiguration_AutosaveInterval());
@@ -230,12 +230,12 @@ bool GeneralSetup::TransferDataFromWindow()
 	mAutoSave_Interval = text->GetValue();
 
 	// write out the values defaults:
-	for (size_t i = 0; i < COLOR_NUM; ++i)
+	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
 	{
-		if (CalChartPens[i] != mCalChartPens[i] && CalChartBrushes[i] != mCalChartBrushes[i])
+		if (&GetCalChartPen(i) != mCalChartPens[i] && &GetCalChartBrush(i) != mCalChartBrushes[i])
 		{
-			CalChartPens[i] = mCalChartPens[i];
-			CalChartBrushes[i] = mCalChartBrushes[i];
+			SetCalChartPen(i, mCalChartPens[i]);
+			SetCalChartBrush(i, mCalChartBrushes[i]);
 			SetConfigColor(i);
 		}
 	}
