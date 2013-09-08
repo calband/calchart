@@ -48,7 +48,7 @@ void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
 
 // We break this out of the class to make CalChart internals more cross platform
 // Draw the point
-void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label);
+void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush& fillBrush, const wxString& label);
 
 void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end);
 

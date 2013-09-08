@@ -255,8 +255,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool, false);
 
 
 // Color is more complicated, we use functions for setting that
-const wxPen *CalChartPens[COLOR_NUM];
-const wxBrush *CalChartBrushes[COLOR_NUM];
+wxPen CalChartPens[COLOR_NUM];
+wxBrush CalChartBrushes[COLOR_NUM];
 
 ///// Show mode configuration /////
 
@@ -514,15 +514,12 @@ void ReadConfigColor()
 		{
 			c = wxColour(DefaultColors[i]);
 		}
-		CalChartBrushes[i] = wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
+		CalChartBrushes[i] = *wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
 		// store widths in a subgroup
 		config->SetPath(wxT("WIDTH"));
 		long width = DefaultPenWidth[i];
 		config->Read(ColorNames[i], &width);
-		if (CalChartPens[i] == NULL)
-		{
-			CalChartPens[i] = wxThePenList->FindOrCreatePen(c, width, wxSOLID);
-		}
+		CalChartPens[i] = *wxThePenList->FindOrCreatePen(c, width, wxSOLID);
 		config->SetPath(wxT(".."));
 	}
 }
@@ -534,13 +531,13 @@ void SetConfigColor(size_t selection)
 	// read out the color configuration:
 	config->SetPath(wxT("/COLORS"));
 	wxString rbuf = ColorNames[selection] + wxT("_Red");
-	config->Write(rbuf, static_cast<long>(CalChartBrushes[selection]->GetColour().Red()));
+	config->Write(rbuf, static_cast<long>(CalChartBrushes[selection].GetColour().Red()));
 	wxString gbuf = ColorNames[selection] + wxT("_Green");
-	config->Write(gbuf, static_cast<long>(CalChartBrushes[selection]->GetColour().Green()));
+	config->Write(gbuf, static_cast<long>(CalChartBrushes[selection].GetColour().Green()));
 	wxString bbuf = ColorNames[selection] + wxT("_Blue");
-	config->Write(bbuf, static_cast<long>(CalChartBrushes[selection]->GetColour().Blue()));
+	config->Write(bbuf, static_cast<long>(CalChartBrushes[selection].GetColour().Blue()));
 	config->SetPath(wxT("WIDTH"));
-	config->Write(ColorNames[selection], CalChartPens[selection]->GetWidth());
+	config->Write(ColorNames[selection], CalChartPens[selection].GetWidth());
 	config->Flush();
 }
 
@@ -631,26 +628,26 @@ void ReadConfig()
 	ReadConfigSpringYardlines();
 }
 
-const wxPen&
+wxPen
 GetCalChartPen(CalChartColors c)
 {
-	return *CalChartPens[c];
+	return CalChartPens[c];
 }
 
 void
-SetCalChartPen(CalChartColors c, const wxPen* pen)
+SetCalChartPen(CalChartColors c, const wxPen& pen)
 {
 	CalChartPens[c] = pen;
 }
 
-const wxBrush&
+wxBrush
 GetCalChartBrush(CalChartColors c)
 {
-	return *CalChartBrushes[c];
+	return CalChartBrushes[c];
 }
 
 void
-SetCalChartBrush(CalChartColors c, const wxBrush* brush)
+SetCalChartBrush(CalChartColors c, const wxBrush& brush)
 {
 	CalChartBrushes[c] = brush;
 }

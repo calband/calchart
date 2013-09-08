@@ -137,26 +137,26 @@ void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref
 	CC_coord origin = show.GetMode().Offset();
 	for (size_t i = 0; i < show.GetNumPoints(); i++)
 	{
-		const wxBrush *fillBrush;
+		wxBrush fillBrush;
 		if (show.IsSelected(i) && primary)
 		{
 			dc.SetPen(GetCalChartPen(COLOR_POINT_HILIT));
-			fillBrush = &GetCalChartBrush(COLOR_POINT_HILIT);
+			fillBrush = GetCalChartBrush(COLOR_POINT_HILIT);
 		}
 		else if (show.IsSelected(i) && !primary)
 		{
 			dc.SetPen(GetCalChartPen(COLOR_REF_POINT_HILIT));
-			fillBrush = &GetCalChartBrush(COLOR_REF_POINT_HILIT);
+			fillBrush = GetCalChartBrush(COLOR_REF_POINT_HILIT);
 		}
 		else if (!show.IsSelected(i) && primary)
 		{
 			dc.SetPen(GetCalChartPen(COLOR_POINT));
-			fillBrush = &GetCalChartBrush(COLOR_POINT);
+			fillBrush = GetCalChartBrush(COLOR_POINT);
 		}
 		else
 		{
 			dc.SetPen(GetCalChartPen(COLOR_REF_POINT));
-			fillBrush = &GetCalChartBrush(COLOR_REF_POINT);
+			fillBrush = GetCalChartBrush(COLOR_REF_POINT);
 		}
 		DrawPoint(sheet.GetPoint(i), dc, ref, origin, fillBrush, show.GetPointLabel(i));
 	}
@@ -543,7 +543,7 @@ void DrawForPrinting(wxDC *printerdc, const CalChartDoc& show, const CC_sheet& s
 }
 
 void
-DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush *fillBrush, const wxString& label)
+DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush& fillBrush, const wxString& label)
 {
 	float circ_r = Float2Coord(GetConfiguration_DotRatio());
 	float offset = circ_r / 2;
@@ -559,7 +559,7 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 		case SYMBOL_SOLBKSL:
 		case SYMBOL_SOLSL:
 		case SYMBOL_SOLX:
-			dc.SetBrush(*fillBrush);
+			dc.SetBrush(fillBrush);
 			break;
 		default:
 			dc.SetBrush(*wxTRANSPARENT_BRUSH);

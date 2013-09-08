@@ -134,8 +134,8 @@ private:
 	wxBitmapComboBox* nameBox;
 	wxSpinCtrl* spin;
 
-	const wxPen *mCalChartPens[COLOR_NUM];
-	const wxBrush *mCalChartBrushes[COLOR_NUM];
+	wxPen mCalChartPens[COLOR_NUM];
+	wxBrush mCalChartBrushes[COLOR_NUM];
 
 	wxString mAutoSave_Interval;
 };
@@ -189,8 +189,8 @@ void GeneralSetup::CreateControls()
 	}
 	nameBox->SetSelection(0);
 
-	spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mCalChartPens[nameBox->GetSelection()]->GetWidth());
-	spin->SetValue(mCalChartPens[nameBox->GetSelection()]->GetWidth());
+	spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mCalChartPens[nameBox->GetSelection()].GetWidth());
+	spin->SetValue(mCalChartPens[nameBox->GetSelection()].GetWidth());
 	horizontalsizer->Add(spin, sBasicSizerFlags );
 	boxsizer->Add(horizontalsizer, sLeftBasicSizerFlags );
 
@@ -209,8 +209,8 @@ void GeneralSetup::Init()
 	// first read out the defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
 	{
-		mCalChartPens[i] = &GetCalChartPen(i);
-		mCalChartBrushes[i] = &GetCalChartBrush(i);
+		mCalChartPens[i] = GetCalChartPen(i);
+		mCalChartBrushes[i] = GetCalChartBrush(i);
 	}
 
 	mAutoSave_Interval.Printf(wxT("%ld"), GetConfiguration_AutosaveInterval());
@@ -232,12 +232,9 @@ bool GeneralSetup::TransferDataFromWindow()
 	// write out the values defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
 	{
-		if (&GetCalChartPen(i) != mCalChartPens[i] && &GetCalChartBrush(i) != mCalChartBrushes[i])
-		{
-			SetCalChartPen(i, mCalChartPens[i]);
-			SetCalChartBrush(i, mCalChartBrushes[i]);
-			SetConfigColor(i);
-		}
+		SetCalChartPen(i, mCalChartPens[i]);
+		SetCalChartBrush(i, mCalChartBrushes[i]);
+		SetConfigColor(i);
 	}
 	long val;
 	mAutoSave_Interval.ToLong(&val);
@@ -260,15 +257,15 @@ bool GeneralSetup::ClearValuesToDefault()
 
 void GeneralSetup::SetColor(int selection, int width, const wxColour& color)
 {
-	mCalChartPens[selection] = wxThePenList->FindOrCreatePen(color, width, wxSOLID);
-	mCalChartBrushes[selection] = wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
+	mCalChartPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxSOLID);
+	mCalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
 
 	// update the namebox list
 	{
 		wxBitmap test_bitmap(16, 16);
 		wxMemoryDC temp_dc;
 		temp_dc.SelectObject(test_bitmap);
-		temp_dc.SetBackground(*mCalChartBrushes[selection]);
+		temp_dc.SetBackground(mCalChartBrushes[selection]);
 		temp_dc.Clear();
 		nameBox->SetItemBitmap(selection, test_bitmap);
 	}
@@ -279,21 +276,20 @@ void GeneralSetup::OnCmdSelectColors(wxCommandEvent&)
 	int selection = nameBox->GetSelection();
 	wxColourData data;
 	data.SetChooseFull(true);
-	const wxBrush* brush = mCalChartBrushes[selection];
-	data.SetColour(brush->GetColour());
+	data.SetColour(mCalChartBrushes[selection].GetColour());
 	wxColourDialog dialog(this, &data);
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxColourData retdata = dialog.GetColourData();
 		wxColour c = retdata.GetColour();
-		SetColor(selection, mCalChartPens[selection]->GetWidth(), c);
+		SetColor(selection, mCalChartPens[selection].GetWidth(), c);
 	}
 }
 
 void GeneralSetup::OnCmdSelectWidth(wxSpinEvent& e)
 {
 	int selection = nameBox->GetSelection();
-	SetColor(selection, e.GetPosition(), mCalChartPens[selection]->GetColour());
+	SetColor(selection, e.GetPosition(), mCalChartPens[selection].GetColour());
 }
 
 void GeneralSetup::OnCmdResetColors(wxCommandEvent&)
@@ -305,7 +301,7 @@ void GeneralSetup::OnCmdResetColors(wxCommandEvent&)
 
 void GeneralSetup::OnCmdChooseNewColor(wxCommandEvent&)
 {
-	spin->SetValue(mCalChartPens[nameBox->GetSelection()]->GetWidth());
+	spin->SetValue(mCalChartPens[nameBox->GetSelection()].GetWidth());
 }
 
 
