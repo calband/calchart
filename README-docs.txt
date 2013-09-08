@@ -1,9 +1,5 @@
 Since the documentation for the calchart project is build from tex files, if you change them you must rebuild them.
 
-These steps require having Lion 10.7 and XCode 4.2.1.  Both should be on the app store.
-
-Follow the instructions for README-MACOSX.txt
-
 Making the help document uses the tex2rtf project.  Unfortunately, tex2rtf is no longer supported in wxWidgets.
 Download tex2rtf from sourceforge:
 $ svn co https://tex2rtf.svn.sourceforge.net/svnroot/tex2rtf/trunk ~/tex2rtf/trunk
@@ -23,5 +19,7 @@ $ sudo install ./src/tex2rtf /usr/local/bin
 Make Calchart's help files.
 $ cd ~/calchart/trunk
 $ make html
+
+Follow the instructions for README-MACOSX.txt, README-WINDOWS.txt, or README-UBUNTU.txt.
 
 

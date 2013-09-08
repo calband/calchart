@@ -1,19 +1,19 @@
 My steps for building for MacOSX.  Updated for Mountain Lion (10.8)
 
-These steps require having Lion 10.8 and XCode 4.4.1.  Both should be on the app store.
+These steps require having Mountain Lion 10.8 and XCode 4.6.3.  Both should be on the app store.
 
 Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
 boost
 
-Download 2.9.4 of wxWidgets to build the library:
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_4 ~/wxWidgets-2.9.4
+Download 2.9.5 of wxWidgets to build the library:
+$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_5 ~/wxWidgets-2.9.5
 
-$ cd wxWidgets-2.9.4
+$ cd wxWidgets-2.9.5
 
 $ mkdir build-results
 $ cd build-results
 
-$ ../configure --with-cocoa --with-macosx-version-min=10.5 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk --enable-debug --enable-debug_info --disable-shared
+$ ../configure --with-cocoa --with-macosx-version-min=10.6 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk --enable-debug --enable-debug_info --disable-shared
 $ make
 
 put into the /usr/local/bin (if you wanted to put somewhere different, use the --prefix option in configure but you're on your own)
