@@ -35,6 +35,7 @@
 #include "animation_frame.h"
 #include "draw.h"
 #include "animatecommand.h"
+#include "cc_sheet.h"
 
 #include <wx/wizard.h>
 
@@ -295,7 +296,7 @@ FieldView::DoDeleteSheet(unsigned where)
 int
 FieldView::FindPoint(CC_coord pos) const
 {
-	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, mCurrentReferencePoint);
+	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, Float2Coord(GetConfiguration_DotRatio()), mCurrentReferencePoint);
 }
 
 CC_coord

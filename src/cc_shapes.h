@@ -24,10 +24,9 @@
 #define _CC_SHAPES_H_
 
 #include "cc_coord.h"
-
-#include <wx/wx.h>
-
 #include <vector>
+
+struct AnimateDraw;
 
 class CC_shape
 {
@@ -35,7 +34,7 @@ public:
 	CC_shape();
 	virtual ~CC_shape();
 
-	virtual void Draw(wxDC *dc, float x, float y) const = 0;
+	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const = 0;
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p) = 0;
 };
 
@@ -49,7 +48,7 @@ public:
 	CC_coord GetOrigin() const;
 
 protected:
-	wxPoint origin;
+	CC_coord origin;
 };
 
 class CC_shape_cross: public CC_shape_1point
@@ -58,7 +57,7 @@ public:
 	CC_shape_cross(const CC_coord& p, Coord width);
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
-	virtual void Draw(wxDC *dc, float x, float y) const;
+	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
 
 protected:
 	Coord cross_width;
@@ -75,7 +74,7 @@ public:
 	CC_coord GetPoint() const;
 
 protected:
-	wxPoint point;
+	CC_coord point;
 };
 
 class CC_shape_line: public CC_shape_2point
@@ -85,7 +84,7 @@ public:
 	CC_shape_line(const CC_coord& p1, const CC_coord& p2);
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
-	virtual void Draw(wxDC *dc, float x, float y) const;
+	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
 };
 
 class CC_shape_angline: public CC_shape_line
@@ -106,7 +105,7 @@ public:
 	CC_shape_arc(const CC_coord& c, const CC_coord& p1, const CC_coord& p2);
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
-	virtual void Draw(wxDC *dc, float x, float y) const;
+	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
 
 	inline float GetAngle() const { return r-r0; }
 private:
@@ -119,7 +118,7 @@ public:
 	CC_shape_rect(const CC_coord& p);
 	CC_shape_rect(const CC_coord& p1, const CC_coord& p2);
 
-	virtual void Draw(wxDC *dc, float x, float y) const;
+	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
 };
 
 class CC_lasso: public CC_shape
@@ -134,16 +133,16 @@ public:
 	void End();
 	void Append(const CC_coord& p);
 	bool Inside(const CC_coord& p) const;
-	virtual void Draw(wxDC *dc, float x, float y) const;
+	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
 	void Drag(const CC_coord& p);
-	inline const wxPoint *FirstPoint() const
+	inline const CC_coord *FirstPoint() const
 	{
 		return pntlist.empty() ? NULL : &pntlist.front();
 	}
 private:
-	bool CrossesLine(const wxPoint& start, const wxPoint& end,
+	bool CrossesLine(const CC_coord& start, const CC_coord& end,
 		const CC_coord& p) const;
-	typedef std::vector<wxPoint> PointList;
+	typedef std::vector<CC_coord> PointList;
 	PointList pntlist;
 };
 

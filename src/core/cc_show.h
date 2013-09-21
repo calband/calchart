@@ -23,22 +23,22 @@
 #ifndef _CC_SHOW_H_
 #define _CC_SHOW_H_
 
-#include "cc_sheet.h"
-
 #include <vector>
+#include <string>
 #include <set>
 
 class CC_sheet;
 class ShowMode;
 class ShowUndoList;
-class CC_show;
 class CC_lasso;
 class CalChartDoc;
+class CC_coord;
+
+typedef std::set<unsigned> SelectionList;
 
 // CalChart Show
 class CC_show
 {
-	friend CalChartDoc;
 public:
 	typedef std::vector<CC_sheet> CC_sheet_container_t;
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
@@ -59,18 +59,18 @@ public:
 	void SetDescr(const std::string& newdescr);
 
 	void SetupNewShow();
-	inline unsigned short GetNumSheets() const { return sheets.size(); }
+	size_t GetNumSheets() const;
 
-	CC_sheet_iterator_t GetSheetBegin() { return sheets.begin(); }
-	const_CC_sheet_iterator_t GetSheetBegin() const { return sheets.begin(); }
-	CC_sheet_iterator_t GetSheetEnd() { return sheets.end(); }
-	const_CC_sheet_iterator_t GetSheetEnd() const { return sheets.end(); }
+	CC_sheet_iterator_t GetSheetBegin();
+	const_CC_sheet_iterator_t GetSheetBegin() const;
+	CC_sheet_iterator_t GetSheetEnd();
+	const_CC_sheet_iterator_t GetSheetEnd() const;
 
 	const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
 	CC_sheet_iterator_t GetNthSheet(unsigned n);
-	const_CC_sheet_iterator_t GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
-	CC_sheet_iterator_t GetCurrentSheet() { return GetNthSheet(mSheetNum); }
-	unsigned GetCurrentSheetNum() const { return mSheetNum; }
+	const_CC_sheet_iterator_t GetCurrentSheet() const;
+	CC_sheet_iterator_t GetCurrentSheet();
+	unsigned GetCurrentSheetNum() const;
 	void SetCurrentSheet(unsigned n);
 
 	CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);

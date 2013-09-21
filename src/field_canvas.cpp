@@ -30,6 +30,8 @@
 #include "math_utils.h"
 #include "background_image.h"
 #include "cc_shapes.h"
+#include "animatedraw.h"
+#include "draw.h"
 
 #include <wx/dcbuffer.h>
 
@@ -88,8 +90,7 @@ FieldCanvas::OnPaint(wxPaintEvent& event)
 			 i != shape_list.end();
 			 ++i)
 		{
-			(*i)->Draw(&dc, origin.x,
-					   origin.y);
+			DrawAnimateDrawList(dc, (*i)->GetAnimateDraw(origin.x, origin.y));
 		}
 	}
 }
@@ -191,7 +192,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 			{
 				case CC_DRAG_POLY:
 				{
-					const wxPoint *p = ((CC_lasso*)curr_shape.get())->FirstPoint();
+					auto* p = ((CC_lasso*)curr_shape.get())->FirstPoint();
 					float d;
 					if (p != NULL)
 					{

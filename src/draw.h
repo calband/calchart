@@ -52,4 +52,7 @@ void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coo
 
 void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end);
 
+void DrawAnimateDrawList(wxDC& dc, const std::vector<AnimateDraw>& draw_commands);
+//void DrawShape(wxDC& dc, const CC_shape& shape, float x, float y);
+
 #endif // __DRAW_H__

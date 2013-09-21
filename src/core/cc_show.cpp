@@ -20,23 +20,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <fstream>
-
 #include "cc_show.h"
 
-#include "cc_command.h"
-#include "confgr.h"
-#include "calchartapp.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
-#include "math_utils.h"
 #include "cc_shapes.h"
-#include "platconf.h"
 #include "cc_fileformat.h"
-#include "draw.h"
 
-#include <list>
 #include <sstream>
 
 static const std::string k_nofile_str = "Unable to open file";
@@ -248,6 +239,53 @@ void CC_show::SetDescr(const std::string& newdescr)
 	descr = newdescr;
 }
 
+
+size_t
+CC_show::GetNumSheets() const
+{
+	return sheets.size();
+}
+
+CC_show::CC_sheet_iterator_t
+CC_show::GetSheetBegin()
+{
+	return sheets.begin();
+}
+
+CC_show::const_CC_sheet_iterator_t
+CC_show::GetSheetBegin() const
+{
+	return sheets.begin();
+}
+
+CC_show::CC_sheet_iterator_t
+CC_show::GetSheetEnd()
+{
+	return sheets.end();
+}
+
+CC_show::const_CC_sheet_iterator_t
+CC_show::GetSheetEnd() const
+{
+	return sheets.end();
+}
+
+CC_show::const_CC_sheet_iterator_t
+CC_show::GetCurrentSheet() const
+{
+	return GetNthSheet(mSheetNum);
+}
+
+CC_show::CC_sheet_iterator_t
+CC_show::GetCurrentSheet()
+{
+	return GetNthSheet(mSheetNum);
+}
+
+unsigned CC_show::GetCurrentSheetNum() const
+{
+	return mSheetNum;
+}
 
 CC_show::const_CC_sheet_iterator_t CC_show::GetNthSheet(unsigned n) const
 {

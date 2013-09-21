@@ -29,6 +29,7 @@
 #include "calchartapp.h"
 #include "calchartdoc.h"
 #include "top_frame.h"
+#include "cc_sheet.h"
 
 #include <wx/dcbuffer.h>
 

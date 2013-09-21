@@ -23,6 +23,7 @@
 #include "animatecompile.h"
 #include "cont.h"
 #include "animatecommand.h"
+#include "cc_sheet.h"
 
 
 float AnimationVariables::GetVarValue(int varnum, unsigned whichPoint) const

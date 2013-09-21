@@ -21,12 +21,10 @@
 */
 
 #include "cc_sheet.h"
+
 #include "cc_show.h"
-#include "cc_command.h"
-#include "modes.h"
-#include "confgr.h"
-#include "draw.h"
 #include "cc_fileformat.h"
+
 #include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 #include <iostream>
@@ -309,13 +307,13 @@ CC_sheet::~CC_sheet()
 
 
 // Find point at certain coords
-int CC_sheet::FindPoint(Coord x, Coord y, unsigned ref) const
+int
+CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref) const
 {
-	Coord w = Float2Coord(GetConfiguration_DotRatio());
 	for (size_t i = 0; i < pts.size(); i++)
 	{
 		CC_coord c = GetPosition(i, ref);
-		if (((x+w) >= c.x) && ((x-w) <= c.x) && ((y+w) >= c.y) && ((y-w) <= c.y))
+		if (((x+searchBound) >= c.x) && ((x-searchBound) <= c.x) && ((y+searchBound) >= c.y) && ((y-searchBound) <= c.y))
 		{
 			return i;
 		}
@@ -392,11 +390,10 @@ void CC_sheet::SetNthContinuity(const std::string& text, unsigned i)
 }
 
 
-CC_continuity CC_sheet::RemoveNthContinuity(unsigned i)
+void
+CC_sheet::RemoveNthContinuity(unsigned i)
 {
-	CC_continuity cont = mAnimationContinuity.at(i);
 	mAnimationContinuity.erase(mAnimationContinuity.begin()+i);
-	return cont;
 }
 
 
@@ -709,5 +706,29 @@ CC_sheet::ContContainer
 CC_sheet::GetAnimationContinuity() const
 {
 	return mAnimationContinuity;
+}
+
+const CC_point&
+CC_sheet::GetPoint(unsigned i) const
+{
+	return pts[i];
+}
+
+CC_point&
+CC_sheet::GetPoint(unsigned i)
+{
+	return pts[i];
+}
+
+std::vector<CC_point>
+CC_sheet::GetPoints() const
+{
+	return pts;
+}
+
+void
+CC_sheet::SetPoints(const std::vector<CC_point>& points)
+{
+	pts = points;
 }
 

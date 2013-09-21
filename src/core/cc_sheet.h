@@ -27,14 +27,15 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "cc_text.h"
-#include "platconf.h"
 
 #include <vector>
 #include <set>
-#include <iosfwd>
+#include <string>
 
 class CC_show;
 class CC_coord;
+class CC_continuity;
+class CC_point;
 typedef std::vector<CC_textline> CC_textline_list;
 
 class CC_sheet
@@ -57,7 +58,7 @@ public:
 	// * needs to be through command only *
 	void SetNthContinuity(const std::string& text, unsigned i);
 	// * needs to be through command only *
-	CC_continuity RemoveNthContinuity(unsigned i);
+	void RemoveNthContinuity(unsigned i);
 	// * needs to be through command only *
 	void InsertContinuity(const CC_continuity& newcont, unsigned i);
 	// * needs to be through command only *
@@ -72,7 +73,7 @@ public:
 	bool ContinuityInUse(unsigned idx) const;
 	
 	// points:
-	int FindPoint(Coord x, Coord y, unsigned ref = 0) const;
+	int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
 	void RelabelSheet(const std::vector<size_t>& table);
 
 	std::string GetName() const;
@@ -85,10 +86,10 @@ public:
 	void SetBeats(unsigned short b);
 	bool IsInAnimation() const { return (GetBeats() != 0); }
 
-	const CC_point& GetPoint(unsigned i) const { return pts[i]; }
-	CC_point& GetPoint(unsigned i) { return pts[i]; }
-	std::vector<CC_point> GetPoints() const { return pts; }
-	void SetPoints(const std::vector<CC_point>& points) { pts = points; }
+	const CC_point& GetPoint(unsigned i) const;
+	CC_point& GetPoint(unsigned i);
+	std::vector<CC_point> GetPoints() const;
+	void SetPoints(const std::vector<CC_point>& points);
 
 	CC_coord GetPosition(unsigned i, unsigned ref = 0) const;
 	void SetAllPositions(const CC_coord& val, unsigned i);

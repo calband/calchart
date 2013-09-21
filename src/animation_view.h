@@ -25,6 +25,7 @@
 
 #include "animate.h"
 #include "calchartdoc.h"
+#include "cc_continuity.h"
 
 #include <boost/shared_ptr.hpp>
 

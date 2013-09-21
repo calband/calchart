@@ -40,6 +40,8 @@
 #include "ui_enums.h"
 #include "field_view.h"
 #include "draw.h"
+#include "cc_sheet.h"
+#include "cc_point.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
