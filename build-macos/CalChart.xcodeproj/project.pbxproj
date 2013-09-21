@@ -6,6 +6,21 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		E803363917EE289400A58457 /* All */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = E803363A17EE289400A58457 /* Build configuration list for PBXAggregateTarget "All" */;
+			buildPhases = (
+			);
+			dependencies = (
+				E803363E17EE28A100A58457 /* PBXTargetDependency */,
+				E803364017EE28A100A58457 /* PBXTargetDependency */,
+			);
+			name = All;
+			productName = All;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -436,6 +451,23 @@
 		E884F3A117A631AE00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E803363D17EE28A100A58457 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
+			remoteInfo = CalChart;
+		};
+		E803363F17EE28A100A58457 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E807BD5B17ED71F50052A53F;
+			remoteInfo = calchart_cmd;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		C70C7AE4156ABC8800E14F1B /* Copy Docs */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -817,7 +849,6 @@
 		C7AFA97E117A6DBA00CC53E2 /* linmath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linmath.h; sourceTree = "<group>"; };
 		C7AFA981117A6DBA00CC53E2 /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modes.cpp; sourceTree = "<group>"; };
 		C7AFA982117A6DBA00CC53E2 /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
-		C7AFA983117A6DBA00CC53E2 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parse.h; sourceTree = "<group>"; };
 		C7AFA984117A6DBA00CC53E2 /* platconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platconf.h; sourceTree = "<group>"; };
 		C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = show_ui.cpp; sourceTree = "<group>"; };
 		C7AFA98B117A6DBA00CC53E2 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show_ui.h; sourceTree = "<group>"; };
@@ -930,6 +961,7 @@
 		E803362917EE1C5F00A58457 /* cc_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_shapes.h; sourceTree = "<group>"; };
 		E803363417EE27C500A58457 /* math_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math_utils.cpp; sourceTree = "<group>"; };
 		E803363517EE27C500A58457 /* math_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = math_utils.h; sourceTree = "<group>"; };
+		E803364117EE2E5400A58457 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parse.h; sourceTree = "<group>"; };
 		E807BD5C17ED71F50052A53F /* calchart_cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = calchart_cmd; sourceTree = BUILT_PRODUCTS_DIR; };
 		E807BD5E17ED71F60052A53F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E807BD6017ED71F60052A53F /* calchart_cmd.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = calchart_cmd.1; sourceTree = "<group>"; };
@@ -1160,7 +1192,6 @@
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
 				C7AFA981117A6DBA00CC53E2 /* modes.cpp */,
 				C7AFA982117A6DBA00CC53E2 /* modes.h */,
-				C7AFA983117A6DBA00CC53E2 /* parse.h */,
 				C7AFA984117A6DBA00CC53E2 /* platconf.h */,
 				C7AD22C615571CBB00AC1301 /* print_ps.cpp */,
 				C7AD22C715571CBB00AC1301 /* print_ps.h */,
@@ -1319,6 +1350,7 @@
 				E878CC9B17ACA6AC009B1F1C /* cont.h */,
 				E803363417EE27C500A58457 /* math_utils.cpp */,
 				E803363517EE27C500A58457 /* math_utils.h */,
+				E803364117EE2E5400A58457 /* parse.h */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -1405,6 +1437,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				E803363917EE289400A58457 /* All */,
 				8D1107260486CEB800E47090 /* CalChart */,
 				C70C7A8A156ABC8800E14F1B /* CalChartHomeView */,
 				E807BD5B17ED71F50052A53F /* calchart_cmd */,
@@ -1621,6 +1654,19 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E803363E17EE28A100A58457 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1107260486CEB800E47090 /* CalChart */;
+			targetProxy = E803363D17EE28A100A58457 /* PBXContainerItemProxy */;
+		};
+		E803364017EE28A100A58457 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E807BD5B17ED71F50052A53F /* calchart_cmd */;
+			targetProxy = E803363F17EE28A100A58457 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
@@ -1794,6 +1840,20 @@
 			};
 			name = Release;
 		};
+		E803363B17EE289400A58457 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E803363C17EE289400A58457 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		E807BD6217ED71F60052A53F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1871,6 +1931,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		E803363A17EE289400A58457 /* Build configuration list for PBXAggregateTarget "All" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E803363B17EE289400A58457 /* Debug */,
+				E803363C17EE289400A58457 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		E807BD6417ED71F60052A53F /* Build configuration list for PBXNativeTarget "calchart_cmd" */ = {
 			isa = XCConfigurationList;

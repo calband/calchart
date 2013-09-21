@@ -10,6 +10,7 @@
 #include "animate.h"
 
 #include <iostream>
+#include <fstream>
 
 void Notify(const std::string& notice)
 {
@@ -24,8 +25,16 @@ bool NotifyError(const std::vector<ErrorMarker>& error_markers, unsigned sheetnu
 int main(int argc, const char * argv[])
 {
 	// insert code here...
-	CC_show p;
-	Animation a(p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::vector<ErrorMarker>&, unsigned, const std::string&) { return true; });
+	if (argc > 1)
+	{
+		std::ifstream input(argv[1]);
+		CC_show p(input);
+		Animation a(p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::vector<ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
+		a.GotoSheet(0);
+		std::cout<<a.GetCurrentInfo()<<"\n";
+	}
+	
+
 	std::cout << "Hello, World!\n";
     return 0;
 }
