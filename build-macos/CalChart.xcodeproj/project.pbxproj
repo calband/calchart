@@ -59,7 +59,6 @@
 		C70C7ABE156ABC8800E14F1B /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
 		C70C7ABF156ABC8800E14F1B /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
 		C70C7AC0156ABC8800E14F1B /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
-		C70C7AC1156ABC8800E14F1B /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
 		C70C7AC2156ABC8800E14F1B /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C70C7AC8156ABC8800E14F1B /* cc_command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A845071398E7D8003AD23E /* cc_command.cpp */; };
 		C70C7AC9156ABC8800E14F1B /* cc_preferences_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */; };
@@ -72,7 +71,6 @@
 		C70C7AD1156ABC8800E14F1B /* animation_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC24414F0703800D46A7E /* animation_view.cpp */; };
 		C70C7AD2156ABC8800E14F1B /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AD22C615571CBB00AC1301 /* print_ps.cpp */; };
 		C70C7AD6156ABC8800E14F1B /* setup_wizards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047D015609A1200D8C71B /* setup_wizards.cpp */; };
-		C70C7AD7156ABC8800E14F1B /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C73C406B156761CB00B86BE8 /* math_utils.cpp */; };
 		C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76B4EBA15694C770087FE94 /* print_ps_dialog.cpp */; };
 		C70C7ADC156ABC8800E14F1B /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
 		C70C7ADD156ABC8800E14F1B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
@@ -206,8 +204,6 @@
 		C713C8D9156C10A600776558 /* field_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047C6155F279000D8C71B /* field_view.cpp */; };
 		C72E2B091441150400118C03 /* top_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C72E2B071441150400118C03 /* top_frame.cpp */; };
 		C72F24BA14D4976E00758A0E /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
-		C73C406D156761D000B86BE8 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C73C406B156761CB00B86BE8 /* math_utils.cpp */; };
-		C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
 		C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC23F14F06B7B00D46A7E /* toolbar.cpp */; };
 		C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC24414F0703800D46A7E /* animation_view.cpp */; };
 		C76B4EBC15694C770087FE94 /* print_ps_dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76B4EBA15694C770087FE94 /* print_ps_dialog.cpp */; };
@@ -399,6 +395,18 @@
 		C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501711CD594E001A4FA2 /* contents.gif */; };
 		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
+		E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
+		E803362B17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
+		E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
+		E803362D17EE1E3B00A58457 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
+		E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
+		E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
+		E803363017EE1E7B00A58457 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
+		E803363117EE1E9700A58457 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
+		E803363317EE23F500A58457 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
+		E803363617EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
+		E803363717EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
+		E803363817EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E807BD5F17ED71F60052A53F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E807BD5E17ED71F60052A53F /* main.cpp */; };
 		E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E807BD6017ED71F60052A53F /* calchart_cmd.1 */; };
 		E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
@@ -406,7 +414,6 @@
 		E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
 		E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
 		E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
-		E807BD6D17ED8AAF0052A53F /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
 		E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
@@ -738,10 +745,6 @@
 		C72E2B071441150400118C03 /* top_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = top_frame.cpp; sourceTree = "<group>"; };
 		C72E2B081441150400118C03 /* top_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = top_frame.h; sourceTree = "<group>"; };
 		C72F24B914D4976E00758A0E /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
-		C73C406B156761CB00B86BE8 /* math_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math_utils.cpp; sourceTree = "<group>"; };
-		C73C406C156761CD00B86BE8 /* math_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = math_utils.h; sourceTree = "<group>"; };
-		C75A5FB91180072C0047B87D /* cc_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_shapes.cpp; sourceTree = "<group>"; };
-		C75A5FBA1180072C0047B87D /* cc_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_shapes.h; sourceTree = "<group>"; };
 		C75CC23F14F06B7B00D46A7E /* toolbar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = toolbar.cpp; sourceTree = "<group>"; };
 		C75CC24014F06B7B00D46A7E /* toolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = toolbar.h; sourceTree = "<group>"; };
 		C75CC24314F06D5000D46A7E /* ui_enums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ui_enums.h; sourceTree = "<group>"; };
@@ -840,7 +843,6 @@
 		C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_translatepoints.html; sourceTree = "<group>"; };
 		C7D4E2C211D087CD007D3587 /* calchartapp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartapp.cpp; sourceTree = "<group>"; };
 		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
-		C7D4FD6615D62D000065799B /* cc_fileformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_fileformat.h; sourceTree = "<group>"; };
 		C7E047C6155F279000D8C71B /* field_view.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_view.cpp; sourceTree = "<group>"; };
 		C7E047C7155F279000D8C71B /* field_view.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_view.h; sourceTree = "<group>"; };
 		C7E047CA155F7B8900D8C71B /* field_canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas.cpp; sourceTree = "<group>"; };
@@ -923,6 +925,11 @@
 		C7ED501811CD594E001A4FA2 /* forward.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = forward.gif; sourceTree = "<group>"; };
 		C7ED502011CD594E001A4FA2 /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
 		E803362617EE1A5E00A58457 /* cc_drawcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_drawcommand.h; sourceTree = "<group>"; };
+		E803362717EE1C3700A58457 /* cc_fileformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_fileformat.h; sourceTree = "<group>"; };
+		E803362817EE1C5F00A58457 /* cc_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_shapes.cpp; sourceTree = "<group>"; };
+		E803362917EE1C5F00A58457 /* cc_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_shapes.h; sourceTree = "<group>"; };
+		E803363417EE27C500A58457 /* math_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math_utils.cpp; sourceTree = "<group>"; };
+		E803363517EE27C500A58457 /* math_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = math_utils.h; sourceTree = "<group>"; };
 		E807BD5C17ED71F50052A53F /* calchart_cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = calchart_cmd; sourceTree = BUILT_PRODUCTS_DIR; };
 		E807BD5E17ED71F60052A53F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E807BD6017ED71F60052A53F /* calchart_cmd.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = calchart_cmd.1; sourceTree = "<group>"; };
@@ -1131,14 +1138,11 @@
 				C7AFA970117A6DBA00CC53E2 /* ccvers.h */,
 				C7A845071398E7D8003AD23E /* cc_command.cpp */,
 				C7A845081398E7D8003AD23E /* cc_command.h */,
-				C7D4FD6615D62D000065799B /* cc_fileformat.h */,
 				C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */,
 				C785A91914D3D6620038B6FE /* cc_omniview_canvas.h */,
 				C72C5FDF155CD16100194225 /* cc_omniview_constants.h */,
 				C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */,
 				C7A8451B1398E8D5003AD23E /* cc_preferences_ui.h */,
-				C75A5FB91180072C0047B87D /* cc_shapes.cpp */,
-				C75A5FBA1180072C0047B87D /* cc_shapes.h */,
 				C7AFA973117A6DBA00CC53E2 /* confgr.cpp */,
 				C7AFA974117A6DBA00CC53E2 /* confgr.h */,
 				C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */,
@@ -1154,8 +1158,6 @@
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
-				C73C406B156761CB00B86BE8 /* math_utils.cpp */,
-				C73C406C156761CD00B86BE8 /* math_utils.h */,
 				C7AFA981117A6DBA00CC53E2 /* modes.cpp */,
 				C7AFA982117A6DBA00CC53E2 /* modes.h */,
 				C7AFA983117A6DBA00CC53E2 /* parse.h */,
@@ -1302,8 +1304,11 @@
 				E884F38817A5E60C00831301 /* cc_coord.cpp */,
 				E884F38917A5E60C00831301 /* cc_coord.h */,
 				E803362617EE1A5E00A58457 /* cc_drawcommand.h */,
+				E803362717EE1C3700A58457 /* cc_fileformat.h */,
 				E884F38A17A5E60C00831301 /* cc_point.cpp */,
 				E884F38B17A5E60C00831301 /* cc_point.h */,
+				E803362817EE1C5F00A58457 /* cc_shapes.cpp */,
+				E803362917EE1C5F00A58457 /* cc_shapes.h */,
 				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E884F38D17A5E60C00831301 /* cc_sheet.h */,
 				E884F38E17A5E60C00831301 /* cc_show.cpp */,
@@ -1312,6 +1317,8 @@
 				E884F39B17A5F09100831301 /* cc_types.h */,
 				E878CC9A17ACA6AC009B1F1C /* cont.cpp */,
 				E878CC9B17ACA6AC009B1F1C /* cont.h */,
+				E803363417EE27C500A58457 /* math_utils.cpp */,
+				E803363517EE27C500A58457 /* math_utils.h */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -1519,7 +1526,6 @@
 				C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */,
 				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
 				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
-				C75A5FBB1180072C0047B87D /* cc_shapes.cpp in Sources */,
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
 				C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */,
 				C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */,
@@ -1535,18 +1541,19 @@
 				C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */,
 				C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */,
 				C7E047D215609A1600D8C71B /* setup_wizards.cpp in Sources */,
-				C73C406D156761D000B86BE8 /* math_utils.cpp in Sources */,
 				C76B4EBC15694C770087FE94 /* print_ps_dialog.cpp in Sources */,
 				E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */,
 				E884F39117A5E60C00831301 /* cc_point.cpp in Sources */,
 				E884F39217A5E60C00831301 /* cc_sheet.cpp in Sources */,
 				E884F39317A5E60C00831301 /* cc_show.cpp in Sources */,
 				E884F39C17A5F09100831301 /* cc_continuity.cpp in Sources */,
+				E803363617EE27C500A58457 /* math_utils.cpp in Sources */,
 				E884F3A017A631AD00831301 /* animate.cpp in Sources */,
 				E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */,
 				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
 				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
+				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1562,10 +1569,10 @@
 				C70C7ABE156ABC8800E14F1B /* show_ui.cpp in Sources */,
 				C70C7ABF156ABC8800E14F1B /* contgram.cpp in Sources */,
 				C70C7AC0156ABC8800E14F1B /* contscan.cpp in Sources */,
-				C70C7AC1156ABC8800E14F1B /* cc_shapes.cpp in Sources */,
 				C70C7AC2156ABC8800E14F1B /* calchartapp.cpp in Sources */,
 				C70C7AC8156ABC8800E14F1B /* cc_command.cpp in Sources */,
 				C70C7AC9156ABC8800E14F1B /* cc_preferences_ui.cpp in Sources */,
+				E803362B17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				C70C7ACA156ABC8800E14F1B /* top_frame.cpp in Sources */,
 				C70C7ACC156ABC8800E14F1B /* background_image.cpp in Sources */,
 				C70C7ACD156ABC8800E14F1B /* animation_frame.cpp in Sources */,
@@ -1573,9 +1580,9 @@
 				C70C7ACF156ABC8800E14F1B /* cc_omniview_canvas.cpp in Sources */,
 				C70C7AD0156ABC8800E14F1B /* toolbar.cpp in Sources */,
 				C70C7AD1156ABC8800E14F1B /* animation_view.cpp in Sources */,
+				E803363717EE27C500A58457 /* math_utils.cpp in Sources */,
 				C70C7AD2156ABC8800E14F1B /* print_ps.cpp in Sources */,
 				C70C7AD6156ABC8800E14F1B /* setup_wizards.cpp in Sources */,
-				C70C7AD7156ABC8800E14F1B /* math_utils.cpp in Sources */,
 				C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */,
 				C713C8D9156C10A600776558 /* field_view.cpp in Sources */,
 				E884F39417A5E62000831301 /* cc_coord.cpp in Sources */,
@@ -1597,11 +1604,18 @@
 			files = (
 				E807BD5F17ED71F60052A53F /* main.cpp in Sources */,
 				E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */,
+				E803363117EE1E9700A58457 /* contscan.cpp in Sources */,
+				E803363817EE27C500A58457 /* math_utils.cpp in Sources */,
 				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
+				E803362D17EE1E3B00A58457 /* animate.cpp in Sources */,
+				E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
+				E803363317EE23F500A58457 /* cont.cpp in Sources */,
 				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
+				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
+				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
 				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
-				E807BD6D17ED8AAF0052A53F /* cc_shapes.cpp in Sources */,
+				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
