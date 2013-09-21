@@ -30,7 +30,7 @@
 #include "math_utils.h"
 #include "background_image.h"
 #include "cc_shapes.h"
-#include "animatedraw.h"
+#include "cc_drawcommand.h"
 #include "draw.h"
 
 #include <wx/dcbuffer.h>
@@ -90,7 +90,7 @@ FieldCanvas::OnPaint(wxPaintEvent& event)
 			 i != shape_list.end();
 			 ++i)
 		{
-			DrawAnimateDrawList(dc, (*i)->GetAnimateDraw(origin.x, origin.y));
+			DrawCC_DrawCommandList(dc, (*i)->GetCC_DrawCommand(origin.x, origin.y));
 		}
 	}
 }

@@ -24,7 +24,7 @@
 #define _ANIMATECOMMAND_H_
 
 #include "animate.h"
-#include "animatedraw.h"
+#include "cc_drawcommand.h"
 
 class AnimateCommand
 {
@@ -53,7 +53,7 @@ public:
 	virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
 
 	// when we want to have the path drawn:
-	virtual AnimateDraw GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const { return AnimateDraw(); }
+	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const { return CC_DrawCommand(); }
 
 protected:
 	unsigned mNumBeats;
@@ -89,7 +89,7 @@ public:
 	virtual float MotionDirection() const;
 	virtual void ClipBeats(unsigned beats);
 
-	virtual AnimateDraw GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const;
+	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;
 
 private:
 	CC_coord mVector;
@@ -112,7 +112,7 @@ public:
 	virtual float RealDirection() const;
 	virtual void ClipBeats(unsigned beats);
 
-	virtual AnimateDraw GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const;
+	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;
 
 private:
 	CC_coord mOrigin;

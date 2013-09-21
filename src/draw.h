@@ -32,7 +32,7 @@ class CC_show;
 class CC_sheet;
 class CC_point;
 class CC_coord;
-struct AnimateDraw;
+struct CC_DrawCommand;
 class CalChartDoc;
 
 // draw the continuity starting at a specific offset
@@ -50,9 +50,9 @@ void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
 // Draw the point
 void DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& origin, const wxBrush& fillBrush, const wxString& label);
 
-void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end);
+void DrawPath(wxDC& dc, const std::vector<CC_DrawCommand>& draw_commands, const CC_coord& end);
 
-void DrawAnimateDrawList(wxDC& dc, const std::vector<AnimateDraw>& draw_commands);
+void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CC_DrawCommand>& draw_commands);
 //void DrawShape(wxDC& dc, const CC_shape& shape, float x, float y);
 
 #endif // __DRAW_H__

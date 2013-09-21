@@ -24,7 +24,7 @@
 #include <cmath>
 
 #include "cc_shapes.h"
-#include "animatedraw.h"
+#include "cc_drawcommand.h"
 
 CC_shape::CC_shape() {}
 CC_shape::~CC_shape() {}
@@ -60,12 +60,12 @@ void CC_shape_cross::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 }
 
 
-std::vector<AnimateDraw>
-CC_shape_cross::GetAnimateDraw(float x, float y) const
+std::vector<CC_DrawCommand>
+CC_shape_cross::GetCC_DrawCommand(float x, float y) const
 {
-	std::vector<AnimateDraw> result;
-	result.push_back(AnimateDraw(origin.x + x - cross_width, origin.y + y - cross_width, origin.x + x + cross_width, origin.y + y + cross_width));
-	result.push_back(AnimateDraw(origin.x + x + cross_width, origin.y + y - cross_width, origin.x + x - cross_width, origin.y + y + cross_width));
+	std::vector<CC_DrawCommand> result;
+	result.push_back(CC_DrawCommand(origin.x + x - cross_width, origin.y + y - cross_width, origin.x + x + cross_width, origin.y + y + cross_width));
+	result.push_back(CC_DrawCommand(origin.x + x + cross_width, origin.y + y - cross_width, origin.x + x - cross_width, origin.y + y + cross_width));
 	return result;
 }
 
@@ -107,11 +107,11 @@ void CC_shape_line::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 }
 
 
-std::vector<AnimateDraw>
-CC_shape_line::GetAnimateDraw(float x, float y) const
+std::vector<CC_DrawCommand>
+CC_shape_line::GetCC_DrawCommand(float x, float y) const
 {
-	std::vector<AnimateDraw> result;
-	result.push_back(AnimateDraw(origin.x + x, origin.y + y, point.x + x, point.y + y));
+	std::vector<CC_DrawCommand> result;
+	result.push_back(CC_DrawCommand(origin.x + x, origin.y + y, point.x + x, point.y + y));
 	return result;
 }
 
@@ -170,17 +170,17 @@ void CC_shape_arc::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 }
 
 
-std::vector<AnimateDraw>
-CC_shape_arc::GetAnimateDraw(float x, float y) const
+std::vector<CC_DrawCommand>
+CC_shape_arc::GetCC_DrawCommand(float x, float y) const
 {
-	std::vector<AnimateDraw> result;
+	std::vector<CC_DrawCommand> result;
 	if (GetAngle() < 0.0 || GetAngle() > 180.0)
 	{
-		result.push_back(AnimateDraw(origin.x + x + d*cos(r), origin.y + y + -d*sin(r), origin.x + x + d*cos(r0), origin.y + y + -d*sin(r0), origin.x + x, origin.y + y));
+		result.push_back(CC_DrawCommand(origin.x + x + d*cos(r), origin.y + y + -d*sin(r), origin.x + x + d*cos(r0), origin.y + y + -d*sin(r0), origin.x + x, origin.y + y));
 	}
 	else
 	{
-		result.push_back(AnimateDraw(origin.x + x + d*cos(r0), origin.y + y + -d*sin(r0), origin.x + x + d*cos(r), origin.y + y + -d*sin(r), origin.x + x, origin.y + y));
+		result.push_back(CC_DrawCommand(origin.x + x + d*cos(r0), origin.y + y + -d*sin(r0), origin.x + x + d*cos(r), origin.y + y + -d*sin(r), origin.x + x, origin.y + y));
 	}
 	return result;
 }
@@ -192,8 +192,8 @@ CC_shape_rect::CC_shape_rect(const CC_coord& p)
 CC_shape_rect::CC_shape_rect(const CC_coord& p1, const CC_coord& p2)
 : CC_shape_2point(p1, p2) {}
 
-std::vector<AnimateDraw>
-CC_shape_rect::GetAnimateDraw(float x, float y) const
+std::vector<CC_DrawCommand>
+CC_shape_rect::GetCC_DrawCommand(float x, float y) const
 {
 	float w, h;
 
@@ -217,13 +217,13 @@ CC_shape_rect::GetAnimateDraw(float x, float y) const
 		y += point.y;
 		h = origin.y - point.y + 1;
 	}
-	std::vector<AnimateDraw> result;
+	std::vector<CC_DrawCommand> result;
 	if ((w > 1) && (h > 1))
 	{
-		result.push_back(AnimateDraw(x, y, x + w, y));
-		result.push_back(AnimateDraw(x + w, y, x + w, y + h));
-		result.push_back(AnimateDraw(x + w, y + h, x, y + h));
-		result.push_back(AnimateDraw(x, y + h, x, y));
+		result.push_back(CC_DrawCommand(x, y, x + w, y));
+		result.push_back(CC_DrawCommand(x + w, y, x + w, y + h));
+		result.push_back(CC_DrawCommand(x + w, y + h, x, y + h));
+		result.push_back(CC_DrawCommand(x, y + h, x, y));
 	}
 	return result;
 }
@@ -303,15 +303,15 @@ bool CC_lasso::Inside(const CC_coord& p) const
 }
 
 
-std::vector<AnimateDraw>
-CC_lasso::GetAnimateDraw(float x, float y) const
+std::vector<CC_DrawCommand>
+CC_lasso::GetCC_DrawCommand(float x, float y) const
 {
-	std::vector<AnimateDraw> result;
+	std::vector<CC_DrawCommand> result;
 	if (pntlist.size() > 1)
 	{
 		for (auto iter = 0; iter < pntlist.size()-1; ++iter)
 		{
-			result.push_back(AnimateDraw(x + pntlist.at(iter).x, y + pntlist.at(iter).y, x + pntlist.at(iter+1).x, y + pntlist.at(iter+1).y));
+			result.push_back(CC_DrawCommand(x + pntlist.at(iter).x, y + pntlist.at(iter).y, x + pntlist.at(iter+1).x, y + pntlist.at(iter+1).y));
 		}
 	}
 	return result;

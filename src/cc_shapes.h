@@ -26,7 +26,7 @@
 #include "cc_coord.h"
 #include <vector>
 
-struct AnimateDraw;
+struct CC_DrawCommand;
 
 class CC_shape
 {
@@ -34,7 +34,7 @@ public:
 	CC_shape();
 	virtual ~CC_shape();
 
-	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const = 0;
+	virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x, float y) const = 0;
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p) = 0;
 };
 
@@ -57,7 +57,7 @@ public:
 	CC_shape_cross(const CC_coord& p, Coord width);
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
-	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
+	virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x, float y) const;
 
 protected:
 	Coord cross_width;
@@ -84,7 +84,7 @@ public:
 	CC_shape_line(const CC_coord& p1, const CC_coord& p2);
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
-	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
+	virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x, float y) const;
 };
 
 class CC_shape_angline: public CC_shape_line
@@ -105,7 +105,7 @@ public:
 	CC_shape_arc(const CC_coord& c, const CC_coord& p1, const CC_coord& p2);
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
-	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
+	virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x, float y) const;
 
 	inline float GetAngle() const { return r-r0; }
 private:
@@ -118,7 +118,7 @@ public:
 	CC_shape_rect(const CC_coord& p);
 	CC_shape_rect(const CC_coord& p1, const CC_coord& p2);
 
-	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
+	virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x, float y) const;
 };
 
 class CC_lasso: public CC_shape
@@ -133,7 +133,7 @@ public:
 	void End();
 	void Append(const CC_coord& p);
 	bool Inside(const CC_coord& p) const;
-	virtual std::vector<AnimateDraw> GetAnimateDraw(float x, float y) const;
+	virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x, float y) const;
 	void Drag(const CC_coord& p);
 	inline const CC_coord *FirstPoint() const
 	{

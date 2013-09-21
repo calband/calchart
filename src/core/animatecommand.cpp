@@ -181,9 +181,9 @@ void AnimateCommandMove::ClipBeats(unsigned beats)
 }
 
 
-AnimateDraw AnimateCommandMove::GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const
+CC_DrawCommand AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const
 {
-	return AnimateDraw(pt.x + offset.x, pt.y + offset.y, pt.x + mVector.x + offset.x, pt.y + mVector.y + offset.y);
+	return CC_DrawCommand(pt.x + offset.x, pt.y + offset.y, pt.x + mVector.x + offset.x, pt.y + mVector.y + offset.y);
 }
 
 
@@ -267,7 +267,7 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 }
 
 
-AnimateDraw AnimateCommandRotate::GenAnimateDraw(const AnimatePoint& pt, const CC_coord& offset) const
+CC_DrawCommand AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const
 {
 	float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
 	float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
@@ -276,6 +276,6 @@ AnimateDraw AnimateCommandRotate::GenAnimateDraw(const AnimatePoint& pt, const C
 	auto x_end = RoundToCoord(mOrigin.x + cos(end*M_PI/180.0)*mR) + offset.x;
 	auto y_end = RoundToCoord(mOrigin.y - sin(end*M_PI/180.0)*mR) + offset.y;
 
-	return AnimateDraw(x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y);
+	return CC_DrawCommand(x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y);
 }
 

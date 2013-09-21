@@ -405,15 +405,15 @@ Animation::GetCommands(unsigned whichPoint) const
 }
 
 
-std::vector<AnimateDraw>
+std::vector<CC_DrawCommand>
 Animation::GenPathToDraw(unsigned point, const CC_coord& offset) const
 {
 	auto animation_commands = GetCommands(point);
 	auto position = pts.at(point);
-	std::vector<AnimateDraw> draw_commands;
+	std::vector<CC_DrawCommand> draw_commands;
 	for (auto commands = animation_commands.begin(); commands != animation_commands.end(); ++commands)
 	{
-		draw_commands.push_back((*commands)->GenAnimateDraw(position, offset));
+		draw_commands.push_back((*commands)->GenCC_DrawCommand(position, offset));
 		(*commands)->ApplyForward(position);
 	}
 	return draw_commands;

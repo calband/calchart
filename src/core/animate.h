@@ -37,7 +37,7 @@ AnimateDir AnimGetDirFromAngle(float ang);
 
 class AnimateCommand;
 class AnimateSheet;
-struct AnimateDraw;
+struct CC_DrawCommand;
 
 struct ErrorMarker
 {
@@ -90,7 +90,7 @@ public:
 	// collection of position of each point, for debugging purposes
 	std::string GetCurrentInfo() const;
 
-	std::vector<AnimateDraw> GenPathToDraw(unsigned point, const CC_coord& offset) const;
+	std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
 	AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
 private:

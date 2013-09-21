@@ -1,5 +1,5 @@
 /*
- * animatedraw.h
+ * CC_DrawCommand.h
  * Class for how to draw
  */
 
@@ -20,20 +20,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATE_DRAW_H_
-#define _ANIMATE_DRAW_H_
+#ifndef _CC_DRAWCOMMAND_H_
+#define _CC_DRAWCOMMAND_H_
 
-struct AnimateDraw
+struct CC_DrawCommand
 {
 	typedef enum { Ignore, Line, Arc } DrawType;
 	DrawType mType;
 	int x1, y1, x2, y2;
 	int xc, yc;
 	// nothing version
-	AnimateDraw() : mType(Ignore) {}
+	CC_DrawCommand() : mType(Ignore) {}
 
 	// Line version
-	AnimateDraw(int startx, int starty, int endx, int endy) :
+	CC_DrawCommand(int startx, int starty, int endx, int endy) :
 	mType(Line),
 	x1(startx),
 	y1(starty),
@@ -42,7 +42,7 @@ struct AnimateDraw
 	{}
 
 	// Arc version
-	AnimateDraw(int startx, int starty, int endx, int endy, int centerx, int centery) :
+	CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx, int centery) :
 	mType(Arc),
 	x1(startx),
 	y1(starty),
@@ -54,4 +54,4 @@ struct AnimateDraw
 
 };
 
-#endif // _ANIMATE_DRAW_H_
+#endif // _CC_DRAWCOMMAND_H_

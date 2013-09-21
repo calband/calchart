@@ -603,29 +603,29 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 }
 
 
-void DrawAnimateDrawList(wxDC& dc, const std::vector<AnimateDraw>& draw_commands)
+void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CC_DrawCommand>& draw_commands)
 {
 	for (auto iter = draw_commands.begin(); iter != draw_commands.end(); ++iter)
 	{
 		switch (iter->mType)
 		{
-			case AnimateDraw::Line:
+			case CC_DrawCommand::Line:
 				dc.DrawLine(iter->x1, iter->y1, iter->x2, iter->y2);
 				break;
-			case AnimateDraw::Arc:
+			case CC_DrawCommand::Arc:
 				dc.DrawArc(iter->x1, iter->y1, iter->x2, iter->y2, iter->xc, iter->yc);
 				break;
-			case AnimateDraw::Ignore:
+			case CC_DrawCommand::Ignore:
 				break;
 		}
 	}
 }
 
-void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_coord& end)
+void DrawPath(wxDC& dc, const std::vector<CC_DrawCommand>& draw_commands, const CC_coord& end)
 {
 	dc.SetBrush(*wxTRANSPARENT_BRUSH);
 	dc.SetPen(GetCalChartPen(COLOR_PATHS));
-	DrawAnimateDrawList(dc, draw_commands);
+	DrawCC_DrawCommandList(dc, draw_commands);
 	dc.SetBrush(GetCalChartBrush(COLOR_PATHS));
 	float circ_r = Float2Coord(GetConfiguration_DotRatio());
 	dc.DrawEllipse(end.x - circ_r/2, end.y - circ_r/2, circ_r, circ_r);
@@ -633,7 +633,7 @@ void DrawPath(wxDC& dc, const std::vector<AnimateDraw>& draw_commands, const CC_
 
 //void DrawShape(wxDC& dc, const CC_shape& shape, float x, float y)
 //{
-//	DrawAnimateDrawList(dc, shape.GetAnimateDraw(x, y));
+//	DrawCC_DrawCommandList(dc, shape.GetCC_DrawCommand(x, y));
 //}
 
 
