@@ -399,6 +399,14 @@
 		C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501711CD594E001A4FA2 /* contents.gif */; };
 		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
+		E807BD5F17ED71F60052A53F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E807BD5E17ED71F60052A53F /* main.cpp */; };
+		E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E807BD6017ED71F60052A53F /* calchart_cmd.1 */; };
+		E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
+		E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
+		E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
+		E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
+		E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
+		E807BD6D17ED8AAF0052A53F /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75A5FB91180072C0047B87D /* cc_shapes.cpp */; };
 		E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
@@ -704,6 +712,16 @@
 			name = "Copy Docs";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E807BD5A17ED71F50052A53F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -904,12 +922,15 @@
 		C7ED501711CD594E001A4FA2 /* contents.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = contents.gif; sourceTree = "<group>"; };
 		C7ED501811CD594E001A4FA2 /* forward.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = forward.gif; sourceTree = "<group>"; };
 		C7ED502011CD594E001A4FA2 /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
+		E803362617EE1A5E00A58457 /* cc_drawcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_drawcommand.h; sourceTree = "<group>"; };
+		E807BD5C17ED71F50052A53F /* calchart_cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = calchart_cmd; sourceTree = BUILT_PRODUCTS_DIR; };
+		E807BD5E17ED71F60052A53F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		E807BD6017ED71F60052A53F /* calchart_cmd.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = calchart_cmd.1; sourceTree = "<group>"; };
 		E813C4A717A7886100705836 /* animate_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animate_types.h; sourceTree = "<group>"; };
 		E813C4A817A7886100705836 /* animatecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecommand.cpp; sourceTree = "<group>"; };
 		E813C4A917A7886100705836 /* animatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecommand.h; sourceTree = "<group>"; };
 		E813C4AA17A7886200705836 /* animatecompile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecompile.cpp; sourceTree = "<group>"; };
 		E813C4AB17A7886200705836 /* animatecompile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecompile.h; sourceTree = "<group>"; };
-		E86224C917C86369001E8063 /* animatedraw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatedraw.h; sourceTree = "<group>"; };
 		E878CC9A17ACA6AC009B1F1C /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
 		E878CC9B17ACA6AC009B1F1C /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
 		E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartdoc.cpp; sourceTree = "<group>"; };
@@ -962,6 +983,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E807BD5917ED71F50052A53F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -988,6 +1016,7 @@
 			children = (
 				8D1107320486CEB800E47090 /* CalChart.app */,
 				C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */,
+				E807BD5C17ED71F50052A53F /* calchart_cmd */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1007,6 +1036,7 @@
 				C774E2A114DF777C00558ABA /* image */,
 				C7AFA969117A6DBA00CC53E2 /* src */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				E807BD5D17ED71F60052A53F /* calchart_cmd */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -1248,6 +1278,15 @@
 			path = ../docs;
 			sourceTree = SOURCE_ROOT;
 		};
+		E807BD5D17ED71F60052A53F /* calchart_cmd */ = {
+			isa = PBXGroup;
+			children = (
+				E807BD5E17ED71F60052A53F /* main.cpp */,
+				E807BD6017ED71F60052A53F /* calchart_cmd.1 */,
+			);
+			path = calchart_cmd;
+			sourceTree = "<group>";
+		};
 		E884F38717A5E60C00831301 /* core */ = {
 			isa = PBXGroup;
 			children = (
@@ -1258,11 +1297,11 @@
 				E813C4A917A7886100705836 /* animatecommand.h */,
 				E813C4AA17A7886200705836 /* animatecompile.cpp */,
 				E813C4AB17A7886200705836 /* animatecompile.h */,
-				E86224C917C86369001E8063 /* animatedraw.h */,
 				E884F39917A5F09000831301 /* cc_continuity.cpp */,
 				E884F39A17A5F09000831301 /* cc_continuity.h */,
 				E884F38817A5E60C00831301 /* cc_coord.cpp */,
 				E884F38917A5E60C00831301 /* cc_coord.h */,
+				E803362617EE1A5E00A58457 /* cc_drawcommand.h */,
 				E884F38A17A5E60C00831301 /* cc_point.cpp */,
 				E884F38B17A5E60C00831301 /* cc_point.h */,
 				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
@@ -1320,6 +1359,23 @@
 			productReference = C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E807BD5B17ED71F50052A53F /* calchart_cmd */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E807BD6417ED71F60052A53F /* Build configuration list for PBXNativeTarget "calchart_cmd" */;
+			buildPhases = (
+				E807BD5817ED71F50052A53F /* Sources */,
+				E807BD5917ED71F50052A53F /* Frameworks */,
+				E807BD5A17ED71F50052A53F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = calchart_cmd;
+			productName = calchart_cmd;
+			productReference = E807BD5C17ED71F50052A53F /* calchart_cmd */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1344,6 +1400,7 @@
 			targets = (
 				8D1107260486CEB800E47090 /* CalChart */,
 				C70C7A8A156ABC8800E14F1B /* CalChartHomeView */,
+				E807BD5B17ED71F50052A53F /* calchart_cmd */,
 			);
 		};
 /* End PBXProject section */
@@ -1534,6 +1591,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E807BD5817ED71F50052A53F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E807BD5F17ED71F60052A53F /* main.cpp in Sources */,
+				E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */,
+				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
+				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
+				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
+				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
+				E807BD6D17ED8AAF0052A53F /* cc_shapes.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
@@ -1588,7 +1659,6 @@
 					__WXOSX__,
 					__WXOSX_COCOA__,
 				);
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1636,7 +1706,6 @@
 					__WXOSX__,
 					__WXOSX_COCOA__,
 				);
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1711,6 +1780,54 @@
 			};
 			name = Release;
 		};
+		E807BD6217ED71F60052A53F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E807BD6317ED71F60052A53F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1737,6 +1854,15 @@
 			buildConfigurations = (
 				C70C7B60156ABC8800E14F1B /* Debug */,
 				C70C7B61156ABC8800E14F1B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E807BD6417ED71F60052A53F /* Build configuration list for PBXNativeTarget "calchart_cmd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E807BD6217ED71F60052A53F /* Debug */,
+				E807BD6317ED71F60052A53F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
