@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <iterator>
 
 void Notify(const std::string& notice)
 {
@@ -31,11 +32,29 @@ int main(int argc, const char * argv[])
 		CC_show p(input);
 		Animation a(p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::vector<ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
 		a.GotoSheet(0);
-		std::cout<<a.GetCurrentInfo()<<"\n";
+		auto currentInfo = a.GetCurrentInfo();
+		std::cout<<currentInfo.first<<"\n";
+		std::copy(currentInfo.second.begin(), currentInfo.second.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+		auto oldInfo = currentInfo;
+		while (a.NextBeat())
+		{
+			auto currentInfo = a.GetCurrentInfo();
+			if (currentInfo.first != oldInfo.first)
+			{
+				std::cout<<currentInfo.first<<"\n";
+			}
+			for (auto i = 0; i < currentInfo.second.size(); ++i)
+			{
+				if (i < oldInfo.second.size() && oldInfo.second.at(i) == currentInfo.second.at(i))
+				{
+					continue;
+				}
+				std::cout<<currentInfo.second.at(i)<<"\n";
+			}
+			oldInfo = currentInfo;
+		}
 	}
 	
-
-	std::cout << "Hello, World!\n";
     return 0;
 }
 

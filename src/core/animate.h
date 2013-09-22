@@ -79,7 +79,7 @@ public:
 		CC_coord mPosition;
 		animate_info_t(bool col, AnimateDir dir, float rdir, CC_coord pos) : mCollision(col), mDirection(dir), mRealDirection(rdir), mPosition(pos) {}
 	};
-	const animate_info_t GetAnimateInfo(unsigned which) const;
+	animate_info_t GetAnimateInfo(unsigned which) const;
 
 	int GetNumberSheets() const;
 	int GetCurrentSheet() const;
@@ -88,7 +88,7 @@ public:
 	std::string GetCurrentSheetName() const;
 
 	// collection of position of each point, for debugging purposes
-	std::string GetCurrentInfo() const;
+	std::pair<std::string, std::vector<std::string> > GetCurrentInfo() const;
 
 	std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
 	AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;

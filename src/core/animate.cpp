@@ -366,7 +366,7 @@ void Animation::CheckCollisions()
 }
 
 
-const Animation::animate_info_t
+Animation::animate_info_t
 Animation::GetAnimateInfo(unsigned which) const
 {
 	return Animation::animate_info_t( mCollisions.count(which), (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which) );
@@ -431,16 +431,19 @@ Animation::EndPosition(unsigned point, const CC_coord& offset) const
 	return position;
 }
 
-std::string
+std::pair<std::string, std::vector<std::string> >
 Animation::GetCurrentInfo() const
 {
+	std::vector<std::string> each;
+	for (size_t i = 0; i < numpts; ++i)
+	{
+		std::ostringstream each_string;
+		auto info = GetAnimateInfo(i);
+		each_string<<"pt "<<i<<": ("<<info.mPosition.x<<", "<<info.mPosition.y<<"), dir="<<info.mDirection<<", realdir="<<info.mRealDirection<<(info.mCollision ? ", collision!" : "");
+		each.push_back(each_string.str());
+	}
 	std::ostringstream output;
 	output<<GetCurrentSheetName()<<" ("<<GetCurrentSheet()<<" of "<<GetNumberSheets()<<")\n";
 	output<<"beat "<<GetCurrentBeat() <<" of "<<GetNumberBeats()<<"\n";
-	for (size_t i = 0; i < numpts; ++i)
-	{
-		auto info = GetAnimateInfo(i);
-		output<<"pt "<<i<<": ("<<info.mPosition.x<<", "<<info.mPosition.y<<"), dir="<<info.mDirection<<", realdir="<<info.mRealDirection<<(info.mCollision ? ", collision!" : "")<< "\n";
-	}
-	return output.str();
+	return std::pair<std::string, std::vector<std::string> >(output.str(), each);
 }
