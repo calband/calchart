@@ -96,7 +96,7 @@ public:
 private:
 	const unsigned numpts;
 	std::vector<AnimatePoint> pts;
-	std::vector<std::vector<boost::shared_ptr<AnimateCommand> >::iterator > curr_cmds; // pointer to the current command
+	std::vector<std::vector<boost::shared_ptr<AnimateCommand> >::const_iterator > curr_cmds; // pointer to the current command
 	std::set<int> mCollisions;
 	unsigned curr_sheetnum;
 	unsigned curr_beat;

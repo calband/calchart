@@ -23,8 +23,6 @@
 #ifndef _CC_FILEFORMAT_H_
 #define _CC_FILEFORMAT_H_
 
-#include "platconf.h"
-
 #include <stdexcept>
 #include <sstream>
 
@@ -92,6 +90,34 @@
 
 // version 0 to 3.1 unknown
 
+template <typename T>
+uint16_t get_big_word(const T* ptr)
+{
+	return ((ptr[0] & 0xFF) << 8) | ((ptr[1] & 0xFF));
+}
+
+template <typename T>
+uint32_t get_big_long(const T* ptr)
+{
+	return ((ptr[0] & 0xFF) << 24) | ((ptr[1] & 0xFF) << 16) | ((ptr[2] & 0xFF) << 8) | ((ptr[3] & 0xFF));
+}
+
+inline void put_big_word(void* p, uint16_t v)
+{
+	uint8_t* ptr = static_cast<uint8_t*>(p);
+	ptr[0] = v>>8;
+	ptr[1] = v;
+}
+
+inline void put_big_long(void* p, uint32_t v)
+{
+	uint8_t* ptr = static_cast<uint8_t*>(p);
+	ptr[0] = v>>24;
+	ptr[1] = v>>16;
+	ptr[2] = v>>8;
+	ptr[3] = v;
+}
+
 class CC_FileException : public std::runtime_error
 {
 	static std::string GetErrorFromID(uint32_t nameID)
@@ -110,13 +136,12 @@ public:
 
 
 
-
 template <typename T>
 inline uint32_t ReadLong(T& stream)
 {
 	char rawd[4];
 	stream.read(rawd, sizeof(rawd));
-	return get_big_long(&rawd);
+	return get_big_long(rawd);
 }
 
 // return false if you don't read the inname

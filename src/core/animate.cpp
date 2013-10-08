@@ -86,7 +86,7 @@ AnimateDir AnimGetDirFromAngle(float ang)
 class AnimateSheet
 {
 public:
-	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::string& s, unsigned beats) : pts(thePoints), commands(thePoints.size()), name(s), numbeats(beats) {}
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::vector<std::vector<boost::shared_ptr<AnimateCommand> > >& theCommands, const std::string& s, unsigned beats) : pts(thePoints), commands(theCommands), name(s), numbeats(beats) {}
 	~AnimateSheet() {}
 	std::string GetName() const { return name; }
 	unsigned GetNumBeats() const { return numbeats; }
@@ -107,23 +107,15 @@ mCollisionAction(NULL)
 	// the variables are persistant through the entire compile process.
 	AnimationVariables variablesStates;
 
-	unsigned sheetnum = 0;
-	for (CC_show::const_CC_sheet_iterator_t curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd();
-		++curr_sheet, sheetnum++)
+	for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet)
 	{
-		if (! curr_sheet->IsInAnimation()) continue;
-		std::vector<AnimatePoint> thePoints(numpts);
-		for (unsigned i = 0; i < numpts; i++)
-		{
-			thePoints.at(i) = curr_sheet->GetPosition(i);
-		}
-		AnimateSheet new_sheet(thePoints, curr_sheet->GetName(), curr_sheet->GetBeats());
+		if (!curr_sheet->IsInAnimation()) continue;
 
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
-		int contnum = 0;
+		std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > theCommands(numpts);
 		auto animcont = curr_sheet->GetAnimationContinuity();
-		for (auto currcont = animcont.begin(); currcont != animcont.end(); ++currcont, contnum++)
+		for (auto currcont = animcont.begin(); currcont != animcont.end(); ++currcont)
 		{
 			if (!currcont->GetText().empty())
 			{
@@ -144,7 +136,7 @@ mCollisionAction(NULL)
 				{
 					if (curr_sheet->GetPoint(j).GetContinuityIndex() == currcont->GetNum())
 					{
-						new_sheet.commands[j] = comp.Compile(curr_sheet, j, contnum, ParsedContinuity);
+						theCommands[j] = comp.Compile(curr_sheet, j, std::distance(animcont.begin(), currcont), ParsedContinuity);
 					}
 				}
 				while (ParsedContinuity)
@@ -162,18 +154,24 @@ mCollisionAction(NULL)
 		}
 		for (unsigned j = 0; j < numpts; j++)
 		{
-			if (new_sheet.commands[j].empty())
+			if (theCommands[j].empty())
 			{
-				new_sheet.commands[j] = comp.Compile(curr_sheet, j, contnum, NULL);
+				theCommands[j] = comp.Compile(curr_sheet, j, animcont.size(), NULL);
 			}
 		}
 		if (!comp.Okay() && notifyErrorList)
 		{
-			if (notifyErrorList(comp.GetErrorMarkers(), sheetnum, (boost::format("Errors for \"%1%\"") % curr_sheet->GetName().substr(0, 32)).str()))
+			if (notifyErrorList(comp.GetErrorMarkers(), std::distance(show.GetSheetBegin(), curr_sheet), (boost::format("Errors for \"%1%\"") % curr_sheet->GetName().substr(0, 32)).str()))
 			{
 				break;
 			}
 		}
+		std::vector<AnimatePoint> thePoints(numpts);
+		for (unsigned i = 0; i < numpts; i++)
+		{
+			thePoints.at(i) = curr_sheet->GetPosition(i);
+		}
+		AnimateSheet new_sheet(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
 		sheets.push_back(new_sheet);
 	}
 }

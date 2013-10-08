@@ -51,18 +51,4 @@
 #define TEXT_DOS_STYLE
 #endif
 
-/*****************************************
- * platform independent definitions follow
- *****************************************/
-
-// little/big endian conversion
-
-#define put_big_word(a,v) {((uint8_t *)(a))[0]=((uint16_t)(v))>>8;((uint8_t *)(a))[1]=((uint16_t)(v));}
-#define put_big_long(a,v) {((uint8_t *)(a))[0]=((uint32_t)(v))>>24;((uint8_t *)(a))[1]=((uint32_t)(v))>>16;((uint8_t *)(a))[2]=((uint32_t)(v))>>8;((uint8_t *)(a))[3]=((uint32_t)(v));}
-
-#define get_big_word(a) (((((uint8_t *)(a))[0] & 0xFF) << 8) | (((uint8_t *)(a))[1] & 0xFF))
-#define get_big_long(a) (((((uint8_t *)(a))[0] & 0xFF) << 24) | ((((uint8_t *)(a))[1] & 0xFF) << 16) | ((((uint8_t *)(a))[2] & 0xFF) << 8) | (((uint8_t *)(a))[3] & 0xFF))
-
-#define put_lil_word(a,v) {((uint8_t *)(a))[0]=((uint16_t)(v));((uint8_t *)(a))[1]=((uint16_t)(v))>>8;}
-#define get_lil_word(a) ((((uint8_t *)(a))[0] & 0xFF) | ((((uint8_t *)(a))[1] & 0xFF) << 8))
 #endif
