@@ -175,7 +175,7 @@ std::string CC_show::ImportContinuity(const std::vector<std::string>& lines)
 
 
 std::vector<uint8_t>
-CC_show::WriteShow() const
+CC_show::SerializeShow() const
 {
 	std::ostringstream stream;
 	uint32_t id;
@@ -216,7 +216,7 @@ CC_show::WriteShow() const
 		curr_sheet != GetSheetEnd();
 		++curr_sheet)
 	{
-		auto data = curr_sheet->WriteSheet();
+		auto data = curr_sheet->SerializeSheet();
 		Write(stream, &data[0], data.size());
 	}
 

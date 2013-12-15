@@ -37,6 +37,11 @@ class CC_coord;
 typedef std::set<unsigned> SelectionList;
 
 // CalChart Show
+// The CalChart show object is what most parts of the system interact with
+// It is essentially a collection of CC_sheets that you iterate through to
+// either look at, or change.
+// A show can be loaded from a input stream
+
 class CC_show
 {
 public:
@@ -49,7 +54,7 @@ public:
 	~CC_show();
 
 	// How we save and load a show:
-	std::vector<uint8_t> WriteShow() const;
+	std::vector<uint8_t> SerializeShow() const;
 
 	// continuity that gets printed
 	std::string ImportContinuity(const std::vector<std::string>& file);

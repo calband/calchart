@@ -185,7 +185,7 @@ wxOutputStream& CalChartDoc::SaveObject(wxOutputStream& stream)
 template <typename T>
 T& CalChartDoc::SaveObjectInternal(T& stream)
 {
-	auto data = mShow->WriteShow();
+	auto data = mShow->SerializeShow();
 	stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
 	return stream;
 }
@@ -193,7 +193,7 @@ T& CalChartDoc::SaveObjectInternal(T& stream)
 template <>
 wxFFileOutputStream& CalChartDoc::SaveObjectInternal<wxFFileOutputStream>(wxFFileOutputStream& stream)
 {
-	auto data = mShow->WriteShow();
+	auto data = mShow->SerializeShow();
 	stream.Write(&data[0], data.size());
 	return stream;
 }

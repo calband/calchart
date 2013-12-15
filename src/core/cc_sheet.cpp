@@ -196,7 +196,7 @@ pts(numPoints)
 }
 
 std::vector<uint8_t>
-CC_sheet::WriteSheet() const
+CC_sheet::SerializeSheet() const
 {
 	std::ostringstream stream("");
 	WriteGurk(stream, INGL_SHET);

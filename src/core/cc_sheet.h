@@ -38,6 +38,10 @@ class CC_continuity;
 class CC_point;
 typedef std::vector<CC_textline> CC_textline_list;
 
+// CalChart Sheet
+// The CalChart sheet object is a collection of CC_point locations, the number of
+// beats and the different marcher's continuity.
+
 class CC_sheet
 {
 public:
@@ -46,15 +50,20 @@ public:
 	CC_sheet(CC_show *shw, const std::string& newname);
 	~CC_sheet();
 
-	std::vector<uint8_t> WriteSheet() const;
+	std::vector<uint8_t> SerializeSheet() const;
+
+	// Observer functions
+	const CC_continuity& GetNthContinuity(unsigned i) const;
+	std::set<unsigned> SelectPointsOfContinuity(unsigned i) const;
+	// return 0 if not found else index+1
+	unsigned FindContinuityByName(const std::string& name) const;
+	bool ContinuityInUse(unsigned idx) const;
 
 	// setting values on the stunt sheet
 	// * needs to be through command only *
 	void SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position);
 
 	// continuity:
-	std::set<unsigned> SelectPointsOfContinuity(unsigned i) const;
-	const CC_continuity& GetNthContinuity(unsigned i) const;
 	// * needs to be through command only *
 	void SetNthContinuity(const std::string& text, unsigned i);
 	// * needs to be through command only *
@@ -68,9 +77,6 @@ public:
 // creates if doesn't exist
 	// * needs to be through command only * //
 	const CC_continuity& GetStandardContinuity(SYMBOL_TYPE sym);
-// return 0 if not found else index+1
-	unsigned FindContinuityByName(const std::string& name) const;
-	bool ContinuityInUse(unsigned idx) const;
 	
 	// points:
 	int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
