@@ -1,15 +1,21 @@
 --- CalChart README.txt ---
-Updated on 7/22/2012 by Richard Powell
+Updated on 12/15/2013 by Richard Powell
 ---
+
+CalChart version 3.3.4
 
 ---
 What's new in this version?
 ---
 
-Bugs fixed in this release:
+Non-user facing changes:
+  General clean-up to separate core code from wxWidgets code
+  Updating to wxWidgets 2.9.5
+  Changes to Do/Undo system where we snapshot the show.  Increase memory usage, but simplifies the code.
+  Updated for Mavericks and Window 7
 
-CalChart-3.3.2 corruption fixed
-3547345: continuity files do not import correctly
+Bugs fixed in this release:
+3524581: Printing with continuity: scale font to fit
 
 ---
 What is CalChart?
@@ -103,6 +109,15 @@ For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
 If you need to regenerate the help documentation, see the README-docs.txt
+
+----------
+
+Release notes for 3.3.3:
+
+Bugs fixed in this release:
+
+CalChart-3.3.2 corruption fixed
+3547345: continuity files do not import correctly
 
 ----------
 

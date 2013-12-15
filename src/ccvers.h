@@ -19,7 +19,7 @@
 
 #define CC_MAJOR_VERSION 3
 #define CC_MINOR_VERSION 3
-#define CC_SUB_MINOR_VERSION 3
+#define CC_SUB_MINOR_VERSION 4
 
 #define MK_STR(name) #name
 

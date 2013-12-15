@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT=CalChart
-VERSION=3.3.3
+VERSION=3.3.4
 APP=CalChart.app
 CONFIG=Debug
 WC_DMG=wc.dmg
