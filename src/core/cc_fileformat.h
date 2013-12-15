@@ -75,6 +75,76 @@
 // INGL_PCNT = 'P','C','N','T' ;
 // INGL_END  = 'E','N','D',' ' ;
 
+
+// Possible file description for 3.4.0
+// Description of the CalChart file format layout, in modified Extended Backus–Naur Form
+// version 3.4.0 to current
+//   Where {} means 0 or 1;
+//         {}* means 0 or more;
+// show               = START , SHOW ;
+// START              = INGL_INGL , INGL_VERS ;
+// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) , SHOW_DATA , SHOW_END ;
+// SHOW_DATA          = NUM_MARCH , { LABEL } , { DESCRIPTION } , { SHEET }* ;
+// SHOW_END           = INGL_END , INGL_SHOW ;
+// NUM_MARCH          = INGL_NUMM , BigEndianInt32(4) , NUM_MARCH_DATA , NUM_MARCH_END;
+// NUM_MARCH_DATA     = BigEndianInt32( number of marchers ) ;
+// NUM_MARCH_END      = INGL_END , INGL_NUMM ;
+// LABEL              = INGL_LABL , BigEndianInt32(DataTill_LABEL_END) , LABEL_DATA , LABEL_END;
+// LABEL_DATA         = { Null-terminated char* }* ;
+// LABEL_END          = INGL_END , INGL_LABL ;
+// DESCRIPTION        = INGL_DESC , BigEndianInt32(DataTill_DESCRIPTION_END) , DESCRIPTION_DATA , DESCRIPTION_END ;
+// DESCRIPTION_DATA   = { Null-terminated char* } ;
+// DESCRIPTION_END    = INGL_END , INGL_DESC ;
+// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
+// SHEET              = NAME , DURATION , ALL_POINTS , POSITION , [ REF_POSITION ] , [ POINT_SYMBOL ] , [ POINT_CONT_INDEX ] , [ POINT_LABEL_FLIP ] , { CONTINUITY } ;
+// SHEET_END          = INGL_END , INGL_SHET ;
+// NAME               = INGL_NAME , BigEndianInt32(DataTill_NAME_END) , NAME_DATA , NAME_END ;
+// NAME_DATA          = { Null-terminated char* } ;
+// NAME_END           = INGL_END , INGL_NAME ;
+// DURATION           = INGL_DURA , BigEndianInt32(4) , DURATION_DATA , DURATION_END;
+// DURATION_DATA      = BigEndianInt32(number of beats) ;
+// DURATION_END       = INGL_END , INGL_DURA ;
+// ALL_POINTS         = INGL_PNTS , BigEndianInt32(DataTill_ALL_POINTS_END) , ALL_POINTS_DATA , ALL_POINTS_END ;
+// ALL_POINTS_DATA    = { POSITION , [ REF_POSITION ] , [ POINT_SYMBOL ] , [ POINT_CONT_INDEX ] , [ POINT_LABEL_FLIP ] } x num_march ;
+// ALL_POINTS_END     = INGL_END , INGL_PNTS ;
+// POSITION           = INGL_POS , BigEndianInt32(DataTill_POSITION_END) , POSITION_DATA , POSITION_END ;
+// POSITION_DATA      = { BigEndianInt16( x ) , BigEndianInt16( y ) } ;
+// POSITION_END       = INGL_END , INGL_POS ;
+// REF_POSITION       = INGL_REFP , BigEndianInt32(DataTill_REF_POSITION_END) , REF_POSITION_DATA , REF_POSITION_END ;
+// REF_POSITION_DATA  = BigEndianInt16( which reference point ) , { BigEndianInt16( x ) , BigEndianInt16( y ) } ;
+// REF_POSITION_END   = INGL_END , INGL_REFP ;
+// POINT_SYMBOL       = INGL_SYMB , BigEndianInt32(DataTill_POINT_SYMBOL_END) , POINT_SYMBOL_DATA , POINT_SYMBOL_END ;
+// POINT_SYMBOL_DATA  = { BigEndianInt8( which symbol type ) } ;
+// POINT_SYMBOL_END   = INGL_END , INGL_SYMB ;
+// POINT_CONT_INDEX   = INGL_TYPE , BigEndianInt32(DataTill_POINT_CONT_INDEX_END)) , POINT_CONT_INDEX_DATA , POINT_CONT_INDEX_END ;
+// POINT_CONT_INDEX_DATA = { BigEndianInt8( which continuity index ) } ;
+// POINT_CONT_INDEX_END = INGL_END , INGL_TYPE ;
+// POINT_LABEL_FLIP   = INGL_LABL , BigEndianInt32(DataTill_POINT_LABEL_FLIP_END)) , POINT_LABEL_FLIP_DATA , POINT_LABEL_FLIP_END ;
+// POINT_LABEL_FLIP_DATA = { BigEndianInt8( label flipped ) } ;
+// POINT_LABEL_FLIP_END = INGL_END , INGL_LABL ;
+// CONTINUITY         = INGL_CONT , BigEndianInt32(DataTill_CONTINUITY_END)) , CONTINUITY_DATA , CONTINUITY_END;
+// CONTINUITY_DATA    = BigEndianInt8( index ) , Null-terminated char* , Null-terminated char* ;
+// CONTINUITY_END     = INGL_END , INGL_CONT ;
+//
+// INGL_INGL = 'I','N','G','L' ;
+// INGL_GURK = 'G','U','R','K' ;
+// INGL_SHOW = 'S','H','O','W' ;
+// INGL_SHET = 'S','H','E','T' ;
+// INGL_NUMM = 'S','I','Z','E' ;
+// INGL_LABL = 'L','A','B','L' ;
+// INGL_MODE = 'M','O','D','E' ;
+// INGL_DESC = 'D','E','S','C' ;
+// INGL_NAME = 'N','A','M','E' ;
+// INGL_DURA = 'D','U','R','A' ;
+// INGL_POS  = 'P','O','S',' ' ;
+// INGL_SYMB = 'S','Y','M','B' ;
+// INGL_TYPE = 'T','Y','P','E' ;
+// INGL_REFP = 'R','E','F','P' ;
+// INGL_CONT = 'C','O','N','T' ;
+// INGL_PCNT = 'P','C','N','T' ;
+// INGL_END  = 'E','N','D',' ' ;
+
+
 // Some assumptions:
 // strings are ascii 8-bit chars.
 // Error if LABEL_DATA does not contain N null terminated strings, where N == number of marchers
