@@ -49,3 +49,7 @@ I modify the project to match up with the results of theses commands:
 $ wx-config --cxxflags
 $ wx-config --libs
 
+Also, as the project uses precompiled headers, you may have to modify the
+preconfigured header file path:
+GCC_PREFIX_HEADER = /usr/local/include/wx-2.9/wx/wxprec.h
+
