@@ -1687,6 +1687,14 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/usr/local/include/wx-2.9/wx/wxprec.h";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_FILE_OFFSET_BITS=64",
+					__WXMAC__,
+					__WXOSX__,
+					__WXOSX_COCOA__,
+					WX_PRECOMP,
+				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
@@ -1699,6 +1707,14 @@
 			buildSettings = {
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/usr/local/include/wx-2.9/wx/wxprec.h";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_FILE_OFFSET_BITS=64",
+					__WXMAC__,
+					__WXOSX__,
+					__WXOSX_COCOA__,
+					WX_PRECOMP,
+				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
@@ -1939,6 +1955,7 @@
 				E803363C17EE289400A58457 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E807BD6417ED71F60052A53F /* Build configuration list for PBXNativeTarget "calchart_cmd" */ = {
 			isa = XCConfigurationList;
