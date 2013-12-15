@@ -178,7 +178,7 @@ void GeneralSetup::CreateControls()
 	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_READONLY|wxCB_DROPDOWN);	
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
 	
-	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
+	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
 		wxBitmap temp_bitmap(16, 16);
 		wxMemoryDC temp_dc;
@@ -207,7 +207,7 @@ void GeneralSetup::CreateControls()
 void GeneralSetup::Init()
 {
 	// first read out the defaults:
-	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
+	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
 		mCalChartPens[i] = GetCalChartPen(i);
 		mCalChartBrushes[i] = GetCalChartBrush(i);
@@ -230,7 +230,7 @@ bool GeneralSetup::TransferDataFromWindow()
 	mAutoSave_Interval = text->GetValue();
 
 	// write out the values defaults:
-	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; ++i)
+	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
 		SetCalChartPen(i, mCalChartPens[i]);
 		SetCalChartBrush(i, mCalChartBrushes[i]);

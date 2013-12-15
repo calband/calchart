@@ -23,6 +23,8 @@
 #ifndef _LINMATH_H_
 #define _LINMATH_H_
 
+#include <math.h>
+
 typedef float LinElem;
 class Vector
 {

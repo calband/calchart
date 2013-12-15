@@ -26,6 +26,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <stdint.h>
 
 class CC_sheet;
 class ShowMode;
