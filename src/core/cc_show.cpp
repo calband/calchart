@@ -27,6 +27,7 @@
 #include "cc_point.h"
 #include "cc_shapes.h"
 #include "cc_fileformat.h"
+#include "ccvers.h"
 
 #include <sstream>
 
@@ -50,7 +51,12 @@ mSheetNum(0)
 	uint32_t name;
 	
 	ReadAndCheckID(stream, INGL_INGL);
-	ReadAndCheckID(stream, INGL_GURK);
+	uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
+	if (version > ((CC_MAJOR_VERSION<<8) | (CC_MINOR_VERSION)))
+	{
+		// what do we do if we don't support it?
+		;
+	}
 	ReadAndCheckID(stream, INGL_SHOW);
 	
 	// Handle show info

@@ -196,6 +196,8 @@ class CC_FileException : public std::runtime_error
 		put_big_long(rawd, nameID);
 		std::stringstream buf;
 		buf<<"Wrong ID read:  Read "<<rawd[0]<<rawd[1]<<rawd[2]<<rawd[3];
+		buf<<"\n";
+		buf<<"Check to make sure you are on the latest version of CalChart\n";
 		return std::string(buf.str());
 	}
 	
@@ -223,6 +225,28 @@ inline void ReadAndCheckID(T& stream, uint32_t inname)
 	{
 		throw CC_FileException(inname);
 	}
+}
+
+// return false if you don't read the inname
+template <typename T>
+inline uint32_t ReadGurkSymbolAndGetVersion(T& stream, uint32_t inname)
+{
+	uint32_t name = ReadLong(stream);
+	if (inname == name)
+	{
+		// if we have an exact match, this is version 0
+		return 0x0;
+	}
+	if ((((name>>24)&0xFF) == ((inname>>24)&0xFF)) && (((name>>16)&0xFF) == ((inname>>16)&0xFF)))
+	{
+		char major_vers = (name>>8) & 0xFF;
+		char minor_vers = (name) & 0xFF;
+		if (isdigit(major_vers) && isdigit(minor_vers))
+		{
+			return ((major_vers - '0')<<8) | (minor_vers - '0');
+		}
+	}
+	throw CC_FileException(inname);
 }
 
 // return false if you don't read the inname

@@ -16,5 +16,14 @@
 */
 
 #ifndef CC_VERSION
-#define CC_VERSION "v3.3.3"
+
+#define CC_MAJOR_VERSION 3
+#define CC_MINOR_VERSION 3
+#define CC_SUB_MINOR_VERSION 3
+
+#define MK_STR(name) #name
+
+#define MK_CC_VERSION(major, minor, subminor) "v" MK_STR(major) "." MK_STR(minor) "." MK_STR(subminor)
+#define CC_VERSION MK_CC_VERSION(CC_MAJOR_VERSION, CC_MINOR_VERSION, CC_SUB_MINOR_VERSION)
+
 #endif
