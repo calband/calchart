@@ -189,7 +189,7 @@ mAnimationFrame(NULL)
 
 // Give it a status line
 	CreateStatusBar(3);
-	SetStatusText(wxT("Welcome to Calchart " wxT( CC_VERSION )));
+	SetStatusText(wxT("Welcome to Calchart v" wxT( STRINGIZE(CC_MAJOR_VERSION) ) wxT(".") wxT( STRINGIZE(CC_MINOR_VERSION) ) wxT(".") wxT( STRINGIZE(CC_SUB_MINOR_VERSION) ) ));
 
 // Make a menubar
 	wxMenu *file_menu = new wxMenu;

@@ -113,7 +113,8 @@ TopFrame::OnCmdHelp(wxCommandEvent& event)
 void
 TopFrame::About()
 {
-	(void)wxMessageBox(wxT("CalChart ") wxT(CC_VERSION) wxT("\nAuthor: Gurk Meeker, Richard Michael Powell\n")
+	(void)wxMessageBox(wxT("CalChart v") wxT( STRINGIZE(CC_MAJOR_VERSION) ) wxT(".") wxT( STRINGIZE(CC_MINOR_VERSION) ) wxT(".") wxT( STRINGIZE(CC_SUB_MINOR_VERSION))
+		wxT("\nAuthor: Gurk Meeker, Richard Michael Powell\n")
 		wxT("http://calchart.sourceforge.net\n")
 		wxT("Copyright (c) 1994-2011 Garrick Meeker, Richard Michael Powell\n")
 		wxT("\n")

@@ -21,9 +21,10 @@
 #define CC_MINOR_VERSION 3
 #define CC_SUB_MINOR_VERSION 4
 
-#define MK_STR(name) #name
+#define STRINGIZE_HELPER(name) #name
+#define STRINGIZE(x)              STRINGIZE_HELPER(x)
 
-#define MK_CC_VERSION(major, minor, subminor) "v" MK_STR(major) "." MK_STR(minor) "." MK_STR(subminor)
+#define MK_CC_VERSION(major, minor, subminor) "v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(subminor)
 #define CC_VERSION MK_CC_VERSION(CC_MAJOR_VERSION, CC_MINOR_VERSION, CC_SUB_MINOR_VERSION)
 
 #endif
