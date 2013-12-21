@@ -1,19 +1,22 @@
-My steps for building for MacOSX.  Updated for Mountain Lion (10.8)
+My steps for building for MacOSX.  Updated for Mavericks (10.9)
 
-These steps require having Mountain Lion 10.8 and XCode 4.6.3.  Both should be on the app store.
+These steps require having Mavericks 10.9 and XCode 5.0.2.  Both should be on the app store.
 
 Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
 boost
 
-Download 2.9.5 of wxWidgets to build the library:
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_9_5 ~/wxWidgets-2.9.5
+Download 3.0.0-rc2 of wxWidgets to build the library:
+$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_0-rc2 ~/wxWidgets-3.0.0-rc2
 
-$ cd wxWidgets-2.9.5
+$ cd wxWidgets-3.0.0-rc2
 
 $ mkdir build-results
 $ cd build-results
 
-$ ../configure --with-cocoa --with-macosx-version-min=10.6 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk --enable-debug --enable-debug_info --disable-shared
+$ ../configure --with-cocoa --with-macosx-version-min=10.7 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk --enable-debug --enable-debug_info --disable-shared CXXFLAGS="-std=c++11 -stdlib=libc++" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
+
+(see http://forums.wxwidgets.org/viewtopic.php?f=19&t=37432 for more information about why you need to add the build options.)
+
 $ make
 
 put into the /usr/local/bin (if you wanted to put somewhere different, use the --prefix option in configure but you're on your own)
