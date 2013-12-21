@@ -189,6 +189,7 @@ CC_show::SerializeShow() const
 
 	WriteHeader(stream);
 	WriteGurk(stream, INGL_SHOW);
+	//WriteGurkAndVersion(stream, CC_MAJOR_VERSION, CC_MINOR_VERSION, INGL_SHOW);
 
 // Handle show info
 	i = GetNumPoints();

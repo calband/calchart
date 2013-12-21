@@ -324,6 +324,16 @@ inline void WriteGurk(T& stream, uint32_t name)
 
 
 template <typename T>
+inline void WriteGurkAndVersion(T& stream, uint8_t major, uint8_t minor, uint32_t name)
+{
+	uint32_t gurk_version = ((INGL_GURK) & 0xFFFF0000) | (major << 8) | (minor);
+	
+	WriteLong(stream, gurk_version);
+	WriteLong(stream, name);
+}
+
+
+template <typename T>
 inline void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
 {
 	WriteLong(stream, name);
