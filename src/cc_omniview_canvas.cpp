@@ -265,7 +265,7 @@ LoadTexture(const wxString &filename, GLuint& texture)
 
 // We always draw from the upper left, upper right, lower right, lower left
 static void
-DrawTextureOnBox(const float points[4][3], size_t repeat_x, size_t repeat_y, const GLuint &texture)
+DrawTextureOnBox(const double points[4][3], size_t repeat_x, size_t repeat_y, const GLuint &texture)
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
@@ -277,7 +277,7 @@ DrawTextureOnBox(const float points[4][3], size_t repeat_x, size_t repeat_y, con
 }
 
 static void
-DrawBox(const float points[4][3])
+DrawBox(const double points[4][3])
 {
 	glBegin(GL_QUADS);
 	glVertex3f(points[0][0], points[0][1], points[0][2]);
@@ -442,61 +442,61 @@ CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
     glMatrixMode(GL_MODELVIEW);
 	
 	// because we look up to see the sky, make sure the texture is pointing down:
-	const float points00[][3] = { { 1000, -1000, 30 }, { -1000, -1000, 30 }, { -1000, 1000, 30 }, { 1000, 1000, 30} };
+	const double points00[][3] = { { 1000, -1000, 30 }, { -1000, -1000, 30 }, { -1000, 1000, 30 }, { 1000, 1000, 30} };
 	DrawTextureOnBox(points00, 20, 20, m_textures[kSky]);
-	const float points01[][3] = { { -1*(FieldNS/2.0+25), (FieldEW/2.0+10), 0 }, { (FieldNS/2.0+25), (FieldEW/2.0+10), 0 }, { (FieldNS/2.0+25), -1*(FieldEW/2.0+10), 0 }, { -1*(FieldNS/2.0+25), -1*(FieldEW/2.0+10), 0 } };
+	const double points01[][3] = { { -1*(FieldNS/2.0+25), (FieldEW/2.0+10), 0 }, { (FieldNS/2.0+25), (FieldEW/2.0+10), 0 }, { (FieldNS/2.0+25), -1*(FieldEW/2.0+10), 0 }, { -1*(FieldNS/2.0+25), -1*(FieldEW/2.0+10), 0 } };
 	DrawTextureOnBox(points01, 2, 2, m_textures[kField]);
-	const float points02[][3] = { { FieldNS/2.0+16, +FieldEW/2.0, 0 }, { FieldNS/2.0+16, -FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 } };
+	const double points02[][3] = { { FieldNS/2.0+16, +FieldEW/2.0, 0 }, { FieldNS/2.0+16, -FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 } };
 	DrawTextureOnBox(points02, 1, 1, m_textures[kCalifornia]);
-	const float points03[][3] = { { -1*(FieldNS/2.0+16), -1*(FieldEW/2.0), 0 }, { -1*(FieldNS/2.0+16), -1*(-FieldEW/2.0), 0 }, { -1*(FieldNS/2.0), -1*(-FieldEW/2.0), 0 }, { -1*(FieldNS/2.0), -1*(FieldEW/2.0), 0 } };
+	const double points03[][3] = { { -1*(FieldNS/2.0+16), -1*(FieldEW/2.0), 0 }, { -1*(FieldNS/2.0+16), -1*(-FieldEW/2.0), 0 }, { -1*(FieldNS/2.0), -1*(-FieldEW/2.0), 0 }, { -1*(FieldNS/2.0), -1*(FieldEW/2.0), 0 } };
 	DrawTextureOnBox(points03, 1, 1, m_textures[kEECS]);
-	const float points04[][3] = { { -FieldNS/2.0, FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { -FieldNS/2.0, -FieldEW/2.0, 0 } };
+	const double points04[][3] = { { -FieldNS/2.0, FieldEW/2.0, 0 }, { FieldNS/2.0, FieldEW/2.0, 0 }, { FieldNS/2.0, -FieldEW/2.0, 0 }, { -FieldNS/2.0, -FieldEW/2.0, 0 } };
 	DrawTextureOnBox(points04, 1, 1, m_textures[kLines]);
-	const float points05[][3] = { { -10, 10, 0 }, { 10, 10, 0 }, { 10, -10, 0 }, { -10, -10, 0 } };
+	const double points05[][3] = { { -10, 10, 0 }, { 10, 10, 0 }, { 10, -10, 0 }, { -10, -10, 0 } };
 	DrawTextureOnBox(points05, 1, 1, m_textures[kCalband]);
 	
 	// stands:
-	const float points06[][3] = { { -FieldNS/2.0 - 25, FieldEW/2.0 + 30, 25 } , { FieldNS/2.0 + 25, FieldEW/2.0 + 30, 25 } , { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 } };
+	const double points06[][3] = { { -FieldNS/2.0 - 25, FieldEW/2.0 + 30, 25 } , { FieldNS/2.0 + 25, FieldEW/2.0 + 30, 25 } , { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 } };
 	DrawTextureOnBox(points06, 5, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points07[][3] = { { -(-FieldNS/2.0 - 25), -(FieldEW/2.0 + 30), 25 } , { -(FieldNS/2.0 + 25), -(FieldEW/2.0 + 30), 25 } , { -(FieldNS/2.0 + 25), -(FieldEW/2.0 + 10), 0 }, { -(-FieldNS/2.0-25), -(FieldEW/2.0 + 10), 0 } };
+	const double points07[][3] = { { -(-FieldNS/2.0 - 25), -(FieldEW/2.0 + 30), 25 } , { -(FieldNS/2.0 + 25), -(FieldEW/2.0 + 30), 25 } , { -(FieldNS/2.0 + 25), -(FieldEW/2.0 + 10), 0 }, { -(-FieldNS/2.0-25), -(FieldEW/2.0 + 10), 0 } };
 	DrawTextureOnBox(points07, 5, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points08[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0-50, -FieldEW/2.0-10, 25 }, { -FieldNS/2.0-25, -FieldEW/2.0-30, 25 } };
+	const double points08[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0-50, -FieldEW/2.0-10, 25 }, { -FieldNS/2.0-25, -FieldEW/2.0-30, 25 } };
 	DrawTextureOnBox(points08, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points09[][3] = { { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 30, 25 }, { -FieldNS/2.0-50, FieldEW/2.0 + 10, 25 } };
+	const double points09[][3] = { { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0-25, FieldEW/2.0 + 30, 25 }, { -FieldNS/2.0-50, FieldEW/2.0 + 10, 25 } };
 	DrawTextureOnBox(points09, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points10[][3] = { { FieldNS/2.0+25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0-30, 25 }, { FieldNS/2.0+50, -FieldEW/2.0-10, 25 } };
+	const double points10[][3] = { { FieldNS/2.0+25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0-30, 25 }, { FieldNS/2.0+50, -FieldEW/2.0-10, 25 } };
 	DrawTextureOnBox(points10, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points11[][3] = { { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+50, FieldEW/2.0 + 10, 25 }, { FieldNS/2.0+25, FieldEW/2.0 + 30, 25 } };
+	const double points11[][3] = { { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+50, FieldEW/2.0 + 10, 25 }, { FieldNS/2.0+25, FieldEW/2.0 + 30, 25 } };
 	DrawTextureOnBox(points11, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points12[][3] = { { -FieldNS/2.0 - 50, -FieldEW/2.0 - 10, 25 }, { -FieldNS/2.0 - 50, FieldEW/2.0 + 10, 25 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 0 }  };
+	const double points12[][3] = { { -FieldNS/2.0 - 50, -FieldEW/2.0 - 10, 25 }, { -FieldNS/2.0 - 50, FieldEW/2.0 + 10, 25 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 0 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 0 }  };
 	DrawTextureOnBox(points12, 4, 5, m_textures[crowdOn ? kCrowd : kBleachers]);
-	const float points13[][3] = { { -(-FieldNS/2.0 - 50), -(-FieldEW/2.0 - 10), 25 }, { -(-FieldNS/2.0 - 50), -(FieldEW/2.0 + 10), 25 }, { -(-FieldNS/2.0 - 25), -(FieldEW/2.0 + 10), 0 }, { -(-FieldNS/2.0 - 25), -(-FieldEW/2.0 - 10), 0 }  };
+	const double points13[][3] = { { -(-FieldNS/2.0 - 50), -(-FieldEW/2.0 - 10), 25 }, { -(-FieldNS/2.0 - 50), -(FieldEW/2.0 + 10), 25 }, { -(-FieldNS/2.0 - 25), -(FieldEW/2.0 + 10), 0 }, { -(-FieldNS/2.0 - 25), -(-FieldEW/2.0 - 10), 0 }  };
 	DrawTextureOnBox(points13, 4, 5, m_textures[crowdOn ? kCrowd : kBleachers]);
 
 	glColor3f(0.0,0.0,0.0);
-	const float points14[][3] = { { FieldNS/2.0 + 25, 8, 0 }, { FieldNS/2.0 + 25, -8, 0 }, { FieldNS/2.0 + 32, -8, 6 }, { FieldNS/2.0 + 32, 8, 6 } };
+	const double points14[][3] = { { FieldNS/2.0 + 25, 8, 0 }, { FieldNS/2.0 + 25, -8, 0 }, { FieldNS/2.0 + 32, -8, 6 }, { FieldNS/2.0 + 32, 8, 6 } };
 	DrawBox(points14); // North Tunnel
-	const float points15[][3] = { { -FieldNS/2.0 - 25, 8, 0 }, { -FieldNS/2.0 - 25, -8, 0 }, { -FieldNS/2.0 - 32, -8, 6 }, { -FieldNS/2.0 - 32, 8, 6 } };
+	const double points15[][3] = { { -FieldNS/2.0 - 25, 8, 0 }, { -FieldNS/2.0 - 25, -8, 0 }, { -FieldNS/2.0 - 32, -8, 6 }, { -FieldNS/2.0 - 32, 8, 6 } };
 	DrawBox(points15); // South Tunnel
 	glColor3f(1.0,1.0,1.0);
 	
-	const float points16[][3] = { { -40, FieldEW/2.0 + 30, 35 } , { 40, FieldEW/2.0 + 30, 35 }, { 40, FieldEW/2.0 + 30, 25 }, { -40, FieldEW/2.0 + 30, 25 } };
+	const double points16[][3] = { { -40, FieldEW/2.0 + 30, 35 } , { 40, FieldEW/2.0 + 30, 35 }, { 40, FieldEW/2.0 + 30, 25 }, { -40, FieldEW/2.0 + 30, 25 } };
 	DrawTextureOnBox(points16, 1, 1, m_textures[kPressbox]);
 	
-	const float points17[][3] = { { 10, -(FieldEW/2.0 + 30), 25 }, { -10, -(FieldEW/2.0 + 30), 25 },{ -10, -(FieldEW/2.0 + 10), 0 }, { 10, -(FieldEW/2.0 + 10), 0 } };
+	const double points17[][3] = { { 10, -(FieldEW/2.0 + 30), 25 }, { -10, -(FieldEW/2.0 + 30), 25 },{ -10, -(FieldEW/2.0 + 10), 0 }, { 10, -(FieldEW/2.0 + 10), 0 } };
 	DrawTextureOnBox(points17, 1, 1, m_textures[kC]);
 
-	const float points18[][3] = { { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 3 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 3 } };
+	const double points18[][3] = { { -FieldNS/2.0-25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0+25, FieldEW/2.0 + 10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 3 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 3 } };
 	DrawTextureOnBox(points18, 5, 1, m_textures[kWall]);
-	const float points19[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0 - 10, 0 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 10, 3 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 3 } };
+	const double points19[][3] = { { -FieldNS/2.0-25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0+25, -FieldEW/2.0 - 10, 0 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 10, 3 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 3 } };
 	DrawTextureOnBox(points19, 5, 1, m_textures[kWall]);
-	const float points20[][3] = { { -FieldNS/2.0 - 25, 8, 0 }, { -FieldNS/2.0 - 25, FieldEW/2.0+10, 0 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 3 }, { -FieldNS/2.0 - 25, 8, 3 } };
+	const double points20[][3] = { { -FieldNS/2.0 - 25, 8, 0 }, { -FieldNS/2.0 - 25, FieldEW/2.0+10, 0 }, { -FieldNS/2.0 - 25, FieldEW/2.0 + 10, 3 }, { -FieldNS/2.0 - 25, 8, 3 } };
 	DrawTextureOnBox(points20, 2, 1, m_textures[kWall]);
-	const float points21[][3] = { { -FieldNS/2.0 - 25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0 - 25, -8, 0 }, { -FieldNS/2.0 - 25, -8, 3 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 3 } };
+	const double points21[][3] = { { -FieldNS/2.0 - 25, -FieldEW/2.0-10, 0 }, { -FieldNS/2.0 - 25, -8, 0 }, { -FieldNS/2.0 - 25, -8, 3 }, { -FieldNS/2.0 - 25, -FieldEW/2.0 - 10, 3 } };
 	DrawTextureOnBox(points21, 2, 1, m_textures[kWall]);
-	const float points22[][3] = { { FieldNS/2.0 + 25, 8, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0+10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 3 }, { FieldNS/2.0 + 25, 8, 3 } };
+	const double points22[][3] = { { FieldNS/2.0 + 25, 8, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0+10, 0 }, { FieldNS/2.0 + 25, FieldEW/2.0 + 10, 3 }, { FieldNS/2.0 + 25, 8, 3 } };
 	DrawTextureOnBox(points22, 2, 1, m_textures[kWall]);
-	const float points23[][3] = { { FieldNS/2.0 + 25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0 + 25, -8, 0 }, { FieldNS/2.0 + 25, -8, 3 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 10, 3 } };
+	const double points23[][3] = { { FieldNS/2.0 + 25, -FieldEW/2.0-10, 0 }, { FieldNS/2.0 + 25, -8, 0 }, { FieldNS/2.0 + 25, -8, 3 }, { FieldNS/2.0 + 25, -FieldEW/2.0 - 10, 3 } };
 	DrawTextureOnBox(points23, 2, 1, m_textures[kWall]);
 	
     glFlush();
@@ -532,7 +532,7 @@ CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &
 	
 	glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 	
-	const float points[][3] = { { x1, y1, z1 }, { x2, y2, z1 }, { x2, y2, z2 }, { x1, y1, z2 } };
+	const double points[][3] = { { x1, y1, z1 }, { x2, y2, z1 }, { x2, y2, z2 }, { x1, y1, z2 } };
 	DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 

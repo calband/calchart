@@ -83,8 +83,8 @@ GridValue gridvalue[] =
 	{Int2Coord(1),0},
 	{Int2Coord(2),0},
 	{Int2Coord(4),0},
-	{Int2Coord(4),Int2Coord(4)/3},
-	{Int2Coord(8),Int2Coord(8)/3}
+	{Int2Coord(4),static_cast<Coord>(Int2Coord(4)/3)},
+	{Int2Coord(8),static_cast<Coord>(Int2Coord(8)/3)}
 };
 
 extern wxPrintDialogData *gPrintDialogData;

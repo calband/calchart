@@ -89,7 +89,6 @@
 		C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76B4EBA15694C770087FE94 /* print_ps_dialog.cpp */; };
 		C70C7ADC156ABC8800E14F1B /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
 		C70C7ADD156ABC8800E14F1B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
-		C70C7ADE156ABC8800E14F1B /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD91479B39A004E5C5B /* QuickTime.framework */; };
 		C70C7ADF156ABC8800E14F1B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD71479B385004E5C5B /* OpenGL.framework */; };
 		C70C7AE0156ABC8800E14F1B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
 		C70C7AE1156ABC8800E14F1B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
@@ -321,7 +320,6 @@
 		C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
 		C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
 		C7C5FBD81479B385004E5C5B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD71479B385004E5C5B /* OpenGL.framework */; };
-		C7C5FBDA1479B39A004E5C5B /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD91479B39A004E5C5B /* QuickTime.framework */; };
 		C7C5FBDC1479B3F8004E5C5B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
 		C7D177EA13B1A83700F65F4C /* charthlp_macosxinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */; };
 		C7D177EB13B1A83700F65F4C /* charthlp_macosxprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */; };
@@ -998,7 +996,6 @@
 			files = (
 				C72F24BA14D4976E00758A0E /* GLUT.framework in Frameworks */,
 				C7C5FBDC1479B3F8004E5C5B /* WebKit.framework in Frameworks */,
-				C7C5FBDA1479B39A004E5C5B /* QuickTime.framework in Frameworks */,
 				C7C5FBD81479B385004E5C5B /* OpenGL.framework in Frameworks */,
 				C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */,
 				C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */,
@@ -1013,7 +1010,6 @@
 			files = (
 				C70C7ADC156ABC8800E14F1B /* GLUT.framework in Frameworks */,
 				C70C7ADD156ABC8800E14F1B /* WebKit.framework in Frameworks */,
-				C70C7ADE156ABC8800E14F1B /* QuickTime.framework in Frameworks */,
 				C70C7ADF156ABC8800E14F1B /* OpenGL.framework in Frameworks */,
 				C70C7AE0156ABC8800E14F1B /* AudioToolbox.framework in Frameworks */,
 				C70C7AE1156ABC8800E14F1B /* Carbon.framework in Frameworks */,
@@ -1687,7 +1683,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "/usr/local/include/wx-2.9/wx/wxprec.h";
+				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.0/wx/wxprec.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_FILE_OFFSET_BITS=64",
 					__WXMAC__,
@@ -1697,7 +1693,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = CalChart;
 			};
 			name = Debug;
@@ -1707,7 +1703,7 @@
 			buildSettings = {
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "/usr/local/include/wx-2.9/wx/wxprec.h";
+				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.0/wx/wxprec.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_FILE_OFFSET_BITS=64",
 					__WXMAC__,
@@ -1717,7 +1713,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = CalChart;
 			};
 			name = Release;
@@ -1726,6 +1722,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				CURRENT_PROJECT_VERSION = 3.3.4;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1739,27 +1737,27 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../resources,
-					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-2.9",
-					"/usr/local/include/wx-2.9",
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
+					"/usr/local/include/wx-3.0",
 					/opt/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
-					"-lwx_osx_cocoau_gl-2.9",
-					"-lwx_osx_cocoau_xrc-2.9",
-					"-lwx_osx_cocoau_html-2.9",
-					"-lwx_osx_cocoau_qa-2.9",
-					"-lwx_osx_cocoau_adv-2.9",
-					"-lwx_osx_cocoau_core-2.9",
-					"-lwx_baseu_xml-2.9",
-					"-lwx_baseu_net-2.9",
-					"-lwx_baseu-2.9",
+					"-lwx_osx_cocoau_gl-3.0",
+					"-lwx_osx_cocoau_xrc-3.0",
+					"-lwx_osx_cocoau_html-3.0",
+					"-lwx_osx_cocoau_qa-3.0",
+					"-lwx_osx_cocoau_adv-3.0",
+					"-lwx_osx_cocoau_core-3.0",
+					"-lwx_baseu_xml-3.0",
+					"-lwx_baseu_net-3.0",
+					"-lwx_baseu-3.0",
 					"-lexpat",
-					"-lwxregexu-2.9",
-					"-lwxtiff-2.9",
-					"-lwxjpeg-2.9",
-					"-lwxpng-2.9",
+					"-lwxregexu-3.0",
+					"-lwxtiff-3.0",
+					"-lwxjpeg-3.0",
+					"-lwxpng-3.0",
 					"-lz",
 					"-lpthread",
 					"-liconv",
@@ -1773,6 +1771,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				CURRENT_PROJECT_VERSION = 3.3.4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1786,26 +1786,26 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../resources,
-					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-2.9",
-					"/usr/local/include/wx-2.9",
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
+					"/usr/local/include/wx-3.0",
 					/opt/local/include,
 				);
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
-					"-lwx_osx_cocoau_gl-2.9",
-					"-lwx_osx_cocoau_xrc-2.9",
-					"-lwx_osx_cocoau_html-2.9",
-					"-lwx_osx_cocoau_qa-2.9",
-					"-lwx_osx_cocoau_adv-2.9",
-					"-lwx_osx_cocoau_core-2.9",
-					"-lwx_baseu_xml-2.9",
-					"-lwx_baseu_net-2.9",
-					"-lwx_baseu-2.9",
+					"-lwx_osx_cocoau_gl-3.0",
+					"-lwx_osx_cocoau_xrc-3.0",
+					"-lwx_osx_cocoau_html-3.0",
+					"-lwx_osx_cocoau_qa-3.0",
+					"-lwx_osx_cocoau_adv-3.0",
+					"-lwx_osx_cocoau_core-3.0",
+					"-lwx_baseu_xml-3.0",
+					"-lwx_baseu_net-3.0",
+					"-lwx_baseu-3.0",
 					"-lexpat",
-					"-lwxregexu-2.9",
-					"-lwxtiff-2.9",
-					"-lwxjpeg-2.9",
-					"-lwxpng-2.9",
+					"-lwxregexu-3.0",
+					"-lwxtiff-3.0",
+					"-lwxjpeg-3.0",
+					"-lwxpng-3.0",
 					"-lz",
 					"-lpthread",
 					"-liconv",
@@ -1832,7 +1832,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChartHomeView-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = CalChartHomeView;
 			};
 			name = Debug;
@@ -1851,7 +1851,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChartHomeView-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = CalChartHomeView;
 			};
 			name = Release;
@@ -1891,7 +1891,6 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1912,7 +1911,6 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
