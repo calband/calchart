@@ -71,8 +71,13 @@ typedef std::set<unsigned> SelectionList;
 #define INGL_TYPE Make4CharWord('T','Y','P','E')
 #define INGL_REFP Make4CharWord('R','E','F','P')
 #define INGL_CONT Make4CharWord('C','O','N','T')
+#define INGL_ECNT Make4CharWord('E','C','N','T')
 #define INGL_PCNT Make4CharWord('P','C','N','T')
+#define INGL_PNTS Make4CharWord('P','N','T','S')
+#define INGL_PONT Make4CharWord('P','O','N','T')
 #define INGL_END  Make4CharWord('E','N','D',' ')
 
+struct Version_3_3_and_earlier {};
+struct Current_version_and_later {};
 
 #endif

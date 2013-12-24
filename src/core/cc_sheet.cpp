@@ -57,7 +57,7 @@ mName(newname)
 }
 
 
-CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream) :
+CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream, Version_3_3_and_earlier) :
 pts(numPoints)
 {
 	// Read in sheet name
@@ -195,111 +195,176 @@ pts(numPoints)
 	}
 }
 
-std::vector<uint8_t>
-CC_sheet::SerializeSheet() const
+CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream, Current_version_and_later) :
+pts(numPoints)
 {
-	std::ostringstream stream("");
-	WriteGurk(stream, INGL_SHET);
-	// Name
-	WriteChunkStr(stream, INGL_NAME, GetName().c_str());
-	// Beats
-	uint32_t id;
-	put_big_long(&id, GetBeats());
-	WriteChunk(stream, INGL_DURA, 4, &id);
+	// Read in sheet name
+	// <INGL_NAME><size><string + 1>
+	std::vector<uint8_t> data = ReadCheckIDandFillData(stream, INGL_NAME);
+	mName = (const char*)&data[0];
+	ReadAndCheckID(stream, INGL_END);
+	ReadAndCheckID(stream, INGL_NAME);
+	
+	// read in the duration:
+	// <INGL_DURA><4><duration>
+	auto chunk = ReadCheckIDandSize(stream, INGL_DURA);
+	beats = chunk;
+	ReadAndCheckID(stream, INGL_END);
+	ReadAndCheckID(stream, INGL_DURA);
 	
 	// Point positions
-	WriteChunkHeader(stream, INGL_POS, pts.size()*4);
-	for (size_t i = 0; i < pts.size(); ++i)
+	ReadAndCheckID(stream, INGL_PNTS);
+	auto pts_size = ReadLong(stream);
+	for (auto i = 0; i < pts.size(); ++i)
 	{
-		Coord crd;
-		put_big_word(&crd, GetPosition(i).x);
-		Write(stream, &crd, 2);
-		put_big_word(&crd, GetPosition(i).y);
-		Write(stream, &crd, 2);
+		auto size = ReadByte(stream);
+		auto point_data = FillData(stream, size);
+		pts[i] = CC_point(point_data);
 	}
-	// Ref point positions
-	for (size_t j = 1; j <= CC_point::kNumRefPoints; j++)
-	{
-		for (size_t i = 0; i < pts.size(); i++)
-		{
-			if (GetPosition(i) != GetPosition(i, j))
-			{
-				Coord crd;
-				WriteChunkHeader(stream, INGL_REFP, pts.size()*4+2);
-				put_big_word(&crd, j);
-				Write(stream, &crd, 2);
-				for (i = 0; i < pts.size(); i++)
-				{
-					put_big_word(&crd, GetPosition(i, j).x);
-					Write(stream, &crd, 2);
-					put_big_word(&crd, GetPosition(i, j).y);
-					Write(stream, &crd, 2);
-				}
-				break;
-			}
-		}
-	}
-	// Point symbols
-	for (size_t i = 0; i < pts.size(); ++i)
-	{
-		if (GetPoint(i).GetSymbol() != 0)
-		{
-			WriteChunkHeader(stream, INGL_SYMB, pts.size());
-			for (i = 0; i < pts.size(); i++)
-			{
-				SYMBOL_TYPE tmp = GetPoint(i).GetSymbol();
-				Write(stream, &tmp, 1);
-			}
-			break;
-		}
-	}
-	// Point continuity types
-	for (size_t i = 0; i < pts.size(); ++i)
-	{
-		if (GetPoint(i).GetContinuityIndex() != 0)
-		{
-			WriteChunkHeader(stream, INGL_TYPE, pts.size());
-			for (i = 0; i < pts.size(); i++)
-			{
-				unsigned char tmp = GetPoint(i).GetContinuityIndex();
-				Write(stream, &tmp, 1);
-			}
-			break;
-		}
-	}
-	// Point labels (left or right)
-	for (size_t i = 0; i < pts.size(); ++i)
-	{
-		if (GetPoint(i).GetFlip())
-		{
-			WriteChunkHeader(stream, INGL_LABL, pts.size());
-			for (i = 0; i < pts.size(); i++)
-			{
-				char c = (GetPoint(i).GetFlip()) ? true : false;
-				Write(stream, &c, 1);
-			}
-			break;
-		}
-	}
+	ReadAndCheckID(stream, INGL_END);
+	ReadAndCheckID(stream, INGL_PNTS);
+	
+	ReadAndCheckID(stream, INGL_CONT);
+	uint32_t cont_size = ReadLong(stream);
+	uint32_t name = ReadLong(stream);
+	
 	// Continuity text
+	while (INGL_ECNT == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		if (data.size() < 3)						  // one byte num + two nils minimum
+		{
+			throw CC_FileException("Bad cont chunk");
+		}
+		const char *d = (const char *)&data[0];
+		if (d[data.size()-1] != '\0')
+		{
+			throw CC_FileException("Bad cont chunk");
+		}
+		
+		const char* text = d + 1;
+		size_t num = strlen(text);
+		if (data.size() < num + 3)					  // check for room for text string
+		{
+			throw CC_FileException("Bad cont chunk");
+		}
+		std::string namestr(text);
+		text = d + 2 + strlen(text);
+		CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
+		std::string textstr(text);
+		newcont.SetText(textstr);
+		mAnimationContinuity.push_back(newcont);
+		
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_ECNT);
+		name = ReadLong(stream);
+	}
+	if (INGL_END != name)
+	{
+		throw CC_FileException(INGL_END);
+	}
+	ReadAndCheckID(stream, INGL_CONT);
+}
+
+// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
+// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, [ PRINT_CONTINUITY ] ;
+// SHEET_END          = INGL_END , INGL_SHET ;
+std::vector<uint8_t>
+CC_sheet::SerializeAllPoints() const
+{
+	// ALL_POINTS         = INGL_PNTS , BigEndianInt32(DataTill_ALL_POINTS_END) , ALL_POINTS_DATA , ALL_POINTS_END ;
+	// ALL_POINTS_DATA    = { EACH_POINT }* ;
+	// ALL_POINTS_END     = INGL_END , INGL_PNTS ;
+	// EACH_POINT         = INGL_PONT , BigEndianInt32(DataTill_EACH_POINT_END) , EACH_POINT_DATA , EACH_POINT_END ;
+	// EACH_POINT_DATA    = { POSITION , [ REF_POSITION ] , [ POINT_SYMBOL ] , [ POINT_CONT_INDEX ] , [ POINT_LABEL_FLIP ] } ;
+	// EACH_POINT_END     = INGL_END , INGL_PONT ;
+
+	// for each of the points, serialize them and put them in the master list
+	std::vector<uint8_t> all_points;
+	for (const auto& i : pts)
+	{
+		std::vector<uint8_t> this_point = i.Serialize();
+		all_points.insert(all_points.end(), this_point.begin(), this_point.end());
+	}
+	return all_points;
+}
+
+std::vector<uint8_t>
+CC_sheet::SerializeContinuityData() const
+{
+	// CONTINUITY_DATA    = { EACH_CONTINUITY }* ;
+	// EACH_CONTINUITY    = INGL_ECNT , BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA , EACH_CONTINUITY_END;
+	// EACH_CONTINUITY_DATA = BigEndianInt8( index ) , Null-terminated char* , Null-terminated char* ;
+	// EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
+	
+	std::ostringstream stream("");
 	for (CC_sheet::ContContainer::const_iterator curranimcont = mAnimationContinuity.begin(); curranimcont != mAnimationContinuity.end();
 		 ++curranimcont)
 	{
-		WriteChunkHeader(stream, INGL_CONT,
+		WriteChunkHeader(stream, INGL_ECNT,
 						 1+curranimcont->GetName().length()+1+
 						 curranimcont->GetText().length()+1);
 		unsigned tnum = curranimcont->GetNum();
 		Write(stream, &tnum, 1);
 		WriteStr(stream, curranimcont->GetName().c_str());
 		WriteStr(stream, curranimcont->GetText().c_str());
+		WriteEnd(stream, INGL_ECNT);
 	}
-	WriteEnd(stream, INGL_SHET);
+
 	auto sdata = stream.str();
 	std::vector<uint8_t> data;
 	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
 	return data;
 }
 
+std::vector<uint8_t>
+CC_sheet::SerializeSheetData() const
+{
+	// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, PRINT_CONTINUITY ;
+
+	std::ostringstream stream("");
+	// Write NAME
+	WriteChunkStr(stream, INGL_NAME, GetName().c_str());
+	WriteEnd(stream, INGL_NAME);
+	
+	// Write DURATION
+	uint32_t id;
+	put_big_long(&id, GetBeats());
+	WriteChunk(stream, INGL_DURA, sizeof(id), &id);
+	WriteEnd(stream, INGL_DURA);
+
+	// Write ALL_POINTS
+	auto all_points = SerializeAllPoints();
+	WriteChunk(stream, INGL_PNTS, all_points.size(), &all_points[0]);
+	WriteEnd(stream, INGL_PNTS);
+
+	// Write Continuity
+	auto all_continuity = SerializeContinuityData();
+	WriteChunk(stream, INGL_CONT, all_continuity.size(), &all_continuity[0]);
+	WriteEnd(stream, INGL_CONT);
+
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
+}
+
+// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
+// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, [ PRINT_CONTINUITY ] ;
+// SHEET_END          = INGL_END , INGL_SHET ;
+std::vector<uint8_t>
+CC_sheet::SerializeSheet() const
+{
+	std::ostringstream stream("");
+	auto sheet_data = SerializeSheetData();
+	WriteChunk(stream, INGL_SHET, sheet_data.size(), &sheet_data[0]);
+	WriteEnd(stream, INGL_SHET);
+	
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
+}
 
 CC_sheet::~CC_sheet()
 {

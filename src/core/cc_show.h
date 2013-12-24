@@ -23,6 +23,8 @@
 #ifndef _CC_SHOW_H_
 #define _CC_SHOW_H_
 
+#include "cc_types.h"
+
 #include <vector>
 #include <string>
 #include <set>
@@ -50,10 +52,22 @@ public:
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
+	// you can create a show in two ways, from scratch, or from an input stream
+	static std::unique_ptr<CC_show> Create_CC_show();
+	static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
+
+private:
 	CC_show();
-	CC_show(std::istream& stream);
+	// using overloading with structs to determine which constructor to use
+	CC_show(std::istream& stream, Version_3_3_and_earlier);
+	CC_show(std::istream& stream, Current_version_and_later);
+
+public:
 	~CC_show();
 
+private:
+	std::vector<uint8_t> SerializeShowData() const;
+public:
 	// How we save and load a show:
 	std::vector<uint8_t> SerializeShow() const;
 

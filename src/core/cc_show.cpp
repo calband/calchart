@@ -36,6 +36,27 @@ static const std::string k_badcont_str = "Error in continuity file";
 static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
 
 
+// you can create a show in two ways, from scratch, or from an input stream
+std::unique_ptr<CC_show>
+CC_show::Create_CC_show()
+{
+	return std::unique_ptr<CC_show>(new CC_show());
+}
+
+std::unique_ptr<CC_show>
+CC_show::Create_CC_show(std::istream& stream)
+{
+	ReadAndCheckID(stream, INGL_INGL);
+	uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
+	if (version <= 0x303)
+	{
+		return std::unique_ptr<CC_show>(new CC_show(stream, Version_3_3_and_earlier()));
+		// what do we do if we don't support it?
+		;
+	}
+	return std::unique_ptr<CC_show>(new CC_show(stream, Current_version_and_later()));
+}
+
 // Create a new show
 CC_show::CC_show() :
 numpoints(0),
@@ -44,29 +65,26 @@ mSheetNum(0)
 }
 
 
-CC_show::CC_show(std::istream& stream) :
+// Constructor for shows 3.3 and ealier.  Recommend that you don't touch
+// this unless you know what you are doing.
+CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver) :
 numpoints(0),
 mSheetNum(0)
 {
-	uint32_t name;
-	
+	// caller should have stripped off INGL and GURK headers
+	/*
 	ReadAndCheckID(stream, INGL_INGL);
 	uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
-	if (version > ((CC_MAJOR_VERSION<<8) | (CC_MINOR_VERSION)))
-	{
-		// what do we do if we don't support it?
-		;
-	}
+	*/
 	ReadAndCheckID(stream, INGL_SHOW);
 	
 	// Handle show info
 	// read in the size:
 	// <INGL_SIZE><4><# points>
-	name = ReadCheckIDandSize(stream, INGL_SIZE);
-	numpoints = name;
+	numpoints = ReadCheckIDandSize(stream, INGL_SIZE);
 	pt_labels.assign(numpoints, std::string());
 	
-	name = ReadLong(stream);
+	uint32_t name = ReadLong(stream);
 	// Optional: read in the point labels
 	// <INGL_LABL><SIZE>
 	if (INGL_LABL == name)
@@ -105,7 +123,7 @@ mSheetNum(0)
 	{
 		ReadAndCheckID(stream, INGL_SHET);
 		
-		CC_sheet sheet(this, GetNumPoints(), stream);
+		CC_sheet sheet(this, GetNumPoints(), stream, ver);
 		InsertSheetInternal(sheet, GetNumSheets());
 		
 		//ReadAndCheckID(stream, INGL_END);
@@ -116,6 +134,77 @@ mSheetNum(0)
 	//ReadAndCheckID(stream, INGL_END);
 	ReadAndCheckID(stream, INGL_SHOW);
 
+	// now set the show to sheet 0
+	mSheetNum = 0;
+}
+
+CC_show::CC_show(std::istream& stream, Current_version_and_later ver) :
+numpoints(0),
+mSheetNum(0)
+{
+	// caller should have stripped off INGL and GURK headers
+	/*
+	ReadAndCheckID(stream, INGL_INGL);
+	uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
+	*/
+	ReadAndCheckID(stream, INGL_SHOW);
+	auto show_data_size = ReadLong(stream);
+	
+	// Handle show info
+	// read in the size:
+	// <INGL_SIZE><4><# points>
+	numpoints = ReadCheckIDandSize(stream, INGL_SIZE);
+	pt_labels.assign(numpoints, std::string());
+	ReadAndCheckID(stream, INGL_END);
+	ReadAndCheckID(stream, INGL_SIZE);
+	
+	ReadAndCheckID(stream, INGL_LABL);
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		std::vector<std::string> labels;
+		const char *str = (const char*)&data[0];
+		for (unsigned i = 0; i < GetNumPoints(); i++)
+		{
+			labels.push_back(str);
+			str += strlen(str)+1;
+		}
+		SetPointLabel(labels);
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_LABL);
+	}
+	
+	// Optional: read in the point labels
+	uint32_t name = ReadLong(stream);
+	if (INGL_DESC == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		auto str = (const char*)&data[0];
+		SetDescr(std::string(str, strlen(str)));
+		// peek for the next name
+		name = ReadLong(stream);
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_DESC);
+	}
+	
+	// Read in sheets
+	// <INGL_GURK><INGL_SHET>
+	while (INGL_SHET == name)
+	{
+		auto sheet_data_size = ReadLong(stream);
+		CC_sheet sheet(this, GetNumPoints(), stream, ver);
+		InsertSheetInternal(sheet, GetNumSheets());
+		
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_SHET);
+		// peek for the next name
+		name = ReadLong(stream);
+	}
+	if (INGL_END != name)
+	{
+		throw CC_FileException(INGL_END);
+	}
+	ReadAndCheckID(stream, INGL_SHOW);
+	
 	// now set the show to sheet 0
 	mSheetNum = 0;
 }
@@ -181,53 +270,69 @@ std::string CC_show::ImportContinuity(const std::vector<std::string>& lines)
 
 
 std::vector<uint8_t>
-CC_show::SerializeShow() const
+CC_show::SerializeShowData() const
 {
-	std::ostringstream stream;
+	// SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
+	
+	std::ostringstream stream("");
+	// Write NUM_MARCH
 	uint32_t id;
-	unsigned i;
+	put_big_long(&id, GetNumPoints());
+	WriteChunk(stream, INGL_SIZE, sizeof(id), &id);
+	WriteEnd(stream, INGL_SIZE);
 
-	WriteHeader(stream);
-	WriteGurk(stream, INGL_SHOW);
-	//WriteGurkAndVersion(stream, CC_MAJOR_VERSION, CC_MINOR_VERSION, INGL_SHOW);
-
-// Handle show info
-	i = GetNumPoints();
-	put_big_long(&id, i);
-	WriteChunk(stream, INGL_SIZE, 4, &id);
-
+	// write LABEL
 	id = 0;
-	for (i = 0; i < GetNumPoints(); i++)
+	for (auto i = 0; i < GetNumPoints(); i++)
 	{
 		id += strlen(GetPointLabel(i).c_str())+1;
 	}
-	if (id > 0)
+	WriteChunkHeader(stream, INGL_LABL, id);
+	for (auto i = 0; i < GetNumPoints(); i++)
 	{
-		WriteChunkHeader(stream, INGL_LABL, id);
-		for (i = 0; i < GetNumPoints(); i++)
-		{
-			WriteStr(stream, GetPointLabel(i).c_str());
-		}
+		WriteStr(stream, GetPointLabel(i).c_str());
 	}
-
-//handl->WriteChunkStr(INGL_MODE, mode->Name());
-
-// Description
+	WriteEnd(stream, INGL_LABL);
+	
+	// write Description
 	if (!GetDescr().empty())
 	{
 		WriteChunkStr(stream, INGL_DESC, GetDescr().c_str());
+		WriteEnd(stream, INGL_DESC);
 	}
-
-// Handle sheets
-	for (const_CC_sheet_iterator_t curr_sheet = GetSheetBegin();
-		curr_sheet != GetSheetEnd();
-		++curr_sheet)
+	
+	// Handle sheets
+	for (auto curr_sheet = GetSheetBegin();
+		 curr_sheet != GetSheetEnd();
+		 ++curr_sheet)
 	{
 		auto data = curr_sheet->SerializeSheet();
 		Write(stream, &data[0], data.size());
 	}
+	
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
+}
 
+std::vector<uint8_t>
+CC_show::SerializeShow() const
+{
+	// show               = START , SHOW ;
+	// START              = INGL_INGL , INGL_VERS ;
+	// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) , SHOW_DATA , SHOW_END ;
+	// SHOW_END           = INGL_END , INGL_SHOW ;
+
+	std::ostringstream stream;
+
+	WriteHeader(stream);
+	WriteGurkAndVersion(stream, CC_MAJOR_VERSION, CC_MINOR_VERSION);
+	
+	auto show_data = SerializeShowData();
+	WriteChunk(stream, INGL_SHOW, show_data.size(), &show_data[0]);
 	WriteEnd(stream, INGL_SHOW);
+
 	auto sdata = stream.str();
 	std::vector<uint8_t> data;
 	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));

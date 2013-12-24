@@ -51,7 +51,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 
 // Create a new show
 CalChartDoc::CalChartDoc() :
-mShow(new CC_show()),
+mShow(CC_show::Create_CC_show()),
 mMode(wxGetApp().GetModeList().front().get()),
 mTimer(*this)
 {
@@ -203,7 +203,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
 	try
 	{
-		mShow.reset(new CC_show(stream));
+		mShow = CC_show::Create_CC_show(stream);
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");

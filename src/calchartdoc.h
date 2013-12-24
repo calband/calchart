@@ -189,7 +189,7 @@ private:
 	CC_show ShowSnapShot() const;
 	void RestoreSnapShot(const CC_show& snapshot);
 	
-	boost::shared_ptr<CC_show> mShow;
+	std::unique_ptr<CC_show> mShow;
 	const ShowMode* mMode;
 	AutoSaveTimer mTimer;
 };

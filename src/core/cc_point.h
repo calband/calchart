@@ -27,6 +27,7 @@
 #include "cc_coord.h"
 
 #include <bitset>
+#include <vector>
 
 // Perhaps this should be put in namespace?
 
@@ -36,6 +37,9 @@ public:
 	static const unsigned kNumRefPoints = 3;
 	CC_point();
 	CC_point(uint8_t cont, const CC_coord& pos);
+
+	CC_point(const std::vector<uint8_t>& serialized_data);
+	std::vector<uint8_t> Serialize() const;
 
 	bool GetFlip() const;
 	void Flip(bool val = true);

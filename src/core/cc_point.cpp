@@ -21,9 +21,11 @@
 */
 
 #include "cc_point.h"
+#include "cc_fileformat.h"
 
 #include <assert.h>
 #include <stdexcept>
+#include <sstream>
 
 CC_point::CC_point() :
 mSym(SYMBOL_PLAIN),
@@ -40,6 +42,116 @@ mPos(p)
 	{
 		mRef[j] = mPos;
 	}
+}
+
+// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) , POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_CONT_INDEX , POINT_LABEL_FLIP ;
+// POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
+// REF_POSITION_DATA  = BigEndianInt8( num ref pts ) , { BigEndianInt8( which reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
+// POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
+// POINT_CONT_INDEX_DATA = BigEndianInt8( which continuity index ) ;
+// POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
+CC_point::CC_point(const std::vector<uint8_t>& serialized_data) :
+mSym(SYMBOL_PLAIN),
+mContinuityIndex(0)
+{
+	const uint8_t *d = &serialized_data[0];
+	{
+		mPos.x = get_big_word(d);
+		d += 2;
+		mPos.y = get_big_word(d);
+		d += 2;
+	}
+	// set all the reference points
+	for (unsigned j = 0; j < CC_point::kNumRefPoints; j++)
+	{
+		mRef[j] = mPos;
+	}
+	
+	uint8_t num_ref = *d;
+	++d;
+	for (auto i = 0; i < num_ref; ++i)
+	{
+		uint8_t ref = *d;
+		++d;
+		mRef[ref-1].x = get_big_word(d);
+		d += 2;
+		mRef[ref-1].y = get_big_word(d);
+		d += 2;
+	}
+	mSym = static_cast<SYMBOL_TYPE>(*d);
+	++d;
+	mContinuityIndex = *d;
+	++d;
+	mFlags.set(kPointLabelFlipped, *d);
+	++d;
+	if (std::distance(&serialized_data[0], d) != serialized_data.size())
+	{
+		throw CC_FileException("bad POS chunk");
+	}
+}
+
+std::vector<uint8_t>
+CC_point::Serialize() const
+{
+	// how many reference points are we going to write?
+	uint8_t num_ref_pts = 0;
+	for (auto j = 1; j <= CC_point::kNumRefPoints; j++)
+	{
+		if (GetPos(j) != GetPos(0))
+		{
+			++num_ref_pts;
+		}
+	}
+	uint8_t size_of_each_point_data = (num_ref_pts * 5) + 2 + 2 + 1 + 1 + 1;
+
+	// Point positions
+	std::ostringstream stream("");
+
+	// Write block size
+	Write(stream, &size_of_each_point_data, sizeof(size_of_each_point_data));
+
+	// Write POSITION
+	Coord crd;
+	put_big_word(&crd, GetPos().x);
+	Write(stream, &crd, 2);
+	put_big_word(&crd, GetPos().y);
+	Write(stream, &crd, 2);
+
+	// Write REF_POS
+	Write(stream, &num_ref_pts, 1);
+	if (num_ref_pts)
+	{
+		for (auto j = 1; j <= CC_point::kNumRefPoints; j++)
+		{
+			if (GetPos(j) != GetPos(0))
+			{
+				uint8_t which = j;
+				Write(stream, &which, 1);
+				Coord crd;
+				put_big_word(&crd, GetPos(j).x);
+				Write(stream, &crd, 2);
+				put_big_word(&crd, GetPos(j).y);
+				Write(stream, &crd, 2);
+			}
+		}
+	}
+
+	// Write POSITION
+	uint8_t tmp = GetSymbol();
+	Write(stream, &tmp, 1);
+
+	// Point continuity types
+	tmp = GetContinuityIndex();
+	Write(stream, &tmp, 1);
+
+	// Point labels (left or right)
+	tmp = (GetFlip()) ? true : false;
+	Write(stream, &tmp, 1);
+
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
 }
 
 bool
