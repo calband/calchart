@@ -149,22 +149,6 @@ void FindContinuityInconsistancies(const char* show)
 				std::cout<<"on sheet "<<std::distance(p->GetSheetBegin(), i)<<": ";
 				std::cout<<"continuity inconsistancy: continuity "<<j.GetName()<<" has name index "<<indexForCont<<", points have name index "<<symbol_for_continuity[j.GetNum()]<<"\n";
 			}
-#if 0
-			else
-			{
-				std::cout<<"no symbol_for_continuity\n";
-			}
-			std::cout<<"j.GetName(): "<<j.GetName()<<" "<<j.GetNum()<<"\t: ";
-			std::cout<<"name index : "<<indexForCont<<"\t: ";
-			if (symbol_for_continuity.count(j.GetNum()))
-			{
-				std::cout<<"symbol_for_continuity : "<<symbol_for_continuity[j.GetNum()]<<"\n";
-			}
-			else
-			{
-				std::cout<<"no symbol_for_continuity\n";
-			}
-#endif
 		}
 		
 	}
