@@ -41,6 +41,17 @@ const std::string contnames[] =
 	"Solx"
 };
 
+int IndexForContNames(const std::string& name)
+{
+	for (auto i = contnames; i != (contnames+sizeof(contnames)/sizeof(contnames[0])); ++i)
+	{
+		if (boost::iequals(name, *i))
+		{
+			return std::distance(contnames, i);
+		}
+	}
+	return -1;
+}
 
 CC_sheet::CC_sheet(CC_show *show) :
 beats(1),
