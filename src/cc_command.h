@@ -180,34 +180,6 @@ protected:
 };
 
 
-// AddContinuityCommand
-// Adding a continuity
-class AddContinuityCommand : public SetSheetCommand
-{
-public:
-	AddContinuityCommand(CalChartDoc& show, const wxString& text);
-	virtual ~AddContinuityCommand();
-
-protected:
-	virtual void DoAction();
-	const wxString mContName;
-};
-
-// RemoveContinuityCommand
-// Removing a continuity
-class RemoveContinuityCommand : public SetSheetCommand
-{
-public:
-	RemoveContinuityCommand(CalChartDoc& show, unsigned i);
-	virtual ~RemoveContinuityCommand();
-
-protected:
-	virtual void DoAction();
-
-	const unsigned mIndexToRemove;
-};
-
-
 ///// Sheet and point commands.  Changes for points selected on a sheet
 // SetSheetAndSelectCommand:
 // Base class for other commands.  Will set selection and page to the state they were
@@ -285,31 +257,16 @@ public:
 
 
 // SetContinuityIndexCommand:
-// Sets the continuity index of the selected points.
-class SetContinuityIndexCommand : public SetSheetAndSelectCommand
-{
-public:
-	SetContinuityIndexCommand(CalChartDoc& show, unsigned index);
-	virtual ~SetContinuityIndexCommand();
-
-protected:
-	virtual void DoAction();
-	std::map<unsigned, unsigned> mContinuity;
-};
-
-
-// SetContinuityIndexCommand:
 // Sets the symbol for the selected points, creating one if it doesn't exist
-class SetSymbolAndContCommand : public SetSheetAndSelectCommand
+class SetSymbolCommand : public SetSheetAndSelectCommand
 {
 public:
-	SetSymbolAndContCommand(CalChartDoc& show, SYMBOL_TYPE sym);
-	virtual ~SetSymbolAndContCommand();
+	SetSymbolCommand(CalChartDoc& show, SYMBOL_TYPE sym);
+	virtual ~SetSymbolCommand();
 
 protected:
 	virtual void DoAction();
-	typedef std::pair<SYMBOL_TYPE,unsigned> sym_cont_t;
-	std::map<unsigned, sym_cont_t> mSymsAndCont;
+	std::map<unsigned, SYMBOL_TYPE> mSyms;
 };
 
 
@@ -318,12 +275,12 @@ protected:
 class SetContinuityTextCommand : public SetSheetAndSelectCommand
 {
 public:
-	SetContinuityTextCommand(CalChartDoc& show, unsigned i, const wxString& text);
+	SetContinuityTextCommand(CalChartDoc& show, SYMBOL_TYPE i, const wxString& text);
 	virtual ~SetContinuityTextCommand();
 
 protected:
 	virtual void DoAction();
-	unsigned mWhichCont;
+	SYMBOL_TYPE mWhichCont;
 	wxString mContinuity;
 };
 

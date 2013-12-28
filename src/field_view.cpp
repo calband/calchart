@@ -226,7 +226,7 @@ bool
 FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolAndContCommand(*mShow, sym), true);
+	GetDocument()->GetCommandProcessor()->Submit(new SetSymbolCommand(*mShow, sym), true);
 	return true;
 }
 

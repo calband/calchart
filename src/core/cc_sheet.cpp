@@ -28,8 +28,9 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 #include <iostream>
+#include <map>
 
-const std::string contnames[] =
+const std::string contnames[MAX_NUM_SYMBOLS] =
 {
 	"Plain",
 	"Sol",
@@ -41,19 +42,31 @@ const std::string contnames[] =
 	"Solx"
 };
 
-int IndexForContNames(const std::string& name)
+SYMBOL_TYPE GetSymbolForName(const std::string& name)
 {
 	for (auto i = contnames; i != (contnames+sizeof(contnames)/sizeof(contnames[0])); ++i)
 	{
 		if (boost::iequals(name, *i))
 		{
-			return std::distance(contnames, i);
+			return static_cast<SYMBOL_TYPE>(std::distance(contnames, i));
 		}
 	}
-	return -1;
+	// what do we do here?  give larger one for now...
+	// This should probably throw
+	return MAX_NUM_SYMBOLS;
+}
+
+std::string GetNameForSymbol(SYMBOL_TYPE which)
+{
+	if (which > MAX_NUM_SYMBOLS)
+	{
+		return "";
+	}
+	return contnames[which];
 }
 
 CC_sheet::CC_sheet(CC_show *show) :
+mAnimationContinuity(MAX_NUM_SYMBOLS),
 beats(1),
 pts(show->GetNumPoints())
 {
@@ -61,14 +74,51 @@ pts(show->GetNumPoints())
 
 
 CC_sheet::CC_sheet(CC_show *show, const std::string& newname) :
+mAnimationContinuity(MAX_NUM_SYMBOLS),
 beats(1),
 pts(show->GetNumPoints()),
 mName(newname)
 {
 }
 
+static void CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index, 	std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol, std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity, const std::string& sheet_name, uint32_t pointNum)
+{
+	// need to check for symbol inconsistency here.
+	if (continity_for_symbol.count(symbol) == 0)
+	{
+		// we haven't seen this symbol->cont_index yet
+		continity_for_symbol[symbol] = cont_index;
+	}
+	else
+	{
+		if (continity_for_symbol[symbol] != cont_index)
+		{
+			std::stringstream buf;
+			buf<<"Error, symbol inconsistency on sheet \""<<sheet_name<<"\".\n";
+			buf<<"Symbol "<<GetNameForSymbol(symbol)<<" previously used continuity "<<(uint32_t)continity_for_symbol[symbol]<<" but point "<<pointNum<<" on uses continuity "<<(uint32_t)cont_index<<", which is used by symbol "<<GetNameForSymbol(symbol_for_continuity[cont_index])<<".\n";
+			buf<<"Try opening this file on CalChart v3.3.5 or earlier.\n";
+			throw CC_FileException(buf.str());
+		}
+	}
+	if (symbol_for_continuity.count(cont_index) == 0)
+	{
+		symbol_for_continuity[cont_index] = symbol;
+	}
+	else
+	{
+		if (symbol_for_continuity[cont_index] != symbol)
+		{
+			std::stringstream buf;
+			buf<<"Error, symbol inconsistency on sheet \""<<sheet_name<<"\".\n";
+			buf<<"Continuity index "<<(uint32_t)cont_index<<" previously used symbol "<<GetNameForSymbol(symbol_for_continuity[cont_index])<<"  but point "<<pointNum<<" on uses symbol "<<GetNameForSymbol(symbol)<<".\n";
+			buf<<"Try opening this file on CalChart v3.3.5 or earlier.\n";
+			throw CC_FileException(buf.str());
+		}
+	}
+}
 
 CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream, Version_3_3_and_earlier) :
+mAnimationContinuity(MAX_NUM_SYMBOLS),
 pts(numPoints)
 {
 	// Read in sheet name
@@ -142,9 +192,13 @@ pts(numPoints)
 		}
 		name = ReadLong(stream);
 	}
+	std::map<SYMBOL_TYPE, uint8_t> continity_for_symbol;
+	std::map<uint8_t, SYMBOL_TYPE> symbol_for_continuity;
+	bool has_type = false;
 	// Point continuity types
 	while (INGL_TYPE == name)
 	{
+		has_type = true;
 		std::vector<uint8_t> data = FillData(stream);
 		if (data.size() != pts.size())
 		{
@@ -153,9 +207,18 @@ pts(numPoints)
 		uint8_t *d = &data[0];
 		for (unsigned i = 0; i < pts.size(); i++)
 		{
-			pts.at(i).SetContinuityIndex(*(d++));
+			CheckInconsistancy(pts[i].GetSymbol(), *(d++), continity_for_symbol, symbol_for_continuity, mName, i);
 		}
 		name = ReadLong(stream);
+	}
+	// because older calchart files may omit the continuity index, need to check if it isn't used
+	if (!has_type)
+	{
+		// when a point doesn't have a cont_index, it is assumed to be 0
+		for (unsigned i = 0; i < pts.size(); i++)
+		{
+			CheckInconsistancy(pts[i].GetSymbol(), 0, continity_for_symbol, symbol_for_continuity, mName, i);
+		}
 	}
 	// Point labels (left or right)
 	while (INGL_LABL == name)
@@ -197,16 +260,32 @@ pts(numPoints)
 		}
 		std::string namestr(text);
 		text = d + 2 + strlen(text);
-		CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
+		
+		auto symbol_index = GetSymbolForName(namestr);
+		if (symbol_index == MAX_NUM_SYMBOLS)
+		{
+			throw CC_FileException("No viable symbol for name");
+		}
+		if (continity_for_symbol.count(symbol_index))
+		{
+			// some point is using this symbol, check to see if it points to the same continuity
+			if (continity_for_symbol[symbol_index] != (*d))
+			{
+				std::stringstream buf;
+				buf<<"Error, continuity inconsistency on sheet "<<mName<<"\n";
+				buf<<"Continuity index "<<(uint32_t)(*d)<<" is symbol "<<GetNameForSymbol(symbol_index)<<" but points using that symbol refer to continuity index "<<(uint32_t)continity_for_symbol[symbol_index]<<"\n";
+				throw CC_FileException(buf.str());
+			}
+		}
 		std::string textstr(text);
-		newcont.SetText(textstr);
-		mAnimationContinuity.push_back(newcont);
+		GetContinuityBySymbol(symbol_index).SetText(textstr);
 		
 		name = ReadLong(stream);
 	}
 }
 
 CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream, Current_version_and_later) :
+mAnimationContinuity(MAX_NUM_SYMBOLS),
 pts(numPoints)
 {
 	// Read in sheet name
@@ -243,7 +322,7 @@ pts(numPoints)
 	while (INGL_ECNT == name)
 	{
 		std::vector<uint8_t> data = FillData(stream);
-		if (data.size() < 3)						  // one byte num + two nils minimum
+		if (data.size() < 2)						  // one byte num + 1 nil minimum
 		{
 			throw CC_FileException("Bad cont chunk");
 		}
@@ -255,16 +334,18 @@ pts(numPoints)
 		
 		const char* text = d + 1;
 		size_t num = strlen(text);
-		if (data.size() < num + 3)					  // check for room for text string
+		if (data.size() < num + 2)					  // check for room for text string
 		{
 			throw CC_FileException("Bad cont chunk");
 		}
-		std::string namestr(text);
-		text = d + 2 + strlen(text);
-		CC_continuity newcont(namestr, *((uint8_t *)&data[0]));
+		SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(*d);
+		if (symbol_index >= MAX_NUM_SYMBOLS)
+		{
+			throw CC_FileException("No viable symbol for name");
+		}
+		
 		std::string textstr(text);
-		newcont.SetText(textstr);
-		mAnimationContinuity.push_back(newcont);
+		GetContinuityBySymbol(symbol_index).SetText(textstr);
 		
 		ReadAndCheckID(stream, INGL_END);
 		ReadAndCheckID(stream, INGL_ECNT);
@@ -305,21 +386,21 @@ CC_sheet::SerializeContinuityData() const
 {
 	// CONTINUITY_DATA    = { EACH_CONTINUITY }* ;
 	// EACH_CONTINUITY    = INGL_ECNT , BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA , EACH_CONTINUITY_END;
-	// EACH_CONTINUITY_DATA = BigEndianInt8( index ) , Null-terminated char* , Null-terminated char* ;
+	// EACH_CONTINUITY_DATA = BigEndianInt8( symbol ) , Null-terminated char* ;
 	// EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
 	
 	std::ostringstream stream("");
-	for (CC_sheet::ContContainer::const_iterator curranimcont = mAnimationContinuity.begin(); curranimcont != mAnimationContinuity.end();
-		 ++curranimcont)
+	for (auto current_symbol = SYMBOLS_START; current_symbol != MAX_NUM_SYMBOLS; ++current_symbol)
 	{
-		WriteChunkHeader(stream, INGL_ECNT,
-						 1+curranimcont->GetName().length()+1+
-						 curranimcont->GetText().length()+1);
-		unsigned tnum = curranimcont->GetNum();
-		Write(stream, &tnum, 1);
-		WriteStr(stream, curranimcont->GetName().c_str());
-		WriteStr(stream, curranimcont->GetText().c_str());
-		WriteEnd(stream, INGL_ECNT);
+		if (ContinuityInUse(current_symbol))
+		{
+			WriteChunkHeader(stream, INGL_ECNT,
+						 1+GetContinuityBySymbol(current_symbol).GetText().length()+1);
+			uint8_t tnum = static_cast<uint8_t>(current_symbol);
+			Write(stream, &tnum, 1);
+			WriteStr(stream, GetContinuityBySymbol(current_symbol).GetText().c_str());
+			WriteEnd(stream, INGL_ECNT);
+		}
 	}
 
 	auto sdata = stream.str();
@@ -399,12 +480,12 @@ CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref) const
 
 
 std::set<unsigned>
-CC_sheet::SelectPointsOfContinuity(unsigned i) const
+CC_sheet::SelectPointsBySymbol(SYMBOL_TYPE i) const
 {
 	std::set<unsigned> select;
 	for (size_t j = 0; j < pts.size(); j++)
 	{
-		if (pts.at(j).GetContinuityIndex() == i)
+		if (pts.at(j).GetSymbol() == i)
 		{
 			select.insert(j);
 		}
@@ -426,14 +507,14 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_
 	}
 	for (c = new_march_position, col = 0; i < num; i++, col++, c.x += Int2Coord(2))
 	{
-		const CC_continuity& plaincont = GetStandardContinuity(SYMBOL_PLAIN);
+		const CC_continuity& plaincont = GetContinuityBySymbol(SYMBOL_PLAIN);
 		if (col >= columns)
 		{
 			c.x = new_march_position.x;
 			c.y += Int2Coord(2);
 			col = 0;
 		}
-		newpts[i] = CC_point(plaincont.GetNum(), c);
+		newpts[i] = CC_point(c);
 	}
 	pts = newpts;
 }
@@ -454,115 +535,36 @@ void CC_sheet::RelabelSheet(const std::vector<size_t>& table)
 }
 
 
-const CC_continuity& CC_sheet::GetNthContinuity(unsigned i) const
+const CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
+{
+	return mAnimationContinuity.at(i);
+}
+
+CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i)
 {
 	return mAnimationContinuity.at(i);
 }
 
 
-void CC_sheet::SetNthContinuity(const std::string& text, unsigned i)
+void CC_sheet::SetContinuityText(SYMBOL_TYPE which, const std::string& text)
 {
-	mAnimationContinuity.at(i).SetText(text);
+	GetContinuityBySymbol(which).SetText(text);
 }
 
 
-void
-CC_sheet::RemoveNthContinuity(unsigned i)
+
+bool CC_sheet::ContinuityInUse(SYMBOL_TYPE idx) const
 {
-	mAnimationContinuity.erase(mAnimationContinuity.begin()+i);
-}
-
-
-void CC_sheet::InsertContinuity(const CC_continuity& newcont, unsigned i)
-{
-	mAnimationContinuity.insert(mAnimationContinuity.begin() + i, newcont);
-}
-
-
-void CC_sheet::AppendContinuity(const CC_continuity& newcont)
-{
-	mAnimationContinuity.push_back(newcont);
-}
-
-
-unsigned CC_sheet::NextUnusedContinuityNum()
-{
-	unsigned i = 0;
-	bool found;
-
-	do
+	// is any point using this symbol?
+	for (auto& point : pts)
 	{
-		found = false;
-		for (ContContainer::const_iterator c = mAnimationContinuity.begin(); c != mAnimationContinuity.end(); ++c)
+		if (point.GetSymbol() == idx)
 		{
-			if (c->GetNum() == i)
-			{
-				found = true;
-				i++;
-				break;
-			}
-		}
-	} while (found);
-	return i;
-}
-
-
-// not undoable
-const CC_continuity& CC_sheet::GetStandardContinuity(SYMBOL_TYPE sym)
-{
-
-	for (ContContainer::const_iterator c = mAnimationContinuity.begin(); c != mAnimationContinuity.end(); ++c)
-	{
-		if (boost::iequals(c->GetName(), contnames[sym]))
-		{
-			return *c;
+			return true;
 		}
 	}
-
-	unsigned i,idx;
-	i = (unsigned)sym;
-	idx = 0;
-// Put in correct postion
-	while (i > 0)
-	{
-		idx = FindContinuityByName(contnames[--i]);
-		if (idx != 0) break;
-	}
-	InsertContinuity(CC_continuity(contnames[sym], NextUnusedContinuityNum()), idx);
-	return GetNthContinuity(idx);
-}
-
-
-unsigned CC_sheet::FindContinuityByName(const std::string& name) const
-{
-	unsigned idx;
-	ContContainer::const_iterator c = mAnimationContinuity.begin();
-
-	for (idx = 1; c != mAnimationContinuity.end(); idx++, ++c)
-	{
-		if (boost::iequals(c->GetName(), mName))
-		{
-			break;
-		}
-	}
-	if (c == mAnimationContinuity.end())
-	{
-		idx = 0;
-	}
-	return idx;
-}
-
-
-bool CC_sheet::ContinuityInUse(unsigned idx) const
-{
-	unsigned i;
-	const CC_continuity& c = GetNthContinuity(idx);
-
-	for (i = 0; i < pts.size(); i++)
-	{
-		if (pts[i].GetContinuityIndex() == c.GetNum()) return true;
-	}
-	return false;
+	// otherwise, is the text set.
+	return !GetContinuityBySymbol(idx).GetText().empty();
 }
 
 
@@ -776,12 +778,6 @@ CC_textline_list
 CC_sheet::GetPrintableContinuity() const
 {
 	return mPrintableContinuity;
-}
-
-CC_sheet::ContContainer
-CC_sheet::GetAnimationContinuity() const
-{
-	return mAnimationContinuity;
 }
 
 const CC_point&

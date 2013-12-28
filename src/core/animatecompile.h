@@ -67,7 +67,7 @@ public:
 	~AnimateCompile();
 
 // Compile a point
-	std::vector<boost::shared_ptr<AnimateCommand> > Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc);
+	std::vector<boost::shared_ptr<AnimateCommand> > Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc);
 // true if successful
 	bool Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 
@@ -94,7 +94,7 @@ private:
 	CC_show::const_CC_sheet_iterator_t curr_sheet;
 	unsigned curr_pt;
 	unsigned beats_rem;
-	unsigned contnum;
+	SYMBOL_TYPE contsymbol;
 	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
 	std::vector<ErrorMarker> error_markers;
 	AnimationVariables& vars;
