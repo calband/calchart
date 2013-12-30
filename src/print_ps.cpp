@@ -531,7 +531,7 @@ void PrintShowToPS::PrintSheets(std::ostream& buffer, short& num_pages)
 		auto continuity = sheet->GetPrintableContinuity();
 		for (auto text = continuity.begin(); text != continuity.end(); ++text)
 		{
-			if (!text->on_main) continue;
+			if (!text->GetOnMain()) continue;
 			if (lines_left <= 0)
 			{
 				if (num_pages > 0)
@@ -593,7 +593,7 @@ void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 	auto continuity = sheet.GetPrintableContinuity();
 	for (auto text = continuity.begin(); text != continuity.end(); ++text)
 	{
-		if (text->on_sheet) cont_len++;
+		if (text->GetOnSheet()) cont_len++;
 	}
 	if (cont_len == 0) return;
 	float this_size = cont_height / (cont_len + 0.5);
@@ -612,7 +612,7 @@ void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet)
 	buffer<<buf;
 	for (CC_textline_list::const_iterator text = continuity.begin(); text != continuity.end(); ++text)
 	{
-		if (!text->on_sheet) continue;
+		if (!text->GetOnSheet()) continue;
 		snprintf(buf, sizeof(buf), "/x lmargin def\n");
 		buffer<<buf;
 
@@ -631,11 +631,9 @@ float fontsize)
 	char buf[kBufferSize];
 
 	short tabstop = 0;
-	for (CC_textchunk_list::const_iterator part = line.chunks.begin();
-		part != line.chunks.end();
-		++part)
+	for (auto& part : line.GetChunks())
 	{
-		if (part->font == PSFONT_TAB)
+		if (part.font == PSFONT_TAB)
 		{
 			if (++tabstop > 3)
 			{
@@ -648,14 +646,14 @@ float fontsize)
 		}
 		else
 		{
-			if (part->font != *currfontnum)
+			if (part.font != *currfontnum)
 			{
-				buffer<<"/"<<fontnames[part->font];
+				buffer<<"/"<<fontnames[part.font];
 				snprintf(buf, sizeof(buf), " findfont %.2f scalefont setfont\n", fontsize);
 				buffer<<buf;
-				*currfontnum = part->font;
+				*currfontnum = part.font;
 			}
-			std::string textstr(part->text);
+			std::string textstr(part.text);
 			const char *text = textstr.c_str();
 			while (*text != 0)
 			{
@@ -672,7 +670,7 @@ float fontsize)
 
 				if (!temp_buf.empty())
 				{
-					if (line.center)
+					if (line.GetCenter())
 					{
 						buffer<<"("<<temp_buf<<") centerText\n";
 					}

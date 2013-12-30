@@ -108,7 +108,8 @@ private:
 	T& SaveObjectInternal(T& stream);
 
 public:
-	wxString ImportContinuity(const wxString& file);
+	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
+	bool SetPrintableContinuity(unsigned current_sheet, const std::vector<std::string>& lines);
 
 	void FlushAllTextWindows();
 	

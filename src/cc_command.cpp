@@ -215,6 +215,38 @@ void SetSheetAndSelectCommand::DoAction()
 }
 
 
+
+ImportPrintContinuityCommand::ImportPrintContinuityCommand(CalChartDoc& show, const std::vector<std::string>& print_cont)
+: SetSheetCommand(show, wxT("Importing Printable continuity command")),
+mPrintCont(print_cont)
+{}
+
+ImportPrintContinuityCommand::~ImportPrintContinuityCommand()
+{}
+
+void ImportPrintContinuityCommand::DoAction()
+{
+	SetSheetCommand::DoAction(); // sets page
+	mDoc.ImportPrintableContinuity(mPrintCont);
+}
+
+
+SetPrintContinuityCommand::SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet, std::vector<std::string>& print_cont)
+: SetSheetCommand(show, wxT("Setting Printable continuity command")),
+mWhichSheet(sheet),
+mPrintCont(print_cont)
+{}
+
+SetPrintContinuityCommand::~SetPrintContinuityCommand()
+{}
+
+void SetPrintContinuityCommand::DoAction()
+{
+	SetSheetCommand::DoAction(); // sets page
+	mDoc.GetNthSheet(mWhichSheet)->SetPrintableContinuity(mPrintCont);
+}
+
+
 // MovePointsOnSheetCommand:
 // Move points around on a sheet.  mPosition is a mapping of which point to two positions,
 // the original and new.  Do will move points to the new position, and undo will move them back.
