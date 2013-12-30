@@ -54,6 +54,7 @@ public:
 private:
 	std::vector<uint8_t> SerializeAllPoints() const;
 	std::vector<uint8_t> SerializeContinuityData() const;
+	std::vector<uint8_t> SerializePrintContinuityData() const;
 	std::vector<uint8_t> SerializeSheetData() const;
 public:
 	std::vector<uint8_t> SerializeSheet() const;
@@ -95,7 +96,7 @@ public:
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 
 	// continuity that gets printed
-	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
+	void SetPrintableContinuity(const std::vector<std::string>& lines);
 	CC_textline_list GetPrintableContinuity() const;
 
 private:

@@ -38,6 +38,7 @@
 #include "cc_sheet.h"
 
 #include <wx/wizard.h>
+#include <wx/textfile.h>
 
 IMPLEMENT_DYNAMIC_CLASS(FieldView, wxView)
 
@@ -291,6 +292,26 @@ FieldView::DoDeleteSheet(unsigned where)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new RemoveSheetsCommand(*mShow, where), true);
 	return true;
+}
+
+bool
+FieldView::DoImportPrintableContinuity(const wxString& file)
+{
+	wxTextFile fp;
+	fp.Open(file);
+	if (!fp.IsOpened())
+	{
+		return wxT("Unable to open file");
+	}
+	// read the file into a vector
+	std::vector<std::string> lines;
+	for (size_t line = 0; line < fp.GetLineCount(); ++line)
+	{
+		lines.push_back(fp.GetLine(line).ToStdString());
+	}
+	
+	auto result = GetDocument()->GetCommandProcessor()->Submit(new ImportPrintContinuityCommand(*mShow, lines));
+	return result;
 }
 
 int
