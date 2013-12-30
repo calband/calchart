@@ -215,7 +215,6 @@ void SetSheetAndSelectCommand::DoAction()
 }
 
 
-
 ImportPrintContinuityCommand::ImportPrintContinuityCommand(CalChartDoc& show, const std::vector<std::string>& print_cont)
 : SetSheetCommand(show, wxT("Importing Printable continuity command")),
 mPrintCont(print_cont)
