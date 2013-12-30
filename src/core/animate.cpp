@@ -114,16 +114,16 @@ mCollisionAction(NULL)
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
 		std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > theCommands(numpts);
-		auto animcont = curr_sheet->GetAnimationContinuity();
-		for (auto currcont = animcont.begin(); currcont != animcont.end(); ++currcont)
+		for (auto current_symbol = SYMBOLS_START; current_symbol != MAX_NUM_SYMBOLS; ++current_symbol)
 		{
-			if (!currcont->GetText().empty())
+			if (curr_sheet->ContinuityInUse(current_symbol))
 			{
-				std::string tmpBuffer(currcont->GetText());
+				auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
+				std::string tmpBuffer(current_continuity.GetText());
 				yyinputbuffer = tmpBuffer.c_str();
 				if (notifyStatus)
 				{
-					notifyStatus((boost::format("Compiling \"%1%\" %2%...") % curr_sheet->GetName().substr(0,32) % currcont->GetName().substr(0,32)).str());
+					notifyStatus((boost::format("Compiling \"%1%\" %2%...") % curr_sheet->GetName().substr(0,32) % GetNameForSymbol(current_symbol).substr(0,32)).str());
 				}
 				// parse out the error
 				if (parsecontinuity() != 0)
@@ -134,9 +134,9 @@ mCollisionAction(NULL)
 				}
 				for (unsigned j = 0; j < numpts; j++)
 				{
-					if (curr_sheet->GetPoint(j).GetContinuityIndex() == currcont->GetNum())
+					if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol)
 					{
-						theCommands[j] = comp.Compile(curr_sheet, j, std::distance(animcont.begin(), currcont), ParsedContinuity);
+						theCommands[j] = comp.Compile(curr_sheet, j, current_symbol, ParsedContinuity);
 					}
 				}
 				while (ParsedContinuity)
@@ -156,7 +156,7 @@ mCollisionAction(NULL)
 		{
 			if (theCommands[j].empty())
 			{
-				theCommands[j] = comp.Compile(curr_sheet, j, animcont.size(), NULL);
+				theCommands[j] = comp.Compile(curr_sheet, j, MAX_NUM_SYMBOLS, NULL);
 			}
 		}
 		if (!comp.Okay() && notifyErrorList)

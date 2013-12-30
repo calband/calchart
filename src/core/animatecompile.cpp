@@ -57,12 +57,12 @@ AnimateCompile::~AnimateCompile()
 }
 
 
-std::vector<boost::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, unsigned cont_num, ContProcedure* proc)
+std::vector<boost::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
 {
 	CC_coord c;
 	cmds.clear();
 
-	contnum = cont_num;
+	contsymbol = cont_symbol;
 	curr_sheet = c_sheet;
 	pt = curr_sheet->GetPosition(pt_num);
 	cmds.clear();
@@ -146,7 +146,7 @@ bool AnimateCompile::Append(boost::shared_ptr<AnimateCommand> cmd, const ContTok
 
 void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 {
-	error_markers[err].contnum = contnum;
+	error_markers[err].contsymbol = contsymbol;
 	if (token != NULL)
 	{
 		error_markers[err].line = token->line;

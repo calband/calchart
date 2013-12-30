@@ -40,10 +40,7 @@ public:
     virtual void OnDraw(wxDC *dc);
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 
-	void DoSetContinuityIndex(unsigned cont);
-	void DoSetNthContinuity(const wxString& text, unsigned i);
-	void DoNewContinuity(const wxString& text);
-	void DoDeleteContinuity(unsigned cont);
+	void DoSetContinuityText(SYMBOL_TYPE which, const wxString& text);
 };
 
 // ContinuityEditor
@@ -63,8 +60,6 @@ public:
 	~ContinuityEditor();
 
 	void OnCloseWindow(wxCommandEvent& event);
-	void OnCmdNew(wxCommandEvent& event);
-	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);
 
 	void Update();		  // Refresh all window controls
@@ -73,8 +68,6 @@ public:
 	void UpdateText();
 
 	void FlushText();						  // Flush changes in text window
-
-	void UpdateContChoice();
 
 	void SetInsertionPoint(int x, int y);
 
@@ -96,6 +89,7 @@ private:
 	void OnDiscard(wxCommandEvent&);
 	void ContEditCurrent(wxCommandEvent&);
 	void OnKeyPress(wxCommandEvent&);
+	SYMBOL_TYPE CurrentSymbolChoice() const;
 
 	void Save();
 	void Discard();

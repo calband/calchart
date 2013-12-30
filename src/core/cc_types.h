@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <set>
+#include <string>
 
 typedef int16_t Coord;
 
@@ -36,9 +37,14 @@ enum PSFONT_TYPE
 
 enum SYMBOL_TYPE
 {
+	SYMBOLS_START = 0,
 	SYMBOL_PLAIN = 0, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
 	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+	, MAX_NUM_SYMBOLS
 };
+
+std::string GetNameForSymbol(SYMBOL_TYPE which);
+SYMBOL_TYPE GetSymbolForName(const std::string& name);
 
 enum CC_DRAG_TYPES
 {

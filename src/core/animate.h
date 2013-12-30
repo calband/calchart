@@ -43,9 +43,9 @@ struct ErrorMarker
 {
 public:
 	std::set<unsigned> pntgroup;			  // which points have this error
-	unsigned contnum;						  // which continuity
+	SYMBOL_TYPE contsymbol;						  // which continuity
 	int line, col;							  // where
-	ErrorMarker(): contnum(0), line(-1), col(-1) {}
+	ErrorMarker(): contsymbol(SYMBOL_PLAIN), line(-1), col(-1) {}
 };
 
 typedef boost::function<void (const std::string& notice)> NotifyStatus;

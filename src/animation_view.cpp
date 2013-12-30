@@ -408,10 +408,10 @@ AnimationView::OnBeat() const
 }
 
 CC_continuity
-AnimationView::GetContinuityOnSheet(unsigned whichSheet, unsigned whichContinuity) const
+AnimationView::GetContinuityOnSheet(unsigned whichSheet, SYMBOL_TYPE whichSymbol) const
 {
 	auto current_sheet = GetShow()->GetNthSheet(whichSheet);
-	return current_sheet->GetNthContinuity(whichContinuity);
+	return current_sheet->GetContinuityBySymbol(whichSymbol);
 }
 
 void

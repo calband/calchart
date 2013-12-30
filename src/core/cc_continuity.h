@@ -31,22 +31,18 @@
 class CC_continuity
 {
 public:
-	CC_continuity(const std::string& s, unsigned n);
+	CC_continuity();
 	~CC_continuity();
-
-	const std::string& GetName() const;
-	unsigned GetNum() const;
 
 	void SetText(const std::string& s);
 	void AppendText(const std::string& s);
 	const std::string& GetText() const;
 
 private:
-	std::string name;
-	unsigned num;
 	std::string text;
 
 friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
+friend void CC_continuity_UnitTests();
 };
 
 bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);

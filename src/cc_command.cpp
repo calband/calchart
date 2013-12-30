@@ -215,38 +215,6 @@ void SetSheetAndSelectCommand::DoAction()
 }
 
 
-AddContinuityCommand::AddContinuityCommand(CalChartDoc& show, const wxString& text)
-: SetSheetCommand(show, wxT("Adding continuity command")),
-mContName(text)
-{}
-
-AddContinuityCommand::~AddContinuityCommand()
-{}
-
-void AddContinuityCommand::DoAction()
-{
-	SetSheetCommand::DoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	CC_continuity newcont(mContName.ToStdString(), sheet->NextUnusedContinuityNum());
-	sheet->AppendContinuity(newcont);
-}
-
-
-RemoveContinuityCommand::RemoveContinuityCommand(CalChartDoc& show, unsigned index)
-: SetSheetCommand(show, wxT("Remove continuity command")),
-mIndexToRemove(index)
-{}
-
-RemoveContinuityCommand::~RemoveContinuityCommand()
-{}
-
-void RemoveContinuityCommand::DoAction()
-{
-	SetSheetCommand::DoAction(); // sets page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->RemoveNthContinuity(mIndexToRemove);
-}
-
 // MovePointsOnSheetCommand:
 // Move points around on a sheet.  mPosition is a mapping of which point to two positions,
 // the original and new.  Do will move points to the new position, and undo will move them back.
@@ -341,34 +309,9 @@ SetReferencePointToRef0::~SetReferencePointToRef0()
 {}
 
 
-// SetContinuityIndexCommand:
-// Sets the continuity index of the selected points.
-SetContinuityIndexCommand::SetContinuityIndexCommand(CalChartDoc& show, unsigned index)
-: SetSheetAndSelectCommand(show, wxT("Setting Continuity Index"))
-{
-	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
-	{
-		mContinuity[*i] = index;
-	}
-}
-
-SetContinuityIndexCommand::~SetContinuityIndexCommand()
-{}
-
-void SetContinuityIndexCommand::DoAction()
-{
-	SetSheetAndSelectCommand::DoAction(); // sets selected and page
-	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (auto i = mContinuity.begin(); i != mContinuity.end(); ++i)
-	{
-		sheet->GetPoint(i->first).SetContinuityIndex(i->second);
-	}
-}
-
-
-// SetSymbolAndContCommand:
+// SetSymbolCommand:
 // Sets the symbol for the selected points, creating one if it doesn't exist
-SetSymbolAndContCommand::SetSymbolAndContCommand(CalChartDoc& show, SYMBOL_TYPE sym)
+SetSymbolCommand::SetSymbolCommand(CalChartDoc& show, SYMBOL_TYPE sym)
 : SetSheetAndSelectCommand(show, wxT("Setting Continuity Symbol"))
 {
 	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
@@ -377,32 +320,31 @@ SetSymbolAndContCommand::SetSymbolAndContCommand(CalChartDoc& show, SYMBOL_TYPE 
 		// Only do work on points that have different symbols
 		if (sym != sheet->GetPoint(*i).GetSymbol())
 		{
-			mSymsAndCont[*i] = sym_cont_t(sym, sheet->GetPoint(*i).GetContinuityIndex());
+			mSyms[*i] = sym;
 		}
 	}
 }
 
-SetSymbolAndContCommand::~SetSymbolAndContCommand()
+SetSymbolCommand::~SetSymbolCommand()
 {}
 
-void SetSymbolAndContCommand::DoAction()
+void SetSymbolCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
 	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
 // possible optimization:  Don't save as map, since they all get moved to new symbol...
-	for (auto i = mSymsAndCont.begin(); i != mSymsAndCont.end(); ++i)
+	for (auto i = mSyms.begin(); i != mSyms.end(); ++i)
 	{
-		sheet->GetPoint(i->first).SetSymbol(i->second.first);
-		sheet->GetPoint(i->first).SetContinuityIndex(sheet->GetStandardContinuity(i->second.first).GetNum());
+		sheet->GetPoint(i->first).SetSymbol(i->second);
 	}
 }
 
 
 // SetContinuityTextCommand
 // Sets the continuity text
-SetContinuityTextCommand::SetContinuityTextCommand(CalChartDoc& show, unsigned i, const wxString& text)
+SetContinuityTextCommand::SetContinuityTextCommand(CalChartDoc& show, SYMBOL_TYPE which, const wxString& text)
 : SetSheetAndSelectCommand(show, wxT("Setting Continuity Text")),
-mWhichCont(i),
+mWhichCont(which),
 mContinuity(text)
 {}
 
@@ -412,7 +354,7 @@ SetContinuityTextCommand::~SetContinuityTextCommand()
 void SetContinuityTextCommand::DoAction()
 {
 	SetSheetAndSelectCommand::DoAction(); // sets selected and page
-	mDoc.GetCurrentSheet()->SetNthContinuity(mContinuity.ToStdString(), mWhichCont);
+	mDoc.GetCurrentSheet()->SetContinuityText(mWhichCont, mContinuity.ToStdString());
 }
 
 

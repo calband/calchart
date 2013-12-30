@@ -76,7 +76,7 @@ public:
 	void ToggleTimer();
 	bool OnBeat() const;
 
-	CC_continuity GetContinuityOnSheet(unsigned whichSheet, unsigned whichContinuity) const;
+	CC_continuity GetContinuityOnSheet(unsigned whichSheet, SYMBOL_TYPE whichSymbol) const;
 
 	const ShowMode& GetShowMode() const;
 

@@ -59,11 +59,9 @@ public:
 	std::vector<uint8_t> SerializeSheet() const;
 
 	// Observer functions
-	const CC_continuity& GetNthContinuity(unsigned i) const;
-	std::set<unsigned> SelectPointsOfContinuity(unsigned i) const;
-	// return 0 if not found else index+1
-	unsigned FindContinuityByName(const std::string& name) const;
-	bool ContinuityInUse(unsigned idx) const;
+	const CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
+	std::set<unsigned> SelectPointsBySymbol(SYMBOL_TYPE i) const;
+	bool ContinuityInUse(SYMBOL_TYPE idx) const;
 
 	// setting values on the stunt sheet
 	// * needs to be through command only *
@@ -71,18 +69,7 @@ public:
 
 	// continuity:
 	// * needs to be through command only *
-	void SetNthContinuity(const std::string& text, unsigned i);
-	// * needs to be through command only *
-	void RemoveNthContinuity(unsigned i);
-	// * needs to be through command only *
-	void InsertContinuity(const CC_continuity& newcont, unsigned i);
-	// * needs to be through command only *
-	void AppendContinuity(const CC_continuity& newcont);
-	// * needs to be through command only *
-	unsigned NextUnusedContinuityNum();
-// creates if doesn't exist
-	// * needs to be through command only * //
-	const CC_continuity& GetStandardContinuity(SYMBOL_TYPE sym);
+	void SetContinuityText(SYMBOL_TYPE sym, const std::string& text);
 	
 	// points:
 	int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
@@ -111,10 +98,10 @@ public:
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
 	CC_textline_list GetPrintableContinuity() const;
 
-	typedef std::vector<CC_continuity> ContContainer;
-	ContContainer GetAnimationContinuity() const;
-
 private:
+	CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
+
+	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer mAnimationContinuity;
 
 	CC_textline_list mPrintableContinuity;

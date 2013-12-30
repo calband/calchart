@@ -28,14 +28,12 @@
 #include <sstream>
 
 CC_point::CC_point() :
-mSym(SYMBOL_PLAIN),
-mContinuityIndex(0)
+mSym(SYMBOL_PLAIN)
 {
 }
 
-CC_point::CC_point(uint8_t c, const CC_coord& p) :
+CC_point::CC_point(const CC_coord& p) :
 mSym(SYMBOL_PLAIN),
-mContinuityIndex(c),
 mPos(p)
 {
 	for (unsigned j = 0; j < CC_point::kNumRefPoints; j++)
@@ -44,15 +42,13 @@ mPos(p)
 	}
 }
 
-// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) , POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_CONT_INDEX , POINT_LABEL_FLIP ;
+// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) , POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
 // POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
 // REF_POSITION_DATA  = BigEndianInt8( num ref pts ) , { BigEndianInt8( which reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
 // POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
-// POINT_CONT_INDEX_DATA = BigEndianInt8( which continuity index ) ;
 // POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
 CC_point::CC_point(const std::vector<uint8_t>& serialized_data) :
-mSym(SYMBOL_PLAIN),
-mContinuityIndex(0)
+mSym(SYMBOL_PLAIN)
 {
 	const uint8_t *d = &serialized_data[0];
 	{
@@ -79,8 +75,6 @@ mContinuityIndex(0)
 		d += 2;
 	}
 	mSym = static_cast<SYMBOL_TYPE>(*d);
-	++d;
-	mContinuityIndex = *d;
 	++d;
 	mFlags.set(kPointLabelFlipped, *d);
 	++d;
@@ -138,10 +132,6 @@ CC_point::Serialize() const
 
 	// Write POSITION
 	uint8_t tmp = GetSymbol();
-	Write(stream, &tmp, 1);
-
-	// Point continuity types
-	tmp = GetContinuityIndex();
 	Write(stream, &tmp, 1);
 
 	// Point labels (left or right)
@@ -213,25 +203,11 @@ CC_point::SetSymbol(SYMBOL_TYPE s)
 	mSym = s;
 }
 
-uint8_t
-CC_point::GetContinuityIndex() const
-{
-	return mContinuityIndex;
-}
-
-void
-CC_point::SetContinuityIndex(uint8_t c)
-{
-	mContinuityIndex = c;
-}
-
-
 // Test Suite stuff
 struct CC_point_values
 {
 	std::bitset<CC_point::kTotalBits> mFlags;
 	SYMBOL_TYPE mSym;
-	uint8_t mContinuityIndex;
 	CC_coord mPos;
 	CC_coord mRef[CC_point::kNumRefPoints];
 	bool GetFlip;
@@ -245,7 +221,6 @@ bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
 	return running_value
 		&& (underTest.mFlags == values.mFlags)
 		&& (underTest.mSym == values.mSym)
-		&& (underTest.mContinuityIndex == values.mContinuityIndex)
 		&& (underTest.mPos == values.mPos)
 		&& (underTest.GetFlip() == values.GetFlip)
 		;
@@ -257,7 +232,6 @@ void CC_point_UnitTests()
 	CC_point_values values;
 	values.mFlags = 0;
 	values.mSym = SYMBOL_PLAIN;
-	values.mContinuityIndex = 0;
 	values.mPos = CC_coord();
 	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		values.mRef[i] = CC_coord();

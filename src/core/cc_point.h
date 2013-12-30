@@ -36,7 +36,7 @@ class CC_point
 public:
 	static const unsigned kNumRefPoints = 3;
 	CC_point();
-	CC_point(uint8_t cont, const CC_coord& pos);
+	CC_point(const CC_coord& pos);
 
 	CC_point(const std::vector<uint8_t>& serialized_data);
 	std::vector<uint8_t> Serialize() const;
@@ -47,9 +47,6 @@ public:
 
 	SYMBOL_TYPE GetSymbol() const;
 	void SetSymbol(SYMBOL_TYPE sym);
-
-	uint8_t GetContinuityIndex() const;
-	void SetContinuityIndex(uint8_t cont);
 
 	// reference points 0 is the point, refs are [1, kNumRefPoints]
 	CC_coord GetPos(unsigned ref = 0) const;
@@ -65,7 +62,6 @@ private:
 	// by having both a sym type and cont index, we can have several
 	// points share the same symbol but have different continuities.
 	SYMBOL_TYPE mSym;
-	uint8_t mContinuityIndex;
 	CC_coord mPos;
 	CC_coord mRef[kNumRefPoints];
 
