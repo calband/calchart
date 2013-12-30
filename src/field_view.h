@@ -66,6 +66,7 @@ public:
 	bool DoSetPointsLabelFlip();
 	bool DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, unsigned where);
 	bool DoDeleteSheet(unsigned where);
+	bool DoImportPrintableContinuity(const wxString& file);
 
 	///// query show attributes /////
 	int FindPoint(CC_coord pos) const;

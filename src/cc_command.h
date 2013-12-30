@@ -193,6 +193,33 @@ protected:
 	const wxString mContName;
 };
 
+// SettingPrintContinuityCommand
+// Setting the print continuity for a sheet
+class ImportPrintContinuityCommand : public SetSheetCommand
+{
+public:
+	ImportPrintContinuityCommand(CalChartDoc& show, const std::vector<std::string>& print_cont);
+	virtual ~ImportPrintContinuityCommand();
+	
+protected:
+	virtual void DoAction();
+	const std::vector<std::string> mPrintCont;
+};
+
+// SettingPrintContinuityCommand
+// Setting the print continuity for a sheet
+class SetPrintContinuityCommand : public SetSheetCommand
+{
+public:
+	SetPrintContinuityCommand(CalChartDoc& show, unsigned, std::vector<std::string>& print_cont);
+	virtual ~SetPrintContinuityCommand();
+	
+protected:
+	virtual void DoAction();
+	const unsigned mWhichSheet;
+	const std::vector<std::string> mPrintCont;
+};
+
 // RemoveContinuityCommand
 // Removing a continuity
 class RemoveContinuityCommand : public SetSheetCommand

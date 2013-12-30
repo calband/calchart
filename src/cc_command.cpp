@@ -232,6 +232,37 @@ void AddContinuityCommand::DoAction()
 }
 
 
+ImportPrintContinuityCommand::ImportPrintContinuityCommand(CalChartDoc& show, const std::vector<std::string>& print_cont)
+: SetSheetCommand(show, wxT("Importing Printable continuity command")),
+mPrintCont(print_cont)
+{}
+
+ImportPrintContinuityCommand::~ImportPrintContinuityCommand()
+{}
+
+void ImportPrintContinuityCommand::DoAction()
+{
+	SetSheetCommand::DoAction(); // sets page
+	mDoc.ImportPrintableContinuity(mPrintCont);
+}
+
+
+SetPrintContinuityCommand::SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet, std::vector<std::string>& print_cont)
+: SetSheetCommand(show, wxT("Setting Printable continuity command")),
+mWhichSheet(sheet),
+mPrintCont(print_cont)
+{}
+
+SetPrintContinuityCommand::~SetPrintContinuityCommand()
+{}
+
+void SetPrintContinuityCommand::DoAction()
+{
+	SetSheetCommand::DoAction(); // sets page
+	mDoc.GetNthSheet(mWhichSheet)->SetPrintableContinuity(mPrintCont);
+}
+
+
 RemoveContinuityCommand::RemoveContinuityCommand(CalChartDoc& show, unsigned index)
 : SetSheetCommand(show, wxT("Remove continuity command")),
 mIndexToRemove(index)

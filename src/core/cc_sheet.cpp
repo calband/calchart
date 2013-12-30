@@ -270,6 +270,25 @@ pts(numPoints)
 		ReadAndCheckID(stream, INGL_ECNT);
 		name = ReadLong(stream);
 	}
+	// Continuity text
+	while (INGL_PCNT == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		const char *d = (const char *)&data[0];
+		const char * const d_end = (const char *)&data[0] + data.size();
+		while (d != d_end)
+		{
+			mPrintableContinuity.push_back(CC_textline(std::string(d)));
+			d += strlen(d);
+		}
+		if (d != d_end)
+		{
+			throw CC_FileException("Bad Print cont chunk");
+		}
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_PCNT);
+		name = ReadLong(stream);
+	}
 	if (INGL_END != name)
 	{
 		throw CC_FileException(INGL_END);
@@ -322,6 +341,25 @@ CC_sheet::SerializeContinuityData() const
 		WriteEnd(stream, INGL_ECNT);
 	}
 
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
+}
+
+std::vector<uint8_t>
+CC_sheet::SerializePrintContinuityData() const
+{
+	// PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END;
+	// PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
+	// PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
+	
+	std::ostringstream stream("");
+	for (auto& curranimcont : mPrintableContinuity)
+	{
+		WriteStr(stream, curranimcont.GetOriginalLine().c_str());
+	}
+	
 	auto sdata = stream.str();
 	std::vector<uint8_t> data;
 	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
@@ -656,120 +694,20 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
  * also, there are three tab stops set for standard continuity format
  */
 
-bool
-CC_sheet::ImportPrintableContinuity(const std::vector<std::string>& line_data)
+void
+CC_sheet::SetPrintableContinuity(const std::vector<std::string>& line_data)
 {
-	enum PSFONT_TYPE currfontnum;
-	currfontnum = PSFONT_NORM;
-	for (auto line_iter = line_data.begin(); line_iter != line_data.end(); ++line_iter)
+	mPrintableContinuity.clear();
+	
+	for (auto& line_iter : line_data)
 	{
-		if ((line_iter->length() >= 2) && (line_iter->at(0) == '%') && (line_iter->at(1) == '%'))
+		if ((line_iter.length() >= 2) && (line_iter.at(0) == '%') && (line_iter.at(1) == '%'))
 		{
-			SetNumber(std::string(*line_iter, 2));
+			SetNumber(std::string(line_iter, 2));
 			continue;
 		}
-		// make a copy of the line
-		std::string line = *line_iter;
-		CC_textline line_text;
-		// peel off the '<>~'
-		if (!line.empty() && line.at(0) == '<')
-		{
-			line_text.on_sheet = false;
-			line.erase(0, 1);
-		}
-		if (!line.empty() && line.at(0) == '>')
-		{
-			line_text.on_main = false;
-			line.erase(0, 1);
-		}
-		if (!line.empty() && line.at(0) == '~')
-		{
-			line_text.center = true;
-			line.erase(0, 1);
-		}
-		// break the line into substrings
-		while (!line.empty())
-		{
-			// first take care of any tabs
-			if (line.at(0) == '\t')
-			{
-				if (line.length() > 1)
-				{
-					CC_textchunk new_text;
-					new_text.font = PSFONT_TAB;
-					line_text.chunks.push_back(new_text);
-				}
-				line.erase(0, 1);
-				continue;
-			}
-			// now check to see if we have any special person marks
-			if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's')))
-			{
-				CC_textchunk new_text;
-				new_text.font = PSFONT_SYMBOL;
-				if (tolower(line.at(1)) == 'p')
-				{
-					switch (tolower(line.at(2)))
-					{
-						case 'o':
-							new_text.text.push_back('A'); break;
-						case 'b':
-							new_text.text.push_back('C'); break;
-						case 's':
-							new_text.text.push_back('D'); break;
-						case 'x':
-							new_text.text.push_back('E'); break;
-						default:
-							// code not recognized
-							return false;
-					}
-				}
-				if (tolower(line.at(1)) == 's')
-				{
-					switch (tolower(line.at(2)))
-					{
-						case 'o':
-							new_text.text.push_back('B'); break;
-						case 'b':
-							new_text.text.push_back('F'); break;
-						case 's':
-							new_text.text.push_back('G'); break;
-						case 'x':
-							new_text.text.push_back('H'); break;
-						default:
-							// code not recognized
-							return false;
-					}
-				}
-				line_text.chunks.push_back(new_text);
-				line.erase(0, 3);
-				continue;
-			}
-			// now check to see if we have any font
-			if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b') || (tolower(line.at(1)) == 'i')))
-			{
-				if (tolower(line.at(2)) == 'e')
-				{
-					currfontnum = PSFONT_NORM;
-				}
-				if (tolower(line.at(2)) == 's')
-				{
-					currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT_BOLD : PSFONT_ITAL;
-				}
-				line.erase(0, 3);
-				continue;
-			}
-			int pos = line.find_first_of("\\\t", 1);
-
-			CC_textchunk new_text;
-			new_text.font = currfontnum;
-			new_text.text = line.substr(0, pos);
-			line_text.chunks.push_back(new_text);
-			line.erase(0, pos);
-		}
-		mPrintableContinuity.push_back(line_text);
+		mPrintableContinuity.push_back(CC_textline(line_iter));
 	}
-	return true;
 }
 
 CC_textline_list
