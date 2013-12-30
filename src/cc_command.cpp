@@ -246,6 +246,16 @@ void SetPrintContinuityCommand::DoAction()
 }
 
 
+SetPrintContinuityCommand::~SetPrintContinuityCommand()
+{}
+
+void SetPrintContinuityCommand::DoAction()
+{
+	SetSheetCommand::DoAction(); // sets page
+	mDoc.GetNthSheet(mWhichSheet)->SetPrintableContinuity(mPrintCont);
+}
+
+
 // MovePointsOnSheetCommand:
 // Move points around on a sheet.  mPosition is a mapping of which point to two positions,
 // the original and new.  Do will move points to the new position, and undo will move them back.
