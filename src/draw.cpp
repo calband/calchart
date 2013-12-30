@@ -37,6 +37,43 @@
 
 extern wxFont *pointLabelFont;
 
+// helper classes for saving and restoring state
+class SaveAndRestore_DeviceOrigin
+{
+	wxDC& dc;
+	wxCoord origX, origY;
+public:
+	SaveAndRestore_DeviceOrigin(wxDC& dc_) : dc(dc_) { dc.GetDeviceOrigin(&origX, &origY); }
+	~SaveAndRestore_DeviceOrigin() { dc.SetDeviceOrigin(origX, origY); }
+};
+
+class SaveAndRestore_UserScale
+{
+	wxDC& dc;
+	double origXscale, origYscale;
+public:
+	SaveAndRestore_UserScale(wxDC& dc_) : dc(dc_) { dc.GetUserScale(&origXscale, &origYscale); }
+	~SaveAndRestore_UserScale() { dc.SetUserScale(origXscale, origYscale); }
+};
+
+class SaveAndRestore_TextForeground
+{
+	wxDC& dc;
+	wxColour origForegroundColor;
+public:
+	SaveAndRestore_TextForeground(wxDC& dc_) : dc(dc_), origForegroundColor(dc.GetTextForeground()) {}
+	~SaveAndRestore_TextForeground() { dc.SetTextForeground(origForegroundColor); }
+};
+
+class SaveAndRestore_Font
+{
+	wxDC& dc;
+	wxFont origFont;
+public:
+	SaveAndRestore_Font(wxDC& dc_) : dc(dc_), origFont(dc.GetFont()) {}
+	~SaveAndRestore_Font() { dc.SetFont(origFont); }
+};
+
 // draw text centered around x (though still at y down)
 void DrawCenteredText(wxDC& dc, const wxString& text, const wxPoint& pt)
 {
@@ -164,46 +201,30 @@ void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref
 }
 
 // draw the continuity starting at a specific offset
-void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landscape)
+void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape)
 {
-	float x, y;
-	wxCoord textw, texth, textd, maxtexth;
+	SaveAndRestore_DeviceOrigin orig_dev(dc);
+	SaveAndRestore_UserScale orig_scale(dc);
+	SaveAndRestore_TextForeground orig_text(dc);
+	SaveAndRestore_Font orig_font(dc);
+#if DEBUG
+	dc.DrawRectangle(bounding);
+#endif
 
-	wxCoord origX, origY;
-	double origXscale, origYscale;
-
-	dc.GetDeviceOrigin(&origX, &origY);
-	dc.GetUserScale(&origXscale, &origYscale);
-	const wxColour& origForegroundColor = dc.GetTextForeground();
-	const wxFont& origFont = dc.GetFont();
-
-	dc.SetDeviceOrigin(20, yStart);
 	dc.SetTextForeground(*wxBLACK);
 	
-	int pageW, pageH;
-	dc.GetSize(&pageW, &pageH);
-	int pageMiddle;
-	if (landscape)
-	{
-		dc.SetUserScale((pageW/kSizeXLandscape)/kContinuityScale, (pageH/kSizeYLandscape)/kContinuityScale);
-		pageMiddle = (pageW * (1.0/((pageW/kSizeXLandscape)/kContinuityScale)))/2 - 20;
-	}
-	else
-	{
-		dc.SetUserScale((pageW/kSizeX)/kContinuityScale, (pageH/kSizeY)/kContinuityScale);
-		pageMiddle = (pageW * (1.0/((pageW/kSizeX)/kContinuityScale)))/2 - 20;
-	}
+	int pageMiddle = (bounding.GetWidth()/2);
 
 	size_t numLines = 0;
-	auto continuity = sheet.GetPrintableContinuity();
-	for (auto text = continuity.begin(); text != continuity.end(); ++text)
+	for (auto text = print_continuity.begin(); text != print_continuity.end(); ++text)
 	{
-		if (text->on_sheet)
+		if (text->GetOnSheet())
 		{
 			++numLines;
 		}
 	}
-	int font_size = ((pageH - yStart) - (numLines - 1)*2)/(numLines ? numLines : 1);
+
+	int font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1)*2)/(numLines ? numLines : 1);
 	//font size, we scale to be no more than 256 pixels.
 	font_size = std::min(font_size, 20);
 
@@ -213,28 +234,29 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 	wxFont *contBoldItalFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxITALIC, wxBOLD);
 	
 	dc.SetFont(*contPlainFont);
+	const wxCoord maxtexth = contPlainFont->GetPointSize()+2;
 
-	y = 0.0;
+	float y = bounding.GetTop();
 	const wxCoord charWidth = dc.GetCharWidth();
-	auto cont = continuity.begin();
-	while (cont != continuity.end())
+	for (auto& cont : print_continuity)
 	{
-		bool do_tab;
-		CC_textchunk_list::const_iterator c;
-		x = 0.0;
-		if (cont->center)
+		float x = bounding.GetLeft();
+		// Determine how to center the text
+		if (cont.GetCenter())
 		{
 			x += pageMiddle;
-			for (c = cont->chunks.begin();
-				c != cont->chunks.end();
-				++c)
+			auto chunks = cont.GetChunks();
+			for (auto& c : chunks)
 			{
-				do_tab = false;
-				switch (c->font)
+				bool do_tab = false;
+				switch (c.font)
 				{
 					case PSFONT_SYMBOL:
-						dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
-						x += textw * c->text.length();
+					{
+						wxCoord textw, texth;
+						dc.GetTextExtent(wxT("O"), &textw, &texth);
+						x += textw * c.text.length();
+					}
 						break;
 					case PSFONT_NORM:
 						dc.SetFont(*contPlainFont);
@@ -252,21 +274,21 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 						do_tab = true;
 						break;
 				}
-				if (!do_tab && (c->font != PSFONT_SYMBOL))
+				if (!do_tab && (c.font != PSFONT_SYMBOL))
 				{
-					dc.GetTextExtent(c->text, &textw, &texth, &textd);
+					wxCoord textw, texth;
+					dc.GetTextExtent(c.text, &textw, &texth);
 					x -= textw/2;
 				}
 			}
 		}
-		maxtexth = contPlainFont->GetPointSize()+2;
+		// now draw the text
 		unsigned tabnum = 0;
-		for (c = cont->chunks.begin();
-			c != cont->chunks.end();
-			++c)
+		auto chunks = cont.GetChunks();
+		for (auto& c : chunks)
 		{
-			do_tab = false;
-			switch (c->font)
+			bool do_tab = false;
+			switch (c.font)
 			{
 				case PSFONT_NORM:
 				case PSFONT_SYMBOL:
@@ -282,28 +304,29 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 					dc.SetFont(*contBoldItalFont);
 					break;
 				case PSFONT_TAB:
+				{
 					tabnum++;
-					textw = charWidth * TabStops(tabnum, landscape);
+					wxCoord textw = charWidth * TabStops(tabnum, landscape);
 					if (textw >= x) x = textw;
 					else x += charWidth;
 					do_tab = true;
+				}
 					break;
 				default:
 					break;
 			}
-			if (c->font == PSFONT_SYMBOL)
+			if (c.font == PSFONT_SYMBOL)
 			{
+				wxCoord textw, texth, textd;
 				dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
-				float d = textw;
-				SYMBOL_TYPE sym;
+				const float d = textw;
+				const float top_y = y + texth - textd - textw;
 
-				float top_y = y + texth - textd - d;
-
-				for (std::string::const_iterator s = c->text.begin(); s != c->text.end(); s++)
+				for (std::string::const_iterator s = c.text.begin(); s != c.text.end(); s++)
 				{
 					{
 						dc.SetPen(*wxBLACK_PEN);
-						sym = (SYMBOL_TYPE)(*s - 'A');
+						SYMBOL_TYPE sym = (SYMBOL_TYPE)(*s - 'A');
 						switch (sym)
 						{
 							case SYMBOL_SOL:
@@ -346,21 +369,22 @@ void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landsc
 			{
 				if (!do_tab)
 				{
-					dc.GetTextExtent(c->text, &textw, &texth, &textd);
-					dc.DrawText(c->text, x, y);
+					wxCoord textw, texth;
+					dc.GetTextExtent(c.text, &textw, &texth);
+					dc.DrawText(c.text, x, y);
 					x += textw;
 				}
 			}
 		}
 		y += maxtexth;
-		++cont;
 	}
-
-	// restore everything
-	dc.SetUserScale(origXscale, origYscale);
-	dc.SetDeviceOrigin(origX, origY);
-	dc.SetTextForeground(origForegroundColor);
-	dc.SetFont(origFont);
+#if DEBUG
+	char buffer[100];
+	snprintf(buffer, sizeof(buffer), "TopLeft %d, %d", bounding.GetTopLeft().x, bounding.GetTopLeft().y);
+	dc.DrawText(buffer, bounding.GetTopLeft());
+	snprintf(buffer, sizeof(buffer), "BottomRight %d, %d", bounding.GetBottomRight().x, bounding.GetBottomRight().y);
+	dc.DrawText(buffer, bounding.GetBottomRight());
+#endif
 }
 
 static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
@@ -529,7 +553,7 @@ void DrawForPrinting(wxDC *printerdc, const CalChartDoc& show, const CC_sheet& s
 	DrawCenteredText(*dc, kLowerNorthLabel, wxPoint(pageW*kLowerNorthPosition[landscape][0], pageH*kLowerNorthPosition[landscape][1]));
 	DrawArrow(*dc, wxPoint(pageW*kLowerNorthArrow[landscape][0], pageH*kLowerNorthArrow[landscape][1]), pageW*kLowerNorthArrow[landscape][2], true);
 
-	DrawCont(*dc, sheet, kBitmapScale*pageH*kContinuityStart[landscape], landscape);
+	DrawCont(*dc, sheet.GetPrintableContinuity(), wxRect(wxPoint(20, pageH*kContinuityStart[landscape]), wxSize(pageW-40, pageH-pageH*kContinuityStart[landscape])), landscape);
 
 	dc->SetUserScale(origXscale, origYscale);
 	dc->SetDeviceOrigin(origX, origY);

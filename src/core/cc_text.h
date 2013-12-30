@@ -37,10 +37,18 @@ struct CC_textchunk
 
 typedef std::vector<CC_textchunk> CC_textchunk_list;
 
-struct CC_textline
+class CC_textline
 {
-	CC_textline() : center(false), on_main(true), on_sheet(true) {}
+public:
+	CC_textline(std::string line);
 
+	CC_textchunk_list GetChunks() const { return chunks; }
+	std::string GetOriginalLine() const { return original_line; }
+	bool GetCenter() const { return center; }
+	bool GetOnMain() const { return on_main; }
+	bool GetOnSheet() const { return on_sheet; }
+private:
+	std::string original_line;
 	CC_textchunk_list chunks;
 	bool center;
 	bool on_main;

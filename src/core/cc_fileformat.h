@@ -133,7 +133,7 @@
 // EACH_CONTINUITY_DATA = BigEndianInt8( symbol ) , Null-terminated char* ;
 // EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
 // PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END;
-// PRINT_CONTINUITY_DATA = Null-terminated char* ;
+// PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
 // PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
 //
 // INGL_INGL = 'I','N','G','L' ;
