@@ -198,13 +198,14 @@ protected:
 class SetPrintContinuityCommand : public SetSheetCommand
 {
 public:
-	SetPrintContinuityCommand(CalChartDoc& show, unsigned, std::vector<std::string>& print_cont);
+	SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet, const std::string& number, const std::string& print_cont);
 	virtual ~SetPrintContinuityCommand();
 	
 protected:
 	virtual void DoAction();
 	const unsigned mWhichSheet;
-	const std::vector<std::string> mPrintCont;
+	const std::string mNumber;
+	const std::string mPrintCont;
 };
 
 ///// Sheet and point commands.  Changes for points selected on a sheet

@@ -230,9 +230,10 @@ void ImportPrintContinuityCommand::DoAction()
 }
 
 
-SetPrintContinuityCommand::SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet, std::vector<std::string>& print_cont)
+SetPrintContinuityCommand::SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet, const std::string& number, const std::string& print_cont)
 : SetSheetCommand(show, wxT("Setting Printable continuity command")),
 mWhichSheet(sheet),
+mNumber(number),
 mPrintCont(print_cont)
 {}
 
@@ -242,7 +243,7 @@ SetPrintContinuityCommand::~SetPrintContinuityCommand()
 void SetPrintContinuityCommand::DoAction()
 {
 	SetSheetCommand::DoAction(); // sets page
-	mDoc.GetNthSheet(mWhichSheet)->SetPrintableContinuity(mPrintCont);
+	mDoc.GetNthSheet(mWhichSheet)->SetPrintableContinuity(mNumber, mPrintCont);
 }
 
 

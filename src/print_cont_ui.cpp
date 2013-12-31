@@ -96,14 +96,7 @@ void PrintContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 
 void PrintContinuityEditorView::DoSetPrintContinuity(unsigned which_sheet, const wxString& cont)
 {
-	std::istringstream conttext(cont.ToStdString());
-	std::vector<std::string> lines;
-	std::string s;
-	while (std::getline(conttext, s, '\n')) {
-		lines.push_back(s);
-	}
-	
-	GetDocument()->GetCommandProcessor()->Submit(new SetPrintContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()), which_sheet, lines), true);
+	GetDocument()->GetCommandProcessor()->Submit(new SetPrintContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()), which_sheet, "", cont.ToStdString()), true);
 }
 
 PrintContinuityEditor::PrintContinuityEditor()
@@ -271,11 +264,7 @@ void PrintContinuityEditor::UpdateText()
 	mUserInput->Clear();
 	mUserInput->DiscardEdits();
 	CC_show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
-	for (auto& printcont : current_sheet->GetPrintableContinuity())
-	{
-		mUserInput->WriteText(printcont.GetOriginalLine());
-		mUserInput->WriteText("\n");
-	}
+	mUserInput->WriteText(current_sheet->GetRawPrintContinuity());
 	mUserInput->SetInsertionPoint(0);
 	mPrintContDisplay->SetPrintContinuity(current_sheet->GetPrintableContinuity());
 	// disable the save and discard buttons as they are not active.
