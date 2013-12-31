@@ -194,8 +194,6 @@ mSheetNum(0)
 		CC_sheet sheet(this, GetNumPoints(), stream, ver);
 		InsertSheetInternal(sheet, GetNumSheets());
 		
-		ReadAndCheckID(stream, INGL_END);
-		ReadAndCheckID(stream, INGL_SHET);
 		// peek for the next name
 		name = ReadLong(stream);
 	}

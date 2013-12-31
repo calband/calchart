@@ -351,21 +351,24 @@ pts(numPoints)
 		ReadAndCheckID(stream, INGL_ECNT);
 		name = ReadLong(stream);
 	}
+	if (INGL_END != name)
+	{
+		throw CC_FileException(INGL_CONT);
+	}
+	ReadAndCheckID(stream, INGL_CONT);
+
+	name = ReadLong(stream);
 	// Continuity text
-	while (INGL_PCNT == name)
+	if (INGL_PCNT == name)
 	{
 		std::vector<uint8_t> data = FillData(stream);
-		const char *d = (const char *)&data[0];
-		const char * const d_end = (const char *)&data[0] + data.size();
-		while (d != d_end)
-		{
-			mPrintableContinuity.push_back(CC_textline(std::string(d)));
-			d += strlen(d);
-		}
-		if (d != d_end)
+		const char *print_name = (const char *)&data[0];
+		const char *print_cont = print_name + strlen(print_name) + 1;
+		if ((strlen(print_name) + 1 + strlen(print_cont) + 1) != data.size())
 		{
 			throw CC_FileException("Bad Print cont chunk");
 		}
+		mPrintableContinuity = CC_print_continuity(print_name, print_cont);
 		ReadAndCheckID(stream, INGL_END);
 		ReadAndCheckID(stream, INGL_PCNT);
 		name = ReadLong(stream);
@@ -374,7 +377,7 @@ pts(numPoints)
 	{
 		throw CC_FileException(INGL_END);
 	}
-	ReadAndCheckID(stream, INGL_CONT);
+	ReadAndCheckID(stream, INGL_SHET);
 }
 
 // SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
@@ -432,15 +435,13 @@ std::vector<uint8_t>
 CC_sheet::SerializePrintContinuityData() const
 {
 	// PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END;
-	// PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
+	// PRINT_CONTINUITY_DATA = Null-terminated char* , Null-terminated char* ;
 	// PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
 	
 	std::ostringstream stream("");
-	for (auto& curranimcont : mPrintableContinuity)
-	{
-		WriteStr(stream, curranimcont.GetOriginalLine().c_str());
-	}
-	
+	WriteStr(stream, mPrintableContinuity.GetPrintNumber().c_str());
+	WriteStr(stream, mPrintableContinuity.GetOriginalLine().c_str());
+
 	auto sdata = stream.str();
 	std::vector<uint8_t> data;
 	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
@@ -473,6 +474,11 @@ CC_sheet::SerializeSheetData() const
 	WriteChunk(stream, INGL_CONT, all_continuity.size(), &all_continuity[0]);
 	WriteEnd(stream, INGL_CONT);
 
+	// Write Continuity
+	auto print_continuity = SerializePrintContinuityData();
+	WriteChunk(stream, INGL_PCNT, print_continuity.size(), &print_continuity[0]);
+	WriteEnd(stream, INGL_PCNT);
+	
 	auto sdata = stream.str();
 	std::vector<uint8_t> data;
 	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
@@ -618,14 +624,13 @@ void CC_sheet::SetName(const std::string& newname)
 
 std::string CC_sheet::GetNumber() const
 {
-	return number;
+	return mPrintableContinuity.GetPrintNumber();
 }
 
-void CC_sheet::SetNumber(const std::string& num)
+std::string CC_sheet::GetRawPrintContinuity() const
 {
-	number = num;
+	return mPrintableContinuity.GetOriginalLine();
 }
-
 
 unsigned short CC_sheet::GetBeats() const
 {
@@ -697,25 +702,15 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
  */
 
 void
-CC_sheet::SetPrintableContinuity(const std::vector<std::string>& line_data)
+CC_sheet::SetPrintableContinuity(const std::string& name, const std::string& lines)
 {
-	mPrintableContinuity.clear();
-	
-	for (auto& line_iter : line_data)
-	{
-		if ((line_iter.length() >= 2) && (line_iter.at(0) == '%') && (line_iter.at(1) == '%'))
-		{
-			SetNumber(std::string(line_iter, 2));
-			continue;
-		}
-		mPrintableContinuity.push_back(CC_textline(line_iter));
-	}
+	mPrintableContinuity = CC_print_continuity(name, lines);
 }
 
 CC_textline_list
 CC_sheet::GetPrintableContinuity() const
 {
-	return mPrintableContinuity;
+	return mPrintableContinuity.GetChunks();
 }
 
 const CC_point&

@@ -22,6 +22,8 @@
 
 #include "cc_text.h"
 
+#include <sstream>
+
 CC_textline::CC_textline(std::string line) :
 center(false),
 on_main(true),
@@ -125,3 +127,47 @@ on_sheet(true)
 		line.erase(0, pos);
 	}
 }
+å
+CC_print_continuity::CC_print_continuity()
+{
+}
+
+CC_print_continuity::CC_print_continuity(const std::string& data) :
+mOriginalLine(data)
+{
+	std::istringstream reader(data);
+	std::string line;
+	while (std::getline(reader, line, '\n')) {
+		mPrintChunks.push_back(CC_textline(line));
+	}
+}
+
+CC_print_continuity::CC_print_continuity(const std::string& number, const std::string& data) :
+mOriginalLine(data),
+mNumber(number)
+{
+	std::istringstream reader(data);
+	std::string line;
+	while (std::getline(reader, line, '\n')) {
+		mPrintChunks.push_back(CC_textline(line));
+	}
+}
+
+CC_textline_list
+CC_print_continuity::GetChunks() const
+{
+	return mPrintChunks;
+}
+
+std::string
+CC_print_continuity::GetOriginalLine() const
+{
+	return mOriginalLine;
+}
+
+std::string
+CC_print_continuity::GetPrintNumber() const
+{
+	return mNumber;
+}
+

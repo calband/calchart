@@ -109,7 +109,7 @@ private:
 
 public:
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
-	bool SetPrintableContinuity(unsigned current_sheet, const std::vector<std::string>& lines);
+	bool SetPrintableContinuity(unsigned current_sheet, const std::string& number, const std::string& lines);
 
 	void FlushAllTextWindows();
 	
