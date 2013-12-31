@@ -31,6 +31,7 @@
 class PrintContinuityEditor;
 class FancyTextWin;
 class FancyTextPanel;
+class wxSplitterWindow;
 
 // View for linking CalChartDoc with PrintContinuityEditor
 class PrintContinuityEditorView : public wxView
@@ -41,7 +42,7 @@ public:
     virtual void OnDraw(wxDC *dc);
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 
-	void DoSetPrintContinuity(unsigned which_sheet, const wxString& text);
+	void DoSetPrintContinuity(unsigned which_sheet, const wxString& number, const wxString& cont);
 };
 
 // PrintContinuityEditor
@@ -71,6 +72,7 @@ public:
 	void FlushText();						  // Flush changes in text window
 
 	void SetInsertionPoint(int x, int y);
+	void UpdateOrientation(wxCommandEvent&);
 
 private:
 	void Init();
@@ -96,6 +98,7 @@ private:
 	PrintContinuityEditorView *mView;
 	FancyTextWin *mUserInput;
 	FancyTextPanel *mPrintContDisplay;
+	wxSplitterWindow *mSplitter;
 
 	DECLARE_EVENT_TABLE()
 };
