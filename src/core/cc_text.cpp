@@ -127,7 +127,8 @@ on_sheet(true)
 		line.erase(0, pos);
 	}
 }
-å
+
+
 CC_print_continuity::CC_print_continuity()
 {
 }

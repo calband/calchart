@@ -22,13 +22,9 @@
 
 #include "basic_ui.h"
 #include "print_cont_ui.h"
-//#include "confgr.h"
 #include "cc_sheet.h"
-//#include "cc_continuity.h"
 #include "cc_command.h"
 #include "calchartapp.h"
-//#include "calchartdoc.h"
-//#include "cc_show.h"
 #include "cc_text.h"
 #include "draw.h"
 
@@ -37,6 +33,7 @@
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
 #include <wx/dcbuffer.h>
+#include <wx/splitter.h>
 
 #include <boost/algorithm/string/split.hpp>
 
@@ -50,6 +47,8 @@ enum
 	PrintContinuityEditor_Save,
 	PrintContinuityEditor_Discard,
 	PrintContinuityEditor_KeyPress,
+	PrintContinuityEditor_PrintNumber,
+	PrintContinuityEditor_PrintOrientation,
 };
 
 BEGIN_EVENT_TABLE(PrintContinuityEditor, wxFrame)
@@ -62,6 +61,7 @@ EVT_BUTTON(wxID_HELP, PrintContinuityEditor::OnCmdHelp)
 EVT_BUTTON(PrintContinuityEditor_Save,PrintContinuityEditor::OnSave)
 EVT_BUTTON(PrintContinuityEditor_Discard,PrintContinuityEditor::OnDiscard)
 EVT_TEXT(PrintContinuityEditor_KeyPress,PrintContinuityEditor::OnKeyPress)
+EVT_CHOICE(PrintContinuityEditor_PrintOrientation,PrintContinuityEditor::UpdateOrientation)
 END_EVENT_TABLE()
 
 class FancyTextPanel: public wxScrolled<wxWindow>
@@ -71,9 +71,11 @@ public:
 	
 	void OnPaint(wxPaintEvent& event);
 	void SetPrintContinuity(const CC_textline_list& print_continuity) { m_print_continuity = print_continuity; }
+	void SetOrientation(bool landscape) { m_landscape = landscape; }
 	
 private:
 	CC_textline_list m_print_continuity;
+	bool m_landscape;
 };
 
 
@@ -94,9 +96,9 @@ void PrintContinuityEditorView::OnUpdate(wxView *sender, wxObject *hint)
 	}
 }
 
-void PrintContinuityEditorView::DoSetPrintContinuity(unsigned which_sheet, const wxString& cont)
+void PrintContinuityEditorView::DoSetPrintContinuity(unsigned which_sheet, const wxString& number, const wxString& cont)
 {
-	GetDocument()->GetCommandProcessor()->Submit(new SetPrintContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()), which_sheet, "", cont.ToStdString()), true);
+	GetDocument()->GetCommandProcessor()->Submit(new SetPrintContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()), which_sheet, number.ToStdString(), cont.ToStdString()), true);
 }
 
 PrintContinuityEditor::PrintContinuityEditor()
@@ -165,6 +167,14 @@ void PrintContinuityEditor::CreateControls()
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
 
+	// Add the field canvas here so that it gets the focus when we switch to frame.
+	mSplitter = new wxSplitterWindow(this, wxID_ANY);
+	mSplitter->SetSize(GetClientSize());
+	mSplitter->SetSashGravity(0.5);
+	mSplitter->SetMinimumPaneSize(20);
+	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
+	mSplitter->SetMinSize(wxSize(300, 400));
+
 // create a sizer for laying things out top down:
 	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 	SetSizer( topsizer );
@@ -173,18 +183,23 @@ void PrintContinuityEditor::CreateControls()
 	// New, delete, choices
 	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
 
+	top_button_sizer->Add(new wxStaticText(this, wxID_STATIC, "Print Number:", wxDefaultPosition, wxDefaultSize, 0), wxSizerFlags(0).Border(wxALL, 2).Left());
+	top_button_sizer->Add(new wxTextCtrl(this, PrintContinuityEditor_PrintNumber), wxSizerFlags(0).Border(wxALL, 2).Center() );
+	top_button_sizer->Add(new wxStaticText(this, wxID_STATIC, "Print Orientation:", wxDefaultPosition, wxDefaultSize, 0), wxSizerFlags(0).Border(wxALL, 2).Left());
+	
+	wxString choices[] = { "Portrait", "Landscape" };
+    top_button_sizer->Add(new wxChoice(this, PrintContinuityEditor_PrintOrientation, wxDefaultPosition, wxDefaultSize, sizeof(choices)/sizeof(*choices), choices));
+
 	// Set, select
-	top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
 	topsizer->Add(top_button_sizer);
 
-
-	mUserInput = new FancyTextWin(this, PrintContinuityEditor_KeyPress, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
+	mUserInput = new FancyTextWin(mSplitter, PrintContinuityEditor_KeyPress, wxEmptyString, wxDefaultPosition, wxSize(50, 100));
 	
-	topsizer->Add(mUserInput, 0, wxGROW|wxALL, 5 );
-
-	mPrintContDisplay = new FancyTextPanel(this);
+	mPrintContDisplay = new FancyTextPanel(mSplitter);
+	mSplitter->Initialize(mUserInput);
+	mSplitter->SplitHorizontally(mUserInput, mPrintContDisplay);
 	
-	topsizer->Add(mPrintContDisplay, 0, wxGROW|wxALL, 5 );
+	topsizer->Add(mSplitter, wxSizerFlags(1).Expand());
 
 	// add a horizontal bar to make things clear:
 	wxStaticLine* line = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
@@ -264,6 +279,10 @@ void PrintContinuityEditor::UpdateText()
 	mUserInput->Clear();
 	mUserInput->DiscardEdits();
 	CC_show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
+
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(PrintContinuityEditor_PrintNumber);
+	text->SetValue(current_sheet->GetNumber());
+	
 	mUserInput->WriteText(current_sheet->GetRawPrintContinuity());
 	mUserInput->SetInsertionPoint(0);
 	mPrintContDisplay->SetPrintContinuity(current_sheet->GetPrintableContinuity());
@@ -274,17 +293,28 @@ void PrintContinuityEditor::UpdateText()
 	button->Disable();
 }
 
+//text = (wxTextCtrl*) FindWindow(HEADERSIZE);
+//text->GetValue().ToDouble(&mPrintValues[0]);
 
 // flush out the text to the show.  This will treat the text box as unedited
 // it is assumed that the user has already been notified that this will modify the show
 void PrintContinuityEditor::FlushText()
 {
 	auto current_sheet = mDoc->GetCurrentSheet();
-//	auto cont = current_sheet->GetPrintableContinuity();
-//	if (conttext != cont.GetText())
-//	{
-	mView->DoSetPrintContinuity(std::distance(mDoc->GetSheetBegin(), current_sheet), mUserInput->GetValue());
-//	}
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(PrintContinuityEditor_PrintNumber);
+	try
+	{
+		if ((mUserInput->GetValue() != current_sheet->GetRawPrintContinuity()) || (text->GetValue() != current_sheet->GetNumber()))
+		{
+			mView->DoSetPrintContinuity(std::distance(mDoc->GetSheetBegin(), current_sheet), text->GetValue(), mUserInput->GetValue());
+		}
+	}
+	catch (const std::runtime_error& e)
+	{
+		wxString message = wxT("Error encountered:\n");
+		message += e.what();
+		wxMessageBox(message, wxT("Print continuity cannot be changed."));
+	}
 	mUserInput->DiscardEdits();
 }
 
@@ -321,13 +351,21 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
 	button->Enable();
 }
 
-
-static const double kSizeX = 576, kSizeY = 734 - 606;
-FancyTextPanel::FancyTextPanel(wxWindow *parent) :
-wxScrolled<wxWindow>(parent, wxID_ANY, wxDefaultPosition, wxSize(kSizeX, kSizeY))
+void
+PrintContinuityEditor::UpdateOrientation(wxCommandEvent&)
 {
+	mPrintContDisplay->SetOrientation(static_cast<wxChoice*>(FindWindow(PrintContinuityEditor_PrintOrientation))->GetSelection());
+	Update();
+}
+
+
+FancyTextPanel::FancyTextPanel(wxWindow *parent) :
+wxScrolled<wxWindow>(parent, wxID_ANY),
+m_landscape(false)
+{
+	static const double kSizeX = 576, kSizeY = 734 - 606;
+	SetVirtualSize(wxSize(kSizeX, kSizeY));
 	SetScrollRate( 10, 10 );
-	SetVirtualSize(wxSize(kSizeX*2, kSizeY*2));
 	SetBackgroundColour( *wxWHITE );
 	Connect(wxEVT_PAINT, wxPaintEventHandler(FancyTextPanel::OnPaint));
 }
@@ -337,13 +375,11 @@ FancyTextPanel::OnPaint(wxPaintEvent& event)
 {
 	wxPaintDC dc(this);
 	PrepareDC(dc);
-	int current_size_x, current_size_y;
-	GetSize(&current_size_x, &current_size_y);
 	wxSize virtSize = GetVirtualSize();
-	GetVirtualSize(&current_size_x, &current_size_y);
 	
 	dc.Clear();
-	DrawCont(dc, m_print_continuity, wxRect(wxPoint(0, 0), virtSize), false);
+	dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
+	DrawCont(dc, m_print_continuity, wxRect(wxPoint(0, 0), virtSize), m_landscape);
 }
 
 
