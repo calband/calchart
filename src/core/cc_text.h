@@ -41,7 +41,7 @@ class CC_textline
 {
 private:
 	friend class CC_print_continuity;
-	CC_textline(std::string line);
+	CC_textline(std::string line, PSFONT_TYPE& currfontnum);
 public:
 
 	CC_textchunk_list GetChunks() const { return chunks; }

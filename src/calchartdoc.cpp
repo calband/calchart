@@ -162,6 +162,7 @@ bool CalChartDoc::ImportPrintableContinuity(const std::vector<std::string>& line
 		unsigned sheet = 0;
 		std::string number(lines.front(), 2);
 		std::string current_print_cont;
+		bool first_line = true;
 		for (auto line = lines.begin()+1; line != lines.end(); ++line)
 		{
 			// new sheet; push the current one into the map and reset it for the next time
@@ -177,7 +178,13 @@ bool CalChartDoc::ImportPrintableContinuity(const std::vector<std::string>& line
 				}
 				continue;
 			}
-			current_print_cont += std::string("\n") + *line;
+			// we need to concatinate all the lines together, making sure to put a new line between them.
+			if (!first_line)
+			{
+				current_print_cont += "\n";
+			}
+			first_line = false;
+			current_print_cont += *line;
 		}
 	}
 	catch (const std::runtime_error& e) {

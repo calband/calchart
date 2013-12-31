@@ -226,7 +226,7 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 
 	int font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1)*2)/(numLines ? numLines : 1);
 	//font size, we scale to be no more than 256 pixels.
-	font_size = std::min(font_size, 20);
+	font_size = std::min(font_size, 10);
 
 	wxFont *contPlainFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxNORMAL, wxNORMAL);
 	wxFont *contBoldFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxNORMAL, wxBOLD);
@@ -306,7 +306,7 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 				case PSFONT_TAB:
 				{
 					tabnum++;
-					wxCoord textw = charWidth * TabStops(tabnum, landscape);
+					wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
 					if (textw >= x) x = textw;
 					else x += charWidth;
 					do_tab = true;
@@ -553,7 +553,7 @@ void DrawForPrinting(wxDC *printerdc, const CalChartDoc& show, const CC_sheet& s
 	DrawCenteredText(*dc, kLowerNorthLabel, wxPoint(pageW*kLowerNorthPosition[landscape][0], pageH*kLowerNorthPosition[landscape][1]));
 	DrawArrow(*dc, wxPoint(pageW*kLowerNorthArrow[landscape][0], pageH*kLowerNorthArrow[landscape][1]), pageW*kLowerNorthArrow[landscape][2], true);
 
-	DrawCont(*dc, sheet.GetPrintableContinuity(), wxRect(wxPoint(20, pageH*kContinuityStart[landscape]), wxSize(pageW-40, pageH-pageH*kContinuityStart[landscape])), landscape);
+	DrawCont(*dc, sheet.GetPrintableContinuity(), wxRect(wxPoint(10, pageH*kContinuityStart[landscape]), wxSize(pageW-20, pageH-pageH*kContinuityStart[landscape])), landscape);
 
 	dc->SetUserScale(origXscale, origYscale);
 	dc->SetDeviceOrigin(origX, origY);
