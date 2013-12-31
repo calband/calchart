@@ -39,20 +39,37 @@ typedef std::vector<CC_textchunk> CC_textchunk_list;
 
 class CC_textline
 {
-public:
+private:
+	friend class CC_print_continuity;
 	CC_textline(std::string line);
+public:
 
 	CC_textchunk_list GetChunks() const { return chunks; }
-	std::string GetOriginalLine() const { return original_line; }
 	bool GetCenter() const { return center; }
 	bool GetOnMain() const { return on_main; }
 	bool GetOnSheet() const { return on_sheet; }
 private:
-	std::string original_line;
 	CC_textchunk_list chunks;
 	bool center;
 	bool on_main;
 	bool on_sheet;
+};
+
+typedef std::vector<CC_textline> CC_textline_list;
+
+class CC_print_continuity
+{
+public:
+	CC_print_continuity();
+	CC_print_continuity(const std::string& data);
+	CC_print_continuity(const std::string& number, const std::string& data);
+	CC_textline_list GetChunks() const;
+	std::string GetOriginalLine() const;
+	std::string GetPrintNumber() const;
+private:
+	CC_textline_list mPrintChunks;
+	std::string mOriginalLine;
+	std::string mNumber;
 };
 
 #endif

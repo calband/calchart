@@ -160,22 +160,24 @@ bool CalChartDoc::ImportPrintableContinuity(const std::vector<std::string>& line
 		
 		// first, split the lines into groups for each page
 		unsigned sheet = 0;
-		std::vector<std::string> current_sheet;
-		current_sheet.push_back(lines.front());
+		std::string number(lines.front(), 2);
+		std::string current_print_cont;
 		for (auto line = lines.begin()+1; line != lines.end(); ++line)
 		{
 			// new sheet; push the current one into the map and reset it for the next time
 			if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%'))
 			{
-				GetNthSheet(sheet)->SetPrintableContinuity(current_sheet);
-				current_sheet.clear();
+				GetNthSheet(sheet)->SetPrintableContinuity(number, current_print_cont);
+				number = std::string(*line, 2);
+				current_print_cont.clear();
 				++sheet;
 				if (sheet >= GetNumSheets())
 				{
 					throw std::runtime_error("More print continuity than sheets!");
 				}
+				continue;
 			}
-			current_sheet.push_back(*line);
+			current_print_cont += std::string("\n") + *line;
 		}
 	}
 	catch (const std::runtime_error& e) {
@@ -190,7 +192,7 @@ bool CalChartDoc::ImportPrintableContinuity(const std::vector<std::string>& line
 }
 
 
-bool CalChartDoc::SetPrintableContinuity(unsigned current_sheet, const std::vector<std::string>& lines)
+bool CalChartDoc::SetPrintableContinuity(unsigned current_sheet, const std::string& number, const std::string& lines)
 {
 	// should this first clear out all the continuity?
 	if (lines.empty())
@@ -200,13 +202,12 @@ bool CalChartDoc::SetPrintableContinuity(unsigned current_sheet, const std::vect
 	try
 	{
 		// check to make sure the first line starts with %%
-		if ((lines.front().length() < 2) || !((lines.front().at(0) == '%') && (lines.front().at(1) == '%')))
+		if (current_sheet >= GetNumSheets())
 		{
-			// Continuity doesn't begin with a sheet header
-			throw std::runtime_error("Continuity file doesn't begin with header");
+			// out of rang
+			throw std::runtime_error("Continuity sheet out of range");
 		}
-		
-		GetNthSheet(current_sheet)->SetPrintableContinuity(lines);
+		GetNthSheet(current_sheet)->SetPrintableContinuity(number, lines);
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");

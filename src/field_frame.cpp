@@ -904,12 +904,7 @@ void FieldFrame::ImportContFile()
 	s = wxFileSelector(wxT("Import Continuity"), wxEmptyString, wxEmptyString, wxEmptyString, wxT("*.txt"));
 	if (!s.empty())
 	{
-//        wxString err = GetShow()->ImportPrintableContinuity(s);
 		GetFieldView()->DoImportPrintableContinuity(s);
-//		if (!err.IsEmpty())
-//		{
-//			(void)wxMessageBox(err, wxT("Load Error"));
-//		}
 	}
 }
 
