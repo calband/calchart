@@ -24,7 +24,7 @@
 
 #include <sstream>
 
-CC_textline::CC_textline(std::string line) :
+CC_textline::CC_textline(std::string line, PSFONT_TYPE& currfontnum) :
 center(false),
 on_main(true),
 on_sheet(true)
@@ -103,7 +103,6 @@ on_sheet(true)
 			line.erase(0, 3);
 			continue;
 		}
-		enum PSFONT_TYPE currfontnum = PSFONT_NORM;
 		// now check to see if we have any font
 		if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b') || (tolower(line.at(1)) == 'i')))
 		{
@@ -138,8 +137,9 @@ mOriginalLine(data)
 {
 	std::istringstream reader(data);
 	std::string line;
+	PSFONT_TYPE currfontnum = PSFONT_NORM;
 	while (std::getline(reader, line, '\n')) {
-		mPrintChunks.push_back(CC_textline(line));
+		mPrintChunks.push_back(CC_textline(line, currfontnum));
 	}
 }
 
@@ -149,8 +149,9 @@ mNumber(number)
 {
 	std::istringstream reader(data);
 	std::string line;
+	PSFONT_TYPE currfontnum = PSFONT_NORM;
 	while (std::getline(reader, line, '\n')) {
-		mPrintChunks.push_back(CC_textline(line));
+		mPrintChunks.push_back(CC_textline(line, currfontnum));
 	}
 }
 
