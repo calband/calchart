@@ -1,0 +1,245 @@
+\hypertarget{a00034}{\section{C\-C\-\_\-point Class Reference}
+\label{a00034}\index{C\-C\-\_\-point@{C\-C\-\_\-point}}
+}
+
+
+This class represents a point in a.  
+
+
+
+
+{\ttfamily \#include $<$cc\-\_\-point.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00034_aca83bde44f92cd505fc2bd1d2cae2ade}{C\-C\-\_\-point} ()
+\begin{DoxyCompactList}\small\item\em Makes a plain dot, with a null position and uninitialized reference points. \end{DoxyCompactList}\item 
+\hyperlink{a00034_a5cf13d3ea61c85cdcb44048e3be9b9d5}{C\-C\-\_\-point} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&pos)
+\begin{DoxyCompactList}\small\item\em Makes a plain dot located at the position provided in the parameters. \end{DoxyCompactList}\item 
+\hyperlink{a00034_ae8a3a993cb0e38634f347af41ede4594}{C\-C\-\_\-point} (const std\-::vector$<$ uint8\-\_\-t $>$ \&serialized\-\_\-data)
+\begin{DoxyCompactList}\small\item\em Used to load a point from a file. \end{DoxyCompactList}\item 
+std\-::vector$<$ uint8\-\_\-t $>$ \hyperlink{a00034_a2de2c8ccca571f59abaf282a2c44a7e5}{Serialize} () const 
+\begin{DoxyCompactList}\small\item\em Generates a serialized version of this point to be saved in a file. \end{DoxyCompactList}\item 
+bool \hyperlink{a00034_adb7c6247e92c09adcc068dad928db579}{Get\-Flip} () const 
+\begin{DoxyCompactList}\small\item\em Returns true if the label on the dot is flipped. \end{DoxyCompactList}\item 
+void \hyperlink{a00034_ab13b2611cdb23e13c1cb8231d0ab73ff}{Flip} (bool val=true)
+\begin{DoxyCompactList}\small\item\em Indicates which side of the dot that the label should be located in the viewer (that is, indicates whether or not the label of this dot is flipped). \end{DoxyCompactList}\item 
+void \hyperlink{a00034_ae593f6c7994bcec3b30b5b1f9744d098}{Flip\-Toggle} ()
+\begin{DoxyCompactList}\small\item\em Toggles whether or not the label of the dot is flipped in the viewer. \end{DoxyCompactList}\item 
+\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} \hyperlink{a00034_ab87115812c129465788ae5da5d684110}{Get\-Symbol} () const 
+\begin{DoxyCompactList}\small\item\em Returns the symbol associated with this dot (e.\-g. \end{DoxyCompactList}\item 
+void \hyperlink{a00034_ad797e691ddb9b681a8b204de3ee87e33}{Set\-Symbol} (\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} sym)
+\begin{DoxyCompactList}\small\item\em Sets the symbol associated with this dot. \end{DoxyCompactList}\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \hyperlink{a00034_aa969cddcae9eb35d23b38829775927c7}{Get\-Pos} (unsigned ref=0) const 
+\item 
+void \hyperlink{a00034_aea2566cb1dd1c1bbde6ce83150462037}{Set\-Pos} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c, unsigned ref=0)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static const unsigned \hyperlink{a00034_a2b34de427e5864328fd455f3122d96f4}{k\-Num\-Ref\-Points} = 3
+\begin{DoxyCompactList}\small\item\em The number of reference points associated with each point. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \{ \hyperlink{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac11f0df078c0ced8c4de839952fbe1e8}{k\-Point\-Label\-Flipped}, 
+\hyperlink{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac65d0716d4049256924dd894d9935221}{k\-Total\-Bits}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\-::bitset$<$ \hyperlink{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac65d0716d4049256924dd894d9935221}{k\-Total\-Bits} $>$ \hyperlink{a00034_a676172a1cc4a700a9c3662155c8b06a8}{m\-Flags}
+\item 
+\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} \hyperlink{a00034_a43c6a5906d61451a1bc48635faf44721}{m\-Sym}
+\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \hyperlink{a00034_a01cdfaad90c4b25418c94e3e17e119a1}{m\-Pos}
+\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \hyperlink{a00034_acb88e94b06850fed4fb44fa9fe095fc0}{m\-Ref} \mbox{[}\hyperlink{a00034_a2b34de427e5864328fd455f3122d96f4}{k\-Num\-Ref\-Points}\mbox{]}
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00034_ab0f18edc2251918b5602d8a471f2ecc0}{C\-C\-\_\-point\-\_\-values}
+\item 
+bool \hyperlink{a00034_a83253bab8cb644ce0049e6bc659c22c5}{Check\-\_\-\-C\-C\-\_\-point} (const \hyperlink{a00034}{C\-C\-\_\-point} \&, const struct \hyperlink{a00035}{C\-C\-\_\-point\-\_\-values} \&)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class represents a point in a. 
+
+\subsection{Member Enumeration Documentation}
+\hypertarget{a00034_aa09d4a78d659a5809cc4ca1e7022c84a}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum\hspace{0.3cm}{\ttfamily [private]}}}\label{a00034_aa09d4a78d659a5809cc4ca1e7022c84a}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{k\-Point\-Label\-Flipped@{k\-Point\-Label\-Flipped}!C\-C\-\_\-point@{C\-C\-\_\-point}}\index{C\-C\-\_\-point@{C\-C\-\_\-point}!k\-Point\-Label\-Flipped@{k\-Point\-Label\-Flipped}}\item[{\em 
+\hypertarget{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac11f0df078c0ced8c4de839952fbe1e8}{k\-Point\-Label\-Flipped}\label{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac11f0df078c0ced8c4de839952fbe1e8}
+}]\index{k\-Total\-Bits@{k\-Total\-Bits}!C\-C\-\_\-point@{C\-C\-\_\-point}}\index{C\-C\-\_\-point@{C\-C\-\_\-point}!k\-Total\-Bits@{k\-Total\-Bits}}\item[{\em 
+\hypertarget{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac65d0716d4049256924dd894d9935221}{k\-Total\-Bits}\label{a00034_aa09d4a78d659a5809cc4ca1e7022c84aac65d0716d4049256924dd894d9935221}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00034_aca83bde44f92cd505fc2bd1d2cae2ade}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!C\-C\-\_\-point@{C\-C\-\_\-point}}
+\index{C\-C\-\_\-point@{C\-C\-\_\-point}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{C\-C\-\_\-point}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-point\-::\-C\-C\-\_\-point (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00034_aca83bde44f92cd505fc2bd1d2cae2ade}
+
+
+Makes a plain dot, with a null position and uninitialized reference points. 
+
+Take caution when using this constructor, because many of the member variables will be null for the new point. \hypertarget{a00034_a5cf13d3ea61c85cdcb44048e3be9b9d5}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!C\-C\-\_\-point@{C\-C\-\_\-point}}
+\index{C\-C\-\_\-point@{C\-C\-\_\-point}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{C\-C\-\_\-point}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-point\-::\-C\-C\-\_\-point (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{pos}
+\end{DoxyParamCaption}
+)}}\label{a00034_a5cf13d3ea61c85cdcb44048e3be9b9d5}
+
+
+Makes a plain dot located at the position provided in the parameters. 
+
+The reference points for the point will also all be set to that same position. \hypertarget{a00034_ae8a3a993cb0e38634f347af41ede4594}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!C\-C\-\_\-point@{C\-C\-\_\-point}}
+\index{C\-C\-\_\-point@{C\-C\-\_\-point}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{C\-C\-\_\-point}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-point\-::\-C\-C\-\_\-point (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ uint8\-\_\-t $>$ \&}]{serialized\-\_\-data}
+\end{DoxyParamCaption}
+)}}\label{a00034_ae8a3a993cb0e38634f347af41ede4594}
+
+
+Used to load a point from a file. 
+
+A file contains serialized data that describes a point, and this constructor uses that data to construct a point that is identical to the one that was saved. 
+
+\subsection{Member Function Documentation}
+\hypertarget{a00034_ab13b2611cdb23e13c1cb8231d0ab73ff}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Flip@{Flip}}
+\index{Flip@{Flip}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Flip}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-point\-::\-Flip (
+\begin{DoxyParamCaption}
+\item[{bool}]{val = {\ttfamily true}}
+\end{DoxyParamCaption}
+)}}\label{a00034_ab13b2611cdb23e13c1cb8231d0ab73ff}
+
+
+Indicates which side of the dot that the label should be located in the viewer (that is, indicates whether or not the label of this dot is flipped). 
+
+\hypertarget{a00034_ae593f6c7994bcec3b30b5b1f9744d098}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Flip\-Toggle@{Flip\-Toggle}}
+\index{Flip\-Toggle@{Flip\-Toggle}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Flip\-Toggle}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-point\-::\-Flip\-Toggle (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00034_ae593f6c7994bcec3b30b5b1f9744d098}
+
+
+Toggles whether or not the label of the dot is flipped in the viewer. 
+
+\hypertarget{a00034_adb7c6247e92c09adcc068dad928db579}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Get\-Flip@{Get\-Flip}}
+\index{Get\-Flip@{Get\-Flip}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Get\-Flip}]{\setlength{\rightskip}{0pt plus 5cm}bool C\-C\-\_\-point\-::\-Get\-Flip (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00034_adb7c6247e92c09adcc068dad928db579}
+
+
+Returns true if the label on the dot is flipped. 
+
+\hypertarget{a00034_aa969cddcae9eb35d23b38829775927c7}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Get\-Pos@{Get\-Pos}}
+\index{Get\-Pos@{Get\-Pos}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Get\-Pos}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord} C\-C\-\_\-point\-::\-Get\-Pos (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{ref = {\ttfamily 0}}
+\end{DoxyParamCaption}
+) const}}\label{a00034_aa969cddcae9eb35d23b38829775927c7}
+\hypertarget{a00034_ab87115812c129465788ae5da5d684110}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Get\-Symbol@{Get\-Symbol}}
+\index{Get\-Symbol@{Get\-Symbol}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Get\-Symbol}]{\setlength{\rightskip}{0pt plus 5cm}{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} C\-C\-\_\-point\-::\-Get\-Symbol (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00034_ab87115812c129465788ae5da5d684110}
+
+
+Returns the symbol associated with this dot (e.\-g. 
+
+solid, slash, plain, etc.). \hypertarget{a00034_a2de2c8ccca571f59abaf282a2c44a7e5}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Serialize@{Serialize}}
+\index{Serialize@{Serialize}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Serialize}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ uint8\-\_\-t $>$ C\-C\-\_\-point\-::\-Serialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00034_a2de2c8ccca571f59abaf282a2c44a7e5}
+
+
+Generates a serialized version of this point to be saved in a file. 
+
+\hypertarget{a00034_aea2566cb1dd1c1bbde6ce83150462037}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Set\-Pos@{Set\-Pos}}
+\index{Set\-Pos@{Set\-Pos}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Set\-Pos}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-point\-::\-Set\-Pos (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c, }
+\item[{unsigned}]{ref = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{a00034_aea2566cb1dd1c1bbde6ce83150462037}
+\hypertarget{a00034_ad797e691ddb9b681a8b204de3ee87e33}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Set\-Symbol@{Set\-Symbol}}
+\index{Set\-Symbol@{Set\-Symbol}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Set\-Symbol}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-point\-::\-Set\-Symbol (
+\begin{DoxyParamCaption}
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{sym}
+\end{DoxyParamCaption}
+)}}\label{a00034_ad797e691ddb9b681a8b204de3ee87e33}
+
+
+Sets the symbol associated with this dot. 
+
+
+
+\subsection{Friends And Related Function Documentation}
+\hypertarget{a00034_ab0f18edc2251918b5602d8a471f2ecc0}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!C\-C\-\_\-point\-\_\-values@{C\-C\-\_\-point\-\_\-values}}
+\index{C\-C\-\_\-point\-\_\-values@{C\-C\-\_\-point\-\_\-values}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{C\-C\-\_\-point\-\_\-values}]{\setlength{\rightskip}{0pt plus 5cm}friend struct {\bf C\-C\-\_\-point\-\_\-values}\hspace{0.3cm}{\ttfamily [friend]}}}\label{a00034_ab0f18edc2251918b5602d8a471f2ecc0}
+\hypertarget{a00034_a83253bab8cb644ce0049e6bc659c22c5}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!Check\-\_\-\-C\-C\-\_\-point@{Check\-\_\-\-C\-C\-\_\-point}}
+\index{Check\-\_\-\-C\-C\-\_\-point@{Check\-\_\-\-C\-C\-\_\-point}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{Check\-\_\-\-C\-C\-\_\-point}]{\setlength{\rightskip}{0pt plus 5cm}bool Check\-\_\-\-C\-C\-\_\-point (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-point} \&}]{, }
+\item[{const struct {\bf C\-C\-\_\-point\-\_\-values} \&}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{a00034_a83253bab8cb644ce0049e6bc659c22c5}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00034_a2b34de427e5864328fd455f3122d96f4}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!k\-Num\-Ref\-Points@{k\-Num\-Ref\-Points}}
+\index{k\-Num\-Ref\-Points@{k\-Num\-Ref\-Points}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{k\-Num\-Ref\-Points}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned C\-C\-\_\-point\-::k\-Num\-Ref\-Points = 3\hspace{0.3cm}{\ttfamily [static]}}}\label{a00034_a2b34de427e5864328fd455f3122d96f4}
+
+
+The number of reference points associated with each point. 
+
+This must be at least 1, since the first ref point is the position of the dot. \hypertarget{a00034_a676172a1cc4a700a9c3662155c8b06a8}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!m\-Flags@{m\-Flags}}
+\index{m\-Flags@{m\-Flags}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{m\-Flags}]{\setlength{\rightskip}{0pt plus 5cm}std\-::bitset$<${\bf k\-Total\-Bits}$>$ C\-C\-\_\-point\-::m\-Flags\hspace{0.3cm}{\ttfamily [private]}}}\label{a00034_a676172a1cc4a700a9c3662155c8b06a8}
+\hypertarget{a00034_a01cdfaad90c4b25418c94e3e17e119a1}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!m\-Pos@{m\-Pos}}
+\index{m\-Pos@{m\-Pos}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{m\-Pos}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord} C\-C\-\_\-point\-::m\-Pos\hspace{0.3cm}{\ttfamily [private]}}}\label{a00034_a01cdfaad90c4b25418c94e3e17e119a1}
+\hypertarget{a00034_acb88e94b06850fed4fb44fa9fe095fc0}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!m\-Ref@{m\-Ref}}
+\index{m\-Ref@{m\-Ref}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{m\-Ref}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord} C\-C\-\_\-point\-::m\-Ref\mbox{[}{\bf k\-Num\-Ref\-Points}\mbox{]}\hspace{0.3cm}{\ttfamily [private]}}}\label{a00034_acb88e94b06850fed4fb44fa9fe095fc0}
+\hypertarget{a00034_a43c6a5906d61451a1bc48635faf44721}{\index{C\-C\-\_\-point@{C\-C\-\_\-point}!m\-Sym@{m\-Sym}}
+\index{m\-Sym@{m\-Sym}!CC_point@{C\-C\-\_\-point}}
+\subsubsection[{m\-Sym}]{\setlength{\rightskip}{0pt plus 5cm}{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} C\-C\-\_\-point\-::m\-Sym\hspace{0.3cm}{\ttfamily [private]}}}\label{a00034_a43c6a5906d61451a1bc48635faf44721}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00208}{cc\-\_\-point.\-h}\item 
+src/core/\hyperlink{a00207}{cc\-\_\-point.\-cpp}\end{DoxyCompactItemize}

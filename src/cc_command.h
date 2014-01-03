@@ -38,140 +38,316 @@ class Matrix;
 // when it's Do() is called.  This is a little bit unnecessary.
 // The Undo() command reverts the show to the original snapshot
 
-// BasicCalChartCommand
-// The low level command all other commands should inherit from.
-// Holds the show reference, and handles setting the modify-ness of the show.
+/**
+ * A command that modifies the CalChart show. 
+ * When you modify points or activate a menu option that applies some change to
+ * the show (for example, the menu option that changes the number of beats
+ * associated with a stunt sheet), a BasicCalChartCommand is created and
+ * processed by the CalChartDoc. The big advantage of applying changes to
+ * the show in this fashion is that you can remember each action that was
+ * applied, and thus undo them. These commands, therefore, have methods
+ * to both Do() and Undo() themselves. The BasicCalChartCommand automatically
+ * handles the Undo() and Do() methods, granted that each command class derived
+ * from BasicCalChartCommand can apply the changes for which they are
+ * responsible when the DoAction() method is called on them.
+ */
 class BasicCalChartCommand : public wxCommand
 {
 public:
+	/**
+	 * Creates a command that operates on the given CalChartDoc.
+	 * @param doc The CalChartDoc to modify through this command.
+	 * @param cmdName The name of the command.
+	 */
 	BasicCalChartCommand(CalChartDoc& doc, const wxString cmdName);
-	// make destructor virtual and implement it to force abstract base class
+	
+	/** 
+	 * Performs cleanup. This is abstract to force the class to be
+	 * abstract.
+	 */
 	virtual ~BasicCalChartCommand() = 0;
 
+	/**
+	 * Applies the command.
+	 * @return True if the operation was successful; false otherwise.
+	 */
 	virtual bool Do();
+
+	/**
+	 * Undoes the changes made by the command.
+	 * @return True if the operation was successful; false otherwise.
+	 */
 	virtual bool Undo();
 
 protected:
+
+	/** 
+	 * The CalChart document that is modified by the command.
+	 */
 	CalChartDoc& mDoc;
 
 private:
+
+	/**
+	 * Modifies the show.
+	 */
 	virtual void DoAction() = 0;
+
+	/**
+	 * Records whether or not the show had been modified since the
+	 * last save before changes were applied by the command.
+	 * TODO what happens when show is saved and then commands are undone to before save?
+	 */
 	bool mDocModified;
+
+	/**
+	 * A snapshot of what the show looked like before it was changed
+	 * through this command. When the command is undone, the show is
+	 * restored to the saved snapshot.
+	 */
 	CC_show mSnapShot;
 };
 
 ///// Global show commands.  Changes settings to a whole show.
 
-// SetDescriptionCommand
-// Set the description of this show
+/** 
+ * A command that sets the description of the show.
+ */
 class SetDescriptionCommand : public BasicCalChartCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The show to modify.
+	 * @param newdecr The new desciption for the show.
+	 */
 	SetDescriptionCommand(CalChartDoc& show, const wxString& newdescr);
+
+	/**
+	 * Cleanup.
+	 */
 	virtual ~SetDescriptionCommand();
 
 protected:
+
 	virtual void DoAction();
+
+	/**
+	 * The new description to apply to the show.
+	 */
 	wxString mDescription;
 };
 
 
-// SetModeCommand
-// Set show mode
+/**
+ * A command that sets the show mode.
+ */
 class SetModeCommand : public BasicCalChartCommand
 {
 public:
+
+	/** 
+	 * Make the command.
+	 * @param show The show to modify.
+	 * @param newmode The new show mode to apply to the show.
+	 */
 	SetModeCommand(CalChartDoc& show, const wxString& newmode);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetModeCommand();
 
 protected:
 	virtual void DoAction();
+
+	/**
+	 * The new show mode to apply to the show.
+	 */
 	wxString mMode;
 };
 
 
-// SetShowInfoCommand
-// Sets the shows number of points and labels 
+/**
+ * A command that sets the number of points in the show and their labels.
+ */
 class SetShowInfoCommand : public BasicCalChartCommand
 {
 public:
+	
+	/**
+	 * Make the command.
+	 * @param show The show to modify.
+	 * @param numPoints The new number of points existing in the show.
+	 * @param numColumns TODO
+	 * @param labels The labels for all of the points.
+	 */
 	SetShowInfoCommand(CalChartDoc& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetShowInfoCommand();
 
 protected:
+
 	virtual void DoAction();
+
+	/**
+	 * The number of points that the show will have after the command is applied.
+	 */
 	unsigned mNumPoints;
+
+	/**
+	 * TODO
+	 */
 	unsigned mNumColumns;
+
+	/**
+	 * The new set of labels for the points.
+	 */
 	std::vector<wxString> mLabels;
 };
 
 
 ///// Sheet commands.  Changes settings on a sheet
 
-// SetSheetCommand:
-// Base class for other commands.  Will set sheet to the page they were
-// when command was created.
+/**
+ * A command that applies a change that is specific to a particular
+ * stunt sheet. These commands record the sheet that is active when they
+ * are created, thus effectively memorizing which stunt sheet the user
+ * intends for them to modify.
+ */
 class SetSheetCommand : public BasicCalChartCommand
 {
 public:
+
+	/**
+	 * Make the command.
+	 * @param show The show to modify with the command.
+	 * @param cmdName The name of the command.
+	 */
 	SetSheetCommand(CalChartDoc& show, const wxString cmdName);
-	// make destructor virtual and implement it to force abstract base class
+
+	/**
+	* Cleanup. This is abstract to force the class to be abstract.
+	*/
 	virtual ~SetSheetCommand() = 0;
 
 protected:
+
 	virtual void DoAction();
+
+	/** 
+	 * The index of the sheet that will be modified by the command.
+	 */
 	const unsigned mSheetNum;
 };
 
 
-// SetSheetTitleCommand
-// Set the description of the current sheet
+/**
+ * A command that sets the title of a stunt sheet.
+ */
 class SetSheetTitleCommand : public SetSheetCommand
 {
 public:
+
+	/**
+	 * Make the command.
+	 * @param show The show to modify with this command.
+	 * @param newname The new name for the stunt sheet.
+	 */
 	SetSheetTitleCommand(CalChartDoc& show, const wxString& newname);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetSheetTitleCommand();
 
 protected:
+
 	virtual void DoAction();
+
+	/**
+	 * The new description for the sheet.
+	 */
 	wxString mDescription;
 };
 
 
-// SetSheetBeatsCommand
-// Set the beats of the current sheet
+/**
+ * A command that sets the duration of a stunt sheet, in beats.
+ */
 class SetSheetBeatsCommand : public SetSheetCommand
 {
 public:
+
+	/** 
+	 * Make the command.
+	 * @param show The show to apply the command to.
+	 * @param beats The new duration of the sheet after the command
+	 * is applied.
+	 */
 	SetSheetBeatsCommand(CalChartDoc& show, unsigned short beats);
+
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetSheetBeatsCommand();
 
 protected:
+
 	virtual void DoAction();
+
+	/**
+	 * The new duration of the target sheet, after the command is
+	 * applied.
+	 */
 	unsigned short mBeats;
 };
 
 
-// AddSheetsCommand
-// For adding a container of sheets
+/**
+ * A command that adds stunt sheets to the show at a particular location.
+ */
 class AddSheetsCommand : public SetSheetCommand
 {
 public:
+
+	/**
+	 * Make the command.
+	 * @param show The show to modify.
+	 * @param sheets The sheets to add to the show.
+	 * @param where TODO ?
+	 */
 	AddSheetsCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
+
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~AddSheetsCommand();
 
 protected:
+
 	virtual void DoAction();
 	CC_show::CC_sheet_container_t mSheets;
 	const unsigned mWhere;
 };
 
-// RemoveSheetsCommand
-// For removing a sheets
+/**
+ * A command that removes a stunt sheet from the show.
+ */
 class RemoveSheetsCommand : public SetSheetCommand
 {
 public:
 	RemoveSheetsCommand(CalChartDoc& show, unsigned where);
+
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~RemoveSheetsCommand();
 
 protected:
@@ -180,15 +356,18 @@ protected:
 };
 
 
-///// Sheet and point commands.  Changes for points selected on a sheet
-// SetSheetAndSelectCommand:
-// Base class for other commands.  Will set selection and page to the state they were
-// when command was created.
+/**
+ * A command that applies changes to the currently selected set of points on the
+ * currently active stuntsheet.
+ */
 class SetSheetAndSelectCommand : public SetSheetCommand
 {
 public:
 	SetSheetAndSelectCommand(CalChartDoc& show, const wxString cmdName);
-	// make destructor virtual and implement it to force abstract base class
+
+	/**
+	* Cleanup. This is abstract to force the class to be abstract.
+	*/
 	virtual ~SetSheetAndSelectCommand() = 0;
 
 protected:
@@ -205,7 +384,10 @@ class MovePointsOnSheetCommand : public SetSheetAndSelectCommand
 {
 public:
 	MovePointsOnSheetCommand(CalChartDoc& show, unsigned ref);
-	// make destructor virtual and implement it to force abstract base class
+	
+	/**
+	* Cleanup. This is abstract to force the class to be abstract.
+	*/
 	virtual ~MovePointsOnSheetCommand() = 0;
 
 protected:
@@ -222,6 +404,10 @@ class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
 {
 public:
 	TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~TranslatePointsByDeltaCommand();
 };
 
@@ -232,6 +418,10 @@ class TransformPointsCommand : public MovePointsOnSheetCommand
 {
 public:
 	TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~TransformPointsCommand();
 };
 
@@ -242,6 +432,10 @@ class TransformPointsInALineCommand : public MovePointsOnSheetCommand
 {
 public:
 	TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~TransformPointsInALineCommand();
 };
 
@@ -252,6 +446,10 @@ class SetReferencePointToRef0 : public MovePointsOnSheetCommand
 {
 public:
 	SetReferencePointToRef0(CalChartDoc& show, unsigned ref);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetReferencePointToRef0();
 };
 
@@ -262,6 +460,10 @@ class SetSymbolCommand : public SetSheetAndSelectCommand
 {
 public:
 	SetSymbolCommand(CalChartDoc& show, SYMBOL_TYPE sym);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetSymbolCommand();
 
 protected:
@@ -276,6 +478,10 @@ class SetContinuityTextCommand : public SetSheetAndSelectCommand
 {
 public:
 	SetContinuityTextCommand(CalChartDoc& show, SYMBOL_TYPE i, const wxString& text);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetContinuityTextCommand();
 
 protected:
@@ -285,13 +491,18 @@ protected:
 };
 
 
-// SetLabelCommand
-// Base class for setting the labels.  Set the mLabelPos with values
+/** 
+ * A command that changes the positions of the point labels for the currently
+ * selected set of points.
+ */
 class SetLabelCommand : public SetSheetAndSelectCommand
 {
 public:
 	SetLabelCommand(CalChartDoc& show);
-	// make destructor virtual and implement it to force abstract base class
+	
+	/**
+	* Cleanup. This is abstract to force the class to be abstract.
+	*/
 	virtual ~SetLabelCommand() = 0;
 
 protected:
@@ -301,22 +512,34 @@ protected:
 };
 
 
-// SetLabelRightCommand
-// Set label on right
+/**
+ * A command that positions the point labels of the currently selected set
+ * of points to the right of their dots.
+ */
 class SetLabelRightCommand : public SetLabelCommand
 {
 public:
 	SetLabelRightCommand(CalChartDoc& show, bool right);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetLabelRightCommand();
 };
 
 
-// SetLabelFlipCommand
-// Set label on left
+/**
+* A command that positions the point labels of the currently selected set
+* of points to the left of their dots.
+*/
 class SetLabelFlipCommand : public SetLabelCommand
 {
 public:
 	SetLabelFlipCommand(CalChartDoc& show);
+
+	/**
+	* Cleanup.
+	*/
 	virtual ~SetLabelFlipCommand();
 };
 

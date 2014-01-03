@@ -45,6 +45,7 @@ public:
 	FieldFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size);
 	~FieldFrame();
 
+
 	void OnCmdAppend(wxCommandEvent& event);
 	void OnCmdImportCont(wxCommandEvent& event);
 	void OnCmdSave(wxCommandEvent& event);

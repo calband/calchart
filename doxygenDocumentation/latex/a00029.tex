@@ -1,0 +1,194 @@
+\hypertarget{a00029}{\section{C\-C\-\_\-coord Class Reference}
+\label{a00029}\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}}
+}
+
+
+A two dimensional vector that can be used to represent a coordinate in Cal\-Chart.  
+
+
+
+
+{\ttfamily \#include $<$cc\-\_\-coord.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00029_a69194d9f67638d9a89c9288924b0f9e2}{C\-C\-\_\-coord} (\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} xval=0, \hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} yval=0)
+\begin{DoxyCompactList}\small\item\em Constructs a coordinate (or vector) with the specified coordinates. \end{DoxyCompactList}\item 
+float \hyperlink{a00029_ad64566e6ad9d6515d0393f6e886f1f6e}{Magnitude} () const 
+\begin{DoxyCompactList}\small\item\em Returns the magnitude of the vector represented by this object. \end{DoxyCompactList}\item 
+float \hyperlink{a00029_ac197fb1a92a5f468d91c19b0e28576a0}{D\-M\-\_\-\-Magnitude} () const 
+\begin{DoxyCompactList}\small\item\em Returns the magnitude of \hyperlink{a00029}{C\-C\-\_\-coord}, as defined by the \hyperlink{a00029_ad64566e6ad9d6515d0393f6e886f1f6e}{Magnitude()} method, I\-F the vector represented by \hyperlink{a00029}{C\-C\-\_\-coord} does not make a 45 degree angle with the x or y axis (which occurs when the x component is either equal to the y component or its negative). \end{DoxyCompactList}\item 
+float \hyperlink{a00029_a508c84e70e6f919e7badc4ca72e27516}{Direction} () const 
+\begin{DoxyCompactList}\small\item\em Returns the angle between the vector represented by this \hyperlink{a00029}{C\-C\-\_\-coord} and a vector pointing along the positive x direction; that is, the angle returned is the angle of the vector in standard position. \end{DoxyCompactList}\item 
+float \hyperlink{a00029_add644be1d01386682dd8eb115b4af7b9}{Direction} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c) const 
+\begin{DoxyCompactList}\small\item\em Returns the direction of the vector (from standard position) that starts at the point represented by this \hyperlink{a00029}{C\-C\-\_\-coord} and ends at the point represented by the parameter. \end{DoxyCompactList}\item 
+bool \hyperlink{a00029_af4fff5071fce15aa9b316de2d7980f6e}{Collides} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c) const 
+\begin{DoxyCompactList}\small\item\em Returns true if this \hyperlink{a00029}{C\-C\-\_\-coord} object is within one step of the one passed as a parameter (where one step is the standard unit of the x and y coordinates of a \hyperlink{a00029}{C\-C\-\_\-coord}); returns false otherwise. \end{DoxyCompactList}\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \& \hyperlink{a00029_a61000324a3fe34fa9579fa43578b7ca3}{operator+=} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c)
+\begin{DoxyCompactList}\small\item\em Performs vector addition. \end{DoxyCompactList}\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \& \hyperlink{a00029_afa570bee9df745b6639fff9fc39a906f}{operator-\/=} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c)
+\begin{DoxyCompactList}\small\item\em Performs vector subtraction. \end{DoxyCompactList}\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \& \hyperlink{a00029_a7d719b060f44d62e846636f88535f692}{operator$\ast$=} (short s)
+\begin{DoxyCompactList}\small\item\em Performs vector-\/scalar multiplication. \end{DoxyCompactList}\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \& \hyperlink{a00029_a4d7b64280048bad9022cafaeecbb94db}{operator/=} (short s)
+\begin{DoxyCompactList}\small\item\em Performs vector-\/scalar division. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} \hyperlink{a00029_a4000dc426fbaa84ee0949161e2c2a8ef}{x}
+\begin{DoxyCompactList}\small\item\em The X component of the vector. \end{DoxyCompactList}\item 
+\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} \hyperlink{a00029_affa708ad9c6f0aa792f8fd4a537a9c12}{y}
+\begin{DoxyCompactList}\small\item\em The Y component of the vector. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A two dimensional vector that can be used to represent a coordinate in Cal\-Chart. 
+
+Essentially, this class is just a two-\/dimensional vector. It can be used to represent a position or path along which to move. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00029_a69194d9f67638d9a89c9288924b0f9e2}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!C\-C\-\_\-coord@{C\-C\-\_\-coord}}
+\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{C\-C\-\_\-coord}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-coord\-::\-C\-C\-\_\-coord (
+\begin{DoxyParamCaption}
+\item[{{\bf Coord}}]{xval = {\ttfamily 0}, }
+\item[{{\bf Coord}}]{yval = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00029_a69194d9f67638d9a89c9288924b0f9e2}
+
+
+Constructs a coordinate (or vector) with the specified coordinates. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em xval} & The x component of the vector/point. \\
+\hline
+{\em yval} & The y component of the vector/point. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00029_af4fff5071fce15aa9b316de2d7980f6e}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!Collides@{Collides}}
+\index{Collides@{Collides}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{Collides}]{\setlength{\rightskip}{0pt plus 5cm}bool C\-C\-\_\-coord\-::\-Collides (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c}
+\end{DoxyParamCaption}
+) const}}\label{a00029_af4fff5071fce15aa9b316de2d7980f6e}
+
+
+Returns true if this \hyperlink{a00029}{C\-C\-\_\-coord} object is within one step of the one passed as a parameter (where one step is the standard unit of the x and y coordinates of a \hyperlink{a00029}{C\-C\-\_\-coord}); returns false otherwise. 
+
+\hypertarget{a00029_a508c84e70e6f919e7badc4ca72e27516}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!Direction@{Direction}}
+\index{Direction@{Direction}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{Direction}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-coord\-::\-Direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00029_a508c84e70e6f919e7badc4ca72e27516}
+
+
+Returns the angle between the vector represented by this \hyperlink{a00029}{C\-C\-\_\-coord} and a vector pointing along the positive x direction; that is, the angle returned is the angle of the vector in standard position. 
+
+The returned angle is in degrees. \hypertarget{a00029_add644be1d01386682dd8eb115b4af7b9}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!Direction@{Direction}}
+\index{Direction@{Direction}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{Direction}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-coord\-::\-Direction (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c}
+\end{DoxyParamCaption}
+) const}}\label{a00029_add644be1d01386682dd8eb115b4af7b9}
+
+
+Returns the direction of the vector (from standard position) that starts at the point represented by this \hyperlink{a00029}{C\-C\-\_\-coord} and ends at the point represented by the parameter. 
+
+The returned angle is in degrees. \hypertarget{a00029_ac197fb1a92a5f468d91c19b0e28576a0}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!D\-M\-\_\-\-Magnitude@{D\-M\-\_\-\-Magnitude}}
+\index{D\-M\-\_\-\-Magnitude@{D\-M\-\_\-\-Magnitude}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{D\-M\-\_\-\-Magnitude}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-coord\-::\-D\-M\-\_\-\-Magnitude (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00029_ac197fb1a92a5f468d91c19b0e28576a0}
+
+
+Returns the magnitude of \hyperlink{a00029}{C\-C\-\_\-coord}, as defined by the \hyperlink{a00029_ad64566e6ad9d6515d0393f6e886f1f6e}{Magnitude()} method, I\-F the vector represented by \hyperlink{a00029}{C\-C\-\_\-coord} does not make a 45 degree angle with the x or y axis (which occurs when the x component is either equal to the y component or its negative). 
+
+If the vector represented by \hyperlink{a00029}{C\-C\-\_\-coord} D\-O\-E\-S make a 45 degree angle with either the x or y axis, then the returned magnitude of the vector is simply the absolute value of the x component (which is equal to the absolute value of the y component of the \hyperlink{a00029}{C\-C\-\_\-coord} under the conditions in which this occurs. \hypertarget{a00029_ad64566e6ad9d6515d0393f6e886f1f6e}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!Magnitude@{Magnitude}}
+\index{Magnitude@{Magnitude}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{Magnitude}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-coord\-::\-Magnitude (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00029_ad64566e6ad9d6515d0393f6e886f1f6e}
+
+
+Returns the magnitude of the vector represented by this object. 
+
+The magnitude is defined to be the distance from the point (0, 0) to the point (x, y), where x is the x component of the object, and y is the y component. \hypertarget{a00029_a7d719b060f44d62e846636f88535f692}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!operator$\ast$=@{operator$\ast$=}}
+\index{operator$\ast$=@{operator$\ast$=}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{operator$\ast$=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord}\& C\-C\-\_\-coord\-::operator$\ast$= (
+\begin{DoxyParamCaption}
+\item[{short}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00029_a7d719b060f44d62e846636f88535f692}
+
+
+Performs vector-\/scalar multiplication. 
+
+\hypertarget{a00029_a61000324a3fe34fa9579fa43578b7ca3}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!operator+=@{operator+=}}
+\index{operator+=@{operator+=}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{operator+=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord}\& C\-C\-\_\-coord\-::operator+= (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00029_a61000324a3fe34fa9579fa43578b7ca3}
+
+
+Performs vector addition. 
+
+\hypertarget{a00029_afa570bee9df745b6639fff9fc39a906f}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!operator-\/=@{operator-\/=}}
+\index{operator-\/=@{operator-\/=}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{operator-\/=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord}\& C\-C\-\_\-coord\-::operator-\/= (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00029_afa570bee9df745b6639fff9fc39a906f}
+
+
+Performs vector subtraction. 
+
+\hypertarget{a00029_a4d7b64280048bad9022cafaeecbb94db}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!operator/=@{operator/=}}
+\index{operator/=@{operator/=}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{operator/=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord}\& C\-C\-\_\-coord\-::operator/= (
+\begin{DoxyParamCaption}
+\item[{short}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00029_a4d7b64280048bad9022cafaeecbb94db}
+
+
+Performs vector-\/scalar division. 
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00029_a4000dc426fbaa84ee0949161e2c2a8ef}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!x@{x}}
+\index{x@{x}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{x}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Coord} C\-C\-\_\-coord\-::x}}\label{a00029_a4000dc426fbaa84ee0949161e2c2a8ef}
+
+
+The X component of the vector. 
+
+\hypertarget{a00029_affa708ad9c6f0aa792f8fd4a537a9c12}{\index{C\-C\-\_\-coord@{C\-C\-\_\-coord}!y@{y}}
+\index{y@{y}!CC_coord@{C\-C\-\_\-coord}}
+\subsubsection[{y}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Coord} C\-C\-\_\-coord\-::y}}\label{a00029_affa708ad9c6f0aa792f8fd4a537a9c12}
+
+
+The Y component of the vector. 
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00204}{cc\-\_\-coord.\-h}\item 
+src/core/\hyperlink{a00203}{cc\-\_\-coord.\-cpp}\end{DoxyCompactItemize}

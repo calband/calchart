@@ -28,6 +28,7 @@
 
 struct CC_DrawCommand;
 
+
 class CC_shape
 {
 public:

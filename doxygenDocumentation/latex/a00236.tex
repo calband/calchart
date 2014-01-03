@@ -1,0 +1,71 @@
+\hypertarget{a00236}{\section{src/modes.h File Reference}
+\label{a00236}\index{src/modes.\-h@{src/modes.\-h}}
+}
+{\ttfamily \#include \char`\"{}cc\-\_\-coord.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$wx/wx.\-h$>$}\\*
+{\ttfamily \#include $<$list$>$}\\*
+{\ttfamily \#include $<$algorithm$>$}\\*
+{\ttfamily \#include $<$boost/shared\-\_\-ptr.\-hpp$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{a00140}{Show\-Mode}
+\item 
+class \hyperlink{a00143}{Show\-Mode\-Standard}
+\item 
+class \hyperlink{a00142}{Show\-Mode\-Spr\-Show}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{a00236_a6b0901343c2eaff1df4a95fc4dd2cae9}{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T}~8
+\item 
+\#define \hyperlink{a00236_a84f909ae80693a1a903c873821eae689}{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T}~4
+\item 
+\#define \hyperlink{a00236_a57db2273220cd4bde69fcafb32a03726}{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E}~2
+\item 
+\#define \hyperlink{a00236_a3f125f7e7a83ca8c9d363185c713578a}{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W}~1
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef std\-::list\\*
+$<$ boost\-::shared\-\_\-ptr$<$ \hyperlink{a00140}{Show\-Mode} $>$ $>$ \hyperlink{a00236_a39f2aa1ac0d2da59ef7f3e58b13f44d2}{Show\-Mode\-List}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00140}{Show\-Mode} $\ast$ \hyperlink{a00236_afa24aef33f76cbcb08077f91f5668865}{Show\-Mode\-List\-\_\-\-Find} (const \hyperlink{a00236_a39f2aa1ac0d2da59ef7f3e58b13f44d2}{Show\-Mode\-List} \&show\-Modes, const wx\-String \&which)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{a00236_a57db2273220cd4bde69fcafb32a03726}{\index{modes.\-h@{modes.\-h}!S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E}}
+\index{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E}!modes.h@{modes.\-h}}
+\subsubsection[{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-A\-B\-O\-V\-E~2}}\label{a00236_a57db2273220cd4bde69fcafb32a03726}
+\hypertarget{a00236_a3f125f7e7a83ca8c9d363185c713578a}{\index{modes.\-h@{modes.\-h}!S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W}}
+\index{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W}!modes.h@{modes.\-h}}
+\subsubsection[{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-B\-E\-L\-O\-W~1}}\label{a00236_a3f125f7e7a83ca8c9d363185c713578a}
+\hypertarget{a00236_a6b0901343c2eaff1df4a95fc4dd2cae9}{\index{modes.\-h@{modes.\-h}!S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T}}
+\index{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T}!modes.h@{modes.\-h}}
+\subsubsection[{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-L\-E\-F\-T~8}}\label{a00236_a6b0901343c2eaff1df4a95fc4dd2cae9}
+\hypertarget{a00236_a84f909ae80693a1a903c873821eae689}{\index{modes.\-h@{modes.\-h}!S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T}}
+\index{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T@{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T}!modes.h@{modes.\-h}}
+\subsubsection[{S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-P\-R\-\_\-\-Y\-A\-R\-D\-\_\-\-R\-I\-G\-H\-T~4}}\label{a00236_a84f909ae80693a1a903c873821eae689}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{a00236_a39f2aa1ac0d2da59ef7f3e58b13f44d2}{\index{modes.\-h@{modes.\-h}!Show\-Mode\-List@{Show\-Mode\-List}}
+\index{Show\-Mode\-List@{Show\-Mode\-List}!modes.h@{modes.\-h}}
+\subsubsection[{Show\-Mode\-List}]{\setlength{\rightskip}{0pt plus 5cm}typedef std\-::list$<$boost\-::shared\-\_\-ptr$<${\bf Show\-Mode}$>$ $>$ {\bf Show\-Mode\-List}}}\label{a00236_a39f2aa1ac0d2da59ef7f3e58b13f44d2}
+
+
+\subsection{Function Documentation}
+\hypertarget{a00236_afa24aef33f76cbcb08077f91f5668865}{\index{modes.\-h@{modes.\-h}!Show\-Mode\-List\-\_\-\-Find@{Show\-Mode\-List\-\_\-\-Find}}
+\index{Show\-Mode\-List\-\_\-\-Find@{Show\-Mode\-List\-\_\-\-Find}!modes.h@{modes.\-h}}
+\subsubsection[{Show\-Mode\-List\-\_\-\-Find}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Show\-Mode}$\ast$ Show\-Mode\-List\-\_\-\-Find (
+\begin{DoxyParamCaption}
+\item[{const {\bf Show\-Mode\-List} \&}]{show\-Modes, }
+\item[{const wx\-String \&}]{which}
+\end{DoxyParamCaption}
+)}}\label{a00236_afa24aef33f76cbcb08077f91f5668865}

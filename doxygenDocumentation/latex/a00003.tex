@@ -1,0 +1,216 @@
+\hypertarget{a00003}{\section{Animate\-Command Class Reference}
+\label{a00003}\index{Animate\-Command@{Animate\-Command}}
+}
+
+
+{\ttfamily \#include $<$animatecommand.\-h$>$}
+
+Inheritance diagram for Animate\-Command\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{a00003}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00003_aebfee0fad0d8e0fb34b5aa51b4798acc}{Animate\-Command} (unsigned beats)
+\item 
+virtual \hyperlink{a00003_ac5e46568837cf7ba139dd67df6a2f431}{$\sim$\-Animate\-Command} ()
+\item 
+virtual bool \hyperlink{a00003_ab69372e28870271550dd8c8a54da02ee}{Begin} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual bool \hyperlink{a00003_ae5dfaac6e8cf870a688a8e3161672b4e}{End} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual bool \hyperlink{a00003_a80bcd30c221c961d87049dee4d9eff5e}{Next\-Beat} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual bool \hyperlink{a00003_aafde773d0e8074306eed850c91c7f207}{Prev\-Beat} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual void \hyperlink{a00003_af8a485b986aacf649f41c81e4d6eeed9}{Apply\-Forward} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual void \hyperlink{a00003_a969de0c473c2ca7d2f3b9ea8748fffb7}{Apply\-Backward} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual \hyperlink{a00196_a6feaf30c8830fe6fcc0982cb7e9621ab}{Animate\-Dir} \hyperlink{a00003_ada84c0464a78c98eb9b24e64f1ea2e36}{Direction} () const =0
+\item 
+virtual float \hyperlink{a00003_a23b1c7a078df01cb31adaad24d29c27d}{Real\-Direction} () const =0
+\item 
+virtual float \hyperlink{a00003_af131cd1634440010576620cd6ad8a2c1}{Motion\-Direction} () const 
+\item 
+virtual void \hyperlink{a00003_ace20ca13c14bf94e13404df0ef825da8}{Clip\-Beats} (unsigned beats)
+\item 
+virtual unsigned \hyperlink{a00003_af182790906aec055af4e35f3b962f89a}{Num\-Beats} () const 
+\item 
+virtual \hyperlink{a00196_a56c9857b8353188d8e6823c408ba71ad}{Marching\-Style} \hyperlink{a00003_a245f81fa1ee5a43bbaaa364107b13c1e}{Step\-Style} ()
+\item 
+virtual \hyperlink{a00031}{C\-C\-\_\-\-Draw\-Command} \hyperlink{a00003_a34d8e8a89c11f7ef6d1e2346db77d462}{Gen\-C\-C\-\_\-\-Draw\-Command} (const \hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt, const \hyperlink{a00029}{C\-C\-\_\-coord} \&offset) const 
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+unsigned \hyperlink{a00003_a6bc20b1356872227a55ba176ec85fa1f}{m\-Num\-Beats}
+\item 
+unsigned \hyperlink{a00003_af6ac5dcbcef33378b6729eec09f9dbc4}{m\-Beat}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00003_aebfee0fad0d8e0fb34b5aa51b4798acc}{\index{Animate\-Command@{Animate\-Command}!Animate\-Command@{Animate\-Command}}
+\index{Animate\-Command@{Animate\-Command}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Animate\-Command}]{\setlength{\rightskip}{0pt plus 5cm}Animate\-Command\-::\-Animate\-Command (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{beats}
+\end{DoxyParamCaption}
+)}}\label{a00003_aebfee0fad0d8e0fb34b5aa51b4798acc}
+\hypertarget{a00003_ac5e46568837cf7ba139dd67df6a2f431}{\index{Animate\-Command@{Animate\-Command}!$\sim$\-Animate\-Command@{$\sim$\-Animate\-Command}}
+\index{$\sim$\-Animate\-Command@{$\sim$\-Animate\-Command}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{$\sim$\-Animate\-Command}]{\setlength{\rightskip}{0pt plus 5cm}Animate\-Command\-::$\sim$\-Animate\-Command (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_ac5e46568837cf7ba139dd67df6a2f431}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00003_a969de0c473c2ca7d2f3b9ea8748fffb7}{\index{Animate\-Command@{Animate\-Command}!Apply\-Backward@{Apply\-Backward}}
+\index{Apply\-Backward@{Apply\-Backward}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Apply\-Backward}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Command\-::\-Apply\-Backward (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_a969de0c473c2ca7d2f3b9ea8748fffb7}
+
+
+Reimplemented in \hyperlink{a00006_af8f47135c6190dc9363a4d7705ad443a}{Animate\-Command\-Rotate}, and \hyperlink{a00004_a04bbf87bd1472184d5129d387b669db5}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_af8a485b986aacf649f41c81e4d6eeed9}{\index{Animate\-Command@{Animate\-Command}!Apply\-Forward@{Apply\-Forward}}
+\index{Apply\-Forward@{Apply\-Forward}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Apply\-Forward}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Command\-::\-Apply\-Forward (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_af8a485b986aacf649f41c81e4d6eeed9}
+
+
+Reimplemented in \hyperlink{a00006_a0ef1ae2cc3ca46a734b231bb38347f79}{Animate\-Command\-Rotate}, and \hyperlink{a00004_aca53b3ec977640ccce4765a5001d211b}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_ab69372e28870271550dd8c8a54da02ee}{\index{Animate\-Command@{Animate\-Command}!Begin@{Begin}}
+\index{Begin@{Begin}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Begin}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Command\-::\-Begin (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_ab69372e28870271550dd8c8a54da02ee}
+\hypertarget{a00003_ace20ca13c14bf94e13404df0ef825da8}{\index{Animate\-Command@{Animate\-Command}!Clip\-Beats@{Clip\-Beats}}
+\index{Clip\-Beats@{Clip\-Beats}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Clip\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Command\-::\-Clip\-Beats (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{beats}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_ace20ca13c14bf94e13404df0ef825da8}
+
+
+Reimplemented in \hyperlink{a00006_a865113f57c577626241256ab35981834}{Animate\-Command\-Rotate}, and \hyperlink{a00004_aecf325aaf810ee9fe14e39f86812b504}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_ada84c0464a78c98eb9b24e64f1ea2e36}{\index{Animate\-Command@{Animate\-Command}!Direction@{Direction}}
+\index{Direction@{Direction}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Direction}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf Animate\-Dir} Animate\-Command\-::\-Direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}}\label{a00003_ada84c0464a78c98eb9b24e64f1ea2e36}
+
+
+Implemented in \hyperlink{a00006_ad534024d6bd630dfc0cde5e07649094a}{Animate\-Command\-Rotate}, and \hyperlink{a00005_a0f746d2dce20a8159f4534e555079501}{Animate\-Command\-M\-T}.
+
+\hypertarget{a00003_ae5dfaac6e8cf870a688a8e3161672b4e}{\index{Animate\-Command@{Animate\-Command}!End@{End}}
+\index{End@{End}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{End}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Command\-::\-End (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_ae5dfaac6e8cf870a688a8e3161672b4e}
+\hypertarget{a00003_a34d8e8a89c11f7ef6d1e2346db77d462}{\index{Animate\-Command@{Animate\-Command}!Gen\-C\-C\-\_\-\-Draw\-Command@{Gen\-C\-C\-\_\-\-Draw\-Command}}
+\index{Gen\-C\-C\-\_\-\-Draw\-Command@{Gen\-C\-C\-\_\-\-Draw\-Command}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Gen\-C\-C\-\_\-\-Draw\-Command}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf C\-C\-\_\-\-Draw\-Command} Animate\-Command\-::\-Gen\-C\-C\-\_\-\-Draw\-Command (
+\begin{DoxyParamCaption}
+\item[{const {\bf Animate\-Point} \&}]{pt, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{offset}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{a00003_a34d8e8a89c11f7ef6d1e2346db77d462}
+
+
+Reimplemented in \hyperlink{a00006_a999e00a33481237a53af76481913d83f}{Animate\-Command\-Rotate}, and \hyperlink{a00004_aaa097d316852a0a16ec6d71942ecef4b}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_af131cd1634440010576620cd6ad8a2c1}{\index{Animate\-Command@{Animate\-Command}!Motion\-Direction@{Motion\-Direction}}
+\index{Motion\-Direction@{Motion\-Direction}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Motion\-Direction}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Command\-::\-Motion\-Direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_af131cd1634440010576620cd6ad8a2c1}
+
+
+Reimplemented in \hyperlink{a00004_a76e50136a8930c4a0020371c45f447ab}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_a80bcd30c221c961d87049dee4d9eff5e}{\index{Animate\-Command@{Animate\-Command}!Next\-Beat@{Next\-Beat}}
+\index{Next\-Beat@{Next\-Beat}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Next\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Command\-::\-Next\-Beat (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_a80bcd30c221c961d87049dee4d9eff5e}
+
+
+Reimplemented in \hyperlink{a00006_a5d1ee680f19374391a6fbccdcd6b6bb7}{Animate\-Command\-Rotate}, and \hyperlink{a00004_aae66871bc335cfc08f1d843b0c070bd8}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_af182790906aec055af4e35f3b962f89a}{\index{Animate\-Command@{Animate\-Command}!Num\-Beats@{Num\-Beats}}
+\index{Num\-Beats@{Num\-Beats}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Num\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}virtual unsigned Animate\-Command\-::\-Num\-Beats (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{a00003_af182790906aec055af4e35f3b962f89a}
+\hypertarget{a00003_aafde773d0e8074306eed850c91c7f207}{\index{Animate\-Command@{Animate\-Command}!Prev\-Beat@{Prev\-Beat}}
+\index{Prev\-Beat@{Prev\-Beat}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Prev\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Command\-::\-Prev\-Beat (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00003_aafde773d0e8074306eed850c91c7f207}
+
+
+Reimplemented in \hyperlink{a00006_a179b843d1c400020f0fbb106a09c38e5}{Animate\-Command\-Rotate}, and \hyperlink{a00004_a0fc987b85dc91d4dc45663584d59f3b6}{Animate\-Command\-Move}.
+
+\hypertarget{a00003_a23b1c7a078df01cb31adaad24d29c27d}{\index{Animate\-Command@{Animate\-Command}!Real\-Direction@{Real\-Direction}}
+\index{Real\-Direction@{Real\-Direction}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Real\-Direction}]{\setlength{\rightskip}{0pt plus 5cm}virtual float Animate\-Command\-::\-Real\-Direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [pure virtual]}}}\label{a00003_a23b1c7a078df01cb31adaad24d29c27d}
+
+
+Implemented in \hyperlink{a00006_afd366a7d56e16f296a80faab4ffe4972}{Animate\-Command\-Rotate}, and \hyperlink{a00005_a09339d867d2968b5db48faf0f9cc4891}{Animate\-Command\-M\-T}.
+
+\hypertarget{a00003_a245f81fa1ee5a43bbaaa364107b13c1e}{\index{Animate\-Command@{Animate\-Command}!Step\-Style@{Step\-Style}}
+\index{Step\-Style@{Step\-Style}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{Step\-Style}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf Marching\-Style} Animate\-Command\-::\-Step\-Style (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{a00003_a245f81fa1ee5a43bbaaa364107b13c1e}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00003_af6ac5dcbcef33378b6729eec09f9dbc4}{\index{Animate\-Command@{Animate\-Command}!m\-Beat@{m\-Beat}}
+\index{m\-Beat@{m\-Beat}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{m\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animate\-Command\-::m\-Beat\hspace{0.3cm}{\ttfamily [protected]}}}\label{a00003_af6ac5dcbcef33378b6729eec09f9dbc4}
+\hypertarget{a00003_a6bc20b1356872227a55ba176ec85fa1f}{\index{Animate\-Command@{Animate\-Command}!m\-Num\-Beats@{m\-Num\-Beats}}
+\index{m\-Num\-Beats@{m\-Num\-Beats}!AnimateCommand@{Animate\-Command}}
+\subsubsection[{m\-Num\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animate\-Command\-::m\-Num\-Beats\hspace{0.3cm}{\ttfamily [protected]}}}\label{a00003_a6bc20b1356872227a55ba176ec85fa1f}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00198}{animatecommand.\-h}\item 
+src/core/\hyperlink{a00197}{animatecommand.\-cpp}\end{DoxyCompactItemize}

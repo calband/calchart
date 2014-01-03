@@ -38,20 +38,60 @@ class CC_continuity;
 class CC_point;
 typedef std::vector<CC_textline> CC_textline_list;
 
-// CalChart Sheet
-// The CalChart sheet object is a collection of CC_point locations, the number of
-// beats and the different marcher's continuity.
 
+/**
+ * A stunt sheet in a CalChart show.
+ * A stunt sheet is essentially a collection of points (CC_point) and
+ * instructions for marchers that are transitioning to the next
+ * stunt sheet (continuities).
+ */
 class CC_sheet
 {
 public:
+	/** 
+	 * Makes a sheet that is associated with the provided show. The number
+	 * of points on the sheet depends on the number of points in the show.
+	 * @param shw The CalChart show with which this stunt sheet is associated.
+	 */
 	CC_sheet(CC_show *shw);
+
+	/**
+	 * Loads a stunt sheet from a the data extracted from a CalChart file
+	 * (according to the file format associated with CalChart versions 3.3
+	 * and earlier).
+	 * @param shw The CalChart show with which this stunt sheet is associated.
+	 * @param numPoints The number of points located on the sheet. This is required information
+	 * to properly load the stunt sheet from the file data.
+	 */
 	CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
+
+	/**
+	 * Loads a stunt sheet from a the data extracted from a CalChart file
+	 * (according to the file format associated with CalChart versions 3.4
+	 * and beyond).
+	 * @param shw The CalChart show with which this stunt sheet is associated.
+	 * @param numPoints The number of points located on the sheet. This is required information
+	 * to properly load the stunt sheet from the file data.
+	 */
 	CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream, Current_version_and_later);
+
+	/**
+	 * Makes a stunt sheet that is associated with the given show and has the given name.
+	 * The number of points on the sheet depends on the number of points in the show.
+	 * @param shw The CalChart show with which this stunt sheet is associated.
+	 * @param newname The name of the stunt sheet.
+	 */
 	CC_sheet(CC_show *shw, const std::string& newname);
+
+	/**
+	 * Performs cleanup. Presently unused.
+	 */
 	~CC_sheet();
 
 private:
+	/** 
+	 *  
+	 */
 	std::vector<uint8_t> SerializeAllPoints() const;
 	std::vector<uint8_t> SerializeContinuityData() const;
 	std::vector<uint8_t> SerializeSheetData() const;
@@ -105,8 +145,20 @@ private:
 	ContContainer mAnimationContinuity;
 
 	CC_textline_list mPrintableContinuity;
+
+	/**
+	 * The duration of this stunt sheet, in beats.
+	 */
 	unsigned short beats;
+
+	/**
+	 * A list of all points associated with this stunt sheet.
+	 */
 	std::vector<CC_point> pts;
+
+	/**
+	 * The name of the stunt sheet.
+	 */
 	std::string mName;
 	std::string number;
 

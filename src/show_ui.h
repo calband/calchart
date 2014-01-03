@@ -74,6 +74,12 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
+/**
+ * A frame that appears when the "Set Up Marchers.." option is selected from
+ * the 'Edit' menu of CalChart. This frame gives the user control of properties
+ * about the show, such as the labels for the dots, and the number of dots in
+ * the show. This is the first page of the setup wizard.
+ */
 class ShowInfoReq : public wxDialog
 {
 	DECLARE_CLASS( ShowInfoReq )
@@ -117,6 +123,12 @@ private:
 	void OnReset(wxCommandEvent&);
 };
 
+/**
+ * A version of the Show Info dialog (which appears when the user selects the
+ * "Set Up Marchers" option) that can be inserted into the show creation wizard.
+ * It builds its layout using the same function as ShowInfoReq:
+ * LayoutShowInfo(...). 
+ */
 class ShowInfoReqWizard : public wxWizardPageSimple
 {
 	DECLARE_CLASS( ShowInfoReqWizard )

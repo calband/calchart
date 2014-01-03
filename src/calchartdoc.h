@@ -39,35 +39,44 @@ class CC_show;
 class CC_lasso;
 class Animation;
 
-// The CalChartDoc_modified class is used for indicating to views if the doc has been modified
-// some views behave differently if the show has been modified
+/**
+ * A message sent to CalChart views to inform them that the doc has been modified.
+ */
 class CalChartDoc_modified : public wxObject
 {
 DECLARE_DYNAMIC_CLASS(CalChartDoc_modified)
 };
 
-// The CalChartDoc_modified class is used for indicating to views to save any text
+/**
+ * A message sent to CalChart views in which the user edits text to make sure that
+ * any edited text is saved.
+ */
 class CalChartDoc_FlushAllViews : public wxObject
 {
 DECLARE_DYNAMIC_CLASS(CalChartDoc_FlushAllViews)
 };
 
-// The CalChartDoc_FinishedLoading class is used for indicating to views that a new file has been loaded
+/**
+ * A message sent to CalChart views to inform them that a new file has been loaded.
+ */
 class CalChartDoc_FinishedLoading : public wxObject
 {
 	DECLARE_DYNAMIC_CLASS(CalChartDoc_FinishedLoading)
 };
 
-// The CalChartDoc_setup class is used for indicating to views to set up a new show
+/**
+ * A message sent to CalChart views to inform them that the user would like to set
+ * up a new show.
+ */
 class CalChartDoc_setup : public wxObject
 {
 DECLARE_DYNAMIC_CLASS(CalChartDoc_setup)
 };
 
 
-
-// CalChart Document.
-// This holds the CC_show, the core part of CalChart.
+/**
+ * A CalChart document. It contains all data about a show, and can be saved/opened/edited.
+ */
 class CalChartDoc : public wxDocument
 {
 	DECLARE_DYNAMIC_CLASS(CalChartDoc)
@@ -76,7 +85,14 @@ public:
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
+	/**
+	 * Creates a new CalChart document. 
+	 */
 	CalChartDoc();
+
+	/** 
+	 * Cleanup. 
+	 */
 	virtual ~CalChartDoc();
 
 	// Override the wxDocument functions:
@@ -108,6 +124,7 @@ private:
 	T& SaveObjectInternal(T& stream);
 
 public:
+
 	wxString ImportContinuity(const wxString& file);
 
 	void FlushAllTextWindows();

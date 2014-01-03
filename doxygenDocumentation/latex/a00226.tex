@@ -1,0 +1,115 @@
+\hypertarget{a00226}{\section{src/field\-\_\-frame.cpp File Reference}
+\label{a00226}\index{src/field\-\_\-frame.\-cpp@{src/field\-\_\-frame.\-cpp}}
+}
+{\ttfamily \#include \char`\"{}field\-\_\-frame.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}platconf.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-coord.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}field\-\_\-canvas.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-show.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}top\-\_\-frame.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}calchartapp.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}print\-\_\-ps\-\_\-dialog.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-preferences\-\_\-ui.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}modes.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}confgr.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ccvers.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cont\-\_\-ui.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}show\-\_\-ui.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}animation\-\_\-frame.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}toolbar.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}ui\-\_\-enums.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}field\-\_\-view.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}draw.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-sheet.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-point.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$wx/help.\-h$>$}\\*
+{\ttfamily \#include $<$wx/html/helpctrl.\-h$>$}\\*
+{\ttfamily \#include $<$wx/cmdproc.\-h$>$}\\*
+{\ttfamily \#include $<$wx/tglbtn.\-h$>$}\\*
+{\ttfamily \#include $<$boost/bind.\-hpp$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00106}{Grid\-Value}
+\item 
+class \hyperlink{a00113}{My\-Printout}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} \hyperlink{a00226_afd4efb474e1d83eb01eedd1fcc6dbf0a}{S\-N\-A\-P\-G\-R\-I\-D} (\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} a, \hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} n, \hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} s)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const wx\-String \hyperlink{a00226_a78f09467cace2629c2a2374a7f4bdc07}{gridtext} \mbox{[}$\,$\mbox{]}
+\item 
+const int \hyperlink{a00226_a78b0dfa6de03f88325ba95ae25f33320}{zoom\-\_\-amounts} \mbox{[}$\,$\mbox{]}
+\item 
+static const wx\-Char $\ast$ \hyperlink{a00226_a4841d82d107bf3e5331296d3527b192d}{file\-\_\-wild} = \hyperlink{a00237_a679ca74e08219209b5fd011946a83b62}{F\-I\-L\-E\-\_\-\-W\-I\-L\-D\-C\-A\-R\-D\-S}
+\item 
+\hyperlink{a00106}{Grid\-Value} \hyperlink{a00226_a75782416c96d40b05fd547805f028dbd}{gridvalue} \mbox{[}$\,$\mbox{]}
+\item 
+wx\-Print\-Dialog\-Data $\ast$ \hyperlink{a00226_a896ed5b078417657f1ceef1e87abe705}{g\-Print\-Dialog\-Data}
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{a00226_afd4efb474e1d83eb01eedd1fcc6dbf0a}{\index{field\-\_\-frame.\-cpp@{field\-\_\-frame.\-cpp}!S\-N\-A\-P\-G\-R\-I\-D@{S\-N\-A\-P\-G\-R\-I\-D}}
+\index{S\-N\-A\-P\-G\-R\-I\-D@{S\-N\-A\-P\-G\-R\-I\-D}!field_frame.cpp@{field\-\_\-frame.\-cpp}}
+\subsubsection[{S\-N\-A\-P\-G\-R\-I\-D}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf Coord} S\-N\-A\-P\-G\-R\-I\-D (
+\begin{DoxyParamCaption}
+\item[{{\bf Coord}}]{a, }
+\item[{{\bf Coord}}]{n, }
+\item[{{\bf Coord}}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{a00226_afd4efb474e1d83eb01eedd1fcc6dbf0a}
+
+
+\subsection{Variable Documentation}
+\hypertarget{a00226_a4841d82d107bf3e5331296d3527b192d}{\index{field\-\_\-frame.\-cpp@{field\-\_\-frame.\-cpp}!file\-\_\-wild@{file\-\_\-wild}}
+\index{file\-\_\-wild@{file\-\_\-wild}!field_frame.cpp@{field\-\_\-frame.\-cpp}}
+\subsubsection[{file\-\_\-wild}]{\setlength{\rightskip}{0pt plus 5cm}const wx\-Char$\ast$ file\-\_\-wild = {\bf F\-I\-L\-E\-\_\-\-W\-I\-L\-D\-C\-A\-R\-D\-S}\hspace{0.3cm}{\ttfamily [static]}}}\label{a00226_a4841d82d107bf3e5331296d3527b192d}
+\hypertarget{a00226_a896ed5b078417657f1ceef1e87abe705}{\index{field\-\_\-frame.\-cpp@{field\-\_\-frame.\-cpp}!g\-Print\-Dialog\-Data@{g\-Print\-Dialog\-Data}}
+\index{g\-Print\-Dialog\-Data@{g\-Print\-Dialog\-Data}!field_frame.cpp@{field\-\_\-frame.\-cpp}}
+\subsubsection[{g\-Print\-Dialog\-Data}]{\setlength{\rightskip}{0pt plus 5cm}wx\-Print\-Dialog\-Data$\ast$ g\-Print\-Dialog\-Data}}\label{a00226_a896ed5b078417657f1ceef1e87abe705}
+\hypertarget{a00226_a78f09467cace2629c2a2374a7f4bdc07}{\index{field\-\_\-frame.\-cpp@{field\-\_\-frame.\-cpp}!gridtext@{gridtext}}
+\index{gridtext@{gridtext}!field_frame.cpp@{field\-\_\-frame.\-cpp}}
+\subsubsection[{gridtext}]{\setlength{\rightskip}{0pt plus 5cm}const wx\-String gridtext\mbox{[}$\,$\mbox{]}}}\label{a00226_a78f09467cace2629c2a2374a7f4bdc07}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+=
+\{
+    wxT(\textcolor{stringliteral}{"None"}),
+    wxT(\textcolor{stringliteral}{"1"}),
+    wxT(\textcolor{stringliteral}{"2"}),
+    wxT(\textcolor{stringliteral}{"4"}),
+    wxT(\textcolor{stringliteral}{"Mil"}),
+    wxT(\textcolor{stringliteral}{"2-Mil"}),
+\}
+\end{DoxyCode}
+\hypertarget{a00226_a75782416c96d40b05fd547805f028dbd}{\index{field\-\_\-frame.\-cpp@{field\-\_\-frame.\-cpp}!gridvalue@{gridvalue}}
+\index{gridvalue@{gridvalue}!field_frame.cpp@{field\-\_\-frame.\-cpp}}
+\subsubsection[{gridvalue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Grid\-Value} gridvalue\mbox{[}$\,$\mbox{]}}}\label{a00226_a75782416c96d40b05fd547805f028dbd}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+=
+\{
+    \{1,0\},
+    \{\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(1),0\},
+    \{\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(2),0\},
+    \{\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(4),0\},
+    \{\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(4),\textcolor{keyword}{static\_cast<}\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord}\textcolor{keyword}{>}(\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(4)/3)\},
+    \{\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(8),\textcolor{keyword}{static\_cast<}\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord}\textcolor{keyword}{>}(\hyperlink{a00204_a1bc12e8db97070dae0b6256347c8c2d6}{Int2Coord}(8)/3)\}
+\}
+\end{DoxyCode}
+\hypertarget{a00226_a78b0dfa6de03f88325ba95ae25f33320}{\index{field\-\_\-frame.\-cpp@{field\-\_\-frame.\-cpp}!zoom\-\_\-amounts@{zoom\-\_\-amounts}}
+\index{zoom\-\_\-amounts@{zoom\-\_\-amounts}!field_frame.cpp@{field\-\_\-frame.\-cpp}}
+\subsubsection[{zoom\-\_\-amounts}]{\setlength{\rightskip}{0pt plus 5cm}const int zoom\-\_\-amounts\mbox{[}$\,$\mbox{]}}}\label{a00226_a78b0dfa6de03f88325ba95ae25f33320}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+=
+\{
+    500, 200, 150, 100, 75, 50, 25, 10,
+\}
+\end{DoxyCode}

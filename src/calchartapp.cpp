@@ -52,7 +52,6 @@ void CC_coord_UnitTests();
 IMPLEMENT_APP(CalChartApp)
 
 
-// Create windows and initialize app
 bool CalChartApp::OnInit()
 {
     //// Create a document manager

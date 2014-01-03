@@ -1,0 +1,397 @@
+\hypertarget{a00045}{\section{C\-C\-\_\-sheet Class Reference}
+\label{a00045}\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}}
+}
+
+
+\hyperlink{a00045}{C\-C\-\_\-sheet} is a class representing a stunt sheet in a Cal\-Chart show.  
+
+
+
+
+{\ttfamily \#include $<$cc\-\_\-sheet.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00045_ab0c9904f0e686fbe57c6ca6bdba09bab}{C\-C\-\_\-sheet} (\hyperlink{a00046}{C\-C\-\_\-show} $\ast$shw)
+\item 
+\hyperlink{a00045_a30372414cfea18692e4dab3953f6a72c}{C\-C\-\_\-sheet} (\hyperlink{a00046}{C\-C\-\_\-show} $\ast$shw, size\-\_\-t num\-Points, std\-::istream \&stream, \hyperlink{a00153}{Version\-\_\-3\-\_\-3\-\_\-and\-\_\-earlier})
+\item 
+\hyperlink{a00045_acbccbd9050a2b2a1b4a4dc391669647f}{C\-C\-\_\-sheet} (\hyperlink{a00046}{C\-C\-\_\-show} $\ast$shw, size\-\_\-t num\-Points, std\-::istream \&stream, \hyperlink{a00097}{Current\-\_\-version\-\_\-and\-\_\-later})
+\item 
+\hyperlink{a00045_afa1de8d4ee5bbd666578eaaf6944578f}{C\-C\-\_\-sheet} (\hyperlink{a00046}{C\-C\-\_\-show} $\ast$shw, const std\-::string \&newname)
+\item 
+\hyperlink{a00045_ac6f9cf59f8311ccac9c2335c16711e2a}{$\sim$\-C\-C\-\_\-sheet} ()
+\item 
+std\-::vector$<$ uint8\-\_\-t $>$ \hyperlink{a00045_afc1de05de1b53f5f59ad47c310ed334f}{Serialize\-Sheet} () const 
+\item 
+const \hyperlink{a00027}{C\-C\-\_\-continuity} \& \hyperlink{a00045_a85deb4da787ce4624eae061d227efc50}{Get\-Continuity\-By\-Symbol} (\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} i) const 
+\item 
+std\-::set$<$ unsigned $>$ \hyperlink{a00045_a35396e54a607e36b4f6a1f48cf34f94a}{Select\-Points\-By\-Symbol} (\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} i) const 
+\item 
+bool \hyperlink{a00045_aa85fcbaf88cd05db8fd2ece3aa49b2a8}{Continuity\-In\-Use} (\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} idx) const 
+\item 
+void \hyperlink{a00045_ac50742b3a8b670e324a510d936b62a85}{Set\-Num\-Points} (unsigned num, unsigned columns, const \hyperlink{a00029}{C\-C\-\_\-coord} \&new\-\_\-march\-\_\-position)
+\item 
+void \hyperlink{a00045_a72d0ca96ad22fe792ca2469195a27367}{Set\-Continuity\-Text} (\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} sym, const std\-::string \&text)
+\item 
+int \hyperlink{a00045_a559857fc852c580f272ce53295b59023}{Find\-Point} (\hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} x, \hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} y, \hyperlink{a00216_acd9dae57b712df0e2d3588c0c4798c11}{Coord} search\-Bound, unsigned ref=0) const 
+\item 
+void \hyperlink{a00045_a13b5c778494626306264b05ab0e26648}{Relabel\-Sheet} (const std\-::vector$<$ size\-\_\-t $>$ \&table)
+\item 
+std\-::string \hyperlink{a00045_a8fd7bccd609d86f0df42f12055c32178}{Get\-Name} () const 
+\item 
+void \hyperlink{a00045_a4a6f9925779f8bf529d448a31c13d21c}{Set\-Name} (const std\-::string \&newname)
+\item 
+std\-::string \hyperlink{a00045_a8fd164675fb15825e1087abefbd2535d}{Get\-Number} () const 
+\item 
+void \hyperlink{a00045_a3da05d3a78f81a0131d4101302d6b1c7}{Set\-Number} (const std\-::string \&newnumber)
+\item 
+unsigned short \hyperlink{a00045_af804d3260ad50627f4b119ac1e070cec}{Get\-Beats} () const 
+\item 
+void \hyperlink{a00045_a0f6fe0c0cfcf494d7eb7ade61c45e31d}{Set\-Beats} (unsigned short b)
+\item 
+bool \hyperlink{a00045_a44cce522fb28d50d9950b55e43d977a0}{Is\-In\-Animation} () const 
+\item 
+const \hyperlink{a00034}{C\-C\-\_\-point} \& \hyperlink{a00045_a435211f11fa9b77df4b2c2a3a08d1c8f}{Get\-Point} (unsigned i) const 
+\item 
+\hyperlink{a00034}{C\-C\-\_\-point} \& \hyperlink{a00045_a34496eced95d937a56be551b12c7cc8c}{Get\-Point} (unsigned i)
+\item 
+std\-::vector$<$ \hyperlink{a00034}{C\-C\-\_\-point} $>$ \hyperlink{a00045_a3b9e00f0f832d38a87348f4034462f6d}{Get\-Points} () const 
+\item 
+void \hyperlink{a00045_ae553f706e9d0f5e4a21465b3d628e086}{Set\-Points} (const std\-::vector$<$ \hyperlink{a00034}{C\-C\-\_\-point} $>$ \&points)
+\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \hyperlink{a00045_acee5043c5298517ae6af21fa6d4bf418}{Get\-Position} (unsigned i, unsigned ref=0) const 
+\item 
+void \hyperlink{a00045_aae68e9352eaff311790b59470461886b}{Set\-All\-Positions} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&val, unsigned i)
+\item 
+void \hyperlink{a00045_a37d4e6d9c5a8865e02292ceb40ae0a1f}{Set\-Position} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&val, unsigned i, unsigned ref=0)
+\item 
+bool \hyperlink{a00045_a81ee7a43bdc2e9e4f119413d8c1cb575}{Import\-Printable\-Continuity} (const std\-::vector$<$ std\-::string $>$ \&lines)
+\item 
+\hyperlink{a00212_ae492d9b165445899a5c5a3128e58f0cf}{C\-C\-\_\-textline\-\_\-list} \hyperlink{a00045_aadb6eccd1efa0023c1d4504e38984682}{Get\-Printable\-Continuity} () const 
+\end{DoxyCompactItemize}
+\subsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef std\-::vector\\*
+$<$ \hyperlink{a00027}{C\-C\-\_\-continuity} $>$ \hyperlink{a00045_a057981286a04d0a0bf0b7ecbdd5e1bcd}{Cont\-Container}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\-::vector$<$ uint8\-\_\-t $>$ \hyperlink{a00045_a6167e427cbf4b3ddd6744238167802ae}{Serialize\-All\-Points} () const 
+\item 
+std\-::vector$<$ uint8\-\_\-t $>$ \hyperlink{a00045_aadf23b9bf05af20065bbbdeb21c58f1a}{Serialize\-Continuity\-Data} () const 
+\item 
+std\-::vector$<$ uint8\-\_\-t $>$ \hyperlink{a00045_a763578b37626d3f15494539a6e2c6739}{Serialize\-Sheet\-Data} () const 
+\item 
+\hyperlink{a00027}{C\-C\-\_\-continuity} \& \hyperlink{a00045_ac2b623ff7a5cd2c1f17c24979c56b41a}{Get\-Continuity\-By\-Symbol} (\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} i)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00045_a057981286a04d0a0bf0b7ecbdd5e1bcd}{Cont\-Container} \hyperlink{a00045_a48691d0c3f157765c1b6448e572f3e0e}{m\-Animation\-Continuity}
+\item 
+\hyperlink{a00212_ae492d9b165445899a5c5a3128e58f0cf}{C\-C\-\_\-textline\-\_\-list} \hyperlink{a00045_aa55d5937b4aa3bf410c598d0b73e937c}{m\-Printable\-Continuity}
+\item 
+unsigned short \hyperlink{a00045_ae0a4f2825ed321a631bd179ee97ce990}{beats}
+\item 
+std\-::vector$<$ \hyperlink{a00034}{C\-C\-\_\-point} $>$ \hyperlink{a00045_a518af96eb5163fccb757e5f1d23fef17}{pts}
+\item 
+std\-::string \hyperlink{a00045_a8eee8546bf15f01705734cddaf7e1866}{m\-Name}
+\item 
+std\-::string \hyperlink{a00045_a075899cc4758e99aa40c51005c2b6458}{number}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{a00045}{C\-C\-\_\-sheet} is a class representing a stunt sheet in a Cal\-Chart show. 
+
+It 
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00045_a057981286a04d0a0bf0b7ecbdd5e1bcd}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Cont\-Container@{Cont\-Container}}
+\index{Cont\-Container@{Cont\-Container}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Cont\-Container}]{\setlength{\rightskip}{0pt plus 5cm}typedef std\-::vector$<${\bf C\-C\-\_\-continuity}$>$ {\bf C\-C\-\_\-sheet\-::\-Cont\-Container}\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a057981286a04d0a0bf0b7ecbdd5e1bcd}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00045_ab0c9904f0e686fbe57c6ca6bdba09bab}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!C\-C\-\_\-sheet@{C\-C\-\_\-sheet}}
+\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{C\-C\-\_\-sheet}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-sheet\-::\-C\-C\-\_\-sheet (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-show} $\ast$}]{shw}
+\end{DoxyParamCaption}
+)}}\label{a00045_ab0c9904f0e686fbe57c6ca6bdba09bab}
+\hypertarget{a00045_a30372414cfea18692e4dab3953f6a72c}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!C\-C\-\_\-sheet@{C\-C\-\_\-sheet}}
+\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{C\-C\-\_\-sheet}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-sheet\-::\-C\-C\-\_\-sheet (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-show} $\ast$}]{shw, }
+\item[{size\-\_\-t}]{num\-Points, }
+\item[{std\-::istream \&}]{stream, }
+\item[{{\bf Version\-\_\-3\-\_\-3\-\_\-and\-\_\-earlier}}]{}
+\end{DoxyParamCaption}
+)}}\label{a00045_a30372414cfea18692e4dab3953f6a72c}
+\hypertarget{a00045_acbccbd9050a2b2a1b4a4dc391669647f}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!C\-C\-\_\-sheet@{C\-C\-\_\-sheet}}
+\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{C\-C\-\_\-sheet}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-sheet\-::\-C\-C\-\_\-sheet (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-show} $\ast$}]{shw, }
+\item[{size\-\_\-t}]{num\-Points, }
+\item[{std\-::istream \&}]{stream, }
+\item[{{\bf Current\-\_\-version\-\_\-and\-\_\-later}}]{}
+\end{DoxyParamCaption}
+)}}\label{a00045_acbccbd9050a2b2a1b4a4dc391669647f}
+\hypertarget{a00045_afa1de8d4ee5bbd666578eaaf6944578f}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!C\-C\-\_\-sheet@{C\-C\-\_\-sheet}}
+\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{C\-C\-\_\-sheet}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-sheet\-::\-C\-C\-\_\-sheet (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-show} $\ast$}]{shw, }
+\item[{const std\-::string \&}]{newname}
+\end{DoxyParamCaption}
+)}}\label{a00045_afa1de8d4ee5bbd666578eaaf6944578f}
+\hypertarget{a00045_ac6f9cf59f8311ccac9c2335c16711e2a}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!$\sim$\-C\-C\-\_\-sheet@{$\sim$\-C\-C\-\_\-sheet}}
+\index{$\sim$\-C\-C\-\_\-sheet@{$\sim$\-C\-C\-\_\-sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{$\sim$\-C\-C\-\_\-sheet}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-sheet\-::$\sim$\-C\-C\-\_\-sheet (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00045_ac6f9cf59f8311ccac9c2335c16711e2a}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00045_aa85fcbaf88cd05db8fd2ece3aa49b2a8}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Continuity\-In\-Use@{Continuity\-In\-Use}}
+\index{Continuity\-In\-Use@{Continuity\-In\-Use}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Continuity\-In\-Use}]{\setlength{\rightskip}{0pt plus 5cm}bool C\-C\-\_\-sheet\-::\-Continuity\-In\-Use (
+\begin{DoxyParamCaption}
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{idx}
+\end{DoxyParamCaption}
+) const}}\label{a00045_aa85fcbaf88cd05db8fd2ece3aa49b2a8}
+\hypertarget{a00045_a559857fc852c580f272ce53295b59023}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Find\-Point@{Find\-Point}}
+\index{Find\-Point@{Find\-Point}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Find\-Point}]{\setlength{\rightskip}{0pt plus 5cm}int C\-C\-\_\-sheet\-::\-Find\-Point (
+\begin{DoxyParamCaption}
+\item[{{\bf Coord}}]{x, }
+\item[{{\bf Coord}}]{y, }
+\item[{{\bf Coord}}]{search\-Bound, }
+\item[{unsigned}]{ref = {\ttfamily 0}}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a559857fc852c580f272ce53295b59023}
+\hypertarget{a00045_af804d3260ad50627f4b119ac1e070cec}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Beats@{Get\-Beats}}
+\index{Get\-Beats@{Get\-Beats}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short C\-C\-\_\-sheet\-::\-Get\-Beats (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00045_af804d3260ad50627f4b119ac1e070cec}
+\hypertarget{a00045_a85deb4da787ce4624eae061d227efc50}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Continuity\-By\-Symbol@{Get\-Continuity\-By\-Symbol}}
+\index{Get\-Continuity\-By\-Symbol@{Get\-Continuity\-By\-Symbol}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Continuity\-By\-Symbol}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf C\-C\-\_\-continuity} \& C\-C\-\_\-sheet\-::\-Get\-Continuity\-By\-Symbol (
+\begin{DoxyParamCaption}
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{i}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a85deb4da787ce4624eae061d227efc50}
+\hypertarget{a00045_ac2b623ff7a5cd2c1f17c24979c56b41a}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Continuity\-By\-Symbol@{Get\-Continuity\-By\-Symbol}}
+\index{Get\-Continuity\-By\-Symbol@{Get\-Continuity\-By\-Symbol}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Continuity\-By\-Symbol}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-continuity} \& C\-C\-\_\-sheet\-::\-Get\-Continuity\-By\-Symbol (
+\begin{DoxyParamCaption}
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_ac2b623ff7a5cd2c1f17c24979c56b41a}
+\hypertarget{a00045_a8fd7bccd609d86f0df42f12055c32178}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Name@{Get\-Name}}
+\index{Get\-Name@{Get\-Name}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Name}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string C\-C\-\_\-sheet\-::\-Get\-Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a8fd7bccd609d86f0df42f12055c32178}
+\hypertarget{a00045_a8fd164675fb15825e1087abefbd2535d}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Number@{Get\-Number}}
+\index{Get\-Number@{Get\-Number}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Number}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string C\-C\-\_\-sheet\-::\-Get\-Number (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a8fd164675fb15825e1087abefbd2535d}
+\hypertarget{a00045_a435211f11fa9b77df4b2c2a3a08d1c8f}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Point@{Get\-Point}}
+\index{Get\-Point@{Get\-Point}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Point}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf C\-C\-\_\-point} \& C\-C\-\_\-sheet\-::\-Get\-Point (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a435211f11fa9b77df4b2c2a3a08d1c8f}
+\hypertarget{a00045_a34496eced95d937a56be551b12c7cc8c}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Point@{Get\-Point}}
+\index{Get\-Point@{Get\-Point}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Point}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-point} \& C\-C\-\_\-sheet\-::\-Get\-Point (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+)}}\label{a00045_a34496eced95d937a56be551b12c7cc8c}
+\hypertarget{a00045_a3b9e00f0f832d38a87348f4034462f6d}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Points@{Get\-Points}}
+\index{Get\-Points@{Get\-Points}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Points}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ {\bf C\-C\-\_\-point} $>$ C\-C\-\_\-sheet\-::\-Get\-Points (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a3b9e00f0f832d38a87348f4034462f6d}
+\hypertarget{a00045_acee5043c5298517ae6af21fa6d4bf418}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Position@{Get\-Position}}
+\index{Get\-Position@{Get\-Position}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Position}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord} C\-C\-\_\-sheet\-::\-Get\-Position (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i, }
+\item[{unsigned}]{ref = {\ttfamily 0}}
+\end{DoxyParamCaption}
+) const}}\label{a00045_acee5043c5298517ae6af21fa6d4bf418}
+\hypertarget{a00045_aadb6eccd1efa0023c1d4504e38984682}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Get\-Printable\-Continuity@{Get\-Printable\-Continuity}}
+\index{Get\-Printable\-Continuity@{Get\-Printable\-Continuity}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Get\-Printable\-Continuity}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-textline\-\_\-list} C\-C\-\_\-sheet\-::\-Get\-Printable\-Continuity (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00045_aadb6eccd1efa0023c1d4504e38984682}
+\hypertarget{a00045_a81ee7a43bdc2e9e4f119413d8c1cb575}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Import\-Printable\-Continuity@{Import\-Printable\-Continuity}}
+\index{Import\-Printable\-Continuity@{Import\-Printable\-Continuity}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Import\-Printable\-Continuity}]{\setlength{\rightskip}{0pt plus 5cm}bool C\-C\-\_\-sheet\-::\-Import\-Printable\-Continuity (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ std\-::string $>$ \&}]{lines}
+\end{DoxyParamCaption}
+)}}\label{a00045_a81ee7a43bdc2e9e4f119413d8c1cb575}
+\hypertarget{a00045_a44cce522fb28d50d9950b55e43d977a0}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Is\-In\-Animation@{Is\-In\-Animation}}
+\index{Is\-In\-Animation@{Is\-In\-Animation}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Is\-In\-Animation}]{\setlength{\rightskip}{0pt plus 5cm}bool C\-C\-\_\-sheet\-::\-Is\-In\-Animation (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00045_a44cce522fb28d50d9950b55e43d977a0}
+\hypertarget{a00045_a13b5c778494626306264b05ab0e26648}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Relabel\-Sheet@{Relabel\-Sheet}}
+\index{Relabel\-Sheet@{Relabel\-Sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Relabel\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Relabel\-Sheet (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ size\-\_\-t $>$ \&}]{table}
+\end{DoxyParamCaption}
+)}}\label{a00045_a13b5c778494626306264b05ab0e26648}
+\hypertarget{a00045_a35396e54a607e36b4f6a1f48cf34f94a}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Select\-Points\-By\-Symbol@{Select\-Points\-By\-Symbol}}
+\index{Select\-Points\-By\-Symbol@{Select\-Points\-By\-Symbol}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Select\-Points\-By\-Symbol}]{\setlength{\rightskip}{0pt plus 5cm}std\-::set$<$ unsigned $>$ C\-C\-\_\-sheet\-::\-Select\-Points\-By\-Symbol (
+\begin{DoxyParamCaption}
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{i}
+\end{DoxyParamCaption}
+) const}}\label{a00045_a35396e54a607e36b4f6a1f48cf34f94a}
+\hypertarget{a00045_a6167e427cbf4b3ddd6744238167802ae}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Serialize\-All\-Points@{Serialize\-All\-Points}}
+\index{Serialize\-All\-Points@{Serialize\-All\-Points}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Serialize\-All\-Points}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ uint8\-\_\-t $>$ C\-C\-\_\-sheet\-::\-Serialize\-All\-Points (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a6167e427cbf4b3ddd6744238167802ae}
+\hypertarget{a00045_aadf23b9bf05af20065bbbdeb21c58f1a}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Serialize\-Continuity\-Data@{Serialize\-Continuity\-Data}}
+\index{Serialize\-Continuity\-Data@{Serialize\-Continuity\-Data}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Serialize\-Continuity\-Data}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ uint8\-\_\-t $>$ C\-C\-\_\-sheet\-::\-Serialize\-Continuity\-Data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_aadf23b9bf05af20065bbbdeb21c58f1a}
+\hypertarget{a00045_afc1de05de1b53f5f59ad47c310ed334f}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Serialize\-Sheet@{Serialize\-Sheet}}
+\index{Serialize\-Sheet@{Serialize\-Sheet}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Serialize\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ uint8\-\_\-t $>$ C\-C\-\_\-sheet\-::\-Serialize\-Sheet (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00045_afc1de05de1b53f5f59ad47c310ed334f}
+\hypertarget{a00045_a763578b37626d3f15494539a6e2c6739}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Serialize\-Sheet\-Data@{Serialize\-Sheet\-Data}}
+\index{Serialize\-Sheet\-Data@{Serialize\-Sheet\-Data}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Serialize\-Sheet\-Data}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ uint8\-\_\-t $>$ C\-C\-\_\-sheet\-::\-Serialize\-Sheet\-Data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a763578b37626d3f15494539a6e2c6739}
+\hypertarget{a00045_aae68e9352eaff311790b59470461886b}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-All\-Positions@{Set\-All\-Positions}}
+\index{Set\-All\-Positions@{Set\-All\-Positions}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-All\-Positions}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-All\-Positions (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{val, }
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+)}}\label{a00045_aae68e9352eaff311790b59470461886b}
+\hypertarget{a00045_a0f6fe0c0cfcf494d7eb7ade61c45e31d}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Beats@{Set\-Beats}}
+\index{Set\-Beats@{Set\-Beats}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Beats (
+\begin{DoxyParamCaption}
+\item[{unsigned short}]{b}
+\end{DoxyParamCaption}
+)}}\label{a00045_a0f6fe0c0cfcf494d7eb7ade61c45e31d}
+\hypertarget{a00045_a72d0ca96ad22fe792ca2469195a27367}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Continuity\-Text@{Set\-Continuity\-Text}}
+\index{Set\-Continuity\-Text@{Set\-Continuity\-Text}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Continuity\-Text}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Continuity\-Text (
+\begin{DoxyParamCaption}
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{sym, }
+\item[{const std\-::string \&}]{text}
+\end{DoxyParamCaption}
+)}}\label{a00045_a72d0ca96ad22fe792ca2469195a27367}
+\hypertarget{a00045_a4a6f9925779f8bf529d448a31c13d21c}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Name@{Set\-Name}}
+\index{Set\-Name@{Set\-Name}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Name}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Name (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{newname}
+\end{DoxyParamCaption}
+)}}\label{a00045_a4a6f9925779f8bf529d448a31c13d21c}
+\hypertarget{a00045_a3da05d3a78f81a0131d4101302d6b1c7}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Number@{Set\-Number}}
+\index{Set\-Number@{Set\-Number}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Number}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Number (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{newnumber}
+\end{DoxyParamCaption}
+)}}\label{a00045_a3da05d3a78f81a0131d4101302d6b1c7}
+\hypertarget{a00045_ac50742b3a8b670e324a510d936b62a85}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Num\-Points@{Set\-Num\-Points}}
+\index{Set\-Num\-Points@{Set\-Num\-Points}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Num\-Points}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Num\-Points (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{num, }
+\item[{unsigned}]{columns, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{new\-\_\-march\-\_\-position}
+\end{DoxyParamCaption}
+)}}\label{a00045_ac50742b3a8b670e324a510d936b62a85}
+\hypertarget{a00045_ae553f706e9d0f5e4a21465b3d628e086}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Points@{Set\-Points}}
+\index{Set\-Points@{Set\-Points}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Points}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Points (
+\begin{DoxyParamCaption}
+\item[{const std\-::vector$<$ {\bf C\-C\-\_\-point} $>$ \&}]{points}
+\end{DoxyParamCaption}
+)}}\label{a00045_ae553f706e9d0f5e4a21465b3d628e086}
+\hypertarget{a00045_a37d4e6d9c5a8865e02292ceb40ae0a1f}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!Set\-Position@{Set\-Position}}
+\index{Set\-Position@{Set\-Position}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{Set\-Position}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-sheet\-::\-Set\-Position (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{val, }
+\item[{unsigned}]{i, }
+\item[{unsigned}]{ref = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{a00045_a37d4e6d9c5a8865e02292ceb40ae0a1f}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00045_ae0a4f2825ed321a631bd179ee97ce990}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!beats@{beats}}
+\index{beats@{beats}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{beats}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short C\-C\-\_\-sheet\-::beats\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_ae0a4f2825ed321a631bd179ee97ce990}
+\hypertarget{a00045_a48691d0c3f157765c1b6448e572f3e0e}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!m\-Animation\-Continuity@{m\-Animation\-Continuity}}
+\index{m\-Animation\-Continuity@{m\-Animation\-Continuity}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{m\-Animation\-Continuity}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cont\-Container} C\-C\-\_\-sheet\-::m\-Animation\-Continuity\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a48691d0c3f157765c1b6448e572f3e0e}
+\hypertarget{a00045_a8eee8546bf15f01705734cddaf7e1866}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!m\-Name@{m\-Name}}
+\index{m\-Name@{m\-Name}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{m\-Name}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string C\-C\-\_\-sheet\-::m\-Name\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a8eee8546bf15f01705734cddaf7e1866}
+\hypertarget{a00045_aa55d5937b4aa3bf410c598d0b73e937c}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!m\-Printable\-Continuity@{m\-Printable\-Continuity}}
+\index{m\-Printable\-Continuity@{m\-Printable\-Continuity}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{m\-Printable\-Continuity}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-textline\-\_\-list} C\-C\-\_\-sheet\-::m\-Printable\-Continuity\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_aa55d5937b4aa3bf410c598d0b73e937c}
+\hypertarget{a00045_a075899cc4758e99aa40c51005c2b6458}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!number@{number}}
+\index{number@{number}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{number}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string C\-C\-\_\-sheet\-::number\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a075899cc4758e99aa40c51005c2b6458}
+\hypertarget{a00045_a518af96eb5163fccb757e5f1d23fef17}{\index{C\-C\-\_\-sheet@{C\-C\-\_\-sheet}!pts@{pts}}
+\index{pts@{pts}!CC_sheet@{C\-C\-\_\-sheet}}
+\subsubsection[{pts}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf C\-C\-\_\-point}$>$ C\-C\-\_\-sheet\-::pts\hspace{0.3cm}{\ttfamily [private]}}}\label{a00045_a518af96eb5163fccb757e5f1d23fef17}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00212}{cc\-\_\-sheet.\-h}\item 
+src/core/\hyperlink{a00211}{cc\-\_\-sheet.\-cpp}\end{DoxyCompactItemize}

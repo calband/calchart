@@ -1,0 +1,97 @@
+\hypertarget{a00244}{\section{src/show\-\_\-ui.cpp File Reference}
+\label{a00244}\index{src/show\-\_\-ui.\-cpp@{src/show\-\_\-ui.\-cpp}}
+}
+{\ttfamily \#include \char`\"{}show\-\_\-ui.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$wx/statline.\-h$>$}\\*
+{\ttfamily \#include $<$wx/spinctrl.\-h$>$}\\*
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \{ \hyperlink{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57af37e69cac1007f2b95d5ab29419f3a10}{Point\-Picker\-\_\-\-Point\-Picker\-All} =1100, 
+\hyperlink{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57a6fb0684bdbfbac1ac0fd6ca2de68f1aa}{Point\-Picker\-\_\-\-Point\-Picker\-None}, 
+\hyperlink{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57af2bd8df0a45fbd0f10c1cb7fc3d3d2a7}{Point\-Picker\-\_\-\-Point\-Picker\-List}
+ \}
+\item 
+enum \{ \\*
+\hyperlink{a00244_a385c44f6fb256e5716a2302a5b940388aef108c1a11d61d81b71cadc8c5f83209}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-S\-P\-I\-N} =1000, 
+\hyperlink{a00244_a385c44f6fb256e5716a2302a5b940388ac8a5c26fde3e9e59efe4cd5cb6ebc1fa}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-C\-O\-L\-U\-M\-N\-S\-\_\-\-S\-P\-I\-N}, 
+\hyperlink{a00244_a385c44f6fb256e5716a2302a5b940388a39902470e7c0c7d12a922271070c8114}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-T\-Y\-P\-E}, 
+\hyperlink{a00244_a385c44f6fb256e5716a2302a5b940388a8569eeefbc6ff1d3e06dd6315d038222}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-P\-E\-R\-\_\-\-L\-E\-T\-T\-E\-R}, 
+\\*
+\hyperlink{a00244_a385c44f6fb256e5716a2302a5b940388afe2e9e9aaae00fd4cd3565029ab7217e}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-L\-E\-T\-T\-E\-R\-S}, 
+\hyperlink{a00244_a385c44f6fb256e5716a2302a5b940388aafd7577686e8e1931d1fa0ac7e4d18e4}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-R\-E\-S\-E\-T}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{a00244_a97d5605536ec90508d971e43b2c8340f}{Calculate\-Labels} (const \hyperlink{a00020}{Cal\-Chart\-Doc} \&show, std\-::set$<$ unsigned $>$ \&letters, bool \&use\-\_\-letters, int \&maxnum)
+\item 
+void \hyperlink{a00244_adf10eb99a294c2658a83d5dc08911809}{Layout\-Show\-Info} (wx\-Window $\ast$parent, bool put\-Last\-Row\-Buttons)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static const size\-\_\-t \hyperlink{a00244_a911abfdb9f51dcabfca0c839c277de85}{k\-Max\-Points} = 1000
+\end{DoxyCompactItemize}
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum}}\label{a00244_a385c44f6fb256e5716a2302a5b940388}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-S\-P\-I\-N@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-S\-P\-I\-N}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-S\-P\-I\-N@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-S\-P\-I\-N}}\item[{\em 
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388aef108c1a11d61d81b71cadc8c5f83209}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-S\-P\-I\-N}\label{a00244_a385c44f6fb256e5716a2302a5b940388aef108c1a11d61d81b71cadc8c5f83209}
+}]\index{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-C\-O\-L\-U\-M\-N\-S\-\_\-\-S\-P\-I\-N@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-C\-O\-L\-U\-M\-N\-S\-\_\-\-S\-P\-I\-N}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-C\-O\-L\-U\-M\-N\-S\-\_\-\-S\-P\-I\-N@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-C\-O\-L\-U\-M\-N\-S\-\_\-\-S\-P\-I\-N}}\item[{\em 
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388ac8a5c26fde3e9e59efe4cd5cb6ebc1fa}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-C\-O\-L\-U\-M\-N\-S\-\_\-\-S\-P\-I\-N}\label{a00244_a385c44f6fb256e5716a2302a5b940388ac8a5c26fde3e9e59efe4cd5cb6ebc1fa}
+}]\index{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-T\-Y\-P\-E@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-T\-Y\-P\-E}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-T\-Y\-P\-E@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-T\-Y\-P\-E}}\item[{\em 
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388a39902470e7c0c7d12a922271070c8114}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-T\-Y\-P\-E}\label{a00244_a385c44f6fb256e5716a2302a5b940388a39902470e7c0c7d12a922271070c8114}
+}]\index{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-P\-E\-R\-\_\-\-L\-E\-T\-T\-E\-R@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-P\-E\-R\-\_\-\-L\-E\-T\-T\-E\-R}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-P\-E\-R\-\_\-\-L\-E\-T\-T\-E\-R@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-P\-E\-R\-\_\-\-L\-E\-T\-T\-E\-R}}\item[{\em 
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388a8569eeefbc6ff1d3e06dd6315d038222}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-P\-O\-I\-N\-T\-S\-\_\-\-P\-E\-R\-\_\-\-L\-E\-T\-T\-E\-R}\label{a00244_a385c44f6fb256e5716a2302a5b940388a8569eeefbc6ff1d3e06dd6315d038222}
+}]\index{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-L\-E\-T\-T\-E\-R\-S@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-L\-E\-T\-T\-E\-R\-S}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-L\-E\-T\-T\-E\-R\-S@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-L\-E\-T\-T\-E\-R\-S}}\item[{\em 
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388afe2e9e9aaae00fd4cd3565029ab7217e}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-L\-A\-B\-E\-L\-\_\-\-L\-E\-T\-T\-E\-R\-S}\label{a00244_a385c44f6fb256e5716a2302a5b940388afe2e9e9aaae00fd4cd3565029ab7217e}
+}]\index{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-R\-E\-S\-E\-T@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-R\-E\-S\-E\-T}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-R\-E\-S\-E\-T@{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-R\-E\-S\-E\-T}}\item[{\em 
+\hypertarget{a00244_a385c44f6fb256e5716a2302a5b940388aafd7577686e8e1931d1fa0ac7e4d18e4}{Show\-Info\-Req\-\_\-\-I\-D\-\_\-\-R\-E\-S\-E\-T}\label{a00244_a385c44f6fb256e5716a2302a5b940388aafd7577686e8e1931d1fa0ac7e4d18e4}
+}]\end{description}
+\end{Desc}
+\hypertarget{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum}}\label{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{Point\-Picker\-\_\-\-Point\-Picker\-All@{Point\-Picker\-\_\-\-Point\-Picker\-All}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Point\-Picker\-\_\-\-Point\-Picker\-All@{Point\-Picker\-\_\-\-Point\-Picker\-All}}\item[{\em 
+\hypertarget{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57af37e69cac1007f2b95d5ab29419f3a10}{Point\-Picker\-\_\-\-Point\-Picker\-All}\label{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57af37e69cac1007f2b95d5ab29419f3a10}
+}]\index{Point\-Picker\-\_\-\-Point\-Picker\-None@{Point\-Picker\-\_\-\-Point\-Picker\-None}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Point\-Picker\-\_\-\-Point\-Picker\-None@{Point\-Picker\-\_\-\-Point\-Picker\-None}}\item[{\em 
+\hypertarget{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57a6fb0684bdbfbac1ac0fd6ca2de68f1aa}{Point\-Picker\-\_\-\-Point\-Picker\-None}\label{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57a6fb0684bdbfbac1ac0fd6ca2de68f1aa}
+}]\index{Point\-Picker\-\_\-\-Point\-Picker\-List@{Point\-Picker\-\_\-\-Point\-Picker\-List}!show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}}\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Point\-Picker\-\_\-\-Point\-Picker\-List@{Point\-Picker\-\_\-\-Point\-Picker\-List}}\item[{\em 
+\hypertarget{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57af2bd8df0a45fbd0f10c1cb7fc3d3d2a7}{Point\-Picker\-\_\-\-Point\-Picker\-List}\label{a00244_ab04a0655cd1e3bcac5e8f48c18df1a57af2bd8df0a45fbd0f10c1cb7fc3d3d2a7}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{a00244_a97d5605536ec90508d971e43b2c8340f}{\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Calculate\-Labels@{Calculate\-Labels}}
+\index{Calculate\-Labels@{Calculate\-Labels}!show_ui.cpp@{show\-\_\-ui.\-cpp}}
+\subsubsection[{Calculate\-Labels}]{\setlength{\rightskip}{0pt plus 5cm}static void Calculate\-Labels (
+\begin{DoxyParamCaption}
+\item[{const {\bf Cal\-Chart\-Doc} \&}]{show, }
+\item[{std\-::set$<$ unsigned $>$ \&}]{letters, }
+\item[{bool \&}]{use\-\_\-letters, }
+\item[{int \&}]{maxnum}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{a00244_a97d5605536ec90508d971e43b2c8340f}
+\hypertarget{a00244_adf10eb99a294c2658a83d5dc08911809}{\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!Layout\-Show\-Info@{Layout\-Show\-Info}}
+\index{Layout\-Show\-Info@{Layout\-Show\-Info}!show_ui.cpp@{show\-\_\-ui.\-cpp}}
+\subsubsection[{Layout\-Show\-Info}]{\setlength{\rightskip}{0pt plus 5cm}void Layout\-Show\-Info (
+\begin{DoxyParamCaption}
+\item[{wx\-Window $\ast$}]{parent, }
+\item[{bool}]{put\-Last\-Row\-Buttons}
+\end{DoxyParamCaption}
+)}}\label{a00244_adf10eb99a294c2658a83d5dc08911809}
+
+
+\subsection{Variable Documentation}
+\hypertarget{a00244_a911abfdb9f51dcabfca0c839c277de85}{\index{show\-\_\-ui.\-cpp@{show\-\_\-ui.\-cpp}!k\-Max\-Points@{k\-Max\-Points}}
+\index{k\-Max\-Points@{k\-Max\-Points}!show_ui.cpp@{show\-\_\-ui.\-cpp}}
+\subsubsection[{k\-Max\-Points}]{\setlength{\rightskip}{0pt plus 5cm}const size\-\_\-t k\-Max\-Points = 1000\hspace{0.3cm}{\ttfamily [static]}}}\label{a00244_a911abfdb9f51dcabfca0c839c277de85}

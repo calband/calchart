@@ -1,0 +1,188 @@
+\hypertarget{a00006}{\section{Animate\-Command\-Rotate Class Reference}
+\label{a00006}\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}}
+}
+
+
+{\ttfamily \#include $<$animatecommand.\-h$>$}
+
+Inheritance diagram for Animate\-Command\-Rotate\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{a00006}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00006_abe77dd3438d47f7b7683bad57fc7f387}{Animate\-Command\-Rotate} (unsigned beats, \hyperlink{a00029}{C\-C\-\_\-coord} cntr, float rad, float ang1, float ang2, bool backwards=false)
+\item 
+virtual \hyperlink{a00006_a64bcc3164c4df08efe08c67d1498c3dd}{$\sim$\-Animate\-Command\-Rotate} ()
+\item 
+virtual bool \hyperlink{a00006_a5d1ee680f19374391a6fbccdcd6b6bb7}{Next\-Beat} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual bool \hyperlink{a00006_a179b843d1c400020f0fbb106a09c38e5}{Prev\-Beat} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual void \hyperlink{a00006_a0ef1ae2cc3ca46a734b231bb38347f79}{Apply\-Forward} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual void \hyperlink{a00006_af8f47135c6190dc9363a4d7705ad443a}{Apply\-Backward} (\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt)
+\item 
+virtual \hyperlink{a00196_a6feaf30c8830fe6fcc0982cb7e9621ab}{Animate\-Dir} \hyperlink{a00006_ad534024d6bd630dfc0cde5e07649094a}{Direction} () const 
+\item 
+virtual float \hyperlink{a00006_afd366a7d56e16f296a80faab4ffe4972}{Real\-Direction} () const 
+\item 
+virtual void \hyperlink{a00006_a865113f57c577626241256ab35981834}{Clip\-Beats} (unsigned beats)
+\item 
+virtual \hyperlink{a00031}{C\-C\-\_\-\-Draw\-Command} \hyperlink{a00006_a999e00a33481237a53af76481913d83f}{Gen\-C\-C\-\_\-\-Draw\-Command} (const \hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \&pt, const \hyperlink{a00029}{C\-C\-\_\-coord} \&offset) const 
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00029}{C\-C\-\_\-coord} \hyperlink{a00006_a8dfd55b23f76e9f9987f8ea9e4e3239a}{m\-Origin}
+\item 
+float \hyperlink{a00006_a1a720ab7b39b95a6a8116308f50b02a8}{m\-R}
+\item 
+float \hyperlink{a00006_a50c782c031d209ac040c71b0792be40e}{m\-Ang\-Start}
+\item 
+float \hyperlink{a00006_a03d54f905dbfd4927a10e4f9e23fcfb9}{m\-Ang\-End}
+\item 
+float \hyperlink{a00006_aa513da05df7bf1998098c4fc9234a1e5}{m\-Face}
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00006_abe77dd3438d47f7b7683bad57fc7f387}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Animate\-Command\-Rotate@{Animate\-Command\-Rotate}}
+\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Animate\-Command\-Rotate}]{\setlength{\rightskip}{0pt plus 5cm}Animate\-Command\-Rotate\-::\-Animate\-Command\-Rotate (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{beats, }
+\item[{{\bf C\-C\-\_\-coord}}]{cntr, }
+\item[{float}]{rad, }
+\item[{float}]{ang1, }
+\item[{float}]{ang2, }
+\item[{bool}]{backwards = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}}\label{a00006_abe77dd3438d47f7b7683bad57fc7f387}
+\hypertarget{a00006_a64bcc3164c4df08efe08c67d1498c3dd}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!$\sim$\-Animate\-Command\-Rotate@{$\sim$\-Animate\-Command\-Rotate}}
+\index{$\sim$\-Animate\-Command\-Rotate@{$\sim$\-Animate\-Command\-Rotate}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{$\sim$\-Animate\-Command\-Rotate}]{\setlength{\rightskip}{0pt plus 5cm}virtual Animate\-Command\-Rotate\-::$\sim$\-Animate\-Command\-Rotate (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{a00006_a64bcc3164c4df08efe08c67d1498c3dd}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00006_af8f47135c6190dc9363a4d7705ad443a}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Apply\-Backward@{Apply\-Backward}}
+\index{Apply\-Backward@{Apply\-Backward}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Apply\-Backward}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Command\-Rotate\-::\-Apply\-Backward (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_af8f47135c6190dc9363a4d7705ad443a}
+
+
+Reimplemented from \hyperlink{a00003_a969de0c473c2ca7d2f3b9ea8748fffb7}{Animate\-Command}.
+
+\hypertarget{a00006_a0ef1ae2cc3ca46a734b231bb38347f79}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Apply\-Forward@{Apply\-Forward}}
+\index{Apply\-Forward@{Apply\-Forward}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Apply\-Forward}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Command\-Rotate\-::\-Apply\-Forward (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_a0ef1ae2cc3ca46a734b231bb38347f79}
+
+
+Reimplemented from \hyperlink{a00003_af8a485b986aacf649f41c81e4d6eeed9}{Animate\-Command}.
+
+\hypertarget{a00006_a865113f57c577626241256ab35981834}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Clip\-Beats@{Clip\-Beats}}
+\index{Clip\-Beats@{Clip\-Beats}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Clip\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Command\-Rotate\-::\-Clip\-Beats (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{beats}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_a865113f57c577626241256ab35981834}
+
+
+Reimplemented from \hyperlink{a00003_ace20ca13c14bf94e13404df0ef825da8}{Animate\-Command}.
+
+\hypertarget{a00006_ad534024d6bd630dfc0cde5e07649094a}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Direction@{Direction}}
+\index{Direction@{Direction}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Direction}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Dir} Animate\-Command\-Rotate\-::\-Direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_ad534024d6bd630dfc0cde5e07649094a}
+
+
+Implements \hyperlink{a00003_ada84c0464a78c98eb9b24e64f1ea2e36}{Animate\-Command}.
+
+\hypertarget{a00006_a999e00a33481237a53af76481913d83f}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Gen\-C\-C\-\_\-\-Draw\-Command@{Gen\-C\-C\-\_\-\-Draw\-Command}}
+\index{Gen\-C\-C\-\_\-\-Draw\-Command@{Gen\-C\-C\-\_\-\-Draw\-Command}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Gen\-C\-C\-\_\-\-Draw\-Command}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-\-Draw\-Command} Animate\-Command\-Rotate\-::\-Gen\-C\-C\-\_\-\-Draw\-Command (
+\begin{DoxyParamCaption}
+\item[{const {\bf Animate\-Point} \&}]{pt, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{offset}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_a999e00a33481237a53af76481913d83f}
+
+
+Reimplemented from \hyperlink{a00003_a34d8e8a89c11f7ef6d1e2346db77d462}{Animate\-Command}.
+
+\hypertarget{a00006_a5d1ee680f19374391a6fbccdcd6b6bb7}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Next\-Beat@{Next\-Beat}}
+\index{Next\-Beat@{Next\-Beat}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Next\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Command\-Rotate\-::\-Next\-Beat (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_a5d1ee680f19374391a6fbccdcd6b6bb7}
+
+
+Reimplemented from \hyperlink{a00003_a80bcd30c221c961d87049dee4d9eff5e}{Animate\-Command}.
+
+\hypertarget{a00006_a179b843d1c400020f0fbb106a09c38e5}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Prev\-Beat@{Prev\-Beat}}
+\index{Prev\-Beat@{Prev\-Beat}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Prev\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Command\-Rotate\-::\-Prev\-Beat (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Point} \&}]{pt}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_a179b843d1c400020f0fbb106a09c38e5}
+
+
+Reimplemented from \hyperlink{a00003_aafde773d0e8074306eed850c91c7f207}{Animate\-Command}.
+
+\hypertarget{a00006_afd366a7d56e16f296a80faab4ffe4972}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!Real\-Direction@{Real\-Direction}}
+\index{Real\-Direction@{Real\-Direction}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{Real\-Direction}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Command\-Rotate\-::\-Real\-Direction (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00006_afd366a7d56e16f296a80faab4ffe4972}
+
+
+Implements \hyperlink{a00003_a23b1c7a078df01cb31adaad24d29c27d}{Animate\-Command}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00006_a03d54f905dbfd4927a10e4f9e23fcfb9}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!m\-Ang\-End@{m\-Ang\-End}}
+\index{m\-Ang\-End@{m\-Ang\-End}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{m\-Ang\-End}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Command\-Rotate\-::m\-Ang\-End\hspace{0.3cm}{\ttfamily [private]}}}\label{a00006_a03d54f905dbfd4927a10e4f9e23fcfb9}
+\hypertarget{a00006_a50c782c031d209ac040c71b0792be40e}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!m\-Ang\-Start@{m\-Ang\-Start}}
+\index{m\-Ang\-Start@{m\-Ang\-Start}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{m\-Ang\-Start}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Command\-Rotate\-::m\-Ang\-Start\hspace{0.3cm}{\ttfamily [private]}}}\label{a00006_a50c782c031d209ac040c71b0792be40e}
+\hypertarget{a00006_aa513da05df7bf1998098c4fc9234a1e5}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!m\-Face@{m\-Face}}
+\index{m\-Face@{m\-Face}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{m\-Face}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Command\-Rotate\-::m\-Face\hspace{0.3cm}{\ttfamily [private]}}}\label{a00006_aa513da05df7bf1998098c4fc9234a1e5}
+\hypertarget{a00006_a8dfd55b23f76e9f9987f8ea9e4e3239a}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!m\-Origin@{m\-Origin}}
+\index{m\-Origin@{m\-Origin}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{m\-Origin}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-coord} Animate\-Command\-Rotate\-::m\-Origin\hspace{0.3cm}{\ttfamily [private]}}}\label{a00006_a8dfd55b23f76e9f9987f8ea9e4e3239a}
+\hypertarget{a00006_a1a720ab7b39b95a6a8116308f50b02a8}{\index{Animate\-Command\-Rotate@{Animate\-Command\-Rotate}!m\-R@{m\-R}}
+\index{m\-R@{m\-R}!AnimateCommandRotate@{Animate\-Command\-Rotate}}
+\subsubsection[{m\-R}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Command\-Rotate\-::m\-R\hspace{0.3cm}{\ttfamily [private]}}}\label{a00006_a1a720ab7b39b95a6a8116308f50b02a8}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00198}{animatecommand.\-h}\item 
+src/core/\hyperlink{a00197}{animatecommand.\-cpp}\end{DoxyCompactItemize}

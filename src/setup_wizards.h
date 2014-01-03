@@ -30,28 +30,83 @@
 class FancyTextWin;
 class wxChoice;
 
-// page for giving a description
+/**
+ * The page of the setup wizard that asks the user to provide a description
+ * for the show.
+ * This page is linked into the full setup wizard and is used by FieldView,
+ * through the OnWizardSetup(...) method.
+ */
 class SetDescriptionWizard : public wxWizardPageSimple
 {
 public:
+
+	/**
+	 * Makes the page.
+	 * @param parent The setup wizard which this page is a part of.
+	 */
 	SetDescriptionWizard(wxWizard *parent);
 
+	/**
+	 * Returns the text that the user entered into the text box
+	 * for the show description.
+	 * @return The description that the user has chosen for the
+	 * show.
+	 */
 	wxString GetValue();
 	
 private:
+	/**
+	 * TODO IS THIS UNUSED?
+	 */
 	wxArrayString modeStrings;
+
+	/**
+	 * A pointer to the text box that collects the user's input.
+	 * You can extract the user's answer from it to get the show
+	 * description.
+	 */
 	FancyTextWin *mText;
 };
 
-// page for deciding the field type
+/**
+ * The page of the setup wizard that asks the user to define a show mode for
+ * the CalChart show. Defining the "Show Mode" is essentially the equivalent of
+ * defining what field your show will take place on (e.g. in tunnel, on the
+ * football field, etc.).
+ * This page is linked into the setup wizard by FieldView, when it is used through
+ * the OnWizardSetup(...) method.
+ */
 class ChooseShowModeWizard : public wxWizardPageSimple
 {
 public:
+	/**
+	 * Makes the page.
+	 * @param parent The setup wizard which this page is a part of.
+	 */
 	ChooseShowModeWizard(wxWizard *parent);
+
+	/**
+	 * Returns the name of the show mode selected by the user.
+	 * @return The name of the show mode selected by the user.
+	 */
 	wxString GetValue();
 	
 private:
+	
+	/**
+	 * The list of strings that will be provided as options
+	 * for show modes. mChoice provides an integer representing
+	 * which index in this array represents the final choice of
+	 * the user.
+	 */
 	wxArrayString modeStrings;
+
+	/**
+	 * A dropdown box that collects the user's choice. From this,
+	 * you can extract an integer representing the choice of the
+	 * user. This integer is the index of the item in modeStrings
+	 * that the user selected.
+	 */
 	wxChoice *mChoice;
 };
 

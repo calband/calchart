@@ -1,0 +1,109 @@
+\hypertarget{a00041}{\section{C\-C\-\_\-shape\-\_\-arc Class Reference}
+\label{a00041}\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}}
+}
+
+
+{\ttfamily \#include $<$cc\-\_\-shapes.\-h$>$}
+
+Inheritance diagram for C\-C\-\_\-shape\-\_\-arc\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{a00041}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00041_a7ada4ea48bdb57dd83bca69412b8d65b}{C\-C\-\_\-shape\-\_\-arc} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c, const \hyperlink{a00029}{C\-C\-\_\-coord} \&p)
+\item 
+\hyperlink{a00041_a14e6776d9618db1f82e6214b6801a04e}{C\-C\-\_\-shape\-\_\-arc} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&c, const \hyperlink{a00029}{C\-C\-\_\-coord} \&p1, const \hyperlink{a00029}{C\-C\-\_\-coord} \&p2)
+\item 
+virtual void \hyperlink{a00041_ac99e4b812a5eb489d29d324cd7dca7e5}{On\-Move} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&p, const \hyperlink{a00029}{C\-C\-\_\-coord} \&snapped\-\_\-p)
+\item 
+virtual std\-::vector\\*
+$<$ \hyperlink{a00031}{C\-C\-\_\-\-Draw\-Command} $>$ \hyperlink{a00041_aa8f4623a8093d5fb095912e2b13ccf80}{Get\-C\-C\-\_\-\-Draw\-Command} (float x, float y) const 
+\item 
+float \hyperlink{a00041_a822ebc83a7e441cb1b710f6599aad92b}{Get\-Angle} () const 
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+float \hyperlink{a00041_a1046b77a88b111d22f31e1d07d9f1139}{r}
+\item 
+float \hyperlink{a00041_a4106c0d55812971a208ab527aeb516ac}{r0}
+\item 
+float \hyperlink{a00041_adc552191491a603591122b01970740d2}{d}
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00041_a7ada4ea48bdb57dd83bca69412b8d65b}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}}
+\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{C\-C\-\_\-shape\-\_\-arc}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-shape\-\_\-arc\-::\-C\-C\-\_\-shape\-\_\-arc (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{p}
+\end{DoxyParamCaption}
+)}}\label{a00041_a7ada4ea48bdb57dd83bca69412b8d65b}
+\hypertarget{a00041_a14e6776d9618db1f82e6214b6801a04e}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}}
+\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{C\-C\-\_\-shape\-\_\-arc}]{\setlength{\rightskip}{0pt plus 5cm}C\-C\-\_\-shape\-\_\-arc\-::\-C\-C\-\_\-shape\-\_\-arc (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{c, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{p1, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{p2}
+\end{DoxyParamCaption}
+)}}\label{a00041_a14e6776d9618db1f82e6214b6801a04e}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00041_a822ebc83a7e441cb1b710f6599aad92b}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!Get\-Angle@{Get\-Angle}}
+\index{Get\-Angle@{Get\-Angle}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{Get\-Angle}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-shape\-\_\-arc\-::\-Get\-Angle (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00041_a822ebc83a7e441cb1b710f6599aad92b}
+\hypertarget{a00041_aa8f4623a8093d5fb095912e2b13ccf80}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!Get\-C\-C\-\_\-\-Draw\-Command@{Get\-C\-C\-\_\-\-Draw\-Command}}
+\index{Get\-C\-C\-\_\-\-Draw\-Command@{Get\-C\-C\-\_\-\-Draw\-Command}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{Get\-C\-C\-\_\-\-Draw\-Command}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ {\bf C\-C\-\_\-\-Draw\-Command} $>$ C\-C\-\_\-shape\-\_\-arc\-::\-Get\-C\-C\-\_\-\-Draw\-Command (
+\begin{DoxyParamCaption}
+\item[{float}]{x, }
+\item[{float}]{y}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00041_aa8f4623a8093d5fb095912e2b13ccf80}
+
+
+Implements \hyperlink{a00037_aec026dc3fefc83bd03031e17307d073c}{C\-C\-\_\-shape}.
+
+\hypertarget{a00041_ac99e4b812a5eb489d29d324cd7dca7e5}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!On\-Move@{On\-Move}}
+\index{On\-Move@{On\-Move}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{On\-Move}]{\setlength{\rightskip}{0pt plus 5cm}void C\-C\-\_\-shape\-\_\-arc\-::\-On\-Move (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{p, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{snapped\-\_\-p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00041_ac99e4b812a5eb489d29d324cd7dca7e5}
+
+
+Reimplemented from \hyperlink{a00039_a5de0c111a1e2e01c7f2802333809b421}{C\-C\-\_\-shape\-\_\-2point}.
+
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00041_adc552191491a603591122b01970740d2}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!d@{d}}
+\index{d@{d}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{d}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-shape\-\_\-arc\-::d\hspace{0.3cm}{\ttfamily [private]}}}\label{a00041_adc552191491a603591122b01970740d2}
+\hypertarget{a00041_a1046b77a88b111d22f31e1d07d9f1139}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!r@{r}}
+\index{r@{r}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{r}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-shape\-\_\-arc\-::r\hspace{0.3cm}{\ttfamily [private]}}}\label{a00041_a1046b77a88b111d22f31e1d07d9f1139}
+\hypertarget{a00041_a4106c0d55812971a208ab527aeb516ac}{\index{C\-C\-\_\-shape\-\_\-arc@{C\-C\-\_\-shape\-\_\-arc}!r0@{r0}}
+\index{r0@{r0}!CC_shape_arc@{C\-C\-\_\-shape\-\_\-arc}}
+\subsubsection[{r0}]{\setlength{\rightskip}{0pt plus 5cm}float C\-C\-\_\-shape\-\_\-arc\-::r0\hspace{0.3cm}{\ttfamily [private]}}}\label{a00041_a4106c0d55812971a208ab527aeb516ac}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00210}{cc\-\_\-shapes.\-h}\item 
+src/core/\hyperlink{a00209}{cc\-\_\-shapes.\-cpp}\end{DoxyCompactItemize}

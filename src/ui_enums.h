@@ -23,6 +23,15 @@
 #ifndef _UI_ENUMS_H_
 #define _UI_ENUMS_H_
 
+/**
+ * This enumeration keeps track of the identities that CalChart has
+ * registered with wxWidgets. This comes into play when registering tools,
+ * for example: when you register a tool with wxWidgets, you link a method
+ * to an integer identity, and if you link an option in a toolbar to the
+ * SAME identity as the method, then when you select that option from the
+ * toolbar, it will call the method associated with that integer identity
+ * to handle the event. 
+ */
 enum
 {
 	CALCHART__APPEND_FILE = wxID_HIGHEST,
@@ -46,10 +55,27 @@ enum
 	CALCHART__OMNIVIEW,
 	CALCHART__SELECTION,
 
+	/**
+	 * The id of the tool that opens the previous stunt sheet for
+	 * viewing/editing in the field frame.
+	 */
 	CALCHART__prev_ss,
+	/**
+	 * The id of the tool that opens the next stunt sheet for
+	 * viewing/editing in the field frame.
+	 */
 	CALCHART__next_ss,
+	/**
+	 * The id of the tool that selects all points in a user-drawn box.
+	 */
 	CALCHART__box,
+	/**
+	 * The id of the tool that selects all points in a user-drawn polygon.
+	 */
 	CALCHART__poly,
+	/**
+	 * The id of the tool that selects all points in a user-drawn lasso.
+	 */
 	CALCHART__lasso,
 	CALCHART__move,
 	CALCHART__line,
@@ -57,17 +83,64 @@ enum
 	CALCHART__shear,
 	CALCHART__reflect,
 	CALCHART__size,
+	/**
+	 * The id of the genius move tool.
+	 */
 	CALCHART__genius,
+	/**
+	 * The id of the tool that places the label to the left
+	 * of the selected points.
+	 */
 	CALCHART__label_left,
+	/**
+	* The id of the tool that places the label to the right
+	* of the selected points.
+	*/
 	CALCHART__label_right,
+	/**
+	* The id of the tool that toggles the location of the label
+	* relative to the selected points between the left and right.
+	*/
 	CALCHART__label_flip,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * plain open dots.
+	 */
 	CALCHART__setsym0,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * solid dots.
+	 */
 	CALCHART__setsym1,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * open dots with a backslash.
+	 */
 	CALCHART__setsym2,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * open dots with a frontslash.
+	 */
 	CALCHART__setsym3,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * open dots with an X.
+	 */
 	CALCHART__setsym4,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * solid dots with a backslash.
+	 */
 	CALCHART__setsym5,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * solid dots with a frontslash.
+	 */
 	CALCHART__setsym6,
+	/**
+	 * The id of the tool that sets the symbol of the selected points to
+	 * solid dots with an X.
+	 */
 	CALCHART__setsym7,
 	CALCHART__slider_zoom,
 	CALCHART__slider_sheet_callback,
@@ -93,6 +166,10 @@ enum
 	CALCHART__anim_gotosheet,
 	CALCHART__anim_gotobeat,
 	
+	/**
+	 * The id of the tool that is used to tell the CalChart viewer to follow
+	 * a marcher in omniview.
+	 */
 	CALCHART__FollowMarcher,
 	CALCHART__SaveCameraAngle,
 	CALCHART__GoToCameraAngle,

@@ -1,0 +1,160 @@
+\hypertarget{a00111}{\section{Matrix Class Reference}
+\label{a00111}\index{Matrix@{Matrix}}
+}
+
+
+{\ttfamily \#include $<$linmath.\-h$>$}
+
+Inheritance diagram for Matrix\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=12.000000cm]{a00111}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00111_a2dba13c45127354c9f75ef576f49269b}{Matrix} ()
+\item 
+\hyperlink{a00111_a8f8b82a2c3ecce8abef29825a10bac3c}{Matrix} (const \hyperlink{a00111}{Matrix} \&ref)
+\item 
+\hyperlink{a00111_add074e4a8747e0d200f0b995f88540b3}{Matrix} (const \hyperlink{a00152}{Vector} \&v0, const \hyperlink{a00152}{Vector} \&v1, const \hyperlink{a00152}{Vector} \&v2, const \hyperlink{a00152}{Vector} \&v3)
+\item 
+\hyperlink{a00234_a4f6e9fb2a8330a392e7819d1aef8881a}{Lin\-Elem} \hyperlink{a00111_a98767142398792a78d85354baf304df2}{Get\-Elem} (int u, int v) const 
+\item 
+void \hyperlink{a00111_aadf4cb194eda0cca3165c8333faae7c3}{Set\-Elem} (int u, int v, \hyperlink{a00234_a4f6e9fb2a8330a392e7819d1aef8881a}{Lin\-Elem} val)
+\item 
+\hyperlink{a00111}{Matrix} \hyperlink{a00111_aabcd3f2fc01a018b7345f9c6057700bb}{Get\-Transpose} () const 
+\item 
+const \hyperlink{a00111}{Matrix} \& \hyperlink{a00111_a05c58b0ce196fde4a04566ef9a72e48d}{operator=} (const \hyperlink{a00111}{Matrix} \&m)
+\item 
+const \hyperlink{a00111}{Matrix} \& \hyperlink{a00111_a1247ea71eb5795380329bf342aed269a}{operator$\ast$=} (const \hyperlink{a00111}{Matrix} \&m)
+\item 
+const \hyperlink{a00111}{Matrix} \& \hyperlink{a00111_a5d2cf9accafcf6bcb7a36f93216fb83f}{operator$\ast$=} (\hyperlink{a00234_a4f6e9fb2a8330a392e7819d1aef8881a}{Lin\-Elem} s)
+\item 
+const \hyperlink{a00111}{Matrix} \& \hyperlink{a00111_a6e0493e673e4d2ce5adfd0d7a235778d}{operator/=} (\hyperlink{a00234_a4f6e9fb2a8330a392e7819d1aef8881a}{Lin\-Elem} s)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00152}{Vector} \hyperlink{a00111_a592df8aac03c08c05cf3eec187ad0b59}{vect} \mbox{[}4\mbox{]}
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00111}{Matrix} \hyperlink{a00111_ab0bbb2ec9c1451f42f0270652df8cada}{operator$\ast$} (const \hyperlink{a00111}{Matrix} \&a, const \hyperlink{a00111}{Matrix} \&b)
+\item 
+\hyperlink{a00152}{Vector} \hyperlink{a00111_aa38737b8af69d746f482d6f27bb5b794}{operator$\ast$} (const \hyperlink{a00111}{Matrix} \&a, const \hyperlink{a00152}{Vector} \&b)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00111_a2dba13c45127354c9f75ef576f49269b}{\index{Matrix@{Matrix}!Matrix@{Matrix}}
+\index{Matrix@{Matrix}!Matrix@{Matrix}}
+\subsubsection[{Matrix}]{\setlength{\rightskip}{0pt plus 5cm}Matrix\-::\-Matrix (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a2dba13c45127354c9f75ef576f49269b}
+\hypertarget{a00111_a8f8b82a2c3ecce8abef29825a10bac3c}{\index{Matrix@{Matrix}!Matrix@{Matrix}}
+\index{Matrix@{Matrix}!Matrix@{Matrix}}
+\subsubsection[{Matrix}]{\setlength{\rightskip}{0pt plus 5cm}Matrix\-::\-Matrix (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix} \&}]{ref}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a8f8b82a2c3ecce8abef29825a10bac3c}
+\hypertarget{a00111_add074e4a8747e0d200f0b995f88540b3}{\index{Matrix@{Matrix}!Matrix@{Matrix}}
+\index{Matrix@{Matrix}!Matrix@{Matrix}}
+\subsubsection[{Matrix}]{\setlength{\rightskip}{0pt plus 5cm}Matrix\-::\-Matrix (
+\begin{DoxyParamCaption}
+\item[{const {\bf Vector} \&}]{v0, }
+\item[{const {\bf Vector} \&}]{v1, }
+\item[{const {\bf Vector} \&}]{v2, }
+\item[{const {\bf Vector} \&}]{v3}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_add074e4a8747e0d200f0b995f88540b3}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00111_a98767142398792a78d85354baf304df2}{\index{Matrix@{Matrix}!Get\-Elem@{Get\-Elem}}
+\index{Get\-Elem@{Get\-Elem}!Matrix@{Matrix}}
+\subsubsection[{Get\-Elem}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Lin\-Elem} Matrix\-::\-Get\-Elem (
+\begin{DoxyParamCaption}
+\item[{int}]{u, }
+\item[{int}]{v}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a98767142398792a78d85354baf304df2}
+\hypertarget{a00111_aabcd3f2fc01a018b7345f9c6057700bb}{\index{Matrix@{Matrix}!Get\-Transpose@{Get\-Transpose}}
+\index{Get\-Transpose@{Get\-Transpose}!Matrix@{Matrix}}
+\subsubsection[{Get\-Transpose}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix} Matrix\-::\-Get\-Transpose (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_aabcd3f2fc01a018b7345f9c6057700bb}
+\hypertarget{a00111_a1247ea71eb5795380329bf342aed269a}{\index{Matrix@{Matrix}!operator$\ast$=@{operator$\ast$=}}
+\index{operator$\ast$=@{operator$\ast$=}!Matrix@{Matrix}}
+\subsubsection[{operator$\ast$=}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Matrix}\& Matrix\-::operator$\ast$= (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix} \&}]{m}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a1247ea71eb5795380329bf342aed269a}
+\hypertarget{a00111_a5d2cf9accafcf6bcb7a36f93216fb83f}{\index{Matrix@{Matrix}!operator$\ast$=@{operator$\ast$=}}
+\index{operator$\ast$=@{operator$\ast$=}!Matrix@{Matrix}}
+\subsubsection[{operator$\ast$=}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Matrix}\& Matrix\-::operator$\ast$= (
+\begin{DoxyParamCaption}
+\item[{{\bf Lin\-Elem}}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a5d2cf9accafcf6bcb7a36f93216fb83f}
+\hypertarget{a00111_a6e0493e673e4d2ce5adfd0d7a235778d}{\index{Matrix@{Matrix}!operator/=@{operator/=}}
+\index{operator/=@{operator/=}!Matrix@{Matrix}}
+\subsubsection[{operator/=}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Matrix}\& Matrix\-::operator/= (
+\begin{DoxyParamCaption}
+\item[{{\bf Lin\-Elem}}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a6e0493e673e4d2ce5adfd0d7a235778d}
+\hypertarget{a00111_a05c58b0ce196fde4a04566ef9a72e48d}{\index{Matrix@{Matrix}!operator=@{operator=}}
+\index{operator=@{operator=}!Matrix@{Matrix}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Matrix}\& Matrix\-::operator= (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix} \&}]{m}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_a05c58b0ce196fde4a04566ef9a72e48d}
+\hypertarget{a00111_aadf4cb194eda0cca3165c8333faae7c3}{\index{Matrix@{Matrix}!Set\-Elem@{Set\-Elem}}
+\index{Set\-Elem@{Set\-Elem}!Matrix@{Matrix}}
+\subsubsection[{Set\-Elem}]{\setlength{\rightskip}{0pt plus 5cm}void Matrix\-::\-Set\-Elem (
+\begin{DoxyParamCaption}
+\item[{int}]{u, }
+\item[{int}]{v, }
+\item[{{\bf Lin\-Elem}}]{val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00111_aadf4cb194eda0cca3165c8333faae7c3}
+
+
+\subsection{Friends And Related Function Documentation}
+\hypertarget{a00111_ab0bbb2ec9c1451f42f0270652df8cada}{\index{Matrix@{Matrix}!operator$\ast$@{operator$\ast$}}
+\index{operator$\ast$@{operator$\ast$}!Matrix@{Matrix}}
+\subsubsection[{operator$\ast$}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix} operator$\ast$ (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix} \&}]{a, }
+\item[{const {\bf Matrix} \&}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{a00111_ab0bbb2ec9c1451f42f0270652df8cada}
+\hypertarget{a00111_aa38737b8af69d746f482d6f27bb5b794}{\index{Matrix@{Matrix}!operator$\ast$@{operator$\ast$}}
+\index{operator$\ast$@{operator$\ast$}!Matrix@{Matrix}}
+\subsubsection[{operator$\ast$}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Vector} operator$\ast$ (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix} \&}]{a, }
+\item[{const {\bf Vector} \&}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{a00111_aa38737b8af69d746f482d6f27bb5b794}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00111_a592df8aac03c08c05cf3eec187ad0b59}{\index{Matrix@{Matrix}!vect@{vect}}
+\index{vect@{vect}!Matrix@{Matrix}}
+\subsubsection[{vect}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Vector} Matrix\-::vect\mbox{[}4\mbox{]}\hspace{0.3cm}{\ttfamily [protected]}}}\label{a00111_a592df8aac03c08c05cf3eec187ad0b59}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/\hyperlink{a00234}{linmath.\-h}\end{DoxyCompactItemize}

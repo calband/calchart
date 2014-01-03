@@ -29,6 +29,8 @@
 #include "cc_fileformat.h"
 #include "ccvers.h"
 
+#include <boost/shared_ptr.hpp>
+
 #include <sstream>
 
 static const std::string k_nofile_str = "Unable to open file";

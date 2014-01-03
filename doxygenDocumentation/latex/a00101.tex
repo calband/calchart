@@ -1,0 +1,328 @@
+\hypertarget{a00101}{\section{Field\-Canvas Class Reference}
+\label{a00101}\index{Field\-Canvas@{Field\-Canvas}}
+}
+
+
+{\ttfamily \#include $<$field\-\_\-canvas.\-h$>$}
+
+Inheritance diagram for Field\-Canvas\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{a00101}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00101_a041189542b2fe164a1b1a13484cfdb3e}{Field\-Canvas} (wx\-View $\ast$view, \hyperlink{a00102}{Field\-Frame} $\ast$frame, float def\-\_\-zoom)
+\item 
+virtual \hyperlink{a00101_a69a815dd136fbc192be653bd561d9e45}{$\sim$\-Field\-Canvas} (void)
+\item 
+void \hyperlink{a00101_a0912d760e90bcd900ffcae4665b3dbd4}{On\-Paint} (wx\-Paint\-Event \&event)
+\item 
+void \hyperlink{a00101_a415abde6a22a5e8427dd6b274466b1fe}{On\-Erase\-Background} (wx\-Erase\-Event \&event)
+\item 
+virtual void \hyperlink{a00101_a1edd2bb8c1fe0356126cf6fb014d3611}{On\-Mouse\-Left\-Down} (wx\-Mouse\-Event \&event)
+\item 
+virtual void \hyperlink{a00101_a1e5d88baede48dc92fe2e904287f8a5b}{On\-Mouse\-Left\-Up} (wx\-Mouse\-Event \&event)
+\item 
+virtual void \hyperlink{a00101_a38d68c5f1458ac728df832ceb8ebda36}{On\-Mouse\-Left\-Double\-Click} (wx\-Mouse\-Event \&event)
+\item 
+virtual void \hyperlink{a00101_a0425e5b286913746da50af63000acab0}{On\-Mouse\-Right\-Down} (wx\-Mouse\-Event \&event)
+\item 
+virtual void \hyperlink{a00101_a990ffe3bd8a0402c60a3a497f4e66501}{On\-Mouse\-Move} (wx\-Mouse\-Event \&event)
+\item 
+void \hyperlink{a00101_a241ade9f268bcdfce766de8178aa7a9a}{On\-Char} (wx\-Key\-Event \&event)
+\item 
+float \hyperlink{a00101_abef5f32425f5f6a4c4623d161e36acec}{Zoom\-To\-Fit\-Factor} () const 
+\item 
+virtual void \hyperlink{a00101_ac4260b49b302d3d7009fad67ac1775de}{Set\-Zoom} (float factor)
+\item 
+bool \hyperlink{a00101_afdb191feba34784ac967d08755e44df5}{Set\-Background\-Image} (const wx\-Image \&image)
+\item 
+void \hyperlink{a00101_a75a40b62efa675cb92871bee42b43637}{Adjust\-Background\-Image} (bool enable)
+\item 
+void \hyperlink{a00101_ad164d99c8a4cf72038e532aaacc0cf9a}{Remove\-Background\-Image} ()
+\item 
+\hyperlink{a00216_a0fc7c44466a98380192d425c98f22aa6}{C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} \hyperlink{a00101_a76e44f20d8f47ab0fbfeae5cb383b7e4}{Get\-Current\-Lasso} () const 
+\item 
+void \hyperlink{a00101_a0f57b3715f60267be91d9bdcbdeba506}{Set\-Current\-Lasso} (\hyperlink{a00216_a0fc7c44466a98380192d425c98f22aa6}{C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} lasso)
+\item 
+\hyperlink{a00216_a45558d38ac05e98ebdbffa5756372654}{C\-C\-\_\-\-M\-O\-V\-E\-\_\-\-M\-O\-D\-E\-S} \hyperlink{a00101_a41d4e10ac454255f77abb527c3359f98}{Get\-Current\-Move} () const 
+\item 
+void \hyperlink{a00101_abc66ecb8018ed140d6a0dbfcdbab8665}{Set\-Current\-Move} (\hyperlink{a00216_a45558d38ac05e98ebdbffa5756372654}{C\-C\-\_\-\-M\-O\-V\-E\-\_\-\-M\-O\-D\-E\-S} move)
+\end{DoxyCompactItemize}
+\subsection*{Private Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef std\-::vector\\*
+$<$ boost\-::shared\-\_\-ptr$<$ \hyperlink{a00037}{C\-C\-\_\-shape} $>$ $>$ \hyperlink{a00101_a6a92f4fe3444b93e6556b35da0a7e964}{Shape\-List}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{a00101_a46e1b675322a2c7bfe63d2bb10a24be3}{Clear\-Shapes} ()
+\item 
+void \hyperlink{a00101_acdbaed7fc119f15cad54ae15a7ba2481}{Begin\-Drag} (\hyperlink{a00216_a0fc7c44466a98380192d425c98f22aa6}{C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} type, const \hyperlink{a00029}{C\-C\-\_\-coord} \&start)
+\item 
+void \hyperlink{a00101_aa14015cdeef3157716369387b4b44bc3}{Add\-Drag} (\hyperlink{a00216_a0fc7c44466a98380192d425c98f22aa6}{C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} type, boost\-::shared\-\_\-ptr$<$ \hyperlink{a00037}{C\-C\-\_\-shape} $>$ shape)
+\item 
+void \hyperlink{a00101_a47f1da366d33edd35221d8a8193b7ebb}{Move\-Drag} (const \hyperlink{a00029}{C\-C\-\_\-coord} \&end)
+\item 
+void \hyperlink{a00101_ac975970f76122e2086bab22adb2c6c66}{End\-Drag} ()
+\item 
+void \hyperlink{a00101_ad2ac0147c978c4e0cc06b8778dfef6fa}{Paint\-Background} (wx\-D\-C \&dc)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00102}{Field\-Frame} $\ast$ \hyperlink{a00101_a4eb19251de05b63c1d024907670b97a3}{m\-Frame}
+\item 
+\hyperlink{a00103}{Field\-View} $\ast$ \hyperlink{a00101_a8708bee382612444a5e4472f50b848bf}{m\-View}
+\item 
+\hyperlink{a00216_a0fc7c44466a98380192d425c98f22aa6}{C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} \hyperlink{a00101_a3dbc2249198dc4da9c1a3b7c9537be02}{curr\-\_\-lasso}
+\item 
+\hyperlink{a00216_a45558d38ac05e98ebdbffa5756372654}{C\-C\-\_\-\-M\-O\-V\-E\-\_\-\-M\-O\-D\-E\-S} \hyperlink{a00101_a50098874a6bb9a9014397a8142d72fd0}{curr\-\_\-move}
+\item 
+\hyperlink{a00216_a0fc7c44466a98380192d425c98f22aa6}{C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} \hyperlink{a00101_ac8199a91ba09448c31f2c20e9acc0228}{drag}
+\item 
+\hyperlink{a00101_a6a92f4fe3444b93e6556b35da0a7e964}{Shape\-List} \hyperlink{a00101_a7560c79cbde29e0719d7aa2949b076f4}{shape\-\_\-list}
+\item 
+boost\-::shared\-\_\-ptr$<$ \hyperlink{a00037}{C\-C\-\_\-shape} $>$ \hyperlink{a00101_accf1c526ef4caf9ec999fc61c57e0771}{curr\-\_\-shape}
+\item 
+boost\-::shared\-\_\-ptr\\*
+$<$ \hyperlink{a00017}{Background\-Image} $>$ \hyperlink{a00101_ad2471426f32f860c684282a7d46e36db}{m\-Background\-Image}
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00101_a6a92f4fe3444b93e6556b35da0a7e964}{\index{Field\-Canvas@{Field\-Canvas}!Shape\-List@{Shape\-List}}
+\index{Shape\-List@{Shape\-List}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Shape\-List}]{\setlength{\rightskip}{0pt plus 5cm}typedef std\-::vector$<$boost\-::shared\-\_\-ptr$<${\bf C\-C\-\_\-shape}$>$ $>$ {\bf Field\-Canvas\-::\-Shape\-List}\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a6a92f4fe3444b93e6556b35da0a7e964}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00101_a041189542b2fe164a1b1a13484cfdb3e}{\index{Field\-Canvas@{Field\-Canvas}!Field\-Canvas@{Field\-Canvas}}
+\index{Field\-Canvas@{Field\-Canvas}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Field\-Canvas}]{\setlength{\rightskip}{0pt plus 5cm}Field\-Canvas\-::\-Field\-Canvas (
+\begin{DoxyParamCaption}
+\item[{wx\-View $\ast$}]{view, }
+\item[{{\bf Field\-Frame} $\ast$}]{frame, }
+\item[{float}]{def\-\_\-zoom}
+\end{DoxyParamCaption}
+)}}\label{a00101_a041189542b2fe164a1b1a13484cfdb3e}
+\hypertarget{a00101_a69a815dd136fbc192be653bd561d9e45}{\index{Field\-Canvas@{Field\-Canvas}!$\sim$\-Field\-Canvas@{$\sim$\-Field\-Canvas}}
+\index{$\sim$\-Field\-Canvas@{$\sim$\-Field\-Canvas}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{$\sim$\-Field\-Canvas}]{\setlength{\rightskip}{0pt plus 5cm}Field\-Canvas\-::$\sim$\-Field\-Canvas (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_a69a815dd136fbc192be653bd561d9e45}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00101_aa14015cdeef3157716369387b4b44bc3}{\index{Field\-Canvas@{Field\-Canvas}!Add\-Drag@{Add\-Drag}}
+\index{Add\-Drag@{Add\-Drag}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Add\-Drag}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Add\-Drag (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S}}]{type, }
+\item[{boost\-::shared\-\_\-ptr$<$ {\bf C\-C\-\_\-shape} $>$}]{shape}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_aa14015cdeef3157716369387b4b44bc3}
+\hypertarget{a00101_a75a40b62efa675cb92871bee42b43637}{\index{Field\-Canvas@{Field\-Canvas}!Adjust\-Background\-Image@{Adjust\-Background\-Image}}
+\index{Adjust\-Background\-Image@{Adjust\-Background\-Image}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Adjust\-Background\-Image}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Adjust\-Background\-Image (
+\begin{DoxyParamCaption}
+\item[{bool}]{enable}
+\end{DoxyParamCaption}
+)}}\label{a00101_a75a40b62efa675cb92871bee42b43637}
+\hypertarget{a00101_acdbaed7fc119f15cad54ae15a7ba2481}{\index{Field\-Canvas@{Field\-Canvas}!Begin\-Drag@{Begin\-Drag}}
+\index{Begin\-Drag@{Begin\-Drag}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Begin\-Drag}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Begin\-Drag (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S}}]{type, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{start}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_acdbaed7fc119f15cad54ae15a7ba2481}
+\hypertarget{a00101_a46e1b675322a2c7bfe63d2bb10a24be3}{\index{Field\-Canvas@{Field\-Canvas}!Clear\-Shapes@{Clear\-Shapes}}
+\index{Clear\-Shapes@{Clear\-Shapes}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Clear\-Shapes}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Clear\-Shapes (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a46e1b675322a2c7bfe63d2bb10a24be3}
+\hypertarget{a00101_ac975970f76122e2086bab22adb2c6c66}{\index{Field\-Canvas@{Field\-Canvas}!End\-Drag@{End\-Drag}}
+\index{End\-Drag@{End\-Drag}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{End\-Drag}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-End\-Drag (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_ac975970f76122e2086bab22adb2c6c66}
+\hypertarget{a00101_a76e44f20d8f47ab0fbfeae5cb383b7e4}{\index{Field\-Canvas@{Field\-Canvas}!Get\-Current\-Lasso@{Get\-Current\-Lasso}}
+\index{Get\-Current\-Lasso@{Get\-Current\-Lasso}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Get\-Current\-Lasso}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} Field\-Canvas\-::\-Get\-Current\-Lasso (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00101_a76e44f20d8f47ab0fbfeae5cb383b7e4}
+\hypertarget{a00101_a41d4e10ac454255f77abb527c3359f98}{\index{Field\-Canvas@{Field\-Canvas}!Get\-Current\-Move@{Get\-Current\-Move}}
+\index{Get\-Current\-Move@{Get\-Current\-Move}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Get\-Current\-Move}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-\-M\-O\-V\-E\-\_\-\-M\-O\-D\-E\-S} Field\-Canvas\-::\-Get\-Current\-Move (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00101_a41d4e10ac454255f77abb527c3359f98}
+\hypertarget{a00101_a47f1da366d33edd35221d8a8193b7ebb}{\index{Field\-Canvas@{Field\-Canvas}!Move\-Drag@{Move\-Drag}}
+\index{Move\-Drag@{Move\-Drag}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Move\-Drag}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Move\-Drag (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-coord} \&}]{end}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a47f1da366d33edd35221d8a8193b7ebb}
+\hypertarget{a00101_a241ade9f268bcdfce766de8178aa7a9a}{\index{Field\-Canvas@{Field\-Canvas}!On\-Char@{On\-Char}}
+\index{On\-Char@{On\-Char}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Char}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Char (
+\begin{DoxyParamCaption}
+\item[{wx\-Key\-Event \&}]{event}
+\end{DoxyParamCaption}
+)}}\label{a00101_a241ade9f268bcdfce766de8178aa7a9a}
+\hypertarget{a00101_a415abde6a22a5e8427dd6b274466b1fe}{\index{Field\-Canvas@{Field\-Canvas}!On\-Erase\-Background@{On\-Erase\-Background}}
+\index{On\-Erase\-Background@{On\-Erase\-Background}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Erase\-Background}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Erase\-Background (
+\begin{DoxyParamCaption}
+\item[{wx\-Erase\-Event \&}]{event}
+\end{DoxyParamCaption}
+)}}\label{a00101_a415abde6a22a5e8427dd6b274466b1fe}
+\hypertarget{a00101_a38d68c5f1458ac728df832ceb8ebda36}{\index{Field\-Canvas@{Field\-Canvas}!On\-Mouse\-Left\-Double\-Click@{On\-Mouse\-Left\-Double\-Click}}
+\index{On\-Mouse\-Left\-Double\-Click@{On\-Mouse\-Left\-Double\-Click}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Mouse\-Left\-Double\-Click}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Mouse\-Left\-Double\-Click (
+\begin{DoxyParamCaption}
+\item[{wx\-Mouse\-Event \&}]{event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_a38d68c5f1458ac728df832ceb8ebda36}
+\hypertarget{a00101_a1edd2bb8c1fe0356126cf6fb014d3611}{\index{Field\-Canvas@{Field\-Canvas}!On\-Mouse\-Left\-Down@{On\-Mouse\-Left\-Down}}
+\index{On\-Mouse\-Left\-Down@{On\-Mouse\-Left\-Down}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Mouse\-Left\-Down}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Mouse\-Left\-Down (
+\begin{DoxyParamCaption}
+\item[{wx\-Mouse\-Event \&}]{event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_a1edd2bb8c1fe0356126cf6fb014d3611}
+\hypertarget{a00101_a1e5d88baede48dc92fe2e904287f8a5b}{\index{Field\-Canvas@{Field\-Canvas}!On\-Mouse\-Left\-Up@{On\-Mouse\-Left\-Up}}
+\index{On\-Mouse\-Left\-Up@{On\-Mouse\-Left\-Up}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Mouse\-Left\-Up}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Mouse\-Left\-Up (
+\begin{DoxyParamCaption}
+\item[{wx\-Mouse\-Event \&}]{event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_a1e5d88baede48dc92fe2e904287f8a5b}
+\hypertarget{a00101_a990ffe3bd8a0402c60a3a497f4e66501}{\index{Field\-Canvas@{Field\-Canvas}!On\-Mouse\-Move@{On\-Mouse\-Move}}
+\index{On\-Mouse\-Move@{On\-Mouse\-Move}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Mouse\-Move}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Mouse\-Move (
+\begin{DoxyParamCaption}
+\item[{wx\-Mouse\-Event \&}]{event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_a990ffe3bd8a0402c60a3a497f4e66501}
+
+
+Reimplemented from \hyperlink{a00096_a8a4c47c47d37722abd13437e61ed384f}{Ctrl\-Scroll\-Canvas}.
+
+\hypertarget{a00101_a0425e5b286913746da50af63000acab0}{\index{Field\-Canvas@{Field\-Canvas}!On\-Mouse\-Right\-Down@{On\-Mouse\-Right\-Down}}
+\index{On\-Mouse\-Right\-Down@{On\-Mouse\-Right\-Down}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Mouse\-Right\-Down}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Mouse\-Right\-Down (
+\begin{DoxyParamCaption}
+\item[{wx\-Mouse\-Event \&}]{event}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_a0425e5b286913746da50af63000acab0}
+\hypertarget{a00101_a0912d760e90bcd900ffcae4665b3dbd4}{\index{Field\-Canvas@{Field\-Canvas}!On\-Paint@{On\-Paint}}
+\index{On\-Paint@{On\-Paint}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{On\-Paint}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-On\-Paint (
+\begin{DoxyParamCaption}
+\item[{wx\-Paint\-Event \&}]{event}
+\end{DoxyParamCaption}
+)}}\label{a00101_a0912d760e90bcd900ffcae4665b3dbd4}
+\hypertarget{a00101_ad2ac0147c978c4e0cc06b8778dfef6fa}{\index{Field\-Canvas@{Field\-Canvas}!Paint\-Background@{Paint\-Background}}
+\index{Paint\-Background@{Paint\-Background}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Paint\-Background}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Paint\-Background (
+\begin{DoxyParamCaption}
+\item[{wx\-D\-C \&}]{dc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_ad2ac0147c978c4e0cc06b8778dfef6fa}
+\hypertarget{a00101_ad164d99c8a4cf72038e532aaacc0cf9a}{\index{Field\-Canvas@{Field\-Canvas}!Remove\-Background\-Image@{Remove\-Background\-Image}}
+\index{Remove\-Background\-Image@{Remove\-Background\-Image}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Remove\-Background\-Image}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Remove\-Background\-Image (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00101_ad164d99c8a4cf72038e532aaacc0cf9a}
+\hypertarget{a00101_afdb191feba34784ac967d08755e44df5}{\index{Field\-Canvas@{Field\-Canvas}!Set\-Background\-Image@{Set\-Background\-Image}}
+\index{Set\-Background\-Image@{Set\-Background\-Image}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Set\-Background\-Image}]{\setlength{\rightskip}{0pt plus 5cm}bool Field\-Canvas\-::\-Set\-Background\-Image (
+\begin{DoxyParamCaption}
+\item[{const wx\-Image \&}]{image}
+\end{DoxyParamCaption}
+)}}\label{a00101_afdb191feba34784ac967d08755e44df5}
+\hypertarget{a00101_a0f57b3715f60267be91d9bdcbdeba506}{\index{Field\-Canvas@{Field\-Canvas}!Set\-Current\-Lasso@{Set\-Current\-Lasso}}
+\index{Set\-Current\-Lasso@{Set\-Current\-Lasso}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Set\-Current\-Lasso}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Set\-Current\-Lasso (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S}}]{lasso}
+\end{DoxyParamCaption}
+)}}\label{a00101_a0f57b3715f60267be91d9bdcbdeba506}
+\hypertarget{a00101_abc66ecb8018ed140d6a0dbfcdbab8665}{\index{Field\-Canvas@{Field\-Canvas}!Set\-Current\-Move@{Set\-Current\-Move}}
+\index{Set\-Current\-Move@{Set\-Current\-Move}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Set\-Current\-Move}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Set\-Current\-Move (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-\-M\-O\-V\-E\-\_\-\-M\-O\-D\-E\-S}}]{move}
+\end{DoxyParamCaption}
+)}}\label{a00101_abc66ecb8018ed140d6a0dbfcdbab8665}
+\hypertarget{a00101_ac4260b49b302d3d7009fad67ac1775de}{\index{Field\-Canvas@{Field\-Canvas}!Set\-Zoom@{Set\-Zoom}}
+\index{Set\-Zoom@{Set\-Zoom}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Set\-Zoom}]{\setlength{\rightskip}{0pt plus 5cm}void Field\-Canvas\-::\-Set\-Zoom (
+\begin{DoxyParamCaption}
+\item[{float}]{factor}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00101_ac4260b49b302d3d7009fad67ac1775de}
+
+
+Reimplemented from \hyperlink{a00096_a3ad771782a6dbb4c590e18a797a56c42}{Ctrl\-Scroll\-Canvas}.
+
+\hypertarget{a00101_abef5f32425f5f6a4c4623d161e36acec}{\index{Field\-Canvas@{Field\-Canvas}!Zoom\-To\-Fit\-Factor@{Zoom\-To\-Fit\-Factor}}
+\index{Zoom\-To\-Fit\-Factor@{Zoom\-To\-Fit\-Factor}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{Zoom\-To\-Fit\-Factor}]{\setlength{\rightskip}{0pt plus 5cm}float Field\-Canvas\-::\-Zoom\-To\-Fit\-Factor (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00101_abef5f32425f5f6a4c4623d161e36acec}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00101_a3dbc2249198dc4da9c1a3b7c9537be02}{\index{Field\-Canvas@{Field\-Canvas}!curr\-\_\-lasso@{curr\-\_\-lasso}}
+\index{curr\-\_\-lasso@{curr\-\_\-lasso}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{curr\-\_\-lasso}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} Field\-Canvas\-::curr\-\_\-lasso\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a3dbc2249198dc4da9c1a3b7c9537be02}
+\hypertarget{a00101_a50098874a6bb9a9014397a8142d72fd0}{\index{Field\-Canvas@{Field\-Canvas}!curr\-\_\-move@{curr\-\_\-move}}
+\index{curr\-\_\-move@{curr\-\_\-move}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{curr\-\_\-move}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-\-M\-O\-V\-E\-\_\-\-M\-O\-D\-E\-S} Field\-Canvas\-::curr\-\_\-move\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a50098874a6bb9a9014397a8142d72fd0}
+\hypertarget{a00101_accf1c526ef4caf9ec999fc61c57e0771}{\index{Field\-Canvas@{Field\-Canvas}!curr\-\_\-shape@{curr\-\_\-shape}}
+\index{curr\-\_\-shape@{curr\-\_\-shape}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{curr\-\_\-shape}]{\setlength{\rightskip}{0pt plus 5cm}boost\-::shared\-\_\-ptr$<${\bf C\-C\-\_\-shape}$>$ Field\-Canvas\-::curr\-\_\-shape\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_accf1c526ef4caf9ec999fc61c57e0771}
+\hypertarget{a00101_ac8199a91ba09448c31f2c20e9acc0228}{\index{Field\-Canvas@{Field\-Canvas}!drag@{drag}}
+\index{drag@{drag}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{drag}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-\-D\-R\-A\-G\-\_\-\-T\-Y\-P\-E\-S} Field\-Canvas\-::drag\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_ac8199a91ba09448c31f2c20e9acc0228}
+\hypertarget{a00101_ad2471426f32f860c684282a7d46e36db}{\index{Field\-Canvas@{Field\-Canvas}!m\-Background\-Image@{m\-Background\-Image}}
+\index{m\-Background\-Image@{m\-Background\-Image}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{m\-Background\-Image}]{\setlength{\rightskip}{0pt plus 5cm}boost\-::shared\-\_\-ptr$<${\bf Background\-Image}$>$ Field\-Canvas\-::m\-Background\-Image\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_ad2471426f32f860c684282a7d46e36db}
+\hypertarget{a00101_a4eb19251de05b63c1d024907670b97a3}{\index{Field\-Canvas@{Field\-Canvas}!m\-Frame@{m\-Frame}}
+\index{m\-Frame@{m\-Frame}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{m\-Frame}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Field\-Frame}$\ast$ Field\-Canvas\-::m\-Frame\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a4eb19251de05b63c1d024907670b97a3}
+\hypertarget{a00101_a8708bee382612444a5e4472f50b848bf}{\index{Field\-Canvas@{Field\-Canvas}!m\-View@{m\-View}}
+\index{m\-View@{m\-View}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{m\-View}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Field\-View}$\ast$ Field\-Canvas\-::m\-View\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a8708bee382612444a5e4472f50b848bf}
+\hypertarget{a00101_a7560c79cbde29e0719d7aa2949b076f4}{\index{Field\-Canvas@{Field\-Canvas}!shape\-\_\-list@{shape\-\_\-list}}
+\index{shape\-\_\-list@{shape\-\_\-list}!FieldCanvas@{Field\-Canvas}}
+\subsubsection[{shape\-\_\-list}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Shape\-List} Field\-Canvas\-::shape\-\_\-list\hspace{0.3cm}{\ttfamily [private]}}}\label{a00101_a7560c79cbde29e0719d7aa2949b076f4}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/\hyperlink{a00225}{field\-\_\-canvas.\-h}\item 
+src/\hyperlink{a00224}{field\-\_\-canvas.\-cpp}\end{DoxyCompactItemize}

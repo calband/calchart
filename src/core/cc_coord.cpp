@@ -26,7 +26,6 @@
 #include "cc_coord.h"
 #include <cstdlib>
 
-// Get magnitude of vector
 float CC_coord::Magnitude() const
 {
 	float x_f, y_f;
@@ -37,7 +36,6 @@ float CC_coord::Magnitude() const
 }
 
 
-// Get magnitude, but check for diagonal military
 float CC_coord::DM_Magnitude() const
 {
 	if ((x == y) || (x == -y))
@@ -51,7 +49,6 @@ float CC_coord::DM_Magnitude() const
 }
 
 
-// Get direction of this vector
 float CC_coord::Direction() const
 {
 	float ang;
@@ -66,7 +63,6 @@ float CC_coord::Direction() const
 }
 
 
-// Get direction from this coord to another
 float CC_coord::Direction(const CC_coord& c) const
 {
 	CC_coord vect = c - *this;
@@ -74,8 +70,6 @@ float CC_coord::Direction(const CC_coord& c) const
 	return vect.Direction();
 }
 
-
-// Returns true if this coordinate is within 1 step of another
 bool CC_coord::Collides(const CC_coord& c) const
 {
 	Coord dx, dy;
@@ -89,7 +83,7 @@ bool CC_coord::Collides(const CC_coord& c) const
 }
 
 
-
+//TODO - UNIT TESTS ELSEWHERE?
 #include <assert.h>
 
 // Test Suite stuff

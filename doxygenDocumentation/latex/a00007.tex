@@ -1,0 +1,235 @@
+\hypertarget{a00007}{\section{Animate\-Compile Class Reference}
+\label{a00007}\index{Animate\-Compile@{Animate\-Compile}}
+}
+
+
+{\ttfamily \#include $<$animatecompile.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00007_a7b3f8a2ace64c939aa76225984e25c04}{Animate\-Compile} (const \hyperlink{a00046}{C\-C\-\_\-show} \&show, \hyperlink{a00014}{Animation\-Variables} \&variables\-States)
+\item 
+\hyperlink{a00007_a8a621790c421b2b1ff10a2a8b3f49fab}{$\sim$\-Animate\-Compile} ()
+\item 
+std\-::vector$<$ boost\-::shared\-\_\-ptr\\*
+$<$ \hyperlink{a00003}{Animate\-Command} $>$ $>$ \hyperlink{a00007_a34cceb61b18c2ae436efe5f95becb28a}{Compile} (\hyperlink{a00046_aaaf1345012d2f833d1c8f28f9b8593ff}{C\-C\-\_\-show\-::const\-\_\-\-C\-C\-\_\-sheet\-\_\-iterator\-\_\-t} c\-\_\-sheet, unsigned pt\-\_\-num, \hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} cont\-\_\-symbol, \hyperlink{a00067}{Cont\-Procedure} $\ast$proc)
+\item 
+bool \hyperlink{a00007_a2eab2ee0c43db362a33e54abb941c057}{Append} (boost\-::shared\-\_\-ptr$<$ \hyperlink{a00003}{Animate\-Command} $>$ cmd, const \hyperlink{a00085}{Cont\-Token} $\ast$token)
+\item 
+bool \hyperlink{a00007_a712b8954d7ef78f56cda0601984986d3}{Okay} ()
+\item 
+void \hyperlink{a00007_aad974c45b5dac1d240ede102fc664e02}{Register\-Error} (\hyperlink{a00196_a85ee9a09c66824778f4d1e44411f8703}{Animate\-Error} err, const \hyperlink{a00085}{Cont\-Token} $\ast$token)
+\item 
+float \hyperlink{a00007_a8a1eabe9a7e81917cd67c7c96266dc7e}{Get\-Var\-Value} (int varnum, const \hyperlink{a00085}{Cont\-Token} $\ast$token)
+\item 
+void \hyperlink{a00007_aa12ee95a9e8e604454ac2ce772cb9c44}{Set\-Var\-Value} (int varnum, float value)
+\item 
+std\-::vector$<$ \hyperlink{a00098}{Error\-Marker} $>$ \hyperlink{a00007_a1cce4acfa8fd114785068f74def98992}{Get\-Error\-Markers} () const 
+\item 
+\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \hyperlink{a00007_ae670d64339321051cbb382525530eff0}{Get\-Point\-Position} () const 
+\item 
+unsigned \hyperlink{a00007_a6406e70747c4bdc0fb8d30b5e71bf3b2}{Get\-Current\-Point} () const 
+\item 
+unsigned \hyperlink{a00007_a3d824c8de9d6e906a6d14d5011ded73f}{Get\-Beats\-Remaining} () const 
+\item 
+\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \hyperlink{a00007_ae4ba7526a293c2cdbada00e592bd21a6}{Get\-Starting\-Position} () const 
+\item 
+\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \hyperlink{a00007_afe8f5e9a0d727dc134497a1783ca7656}{Get\-Ending\-Position} (const \hyperlink{a00085}{Cont\-Token} $\ast$token)
+\item 
+\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \hyperlink{a00007_ab55c26d9886d951d63f9415e653e865c}{Get\-Reference\-Point\-Position} (unsigned refnum) const 
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{a00007_a1fafdaa29093c8abfc725a9dad511966}{Set\-Status} (bool s)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \hyperlink{a00007_a452baa7903c665a4861cb1f1eaa9d2df}{pt}
+\item 
+const \hyperlink{a00046}{C\-C\-\_\-show} \& \hyperlink{a00007_abf4e08c9790e8d8e011de3c2b8120ecd}{m\-Show}
+\item 
+\hyperlink{a00046_aaaf1345012d2f833d1c8f28f9b8593ff}{C\-C\-\_\-show\-::const\-\_\-\-C\-C\-\_\-sheet\-\_\-iterator\-\_\-t} \hyperlink{a00007_a506679d533380355bf4de8b9f4d8aaa1}{curr\-\_\-sheet}
+\item 
+unsigned \hyperlink{a00007_a88dedadc61cd7a2dcc08140809e81e0b}{curr\-\_\-pt}
+\item 
+unsigned \hyperlink{a00007_af3feb682c6ad3aab1c7483d6b3dcd5f0}{beats\-\_\-rem}
+\item 
+\hyperlink{a00216_a68cd84e0300be6f9ff4474682762c9ee}{S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} \hyperlink{a00007_aa854b256cdb3fcc21d3a7b110f34bc20}{contsymbol}
+\item 
+std\-::vector$<$ boost\-::shared\-\_\-ptr\\*
+$<$ \hyperlink{a00003}{Animate\-Command} $>$ $>$ \hyperlink{a00007_a5d5b0775236c5ad6382eb58f1e0fc0a9}{cmds}
+\item 
+std\-::vector$<$ \hyperlink{a00098}{Error\-Marker} $>$ \hyperlink{a00007_a727a78d36a18425535c2d262ee7634b2}{error\-\_\-markers}
+\item 
+\hyperlink{a00014}{Animation\-Variables} \& \hyperlink{a00007_a5bb5e56e9ad574dc86439a37eb4511c7}{vars}
+\item 
+bool \hyperlink{a00007_a937c6b3e6577b594848cc98b62915ede}{okay}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00007_a7b3f8a2ace64c939aa76225984e25c04}{\index{Animate\-Compile@{Animate\-Compile}!Animate\-Compile@{Animate\-Compile}}
+\index{Animate\-Compile@{Animate\-Compile}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Animate\-Compile}]{\setlength{\rightskip}{0pt plus 5cm}Animate\-Compile\-::\-Animate\-Compile (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-show} \&}]{show, }
+\item[{{\bf Animation\-Variables} \&}]{variables\-States}
+\end{DoxyParamCaption}
+)}}\label{a00007_a7b3f8a2ace64c939aa76225984e25c04}
+\hypertarget{a00007_a8a621790c421b2b1ff10a2a8b3f49fab}{\index{Animate\-Compile@{Animate\-Compile}!$\sim$\-Animate\-Compile@{$\sim$\-Animate\-Compile}}
+\index{$\sim$\-Animate\-Compile@{$\sim$\-Animate\-Compile}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{$\sim$\-Animate\-Compile}]{\setlength{\rightskip}{0pt plus 5cm}Animate\-Compile\-::$\sim$\-Animate\-Compile (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00007_a8a621790c421b2b1ff10a2a8b3f49fab}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00007_a2eab2ee0c43db362a33e54abb941c057}{\index{Animate\-Compile@{Animate\-Compile}!Append@{Append}}
+\index{Append@{Append}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Append}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Compile\-::\-Append (
+\begin{DoxyParamCaption}
+\item[{boost\-::shared\-\_\-ptr$<$ {\bf Animate\-Command} $>$}]{cmd, }
+\item[{const {\bf Cont\-Token} $\ast$}]{token}
+\end{DoxyParamCaption}
+)}}\label{a00007_a2eab2ee0c43db362a33e54abb941c057}
+\hypertarget{a00007_a34cceb61b18c2ae436efe5f95becb28a}{\index{Animate\-Compile@{Animate\-Compile}!Compile@{Compile}}
+\index{Compile@{Compile}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Compile}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ boost\-::shared\-\_\-ptr$<$ {\bf Animate\-Command} $>$ $>$ Animate\-Compile\-::\-Compile (
+\begin{DoxyParamCaption}
+\item[{{\bf C\-C\-\_\-show\-::const\-\_\-\-C\-C\-\_\-sheet\-\_\-iterator\-\_\-t}}]{c\-\_\-sheet, }
+\item[{unsigned}]{pt\-\_\-num, }
+\item[{{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E}}]{cont\-\_\-symbol, }
+\item[{{\bf Cont\-Procedure} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)}}\label{a00007_a34cceb61b18c2ae436efe5f95becb28a}
+\hypertarget{a00007_a3d824c8de9d6e906a6d14d5011ded73f}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Beats\-Remaining@{Get\-Beats\-Remaining}}
+\index{Get\-Beats\-Remaining@{Get\-Beats\-Remaining}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Beats\-Remaining}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animate\-Compile\-::\-Get\-Beats\-Remaining (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00007_a3d824c8de9d6e906a6d14d5011ded73f}
+\hypertarget{a00007_a6406e70747c4bdc0fb8d30b5e71bf3b2}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Current\-Point@{Get\-Current\-Point}}
+\index{Get\-Current\-Point@{Get\-Current\-Point}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Current\-Point}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animate\-Compile\-::\-Get\-Current\-Point (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00007_a6406e70747c4bdc0fb8d30b5e71bf3b2}
+\hypertarget{a00007_afe8f5e9a0d727dc134497a1783ca7656}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Ending\-Position@{Get\-Ending\-Position}}
+\index{Get\-Ending\-Position@{Get\-Ending\-Position}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Ending\-Position}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Point} Animate\-Compile\-::\-Get\-Ending\-Position (
+\begin{DoxyParamCaption}
+\item[{const {\bf Cont\-Token} $\ast$}]{token}
+\end{DoxyParamCaption}
+)}}\label{a00007_afe8f5e9a0d727dc134497a1783ca7656}
+\hypertarget{a00007_a1cce4acfa8fd114785068f74def98992}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Error\-Markers@{Get\-Error\-Markers}}
+\index{Get\-Error\-Markers@{Get\-Error\-Markers}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Error\-Markers}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Error\-Marker}$>$ Animate\-Compile\-::\-Get\-Error\-Markers (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00007_a1cce4acfa8fd114785068f74def98992}
+\hypertarget{a00007_ae670d64339321051cbb382525530eff0}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Point\-Position@{Get\-Point\-Position}}
+\index{Get\-Point\-Position@{Get\-Point\-Position}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Point\-Position}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Point} Animate\-Compile\-::\-Get\-Point\-Position (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00007_ae670d64339321051cbb382525530eff0}
+\hypertarget{a00007_ab55c26d9886d951d63f9415e653e865c}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Reference\-Point\-Position@{Get\-Reference\-Point\-Position}}
+\index{Get\-Reference\-Point\-Position@{Get\-Reference\-Point\-Position}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Reference\-Point\-Position}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Point} Animate\-Compile\-::\-Get\-Reference\-Point\-Position (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{refnum}
+\end{DoxyParamCaption}
+) const}}\label{a00007_ab55c26d9886d951d63f9415e653e865c}
+\hypertarget{a00007_ae4ba7526a293c2cdbada00e592bd21a6}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Starting\-Position@{Get\-Starting\-Position}}
+\index{Get\-Starting\-Position@{Get\-Starting\-Position}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Starting\-Position}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Point} Animate\-Compile\-::\-Get\-Starting\-Position (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00007_ae4ba7526a293c2cdbada00e592bd21a6}
+\hypertarget{a00007_a8a1eabe9a7e81917cd67c7c96266dc7e}{\index{Animate\-Compile@{Animate\-Compile}!Get\-Var\-Value@{Get\-Var\-Value}}
+\index{Get\-Var\-Value@{Get\-Var\-Value}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Get\-Var\-Value}]{\setlength{\rightskip}{0pt plus 5cm}float Animate\-Compile\-::\-Get\-Var\-Value (
+\begin{DoxyParamCaption}
+\item[{int}]{varnum, }
+\item[{const {\bf Cont\-Token} $\ast$}]{token}
+\end{DoxyParamCaption}
+)}}\label{a00007_a8a1eabe9a7e81917cd67c7c96266dc7e}
+\hypertarget{a00007_a712b8954d7ef78f56cda0601984986d3}{\index{Animate\-Compile@{Animate\-Compile}!Okay@{Okay}}
+\index{Okay@{Okay}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Okay}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Compile\-::\-Okay (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00007_a712b8954d7ef78f56cda0601984986d3}
+\hypertarget{a00007_aad974c45b5dac1d240ede102fc664e02}{\index{Animate\-Compile@{Animate\-Compile}!Register\-Error@{Register\-Error}}
+\index{Register\-Error@{Register\-Error}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Register\-Error}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Compile\-::\-Register\-Error (
+\begin{DoxyParamCaption}
+\item[{{\bf Animate\-Error}}]{err, }
+\item[{const {\bf Cont\-Token} $\ast$}]{token}
+\end{DoxyParamCaption}
+)}}\label{a00007_aad974c45b5dac1d240ede102fc664e02}
+\hypertarget{a00007_a1fafdaa29093c8abfc725a9dad511966}{\index{Animate\-Compile@{Animate\-Compile}!Set\-Status@{Set\-Status}}
+\index{Set\-Status@{Set\-Status}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Set\-Status}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Compile\-::\-Set\-Status (
+\begin{DoxyParamCaption}
+\item[{bool}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}}\label{a00007_a1fafdaa29093c8abfc725a9dad511966}
+\hypertarget{a00007_aa12ee95a9e8e604454ac2ce772cb9c44}{\index{Animate\-Compile@{Animate\-Compile}!Set\-Var\-Value@{Set\-Var\-Value}}
+\index{Set\-Var\-Value@{Set\-Var\-Value}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{Set\-Var\-Value}]{\setlength{\rightskip}{0pt plus 5cm}void Animate\-Compile\-::\-Set\-Var\-Value (
+\begin{DoxyParamCaption}
+\item[{int}]{varnum, }
+\item[{float}]{value}
+\end{DoxyParamCaption}
+)}}\label{a00007_aa12ee95a9e8e604454ac2ce772cb9c44}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00007_af3feb682c6ad3aab1c7483d6b3dcd5f0}{\index{Animate\-Compile@{Animate\-Compile}!beats\-\_\-rem@{beats\-\_\-rem}}
+\index{beats\-\_\-rem@{beats\-\_\-rem}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{beats\-\_\-rem}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animate\-Compile\-::beats\-\_\-rem\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_af3feb682c6ad3aab1c7483d6b3dcd5f0}
+\hypertarget{a00007_a5d5b0775236c5ad6382eb58f1e0fc0a9}{\index{Animate\-Compile@{Animate\-Compile}!cmds@{cmds}}
+\index{cmds@{cmds}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{cmds}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$boost\-::shared\-\_\-ptr$<${\bf Animate\-Command}$>$ $>$ Animate\-Compile\-::cmds\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a5d5b0775236c5ad6382eb58f1e0fc0a9}
+\hypertarget{a00007_aa854b256cdb3fcc21d3a7b110f34bc20}{\index{Animate\-Compile@{Animate\-Compile}!contsymbol@{contsymbol}}
+\index{contsymbol@{contsymbol}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{contsymbol}]{\setlength{\rightskip}{0pt plus 5cm}{\bf S\-Y\-M\-B\-O\-L\-\_\-\-T\-Y\-P\-E} Animate\-Compile\-::contsymbol\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_aa854b256cdb3fcc21d3a7b110f34bc20}
+\hypertarget{a00007_a88dedadc61cd7a2dcc08140809e81e0b}{\index{Animate\-Compile@{Animate\-Compile}!curr\-\_\-pt@{curr\-\_\-pt}}
+\index{curr\-\_\-pt@{curr\-\_\-pt}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{curr\-\_\-pt}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animate\-Compile\-::curr\-\_\-pt\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a88dedadc61cd7a2dcc08140809e81e0b}
+\hypertarget{a00007_a506679d533380355bf4de8b9f4d8aaa1}{\index{Animate\-Compile@{Animate\-Compile}!curr\-\_\-sheet@{curr\-\_\-sheet}}
+\index{curr\-\_\-sheet@{curr\-\_\-sheet}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{curr\-\_\-sheet}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-show\-::const\-\_\-\-C\-C\-\_\-sheet\-\_\-iterator\-\_\-t} Animate\-Compile\-::curr\-\_\-sheet\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a506679d533380355bf4de8b9f4d8aaa1}
+\hypertarget{a00007_a727a78d36a18425535c2d262ee7634b2}{\index{Animate\-Compile@{Animate\-Compile}!error\-\_\-markers@{error\-\_\-markers}}
+\index{error\-\_\-markers@{error\-\_\-markers}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{error\-\_\-markers}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Error\-Marker}$>$ Animate\-Compile\-::error\-\_\-markers\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a727a78d36a18425535c2d262ee7634b2}
+\hypertarget{a00007_abf4e08c9790e8d8e011de3c2b8120ecd}{\index{Animate\-Compile@{Animate\-Compile}!m\-Show@{m\-Show}}
+\index{m\-Show@{m\-Show}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{m\-Show}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf C\-C\-\_\-show}\& Animate\-Compile\-::m\-Show\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_abf4e08c9790e8d8e011de3c2b8120ecd}
+\hypertarget{a00007_a937c6b3e6577b594848cc98b62915ede}{\index{Animate\-Compile@{Animate\-Compile}!okay@{okay}}
+\index{okay@{okay}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{okay}]{\setlength{\rightskip}{0pt plus 5cm}bool Animate\-Compile\-::okay\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a937c6b3e6577b594848cc98b62915ede}
+\hypertarget{a00007_a452baa7903c665a4861cb1f1eaa9d2df}{\index{Animate\-Compile@{Animate\-Compile}!pt@{pt}}
+\index{pt@{pt}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{pt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Point} Animate\-Compile\-::pt\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a452baa7903c665a4861cb1f1eaa9d2df}
+\hypertarget{a00007_a5bb5e56e9ad574dc86439a37eb4511c7}{\index{Animate\-Compile@{Animate\-Compile}!vars@{vars}}
+\index{vars@{vars}!AnimateCompile@{Animate\-Compile}}
+\subsubsection[{vars}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animation\-Variables}\& Animate\-Compile\-::vars\hspace{0.3cm}{\ttfamily [private]}}}\label{a00007_a5bb5e56e9ad574dc86439a37eb4511c7}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00200}{animatecompile.\-h}\item 
+src/core/\hyperlink{a00199}{animatecompile.\-cpp}\end{DoxyCompactItemize}

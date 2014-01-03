@@ -1,0 +1,79 @@
+\hypertarget{a00194}{\section{src/core/animate.cpp File Reference}
+\label{a00194}\index{src/core/animate.\-cpp@{src/core/animate.\-cpp}}
+}
+{\ttfamily \#include \char`\"{}animate.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}animatecommand.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cont.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-sheet.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-continuity.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}cc\-\_\-point.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}math\-\_\-utils.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$boost/format.\-hpp$>$}\\*
+{\ttfamily \#include $<$cmath$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$sstream$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{a00008}{Animate\-Sheet}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{a00194_a525335710b53cb064ca56b936120431e}{\-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{a00194_ab91f4a3fc9561b6b50d57907e8751643}{parsecontinuity} ()
+\item 
+std\-::string \hyperlink{a00194_aab4ab291804c5a225333f30233413fc7}{animate\-\_\-err\-\_\-msgs} (size\-\_\-t which)
+\item 
+\hyperlink{a00196_a6feaf30c8830fe6fcc0982cb7e9621ab}{Animate\-Dir} \hyperlink{a00194_a149d51d42f280c1e82e5934235d35ab7}{Anim\-Get\-Dir\-From\-Angle} (float ang)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const char $\ast$ \hyperlink{a00194_af16723acd9cc8353403d36b04624da82}{yyinputbuffer}
+\item 
+\hyperlink{a00067}{Cont\-Procedure} $\ast$ \hyperlink{a00194_a26d6f5bc37e42edc9380bb729613bde4}{Parsed\-Continuity}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{a00194_a525335710b53cb064ca56b936120431e}{\index{animate.\-cpp@{animate.\-cpp}!\-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S@{\-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S}}
+\index{\-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S@{\-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S}!animate.cpp@{animate.\-cpp}}
+\subsubsection[{\-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define \-\_\-\-U\-S\-E\-\_\-\-M\-A\-T\-H\-\_\-\-D\-E\-F\-I\-N\-E\-S}}\label{a00194_a525335710b53cb064ca56b936120431e}
+
+
+\subsection{Function Documentation}
+\hypertarget{a00194_aab4ab291804c5a225333f30233413fc7}{\index{animate.\-cpp@{animate.\-cpp}!animate\-\_\-err\-\_\-msgs@{animate\-\_\-err\-\_\-msgs}}
+\index{animate\-\_\-err\-\_\-msgs@{animate\-\_\-err\-\_\-msgs}!animate.cpp@{animate.\-cpp}}
+\subsubsection[{animate\-\_\-err\-\_\-msgs}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string animate\-\_\-err\-\_\-msgs (
+\begin{DoxyParamCaption}
+\item[{size\-\_\-t}]{which}
+\end{DoxyParamCaption}
+)}}\label{a00194_aab4ab291804c5a225333f30233413fc7}
+\hypertarget{a00194_a149d51d42f280c1e82e5934235d35ab7}{\index{animate.\-cpp@{animate.\-cpp}!Anim\-Get\-Dir\-From\-Angle@{Anim\-Get\-Dir\-From\-Angle}}
+\index{Anim\-Get\-Dir\-From\-Angle@{Anim\-Get\-Dir\-From\-Angle}!animate.cpp@{animate.\-cpp}}
+\subsubsection[{Anim\-Get\-Dir\-From\-Angle}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Dir} Anim\-Get\-Dir\-From\-Angle (
+\begin{DoxyParamCaption}
+\item[{float}]{ang}
+\end{DoxyParamCaption}
+)}}\label{a00194_a149d51d42f280c1e82e5934235d35ab7}
+\hypertarget{a00194_ab91f4a3fc9561b6b50d57907e8751643}{\index{animate.\-cpp@{animate.\-cpp}!parsecontinuity@{parsecontinuity}}
+\index{parsecontinuity@{parsecontinuity}!animate.cpp@{animate.\-cpp}}
+\subsubsection[{parsecontinuity}]{\setlength{\rightskip}{0pt plus 5cm}int parsecontinuity (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00194_ab91f4a3fc9561b6b50d57907e8751643}
+
+
+\subsection{Variable Documentation}
+\hypertarget{a00194_a26d6f5bc37e42edc9380bb729613bde4}{\index{animate.\-cpp@{animate.\-cpp}!Parsed\-Continuity@{Parsed\-Continuity}}
+\index{Parsed\-Continuity@{Parsed\-Continuity}!animate.cpp@{animate.\-cpp}}
+\subsubsection[{Parsed\-Continuity}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cont\-Procedure}$\ast$ Parsed\-Continuity}}\label{a00194_a26d6f5bc37e42edc9380bb729613bde4}
+\hypertarget{a00194_af16723acd9cc8353403d36b04624da82}{\index{animate.\-cpp@{animate.\-cpp}!yyinputbuffer@{yyinputbuffer}}
+\index{yyinputbuffer@{yyinputbuffer}!animate.cpp@{animate.\-cpp}}
+\subsubsection[{yyinputbuffer}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ yyinputbuffer}}\label{a00194_af16723acd9cc8353403d36b04624da82}

@@ -1,0 +1,105 @@
+\hypertarget{a00018}{\section{Basic\-Cal\-Chart\-Command Class Reference}
+\label{a00018}\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}}
+}
+
+
+{\ttfamily \#include $<$cc\-\_\-command.\-h$>$}
+
+Inheritance diagram for Basic\-Cal\-Chart\-Command\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.296651cm]{a00018}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00018_a176cb9a986d1b043dd6d5350f3316bb9}{Basic\-Cal\-Chart\-Command} (\hyperlink{a00020}{Cal\-Chart\-Doc} \&doc, const wx\-String cmd\-Name)
+\item 
+virtual \hyperlink{a00018_a86f682185344e0b3eded54702d7b1f16}{$\sim$\-Basic\-Cal\-Chart\-Command} ()=0
+\item 
+virtual bool \hyperlink{a00018_a4e672c037f38626e4b8634c9613ea34e}{Do} ()
+\item 
+virtual bool \hyperlink{a00018_adfffde377bdc935cf06490667de1d7b6}{Undo} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00020}{Cal\-Chart\-Doc} \& \hyperlink{a00018_ab9f5e00f2b86c92e0051f56b889d1a13}{m\-Doc}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{a00018_ab6f65965601103020ea8276abf88313a}{Do\-Action} ()=0
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{a00018_a75aae02cbaadf5c37f31ec036078bc40}{m\-Doc\-Modified}
+\item 
+\hyperlink{a00046}{C\-C\-\_\-show} \hyperlink{a00018_a04e36485f183ef4967929432c0a08714}{m\-Snap\-Shot}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00018_a176cb9a986d1b043dd6d5350f3316bb9}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}}
+\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{Basic\-Cal\-Chart\-Command}]{\setlength{\rightskip}{0pt plus 5cm}Basic\-Cal\-Chart\-Command\-::\-Basic\-Cal\-Chart\-Command (
+\begin{DoxyParamCaption}
+\item[{{\bf Cal\-Chart\-Doc} \&}]{doc, }
+\item[{const wx\-String}]{cmd\-Name}
+\end{DoxyParamCaption}
+)}}\label{a00018_a176cb9a986d1b043dd6d5350f3316bb9}
+\hypertarget{a00018_a86f682185344e0b3eded54702d7b1f16}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!$\sim$\-Basic\-Cal\-Chart\-Command@{$\sim$\-Basic\-Cal\-Chart\-Command}}
+\index{$\sim$\-Basic\-Cal\-Chart\-Command@{$\sim$\-Basic\-Cal\-Chart\-Command}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{$\sim$\-Basic\-Cal\-Chart\-Command}]{\setlength{\rightskip}{0pt plus 5cm}Basic\-Cal\-Chart\-Command\-::$\sim$\-Basic\-Cal\-Chart\-Command (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}}\label{a00018_a86f682185344e0b3eded54702d7b1f16}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00018_a4e672c037f38626e4b8634c9613ea34e}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!Do@{Do}}
+\index{Do@{Do}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{Do}]{\setlength{\rightskip}{0pt plus 5cm}bool Basic\-Cal\-Chart\-Command\-::\-Do (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00018_a4e672c037f38626e4b8634c9613ea34e}
+\hypertarget{a00018_ab6f65965601103020ea8276abf88313a}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!Do\-Action@{Do\-Action}}
+\index{Do\-Action@{Do\-Action}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{Do\-Action}]{\setlength{\rightskip}{0pt plus 5cm}virtual void Basic\-Cal\-Chart\-Command\-::\-Do\-Action (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}, {\ttfamily [pure virtual]}}}\label{a00018_ab6f65965601103020ea8276abf88313a}
+
+
+Implemented in \hyperlink{a00127_a1b03e239de9656b4fabe64f52ef502bb}{Set\-Label\-Command}, \hyperlink{a00124_a8545ed7f5c3ca572042c4a0abc8c2491}{Set\-Continuity\-Text\-Command}, \hyperlink{a00137_ac01aa3b3a02f3a8db5b16e9cbb1c3228}{Set\-Symbol\-Command}, \hyperlink{a00112_a2339b105a336b22d59771534a3f4a304}{Move\-Points\-On\-Sheet\-Command}, \hyperlink{a00132_ae017079a0a6c65222f10968fad8fc082}{Set\-Sheet\-And\-Select\-Command}, \hyperlink{a00122_ac289d6c5166a7139fa0c61c664d1710e}{Remove\-Sheets\-Command}, \hyperlink{a00001_aba46cac1335e29189a9aaf5b50d3f364}{Add\-Sheets\-Command}, \hyperlink{a00133_a9efb63e15dae7c253792ae214feda42e}{Set\-Sheet\-Beats\-Command}, \hyperlink{a00135_ab2e45d322adbc00b829917145585e152}{Set\-Sheet\-Title\-Command}, \hyperlink{a00134_a027700275d409b94185dfb3aa2d792bb}{Set\-Sheet\-Command}, \hyperlink{a00136_abf979162c4c398c5f11057410f3c2bc2}{Set\-Show\-Info\-Command}, \hyperlink{a00130_aa9a96b69185714f4acfa18ae5812cbcf}{Set\-Mode\-Command}, and \hyperlink{a00125_a1e24fd27d87d38070e1823095d396d28}{Set\-Description\-Command}.
+
+\hypertarget{a00018_adfffde377bdc935cf06490667de1d7b6}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!Undo@{Undo}}
+\index{Undo@{Undo}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{Undo}]{\setlength{\rightskip}{0pt plus 5cm}bool Basic\-Cal\-Chart\-Command\-::\-Undo (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{a00018_adfffde377bdc935cf06490667de1d7b6}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00018_ab9f5e00f2b86c92e0051f56b889d1a13}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!m\-Doc@{m\-Doc}}
+\index{m\-Doc@{m\-Doc}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{m\-Doc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cal\-Chart\-Doc}\& Basic\-Cal\-Chart\-Command\-::m\-Doc\hspace{0.3cm}{\ttfamily [protected]}}}\label{a00018_ab9f5e00f2b86c92e0051f56b889d1a13}
+\hypertarget{a00018_a75aae02cbaadf5c37f31ec036078bc40}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!m\-Doc\-Modified@{m\-Doc\-Modified}}
+\index{m\-Doc\-Modified@{m\-Doc\-Modified}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{m\-Doc\-Modified}]{\setlength{\rightskip}{0pt plus 5cm}bool Basic\-Cal\-Chart\-Command\-::m\-Doc\-Modified\hspace{0.3cm}{\ttfamily [private]}}}\label{a00018_a75aae02cbaadf5c37f31ec036078bc40}
+\hypertarget{a00018_a04e36485f183ef4967929432c0a08714}{\index{Basic\-Cal\-Chart\-Command@{Basic\-Cal\-Chart\-Command}!m\-Snap\-Shot@{m\-Snap\-Shot}}
+\index{m\-Snap\-Shot@{m\-Snap\-Shot}!BasicCalChartCommand@{Basic\-Cal\-Chart\-Command}}
+\subsubsection[{m\-Snap\-Shot}]{\setlength{\rightskip}{0pt plus 5cm}{\bf C\-C\-\_\-show} Basic\-Cal\-Chart\-Command\-::m\-Snap\-Shot\hspace{0.3cm}{\ttfamily [private]}}}\label{a00018_a04e36485f183ef4967929432c0a08714}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/\hyperlink{a00183}{cc\-\_\-command.\-h}\item 
+src/\hyperlink{a00182}{cc\-\_\-command.\-cpp}\end{DoxyCompactItemize}

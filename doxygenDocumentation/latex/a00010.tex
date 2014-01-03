@@ -1,0 +1,303 @@
+\hypertarget{a00010}{\section{Animation Class Reference}
+\label{a00010}\index{Animation@{Animation}}
+}
+
+
+{\ttfamily \#include $<$animate.\-h$>$}
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{a00002}{animate\-\_\-info\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef void($\ast$ \hyperlink{a00010_acf8ace9aee0e09e12c10002bcde0459c}{Collision\-Action\-\_\-t} )()
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{a00010_a0469b77a735cccf19b3f068611a3bc59}{Animation} (const \hyperlink{a00046}{C\-C\-\_\-show} \&show, \hyperlink{a00195_aef08fe65401b34c561d7d6fc0ff39b60}{Notify\-Status} notify\-Status, \hyperlink{a00195_a9f9c725e3e1c76c65ddb676bf591d49b}{Notify\-Error\-List} notify\-Error\-List)
+\item 
+\hyperlink{a00010_a401b68793d4fbf48d481c030ee4b2a16}{$\sim$\-Animation} ()
+\item 
+void \hyperlink{a00010_a4002f343256ac4cd8d3380c0c1469f7e}{Goto\-Sheet} (unsigned i)
+\item 
+bool \hyperlink{a00010_ad21c5572e9ace3038eea38396490c58f}{Prev\-Sheet} ()
+\item 
+bool \hyperlink{a00010_aad0b053579fd437f731854a4a29d65fb}{Next\-Sheet} ()
+\item 
+void \hyperlink{a00010_ad8bfb6051a31076e99a0f9e61bd5b40c}{Goto\-Beat} (unsigned i)
+\item 
+bool \hyperlink{a00010_ae2733e6156063597977b48c695650de7}{Prev\-Beat} ()
+\item 
+bool \hyperlink{a00010_a2be557510614b62bfe39a6913ba1c9d4}{Next\-Beat} ()
+\item 
+\hyperlink{a00010_acf8ace9aee0e09e12c10002bcde0459c}{Collision\-Action\-\_\-t} \hyperlink{a00010_a6a76704f47af6f050fbfc3d7cd37953c}{Set\-Collision\-Action} (\hyperlink{a00010_acf8ace9aee0e09e12c10002bcde0459c}{Collision\-Action\-\_\-t} col)
+\item 
+\hyperlink{a00002}{animate\-\_\-info\-\_\-t} \hyperlink{a00010_addde584b88aff4f6ce2783471cf59b31}{Get\-Animate\-Info} (unsigned which) const 
+\item 
+int \hyperlink{a00010_a7440e14027f14c9327fd362e4645d7b4}{Get\-Number\-Sheets} () const 
+\item 
+int \hyperlink{a00010_ae09f383c81194e7fe5c06e85f91f7f4f}{Get\-Current\-Sheet} () const 
+\item 
+int \hyperlink{a00010_ac2d3c692da52a41140a81daeb95b8d72}{Get\-Number\-Beats} () const 
+\item 
+int \hyperlink{a00010_a2336103e6472cc869c8fa711620b23f7}{Get\-Current\-Beat} () const 
+\item 
+std\-::string \hyperlink{a00010_ad2de4217b9c101ff735ca02485f459ab}{Get\-Current\-Sheet\-Name} () const 
+\item 
+std\-::pair$<$ std\-::string, \\*
+std\-::vector$<$ std\-::string $>$ $>$ \hyperlink{a00010_a6b082a6468594117eb0c67e711df6c90}{Get\-Current\-Info} () const 
+\item 
+std\-::vector$<$ \hyperlink{a00031}{C\-C\-\_\-\-Draw\-Command} $>$ \hyperlink{a00010_a21fbf6114ee962ac7f4b55dbcd048955}{Gen\-Path\-To\-Draw} (unsigned point, const \hyperlink{a00029}{C\-C\-\_\-coord} \&offset) const 
+\item 
+\hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} \hyperlink{a00010_a6d49cd0a8acd0996a71880a207cc3c79}{End\-Position} (unsigned point, const \hyperlink{a00029}{C\-C\-\_\-coord} \&offset) const 
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{a00010_aaa42809ed2f413a88a931e1bbc9f0022}{Begin\-Cmd} (unsigned i)
+\item 
+void \hyperlink{a00010_a9206b83afe0f3d9af32fa5c5ed3ff891}{End\-Cmd} (unsigned i)
+\item 
+void \hyperlink{a00010_ace07eadd483794e6b565b4f0edffa1e8}{Refresh\-Sheet} ()
+\item 
+void \hyperlink{a00010_a72a444e343b278a04baff74ab204243e}{Check\-Collisions} ()
+\item 
+std\-::vector$<$ boost\-::shared\-\_\-ptr\\*
+$<$ \hyperlink{a00003}{Animate\-Command} $>$ $>$ \hyperlink{a00010_ada367c468f7e09499c9f9e9369b11a1e}{Get\-Commands} (unsigned which\-Point) const 
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const unsigned \hyperlink{a00010_acaf7f9a7901248baea8d8166b2808116}{numpts}
+\item 
+std\-::vector$<$ \hyperlink{a00196_a91212e6bb797b2b440819b6a9a86f702}{Animate\-Point} $>$ \hyperlink{a00010_aa0df8c15f9b19dbe028c86dd4e2f6621}{pts}
+\item 
+std\-::vector$<$ std\-::vector\\*
+$<$ boost\-::shared\-\_\-ptr\\*
+$<$ \hyperlink{a00003}{Animate\-Command} $>$\\*
+ $>$\-::const\-\_\-iterator $>$ \hyperlink{a00010_a9e66fe602b1bacfac5a65921b1976875}{curr\-\_\-cmds}
+\item 
+std\-::set$<$ int $>$ \hyperlink{a00010_af39cf527a79753494729d7985126acde}{m\-Collisions}
+\item 
+unsigned \hyperlink{a00010_a8aca3cfaa97f1c60edd531ef2f9c2d53}{curr\-\_\-sheetnum}
+\item 
+unsigned \hyperlink{a00010_acef8e877990ac43138c8e29436c6c38d}{curr\-\_\-beat}
+\item 
+std\-::vector$<$ \hyperlink{a00008}{Animate\-Sheet} $>$ \hyperlink{a00010_a6d138f4ed50295d2ef8c6d336df37324}{sheets}
+\item 
+\hyperlink{a00010_acf8ace9aee0e09e12c10002bcde0459c}{Collision\-Action\-\_\-t} \hyperlink{a00010_a8f4074da4b09a0fd464099f193354833}{m\-Collision\-Action}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Typedef Documentation}
+\hypertarget{a00010_acf8ace9aee0e09e12c10002bcde0459c}{\index{Animation@{Animation}!Collision\-Action\-\_\-t@{Collision\-Action\-\_\-t}}
+\index{Collision\-Action\-\_\-t@{Collision\-Action\-\_\-t}!Animation@{Animation}}
+\subsubsection[{Collision\-Action\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef void($\ast$ Animation\-::\-Collision\-Action\-\_\-t)()}}\label{a00010_acf8ace9aee0e09e12c10002bcde0459c}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{a00010_a0469b77a735cccf19b3f068611a3bc59}{\index{Animation@{Animation}!Animation@{Animation}}
+\index{Animation@{Animation}!Animation@{Animation}}
+\subsubsection[{Animation}]{\setlength{\rightskip}{0pt plus 5cm}Animation\-::\-Animation (
+\begin{DoxyParamCaption}
+\item[{const {\bf C\-C\-\_\-show} \&}]{show, }
+\item[{{\bf Notify\-Status}}]{notify\-Status, }
+\item[{{\bf Notify\-Error\-List}}]{notify\-Error\-List}
+\end{DoxyParamCaption}
+)}}\label{a00010_a0469b77a735cccf19b3f068611a3bc59}
+\hypertarget{a00010_a401b68793d4fbf48d481c030ee4b2a16}{\index{Animation@{Animation}!$\sim$\-Animation@{$\sim$\-Animation}}
+\index{$\sim$\-Animation@{$\sim$\-Animation}!Animation@{Animation}}
+\subsubsection[{$\sim$\-Animation}]{\setlength{\rightskip}{0pt plus 5cm}Animation\-::$\sim$\-Animation (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00010_a401b68793d4fbf48d481c030ee4b2a16}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{a00010_aaa42809ed2f413a88a931e1bbc9f0022}{\index{Animation@{Animation}!Begin\-Cmd@{Begin\-Cmd}}
+\index{Begin\-Cmd@{Begin\-Cmd}!Animation@{Animation}}
+\subsubsection[{Begin\-Cmd}]{\setlength{\rightskip}{0pt plus 5cm}void Animation\-::\-Begin\-Cmd (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_aaa42809ed2f413a88a931e1bbc9f0022}
+\hypertarget{a00010_a72a444e343b278a04baff74ab204243e}{\index{Animation@{Animation}!Check\-Collisions@{Check\-Collisions}}
+\index{Check\-Collisions@{Check\-Collisions}!Animation@{Animation}}
+\subsubsection[{Check\-Collisions}]{\setlength{\rightskip}{0pt plus 5cm}void Animation\-::\-Check\-Collisions (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_a72a444e343b278a04baff74ab204243e}
+\hypertarget{a00010_a9206b83afe0f3d9af32fa5c5ed3ff891}{\index{Animation@{Animation}!End\-Cmd@{End\-Cmd}}
+\index{End\-Cmd@{End\-Cmd}!Animation@{Animation}}
+\subsubsection[{End\-Cmd}]{\setlength{\rightskip}{0pt plus 5cm}void Animation\-::\-End\-Cmd (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_a9206b83afe0f3d9af32fa5c5ed3ff891}
+\hypertarget{a00010_a6d49cd0a8acd0996a71880a207cc3c79}{\index{Animation@{Animation}!End\-Position@{End\-Position}}
+\index{End\-Position@{End\-Position}!Animation@{Animation}}
+\subsubsection[{End\-Position}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animate\-Point} Animation\-::\-End\-Position (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{point, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{offset}
+\end{DoxyParamCaption}
+) const}}\label{a00010_a6d49cd0a8acd0996a71880a207cc3c79}
+\hypertarget{a00010_a21fbf6114ee962ac7f4b55dbcd048955}{\index{Animation@{Animation}!Gen\-Path\-To\-Draw@{Gen\-Path\-To\-Draw}}
+\index{Gen\-Path\-To\-Draw@{Gen\-Path\-To\-Draw}!Animation@{Animation}}
+\subsubsection[{Gen\-Path\-To\-Draw}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ {\bf C\-C\-\_\-\-Draw\-Command} $>$ Animation\-::\-Gen\-Path\-To\-Draw (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{point, }
+\item[{const {\bf C\-C\-\_\-coord} \&}]{offset}
+\end{DoxyParamCaption}
+) const}}\label{a00010_a21fbf6114ee962ac7f4b55dbcd048955}
+\hypertarget{a00010_addde584b88aff4f6ce2783471cf59b31}{\index{Animation@{Animation}!Get\-Animate\-Info@{Get\-Animate\-Info}}
+\index{Get\-Animate\-Info@{Get\-Animate\-Info}!Animation@{Animation}}
+\subsubsection[{Get\-Animate\-Info}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Animation\-::animate\-\_\-info\-\_\-t} Animation\-::\-Get\-Animate\-Info (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{which}
+\end{DoxyParamCaption}
+) const}}\label{a00010_addde584b88aff4f6ce2783471cf59b31}
+\hypertarget{a00010_ada367c468f7e09499c9f9e9369b11a1e}{\index{Animation@{Animation}!Get\-Commands@{Get\-Commands}}
+\index{Get\-Commands@{Get\-Commands}!Animation@{Animation}}
+\subsubsection[{Get\-Commands}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$ boost\-::shared\-\_\-ptr$<$ {\bf Animate\-Command} $>$ $>$ Animation\-::\-Get\-Commands (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{which\-Point}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_ada367c468f7e09499c9f9e9369b11a1e}
+\hypertarget{a00010_a2336103e6472cc869c8fa711620b23f7}{\index{Animation@{Animation}!Get\-Current\-Beat@{Get\-Current\-Beat}}
+\index{Get\-Current\-Beat@{Get\-Current\-Beat}!Animation@{Animation}}
+\subsubsection[{Get\-Current\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}int Animation\-::\-Get\-Current\-Beat (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00010_a2336103e6472cc869c8fa711620b23f7}
+\hypertarget{a00010_a6b082a6468594117eb0c67e711df6c90}{\index{Animation@{Animation}!Get\-Current\-Info@{Get\-Current\-Info}}
+\index{Get\-Current\-Info@{Get\-Current\-Info}!Animation@{Animation}}
+\subsubsection[{Get\-Current\-Info}]{\setlength{\rightskip}{0pt plus 5cm}std\-::pair$<$ std\-::string, std\-::vector$<$ std\-::string $>$ $>$ Animation\-::\-Get\-Current\-Info (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00010_a6b082a6468594117eb0c67e711df6c90}
+\hypertarget{a00010_ae09f383c81194e7fe5c06e85f91f7f4f}{\index{Animation@{Animation}!Get\-Current\-Sheet@{Get\-Current\-Sheet}}
+\index{Get\-Current\-Sheet@{Get\-Current\-Sheet}!Animation@{Animation}}
+\subsubsection[{Get\-Current\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}int Animation\-::\-Get\-Current\-Sheet (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00010_ae09f383c81194e7fe5c06e85f91f7f4f}
+\hypertarget{a00010_ad2de4217b9c101ff735ca02485f459ab}{\index{Animation@{Animation}!Get\-Current\-Sheet\-Name@{Get\-Current\-Sheet\-Name}}
+\index{Get\-Current\-Sheet\-Name@{Get\-Current\-Sheet\-Name}!Animation@{Animation}}
+\subsubsection[{Get\-Current\-Sheet\-Name}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string Animation\-::\-Get\-Current\-Sheet\-Name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00010_ad2de4217b9c101ff735ca02485f459ab}
+\hypertarget{a00010_ac2d3c692da52a41140a81daeb95b8d72}{\index{Animation@{Animation}!Get\-Number\-Beats@{Get\-Number\-Beats}}
+\index{Get\-Number\-Beats@{Get\-Number\-Beats}!Animation@{Animation}}
+\subsubsection[{Get\-Number\-Beats}]{\setlength{\rightskip}{0pt plus 5cm}int Animation\-::\-Get\-Number\-Beats (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00010_ac2d3c692da52a41140a81daeb95b8d72}
+\hypertarget{a00010_a7440e14027f14c9327fd362e4645d7b4}{\index{Animation@{Animation}!Get\-Number\-Sheets@{Get\-Number\-Sheets}}
+\index{Get\-Number\-Sheets@{Get\-Number\-Sheets}!Animation@{Animation}}
+\subsubsection[{Get\-Number\-Sheets}]{\setlength{\rightskip}{0pt plus 5cm}int Animation\-::\-Get\-Number\-Sheets (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}}\label{a00010_a7440e14027f14c9327fd362e4645d7b4}
+\hypertarget{a00010_ad8bfb6051a31076e99a0f9e61bd5b40c}{\index{Animation@{Animation}!Goto\-Beat@{Goto\-Beat}}
+\index{Goto\-Beat@{Goto\-Beat}!Animation@{Animation}}
+\subsubsection[{Goto\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}void Animation\-::\-Goto\-Beat (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+)}}\label{a00010_ad8bfb6051a31076e99a0f9e61bd5b40c}
+\hypertarget{a00010_a4002f343256ac4cd8d3380c0c1469f7e}{\index{Animation@{Animation}!Goto\-Sheet@{Goto\-Sheet}}
+\index{Goto\-Sheet@{Goto\-Sheet}!Animation@{Animation}}
+\subsubsection[{Goto\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}void Animation\-::\-Goto\-Sheet (
+\begin{DoxyParamCaption}
+\item[{unsigned}]{i}
+\end{DoxyParamCaption}
+)}}\label{a00010_a4002f343256ac4cd8d3380c0c1469f7e}
+\hypertarget{a00010_a2be557510614b62bfe39a6913ba1c9d4}{\index{Animation@{Animation}!Next\-Beat@{Next\-Beat}}
+\index{Next\-Beat@{Next\-Beat}!Animation@{Animation}}
+\subsubsection[{Next\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}bool Animation\-::\-Next\-Beat (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00010_a2be557510614b62bfe39a6913ba1c9d4}
+\hypertarget{a00010_aad0b053579fd437f731854a4a29d65fb}{\index{Animation@{Animation}!Next\-Sheet@{Next\-Sheet}}
+\index{Next\-Sheet@{Next\-Sheet}!Animation@{Animation}}
+\subsubsection[{Next\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}bool Animation\-::\-Next\-Sheet (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00010_aad0b053579fd437f731854a4a29d65fb}
+\hypertarget{a00010_ae2733e6156063597977b48c695650de7}{\index{Animation@{Animation}!Prev\-Beat@{Prev\-Beat}}
+\index{Prev\-Beat@{Prev\-Beat}!Animation@{Animation}}
+\subsubsection[{Prev\-Beat}]{\setlength{\rightskip}{0pt plus 5cm}bool Animation\-::\-Prev\-Beat (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00010_ae2733e6156063597977b48c695650de7}
+\hypertarget{a00010_ad21c5572e9ace3038eea38396490c58f}{\index{Animation@{Animation}!Prev\-Sheet@{Prev\-Sheet}}
+\index{Prev\-Sheet@{Prev\-Sheet}!Animation@{Animation}}
+\subsubsection[{Prev\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}bool Animation\-::\-Prev\-Sheet (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{a00010_ad21c5572e9ace3038eea38396490c58f}
+\hypertarget{a00010_ace07eadd483794e6b565b4f0edffa1e8}{\index{Animation@{Animation}!Refresh\-Sheet@{Refresh\-Sheet}}
+\index{Refresh\-Sheet@{Refresh\-Sheet}!Animation@{Animation}}
+\subsubsection[{Refresh\-Sheet}]{\setlength{\rightskip}{0pt plus 5cm}void Animation\-::\-Refresh\-Sheet (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_ace07eadd483794e6b565b4f0edffa1e8}
+\hypertarget{a00010_a6a76704f47af6f050fbfc3d7cd37953c}{\index{Animation@{Animation}!Set\-Collision\-Action@{Set\-Collision\-Action}}
+\index{Set\-Collision\-Action@{Set\-Collision\-Action}!Animation@{Animation}}
+\subsubsection[{Set\-Collision\-Action}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Collision\-Action\-\_\-t} Animation\-::\-Set\-Collision\-Action (
+\begin{DoxyParamCaption}
+\item[{{\bf Collision\-Action\-\_\-t}}]{col}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{a00010_a6a76704f47af6f050fbfc3d7cd37953c}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{a00010_acef8e877990ac43138c8e29436c6c38d}{\index{Animation@{Animation}!curr\-\_\-beat@{curr\-\_\-beat}}
+\index{curr\-\_\-beat@{curr\-\_\-beat}!Animation@{Animation}}
+\subsubsection[{curr\-\_\-beat}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animation\-::curr\-\_\-beat\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_acef8e877990ac43138c8e29436c6c38d}
+\hypertarget{a00010_a9e66fe602b1bacfac5a65921b1976875}{\index{Animation@{Animation}!curr\-\_\-cmds@{curr\-\_\-cmds}}
+\index{curr\-\_\-cmds@{curr\-\_\-cmds}!Animation@{Animation}}
+\subsubsection[{curr\-\_\-cmds}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<$std\-::vector$<$boost\-::shared\-\_\-ptr$<${\bf Animate\-Command}$>$ $>$\-::const\-\_\-iterator $>$ Animation\-::curr\-\_\-cmds\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_a9e66fe602b1bacfac5a65921b1976875}
+\hypertarget{a00010_a8aca3cfaa97f1c60edd531ef2f9c2d53}{\index{Animation@{Animation}!curr\-\_\-sheetnum@{curr\-\_\-sheetnum}}
+\index{curr\-\_\-sheetnum@{curr\-\_\-sheetnum}!Animation@{Animation}}
+\subsubsection[{curr\-\_\-sheetnum}]{\setlength{\rightskip}{0pt plus 5cm}unsigned Animation\-::curr\-\_\-sheetnum\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_a8aca3cfaa97f1c60edd531ef2f9c2d53}
+\hypertarget{a00010_a8f4074da4b09a0fd464099f193354833}{\index{Animation@{Animation}!m\-Collision\-Action@{m\-Collision\-Action}}
+\index{m\-Collision\-Action@{m\-Collision\-Action}!Animation@{Animation}}
+\subsubsection[{m\-Collision\-Action}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Collision\-Action\-\_\-t} Animation\-::m\-Collision\-Action\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_a8f4074da4b09a0fd464099f193354833}
+\hypertarget{a00010_af39cf527a79753494729d7985126acde}{\index{Animation@{Animation}!m\-Collisions@{m\-Collisions}}
+\index{m\-Collisions@{m\-Collisions}!Animation@{Animation}}
+\subsubsection[{m\-Collisions}]{\setlength{\rightskip}{0pt plus 5cm}std\-::set$<$int$>$ Animation\-::m\-Collisions\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_af39cf527a79753494729d7985126acde}
+\hypertarget{a00010_acaf7f9a7901248baea8d8166b2808116}{\index{Animation@{Animation}!numpts@{numpts}}
+\index{numpts@{numpts}!Animation@{Animation}}
+\subsubsection[{numpts}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned Animation\-::numpts\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_acaf7f9a7901248baea8d8166b2808116}
+\hypertarget{a00010_aa0df8c15f9b19dbe028c86dd4e2f6621}{\index{Animation@{Animation}!pts@{pts}}
+\index{pts@{pts}!Animation@{Animation}}
+\subsubsection[{pts}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Animate\-Point}$>$ Animation\-::pts\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_aa0df8c15f9b19dbe028c86dd4e2f6621}
+\hypertarget{a00010_a6d138f4ed50295d2ef8c6d336df37324}{\index{Animation@{Animation}!sheets@{sheets}}
+\index{sheets@{sheets}!Animation@{Animation}}
+\subsubsection[{sheets}]{\setlength{\rightskip}{0pt plus 5cm}std\-::vector$<${\bf Animate\-Sheet}$>$ Animation\-::sheets\hspace{0.3cm}{\ttfamily [private]}}}\label{a00010_a6d138f4ed50295d2ef8c6d336df37324}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+src/core/\hyperlink{a00195}{animate.\-h}\item 
+src/core/\hyperlink{a00194}{animate.\-cpp}\end{DoxyCompactItemize}

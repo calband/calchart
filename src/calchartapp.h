@@ -37,18 +37,58 @@ wxHtmlHelpController& GetGlobalHelpController();
 
 DECLARE_APP(CalChartApp)
 
-// Define a new application
+/**
+ * The Calchart Application.
+ * This class (a wxWidgets application) functions as the starting point for 
+ * the CalChart program. When you start up the CalChart program, the OnInit()
+ * method of CalChartApp is called, and when you close the program, the
+ * OnExit() method is called. This class is not drawn (so it is invisible to the
+ * user), but when OnInit() is called (that is, when the user starts up the
+ * CalChart program), CalChartApp creates a frame that IS visible to the user,
+ * and the user can use that frame to view and edit shows.
+ */
 class CalChartApp : public wxApp
 {
 public:
+
+	/**
+	 * Initializes the application.
+	 * This method is called when the program starts. It is responsible for
+	 * setting up the frame to which CalChart is drawn (thereby making the
+	 * program visible to the user) and for linking that frame to a wxDocManager
+	 * that understands the CalChart show file, including how to open it, save it,
+	 * and display it. The frame uses the wxDocManager to properly display
+	 * the CalChart show to the user. 
+	 * @return Returns true if the application should continue processing; false
+	 * otherwise. False would be returned if an error occurs, for example.
+	 * OnExit() will only be called if this method returns true.
+	 */
 	virtual bool OnInit();
+
+	/**
+	 * TODO - I'm not a mac user...
+	 * @param fileName The name of the file to open.
+	 * TODO WHY VIRTUAL?!
+	 */
 	virtual void MacOpenFile(const wxString &fileName);
+
+	/**
+	 * Cleans up the application immediately before exiting.
+	 * This method is called when the program is closed. It performs cleanup.
+	 * @return Ignored.
+	 */
 	int OnExit();
 
+	//TODO
 	ShowModeList& GetModeList() { return mModeList; }
 private:
+
+	//TODO
 	ShowModeList mModeList;
 
+	/**
+	 * Understands how to open/save/view CalChart-associated files.
+	 */
 	wxDocManager* mDocManager;
 };
 

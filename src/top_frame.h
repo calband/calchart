@@ -25,22 +25,61 @@
 
 #include <wx/docview.h>
 
-// TopFrame
-// Serves as the top frame that gets displayed when CalChart starts
+/**
+ * The main frame of the CalChart program.
+ * When you open CalChart, without opening a show file, you are greeted with
+ * an empty frame/window which you can use to open the files that you wish
+ * to view/edit. That is the "top frame," and it functions as the main frame
+ * for the CalChart program. If you close it, it closes all other windows,
+ * and you exit the program.
+ */
 class TopFrame : public wxDocParentFrame
 {
 	DECLARE_CLASS(TopFrame)
 public:
+
+	/** Makes a top frame.
+	 * @param manager The doc manager that handles the saving/opening/viewing
+	 * of CalChart-related files.
+	 * @param frame The parent frame. Should be null - this frame is the
+	 * parent for all other CalChart frames.
+	 * @param title The name of the frame.
+	 */
 	TopFrame(wxDocManager *manager,
 			 wxFrame *frame,
 			 const wxString& title);
+
+	/** 
+	 * Performs cleanup. Currently does nothing.
+	 */
 	~TopFrame();
 
+	/** 
+	 * Called when the 'About' item is selected in the 'Help' menu.
+	 * @param event Ignored.
+	 */
 	void OnCmdAbout(wxCommandEvent& event);
+
+	/**
+	 * Called when the 'Help' item is selected in the 'Help' menu.
+	 * @param event Ignored.
+	 */
 	void OnCmdHelp(wxCommandEvent& event);
+
+	/**
+	 * Called when the 'Preferences' item is selected in the 'File' menu.
+	 * @param event Ignored.
+	 */
 	void OnCmdPreferences(wxCommandEvent& event);
 
+	/** 
+	 * Opens the 'About' dialog.
+	 */
 	static void About();
+
+	/**
+	 * Opens the 'Help' manual.
+	 */
 	static void Help();
 
 	DECLARE_EVENT_TABLE()

@@ -35,12 +35,60 @@ enum PSFONT_TYPE
 	PSFONT_TAB
 };
 
+/** 
+ * An enumeration of the various dot types (e.g. plain, solid, slash, etc.)
+ */
 enum SYMBOL_TYPE
 {
+	/**
+	  * The smallest value that is associated with a valid symbol type.
+	  */
 	SYMBOLS_START = 0,
-	SYMBOL_PLAIN = 0, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
-	, MAX_NUM_SYMBOLS
+
+	/**
+	 * A plain, open dot.
+	 */
+	SYMBOL_PLAIN = 0,
+	
+	/**
+	 * A solid dot.
+	 */
+	SYMBOL_SOL,
+	
+	/**
+	 * An open dot with a backslash through it.
+	 */
+	SYMBOL_BKSL,
+	
+	/**
+	 * An open dot with a frontslash through it.
+	 */
+	SYMBOL_SL,
+
+	/**
+	 * An open dot with an X through it.
+	 */
+	SYMBOL_X,
+	
+	/**
+	 * A solid dot with a backslash through it.
+	 */
+	SYMBOL_SOLBKSL,
+	
+	/**
+	 * A solid dot with a frontslash through it.
+	 */
+	SYMBOL_SOLSL,
+	
+	/**
+	 * A solid dot with an X through it.
+	 */
+	SYMBOL_SOLX,
+	
+	/**
+	 *The maximum value that is associated with a valid symbol type.
+	 */
+	MAX_NUM_SYMBOLS
 };
 
 std::string GetNameForSymbol(SYMBOL_TYPE which);
@@ -51,6 +99,7 @@ enum CC_DRAG_TYPES
 	CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
 	CC_DRAG_LASSO, CC_DRAG_LINE, CC_DRAG_CROSS
 };
+
 enum CC_MOVE_MODES
 {
 	CC_MOVE_NORMAL, CC_MOVE_LINE, CC_MOVE_ROTATE,
@@ -83,7 +132,22 @@ typedef std::set<unsigned> SelectionList;
 #define INGL_PONT Make4CharWord('P','O','N','T')
 #define INGL_END  Make4CharWord('E','N','D',' ')
 
+/**
+ * A structure that is used to specify that the program should behave
+ * according to the rules of CalChart version 3.3 and earlier. This
+ * is especially important for saving/loading from a a file, because
+ * newer versions of CalChart save files in a different file format
+ * that must be saved and loaded differently.
+ */
 struct Version_3_3_and_earlier {};
+
+/**
+* A structure that is used to specify that the program should behave
+* according to the rules of CalChart version 3.4 and later. This
+* is especially important for saving/loading from a a file, because
+* newer versions of CalChart save files in a different file format
+* that must be saved and loaded differently.
+*/
 struct Current_version_and_later {};
 
 #endif

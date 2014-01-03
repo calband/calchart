@@ -37,14 +37,43 @@ EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
 EVT_MENU(wxID_PREFERENCES, TopFrame::OnCmdPreferences)
 END_EVENT_TABLE()
 
-
+/**
+ * Handles the event where the user drags and drops files into the CalChart TopFrame.
+ * When files are dropped into the CalChart TopFrame, this class makes sure that
+ * the files are opened for viewing/editing.
+ */
 class TopFrameDropTarget : public wxFileDropTarget
 {
 public:
+
+	/**
+	 * Makes a drop target for a TopFrame object that loads the files that are dropped
+	 * into it using the doc manager.
+	 * @param manager The doc manager to use when loading files dropped into the drop
+	 * target.
+	 * @param f The top frame of the CalChart program.
+	 */
 	TopFrameDropTarget(wxDocManager *manager, TopFrame *f) : mManager(manager), frame(f) {}
+
+	/** 
+	 * This method is called when files are dragged and dropped into the drop target.
+	 * @param x The x coordinate where the files were dropped.
+	 * @param y The y coordinate where the files were dropped.
+	 * @param filenames An array of the names of the files that were dropped into the
+	 * frame.
+	 * @return Return true if the files were accepted and loaded; false otherwise.
+	 */
 	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
 private:
+	/**
+	 * A doc manager that is responsible for knowing how to open/save/view files
+	 * that are dropped into the drop target. In this case, that means .shw files.
+	 */
 	wxDocManager *mManager;
+
+	/**
+	 * The main frame with which this drop target is associated.
+	 */
 	TopFrame *frame;
 };
 
