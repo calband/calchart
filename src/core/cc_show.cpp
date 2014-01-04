@@ -194,8 +194,6 @@ mSheetNum(0)
 		CC_sheet sheet(this, GetNumPoints(), stream, ver);
 		InsertSheetInternal(sheet, GetNumSheets());
 		
-		ReadAndCheckID(stream, INGL_END);
-		ReadAndCheckID(stream, INGL_SHET);
 		// peek for the next name
 		name = ReadLong(stream);
 	}
@@ -212,61 +210,6 @@ mSheetNum(0)
 // Destroy a show
 CC_show::~CC_show()
 {}
-
-
-std::string CC_show::ImportContinuity(const std::vector<std::string>& lines)
-{
-/* This is the format for each sheet:
- * %%str      where str is the string printed for the stuntsheet number
- * normal ascii text possibly containing the following codes:
- * \bs \be \is \ie for bold start, bold end, italics start, italics end
- * \po plainman
- * \pb backslashman
- * \ps slashman
- * \px xman
- * \so solidman
- * \sb solidbackslashman
- * \ss solidslashman
- * \sx solidxman
- * a line may begin with these symbols in order: <>~
- * < don't print continuity on individual sheets
- * > don't print continuity on master sheet
- * ~ center this line
- * also, there are three tab stops set for standard continuity format
- */
-
-	// check to make sure the first line starts with %%
-	if (!lines.empty())
-	{
-		if ((lines.at(0).length() < 2) || !((lines.at(0).at(0) == '%') && (lines.at(0).at(1) == '%')))
-		{
-			// Continuity doesn't begin with a sheet header
-			return k_contnohead_str;
-		}
-	}
-
-	// first, split the lines into groups for each page
-	std::vector<std::vector<std::string> > lines_data;
-	for (auto line = lines.begin(); line != lines.end(); ++line)
-	{
-		if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%'))
-		{
-			lines_data.push_back(std::vector<std::string>());
-		}
-		lines_data.back().push_back(*line);
-	}
-	
-	auto line_data = lines_data.begin();
-	auto curr_sheet = GetSheetBegin();
-	for (; line_data != lines_data.end() && curr_sheet != GetSheetEnd(); ++line_data, ++curr_sheet)
-	{
-		if (!curr_sheet->ImportPrintableContinuity(*line_data))
-		{
-			return k_badcont_str;
-		}
-	}
-	return "";
-}
 
 
 std::vector<uint8_t>

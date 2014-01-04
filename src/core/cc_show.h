@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <map>
 #include <stdint.h>
 
 class CC_sheet;
@@ -70,9 +71,6 @@ private:
 public:
 	// How we save and load a show:
 	std::vector<uint8_t> SerializeShow() const;
-
-	// continuity that gets printed
-	std::string ImportContinuity(const std::vector<std::string>& file);
 
 public:
 	const std::string& GetDescr() const;

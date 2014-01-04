@@ -34,10 +34,12 @@ class CC_point;
 class CC_coord;
 struct CC_DrawCommand;
 class CalChartDoc;
+class CC_textline;
+typedef std::vector<CC_textline> CC_textline_list;
 
 // draw the continuity starting at a specific offset
 void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary);
-void DrawCont(wxDC& dc, const CC_sheet& sheet, const wxCoord yStart, bool landscape);
+void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC *dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);
 
 void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);

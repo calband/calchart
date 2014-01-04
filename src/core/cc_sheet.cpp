@@ -353,9 +353,31 @@ pts(numPoints)
 	}
 	if (INGL_END != name)
 	{
-		throw CC_FileException(INGL_END);
+		throw CC_FileException(INGL_CONT);
 	}
 	ReadAndCheckID(stream, INGL_CONT);
+
+	name = ReadLong(stream);
+	// Continuity text
+	if (INGL_PCNT == name)
+	{
+		std::vector<uint8_t> data = FillData(stream);
+		const char *print_name = (const char *)&data[0];
+		const char *print_cont = print_name + strlen(print_name) + 1;
+		if ((strlen(print_name) + 1 + strlen(print_cont) + 1) != data.size())
+		{
+			throw CC_FileException("Bad Print cont chunk");
+		}
+		mPrintableContinuity = CC_print_continuity(print_name, print_cont);
+		ReadAndCheckID(stream, INGL_END);
+		ReadAndCheckID(stream, INGL_PCNT);
+		name = ReadLong(stream);
+	}
+	if (INGL_END != name)
+	{
+		throw CC_FileException(INGL_END);
+	}
+	ReadAndCheckID(stream, INGL_SHET);
 }
 
 // SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
@@ -410,6 +432,23 @@ CC_sheet::SerializeContinuityData() const
 }
 
 std::vector<uint8_t>
+CC_sheet::SerializePrintContinuityData() const
+{
+	// PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END;
+	// PRINT_CONTINUITY_DATA = Null-terminated char* , Null-terminated char* ;
+	// PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
+	
+	std::ostringstream stream("");
+	WriteStr(stream, mPrintableContinuity.GetPrintNumber().c_str());
+	WriteStr(stream, mPrintableContinuity.GetOriginalLine().c_str());
+
+	auto sdata = stream.str();
+	std::vector<uint8_t> data;
+	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
+	return data;
+}
+
+std::vector<uint8_t>
 CC_sheet::SerializeSheetData() const
 {
 	// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, PRINT_CONTINUITY ;
@@ -435,6 +474,11 @@ CC_sheet::SerializeSheetData() const
 	WriteChunk(stream, INGL_CONT, all_continuity.size(), &all_continuity[0]);
 	WriteEnd(stream, INGL_CONT);
 
+	// Write Continuity
+	auto print_continuity = SerializePrintContinuityData();
+	WriteChunk(stream, INGL_PCNT, print_continuity.size(), &print_continuity[0]);
+	WriteEnd(stream, INGL_PCNT);
+	
 	auto sdata = stream.str();
 	std::vector<uint8_t> data;
 	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
@@ -580,14 +624,13 @@ void CC_sheet::SetName(const std::string& newname)
 
 std::string CC_sheet::GetNumber() const
 {
-	return number;
+	return mPrintableContinuity.GetPrintNumber();
 }
 
-void CC_sheet::SetNumber(const std::string& num)
+std::string CC_sheet::GetRawPrintContinuity() const
 {
-	number = num;
+	return mPrintableContinuity.GetOriginalLine();
 }
-
 
 unsigned short CC_sheet::GetBeats() const
 {
@@ -658,126 +701,16 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
  * also, there are three tab stops set for standard continuity format
  */
 
-bool
-CC_sheet::ImportPrintableContinuity(const std::vector<std::string>& line_data)
+void
+CC_sheet::SetPrintableContinuity(const std::string& name, const std::string& lines)
 {
-	enum PSFONT_TYPE currfontnum;
-	currfontnum = PSFONT_NORM;
-	for (auto line_iter = line_data.begin(); line_iter != line_data.end(); ++line_iter)
-	{
-		if ((line_iter->length() >= 2) && (line_iter->at(0) == '%') && (line_iter->at(1) == '%'))
-		{
-			SetNumber(std::string(*line_iter, 2));
-			continue;
-		}
-		// make a copy of the line
-		std::string line = *line_iter;
-		CC_textline line_text;
-		// peel off the '<>~'
-		if (!line.empty() && line.at(0) == '<')
-		{
-			line_text.on_sheet = false;
-			line.erase(0, 1);
-		}
-		if (!line.empty() && line.at(0) == '>')
-		{
-			line_text.on_main = false;
-			line.erase(0, 1);
-		}
-		if (!line.empty() && line.at(0) == '~')
-		{
-			line_text.center = true;
-			line.erase(0, 1);
-		}
-		// break the line into substrings
-		while (!line.empty())
-		{
-			// first take care of any tabs
-			if (line.at(0) == '\t')
-			{
-				if (line.length() > 1)
-				{
-					CC_textchunk new_text;
-					new_text.font = PSFONT_TAB;
-					line_text.chunks.push_back(new_text);
-				}
-				line.erase(0, 1);
-				continue;
-			}
-			// now check to see if we have any special person marks
-			if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's')))
-			{
-				CC_textchunk new_text;
-				new_text.font = PSFONT_SYMBOL;
-				if (tolower(line.at(1)) == 'p')
-				{
-					switch (tolower(line.at(2)))
-					{
-						case 'o':
-							new_text.text.push_back('A'); break;
-						case 'b':
-							new_text.text.push_back('C'); break;
-						case 's':
-							new_text.text.push_back('D'); break;
-						case 'x':
-							new_text.text.push_back('E'); break;
-						default:
-							// code not recognized
-							return false;
-					}
-				}
-				if (tolower(line.at(1)) == 's')
-				{
-					switch (tolower(line.at(2)))
-					{
-						case 'o':
-							new_text.text.push_back('B'); break;
-						case 'b':
-							new_text.text.push_back('F'); break;
-						case 's':
-							new_text.text.push_back('G'); break;
-						case 'x':
-							new_text.text.push_back('H'); break;
-						default:
-							// code not recognized
-							return false;
-					}
-				}
-				line_text.chunks.push_back(new_text);
-				line.erase(0, 3);
-				continue;
-			}
-			// now check to see if we have any font
-			if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b') || (tolower(line.at(1)) == 'i')))
-			{
-				if (tolower(line.at(2)) == 'e')
-				{
-					currfontnum = PSFONT_NORM;
-				}
-				if (tolower(line.at(2)) == 's')
-				{
-					currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT_BOLD : PSFONT_ITAL;
-				}
-				line.erase(0, 3);
-				continue;
-			}
-			int pos = line.find_first_of("\\\t", 1);
-
-			CC_textchunk new_text;
-			new_text.font = currfontnum;
-			new_text.text = line.substr(0, pos);
-			line_text.chunks.push_back(new_text);
-			line.erase(0, pos);
-		}
-		mPrintableContinuity.push_back(line_text);
-	}
-	return true;
+	mPrintableContinuity = CC_print_continuity(name, lines);
 }
 
 CC_textline_list
 CC_sheet::GetPrintableContinuity() const
 {
-	return mPrintableContinuity;
+	return mPrintableContinuity.GetChunks();
 }
 
 const CC_point&

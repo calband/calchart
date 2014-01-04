@@ -142,23 +142,89 @@ CalChartDoc::~CalChartDoc()
 {}
 
 
-wxString CalChartDoc::ImportContinuity(const wxString& file)
+bool CalChartDoc::ImportPrintableContinuity(const std::vector<std::string>& lines)
 {
-	wxTextFile fp;
-	fp.Open(file);
-	if (!fp.IsOpened())
+	// should this first clear out all the continuity?
+	if (lines.empty())
 	{
-		return wxT("Unable to open file");
+		return true; // done, technically
 	}
-	std::vector<std::string> lines;
-	for (size_t line = 0; line < fp.GetLineCount(); ++line)
+	try
 	{
-		lines.push_back(fp.GetLine(line).ToStdString());
+		// check to make sure the first line starts with %%
+		if ((lines.front().length() < 2) || !((lines.front().at(0) == '%') && (lines.front().at(1) == '%')))
+		{
+			// Continuity doesn't begin with a sheet header
+			throw std::runtime_error("Continuity file doesn't begin with header");
+		}
+		
+		// first, split the lines into groups for each page
+		unsigned sheet = 0;
+		std::string number(lines.front(), 2);
+		std::string current_print_cont;
+		bool first_line = true;
+		for (auto line = lines.begin()+1; line != lines.end(); ++line)
+		{
+			// new sheet; push the current one into the map and reset it for the next time
+			if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%'))
+			{
+				GetNthSheet(sheet)->SetPrintableContinuity(number, current_print_cont);
+				number = std::string(*line, 2);
+				current_print_cont.clear();
+				++sheet;
+				if (sheet >= GetNumSheets())
+				{
+					throw std::runtime_error("More print continuity than sheets!");
+				}
+				continue;
+			}
+			// we need to concatinate all the lines together, making sure to put a new line between them.
+			if (!first_line)
+			{
+				current_print_cont += "\n";
+			}
+			first_line = false;
+			current_print_cont += *line;
+		}
 	}
-
-	auto result = mShow->ImportContinuity(lines);
+	catch (const std::runtime_error& e) {
+		wxString message = wxT("Error encountered:\n");
+		message += e.what();
+		wxMessageBox(message, wxT("Error!"));
+		return false;
+	}
 	UpdateAllViews();
-	return result;
+
+	return true;
+}
+
+
+bool CalChartDoc::SetPrintableContinuity(unsigned current_sheet, const std::string& number, const std::string& lines)
+{
+	// should this first clear out all the continuity?
+	if (lines.empty())
+	{
+		return true; // done, technically
+	}
+	try
+	{
+		// check to make sure the first line starts with %%
+		if (current_sheet >= GetNumSheets())
+		{
+			// out of rang
+			throw std::runtime_error("Continuity sheet out of range");
+		}
+		GetNthSheet(current_sheet)->SetPrintableContinuity(number, lines);
+	}
+	catch (CC_FileException& e) {
+		wxString message = wxT("Error encountered:\n");
+		message += e.what();
+		wxMessageBox(message, wxT("Error!"));
+		return false;
+	}
+	UpdateAllViews();
+	
+	return true;
 }
 
 

@@ -34,6 +34,7 @@
 #include "confgr.h"
 #include "ccvers.h"
 #include "cont_ui.h"
+#include "print_cont_ui.h"
 #include "show_ui.h"
 #include "animation_frame.h"
 #include "toolbar.h"
@@ -103,6 +104,7 @@ EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
 EVT_MENU(wxID_DELETE, FieldFrame::OnCmdDelete)
 EVT_MENU(CALCHART__RELABEL, FieldFrame::OnCmdRelabel)
 EVT_MENU(CALCHART__EDIT_CONTINUITY, FieldFrame::OnCmdEditCont)
+EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, FieldFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_SHEET_TITLE, FieldFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, FieldFrame::OnCmdSetBeats)
 EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
@@ -226,6 +228,7 @@ mAnimationFrame(NULL)
 	edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
 	edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
 	edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
+	edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
 
 	wxMenu *anim_menu = new wxMenu;
@@ -531,6 +534,17 @@ void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
 	{
 		ContinuityEditor* ce = new ContinuityEditor(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY,
 			wxT("Animation Continuity"));
+		// make it modeless:
+		ce->Show();
+	}
+}
+
+
+void FieldFrame::OnCmdEditPrintCont(wxCommandEvent& event)
+{
+	if (GetShow())
+	{
+		PrintContinuityEditor* ce = new PrintContinuityEditor(static_cast<CalChartDoc*>(GetDocument()), this);
 		// make it modeless:
 		ce->Show();
 	}
@@ -890,11 +904,7 @@ void FieldFrame::ImportContFile()
 	s = wxFileSelector(wxT("Import Continuity"), wxEmptyString, wxEmptyString, wxEmptyString, wxT("*.txt"));
 	if (!s.empty())
 	{
-        wxString err = GetShow()->ImportContinuity(s);
-		if (!err.IsEmpty())
-		{
-			(void)wxMessageBox(err, wxT("Load Error"));
-		}
+		GetFieldView()->DoImportPrintableContinuity(s);
 	}
 }
 

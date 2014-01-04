@@ -62,6 +62,7 @@ public:
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdRelabel(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);
+	void OnCmdEditPrintCont(wxCommandEvent& event);
 	void OnCmdSetSheetTitle(wxCommandEvent& event);
 	void OnCmdSetBeats(wxCommandEvent& event);
 	void OnCmdSetup(wxCommandEvent& event);

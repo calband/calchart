@@ -36,7 +36,6 @@ class CC_show;
 class CC_coord;
 class CC_continuity;
 class CC_point;
-typedef std::vector<CC_textline> CC_textline_list;
 
 // CalChart Sheet
 // The CalChart sheet object is a collection of CC_point locations, the number of
@@ -54,6 +53,7 @@ public:
 private:
 	std::vector<uint8_t> SerializeAllPoints() const;
 	std::vector<uint8_t> SerializeContinuityData() const;
+	std::vector<uint8_t> SerializePrintContinuityData() const;
 	std::vector<uint8_t> SerializeSheetData() const;
 public:
 	std::vector<uint8_t> SerializeSheet() const;
@@ -95,8 +95,9 @@ public:
 	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 
 	// continuity that gets printed
-	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
+	void SetPrintableContinuity(const std::string& name, const std::string& lines);
 	CC_textline_list GetPrintableContinuity() const;
+	std::string GetRawPrintContinuity() const;
 
 private:
 	CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
@@ -104,12 +105,10 @@ private:
 	typedef std::vector<CC_continuity> ContContainer;
 	ContContainer mAnimationContinuity;
 
-	CC_textline_list mPrintableContinuity;
+	CC_print_continuity mPrintableContinuity;
 	unsigned short beats;
 	std::vector<CC_point> pts;
 	std::string mName;
-	std::string number;
-
 };
 
 #endif
