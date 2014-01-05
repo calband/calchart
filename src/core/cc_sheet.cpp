@@ -412,7 +412,7 @@ CC_sheet::SerializeContinuityData() const
 	// EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
 	
 	std::ostringstream stream("");
-	for (auto current_symbol = SYMBOLS_START; current_symbol != MAX_NUM_SYMBOLS; ++current_symbol)
+	for (auto& current_symbol : k_symbols)
 	{
 		if (ContinuityInUse(current_symbol))
 		{

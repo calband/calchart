@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,14 +19,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -50,7 +50,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxmsw29ud_core.lib;wxbase29ud.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxmsw30ud_core.lib;wxbase30ud.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <CustomBuildStep>
@@ -117,6 +117,7 @@
     <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\parse.h" />
     <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\print_ps.h" />
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
     <ClInclude Include="..\..\src\setup_wizards.h" />
@@ -149,6 +150,7 @@
     <ClCompile Include="..\..\src\core\cc_shapes.cpp" />
     <ClCompile Include="..\..\src\core\cc_sheet.cpp" />
     <ClCompile Include="..\..\src\core\cc_show.cpp" />
+    <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
@@ -156,6 +158,7 @@
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
+    <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\print_ps.cpp" />
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
     <ClCompile Include="..\..\src\setup_wizards.cpp" />
