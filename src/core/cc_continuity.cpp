@@ -50,6 +50,9 @@ const string& CC_continuity::GetText() const
 
 
 // Test Suite stuff
+/**
+ * A structure used for testing CC_continuity.
+ */
 struct CC_continuity_values
 {
 	string text;

@@ -26,6 +26,9 @@
 #include <wx/docview.h>
 
 // Define the main editing frame
+/**
+* Unused, as far as I can tell. Related to HomeView.
+*/
 class HomeViewFrame : public wxDocChildFrame
 {
 public:

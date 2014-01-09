@@ -42,6 +42,9 @@ typedef wxDocChildFrame AnimationFrameParent;
 typedef wxFrame AnimationFrameParent;
 #endif
 
+/**
+ * The frame where the animation of the show can be viewed.
+ */
 class AnimationFrame : public AnimationFrameParent
 {
 public:

@@ -185,6 +185,9 @@ inline void put_big_long(void* p, uint32_t v)
 	ptr[3] = v;
 }
 
+/**
+ * An error to throw when something goes wrong while reading a CalChart file.
+ */
 class CC_FileException : public std::runtime_error
 {
 	static std::string GetErrorFromID(uint32_t nameID)

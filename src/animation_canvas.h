@@ -28,6 +28,10 @@
 class AnimationView;
 class CC_coord;
 
+/**
+ * The canvas to which the 2D animation is drawn. The actual drawing is done
+ * by the AnimationView.
+ */
 class AnimationCanvas: public wxPanel
 {
 public:

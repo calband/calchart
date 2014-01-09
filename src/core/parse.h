@@ -23,6 +23,9 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 
+/**
+ * TODO
+ */
 struct YYLTYPE
 {
 	int first_line;
@@ -31,9 +34,19 @@ struct YYLTYPE
 
 extern YYLTYPE yylloc;
 
+/**
+ * A list of Procedures entered through the Continuity Editor.
+ */
 struct proclist
 {
+	/**
+	 * The first procedure in the list. Each procedure has a link to the next
+	 * one, so this gives access to the entire list.
+	 */
 	ContProcedure* list;
+	/**
+	 * The last procedure in the list.
+	 */
 	ContProcedure* last;
 };
 #endif

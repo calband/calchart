@@ -44,15 +44,64 @@ T Deg2Rad(const T& a)
 
 #define SQRT2 1.4142136
 
+/**
+ * Confines an angle to the range of [0,360) degrees.
+ * @param f The angle to bound, in degrees.
+ * @return The angle f, bound on the range [0, 360).
+ */
 float BoundDirection(float f);
+
+/**
+ * TODO
+ */
 float NormalizeAngle(float ang);
 
+/**
+ * Confines an angle to the range of [-180, 180) degrees.
+ * @param f The angle to bound, in degrees.
+ * @return The angle f, bound on the range of [-180, 180).
+ */
 float BoundDirectionSigned(float f);
 
+/**
+ * Returns true if the angle f represents a diagonal direction
+ * (45, 135, 225, or 315 degrees, when bounded on [0, 360)).
+ * @param f The angle to check, in degrees.
+ * @return True if the angle represents a diagonal direction;
+ * falso otherwise.
+ */
 bool IsDiagonalDirection(float f);
 
+/**
+ * Modifies the input vector so that it has a particular
+ * magnitude and direction (except in the case that the
+ * direction is diagonal). When diagonal vectors are formed,
+ * the absolute values of both final vector components will
+ * have the magnitude passed as a parameter.
+ * @param c The vector to modify.
+ * @param dir The angle that the finished vector will
+ * make with the positive x-axis, in degrees.
+ * @param mag The magnitude of the final vector, except
+ * in the case where the direction is diagonal. In that
+ * case, both components of the final vector will have
+ * absolute values equal to this parameter.
+ */ 
 void CreateVector(CC_coord& c, float dir, float mag);
 
+/**
+ * Modifies the input parameters so that they represent
+ * a unit vector pointing in a particular direction
+ * (with a special case when the direction is a diagonal
+ * direction). When the direction is a diagonal direction,
+ * the components of the output vector both will have
+ * absolute values equal to one.
+ * @param a This will be modified by the function to represent
+ * the x component of the output vector.
+ * @param b This will be modified by the function to represent
+ * the y component of the output vector.
+ * @param dir This is the angle that the final output vector
+ * will make with the positive x-axis, in degrees.
+ */
 void CreateUnitVector(float& a, float& b, float dir);
 
 #endif

@@ -28,6 +28,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * TODO
+ */
 struct CC_textchunk
 {
 	CC_textchunk() : text(), font(PSFONT_NORM) {}
@@ -37,6 +40,9 @@ struct CC_textchunk
 
 typedef std::vector<CC_textchunk> CC_textchunk_list;
 
+/**
+ * TODO
+ */
 struct CC_textline
 {
 	CC_textline() : center(false), on_main(true), on_sheet(true) {}

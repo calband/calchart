@@ -234,8 +234,9 @@ void ContinuityEditor::Update()
 	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 
 	mContinuityChoices->Clear();
-	for (auto curranimcont = SYMBOLS_START; curranimcont != MAX_NUM_SYMBOLS; ++curranimcont)
+	for (int iCounter = SYMBOLS_START; iCounter != MAX_NUM_SYMBOLS; ++iCounter)
 	{
+		SYMBOL_TYPE curranimcont = (SYMBOL_TYPE)iCounter;
 		if (sht->ContinuityInUse(curranimcont))
 		{
 			mContinuityChoices->Append(GetNameForSymbol(curranimcont));

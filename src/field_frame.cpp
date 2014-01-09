@@ -149,12 +149,45 @@ EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_SIZE( FieldFrame::OnSize)
 END_EVENT_TABLE()
 
+/**
+ * The representation of the show in Print Preview.
+ */
 class MyPrintout : public wxPrintout
 {
 public:
+	/**
+	 * Makes the printout.
+	 * @param title 
+	 * @param show The document to display.
+	 */
 	MyPrintout(const wxString& title, const CalChartDoc& show) : wxPrintout(title), mShow(show) {}
+	/**
+	 * Cleanup.
+	 */
 	virtual ~MyPrintout() {}
+	/**
+	 * Returns true if the page exists in the preview; false otherwise.
+	 * @param pageNum The page number to check.
+	 * @return True if the requested page exists in the preview; false
+	 * otherwise.
+	 */
 	virtual bool HasPage(int pageNum) { return pageNum <= mShow.GetNumSheets(); }
+	/**
+	 * Fills the parameters with information about the range of pages that
+	 * the document will occupy when displayed in Print Preview.
+	 * @param minPage A pointer to an integer which will, after the method
+	 * completes, point to the page number of the first page of the document
+	 * being displayed through the print preview.
+	 * @param maxPage A pointer to an integer which will, after the method
+	 * completes, point to the page number of the last page of the document
+	 * being displayed through the print preview.
+	 * @param pageFrom A pointer to an integer which will, after the method
+	 * completes, point to the page number of the first page to appear in
+	 * the print preview.
+	 * @param pageTo A pointer to an integer which will, after the method
+	 * completes, point to the page number of the last page to apear in
+	 * the print preview.
+	 */
 	virtual void GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo)
 	{
 		*minPage = 1;
@@ -162,6 +195,12 @@ public:
 		*pageFrom = 1;
 		*pageTo = mShow.GetNumSheets();
 	}
+	/**
+	 * Called when a page of the show is drawn to the Print Preview dialog.
+	 * @param pageNum The page number of the page being drawn to
+	 * Print Preview.
+	 * @return True if the operation is successful; false otherwise.
+	 */
 	virtual bool OnPrintPage(int pageNum)
 	{
 		wxDC* dc = wxPrintout::GetDC();
@@ -173,6 +212,9 @@ public:
 
 		return true;
 	}
+	/**
+	 * The show being drawn to Print Preview.
+	 */
 	const CalChartDoc& mShow;
 };
 

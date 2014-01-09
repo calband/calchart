@@ -36,6 +36,9 @@ class Animation;
 // Field:
 // Field is the editable overhead view of the marchers on the field.
 // This is where in the app you edit a marcher's location and continuity
+/**
+ * Unused, as far as I can tell. Related to HomeView.
+ */
 class HomeViewView : public wxView
 {
 public:

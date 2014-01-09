@@ -204,6 +204,9 @@ CC_point::SetSymbol(SYMBOL_TYPE s)
 }
 
 // Test Suite stuff
+/**
+ * A structure used for testing cc_point.
+ */
 struct CC_point_values
 {
 	std::bitset<CC_point::kTotalBits> mFlags;

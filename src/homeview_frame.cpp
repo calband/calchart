@@ -66,6 +66,9 @@ const int zoom_amounts[] =
 
 static const wxChar *file_wild = FILE_WILDCARDS;
 
+/**
+* Unused, as far as I can tell. Related to HomeView.
+*/
 struct GridValue
 {
 	Coord num, sub;
@@ -97,6 +100,9 @@ EVT_MENU(wxID_HELP, HomeViewFrame::OnCmdHelp)
 EVT_MENU(wxID_PREFERENCES, HomeViewFrame::OnCmdPreferences)
 END_EVENT_TABLE()
 
+/**
+* Unused, as far as I can tell. Related to HomeView.
+*/
 class MyPrintout : public wxPrintout
 {
 public:

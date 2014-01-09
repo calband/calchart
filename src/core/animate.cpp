@@ -82,19 +82,54 @@ AnimateDir AnimGetDirFromAngle(float ang)
 }
 
 
-// AnimateSheet is a snapshot of CC_sheet
+/**
+ * Essentially a structure used to collect the points of a stuntsheet and
+ * the commands used to animate them as they transition to the next
+ * sheet.
+ */
 class AnimateSheet
 {
 public:
+	/**
+	 * Makes the sheet.
+	 * @param thePoints A list of the points on the sheet.
+	 * @param theCommands The commands that will be used to animate the points
+	 * on the sheet.
+	 * @param s The name of the sheet.
+	 * @param beats The duration of the sheet, in beats.
+	 */
 	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::vector<std::vector<boost::shared_ptr<AnimateCommand> > >& theCommands, const std::string& s, unsigned beats) : pts(thePoints), commands(theCommands), name(s), numbeats(beats) {}
+	/**
+	 * Cleanup.
+	 */
 	~AnimateSheet() {}
+	/**
+	 * Returns the name of the sheet.
+	 * @return The name of the sheet.
+	 */
 	std::string GetName() const { return name; }
+	/**
+	 * Returns the duration of the sheet, in beats.
+	 * @return The duration of the sheet, in beats.
+	 */
 	unsigned GetNumBeats() const { return numbeats; }
 	
+	/**
+	 * A list of the points on the sheet.
+	 */
 	std::vector<AnimatePoint> pts; // should probably be const
+	/**
+	 * The list of commands used to annimate the points.
+	 */
 	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
 private:
+	/**
+	 * The name of the sheet.
+	 */
 	std::string name;
+	/**
+	 * The duration of the sheet, in beats.
+	 */
 	unsigned numbeats;
 };
 
@@ -114,8 +149,9 @@ mCollisionAction(NULL)
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
 		std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > theCommands(numpts);
-		for (auto current_symbol = SYMBOLS_START; current_symbol != MAX_NUM_SYMBOLS; ++current_symbol)
+		for (int iCounter = SYMBOLS_START; iCounter != MAX_NUM_SYMBOLS; ++iCounter)
 		{
+			SYMBOL_TYPE current_symbol = (SYMBOL_TYPE)iCounter;
 			if (curr_sheet->ContinuityInUse(current_symbol))
 			{
 				auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);

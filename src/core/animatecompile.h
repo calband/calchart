@@ -34,30 +34,89 @@ class AnimateCommand;
 class CC_show;
 class CC_sheet;
 
+/**
+ * A variable defined in a continuity that can be changed throughout
+ * an animation.
+ */
 class AnimateVariable
 {
 private:
+	/**
+	 * The current value of the variable.
+	 */
 	float v;
+	/**
+	 * True if the value is valid; false otherwise.
+	 */
 	bool valid;
 public:
+	/**
+	 * Makes the variable. It is initially invalid.
+	 */
 	AnimateVariable(): v(0.0), valid(false) {}
+	/**
+	 * Returns whether or not the variable is valid. A variable is valid
+	 * if it has been initialized (that is, if its value has been set).
+	 * @return True if the variable is valid; false otherwise.
+	 */
 	inline bool IsValid() const { return valid; }
+	/**
+	 * Returns the current value of the variable.
+	 * @return The current value of the variable.
+	 */
 	inline float GetValue() const { return v; }
+	/**
+	 * Sets the value of the variable.
+	 * @param newv The new value for the variable.
+	 */
 	inline void SetValue(float newv) { v = newv; valid = true; }
+	/**
+	 * Clears the value of the variable, making it invalid.
+	 */
 	inline void ClearValue() { v = 0.0; valid = false; }
 };
 
-
+/**
+ * A collection of animation variables, and their values for each point.
+ * Each unique variable can be identified by a unique index,and each variable
+ * can have a different value for each point.
+ */
 class AnimationVariables
 {
 public:
+	/**
+	 * An error to throw if something goes wrong.
+	 */
 	struct AnimationVariableException {};
-	float GetVarValue(int varnum, unsigned whichPoint) const; // may throw AnimationVariableException if variable doesn't exist
+	/**
+	 * Returns the value of a variable for a particular point. This throws an
+	 * AnimationVariableException if the desired variable does not exist,
+	 * or is invalid.
+	 * @param varnum The identity of the variable to retrieve.
+	 * @param whichPoint The point for which to retrieve the value of the
+	 * variable.
+	 * @return The value of the variable for a point.
+	 */
+	float GetVarValue(int varnum, unsigned whichPoint) const;
+	/**
+	 * Sets the value of a variable for a particular point.
+	 * @param varnum The identity of the variable to set.
+	 * @param whichPoint The point for which to set the value of the variable.
+	 * @param value The value to apply to the variable.
+	 */
 	void SetVarValue(int varnum, unsigned whichPoint, float value);
 private:
+	/**
+	 * A list of maps (one map for each unique variable)
+	 * that map a point index to the value of a particular
+	 * variable for that point.
+	 */
 	std::map<unsigned,AnimateVariable> mVars[NUMCONTVARS];
 };
 
+/**
+ * Used to compile all continuities into a complete animation.
+ */
 class AnimateCompile
 {
 public:

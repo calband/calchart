@@ -35,11 +35,25 @@ void SetBandIcon(wxFrame *frame)
 	frame->SetIcon(icon);
 }
 
-
+/**
+ * The drop target for a FancyTextWin.
+ * This drop target calls on its FancyTextWin to load any files that are
+ * dropped into it.
+ */
 class FancyTextWinDropTarget : public wxFileDropTarget
 {
 public:
+	/**
+	 * Makes the drop target.
+	 * @param w The FancyTextWin which contains this drop target.
+	 */
 	FancyTextWinDropTarget(FancyTextWin *w) : win(w) {}
+	/**
+	 * Called when files are dropped into the drop target.
+	 * @param x The x coordinate at which the files were dropped.
+	 * @param y The y coordinate at which the files were dropped.
+	 * @param filenames The names of the files that were dropped.
+	 */
 	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
 	{
 		if (filenames.Count() > 0)
@@ -50,6 +64,9 @@ public:
 	}
 
 private:
+	/**
+	 * The FancyTextWin that contains this drop target.
+	 */
 	FancyTextWin *win;
 };
 

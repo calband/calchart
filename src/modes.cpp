@@ -320,13 +320,32 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 	}
 }
 
+/**
+ * Used to find a show mode by its name.
+ * This is essentially a function that is applied to each show mode
+ * to check whether that show mode has the desired name or not.
+ */
 class FindByName
 {
 public:
+	/**
+	 * Makes the object.
+	 * @param name The name that the function is searching for.
+	 */
 	FindByName(wxString name) : mName(name) {}
+	/**
+	 * Returns true if the show mode given as input has the correct
+	 * name.
+	 * @param a The show mode to check.
+	 * @return True if the show mode has the desired name; false
+	 * otherwise.
+	 */
 	template <typename T>
 	bool operator()(const T& a) { return mName == a->GetName(); }
 private:
+	/**
+	 * The name of the show mode that this object is searching for.
+	 */
 	wxString mName;
 };
 

@@ -35,11 +35,41 @@
 #define SPR_YARD_ABOVE 2
 #define SPR_YARD_BELOW 1
 
+/**
+ * The type of show being charted.
+ * Mostly, different show modes are drawn differently on the field frame, as
+ * to provide a background that is most suitable for editing a particular
+ * kind of show.
+ */
 class ShowMode
 {
 public:
-	typedef enum { SHOW_STANDARD, SHOW_SPRINGSHOW } ShowType;
+	/**
+	 * The show types.
+	 */
+	typedef enum {
+		/**
+		 * A standard field show.
+		 */
+		SHOW_STANDARD,
+		/**
+		 * Springshow.
+		 */
+		SHOW_SPRINGSHOW
+	} ShowType;
 	
+	/**
+	 * Makes the showmode.
+	 * @param name Name of the mode.
+	 * @param size The size of the region where the show takes place
+	 * (that is, the size of the show region).
+	 * @param offset The offset of the region where the show takes place
+	 * (that is, the offset of the show region).
+	 * @param border1 Provides the width and height of the border in the
+	 * lower left corner of the show region.
+	 * @param border2 Provides the width and height of the border in the
+	 * upper right corner of the show region.
+	 */
 	ShowMode(const wxString& name,
 			 const CC_coord& size,
 			 const CC_coord& offset,
@@ -51,45 +81,168 @@ public:
 			 const CC_coord& border2);
 	virtual ~ShowMode();
 
+	/**
+	 * Returns the type of show that this show mode represents.
+	 * @return The type of show represented by this show mode.
+	 */
 	virtual ShowType GetType() const = 0;
+	/**
+	 * Returns the offset of the region where the show takes place for this
+	 * show mode (the offset of the show region).
+	 * @return Offset of the region where the show takes place.
+	 */
 	inline const CC_coord& Offset() const { return mOffset; };
+	/**
+	 * Returns the offset of the region where the performers can actually
+	 * stand for this show mode (the offset of the field region).
+	 * @return Offset for the region where the dots can stand.
+	 */
 	inline CC_coord FieldOffset() const { return -(mOffset-mBorder1); }
+	/**
+	 * Returns the size of the region where the show takes place for this
+	 * show mode (the offset of the show region).
+	 * @return The size of the region where the show takes place.
+	 */
 	inline const CC_coord& Size() const { return mSize; };
+	/**
+	 * The size of the region where performers can actually stand for this
+	 * show mode (the offset of the field region).
+	 * @return The size of the region where dots can stand.
+	 */
 	inline CC_coord FieldSize() const { return mSize-mBorder1-mBorder2; }
+	/**
+	 * Returns the minimum position that a coordinate can have while remaining
+	 * within the show mode's local coordinate system (which is centered about
+	 * the center of the show region).
+	 * @return The minimum position that a coordinate can have in this show
+	 * mode.
+	 */
 	inline CC_coord MinPosition() const { return -mOffset; }
+	/**
+	 * Returns the maximum position that a coordinate can have while remaining
+	 * within the show mode's local coordinate system (which is centered about
+	 * the center of the show region).
+	 * @return The maximum position that a coordinate can have in this show
+	 * mode.
+	 */
 	inline CC_coord MaxPosition() const { return mSize-mOffset; }
+	/**
+	 * Returns the name of the show mode.
+	 * @return The name of the show mode.
+	 */
 	inline const wxString& GetName() const { return mName; };
+	/**
+	 * Clips a position so that it lies within the bounds of the show
+	 * region.
+	 * @param pos The position to clip.
+	 * @return The clipped version of the input position, which fits
+	 * in the bounds of the shor region.
+	 */
 	CC_coord ClipPosition(const CC_coord& pos) const;
 
 protected:
+	/**
+	 * The different targets to which the
+	 * the show mode can be drawn.
+	 */
 	typedef enum
 	{
+		/**
+		 * The field frame.
+		 */
 		kFieldView,
+		/**
+		 * The animation frame.
+		 */
 		kAnimation,
+		/**
+		 * Omniview. 
+		 */
 		kOmniView
 	} HowToDraw;
 
 public:
+	/**
+	 * Draws the show mode as it would appear in the field frame
+	 * (it will be drawn to the field frame through the field view).
+	 * @param dc The device context, used to draw the show mode.
+	 */
 	void Draw(wxDC& dc) const { DrawHelper(dc, kFieldView); }
+	/**
+	* Draws the show mode as it would appear in the animation frame.
+	* @param dc The device context, used to draw the show mode.
+	*/
 	void DrawAnim(wxDC& dc) const { DrawHelper(dc, kAnimation); }
+	/**
+	* Draws the show mode as it would appear in omniview.
+	* @param dc The device context, used to draw the show mode.
+	*/
 	void DrawOmni(wxDC& dc) const { DrawHelper(dc, kOmniView); }
-
+	/**
+	 * Returns the image that will be used to texture the floor
+	 * of the show region in OmniView. This is responsible
+	 * for defining how the field lines should be drawn.
+	 * @return The image that will be used to texture the floor of
+	 * the show region in OmniView.
+	 */
 	wxImage GetOmniLinesImage() const;
 
 protected:
+	/**
+	 * Draws the show mode as it would appear in the various frames.
+	 * This is called by all of the other draw methods of this class.
+	 * @param dc The device context, used to draw the show mode.
+	 * @param HowToDraw The style in which the show mode should be
+	 * drawn (e.g. the style in which the mode is drawn in the
+	 * animation frame, or the style in which the mode is drawn in
+	 * the field frame.
+	 */
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const = 0;
 
+	/**
+	 * The offset of the show region.
+	 */
 	CC_coord mOffset;
+	/**
+	 * The size of the show region.
+	 */
 	CC_coord mSize;
+	/**
+	 * The width and height of the lower left corner of the show region.
+	 */
 	CC_coord mBorder1;
+	/**
+	 * The width and height of the upper right corner of the show region.
+	 */
 	CC_coord mBorder2;
 private:
+	/**
+	 * The name of the show mode.
+	 */
 	wxString mName;
 };
 
+/**
+ * A standard show mode (represents a show that is marched on something that
+ * can be represented by a football field).
+ */
 class ShowModeStandard : public ShowMode
 {
 public:
+	/**
+	 * Makes the show mode.
+	 * @param name Name of the mode.
+	 * @param size The size of the region where the show takes place
+	 * (that is, the size of the show region).
+	 * @param offset The offset of the region where the show takes place
+	 * (that is, the offset of the show region).
+	 * @param border1 Provides the width and height of the border in the
+	 * lower left corner of the show region.
+	 * @param border2 Provides the width and height of the border in the
+	 * upper right corner of the show region.
+	 * @param whash The y coordinate of the west hash of the field.
+	 * @param ehash The y coordinate of the east hash of the field. 
+	 */
 	ShowModeStandard(const wxString& name,
 					 CC_coord size,
 					 CC_coord offset,
@@ -97,6 +250,9 @@ public:
 					 CC_coord border2,
 					 unsigned short whash,
 					 unsigned short ehash);
+	/**
+	 * Cleanup.
+	 */
 	virtual ~ShowModeStandard();
 
 	virtual ShowType GetType() const;
@@ -107,9 +263,21 @@ protected:
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
 
 private:
-	unsigned short mHashW, mHashE;
+	/**
+	 * The y coordinate of the west hash of the field.
+	 */
+	unsigned short mHashW;
+	/**
+	 * The y coordinate of the east hash of the field.
+	 */
+	unsigned short mHashE;
 };
 
+/**
+ * A springshow show mode (represents a show that is marched on something that
+ * can be represented by a stage).
+ * TODO - Finish documentation
+ */
 class ShowModeSprShow : public ShowMode
 {
 public:

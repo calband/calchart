@@ -154,8 +154,8 @@ public:
 	SetModeCommand(CalChartDoc& show, const wxString& newmode);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetModeCommand();
 
 protected:
@@ -185,8 +185,8 @@ public:
 	SetShowInfoCommand(CalChartDoc& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetShowInfoCommand();
 
 protected:
@@ -199,7 +199,8 @@ protected:
 	unsigned mNumPoints;
 
 	/**
-	 * TODO
+	 * The number of columns in the initial configuration of points that the show
+	 * wll have after the command is applied.
 	 */
 	unsigned mNumColumns;
 
@@ -230,8 +231,8 @@ public:
 	SetSheetCommand(CalChartDoc& show, const wxString cmdName);
 
 	/**
-	* Cleanup. This is abstract to force the class to be abstract.
-	*/
+	 * Cleanup. This is abstract to force the class to be abstract.
+	 */
 	virtual ~SetSheetCommand() = 0;
 
 protected:
@@ -260,8 +261,8 @@ public:
 	SetSheetTitleCommand(CalChartDoc& show, const wxString& newname);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetSheetTitleCommand();
 
 protected:
@@ -292,8 +293,8 @@ public:
 
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetSheetBeatsCommand();
 
 protected:
@@ -325,14 +326,20 @@ public:
 
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~AddSheetsCommand();
 
 protected:
 
 	virtual void DoAction();
+	/**
+	 * The sheets to insert into the show.
+	 */
 	CC_show::CC_sheet_container_t mSheets;
+	/**
+	 * The index that the first added sheet will have after the command is applied.
+	 */
 	const unsigned mWhere;
 };
 
@@ -346,12 +353,15 @@ public:
 
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~RemoveSheetsCommand();
 
 protected:
 	virtual void DoAction();
+	/**
+	 * The index of the stuntsheet to remove from the show.
+	 */
 	const unsigned mWhere;
 };
 
@@ -366,127 +376,204 @@ public:
 	SetSheetAndSelectCommand(CalChartDoc& show, const wxString cmdName);
 
 	/**
-	* Cleanup. This is abstract to force the class to be abstract.
-	*/
+	 * Cleanup. This is abstract to force the class to be abstract.
+	 */
 	virtual ~SetSheetAndSelectCommand() = 0;
 
 protected:
 	virtual void DoAction();
+	/**
+	 * The list of selected points, to which the command will be applied.
+	 */
 	const SelectionList mPoints;
 };
 
 
-// MovePointsOnSheetCommand:
-// Move points around on a sheet.  mPosition is a mapping of which point to two positions,
-// the original and new.  Do will move points to the new position, and undo will move them back.
-// Fill out the mPosition in the constructor.
+/**
+ * A command that moves the currently selected  points to new positions on the
+ * stunt sheet when applied.
+ */
 class MovePointsOnSheetCommand : public SetSheetAndSelectCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The show to edit.
+	 * @param ref The index of the reference point to edit for each point
+	 * through this command.
+	 */
 	MovePointsOnSheetCommand(CalChartDoc& show, unsigned ref);
 	
 	/**
-	* Cleanup. This is abstract to force the class to be abstract.
-	*/
+	 * Cleanup. This is abstract to force the class to be abstract.
+	 */
 	virtual ~MovePointsOnSheetCommand() = 0;
 
 protected:
 	virtual void DoAction();
 
+	/**
+	 * A mapping of from a point's index to the new position for that point
+	 * after the command is applied.
+	 */
 	std::map<unsigned, CC_coord> mPositions;
+	/**
+	 * The index of the reference point for the dots which will be altered
+	 * through this command.
+	 */
 	const unsigned mRef;
 };
 
 
-// TranslatePointsByDeltaCommand:
-// Move the selected points by a fixed delta
+/**
+ * Moves all currently selected points by some change (delta).
+ */
 class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The show to modify through this command.
+	 * @param delta The amount by which the positions of the selecte points should change.
+	 * @param ref The index of the reference point to move for each selected point.
+	 */
 	TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~TranslatePointsByDeltaCommand();
 };
 
 
-// TransformPointsCommand:
-// Move the selected points by a matrix function
+/**
+ * Transforms the selected points by a transformation matrix when the command
+ * is applied. The points are multiplied by the transformation matrix as if
+ * they were vectors.
+ */
 class TransformPointsCommand : public MovePointsOnSheetCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through this command.
+	 * @param transmat The transformation matrix to apply to the selected points.
+	 * @param ref The reference point to transform with the matrix.
+	 */
 	TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~TransformPointsCommand();
 };
 
 
-// TransformPointsInALineCommand:
-// Move the selected points by a line function
+/**
+ * Moves the selected points into a line when the command is applied.
+ */
 class TransformPointsInALineCommand : public MovePointsOnSheetCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through this command.
+	 * @param start The starting point for the line.
+	 * @param second The position of the second point in the line.
+	 * @param ref The reference point to modify through this command.
+	 */
 	TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~TransformPointsInALineCommand();
 };
 
 
-// SetReferencePointToRef0 :
-// Reset a reference point position to ref point 0.
+/**
+ * Sets the position of a particular reference point for each of the selected
+ * points to the actual position of the point itself (the position of its
+ * zeroth reference point) when applied.
+ */
 class SetReferencePointToRef0 : public MovePointsOnSheetCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through the command.
+	 * @param ref The index of the reference point that should be modified
+	 * through this command.
+	 */
 	SetReferencePointToRef0(CalChartDoc& show, unsigned ref);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetReferencePointToRef0();
 };
 
 
-// SetContinuityIndexCommand:
-// Sets the symbol for the selected points, creating one if it doesn't exist
+/**
+ * Sets the symbol of the currently selected points when the command is
+ * applied.
+ */
 class SetSymbolCommand : public SetSheetAndSelectCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through the command.
+	 * @param sym The symbol to associate with the points after
+	 * the command is applied.
+	 */
 	SetSymbolCommand(CalChartDoc& show, SYMBOL_TYPE sym);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetSymbolCommand();
 
 protected:
 	virtual void DoAction();
+	/**
+	 * A map of point index to the symbol to apply to that point
+	 * when the command is applied.
+	 */
 	std::map<unsigned, SYMBOL_TYPE> mSyms;
 };
 
 
-// SetContinuityTextCommand
-// Sets the continuity text
+/**
+ * Sets the text of a continuity associated with the current stunt sheet
+ * (the text of a continuity is the script associated with the continuity
+ * as submitted through the Continuity Editor) when applied.
+ */
 class SetContinuityTextCommand : public SetSheetAndSelectCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through this command.
+	 * @param i The symbol type associated with the target continuity.
+	 * @param text The new text for the continuity.
+	 */
 	SetContinuityTextCommand(CalChartDoc& show, SYMBOL_TYPE i, const wxString& text);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetContinuityTextCommand();
 
 protected:
 	virtual void DoAction();
+	/**
+	 * The symbol type associated with the target continuity.
+	 */
 	SYMBOL_TYPE mWhichCont;
+	/**
+	 * The new text for the continuity.
+	 */
 	wxString mContinuity;
 };
 
@@ -498,48 +585,68 @@ protected:
 class SetLabelCommand : public SetSheetAndSelectCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through this command.
+	 */
 	SetLabelCommand(CalChartDoc& show);
 	
 	/**
-	* Cleanup. This is abstract to force the class to be abstract.
-	*/
+	 * Cleanup. This is abstract to force the class to be abstract.
+	 */
 	virtual ~SetLabelCommand() = 0;
 
 protected:
 	virtual void DoAction();
 
+	/**
+	 * A mapping from the index of a point to the final position of the
+	 * label relative to the point (true if the label will be on the
+	 * right of the point, false if on the left) after the command
+	 * is appied.
+	 */
 	std::map<unsigned, bool> mLabelPos;
 };
 
 
 /**
  * A command that positions the point labels of the currently selected set
- * of points to the right of their dots.
+ * of points to the right/left of their dots.
  */
 class SetLabelRightCommand : public SetLabelCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The document to modify through this command.
+	 * @param right True if the label should be placed to the right
+	 * of the dots, false if the label should be placed to the left.
+	 */
 	SetLabelRightCommand(CalChartDoc& show, bool right);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetLabelRightCommand();
 };
 
 
 /**
-* A command that positions the point labels of the currently selected set
-* of points to the left of their dots.
-*/
+ * A command that toggles the positions the point labels of the currently
+ * selected set of points between the right and left of the dots.
+ */
 class SetLabelFlipCommand : public SetLabelCommand
 {
 public:
+	/**
+	 * Makes the command.
+	 * @param show The show to modify through this command.
+	 */
 	SetLabelFlipCommand(CalChartDoc& show);
 
 	/**
-	* Cleanup.
-	*/
+	 * Cleanup.
+	 */
 	virtual ~SetLabelFlipCommand();
 };
 

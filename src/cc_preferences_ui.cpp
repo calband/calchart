@@ -54,17 +54,39 @@ static void AddTextboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer, i
 	verticalsizer->Add(textsizer, sBasicSizerFlags);
 }
 
-// the basic class panel we use for all the pages:
+/**
+ * A page of the Preferences dialog.
+ */
 class PreferencePage : public wxPanel
 {
 	DECLARE_ABSTRACT_CLASS( GeneralSetup )
 public:
+	/**
+	 * Makes a preference page.
+	 */
 	PreferencePage()
 	{
 		Init();
 	}
+	/**
+	 * Cleanup.
+	 */
 	virtual ~PreferencePage( ) {}
+	/**
+	 * Called to initialize the preference page, before the Create(...)
+	 * method is called.
+	 */
 	virtual void Init() {}
+	/**
+	 * Sets up the Preferences page.
+	 * @param parent The parent for this dialog. If the parent is
+	 * closed, this dialog will be closed too.
+	 * @param id The identity of the window.
+	 * @param caption The title of the dialog box.
+	 * @param pos The position of the dialog.
+	 * @param size The size of the dialog.
+	 * @param style The style in which the dialog will be drawn.
+	 */
 	virtual bool Create(wxWindow *parent,
 		wxWindowID id,
 		const wxString& caption,
@@ -81,11 +103,29 @@ public:
 		return true;
 	}
 
+	/**
+	 * Sets up the GUI components of the page.
+	 */
 	virtual void CreateControls() = 0;
 
 	// use these to get and set default values
+	/**
+	 * Syncs the GUI components with the variable values
+	 * in the Preferences Page.
+	 * @return TODO
+	 */
 	virtual bool TransferDataToWindow() = 0;
+	/**
+	 * Saves the current values held in the GUI components
+	 * to the CalChart config.
+	 * @return TODO
+	 */
 	virtual bool TransferDataFromWindow() = 0;
+	/**
+	 * Sets the values recorded by all attached GUI components
+	 * to their defaults.
+	 * @return TODO
+	 */
 	virtual bool ClearValuesToDefault() = 0;
 
 };
@@ -96,13 +136,25 @@ IMPLEMENT_ABSTRACT_CLASS( PreferencePage, wxPanel )
 //////// General setup ////////
 // handling autosave and colors
 ////////
-
+/**
+ * The General page of the Preferences dialog.
+ */
 class GeneralSetup : public PreferencePage
 {
 	DECLARE_CLASS( GeneralSetup )
 	DECLARE_EVENT_TABLE()
 
 public:
+	/**
+	 * Sets up the page.
+	 * @param parent The parent for this dialog. If the parent is
+	 * closed, this dialog will be closed too.
+	 * @param id The identity of the window.
+	 * @param caption The title of the dialog box.
+	 * @param pos The position of the dialog.
+	 * @param size The size of the dialog.
+	 * @param style The style in which the dialog will be drawn.
+	 */
 	GeneralSetup( wxWindow *parent,
 		wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("General Setup"),
@@ -308,7 +360,9 @@ void GeneralSetup::OnCmdChooseNewColor(wxCommandEvent&)
 //////// General setup ////////
 // setup pringing values and colors
 ////////
-
+/**
+ * The PS Printing page of the Preferences dialog.
+ */
 class PSPrintingSetUp : public PreferencePage
 {
 	DECLARE_CLASS( PSPrintingSetUp )
@@ -546,7 +600,9 @@ bool PSPrintingSetUp::ClearValuesToDefault()
 //////// Show Mode setup ////////
 // setup pringing values and colors
 ////////
-
+/**
+ * The Show Mode Setup page of the Preferences dialog.
+ */
 class ShowModeSetup : public PreferencePage
 {
 	DECLARE_CLASS( ShowModeSetup )
@@ -738,6 +794,9 @@ void ShowModeSetup::OnCmdChoice(wxCommandEvent&)
 // setup pringing values and colors
 ////////
 
+/**
+ * The SpringShow Mode Setup page of the Preferences dialog.
+ */
 class SpringShowModeSetup : public PreferencePage
 {
 	DECLARE_CLASS( SpringShowModeSetup )

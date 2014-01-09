@@ -29,6 +29,7 @@
 #include <string>
 #include <set>
 #include <stdint.h>
+#include <memory>
 
 class CC_sheet;
 class ShowMode;
@@ -41,11 +42,7 @@ typedef std::set<unsigned> SelectionList;
 
 /**
  * A CalChart show.
- * A CalChart show is essentially a collection of sheets. 
- * The CalChart show object is what most parts of the system interact with
- * It is essentially a collection of CC_sheets that you iterate through to
- * either look at, or change.
- * A show can be loaded from a input stream
+ * TODO
  */
 class CC_show
 {
@@ -77,15 +74,46 @@ public:
 	std::string ImportContinuity(const std::vector<std::string>& file);
 
 public:
+	/**
+	 * Returns the description of the show.
+	 * @return The show discription.
+	 */
 	const std::string& GetDescr() const;
+	/**
+	 * Sets the show description.
+	 * @return The new show description.
+	 */
 	void SetDescr(const std::string& newdescr);
 
+
 	void SetupNewShow();
+	/**
+	 * Returns the number of stunt sheets in the show.
+	 * @return The number of stunt sheets in the show.
+	 */
 	size_t GetNumSheets() const;
 
+	/**
+	 * Returns an iterator that will iterate through all of the stunt sheets
+	 * and is initially positioned at the first stunt sheet.
+	 * @return An iterator positioned on the first stunt sheet.
+	 */
 	CC_sheet_iterator_t GetSheetBegin();
+	/**
+	 * Returns an iterator that will iterate through all of the stunt sheets
+	 * and is initially positioned at the first stunt sheet.
+	 * @return An iterator positioned on the first stunt sheet.
+	 */
 	const_CC_sheet_iterator_t GetSheetBegin() const;
+	/** Returns an iterator that iterates through all of the stunt sheets
+	 * but is initially positioned immediately AFTER the last stunt sheet.
+	 * @return An iterator positioned beyond the last stunt sheet.
+	 */
 	CC_sheet_iterator_t GetSheetEnd();
+	/** Returns an iterator that iterates through all of the stunt sheets
+	 * but is initially positioned immediately AFTER the last stunt sheet.
+	 * @return An iterator positioned beyond the last stunt sheet.
+	 */
 	const_CC_sheet_iterator_t GetSheetEnd() const;
 
 	const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;

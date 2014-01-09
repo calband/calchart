@@ -68,7 +68,7 @@ public:
 	/**
 	 * TODO - I'm not a mac user...
 	 * @param fileName The name of the file to open.
-	 * TODO WHY VIRTUAL?!
+	 * TODO why virtual?
 	 */
 	virtual void MacOpenFile(const wxString &fileName);
 

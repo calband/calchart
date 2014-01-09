@@ -29,12 +29,28 @@
 #include <vector>
 
 // Set icon to band's insignia
+/**
+ * Sets the icon of a frame to the band icon.
+ * @param frame The frame to install the band icon to.
+ */
 void SetBandIcon(wxFrame *frame);
 
-// Define a text subwindow that can respond to drag-and-drop
+/**
+ * A text subwindow that can respond to drag-and-drop.
+ */
 class FancyTextWin : public wxTextCtrl
 {
 public:
+	/**
+	 * Makes the subwindow.
+	 * @param parent The parent for this dialog. If the parent is
+	 * closed, this dialog will be closed too.
+	 * @param id The identity of the window.
+	 * @param caption The title of the dialog box.
+	 * @param pos The position of the dialog.
+	 * @param size The size of the dialog.
+	 * @param style The style in which the dialog will be drawn.
+	 */
 	FancyTextWin(wxWindow* parent, wxWindowID id,
 		const wxString& value = wxEmptyString,
 		const wxPoint& pos = wxDefaultPosition,
@@ -46,37 +62,83 @@ public:
 };
 
 
-///// CtrlScrollCanvas /////
-// A canvas that does zooming and ctrlScrolling
-// ctrlScrolling scrolls when you hold the ctrl key and move the mouse
-// To use, call PrepareDC on your OnPaint routines with the dc.
-// Call OnMouseMove on the MouseMove handler to inform the Canvas a move has occurred.
-//////////
+/**
+ * A canvas that does zooming and 'ctrlScrolling'.
+ * ctrlScrolling scrolls the canvas when the user holds the ctrl key and moves
+ * the mouse.
+ * To make this work:
+ * The OnPaint routine of any child class must call PrepareDC
+ * at the beginning to make this canvas draw properly.
+ * The OnMouseMove routine must be called when the mouse moves, so any child
+ * class must recieve mouse events.
+ */
 class CtrlScrollCanvas : public wxScrolledWindow
 {
 private:
 	typedef wxScrolledWindow super;
 public:
+	/**
+	 * Makes the canvas.
+	  * @param parent The parent for this dialog. If the parent is
+	  * closed, this dialog will be closed too.
+	  * @param id The identity of the window.
+	  * @param caption The title of the dialog box.
+	  * @param pos The position of the dialog.
+	  * @param size The size of the dialog.
+	  * @param style The style in which the dialog will be drawn.
+	  */
 	CtrlScrollCanvas(wxWindow *parent,
 					 wxWindowID id = wxID_ANY,
 					 const wxPoint& pos = wxDefaultPosition,
 					 const wxSize& size = wxDefaultSize,
 					 long style = 0);
+	/**
+	 * Cleanup.
+	 */
 	virtual ~CtrlScrollCanvas();
 
 protected:
+	/**
+	 * Sets up the device context so that anything drawn to the
+	 * canvas using that context will be scrolled.
+	 */
 	void PrepareDC(wxDC&);
 
 public:
+	/**
+	 * Sets the zoom to a given percentage of the standard zoom.
+	 * @param z The percentage of the standard zoom to which the
+	 * canvas should be zoomed.
+	 */
 	virtual void SetZoom(float z);
+	/**
+	 * Returns the zoom factor.
+	 * @return The zoom factor (the percentage that the current
+	 * zoom is of the standard zoom).
+	 */
 	virtual float GetZoom() const;
 
-	// Inform the ctrl scrolling when the mouse moves
+	/**
+	 * Called when the mouse is moved. This handles canvas scrolling.
+	 * @param An event containing mouse-related information.
+	 */
     virtual void OnMouseMove(wxMouseEvent &event);
 
 private:
+	
+	/**
+	 * The offset of the canvas as a result of scrolling.
+	 */
 	wxPoint mOffset;
+	/**
+	 * The position that the mouse was at when the last mouse event
+	 * was sent to this canvas.
+	 */
 	wxPoint mLastPos;
+	/**
+	 * The zoom factor of the canvas. That is, the ratio of the
+	 * current zoom to the standard zoom.
+	 */
 	float mZoomFactor;
 };
 

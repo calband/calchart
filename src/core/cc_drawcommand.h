@@ -23,16 +23,48 @@
 #ifndef _CC_DRAWCOMMAND_H_
 #define _CC_DRAWCOMMAND_H_
 
+/**
+ * An instruction defining how something should be drawn.
+ */
 struct CC_DrawCommand
 {
 	typedef enum { Ignore, Line, Arc } DrawType;
+	/**
+	 * Defines how the draw command's data should be interpreted when
+	 * drawing.
+	 */
 	DrawType mType;
-	int x1, y1, x2, y2;
-	int xc, yc;
+	/**
+	 * Start x position.
+	 */
+	int x1;
+	/**
+	 * Start y position.
+	 */
+	int y1;
+	/** 
+	 * End x position.
+	 */
+	int x2;
+	/**
+	 * End y position.
+	 */
+	int y2;
+	/**
+	 * Center x position.
+	 */
+	int xc;
+	/**
+	 * Center y position.
+	 */
+	int yc;
 	// nothing version
 	CC_DrawCommand() : mType(Ignore) {}
 
 	// Line version
+	/**
+	 * Makes a command that will draw a line.
+	 */
 	CC_DrawCommand(int startx, int starty, int endx, int endy) :
 	mType(Line),
 	x1(startx),
@@ -42,6 +74,9 @@ struct CC_DrawCommand
 	{}
 
 	// Arc version
+	/**
+	 * Makes a command that will draw an arc.
+	 */
 	CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx, int centery) :
 	mType(Arc),
 	x1(startx),

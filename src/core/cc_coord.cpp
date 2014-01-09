@@ -87,6 +87,9 @@ bool CC_coord::Collides(const CC_coord& c) const
 #include <assert.h>
 
 // Test Suite stuff
+/**
+ * Used to test CC_coord.
+ */
 struct CC_coord_values
 {
 	Coord x, y;

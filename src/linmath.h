@@ -830,7 +830,9 @@ public:
 	}
 };
 
-//TODO
+/**
+ * TODO
+ */
 class ProjectionMatrix: public Matrix
 {
 public:

@@ -390,8 +390,9 @@ CC_sheet::SerializeContinuityData() const
 	// EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
 	
 	std::ostringstream stream("");
-	for (auto current_symbol = SYMBOLS_START; current_symbol != MAX_NUM_SYMBOLS; ++current_symbol)
+	for (int iCounter = SYMBOLS_START; iCounter != MAX_NUM_SYMBOLS; ++iCounter)
 	{
+		SYMBOL_TYPE current_symbol = (SYMBOL_TYPE)(iCounter);
 		if (ContinuityInUse(current_symbol))
 		{
 			WriteChunkHeader(stream, INGL_ECNT,

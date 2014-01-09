@@ -25,24 +25,63 @@
 
 #include <string>
 
-// points have a symbol index and a continuity index.  The continuity
-// numbers is the way that the points know what continity they use.
-// This allows multiple points to have different symbols but the same continuity.
+/**
+ * Represents a CalChart continuity (the set of instructions for points
+ * transitioning between two stuntsheets).
+ * The continuity has text associated with it that defines the continuity,
+ * and that text is entered through the continuity editor.
+ * Continuities are also associated with a particular symbol type, but that
+ * information is not local to the continuity itself. The CalChart sheets
+ * keep track of which continuity object to associate with each symbol type -
+ * that way, a single continuity object can be used for multiple symbol types,
+ * because the continuity itself is separated from the dot type that it is
+ * associated with.
+ */
 class CC_continuity
 {
 public:
+	/**
+	 * Makes the continuity.
+	 */
 	CC_continuity();
+	/**
+	 * Cleanup.
+	 */
 	~CC_continuity();
 
+	/**
+	 * Sets the text of the continuity, which should define the instructions
+	 * for the dots which adhere to this continuity.
+	 * @param s The text for the continuity.
+	 */
 	void SetText(const std::string& s);
+	/**
+	 * Adds extra text onto the end of the text for this continuity.
+	 * @param s The text to add on to the end of the text for the continuity.
+	 */
 	void AppendText(const std::string& s);
+	/**
+	 * Returns the text associated with this continuity.
+	 * @return The text associated with this continuity.
+	 */
 	const std::string& GetText() const;
 
 private:
+	/**
+	 * The text associated with this continuity. This should essentially be a
+	 * script that describes how points adhering to this continuity should
+	 * behave.
+	 */
 	std::string text;
 
-friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
-friend void CC_continuity_UnitTests();
+	/**
+	 * Friended to give tests full access to the continuity.
+	 */
+	friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
+	/**
+	* Friended to give tests full access to the continuity.
+	*/
+	friend void CC_continuity_UnitTests();
 };
 
 bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);

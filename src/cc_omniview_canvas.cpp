@@ -107,6 +107,10 @@ typedef enum
 	kImageLast
 } WhichImageEnum;
 
+/**
+ * A structure used to map an image id to the name of a file that it is
+ * associated with.
+ */
 typedef struct { WhichImageEnum mImageId; wxString mImageFilename; } id_string_t;
 
 id_string_t ListOfImageFiles[] = {
@@ -388,7 +392,9 @@ GetAngle(float x, float y, const viewpoint_t &viewpoint)
 }
 
 
-// the rendering context used by CCOmniView_Canvas
+/**
+* The rendering context used to draw in 3D for OmniView.
+*/
 class CCOmniView_GLContext : public wxGLContext
 {
 public:
