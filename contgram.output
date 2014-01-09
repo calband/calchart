@@ -1,0 +1,2170 @@
+Terminals unused in grammar
+
+   UNKNOWN_TOKEN
+
+
+State 101 conflicts: 41 reduce/reduce
+State 105 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: proc_list $end
+
+    1 proc_list: /* empty */
+    2          | proc_list procedure
+
+    3 procedure: varvalue '=' value
+    4          | pBLAM
+    5          | pCOUNTERMARCH point point value value value value
+    6          | pDMCM point point value
+    7          | pDMHS point
+    8          | pEVEN value point
+    9          | pEWNS point
+   10          | pFOUNTAIN value value point
+   11          | pFOUNTAIN value value value value point
+   12          | pFM value value
+   13          | pFMTO point
+   14          | pGRID value
+   15          | pHSCM point point value
+   16          | pHSDM point
+   17          | pMAGIC point
+   18          | pMARCH value value value
+   19          | pMARCH value value value value
+   20          | pMT value value
+   21          | pMTRM value
+   22          | pNSEW point
+   23          | pROTATE value value point
+
+   24 point: rwP
+   25      | rwSP
+   26      | rwNP
+   27      | rwR FLOATCONST
+
+   28 value: FLOATCONST
+   29      | DEFINECONST
+   30      | value '+' value
+   31      | value '-' value
+   32      | value '*' value
+   33      | value '/' value
+   34      | '-' value
+   35      | '(' value ')'
+   36      | rwREM
+   37      | rwDOF
+   38      | rwDOH
+   39      | varvalue
+   40      | function
+
+   41 function: fDIR '(' point ')'
+   42         | fDIRFROM '(' point point ')'
+   43         | fDIST '(' point ')'
+   44         | fDISTFROM '(' point point ')'
+   45         | fEITHER '(' value value point ')'
+   46         | fOPP '(' value ')'
+   47         | fSTEP '(' value value point ')'
+
+   48 varvalue: VARIABLE
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 35 41 42 43 44 45 46 47
+')' (41) 35 41 42 43 44 45 46 47
+'*' (42) 32
+'+' (43) 30
+'-' (45) 31 34
+'/' (47) 33
+'=' (61) 3
+error (256)
+rwP (258) 24
+rwNP (259) 26
+rwR (260) 27
+rwREM (261) 36
+rwSP (262) 25
+rwDOF (263) 37
+rwDOH (264) 38
+pBLAM (265) 4
+pCOUNTERMARCH (266) 5
+pDMCM (267) 6
+pDMHS (268) 7
+pEVEN (269) 8
+pEWNS (270) 9
+pFOUNTAIN (271) 10 11
+pFM (272) 12
+pFMTO (273) 13
+pGRID (274) 14
+pHSDM (275) 16
+pHSCM (276) 15
+pMAGIC (277) 17
+pMARCH (278) 18 19
+pMT (279) 20
+pMTRM (280) 21
+pNSEW (281) 22
+pROTATE (282) 23
+fDIR (283) 41
+fDIRFROM (284) 42
+fDIST (285) 43
+fDISTFROM (286) 44
+fEITHER (287) 45
+fOPP (288) 46
+fSTEP (289) 47
+UNKNOWN_TOKEN (290)
+FLOATCONST (291) 27 28
+VARIABLE (292) 48
+DEFINECONST (293) 29
+UNARY (294)
+
+
+Nonterminals, with rules where they appear
+
+$accept (47)
+    on left: 0
+proc_list (48)
+    on left: 1 2, on right: 0 2
+procedure (49)
+    on left: 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23,
+    on right: 2
+point (50)
+    on left: 24 25 26 27, on right: 5 6 7 8 9 10 11 13 15 16 17 22
+    23 41 42 43 44 45 47
+value (51)
+    on left: 28 29 30 31 32 33 34 35 36 37 38 39 40, on right: 3 5
+    6 8 10 11 12 14 15 18 19 20 21 23 30 31 32 33 34 35 45 46 47
+function (52)
+    on left: 41 42 43 44 45 46 47, on right: 40
+varvalue (53)
+    on left: 48, on right: 3 39
+
+
+state 0
+
+    0 $accept: . proc_list $end
+
+    $default  reduce using rule 1 (proc_list)
+
+    proc_list  go to state 1
+
+
+state 1
+
+    0 $accept: proc_list . $end
+    2 proc_list: proc_list . procedure
+
+    $end           shift, and go to state 2
+    pBLAM          shift, and go to state 3
+    pCOUNTERMARCH  shift, and go to state 4
+    pDMCM          shift, and go to state 5
+    pDMHS          shift, and go to state 6
+    pEVEN          shift, and go to state 7
+    pEWNS          shift, and go to state 8
+    pFOUNTAIN      shift, and go to state 9
+    pFM            shift, and go to state 10
+    pFMTO          shift, and go to state 11
+    pGRID          shift, and go to state 12
+    pHSDM          shift, and go to state 13
+    pHSCM          shift, and go to state 14
+    pMAGIC         shift, and go to state 15
+    pMARCH         shift, and go to state 16
+    pMT            shift, and go to state 17
+    pMTRM          shift, and go to state 18
+    pNSEW          shift, and go to state 19
+    pROTATE        shift, and go to state 20
+    VARIABLE       shift, and go to state 21
+
+    procedure  go to state 22
+    varvalue   go to state 23
+
+
+state 2
+
+    0 $accept: proc_list $end .
+
+    $default  accept
+
+
+state 3
+
+    4 procedure: pBLAM .
+
+    $default  reduce using rule 4 (procedure)
+
+
+state 4
+
+    5 procedure: pCOUNTERMARCH . point point value value value value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 28
+
+
+state 5
+
+    6 procedure: pDMCM . point point value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 29
+
+
+state 6
+
+    7 procedure: pDMHS . point
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 30
+
+
+state 7
+
+    8 procedure: pEVEN . value point
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 45
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 8
+
+    9 procedure: pEWNS . point
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 48
+
+
+state 9
+
+   10 procedure: pFOUNTAIN . value value point
+   11          | pFOUNTAIN . value value value value point
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 49
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 10
+
+   12 procedure: pFM . value value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 50
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 11
+
+   13 procedure: pFMTO . point
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 51
+
+
+state 12
+
+   14 procedure: pGRID . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 52
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 13
+
+   16 procedure: pHSDM . point
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 53
+
+
+state 14
+
+   15 procedure: pHSCM . point point value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 54
+
+
+state 15
+
+   17 procedure: pMAGIC . point
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 55
+
+
+state 16
+
+   18 procedure: pMARCH . value value value
+   19          | pMARCH . value value value value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 56
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 17
+
+   20 procedure: pMT . value value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 57
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 18
+
+   21 procedure: pMTRM . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 58
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 19
+
+   22 procedure: pNSEW . point
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 59
+
+
+state 20
+
+   23 procedure: pROTATE . value value point
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 60
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 21
+
+   48 varvalue: VARIABLE .
+
+    $default  reduce using rule 48 (varvalue)
+
+
+state 22
+
+    2 proc_list: proc_list procedure .
+
+    $default  reduce using rule 2 (proc_list)
+
+
+state 23
+
+    3 procedure: varvalue . '=' value
+
+    '='  shift, and go to state 61
+
+
+state 24
+
+   24 point: rwP .
+
+    $default  reduce using rule 24 (point)
+
+
+state 25
+
+   26 point: rwNP .
+
+    $default  reduce using rule 26 (point)
+
+
+state 26
+
+   27 point: rwR . FLOATCONST
+
+    FLOATCONST  shift, and go to state 62
+
+
+state 27
+
+   25 point: rwSP .
+
+    $default  reduce using rule 25 (point)
+
+
+state 28
+
+    5 procedure: pCOUNTERMARCH point . point value value value value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 63
+
+
+state 29
+
+    6 procedure: pDMCM point . point value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 64
+
+
+state 30
+
+    7 procedure: pDMHS point .
+
+    $default  reduce using rule 7 (procedure)
+
+
+state 31
+
+   36 value: rwREM .
+
+    $default  reduce using rule 36 (value)
+
+
+state 32
+
+   37 value: rwDOF .
+
+    $default  reduce using rule 37 (value)
+
+
+state 33
+
+   38 value: rwDOH .
+
+    $default  reduce using rule 38 (value)
+
+
+state 34
+
+   41 function: fDIR . '(' point ')'
+
+    '('  shift, and go to state 65
+
+
+state 35
+
+   42 function: fDIRFROM . '(' point point ')'
+
+    '('  shift, and go to state 66
+
+
+state 36
+
+   43 function: fDIST . '(' point ')'
+
+    '('  shift, and go to state 67
+
+
+state 37
+
+   44 function: fDISTFROM . '(' point point ')'
+
+    '('  shift, and go to state 68
+
+
+state 38
+
+   45 function: fEITHER . '(' value value point ')'
+
+    '('  shift, and go to state 69
+
+
+state 39
+
+   46 function: fOPP . '(' value ')'
+
+    '('  shift, and go to state 70
+
+
+state 40
+
+   47 function: fSTEP . '(' value value point ')'
+
+    '('  shift, and go to state 71
+
+
+state 41
+
+   28 value: FLOATCONST .
+
+    $default  reduce using rule 28 (value)
+
+
+state 42
+
+   29 value: DEFINECONST .
+
+    $default  reduce using rule 29 (value)
+
+
+state 43
+
+   34 value: '-' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 72
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 44
+
+   35 value: '(' . value ')'
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 73
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 45
+
+    8 procedure: pEVEN value . point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+    '+'   shift, and go to state 74
+    '-'   shift, and go to state 75
+    '*'   shift, and go to state 76
+    '/'   shift, and go to state 77
+
+    point  go to state 78
+
+
+state 46
+
+   40 value: function .
+
+    $default  reduce using rule 40 (value)
+
+
+state 47
+
+   39 value: varvalue .
+
+    $default  reduce using rule 39 (value)
+
+
+state 48
+
+    9 procedure: pEWNS point .
+
+    $default  reduce using rule 9 (procedure)
+
+
+state 49
+
+   10 procedure: pFOUNTAIN value . value point
+   11          | pFOUNTAIN value . value value value point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 80
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 50
+
+   12 procedure: pFM value . value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 81
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 51
+
+   13 procedure: pFMTO point .
+
+    $default  reduce using rule 13 (procedure)
+
+
+state 52
+
+   14 procedure: pGRID value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 14 (procedure)
+
+
+state 53
+
+   16 procedure: pHSDM point .
+
+    $default  reduce using rule 16 (procedure)
+
+
+state 54
+
+   15 procedure: pHSCM point . point value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 82
+
+
+state 55
+
+   17 procedure: pMAGIC point .
+
+    $default  reduce using rule 17 (procedure)
+
+
+state 56
+
+   18 procedure: pMARCH value . value value
+   19          | pMARCH value . value value value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 83
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 57
+
+   20 procedure: pMT value . value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 84
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 58
+
+   21 procedure: pMTRM value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 21 (procedure)
+
+
+state 59
+
+   22 procedure: pNSEW point .
+
+    $default  reduce using rule 22 (procedure)
+
+
+state 60
+
+   23 procedure: pROTATE value . value point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 85
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 61
+
+    3 procedure: varvalue '=' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 86
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 62
+
+   27 point: rwR FLOATCONST .
+
+    $default  reduce using rule 27 (point)
+
+
+state 63
+
+    5 procedure: pCOUNTERMARCH point point . value value value value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 87
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 64
+
+    6 procedure: pDMCM point point . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 88
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 65
+
+   41 function: fDIR '(' . point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 89
+
+
+state 66
+
+   42 function: fDIRFROM '(' . point point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 90
+
+
+state 67
+
+   43 function: fDIST '(' . point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 91
+
+
+state 68
+
+   44 function: fDISTFROM '(' . point point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 92
+
+
+state 69
+
+   45 function: fEITHER '(' . value value point ')'
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 93
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 70
+
+   46 function: fOPP '(' . value ')'
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 94
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 71
+
+   47 function: fSTEP '(' . value value point ')'
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 95
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 72
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   34      | '-' value .
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 34 (value)
+
+
+state 73
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   35      | '(' value . ')'
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+    ')'  shift, and go to state 96
+
+
+state 74
+
+   30 value: value '+' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 97
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 75
+
+   31 value: value '-' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 98
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 76
+
+   32 value: value '*' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 99
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 77
+
+   33 value: value '/' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 100
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 78
+
+    8 procedure: pEVEN value point .
+
+    $default  reduce using rule 8 (procedure)
+
+
+state 79
+
+   31 value: value '-' . value
+   34      | '-' . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 101
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 80
+
+   10 procedure: pFOUNTAIN value value . point
+   11          | pFOUNTAIN value value . value value point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwP          shift, and go to state 24
+    rwNP         shift, and go to state 25
+    rwR          shift, and go to state 26
+    rwREM        shift, and go to state 31
+    rwSP         shift, and go to state 27
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    point     go to state 102
+    value     go to state 103
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 81
+
+   12 procedure: pFM value value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 12 (procedure)
+
+
+state 82
+
+   15 procedure: pHSCM point point . value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '-'          shift, and go to state 43
+    '('          shift, and go to state 44
+
+    value     go to state 104
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 83
+
+   18 procedure: pMARCH value value . value
+   19          | pMARCH value value . value value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 105
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 84
+
+   20 procedure: pMT value value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 20 (procedure)
+
+
+state 85
+
+   23 procedure: pROTATE value value . point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+    '+'   shift, and go to state 74
+    '-'   shift, and go to state 75
+    '*'   shift, and go to state 76
+    '/'   shift, and go to state 77
+
+    point  go to state 106
+
+
+state 86
+
+    3 procedure: varvalue '=' value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 3 (procedure)
+
+
+state 87
+
+    5 procedure: pCOUNTERMARCH point point value . value value value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 107
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 88
+
+    6 procedure: pDMCM point point value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 6 (procedure)
+
+
+state 89
+
+   41 function: fDIR '(' point . ')'
+
+    ')'  shift, and go to state 108
+
+
+state 90
+
+   42 function: fDIRFROM '(' point . point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 109
+
+
+state 91
+
+   43 function: fDIST '(' point . ')'
+
+    ')'  shift, and go to state 110
+
+
+state 92
+
+   44 function: fDISTFROM '(' point . point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+
+    point  go to state 111
+
+
+state 93
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   45 function: fEITHER '(' value . value point ')'
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 112
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 94
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   46 function: fOPP '(' value . ')'
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+    ')'  shift, and go to state 113
+
+
+state 95
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   47 function: fSTEP '(' value . value point ')'
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 114
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 96
+
+   35 value: '(' value ')' .
+
+    $default  reduce using rule 35 (value)
+
+
+state 97
+
+   30 value: value . '+' value
+   30      | value '+' value .
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    $default  reduce using rule 30 (value)
+
+
+state 98
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   31      | value '-' value .
+   32      | value . '*' value
+   33      | value . '/' value
+
+    $default  reduce using rule 31 (value)
+
+
+state 99
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   32      | value '*' value .
+   33      | value . '/' value
+
+    $default  reduce using rule 32 (value)
+
+
+state 100
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   33      | value '/' value .
+
+    $default  reduce using rule 33 (value)
+
+
+state 101
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   31      | value '-' value .
+   32      | value . '*' value
+   33      | value . '/' value
+   34      | '-' value .
+
+    $end           reduce using rule 31 (value)
+    $end           [reduce using rule 34 (value)]
+    rwP            reduce using rule 31 (value)
+    rwP            [reduce using rule 34 (value)]
+    rwNP           reduce using rule 31 (value)
+    rwNP           [reduce using rule 34 (value)]
+    rwR            reduce using rule 31 (value)
+    rwR            [reduce using rule 34 (value)]
+    rwREM          reduce using rule 31 (value)
+    rwREM          [reduce using rule 34 (value)]
+    rwSP           reduce using rule 31 (value)
+    rwSP           [reduce using rule 34 (value)]
+    rwDOF          reduce using rule 31 (value)
+    rwDOF          [reduce using rule 34 (value)]
+    rwDOH          reduce using rule 31 (value)
+    rwDOH          [reduce using rule 34 (value)]
+    pBLAM          reduce using rule 31 (value)
+    pBLAM          [reduce using rule 34 (value)]
+    pCOUNTERMARCH  reduce using rule 31 (value)
+    pCOUNTERMARCH  [reduce using rule 34 (value)]
+    pDMCM          reduce using rule 31 (value)
+    pDMCM          [reduce using rule 34 (value)]
+    pDMHS          reduce using rule 31 (value)
+    pDMHS          [reduce using rule 34 (value)]
+    pEVEN          reduce using rule 31 (value)
+    pEVEN          [reduce using rule 34 (value)]
+    pEWNS          reduce using rule 31 (value)
+    pEWNS          [reduce using rule 34 (value)]
+    pFOUNTAIN      reduce using rule 31 (value)
+    pFOUNTAIN      [reduce using rule 34 (value)]
+    pFM            reduce using rule 31 (value)
+    pFM            [reduce using rule 34 (value)]
+    pFMTO          reduce using rule 31 (value)
+    pFMTO          [reduce using rule 34 (value)]
+    pGRID          reduce using rule 31 (value)
+    pGRID          [reduce using rule 34 (value)]
+    pHSDM          reduce using rule 31 (value)
+    pHSDM          [reduce using rule 34 (value)]
+    pHSCM          reduce using rule 31 (value)
+    pHSCM          [reduce using rule 34 (value)]
+    pMAGIC         reduce using rule 31 (value)
+    pMAGIC         [reduce using rule 34 (value)]
+    pMARCH         reduce using rule 31 (value)
+    pMARCH         [reduce using rule 34 (value)]
+    pMT            reduce using rule 31 (value)
+    pMT            [reduce using rule 34 (value)]
+    pMTRM          reduce using rule 31 (value)
+    pMTRM          [reduce using rule 34 (value)]
+    pNSEW          reduce using rule 31 (value)
+    pNSEW          [reduce using rule 34 (value)]
+    pROTATE        reduce using rule 31 (value)
+    pROTATE        [reduce using rule 34 (value)]
+    fDIR           reduce using rule 31 (value)
+    fDIR           [reduce using rule 34 (value)]
+    fDIRFROM       reduce using rule 31 (value)
+    fDIRFROM       [reduce using rule 34 (value)]
+    fDIST          reduce using rule 31 (value)
+    fDIST          [reduce using rule 34 (value)]
+    fDISTFROM      reduce using rule 31 (value)
+    fDISTFROM      [reduce using rule 34 (value)]
+    fEITHER        reduce using rule 31 (value)
+    fEITHER        [reduce using rule 34 (value)]
+    fOPP           reduce using rule 31 (value)
+    fOPP           [reduce using rule 34 (value)]
+    fSTEP          reduce using rule 31 (value)
+    fSTEP          [reduce using rule 34 (value)]
+    FLOATCONST     reduce using rule 31 (value)
+    FLOATCONST     [reduce using rule 34 (value)]
+    VARIABLE       reduce using rule 31 (value)
+    VARIABLE       [reduce using rule 34 (value)]
+    DEFINECONST    reduce using rule 31 (value)
+    DEFINECONST    [reduce using rule 34 (value)]
+    '+'            reduce using rule 31 (value)
+    '+'            [reduce using rule 34 (value)]
+    '-'            reduce using rule 31 (value)
+    '-'            [reduce using rule 34 (value)]
+    '*'            reduce using rule 31 (value)
+    '*'            [reduce using rule 34 (value)]
+    '/'            reduce using rule 31 (value)
+    '/'            [reduce using rule 34 (value)]
+    '('            reduce using rule 31 (value)
+    '('            [reduce using rule 34 (value)]
+    $default       reduce using rule 31 (value)
+
+
+state 102
+
+   10 procedure: pFOUNTAIN value value point .
+
+    $default  reduce using rule 10 (procedure)
+
+
+state 103
+
+   11 procedure: pFOUNTAIN value value value . value point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 115
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 104
+
+   15 procedure: pHSCM point point value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 15 (procedure)
+
+
+state 105
+
+   18 procedure: pMARCH value value value .
+   19          | pMARCH value value value . value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    VARIABLE  [reduce using rule 18 (procedure)]
+    $default  reduce using rule 18 (procedure)
+
+    value     go to state 116
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 106
+
+   23 procedure: pROTATE value value point .
+
+    $default  reduce using rule 23 (procedure)
+
+
+state 107
+
+    5 procedure: pCOUNTERMARCH point point value value . value value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 117
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 108
+
+   41 function: fDIR '(' point ')' .
+
+    $default  reduce using rule 41 (function)
+
+
+state 109
+
+   42 function: fDIRFROM '(' point point . ')'
+
+    ')'  shift, and go to state 118
+
+
+state 110
+
+   43 function: fDIST '(' point ')' .
+
+    $default  reduce using rule 43 (function)
+
+
+state 111
+
+   44 function: fDISTFROM '(' point point . ')'
+
+    ')'  shift, and go to state 119
+
+
+state 112
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   45 function: fEITHER '(' value value . point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+    '+'   shift, and go to state 74
+    '-'   shift, and go to state 75
+    '*'   shift, and go to state 76
+    '/'   shift, and go to state 77
+
+    point  go to state 120
+
+
+state 113
+
+   46 function: fOPP '(' value ')' .
+
+    $default  reduce using rule 46 (function)
+
+
+state 114
+
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+   47 function: fSTEP '(' value value . point ')'
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+    '+'   shift, and go to state 74
+    '-'   shift, and go to state 75
+    '*'   shift, and go to state 76
+    '/'   shift, and go to state 77
+
+    point  go to state 121
+
+
+state 115
+
+   11 procedure: pFOUNTAIN value value value value . point
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwP   shift, and go to state 24
+    rwNP  shift, and go to state 25
+    rwR   shift, and go to state 26
+    rwSP  shift, and go to state 27
+    '+'   shift, and go to state 74
+    '-'   shift, and go to state 75
+    '*'   shift, and go to state 76
+    '/'   shift, and go to state 77
+
+    point  go to state 122
+
+
+state 116
+
+   19 procedure: pMARCH value value value value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 19 (procedure)
+
+
+state 117
+
+    5 procedure: pCOUNTERMARCH point point value value value . value
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    rwREM        shift, and go to state 31
+    rwDOF        shift, and go to state 32
+    rwDOH        shift, and go to state 33
+    fDIR         shift, and go to state 34
+    fDIRFROM     shift, and go to state 35
+    fDIST        shift, and go to state 36
+    fDISTFROM    shift, and go to state 37
+    fEITHER      shift, and go to state 38
+    fOPP         shift, and go to state 39
+    fSTEP        shift, and go to state 40
+    FLOATCONST   shift, and go to state 41
+    VARIABLE     shift, and go to state 21
+    DEFINECONST  shift, and go to state 42
+    '+'          shift, and go to state 74
+    '-'          shift, and go to state 79
+    '*'          shift, and go to state 76
+    '/'          shift, and go to state 77
+    '('          shift, and go to state 44
+
+    value     go to state 123
+    function  go to state 46
+    varvalue  go to state 47
+
+
+state 118
+
+   42 function: fDIRFROM '(' point point ')' .
+
+    $default  reduce using rule 42 (function)
+
+
+state 119
+
+   44 function: fDISTFROM '(' point point ')' .
+
+    $default  reduce using rule 44 (function)
+
+
+state 120
+
+   45 function: fEITHER '(' value value point . ')'
+
+    ')'  shift, and go to state 124
+
+
+state 121
+
+   47 function: fSTEP '(' value value point . ')'
+
+    ')'  shift, and go to state 125
+
+
+state 122
+
+   11 procedure: pFOUNTAIN value value value value point .
+
+    $default  reduce using rule 11 (procedure)
+
+
+state 123
+
+    5 procedure: pCOUNTERMARCH point point value value value value .
+   30 value: value . '+' value
+   31      | value . '-' value
+   32      | value . '*' value
+   33      | value . '/' value
+
+    '+'  shift, and go to state 74
+    '-'  shift, and go to state 75
+    '*'  shift, and go to state 76
+    '/'  shift, and go to state 77
+
+    $default  reduce using rule 5 (procedure)
+
+
+state 124
+
+   45 function: fEITHER '(' value value point ')' .
+
+    $default  reduce using rule 45 (function)
+
+
+state 125
+
+   47 function: fSTEP '(' value value point ')' .
+
+    $default  reduce using rule 47 (function)
