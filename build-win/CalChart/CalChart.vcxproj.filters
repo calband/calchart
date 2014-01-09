@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\generated\contgram.cpp" />
+    <ClCompile Include="..\..\generated\contscan.cpp" />
+    <ClCompile Include="..\..\src\animation_canvas.cpp" />
+    <ClCompile Include="..\..\src\animation_frame.cpp" />
+    <ClCompile Include="..\..\src\animation_view.cpp" />
+    <ClCompile Include="..\..\src\background_image.cpp" />
+    <ClCompile Include="..\..\src\basic_ui.cpp" />
+    <ClCompile Include="..\..\src\calchartapp.cpp" />
+    <ClCompile Include="..\..\src\calchartdoc.cpp" />
+    <ClCompile Include="..\..\src\cc_command.cpp" />
+    <ClCompile Include="..\..\src\cc_omniview_canvas.cpp" />
+    <ClCompile Include="..\..\src\cc_preferences_ui.cpp" />
+    <ClCompile Include="..\..\src\confgr.cpp" />
+    <ClCompile Include="..\..\src\cont_ui.cpp" />
+    <ClCompile Include="..\..\src\draw.cpp" />
+    <ClCompile Include="..\..\src\field_canvas.cpp" />
+    <ClCompile Include="..\..\src\field_frame.cpp" />
+    <ClCompile Include="..\..\src\field_view.cpp" />
+    <ClCompile Include="..\..\src\modes.cpp" />
+    <ClCompile Include="..\..\src\print_ps.cpp" />
+    <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
+    <ClCompile Include="..\..\src\setup_wizards.cpp" />
+    <ClCompile Include="..\..\src\show_ui.cpp" />
+    <ClCompile Include="..\..\src\toolbar.cpp" />
+    <ClCompile Include="..\..\src\top_frame.cpp" />
+    <ClCompile Include="..\..\src\core\animate.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\animatecommand.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\animatecompile.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_continuity.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_coord.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_point.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_shapes.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_sheet.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_show.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cc_text.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\cont.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\math_utils.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\print_cont_ui.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\animation_canvas.h" />
+    <ClInclude Include="..\..\src\animation_frame.h" />
+    <ClInclude Include="..\..\src\animation_view.h" />
+    <ClInclude Include="..\..\src\background_image.h" />
+    <ClInclude Include="..\..\src\basic_ui.h" />
+    <ClInclude Include="..\..\src\calchartapp.h" />
+    <ClInclude Include="..\..\src\calchartdoc.h" />
+    <ClInclude Include="..\..\src\ccvers.h" />
+    <ClInclude Include="..\..\src\cc_command.h" />
+    <ClInclude Include="..\..\src\cc_omniview_canvas.h" />
+    <ClInclude Include="..\..\src\cc_omniview_constants.h" />
+    <ClInclude Include="..\..\src\cc_preferences_ui.h" />
+    <ClInclude Include="..\..\src\confgr.h" />
+    <ClInclude Include="..\..\src\cont_ui.h" />
+    <ClInclude Include="..\..\src\field_canvas.h" />
+    <ClInclude Include="..\..\src\field_frame.h" />
+    <ClInclude Include="..\..\src\field_view.h" />
+    <ClInclude Include="..\..\src\linmath.h" />
+    <ClInclude Include="..\..\src\modes.h" />
+    <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\print_ps.h" />
+    <ClInclude Include="..\..\src\print_ps_dialog.h" />
+    <ClInclude Include="..\..\src\setup_wizards.h" />
+    <ClInclude Include="..\..\src\show_ui.h" />
+    <ClInclude Include="..\..\src\toolbar.h" />
+    <ClInclude Include="..\..\src\top_frame.h" />
+    <ClInclude Include="..\..\src\ui_enums.h" />
+    <ClInclude Include="..\..\src\core\animate_types.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\animate.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\animatecommand.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\animatecompile.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_continuity.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_coord.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_point.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_shapes.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_sheet.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_show.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_text.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cc_types.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\cont.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\parse.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\math_utils.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\print_cont_ui.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\calchart.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\contgram.y" />
+    <None Include="..\..\src\contscan.l" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{2666d93e-2ad0-4eac-a0db-5304526bfdb7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

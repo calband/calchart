@@ -114,7 +114,7 @@ mCollisionAction(NULL)
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
 		std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > theCommands(numpts);
-		for (auto current_symbol = SYMBOLS_START; current_symbol != MAX_NUM_SYMBOLS; ++current_symbol)
+		for (auto& current_symbol : k_symbols)
 		{
 			if (curr_sheet->ContinuityInUse(current_symbol))
 			{

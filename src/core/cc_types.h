@@ -43,6 +43,11 @@ enum SYMBOL_TYPE
 	, MAX_NUM_SYMBOLS
 };
 
+static const SYMBOL_TYPE k_symbols[] = {
+	SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
+	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+};
+
 std::string GetNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
 

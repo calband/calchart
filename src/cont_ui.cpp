@@ -234,7 +234,7 @@ void ContinuityEditor::Update()
 	CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
 
 	mContinuityChoices->Clear();
-	for (auto curranimcont = SYMBOLS_START; curranimcont != MAX_NUM_SYMBOLS; ++curranimcont)
+	for (auto& curranimcont : k_symbols)
 	{
 		if (sht->ContinuityInUse(curranimcont))
 		{

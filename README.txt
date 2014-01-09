@@ -1,21 +1,21 @@
 --- CalChart README.txt ---
-Updated on 12/15/2013 by Richard Powell
+Updated on 1/2/2014 by Richard Powell
 ---
 
-CalChart version 3.3.4
+CalChart version 3.4.0
 
 ---
 What's new in this version?
 ---
 
+Changed save file format.  Files saved in this version and beyond cannot be
+opened by earlier versions of calchart.
+
 Non-user facing changes:
-  General clean-up to separate core code from wxWidgets code
-  Updating to wxWidgets 2.9.5
-  Changes to Do/Undo system where we snapshot the show.  Increase memory usage, but simplifies the code.
-  Updated for Mavericks and Window 7
+  Moved to github
+  Updating to wxWidgets 3.0
 
 Bugs fixed in this release:
-3524581: Printing with continuity: scale font to fit
 
 ---
 What is CalChart?
@@ -33,7 +33,7 @@ for linux, or QT for cross platform), but wxWidgets was chosen as a good
 balance of features, cross-platform, and support.  This allows one version to
 be built on Windows/MacOS/Linux, but also means that proprietary UI Kits like
 iOS would be difficult to support, requiring a complete rewrite.  Currently,
-Calchart uses wxWidgets version 2.9.2.
+Calchart uses wxWidgets version 3.0.
 
 Calchart also has an internal compiling language for interpreting the
 continuity commands into movement.  This language description is converted into
@@ -47,12 +47,19 @@ distributed in the developer package.
 Helping Develop CalChart:
 ---
 
+Visit the CalChart github page:
+
+CalChart is hosted on github.com in the Calband/CalChart section.  You can
+think of this as the "developer" site of CalChart.
+
+https://github.com/calband/calchart
+
 Visit the CalChart sourceforge.net page.
 
-SourceForge.net is the site that we host the source project for CalChart.
+SourceForge.net is the site that we host the resulting projects for CalChart.
 SourceForge.net is a server that host many open source projects, allowing people
-from all over the world to work on them.  You can think of this as the home of
-calchart.
+from all over the world to work on them.  You can think of this as the "user"
+site for CalChart.
 
 http://sourceforge.net/projects/calchart/
 
@@ -109,6 +116,26 @@ For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
 If you need to regenerate the help documentation, see the README-docs.txt
+
+----------
+
+Release notes for 3.3.5:
+
+Bugs fixed in this release:
+#74: 3.3.4: Hang when opening Preferences
+
+----------
+
+Release notes for 3.3.4:
+
+Non-user facing changes:
+  General clean-up to separate core code from wxWidgets code
+  Updating to wxWidgets 2.9.5
+  Changes to Do/Undo system where we snapshot the show.  Increase memory usage, but simplifies the code.
+  Updated for Mavericks and Window 7
+
+Bugs fixed in this release:
+3524581: Printing with continuity: scale font to fit
 
 ----------
 
