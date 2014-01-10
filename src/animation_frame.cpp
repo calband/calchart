@@ -420,10 +420,62 @@ AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->GotoBeat(event.GetPosition());
+		//False if the change in the slider should cause the animation to transition to the next/previous stunt sheet
+		//true otherwise
+		bool bBeatChangeIsInternal = true;
+		if (OnSlider_shouldTransitionToNextSheet(event)) {
+			bBeatChangeIsInternal = false;
+			TransitionToNextSheet();
+		}
+		else if (OnSlider_shouldTransitionToPreviousSheet(event)) {
+			bBeatChangeIsInternal = false;
+			TransitionToPreviousSheet();
+		}
+		if (bBeatChangeIsInternal) {
+			mAnimationView->GotoBeat(event.GetPosition());
+		}
 	}
 }
 
+bool
+AnimationFrame::OnSlider_shouldTransitionToNextSheet(wxScrollEvent& event) {
+	if (OnSlider_isNextBeatEvent(event)) {
+		return (mAnimationView->GetCurrentBeat() == mAnimationView->GetNumberBeats() - 1);
+	}
+	return false;
+}
+
+bool
+AnimationFrame::OnSlider_shouldTransitionToPreviousSheet(wxScrollEvent& event) {
+	if (OnSlider_isPreviousBeatEvent(event)) {
+		return (mAnimationView->GetCurrentBeat() == 0);
+	}
+	return false;
+}
+
+bool
+AnimationFrame::OnSlider_isPreviousBeatEvent(wxScrollEvent& event) {
+	wxEventType pEventType = event.GetEventType();
+	return (pEventType == wxEVT_SCROLL_LINEUP || pEventType == wxEVT_SCROLL_PAGEUP);
+}
+
+bool
+AnimationFrame::OnSlider_isNextBeatEvent(wxScrollEvent& event) {
+	wxEventType pEventType = event.GetEventType();
+	return (pEventType == wxEVT_SCROLL_LINEDOWN || pEventType == wxEVT_SCROLL_PAGEDOWN);
+}
+
+void
+AnimationFrame::TransitionToNextSheet() {
+	mAnimationView->GotoBeat(mAnimationView->GetNumberBeats() - 1);
+	mAnimationView->NextBeat();
+}
+
+void
+AnimationFrame::TransitionToPreviousSheet() {
+	mAnimationView->GotoBeat(0);
+	mAnimationView->PrevBeat();
+}
 
 void
 AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)

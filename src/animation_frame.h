@@ -24,6 +24,7 @@
 #define _ANIMATION_FRAME_H_
 
 #include "animate.h"
+#include "overflow_slider.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
@@ -98,6 +99,16 @@ public:
 	void OnCmd_UpdateUIUnsplit(wxUpdateUIEvent& event);
 	
 private:
+	bool OnSlider_isNextBeatEvent(wxScrollEvent& event);
+	bool OnSlider_shouldTransitionToNextSheet(wxScrollEvent& event);
+	bool OnSlider_isPreviousBeatEvent(wxScrollEvent& event);
+	bool OnSlider_shouldTransitionToPreviousSheet(wxScrollEvent& event);
+	void TransitionToPreviousSheet();
+	void TransitionToNextSheet();
+
+
+
+
 	AnimationView *mAnimationView;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 
 	AnimationCanvas *mCanvas;
