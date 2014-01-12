@@ -24,7 +24,6 @@
 #define _ANIMATION_FRAME_H_
 
 #include "animate.h"
-#include "overflow_slider.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
@@ -105,7 +104,6 @@ private:
 	bool OnSlider_shouldTransitionToPreviousSheet(wxScrollEvent& event);
 	void TransitionToPreviousSheet();
 	void TransitionToNextSheet();
-
 
 
 

@@ -422,16 +422,16 @@ AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
 	{
 		//False if the change in the slider should cause the animation to transition to the next/previous stunt sheet
 		//true otherwise
-		bool bBeatChangeIsInternal = true;
+		bool beatChangeIsInternal = true;
 		if (OnSlider_shouldTransitionToNextSheet(event)) {
-			bBeatChangeIsInternal = false;
+			beatChangeIsInternal = false;
 			TransitionToNextSheet();
 		}
 		else if (OnSlider_shouldTransitionToPreviousSheet(event)) {
-			bBeatChangeIsInternal = false;
+			beatChangeIsInternal = false;
 			TransitionToPreviousSheet();
 		}
-		if (bBeatChangeIsInternal) {
+		if (beatChangeIsInternal) {
 			mAnimationView->GotoBeat(event.GetPosition());
 		}
 	}
