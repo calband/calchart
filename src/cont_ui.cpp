@@ -265,7 +265,6 @@ SYMBOL_TYPE ContinuityEditor::CurrentSymbolChoice() const
 void ContinuityEditor::UpdateText()
 {
 	mUserInput->Clear();
-	mUserInput->DiscardEdits();
 	CC_show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
 	const CC_continuity& c = current_sheet->GetContinuityBySymbol(CurrentSymbolChoice());
 	if (!c.GetText().empty())
@@ -273,6 +272,7 @@ void ContinuityEditor::UpdateText()
 		mUserInput->WriteText(c.GetText());
 		mUserInput->SetInsertionPoint(0);
 	}
+	mUserInput->DiscardEdits();
 	// disable the save and discard buttons as they are not active.
 	wxButton* button = (wxButton*) FindWindow(ContinuityEditor_Save);
 	button->Disable();
