@@ -25,7 +25,7 @@
 
 #include <wx/glcanvas.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <map>
 
@@ -70,7 +70,7 @@ private:
 	MarcherInfo GetMarcherInfo(size_t which) const;
 	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
 
-	boost::shared_ptr<CCOmniView_GLContext> m_glContext;
+	std::shared_ptr<CCOmniView_GLContext> m_glContext;
 	AnimationView *mAnimationView;
 	viewpoint_t mViewPoint;
 

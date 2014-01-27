@@ -35,8 +35,6 @@
 #include <wx/dcbuffer.h>
 #include <wx/splitter.h>
 
-#include <boost/algorithm/string/split.hpp>
-
 #include <string>
 #include <vector>
 #include <sstream>

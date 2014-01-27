@@ -26,7 +26,7 @@
 #include "animate_types.h"
 #include "animate.h"
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ContProcedure;
 class ContToken;
@@ -67,9 +67,9 @@ public:
 	~AnimateCompile();
 
 // Compile a point
-	std::vector<boost::shared_ptr<AnimateCommand> > Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc);
+	std::vector<std::shared_ptr<AnimateCommand> > Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc);
 // true if successful
-	bool Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token);
+	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 
 public:
 	inline bool Okay() { return okay; };
@@ -95,7 +95,7 @@ private:
 	unsigned curr_pt;
 	unsigned beats_rem;
 	SYMBOL_TYPE contsymbol;
-	std::vector<boost::shared_ptr<AnimateCommand> > cmds;
+	std::vector<std::shared_ptr<AnimateCommand> > cmds;
 	std::vector<ErrorMarker> error_markers;
 	AnimationVariables& vars;
 	bool okay;

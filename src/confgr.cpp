@@ -344,7 +344,7 @@ void ReadConfigurationShowMode()
 		size.x = Int2Coord(values[8]);
 		size.y = Int2Coord(values[9]);
 
-		wxGetApp().GetModeList().push_back(boost::shared_ptr<ShowMode>(new ShowModeStandard(kShowModeStrings[i], size, offset, bord1, bord2, whash, ehash)));
+		wxGetApp().GetModeList().emplace_back(std::unique_ptr<ShowMode>(new ShowModeStandard(kShowModeStrings[i], size, offset, bord1, bord2, whash, ehash)));
 	}
 }
 
@@ -414,7 +414,7 @@ void ReadConfigurationSpringShowMode()
 		short eps_text_right = values[18];
 		short eps_text_top = values[19];
 		short eps_text_bottom = values[20];
-		wxGetApp().GetModeList().push_back(boost::shared_ptr<ShowMode>(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
+		wxGetApp().GetModeList().emplace_back(std::unique_ptr<ShowMode>(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
 					which_spr_yards,
 					mode_steps_x, mode_steps_y,
 					mode_steps_w, mode_steps_h,

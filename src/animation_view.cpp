@@ -33,7 +33,6 @@
 
 #include <wx/dcbuffer.h>
 
-#include <boost/bind.hpp>
 #include <fstream>
 
 
@@ -191,8 +190,10 @@ AnimationView::Generate()
 	// set our error indicator:
 	mErrorOccurred = false;
 	// (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
-	NotifyStatus notifyStatus = boost::bind(&AnimationView::OnNotifyStatus, this, _1);
-	NotifyErrorList notifyErrorList = boost::bind(&AnimationView::OnNotifyErrorList, this, _1, _2, _3);
+	NotifyStatus notifyStatus = [this](const std::string& notice) { this->OnNotifyStatus(notice); };
+	NotifyErrorList notifyErrorList = [this](const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message) {
+		return this->OnNotifyErrorList(error_markers, sheetnum, message);
+	};
 	mAnimation = GetShow()->NewAnimation(notifyStatus, notifyErrorList);
 	if (mAnimation && (mAnimation->GetNumberSheets() == 0))
 	{
@@ -429,10 +430,10 @@ AnimationView::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, 
 	return false;
 }
 
-boost::shared_ptr<Animation>
-AnimationView::GetAnimation()
+const Animation*
+AnimationView::GetAnimation() const
 {
-	return mAnimation;
+	return mAnimation.get();
 }
 
 AnimationFrame*
