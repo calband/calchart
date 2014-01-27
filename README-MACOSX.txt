@@ -5,6 +5,10 @@ These steps require having Mavericks 10.9 and XCode 5.0.2.  Both should be on th
 Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
 boost
 
+Note: All lines starting with ‘$’ mean you should run them from the terminal.  Do not include the ‘$’ with the command :)
+
+To start the terminal, open Spotlight and search for terminal.
+
 Download 3.0.0-rc2 of wxWidgets to build the library:
 $ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_0-rc2 ~/wxWidgets-3.0.0-rc2
 
@@ -23,7 +27,9 @@ put into the /usr/local/bin (if you wanted to put somewhere different, use the -
 $ sudo make install
 
 Get calchart (you'll need to log in with your source forge account):
-$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/trunk
+$ git clone https://github.com/calband/calchart.git ~/calchart
+
+// SKIP TO BUILD_CALCHART UNLESS YOU NEED TO BUILD DOCUMENTATION!!!
 
 Configure and build tex2rtf (this is only if you are planning on rebuilding the documentation):
 CalChart uses the tex2rtf project.  Unfortunately, tex2rtf is no longer supported in wxWidgets.
@@ -40,6 +46,8 @@ $ ../configure
 $ make
 $ sudo install ./src/tex2rtf /usr/local/bin
 
+// BUILD CAL_CHART
+
 Make Calchart's generated files:
 $ cd ~/calchart/trunk
 $ make generate
@@ -54,5 +62,5 @@ $ wx-config --libs
 
 Also, as the project uses precompiled headers, you may have to modify the
 preconfigured header file path:
-GCC_PREFIX_HEADER = /usr/local/include/wx-2.9/wx/wxprec.h
+GCC_PREFIX_HEADER = /usr/local/include/wx-3.0/wx/wxprec.h
 
