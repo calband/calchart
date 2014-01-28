@@ -25,10 +25,11 @@
 #include "cc_show.h"
 #include "cc_fileformat.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 #include <iostream>
 #include <map>
+#include <cctype>
+#include <algorithm>
 
 const std::string contnames[MAX_NUM_SYMBOLS] =
 {
@@ -42,11 +43,25 @@ const std::string contnames[MAX_NUM_SYMBOLS] =
 	"Solx"
 };
 
+bool are_equal_helper(const std::string& a, const std::string& b)
+{
+	auto p = std::mismatch(a.begin(), a.end(), b.begin(), [](char c1, char c2) {
+		return std::tolower(c1) == std::tolower(c2);
+	});
+	return (p.first == a.end() && p.second == b.end());
+}
+
+bool are_equal(const std::string& a, const std::string& b)
+{
+	return a.size()<=b.size() ? are_equal_helper(a, b) : are_equal_helper(b, a);
+}
+
 SYMBOL_TYPE GetSymbolForName(const std::string& name)
 {
 	for (auto i = contnames; i != (contnames+sizeof(contnames)/sizeof(contnames[0])); ++i)
 	{
-		if (boost::iequals(name, *i))
+
+		if (are_equal(name, *i))
 		{
 			return static_cast<SYMBOL_TYPE>(std::distance(contnames, i));
 		}

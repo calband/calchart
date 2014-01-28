@@ -8,13 +8,12 @@ YACC = bison
 YFLAGS = -dv
 
 CXXFLAGS += `$(WXCONFIG) --cxxflags`
-CXXFLAGS += -I$(RESDIR) -I$(SRCDIR) -I$(BOOSTDIR)
+CXXFLAGS += -I$(RESDIR) -I$(SRCDIR)
 CXXFLAGS += -g -Wall $(CONF_FLAGS)
 CXX = `$(WXCONFIG) --cxx`
 LIBS = `$(WXCONFIG) --libs`
 
 #### Directories ####
-BOOSTDIR = /opt/local/include
 SRCDIR = ./src
 GENDIR = ./generated
 RESDIR = ./resources

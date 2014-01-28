@@ -2,9 +2,6 @@ My steps for building for MacOSX.  Updated for Mavericks (10.9)
 
 These steps require having Mavericks 10.9 and XCode 5.0.2.  Both should be on the app store.
 
-Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
-boost
-
 Note: All lines starting with ‘$’ mean you should run them from the terminal.  Do not include the ‘$’ with the command :)
 
 To start the terminal, open Spotlight and search for terminal.

@@ -9,9 +9,6 @@ $ sudo apt-get install subversion bison flex transfig
 Packages for wxwidgets: (from http://wiki.wxwidgets.org/Installing_and_configuring_under_Ubuntu)
 $ sudo apt-get install libwxgtk2.9.2-dev libwxgtk2.9.2-dbg
 
-Boost libraries:
-$ sudo apt-get install libboost-all-dev
-
 If you don't have a C++ compiler yet, you can install one by installing this package:
 $ sudo apt-get install build-essential
 

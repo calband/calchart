@@ -21,6 +21,7 @@
 */
 
 #include "cc_continuity.h"
+#include <assert.h>
 
 using std::string;
 
