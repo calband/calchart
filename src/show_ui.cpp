@@ -21,6 +21,8 @@
 */
 
 #include "show_ui.h"
+#include "toolbar.h"
+#include "cc_sheet.h"
 #include <ctype.h>
 #include <wx/statline.h>
 #include <wx/spinctrl.h>
@@ -96,7 +98,6 @@ bool PointPicker::Create(wxWindow *parent, wxWindowID id,
 
 void PointPicker::CreateControls()
 {
-// Give it an icon
 // create a sizer for laying things out top down:
 	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 	SetSizer( topsizer );
@@ -105,18 +106,29 @@ void PointPicker::CreateControls()
 	wxBoxSizer *top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
 	wxButton *closeBut = new wxButton(this, wxID_OK, wxT("&Close"));
 	closeBut->SetDefault();
-	top_button_sizer->Add(closeBut, 0, wxALL, 5 );
+	top_button_sizer->Add(closeBut, wxSizerFlags(0).Border(wxALL, 5));
 
 	wxButton *setnumBut = new wxButton(this, PointPicker_PointPickerAll, wxT("&All"));
-	top_button_sizer->Add(setnumBut, 0, wxALL, 5 );
+	top_button_sizer->Add(setnumBut, wxSizerFlags(0).Border(wxALL, 5));
 
 	wxButton *setlabBut = new wxButton(this, PointPicker_PointPickerNone, wxT("&None"));
-	top_button_sizer->Add(setlabBut, 0, wxALL, 5 );
+	top_button_sizer->Add(setlabBut, wxSizerFlags(0).Border(wxALL, 5));
 
-	topsizer->Add(top_button_sizer, 0, wxALIGN_CENTER );
+	topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
 
-	mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-	topsizer->Add(mList, 0, wxGROW|wxALL, 0 );
+	top_button_sizer = new wxBoxSizer( wxHORIZONTAL );
+	auto symbols = GetSymbolsToolBar();
+	for (auto iter = symbols.begin(); iter != symbols.end(); ++iter)
+	{
+		auto button = new wxBitmapButton(this, wxID_ANY, *(iter->bm));
+		SYMBOL_TYPE which = static_cast<SYMBOL_TYPE>(std::distance(symbols.begin(), iter));
+		button->Bind(wxEVT_BUTTON,[this, which](wxCommandEvent&) { PointPickerBySymbol(which); });
+		top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 2));
+	}
+	topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
+
+	mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition, wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
+	topsizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center().Expand());
 	Update();
 }
 
@@ -126,6 +138,11 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 	mShow.SelectAll();
 }
 
+
+void PointPicker::PointPickerBySymbol(SYMBOL_TYPE which)
+{
+	mShow.SetSelection(mShow.GetCurrentSheet()->SelectPointsBySymbol(which));
+}
 
 void PointPicker::PointPickerNone(wxCommandEvent&)
 {
