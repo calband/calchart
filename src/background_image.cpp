@@ -21,6 +21,7 @@
  */
 
 #include "background_image.h"
+#include <algorithm>
 
 BackgroundImage::BackgroundImage(const wxImage& image, const wxCoord& x, const wxCoord& y) :
 mImage(image),
