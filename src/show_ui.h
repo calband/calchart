@@ -68,6 +68,7 @@ private:
 
 
 	void PointPickerAll(wxCommandEvent&);
+	void PointPickerBySymbol(SYMBOL_TYPE which);
 	void PointPickerNone(wxCommandEvent&);
 	void PointPickerSelect(wxCommandEvent&);
 

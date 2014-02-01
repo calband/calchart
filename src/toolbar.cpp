@@ -73,9 +73,41 @@ AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame& frame)
 
 
 std::vector<ToolBarEntry>
-GetMainToolBar()
+GetSymbolsToolBar()
 {
-	static const ToolBarEntry main_tb[] = {
+	static const ToolBarEntry tb[] = {
+		{ wxITEM_NORMAL, NULL, wxT("plainmen"), CALCHART__setsym0 },
+		{ wxITEM_NORMAL, NULL, wxT("solidmen"), CALCHART__setsym1 },
+		{ wxITEM_NORMAL, NULL, wxT("backslash men"), CALCHART__setsym2 },
+		{ wxITEM_NORMAL, NULL, wxT("slash men"), CALCHART__setsym3 },
+		{ wxITEM_NORMAL, NULL, wxT("x men"), CALCHART__setsym4 },
+		{ wxITEM_NORMAL, NULL, wxT("solid backslash men"), CALCHART__setsym5 },
+		{ wxITEM_NORMAL, NULL, wxT("solid slash men"), CALCHART__setsym6 },
+		{ wxITEM_NORMAL, NULL, wxT("solid x men"), CALCHART__setsym7 }
+	};
+	static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb)/sizeof(tb[0]));
+	// technically this is a race condition, but not worth fixing (how often do we call this function synchronously...?
+	static bool sFirstTime = true;
+	if (sFirstTime)
+	{
+		sFirstTime = false;
+		std::vector<ToolBarEntry>::iterator i = sTB.begin();
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym0));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym1));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym2));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym3));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym4));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym5));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym6));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym7));
+	}
+	return sTB;
+}
+
+std::vector<ToolBarEntry>
+GetHalfOfMainToolBar()
+{
+	static const ToolBarEntry tb[] = {
 		{ wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"), CALCHART__prev_ss },
 		{ wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
 		{ wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
@@ -91,21 +123,13 @@ GetMainToolBar()
 		{ wxITEM_NORMAL, NULL, wxT("Label on left"), CALCHART__label_left },
 		{ wxITEM_NORMAL, NULL, wxT("Flip label"), CALCHART__label_flip },
 		{ wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
-		{ wxITEM_NORMAL, NULL, wxT("Change to plainmen"), CALCHART__setsym0 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to solidmen"), CALCHART__setsym1 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to backslash men"), CALCHART__setsym2 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to slash men"), CALCHART__setsym3 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to x men"), CALCHART__setsym4 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to solid backslash men"), CALCHART__setsym5 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to solid slash men"), CALCHART__setsym6 },
-		{ wxITEM_NORMAL, NULL, wxT("Change to solid x men"), CALCHART__setsym7 }
 	};
-	static std::vector<ToolBarEntry> sMainTB(main_tb, main_tb + sizeof(main_tb)/sizeof(main_tb[0]));
+	static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb)/sizeof(tb[0]));
 	static bool sFirstTime = true;
 	if (sFirstTime)
 	{
 		sFirstTime = false;
-		std::vector<ToolBarEntry>::iterator i = sMainTB.begin();
+		std::vector<ToolBarEntry>::iterator i = sTB.begin();
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_left));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_right));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_box));
@@ -121,16 +145,17 @@ GetMainToolBar()
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym0));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym1));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym2));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym3));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym4));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym5));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym6));
-		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_sym7));
 	}
-	return sMainTB;
+	return sTB;
+}
+
+std::vector<ToolBarEntry>
+GetMainToolBar()
+{
+	auto first_half = GetHalfOfMainToolBar();
+	auto second_half = GetSymbolsToolBar();
+	first_half.insert(first_half.end(), second_half.begin(), second_half.end());
+	return first_half;
 }
 
 
