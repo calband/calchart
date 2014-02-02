@@ -72,7 +72,7 @@ EVT_SIZE(AnimationFrame::OnSize)
 END_EVENT_TABLE()
 
 
-AnimationFrame::AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size) :
+AnimationFrame::AnimationFrame(std::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size) :
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 wxDocChildFrame(doc, view, parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #else

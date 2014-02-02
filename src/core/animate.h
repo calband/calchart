@@ -27,8 +27,8 @@
 
 #include "cc_coord.h"
 #include "cc_show.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
+#include <memory>
+#include <functional>
 #include <map>
 #include <set>
 #include <vector>
@@ -48,8 +48,8 @@ public:
 	ErrorMarker(): contsymbol(SYMBOL_PLAIN), line(-1), col(-1) {}
 };
 
-typedef boost::function<void (const std::string& notice)> NotifyStatus;
-typedef boost::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
+typedef std::function<void (const std::string& notice)> NotifyStatus;
+typedef std::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
 
 class Animation
 {
@@ -96,7 +96,7 @@ public:
 private:
 	const unsigned numpts;
 	std::vector<AnimatePoint> pts;
-	std::vector<std::vector<boost::shared_ptr<AnimateCommand> >::const_iterator > curr_cmds; // pointer to the current command
+	std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator > curr_cmds; // pointer to the current command
 	std::set<int> mCollisions;
 	unsigned curr_sheetnum;
 	unsigned curr_beat;
@@ -111,7 +111,7 @@ private:
 	void CheckCollisions();
 	CollisionAction_t mCollisionAction;
 
-	std::vector<boost::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
+	std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
 };
 
 #endif

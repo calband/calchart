@@ -27,7 +27,7 @@
 #include "calchartdoc.h"
 #include "cc_continuity.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class AnimationFrame;
 class FieldView;
@@ -83,7 +83,7 @@ public:
 	const CalChartDoc *GetShow() const;
 	CalChartDoc *GetShow();
 
-	boost::shared_ptr<Animation> GetAnimation();
+	const Animation* GetAnimation() const;
 
 private:
 	void OnNotifyStatus(const wxString& status);
@@ -94,7 +94,7 @@ private:
 	const AnimationFrame *GetAnimationFrame() const;
 	AnimationFrame *GetAnimationFrame();
 
-	boost::shared_ptr<Animation> mAnimation;
+	std::unique_ptr<Animation> mAnimation;
 	CollisionWarning mCollisionWarningType;
 };
 

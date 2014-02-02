@@ -28,7 +28,7 @@
 #include <wx/wx.h>
 #include <list>
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #define SPR_YARD_LEFT 8
 #define SPR_YARD_RIGHT 4
@@ -156,7 +156,7 @@ private:
 	short text_left, text_right, text_top, text_bottom;
 };
 
-typedef std::list<boost::shared_ptr<ShowMode> > ShowModeList;
+typedef std::list<std::unique_ptr<ShowMode> > ShowModeList;
 
 ShowMode*
 ShowModeList_Find(const ShowModeList& showModes, const wxString& which);

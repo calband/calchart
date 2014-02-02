@@ -23,6 +23,7 @@
 #include "show_ui.h"
 #include "toolbar.h"
 #include "cc_sheet.h"
+#include <algorithm>
 #include <ctype.h>
 #include <wx/statline.h>
 #include <wx/spinctrl.h>

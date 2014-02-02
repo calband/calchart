@@ -389,9 +389,9 @@ CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetEnd() const { return
 
 unsigned CalChartDoc::GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
 
-boost::shared_ptr<Animation> CalChartDoc::NewAnimation(NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
+std::unique_ptr<Animation> CalChartDoc::NewAnimation(NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
 {
-	return boost::shared_ptr<Animation>(new Animation(*mShow, notifyStatus, notifyErrorList));
+	return std::unique_ptr<Animation>(new Animation(*mShow, notifyStatus, notifyErrorList));
 }
 
 void CalChartDoc::SetupNewShow()

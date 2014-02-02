@@ -57,7 +57,7 @@ AnimateCompile::~AnimateCompile()
 }
 
 
-std::vector<boost::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
+std::vector<std::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
 {
 	CC_coord c;
 	cmds.clear();
@@ -104,19 +104,19 @@ std::vector<boost::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show:
 		{
 			c = curr_sheet_next->GetPosition(curr_pt) - pt;
 			RegisterError(ANIMERR_WRONGPLACE, NULL);
-			Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMove(beats_rem, c)), NULL);
+			Append(std::make_shared<AnimateCommandMove>(beats_rem, c), NULL);
 		}
 	}
 	if (beats_rem)
 	{
 		RegisterError(ANIMERR_EXTRATIME, NULL);
-		Append(boost::shared_ptr<AnimateCommand>(new AnimateCommandMT(beats_rem, ANIMDIR_E)), NULL);
+		Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), NULL);
 	}
 	return cmds;
 }
 
 
-bool AnimateCompile::Append(boost::shared_ptr<AnimateCommand> cmd, const ContToken *token)
+bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token)
 {
 	bool clipped;
 

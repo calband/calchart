@@ -29,7 +29,7 @@
 #include <wx/docview.h>
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class FieldView;
 class FieldFrame;
@@ -78,18 +78,18 @@ private:
 	void ClearShapes();
 
 	void BeginDrag(CC_DRAG_TYPES type, const CC_coord& start);
-	void AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape);
+	void AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
 	void MoveDrag(const CC_coord& end);
 	void EndDrag();
 	
 	CC_DRAG_TYPES drag;
-	typedef std::vector<boost::shared_ptr<CC_shape> > ShapeList;
+	typedef std::vector<std::shared_ptr<CC_shape>> ShapeList;
 	ShapeList shape_list;
-	boost::shared_ptr<CC_shape> curr_shape;
+	std::shared_ptr<CC_shape> curr_shape;
 
 	// Background Picture
 	void PaintBackground(wxDC& dc);
-	boost::shared_ptr<BackgroundImage> mBackgroundImage;
+	std::unique_ptr<BackgroundImage> mBackgroundImage;
 	
 	DECLARE_EVENT_TABLE()
 };

@@ -28,7 +28,7 @@
 #include <wx/wx.h>
 #include <wx/docview.h>
 
-#include <boost/function.hpp>
+#include <functional>
 
 class AnimationView;
 class AnimationCanvas;
@@ -47,7 +47,7 @@ class AnimationFrame : public AnimationFrameParent
 public:
 	typedef AnimationFrameParent super;
 
-	AnimationFrame(boost::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size);
+	AnimationFrame(std::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size);
 	~AnimationFrame();
 	
 	void OnSize(wxSizeEvent& event);
@@ -134,7 +134,7 @@ private:
 	bool mTimerOn;
 
 	// when we go, let people know
-	boost::function<void ()> mWhenClosed;
+	std::function<void ()> mWhenClosed;
 	wxDECLARE_EVENT_TABLE();
 };
 

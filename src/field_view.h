@@ -28,7 +28,7 @@
 
 #include <wx/docview.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class FieldFrame;
 class AnimationFrame;
@@ -104,7 +104,7 @@ private:
 	
 	void DrawPaths(wxDC& dc, const CC_sheet& sheet);
 	void GeneratePaths();
-	boost::shared_ptr<Animation> mAnimation;
+	std::unique_ptr<Animation> mAnimation;
 	bool mDrawPaths;
 	
 private:

@@ -14,10 +14,6 @@ flex
 patch
 autoconf
 
-Get Boost:
-Go to boost.org and get the latest (I used boost 1.54).
-Put it at c:\boost_1_54_0
-
 Get Visual C++ Express 2013 for Windows Desktop:
 I use Visual C++ Express 2013 for Windows Desktop because it supports c99 and it is free.  If you have the Pro version, feel free to use that.
 Go to microsoft, download and install Visual C++ Express 2013 for Windows Desktop.
@@ -37,7 +33,6 @@ Add environment variables
 Go to Control Panel->System->Advanced System Settings->Environment Variables
 Add the following User variables:
 WXWIN=c:\wxWidgets-3.0.0
-BOOST_DIR=c:\boost_1_54_0
 
 Get calchart (you'll need to log in with your source forge account):
 Open cygwin and run the following:

@@ -28,7 +28,7 @@
 #include <wx/wx.h>							  // For basic wx defines
 #include <wx/docview.h>							  // For basic wx defines
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <set>
 
@@ -113,7 +113,7 @@ public:
 
 	void FlushAllTextWindows();
 	
-	boost::shared_ptr<Animation> NewAnimation(NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
+	std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
 	void SetupNewShow();
 	
 	const std::string& GetDescr() const;

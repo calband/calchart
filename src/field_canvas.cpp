@@ -86,7 +86,7 @@ FieldCanvas::OnPaint(wxPaintEvent& event)
 		dc.SetBrush(*wxTRANSPARENT_BRUSH);
 		dc.SetPen(GetCalChartPen(COLOR_SHAPES));
 		CC_coord origin = mView->GetShowFieldOffset();
-		for (ShapeList::const_iterator i=shape_list.begin();
+		for (auto i=shape_list.begin();
 			 i != shape_list.end();
 			 ++i)
 		{
@@ -143,8 +143,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				if (curr_shape &&
 					(((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos))
 				{
-					AddDrag(CC_DRAG_LINE,
-							boost::shared_ptr<CC_shape>(new CC_shape_arc(((CC_shape_1point*)
+					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_arc(((CC_shape_1point*)
 											  curr_shape.get())->GetOrigin(), pos)));
 				}
 				else
@@ -160,7 +159,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					CC_coord vect(pos - ((CC_shape_1point*)curr_shape.get())->GetOrigin());
 					// rotate vect 90 degrees
 					AddDrag(CC_DRAG_LINE,
-							boost::shared_ptr<CC_shape>(new CC_shape_angline(pos,CC_coord(-vect.y, vect.x))));
+							std::unique_ptr<CC_shape>(new CC_shape_angline(pos,CC_coord(-vect.y, vect.x))));
 				}
 				else
 				{
@@ -176,7 +175,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				if (curr_shape &&
 					(((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos))
 				{
-					AddDrag(CC_DRAG_LINE, boost::shared_ptr<CC_shape>(new CC_shape_line(pos)));
+					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
 				}
 				else
 				{
@@ -185,7 +184,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				break;
 			case CC_MOVE_GENIUS:
 				mFrame->SnapToGrid(pos);
-				AddDrag(CC_DRAG_LINE, boost::shared_ptr<CC_shape>(new CC_shape_line(pos)));
+				AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
 				break;
 			default:
 				switch (drag)
@@ -271,7 +270,6 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 		pos.y = (y - pos.y);
 		
 		const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
-		const CC_shape_1point *origin;
 		if (curr_shape)
 		{
 			switch (curr_move)
@@ -283,7 +281,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 				case CC_MOVE_ROTATE:
 					if (shape_list.size() > 1)
 					{
-						origin = (CC_shape_1point*)shape_list[0].get();
+						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
 							BeginDrag(CC_DRAG_CROSS, pos);
@@ -291,7 +289,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 						else
 						{
 							Matrix m;
-							CC_coord c1 = origin->GetOrigin();
+							CC_coord c1 = origin.GetOrigin();
 							float r = -((CC_shape_arc*)curr_shape.get())->GetAngle();
 							
 							m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
@@ -305,7 +303,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 				case CC_MOVE_SHEAR:
 					if (shape_list.size() > 1)
 					{
-						origin = (CC_shape_1point*)shape_list[0].get();
+						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
 							BeginDrag(CC_DRAG_CROSS, pos);
@@ -313,7 +311,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 						else
 						{
 							Matrix m;
-							CC_coord o = origin->GetOrigin();
+							CC_coord o = origin.GetOrigin();
 							CC_coord c1 = shape->GetOrigin();
 							CC_coord c2 = shape->GetPoint();
 							CC_coord v1, v2;
@@ -358,7 +356,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 				case CC_MOVE_SIZE:
 					if (shape_list.size() > 1)
 					{
-						origin = (CC_shape_1point*)shape_list[0].get();
+						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
 							BeginDrag(CC_DRAG_CROSS, pos);
@@ -366,7 +364,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 						else
 						{
 							Matrix m;
-							CC_coord c1 = origin->GetOrigin();
+							CC_coord c1 = origin.GetOrigin();
 							CC_coord c2;
 							float sx, sy;
 							
@@ -581,30 +579,32 @@ FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
 	switch (type)
 	{
 		case CC_DRAG_BOX:
-			AddDrag(type, boost::shared_ptr<CC_shape>(new CC_shape_rect(start)));
+			AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_rect(start)));
 			break;
 		case CC_DRAG_POLY:
-			AddDrag(type, boost::shared_ptr<CC_shape>(new CC_poly(start)));
+			AddDrag(type, std::unique_ptr<CC_shape>(new CC_poly(start)));
 			break;
 		case CC_DRAG_LASSO:
-			AddDrag(type, boost::shared_ptr<CC_shape>(new CC_lasso(start)));
+			AddDrag(type, std::unique_ptr<CC_shape>(new CC_lasso(start)));
 			break;
 		case CC_DRAG_LINE:
-			AddDrag(type, boost::shared_ptr<CC_shape>(new CC_shape_line(start)));
+			AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_line(start)));
 			break;
 		case CC_DRAG_CROSS:
-			AddDrag(type, boost::shared_ptr<CC_shape>(new CC_shape_cross(start, Int2Coord(2))));
+			AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_cross(start, Int2Coord(2))));
 		default:
 			break;
 	}
 }
 
 void
-FieldCanvas::AddDrag(CC_DRAG_TYPES type, boost::shared_ptr<CC_shape> shape)
+FieldCanvas::AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape)
 {
 	drag = type;
-	shape_list.push_back(shape);
-	curr_shape = shape;
+	// convert shape to shared_ptr
+	std::shared_ptr<CC_shape> shared_shape(std::move(shape));
+	shape_list.push_back(shared_shape);
+	curr_shape = shared_shape;
 }
 
 void

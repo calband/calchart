@@ -25,7 +25,7 @@
 
 #include <wx/dc.h>
 #include <wx/event.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class BackgroundImage
 {
@@ -68,7 +68,7 @@ private:
 		float mAspectRatio;
 		eBackgroundAdjustType mAdjustType;
 	};
-	boost::shared_ptr<CalculateScaleAndMove> mScaleAndMove;
+	std::shared_ptr<CalculateScaleAndMove> mScaleAndMove;
 };
 
 #endif // _BACKGROUND_IMAGE_H_

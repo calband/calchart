@@ -21,7 +21,7 @@
 */
 
 #include "cc_continuity.h"
-#include <boost/algorithm/string/case_conv.hpp>
+#include <assert.h>
 
 using std::string;
 

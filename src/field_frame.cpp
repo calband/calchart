@@ -52,8 +52,6 @@
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
 
-#include <boost/bind.hpp>
-
 const wxString gridtext[] =
 {
 	wxT("None"),
@@ -628,7 +626,7 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 	}
 	else if (GetShow())
 	{
-		mAnimationFrame = new AnimationFrame(boost::bind(&FieldFrame::ClearAnimationFrame, this), GetShow(), GetView(), this, wxSize(GetConfiguration_AnimationFrameWidth(), GetConfiguration_AnimationFrameHeight()));
+		mAnimationFrame = new AnimationFrame([this]() { this->ClearAnimationFrame(); }, GetShow(), GetView(), this, wxSize(GetConfiguration_AnimationFrameWidth(), GetConfiguration_AnimationFrameHeight()));
 	}
 }
 
@@ -990,7 +988,7 @@ void FieldFrame::SetMode()
 	{
 		wxArrayString modeStrings;
 		unsigned whichMode = 0, tmode = 0;
-		for (ShowModeList::const_iterator mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode, ++tmode)
+		for (auto mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode, ++tmode)
 		{
 			modeStrings.Add((*mode)->GetName());
 			if ((*mode)->GetName() == GetShow()->GetMode().GetName())

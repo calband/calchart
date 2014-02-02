@@ -28,8 +28,6 @@
 #include "cc_point.h"
 #include "math_utils.h"
 
-#include <boost/format.hpp>
-
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <string>
@@ -86,13 +84,13 @@ AnimateDir AnimGetDirFromAngle(float ang)
 class AnimateSheet
 {
 public:
-	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::vector<std::vector<boost::shared_ptr<AnimateCommand> > >& theCommands, const std::string& s, unsigned beats) : pts(thePoints), commands(theCommands), name(s), numbeats(beats) {}
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::vector<std::vector<std::shared_ptr<AnimateCommand> > >& theCommands, const std::string& s, unsigned beats) : pts(thePoints), commands(theCommands), name(s), numbeats(beats) {}
 	~AnimateSheet() {}
 	std::string GetName() const { return name; }
 	unsigned GetNumBeats() const { return numbeats; }
 	
 	std::vector<AnimatePoint> pts; // should probably be const
-	std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > commands;
+	std::vector<std::vector<std::shared_ptr<AnimateCommand> > > commands;
 private:
 	std::string name;
 	unsigned numbeats;
@@ -113,7 +111,7 @@ mCollisionAction(NULL)
 
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
-		std::vector<std::vector<boost::shared_ptr<AnimateCommand> > > theCommands(numpts);
+		std::vector<std::vector<std::shared_ptr<AnimateCommand> > > theCommands(numpts);
 		for (auto& current_symbol : k_symbols)
 		{
 			if (curr_sheet->ContinuityInUse(current_symbol))
@@ -123,7 +121,12 @@ mCollisionAction(NULL)
 				yyinputbuffer = tmpBuffer.c_str();
 				if (notifyStatus)
 				{
-					notifyStatus((boost::format("Compiling \"%1%\" %2%...") % curr_sheet->GetName().substr(0,32) % GetNameForSymbol(current_symbol).substr(0,32)).str());
+					std::string message("Compiling \"");
+					message += curr_sheet->GetName().substr(0,32);
+					message += ("\" ");
+					message += GetNameForSymbol(current_symbol).substr(0,32);
+					message += ("...");
+					notifyStatus(message);
 				}
 				// parse out the error
 				if (parsecontinuity() != 0)
@@ -150,7 +153,10 @@ mCollisionAction(NULL)
 // Handle points that don't have continuity (shouldn't happen)
 		if (notifyStatus)
 		{
-			notifyStatus((boost::format("Compiling \"%1%\"...") % curr_sheet->GetName().substr(0,32)).str());
+			std::string message("Compiling \"");
+			message += curr_sheet->GetName().substr(0,32);
+			message += ("\"...");
+			notifyStatus(message);
 		}
 		for (unsigned j = 0; j < numpts; j++)
 		{
@@ -161,7 +167,10 @@ mCollisionAction(NULL)
 		}
 		if (!comp.Okay() && notifyErrorList)
 		{
-			if (notifyErrorList(comp.GetErrorMarkers(), std::distance(show.GetSheetBegin(), curr_sheet), (boost::format("Errors for \"%1%\"") % curr_sheet->GetName().substr(0, 32)).str()))
+			std::string message("Errors for \"");
+			message += curr_sheet->GetName().substr(0,32);
+			message += ("\"");
+			if (notifyErrorList(comp.GetErrorMarkers(), std::distance(show.GetSheetBegin(), curr_sheet), message))
 			{
 				break;
 			}
@@ -395,7 +404,7 @@ std::string Animation::GetCurrentSheetName() const
 	return sheets.at(curr_sheetnum).GetName();
 }
 
-std::vector<boost::shared_ptr<AnimateCommand> >
+std::vector<std::shared_ptr<AnimateCommand> >
 Animation::GetCommands(unsigned whichPoint) const
 {
 	return sheets.at(curr_sheetnum).commands.at(whichPoint);
