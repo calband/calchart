@@ -23,4 +23,4 @@ Filename: "{app}\bin\vcredist_x86.exe"; Parameters: "/q:a/c:""VCREDI~3.EXE /q:a 
 [Icons]
 Name: "{commonprograms}\CalChartHomeView"; Filename: "{app}\CalChartHomeView.exe"
 Name: "{commondesktop}\CalChartHomeView"; Filename: "{app}\CalChartHomeView.exe"
-Name: "{commonstartup}\CalChartHomeView"; Filename: "{app}\CalChartHomeView.exe"
+
