@@ -1,5 +1,5 @@
 --- CalChart README.txt ---
-Updated on 1/2/2014 by Richard Powell
+Updated on 2/15/2014 by Richard Powell
 ---
 
 CalChart version 3.4.0
@@ -12,7 +12,7 @@ Changed save file format.  Files saved in this version and beyond cannot be
 opened by earlier versions of calchart.
 
 Non-user facing changes:
-  Moved to github
+  Moved to GitHub
   Updating to wxWidgets 3.0
 
 Bugs fixed in this release:
@@ -47,66 +47,37 @@ distributed in the developer package.
 Helping Develop CalChart:
 ---
 
-Visit the CalChart github page:
+Visit the CalChart GitHub page:
 
 CalChart is hosted on github.com in the Calband/CalChart section.  You can
 think of this as the "developer" site of CalChart.
 
 https://github.com/calband/calchart
 
-Visit the CalChart sourceforge.net page.
-
-SourceForge.net is the site that we host the resulting projects for CalChart.
-SourceForge.net is a server that host many open source projects, allowing people
-from all over the world to work on them.  You can think of this as the "user"
-site for CalChart.
-
+note:
+The CalChart sourceforge.net will be used for hosting CalChart files, but
+principle development will be on GitHub.
 http://sourceforge.net/projects/calchart/
 
 ----
-Reporting a bug.
+Reporting a bug or requesting a new feature.
 ----
 
-I recommend signing up for a SourceForge account.  When you log bugs or feature
-request to CalChart, it always helps to be logged in.  You *can* log your issues
-as a guest, but it makes it very hard for the person fixing the bug to
-communicate with you.
+CalChart uses an issues page on the github site for tracking bugs and features.
+To post issues, you will need to create a GitHub account at https://github.com.
 
-From the CalChart project page (http://sourceforge.net/projects/calchart/),
-click on Develop, then Tracker, then Bugs.  This should list all of the bugs
-currently logged against CalChart.  Your bug may already be here.  If it is,
-then add any information to the bug.  If it is there, and it has been fixed,
-please reopen the bug and put more information on it.  Or click on "Add new" to
-add a new bug.
+From the CalChart project page (https://github.net/calband/calchart/),
+click on Issues.  This should list all of the issues logged against CalChart.
+Your bug may already be here.  If it is, then add any information to the bug.
+If not, click on "New Issue" to add a new bug.
 
-This will bring up the new Bug page.  Please enter a summary and a description
-of the bug.  If you have any reproduction steps that will cause this bug to
+This will bring up the new Issue page.  Please enter a summary and a description
+of the issue.  If you have any reproduction steps that will cause a bug to
 happen, please enter them.  The more details, the more likely it is to fix.  If
 you have a file that causes this to happen, or if you have any screen shots of
-the problem, attach them to the bug.
-
----
-Requesting new features.
----
-
-Sometimes what's wrong isn't a bug, but that there is a lack of a feature.  If
-there is something that you wanted or something that you think will make
-CalChart better, please create a Feature Request.
-
-I recommend signing up for a SourceForge account.  When you log bugs or feature
-request to CalChart, it always helps to be logged in.  You *can* log your issues
-as a guest, but it makes it very hard for the person fixing the bug to
-communicate with you.
-
-From the CalChart project page (http://sourceforge.net/projects/calchart/),
-click on Develop, then Tracker, then Feature Request.  This brings up all the
-feature requests logged against CalChart.  You may see that somebody has already
-entered the feature.  If so, please add your opinions to it.  If not, click on
-"Add new" to add a new Feature Request.
-
-This will bring up the new Feature Request page.  Please enter a summary and a
-description of the Feature.  The more details, the more likely it is to be
-implemented.
+the problem, attach them to the bug.  If you are requesting a feature, add
+anything that you think will help create the feature, such as describing the
+desired behavior.
 
 ---
 Build CalChart

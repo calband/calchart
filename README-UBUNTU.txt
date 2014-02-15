@@ -12,17 +12,10 @@ $ sudo apt-get install libwxgtk2.9.2-dev libwxgtk2.9.2-dbg
 If you don't have a C++ compiler yet, you can install one by installing this package:
 $ sudo apt-get install build-essential
 
-The libwx packages do not include tex2rtf, so you will need to download 2.8.10 of wxWidgets:
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_8_10 ~/wxWidgets-2.8.10
-
-$ cd ~/wxWidgets-2.8.10/utils/tex2rtf/src
-$ mv makefile.unx makefile
-$ make
-$ sudo mv tex2rtf /usr/bin
-
 Get calchart (you'll need to log in with your source forge account when you commit):
-$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/trunk ~/calchart/trunk
+$ git clone https://github.com/calband/calchart.git ~/calchart
 
 Build calchart
 $ cd ~/calchart/trunk
 $ make
+

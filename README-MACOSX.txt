@@ -2,14 +2,14 @@ My steps for building for MacOSX.  Updated for Mavericks (10.9)
 
 These steps require having Mavericks 10.9 and XCode 5.0.2.  Both should be on the app store.
 
-Note: All lines starting with ‘$’ mean you should run them from the terminal.  Do not include the ‘$’ with the command :)
+Download 3.0.0 of wxWidgets
+Go to wxwidgets.org and download the "Source for Linux, OS X".  You will then need to move the package to a known place (I recommend your desktop).
+Make sure you unzip and untar the bundle (usually involves just double clicking the tar file.
 
+Note: All lines starting with ‘$’ mean you should run them from the terminal.  Do not include the ‘$’ with the command :)
 To start the terminal, open Spotlight and search for terminal.
 
-Download 3.0.0-rc2 of wxWidgets to build the library:
-$ svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_0-rc2 ~/wxWidgets-3.0.0-rc2
-
-$ cd wxWidgets-3.0.0-rc2
+$ cd ~/Desktop/wxWidgets-3.0.0
 
 $ mkdir build-results
 $ cd build-results
@@ -26,24 +26,7 @@ $ sudo make install
 Get calchart (you'll need to log in with your source forge account):
 $ git clone https://github.com/calband/calchart.git ~/calchart
 
-// SKIP TO BUILD_CALCHART UNLESS YOU NEED TO BUILD DOCUMENTATION!!!
-
-Configure and build tex2rtf (this is only if you are planning on rebuilding the documentation):
-CalChart uses the tex2rtf project.  Unfortunately, tex2rtf is no longer supported in wxWidgets.
-Download tex2rtf from sourceforge:
-$ svn co https://tex2rtf.svn.sourceforge.net/svnroot/tex2rtf/trunk ~/tex2rtf/trunk
-$ cd ~/tex2rtf/trunk
-Because there are slight issues with the version in trunk, you'll need to patch up the trunk
-$ patch -p0 < ~/calchart/trunk/tex2rtf_changes.diff
-
-$ autoreconf --install
-$ mkdir build-results
-$ cd build-results
-$ ../configure
-$ make
-$ sudo install ./src/tex2rtf /usr/local/bin
-
-// BUILD CAL_CHART
+If you need to rebuild the documentation, refer to the README-DOC.txt
 
 Make Calchart's generated files:
 $ cd ~/calchart/trunk

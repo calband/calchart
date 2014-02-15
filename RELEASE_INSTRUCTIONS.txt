@@ -2,7 +2,7 @@
 
 How to release calchart:
 
-The current calchart version is 3.3.4.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.3.4)
+The current calchart version is 3.4.0.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.4.0)
 
 0.1 Increment the versions in ccvers.h to CCVER
 
@@ -12,29 +12,26 @@ The current calchart version is 3.3.4.  In all commands below, substitute that n
 
 0.4 Edit build-macos/dmg_maker.sh and build-macos/homeview_dmg_maker.sh to have the right version
 
-1. copy trunk to a tag:
-$ svn copy -m "copying trunk to tag for version $CCVER" https://calchart.svn.sourceforge.net/svnroot/calchart/trunk https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER
+Because you sometimes run into build issues on one platform instead of another, do a build before you do a tag:
+1. Prebuild the project to make sure its working
+1.0.1: Make sure you note the git HASH you are dealing with.  Make sure both Windows and Mac are on the same hash.
 
-2. get that tag on your computer
-$ svn co https://calchart.svn.sourceforge.net/svnroot/calchart/tags/calchart-$CCVER calchart-$CCVER
-
-3. Build the product:
 ---
 For windows:
 
-w3.1 Follow the instructions in README-win.txt
+w1.1 Follow the instructions in README-win.txt
 
-w3.2 Install InnoSetup
+w1.2 Install InnoSetup
 I use InnoSetup for creating the installer.  Get it from:
 http://www.jrsoftware.org/isinfo.php
 
-w3.3 CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
-  w3.3.a. Google and find the vcredist_x86.exe for Visual C++ 2010.  Download and save to \calchart\trunk\build-win.
+w1.3 CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
+  w1.3.a. Google and find the vcredist_x86.exe for Visual C++ 2010.  Download and save to \calchart\trunk\build-win.
 
-w3.4 Build the setup.exe installer:
+w1.4 Build the setup.exe installer:
 Compile via Build->Compile.
 
-w3.5 The installer is called setup.exe.  Rename to:
+w1.5 The installer is called setup.exe.  Rename to:
 $ cd build-win/InstallerFiles
 $ mv setup.exe Install-CalChart-$CCVER.exe
 
@@ -42,24 +39,38 @@ The final product is Install-CalChart-$CCVER.exe
 
 ---
 For Mac:
-m3.1 Follow the instructions in README-macos.txt
+m1.1 Follow the instructions in README-macos.txt
 
-m3.2 Run dmg_maker.sh
+m1.2 Run dmg_maker.sh
 $ bash dmg_maker.sh
 
 The final product is CalChart-$CCVER.dmg
 
 ---
-4. Go to the sourceforge page at http://sourceforge.net/projects/calchart
-You'll need to be logged in to modify the files.
 
-5. Go to Project Admin -> File Manager
+2. Tag the depot
+$ git tag -a v3.4.0 -m "calchart-3.4.0"
 
-6. Make a new directory for this version (click on the * next to root)
+3. Go to a temporary directory on your system to recheck at the tag.  This is to avoid having any unwanted files
+$ cd /tmp
+$ git clone https://github.com/calband/calchart.git calchart
+$ cd calchart
+$ git checkout v3.4.0
 
-7. Upload the README.txt to the new folder.  Click on README.txt and edit the file details to signify it's a release notes.
+4. Rebuild the release now that you have the tag (repeat instructions for step 1)
 
-8. Upload the CalChart-$CCVER.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
+5. Go to the sourceforge page at http://sourceforge.net/projects/calchart
+You'll need to be logged in as Administrator to modify the files.
 
-9. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
+6. Go to Project Admin -> File Manager
+
+7. Make a new directory for this version (click on the * next to root)
+
+8. Upload the README.txt to the new folder.  Click on README.txt and edit the file details to signify it's a release notes.
+
+9. Upload the CalChart-$CCVER.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
+
+10. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
+
+11. Have a cookie.
 
