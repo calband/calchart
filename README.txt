@@ -19,8 +19,16 @@ Non-user facing changes:
   Updating to wxWidgets 3.0
 
 Bugs and features fixed in this release:
+#7 Make Point-Picker better
+#15 Windows: Always propted to save changes after edit cont
+#16 keyb buttons (right-left arrow) are ignored in view on win
 #17 can not import a Mac continuity file
-#27 Add a printed contiuity editor.
+#31 Add a printed continuity editor.
+#34 Adding printed continuity to be saved with the file
+#43 Updated docs for GitHub
+#53 Removed Boost and used std lib wherever possible
+#54 Auto launching CalChart on startup on Windows.
+#56 Keyboard shortcut for Reanimate
 
 ---
 What is CalChart?
