@@ -11,11 +11,16 @@ What's new in this version?
 Changed save file format.  Files saved in this version and beyond cannot be
 opened by earlier versions of calchart.
 
+Added a Print Continuity Editor.  This allows you to preview and edit what the
+bottom part of the printed page.
+
 Non-user facing changes:
   Moved to GitHub
   Updating to wxWidgets 3.0
 
-Bugs fixed in this release:
+Bugs and features fixed in this release:
+#17 can not import a Mac continuity file
+#27 Add a printed contiuity editor.
 
 ---
 What is CalChart?
