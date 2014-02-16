@@ -309,7 +309,19 @@ FieldView::DoImportPrintableContinuity(const wxString& file)
 	{
 		lines.push_back(fp.GetLine(line).ToStdString());
 	}
-	
+	auto hasCont = mShow->AlreadyHasPrintContinuity();
+	if (hasCont)
+	{
+		// prompt the user to find out if they would like to continue
+		int userchoice = wxMessageBox(
+									  wxT("This show already has some Printable Continuity.")
+									  wxT("Would you like to continue Importing Printable Continuity and overwrite it?"),
+									  wxT("Overwrite Printable Continuity?"), wxYES_NO|wxCANCEL);
+		if (userchoice != wxYES)
+		{
+			return true;
+		}
+	}
 	auto result = GetDocument()->GetCommandProcessor()->Submit(new ImportPrintContinuityCommand(*mShow, lines));
 	return result;
 }

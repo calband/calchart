@@ -467,6 +467,19 @@ std::string CC_show::GetPointLabel(unsigned i) const
 }
 
 
+bool CC_show::AlreadyHasPrintContinuity() const
+{
+	for (auto& i : sheets)
+	{
+		if (i.GetPrintableContinuity().size() > 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
 bool CC_show::SelectAll()
 {
 	bool changed = selectionList.size() != numpoints;
