@@ -526,7 +526,6 @@ void
 AnimationFrame::OnCmd_ShowKeyboardControls(wxCommandEvent& event)
 {
 	wxMessageDialog dialog(this,
-						   wxT("Keyboard Commands"),
 						   wxT("1, 2, 3 : Select different camera angles (student, field, upper corner)\n")
 						   wxT("shift-1, shift-2, shift-3 : Select ALUMNI different camera angles (Alumni, field viewing east, upper corner)\n")
 						   wxT("4, 5, 6 : Select custom camera angles (set to student, field, upper corner by default)\n")
@@ -548,6 +547,7 @@ AnimationFrame::OnCmd_ShowKeyboardControls(wxCommandEvent& event)
 						   wxT("left arrow : Back 1 beat\n")
 						   wxT("right arrow : Forward 1 beat\n")
 						   wxT("space : Toggle Marching\n"),
+						   wxT("Keyboard Commands"),
 						   wxOK);
 	dialog.ShowModal();
 	return;
