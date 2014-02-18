@@ -532,3 +532,8 @@ CalChartDoc::RestoreSnapShot(const CC_show& snapshot)
 	mShow.reset(new CC_show(snapshot));
 }
 
+bool
+CalChartDoc::AlreadyHasPrintContinuity() const
+{
+	return mShow->AlreadyHasPrintContinuity();
+}

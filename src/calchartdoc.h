@@ -161,6 +161,8 @@ public:
 	const ShowMode& GetMode() const;
 	void SetMode(const ShowMode* m);
 
+	bool AlreadyHasPrintContinuity() const;
+
 private:
 	// Autosaving:
 	// goal is to allow the user to have a recoverable file.

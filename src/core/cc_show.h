@@ -105,6 +105,8 @@ public:
 	void SetPointLabel(const std::vector<std::string>& labels) { pt_labels = labels; }
 	inline const std::vector<std::string>& GetPointLabels() const { return pt_labels; }
 
+	bool AlreadyHasPrintContinuity() const;
+
 	// how to select points:
 	// Always select or unselect in groups
 	bool SelectAll();
