@@ -1,3 +1,6 @@
-build-*/
-contgram.*
+build-macos/CalChart.xcodeproj/project.xcworkspace/*
+build-macos/CalChart.xcodeproj/xcuserdata/*
+build-win/README.txt
+contgram.output
+contgram.tab.c
 generated/*
