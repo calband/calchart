@@ -59,6 +59,7 @@ public:
 	void OnCmdRedo(wxCommandEvent& event);
 	void OnCmdInsertBefore(wxCommandEvent& event);
 	void OnCmdInsertAfter(wxCommandEvent& event);
+    void OnCmdInsertFromOtherShow(wxCommandEvent& event);
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdRelabel(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);

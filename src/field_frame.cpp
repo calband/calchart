@@ -99,6 +99,7 @@ EVT_MENU(CALCHART__LEGACY_PRINT, FieldFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, FieldFrame::OnCmdLegacyPrintEPS)
 EVT_MENU(CALCHART__INSERT_BEFORE, FieldFrame::OnCmdInsertBefore)
 EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
+EVT_MENU(CALCHART__INSERT_OTHER_SHOW, FieldFrame::OnCmdInsertFromOtherShow)
 EVT_MENU(wxID_DELETE, FieldFrame::OnCmdDelete)
 EVT_MENU(CALCHART__RELABEL, FieldFrame::OnCmdRelabel)
 EVT_MENU(CALCHART__EDIT_CONTINUITY, FieldFrame::OnCmdEditCont)
@@ -217,6 +218,8 @@ mAnimationFrame(NULL)
 	edit_menu->Append(wxID_REDO, wxT("&Redo\tCTRL-SHIFT-Z"));
 	edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before\tCTRL-["), wxT("Insert a new stuntsheet before this one"));
 	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
+    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW, wxT("&Insert Sheets From Other Show..."),
+                      wxT("Insert a saved stuntsheet after this one"));
 	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
 	edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"), wxT("Setup number of marchers"));
@@ -490,6 +493,73 @@ void FieldFrame::OnCmdInsertAfter(wxCommandEvent& event)
 	CC_show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
 	GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum()+1);
 	GetFieldView()->GoToNextSheet();
+}
+
+void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
+{
+    wxString s = wxFileSelector(wxT("Add Sheets from Other Shows"),
+                                wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
+    if (s.IsEmpty()) return;
+    CalChartDoc *show = new CalChartDoc();
+    if (!show->OnOpenDocument(s))
+    {
+        (void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
+        return;
+    }
+    if (show->GetNumPoints() != GetShow()->GetNumPoints())
+    {
+       (void)wxMessageBox(wxT("The blocksize doesn't match"), wxT("Import Error"));
+        delete show;
+        return;
+    }
+    wxString prompt = wxT("Enter the %s sheet number (highest possible: %i)");
+    wxString begin = wxGetTextFromUser(wxString::Format(prompt, "beginning", show->GetNumSheets()),
+                          "First Sheet Number",
+                          "1",
+                          this);
+    if (!begin)
+    {
+        delete show;
+        return;
+    }
+    long beginValue;
+    if(!begin.ToLong(&beginValue) || beginValue < 1 || beginValue > show->GetNumSheets())
+    {
+        (void)wxMessageBox(wxT("Not a valid sheet number"), wxT("Insert Failed"));
+        delete show;
+        return;
+    }
+    long endValue;
+    if (beginValue != show->GetNumSheets())
+    {
+        wxString end = wxGetTextFromUser(wxString::Format(prompt, "ending", show->GetNumSheets()),
+                                         "Last Sheet Number",
+                                         begin,
+                                         this);
+        if (!end)
+        {
+            delete show;
+            return;
+        }
+        if(!end.ToLong(&endValue) || endValue < beginValue || endValue > show->GetNumSheets())
+        {
+            (void)wxMessageBox(wxT("Not a valid sheet number"), wxT("Insert Failed"));
+            delete show;
+            return;
+        }
+    }
+    else
+    {
+        //don't ask user if the first sheet they want to copy over is the last sheet in the show being copied from
+        endValue = beginValue;
+    }
+    
+    int currend = GetShow()->GetNumSheets();
+    CC_show::CC_sheet_container_t sheets(show->GetNthSheet(beginValue - 1),
+                                         show->GetNthSheet(endValue));
+    GetFieldView()->DoInsertSheets(sheets, GetFieldView()->GetCurrentSheetNum() + 1);
+    GetShow()->RelabelSheets(currend - 1);
+    delete show;
 }
 
 
