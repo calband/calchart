@@ -500,51 +500,38 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
     wxString s = wxFileSelector(wxT("Add Sheets from Other Shows"),
                                 wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
     if (s.IsEmpty()) return;
-    CalChartDoc *show = new CalChartDoc();
-    if (!show->OnOpenDocument(s))
+    CalChartDoc show;
+    if (!(&show)->OnOpenDocument(s))
     {
         (void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
         return;
     }
-    if (show->GetNumPoints() != GetShow()->GetNumPoints())
+    if ((&show)->GetNumPoints() != GetShow()->GetNumPoints())
     {
        (void)wxMessageBox(wxT("The blocksize doesn't match"), wxT("Import Error"));
-        delete show;
         return;
     }
     wxString prompt = wxT("Enter the %s sheet number (highest possible: %i)");
-    wxString begin = wxGetTextFromUser(wxString::Format(prompt, "beginning", show->GetNumSheets()),
+    wxString begin = wxGetTextFromUser(wxString::Format(prompt, "beginning", (&show)->GetNumSheets()),
                           "First Sheet Number",
                           "1",
                           this);
-    if (!begin)
-    {
-        delete show;
-        return;
-    }
     long beginValue;
-    if(!begin.ToLong(&beginValue) || beginValue < 1 || beginValue > show->GetNumSheets())
+    if(!begin || !begin.ToLong(&beginValue) || beginValue < 1 || beginValue > (&show)->GetNumSheets())
     {
         (void)wxMessageBox(wxT("Not a valid sheet number"), wxT("Insert Failed"));
-        delete show;
         return;
     }
     long endValue;
-    if (beginValue != show->GetNumSheets())
+    if (beginValue != (&show)->GetNumSheets())
     {
-        wxString end = wxGetTextFromUser(wxString::Format(prompt, "ending", show->GetNumSheets()),
+        wxString end = wxGetTextFromUser(wxString::Format(prompt, "ending", (&show)->GetNumSheets()),
                                          "Last Sheet Number",
                                          begin,
                                          this);
-        if (!end)
-        {
-            delete show;
-            return;
-        }
-        if(!end.ToLong(&endValue) || endValue < beginValue || endValue > show->GetNumSheets())
+        if(!end || !end.ToLong(&endValue) || endValue < beginValue || endValue > (&show)->GetNumSheets())
         {
             (void)wxMessageBox(wxT("Not a valid sheet number"), wxT("Insert Failed"));
-            delete show;
             return;
         }
     }
@@ -555,11 +542,9 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
     }
     
     int currend = GetShow()->GetNumSheets();
-    CC_show::CC_sheet_container_t sheets(show->GetNthSheet(beginValue - 1),
-                                         show->GetNthSheet(endValue));
-    GetFieldView()->DoInsertSheets(sheets, GetFieldView()->GetCurrentSheetNum() + 1);
-    GetShow()->RelabelSheets(currend - 1);
-    delete show;
+    CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(beginValue - 1),
+                                         (&show)->GetNthSheet(endValue));
+    GetFieldView()->DoInsertSheetsOtherShow(sheets, GetFieldView()->GetCurrentSheetNum() + 1, currend - 1);
 }
 
 

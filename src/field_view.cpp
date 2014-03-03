@@ -288,6 +288,14 @@ FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned whe
 }
 
 bool
+FieldView::DoInsertSheetsOtherShow(const CC_show::CC_sheet_container_t& sht, unsigned where, unsigned endpoint)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new AddSheetsOtherShowCommand(*mShow, sht, where,
+                                                                               endpoint), true);
+	return true;
+}
+
+bool
 FieldView::DoDeleteSheet(unsigned where)
 {
 	GetDocument()->GetCommandProcessor()->Submit(new RemoveSheetsCommand(*mShow, where), true);
