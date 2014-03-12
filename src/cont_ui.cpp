@@ -257,7 +257,7 @@ void ContinuityEditor::SetInsertionPoint(int x, int y)
 
 SYMBOL_TYPE ContinuityEditor::CurrentSymbolChoice() const
 {
-	auto name = mContinuityChoices->GetString(mContinuityChoices->GetSelection());
+	auto name = mContinuityChoices->GetString(mCurrentContinuityChoice);
 	return GetSymbolForName(name.ToStdString());
 }
 
