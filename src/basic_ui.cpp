@@ -85,13 +85,133 @@ wxString FancyTextWin::GetValue(void) const
 #endif
 
 
-CtrlScrollCanvas::CtrlScrollCanvas(wxWindow *parent,
+ScrollZoomCanvas::ScrollZoomCanvas(wxWindow *parent,
 								   wxWindowID id,
 								   const wxPoint& pos,
 								   const wxSize& size,
 								   long style) :
 wxScrolledWindow(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style),
-mZoomFactor(1.0)
+mZoomFactor(1.0),
+mOrigin(0, 0),
+mOffset(0, 0)
+{
+}
+
+
+ScrollZoomCanvas::~ScrollZoomCanvas()
+{
+}
+
+
+void
+ScrollZoomCanvas::PrepareDC(wxDC& dc)
+{
+	super::PrepareDC(dc);
+	dc.SetUserScale(mZoomFactor, mZoomFactor);
+}
+
+
+void
+ScrollZoomCanvas::SetZoom(float z)
+{
+	mZoomFactor = z;
+}
+
+float
+ScrollZoomCanvas::GetZoom() const
+{
+	return mZoomFactor;
+}
+
+void
+ScrollZoomCanvas::SetOffset(wxPoint newOffset)
+{
+	ChangeOffset(mOffset - newOffset);
+}
+
+void
+ScrollZoomCanvas::ChangeOffset(wxPoint deltaOffset)
+{
+	mOffset += deltaOffset;
+	Scroll(-mOffset);
+	wxPoint start = GetViewStart();
+	mOffset = -start - mOrigin;
+}
+
+wxPoint
+ScrollZoomCanvas::GetOffset() const
+{
+	return mOffset;
+}
+
+void
+ScrollZoomCanvas::ResetScrollToOrigin()
+{
+	ChangeOffset(-mOffset);
+}
+
+void
+ScrollZoomCanvas::SetOffsetOrigin(wxPoint newOrigin)
+{
+	ChangeOffsetOrigin(mOrigin - newOrigin);
+}
+
+void
+ScrollZoomCanvas::ChangeOffsetOrigin(wxPoint deltaOrigin)
+{
+	mOffset -= deltaOrigin;
+	mOrigin += deltaOrigin;
+}
+
+wxPoint
+ScrollZoomCanvas::GetOffsetOrigin() const
+{
+	return mOrigin;
+}
+
+
+MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow *parent,
+	wxWindowID id,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style) :
+ScrollZoomCanvas(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style),
+mLastPos(0, 0),
+mScrolledLastMove(false)
+{
+}
+
+
+MouseMoveScrollCanvas::~MouseMoveScrollCanvas()
+{
+}
+
+
+void
+MouseMoveScrollCanvas::OnMouseMove(wxMouseEvent &event)
+{
+	wxPoint thisPos = event.GetPosition();
+	mScrolledLastMove = false;
+	if (ShouldScrollOnMouseEvent(event))
+	{
+		wxPoint changeInOffset = thisPos - mLastPos;
+		ChangeOffset(changeInOffset * GetScrollFactor());
+		mScrolledLastMove = true;
+	}
+	mLastPos = thisPos;
+}
+
+bool MouseMoveScrollCanvas::IsScrolling()
+{
+	return mScrolledLastMove;
+}
+
+CtrlScrollCanvas::CtrlScrollCanvas(wxWindow *parent,
+	wxWindowID id,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style) :
+MouseMoveScrollCanvas(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
 {
 }
 
@@ -100,40 +220,32 @@ CtrlScrollCanvas::~CtrlScrollCanvas()
 {
 }
 
-
-void
-CtrlScrollCanvas::PrepareDC(wxDC& dc)
+bool CtrlScrollCanvas::ShouldScrollOnMouseEvent(wxMouseEvent &event)
 {
-	super::PrepareDC(dc);
-	dc.SetUserScale(mZoomFactor, mZoomFactor);
+	return event.ControlDown();
+}
+
+float CtrlScrollCanvas::GetScrollFactor()
+{
+	return 1.0;
 }
 
 
-void
-CtrlScrollCanvas::SetZoom(float z)
+ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(wxWindow *parent,
+	wxWindowID id,
+	const wxPoint& pos,
+	const wxSize& size,
+	long style) :
+CtrlScrollCanvas(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
 {
-	mZoomFactor = z;
-}
-
-float
-CtrlScrollCanvas::GetZoom() const
-{
-	return mZoomFactor;
 }
 
 
-void
-CtrlScrollCanvas::OnMouseMove(wxMouseEvent &event)
+ClickDragCtrlScrollCanvas::~ClickDragCtrlScrollCanvas()
 {
-	wxPoint thisPos = event.GetPosition();
-	if (event.ControlDown())
-	{
-		mOffset += thisPos - mLastPos;
-		Scroll(-mOffset);
-		// cap the offset by how much the view moved
-		wxPoint start = GetViewStart();
-		mOffset = -start;
-	}
-	mLastPos = thisPos;
 }
 
+bool ClickDragCtrlScrollCanvas::ShouldScrollOnMouseEvent(wxMouseEvent &event)
+{
+	return event.Dragging() && CtrlScrollCanvas::ShouldScrollOnMouseEvent(event);
+}

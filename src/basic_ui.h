@@ -46,23 +46,21 @@ public:
 };
 
 
-///// CtrlScrollCanvas /////
-// A canvas that does zooming and ctrlScrolling
-// ctrlScrolling scrolls when you hold the ctrl key and move the mouse
-// To use, call PrepareDC on your OnPaint routines with the dc.
-// Call OnMouseMove on the MouseMove handler to inform the Canvas a move has occurred.
-//////////
-class CtrlScrollCanvas : public wxScrolledWindow
+/**
+ * A canvas that can be scrolled and zoomed in on.
+ * To use, call PrepareDC on your OnPaint routines with the dc.
+ */
+class ScrollZoomCanvas : public wxScrolledWindow
 {
 private:
 	typedef wxScrolledWindow super;
 public:
-	CtrlScrollCanvas(wxWindow *parent,
-					 wxWindowID id = wxID_ANY,
-					 const wxPoint& pos = wxDefaultPosition,
-					 const wxSize& size = wxDefaultSize,
-					 long style = 0);
-	virtual ~CtrlScrollCanvas();
+	ScrollZoomCanvas(wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0);
+	virtual ~ScrollZoomCanvas();
 
 protected:
 	void PrepareDC(wxDC&);
@@ -71,13 +69,81 @@ public:
 	virtual void SetZoom(float z);
 	virtual float GetZoom() const;
 
+	virtual void SetOffset(wxPoint newOffset);
+	virtual void ChangeOffset(wxPoint deltaOffset);
+	virtual wxPoint GetOffset() const;
+	virtual void ResetScrollToOrigin();
+
+	virtual void SetOffsetOrigin(wxPoint newOrigin);
+	virtual void ChangeOffsetOrigin(wxPoint deltaOrigin);
+	virtual wxPoint GetOffsetOrigin() const;
+private:
+	wxPoint mOrigin;
+	wxPoint mOffset;
+	float mZoomFactor;
+};
+
+/**
+ * A canvas that scrolls according to the movement of the mouse. The amount that the canvas
+ * scrolls is directly proportional to the mouse movement.
+ * To make this work, OnMouseMove(...) should be called in response to mouse move events.
+ */
+class MouseMoveScrollCanvas : public ScrollZoomCanvas
+{
+public:
+	MouseMoveScrollCanvas(wxWindow *parent,
+					 wxWindowID id = wxID_ANY,
+					 const wxPoint& pos = wxDefaultPosition,
+					 const wxSize& size = wxDefaultSize,
+					 long style = 0);
+	virtual ~MouseMoveScrollCanvas();
+public:
 	// Inform the ctrl scrolling when the mouse moves
     virtual void OnMouseMove(wxMouseEvent &event);
+	virtual bool IsScrolling();
+protected:
+	virtual bool ShouldScrollOnMouseEvent(wxMouseEvent &event) = 0;
+	virtual float GetScrollFactor() = 0;
+private:
+	wxPoint mLastPos;
+	bool mScrolledLastMove;
+};
 
+/**
+ * A canvas that scrolls when the ctrl button is pressed and the mouse is moved.
+ */
+class CtrlScrollCanvas : public MouseMoveScrollCanvas
+{
+public:
+	CtrlScrollCanvas(wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0);
+	virtual ~CtrlScrollCanvas();
+protected:
+	virtual bool ShouldScrollOnMouseEvent(wxMouseEvent &event);
+	virtual float GetScrollFactor();
 private:
 	wxPoint mOffset;
 	wxPoint mLastPos;
 	float mZoomFactor;
+};
+
+/**
+ * A canvas that scrolls when the ctrl button is pressed and the user clicks and drags the mouse.
+ */
+class ClickDragCtrlScrollCanvas : public CtrlScrollCanvas
+{
+public:
+	ClickDragCtrlScrollCanvas(wxWindow *parent,
+		wxWindowID id = wxID_ANY,
+		const wxPoint& pos = wxDefaultPosition,
+		const wxSize& size = wxDefaultSize,
+		long style = 0);
+	virtual ~ClickDragCtrlScrollCanvas();
+protected:
+	virtual bool ShouldScrollOnMouseEvent(wxMouseEvent &event);
 };
 
 #endif

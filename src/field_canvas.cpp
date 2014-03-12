@@ -48,7 +48,7 @@ END_EVENT_TABLE()
 
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom) :
-CtrlScrollCanvas(frame, wxID_ANY),
+ClickDragCtrlScrollCanvas(frame, wxID_ANY),
 mFrame(frame),
 mView(static_cast<FieldView*>(view)),
 curr_lasso(CC_DRAG_BOX),
@@ -511,29 +511,32 @@ FieldCanvas::OnMouseRightDown(wxMouseEvent& event)
 void
 FieldCanvas::OnMouseMove(wxMouseEvent& event)
 {
-	CtrlScrollCanvas::OnMouseMove(event);
+	ClickDragCtrlScrollCanvas::OnMouseMove(event);
 	
-	wxClientDC dc(this);
-	PrepareDC(dc);
-	long x,y;
-	event.GetPosition(&x, &y);
-	x = dc.DeviceToLogicalX( x );
-	y = dc.DeviceToLogicalY( y );
-	
-	if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment())
+	if (!IsScrolling())
 	{
-		mBackgroundImage->OnMouseMove(event, dc);
-	}
-	else
-	{
-		CC_coord pos = mView->GetShowFieldOffset();
-		pos.x = (x - pos.x);
-		pos.y = (y - pos.y);
-		
-		if ((event.Dragging() && event.LeftIsDown() && curr_shape)
-			|| (event.Moving() && curr_shape && (CC_DRAG_POLY == drag)))
+		wxClientDC dc(this);
+		PrepareDC(dc);
+		long x, y;
+		event.GetPosition(&x, &y);
+		x = dc.DeviceToLogicalX(x);
+		y = dc.DeviceToLogicalY(y);
+
+		if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment())
 		{
-			MoveDrag(pos);
+			mBackgroundImage->OnMouseMove(event, dc);
+		}
+		else
+		{
+			CC_coord pos = mView->GetShowFieldOffset();
+			pos.x = (x - pos.x);
+			pos.y = (y - pos.y);
+
+			if ((event.Dragging() && event.LeftIsDown() && curr_shape)
+				|| (event.Moving() && curr_shape && (CC_DRAG_POLY == drag)))
+			{
+				MoveDrag(pos);
+			}
 		}
 	}
 	Refresh();
