@@ -38,8 +38,9 @@ class BackgroundImage;
 class CC_coord;
 
 // Field Canvas controls how to paint and the first line control of user input
-class FieldCanvas : public CtrlScrollCanvas
+class FieldCanvas : public ClickDragCtrlScrollCanvas
 {
+	using super = ClickDragCtrlScrollCanvas;
 public:
 // Basic functions
 	FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom);
