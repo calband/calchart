@@ -224,8 +224,8 @@ void ContinuityEditor::OnCloseWindow(wxCommandEvent& event)
 
 void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 {
-	GetGlobalHelpController().LoadFile();
-	GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+	wxGetApp().GetGlobalHelpController().LoadFile();
+	wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
 }
 
 
