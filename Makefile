@@ -26,7 +26,7 @@ SRCS = $(wildcard $(SRCDIR)/*.cpp)
 
 GENERATED_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
 GENERATED_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
-GENERATED_FILES = $(GENERATED_SRCS) $(GENDIR)/contgram.h $(WINOBJDIR)/README.txt
+GENERATED_FILES = $(GENERATED_SRCS) $(WINOBJDIR)/README.txt
 
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
 OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(GENERATED_SRCS))
@@ -43,7 +43,7 @@ DOCSRC = $(wildcard $(DOCSRCDIR)/*)
 MOSTSRCS = $(SRCS) $(GENERATED_BASES) $(HEADERS) $(DOCSRC)
 ALLSRCS = $(MOSTSRCS) $(IMAGES_ALL) Makefile xbm2xpm \
 	makefile.wat calchart.rc install.inf
-MSWSRCS = $(MOSTSRCS) contgram.h $(GENERATED_SRCS) \
+MSWSRCS = $(MOSTSRCS) $(GENERATED_SRCS) \
 	makefile.wat calchart.rc install.inf
 
 #### Targets ####
@@ -59,13 +59,7 @@ $(OBJDIR)/%.o: $(GENDIR)/%.cpp
 
 $(GENDIR)/%.cpp: $(SRCDIR)/%.y
 	@mkdir -p $(GENDIR)
-	$(YACC) $(YFLAGS) $<
-	mv -f $*.tab.c $@
-
-$(GENDIR)/%.h: $(SRCDIR)/%.y
-	@mkdir -p $(GENDIR)
-	$(YACC) $(YFLAGS) $<
-	mv -f $*.tab.h $@
+	$(YACC) $(YFLAGS) $< -o $@
 
 $(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	@mkdir -p $(GENDIR)
@@ -80,8 +74,6 @@ generate: $(GENERATED_FILES)
 
 calchart: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(LIBS)
-
-$(OBJDIR)/contscan.o: $(GENDIR)/contgram.h
 
 TAGS: $(SRCS) $(HEADERS)
 	etags $(SRCS) $(HEADERS)
