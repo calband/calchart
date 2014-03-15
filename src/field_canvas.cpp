@@ -511,7 +511,7 @@ FieldCanvas::OnMouseRightDown(wxMouseEvent& event)
 void
 FieldCanvas::OnMouseMove(wxMouseEvent& event)
 {
-	ClickDragCtrlScrollCanvas::OnMouseMove(event);
+	super::OnMouseMove(event);
 	
 	if (!IsScrolling())
 	{

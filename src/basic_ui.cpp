@@ -91,9 +91,9 @@ ScrollZoomCanvas::ScrollZoomCanvas(wxWindow *parent,
 								   const wxSize& size,
 								   long style) :
 wxScrolledWindow(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style),
-mZoomFactor(1.0),
 mOrigin(0, 0),
-mOffset(0, 0)
+mOffset(0, 0),
+mZoomFactor(1.0)
 {
 }
 
@@ -175,7 +175,7 @@ MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow *parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-ScrollZoomCanvas(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style),
+super(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style),
 mLastPos(0, 0),
 mScrolledLastMove(false)
 {
@@ -195,13 +195,13 @@ MouseMoveScrollCanvas::OnMouseMove(wxMouseEvent &event)
 	if (ShouldScrollOnMouseEvent(event))
 	{
 		wxPoint changeInOffset = thisPos - mLastPos;
-		ChangeOffset(changeInOffset * GetScrollFactor());
+		ChangeOffset(changeInOffset);
 		mScrolledLastMove = true;
 	}
 	mLastPos = thisPos;
 }
 
-bool MouseMoveScrollCanvas::IsScrolling()
+bool MouseMoveScrollCanvas::IsScrolling() const
 {
 	return mScrolledLastMove;
 }
@@ -211,7 +211,7 @@ CtrlScrollCanvas::CtrlScrollCanvas(wxWindow *parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-MouseMoveScrollCanvas(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
+super(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
 {
 }
 
@@ -220,14 +220,9 @@ CtrlScrollCanvas::~CtrlScrollCanvas()
 {
 }
 
-bool CtrlScrollCanvas::ShouldScrollOnMouseEvent(wxMouseEvent &event)
+bool CtrlScrollCanvas::ShouldScrollOnMouseEvent(const wxMouseEvent &event) const
 {
 	return event.ControlDown();
-}
-
-float CtrlScrollCanvas::GetScrollFactor()
-{
-	return 1.0;
 }
 
 
@@ -236,7 +231,7 @@ ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(wxWindow *parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style) :
-CtrlScrollCanvas(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
+super(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
 {
 }
 
@@ -245,7 +240,7 @@ ClickDragCtrlScrollCanvas::~ClickDragCtrlScrollCanvas()
 {
 }
 
-bool ClickDragCtrlScrollCanvas::ShouldScrollOnMouseEvent(wxMouseEvent &event)
+bool ClickDragCtrlScrollCanvas::ShouldScrollOnMouseEvent(const wxMouseEvent &event) const
 {
-	return event.Dragging() && CtrlScrollCanvas::ShouldScrollOnMouseEvent(event);
+	return event.Dragging() && super::ShouldScrollOnMouseEvent(event);
 }

@@ -52,8 +52,7 @@ public:
  */
 class ScrollZoomCanvas : public wxScrolledWindow
 {
-private:
-	typedef wxScrolledWindow super;
+	using super = wxScrolledWindow;
 public:
 	ScrollZoomCanvas(wxWindow *parent,
 		wxWindowID id = wxID_ANY,
@@ -66,17 +65,17 @@ protected:
 	void PrepareDC(wxDC&);
 
 public:
-	virtual void SetZoom(float z);
-	virtual float GetZoom() const;
+	void SetZoom(float z);
+	float GetZoom() const;
 
-	virtual void SetOffset(wxPoint newOffset);
-	virtual void ChangeOffset(wxPoint deltaOffset);
-	virtual wxPoint GetOffset() const;
-	virtual void ResetScrollToOrigin();
+	void SetOffset(wxPoint newOffset);
+	void ChangeOffset(wxPoint deltaOffset);
+	wxPoint GetOffset() const;
+	void ResetScrollToOrigin();
 
-	virtual void SetOffsetOrigin(wxPoint newOrigin);
-	virtual void ChangeOffsetOrigin(wxPoint deltaOrigin);
-	virtual wxPoint GetOffsetOrigin() const;
+	void SetOffsetOrigin(wxPoint newOrigin);
+	void ChangeOffsetOrigin(wxPoint deltaOrigin);
+	wxPoint GetOffsetOrigin() const;
 private:
 	wxPoint mOrigin;
 	wxPoint mOffset;
@@ -90,6 +89,7 @@ private:
  */
 class MouseMoveScrollCanvas : public ScrollZoomCanvas
 {
+	using super = ScrollZoomCanvas;
 public:
 	MouseMoveScrollCanvas(wxWindow *parent,
 					 wxWindowID id = wxID_ANY,
@@ -100,10 +100,9 @@ public:
 public:
 	// Inform the ctrl scrolling when the mouse moves
     virtual void OnMouseMove(wxMouseEvent &event);
-	virtual bool IsScrolling();
+	virtual bool IsScrolling() const;
 protected:
-	virtual bool ShouldScrollOnMouseEvent(wxMouseEvent &event) = 0;
-	virtual float GetScrollFactor() = 0;
+	virtual bool ShouldScrollOnMouseEvent(const wxMouseEvent &event) const = 0;
 private:
 	wxPoint mLastPos;
 	bool mScrolledLastMove;
@@ -114,6 +113,7 @@ private:
  */
 class CtrlScrollCanvas : public MouseMoveScrollCanvas
 {
+	using super = MouseMoveScrollCanvas;
 public:
 	CtrlScrollCanvas(wxWindow *parent,
 		wxWindowID id = wxID_ANY,
@@ -122,12 +122,7 @@ public:
 		long style = 0);
 	virtual ~CtrlScrollCanvas();
 protected:
-	virtual bool ShouldScrollOnMouseEvent(wxMouseEvent &event);
-	virtual float GetScrollFactor();
-private:
-	wxPoint mOffset;
-	wxPoint mLastPos;
-	float mZoomFactor;
+	virtual bool ShouldScrollOnMouseEvent(const wxMouseEvent &event) const;
 };
 
 /**
@@ -135,6 +130,7 @@ private:
  */
 class ClickDragCtrlScrollCanvas : public CtrlScrollCanvas
 {
+	using super = CtrlScrollCanvas;
 public:
 	ClickDragCtrlScrollCanvas(wxWindow *parent,
 		wxWindowID id = wxID_ANY,
@@ -143,7 +139,7 @@ public:
 		long style = 0);
 	virtual ~ClickDragCtrlScrollCanvas();
 protected:
-	virtual bool ShouldScrollOnMouseEvent(wxMouseEvent &event);
+	virtual bool ShouldScrollOnMouseEvent(const wxMouseEvent &event) const;
 };
 
 #endif
