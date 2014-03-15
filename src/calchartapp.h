@@ -27,13 +27,11 @@
 
 #include <wx/wx.h>
 #include <wx/docview.h>
+#include <memory>
 
 class CalChartApp;
 class ShowMode;
 class wxHtmlHelpController;
-
-// the global help system:
-wxHtmlHelpController& GetGlobalHelpController();
 
 DECLARE_APP(CalChartApp)
 
@@ -46,10 +44,15 @@ public:
 	int OnExit();
 
 	ShowModeList& GetModeList() { return mModeList; }
+
+	// the global help system:
+	wxHtmlHelpController& GetGlobalHelpController();
+	
 private:
 	ShowModeList mModeList;
 
 	wxDocManager* mDocManager;
+	std::unique_ptr<wxHtmlHelpController> mHelpController;
 };
 
 #endif // _CALCHARTAPP_H_
