@@ -537,10 +537,11 @@ CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo &info, const viewpoint_t &
 }
 
 
-CCOmniView_Canvas::CCOmniView_Canvas(AnimationView *view, wxWindow *frame, const wxSize& size) :
+CCOmniView_Canvas::CCOmniView_Canvas(AnimationView *view, wxWindow *frame, CalChartConfiguration& config_, const wxSize& size) :
 wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE),
 m_glContext(new CCOmniView_GLContext(this)),
 mAnimationView(view),
+config(config_),
 mViewPoint(KStartingViewPoint),
 mFollowMarcher(-1),
 mCrowdOn(false),
@@ -552,7 +553,7 @@ mFOV(60),
 mShiftMoving(false)
 {
 #if defined(__APPLE__) && (__APPLE__)
-    m_glContext->UseForLines(mAnimationView->GetShow()->GetMode().GetOmniLinesImage());
+    m_glContext->UseForLines(mAnimationView->GetShow()->GetMode().GetOmniLinesImage(config));
 #endif
 }
 
@@ -777,52 +778,52 @@ CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 			
 		case '4':
 			OnCmd_FollowMarcher(-1);
-			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_4(), GetConfiguration_OmniViewPoint_Y_4(), GetConfiguration_OmniViewPoint_Z_4());
-			mViewAngle = GetConfiguration_OmniViewAngle_4();
-			mViewAngleZ = GetConfiguration_OmniViewAngle_Z_4();
+			mViewPoint = viewpoint_t(config.Get_OmniViewPoint_X_4(), config.Get_OmniViewPoint_Y_4(), config.Get_OmniViewPoint_Z_4());
+			mViewAngle = config.Get_OmniViewAngle_4();
+			mViewAngleZ = config.Get_OmniViewAngle_Z_4();
 			break;
 		case '5':
-			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_5(), GetConfiguration_OmniViewPoint_Y_5(), GetConfiguration_OmniViewPoint_Z_5());
-			mViewAngle = GetConfiguration_OmniViewAngle_5();
-			mViewAngleZ = GetConfiguration_OmniViewAngle_Z_5();
+			mViewPoint = viewpoint_t(config.Get_OmniViewPoint_X_5(), config.Get_OmniViewPoint_Y_5(), config.Get_OmniViewPoint_Z_5());
+			mViewAngle = config.Get_OmniViewAngle_5();
+			mViewAngleZ = config.Get_OmniViewAngle_Z_5();
 			break;
 		case '6':
-			mViewPoint = viewpoint_t(GetConfiguration_OmniViewPoint_X_6(), GetConfiguration_OmniViewPoint_Y_6(), GetConfiguration_OmniViewPoint_Z_6());
-			mViewAngle = GetConfiguration_OmniViewAngle_6();
-			mViewAngleZ = GetConfiguration_OmniViewAngle_Z_6();
+			mViewPoint = viewpoint_t(config.Get_OmniViewPoint_X_6(), config.Get_OmniViewPoint_Y_6(), config.Get_OmniViewPoint_Z_6());
+			mViewAngle = config.Get_OmniViewAngle_6();
+			mViewAngleZ = config.Get_OmniViewAngle_Z_6();
 			break;
 
 		case '$':
 			OnCmd_FollowMarcher(-1);
 			if (wxMessageBox(wxT("Set Custom Viewpoint 4?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES)
 			{
-				SetConfiguration_OmniViewPoint_X_4(mViewPoint.x);
-				SetConfiguration_OmniViewPoint_Y_4(mViewPoint.y);
-				SetConfiguration_OmniViewPoint_Z_4(mViewPoint.z);
-				SetConfiguration_OmniViewAngle_4(mViewAngle);
-				SetConfiguration_OmniViewAngle_Z_4(mViewAngleZ);
+				config.Set_OmniViewPoint_X_4(mViewPoint.x);
+				config.Set_OmniViewPoint_Y_4(mViewPoint.y);
+				config.Set_OmniViewPoint_Z_4(mViewPoint.z);
+				config.Set_OmniViewAngle_4(mViewAngle);
+				config.Set_OmniViewAngle_Z_4(mViewAngleZ);
 			}
 			break;
 		case '%':
 			OnCmd_FollowMarcher(-1);
 			if (wxMessageBox(wxT("Set Custom Viewpoint 5?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES)
 			{
-				SetConfiguration_OmniViewPoint_X_5(mViewPoint.x);
-				SetConfiguration_OmniViewPoint_Y_5(mViewPoint.y);
-				SetConfiguration_OmniViewPoint_Z_5(mViewPoint.z);
-				SetConfiguration_OmniViewAngle_5(mViewAngle);
-				SetConfiguration_OmniViewAngle_Z_5(mViewAngleZ);
+				config.Set_OmniViewPoint_X_5(mViewPoint.x);
+				config.Set_OmniViewPoint_Y_5(mViewPoint.y);
+				config.Set_OmniViewPoint_Z_5(mViewPoint.z);
+				config.Set_OmniViewAngle_5(mViewAngle);
+				config.Set_OmniViewAngle_Z_5(mViewAngleZ);
 			}
 			break;
 		case '^':
 			OnCmd_FollowMarcher(-1);
 			if (wxMessageBox(wxT("Set Custom Viewpoint 6?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES)
 			{
-				SetConfiguration_OmniViewPoint_X_6(mViewPoint.x);
-				SetConfiguration_OmniViewPoint_Y_6(mViewPoint.y);
-				SetConfiguration_OmniViewPoint_Z_6(mViewPoint.z);
-				SetConfiguration_OmniViewAngle_6(mViewAngle);
-				SetConfiguration_OmniViewAngle_Z_6(mViewAngleZ);
+				config.Set_OmniViewPoint_X_6(mViewPoint.x);
+				config.Set_OmniViewPoint_Y_6(mViewPoint.y);
+				config.Set_OmniViewPoint_Z_6(mViewPoint.z);
+				config.Set_OmniViewAngle_6(mViewAngle);
+				config.Set_OmniViewAngle_Z_6(mViewAngleZ);
 			}
 			break;
 			

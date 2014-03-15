@@ -45,7 +45,8 @@ IMPLEMENT_DYNAMIC_CLASS(FieldView, wxView)
 FieldView::FieldView() :
 mFrame(NULL),
 mDrawPaths(false),
-mCurrentReferencePoint(0)
+mCurrentReferencePoint(0),
+config(GetConfig())
 {
 }
 
@@ -62,7 +63,7 @@ FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 	mFrame = new AnimationFrame(NULL, doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame));
 #else
-	mFrame = new FieldFrame(doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50), wxSize(GetConfiguration_FieldFrameWidth(), GetConfiguration_FieldFrameHeight()));
+	mFrame = new FieldFrame(doc, this, config, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50), wxSize(config.Get_FieldFrameWidth(), config.Get_FieldFrameHeight()));
 #endif
 	
 	mFrame->Show(true);
@@ -78,21 +79,21 @@ FieldView::OnDraw(wxDC *dc)
 	if (mShow)
 	{
 		// draw the field
-		dc->SetPen(GetCalChartPen(COLOR_FIELD_DETAIL));
-		dc->SetTextForeground(GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
-		mShow->GetMode().Draw(*dc);
+		dc->SetPen(GetConfig().GetCalChartPen(COLOR_FIELD_DETAIL));
+		dc->SetTextForeground(GetConfig().GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
+		mShow->GetMode().Draw(*dc, config);
 		
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
 			if (mCurrentReferencePoint > 0)
 			{
-				Draw(*dc, *mShow, *mShow->GetCurrentSheet(), 0, false);
-				Draw(*dc, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+				Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), 0, false);
+				Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			else
 			{
-				Draw(*dc, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+				Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			DrawPaths(*dc, *sheet);
 		}
@@ -329,7 +330,7 @@ FieldView::DoImportPrintableContinuity(const wxString& file)
 int
 FieldView::FindPoint(CC_coord pos) const
 {
-	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, Float2Coord(GetConfiguration_DotRatio()), mCurrentReferencePoint);
+	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, Float2Coord(config.Get_DotRatio()), mCurrentReferencePoint);
 }
 
 CC_coord
@@ -430,7 +431,7 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
 		for (auto point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
 		{
-			DrawPath(dc, mAnimation->GenPathToDraw(*point, origin), mAnimation->EndPosition(*point, origin));
+			DrawPath(dc, config, mAnimation->GenPathToDraw(*point, origin), mAnimation->EndPosition(*point, origin));
 		}
 	}
 }

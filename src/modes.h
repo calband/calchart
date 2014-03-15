@@ -24,6 +24,7 @@
 #define _MODES_H_
 
 #include "cc_coord.h"
+#include "confgr.h"
 
 #include <wx/wx.h>
 #include <list>
@@ -70,14 +71,14 @@ protected:
 	} HowToDraw;
 
 public:
-	void Draw(wxDC& dc) const { DrawHelper(dc, kFieldView); }
-	void DrawAnim(wxDC& dc) const { DrawHelper(dc, kAnimation); }
-	void DrawOmni(wxDC& dc) const { DrawHelper(dc, kOmniView); }
+	void Draw(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kFieldView); }
+	void DrawAnim(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kAnimation); }
+	void DrawOmni(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kOmniView); }
 
-	wxImage GetOmniLinesImage() const;
+	wxImage GetOmniLinesImage(const CalChartConfiguration& config) const;
 
 protected:
-	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const = 0;
+	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const = 0;
 
 	CC_coord mOffset;
 	CC_coord mSize;
@@ -104,7 +105,7 @@ public:
 	inline unsigned short HashE() const { return mHashE; }
 
 protected:
-	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
+	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
 
 private:
 	unsigned short mHashW, mHashE;
@@ -146,7 +147,7 @@ public:
 	inline short TextBottom() const { return text_bottom; }
 
 protected:
-	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
+	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
 	
 private:
 	unsigned char which_yards;

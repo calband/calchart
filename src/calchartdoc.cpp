@@ -55,7 +55,7 @@ mShow(CC_show::Create_CC_show()),
 mMode(wxGetApp().GetModeList().front().get()),
 mTimer(*this)
 {
-	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
+	mTimer.Start(GetConfig().Get_AutosaveInterval()*1000);
 }
 
 // When a file is opened, we first check to see if there is a temporary 

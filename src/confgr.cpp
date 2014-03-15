@@ -107,6 +107,12 @@ const int DefaultPenWidth[COLOR_NUM] =
 	2,
 };
 
+CalChartConfiguration& GetConfig()
+{
+	static CalChartConfiguration sconfig;
+	return sconfig;
+}
+
 // constants for behavior:
 // Autosave
 
@@ -172,9 +178,9 @@ const wxString spr_line_text_index[MAX_SPR_LINES] =
 #define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type, TheValue ) \
 static const wxString k ## KeyName ## Key = wxT( #KeyName ); \
 static const Type k ## KeyName ## Value = (TheValue); \
-Type GetConfiguration_ ## KeyName () { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
-void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
-void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
+Type CalChartConfiguration::Get_ ## KeyName () const { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
+void CalChartConfiguration::Set_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
+void CalChartConfiguration::Clear_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
 
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long, 60);
@@ -524,24 +530,8 @@ void ReadConfigColor()
 	}
 }
 
-void SetConfigColor(size_t selection)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	
-	// read out the color configuration:
-	config->SetPath(wxT("/COLORS"));
-	wxString rbuf = ColorNames[selection] + wxT("_Red");
-	config->Write(rbuf, static_cast<long>(CalChartBrushes[selection].GetColour().Red()));
-	wxString gbuf = ColorNames[selection] + wxT("_Green");
-	config->Write(gbuf, static_cast<long>(CalChartBrushes[selection].GetColour().Green()));
-	wxString bbuf = ColorNames[selection] + wxT("_Blue");
-	config->Write(bbuf, static_cast<long>(CalChartBrushes[selection].GetColour().Blue()));
-	config->SetPath(wxT("WIDTH"));
-	config->Write(ColorNames[selection], CalChartPens[selection].GetWidth());
-	config->Flush();
-}
-
-void ClearConfigColor(size_t selection)
+void
+CalChartConfiguration::ClearConfigColor(size_t selection)
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	
@@ -567,17 +557,77 @@ void ReadConfigYardlines()
 	}
 }
 
-void SetConfigShowYardline()
+wxString
+CalChartConfiguration::Get_yard_text(size_t which) const
 {
-	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
-	{
-		wxString key;
-		key.Printf(wxT("YardLines_%ld"), i);
-		SetConfigValue<wxString>(key, yard_text[i], yard_text_index[i]);
-	}
+	if (which >= MAX_YARD_LINES)
+		throw std::runtime_error("Error, exceeding yard_text size");
+	return yard_text[which];
 }
 
-void ClearConfigShowYardline()
+void
+CalChartConfiguration::Set_yard_text(size_t which, const wxString& name)
+{
+	if (which >= MAX_YARD_LINES)
+		throw std::runtime_error("Error, exceeding yard_text size");
+	yard_text[which] = name;
+	wxString key;
+	key.Printf(wxT("YardLines_%ld"), which);
+	SetConfigValue<wxString>(key, yard_text[which], yard_text_index[which]);
+}
+
+wxString
+CalChartConfiguration::Get_spr_line_text(size_t which) const
+{
+	if (which >= MAX_SPR_LINES)
+		throw std::runtime_error("Error, exceeding yard_text size");
+	return spr_line_text[which];
+}
+
+void
+CalChartConfiguration::Set_spr_line_text(size_t which, const wxString& name)
+{
+	if (which >= MAX_SPR_LINES)
+		throw std::runtime_error("Error, exceeding yard_text size");
+	spr_line_text[which] = name;
+	wxString key;
+	key.Printf(wxT("SpringShowYardLines_%ld"), which);
+	SetConfigValue<wxString>(key, spr_line_text[which], spr_line_text_index[which]);
+}
+
+std::vector<wxString>
+CalChartConfiguration::Get_yard_text_index() const
+{
+	return { std::begin(yard_text_index), std::end(yard_text_index) };
+}
+
+std::vector<wxString>
+CalChartConfiguration::Get_spr_line_text_index() const
+{
+	return { std::begin(spr_line_text_index), std::end(spr_line_text_index) };
+}
+
+std::vector<wxString>
+CalChartConfiguration::GetColorNames() const
+{
+	return { std::begin(ColorNames), std::end(ColorNames) };
+}
+
+std::vector<wxString>
+CalChartConfiguration::GetDefaultColors() const
+{
+	return { std::begin(DefaultColors), std::end(DefaultColors) };
+}
+
+std::vector<int>
+CalChartConfiguration::GetDefaultPenWidth() const
+{
+	return { std::begin(DefaultPenWidth), std::end(DefaultPenWidth) };
+}
+
+
+void
+CalChartConfiguration::ClearConfigShowYardline()
 {
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
@@ -598,17 +648,8 @@ void ReadConfigSpringYardlines()
 	}
 }
 
-void SetConfigSpringShowYardline()
-{
-	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
-	{
-		wxString key;
-		key.Printf(wxT("SpringShowYardLines_%ld"), i);
-		SetConfigValue<wxString>(key, spr_line_text[i], spr_line_text_index[i]);
-	}
-}
-
-void ClearConfigSpringShowYardline()
+void
+CalChartConfiguration::ClearConfigSpringShowYardline()
 {
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
@@ -628,27 +669,37 @@ void ReadConfig()
 	ReadConfigSpringYardlines();
 }
 
+wxBrush
+CalChartConfiguration::GetCalChartBrush(CalChartColors c) const
+{
+	return CalChartBrushes[c];
+}
+
 wxPen
-GetCalChartPen(CalChartColors c)
+CalChartConfiguration::GetCalChartPen(CalChartColors c) const
 {
 	return CalChartPens[c];
 }
 
 void
-SetCalChartPen(CalChartColors c, const wxPen& pen)
+CalChartConfiguration::SetCalChartBrushAndPen(CalChartColors c, const wxBrush& brush, const wxPen& pen)
 {
-	CalChartPens[c] = pen;
-}
-
-wxBrush
-GetCalChartBrush(CalChartColors c)
-{
-	return CalChartBrushes[c];
-}
-
-void
-SetCalChartBrush(CalChartColors c, const wxBrush& brush)
-{
+	if (c >= COLOR_NUM)
+		throw std::runtime_error("Error, exceeding COLOR_NUM size");
 	CalChartBrushes[c] = brush;
-}
+	CalChartPens[c] = pen;
 
+	wxConfigBase *config = wxConfigBase::Get();
+
+	// read out the color configuration:
+	config->SetPath(wxT("/COLORS"));
+	wxString rbuf = ColorNames[c] + wxT("_Red");
+	config->Write(rbuf, static_cast<long>(CalChartBrushes[c].GetColour().Red()));
+	wxString gbuf = ColorNames[c] + wxT("_Green");
+	config->Write(gbuf, static_cast<long>(CalChartBrushes[c].GetColour().Green()));
+	wxString bbuf = ColorNames[c] + wxT("_Blue");
+	config->Write(bbuf, static_cast<long>(CalChartBrushes[c].GetColour().Blue()));
+	config->SetPath(wxT("WIDTH"));
+	config->Write(ColorNames[c], CalChartPens[c].GetWidth());
+	config->Flush();
+}

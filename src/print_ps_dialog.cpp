@@ -58,7 +58,7 @@ EVT_BUTTON(CC_PRINT_BUTTON_SELECT,PrintPostScriptDialog::ShowPrintSelect)
 EVT_BUTTON(CC_PRINT_BUTTON_RESET_DEFAULTS,PrintPostScriptDialog::ResetDefaults)
 END_EVENT_TABLE()
 
-void PrintPostScriptDialog::PrintShow()
+void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 {
 	wxString s;
 #ifdef PRINT__RUN_CMD
@@ -73,15 +73,15 @@ void PrintPostScriptDialog::PrintShow()
 		wxLogError(wxT("Yards entered invalid.  Please enter a number between 10 and 100."));
 		return;
 	}
-	overview = GetConfiguration_PrintPSOverview();
+	overview = config.Get_PrintPSOverview();
 
-	switch (GetConfiguration_PrintPSModes())
+	switch (config.Get_PrintPSModes())
 	{
 		case CC_PRINT_ACTION_PREVIEW:
 		{
 #ifdef PRINT__RUN_CMD
 			s = wxFileName::CreateTempFileName(wxT("cc_"));
-			buf.sprintf(wxT("%s %s \"%s\""), GetConfiguration_PrintViewCmd().c_str(), GetConfiguration_PrintViewCmd().c_str(), s.c_str());
+			buf.sprintf(wxT("%s %s \"%s\""), config.Get_PrintViewCmd().c_str(), config.Get_PrintViewCmd().c_str(), s.c_str());
 #endif
 		}
 			break;
@@ -94,7 +94,7 @@ void PrintPostScriptDialog::PrintShow()
 		{
 #ifdef PRINT__RUN_CMD
 			s = wxFileName::CreateTempFileName(wxT("cc_"));
-			buf.sprintf(wxT("%s %s \"%s\""), GetConfiguration_PrintCmd().c_str(), GetConfiguration_PrintOpts().c_str(), s.c_str());
+			buf.sprintf(wxT("%s %s \"%s\""), config.Get_PrintCmd().c_str(), config.Get_PrintOpts().c_str(), s.c_str());
 #else
 #endif
 		}
@@ -104,11 +104,11 @@ void PrintPostScriptDialog::PrintShow()
 	}
 
 	std::ostringstream buffer;
-	bool doLandscape = GetConfiguration_PrintPSLandscape();
-	bool doCont = GetConfiguration_PrintPSDoCont();
-	bool doContSheet = GetConfiguration_PrintPSDoContSheet();
+	bool doLandscape = config.Get_PrintPSLandscape();
+	bool doCont = config.Get_PrintPSDoCont();
+	bool doContSheet = config.Get_PrintPSDoContSheet();
 	
-	PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet);
+	PrintShowToPS printShowToPS(*mShow, config, doLandscape, doCont, doContSheet);
 	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards, mIsSheetPicked);
 	// stream to file:
 	{
@@ -117,7 +117,7 @@ void PrintPostScriptDialog::PrintShow()
 	}
 
 #ifdef PRINT__RUN_CMD
-	switch (GetConfiguration_PrintPSModes())
+	switch (config.Get_PrintPSModes())
 	{
 		case CC_PRINT_ACTION_FILE:
 			break;
@@ -168,18 +168,18 @@ void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
 {
 #ifdef PRINT__RUN_CMD
-	ClearConfiguration_PrintCmd();
-	ClearConfiguration_PrintOpts();
+	GetConfig().Clear_PrintCmd();
+	GetConfig().Clear_PrintOpts();
 #else
-	ClearConfiguration_PrintFile();
+	GetConfig().Clear_PrintFile();
 #endif
-	ClearConfiguration_PrintViewCmd();
-	ClearConfiguration_PrintViewOpts();
+	GetConfig().Clear_PrintViewCmd();
+	GetConfig().Clear_PrintViewOpts();
 
-	ClearConfiguration_PageOffsetX();
-	ClearConfiguration_PageOffsetY();
-	ClearConfiguration_PageWidth();
-	ClearConfiguration_PageHeight();
+	GetConfig().Clear_PageOffsetX();
+	GetConfig().Clear_PageOffsetY();
+	GetConfig().Clear_PageWidth();
+	GetConfig().Clear_PageHeight();
 
 	// re-read values
 	TransferDataToWindow();
@@ -390,32 +390,32 @@ void PrintPostScriptDialog::CreateControls()
 bool PrintPostScriptDialog::TransferDataToWindow()
 {
 #ifdef PRINT__RUN_CMD
-	text_cmd->SetValue(GetConfiguration_PrintCmd());
-	text_opts->SetValue(GetConfiguration_PrintOpts());
-	text_view_cmd->SetValue(GetConfiguration_PrintViewCmd());
-	text_view_opts->SetValue(GetConfiguration_PrintViewOpts());
+	text_cmd->SetValue(GetConfig().Get_PrintCmd());
+	text_opts->SetValue(GetConfig().Get_PrintOpts());
+	text_view_cmd->SetValue(GetConfig().Get_PrintViewCmd());
+	text_view_opts->SetValue(GetConfig().Get_PrintViewOpts());
 #else
-	text_cmd->SetValue(GetConfiguration_PrintFile());
+	text_cmd->SetValue(GetConfig().Get_PrintFile());
 #endif
-	radio_orient->SetSelection(GetConfiguration_PrintPSLandscape());
-	radio_method->SetSelection(GetConfiguration_PrintPSModes());
-	check_overview->SetValue(GetConfiguration_PrintPSOverview());
-	check_cont->SetValue(GetConfiguration_PrintPSDoCont());
+	radio_orient->SetSelection(GetConfig().Get_PrintPSLandscape());
+	radio_method->SetSelection(GetConfig().Get_PrintPSModes());
+	check_overview->SetValue(GetConfig().Get_PrintPSOverview());
+	check_cont->SetValue(GetConfig().Get_PrintPSDoCont());
 	if (check_pages)
 	{
-		check_pages->SetValue(GetConfiguration_PrintPSDoContSheet());
+		check_pages->SetValue(GetConfig().Get_PrintPSDoContSheet());
 	}
 
 	wxString buf;
-	buf.Printf(wxT("%.2f"),GetConfiguration_PageOffsetX());
+	buf.Printf(wxT("%.2f"),GetConfig().Get_PageOffsetX());
 	text_x->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetConfiguration_PageOffsetY());
+	buf.Printf(wxT("%.2f"),GetConfig().Get_PageOffsetY());
 	text_y->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetConfiguration_PageWidth());
+	buf.Printf(wxT("%.2f"),GetConfig().Get_PageWidth());
 	text_width->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetConfiguration_PageHeight());
+	buf.Printf(wxT("%.2f"),GetConfig().Get_PageHeight());
 	text_height->SetValue(buf);
-	buf.Printf(wxT("%.2f"),GetConfiguration_PaperLength());
+	buf.Printf(wxT("%.2f"),GetConfig().Get_PaperLength());
 	text_length->SetValue(buf);
 	return true;
 }
@@ -423,33 +423,33 @@ bool PrintPostScriptDialog::TransferDataToWindow()
 bool PrintPostScriptDialog::TransferDataFromWindow()
 {
 #ifdef PRINT__RUN_CMD
-	SetConfiguration_PrintCmd(text_cmd->GetValue());
-	SetConfiguration_PrintOpts(text_opts->GetValue());
-	SetConfiguration_PrintViewCmd(text_view_cmd->GetValue());
-	SetConfiguration_PrintViewOpts(text_view_opts->GetValue());
+	GetConfig().Set_PrintCmd(text_cmd->GetValue());
+	GetConfig().Set_PrintOpts(text_opts->GetValue());
+	GetConfig().Set_PrintViewCmd(text_view_cmd->GetValue());
+	GetConfig().Set_PrintViewOpts(text_view_opts->GetValue());
 #else
-	SetConfiguration_PrintFile(text_cmd->GetValue());
+	GetConfig().Set_PrintFile(text_cmd->GetValue());
 #endif
-	SetConfiguration_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
-	SetConfiguration_PrintPSModes(radio_method->GetSelection());
-	SetConfiguration_PrintPSOverview(check_overview->GetValue());
-	SetConfiguration_PrintPSDoCont(check_cont->GetValue());
+	GetConfig().Set_PrintPSLandscape(radio_orient->GetSelection() == CC_PRINT_ORIENT_LANDSCAPE);
+	GetConfig().Set_PrintPSModes(radio_method->GetSelection());
+	GetConfig().Set_PrintPSOverview(check_overview->GetValue());
+	GetConfig().Set_PrintPSDoCont(check_cont->GetValue());
 	if (check_pages)
 	{
-		SetConfiguration_PrintPSDoContSheet(check_pages->GetValue());
+		GetConfig().Set_PrintPSDoContSheet(check_pages->GetValue());
 	}
 
 	double dval;
 	text_x->GetValue().ToDouble(&dval);
-	SetConfiguration_PageOffsetX(dval);
+	GetConfig().Set_PageOffsetX(dval);
 	text_y->GetValue().ToDouble(&dval);
-	SetConfiguration_PageOffsetY(dval);
+	GetConfig().Set_PageOffsetY(dval);
 	text_width->GetValue().ToDouble(&dval);
-	SetConfiguration_PageWidth(dval);
+	GetConfig().Set_PageWidth(dval);
 	text_height->GetValue().ToDouble(&dval);
-	SetConfiguration_PageHeight(dval);
+	GetConfig().Set_PageHeight(dval);
 	text_length->GetValue().ToDouble(&dval);
-	SetConfiguration_PaperLength(dval);
+	GetConfig().Set_PaperLength(dval);
 
 	return true;
 }

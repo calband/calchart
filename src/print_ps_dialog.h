@@ -30,6 +30,7 @@
 #include <set>
 
 class CalChartDoc;
+class CalChartConfiguration;
 
 class PrintPostScriptDialog : public wxDialog
 {
@@ -62,7 +63,7 @@ class PrintPostScriptDialog : public wxDialog
 	virtual bool TransferDataFromWindow();
 
 // to print a show, call this function
-	void PrintShow();
+	void PrintShow(const CalChartConfiguration& config);
 
 private:
 	const CalChartDoc* mShow;

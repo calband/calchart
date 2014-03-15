@@ -35,6 +35,7 @@ class AnimationCanvas;
 class CCOmniView_Canvas;
 class FancyTextWin;
 class wxSplitterWindow;
+class CalChartConfiguration;
 
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 typedef wxDocChildFrame AnimationFrameParent;
@@ -47,7 +48,7 @@ class AnimationFrame : public AnimationFrameParent
 public:
 	typedef AnimationFrameParent super;
 
-	AnimationFrame(std::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size);
+	AnimationFrame(std::function<void ()> onClose, wxDocument *doc, CalChartConfiguration& config, wxView *view, wxFrame *parent, const wxSize& size);
 	~AnimationFrame();
 	
 	void OnSize(wxSizeEvent& event);
@@ -107,7 +108,8 @@ private:
 
 
 
-	AnimationView *mAnimationView;
+	std::unique_ptr<AnimationView> mAnimationView;
+	CalChartConfiguration& config;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 
 	AnimationCanvas *mCanvas;
 	CCOmniView_Canvas *mOmniViewCanvas;

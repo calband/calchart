@@ -175,7 +175,7 @@ void GeneralSetup::CreateControls()
 	topsizer->Add(boxsizer);
 
 	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
-	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_READONLY|wxCB_DROPDOWN);	
+	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, GetConfig().GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, GetConfig().GetColorNames().data(), wxCB_READONLY|wxCB_DROPDOWN);
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
 	
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
@@ -183,7 +183,7 @@ void GeneralSetup::CreateControls()
 		wxBitmap temp_bitmap(16, 16);
 		wxMemoryDC temp_dc;
 		temp_dc.SelectObject(temp_bitmap);
-		temp_dc.SetBackground(GetCalChartBrush(i));
+		temp_dc.SetBackground(GetConfig().GetCalChartBrush(i));
 		temp_dc.Clear();
 		nameBox->SetItemBitmap(i, temp_bitmap);
 	}
@@ -209,11 +209,11 @@ void GeneralSetup::Init()
 	// first read out the defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
-		mCalChartPens[i] = GetCalChartPen(i);
-		mCalChartBrushes[i] = GetCalChartBrush(i);
+		mCalChartPens[i] = GetConfig().GetCalChartPen(i);
+		mCalChartBrushes[i] = GetConfig().GetCalChartBrush(i);
 	}
 
-	mAutoSave_Interval.Printf(wxT("%ld"), GetConfiguration_AutosaveInterval());
+	mAutoSave_Interval.Printf(wxT("%ld"), GetConfig().Get_AutosaveInterval());
 }
 
 bool GeneralSetup::TransferDataToWindow()
@@ -232,13 +232,11 @@ bool GeneralSetup::TransferDataFromWindow()
 	// write out the values defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
-		SetCalChartPen(i, mCalChartPens[i]);
-		SetCalChartBrush(i, mCalChartBrushes[i]);
-		SetConfigColor(i);
+		GetConfig().SetCalChartBrushAndPen(i, mCalChartBrushes[i], mCalChartPens[i]);
 	}
 	long val;
 	mAutoSave_Interval.ToLong(&val);
-	SetConfiguration_AutosaveInterval(val);
+	GetConfig().Set_AutosaveInterval(val);
 	return true;
 }
 
@@ -246,10 +244,10 @@ bool GeneralSetup::ClearValuesToDefault()
 {
 	for (int i = 0; i < COLOR_NUM; ++i)
 	{
-		SetColor(i, DefaultPenWidth[i], DefaultColors[i]);
-		ClearConfigColor(i);
+		SetColor(i, GetConfig().GetDefaultPenWidth()[i], GetConfig().GetDefaultColors()[i]);
+		GetConfig().ClearConfigColor(i);
 	}
-	ClearConfiguration_AutosaveInterval();
+	GetConfig().Clear_AutosaveInterval();
 	Init();
 	TransferDataToWindow();
 	return true;
@@ -295,8 +293,8 @@ void GeneralSetup::OnCmdSelectWidth(wxSpinEvent& e)
 void GeneralSetup::OnCmdResetColors(wxCommandEvent&)
 {
 	int selection = nameBox->GetSelection();
-	SetColor(selection, DefaultPenWidth[selection], DefaultColors[selection]);
-	ClearConfigColor(selection);
+	SetColor(selection, GetConfig().GetDefaultPenWidth()[selection], GetConfig().GetDefaultColors()[selection]);
+	GetConfig().ClearConfigColor(selection);
 }
 
 void GeneralSetup::OnCmdChooseNewColor(wxCommandEvent&)
@@ -407,21 +405,21 @@ void PSPrintingSetUp::CreateControls()
 
 void PSPrintingSetUp::Init()
 {
-	mFontNames[0] = GetConfiguration_HeadFont();
-	mFontNames[1] = GetConfiguration_MainFont();
-	mFontNames[2] = GetConfiguration_NumberFont();
-	mFontNames[3] = GetConfiguration_ContFont();
-	mFontNames[4] = GetConfiguration_BoldFont();
-	mFontNames[5] = GetConfiguration_ItalFont();
-	mFontNames[6] = GetConfiguration_BoldItalFont();
-	mPrintValues[0] = GetConfiguration_HeaderSize();
-	mPrintValues[1] = GetConfiguration_YardsSize();
-	mPrintValues[2] = GetConfiguration_TextSize();
-	mPrintValues[3] = GetConfiguration_DotRatio();
-	mPrintValues[4] = GetConfiguration_NumRatio();
-	mPrintValues[5] = GetConfiguration_PLineRatio();
-	mPrintValues[6] = GetConfiguration_SLineRatio();
-	mPrintValues[7] = GetConfiguration_ContRatio();
+	mFontNames[0] = GetConfig().Get_HeadFont();
+	mFontNames[1] = GetConfig().Get_MainFont();
+	mFontNames[2] = GetConfig().Get_NumberFont();
+	mFontNames[3] = GetConfig().Get_ContFont();
+	mFontNames[4] = GetConfig().Get_BoldFont();
+	mFontNames[5] = GetConfig().Get_ItalFont();
+	mFontNames[6] = GetConfig().Get_BoldItalFont();
+	mPrintValues[0] = GetConfig().Get_HeaderSize();
+	mPrintValues[1] = GetConfig().Get_YardsSize();
+	mPrintValues[2] = GetConfig().Get_TextSize();
+	mPrintValues[3] = GetConfig().Get_DotRatio();
+	mPrintValues[4] = GetConfig().Get_NumRatio();
+	mPrintValues[5] = GetConfig().Get_PLineRatio();
+	mPrintValues[6] = GetConfig().Get_SLineRatio();
+	mPrintValues[7] = GetConfig().Get_ContRatio();
 }
 
 bool PSPrintingSetUp::TransferDataToWindow()
@@ -503,41 +501,41 @@ bool PSPrintingSetUp::TransferDataFromWindow()
 	text->GetValue().ToDouble(&mPrintValues[7]);
 
 	// write out the values defaults:
-	SetConfiguration_HeadFont(mFontNames[0]);
-	SetConfiguration_MainFont(mFontNames[1]);
-	SetConfiguration_NumberFont(mFontNames[2]);
-	SetConfiguration_ContFont(mFontNames[3]);
-	SetConfiguration_BoldFont(mFontNames[4]);
-	SetConfiguration_ItalFont(mFontNames[5]);
-	SetConfiguration_BoldItalFont(mFontNames[6]);
-	SetConfiguration_HeaderSize(mPrintValues[0]);
-	SetConfiguration_YardsSize(mPrintValues[1]);
-	SetConfiguration_TextSize(mPrintValues[2]);
-	SetConfiguration_DotRatio(mPrintValues[3]);
-	SetConfiguration_NumRatio(mPrintValues[4]);
-	SetConfiguration_PLineRatio(mPrintValues[5]);
-	SetConfiguration_SLineRatio(mPrintValues[6]);
-	SetConfiguration_ContRatio(mPrintValues[7]);
+	GetConfig().Set_HeadFont(mFontNames[0]);
+	GetConfig().Set_MainFont(mFontNames[1]);
+	GetConfig().Set_NumberFont(mFontNames[2]);
+	GetConfig().Set_ContFont(mFontNames[3]);
+	GetConfig().Set_BoldFont(mFontNames[4]);
+	GetConfig().Set_ItalFont(mFontNames[5]);
+	GetConfig().Set_BoldItalFont(mFontNames[6]);
+	GetConfig().Set_HeaderSize(mPrintValues[0]);
+	GetConfig().Set_YardsSize(mPrintValues[1]);
+	GetConfig().Set_TextSize(mPrintValues[2]);
+	GetConfig().Set_DotRatio(mPrintValues[3]);
+	GetConfig().Set_NumRatio(mPrintValues[4]);
+	GetConfig().Set_PLineRatio(mPrintValues[5]);
+	GetConfig().Set_SLineRatio(mPrintValues[6]);
+	GetConfig().Set_ContRatio(mPrintValues[7]);
 	return true;
 }
 
 bool PSPrintingSetUp::ClearValuesToDefault()
 {
-	ClearConfiguration_HeadFont();
-	ClearConfiguration_MainFont();
-	ClearConfiguration_NumberFont();
-	ClearConfiguration_ContFont();
-	ClearConfiguration_BoldFont();
-	ClearConfiguration_ItalFont();
-	ClearConfiguration_BoldItalFont();
-	ClearConfiguration_HeaderSize();
-	ClearConfiguration_YardsSize();
-	ClearConfiguration_TextSize();
-	ClearConfiguration_DotRatio();
-	ClearConfiguration_NumRatio();
-	ClearConfiguration_PLineRatio();
-	ClearConfiguration_SLineRatio();
-	ClearConfiguration_ContRatio();
+	GetConfig().Clear_HeadFont();
+	GetConfig().Clear_MainFont();
+	GetConfig().Clear_NumberFont();
+	GetConfig().Clear_ContFont();
+	GetConfig().Clear_BoldFont();
+	GetConfig().Clear_ItalFont();
+	GetConfig().Clear_BoldItalFont();
+	GetConfig().Clear_HeaderSize();
+	GetConfig().Clear_YardsSize();
+	GetConfig().Clear_TextSize();
+	GetConfig().Clear_DotRatio();
+	GetConfig().Clear_NumRatio();
+	GetConfig().Clear_PLineRatio();
+	GetConfig().Clear_SLineRatio();
+	GetConfig().Clear_ContRatio();
 	Init();
 	return TransferDataToWindow();
 }
@@ -639,7 +637,7 @@ void ShowModeSetup::CreateControls()
 	wxBoxSizer* textsizer = new wxBoxSizer( wxHORIZONTAL );
 	sizer1->Add(textsizer, sBasicSizerFlags );
 	textsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Adjust yardline marker"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	wxChoice* textchoice = new wxChoice(this, SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, MAX_YARD_LINES, yard_text_index);
+	wxChoice* textchoice = new wxChoice(this, SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, GetConfig().Get_yard_text_index().size(), GetConfig().Get_yard_text_index().data());
 	textchoice->SetSelection(0);
 	textsizer->Add(textchoice);
 	textsizer->Add(new wxTextCtrl(this, SHOW_LINE_VALUE), sBasicSizerFlags );
@@ -657,7 +655,7 @@ void ShowModeSetup::Init()
 	}
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
-		mYardText[i] = yard_text[i];
+		mYardText[i] = GetConfig().Get_yard_text(i);
 	}
 }
 
@@ -696,9 +694,8 @@ bool ShowModeSetup::TransferDataFromWindow()
 
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
-		yard_text[i] = mYardText[i];
+		GetConfig().Set_yard_text(i, mYardText[i]);
 	}
-	SetConfigShowYardline();
 
 	return true;
 }
@@ -709,7 +706,7 @@ bool ShowModeSetup::ClearValuesToDefault()
 	{
 		ClearConfigurationShowMode(i);
 	}
-	ClearConfigShowYardline();
+	GetConfig().ClearConfigShowYardline();
 	Init();
 	return TransferDataToWindow();
 }
@@ -867,7 +864,7 @@ void SpringShowModeSetup::CreateControls()
 	wxBoxSizer* textsizer = new wxBoxSizer( wxHORIZONTAL );
 	sizer1->Add(textsizer, sBasicSizerFlags );
 	textsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Adjust yardline marker"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALIGN_LEFT|wxALL, 5);
-	wxChoice* textchoice = new wxChoice(this, SPRING_SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, MAX_SPR_LINES, spr_line_text_index);
+	wxChoice* textchoice = new wxChoice(this, SPRING_SHOW_LINE_MARKING, wxDefaultPosition, wxDefaultSize, GetConfig().Get_spr_line_text_index().size(), GetConfig().Get_spr_line_text_index().data());
 	textchoice->SetSelection(0);
 	textsizer->Add(textchoice);
 	textsizer->Add(new wxTextCtrl(this, SPRING_SHOW_LINE_VALUE), sBasicSizerFlags );
@@ -885,7 +882,7 @@ void SpringShowModeSetup::Init()
 	}
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
-		mYardText[i] = spr_line_text[i];
+		mYardText[i] = GetConfig().Get_spr_line_text(i);
 	}
 }
 
@@ -906,7 +903,7 @@ bool SpringShowModeSetup::TransferDataToWindow()
 	}
 
 	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_SHOW_LINE_VALUE);
-	text->SetValue(spr_line_text[mWhichYardLine]);
+	text->SetValue(GetConfig().Get_spr_line_text(mWhichYardLine));
 	return true;
 }
 
@@ -938,9 +935,8 @@ bool SpringShowModeSetup::TransferDataFromWindow()
 
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
-		spr_line_text[i] = mYardText[i];
+		GetConfig().Set_spr_line_text(i, mYardText[i]);
 	}
-	SetConfigSpringShowYardline();
 
 	return true;
 }
@@ -951,7 +947,7 @@ bool SpringShowModeSetup::ClearValuesToDefault()
 	{
 		ClearConfigurationSpringShowMode(i);
 	}
-	ClearConfigSpringShowYardline();
+	GetConfig().ClearConfigSpringShowYardline();
 	Init();
 	return TransferDataToWindow();
 }

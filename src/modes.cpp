@@ -86,7 +86,7 @@ ShowMode::ClipPosition(const CC_coord& pos) const
 
 
 wxImage
-ShowMode::GetOmniLinesImage() const
+ShowMode::GetOmniLinesImage(const CalChartConfiguration& config) const
 {
 	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
 	wxBitmap bmp(fieldsize.x, fieldsize.y, 32);
@@ -94,9 +94,9 @@ ShowMode::GetOmniLinesImage() const
     dc.SelectObject(bmp);
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
-	dc.SetPen(GetCalChartPen(COLOR_FIELD_DETAIL));
-	dc.SetTextForeground(GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
-	DrawOmni(dc);
+	dc.SetPen(config.GetCalChartPen(COLOR_FIELD_DETAIL));
+	dc.SetTextForeground(config.GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
+	DrawOmni(dc, config);
     dc.SelectObject(wxNullBitmap);
     return bmp.ConvertToImage();
 }
@@ -121,7 +121,7 @@ ShowMode::ShowType ShowModeStandard::GetType() const
 	return SHOW_STANDARD;
 }
 
-void ShowModeStandard::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
+void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
 {
 	wxPoint points[5];
 	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
@@ -204,16 +204,16 @@ void ShowModeStandard::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 	}
 	
 	// Draw labels
-	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_YardsSize()),
+	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_YardsSize()),
 															wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*yardLabelFont);
 	for (int i = 0; (howToDraw == kFieldView || howToDraw == kOmniView) && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		CC_coord fieldedge = mOffset - mBorder1;
 		wxCoord textw, texth, textd;
-		dc.GetTextExtent(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
-		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + border1.x, border1.y - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
-		dc.DrawText(yard_text[i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + border1.x, border1.y + fieldsize.y - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		dc.GetTextExtent(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8), &textw, &texth, &textd);
+		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y + fieldsize.y - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
 	}
 }
 
@@ -251,7 +251,7 @@ ShowMode::ShowType ShowModeSprShow::GetType() const
 }
 
 
-void ShowModeSprShow::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
+void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
 {
 	wxPoint points[2];
 	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
@@ -297,26 +297,26 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, HowToDraw howToDraw) const
 	}
 
 	// Draw labels
-	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_YardsSize()),
+	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_YardsSize()),
 															wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*yardLabelFont);
 	for (int i = 0; howToDraw == kFieldView && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		wxCoord textw, texth, textd;
-		dc.GetTextExtent(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], &textw, &texth, &textd);
+		dc.GetTextExtent(config.Get_yard_text(i+(steps_x+(MAX_YARD_LINES-1)*4)/8), &textw, &texth, &textd);
 		if (which_yards & SPR_YARD_ABOVE)
-			dc.DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
+			dc.DrawText(config.Get_yard_text(i+(steps_x+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
 		if (which_yards & SPR_YARD_BELOW)
-			dc.DrawText(yard_text[i+(steps_x+(MAX_YARD_LINES-1)*4)/8], Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
+			dc.DrawText(config.Get_yard_text(i+(steps_x+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
 	}
 	for (int i = 0; howToDraw == kFieldView && i <= Coord2Int(fieldsize.y); i+=8)
 	{
 		wxCoord textw, texth, textd;
-		dc.GetTextExtent(spr_line_text[i/8], &textw, &texth, &textd);
+		dc.GetTextExtent(config.Get_spr_line_text(i/8), &textw, &texth, &textd);
 		if (which_yards & SPR_YARD_LEFT)
-			dc.DrawText(spr_line_text[i/8], mBorder1.x - textw, mBorder1.y - texth/2 + Int2Coord(i));
+			dc.DrawText(config.Get_spr_line_text(i/8), mBorder1.x - textw, mBorder1.y - texth/2 + Int2Coord(i));
 		if (which_yards & SPR_YARD_RIGHT)
-			dc.DrawText(spr_line_text[i/8], fieldsize.x + mBorder1.x, mBorder1.y - texth/2 + Int2Coord(i));
+			dc.DrawText(config.Get_spr_line_text(i/8), fieldsize.x + mBorder1.x, mBorder1.y - texth/2 + Int2Coord(i));
 	}
 }
 

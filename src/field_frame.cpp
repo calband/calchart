@@ -152,7 +152,7 @@ END_EVENT_TABLE()
 class MyPrintout : public wxPrintout
 {
 public:
-	MyPrintout(const wxString& title, const CalChartDoc& show) : wxPrintout(title), mShow(show) {}
+	MyPrintout(const wxString& title, const CalChartDoc& show, const CalChartConfiguration& config_) : wxPrintout(title), mShow(show), config(config_) {}
 	virtual ~MyPrintout() {}
 	virtual bool HasPage(int pageNum) { return pageNum <= mShow.GetNumSheets(); }
 	virtual void GetPageInfo(int *minPage, int *maxPage, int *pageFrom, int *pageTo)
@@ -169,19 +169,21 @@ public:
 
 		int size = gPrintDialogData->GetPrintData().GetOrientation();
 
-		DrawForPrinting(dc, mShow, *sheet, 0, 2 == size);
+		DrawForPrinting(dc, config, mShow, *sheet, 0, 2 == size);
 
 		return true;
 	}
 	const CalChartDoc& mShow;
+	const CalChartConfiguration& config;
 };
 
 
 // Main frame constructor
-FieldFrame::FieldFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size):
+FieldFrame::FieldFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config_, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size):
 wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size),
 mCanvas(NULL),
-mAnimationFrame(NULL)
+mAnimationFrame(NULL),
+config(config_)
 {
 	this->SetBackgroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_MENU ) );
 // Give it an icon
@@ -257,7 +259,7 @@ mAnimationFrame(NULL)
 
 // Add the field canvas
 	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
-	mCanvas = new FieldCanvas(view, this, GetConfiguration_FieldFrameZoom());
+	mCanvas = new FieldCanvas(view, this, config.Get_FieldFrameZoom());
 	// set scroll rate 1 to 1, so we can have even scrolling of whole field
 	mCanvas->SetScrollRate(1, 1);
 
@@ -296,7 +298,7 @@ mAnimationFrame(NULL)
 	if (mZoomBox)
 	{
 		wxString zoomtxt;
-		zoomtxt.sprintf("%d%%", (int)(GetConfiguration_FieldFrameZoom()*100));
+		zoomtxt.sprintf("%d%%", (int)(config.Get_FieldFrameZoom()*100));
 		mZoomBox->SetValue(zoomtxt);
 	}
 	sizer1->Add(mZoomBox, centerWidget);
@@ -386,7 +388,7 @@ void FieldFrame::OnCmdPrint(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrinter printer(gPrintDialogData);
-	MyPrintout printout(wxT("My Printout"), *GetShow());
+	MyPrintout printout(wxT("My Printout"), *GetShow(), config);
 	wxPrintDialogData& printDialog = printer.GetPrintDialogData();
 
 	int minPage, maxPage, pageFrom, pageTo;
@@ -416,8 +418,8 @@ void FieldFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
 	// grab our current page setup.
 	wxPrintPreview *preview = new wxPrintPreview(
-		new MyPrintout(wxT("My Printout"), *GetShow()),
-		new MyPrintout(wxT("My Printout"), *GetShow()),
+		new MyPrintout(wxT("My Printout"), *GetShow(), config),
+		new MyPrintout(wxT("My Printout"), *GetShow(), config),
 		gPrintDialogData);
 	if (!preview->Ok())
 	{
@@ -450,7 +452,7 @@ void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 		PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), false, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			dialog.PrintShow();
+			dialog.PrintShow(config);
 		}
 	}
 }
@@ -462,7 +464,7 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 		PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), true, this);
 		if (dialog.ShowModal() == wxID_OK)
 		{
-			dialog.PrintShow();
+			dialog.PrintShow(config);
 		}
 	}
 }
@@ -626,7 +628,7 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 	}
 	else if (GetShow())
 	{
-		mAnimationFrame = new AnimationFrame([this]() { this->ClearAnimationFrame(); }, GetShow(), GetView(), this, wxSize(GetConfiguration_AnimationFrameWidth(), GetConfiguration_AnimationFrameHeight()));
+		mAnimationFrame = new AnimationFrame([this]() { this->ClearAnimationFrame(); }, GetShow(), config, GetView(), this, wxSize(config.Get_AnimationFrameWidth(), config.Get_AnimationFrameHeight()));
 	}
 }
 
@@ -854,8 +856,8 @@ void FieldFrame::OnSize(wxSizeEvent& event)
 	// HACK: Prevent width and height from growing out of control
 	int w = event.GetSize().GetWidth();
 	int h = event.GetSize().GetHeight();
-	SetConfiguration_FieldFrameWidth((w > 1200) ? 1200 : w);
-	SetConfiguration_FieldFrameHeight((h > 700) ? 700 : h);
+	config.Set_FieldFrameWidth((w > 1200) ? 1200 : w);
+	config.Set_FieldFrameHeight((h > 700) ? 700 : h);
 	super::OnSize(event);
 }
 
@@ -1036,7 +1038,7 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
 	{
 		zoom_amount = mCanvas->ZoomToFitFactor();
 	}
-	SetConfiguration_FieldFrameZoom(zoom_amount);
+	config.Set_FieldFrameZoom(zoom_amount);
 	mCanvas->SetZoom(zoom_amount);
 }
 
@@ -1065,7 +1067,7 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 		// return if not valid
 		return;
 	}
-	SetConfiguration_FieldFrameZoom(zoom_amount);
+	config.Set_FieldFrameZoom(zoom_amount);
 	// set the text to have '%' appended
 	zoomtxt += wxT("%");
 	mZoomBox->SetValue(zoomtxt);

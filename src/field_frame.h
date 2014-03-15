@@ -35,6 +35,7 @@ class CC_show;
 class FieldCanvas;
 class FieldView;
 class CalChartDoc;
+class CalChartConfiguration;
 
 // Define the main editing frame
 class FieldFrame : public wxDocChildFrame
@@ -42,7 +43,7 @@ class FieldFrame : public wxDocChildFrame
 	typedef wxDocChildFrame super;
 public:
 	// FieldFrame will own the show that is passed in
-	FieldFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size);
+	FieldFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config_, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size);
 	~FieldFrame();
 
 	void OnCmdAppend(wxCommandEvent& event);
@@ -141,6 +142,7 @@ public:
 	FieldCanvas *mCanvas;
 	
 	wxWindow *mAnimationFrame;
+	CalChartConfiguration& config;
 	void ClearAnimationFrame();
 	
 	DECLARE_EVENT_TABLE()
