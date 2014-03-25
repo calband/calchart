@@ -22,6 +22,7 @@
 
 #include "cc_preferences_ui.h"
 #include "confgr.h"
+#include "modes.h"
 #include <wx/colordlg.h>
 #include <wx/stattext.h>
 #include <wx/statline.h>
@@ -138,7 +139,45 @@ private:
 	wxBrush mCalChartBrushes[COLOR_NUM];
 
 	wxString mAutoSave_Interval;
+	wxScrolledWindow* panel;
 };
+
+class FieldViewPanel : public wxScrolledWindow
+{
+	DECLARE_EVENT_TABLE()
+public:
+	FieldViewPanel( wxWindow *parent ) : wxScrolledWindow(parent),
+	mMode(wxT("Standard"), { 96, 84 }, { 48, 42 }, { 6, 19, }, { 6, 6 }, 32, 52 )
+	{
+//		static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
+//		{
+//			CC_coord bord1(Int2Coord(8),Int2Coord(8)), bord2(Int2Coord(8),Int2Coord(8));
+//			CC_coord siz, off;
+//			uint32_t whash = 32;
+//			uint32_t ehash = 52;
+//			bord1.x = Int2Coord((landscape)?12:6);
+//			bord1.y = Int2Coord((landscape)?21:19);
+//			bord2.x = Int2Coord((landscape)?12:6);
+//			bord2.y = Int2Coord((landscape)?12:6);
+//			siz.x = Int2Coord((landscape)?160:96);
+//			siz.y = Int2Coord(84);
+//			off.x = Int2Coord((landscape)?80:48);
+//			off.y = Int2Coord(42);
+//			
+//			return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), siz, off, bord1, bord2, whash, ehash));
+//		}
+//		
+}
+	void OnPaint(wxPaintEvent&);
+	void PaintBackground(wxDC& dc);
+	void PaintField(wxDC& dc);
+private:
+	ShowModeStandard mMode;
+};
+BEGIN_EVENT_TABLE(FieldViewPanel, PreferencePage)
+EVT_PAINT(FieldViewPanel::OnPaint)
+END_EVENT_TABLE()
+
 
 enum
 {
@@ -201,7 +240,76 @@ void GeneralSetup::CreateControls()
 
 	boxsizer->Add(horizontalsizer, sBasicSizerFlags );
 
+	panel = new FieldViewPanel(this);
+	topsizer->Add(panel, wxSizerFlags(1).Expand().Proportion(1) );
+	
+
 	TransferDataToWindow();
+}
+
+void
+FieldViewPanel::OnPaint(wxPaintEvent& event)
+{
+	wxBufferedPaintDC dc(this);
+	PrepareDC(dc);
+	
+	// draw the background
+	PaintBackground(dc);
+#if 0
+	// draw the view
+	mView->OnDraw(&dc);
+	
+	if (curr_shape)
+	{
+		dc.SetBrush(*wxTRANSPARENT_BRUSH);
+		dc.SetPen(GetConfig().GetCalChartPen(COLOR_SHAPES));
+		CC_coord origin = mView->GetShowFieldOffset();
+		for (auto i=shape_list.begin();
+			 i != shape_list.end();
+			 ++i)
+		{
+			DrawCC_DrawCommandList(dc, (*i)->GetCC_DrawCommand(origin.x, origin.y));
+		}
+	}
+#endif
+}
+
+
+void
+FieldViewPanel::PaintBackground(wxDC& dc)
+{
+	// draw the background
+	dc.SetBackgroundMode(wxTRANSPARENT);
+	dc.SetBackground(GetConfig().GetCalChartBrush(COLOR_FIELD));
+	dc.Clear();
+	PaintField(dc);
+}
+
+void
+FieldViewPanel::PaintField(wxDC& dc)
+{
+	// draw the field
+	dc.SetPen(GetConfig().GetCalChartPen(COLOR_FIELD_DETAIL));
+	dc.SetTextForeground(GetConfig().GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
+	mMode.Draw(dc, GetConfig());
+
+#if 0
+	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+	if (sheet != mShow->GetSheetEnd())
+	{
+		if (mCurrentReferencePoint > 0)
+		{
+			Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), 0, false);
+			Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+		}
+		else
+		{
+			Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+		}
+		DrawPaths(*dc, *sheet);
+	}
+}
+#endif
 }
 
 void GeneralSetup::Init()
