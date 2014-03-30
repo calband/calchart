@@ -139,26 +139,7 @@ private:
 	wxBrush mCalChartBrushes[COLOR_NUM];
 
 	wxString mAutoSave_Interval;
-	wxPanel* panel;
 };
-
-class FieldViewPanel : public wxPanel
-{
-	DECLARE_EVENT_TABLE()
-public:
-	FieldViewPanel( wxWindow *parent ) : wxPanel(parent),
-	mMode(wxT("Standard"), { Int2Coord(160), Int2Coord(84) }, { Int2Coord(6), Int2Coord(6) }, { Int2Coord(6), Int2Coord(6), }, { Int2Coord(6), Int2Coord(6) }, Int2Coord(32), Int2Coord(52) )
-	{}
-	void OnPaint(wxPaintEvent&);
-	void PaintBackground(wxDC& dc);
-	void PaintField(wxDC& dc);
-private:
-	ShowModeStandard mMode;
-};
-BEGIN_EVENT_TABLE(FieldViewPanel, PreferencePage)
-EVT_PAINT(FieldViewPanel::OnPaint)
-END_EVENT_TABLE()
-
 
 enum
 {
@@ -221,77 +202,7 @@ void GeneralSetup::CreateControls()
 
 	boxsizer->Add(horizontalsizer, sBasicSizerFlags );
 
-	panel = new FieldViewPanel(this);
-	topsizer->Add(panel, wxSizerFlags(1).Expand().Proportion(1) );
-	
-
 	TransferDataToWindow();
-}
-
-void
-FieldViewPanel::OnPaint(wxPaintEvent& event)
-{
-	wxBufferedPaintDC dc(this);
-	PrepareDC(dc);
-	
-	// draw the background
-	PaintBackground(dc);
-#if 0
-	// draw the view
-	mView->OnDraw(&dc);
-	
-	if (curr_shape)
-	{
-		dc.SetBrush(*wxTRANSPARENT_BRUSH);
-		dc.SetPen(GetConfig().GetCalChartPen(COLOR_SHAPES));
-		CC_coord origin = mView->GetShowFieldOffset();
-		for (auto i=shape_list.begin();
-			 i != shape_list.end();
-			 ++i)
-		{
-			DrawCC_DrawCommandList(dc, (*i)->GetCC_DrawCommand(origin.x, origin.y));
-		}
-	}
-#endif
-}
-
-
-void
-FieldViewPanel::PaintBackground(wxDC& dc)
-{
-	// draw the background
-	dc.SetBackgroundMode(wxTRANSPARENT);
-	dc.SetBackground(GetConfig().GetCalChartBrush(COLOR_FIELD));
-	dc.Clear();
-	PaintField(dc);
-}
-
-void
-FieldViewPanel::PaintField(wxDC& dc)
-{
-	// draw the field
-	dc.SetPen(GetConfig().GetCalChartPen(COLOR_FIELD_DETAIL));
-	dc.SetTextForeground(GetConfig().GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
-	dc.SetUserScale(1, 1);
-	mMode.Draw(dc, GetConfig());
-
-#if 0
-	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
-	if (sheet != mShow->GetSheetEnd())
-	{
-		if (mCurrentReferencePoint > 0)
-		{
-			Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), 0, false);
-			Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
-		}
-		else
-		{
-			Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
-		}
-		DrawPaths(*dc, *sheet);
-	}
-}
-#endif
 }
 
 void GeneralSetup::Init()
@@ -782,6 +693,9 @@ bool ShowModeSetup::TransferDataFromWindow()
 		GetConfig().SetConfigurationShowMode(i, mShowModeValues[i]);
 	}
 
+	// grab whatever's in the box
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SHOW_LINE_VALUE);
+	mYardText[mWhichYardLine] = text->GetValue();
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
 		GetConfig().Set_yard_text(i, mYardText[i]);
@@ -1023,6 +937,8 @@ bool SpringShowModeSetup::TransferDataFromWindow()
 		GetConfig().SetConfigurationSpringShowMode(modes->GetSelection(), mSpringShowModeValues[mWhichMode]);
 	}
 
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_SHOW_LINE_VALUE);
+	mYardText[mWhichYardLine] = text->GetValue();
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
 		GetConfig().Set_spr_line_text(i, mYardText[i]);
