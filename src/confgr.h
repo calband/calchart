@@ -31,6 +31,7 @@
 class wxPen;
 class wxBrush;
 class wxPathList;
+class ShowMode;
 
 #define MAX_SPR_LINES 5
 #define MAX_YARD_LINES 53
@@ -177,21 +178,20 @@ public:
 	std::vector<wxString> GetDefaultColors() const;
 	std::vector<int> GetDefaultPenWidth() const;
 	
+	static const size_t kShowModeValues = 10;
+	std::vector<long> GetConfigurationShowMode(size_t which);
+	void SetConfigurationShowMode(size_t which, const std::vector<long>& values);
+	void ClearConfigurationShowMode(size_t which);
+	
+	static const size_t kSpringShowModeValues = 21;
+	std::vector<long> GetConfigurationSpringShowMode(size_t which);
+	void SetConfigurationSpringShowMode(size_t which, const std::vector<long>& values);
+	void ClearConfigurationSpringShowMode(size_t which);
+	
+	std::unique_ptr<ShowMode> GetMode(const wxString& which);
 };
 
 CalChartConfiguration& GetConfig();
-
-extern void ReadConfig();
-
-const size_t kShowModeValues = 10;
-void GetConfigurationShowMode(size_t which, long values[kShowModeValues]);
-void SetConfigurationShowMode(size_t which, const long values[kShowModeValues]);
-void ClearConfigurationShowMode(size_t which);
-
-const size_t kSpringShowModeValues = 21;
-void GetConfigurationSpringShowMode(size_t which, long values[kSpringShowModeValues]);
-void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowModeValues]);
-void ClearConfigurationSpringShowMode(size_t which);
 
 
 #endif

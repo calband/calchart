@@ -159,7 +159,7 @@ public:
 	const SelectionList& GetSelectionList() const;
 
 	const ShowMode& GetMode() const;
-	void SetMode(const ShowMode* m);
+	void SetMode(std::unique_ptr<const ShowMode> m);
 
 	bool AlreadyHasPrintContinuity() const;
 
@@ -193,7 +193,7 @@ private:
 	void RestoreSnapShot(const CC_show& snapshot);
 	
 	std::unique_ptr<CC_show> mShow;
-	const ShowMode* mMode;
+	std::unique_ptr<const ShowMode> mMode;
 	AutoSaveTimer mTimer;
 };
 

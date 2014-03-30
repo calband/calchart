@@ -139,35 +139,16 @@ private:
 	wxBrush mCalChartBrushes[COLOR_NUM];
 
 	wxString mAutoSave_Interval;
-	wxScrolledWindow* panel;
+	wxPanel* panel;
 };
 
-class FieldViewPanel : public wxScrolledWindow
+class FieldViewPanel : public wxPanel
 {
 	DECLARE_EVENT_TABLE()
 public:
-	FieldViewPanel( wxWindow *parent ) : wxScrolledWindow(parent),
-	mMode(wxT("Standard"), { 96, 84 }, { 48, 42 }, { 6, 19, }, { 6, 6 }, 32, 52 )
-	{
-//		static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
-//		{
-//			CC_coord bord1(Int2Coord(8),Int2Coord(8)), bord2(Int2Coord(8),Int2Coord(8));
-//			CC_coord siz, off;
-//			uint32_t whash = 32;
-//			uint32_t ehash = 52;
-//			bord1.x = Int2Coord((landscape)?12:6);
-//			bord1.y = Int2Coord((landscape)?21:19);
-//			bord2.x = Int2Coord((landscape)?12:6);
-//			bord2.y = Int2Coord((landscape)?12:6);
-//			siz.x = Int2Coord((landscape)?160:96);
-//			siz.y = Int2Coord(84);
-//			off.x = Int2Coord((landscape)?80:48);
-//			off.y = Int2Coord(42);
-//			
-//			return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), siz, off, bord1, bord2, whash, ehash));
-//		}
-//		
-}
+	FieldViewPanel( wxWindow *parent ) : wxPanel(parent),
+	mMode(wxT("Standard"), { Int2Coord(160), Int2Coord(84) }, { Int2Coord(6), Int2Coord(6) }, { Int2Coord(6), Int2Coord(6), }, { Int2Coord(6), Int2Coord(6) }, Int2Coord(32), Int2Coord(52) )
+	{}
 	void OnPaint(wxPaintEvent&);
 	void PaintBackground(wxDC& dc);
 	void PaintField(wxDC& dc);
@@ -291,6 +272,7 @@ FieldViewPanel::PaintField(wxDC& dc)
 	// draw the field
 	dc.SetPen(GetConfig().GetCalChartPen(COLOR_FIELD_DETAIL));
 	dc.SetTextForeground(GetConfig().GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
+	dc.SetUserScale(1, 1);
 	mMode.Draw(dc, GetConfig());
 
 #if 0
@@ -681,7 +663,7 @@ public:
 private:
 	void OnCmdLineText(wxCommandEvent&);
 	void OnCmdChoice(wxCommandEvent&);
-	long mShowModeValues[SHOWMODE_NUM][kShowModeValues];
+	std::vector<long> mShowModeValues[SHOWMODE_NUM];
 	wxString mYardText[MAX_YARD_LINES];
 	int mWhichMode;
 	int mWhichYardLine;
@@ -759,7 +741,7 @@ void ShowModeSetup::Init()
 	mWhichYardLine = 0;
 	for (size_t i = 0; i < SHOWMODE_NUM; ++i)
 	{
-		GetConfigurationShowMode(i, mShowModeValues[i]);
+		mShowModeValues[i] = GetConfig().GetConfigurationShowMode(i);
 	}
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
 	{
@@ -770,11 +752,11 @@ void ShowModeSetup::Init()
 bool ShowModeSetup::TransferDataToWindow()
 {
 	// standard show
-	for (size_t i = 0; i < kShowModeValues; ++i)
+	for (auto i = mShowModeValues[mWhichMode].begin(); i != mShowModeValues[mWhichMode].end(); ++i)
 	{
 		wxString buf;
-		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + i);
-		buf.Printf(wxT("%ld"), mShowModeValues[mWhichMode][i]);
+		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
+		buf.Printf(wxT("%ld"), *i);
 		text->SetValue(buf);
 	}
 
@@ -787,17 +769,17 @@ bool ShowModeSetup::TransferDataFromWindow()
 {
 	// read out the values from the window
 	// standard show
-	for (size_t i = 0; i < kShowModeValues; ++i)
+	for (auto i = mShowModeValues[mWhichMode].begin(); i != mShowModeValues[mWhichMode].end(); ++i)
 	{
 		long val;
-		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + i);
+		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
 		text->GetValue().ToLong(&val);
-		mShowModeValues[mWhichMode][i] = val;
+		*i = val;
 	}
 	// write out the values defaults:
 	for (size_t i = 0; i < SHOWMODE_NUM; ++i)
 	{
-		SetConfigurationShowMode(i, mShowModeValues[i]);
+		GetConfig().SetConfigurationShowMode(i, mShowModeValues[i]);
 	}
 
 	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
@@ -812,7 +794,7 @@ bool ShowModeSetup::ClearValuesToDefault()
 {
 	for (size_t i = 0; i < SHOWMODE_NUM; ++i)
 	{
-		ClearConfigurationShowMode(i);
+		GetConfig().ClearConfigurationShowMode(i);
 	}
 	GetConfig().ClearConfigShowYardline();
 	Init();
@@ -822,12 +804,12 @@ bool ShowModeSetup::ClearValuesToDefault()
 void ShowModeSetup::OnCmdChoice(wxCommandEvent&)
 {
 	// save off all the old values:
-	for (size_t i = 0; i < kShowModeValues; ++i)
+	for (auto i = mShowModeValues[mWhichMode].begin(); i != mShowModeValues[mWhichMode].end(); ++i)
 	{
 		long val;
-		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + i);
+		wxTextCtrl* text = (wxTextCtrl*) FindWindow(WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
 		text->GetValue().ToLong(&val);
-		mShowModeValues[mWhichMode][i] = val;
+		*i = val;
 	}
 	wxChoice* modes = (wxChoice*) FindWindow(MODE_CHOICE);
 	mWhichMode = modes->GetSelection();
@@ -870,7 +852,7 @@ public:
 	virtual bool ClearValuesToDefault();
 private:
 	void OnCmdChoice(wxCommandEvent&);
-	long mSpringShowModeValues[SPRINGSHOWMODE_NUM][kSpringShowModeValues];
+	std::vector<long> mSpringShowModeValues[SPRINGSHOWMODE_NUM];
 	wxString mYardText[MAX_SPR_LINES];
 	int mWhichMode;
 	int mWhichYardLine;
@@ -986,7 +968,7 @@ void SpringShowModeSetup::Init()
 	mWhichYardLine = 0;
 	for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i)
 	{
-		GetConfigurationSpringShowMode(i, mSpringShowModeValues[i]);
+		mSpringShowModeValues[i] = GetConfig().GetConfigurationSpringShowMode(i);
 	}
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
 	{
@@ -1002,11 +984,11 @@ bool SpringShowModeSetup::TransferDataToWindow()
 		wxCheckBox* checkbox = (wxCheckBox*) FindWindow(DISPLAY_YARDLINE_BELOW + i);
 		checkbox->SetValue(mSpringShowModeValues[mWhichMode][0] & (1<<i));
 	}
-	for (size_t i = 1; i < kSpringShowModeValues; ++i)
+	for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1; i != mSpringShowModeValues[mWhichMode].end(); ++i)
 	{
 		wxString buf;
-		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + i - 1);
-		buf.Printf(wxT("%ld"), mSpringShowModeValues[mWhichMode][i]);
+		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - 1);
+		buf.Printf(wxT("%ld"), *i);
 		text->SetValue(buf);
 	}
 
@@ -1027,18 +1009,18 @@ bool SpringShowModeSetup::TransferDataFromWindow()
 		wxCheckBox* checkbox = (wxCheckBox*) FindWindow(DISPLAY_YARDLINE_BELOW + i);
 		mSpringShowModeValues[mWhichMode][0] |= checkbox->IsChecked() ? (1<<i) : 0;
 	}
-	for (size_t i = 1; i < kSpringShowModeValues; ++i)
+	for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1; i != mSpringShowModeValues[mWhichMode].end(); ++i)
 	{
 		long val;
-		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + i - 1);
+		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - 1);
 		text->GetValue().ToLong(&val);
-		mSpringShowModeValues[mWhichMode][i] = val;
+		*i = val;
 	}
 
 	// write out the values defaults:
 	for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i)
 	{
-		SetConfigurationSpringShowMode(modes->GetSelection(), mSpringShowModeValues[mWhichMode]);
+		GetConfig().SetConfigurationSpringShowMode(modes->GetSelection(), mSpringShowModeValues[mWhichMode]);
 	}
 
 	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
@@ -1053,7 +1035,7 @@ bool SpringShowModeSetup::ClearValuesToDefault()
 {
 	for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i)
 	{
-		ClearConfigurationSpringShowMode(i);
+		GetConfig().ClearConfigurationSpringShowMode(i);
 	}
 	GetConfig().ClearConfigSpringShowYardline();
 	Init();
@@ -1069,12 +1051,12 @@ void SpringShowModeSetup::OnCmdChoice(wxCommandEvent&)
 		wxCheckBox* checkbox = (wxCheckBox*) FindWindow(DISPLAY_YARDLINE_BELOW + i);
 		mSpringShowModeValues[mWhichMode][0] |= checkbox->IsChecked() ? (1<<i) : 0;
 	}
-	for (size_t i = 1; i < kSpringShowModeValues; ++i)
+	for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1; i != mSpringShowModeValues[mWhichMode].end(); ++i)
 	{
 		long val;
-		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + i - 1);
+		wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_BORDER_LEFT + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - 1);
 		text->GetValue().ToLong(&val);
-		mSpringShowModeValues[mWhichMode][i] = val;
+		*i = val;
 	}
 	wxChoice* modes = (wxChoice*) FindWindow(SPRING_MODE_CHOICE);
 	mWhichMode = modes->GetSelection();
@@ -1180,7 +1162,6 @@ bool CalChartPreferences::TransferDataFromWindow()
 		PreferencePage* page = static_cast<PreferencePage*>(mNotebook->GetPage(i));
 		page->TransferDataFromWindow();
 	}
-	wxMessageBox(wxT("If you change any preferences, you may have restart CalChart to have them take effect"), wxT("Restart CalChart"));
 	return true;
 }
 

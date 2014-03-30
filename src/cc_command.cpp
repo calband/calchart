@@ -86,10 +86,10 @@ SetModeCommand::~SetModeCommand()
 
 void SetModeCommand::DoAction()
 {
-	ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), mMode);
+	auto newmode = wxGetApp().GetMode(mMode);
 	if (newmode)
 	{
-		mDoc.SetMode(newmode);
+		mDoc.SetMode(std::move(newmode));
 	}
 }
 

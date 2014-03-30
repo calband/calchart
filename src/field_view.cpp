@@ -174,10 +174,10 @@ FieldView::OnWizardSetup(CalChartDoc& show)
 		auto labels = page1->GetLabels();
 		std::vector<std::string> tlabels(labels.begin(), labels.end());
 		show.SetPointLabel(tlabels);
-		ShowMode *newmode = ShowModeList_Find(wxGetApp().GetModeList(), page2->GetValue());
+		auto newmode = wxGetApp().GetMode(page2->GetValue());
 		if (newmode)
 		{
-			show.SetMode(newmode);
+			show.SetMode(std::move(newmode));
 		}
 		show.SetDescr(page3->GetValue().ToStdString());
 	}

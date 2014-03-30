@@ -64,9 +64,6 @@ bool CalChartApp::OnInit()
 
 	gPrintDialogData = new wxPrintDialogData();
 
-	// setup the configuration.
-	ReadConfig();
-
 	//// Create the main frame window
 	wxFrame *frame = new TopFrame(mDocManager, (wxFrame *) NULL, _T("CalChart"));
 
@@ -128,3 +125,8 @@ int CalChartApp::OnExit()
 	return wxApp::OnExit();
 }
 
+std::unique_ptr<ShowMode>
+CalChartApp::GetMode(const wxString& which)
+{
+	return GetConfig().GetMode(which);
+}

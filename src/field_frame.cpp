@@ -990,10 +990,16 @@ void FieldFrame::SetMode()
 	{
 		wxArrayString modeStrings;
 		unsigned whichMode = 0, tmode = 0;
-		for (auto mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode, ++tmode)
+		for (auto mode : kShowModeStrings)
 		{
-			modeStrings.Add((*mode)->GetName());
-			if ((*mode)->GetName() == GetShow()->GetMode().GetName())
+			modeStrings.Add(mode);
+			if (mode == GetShow()->GetMode().GetName())
+				whichMode = tmode;
+		}
+		for (auto mode : kSpringShowModeStrings)
+		{
+			modeStrings.Add(mode);
+			if (mode == GetShow()->GetMode().GetName())
 				whichMode = tmode;
 		}
 		wxSingleChoiceDialog dialog(this,

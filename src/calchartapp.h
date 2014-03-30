@@ -45,10 +45,8 @@ public:
 	virtual void MacOpenFile(const wxString &fileName);
 	int OnExit();
 
-	ShowModeList& GetModeList() { return mModeList; }
+	std::unique_ptr<ShowMode> GetMode(const wxString& which);
 private:
-	ShowModeList mModeList;
-
 	wxDocManager* mDocManager;
 };
 
