@@ -79,8 +79,8 @@ FieldView::OnDraw(wxDC *dc)
 	if (mShow)
 	{
 		// draw the field
-		dc->SetPen(GetConfig().GetCalChartPen(COLOR_FIELD_DETAIL));
-		dc->SetTextForeground(GetConfig().GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
+		dc->SetPen(config.GetCalChartPen(COLOR_FIELD_DETAIL));
+		dc->SetTextForeground(config.GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
 		mShow->GetMode().Draw(*dc, config);
 		
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
