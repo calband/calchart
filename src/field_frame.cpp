@@ -115,6 +115,10 @@ EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
 EVT_MENU(CALCHART__AdjustBackgroundImage, FieldFrame::OnCmd_AdjustBackgroundImage)
 EVT_MENU(CALCHART__RemoveBackgroundImage, FieldFrame::OnCmd_RemoveBackgroundImage)
+EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostNthSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
@@ -239,6 +243,18 @@ mAnimationFrame(NULL)
 	backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
 	backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImage, false);
 	backgroundimage_menu->Enable(CALCHART__RemoveBackgroundImage, false);
+
+
+	GhostModule* ghostModule = &(GetFieldView()->getGhostModule());
+	mGhostOptions.push_back(new DisableGhostTool(ghostModule));
+	mGhostOptions.push_back(new GhostSheetNextTool(ghostModule));
+	mGhostOptions.push_back(new GhostSheetPreviousTool(ghostModule));
+	mGhostOptions.push_back(new GhostSheetAbsoluteTool(ghostModule, this));
+	wxMenu *ghost_menu = new wxMenu;
+	ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
+	ghost_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
+	ghost_menu->Append(CALCHART__GhostPreviousSheet, wxT("Ghost Previous Sheet"), wxT("Draw a ghost of the previous stuntsheet"));
+	ghost_menu->Append(CALCHART__GhostNthSheet, wxT("Ghost Particular Sheet..."), wxT("Draw a ghost of a particular stuntsheet"));
 	
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
@@ -248,9 +264,12 @@ mAnimationFrame(NULL)
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(edit_menu, wxT("&Edit"));
 	menu_bar->Append(backgroundimage_menu, wxT("&Field Image"));
+	menu_bar->Append(ghost_menu, wxT("&Ghost View"));
 	menu_bar->Append(anim_menu, wxT("&CalChart Viewer"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
+
+	refreshGhostOptionStates();
 
 // Add a toolbar
 	AddCoolToolBar(GetMainToolBar(), *this);
@@ -364,7 +383,11 @@ mAnimationFrame(NULL)
 
 
 FieldFrame::~FieldFrame()
-{}
+{
+	for (int index = 0; index < mGhostOptions.size(); index++) {
+		delete mGhostOptions[index];
+	}
+}
 
 
 // Intercept menu commands
@@ -840,6 +863,24 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 	mCanvas->RemoveBackgroundImage();
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
 	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
+}
+
+
+void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event) {
+	for (int index = 0; index < mGhostOptions.size(); index++) {
+		if (mGhostOptions[index]->getId() == event.GetId()) {
+			mGhostOptions[index]->activate();
+			break;
+		}
+	}
+	refreshGhostOptionStates();
+	GetCanvas()->Refresh();
+}
+
+void FieldFrame::refreshGhostOptionStates() {
+	for (int index = 0; index < mGhostOptions.size(); index++) {
+		GetMenuBar()->FindItem(mGhostOptions[index]->getId())->Enable(mGhostOptions[index]->canActivate());
+	}
 }
 
 

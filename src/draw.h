@@ -25,6 +25,7 @@
 
 #include <wx/dc.h>
 #include <vector>
+#include "confgr.h"
 
 class wxBrush;
 class wxString;
@@ -38,6 +39,8 @@ class CC_textline;
 typedef std::vector<CC_textline> CC_textline_list;
 
 // draw the continuity starting at a specific offset
+void DrawSheetPoints(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor);
+void DrawGhostSheet(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref);
 void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary);
 void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC *dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);

@@ -24,6 +24,7 @@
 #define _FIELD_FRAME_H_
 
 #include "cc_types.h"
+#include "ghost_tools.h"
 
 #include <wx/docview.h>
 
@@ -102,6 +103,8 @@ public:
 	void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
 	void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
 
+	void OnCmd_GhostOption(wxCommandEvent& event);
+
 	void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 
 	void OnSize(wxSizeEvent& event);
@@ -144,6 +147,10 @@ public:
 	void ClearAnimationFrame();
 	
 	DECLARE_EVENT_TABLE()
+private:
+	void refreshGhostOptionStates();
+
+	std::vector<GhostTool*> mGhostOptions;
 };
 
 #endif
