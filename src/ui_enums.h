@@ -78,6 +78,7 @@ enum
 	CALCHART__AdjustBackgroundImage,
 	CALCHART__RemoveBackgroundImage,
 	CALCHART__ResetReferencePoint,
+	CALCHART__EditMusicData,
 
 	CALCHART__anim_reanimate,
 	CALCHART__anim_select_coll,
@@ -106,6 +107,9 @@ enum
 	CALCHART__SplitViewVertical,
 	CALCHART__SplitViewUnsplit,
 	CALCHART__SplitViewSwapAnimateAndOmni,
+
+	CALCHART__ExportBeatsFile,
+	CALCHART__ImportBeatsFile
 };
 
 #endif // _UI_ENUMS_H_

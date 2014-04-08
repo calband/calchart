@@ -43,6 +43,7 @@
 #include "draw.h"
 #include "cc_sheet.h"
 #include "cc_point.h"
+#include "music_ui.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -115,6 +116,7 @@ EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
 EVT_MENU(CALCHART__AdjustBackgroundImage, FieldFrame::OnCmd_AdjustBackgroundImage)
 EVT_MENU(CALCHART__RemoveBackgroundImage, FieldFrame::OnCmd_RemoveBackgroundImage)
+EVT_MENU(CALCHART__EditMusicData, FieldFrame::OnCmd_SetMusicData)
 EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
@@ -228,6 +230,7 @@ mAnimationFrame(NULL)
 	edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
+	edit_menu->Append(CALCHART__EditMusicData, wxT("Edit Music Data..."), wxT("Edit information regarding the music behind the show"));
 
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
@@ -840,6 +843,11 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 	mCanvas->RemoveBackgroundImage();
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
 	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
+}
+
+void FieldFrame::OnCmd_SetMusicData(wxCommandEvent& event) {
+	MeasureDataEditor* measureEditor = new MeasureDataEditor(GetShow()->GetMusicData(), this);
+	measureEditor->Show();
 }
 
 

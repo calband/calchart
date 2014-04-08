@@ -24,6 +24,8 @@
 #define _ANIMATION_FRAME_H_
 
 #include "animate.h"
+#include "play_animation_controller.h"
+#include "music_data.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
@@ -61,7 +63,6 @@ public:
 	void OnCmd_anim_play(wxCommandEvent& event);
 	void OnCmd_anim_prev_beat(wxCommandEvent& event);
 	void OnCmd_anim_next_beat(wxCommandEvent& event);
-	void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
 	void OnCmd_anim_prev_sheet(wxCommandEvent& event);
 	void OnCmd_anim_next_sheet(wxCommandEvent& event);
 	void OnCmd_anim_collisions(wxCommandEvent& event);
@@ -77,6 +78,9 @@ public:
 	void OnCmd_ToggleCrowd(wxCommandEvent& event);
 	void OnCmd_ToggleMarching(wxCommandEvent& event);
 	void OnCmd_ToggleShowOnlySelected(wxCommandEvent& event);
+
+	void OnCmd_ExportBeatsFile(wxCommandEvent& event);
+	void OnCmd_ImportMusic(wxCommandEvent& event);
 
 	// Called by the view
 	void ToggleTimer();
@@ -106,6 +110,12 @@ private:
 	void TransitionToNextSheet();
 
 
+	PlayAnimationController* getAnimationPlayer();
+	void setupDefaultAnimationPlayer();
+	void updateAnimPlayer();
+
+	PlayAnimationController* mAnimationPlayer;
+	ConstantSpeedPlayAnimationController* mDefaultAnimationPlayer;
 
 	AnimationView *mAnimationView;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 

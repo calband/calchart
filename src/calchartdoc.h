@@ -24,6 +24,7 @@
 #define _CALCHARTDOC_H_
 
 #include "animate.h"
+#include "music_data.h"
 
 #include <wx/wx.h>							  // For basic wx defines
 #include <wx/docview.h>							  // For basic wx defines
@@ -163,6 +164,8 @@ public:
 
 	bool AlreadyHasPrintContinuity() const;
 
+	MusicData* GetMusicData();
+
 private:
 	// Autosaving:
 	// goal is to allow the user to have a recoverable file.
@@ -195,6 +198,8 @@ private:
 	std::unique_ptr<CC_show> mShow;
 	const ShowMode* mMode;
 	AutoSaveTimer mTimer;
+	
+	MusicData* mMusicData;
 };
 
 #endif // _CALCHARTDOC_H_

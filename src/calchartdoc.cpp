@@ -53,7 +53,8 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 CalChartDoc::CalChartDoc() :
 mShow(CC_show::Create_CC_show()),
 mMode(wxGetApp().GetModeList().front().get()),
-mTimer(*this)
+mTimer(*this),
+mMusicData(new MusicData())
 {
 	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
 }
@@ -536,4 +537,8 @@ bool
 CalChartDoc::AlreadyHasPrintContinuity() const
 {
 	return mShow->AlreadyHasPrintContinuity();
+}
+
+MusicData* CalChartDoc::GetMusicData() {
+	return mMusicData;
 }

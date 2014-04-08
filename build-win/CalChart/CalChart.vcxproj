@@ -87,6 +87,8 @@
     <ClInclude Include="..\..\src\animation_view.h" />
     <ClInclude Include="..\..\src\background_image.h" />
     <ClInclude Include="..\..\src\basic_ui.h" />
+    <ClInclude Include="..\..\src\beats_file.h" />
+    <ClInclude Include="..\..\src\beats_ui.h" />
     <ClInclude Include="..\..\src\calchartapp.h" />
     <ClInclude Include="..\..\src\calchartdoc.h" />
     <ClInclude Include="..\..\src\ccvers.h" />
@@ -100,6 +102,7 @@
     <ClInclude Include="..\..\src\core\animatecommand.h" />
     <ClInclude Include="..\..\src\core\animatecompile.h" />
     <ClInclude Include="..\..\src\core\animate_types.h" />
+    <ClInclude Include="..\..\src\core\BeatInfo.h" />
     <ClInclude Include="..\..\src\core\cc_continuity.h" />
     <ClInclude Include="..\..\src\core\cc_coord.h" />
     <ClInclude Include="..\..\src\core\cc_point.h" />
@@ -109,14 +112,24 @@
     <ClInclude Include="..\..\src\core\cc_text.h" />
     <ClInclude Include="..\..\src\core\cc_types.h" />
     <ClInclude Include="..\..\src\core\cont.h" />
+    <ClInclude Include="..\..\src\core\fileio\cont_file_builder.h" />
+    <ClInclude Include="..\..\src\core\fileio\cont_file_formatter.h" />
+    <ClInclude Include="..\..\src\core\fileio\json_file_formatter.h" />
+    <ClInclude Include="..\..\src\core\fileio\json_import_gram.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\src\core\math_utils.h" />
+    <ClInclude Include="..\..\src\core\measure_event_data.h" />
+    <ClInclude Include="..\..\src\core\music_data.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\modes.h" />
+    <ClInclude Include="..\..\src\music_ui.h" />
     <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\play_animation_controller.h" />
     <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\print_ps.h" />
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
@@ -134,6 +147,8 @@
     <ClCompile Include="..\..\src\animation_view.cpp" />
     <ClCompile Include="..\..\src\background_image.cpp" />
     <ClCompile Include="..\..\src\basic_ui.cpp" />
+    <ClCompile Include="..\..\src\beats_file.cpp" />
+    <ClCompile Include="..\..\src\beats_ui.cpp" />
     <ClCompile Include="..\..\src\calchartapp.cpp" />
     <ClCompile Include="..\..\src\calchartdoc.cpp" />
     <ClCompile Include="..\..\src\cc_command.cpp" />
@@ -144,6 +159,7 @@
     <ClCompile Include="..\..\src\core\animate.cpp" />
     <ClCompile Include="..\..\src\core\animatecommand.cpp" />
     <ClCompile Include="..\..\src\core\animatecompile.cpp" />
+    <ClCompile Include="..\..\src\core\BeatInfo.cpp" />
     <ClCompile Include="..\..\src\core\cc_continuity.cpp" />
     <ClCompile Include="..\..\src\core\cc_coord.cpp" />
     <ClCompile Include="..\..\src\core\cc_point.cpp" />
@@ -152,12 +168,30 @@
     <ClCompile Include="..\..\src\core\cc_show.cpp" />
     <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
+    <ClCompile Include="..\..\src\core\fileio\cont_file_builder.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\fileio\cont_file_formatter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\fileio\json_file_formatter.cpp" />
+    <ClCompile Include="..\..\src\core\fileio\json_import_gram.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\fileio\json_import_scan.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
+    <ClCompile Include="..\..\src\core\music_data.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
+    <ClCompile Include="..\..\src\music_ui.cpp" />
+    <ClCompile Include="..\..\src\play_animation_controller.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\print_ps.cpp" />
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
@@ -175,6 +209,8 @@
   <ItemGroup>
     <None Include="..\..\src\contgram.y" />
     <None Include="..\..\src\contscan.l" />
+    <None Include="..\..\src\json_import_gram.y" />
+    <None Include="..\..\src\json_import_scan.l" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

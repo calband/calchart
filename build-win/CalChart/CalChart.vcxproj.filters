@@ -63,6 +63,34 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
+    <ClCompile Include="..\..\src\ghost_module.cpp" />
+    <ClCompile Include="..\..\src\ghost_tools.cpp" />
+    <ClCompile Include="..\..\src\ghost_source.cpp" />
+    <ClCompile Include="..\..\src\beats_ui.cpp" />
+    <ClCompile Include="..\..\src\core\fileio\cont_file_builder.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\fileio\cont_file_formatter.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\fileio\json_file_formatter.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\play_animation_controller.cpp" />
+    <ClCompile Include="..\..\src\core\fileio\json_import_gram.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\fileio\json_import_scan.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\music_data.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\music_ui.cpp" />
+    <ClCompile Include="..\..\src\core\BeatInfo.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\beats_file.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -138,6 +166,36 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\print_cont_ui.h" />
+    <ClInclude Include="..\..\src\core\parse.h" />
+    <ClInclude Include="..\..\src\ghost_module.h" />
+    <ClInclude Include="..\..\src\ghost_tools.h" />
+    <ClInclude Include="..\..\src\ghost_source.h" />
+    <ClInclude Include="..\..\src\draw.h" />
+    <ClInclude Include="..\..\src\beats_ui.h" />
+    <ClInclude Include="..\..\src\core\fileio\cont_file_builder.h">
+      <Filter>core\fileio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\fileio\cont_file_formatter.h">
+      <Filter>core\fileio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\fileio\json_file_formatter.h">
+      <Filter>core\fileio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\play_animation_controller.h" />
+    <ClInclude Include="..\..\src\core\fileio\json_import_gram.hpp">
+      <Filter>core\fileio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\music_data.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\measure_event_data.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\music_ui.h" />
+    <ClInclude Include="..\..\src\core\BeatInfo.h">
+      <Filter>core\fileio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\beats_file.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />
@@ -145,10 +203,19 @@
   <ItemGroup>
     <None Include="..\..\src\contgram.y" />
     <None Include="..\..\src\contscan.l" />
+    <None Include="..\..\src\json_import_gram.y">
+      <Filter>core\fileio</Filter>
+    </None>
+    <None Include="..\..\src\json_import_scan.l">
+      <Filter>core\fileio</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
       <UniqueIdentifier>{2666d93e-2ad0-4eac-a0db-5304526bfdb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\fileio">
+      <UniqueIdentifier>{336cf169-893d-435e-9ffa-2b87cf5ce87a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

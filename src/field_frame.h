@@ -101,6 +101,8 @@ public:
 	void OnCmd_AddBackgroundImage(wxCommandEvent& event);
 	void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
 	void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
+	
+	void OnCmd_SetMusicData(wxCommandEvent& event);
 
 	void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 

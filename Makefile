@@ -24,8 +24,8 @@ WINOBJDIR = build-win
 HEADERS = $(wildcard $(SRCDIR)/*.h)
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
 
-GENERATED_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
-GENERATED_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
+GENERATED_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y $(SRCDIR)/json_import_scan.l $(SRCDIR)/json_import_gram.y
+GENERATED_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp $(GENDIR)/json_import_scan.cpp $(GENDIR)/json_import_gram.cpp
 GENERATED_FILES = $(GENERATED_SRCS) $(WINOBJDIR)/README.txt
 
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
@@ -64,6 +64,7 @@ $(GENDIR)/%.cpp: $(SRCDIR)/%.y
 $(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	@mkdir -p $(GENDIR)
 	$(LEX) $(LFLAGS) -t $< > $@
+	
 
 %.bmp: %.xbm
 # use ImageMagick to convert

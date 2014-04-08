@@ -29,10 +29,13 @@
 #include "ui_enums.h"
 #include "basic_ui.h"
 #include "confgr.h"
+#include "beats_ui.h"
+#include "core\BeatInfo.h"
 
 #include <wx/timer.h>
 #include <wx/splitter.h>
 #include <wx/spinctrl.h>
+#include <wx/wfstream.h>
 
 
 BEGIN_EVENT_TABLE(AnimationFrame, AnimationFrame::super)
@@ -58,12 +61,13 @@ EVT_MENU(CALCHART__SplitViewHorizontal, AnimationFrame::OnCmd_SplitViewHorizonta
 EVT_MENU(CALCHART__SplitViewVertical, AnimationFrame::OnCmd_SplitViewVertical)
 EVT_MENU(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_SplitViewUnsplit)
 EVT_MENU(CALCHART__SplitViewSwapAnimateAndOmni, AnimationFrame::OnCmd_SwapAnimateAndOmni)
+EVT_MENU(CALCHART__ExportBeatsFile, AnimationFrame::OnCmd_ExportBeatsFile)
+EVT_MENU(CALCHART__ImportBeatsFile, AnimationFrame::OnCmd_ImportMusic)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_CHOICE(CALCHART__anim_errors, AnimationFrame::OnCmd_anim_errors)
 EVT_SPINCTRL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotosheet, AnimationFrame::OnSlider_anim_gotosheet)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationFrame::OnSlider_anim_gotobeat)
-EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationFrame::OnCmd_anim_next_beat_timer)
 EVT_UPDATE_UI(CALCHART__SplitViewHorizontal, AnimationFrame::OnCmd_UpdateUIHorizontal)
 EVT_UPDATE_UI(CALCHART__SplitViewVertical, AnimationFrame::OnCmd_UpdateUIVertical)
 EVT_UPDATE_UI(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_UpdateUIUnsplit)
@@ -92,6 +96,9 @@ mWhenClosed(onClose)
 	mAnimationView->SetFrame(this);
 	SetBandIcon(this);
 
+	mDefaultAnimationPlayer = new ConstantSpeedPlayAnimationController(mAnimationView, GetTempo());
+	mAnimationPlayer = nullptr;
+
 	// this frame has 2 status bars at the bottom
 	CreateStatusBar(2);
 
@@ -119,6 +126,11 @@ mWhenClosed(onClose)
 	split_menu->Append(CALCHART__SplitViewUnsplit, wxT("&Unsplit\tCtrl-U"), wxT("Unsplit"));
 	split_menu->Append(CALCHART__SplitViewSwapAnimateAndOmni, wxT("&Swap Views\tCtrl-S"), wxT("Swap Views"));
 	menu_bar->Append(split_menu, wxT("&Split"));
+
+	wxMenu *music_menu = new wxMenu;
+	music_menu->Append(CALCHART__ExportBeatsFile, wxT("Export Beats File..."), wxT("Export a beats file for the online CalChart Viewer"));
+	music_menu->Append(CALCHART__ImportBeatsFile, wxT("Import Music..."), wxT("Import a beats file and music file to play behind the show"));
+	menu_bar->Append(music_menu, wxT("&Music"));
 	
 	SetMenuBar(menu_bar);
 
@@ -298,14 +310,15 @@ AnimationFrame::OnCmdClose(wxCloseEvent& event)
 void
 AnimationFrame::OnCmd_anim_stop(wxCommandEvent& event)
 {
-	StopTimer();
+	getAnimationPlayer()->pause();
 }
 
 
 void
 AnimationFrame::OnCmd_anim_play(wxCommandEvent& event)
 {
-	StartTimer();
+	getAnimationPlayer()->update();
+	getAnimationPlayer()->play();
 }
 
 
@@ -314,7 +327,9 @@ AnimationFrame::OnCmd_anim_prev_beat(wxCommandEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->PrevBeat();
+		if (mAnimationView->PrevBeat()) {
+			updateAnimPlayer();
+		}
 	}
 }
 
@@ -324,18 +339,9 @@ AnimationFrame::OnCmd_anim_next_beat(wxCommandEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->NextBeat();
-	}
-}
-
-
-void
-AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
-{
-	// next_beat could come from the timer.  If so, stop the timer.
-	if (mAnimationView && !mAnimationView->NextBeat())
-	{
-		StopTimer();
+		if (mAnimationView->NextBeat()) {
+			updateAnimPlayer();
+		}
 	}
 }
 
@@ -345,7 +351,9 @@ AnimationFrame::OnCmd_anim_prev_sheet(wxCommandEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->PrevSheet();
+		if (mAnimationView->PrevSheet()) {
+			updateAnimPlayer();
+		}
 	}
 }
 
@@ -355,7 +363,9 @@ AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->NextSheet();
+		if (mAnimationView->NextSheet()) {
+			updateAnimPlayer();
+		}
 	}
 }
 
@@ -396,12 +406,33 @@ AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
 	}
 }
 
+void AnimationFrame::OnCmd_ExportBeatsFile(wxCommandEvent& event) {
+	BeatsEditor* beatsEditor = new BeatsEditor(mAnimationView, this);
+	beatsEditor->Show();
+}
+
+void AnimationFrame::OnCmd_ImportMusic(wxCommandEvent& event) {
+	wxString musicFilename = wxFileSelector(wxT("Select a music file"));
+	if (musicFilename.IsEmpty()) {
+		return;
+	}
+	wxString beatsFilename = wxFileSelector(wxT("Select a beats file"));
+	if (beatsFilename.IsEmpty()) {
+		return;
+	}
+	//TEMPORARY FIX THIS
+	if (mAnimationPlayer != nullptr) {
+		delete mAnimationPlayer;
+	}
+	wxFileInputStream inputStream(beatsFilename);
+	BeatInfo* beats = BeatsFileHandler::importBeatsFile(&inputStream);
+	mAnimationPlayer = new MusicPlayAnimationController(mAnimationView, this, beats, musicFilename.ToStdString());
+}
 
 void
 AnimationFrame::OnSlider_anim_tempo(wxSpinEvent& event)
 {
 	SetTempo(event.GetPosition());
-	StartTimer();
 }
 
 
@@ -410,7 +441,8 @@ AnimationFrame::OnSlider_anim_gotosheet(wxScrollEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->GotoSheet(event.GetPosition()-1);
+		mAnimationView->GotoSheet(event.GetPosition() - 1);
+		updateAnimPlayer();
 	}
 }
 
@@ -434,6 +466,7 @@ AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
 		if (beatChangeIsInternal) {
 			mAnimationView->GotoBeat(event.GetPosition());
 		}
+		updateAnimPlayer();
 	}
 }
 
@@ -759,6 +792,7 @@ void
 AnimationFrame::SetTempo(unsigned tempo)
 {
 	mTempo = tempo;
+	mDefaultAnimationPlayer->setBPM(tempo);
 }
 
 void
@@ -773,5 +807,24 @@ AnimationFrame::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers,
 			mErrorList->Append(error_string);
 			mErrorMarkers.push_back(std::pair<ErrorMarker, unsigned>(error_markers[i], sheetnum));
 		}
+	}
+}
+
+
+PlayAnimationController* AnimationFrame::getAnimationPlayer() {
+	if (mAnimationPlayer == nullptr) {
+		setupDefaultAnimationPlayer();
+	}
+	return mAnimationPlayer;
+}
+
+void AnimationFrame::setupDefaultAnimationPlayer() {
+	mAnimationPlayer = mDefaultAnimationPlayer;
+}
+
+void AnimationFrame::updateAnimPlayer() {
+	PlayAnimationController* animPlayer = getAnimationPlayer();
+	if (animPlayer->isPlaying()) {
+		animPlayer->update();
 	}
 }
