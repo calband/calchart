@@ -155,8 +155,19 @@ void MeasureDataGridPage::OnElementChanged(wxGridEvent& eventObj) {
 	mIsChanged = true;
 }
 
+bool MeasureDataGridPage::isModified() {
+	return mIsChanged;
+}
+
+void MeasureDataGridPage::save() {
+	mIsChanged = false;
+	mGridHandler->saveGrid(mGrid);
+}
+
 
 BEGIN_EVENT_TABLE(MeasureDataEditor, wxDialog)
+EVT_BUTTON(wxID_CLOSE, MeasureDataEditor::OnClose)
+EVT_BUTTON(wxID_SAVE, MeasureDataEditor::OnSave)
 END_EVENT_TABLE()
 
 
@@ -196,20 +207,57 @@ void MeasureDataEditor::CreateControls() {
 	wxBoxSizer *windowSizer = new wxBoxSizer(wxVERTICAL);
 	SetSizer(windowSizer);
 
-	wxButton * mCloseButton = new wxButton(this, wxID_OK, wxT("&Close"));
-	mCloseButton->SetDefault();
+	wxButton * closeButton = new wxButton(this, wxID_CLOSE, wxT("&Close"));
+	closeButton->SetDefault();
+	wxButton * saveButton = new wxButton(this, wxID_SAVE, wxT("&Save"));
 
 	wxNotebook* mGridNotebook = new wxNotebook(this, wxID_ANY);
 	mGridNotebook->Hide();
 	for (int index = 0; index < mGridHandlers.size(); index++) {
-		mGridNotebook->AddPage(new MeasureDataGridPage(mGridHandlers[index], mGridNotebook, wxID_ANY), mPageNames[index]);
+		mPages.push_back(new MeasureDataGridPage(mGridHandlers[index], mGridNotebook, wxID_ANY));
+		mGridNotebook->AddPage(mPages[index], mPageNames[index]);
 	}
 	mGridNotebook->SetSelection(0);
 
 	windowSizer->Add(mGridNotebook, wxSizerFlags().Expand().Border(wxALL, 5));
-	windowSizer->Add(mCloseButton, wxSizerFlags().Border(wxALL, 5));
+	windowSizer->Add(saveButton, wxSizerFlags().Border(wxALL, 5));
+	windowSizer->Add(closeButton, wxSizerFlags().Border(wxALL, 5));
 	windowSizer->Show(mGridNotebook);
 	windowSizer->Layout();
 
 	Update();
+}
+
+void MeasureDataEditor::OnClose(wxCommandEvent& event) {
+	bool changesMade = false;
+	for (int counter = 0; counter < mPages.size(); counter++) {
+		if (mPages[counter]->isModified()) {
+			changesMade = true;
+			break;
+		}
+	}
+	if (changesMade) {
+		int userchoice = wxMessageBox(wxT("Data modified.  Save changes or cancel?"), wxT("Save changes?"), wxYES_NO | wxCANCEL);
+		if (userchoice == wxYES)
+		{
+			save();
+		}
+		if (userchoice == wxCANCEL)
+		{
+			wxString message = wxT("Close cancelled.");
+			wxMessageBox(message, message);
+			return;
+		}
+	}
+	Close();
+}
+
+void MeasureDataEditor::OnSave(wxCommandEvent& event) {
+	save();
+}
+
+void MeasureDataEditor::save() {
+	for (int counter = 0; counter < mPages.size(); counter++) {
+		mPages[counter]->save();
+	}
 }

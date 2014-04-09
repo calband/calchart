@@ -31,6 +31,7 @@
 #include "confgr.h"
 #include "beats_ui.h"
 #include "core\BeatInfo.h"
+#include "animate_player_tool.h"
 
 #include <wx/timer.h>
 #include <wx/splitter.h>
@@ -63,6 +64,9 @@ EVT_MENU(CALCHART__SplitViewUnsplit, AnimationFrame::OnCmd_SplitViewUnsplit)
 EVT_MENU(CALCHART__SplitViewSwapAnimateAndOmni, AnimationFrame::OnCmd_SwapAnimateAndOmni)
 EVT_MENU(CALCHART__ExportBeatsFile, AnimationFrame::OnCmd_ExportBeatsFile)
 EVT_MENU(CALCHART__ImportBeatsFile, AnimationFrame::OnCmd_ImportMusic)
+EVT_MENU(CALCHART__SelectConstantSpeedAnimPlayer, AnimationFrame::OnCmd_SelectConstantSpeedAnimPlayer)
+EVT_MENU(CALCHART__SelectTempoAnimPlayer, AnimationFrame::OnCmd_SelectTempoAnimPlayer)
+EVT_MENU(CALCHART__SelectMusicAnimPlayer, AnimationFrame::OnCmd_SelectMusicAnimPlayer)
 EVT_CHOICE(CALCHART__anim_collisions, AnimationFrame::OnCmd_anim_collisions)
 EVT_CHOICE(CALCHART__anim_errors, AnimationFrame::OnCmd_anim_errors)
 EVT_SPINCTRL(CALCHART__anim_tempo, AnimationFrame::OnSlider_anim_tempo)
@@ -96,8 +100,10 @@ mWhenClosed(onClose)
 	mAnimationView->SetFrame(this);
 	SetBandIcon(this);
 
-	mDefaultAnimationPlayer = new ConstantSpeedPlayAnimationController(mAnimationView, GetTempo());
-	mAnimationPlayer = nullptr;
+	mAnimPlayerModule = new AnimationPlayerModule();
+	mConstantSpeedAnimPlayerTool = new ConstantSpeedAnimationPlayerTool(mAnimationView, mAnimPlayerModule);
+	mMusicAnimPlayerTool = new MusicAnimationPlayerTool(mAnimationView, mAnimPlayerModule);
+	mTempoAnimPlayerTool = new TempoAnimationPlayerTool(mAnimationView, ((CalChartDoc*)doc)->GetMusicData()->getTempos(), ((CalChartDoc*)doc)->GetMusicData()->getBeatsPerBar(), mAnimPlayerModule);
 
 	// this frame has 2 status bars at the bottom
 	CreateStatusBar(2);
@@ -131,6 +137,12 @@ mWhenClosed(onClose)
 	music_menu->Append(CALCHART__ExportBeatsFile, wxT("Export Beats File..."), wxT("Export a beats file for the online CalChart Viewer"));
 	music_menu->Append(CALCHART__ImportBeatsFile, wxT("Import Music..."), wxT("Import a beats file and music file to play behind the show"));
 	menu_bar->Append(music_menu, wxT("&Music"));
+
+	wxMenu *anim_player_menu = new wxMenu;
+	anim_player_menu->Append(CALCHART__SelectConstantSpeedAnimPlayer, wxT("Activate Default Animation Player"), wxT("Play the animation at a constant speed"));
+	anim_player_menu->Append(CALCHART__SelectTempoAnimPlayer, wxT("Activate Tempo Animation Player"), wxT("Play the show animation according to the music tempos"));
+	anim_player_menu->Append(CALCHART__SelectMusicAnimPlayer, wxT("Activate Music Animation Player"), wxT("Play music with the show animation"));
+	menu_bar->Append(anim_player_menu, wxT("Animation Player"));
 	
 	SetMenuBar(menu_bar);
 
@@ -236,6 +248,7 @@ mWhenClosed(onClose)
 
 	mAnimationView->Generate();
 
+	updateAnimationPlayerOptions();
 	UpdatePanel();
 
 	Fit();
@@ -420,13 +433,10 @@ void AnimationFrame::OnCmd_ImportMusic(wxCommandEvent& event) {
 	if (beatsFilename.IsEmpty()) {
 		return;
 	}
-	//TEMPORARY FIX THIS
-	if (mAnimationPlayer != nullptr) {
-		delete mAnimationPlayer;
-	}
 	wxFileInputStream inputStream(beatsFilename);
 	BeatInfo* beats = BeatsFileHandler::importBeatsFile(&inputStream);
-	mAnimationPlayer = new MusicPlayAnimationController(mAnimationView, this, beats, musicFilename.ToStdString());
+	mMusicAnimPlayerTool->load(this, musicFilename.ToStdString(), beats);
+	updateAnimationPlayerOptions();
 }
 
 void
@@ -792,7 +802,7 @@ void
 AnimationFrame::SetTempo(unsigned tempo)
 {
 	mTempo = tempo;
-	mDefaultAnimationPlayer->setBPM(tempo);
+	mConstantSpeedAnimPlayerTool->updateTempo(tempo);
 }
 
 void
@@ -812,19 +822,43 @@ AnimationFrame::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers,
 
 
 PlayAnimationController* AnimationFrame::getAnimationPlayer() {
-	if (mAnimationPlayer == nullptr) {
+	if (mAnimPlayerModule->getPlayController() == nullptr) {
 		setupDefaultAnimationPlayer();
 	}
-	return mAnimationPlayer;
+	return mAnimPlayerModule->getPlayController();
 }
 
 void AnimationFrame::setupDefaultAnimationPlayer() {
-	mAnimationPlayer = mDefaultAnimationPlayer;
+	mConstantSpeedAnimPlayerTool->activate();
 }
 
-void AnimationFrame::updateAnimPlayer() {
+void AnimationFrame::updateAnimPlayer(bool unconditional) {
 	PlayAnimationController* animPlayer = getAnimationPlayer();
-	if (animPlayer->isPlaying()) {
+	if (unconditional || animPlayer->isPlaying()) {
 		animPlayer->update();
 	}
+}
+
+void AnimationFrame::OnCmd_SelectMusicAnimPlayer(wxCommandEvent& event) {
+	mMusicAnimPlayerTool->activate();
+	updateAnimationPlayerOptions();
+	updateAnimPlayer(true);
+}
+
+void AnimationFrame::OnCmd_SelectTempoAnimPlayer(wxCommandEvent& event) {
+	mTempoAnimPlayerTool->activate();
+	updateAnimationPlayerOptions();
+	updateAnimPlayer(true);
+}
+
+void AnimationFrame::OnCmd_SelectConstantSpeedAnimPlayer(wxCommandEvent& event) {
+	mConstantSpeedAnimPlayerTool->activate();
+	updateAnimationPlayerOptions();
+	updateAnimPlayer(true);
+}
+
+void AnimationFrame::updateAnimationPlayerOptions() {
+	GetMenuBar()->FindItem(CALCHART__SelectConstantSpeedAnimPlayer)->Enable(mConstantSpeedAnimPlayerTool->canActivate());
+	GetMenuBar()->FindItem(CALCHART__SelectTempoAnimPlayer)->Enable(mTempoAnimPlayerTool->canActivate());
+	GetMenuBar()->FindItem(CALCHART__SelectMusicAnimPlayer)->Enable(mMusicAnimPlayerTool->canActivate());
 }

@@ -82,8 +82,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\animate_player_tool.h" />
     <ClInclude Include="..\..\src\animation_canvas.h" />
     <ClInclude Include="..\..\src\animation_frame.h" />
+    <ClInclude Include="..\..\src\animation_player_module.h" />
     <ClInclude Include="..\..\src\animation_view.h" />
     <ClInclude Include="..\..\src\background_image.h" />
     <ClInclude Include="..\..\src\basic_ui.h" />
@@ -142,8 +144,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\generated\contgram.cpp" />
     <ClCompile Include="..\..\generated\contscan.cpp" />
+    <ClCompile Include="..\..\src\animate_player_tool.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\animation_canvas.cpp" />
     <ClCompile Include="..\..\src\animation_frame.cpp" />
+    <ClCompile Include="..\..\src\animation_player_module.cpp" />
     <ClCompile Include="..\..\src\animation_view.cpp" />
     <ClCompile Include="..\..\src\background_image.cpp" />
     <ClCompile Include="..\..\src\basic_ui.cpp" />

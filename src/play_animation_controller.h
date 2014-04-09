@@ -5,6 +5,7 @@
 #include <wx/mediactrl.h>
 
 #include "core\BeatInfo.h"
+#include "core\music_data.h"
 
 class AnimationView;
 class AnimationFrame;
@@ -127,18 +128,22 @@ private:
 	BeatInfo* mBeats;
 };
 
-/*
 class TempoPlayAnimationController : public BeatNumDependentAnimationController {
 private:
 	using super = BeatNumDependentAnimationController;
 public:
-	TempoPlayAnimationController(AnimationView* view, TempoData* tempos);
+	TempoPlayAnimationController(AnimationView* view, TempoData* tempos, MeasureData* bars);
+	~TempoPlayAnimationController();
+
+	virtual void update();
 protected:
 	virtual long getNextTimerInterval();
+	virtual void nextBeat();
 private:
 	TempoData* mTempos;
+	MeasureData* mMeasures;
+	TempoBrowser* mBrowser;
 };
-*/
 
 class ConstantSpeedPlayAnimationController : public ClockedBeatPlayAnimationController {
 private:

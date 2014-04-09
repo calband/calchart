@@ -175,16 +175,36 @@ void MusicPlayAnimationController::update() {
 	restartAndContinueClock();
 }
 
-/*
-TempoPlayAnimationController::TempoPlayAnimationController(AnimationView* view, TempoData* tempos)
-: super(view), mTempos(tempos)
+TempoPlayAnimationController::TempoPlayAnimationController(AnimationView* view, TempoData* tempos, MeasureData* bars)
+: super(view), mTempos(tempos), mMeasures(bars), mBrowser(nullptr)
 {}
 
+TempoPlayAnimationController::~TempoPlayAnimationController() {
+	if (mBrowser != nullptr) {
+		delete mBrowser;
+	}
+}
+
+void TempoPlayAnimationController::update() {
+	if (mBrowser != nullptr) {
+		delete mBrowser;
+	}
+	mBrowser = mTempos->makeTempoBrowser(getCurrentBeatNum(), mMeasures);
+}
+
+void TempoPlayAnimationController::nextBeat() {
+	mBrowser->nextBeat();
+	super::nextBeat();
+}
 
 long TempoPlayAnimationController::getNextTimerInterval() {
-	//TODO: get tempo at current beat, get time to next one
+	if (mTempos->getNumEvents() > 0) {
+		return 1000 * 60 / mBrowser->getCurrentTempo();
+	} else {
+		getTimer()->Stop();
+		return 0;
+	}
 }
-*/
 
 ConstantSpeedPlayAnimationController::ConstantSpeedPlayAnimationController(AnimationView* view, int beatsPerMinute)
 : super(view), mBPM(beatsPerMinute)

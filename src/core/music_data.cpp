@@ -144,8 +144,6 @@ void TempoBrowser::pushBackTime() {
 	setCurrentTime(mMeasures->getCurrentTime());
 }
 
-
-
 std::string SongData::getSong(int beat, MeasureData* measureData) {
 	MeasureTime time = measureData->getMeasureTime(beat);
 	return getSong(time.bar, time.beat);

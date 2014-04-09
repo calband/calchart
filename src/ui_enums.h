@@ -109,7 +109,11 @@ enum
 	CALCHART__SplitViewSwapAnimateAndOmni,
 
 	CALCHART__ExportBeatsFile,
-	CALCHART__ImportBeatsFile
+	CALCHART__ImportBeatsFile,
+
+	CALCHART__SelectConstantSpeedAnimPlayer,
+	CALCHART__SelectTempoAnimPlayer,
+	CALCHART__SelectMusicAnimPlayer
 };
 
 #endif // _UI_ENUMS_H_

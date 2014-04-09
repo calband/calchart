@@ -26,6 +26,7 @@
 #include "animate.h"
 #include "play_animation_controller.h"
 #include "music_data.h"
+#include "animation_player_module.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
@@ -37,6 +38,9 @@ class AnimationCanvas;
 class CCOmniView_Canvas;
 class FancyTextWin;
 class wxSplitterWindow;
+class ConstantSpeedAnimationPlayerTool;
+class MusicAnimationPlayerTool;
+class TempoAnimationPlayerTool;
 
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 typedef wxDocChildFrame AnimationFrameParent;
@@ -47,6 +51,8 @@ typedef wxFrame AnimationFrameParent;
 class AnimationFrame : public AnimationFrameParent
 {
 public:
+
+
 	typedef AnimationFrameParent super;
 
 	AnimationFrame(std::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size);
@@ -100,6 +106,10 @@ public:
 	void OnCmd_UpdateUIHorizontal(wxUpdateUIEvent& event);
 	void OnCmd_UpdateUIVertical(wxUpdateUIEvent& event);
 	void OnCmd_UpdateUIUnsplit(wxUpdateUIEvent& event);
+
+	void OnCmd_SelectMusicAnimPlayer(wxCommandEvent& event);
+	void OnCmd_SelectTempoAnimPlayer(wxCommandEvent& event);
+	void OnCmd_SelectConstantSpeedAnimPlayer(wxCommandEvent& event);
 	
 private:
 	bool OnSlider_isNextBeatEvent(wxScrollEvent& event);
@@ -109,13 +119,21 @@ private:
 	void TransitionToPreviousSheet();
 	void TransitionToNextSheet();
 
+	void updateAnimationPlayerOptions();
+
 
 	PlayAnimationController* getAnimationPlayer();
 	void setupDefaultAnimationPlayer();
-	void updateAnimPlayer();
+	void updateAnimPlayer(bool unconditional = false);
 
-	PlayAnimationController* mAnimationPlayer;
-	ConstantSpeedPlayAnimationController* mDefaultAnimationPlayer;
+
+	ConstantSpeedAnimationPlayerTool* mConstantSpeedAnimPlayerTool;
+	MusicAnimationPlayerTool* mMusicAnimPlayerTool;
+	TempoAnimationPlayerTool* mTempoAnimPlayerTool;
+	AnimationPlayerModule* mAnimPlayerModule;
+	
+
+	
 
 	AnimationView *mAnimationView;
 	// we really do need one of each.  We can't do inheritance because they have different base classes 

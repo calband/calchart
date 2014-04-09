@@ -115,7 +115,7 @@ std::string BeatBuilder::timeToString(long time) {
 }
 
 BeatsEditor::BeatsEditor(AnimationView* targetAnimation, wxWindow *parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-: super(parent, id, caption, pos, size, style), mBeatBuilder(this, BeatsExport_BeatBuilder)
+: super(parent, id, caption, pos, size, style), mBeatBuilder(this, BeatsExport_BeatBuilder), mShouldAddAutoFirstBeat(false), mShouldAddAutoLastBeat(false)
 {
 	Create(parent, id, caption, pos, size, style);
 }

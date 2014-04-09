@@ -168,6 +168,8 @@ public:
 	MeasureDataGridPage(GridHandler* gridHandler, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 	~MeasureDataGridPage();
 
+	bool isModified();
+	void save();
 private:
 	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxPoint& pos = wxDefaultPosition,
@@ -195,6 +197,8 @@ public:
 	MeasureDataEditor(MusicData* musicData, wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Measure Data"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
 	~MeasureDataEditor();
 
+	void OnClose(wxCommandEvent& event);
+	void OnSave(wxCommandEvent& event);
 private:
 	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
 		const wxString& caption = wxT("Measure Data"),
@@ -204,7 +208,11 @@ private:
 
 	void CreateControls();
 
+	
+	void save();
+
 	std::vector<GridHandler*> mGridHandlers;
+	std::vector<MeasureDataGridPage*> mPages;
 	std::vector<wxString> mPageNames;
 
 	DECLARE_EVENT_TABLE()
