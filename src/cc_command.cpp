@@ -191,9 +191,8 @@ AddSheetsOtherShowCommand::~AddSheetsOtherShowCommand()
 
 void AddSheetsOtherShowCommand::DoAction()
 {
-	SetSheetCommand::DoAction(); // sets page
+	SetSheetCommand::DoAction();
 	mDoc.InsertSheetInternal(mSheets, mWhere);
-    mDoc.RelabelSheets(mEndpoint - 1);
 }
 
 // RemoveSheetsCommand
