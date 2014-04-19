@@ -1,34 +1,21 @@
 --- CalChart README.txt ---
-Updated on 2/15/2014 by Richard Powell
+Updated on 4/19/2014 by Richard Powell
 ---
 
-CalChart version 3.4.0
+CalChart version 3.4.1
 
 ---
 What's new in this version?
 ---
 
-Changed save file format.  Files saved in this version and beyond cannot be
-opened by earlier versions of calchart.
-
-Added a Print Continuity Editor.  This allows you to preview and edit what the
-bottom part of the printed page.
-
-Non-user facing changes:
-  Moved to GitHub
-  Updating to wxWidgets 3.0
+Add ability to insert stunt sheets from other shows.
 
 Bugs and features fixed in this release:
-#7 Make Point-Picker better
-#15 Windows: Always propted to save changes after edit cont
-#16 keyb buttons (right-left arrow) are ignored in view on win
-#17 can not import a Mac continuity file
-#31 Add a printed continuity editor.
-#34 Adding printed continuity to be saved with the file
-#43 Updated docs for GitHub
-#53 Removed Boost and used std lib wherever possible
-#54 Auto launching CalChart on startup on Windows.
-#56 Keyboard shortcut for Reanimate
+#20 MAC: Crash when quitting from the help menu 
+#23 Add ability to insert stunt sheets from other shows
+#66 Ctrl + Click Scrolling
+#69 Continuity editor saves to incorrect dot types
+#71 Saving/Loading shows with descriptions is broken
 
 ---
 What is CalChart?
@@ -100,6 +87,33 @@ For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
 If you need to regenerate the help documentation, see the README-docs.txt
+
+----------
+
+Release notes for 3.4.0:
+
+Changed save file format.  Files saved in this version and beyond cannot be
+opened by earlier versions of calchart.
+
+Added a Print Continuity Editor.  This allows you to preview and edit what the
+bottom part of the printed page.
+
+Non-user facing changes:
+  Moved to GitHub
+  Updating to wxWidgets 3.0
+
+Bugs and features fixed in this release:
+#7 Make Point-Picker better
+#15 Windows: Always propted to save changes after edit cont
+#16 keyb buttons (right-left arrow) are ignored in view on win
+#17 can not import a Mac continuity file
+#31 Add a printed continuity editor.
+#34 Adding printed continuity to be saved with the file
+#43 Updated docs for GitHub
+#53 Removed Boost and used std lib wherever possible
+#54 Auto launching CalChart on startup on Windows.
+#56 Keyboard shortcut for Reanimate
+
 
 ----------
 
