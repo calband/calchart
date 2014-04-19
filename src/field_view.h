@@ -65,6 +65,7 @@ public:
 	bool DoSetPointsLabel(bool right);
 	bool DoSetPointsLabelFlip();
 	bool DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, unsigned where);
+    bool DoInsertSheetsOtherShow(const CalChartDoc::CC_sheet_container_t& sht, unsigned where, unsigned endpoint);
 	bool DoDeleteSheet(unsigned where);
 	bool DoImportPrintableContinuity(const wxString& file);
 
