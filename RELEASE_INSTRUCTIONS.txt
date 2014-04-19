@@ -2,7 +2,7 @@
 
 How to release calchart:
 
-The current calchart version is 3.4.0.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.4.0)
+The current calchart version is 3.4.1.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.4.1)
 
 0.1 Increment the versions in ccvers.h to CCVER
 
