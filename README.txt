@@ -9,6 +9,7 @@ What's new in this version?
 ---
 
 Add ability to insert stunt sheets from other shows.
+Updated VisualStudio runtime to VC2013.
 
 Bugs and features fixed in this release:
 #20 MAC: Crash when quitting from the help menu 
