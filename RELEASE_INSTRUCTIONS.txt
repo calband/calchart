@@ -26,7 +26,7 @@ I use InnoSetup for creating the installer.  Get it from:
 http://www.jrsoftware.org/isinfo.php
 
 w1.3 CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
-  w1.3.a. Google and find the vcredist_x86.exe for Visual C++ 2010.  Download and save to \calchart\trunk\build-win.
+  w1.3.a. Google and find the vcredist_x86.exe for Visual C++ 2013.  Download and save to \calchart\trunk\build-win.
 
 w1.4 Build the setup.exe installer:
 Compile via Build->Compile.
