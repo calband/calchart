@@ -14,6 +14,7 @@ Bugs and features fixed in this release:
 #20 MAC: Crash when quitting from the help menu 
 #23 Add ability to insert stunt sheets from other shows
 #66 Ctrl + Click Scrolling
+#67 Include the most recent Visual C++ Redistribution with CalChart
 #69 Continuity editor saves to incorrect dot types
 #71 Saving/Loading shows with descriptions is broken
 
