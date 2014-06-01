@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=CalChart
-AppVersion=3.4.0
+AppVersion=3.4.1
 DefaultDirName={pf}\CalChart
 DefaultGroupName=CalChart
 UninstallDisplayIcon={app}\CalChart.exe
@@ -18,7 +18,7 @@ Source: "README.txt"; DestDir: "{app}"; Flags: isreadme
 Source: "vcredist_x86.exe"; DestDir: "{app}\bin";
 
 [Run]
-Filename: "{app}\bin\vcredist_x86.exe"; Parameters: "/q:a/c:""VCREDI~3.EXE /q:a /c:""""msi exec /i vcredist.msi /qn"""" """; WorkingDir: "{app}\bin"; StatusMsg: "Installing C-RunTime.  Windows may ask you to install or repair the runtime files needed to run CalChart on your system."
+Filename: "{app}\bin\vcredist_x86.exe"; WorkingDir: "{app}\bin"; StatusMsg: "Installing C-RunTime.  Windows may ask you to install or repair the runtime files needed to run CalChart on your system."
 
 [Icons]
 Name: "{commonprograms}\CalChart"; Filename: "{app}\CalChart.exe"

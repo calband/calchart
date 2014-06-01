@@ -139,8 +139,8 @@ TopFrame::About()
 void
 TopFrame::Help()
 {
-	GetGlobalHelpController().LoadFile();
-	GetGlobalHelpController().DisplayContents();
+	wxGetApp().GetGlobalHelpController().LoadFile();
+	wxGetApp().GetGlobalHelpController().DisplayContents();
 }
 
 

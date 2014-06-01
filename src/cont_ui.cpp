@@ -224,8 +224,8 @@ void ContinuityEditor::OnCloseWindow(wxCommandEvent& event)
 
 void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 {
-	GetGlobalHelpController().LoadFile();
-	GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+	wxGetApp().GetGlobalHelpController().LoadFile();
+	wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
 }
 
 
@@ -257,7 +257,7 @@ void ContinuityEditor::SetInsertionPoint(int x, int y)
 
 SYMBOL_TYPE ContinuityEditor::CurrentSymbolChoice() const
 {
-	auto name = mContinuityChoices->GetString(mContinuityChoices->GetSelection());
+	auto name = mContinuityChoices->GetString(mCurrentContinuityChoice);
 	return GetSymbolForName(name.ToStdString());
 }
 

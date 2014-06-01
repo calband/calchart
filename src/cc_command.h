@@ -166,6 +166,21 @@ protected:
 	const unsigned mWhere;
 };
 
+// AddSheetsCommand
+// For adding a container of sheets
+class AddSheetsOtherShowCommand : public SetSheetCommand
+{
+public:
+	AddSheetsOtherShowCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where, unsigned endpoint);
+	virtual ~AddSheetsOtherShowCommand();
+    
+protected:
+	virtual void DoAction();
+	CC_show::CC_sheet_container_t mSheets;
+	const unsigned mWhere;
+    const unsigned mEndpoint;
+};
+
 // RemoveSheetsCommand
 // For removing a sheets
 class RemoveSheetsCommand : public SetSheetCommand

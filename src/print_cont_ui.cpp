@@ -253,8 +253,8 @@ void PrintContinuityEditor::OnCloseWindow(wxCommandEvent& event)
 
 void PrintContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 {
-	GetGlobalHelpController().LoadFile();
-	GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+	wxGetApp().GetGlobalHelpController().LoadFile();
+	wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
 }
 
 

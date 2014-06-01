@@ -1,0 +1,11 @@
+build-macos/CalChart.xcodeproj/project.xcworkspace/*
+build-macos/CalChart.xcodeproj/xcuserdata/*
+build-win/README.txt
+contgram.output
+contgram.tab.c
+generated/*
+build-win/CalChart/Debug
+build-win/CalChart/Release
+build-win/CalChart/CalChart.v12.suo
+build-win/CalChart/CalChart.sdf
+

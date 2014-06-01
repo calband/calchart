@@ -23,7 +23,7 @@
 
 #include "cont.h"
 #include "parse.h"
-#include "contgram.h"
+#include "contgram.hpp"
 
 /* Globals to communicate with parser */
 extern YYSTYPE yylval;	/* lexical value of current token */

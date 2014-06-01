@@ -166,7 +166,7 @@ void SetSheetBeatsCommand::DoAction()
 // AddSheetsCommand
 // For adding a container of sheets
 AddSheetsCommand::AddSheetsCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where)
-: SetSheetCommand(show, wxT("Moving points")),
+: SetSheetCommand(show, wxT("Adding Sheets")),
 mSheets(sheets), mWhere(where)
 {}
 
@@ -179,11 +179,26 @@ void AddSheetsCommand::DoAction()
 	mDoc.InsertSheetInternal(mSheets, mWhere);
 }
 
+// AddSheetsOtherShowCommand
+// For adding a container of sheets
+AddSheetsOtherShowCommand::AddSheetsOtherShowCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where, unsigned endpoint)
+: SetSheetCommand(show, wxT("Add From Other Show")),
+mSheets(sheets), mWhere(where), mEndpoint(endpoint)
+{}
+
+AddSheetsOtherShowCommand::~AddSheetsOtherShowCommand()
+{}
+
+void AddSheetsOtherShowCommand::DoAction()
+{
+	SetSheetCommand::DoAction();
+	mDoc.InsertSheetInternal(mSheets, mWhere);
+}
 
 // RemoveSheetsCommand
 // For removing a sheets
 RemoveSheetsCommand::RemoveSheetsCommand(CalChartDoc& show, unsigned where)
-: SetSheetCommand(show, wxT("Moving points")),
+: SetSheetCommand(show, wxT("Remove Sheets")),
 mWhere(where)
 {}
 

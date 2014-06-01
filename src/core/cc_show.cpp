@@ -181,9 +181,9 @@ mSheetNum(0)
 		auto str = (const char*)&data[0];
 		SetDescr(std::string(str, strlen(str)));
 		// peek for the next name
-		name = ReadLong(stream);
 		ReadAndCheckID(stream, INGL_END);
 		ReadAndCheckID(stream, INGL_DESC);
+		name = ReadLong(stream);
 	}
 	
 	// Read in sheets

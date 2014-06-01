@@ -37,13 +37,6 @@
 
 wxPrintDialogData *gPrintDialogData;
 
-wxHtmlHelpController&
-GetGlobalHelpController()
-{
-	static wxHtmlHelpController sHelpController;
-	return sHelpController;
-}
-
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
 void CC_coord_UnitTests();
@@ -63,6 +56,7 @@ bool CalChartApp::OnInit()
 			CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
 
 	gPrintDialogData = new wxPrintDialogData();
+	mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
 
 	//// Create the main frame window
 	wxFrame *frame = new TopFrame(mDocManager, (wxFrame *) NULL, _T("CalChart"));
@@ -104,6 +98,12 @@ bool CalChartApp::OnInit()
 	return true;
 }
 
+wxHtmlHelpController&
+CalChartApp::GetGlobalHelpController()
+{
+	return *mHelpController;
+}
+
 void CalChartApp::MacOpenFile(const wxString &fileName)
 {
 	mDocManager->CreateDocument(fileName, wxDOC_SILENT);
@@ -122,6 +122,8 @@ int CalChartApp::OnExit()
     // delete the doc manager
     delete wxDocManager::GetDocumentManager();
     
+	mHelpController.reset();
+
 	return wxApp::OnExit();
 }
 
