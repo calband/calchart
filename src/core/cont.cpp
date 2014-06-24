@@ -26,6 +26,20 @@
 #include "cont.h"
 #include "parse.h"
 
+std::string contDefinedValueStrings[] = { "N", "NW", "W", "SW", "S", "SE", "E", "NE", "HS", "MM", "SH", "JS", "GV", "M", "DM" };
+
+std::string translateContDefinedValue(ContDefinedValue value) {
+	return contDefinedValueStrings[value];
+}
+
+std::string translateContDefinedValue(int value) {
+	return translateContDefinedValue((ContDefinedValue)value);
+}
+
+std::string translateDirection(float value) {
+	return translateContDefinedValue(value / 45);
+}
+
 int float2int(const ContProcedure *proc,
 AnimateCompile *anim,
 float f)
@@ -486,18 +500,44 @@ float ContFuncStep::Get(AnimateCompile* anim) const
 
 ContProcedure::~ContProcedure() {}
 
+bool ContProcedure::HasExplicitDuration() {
+	return false;
+}
+
+int ContProcedure::GetExplicitDuration(AnimateCompile* compiler) {
+	return 0;
+}
+
+bool ContProcedure::ShouldAppendPrintContinuityToPreviousLine() {
+	return false;
+}
+
 ContProcSet::~ContProcSet()
 {
 	if (var) delete var;
 	if (val) delete val;
 }
 
+std::string ContProcSet::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (SET)] ";
+};
 
 void ContProcSet::Compile(AnimateCompile* anim)
 {
 	var->Set(anim, val->Get(anim));
 }
 
+bool ContProcSet::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcSet::GetExplicitDuration(AnimateCompile* compiler) {
+	return 0;
+}
+
+std::string ContProcBlam::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (BLAM)] ";
+};
 
 void ContProcBlam::Compile(AnimateCompile* anim)
 {
@@ -519,10 +559,22 @@ ContProcCM::~ContProcCM()
 	if (numbeats) delete numbeats;
 }
 
+std::string ContProcCM::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (CM)] ";
+};
+
 
 void ContProcCM::Compile(AnimateCompile* anim)
 {
 	DoCounterMarch(this, anim, pnt1, pnt2, stps, dir1, dir2, numbeats);
+}
+
+bool ContProcCM::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcCM::GetExplicitDuration(AnimateCompile* compiler) {
+	return numbeats->Get(compiler);
 }
 
 
@@ -533,6 +585,9 @@ ContProcDMCM::~ContProcDMCM()
 	if (numbeats) delete numbeats;
 }
 
+std::string ContProcDMCM::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (DMCM)] ";
+};
 
 void ContProcDMCM::Compile(AnimateCompile* anim)
 {
@@ -586,12 +641,23 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 	anim->RegisterError(ANIMERR_INVALID_CM, this);
 }
 
+bool ContProcDMCM::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcDMCM::GetExplicitDuration(AnimateCompile* compiler) {
+	return numbeats->Get(compiler);
+}
+
 
 ContProcDMHS::~ContProcDMHS()
 {
 	if (pnt) delete pnt;
 }
 
+std::string ContProcDMHS::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "FMDHS/HS to SS " + std::to_string(compiler->getCurrentSheetNum() + 1);
+};
 
 void ContProcDMHS::Compile(AnimateCompile* anim)
 {
@@ -640,6 +706,9 @@ ContProcEven::~ContProcEven()
 	if (pnt) delete pnt;
 }
 
+std::string ContProcEven::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (EVEN)] ";
+};
 
 void ContProcEven::Compile(AnimateCompile* anim)
 {
@@ -657,12 +726,23 @@ void ContProcEven::Compile(AnimateCompile* anim)
 	}
 }
 
+bool ContProcEven::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcEven::GetExplicitDuration(AnimateCompile* compiler) {
+	return stps->Get(compiler);
+}
+
 
 ContProcEWNS::~ContProcEWNS()
 {
 	if (pnt) delete pnt;
 }
 
+std::string ContProcEWNS::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "FMHS EW/NS to SS " + std::to_string(compiler->getCurrentSheetNum() + 1);
+};
 
 void ContProcEWNS::Compile(AnimateCompile* anim)
 {
@@ -701,6 +781,9 @@ ContProcFountain::~ContProcFountain()
 	if (stepsize2) delete stepsize2;
 }
 
+std::string ContProcFountain::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (FOUNTAIN)] ";
+};
 
 void ContProcFountain::Compile(AnimateCompile* anim)
 {
@@ -790,6 +873,9 @@ ContProcFM::~ContProcFM()
 	if (dir) delete dir;
 }
 
+std::string ContProcFM::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "FMHS " + std::to_string(((int)(stps)->Get(compiler))) + " " + translateDirection(dir->Get(compiler));
+};
 
 void ContProcFM::Compile(AnimateCompile* anim)
 {
@@ -814,11 +900,23 @@ void ContProcFM::Compile(AnimateCompile* anim)
 	}
 }
 
+bool ContProcFM::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcFM::GetExplicitDuration(AnimateCompile* compiler) {
+	return stps->Get(compiler);
+}
+
 
 ContProcFMTO::~ContProcFMTO()
 {
 	if (pnt) delete pnt;
 }
+
+std::string ContProcFMTO::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (FMTO)] ";
+};
 
 
 void ContProcFMTO::Compile(AnimateCompile* anim)
@@ -856,6 +954,9 @@ static inline Coord roundcoord(Coord a, Coord mod)
 	return a;
 }
 
+std::string ContProcGrid::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (GRID)] ";
+};
 
 void ContProcGrid::Compile(AnimateCompile* anim)
 {
@@ -875,6 +976,13 @@ void ContProcGrid::Compile(AnimateCompile* anim)
 	}
 }
 
+bool ContProcGrid::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcGrid::GetExplicitDuration(AnimateCompile* compiler) {
+	return 0;
+}
 
 ContProcHSCM::~ContProcHSCM()
 {
@@ -883,6 +991,9 @@ ContProcHSCM::~ContProcHSCM()
 	if (numbeats) delete numbeats;
 }
 
+std::string ContProcHSCM::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (HSCM)] ";
+};
 
 void ContProcHSCM::Compile(AnimateCompile* anim)
 {
@@ -914,12 +1025,23 @@ void ContProcHSCM::Compile(AnimateCompile* anim)
 	anim->RegisterError(ANIMERR_INVALID_CM, this);
 }
 
+bool ContProcHSCM::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcHSCM::GetExplicitDuration(AnimateCompile* compiler) {
+	return numbeats->Get(compiler);
+}
+
 
 ContProcHSDM::~ContProcHSDM()
 {
 	if (pnt) delete pnt;
 }
 
+std::string ContProcHSDM::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "FMHS/DHS to SS " + std::to_string(compiler->getCurrentSheetNum() + 1);
+};
 
 void ContProcHSDM::Compile(AnimateCompile* anim)
 {
@@ -967,6 +1089,9 @@ ContProcMagic::~ContProcMagic()
 	if (pnt) delete pnt;
 }
 
+std::string ContProcMagic::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (MAGIC)] ";
+};
 
 void ContProcMagic::Compile(AnimateCompile* anim)
 {
@@ -976,6 +1101,13 @@ void ContProcMagic::Compile(AnimateCompile* anim)
 	anim->Append(std::make_shared<AnimateCommandMove>(0, c), this);
 }
 
+bool ContProcMagic::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcMagic::GetExplicitDuration(AnimateCompile* compiler) {
+	return 0;
+}
 
 ContProcMarch::~ContProcMarch()
 {
@@ -984,6 +1116,9 @@ ContProcMarch::~ContProcMarch()
 	if (dir) delete dir;
 }
 
+std::string ContProcMarch::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "[FIX THIS STUNT (MARCH)] ";
+};
 
 void ContProcMarch::Compile(AnimateCompile* anim)
 {
@@ -1015,6 +1150,14 @@ void ContProcMarch::Compile(AnimateCompile* anim)
 	}
 }
 
+bool ContProcMarch::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcMarch::GetExplicitDuration(AnimateCompile* compiler) {
+	return stps->Get(compiler);
+}
+
 
 ContProcMT::~ContProcMT()
 {
@@ -1022,6 +1165,9 @@ ContProcMT::~ContProcMT()
 	if (dir) delete dir;
 }
 
+std::string ContProcMT::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "MTHS " + std::to_string(((int)(numbeats)->Get(compiler))) + " " + translateDirection(dir->Get(compiler));
+};
 
 void ContProcMT::Compile(AnimateCompile* anim)
 {
@@ -1034,12 +1180,32 @@ void ContProcMT::Compile(AnimateCompile* anim)
 	}
 }
 
+bool ContProcMT::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcMT::GetExplicitDuration(AnimateCompile* compiler) {
+	return numbeats->Get(compiler);
+}
 
 ContProcMTRM::~ContProcMTRM()
 {
 	if (dir) delete dir;
 }
 
+
+std::string ContProcMTRM::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	std::string base = "MTHS " + translateDirection(dir->Get(compiler));
+	if (!newLine) {
+		return " [" + base + "]";
+	} else {
+		return base;
+	}
+};
+
+bool ContProcMTRM::ShouldAppendPrintContinuityToPreviousLine() {
+	return true;
+}
 
 void ContProcMTRM::Compile(AnimateCompile* anim)
 {
@@ -1052,6 +1218,9 @@ ContProcNSEW::~ContProcNSEW()
 	if (pnt) delete pnt;
 }
 
+std::string ContProcNSEW::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "FMHS NS/EW to SS " + std::to_string(compiler->getCurrentSheetNum() + 1);
+};
 
 void ContProcNSEW::Compile(AnimateCompile* anim)
 {
@@ -1089,6 +1258,10 @@ ContProcRotate::~ContProcRotate()
 	if (pnt) delete pnt;
 }
 
+std::string ContProcRotate::GetPrintContinuity(AnimateCompile *compiler, bool newLine){
+	return "Execute GTHS " + std::to_string(((int)(stps->Get(compiler)))) + " counts " + std::to_string(((int)(ang->Get(compiler))))
+		+ " degrees " + (ang->Get(compiler) > 0 ? "CW" : "CCW") + " about [FIX THIS STUNT].";
+}
 
 void ContProcRotate::Compile(AnimateCompile* anim)
 {
@@ -1118,3 +1291,12 @@ void ContProcRotate::Compile(AnimateCompile* anim)
 		backwards),
 		this);
 }
+
+bool ContProcRotate::HasExplicitDuration() {
+	return true;
+}
+
+int ContProcRotate::GetExplicitDuration(AnimateCompile* compiler) {
+	return stps->Get(compiler);
+}
+

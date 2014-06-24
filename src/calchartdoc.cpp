@@ -540,5 +540,13 @@ CalChartDoc::AlreadyHasPrintContinuity() const
 }
 
 MusicData* CalChartDoc::GetMusicData() {
-	return mMusicData;
+	return mMusicData.get();
+}
+
+const MusicData* CalChartDoc::GetMusicData() const {
+	return mMusicData.get();
+}
+
+const CC_show* CalChartDoc::getShow() const {
+	return mShow.get();
 }

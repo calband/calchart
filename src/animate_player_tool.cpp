@@ -9,19 +9,30 @@ AnimationPlayerModule* AnimationPlayerTool::getModule() {
 }
 
 MusicAnimationPlayerTool::MusicAnimationPlayerTool(AnimationView* view, AnimationPlayerModule* module)
-: super(view, module), mPlayer(nullptr)
+: super(view, module), mPlayer(nullptr), mInfoToDelete(nullptr)
 {}
 
 MusicAnimationPlayerTool::~MusicAnimationPlayerTool() {
 	tradeController(nullptr);
 }
 
-void MusicAnimationPlayerTool::load(AnimationFrame* frame, std::string filename, BeatInfo* beats) {
-	mPlayer = new MusicPlayAnimationController(getAnimView(), frame, beats, filename);
+void MusicAnimationPlayerTool::load(AnimationFrame* frame, std::string filename, BeatInfo* beats, bool responsibleForBeats) {
+	tradeController(new MusicPlayAnimationController(getAnimView(), frame, beats, filename));
+	if (responsibleForBeats) {
+		mInfoToDelete = beats;
+	}
 }
 
 bool MusicAnimationPlayerTool::canActivate() {
 	return mPlayer != nullptr;
+}
+
+void MusicAnimationPlayerTool::tradeController(MusicPlayAnimationController* newController) {
+	BeatInfo* toDelete = mInfoToDelete;
+	super::tradeController(newController);
+	if (toDelete != nullptr) {
+		delete toDelete;
+	}
 }
 
 MusicPlayAnimationController* MusicAnimationPlayerTool::getController() {

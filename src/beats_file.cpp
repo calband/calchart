@@ -2,7 +2,6 @@
 #include "core\fileio\json_file_formatter.h"
 #include "core\BeatInfo.h"
 
-
 extern int importJSON();
 extern const char *json_inputbuffer;
 extern JSONObjectValue *OutputMainObject;
@@ -12,14 +11,14 @@ void BeatsFileHandler::exportBeatsFile(wxOutputStream* outputStream, BeatInfo* b
 	JSONObjectValue* mainObject = new JSONObjectValue();
 	JSONObjectValue* metaObject = new JSONObjectValue();
 	JSONArrayValue* beatsObject = new JSONArrayValue();
-	metaObject->addValue("version", new JSONStringValue("1.0.0"));
+	metaObject->setValue("version", new JSONStringValue("1.0.0"));
 	long lastBeatTime = 0;
 	for (int index = 0; index < beatInfo->getNumBeats(); index++) {
 		beatsObject->addValue(new JSONIntValue(beatInfo->getBeat(index) - lastBeatTime));
 		lastBeatTime = beatInfo->getBeat(index);
 	}
-	mainObject->addValue("meta", metaObject);
-	mainObject->addValue("beats", beatsObject);
+	mainObject->setValue("meta", metaObject);
+	mainObject->setValue("beats", beatsObject);
 	JSONFormatter::exportJSON(outputStream, *mainObject);
 	delete mainObject;
 }
@@ -31,10 +30,16 @@ BeatInfo* BeatsFileHandler::importBeatsFile(wxInputStream* inputStream) {
 	importJSON();
 	BeatInfo* returnVal = new BeatInfo();
 	long lastBeatTime = 0;
-	JSONArrayValue* beatsArray = (JSONArrayValue*)(OutputMainObject->getContentValue("beats"));
-	for (int index = 0; index < beatsArray->getNumContentValues(); index++) {
-		lastBeatTime += ((JSONIntValue*)beatsArray->getContentValue(index))->getValue();
-		returnVal->addBeat(lastBeatTime);
+	if (OutputMainObject != nullptr) {
+		JSONArrayValue* beatsArray = (JSONArrayValue*)(OutputMainObject->getContentValue("beats"));
+		for (int index = 0; index < beatsArray->getNumContentValues(); index++) {
+			lastBeatTime += ((JSONIntValue*)beatsArray->getContentValue(index))->getValue();
+			returnVal->addBeat(lastBeatTime);
+		}
+		delete OutputMainObject;
+	} else {
+		delete returnVal;
+		return nullptr;
 	}
 	return returnVal;
 }

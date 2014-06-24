@@ -1,12 +1,9 @@
 %{
-
-
 #include <string>
 #include "json_file_formatter.h"
 #include "json_import_gram.hpp"
 
-/* Globals to communicate with parser */
-extern JSON_STYPE json_lval;	/* lexical value of current token */
+extern JSON_STYPE json_lval;	/* Current Token */
 
 
 

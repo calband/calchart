@@ -88,9 +88,7 @@ wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #endif
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
-mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
 mTempo(120),
-mTimerOn(false),
 mWhenClosed(onClose)
 {
 // Give it an icon
@@ -249,6 +247,7 @@ mWhenClosed(onClose)
 	mAnimationView->Generate();
 
 	updateAnimationPlayerOptions();
+	updateAnimPlayer();
 	UpdatePanel();
 
 	Fit();
@@ -262,11 +261,14 @@ mWhenClosed(onClose)
 
 AnimationFrame::~AnimationFrame()
 {
+	delete mConstantSpeedAnimPlayerTool;
+	delete mMusicAnimPlayerTool;
+	delete mTempoAnimPlayerTool;
+	delete mAnimPlayerModule;
 	if (mCanvas)
 		mCanvas->SetView(NULL);
 	if (mOmniViewCanvas)
 		mOmniViewCanvas->SetView(NULL);
-	mTimer->Stop();
 	delete mAnimationView;
 }
 
@@ -286,11 +288,11 @@ AnimationFrame::OnSize(wxSizeEvent& event)
 void
 AnimationFrame::OnCmdReanimate(wxCommandEvent& event)
 {
-	StopTimer();
 	mErrorMarkers.clear();
 	if (mAnimationView)
 	{
 		mAnimationView->Generate();
+		updateAnimPlayer();
 	}
 }
 
@@ -318,6 +320,16 @@ AnimationFrame::OnCmdClose(wxCloseEvent& event)
 		mWhenClosed();
 	}
 	Destroy();
+}
+
+void AnimationFrame::ToggleAnimate() {
+	PlayAnimationController* currentPlayer = getAnimationPlayer();
+	if (currentPlayer->isPlaying()) {
+		currentPlayer->pause();
+	} else {
+		updateAnimPlayer();
+		currentPlayer->play();
+	}
 }
 
 void
@@ -435,8 +447,13 @@ void AnimationFrame::OnCmd_ImportMusic(wxCommandEvent& event) {
 	}
 	wxFileInputStream inputStream(beatsFilename);
 	BeatInfo* beats = BeatsFileHandler::importBeatsFile(&inputStream);
+	if (beats == nullptr) {
+		wxMessageBox(wxT("Invalid Beats File"), wxT("Operation Failed"));
+		return;
+	}
 	mMusicAnimPlayerTool->load(this, musicFilename.ToStdString(), beats);
 	updateAnimationPlayerOptions();
+	wxMessageBox(wxT("Activate the \"Music Animation Player,\" and then press the play button to animate the show with music"), wxT("Music Loaded"));
 }
 
 void
@@ -623,15 +640,6 @@ AnimationFrame::OnCmd_ToggleShowOnlySelected(wxCommandEvent& event)
 	}
 }
 
-void
-AnimationFrame::ToggleTimer()
-{
-	if (mTimerOn)
-		StopTimer();
-	else
-		StartTimer();
-}
-
 
 void
 AnimationFrame::UpdatePanel()
@@ -768,29 +776,6 @@ AnimationFrame::OnCmd_UpdateUIUnsplit(wxUpdateUIEvent& event)
 }
 
 
-void
-AnimationFrame::StartTimer()
-{
-	if (!mTimer->Start(60000/GetTempo()))
-	{
-		SetStatusText(wxT("Could not set tempo!"));
-		mTimerOn = false;
-	}
-	else
-	{
-		mTimerOn = true;
-	}
-}
-
-
-void
-AnimationFrame::StopTimer()
-{
-	mTimer->Stop();
-	mTimerOn = false;
-}
-
-
 unsigned
 AnimationFrame::GetTempo() const
 {
@@ -842,19 +827,19 @@ void AnimationFrame::updateAnimPlayer(bool unconditional) {
 void AnimationFrame::OnCmd_SelectMusicAnimPlayer(wxCommandEvent& event) {
 	mMusicAnimPlayerTool->activate();
 	updateAnimationPlayerOptions();
-	updateAnimPlayer(true);
+	//updateAnimPlayer(true);
 }
 
 void AnimationFrame::OnCmd_SelectTempoAnimPlayer(wxCommandEvent& event) {
 	mTempoAnimPlayerTool->activate();
 	updateAnimationPlayerOptions();
-	updateAnimPlayer(true);
+	//updateAnimPlayer(true);
 }
 
 void AnimationFrame::OnCmd_SelectConstantSpeedAnimPlayer(wxCommandEvent& event) {
 	mConstantSpeedAnimPlayerTool->activate();
 	updateAnimationPlayerOptions();
-	updateAnimPlayer(true);
+	//updateAnimPlayer(true);
 }
 
 void AnimationFrame::updateAnimationPlayerOptions() {

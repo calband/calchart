@@ -1482,13 +1482,13 @@ yyreduce:
   case 13:
 /* Line 1787 of yacc.c  */
 #line 109 "src/json_import_gram.y"
-    {JSONObjectValue* object = new JSONObjectValue(); (yyval.value) = object; object->addValue(*(yyvsp[(1) - (2)].stringVal), (yyvsp[(2) - (2)].value)); delete (yyvsp[(1) - (2)].stringVal); }
+    {JSONObjectValue* object = new JSONObjectValue(); (yyval.value) = object; object->setValue(*(yyvsp[(1) - (2)].stringVal), (yyvsp[(2) - (2)].value)); delete (yyvsp[(1) - (2)].stringVal); }
     break;
 
   case 14:
 /* Line 1787 of yacc.c  */
 #line 111 "src/json_import_gram.y"
-    {(yyval.value) = (yyvsp[(1) - (4)].value); ((JSONObjectValue*)((yyval.value)))->addValue(*(yyvsp[(3) - (4)].stringVal), (yyvsp[(4) - (4)].value)); delete (yyvsp[(3) - (4)].stringVal);}
+    {(yyval.value) = (yyvsp[(1) - (4)].value); ((JSONObjectValue*)((yyval.value)))->setValue(*(yyvsp[(3) - (4)].stringVal), (yyvsp[(4) - (4)].value)); delete (yyvsp[(3) - (4)].stringVal);}
     break;
 
   case 15:

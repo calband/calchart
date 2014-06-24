@@ -20,10 +20,17 @@ AnimationView* PlayAnimationController::getAnimationView() {
 	return mView;
 }
 
-void PlayAnimationController::nextBeat() {
-	if (!getAnimationView()->NextBeat()) {
+bool PlayAnimationController::nextBeat() {
+	if (hasNextBeat()) {
+		return getAnimationView()->NextBeat();
+	} else{
 		pause();
+		return false;
 	}
+}
+
+bool PlayAnimationController::hasNextBeat() {
+	return true;
 }
 
 
@@ -54,33 +61,40 @@ TimedPlayAnimationController::AnimationTimer* TimedPlayAnimationController::make
 }
 
 ClockedBeatPlayAnimationController::ClockedBeatPlayAnimationController(AnimationView* view)
-: super(view)
+: super(view), mPaused(true)
 {}
 
 void ClockedBeatPlayAnimationController::play() {
+	mPaused = false;
 	restartClock();
 }
 
 void ClockedBeatPlayAnimationController::pause() {
+	mPaused = true;
 	getTimer()->Stop();
 }
 
 bool ClockedBeatPlayAnimationController::isPlaying() {
-	return getTimer()->IsRunning();
+	return !mPaused;
 }
 
 void ClockedBeatPlayAnimationController::timerFired() {
 	nextBeat();
+	if (!hasNextBeat()) {
+		pause();
+	}
 }
 
 void ClockedBeatPlayAnimationController::restartClock() {
-	if (getTimer()->IsRunning()) {
-		getTimer()->Stop();
+	getTimer()->Stop();
+	if (hasNextBeat()) {
+		getTimer()->Start(getStartTimerInterval() / getSpeedScale(), oneTick());
+	} else {
+		pause();
 	}
-	getTimer()->Start(getStartTimerInterval() / getSpeedScale(), oneTick());
 }
 
-void ClockedBeatPlayAnimationController::restartAndContinueClock() {
+void ClockedBeatPlayAnimationController::continueClock() {
 	if (getTimer()->IsRunning()) {
 		restartClock();
 	}
@@ -92,9 +106,7 @@ bool ClockedBeatPlayAnimationController::oneTick() {
 
 void ClockedBeatPlayAnimationController::scaleSpeed(float scale) {
 	super::scaleSpeed(scale);
-	if (isPlaying()) {
-		restartClock();
-	}
+	continueClock();
 }
 
 ReclockBeatPlayAnimationController::ReclockBeatPlayAnimationController(AnimationView* view)
@@ -103,12 +115,21 @@ ReclockBeatPlayAnimationController::ReclockBeatPlayAnimationController(Animation
 
 void ReclockBeatPlayAnimationController::timerFired() {
 	super::timerFired();
-	long nextTimerInterval = getNextTimerInterval() / getSpeedScale();
-	if (nextTimerInterval <= 0) {
-		timerFired();
-	} else {
-		getTimer()->Start(nextTimerInterval, oneTick());
+	if (isPlaying() && hasNextBeat() && shouldReclockThisTick()) {
+		long nextTimerInterval = getNextTimerInterval() / getSpeedScale();
+		if (isPlaying()) {
+			if (nextTimerInterval <= 0) {
+				timerFired();
+			}
+			else {
+				getTimer()->Start(nextTimerInterval, oneTick());
+			}
+		}
 	}
+}
+
+bool ReclockBeatPlayAnimationController::shouldReclockThisTick() {
+	return oneTick();
 }
 
 bool ReclockBeatPlayAnimationController::oneTick() {
@@ -132,27 +153,32 @@ void BeatNumDependentAnimationController::update() {
 		mCurrBeat += show->GetNthSheet(counter)->GetBeats();
 	}
 	mCurrBeat += getAnimationView()->GetCurrentBeat();
-	restartClock();
+	continueClock();
 }
 
 int BeatNumDependentAnimationController::getCurrentBeatNum() {
 	return mCurrBeat;
 }
 
-void BeatNumDependentAnimationController::nextBeat() {
-	super::nextBeat();
+bool BeatNumDependentAnimationController::nextBeat() {
+	bool returnVal = super::nextBeat();
 	mCurrBeat++;
+	return returnVal;
 }
 
-
+bool BeatNumDependentAnimationController::hasNextBeat() {
+	return getAnimationView()->GetCurrentSheet() < getAnimationView()->GetNumberSheets() - 1 || getAnimationView()->GetCurrentBeat() < getAnimationView()->GetNumberBeats() - 1;
+}
 
 MusicPlayAnimationController::MusicPlayAnimationController(AnimationView* view, AnimationFrame* frame, BeatInfo* beats, std::string filePath, int musicPlayerId)
 : super(view), mBeats(beats), mMusicPlayer(frame, musicPlayerId, filePath, wxDefaultPosition, wxSize(0, 0))
 {}
 
 void MusicPlayAnimationController::play() {
-	mMusicPlayer.Play();
 	super::play();
+	if (isPlaying()) {
+		mMusicPlayer.Play();
+	}
 }
 
 void MusicPlayAnimationController::pause() {
@@ -160,19 +186,25 @@ void MusicPlayAnimationController::pause() {
 	super::pause();
 }
 
+void MusicPlayAnimationController::scaleSpeed(float scale) {
+	super::scaleSpeed(scale);
+	mMusicPlayer.SetPlaybackRate(getSpeedScale());
+}
+
 long MusicPlayAnimationController::getNextTimerInterval() {
-	int nextBeatNum = getCurrentBeatNum() + 1;
-	if (nextBeatNum >= mBeats->getNumBeats()) {
-		getTimer()->Stop();
-		return 0;
-	}
 	return mBeats->getBeat(getCurrentBeatNum() + 1) - ((wxLongLong)mMusicPlayer.Tell()).GetValue();
 }
 
 void MusicPlayAnimationController::update() {
 	super::update();
-	mMusicPlayer.Seek(mBeats->getBeat(getCurrentBeatNum()));
-	restartAndContinueClock();
+	if (hasNextBeat()) {
+		mMusicPlayer.Seek(mBeats->getBeat(getCurrentBeatNum()));
+	}
+	continueClock();
+}
+
+bool MusicPlayAnimationController::hasNextBeat() {
+	return super::hasNextBeat() && getCurrentBeatNum() < mBeats->getNumBeats() - 1;
 }
 
 TempoPlayAnimationController::TempoPlayAnimationController(AnimationView* view, TempoData* tempos, MeasureData* bars)
@@ -186,24 +218,57 @@ TempoPlayAnimationController::~TempoPlayAnimationController() {
 }
 
 void TempoPlayAnimationController::update() {
+	super::update();
+	rebuildBrowser();
+	continueClock();
+}
+
+void TempoPlayAnimationController::rebuildBrowser() {
 	if (mBrowser != nullptr) {
 		delete mBrowser;
 	}
 	mBrowser = mTempos->makeTempoBrowser(getCurrentBeatNum(), mMeasures);
 }
 
-void TempoPlayAnimationController::nextBeat() {
-	mBrowser->nextBeat();
-	super::nextBeat();
+bool TempoPlayAnimationController::validateBrowser() {
+	if (mBrowser == nullptr || !mBrowser->isValid()) {
+		rebuildBrowser();
+	}
+	return mBrowser->isValid();
+}
+
+bool TempoPlayAnimationController::nextBeat() {
+	if (!validateBrowser()) {
+		pause();
+		return false;
+	} else {
+		mBrowser->nextBeat();
+		return super::nextBeat();
+	}
+}
+
+bool TempoPlayAnimationController::hasNextBeat() {
+	return super::hasNextBeat() && mTempos->getNumEvents() > 0 && mMeasures->getNumEvents() > 0;
+}
+
+long TempoPlayAnimationController::getStartTimerInterval() {
+	mCurrentTempo = mBrowser->getCurrentTempo();
+	return super::getStartTimerInterval();
 }
 
 long TempoPlayAnimationController::getNextTimerInterval() {
-	if (mTempos->getNumEvents() > 0) {
-		return 1000 * 60 / mBrowser->getCurrentTempo();
-	} else {
-		getTimer()->Stop();
-		return 0;
-	}
+	return 1000 * 60 / mCurrentTempo;
+}
+
+bool TempoPlayAnimationController::shouldReclockThisTick() {
+	int newTempo = mBrowser->getCurrentTempo();
+	bool returnVal = newTempo != mCurrentTempo;
+	mCurrentTempo = newTempo;
+	return returnVal;
+}
+
+bool TempoPlayAnimationController::oneTick() {
+	return false;
 }
 
 ConstantSpeedPlayAnimationController::ConstantSpeedPlayAnimationController(AnimationView* view, int beatsPerMinute)
@@ -215,10 +280,18 @@ void ConstantSpeedPlayAnimationController::update()
 
 void ConstantSpeedPlayAnimationController::setBPM(int beatsPerMinute) {
 	mBPM = beatsPerMinute;
-	restartAndContinueClock();
+	continueClock();
 }
 
 long ConstantSpeedPlayAnimationController::getStartTimerInterval() {
 	long returnVal = 1000 * 60 / mBPM;
 	return returnVal;
+}
+
+bool ConstantSpeedPlayAnimationController::nextBeat() {
+	if (!super::nextBeat()) {
+		pause();
+		return false;
+	}
+	return true;
 }

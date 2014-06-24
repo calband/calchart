@@ -1,3 +1,6 @@
+#ifndef _JSON_FILE_FORMATTER_H_
+#define _JSON_FILE_FORMATTER_H_
+
 #include <string>
 #include <vector>
 
@@ -169,7 +172,7 @@ private:
 public:
 	~JSONObjectValue() { destroyContent(); };
 
-	void addValue(std::string binding, JSONValue* value);
+	void setValue(std::string binding, JSONValue* value);
 
 	virtual JSONValueType getType() { return VAL_OBJECT; };
 
@@ -179,6 +182,8 @@ public:
 	virtual std::string getBinding(int index) { return mBindings[index]; };
 	virtual JSONValue* getContentValue(std::string binding);
 protected:
+	virtual int getBindingIndex(std::string binding);
+
 	virtual JSONToken* makeBlockOpenToken() { return GenericJSONToken::makeObjectStartToken(); };
 	virtual JSONToken* makeBlockCloseToken() { return GenericJSONToken::makeObjectEndToken(); };
 
@@ -217,3 +222,5 @@ protected:
 	static void stylize(std::vector<JSONToken*>* tokenVector);
 	static void exportToStream(OUTSTREAM* output, std::vector<JSONToken*>* tokenVector);
 };
+
+#endif

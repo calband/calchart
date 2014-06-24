@@ -398,7 +398,7 @@ AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
 void
 AnimationView::ToggleTimer()
 {
-	GetAnimationFrame()->ToggleTimer();
+	GetAnimationFrame()->ToggleAnimate();
 }
 
 

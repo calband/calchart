@@ -209,3 +209,20 @@ AnimatePoint AnimateCompile::GetReferencePointPosition(unsigned refnum) const
 }
 
 
+unsigned AnimateCompile::getCurrentSheetNum() const {
+	return getCurrentSheetIndex() + 1;
+}
+
+unsigned AnimateCompile::getCurrentSheetIndex() const {
+	CC_show::const_CC_sheet_iterator_t sheet = mShow.GetSheetBegin();
+	int sheetNum = 0;
+	while (sheet != curr_sheet) {
+		sheetNum++;
+		sheet++;
+	}
+	return sheetNum;
+}
+
+void AnimateCompile::setCurrentSheet(CC_show::const_CC_sheet_iterator_t sheet) {
+	curr_sheet = sheet;
+}

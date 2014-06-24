@@ -31,6 +31,8 @@ enum ContDefinedValue
 	CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM
 };
 
+std::string contDefinedValueStrings[];
+
 class ContToken
 {
 public:
@@ -74,7 +76,7 @@ private:
 	unsigned refnum;
 };
 
-class ContValue: public ContToken
+class ContValue : public ContToken
 {
 public:
 	ContValue() {}
@@ -86,7 +88,7 @@ public:
 class ContValueFloat : public ContValue
 {
 public:
-	ContValueFloat(float v): val(v) {}
+	ContValueFloat(float v) : val(v) {}
 
 	virtual float Get(AnimateCompile* anim) const;
 private:
@@ -96,7 +98,7 @@ private:
 class ContValueDefined : public ContValue
 {
 public:
-	ContValueDefined(ContDefinedValue v): val(v) {}
+	ContValueDefined(ContDefinedValue v) : val(v) {}
 
 	virtual float Get(AnimateCompile* anim) const;
 private:
@@ -167,7 +169,7 @@ public:
 class ContValueVar : public ContValue
 {
 public:
-	ContValueVar(unsigned num): varnum(num) {}
+	ContValueVar(unsigned num) : varnum(num) {}
 
 	virtual float Get(AnimateCompile* anim) const;
 	void Set(AnimateCompile* anim, float v);
@@ -178,7 +180,7 @@ private:
 class ContFuncDir : public ContValue
 {
 public:
-	ContFuncDir(ContPoint *p): pnt(p) {}
+	ContFuncDir(ContPoint *p) : pnt(p) {}
 	virtual ~ContFuncDir();
 
 	virtual float Get(AnimateCompile* anim) const;
@@ -201,7 +203,7 @@ private:
 class ContFuncDist : public ContValue
 {
 public:
-	ContFuncDist(ContPoint *p): pnt(p) {}
+	ContFuncDist(ContPoint *p) : pnt(p) {}
 	virtual ~ContFuncDist();
 
 	virtual float Get(AnimateCompile* anim) const;
@@ -237,7 +239,7 @@ private:
 class ContFuncOpp : public ContValue
 {
 public:
-	ContFuncOpp(ContValue *d): dir(d) {}
+	ContFuncOpp(ContValue *d) : dir(d) {}
 	virtual ~ContFuncOpp();
 
 	virtual float Get(AnimateCompile* anim) const;
@@ -258,13 +260,18 @@ private:
 	ContPoint *pnt;
 };
 
-class ContProcedure: public ContToken
+class ContProcedure : public ContToken
 {
 public:
-	ContProcedure(): next(NULL) {}
+	ContProcedure() : next(NULL) {}
 	virtual ~ContProcedure();
 
+	virtual bool ShouldAppendPrintContinuityToPreviousLine();
+	virtual std::string GetPrintContinuity(AnimateCompile* compiler, bool newLine = true) = 0;
 	virtual void Compile(AnimateCompile* anim) = 0;
+
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 
 	ContProcedure *next;
 };
@@ -276,8 +283,11 @@ public:
 		: var(vr), val(v) {}
 	virtual ~ContProcSet();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValueVar *var;
 	ContValue *val;
@@ -286,6 +296,7 @@ private:
 class ContProcBlam : public ContProcedure
 {
 public:
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 };
 
@@ -297,8 +308,11 @@ public:
 		: pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
 	virtual ~ContProcCM();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContPoint *pnt1, *pnt2;
 	ContValue *stps, *dir1, *dir2, *numbeats;
@@ -311,8 +325,11 @@ public:
 		: pnt1(p1), pnt2(p2), numbeats(beats) {}
 	virtual ~ContProcDMCM();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContPoint *pnt1, *pnt2;
 	ContValue *numbeats;
@@ -325,6 +342,7 @@ public:
 		: pnt(p) {}
 	virtual ~ContProcDMHS();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -338,8 +356,11 @@ public:
 		: stps(steps), pnt(p) {}
 	virtual ~ContProcEven();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValue *stps;
 	ContPoint *pnt;
@@ -352,6 +373,7 @@ public:
 		: pnt(p) {}
 	virtual ~ContProcEWNS();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -366,6 +388,7 @@ public:
 		: dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
 	virtual ~ContProcFountain();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -381,8 +404,11 @@ public:
 		: stps(steps), dir(d) {}
 	virtual ~ContProcFM();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValue *stps, *dir;
 };
@@ -394,6 +420,7 @@ public:
 		: pnt(p) {}
 	virtual ~ContProcFMTO();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -407,8 +434,11 @@ public:
 		: grid(g) {}
 	virtual ~ContProcGrid();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValue *grid;
 };
@@ -420,8 +450,11 @@ public:
 		: pnt1(p1), pnt2(p2), numbeats(beats) {}
 	virtual ~ContProcHSCM();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContPoint *pnt1, *pnt2;
 	ContValue *numbeats;
@@ -434,6 +467,7 @@ public:
 		: pnt(p) {}
 	virtual ~ContProcHSDM();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -447,8 +481,11 @@ public:
 		: pnt(p) {}
 	virtual ~ContProcMagic();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContPoint *pnt;
 };
@@ -460,8 +497,11 @@ public:
 		: stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
 	virtual ~ContProcMarch();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValue *stpsize, *stps, *dir, *facedir;
 };
@@ -473,8 +513,11 @@ public:
 		: numbeats(beats), dir(d) {}
 	virtual ~ContProcMT();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValue *numbeats, *dir;
 };
@@ -486,6 +529,8 @@ public:
 		: dir(d) {}
 	virtual ~ContProcMTRM();
 
+	virtual bool ShouldAppendPrintContinuityToPreviousLine();
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -499,6 +544,7 @@ public:
 		: pnt(p) {}
 	virtual ~ContProcNSEW();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
 private:
@@ -512,10 +558,14 @@ public:
 		: ang(angle), stps(steps), pnt(p) {}
 	virtual ~ContProcRotate();
 
+	virtual std::string GetPrintContinuity(AnimateCompile *compiler, bool newLine = true);
 	virtual void Compile(AnimateCompile* anim);
 
+	virtual bool HasExplicitDuration();
+	virtual int GetExplicitDuration(AnimateCompile* compiler);
 private:
 	ContValue *ang, *stps;
 	ContPoint *pnt;
 };
+
 #endif

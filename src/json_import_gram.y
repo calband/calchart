@@ -1,13 +1,7 @@
 %{
 
-
-
-
-
 #include "json_file_formatter.h"
 #include <string>
-
-//#define YYDEBUG 1
 
 extern int json_lex();
 extern void json_initscanner();
@@ -15,10 +9,6 @@ int json_error(const char *);
 
 JSONObjectValue *OutputMainObject = nullptr;
 
-%}
-
-%{
-	/* Reserved word definitions */
 %}
 
 %token OBJECT_OPEN OBJECT_CLOSE
@@ -29,17 +19,12 @@ JSONObjectValue *OutputMainObject = nullptr;
 %token JNULL
 
 
-%{
-	/* Constants and variables */
-%}
 %token <stringVal> STRING
 %token <intVal> INT
 %token <floatVal> FLOAT
 %token <boolVal> BOOL
 
-%{
-	/* Semantic stack */
-%}
+
 %union {
 	JSONValue* value;
 	std::string* stringVal;

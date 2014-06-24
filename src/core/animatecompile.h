@@ -87,6 +87,11 @@ public:
 	AnimatePoint GetStartingPosition() const;
 	AnimatePoint GetEndingPosition(const ContToken *token);
 	AnimatePoint GetReferencePointPosition(unsigned refnum) const;
+
+	unsigned getCurrentSheetNum() const;
+	unsigned getCurrentSheetIndex() const;
+
+	void setCurrentSheet(CC_show::const_CC_sheet_iterator_t sheet);
 private:
 	inline void SetStatus(bool s) { okay = s; };
 	AnimatePoint pt;

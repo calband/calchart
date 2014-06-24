@@ -44,6 +44,7 @@
 #include "cc_sheet.h"
 #include "cc_point.h"
 #include "music_ui.h"
+#include "core\fileio\cont_file_builder.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -117,6 +118,7 @@ EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
 EVT_MENU(CALCHART__AdjustBackgroundImage, FieldFrame::OnCmd_AdjustBackgroundImage)
 EVT_MENU(CALCHART__RemoveBackgroundImage, FieldFrame::OnCmd_RemoveBackgroundImage)
 EVT_MENU(CALCHART__EditMusicData, FieldFrame::OnCmd_SetMusicData)
+EVT_MENU(CALCHART__GenerateContFile, FieldFrame::OnCmd_GenerateContFile)
 EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
@@ -231,6 +233,7 @@ mAnimationFrame(NULL)
 	edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
 	edit_menu->Append(CALCHART__EditMusicData, wxT("Edit Music Data..."), wxT("Edit information regarding the music behind the show"));
+	edit_menu->Append(CALCHART__GenerateContFile, wxT("Generate Continuity File..."), wxT("Generate a continuity file that descibes this show"));
 
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
@@ -848,6 +851,16 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 void FieldFrame::OnCmd_SetMusicData(wxCommandEvent& event) {
 	MeasureDataEditor* measureEditor = new MeasureDataEditor(GetShow()->GetMusicData(), this);
 	measureEditor->Show();
+}
+
+void FieldFrame::OnCmd_GenerateContFile(wxCommandEvent& event) {
+	wxFileDialog saveFileDialog(this, wxString("Save Continuity File"), wxEmptyString, wxEmptyString,
+		"Text files (*.txt)|*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if (saveFileDialog.ShowModal() == wxID_CANCEL) {
+		return;
+	}
+	wxFileOutputStream outputStream(saveFileDialog.GetPath());
+	ContFileWriter::writeContFile(&outputStream, GetShow());
 }
 
 

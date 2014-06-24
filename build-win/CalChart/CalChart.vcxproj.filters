@@ -90,6 +90,9 @@
     <ClCompile Include="..\..\src\beats_file.cpp" />
     <ClCompile Include="..\..\src\animation_player_module.cpp" />
     <ClCompile Include="..\..\src\animate_player_tool.cpp" />
+    <ClCompile Include="..\..\src\core\json_unit_tests.cpp">
+      <Filter>core\fileio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -190,6 +193,9 @@
     <ClInclude Include="..\..\src\beats_file.h" />
     <ClInclude Include="..\..\src\animate_player_tool.h" />
     <ClInclude Include="..\..\src\animation_player_module.h" />
+    <ClInclude Include="..\..\src\core\json_unit_tests.h">
+      <Filter>core\fileio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />

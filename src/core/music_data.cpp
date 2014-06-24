@@ -1,10 +1,10 @@
 #include "music_data.h"
 
-int MeasureData::getBar(int beat) {
+int MeasureData::getBar(int beat) const {
 	return getMeasureTime(beat).bar;
 }
 
-int MeasureData::getBeat(int bar, int beat) {
+int MeasureData::getBeat(int bar, int beat) const {
 	GetBeatSeeker* seeker = new GetBeatSeeker(this, bar, beat);
 	seek(seeker);
 	int returnVal = seeker->getElapsedBeats();
@@ -12,7 +12,7 @@ int MeasureData::getBeat(int bar, int beat) {
 	return returnVal;
 }
 
-MeasureTime MeasureData::getMeasureTime(int beat) {
+MeasureTime MeasureData::getMeasureTime(int beat) const {
 	GetBarSeeker* seeker = new GetBarSeeker(this, beat);
 	seek(seeker);
 	MeasureTime returnVal = seeker->getFinalMeasureTime();
@@ -20,20 +20,24 @@ MeasureTime MeasureData::getMeasureTime(int beat) {
 	return returnVal;
 }
 
-int MeasureData::extractEventData(BeatsPerBarShiftEvent eventObj) {
+int MeasureData::extractEventData(BeatsPerBarShiftEvent eventObj) const {
 	return eventObj.beatsPerBar;
 }
 
-MeasureTime MeasureData::convertToMeasureTime(BeatsPerBarShiftEvent eventObj) {
+MeasureTime MeasureData::convertToMeasureTime(BeatsPerBarShiftEvent eventObj) const {
 	return eventObj.toMeasureTime();
 }
 
-MeasureBrowser* MeasureData::makeMeasureBrowser(int beat) {
-	MeasureTime time = getMeasureTime(beat);
-	return makeMeasureBrowser(time.bar, time.beat);
+MeasureBrowser* MeasureData::makeMeasureBrowser(int beat) const {
+	if (getNumEvents() > 0) {
+		MeasureTime time = getMeasureTime(beat);
+		return makeMeasureBrowser(time.bar, time.beat);
+	} else {
+		return nullptr;
+	}
 }
 
-MeasureBrowser* MeasureData::makeMeasureBrowser(int bar, int beat) {
+MeasureBrowser* MeasureData::makeMeasureBrowser(int bar, int beat) const {
 	BeatsPerBarShiftEvent targetEncompassingEvent = getEncompassingEventMarker(bar, beat);
 	int index;
 	for (index = 0; index < getNumEvents(); index++) {
@@ -41,14 +45,21 @@ MeasureBrowser* MeasureData::makeMeasureBrowser(int bar, int beat) {
 			break;
 		}
 	}
-	return new MeasureBrowser(this, MeasureTime(bar, beat), index);
+	return MeasureBrowser::make(this, MeasureTime(bar, beat), index);
 }
 
-MeasureBrowser::MeasureBrowser(MeasureData* source, MeasureTime startTime, int startIndex)
+MeasureBrowser* MeasureBrowser::make(const MeasureData* source, MeasureTime startTime, int startIndex) {
+	if (source->getNumEvents() > 0) {
+		return new MeasureBrowser(source, startTime, startIndex);
+	}
+	return nullptr;
+}
+
+MeasureBrowser::MeasureBrowser(const MeasureData* source, MeasureTime startTime, int startIndex)
 : super(source, startTime, startIndex)
 {}
 
-int MeasureBrowser::getNumBeatsInCurrentBar() {
+int MeasureBrowser::getNumBeatsInCurrentBar() const {
 	return getCurrentEvent();
 }
 
@@ -57,7 +68,7 @@ void MeasureBrowser::pushForwardTime() {
 	current.beat += 1;
 	if (current.beat >= getCurrentEvent()) {
 		current.bar += 1;
-		current.beat = 1;
+		current.beat = 0;
 	}
 	setCurrentTime(current);
 }
@@ -84,21 +95,25 @@ bool MeasureBrowser::checkTransitionBack() {
 	return false;
 }
 
-int TempoData::getTempo(int beat, MeasureData* measureData){
+int TempoData::getTempo(int beat, MeasureData* measureData) const {
 	MeasureTime time = measureData->getMeasureTime(beat);
 	return getTempo(time.bar, time.beat);
 }
 
-int TempoData::getTempo(int bar, int beat) {
+int TempoData::getTempo(int bar, int beat) const {
 	return getEvent(bar, beat);
 }
 
-TempoBrowser* TempoData::makeTempoBrowser(int beat, MeasureData* measureData) {
-	MeasureTime time = measureData->getMeasureTime(beat);
-	return makeTempoBrowser(time.bar, time.beat, measureData);
+TempoBrowser* TempoData::makeTempoBrowser(int beat, MeasureData* measureData) const {
+	if (measureData->getNumEvents() > 0) {
+		MeasureTime time = measureData->getMeasureTime(beat);
+		return makeTempoBrowser(time.bar, time.beat, measureData);
+	} else {
+		return nullptr;
+	}
 }
 
-TempoBrowser* TempoData::makeTempoBrowser(int bar, int beat, MeasureData* measureData) {
+TempoBrowser* TempoData::makeTempoBrowser(int bar, int beat, MeasureData* measureData) const {
 	TempoShiftEvent targetEncompassingEvent = getEncompassingEventMarker(bar, beat);
 	int index;
 	for (index = 0; index < getNumEvents(); index++) {
@@ -107,18 +122,24 @@ TempoBrowser* TempoData::makeTempoBrowser(int bar, int beat, MeasureData* measur
 			break;
 		}
 	}
-	return new TempoBrowser(this, measureData, MeasureTime(bar, beat), index);
+	return TempoBrowser::make(this, measureData, MeasureTime(bar, beat), index);
 }
 
-int TempoData::extractEventData(TempoShiftEvent eventObj) {
+int TempoData::extractEventData(TempoShiftEvent eventObj) const {
 	return eventObj.beatsPerMinute;
 }
-MeasureTime TempoData::convertToMeasureTime(TempoShiftEvent eventObj) {
+MeasureTime TempoData::convertToMeasureTime(TempoShiftEvent eventObj) const {
 	return eventObj;
 }
 
+TempoBrowser* TempoBrowser::make(const TempoData* source, const MeasureData* measureSource, MeasureTime startTime, int startIndex) {
+	if (source->getNumEvents() > 0 && measureSource->getNumEvents() > 0) {
+		return new TempoBrowser(source, measureSource, startTime, startIndex);
+	}
+	return nullptr;
+}
 
-TempoBrowser::TempoBrowser(TempoData* source, MeasureData* measureSource, MeasureTime startTime, int startIndex)
+TempoBrowser::TempoBrowser(const TempoData* source, const MeasureData* measureSource, MeasureTime startTime, int startIndex)
 : super(source, startTime, startIndex), mMeasures(measureSource->makeMeasureBrowser(startTime.bar, startTime.beat))
 {}
 
@@ -126,11 +147,11 @@ TempoBrowser::~TempoBrowser() {
 	delete mMeasures;
 }
 
-bool TempoBrowser::isValid() {
+bool TempoBrowser::isValid() const {
 	return super::isValid() && mMeasures->isValid();
 }
 
-int TempoBrowser::getCurrentTempo() {
+int TempoBrowser::getCurrentTempo() const {
 	return getCurrentEvent();
 }
 
@@ -144,20 +165,20 @@ void TempoBrowser::pushBackTime() {
 	setCurrentTime(mMeasures->getCurrentTime());
 }
 
-std::string SongData::getSong(int beat, MeasureData* measureData) {
+std::string SongData::getSong(int beat, MeasureData* measureData) const {
 	MeasureTime time = measureData->getMeasureTime(beat);
 	return getSong(time.bar, time.beat);
 }
 
-std::string SongData::getSong(int bar, int beat) {
+std::string SongData::getSong(int bar, int beat) const {
 	return getEvent(bar, beat);
 }
 
-std::string SongData::extractEventData(SongChangeEvent eventObj) {
+std::string SongData::extractEventData(SongChangeEvent eventObj) const {
 	return eventObj.songName;
 }
 
-MeasureTime SongData::convertToMeasureTime(SongChangeEvent eventObj) {
+MeasureTime SongData::convertToMeasureTime(SongChangeEvent eventObj) const {
 	return eventObj;
 }
 
@@ -181,5 +202,17 @@ TempoData* MusicData::getTempos() {
 }
 
 SongData* MusicData::getSongs() {
+	return mSongData;
+}
+
+const MeasureData* MusicData::getBeatsPerBar() const {
+	return mBeatsPerBar;
+}
+
+const TempoData* MusicData::getTempos() const {
+	return mTempos;
+}
+
+const SongData* MusicData::getSongs() const {
 	return mSongData;
 }

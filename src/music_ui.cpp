@@ -14,7 +14,7 @@ int BeatsPerBarGridHandler::getNumCols() {
 }
 
 void BeatsPerBarGridHandler::writeGridRow(wxGrid* grid, int row, BeatsPerBarShiftEvent mData) {
-	grid->SetCellValue(wxGridCellCoords(row, 0), wxString::Format(wxT("%i"), mData.bar));
+	grid->SetCellValue(wxGridCellCoords(row, 0), wxString::Format(wxT("%i"), mData.bar + 1));
 	grid->SetCellValue(wxGridCellCoords(row, 1), wxString::Format(wxT("%i"), mData.beatsPerBar));
 }
 
@@ -23,7 +23,10 @@ BeatsPerBarShiftEvent BeatsPerBarGridHandler::readGridRow(wxGrid* grid, int row)
 	if (!grid->GetCellValue(wxGridCellCoords(row, 0)).ToCLong(&bar) || !grid->GetCellValue(wxGridCellCoords(row, 1)).ToCLong(&beatsPerBar)) {
 		throw InvalidRowEntryException();
 	}
-	return BeatsPerBarShiftEvent((int)bar, (int)beatsPerBar);
+	if (bar < 1 || beatsPerBar < 0) {
+		throw InvalidRowEntryException();
+	}
+	return BeatsPerBarShiftEvent((int)bar - 1, (int)beatsPerBar);
 }
 
 
@@ -42,8 +45,8 @@ int TempoGridHandler::getNumCols() {
 }
 
 void TempoGridHandler::writeGridRow(wxGrid* grid, int row, TempoShiftEvent mData) {
-	grid->SetCellValue(wxGridCellCoords(row, 0), wxString::Format(wxT("%i"), mData.bar));
-	grid->SetCellValue(wxGridCellCoords(row, 1), wxString::Format(wxT("%i"), mData.beat));
+	grid->SetCellValue(wxGridCellCoords(row, 0), wxString::Format(wxT("%i"), mData.bar + 1));
+	grid->SetCellValue(wxGridCellCoords(row, 1), wxString::Format(wxT("%i"), mData.beat + 1));
 	grid->SetCellValue(wxGridCellCoords(row, 2), wxString::Format(wxT("%i"), mData.beatsPerMinute));
 }
 
@@ -52,7 +55,10 @@ TempoShiftEvent TempoGridHandler::readGridRow(wxGrid* grid, int row) {
 	if (!grid->GetCellValue(wxGridCellCoords(row, 0)).ToCLong(&bar) || !grid->GetCellValue(wxGridCellCoords(row, 1)).ToCLong(&beat) || !grid->GetCellValue(wxGridCellCoords(row, 2)).ToCLong(&tempo)) {
 		throw InvalidRowEntryException();
 	}
-	return TempoShiftEvent((int)bar, (int)beat, (int)tempo);
+	if (bar < 1 || beat < 1 || tempo < 1) {
+		throw InvalidRowEntryException();
+	}
+	return TempoShiftEvent((int)bar - 1, (int)beat - 1, (int)tempo);
 }
 
 SongGridHandler::SongGridHandler(MeasureEventData<SongChangeEvent, std::string>* source) 
@@ -70,8 +76,8 @@ int SongGridHandler::getNumCols() {
 }
 
 void SongGridHandler::writeGridRow(wxGrid* grid, int row, SongChangeEvent mData) {
-	grid->SetCellValue(wxGridCellCoords(row, 0), wxString::Format(wxT("%i"), mData.bar));
-	grid->SetCellValue(wxGridCellCoords(row, 1), wxString::Format(wxT("%i"), mData.beat));
+	grid->SetCellValue(wxGridCellCoords(row, 0), wxString::Format(wxT("%i"), mData.bar + 1));
+	grid->SetCellValue(wxGridCellCoords(row, 1), wxString::Format(wxT("%i"), mData.beat + 1));
 	grid->SetCellValue(wxGridCellCoords(row, 2), wxString(mData.songName.c_str()));
 }
 
@@ -80,7 +86,10 @@ SongChangeEvent SongGridHandler::readGridRow(wxGrid* grid, int row) {
 	if (!grid->GetCellValue(wxGridCellCoords(row, 0)).ToCLong(&bar) || !grid->GetCellValue(wxGridCellCoords(row, 1)).ToCLong(&beat)) {
 		throw InvalidRowEntryException();
 	}
-	return SongChangeEvent((int)bar, (int)beat, grid->GetCellValue(wxGridCellCoords(row, 2)).ToStdString());
+	if (bar < 1 || beat < 1) {
+		throw InvalidRowEntryException();
+	}
+	return SongChangeEvent((int)bar - 1, (int)beat - 1, grid->GetCellValue(wxGridCellCoords(row, 2)).ToStdString());
 }
 
 
@@ -139,7 +148,7 @@ void MeasureDataGridPage::OnElementChanged(wxGridEvent& eventObj) {
 	} else {
 		emptyRowCreated = true;
 		for (int col = 0; col < mGrid->GetNumberCols(); col++) {
-			if (!mGrid->GetCellValue(changedRow, changedCol).IsEmpty()) {
+			if (!mGrid->GetCellValue(changedRow, col).IsEmpty()) {
 				emptyRowCreated = false;
 				break;
 			}
@@ -153,6 +162,7 @@ void MeasureDataGridPage::OnElementChanged(wxGridEvent& eventObj) {
 		mGridHandler->sortGrid(mGrid);
 	}
 	mIsChanged = true;
+	Layout();
 }
 
 bool MeasureDataGridPage::isModified() {
@@ -165,9 +175,15 @@ void MeasureDataGridPage::save() {
 }
 
 
-BEGIN_EVENT_TABLE(MeasureDataEditor, wxDialog)
-EVT_BUTTON(wxID_CLOSE, MeasureDataEditor::OnClose)
-EVT_BUTTON(wxID_SAVE, MeasureDataEditor::OnSave)
+enum MeasureDataEditorEvents
+{
+	MeasureDataEditor_Close = 100,
+	MeasureDataEditor_Save
+};
+
+BEGIN_EVENT_TABLE(MeasureDataEditor, wxFrame)
+EVT_BUTTON(MeasureDataEditor_Close, MeasureDataEditor::OnClose)
+EVT_BUTTON(MeasureDataEditor_Save, MeasureDataEditor::OnSave)
 END_EVENT_TABLE()
 
 
@@ -183,11 +199,8 @@ MeasureDataEditor::MeasureDataEditor(MusicData* musicData, wxWindow *parent, wxW
 	Create(parent, id, caption, pos, size, style);
 }
 
-MeasureDataEditor::~MeasureDataEditor() {
-	for (int index = 0; index < mGridHandlers.size(); index++) {
-		delete mGridHandlers[index];
-	}
-}
+MeasureDataEditor::~MeasureDataEditor() 
+{}
 
 bool MeasureDataEditor::Create(wxWindow *parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style) {
 	CreateControls();
@@ -207,17 +220,18 @@ void MeasureDataEditor::CreateControls() {
 	wxBoxSizer *windowSizer = new wxBoxSizer(wxVERTICAL);
 	SetSizer(windowSizer);
 
-	wxButton * closeButton = new wxButton(this, wxID_CLOSE, wxT("&Close"));
+	wxButton * closeButton = new wxButton(this, MeasureDataEditor_Close, wxT("&Close"));
 	closeButton->SetDefault();
-	wxButton * saveButton = new wxButton(this, wxID_SAVE, wxT("&Save"));
+	wxButton * saveButton = new wxButton(this, MeasureDataEditor_Save, wxT("&Save"));
 
-	wxNotebook* mGridNotebook = new wxNotebook(this, wxID_ANY);
+	wxNotebook* mGridNotebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxSize(300, 450));
 	mGridNotebook->Hide();
 	for (int index = 0; index < mGridHandlers.size(); index++) {
 		mPages.push_back(new MeasureDataGridPage(mGridHandlers[index], mGridNotebook, wxID_ANY));
 		mGridNotebook->AddPage(mPages[index], mPageNames[index]);
 	}
 	mGridNotebook->SetSelection(0);
+	//mGridNotebook->SetFocus();
 
 	windowSizer->Add(mGridNotebook, wxSizerFlags().Expand().Border(wxALL, 5));
 	windowSizer->Add(saveButton, wxSizerFlags().Border(wxALL, 5));

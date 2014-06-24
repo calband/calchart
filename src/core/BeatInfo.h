@@ -3,32 +3,60 @@
 
 #include <vector>
 #include <iostream>
+
+/**
+ * Records the timing for each beat in the show, in milliseconds.
+ */
 class BeatInfo {
 public:
-	int beatCount = 0;
-	std::vector<long> beatsList;
-
-	/*Adds a beat.
-	time = the time at which the beat occurs (that is, the number of milliseconds since the beginning of the song to the beat)  */
+	/**
+	 * Adds a beat.
+	 * @param time The time at which the beat occurs, in milliseconds.
+	 */
 	void addBeat(long time);
 
-	/*Removes the beat that occurs at a particular time. */
+	/**
+	 * Removes a beat.
+	 * @param time The time from which to remove a beat.
+	 */
 	void removeBeat(long time);
 
-	/* Removes a particular beat. (e.g. remove the 5th beat translates to removeBeat(5), and remove the 0th beat translates to removeBeat(0)) */
+	/** 
+	 * Removes a beat.
+	 * @param beatNum The index of the beat to remove. A show starts at the zeroth beat.
+	 */
 	void removeBeatByIndex(int beatNum);
 
-	/*Clears all beats */
+	/**
+	 * Clears all beats.
+	 */
 	void clearBeats();
 
-	/* Returns the beatNum of the beat occurring at a particular time. E.g. if the 1st beat occurs at 20ms, and the second beat occurs at 30 ms, then getCurrentBeat(25) returns 1, because 25 ms occurs during the first beat, and before the second. */
-	int getCurrentBeat(long time);
+	/** 
+	 * Returns the index of the active beat for a particular time. 
+	 * Example: if beat 4 occurs at 30 milliseconds, and beat 5 occurs at 50 milliseconds, then the active beat for all times between 30 and 50 milliseconds will be 4.
+	 * @param time The time to check.
+	 * @return The beat that is active at the given time.
+	 */
+	int getCurrentBeat(long time) const;
 
-	/* Returns the time, in milliseconds, at which a particular beat occurs. */
-	long getBeat(int beatNum);
+	/**
+	 * Returns the time, in milliseconds, at which the specified beat occurs.
+	 * @beatNum The index of the target beat. The show starts at the zeroth beat.
+	 * @return The time, in milliseconds, at which the specified beat occurs.
+	 */
+	long getBeat(int beatNum) const;
 
-	/* Returns the total number of beats in the music. */
-	int getNumBeats();
+	/** 
+	 * Returns the total number of beats.
+	 * @return The total number of beats.
+	 */
+	int getNumBeats() const;
+private:
+	/**
+	 * A list containing all of the beats.
+	 */
+	std::vector<long> mBeatsList;
 };
 
 #endif

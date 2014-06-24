@@ -165,6 +165,9 @@ public:
 	bool AlreadyHasPrintContinuity() const;
 
 	MusicData* GetMusicData();
+	const MusicData* GetMusicData() const;
+
+	const CC_show* getShow() const;
 
 private:
 	// Autosaving:
@@ -199,7 +202,7 @@ private:
 	const ShowMode* mMode;
 	AutoSaveTimer mTimer;
 	
-	MusicData* mMusicData;
+	std::unique_ptr<MusicData> mMusicData;
 };
 
 #endif // _CALCHARTDOC_H_

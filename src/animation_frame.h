@@ -89,7 +89,7 @@ public:
 	void OnCmd_ImportMusic(wxCommandEvent& event);
 
 	// Called by the view
-	void ToggleTimer();
+	void ToggleAnimate();
 	void UpdatePanel();
 	
 	bool OnBeat() const;
@@ -153,13 +153,9 @@ private:
 	FancyTextWin *mErrorText;
 	
 // timer stuff:
-	void StartTimer();
-	void StopTimer();
 	unsigned GetTempo() const;
 	void SetTempo(unsigned tempo);
-	wxTimer *mTimer;
 	unsigned mTempo;
-	bool mTimerOn;
 
 	// when we go, let people know
 	std::function<void ()> mWhenClosed;

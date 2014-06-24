@@ -120,6 +120,7 @@
     <ClInclude Include="..\..\src\core\fileio\json_import_gram.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\json_unit_tests.h" />
     <ClInclude Include="..\..\src\core\math_utils.h" />
     <ClInclude Include="..\..\src\core\measure_event_data.h" />
     <ClInclude Include="..\..\src\core\music_data.h" />
@@ -175,10 +176,10 @@
     <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
     <ClCompile Include="..\..\src\core\fileio\cont_file_builder.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\core\fileio\cont_file_formatter.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\core\fileio\json_file_formatter.cpp" />
     <ClCompile Include="..\..\src\core\fileio\json_import_gram.cpp">
@@ -187,6 +188,7 @@
     <ClCompile Include="..\..\src\core\fileio\json_import_scan.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\json_unit_tests.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\core\music_data.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />

@@ -104,6 +104,8 @@ public:
 	
 	void OnCmd_SetMusicData(wxCommandEvent& event);
 
+	void OnCmd_GenerateContFile(wxCommandEvent& event);
+
 	void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 
 	void OnSize(wxSizeEvent& event);

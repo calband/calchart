@@ -144,18 +144,33 @@ void JSONContainerValue::destroyContent() {
 	}
 }
 
-void JSONObjectValue::addValue(std::string binding, JSONValue* value) {
-	mBindings.push_back(binding);
-	mValues.push_back(value);
+void JSONObjectValue::setValue(std::string binding, JSONValue* value) {
+	int bindingIndex = getBindingIndex(binding);
+	if (bindingIndex >= 0) {
+		delete mValues[bindingIndex];
+		mValues[bindingIndex] = value;
+	} else {
+		mBindings.push_back(binding);
+		mValues.push_back(value);
+	}
 }
 
 JSONValue* JSONObjectValue::getContentValue(std::string binding) {
+	int targetIndex = getBindingIndex(binding);
+	if (targetIndex >= 0) {
+		return getContentValue(targetIndex);
+	} else {
+		return nullptr;
+	}
+}
+
+int JSONObjectValue::getBindingIndex(std::string binding) {
 	for (int index = 0; index < getNumContentValues(); index++) {
 		if (getBinding(index) == binding) {
-			return getContentValue(index);
+			return index;
 		}
 	}
-	return nullptr;
+	return -1;
 }
 
 void JSONObjectValue::exportContentToken(std::vector<JSONToken*>& tokenPool, int index) {

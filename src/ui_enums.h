@@ -79,6 +79,7 @@ enum
 	CALCHART__RemoveBackgroundImage,
 	CALCHART__ResetReferencePoint,
 	CALCHART__EditMusicData,
+	CALCHART__GenerateContFile,
 
 	CALCHART__anim_reanimate,
 	CALCHART__anim_select_coll,
