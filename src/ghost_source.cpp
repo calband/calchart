@@ -1,39 +1,42 @@
 #include "ghost_source.h"
 
 RelativeGhostSource::RelativeGhostSource(int relativeTarget)
-: mRelativeSheet(relativeTarget), mGhost(nullptr)
+: mRelativeSheet(relativeTarget), mDoc(nullptr), mCurrentSheet(0)
 {}
 
 CC_sheet* RelativeGhostSource::getGhostSheet() {
-	return mGhost;
+	if (mDoc == nullptr) {
+		return nullptr;
+	}
+	int targetSheet = mCurrentSheet + mRelativeSheet;
+	if (targetSheet >= 0 && targetSheet < mDoc->GetNumSheets()) {
+		return &(*(mDoc->GetNthSheet(targetSheet)));
+	} else {
+		return nullptr;
+	}
 }
 
 void RelativeGhostSource::update(CalChartDoc* doc, int currentSheet) {
-	int targetSheet = currentSheet + mRelativeSheet;
-	if (targetSheet >= 0 && targetSheet < doc->GetNumSheets()) {
-		mGhost = &(*(doc->GetNthSheet(targetSheet)));
-	} else {
-		mGhost = nullptr;
-	}
+	mCurrentSheet = currentSheet;
+	mDoc = doc;
 }
 
 AbsoluteGhostSource::AbsoluteGhostSource(int targetSheet)
-: mTargetSheet(targetSheet), mGhost(nullptr), mIsActive(false)
+: mTargetSheet(targetSheet), mDoc(nullptr), mCurrentSheet(0)
 {}
 
 CC_sheet* AbsoluteGhostSource::getGhostSheet() {
-	if (mIsActive) {
-		return mGhost;
+	if (mCurrentSheet == mTargetSheet || mDoc == nullptr) {
+		return nullptr;
 	}
-	return nullptr;
+	if (mTargetSheet >= 0 && mTargetSheet < mDoc->GetNumSheets()) {
+		return &(*(mDoc->GetNthSheet(mTargetSheet)));
+	} else {
+		return nullptr;
+	}
 }
 
 void AbsoluteGhostSource::update(CalChartDoc* doc, int currentSheet) {
-	if (mTargetSheet >= 0 && mTargetSheet < doc->GetNumSheets()) {
-		mGhost = &(*(doc->GetNthSheet(mTargetSheet)));
-	}
-	else {
-		mGhost = nullptr;
-	}
-	mIsActive = (currentSheet != mTargetSheet);
+	mDoc = doc;
+	mCurrentSheet = currentSheet;
 }
