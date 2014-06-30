@@ -2,7 +2,7 @@
 #define _BEATS_FILE_H_
 
 #include <wx\stream.h>
-#include "core\BeatInfo.h"
+#include "beat_info.h"
 
 /**
  * Used to import/export beats files.

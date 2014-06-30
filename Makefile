@@ -64,7 +64,6 @@ $(GENDIR)/%.cpp: $(SRCDIR)/%.y
 $(GENDIR)/%.cpp: $(SRCDIR)/%.l
 	@mkdir -p $(GENDIR)
 	$(LEX) $(LFLAGS) -t $< > $@
-	
 
 %.bmp: %.xbm
 # use ImageMagick to convert

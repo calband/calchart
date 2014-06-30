@@ -44,7 +44,7 @@
 #include "cc_sheet.h"
 #include "cc_point.h"
 #include "music_ui.h"
-#include "core\fileio\cont_file_builder.h"
+#include "cont_file_builder.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>

@@ -1,5 +1,5 @@
 #include "play_animation_controller.h"
-#include "core\cc_sheet.h"
+#include "cc_sheet.h"
 
 #include "animation_frame.h"
 #include "animation_view.h"

@@ -82,6 +82,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\generated\json_import_gram.hpp" />
     <ClInclude Include="..\..\src\animate_player_tool.h" />
     <ClInclude Include="..\..\src\animation_canvas.h" />
     <ClInclude Include="..\..\src\animation_frame.h" />
@@ -99,12 +100,14 @@
     <ClInclude Include="..\..\src\cc_omniview_constants.h" />
     <ClInclude Include="..\..\src\cc_preferences_ui.h" />
     <ClInclude Include="..\..\src\confgr.h" />
+    <ClInclude Include="..\..\src\cont_file_builder.h" />
+    <ClInclude Include="..\..\src\cont_file_formatter.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
     <ClInclude Include="..\..\src\core\animate.h" />
     <ClInclude Include="..\..\src\core\animatecommand.h" />
     <ClInclude Include="..\..\src\core\animatecompile.h" />
     <ClInclude Include="..\..\src\core\animate_types.h" />
-    <ClInclude Include="..\..\src\core\BeatInfo.h" />
+    <ClInclude Include="..\..\src\core\beat_info.h" />
     <ClInclude Include="..\..\src\core\cc_continuity.h" />
     <ClInclude Include="..\..\src\core\cc_coord.h" />
     <ClInclude Include="..\..\src\core\cc_point.h" />
@@ -114,13 +117,6 @@
     <ClInclude Include="..\..\src\core\cc_text.h" />
     <ClInclude Include="..\..\src\core\cc_types.h" />
     <ClInclude Include="..\..\src\core\cont.h" />
-    <ClInclude Include="..\..\src\core\fileio\cont_file_builder.h" />
-    <ClInclude Include="..\..\src\core\fileio\cont_file_formatter.h" />
-    <ClInclude Include="..\..\src\core\fileio\json_file_formatter.h" />
-    <ClInclude Include="..\..\src\core\fileio\json_import_gram.hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\json_unit_tests.h" />
     <ClInclude Include="..\..\src\core\math_utils.h" />
     <ClInclude Include="..\..\src\core\measure_event_data.h" />
     <ClInclude Include="..\..\src\core\music_data.h" />
@@ -128,6 +124,8 @@
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
+    <ClInclude Include="..\..\src\json_file_formatter.h" />
+    <ClInclude Include="..\..\src\json_unit_tests.h" />
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\music_ui.h" />
@@ -145,6 +143,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\generated\contgram.cpp" />
     <ClCompile Include="..\..\generated\contscan.cpp" />
+    <ClCompile Include="..\..\generated\json_import_gram.cpp" />
+    <ClCompile Include="..\..\generated\json_import_scan.cpp" />
     <ClCompile Include="..\..\src\animate_player_tool.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
@@ -162,11 +162,13 @@
     <ClCompile Include="..\..\src\cc_omniview_canvas.cpp" />
     <ClCompile Include="..\..\src\cc_preferences_ui.cpp" />
     <ClCompile Include="..\..\src\confgr.cpp" />
+    <ClCompile Include="..\..\src\cont_file_builder.cpp" />
+    <ClCompile Include="..\..\src\cont_file_formatter.cpp" />
     <ClCompile Include="..\..\src\cont_ui.cpp" />
     <ClCompile Include="..\..\src\core\animate.cpp" />
     <ClCompile Include="..\..\src\core\animatecommand.cpp" />
     <ClCompile Include="..\..\src\core\animatecompile.cpp" />
-    <ClCompile Include="..\..\src\core\BeatInfo.cpp" />
+    <ClCompile Include="..\..\src\core\beat_info.cpp" />
     <ClCompile Include="..\..\src\core\cc_continuity.cpp" />
     <ClCompile Include="..\..\src\core\cc_coord.cpp" />
     <ClCompile Include="..\..\src\core\cc_point.cpp" />
@@ -175,26 +177,14 @@
     <ClCompile Include="..\..\src\core\cc_show.cpp" />
     <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
-    <ClCompile Include="..\..\src\core\fileio\cont_file_builder.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\fileio\cont_file_formatter.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\fileio\json_file_formatter.cpp" />
-    <ClCompile Include="..\..\src\core\fileio\json_import_gram.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\fileio\json_import_scan.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\json_unit_tests.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\core\music_data.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
+    <ClCompile Include="..\..\src\json_file_formatter.cpp" />
+    <ClCompile Include="..\..\src\json_unit_tests.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
     <ClCompile Include="..\..\src\music_ui.cpp" />
     <ClCompile Include="..\..\src\play_animation_controller.cpp">

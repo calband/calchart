@@ -4,8 +4,8 @@
 #include <wx/timer.h>
 #include <wx/mediactrl.h>
 
-#include "core\BeatInfo.h"
-#include "core\music_data.h"
+#include "beat_info.h"
+#include "music_data.h"
 
 class AnimationView;
 class AnimationFrame;

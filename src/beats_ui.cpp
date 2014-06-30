@@ -1,5 +1,5 @@
 #include "beats_ui.h"
-#include "core\fileio\json_file_formatter.h"
+#include "json_file_formatter.h"
 
 #include <wx/tglbtn.h>
 #include <wx/wfstream.h>

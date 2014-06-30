@@ -30,7 +30,7 @@
 #include "basic_ui.h"
 #include "confgr.h"
 #include "beats_ui.h"
-#include "core\BeatInfo.h"
+#include "beat_info.h"
 #include "animate_player_tool.h"
 
 #include <wx/timer.h>

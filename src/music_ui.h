@@ -2,7 +2,7 @@
 #include <wx/grid.h>
 #include <wx/notebook.h>
 
-#include "core/music_data.h"
+#include "music_data.h"
 
 
 /**

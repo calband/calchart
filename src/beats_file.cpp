@@ -1,6 +1,6 @@
 #include "beats_file.h"
-#include "core\fileio\json_file_formatter.h"
-#include "core\BeatInfo.h"
+#include "json_file_formatter.h"
+#include "beat_info.h"
 
 extern int importJSON();
 extern const char *json_inputbuffer;

@@ -3,7 +3,7 @@
 #include <wx\button.h>
 
 #include "animation_view.h"
-#include "core\BeatInfo.h"
+#include "beat_info.h"
 #include "beats_file.h"
 
 /**
