@@ -206,7 +206,6 @@ void GeneralSetup::CreateControls()
 
 void GeneralSetup::Init()
 {
-	ReadConfig();
 	// first read out the defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
