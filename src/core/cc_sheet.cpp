@@ -132,7 +132,7 @@ static void CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index, 	std::map
 	}
 }
 
-CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream, Version_3_3_and_earlier) :
+CC_sheet::CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier) :
 mAnimationContinuity(MAX_NUM_SYMBOLS),
 pts(numPoints)
 {
@@ -299,7 +299,7 @@ pts(numPoints)
 	}
 }
 
-CC_sheet::CC_sheet(CC_show *show, size_t numPoints, std::istream& stream, Current_version_and_later) :
+CC_sheet::CC_sheet(size_t numPoints, std::istream& stream, Current_version_and_later) :
 mAnimationContinuity(MAX_NUM_SYMBOLS),
 pts(numPoints)
 {

@@ -45,8 +45,8 @@ class CC_sheet
 {
 public:
 	CC_sheet(CC_show *shw);
-	CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
-	CC_sheet(CC_show *shw, size_t numPoints, std::istream& stream, Current_version_and_later);
+	CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
+	CC_sheet(size_t numPoints, std::istream& stream, Current_version_and_later);
 	CC_sheet(CC_show *shw, const std::string& newname);
 	~CC_sheet();
 
