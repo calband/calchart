@@ -33,46 +33,10 @@
 #include "cc_text.h"
 #include "animate.h"
 #include "animatecommand.h"
+#include "draw_utils.h"
 #include <memory>
 
 extern wxFont *pointLabelFont;
-
-// helper classes for saving and restoring state
-class SaveAndRestore_DeviceOrigin
-{
-	wxDC& dc;
-	wxCoord origX, origY;
-public:
-	SaveAndRestore_DeviceOrigin(wxDC& dc_) : dc(dc_) { dc.GetDeviceOrigin(&origX, &origY); }
-	~SaveAndRestore_DeviceOrigin() { dc.SetDeviceOrigin(origX, origY); }
-};
-
-class SaveAndRestore_UserScale
-{
-	wxDC& dc;
-	double origXscale, origYscale;
-public:
-	SaveAndRestore_UserScale(wxDC& dc_) : dc(dc_) { dc.GetUserScale(&origXscale, &origYscale); }
-	~SaveAndRestore_UserScale() { dc.SetUserScale(origXscale, origYscale); }
-};
-
-class SaveAndRestore_TextForeground
-{
-	wxDC& dc;
-	wxColour origForegroundColor;
-public:
-	SaveAndRestore_TextForeground(wxDC& dc_) : dc(dc_), origForegroundColor(dc.GetTextForeground()) {}
-	~SaveAndRestore_TextForeground() { dc.SetTextForeground(origForegroundColor); }
-};
-
-class SaveAndRestore_Font
-{
-	wxDC& dc;
-	wxFont origFont;
-public:
-	SaveAndRestore_Font(wxDC& dc_) : dc(dc_), origFont(dc.GetFont()) {}
-	~SaveAndRestore_Font() { dc.SetFont(origFont); }
-};
 
 // draw text centered around x (though still at y down)
 void DrawCenteredText(wxDC& dc, const wxString& text, const wxPoint& pt)

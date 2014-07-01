@@ -338,3 +338,60 @@ ShowModeList_Find(const ShowModeList& showModes, const wxString& which)
 		return (*i).get();
 	return NULL;
 }
+
+std::unique_ptr<ShowMode>
+CreateShowMode(const wxString& which, std::vector<long> values)
+{
+	unsigned short whash = values[0];
+	unsigned short ehash = values[1];
+	CC_coord bord1, bord2;
+	bord1.x = Int2Coord(values[2]);
+	bord1.y = Int2Coord(values[3]);
+	bord2.x = Int2Coord(values[4]);
+	bord2.y = Int2Coord(values[5]);
+	CC_coord size, offset;
+	offset.x = Int2Coord(-values[6]);
+	offset.y = Int2Coord(-values[7]);
+	size.x = Int2Coord(values[8]);
+	size.y = Int2Coord(values[9]);
+	return std::unique_ptr<ShowMode>(new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
+}
+
+std::unique_ptr<ShowMode>
+CreateSpringShowMode(const wxString& which, std::vector<long> values)
+{
+	unsigned char which_spr_yards = values[0];
+	CC_coord bord1, bord2;
+	bord1.x = Int2Coord(values[1]);
+	bord1.y = Int2Coord(values[2]);
+	bord2.x = Int2Coord(values[3]);
+	bord2.y = Int2Coord(values[4]);
+	
+	short mode_steps_x = values[5];
+	short mode_steps_y = values[6];
+	short mode_steps_w = values[7];
+	short mode_steps_h = values[8];
+	short eps_stage_x = values[9];
+	short eps_stage_y = values[10];
+	short eps_stage_w = values[11];
+	short eps_stage_h = values[12];
+	short eps_field_x = values[13];
+	short eps_field_y = values[14];
+	short eps_field_w = values[15];
+	short eps_field_h = values[16];
+	short eps_text_left = values[17];
+	short eps_text_right = values[18];
+	short eps_text_top = values[19];
+	short eps_text_bottom = values[20];
+	return std::unique_ptr<ShowMode>(new ShowModeSprShow(which, bord1, bord2,
+														 which_spr_yards,
+														 mode_steps_x, mode_steps_y,
+														 mode_steps_w, mode_steps_h,
+														 eps_stage_x, eps_stage_y,
+														 eps_stage_w, eps_stage_h,
+														 eps_field_x, eps_field_y,
+														 eps_field_w, eps_field_h,
+														 eps_text_left, eps_text_right,
+														 eps_text_top, eps_text_bottom));
+}
+

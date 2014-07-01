@@ -31,6 +31,7 @@
 
 class AnimationFrame;
 class FieldView;
+class CalChartConfiguration;
 
 class AnimationView : public wxView
 {
@@ -41,6 +42,7 @@ public:
 //	virtual bool OnCreate(wxDocument *doc, long flags);
 //	virtual bool OnClose(bool deleteWindow = true);
     virtual void OnDraw(wxDC *dc);
+    void OnDraw(wxDC *dc, const CalChartConfiguration& config);
     virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
 
 	void RefreshFrame();

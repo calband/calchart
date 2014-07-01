@@ -29,82 +29,35 @@
 #include <wx/file.h>
 #include <ctype.h>
 #include <string>
+#include <array>
 
 #include "calchartapp.h"
 #include "confgr.h"
 #include "modes.h"
 #include "cc_omniview_constants.h"
 
-const wxString ColorNames[COLOR_NUM] =
+const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 {
-	wxT("FIELD"),
-	wxT("FIELD DETAIL"),
-	wxT("FIELD TEXT"),
-	wxT("POINT"),
-	wxT("POINT TEXT"),
-	wxT("HILIT POINT"),
-	wxT("HILIT POINT TEXT"),
-	wxT("REF POINT"),
-	wxT("REF POINT TEXT"),
-	wxT("HILIT REF POINT"),
-	wxT("HILIT REF POINT TEXT"),
-	wxT("ANIM FRONT"),
-	wxT("ANIM BACK"),
-	wxT("ANIM SIDE"),
-	wxT("HILIT ANIM FRONT"),
-	wxT("HILIT ANIM BACK"),
-	wxT("HILIT ANIM SIDE"),
-	wxT("ANIM COLLISION"),
-	wxT("CONTINUITY PATHS"),
-	wxT("SHAPES")
-};
-
-const wxString DefaultColors[COLOR_NUM] =
-{
-	wxT("FOREST GREEN"),
-	wxT("WHITE"),
-	wxT("BLACK"),
-	wxT("WHITE"),
-	wxT("BLACK"),
-	wxT("YELLOW"),
-	wxT("BLACK"),
-	wxT("PURPLE"),
-	wxT("BLACK"),
-	wxT("PURPLE"),
-	wxT("BLACK"),
-	wxT("WHITE"),
-	wxT("YELLOW"),
-	wxT("SKY BLUE"),
-	wxT("RED"),
-	wxT("RED"),
-	wxT("RED"),
-	wxT("PURPLE"),
-	wxT("RED"),
-	wxT("ORANGE")
-};
-
-const int DefaultPenWidth[COLOR_NUM] =
-{
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	2,
+	{ wxT("FIELD"),					wxT("FOREST GREEN"),	1 },
+	{ wxT("FIELD DETAIL"),			wxT("WHITE"),			1 },
+	{ wxT("FIELD TEXT"),			wxT("BLACK"),			1 },
+	{ wxT("POINT"),					wxT("WHITE"),			1 },
+	{ wxT("POINT TEXT"),			wxT("BLACK"),			1 },
+	{ wxT("HILIT POINT"),			wxT("YELLOW"),			1 },
+	{ wxT("HILIT POINT TEXT"),		wxT("BLACK"),			1 },
+	{ wxT("REF POINT"),				wxT("PURPLE"),			1 },
+	{ wxT("REF POINT TEXT"),		wxT("BLACK"),			1 },
+	{ wxT("HILIT REF POINT"),		wxT("PURPLE"),			1 },
+	{ wxT("HILIT REF POINT TEXT"),	wxT("BLACK"),			1 },
+	{ wxT("ANIM FRONT"),			wxT("WHITE"),			1 },
+	{ wxT("ANIM BACK"),				wxT("YELLOW"),			1 },
+	{ wxT("ANIM SIDE"),				wxT("SKY BLUE"),		1 },
+	{ wxT("HILIT ANIM FRONT"),		wxT("RED"),				1 },
+	{ wxT("HILIT ANIM BACK"),		wxT("RED"),				1 },
+	{ wxT("HILIT ANIM SIDE"),		wxT("RED"),				1 },
+	{ wxT("ANIM COLLISION"),		wxT("PURPLE"),			1 },
+	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
+	{ wxT("SHAPES"),				wxT("ORANGE"),			2 },
 };
 
 CalChartConfiguration& GetConfig()
@@ -264,11 +217,6 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool, false);
 //IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long, 450);
 
 
-// Color is more complicated, we use functions for setting that
-wxPen CalChartPens[COLOR_NUM];
-wxBrush CalChartBrushes[COLOR_NUM];
-std::bitset<COLOR_NUM> s_brush_pen_valid;
-
 ///// Show mode configuration /////
 
 const wxString kShowModeStrings[SHOWMODE_NUM] =
@@ -341,60 +289,12 @@ CalChartConfiguration::GetMode(const wxString& which)
 	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
 	if (iter != std::end(kShowModeStrings))
 	{
-		auto i = std::distance(std::begin(kShowModeStrings), iter);
-		std::vector<long> values = GetConfig().GetConfigurationShowMode(i);
-		unsigned short whash = values[0];
-		unsigned short ehash = values[1];
-		CC_coord bord1, bord2;
-		bord1.x = Int2Coord(values[2]);
-		bord1.y = Int2Coord(values[3]);
-		bord2.x = Int2Coord(values[4]);
-		bord2.y = Int2Coord(values[5]);
-		CC_coord size, offset;
-		offset.x = Int2Coord(-values[6]);
-		offset.y = Int2Coord(-values[7]);
-		size.x = Int2Coord(values[8]);
-		size.y = Int2Coord(values[9]);
-		return std::unique_ptr<ShowMode>(new ShowModeStandard(kShowModeStrings[i], size, offset, bord1, bord2, whash, ehash));
+		return CreateShowMode(which, GetConfig().GetConfigurationShowMode(std::distance(std::begin(kShowModeStrings), iter)));
 	}
 	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
 	if (iter != std::end(kSpringShowModeStrings))
 	{
-		auto i = std::distance(std::begin(kSpringShowModeStrings), iter);
-		std::vector<long> values = GetConfig().GetConfigurationSpringShowMode(i);
-		unsigned char which_spr_yards = values[0];
-		CC_coord bord1, bord2;
-		bord1.x = Int2Coord(values[1]);
-		bord1.y = Int2Coord(values[2]);
-		bord2.x = Int2Coord(values[3]);
-		bord2.y = Int2Coord(values[4]);
-		
-		short mode_steps_x = values[5];
-		short mode_steps_y = values[6];
-		short mode_steps_w = values[7];
-		short mode_steps_h = values[8];
-		short eps_stage_x = values[9];
-		short eps_stage_y = values[10];
-		short eps_stage_w = values[11];
-		short eps_stage_h = values[12];
-		short eps_field_x = values[13];
-		short eps_field_y = values[14];
-		short eps_field_w = values[15];
-		short eps_field_h = values[16];
-		short eps_text_left = values[17];
-		short eps_text_right = values[18];
-		short eps_text_top = values[19];
-		short eps_text_bottom = values[20];
-		return std::unique_ptr<ShowMode>(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
-																							which_spr_yards,
-																							mode_steps_x, mode_steps_y,
-																							mode_steps_w, mode_steps_h,
-																							eps_stage_x, eps_stage_y,
-																							eps_stage_w, eps_stage_h,
-																							eps_field_x, eps_field_y,
-																							eps_field_w, eps_field_h,
-																							eps_text_left, eps_text_right,
-																							eps_text_top, eps_text_bottom));
+		return CreateSpringShowMode(which, GetConfig().GetConfigurationSpringShowMode(std::distance(std::begin(kSpringShowModeStrings), iter)));
 	}
 	return {};
 }
@@ -502,38 +402,57 @@ CalChartConfiguration::ClearConfigurationSpringShowMode(size_t which)
 }
 
 ///// Color Configuration /////
-void ReadConfigColor(CalChartColors i)
+// Color is more complicated, we use functions for setting that
+std::array<long, 3> sColors[COLOR_NUM];
+long sWidths[COLOR_NUM];
+std::bitset<COLOR_NUM> s_color_valid;
+std::bitset<COLOR_NUM> s_width_valid;
+
+std::array<long, 3> ReadConfigColor(CalChartColors i)
 {
-	if (s_brush_pen_valid.test(i))
+	if (s_color_valid.test(i))
 	{
-		return;
+		return sColors[i];
 	}
 	wxConfigBase *config = wxConfigBase::Get();
 	
 	// read out the color configuration:
 	config->SetPath(wxT("/COLORS"));
-	wxColour c;
-	wxString rbuf = ColorNames[i] + wxT("_Red");
-	wxString gbuf = ColorNames[i] + wxT("_Green");
-	wxString bbuf = ColorNames[i] + wxT("_Blue");
+	wxString rbuf = std::get<0>(ColorInfo[i]) + wxT("_Red");
+	wxString gbuf = std::get<0>(ColorInfo[i]) + wxT("_Green");
+	wxString bbuf = std::get<0>(ColorInfo[i]) + wxT("_Blue");
 	if (config->Exists(rbuf) && config->Exists(gbuf) && config->Exists(bbuf))
 	{
 		long r = config->Read(rbuf, 0l);
 		long g = config->Read(gbuf, 0l);
 		long b = config->Read(bbuf, 0l);
-		c = wxColour(r, g, b);
+		sColors[i] = { {r, g, b} };
 	}
 	else
 	{
-		c = wxColour(DefaultColors[i]);
+		auto color = wxColour(std::get<1>(ColorInfo[i]));
+		sColors[i] = { {color.Red(), color.Green(), color.Blue()} };
 	}
-	CalChartBrushes[i] = *wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
+	s_color_valid.set(i);
+	return sColors[i];
+}
+
+long ReadConfigColorWidth(CalChartColors i)
+{
+	if (s_width_valid.test(i))
+	{
+		return sWidths[i];
+	}
+	wxConfigBase *config = wxConfigBase::Get();
+	
+	// read out the color configuration:
+	config->SetPath(wxT("/COLORS"));
 	// store widths in a subgroup
 	config->SetPath(wxT("WIDTH"));
-	long width = DefaultPenWidth[i];
-	config->Read(ColorNames[i], &width);
-	CalChartPens[i] = *wxThePenList->FindOrCreatePen(c, width, wxSOLID);
-	s_brush_pen_valid.set(i);
+	sWidths[i] = std::get<2>(ColorInfo[i]);
+	config->Read(std::get<0>(ColorInfo[i]), &sWidths[i]);
+	s_width_valid.set(i);
+	return sWidths[i];
 }
 
 void
@@ -542,16 +461,17 @@ CalChartConfiguration::ClearConfigColor(size_t selection)
 	wxConfigBase *config = wxConfigBase::Get();
 	
 	config->SetPath(wxT("/COLORS"));
-	wxString rbuf = ColorNames[selection] + wxT("_Red");
+	wxString rbuf = std::get<0>(ColorInfo[selection]) + wxT("_Red");
 	config->DeleteEntry(rbuf);
-	wxString gbuf = ColorNames[selection] + wxT("_Green");
+	wxString gbuf = std::get<0>(ColorInfo[selection]) + wxT("_Green");
 	config->DeleteEntry(gbuf);
-	wxString bbuf = ColorNames[selection] + wxT("_Blue");
+	wxString bbuf = std::get<0>(ColorInfo[selection]) + wxT("_Blue");
 	config->DeleteEntry(bbuf);
 	config->SetPath(wxT("WIDTH"));
-	config->DeleteEntry(ColorNames[selection]);
+	config->DeleteEntry(std::get<0>(ColorInfo[selection]));
 	config->Flush();
-	s_brush_pen_valid.reset(selection);
+	s_color_valid.reset(selection);
+	s_width_valid.reset(selection);
 }
 
 void ReadConfigYardlines()
@@ -639,19 +559,25 @@ CalChartConfiguration::Get_spr_line_text_index() const
 std::vector<wxString>
 CalChartConfiguration::GetColorNames() const
 {
-	return { std::begin(ColorNames), std::end(ColorNames) };
+	std::vector<wxString> result;
+	std::transform(std::begin(ColorInfo), std::end(ColorInfo), std::back_inserter(result), [](const std::tuple<wxString, wxString, int>& i) { return std::get<0>(i); });
+	return result;
 }
 
 std::vector<wxString>
 CalChartConfiguration::GetDefaultColors() const
 {
-	return { std::begin(DefaultColors), std::end(DefaultColors) };
+	std::vector<wxString> result;
+	std::transform(std::begin(ColorInfo), std::end(ColorInfo), std::back_inserter(result), [](const std::tuple<wxString, wxString, int>& i) { return std::get<1>(i); });
+	return result;
 }
 
 std::vector<int>
 CalChartConfiguration::GetDefaultPenWidth() const
 {
-	return { std::begin(DefaultPenWidth), std::end(DefaultPenWidth) };
+	std::vector<int> result;
+	std::transform(std::begin(ColorInfo), std::end(ColorInfo), std::back_inserter(result), [](const std::tuple<wxString, wxString, int>& i) { return std::get<2>(i); });
+	return result;
 }
 
 
@@ -682,15 +608,18 @@ CalChartConfiguration::ClearConfigSpringShowYardline()
 wxBrush
 CalChartConfiguration::GetCalChartBrush(CalChartColors c) const
 {
-	ReadConfigColor(c);
-	return CalChartBrushes[c];
+	auto color_values = ReadConfigColor(c);
+	auto color = wxColour(color_values[0], color_values[1], color_values[2]);
+	return *wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
 }
 
 wxPen
 CalChartConfiguration::GetCalChartPen(CalChartColors c) const
 {
-	ReadConfigColor(c);
-	return CalChartPens[c];
+	auto color_values = ReadConfigColor(c);
+	auto color = wxColour(color_values[0], color_values[1], color_values[2]);
+	auto width = ReadConfigColorWidth(c);
+	return *wxThePenList->FindOrCreatePen(color, width, wxSOLID);
 }
 
 void
@@ -698,20 +627,20 @@ CalChartConfiguration::SetCalChartBrushAndPen(CalChartColors c, const wxBrush& b
 {
 	if (c >= COLOR_NUM)
 		throw std::runtime_error("Error, exceeding COLOR_NUM size");
-	CalChartBrushes[c] = brush;
-	CalChartPens[c] = pen;
 
 	wxConfigBase *config = wxConfigBase::Get();
 
 	// read out the color configuration:
 	config->SetPath(wxT("/COLORS"));
-	wxString rbuf = ColorNames[c] + wxT("_Red");
-	config->Write(rbuf, static_cast<long>(CalChartBrushes[c].GetColour().Red()));
-	wxString gbuf = ColorNames[c] + wxT("_Green");
-	config->Write(gbuf, static_cast<long>(CalChartBrushes[c].GetColour().Green()));
-	wxString bbuf = ColorNames[c] + wxT("_Blue");
-	config->Write(bbuf, static_cast<long>(CalChartBrushes[c].GetColour().Blue()));
+	wxString rbuf = std::get<0>(ColorInfo[c]) + wxT("_Red");
+	config->Write(rbuf, static_cast<long>(brush.GetColour().Red()));
+	wxString gbuf = std::get<0>(ColorInfo[c]) + wxT("_Green");
+	config->Write(gbuf, static_cast<long>(brush.GetColour().Green()));
+	wxString bbuf = std::get<0>(ColorInfo[c]) + wxT("_Blue");
+	config->Write(bbuf, static_cast<long>(brush.GetColour().Blue()));
 	config->SetPath(wxT("WIDTH"));
-	config->Write(ColorNames[c], CalChartPens[c].GetWidth());
+	config->Write(std::get<0>(ColorInfo[c]), pen.GetWidth());
 	config->Flush();
+	s_color_valid.reset(c);
+	s_width_valid.reset(c);
 }

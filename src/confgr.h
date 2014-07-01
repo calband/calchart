@@ -81,6 +81,10 @@ enum CalChartSpringShowModes
 
 extern const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM];
 
+// so:
+// we take a snapshot of the config and give to the system to use.  They can modify.
+// on the d-tor, save out the values that it may have changed; unless it was told to be
+// discarded.
 class CalChartConfiguration
 {
 public:

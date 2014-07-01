@@ -162,4 +162,9 @@ typedef std::list<std::unique_ptr<ShowMode> > ShowModeList;
 ShowMode*
 ShowModeList_Find(const ShowModeList& showModes, const wxString& which);
 
+std::unique_ptr<ShowMode>
+CreateShowMode(const wxString& which, std::vector<long> values);
+std::unique_ptr<ShowMode>
+CreateSpringShowMode(const wxString& which, std::vector<long> values);
+
 #endif

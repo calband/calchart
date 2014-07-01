@@ -963,6 +963,7 @@
 		E803363417EE27C500A58457 /* math_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = math_utils.cpp; sourceTree = "<group>"; };
 		E803363517EE27C500A58457 /* math_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = math_utils.h; sourceTree = "<group>"; };
 		E803364117EE2E5400A58457 /* parse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parse.h; sourceTree = "<group>"; };
+		E803A0C7193BA54900C5F2D5 /* draw_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = draw_utils.h; sourceTree = "<group>"; };
 		E807BD5C17ED71F50052A53F /* calchart_cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = calchart_cmd; sourceTree = BUILT_PRODUCTS_DIR; };
 		E807BD5E17ED71F60052A53F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E807BD6017ED71F60052A53F /* calchart_cmd.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = calchart_cmd.1; sourceTree = "<group>"; };
@@ -1185,6 +1186,7 @@
 				C7AFA97A117A6DBA00CC53E2 /* contscan.l */,
 				C7AFA97B117A6DBA00CC53E2 /* draw.cpp */,
 				E884F3A217A631BB00831301 /* draw.h */,
+				E803A0C7193BA54900C5F2D5 /* draw_utils.h */,
 				C7E047CA155F7B8900D8C71B /* field_canvas.cpp */,
 				C7E047CB155F7B8A00D8C71B /* field_canvas.h */,
 				C7E047CD155F892400D8C71B /* field_frame.cpp */,

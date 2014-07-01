@@ -55,6 +55,12 @@ void
 AnimationView::OnDraw(wxDC *dc)
 {
 	auto& config = GetConfig();
+	OnDraw(dc, config);
+}
+
+void
+AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
+{
 	dc->SetPen(config.GetCalChartPen(COLOR_FIELD_DETAIL));
 	GetShow()->GetMode().DrawAnim(*dc, config);
 	const bool checkForCollision = mCollisionWarningType != COLLISION_NONE;

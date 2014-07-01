@@ -79,7 +79,7 @@ AnimationCanvas::OnPaint(wxPaintEvent& event)
 	}
 	if (mAnimationView)
 	{
-		mAnimationView->OnDraw(&dc);
+		mAnimationView->OnDraw(&dc, GetConfig());
 	}
 }
 
