@@ -122,6 +122,7 @@
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
     <ClInclude Include="..\..\src\setup_wizards.h" />
     <ClInclude Include="..\..\src\show_ui.h" />
+    <ClInclude Include="..\..\src\single_instance_ipc.h" />
     <ClInclude Include="..\..\src\toolbar.h" />
     <ClInclude Include="..\..\src\top_frame.h" />
     <ClInclude Include="..\..\src\ui_enums.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
     <ClCompile Include="..\..\src\setup_wizards.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
+    <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
     <ClCompile Include="..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
   </ItemGroup>
