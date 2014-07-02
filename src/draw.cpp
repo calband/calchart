@@ -178,7 +178,7 @@ void DrawSheetPoints(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, u
 		{
 			dc.SetPen(GetCalChartPen(selectedColor));
 			fillBrush = GetCalChartBrush(selectedColor);
-			dc.SetTextForeground(GetCalChartPen(selectedColor).GetColour());
+			dc.SetTextForeground(GetCalChartPen(selectedTextColor).GetColour());
 		}
 		else
 		{
@@ -192,7 +192,7 @@ void DrawSheetPoints(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, u
 }
 
 void DrawGhostSheet(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref) {
-	DrawSheetPoints(dc, show, sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT, COLOR_GHOST_POINT_TEXT, COLOR_GHOST_POINT_TEXT);
+	DrawSheetPoints(dc, show, sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT_HLIT, COLOR_GHOST_POINT_TEXT, COLOR_GHOST_POINT_HLIT_TEXT);
 }
 
 void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary)
