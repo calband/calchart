@@ -83,7 +83,8 @@ FieldView::OnDraw(wxDC *dc)
 		mShow->GetMode().Draw(*dc);
 		
 
-		CC_sheet* ghostSheet = mGhostModule.getGhostSheet();
+		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
+
 		if (ghostSheet != nullptr) {
 			DrawGhostSheet(*dc, *mShow, *ghostSheet, 0);
 		}
@@ -131,7 +132,6 @@ FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 		mFrame->UpdatePanel();
 		mFrame->Refresh();
 	}
-	mGhostModule.update(mShow, GetCurrentSheetNum());
 }
 
 // Clean up windows used for displaying the view.

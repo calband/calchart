@@ -245,11 +245,6 @@ mAnimationFrame(NULL)
 	backgroundimage_menu->Enable(CALCHART__RemoveBackgroundImage, false);
 
 
-	GhostModule* ghostModule = &(GetFieldView()->getGhostModule());
-	mGhostOptions.push_back(new DisableGhostTool(ghostModule));
-	mGhostOptions.push_back(new GhostSheetNextTool(ghostModule));
-	mGhostOptions.push_back(new GhostSheetPreviousTool(ghostModule));
-	mGhostOptions.push_back(new GhostSheetAbsoluteTool(ghostModule, this));
 	wxMenu *ghost_menu = new wxMenu;
 	ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
 	ghost_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
@@ -384,9 +379,6 @@ mAnimationFrame(NULL)
 
 FieldFrame::~FieldFrame()
 {
-	for (int index = 0; index < mGhostOptions.size(); index++) {
-		delete mGhostOptions[index];
-	}
 }
 
 
@@ -866,21 +858,39 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 }
 
 
-void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event) {
-	for (int index = 0; index < mGhostOptions.size(); index++) {
-		if (mGhostOptions[index]->getId() == event.GetId()) {
-			mGhostOptions[index]->activate();
+void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
+{
+	switch (event.GetId())
+	{
+		case CALCHART__GhostOff:
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::disabled);
 			break;
+		case CALCHART__GhostNextSheet:
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::next);
+			break;
+		case CALCHART__GhostPreviousSheet:
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::previous);
+			break;
+		case CALCHART__GhostNthSheet:
+		{
+			wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:","Ghost Sheet", "1", this);
+			long targetSheetNum = 0;
+			if (targetSheet.ToLong(&targetSheetNum)) {
+				GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific, targetSheetNum - 1);
+			} else {
+				wxMessageBox(wxT("The input must be a number."), wxT("Operation failed."));
+			}
 		}
+			break;
 	}
 	refreshGhostOptionStates();
 	GetCanvas()->Refresh();
 }
 
-void FieldFrame::refreshGhostOptionStates() {
-	for (int index = 0; index < mGhostOptions.size(); index++) {
-		GetMenuBar()->FindItem(mGhostOptions[index]->getId())->Enable(mGhostOptions[index]->canActivate());
-	}
+void FieldFrame::refreshGhostOptionStates()
+{
+	bool active = GetFieldView()->getGhostModule().isActive();
+	GetMenuBar()->FindItem(CALCHART__GhostOff)->Enable(active);
 }
 
 

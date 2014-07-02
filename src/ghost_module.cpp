@@ -1,54 +1,30 @@
 #include "ghost_module.h"
 
-GhostModule::GhostModule()
-: mDoc(nullptr), mCurrentSheet(0), mCurrentSource(nullptr), mIsActive(false), mIsResponsibleForSource(false)
-{}
+#include "cc_sheet.h"
+#include "calchartdoc.h"
 
-GhostModule::GhostModule(CalChartDoc* doc, int currentSheet)
-: mDoc(doc), mCurrentSheet(currentSheet), mCurrentSource(nullptr), mIsActive(false), mIsResponsibleForSource(false)
-{}
-
-GhostModule::~GhostModule() {
-	setGhostSource(nullptr);
-}
-
-void GhostModule::setGhostSource(GhostSource* source, bool isResponsible) {
-	if (mIsResponsibleForSource && mCurrentSource != nullptr) {
-		delete mCurrentSource;
-	}
-	mIsResponsibleForSource = isResponsible;
+void GhostModule::setGhostSource(GhostSource source, int which)
+{
 	mCurrentSource = source;
-	updateCurrentGhostSource();
+	mWhich = which;
 }
 
-CC_sheet* GhostModule::getGhostSheet() {
-	if (mIsActive && mCurrentSource != nullptr) {
-		return mCurrentSource->getGhostSheet();
-	} else {
+CC_sheet* GhostModule::getGhostSheet(CalChartDoc* doc, int currentSheet) const
+{
+	if ((doc == nullptr) || (mCurrentSource == disabled))
+	{
 		return nullptr;
 	}
-}
-
-void GhostModule::update(CalChartDoc* doc, int currentSheet) {
-	mDoc = doc;
-	mCurrentSheet = currentSheet;
-	updateCurrentGhostSource();
-}
-
-void GhostModule::setState(bool isActive) {
-	bool wasActive = mIsActive;
-	mIsActive = isActive;
-	if (mIsActive && !wasActive) {
-		updateCurrentGhostSource();
+	auto targetSheet = (mCurrentSource == next) ? currentSheet + 1 : (mCurrentSource == previous) ? currentSheet - 1 : mWhich;
+	if (targetSheet >= 0 && targetSheet < doc->GetNumSheets())
+	{
+		return &(*(doc->GetNthSheet(targetSheet)));
 	}
+	return nullptr;
 }
 
-bool GhostModule::isActive() {
-	return mIsActive;
+bool GhostModule::isActive() const
+{
+	return mCurrentSource != disabled;
 }
 
-void GhostModule::updateCurrentGhostSource() {
-	if (mIsActive && mCurrentSource != nullptr) {
-		mCurrentSource->update(mDoc, mCurrentSheet);
-	}
-}

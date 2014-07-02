@@ -24,7 +24,6 @@
 #define _FIELD_FRAME_H_
 
 #include "cc_types.h"
-#include "ghost_tools.h"
 
 #include <wx/docview.h>
 
@@ -149,8 +148,6 @@ public:
 	DECLARE_EVENT_TABLE()
 private:
 	void refreshGhostOptionStates();
-
-	std::vector<GhostTool*> mGhostOptions;
 };
 
 #endif
