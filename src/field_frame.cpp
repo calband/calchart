@@ -563,18 +563,16 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 		wxCustomDataObject* clipboardObject = new wxCustomDataObject("CC_sheet_v3.4.1");
 		std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
-		auto numPoints = GetShow()->GetNumPoints();
+		uint16_t numPoints = GetShow()->GetNumPoints();
 
 		int bytesForNumPoints = sizeof(numPoints);
 		int bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
 		int totalBytes = bytesForNumPoints + bytesForSheetData;
-		char* clipboardData = new char[totalBytes];
-		memcpy(clipboardData, &numPoints, bytesForNumPoints);
-		memcpy(clipboardData + bytesForNumPoints, &(serializedSheet[0]), bytesForSheetData);
+		std::vector<char> clipboardData(totalBytes);
+		memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
+		memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(), bytesForSheetData);
 
-		clipboardObject->SetData(totalBytes, clipboardData);
-
-		delete clipboardData;
+		clipboardObject->SetData(totalBytes, clipboardData.data());
 
 		wxTheClipboard->SetData(clipboardObject);
 		wxTheClipboard->Close();
@@ -590,10 +588,12 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
 			wxTheClipboard->GetData(clipboardObject);
 
 
-			unsigned short numPoints;
+			uint16_t numPoints;
 			memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
 			if (numPoints != GetShow()->GetNumPoints()) {
-				wxMessageBox(wxT("Cannot paste - number of points does not match"));
+				wxMessageBox(wxString::Format(
+					wxT("Cannot paste - number of points in pasted sheet (%i) does not match number of points in current show (%i)"),
+					numPoints, GetShow()->GetNumPoints()));
 				return;
 			}
 			std::stringstream sheetStream;
