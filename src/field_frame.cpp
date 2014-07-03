@@ -604,8 +604,8 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
 
 			ReadLong(sheetStream);
 			ReadLong(sheetStream);
-			GetShow()->InsertSheet(CC_sheet(numPoints, sheetStream, Current_version_and_later()), GetShow()->GetCurrentSheetNum());
-			GetShow()->SetCurrentSheet(GetShow()->GetCurrentSheetNum() - 1);
+			CC_show::CC_sheet_container_t sht(1, CC_sheet(numPoints, sheetStream, Current_version_and_later()));
+			GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
 		}
 		wxTheClipboard->Close();
 	}
