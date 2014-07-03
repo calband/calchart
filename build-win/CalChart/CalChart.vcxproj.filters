@@ -64,8 +64,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
-    <ClCompile Include="..\..\src\ghost_tools.cpp" />
-    <ClCompile Include="..\..\src\ghost_source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -140,8 +138,6 @@
     <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
-    <ClInclude Include="..\..\src\ghost_tools.h" />
-    <ClInclude Include="..\..\src\ghost_source.h" />
     <ClInclude Include="..\..\src\draw.h" />
   </ItemGroup>
   <ItemGroup>
