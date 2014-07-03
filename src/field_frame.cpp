@@ -58,8 +58,7 @@
 #include <wx/clipbrd.h>
 
 
-
-#define SHEET_DATA_CLIPBOARD_FORMAT  "CC_sheet_clipboard_v1"
+const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
 const wxString gridtext[] =
 {
@@ -564,7 +563,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
 void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 	if (wxTheClipboard->Open())
 	{
-		wxCustomDataObject* clipboardObject = new wxCustomDataObject(SHEET_DATA_CLIPBOARD_FORMAT);
+		wxCustomDataObject* clipboardObject = new wxCustomDataObject(kSheetDataClipboardFormat);
 		std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
 		uint16_t numPoints = GetShow()->GetNumPoints();
@@ -586,9 +585,9 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
 	if (wxTheClipboard->Open())
 	{
-		if (wxTheClipboard->IsSupported(SHEET_DATA_CLIPBOARD_FORMAT))
+		if (wxTheClipboard->IsSupported(kSheetDataClipboardFormat))
 		{
-			wxCustomDataObject clipboardObject(SHEET_DATA_CLIPBOARD_FORMAT);
+			wxCustomDataObject clipboardObject(kSheetDataClipboardFormat);
 			wxTheClipboard->GetData(clipboardObject);
 
 
