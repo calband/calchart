@@ -58,8 +58,7 @@
 #include <wx/clipbrd.h>
 
 
-
-#define SHEET_DATA_CLIPBOARD_FORMAT  "CC_sheet_clipboard_v1"
+const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
 const wxString gridtext[] =
 {
@@ -564,7 +563,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
 void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 	if (wxTheClipboard->Open())
 	{
-		std::unique_ptr<wxCustomDataObject> clipboardObject(new wxCustomDataObject(SHEET_DATA_CLIPBOARD_FORMAT));
+		std::unique_ptr<wxCustomDataObject> clipboardObject(new wxCustomDataObject(kSheetDataClipboardFormat));
 		std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
 		uint16_t numPoints = GetShow()->GetNumPoints();
@@ -587,9 +586,9 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
 	if (wxTheClipboard->Open())
 	{
-		if (wxTheClipboard->IsSupported(SHEET_DATA_CLIPBOARD_FORMAT))
+		if (wxTheClipboard->IsSupported(kSheetDataClipboardFormat))
 		{
-			wxCustomDataObject clipboardObject(SHEET_DATA_CLIPBOARD_FORMAT);
+			wxCustomDataObject clipboardObject(kSheetDataClipboardFormat);
 			wxTheClipboard->GetData(clipboardObject);
 
 
@@ -606,8 +605,8 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
 
 			ReadLong(sheetStream);
 			ReadLong(sheetStream);
-			GetShow()->InsertSheet(CC_sheet(numPoints, sheetStream, Current_version_and_later()), GetShow()->GetCurrentSheetNum());
-			GetShow()->SetCurrentSheet(GetShow()->GetCurrentSheetNum() - 1);
+			CC_show::CC_sheet_container_t sht(1, CC_sheet(numPoints, sheetStream, Current_version_and_later()));
+			GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
 		}
 		wxTheClipboard->Close();
 	}
