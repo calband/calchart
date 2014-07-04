@@ -564,7 +564,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
 void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 	if (wxTheClipboard->Open())
 	{
-		wxCustomDataObject* clipboardObject = new wxCustomDataObject(SHEET_DATA_CLIPBOARD_FORMAT);
+		std::unique_ptr<wxCustomDataObject> clipboardObject(new wxCustomDataObject(SHEET_DATA_CLIPBOARD_FORMAT));
 		std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
 		uint16_t numPoints = GetShow()->GetNumPoints();
@@ -578,7 +578,8 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 
 		clipboardObject->SetData(totalBytes, clipboardData.data());
 
-		wxTheClipboard->SetData(clipboardObject);
+		wxTheClipboard->SetData(clipboardObject.get());
+		clipboardObject.release();
 		wxTheClipboard->Close();
 	}
 }
