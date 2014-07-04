@@ -52,6 +52,7 @@ public:
 	void OnWizardSetup(CalChartDoc& show);
 
 	///// Modify the show /////
+	bool DoRotatePointPositions(unsigned rotateAmount);
 	bool DoTranslatePoints(const CC_coord& pos);
 	bool DoTransformPoints(const Matrix& transmat);
 	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second);
@@ -91,6 +92,7 @@ public:
 	void ToggleSelection(const SelectionList& sl);
 	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
+	const SelectionList& GetSelectionList();
 
 	///// Drawing marcher's paths /////
 	// call this when we need to generate the marcher's paths.

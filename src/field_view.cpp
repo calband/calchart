@@ -191,6 +191,13 @@ FieldView::OnWizardSetup(CalChartDoc& show)
 }
 
 bool
+FieldView::DoRotatePointPositions(unsigned rotateAmount)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new RotatePointPositionsCommand(*mShow, rotateAmount, mCurrentReferencePoint), true);
+	return true;
+}
+
+bool
 FieldView::DoTranslatePoints(const CC_coord& delta)
 {
 	if (((delta.x == 0) && (delta.y == 0)) ||
@@ -416,6 +423,11 @@ FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggl
 	lasso.Append(CC_coord(c2.x, c1.y));
 	lasso.End();
 	SelectWithLasso(&lasso, toggleSelected);
+}
+
+const SelectionList& 
+FieldView::GetSelectionList() {
+	return mShow->GetSelectionList();
 }
 
 void

@@ -54,6 +54,7 @@ enum
 	CALCHART__poly,
 	CALCHART__lasso,
 	CALCHART__move,
+	CALCHART__swap,
 	CALCHART__line,
 	CALCHART__rot,
 	CALCHART__shear,

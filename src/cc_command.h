@@ -259,6 +259,16 @@ protected:
 };
 
 
+class RotatePointPositionsCommand : public MovePointsOnSheetCommand
+{
+private:
+	using super = MovePointsOnSheetCommand;
+public:
+	RotatePointPositionsCommand(CalChartDoc& show, unsigned rotateAmount, unsigned ref);
+	virtual ~RotatePointPositionsCommand();
+};
+
+
 // TranslatePointsByDeltaCommand:
 // Move the selected points by a fixed delta
 class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
