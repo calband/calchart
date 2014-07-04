@@ -30,12 +30,14 @@
 CC_point::CC_point() :
 mSym(SYMBOL_PLAIN)
 {
+	SetLabelVisibility(true);
 }
 
 CC_point::CC_point(const CC_coord& p) :
 mSym(SYMBOL_PLAIN),
 mPos(p)
 {
+	SetLabelVisibility(true);
 	for (unsigned j = 0; j < CC_point::kNumRefPoints; j++)
 	{
 		mRef[j] = mPos;
@@ -78,6 +80,9 @@ mSym(SYMBOL_PLAIN)
 	++d;
 	mFlags.set(kPointLabelFlipped, *d);
 	++d;
+
+	SetLabelVisibility(true);
+
 	if (std::distance(&serialized_data[0], d) != serialized_data.size())
 	{
 		throw CC_FileException("bad POS chunk");
@@ -162,6 +167,18 @@ CC_point::FlipToggle()
 	mFlags.flip(kPointLabelFlipped);
 }
 
+bool
+CC_point::LabelIsVisible() const
+{
+	return mFlags.test(kLabelIsVisible);
+}
+
+void
+CC_point::SetLabelVisibility(bool isVisible)
+{
+	mFlags.set(kLabelIsVisible, isVisible);
+}
+
 CC_coord
 CC_point::GetPos(unsigned ref) const
 {
@@ -206,7 +223,6 @@ CC_point::SetSymbol(SYMBOL_TYPE s)
 // Test Suite stuff
 struct CC_point_values
 {
-	std::bitset<CC_point::kTotalBits> mFlags;
 	SYMBOL_TYPE mSym;
 	CC_coord mPos;
 	CC_coord mRef[CC_point::kNumRefPoints];
@@ -219,7 +235,6 @@ bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
 	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		running_value = running_value && (underTest.mRef[i] == values.mRef[i]);
 	return running_value
-		&& (underTest.mFlags == values.mFlags)
 		&& (underTest.mSym == values.mSym)
 		&& (underTest.mPos == values.mPos)
 		&& (underTest.GetFlip() == values.GetFlip)
@@ -230,7 +245,6 @@ void CC_point_UnitTests()
 {
 	// test some defaults:
 	CC_point_values values;
-	values.mFlags = 0;
 	values.mSym = SYMBOL_PLAIN;
 	values.mPos = CC_coord();
 	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
@@ -245,23 +259,19 @@ void CC_point_UnitTests()
 	underTest.Flip(false);
 	assert(Check_CC_point(underTest, values));
 
-	values.mFlags = 1;
 	values.GetFlip = true;
 	underTest.Flip(true);
 	assert(Check_CC_point(underTest, values));
 
-	values.mFlags = 0;
 	values.GetFlip = false;
 	underTest.Flip(false);
 	assert(Check_CC_point(underTest, values));
 
 	// test flip toggle
-	values.mFlags = 1;
 	values.GetFlip = true;
 	underTest.FlipToggle();
 	assert(Check_CC_point(underTest, values));
 
-	values.mFlags = 0;
 	values.GetFlip = false;
 	underTest.FlipToggle();
 	assert(Check_CC_point(underTest, values));

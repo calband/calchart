@@ -39,6 +39,9 @@
 #include "tb_lbl_l.xbm"
 #include "tb_lbl_r.xbm"
 #include "tb_lbl_f.xbm"
+#include "tb_lbl_show.xbm"
+#include "tb_lbl_hide.xbm"
+#include "tb_lbl_vis_toggle.xbm"
 #include "tb_sym0.xbm"
 #include "tb_sym1.xbm"
 #include "tb_sym2.xbm"
@@ -123,6 +126,9 @@ GetHalfOfMainToolBar()
 		{ wxITEM_NORMAL, NULL, wxT("Label on left"), CALCHART__label_left },
 		{ wxITEM_NORMAL, NULL, wxT("Flip label"), CALCHART__label_flip },
 		{ wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
+		{ wxITEM_NORMAL, NULL, wxT("Hide Label"), CALCHART__label_hide },
+		{ wxITEM_NORMAL, NULL, wxT("Toggle Label Visibility"), CALCHART__label_visibility_toggle },
+		{ wxITEM_NORMAL, NULL, wxT("Show Label"), CALCHART__label_show, true },
 	};
 	static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb)/sizeof(tb[0]));
 	static bool sFirstTime = true;
@@ -145,6 +151,9 @@ GetHalfOfMainToolBar()
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_hide));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_vis_toggle));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_show));
 	}
 	return sTB;
 }

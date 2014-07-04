@@ -89,6 +89,9 @@ public:
 	void OnCmd_label_left(wxCommandEvent& event);
 	void OnCmd_label_right(wxCommandEvent& event);
 	void OnCmd_label_flip(wxCommandEvent& event);
+	void OnCmd_label_hide(wxCommandEvent& event);
+	void OnCmd_label_show(wxCommandEvent& event);
+	void OnCmd_label_visibility_toggle(wxCommandEvent& event);
 	void OnCmd_setsym0(wxCommandEvent& event);
 	void OnCmd_setsym1(wxCommandEvent& event);
 	void OnCmd_setsym2(wxCommandEvent& event);

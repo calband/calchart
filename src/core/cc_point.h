@@ -45,6 +45,9 @@ public:
 	void Flip(bool val = true);
 	void FlipToggle();
 
+	bool LabelIsVisible() const;
+	void SetLabelVisibility(bool isVisible);
+
 	SYMBOL_TYPE GetSymbol() const;
 	void SetSymbol(SYMBOL_TYPE sym);
 
@@ -55,6 +58,7 @@ public:
 private:
 	enum {
 		kPointLabelFlipped,
+		kLabelIsVisible,
 		kTotalBits
 	};
 	
