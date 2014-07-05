@@ -82,6 +82,13 @@ FieldView::OnDraw(wxDC *dc)
 		dc->SetTextForeground(GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
 		mShow->GetMode().Draw(*dc);
 		
+
+		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
+
+		if (ghostSheet != nullptr) {
+			DrawGhostSheet(*dc, *mShow, *ghostSheet, 0);
+		}
+
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{

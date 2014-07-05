@@ -26,6 +26,8 @@
 #include "calchartdoc.h"
 #include "CC_coord.h"
 
+#include "ghost_module.h"
+
 #include <wx/docview.h>
 
 #include <memory>
@@ -96,6 +98,7 @@ public:
 	// call this when we need to generate the marcher's paths.
 	void OnEnableDrawPaths(bool enable);
 
+	GhostModule& getGhostModule() { return mGhostModule; };
 private:
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 	AnimationFrame *mFrame;
@@ -109,6 +112,8 @@ private:
 	bool mDrawPaths;
 	
 private:
+	GhostModule mGhostModule;
+
 	CalChartDoc* mShow;
 	unsigned mCurrentReferencePoint;
 

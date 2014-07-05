@@ -80,6 +80,11 @@ enum
 	CALCHART__RemoveBackgroundImage,
 	CALCHART__ResetReferencePoint,
 
+	CALCHART__GhostOff,
+	CALCHART__GhostNextSheet,
+	CALCHART__GhostPreviousSheet,
+	CALCHART__GhostNthSheet,
+
 	CALCHART__anim_reanimate,
 	CALCHART__anim_select_coll,
 	CALCHART__anim_stop,

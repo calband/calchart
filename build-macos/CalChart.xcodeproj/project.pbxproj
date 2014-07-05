@@ -450,6 +450,7 @@
 		E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
+		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -993,6 +994,8 @@
 		E8B89DD8186F5655004DE7DF /* cc_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_text.cpp; sourceTree = "<group>"; };
 		E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_cont_ui.cpp; sourceTree = "<group>"; };
 		E8B89DDC186F7C50004DE7DF /* print_cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_cont_ui.h; sourceTree = "<group>"; };
+		E8E2E1051962870B002453E8 /* ghost_module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ghost_module.cpp; sourceTree = "<group>"; };
+		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1191,6 +1194,8 @@
 				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
+				E8E2E1051962870B002453E8 /* ghost_module.cpp */,
+				E8E2E1061962870B002453E8 /* ghost_module.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
 				C7AFA981117A6DBA00CC53E2 /* modes.cpp */,
 				C7AFA982117A6DBA00CC53E2 /* modes.h */,
@@ -1565,6 +1570,7 @@
 				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
 				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
+				E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */,
 				C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */,
 				C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */,
 				C72E2B091441150400118C03 /* top_frame.cpp in Sources */,

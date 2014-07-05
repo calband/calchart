@@ -103,6 +103,8 @@ public:
 	void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
 	void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
 
+	void OnCmd_GhostOption(wxCommandEvent& event);
+
 	void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 
 	void OnSize(wxSizeEvent& event);
@@ -145,6 +147,8 @@ public:
 	void ClearAnimationFrame();
 	
 	DECLARE_EVENT_TABLE()
+private:
+	void refreshGhostOptionStates();
 };
 
 #endif
