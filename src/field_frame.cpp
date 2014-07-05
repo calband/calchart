@@ -577,8 +577,7 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
 
 		clipboardObject->SetData(totalBytes, clipboardData.data());
 
-		wxTheClipboard->SetData(clipboardObject.get());
-		clipboardObject.release();
+		wxTheClipboard->SetData(clipboardObject.release());
 		wxTheClipboard->Close();
 	}
 }
