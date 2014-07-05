@@ -359,10 +359,15 @@ void Animation::CheckCollisions()
 	{
 		for (unsigned j = i+1; j < numpts; j++)
 		{
-			if (pts[i].Collides(pts[j]))
+			CollisionType collisionResult = pts[i].DetectCollision(pts[j]);
+			if (collisionResult)
 			{
-				mCollisions.insert(i);
-				mCollisions.insert(j);
+				if (!mCollisions.count(i) || mCollisions[i] < collisionResult) {
+					mCollisions[i] = collisionResult;
+				}
+				if (!mCollisions.count(j) || mCollisions[j] < collisionResult) {
+					mCollisions[j] =  collisionResult;
+				}
 			}
 		}
 	}
@@ -376,7 +381,7 @@ void Animation::CheckCollisions()
 Animation::animate_info_t
 Animation::GetAnimateInfo(unsigned which) const
 {
-	return Animation::animate_info_t( mCollisions.count(which), (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which) );
+	return Animation::animate_info_t(mCollisions.count(which) ? mCollisions.find(which)->second : COLLISION_NONE, (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which));
 }
 
 int Animation::GetNumberSheets() const
