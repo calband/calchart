@@ -123,7 +123,7 @@ mSheetNum(0)
 	{
 		ReadAndCheckID(stream, INGL_SHET);
 		
-		CC_sheet sheet(this, GetNumPoints(), stream, ver);
+		CC_sheet sheet(GetNumPoints(), stream, ver);
 		InsertSheetInternal(sheet, GetNumSheets());
 		
 		//ReadAndCheckID(stream, INGL_END);
@@ -191,7 +191,7 @@ mSheetNum(0)
 	while (INGL_SHET == name)
 	{
 		auto sheet_data_size = ReadLong(stream);
-		CC_sheet sheet(this, GetNumPoints(), stream, ver);
+		CC_sheet sheet(GetNumPoints(), stream, ver);
 		InsertSheetInternal(sheet, GetNumSheets());
 		
 		// peek for the next name

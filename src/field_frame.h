@@ -60,6 +60,8 @@ public:
 	void OnCmdInsertBefore(wxCommandEvent& event);
 	void OnCmdInsertAfter(wxCommandEvent& event);
     void OnCmdInsertFromOtherShow(wxCommandEvent& event);
+	void OnCmdCopySheet(wxCommandEvent& event);
+	void OnCmdPasteSheet(wxCommandEvent& event);
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdRelabel(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);

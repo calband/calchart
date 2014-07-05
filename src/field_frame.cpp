@@ -20,6 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstring>
+#include <sstream>
+
 #include "field_frame.h"
 
 #include "platconf.h"
@@ -43,6 +46,7 @@
 #include "draw.h"
 #include "cc_sheet.h"
 #include "cc_point.h"
+#include "cc_fileformat.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -51,6 +55,10 @@
 #endif
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
+#include <wx/clipbrd.h>
+
+
+const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
 const wxString gridtext[] =
 {
@@ -97,6 +105,8 @@ EVT_MENU(CALCHART__wxID_PREVIEW, FieldFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, FieldFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, FieldFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, FieldFrame::OnCmdLegacyPrintEPS)
+EVT_MENU(CALCHART__COPY_SHEET, FieldFrame::OnCmdCopySheet)
+EVT_MENU(CALCHART__PASTE_SHEET, FieldFrame::OnCmdPasteSheet)
 EVT_MENU(CALCHART__INSERT_BEFORE, FieldFrame::OnCmdInsertBefore)
 EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
 EVT_MENU(CALCHART__INSERT_OTHER_SHOW, FieldFrame::OnCmdInsertFromOtherShow)
@@ -220,9 +230,11 @@ mAnimationFrame(NULL)
 	wxMenu *edit_menu = new wxMenu;
 	edit_menu->Append(wxID_UNDO, wxT("&Undo\tCTRL-Z"));
 	edit_menu->Append(wxID_REDO, wxT("&Redo\tCTRL-SHIFT-Z"));
+	edit_menu->Append(CALCHART__COPY_SHEET, wxT("&Copy Sheet\tCTRL-C"), wxT("Copy the current stuntsheet"));
+	edit_menu->Append(CALCHART__PASTE_SHEET, wxT("&Paste Sheet\tCTRL-V"), wxT("Paste the current stuntsheet"));
 	edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before\tCTRL-["), wxT("Insert a new stuntsheet before this one"));
 	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
-    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW, wxT("&Insert Sheets From Other Show..."),
+    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW, wxT("Insert Sheets From Other Show..."),
                       wxT("Insert a saved stuntsheet after this one"));
 	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
@@ -562,6 +574,57 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
     GetFieldView()->DoInsertSheetsOtherShow(sheets, GetFieldView()->GetCurrentSheetNum() + 1, currend - 1);
 }
 
+
+void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
+	if (wxTheClipboard->Open())
+	{
+		std::unique_ptr<wxCustomDataObject> clipboardObject(new wxCustomDataObject(kSheetDataClipboardFormat));
+		std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
+
+		uint16_t numPoints = GetShow()->GetNumPoints();
+
+		int bytesForNumPoints = sizeof(numPoints);
+		int bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
+		int totalBytes = bytesForNumPoints + bytesForSheetData;
+		std::vector<char> clipboardData(totalBytes);
+		memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
+		memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(), bytesForSheetData);
+
+		clipboardObject->SetData(totalBytes, clipboardData.data());
+
+		wxTheClipboard->SetData(clipboardObject.release());
+		wxTheClipboard->Close();
+	}
+}
+
+void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
+	if (wxTheClipboard->Open())
+	{
+		if (wxTheClipboard->IsSupported(kSheetDataClipboardFormat))
+		{
+			wxCustomDataObject clipboardObject(kSheetDataClipboardFormat);
+			wxTheClipboard->GetData(clipboardObject);
+
+
+			uint16_t numPoints;
+			memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
+			if (numPoints != GetShow()->GetNumPoints()) {
+				wxMessageBox(wxString::Format(
+					wxT("Cannot paste - number of points in pasted sheet (%i) does not match number of points in current show (%i)"),
+					numPoints, GetShow()->GetNumPoints()));
+				return;
+			}
+			std::stringstream sheetStream;
+			sheetStream.write((char*)(clipboardObject.GetData()) + sizeof(numPoints), clipboardObject.GetDataSize() - sizeof(numPoints));
+
+			ReadLong(sheetStream);
+			ReadLong(sheetStream);
+			CC_show::CC_sheet_container_t sht(1, CC_sheet(numPoints, sheetStream, Current_version_and_later()));
+			GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+		}
+		wxTheClipboard->Close();
+	}
+}
 
 void FieldFrame::OnCmdDelete(wxCommandEvent& event)
 {
