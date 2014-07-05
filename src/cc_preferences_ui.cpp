@@ -212,7 +212,7 @@ void GeneralSetup::Init()
 		mCalChartPens[i] = GetCalChartPen(i);
 		mCalChartBrushes[i] = GetCalChartBrush(i);
 	}
-	
+
 	mAutoSave_Interval.Printf(wxT("%ld"), GetConfiguration_AutosaveInterval());
 }
 
