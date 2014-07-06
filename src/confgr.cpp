@@ -115,6 +115,10 @@ const int DefaultPenWidth[COLOR_NUM] =
 	1,
 	1,
 	1,
+	1,
+	1,
+	1,
+	1,
 	2,
 };
 
