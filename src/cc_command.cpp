@@ -288,29 +288,18 @@ void MovePointsOnSheetCommand::DoAction()
 RotatePointPositionsCommand::RotatePointPositionsCommand(CalChartDoc& show, unsigned rotateAmount, unsigned ref)
 : super(show, ref)
 {
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	// construct a vector of point indices in order
 	std::vector<unsigned> pointIndices;
+	std::copy(mPoints.begin(), mPoints.end(), std::back_inserter(pointIndices));
+
+	// construct a vector of point positions, rotated by rotate amount
 	std::vector<CC_coord> finalPositions;
+	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	std::transform(mPoints.begin(), mPoints.end(), std::back_inserter(finalPositions), [=](unsigned i) { return sheet->GetPosition(i, mRef); });
 	rotateAmount %= mPoints.size();
-	auto iterator = mPoints.begin();
-	unsigned index = 0;
-	while (index < rotateAmount) {
-		pointIndices.push_back(*iterator);
-		index++;
-		iterator++;
-	}
-	while (iterator != mPoints.end()) {
-		pointIndices.push_back(*iterator);
-		finalPositions.push_back(sheet->GetPosition(*iterator, mRef));
-		iterator++;
-	}
-	iterator = mPoints.begin();
-	index = 0;
-	while (index < rotateAmount) {
-		finalPositions.push_back(sheet->GetPosition(*iterator, mRef));
-		index++;
-		iterator++;
-	}
+	std::rotate(finalPositions.begin(), finalPositions.begin() + rotateAmount, finalPositions.end());
+
+	// put things into place.
 	for (int index = pointIndices.size() - 1; index >= 0; index--) {
 		mPositions[pointIndices[index]] = finalPositions[index];
 	}
