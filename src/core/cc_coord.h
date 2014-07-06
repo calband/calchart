@@ -48,6 +48,12 @@ static inline Coord Int2Coord(T a) { return a * COORD_DECIMAL; }
 template <typename T>
 static inline int Coord2Int(T a) { return a / COORD_DECIMAL; }
 
+enum CollisionType {
+	COLLISION_NONE = 0,
+	COLLISION_WARNING,
+	COLLISION_INTERSECT
+};
+
 class CC_coord
 {
 public:
@@ -58,7 +64,7 @@ public:
 	float Direction() const;
 	float Direction(const CC_coord& c) const;
 
-	bool Collides(const CC_coord& c) const;
+	CollisionType DetectCollision(const CC_coord& c) const;
 
 	inline CC_coord& operator += (const CC_coord& c)
 	{
