@@ -37,14 +37,13 @@ ShowMode::ShowMode(const wxString& name,
 				   const CC_coord& offset,
 				   const CC_coord& border1,
 				   const CC_coord& border2) :
-mOffset(offset),
-mSize(size),
+mBaseOffset(offset),
+mBaseSize(size),
 mBorder1(border1),
 mBorder2(border2),
 mName(name)
 {
-	mSize += mBorder1 + mBorder2;
-	mOffset += mBorder1;
+	UpdateSizeAndOffset();
 }
 
 
@@ -52,19 +51,24 @@ ShowMode::ShowMode(const wxString& name,
 				   const CC_coord& size,
 				   const CC_coord& border1,
 				   const CC_coord& border2) :
-mOffset(size/2),
-mSize(size),
+mBaseOffset(size/2),
+mBaseSize(size),
 mBorder1(border1),
 mBorder2(border2),
 mName(name)
 {
-	mSize += mBorder1 + mBorder2;
-	mOffset += mBorder1;
+	UpdateSizeAndOffset();
 }
 
 
 ShowMode::~ShowMode()
 {
+}
+
+void
+ShowMode::UpdateSizeAndOffset() {
+	mSize = mBaseSize + mBorder1 + mBorder2;
+	mOffset = mBaseOffset + mBorder1;
 }
 
 

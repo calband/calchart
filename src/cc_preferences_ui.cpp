@@ -1076,7 +1076,6 @@ bool CalChartPreferences::TransferDataFromWindow()
 		PreferencePage* page = static_cast<PreferencePage*>(mNotebook->GetPage(i));
 		page->TransferDataFromWindow();
 	}
-	wxMessageBox(wxT("If you change any preferences, you may have restart CalChart to have them take effect"), wxT("Restart CalChart"));
 	return true;
 }
 

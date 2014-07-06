@@ -55,11 +55,15 @@ public:
 	inline const CC_coord& Offset() const { return mOffset; };
 	inline CC_coord FieldOffset() const { return -(mOffset-mBorder1); }
 	inline const CC_coord& Size() const { return mSize; };
-	inline CC_coord FieldSize() const { return mSize-mBorder1-mBorder2; }
-	inline CC_coord MinPosition() const { return -mOffset; }
-	inline CC_coord MaxPosition() const { return mSize-mOffset; }
+	inline CC_coord FieldSize() const { return mSize - mBorder1 - mBorder2; };
+	inline CC_coord MinPosition() const { return -mOffset; };
+	inline CC_coord MaxPosition() const { return mSize - mOffset; };
 	inline const wxString& GetName() const { return mName; };
 	CC_coord ClipPosition(const CC_coord& pos) const;
+	void SetOffset(CC_coord offset) { mBaseOffset = offset; UpdateSizeAndOffset(); };
+	void SetSize(CC_coord size) { mBaseSize = size; UpdateSizeAndOffset(); };
+	void SetUpperLeftBorder(CC_coord border) { mBorder1 = border; UpdateSizeAndOffset();  };
+	void SetLowerRightBorder(CC_coord border) { mBorder2 = border; UpdateSizeAndOffset(); };
 
 protected:
 	typedef enum
@@ -79,11 +83,15 @@ public:
 protected:
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const = 0;
 
+	CC_coord mBaseSize;
+	CC_coord mBaseOffset;
 	CC_coord mOffset;
 	CC_coord mSize;
 	CC_coord mBorder1;
 	CC_coord mBorder2;
 private:
+	void UpdateSizeAndOffset();
+
 	wxString mName;
 };
 
@@ -102,6 +110,8 @@ public:
 	virtual ShowType GetType() const;
 	inline unsigned short HashW() const { return mHashW; }
 	inline unsigned short HashE() const { return mHashE; }
+	void SetHashW(unsigned short hash) { mHashW = hash; };
+	void SetHashE(unsigned short hash) { mHashE = hash; };
 
 protected:
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
@@ -144,6 +154,23 @@ public:
 	inline short TextRight() const { return text_right; }
 	inline short TextTop() const { return text_top; }
 	inline short TextBottom() const { return text_bottom; }
+	void SetWhichYards(unsigned char which) { which_yards = which; };
+	void SetStageX(short x) { stage_x = x; };
+	void SetStageY(short y) { stage_y = y; };
+	void SetStageW(short width) { stage_w = width; };
+	void SetStageH(short height) { stage_h = height; };
+	void SetFieldX(short x) { field_x = x; };
+	void SetFieldY(short y) { field_y = y; };
+	void SetFieldW(short width) { field_w = width; };
+	void SetFieldH(short height) { field_h = height; };
+	void SetStepsX(short x) { steps_x = x; };
+	void SetStepsY(short y) { steps_y = y; };
+	void SetStepsW(short width) { steps_w = width; };
+	void SetStepsH(short height) { steps_h = height; };
+	void SetTextLeft(short val) { text_left = val; };
+	void SetTextRight(short val) { text_right = val; };
+	void SetTextTop(short val) { text_top = val; };
+	void SetTextBottom(short val) { text_bottom = val; };
 
 protected:
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
