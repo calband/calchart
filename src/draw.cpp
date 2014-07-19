@@ -631,11 +631,13 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 		default:
 			break;
 	}
-	wxCoord textw, texth, textd;
-	dc.GetTextExtent(label, &textw, &texth, &textd);
-	dc.DrawText(label,
-				point.GetFlip() ? x : (x - textw),
-				y - textoff - texth + textd);
+	if (point.LabelIsVisible()) {
+		wxCoord textw, texth, textd;
+		dc.GetTextExtent(label, &textw, &texth, &textd);
+		dc.DrawText(label,
+			point.GetFlip() ? x : (x - textw),
+			y - textoff - texth + textd);
+	}
 }
 
 

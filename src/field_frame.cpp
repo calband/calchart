@@ -145,6 +145,9 @@ EVT_MENU(CALCHART__genius, FieldFrame::OnCmd_genius)
 EVT_MENU(CALCHART__label_left, FieldFrame::OnCmd_label_left)
 EVT_MENU(CALCHART__label_right, FieldFrame::OnCmd_label_right)
 EVT_MENU(CALCHART__label_flip, FieldFrame::OnCmd_label_flip)
+EVT_MENU(CALCHART__label_hide, FieldFrame::OnCmd_label_hide)
+EVT_MENU(CALCHART__label_show, FieldFrame::OnCmd_label_show)
+EVT_MENU(CALCHART__label_visibility_toggle, FieldFrame::OnCmd_label_visibility_toggle)
 EVT_MENU(CALCHART__setsym0, FieldFrame::OnCmd_setsym0)
 EVT_MENU(CALCHART__setsym1, FieldFrame::OnCmd_setsym1)
 EVT_MENU(CALCHART__setsym2, FieldFrame::OnCmd_setsym2)
@@ -869,6 +872,17 @@ void FieldFrame::OnCmd_label_flip(wxCommandEvent& event)
 	GetFieldView()->DoSetPointsLabelFlip();
 }
 
+void FieldFrame::OnCmd_label_hide(wxCommandEvent& event) {
+	GetFieldView()->DoSetPointsLabelVisibility(false);
+}
+
+void FieldFrame::OnCmd_label_show(wxCommandEvent& event) {
+	GetFieldView()->DoSetPointsLabelVisibility(true);
+}
+
+void FieldFrame::OnCmd_label_visibility_toggle(wxCommandEvent& event) {
+	GetFieldView()->DoTogglePointsLabelVisibility();
+}
 
 void FieldFrame::OnCmd_setsym0(wxCommandEvent& event)
 {

@@ -287,6 +287,20 @@ FieldView::DoSetPointsLabelFlip()
 	return true;
 }
 
+bool 
+FieldView::DoSetPointsLabelVisibility(bool isVisible) {
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new SetLabelVisibleCommand(*mShow, isVisible), true);
+	return true;
+}
+
+bool 
+FieldView::DoTogglePointsLabelVisibility() {
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new ToggleLabelVisibilityCommand(*mShow), true);
+	return true;
+}
+
 bool
 FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht, unsigned where)
 {
