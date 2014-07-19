@@ -63,53 +63,16 @@ void CalChartApp::MacOpenFiles(const wxArrayString &fileNames) {
 
 bool CalChartApp::OnInit()
 {
-	ConnectToHostApp();
-	return InitApp();
-}
-
-void CalChartApp::ConnectToHostApp() {
-	#ifdef __APPLE__
-		mIsHostApp = true;
-		mHostInterface = new IndependentHostAppInterface(this);
-	#else
-		ClientSideHostAppInterface* client = ClientSideHostAppInterface::Make();
-		if (client == nullptr) {
-			mHostInterface = ServerSideHostAppInterface::Make(this);
-			mIsHostApp = true;
-		} else {
-			mHostInterface = client;
-			mIsHostApp = false;
-		}
-	#endif
-}
-
-bool CalChartApp::InitApp() {
-	if (mIsHostApp) {
-		InitAppAsServer();
-		return true;
-	} else {
-		InitAppAsClient();
-		return false;
-	}
+	StartStopFunc_t asServer { [=](){ this->InitAppAsServer(); }, [=](){ this->ExitAppAsServer(); } };
+	StartStopFunc_t asClient { [=](){ this->InitAppAsClient(); }, [=](){ this->ExitAppAsClient(); } };
+	mHostInterface = HostAppInterface::Make(this, asServer, asClient);
+	return mHostInterface->OnInit();
 }
 
 int CalChartApp::OnExit()
 {
-	DisconnectFromHostApp();
-	ExitApp();
+	mHostInterface.reset(); // calls ExitApp for client or server
 	return wxApp::OnExit();
-}
-
-void CalChartApp::DisconnectFromHostApp() {
-	delete mHostInterface;
-}
-
-void CalChartApp::ExitApp() {
-	if (mIsHostApp) {
-		ExitAppAsServer();
-	} else {
-		ExitAppAsClient();
-	}
 }
 
 

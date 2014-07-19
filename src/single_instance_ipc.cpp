@@ -9,65 +9,132 @@
 const wxString OPEN_FILE = "OpenFile";
 
 
-ServerSideHostAppInterface* ServerSideHostAppInterface::Make(CalChartApp* app) {
-	CCAppServer* server = CCAppServer::MakeServer(app);
-	if (server != nullptr) {
-		return new ServerSideHostAppInterface(server);
+std::unique_ptr<HostAppInterface>
+HostAppInterface::Make(CalChartApp* app,
+					   StartStopFunc_t serverStartStop,
+					   StartStopFunc_t clientStartStop)
+{
+#ifdef __APPLE__
+	return IndependentHostAppInterface::Make(app, serverStartStop, clientStartStop);
+#else
+	auto client = ClientSideHostAppInterface::Make(serverStartStop, clientStartStop);
+	if (client == nullptr) {
+		mHostInterface = ServerSideHostAppInterface::Make(app, serverStartStop, clientStartStop);
 	} else {
-		return nullptr;
+		mHostInterface = client;
 	}
+#endif
+}
+
+HostAppInterface::HostAppInterface(StartStopFunc_t serverStartStop, StartStopFunc_t clientStartStop) :
+m_serverStartStop(serverStartStop),
+m_clientStartStop(clientStartStop)
+{
+}
+
+HostAppInterface::~HostAppInterface()
+{
+}
+
+std::unique_ptr<HostAppInterface> ServerSideHostAppInterface::Make(CalChartApp* app,
+																   StartStopFunc_t serverStartStop,
+																   StartStopFunc_t clientStartStop)
+{
+	auto server = CCAppServer::MakeServer(app);
+	if (server != nullptr) {
+		return std::unique_ptr<HostAppInterface>{new ServerSideHostAppInterface(std::move(server), serverStartStop, clientStartStop)};
+	}
+	return nullptr;
+}
+
+bool ServerSideHostAppInterface::OnInit() {
+	m_serverStartStop.first();
+	return true;
 }
 
 void ServerSideHostAppInterface::OpenFile(const wxString& filename) {
 	mServer->OpenFile(filename);
 }
 
-ServerSideHostAppInterface::ServerSideHostAppInterface(CCAppServer* server)
-: mServer(server)
+ServerSideHostAppInterface::ServerSideHostAppInterface(std::unique_ptr<CCAppServer> server,
+													   StartStopFunc_t serverStartStop,
+													   StartStopFunc_t clientStartStop) :
+HostAppInterface(serverStartStop, clientStartStop),
+mServer(std::move(server))
 {}
 
-ServerSideHostAppInterface::~ServerSideHostAppInterface() {
-	delete mServer;
+ServerSideHostAppInterface::~ServerSideHostAppInterface()
+{
+	m_serverStartStop.second();
 }
 
-ClientSideHostAppInterface* ClientSideHostAppInterface::Make() {
-	CCAppClient* client = CCAppClient::MakeClient();
+std::unique_ptr<HostAppInterface> ClientSideHostAppInterface::Make(StartStopFunc_t serverStartStop,
+																   StartStopFunc_t clientStartStop) {
+	auto client = CCAppClient::MakeClient();
 	if (client != nullptr) {
-		return new ClientSideHostAppInterface(client);
-	} else {
-		return nullptr;
+		return std::unique_ptr<HostAppInterface>{new ClientSideHostAppInterface(std::move(client), serverStartStop, clientStartStop)};
 	}
+	return nullptr;
+}
+
+bool ClientSideHostAppInterface::OnInit() {
+	m_clientStartStop.first();
+	return false;
 }
 
 void ClientSideHostAppInterface::OpenFile(const wxString& filename) {
 	mClient->OpenFile(filename);
 }
 
-ClientSideHostAppInterface::ClientSideHostAppInterface(CCAppClient* client)
-: mClient(client)
+ClientSideHostAppInterface::ClientSideHostAppInterface(std::unique_ptr<CCAppClient> client,
+													   StartStopFunc_t serverStartStop,
+													   StartStopFunc_t clientStartStop) :
+HostAppInterface(serverStartStop, clientStartStop),
+mClient(std::move(client))
 {}
 
-ClientSideHostAppInterface::~ClientSideHostAppInterface() {
-	delete mClient;
+ClientSideHostAppInterface::~ClientSideHostAppInterface()
+{
+	m_clientStartStop.second();
 }
 
-IndependentHostAppInterface::IndependentHostAppInterface(CalChartApp* app)
-: mApp(app)
+std::unique_ptr<HostAppInterface> IndependentHostAppInterface::Make(CalChartApp* app,
+																	StartStopFunc_t serverStartStop,
+																	StartStopFunc_t clientStartStop)
+{
+	return std::unique_ptr<HostAppInterface>{ new IndependentHostAppInterface(app, serverStartStop, clientStartStop) };
+}
+
+IndependentHostAppInterface::IndependentHostAppInterface(CalChartApp* app,
+														 StartStopFunc_t serverStartStop,
+														 StartStopFunc_t clientStartStop) :
+HostAppInterface(serverStartStop, clientStartStop),
+mApp(app)
 {}
+
+bool IndependentHostAppInterface::OnInit() {
+	m_serverStartStop.first();
+	return true;
+}
 
 void IndependentHostAppInterface::OpenFile(const wxString& filename) {
 	mApp->OpenFile(filename);
 }
 
-CCAppClient* CCAppClient::MakeClient() {
-	CCAppClient* newClient = new CCAppClient();
+IndependentHostAppInterface::~IndependentHostAppInterface()
+{
+	m_serverStartStop.second();
+}
+
+
+
+std::unique_ptr<CCAppClient> CCAppClient::MakeClient() {
+	std::unique_ptr<CCAppClient> newClient { new CCAppClient() };
 	newClient->Connect("localhost", CCAppServer::GetServerName(), "Client");
 	if (!newClient->IsConnected()) {
-		delete newClient;
 		return nullptr;
-	} else {
-		return newClient;
 	}
+	return newClient;
 }
 
 void CCAppClient::OpenFile(const wxString& filename) {
@@ -118,10 +185,9 @@ wxString CCAppServer::GetServerName() {
 	return returnVal;
 }
 
-CCAppServer* CCAppServer::MakeServer(CalChartApp* app) {
-	CCAppServer* newServer = new CCAppServer(app);
+std::unique_ptr<CCAppServer> CCAppServer::MakeServer(CalChartApp* app) {
+	std::unique_ptr<CCAppServer> newServer { new CCAppServer(app) };
 	if (!newServer->Create(GetServerName())) {
-		delete newServer;
 		return nullptr;
 	}
 	return newServer;

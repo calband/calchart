@@ -12,13 +12,13 @@ class CalChartApp;
 class CCAppClientConnection;
 class CCAppServerConnection;
 
- 
+
 
 class CCAppClient : public wxClient {
 public:
 	~CCAppClient();
 
-	static CCAppClient* MakeClient();
+	static std::unique_ptr<CCAppClient> MakeClient();
 
 	void OpenFile(const wxString& filename);
 
@@ -45,7 +45,7 @@ public:
 
 	static wxString GetServerName();
 
-	static CCAppServer* MakeServer(CalChartApp* app);
+	static std::unique_ptr<CCAppServer> MakeServer(CalChartApp* app);
 
 	void OpenFile(const wxString& filename);
 
@@ -103,47 +103,77 @@ private:
 };
 
 
-
+using StartStopFunc_t = std::pair<std::function<void()>, std::function<void()>>;
 class HostAppInterface {
 public:
+	static std::unique_ptr<HostAppInterface> Make(CalChartApp* app,
+												  StartStopFunc_t serverStartStop,
+												  StartStopFunc_t clientStartStop);
+protected:
+	HostAppInterface(StartStopFunc_t serverStartStop,
+					 StartStopFunc_t clientStartStop);
+	StartStopFunc_t m_serverStartStop;
+	StartStopFunc_t m_clientStartStop;
+public:
+	virtual ~HostAppInterface(); // calls the exit function
+
+	virtual bool OnInit() = 0;
 	virtual void OpenFile(const wxString& filename) = 0;
 };
 
 class ServerSideHostAppInterface : public HostAppInterface {
 public:
-	~ServerSideHostAppInterface();
+	virtual ~ServerSideHostAppInterface();
 
-	static ServerSideHostAppInterface* Make(CalChartApp* app);
+	static std::unique_ptr<HostAppInterface> Make(CalChartApp* app,
+												  StartStopFunc_t serverStartStop,
+												  StartStopFunc_t clientStartStop);
 
+	virtual bool OnInit();
 	virtual void OpenFile(const wxString& filename);
 private:
-	ServerSideHostAppInterface(CCAppServer* server);
+	ServerSideHostAppInterface(std::unique_ptr<CCAppServer> server,
+							   StartStopFunc_t serverStartStop,
+							   StartStopFunc_t clientStartStop);
 	
 
-	CCAppServer* mServer;
+	std::unique_ptr<CCAppServer> mServer;
 };
 
 
 class ClientSideHostAppInterface : public HostAppInterface {
 public:
-	~ClientSideHostAppInterface();
+	virtual ~ClientSideHostAppInterface();
 
-	static ClientSideHostAppInterface* Make();
+	static std::unique_ptr<HostAppInterface> Make(StartStopFunc_t serverStartStop,
+												  StartStopFunc_t clientStartStop);
 
+	virtual bool OnInit();
 	virtual void OpenFile(const wxString& filename);
 private:
-	ClientSideHostAppInterface(CCAppClient* client);
+	ClientSideHostAppInterface(std::unique_ptr<CCAppClient> client,
+							   StartStopFunc_t serverStartStop,
+							   StartStopFunc_t clientStartStop);
 	
 
-	CCAppClient* mClient;
+	std::unique_ptr<CCAppClient> mClient;
 };
 
 class IndependentHostAppInterface : public HostAppInterface {
 public:
-	IndependentHostAppInterface(CalChartApp* app);
+	virtual ~IndependentHostAppInterface();
 
+	static std::unique_ptr<HostAppInterface> Make(CalChartApp* app,
+												  StartStopFunc_t serverStartStop,
+												  StartStopFunc_t clientStartStop);
+	
+	virtual bool OnInit();
 	virtual void OpenFile(const wxString& filename);
 private:
+	IndependentHostAppInterface(CalChartApp* app,
+								StartStopFunc_t serverStartStop,
+								StartStopFunc_t clientStartStop);
+
 	CalChartApp* mApp;
 };
 

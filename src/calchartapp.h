@@ -53,27 +53,19 @@ public:
 	void OpenFile(const wxString &fileName);
 	void OpenFileOnHost(const wxString &filename);
 private:
-	void ConnectToHostApp();
-	void DisconnectFromHostApp();
-
 	void ProcessArguments ();
-
-	bool InitApp();
-	void ExitApp();
 
 	void InitAppAsServer();
 	void InitAppAsClient();
 	void ExitAppAsServer();
 	void ExitAppAsClient();
 
-
 	ShowModeList mModeList;
 
 	wxDocManager* mDocManager;
 	std::unique_ptr<wxHtmlHelpController> mHelpController;
 
-	bool mIsHostApp;
-	HostAppInterface* mHostInterface;
+	std::unique_ptr<HostAppInterface> mHostInterface;
 };
 
 #endif // _CALCHARTAPP_H_
