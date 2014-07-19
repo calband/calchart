@@ -58,7 +58,7 @@ public:
 private:
 	enum {
 		kPointLabelFlipped,
-		kLabelIsVisible,
+		kLabelIsInvisible,
 		kTotalBits
 	};
 	
