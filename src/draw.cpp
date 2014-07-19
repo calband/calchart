@@ -129,7 +129,6 @@ size_t TabStops(size_t which, bool landscape)
 
 // these are the sizes that the page is set up to do.
 static const double kBitmapScale = 2.0; // the factor to scale the bitmap
-static const double kContinuityScale = 2.0; // the factor to scale the continuity
 static const double kSizeX = 576, kSizeY = 734;
 static const double kSizeXLandscape = 917, kSizeYLandscape = 720;
 static const double kHeaderLocation[2][2] = { { 0.5, 18/kSizeY }, { 0.5, 22/kSizeYLandscape } };
