@@ -82,6 +82,7 @@ public:
 	void OnCmd_poly(wxCommandEvent& event);
 	void OnCmd_lasso(wxCommandEvent& event);
 	void OnCmd_move(wxCommandEvent& event);
+	void OnCmd_swap(wxCommandEvent& event);
 	void OnCmd_line(wxCommandEvent& event);
 	void OnCmd_rot(wxCommandEvent& event);
 	void OnCmd_shear(wxCommandEvent& event);

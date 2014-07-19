@@ -136,6 +136,7 @@ EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
 EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
 EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
 EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
+EVT_MENU(CALCHART__swap, FieldFrame::OnCmd_swap)
 EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
 EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
 EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
@@ -818,6 +819,10 @@ void FieldFrame::OnCmd_move(wxCommandEvent& event)
 	SetCurrentMove(CC_MOVE_NORMAL);
 }
 
+void FieldFrame::OnCmd_swap(wxCommandEvent& event) 
+{
+	SetCurrentMove(CC_MOVE_SWAP);
+}
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)
 {
