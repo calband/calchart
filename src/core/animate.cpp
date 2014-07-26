@@ -105,9 +105,13 @@ mCollisionAction(NULL)
 	// the variables are persistant through the entire compile process.
 	AnimationVariables variablesStates;
 
+	int sheetIndex = 0;
 	for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet)
 	{
+		mAnimSheetIndices.push_back(sheetIndex);
 		if (!curr_sheet->IsInAnimation()) continue;
+
+		sheetIndex++;
 
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
@@ -309,6 +313,11 @@ void Animation::GotoBeat(unsigned i)
 
 
 void Animation::GotoSheet(unsigned i)
+{
+	GotoAnimationSheet(mAnimSheetIndices[i]);
+}
+
+void Animation::GotoAnimationSheet(unsigned i)
 {
 	curr_sheetnum = i;
 	RefreshSheet();
