@@ -177,8 +177,7 @@ void GeneralSetup::CreateControls()
 	topsizer->Add(boxsizer);
 
 	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
-	wxString choices[] = { wxString("one") };
-	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_DROPDOWN);	
+	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_READONLY|wxCB_DROPDOWN);
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
 	
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
