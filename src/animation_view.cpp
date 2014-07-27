@@ -301,6 +301,16 @@ AnimationView::GotoSheet(unsigned i)
 	}
 }
 
+void
+AnimationView::GotoAnimationSheet(unsigned i)
+{
+	if (mAnimation)
+	{
+		mAnimation->GotoAnimationSheet(i);
+		RefreshFrame();
+	}
+}
+
 
 void
 AnimationView::SetSelection(const SelectionList& sl)

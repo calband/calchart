@@ -499,6 +499,7 @@ void CalChartDoc::ToggleSelection(const SelectionList& sl)
 void CalChartDoc::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref)
 {
 	mShow->SelectWithLasso(lasso, toggleSelected, ref);
+	UpdateAllViews();
 }
 
 bool CalChartDoc::IsSelected(unsigned i) const { return mShow->IsSelected(i); }

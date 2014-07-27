@@ -60,6 +60,7 @@ public:
 
 // Returns true if changes made
 	void GotoSheet(unsigned i);
+	void GotoAnimationSheet(unsigned i);
 	bool PrevSheet();
 	bool NextSheet();
 
@@ -113,6 +114,8 @@ private:
 	CollisionAction_t mCollisionAction;
 
 	std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
+
+	std::vector<int> mAnimSheetIndices;
 };
 
 #endif

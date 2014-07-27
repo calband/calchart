@@ -303,6 +303,9 @@ void ContinuityEditor::FlushText()
 void ContinuityEditor::SetCurrent(unsigned i)
 {
 	mCurrentContinuityChoice = i;
+	if (mCurrentContinuityChoice >= mContinuityChoices->GetCount()) {
+		mCurrentContinuityChoice = mContinuityChoices->GetCount() - 1;
+	}
 	mContinuityChoices->SetSelection(mCurrentContinuityChoice);
 	UpdateText();
 }

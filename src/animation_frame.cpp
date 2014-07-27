@@ -412,7 +412,7 @@ AnimationFrame::OnSlider_anim_gotosheet(wxScrollEvent& event)
 {
 	if (mAnimationView)
 	{
-		mAnimationView->GotoSheet(event.GetPosition()-1);
+		mAnimationView->GotoAnimationSheet(event.GetPosition()-1);
 	}
 }
 
