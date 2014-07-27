@@ -58,6 +58,7 @@ public:
 	bool PrevSheet();
 	bool NextSheet();
 	void GotoSheet(unsigned i);
+	void GotoAnimationSheet(unsigned i);
 	void SetSelection(const SelectionList& sl);
 
 	// info
