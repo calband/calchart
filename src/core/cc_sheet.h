@@ -23,6 +23,8 @@
 #ifndef _CC_SHEET_H_
 #define _CC_SHEET_H_
 
+#include <precomp.h>
+
 #include "cc_types.h"
 #include "cc_continuity.h"
 #include "cc_point.h"

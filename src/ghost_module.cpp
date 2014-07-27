@@ -1,3 +1,6 @@
+
+#include "precomp.h"
+
 #include "ghost_module.h"
 
 #include "cc_sheet.h"

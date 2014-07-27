@@ -46,6 +46,8 @@
       <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -119,6 +121,7 @@
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\precomp.h" />
     <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\print_ps.h" />
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
@@ -129,8 +132,12 @@
     <ClInclude Include="..\..\src\ui_enums.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\generated\contgram.cpp" />
-    <ClCompile Include="..\..\generated\contscan.cpp" />
+    <ClCompile Include="..\..\generated\contgram.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\contscan.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\src\animation_canvas.cpp" />
     <ClCompile Include="..\..\src\animation_frame.cpp" />
     <ClCompile Include="..\..\src\animation_view.cpp" />
@@ -161,6 +168,9 @@
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
+    <ClCompile Include="..\..\src\precomp.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\print_ps.cpp" />
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />

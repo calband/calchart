@@ -20,6 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+#include "precomp.h"
+
 #include "modes.h"
 #include "confgr.h"
 #include <wx/dc.h>

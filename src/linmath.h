@@ -23,6 +23,8 @@
 #ifndef _LINMATH_H_
 #define _LINMATH_H_
 
+#include <precomp.h>
+
 #include <math.h>
 
 typedef float LinElem;

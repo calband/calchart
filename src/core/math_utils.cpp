@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "math_utils.h"
 
 #include "cc_coord.h"

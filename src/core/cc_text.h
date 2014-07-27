@@ -23,6 +23,8 @@
 #ifndef __CC_TEXT_H__
 #define __CC_TEXT_H__
 
+#include <precomp.h>
+
 #include "cc_types.h"
 
 #include <string>

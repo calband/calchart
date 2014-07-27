@@ -23,6 +23,8 @@
 #ifndef _CALCHARTAPP_H_
 #define _CALCHARTAPP_H_
 
+#include <precomp.h>
+
 #include "modes.h"
 
 #include <wx/wx.h>

@@ -23,6 +23,8 @@
 #ifndef _CONT_H_
 #define _CONT_H_
 
+#include <precomp.h>
+
 #include "animatecompile.h"
 
 enum ContDefinedValue

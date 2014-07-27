@@ -23,6 +23,8 @@
 #ifndef _BASIC_UI_H_
 #define _BASIC_UI_H_
 
+#include <precomp.h>
+
 #include <wx/wx.h>
 #include <wx/toolbar.h>
 

@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "cc_preferences_ui.h"
 #include "confgr.h"
 #include <wx/colordlg.h>
@@ -175,7 +177,8 @@ void GeneralSetup::CreateControls()
 	topsizer->Add(boxsizer);
 
 	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
-	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_READONLY|wxCB_DROPDOWN);	
+	wxString choices[] = { wxString("one") };
+	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, ColorNames[0], wxDefaultPosition, wxDefaultSize, COLOR_NUM, ColorNames, wxCB_DROPDOWN);	
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
 	
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
@@ -206,6 +209,7 @@ void GeneralSetup::CreateControls()
 
 void GeneralSetup::Init()
 {
+	ReadConfigColor();
 	// first read out the defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{

@@ -23,6 +23,8 @@
 #ifndef _ANIMATION_CANVAS_H_
 #define _ANIMATION_CANVAS_H_
 
+#include <precomp.h>
+
 #include <wx/wx.h>
 
 class AnimationView;

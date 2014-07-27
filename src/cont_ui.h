@@ -23,6 +23,8 @@
 #ifndef _CONT_UI_H_
 #define _CONT_UI_H_
 
+#include <precomp.h>
+
 #include "calchartdoc.h"
 
 #include <wx/docview.h>

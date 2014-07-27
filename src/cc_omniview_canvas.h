@@ -23,6 +23,8 @@
 #ifndef _CC_ONMIVIEW_CANVAS_H_
 #define _CC_ONMIVIEW_CANVAS_H_
 
+#include <precomp.h>
+
 #include <wx/glcanvas.h>
 
 #include <memory>

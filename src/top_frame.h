@@ -23,7 +23,7 @@
 #ifndef _TOP_FRAME_H_
 #define _TOP_FRAME_H_
 
-#include <wx/docview.h>
+//#include <wx/docview.h>
 
 // TopFrame
 // Serves as the top frame that gets displayed when CalChart starts

@@ -23,6 +23,8 @@
 #ifndef __DRAW_H__
 #define __DRAW_H__
 
+#include <precomp.h>
+
 #include <wx/dc.h>
 #include <vector>
 #include "confgr.h"

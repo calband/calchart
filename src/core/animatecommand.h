@@ -23,6 +23,8 @@
 #ifndef _ANIMATECOMMAND_H_
 #define _ANIMATECOMMAND_H_
 
+#include <precomp.h>
+
 #include "animate.h"
 #include "cc_drawcommand.h"
 

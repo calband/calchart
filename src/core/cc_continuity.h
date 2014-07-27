@@ -23,6 +23,8 @@
 #ifndef _CC_CONTINUITY_H_
 #define _CC_CONTINUITY_H_
 
+#include <precomp.h>
+
 #include <string>
 
 // points have a symbol index and a continuity index.  The continuity

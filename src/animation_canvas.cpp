@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "animation_canvas.h"
 #include "animation_view.h"
 #include "confgr.h"
