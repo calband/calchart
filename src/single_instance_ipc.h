@@ -1,7 +1,10 @@
 #ifndef _SINGLE_INSTANCE_IPC_H_
 #define _SINGLE_INSTANCE_IPC_H_
 
+#include <memory>
 #include <functional>
+
+#include <wx\string.h>
 
 class CalChartApp;
 
