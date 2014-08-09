@@ -4,7 +4,7 @@
 #include <memory>
 #include <functional>
 
-#include <wx\string.h>
+#include <wx/string.h>
 
 class CalChartApp;
 
