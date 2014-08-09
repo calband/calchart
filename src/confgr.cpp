@@ -48,6 +48,10 @@ const wxString ColorNames[COLOR_NUM] =
 	wxT("REF POINT TEXT"),
 	wxT("HILIT REF POINT"),
 	wxT("HILIT REF POINT TEXT"),
+	wxT("GHOST POINT"),
+	wxT("GHOST POINT TEXT"),
+	wxT("HLIT GHOST POINT"),
+	wxT("HLIT GHOST POINT TEXT"),
 	wxT("ANIM FRONT"),
 	wxT("ANIM BACK"),
 	wxT("ANIM SIDE"),
@@ -55,6 +59,7 @@ const wxString ColorNames[COLOR_NUM] =
 	wxT("HILIT ANIM BACK"),
 	wxT("HILIT ANIM SIDE"),
 	wxT("ANIM COLLISION"),
+	wxT("ANIM COLLISION WARNING"),
 	wxT("CONTINUITY PATHS"),
 	wxT("SHAPES")
 };
@@ -67,11 +72,15 @@ const wxString DefaultColors[COLOR_NUM] =
 	wxT("WHITE"),
 	wxT("BLACK"),
 	wxT("YELLOW"),
-	wxT("BLACK"),
+	wxT("YELLOW"),
 	wxT("PURPLE"),
 	wxT("BLACK"),
 	wxT("PURPLE"),
 	wxT("BLACK"),
+	wxT("BLUE"),
+	wxT("NAVY"),
+	wxT("PURPLE"),
+	wxT("PLUM"),
 	wxT("WHITE"),
 	wxT("YELLOW"),
 	wxT("SKY BLUE"),
@@ -79,12 +88,18 @@ const wxString DefaultColors[COLOR_NUM] =
 	wxT("RED"),
 	wxT("RED"),
 	wxT("PURPLE"),
+	wxT("CORAL"),
 	wxT("RED"),
 	wxT("ORANGE")
 };
 
 const int DefaultPenWidth[COLOR_NUM] =
 {
+	1,
+	1,
+	1,
+	1,
+	1,
 	1,
 	1,
 	1,

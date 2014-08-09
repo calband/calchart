@@ -129,7 +129,6 @@ size_t TabStops(size_t which, bool landscape)
 
 // these are the sizes that the page is set up to do.
 static const double kBitmapScale = 2.0; // the factor to scale the bitmap
-static const double kContinuityScale = 2.0; // the factor to scale the continuity
 static const double kSizeX = 576, kSizeY = 734;
 static const double kSizeXLandscape = 917, kSizeYLandscape = 720;
 static const double kHeaderLocation[2][2] = { { 0.5, 18/kSizeY }, { 0.5, 22/kSizeYLandscape } };
@@ -165,39 +164,51 @@ static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 
 
 static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
 
-void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary)
+void DrawSheetPoints(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
 {
 	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(GetConfiguration_DotRatio() * GetConfiguration_NumRatio()),
-															 wxSWISS, wxNORMAL, wxNORMAL);
+		wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*pointLabelFont);
-	dc.SetTextForeground(GetCalChartPen(COLOR_POINT_TEXT).GetColour());
 	CC_coord origin = show.GetMode().Offset();
 	for (size_t i = 0; i < show.GetNumPoints(); i++)
 	{
 		wxBrush fillBrush;
-		if (show.IsSelected(i) && primary)
+		if (show.IsSelected(i))
 		{
-			dc.SetPen(GetCalChartPen(COLOR_POINT_HILIT));
-			fillBrush = GetCalChartBrush(COLOR_POINT_HILIT);
-		}
-		else if (show.IsSelected(i) && !primary)
-		{
-			dc.SetPen(GetCalChartPen(COLOR_REF_POINT_HILIT));
-			fillBrush = GetCalChartBrush(COLOR_REF_POINT_HILIT);
-		}
-		else if (!show.IsSelected(i) && primary)
-		{
-			dc.SetPen(GetCalChartPen(COLOR_POINT));
-			fillBrush = GetCalChartBrush(COLOR_POINT);
+			dc.SetPen(GetCalChartPen(selectedColor));
+			fillBrush = GetCalChartBrush(selectedColor);
+			dc.SetTextForeground(GetCalChartPen(selectedTextColor).GetColour());
 		}
 		else
 		{
-			dc.SetPen(GetCalChartPen(COLOR_REF_POINT));
-			fillBrush = GetCalChartBrush(COLOR_REF_POINT);
+			dc.SetPen(GetCalChartPen(unselectedColor));
+			fillBrush = GetCalChartBrush(unselectedColor);
+			dc.SetTextForeground(GetCalChartPen(unselectedTextColor).GetColour());
 		}
 		DrawPoint(sheet.GetPoint(i), dc, ref, origin, fillBrush, show.GetPointLabel(i));
 	}
 	dc.SetFont(wxNullFont);
+}
+
+void DrawGhostSheet(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref) {
+	DrawSheetPoints(dc, show, sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT_HLIT, COLOR_GHOST_POINT_TEXT, COLOR_GHOST_POINT_HLIT_TEXT);
+}
+
+void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary)
+{
+	CalChartColors unselectedColor, selectedColor, unselectedTextColor, selectedTextColor;
+	if (primary) {
+		unselectedColor = COLOR_POINT;
+		selectedColor = COLOR_POINT_HILIT;
+		unselectedTextColor = COLOR_POINT_TEXT;
+		selectedTextColor = COLOR_POINT_HILIT_TEXT;
+	} else {
+		unselectedColor = COLOR_REF_POINT;
+		selectedColor = COLOR_REF_POINT_HILIT;
+		unselectedTextColor = COLOR_REF_POINT_TEXT;
+		selectedTextColor = COLOR_REF_POINT_HILIT_TEXT;
+	}
+	DrawSheetPoints(dc, show, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
 // draw the continuity starting at a specific offset
@@ -619,11 +630,13 @@ DrawPoint(const CC_point& point, wxDC& dc, unsigned reference, const CC_coord& o
 		default:
 			break;
 	}
-	wxCoord textw, texth, textd;
-	dc.GetTextExtent(label, &textw, &texth, &textd);
-	dc.DrawText(label,
-				point.GetFlip() ? x : (x - textw),
-				y - textoff - texth + textd);
+	if (point.LabelIsVisible()) {
+		wxCoord textw, texth, textd;
+		dc.GetTextExtent(label, &textw, &texth, &textd);
+		dc.DrawText(label,
+			point.GetFlip() ? x : (x - textw),
+			y - textoff - texth + textd);
+	}
 }
 
 

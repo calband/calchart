@@ -60,6 +60,8 @@ public:
 	void OnCmdInsertBefore(wxCommandEvent& event);
 	void OnCmdInsertAfter(wxCommandEvent& event);
     void OnCmdInsertFromOtherShow(wxCommandEvent& event);
+	void OnCmdCopySheet(wxCommandEvent& event);
+	void OnCmdPasteSheet(wxCommandEvent& event);
 	void OnCmdDelete(wxCommandEvent& event);
 	void OnCmdRelabel(wxCommandEvent& event);
 	void OnCmdEditCont(wxCommandEvent& event);
@@ -80,6 +82,7 @@ public:
 	void OnCmd_poly(wxCommandEvent& event);
 	void OnCmd_lasso(wxCommandEvent& event);
 	void OnCmd_move(wxCommandEvent& event);
+	void OnCmd_swap(wxCommandEvent& event);
 	void OnCmd_line(wxCommandEvent& event);
 	void OnCmd_rot(wxCommandEvent& event);
 	void OnCmd_shear(wxCommandEvent& event);
@@ -89,6 +92,9 @@ public:
 	void OnCmd_label_left(wxCommandEvent& event);
 	void OnCmd_label_right(wxCommandEvent& event);
 	void OnCmd_label_flip(wxCommandEvent& event);
+	void OnCmd_label_hide(wxCommandEvent& event);
+	void OnCmd_label_show(wxCommandEvent& event);
+	void OnCmd_label_visibility_toggle(wxCommandEvent& event);
 	void OnCmd_setsym0(wxCommandEvent& event);
 	void OnCmd_setsym1(wxCommandEvent& event);
 	void OnCmd_setsym2(wxCommandEvent& event);
@@ -102,6 +108,8 @@ public:
 	void OnCmd_AddBackgroundImage(wxCommandEvent& event);
 	void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
 	void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
+
+	void OnCmd_GhostOption(wxCommandEvent& event);
 
 	void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 
@@ -145,6 +153,8 @@ public:
 	void ClearAnimationFrame();
 	
 	DECLARE_EVENT_TABLE()
+private:
+	void refreshGhostOptionStates();
 };
 
 #endif

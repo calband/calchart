@@ -33,6 +33,7 @@
 #include <set>
 #include <vector>
 
+
 AnimateDir AnimGetDirFromAngle(float ang);
 
 class AnimateCommand;
@@ -59,6 +60,7 @@ public:
 
 // Returns true if changes made
 	void GotoSheet(unsigned i);
+	void GotoAnimationSheet(unsigned i);
 	bool PrevSheet();
 	bool NextSheet();
 
@@ -73,11 +75,11 @@ public:
 	// For drawing:
 	struct animate_info_t
 	{
-		bool mCollision;
+		int mCollision;
 		AnimateDir mDirection;
 		float mRealDirection;
 		CC_coord mPosition;
-		animate_info_t(bool col, AnimateDir dir, float rdir, CC_coord pos) : mCollision(col), mDirection(dir), mRealDirection(rdir), mPosition(pos) {}
+		animate_info_t(int col, AnimateDir dir, float rdir, CC_coord pos) : mCollision(col), mDirection(dir), mRealDirection(rdir), mPosition(pos) {}
 	};
 	animate_info_t GetAnimateInfo(unsigned which) const;
 
@@ -97,7 +99,7 @@ private:
 	const unsigned numpts;
 	std::vector<AnimatePoint> pts;
 	std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator > curr_cmds; // pointer to the current command
-	std::set<int> mCollisions;
+	std::map<unsigned, CollisionType> mCollisions;
 	unsigned curr_sheetnum;
 	unsigned curr_beat;
 
@@ -112,6 +114,8 @@ private:
 	CollisionAction_t mCollisionAction;
 
 	std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
+
+	std::vector<int> mAnimSheetIndices;
 };
 
 #endif

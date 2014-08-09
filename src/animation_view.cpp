@@ -41,7 +41,7 @@
 
 AnimationView::AnimationView() :
 mErrorOccurred(false),
-mCollisionWarningType(COLLISION_SHOW)
+mCollisionWarningType(COLLISION_RESPONSE_SHOW)
 {
 }
 
@@ -56,7 +56,7 @@ AnimationView::OnDraw(wxDC *dc)
 {
 	dc->SetPen(GetCalChartPen(COLOR_FIELD_DETAIL));
 	GetShow()->GetMode().DrawAnim(*dc);
-	const bool checkForCollision = mCollisionWarningType != COLLISION_NONE;
+	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
 	if (mAnimation)
 	{
 		for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
@@ -65,8 +65,14 @@ AnimationView::OnDraw(wxDC *dc)
 
 			if (checkForCollision && info.mCollision)
 			{
-				dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_COLLISION));
-				dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_COLLISION));
+				if (info.mCollision == COLLISION_WARNING) {
+					dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_COLLISION_WARNING));
+					dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_COLLISION_WARNING));
+				} else if (info.mCollision == COLLISION_INTERSECT) {
+					dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_COLLISION));
+					dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_COLLISION));
+				}
+
 			}
 			else if (GetShow()->IsSelected(i))
 			{
@@ -152,7 +158,7 @@ AnimationView::SetCollisionType(CollisionWarning col)
 	mCollisionWarningType = col;
 	if (mAnimation)
 	{
-		mAnimation->SetCollisionAction(col == COLLISION_BEEP ? wxBell : NULL);
+		mAnimation->SetCollisionAction(col == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
 	}
 }
 
@@ -210,7 +216,7 @@ AnimationView::Generate()
 		} while (mAnimation->NextBeat());
 #endif // GENERATE_SHOW_DUMP
 
-		mAnimation->SetCollisionAction(mCollisionWarningType == COLLISION_BEEP ? wxBell : NULL);
+		mAnimation->SetCollisionAction(mCollisionWarningType == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
 		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
 	}
 	GetAnimationFrame()->UpdatePanel();
@@ -289,6 +295,16 @@ AnimationView::GotoSheet(unsigned i)
 	if (mAnimation)
 	{
 		mAnimation->GotoSheet(i);
+		RefreshFrame();
+	}
+}
+
+void
+AnimationView::GotoAnimationSheet(unsigned i)
+{
+	if (mAnimation)
+	{
+		mAnimation->GotoAnimationSheet(i);
 		RefreshFrame();
 	}
 }

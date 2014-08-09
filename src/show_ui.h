@@ -107,6 +107,7 @@ private:
 	unsigned mNumberPoints;
 	unsigned mNumberColumns;
 	std::vector<wxString> mLabels;
+	void OnCmd_label_type(wxCommandEvent& event);
 
 public:
 	unsigned GetNumberPoints() const { return mNumberPoints; }
@@ -121,6 +122,7 @@ private:
 class ShowInfoReqWizard : public wxWizardPageSimple
 {
 	DECLARE_CLASS( ShowInfoReqWizard )
+	DECLARE_EVENT_TABLE()
 public:
 	ShowInfoReqWizard(wxWizard *parent);
 
@@ -134,6 +136,7 @@ private:
 	unsigned mNumberPoints;
 	unsigned mNumberColumns;
 	std::vector<wxString> mLabels;
+	void OnCmd_label_type(wxCommandEvent& event);
 
 public:
 	unsigned GetNumberPoints() const { return mNumberPoints; }

@@ -111,9 +111,11 @@
     <ClInclude Include="..\..\src\core\cont.h" />
     <ClInclude Include="..\..\src\core\math_utils.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
+    <ClInclude Include="..\..\src\draw.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
+    <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\platconf.h" />
@@ -158,6 +160,7 @@
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
+    <ClCompile Include="..\..\src\ghost_module.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\print_ps.cpp" />

@@ -284,6 +284,31 @@ void MovePointsOnSheetCommand::DoAction()
 	}
 }
 
+// RotatePointPositionsCommand
+RotatePointPositionsCommand::RotatePointPositionsCommand(CalChartDoc& show, unsigned rotateAmount, unsigned ref)
+: super(show, ref)
+{
+	// construct a vector of point indices in order
+	std::vector<unsigned> pointIndices;
+	std::copy(mPoints.begin(), mPoints.end(), std::back_inserter(pointIndices));
+
+	// construct a vector of point positions, rotated by rotate amount
+	std::vector<CC_coord> finalPositions;
+	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	std::transform(mPoints.begin(), mPoints.end(), std::back_inserter(finalPositions), [=](unsigned i) { return sheet->GetPosition(i, mRef); });
+	rotateAmount %= mPoints.size();
+	std::rotate(finalPositions.begin(), finalPositions.begin() + rotateAmount, finalPositions.end());
+
+	// put things into place.
+	for (int index = pointIndices.size() - 1; index >= 0; index--) {
+		mPositions[pointIndices[index]] = finalPositions[index];
+	}
+}
+
+RotatePointPositionsCommand::~RotatePointPositionsCommand()
+{}
+
+
 
 // TranslatePointsByDeltaCommand:
 // Move the selected points by a fixed delta
@@ -449,3 +474,41 @@ SetLabelFlipCommand::SetLabelFlipCommand(CalChartDoc& show)
 SetLabelFlipCommand::~SetLabelFlipCommand()
 {}
 
+
+SetLabelVisibilityCommand::SetLabelVisibilityCommand(CalChartDoc& show) 
+: super(show, wxT("Setting Label Visibility"))
+{}
+
+SetLabelVisibilityCommand::~SetLabelVisibilityCommand()
+{}
+
+void SetLabelVisibilityCommand::DoAction() {
+	SetSheetAndSelectCommand::DoAction(); // sets selected and page
+	CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	for (auto iterator = mLabelVisibility.begin(); iterator != mLabelVisibility.end(); iterator++) {
+		sheet->GetPoint(iterator->first).SetLabelVisibility(iterator->second);
+	}
+}
+
+SetLabelVisibleCommand::SetLabelVisibleCommand(CalChartDoc& show, bool isVisible)
+: super(show)
+{
+	for (auto iterator = mPoints.begin(); iterator != mPoints.end(); iterator++) {
+		mLabelVisibility[*iterator] = isVisible;
+	}
+}
+
+SetLabelVisibleCommand::~SetLabelVisibleCommand()
+{}
+
+ToggleLabelVisibilityCommand::ToggleLabelVisibilityCommand(CalChartDoc& show)
+: super(show)
+{
+	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	for (auto iterator = mPoints.begin(); iterator != mPoints.end(); iterator++) {
+		mLabelVisibility[*iterator] = !sheet->GetPoint(*iterator).LabelIsVisible();
+	}
+}
+
+ToggleLabelVisibilityCommand::~ToggleLabelVisibilityCommand()
+{}

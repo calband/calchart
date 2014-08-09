@@ -74,9 +74,9 @@ enum MarchingStyle
 
 enum CollisionWarning
 {
-	COLLISION_NONE,
-	COLLISION_SHOW,
-	COLLISION_BEEP
+	COLLISION_RESPONSE_NONE,
+	COLLISION_RESPONSE_SHOW,
+	COLLISION_RESPONSE_BEEP
 };
 
 std::string animate_err_msgs(size_t which);

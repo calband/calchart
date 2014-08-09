@@ -162,6 +162,18 @@ CC_point::FlipToggle()
 	mFlags.flip(kPointLabelFlipped);
 }
 
+bool
+CC_point::LabelIsVisible() const
+{
+	return !mFlags.test(kLabelIsInvisible);
+}
+
+void
+CC_point::SetLabelVisibility(bool isVisible)
+{
+	mFlags.set(kLabelIsInvisible, !isVisible);
+}
+
 CC_coord
 CC_point::GetPos(unsigned ref) const
 {
@@ -211,6 +223,7 @@ struct CC_point_values
 	CC_coord mPos;
 	CC_coord mRef[CC_point::kNumRefPoints];
 	bool GetFlip;
+	bool Visable;
 };
 
 bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
@@ -223,6 +236,7 @@ bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
 		&& (underTest.mSym == values.mSym)
 		&& (underTest.mPos == values.mPos)
 		&& (underTest.GetFlip() == values.GetFlip)
+		&& (underTest.LabelIsVisible() == values.Visable)
 		;
 }
 
@@ -236,6 +250,7 @@ void CC_point_UnitTests()
 	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		values.mRef[i] = CC_coord();
 	values.GetFlip = false;
+	values.Visable = true;
 
 	// test defaults
 	CC_point underTest;
@@ -264,6 +279,20 @@ void CC_point_UnitTests()
 	values.mFlags = 0;
 	values.GetFlip = false;
 	underTest.FlipToggle();
+	assert(Check_CC_point(underTest, values));
+
+	// test visability
+	underTest.SetLabelVisibility(true);
+	assert(Check_CC_point(underTest, values));
+
+	values.mFlags = 2;
+	values.Visable = false;
+	underTest.SetLabelVisibility(false);
+	assert(Check_CC_point(underTest, values));
+
+	values.mFlags = 0;
+	values.Visable = true;
+	underTest.SetLabelVisibility(true);
 	assert(Check_CC_point(underTest, values));
 
 }

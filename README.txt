@@ -1,23 +1,20 @@
 --- CalChart README.txt ---
-Updated on 4/19/2014 by Richard Powell
+Updated on 7/19/2014 by Richard Powell
 ---
 
-CalChart version 3.4.1
+CalChart version 3.4.2
 
 ---
 What's new in this version?
 ---
 
-Add ability to insert stunt sheets from other shows.
-Updated VisualStudio runtime to VC2013.
-
-Bugs and features fixed in this release:
-#20 MAC: Crash when quitting from the help menu 
-#23 Add ability to insert stunt sheets from other shows
-#66 Ctrl + Click Scrolling
-#67 Include the most recent Visual C++ Redistribution with CalChart
-#69 Continuity editor saves to incorrect dot types
-#71 Saving/Loading shows with descriptions is broken
+Bugs fixed and features added in this release:
+#24 Dot swap feature: You can swap two points on a stunt sheet
+#29 Add a ghost image of previous/next screen
+#40 Show Setup dialog: grey out letter labels when on numbers
+#68 Option to turn off point labels 
+#77 Omniview shows purple dots even when they're not colliding 
+#84 Copy and paste for pages in field view
 
 ---
 What is CalChart?
@@ -89,6 +86,21 @@ For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
 If you need to regenerate the help documentation, see the README-docs.txt
+
+----------
+
+Release notes for 3.4.1
+
+Add ability to insert stunt sheets from other shows.
+Updated VisualStudio runtime to VC2013.
+
+Bugs and features fixed in this release:
+#20 MAC: Crash when quitting from the help menu 
+#23 Add ability to insert stunt sheets from other shows
+#66 Ctrl + Click Scrolling
+#67 Include the most recent Visual C++ Redistribution with CalChart
+#69 Continuity editor saves to incorrect dot types
+#71 Saving/Loading shows with descriptions is broken
 
 ----------
 

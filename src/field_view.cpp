@@ -82,6 +82,13 @@ FieldView::OnDraw(wxDC *dc)
 		dc->SetTextForeground(GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
 		mShow->GetMode().Draw(*dc);
 		
+
+		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
+
+		if (ghostSheet != nullptr) {
+			DrawGhostSheet(*dc, *mShow, *ghostSheet, 0);
+		}
+
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
@@ -191,6 +198,13 @@ FieldView::OnWizardSetup(CalChartDoc& show)
 }
 
 bool
+FieldView::DoRotatePointPositions(unsigned rotateAmount)
+{
+	GetDocument()->GetCommandProcessor()->Submit(new RotatePointPositionsCommand(*mShow, rotateAmount, mCurrentReferencePoint), true);
+	return true;
+}
+
+bool
 FieldView::DoTranslatePoints(const CC_coord& delta)
 {
 	if (((delta.x == 0) && (delta.y == 0)) ||
@@ -277,6 +291,20 @@ FieldView::DoSetPointsLabelFlip()
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow), true);
+	return true;
+}
+
+bool 
+FieldView::DoSetPointsLabelVisibility(bool isVisible) {
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new SetLabelVisibleCommand(*mShow, isVisible), true);
+	return true;
+}
+
+bool 
+FieldView::DoTogglePointsLabelVisibility() {
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new ToggleLabelVisibilityCommand(*mShow), true);
 	return true;
 }
 
@@ -416,6 +444,11 @@ FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggl
 	lasso.Append(CC_coord(c2.x, c1.y));
 	lasso.End();
 	SelectWithLasso(&lasso, toggleSelected);
+}
+
+const SelectionList& 
+FieldView::GetSelectionList() {
+	return mShow->GetSelectionList();
 }
 
 void

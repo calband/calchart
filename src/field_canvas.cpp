@@ -186,6 +186,25 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				mFrame->SnapToGrid(pos);
 				AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
 				break;
+			case CC_MOVE_SWAP:
+			{
+				int targetDotIndex = mView->FindPoint(pos);
+				if (targetDotIndex >= 0) {
+					SelectionList targetDot;
+					targetDot.insert(targetDotIndex);
+					if (mView->GetSelectionList().size() != 1) {
+						mView->UnselectAll();
+					}
+					mView->AddToSelection(targetDot);
+					if (mView->GetSelectionList().size() == 2) {
+						mView->DoRotatePointPositions(1);
+						mView->UnselectAll();
+					}
+				} else {
+					mView->UnselectAll();
+				}
+				break;
+			}
 			default:
 				switch (drag)
 			{
