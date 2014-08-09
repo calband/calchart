@@ -5,7 +5,7 @@
 //-wxWidgets Includes-
 //====================
 
-#include <wx\wxprec.h>
+#include <wx/wxprec.h>
 
 //Additional wxWidgets includes, not in wxprec.h
 #include <wx/dcbuffer.h>
