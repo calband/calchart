@@ -189,7 +189,7 @@ static const wxString k ## KeyName ## Key = wxT( #KeyName ); \
 static const Type k ## KeyName ## Value = (TheValue); \
 Type GetConfiguration_ ## KeyName () { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
 void SetConfiguration_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
-void ClearConfiguration_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
+void ClearConfiguration_ ## KeyName() { return ClearConfigValue<Type>(k ## KeyName ## Key);}
 
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long, 60);
@@ -290,11 +290,11 @@ const wxString kShowModeStrings[SHOWMODE_NUM] =
 // x y w h (region of the field to use, in steps)
 const long kShowModeDefaultValues[SHOWMODE_NUM][kShowModeValues] =
 {
-	{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
-	{ 32, 52, 8, 8, 8, 8, -96, -42, 192, 84 },
-	{ 32, 52, 8, 8, 8, 8, 16, -42, 192, 84 },
-	{ 28, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
-	{ 36, 48, 8, 8, 8, 8, -80, -42, 160, 84 }
+	{ 32, 52, 8, 8, 8, 8, 80, 42, 160, 84 },
+	{ 32, 52, 8, 8, 8, 8, 96, 42, 192, 84 },
+	{ 32, 52, 8, 8, 8, 8, -16, 42, 192, 84 },
+	{ 28, 52, 8, 8, 8, 8, 80, 42, 160, 84 },
+	{ 36, 48, 8, 8, 8, 8, 80, 42, 160, 84 }
 };
 
 const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] =
@@ -315,6 +315,7 @@ const long kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM][kSpringShowModeValue
 	{ 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232, 153, 438, 270, 12 }
 };
 
+
 void GetConfigurationShowMode(size_t which, long values[kShowModeValues])
 {
 	for (size_t i = 0; i < kShowModeValues; ++i)
@@ -333,37 +334,55 @@ void GetConfigurationShowMode(size_t which, long values[kShowModeValues])
 		values[3] = config->Read(wxT("bord1_y"), values[3]);
 		values[4] = config->Read(wxT("bord2_x"), values[4]);
 		values[5] = config->Read(wxT("bord2_y"), values[5]);
-		values[6] = config->Read(wxT("size_x"), values[6]);
-		values[7] = config->Read(wxT("size_y"), values[7]);
-		values[8] = config->Read(wxT("offset_x"), values[8]);
-		values[9] = config->Read(wxT("offset_y"), values[9]);
+		values[6] = config->Read(wxT("offset_x"), values[6]);
+		values[7] = config->Read(wxT("offset_y"), values[7]);
+		values[8] = config->Read(wxT("size_x"), values[8]);
+		values[9] = config->Read(wxT("size_y"), values[9]);
 	}
+}
+
+void SetupShowMode(const wxString& name, const long values[kShowModeValues]) {
+	unsigned short whash = values[0];
+	unsigned short ehash = values[1];
+	CC_coord bord1, bord2;
+	bord1.x = Int2Coord(values[2]);
+	bord1.y = Int2Coord(values[3]);
+	bord2.x = Int2Coord(values[4]);
+	bord2.y = Int2Coord(values[5]);
+	CC_coord size, offset;
+	offset.x = Int2Coord(values[6]);
+	offset.y = Int2Coord(values[7]);
+	size.x = Int2Coord(values[8]);
+	size.y = Int2Coord(values[9]);
+
+	ShowModeStandard* mode = dynamic_cast<ShowModeStandard*>(ShowModeList_Find(wxGetApp().GetModeList(), name));
+	if (mode == nullptr) {
+		wxGetApp().GetModeList().emplace_back(std::unique_ptr<ShowMode>(new ShowModeStandard(name, size, offset, bord1, bord2, whash, ehash)));
+	} else {
+		mode->SetSize(size);
+		mode->SetOffset(offset);
+		mode->SetUpperLeftBorder(bord1);
+		mode->SetLowerRightBorder(bord2);
+		mode->SetHashW(whash);
+		mode->SetHashE(ehash);
+	}
+}
+
+void ReadConfigurationShowMode(size_t which) {
+	long values[kShowModeValues];
+	GetConfigurationShowMode(which, values);
+	SetupShowMode(kShowModeStrings[which], values);
 }
 
 void ReadConfigurationShowMode()
 {
 	for (size_t i=0; i<SHOWMODE_NUM; ++i)
 	{
-		long values[kShowModeValues];
-		GetConfigurationShowMode(i, values);
-		unsigned short whash = values[0];
-		unsigned short ehash = values[1];
-		CC_coord bord1, bord2;
-		bord1.x = Int2Coord(values[2]);
-		bord1.y = Int2Coord(values[3]);
-		bord2.x = Int2Coord(values[4]);
-		bord2.y = Int2Coord(values[5]);
-		CC_coord size, offset;
-		offset.x = Int2Coord(-values[6]);
-		offset.y = Int2Coord(-values[7]);
-		size.x = Int2Coord(values[8]);
-		size.y = Int2Coord(values[9]);
-
-		wxGetApp().GetModeList().emplace_back(std::unique_ptr<ShowMode>(new ShowModeStandard(kShowModeStrings[i], size, offset, bord1, bord2, whash, ehash)));
+		ReadConfigurationShowMode(i);
 	}
 }
 
-void GetConfigurationSpringShowMode(size_t which, long values[kShowModeValues])
+void GetConfigurationSpringShowMode(size_t which, long values[kSpringShowModeValues])
 {
 	for (size_t i = 0; i < kSpringShowModeValues; ++i)
 	{
@@ -380,7 +399,6 @@ void GetConfigurationSpringShowMode(size_t which, long values[kShowModeValues])
 		values[2] = config->Read(wxT("bord1_y"), values[2]);
 		values[3] = config->Read(wxT("bord2_x"), values[3]);
 		values[4] = config->Read(wxT("bord2_y"), values[4]);
-
 		values[5] = config->Read(wxT("mode_steps_x"), values[5]);
 		values[6] = config->Read(wxT("mode_steps_y"), values[6]);
 		values[7] = config->Read(wxT("mode_steps_w"), values[7]);
@@ -400,46 +418,75 @@ void GetConfigurationSpringShowMode(size_t which, long values[kShowModeValues])
 	}
 }
 
+void SetupSpringShowMode(const wxString& name, const long values[kSpringShowModeValues]) {
+	unsigned char which_spr_yards = values[0];
+	CC_coord bord1, bord2;
+	bord1.x = Int2Coord(values[1]);
+	bord1.y = Int2Coord(values[2]);
+	bord2.x = Int2Coord(values[3]);
+	bord2.y = Int2Coord(values[4]);
+
+	short mode_steps_x = values[5];
+	short mode_steps_y = values[6];
+	short mode_steps_w = values[7];
+	short mode_steps_h = values[8];
+	short eps_stage_x = values[9];
+	short eps_stage_y = values[10];
+	short eps_stage_w = values[11];
+	short eps_stage_h = values[12];
+	short eps_field_x = values[13];
+	short eps_field_y = values[14];
+	short eps_field_w = values[15];
+	short eps_field_h = values[16];
+	short eps_text_left = values[17];
+	short eps_text_right = values[18];
+	short eps_text_top = values[19];
+	short eps_text_bottom = values[20];
+	
+	ShowModeSprShow* mode = dynamic_cast<ShowModeSprShow*>(ShowModeList_Find(wxGetApp().GetModeList(), name));
+	if (mode == nullptr) {
+		wxGetApp().GetModeList().emplace_back(std::unique_ptr<ShowMode>(new ShowModeSprShow(name, bord1, bord2,
+			which_spr_yards,
+			mode_steps_x, mode_steps_y,
+			mode_steps_w, mode_steps_h,
+			eps_stage_x, eps_stage_y,
+			eps_stage_w, eps_field_h,
+			eps_field_x, eps_field_y,
+			eps_field_w, eps_field_h,
+			eps_text_left, eps_text_right,
+			eps_text_top, eps_text_bottom)));
+	} else {
+		mode->SetWhichYards(which_spr_yards);
+		mode->SetStepsX(mode_steps_x);
+		mode->SetStepsY(mode_steps_y);
+		mode->SetStepsW(mode_steps_w);
+		mode->SetStepsH(mode_steps_h);
+		mode->SetStageX(eps_stage_x);
+		mode->SetStageY(eps_stage_y);
+		mode->SetStageW(eps_stage_w);
+		mode->SetStageH(eps_field_h);
+		mode->SetFieldX(eps_field_x);
+		mode->SetFieldY(eps_field_y);
+		mode->SetFieldW(eps_field_w);
+		mode->SetFieldH(eps_field_h);
+		mode->SetTextLeft(eps_text_left);
+		mode->SetTextRight(eps_text_right);
+		mode->SetTextTop(eps_text_top);
+		mode->SetTextBottom(eps_text_bottom);
+	}
+}
+
+void ReadConfigurationSpringShowMode(size_t which) {
+	long values[kSpringShowModeValues];
+	GetConfigurationSpringShowMode(which, values);
+	SetupSpringShowMode(kSpringShowModeStrings[which], values);
+}
+
 void ReadConfigurationSpringShowMode()
 {
 	for (size_t i=0; i<SPRINGSHOWMODE_NUM; ++i)
 	{
-		long values[kSpringShowModeValues];
-		GetConfigurationSpringShowMode(i, values);
-		unsigned char which_spr_yards = values[0];
-		CC_coord bord1, bord2;
-		bord1.x = Int2Coord(values[1]);
-		bord1.y = Int2Coord(values[2]);
-		bord2.x = Int2Coord(values[3]);
-		bord2.y = Int2Coord(values[4]);
-
-		short mode_steps_x = values[5];
-		short mode_steps_y = values[6];
-		short mode_steps_w = values[7];
-		short mode_steps_h = values[8];
-		short eps_stage_x = values[9];
-		short eps_stage_y = values[10];
-		short eps_stage_w = values[11];
-		short eps_stage_h = values[12];
-		short eps_field_x = values[13];
-		short eps_field_y = values[14];
-		short eps_field_w = values[15];
-		short eps_field_h = values[16];
-		short eps_text_left = values[17];
-		short eps_text_right = values[18];
-		short eps_text_top = values[19];
-		short eps_text_bottom = values[20];
-		wxGetApp().GetModeList().emplace_back(std::unique_ptr<ShowMode>(new ShowModeSprShow(kSpringShowModeStrings[i], bord1, bord2,
-					which_spr_yards,
-					mode_steps_x, mode_steps_y,
-					mode_steps_w, mode_steps_h,
-					eps_stage_x, eps_stage_y,
-					eps_stage_w, eps_stage_h,
-					eps_field_x, eps_field_y,
-					eps_field_w, eps_field_h,
-					eps_text_left, eps_text_right,
-					eps_text_top, eps_text_bottom)));
-
+		ReadConfigurationSpringShowMode(i);
 	}
 }
 
@@ -454,12 +501,14 @@ void SetConfigurationShowMode(size_t which, const long values[kShowModeValues])
 	config->Write(wxT("bord1_y"), values[3]);
 	config->Write(wxT("bord2_x"), values[4]);
 	config->Write(wxT("bord2_y"), values[5]);
-	config->Write(wxT("size_x"), values[6]);
-	config->Write(wxT("size_y"), values[7]);
-	config->Write(wxT("offset_x"), values[8]);
-	config->Write(wxT("offset_y"), values[9]);
+	config->Write(wxT("offset_x"), values[6]);
+	config->Write(wxT("offset_y"), values[7]);
+	config->Write(wxT("size_x"), values[8]);
+	config->Write(wxT("size_y"), values[9]);
 	config->Flush();
+	SetupShowMode(kShowModeStrings[which], values);
 }
+
 
 void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowModeValues])
 {
@@ -471,7 +520,6 @@ void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowM
 	config->Write(wxT("bord1_y"), values[2]);
 	config->Write(wxT("bord2_x"), values[3]);
 	config->Write(wxT("bord2_y"), values[4]);
-
 	config->Write(wxT("mode_steps_x"), values[5]);
 	config->Write(wxT("mode_steps_y"), values[6]);
 	config->Write(wxT("mode_steps_w"), values[7]);
@@ -489,55 +537,65 @@ void SetConfigurationSpringShowMode(size_t which, const long values[kSpringShowM
 	config->Write(wxT("eps_text_top"), values[19]);
 	config->Write(wxT("eps_text_bottom"), values[20]);
 	config->Flush();
+	SetupSpringShowMode(kSpringShowModeStrings[which], values);
 }
 
 void ClearConfigurationShowMode(size_t which)
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/SHOWMODES"));
-	config->DeleteEntry(kShowModeStrings[which]);
+	config->DeleteGroup(kShowModeStrings[which]);
+	config->Flush();
+	ReadConfigurationShowMode(which);
 }
 
 void ClearConfigurationSpringShowMode(size_t which)
 {
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/SPRINGSHOWMODES"));
-	config->DeleteEntry(kSpringShowModeStrings[which]);
+	config->DeleteGroup(kSpringShowModeStrings[which]);
+	config->Flush();
+	ReadConfigurationSpringShowMode(which);
 }
 
 ///// Color Configuration /////
-void ReadConfigColor()
+void ReadConfigColor(size_t selection)
 {
 	wxConfigBase *config = wxConfigBase::Get();
-	
-	// read out the color configuration:
+
 	config->SetPath(wxT("/COLORS"));
-	for (size_t i=0; i<COLOR_NUM; i++)
+	wxColour c;
+	wxString rbuf = ColorNames[selection] + wxT("_Red");
+	wxString gbuf = ColorNames[selection] + wxT("_Green");
+	wxString bbuf = ColorNames[selection] + wxT("_Blue");
+	if (config->Exists(rbuf) && config->Exists(gbuf) && config->Exists(bbuf))
 	{
-		wxColour c;
-		wxString rbuf = ColorNames[i] + wxT("_Red");
-		wxString gbuf = ColorNames[i] + wxT("_Green");
-		wxString bbuf = ColorNames[i] + wxT("_Blue");
-		if (config->Exists(rbuf) && config->Exists(gbuf) && config->Exists(bbuf))
-		{
-			long r = config->Read(rbuf, 0l);
-			long g = config->Read(gbuf, 0l);
-			long b = config->Read(bbuf, 0l);
-			c = wxColour(r, g, b);
-		}
-		else
-		{
-			c = wxColour(DefaultColors[i]);
-		}
-		CalChartBrushes[i] = *wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
-		// store widths in a subgroup
-		config->SetPath(wxT("WIDTH"));
-		long width = DefaultPenWidth[i];
-		config->Read(ColorNames[i], &width);
-		CalChartPens[i] = *wxThePenList->FindOrCreatePen(c, width, wxSOLID);
-		config->SetPath(wxT(".."));
+		long r = config->Read(rbuf, 0l);
+		long g = config->Read(gbuf, 0l);
+		long b = config->Read(bbuf, 0l);
+		c = wxColour(r, g, b);
+	}
+	else
+	{
+		c = wxColour(DefaultColors[selection]);
+	}
+	CalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(c, wxSOLID);
+	// store widths in a subgroup
+	config->SetPath(wxT("WIDTH"));
+	long width = DefaultPenWidth[selection];
+	config->Read(ColorNames[selection], &width);
+	CalChartPens[selection] = *wxThePenList->FindOrCreatePen(c, width, wxSOLID);
+	config->SetPath(wxT(".."));
+}
+
+void ReadConfigColor()
+{
+	for (size_t i = 0; i<COLOR_NUM; i++)
+	{
+		ReadConfigColor(i);
 	}
 }
+
 
 void SetConfigColor(size_t selection)
 {
@@ -570,6 +628,7 @@ void ClearConfigColor(size_t selection)
 	config->SetPath(wxT("WIDTH"));
 	config->DeleteEntry(ColorNames[selection]);
 	config->Flush();
+	ReadConfigColor(selection);
 }
 
 void ReadConfigYardlines()
