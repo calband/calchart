@@ -23,6 +23,8 @@
 #ifndef _CC_POINT_H_
 #define _CC_POINT_H_
 
+#include <precomp.h>
+
 #include "cc_types.h"
 #include "cc_coord.h"
 

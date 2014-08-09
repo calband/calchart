@@ -23,6 +23,8 @@
 #ifndef _COLOR_SELECT_UI_H_
 #define _COLOR_SELECT_UI_H_
 
+#include <precomp.h>
+
 #include <wx/wx.h>
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>

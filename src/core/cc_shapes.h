@@ -23,6 +23,8 @@
 #ifndef _CC_SHAPES_H_
 #define _CC_SHAPES_H_
 
+#include <precomp.h>
+
 #include "cc_coord.h"
 #include <vector>
 

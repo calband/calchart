@@ -23,6 +23,8 @@
 #ifndef _UNDO_H_
 #define _UNDO_H_
 
+#include <precomp.h>
+
 #include "cc_continuity.h"
 #include "cc_coord.h"
 #include "calchartdoc.h"

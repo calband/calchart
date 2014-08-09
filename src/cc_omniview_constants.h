@@ -23,6 +23,8 @@
 #ifndef __CC_OMNIVIEW_CONSTANTS_H__
 #define __CC_OMNIVIEW_CONSTANTS_H__
 
+#include <precomp.h>
+
 #define _USE_MATH_DEFINES
 #include <cmath>
 

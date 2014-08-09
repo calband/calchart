@@ -23,6 +23,8 @@
 #ifndef _ANIMATION_VIEW_H_
 #define _ANIMATION_VIEW_H_
 
+#include <precomp.h>
+
 #include "animate.h"
 #include "calchartdoc.h"
 #include "cc_continuity.h"

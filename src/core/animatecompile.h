@@ -23,6 +23,8 @@
 #ifndef _ANIMATECOMPILE_H_
 #define _ANIMATECOMPILE_H_
 
+#include <precomp.h>
+
 #include "animate_types.h"
 #include "animate.h"
 #include <vector>

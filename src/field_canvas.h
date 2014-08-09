@@ -23,6 +23,8 @@
 #ifndef _FIELD_CANVAS_H_
 #define _FIELD_CANVAS_H_
 
+#include <precomp.h>
+
 #include "basic_ui.h"
 #include "cc_types.h"
 

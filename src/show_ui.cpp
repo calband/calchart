@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "show_ui.h"
 #include "toolbar.h"
 #include "cc_sheet.h"

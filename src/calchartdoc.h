@@ -23,6 +23,8 @@
 #ifndef _CALCHARTDOC_H_
 #define _CALCHARTDOC_H_
 
+#include <precomp.h>
+
 #include "animate.h"
 
 #include <wx/wx.h>							  // For basic wx defines

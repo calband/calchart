@@ -65,6 +65,7 @@
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
+    <ClCompile Include="..\..\src\precomp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -141,6 +142,7 @@
     <ClInclude Include="..\..\src\single_instance_ipc.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\draw.h" />
+    <ClInclude Include="..\..\src\precomp.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />

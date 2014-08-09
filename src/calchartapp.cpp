@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "calchartapp.h"
 #include "calchartdoc.h"
 #include "top_frame.h"

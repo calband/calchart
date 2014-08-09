@@ -1,6 +1,8 @@
 #ifndef _GHOST_MODULE_H_
 #define _GHOST_MODULE_H_
 
+#include <precomp.h>
+
 class CC_sheet;
 class CalChartDoc;
 /**

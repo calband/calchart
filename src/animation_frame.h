@@ -23,6 +23,8 @@
 #ifndef _ANIMATION_FRAME_H_
 #define _ANIMATION_FRAME_H_
 
+#include <precomp.h>
+
 #include "animate.h"
 
 #include <wx/wx.h>

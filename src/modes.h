@@ -23,6 +23,8 @@
 #ifndef _MODES_H_
 #define _MODES_H_
 
+#include <precomp.h>
+
 #include "cc_coord.h"
 
 #include <wx/wx.h>

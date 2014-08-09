@@ -23,6 +23,8 @@
 #ifndef _FIELD_FRAME_H_
 #define _FIELD_FRAME_H_
 
+#include <precomp.h>
+
 #include "cc_types.h"
 
 #include <wx/docview.h>

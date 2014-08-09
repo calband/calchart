@@ -23,6 +23,8 @@
 #ifndef _CONFGR_H_
 #define _CONFGR_H_
 
+#include <precomp.h>
+
 #include <wx/string.h>
 #include <wx/gdicmn.h>
 
@@ -174,6 +176,7 @@ extern wxString spr_line_text[MAX_SPR_LINES];
 extern const wxString spr_line_text_index[MAX_SPR_LINES];
 
 extern void ReadConfig();
+extern void ReadConfigColor();
 
 const size_t kShowModeValues = 10;
 void GetConfigurationShowMode(size_t which, long values[kShowModeValues]);

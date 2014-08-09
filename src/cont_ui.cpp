@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "basic_ui.h"
 #include "cont_ui.h"
 #include "confgr.h"

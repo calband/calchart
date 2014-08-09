@@ -20,6 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "precomp.h"
+
 #include "top_frame.h"
 #include "basic_ui.h"
 #include "ccvers.h"

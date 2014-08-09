@@ -23,6 +23,8 @@
 #ifndef _BACKGROUND_IMAGE_H_
 #define _BACKGROUND_IMAGE_H_
 
+#include <precomp.h>
+
 #include <wx/dc.h>
 #include <wx/event.h>
 #include <memory>
