@@ -106,6 +106,15 @@ FieldView::OnDraw(wxDC *dc)
 	}
 }
 
+// Sneakily gets used for default print/preview
+// as well as drawing on the screen.
+void
+FieldView::DrawOtherPoints(wxDC &dc, const std::map<unsigned, CC_coord>& positions)
+{
+	
+	DrawPhatomPoints(dc, *mShow, *mShow->GetCurrentSheet(), positions);
+}
+
 void
 FieldView::OnUpdate(wxView *WXUNUSED(sender), wxObject *hint)
 {

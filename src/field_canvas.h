@@ -30,12 +30,15 @@
 
 #include <vector>
 #include <memory>
+#include <functional>
+#include <map>
 
 class FieldView;
 class FieldFrame;
 class CC_shape;
 class BackgroundImage;
 class CC_coord;
+class Matrix;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas
@@ -70,6 +73,8 @@ public:
 	void SetCurrentMove(CC_MOVE_MODES move);
 	
 private:
+	std::map<unsigned, CC_coord> GetPoints(const Matrix& transmat);
+
 	// Variables
 	FieldFrame *mFrame;
 	FieldView* mView;
@@ -91,6 +96,8 @@ private:
 	// Background Picture
 	void PaintBackground(wxDC& dc);
 	std::unique_ptr<BackgroundImage> mBackgroundImage;
+	std::map<unsigned, CC_coord> mMovePoints;
+	std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;
 	
 	DECLARE_EVENT_TABLE()
 };

@@ -48,6 +48,7 @@ public:
 
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);
+    void DrawOtherPoints(wxDC& dc, const std::map<unsigned, CC_coord>& positions);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
     bool OnClose(bool deleteWindow = true);
 

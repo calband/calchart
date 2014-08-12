@@ -80,6 +80,8 @@ FieldCanvas::OnPaint(wxPaintEvent& event)
 	
 	// draw the view
 	mView->OnDraw(&dc);
+//	mView->DrawOtherPoints(dc);
+		mView->DrawOtherPoints(dc, mMovePoints);
 	
 	if (curr_shape)
 	{
@@ -145,6 +147,19 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				{
 					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_arc(((CC_shape_1point*)
 											  curr_shape.get())->GetOrigin(), pos)));
+
+					mTransformer = [this](const CC_coord&) {
+					Matrix m;
+						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
+					CC_coord c1 = origin.GetOrigin();
+					float r = -((CC_shape_arc*)curr_shape.get())->GetAngle();
+					
+					m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+					ZRotationMatrix(r) *
+					TranslationMatrix(Vector(c1.x, c1.y, 0));
+						return this->GetPoints(m);
+					};
+
 				}
 				else
 				{
@@ -160,6 +175,32 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					// rotate vect 90 degrees
 					AddDrag(CC_DRAG_LINE,
 							std::unique_ptr<CC_shape>(new CC_shape_angline(pos,CC_coord(-vect.y, vect.x))));
+
+					mTransformer = [this](const CC_coord&) {
+						Matrix m;
+						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
+						const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+						CC_coord o = origin.GetOrigin();
+						CC_coord c1 = shape->GetOrigin();
+						CC_coord c2 = shape->GetPoint();
+						CC_coord v1, v2;
+						float ang, amount;
+						
+						v1 = c1 - o;
+						v2 = c2 - c1;
+						amount = v2.Magnitude() / v1.Magnitude();
+						if (BoundDirectionSigned(v1.Direction() -
+												 (c2-o).Direction()) < 0)
+							amount = -amount;
+						ang = -v1.Direction()*M_PI/180.0;
+						m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
+						ZRotationMatrix(-ang) *
+						YXShearMatrix(amount) *
+						ZRotationMatrix(ang) *
+						TranslationMatrix(Vector(o.x, o.y, 0));
+						return this->GetPoints(m);
+					};
+				
 				}
 				else
 				{
@@ -169,6 +210,24 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 			case CC_MOVE_REFL:
 				mFrame->SnapToGrid(pos);
 				BeginDrag(CC_DRAG_LINE, pos);
+				
+				mTransformer = [this](const CC_coord&)
+			{
+				Matrix m;
+				const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+				CC_coord c1 = shape->GetOrigin();
+				CC_coord c2;
+				float ang;
+				
+				c2 = shape->GetPoint() - c1;
+				ang = -c2.Direction()*M_PI/180.0;
+				m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+				ZRotationMatrix(-ang) *
+				YReflectionMatrix() *
+				ZRotationMatrix(ang) *
+				TranslationMatrix(Vector(c1.x, c1.y, 0));
+				return this->GetPoints(m);
+			};
 				break;
 			case CC_MOVE_SIZE:
 				mFrame->SnapToGrid(pos);
@@ -176,6 +235,45 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					(((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos))
 				{
 					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
+					mTransformer = [this](const CC_coord&) -> std::map<unsigned, CC_coord>
+					{
+						Matrix m;
+						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
+						const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+						CC_coord c1 = origin.GetOrigin();
+						CC_coord c2;
+						float sx, sy;
+						
+						c2 = shape->GetPoint() - c1;
+						sx = c2.x;
+						sy = c2.y;
+						c2 = shape->GetOrigin() - c1;
+						if ((c2.x != 0) || (c2.y != 0))
+						{
+							if (c2.x != 0)
+							{
+								sx /= c2.x;
+							}
+							else
+							{
+								sx = 1;
+							}
+							if (c2.y != 0)
+							{
+								sy /= c2.y;
+							}
+							else
+							{
+								sy = 1;
+							}
+							m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+							ScaleMatrix(Vector(sx, sy, 0)) *
+							TranslationMatrix(Vector(c1.x, c1.y, 0));
+							return this->GetPoints(m);
+						}
+						return std::map<unsigned, CC_coord>{};
+					};
+					
 				}
 				else
 				{
@@ -592,6 +690,23 @@ FieldCanvas::SetZoom(float factor)
 	Refresh();
 }
 
+
+std::map<unsigned, CC_coord>
+FieldCanvas::GetPoints(const Matrix& transmat)
+{
+	std::map<unsigned, CC_coord> result;
+	for (auto i : mView->GetSelectionList())
+	{
+		auto c = mView->PointPosition(i);
+		Vector v(c.x, c.y, 0);
+		v = transmat * v;
+		v.Homogenize();
+		c = CC_coord(RoundToCoord(v.GetX()), RoundToCoord(v.GetY()));
+		result[i] = c;
+	}
+	return result;
+}
+
 void
 FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
 {
@@ -617,6 +732,12 @@ FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
 		default:
 			break;
 	}
+//	for (auto i : mView->GetSelectionList())
+//	{
+//		mMovePoints[i] = mView->PointPosition(i);
+//	}
+	std::map<unsigned, CC_coord> mPositions;
+
 }
 
 void
@@ -638,12 +759,24 @@ FieldCanvas::MoveDrag(const CC_coord& end)
 		mFrame->SnapToGrid(snapped);
 		curr_shape->OnMove(end, snapped);
 	}
+	if (mTransformer)
+	{
+		mMovePoints = mTransformer(end);
+	}
+//	for (auto i : mView->GetSelectionList())
+//	{
+//		const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+//		auto opos = shape->GetPoint() - shape->GetOrigin();
+//		mMovePoints[i] = mView->PointPosition(i) + opos;
+//	}
 }
 
 void
 FieldCanvas::EndDrag()
 {
+	mMovePoints.clear();
 	ClearShapes();
+	mTransformer = nullptr;
 	drag = CC_DRAG_NONE;
 }
 
