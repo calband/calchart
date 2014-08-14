@@ -80,8 +80,7 @@ FieldCanvas::OnPaint(wxPaintEvent& event)
 	
 	// draw the view
 	mView->OnDraw(&dc);
-//	mView->DrawOtherPoints(dc);
-		mView->DrawOtherPoints(dc, mMovePoints);
+	mView->DrawOtherPoints(dc, mMovePoints);
 	
 	if (curr_shape)
 	{
@@ -139,6 +138,21 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 			case CC_MOVE_LINE:
 				mFrame->SnapToGrid(pos);
 				BeginDrag(CC_DRAG_LINE, pos);
+
+				mTransformer = [this](const CC_coord&)
+				{
+					const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+					auto start = shape->GetOrigin();
+					auto second = shape->GetPoint();
+					CC_coord curr_pos = start;
+					std::map<unsigned, CC_coord> result;
+					auto& select_list = mView->GetSelectionList();
+					for (auto i = select_list.begin(); i != select_list.end(); ++i, curr_pos += second - start)
+					{
+						result[*i] = curr_pos;
+					}
+					return result;
+				};
 				break;
 			case CC_MOVE_ROTATE:
 				mFrame->SnapToGrid(pos);
@@ -148,18 +162,16 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_arc(((CC_shape_1point*)
 											  curr_shape.get())->GetOrigin(), pos)));
 
-					mTransformer = [this](const CC_coord&) {
-					Matrix m;
-						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
-					CC_coord c1 = origin.GetOrigin();
-					float r = -((CC_shape_arc*)curr_shape.get())->GetAngle();
-					
-					m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-					ZRotationMatrix(r) *
-					TranslationMatrix(Vector(c1.x, c1.y, 0));
+					// set up the place where points moves
+					CC_coord c1 = dynamic_cast<CC_shape_1point&>(*shape_list[0]).GetOrigin();
+					mTransformer = [c1, this](const CC_coord&)
+					{
+						auto r = -((CC_shape_arc*)curr_shape.get())->GetAngle();
+						auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+							ZRotationMatrix(r) *
+							TranslationMatrix(Vector(c1.x, c1.y, 0));
 						return this->GetPoints(m);
 					};
-
 				}
 				else
 				{
@@ -176,31 +188,28 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					AddDrag(CC_DRAG_LINE,
 							std::unique_ptr<CC_shape>(new CC_shape_angline(pos,CC_coord(-vect.y, vect.x))));
 
-					mTransformer = [this](const CC_coord&) {
-						Matrix m;
-						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
+					// set up the place where points moves
+					CC_coord o = dynamic_cast<CC_shape_1point&>(*shape_list[0]).GetOrigin();
+					mTransformer = [o, this](const CC_coord&)
+					{
 						const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
-						CC_coord o = origin.GetOrigin();
 						CC_coord c1 = shape->GetOrigin();
 						CC_coord c2 = shape->GetPoint();
-						CC_coord v1, v2;
-						float ang, amount;
-						
-						v1 = c1 - o;
-						v2 = c2 - c1;
-						amount = v2.Magnitude() / v1.Magnitude();
-						if (BoundDirectionSigned(v1.Direction() -
-												 (c2-o).Direction()) < 0)
+						CC_coord v1 = c1 - o;
+						CC_coord v2 = c2 - c1;
+						float amount = v2.Magnitude() / v1.Magnitude();
+						if (BoundDirectionSigned(v1.Direction() - (c2-o).Direction()) < 0)
+						{
 							amount = -amount;
-						ang = -v1.Direction()*M_PI/180.0;
-						m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
-						ZRotationMatrix(-ang) *
-						YXShearMatrix(amount) *
-						ZRotationMatrix(ang) *
-						TranslationMatrix(Vector(o.x, o.y, 0));
+						}
+						float ang = -v1.Direction()*M_PI/180.0;
+						auto m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
+							ZRotationMatrix(-ang) *
+							YXShearMatrix(amount) *
+							ZRotationMatrix(ang) *
+							TranslationMatrix(Vector(o.x, o.y, 0));
 						return this->GetPoints(m);
 					};
-				
 				}
 				else
 				{
@@ -212,22 +221,18 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				BeginDrag(CC_DRAG_LINE, pos);
 				
 				mTransformer = [this](const CC_coord&)
-			{
-				Matrix m;
-				const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
-				CC_coord c1 = shape->GetOrigin();
-				CC_coord c2;
-				float ang;
-				
-				c2 = shape->GetPoint() - c1;
-				ang = -c2.Direction()*M_PI/180.0;
-				m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-				ZRotationMatrix(-ang) *
-				YReflectionMatrix() *
-				ZRotationMatrix(ang) *
-				TranslationMatrix(Vector(c1.x, c1.y, 0));
-				return this->GetPoints(m);
-			};
+				{
+					const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+					CC_coord c1 = shape->GetOrigin();
+					CC_coord c2 = shape->GetPoint() - c1;
+					float ang = -c2.Direction()*M_PI/180.0;
+					auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+						ZRotationMatrix(-ang) *
+						YReflectionMatrix() *
+						ZRotationMatrix(ang) *
+						TranslationMatrix(Vector(c1.x, c1.y, 0));
+					return this->GetPoints(m);
+				};
 				break;
 			case CC_MOVE_SIZE:
 				mFrame->SnapToGrid(pos);
@@ -237,16 +242,12 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
 					mTransformer = [this](const CC_coord&) -> std::map<unsigned, CC_coord>
 					{
-						Matrix m;
 						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
-						const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
 						CC_coord c1 = origin.GetOrigin();
-						CC_coord c2;
-						float sx, sy;
-						
-						c2 = shape->GetPoint() - c1;
-						sx = c2.x;
-						sy = c2.y;
+						const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+						CC_coord c2 = shape->GetPoint() - c1;
+						float sx = c2.x;
+						float sy = c2.y;
 						c2 = shape->GetOrigin() - c1;
 						if ((c2.x != 0) || (c2.y != 0))
 						{
@@ -266,9 +267,9 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 							{
 								sy = 1;
 							}
-							m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-							ScaleMatrix(Vector(sx, sy, 0)) *
-							TranslationMatrix(Vector(c1.x, c1.y, 0));
+							auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
+								ScaleMatrix(Vector(sx, sy, 0)) *
+								TranslationMatrix(Vector(c1.x, c1.y, 0));
 							return this->GetPoints(m);
 						}
 						return std::map<unsigned, CC_coord>{};
@@ -283,6 +284,50 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 			case CC_MOVE_GENIUS:
 				mFrame->SnapToGrid(pos);
 				AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
+				if (shape_list.size() > 2)
+				{
+					mTransformer = [this](const CC_coord&) -> std::map<unsigned, CC_coord>
+					{
+						CC_shape_2point* v1 = (CC_shape_2point*)shape_list[0].get();
+						CC_shape_2point* v2 = (CC_shape_2point*)shape_list[1].get();
+						CC_shape_2point* v3 = (CC_shape_2point*)shape_list[2].get();
+						
+						CC_coord s1 = v1->GetOrigin();
+						CC_coord e1 = v1->GetPoint();
+						CC_coord s2 = v2->GetOrigin();
+						CC_coord e2 = v2->GetPoint();
+						CC_coord s3 = v3->GetOrigin();
+						CC_coord e3 = v3->GetPoint();
+						auto d = (float)s1.x*(float)s2.y - (float)s2.x*(float)s1.y + (float)s3.x*(float)s1.y - (float)s1.x*(float)s3.y + (float)s2.x*(float)s3.y - (float)s3.x*(float)s2.y;
+						if (IS_ZERO(d))
+						{
+							return std::map<unsigned, CC_coord>{};
+						}
+						else
+						{
+							Matrix A = Matrix(Vector(e1.x,e2.x,0,e3.x),
+											  Vector(e1.y,e2.y,0,e3.y),
+											  Vector(0,0,0,0),
+											  Vector(1,1,0,1));
+							Matrix Binv = Matrix(Vector((float)s2.y-(float)s3.y,
+														(float)s3.x-(float)s2.x, 0,
+														(float)s2.x*(float)s3.y -
+														(float)s3.x*(float)s2.y),
+												 Vector((float)s3.y-(float)s1.y,
+														(float)s1.x-(float)s3.x, 0,
+														(float)s3.x*(float)s1.y -
+														(float)s1.x*(float)s3.y),
+												 Vector(0, 0, 0, 0),
+												 Vector((float)s1.y-(float)s2.y,
+														(float)s2.x-(float)s1.x, 0,
+														(float)s1.x*(float)s2.y -
+														(float)s2.x*(float)s1.y));
+							Binv /= d;
+							Matrix m = Binv*A;
+							return this->GetPoints(m);
+						}
+					};
+				}
 				break;
 			case CC_MOVE_SWAP:
 			{
@@ -357,6 +402,18 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 						}
 						
 						BeginDrag(CC_DRAG_LINE, mView->PointPosition(i));
+						mTransformer = [this](const CC_coord&)
+						{
+							const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
+							CC_coord pos = shape->GetPoint() - shape->GetOrigin();
+							std::map<unsigned, CC_coord> result;
+							auto& select_list = mView->GetSelectionList();
+							for (auto i = select_list.begin(); i != select_list.end(); ++i)
+							{
+								result[*i] = mView->PointPosition(*i) + pos;
+							}
+							return result;
+						};
 					}
 			}
 				break;
@@ -392,27 +449,19 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 			switch (curr_move)
 			{
 				case CC_MOVE_LINE:
-					mView->DoMovePointsInLine(shape->GetOrigin(), shape->GetPoint());
+					mView->DoMovePoints(mMovePoints);
 					mFrame->SetCurrentMove(CC_MOVE_NORMAL);
 					break;
 				case CC_MOVE_ROTATE:
 					if (shape_list.size() > 1)
 					{
-						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
 							BeginDrag(CC_DRAG_CROSS, pos);
 						}
 						else
 						{
-							Matrix m;
-							CC_coord c1 = origin.GetOrigin();
-							float r = -((CC_shape_arc*)curr_shape.get())->GetAngle();
-							
-							m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-							ZRotationMatrix(r) *
-							TranslationMatrix(Vector(c1.x, c1.y, 0));
-							mView->DoTransformPoints(m);
+							mView->DoMovePoints(mMovePoints);
 							mFrame->SetCurrentMove(CC_MOVE_NORMAL);
 						}
 					}
@@ -420,33 +469,13 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 				case CC_MOVE_SHEAR:
 					if (shape_list.size() > 1)
 					{
-						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
 							BeginDrag(CC_DRAG_CROSS, pos);
 						}
 						else
 						{
-							Matrix m;
-							CC_coord o = origin.GetOrigin();
-							CC_coord c1 = shape->GetOrigin();
-							CC_coord c2 = shape->GetPoint();
-							CC_coord v1, v2;
-							float ang, amount;
-							
-							v1 = c1 - o;
-							v2 = c2 - c1;
-							amount = v2.Magnitude() / v1.Magnitude();
-							if (BoundDirectionSigned(v1.Direction() -
-													 (c2-o).Direction()) < 0)
-								amount = -amount;
-							ang = -v1.Direction()*M_PI/180.0;
-							m = TranslationMatrix(Vector(-o.x, -o.y, 0)) *
-							ZRotationMatrix(-ang) *
-							YXShearMatrix(amount) *
-							ZRotationMatrix(ang) *
-							TranslationMatrix(Vector(o.x, o.y, 0));
-							mView->DoTransformPoints(m);
+							mView->DoMovePoints(mMovePoints);
 							mFrame->SetCurrentMove(CC_MOVE_NORMAL);
 						}
 					}
@@ -454,116 +483,28 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 				case CC_MOVE_REFL:
 					if (shape->GetOrigin() != shape->GetPoint())
 					{
-						Matrix m;
-						CC_coord c1 = shape->GetOrigin();
-						CC_coord c2;
-						float ang;
-						
-						c2 = shape->GetPoint() - c1;
-						ang = -c2.Direction()*M_PI/180.0;
-						m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-						ZRotationMatrix(-ang) *
-						YReflectionMatrix() *
-						ZRotationMatrix(ang) *
-						TranslationMatrix(Vector(c1.x, c1.y, 0));
-						mView->DoTransformPoints(m);
+						mView->DoMovePoints(mMovePoints);
 					}
 					mFrame->SetCurrentMove(CC_MOVE_NORMAL);
 					break;
 				case CC_MOVE_SIZE:
 					if (shape_list.size() > 1)
 					{
-						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
 							BeginDrag(CC_DRAG_CROSS, pos);
 						}
 						else
 						{
-							Matrix m;
-							CC_coord c1 = origin.GetOrigin();
-							CC_coord c2;
-							float sx, sy;
-							
-							c2 = shape->GetPoint() - c1;
-							sx = c2.x;
-							sy = c2.y;
-							c2 = shape->GetOrigin() - c1;
-							if ((c2.x != 0) || (c2.y != 0))
-							{
-								if (c2.x != 0)
-								{
-									sx /= c2.x;
-								}
-								else
-								{
-									sx = 1;
-								}
-								if (c2.y != 0)
-								{
-									sy /= c2.y;
-								}
-								else
-								{
-									sy = 1;
-								}
-								m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) *
-								ScaleMatrix(Vector(sx, sy, 0)) *
-								TranslationMatrix(Vector(c1.x, c1.y, 0));
-								mView->DoTransformPoints(m);
-							}
+							mView->DoMovePoints(mMovePoints);
 							mFrame->SetCurrentMove(CC_MOVE_NORMAL);
 						}
 					}
 					break;
 				case CC_MOVE_GENIUS:
-					if (shape_list.size() >= 3)
+					if (shape_list.size() > 2)
 					{
-						CC_shape_2point* v1 = (CC_shape_2point*)shape_list[0].get();
-						CC_shape_2point* v2 = (CC_shape_2point*)shape_list[1].get();
-						CC_shape_2point* v3 = (CC_shape_2point*)shape_list[2].get();
-						CC_coord s1, s2, s3;
-						CC_coord e1, e2, e3;
-						float d;
-						Matrix m;
-						
-						s1 = v1->GetOrigin();
-						e1 = v1->GetPoint();
-						s2 = v2->GetOrigin();
-						e2 = v2->GetPoint();
-						s3 = v3->GetOrigin();
-						e3 = v3->GetPoint();
-						d = (float)s1.x*(float)s2.y - (float)s2.x*(float)s1.y +
-						(float)s3.x*(float)s1.y - (float)s1.x*(float)s3.y +
-						(float)s2.x*(float)s3.y - (float)s3.x*(float)s2.y;
-						if (IS_ZERO(d))
-						{
-							(void)wxMessageBox(wxT("Invalid genius move definition"),
-											   wxT("Genius Move"));
-						}
-						else
-						{
-							Matrix A = Matrix(Vector(e1.x,e2.x,0,e3.x),
-											  Vector(e1.y,e2.y,0,e3.y),
-											  Vector(0,0,0,0),
-											  Vector(1,1,0,1));
-							Matrix Binv = Matrix(Vector((float)s2.y-(float)s3.y,
-														(float)s3.x-(float)s2.x, 0,
-														(float)s2.x*(float)s3.y -
-														(float)s3.x*(float)s2.y),
-												 Vector((float)s3.y-(float)s1.y,
-														(float)s1.x-(float)s3.x, 0,
-														(float)s3.x*(float)s1.y -
-														(float)s1.x*(float)s3.y),
-												 Vector(0, 0, 0, 0),
-												 Vector((float)s1.y-(float)s2.y,
-														(float)s2.x-(float)s1.x, 0,
-														(float)s1.x*(float)s2.y -
-														(float)s2.x*(float)s1.y));
-							Binv /= d;
-							m = Binv*A;
-							mView->DoTransformPoints(m);
-						}
+						mView->DoMovePoints(mMovePoints);
 						mFrame->SetCurrentMove(CC_MOVE_NORMAL);
 					}
 					break;
@@ -575,8 +516,7 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 						EndDrag();
 						break;
 					case CC_DRAG_LINE:
-						pos = shape->GetPoint() - shape->GetOrigin();
-						mView->DoTranslatePoints(pos);
+						mView->DoMovePoints(mMovePoints);
 						EndDrag();
 						break;
 					case CC_DRAG_LASSO:

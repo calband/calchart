@@ -224,6 +224,14 @@ FieldView::DoTranslatePoints(const CC_coord& delta)
 }
 
 bool
+FieldView::DoMovePoints(const std::map<unsigned, CC_coord>& newPositions)
+{
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new MovePointsCommand(*mShow, newPositions, mCurrentReferencePoint), true);
+	return true;
+}
+
+bool
 FieldView::DoTransformPoints(const Matrix& transmat)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;

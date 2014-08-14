@@ -58,6 +58,7 @@ public:
 	bool DoRotatePointPositions(unsigned rotateAmount);
 	bool DoTranslatePoints(const CC_coord& pos);
 	bool DoTransformPoints(const Matrix& transmat);
+	bool DoMovePoints(const std::map<unsigned, CC_coord>& transmat);
 	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second);
 	bool DoResetReferencePoint();
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);

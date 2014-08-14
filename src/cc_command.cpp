@@ -309,6 +309,17 @@ RotatePointPositionsCommand::~RotatePointPositionsCommand()
 {}
 
 
+// MovePointsCommand:
+// Move points to position
+MovePointsCommand::MovePointsCommand(CalChartDoc& show, const std::map<unsigned, CC_coord>& newPosition, unsigned ref)
+: super(show, ref)
+{
+	mPositions = newPosition;
+}
+
+MovePointsCommand::~MovePointsCommand()
+{}
+
 
 // TranslatePointsByDeltaCommand:
 // Move the selected points by a fixed delta

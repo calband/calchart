@@ -269,6 +269,18 @@ public:
 };
 
 
+// MovePointsCommand:
+// Move points to position
+class MovePointsCommand : public MovePointsOnSheetCommand
+{
+private:
+	using super = MovePointsOnSheetCommand;
+public:
+	MovePointsCommand(CalChartDoc& show, const std::map<unsigned, CC_coord>& newPosition, unsigned ref);
+	virtual ~MovePointsCommand();
+};
+
+
 // TranslatePointsByDeltaCommand:
 // Move the selected points by a fixed delta
 class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
