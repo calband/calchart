@@ -54,8 +54,7 @@ AnimationView::~AnimationView()
 void
 AnimationView::OnDraw(wxDC *dc)
 {
-	dc->SetPen(GetCalChartPen(COLOR_FIELD_DETAIL));
-	GetShow()->GetMode().DrawAnim(*dc);
+	GetShow()->GetMode().DrawMode(*dc, ShowMode::kAnimation);
 	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
 	if (mAnimation)
 	{

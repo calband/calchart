@@ -77,10 +77,7 @@ FieldView::OnDraw(wxDC *dc)
 {
 	if (mShow)
 	{
-		// draw the field
-		dc->SetPen(GetCalChartPen(COLOR_FIELD_DETAIL));
-		dc->SetTextForeground(GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
-		mShow->GetMode().Draw(*dc);
+		mShow->GetMode().DrawMode(*dc, ShowMode::kFieldView);
 		
 
 		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
