@@ -26,11 +26,14 @@
 #include <wx/string.h>
 #include <wx/gdicmn.h>
 #include <vector>
+#include <functional>
+#include <map>
 
 // forward declare
 class wxPen;
 class wxBrush;
 class wxPathList;
+class wxColour;
 class ShowMode;
 
 #define MAX_SPR_LINES 5
@@ -88,12 +91,23 @@ extern const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM];
 class CalChartConfiguration
 {
 public:
+	// on dtor, if triggered to flush, flush-out
+	// explicit flush
+//private:
+	void FlushValuesToConfig();
+private:
+	void AddToWriteQueue();
+	std::map<wxString, std::function<void()>> mWriteQueue;
+//	~CalChartConfiguration();
 
 // macro for declaring configuration Get_, Set_, and Clear_
 #define DECLARE_CONFIGURATION_FUNCTIONS( Key, Type ) \
+public: \
 	Type Get_ ## Key () const ; \
 	void Set_ ## Key (const Type& v) ; \
-	void Clear_ ## Key () ;
+	void Clear_ ## Key () ; \
+private: \
+	mutable std::pair<bool, Type> m ## Key = { false, Type() };
 
 	DECLARE_CONFIGURATION_FUNCTIONS( AutosaveInterval, long);
 
@@ -164,10 +178,17 @@ public:
 	DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameSplitScreen, bool);
 	DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool);
 
-	wxBrush GetCalChartBrush(CalChartColors c) const;
-	wxPen GetCalChartPen(CalChartColors c) const;
-	void SetCalChartBrushAndPen(CalChartColors c, const wxBrush& brush, const wxPen& pen);
-	void ClearConfigColor(size_t selection);
+public:
+	std::vector<wxString> GetColorNames() const;
+	std::vector<wxString> GetDefaultColors() const;
+	std::vector<int> GetDefaultPenWidth() const;
+
+	using ColorWidth_t = std::pair<wxColour, long>;
+	mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth;
+
+	std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
+	void Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush, const wxPen& pen);
+	void Clear_ConfigColor(size_t selection);
 
 	wxString Get_yard_text(size_t which) const;
 	void Set_yard_text(size_t which, const wxString&);
@@ -178,10 +199,6 @@ public:
 	void ClearConfigShowYardline();
 	void ClearConfigSpringShowYardline();
 
-	std::vector<wxString> GetColorNames() const;
-	std::vector<wxString> GetDefaultColors() const;
-	std::vector<int> GetDefaultPenWidth() const;
-	
 	static const size_t kShowModeValues = 10;
 	std::vector<long> GetConfigurationShowMode(size_t which);
 	void SetConfigurationShowMode(size_t which, const std::vector<long>& values);

@@ -79,21 +79,22 @@ FieldView::OnDraw(wxDC *dc)
 	if (mShow)
 	{
 		// draw the field
-		dc->SetPen(config.GetCalChartPen(COLOR_FIELD_DETAIL));
-		dc->SetTextForeground(config.GetCalChartPen(COLOR_FIELD_TEXT).GetColour());
+		dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+		dc->SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
 		mShow->GetMode().Draw(*dc, config);
+		CC_coord origin = mShow->GetMode().Offset();
 		
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
 			if (mCurrentReferencePoint > 0)
 			{
-				Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), 0, false);
-				Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+				DrawPoints(*dc, config, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), 0, false);
+				DrawPoints(*dc, config, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			else
 			{
-				Draw(*dc, config, *mShow, *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+				DrawPoints(*dc, config, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			DrawPaths(*dc, *sheet);
 		}

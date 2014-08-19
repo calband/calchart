@@ -23,8 +23,10 @@
 #ifndef __DRAW_H__
 #define __DRAW_H__
 
+#include "cc_show.h"
 #include <wx/dc.h>
 #include <vector>
+#include <set>
 
 class wxBrush;
 class wxString;
@@ -39,7 +41,7 @@ class CalChartConfiguration;
 typedef std::vector<CC_textline> CC_textline_list;
 
 // draw the continuity starting at a specific offset
-void Draw(wxDC& dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary);
+void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, bool primary);
 void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC *dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);
 

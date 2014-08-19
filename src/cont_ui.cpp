@@ -167,6 +167,13 @@ void ContinuityEditor::CreateControls()
 
 
 	mUserInput = new FancyTextWin(this, ContinuityEditor_KeyPress, wxEmptyString, wxDefaultPosition, wxSize(50, 300));
+
+	wxArrayString autocompletes;
+	for (auto& i : { wxT("Hello"), wxT("Bye"), wxT("Cat"), wxT("Hela") })
+	{
+		autocompletes.Add(i);
+	}
+	mUserInput->AutoComplete(autocompletes);
 	
 	topsizer->Add(mUserInput, 0, wxGROW|wxALL, 5 );
 

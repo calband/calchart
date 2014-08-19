@@ -36,6 +36,8 @@
 #include "modes.h"
 #include "cc_omniview_constants.h"
 
+using ColorWidth_t = std::pair<wxColour, long>;
+
 const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 {
 	{ wxT("FIELD"),					wxT("FOREST GREEN"),	1 },
@@ -56,8 +58,8 @@ const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 	{ wxT("HILIT ANIM BACK"),		wxT("RED"),				1 },
 	{ wxT("HILIT ANIM SIDE"),		wxT("RED"),				1 },
 	{ wxT("ANIM COLLISION"),		wxT("PURPLE"),			1 },
-	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
 	{ wxT("SHAPES"),				wxT("ORANGE"),			2 },
+	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
 };
 
 CalChartConfiguration& GetConfig()
@@ -66,9 +68,8 @@ CalChartConfiguration& GetConfig()
 	return sconfig;
 }
 
-// constants for behavior:
-// Autosave
 
+// functions for dealing with the wx config directly
 template <typename T>
 T GetConfigValue(const wxString& key, const T& def)
 {
@@ -79,6 +80,10 @@ T GetConfigValue(const wxString& key, const T& def)
 	return value;
 }
 
+// clear out the config if it matches
+template <typename T>
+void ClearConfigValue(const wxString& key);
+
 // default value need to check if we need to set a value
 template <typename T>
 void SetConfigValue(const wxString& key, const T& value, const T& def)
@@ -86,6 +91,13 @@ void SetConfigValue(const wxString& key, const T& value, const T& def)
 	// don't write if we don't have to
 	if (GetConfigValue<T>(key, def) == value)
 		return;
+	// clear out the value if it's the same as the default
+	if (def == value)
+	{
+		ClearConfigValue<T>(key);
+		return;
+	}
+	
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/CalChart"));
 	config->Write(key, value);
@@ -100,6 +112,66 @@ void ClearConfigValue(const wxString& key)
 	config->DeleteEntry(key);
 	config->Flush();
 }
+
+// Specialize on Color
+template <>
+ColorWidth_t GetConfigValue(const wxString& key, const ColorWidth_t& def)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/COLORS"));
+	wxString rkey = key + wxT("_Red");
+	wxString gkey = key + wxT("_Green");
+	wxString bkey = key + wxT("_Blue");
+	long r = std::get<0>(def).Red();
+	long g = std::get<0>(def).Green();
+	long b = std::get<0>(def).Blue();
+	config->Read(rkey, &r);
+	config->Read(gkey, &g);
+	config->Read(bkey, &b);
+
+	// store widths in a subgroup
+	config->SetPath(wxT("WIDTH"));
+	long w = std::get<1>(def);
+	config->Read(key, &w);
+	return { wxColour( r, g, b ), w };
+}
+
+// Specialize on Color
+template <>
+void SetConfigValue(const wxString& key, const ColorWidth_t& value, const ColorWidth_t& def)
+{
+	// don't write if we don't have to
+	if (GetConfigValue<ColorWidth_t>(key, def) == value)
+		return;
+	wxString rkey = key + wxT("_Red");
+	wxString gkey = key + wxT("_Green");
+	wxString bkey = key + wxT("_Blue");
+
+	// TODO: fix this so it clears
+//	// clear out the value if it's the same as the default
+//	if (def == value)
+//	{
+//		ClearConfigValue<wxColour>(rkey);
+//		ClearConfigValue<wxColour>(gkey);
+//		ClearConfigValue<wxColour>(bkey);
+//		return;
+//	}
+	
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(wxT("/COLORS"));
+	long r = std::get<0>(value).Red();
+	long g = std::get<0>(value).Green();
+	long b = std::get<0>(value).Blue();
+	config->Write(rkey, r);
+	config->Write(gkey, g);
+	config->Write(bkey, b);
+	config->SetPath(wxT("WIDTH"));
+	long w = std::get<1>(def);
+	config->Write(key, w);
+	config->Flush();
+}
+
+
 
 // printing controls
 wxString yard_text[MAX_YARD_LINES] =
@@ -135,9 +207,21 @@ static bool spr_line_yard_text_valid = false;
 #define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type, TheValue ) \
 static const wxString k ## KeyName ## Key = wxT( #KeyName ); \
 static const Type k ## KeyName ## Value = (TheValue); \
-Type CalChartConfiguration::Get_ ## KeyName () const { return GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); } \
-void CalChartConfiguration::Set_ ## KeyName (const Type& v) { return SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); } \
-void CalChartConfiguration::Clear_ ## KeyName () { return ClearConfigValue<Type>( k ## KeyName ## Key ); }
+Type CalChartConfiguration::Get_ ## KeyName () const \
+{ \
+	if (! m ## KeyName.first) { \
+		m ## KeyName.second = GetConfigValue<Type>( k ## KeyName ## Key, k ## KeyName ## Value); \
+		m ## KeyName.first = true; \
+	} \
+	return m ## KeyName.second; \
+} \
+void CalChartConfiguration::Set_ ## KeyName (const Type& v) \
+{ \
+	mWriteQueue[k ## KeyName ## Key] = [v]() { SetConfigValue<Type>( k ## KeyName ## Key, v, k ## KeyName ## Value); }; \
+	m ## KeyName.first = true; \
+	m ## KeyName.second = v; \
+} \
+void CalChartConfiguration::Clear_ ## KeyName () { return Set_ ## KeyName (k ## KeyName ## Value); }
 
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( AutosaveInterval, long, 60);
@@ -401,79 +485,6 @@ CalChartConfiguration::ClearConfigurationSpringShowMode(size_t which)
 	config->DeleteEntry(kSpringShowModeStrings[which]);
 }
 
-///// Color Configuration /////
-// Color is more complicated, we use functions for setting that
-std::array<long, 3> sColors[COLOR_NUM];
-long sWidths[COLOR_NUM];
-std::bitset<COLOR_NUM> s_color_valid;
-std::bitset<COLOR_NUM> s_width_valid;
-
-std::array<long, 3> ReadConfigColor(CalChartColors i)
-{
-	if (s_color_valid.test(i))
-	{
-		return sColors[i];
-	}
-	wxConfigBase *config = wxConfigBase::Get();
-	
-	// read out the color configuration:
-	config->SetPath(wxT("/COLORS"));
-	wxString rbuf = std::get<0>(ColorInfo[i]) + wxT("_Red");
-	wxString gbuf = std::get<0>(ColorInfo[i]) + wxT("_Green");
-	wxString bbuf = std::get<0>(ColorInfo[i]) + wxT("_Blue");
-	if (config->Exists(rbuf) && config->Exists(gbuf) && config->Exists(bbuf))
-	{
-		long r = config->Read(rbuf, 0l);
-		long g = config->Read(gbuf, 0l);
-		long b = config->Read(bbuf, 0l);
-		sColors[i] = { {r, g, b} };
-	}
-	else
-	{
-		auto color = wxColour(std::get<1>(ColorInfo[i]));
-		sColors[i] = { {color.Red(), color.Green(), color.Blue()} };
-	}
-	s_color_valid.set(i);
-	return sColors[i];
-}
-
-long ReadConfigColorWidth(CalChartColors i)
-{
-	if (s_width_valid.test(i))
-	{
-		return sWidths[i];
-	}
-	wxConfigBase *config = wxConfigBase::Get();
-	
-	// read out the color configuration:
-	config->SetPath(wxT("/COLORS"));
-	// store widths in a subgroup
-	config->SetPath(wxT("WIDTH"));
-	sWidths[i] = std::get<2>(ColorInfo[i]);
-	config->Read(std::get<0>(ColorInfo[i]), &sWidths[i]);
-	s_width_valid.set(i);
-	return sWidths[i];
-}
-
-void
-CalChartConfiguration::ClearConfigColor(size_t selection)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	
-	config->SetPath(wxT("/COLORS"));
-	wxString rbuf = std::get<0>(ColorInfo[selection]) + wxT("_Red");
-	config->DeleteEntry(rbuf);
-	wxString gbuf = std::get<0>(ColorInfo[selection]) + wxT("_Green");
-	config->DeleteEntry(gbuf);
-	wxString bbuf = std::get<0>(ColorInfo[selection]) + wxT("_Blue");
-	config->DeleteEntry(bbuf);
-	config->SetPath(wxT("WIDTH"));
-	config->DeleteEntry(std::get<0>(ColorInfo[selection]));
-	config->Flush();
-	s_color_valid.reset(selection);
-	s_width_valid.reset(selection);
-}
-
 void ReadConfigYardlines()
 {
 	if (yard_text_valid)
@@ -605,42 +616,36 @@ CalChartConfiguration::ClearConfigSpringShowYardline()
 	spr_line_yard_text_valid = false;
 }
 
-wxBrush
-CalChartConfiguration::GetCalChartBrush(CalChartColors c) const
-{
-	auto color_values = ReadConfigColor(c);
-	auto color = wxColour(color_values[0], color_values[1], color_values[2]);
-	return *wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
-}
+///// Color Configuration /////
 
-wxPen
-CalChartConfiguration::GetCalChartPen(CalChartColors c) const
+std::pair<wxBrush, wxPen>
+CalChartConfiguration::Get_CalChartBrushAndPen(CalChartColors c) const
 {
-	auto color_values = ReadConfigColor(c);
-	auto color = wxColour(color_values[0], color_values[1], color_values[2]);
-	auto width = ReadConfigColorWidth(c);
-	return *wxThePenList->FindOrCreatePen(color, width, wxSOLID);
+	if (!mColorsAndWidth.count(c))
+	{
+		mColorsAndWidth[c] = GetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[c]), ColorWidth_t(std::get<1>(ColorInfo[c]), std::get<2>(ColorInfo[c])));
+	}
+	auto colorAndWidth = mColorsAndWidth[c];
+	return { *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorAndWidth), wxSOLID), *wxThePenList->FindOrCreatePen(std::get<0>(colorAndWidth), std::get<1>(colorAndWidth), wxSOLID) };
 }
 
 void
-CalChartConfiguration::SetCalChartBrushAndPen(CalChartColors c, const wxBrush& brush, const wxPen& pen)
+CalChartConfiguration::Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush, const wxPen& pen)
 {
 	if (c >= COLOR_NUM)
 		throw std::runtime_error("Error, exceeding COLOR_NUM size");
 
-	wxConfigBase *config = wxConfigBase::Get();
+	ColorWidth_t v{ brush.GetColour(), pen.GetWidth() };
 
-	// read out the color configuration:
-	config->SetPath(wxT("/COLORS"));
-	wxString rbuf = std::get<0>(ColorInfo[c]) + wxT("_Red");
-	config->Write(rbuf, static_cast<long>(brush.GetColour().Red()));
-	wxString gbuf = std::get<0>(ColorInfo[c]) + wxT("_Green");
-	config->Write(gbuf, static_cast<long>(brush.GetColour().Green()));
-	wxString bbuf = std::get<0>(ColorInfo[c]) + wxT("_Blue");
-	config->Write(bbuf, static_cast<long>(brush.GetColour().Blue()));
-	config->SetPath(wxT("WIDTH"));
-	config->Write(std::get<0>(ColorInfo[c]), pen.GetWidth());
-	config->Flush();
-	s_color_valid.reset(c);
-	s_width_valid.reset(c);
+	mWriteQueue[std::get<0>(ColorInfo[c])] = [c, v]() { SetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[c]), v, ColorWidth_t(std::get<1>(ColorInfo[c]), std::get<2>(ColorInfo[c]))); };
+	mColorsAndWidth[c] = v;
 }
+
+void
+CalChartConfiguration::Clear_ConfigColor(size_t selection)
+{
+	auto default_value = ColorWidth_t(std::get<1>(ColorInfo[selection]), std::get<2>(ColorInfo[selection]));
+	SetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[selection]), default_value, default_value);
+}
+
+

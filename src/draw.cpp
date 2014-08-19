@@ -129,37 +129,40 @@ static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 
 
 static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
 
-void Draw(wxDC& dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary)
+void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, bool primary)
 {
 	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()),
 															 wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*pointLabelFont);
-	dc.SetTextForeground(config.GetCalChartPen(COLOR_POINT_TEXT).GetColour());
-	CC_coord origin = show.GetMode().Offset();
-	for (size_t i = 0; i < show.GetNumPoints(); i++)
+	dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
+	for (size_t i = 0; i < numberPoints; i++)
 	{
 		wxBrush fillBrush;
-		if (show.IsSelected(i) && primary)
+		if (selection_list.count(i) && primary)
 		{
-			dc.SetPen(config.GetCalChartPen(COLOR_POINT_HILIT));
-			fillBrush = config.GetCalChartBrush(COLOR_POINT_HILIT);
+			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_HILIT);
+			fillBrush = brushAndPen.first;
+			dc.SetPen(brushAndPen.second);
 		}
-		else if (show.IsSelected(i) && !primary)
+		else if (selection_list.count(i) && !primary)
 		{
-			dc.SetPen(config.GetCalChartPen(COLOR_REF_POINT_HILIT));
-			fillBrush = config.GetCalChartBrush(COLOR_REF_POINT_HILIT);
+			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_REF_POINT_HILIT);
+			fillBrush = brushAndPen.first;
+			dc.SetPen(brushAndPen.second);
 		}
-		else if (!show.IsSelected(i) && primary)
+		else if (!selection_list.count(i) && primary)
 		{
-			dc.SetPen(config.GetCalChartPen(COLOR_POINT));
-			fillBrush = config.GetCalChartBrush(COLOR_POINT);
+			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT);
+			fillBrush = brushAndPen.first;
+			dc.SetPen(brushAndPen.second);
 		}
 		else
 		{
-			dc.SetPen(config.GetCalChartPen(COLOR_REF_POINT));
-			fillBrush = config.GetCalChartBrush(COLOR_REF_POINT);
+			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_REF_POINT);
+			fillBrush = brushAndPen.first;
+			dc.SetPen(brushAndPen.second);
 		}
-		DrawPoint(sheet.GetPoint(i), dc, config, ref, origin, fillBrush, show.GetPointLabel(i));
+		DrawPoint(sheet.GetPoint(i), dc, config, ref, origin, fillBrush, labels.at(i));
 	}
 	dc.SetFont(wxNullFont);
 }
@@ -612,9 +615,10 @@ void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CC_DrawCommand>& draw_co
 void DrawPath(wxDC& dc, const CalChartConfiguration& config, const std::vector<CC_DrawCommand>& draw_commands, const CC_coord& end)
 {
 	dc.SetBrush(*wxTRANSPARENT_BRUSH);
-	dc.SetPen(config.GetCalChartPen(COLOR_PATHS));
+	auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_PATHS);
+	dc.SetPen(brushAndPen.second);
 	DrawCC_DrawCommandList(dc, draw_commands);
-	dc.SetBrush(config.GetCalChartBrush(COLOR_PATHS));
+	dc.SetBrush(brushAndPen.first);
 	float circ_r = Float2Coord(config.Get_DotRatio());
 	dc.DrawEllipse(end.x - circ_r/2, end.y - circ_r/2, circ_r, circ_r);
 }

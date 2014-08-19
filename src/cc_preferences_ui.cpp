@@ -21,8 +21,11 @@
 */
 
 #include "cc_preferences_ui.h"
+#include "cc_drawcommand.h"
 #include "confgr.h"
 #include "modes.h"
+#include "draw.h"
+#include "cc_sheet.h"
 #include <wx/colordlg.h>
 #include <wx/stattext.h>
 #include <wx/statline.h>
@@ -109,7 +112,8 @@ public:
 		const wxString& caption = wxT("General Setup"),
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU )
+				 long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU ) :
+	mConfig(GetConfig())
 	{
 		Init();
 		Create(parent, id, caption, pos, size, style);
@@ -139,6 +143,8 @@ private:
 	wxBrush mCalChartBrushes[COLOR_NUM];
 
 	wxString mAutoSave_Interval;
+	CalChartConfiguration mConfig;
+
 };
 
 enum
@@ -158,6 +164,30 @@ EVT_COMBOBOX(NEW_COLOR_CHOICE,GeneralSetup::OnCmdChooseNewColor)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( GeneralSetup, PreferencePage )
+#include "basic_ui.h"
+#include "calchartdoc.h"
+
+class PrefCanvas : public ClickDragCtrlScrollCanvas
+{
+	DECLARE_EVENT_TABLE()
+	using super = ClickDragCtrlScrollCanvas;
+public:
+	PrefCanvas(wxWindow *parent, CalChartConfiguration& config);
+
+	void OnPaint(wxPaintEvent& event);
+	void PaintBackground(wxDC& dc);
+	void OnEraseBackground(wxEraseEvent& event);
+	std::unique_ptr<CC_show> mShow;
+	std::unique_ptr<const ShowMode> mMode;
+	CC_coord mOffset;
+	CalChartConfiguration& mConfig;
+
+};
+
+BEGIN_EVENT_TABLE(PrefCanvas, ClickDragCtrlScrollCanvas)
+EVT_PAINT(PrefCanvas::OnPaint)
+EVT_ERASE_BACKGROUND(PrefCanvas::OnEraseBackground)
+END_EVENT_TABLE()
 
 void GeneralSetup::CreateControls()
 {
@@ -176,7 +206,7 @@ void GeneralSetup::CreateControls()
 	topsizer->Add(boxsizer);
 
 	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
-	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, GetConfig().GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, GetConfig().GetColorNames().data(), wxCB_READONLY|wxCB_DROPDOWN);
+	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(), wxCB_READONLY|wxCB_DROPDOWN);
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
 	
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
@@ -184,7 +214,7 @@ void GeneralSetup::CreateControls()
 		wxBitmap temp_bitmap(16, 16);
 		wxMemoryDC temp_dc;
 		temp_dc.SelectObject(temp_bitmap);
-		temp_dc.SetBackground(GetConfig().GetCalChartBrush(i));
+		temp_dc.SetBackground(mConfig.Get_CalChartBrushAndPen(i).first);
 		temp_dc.Clear();
 		nameBox->SetItemBitmap(i, temp_bitmap);
 	}
@@ -202,7 +232,94 @@ void GeneralSetup::CreateControls()
 
 	boxsizer->Add(horizontalsizer, sBasicSizerFlags );
 
+	auto prefCanvas = new PrefCanvas(this, mConfig);
+	// set scroll rate 1 to 1, so we can have even scrolling of whole field
+	topsizer->Add(prefCanvas, 1, wxEXPAND);
+//	mCanvas->SetScrollRate(1, 1);
+
 	TransferDataToWindow();
+}
+
+PrefCanvas::PrefCanvas(wxWindow *parent, CalChartConfiguration& config) :
+super(parent),
+mMode(new ShowModeStandard(wxT(""), CC_coord(Int2Coord(160), Int2Coord(84)), CC_coord(Int2Coord(80), Int2Coord(42)), CC_coord(Int2Coord(4), Int2Coord(4)), CC_coord(Int2Coord(4), Int2Coord(4)), Int2Coord(32), Int2Coord(52) )),
+
+mOffset(mMode->FieldOffset()),
+mConfig(config)
+{
+	mShow = CC_show::Create_CC_show();
+	mShow->SetupNewShow();
+	mShow->SetNumPoints(4, 4, mOffset);
+	mShow->SetPointLabel(std::vector<std::string>{
+		"unsel",
+		"unsel",
+		"sel",
+		"sel",
+	});
+	CC_show::CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+	sheet->GetPoint(0).SetSymbol(SYMBOL_X);
+	sheet->GetPoint(1).SetSymbol(SYMBOL_SOLX);
+	sheet->GetPoint(2).SetSymbol(SYMBOL_X);
+	sheet->GetPoint(3).SetSymbol(SYMBOL_SOLX);
+	
+	for (auto i = 0; i < 4; ++i)
+	{
+		sheet->SetAllPositions(mOffset + CC_coord(Int2Coord(i*4), Int2Coord(2)), i);
+		sheet->SetPosition(mOffset + CC_coord(Int2Coord(i*4), Int2Coord(6)), i, 1);
+	}
+}
+
+
+// Define the repainting behaviour
+void
+PrefCanvas::OnPaint(wxPaintEvent& event)
+{
+	wxBufferedPaintDC dc(this);
+	PrepareDC(dc);
+	
+	// draw the background
+	PaintBackground(dc);
+
+	dc.SetPen(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+	dc.SetTextForeground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
+	mMode->Draw(dc, mConfig);
+	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+
+	SelectionList list;
+	list.insert(2);
+	list.insert(3);
+
+	DrawPoints(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 0, true);
+	DrawPoints(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 1, false);
+
+	auto offset = mMode->FieldOffset();
+	auto point_start = mMode->Offset() + offset + CC_coord(Int2Coord(4), Int2Coord(2));
+	auto point_end = point_start + CC_coord(Int2Coord(0), Int2Coord(2));
+	std::vector<CC_DrawCommand> cmds;
+	cmds.push_back(CC_DrawCommand(point_start, point_end));
+	point_start = point_end;
+	point_end += CC_coord(Int2Coord(10), Int2Coord(0));
+	cmds.push_back(CC_DrawCommand(point_start, point_end));
+	
+//	struct CC_DrawCommand
+
+	DrawPath(dc, mConfig, cmds, point_end);
+
+}
+
+void
+PrefCanvas::PaintBackground(wxDC& dc)
+{
+	// draw the background
+	dc.SetBackgroundMode(wxTRANSPARENT);
+	dc.SetBackground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+	dc.Clear();
+}
+
+// We have a empty erase background to improve redraw performance.
+void
+PrefCanvas::OnEraseBackground(wxEraseEvent& event)
+{
 }
 
 void GeneralSetup::Init()
@@ -210,11 +327,12 @@ void GeneralSetup::Init()
 	// first read out the defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
-		mCalChartPens[i] = GetConfig().GetCalChartPen(i);
-		mCalChartBrushes[i] = GetConfig().GetCalChartBrush(i);
+		auto brushAndPen = mConfig.Get_CalChartBrushAndPen(i);
+		mCalChartPens[i] = brushAndPen.second;
+		mCalChartBrushes[i] = brushAndPen.first;
 	}
 
-	mAutoSave_Interval.Printf(wxT("%ld"), GetConfig().Get_AutosaveInterval());
+	mAutoSave_Interval.Printf(wxT("%ld"), mConfig.Get_AutosaveInterval());
 }
 
 bool GeneralSetup::TransferDataToWindow()
@@ -233,11 +351,11 @@ bool GeneralSetup::TransferDataFromWindow()
 	// write out the values defaults:
 	for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i)+1))
 	{
-		GetConfig().SetCalChartBrushAndPen(i, mCalChartBrushes[i], mCalChartPens[i]);
+		mConfig.Set_CalChartBrushAndPen(i, mCalChartBrushes[i], mCalChartPens[i]);
 	}
 	long val;
 	mAutoSave_Interval.ToLong(&val);
-	GetConfig().Set_AutosaveInterval(val);
+	mConfig.Set_AutosaveInterval(val);
 	return true;
 }
 
@@ -245,10 +363,10 @@ bool GeneralSetup::ClearValuesToDefault()
 {
 	for (int i = 0; i < COLOR_NUM; ++i)
 	{
-		SetColor(i, GetConfig().GetDefaultPenWidth()[i], GetConfig().GetDefaultColors()[i]);
-		GetConfig().ClearConfigColor(i);
+		SetColor(i, mConfig.GetDefaultPenWidth()[i], mConfig.GetDefaultColors()[i]);
+		mConfig.Clear_ConfigColor(i);
 	}
-	GetConfig().Clear_AutosaveInterval();
+	mConfig.Clear_AutosaveInterval();
 	Init();
 	TransferDataToWindow();
 	return true;
@@ -259,6 +377,8 @@ void GeneralSetup::SetColor(int selection, int width, const wxColour& color)
 	mCalChartPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxSOLID);
 	mCalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
 
+	mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection), mCalChartBrushes[selection], mCalChartPens[selection]);
+
 	// update the namebox list
 	{
 		wxBitmap test_bitmap(16, 16);
@@ -268,6 +388,7 @@ void GeneralSetup::SetColor(int selection, int width, const wxColour& color)
 		temp_dc.Clear();
 		nameBox->SetItemBitmap(selection, test_bitmap);
 	}
+	Refresh();
 }
 
 void GeneralSetup::OnCmdSelectColors(wxCommandEvent&)
@@ -294,8 +415,8 @@ void GeneralSetup::OnCmdSelectWidth(wxSpinEvent& e)
 void GeneralSetup::OnCmdResetColors(wxCommandEvent&)
 {
 	int selection = nameBox->GetSelection();
-	SetColor(selection, GetConfig().GetDefaultPenWidth()[selection], GetConfig().GetDefaultColors()[selection]);
-	GetConfig().ClearConfigColor(selection);
+	SetColor(selection, mConfig.GetDefaultPenWidth()[selection], mConfig.GetDefaultColors()[selection]);
+	mConfig.Clear_ConfigColor(selection);
 }
 
 void GeneralSetup::OnCmdChooseNewColor(wxCommandEvent&)

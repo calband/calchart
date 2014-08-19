@@ -417,6 +417,7 @@ void CC_show::SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_m
 		sht->SetNumPoints(num, columns, new_march_position);
 	}
 	numpoints = num;
+	pt_labels.resize(numpoints);
 }
 
 
