@@ -672,10 +672,6 @@ FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
 		default:
 			break;
 	}
-//	for (auto i : mView->GetSelectionList())
-//	{
-//		mMovePoints[i] = mView->PointPosition(i);
-//	}
 	std::map<unsigned, CC_coord> mPositions;
 
 }
@@ -703,12 +699,6 @@ FieldCanvas::MoveDrag(const CC_coord& end)
 	{
 		mMovePoints = mTransformer(end);
 	}
-//	for (auto i : mView->GetSelectionList())
-//	{
-//		const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
-//		auto opos = shape->GetPoint() - shape->GetOrigin();
-//		mMovePoints[i] = mView->PointPosition(i) + opos;
-//	}
 }
 
 void

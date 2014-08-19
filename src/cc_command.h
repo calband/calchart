@@ -281,36 +281,6 @@ public:
 };
 
 
-// TranslatePointsByDeltaCommand:
-// Move the selected points by a fixed delta
-class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
-{
-public:
-	TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref);
-	virtual ~TranslatePointsByDeltaCommand();
-};
-
-
-// TransformPointsCommand:
-// Move the selected points by a matrix function
-class TransformPointsCommand : public MovePointsOnSheetCommand
-{
-public:
-	TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref);
-	virtual ~TransformPointsCommand();
-};
-
-
-// TransformPointsInALineCommand:
-// Move the selected points by a line function
-class TransformPointsInALineCommand : public MovePointsOnSheetCommand
-{
-public:
-	TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref);
-	virtual ~TransformPointsInALineCommand();
-};
-
-
 // SetReferencePointToRef0 :
 // Reset a reference point position to ref point 0.
 class SetReferencePointToRef0 : public MovePointsOnSheetCommand

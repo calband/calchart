@@ -214,36 +214,10 @@ FieldView::DoRotatePointPositions(unsigned rotateAmount)
 }
 
 bool
-FieldView::DoTranslatePoints(const CC_coord& delta)
-{
-	if (((delta.x == 0) && (delta.y == 0)) ||
-		(mShow->GetSelectionList().size() == 0))
-		return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, mCurrentReferencePoint), true);
-	return true;
-}
-
-bool
 FieldView::DoMovePoints(const std::map<unsigned, CC_coord>& newPositions)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new MovePointsCommand(*mShow, newPositions, mCurrentReferencePoint), true);
-	return true;
-}
-
-bool
-FieldView::DoTransformPoints(const Matrix& transmat)
-{
-	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, mCurrentReferencePoint), true);
-	return true;
-}
-
-bool
-FieldView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second)
-{
-	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, mCurrentReferencePoint), true);
 	return true;
 }
 
