@@ -24,6 +24,7 @@
 #define _CALCHARTAPP_H_
 
 #include "modes.h"
+#include "single_instance_ipc.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
@@ -41,18 +42,30 @@ class CalChartApp : public wxApp
 public:
 	virtual bool OnInit();
 	virtual void MacOpenFile(const wxString &fileName);
+	virtual void MacOpenFiles(const wxArrayString &fileNames);
 	int OnExit();
 
 	ShowModeList& GetModeList() { return mModeList; }
 
 	// the global help system:
 	wxHtmlHelpController& GetGlobalHelpController();
-	
+
+	void OpenFile(const wxString &fileName);
+	void OpenFileOnHost(const wxString &filename);
 private:
+	void ProcessArguments ();
+
+	void InitAppAsServer();
+	void InitAppAsClient();
+	void ExitAppAsServer();
+	void ExitAppAsClient();
+
 	ShowModeList mModeList;
 
 	wxDocManager* mDocManager;
 	std::unique_ptr<wxHtmlHelpController> mHelpController;
+
+	std::unique_ptr<HostAppInterface> mHostInterface;
 };
 
 #endif // _CALCHARTAPP_H_

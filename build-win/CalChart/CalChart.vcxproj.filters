@@ -63,6 +63,7 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
+    <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
     <ClCompile Include="..\..\src\json_file_formatter.cpp">
       <Filter>fileio</Filter>
@@ -149,6 +150,7 @@
     </ClInclude>
     <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
+    <ClInclude Include="..\..\src\single_instance_ipc.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\draw.h" />
     <ClInclude Include="..\..\src\json_file_formatter.h">

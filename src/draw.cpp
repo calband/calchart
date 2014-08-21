@@ -446,10 +446,8 @@ void DrawForPrinting(wxDC *printerdc, const CalChartDoc& show, const CC_sheet& s
 
 	// draw the field.
 	dc->Clear();
-	dc->SetPen(*wxBLACK_PEN);
-	dc->SetTextForeground(*wxBLACK);
 	dc->SetLogicalFunction(wxCOPY);
-	mode->Draw(*dc);
+	mode->DrawMode(*dc, ShowMode::kPrinting);
 
 	const std::vector<CC_point> pts = sheet.GetPoints();
 	if (!pts.empty())

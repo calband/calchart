@@ -45,10 +45,6 @@ public:
 			 const CC_coord& offset,
 			 const CC_coord& border1,
 			 const CC_coord& border2);
-	ShowMode(const wxString& name,
-			 const CC_coord& size,
-			 const CC_coord& border1,
-			 const CC_coord& border2);
 	virtual ~ShowMode();
 
 	virtual ShowType GetType() const = 0;
@@ -61,28 +57,25 @@ public:
 	inline const wxString& GetName() const { return mName; };
 	CC_coord ClipPosition(const CC_coord& pos) const;
 
-protected:
+public:
 	typedef enum
 	{
 		kFieldView,
 		kAnimation,
+		kPrinting,
 		kOmniView
 	} HowToDraw;
-
-public:
-	void Draw(wxDC& dc) const { DrawHelper(dc, kFieldView); }
-	void DrawAnim(wxDC& dc) const { DrawHelper(dc, kAnimation); }
-	void DrawOmni(wxDC& dc) const { DrawHelper(dc, kOmniView); }
+	void DrawMode(wxDC& dc, HowToDraw howToDraw) const;
 
 	wxImage GetOmniLinesImage() const;
 
 protected:
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const = 0;
 
-	CC_coord mOffset;
-	CC_coord mSize;
-	CC_coord mBorder1;
-	CC_coord mBorder2;
+	const CC_coord mOffset;
+	const CC_coord mSize;
+	const CC_coord mBorder1;
+	const CC_coord mBorder2;
 private:
 	wxString mName;
 };
@@ -107,7 +100,7 @@ protected:
 	virtual void DrawHelper(wxDC& dc, HowToDraw howToDraw) const;
 
 private:
-	unsigned short mHashW, mHashE;
+	const unsigned short mHashW, mHashE;
 };
 
 class ShowModeSprShow : public ShowMode
