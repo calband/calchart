@@ -116,6 +116,8 @@
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
+    <ClInclude Include="..\..\src\json_file_formatter.h" />
+    <ClInclude Include="..\..\src\json_unit_tests.h" />
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\platconf.h" />
@@ -132,6 +134,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\generated\contgram.cpp" />
     <ClCompile Include="..\..\generated\contscan.cpp" />
+    <ClCompile Include="..\..\generated\json_import_gram.cpp" />
+    <ClCompile Include="..\..\generated\json_import_scan.cpp" />
     <ClCompile Include="..\..\src\animation_canvas.cpp" />
     <ClCompile Include="..\..\src\animation_frame.cpp" />
     <ClCompile Include="..\..\src\animation_view.cpp" />
@@ -161,6 +165,8 @@
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
+    <ClCompile Include="..\..\src\json_file_formatter.cpp" />
+    <ClCompile Include="..\..\src\json_unit_tests.cpp" />
     <ClCompile Include="..\..\src\modes.cpp" />
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\print_ps.cpp" />
@@ -180,6 +186,8 @@
   <ItemGroup>
     <None Include="..\..\src\contgram.y" />
     <None Include="..\..\src\contscan.l" />
+    <None Include="..\..\src\json_import_gram.y" />
+    <None Include="..\..\src\json_import_scan.l" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

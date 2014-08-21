@@ -65,6 +65,18 @@
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
+    <ClCompile Include="..\..\src\json_file_formatter.cpp">
+      <Filter>fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\json_unit_tests.cpp">
+      <Filter>fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\json_import_gram.cpp">
+      <Filter>fileio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\json_import_scan.cpp">
+      <Filter>fileio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -141,6 +153,12 @@
     <ClInclude Include="..\..\src\single_instance_ipc.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\draw.h" />
+    <ClInclude Include="..\..\src\json_file_formatter.h">
+      <Filter>fileio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\json_unit_tests.h">
+      <Filter>fileio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />
@@ -148,10 +166,19 @@
   <ItemGroup>
     <None Include="..\..\src\contgram.y" />
     <None Include="..\..\src\contscan.l" />
+    <None Include="..\..\src\json_import_gram.y">
+      <Filter>fileio</Filter>
+    </None>
+    <None Include="..\..\src\json_import_scan.l">
+      <Filter>fileio</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
       <UniqueIdentifier>{2666d93e-2ad0-4eac-a0db-5304526bfdb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="fileio">
+      <UniqueIdentifier>{538c1490-80a7-497d-a840-e73e4b24be67}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

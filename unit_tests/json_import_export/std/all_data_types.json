@@ -1,0 +1,14 @@
+{
+	"intVal": 3,
+	"floatVal": 3.5,
+	"stringVal": "hey",
+	"boolVal1": true,
+	"boolVal2": false,
+	"nullVal": null,
+	"objectVal": {
+		"intVal2": 3
+	},
+	"arrayVal": [
+		3
+	]
+}

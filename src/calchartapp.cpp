@@ -28,6 +28,7 @@
 #include "basic_ui.h"
 #include "platconf.h"
 #include "field_view.h"
+#include "json_unit_tests.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -138,8 +139,12 @@ void CalChartApp::InitAppAsServer() {
 	CC_continuity_UnitTests();
 	CC_point_UnitTests();
 	CC_coord_UnitTests();
-
-
+	try {
+		json_UnitTests();
+	} catch (JSONUnitTestFailureException) {
+		wxLogError("JSON Unit Tests Failed");
+	}
+	
 	ProcessArguments();
 }
 
