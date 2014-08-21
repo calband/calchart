@@ -48,6 +48,7 @@ public:
 
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);
+    void DrawOtherPoints(wxDC& dc, const std::map<unsigned, CC_coord>& positions);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
     bool OnClose(bool deleteWindow = true);
 
@@ -55,9 +56,7 @@ public:
 
 	///// Modify the show /////
 	bool DoRotatePointPositions(unsigned rotateAmount);
-	bool DoTranslatePoints(const CC_coord& pos);
-	bool DoTransformPoints(const Matrix& transmat);
-	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second);
+	bool DoMovePoints(const std::map<unsigned, CC_coord>& transmat);
 	bool DoResetReferencePoint();
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
 	bool DoSetDescription(const wxString& descr);

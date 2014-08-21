@@ -309,57 +309,15 @@ RotatePointPositionsCommand::~RotatePointPositionsCommand()
 {}
 
 
-
-// TranslatePointsByDeltaCommand:
-// Move the selected points by a fixed delta
-TranslatePointsByDeltaCommand::TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref)
-: MovePointsOnSheetCommand(show, ref)
+// MovePointsCommand:
+// Move points to position
+MovePointsCommand::MovePointsCommand(CalChartDoc& show, const std::map<unsigned, CC_coord>& newPosition, unsigned ref)
+: super(show, ref)
 {
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
-	{
-		mPositions[*i] = sheet->GetPosition(*i, mRef) + delta;
-	}
+	mPositions = newPosition;
 }
 
-TranslatePointsByDeltaCommand::~TranslatePointsByDeltaCommand()
-{}
-
-
-// TransformPointsCommand:
-// Move the selected points by a matrix function
-TransformPointsCommand::TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref)
-: MovePointsOnSheetCommand(show, ref)
-{
-	CC_show::const_CC_sheet_iterator_t sheet = mDoc.GetNthSheet(mSheetNum);
-	for (auto i = mPoints.begin(); i != mPoints.end(); ++i)
-	{
-		CC_coord c = sheet->GetPosition(*i, ref);
-		Vector v = Vector(c.x, c.y, 0);
-		v = transmat * v;
-		v.Homogenize();
-		c = CC_coord(RoundToCoord(v.GetX()), RoundToCoord(v.GetY()));
-		mPositions[*i] = c;
-	}
-}
-
-TransformPointsCommand::~TransformPointsCommand()
-{}
-
-
-// TransformPointsInALineCommand:
-// Move the selected points by a line function
-TransformPointsInALineCommand::TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref)
-: MovePointsOnSheetCommand(show, ref)
-{
-	CC_coord curr_pos = start;
-	for (auto i = mPoints.begin(); i != mPoints.end(); ++i, curr_pos += second - start)
-	{
-		mPositions[*i] = curr_pos;
-	}
-}
-
-TransformPointsInALineCommand::~TransformPointsInALineCommand()
+MovePointsCommand::~MovePointsCommand()
 {}
 
 
