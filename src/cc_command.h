@@ -269,33 +269,15 @@ public:
 };
 
 
-// TranslatePointsByDeltaCommand:
-// Move the selected points by a fixed delta
-class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
+// MovePointsCommand:
+// Move points to position
+class MovePointsCommand : public MovePointsOnSheetCommand
 {
+private:
+	using super = MovePointsOnSheetCommand;
 public:
-	TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref);
-	virtual ~TranslatePointsByDeltaCommand();
-};
-
-
-// TransformPointsCommand:
-// Move the selected points by a matrix function
-class TransformPointsCommand : public MovePointsOnSheetCommand
-{
-public:
-	TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref);
-	virtual ~TransformPointsCommand();
-};
-
-
-// TransformPointsInALineCommand:
-// Move the selected points by a line function
-class TransformPointsInALineCommand : public MovePointsOnSheetCommand
-{
-public:
-	TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref);
-	virtual ~TransformPointsInALineCommand();
+	MovePointsCommand(CalChartDoc& show, const std::map<unsigned, CC_coord>& newPosition, unsigned ref);
+	virtual ~MovePointsCommand();
 };
 
 
