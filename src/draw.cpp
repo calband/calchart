@@ -365,7 +365,7 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 #endif
 }
 
-static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
+static std::unique_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 {
 	CC_coord bord1(Int2Coord(8),Int2Coord(8)), bord2(Int2Coord(8),Int2Coord(8));
 	CC_coord siz, off;
@@ -380,7 +380,7 @@ static std::auto_ptr<ShowMode> CreateFieldForPrinting(bool landscape)
 	off.x = Int2Coord((landscape)?80:48);
 	off.y = Int2Coord(42);
 
-	return std::auto_ptr<ShowMode>(new ShowModeStandard(wxT("Standard"), siz, off, bord1, bord2, whash, ehash));
+	return ShowModeStandard::CreateShowMode(wxT("Standard"), siz, off, bord1, bord2, whash, ehash);
 }
 
 void DrawForPrinting(wxDC *printerdc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape)
@@ -403,7 +403,7 @@ void DrawForPrinting(wxDC *printerdc, const CalChartConfiguration& config, const
 	}
 
 	// create a field for drawing:
-	std::auto_ptr<ShowMode> mode = CreateFieldForPrinting(landscape);
+	auto mode = CreateFieldForPrinting(landscape);
 
 	int pageW, pageH;
 	dc->GetSize(&pageW, &pageH);

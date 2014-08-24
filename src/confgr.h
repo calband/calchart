@@ -89,21 +89,28 @@ enum CalChartSpringShowModes
 
 extern const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM];
 
-// so:
-// we take a snapshot of the config and give to the system to use.  They can modify.
-// on the d-tor, save out the values that it may have changed; unless it was told to be
-// discarded.
+// CalChartConfiguration interfaces with the system config and acts as a "cache" for the values.
+// On Get, it reads the values from system config, and caches a copy.
+// On Set (and clear), it updates it's cache, and puts the command into a write-queue.
+// The write-queue needs to be explicitly flushed or the values will be lost
+//
+// To use a config value, first get the Global config, and then Get_ the value from it:
+// auto save_interval = CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval();
+//
+// To add a new config value:
+// Add DECLARE_CONFIGURATION_FUNCTIONS in the class declaration of the right type; this will make the Get_, Set_ and Clear_
+// functions available.  Then in the implementation file, declare IMPLEMENT_CONFIGURATION_FUNCTIONS with the default.
 class CalChartConfiguration
 {
 public:
-	// on dtor, if triggered to flush, flush-out
+	static CalChartConfiguration& GetGlobalConfig();
+	static void AssignConfig(const CalChartConfiguration& config);
+
 	// explicit flush
-//private:
-	void FlushValuesToConfig();
+	void FlushWriteQueue() const;
+
 private:
-	void AddToWriteQueue();
-	std::map<wxString, std::function<void()>> mWriteQueue;
-//	~CalChartConfiguration();
+	mutable std::map<wxString, std::function<void()>> mWriteQueue;
 
 // macro for declaring configuration Get_, Set_, and Clear_
 #define DECLARE_CONFIGURATION_FUNCTIONS( Key, Type ) \
@@ -205,19 +212,15 @@ public:
 	void ClearConfigSpringShowYardline();
 
 	static const size_t kShowModeValues = 10;
-	std::vector<long> GetConfigurationShowMode(size_t which);
+	std::vector<long> GetConfigurationShowMode(size_t which) const;
 	void SetConfigurationShowMode(size_t which, const std::vector<long>& values);
 	void ClearConfigurationShowMode(size_t which);
 	
 	static const size_t kSpringShowModeValues = 21;
-	std::vector<long> GetConfigurationSpringShowMode(size_t which);
+	std::vector<long> GetConfigurationSpringShowMode(size_t which) const;
 	void SetConfigurationSpringShowMode(size_t which, const std::vector<long>& values);
 	void ClearConfigurationSpringShowMode(size_t which);
-	
-	std::unique_ptr<ShowMode> GetMode(const wxString& which);
 };
-
-CalChartConfiguration& GetConfig();
 
 
 #endif

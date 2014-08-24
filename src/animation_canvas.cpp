@@ -65,21 +65,22 @@ void
 AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
 	wxBufferedPaintDC dc(this);
+	auto& config = CalChartConfiguration::GetGlobalConfig();
 
-	dc.SetBackground(GetConfig().Get_CalChartBrushAndPen(COLOR_FIELD).first);
+	dc.SetBackground(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
 	dc.Clear();
 	dc.SetUserScale(mUserScale, mUserScale);
 	dc.SetDeviceOrigin(mUserOriginX, 0);
 	if (mMouseDown)
 	{
 		dc.SetBrush(*wxTRANSPARENT_BRUSH);
-		dc.SetPen(GetConfig().Get_CalChartBrushAndPen(COLOR_SHAPES).second);
+		dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
 		dc.DrawRectangle(mMouseXStart, mMouseYStart,
 						  mMouseXEnd - mMouseXStart, mMouseYEnd - mMouseYStart);
 	}
 	if (mAnimationView)
 	{
-		mAnimationView->OnDraw(&dc, GetConfig());
+		mAnimationView->OnDraw(&dc, config);
 	}
 }
 

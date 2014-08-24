@@ -46,7 +46,7 @@ FieldView::FieldView() :
 mFrame(NULL),
 mDrawPaths(false),
 mCurrentReferencePoint(0),
-config(GetConfig())
+mConfig(CalChartConfiguration::GetGlobalConfig())
 {
 }
 
@@ -63,7 +63,7 @@ FieldView::OnCreate(wxDocument *doc, long WXUNUSED(flags) )
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 	mFrame = new AnimationFrame(NULL, doc, this, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame));
 #else
-	mFrame = new FieldFrame(doc, this, config, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50), wxSize(config.Get_FieldFrameWidth(), config.Get_FieldFrameHeight()));
+	mFrame = new FieldFrame(doc, this, mConfig, wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame), wxPoint(50, 50), wxSize(mConfig.Get_FieldFrameWidth(), mConfig.Get_FieldFrameHeight()));
 #endif
 	
 	mFrame->Show(true);
@@ -80,13 +80,13 @@ FieldView::OnDraw(wxDC *dc)
 	{
 		// draw the field
 		CC_coord origin = mShow->GetMode().Offset();
-		mShow->GetMode().DrawMode(*dc, config, ShowMode::kFieldView);
+		mShow->GetMode().DrawMode(*dc, mConfig, ShowMode::kFieldView);
 		
 
 		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
 
 		if (ghostSheet != nullptr) {
-			DrawGhostSheet(*dc, config, origin, SelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *ghostSheet, 0);
+			DrawGhostSheet(*dc, mConfig, origin, SelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *ghostSheet, 0);
 		}
 
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
@@ -94,12 +94,12 @@ FieldView::OnDraw(wxDC *dc)
 		{
 			if (mCurrentReferencePoint > 0)
 			{
-				DrawPoints(*dc, config, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), 0, false);
-				DrawPoints(*dc, config, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+				DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), 0, false);
+				DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			else
 			{
-				DrawPoints(*dc, config, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+				DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
 			}
 			DrawPaths(*dc, *sheet);
 		}
@@ -109,9 +109,9 @@ FieldView::OnDraw(wxDC *dc)
 // Sneakily gets used for default print/preview
 // as well as drawing on the screen.
 void
-FieldView::DrawOtherPoints(wxDC &dc, const CalChartConfiguration& config, const std::map<unsigned, CC_coord>& positions)
+FieldView::DrawOtherPoints(wxDC &dc, const std::map<unsigned, CC_coord>& positions)
 {
-	DrawPhatomPoints(dc, config, *mShow, *mShow->GetCurrentSheet(), positions);
+	DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
 
 void
@@ -355,7 +355,7 @@ FieldView::DoImportPrintableContinuity(const wxString& file)
 int
 FieldView::FindPoint(CC_coord pos) const
 {
-	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, Float2Coord(config.Get_DotRatio()), mCurrentReferencePoint);
+	return mShow->GetCurrentSheet()->FindPoint(pos.x, pos.y, Float2Coord(mConfig.Get_DotRatio()), mCurrentReferencePoint);
 }
 
 CC_coord
@@ -461,7 +461,7 @@ FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 		mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
 		for (auto point = mShow->GetSelectionList().begin(); point != mShow->GetSelectionList().end(); ++point)
 		{
-			DrawPath(dc, config, mAnimation->GenPathToDraw(*point, origin), mAnimation->EndPosition(*point, origin));
+			DrawPath(dc, mConfig, mAnimation->GenPathToDraw(*point, origin), mAnimation->EndPosition(*point, origin));
 		}
 	}
 }

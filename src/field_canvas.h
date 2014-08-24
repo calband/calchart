@@ -39,6 +39,7 @@ class CC_shape;
 class BackgroundImage;
 class CC_coord;
 class Matrix;
+class CalChartConfiguration;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas
@@ -94,7 +95,8 @@ private:
 	std::shared_ptr<CC_shape> curr_shape;
 
 	// Background Picture
-	void PaintBackground(wxDC& dc);
+	void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
+	void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
 	std::unique_ptr<BackgroundImage> mBackgroundImage;
 	std::map<unsigned, CC_coord> mMovePoints;
 	std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;

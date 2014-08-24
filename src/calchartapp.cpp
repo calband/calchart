@@ -155,6 +155,8 @@ void CalChartApp::ProcessArguments() {
 
 
 void CalChartApp::ExitAppAsServer() {
+	// Flush out the other commands
+	CalChartConfiguration::GetGlobalConfig().FlushWriteQueue();
 	// Get the file history
 	wxConfigBase *config = wxConfigBase::Get();
 	config->SetPath(wxT("/FileHistory"));
@@ -172,7 +174,7 @@ void CalChartApp::ExitAppAsServer() {
 std::unique_ptr<ShowMode>
 CalChartApp::GetMode(const wxString& which)
 {
-	return GetConfig().GetMode(which);
+	return ShowMode::GetMode(which);
 }
 
 void CalChartApp::ExitAppAsClient() {

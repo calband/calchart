@@ -54,7 +54,7 @@ AnimationView::~AnimationView()
 void
 AnimationView::OnDraw(wxDC *dc)
 {
-	auto& config = GetConfig();
+	auto& config = CalChartConfiguration::GetGlobalConfig();
 	OnDraw(dc, config);
 }
 

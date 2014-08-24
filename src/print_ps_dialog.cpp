@@ -167,7 +167,7 @@ void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 
 void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
 {
-	auto& config = GetConfig();
+	auto& config = CalChartConfiguration::GetGlobalConfig();
 #ifdef PRINT__RUN_CMD
 	config.Clear_PrintCmd();
 	config.Clear_PrintOpts();
@@ -390,7 +390,7 @@ void PrintPostScriptDialog::CreateControls()
 
 bool PrintPostScriptDialog::TransferDataToWindow()
 {
-	auto& config = GetConfig();
+	auto& config = CalChartConfiguration::GetGlobalConfig();
 #ifdef PRINT__RUN_CMD
 	text_cmd->SetValue(config.Get_PrintCmd());
 	text_opts->SetValue(config.Get_PrintOpts());
@@ -424,7 +424,7 @@ bool PrintPostScriptDialog::TransferDataToWindow()
 
 bool PrintPostScriptDialog::TransferDataFromWindow()
 {
-	auto& config = GetConfig();
+	auto& config = CalChartConfiguration::GetGlobalConfig();
 #ifdef PRINT__RUN_CMD
 	config.Set_PrintCmd(text_cmd->GetValue());
 	config.Set_PrintOpts(text_opts->GetValue());

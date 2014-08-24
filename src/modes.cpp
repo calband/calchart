@@ -312,27 +312,25 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, 
 	}
 }
 
-class FindByName
+std::unique_ptr<ShowMode>
+ShowMode::GetMode(const wxString& which)
 {
-public:
-	FindByName(wxString name) : mName(name) {}
-	template <typename T>
-	bool operator()(const T& a) { return mName == a->GetName(); }
-private:
-	wxString mName;
-};
-
-ShowMode*
-ShowModeList_Find(const ShowModeList& showModes, const wxString& which)
-{
-	ShowModeList::const_iterator i;
-	if ((i = std::find_if(showModes.begin(), showModes.end(), FindByName(which))) != showModes.end())
-		return (*i).get();
-	return NULL;
+	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
+	if (iter != std::end(kShowModeStrings))
+	{
+		return ShowModeStandard::CreateShowMode(which, CalChartConfiguration::GetGlobalConfig().GetConfigurationShowMode(std::distance(std::begin(kShowModeStrings), iter)));
+	}
+	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
+	if (iter != std::end(kSpringShowModeStrings))
+	{
+		return ShowModeSprShow::CreateSpringShowMode(which, CalChartConfiguration::GetGlobalConfig().GetConfigurationSpringShowMode(std::distance(std::begin(kSpringShowModeStrings), iter)));
+	}
+	return {};
 }
 
+
 std::unique_ptr<ShowMode>
-CreateShowMode(const wxString& which, std::vector<long> values)
+ShowModeStandard::CreateShowMode(const wxString& which, std::vector<long> values)
 {
 	unsigned short whash = values[0];
 	unsigned short ehash = values[1];
@@ -350,7 +348,19 @@ CreateShowMode(const wxString& which, std::vector<long> values)
 }
 
 std::unique_ptr<ShowMode>
-CreateSpringShowMode(const wxString& which, std::vector<long> values)
+ShowModeStandard::CreateShowMode(const wxString& name,
+								 CC_coord size,
+								 CC_coord offset,
+								 CC_coord border1,
+								 CC_coord border2,
+								 unsigned short whash,
+								 unsigned short ehash)
+{
+	return std::unique_ptr<ShowMode>(new ShowModeStandard(name, size, offset, border1, border2, whash, ehash));
+}
+
+std::unique_ptr<ShowMode>
+ShowModeSprShow::CreateSpringShowMode(const wxString& which, std::vector<long> values)
 {
 	unsigned char which_spr_yards = values[0];
 	CC_coord bord1, bord2;

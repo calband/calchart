@@ -40,13 +40,12 @@ class ShowMode
 {
 public:
 	typedef enum { SHOW_STANDARD, SHOW_SPRINGSHOW } ShowType;
-	
-	ShowMode(const wxString& name,
-			 const CC_coord& size,
-			 const CC_coord& offset,
-			 const CC_coord& border1,
-			 const CC_coord& border2);
+
+	// to find a specific Show:
+	static std::unique_ptr<ShowMode> GetMode(const wxString& which);
 	virtual ~ShowMode();
+
+public:
 
 	virtual ShowType GetType() const = 0;
 	inline const CC_coord& Offset() const { return mOffset; };
@@ -67,15 +66,21 @@ public:
 		kOmniView
 	} HowToDraw;
 
-public:
-	void Draw(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kFieldView); }
-	void DrawAnim(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kAnimation); }
-	void DrawOmni(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kOmniView); }
+//public:
+//	void Draw(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kFieldView); }
+//	void DrawAnim(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kAnimation); }
+//	void DrawOmni(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kOmniView); }
 	void DrawMode(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
 
 	wxImage GetOmniLinesImage(const CalChartConfiguration& config) const;
 
 protected:
+	// Users shouldn't create show modes, it should be done through derived classes
+	ShowMode(const wxString& name,
+			 const CC_coord& size,
+			 const CC_coord& offset,
+			 const CC_coord& border1,
+			 const CC_coord& border2);
 	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const = 0;
 
 	const CC_coord mOffset;
@@ -89,6 +94,16 @@ private:
 class ShowModeStandard : public ShowMode
 {
 public:
+	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& which, std::vector<long> values);
+	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& name,
+													CC_coord size,
+													CC_coord offset,
+													CC_coord border1,
+													CC_coord border2,
+													unsigned short whash,
+													unsigned short ehash);
+
+private:
 	ShowModeStandard(const wxString& name,
 					 CC_coord size,
 					 CC_coord offset,
@@ -96,6 +111,7 @@ public:
 					 CC_coord border2,
 					 unsigned short whash,
 					 unsigned short ehash);
+public:
 	virtual ~ShowModeStandard();
 
 	virtual ShowType GetType() const;
@@ -112,6 +128,9 @@ private:
 class ShowModeSprShow : public ShowMode
 {
 public:
+	static std::unique_ptr<ShowMode> CreateSpringShowMode(const wxString& which, std::vector<long> values);
+
+private:
 // Look at calchart.cfg for description of arguments
 	ShowModeSprShow(const wxString& name, CC_coord border1, CC_coord border2,
 		unsigned char which,
@@ -123,6 +142,7 @@ public:
 		short fld_w, short fld_h,
 		short txt_l, short txt_r,
 		short txt_tp, short txt_bm);
+public:
 	virtual ~ShowModeSprShow();
 
 	virtual ShowType GetType() const;
@@ -154,15 +174,5 @@ private:
 	short steps_x, steps_y, steps_w, steps_h;
 	short text_left, text_right, text_top, text_bottom;
 };
-
-typedef std::list<std::unique_ptr<ShowMode> > ShowModeList;
-
-ShowMode*
-ShowModeList_Find(const ShowModeList& showModes, const wxString& which);
-
-std::unique_ptr<ShowMode>
-CreateShowMode(const wxString& which, std::vector<long> values);
-std::unique_ptr<ShowMode>
-CreateSpringShowMode(const wxString& which, std::vector<long> values);
 
 #endif

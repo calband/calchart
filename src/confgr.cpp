@@ -67,10 +67,24 @@ const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
 };
 
-CalChartConfiguration& GetConfig()
+static CalChartConfiguration& GetConfig()
 {
 	static CalChartConfiguration sconfig;
 	return sconfig;
+}
+
+CalChartConfiguration&
+CalChartConfiguration::GetGlobalConfig()
+{
+	return GetConfig();
+}
+
+void
+CalChartConfiguration::AssignConfig(const CalChartConfiguration& config)
+{
+	// now flush out the config
+	GetConfig() = config;
+	GetConfig().FlushWriteQueue();
 }
 
 
@@ -350,7 +364,7 @@ const std::vector<long> kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM] =
 };
 
 std::vector<long>
-CalChartConfiguration::GetConfigurationShowMode(size_t which)
+CalChartConfiguration::GetConfigurationShowMode(size_t which) const
 {
 	std::vector<long> values = kShowModeDefaultValues[which];
 
@@ -373,24 +387,8 @@ CalChartConfiguration::GetConfigurationShowMode(size_t which)
 	return values;
 }
 
-std::unique_ptr<ShowMode>
-CalChartConfiguration::GetMode(const wxString& which)
-{
-	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
-	if (iter != std::end(kShowModeStrings))
-	{
-		return CreateShowMode(which, GetConfig().GetConfigurationShowMode(std::distance(std::begin(kShowModeStrings), iter)));
-	}
-	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
-	if (iter != std::end(kSpringShowModeStrings))
-	{
-		return CreateSpringShowMode(which, GetConfig().GetConfigurationSpringShowMode(std::distance(std::begin(kSpringShowModeStrings), iter)));
-	}
-	return {};
-}
-
 std::vector<long>
-CalChartConfiguration::GetConfigurationSpringShowMode(size_t which)
+CalChartConfiguration::GetConfigurationSpringShowMode(size_t which) const
 {
 	std::vector<long> values = kSpringShowModeDefaultValues[which];
 
@@ -654,4 +652,14 @@ CalChartConfiguration::Clear_ConfigColor(size_t selection)
 	SetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[selection]), default_value, default_value);
 }
 
+// function technically const because it is changing a mutable value
+void
+CalChartConfiguration::FlushWriteQueue() const
+{
+	for (auto& i : mWriteQueue)
+	{
+		i.second();
+	}
+	mWriteQueue.clear();
+}
 

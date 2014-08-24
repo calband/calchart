@@ -60,8 +60,6 @@ private:
 	void ExitAppAsServer();
 	void ExitAppAsClient();
 
-	ShowModeList mModeList;
-
 	wxDocManager* mDocManager;
 	std::unique_ptr<wxHtmlHelpController> mHelpController;
 

@@ -55,7 +55,7 @@ mShow(CC_show::Create_CC_show()),
 mMode(wxGetApp().GetMode(kShowModeStrings[0])),
 mTimer(*this)
 {
-	mTimer.Start(GetConfig().Get_AutosaveInterval()*1000);
+	mTimer.Start(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()*1000);
 }
 
 // When a file is opened, we first check to see if there is a temporary 
