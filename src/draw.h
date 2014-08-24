@@ -27,6 +27,8 @@
 #include <wx/dc.h>
 #include <vector>
 #include <set>
+#include <map>
+#include "confgr.h"
 
 class wxBrush;
 class wxString;
@@ -42,8 +44,11 @@ typedef std::vector<CC_textline> CC_textline_list;
 
 // draw the continuity starting at a specific offset
 void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, bool primary);
+void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref);
+void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool primary);
 void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC *dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);
+void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, const std::map<unsigned, CC_coord>& positions);
 
 void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);
 void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet);
@@ -53,7 +58,7 @@ void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
 
 // We break this out of the class to make CalChart internals more cross platform
 // Draw the point
-void DrawPoint(const CC_point& point, wxDC& dc, const CalChartConfiguration& config, unsigned reference, const CC_coord& origin, const wxBrush& fillBrush, const wxString& label);
+void DrawPoint(const CC_point& point, wxDC& dc, const CalChartConfiguration& config, unsigned reference, const CC_coord& origin, const wxString& label);
 
 void DrawPath(wxDC& dc, const CalChartConfiguration& config, const std::vector<CC_DrawCommand>& draw_commands, const CC_coord& end);
 

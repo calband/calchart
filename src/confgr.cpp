@@ -46,11 +46,15 @@ const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 	{ wxT("POINT"),					wxT("WHITE"),			1 },
 	{ wxT("POINT TEXT"),			wxT("BLACK"),			1 },
 	{ wxT("HILIT POINT"),			wxT("YELLOW"),			1 },
-	{ wxT("HILIT POINT TEXT"),		wxT("BLACK"),			1 },
+	{ wxT("HILIT POINT TEXT"),		wxT("YELLOW"),			1 },
 	{ wxT("REF POINT"),				wxT("PURPLE"),			1 },
 	{ wxT("REF POINT TEXT"),		wxT("BLACK"),			1 },
 	{ wxT("HILIT REF POINT"),		wxT("PURPLE"),			1 },
-	{ wxT("HILIT REF POINT TEXT"),	wxT("BLACK"),			1 },
+	{ wxT("HILIT REF POINT TEXT"),		wxT("BLACK"),			1 },
+	{ wxT("GHOST POINT"),			wxT("BLUE"),			1 },
+	{ wxT("GHOST POINT TEXT"),		wxT("NAVY"),			1 },
+	{ wxT("HLIT GHOST POINT"),		wxT("PURPLE"),			1 },
+	{ wxT("HLIT GHOST POINT TEXT"),		wxT("PLUM"),			1 },
 	{ wxT("ANIM FRONT"),			wxT("WHITE"),			1 },
 	{ wxT("ANIM BACK"),				wxT("YELLOW"),			1 },
 	{ wxT("ANIM SIDE"),				wxT("SKY BLUE"),		1 },
@@ -58,6 +62,7 @@ const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 	{ wxT("HILIT ANIM BACK"),		wxT("RED"),				1 },
 	{ wxT("HILIT ANIM SIDE"),		wxT("RED"),				1 },
 	{ wxT("ANIM COLLISION"),		wxT("PURPLE"),			1 },
+	{ wxT("ANIM COLLISION WARNING"),	wxT("CORAL"),			1 },
 	{ wxT("SHAPES"),				wxT("ORANGE"),			2 },
 	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
 };
@@ -67,6 +72,7 @@ CalChartConfiguration& GetConfig()
 	static CalChartConfiguration sconfig;
 	return sconfig;
 }
+
 
 
 // functions for dealing with the wx config directly

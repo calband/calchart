@@ -26,6 +26,8 @@
 #include "calchartdoc.h"
 #include "CC_coord.h"
 
+#include "ghost_module.h"
+
 #include <wx/docview.h>
 
 #include <memory>
@@ -47,15 +49,15 @@ public:
 
     bool OnCreate(wxDocument *doc, long flags);
     void OnDraw(wxDC *dc);
+    void DrawOtherPoints(wxDC& dc, const CalChartConfiguration& config, const std::map<unsigned, CC_coord>& positions);
     void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
     bool OnClose(bool deleteWindow = true);
 
 	void OnWizardSetup(CalChartDoc& show);
 
 	///// Modify the show /////
-	bool DoTranslatePoints(const CC_coord& pos);
-	bool DoTransformPoints(const Matrix& transmat);
-	bool DoMovePointsInLine(const CC_coord& start, const CC_coord& second);
+	bool DoRotatePointPositions(unsigned rotateAmount);
+	bool DoMovePoints(const std::map<unsigned, CC_coord>& transmat);
 	bool DoResetReferencePoint();
 	bool DoSetPointsSymbol(SYMBOL_TYPE sym);
 	bool DoSetDescription(const wxString& descr);
@@ -65,6 +67,8 @@ public:
 	bool DoSetSheetBeats(unsigned short beats);
 	bool DoSetPointsLabel(bool right);
 	bool DoSetPointsLabelFlip();
+	bool DoSetPointsLabelVisibility(bool isVisible);
+	bool DoTogglePointsLabelVisibility();
 	bool DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, unsigned where);
     bool DoInsertSheetsOtherShow(const CalChartDoc::CC_sheet_container_t& sht, unsigned where, unsigned endpoint);
 	bool DoDeleteSheet(unsigned where);
@@ -92,11 +96,13 @@ public:
 	void ToggleSelection(const SelectionList& sl);
 	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
 	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
+	const SelectionList& GetSelectionList();
 
 	///// Drawing marcher's paths /////
 	// call this when we need to generate the marcher's paths.
 	void OnEnableDrawPaths(bool enable);
 
+	GhostModule& getGhostModule() { return mGhostModule; };
 private:
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 	AnimationFrame *mFrame;
@@ -110,6 +116,8 @@ private:
 	bool mDrawPaths;
 	
 private:
+	GhostModule mGhostModule;
+
 	CalChartDoc* mShow;
 	unsigned mCurrentReferencePoint;
 	CalChartConfiguration& config;

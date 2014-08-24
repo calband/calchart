@@ -79,11 +79,16 @@ FieldView::OnDraw(wxDC *dc)
 	if (mShow)
 	{
 		// draw the field
-		dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-		dc->SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
-		mShow->GetMode().Draw(*dc, config);
 		CC_coord origin = mShow->GetMode().Offset();
+		mShow->GetMode().DrawMode(*dc, config, ShowMode::kFieldView);
 		
+
+		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
+
+		if (ghostSheet != nullptr) {
+			DrawGhostSheet(*dc, config, origin, SelectionList(), mShow->GetNumPoints(), mShow->GetPointLabels(), *ghostSheet, 0);
+		}
+
 		CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 		if (sheet != mShow->GetSheetEnd())
 		{
@@ -99,6 +104,14 @@ FieldView::OnDraw(wxDC *dc)
 			DrawPaths(*dc, *sheet);
 		}
 	}
+}
+
+// Sneakily gets used for default print/preview
+// as well as drawing on the screen.
+void
+FieldView::DrawOtherPoints(wxDC &dc, const CalChartConfiguration& config, const std::map<unsigned, CC_coord>& positions)
+{
+	DrawPhatomPoints(dc, config, *mShow, *mShow->GetCurrentSheet(), positions);
 }
 
 void
@@ -193,28 +206,17 @@ FieldView::OnWizardSetup(CalChartDoc& show)
 }
 
 bool
-FieldView::DoTranslatePoints(const CC_coord& delta)
+FieldView::DoRotatePointPositions(unsigned rotateAmount)
 {
-	if (((delta.x == 0) && (delta.y == 0)) ||
-		(mShow->GetSelectionList().size() == 0))
-		return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TranslatePointsByDeltaCommand(*mShow, delta, mCurrentReferencePoint), true);
+	GetDocument()->GetCommandProcessor()->Submit(new RotatePointPositionsCommand(*mShow, rotateAmount, mCurrentReferencePoint), true);
 	return true;
 }
 
 bool
-FieldView::DoTransformPoints(const Matrix& transmat)
+FieldView::DoMovePoints(const std::map<unsigned, CC_coord>& newPositions)
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsCommand(*mShow, transmat, mCurrentReferencePoint), true);
-	return true;
-}
-
-bool
-FieldView::DoMovePointsInLine(const CC_coord& start, const CC_coord& second)
-{
-	if (mShow->GetSelectionList().size() == 0) return false;
-	GetDocument()->GetCommandProcessor()->Submit(new TransformPointsInALineCommand(*mShow, start, second, mCurrentReferencePoint), true);
+	GetDocument()->GetCommandProcessor()->Submit(new MovePointsCommand(*mShow, newPositions, mCurrentReferencePoint), true);
 	return true;
 }
 
@@ -279,6 +281,20 @@ FieldView::DoSetPointsLabelFlip()
 {
 	if (mShow->GetSelectionList().size() == 0) return false;
 	GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow), true);
+	return true;
+}
+
+bool 
+FieldView::DoSetPointsLabelVisibility(bool isVisible) {
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new SetLabelVisibleCommand(*mShow, isVisible), true);
+	return true;
+}
+
+bool 
+FieldView::DoTogglePointsLabelVisibility() {
+	if (mShow->GetSelectionList().size() == 0) return false;
+	GetDocument()->GetCommandProcessor()->Submit(new ToggleLabelVisibilityCommand(*mShow), true);
 	return true;
 }
 
@@ -418,6 +434,11 @@ FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggl
 	lasso.Append(CC_coord(c2.x, c1.y));
 	lasso.End();
 	SelectWithLasso(&lasso, toggleSelected);
+}
+
+const SelectionList& 
+FieldView::GetSelectionList() {
+	return mShow->GetSelectionList();
 }
 
 void

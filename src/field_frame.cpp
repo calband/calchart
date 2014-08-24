@@ -20,6 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstring>
+#include <sstream>
+
 #include "field_frame.h"
 
 #include "platconf.h"
@@ -43,6 +46,7 @@
 #include "draw.h"
 #include "cc_sheet.h"
 #include "cc_point.h"
+#include "cc_fileformat.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -51,6 +55,10 @@
 #endif
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
+#include <wx/clipbrd.h>
+
+
+const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
 const wxString gridtext[] =
 {
@@ -97,6 +105,8 @@ EVT_MENU(CALCHART__wxID_PREVIEW, FieldFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, FieldFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, FieldFrame::OnCmdLegacyPrint)
 EVT_MENU(CALCHART__LEGACY_PRINT_EPS, FieldFrame::OnCmdLegacyPrintEPS)
+EVT_MENU(CALCHART__COPY_SHEET, FieldFrame::OnCmdCopySheet)
+EVT_MENU(CALCHART__PASTE_SHEET, FieldFrame::OnCmdPasteSheet)
 EVT_MENU(CALCHART__INSERT_BEFORE, FieldFrame::OnCmdInsertBefore)
 EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
 EVT_MENU(CALCHART__INSERT_OTHER_SHOW, FieldFrame::OnCmdInsertFromOtherShow)
@@ -116,12 +126,17 @@ EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
 EVT_MENU(CALCHART__AdjustBackgroundImage, FieldFrame::OnCmd_AdjustBackgroundImage)
 EVT_MENU(CALCHART__RemoveBackgroundImage, FieldFrame::OnCmd_RemoveBackgroundImage)
+EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostNthSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
 EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
 EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
 EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
+EVT_MENU(CALCHART__swap, FieldFrame::OnCmd_swap)
 EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
 EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
 EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
@@ -131,6 +146,9 @@ EVT_MENU(CALCHART__genius, FieldFrame::OnCmd_genius)
 EVT_MENU(CALCHART__label_left, FieldFrame::OnCmd_label_left)
 EVT_MENU(CALCHART__label_right, FieldFrame::OnCmd_label_right)
 EVT_MENU(CALCHART__label_flip, FieldFrame::OnCmd_label_flip)
+EVT_MENU(CALCHART__label_hide, FieldFrame::OnCmd_label_hide)
+EVT_MENU(CALCHART__label_show, FieldFrame::OnCmd_label_show)
+EVT_MENU(CALCHART__label_visibility_toggle, FieldFrame::OnCmd_label_visibility_toggle)
 EVT_MENU(CALCHART__setsym0, FieldFrame::OnCmd_setsym0)
 EVT_MENU(CALCHART__setsym1, FieldFrame::OnCmd_setsym1)
 EVT_MENU(CALCHART__setsym2, FieldFrame::OnCmd_setsym2)
@@ -218,9 +236,11 @@ config(config_)
 	wxMenu *edit_menu = new wxMenu;
 	edit_menu->Append(wxID_UNDO, wxT("&Undo\tCTRL-Z"));
 	edit_menu->Append(wxID_REDO, wxT("&Redo\tCTRL-SHIFT-Z"));
+	edit_menu->Append(CALCHART__COPY_SHEET, wxT("&Copy Sheet\tCTRL-C"), wxT("Copy the current stuntsheet"));
+	edit_menu->Append(CALCHART__PASTE_SHEET, wxT("&Paste Sheet\tCTRL-V"), wxT("Paste the current stuntsheet"));
 	edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before\tCTRL-["), wxT("Insert a new stuntsheet before this one"));
 	edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
-    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW, wxT("&Insert Sheets From Other Show..."),
+    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW, wxT("Insert Sheets From Other Show..."),
                       wxT("Insert a saved stuntsheet after this one"));
 	edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
 	edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
@@ -244,6 +264,13 @@ config(config_)
 	backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
 	backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImage, false);
 	backgroundimage_menu->Enable(CALCHART__RemoveBackgroundImage, false);
+
+
+	wxMenu *ghost_menu = new wxMenu;
+	ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
+	ghost_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
+	ghost_menu->Append(CALCHART__GhostPreviousSheet, wxT("Ghost Previous Sheet"), wxT("Draw a ghost of the previous stuntsheet"));
+	ghost_menu->Append(CALCHART__GhostNthSheet, wxT("Ghost Particular Sheet..."), wxT("Draw a ghost of a particular stuntsheet"));
 	
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"), wxT("Information about the program"));
@@ -253,9 +280,12 @@ config(config_)
 	menu_bar->Append(file_menu, wxT("&File"));
 	menu_bar->Append(edit_menu, wxT("&Edit"));
 	menu_bar->Append(backgroundimage_menu, wxT("&Field Image"));
+	menu_bar->Append(ghost_menu, wxT("&Ghost View"));
 	menu_bar->Append(anim_menu, wxT("&CalChart Viewer"));
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
+
+	refreshGhostOptionStates();
 
 // Add a toolbar
 	AddCoolToolBar(GetMainToolBar(), *this);
@@ -369,7 +399,8 @@ config(config_)
 
 
 FieldFrame::~FieldFrame()
-{}
+{
+}
 
 
 // Intercept menu commands
@@ -549,6 +580,57 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
     GetFieldView()->DoInsertSheetsOtherShow(sheets, GetFieldView()->GetCurrentSheetNum() + 1, currend - 1);
 }
 
+
+void FieldFrame::OnCmdCopySheet(wxCommandEvent& event) {
+	if (wxTheClipboard->Open())
+	{
+		std::unique_ptr<wxCustomDataObject> clipboardObject(new wxCustomDataObject(kSheetDataClipboardFormat));
+		std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
+
+		uint16_t numPoints = GetShow()->GetNumPoints();
+
+		int bytesForNumPoints = sizeof(numPoints);
+		int bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
+		int totalBytes = bytesForNumPoints + bytesForSheetData;
+		std::vector<char> clipboardData(totalBytes);
+		memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
+		memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(), bytesForSheetData);
+
+		clipboardObject->SetData(totalBytes, clipboardData.data());
+
+		wxTheClipboard->SetData(clipboardObject.release());
+		wxTheClipboard->Close();
+	}
+}
+
+void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
+	if (wxTheClipboard->Open())
+	{
+		if (wxTheClipboard->IsSupported(kSheetDataClipboardFormat))
+		{
+			wxCustomDataObject clipboardObject(kSheetDataClipboardFormat);
+			wxTheClipboard->GetData(clipboardObject);
+
+
+			uint16_t numPoints;
+			memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
+			if (numPoints != GetShow()->GetNumPoints()) {
+				wxMessageBox(wxString::Format(
+					wxT("Cannot paste - number of points in pasted sheet (%i) does not match number of points in current show (%i)"),
+					numPoints, GetShow()->GetNumPoints()));
+				return;
+			}
+			std::stringstream sheetStream;
+			sheetStream.write((char*)(clipboardObject.GetData()) + sizeof(numPoints), clipboardObject.GetDataSize() - sizeof(numPoints));
+
+			ReadLong(sheetStream);
+			ReadLong(sheetStream);
+			CC_show::CC_sheet_container_t sht(1, CC_sheet(numPoints, sheetStream, Current_version_and_later()));
+			GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
+		}
+		wxTheClipboard->Close();
+	}
+}
 
 void FieldFrame::OnCmdDelete(wxCommandEvent& event)
 {
@@ -739,6 +821,10 @@ void FieldFrame::OnCmd_move(wxCommandEvent& event)
 	SetCurrentMove(CC_MOVE_NORMAL);
 }
 
+void FieldFrame::OnCmd_swap(wxCommandEvent& event) 
+{
+	SetCurrentMove(CC_MOVE_SWAP);
+}
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)
 {
@@ -793,6 +879,17 @@ void FieldFrame::OnCmd_label_flip(wxCommandEvent& event)
 	GetFieldView()->DoSetPointsLabelFlip();
 }
 
+void FieldFrame::OnCmd_label_hide(wxCommandEvent& event) {
+	GetFieldView()->DoSetPointsLabelVisibility(false);
+}
+
+void FieldFrame::OnCmd_label_show(wxCommandEvent& event) {
+	GetFieldView()->DoSetPointsLabelVisibility(true);
+}
+
+void FieldFrame::OnCmd_label_visibility_toggle(wxCommandEvent& event) {
+	GetFieldView()->DoTogglePointsLabelVisibility();
+}
 
 void FieldFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
@@ -897,6 +994,42 @@ void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
 	mCanvas->RemoveBackgroundImage();
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
 	GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
+}
+
+
+void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
+{
+	switch (event.GetId())
+	{
+		case CALCHART__GhostOff:
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::disabled);
+			break;
+		case CALCHART__GhostNextSheet:
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::next);
+			break;
+		case CALCHART__GhostPreviousSheet:
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::previous);
+			break;
+		case CALCHART__GhostNthSheet:
+		{
+			wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:","Ghost Sheet", "1", this);
+			long targetSheetNum = 0;
+			if (targetSheet.ToLong(&targetSheetNum)) {
+				GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific, targetSheetNum - 1);
+			} else {
+				wxMessageBox(wxT("The input must be a number."), wxT("Operation failed."));
+			}
+		}
+			break;
+	}
+	refreshGhostOptionStates();
+	GetCanvas()->Refresh();
+}
+
+void FieldFrame::refreshGhostOptionStates()
+{
+	bool active = GetFieldView()->getGhostModule().isActive();
+	GetMenuBar()->FindItem(CALCHART__GhostOff)->Enable(active);
 }
 
 

@@ -105,9 +105,13 @@ mCollisionAction(NULL)
 	// the variables are persistant through the entire compile process.
 	AnimationVariables variablesStates;
 
+	int sheetIndex = 0;
 	for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet)
 	{
+		mAnimSheetIndices.push_back(sheetIndex);
 		if (!curr_sheet->IsInAnimation()) continue;
+
+		sheetIndex++;
 
 // Now parse continuity
 		AnimateCompile comp(show, variablesStates);
@@ -310,6 +314,11 @@ void Animation::GotoBeat(unsigned i)
 
 void Animation::GotoSheet(unsigned i)
 {
+	GotoAnimationSheet(mAnimSheetIndices[i]);
+}
+
+void Animation::GotoAnimationSheet(unsigned i)
+{
 	curr_sheetnum = i;
 	RefreshSheet();
 	CheckCollisions();
@@ -359,10 +368,15 @@ void Animation::CheckCollisions()
 	{
 		for (unsigned j = i+1; j < numpts; j++)
 		{
-			if (pts[i].Collides(pts[j]))
+			CollisionType collisionResult = pts[i].DetectCollision(pts[j]);
+			if (collisionResult)
 			{
-				mCollisions.insert(i);
-				mCollisions.insert(j);
+				if (!mCollisions.count(i) || mCollisions[i] < collisionResult) {
+					mCollisions[i] = collisionResult;
+				}
+				if (!mCollisions.count(j) || mCollisions[j] < collisionResult) {
+					mCollisions[j] =  collisionResult;
+				}
 			}
 		}
 	}
@@ -376,7 +390,7 @@ void Animation::CheckCollisions()
 Animation::animate_info_t
 Animation::GetAnimateInfo(unsigned which) const
 {
-	return Animation::animate_info_t( mCollisions.count(which), (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which) );
+	return Animation::animate_info_t(mCollisions.count(which) ? mCollisions.find(which)->second : COLLISION_NONE, (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which));
 }
 
 int Animation::GetNumberSheets() const

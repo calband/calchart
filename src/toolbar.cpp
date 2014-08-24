@@ -30,6 +30,7 @@
 #include "tb_poly.xbm"
 #include "tb_lasso.xbm"
 #include "tb_mv.xbm"
+#include "tb_swap.xbm"
 #include "tb_line.xbm"
 #include "tb_rot.xbm"
 #include "tb_shr.xbm"
@@ -39,6 +40,9 @@
 #include "tb_lbl_l.xbm"
 #include "tb_lbl_r.xbm"
 #include "tb_lbl_f.xbm"
+#include "tb_lbl_show.xbm"
+#include "tb_lbl_hide.xbm"
+#include "tb_lbl_vis_toggle.xbm"
 #include "tb_sym0.xbm"
 #include "tb_sym1.xbm"
 #include "tb_sym2.xbm"
@@ -114,6 +118,7 @@ GetHalfOfMainToolBar()
 		{ wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
 		{ wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso, true },
 		{ wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
+		{ wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap },
 		{ wxITEM_RADIO, NULL, wxT("Move points into line"), CALCHART__line },
 		{ wxITEM_RADIO, NULL, wxT("Rotate block"), CALCHART__rot },
 		{ wxITEM_RADIO, NULL, wxT("Shear block"), CALCHART__shear },
@@ -123,6 +128,9 @@ GetHalfOfMainToolBar()
 		{ wxITEM_NORMAL, NULL, wxT("Label on left"), CALCHART__label_left },
 		{ wxITEM_NORMAL, NULL, wxT("Flip label"), CALCHART__label_flip },
 		{ wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
+		{ wxITEM_NORMAL, NULL, wxT("Hide Label"), CALCHART__label_hide },
+		{ wxITEM_NORMAL, NULL, wxT("Toggle Label Visibility"), CALCHART__label_visibility_toggle },
+		{ wxITEM_NORMAL, NULL, wxT("Show Label"), CALCHART__label_show, true },
 	};
 	static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb)/sizeof(tb[0]));
 	static bool sFirstTime = true;
@@ -136,6 +144,7 @@ GetHalfOfMainToolBar()
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_poly));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lasso));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_mv));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_swap));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_line));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_rot));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_shr));
@@ -145,6 +154,9 @@ GetHalfOfMainToolBar()
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
 		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_hide));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_vis_toggle));
+		(i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_show));
 	}
 	return sTB;
 }

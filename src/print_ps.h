@@ -32,7 +32,7 @@
 class CC_sheet;
 class CC_show;
 class CalChartDoc;
-struct CC_textline;
+class CC_textline;
 
 // intented to print a show to a buffer.
 class PrintShowToPS

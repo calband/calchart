@@ -63,6 +63,8 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\print_cont_ui.cpp" />
+    <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
+    <ClCompile Include="..\..\src\ghost_module.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -131,13 +133,14 @@
     <ClInclude Include="..\..\src\core\cont.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\parse.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\math_utils.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\print_cont_ui.h" />
+    <ClInclude Include="..\..\src\core\parse.h" />
+    <ClInclude Include="..\..\src\single_instance_ipc.h" />
+    <ClInclude Include="..\..\src\ghost_module.h" />
+    <ClInclude Include="..\..\src\draw.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />

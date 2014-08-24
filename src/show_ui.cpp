@@ -234,6 +234,7 @@ enum
 
 BEGIN_EVENT_TABLE(ShowInfoReq, wxDialog)
 EVT_BUTTON( wxID_RESET, ShowInfoReq::OnReset)
+EVT_CHOICE(ShowInfoReq_ID_LABEL_TYPE, ShowInfoReq::OnCmd_label_type)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( ShowInfoReq, wxDialog )
@@ -272,6 +273,15 @@ bool ShowInfoReq::Create(wxWindow *parent, wxWindowID id,
 	Center();
 
 	return true;
+}
+
+
+void
+EnableLetter(wxWindow& window, bool letters)
+{
+	// on first time, we need to set up values
+	window.FindWindow(ShowInfoReq_ID_POINTS_PER_LETTER)->Enable(letters);
+	window.FindWindow(ShowInfoReq_ID_LABEL_LETTERS)->Enable(letters);
 }
 
 
@@ -366,6 +376,7 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 		wxButton *cancel = new wxButton(parent, wxID_CANCEL);
 		okCancelBox->Add(cancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	}
+	EnableLetter(*parent, label_type->GetSelection());
 }
 
 void ShowInfoReq::CreateControls()
@@ -399,6 +410,7 @@ bool ShowInfoReq::TransferDataToWindow()
 			label_letters->SetSelection(i);
 		}
 	}
+	EnableLetter(*this, labelType->GetSelection());
 	return true;
 }
 
@@ -485,7 +497,19 @@ void ShowInfoReq::OnReset(wxCommandEvent&)
 }
 
 
+void
+ShowInfoReq::OnCmd_label_type(wxCommandEvent& event)
+{
+	EnableLetter(*this, event.GetInt());
+	Refresh();
+}
+
+
 IMPLEMENT_CLASS( ShowInfoReqWizard, wxWizardPageSimple )
+
+BEGIN_EVENT_TABLE(ShowInfoReqWizard, wxWizardPageSimple)
+EVT_CHOICE(ShowInfoReq_ID_LABEL_TYPE, ShowInfoReqWizard::OnCmd_label_type)
+END_EVENT_TABLE()
 
 ShowInfoReqWizard::ShowInfoReqWizard(wxWizard *parent) : wxWizardPageSimple(parent),
 mTransferDataToWindowFirstTime(true),
@@ -512,6 +536,7 @@ bool ShowInfoReqWizard::TransferDataToWindow()
 		labelType->SetSelection(false);
 		pointsPerLine->SetValue(10);
 		label_letters->DeselectAll();
+		EnableLetter(*this, labelType->GetSelection());
 		mTransferDataToWindowFirstTime = false;
 	}
 	return true;
@@ -591,4 +616,12 @@ bool ShowInfoReqWizard::Validate()
 		wxMessageBox(wxT("There are not enough labels defined."), wxT("Set labels"));
 	return canDo;
 }
+
+void
+ShowInfoReqWizard::OnCmd_label_type(wxCommandEvent& event)
+{
+	EnableLetter(*this, event.GetInt());
+	Refresh();
+}
+
 

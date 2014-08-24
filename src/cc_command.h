@@ -259,33 +259,25 @@ protected:
 };
 
 
-// TranslatePointsByDeltaCommand:
-// Move the selected points by a fixed delta
-class TranslatePointsByDeltaCommand : public MovePointsOnSheetCommand
+class RotatePointPositionsCommand : public MovePointsOnSheetCommand
 {
+private:
+	using super = MovePointsOnSheetCommand;
 public:
-	TranslatePointsByDeltaCommand(CalChartDoc& show, const CC_coord& delta, unsigned ref);
-	virtual ~TranslatePointsByDeltaCommand();
+	RotatePointPositionsCommand(CalChartDoc& show, unsigned rotateAmount, unsigned ref);
+	virtual ~RotatePointPositionsCommand();
 };
 
 
-// TransformPointsCommand:
-// Move the selected points by a matrix function
-class TransformPointsCommand : public MovePointsOnSheetCommand
+// MovePointsCommand:
+// Move points to position
+class MovePointsCommand : public MovePointsOnSheetCommand
 {
+private:
+	using super = MovePointsOnSheetCommand;
 public:
-	TransformPointsCommand(CalChartDoc& show, const Matrix& transmat, unsigned ref);
-	virtual ~TransformPointsCommand();
-};
-
-
-// TransformPointsInALineCommand:
-// Move the selected points by a line function
-class TransformPointsInALineCommand : public MovePointsOnSheetCommand
-{
-public:
-	TransformPointsInALineCommand(CalChartDoc& show, const CC_coord& start, const CC_coord& second, unsigned ref);
-	virtual ~TransformPointsInALineCommand();
+	MovePointsCommand(CalChartDoc& show, const std::map<unsigned, CC_coord>& newPosition, unsigned ref);
+	virtual ~MovePointsCommand();
 };
 
 
@@ -362,5 +354,47 @@ public:
 	SetLabelFlipCommand(CalChartDoc& show);
 	virtual ~SetLabelFlipCommand();
 };
+
+
+// SetLabelVisibilityCommand
+// Base class for setting label visibility
+class SetLabelVisibilityCommand : public SetSheetAndSelectCommand
+{
+private:
+	using super = SetSheetAndSelectCommand;
+public:
+	SetLabelVisibilityCommand(CalChartDoc& show);
+	virtual ~SetLabelVisibilityCommand() = 0;
+
+protected:
+	virtual void DoAction();
+
+	std::map<unsigned, bool> mLabelVisibility;
+};
+
+
+// SetLabelVisibleCommand
+// Set label to be visible or invisible
+class SetLabelVisibleCommand : public SetLabelVisibilityCommand
+{
+private:
+	using super = SetLabelVisibilityCommand;
+public:
+	SetLabelVisibleCommand(CalChartDoc& show, bool isVisible);
+	virtual ~SetLabelVisibleCommand();
+};
+
+
+// ToggleVisibilityCommand
+// Toggle whether or not the label is visible
+class ToggleLabelVisibilityCommand : public SetLabelVisibilityCommand
+{
+private:
+	using super = SetLabelVisibilityCommand;
+public:
+	ToggleLabelVisibilityCommand(CalChartDoc& show);
+	virtual ~ToggleLabelVisibilityCommand();
+};
+
 
 #endif

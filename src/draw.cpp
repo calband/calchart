@@ -93,7 +93,6 @@ size_t TabStops(size_t which, bool landscape)
 
 // these are the sizes that the page is set up to do.
 static const double kBitmapScale = 2.0; // the factor to scale the bitmap
-static const double kContinuityScale = 2.0; // the factor to scale the continuity
 static const double kSizeX = 576, kSizeY = 734;
 static const double kSizeXLandscape = 917, kSizeYLandscape = 720;
 static const double kHeaderLocation[2][2] = { { 0.5, 18/kSizeY }, { 0.5, 22/kSizeYLandscape } };
@@ -129,42 +128,54 @@ static const double kLowerNorthArrow[2][3] = { { 1.0 - 52/kSizeX, (570)/kSizeY, 
 
 static const double kContinuityStart[2] = { 606/kSizeY, 556/kSizeYLandscape };
 
-void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, bool primary)
+void DrawSheetPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
 {
-	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()),
-															 wxSWISS, wxNORMAL, wxNORMAL);
+	SaveAndRestore_Font orig_font(dc);
+	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*pointLabelFont);
 	dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
 	for (size_t i = 0; i < numberPoints; i++)
 	{
 		wxBrush fillBrush;
-		if (selection_list.count(i) && primary)
+		if (selection_list.count(i))
 		{
-			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_HILIT);
+			auto brushAndPen = config.Get_CalChartBrushAndPen(selectedColor);
 			fillBrush = brushAndPen.first;
+			dc.SetBrush(brushAndPen.first);
 			dc.SetPen(brushAndPen.second);
-		}
-		else if (selection_list.count(i) && !primary)
-		{
-			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_REF_POINT_HILIT);
-			fillBrush = brushAndPen.first;
-			dc.SetPen(brushAndPen.second);
-		}
-		else if (!selection_list.count(i) && primary)
-		{
-			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT);
-			fillBrush = brushAndPen.first;
-			dc.SetPen(brushAndPen.second);
+			dc.SetTextForeground(config.Get_CalChartBrushAndPen(selectedTextColor).second.GetColour());
 		}
 		else
 		{
-			auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_REF_POINT);
+			auto brushAndPen = config.Get_CalChartBrushAndPen(unselectedColor);
 			fillBrush = brushAndPen.first;
+			dc.SetBrush(brushAndPen.first);
 			dc.SetPen(brushAndPen.second);
+			dc.SetTextForeground(config.Get_CalChartBrushAndPen(unselectedTextColor).second.GetColour());
 		}
-		DrawPoint(sheet.GetPoint(i), dc, config, ref, origin, fillBrush, labels.at(i));
+		DrawPoint(sheet.GetPoint(i), dc, config, ref, origin, labels.at(i));
 	}
-	dc.SetFont(wxNullFont);
+}
+
+void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref) {
+	DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels, sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT_HLIT, COLOR_GHOST_POINT_TEXT, COLOR_GHOST_POINT_HLIT_TEXT);
+}
+
+void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, bool primary)
+{
+	CalChartColors unselectedColor, selectedColor, unselectedTextColor, selectedTextColor;
+	if (primary) {
+		unselectedColor = COLOR_POINT;
+		selectedColor = COLOR_POINT_HILIT;
+		unselectedTextColor = COLOR_POINT_TEXT;
+		selectedTextColor = COLOR_POINT_HILIT_TEXT;
+	} else {
+		unselectedColor = COLOR_REF_POINT;
+		selectedColor = COLOR_REF_POINT_HILIT;
+		unselectedTextColor = COLOR_REF_POINT_TEXT;
+		selectedTextColor = COLOR_REF_POINT_HILIT_TEXT;
+	}
+	DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels, sheet, ref, unselectedColor, selectedColor, unselectedTextColor, selectedTextColor);
 }
 
 // draw the continuity starting at a specific offset
@@ -402,10 +413,8 @@ void DrawForPrinting(wxDC *printerdc, const CalChartConfiguration& config, const
 
 	// draw the field.
 	dc->Clear();
-	dc->SetPen(*wxBLACK_PEN);
-	dc->SetTextForeground(*wxBLACK);
 	dc->SetLogicalFunction(wxCOPY);
-	mode->Draw(*dc, config);
+	mode->DrawMode(*dc, config, ShowMode::kPrinting);
 
 	const std::vector<CC_point> pts = sheet.GetPoints();
 	if (!pts.empty())
@@ -534,23 +543,24 @@ void DrawForPrinting(wxDC *printerdc, const CalChartConfiguration& config, const
 }
 
 void
-DrawPoint(const CC_point& point, wxDC& dc, const CalChartConfiguration& config, unsigned reference, const CC_coord& origin, const wxBrush& fillBrush, const wxString& label)
+DrawPointHelper(const CC_coord& pos, const CC_point& point, wxDC& dc, const CalChartConfiguration& config, const wxString& label)
+
 {
+	SaveAndRestore_Brush restore(dc);
 	float circ_r = Float2Coord(config.Get_DotRatio());
 	float offset = circ_r / 2;
 	float plineoff = offset * config.Get_PLineRatio();
 	float slineoff = offset * config.Get_SLineRatio();
 	float textoff = offset * 1.25;
 	
-	long x = point.GetPos(reference).x + origin.x;
-	long y = point.GetPos(reference).y + origin.y;
+	long x = pos.x;
+	long y = pos.y;
 	switch (point.GetSymbol())
 	{
 		case SYMBOL_SOL:
 		case SYMBOL_SOLBKSL:
 		case SYMBOL_SOLSL:
 		case SYMBOL_SOLX:
-			dc.SetBrush(fillBrush);
 			break;
 		default:
 			dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -586,13 +596,38 @@ DrawPoint(const CC_point& point, wxDC& dc, const CalChartConfiguration& config, 
 		default:
 			break;
 	}
-	wxCoord textw, texth, textd;
-	dc.GetTextExtent(label, &textw, &texth, &textd);
-	dc.DrawText(label,
-				point.GetFlip() ? x : (x - textw),
-				y - textoff - texth + textd);
+	if (point.LabelIsVisible()) {
+		wxCoord textw, texth, textd;
+		dc.GetTextExtent(label, &textw, &texth, &textd);
+		dc.DrawText(label,
+			point.GetFlip() ? x : (x - textw),
+			y - textoff - texth + textd);
+	}
 }
 
+void
+DrawPoint(const CC_point& point, wxDC& dc, const CalChartConfiguration& config, unsigned reference, const CC_coord& origin, const wxString& label)
+{
+	DrawPointHelper(point.GetPos(reference) + origin, point, dc, config, label);
+}
+
+void
+DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, const std::map<unsigned, CC_coord>& positions)
+{
+	SaveAndRestore_Font orig_font(dc);
+	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxSWISS, wxNORMAL, wxNORMAL);
+	dc.SetFont(*pointLabelFont);
+	CC_coord origin = show.GetMode().Offset();
+	auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT);
+	dc.SetPen(brushAndPen.second);
+	dc.SetBrush(brushAndPen.first);
+	dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT_TEXT).first.GetColour());
+	
+	for (auto& i : positions)
+	{
+		DrawPointHelper(i.second + origin, sheet.GetPoint(i.first), dc, config, show.GetPointLabel(i.first));
+	}
+}
 
 void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CC_DrawCommand>& draw_commands)
 {

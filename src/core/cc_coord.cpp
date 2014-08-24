@@ -75,17 +75,26 @@ float CC_coord::Direction(const CC_coord& c) const
 }
 
 
-// Returns true if this coordinate is within 1 step of another
-bool CC_coord::Collides(const CC_coord& c) const
+// Returns the type of collision between this point and another
+CollisionType CC_coord::DetectCollision(const CC_coord& c) const
 {
-	Coord dx, dy;
+	Coord dx, dy, squaredDist, distOfOne;
 
 	dx = x - c.x;
 	dy = y - c.y;
 // Check for special cases to avoid multiplications
-	if (std::abs(dx) > Int2Coord(1)) return false;
-	if (std::abs(dy) > Int2Coord(1)) return false;
-	return (((dx*dx)+(dy*dy)) <= (Int2Coord(1)*Int2Coord(1)));
+	if (std::abs(dx) > Int2Coord(1)) return COLLISION_NONE;
+	if (std::abs(dy) > Int2Coord(1)) return COLLISION_NONE;
+	squaredDist = ((dx*dx) + (dy*dy));
+	distOfOne = Int2Coord(1) * Int2Coord(1);
+	if (squaredDist < distOfOne) {
+		return COLLISION_INTERSECT;
+	}
+	else if (squaredDist == distOfOne) {
+		return COLLISION_WARNING;
+	} else {
+		return COLLISION_NONE;
+	}
 }
 
 

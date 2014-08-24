@@ -41,11 +41,10 @@ END_EVENT_TABLE()
 class TopFrameDropTarget : public wxFileDropTarget
 {
 public:
-	TopFrameDropTarget(wxDocManager *manager, TopFrame *f) : mManager(manager), frame(f) {}
+	TopFrameDropTarget(wxDocManager *manager) : mManager(manager) {}
 	virtual bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames);
 private:
 	wxDocManager *mManager;
-	TopFrame *frame;
 };
 
 
@@ -87,7 +86,7 @@ wxDocParentFrame(manager, frame, wxID_ANY, title)
 	menu_bar->Append(help_menu, wxT("&Help"));
 	SetMenuBar(menu_bar);
 
-	SetDropTarget(new TopFrameDropTarget(manager, this));
+	SetDropTarget(new TopFrameDropTarget(manager));
 	Show(true);
 }
 

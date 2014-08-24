@@ -447,9 +447,12 @@
 		E884F39D17A5F09100831301 /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
 		E884F3A017A631AD00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E884F3A117A631AE00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
+		E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
+		E88D29271974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
 		E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
+		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -991,9 +994,13 @@
 		E884F39E17A631AD00831301 /* animate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animate.cpp; sourceTree = "<group>"; };
 		E884F39F17A631AD00831301 /* animate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animate.h; sourceTree = "<group>"; };
 		E884F3A217A631BB00831301 /* draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = draw.h; sourceTree = "<group>"; };
+		E88D29241974E6F900323012 /* single_instance_ipc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = single_instance_ipc.cpp; sourceTree = "<group>"; };
+		E88D29251974E6F900323012 /* single_instance_ipc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = single_instance_ipc.h; sourceTree = "<group>"; };
 		E8B89DD8186F5655004DE7DF /* cc_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_text.cpp; sourceTree = "<group>"; };
 		E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_cont_ui.cpp; sourceTree = "<group>"; };
 		E8B89DDC186F7C50004DE7DF /* print_cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_cont_ui.h; sourceTree = "<group>"; };
+		E8E2E1051962870B002453E8 /* ghost_module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ghost_module.cpp; sourceTree = "<group>"; };
+		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1193,6 +1200,8 @@
 				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
 				C7E047C7155F279000D8C71B /* field_view.h */,
+				E8E2E1051962870B002453E8 /* ghost_module.cpp */,
+				E8E2E1061962870B002453E8 /* ghost_module.h */,
 				C7AFA97E117A6DBA00CC53E2 /* linmath.h */,
 				C7AFA981117A6DBA00CC53E2 /* modes.cpp */,
 				C7AFA982117A6DBA00CC53E2 /* modes.h */,
@@ -1205,6 +1214,8 @@
 				C76B4EBB15694C770087FE94 /* print_ps_dialog.h */,
 				C7E047D015609A1200D8C71B /* setup_wizards.cpp */,
 				C7E047D115609A1400D8C71B /* setup_wizards.h */,
+				E88D29241974E6F900323012 /* single_instance_ipc.cpp */,
+				E88D29251974E6F900323012 /* single_instance_ipc.h */,
 				C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */,
 				C7AFA98B117A6DBA00CC53E2 /* show_ui.h */,
 				C75CC23F14F06B7B00D46A7E /* toolbar.cpp */,
@@ -1428,7 +1439,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "CalChart" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1567,6 +1578,7 @@
 				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
 				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
+				E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */,
 				C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */,
 				C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */,
 				C72E2B091441150400118C03 /* top_frame.cpp in Sources */,
@@ -1577,6 +1589,7 @@
 				C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */,
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
 				C7AD22C815571CBB00AC1301 /* print_ps.cpp in Sources */,
+				E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */,
 				C7E047C8155F279000D8C71B /* field_view.cpp in Sources */,
 				C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */,
 				C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */,
@@ -1653,6 +1666,7 @@
 				E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				E803363317EE23F500A58457 /* cont.cpp in Sources */,
 				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
+				E88D29271974E6F900323012 /* single_instance_ipc.cpp in Sources */,
 				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
@@ -1692,6 +1706,7 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1715,6 +1730,7 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.0/wx/wxprec.h";
@@ -1735,10 +1751,9 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
-				CURRENT_PROJECT_VERSION = 3.4.1;
+				CURRENT_PROJECT_VERSION = 3.4.2;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1783,10 +1798,9 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
-				CURRENT_PROJECT_VERSION = 3.4.1;
+				CURRENT_PROJECT_VERSION = 3.4.2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1830,6 +1844,7 @@
 		C70C7B60156ABC8800E14F1B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1852,6 +1867,7 @@
 		C70C7B61156ABC8800E14F1B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (

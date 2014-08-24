@@ -62,4 +62,13 @@ public:
 	~SaveAndRestore_Font() { dc.SetFont(origFont); }
 };
 
+class SaveAndRestore_Brush
+{
+	wxDC& dc;
+	wxBrush origBrush;
+public:
+	SaveAndRestore_Brush(wxDC& dc_) : dc(dc_), origBrush(dc.GetBrush()) {}
+	~SaveAndRestore_Brush() { dc.SetBrush(origBrush); }
+};
+
 #endif // __DRAW_UTILS_H__

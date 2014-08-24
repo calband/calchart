@@ -26,55 +26,30 @@
 
 #include <algorithm>
 
-// utility to convert from int to coord if needed
-template <typename T>
-static inline Coord Int2CoordIfNeeded(bool DoConvert, T a) { return DoConvert ? a * COORD_DECIMAL : a; }
-
-extern wxFont* yardLabelFont;
-
 ShowMode::ShowMode(const wxString& name,
 				   const CC_coord& size,
 				   const CC_coord& offset,
 				   const CC_coord& border1,
 				   const CC_coord& border2) :
-mOffset(offset),
-mSize(size),
+mOffset(offset + border1),
+mSize(size + border1 + border2),
 mBorder1(border1),
 mBorder2(border2),
 mName(name)
-{
-	mSize += mBorder1 + mBorder2;
-	mOffset += mBorder1;
-}
-
-
-ShowMode::ShowMode(const wxString& name,
-				   const CC_coord& size,
-				   const CC_coord& border1,
-				   const CC_coord& border2) :
-mOffset(size/2),
-mSize(size),
-mBorder1(border1),
-mBorder2(border2),
-mName(name)
-{
-	mSize += mBorder1 + mBorder2;
-	mOffset += mBorder1;
-}
+{}
 
 
 ShowMode::~ShowMode()
-{
-}
+{}
 
 
 CC_coord
 ShowMode::ClipPosition(const CC_coord& pos) const
 {
-	CC_coord clipped;
-	CC_coord min = MinPosition();
-	CC_coord max = MaxPosition();
+	auto min = MinPosition();
+	auto max = MaxPosition();
 
+	CC_coord clipped;
 	if (pos.x < min.x) clipped.x = min.x;
 	else if (pos.x > max.x) clipped.x = max.x;
 	else clipped.x = pos.x;
@@ -88,16 +63,13 @@ ShowMode::ClipPosition(const CC_coord& pos) const
 wxImage
 ShowMode::GetOmniLinesImage(const CalChartConfiguration& config) const
 {
-	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
+	auto fieldsize = FieldSize();
 	wxBitmap bmp(fieldsize.x, fieldsize.y, 32);
     wxMemoryDC dc;
     dc.SelectObject(bmp);
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
-	dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-	dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
-	DrawOmni(dc, config);
-    dc.SelectObject(wxNullBitmap);
+	DrawMode(dc, config, ShowMode::kOmniView);
     return bmp.ConvertToImage();
 }
 
@@ -121,10 +93,30 @@ ShowMode::ShowType ShowModeStandard::GetType() const
 	return SHOW_STANDARD;
 }
 
+void
+ShowMode::DrawMode(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
+{
+	switch (howToDraw)
+	{
+		case kFieldView:
+		case kAnimation:
+		case kOmniView:
+			dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+			dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
+			break;
+		case kPrinting:
+			dc.SetPen(*wxBLACK_PEN);
+			dc.SetTextForeground(*wxBLACK);
+			break;
+	}
+	// draw the field
+	DrawHelper(dc, config, howToDraw);
+}
+
 void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
 {
 	wxPoint points[5];
-	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
+	auto fieldsize = FieldSize();
 	CC_coord border1 = mBorder1;
 	CC_coord border2 = mBorder2;
 	if (howToDraw == kOmniView)
