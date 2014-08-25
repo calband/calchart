@@ -78,6 +78,7 @@ wxDocChildFrame(doc, view, parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPo
 #else
 wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #endif
+mAnimationView(),
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
 mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
@@ -87,9 +88,8 @@ mWhenClosed(onClose)
 {
 // Give it an icon
 	// give this a view so it can pick up document changes
-	mAnimationView = new AnimationView();
-	mAnimationView->SetDocument(doc);
-	mAnimationView->SetFrame(this);
+	mAnimationView.SetDocument(doc);
+	mAnimationView.SetFrame(this);
 	SetBandIcon(this);
 
 	// this frame has 2 status bars at the bottom
@@ -131,8 +131,8 @@ mWhenClosed(onClose)
 	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
 	mSplitter->SetMinSize(wxSize(300, 400));
 	
-	mOmniViewCanvas = new CCOmniView_Canvas(mAnimationView, mSplitter);
-	mCanvas = new AnimationCanvas(mAnimationView, mSplitter);
+	mOmniViewCanvas = new CCOmniView_Canvas(&mAnimationView, mSplitter);
+	mCanvas = new AnimationCanvas(&mAnimationView, mSplitter);
 	
 	mSplitA = mOmniViewCanvas;
 	mSplitB = mCanvas;
@@ -175,7 +175,7 @@ mWhenClosed(onClose)
 		wxT("Ignore"), wxT("Show"), wxT("Beep")
 	};
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
-	collis->SetSelection(mAnimationView->GetCollisionType());
+	collis->SetSelection(mAnimationView.GetCollisionType());
 	sizer1->Add(collis, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
@@ -222,7 +222,7 @@ mWhenClosed(onClose)
 	topsizer->SetSizeHints(this);				  // set size hints to honour minimum size
 	this->Layout();
 
-	mAnimationView->Generate();
+	mAnimationView.Generate();
 
 	UpdatePanel();
 
@@ -242,7 +242,6 @@ AnimationFrame::~AnimationFrame()
 	if (mOmniViewCanvas)
 		mOmniViewCanvas->SetView(NULL);
 	mTimer->Stop();
-	delete mAnimationView;
 }
 
 
@@ -263,20 +262,14 @@ AnimationFrame::OnCmdReanimate(wxCommandEvent& event)
 {
 	StopTimer();
 	mErrorMarkers.clear();
-	if (mAnimationView)
-	{
-		mAnimationView->Generate();
-	}
+	mAnimationView.Generate();
 }
 
 
 void
 AnimationFrame::OnCmdSelectCollisions(wxCommandEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->SelectCollisions();
-	}
+	mAnimationView.SelectCollisions();
 }
 
 
@@ -312,20 +305,14 @@ AnimationFrame::OnCmd_anim_play(wxCommandEvent& event)
 void
 AnimationFrame::OnCmd_anim_prev_beat(wxCommandEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->PrevBeat();
-	}
+	mAnimationView.PrevBeat();
 }
 
 
 void
 AnimationFrame::OnCmd_anim_next_beat(wxCommandEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->NextBeat();
-	}
+	mAnimationView.NextBeat();
 }
 
 
@@ -333,7 +320,7 @@ void
 AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 {
 	// next_beat could come from the timer.  If so, stop the timer.
-	if (mAnimationView && !mAnimationView->NextBeat())
+	if (!mAnimationView.NextBeat())
 	{
 		StopTimer();
 	}
@@ -343,30 +330,21 @@ AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 void
 AnimationFrame::OnCmd_anim_prev_sheet(wxCommandEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->PrevSheet();
-	}
+	mAnimationView.PrevSheet();
 }
 
 
 void
 AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->NextSheet();
-	}
+	mAnimationView.NextSheet();
 }
 
 
 void
 AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->SetCollisionType(static_cast<CollisionWarning>(event.GetSelection()));
-	}
+	mAnimationView.SetCollisionType(static_cast<CollisionWarning>(event.GetSelection()));
 	Refresh();
 }
 
@@ -378,11 +356,11 @@ AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
 	size_t which = mErrorList->GetSelection() - 1;
 	if (which < mErrorMarkers.size())
 	{
-		mAnimationView->SetSelection(mErrorMarkers.at(which).first.pntgroup);
-		mAnimationView->GotoSheet(mErrorMarkers.at(which).second);
+		mAnimationView.SetSelection(mErrorMarkers.at(which).first.pntgroup);
+		mAnimationView.GotoSheet(mErrorMarkers.at(which).second);
 
 		mErrorText->Clear();
-		CC_continuity c = mAnimationView->GetContinuityOnSheet(mErrorMarkers.at(which).second, mErrorMarkers.at(which).first.contsymbol);
+		CC_continuity c = mAnimationView.GetContinuityOnSheet(mErrorMarkers.at(which).second, mErrorMarkers.at(which).first.contsymbol);
 		if (!c.GetText().empty())
 		{
 			mErrorText->WriteText(c.GetText());
@@ -408,39 +386,33 @@ AnimationFrame::OnSlider_anim_tempo(wxSpinEvent& event)
 void
 AnimationFrame::OnSlider_anim_gotosheet(wxScrollEvent& event)
 {
-	if (mAnimationView)
-	{
-		mAnimationView->GotoAnimationSheet(event.GetPosition()-1);
-	}
+	mAnimationView.GotoAnimationSheet(event.GetPosition()-1);
 }
 
 
 void
 AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
 {
-	if (mAnimationView)
-	{
-		//False if the change in the slider should cause the animation to transition to the next/previous stunt sheet
-		//true otherwise
-		bool beatChangeIsInternal = true;
-		if (OnSlider_shouldTransitionToNextSheet(event)) {
-			beatChangeIsInternal = false;
-			TransitionToNextSheet();
-		}
-		else if (OnSlider_shouldTransitionToPreviousSheet(event)) {
-			beatChangeIsInternal = false;
-			TransitionToPreviousSheet();
-		}
-		if (beatChangeIsInternal) {
-			mAnimationView->GotoBeat(event.GetPosition());
-		}
+	//False if the change in the slider should cause the animation to transition to the next/previous stunt sheet
+	//true otherwise
+	bool beatChangeIsInternal = true;
+	if (OnSlider_shouldTransitionToNextSheet(event)) {
+		beatChangeIsInternal = false;
+		TransitionToNextSheet();
+	}
+	else if (OnSlider_shouldTransitionToPreviousSheet(event)) {
+		beatChangeIsInternal = false;
+		TransitionToPreviousSheet();
+	}
+	if (beatChangeIsInternal) {
+		mAnimationView.GotoBeat(event.GetPosition());
 	}
 }
 
 bool
 AnimationFrame::OnSlider_shouldTransitionToNextSheet(wxScrollEvent& event) {
 	if (OnSlider_isNextBeatEvent(event)) {
-		return (mAnimationView->GetCurrentBeat() == mAnimationView->GetNumberBeats() - 1);
+		return (mAnimationView.GetCurrentBeat() == mAnimationView.GetNumberBeats() - 1);
 	}
 	return false;
 }
@@ -448,7 +420,7 @@ AnimationFrame::OnSlider_shouldTransitionToNextSheet(wxScrollEvent& event) {
 bool
 AnimationFrame::OnSlider_shouldTransitionToPreviousSheet(wxScrollEvent& event) {
 	if (OnSlider_isPreviousBeatEvent(event)) {
-		return (mAnimationView->GetCurrentBeat() == 0);
+		return (mAnimationView.GetCurrentBeat() == 0);
 	}
 	return false;
 }
@@ -467,14 +439,14 @@ AnimationFrame::OnSlider_isNextBeatEvent(wxScrollEvent& event) {
 
 void
 AnimationFrame::TransitionToNextSheet() {
-	mAnimationView->GotoBeat(mAnimationView->GetNumberBeats() - 1);
-	mAnimationView->NextBeat();
+	mAnimationView.GotoBeat(mAnimationView.GetNumberBeats() - 1);
+	mAnimationView.NextBeat();
 }
 
 void
 AnimationFrame::TransitionToPreviousSheet() {
-	mAnimationView->GotoBeat(0);
-	mAnimationView->PrevBeat();
+	mAnimationView.GotoBeat(0);
+	mAnimationView.PrevBeat();
 }
 
 void
@@ -488,7 +460,7 @@ AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxString value = dialog.GetValue();
-		auto& labels = mAnimationView->GetShow()->GetPointLabels();
+		auto& labels = mAnimationView.GetShow()->GetPointLabels();
 		auto which = std::find(labels.begin(), labels.end(), value);
 		if (which == labels.end())
 		{
@@ -507,7 +479,7 @@ AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
 		}
 		SelectionList sl;
 		sl.insert(std::distance(labels.begin(), which));
-		mAnimationView->SetSelection(sl);
+		mAnimationView.SetSelection(sl);
 	}
 	Refresh();
 }
@@ -593,8 +565,8 @@ AnimationFrame::ToggleTimer()
 void
 AnimationFrame::UpdatePanel()
 {
-	int num = (mAnimationView) ? mAnimationView->GetNumberSheets() : 1;
-	int curr = (mAnimationView) ? mAnimationView->GetCurrentSheet()+1 : 1;
+	int num = mAnimationView.GetNumberSheets();
+	int curr = mAnimationView.GetCurrentSheet()+1;
 
 	if (num > 1)
 	{
@@ -610,8 +582,8 @@ AnimationFrame::UpdatePanel()
 		mSheetSlider->Enable(false);
 	}
 
-	num = (mAnimationView) ? mAnimationView->GetNumberBeats()-1 : 1;
-	curr = (mAnimationView) ? mAnimationView->GetCurrentBeat() : 1;
+	num = mAnimationView.GetNumberBeats()-1;
+	curr = mAnimationView.GetCurrentBeat();
 
 	if (num > 0)
 	{
@@ -626,10 +598,7 @@ AnimationFrame::UpdatePanel()
 	{
 		mBeatSlider->Enable(false);
 	}
-	if (mAnimationView)
-	{
-		SetStatusText(mAnimationView->GetStatusText(), 1);
-	}
+	SetStatusText(mAnimationView.GetStatusText(), 1);
 }
 
 
