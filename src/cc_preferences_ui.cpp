@@ -214,11 +214,11 @@ class PrefCanvas : public ClickDragCtrlScrollCanvas
 	using super = ClickDragCtrlScrollCanvas;
 public:
 	PrefCanvas(CalChartConfiguration& config, wxWindow *parent);
-	
+
 	void OnPaint(wxPaintEvent& event);
 private:
 	void OnEraseBackground(wxEraseEvent& event);
-	
+
 	std::unique_ptr<CC_show> mShow;
 	std::unique_ptr<const ShowMode> mMode;
 	CalChartConfiguration& mConfig;
@@ -257,7 +257,7 @@ mConfig(config)
 	sheet->GetPoint(1).SetSymbol(SYMBOL_SOLX);
 	sheet->GetPoint(2).SetSymbol(SYMBOL_X);
 	sheet->GetPoint(3).SetSymbol(SYMBOL_SOLX);
-	
+
 	for (auto i = 0; i < 4; ++i)
 	{
 		sheet->SetAllPositions(field_offset + CC_coord(Int2Coord(i*4), Int2Coord(2)), i);
@@ -295,7 +295,7 @@ PrefCanvas::OnPaint(wxPaintEvent& event)
 {
 	wxBufferedPaintDC dc(this);
 	PrepareDC(dc);
-	
+
 	// draw the background
 	dc.SetBackgroundMode(wxTRANSPARENT);
 	dc.SetBackground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD).first);
@@ -340,7 +340,7 @@ class DrawingSetup : public PreferencePage
 {
 	DECLARE_CLASS( DrawingSetup )
 	DECLARE_EVENT_TABLE()
-	
+
 public:
 	DrawingSetup( CalChartConfiguration& config, wxWindow *parent,
 				 wxWindowID id = wxID_ANY,
@@ -354,15 +354,15 @@ public:
 		Create(parent, id, caption, pos, size, style);
 	}
 	virtual ~DrawingSetup( ) {}
-	
+
 	virtual void Init();
 	virtual void CreateControls();
-	
+
 	// use these to get and set default values
 	virtual bool TransferDataToWindow();
 	virtual bool TransferDataFromWindow();
 	virtual bool ClearValuesToDefault();
-	
+
 private:
 	void OnCmdSelectColors(wxCommandEvent&);
 	void OnCmdSelectWidth(wxSpinEvent&);
@@ -370,16 +370,15 @@ private:
 	void OnCmdResetAll(wxCommandEvent&);
 	void OnCmdChooseNewColor(wxCommandEvent&);
 	void OnCmdTextChanged(wxCommandEvent&);
-	
+
 	void SetColor(int selection, int width, const wxColour& color);
 	wxBitmapComboBox* nameBox;
 	wxSpinCtrl* spin;
-	
+
 	wxPen mCalChartPens[COLOR_NUM];
 	wxBrush mCalChartBrushes[COLOR_NUM];
-	
+
 	double mPrintValues[5];
-	
 };
 
 enum
@@ -388,11 +387,10 @@ enum
 	BUTTON_RESTORE,
 	SPIN_WIDTH,
 	NEW_COLOR_CHOICE,
-	A_DOTRATIO,
-	A_NUMRATIO,
-	A_PLINERATIO,
-	A_SLINERATIO,
-	A_CONTRATIO
+	DOTRATIO,
+	NUMRATIO,
+	PLINERATIO,
+	SLINERATIO
 };
 
 
@@ -401,11 +399,10 @@ EVT_BUTTON(BUTTON_SELECT,DrawingSetup::OnCmdSelectColors)
 EVT_BUTTON(BUTTON_RESTORE,DrawingSetup::OnCmdResetColors)
 EVT_SPINCTRL(SPIN_WIDTH,DrawingSetup::OnCmdSelectWidth)
 EVT_COMBOBOX(NEW_COLOR_CHOICE,DrawingSetup::OnCmdChooseNewColor)
-EVT_TEXT_ENTER(A_DOTRATIO,DrawingSetup::OnCmdTextChanged)
-EVT_TEXT_ENTER(A_NUMRATIO,DrawingSetup::OnCmdTextChanged)
-EVT_TEXT_ENTER(A_PLINERATIO,DrawingSetup::OnCmdTextChanged)
-EVT_TEXT_ENTER(A_SLINERATIO,DrawingSetup::OnCmdTextChanged)
-EVT_TEXT_ENTER(A_CONTRATIO,DrawingSetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(DOTRATIO,DrawingSetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(NUMRATIO,DrawingSetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(PLINERATIO,DrawingSetup::OnCmdTextChanged)
+EVT_TEXT_ENTER(SLINERATIO,DrawingSetup::OnCmdTextChanged)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS( DrawingSetup, PreferencePage )
@@ -414,10 +411,10 @@ void DrawingSetup::CreateControls()
 {
 	wxBoxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 	SetSizer( topsizer );
-	
+
 	wxStaticBoxSizer* boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Color settings")), wxVERTICAL);
 	topsizer->Add(boxsizer);
-	
+
 	wxBoxSizer *horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(), wxCB_READONLY|wxCB_DROPDOWN);
 	horizontalsizer->Add(nameBox, sBasicSizerFlags );
@@ -432,36 +429,35 @@ void DrawingSetup::CreateControls()
 		nameBox->SetItemBitmap(i, temp_bitmap);
 	}
 	nameBox->SetSelection(0);
-	
+
 	spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mCalChartPens[nameBox->GetSelection()].GetWidth());
 	spin->SetValue(mCalChartPens[nameBox->GetSelection()].GetWidth());
 	horizontalsizer->Add(spin, sBasicSizerFlags );
 	boxsizer->Add(horizontalsizer, sLeftBasicSizerFlags );
-	
+
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
-	
+
 	horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")), sBasicSizerFlags );
 	horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")), sBasicSizerFlags );
-	
+
 	boxsizer->Add(horizontalsizer, sBasicSizerFlags );
-	
+
 	boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("ratios")), wxVERTICAL);
 	topsizer->Add(boxsizer);
-	
+
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	boxsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
-	
-	AddTextboxWithCaption(this, horizontalsizer, A_DOTRATIO, wxT("Dot Ratio:"), wxTE_PROCESS_ENTER);
-	AddTextboxWithCaption(this, horizontalsizer, A_NUMRATIO, wxT("Num Ratio:"), wxTE_PROCESS_ENTER);
-	AddTextboxWithCaption(this, horizontalsizer, A_PLINERATIO, wxT("P-Line Ratio:"), wxTE_PROCESS_ENTER);
-	AddTextboxWithCaption(this, horizontalsizer, A_SLINERATIO, wxT("S-Line Ratio:"), wxTE_PROCESS_ENTER);
-	AddTextboxWithCaption(this, horizontalsizer, A_CONTRATIO, wxT("Continuity Ratio:"), wxTE_PROCESS_ENTER);
-	
+
+	AddTextboxWithCaption(this, horizontalsizer, DOTRATIO, wxT("Dot Ratio:"), wxTE_PROCESS_ENTER);
+	AddTextboxWithCaption(this, horizontalsizer, NUMRATIO, wxT("Num Ratio:"), wxTE_PROCESS_ENTER);
+	AddTextboxWithCaption(this, horizontalsizer, PLINERATIO, wxT("P-Line Ratio:"), wxTE_PROCESS_ENTER);
+	AddTextboxWithCaption(this, horizontalsizer, SLINERATIO, wxT("S-Line Ratio:"), wxTE_PROCESS_ENTER);
+
 	auto prefCanvas = new PrefCanvas(mConfig, this);
 	// set scroll rate 1 to 1, so we can have even scrolling of whole field
 	topsizer->Add(prefCanvas, 1, wxEXPAND);
 	//	mCanvas->SetScrollRate(1, 1);
-	
+
 	TransferDataToWindow();
 }
 
@@ -474,7 +470,7 @@ void DrawingSetup::Init()
 		mCalChartPens[i] = brushAndPen.second;
 		mCalChartBrushes[i] = brushAndPen.first;
 	}
-	
+
 	mPrintValues[0] = mConfig.Get_DotRatio();
 	mPrintValues[1] = mConfig.Get_NumRatio();
 	mPrintValues[2] = mConfig.Get_PLineRatio();
@@ -485,22 +481,19 @@ void DrawingSetup::Init()
 bool DrawingSetup::TransferDataToWindow()
 {
 	wxString buf;
-	wxTextCtrl* text = (wxTextCtrl*) FindWindow(A_DOTRATIO);
+	wxTextCtrl* text = (wxTextCtrl*) FindWindow(DOTRATIO);
 	buf.Printf(wxT("%.2f"), mPrintValues[0]);
 	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(A_NUMRATIO);
+	text = (wxTextCtrl*) FindWindow(NUMRATIO);
 	buf.Printf(wxT("%.2f"), mPrintValues[1]);
 	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(A_PLINERATIO);
+	text = (wxTextCtrl*) FindWindow(PLINERATIO);
 	buf.Printf(wxT("%.2f"), mPrintValues[2]);
 	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(A_SLINERATIO);
+	text = (wxTextCtrl*) FindWindow(SLINERATIO);
 	buf.Printf(wxT("%.2f"), mPrintValues[3]);
 	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(A_CONTRATIO);
-	buf.Printf(wxT("%.2f"), mPrintValues[4]);
-	text->SetValue(buf);
-	
+
 	return true;
 }
 
@@ -530,9 +523,9 @@ void DrawingSetup::SetColor(int selection, int width, const wxColour& color)
 {
 	mCalChartPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxSOLID);
 	mCalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
-	
+
 	mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection), mCalChartBrushes[selection], mCalChartPens[selection]);
-	
+
 	// update the namebox list
 	{
 		wxBitmap test_bitmap(16, 16);
@@ -585,7 +578,7 @@ void DrawingSetup::OnCmdTextChanged(wxCommandEvent& e)
 	double value;
 	if (text->GetValue().ToDouble(&value))
 	{
-		switch (id - A_DOTRATIO)
+		switch (id - DOTRATIO)
 		{
 			case 0:
 				mConfig.Set_DotRatio(value);
@@ -657,10 +650,6 @@ typedef enum
 	HEADERSIZE,
 	YARDSSIZE,
 	TEXTSIZE,
-	DOTRATIO,
-	NUMRATIO,
-	PLINERATIO,
-	SLINERATIO,
 	CONTRATIO
 } PSPrintingSetUp_IDs;
 
@@ -700,10 +689,6 @@ void PSPrintingSetUp::CreateControls()
 	horizontalsizer = new wxBoxSizer( wxHORIZONTAL );
 	topsizer->Add(horizontalsizer, sLeftBasicSizerFlags );
 
-	AddTextboxWithCaption(this, horizontalsizer, DOTRATIO, wxT("Dot Ratio:"));
-	AddTextboxWithCaption(this, horizontalsizer, NUMRATIO, wxT("Num Ratio:"));
-	AddTextboxWithCaption(this, horizontalsizer, PLINERATIO, wxT("P-Line Ratio:"));
-	AddTextboxWithCaption(this, horizontalsizer, SLINERATIO, wxT("S-Line Ratio:"));
 	AddTextboxWithCaption(this, horizontalsizer, CONTRATIO, wxT("Continuity Ratio:"));
 
 	TransferDataToWindow();
@@ -721,10 +706,6 @@ void PSPrintingSetUp::Init()
 	mPrintValues[0] = mConfig.Get_HeaderSize();
 	mPrintValues[1] = mConfig.Get_YardsSize();
 	mPrintValues[2] = mConfig.Get_TextSize();
-	mPrintValues[3] = mConfig.Get_DotRatio();
-	mPrintValues[4] = mConfig.Get_NumRatio();
-	mPrintValues[5] = mConfig.Get_PLineRatio();
-	mPrintValues[6] = mConfig.Get_SLineRatio();
 	mPrintValues[7] = mConfig.Get_ContRatio();
 }
 
@@ -753,18 +734,6 @@ bool PSPrintingSetUp::TransferDataToWindow()
 	text->SetValue(buf);
 	text = (wxTextCtrl*) FindWindow(TEXTSIZE);
 	buf.Printf(wxT("%.2f"), mPrintValues[2]);
-	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(DOTRATIO);
-	buf.Printf(wxT("%.2f"), mPrintValues[3]);
-	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(NUMRATIO);
-	buf.Printf(wxT("%.2f"), mPrintValues[4]);
-	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(PLINERATIO);
-	buf.Printf(wxT("%.2f"), mPrintValues[5]);
-	text->SetValue(buf);
-	text = (wxTextCtrl*) FindWindow(SLINERATIO);
-	buf.Printf(wxT("%.2f"), mPrintValues[6]);
 	text->SetValue(buf);
 	text = (wxTextCtrl*) FindWindow(CONTRATIO);
 	buf.Printf(wxT("%.2f"), mPrintValues[7]);
@@ -795,14 +764,6 @@ bool PSPrintingSetUp::TransferDataFromWindow()
 	text->GetValue().ToDouble(&mPrintValues[1]);
 	text = (wxTextCtrl*) FindWindow(TEXTSIZE);
 	text->GetValue().ToDouble(&mPrintValues[2]);
-	text = (wxTextCtrl*) FindWindow(DOTRATIO);
-	text->GetValue().ToDouble(&mPrintValues[3]);
-	text = (wxTextCtrl*) FindWindow(NUMRATIO);
-	text->GetValue().ToDouble(&mPrintValues[4]);
-	text = (wxTextCtrl*) FindWindow(PLINERATIO);
-	text->GetValue().ToDouble(&mPrintValues[5]);
-	text = (wxTextCtrl*) FindWindow(SLINERATIO);
-	text->GetValue().ToDouble(&mPrintValues[6]);
 	text = (wxTextCtrl*) FindWindow(CONTRATIO);
 	text->GetValue().ToDouble(&mPrintValues[7]);
 
@@ -817,10 +778,6 @@ bool PSPrintingSetUp::TransferDataFromWindow()
 	mConfig.Set_HeaderSize(mPrintValues[0]);
 	mConfig.Set_YardsSize(mPrintValues[1]);
 	mConfig.Set_TextSize(mPrintValues[2]);
-	mConfig.Set_DotRatio(mPrintValues[3]);
-	mConfig.Set_NumRatio(mPrintValues[4]);
-	mConfig.Set_PLineRatio(mPrintValues[5]);
-	mConfig.Set_SLineRatio(mPrintValues[6]);
 	mConfig.Set_ContRatio(mPrintValues[7]);
 	return true;
 }
@@ -837,10 +794,6 @@ bool PSPrintingSetUp::ClearValuesToDefault()
 	mConfig.Clear_HeaderSize();
 	mConfig.Clear_YardsSize();
 	mConfig.Clear_TextSize();
-	mConfig.Clear_DotRatio();
-	mConfig.Clear_NumRatio();
-	mConfig.Clear_PLineRatio();
-	mConfig.Clear_SLineRatio();
 	mConfig.Clear_ContRatio();
 	Init();
 	return TransferDataToWindow();

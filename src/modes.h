@@ -66,10 +66,6 @@ public:
 		kOmniView
 	} HowToDraw;
 
-//public:
-//	void Draw(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kFieldView); }
-//	void DrawAnim(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kAnimation); }
-//	void DrawOmni(wxDC& dc, const CalChartConfiguration& config) const { DrawHelper(dc, config, kOmniView); }
 	void DrawMode(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
 
 	wxImage GetOmniLinesImage(const CalChartConfiguration& config) const;
