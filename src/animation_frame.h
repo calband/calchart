@@ -24,6 +24,7 @@
 #define _ANIMATION_FRAME_H_
 
 #include "animate.h"
+#include "animation_view.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
@@ -106,11 +107,9 @@ private:
 	void TransitionToPreviousSheet();
 	void TransitionToNextSheet();
 
-
-
-	std::unique_ptr<AnimationView> mAnimationView;
+	AnimationView mAnimationView;
 	CalChartConfiguration& config;
-	// we really do need one of each.  We can't do inheritance because they have different base classes 
+	// we really do need one of each.  We can't do inheritance because they have different base classes
 	AnimationCanvas *mCanvas;
 	CCOmniView_Canvas *mOmniViewCanvas;
 	wxSlider *mSheetSlider;
