@@ -94,7 +94,7 @@ private:
 class ShowModeStandard : public ShowMode
 {
 public:
-	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& which, std::vector<long> values);
+	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& which, const CalChartConfiguration::ShowModeInfo_t& values);
 	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& name,
 													CC_coord size,
 													CC_coord offset,
@@ -128,7 +128,7 @@ private:
 class ShowModeSprShow : public ShowMode
 {
 public:
-	static std::unique_ptr<ShowMode> CreateSpringShowMode(const wxString& which, std::vector<long> values);
+	static std::unique_ptr<ShowMode> CreateSpringShowMode(const wxString& which, const CalChartConfiguration::SpringShowModeInfo_t& values);
 
 private:
 // Look at calchart.cfg for description of arguments

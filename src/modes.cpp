@@ -203,9 +203,9 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 	{
 		CC_coord fieldedge = mOffset - mBorder1;
 		wxCoord textw, texth, textd;
-		dc.GetTextExtent(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8), &textw, &texth, &textd);
-		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
-		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y + fieldsize.y - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		dc.GetTextExtent(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8), &textw, &texth, &textd);
+		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y + fieldsize.y - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
 	}
 }
 
@@ -295,11 +295,11 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, 
 	for (int i = 0; howToDraw == kFieldView && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		wxCoord textw, texth, textd;
-		dc.GetTextExtent(config.Get_yard_text(i+(steps_x+(MAX_YARD_LINES-1)*4)/8), &textw, &texth, &textd);
+		dc.GetTextExtent(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), &textw, &texth, &textd);
 		if (which_yards & SPR_YARD_ABOVE)
-			dc.DrawText(config.Get_yard_text(i+(steps_x+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
+			dc.DrawText(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
 		if (which_yards & SPR_YARD_BELOW)
-			dc.DrawText(config.Get_yard_text(i+(steps_x+(MAX_YARD_LINES-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
+			dc.DrawText(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
 	}
 	for (int i = 0; howToDraw == kFieldView && i <= Coord2Int(fieldsize.y); i+=8)
 	{
@@ -318,19 +318,19 @@ ShowMode::GetMode(const wxString& which)
 	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
 	if (iter != std::end(kShowModeStrings))
 	{
-		return ShowModeStandard::CreateShowMode(which, CalChartConfiguration::GetGlobalConfig().GetConfigurationShowMode(std::distance(std::begin(kShowModeStrings), iter)));
+		return ShowModeStandard::CreateShowMode(which, CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter))));
 	}
 	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
 	if (iter != std::end(kSpringShowModeStrings))
 	{
-		return ShowModeSprShow::CreateSpringShowMode(which, CalChartConfiguration::GetGlobalConfig().GetConfigurationSpringShowMode(std::distance(std::begin(kSpringShowModeStrings), iter)));
+		return ShowModeSprShow::CreateSpringShowMode(which, CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter))));
 	}
 	return {};
 }
 
 
 std::unique_ptr<ShowMode>
-ShowModeStandard::CreateShowMode(const wxString& which, std::vector<long> values)
+ShowModeStandard::CreateShowMode(const wxString& which, const CalChartConfiguration::ShowModeInfo_t& values)
 {
 	unsigned short whash = values[0];
 	unsigned short ehash = values[1];
@@ -360,7 +360,7 @@ ShowModeStandard::CreateShowMode(const wxString& name,
 }
 
 std::unique_ptr<ShowMode>
-ShowModeSprShow::CreateSpringShowMode(const wxString& which, std::vector<long> values)
+ShowModeSprShow::CreateSpringShowMode(const wxString& which, const CalChartConfiguration::SpringShowModeInfo_t& values)
 {
 	unsigned char which_spr_yards = values[0];
 	CC_coord bord1, bord2;

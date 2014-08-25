@@ -264,15 +264,26 @@ mConfig(config)
 		sheet->SetPosition(field_offset + CC_coord(Int2Coord(i*4), Int2Coord(6)), i, 1);
 	}
 
+	mShow->InsertSheet(*sheet, 1);
+	mShow->SetCurrentSheet(0);
+	sheet = mShow->GetCurrentSheet();
+	++sheet;
+	for (auto i = 0; i < 4; ++i)
+	{
+		sheet->SetAllPositions(field_offset + CC_coord(Int2Coord(18+i*4), Int2Coord(2+2)), i);
+		sheet->SetPosition(field_offset + CC_coord(Int2Coord(18+i*4), Int2Coord(2+6)), i, 1);
+	}
+	mShow->SetCurrentSheet(0);
+
 	auto point_start = offset + field_offset + CC_coord(Int2Coord(4), Int2Coord(2));
 	mPathEnd = point_start + CC_coord(Int2Coord(0), Int2Coord(2));
 	mPath.push_back(CC_DrawCommand(point_start, mPathEnd));
 	point_start = mPathEnd;
-	mPathEnd += CC_coord(Int2Coord(10), Int2Coord(0));
+	mPathEnd += CC_coord(Int2Coord(18), Int2Coord(0));
 	mPath.push_back(CC_DrawCommand(point_start, mPathEnd));
 
-	auto shape_start = field_offset + CC_coord(Int2Coord(20), Int2Coord(2));
-	auto shape_end = shape_start + CC_coord(Int2Coord(8), Int2Coord(4));
+	auto shape_start = field_offset + CC_coord(Int2Coord(18), Int2Coord(-2));
+	auto shape_end = shape_start + CC_coord(Int2Coord(4), Int2Coord(4));
 	CC_shape_rect rect(shape_start, shape_end);
 	mShape = rect.GetCC_DrawCommand(offset.x, offset.y);
 }
@@ -293,11 +304,18 @@ PrefCanvas::OnPaint(wxPaintEvent& event)
 	// Draw the field
 	mMode->DrawMode(dc, mConfig, ShowMode::kFieldView);
 
-	// Draw the points
 	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+	auto nextSheet = sheet;
+	++nextSheet;
+
 	SelectionList list;
 	list.insert(2);
 	list.insert(3);
+
+	// draw the ghost sheet
+	DrawGhostSheet(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *nextSheet, 0);
+
+	// Draw the points
 	DrawPoints(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 0, true);
 	DrawPoints(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 1, false);
 
@@ -862,8 +880,8 @@ public:
 private:
 	void OnCmdLineText(wxCommandEvent&);
 	void OnCmdChoice(wxCommandEvent&);
-	std::vector<long> mShowModeValues[SHOWMODE_NUM];
-	wxString mYardText[MAX_YARD_LINES];
+	CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];
+	wxString mYardText[CalChartConfiguration::kYardTextValues];
 	int mWhichMode;
 	int mWhichYardLine;
 };
@@ -940,9 +958,9 @@ void ShowModeSetup::Init()
 	mWhichYardLine = 0;
 	for (size_t i = 0; i < SHOWMODE_NUM; ++i)
 	{
-		mShowModeValues[i] = mConfig.GetConfigurationShowMode(i);
+		mShowModeValues[i] = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(i));
 	}
-	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
+	for (size_t i = 0; i < CalChartConfiguration::kYardTextValues; ++i)
 	{
 		mYardText[i] = mConfig.Get_yard_text(i);
 	}
@@ -978,13 +996,13 @@ bool ShowModeSetup::TransferDataFromWindow()
 	// write out the values defaults:
 	for (size_t i = 0; i < SHOWMODE_NUM; ++i)
 	{
-		mConfig.SetConfigurationShowMode(i, mShowModeValues[i]);
+		mConfig.Set_ShowModeInfo(static_cast<CalChartShowModes>(i), mShowModeValues[i]);
 	}
 
 	// grab whatever's in the box
 	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SHOW_LINE_VALUE);
 	mYardText[mWhichYardLine] = text->GetValue();
-	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
+	for (size_t i = 0; i < CalChartConfiguration::kYardTextValues; ++i)
 	{
 		mConfig.Set_yard_text(i, mYardText[i]);
 	}
@@ -996,9 +1014,12 @@ bool ShowModeSetup::ClearValuesToDefault()
 {
 	for (size_t i = 0; i < SHOWMODE_NUM; ++i)
 	{
-		mConfig.ClearConfigurationShowMode(i);
+		mConfig.Clear_ShowModeInfo(static_cast<CalChartShowModes>(i));
 	}
-	mConfig.ClearConfigShowYardline();
+	for (auto i = 0; i < CalChartConfiguration::kYardTextValues; ++i)
+	{
+		mConfig.Clear_yard_text(i);
+	}
 	Init();
 	return TransferDataToWindow();
 }
@@ -1055,8 +1076,8 @@ public:
 	virtual bool ClearValuesToDefault();
 private:
 	void OnCmdChoice(wxCommandEvent&);
-	std::vector<long> mSpringShowModeValues[SPRINGSHOWMODE_NUM];
-	wxString mYardText[MAX_SPR_LINES];
+	CalChartConfiguration::SpringShowModeInfo_t mSpringShowModeValues[SPRINGSHOWMODE_NUM];
+	wxString mYardText[CalChartConfiguration::kSprLineTextValues];
 	int mWhichMode;
 	int mWhichYardLine;
 };
@@ -1171,9 +1192,9 @@ void SpringShowModeSetup::Init()
 	mWhichYardLine = 0;
 	for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i)
 	{
-		mSpringShowModeValues[i] = mConfig.GetConfigurationSpringShowMode(i);
+		mSpringShowModeValues[i] = mConfig.Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
 	}
-	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
+	for (size_t i = 0; i < CalChartConfiguration::kSprLineTextValues; ++i)
 	{
 		mYardText[i] = mConfig.Get_spr_line_text(i);
 	}
@@ -1223,12 +1244,12 @@ bool SpringShowModeSetup::TransferDataFromWindow()
 	// write out the values defaults:
 	for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i)
 	{
-		mConfig.SetConfigurationSpringShowMode(modes->GetSelection(), mSpringShowModeValues[mWhichMode]);
+		mConfig.Set_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(modes->GetSelection()), mSpringShowModeValues[mWhichMode]);
 	}
 
 	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_SHOW_LINE_VALUE);
 	mYardText[mWhichYardLine] = text->GetValue();
-	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
+	for (size_t i = 0; i < CalChartConfiguration::kSprLineTextValues; ++i)
 	{
 		mConfig.Set_spr_line_text(i, mYardText[i]);
 	}
@@ -1240,9 +1261,12 @@ bool SpringShowModeSetup::ClearValuesToDefault()
 {
 	for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i)
 	{
-		mConfig.ClearConfigurationSpringShowMode(i);
+		mConfig.Clear_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
 	}
-	mConfig.ClearConfigSpringShowYardline();
+	for (auto i = 0; i < CalChartConfiguration::kSprLineTextValues; ++i)
+	{
+		mConfig.Clear_spr_line_text(i);
+	}
 	Init();
 	return TransferDataToWindow();
 }

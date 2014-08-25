@@ -815,7 +815,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet)
 		snprintf(buf, sizeof(buf), "/y %.2f def\n", field_h + (step_size / 2));
 		buffer<<buf;
 		std::string yardstr(config.Get_yard_text((step_offset +
-			(MAX_YARD_LINES-1)*4 +
+			(CalChartConfiguration::kYardTextValues-1)*4 +
 			Coord2Int(fieldoff.x) + j)/8).utf8_str());
 		buffer<<"("<<yardstr<<") dup centerText\n";
 		snprintf(buf, sizeof(buf), "/y %.2f def\n", -(step_size * 2));
@@ -919,7 +919,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 					modesprshow->StageH());
 				buffer<<buf;
 				std::string yardstr(config.Get_yard_text((modesprshow->StepsX() +
-					(MAX_YARD_LINES-1)*4 + j)/8).utf8_str());
+					(CalChartConfiguration::kYardTextValues-1)*4 + j)/8).utf8_str());
 				snprintf(buf, sizeof(buf), "(%s) centerText\n", yardstr.c_str());
 				buffer<<buf;
 			}
@@ -932,7 +932,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 					modesprshow->StageH() -(step_size*config.Get_YardsSize()));
 				buffer<<buf;
 				std::string yardstr(config.Get_yard_text((modesprshow->StepsX() +
-					(MAX_YARD_LINES-1)*4 + j)/8).utf8_str());
+					(CalChartConfiguration::kYardTextValues-1)*4 + j)/8).utf8_str());
 				snprintf(buf, sizeof(buf), "(%s) centerText\n", yardstr.c_str());
 				buffer<<buf;
 			}

@@ -36,8 +36,6 @@
 #include "modes.h"
 #include "cc_omniview_constants.h"
 
-using ColorWidth_t = std::pair<wxColour, long>;
-
 const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 {
 	{ wxT("FIELD"),					wxT("FOREST GREEN"),	1 },
@@ -67,6 +65,77 @@ const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
 };
 
+///// Show mode configuration /////
+
+const wxString kShowModeStrings[SHOWMODE_NUM] =
+{
+	wxT("Standard"),
+	wxT("Full Field"),
+	wxT("Tunnel"),
+	wxT("Old Field"),
+	wxT("Pro Field")
+};
+
+// What values mean:
+// whash ehash (steps from west sideline)
+// left top right bottom (border in steps)
+// x y w h (region of the field to use, in steps)
+const std::array<long, CalChartConfiguration::kShowModeValues> kShowModeDefaultValues[SHOWMODE_NUM] =
+{
+	{{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 }},
+	{{ 32, 52, 8, 8, 8, 8, -96, -42, 192, 84 }},
+	{{ 32, 52, 8, 8, 8, 8, 16, -42, 192, 84 }},
+	{{ 28, 52, 8, 8, 8, 8, -80, -42, 160, 84 }},
+	{{ 36, 48, 8, 8, 8, 8, -80, -42, 160, 84 }}
+};
+
+const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] =
+{
+	wxT("Zellerbach"),
+};
+
+// what values mean
+// X (hex digit of which yard lines to print:
+//   8 = left, 4 = right, 2 = above, 1 = below)
+// left top right bottom (border in steps)
+// x y w h (region of the field to use, in steps)
+// x y w h (size of stage EPS file as per BoundingBox)
+// x y w h (where to put the field on the stage, depends on the EPS file)
+// l r t b (location of yard line text's inside edge, depends on the EPS file)
+const std::array<long, CalChartConfiguration::kSpringShowModeValues> kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM] =
+{
+	{{ 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232, 153, 438, 270, 12 }}
+};
+
+// Yard lines
+const wxString yard_text_defaults[CalChartConfiguration::kYardTextValues] =
+{
+	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
+	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
+	wxT("45"), wxT("40"), wxT("35"), wxT("30"), wxT("25"), wxT("20"), wxT("15"), wxT("10"), wxT("5"), wxT("0"), wxT("-5"), wxT("-10"),
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
+};
+
+const wxString yard_text_index[CalChartConfiguration::kYardTextValues] =
+{
+	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
+	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
+	wxT("45"), wxT("40"), wxT("35"), wxT("30"), wxT("25"), wxT("20"), wxT("15"), wxT("10"), wxT("5"), wxT("0"), wxT("-5"), wxT("-10"),
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
+};
+
+const wxString spr_line_text_defaults[CalChartConfiguration::kSprLineTextValues] =
+{
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
+};
+
+const wxString spr_line_text_index[CalChartConfiguration::kSprLineTextValues] =
+{
+	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
+};
+
+
+
 static CalChartConfiguration& GetConfig()
 {
 	static CalChartConfiguration sconfig;
@@ -88,13 +157,12 @@ CalChartConfiguration::AssignConfig(const CalChartConfiguration& config)
 }
 
 
-
-// functions for dealing with the wx config directly
+// Get, Clear and Set PathKey are the primatives; do not use these directly.
 template <typename T>
-T GetConfigValue(const wxString& key, const T& def)
+T GetConfigPathKey(const wxString& path, const wxString& key, const T& def)
 {
 	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/CalChart"));
+	config->SetPath(path);
 	T value = def;
 	config->Read(key, &value);
 	return value;
@@ -102,7 +170,41 @@ T GetConfigValue(const wxString& key, const T& def)
 
 // clear out the config if it matches
 template <typename T>
-void ClearConfigValue(const wxString& key);
+void ClearConfigPathKey(const wxString& path, const wxString& key)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(path);
+	config->DeleteEntry(key);
+	config->Flush();
+}
+
+// default value need to check if we need to set a value
+template <typename T>
+void SetConfigPathKey(const wxString& path, const wxString& key, const T& value)
+{
+	wxConfigBase *config = wxConfigBase::Get();
+	config->SetPath(path);
+	config->Write(key, value);
+	config->Flush();
+}
+
+
+// functions for dealing with the wx config directly
+template <typename T>
+T GetConfigValue(const wxString& key, const T& def)
+{
+	return GetConfigPathKey<T>(wxT("/CalChart"), key, def);
+}
+
+// clear out the config if it matches
+//template <typename T>
+//void ClearConfigValue(const wxString& key)
+//{
+//	wxConfigBase *config = wxConfigBase::Get();
+//	config->SetPath(wxT("/CalChart"));
+//	config->DeleteEntry(key);
+//	config->Flush();
+//}
 
 // default value need to check if we need to set a value
 template <typename T>
@@ -114,115 +216,146 @@ void SetConfigValue(const wxString& key, const T& value, const T& def)
 	// clear out the value if it's the same as the default
 	if (def == value)
 	{
-		ClearConfigValue<T>(key);
+		ClearConfigPathKey<T>(wxT("/CalChart"), key);
 		return;
 	}
-	
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/CalChart"));
-	config->Write(key, value);
-	config->Flush();
-}
-
-template <typename T>
-void ClearConfigValue(const wxString& key)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/CalChart"));
-	config->DeleteEntry(key);
-	config->Flush();
+	SetConfigPathKey(wxT("/CalChart"), key, value);
 }
 
 // Specialize on Color
 template <>
-ColorWidth_t GetConfigValue(const wxString& key, const ColorWidth_t& def)
+CalChartConfiguration::ColorWidth_t GetConfigValue(const wxString& key, const CalChartConfiguration::ColorWidth_t& def)
 {
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/COLORS"));
-	wxString rkey = key + wxT("_Red");
-	wxString gkey = key + wxT("_Green");
-	wxString bkey = key + wxT("_Blue");
 	long r = std::get<0>(def).Red();
 	long g = std::get<0>(def).Green();
 	long b = std::get<0>(def).Blue();
-	config->Read(rkey, &r);
-	config->Read(gkey, &g);
-	config->Read(bkey, &b);
+	wxString rkey = key + wxT("_Red");
+	wxString gkey = key + wxT("_Green");
+	wxString bkey = key + wxT("_Blue");
+	r = GetConfigPathKey<long>(wxT("/COLORS"), rkey, r);
+	g = GetConfigPathKey<long>(wxT("/COLORS"), gkey, g);
+	b = GetConfigPathKey<long>(wxT("/COLORS"), bkey, b);
 
-	// store widths in a subgroup
-	config->SetPath(wxT("WIDTH"));
 	long w = std::get<1>(def);
-	config->Read(key, &w);
+	w = GetConfigPathKey<long>(wxT("/COLORS/WIDTH"), key, w);
+
 	return { wxColour( r, g, b ), w };
 }
 
 // Specialize on Color
 template <>
-void SetConfigValue(const wxString& key, const ColorWidth_t& value, const ColorWidth_t& def)
+void SetConfigValue(const wxString& key, const CalChartConfiguration::ColorWidth_t& value, const CalChartConfiguration::ColorWidth_t& def)
 {
 	// don't write if we don't have to
-	if (GetConfigValue<ColorWidth_t>(key, def) == value)
+	if (GetConfigValue<CalChartConfiguration::ColorWidth_t>(key, def) == value)
 		return;
 	wxString rkey = key + wxT("_Red");
 	wxString gkey = key + wxT("_Green");
 	wxString bkey = key + wxT("_Blue");
 
 	// TODO: fix this so it clears
-//	// clear out the value if it's the same as the default
-//	if (def == value)
-//	{
-//		ClearConfigValue<wxColour>(rkey);
-//		ClearConfigValue<wxColour>(gkey);
-//		ClearConfigValue<wxColour>(bkey);
-//		return;
-//	}
+	// clear out the value if it's the same as the default
+	if (def == value)
+	{
+		ClearConfigPathKey<long>(wxT("/COLORS"), rkey);
+		ClearConfigPathKey<long>(wxT("/COLORS"), gkey);
+		ClearConfigPathKey<long>(wxT("/COLORS"), bkey);
+		ClearConfigPathKey<long>(wxT("/COLORS/WIDTH"), key);
+		return;
+	}
 	
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/COLORS"));
 	long r = std::get<0>(value).Red();
 	long g = std::get<0>(value).Green();
 	long b = std::get<0>(value).Blue();
-	config->Write(rkey, r);
-	config->Write(gkey, g);
-	config->Write(bkey, b);
-	config->SetPath(wxT("WIDTH"));
 	long w = std::get<1>(def);
-	config->Write(key, w);
-	config->Flush();
+	SetConfigPathKey<long>(wxT("/COLORS"), rkey, r);
+	SetConfigPathKey<long>(wxT("/COLORS"), gkey, g);
+	SetConfigPathKey<long>(wxT("/COLORS"), bkey, b);
+	SetConfigPathKey<long>(wxT("/COLORS/WIDTH"), key, w);
 }
 
+// Specialize on show mode
+wxString ShowModeKeys[CalChartConfiguration::kShowModeValues] = { wxT("whash"), wxT("ehash"), wxT("bord1_x"), wxT("bord1_y"), wxT("bord2_x"), wxT("bord2_y"), wxT("size_x"), wxT("size_y"), wxT("offset_x"), wxT("offset_y") };
 
-
-// printing controls
-wxString yard_text[MAX_YARD_LINES] =
+template <>
+CalChartConfiguration::ShowModeInfo_t GetConfigValue(const wxString& key, const CalChartConfiguration::ShowModeInfo_t& def)
 {
-	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
-	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
-	wxT("45"), wxT("40"), wxT("35"), wxT("30"), wxT("25"), wxT("20"), wxT("15"), wxT("10"), wxT("5"), wxT("0"), wxT("-5"), wxT("-10"),
-	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
-};
+	CalChartConfiguration::ShowModeInfo_t values;
+	wxString path = wxT("/SHOWMODES/") + key;
+	for (auto i=0; i < CalChartConfiguration::kShowModeValues; ++i)
+	{
+		values[i] = GetConfigPathKey<long>(path, ShowModeKeys[i], values[i]);
+	}
+	return values;
+}
 
-const wxString yard_text_index[MAX_YARD_LINES] =
+// Specialize on show mode
+template <>
+void SetConfigValue(const wxString& key, const CalChartConfiguration::ShowModeInfo_t& value, const CalChartConfiguration::ShowModeInfo_t& def)
 {
-	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
-	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
-	wxT("45"), wxT("40"), wxT("35"), wxT("30"), wxT("25"), wxT("20"), wxT("15"), wxT("10"), wxT("5"), wxT("0"), wxT("-5"), wxT("-10"),
-	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
-};
+	// don't write if we don't have to
+	if (GetConfigValue<CalChartConfiguration::ShowModeInfo_t>(key, def) == value)
+		return;
+	wxString path = wxT("/SHOWMODES/") + key;
+	
+	// TODO: fix this so it clears
+	// clear out the value if it's the same as the default
+	if (def == value)
+	{
+		for (auto i=0; i < CalChartConfiguration::kShowModeValues; ++i)
+		{
+			ClearConfigPathKey<long>(path, ShowModeKeys[i]);
+		}
+		return;
+	}
+	
+	for (auto i=0; i < CalChartConfiguration::kShowModeValues; ++i)
+	{
+		SetConfigPathKey<long>(path, ShowModeKeys[i], value[i]);
+	}
+}
 
-static bool yard_text_valid = false;
+// Specialize on spring show mode
+wxString SpringShowModeKeys[CalChartConfiguration::kSpringShowModeValues] = { wxT("which_spr_yards"), wxT("bord1_x"), wxT("bord1_y"), wxT("bord2_x"), wxT("bord2_y"), wxT("mode_steps_x"), wxT("mode_steps_y"), wxT("mode_steps_w"), wxT("mode_steps_h"), wxT("eps_stage_x"), wxT("eps_stage_y"), wxT("eps_stage_w"), wxT("eps_stage_h"), wxT("eps_field_x"), wxT("eps_field_y"), wxT("eps_field_w"), wxT("eps_field_h"), wxT("eps_text_left"), wxT("eps_text_right"), wxT("eps_text_top"), wxT("eps_text_bottom") };
 
-wxString spr_line_text[MAX_SPR_LINES] =
+template <>
+CalChartConfiguration::SpringShowModeInfo_t GetConfigValue(const wxString& key, const CalChartConfiguration::SpringShowModeInfo_t& def)
 {
-	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
-};
+	CalChartConfiguration::SpringShowModeInfo_t values;
+	wxString path = wxT("/SPRINGSHOWMODES/") + key;
+	for (auto i=0; i < CalChartConfiguration::kSpringShowModeValues; ++i)
+	{
+		values[i] = GetConfigPathKey<long>(path, SpringShowModeKeys[i], values[i]);
+	}
+	return values;
+}
 
-const wxString spr_line_text_index[MAX_SPR_LINES] =
+// Specialize on spring show mode
+template <>
+void SetConfigValue(const wxString& key, const CalChartConfiguration::SpringShowModeInfo_t& value, const CalChartConfiguration::SpringShowModeInfo_t& def)
 {
-	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
-};
+	// don't write if we don't have to
+	if (GetConfigValue<CalChartConfiguration::SpringShowModeInfo_t>(key, def) == value)
+		return;
+	wxString path = wxT("/SPRINGSHOWMODES/") + key;
+	
+	// TODO: fix this so it clears
+	// clear out the value if it's the same as the default
+	if (def == value)
+	{
+		for (auto i=0; i < CalChartConfiguration::kSpringShowModeValues; ++i)
+		{
+			ClearConfigPathKey<long>(path, SpringShowModeKeys[i]);
+		}
+		return;
+	}
+	
+	for (auto i=0; i < CalChartConfiguration::kSpringShowModeValues; ++i)
+	{
+		SetConfigPathKey<long>(path, SpringShowModeKeys[i], value[i]);
+	}
+}
 
-static bool spr_line_yard_text_valid = false;
 
 #define IMPLEMENT_CONFIGURATION_FUNCTIONS( KeyName, Type, TheValue ) \
 static const wxString k ## KeyName ## Key = wxT( #KeyName ); \
@@ -321,256 +454,6 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool, false);
 //IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameHeight, long, 450);
 
 
-///// Show mode configuration /////
-
-const wxString kShowModeStrings[SHOWMODE_NUM] =
-{
-	wxT("Standard"),
-	wxT("Full Field"),
-	wxT("Tunnel"),
-	wxT("Old Field"),
-	wxT("Pro Field")
-};
-
-// What values mean:
-// whash ehash (steps from west sideline)
-// left top right bottom (border in steps)
-// x y w h (region of the field to use, in steps)
-const std::vector<long> kShowModeDefaultValues[SHOWMODE_NUM] =
-{
-	{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
-	{ 32, 52, 8, 8, 8, 8, -96, -42, 192, 84 },
-	{ 32, 52, 8, 8, 8, 8, 16, -42, 192, 84 },
-	{ 28, 52, 8, 8, 8, 8, -80, -42, 160, 84 },
-	{ 36, 48, 8, 8, 8, 8, -80, -42, 160, 84 }
-};
-
-const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] =
-{
-	wxT("Zellerbach"),
-};
-
-// what values mean
-// X (hex digit of which yard lines to print:
-//   8 = left, 4 = right, 2 = above, 1 = below)
-// left top right bottom (border in steps)
-// x y w h (region of the field to use, in steps)
-// x y w h (size of stage EPS file as per BoundingBox)
-// x y w h (where to put the field on the stage, depends on the EPS file)
-// l r t b (location of yard line text's inside edge, depends on the EPS file)
-const std::vector<long> kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM] =
-{
-	{ 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232, 153, 438, 270, 12 }
-};
-
-std::vector<long>
-CalChartConfiguration::GetConfigurationShowMode(size_t which) const
-{
-	std::vector<long> values = kShowModeDefaultValues[which];
-
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/SHOWMODES"));
-	if (config->Exists(kShowModeStrings[which]))
-	{
-		config->SetPath(kShowModeStrings[which]);
-		values[0] = config->Read(wxT("whash"), values[0]);
-		values[1] = config->Read(wxT("ehash"), values[1]);
-		values[2] = config->Read(wxT("bord1_x"), values[2]);
-		values[3] = config->Read(wxT("bord1_y"), values[3]);
-		values[4] = config->Read(wxT("bord2_x"), values[4]);
-		values[5] = config->Read(wxT("bord2_y"), values[5]);
-		values[6] = config->Read(wxT("size_x"), values[6]);
-		values[7] = config->Read(wxT("size_y"), values[7]);
-		values[8] = config->Read(wxT("offset_x"), values[8]);
-		values[9] = config->Read(wxT("offset_y"), values[9]);
-	}
-	return values;
-}
-
-std::vector<long>
-CalChartConfiguration::GetConfigurationSpringShowMode(size_t which) const
-{
-	std::vector<long> values = kSpringShowModeDefaultValues[which];
-
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/SPRINGSHOWMODES"));
-	if (config->Exists(kSpringShowModeStrings[which]))
-	{
-		config->SetPath(kSpringShowModeStrings[which]);
-		values[0] = config->Read(wxT("which_spr_yards"), values[0]);
-		values[1] = config->Read(wxT("bord1_x"), values[1]);
-		values[2] = config->Read(wxT("bord1_y"), values[2]);
-		values[3] = config->Read(wxT("bord2_x"), values[3]);
-		values[4] = config->Read(wxT("bord2_y"), values[4]);
-
-		values[5] = config->Read(wxT("mode_steps_x"), values[5]);
-		values[6] = config->Read(wxT("mode_steps_y"), values[6]);
-		values[7] = config->Read(wxT("mode_steps_w"), values[7]);
-		values[8] = config->Read(wxT("mode_steps_h"), values[8]);
-		values[9] = config->Read(wxT("eps_stage_x"), values[9]);
-		values[10] = config->Read(wxT("eps_stage_y"), values[10]);
-		values[11] = config->Read(wxT("eps_stage_w"), values[11]);
-		values[12] = config->Read(wxT("eps_stage_h"), values[12]);
-		values[13] = config->Read(wxT("eps_field_x"), values[13]);
-		values[14] = config->Read(wxT("eps_field_y"), values[14]);
-		values[15] = config->Read(wxT("eps_field_w"), values[15]);
-		values[16] = config->Read(wxT("eps_field_h"), values[16]);
-		values[17] = config->Read(wxT("eps_text_left"), values[17]);
-		values[18] = config->Read(wxT("eps_text_right"), values[18]);
-		values[19] = config->Read(wxT("eps_text_top"), values[19]);
-		values[20] = config->Read(wxT("eps_text_bottom"), values[20]);
-	}
-	return values;
-}
-
-void
-CalChartConfiguration::SetConfigurationShowMode(size_t which, const std::vector<long>& values)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/SHOWMODES"));
-	config->SetPath(kShowModeStrings[which]);
-	config->Write(wxT("whash"), values[0]);
-	config->Write(wxT("ehash"), values[1]);
-	config->Write(wxT("bord1_x"), values[2]);
-	config->Write(wxT("bord1_y"), values[3]);
-	config->Write(wxT("bord2_x"), values[4]);
-	config->Write(wxT("bord2_y"), values[5]);
-	config->Write(wxT("size_x"), values[6]);
-	config->Write(wxT("size_y"), values[7]);
-	config->Write(wxT("offset_x"), values[8]);
-	config->Write(wxT("offset_y"), values[9]);
-	config->Flush();
-}
-
-void
-CalChartConfiguration::SetConfigurationSpringShowMode(size_t which, const std::vector<long>& values)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/SPRINGSHOWMODES"));
-	config->SetPath(kSpringShowModeStrings[which]);
-	config->Write(wxT("which_spr_yards"), values[0]);
-	config->Write(wxT("bord1_x"), values[1]);
-	config->Write(wxT("bord1_y"), values[2]);
-	config->Write(wxT("bord2_x"), values[3]);
-	config->Write(wxT("bord2_y"), values[4]);
-
-	config->Write(wxT("mode_steps_x"), values[5]);
-	config->Write(wxT("mode_steps_y"), values[6]);
-	config->Write(wxT("mode_steps_w"), values[7]);
-	config->Write(wxT("mode_steps_h"), values[8]);
-	config->Write(wxT("eps_stage_x"), values[9]);
-	config->Write(wxT("eps_stage_y"), values[10]);
-	config->Write(wxT("eps_stage_w"), values[11]);
-	config->Write(wxT("eps_stage_h"), values[12]);
-	config->Write(wxT("eps_field_x"), values[13]);
-	config->Write(wxT("eps_field_y"), values[14]);
-	config->Write(wxT("eps_field_w"), values[15]);
-	config->Write(wxT("eps_field_h"), values[16]);
-	config->Write(wxT("eps_text_left"), values[17]);
-	config->Write(wxT("eps_text_right"), values[18]);
-	config->Write(wxT("eps_text_top"), values[19]);
-	config->Write(wxT("eps_text_bottom"), values[20]);
-	config->Flush();
-}
-
-void
-CalChartConfiguration::ClearConfigurationShowMode(size_t which)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/SHOWMODES"));
-	config->DeleteEntry(kShowModeStrings[which]);
-}
-
-void
-CalChartConfiguration::ClearConfigurationSpringShowMode(size_t which)
-{
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/SPRINGSHOWMODES"));
-	config->DeleteEntry(kSpringShowModeStrings[which]);
-}
-
-void ReadConfigYardlines()
-{
-	if (yard_text_valid)
-	{
-		return;
-	}
-	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
-	{
-		wxString key;
-		key.Printf(wxT("YardLines_%ld"), i);
-		yard_text[i] = GetConfigValue<wxString>(key, yard_text_index[i]);
-	}
-	yard_text_valid = true;
-}
-
-void ReadConfigSpringYardlines()
-{
-	if (spr_line_yard_text_valid)
-	{
-		return;
-	}
-	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
-	{
-		wxString key;
-		key.Printf(wxT("SpringShowYardLines_%ld"), i);
-		spr_line_text[i] = GetConfigValue<wxString>(key, spr_line_text_index[i]);
-	}
-	spr_line_yard_text_valid = true;
-}
-
-wxString
-CalChartConfiguration::Get_yard_text(size_t which) const
-{
-	if (which >= MAX_YARD_LINES)
-		throw std::runtime_error("Error, exceeding yard_text size");
-	ReadConfigYardlines();
-	return yard_text[which];
-}
-
-void
-CalChartConfiguration::Set_yard_text(size_t which, const wxString& name)
-{
-	if (which >= MAX_YARD_LINES)
-		throw std::runtime_error("Error, exceeding yard_text size");
-	yard_text[which] = name;
-	wxString key;
-	key.Printf(wxT("YardLines_%ld"), which);
-	SetConfigValue<wxString>(key, yard_text[which], yard_text_index[which]);
-}
-
-wxString
-CalChartConfiguration::Get_spr_line_text(size_t which) const
-{
-	if (which >= MAX_SPR_LINES)
-		throw std::runtime_error("Error, exceeding yard_text size");
-	ReadConfigSpringYardlines();
-	return spr_line_text[which];
-}
-
-void
-CalChartConfiguration::Set_spr_line_text(size_t which, const wxString& name)
-{
-	if (which >= MAX_SPR_LINES)
-		throw std::runtime_error("Error, exceeding yard_text size");
-	spr_line_text[which] = name;
-	wxString key;
-	key.Printf(wxT("SpringShowYardLines_%ld"), which);
-	SetConfigValue<wxString>(key, spr_line_text[which], spr_line_text_index[which]);
-}
-
-std::vector<wxString>
-CalChartConfiguration::Get_yard_text_index() const
-{
-	return { std::begin(yard_text_index), std::end(yard_text_index) };
-}
-
-std::vector<wxString>
-CalChartConfiguration::Get_spr_line_text_index() const
-{
-	return { std::begin(spr_line_text_index), std::end(spr_line_text_index) };
-}
-
 std::vector<wxString>
 CalChartConfiguration::GetColorNames() const
 {
@@ -595,29 +478,16 @@ CalChartConfiguration::GetDefaultPenWidth() const
 	return result;
 }
 
-
-void
-CalChartConfiguration::ClearConfigShowYardline()
+std::vector<wxString>
+CalChartConfiguration::Get_yard_text_index() const
 {
-	for (size_t i = 0; i < MAX_YARD_LINES; ++i)
-	{
-		wxString key;
-		key.Printf(wxT("YardLines_%ld"), i);
-		ClearConfigValue<wxString>(key);
-	}
-	yard_text_valid = false;
+	return { std::begin(yard_text_index), std::end(yard_text_index) };
 }
 
-void
-CalChartConfiguration::ClearConfigSpringShowYardline()
+std::vector<wxString>
+CalChartConfiguration::Get_spr_line_text_index() const
 {
-	for (size_t i = 0; i < MAX_SPR_LINES; ++i)
-	{
-		wxString key;
-		key.Printf(wxT("SpringShowYardLines_%ld"), i);
-		ClearConfigValue<wxString>(key);
-	}
-	spr_line_yard_text_valid = false;
+	return { std::begin(spr_line_text_index), std::end(spr_line_text_index) };
 }
 
 ///// Color Configuration /////
@@ -625,6 +495,9 @@ CalChartConfiguration::ClearConfigSpringShowYardline()
 std::pair<wxBrush, wxPen>
 CalChartConfiguration::Get_CalChartBrushAndPen(CalChartColors c) const
 {
+	if (c >= COLOR_NUM)
+		throw std::runtime_error("Error, exceeding COLOR_NUM size");
+
 	if (!mColorsAndWidth.count(c))
 	{
 		mColorsAndWidth[c] = GetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[c]), ColorWidth_t(std::get<1>(ColorInfo[c]), std::get<2>(ColorInfo[c])));
@@ -648,8 +521,162 @@ CalChartConfiguration::Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& 
 void
 CalChartConfiguration::Clear_ConfigColor(size_t selection)
 {
+	if (selection >= COLOR_NUM)
+		throw std::runtime_error("Error, exceeding COLOR_NUM size");
+
 	auto default_value = ColorWidth_t(std::get<1>(ColorInfo[selection]), std::get<2>(ColorInfo[selection]));
 	SetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[selection]), default_value, default_value);
+}
+
+///// Show Configuration /////
+
+CalChartConfiguration::ShowModeInfo_t
+CalChartConfiguration::Get_ShowModeInfo(CalChartShowModes which) const
+{
+	if (which >= SHOWMODE_NUM)
+		throw std::runtime_error("Error, exceeding SHOWMODE_NUM size");
+
+	if (!mShowModeInfos.count(which))
+	{
+		mShowModeInfos[which] = GetConfigValue<ShowModeInfo_t>(kShowModeStrings[which], kShowModeDefaultValues[which]);
+	}
+	return mShowModeInfos[which];
+}
+
+void
+CalChartConfiguration::Set_ShowModeInfo(CalChartShowModes which, const ShowModeInfo_t& values)
+{
+	if (which >= SHOWMODE_NUM)
+		throw std::runtime_error("Error, exceeding SHOWMODE_NUM size");
+	
+	mWriteQueue[kShowModeStrings[which]] = [which, values]() { SetConfigValue<ShowModeInfo_t>(kShowModeStrings[which], values, kShowModeDefaultValues[which]); };
+	mShowModeInfos[which] = values;
+}
+
+void
+CalChartConfiguration::Clear_ShowModeInfo(CalChartShowModes which)
+{
+	if (which >= SHOWMODE_NUM)
+		throw std::runtime_error("Error, exceeding SHOWMODE_NUM size");
+	
+	auto default_value = kShowModeDefaultValues[which];
+	SetConfigValue<ShowModeInfo_t>(kShowModeStrings[which], default_value, default_value);
+}
+
+
+CalChartConfiguration::SpringShowModeInfo_t
+CalChartConfiguration::Get_SpringShowModeInfo(CalChartSpringShowModes which) const
+{
+	if (which >= SPRINGSHOWMODE_NUM)
+		throw std::runtime_error("Error, exceeding SPRINGSHOWMODE_NUM size");
+	
+	if (!mSpringShowModeInfos.count(which))
+	{
+		mSpringShowModeInfos[which] = GetConfigValue<SpringShowModeInfo_t>(kSpringShowModeStrings[which], kSpringShowModeDefaultValues[which]);
+	}
+	return mSpringShowModeInfos[which];
+}
+
+void
+CalChartConfiguration::Set_SpringShowModeInfo(CalChartSpringShowModes which, const SpringShowModeInfo_t& values)
+{
+	if (which >= SPRINGSHOWMODE_NUM)
+		throw std::runtime_error("Error, exceeding SPRINGSHOWMODE_NUM size");
+	
+	mWriteQueue[kSpringShowModeStrings[which]] = [which, values]() { SetConfigValue<SpringShowModeInfo_t>(kSpringShowModeStrings[which], values, kSpringShowModeDefaultValues[which]); };
+	mSpringShowModeInfos[which] = values;
+}
+
+void
+CalChartConfiguration::Clear_SpringShowModeInfo(CalChartSpringShowModes which)
+{
+	if (which >= SPRINGSHOWMODE_NUM)
+		throw std::runtime_error("Error, exceeding SPRINGSHOWMODE_NUM size");
+	
+	auto default_value = kSpringShowModeDefaultValues[which];
+	SetConfigValue<SpringShowModeInfo_t>(kSpringShowModeStrings[which], default_value, default_value);
+}
+
+
+// Yard Lines
+wxString
+CalChartConfiguration::Get_yard_text(size_t which) const
+{
+	if (which >= kYardTextValues)
+		throw std::runtime_error("Error, exceeding kYardTextValues size");
+	
+	if (!mYardTextInfos.count(which))
+	{
+		wxString key;
+		key.Printf(wxT("YardLines_%ld"), which);
+		mYardTextInfos[which] = GetConfigValue(key, yard_text_defaults[which]);
+	}
+	return mYardTextInfos[which];
+}
+
+void
+CalChartConfiguration::Set_yard_text(size_t which, const wxString& value)
+{
+	if (which >= kYardTextValues)
+		throw std::runtime_error("Error, exceeding kYardTextValues size");
+	
+	wxString key;
+	key.Printf(wxT("YardLines_%ld"), which);
+	auto default_value = yard_text_defaults[which];
+	mWriteQueue[key] = [key, value, default_value]() { SetConfigValue(key, value, default_value); };
+	mYardTextInfos[which] = value;
+}
+
+void
+CalChartConfiguration::Clear_yard_text(size_t which)
+{
+	if (which >= kYardTextValues)
+		throw std::runtime_error("Error, exceeding kYardTextValues size");
+	
+	wxString key;
+	key.Printf(wxT("YardLines_%ld"), which);
+	auto default_value = yard_text_defaults[which];
+	SetConfigValue(key, default_value, default_value);
+}
+
+wxString
+CalChartConfiguration::Get_spr_line_text(size_t which) const
+{
+	if (which >= kSprLineTextValues)
+		throw std::runtime_error("Error, exceeding kSprLineTextValues size");
+	
+	if (!mSprLineTextInfos.count(which))
+	{
+		wxString key;
+		key.Printf(wxT("SpringShowLines_%ld"), which);
+		mSprLineTextInfos[which] = GetConfigValue(key, spr_line_text_defaults[which]);
+	}
+	return mSprLineTextInfos[which];
+}
+
+void
+CalChartConfiguration::Set_spr_line_text(size_t which, const wxString& value)
+{
+	if (which >= kSprLineTextValues)
+		throw std::runtime_error("Error, exceeding kSprLineTextValues size");
+	
+	wxString key;
+	key.Printf(wxT("SpringShowLines_%ld"), which);
+	auto default_value = spr_line_text_defaults[which];
+	mWriteQueue[key] = [key, value, default_value]() { SetConfigValue(key, value, default_value); };
+	mSprLineTextInfos[which] = value;
+}
+
+void
+CalChartConfiguration::Clear_spr_line_text(size_t which)
+{
+	if (which >= kSprLineTextValues)
+		throw std::runtime_error("Error, exceeding kSprLineTextValues size");
+	
+	wxString key;
+	key.Printf(wxT("SpringShowLines_%ld"), which);
+	auto default_value = spr_line_text_defaults[which];
+	SetConfigValue(key, default_value, default_value);
 }
 
 // function technically const because it is changing a mutable value

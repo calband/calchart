@@ -28,6 +28,7 @@
 #include <vector>
 #include <functional>
 #include <map>
+#include <array>
 
 // forward declare
 class wxPen;
@@ -35,9 +36,6 @@ class wxBrush;
 class wxPathList;
 class wxColour;
 class ShowMode;
-
-#define MAX_SPR_LINES 5
-#define MAX_YARD_LINES 53
 
 enum CalChartColors
 {
@@ -191,35 +189,50 @@ private: \
 	DECLARE_CONFIGURATION_FUNCTIONS( AnimationFrameSplitVertical, bool);
 
 public:
+	// helpers for displaying different config attributes
 	std::vector<wxString> GetColorNames() const;
 	std::vector<wxString> GetDefaultColors() const;
 	std::vector<int> GetDefaultPenWidth() const;
+	std::vector<wxString> Get_yard_text_index() const;
+	std::vector<wxString> Get_spr_line_text_index() const;
 
+	// Colors
 	using ColorWidth_t = std::pair<wxColour, long>;
 	mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth;
-
 	std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
 	void Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush, const wxPen& pen);
 	void Clear_ConfigColor(size_t selection);
 
-	wxString Get_yard_text(size_t which) const;
-	void Set_yard_text(size_t which, const wxString&);
-	std::vector<wxString> Get_yard_text_index() const;
-	wxString Get_spr_line_text(size_t which) const;
-	void Set_spr_line_text(size_t which, const wxString&);
-	std::vector<wxString> Get_spr_line_text_index() const;
-	void ClearConfigShowYardline();
-	void ClearConfigSpringShowYardline();
-
+	// Shows
 	static const size_t kShowModeValues = 10;
-	std::vector<long> GetConfigurationShowMode(size_t which) const;
-	void SetConfigurationShowMode(size_t which, const std::vector<long>& values);
-	void ClearConfigurationShowMode(size_t which);
+	using ShowModeInfo_t = std::array<long, kShowModeValues>;
+	mutable std::map<CalChartShowModes, ShowModeInfo_t> mShowModeInfos;
+	ShowModeInfo_t Get_ShowModeInfo(CalChartShowModes which) const;
+	void Set_ShowModeInfo(CalChartShowModes which, const ShowModeInfo_t& values);
+	void Clear_ShowModeInfo(CalChartShowModes which);
 	
 	static const size_t kSpringShowModeValues = 21;
-	std::vector<long> GetConfigurationSpringShowMode(size_t which) const;
-	void SetConfigurationSpringShowMode(size_t which, const std::vector<long>& values);
-	void ClearConfigurationSpringShowMode(size_t which);
+	using SpringShowModeInfo_t = std::array<long, kSpringShowModeValues>;
+	mutable std::map<CalChartSpringShowModes, SpringShowModeInfo_t> mSpringShowModeInfos;
+	SpringShowModeInfo_t Get_SpringShowModeInfo(CalChartSpringShowModes which) const;
+	void Set_SpringShowModeInfo(CalChartSpringShowModes which, const SpringShowModeInfo_t& values);
+	void Clear_SpringShowModeInfo(CalChartSpringShowModes which);
+
+//#define MAX_SPR_LINES 5
+//#define MAX_YARD_LINES 53
+//
+	// Yard Lines
+	static const size_t kYardTextValues = 53;
+	mutable std::map<size_t, wxString> mYardTextInfos;
+	wxString Get_yard_text(size_t which) const;
+	void Set_yard_text(size_t which, const wxString&);
+	void Clear_yard_text(size_t which);
+
+	static const size_t kSprLineTextValues = 5;
+	mutable std::map<size_t, wxString> mSprLineTextInfos;
+	wxString Get_spr_line_text(size_t which) const;
+	void Set_spr_line_text(size_t which, const wxString&);
+	void Clear_spr_line_text(size_t which);
 };
 
 
