@@ -132,7 +132,7 @@ mWhenClosed(onClose)
 	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
 	mSplitter->SetMinSize(wxSize(300, 400));
 	
-	mOmniViewCanvas = new CCOmniView_Canvas(&mAnimationView, mSplitter);
+	mOmniViewCanvas = new CCOmniView_Canvas(&mAnimationView, mSplitter, config);
 	mCanvas = new AnimationCanvas(&mAnimationView, mSplitter);
 	
 	mSplitA = mOmniViewCanvas;
