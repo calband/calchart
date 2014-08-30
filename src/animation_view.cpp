@@ -54,7 +54,15 @@ AnimationView::~AnimationView()
 void
 AnimationView::OnDraw(wxDC *dc)
 {
-	GetShow()->GetMode().DrawMode(*dc, ShowMode::kAnimation);
+	auto& config = CalChartConfiguration::GetGlobalConfig();
+	OnDraw(dc, config);
+}
+
+void
+AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
+{
+	dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+	GetShow()->GetMode().DrawMode(*dc, config, ShowMode::kAnimation);
 	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
 	if (mAnimation)
 	{
@@ -65,13 +73,14 @@ AnimationView::OnDraw(wxDC *dc)
 			if (checkForCollision && info.mCollision)
 			{
 				if (info.mCollision == COLLISION_WARNING) {
-					dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_COLLISION_WARNING));
-					dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_COLLISION_WARNING));
+					auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
+					dc->SetBrush(brushAndPen.first);
+					dc->SetPen(brushAndPen.second);
 				} else if (info.mCollision == COLLISION_INTERSECT) {
-					dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_COLLISION));
-					dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_COLLISION));
+					auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
+					dc->SetBrush(brushAndPen.first);
+					dc->SetPen(brushAndPen.second);
 				}
-
 			}
 			else if (GetShow()->IsSelected(i))
 			{
@@ -80,18 +89,27 @@ AnimationView::OnDraw(wxDC *dc)
 					case ANIMDIR_SW:
 					case ANIMDIR_W:
 					case ANIMDIR_NW:
-						dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_HILIT_BACK));
-						dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_HILIT_BACK));
+					{
+						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
+						dc->SetBrush(brushAndPen.first);
+						dc->SetPen(brushAndPen.second);
+					}
 						break;
 					case ANIMDIR_SE:
 					case ANIMDIR_E:
 					case ANIMDIR_NE:
-						dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_HILIT_FRONT));
-						dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_HILIT_FRONT));
+					{
+						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
+						dc->SetBrush(brushAndPen.first);
+						dc->SetPen(brushAndPen.second);
+					}
 						break;
 					default:
-						dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_HILIT_SIDE));
-						dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_HILIT_SIDE));
+					{
+						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_SIDE);
+						dc->SetBrush(brushAndPen.first);
+						dc->SetPen(brushAndPen.second);
+					}
 				}
 			}
 			else
@@ -101,18 +119,27 @@ AnimationView::OnDraw(wxDC *dc)
 					case ANIMDIR_SW:
 					case ANIMDIR_W:
 					case ANIMDIR_NW:
-						dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_BACK));
-						dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_BACK));
+					{
+						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
+						dc->SetBrush(brushAndPen.first);
+						dc->SetPen(brushAndPen.second);
+					}
 						break;
 					case ANIMDIR_SE:
 					case ANIMDIR_E:
 					case ANIMDIR_NE:
-						dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_FRONT));
-						dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_FRONT));
+					{
+						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
+						dc->SetBrush(brushAndPen.first);
+						dc->SetPen(brushAndPen.second);
+					}
 						break;
 					default:
-						dc->SetPen(GetCalChartPen(COLOR_POINT_ANIM_SIDE));
-						dc->SetBrush(GetCalChartBrush(COLOR_POINT_ANIM_SIDE));
+					{
+						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_SIDE);
+						dc->SetBrush(brushAndPen.first);
+						dc->SetPen(brushAndPen.second);
+					}
 				}
 			}
 			CC_coord position = info.mPosition;

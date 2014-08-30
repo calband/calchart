@@ -45,7 +45,7 @@ public:
 	virtual void MacOpenFiles(const wxArrayString &fileNames);
 	int OnExit();
 
-	ShowModeList& GetModeList() { return mModeList; }
+	std::unique_ptr<ShowMode> GetMode(const wxString& which);
 
 	// the global help system:
 	wxHtmlHelpController& GetGlobalHelpController();
@@ -59,8 +59,6 @@ private:
 	void InitAppAsClient();
 	void ExitAppAsServer();
 	void ExitAppAsClient();
-
-	ShowModeList mModeList;
 
 	wxDocManager* mDocManager;
 	std::unique_ptr<wxHtmlHelpController> mHelpController;

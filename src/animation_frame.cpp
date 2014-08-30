@@ -72,13 +72,14 @@ EVT_SIZE(AnimationFrame::OnSize)
 END_EVENT_TABLE()
 
 
-AnimationFrame::AnimationFrame(std::function<void ()> onClose, wxDocument *doc, wxView *view, wxFrame *parent, const wxSize& size) :
+AnimationFrame::AnimationFrame(std::function<void ()> onClose, wxDocument *doc, CalChartConfiguration& config_, wxView *view, wxFrame *parent, const wxSize& size) :
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
 wxDocChildFrame(doc, view, parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #else
 wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition, size),
 #endif
 mAnimationView(),
+config(config_),
 mCanvas(NULL),
 mOmniViewCanvas(NULL),
 mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer)),
@@ -131,19 +132,19 @@ mWhenClosed(onClose)
 	mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
 	mSplitter->SetMinSize(wxSize(300, 400));
 	
-	mOmniViewCanvas = new CCOmniView_Canvas(&mAnimationView, mSplitter);
+	mOmniViewCanvas = new CCOmniView_Canvas(&mAnimationView, mSplitter, config);
 	mCanvas = new AnimationCanvas(&mAnimationView, mSplitter);
 	
 	mSplitA = mOmniViewCanvas;
 	mSplitB = mCanvas;
-	if (!GetConfiguration_AnimationFrameOmniAnimation())
+	if (!config.Get_AnimationFrameOmniAnimation())
 	{
 		std::swap(mSplitA, mSplitB);
 	}
 	mSplitter->Initialize(mSplitA);
-	if (GetConfiguration_AnimationFrameSplitScreen())
+	if (config.Get_AnimationFrameSplitScreen())
 	{
-		if (GetConfiguration_AnimationFrameSplitVertical())
+		if (config.Get_AnimationFrameSplitVertical())
 		{
 			mSplitter->SplitVertically(mSplitA, mSplitB);
 		}
@@ -152,7 +153,7 @@ mWhenClosed(onClose)
 			mSplitter->SplitHorizontally(mSplitA, mSplitB);
 		}
 	}
-	mSplitter->SetSashPosition(GetConfiguration_AnimationFrameSashPosition());
+	mSplitter->SetSashPosition(config.Get_AnimationFrameSashPosition());
 		
 	
 	AddCoolToolBar(GetAnimationToolBar(), *this);
@@ -251,8 +252,8 @@ AnimationFrame::OnSize(wxSizeEvent& event)
 	// HACK: Prevent width and height from growing out of control
 	int w = event.GetSize().GetWidth();
 	int h = event.GetSize().GetHeight();
-	SetConfiguration_AnimationFrameWidth((w > 1200) ? 1200 : w);
-	SetConfiguration_AnimationFrameHeight((h > 700) ? 700 : h);
+	config.Set_AnimationFrameWidth((w > 1200) ? 1200 : w);
+	config.Set_AnimationFrameHeight((h > 700) ? 700 : h);
 	super::OnSize(event);
 }
 
@@ -278,7 +279,7 @@ AnimationFrame::OnCmdClose(wxCloseEvent& event)
 {
 	if (mSplitter)
 	{
-		SetConfiguration_AnimationFrameSashPosition(mSplitter->GetSashPosition());
+		config.Set_AnimationFrameSashPosition(mSplitter->GetSashPosition());
 	}
 	// we should inform the parent frame we are closing
 	if (mWhenClosed)
@@ -620,8 +621,8 @@ AnimationFrame::OnCmd_SplitViewHorizontal(wxCommandEvent& event)
 	mSplitA->Show(true);
 	mSplitB->Show(true);
 	mSplitter->SplitHorizontally(mSplitA, mSplitB);
-	SetConfiguration_AnimationFrameSplitScreen(true);
-	SetConfiguration_AnimationFrameSplitVertical(false);
+	config.Set_AnimationFrameSplitScreen(true);
+	config.Set_AnimationFrameSplitVertical(false);
 }
 
 void
@@ -634,8 +635,8 @@ AnimationFrame::OnCmd_SplitViewVertical(wxCommandEvent& event)
 	mSplitA->Show(true);
 	mSplitB->Show(true);
 	mSplitter->SplitVertically(mSplitA, mSplitB);
-	SetConfiguration_AnimationFrameSplitScreen(true);
-	SetConfiguration_AnimationFrameSplitVertical(true);
+	config.Set_AnimationFrameSplitScreen(true);
+	config.Set_AnimationFrameSplitVertical(true);
 }
 
 void
@@ -645,7 +646,7 @@ AnimationFrame::OnCmd_SplitViewUnsplit(wxCommandEvent& event)
 	{
 		mSplitter->Unsplit();
 	}
-	SetConfiguration_AnimationFrameSplitScreen(false);
+	config.Set_AnimationFrameSplitScreen(false);
 }
 
 void
@@ -658,7 +659,7 @@ AnimationFrame::OnCmd_SwapAnimateAndOmni(wxCommandEvent& event)
 		mSplitter->Unsplit();
 	}
 	std::swap(mSplitA, mSplitB);
-	SetConfiguration_AnimationFrameOmniAnimation(!GetConfiguration_AnimationFrameOmniAnimation());
+	config.Set_AnimationFrameOmniAnimation(!config.Get_AnimationFrameOmniAnimation());
 	if (mode == wxSPLIT_HORIZONTAL)
 	{
 		mSplitter->SplitHorizontally(mSplitA, mSplitB);

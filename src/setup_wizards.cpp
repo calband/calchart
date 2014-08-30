@@ -51,9 +51,13 @@ SetDescriptionWizard::GetValue()
 ChooseShowModeWizard::ChooseShowModeWizard(wxWizard *parent) :
 wxWizardPageSimple(parent)
 {
-	for (ShowModeList::const_iterator mode = wxGetApp().GetModeList().begin(); mode != wxGetApp().GetModeList().end(); ++mode)
+	for (auto mode : kShowModeStrings)
 	{
-		modeStrings.Add((*mode)->GetName());
+		modeStrings.Add(mode);
+	}
+	for (auto mode : kSpringShowModeStrings)
+	{
+		modeStrings.Add(mode);
 	}
 	
 	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );

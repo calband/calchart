@@ -36,6 +36,7 @@ class FieldFrame;
 class AnimationFrame;
 class Animation;
 class Matrix;
+class CalChartConfiguration;
 
 // Field:
 // Field is the editable overhead view of the marchers on the field.
@@ -119,6 +120,7 @@ private:
 
 	CalChartDoc* mShow;
 	unsigned mCurrentReferencePoint;
+	CalChartConfiguration& mConfig;
 
     DECLARE_DYNAMIC_CLASS(FieldView)
 };

@@ -23,6 +23,8 @@
 #ifndef _CC_DRAWCOMMAND_H_
 #define _CC_DRAWCOMMAND_H_
 
+#include "cc_coord.h"
+
 struct CC_DrawCommand
 {
 	typedef enum { Ignore, Line, Arc } DrawType;
@@ -41,6 +43,15 @@ struct CC_DrawCommand
 	y2(endy)
 	{}
 
+	// Line version
+	CC_DrawCommand(const CC_coord& start, const CC_coord& end) :
+	mType(Line),
+	x1(start.x),
+	y1(start.y),
+	x2(end.x),
+	y2(end.y)
+	{}
+	
 	// Arc version
 	CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx, int centery) :
 	mType(Arc),

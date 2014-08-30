@@ -52,10 +52,10 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 // Create a new show
 CalChartDoc::CalChartDoc() :
 mShow(CC_show::Create_CC_show()),
-mMode(wxGetApp().GetModeList().front().get()),
+mMode(wxGetApp().GetMode(kShowModeStrings[0])),
 mTimer(*this)
 {
-	mTimer.Start(GetConfiguration_AutosaveInterval()*1000);
+	mTimer.Start(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()*1000);
 }
 
 // When a file is opened, we first check to see if there is a temporary 
@@ -511,13 +511,13 @@ CalChartDoc::GetMode() const
 }
 
 void
-CalChartDoc::SetMode(const ShowMode* m)
+CalChartDoc::SetMode(std::unique_ptr<const ShowMode> m)
 {
 	if (!m)
 	{
 		throw std::runtime_error("Cannot use NULL ShowMode");
 	}
-	mMode = m;
+	std::swap(mMode, m);
 	UpdateAllViews();
 }
 

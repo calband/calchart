@@ -31,6 +31,7 @@
 
 class AnimationView;
 class CCOmniView_GLContext;
+class CalChartConfiguration;
 
 struct viewpoint_t
 {
@@ -49,7 +50,7 @@ struct MarcherInfo
 class CCOmniView_Canvas: public wxGLCanvas
 {
 public:
-	CCOmniView_Canvas(AnimationView *view, wxWindow *frame, const wxSize& size = wxDefaultSize);
+	CCOmniView_Canvas(AnimationView *view, wxWindow *frame, CalChartConfiguration& config, const wxSize& size = wxDefaultSize);
 	~CCOmniView_Canvas();
 
 	void SetView(AnimationView *view);
@@ -72,6 +73,7 @@ private:
 
 	std::shared_ptr<CCOmniView_GLContext> m_glContext;
 	AnimationView *mAnimationView;
+	CalChartConfiguration& config;
 	viewpoint_t mViewPoint;
 
 	// a -1 means not following any marcher

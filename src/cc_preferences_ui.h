@@ -27,6 +27,7 @@
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>
 #include <wx/notebook.h>
+#include "confgr.h"
 
 class CalChartPreferences : public wxDialog
 {
@@ -59,6 +60,7 @@ public:
 private:
 	void OnCmdResetAll(wxCommandEvent&);
 	wxNotebook* mNotebook;
+	CalChartConfiguration mConfig;
 };
 
 #endif

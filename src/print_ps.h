@@ -24,6 +24,7 @@
 #define __PRINT_PS_H__
 
 #include "cc_types.h"
+#include "confgr.h"
 
 #include <iostream>
 #include <set>
@@ -37,7 +38,7 @@ class CC_textline;
 class PrintShowToPS
 {
 public:
-	PrintShowToPS(const CalChartDoc&, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet);
+	PrintShowToPS(const CalChartDoc&, const CalChartConfiguration& config_, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet);
 
 	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked);
 
@@ -51,6 +52,7 @@ private:
 	void print_start_page(std::ostream& buffer, bool landscape);
 
 	const CalChartDoc& mShow;
+	const CalChartConfiguration& config;
 	bool mPrintLandscape;
 	bool mPrintDoCont;
 	bool mPrintDoContSheet;
