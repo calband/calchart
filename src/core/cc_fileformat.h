@@ -27,7 +27,79 @@
 #include <sstream>
 
 // Description of the CalChart file format layout, in modified Extended Backus–Naur Form
-// version 3.1.0 to current
+// version 3.4.0 to current
+//
+// Most all blocks are generally in the form:
+// {4-char block name} {4-byte size of block} {BlockData} {'E''N''D'' '} {4-char block name}
+//   This allows a parser to quickly jump to the end of a block it doesn't know about, to allow
+//   for future improvements.
+//
+//   Where {}* means 0 or more;
+//         [] means 0 or 1;
+//         /**/ means could contain future blocks that could be ignored.
+//
+// show               = START , SHOW ;
+// START              = INGL_INGL , INGL_VERS ;
+// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) , SHOW_DATA , SHOW_END ;
+// SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* , /**/ ;
+// SHOW_END           = INGL_END , INGL_SHOW ;
+// NUM_MARCH          = INGL_SIZE , BigEndianInt32(4) , NUM_MARCH_DATA , NUM_MARCH_END;
+// NUM_MARCH_DATA     = BigEndianInt32( number of marchers ) ;
+// NUM_MARCH_END      = INGL_END , INGL_SIZE ;
+// LABEL              = INGL_LABL , BigEndianInt32(DataTill_LABEL_END) , LABEL_DATA , LABEL_END;
+// LABEL_DATA         = { Null-terminated_char* }* ;
+// LABEL_END          = INGL_END , INGL_LABL ;
+// DESCRIPTION        = INGL_DESC , BigEndianInt32(DataTill_DESCRIPTION_END) , DESCRIPTION_DATA , DESCRIPTION_END ;
+// DESCRIPTION_DATA   = Null-terminated_char* ;
+// DESCRIPTION_END    = INGL_END , INGL_DESC ;
+// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
+// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY , PRINT_CONTINUITY , /**/ ;
+// SHEET_END          = INGL_END , INGL_SHET ;
+// NAME               = INGL_NAME , BigEndianInt32(DataTill_NAME_END) , NAME_DATA , NAME_END ;
+// NAME_DATA          = Null-terminated_char* ;
+// NAME_END           = INGL_END , INGL_NAME ;
+// DURATION           = INGL_DURA , BigEndianInt32(4) , DURATION_DATA , DURATION_END;
+// DURATION_DATA      = BigEndianInt32(number of beats) ;
+// DURATION_END       = INGL_END , INGL_DURA ;
+// ALL_POINTS         = INGL_PNTS , BigEndianInt32(DataTill_ALL_POINTS_END) , ALL_POINTS_DATA , ALL_POINTS_END ;
+// ALL_POINTS_DATA    = { EACH_POINT_DATA }* ;
+// ALL_POINTS_END     = INGL_END , INGL_PNTS ;
+// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) , POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
+// POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
+// REF_POSITION_DATA  = BigEndianInt8( num ref pts ) , { BigEndianInt8( which reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
+// POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
+// POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
+// CONTINUITY         = INGL_CONT , BigEndianInt32(DataTill_CONTINUITY_END)) , CONTINUITY_DATA , CONTINUITY_END;
+// CONTINUITY_DATA    = { EACH_CONTINUITY }* ;
+// CONTINUITY_END     = INGL_END , INGL_CONT ;
+// EACH_CONTINUITY    = INGL_ECNT , BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA , EACH_CONTINUITY_END;
+// EACH_CONTINUITY_DATA = BigEndianInt8( symbol ) , Null-terminated char* ;
+// EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
+// PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END;
+// PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
+// PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
+//
+// INGL_INGL = 'I','N','G','L' ;
+// INGL_GURK = 'G','U','R','K' ;
+// INGL_SHOW = 'S','H','O','W' ;
+// INGL_SHET = 'S','H','E','T' ;
+// INGL_SIZE = 'S','I','Z','E' ;
+// INGL_LABL = 'L','A','B','L' ;
+// INGL_MODE = 'M','O','D','E' ;
+// INGL_DESC = 'D','E','S','C' ;
+// INGL_NAME = 'N','A','M','E' ;
+// INGL_DURA = 'D','U','R','A' ;
+// INGL_POS  = 'P','O','S',' ' ;
+// INGL_SYMB = 'S','Y','M','B' ;
+// INGL_TYPE = 'T','Y','P','E' ;
+// INGL_REFP = 'R','E','F','P' ;
+// INGL_CONT = 'C','O','N','T' ;
+// INGL_PCNT = 'P','C','N','T' ;
+// INGL_END  = 'E','N','D',' ' ;
+
+
+// Description of the CalChart file format layout, in modified Extended Backus–Naur Form
+// version 3.1.0 to 3.3.5
 // show = START , SHOW ;
 // START = INGL_INGL , INGL_GURK ;
 // SHOW = INGL_SHOW , SIZE , { LABEL } , { DESCRIPTION } , { SHEET } , SHOW_END ;
@@ -86,73 +158,6 @@
 // If POINT_SYMBOL is not supplied, all points assumed to be symbol 0
 // If POINT_CONT_INDEX is not supplied, all points assumed to be index 0
 // If POINT_LABEL_FLIP is not supplied, all points assumed to be not flipped
-
-
-
-
-// file description for 3.4.0
-// Description of the CalChart file format layout, in modified Extended Backus–Naur Form
-// version 3.4.0 to current
-//   Where {}* means 0 or more;
-//         [] means 0 or 1;
-// show               = START , SHOW ;
-// START              = INGL_INGL , INGL_VERS ;
-// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) , SHOW_DATA , SHOW_END ;
-// SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
-// SHOW_END           = INGL_END , INGL_SHOW ;
-// NUM_MARCH          = INGL_SIZE , BigEndianInt32(4) , NUM_MARCH_DATA , NUM_MARCH_END;
-// NUM_MARCH_DATA     = BigEndianInt32( number of marchers ) ;
-// NUM_MARCH_END      = INGL_END , INGL_SIZE ;
-// LABEL              = INGL_LABL , BigEndianInt32(DataTill_LABEL_END) , LABEL_DATA , LABEL_END;
-// LABEL_DATA         = { Null-terminated_char* }* ;
-// LABEL_END          = INGL_END , INGL_LABL ;
-// DESCRIPTION        = INGL_DESC , BigEndianInt32(DataTill_DESCRIPTION_END) , DESCRIPTION_DATA , DESCRIPTION_END ;
-// DESCRIPTION_DATA   = Null-terminated_char* ;
-// DESCRIPTION_END    = INGL_END , INGL_DESC ;
-// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
-// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, PRINT_CONTINUITY ;
-// SHEET_END          = INGL_END , INGL_SHET ;
-// NAME               = INGL_NAME , BigEndianInt32(DataTill_NAME_END) , NAME_DATA , NAME_END ;
-// NAME_DATA          = Null-terminated_char* ;
-// NAME_END           = INGL_END , INGL_NAME ;
-// DURATION           = INGL_DURA , BigEndianInt32(4) , DURATION_DATA , DURATION_END;
-// DURATION_DATA      = BigEndianInt32(number of beats) ;
-// DURATION_END       = INGL_END , INGL_DURA ;
-// ALL_POINTS         = INGL_PNTS , BigEndianInt32(DataTill_ALL_POINTS_END) , ALL_POINTS_DATA , ALL_POINTS_END ;
-// ALL_POINTS_DATA    = { EACH_POINT_DATA }* ;
-// ALL_POINTS_END     = INGL_END , INGL_PNTS ;
-// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) , POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
-// POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
-// REF_POSITION_DATA  = BigEndianInt8( num ref pts ) , { BigEndianInt8( which reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
-// POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
-// POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
-// CONTINUITY         = INGL_CONT , BigEndianInt32(DataTill_CONTINUITY_END)) , CONTINUITY_DATA , CONTINUITY_END;
-// CONTINUITY_DATA    = { EACH_CONTINUITY }* ;
-// CONTINUITY_END     = INGL_END , INGL_CONT ;
-// EACH_CONTINUITY    = INGL_ECNT , BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA , EACH_CONTINUITY_END;
-// EACH_CONTINUITY_DATA = BigEndianInt8( symbol ) , Null-terminated char* ;
-// EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
-// PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END;
-// PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
-// PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
-//
-// INGL_INGL = 'I','N','G','L' ;
-// INGL_GURK = 'G','U','R','K' ;
-// INGL_SHOW = 'S','H','O','W' ;
-// INGL_SHET = 'S','H','E','T' ;
-// INGL_SIZE = 'S','I','Z','E' ;
-// INGL_LABL = 'L','A','B','L' ;
-// INGL_MODE = 'M','O','D','E' ;
-// INGL_DESC = 'D','E','S','C' ;
-// INGL_NAME = 'N','A','M','E' ;
-// INGL_DURA = 'D','U','R','A' ;
-// INGL_POS  = 'P','O','S',' ' ;
-// INGL_SYMB = 'S','Y','M','B' ;
-// INGL_TYPE = 'T','Y','P','E' ;
-// INGL_REFP = 'R','E','F','P' ;
-// INGL_CONT = 'C','O','N','T' ;
-// INGL_PCNT = 'P','C','N','T' ;
-// INGL_END  = 'E','N','D',' ' ;
 
 
 // version 0 to 3.1 unknown
