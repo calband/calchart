@@ -123,75 +123,79 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 	{
 		border1 = border2 = CC_coord(0, 0);
 	}
+	auto offsetx = 0;//-fieldsize.x/2;
+	auto offsety = 0;//-fieldsize.y/2;
+	auto borderoffsetx = 0;//-border1.x;
+	auto borderoffsety = 0;//-border1.y;
 	
-	points[0] = wxPoint(0, 0);
-	points[1] = wxPoint(fieldsize.x, 0);
-	points[2] = wxPoint(fieldsize.x, fieldsize.y);
-	points[3] = wxPoint(0, fieldsize.y);
+	points[0] = wxPoint(0+offsetx, 0+offsety);
+	points[1] = wxPoint(fieldsize.x+offsetx, 0+offsety);
+	points[2] = wxPoint(fieldsize.x+offsetx, fieldsize.y+offsety);
+	points[3] = wxPoint(0+offsetx, fieldsize.y+offsety);
 	points[4] = points[0];
 	
 	// Draw outline
-	dc.DrawLines(5, points, border1.x, border1.y);
+	dc.DrawLines(5, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 	
 	// Draw vertical lines
-	for (Coord j = Int2Coord(8); j < fieldsize.x; j += Int2Coord(8))
+	for (Coord j = Int2Coord(8)+offsetx; j < fieldsize.x+offsetx; j += Int2Coord(8))
 	{
 		// draw solid yardlines
-		points[0] = wxPoint(j, 0);
-		points[1] = wxPoint(j, fieldsize.y);
-		dc.DrawLines(2, points, border1.x, border1.y);
+		points[0] = wxPoint(j, 0+offsety);
+		points[1] = wxPoint(j, fieldsize.y+offsety);
+		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 	}
 	
-	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j < fieldsize.x; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4)+offsetx; howToDraw == kFieldView && j < fieldsize.x+offsetx; j += Int2Coord(8))
 	{
 		// draw mid-dotted lines
-		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
+		for (Coord k = 0+offsety; k < fieldsize.y+offsety; k += Int2Coord(2))
 		{
 			points[0] = wxPoint(j, k);
 			points[1] = wxPoint(j, k + Int2Coord(1));
-			dc.DrawLines(2, points, border1.x, border1.y);
+			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		}
 	}
 	
 	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j < fieldsize.y; j += Int2Coord(4))
+	for (Coord j = Int2Coord(4)+offsety; howToDraw == kFieldView && j < fieldsize.y+offsety; j += Int2Coord(4))
 	{
 		if ((j == Int2Coord(mHashW)) || j == Int2Coord(mHashE))
 			continue;
-		for (Coord k = 0; k < fieldsize.x; k += Int2Coord(2))
+		for (Coord k = 0+offsetx; k < fieldsize.x+offsetx; k += Int2Coord(2))
 		{
 			points[0] = wxPoint(k, j);
 			points[1] = wxPoint(k + Int2Coord(1), j);
-			dc.DrawLines(2, points, border1.x, border1.y);
+			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		}
 	}
 	
 	// Draw hashes
-	for (Coord j = Int2Coord(0); j < fieldsize.x; j += Int2Coord(8))
+	for (Coord j = Int2Coord(0)+offsetx; j < fieldsize.x+offsetx; j += Int2Coord(8))
 	{
 		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashW));
 		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashW));
-		dc.DrawLines(2, points, border1.x, border1.y);
+		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashW));
 		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashW));
-		dc.DrawLines(2, points, border1.x, border1.y);
+		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		
 		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashE));
 		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashE));
-		dc.DrawLines(2, points, border1.x, border1.y);
+		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashE));
 		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashE));
-		dc.DrawLines(2, points, border1.x, border1.y);
+		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		
 		for (size_t midhash = 1; howToDraw == kFieldView && midhash < 5; ++midhash)
 		{
 			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashW));
 			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashW-(0.2*8)));
-			dc.DrawLines(2, points, border1.x, border1.y);
+			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 			
 			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashE));
 			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashE+(0.2*8)));
-			dc.DrawLines(2, points, border1.x, border1.y);
+			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		}
 	}
 	
@@ -203,9 +207,10 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 	{
 		CC_coord fieldedge = mOffset - mBorder1;
 		wxCoord textw, texth, textd;
-		dc.GetTextExtent(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8), &textw, &texth, &textd);
-		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
-		dc.DrawText(config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + border1.x, border1.y + fieldsize.y - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		auto text = config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8);
+		dc.GetTextExtent(text, &textw, &texth, &textd);
+		dc.DrawText(text, offsetx + Int2Coord(i*8) - textw/2 + border1.x+borderoffsetx, border1.y+borderoffsety - offsety - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
+		dc.DrawText(text, offsetx + Int2Coord(i*8) - textw/2 + border1.x+borderoffsetx, border1.y+borderoffsety + fieldsize.y-offsety - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
 	}
 }
 
