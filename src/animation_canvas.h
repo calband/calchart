@@ -37,21 +37,25 @@ public:
 	void SetView(AnimationView *view);
 
 	void OnPaint(wxPaintEvent& event);
-	void OnSize(wxSizeEvent& event);
 	void OnLeftDownMouseEvent(wxMouseEvent& event);
 	void OnLeftUpMouseEvent(wxMouseEvent& event);
 	void OnRightUpMouseEvent(wxMouseEvent& event);
 	void OnMouseMove(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& event);
+	void SetZoomOnMarchers(bool zoomOnMarchers);
+	bool GetZoomOnMarchers() const;
+	void SetStepsOutForMarchersZoom(size_t steps);
+	size_t GetStepsOutForMarchersZoom() const;
 
 private:
 	AnimationView *mAnimationView;
 
-	static const size_t kDefaultAnimSize = 3;
-	float mUserScale;
-	wxCoord mUserOriginX;
-	static float CalcUserScale(const CC_coord& showSize, const wxSize& windowSize);
-	static wxCoord CalcUserOriginX(const CC_coord& showSize, const wxSize& windowSize);
+	float mUserScale = 1;
+	std::pair<wxCoord, wxCoord> mUserOrigin = { 0, 0 };
+	bool mZoomOnMarchers = false;
+	size_t mStepsOutForMarcherZoom = 4;
+
+	void UpdateScaleAndOrigin();
 
 	// for mouse and drawing
 	bool mMouseDown;

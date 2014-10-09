@@ -71,7 +71,8 @@ public:
 	
 	wxString GetStatusText() const;
 
-	const CC_coord& GetShowSize() const;
+	std::pair<CC_coord, CC_coord> GetShowSizeAndOffset() const;
+	std::pair<CC_coord, CC_coord> GetMarcherSizeAndOffset() const;
 
 	void UnselectMarchers();
 	void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd, long mouseYEnd, bool altDown);
