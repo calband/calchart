@@ -40,6 +40,8 @@ wxPrintDialogData *gPrintDialogData;
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
 void CC_coord_UnitTests();
+void CC_show_UnitTests();
+void CC_sheet_UnitTests();
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
@@ -135,6 +137,8 @@ void CalChartApp::InitAppAsServer() {
 	CC_continuity_UnitTests();
 	CC_point_UnitTests();
 	CC_coord_UnitTests();
+	CC_show_UnitTests();
+	CC_sheet_UnitTests();
 
 
 	ProcessArguments();

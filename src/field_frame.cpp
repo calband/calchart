@@ -625,7 +625,13 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event) {
 
 			ReadLong(sheetStream);
 			ReadLong(sheetStream);
-			CC_show::CC_sheet_container_t sht(1, CC_sheet(numPoints, sheetStream, Current_version_and_later()));
+
+			sheetStream.unsetf(std::ios_base::skipws);
+			std::istream_iterator<uint8_t> theBegin(sheetStream);
+			std::istream_iterator<uint8_t> theEnd{};
+			std::vector<uint8_t> data(theBegin, theEnd);
+
+			CC_show::CC_sheet_container_t sht(1, CC_sheet(numPoints, data.data(), data.size(), Current_version_and_later()));
 			GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
 		}
 		wxTheClipboard->Close();

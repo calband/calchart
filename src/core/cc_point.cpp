@@ -96,52 +96,37 @@ CC_point::Serialize() const
 			++num_ref_pts;
 		}
 	}
-	uint8_t size_of_each_point_data = (num_ref_pts * 5) + 2 + 2 + 1 + 1 + 1;
-
+	std::vector<uint8_t> result;
 	// Point positions
-	std::ostringstream stream("");
-
 	// Write block size
-	Write(stream, &size_of_each_point_data, sizeof(size_of_each_point_data));
 
-	// Write POSITION
-	Coord crd;
-	put_big_word(&crd, GetPos().x);
-	Write(stream, &crd, 2);
-	put_big_word(&crd, GetPos().y);
-	Write(stream, &crd, 2);
+	// Write POSITIONw
+	CalChart::Parser::Append(result, uint16_t(GetPos().x));
+	CalChart::Parser::Append(result, uint16_t(GetPos().y));
 
 	// Write REF_POS
-	Write(stream, &num_ref_pts, 1);
+	CalChart::Parser::Append(result, uint8_t(num_ref_pts));
 	if (num_ref_pts)
 	{
 		for (auto j = 1; j <= CC_point::kNumRefPoints; j++)
 		{
 			if (GetPos(j) != GetPos(0))
 			{
-				uint8_t which = j;
-				Write(stream, &which, 1);
-				Coord crd;
-				put_big_word(&crd, GetPos(j).x);
-				Write(stream, &crd, 2);
-				put_big_word(&crd, GetPos(j).y);
-				Write(stream, &crd, 2);
+				CalChart::Parser::Append(result, uint8_t(j));
+				CalChart::Parser::Append(result, uint16_t(GetPos(j).x));
+				CalChart::Parser::Append(result, uint16_t(GetPos(j).y));
 			}
 		}
 	}
 
 	// Write POSITION
-	uint8_t tmp = GetSymbol();
-	Write(stream, &tmp, 1);
+	CalChart::Parser::Append(result, uint8_t(GetSymbol()));
 
 	// Point labels (left or right)
-	tmp = (GetFlip()) ? true : false;
-	Write(stream, &tmp, 1);
+	CalChart::Parser::Append(result, uint8_t(GetFlip()));
+	result.insert(result.begin(), uint8_t(result.size()));
 
-	auto sdata = stream.str();
-	std::vector<uint8_t> data;
-	std::copy(sdata.begin(), sdata.end(), std::back_inserter(data));
-	return data;
+	return result;
 }
 
 bool
