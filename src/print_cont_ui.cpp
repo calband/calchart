@@ -155,7 +155,7 @@ void PrintContinuityEditor::CreateControls()
 	// menu bar
 	wxMenu *cont_menu = new wxMenu;
 	cont_menu->Append(PrintContinuityEditor_Save, wxT("&Save Continuity\tCTRL-S"), wxT("Save continuity"));
-	cont_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close this window"));
+	cont_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"), wxT("Close this window"));
 
 	wxMenu *help_menu = new wxMenu;
 	help_menu->Append(wxID_HELP, wxT("&Help on Continuity...\tCTRL-H"), wxT("Help on Continuity"));
@@ -209,7 +209,7 @@ void PrintContinuityEditor::CreateControls()
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	button = new wxButton(this, PrintContinuityEditor_Discard, wxT("&Discard"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-	button = new wxButton(this, wxID_CLOSE, wxT("&Close"));
+	button = new wxButton(this, wxID_CLOSE, wxT("Close"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	button = new wxButton(this, wxID_HELP, wxT("&Help"));
 	top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );

@@ -100,7 +100,7 @@ mWhenClosed(onClose)
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__anim_reanimate, wxT("&Reanimate Show...\tCTRL-RETURN"), wxT("Regenerate animation"));
 	anim_menu->Append(CALCHART__anim_select_coll, wxT("&Select Collisions"), wxT("Select colliding points"));
-	anim_menu->Append(wxID_CLOSE, wxT("&Close Window\tCTRL-W"), wxT("Close window"));
+	anim_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"), wxT("Close window"));
 
 	
 	wxMenuBar *menu_bar = new wxMenuBar;
