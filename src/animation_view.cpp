@@ -391,10 +391,30 @@ AnimationView::GetStatusText() const
 }
 
 
-const CC_coord&
-AnimationView::GetShowSize() const
+// Return a bounding box of the show
+std::pair<CC_coord, CC_coord>
+AnimationView::GetShowSizeAndOffset() const
 {
-	return GetShow()->GetMode().Size();
+	auto size = GetShow()->GetMode().Size();
+	return { size, CC_coord(0,0) };
+}
+
+// Return a bounding box of the show of where the marchers are.  If they are outside the show, we don't see them.
+std::pair<CC_coord, CC_coord>
+AnimationView::GetMarcherSizeAndOffset() const
+{
+	auto mode_size = GetShow()->GetMode().Size();
+	CC_coord bounding_box_upper_left = mode_size;
+	CC_coord bounding_box_low_right(0,0);
+
+	for (unsigned i = 0; mAnimation && i < GetShow()->GetNumPoints(); ++i)
+	{
+		CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
+		bounding_box_upper_left = CC_coord(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
+		bounding_box_low_right = CC_coord(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
+	}
+
+	return { bounding_box_low_right-bounding_box_upper_left, mode_size/2 + bounding_box_upper_left };
 }
 
 void

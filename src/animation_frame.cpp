@@ -33,6 +33,7 @@
 #include <wx/timer.h>
 #include <wx/splitter.h>
 #include <wx/spinctrl.h>
+#include <wx/tglbtn.h>
 
 
 BEGIN_EVENT_TABLE(AnimationFrame, AnimationFrame::super)
@@ -203,6 +204,26 @@ mWhenClosed(onClose)
 	sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Beat")), centerText);
 	mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 0, 0, 1, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
 	sizer1->Add(mBeatSlider, centerWidget);
+	toprow->Add(sizer1, topRowSizerFlags);
+
+	// Zoom and Zoom slider
+	sizer1 = new wxBoxSizer(wxVERTICAL);
+	wxToggleButton* checkbox = new wxToggleButton(this, wxID_ANY, wxT("Zoom On Marchers"));
+	checkbox->Bind(wxEVT_TOGGLEBUTTON, [this](wxCommandEvent& event) {
+		mCanvas->SetZoomOnMarchers(event.IsChecked());
+	});
+	checkbox->SetValue(mCanvas->GetZoomOnMarchers());
+	sizer1->Add(checkbox, centerWidget);
+	auto sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	sizer2->Add(new wxStaticText(this, wxID_ANY, wxT("steps")), wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_LEFT));
+	auto steps = new wxSpinCtrl(this, wxID_ANY);
+	steps->SetRange(0, 100);
+	steps->SetValue(mCanvas->GetStepsOutForMarchersZoom());
+	steps->Bind(wxEVT_SPINCTRL, [this](wxSpinEvent& event) {
+		mCanvas->SetStepsOutForMarchersZoom(event.GetPosition());
+	});
+	sizer2->Add(steps, wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_RIGHT).Expand());
+	sizer1->Add(sizer2, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 
 	sizer1 = new wxBoxSizer(wxVERTICAL);
