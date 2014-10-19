@@ -728,7 +728,7 @@ CC_sheet::SetPoints(const std::vector<CC_point>& points)
 
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
-
+#include <assert.h>
 using namespace CalChart::Parser;
 
 void CC_sheet::CC_sheet_round_trip_test()

@@ -577,6 +577,8 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsign
 }
 
 
+// -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
+#include <assert.h>
 using namespace CalChart::Parser;
 
 static std::vector<char> Construct_show_zero_points_zero_labels_zero_description()

@@ -448,7 +448,6 @@
 		E884F3A017A631AD00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E884F3A117A631AE00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
-		E88D29271974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
 		E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
@@ -1666,7 +1665,6 @@
 				E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				E803363317EE23F500A58457 /* cont.cpp in Sources */,
 				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
-				E88D29271974E6F900323012 /* single_instance_ipc.cpp in Sources */,
 				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
