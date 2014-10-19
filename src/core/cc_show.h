@@ -24,6 +24,7 @@
 #define _CC_SHOW_H_
 
 #include "cc_types.h"
+#include "cc_fileformat.h"
 
 #include <vector>
 #include <string>
@@ -54,7 +55,7 @@ public:
 	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
 	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
-	// you can create a show in two ways, from scratch, or from an input stream
+	// you can create a show in two ways, from nothing, or from an input stream
 	static std::unique_ptr<CC_show> Create_CC_show();
 	static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
 
@@ -62,7 +63,7 @@ private:
 	CC_show();
 	// using overloading with structs to determine which constructor to use
 	CC_show(std::istream& stream, Version_3_3_and_earlier);
-	CC_show(std::istream& stream, Current_version_and_later);
+	CC_show(const uint8_t* ptr, size_t size, Current_version_and_later);
 
 public:
 	~CC_show();
@@ -126,6 +127,21 @@ private:
 	std::vector<std::string> pt_labels;
 	SelectionList selectionList;	  // order of selections
 	unsigned mSheetNum;
+
+	// unit tests
+	friend void CC_show_UnitTests();
+	static void CC_show_round_trip_test();
+	static void CC_show_round_trip_test_with_number_label_description();
+	static void CC_show_blank_desc_test();
+	static void CC_show_future_show_test();
+	static void CC_show_wrong_size_throws_exception();
+	static void CC_show_wrong_size_number_labels_throws();
+	static void CC_show_wrong_size_description();
+	static void CC_show_extra_cruft_ok();
+	static void CC_show_with_nothing_throws();
+
 };
+
+void CC_show_UnitTests();
 
 #endif // _CC_SHOW_H_

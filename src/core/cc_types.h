@@ -65,30 +65,4 @@ enum CC_MOVE_MODES
 
 typedef std::set<unsigned> SelectionList;
 
-#define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
-
-#define INGL_INGL Make4CharWord('I','N','G','L')
-#define INGL_GURK Make4CharWord('G','U','R','K')
-#define INGL_SHOW Make4CharWord('S','H','O','W')
-#define INGL_SHET Make4CharWord('S','H','E','T')
-#define INGL_SIZE Make4CharWord('S','I','Z','E')
-#define INGL_LABL Make4CharWord('L','A','B','L')
-#define INGL_MODE Make4CharWord('M','O','D','E')
-#define INGL_DESC Make4CharWord('D','E','S','C')
-#define INGL_NAME Make4CharWord('N','A','M','E')
-#define INGL_DURA Make4CharWord('D','U','R','A')
-#define INGL_POS  Make4CharWord('P','O','S',' ')
-#define INGL_SYMB Make4CharWord('S','Y','M','B')
-#define INGL_TYPE Make4CharWord('T','Y','P','E')
-#define INGL_REFP Make4CharWord('R','E','F','P')
-#define INGL_CONT Make4CharWord('C','O','N','T')
-#define INGL_ECNT Make4CharWord('E','C','N','T')
-#define INGL_PCNT Make4CharWord('P','C','N','T')
-#define INGL_PNTS Make4CharWord('P','N','T','S')
-#define INGL_PONT Make4CharWord('P','O','N','T')
-#define INGL_END  Make4CharWord('E','N','D',' ')
-
-struct Version_3_3_and_earlier {};
-struct Current_version_and_later {};
-
 #endif

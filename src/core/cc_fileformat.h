@@ -25,6 +25,12 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <vector>
+#include <map>
+
+struct Version_3_3_and_earlier {};
+struct Current_version_and_later {};
+
 
 // Description of the CalChart file format layout, in modified Extended Backus–Naur Form
 // version 3.4.0 to current
@@ -162,6 +168,30 @@
 
 // version 0 to 3.1 unknown
 
+#define Make4CharWord(a,b,c,d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
+
+#define INGL_INGL Make4CharWord('I','N','G','L')
+#define INGL_GURK Make4CharWord('G','U','R','K')
+#define INGL_SHOW Make4CharWord('S','H','O','W')
+#define INGL_SHET Make4CharWord('S','H','E','T')
+#define INGL_SIZE Make4CharWord('S','I','Z','E')
+#define INGL_LABL Make4CharWord('L','A','B','L')
+#define INGL_MODE Make4CharWord('M','O','D','E')
+#define INGL_DESC Make4CharWord('D','E','S','C')
+#define INGL_NAME Make4CharWord('N','A','M','E')
+#define INGL_DURA Make4CharWord('D','U','R','A')
+#define INGL_POS  Make4CharWord('P','O','S',' ')
+#define INGL_SYMB Make4CharWord('S','Y','M','B')
+#define INGL_TYPE Make4CharWord('T','Y','P','E')
+#define INGL_REFP Make4CharWord('R','E','F','P')
+#define INGL_CONT Make4CharWord('C','O','N','T')
+#define INGL_ECNT Make4CharWord('E','C','N','T')
+#define INGL_PCNT Make4CharWord('P','C','N','T')
+#define INGL_PNTS Make4CharWord('P','N','T','S')
+#define INGL_PONT Make4CharWord('P','O','N','T')
+#define INGL_END  Make4CharWord('E','N','D',' ')
+
+
 template <typename T>
 uint16_t get_big_word(const T* ptr)
 {
@@ -206,6 +236,7 @@ class CC_FileException : public std::runtime_error
 public:
 	CC_FileException(const std::string& reason) : std::runtime_error(reason) {}
 	CC_FileException(uint32_t nameID) : std::runtime_error(GetErrorFromID(nameID)) {};
+	CC_FileException(const std::string& reason, uint32_t nameID) : std::runtime_error(reason + " : " + GetErrorFromID(nameID)) {};
 };
 
 
@@ -385,7 +416,140 @@ inline void WriteStr(T& stream, const char *str)
 	Write(stream, str, strlen(str)+1);
 }
 
+namespace CalChart
+{
+namespace Parser
+{
+
+template <typename Iter>
+uint32_t get_big_long(Iter ptr)
+{
+	uint32_t result = (*ptr++ & 0xFF);
+	result = (result << 8) | (*ptr++ & 0xFF);
+	result = (result << 8) | (*ptr++ & 0xFF);
+	result = (result << 8) | (*ptr++ & 0xFF);
+	return result;
+}
+
+template<typename Iter>
+std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin, Iter end)
+{
+	std::vector<std::tuple<uint32_t, Iter, size_t>> result;
+	while (begin != end)
+	{
+		auto length = std::distance(begin, end);
+		if (length < 8)
+		{
+			return result;
+		}
+		auto name = get_big_long(begin);
+		begin += 4;
+		auto size = get_big_long(begin);
+		begin += 4;
+		length = std::distance(begin, end);
+		if (length < size+8)
+		{
+			return result;
+		}
+		auto data = begin;
+		begin += size;
+		auto end = get_big_long(begin);
+		begin += 4;
+		auto end_name = get_big_long(begin);
+		begin += 4;
+		if ((end != INGL_END) || (end_name != name))
+		{
+			return result;
+		}
+		result.push_back({name, data, size});
+	}
+	return result;
+}
+
+struct PrintHeader
+{
+	uint32_t d;
+};
+
+static inline
+std::ostream& operator<<(std::ostream& os, PrintHeader p)
+{
+	return os<<char(p.d>>24)<<char(p.d>>16)<<char(p.d>>8)<<char(p.d>>0);
+}
 
 
+template<typename Iter>
+void DoRecursiveParsing(std::ostream& os, const std::string& prefix, Iter begin, Iter end)
+{
+	auto table = ParseOutLabels(begin, end);
+	std::map<uint32_t, int> counter;
+	for (auto& i : table)
+	{
+		os<<prefix<<"found "<<PrintHeader{std::get<0>(i)}<<"\n";
+		os<<prefix<<counter[std::get<0>(i)]++<<"\tsize "<<std::get<2>(i)<<"\n";
+		DoRecursiveParsing(os, prefix + "  ", std::get<1>(i), std::get<1>(i) + std::get<2>(i));
+	}
+}
+
+template<typename T, typename U>
+void Append(T& d, const U& s)
+{
+	d.insert(d.end(), s.begin(), s.end());
+}
+
+template<typename T>
+void Append(T& d, uint32_t v)
+{
+	char rawd[4];
+	put_big_long(rawd, v);
+	d.insert(d.end(), std::begin(rawd), std::end(rawd));
+}
+
+template<typename T>
+void Append(T& d, uint16_t v)
+{
+	char rawd[2];
+	put_big_word(rawd, v);
+	d.insert(d.end(), std::begin(rawd), std::end(rawd));
+}
+
+template<typename T>
+void Append(T& d, uint8_t v)
+{
+	d.insert(d.end(), v);
+}
+
+template<typename T, typename U>
+void AppendAndNullTerminate(T& d, const U& s)
+{
+	Append(d, s);
+	Append(d, uint8_t{0});
+}
+
+template<typename T>
+std::vector<char> Construct_block(uint32_t type, const T& data)
+{
+	std::vector<char> result;
+	Append(result, uint32_t{type});
+	Append(result, static_cast<uint32_t>(data.size()));
+	Append(result, data);
+	Append(result, uint32_t{INGL_END});
+	Append(result, uint32_t{type});
+	return result;
+}
+
+static inline std::vector<char> Construct_block(uint32_t type, uint32_t data)
+{
+	std::vector<char> result;
+	Append(result, uint32_t{type});
+	Append(result, uint32_t{sizeof(data)});
+	Append(result, data);
+	Append(result, uint32_t{INGL_END});
+	Append(result, uint32_t{type});
+	return result;
+}
+
+}
+}
 
 #endif // _CC_FILEFORMAT_H_

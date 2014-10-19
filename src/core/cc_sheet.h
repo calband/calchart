@@ -27,6 +27,7 @@
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "cc_text.h"
+#include "cc_fileformat.h"
 
 #include <vector>
 #include <set>
@@ -44,10 +45,10 @@ class CC_point;
 class CC_sheet
 {
 public:
-	CC_sheet(CC_show *shw);
+	CC_sheet(size_t numPoints);
+	CC_sheet(size_t numPoints, const std::string& newname);
 	CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
-	CC_sheet(size_t numPoints, std::istream& stream, Current_version_and_later);
-	CC_sheet(CC_show *shw, const std::string& newname);
+	CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_and_later);
 	~CC_sheet();
 
 private:
@@ -109,6 +110,12 @@ private:
 	unsigned short beats;
 	std::vector<CC_point> pts;
 	std::string mName;
+
+	// unit tests
+	friend void CC_sheet_UnitTests();
+	static void CC_sheet_round_trip_test();
 };
+
+void CC_sheet_UnitTests();
 
 #endif
