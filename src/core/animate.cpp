@@ -32,6 +32,7 @@
 #include <cmath>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
@@ -139,6 +140,14 @@ mCollisionAction(NULL)
 					ContToken dummy;
 					comp.RegisterError(ANIMERR_SYNTAX, &dummy);
 				}
+#if 0 // enable to see dump of continuity
+				{
+					for (auto proc = ParsedContinuity; proc; proc = proc->next)
+					{
+						std::cout<<*proc<<"\n";
+					}
+				}
+#endif
 				for (unsigned j = 0; j < numpts; j++)
 				{
 					if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol)

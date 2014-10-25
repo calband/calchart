@@ -24,6 +24,7 @@
 #define _CONT_H_
 
 #include "animatecompile.h"
+#include <iosfwd>
 
 enum ContDefinedValue
 {
@@ -37,198 +38,239 @@ public:
 	ContToken();
 	virtual ~ContToken();
 	int line, col;
+	virtual std::ostream& Print(std::ostream&) const;
 };
+
+static inline std::ostream& operator<<(std::ostream& os, const ContToken& c) { return c.Print(os); }
 
 class ContPoint: public ContToken
 {
+	using super = ContToken;
 public:
 	ContPoint() {}
 	virtual ~ContPoint();
 
 	virtual CC_coord Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 };
 
 class ContStartPoint : public ContPoint
 {
+	using super = ContPoint;
 public:
 	ContStartPoint() {}
 
 	virtual CC_coord Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 };
 
 class ContNextPoint : public ContPoint
 {
+	using super = ContPoint;
 public:
 	ContNextPoint() {}
 
 	virtual CC_coord Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 };
 
 class ContRefPoint : public ContPoint
 {
+	using super = ContPoint;
 public:
 	ContRefPoint(unsigned n): refnum(n) {}
 
 	virtual CC_coord Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	unsigned refnum;
 };
 
 class ContValue: public ContToken
 {
+	using super = ContToken;
 public:
 	ContValue() {}
 	virtual ~ContValue();
 
 	virtual float Get(AnimateCompile* anim) const = 0;
+	virtual std::ostream& Print(std::ostream&) const override;
 };
 
 class ContValueFloat : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueFloat(float v): val(v) {}
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	float val;
 };
 
 class ContValueDefined : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueDefined(ContDefinedValue v): val(v) {}
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContDefinedValue val;
 };
 
 class ContValueAdd : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueAdd(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
 	virtual ~ContValueAdd();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *val1, *val2;
 };
 
 class ContValueSub : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueSub(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
 	virtual ~ContValueSub();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *val1, *val2;
 };
 
 class ContValueMult : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueMult(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
 	virtual ~ContValueMult();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *val1, *val2;
 };
 
 class ContValueDiv : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueDiv(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
 	virtual ~ContValueDiv();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *val1, *val2;
 };
 
 class ContValueNeg : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueNeg(ContValue *v) : val(v) {}
 	virtual ~ContValueNeg();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *val;
 };
 
 class ContValueREM : public ContValue
 {
+	using super = ContValue;
 public:
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 };
 
 class ContValueVar : public ContValue
 {
+	using super = ContValue;
 public:
 	ContValueVar(unsigned num): varnum(num) {}
 
 	virtual float Get(AnimateCompile* anim) const;
 	void Set(AnimateCompile* anim, float v);
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	unsigned varnum;
 };
 
 class ContFuncDir : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncDir(ContPoint *p): pnt(p) {}
 	virtual ~ContFuncDir();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContPoint *pnt;
 };
 
 class ContFuncDirFrom : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncDirFrom(ContPoint *start, ContPoint *end)
 		: pnt_start(start), pnt_end(end) {}
 	virtual ~ContFuncDirFrom();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContPoint *pnt_start, *pnt_end;
 };
 
 class ContFuncDist : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncDist(ContPoint *p): pnt(p) {}
 	virtual ~ContFuncDist();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContPoint *pnt;
 };
 
 class ContFuncDistFrom : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncDistFrom(ContPoint *start, ContPoint *end)
 		: pnt_start(start), pnt_end(end) {}
 	virtual ~ContFuncDistFrom();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContPoint *pnt_start, *pnt_end;
 };
 
 class ContFuncEither : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncEither(ContValue *d1, ContValue *d2, ContPoint *p)
 		: dir1(d1), dir2(d2), pnt(p) {}
 	virtual ~ContFuncEither();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *dir1, *dir2;
 	ContPoint *pnt;
@@ -236,23 +278,27 @@ private:
 
 class ContFuncOpp : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncOpp(ContValue *d): dir(d) {}
 	virtual ~ContFuncOpp();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *dir;
 };
 
 class ContFuncStep : public ContValue
 {
+	using super = ContValue;
 public:
 	ContFuncStep(ContValue *beats, ContValue *blocksize, ContPoint *p)
 		: numbeats(beats), blksize(blocksize), pnt(p) {}
 	virtual ~ContFuncStep();
 
 	virtual float Get(AnimateCompile* anim) const;
+	virtual std::ostream& Print(std::ostream&) const override;
 private:
 	ContValue *numbeats, *blksize;
 	ContPoint *pnt;
@@ -260,23 +306,27 @@ private:
 
 class ContProcedure: public ContToken
 {
+	using super = ContToken;
 public:
 	ContProcedure(): next(NULL) {}
 	virtual ~ContProcedure();
 
 	virtual void Compile(AnimateCompile* anim) = 0;
+	virtual std::ostream& Print(std::ostream&) const override;
 
 	ContProcedure *next;
 };
 
 class ContProcSet : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcSet(ContValueVar *vr, ContValue *v)
 		: var(vr), val(v) {}
 	virtual ~ContProcSet();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValueVar *var;
@@ -285,12 +335,15 @@ private:
 
 class ContProcBlam : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 };
 
 class ContProcCM : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcCM(ContPoint *p1, ContPoint *p2, ContValue *steps, ContValue *d1,
 		ContValue *d2, ContValue *beats)
@@ -298,6 +351,7 @@ public:
 	virtual ~ContProcCM();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt1, *pnt2;
@@ -306,12 +360,14 @@ private:
 
 class ContProcDMCM : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcDMCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
 		: pnt1(p1), pnt2(p2), numbeats(beats) {}
 	virtual ~ContProcDMCM();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt1, *pnt2;
@@ -320,12 +376,14 @@ private:
 
 class ContProcDMHS : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcDMHS(ContPoint *p)
 		: pnt(p) {}
 	virtual ~ContProcDMHS();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt;
@@ -333,12 +391,14 @@ private:
 
 class ContProcEven : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcEven(ContValue *steps, ContPoint *p)
 		: stps(steps), pnt(p) {}
 	virtual ~ContProcEven();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *stps;
@@ -347,12 +407,14 @@ private:
 
 class ContProcEWNS : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcEWNS(ContPoint *p)
 		: pnt(p) {}
 	virtual ~ContProcEWNS();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt;
@@ -360,6 +422,7 @@ private:
 
 class ContProcFountain : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcFountain(ContValue *d1, ContValue *d2, ContValue *s1, ContValue *s2,
 		ContPoint *p)
@@ -367,6 +430,7 @@ public:
 	virtual ~ContProcFountain();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *dir1, *dir2;
@@ -376,12 +440,14 @@ private:
 
 class ContProcFM : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcFM(ContValue *steps, ContValue *d)
 		: stps(steps), dir(d) {}
 	virtual ~ContProcFM();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *stps, *dir;
@@ -389,12 +455,14 @@ private:
 
 class ContProcFMTO : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcFMTO(ContPoint *p)
 		: pnt(p) {}
 	virtual ~ContProcFMTO();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt;
@@ -402,12 +470,14 @@ private:
 
 class ContProcGrid : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcGrid(ContValue *g)
 		: grid(g) {}
 	virtual ~ContProcGrid();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *grid;
@@ -415,12 +485,14 @@ private:
 
 class ContProcHSCM : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcHSCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
 		: pnt1(p1), pnt2(p2), numbeats(beats) {}
 	virtual ~ContProcHSCM();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt1, *pnt2;
@@ -429,12 +501,14 @@ private:
 
 class ContProcHSDM : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcHSDM(ContPoint *p)
 		: pnt(p) {}
 	virtual ~ContProcHSDM();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt;
@@ -442,12 +516,14 @@ private:
 
 class ContProcMagic : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcMagic(ContPoint *p)
 		: pnt(p) {}
 	virtual ~ContProcMagic();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt;
@@ -455,12 +531,14 @@ private:
 
 class ContProcMarch : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcMarch(ContValue *stepsize, ContValue *steps, ContValue *d, ContValue *face)
 		: stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
 	virtual ~ContProcMarch();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *stpsize, *stps, *dir, *facedir;
@@ -468,12 +546,14 @@ private:
 
 class ContProcMT : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcMT(ContValue *beats, ContValue *d)
 		: numbeats(beats), dir(d) {}
 	virtual ~ContProcMT();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *numbeats, *dir;
@@ -481,12 +561,14 @@ private:
 
 class ContProcMTRM : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcMTRM(ContValue *d)
 		: dir(d) {}
 	virtual ~ContProcMTRM();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *dir;
@@ -494,12 +576,14 @@ private:
 
 class ContProcNSEW : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcNSEW(ContPoint *p)
 		: pnt(p) {}
 	virtual ~ContProcNSEW();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContPoint *pnt;
@@ -507,12 +591,14 @@ private:
 
 class ContProcRotate : public ContProcedure
 {
+	using super = ContProcedure;
 public:
 	ContProcRotate(ContValue *angle, ContValue *steps, ContPoint *p)
 		: ang(angle), stps(steps), pnt(p) {}
 	virtual ~ContProcRotate();
 
 	virtual void Compile(AnimateCompile* anim);
+	virtual std::ostream& Print(std::ostream&) const override;
 
 private:
 	ContValue *ang, *stps;
