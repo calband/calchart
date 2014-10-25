@@ -14,16 +14,16 @@
 #include <fstream>
 #include <iterator>
 #include <unistd.h>
+#include <getopt.h>
 
-void Notify(const std::string& notice)
+
+void AnimateShow(const char* show)
 {
-	std::cout<<notice<<"\n";
+	std::ifstream input(show);
+	std::unique_ptr<CC_show> p(CC_show::Create_CC_show(input));
+	Animation a(*p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::vector<ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
 }
 
-bool NotifyError(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)
-{
-	return true;
-}
 
 void PrintShow(const char* show)
 {
@@ -54,6 +54,31 @@ void PrintShow(const char* show)
 	}
 }
 
+void DumpContinuity(const char* show)
+{
+	std::ifstream input(show);
+	std::unique_ptr<const CC_show> p(CC_show::Create_CC_show(input));
+	auto sheet_num = 0;
+	for (auto i = p->GetSheetBegin(); i != p->GetSheetEnd(); ++i, ++sheet_num)
+	{
+		static const SYMBOL_TYPE k_symbols[] = {
+			SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
+			SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+		};
+		for (auto& symbol : k_symbols)
+		{
+			if (i->ContinuityInUse(symbol))
+			{
+				auto& cont = i->GetContinuityBySymbol(symbol);
+				std::cout<<"sheet num "<<sheet_num<<": symbol "<<GetNameForSymbol(symbol)<<":\n";
+				std::cout<<cont.GetText();
+			}
+		}
+	}
+}
+
+
+
 int IndexForContNames(const std::string& name);
 
 bool ContinuityCountDifferentThanSymbol(const char* show)
@@ -76,30 +101,58 @@ void FindContinuityInconsistancies(const char* show)
 	}
 }
 
+int verbose_flag = 1;
+int print_flag = 0;
+int animate_flag = 0;
+int dump_continuity = 0;
+int check_flag = 0;
+
+static struct option long_options[] =
+{
+	/* These options set a flag. */
+	{"print_show", no_argument,    &print_flag, 1}, // p
+	{"check_flag", no_argument,    &check_flag, 1}, // c
+	{"dump_continuity", no_argument,    &dump_continuity, 1}, // c
+	{"animate_flag", no_argument,    &animate_flag, 1}, // a
+	{0, 0, 0, 0}
+};
+
 int main(int argc, char * argv[])
 {
     opterr = 0;
-	int doPrint = 0;
-	int doCheck = 0;
 	int c = 0;
-	while ((c = getopt (argc, argv, "cp")) != -1)
+	while ((c = getopt (argc, argv, "cpad")) != -1)
 		switch (c)
 	{
 		case 'p':
-			doPrint = true;
+			print_flag = true;
+			break;
+		case 'a':
+			animate_flag = true;
+			break;
+		case 'd':
+			dump_continuity = true;
 			break;
 		case 'c':
-			doCheck = true;
+			check_flag = true;
 			break;
 	}
 	while (optind < argc)
 	{
 		try {
-		if (doPrint)
+		if (print_flag)
 		{
 			PrintShow(argv[optind]);
 		}
-		if (doCheck)
+		if (animate_flag)
+		{
+			AnimateShow(argv[optind]);
+		}
+		if (dump_continuity)
+		{
+			DumpContinuity(argv[optind]);
+		}
+		if (check_flag)
 		{
 			std::cout<<"ContinuityCountDifferentThanSymbol ? "<<ContinuityCountDifferentThanSymbol(argv[optind])<<"\n";
 			FindContinuityInconsistancies(argv[optind]);
