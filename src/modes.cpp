@@ -146,7 +146,7 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 	}
 	
-	for (Coord j = Int2Coord(4)+offsetx; howToDraw == kFieldView && j < fieldsize.x+offsetx; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4)+offsetx; (howToDraw == kFieldView || howToDraw == kPrinting) && j < fieldsize.x+offsetx; j += Int2Coord(8))
 	{
 		// draw mid-dotted lines
 		for (Coord k = 0+offsety; k < fieldsize.y+offsety; k += Int2Coord(2))
@@ -158,7 +158,7 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 	}
 	
 	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4)+offsety; howToDraw == kFieldView && j < fieldsize.y+offsety; j += Int2Coord(4))
+	for (Coord j = Int2Coord(4)+offsety; (howToDraw == kFieldView || howToDraw == kPrinting) && j < fieldsize.y+offsety; j += Int2Coord(4))
 	{
 		if ((j == Int2Coord(mHashW)) || j == Int2Coord(mHashE))
 			continue;
@@ -187,7 +187,7 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashE));
 		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
 		
-		for (size_t midhash = 1; howToDraw == kFieldView && midhash < 5; ++midhash)
+		for (size_t midhash = 1; (howToDraw == kFieldView || howToDraw == kPrinting) && midhash < 5; ++midhash)
 		{
 			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashW));
 			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashW-(0.2*8)));
@@ -203,7 +203,7 @@ void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_YardsSize()),
 															wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*yardLabelFont);
-	for (int i = 0; (howToDraw == kFieldView || howToDraw == kOmniView) && i < Coord2Int(fieldsize.x)/8+1; i++)
+	for (int i = 0; (howToDraw == kFieldView || howToDraw == kOmniView || howToDraw == kPrinting) && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		CC_coord fieldedge = mOffset - mBorder1;
 		wxCoord textw, texth, textd;
@@ -262,7 +262,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, 
 		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
 	}
 
-	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j < fieldsize.x; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4); (howToDraw == kFieldView || howToDraw == kPrinting) && j < fieldsize.x; j += Int2Coord(8))
 	{
 		// draw mid-dotted lines
 		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
@@ -283,7 +283,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, 
 	}
 	
 	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4); howToDraw == kFieldView && j <= fieldsize.y; j += Int2Coord(8))
+	for (Coord j = Int2Coord(4); (howToDraw == kFieldView || howToDraw == kPrinting) && j <= fieldsize.y; j += Int2Coord(8))
 	{
 		for (Coord k = 0; k < fieldsize.x; k += Int2Coord(2))
 		{
@@ -297,7 +297,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, 
 	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_YardsSize()),
 															wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*yardLabelFont);
-	for (int i = 0; howToDraw == kFieldView && i < Coord2Int(fieldsize.x)/8+1; i++)
+	for (int i = 0; (howToDraw == kFieldView || howToDraw == kPrinting) && i < Coord2Int(fieldsize.x)/8+1; i++)
 	{
 		wxCoord textw, texth, textd;
 		dc.GetTextExtent(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), &textw, &texth, &textd);
@@ -306,7 +306,7 @@ void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, 
 		if (which_yards & SPR_YARD_BELOW)
 			dc.DrawText(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
 	}
-	for (int i = 0; howToDraw == kFieldView && i <= Coord2Int(fieldsize.y); i+=8)
+	for (int i = 0; (howToDraw == kFieldView || howToDraw == kPrinting) && i <= Coord2Int(fieldsize.y); i+=8)
 	{
 		wxCoord textw, texth, textd;
 		dc.GetTextExtent(config.Get_spr_line_text(i/8), &textw, &texth, &textd);
