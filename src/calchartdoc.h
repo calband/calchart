@@ -38,6 +38,7 @@ class ShowUndoList;
 class CC_show;
 class CC_lasso;
 class Animation;
+class CalChartConfiguration;
 
 // The CalChartDoc_modified class is used for indicating to views if the doc has been modified
 // some views behave differently if the show has been modified
@@ -162,7 +163,8 @@ public:
 	void SetMode(std::unique_ptr<const ShowMode> m);
 
 	bool AlreadyHasPrintContinuity() const;
-
+	int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
+	
 private:
 	// Autosaving:
 	// goal is to allow the user to have a recoverable file.

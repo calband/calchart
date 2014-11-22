@@ -36,6 +36,7 @@
 #include "draw.h"
 #include "cc_fileformat.h"
 #include "modes.h"
+#include "print_ps.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
@@ -537,4 +538,15 @@ bool
 CalChartDoc::AlreadyHasPrintContinuity() const
 {
 	return mShow->AlreadyHasPrintContinuity();
+}
+
+int
+CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const
+{
+	auto doLandscape = config_.Get_PrintPSLandscape();
+	auto doCont = config_.Get_PrintPSDoCont();
+	auto doContSheet = config_.Get_PrintPSDoContSheet();
+
+	PrintShowToPS printShowToPS(*mShow, config_, doLandscape, doCont, doContSheet);
+	return printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), min_yards, isPicked, GetMode(), GetTitle().ToStdString());
 }

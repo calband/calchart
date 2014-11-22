@@ -9,6 +9,7 @@
 #include "cc_show.h"
 #include "cc_sheet.h"
 #include "animate.h"
+#include "print_ps.h"
 
 #include <iostream>
 #include <fstream>
@@ -75,6 +76,60 @@ void DumpContinuity(const char* show)
 			}
 		}
 	}
+}
+
+void PrintToPS(const char* show)
+{
+	std::ifstream input(show);
+	std::unique_ptr<const CC_show> p(CC_show::Create_CC_show(input));
+
+	std::ostringstream buffer;
+	bool doLandscape = 0;
+	bool doCont = 0;
+	bool doContSheet = 0;
+	
+	std::string head_font_str = "Palatino-Bold";
+	std::string main_font_str = "Helvetica";
+	std::string number_font_str = "Helvetica-Bold";
+	std::string cont_font_str = "Courier";
+	std::string bold_font_str = "Courier-Bold";
+	std::string ital_font_str = "Courier-Italic";
+	std::string bold_ital_font_str = "Courier-BoldItalic";
+
+	double PageWidth = 7.5;
+	double PageHeight = 10.0;
+	double PageOffsetX = 0.5;
+	double PageOffsetY = 0.5;
+	double PaperLength = 11.0;
+
+	double HeaderSize = 3.0;
+	double YardsSize = 1.5;
+	double TextSize = 10.0;
+	double DotRatio = 0.9;
+	double NumRatio = 1.35;
+	double PLineRatio = 1.2;
+	double SLineRatio = 1.2;
+	double ContRatio = 0.2;
+
+	auto Get_yard_text = [](size_t offset) {
+		static const std::string yard_text[] = {
+			"N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A",
+			"-10", "-5", "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
+			"45", "40", "35", "30", "25", "20", "15", "10", "5", "0", "-5", "-10",
+			"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
+		};
+		return yard_text[offset];
+	};
+	auto Get_spr_line_text = Get_yard_text;
+
+	PrintShowToPS printShowToPS(*p, doLandscape, doCont, doContSheet, head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
+//	PrintShowToPS printShowToPS(*p, config, doLandscape, doCont, doContSheet);
+//	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards, mIsSheetPicked);
+//	// stream to file:
+//	{
+//		wxFFileOutputStream outstream(s);
+//		outstream.Write(buffer.str().c_str(), buffer.str().size());
+//	}
 }
 
 

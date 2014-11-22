@@ -435,6 +435,7 @@
 		E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
 		E878CCA117ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
+		E8793DF91A20729C00293D16 /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AD22C615571CBB00AC1301 /* print_ps.cpp */; };
 		E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
 		E884F39117A5E60C00831301 /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
 		E884F39217A5E60C00831301 /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
@@ -1668,6 +1669,7 @@
 				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
+				E8793DF91A20729C00293D16 /* print_ps.cpp in Sources */,
 				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
 				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
 				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,

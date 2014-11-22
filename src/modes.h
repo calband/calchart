@@ -24,9 +24,9 @@
 #define _MODES_H_
 
 #include "cc_coord.h"
-#include "confgr.h"
+//#include "confgr.h"
 
-#include <wx/wx.h>
+//#include <wx/wx.h>
 #include <list>
 #include <algorithm>
 #include <memory>

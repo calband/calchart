@@ -105,12 +105,8 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 	}
 
 	std::ostringstream buffer;
-	bool doLandscape = config.Get_PrintPSLandscape();
-	bool doCont = config.Get_PrintPSDoCont();
-	bool doContSheet = config.Get_PrintPSDoContSheet();
 	
-	PrintShowToPS printShowToPS(*mShow, config, doLandscape, doCont, doContSheet);
-	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards, mIsSheetPicked);
+	int n = mShow->PrintToPS(buffer, eps, overview, minyards, mIsSheetPicked, config);
 	// stream to file:
 	{
 		wxFFileOutputStream outstream(s);
