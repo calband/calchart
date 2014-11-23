@@ -30,6 +30,7 @@
 #include "calchartdoc.h"
 #include "top_frame.h"
 #include "cc_sheet.h"
+#include "draw.h"
 
 #include <wx/dcbuffer.h>
 
@@ -62,7 +63,7 @@ void
 AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
 {
 	dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-	GetShow()->GetMode().DrawMode(*dc, config, ShowMode::kAnimation);
+	DrawMode(*dc, config, GetShow()->GetMode(), ShowMode::kAnimation);
 	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
 	if (mAnimation)
 	{

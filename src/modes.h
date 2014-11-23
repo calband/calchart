@@ -24,25 +24,30 @@
 #define _MODES_H_
 
 #include "cc_coord.h"
-//#include "confgr.h"
 
-//#include <wx/wx.h>
-#include <list>
-#include <algorithm>
-#include <memory>
+#include <string>
+#include <array>
 
 #define SPR_YARD_LEFT 8
 #define SPR_YARD_RIGHT 4
 #define SPR_YARD_ABOVE 2
 #define SPR_YARD_BELOW 1
 
+static const size_t kYardTextValues = 53;
+static const size_t kSprLineTextValues = 5;
+
+static const int kFieldStepSizeNorthSouth[2] = { 96, 160 };
+static const int kFieldStepSizeEastWest = 84;
+static const int kFieldStepSizeSouthEdgeFromCenter[2] = { 48, 80 };
+static const int kFieldStepSizeWestEdgeFromCenter = 42;
+static const int kFieldStepWestHashFromWestSideline = 32;
+static const int kFieldStepEastHashFromWestSideline = 52;
+
 class ShowMode
 {
 public:
 	typedef enum { SHOW_STANDARD, SHOW_SPRINGSHOW } ShowType;
 
-	// to find a specific Show:
-	static std::unique_ptr<ShowMode> GetMode(const wxString& which);
 	virtual ~ShowMode();
 
 public:
@@ -54,7 +59,9 @@ public:
 	inline CC_coord FieldSize() const { return mSize-mBorder1-mBorder2; }
 	inline CC_coord MinPosition() const { return -mOffset; }
 	inline CC_coord MaxPosition() const { return mSize-mOffset; }
-	inline const wxString& GetName() const { return mName; };
+	CC_coord Border1() const { return mBorder1; }
+	CC_coord Border2() const { return mBorder2; }
+	inline const std::string& GetName() const { return mName; };
 	CC_coord ClipPosition(const CC_coord& pos) const;
 
 public:
@@ -66,32 +73,29 @@ public:
 		kOmniView
 	} HowToDraw;
 
-	void DrawMode(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
-
-	wxImage GetOmniLinesImage(const CalChartConfiguration& config) const;
-
 protected:
 	// Users shouldn't create show modes, it should be done through derived classes
-	ShowMode(const wxString& name,
+	ShowMode(const std::string& name,
 			 const CC_coord& size,
 			 const CC_coord& offset,
 			 const CC_coord& border1,
 			 const CC_coord& border2);
-	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const = 0;
 
 	const CC_coord mOffset;
 	const CC_coord mSize;
 	const CC_coord mBorder1;
 	const CC_coord mBorder2;
 private:
-	wxString mName;
+	std::string mName;
 };
 
 class ShowModeStandard : public ShowMode
 {
 public:
-	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& which, const CalChartConfiguration::ShowModeInfo_t& values);
-	static std::unique_ptr<ShowMode> CreateShowMode(const wxString& name,
+	enum ArrayValues { kwhash, kehash, kbord1_x, kbord1_y, kbord2_x, kbord2_y, koffset_x, koffset_y, ksize_x, ksize_y, kShowModeValues };
+	using ShowModeInfo_t = std::array<long, kShowModeValues>;
+	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& which, const ShowModeInfo_t& values);
+	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& name,
 													CC_coord size,
 													CC_coord offset,
 													CC_coord border1,
@@ -100,7 +104,7 @@ public:
 													unsigned short ehash);
 
 private:
-	ShowModeStandard(const wxString& name,
+	ShowModeStandard(const std::string& name,
 					 CC_coord size,
 					 CC_coord offset,
 					 CC_coord border1,
@@ -114,9 +118,6 @@ public:
 	inline unsigned short HashW() const { return mHashW; }
 	inline unsigned short HashE() const { return mHashE; }
 
-protected:
-	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
-
 private:
 	const unsigned short mHashW, mHashE;
 };
@@ -124,11 +125,14 @@ private:
 class ShowModeSprShow : public ShowMode
 {
 public:
-	static std::unique_ptr<ShowMode> CreateSpringShowMode(const wxString& which, const CalChartConfiguration::SpringShowModeInfo_t& values);
+	enum ArrayValues { kwhich_spr_yards, kbord1_x, kbord1_y, kbord2_x, kbord2_y, kmode_steps_x, kmode_steps_y, kmode_steps_w, kmode_steps_h, keps_stage_x, keps_stage_y, keps_stage_w, keps_stage_h, keps_field_x, keps_field_y, keps_field_w, keps_field_h, keps_text_left, keps_text_right, keps_text_top, keps_text_bottom, kShowModeValues };
+	using SpringShowModeInfo_t = std::array<long, kShowModeValues>;
+
+	static std::unique_ptr<ShowMode> CreateSpringShowMode(const std::string& which, const SpringShowModeInfo_t& values);
 
 private:
 // Look at calchart.cfg for description of arguments
-	ShowModeSprShow(const wxString& name, CC_coord border1, CC_coord border2,
+	ShowModeSprShow(const std::string& name, CC_coord border1, CC_coord border2,
 		unsigned char which,
 		short stps_x, short stps_y,
 		short stps_w, short stps_h,
@@ -160,9 +164,6 @@ public:
 	inline short TextTop() const { return text_top; }
 	inline short TextBottom() const { return text_bottom; }
 
-protected:
-	virtual void DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const;
-	
 private:
 	unsigned char which_yards;
 	short stage_x, stage_y, stage_w, stage_h;

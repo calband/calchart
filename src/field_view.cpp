@@ -80,7 +80,7 @@ FieldView::OnDraw(wxDC *dc)
 	{
 		// draw the field
 		CC_coord origin = mShow->GetMode().Offset();
-		mShow->GetMode().DrawMode(*dc, mConfig, ShowMode::kFieldView);
+		DrawMode(*dc, mConfig, mShow->GetMode(), ShowMode::kFieldView);
 		
 
 		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());

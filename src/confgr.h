@@ -218,22 +218,20 @@ public:
 	void Set_SpringShowModeInfo(CalChartSpringShowModes which, const SpringShowModeInfo_t& values);
 	void Clear_SpringShowModeInfo(CalChartSpringShowModes which);
 
-//#define MAX_SPR_LINES 5
-//#define MAX_YARD_LINES 53
-//
 	// Yard Lines
-	static const size_t kYardTextValues = 53;
 	mutable std::map<size_t, wxString> mYardTextInfos;
 	wxString Get_yard_text(size_t which) const;
 	void Set_yard_text(size_t which, const wxString&);
 	void Clear_yard_text(size_t which);
 
-	static const size_t kSprLineTextValues = 5;
 	mutable std::map<size_t, wxString> mSprLineTextInfos;
 	wxString Get_spr_line_text(size_t which) const;
 	void Set_spr_line_text(size_t which, const wxString&);
 	void Clear_spr_line_text(size_t which);
 };
+
+// to find a specific Show:
+std::unique_ptr<ShowMode> GetShowMode(const wxString& which);
 
 
 #endif

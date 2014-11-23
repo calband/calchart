@@ -21,12 +21,11 @@
 */
 
 #include "modes.h"
-#include "confgr.h"
-#include <wx/dc.h>
+//#include "confgr.h"
 
 #include <algorithm>
 
-ShowMode::ShowMode(const wxString& name,
+ShowMode::ShowMode(const std::string& name,
 				   const CC_coord& size,
 				   const CC_coord& offset,
 				   const CC_coord& border1,
@@ -60,21 +59,7 @@ ShowMode::ClipPosition(const CC_coord& pos) const
 }
 
 
-wxImage
-ShowMode::GetOmniLinesImage(const CalChartConfiguration& config) const
-{
-	auto fieldsize = FieldSize();
-	wxBitmap bmp(fieldsize.x, fieldsize.y, 32);
-    wxMemoryDC dc;
-    dc.SelectObject(bmp);
-    dc.SetBackground(*wxTRANSPARENT_BRUSH);
-    dc.Clear();
-	DrawMode(dc, config, ShowMode::kOmniView);
-    return bmp.ConvertToImage();
-}
-
-
-ShowModeStandard::ShowModeStandard(const wxString& name,
+ShowModeStandard::ShowModeStandard(const std::string& name,
 								   CC_coord size,
 								   CC_coord offset,
 								   CC_coord border1,
@@ -93,129 +78,7 @@ ShowMode::ShowType ShowModeStandard::GetType() const
 	return SHOW_STANDARD;
 }
 
-void
-ShowMode::DrawMode(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
-{
-	switch (howToDraw)
-	{
-		case kFieldView:
-		case kAnimation:
-		case kOmniView:
-			dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-			dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_FIELD_TEXT).second.GetColour());
-			break;
-		case kPrinting:
-			dc.SetPen(*wxBLACK_PEN);
-			dc.SetTextForeground(*wxBLACK);
-			break;
-	}
-	// draw the field
-	DrawHelper(dc, config, howToDraw);
-}
-
-void ShowModeStandard::DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
-{
-	wxPoint points[5];
-	auto fieldsize = FieldSize();
-	CC_coord border1 = mBorder1;
-	CC_coord border2 = mBorder2;
-	if (howToDraw == kOmniView)
-	{
-		border1 = border2 = CC_coord(0, 0);
-	}
-	auto offsetx = 0;//-fieldsize.x/2;
-	auto offsety = 0;//-fieldsize.y/2;
-	auto borderoffsetx = 0;//-border1.x;
-	auto borderoffsety = 0;//-border1.y;
-	
-	points[0] = wxPoint(0+offsetx, 0+offsety);
-	points[1] = wxPoint(fieldsize.x+offsetx, 0+offsety);
-	points[2] = wxPoint(fieldsize.x+offsetx, fieldsize.y+offsety);
-	points[3] = wxPoint(0+offsetx, fieldsize.y+offsety);
-	points[4] = points[0];
-	
-	// Draw outline
-	dc.DrawLines(5, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-	
-	// Draw vertical lines
-	for (Coord j = Int2Coord(8)+offsetx; j < fieldsize.x+offsetx; j += Int2Coord(8))
-	{
-		// draw solid yardlines
-		points[0] = wxPoint(j, 0+offsety);
-		points[1] = wxPoint(j, fieldsize.y+offsety);
-		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-	}
-	
-	for (Coord j = Int2Coord(4)+offsetx; (howToDraw == kFieldView || howToDraw == kPrinting) && j < fieldsize.x+offsetx; j += Int2Coord(8))
-	{
-		// draw mid-dotted lines
-		for (Coord k = 0+offsety; k < fieldsize.y+offsety; k += Int2Coord(2))
-		{
-			points[0] = wxPoint(j, k);
-			points[1] = wxPoint(j, k + Int2Coord(1));
-			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		}
-	}
-	
-	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4)+offsety; (howToDraw == kFieldView || howToDraw == kPrinting) && j < fieldsize.y+offsety; j += Int2Coord(4))
-	{
-		if ((j == Int2Coord(mHashW)) || j == Int2Coord(mHashE))
-			continue;
-		for (Coord k = 0+offsetx; k < fieldsize.x+offsetx; k += Int2Coord(2))
-		{
-			points[0] = wxPoint(k, j);
-			points[1] = wxPoint(k + Int2Coord(1), j);
-			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		}
-	}
-	
-	// Draw hashes
-	for (Coord j = Int2Coord(0)+offsetx; j < fieldsize.x+offsetx; j += Int2Coord(8))
-	{
-		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashW));
-		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashW));
-		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashW));
-		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashW));
-		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		
-		points[0] = wxPoint(j+Float2Coord(0.0*8), Int2Coord(mHashE));
-		points[1] = wxPoint(j+Float2Coord(0.1*8), Int2Coord(mHashE));
-		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		points[0] = wxPoint(j+Float2Coord(0.9*8), Int2Coord(mHashE));
-		points[1] = wxPoint(j+Float2Coord(1.0*8), Int2Coord(mHashE));
-		dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		
-		for (size_t midhash = 1; (howToDraw == kFieldView || howToDraw == kPrinting) && midhash < 5; ++midhash)
-		{
-			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashW));
-			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashW-(0.2*8)));
-			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-			
-			points[0] = wxPoint(j+Float2Coord(midhash/5.0*8), Int2Coord(mHashE));
-			points[1] = wxPoint(j+Float2Coord(midhash/5.0*8), Float2Coord(mHashE+(0.2*8)));
-			dc.DrawLines(2, points, border1.x+borderoffsetx, border1.y+borderoffsety);
-		}
-	}
-	
-	// Draw labels
-	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_YardsSize()),
-															wxSWISS, wxNORMAL, wxNORMAL);
-	dc.SetFont(*yardLabelFont);
-	for (int i = 0; (howToDraw == kFieldView || howToDraw == kOmniView || howToDraw == kPrinting) && i < Coord2Int(fieldsize.x)/8+1; i++)
-	{
-		CC_coord fieldedge = mOffset - mBorder1;
-		wxCoord textw, texth, textd;
-		auto text = config.Get_yard_text(i+(-Coord2Int(fieldedge.x)+(CalChartConfiguration::kYardTextValues-1)*4)/8);
-		dc.GetTextExtent(text, &textw, &texth, &textd);
-		dc.DrawText(text, offsetx + Int2Coord(i*8) - textw/2 + border1.x+borderoffsetx, border1.y+borderoffsety - offsety - texth + ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
-		dc.DrawText(text, offsetx + Int2Coord(i*8) - textw/2 + border1.x+borderoffsetx, border1.y+borderoffsety + fieldsize.y-offsety - ((howToDraw == kOmniView) ? Int2Coord(8) : 0));
-	}
-}
-
-
-ShowModeSprShow::ShowModeSprShow(const wxString& nam,
+ShowModeSprShow::ShowModeSprShow(const std::string& nam,
 CC_coord bord1, CC_coord bord2,
 unsigned char which,
 short stps_x, short stps_y,
@@ -248,112 +111,26 @@ ShowMode::ShowType ShowModeSprShow::GetType() const
 }
 
 
-void ShowModeSprShow::DrawHelper(wxDC& dc, const CalChartConfiguration& config, HowToDraw howToDraw) const
-{
-	wxPoint points[2];
-	CC_coord fieldsize = mSize - mBorder1 - mBorder2;
-
-	// Draw vertical lines
-	for (Coord j = 0; j <= fieldsize.x; j+=Int2Coord(8))
-	{
-		// draw solid yardlines
-		points[0] = wxPoint(j, 0);
-		points[1] = wxPoint(j, fieldsize.y);
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
-	}
-
-	for (Coord j = Int2Coord(4); (howToDraw == kFieldView || howToDraw == kPrinting) && j < fieldsize.x; j += Int2Coord(8))
-	{
-		// draw mid-dotted lines
-		for (Coord k = 0; k < fieldsize.y; k += Int2Coord(2))
-		{
-			points[0] = wxPoint(j, k);
-			points[1] = wxPoint(j, k + Int2Coord(1));
-			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
-		}
-	}
-	
-	// Draw horizontal lines
-	for (Coord j = 0; j <= fieldsize.y; j+=Int2Coord(8))
-	{
-		// draw solid yardlines
-		points[0] = wxPoint(0, j);
-		points[1] = wxPoint(fieldsize.x, j);
-		dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
-	}
-	
-	// Draw horizontal mid-dotted lines
-	for (Coord j = Int2Coord(4); (howToDraw == kFieldView || howToDraw == kPrinting) && j <= fieldsize.y; j += Int2Coord(8))
-	{
-		for (Coord k = 0; k < fieldsize.x; k += Int2Coord(2))
-		{
-			points[0] = wxPoint(k, j);
-			points[1] = wxPoint(k + Int2Coord(1), j);
-			dc.DrawLines(2, points, mBorder1.x, mBorder1.y);
-		}
-	}
-
-	// Draw labels
-	wxFont *yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_YardsSize()),
-															wxSWISS, wxNORMAL, wxNORMAL);
-	dc.SetFont(*yardLabelFont);
-	for (int i = 0; (howToDraw == kFieldView || howToDraw == kPrinting) && i < Coord2Int(fieldsize.x)/8+1; i++)
-	{
-		wxCoord textw, texth, textd;
-		dc.GetTextExtent(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), &textw, &texth, &textd);
-		if (which_yards & SPR_YARD_ABOVE)
-			dc.DrawText(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mBorder1.y - texth);
-		if (which_yards & SPR_YARD_BELOW)
-			dc.DrawText(config.Get_yard_text(i+(steps_x+(CalChartConfiguration::kYardTextValues-1)*4)/8), Int2Coord(i*8) - textw/2 + mBorder1.x, mSize.y - mBorder2.y);
-	}
-	for (int i = 0; (howToDraw == kFieldView || howToDraw == kPrinting) && i <= Coord2Int(fieldsize.y); i+=8)
-	{
-		wxCoord textw, texth, textd;
-		dc.GetTextExtent(config.Get_spr_line_text(i/8), &textw, &texth, &textd);
-		if (which_yards & SPR_YARD_LEFT)
-			dc.DrawText(config.Get_spr_line_text(i/8), mBorder1.x - textw, mBorder1.y - texth/2 + Int2Coord(i));
-		if (which_yards & SPR_YARD_RIGHT)
-			dc.DrawText(config.Get_spr_line_text(i/8), fieldsize.x + mBorder1.x, mBorder1.y - texth/2 + Int2Coord(i));
-	}
-}
-
 std::unique_ptr<ShowMode>
-ShowMode::GetMode(const wxString& which)
+ShowModeStandard::CreateShowMode(const std::string& which, const ShowModeInfo_t& values)
 {
-	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
-	if (iter != std::end(kShowModeStrings))
-	{
-		return ShowModeStandard::CreateShowMode(which, CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter))));
-	}
-	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
-	if (iter != std::end(kSpringShowModeStrings))
-	{
-		return ShowModeSprShow::CreateSpringShowMode(which, CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter))));
-	}
-	return {};
-}
-
-
-std::unique_ptr<ShowMode>
-ShowModeStandard::CreateShowMode(const wxString& which, const CalChartConfiguration::ShowModeInfo_t& values)
-{
-	unsigned short whash = values[0];
-	unsigned short ehash = values[1];
+	unsigned short whash = values[kwhash];
+	unsigned short ehash = values[kehash];
 	CC_coord bord1, bord2;
-	bord1.x = Int2Coord(values[2]);
-	bord1.y = Int2Coord(values[3]);
-	bord2.x = Int2Coord(values[4]);
-	bord2.y = Int2Coord(values[5]);
+	bord1.x = Int2Coord(values[kbord1_x]);
+	bord1.y = Int2Coord(values[kbord1_y]);
+	bord2.x = Int2Coord(values[kbord2_x]);
+	bord2.y = Int2Coord(values[kbord2_y]);
 	CC_coord size, offset;
-	offset.x = Int2Coord(-values[6]);
-	offset.y = Int2Coord(-values[7]);
-	size.x = Int2Coord(values[8]);
-	size.y = Int2Coord(values[9]);
+	offset.x = Int2Coord(-values[koffset_x]);
+	offset.y = Int2Coord(-values[koffset_y]);
+	size.x = Int2Coord(values[ksize_x]);
+	size.y = Int2Coord(values[ksize_y]);
 	return std::unique_ptr<ShowMode>(new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
 }
 
 std::unique_ptr<ShowMode>
-ShowModeStandard::CreateShowMode(const wxString& name,
+ShowModeStandard::CreateShowMode(const std::string& name,
 								 CC_coord size,
 								 CC_coord offset,
 								 CC_coord border1,
@@ -365,31 +142,31 @@ ShowModeStandard::CreateShowMode(const wxString& name,
 }
 
 std::unique_ptr<ShowMode>
-ShowModeSprShow::CreateSpringShowMode(const wxString& which, const CalChartConfiguration::SpringShowModeInfo_t& values)
+ShowModeSprShow::CreateSpringShowMode(const std::string& which, const SpringShowModeInfo_t& values)
 {
-	unsigned char which_spr_yards = values[0];
+	unsigned char which_spr_yards = values[kwhich_spr_yards];
 	CC_coord bord1, bord2;
-	bord1.x = Int2Coord(values[1]);
-	bord1.y = Int2Coord(values[2]);
-	bord2.x = Int2Coord(values[3]);
-	bord2.y = Int2Coord(values[4]);
+	bord1.x = Int2Coord(values[kbord1_x]);
+	bord1.y = Int2Coord(values[kbord1_y]);
+	bord2.x = Int2Coord(values[kbord2_x]);
+	bord2.y = Int2Coord(values[kbord2_y]);
 	
-	short mode_steps_x = values[5];
-	short mode_steps_y = values[6];
-	short mode_steps_w = values[7];
-	short mode_steps_h = values[8];
-	short eps_stage_x = values[9];
-	short eps_stage_y = values[10];
-	short eps_stage_w = values[11];
-	short eps_stage_h = values[12];
-	short eps_field_x = values[13];
-	short eps_field_y = values[14];
-	short eps_field_w = values[15];
-	short eps_field_h = values[16];
-	short eps_text_left = values[17];
-	short eps_text_right = values[18];
-	short eps_text_top = values[19];
-	short eps_text_bottom = values[20];
+	short mode_steps_x = values[kmode_steps_x];
+	short mode_steps_y = values[kmode_steps_y];
+	short mode_steps_w = values[kmode_steps_w];
+	short mode_steps_h = values[kmode_steps_h];
+	short eps_stage_x = values[keps_stage_x];
+	short eps_stage_y = values[keps_stage_y];
+	short eps_stage_w = values[keps_stage_w];
+	short eps_stage_h = values[keps_stage_h];
+	short eps_field_x = values[keps_field_x];
+	short eps_field_y = values[keps_field_y];
+	short eps_field_w = values[keps_field_w];
+	short eps_field_h = values[keps_field_h];
+	short eps_text_left = values[keps_text_left];
+	short eps_text_right = values[keps_text_right];
+	short eps_text_top = values[keps_text_top];
+	short eps_text_bottom = values[keps_text_bottom];
 	return std::unique_ptr<ShowMode>(new ShowModeSprShow(which, bord1, bord2,
 														 which_spr_yards,
 														 mode_steps_x, mode_steps_y,

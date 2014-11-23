@@ -10,6 +10,7 @@
 #include "cc_sheet.h"
 #include "animate.h"
 #include "print_ps.h"
+#include "modes.h"
 
 #include <iostream>
 #include <fstream>
@@ -78,15 +79,12 @@ void DumpContinuity(const char* show)
 	}
 }
 
-void PrintToPS(const char* show)
+void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet, std::string const& outfile)
 {
 	std::ifstream input(show);
 	std::unique_ptr<const CC_show> p(CC_show::Create_CC_show(input));
 
-	std::ostringstream buffer;
-	bool doLandscape = 0;
-	bool doCont = 0;
-	bool doContSheet = 0;
+	std::ofstream output(outfile);
 	
 	std::string head_font_str = "Palatino-Bold";
 	std::string main_font_str = "Helvetica";
@@ -122,14 +120,15 @@ void PrintToPS(const char* show)
 	};
 	auto Get_spr_line_text = Get_yard_text;
 
-	PrintShowToPS printShowToPS(*p, doLandscape, doCont, doContSheet, head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
-//	PrintShowToPS printShowToPS(*p, config, doLandscape, doCont, doContSheet);
-//	int n = printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), minyards, mIsSheetPicked);
-//	// stream to file:
-//	{
-//		wxFFileOutputStream outstream(s);
-//		outstream.Write(buffer.str().c_str(), buffer.str().size());
-//	}
+	PrintShowToPS printShowToPS(*p, landscape, cont, contsheet, head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
+
+	std::set<size_t> picked;
+	for (auto i = 0; i < p->GetNumSheets(); ++i)
+		picked.insert(i);
+
+	auto mode = ShowModeStandard::CreateShowMode("Standard", {{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 }});
+
+	printShowToPS(output, false, false, 0, 50, picked, *mode, "show");
 }
 
 
@@ -161,6 +160,7 @@ int print_flag = 0;
 int animate_flag = 0;
 int dump_continuity = 0;
 int check_flag = 0;
+int psprint_flag = 0;
 
 static struct option long_options[] =
 {
@@ -169,6 +169,7 @@ static struct option long_options[] =
 	{"check_flag", no_argument,    &check_flag, 1}, // c
 	{"dump_continuity", no_argument,    &dump_continuity, 1}, // c
 	{"animate_flag", no_argument,    &animate_flag, 1}, // a
+	{"psprint_flag", no_argument,    &psprint_flag, 1}, // P
 	{0, 0, 0, 0}
 };
 
@@ -176,7 +177,7 @@ int main(int argc, char * argv[])
 {
     opterr = 0;
 	int c = 0;
-	while ((c = getopt (argc, argv, "cpad")) != -1)
+	while ((c = getopt (argc, argv, "cpadP")) != -1)
 		switch (c)
 	{
 		case 'p':
@@ -190,6 +191,9 @@ int main(int argc, char * argv[])
 			break;
 		case 'c':
 			check_flag = true;
+			break;
+		case 'P':
+			psprint_flag = true;
 			break;
 	}
 	while (optind < argc)
@@ -211,6 +215,11 @@ int main(int argc, char * argv[])
 		{
 			std::cout<<"ContinuityCountDifferentThanSymbol ? "<<ContinuityCountDifferentThanSymbol(argv[optind])<<"\n";
 			FindContinuityInconsistancies(argv[optind]);
+		}
+		if (psprint_flag)
+		{
+			PrintToPS(argv[optind], atoi(argv[optind+1]), atoi(argv[optind+2]), atoi(argv[optind+3]), argv[optind+4]);
+			break;
 		}
 		} catch (const std::runtime_error& e) {
 			std::cerr<<"Error on file "<<argv[optind]<<": "<<e.what()<<"\n";

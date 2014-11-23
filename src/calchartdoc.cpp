@@ -547,6 +547,6 @@ CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_ya
 	auto doCont = config_.Get_PrintPSDoCont();
 	auto doContSheet = config_.Get_PrintPSDoContSheet();
 
-	PrintShowToPS printShowToPS(*mShow, config_, doLandscape, doCont, doContSheet);
+	PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet, config_.Get_HeadFont().ToStdString(), config_.Get_MainFont().ToStdString(), config_.Get_NumberFont().ToStdString(), config_.Get_ContFont().ToStdString(), config_.Get_BoldFont().ToStdString(), config_.Get_ItalFont().ToStdString(), config_.Get_BoldItalFont().ToStdString(), config_.Get_PageWidth(), config_.Get_PageHeight(), config_.Get_PageOffsetX(), config_.Get_PageOffsetY(), config_.Get_PaperLength(), config_.Get_HeaderSize(), config_.Get_YardsSize(), config_.Get_TextSize(), config_.Get_DotRatio(), config_.Get_NumRatio(), config_.Get_PLineRatio(), config_.Get_SLineRatio(), config_.Get_ContRatio(), [&config_](size_t which) { return config_.Get_yard_text(which).ToStdString(); }, [&config_](size_t which) { return config_.Get_spr_line_text(which).ToStdString(); });
 	return printShowToPS(buffer, eps, overview, mShow->GetCurrentSheetNum(), min_yards, isPicked, GetMode(), GetTitle().ToStdString());
 }

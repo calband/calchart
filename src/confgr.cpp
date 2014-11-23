@@ -108,7 +108,7 @@ const std::array<long, CalChartConfiguration::kSpringShowModeValues> kSpringShow
 };
 
 // Yard lines
-const wxString yard_text_defaults[CalChartConfiguration::kYardTextValues] =
+const wxString yard_text_defaults[kYardTextValues] =
 {
 	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
 	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
@@ -116,7 +116,7 @@ const wxString yard_text_defaults[CalChartConfiguration::kYardTextValues] =
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
 };
 
-const wxString yard_text_index[CalChartConfiguration::kYardTextValues] =
+const wxString yard_text_index[kYardTextValues] =
 {
 	wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"), wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"), wxT("B"), wxT("A"),
 	wxT("-10"), wxT("-5"), wxT("0"), wxT("5"), wxT("10"), wxT("15"), wxT("20"), wxT("25"), wxT("30"), wxT("35"), wxT("40"), wxT("45"), wxT("50"),
@@ -124,12 +124,12 @@ const wxString yard_text_index[CalChartConfiguration::kYardTextValues] =
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"), wxT("F"), wxT("G"), wxT("H"), wxT("I"), wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
 };
 
-const wxString spr_line_text_defaults[CalChartConfiguration::kSprLineTextValues] =
+const wxString spr_line_text_defaults[kSprLineTextValues] =
 {
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
 
-const wxString spr_line_text_index[CalChartConfiguration::kSprLineTextValues] =
+const wxString spr_line_text_index[kSprLineTextValues] =
 {
 	wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
@@ -530,7 +530,7 @@ CalChartConfiguration::Clear_ConfigColor(size_t selection)
 
 ///// Show Configuration /////
 
-CalChartConfiguration::ShowModeInfo_t
+ShowModeStandard::ShowModeInfo_t
 CalChartConfiguration::Get_ShowModeInfo(CalChartShowModes which) const
 {
 	if (which >= SHOWMODE_NUM)
@@ -689,4 +689,21 @@ CalChartConfiguration::FlushWriteQueue() const
 	}
 	mWriteQueue.clear();
 }
+
+std::unique_ptr<ShowMode>
+GetShowMode(const wxString& which)
+{
+	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
+	if (iter != std::end(kShowModeStrings))
+	{
+		return ShowModeStandard::CreateShowMode(which.ToStdString(), CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter))));
+	}
+	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
+	if (iter != std::end(kSpringShowModeStrings))
+	{
+		return ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter))));
+	}
+	return {};
+}
+
 

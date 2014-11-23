@@ -24,7 +24,6 @@
 #define __PRINT_PS_H__
 
 #include "cc_types.h"
-//#include "confgr.h"
 
 #include <iostream>
 #include <set>
@@ -41,9 +40,7 @@ class ShowMode;
 class PrintShowToPS
 {
 public:
-//	PrintShowToPS(const CC_show&, const CalChartConfiguration& config_, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet);
 	PrintShowToPS(const CC_show&, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::string const& head_font_str_, std::string const& main_font_str_, std::string const& number_font_str_, std::string const& cont_font_str_, std::string const& bold_font_str_, std::string const& ital_font_str_, std::string const& bold_ital_font_str_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text);
-//	PrintShowToPS(const CC_show&);//, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::string const& head_font_str_, std::string const& main_font_str_, std::string const& number_font_str_, std::string const& cont_font_str_, std::string const& bold_font_str_, std::string const& ital_font_str_, std::string const& bold_ital_font_str_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio);//, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text);
 
 	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked, ShowMode const& mode, std::string const& title);
 

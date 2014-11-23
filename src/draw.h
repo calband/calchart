@@ -24,6 +24,7 @@
 #define __DRAW_H__
 
 #include "cc_show.h"
+#include "modes.h"
 #include <wx/dc.h>
 #include <vector>
 #include <set>
@@ -49,6 +50,9 @@ void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref
 void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC *dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, const std::map<unsigned, CC_coord>& positions);
+void DrawMode(wxDC& dc, const CalChartConfiguration& config, const ShowMode& mode, ShowMode::HowToDraw howToDraw);
+wxImage GetOmniLinesImage(const CalChartConfiguration& config, const ShowMode& mode);
+
 
 void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);
 void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet);
