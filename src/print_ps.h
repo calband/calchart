@@ -53,14 +53,18 @@ public:
 	int operator()(std::ostream& buffer, bool eps, unsigned curr_ss, const std::set<size_t>& isPicked, std::string const& title) const;
 
 private:
-	short PrintSheets(std::ostream& buffer, short num_pages) const;
-	void PrintCont(std::ostream& buffer, const CC_sheet& sheet) const;
+	short PrintContinuitySheets(std::ostream& buffer, short num_pages) const;
+	void PrintContSections(std::ostream& buffer, const CC_sheet& sheet) const;
 	void PrintStandard(std::ostream& buffer, const CC_sheet& sheet, bool split_sheet) const;
 	void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet) const;
 	void PrintOverview(std::ostream& buffer, const CC_sheet& sheet) const;
 	void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE currfontnum, float fontsize) const;
-	void print_start_page(std::ostream& buffer, bool landscape) const;
+	void print_start_page(std::ostream& buffer, bool landscape, double translate_x, double translate_y) const;
 	bool SplitSheet(const CC_sheet& sheet) const;
+	void PrintHeader(std::ostream& buffer, bool eps, const std::string& title) const;
+	void PrintFieldDefinition(std::ostream& buffer) const;
+	void PrintTrailer(std::ostream& buffer, short num_pages) const;
+	short PrintSheets(std::ostream& buffer, bool eps, unsigned curr_ss, const std::set<size_t>& isPicked, short num_pages) const;
 
 	const CC_show& mShow;
 	bool mPrintLandscape;
