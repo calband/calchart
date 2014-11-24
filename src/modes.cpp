@@ -21,7 +21,6 @@
 */
 
 #include "modes.h"
-//#include "confgr.h"
 
 #include <algorithm>
 
