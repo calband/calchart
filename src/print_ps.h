@@ -28,6 +28,7 @@
 #include <iostream>
 #include <set>
 #include <functional>
+#include <array>
 
 class CC_sheet;
 class CC_show;
@@ -37,34 +38,37 @@ class CalChartConfiguration;
 class ShowMode;
 
 // intented to print a show to a buffer.
+// fonts are the list of fonts in this order:
+//std::string head_font_str;
+//std::string main_font_str;
+//std::string number_font_str;
+//std::string cont_font_str;
+//std::string bold_font_str;
+//std::string ital_font_str;
+//std::string bold_ital_font_str;
+
 class PrintShowToPS
 {
 public:
-	PrintShowToPS(const CC_show&, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::string const& head_font_str_, std::string const& main_font_str_, std::string const& number_font_str_, std::string const& cont_font_str_, std::string const& bold_font_str_, std::string const& ital_font_str_, std::string const& bold_ital_font_str_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text);
+	PrintShowToPS(const CC_show&, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::array<std::string, 7> const& fonts_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text);
 
 	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked, ShowMode const& mode, std::string const& title);
 
 private:
-	void PrintSheets(std::ostream& buffer, short& num_pages);
-	void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
+	short PrintSheets(std::ostream& buffer, short num_pages);
+	void PrintCont(std::ostream& buffer, const CC_sheet& sheet) const;
 	void PrintStandard(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode);
 	void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode);
-	void PrintOverview(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode);
-	void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize);
-	void print_start_page(std::ostream& buffer, bool landscape);
+	void PrintOverview(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode) const;
+	void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize) const;
+	void print_start_page(std::ostream& buffer, bool landscape) const;
 
 	const CC_show& mShow;
 	bool mPrintLandscape;
 	bool mPrintDoCont;
 	bool mPrintDoContSheet;
 
-	std::string head_font_str;
-	std::string main_font_str;
-	std::string number_font_str;
-	std::string cont_font_str;
-	std::string bold_font_str;
-	std::string ital_font_str;
-	std::string bold_ital_font_str;
+	std::array<std::string, 7> fonts;
 
 	double mPageWidth;
 	double mPageHeight;

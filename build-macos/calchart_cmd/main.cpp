@@ -79,7 +79,7 @@ void DumpContinuity(const char* show)
 	}
 }
 
-void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet, std::string const& outfile)
+void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet, bool overview, std::string const& outfile)
 {
 	std::ifstream input(show);
 	std::unique_ptr<const CC_show> p(CC_show::Create_CC_show(input));
@@ -120,7 +120,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet, std:
 	};
 	auto Get_spr_line_text = Get_yard_text;
 
-	PrintShowToPS printShowToPS(*p, landscape, cont, contsheet, head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
+	PrintShowToPS printShowToPS(*p, landscape, cont, contsheet, { head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str }, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
 
 	std::set<size_t> picked;
 	for (auto i = 0; i < p->GetNumSheets(); ++i)
@@ -128,7 +128,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet, std:
 
 	auto mode = ShowModeStandard::CreateShowMode("Standard", {{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 }});
 
-	printShowToPS(output, false, false, 0, 50, picked, *mode, "show");
+	printShowToPS(output, false, overview, 0, 50, picked, *mode, "show");
 }
 
 
@@ -218,7 +218,7 @@ int main(int argc, char * argv[])
 		}
 		if (psprint_flag)
 		{
-			PrintToPS(argv[optind], atoi(argv[optind+1]), atoi(argv[optind+2]), atoi(argv[optind+3]), argv[optind+4]);
+			PrintToPS(argv[optind], atoi(argv[optind+1]), atoi(argv[optind+2]), atoi(argv[optind+3]), atoi(argv[optind+4]), argv[optind+5]);
 			break;
 		}
 		} catch (const std::runtime_error& e) {

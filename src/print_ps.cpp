@@ -69,25 +69,23 @@ static const char *fontnames[] =
 
 static const size_t kBufferSize = 256;
 
-#if 0
-PrintShowToPS::PrintShowToPS(const CC_show& show, const CalChartConfiguration& config, bool print_landscape, bool print_do_cont, bool print_do_cont_sheet) :
-PrintShowToPS(show, print_landscape, print_do_cont, print_do_cont_sheet, config.Get_HeadFont().ToStdString(), config.Get_MainFont().ToStdString(), config.Get_NumberFont().ToStdString(), config.Get_ContFont().ToStdString(), config.Get_BoldFont().ToStdString(), config.Get_ItalFont().ToStdString(), config.Get_BoldItalFont().ToStdString(), config.Get_PageWidth(), config.Get_PageHeight(), config.Get_PageOffsetX(), config.Get_PageOffsetY(), config.Get_PaperLength(), config.Get_HeaderSize(), config.Get_YardsSize(), config.Get_TextSize(), config.Get_DotRatio(), config.Get_NumRatio(), config.Get_PLineRatio(), config.Get_SLineRatio(), config.Get_ContRatio(), [&config](size_t which) { return config.Get_yard_text(which).ToStdString(); }, [&config](size_t which) { return config.Get_spr_line_text(which).ToStdString(); })
+template<typename IOS>
+class RAII_setprecision
 {
-}
-#endif
+public:
+	RAII_setprecision(IOS& s) : os(s), precision(s.precision()) {}
+	~RAII_setprecision() { os.precision(precision); }
+private:
+	IOS& os;
+	std::streamsize precision;
+};
 
-PrintShowToPS::PrintShowToPS(const CC_show& show, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::string const& head_font_str_, std::string const& main_font_str_, std::string const& number_font_str_, std::string const& cont_font_str_, std::string const& bold_font_str_, std::string const& ital_font_str_, std::string const& bold_ital_font_str_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text) :
+PrintShowToPS::PrintShowToPS(const CC_show& show, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::array<std::string, 7> const& fonts_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text) :
 mShow(show),
 mPrintLandscape(PrintLandscape),
 mPrintDoCont(PrintDoCont),
 mPrintDoContSheet(PrintDoContSheet),
-head_font_str(head_font_str_),
-main_font_str(main_font_str_),
-number_font_str(number_font_str_),
-cont_font_str(cont_font_str_),
-bold_font_str(bold_font_str_),
-ital_font_str(ital_font_str_),
-bold_ital_font_str(bold_ital_font_str_),
+fonts(fonts_),
 mPageWidth(PageWidth),
 mPageHeight(PageHeight),
 mPageOffsetX(PageOffsetX),
@@ -106,75 +104,88 @@ mGet_spr_line_text(Get_spr_line_text)
 {
 }
 
-int
-PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked, ShowMode const& mode, std::string const& title)
+std::tuple<float, float, float, float, float> CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageHeight, double ContRatio)
 {
-	char buf[kBufferSize];
-	time_t t;
+	float width, height, real_width, real_height, field_y;
+	if (PrintLandscape)
+	{
+		width = PageHeight * DPI;
+		if (PrintDoCont)
+		{
+			height = PageWidth * (1.0 - ContRatio) * DPI;
+			field_y = PageWidth * ContRatio * DPI;
+		}
+		else
+		{
+			height = PageWidth * DPI;
+			field_y = 0;
+		}
+	}
+	else
+	{
+		width = PageWidth * DPI;
+		if (PrintDoCont)
+		{
+			height = PageHeight * (1.0 - ContRatio) * DPI;
+			field_y = PageHeight * ContRatio * DPI;
+		}
+		else
+		{
+			height = PageHeight * DPI;
+			field_y = 0;
+		}
+	}
+	real_width = PageWidth * DPI;
+	real_height = PageHeight * DPI;
+	return { width, height, real_width, real_height, field_y };
+}
+
+std::tuple<float, float, float, float, float, float, float, float, float, float, float, float, float, float, short>
+CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview, double PageWidth, double PageHeight, double ContRatio, int min_yards, ShowMode const& mode)
+{
+	float width, height, real_width, real_height;
+	float field_x, field_y, field_w, field_h;
+	float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
+	float step_size;
+	float spr_step_size;
+	short step_width;
+
 	CC_coord fullsize = mode.Size();
 	CC_coord fieldsize = mode.FieldSize();
 	float fullwidth = Coord2Float(fullsize.x);
 	float fullheight = Coord2Float(fullsize.y);
 	float fieldwidth = Coord2Float(fieldsize.x);
 	float fieldheight = Coord2Float(fieldsize.y);
-
-	short num_pages = 0;
-/* first, calculate dimensions */
+	
+	/* first, calculate dimensions */
 	if (!overview)
 	{
 		switch (mode.GetType())
 		{
 			case ShowMode::SHOW_STANDARD:
-				if (mPrintLandscape)
-				{
-					width = mPageHeight * DPI;
-					if (mPrintDoCont)
-					{
-						height = mPageWidth * (1.0 - mContRatio) * DPI;
-						field_y = mPageWidth * mContRatio * DPI;
-					}
-					else
-					{
-						height = mPageWidth * DPI;
-						field_y = 0;
-					}
-				}
-				else
-				{
-					width = mPageWidth * DPI;
-					if (mPrintDoCont)
-					{
-						height = mPageHeight * (1.0 - mContRatio) * DPI;
-						field_y = mPageHeight * mContRatio * DPI;
-					}
-					else
-					{
-						height = mPageHeight * DPI;
-						field_y = 0;
-					}
-				}
-				real_width = mPageWidth * DPI;
-				real_height = mPageHeight * DPI;
+				std::tie(width, height, real_width, real_height, field_y) = CalcValues(PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
 				step_width = (short)(width / (height / (fullheight+8.0)));
 				if (step_width > Coord2Int(fieldsize.x))
+				{
 					step_width = Coord2Int(fieldsize.x);
+				}
 				min_yards = min_yards*16/10;
 				if (step_width > min_yards)
 				{
-/* We can get the minimum size */
+					/* We can get the minimum size */
 					step_width = (step_width / 8) * 8;
 					field_w = step_width * (height / (fullheight+8.0));
 					field_h = height * (fieldheight/(fullheight+8.0));
 					if ((field_w/step_width*(step_width+4)) > width)
 					{
-/* Oops, we didn't made it big enough */
+						/* Oops, we didn't made it big enough */
 						field_h *= width*step_width/(step_width+4)/field_w;
 						field_w = width*step_width/(step_width+4);
 					}
 				}
 				else
 				{
-/* Decrease height to get minimum size */
+					/* Decrease height to get minimum size */
 					field_w = width;
 					field_h = width * fieldheight / min_yards;
 					step_width = min_yards;
@@ -187,74 +198,45 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 			{
 				// this may throw if not doing spring show..
 				const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mode);
-
-				if (mPrintLandscape)
-				{
-					width = mPageHeight * DPI;
-					if (mPrintDoCont)
-					{
-						height = mPageWidth * (1.0 - mContRatio) * DPI;
-						field_y = mPageWidth * mContRatio * DPI;
-					}
-					else
-					{
-						height = mPageWidth * DPI;
-						field_y = 0;
-					}
-				}
-				else
-				{
-					width = mPageWidth * DPI;
-					if (mPrintDoCont)
-					{
-						height = mPageHeight * (1.0 - mContRatio) * DPI;
-						field_y = mPageHeight * mContRatio * DPI;
-					}
-					else
-					{
-						height = mPageHeight * DPI;
-						field_y = 0;
-					}
-				}
-				real_width = mPageWidth * DPI;
-				real_height = mPageHeight * DPI;
+				
+				std::tie(width, height, real_width, real_height, field_y) = CalcValues(PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
 				field_h = height / (1 + 16*springShow.FieldW()/
-					((float)springShow.StageW()*80));
+									((float)springShow.StageW()*80));
 				field_w = field_h/springShow.StageH() *
-					springShow.StageW();
+				springShow.StageW();
 				if (field_w > width)
 				{
-/* reduce stage to fit on page */
+					/* reduce stage to fit on page */
 					field_h *= width/field_w;
 					field_w = width;
 				}
 				stage_field_w = field_w * springShow.FieldW() /
-					springShow.StageW();
+				springShow.StageW();
 				stage_field_h = field_h * springShow.FieldH() /
-					springShow.StageH();
+				springShow.StageH();
 				step_size = stage_field_w / springShow.StepsW();
 				spr_step_size = (short)(field_w/80.0);
 				field_x = (width - field_w) / 2;
 				field_y += height - (field_h + spr_step_size*16);
 				stage_field_x = field_w * springShow.FieldX() /
-					springShow.StageW();
+				springShow.StageW();
 				stage_field_y = field_h * springShow.FieldY() /
-					springShow.StageH();
+				springShow.StageH();
 			}
 				break;
 		}
 	}
 	else
 	{
-		if (mPrintLandscape)
+		if (PrintLandscape)
 		{
-			width = mPageHeight * DPI;
-			height = mPageWidth * DPI;
+			width = PageHeight * DPI;
+			height = PageWidth * DPI;
 		}
 		else
 		{
-			width = mPageWidth * DPI;
-			height = mPageHeight * DPI;
+			width = PageWidth * DPI;
+			height = PageHeight * DPI;
 		}
 		if ((width * (fullheight / fullwidth)) > height)
 		{
@@ -265,7 +247,7 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 			height = width * (fullheight / fullwidth);
 		}
 		width--; height--;
-		if (mPrintLandscape)
+		if (PrintLandscape)
 		{
 			real_width = height;
 			real_height = width;
@@ -280,6 +262,46 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 		width *= fieldwidth/fullwidth;
 		height *= fieldheight/fullheight;
 	}
+	return { width, height, real_width, real_height,
+		field_x, field_y, field_w, field_h,
+		stage_field_x, stage_field_y, stage_field_w, stage_field_h,
+		step_size,
+		spr_step_size,
+		step_width };
+}
+
+template<typename OS>
+void PrintFontHeader(OS& buffer,
+					 std::array<std::string, 7> const& fonts)
+{
+	buffer<<"%%IncludeResources: font";
+	for (auto& i : fonts)
+	{
+		buffer<<" "<<i;
+	}
+	buffer<<"\n";
+	buffer<<"/headfont0 /"<<fonts[0]<<" def\n";
+	buffer<<"/mainfont0 /"<<fonts[1]<<" def\n";
+	buffer<<"/numberfont0 /"<<fonts[2]<<" def\n";
+	buffer<<"/contfont0 /"<<fonts[3]<<" def\n";
+	buffer<<"/boldfont0 /"<<fonts[4]<<" def\n";
+	buffer<<"/italfont0 /"<<fonts[5]<<" def\n";
+	buffer<<"/bolditalfont0 /"<<fonts[6]<<" def\n";
+}
+
+int
+PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked, ShowMode const& mode, std::string const& title)
+{
+	RAII_setprecision<std::ostream> tmp_(buffer);
+	buffer<<std::fixed;
+	buffer.precision(2);
+	
+	std::tie(width, height, real_width, real_height,
+			 field_x, field_y, field_w, field_h,
+			 stage_field_x, stage_field_y, stage_field_w, stage_field_h,
+			 step_size,
+			 spr_step_size,
+			 step_width) = CalcAllValues(mPrintLandscape, mPrintDoCont, overview, mPageWidth, mPageHeight, mContRatio, min_yards, mode);
 
 /* Now write postscript header */
 	if (eps)
@@ -290,12 +312,13 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 	{
 		buffer<<"%!PS-Adobe-3.0\n";
 	}
-	snprintf(buf, sizeof(buf), "%%%%BoundingBox: %.0f %.0f %.0f %.0f\n",
-		mPageOffsetX * DPI,
-		(mPaperLength - mPageOffsetY) * DPI - real_height,
-		mPageOffsetX * DPI + real_width,
-		(mPaperLength - mPageOffsetY) * DPI);
-	buffer<<buf;
+
+	{
+		RAII_setprecision<std::ostream> tmp_(buffer);
+		buffer.precision(0);
+		buffer<<"%%BoundingBox: "<<(mPageOffsetX * DPI)<<" "<<((mPaperLength - mPageOffsetY) * DPI - real_height)<<" "<<(mPageOffsetX * DPI + real_width)<<" "<<((mPaperLength - mPageOffsetY) * DPI)<<"\n";
+	}
+	time_t t;
 	time(&t);
 	buffer<<"%%CreationDate: "<<ctime(&t);
 	buffer<<"%%Title: "<<title<<"\n";
@@ -304,27 +327,23 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 	buffer<<"%%PageOrder: Ascend\n";
 	if (!overview)
 	{
-		snprintf(buf, sizeof(buf), "%%%%DocumentNeededResources: font %s %s %s %s %s %s %s\n",
-			head_font_str.c_str(), main_font_str.c_str(),
-			number_font_str.c_str(), cont_font_str.c_str(),
-			bold_font_str.c_str(), ital_font_str.c_str(),
-			bold_ital_font_str.c_str());
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "%%%%DocumentSuppliedResources: font CalChart\n");
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "%%%%BeginDefaults\n");
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "%%%%PageResources: font %s %s %s %s %s %s %s CalChart\n",
-			head_font_str.c_str(), main_font_str.c_str(),
-			number_font_str.c_str(), cont_font_str.c_str(),
-			bold_font_str.c_str(), ital_font_str.c_str(),
-			bold_ital_font_str.c_str());
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "%%%%EndDefaults\n");
-		buffer<<buf;
+		buffer<<"%%DocumentNeededResources: font";
+		for (auto& i : fonts)
+		{
+			buffer<<" "<<i;
+		}
+		buffer<<"\n";
+		buffer<<"%%DocumentSuppliedResources: font CalChart\n";
+		buffer<<"%%BeginDefaults\n";
+		buffer<<"%%PageResources: font";
+		for (auto& i : fonts)
+		{
+			buffer<<" "<<i;
+		}
+		buffer<<" CalChart\n";
+		buffer<<"%%EndDefaults\n";
 	}
-	snprintf(buf, sizeof(buf), "%%%%EndComments\n");
-	buffer<<buf;
+	buffer<<"%%EndComments\n";
 	if (!overview)
 	{
 		switch (mode.GetType())
@@ -333,123 +352,50 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 			{
 				// this may throw if not doing spring show..
 				const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mode);
-				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/fieldh %.2f def\n", field_h);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/fieldy %.2f def\n", field_y);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/stepw %hd def\n", step_width);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/whash %hd def\n",
-					standardShow.HashW());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/ehash %hd def\n",
-					standardShow.HashE());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/headsize %.2f def\n", mHeaderSize);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/yardsize %.2f def\n", mYardsSize);
-				buffer<<buf;
-				// subtract 1 because we don't want to write the '\0' at the end
+				buffer<<"%%BeginProlog\n";
+				buffer<<"/fieldw "<<field_w<<" def\n";
+				buffer<<"/fieldh "<<field_h<<" def\n";
+				buffer<<"/fieldy "<<field_y<<" def\n";
+				buffer<<"/stepw "<<step_width<<" def\n";
+				buffer<<"/whash "<<standardShow.HashW()<<" def\n";
+				buffer<<"/ehash "<<standardShow.HashE()<<" def\n";
+				buffer<<"/headsize "<<mHeaderSize<<" def\n";
+				buffer<<"/yardsize "<<mYardsSize<<" def\n";
 				buffer<<prolog0_ps;
-				snprintf(buf, sizeof(buf), "%%%%EndProlog\n");
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "%%%%BeginSetup\n");
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
-					head_font_str.c_str(), main_font_str.c_str(),
-					number_font_str.c_str(), cont_font_str.c_str(),
-					bold_font_str.c_str(), ital_font_str.c_str(),
-					bold_ital_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/headfont0 /%s def\n", head_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/mainfont0 /%s def\n", main_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/numberfont0 /%s def\n", number_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/contfont0 /%s def\n", cont_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/boldfont0 /%s def\n", bold_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/italfont0 /%s def\n", ital_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/bolditalfont0 /%s def\n",
-					bold_ital_font_str.c_str());
-				buffer<<buf;
-				// subtract 1 because we don't want to write the '\0' at the end
+				buffer<<"%%EndProlog\n";
+				buffer<<"%%BeginSetup\n";
+				PrintFontHeader(buffer, fonts);
 				buffer<<setup0_ps;
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
-				buffer<<buf;
+				buffer<<"%%EndSetup\n";
 			}
 				break;
 			case ShowMode::SHOW_SPRINGSHOW:
 			{
 				// this may throw if not doing spring show..
 				const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mode);
-				snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", field_w);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/fieldh %.2f def\n", field_h);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/fieldy %.2f def\n", field_y);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/sfieldw %.2f def\n", stage_field_w);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/sfieldh %.2f def\n", stage_field_h);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/sfieldx %.2f def\n", stage_field_x);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/sfieldy %.2f def\n", stage_field_y);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/stepsize %.6f def\n", step_size);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/sprstepsize %.6f def\n", spr_step_size);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/nfieldw %hd def\n",
-					springShow.StepsW());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/nfieldh %hd def\n",
-					springShow.StepsH());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/headsize %.2f def\n", mHeaderSize);
-				buffer<<buf;
-				// subtract 1 because we don't want to write the '\0' at the end
+				buffer<<"%%BeginProlog\n";
+				buffer<<"/fieldw "<<field_w<<" def\n";
+				buffer<<"/fieldh "<<field_h<<" def\n";
+				buffer<<"/fieldy "<<field_y<<" def\n";
+				buffer<<"/sfieldw "<<stage_field_w<<" def\n";
+				buffer<<"/sfieldh "<<stage_field_h<<" def\n";
+				buffer<<"/sfieldx "<<stage_field_x<<" def\n";
+				buffer<<"/sfieldy "<<stage_field_y<<" def\n";
+				{
+					RAII_setprecision<std::ostream> tmp_(buffer);
+					buffer.precision(6);
+					buffer<<"/stepsize "<<step_size<<" def\n";
+					buffer<<"/sprstepsize "<<spr_step_size<<" def\n";
+				}
+				buffer<<"/nfieldw "<<springShow.StepsW()<<" def\n";
+				buffer<<"/nfieldh "<<springShow.StepsH()<<" def\n";
+				buffer<<"/headsize "<<mHeaderSize<<" def\n";
 				buffer<<prolog1_ps;
-				snprintf(buf, sizeof(buf), "%%%%EndProlog\n");
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "%%%%BeginSetup\n");
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "%%%%IncludeResources: font %s %s %s %s %s %s %s\n",
-					head_font_str.c_str(), main_font_str.c_str(),
-					number_font_str.c_str(), cont_font_str.c_str(),
-					bold_font_str.c_str(), ital_font_str.c_str(),
-					bold_ital_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/headfont0 /%s def\n", head_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/mainfont0 /%s def\n", main_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/numberfont0 /%s def\n", number_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/contfont0 /%s def\n", cont_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/boldfont0 /%s def\n", bold_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/italfont0 /%s def\n", ital_font_str.c_str());
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/bolditalfont0 /%s def\n",
-					bold_ital_font_str.c_str());
-				buffer<<buf;
-				// subtract 1 because we don't want to write the '\0' at the end
+				buffer<<"%%EndProlog\n";
+				buffer<<"%%BeginSetup\n";
+				PrintFontHeader(buffer, fonts);
 				buffer<<setup1_ps;
-				snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
-				buffer<<buf;
+				buffer<<"%%EndSetup\n";
 			}
 				break;
 		}
@@ -458,34 +404,23 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 	{
 		// this may throw if not doing spring show..
 		const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mode);
-		snprintf(buf, sizeof(buf), "%%%%BeginProlog\n");
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "/whash %hd def\n",
-			standardShow.HashW());
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "/ehash %hd def\n",
-			standardShow.HashE());
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "/fieldw %.2f def\n", width);
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "/fieldh %.2f def\n", height);
-		buffer<<buf;
-		// subtract 1 because we don't want to write the '\0' at the end
+		buffer<<"%%BeginProlog\n";
+		buffer<<"/whash "<<standardShow.HashW()<<" def\n";
+		buffer<<"/ehash "<<standardShow.HashE()<<" def\n";
+		buffer<<"/fieldw "<<width<<" def\n";
+		buffer<<"/fieldh "<<height<<" def\n";
 		buffer<<prolog2_ps;
-		snprintf(buf, sizeof(buf), "%%%%EndProlog\n");
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "%%%%BeginSetup\n");
-		buffer<<buf;
-		// subtract 1 because we don't want to write the '\0' at the end
+		buffer<<"%%EndProlog\n";
+		buffer<<"%%BeginSetup\n";
 		buffer<<setup2_ps;
-		snprintf(buf, sizeof(buf), "%%%%EndSetup\n");
-		buffer<<buf;
+		buffer<<"%%EndSetup\n";
 	}
 
+	short num_pages = 0;
 /* print continuity sheets first */
 	if (mPrintDoContSheet && !eps && !overview)
 	{
-		PrintSheets(buffer, num_pages);
+		num_pages = PrintSheets(buffer, num_pages);
 	}
 
 /* do stuntsheet pages now */
@@ -519,8 +454,7 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 			if (eps) break;
 			else
 			{
-				snprintf(buf, sizeof(buf), "showpage\n");
-				buffer<<buf;
+				buffer<<"showpage\n";
 			}
 		}
 		if (!split_sheet)
@@ -529,20 +463,18 @@ PrintShowToPS::operator()(std::ostream& buffer, bool eps, bool overview, unsigne
 		}
 	}
 /* finally, write trailer */
-	snprintf(buf, sizeof(buf), "%%%%Trailer\n");
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "%%%%Pages: %hd\n", num_pages);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "%%%%EOF\n");
-	buffer<<buf;
+	buffer<<"%%Trailer\n";
+	buffer<<"%%Pages: "<<num_pages<<"\n";
+	buffer<<"%%EOF\n";
 
 	return num_pages;
 }
 
 
-void PrintShowToPS::PrintSheets(std::ostream& buffer, short& num_pages)
+short PrintShowToPS::PrintSheets(std::ostream& buffer, short num_pages)
 {
-	char buf[kBufferSize];
+	RAII_setprecision<std::ostream> tmp_(buffer);
+	buffer.precision(2);
 	short lines_left = 0;
 	bool need_eject = false;
 	for (CC_show::const_CC_sheet_iterator_t sheet = mShow.GetSheetBegin(); sheet != mShow.GetSheetEnd(); ++sheet)
@@ -558,33 +490,17 @@ void PrintShowToPS::PrintSheets(std::ostream& buffer, short& num_pages)
 					buffer<<"showpage\n";
 				}
 				num_pages++;
-				snprintf(buf, sizeof(buf), "%%%%Page: CONT%hd\n", num_pages);
-				buffer<<buf;
+				buffer<<"%%Page: CONT"<<num_pages<<"\n";
 				buffer<<"0 setgray\n";
 				buffer<<"0.25 setlinewidth\n";
-				snprintf(buf, sizeof(buf), "%.2f %.2f translate\n",
-					mPageOffsetX * DPI,
-					(mPaperLength-mPageOffsetY)*DPI - real_height);
-				buffer<<buf;
+				buffer<<(mPageOffsetX * DPI)<<" "<<((mPaperLength-mPageOffsetY)*DPI - real_height)<<" translate\n";
 				lines_left = (short)(real_height / mTextSize - 0.5);
-				snprintf(buf, sizeof(buf),
-					"/contfont findfont %.2f scalefont setfont\n",
-					mTextSize);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/y %.2f def\n", real_height - mTextSize);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/h %.2f def\n", mTextSize);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/lmargin 0 def /rmargin %.2f def\n",
-					real_width);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), 
-					"/tab1 %.2f def /tab2 %.2f def /tab3 %.2f def\n",
-					real_width * 0.5 / 7.5, real_width * 1.5 / 7.5,
-					real_width * 2.0 / 7.5);
-				buffer<<buf;
-				snprintf(buf, sizeof(buf), "/x lmargin def\n");
-				buffer<<buf;
+				buffer<<"/contfont findfont "<<mTextSize<<" scalefont setfont\n";
+				buffer<<"/y "<<(real_height - mTextSize)<<" def\n";
+				buffer<<"/h "<<mTextSize<<" def\n";
+				buffer<<"/lmargin 0 def /rmargin "<<real_width<<" def\n";
+				buffer<<"/tab1 "<<(real_width * 0.5 / 7.5)<<" def /tab2 "<<(real_width * 1.5 / 7.5)<<" def /tab3 "<<(real_width * 2.0 / 7.5)<<" def\n";
+				buffer<<"/x lmargin def\n";
 			}
 
 			enum PSFONT_TYPE currfontnum = PSFONT_NORM;
@@ -600,55 +516,37 @@ void PrintShowToPS::PrintSheets(std::ostream& buffer, short& num_pages)
 	{
 		buffer<<"showpage\n";
 	}
+	return num_pages;
 }
 
 
-void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet)
+void PrintShowToPS::PrintCont(std::ostream& buffer, const CC_sheet& sheet) const
 {
-	char buf[kBufferSize];
-	short cont_len = 0;
+	const auto& continuity = sheet.GetPrintableContinuity();
+	auto cont_len = std::count_if(continuity.begin(), continuity.end(), [](const CC_textline& c) { return c.GetOnSheet(); });
+	if (cont_len == 0) return;
 
 	float cont_height = field_y - step_size*10;
-	auto continuity = sheet.GetPrintableContinuity();
-	for (auto text = continuity.begin(); text != continuity.end(); ++text)
-	{
-		if (text->GetOnSheet()) cont_len++;
-	}
-	if (cont_len == 0) return;
 	float this_size = cont_height / (cont_len + 0.5);
 	if (this_size > mTextSize) this_size = mTextSize;
-	snprintf(buf, sizeof(buf), "/y %.2f def\n", cont_height - this_size);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/h %.2f def\n", this_size);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/lmargin 0 def /rmargin %.2f def\n", width);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/tab1 %.2f def /tab2 %.2f def /tab3 %.2f def\n",
-		width * 0.5 / 7.5, width * 1.5 / 7.5, width * 2.0 / 7.5);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/contfont findfont %.2f scalefont setfont\n",
-		this_size);
-	buffer<<buf;
+	buffer<<"/y "<<(cont_height - this_size)<<" def\n";
+	buffer<<"/h "<<(this_size)<<" def\n";
+	buffer<<"/lmargin 0 def /rmargin "<<(width)<<" def\n";
+	buffer<<"/tab1 "<<(width * 0.5 / 7.5)<<" def /tab2 "<<(width * 1.5 / 7.5)<<" def /tab3 "<<(width * 2.0 / 7.5)<<" def\n";
+	buffer<<"/contfont findfont "<<(this_size)<<" scalefont setfont\n";
 	for (CC_textline_list::const_iterator text = continuity.begin(); text != continuity.end(); ++text)
 	{
 		if (!text->GetOnSheet()) continue;
-		snprintf(buf, sizeof(buf), "/x lmargin def\n");
-		buffer<<buf;
-
+		buffer<<"/x lmargin def\n";
 		enum PSFONT_TYPE currfontnum = PSFONT_NORM;
 		gen_cont_line(buffer, *text, &currfontnum, this_size);
-
-		snprintf(buf, sizeof(buf), "/y y h sub def\n");
-		buffer<<buf;
+		buffer<<"/y y h sub def\n";
 	}
 }
 
 
-void PrintShowToPS::gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum,
-float fontsize)
+void PrintShowToPS::gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize) const
 {
-	char buf[kBufferSize];
-
 	short tabstop = 0;
 	for (auto& part : line.GetChunks())
 	{
@@ -668,8 +566,7 @@ float fontsize)
 			if (part.font != *currfontnum)
 			{
 				buffer<<"/"<<fontnames[part.font];
-				snprintf(buf, sizeof(buf), " findfont %.2f scalefont setfont\n", fontsize);
-				buffer<<buf;
+				buffer<<" findfont "<<fontsize<<" scalefont setfont\n";
 				*currfontnum = part.font;
 			}
 			std::string textstr(part.text);
@@ -704,28 +601,24 @@ float fontsize)
 }
 
 
-void PrintShowToPS::print_start_page(std::ostream& buffer, bool landscape)
+void PrintShowToPS::print_start_page(std::ostream& buffer, bool landscape) const
 {
-	char buf[kBufferSize];
-
+	RAII_setprecision<std::ostream> tmp_(buffer);
+	buffer.precision(2);
 	buffer<<"0 setgray\n";
 	buffer<<"0.25 setlinewidth\n";
-	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n",
-		mPageOffsetX * DPI,
-		(mPaperLength - mPageOffsetY) * DPI - real_height);
-	buffer<<buf;
+	buffer<<(mPageOffsetX * DPI)<<" "<<((mPaperLength - mPageOffsetY) * DPI - real_height)<<" translate\n";
 	if (landscape)
 	{
-		snprintf(buf, sizeof(buf), "%.2f 0 translate 90 rotate\n", real_width);
-		buffer<<buf;
+		buffer<<real_width<<" 0 translate 90 rotate\n";
 	}
 }
 
 
 void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode)
 {
-	char buf[kBufferSize];
-
+	RAII_setprecision<std::ostream> tmp_(buffer);
+	buffer.precision(2);
 	CC_coord fieldsize = mode.FieldSize();
 	CC_coord fieldoff = mode.FieldOffset();
 	Coord pmin = mode.MinPosition().x;
@@ -817,42 +710,31 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet, S
 	}
 	print_start_page(buffer, mPrintLandscape);
 
-	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
-	buffer<<buf;
+	buffer<<field_x<<" "<<field_y<<" translate\n";
 
 /* Draw field */
 	buffer<<"drawfield\n";
-	snprintf(buf, sizeof(buf), "/mainfont findfont %.2f scalefont setfont\n", step_size * mYardsSize);
-	buffer<<buf;
+	buffer<<"/mainfont findfont "<<(step_size * mYardsSize)<<" scalefont setfont\n";
 
 	for (short j=0; j <= step_width; j+=8)
 	{
-		snprintf(buf, sizeof(buf), "/lmargin %.2f def /rmargin %.2f def\n",
-			step_size * j, step_size * j);
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "/y %.2f def\n", field_h + (step_size / 2));
-		buffer<<buf;
-		std::string yardstr(mGet_yard_text((step_offset +
-			(kYardTextValues-1)*4 +
-			Coord2Int(fieldoff.x) + j)/8));
+		buffer<<"/lmargin "<<(step_size * j)<<" def /rmargin "<<(step_size * j)<<" def\n";
+		buffer<<"/y "<<(field_h + (step_size / 2))<<" def\n";
+		std::string yardstr(mGet_yard_text((step_offset + (kYardTextValues-1)*4 + Coord2Int(fieldoff.x) + j)/8));
 		buffer<<"("<<yardstr<<") dup centerText\n";
-		snprintf(buf, sizeof(buf), "/y %.2f def\n", -(step_size * 2));
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "centerText\n");
-		buffer<<buf;
+		buffer<<"/y "<<(-(step_size * 2))<<" def\n";
+		buffer<<"centerText\n";
 	}
 
-
 	float dot_w = step_size / 2 * mDotRatio;
-	snprintf(buf, sizeof(buf), "/w %.4f def\n", dot_w);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/plinew %.4f def\n", dot_w * mPLineRatio);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/slinew %.4f def\n", dot_w * mSLineRatio);
-	buffer<<buf;
-	snprintf(buf, sizeof(buf), "/numberfont findfont %.2f scalefont setfont\n",
-		dot_w * 2 * mNumRatio);
-	buffer<<buf;
+	{
+		RAII_setprecision<std::ostream> tmp_(buffer);
+		buffer.precision(4);
+		buffer<<"/w "<<dot_w<<" def\n";
+		buffer<<"/plinew "<<(dot_w * mPLineRatio)<<" def\n";
+		buffer<<"/slinew "<<(dot_w * mSLineRatio)<<" def\n";
+	}
+	buffer<<"/numberfont findfont "<<(dot_w * 2 * mNumRatio)<<" scalefont setfont\n";
 	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
 		if ((sheet.GetPoint(i).GetPos().x > clip_n) || (sheet.GetPoint(i).GetPos().x < clip_s)) continue;
@@ -862,18 +744,12 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet, S
 		float dot_x = (Coord2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) /
 			step_width * field_w;
 		float dot_y = (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)-fieldoffy)/fieldheight)*field_h;
-		snprintf(buf, sizeof(buf), "%.2f %.2f %s\n",
-			dot_x, dot_y, dot_routines[sheet.GetPoint(i).GetSymbol()]);
-		buffer<<buf;
-		snprintf(buf, sizeof(buf), "(%s) %.2f %.2f %s\n",
-			mShow.GetPointLabel(i).c_str(), dot_x, dot_y,
-			sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber");
-		buffer<<buf;
+		buffer<<dot_x<<" "<<dot_y<<" "<<dot_routines[sheet.GetPoint(i).GetSymbol()]<<"\n";
+		buffer<<"("<<mShow.GetPointLabel(i).c_str()<<") "<<dot_x<<" "<<dot_y<<" "<<(sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber")<<"\n";
 	}
 	if (mPrintDoCont)
 	{
-		snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", -field_x, -field_y);
-		buffer<<buf;
+		buffer<<(-field_x)<<" "<<(-field_y)<<" translate\n";
 		PrintCont(buffer, sheet);
 	}
 }
@@ -1019,20 +895,17 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet,
 }
 
 
-void PrintShowToPS::PrintOverview(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode)
+void PrintShowToPS::PrintOverview(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode) const
 {
-	char buf[kBufferSize];
 	buffer<<"%%Page: "<<sheet.GetName()<<"\n";
 
 	print_start_page(buffer, mPrintLandscape);
-	snprintf(buf, sizeof(buf), "%.2f %.2f translate\n", field_x, field_y);
-	buffer<<buf;
+	buffer<<(field_x)<<" "<<(field_y)<<" translate\n";
 	buffer<<"drawfield\n";
 	CC_coord fieldoff = mode.FieldOffset();
 	CC_coord fieldsize = mode.FieldSize();
 	float fieldwidth = Coord2Float(fieldsize.x);
-	snprintf(buf, sizeof(buf), "/w %.2f def\n", width / fieldwidth * 2.0 / 3.0);
-	buffer<<buf;
+	buffer<<"/w "<<(width / fieldwidth * 2.0 / 3.0)<<" def\n";
 
 	float fieldx = Coord2Float(fieldoff.x);
 	float fieldy = Coord2Float(fieldoff.y);
@@ -1040,11 +913,7 @@ void PrintShowToPS::PrintOverview(std::ostream& buffer, const CC_sheet& sheet, S
 
 	for (unsigned i = 0; i < mShow.GetNumPoints(); i++)
 	{
-		snprintf(buf, sizeof(buf), "%.2f %.2f dotbox\n",
-			(Coord2Float(sheet.GetPoint(i).GetPos().x)-fieldx) / fieldwidth * width,
-			(1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)-
-			fieldy)/fieldheight) * height);
-		buffer<<buf;
+		buffer<<((Coord2Float(sheet.GetPoint(i).GetPos().x)-fieldx) / fieldwidth * width)<<" "<<((1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)-fieldy)/fieldheight) * height)<<" dotbox\n";
 	}
 }
 
