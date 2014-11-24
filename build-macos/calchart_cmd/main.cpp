@@ -120,15 +120,15 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet, bool
 	};
 	auto Get_spr_line_text = Get_yard_text;
 
-	PrintShowToPS printShowToPS(*p, landscape, cont, contsheet, { head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str }, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
+	auto mode = ShowModeStandard::CreateShowMode("Standard", {{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 }});
+	
+	PrintShowToPS printShowToPS(*p, landscape, cont, contsheet, overview, 50, *mode, {{ head_font_str, main_font_str, number_font_str, cont_font_str, bold_font_str, ital_font_str, bold_ital_font_str }}, PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize, YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio, ContRatio, Get_yard_text, Get_spr_line_text);
 
 	std::set<size_t> picked;
 	for (auto i = 0; i < p->GetNumSheets(); ++i)
 		picked.insert(i);
 
-	auto mode = ShowModeStandard::CreateShowMode("Standard", {{ 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 }});
-
-	printShowToPS(output, false, overview, 0, 50, picked, *mode, "show");
+	printShowToPS(output, false, 0, picked, "show");
 }
 
 

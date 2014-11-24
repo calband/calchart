@@ -32,9 +32,7 @@
 
 class CC_sheet;
 class CC_show;
-class CalChartDoc;
 class CC_textline;
-class CalChartConfiguration;
 class ShowMode;
 
 // intented to print a show to a buffer.
@@ -50,23 +48,26 @@ class ShowMode;
 class PrintShowToPS
 {
 public:
-	PrintShowToPS(const CC_show&, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, std::array<std::string, 7> const& fonts_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text);
+	PrintShowToPS(const CC_show&, bool PrintLandscape, bool PrintDoCont, bool PrintDoContSheet, bool PrintOverview, int min_yards, ShowMode const& mode, std::array<std::string, 7> const& fonts_, double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY, double PaperLength, double HeaderSize, double YardsSize, double TextSize, double DotRatio, double NumRatio, double PLineRatio, double SLineRatio, double ContRatio, std::function<std::string(size_t)> Get_yard_text, std::function<std::string(size_t)> Get_spr_line_text);
 
-	int operator()(std::ostream& buffer, bool eps, bool overview, unsigned curr_ss, int min_yards, const std::set<size_t>& isPicked, ShowMode const& mode, std::string const& title);
+	int operator()(std::ostream& buffer, bool eps, unsigned curr_ss, const std::set<size_t>& isPicked, std::string const& title) const;
 
 private:
-	short PrintSheets(std::ostream& buffer, short num_pages);
+	short PrintSheets(std::ostream& buffer, short num_pages) const;
 	void PrintCont(std::ostream& buffer, const CC_sheet& sheet) const;
-	void PrintStandard(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode);
-	void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode);
-	void PrintOverview(std::ostream& buffer, const CC_sheet& sheet, ShowMode const& mode) const;
-	void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE *currfontnum, float fontsize) const;
+	void PrintStandard(std::ostream& buffer, const CC_sheet& sheet, bool split_sheet) const;
+	void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet) const;
+	void PrintOverview(std::ostream& buffer, const CC_sheet& sheet) const;
+	void gen_cont_line(std::ostream& buffer, const CC_textline& line, PSFONT_TYPE currfontnum, float fontsize) const;
 	void print_start_page(std::ostream& buffer, bool landscape) const;
+	bool SplitSheet(const CC_sheet& sheet) const;
 
 	const CC_show& mShow;
 	bool mPrintLandscape;
 	bool mPrintDoCont;
 	bool mPrintDoContSheet;
+	bool mOverview;
+	ShowMode const& mMode;
 
 	std::array<std::string, 7> fonts;
 
@@ -93,9 +94,7 @@ private:
 	float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
 	float step_size;
 	float spr_step_size;
-	short step_width, step_offset;
-	Coord max_s, max_n, clip_s, clip_n;
-	short split_sheet;
+	short step_width;
 };
 
 #endif // __PRINT_PS_H__
