@@ -25,7 +25,13 @@
 
 #include "animatecompile.h"
 #include <iosfwd>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/variant/recursive_variant.hpp>
 
+namespace calchart {
+namespace continuity {
+		
+#if 0
 
 enum ContDefinedValue
 {
@@ -44,51 +50,118 @@ public:
 
 static inline std::ostream& operator<<(std::ostream& os, const ContToken& c) { return c.Print(os); }
 
+#endif
+
 // points are anything that conforms to
 //CC_coord Get(AnimateCompile* anim) const;
-//virtual std::ostream& Print(std::ostream&) const override;
-class ContPoint: public ContToken
+//std::ostream& Print(std::ostream&) const override;
+class CurrentPoint
 {
-	using super = ContToken;
 public:
-	ContPoint() {}
-	virtual ~ContPoint();
-
-	virtual CC_coord Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
+	CC_coord Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
 };
 
-class ContStartPoint : public ContPoint
+class StartPoint
 {
-	using super = ContPoint;
 public:
-	ContStartPoint() {}
-
-	virtual CC_coord Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
+	CC_coord Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
 };
 
-class ContNextPoint : public ContPoint
+class NextPoint
 {
-	using super = ContPoint;
 public:
-	ContNextPoint() {}
-
-	virtual CC_coord Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
+	CC_coord Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
 };
 
-class ContRefPoint : public ContPoint
+class RefPoint
 {
-	using super = ContPoint;
 public:
-	ContRefPoint(unsigned n=0): refnum(n) {}
+	RefPoint(unsigned n=0): refnum(n) {}
 
-	virtual CC_coord Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
+	CC_coord Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
 	unsigned refnum;
 };
+
+}}
+
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::RefPoint,
+						  (unsigned, refnum)
+						  )
+
+namespace calchart { namespace continuity {
+
+typedef
+boost::variant<
+calchart::continuity::CurrentPoint
+, calchart::continuity::StartPoint
+, calchart::continuity::NextPoint
+, calchart::continuity::RefPoint
+>
+Point;
+
+struct Point_Printer : boost::static_visitor<>
+{
+	Point_Printer(std::ostream& os) : os(os) {}
+	
+	void operator()(calchart::continuity::CurrentPoint const& p) const
+	{
+		p.Print(os);
+	}
+	void operator()(calchart::continuity::NextPoint const& p) const
+	{
+		p.Print(os);
+	}
+	void operator()(calchart::continuity::StartPoint const& p) const
+	{
+		p.Print(os);
+	}
+	void operator()(calchart::continuity::RefPoint const& p) const
+	{
+		p.Print(os);
+	}
+	std::ostream& os;
+};
+
+static inline std::ostream& operator<<(std::ostream& os, Point const& p)
+{
+	boost::apply_visitor(Point_Printer(os), p);
+	return os;
+}
+
+struct Point_Getter : boost::static_visitor<CC_coord>
+{
+	Point_Getter(AnimateCompile& anim) : anim(anim) {}
+	
+	CC_coord operator()(calchart::continuity::CurrentPoint const& p) const
+	{
+		return p.Get(&anim);
+	}
+	CC_coord operator()(calchart::continuity::NextPoint const& p) const
+	{
+		return p.Get(&anim);
+	}
+	CC_coord operator()(calchart::continuity::StartPoint const& p) const
+	{
+		return p.Get(&anim);
+	}
+	CC_coord operator()(calchart::continuity::RefPoint const& p) const
+	{
+		return p.Get(&anim);
+	}
+	AnimateCompile& anim;
+};
+
+static inline CC_coord Get(AnimateCompile& anim, Point const& p)
+{
+	return boost::apply_visitor(Point_Getter(anim), p);
+}
+
+#if 0
 
 class ContValue: public ContToken
 {
@@ -211,19 +284,67 @@ private:
 	unsigned varnum;
 };
 
-class ContFuncDir : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncDir(ContPoint *p): pnt(p) {}
-	virtual ~ContFuncDir();
+#endif
 
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContPoint *pnt;
+class FunctionDir
+{
+public:
+	FunctionDir(const Point& p): point(p) {}
+	FunctionDir() {}
+	float Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point point;
 };
 
+}}
+
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionDir,
+						  (calchart::continuity::Point, point)
+						  )
+
+namespace calchart { namespace continuity {
+
+typedef
+boost::variant<
+FunctionDir
+>
+Function;
+
+struct Function_Printer : boost::static_visitor<>
+{
+	Function_Printer(std::ostream& os) : os(os) {}
+	
+	void operator()(FunctionDir const& f) const
+	{
+		f.Print(os);
+	}
+	std::ostream& os;
+};
+
+static inline std::ostream& operator<<(std::ostream& os, Function const& p)
+{
+	boost::apply_visitor(Function_Printer(os), p);
+	return os;
+}
+
+struct Function_Getter : boost::static_visitor<float>
+{
+	Function_Getter(AnimateCompile& anim) : anim(anim) {}
+	
+	float operator()(calchart::continuity::FunctionDir const& f) const
+	{
+		return f.Get(&anim);
+	}
+	AnimateCompile& anim;
+};
+
+static inline float Get(AnimateCompile& anim, Function const& p)
+{
+	return boost::apply_visitor(Function_Getter(anim), p);
+}
+
+#if 0
 class ContFuncDirFrom : public ContValue
 {
 	using super = ContValue;
@@ -608,4 +729,8 @@ private:
 	ContValue *ang, *stps;
 	ContPoint *pnt;
 };
+#endif
+} // namespace continuity
+} // namespace calchart
+
 #endif

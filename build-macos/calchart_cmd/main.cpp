@@ -117,10 +117,16 @@ static struct option long_options[] =
 	{0, 0, 0, 0}
 };
 
+namespace calchart {
+int main(int argc, char * argv[]);
+}
+
 int main(int argc, char * argv[])
 {
+	calchart::main(argc, argv);
     opterr = 0;
 	int c = 0;
+	
 	while ((c = getopt (argc, argv, "cpad")) != -1)
 		switch (c)
 	{

@@ -26,6 +26,7 @@
 #include "cc_types.h"
 
 #include <stdint.h>
+#include <iostream>
 
 #define COORD_SHIFT 4
 #define COORD_DECIMAL (1<<COORD_SHIFT)
@@ -130,6 +131,10 @@ inline int operator != (const CC_coord& a, const CC_coord& b)
 	return ((a.x != b.x) || (a.y != b.y));
 }
 
+static inline std::ostream& operator<<(std::ostream& os, CC_coord const& p)
+{
+	return os << "(" << p.x << ", " << p.y << ")";
+}
 
 void CC_coord_UnitTests();
 

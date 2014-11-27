@@ -45,6 +45,8 @@ void AnimationVariables::SetVarValue(int varnum, unsigned whichPoint, float valu
 
 AnimateCompile::AnimateCompile(const CC_show& show, AnimationVariables& variablesStates) :
 mShow(show),
+curr_sheet(show.GetSheetBegin()),
+curr_pt(0),
 error_markers(NUM_ANIMERR),
 vars(variablesStates),
 okay(true)

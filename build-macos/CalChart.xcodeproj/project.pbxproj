@@ -416,7 +416,6 @@
 		E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E803363017EE1E7B00A58457 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
 		E803363117EE1E9700A58457 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
-		E803363317EE23F500A58457 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E803363617EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E803363717EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E803363817EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
@@ -431,6 +430,9 @@
 		E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
 		E813C4AF17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
+		E83BFE231A268908002C9592 /* new_cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83BFE211A268908002C9592 /* new_cont.cpp */; };
+		E83BFE241A268D0A002C9592 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
+		E8786A1B1A26780E00A76128 /* test_spirit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8786A1A1A26780E00A76128 /* test_spirit.cpp */; };
 		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
@@ -974,6 +976,9 @@
 		E813C4A917A7886100705836 /* animatecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecommand.h; sourceTree = "<group>"; };
 		E813C4AA17A7886200705836 /* animatecompile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animatecompile.cpp; sourceTree = "<group>"; };
 		E813C4AB17A7886200705836 /* animatecompile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecompile.h; sourceTree = "<group>"; };
+		E83BFE211A268908002C9592 /* new_cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = new_cont.cpp; sourceTree = "<group>"; };
+		E83BFE221A268908002C9592 /* new_cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = new_cont.h; sourceTree = "<group>"; };
+		E8786A1A1A26780E00A76128 /* test_spirit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = test_spirit.cpp; sourceTree = "<group>"; };
 		E878CC9A17ACA6AC009B1F1C /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
 		E878CC9B17ACA6AC009B1F1C /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
 		E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartdoc.cpp; sourceTree = "<group>"; };
@@ -1330,6 +1335,9 @@
 		E807BD5D17ED71F60052A53F /* calchart_cmd */ = {
 			isa = PBXGroup;
 			children = (
+				E83BFE211A268908002C9592 /* new_cont.cpp */,
+				E83BFE221A268908002C9592 /* new_cont.h */,
+				E8786A1A1A26780E00A76128 /* test_spirit.cpp */,
 				E807BD5E17ED71F60052A53F /* main.cpp */,
 				E807BD6017ED71F60052A53F /* calchart_cmd.1 */,
 			);
@@ -1659,13 +1667,15 @@
 				E807BD5F17ED71F60052A53F /* main.cpp in Sources */,
 				E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */,
 				E803363117EE1E9700A58457 /* contscan.cpp in Sources */,
+				E83BFE241A268D0A002C9592 /* cont.cpp in Sources */,
+				E83BFE231A268908002C9592 /* new_cont.cpp in Sources */,
 				E803363817EE27C500A58457 /* math_utils.cpp in Sources */,
 				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
 				E803362D17EE1E3B00A58457 /* animate.cpp in Sources */,
 				E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
-				E803363317EE23F500A58457 /* cont.cpp in Sources */,
 				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
 				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
+				E8786A1B1A26780E00A76128 /* test_spirit.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
 				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
@@ -1917,6 +1927,12 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				HEADER_SEARCH_PATHS = (
+					../resources,
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
+					"/usr/local/include/wx-3.0",
+					/opt/local/include,
+				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1937,6 +1953,12 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				HEADER_SEARCH_PATHS = (
+					../resources,
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
+					"/usr/local/include/wx-3.0",
+					/opt/local/include,
+				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

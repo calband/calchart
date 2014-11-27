@@ -85,7 +85,7 @@ public:
 	unsigned GetCurrentPoint() const { return curr_pt; }
 	unsigned GetBeatsRemaining() const { return beats_rem; }
 	AnimatePoint GetStartingPosition() const;
-	AnimatePoint GetEndingPosition(const ContToken *token);
+	AnimatePoint GetEndingPosition(const ContToken *token = nullptr);
 	AnimatePoint GetReferencePointPosition(unsigned refnum) const;
 private:
 	inline void SetStatus(bool s) { okay = s; };

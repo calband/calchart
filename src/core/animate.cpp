@@ -140,8 +140,9 @@ mCollisionAction(NULL)
 					ContToken dummy;
 					comp.RegisterError(ANIMERR_SYNTAX, &dummy);
 				}
-#if 0 // enable to see dump of continuity
+#if 1 // enable to see dump of continuity
 				{
+					std::cout<<"continuity:\n"<<tmpBuffer<<"\n\n";
 					for (auto proc = ParsedContinuity; proc; proc = proc->next)
 					{
 						std::cout<<*proc<<"\n";
