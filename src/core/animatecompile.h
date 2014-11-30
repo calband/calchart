@@ -63,22 +63,20 @@ class AnimateCompile
 public:
 // Compile a point
 	// give a copy of the variable state
-	AnimateCompile(const CC_show& show, AnimationVariables& variablesStates);
+	AnimateCompile(const CC_show& show, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, AnimationVariables& variablesStates, std::map<AnimateError, ErrorMarker>& error_markers);
 	~AnimateCompile();
 
 // Compile a point
-	std::vector<std::shared_ptr<AnimateCommand> > Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc);
+	std::vector<std::shared_ptr<AnimateCommand> > Compile(ContProcedure* proc);
 // true if successful
 	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 
 public:
-	inline bool Okay() { return okay; };
 	void RegisterError(AnimateError err, const ContToken *token);
+	static void RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, const ContToken *token);
 
 	float GetVarValue(int varnum, const ContToken *token);
 	void SetVarValue(int varnum, float value);
-
-	std::vector<ErrorMarker> GetErrorMarkers() const { return error_markers; }
 
 	// helper functions to get information for building a command
 	AnimatePoint GetPointPosition() const { return pt; }
@@ -88,17 +86,15 @@ public:
 	AnimatePoint GetEndingPosition(const ContToken *token = nullptr);
 	AnimatePoint GetReferencePointPosition(unsigned refnum) const;
 private:
-	inline void SetStatus(bool s) { okay = s; };
 	AnimatePoint pt;
 	const CC_show& mShow;
-	CC_show::const_CC_sheet_iterator_t curr_sheet;
-	unsigned curr_pt;
+	const CC_show::const_CC_sheet_iterator_t curr_sheet;
+	const unsigned curr_pt;
 	unsigned beats_rem;
-	SYMBOL_TYPE contsymbol;
+	const SYMBOL_TYPE contsymbol;
 	std::vector<std::shared_ptr<AnimateCommand> > cmds;
-	std::vector<ErrorMarker> error_markers;
+	std::map<AnimateError, ErrorMarker>& error_markers;
 	AnimationVariables& vars;
-	bool okay;
 };
 
 #endif // _ANIMATECOMPILE_H_

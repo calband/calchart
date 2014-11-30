@@ -21,7 +21,7 @@ void AnimateShow(const char* show)
 {
 	std::ifstream input(show);
 	std::unique_ptr<CC_show> p(CC_show::Create_CC_show(input));
-	Animation a(*p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::vector<ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
+	Animation a(*p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::map<AnimateError, ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
 }
 
 
@@ -29,7 +29,7 @@ void PrintShow(const char* show)
 {
 	std::ifstream input(show);
 	std::unique_ptr<CC_show> p(CC_show::Create_CC_show(input));
-	Animation a(*p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::vector<ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
+	Animation a(*p, [](const std::string& notice) { std::cout<<notice<<"\n"; }, [](const std::map<AnimateError, ErrorMarker>&, unsigned, const std::string& error) { std::cout<<"error"<<error<<"\n"; return true; });
 	a.GotoSheet(0);
 	auto currentInfo = a.GetCurrentInfo();
 	std::cout<<currentInfo.first<<"\n";

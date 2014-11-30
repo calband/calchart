@@ -43,13 +43,14 @@ void AnimationVariables::SetVarValue(int varnum, unsigned whichPoint, float valu
 }
 
 
-AnimateCompile::AnimateCompile(const CC_show& show, AnimationVariables& variablesStates) :
+AnimateCompile::AnimateCompile(const CC_show& show, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, AnimationVariables& variablesStates, std::map<AnimateError, ErrorMarker>& error_markers) :
+pt(c_sheet->GetPosition(pt_num)),
 mShow(show),
-curr_sheet(show.GetSheetBegin()),
-curr_pt(0),
-error_markers(NUM_ANIMERR),
-vars(variablesStates),
-okay(true)
+curr_sheet(c_sheet),
+curr_pt(pt_num),
+contsymbol(cont_symbol),
+error_markers(error_markers),
+vars(variablesStates)
 {
 }
 
@@ -59,16 +60,12 @@ AnimateCompile::~AnimateCompile()
 }
 
 
-std::vector<std::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
+std::vector<std::shared_ptr<AnimateCommand> > AnimateCompile::Compile(ContProcedure* proc)
 {
 	CC_coord c;
 	cmds.clear();
 
-	contsymbol = cont_symbol;
-	curr_sheet = c_sheet;
-	pt = curr_sheet->GetPosition(pt_num);
 	cmds.clear();
-	curr_pt = pt_num;
 	beats_rem = curr_sheet->GetBeats();
 
 	if (proc == NULL)
@@ -146,7 +143,7 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken
 }
 
 
-void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
+void AnimateCompile::RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, const ContToken *token)
 {
 	error_markers[err].contsymbol = contsymbol;
 	if (token != NULL)
@@ -155,9 +152,13 @@ void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 		error_markers[err].col = token->col;
 	}
 	error_markers[err].pntgroup.insert(curr_pt);
-	SetStatus(false);
 }
 
+
+void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
+{
+	AnimateCompile::RegisterError(error_markers, contsymbol, curr_pt, err, token);
+}
 
 float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 {

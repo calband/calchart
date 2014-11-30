@@ -31,6 +31,117 @@
 namespace calchart {
 namespace continuity {
 
+struct Point_Printer : boost::static_visitor<>
+{
+	Point_Printer(std::ostream& os) : os(os) {}
+	void operator()(CurrentPoint const& p) const { p.Print(os); }
+	void operator()(NextPoint const& p) const { p.Print(os); }
+	void operator()(StartPoint const& p) const { p.Print(os); }
+	void operator()(RefPoint const& p) const { p.Print(os); }
+	std::ostream& os;
+};
+
+std::ostream& operator<<(std::ostream& os, Point const& p)
+{
+	boost::apply_visitor(Point_Printer(os), p);
+	return os;
+}
+
+struct Point_Getter : boost::static_visitor<CC_coord>
+{
+	Point_Getter(AnimateCompile& anim) : anim(anim) {}
+	CC_coord operator()(CurrentPoint const& p) const { return p.Get(&anim); }
+	CC_coord operator()(NextPoint const& p) const { return p.Get(&anim); }
+	CC_coord operator()(StartPoint const& p) const { return p.Get(&anim); }
+	CC_coord operator()(RefPoint const& p) const { return p.Get(&anim); }
+	AnimateCompile& anim;
+};
+
+CC_coord Get(AnimateCompile& anim, Point const& p)
+{
+	return boost::apply_visitor(Point_Getter(anim), p);
+}
+
+struct Function_Printer : boost::static_visitor<>
+{
+	Function_Printer(std::ostream& os) : os(os) {}
+	
+	void operator()(FunctionDir const& f) const { f.Print(os); }
+	void operator()(FunctionDirFrom const& f) const { f.Print(os); }
+	void operator()(FunctionDist const& f) const { f.Print(os); }
+	void operator()(FunctionDistFrom const& f) const { f.Print(os); }
+	void operator()(FunctionEither const& f) const { f.Print(os); }
+	void operator()(FunctionOpposite const& f) const { f.Print(os); }
+	void operator()(FunctionStep const& f) const { f.Print(os); }
+	std::ostream& os;
+};
+
+std::ostream& operator<<(std::ostream& os, Function const& p)
+{
+	boost::apply_visitor(Function_Printer(os), p);
+	return os;
+}
+
+struct Function_Getter : boost::static_visitor<double>
+{
+	Function_Getter(AnimateCompile& anim) : anim(anim) {}
+	
+	double operator()(calchart::continuity::FunctionDir const& f) const { return f.Get(&anim); }
+	double operator()(calchart::continuity::FunctionDirFrom const& f) const { return f.Get(&anim); }
+	double operator()(calchart::continuity::FunctionDist const& f) const { return f.Get(&anim); }
+	double operator()(calchart::continuity::FunctionDistFrom const& f) const { return f.Get(&anim); }
+	double operator()(calchart::continuity::FunctionEither const& f) const { return f.Get(&anim); }
+	double operator()(calchart::continuity::FunctionOpposite const& f) const { return f.Get(&anim); }
+	double operator()(calchart::continuity::FunctionStep const& f) const { return f.Get(&anim); }
+	AnimateCompile& anim;
+};
+
+double Get(AnimateCompile& anim, Function const& p)
+{
+	return boost::apply_visitor(Function_Getter(anim), p);
+}
+
+struct Value_Printer : boost::static_visitor<>
+{
+	Value_Printer(std::ostream& os) : os(os) {}
+	void operator()(double const& v) const { os<<v; }
+	void operator()(ValueAdd const& v) const { v.Print(os); }
+	void operator()(ValueSub const& v) const { v.Print(os); }
+	void operator()(ValueMult const& v) const { v.Print(os); }
+	void operator()(ValueDiv const& v) const { v.Print(os); }
+	void operator()(ValueNeg const& v) const { v.Print(os); }
+	std::ostream& os;
+};
+
+std::ostream& operator<<(std::ostream& os, Value const& v)
+{
+	boost::apply_visitor(Value_Printer(os), v);
+	return os;
+}
+
+struct Value_Getter : boost::static_visitor<double>
+{
+	Value_Getter(AnimateCompile& anim) : anim(anim) {}
+	double operator()(double const& v) const { return v; }
+	double operator()(ValueAdd const& v) const { return v.Get(&anim); }
+	double operator()(ValueSub const& v) const { return v.Get(&anim); }
+	double operator()(ValueMult const& v) const { return v.Get(&anim); }
+	double operator()(ValueDiv const& v) const { return v.Get(&anim); }
+	double operator()(ValueNeg const& v) const { return v.Get(&anim); }
+	AnimateCompile& anim;
+};
+
+double Get(AnimateCompile& anim, Value const& v)
+{
+	return boost::apply_visitor(Value_Getter(anim), v);
+}
+
+//Value operator+(Value const& lhs, Value const& rhs)
+//{
+//	return boost::apply_visitor(Value_Getter(anim), lhs) + boost::apply_visitor(Value_Getter(anim), rhs);
+//}
+	
+
 #if 0
 
 std::string ContDefinedValue_strings[] =
@@ -324,111 +435,75 @@ std::ostream& ContValueDefined::Print(std::ostream& os) const
 	return os<<"Defined:"<<ContDefinedValue_strings[val];
 }
 
+#endif
 
-ContValueAdd::~ContValueAdd()
+double ValueAdd::Get(AnimateCompile* anim) const
 {
-	if (val1) delete val1;
-	if (val2) delete val2;
+	using calchart::continuity::Get;
+	return Get(*anim, value1) + Get(*anim, value2);
+}
+
+std::ostream& ValueAdd::Print(std::ostream& os) const
+{
+	return os<<value1<<" + "<<value2;
+}
+
+double ValueSub::Get(AnimateCompile* anim) const
+{
+	using calchart::continuity::Get;
+	return Get(*anim, value1) - Get(*anim, value2);
+}
+
+std::ostream& ValueSub::Print(std::ostream& os) const
+{
+	return os<<value1<<" - "<<value2;
 }
 
 
-float ContValueAdd::Get(AnimateCompile* anim) const
+double ValueMult::Get(AnimateCompile* anim) const
 {
-	return (val1->Get(anim) + val2->Get(anim));
+	using calchart::continuity::Get;
+	return Get(*anim, value1) * Get(*anim, value2);
 }
 
-std::ostream& ContValueAdd::Print(std::ostream& os) const
+std::ostream& ValueMult::Print(std::ostream& os) const
 {
-	super::Print(os);
-	return os<<*val1<<" + "<<*val2;
-}
-
-
-ContValueSub::~ContValueSub()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
+	return os<<value1<<" * "<<value2;
 }
 
 
-float ContValueSub::Get(AnimateCompile* anim) const
+double ValueDiv::Get(AnimateCompile* anim) const
 {
-	return (val1->Get(anim) - val2->Get(anim));
-}
-
-std::ostream& ContValueSub::Print(std::ostream& os) const
-{
-	super::Print(os);
-	return os<<*val1<<" - "<<*val2;
-}
-
-
-ContValueMult::~ContValueMult()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
-}
-
-
-float ContValueMult::Get(AnimateCompile* anim) const
-{
-	return (val1->Get(anim) * val2->Get(anim));
-}
-
-std::ostream& ContValueMult::Print(std::ostream& os) const
-{
-	super::Print(os);
-	return os<<*val1<<" * "<<*val2;
-}
-
-
-ContValueDiv::~ContValueDiv()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
-}
-
-
-float ContValueDiv::Get(AnimateCompile* anim) const
-{
-	float f;
-
-	f = val2->Get(anim);
+	using calchart::continuity::Get;
+	auto f = Get(*anim, value2);
 	if (IS_ZERO(f))
 	{
-		anim->RegisterError(ANIMERR_DIVISION_ZERO, this);
+#warning need to resolve errors
+//		anim->RegisterError(ANIMERR_DIVISION_ZERO, this);
 		return 0.0;
 	}
-	else
-	{
-		return (val1->Get(anim) / f);
-	}
+	return Get(*anim, value1) / f;
 }
 
-std::ostream& ContValueDiv::Print(std::ostream& os) const
+std::ostream& ValueDiv::Print(std::ostream& os) const
 {
-	super::Print(os);
-	return os<<*val1<<" / "<<*val2;
+	return os<<value1<<" / "<<value2;
 }
 
-
-ContValueNeg::~ContValueNeg()
+double ValueNeg::Get(AnimateCompile* anim) const
 {
-	if (val) delete val;
+	using calchart::continuity::Get;
+	return -Get(*anim, value);
 }
 
-
-float ContValueNeg::Get(AnimateCompile* anim) const
+std::ostream& ValueNeg::Print(std::ostream& os) const
 {
-	return -val->Get(anim);
+	return os<<"- "<<value;
 }
 
-std::ostream& ContValueNeg::Print(std::ostream& os) const
-{
-	super::Print(os);
-	return os<<"- "<<*val;
-}
 
+#if 0
+	
 
 float ContValueREM::Get(AnimateCompile* anim) const
 {
@@ -461,14 +536,15 @@ void ContValueVar::Set(AnimateCompile* anim, float v)
 
 #endif
 
-float FunctionDir::Get(AnimateCompile* anim) const
+double FunctionDir::Get(AnimateCompile* anim) const
 {
 	using calchart::continuity::Get;
 	CC_coord c = Get(*anim, point);
-//	if (c == anim->GetPointPosition())
-//	{
+	if (c == anim->GetPointPosition())
+	{
+#warning need to resolve this:
 //		anim->RegisterError(ANIMERR_UNDEFINED, this);
-//	}
+	}
 	return anim->GetPointPosition().Direction(c);
 }
 
@@ -477,153 +553,105 @@ std::ostream& FunctionDir::Print(std::ostream& os) const
 	return os<<"Direction to "<<point;
 }
 
-#if 0
-
-ContFuncDirFrom::~ContFuncDirFrom()
+	
+double FunctionDirFrom::Get(AnimateCompile* anim) const
 {
-	if (pnt_start) delete pnt_start;
-	if (pnt_end) delete pnt_end;
-}
-
-
-float ContFuncDirFrom::Get(AnimateCompile* anim) const
-{
-	CC_coord start = pnt_start->Get(anim);
-	CC_coord end = pnt_end->Get(anim);
+	using calchart::continuity::Get;
+	CC_coord start = Get(*anim, point_start);
+	CC_coord end = Get(*anim, point_end);
 	if (start == end)
 	{
-		anim->RegisterError(ANIMERR_UNDEFINED, this);
+#warning need to resolve this:
+//		anim->RegisterError(ANIMERR_UNDEFINED, this);
 	}
 	return start.Direction(end);
 }
 
-std::ostream& ContFuncDirFrom::Print(std::ostream& os) const
+std::ostream& FunctionDirFrom::Print(std::ostream& os) const
 {
-	super::Print(os);
-	return os<<"Direction from "<<*pnt_start<<" to "<<*pnt_end;
+	return os<<"Direction from "<<point_start<<" to "<<point_end;
 }
 
 
-ContFuncDist::~ContFuncDist()
+double FunctionDist::Get(AnimateCompile* anim) const
 {
-	if (pnt) delete pnt;
-}
-
-
-float ContFuncDist::Get(AnimateCompile* anim) const
-{
-	CC_coord vector;
-
-	vector = pnt->Get(anim) - anim->GetPointPosition();
+	using calchart::continuity::Get;
+	CC_coord vector = Get(*anim, point) - anim->GetPointPosition();
 	return vector.DM_Magnitude();
 }
 
-std::ostream& ContFuncDist::Print(std::ostream& os) const
+std::ostream& FunctionDist::Print(std::ostream& os) const
 {
-	super::Print(os);
-	return os<<"Distance to "<<*pnt;
+	return os<<"Distance to "<<point;
 }
 
 
-ContFuncDistFrom::~ContFuncDistFrom()
+double FunctionDistFrom::Get(AnimateCompile* anim) const
 {
-	if (pnt_start) delete pnt_start;
-	if (pnt_end) delete pnt_end;
-}
-
-
-float ContFuncDistFrom::Get(AnimateCompile* anim) const
-{
-	CC_coord vector;
-
-	vector = pnt_end->Get(anim) - pnt_start->Get(anim);
+	using calchart::continuity::Get;
+	CC_coord vector = Get(*anim, point_end) - Get(*anim, point_start);
 	return vector.Magnitude();
 }
 
-std::ostream& ContFuncDistFrom::Print(std::ostream& os) const
+std::ostream& FunctionDistFrom::Print(std::ostream& os) const
 {
-	super::Print(os);
-	return os<<"Distance from "<<*pnt_start<<" to "<<*pnt_end;
+	return os<<"Distance from "<<point_start<<" to "<<point_end;
 }
 
 
-ContFuncEither::~ContFuncEither()
+double FunctionEither::Get(AnimateCompile* anim) const
 {
-	if (dir1) delete dir1;
-	if (dir2) delete dir2;
-	if (pnt) delete pnt;
-}
-
-
-float ContFuncEither::Get(AnimateCompile* anim) const
-{
-	float dir;
-	float d1, d2;
-	CC_coord c = pnt->Get(anim);
-
-	if (anim->GetPointPosition() == c)
+	using calchart::continuity::Get;
+	CC_coord c = Get(*anim, point);
+	if (c == anim->GetPointPosition())
 	{
-		anim->RegisterError(ANIMERR_UNDEFINED, this);
-		return dir1->Get(anim);
+#warning need to resolve this:
+//		anim->RegisterError(ANIMERR_UNDEFINED, this);
+		return Get(*anim, dir1);
 	}
-	dir = anim->GetPointPosition().Direction(c);
-	d1 = dir1->Get(anim) - dir;
-	d2 = dir2->Get(anim) - dir;
+
+	auto dir = anim->GetPointPosition().Direction(c);
+	auto d1 = Get(*anim, dir1) - dir;
+	auto d2 = Get(*anim, dir2) - dir;
 	while (d1 > 180) d1-=360;
 	while (d1 < -180) d1+=360;
 	while (d2 > 180) d2-=360;
 	while (d2 < -180) d2+=360;
-	return (std::abs(d1) > std::abs(d2)) ? dir2->Get(anim) : dir1->Get(anim);
+	return (std::abs(d1) > std::abs(d2)) ? Get(*anim, dir2) : Get(*anim, dir1);
 }
 
-std::ostream& ContFuncEither::Print(std::ostream& os) const
+std::ostream& FunctionEither::Print(std::ostream& os) const
 {
-	super::Print(os);
-	return os<<"Either direction to "<<*dir1<<" or "<<*dir2<<", depending on whichever is a shorter angle to "<<*pnt;
+	return os<<"Either direction to "<<dir1<<" or "<<dir2<<", depending on whichever is a shorter angle to "<<point;
 }
 
-
-ContFuncOpp::~ContFuncOpp()
+double FunctionOpposite::Get(AnimateCompile* anim) const
 {
-	if (dir) delete dir;
+	using calchart::continuity::Get;
+	return Get(*anim, dir) + 180.0;
 }
 
-
-float ContFuncOpp::Get(AnimateCompile* anim) const
+std::ostream& FunctionOpposite::Print(std::ostream& os) const
 {
-	return (dir->Get(anim) + 180.0f);
+	return os<<"opposite direction of "<<dir;
 }
 
-std::ostream& ContFuncOpp::Print(std::ostream& os) const
+
+double FunctionStep::Get(AnimateCompile* anim) const
 {
-	super::Print(os);
-	return os<<"opposite direction of "<<*dir;
+	using calchart::continuity::Get;
+	CC_coord c = Get(*anim, point) - anim->GetPointPosition();
+	return (c.DM_Magnitude() * Get(*anim, numbeats) / Get(*anim, blocksize));
 }
 
-
-ContFuncStep::~ContFuncStep()
+std::ostream& FunctionStep::Print(std::ostream& os) const
 {
-	if (numbeats) delete numbeats;
-	if (blksize) delete blksize;
-	if (pnt) delete pnt;
+	return os<<"Step drill at "<<numbeats<<" beats for a block size of "<<blocksize<<" from point "<<point;
 }
 
 
-float ContFuncStep::Get(AnimateCompile* anim) const
-{
-	CC_coord c;
-
-	c = pnt->Get(anim) - anim->GetPointPosition();
-	return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
-}
-
-std::ostream& ContFuncStep::Print(std::ostream& os) const
-{
-	super::Print(os);
-	return os<<"Step drill at "<<*numbeats<<" beats for a block size of "<<*blksize<<" from point "<<*pnt;
-}
-
-
+#if 0
+	
 ContProcedure::~ContProcedure() {}
 
 std::ostream& ContProcedure::Print(std::ostream& os) const

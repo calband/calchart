@@ -50,7 +50,7 @@ public:
 };
 
 typedef std::function<void (const std::string& notice)> NotifyStatus;
-typedef std::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
+typedef std::function<bool (const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
 
 class Animation
 {

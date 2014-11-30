@@ -105,6 +105,7 @@ mCollisionAction(NULL)
 {
 	// the variables are persistant through the entire compile process.
 	AnimationVariables variablesStates;
+	std::map<AnimateError, ErrorMarker> error_markers;
 
 	int sheetIndex = 0;
 	for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet)
@@ -115,7 +116,6 @@ mCollisionAction(NULL)
 		sheetIndex++;
 
 // Now parse continuity
-		AnimateCompile comp(show, variablesStates);
 		std::vector<std::vector<std::shared_ptr<AnimateCommand> > > theCommands(numpts);
 		for (auto& current_symbol : k_symbols)
 		{
@@ -138,7 +138,7 @@ mCollisionAction(NULL)
 				{
 					// Supply a generic parse error
 					ContToken dummy;
-					comp.RegisterError(ANIMERR_SYNTAX, &dummy);
+					AnimateCompile::RegisterError(error_markers, current_symbol, 0, ANIMERR_SYNTAX, &dummy);
 				}
 #if 1 // enable to see dump of continuity
 				{
@@ -153,7 +153,8 @@ mCollisionAction(NULL)
 				{
 					if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol)
 					{
-						theCommands[j] = comp.Compile(curr_sheet, j, current_symbol, ParsedContinuity);
+						AnimateCompile comp(show, curr_sheet, j, current_symbol, variablesStates, error_markers);
+						theCommands[j] = comp.Compile(ParsedContinuity);
 					}
 				}
 				while (ParsedContinuity)
@@ -176,15 +177,16 @@ mCollisionAction(NULL)
 		{
 			if (theCommands[j].empty())
 			{
-				theCommands[j] = comp.Compile(curr_sheet, j, MAX_NUM_SYMBOLS, NULL);
+				AnimateCompile comp(show, curr_sheet, j, SYMBOL_PLAIN, variablesStates, error_markers);
+				theCommands[j] = comp.Compile(NULL);
 			}
 		}
-		if (!comp.Okay() && notifyErrorList)
+		if (!error_markers.empty() && notifyErrorList)
 		{
 			std::string message("Errors for \"");
 			message += curr_sheet->GetName().substr(0,32);
 			message += ("\"");
-			if (notifyErrorList(comp.GetErrorMarkers(), std::distance(show.GetSheetBegin(), curr_sheet), message))
+			if (notifyErrorList(error_markers, std::distance(show.GetSheetBegin(), curr_sheet), message))
 			{
 				break;
 			}

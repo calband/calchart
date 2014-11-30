@@ -86,7 +86,7 @@ public:
 	
 	bool OnBeat() const;
 
-	void OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message);
+	void OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message);
 
 	// controlling how the screen splits between views
 	void OnCmd_SplitViewHorizontal(wxCommandEvent& event);

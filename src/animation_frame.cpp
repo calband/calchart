@@ -753,16 +753,13 @@ AnimationFrame::SetTempo(unsigned tempo)
 }
 
 void
-AnimationFrame::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
+AnimationFrame::OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
 {
-	for (unsigned i = 0; i < error_markers.size(); i++)
+	for (auto& i : error_markers)
 	{
-		if (!error_markers[i].pntgroup.empty())
-		{
-			wxString error_string;
-			error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, animate_err_msgs(i));
-			mErrorList->Append(error_string);
-			mErrorMarkers.push_back(std::pair<ErrorMarker, unsigned>(error_markers[i], sheetnum));
-		}
+		wxString error_string;
+		error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, animate_err_msgs(i.first));
+		mErrorList->Append(error_string);
+		mErrorMarkers.push_back(std::pair<ErrorMarker, unsigned>(i.second, sheetnum));
 	}
 }

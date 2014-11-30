@@ -223,7 +223,7 @@ AnimationView::Generate()
 	mErrorOccurred = false;
 	// (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
 	NotifyStatus notifyStatus = [this](const std::string& notice) { this->OnNotifyStatus(notice); };
-	NotifyErrorList notifyErrorList = [this](const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message) {
+	NotifyErrorList notifyErrorList = [this](const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message) {
 		return this->OnNotifyErrorList(error_markers, sheetnum, message);
 	};
 	mAnimation = GetShow()->NewAnimation(notifyStatus, notifyErrorList);
@@ -485,7 +485,7 @@ AnimationView::OnNotifyStatus(const wxString& status)
 
 
 bool
-AnimationView::OnNotifyErrorList(const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
+AnimationView::OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
 {
 	GetAnimationFrame()->OnNotifyErrorList(error_markers, sheetnum, message);
 	mErrorOccurred = true;

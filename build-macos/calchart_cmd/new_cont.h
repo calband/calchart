@@ -30,31 +30,10 @@
 
 namespace calchart {
 namespace continuity {
-		
-#if 0
 
-enum ContDefinedValue
-{
-	CC_N, CC_NW, CC_W, CC_SW, CC_S, CC_SE, CC_E, CC_NE,
-	CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM
-};
-
-class ContToken
-{
-public:
-	ContToken();
-	virtual ~ContToken();
-	int line, col;
-	virtual std::ostream& Print(std::ostream&) const;
-};
-
-static inline std::ostream& operator<<(std::ostream& os, const ContToken& c) { return c.Print(os); }
-
-#endif
-
-// points are anything that conforms to
+// points conform to
 //CC_coord Get(AnimateCompile* anim) const;
-//std::ostream& Print(std::ostream&) const override;
+//std::ostream& Print(std::ostream&) const;
 class CurrentPoint
 {
 public:
@@ -104,165 +83,111 @@ calchart::continuity::CurrentPoint
 >
 Point;
 
-struct Point_Printer : boost::static_visitor<>
+std::ostream& operator<<(std::ostream& os, Point const& p);
+CC_coord Get(AnimateCompile& anim, Point const& p);
+
+class ValueAdd;
+class ValueSub;
+class ValueMult;
+class ValueDiv;
+	class ValueNeg;
+
+typedef
+boost::variant<
+	double
+	, boost::recursive_wrapper< ValueAdd >
+	, boost::recursive_wrapper< ValueSub >
+	, boost::recursive_wrapper< ValueMult >
+	, boost::recursive_wrapper< ValueDiv >
+	, boost::recursive_wrapper< ValueNeg >
+>
+Value;
+
+
+class ValueAdd
 {
-	Point_Printer(std::ostream& os) : os(os) {}
-	
-	void operator()(calchart::continuity::CurrentPoint const& p) const
-	{
-		p.Print(os);
-	}
-	void operator()(calchart::continuity::NextPoint const& p) const
-	{
-		p.Print(os);
-	}
-	void operator()(calchart::continuity::StartPoint const& p) const
-	{
-		p.Print(os);
-	}
-	void operator()(calchart::continuity::RefPoint const& p) const
-	{
-		p.Print(os);
-	}
-	std::ostream& os;
+public:
+	ValueAdd(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
+	ValueAdd() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value value1, value2;
 };
 
-static inline std::ostream& operator<<(std::ostream& os, Point const& p)
+class ValueSub
 {
-	boost::apply_visitor(Point_Printer(os), p);
-	return os;
-}
-
-struct Point_Getter : boost::static_visitor<CC_coord>
-{
-	Point_Getter(AnimateCompile& anim) : anim(anim) {}
-	
-	CC_coord operator()(calchart::continuity::CurrentPoint const& p) const
-	{
-		return p.Get(&anim);
-	}
-	CC_coord operator()(calchart::continuity::NextPoint const& p) const
-	{
-		return p.Get(&anim);
-	}
-	CC_coord operator()(calchart::continuity::StartPoint const& p) const
-	{
-		return p.Get(&anim);
-	}
-	CC_coord operator()(calchart::continuity::RefPoint const& p) const
-	{
-		return p.Get(&anim);
-	}
-	AnimateCompile& anim;
+public:
+	ValueSub(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
+	ValueSub() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value value1, value2;
 };
 
-static inline CC_coord Get(AnimateCompile& anim, Point const& p)
+class ValueMult
 {
-	return boost::apply_visitor(Point_Getter(anim), p);
-}
+public:
+	ValueMult(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
+	ValueMult() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value value1, value2;
+};
+
+class ValueDiv
+{
+public:
+	ValueDiv(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
+	ValueDiv() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value value1, value2;
+};
+
+class ValueNeg
+{
+public:
+	ValueNeg(Value const& v) : value(v) {}
+	ValueNeg() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value value;
+};
+
+}}
+
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ValueAdd,
+						  (calchart::continuity::Value, value1)
+						  (calchart::continuity::Value, value2)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ValueSub,
+						  (calchart::continuity::Value, value1)
+						  (calchart::continuity::Value, value2)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ValueMult,
+						  (calchart::continuity::Value, value1)
+						  (calchart::continuity::Value, value2)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ValueDiv,
+						  (calchart::continuity::Value, value1)
+						  (calchart::continuity::Value, value2)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ValueNeg,
+						  (calchart::continuity::Value, value)
+						  )
+
+namespace calchart { namespace continuity {
+
+std::ostream& operator<<(std::ostream& os, Value const& v);
+double Get(AnimateCompile& anim, Value const& v);
+//Value operator+(Value const& lhs, Value const& rhs);
 
 #if 0
-
-class ContValue: public ContToken
-{
-	using super = ContToken;
-public:
-	ContValue() {}
-	virtual ~ContValue();
-
-	virtual float Get(AnimateCompile* anim) const = 0;
-	virtual std::ostream& Print(std::ostream&) const override;
-};
-
-class ContValueFloat : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueFloat(float v): val(v) {}
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	float val;
-};
-
-class ContValueDefined : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueDefined(ContDefinedValue v): val(v) {}
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContDefinedValue val;
-};
-
-class ContValueAdd : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueAdd(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-	virtual ~ContValueAdd();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *val1, *val2;
-};
-
-class ContValueSub : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueSub(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-	virtual ~ContValueSub();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *val1, *val2;
-};
-
-class ContValueMult : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueMult(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-	virtual ~ContValueMult();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *val1, *val2;
-};
-
-class ContValueDiv : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueDiv(ContValue *v1, ContValue *v2) : val1(v1), val2(v2) {}
-	virtual ~ContValueDiv();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *val1, *val2;
-};
-
-class ContValueNeg : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueNeg(ContValue *v) : val(v) {}
-	virtual ~ContValueNeg();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *val;
-};
-
 class ContValueREM : public ContValue
 {
 	using super = ContValue;
@@ -283,151 +208,137 @@ public:
 private:
 	unsigned varnum;
 };
-
 #endif
+
 
 class FunctionDir
 {
 public:
 	FunctionDir(const Point& p): point(p) {}
 	FunctionDir() {}
-	float Get(AnimateCompile* anim) const;
+	double Get(AnimateCompile* anim) const;
 	std::ostream& Print(std::ostream&) const;
 	Point point;
 };
 
+class FunctionDirFrom
+{
+public:
+	FunctionDirFrom(const Point& start, const Point& end) : point_start(start), point_end(end) {}
+	FunctionDirFrom() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point point_start, point_end;
+};
+	
+class FunctionDist
+{
+public:
+	FunctionDist(const Point& p): point(p) {}
+	FunctionDist() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point point;
+};
+
+class FunctionDistFrom
+{
+public:
+	FunctionDistFrom(const Point& start, const Point& end) : point_start(start), point_end(end) {}
+	FunctionDistFrom() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point point_start, point_end;
+};
+
+class FunctionEither
+{
+public:
+	FunctionEither(Value const& v1, Value const& v2, Point const& p) : dir1(v1), dir2(v2), point(p) {}
+	FunctionEither() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value dir1, dir2;
+	Point point;
+};
+
+class FunctionOpposite
+{
+public:
+	FunctionOpposite(Value const& v) : dir(v) {}
+	FunctionOpposite() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value dir;
+};
+
+class FunctionStep
+{
+public:
+	FunctionStep(Value const& v1, Value const& v2, Point const& p) : numbeats(v1), blocksize(v2), point(p) {}
+	FunctionStep() {}
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value numbeats, blocksize;
+	Point point;
+};
 }}
 
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::FunctionDir,
 						  (calchart::continuity::Point, point)
 						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionDirFrom,
+						  (calchart::continuity::Point, point_start)
+						  (calchart::continuity::Point, point_end)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionDist,
+						  (calchart::continuity::Point, point)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionDistFrom,
+						  (calchart::continuity::Point, point_start)
+						  (calchart::continuity::Point, point_end)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionEither,
+						  (calchart::continuity::Value, dir1)
+						  (calchart::continuity::Value, dir2)
+						  (calchart::continuity::Point, point)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionOpposite,
+						  (calchart::continuity::Value, dir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::FunctionStep,
+						  (calchart::continuity::Value, numbeats)
+						  (calchart::continuity::Value, blocksize)
+						  (calchart::continuity::Point, point)
+						  )
+
 
 namespace calchart { namespace continuity {
 
 typedef
 boost::variant<
 FunctionDir
+, FunctionDirFrom
+, FunctionDist
+, FunctionDistFrom
+, FunctionEither
+, FunctionOpposite
+, FunctionStep
 >
 Function;
 
-struct Function_Printer : boost::static_visitor<>
-{
-	Function_Printer(std::ostream& os) : os(os) {}
-	
-	void operator()(FunctionDir const& f) const
-	{
-		f.Print(os);
-	}
-	std::ostream& os;
-};
+std::ostream& operator<<(std::ostream& os, Function const& p);
 
-static inline std::ostream& operator<<(std::ostream& os, Function const& p)
-{
-	boost::apply_visitor(Function_Printer(os), p);
-	return os;
-}
-
-struct Function_Getter : boost::static_visitor<float>
-{
-	Function_Getter(AnimateCompile& anim) : anim(anim) {}
-	
-	float operator()(calchart::continuity::FunctionDir const& f) const
-	{
-		return f.Get(&anim);
-	}
-	AnimateCompile& anim;
-};
-
-static inline float Get(AnimateCompile& anim, Function const& p)
-{
-	return boost::apply_visitor(Function_Getter(anim), p);
-}
+double Get(AnimateCompile& anim, Function const& p);
 
 #if 0
-class ContFuncDirFrom : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncDirFrom(ContPoint *start, ContPoint *end)
-		: pnt_start(start), pnt_end(end) {}
-	virtual ~ContFuncDirFrom();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContPoint *pnt_start, *pnt_end;
-};
-
-class ContFuncDist : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncDist(ContPoint *p): pnt(p) {}
-	virtual ~ContFuncDist();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContPoint *pnt;
-};
-
-class ContFuncDistFrom : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncDistFrom(ContPoint *start, ContPoint *end)
-		: pnt_start(start), pnt_end(end) {}
-	virtual ~ContFuncDistFrom();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContPoint *pnt_start, *pnt_end;
-};
-
-class ContFuncEither : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncEither(ContValue *d1, ContValue *d2, ContPoint *p)
-		: dir1(d1), dir2(d2), pnt(p) {}
-	virtual ~ContFuncEither();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *dir1, *dir2;
-	ContPoint *pnt;
-};
-
-class ContFuncOpp : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncOpp(ContValue *d): dir(d) {}
-	virtual ~ContFuncOpp();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *dir;
-};
-
-class ContFuncStep : public ContValue
-{
-	using super = ContValue;
-public:
-	ContFuncStep(ContValue *beats, ContValue *blocksize, ContPoint *p)
-		: numbeats(beats), blksize(blocksize), pnt(p) {}
-	virtual ~ContFuncStep();
-
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	ContValue *numbeats, *blksize;
-	ContPoint *pnt;
-};
 
 class ContProcedure: public ContToken
 {
