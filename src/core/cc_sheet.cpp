@@ -30,6 +30,7 @@
 #include <map>
 #include <cctype>
 #include <algorithm>
+#include <functional>
 
 const std::string contnames[MAX_NUM_SYMBOLS] =
 {
