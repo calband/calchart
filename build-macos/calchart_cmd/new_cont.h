@@ -31,31 +31,83 @@
 namespace calchart {
 namespace continuity {
 
+	struct LocationInfo {
+		unsigned line, column, length;
+	};
+
+	class FunctionDir;
+	class FunctionDirFrom;
+	class FunctionDist;
+	class FunctionDistFrom;
+	class FunctionEither;
+	class FunctionOpposite;
+	class FunctionStep;
+
+	typedef
+	boost::variant<
+	FunctionDir
+	, FunctionDirFrom
+	, FunctionDist
+	, FunctionDistFrom
+	, FunctionEither
+	, FunctionOpposite
+	, FunctionStep
+	>
+	Function;
+	
+	class ValueAdd;
+	class ValueSub;
+	class ValueMult;
+	class ValueDiv;
+	class ValueNeg;
+	class ValueREM;
+	
+	class Variable;
+	
+	typedef
+	boost::variant<
+	double
+	, boost::recursive_wrapper< ValueAdd >
+	, boost::recursive_wrapper< ValueSub >
+	, boost::recursive_wrapper< ValueMult >
+	, boost::recursive_wrapper< ValueDiv >
+	, boost::recursive_wrapper< ValueNeg >
+	, boost::recursive_wrapper< ValueREM >
+	, boost::recursive_wrapper< Variable >
+	, boost::recursive_wrapper< Function >
+	>
+	Value;
+	
+	
+
 // points conform to
 //CC_coord Get(AnimateCompile* anim) const;
 //std::ostream& Print(std::ostream&) const;
-class CurrentPoint
+	struct CurrentPoint : public LocationInfo
 {
 public:
 	CC_coord Get(AnimateCompile* anim) const;
 	std::ostream& Print(std::ostream&) const;
 };
+	static inline std::ostream& operator<<(std::ostream& os, CurrentPoint const& v) { return v.Print(os); }
 
-class StartPoint
+	class StartPoint : public LocationInfo
 {
 public:
 	CC_coord Get(AnimateCompile* anim) const;
 	std::ostream& Print(std::ostream&) const;
 };
+	static inline std::ostream& operator<<(std::ostream& os, StartPoint const& v) { return v.Print(os); }
 
-class NextPoint
+	class NextPoint : public LocationInfo
 {
 public:
 	CC_coord Get(AnimateCompile* anim) const;
 	std::ostream& Print(std::ostream&) const;
 };
+	static inline std::ostream& operator<<(std::ostream& os, NextPoint const& v) { return v.Print(os); }
 
-class RefPoint
+	class RefPoint : public LocationInfo
 {
 public:
 	RefPoint(unsigned n=0): refnum(n) {}
@@ -85,24 +137,7 @@ Point;
 
 std::ostream& operator<<(std::ostream& os, Point const& p);
 CC_coord Get(AnimateCompile& anim, Point const& p);
-
-class ValueAdd;
-class ValueSub;
-class ValueMult;
-class ValueDiv;
-	class ValueNeg;
-
-typedef
-boost::variant<
-	double
-	, boost::recursive_wrapper< ValueAdd >
-	, boost::recursive_wrapper< ValueSub >
-	, boost::recursive_wrapper< ValueMult >
-	, boost::recursive_wrapper< ValueDiv >
-	, boost::recursive_wrapper< ValueNeg >
->
-Value;
-
+	void Annotate(Point& p, LocationInfo);
 
 class ValueAdd
 {
@@ -153,7 +188,19 @@ public:
 	std::ostream& Print(std::ostream&) const;
 	Value value;
 };
+	static inline std::ostream& operator<<(std::ostream& os, ValueNeg const& v) { return v.Print(os); }
 
+class ValueREM
+{
+public:
+	double Get(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+};
+	static inline std::ostream& operator<<(std::ostream& os, ValueREM const& v) { return v.Print(os); }
+
+std::ostream& operator<<(std::ostream& os, Value const& v);
+double Get(AnimateCompile& anim, Value const& v);
+	
 }}
 
 BOOST_FUSION_ADAPT_STRUCT(
@@ -183,33 +230,29 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 namespace calchart { namespace continuity {
 
-std::ostream& operator<<(std::ostream& os, Value const& v);
-double Get(AnimateCompile& anim, Value const& v);
-//Value operator+(Value const& lhs, Value const& rhs);
+	class Variable
+	{
+	public:
+		Variable(AnimateVar num): varnum(num) {}
+		Variable() {}
+		double Get(AnimateCompile* anim) const;
+		void Set(AnimateCompile* anim, double v) const;
+		std::ostream& Print(std::ostream&) const;
+		AnimateVar varnum;
+	};
 
-#if 0
-class ContValueREM : public ContValue
-{
-	using super = ContValue;
-public:
-	virtual float Get(AnimateCompile* anim) const;
-	virtual std::ostream& Print(std::ostream&) const override;
-};
+	static inline std::ostream& operator<<(std::ostream& os, Variable const& v) { return v.Print(os); }
+//	double Get(AnimateCompile& anim, Variable const& v);
+//	void Set(AnimateCompile& anim, Variable& which, Value const& v);
+	
+}}
 
-class ContValueVar : public ContValue
-{
-	using super = ContValue;
-public:
-	ContValueVar(unsigned num): varnum(num) {}
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::Variable,
+						  (AnimateVar, varnum)
+						  )
 
-	virtual float Get(AnimateCompile* anim) const;
-	void Set(AnimateCompile* anim, float v);
-	virtual std::ostream& Print(std::ostream&) const override;
-private:
-	unsigned varnum;
-};
-#endif
-
+namespace calchart { namespace continuity {
 
 class FunctionDir
 {
@@ -322,326 +365,216 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 namespace calchart { namespace continuity {
 
-typedef
-boost::variant<
-FunctionDir
-, FunctionDirFrom
-, FunctionDist
-, FunctionDistFrom
-, FunctionEither
-, FunctionOpposite
-, FunctionStep
->
-Function;
-
 std::ostream& operator<<(std::ostream& os, Function const& p);
 
 double Get(AnimateCompile& anim, Function const& p);
 
-#if 0
 
-class ContProcedure: public ContToken
+struct ProcedureSet
 {
-	using super = ContToken;
-public:
-	ContProcedure(): next(NULL) {}
-	virtual ~ContProcedure();
-
-	virtual void Compile(AnimateCompile* anim) = 0;
-	virtual std::ostream& Print(std::ostream&) const override;
-
-	ContProcedure *next;
+	ProcedureSet(Variable const& vr, Value const& v) : var(vr), val(v) {}
+	ProcedureSet() {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Variable var;
+	Value val;
 };
 
-class ContProcSet : public ContProcedure
+struct ProcedureBlam
 {
-	using super = ContProcedure;
-public:
-	ContProcSet(ContValueVar *vr, ContValue *v)
-		: var(vr), val(v) {}
-	virtual ~ContProcSet();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValueVar *var;
-	ContValue *val;
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
 };
 
-class ContProcBlam : public ContProcedure
+struct ProcedureCM
 {
-	using super = ContProcedure;
-public:
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
+	ProcedureCM(Point const& p1, Point const& p2, Value const& steps, Value const& d1, Value const& d2, Value const& beats) : pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
+	ProcedureCM() {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt1, pnt2;
+	Value stps, dir1, dir2, numbeats;
 };
 
-class ContProcCM : public ContProcedure
+struct ProcedureDMCM
 {
-	using super = ContProcedure;
-public:
-	ContProcCM(ContPoint *p1, ContPoint *p2, ContValue *steps, ContValue *d1,
-		ContValue *d2, ContValue *beats)
-		: pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
-	virtual ~ContProcCM();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt1, *pnt2;
-	ContValue *stps, *dir1, *dir2, *numbeats;
+	ProcedureDMCM(Point const& p1, Point const& p2, Value const& beats) : pnt1(p1), pnt2(p2), numbeats(beats) {}
+	ProcedureDMCM() {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt1, pnt2;
+	Value numbeats;
 };
 
-class ContProcDMCM : public ContProcedure
+struct ProcedureDMHS
 {
-	using super = ContProcedure;
-public:
-	ContProcDMCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
-		: pnt1(p1), pnt2(p2), numbeats(beats) {}
-	virtual ~ContProcDMCM();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt1, *pnt2;
-	ContValue *numbeats;
+	ProcedureDMHS(Point const& p) : pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt;
 };
 
-class ContProcDMHS : public ContProcedure
+struct ProcedureEven
 {
-	using super = ContProcedure;
-public:
-	ContProcDMHS(ContPoint *p)
-		: pnt(p) {}
-	virtual ~ContProcDMHS();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt;
+	ProcedureEven(Value const& steps, Point const& p) : stps(steps), pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value stps;
+	Point pnt;
 };
 
-class ContProcEven : public ContProcedure
+struct ProcedureEWNS
 {
-	using super = ContProcedure;
-public:
-	ContProcEven(ContValue *steps, ContPoint *p)
-		: stps(steps), pnt(p) {}
-	virtual ~ContProcEven();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *stps;
-	ContPoint *pnt;
+	ProcedureEWNS(Point const& p) : pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt;
 };
 
-class ContProcEWNS : public ContProcedure
+struct ProcedureFountain
 {
-	using super = ContProcedure;
-public:
-	ContProcEWNS(ContPoint *p)
-		: pnt(p) {}
-	virtual ~ContProcEWNS();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt;
+	ProcedureFountain(Value const& d1, Value const& d2, Value const& s1, Value const& s2, Point const& p) : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value dir1, dir2;
+	Value stepsize1, stepsize2;
+	Point pnt;
 };
 
-class ContProcFountain : public ContProcedure
+struct ProcedureFM
 {
-	using super = ContProcedure;
-public:
-	ContProcFountain(ContValue *d1, ContValue *d2, ContValue *s1, ContValue *s2,
-		ContPoint *p)
-		: dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
-	virtual ~ContProcFountain();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *dir1, *dir2;
-	ContValue *stepsize1, *stepsize2;
-	ContPoint *pnt;
+	ProcedureFM(Value const& steps, Value const& d) : stps(steps), dir(d) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value stps, dir;
 };
 
-class ContProcFM : public ContProcedure
+struct ProcedureFMTO
 {
-	using super = ContProcedure;
-public:
-	ContProcFM(ContValue *steps, ContValue *d)
-		: stps(steps), dir(d) {}
-	virtual ~ContProcFM();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *stps, *dir;
+	ProcedureFMTO(Point const& p) : pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt;
 };
 
-class ContProcFMTO : public ContProcedure
+struct ProcedureGrid
 {
-	using super = ContProcedure;
-public:
-	ContProcFMTO(ContPoint *p)
-		: pnt(p) {}
-	virtual ~ContProcFMTO();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt;
+	ProcedureGrid(Value const& g) : grid(g) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value grid;
 };
 
-class ContProcGrid : public ContProcedure
+struct ProcedureHSCM
 {
-	using super = ContProcedure;
-public:
-	ContProcGrid(ContValue *g)
-		: grid(g) {}
-	virtual ~ContProcGrid();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *grid;
+	ProcedureHSCM(Point const& p1, Point const& p2, Value const& beats) : pnt1(p1), pnt2(p2), numbeats(beats) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt1, pnt2;
+	Value numbeats;
 };
 
-class ContProcHSCM : public ContProcedure
+struct ProcedureHSDM
 {
-	using super = ContProcedure;
-public:
-	ContProcHSCM(ContPoint *p1, ContPoint *p2, ContValue *beats)
-		: pnt1(p1), pnt2(p2), numbeats(beats) {}
-	virtual ~ContProcHSCM();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt1, *pnt2;
-	ContValue *numbeats;
+	ProcedureHSDM(Point const& p) : pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt;
 };
 
-class ContProcHSDM : public ContProcedure
+struct ProcedureMagic
 {
-	using super = ContProcedure;
-public:
-	ContProcHSDM(ContPoint *p)
-		: pnt(p) {}
-	virtual ~ContProcHSDM();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt;
+	ProcedureMagic(Point const& p) : pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt;
 };
 
-class ContProcMagic : public ContProcedure
+struct ProcedureMarch
 {
-	using super = ContProcedure;
-public:
-	ContProcMagic(ContPoint *p)
-		: pnt(p) {}
-	virtual ~ContProcMagic();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt;
+	ProcedureMarch(Value const& stepsize, Value const& steps, Value const& d, Value const& face) : stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value stpsize, stps, dir, facedir;
 };
 
-class ContProcMarch : public ContProcedure
+struct ProcedureMT
 {
-	using super = ContProcedure;
-public:
-	ContProcMarch(ContValue *stepsize, ContValue *steps, ContValue *d, ContValue *face)
-		: stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
-	virtual ~ContProcMarch();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *stpsize, *stps, *dir, *facedir;
+	ProcedureMT(Value const& beats, Value const& d) : numbeats(beats), dir(d) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value numbeats, dir;
 };
 
-class ContProcMT : public ContProcedure
+struct ProcedureMTRM
 {
-	using super = ContProcedure;
-public:
-	ContProcMT(ContValue *beats, ContValue *d)
-		: numbeats(beats), dir(d) {}
-	virtual ~ContProcMT();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *numbeats, *dir;
+	ProcedureMTRM(Value const& d) : dir(d) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value dir;
 };
 
-class ContProcMTRM : public ContProcedure
+struct ProcedureNSEW
 {
-	using super = ContProcedure;
-public:
-	ContProcMTRM(ContValue *d)
-		: dir(d) {}
-	virtual ~ContProcMTRM();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *dir;
+	ProcedureNSEW(Point const& p) : pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Point pnt;
 };
 
-class ContProcNSEW : public ContProcedure
+struct ProcedureRotate
 {
-	using super = ContProcedure;
-public:
-	ContProcNSEW(ContPoint *p)
-		: pnt(p) {}
-	virtual ~ContProcNSEW();
-
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContPoint *pnt;
+	ProcedureRotate(Value const& angle, Value const& steps, Point const& p) : ang(angle), stps(steps), pnt(p) {}
+	void Compile(AnimateCompile* anim) const;
+	std::ostream& Print(std::ostream&) const;
+	Value ang, stps;
+	Point pnt;
 };
 
-class ContProcRotate : public ContProcedure
-{
-	using super = ContProcedure;
-public:
-	ContProcRotate(ContValue *angle, ContValue *steps, ContPoint *p)
-		: ang(angle), stps(steps), pnt(p) {}
-	virtual ~ContProcRotate();
+	typedef
+	boost::variant<
+	calchart::continuity::ProcedureSet
+	, calchart::continuity::ProcedureBlam
+	, calchart::continuity::ProcedureCM
+	, calchart::continuity::ProcedureDMCM
+	/*
+	, calchart::continuity::ProcedureDMHS
+	, calchart::continuity::ProcedureEven
+	, calchart::continuity::ProcedureEWNS
+	, calchart::continuity::ProcedureFountain
+	, calchart::continuity::ProcedureFM
+	, calchart::continuity::ProcedureFMTO
+	, calchart::continuity::ProcedureGrid
+	, calchart::continuity::ProcedureHSCM
+	, calchart::continuity::ProcedureHSDM
+	, calchart::continuity::ProcedureMagic
+	, calchart::continuity::ProcedureMarch
+	, calchart::continuity::ProcedureMT
+	, calchart::continuity::ProcedureMTRM
+	, calchart::continuity::ProcedureNSEW
+	, calchart::continuity::ProcedureRotate
+	 */
+	>
+	Procedure;
+	std::ostream& operator<<(std::ostream& os, Procedure const& p);
+	
+//	void Compile(AnimateCompile& anim, Procedure const& p);
+}}
 
-	virtual void Compile(AnimateCompile* anim);
-	virtual std::ostream& Print(std::ostream&) const override;
-
-private:
-	ContValue *ang, *stps;
-	ContPoint *pnt;
-};
-#endif
-} // namespace continuity
-} // namespace calchart
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureCM,
+						  (calchart::continuity::Point, pnt1)
+						  (calchart::continuity::Point, pnt2)
+						  (calchart::continuity::Value, stps)
+						  (calchart::continuity::Value, dir1)
+						  (calchart::continuity::Value, dir2)
+						  (calchart::continuity::Value, numbeats)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureDMCM,
+						  (calchart::continuity::Point, pnt1)
+						  (calchart::continuity::Point, pnt2)
+						  (calchart::continuity::Value, numbeats)
+						  )
 
 #endif

@@ -69,13 +69,13 @@ public:
 // Compile a point
 	std::vector<std::shared_ptr<AnimateCommand> > Compile(ContProcedure* proc);
 // true if successful
-	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token);
+	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token = nullptr);
 
 public:
 	void RegisterError(AnimateError err, const ContToken *token);
 	static void RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, const ContToken *token);
 
-	float GetVarValue(int varnum, const ContToken *token);
+	float GetVarValue(int varnum, const ContToken *token = nullptr);
 	void SetVarValue(int varnum, float value);
 
 	// helper functions to get information for building a command

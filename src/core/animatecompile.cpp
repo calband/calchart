@@ -48,6 +48,7 @@ pt(c_sheet->GetPosition(pt_num)),
 mShow(show),
 curr_sheet(c_sheet),
 curr_pt(pt_num),
+beats_rem(c_sheet->GetBeats()),
 contsymbol(cont_symbol),
 error_markers(error_markers),
 vars(variablesStates)
