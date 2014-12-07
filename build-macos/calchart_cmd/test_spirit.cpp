@@ -40,23 +40,6 @@
 
 using pos_iterator_t = boost::spirit::line_pos_iterator<std::string::const_iterator>;
 
-
-#if 0
-namespace calchart
-{
-	///////////////////////////////////////////////////////////////////////////
-	//  Our employee struct
-	///////////////////////////////////////////////////////////////////////////
-	//[tutorial_employee_struct
-	struct pCOUNTERMARCH
-	{
-		Point point1;
-		Point point2;
-	};
-	
-}
-#endif
-
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;
 
@@ -112,7 +95,7 @@ varvalue
 template <typename Iterator>
 struct variable_grammar : qi::grammar<Iterator, calchart::continuity::Variable(), ascii::space_type>
 {
-	variable_grammar() : variable_grammar::base_type(variable)
+	variable_grammar(Iterator first) : variable_grammar::base_type(variable), annotate(first)
 	{
 		static const struct variableT_ : qi::symbols<char, calchart::continuity::Variable>
 		{
@@ -140,8 +123,13 @@ struct variable_grammar : qi::grammar<Iterator, calchart::continuity::Variable()
 		} variableTable;
 		
 		variable %= variableTable;
+
+		// annotate on success
+		auto set_location_info = annotate(qi::_val, qi::labels::_1, qi::labels::_3);
+		qi::on_success(variable, set_location_info);
 	}
 	qi::rule<Iterator, calchart::continuity::Variable(), ascii::space_type> variable;
+	boost::phoenix::function<calchart::continuity::annotation_f<Iterator>> annotate;
 };
 
 #if 0
@@ -156,37 +144,6 @@ point
 { $$ = new ContRefPoint((unsigned)$2 - 1); }
 ;
 #endif
-
-template<typename It>
-struct annotation_f {
-	typedef void result_type;
-	
-	annotation_f(It first) : first(first) {}
-	It const first;
-	
-	template<typename Val, typename First, typename Last>
-	void operator()(Val& v, First f, Last l) const {
-		using std::distance;
-		calchart::continuity::LocationInfo li { unsigned(get_line(f)), unsigned(get_column(first, f)), unsigned(distance(f, l)) };
-//		calchart::continuity::Annotate(v, li);
-//		do_annotate(v, f, l, first);
-		do_annotate(v, li);
-
-	}
-private:
-	void static do_annotate(calchart::continuity::LocationInfo& v, const calchart::continuity::LocationInfo& li) {
-		v.line   = li.line;
-		v.column = li.column;
-		v.length = li.length;
-	}
-//	template<typename Val>
-	void static do_annotate(calchart::continuity::Point& v, const calchart::continuity::LocationInfo& li) {
-		calchart::continuity::Annotate(v, li);
-	}
-//	void static do_annotate(& li, It f, It l, It first) {
-//	}
-	static void do_annotate(...) {}
-};
 
 template <typename Iterator>
 struct point_grammar : qi::grammar<Iterator, calchart::continuity::Point(), ascii::space_type>
@@ -207,13 +164,13 @@ struct point_grammar : qi::grammar<Iterator, calchart::continuity::Point(), asci
 		
 		refpoint %= qi::lit("R") >> qi::int_ ;
 		point %= (PointT | refpoint);
-		using qi::_val;
-		using namespace qi::labels;
-		auto set_location_info = annotate(_val, _1, _3);
+
+		// annotate on success
+		auto set_location_info = annotate(qi::_val, qi::labels::_1, qi::labels::_3);
 		qi::on_success(point,    set_location_info);
 		qi::on_success(refpoint, set_location_info);
 	}
-	boost::phoenix::function<annotation_f<Iterator>> annotate;
+	boost::phoenix::function<calchart::continuity::annotation_f<Iterator>> annotate;
 	qi::rule<Iterator, calchart::continuity::Point(), ascii::space_type> point;
 	qi::rule<Iterator, calchart::continuity::RefPoint(), ascii::space_type> refpoint;
 };
@@ -240,7 +197,7 @@ function
 template <typename Iterator>
 struct function_grammar : qi::grammar<Iterator, calchart::continuity::Function(), ascii::space_type>
 {
-	function_grammar(Iterator first) : function_grammar::base_type(function), point(first), value(first)
+	function_grammar(Iterator first) : function_grammar::base_type(function), point(first), value(first), annotate(first)
 	{
 		using qi::lit;
 		FuncDir %= lit("DIR") >> '(' >> point >> ')' ;
@@ -251,6 +208,17 @@ struct function_grammar : qi::grammar<Iterator, calchart::continuity::Function()
 		FuncOpp %= lit("OPP") >> '(' >> value >> ')' ;
 		FuncStep %= lit("STEP") >> '(' >> value >> value >> point >> ')' ;
 		function %= ( FuncDir | FuncDirFrom | FuncDist | FuncDistFrom | FuncEither | FuncOpp | FuncStep );
+
+		// annotate on success
+		auto set_location_info = annotate(qi::_val, qi::labels::_1, qi::labels::_3);
+		qi::on_success(function,     set_location_info);
+		qi::on_success(FuncDir,      set_location_info);
+		qi::on_success(FuncDirFrom,  set_location_info);
+		qi::on_success(FuncDist,     set_location_info);
+		qi::on_success(FuncDistFrom, set_location_info);
+		qi::on_success(FuncEither,   set_location_info);
+		qi::on_success(FuncOpp,      set_location_info);
+		qi::on_success(FuncStep,     set_location_info);
 	}
 	qi::rule<Iterator, calchart::continuity::Function(), ascii::space_type> function;
 	qi::rule<Iterator, calchart::continuity::FunctionDir(), ascii::space_type> FuncDir;
@@ -262,6 +230,7 @@ struct function_grammar : qi::grammar<Iterator, calchart::continuity::Function()
 	qi::rule<Iterator, calchart::continuity::FunctionStep(), ascii::space_type> FuncStep;
 	point_grammar<Iterator> point;
 	value_grammar<Iterator> value;
+	boost::phoenix::function<calchart::continuity::annotation_f<Iterator>> annotate;
 };
 
 
@@ -299,7 +268,7 @@ value
 template <typename Iterator>
 struct value_grammar : qi::grammar<Iterator, calchart::continuity::Value(), ascii::space_type>
 {
-	value_grammar(Iterator first) : value_grammar::base_type(expression), point(first)
+	value_grammar(Iterator first) : value_grammar::base_type(expression), variable(first), point(first), annotate(first)
 	{
 		using qi::lit;
 		using qi::double_;
@@ -361,6 +330,7 @@ struct value_grammar : qi::grammar<Iterator, calchart::continuity::Value(), asci
 		expression.name("expression");
 		term.name("term");
 		factor.name("factor");
+
 		qi::on_error<qi::fail>
 		(
 		 expression
@@ -373,15 +343,27 @@ struct value_grammar : qi::grammar<Iterator, calchart::continuity::Value(), asci
 		 << std::endl
 		 );
 		
-		qi::debug(expression);
-		qi::debug(term);
-		qi::debug(factor);
+//		qi::debug(expression);
+//		qi::debug(term);
+//		qi::debug(factor);
 	
+		// annotate on success
+		auto set_location_info = annotate(qi::_val, qi::labels::_1, qi::labels::_3);
+		qi::on_success(factor,       set_location_info);
+		qi::on_success(term,         set_location_info);
+		qi::on_success(expression,   set_location_info);
+		qi::on_success(function,     set_location_info);
+		qi::on_success(FuncDir,      set_location_info);
+		qi::on_success(FuncDirFrom,  set_location_info);
+		qi::on_success(FuncDist,     set_location_info);
+		qi::on_success(FuncDistFrom, set_location_info);
+		qi::on_success(FuncEither,   set_location_info);
+		qi::on_success(FuncOpp,      set_location_info);
+		qi::on_success(FuncStep,     set_location_info);
 	}
 	qi::rule<Iterator, calchart::continuity::Value(), ascii::space_type> factor;
 	qi::rule<Iterator, calchart::continuity::Value(), ascii::space_type> term;
 	qi::rule<Iterator, calchart::continuity::Value(), ascii::space_type> expression;
-	variable_grammar<Iterator> variable;
 	qi::rule<Iterator, calchart::continuity::Function(), ascii::space_type> function;
 	qi::rule<Iterator, calchart::continuity::FunctionDir(), ascii::space_type> FuncDir;
 	qi::rule<Iterator, calchart::continuity::FunctionDirFrom(), ascii::space_type> FuncDirFrom;
@@ -390,93 +372,29 @@ struct value_grammar : qi::grammar<Iterator, calchart::continuity::Value(), asci
 	qi::rule<Iterator, calchart::continuity::FunctionEither(), ascii::space_type> FuncEither;
 	qi::rule<Iterator, calchart::continuity::FunctionOpposite(), ascii::space_type> FuncOpp;
 	qi::rule<Iterator, calchart::continuity::FunctionStep(), ascii::space_type> FuncStep;
+	variable_grammar<Iterator> variable;
 	point_grammar<Iterator> point;
+	boost::phoenix::function<calchart::continuity::annotation_f<Iterator>> annotate;
 };
 
 
 
 #if 0
 procedure
-: varvalue '=' value
-{ $$ = new ContProcSet($1, $3); }
-| pBLAM
-{ $$ = new ContProcBlam(); }
-| pCOUNTERMARCH point point value value value value
-{ $$ = new ContProcCM($2, $3, $4, $5, $6, $7); }
-| pDMCM point point value
-{ $$ = new ContProcDMCM($2, $3, $4); }
-| pDMHS point
-{ $$ = new ContProcDMHS($2); }
-| pEVEN value point
-{ $$ = new ContProcEven($2, $3); }
-| pEWNS point
-{ $$ = new ContProcEWNS($2); }
-| pFOUNTAIN value value point
-{ $$ = new ContProcFountain($2, $3, NULL, NULL, $4); }
-| pFOUNTAIN value value value value point
-{ $$ = new ContProcFountain($2, $3, $4, $5, $6); }
-| pFM value value
-{ $$ = new ContProcFM($2, $3); }
-| pFMTO point
-{ $$ = new ContProcFMTO($2); }
-| pGRID value
-{ $$ = new ContProcGrid($2); }
-| pHSCM point point value
-{ $$ = new ContProcHSCM($2, $3, $4); }
-| pHSDM point
-{ $$ = new ContProcHSDM($2); }
-| pMAGIC point
-{ $$ = new ContProcMagic($2); }
-| pMARCH value value value
-{ $$ = new ContProcMarch($2, $3, $4, NULL); }
-| pMARCH value value value value
-{ $$ = new ContProcMarch($2, $3, $4, $5); }
-| pMT value value
-{ $$ = new ContProcMT($2, $3); }
-| pMTRM value
-{ $$ = new ContProcMTRM($2); }
-| pNSEW point
-{ $$ = new ContProcNSEW($2); }
-| pROTATE value value point
-{ $$ = new ContProcRotate($2, $3, $4); }
 ;
 #endif
 
 template <typename Iterator>
 struct procedure_grammar : qi::grammar<Iterator, calchart::continuity::Procedure(), ascii::space_type>
 {
-	procedure_grammar(Iterator first) : procedure_grammar::base_type(procedure), point(first), value(first)
+	procedure_grammar(Iterator first) : procedure_grammar::base_type(procedure), variable(first), point(first), value(first), annotate(first)
 	{
 		using qi::lit;
 		using qi::double_;
 		using boost::phoenix::construct;
 		using namespace qi::labels;
 		using boost::phoenix::val;
-#if 0
-		"CLOSE"		ReturnToken(pMT);
-		"DMHS"		ReturnToken(pDMHS);
-		"EVEN"		ReturnToken(pEVEN);
-		"EWNS"		ReturnToken(pEWNS);
-		"FOUNTAIN"	ReturnToken(pFOUNTAIN);
-		"FM"		ReturnToken(pFM);
-		"FMTO"		ReturnToken(pFMTO);
-		"GRID"		ReturnToken(pGRID);
-		"HSCM"		ReturnToken(pHSCM);
-		"HSDM"		ReturnToken(pHSDM);
-		"MAGIC"		ReturnToken(pMAGIC);
-		"MARCH"		ReturnToken(pMARCH);
-		"MT"		ReturnToken(pMT);
-		"MTRM"		ReturnToken(pMTRM);
-		"NSEW"		ReturnToken(pNSEW);
-		"ROTATE"	ReturnToken(pROTATE);
-		"DIR"		ReturnToken(fDIR);
-		"DIRFROM"	ReturnToken(fDIRFROM);
-		"DIST"		ReturnToken(fDIST);
-		"DISTFROM"	ReturnToken(fDISTFROM);
-		"EITHER"	ReturnToken(fEITHER);
-		"OPP"		ReturnToken(fOPP);
-		"STEP"		ReturnToken(fSTEP);
-#endif
+			using ascii::char_;
 
 		static const struct ProcBlamTable_ : qi::symbols<char, calchart::continuity::ProcedureBlam>
 		{
@@ -487,100 +405,58 @@ struct procedure_grammar : qi::grammar<Iterator, calchart::continuity::Procedure
 				;
 			}
 		} ProcBlamTable;
-		ProcCM %= lit("COUNTERMARCH") >> point >> point >> value >> value >> value >> value ;
-		ProcDMCM %= lit("DMCM") >> point >> point >> value ;
-		procedure %= ( ProcBlamTable | ProcCM );
+		ProcSet       %= variable >> char_('=') >> value;
+		ProcCM        %= lit("COUNTERMARCH") >> point >> point >> value >> value >> value >> value ;
+		ProcDMCM      %= lit("DMCM") >> point >> point >> value ;
+		ProcDMHS      %= lit("DMHS") >> point ;
+		ProcEven      %= lit("EVEN") >> value >> point ;
+		ProcEWNS      %= lit("EWNS") >> point ;
+//		ProcFountain1  = lit("FOUNTAIN") >> value >> value >> point [ _val = calchart::continuity::ProcedureFountain(_1, _2, _3) ];
+//		ProcFountain2 %= lit("FOUNTAIN") >> value >> value >> value >> value >> point ;
+		ProcFM        %= lit("FM") >> value >> value ;
+		ProcFMTO      %= lit("FMTO") >> point ;
+		ProcGrid      %= lit("GRID") >> value ;
+		ProcHSCM      %= lit("HSCM") >> point >> point >> value ;
+		ProcHSDM      %= lit("HSDM") >> point ;
+		ProcMagic     %= lit("MAGIC") >> point ;
+//		ProcMarch1     = lit("MARCH") >> value >> value >> value  [ _val = calchart::continuity::ProcedureMarch(_1, _2, _3) ] ;
+//		ProcMarch2    %= lit("MARCH") >> value >> value >> value >> value ;
+		ProcMT        %= ( lit("CLOSE") | lit("MT") ) >> value >> value ;
+		ProcMTRM      %= lit("MTRM") >> value ;
+		ProcNSEW      %= lit("NSEW") >> point ;
+		ProcRotate    %= lit("ROTATE") >> value >> value >> point ;
+		procedure     %= ( ProcSet | ProcBlamTable | ProcCM | ProcDMCM | ProcDMHS | ProcEven | ProcEWNS | ProcFountain1 | ProcFountain2 | ProcFM | ProcFMTO | ProcGrid | ProcHSCM | ProcHSDM | ProcMagic | ProcMarch1 | ProcMarch2 | ProcMT | ProcMTRM | ProcNSEW | ProcRotate );
 		
+		// annotate on success
+		auto set_location_info = annotate(qi::_val, qi::labels::_1, qi::labels::_3);
+		qi::on_success(procedure,    set_location_info);
 	}
 	qi::rule<Iterator, calchart::continuity::Procedure(), ascii::space_type> procedure;
-//	qi::rule<Iterator, calchart::continuity::ProcedureBlam(), ascii::space_type> ProcBlam;
-	qi::rule<Iterator, calchart::continuity::ProcedureCM(), ascii::space_type> ProcCM;
-	qi::rule<Iterator, calchart::continuity::ProcedureDMCM(), ascii::space_type> ProcDMCM;
+	qi::rule<Iterator, calchart::continuity::ProcedureSet(),      ascii::space_type> ProcSet;
+	qi::rule<Iterator, calchart::continuity::ProcedureCM(),       ascii::space_type> ProcCM;
+	qi::rule<Iterator, calchart::continuity::ProcedureDMCM(),     ascii::space_type> ProcDMCM;
+	qi::rule<Iterator, calchart::continuity::ProcedureDMHS(),     ascii::space_type> ProcDMHS;
+	qi::rule<Iterator, calchart::continuity::ProcedureEven(),     ascii::space_type> ProcEven;
+	qi::rule<Iterator, calchart::continuity::ProcedureEWNS(),     ascii::space_type> ProcEWNS;
+	qi::rule<Iterator, calchart::continuity::ProcedureFountain(), ascii::space_type> ProcFountain1, ProcFountain2;
+	qi::rule<Iterator, calchart::continuity::ProcedureFM(),       ascii::space_type> ProcFM;
+	qi::rule<Iterator, calchart::continuity::ProcedureFMTO(),     ascii::space_type> ProcFMTO;
+	qi::rule<Iterator, calchart::continuity::ProcedureGrid(),     ascii::space_type> ProcGrid;
+	qi::rule<Iterator, calchart::continuity::ProcedureHSCM(),     ascii::space_type> ProcHSCM;
+	qi::rule<Iterator, calchart::continuity::ProcedureHSDM(),     ascii::space_type> ProcHSDM;
+	qi::rule<Iterator, calchart::continuity::ProcedureMagic(),    ascii::space_type> ProcMagic;
+	qi::rule<Iterator, calchart::continuity::ProcedureMarch(),    ascii::space_type> ProcMarch1, ProcMarch2;
+	qi::rule<Iterator, calchart::continuity::ProcedureMT(),       ascii::space_type> ProcMT;
+	qi::rule<Iterator, calchart::continuity::ProcedureMTRM(),     ascii::space_type> ProcMTRM;
+	qi::rule<Iterator, calchart::continuity::ProcedureNSEW(),     ascii::space_type> ProcNSEW;
+	qi::rule<Iterator, calchart::continuity::ProcedureRotate(),   ascii::space_type> ProcRotate;
+	variable_grammar<Iterator> variable;
 	point_grammar<Iterator> point;
 	value_grammar<Iterator> value;
+	boost::phoenix::function<calchart::continuity::annotation_f<Iterator>> annotate;
 };
 
 
-
-//
-namespace calchart
-{
-	namespace qi = boost::spirit::qi;
-	namespace ascii = boost::spirit::ascii;
-	//]
-#if 0
-	
-	std::ostream& operator<<(std::ostream& os, Function const& p)
-	{
-		boost::apply_visitor(Func_printer(os), p);
-		return os;
-	}
-	
-	struct function_printer
-	{
-		void operator()(Function const& proc) const;
-	};
-	
-	void function_printer::operator()(Function const& f) const
-	{
-		std::cout << "got: "<<f<<std::endl;
-	}
-	
-	///////////////////////////////////////////////////////////////////////////
-	//  Our mini XML grammar definition
-	///////////////////////////////////////////////////////////////////////////
-	//[tutorial_xml1_grammar
-	template <typename Iterator>
-	struct cont_point_grammar : qi::grammar<Iterator, Point(), ascii::space_type>
-	{
-		cont_point_grammar() : cont_point_grammar::base_type(start)
-		{
-			static const struct PointT_ : qi::symbols<char, Point>
-			{
-				PointT_()
-				{
-					add
-					("P"     , CurrPoint())
-					("NP"    , NextPoint())
-					("SP"    , StartPoint())
-					;
-				}
-			} PointT;
-			
-			refpoint %= qi::lit("R") ;
-			start %= (PointT | refpoint);
-		}
-		qi::rule<Iterator, Point(), ascii::space_type> start;
-		qi::rule<Iterator, RefPoint(), ascii::space_type> refpoint;
-	};
-	
-	template <typename Iterator>
-	struct cont_procedure_grammar : qi::grammar<Iterator, pCOUNTERMARCH(), ascii::space_type>
-	{
-		cont_procedure_grammar() : cont_procedure_grammar::base_type(start)
-		{
-			using qi::int_;
-			using qi::lit;
-			using qi::double_;
-			using qi::string;
-			using qi::lexeme;
-			using ascii::char_;
-			
-			start %=
-			lit("COUNTERMARCH")
-			>> '{'
-			>>  point
-			>>  point
-			>>  '}'
-			;
-		}
-		qi::rule<Iterator, pCOUNTERMARCH(), ascii::space_type> start;
-		cont_point_grammar<Iterator> point;
-	};
-	
-	//]
-#endif
-}
 
 namespace calchart
 {
@@ -865,10 +741,13 @@ std::pair<int, int> test_value()
 int main(int argc, char **argv)
 {
 	auto result = test_points();
+	std::cout<<"test_function\n";
 	auto next_result = test_function();
 	result.first += next_result.first; result.second += next_result.second;
+	std::cout<<"test_value\n";
 	next_result = test_value();
 	result.first += next_result.first; result.second += next_result.second;
+	std::cout<<"test_procedure\n";
 	next_result = test_procedure();
 	result.first += next_result.first; result.second += next_result.second;
 	std::cout<<"ran "<<result.first<<" tests, passed: "<<result.second<<"\n";

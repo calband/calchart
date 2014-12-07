@@ -70,12 +70,16 @@ public:
 	std::vector<std::shared_ptr<AnimateCommand> > Compile(ContProcedure* proc);
 // true if successful
 	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token = nullptr);
+	bool Append(std::shared_ptr<AnimateCommand> cmd, int line, int column);
 
 public:
 	void RegisterError(AnimateError err, const ContToken *token);
-	static void RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, const ContToken *token);
+	void RegisterError(AnimateError err, int line, int col);
+	static void RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err);
+	static void RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, int line, int col);
 
 	float GetVarValue(int varnum, const ContToken *token = nullptr);
+	float GetVarValue(int varnum, int line, int column);
 	void SetVarValue(int varnum, float value);
 
 	// helper functions to get information for building a command

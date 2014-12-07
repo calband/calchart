@@ -137,8 +137,7 @@ mCollisionAction(NULL)
 				if (parsecontinuity() != 0)
 				{
 					// Supply a generic parse error
-					ContToken dummy;
-					AnimateCompile::RegisterError(error_markers, current_symbol, 0, ANIMERR_SYNTAX, &dummy);
+					AnimateCompile::RegisterError(error_markers, current_symbol, 0, ANIMERR_SYNTAX);
 				}
 #if 1 // enable to see dump of continuity
 				{

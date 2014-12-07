@@ -31,177 +31,599 @@
 namespace calchart {
 namespace continuity {
 
-	struct LocationInfo {
-		unsigned line, column, length;
-	};
-
-	class FunctionDir;
-	class FunctionDirFrom;
-	class FunctionDist;
-	class FunctionDistFrom;
-	class FunctionEither;
-	class FunctionOpposite;
-	class FunctionStep;
-
-	typedef
-	boost::variant<
-	FunctionDir
-	, FunctionDirFrom
-	, FunctionDist
-	, FunctionDistFrom
-	, FunctionEither
-	, FunctionOpposite
-	, FunctionStep
-	>
-	Function;
-	
-	class ValueAdd;
-	class ValueSub;
-	class ValueMult;
-	class ValueDiv;
-	class ValueNeg;
-	class ValueREM;
-	
-	class Variable;
-	
-	typedef
-	boost::variant<
-	double
-	, boost::recursive_wrapper< ValueAdd >
-	, boost::recursive_wrapper< ValueSub >
-	, boost::recursive_wrapper< ValueMult >
-	, boost::recursive_wrapper< ValueDiv >
-	, boost::recursive_wrapper< ValueNeg >
-	, boost::recursive_wrapper< ValueREM >
-	, boost::recursive_wrapper< Variable >
-	, boost::recursive_wrapper< Function >
-	>
-	Value;
-	
-	
-
-// points conform to
-//CC_coord Get(AnimateCompile* anim) const;
-//std::ostream& Print(std::ostream&) const;
-	struct CurrentPoint : public LocationInfo
-{
-public:
-	CC_coord Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+struct ParsedLocationInfo {
+	unsigned line, column, length;
+	void Annotate(ParsedLocationInfo const&);
+	ParsedLocationInfo(unsigned l=0, unsigned c=0, unsigned len=0) : line(l), column(c), length(len) {}
+	virtual ~ParsedLocationInfo() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 };
-	static inline std::ostream& operator<<(std::ostream& os, CurrentPoint const& v) { return v.Print(os); }
+static inline std::ostream& operator<<(std::ostream& os, ParsedLocationInfo const& v) { return v.Print(os); }
 
-	class StartPoint : public LocationInfo
-{
-public:
-	CC_coord Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-};
-	static inline std::ostream& operator<<(std::ostream& os, StartPoint const& v) { return v.Print(os); }
-
-	class NextPoint : public LocationInfo
-{
-public:
-	CC_coord Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-};
-	static inline std::ostream& operator<<(std::ostream& os, NextPoint const& v) { return v.Print(os); }
-
-	class RefPoint : public LocationInfo
-{
-public:
-	RefPoint(unsigned n=0): refnum(n) {}
-
-	CC_coord Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	unsigned refnum;
-};
-
-}}
-
-BOOST_FUSION_ADAPT_STRUCT(
-						  calchart::continuity::RefPoint,
-						  (unsigned, refnum)
-						  )
-
-namespace calchart { namespace continuity {
+// Functions
+struct FunctionDir;
+struct FunctionDirFrom;
+struct FunctionDist;
+struct FunctionDistFrom;
+struct FunctionEither;
+struct FunctionOpposite;
+struct FunctionStep;
 
 typedef
 boost::variant<
-calchart::continuity::CurrentPoint
-, calchart::continuity::StartPoint
-, calchart::continuity::NextPoint
-, calchart::continuity::RefPoint
+FunctionDir
+, FunctionDirFrom
+, FunctionDist
+, FunctionDistFrom
+, FunctionEither
+, FunctionOpposite
+, FunctionStep
+>
+Function;
+
+std::ostream& operator<<(std::ostream& os, Function const& p);
+double Get(AnimateCompile& anim, Function const& p);
+void Annotate(Function& p, const ParsedLocationInfo&);
+
+// Variables
+struct Variable;
+
+// Values
+struct ValueAdd;
+struct ValueSub;
+struct ValueMult;
+struct ValueDiv;
+struct ValueNeg;
+struct ValueREM;
+
+typedef
+boost::variant<
+double
+, boost::recursive_wrapper< ValueAdd >
+, boost::recursive_wrapper< ValueSub >
+, boost::recursive_wrapper< ValueMult >
+, boost::recursive_wrapper< ValueDiv >
+, boost::recursive_wrapper< ValueNeg >
+, boost::recursive_wrapper< ValueREM >
+, boost::recursive_wrapper< Variable >
+, boost::recursive_wrapper< Function >
+>
+Value;
+
+// Functions on Values
+std::ostream& operator<<(std::ostream& os, Value const& v);
+double Get(AnimateCompile& anim, Value const& v);
+void Annotate(Value& p, const ParsedLocationInfo&);
+
+// Points
+struct CurrentPoint;
+struct StartPoint;
+struct NextPoint;
+struct RefPoint;
+
+typedef
+boost::variant<
+CurrentPoint
+, StartPoint
+, NextPoint
+, RefPoint
 >
 Point;
 
 std::ostream& operator<<(std::ostream& os, Point const& p);
 CC_coord Get(AnimateCompile& anim, Point const& p);
-	void Annotate(Point& p, LocationInfo);
+void Annotate(Point& p, const ParsedLocationInfo&);
 
-class ValueAdd
+struct ProcedureSet;
+struct ProcedureBlam;
+struct ProcedureCM;
+struct ProcedureDMCM;
+struct ProcedureDMHS;
+struct ProcedureEven;
+struct ProcedureEWNS;
+struct ProcedureFountain;
+struct ProcedureFM;
+struct ProcedureFMTO;
+struct ProcedureGrid;
+struct ProcedureHSCM;
+struct ProcedureHSDM;
+struct ProcedureMagic;
+struct ProcedureMarch;
+struct ProcedureMT;
+struct ProcedureMTRM;
+struct ProcedureNSEW;
+struct ProcedureRotate;
+
+typedef
+boost::variant<
+ProcedureSet
+, ProcedureBlam
+, ProcedureCM
+, ProcedureDMCM
+, ProcedureDMHS
+, ProcedureEven
+, ProcedureEWNS
+, ProcedureFountain
+, ProcedureFM
+, ProcedureFMTO
+, ProcedureGrid
+, ProcedureHSCM
+, ProcedureHSDM
+, ProcedureMagic
+, ProcedureMarch
+, ProcedureMT
+, ProcedureMTRM
+, ProcedureNSEW
+, ProcedureRotate
+>
+Procedure;
+
+std::ostream& operator<<(std::ostream& os, Procedure const& p);
+void Compile(AnimateCompile& anim, Procedure const& p);
+void Annotate(Procedure& p, const ParsedLocationInfo&);
+
+
+// points conform to
+//CC_coord Get(AnimateCompile& anim) const;
+//std::ostream& Print(std::ostream&) const;
+struct CurrentPoint : public ParsedLocationInfo
 {
-public:
+	using super = ParsedLocationInfo;
+	CC_coord Get(AnimateCompile& anim) const;
+	virtual ~CurrentPoint() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+};
+
+struct StartPoint : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	CC_coord Get(AnimateCompile& anim) const;
+	virtual ~StartPoint() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+};
+
+struct NextPoint : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	CC_coord Get(AnimateCompile& anim) const;
+	virtual ~NextPoint() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+};
+
+struct RefPoint : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	RefPoint(unsigned n=0): refnum(n) {}
+	CC_coord Get(AnimateCompile& anim) const;
+	virtual ~RefPoint() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	unsigned refnum;
+};
+
+
+// Value conform to
+//double Get(AnimateCompile& anim) const;
+struct ValueAdd : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
 	ValueAdd(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
 	ValueAdd() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+	double Get(AnimateCompile& anim) const;
+	virtual ~ValueAdd() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 	Value value1, value2;
 };
 
-class ValueSub
+struct ValueSub : public ParsedLocationInfo
 {
-public:
+	using super = ParsedLocationInfo;
 	ValueSub(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
 	ValueSub() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+	double Get(AnimateCompile& anim) const;
+	virtual ~ValueSub() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 	Value value1, value2;
 };
 
-class ValueMult
+
+struct ValueMult : public ParsedLocationInfo
 {
-public:
+	using super = ParsedLocationInfo;
 	ValueMult(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
 	ValueMult() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+	double Get(AnimateCompile& anim) const;
+	virtual ~ValueMult() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 	Value value1, value2;
 };
 
-class ValueDiv
+struct ValueDiv : public ParsedLocationInfo
 {
-public:
+	using super = ParsedLocationInfo;
 	ValueDiv(Value const& v1, Value const &v2) : value1(v1), value2(v2) {}
 	ValueDiv() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+	double Get(AnimateCompile& anim) const;
+	virtual ~ValueDiv() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 	Value value1, value2;
 };
 
-class ValueNeg
+struct ValueNeg : public ParsedLocationInfo
 {
-public:
+	using super = ParsedLocationInfo;
 	ValueNeg(Value const& v) : value(v) {}
 	ValueNeg() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+	double Get(AnimateCompile& anim) const;
+	virtual ~ValueNeg() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 	Value value;
 };
-	static inline std::ostream& operator<<(std::ostream& os, ValueNeg const& v) { return v.Print(os); }
 
-class ValueREM
+struct ValueREM : public ParsedLocationInfo
 {
-public:
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
+	using super = ParsedLocationInfo;
+	double Get(AnimateCompile& anim) const;
+	virtual ~ValueREM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
 };
-	static inline std::ostream& operator<<(std::ostream& os, ValueREM const& v) { return v.Print(os); }
 
-std::ostream& operator<<(std::ostream& os, Value const& v);
-double Get(AnimateCompile& anim, Value const& v);
+// Variable
+struct Variable : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	Variable(AnimateVar num): varnum(num) {}
+	Variable() {}
+	double Get(AnimateCompile& anim) const;
+	void Set(AnimateCompile& anim, double v) const;
+	virtual ~Variable() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	AnimateVar varnum;
+};
 	
+
+// Function conforms to
+//double Get(AnimateCompile& anim) const;
+struct FunctionDir : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionDir(const Point& p): point(p) {}
+	FunctionDir() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionDir() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point point;
+};
+
+struct FunctionDirFrom : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionDirFrom(const Point& start, const Point& end) : point_start(start), point_end(end) {}
+	FunctionDirFrom() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionDirFrom() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point point_start, point_end;
+};
+	
+struct FunctionDist : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionDist(const Point& p): point(p) {}
+	FunctionDist() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionDist() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point point;
+};
+
+struct FunctionDistFrom : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionDistFrom(const Point& start, const Point& end) : point_start(start), point_end(end) {}
+	FunctionDistFrom() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionDistFrom() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point point_start, point_end;
+};
+
+struct FunctionEither : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionEither(Value const& v1, Value const& v2, Point const& p) : dir1(v1), dir2(v2), point(p) {}
+	FunctionEither() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionEither() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value dir1, dir2;
+	Point point;
+};
+
+struct FunctionOpposite : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionOpposite(Value const& v) : dir(v) {}
+	FunctionOpposite() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionOpposite() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value dir;
+};
+
+struct FunctionStep : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	FunctionStep(Value const& v1, Value const& v2, Point const& p) : numbeats(v1), blocksize(v2), point(p) {}
+	FunctionStep() {}
+	double Get(AnimateCompile& anim) const;
+	virtual ~FunctionStep() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value numbeats, blocksize;
+	Point point;
+};
+
+
+struct ProcedureSet : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureSet(Variable const& vr, Value const& v) : var(vr), val(v) {}
+	ProcedureSet() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureSet() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Variable var;
+	Value val;
+};
+
+struct ProcedureBlam : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureBlam() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+};
+
+struct ProcedureCM : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureCM(Point const& p1, Point const& p2, Value const& steps, Value const& d1, Value const& d2, Value const& beats) : pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
+	ProcedureCM() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureCM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt1, pnt2;
+	Value stps, dir1, dir2, numbeats;
+};
+
+struct ProcedureDMCM : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureDMCM(Point const& p1, Point const& p2, Value const& beats) : pnt1(p1), pnt2(p2), numbeats(beats) {}
+	ProcedureDMCM() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureDMCM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt1, pnt2;
+	Value numbeats;
+};
+
+struct ProcedureDMHS : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureDMHS(Point const& p) : pnt(p) {}
+	ProcedureDMHS() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureDMHS() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt;
+};
+
+struct ProcedureEven : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureEven(Value const& steps, Point const& p) : stps(steps), pnt(p) {}
+	ProcedureEven() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureEven() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value stps;
+	Point pnt;
+};
+
+struct ProcedureEWNS : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureEWNS(Point const& p) : pnt(p) {}
+	ProcedureEWNS() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureEWNS() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt;
+};
+
+struct ProcedureFountain : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureFountain(Value const& d1, Value const& d2, Value const& s1, Value const& s2, Point const& p) : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p), use_stepsize(true) {}
+	ProcedureFountain(Value const& d1, Value const& d2, Point const& p) : dir1(d1), dir2(d2), pnt(p) {}
+	ProcedureFountain() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureFountain() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value dir1, dir2;
+	Value stepsize1, stepsize2;
+	Point pnt;
+	bool use_stepsize = false;
+};
+
+struct ProcedureFM : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureFM(Value const& steps, Value const& d) : stps(steps), dir(d) {}
+	ProcedureFM() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureFM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value stps, dir;
+};
+
+struct ProcedureFMTO : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureFMTO(Point const& p) : pnt(p) {}
+	ProcedureFMTO() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureFMTO() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt;
+};
+
+struct ProcedureGrid : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureGrid(Value const& g) : grid(g) {}
+	ProcedureGrid() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureGrid() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value grid;
+};
+
+struct ProcedureHSCM : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureHSCM(Point const& p1, Point const& p2, Value const& beats) : pnt1(p1), pnt2(p2), numbeats(beats) {}
+	ProcedureHSCM() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureHSCM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt1, pnt2;
+	Value numbeats;
+};
+
+struct ProcedureHSDM : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureHSDM(Point const& p) : pnt(p) {}
+	ProcedureHSDM() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureHSDM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt;
+};
+
+struct ProcedureMagic : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureMagic(Point const& p) : pnt(p) {}
+	ProcedureMagic() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureMagic() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt;
+};
+
+struct ProcedureMarch : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureMarch(Value const& stepsize, Value const& steps, Value const& d, Value const& face) : stpsize(stepsize), stps(steps), dir(d), facedir(face), use_facedir(true) {}
+	ProcedureMarch(Value const& stepsize, Value const& steps, Value const& d) : stpsize(stepsize), stps(steps), dir(d) {}
+	ProcedureMarch() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureMarch() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value stpsize, stps, dir, facedir;
+	bool use_facedir = false;
+};
+
+struct ProcedureMT : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureMT(Value const& beats, Value const& d) : numbeats(beats), dir(d) {}
+	ProcedureMT() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureMT() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value numbeats, dir;
+};
+
+struct ProcedureMTRM : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureMTRM(Value const& d) : dir(d) {}
+	ProcedureMTRM() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureMTRM() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value dir;
+};
+
+struct ProcedureNSEW : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureNSEW(Point const& p) : pnt(p) {}
+	ProcedureNSEW() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureNSEW() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Point pnt;
+};
+
+struct ProcedureRotate : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureRotate(Value const& angle, Value const& steps, Point const& p) : ang(angle), stps(steps), pnt(p) {}
+	ProcedureRotate() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureRotate() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value ang, stps;
+	Point pnt;
+};
+
+template<typename It>
+struct annotation_f {
+	typedef void result_type;
+	
+	annotation_f(It first) : first(first) {}
+	It const first;
+	
+	template<typename Val, typename First, typename Last>
+	void operator()(Val& v, First f, Last l) const {
+		using std::distance;
+		do_annotate(v, { static_cast<unsigned>(get_line(f)), static_cast<unsigned>(get_column(first, f)), static_cast<unsigned>(distance(f, l)) });
+	}
+private:
+	void static do_annotate(Point& v, ParsedLocationInfo const& li) {
+		using calchart::continuity::Annotate;
+		Annotate(v, li);
+	}
+	void static do_annotate(Function& v, ParsedLocationInfo const& li) {
+		using calchart::continuity::Annotate;
+		Annotate(v, li);
+	}
+	void static do_annotate(Value& v, ParsedLocationInfo const& li) {
+		using calchart::continuity::Annotate;
+		Annotate(v, li);
+	}
+	void static do_annotate(Procedure& v, ParsedLocationInfo const& li) {
+		using calchart::continuity::Annotate;
+		Annotate(v, li);
+	}
+	void static do_annotate(ParsedLocationInfo& v, ParsedLocationInfo const& li) {
+		v.Annotate(li);
+	}
+};
+
+
 }}
+
+
+// FUSION adaptors work
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::RefPoint,
+						  (unsigned, refnum)
+						  )
 
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::ValueAdd,
@@ -228,104 +650,10 @@ BOOST_FUSION_ADAPT_STRUCT(
 						  (calchart::continuity::Value, value)
 						  )
 
-namespace calchart { namespace continuity {
-
-	class Variable
-	{
-	public:
-		Variable(AnimateVar num): varnum(num) {}
-		Variable() {}
-		double Get(AnimateCompile* anim) const;
-		void Set(AnimateCompile* anim, double v) const;
-		std::ostream& Print(std::ostream&) const;
-		AnimateVar varnum;
-	};
-
-	static inline std::ostream& operator<<(std::ostream& os, Variable const& v) { return v.Print(os); }
-//	double Get(AnimateCompile& anim, Variable const& v);
-//	void Set(AnimateCompile& anim, Variable& which, Value const& v);
-	
-}}
-
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::Variable,
 						  (AnimateVar, varnum)
 						  )
-
-namespace calchart { namespace continuity {
-
-class FunctionDir
-{
-public:
-	FunctionDir(const Point& p): point(p) {}
-	FunctionDir() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point point;
-};
-
-class FunctionDirFrom
-{
-public:
-	FunctionDirFrom(const Point& start, const Point& end) : point_start(start), point_end(end) {}
-	FunctionDirFrom() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point point_start, point_end;
-};
-	
-class FunctionDist
-{
-public:
-	FunctionDist(const Point& p): point(p) {}
-	FunctionDist() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point point;
-};
-
-class FunctionDistFrom
-{
-public:
-	FunctionDistFrom(const Point& start, const Point& end) : point_start(start), point_end(end) {}
-	FunctionDistFrom() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point point_start, point_end;
-};
-
-class FunctionEither
-{
-public:
-	FunctionEither(Value const& v1, Value const& v2, Point const& p) : dir1(v1), dir2(v2), point(p) {}
-	FunctionEither() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value dir1, dir2;
-	Point point;
-};
-
-class FunctionOpposite
-{
-public:
-	FunctionOpposite(Value const& v) : dir(v) {}
-	FunctionOpposite() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value dir;
-};
-
-class FunctionStep
-{
-public:
-	FunctionStep(Value const& v1, Value const& v2, Point const& p) : numbeats(v1), blocksize(v2), point(p) {}
-	FunctionStep() {}
-	double Get(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value numbeats, blocksize;
-	Point point;
-};
-}}
 
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::FunctionDir,
@@ -362,205 +690,11 @@ BOOST_FUSION_ADAPT_STRUCT(
 						  (calchart::continuity::Point, point)
 						  )
 
-
-namespace calchart { namespace continuity {
-
-std::ostream& operator<<(std::ostream& os, Function const& p);
-
-double Get(AnimateCompile& anim, Function const& p);
-
-
-struct ProcedureSet
-{
-	ProcedureSet(Variable const& vr, Value const& v) : var(vr), val(v) {}
-	ProcedureSet() {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Variable var;
-	Value val;
-};
-
-struct ProcedureBlam
-{
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-};
-
-struct ProcedureCM
-{
-	ProcedureCM(Point const& p1, Point const& p2, Value const& steps, Value const& d1, Value const& d2, Value const& beats) : pnt1(p1), pnt2(p2), stps(steps), dir1(d1), dir2(d2), numbeats(beats) {}
-	ProcedureCM() {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt1, pnt2;
-	Value stps, dir1, dir2, numbeats;
-};
-
-struct ProcedureDMCM
-{
-	ProcedureDMCM(Point const& p1, Point const& p2, Value const& beats) : pnt1(p1), pnt2(p2), numbeats(beats) {}
-	ProcedureDMCM() {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt1, pnt2;
-	Value numbeats;
-};
-
-struct ProcedureDMHS
-{
-	ProcedureDMHS(Point const& p) : pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt;
-};
-
-struct ProcedureEven
-{
-	ProcedureEven(Value const& steps, Point const& p) : stps(steps), pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value stps;
-	Point pnt;
-};
-
-struct ProcedureEWNS
-{
-	ProcedureEWNS(Point const& p) : pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt;
-};
-
-struct ProcedureFountain
-{
-	ProcedureFountain(Value const& d1, Value const& d2, Value const& s1, Value const& s2, Point const& p) : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value dir1, dir2;
-	Value stepsize1, stepsize2;
-	Point pnt;
-};
-
-struct ProcedureFM
-{
-	ProcedureFM(Value const& steps, Value const& d) : stps(steps), dir(d) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value stps, dir;
-};
-
-struct ProcedureFMTO
-{
-	ProcedureFMTO(Point const& p) : pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt;
-};
-
-struct ProcedureGrid
-{
-	ProcedureGrid(Value const& g) : grid(g) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value grid;
-};
-
-struct ProcedureHSCM
-{
-	ProcedureHSCM(Point const& p1, Point const& p2, Value const& beats) : pnt1(p1), pnt2(p2), numbeats(beats) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt1, pnt2;
-	Value numbeats;
-};
-
-struct ProcedureHSDM
-{
-	ProcedureHSDM(Point const& p) : pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt;
-};
-
-struct ProcedureMagic
-{
-	ProcedureMagic(Point const& p) : pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt;
-};
-
-struct ProcedureMarch
-{
-	ProcedureMarch(Value const& stepsize, Value const& steps, Value const& d, Value const& face) : stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value stpsize, stps, dir, facedir;
-};
-
-struct ProcedureMT
-{
-	ProcedureMT(Value const& beats, Value const& d) : numbeats(beats), dir(d) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value numbeats, dir;
-};
-
-struct ProcedureMTRM
-{
-	ProcedureMTRM(Value const& d) : dir(d) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value dir;
-};
-
-struct ProcedureNSEW
-{
-	ProcedureNSEW(Point const& p) : pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Point pnt;
-};
-
-struct ProcedureRotate
-{
-	ProcedureRotate(Value const& angle, Value const& steps, Point const& p) : ang(angle), stps(steps), pnt(p) {}
-	void Compile(AnimateCompile* anim) const;
-	std::ostream& Print(std::ostream&) const;
-	Value ang, stps;
-	Point pnt;
-};
-
-	typedef
-	boost::variant<
-	calchart::continuity::ProcedureSet
-	, calchart::continuity::ProcedureBlam
-	, calchart::continuity::ProcedureCM
-	, calchart::continuity::ProcedureDMCM
-	/*
-	, calchart::continuity::ProcedureDMHS
-	, calchart::continuity::ProcedureEven
-	, calchart::continuity::ProcedureEWNS
-	, calchart::continuity::ProcedureFountain
-	, calchart::continuity::ProcedureFM
-	, calchart::continuity::ProcedureFMTO
-	, calchart::continuity::ProcedureGrid
-	, calchart::continuity::ProcedureHSCM
-	, calchart::continuity::ProcedureHSDM
-	, calchart::continuity::ProcedureMagic
-	, calchart::continuity::ProcedureMarch
-	, calchart::continuity::ProcedureMT
-	, calchart::continuity::ProcedureMTRM
-	, calchart::continuity::ProcedureNSEW
-	, calchart::continuity::ProcedureRotate
-	 */
-	>
-	Procedure;
-	std::ostream& operator<<(std::ostream& os, Procedure const& p);
-	
-//	void Compile(AnimateCompile& anim, Procedure const& p);
-}}
-
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureSet,
+						  (calchart::continuity::Variable, var)
+						  (calchart::continuity::Value, val)
+						  )
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::ProcedureCM,
 						  (calchart::continuity::Point, pnt1)
@@ -575,6 +709,82 @@ BOOST_FUSION_ADAPT_STRUCT(
 						  (calchart::continuity::Point, pnt1)
 						  (calchart::continuity::Point, pnt2)
 						  (calchart::continuity::Value, numbeats)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureDMHS,
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureEven,
+						  (calchart::continuity::Value, stps)
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureEWNS,
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureFountain,
+						  (calchart::continuity::Value, dir1)
+						  (calchart::continuity::Value, dir2)
+						  (calchart::continuity::Value, stepsize1)
+						  (calchart::continuity::Value, stepsize2)
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureFM,
+						  (calchart::continuity::Value, stps)
+						  (calchart::continuity::Value, dir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureFMTO,
+						  (calchart::continuity::Point, pnt)
+						  (calchart::continuity::Value, dir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureGrid,
+						  (calchart::continuity::Value, grid)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureHSCM,
+						  (calchart::continuity::Point, pnt1)
+						  (calchart::continuity::Point, pnt2)
+						  (calchart::continuity::Value, numbeats)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureHSDM,
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureMagic,
+						  (calchart::continuity::Point, pnt)
+						  )
+
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureMarch,
+						  (calchart::continuity::Value, stpsize)
+						  (calchart::continuity::Value, stps)
+						  (calchart::continuity::Value, dir)
+						  (calchart::continuity::Value, facedir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureMT,
+						  (calchart::continuity::Value, numbeats)
+						  (calchart::continuity::Value, dir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureMTRM,
+						  (calchart::continuity::Value, dir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureNSEW,
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureRotate,
+						  (calchart::continuity::Value, ang)
+						  (calchart::continuity::Value, stps)
+						  (calchart::continuity::Point, pnt)
 						  )
 
 #endif

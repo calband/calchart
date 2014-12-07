@@ -143,22 +143,60 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken
 	return true;
 }
 
+bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, int line, int column)
+{
+	bool clipped;
 
-void AnimateCompile::RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, const ContToken *token)
+	if (beats_rem < cmd->NumBeats())
+	{
+		RegisterError(ANIMERR_OUTOFTIME, line, column);
+		if (beats_rem == 0)
+		{
+			return false;
+		}
+		cmd->ClipBeats(beats_rem);
+		clipped = true;
+	}
+	else
+	{
+		clipped = false;
+	}
+	cmds.push_back(cmd);
+	beats_rem -= cmd->NumBeats();
+
+	cmd->ApplyForward(pt);						  // Move current point to new position
+	SetVarValue(CONTVAR_DOF, cmd->MotionDirection());
+	SetVarValue(CONTVAR_DOH, cmd->RealDirection());
+	return true;
+}
+
+
+void AnimateCompile::RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err)
 {
 	error_markers[err].contsymbol = contsymbol;
-	if (token != NULL)
-	{
-		error_markers[err].line = token->line;
-		error_markers[err].col = token->col;
-	}
 	error_markers[err].pntgroup.insert(curr_pt);
+}
+
+void AnimateCompile::RegisterError(std::map<AnimateError, ErrorMarker>& error_markers, SYMBOL_TYPE contsymbol, unsigned curr_pt, AnimateError err, int line, int col)
+{
+	error_markers[err].line = line;
+	error_markers[err].col = col;
+	return AnimateCompile::RegisterError(error_markers, contsymbol, curr_pt, err);
 }
 
 
 void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
 {
-	AnimateCompile::RegisterError(error_markers, contsymbol, curr_pt, err, token);
+	if (token)
+	{
+		return AnimateCompile::RegisterError(error_markers, contsymbol, curr_pt, err, token->line, token->col);
+	}
+	AnimateCompile::RegisterError(error_markers, contsymbol, curr_pt, err);
+}
+
+void AnimateCompile::RegisterError(AnimateError err, int line, int col)
+{
+	AnimateCompile::RegisterError(error_markers, contsymbol, curr_pt, err, line, col);
 }
 
 float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
@@ -171,6 +209,20 @@ float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 	{
 	}
 	RegisterError(ANIMERR_UNDEFINED, token);
+	return 0.0;
+}
+
+
+float AnimateCompile::GetVarValue(int varnum, int line, int column)
+{
+	try
+	{
+		return vars.GetVarValue(varnum, curr_pt);
+	}
+	catch (AnimationVariables::AnimationVariableException&)
+	{
+	}
+	RegisterError(ANIMERR_UNDEFINED, line, column);
 	return 0.0;
 }
 
