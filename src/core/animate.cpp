@@ -34,6 +34,13 @@
 #include <sstream>
 #include <iostream>
 
+#define DO_PRINT 1
+#define DO_NEW_CONT 1
+#if DO_NEW_CONT
+#include "new_cont_grammar.h"
+bool g_use_spirit = 0;
+#endif
+
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
 extern ContProcedure *ParsedContinuity;
@@ -98,6 +105,15 @@ private:
 };
 
 
+#if DO_NEW_CONT
+std::pair<bool, std::vector<calchart::continuity::Procedure>> ParseContinuity(std::string const& cont)
+{
+	auto parse_result = Parse_procedure_string(cont);
+	return parse_result;
+}
+#endif
+
+
 Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
 : numpts(show.GetNumPoints()), pts(numpts), curr_cmds(numpts),
 curr_sheetnum(0),
@@ -119,27 +135,53 @@ mCollisionAction(NULL)
 		std::vector<std::vector<std::shared_ptr<AnimateCommand> > > theCommands(numpts);
 		for (auto& current_symbol : k_symbols)
 		{
+			if (notifyStatus)
+			{
+				std::string message("Compiling \"");
+				message += curr_sheet->GetName().substr(0,32);
+				message += ("\" ");
+				message += GetNameForSymbol(current_symbol).substr(0,32);
+				message += ("...");
+				notifyStatus(message);
+			}
 			if (curr_sheet->ContinuityInUse(current_symbol))
 			{
 				auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
 				std::string tmpBuffer(current_continuity.GetText());
-				yyinputbuffer = tmpBuffer.c_str();
-				if (notifyStatus)
+#if DO_NEW_CONT
+				if (g_use_spirit)
 				{
-					std::string message("Compiling \"");
-					message += curr_sheet->GetName().substr(0,32);
-					message += ("\" ");
-					message += GetNameForSymbol(current_symbol).substr(0,32);
-					message += ("...");
-					notifyStatus(message);
+				auto result = ParseContinuity(tmpBuffer);
+				if (!result.first)
+				{
+					// Supply a generic parse error
+					AnimateCompile::RegisterError(error_markers, current_symbol, 0, ANIMERR_SYNTAX);
 				}
+#if DO_PRINT // enable to see dump of continuity
+				{
+					std::cout<<"continuity:\n"<<tmpBuffer<<"\n\n";
+					for (auto&& i : result.second)
+						std::cout << i<<" :\n";
+				}
+#endif
+				for (unsigned j = 0; j < numpts; j++)
+				{
+					if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol)
+					{
+						AnimateCompile comp(show, curr_sheet, j, current_symbol, variablesStates, error_markers);
+						theCommands[j] = comp.Compile(result.second);
+					}
+				}
+				} else {
+#endif
+				yyinputbuffer = tmpBuffer.c_str();
 				// parse out the error
 				if (parsecontinuity() != 0)
 				{
 					// Supply a generic parse error
 					AnimateCompile::RegisterError(error_markers, current_symbol, 0, ANIMERR_SYNTAX);
 				}
-#if 1 // enable to see dump of continuity
+#if DO_PRINT // enable to see dump of continuity
 				{
 					std::cout<<"continuity:\n"<<tmpBuffer<<"\n\n";
 					for (auto proc = ParsedContinuity; proc; proc = proc->next)
@@ -162,6 +204,9 @@ mCollisionAction(NULL)
 					delete ParsedContinuity;
 					ParsedContinuity = curr_proc;
 				}
+#if DO_NEW_CONT
+				}
+#endif
 			}
 		}
 // Handle points that don't have continuity (shouldn't happen)

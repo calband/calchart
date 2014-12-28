@@ -1252,7 +1252,7 @@ void ContProcMarch::Compile(AnimateCompile* anim)
 std::ostream& ContProcMarch::Print(std::ostream& os) const
 {
 	super::Print(os);
-	os<<"March step size"<<*stpsize<<" for steps "<<*stps<<" in direction "<<*dir;
+	os<<"March step size "<<*stpsize<<" for steps "<<*stps<<" in direction "<<*dir;
 	if (facedir)
 		os<<" facing "<<*facedir;
 	return os;

@@ -22,6 +22,7 @@
 
 #include "new_cont.h"
 
+#include "animatecompile.h"
 #include "math_utils.h"
 #include "animatecommand.h"
 #include "cc_sheet.h"
@@ -632,32 +633,83 @@ std::ostream& ProcedureEWNS::Print(std::ostream& os) const
 }
 
 
-void ProcedureFountain::Compile(AnimateCompile& anim) const
+void ProcedureFountain1::Compile(AnimateCompile& anim) const
+{
+	auto f1 = Get(anim, dir1);
+	auto f2 = Get(anim, stepsize1);
+	auto a = f2 * cos(Deg2Rad(f1));
+	auto c = f2 * -sin(Deg2Rad(f1));
+	f1 = Get(anim, dir2);
+	f2 = Get(anim, stepsize2);
+	auto b = f2 * cos(Deg2Rad(f1));
+	auto d = f2 * -sin(Deg2Rad(f1));
+	auto v = Get(anim, pnt) - anim.GetPointPosition();
+	auto e = Coord2Float(v.x);
+	auto f = Coord2Float(v.y);
+	f1 = a*d - b*c;
+	if (IS_ZERO(f1))
+	{
+		if (IS_ZERO(a-b) && IS_ZERO(c-d) && IS_ZERO(e*c-a*f))
+		{
+// Special case: directions are same
+			if (IS_ZERO(c))
+			{
+				f1 = f/c;
+			}
+			else
+			{
+				f1 = e/a;
+			}
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f1), v), line, column))
+			{
+				return;
+			}
+		}
+		else
+		{
+			anim.RegisterError(ANIMERR_INVALID_FNTN, line, column);
+			return;
+		}
+	}
+	else
+	{
+		auto f2 = (d*e - b*f) / f1;
+		if (!IS_ZERO(f2))
+		{
+			v.x = Float2Coord(f2*a);
+			v.y = Float2Coord(f2*c);
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), line, column))
+			{
+				return;
+			}
+		}
+		f2 = (a*f - c*e) / f1;
+		if (!IS_ZERO(f2))
+		{
+			v.x = Float2Coord(f2*b);
+			v.y = Float2Coord(f2*d);
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), line, column))
+			{
+				return;
+			}
+		}
+	}
+}
+
+std::ostream& ProcedureFountain1::Print(std::ostream& os) const
+{
+	return super::Print(os)<<"Fountain step, first going "<<dir1<<" then "<<dir2<<", first at "<<stepsize1<<", then at "<<stepsize2<<", ending at "<<pnt;
+}
+
+
+void ProcedureFountain2::Compile(AnimateCompile& anim) const
 {
 	float a, b, c, d, e, f;
 
 	auto f1 = Get(anim, dir1);
-	if (use_stepsize)
-	{
-		auto f2 = Get(anim, stepsize1);
-		a = f2 * cos(Deg2Rad(f1));
-		c = f2 * -sin(Deg2Rad(f1));
-	}
-	else
-	{
-		CreateUnitVector(a, c, f1);
-	}
+	CreateUnitVector(a, c, f1);
 	f1 = Get(anim, dir2);
-	if (use_stepsize)
-	{
-		auto f2 = Get(anim, stepsize2);
-		b = f2 * cos(Deg2Rad(f1));
-		d = f2 * -sin(Deg2Rad(f1));
-	}
-	else
-	{
-		CreateUnitVector(b, d, f1);
-	}
+	CreateUnitVector(b, d, f1);
 	auto v = Get(anim, pnt) - anim.GetPointPosition();
 	e = Coord2Float(v.x);
 	f = Coord2Float(v.y);
@@ -711,10 +763,8 @@ void ProcedureFountain::Compile(AnimateCompile& anim) const
 	}
 }
 
-std::ostream& ProcedureFountain::Print(std::ostream& os) const
+std::ostream& ProcedureFountain2::Print(std::ostream& os) const
 {
-	if (use_stepsize)
-		return super::Print(os)<<"Fountain step, first going "<<dir1<<" then "<<dir2<<", first at "<<stepsize1<<", then at "<<stepsize2<<", ending at "<<pnt;
 	return super::Print(os)<<"Fountain step, first going "<<dir1<<" then "<<dir2<<", ending at "<<pnt;
 }
 
@@ -894,7 +944,7 @@ std::ostream& ProcedureMagic::Print(std::ostream& os) const
 }
 
 
-void ProcedureMarch::Compile(AnimateCompile& anim) const
+void ProcedureMarch1::Compile(AnimateCompile& anim) const
 {
 	auto b = float2int(*this, anim, Get(anim, stps));
 	if (b != 0)
@@ -907,9 +957,30 @@ void ProcedureMarch::Compile(AnimateCompile& anim) const
 		c.y = -(Float2Coord(sin(rads)*mag));
 		if (c != 0)
 		{
-			if (use_facedir)
-				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)std::abs(b), c, Get(anim, facedir)), line, column);
-			else
+			anim.Append(std::make_shared<AnimateCommandMove>((unsigned)std::abs(b), c, Get(anim, facedir)), line, column);
+		}
+	}
+}
+
+std::ostream& ProcedureMarch1::Print(std::ostream& os) const
+{
+	return super::Print(os)<<"March step size "<<stpsize<<" for steps "<<stps<<" in direction "<<" facing "<<facedir;
+}
+
+
+void ProcedureMarch2::Compile(AnimateCompile& anim) const
+{
+	auto b = float2int(*this, anim, Get(anim, stps));
+	if (b != 0)
+	{
+		auto rads = Deg2Rad(Get(anim, dir));
+		auto mag = Get(anim, stpsize) * Get(anim, stps);
+		CC_coord c;
+
+		c.x = Float2Coord(cos(rads)*mag);
+		c.y = -(Float2Coord(sin(rads)*mag));
+		if (c != 0)
+		{
 			if (b < 0)
 			{
 				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c, -c.Direction()), line, column);
@@ -922,12 +993,9 @@ void ProcedureMarch::Compile(AnimateCompile& anim) const
 	}
 }
 
-std::ostream& ProcedureMarch::Print(std::ostream& os) const
+std::ostream& ProcedureMarch2::Print(std::ostream& os) const
 {
-	super::Print(os)<<"March step size"<<stpsize<<" for steps "<<stps<<" in direction "<<dir;
-	if (use_facedir)
-		os<<" facing "<<facedir;
-	return os;
+	return super::Print(os)<<"March step size "<<stpsize<<" for steps "<<stps<<" in direction "<<dir;
 }
 
 
@@ -1195,14 +1263,16 @@ struct Procedure_Printer : boost::static_visitor<>
 	void operator()(ProcedureDMHS const& p) const { p.Print(os); }
 	void operator()(ProcedureEven const& p) const { p.Print(os); }
 	void operator()(ProcedureEWNS const& p) const { p.Print(os); }
-	void operator()(ProcedureFountain const& p) const { p.Print(os); }
+	void operator()(ProcedureFountain1 const& p) const { p.Print(os); }
+	void operator()(ProcedureFountain2 const& p) const { p.Print(os); }
 	void operator()(ProcedureFM const& p) const { p.Print(os); }
 	void operator()(ProcedureFMTO const& p) const { p.Print(os); }
 	void operator()(ProcedureGrid const& p) const { p.Print(os); }
 	void operator()(ProcedureHSCM const& p) const { p.Print(os); }
 	void operator()(ProcedureHSDM const& p) const { p.Print(os); }
 	void operator()(ProcedureMagic const& p) const { p.Print(os); }
-	void operator()(ProcedureMarch const& p) const { p.Print(os); }
+	void operator()(ProcedureMarch1 const& p) const { p.Print(os); }
+	void operator()(ProcedureMarch2 const& p) const { p.Print(os); }
 	void operator()(ProcedureMT const& p) const { p.Print(os); }
 	void operator()(ProcedureMTRM const& p) const { p.Print(os); }
 	void operator()(ProcedureNSEW const& p) const { p.Print(os); }
@@ -1226,14 +1296,16 @@ struct Procedure_Compiler : boost::static_visitor<>
 	void operator()(ProcedureDMHS const& p) const { p.Compile(anim); }
 	void operator()(ProcedureEven const& p) const { p.Compile(anim); }
 	void operator()(ProcedureEWNS const& p) const { p.Compile(anim); }
-	void operator()(ProcedureFountain const& p) const { p.Compile(anim); }
+	void operator()(ProcedureFountain1 const& p) const { p.Compile(anim); }
+	void operator()(ProcedureFountain2 const& p) const { p.Compile(anim); }
 	void operator()(ProcedureFM const& p) const { p.Compile(anim); }
 	void operator()(ProcedureFMTO const& p) const { p.Compile(anim); }
 	void operator()(ProcedureGrid const& p) const { p.Compile(anim); }
 	void operator()(ProcedureHSCM const& p) const { p.Compile(anim); }
 	void operator()(ProcedureHSDM const& p) const { p.Compile(anim); }
 	void operator()(ProcedureMagic const& p) const { p.Compile(anim); }
-	void operator()(ProcedureMarch const& p) const { p.Compile(anim); }
+	void operator()(ProcedureMarch1 const& p) const { p.Compile(anim); }
+	void operator()(ProcedureMarch2 const& p) const { p.Compile(anim); }
 	void operator()(ProcedureMT const& p) const { p.Compile(anim); }
 	void operator()(ProcedureMTRM const& p) const { p.Compile(anim); }
 	void operator()(ProcedureNSEW const& p) const { p.Compile(anim); }
@@ -1256,14 +1328,16 @@ struct Procedure_Annotate : boost::static_visitor<>
 	void operator()(ProcedureDMHS& p) const { p.Annotate(l); }
 	void operator()(ProcedureEven& p) const { p.Annotate(l); }
 	void operator()(ProcedureEWNS& p) const { p.Annotate(l); }
-	void operator()(ProcedureFountain& p) const { p.Annotate(l); }
+	void operator()(ProcedureFountain1& p) const { p.Annotate(l); }
+	void operator()(ProcedureFountain2& p) const { p.Annotate(l); }
 	void operator()(ProcedureFM& p) const { p.Annotate(l); }
 	void operator()(ProcedureFMTO& p) const { p.Annotate(l); }
 	void operator()(ProcedureGrid& p) const { p.Annotate(l); }
 	void operator()(ProcedureHSCM& p) const { p.Annotate(l); }
 	void operator()(ProcedureHSDM& p) const { p.Annotate(l); }
 	void operator()(ProcedureMagic& p) const { p.Annotate(l); }
-	void operator()(ProcedureMarch& p) const { p.Annotate(l); }
+	void operator()(ProcedureMarch1& p) const { p.Annotate(l); }
+	void operator()(ProcedureMarch2& p) const { p.Annotate(l); }
 	void operator()(ProcedureMT& p) const { p.Annotate(l); }
 	void operator()(ProcedureMTRM& p) const { p.Annotate(l); }
 	void operator()(ProcedureNSEW& p) const { p.Annotate(l); }

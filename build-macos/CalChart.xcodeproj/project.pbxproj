@@ -432,6 +432,7 @@
 		E813C4AF17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
 		E83BFE231A268908002C9592 /* new_cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83BFE211A268908002C9592 /* new_cont.cpp */; };
 		E83BFE241A268D0A002C9592 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
+		E865E7E21A47386B004A5BC0 /* new_cont_grammar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E865E7E11A47386B004A5BC0 /* new_cont_grammar.cpp */; };
 		E8786A1B1A26780E00A76128 /* test_spirit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8786A1A1A26780E00A76128 /* test_spirit.cpp */; };
 		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
@@ -978,6 +979,8 @@
 		E813C4AB17A7886200705836 /* animatecompile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animatecompile.h; sourceTree = "<group>"; };
 		E83BFE211A268908002C9592 /* new_cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = new_cont.cpp; sourceTree = "<group>"; };
 		E83BFE221A268908002C9592 /* new_cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = new_cont.h; sourceTree = "<group>"; };
+		E84FFE761A3ABBF90097C9F9 /* new_cont_grammar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = new_cont_grammar.h; sourceTree = "<group>"; };
+		E865E7E11A47386B004A5BC0 /* new_cont_grammar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = new_cont_grammar.cpp; sourceTree = "<group>"; };
 		E8786A1A1A26780E00A76128 /* test_spirit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = test_spirit.cpp; sourceTree = "<group>"; };
 		E878CC9A17ACA6AC009B1F1C /* cont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cont.cpp; sourceTree = "<group>"; };
 		E878CC9B17ACA6AC009B1F1C /* cont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont.h; sourceTree = "<group>"; };
@@ -1335,6 +1338,8 @@
 		E807BD5D17ED71F60052A53F /* calchart_cmd */ = {
 			isa = PBXGroup;
 			children = (
+				E865E7E11A47386B004A5BC0 /* new_cont_grammar.cpp */,
+				E84FFE761A3ABBF90097C9F9 /* new_cont_grammar.h */,
 				E83BFE211A268908002C9592 /* new_cont.cpp */,
 				E83BFE221A268908002C9592 /* new_cont.h */,
 				E8786A1A1A26780E00A76128 /* test_spirit.cpp */,
@@ -1678,6 +1683,7 @@
 				E8786A1B1A26780E00A76128 /* test_spirit.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
+				E865E7E21A47386B004A5BC0 /* new_cont_grammar.cpp in Sources */,
 				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
 				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
 				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,

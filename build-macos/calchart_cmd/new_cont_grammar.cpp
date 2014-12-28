@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _NEW_CONT_GRAMMAR_H_
-#define _NEW_CONT_GRAMMAR_H_
-
+#define BOOST_SPIRIT_DEBUG
+#include "new_cont_grammar.h"
 #include "new_cont.h"
+#include "animatecompile.h"
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -44,6 +44,11 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
+using pos_iterator_t = boost::spirit::line_pos_iterator<std::string::const_iterator>;
+
+namespace qi = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
 
 namespace calchart {
 namespace continuity {
@@ -97,6 +102,9 @@ struct point_grammar : qi::grammar<Iterator, Point(), ascii::space_type>
 {
 	point_grammar(Iterator first) : point_grammar::base_type(point), annotate(first)
 	{
+		using boost::phoenix::construct;
+		using namespace qi::labels;
+		using boost::phoenix::val;
 		// name rules to help with debugging
 		point.name("point");
 		refpoint.name("refpoint");
@@ -114,7 +122,7 @@ struct point_grammar : qi::grammar<Iterator, Point(), ascii::space_type>
 		} PointT;
 
 		// grammar definition:
-		refpoint %= qi::no_case[ qi::lit("r") >> qi::int_ ] ;
+		refpoint  = qi::no_case[ qi::lit("r") >> qi::int_ [ _val = boost::phoenix::construct<RefPoint>(_1 - 1) ] ] ;
 		point    %= qi::no_case[ (PointT | refpoint) ] ;
 
 		// annotate on success
@@ -267,7 +275,7 @@ struct procedure_grammar : qi::grammar<Iterator, std::vector<Procedure>(), ascii
 				;
 			}
 		} ProcBlamTable;
-		ProcSet       %= variable > char_('=') > value;
+		ProcSet       %= variable > '=' > value;
 		ProcCM        %= qi::no_case [ qi::lit("countermarch") >> point >> point >> value >> value >> value >> value ] ;
 		ProcDMCM      %= qi::no_case [ qi::lit("dmcm") >> point >> point >> value ] ;
 		ProcDMHS      %= qi::no_case [ qi::lit("dmhs") >> point ] ;
@@ -329,4 +337,58 @@ struct procedure_grammar : qi::grammar<Iterator, std::vector<Procedure>(), ascii
 } // namespace continuity
 } // namespace calchart
 
-#endif // _NEW_CONT_GRAMMAR_H_
+std::pair<bool, CC_coord> Parse_point_string(const std::string& test, AnimateCompile& a)
+{
+	using boost::spirit::ascii::space;
+	pos_iterator_t first(test.begin()), iter = first, end(test.end());
+	calchart::continuity::point_grammar<pos_iterator_t> gram(first); // Our grammar
+	calchart::continuity::Point ast; // Our tree
+
+	bool r = phrase_parse(iter, end, gram, space, ast);
+	if (r && iter == end)
+	{
+		std::cout<<ast<<"\n";
+		return { true, Get(a, ast) };
+	}
+	return { false, CC_coord() };
+}
+
+std::pair<bool, double> Parse_value_string(const std::string& test, AnimateCompile& a)
+{
+	using boost::spirit::ascii::space;
+	pos_iterator_t first(test.begin()), iter = first, end(test.end());
+	calchart::continuity::value_grammar<pos_iterator_t> gram(first); // Our grammar
+	calchart::continuity::Value ast; // Our tree
+
+	bool r = phrase_parse(iter, end, gram, space, ast);
+	if (r && iter == end)
+	{
+		std::cout<<ast<<"\n";
+		return { true, Get(a, ast) };
+	}
+	return { false, double() };
+}
+
+std::pair<bool, std::vector<calchart::continuity::Procedure>> Parse_procedure_string(const std::string& test)
+{
+	std::pair<bool, std::vector<calchart::continuity::Procedure>> result = { true, {} };
+    std::istringstream input(test);
+	for (std::string line; std::getline(input, line); )
+	{
+		pos_iterator_t first(line.begin()), iter = first, end(line.end());
+		calchart::continuity::procedure_grammar<pos_iterator_t> gram(first); // Our grammar
+		std::vector<calchart::continuity::Procedure> ast; // Our tree
+		bool r = phrase_parse(iter, end, gram, boost::spirit::ascii::space, ast);
+		if (r && iter == end)
+		{
+			result.second.insert(result.second.end(), ast.begin(), ast.end());
+		}
+		else
+		{
+			return { false, {} };
+		}
+	}
+	return result;
+}
+
+

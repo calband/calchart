@@ -25,6 +25,7 @@
 
 #include "animate_types.h"
 #include "animate.h"
+#include "new_cont.h"
 #include <vector>
 #include <memory>
 
@@ -68,6 +69,7 @@ public:
 
 // Compile a point
 	std::vector<std::shared_ptr<AnimateCommand> > Compile(ContProcedure* proc);
+	std::vector<std::shared_ptr<AnimateCommand> > Compile(const std::vector<calchart::continuity::Procedure>& proc);
 // true if successful
 	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token = nullptr);
 	bool Append(std::shared_ptr<AnimateCommand> cmd, int line, int column);

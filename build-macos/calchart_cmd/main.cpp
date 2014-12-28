@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <getopt.h>
 
+extern bool g_use_spirit;
 
 void AnimateShow(const char* show)
 {
@@ -123,11 +124,11 @@ int main(int argc, char * argv[]);
 
 int main(int argc, char * argv[])
 {
-	calchart::main(argc, argv);
+//	calchart::main(argc, argv);
     opterr = 0;
 	int c = 0;
 	
-	while ((c = getopt (argc, argv, "cpad")) != -1)
+	while ((c = getopt (argc, argv, "scpad")) != -1)
 		switch (c)
 	{
 		case 'p':
@@ -135,6 +136,9 @@ int main(int argc, char * argv[])
 			break;
 		case 'a':
 			animate_flag = true;
+			break;
+		case 's':
+			g_use_spirit = true;
 			break;
 		case 'd':
 			dump_continuity = true;

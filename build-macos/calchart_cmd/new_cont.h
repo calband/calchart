@@ -20,13 +20,34 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CONT_H_
-#define _CONT_H_
+#ifndef _NEW_CONT_H_
+#define _NEW_CONT_H_
 
-#include "animatecompile.h"
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_LIMIT_LIST_SIZE 30
+
+//#include "animatecompile.h"
+#include "cc_coord.h"
+#include "animate_types.h"
 #include <iosfwd>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/variant/recursive_variant.hpp>
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_fusion.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/phoenix/object/construct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/variant/recursive_variant.hpp>
+#include <boost/foreach.hpp>
+#include <boost/phoenix/object/construct.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/home/support/iterators/line_pos_iterator.hpp>
+
+
+class AnimateCompile;
 
 namespace calchart {
 namespace continuity {
@@ -121,14 +142,16 @@ struct ProcedureDMCM;
 struct ProcedureDMHS;
 struct ProcedureEven;
 struct ProcedureEWNS;
-struct ProcedureFountain;
+struct ProcedureFountain1;
+struct ProcedureFountain2;
 struct ProcedureFM;
 struct ProcedureFMTO;
 struct ProcedureGrid;
 struct ProcedureHSCM;
 struct ProcedureHSDM;
 struct ProcedureMagic;
-struct ProcedureMarch;
+struct ProcedureMarch1;
+struct ProcedureMarch2;
 struct ProcedureMT;
 struct ProcedureMTRM;
 struct ProcedureNSEW;
@@ -143,14 +166,16 @@ ProcedureSet
 , ProcedureDMHS
 , ProcedureEven
 , ProcedureEWNS
-, ProcedureFountain
+, ProcedureFountain1
+, ProcedureFountain2
 , ProcedureFM
 , ProcedureFMTO
 , ProcedureGrid
 , ProcedureHSCM
 , ProcedureHSDM
 , ProcedureMagic
-, ProcedureMarch
+, ProcedureMarch1
+, ProcedureMarch2
 , ProcedureMT
 , ProcedureMTRM
 , ProcedureNSEW
@@ -441,19 +466,29 @@ struct ProcedureEWNS : public ParsedLocationInfo
 	Point pnt;
 };
 
-struct ProcedureFountain : public ParsedLocationInfo
+struct ProcedureFountain1 : public ParsedLocationInfo
 {
 	using super = ParsedLocationInfo;
-	ProcedureFountain(Value const& d1, Value const& d2, Value const& s1, Value const& s2, Point const& p) : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p), use_stepsize(true) {}
-	ProcedureFountain(Value const& d1, Value const& d2, Point const& p) : dir1(d1), dir2(d2), pnt(p) {}
-	ProcedureFountain() = default;
+	ProcedureFountain1(Value const& d1, Value const& d2, Value const& s1, Value const& s2, Point const& p) : dir1(d1), dir2(d2), stepsize1(s1), stepsize2(s2), pnt(p) {}
+	ProcedureFountain1() = default;
 	void Compile(AnimateCompile& anim) const;
-	virtual ~ProcedureFountain() = default;
+	virtual ~ProcedureFountain1() = default;
 	virtual std::ostream& Print(std::ostream&) const;
 	Value dir1, dir2;
 	Value stepsize1, stepsize2;
 	Point pnt;
-	bool use_stepsize = false;
+};
+
+struct ProcedureFountain2 : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureFountain2(Value const& d1, Value const& d2, Point const& p) : dir1(d1), dir2(d2), pnt(p) {}
+	ProcedureFountain2() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureFountain2() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value dir1, dir2;
+	Point pnt;
 };
 
 struct ProcedureFM : public ParsedLocationInfo
@@ -523,17 +558,26 @@ struct ProcedureMagic : public ParsedLocationInfo
 	Point pnt;
 };
 
-struct ProcedureMarch : public ParsedLocationInfo
+struct ProcedureMarch1 : public ParsedLocationInfo
 {
 	using super = ParsedLocationInfo;
-	ProcedureMarch(Value const& stepsize, Value const& steps, Value const& d, Value const& face) : stpsize(stepsize), stps(steps), dir(d), facedir(face), use_facedir(true) {}
-	ProcedureMarch(Value const& stepsize, Value const& steps, Value const& d) : stpsize(stepsize), stps(steps), dir(d) {}
-	ProcedureMarch() = default;
+	ProcedureMarch1(Value const& stepsize, Value const& steps, Value const& d, Value const& face) : stpsize(stepsize), stps(steps), dir(d), facedir(face) {}
+	ProcedureMarch1() = default;
 	void Compile(AnimateCompile& anim) const;
-	virtual ~ProcedureMarch() = default;
+	virtual ~ProcedureMarch1() = default;
 	virtual std::ostream& Print(std::ostream&) const;
 	Value stpsize, stps, dir, facedir;
-	bool use_facedir = false;
+};
+
+struct ProcedureMarch2 : public ParsedLocationInfo
+{
+	using super = ParsedLocationInfo;
+	ProcedureMarch2(Value const& stepsize, Value const& steps, Value const& d) : stpsize(stepsize), stps(steps), dir(d) {}
+	ProcedureMarch2() = default;
+	void Compile(AnimateCompile& anim) const;
+	virtual ~ProcedureMarch2() = default;
+	virtual std::ostream& Print(std::ostream&) const;
+	Value stpsize, stps, dir;
 };
 
 struct ProcedureMT : public ParsedLocationInfo
@@ -614,6 +658,13 @@ private:
 		v.Annotate(li);
 	}
 };
+
+template<typename Iterator>
+auto set_location_info() -> decltype(boost::phoenix::function<annotation_f<Iterator>>::operator())
+{
+	static const boost::phoenix::function<annotation_f<Iterator>> annotate;
+	return annotate(boost::spirit::qi::_val, boost::spirit::qi::labels::_1, boost::spirit::qi::labels::_3);
+}
 
 
 }}
@@ -724,11 +775,17 @@ BOOST_FUSION_ADAPT_STRUCT(
 						  (calchart::continuity::Point, pnt)
 						  )
 BOOST_FUSION_ADAPT_STRUCT(
-						  calchart::continuity::ProcedureFountain,
+						  calchart::continuity::ProcedureFountain1,
 						  (calchart::continuity::Value, dir1)
 						  (calchart::continuity::Value, dir2)
 						  (calchart::continuity::Value, stepsize1)
 						  (calchart::continuity::Value, stepsize2)
+						  (calchart::continuity::Point, pnt)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureFountain2,
+						  (calchart::continuity::Value, dir1)
+						  (calchart::continuity::Value, dir2)
 						  (calchart::continuity::Point, pnt)
 						  )
 BOOST_FUSION_ADAPT_STRUCT(
@@ -739,7 +796,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::ProcedureFMTO,
 						  (calchart::continuity::Point, pnt)
-						  (calchart::continuity::Value, dir)
 						  )
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::ProcedureGrid,
@@ -761,11 +817,17 @@ BOOST_FUSION_ADAPT_STRUCT(
 						  )
 
 BOOST_FUSION_ADAPT_STRUCT(
-						  calchart::continuity::ProcedureMarch,
+						  calchart::continuity::ProcedureMarch1,
 						  (calchart::continuity::Value, stpsize)
 						  (calchart::continuity::Value, stps)
 						  (calchart::continuity::Value, dir)
 						  (calchart::continuity::Value, facedir)
+						  )
+BOOST_FUSION_ADAPT_STRUCT(
+						  calchart::continuity::ProcedureMarch2,
+						  (calchart::continuity::Value, stpsize)
+						  (calchart::continuity::Value, stps)
+						  (calchart::continuity::Value, dir)
 						  )
 BOOST_FUSION_ADAPT_STRUCT(
 						  calchart::continuity::ProcedureMT,

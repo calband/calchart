@@ -116,6 +116,61 @@ std::vector<std::shared_ptr<AnimateCommand> > AnimateCompile::Compile(ContProced
 }
 
 
+std::vector<std::shared_ptr<AnimateCommand> > AnimateCompile::Compile(const std::vector<calchart::continuity::Procedure>& procs)
+{
+	CC_coord c;
+	cmds.clear();
+
+	cmds.clear();
+	beats_rem = curr_sheet->GetBeats();
+
+	if (procs.empty())
+	{
+// no continuity was specified
+		CC_show::const_CC_sheet_iterator_t s;
+		for (s = curr_sheet + 1; s != mShow.GetSheetEnd(); ++s)
+		{
+			if (s->IsInAnimation())
+			{
+//use EVEN REM NP
+				ContProcEven defcont(new ContValueFloat(beats_rem),
+					new ContNextPoint());
+				defcont.Compile(this);
+				break;
+			}
+		}
+		if (s == mShow.GetSheetEnd())
+		{
+//use MTRM E
+			ContProcMTRM defcont(new ContValueDefined(CC_E));
+			defcont.Compile(this);
+		}
+	}
+
+	for (auto& proc : procs)
+	{
+		calchart::continuity::Compile(*this, proc);
+	}
+	if ((curr_sheet + 1) != mShow.GetSheetEnd())
+	{
+		CC_show::const_CC_sheet_iterator_t curr_sheet_next = curr_sheet+1;
+		if (pt !=
+			curr_sheet_next->GetPosition(curr_pt))
+		{
+			c = curr_sheet_next->GetPosition(curr_pt) - pt;
+			RegisterError(ANIMERR_WRONGPLACE, NULL);
+			Append(std::make_shared<AnimateCommandMove>(beats_rem, c), NULL);
+		}
+	}
+	if (beats_rem)
+	{
+		RegisterError(ANIMERR_EXTRATIME, NULL);
+		Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), NULL);
+	}
+	return cmds;
+}
+
+
 bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token)
 {
 	bool clipped;
