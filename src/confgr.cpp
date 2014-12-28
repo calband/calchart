@@ -38,31 +38,31 @@
 
 const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] =
 {
-	{ wxT("FIELD"),					wxT("FOREST GREEN"),	1 },
-	{ wxT("FIELD DETAIL"),			wxT("WHITE"),			1 },
-	{ wxT("FIELD TEXT"),			wxT("BLACK"),			1 },
-	{ wxT("POINT"),					wxT("WHITE"),			1 },
-	{ wxT("POINT TEXT"),			wxT("BLACK"),			1 },
-	{ wxT("HILIT POINT"),			wxT("YELLOW"),			1 },
-	{ wxT("HILIT POINT TEXT"),		wxT("YELLOW"),			1 },
-	{ wxT("REF POINT"),				wxT("PURPLE"),			1 },
-	{ wxT("REF POINT TEXT"),		wxT("BLACK"),			1 },
-	{ wxT("HILIT REF POINT"),		wxT("PURPLE"),			1 },
-	{ wxT("HILIT REF POINT TEXT"),		wxT("BLACK"),			1 },
-	{ wxT("GHOST POINT"),			wxT("BLUE"),			1 },
-	{ wxT("GHOST POINT TEXT"),		wxT("NAVY"),			1 },
-	{ wxT("HLIT GHOST POINT"),		wxT("PURPLE"),			1 },
-	{ wxT("HLIT GHOST POINT TEXT"),		wxT("PLUM"),			1 },
-	{ wxT("ANIM FRONT"),			wxT("WHITE"),			1 },
-	{ wxT("ANIM BACK"),				wxT("YELLOW"),			1 },
-	{ wxT("ANIM SIDE"),				wxT("SKY BLUE"),		1 },
-	{ wxT("HILIT ANIM FRONT"),		wxT("RED"),				1 },
-	{ wxT("HILIT ANIM BACK"),		wxT("RED"),				1 },
-	{ wxT("HILIT ANIM SIDE"),		wxT("RED"),				1 },
-	{ wxT("ANIM COLLISION"),		wxT("PURPLE"),			1 },
-	{ wxT("ANIM COLLISION WARNING"),	wxT("CORAL"),			1 },
-	{ wxT("SHAPES"),				wxT("ORANGE"),			2 },
-	{ wxT("CONTINUITY PATHS"),		wxT("RED"),				1 },
+	std::tuple<wxString, wxString, int>(wxT("FIELD"),					wxT("FOREST GREEN"),	1),
+	std::tuple<wxString, wxString, int>(wxT("FIELD DETAIL"),			wxT("WHITE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("FIELD TEXT"),				wxT("BLACK"),			1),
+	std::tuple<wxString, wxString, int>(wxT("POINT"),					wxT("WHITE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("POINT TEXT"),				wxT("BLACK"),			1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT POINT"),				wxT("YELLOW"),			1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT POINT TEXT"),		wxT("YELLOW"),			1),
+	std::tuple<wxString, wxString, int>(wxT("REF POINT"),				wxT("PURPLE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("REF POINT TEXT"),			wxT("BLACK"),			1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT REF POINT"),			wxT("PURPLE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT REF POINT TEXT"),	wxT("BLACK"),			1),
+	std::tuple<wxString, wxString, int>(wxT("GHOST POINT"),				wxT("BLUE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("GHOST POINT TEXT"),		wxT("NAVY"),			1),
+	std::tuple<wxString, wxString, int>(wxT("HLIT GHOST POINT"),		wxT("PURPLE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("HLIT GHOST POINT TEXT"),	wxT("PLUM"),			1),
+	std::tuple<wxString, wxString, int>(wxT("ANIM FRONT"),				wxT("WHITE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("ANIM BACK"),				wxT("YELLOW"),			1),
+	std::tuple<wxString, wxString, int>(wxT("ANIM SIDE"),				wxT("SKY BLUE"),		1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT ANIM FRONT"),		wxT("RED"),				1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT ANIM BACK"),			wxT("RED"),				1),
+	std::tuple<wxString, wxString, int>(wxT("HILIT ANIM SIDE"),			wxT("RED"),				1),
+	std::tuple<wxString, wxString, int>(wxT("ANIM COLLISION"),			wxT("PURPLE"),			1),
+	std::tuple<wxString, wxString, int>(wxT("ANIM COLLISION WARNING"),	wxT("CORAL"),			1),
+	std::tuple<wxString, wxString, int>(wxT("SHAPES"),					wxT("ORANGE"),			2),
+	std::tuple<wxString, wxString, int>(wxT("CONTINUITY PATHS"),		wxT("RED"),				1),
 };
 
 ///// Show mode configuration /////
@@ -239,7 +239,7 @@ CalChartConfiguration::ColorWidth_t GetConfigValue(const wxString& key, const Ca
 	long w = std::get<1>(def);
 	w = GetConfigPathKey<long>(wxT("/COLORS/WIDTH"), key, w);
 
-	return { wxColour( r, g, b ), w };
+	return CalChartConfiguration::ColorWidth_t(wxColour( r, g, b ), w);
 }
 
 // Specialize on Color

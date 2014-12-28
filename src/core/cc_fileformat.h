@@ -461,7 +461,7 @@ std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin, Iter 
 		{
 			return result;
 		}
-		result.push_back({name, data, size});
+		result.push_back(std::tuple<uint32_t, Iter, size_t>(name, data, size));
 	}
 	return result;
 }

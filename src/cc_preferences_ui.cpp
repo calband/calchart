@@ -35,6 +35,7 @@
 #include <wx/statline.h>
 #include <wx/notebook.h>
 #include <wx/listbook.h>
+#include <wx/dcbuffer.h>
 
 // how the preferences work:
 // preference dialog create a copy of the CalChart config from which to read and set values
