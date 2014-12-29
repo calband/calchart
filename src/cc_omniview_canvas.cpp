@@ -26,6 +26,7 @@
 #include "modes.h"
 #include "animation_frame.h"
 #include "cc_omniview_constants.h"
+#include "draw.h"
 
 #include <wx/dcbuffer.h>
 
@@ -553,7 +554,7 @@ mFOV(60),
 mShiftMoving(false)
 {
 #if defined(__APPLE__) && (__APPLE__)
-    m_glContext->UseForLines(mAnimationView->GetShow()->GetMode().GetOmniLinesImage(config));
+    m_glContext->UseForLines(GetOmniLinesImage(config, mAnimationView->GetShow()->GetMode()));
 #endif
 }
 

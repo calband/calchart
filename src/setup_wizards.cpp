@@ -24,6 +24,7 @@
 #include "basic_ui.h"
 #include "modes.h"
 #include "calchartapp.h"
+#include "confgr.h"
 
 #include <wx/wx.h>
 

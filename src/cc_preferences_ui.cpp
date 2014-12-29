@@ -29,6 +29,7 @@
 #include "basic_ui.h"
 #include "calchartdoc.h"
 #include "cc_shapes.h"
+#include "draw.h"
 
 #include <wx/colordlg.h>
 #include <wx/stattext.h>
@@ -237,7 +238,7 @@ END_EVENT_TABLE()
 
 PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow *parent) :
 super(parent, wxID_ANY, wxDefaultPosition, wxSize(640, 240)),
-mMode(ShowModeStandard::CreateShowMode(wxT(""), CC_coord(Int2Coord(160), Int2Coord(84)), CC_coord(Int2Coord(80), Int2Coord(42)), CC_coord(Int2Coord(4), Int2Coord(4)), CC_coord(Int2Coord(4), Int2Coord(4)), Int2Coord(32), Int2Coord(52) )),
+mMode(ShowModeStandard::CreateShowMode("", CC_coord(Int2Coord(160), Int2Coord(84)), CC_coord(Int2Coord(80), Int2Coord(42)), CC_coord(Int2Coord(4), Int2Coord(4)), CC_coord(Int2Coord(4), Int2Coord(4)), Int2Coord(32), Int2Coord(52) )),
 mConfig(config)
 {
 	auto field_offset = mMode->FieldOffset();
@@ -303,7 +304,7 @@ PrefCanvas::OnPaint(wxPaintEvent& event)
 	dc.Clear();
 
 	// Draw the field
-	mMode->DrawMode(dc, mConfig, ShowMode::kFieldView);
+	DrawMode(dc, mConfig, *mMode, ShowMode::kFieldView);
 
 	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 	auto nextSheet = sheet;
@@ -835,7 +836,7 @@ private:
 	void OnCmdLineText(wxCommandEvent&);
 	void OnCmdChoice(wxCommandEvent&);
 	CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];
-	wxString mYardText[CalChartConfiguration::kYardTextValues];
+	wxString mYardText[kYardTextValues];
 	int mWhichMode;
 	int mWhichYardLine;
 };
@@ -914,7 +915,7 @@ void ShowModeSetup::Init()
 	{
 		mShowModeValues[i] = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(i));
 	}
-	for (size_t i = 0; i < CalChartConfiguration::kYardTextValues; ++i)
+	for (size_t i = 0; i < kYardTextValues; ++i)
 	{
 		mYardText[i] = mConfig.Get_yard_text(i);
 	}
@@ -956,7 +957,7 @@ bool ShowModeSetup::TransferDataFromWindow()
 	// grab whatever's in the box
 	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SHOW_LINE_VALUE);
 	mYardText[mWhichYardLine] = text->GetValue();
-	for (size_t i = 0; i < CalChartConfiguration::kYardTextValues; ++i)
+	for (size_t i = 0; i < kYardTextValues; ++i)
 	{
 		mConfig.Set_yard_text(i, mYardText[i]);
 	}
@@ -970,7 +971,7 @@ bool ShowModeSetup::ClearValuesToDefault()
 	{
 		mConfig.Clear_ShowModeInfo(static_cast<CalChartShowModes>(i));
 	}
-	for (auto i = 0; i < CalChartConfiguration::kYardTextValues; ++i)
+	for (auto i = 0; i < kYardTextValues; ++i)
 	{
 		mConfig.Clear_yard_text(i);
 	}
@@ -1031,7 +1032,7 @@ public:
 private:
 	void OnCmdChoice(wxCommandEvent&);
 	CalChartConfiguration::SpringShowModeInfo_t mSpringShowModeValues[SPRINGSHOWMODE_NUM];
-	wxString mYardText[CalChartConfiguration::kSprLineTextValues];
+	wxString mYardText[kSprLineTextValues];
 	int mWhichMode;
 	int mWhichYardLine;
 };
@@ -1148,7 +1149,7 @@ void SpringShowModeSetup::Init()
 	{
 		mSpringShowModeValues[i] = mConfig.Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
 	}
-	for (size_t i = 0; i < CalChartConfiguration::kSprLineTextValues; ++i)
+	for (size_t i = 0; i < kSprLineTextValues; ++i)
 	{
 		mYardText[i] = mConfig.Get_spr_line_text(i);
 	}
@@ -1203,7 +1204,7 @@ bool SpringShowModeSetup::TransferDataFromWindow()
 
 	wxTextCtrl* text = (wxTextCtrl*) FindWindow(SPRING_SHOW_LINE_VALUE);
 	mYardText[mWhichYardLine] = text->GetValue();
-	for (size_t i = 0; i < CalChartConfiguration::kSprLineTextValues; ++i)
+	for (size_t i = 0; i < kSprLineTextValues; ++i)
 	{
 		mConfig.Set_spr_line_text(i, mYardText[i]);
 	}
@@ -1217,7 +1218,7 @@ bool SpringShowModeSetup::ClearValuesToDefault()
 	{
 		mConfig.Clear_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
 	}
-	for (auto i = 0; i < CalChartConfiguration::kSprLineTextValues; ++i)
+	for (auto i = 0; i < kSprLineTextValues; ++i)
 	{
 		mConfig.Clear_spr_line_text(i);
 	}
