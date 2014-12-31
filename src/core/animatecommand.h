@@ -24,13 +24,14 @@
 #define _ANIMATECOMMAND_H_
 
 #include "animate.h"
-#include "cc_drawcommand.h"
+
+struct CC_DrawCommand;
 
 class AnimateCommand
 {
 public:
 	AnimateCommand(unsigned beats);
-	virtual ~AnimateCommand();
+	virtual ~AnimateCommand() = default;
 
 // returns false if end of command
 	virtual bool Begin(AnimatePoint& pt);
@@ -53,7 +54,7 @@ public:
 	virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
 
 	// when we want to have the path drawn:
-	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const { return CC_DrawCommand(); }
+	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;
 
 protected:
 	unsigned mNumBeats;
@@ -64,7 +65,7 @@ class AnimateCommandMT : public AnimateCommand
 {
 public:
 	AnimateCommandMT(unsigned beats, float direction);
-	virtual ~AnimateCommandMT() {}
+	virtual ~AnimateCommandMT() = default;
 
 	virtual AnimateDir Direction() const;
 	virtual float RealDirection() const;
@@ -78,7 +79,7 @@ class AnimateCommandMove : public AnimateCommandMT
 public:
 	AnimateCommandMove(unsigned beats, CC_coord movement);
 	AnimateCommandMove(unsigned beats, CC_coord movement, float direction);
-	virtual ~AnimateCommandMove() {}
+	virtual ~AnimateCommandMove() = default;
 
 	virtual bool NextBeat(AnimatePoint& pt);
 	virtual bool PrevBeat(AnimatePoint& pt);
@@ -100,7 +101,7 @@ class AnimateCommandRotate : public AnimateCommand
 public:
 	AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad,
 		float ang1, float ang2, bool backwards = false);
-	virtual ~AnimateCommandRotate() {}
+	virtual ~AnimateCommandRotate() = default;
 
 	virtual bool NextBeat(AnimatePoint& pt);
 	virtual bool PrevBeat(AnimatePoint& pt);

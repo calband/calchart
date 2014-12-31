@@ -36,6 +36,7 @@
 #include "draw.h"
 #include "animatecommand.h"
 #include "cc_sheet.h"
+#include "cc_drawcommand.h"
 
 #include <wx/wizard.h>
 #include <wx/textfile.h>

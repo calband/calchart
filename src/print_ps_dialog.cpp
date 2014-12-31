@@ -27,6 +27,7 @@
 #include "confgr.h"
 #include "cc_sheet.h"
 #include "print_ps.h"
+#include "cc_show.h"
 #include <set>
 
 #include <wx/filename.h>

@@ -541,7 +541,6 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_
 	}
 	for (c = new_march_position, col = 0; i < num; i++, col++, c.x += Int2Coord(2))
 	{
-		const CC_continuity& plaincont = GetContinuityBySymbol(SYMBOL_PLAIN);
 		if (col >= columns)
 		{
 			c.x = new_march_position.x;

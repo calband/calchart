@@ -21,12 +21,14 @@
 */
 
 #include "animate.h"
+#include "cc_show.h"
 #include "animatecommand.h"
 #include "cont.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"
 #include "cc_point.h"
 #include "math_utils.h"
+#include "cc_drawcommand.h"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -85,21 +87,26 @@ AnimateDir AnimGetDirFromAngle(float ang)
 class AnimateSheet
 {
 public:
-	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::vector<std::vector<std::shared_ptr<AnimateCommand> > >& theCommands, const std::string& s, unsigned beats) : pts(thePoints), commands(theCommands), name(s), numbeats(beats) {}
-	~AnimateSheet() {}
+	AnimateSheet(const std::vector<AnimatePoint>& thePoints, const std::vector<AnimateCommands>& theCommands, const std::string& s, unsigned beats) : mPoints(thePoints), commands(theCommands), name(s), numbeats(beats) {}
 	std::string GetName() const { return name; }
 	unsigned GetNumBeats() const { return numbeats; }
-	
-	std::vector<AnimatePoint> pts; // should probably be const
-	std::vector<std::vector<std::shared_ptr<AnimateCommand> > > commands;
+	std::vector<AnimatePoint> GetPoints() const { return mPoints; }
+	AnimateCommands GetCommands(int which) const { return commands.at(which); }
+	AnimateCommands::const_iterator GetCommandsBegin(int which) const { return commands.at(which).begin(); }
+	AnimateCommands::const_iterator GetCommandsEnd(int which) const { return commands.at(which).end(); }
+
 private:
+	std::vector<AnimatePoint> mPoints; // should probably be const
+	std::vector<AnimateCommands> commands;
 	std::string name;
 	unsigned numbeats;
 };
 
 
-Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
-: numpts(show.GetNumPoints()), pts(numpts), curr_cmds(numpts),
+Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList) :
+numpts(show.GetNumPoints()),
+pts(numpts),
+curr_cmds(numpts),
 curr_sheetnum(0),
 mCollisionAction(NULL)
 {
@@ -115,8 +122,8 @@ mCollisionAction(NULL)
 		sheetIndex++;
 
 // Now parse continuity
-		AnimateCompile comp(show, variablesStates);
-		std::vector<std::vector<std::shared_ptr<AnimateCommand> > > theCommands(numpts);
+		AnimationErrors errors;
+		std::vector<AnimateCommands> theCommands(numpts);
 		for (auto& current_symbol : k_symbols)
 		{
 			if (curr_sheet->ContinuityInUse(current_symbol))
@@ -138,7 +145,7 @@ mCollisionAction(NULL)
 				{
 					// Supply a generic parse error
 					ContToken dummy;
-					comp.RegisterError(ANIMERR_SYNTAX, &dummy);
+					errors.RegisterError(ANIMERR_SYNTAX, &dummy, 0, current_symbol);
 				}
 #if 0 // enable to see dump of continuity
 				{
@@ -152,7 +159,7 @@ mCollisionAction(NULL)
 				{
 					if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol)
 					{
-						theCommands[j] = comp.Compile(curr_sheet, j, current_symbol, ParsedContinuity);
+						theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, ParsedContinuity);
 					}
 				}
 				while (ParsedContinuity)
@@ -175,15 +182,15 @@ mCollisionAction(NULL)
 		{
 			if (theCommands[j].empty())
 			{
-				theCommands[j] = comp.Compile(curr_sheet, j, MAX_NUM_SYMBOLS, NULL);
+				theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, NULL);
 			}
 		}
-		if (!comp.Okay() && notifyErrorList)
+		if (errors.AnyErrors() && notifyErrorList)
 		{
 			std::string message("Errors for \"");
 			message += curr_sheet->GetName().substr(0,32);
 			message += ("\"");
-			if (notifyErrorList(comp.GetErrorMarkers(), std::distance(show.GetSheetBegin(), curr_sheet), message))
+			if (notifyErrorList(errors.GetErrors(), std::distance(show.GetSheetBegin(), curr_sheet), message))
 			{
 				break;
 			}
@@ -193,8 +200,7 @@ mCollisionAction(NULL)
 		{
 			thePoints.at(i) = curr_sheet->GetPosition(i);
 		}
-		AnimateSheet new_sheet(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
-		sheets.push_back(new_sheet);
+		sheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
 	}
 }
 
@@ -255,7 +261,7 @@ bool Animation::PrevBeat()
 		curr_sheetnum--;
 		for (i = 0; i < numpts; i++)
 		{
-			curr_cmds[i] = sheets.at(curr_sheetnum).commands[i].end() - 1;
+			curr_cmds[i] = sheets.at(curr_sheetnum).GetCommandsEnd(i) - 1;
 			EndCmd(i);
 		}
 		curr_beat = sheets.at(curr_sheetnum).GetNumBeats();
@@ -265,7 +271,7 @@ bool Animation::PrevBeat()
 		if (!(*curr_cmds.at(i))->PrevBeat(pts[i]))
 		{
 // Advance to prev command, skipping zero beat commands
-			if (curr_cmds[i] != sheets.at(curr_sheetnum).commands[i].begin())
+			if (curr_cmds[i] != sheets.at(curr_sheetnum).GetCommandsBegin(i))
 			{
 				--curr_cmds[i];
 				EndCmd(i);
@@ -296,7 +302,7 @@ bool Animation::NextBeat()
 		if (!(*curr_cmds.at(i))->NextBeat(pts[i]))
 		{
 // Advance to next command, skipping zero beat commands
-			if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).commands.at(i).end())
+			if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).GetCommandsEnd(i))
 			{
 				++curr_cmds[i];
 				BeginCmd(i);
@@ -338,7 +344,7 @@ void Animation::BeginCmd(unsigned i)
 {
 	while (!(*curr_cmds.at(i))->Begin(pts[i]))
 	{
-		if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).commands.at(i).end())
+		if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).GetCommandsEnd(i))
 			return;
 		++curr_cmds[i];
 	}
@@ -349,7 +355,7 @@ void Animation::EndCmd(unsigned i)
 {
 	while (!(*curr_cmds.at(i))->End(pts[i]))
 	{
-		if ((curr_cmds[i]) == sheets.at(curr_sheetnum).commands.at(i).begin())
+		if ((curr_cmds[i]) == sheets.at(curr_sheetnum).GetCommandsBegin(i))
 			return;
 		--curr_cmds[i];
 	}
@@ -358,12 +364,10 @@ void Animation::EndCmd(unsigned i)
 
 void Animation::RefreshSheet()
 {
-	unsigned i;
-
-	for (i = 0; i < numpts; i++)
+	pts = sheets.at(curr_sheetnum).GetPoints();
+	for (auto i = 0; i < numpts; i++)
 	{
-		pts[i] = sheets.at(curr_sheetnum).pts[i];
-		curr_cmds[i] = sheets.at(curr_sheetnum).commands[i].begin();
+		curr_cmds[i] = sheets.at(curr_sheetnum).GetCommandsBegin(i);
 		BeginCmd(i);
 	}
 	curr_beat = 0;
@@ -427,10 +431,10 @@ std::string Animation::GetCurrentSheetName() const
 	return sheets.at(curr_sheetnum).GetName();
 }
 
-std::vector<std::shared_ptr<AnimateCommand> >
+AnimateCommands
 Animation::GetCommands(unsigned whichPoint) const
 {
-	return sheets.at(curr_sheetnum).commands.at(whichPoint);
+	return sheets.at(curr_sheetnum).GetCommands(whichPoint);
 }
 
 

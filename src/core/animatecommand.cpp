@@ -24,15 +24,14 @@
 #include <cmath>
 
 #include "animatecommand.h"
+#include "cc_drawcommand.h"
 
 AnimateCommand::AnimateCommand(unsigned beats)
 : mNumBeats(beats), mBeat(0)
 {
 }
 
-AnimateCommand::~AnimateCommand()
-{
-}
+CC_DrawCommand AnimateCommand::GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const { return CC_DrawCommand(); }
 
 bool AnimateCommand::Begin(AnimatePoint& pt)
 {

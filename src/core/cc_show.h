@@ -40,8 +40,6 @@ class CC_lasso;
 class CalChartDoc;
 class CC_coord;
 
-typedef std::set<unsigned> SelectionList;
-
 // CalChart Show
 // The CalChart show object is what most parts of the system interact with
 // It is essentially a collection of CC_sheets that you iterate through to

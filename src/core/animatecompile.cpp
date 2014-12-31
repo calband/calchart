@@ -25,92 +25,84 @@
 #include "animatecommand.h"
 #include "cc_sheet.h"
 
-
-float AnimationVariables::GetVarValue(int varnum, unsigned whichPoint) const
+void
+AnimationErrors::RegisterError(AnimateError err, const ContToken *token, unsigned curr_pt, SYMBOL_TYPE contsymbol)
 {
-	std::map<unsigned,AnimateVariable>::const_iterator i = mVars[varnum].find(whichPoint);
-	if (i == mVars[varnum].end() || !i->second.IsValid())
+	mErrorMarkers[err].contsymbol = contsymbol;
+	if (token != NULL)
 	{
-		throw AnimationVariableException();
+		mErrorMarkers[err].line = token->line;
+		mErrorMarkers[err].col = token->col;
 	}
-	return i->second.GetValue();
+	mErrorMarkers[err].pntgroup.insert(curr_pt);
 }
 
 
-void AnimationVariables::SetVarValue(int varnum, unsigned whichPoint, float value)
-{
-	mVars[varnum][whichPoint].SetValue(value);
-}
 
-
-AnimateCompile::AnimateCompile(const CC_show& show, AnimationVariables& variablesStates) :
+AnimateCompile::AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned& beats_rem, CC_coord& pt, AnimationVariables& variablesStates, AnimationErrors& errors, AnimateCommands& cmds) :
 mShow(show),
-error_markers(NUM_ANIMERR),
-vars(variablesStates),
-okay(true)
+contsymbol(cont_symbol),
+curr_pt(pt_num),
+curr_sheet(c_sheet),
+pt(pt),
+beats_rem(beats_rem),
+mVars(variablesStates),
+cmds(cmds),
+error_markers(errors)
 {
 }
 
 
-AnimateCompile::~AnimateCompile()
+
+AnimateCommands
+AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
 {
-}
-
-
-std::vector<std::shared_ptr<AnimateCommand> > AnimateCompile::Compile(CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
-{
-	CC_coord c;
-	cmds.clear();
-
-	contsymbol = cont_symbol;
-	curr_sheet = c_sheet;
-	pt = curr_sheet->GetPosition(pt_num);
-	cmds.clear();
-	curr_pt = pt_num;
-	beats_rem = curr_sheet->GetBeats();
+	AnimateCommands cmds;
+	unsigned beats_rem = c_sheet->GetBeats();
+	auto pt = c_sheet->GetPosition(pt_num);
+	AnimateCompile ac(show, cont_symbol, pt_num, c_sheet, beats_rem, pt, variablesStates, errors, cmds);
 
 	if (proc == NULL)
 	{
 // no continuity was specified
-		CC_show::const_CC_sheet_iterator_t s;
-		for (s = curr_sheet + 1; s != mShow.GetSheetEnd(); ++s)
+		auto s = c_sheet + 1;
+		for (; s != show.GetSheetEnd(); ++s)
 		{
 			if (s->IsInAnimation())
 			{
 //use EVEN REM NP
-				ContProcEven defcont(new ContValueFloat(beats_rem),
-					new ContNextPoint());
-				defcont.Compile(this);
+				ContProcEven defcont(new ContValueFloat(beats_rem), new ContNextPoint());
+				defcont.Compile(&ac);
 				break;
 			}
 		}
-		if (s == mShow.GetSheetEnd())
+		if (s == show.GetSheetEnd())
 		{
 //use MTRM E
 			ContProcMTRM defcont(new ContValueDefined(CC_E));
-			defcont.Compile(this);
+			defcont.Compile(&ac);
 		}
 	}
 
 	for (; proc; proc = proc->next)
 	{
-		proc->Compile(this);
+		proc->Compile(&ac);
 	}
-	if ((curr_sheet + 1) != mShow.GetSheetEnd())
+
+	if ((c_sheet + 1) != show.GetSheetEnd())
 	{
-		CC_show::const_CC_sheet_iterator_t curr_sheet_next = curr_sheet+1;
-		if (pt !=
-			curr_sheet_next->GetPosition(curr_pt))
+		auto next_point = (c_sheet + 1)->GetPosition(pt_num);
+		if (pt != next_point)
 		{
-			c = curr_sheet_next->GetPosition(curr_pt) - pt;
-			RegisterError(ANIMERR_WRONGPLACE, NULL);
-			Append(std::make_shared<AnimateCommandMove>(beats_rem, c), NULL);
+			auto c = next_point - pt;
+			ac.RegisterError(ANIMERR_WRONGPLACE, NULL);
+			ac.Append(std::make_shared<AnimateCommandMove>(beats_rem, c), NULL);
 		}
 	}
 	if (beats_rem)
 	{
-		RegisterError(ANIMERR_EXTRATIME, NULL);
-		Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), NULL);
+		ac.RegisterError(ANIMERR_EXTRATIME, NULL);
+		ac.Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), NULL);
 	}
 	return cmds;
 }
@@ -144,27 +136,18 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken
 }
 
 
-void AnimateCompile::RegisterError(AnimateError err, const ContToken *token)
+void AnimateCompile::RegisterError(AnimateError err, const ContToken *token) const
 {
-	error_markers[err].contsymbol = contsymbol;
-	if (token != NULL)
-	{
-		error_markers[err].line = token->line;
-		error_markers[err].col = token->col;
-	}
-	error_markers[err].pntgroup.insert(curr_pt);
-	SetStatus(false);
+	error_markers.RegisterError(err, token, curr_pt, contsymbol);
 }
 
 
-float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
+float AnimateCompile::GetVarValue(int varnum, const ContToken *token) const
 {
-	try
+	auto i = mVars[varnum].find(curr_pt);
+	if (i != mVars[varnum].end())
 	{
-		return vars.GetVarValue(varnum, curr_pt);
-	}
-	catch (AnimationVariables::AnimationVariableException&)
-	{
+		return i->second;
 	}
 	RegisterError(ANIMERR_UNDEFINED, token);
 	return 0.0;
@@ -173,7 +156,7 @@ float AnimateCompile::GetVarValue(int varnum, const ContToken *token)
 
 void AnimateCompile::SetVarValue(int varnum, float value)
 {
-	vars.SetVarValue(varnum, curr_pt, value);
+	mVars[varnum][curr_pt] = value;
 }
 
 
@@ -183,7 +166,7 @@ AnimatePoint AnimateCompile::GetStartingPosition() const
 }
 
 
-AnimatePoint AnimateCompile::GetEndingPosition(const ContToken *token)
+AnimatePoint AnimateCompile::GetEndingPosition(const ContToken *token) const
 {
 	CC_show::const_CC_sheet_iterator_t sheet = curr_sheet + 1;
 	

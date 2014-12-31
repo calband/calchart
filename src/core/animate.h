@@ -24,33 +24,31 @@
 #define _ANIMATE_H_
 
 #include "animate_types.h"
-
 #include "cc_coord.h"
-#include "cc_show.h"
+
 #include <memory>
 #include <functional>
 #include <map>
 #include <set>
 #include <vector>
 
-
 AnimateDir AnimGetDirFromAngle(float ang);
 
 class AnimateCommand;
 class AnimateSheet;
 struct CC_DrawCommand;
+class CC_show;
 
 struct ErrorMarker
 {
-public:
 	std::set<unsigned> pntgroup;			  // which points have this error
-	SYMBOL_TYPE contsymbol;						  // which continuity
+	SYMBOL_TYPE contsymbol;					  // which continuity
 	int line, col;							  // where
 	ErrorMarker(): contsymbol(SYMBOL_PLAIN), line(-1), col(-1) {}
 };
 
 typedef std::function<void (const std::string& notice)> NotifyStatus;
-typedef std::function<bool (const std::vector<ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
+typedef std::function<bool (const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message)> NotifyErrorList;
 
 class Animation
 {
@@ -108,7 +106,7 @@ private:
 
 	void RefreshSheet();
 
-	std::vector<AnimateSheet> sheets;
+	std::vector<const AnimateSheet> sheets;
 	
 	void CheckCollisions();
 	CollisionAction_t mCollisionAction;

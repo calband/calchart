@@ -100,7 +100,6 @@ private:
 	wxChoice *mContinuityChoices;
 	unsigned mCurrentContinuityChoice;
 	FancyTextWin *mUserInput;
-	CC_show::const_CC_sheet_iterator_t mSheetUnderEdit;
 
 	DECLARE_EVENT_TABLE()
 };

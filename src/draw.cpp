@@ -34,6 +34,7 @@
 #include "animate.h"
 #include "animatecommand.h"
 #include "draw_utils.h"
+#include "cc_drawcommand.h"
 #include <memory>
 
 extern wxFont *pointLabelFont;
