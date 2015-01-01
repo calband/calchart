@@ -31,9 +31,4 @@ struct YYLTYPE
 
 extern YYLTYPE yylloc;
 
-struct proclist
-{
-	ContProcedure* list;
-	ContProcedure* last;
-};
 #endif

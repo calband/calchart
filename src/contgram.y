@@ -28,13 +28,15 @@
 #include "parse.h"
 #include "animate.h"
 
+#include <list>
+
 //#define YYDEBUG 1
 
 int yyerror(const char *s);
 extern int yylex();
 extern void initscanner();
 
-ContProcedure *ParsedContinuity = NULL;
+std::list<ContProcedure*> ParsedContinuity;
 
 %}
 
@@ -66,7 +68,6 @@ ContProcedure *ParsedContinuity = NULL;
 	char v;
 	float f;
 	ContDefinedValue d;
-	proclist list;
 	ContProcedure *proc;
 	ContPoint *pnt;
 	ContValue *value;
@@ -87,11 +88,9 @@ ContProcedure *ParsedContinuity = NULL;
 
 proc_list
 	: // Empty
-		{ $$.list = NULL; ParsedContinuity = NULL;}
+		{}
 	| proc_list procedure
-		{ if ($1.list)
-			{$$.list = $1.list; $1.last->next = $2; $$.last = $2;}
-		  else {ParsedContinuity = $2; $$.list = $2; $$.last = $2;}}
+		{ ParsedContinuity.push_back($2); }
 	;
 
 procedure
@@ -238,7 +237,7 @@ varvalue
 
 int parsecontinuity()
 {
-  ParsedContinuity = NULL;
+  ParsedContinuity.clear();
   initscanner();
 //  yydebug = 1;
   return yyparse();

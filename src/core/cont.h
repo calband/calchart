@@ -308,13 +308,11 @@ class ContProcedure: public ContToken
 {
 	using super = ContToken;
 public:
-	ContProcedure(): next(NULL) {}
+	ContProcedure() {}
 	virtual ~ContProcedure();
 
 	virtual void Compile(AnimateCompile* anim) = 0;
 	virtual std::ostream& Print(std::ostream&) const override;
-
-	ContProcedure *next;
 };
 
 class ContProcSet : public ContProcedure

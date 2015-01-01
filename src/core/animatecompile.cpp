@@ -55,14 +55,14 @@ error_markers(errors)
 
 
 AnimateCommands
-AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, ContProcedure* proc)
+AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, std::list<ContProcedure*> const& procs)
 {
 	AnimateCommands cmds;
 	unsigned beats_rem = c_sheet->GetBeats();
 	auto pt = c_sheet->GetPosition(pt_num);
 	AnimateCompile ac(show, cont_symbol, pt_num, c_sheet, beats_rem, pt, variablesStates, errors, cmds);
 
-	if (proc == NULL)
+	if (procs.empty())
 	{
 // no continuity was specified
 		auto s = c_sheet + 1;
@@ -84,7 +84,7 @@ AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates
 		}
 	}
 
-	for (; proc; proc = proc->next)
+	for (auto& proc : procs)
 	{
 		proc->Compile(&ac);
 	}

@@ -38,7 +38,7 @@
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
-extern ContProcedure *ParsedContinuity;
+extern std::list<ContProcedure*> ParsedContinuity;
 
 std::string animate_err_msgs(size_t which)
 {
@@ -149,7 +149,7 @@ mCollisionAction(NULL)
 				}
 #if 0 // enable to see dump of continuity
 				{
-					for (auto proc = ParsedContinuity; proc; proc = proc->next)
+					for (auto& proc : ParsedContinuity)
 					{
 						std::cout<<*proc<<"\n";
 					}
@@ -162,12 +162,11 @@ mCollisionAction(NULL)
 						theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, ParsedContinuity);
 					}
 				}
-				while (ParsedContinuity)
+				for (auto& proc : ParsedContinuity)
 				{
-					ContProcedure* curr_proc = ParsedContinuity->next;
-					delete ParsedContinuity;
-					ParsedContinuity = curr_proc;
+					delete proc;
 				}
+				ParsedContinuity.clear();
 			}
 		}
 // Handle points that don't have continuity (shouldn't happen)
@@ -182,7 +181,7 @@ mCollisionAction(NULL)
 		{
 			if (theCommands[j].empty())
 			{
-				theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, NULL);
+				theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
 			}
 		}
 		if (errors.AnyErrors() && notifyErrorList)
