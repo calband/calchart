@@ -29,6 +29,7 @@
 #include <functional>
 #include <map>
 #include <array>
+#include <memory>
 
 // forward declare
 class wxPen;

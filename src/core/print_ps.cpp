@@ -133,7 +133,7 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth, double PageH
 	}
 	real_width = PageWidth * DPI;
 	real_height = PageHeight * DPI;
-	return { width, height, real_width, real_height, field_y };
+	return std::tuple<float, float, float, float, float>(width, height, real_width, real_height, field_y);
 }
 
 static std::tuple<float, float, float, float, float, float, float, float, float, float, float, float, float, float, short>
@@ -258,7 +258,8 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview, double PageW
 		width *= fieldwidth/fullwidth;
 		height *= fieldheight/fullheight;
 	}
-	return { width, height, real_width, real_height, field_x, field_y, field_w, field_h, stage_field_x, stage_field_y, stage_field_w, stage_field_h, step_size, spr_step_size, step_width };
+	return std::tuple<float, float, float, float, float, float, float, float, float, float, float, float, float, float, short>(
+		width, height, real_width, real_height, field_x, field_y, field_w, field_h, stage_field_x, stage_field_y, stage_field_w, stage_field_h, step_size, spr_step_size, step_width);
 }
 
 
