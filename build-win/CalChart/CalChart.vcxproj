@@ -99,6 +99,11 @@
     <ClInclude Include="..\..\src\cc_preferences_ui.h" />
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
+    <ClInclude Include="..\..\src\core\music_score_bar_labels.h" />
+    <ClInclude Include="..\..\src\core\music_score_jumps.h" />
+    <ClInclude Include="..\..\src\core\music_score_moment_browser.h" />
+    <ClInclude Include="..\..\src\core\music_score_tempos.h" />
+    <ClInclude Include="..\..\src\core\music_score_time_signatures.h" />
     <ClInclude Include="..\..\src\core\animate.h" />
     <ClInclude Include="..\..\src\core\animatecommand.h" />
     <ClInclude Include="..\..\src\core\animatecompile.h" />
@@ -113,7 +118,9 @@
     <ClInclude Include="..\..\src\core\cc_types.h" />
     <ClInclude Include="..\..\src\core\cont.h" />
     <ClInclude Include="..\..\src\core\math_utils.h" />
+    <ClInclude Include="..\..\src\core\music_score_events.h" />
     <ClInclude Include="..\..\src\core\modes.h" />
+    <ClInclude Include="..\..\src\core\music_score_doc_component.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
     <ClInclude Include="..\..\src\core\print_ps.h" />
     <ClInclude Include="..\..\src\draw.h" />
@@ -161,6 +168,11 @@
     <ClCompile Include="..\..\src\core\cont.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\core\modes.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_bar_labels.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_jumps.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_moment_browser.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_tempos.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_time_signatures.cpp" />
     <ClCompile Include="..\..\src\core\print_ps.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
