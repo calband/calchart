@@ -806,65 +806,65 @@ void FieldFrame::OnCmd_next_ss(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_box(wxCommandEvent& event)
 {
-	SetCurrentLasso(CC_DRAG_BOX);
+	SetCurrentLasso(CC_DRAG_TYPES::BOX);
 }
 
 
 void FieldFrame::OnCmd_poly(wxCommandEvent& event)
 {
-	SetCurrentLasso(CC_DRAG_POLY);
+	SetCurrentLasso(CC_DRAG_TYPES::POLY);
 }
 
 
 void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
 {
-	SetCurrentLasso(CC_DRAG_LASSO);
+	SetCurrentLasso(CC_DRAG_TYPES::LASSO);
 }
 
 
 void FieldFrame::OnCmd_move(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_NORMAL);
+	SetCurrentMove(CC_MOVE_MODES::NORMAL);
 }
 
 void FieldFrame::OnCmd_swap(wxCommandEvent& event) 
 {
-	SetCurrentMove(CC_MOVE_SWAP);
+	SetCurrentMove(CC_MOVE_MODES::SWAP);
 }
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_LINE);
+	SetCurrentMove(CC_MOVE_MODES::LINE);
 }
 
 
 void FieldFrame::OnCmd_rot(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_ROTATE);
+	SetCurrentMove(CC_MOVE_MODES::ROTATE);
 }
 
 
 void FieldFrame::OnCmd_shear(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_SHEAR);
+	SetCurrentMove(CC_MOVE_MODES::SHEAR);
 }
 
 
 void FieldFrame::OnCmd_reflect(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_REFL);
+	SetCurrentMove(CC_MOVE_MODES::REFL);
 }
 
 
 void FieldFrame::OnCmd_size(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_SIZE);
+	SetCurrentMove(CC_MOVE_MODES::SIZE);
 }
 
 
 void FieldFrame::OnCmd_genius(wxCommandEvent& event)
 {
-	SetCurrentMove(CC_MOVE_GENIUS);
+	SetCurrentMove(CC_MOVE_MODES::GENIUS);
 }
 
 
@@ -899,49 +899,49 @@ void FieldFrame::OnCmd_label_visibility_toggle(wxCommandEvent& event) {
 
 void FieldFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_PLAIN);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::PLAIN);
 }
 
 
 void FieldFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::SOL);
 }
 
 
 void FieldFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_BKSL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::BKSL);
 }
 
 
 void FieldFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_SL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::SL);
 }
 
 
 void FieldFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_X);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::X);
 }
 
 
 void FieldFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLBKSL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::SOLBKSL);
 }
 
 
 void FieldFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLSL);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::SOLSL);
 }
 
 
 void FieldFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
-	GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLX);
+	GetFieldView()->DoSetPointsSymbol(SYMBOL_TYPE::SOLX);
 }
 
 
@@ -1008,20 +1008,20 @@ void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
 	switch (event.GetId())
 	{
 		case CALCHART__GhostOff:
-			GetFieldView()->getGhostModule().setGhostSource(GhostModule::disabled);
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::GhostSource::disabled);
 			break;
 		case CALCHART__GhostNextSheet:
-			GetFieldView()->getGhostModule().setGhostSource(GhostModule::next);
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::GhostSource::next);
 			break;
 		case CALCHART__GhostPreviousSheet:
-			GetFieldView()->getGhostModule().setGhostSource(GhostModule::previous);
+			GetFieldView()->getGhostModule().setGhostSource(GhostModule::GhostSource::previous);
 			break;
 		case CALCHART__GhostNthSheet:
 		{
 			wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:","Ghost Sheet", "1", this);
 			long targetSheetNum = 0;
 			if (targetSheet.ToLong(&targetSheetNum)) {
-				GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific, targetSheetNum - 1);
+				GetFieldView()->getGhostModule().setGhostSource(GhostModule::GhostSource::specific, targetSheetNum - 1);
 			} else {
 				wxMessageBox(wxT("The input must be a number."), wxT("Operation failed."));
 			}
@@ -1130,7 +1130,7 @@ void FieldFrame::SnapToGrid(CC_coord& c)
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
 	// retoggle the tool because we want it to draw as selected
-	int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : CALCHART__box;
+	int toggleID = (type == CC_DRAG_TYPES::POLY) ? CALCHART__poly : (type == CC_DRAG_TYPES::LASSO) ? CALCHART__lasso : CALCHART__box;
 	wxToolBar* tb = GetToolBar();
 	tb->ToggleTool(toggleID, true);
 
@@ -1142,7 +1142,7 @@ void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
 {
 	// retoggle the tool because we want it to draw as selected
 	wxToolBar* tb = GetToolBar();
-	tb->ToggleTool(CALCHART__move + type, true);
+	tb->ToggleTool(CALCHART__move + toUType(type), true);
 
 	mCanvas->SetCurrentMove(type);
 }

@@ -37,6 +37,7 @@
 #include "cc_drawcommand.h"
 #include <memory>
 
+//using calchart::CC_point;
 extern wxFont *pointLabelFont;
 
 static void DrawPoint(wxDC& dc, const CalChartConfiguration& config, const CC_point& point, unsigned reference, const CC_coord& origin, const wxString& label);
@@ -235,30 +236,30 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 				bool do_tab = false;
 				switch (c.font)
 				{
-					case PSFONT_SYMBOL:
+					case PSFONT_TYPE::SYMBOL:
 					{
 						wxCoord textw, texth;
 						dc.GetTextExtent(wxT("O"), &textw, &texth);
 						x += textw * c.text.length();
 					}
 						break;
-					case PSFONT_NORM:
+					case PSFONT_TYPE::NORM:
 						dc.SetFont(*contPlainFont);
 						break;
-					case PSFONT_BOLD:
+					case PSFONT_TYPE::BOLD:
 						dc.SetFont(*contBoldFont);
 						break;
-					case PSFONT_ITAL:
+					case PSFONT_TYPE::ITAL:
 						dc.SetFont(*contItalFont);
 						break;
-					case PSFONT_BOLDITAL:
+					case PSFONT_TYPE::BOLDITAL:
 						dc.SetFont(*contBoldItalFont);
 						break;
-					case PSFONT_TAB:
+					case PSFONT_TYPE::TAB:
 						do_tab = true;
 						break;
 				}
-				if (!do_tab && (c.font != PSFONT_SYMBOL))
+				if (!do_tab && (c.font != PSFONT_TYPE::SYMBOL))
 				{
 					wxCoord textw, texth;
 					dc.GetTextExtent(c.text, &textw, &texth);
@@ -274,20 +275,20 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 			bool do_tab = false;
 			switch (c.font)
 			{
-				case PSFONT_NORM:
-				case PSFONT_SYMBOL:
+				case PSFONT_TYPE::NORM:
+				case PSFONT_TYPE::SYMBOL:
 					dc.SetFont(*contPlainFont);
 					break;
-				case PSFONT_BOLD:
+				case PSFONT_TYPE::BOLD:
 					dc.SetFont(*contBoldFont);
 					break;
-				case PSFONT_ITAL:
+				case PSFONT_TYPE::ITAL:
 					dc.SetFont(*contItalFont);
 					break;
-				case PSFONT_BOLDITAL:
+				case PSFONT_TYPE::BOLDITAL:
 					dc.SetFont(*contBoldItalFont);
 					break;
-				case PSFONT_TAB:
+				case PSFONT_TYPE::TAB:
 				{
 					tabnum++;
 					wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
@@ -299,7 +300,7 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 				default:
 					break;
 			}
-			if (c.font == PSFONT_SYMBOL)
+			if (c.font == PSFONT_TYPE::SYMBOL)
 			{
 				wxCoord textw, texth, textd;
 				dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
@@ -313,10 +314,10 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 						SYMBOL_TYPE sym = (SYMBOL_TYPE)(*s - 'A');
 						switch (sym)
 						{
-							case SYMBOL_SOL:
-							case SYMBOL_SOLBKSL:
-							case SYMBOL_SOLSL:
-							case SYMBOL_SOLX:
+							case SYMBOL_TYPE::SOL:
+							case SYMBOL_TYPE::SOLBKSL:
+							case SYMBOL_TYPE::SOLSL:
+							case SYMBOL_TYPE::SOLX:
 								dc.SetBrush(*wxBLACK_BRUSH);
 								break;
 							default:
@@ -325,10 +326,10 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 						dc.DrawEllipse(x, top_y, d, d);
 						switch (sym)
 						{
-							case SYMBOL_SL:
-							case SYMBOL_X:
-							case SYMBOL_SOLSL:
-							case SYMBOL_SOLX:
+							case SYMBOL_TYPE::SL:
+							case SYMBOL_TYPE::X:
+							case SYMBOL_TYPE::SOLSL:
+							case SYMBOL_TYPE::SOLX:
 								dc.DrawLine(x-1, top_y + d+1, x + d+1, top_y-1);
 								break;
 							default:
@@ -336,10 +337,10 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& 
 						}
 						switch (sym)
 						{
-							case SYMBOL_BKSL:
-							case SYMBOL_X:
-							case SYMBOL_SOLBKSL:
-							case SYMBOL_SOLX:
+							case SYMBOL_TYPE::BKSL:
+							case SYMBOL_TYPE::X:
+							case SYMBOL_TYPE::SOLBKSL:
+							case SYMBOL_TYPE::SOLX:
 								dc.DrawLine(x-1, top_y-1, x + d+1, top_y + d+1);
 								break;
 							default:
@@ -541,10 +542,10 @@ DrawPointHelper(wxDC& dc, const CalChartConfiguration& config, const CC_coord& p
 	long y = pos.y;
 	switch (point.GetSymbol())
 	{
-		case SYMBOL_SOL:
-		case SYMBOL_SOLBKSL:
-		case SYMBOL_SOLSL:
-		case SYMBOL_SOLX:
+		case SYMBOL_TYPE::SOL:
+		case SYMBOL_TYPE::SOLBKSL:
+		case SYMBOL_TYPE::SOLSL:
+		case SYMBOL_TYPE::SOLX:
 			break;
 		default:
 			dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -552,13 +553,13 @@ DrawPointHelper(wxDC& dc, const CalChartConfiguration& config, const CC_coord& p
 	dc.DrawEllipse(x - offset, y - offset, circ_r, circ_r);
 	switch (point.GetSymbol())
 	{
-		case SYMBOL_SL:
-		case SYMBOL_X:
+		case SYMBOL_TYPE::SL:
+		case SYMBOL_TYPE::X:
 			dc.DrawLine(x - plineoff, y + plineoff,
 						x + plineoff, y - plineoff);
 			break;
-		case SYMBOL_SOLSL:
-		case SYMBOL_SOLX:
+		case SYMBOL_TYPE::SOLSL:
+		case SYMBOL_TYPE::SOLX:
 			dc.DrawLine(x - slineoff, y + slineoff,
 						x + slineoff, y - slineoff);
 			break;
@@ -567,13 +568,13 @@ DrawPointHelper(wxDC& dc, const CalChartConfiguration& config, const CC_coord& p
 	}
 	switch (point.GetSymbol())
 	{
-		case SYMBOL_BKSL:
-		case SYMBOL_X:
+		case SYMBOL_TYPE::BKSL:
+		case SYMBOL_TYPE::X:
 			dc.DrawLine(x - plineoff, y - plineoff,
 						x + plineoff, y + plineoff);
 			break;
-		case SYMBOL_SOLBKSL:
-		case SYMBOL_SOLX:
+		case SYMBOL_TYPE::SOLBKSL:
+		case SYMBOL_TYPE::SOLX:
 			dc.DrawLine(x - slineoff, y - slineoff,
 						x + slineoff, y + slineoff);
 			break;
@@ -619,13 +620,13 @@ void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CC_DrawCommand>& draw_co
 	{
 		switch (iter->mType)
 		{
-			case CC_DrawCommand::Line:
+			case CC_DrawCommand::DrawType::Line:
 				dc.DrawLine(iter->x1, iter->y1, iter->x2, iter->y2);
 				break;
-			case CC_DrawCommand::Arc:
+			case CC_DrawCommand::DrawType::Arc:
 				dc.DrawArc(iter->x1, iter->y1, iter->x2, iter->y2, iter->xc, iter->yc);
 				break;
-			case CC_DrawCommand::Ignore:
+			case CC_DrawCommand::DrawType::Ignore:
 				break;
 		}
 	}

@@ -43,7 +43,7 @@ struct ErrorMarker
 	std::set<unsigned> pntgroup;			  // which points have this error
 	SYMBOL_TYPE contsymbol;					  // which continuity
 	int line, col;							  // where
-	ErrorMarker(): contsymbol(SYMBOL_PLAIN), line(-1), col(-1) {}
+	ErrorMarker(): contsymbol(SYMBOL_TYPE::PLAIN), line(-1), col(-1) {}
 };
 
 typedef std::function<void (const std::string& notice)> NotifyStatus;
@@ -72,11 +72,11 @@ public:
 	// For drawing:
 	struct animate_info_t
 	{
-		int mCollision;
+		CollisionType mCollision;
 		AnimateDir mDirection;
 		float mRealDirection;
 		CC_coord mPosition;
-		animate_info_t(int col, AnimateDir dir, float rdir, CC_coord pos) : mCollision(col), mDirection(dir), mRealDirection(rdir), mPosition(pos) {}
+		animate_info_t(CollisionType col, AnimateDir dir, float rdir, CC_coord pos) : mCollision(col), mDirection(dir), mRealDirection(rdir), mPosition(pos) {}
 	};
 	animate_info_t GetAnimateInfo(unsigned which) const;
 

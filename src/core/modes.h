@@ -46,7 +46,7 @@ static const int kFieldStepEastHashFromWestSideline = 52;
 class ShowMode
 {
 public:
-	typedef enum { SHOW_STANDARD, SHOW_SPRINGSHOW } ShowType;
+	enum class ShowType { STANDARD, SPRINGSHOW };
 
 	virtual ~ShowMode();
 
@@ -92,8 +92,8 @@ private:
 class ShowModeStandard : public ShowMode
 {
 public:
-	enum ArrayValues { kwhash, kehash, kbord1_x, kbord1_y, kbord2_x, kbord2_y, koffset_x, koffset_y, ksize_x, ksize_y, kShowModeValues };
-	using ShowModeInfo_t = std::array<long, kShowModeValues>;
+	enum class ArrayValues { kwhash, kehash, kbord1_x, kbord1_y, kbord2_x, kbord2_y, koffset_x, koffset_y, ksize_x, ksize_y, kShowModeValues };
+	using ShowModeInfo_t = std::array<long, toUType(ArrayValues::kShowModeValues)>;
 	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& which, const ShowModeInfo_t& values);
 	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& name,
 													CC_coord size,
@@ -125,8 +125,8 @@ private:
 class ShowModeSprShow : public ShowMode
 {
 public:
-	enum ArrayValues { kwhich_spr_yards, kbord1_x, kbord1_y, kbord2_x, kbord2_y, kmode_steps_x, kmode_steps_y, kmode_steps_w, kmode_steps_h, keps_stage_x, keps_stage_y, keps_stage_w, keps_stage_h, keps_field_x, keps_field_y, keps_field_w, keps_field_h, keps_text_left, keps_text_right, keps_text_top, keps_text_bottom, kShowModeValues };
-	using SpringShowModeInfo_t = std::array<long, kShowModeValues>;
+	enum class ArrayValues { kwhich_spr_yards, kbord1_x, kbord1_y, kbord2_x, kbord2_y, kmode_steps_x, kmode_steps_y, kmode_steps_w, kmode_steps_h, keps_stage_x, keps_stage_y, keps_stage_w, keps_stage_h, keps_field_x, keps_field_y, keps_field_w, keps_field_h, keps_text_left, keps_text_right, keps_text_top, keps_text_bottom, kShowModeValues };
+	using SpringShowModeInfo_t = std::array<long, toUType(ArrayValues::kShowModeValues)>;
 
 	static std::unique_ptr<ShowMode> CreateSpringShowMode(const std::string& which, const SpringShowModeInfo_t& values);
 

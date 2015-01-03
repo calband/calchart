@@ -26,58 +26,41 @@
 #include <string>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
-enum
+enum class ContVar
 {
-	CONTVAR_A,
-	CONTVAR_B,
-	CONTVAR_C,
-	CONTVAR_D,
-	CONTVAR_X,
-	CONTVAR_Y,
-	CONTVAR_Z,
-	CONTVAR_DOF,
-	CONTVAR_DOH,
-	NUMCONTVARS
+	A, B, C, D, X, Y, Z, DOF, DOH, NumContVars
 };
 
-enum AnimateDir
+enum class AnimateDir
 {
-	ANIMDIR_N, ANIMDIR_NE, ANIMDIR_E, ANIMDIR_SE,
-	ANIMDIR_S, ANIMDIR_SW, ANIMDIR_W, ANIMDIR_NW
+	N, NE, E, SE, S, SW, W, NW
 };
 
-enum AnimateError
+enum class AnimateError
 {
-	ANIMERR_OUTOFTIME,
-	ANIMERR_EXTRATIME,
-	ANIMERR_WRONGPLACE,
-	ANIMERR_INVALID_CM,
-	ANIMERR_INVALID_FNTN,
-	ANIMERR_DIVISION_ZERO,
-	ANIMERR_UNDEFINED,
-	ANIMERR_SYNTAX,
-	ANIMERR_NONINT,
-	ANIMERR_NEGINT,
+	OUTOFTIME,
+	EXTRATIME,
+	WRONGPLACE,
+	INVALID_CM,
+	INVALID_FNTN,
+	DIVISION_ZERO,
+	UNDEFINED,
+	SYNTAX,
+	NONINT,
+	NEGINT,
 	NUM_ANIMERR
 };
 
-enum MarchingStyle
+enum class MarchingStyle
 {
-	STYLE_HighStep,
-	STYLE_Military,
-	STYLE_ShowHigh,
-	STYLE_GrapeVine,
-	STYLE_JerkyStep,
-	STYLE_Close
+	HighStep, Military, ShowHigh, GrapeVine, JerkyStep, Close
 };
 
-enum CollisionWarning
+enum class CollisionWarning
 {
-	COLLISION_RESPONSE_NONE,
-	COLLISION_RESPONSE_SHOW,
-	COLLISION_RESPONSE_BEEP
+	NONE, SHOW, BEEP
 };
 
-std::string animate_err_msgs(size_t which);
+std::string animate_err_msgs(AnimateError which);
 
 typedef CC_coord AnimatePoint;

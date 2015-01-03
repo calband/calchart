@@ -255,10 +255,10 @@ mConfig(config)
 		"sel",
 	});
 	CC_show::CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
-	sheet->GetPoint(0).SetSymbol(SYMBOL_X);
-	sheet->GetPoint(1).SetSymbol(SYMBOL_SOLX);
-	sheet->GetPoint(2).SetSymbol(SYMBOL_X);
-	sheet->GetPoint(3).SetSymbol(SYMBOL_SOLX);
+	sheet->GetPoint(0).SetSymbol(SYMBOL_TYPE::X);
+	sheet->GetPoint(1).SetSymbol(SYMBOL_TYPE::SOLX);
+	sheet->GetPoint(2).SetSymbol(SYMBOL_TYPE::X);
+	sheet->GetPoint(3).SetSymbol(SYMBOL_TYPE::SOLX);
 
 	for (auto i = 0; i < 4; ++i)
 	{

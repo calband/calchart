@@ -50,7 +50,7 @@ public:
 	virtual unsigned NumBeats() const { return mNumBeats; }
 
 	// What style to display
-	virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
+	virtual MarchingStyle StepStyle() { return MarchingStyle::HighStep; }
 
 	// when we want to have the path drawn:
 	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;

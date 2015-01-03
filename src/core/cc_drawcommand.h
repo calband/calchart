@@ -27,16 +27,16 @@
 
 struct CC_DrawCommand
 {
-	typedef enum { Ignore, Line, Arc } DrawType;
+	enum class DrawType { Ignore, Line, Arc };
 	DrawType mType;
 	int x1, y1, x2, y2;
 	int xc, yc;
 	// nothing version
-	CC_DrawCommand() : mType(Ignore) {}
+	CC_DrawCommand() : mType(DrawType::Ignore) {}
 
 	// Line version
 	CC_DrawCommand(int startx, int starty, int endx, int endy) :
-	mType(Line),
+	mType(DrawType::Line),
 	x1(startx),
 	y1(starty),
 	x2(endx),
@@ -45,7 +45,7 @@ struct CC_DrawCommand
 
 	// Line version
 	CC_DrawCommand(const CC_coord& start, const CC_coord& end) :
-	mType(Line),
+	mType(DrawType::Line),
 	x1(start.x),
 	y1(start.y),
 	x2(end.x),
@@ -54,7 +54,7 @@ struct CC_DrawCommand
 	
 	// Arc version
 	CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx, int centery) :
-	mType(Arc),
+	mType(DrawType::Arc),
 	x1(startx),
 	y1(starty),
 	x2(endx),

@@ -158,7 +158,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview, double PageW
 	{
 		switch (mode.GetType())
 		{
-			case ShowMode::SHOW_STANDARD:
+			case ShowMode::ShowType::STANDARD:
 				std::tie(width, height, real_width, real_height, field_y) = CalcValues(PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
 				step_width = (short)(width / (height / (fullheight+8.0)));
 				if (step_width > Coord2Int(fieldsize.x))
@@ -190,7 +190,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview, double PageW
 				field_x = (width - field_w) / 2;
 				field_y += height - (field_h + step_size*16);
 				break;
-			case ShowMode::SHOW_SPRINGSHOW:
+			case ShowMode::ShowType::SPRINGSHOW:
 			{
 				// this may throw if not doing spring show..
 				const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mode);
@@ -398,7 +398,7 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
 	{
 		switch (mMode.GetType())
 		{
-			case ShowMode::SHOW_STANDARD:
+			case ShowMode::ShowType::STANDARD:
 			{
 				// this may throw if not doing spring show..
 				const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
@@ -419,7 +419,7 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
 				buffer<<"%%EndSetup\n";
 			}
 				break;
-			case ShowMode::SHOW_SPRINGSHOW:
+			case ShowMode::ShowType::SPRINGSHOW:
 			{
 				// this may throw if not doing spring show..
 				const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mMode);
@@ -483,7 +483,7 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps, unsigned curr_s
 			{
 				switch (mMode.GetType())
 				{
-					case ShowMode::SHOW_STANDARD:
+					case ShowMode::ShowType::STANDARD:
 						PrintStandard(buffer, *curr_sheet, false);
 						if (SplitSheet(*curr_sheet))
 						{
@@ -495,7 +495,7 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps, unsigned curr_s
 							PrintStandard(buffer, *curr_sheet, true);
 						}
 						break;
-					case ShowMode::SHOW_SPRINGSHOW:
+					case ShowMode::ShowType::SPRINGSHOW:
 						PrintSpringshow(buffer, *curr_sheet);
 						break;
 				}
@@ -538,7 +538,7 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer, short num_pages
 				PrintContinuityPreamble(buffer, real_height - mTextSize, mTextSize, real_width, real_width * 0.5 / 7.5, real_width * 1.5 / 7.5, real_width * 2.0 / 7.5, mTextSize);
 			}
 
-			gen_cont_line(buffer, text, PSFONT_NORM, mTextSize);
+			gen_cont_line(buffer, text, PSFONT_TYPE::NORM, mTextSize);
 			lines_left--;
 			need_eject = true;
 		}
@@ -564,7 +564,7 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer, const CC_sheet& shee
 	for (auto& text : continuity)
 	{
 		if (!text.GetOnSheet()) continue;
-		gen_cont_line(buffer, text, PSFONT_NORM, this_size);
+		gen_cont_line(buffer, text, PSFONT_TYPE::NORM, this_size);
 	}
 }
 
@@ -575,7 +575,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const CC_textline& line,
 	short tabstop = 0;
 	for (auto& part : line.GetChunks())
 	{
-		if (part.font == PSFONT_TAB)
+		if (part.font == PSFONT_TYPE::TAB)
 		{
 			if (++tabstop > 3)
 			{
@@ -590,7 +590,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const CC_textline& line,
 		{
 			if (part.font != currfontnum)
 			{
-				buffer<<"/"<<fontnames[part.font];
+				buffer<<"/"<<fontnames[toUType(part.font)];
 				buffer<<" findfont "<<fontsize<<" scalefont setfont\n";
 				currfontnum = part.font;
 			}
@@ -782,7 +782,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet, b
 		float fieldoffy = Coord2Float(fieldoff.y);
 		float dot_x = (Coord2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
 		float dot_y = (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)-fieldoffy)/fieldheight)*field_h;
-		buffer<<dot_x<<" "<<dot_y<<" "<<dot_routines[sheet.GetPoint(i).GetSymbol()]<<"\n";
+		buffer<<dot_x<<" "<<dot_y<<" "<<dot_routines[toUType(sheet.GetPoint(i).GetSymbol())]<<"\n";
 		buffer<<"("<<mShow.GetPointLabel(i)<<") "<<dot_x<<" "<<dot_y<<" "<<(sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber")<<"\n";
 	}
 	if (mPrintDoCont)
@@ -872,7 +872,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet)
 	{
 		float dot_x = stage_field_x + (Coord2Float(sheet.GetPoint(i).GetPos().x) - modesprshow.StepsX()) / modesprshow.StepsW() * stage_field_w;
 		float dot_y = stage_field_y + stage_field_h * (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y)- modesprshow.StepsY())/ modesprshow.StepsH());
-		buffer<<dot_x<<" "<<dot_y<<" "<<dot_routines[sheet.GetPoint(i).GetSymbol()]<<"\n";
+		buffer<<dot_x<<" "<<dot_y<<" "<<dot_routines[toUType(sheet.GetPoint(i).GetSymbol())]<<"\n";
 		buffer<<"("<<mShow.GetPointLabel(i)<<") "<<dot_x<<" "<<dot_y<<" "<<((sheet.GetPoint(i).GetFlip()) ? "donumber2" : "donumber")<<"\n";
 	}
 	if (mPrintDoCont)

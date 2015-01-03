@@ -29,9 +29,9 @@
 
 struct CC_textchunk
 {
-	CC_textchunk() : text(), font(PSFONT_NORM) {}
+	CC_textchunk() : text(), font(PSFONT_TYPE::NORM) {}
 	std::string text;
-	enum PSFONT_TYPE font;
+	PSFONT_TYPE font;
 };
 
 typedef std::vector<CC_textchunk> CC_textchunk_list;

@@ -35,7 +35,7 @@ class ContProcedure;
 class ContToken;
 class AnimateCommand;
 
-using AnimationVariables = std::array<std::map<unsigned,float>, NUMCONTVARS>;
+using AnimationVariables = std::array<std::map<int,float>, toUType(ContVar::NumContVars)>;
 
 using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
 
@@ -62,8 +62,8 @@ public:
 	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token);
 	void RegisterError(AnimateError err, const ContToken *token) const;
 
-	float GetVarValue(int varnum, const ContToken *token) const;
-	void SetVarValue(int varnum, float value);
+	float GetVarValue(ContVar varnum, const ContToken *token) const;
+	void SetVarValue(ContVar varnum, float value);
 
 	// helper functions to get information for building a command
 	AnimatePoint GetPointPosition() const { return pt; }
