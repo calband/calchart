@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_CONTINUITY_H_
-#define _CC_CONTINUITY_H_
+#pragma once
 
 #include <string>
 
@@ -48,5 +47,3 @@ friend void CC_continuity_UnitTests();
 bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
 
 void CC_continuity_UnitTests();
-
-#endif

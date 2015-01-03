@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_SHAPES_H_
-#define _CC_SHAPES_H_
+#pragma once
 
 #include "cc_coord.h"
 #include <vector>
@@ -153,5 +152,3 @@ public:
 
 	virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p);
 };
-
-#endif

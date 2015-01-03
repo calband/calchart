@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOOLBAR_H_
-#define _TOOLBAR_H_
+#pragma once
 
 #include <wx/wx.h>
 #include <wx/toolbar.h>
@@ -41,5 +40,3 @@ void AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame& frame);
 std::vector<ToolBarEntry> GetSymbolsToolBar();
 std::vector<ToolBarEntry> GetMainToolBar();
 std::vector<ToolBarEntry> GetAnimationToolBar();
-
-#endif // _TOOLBAR_H_

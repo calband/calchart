@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_POINT_H_
-#define _CC_POINT_H_
+#pragma once
 
 #include "cc_types.h"
 #include "cc_coord.h"
@@ -74,5 +73,3 @@ private:
 };
 
 void CC_point_UnitTests();
-
-#endif // _CC_POINT_H_

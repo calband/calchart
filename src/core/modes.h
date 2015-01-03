@@ -20,13 +20,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MODES_H_
-#define _MODES_H_
+#pragma once
 
 #include "cc_coord.h"
 
 #include <string>
 #include <array>
+#include <memory>
 
 #define SPR_YARD_LEFT 8
 #define SPR_YARD_RIGHT 4
@@ -171,5 +171,3 @@ private:
 	short steps_x, steps_y, steps_w, steps_h;
 	short text_left, text_right, text_top, text_bottom;
 };
-
-#endif

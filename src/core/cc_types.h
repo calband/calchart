@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_TYPES_H_
-#define _CC_TYPES_H_
+#pragma once
 
 #include <stdint.h>
 #include <set>
@@ -67,4 +66,3 @@ constexpr typename std::underlying_type<E>::type toUType(E enumerator) noexcept
 	return static_cast<typename std::underlying_type<E>::type>(enumerator);
 }
 
-#endif

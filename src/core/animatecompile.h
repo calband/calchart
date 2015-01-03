@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATECOMPILE_H_
-#define _ANIMATECOMPILE_H_
+#pragma once
 
 #include "animate_types.h"
 #include "animate.h"
@@ -87,5 +86,3 @@ private:
 	// this is effectively mutable;
 	AnimationErrors& error_markers;
 };
-
-#endif // _ANIMATECOMPILE_H_

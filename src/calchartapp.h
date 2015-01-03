@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CALCHARTAPP_H_
-#define _CALCHARTAPP_H_
+#pragma once
 
 #include "modes.h"
 #include "single_instance_ipc.h"
@@ -65,5 +64,3 @@ private:
 
 	std::unique_ptr<HostAppInterface> mHostInterface;
 };
-
-#endif // _CALCHARTAPP_H_

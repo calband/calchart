@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __CC_TEXT_H__
-#define __CC_TEXT_H__
+#pragma once
 
 #include "cc_types.h"
 
@@ -71,5 +70,3 @@ private:
 	std::string mOriginalLine;
 	std::string mNumber;
 };
-
-#endif

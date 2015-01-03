@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _UNDO_H_
-#define _UNDO_H_
+#pragma once
 
 #include "cc_continuity.h"
 #include "cc_coord.h"
@@ -395,6 +394,3 @@ public:
 	ToggleLabelVisibilityCommand(CalChartDoc& show);
 	virtual ~ToggleLabelVisibilityCommand();
 };
-
-
-#endif

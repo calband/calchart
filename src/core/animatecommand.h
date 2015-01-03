@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATECOMMAND_H_
-#define _ANIMATECOMMAND_H_
+#pragma once
 
 #include "animate.h"
 
@@ -120,5 +119,3 @@ private:
 	float mR, mAngStart, mAngEnd;
 	float mFace;
 };
-
-#endif //_ANIMATECOMMAND_H_

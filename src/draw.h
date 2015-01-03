@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __DRAW_H__
-#define __DRAW_H__
+#pragma once
 
 #include "cc_show.h"
 #include "modes.h"
@@ -65,5 +64,3 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config, const std::vector<C
 
 void DrawCC_DrawCommandList(wxDC& dc, const std::vector<CC_DrawCommand>& draw_commands);
 //void DrawShape(wxDC& dc, const CC_shape& shape, float x, float y);
-
-#endif // __DRAW_H__

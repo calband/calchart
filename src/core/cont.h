@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CONT_H_
-#define _CONT_H_
+#pragma once
 
 #include "animatecompile.h"
 #include <iosfwd>
@@ -602,4 +601,4 @@ private:
 	ContValue *ang, *stps;
 	ContPoint *pnt;
 };
-#endif
+

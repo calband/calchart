@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CONFGR_H_
-#define _CONFGR_H_
+#pragma once
 
 #include <wx/string.h>
 #include <wx/gdicmn.h>
@@ -29,6 +28,7 @@
 #include <functional>
 #include <map>
 #include <array>
+#include <memory>
 
 // forward declare
 class wxPen;
@@ -232,6 +232,3 @@ public:
 
 // to find a specific Show:
 std::unique_ptr<ShowMode> GetShowMode(const wxString& which);
-
-
-#endif

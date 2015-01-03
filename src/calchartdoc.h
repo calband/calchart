@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CALCHARTDOC_H_
-#define _CALCHARTDOC_H_
+#pragma once
 
 #include "animate.h"
 
@@ -198,5 +197,3 @@ private:
 	std::unique_ptr<const ShowMode> mMode;
 	AutoSaveTimer mTimer;
 };
-
-#endif // _CALCHARTDOC_H_

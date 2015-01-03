@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATION_CANVAS_H_
-#define _ANIMATION_CANVAS_H_
+#pragma once
 
 #include <wx/wx.h>
 
@@ -64,5 +63,3 @@ private:
 	
 	wxDECLARE_EVENT_TABLE();
 };
-
-#endif // _ANIMATION_CANVAS_H_

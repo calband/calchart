@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_COORD_H_
-#define _CC_COORD_H_
+#pragma once
 
 #include "cc_types.h"
 
@@ -131,5 +130,3 @@ inline int operator != (const CC_coord& a, const CC_coord& b)
 
 
 void CC_coord_UnitTests();
-
-#endif
