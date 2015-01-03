@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _TOP_FRAME_H_
-#define _TOP_FRAME_H_
+#pragma once
 
 #include <wx/docview.h>
 
@@ -45,5 +44,3 @@ public:
 
 	DECLARE_EVENT_TABLE()
 };
-
-#endif // _TOP_FRAME_H_

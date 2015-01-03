@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _UI_ENUMS_H_
-#define _UI_ENUMS_H_
+#pragma once
 
 enum
 {
@@ -119,5 +118,3 @@ enum
 	CALCHART__SplitViewUnsplit,
 	CALCHART__SplitViewSwapAnimateAndOmni,
 };
-
-#endif // _UI_ENUMS_H_

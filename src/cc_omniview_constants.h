@@ -20,8 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CC_OMNIVIEW_CONSTANTS_H__
-#define __CC_OMNIVIEW_CONSTANTS_H__
+#pragma once
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -43,5 +42,3 @@ static const float kViewPoint_y_3 = -55.0;
 static const float kViewPoint_z_3 = 20.0;
 static const float kViewAngle_3 = 11.0*M_PI/16.0;
 static const float kViewAngle_z_3 = -M_PI/8.0;
-
-#endif // __CC_OMNIVIEW_CONSTANTS_H__

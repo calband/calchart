@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_SHEET_H_
-#define _CC_SHEET_H_
+#pragma once
 
 #include "cc_types.h"
 #include "cc_continuity.h"
@@ -117,5 +116,3 @@ private:
 };
 
 void CC_sheet_UnitTests();
-
-#endif
