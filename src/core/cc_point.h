@@ -56,13 +56,13 @@ public:
 	void SetPos(const CC_coord& c, unsigned ref = 0);
 
 private:
-	enum {
-		kPointLabelFlipped,
-		kLabelIsInvisible,
-		kTotalBits
+	enum class Flags {
+		PointLabelFlipped,
+		LabelIsInvisible,
+		TotalBits
 	};
 	
-	std::bitset<kTotalBits> mFlags;
+	std::bitset<toUType(Flags::TotalBits)> mFlags;
 	// by having both a sym type and cont index, we can have several
 	// points share the same symbol but have different continuities.
 	SYMBOL_TYPE mSym;

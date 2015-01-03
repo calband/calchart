@@ -54,7 +54,7 @@ on_sheet(true)
 			if (line.length() > 1)
 			{
 				CC_textchunk new_text;
-				new_text.font = PSFONT_TAB;
+				new_text.font = PSFONT_TYPE::TAB;
 				chunks.push_back(new_text);
 			}
 			line.erase(0, 1);
@@ -64,7 +64,7 @@ on_sheet(true)
 		if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's')))
 		{
 			CC_textchunk new_text;
-			new_text.font = PSFONT_SYMBOL;
+			new_text.font = PSFONT_TYPE::SYMBOL;
 			if (tolower(line.at(1)) == 'p')
 			{
 				switch (tolower(line.at(2)))
@@ -108,11 +108,11 @@ on_sheet(true)
 		{
 			if (tolower(line.at(2)) == 'e')
 			{
-				currfontnum = PSFONT_NORM;
+				currfontnum = PSFONT_TYPE::NORM;
 			}
 			if (tolower(line.at(2)) == 's')
 			{
-				currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT_BOLD : PSFONT_ITAL;
+				currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT_TYPE::BOLD : PSFONT_TYPE::ITAL;
 			}
 			line.erase(0, 3);
 			continue;
@@ -137,7 +137,7 @@ mOriginalLine(data)
 {
 	std::istringstream reader(data);
 	std::string line;
-	PSFONT_TYPE currfontnum = PSFONT_NORM;
+	PSFONT_TYPE currfontnum = PSFONT_TYPE::NORM;
 	while (std::getline(reader, line, '\n')) {
 		mPrintChunks.push_back(CC_textline(line, currfontnum));
 	}
@@ -149,7 +149,7 @@ mNumber(number)
 {
 	std::istringstream reader(data);
 	std::string line;
-	PSFONT_TYPE currfontnum = PSFONT_NORM;
+	PSFONT_TYPE currfontnum = PSFONT_TYPE::NORM;
 	while (std::getline(reader, line, '\n')) {
 		mPrintChunks.push_back(CC_textline(line, currfontnum));
 	}

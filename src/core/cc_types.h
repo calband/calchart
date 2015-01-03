@@ -29,40 +29,42 @@
 
 typedef int16_t Coord;
 
-enum PSFONT_TYPE
+enum class PSFONT_TYPE
 {
-	PSFONT_SYMBOL, PSFONT_NORM, PSFONT_BOLD, PSFONT_ITAL, PSFONT_BOLDITAL,
-	PSFONT_TAB
+	SYMBOL, NORM, BOLD, ITAL, BOLDITAL, TAB
 };
 
-enum SYMBOL_TYPE
+enum class SYMBOL_TYPE
 {
-	SYMBOLS_START = 0,
-	SYMBOL_PLAIN = 0, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+	PLAIN, SOL, BKSL, SL, X, SOLBKSL, SOLSL, SOLX
 	, MAX_NUM_SYMBOLS
 };
 
 static const SYMBOL_TYPE k_symbols[] = {
-	SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+	SYMBOL_TYPE::PLAIN, SYMBOL_TYPE::SOL, SYMBOL_TYPE::BKSL, SYMBOL_TYPE::SL, SYMBOL_TYPE::X, SYMBOL_TYPE::SOLBKSL, SYMBOL_TYPE::SOLSL, SYMBOL_TYPE::SOLX
 };
 
 std::string GetNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
 
-enum CC_DRAG_TYPES
+enum class CC_DRAG_TYPES
 {
-	CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
-	CC_DRAG_LASSO, CC_DRAG_LINE, CC_DRAG_CROSS
+	NONE, BOX, POLY, LASSO, LINE, CROSS
 };
-enum CC_MOVE_MODES
+
+enum class CC_MOVE_MODES
 {
-	CC_MOVE_NORMAL, CC_MOVE_SWAP, CC_MOVE_LINE,
-	CC_MOVE_ROTATE, CC_MOVE_SHEAR, CC_MOVE_REFL, 
-	CC_MOVE_SIZE, CC_MOVE_GENIUS
+	NORMAL, SWAP, LINE, ROTATE, SHEAR, REFL, SIZE, GENIUS
 };
 
 typedef std::set<unsigned> SelectionList;
+
+// General utility for extracting the underlying type from an enum
+// should be moved to a more generic place
+template<typename E>
+constexpr typename std::underlying_type<E>::type toUType(E enumerator) noexcept
+{
+	return static_cast<typename std::underlying_type<E>::type>(enumerator);
+}
 
 #endif

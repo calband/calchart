@@ -42,7 +42,7 @@
 
 AnimationView::AnimationView() :
 mErrorOccurred(false),
-mCollisionWarningType(COLLISION_RESPONSE_SHOW)
+mCollisionWarningType(CollisionWarning::SHOW)
 {
 }
 
@@ -64,20 +64,20 @@ AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
 {
 	dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
 	DrawMode(*dc, config, GetShow()->GetMode(), ShowMode::kAnimation);
-	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
+	const bool checkForCollision = mCollisionWarningType != CollisionWarning::NONE;
 	if (mAnimation)
 	{
 		for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
 		{
 			auto info = mAnimation->GetAnimateInfo(i);
 
-			if (checkForCollision && info.mCollision)
+			if (checkForCollision && info.mCollision != CollisionType::NONE)
 			{
-				if (info.mCollision == COLLISION_WARNING) {
+				if (info.mCollision == CollisionType::WARNING) {
 					auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
 					dc->SetBrush(brushAndPen.first);
 					dc->SetPen(brushAndPen.second);
-				} else if (info.mCollision == COLLISION_INTERSECT) {
+				} else if (info.mCollision == CollisionType::INTERSECT) {
 					auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
 					dc->SetBrush(brushAndPen.first);
 					dc->SetPen(brushAndPen.second);
@@ -87,18 +87,18 @@ AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
 			{
 				switch (info.mDirection)
 				{
-					case ANIMDIR_SW:
-					case ANIMDIR_W:
-					case ANIMDIR_NW:
+					case AnimateDir::SW:
+					case AnimateDir::W:
+					case AnimateDir::NW:
 					{
 						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
 						dc->SetBrush(brushAndPen.first);
 						dc->SetPen(brushAndPen.second);
 					}
 						break;
-					case ANIMDIR_SE:
-					case ANIMDIR_E:
-					case ANIMDIR_NE:
+					case AnimateDir::SE:
+					case AnimateDir::E:
+					case AnimateDir::NE:
 					{
 						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
 						dc->SetBrush(brushAndPen.first);
@@ -117,18 +117,18 @@ AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
 			{
 				switch (info.mDirection)
 				{
-					case ANIMDIR_SW:
-					case ANIMDIR_W:
-					case ANIMDIR_NW:
+					case AnimateDir::SW:
+					case AnimateDir::W:
+					case AnimateDir::NW:
 					{
 						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
 						dc->SetBrush(brushAndPen.first);
 						dc->SetPen(brushAndPen.second);
 					}
 						break;
-					case ANIMDIR_SE:
-					case ANIMDIR_E:
-					case ANIMDIR_NE:
+					case AnimateDir::SE:
+					case AnimateDir::E:
+					case AnimateDir::NE:
 					{
 						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
 						dc->SetBrush(brushAndPen.first);
@@ -185,7 +185,7 @@ AnimationView::SetCollisionType(CollisionWarning col)
 	mCollisionWarningType = col;
 	if (mAnimation)
 	{
-		mAnimation->SetCollisionAction(col == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
+		mAnimation->SetCollisionAction(col == CollisionWarning::BEEP ? wxBell : NULL);
 	}
 }
 
@@ -200,7 +200,7 @@ AnimationView::SelectCollisions()
 		{
 			auto info = mAnimation->GetAnimateInfo(i);
 
-			if (info.mCollision)
+			if (info.mCollision != CollisionType::NONE)
 			{
 				select.insert(i);
 			}
@@ -243,7 +243,7 @@ AnimationView::Generate()
 		} while (mAnimation->NextBeat());
 #endif // GENERATE_SHOW_DUMP
 
-		mAnimation->SetCollisionAction(mCollisionWarningType == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
+		mAnimation->SetCollisionAction(mCollisionWarningType == CollisionWarning::BEEP ? wxBell : NULL);
 		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
 	}
 	GetAnimationFrame()->UpdatePanel();

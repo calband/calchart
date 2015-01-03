@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <functional>
 
-const std::string contnames[MAX_NUM_SYMBOLS] =
+const std::string contnames[toUType(SYMBOL_TYPE::MAX_NUM_SYMBOLS)] =
 {
 	"Plain",
 	"Sol",
@@ -45,7 +45,7 @@ const std::string contnames[MAX_NUM_SYMBOLS] =
 };
 
 CC_sheet::CC_sheet(size_t numPoints) :
-mAnimationContinuity(MAX_NUM_SYMBOLS),
+mAnimationContinuity(toUType(SYMBOL_TYPE::MAX_NUM_SYMBOLS)),
 beats(1),
 pts(numPoints)
 {
@@ -53,7 +53,7 @@ pts(numPoints)
 
 
 CC_sheet::CC_sheet(size_t numPoints, const std::string& newname) :
-mAnimationContinuity(MAX_NUM_SYMBOLS),
+mAnimationContinuity(toUType(SYMBOL_TYPE::MAX_NUM_SYMBOLS)),
 beats(1),
 pts(numPoints),
 mName(newname)
@@ -87,16 +87,16 @@ SYMBOL_TYPE GetSymbolForName(const std::string& name)
 	}
 	// what do we do here?  give larger one for now...
 	// This should probably throw
-	return MAX_NUM_SYMBOLS;
+	return SYMBOL_TYPE::MAX_NUM_SYMBOLS;
 }
 
 std::string GetNameForSymbol(SYMBOL_TYPE which)
 {
-	if (which > MAX_NUM_SYMBOLS)
+	if (which > SYMBOL_TYPE::MAX_NUM_SYMBOLS)
 	{
 		return "";
 	}
-	return contnames[which];
+	return contnames[toUType(which)];
 }
 
 static void CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index, 	std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol, std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity, const std::string& sheet_name, uint32_t pointNum)
@@ -137,7 +137,7 @@ static void CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index, 	std::map
 
 // Constructor for shows 3.3 and ealier.
 CC_sheet::CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier) :
-mAnimationContinuity(MAX_NUM_SYMBOLS),
+mAnimationContinuity(toUType(SYMBOL_TYPE::MAX_NUM_SYMBOLS)),
 pts(numPoints)
 {
 	// Read in sheet name
@@ -281,7 +281,7 @@ pts(numPoints)
 		text = d + 2 + strlen(text);
 		
 		auto symbol_index = GetSymbolForName(namestr);
-		if (symbol_index == MAX_NUM_SYMBOLS)
+		if (symbol_index == SYMBOL_TYPE::MAX_NUM_SYMBOLS)
 		{
 			throw CC_FileException("No viable symbol for name");
 		}
@@ -306,7 +306,7 @@ pts(numPoints)
 
 
 CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_and_later) :
-mAnimationContinuity(MAX_NUM_SYMBOLS),
+mAnimationContinuity(toUType(SYMBOL_TYPE::MAX_NUM_SYMBOLS)),
 pts(numPoints)
 {
 	// construct the parser handlers
@@ -363,7 +363,7 @@ pts(numPoints)
 			throw CC_FileException("Bad cont chunk", INGL_ECNT);
 		}
 		SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(*d);
-		if (symbol_index >= MAX_NUM_SYMBOLS)
+		if (symbol_index >= SYMBOL_TYPE::MAX_NUM_SYMBOLS)
 		{
 			throw CC_FileException("No viable symbol for name", INGL_ECNT);
 		}
@@ -570,12 +570,12 @@ void CC_sheet::RelabelSheet(const std::vector<size_t>& table)
 
 const CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
 {
-	return mAnimationContinuity.at(i);
+	return mAnimationContinuity.at(toUType(i));
 }
 
 CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i)
 {
-	return mAnimationContinuity.at(i);
+	return mAnimationContinuity.at(toUType(i));
 }
 
 
@@ -765,7 +765,7 @@ void CC_sheet::CC_sheet_round_trip_test()
 		blank_sheet.SetPosition(CC_coord(30, 40), 0, 2);
 		blank_sheet.SetPosition(CC_coord(52, 50), 0, 3);
 		blank_sheet.SetBeats(13);
-		blank_sheet.GetContinuityBySymbol(SYMBOL_PLAIN).SetText("continuity test");
+		blank_sheet.GetContinuityBySymbol(SYMBOL_TYPE::PLAIN).SetText("continuity test");
 		blank_sheet.mPrintableContinuity = CC_print_continuity{"number 1", "duuuude, writing this testing is boring"};
 		auto blank_sheet_data = blank_sheet.SerializeSheet();
 		// need to pull out the sheet data

@@ -13,7 +13,7 @@ public:
 	 * @param source The source from which the active ghost sheet will be extracted.
 	 * @param isResponsible True if the GhostModule should delete the source when it forgets it.
 	 */
-	enum GhostSource { disabled, next, previous, specific };
+	enum class GhostSource { disabled, next, previous, specific };
 	void setGhostSource(GhostSource source, int which = 0);
 	/**
 	 * Returns the sheet having the ghost formation to draw.
@@ -27,7 +27,7 @@ public:
 	bool isActive() const;
 private:
 
-	GhostSource mCurrentSource = disabled;
+	GhostSource mCurrentSource = GhostSource::disabled;
 	int mWhich = 0;
 };
 

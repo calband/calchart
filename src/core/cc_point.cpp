@@ -28,12 +28,12 @@
 #include <sstream>
 
 CC_point::CC_point() :
-mSym(SYMBOL_PLAIN)
+mSym(SYMBOL_TYPE::PLAIN)
 {
 }
 
 CC_point::CC_point(const CC_coord& p) :
-mSym(SYMBOL_PLAIN),
+mSym(SYMBOL_TYPE::PLAIN),
 mPos(p)
 {
 	for (unsigned j = 0; j < CC_point::kNumRefPoints; j++)
@@ -48,7 +48,7 @@ mPos(p)
 // POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
 // POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
 CC_point::CC_point(const std::vector<uint8_t>& serialized_data) :
-mSym(SYMBOL_PLAIN)
+mSym(SYMBOL_TYPE::PLAIN)
 {
 	const uint8_t *d = &serialized_data[0];
 	{
@@ -76,7 +76,7 @@ mSym(SYMBOL_PLAIN)
 	}
 	mSym = static_cast<SYMBOL_TYPE>(*d);
 	++d;
-	mFlags.set(kPointLabelFlipped, *d);
+	mFlags.set(toUType(Flags::PointLabelFlipped), *d);
 	++d;
 	if (std::distance(&serialized_data[0], d) != serialized_data.size())
 	{
@@ -132,31 +132,31 @@ CC_point::Serialize() const
 bool
 CC_point::GetFlip() const
 {
-	return mFlags.test(kPointLabelFlipped);
+	return mFlags.test(toUType(Flags::PointLabelFlipped));
 }
 
 void
 CC_point::Flip(bool val)
 {
-	mFlags.set(kPointLabelFlipped, val);
+	mFlags.set(toUType(Flags::PointLabelFlipped), val);
 };
 
 void
 CC_point::FlipToggle()
 {
-	mFlags.flip(kPointLabelFlipped);
+	mFlags.flip(toUType(Flags::PointLabelFlipped));
 }
 
 bool
 CC_point::LabelIsVisible() const
 {
-	return !mFlags.test(kLabelIsInvisible);
+	return !mFlags.test(toUType(Flags::LabelIsInvisible));
 }
 
 void
 CC_point::SetLabelVisibility(bool isVisible)
 {
-	mFlags.set(kLabelIsInvisible, !isVisible);
+	mFlags.set(toUType(Flags::LabelIsInvisible), !isVisible);
 }
 
 CC_coord
@@ -203,7 +203,7 @@ CC_point::SetSymbol(SYMBOL_TYPE s)
 // Test Suite stuff
 struct CC_point_values
 {
-	std::bitset<CC_point::kTotalBits> mFlags;
+	std::bitset<toUType(CC_point::Flags::TotalBits)> mFlags;
 	SYMBOL_TYPE mSym;
 	CC_coord mPos;
 	CC_coord mRef[CC_point::kNumRefPoints];
@@ -230,7 +230,7 @@ void CC_point_UnitTests()
 	// test some defaults:
 	CC_point_values values;
 	values.mFlags = 0;
-	values.mSym = SYMBOL_PLAIN;
+	values.mSym = SYMBOL_TYPE::PLAIN;
 	values.mPos = CC_coord();
 	for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
 		values.mRef[i] = CC_coord();

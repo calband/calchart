@@ -40,7 +40,7 @@ float f)
 	int v = (int)floor(f+0.5);
 	if (std::abs(f - (float)v) >= COORD_DECIMAL)
 	{
-		anim->RegisterError(ANIMERR_NONINT, proc);
+		anim->RegisterError(AnimateError::NONINT, proc);
 	}
 	return v;
 }
@@ -53,7 +53,7 @@ float f)
 	int v = float2int(proc, anim, f);
 	if (v < 0)
 	{
-		anim->RegisterError(ANIMERR_NEGINT, proc);
+		anim->RegisterError(AnimateError::NEGINT, proc);
 		return 0;
 	}
 	else
@@ -85,7 +85,7 @@ ContValue *numbeats)
 	c = sin(Deg2Rad(d1 - d2));
 	if (IS_ZERO(c))
 	{
-		anim->RegisterError(ANIMERR_INVALID_CM, proc);
+		anim->RegisterError(AnimateError::INVALID_CM, proc);
 		return;
 	}
 	CreateVector(v1, d1, steps1);
@@ -134,7 +134,7 @@ ContValue *numbeats)
 				else
 				{
 // Current point is not in path of countermarch
-					anim->RegisterError(ANIMERR_INVALID_CM, proc);
+					anim->RegisterError(AnimateError::INVALID_CM, proc);
 					return;
 				}
 			}
@@ -266,46 +266,46 @@ float ContValueDefined::Get(AnimateCompile*) const
 		default:
 			f = 0.0;
 			break;
-		case CC_NW:
+		case ContDefinedValue::NW:
 			f = 45.0;
 			break;
-		case CC_W:
+		case ContDefinedValue::W:
 			f = 90.0;
 			break;
-		case CC_SW:
+		case ContDefinedValue::SW:
 			f = 135.0;
 			break;
-		case CC_S:
+		case ContDefinedValue::S:
 			f = 180.0;
 			break;
-		case CC_SE:
+		case ContDefinedValue::SE:
 			f = 225.0;
 			break;
-		case CC_E:
+		case ContDefinedValue::E:
 			f = 270.0;
 			break;
-		case CC_NE:
+		case ContDefinedValue::NE:
 			f = 315.0;
 			break;
-		case CC_HS:
+		case ContDefinedValue::HS:
 			f = 1.0;
 			break;
-		case CC_MM:
+		case ContDefinedValue::MM:
 			f = 1.0;
 			break;
-		case CC_SH:
+		case ContDefinedValue::SH:
 			f = 0.5;
 			break;
-		case CC_JS:
+		case ContDefinedValue::JS:
 			f = 0.5;
 			break;
-		case CC_GV:
+		case ContDefinedValue::GV:
 			f = 1.0;
 			break;
-		case CC_M:
+		case ContDefinedValue::M:
 			f = 4.0f/3;
 			break;
-		case CC_DM:
+		case ContDefinedValue::DM:
 			f = static_cast<float>(SQRT2);
 			break;
 	}
@@ -315,7 +315,7 @@ float ContValueDefined::Get(AnimateCompile*) const
 std::ostream& ContValueDefined::Print(std::ostream& os) const
 {
 	super::Print(os);
-	return os<<"Defined:"<<ContDefinedValue_strings[val];
+	return os<<"Defined:"<<ContDefinedValue_strings[toUType(val)];
 }
 
 
@@ -390,7 +390,7 @@ float ContValueDiv::Get(AnimateCompile* anim) const
 	f = val2->Get(anim);
 	if (IS_ZERO(f))
 	{
-		anim->RegisterError(ANIMERR_DIVISION_ZERO, this);
+		anim->RegisterError(AnimateError::DIVISION_ZERO, this);
 		return 0.0;
 	}
 	else
@@ -444,7 +444,7 @@ float ContValueVar::Get(AnimateCompile* anim) const
 std::ostream& ContValueVar::Print(std::ostream& os) const
 {
 	super::Print(os);
-	return os<<"Var "<<varnum;
+	return os<<"Var "<<toUType(varnum);
 }
 
 
@@ -465,7 +465,7 @@ float ContFuncDir::Get(AnimateCompile* anim) const
 	CC_coord c = pnt->Get(anim);
 	if (c == anim->GetPointPosition())
 	{
-		anim->RegisterError(ANIMERR_UNDEFINED, this);
+		anim->RegisterError(AnimateError::UNDEFINED, this);
 	}
 	return anim->GetPointPosition().Direction(c);
 }
@@ -490,7 +490,7 @@ float ContFuncDirFrom::Get(AnimateCompile* anim) const
 	CC_coord end = pnt_end->Get(anim);
 	if (start == end)
 	{
-		anim->RegisterError(ANIMERR_UNDEFINED, this);
+		anim->RegisterError(AnimateError::UNDEFINED, this);
 	}
 	return start.Direction(end);
 }
@@ -561,7 +561,7 @@ float ContFuncEither::Get(AnimateCompile* anim) const
 
 	if (anim->GetPointPosition() == c)
 	{
-		anim->RegisterError(ANIMERR_UNDEFINED, this);
+		anim->RegisterError(AnimateError::UNDEFINED, this);
 		return dir1->Get(anim);
 	}
 	dir = anim->GetPointPosition().Direction(c);
@@ -710,8 +710,8 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 	{
 		if (c >= 0)
 		{
-			ContValueDefined dir1(CC_SW);
-			ContValueDefined dir2(CC_W);
+			ContValueDefined dir1(ContDefinedValue::SW);
+			ContValueDefined dir2(ContDefinedValue::W);
 			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
 			return;
 		}
@@ -720,8 +720,8 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 	{
 		if (c >= 0)
 		{
-			ContValueDefined dir1(CC_SE);
-			ContValueDefined dir2(CC_W);
+			ContValueDefined dir1(ContDefinedValue::SE);
+			ContValueDefined dir2(ContDefinedValue::W);
 			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
 			return;
 		}
@@ -730,8 +730,8 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 	{
 		if (c <= 0)
 		{
-			ContValueDefined dir1(CC_NW);
-			ContValueDefined dir2(CC_E);
+			ContValueDefined dir1(ContDefinedValue::NW);
+			ContValueDefined dir2(ContDefinedValue::E);
 			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
 			return;
 		}
@@ -740,13 +740,13 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 	{
 		if (c <= 0)
 		{
-			ContValueDefined dir1(CC_NE);
-			ContValueDefined dir2(CC_E);
+			ContValueDefined dir1(ContDefinedValue::NE);
+			ContValueDefined dir2(ContDefinedValue::E);
 			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
 			return;
 		}
 	}
-	anim->RegisterError(ANIMERR_INVALID_CM, this);
+	anim->RegisterError(AnimateError::INVALID_CM, this);
 }
 
 std::ostream& ContProcDMCM::Print(std::ostream& os) const
@@ -941,7 +941,7 @@ void ContProcFountain::Compile(AnimateCompile* anim)
 		}
 		else
 		{
-			anim->RegisterError(ANIMERR_INVALID_FNTN, this);
+			anim->RegisterError(AnimateError::INVALID_FNTN, this);
 			return;
 		}
 	}
@@ -1111,8 +1111,8 @@ void ContProcHSCM::Compile(AnimateCompile* anim)
 	{
 		if (r2.x >= r1.x)
 		{
-			ContValueDefined dirs(CC_S);
-			ContValueDefined dirw(CC_W);
+			ContValueDefined dirs(ContDefinedValue::S);
+			ContValueDefined dirw(ContDefinedValue::W);
 			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirs, &dirw, numbeats);
 			return;
 		}
@@ -1121,13 +1121,13 @@ void ContProcHSCM::Compile(AnimateCompile* anim)
 	{
 		if (r1.x >= r2.x)
 		{
-			ContValueDefined dirn(CC_N);
-			ContValueDefined dire(CC_E);
+			ContValueDefined dirn(ContDefinedValue::N);
+			ContValueDefined dire(ContDefinedValue::E);
 			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirn, &dire, numbeats);
 			return;
 		}
 	}
-	anim->RegisterError(ANIMERR_INVALID_CM, this);
+	anim->RegisterError(AnimateError::INVALID_CM, this);
 }
 
 std::ostream& ContProcHSCM::Print(std::ostream& os) const
@@ -1361,7 +1361,7 @@ void ContProcRotate::Compile(AnimateCompile* anim)
 	c = pnt->Get(anim);
 	rad = anim->GetPointPosition() - c;
 	if (c == anim->GetPointPosition())
-		start_ang = anim->GetVarValue(CONTVAR_DOH, this);
+		start_ang = anim->GetVarValue(ContVar::DOH, this);
 	else
 		start_ang = c.Direction(anim->GetPointPosition());
 	int b = float2int(this, anim, stps->Get(anim));

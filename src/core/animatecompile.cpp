@@ -79,7 +79,7 @@ AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates
 		if (s == show.GetSheetEnd())
 		{
 //use MTRM E
-			ContProcMTRM defcont(new ContValueDefined(CC_E));
+			ContProcMTRM defcont(new ContValueDefined(ContDefinedValue::E));
 			defcont.Compile(&ac);
 		}
 	}
@@ -95,14 +95,14 @@ AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates
 		if (pt != next_point)
 		{
 			auto c = next_point - pt;
-			ac.RegisterError(ANIMERR_WRONGPLACE, NULL);
+			ac.RegisterError(AnimateError::WRONGPLACE, NULL);
 			ac.Append(std::make_shared<AnimateCommandMove>(beats_rem, c), NULL);
 		}
 	}
 	if (beats_rem)
 	{
-		ac.RegisterError(ANIMERR_EXTRATIME, NULL);
-		ac.Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), NULL);
+		ac.RegisterError(AnimateError::EXTRATIME, NULL);
+		ac.Append(std::make_shared<AnimateCommandMT>(beats_rem, 270.0), NULL);
 	}
 	return cmds;
 }
@@ -114,7 +114,7 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken
 
 	if (beats_rem < cmd->NumBeats())
 	{
-		RegisterError(ANIMERR_OUTOFTIME, token);
+		RegisterError(AnimateError::OUTOFTIME, token);
 		if (beats_rem == 0)
 		{
 			return false;
@@ -130,8 +130,8 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd, const ContToken
 	beats_rem -= cmd->NumBeats();
 
 	cmd->ApplyForward(pt);						  // Move current point to new position
-	SetVarValue(CONTVAR_DOF, cmd->MotionDirection());
-	SetVarValue(CONTVAR_DOH, cmd->RealDirection());
+	SetVarValue(ContVar::DOF, cmd->MotionDirection());
+	SetVarValue(ContVar::DOH, cmd->RealDirection());
 	return true;
 }
 
@@ -142,21 +142,21 @@ void AnimateCompile::RegisterError(AnimateError err, const ContToken *token) con
 }
 
 
-float AnimateCompile::GetVarValue(int varnum, const ContToken *token) const
+float AnimateCompile::GetVarValue(ContVar varnum, const ContToken *token) const
 {
-	auto i = mVars[varnum].find(curr_pt);
-	if (i != mVars[varnum].end())
+	auto i = mVars[toUType(varnum)].find(curr_pt);
+	if (i != mVars[toUType(varnum)].end())
 	{
 		return i->second;
 	}
-	RegisterError(ANIMERR_UNDEFINED, token);
+	RegisterError(AnimateError::UNDEFINED, token);
 	return 0.0;
 }
 
 
-void AnimateCompile::SetVarValue(int varnum, float value)
+void AnimateCompile::SetVarValue(ContVar varnum, float value)
 {
-	mVars[varnum][curr_pt] = value;
+	mVars[toUType(varnum)][curr_pt] = value;
 }
 
 
@@ -174,7 +174,7 @@ AnimatePoint AnimateCompile::GetEndingPosition(const ContToken *token) const
 	{
 		if (sheet == mShow.GetSheetEnd())
 		{
-			RegisterError(ANIMERR_UNDEFINED, token);
+			RegisterError(AnimateError::UNDEFINED, token);
 			return GetPointPosition();
 		}
 		if (sheet->IsInAnimation())

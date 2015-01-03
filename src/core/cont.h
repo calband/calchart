@@ -26,10 +26,10 @@
 #include "animatecompile.h"
 #include <iosfwd>
 
-enum ContDefinedValue
+enum class ContDefinedValue
 {
-	CC_N, CC_NW, CC_W, CC_SW, CC_S, CC_SE, CC_E, CC_NE,
-	CC_HS, CC_MM, CC_SH, CC_JS, CC_GV, CC_M, CC_DM
+	N, NW, W, SW, S, SE, E, NE,
+	HS, MM, SH, JS, GV, M, DM
 };
 
 class ContToken
@@ -198,13 +198,13 @@ class ContValueVar : public ContValue
 {
 	using super = ContValue;
 public:
-	ContValueVar(unsigned num): varnum(num) {}
+	ContValueVar(ContVar num): varnum(num) {}
 
 	virtual float Get(AnimateCompile* anim) const;
 	void Set(AnimateCompile* anim, float v);
 	virtual std::ostream& Print(std::ostream&) const override;
 private:
-	unsigned varnum;
+	ContVar varnum;
 };
 
 class ContFuncDir : public ContValue

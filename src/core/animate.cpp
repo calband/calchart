@@ -40,7 +40,7 @@ extern int parsecontinuity();
 extern const char *yyinputbuffer;
 extern std::list<ContProcedure*> ParsedContinuity;
 
-std::string animate_err_msgs(size_t which)
+std::string animate_err_msgs(AnimateError which)
 {
 	const std::string s_animate_err_msgs[] = {
 		"Ran out of time",
@@ -54,9 +54,10 @@ std::string animate_err_msgs(size_t which)
 		"Non-integer value",
 		"Negative value",
 	};
-	if (which < sizeof(s_animate_err_msgs)/sizeof(std::string))
+	auto twhich = toUType(which);
+	if (twhich < sizeof(s_animate_err_msgs)/sizeof(std::string))
 	{
-		return s_animate_err_msgs[which];
+		return s_animate_err_msgs[twhich];
 	}
 	return "";
 }
@@ -69,17 +70,17 @@ AnimateDir AnimGetDirFromAngle(float ang)
 	size_t quadrant = ang/45.0;
 	switch (quadrant)
 	{
-		case 0: return ANIMDIR_N;
-		case 1: return ANIMDIR_NW;
-		case 2: return ANIMDIR_W;
-		case 3: return ANIMDIR_SW;
-		case 4: return ANIMDIR_S;
-		case 5: return ANIMDIR_SE;
-		case 6: return ANIMDIR_E;
-		case 7: return ANIMDIR_NE;
-		case 8: return ANIMDIR_N;
+		case 0: return AnimateDir::N;
+		case 1: return AnimateDir::NW;
+		case 2: return AnimateDir::W;
+		case 3: return AnimateDir::SW;
+		case 4: return AnimateDir::S;
+		case 5: return AnimateDir::SE;
+		case 6: return AnimateDir::E;
+		case 7: return AnimateDir::NE;
+		case 8: return AnimateDir::N;
 	}
-	return ANIMDIR_N;
+	return AnimateDir::N;
 }
 
 
@@ -145,7 +146,7 @@ mCollisionAction(NULL)
 				{
 					// Supply a generic parse error
 					ContToken dummy;
-					errors.RegisterError(ANIMERR_SYNTAX, &dummy, 0, current_symbol);
+					errors.RegisterError(AnimateError::SYNTAX, &dummy, 0, current_symbol);
 				}
 #if 0 // enable to see dump of continuity
 				{
@@ -181,7 +182,7 @@ mCollisionAction(NULL)
 		{
 			if (theCommands[j].empty())
 			{
-				theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
+				theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, SYMBOL_TYPE::MAX_NUM_SYMBOLS, {});
 			}
 		}
 		if (errors.AnyErrors() && notifyErrorList)
@@ -381,7 +382,7 @@ void Animation::CheckCollisions()
 		for (unsigned j = i+1; j < numpts; j++)
 		{
 			CollisionType collisionResult = pts[i].DetectCollision(pts[j]);
-			if (collisionResult)
+			if (collisionResult != CollisionType::NONE)
 			{
 				if (!mCollisions.count(i) || mCollisions[i] < collisionResult) {
 					mCollisions[i] = collisionResult;
@@ -402,7 +403,7 @@ void Animation::CheckCollisions()
 Animation::animate_info_t
 Animation::GetAnimateInfo(unsigned which) const
 {
-	return Animation::animate_info_t(mCollisions.count(which) ? mCollisions.find(which)->second : COLLISION_NONE, (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which));
+	return Animation::animate_info_t(mCollisions.count(which) ? mCollisions.find(which)->second : CollisionType::NONE, (*curr_cmds.at(which))->Direction(), (*curr_cmds.at(which))->RealDirection(), pts.at(which));
 }
 
 int Animation::GetNumberSheets() const
@@ -472,7 +473,7 @@ Animation::GetCurrentInfo() const
 	{
 		std::ostringstream each_string;
 		auto info = GetAnimateInfo(i);
-		each_string<<"pt "<<i<<": ("<<info.mPosition.x<<", "<<info.mPosition.y<<"), dir="<<info.mDirection<<", realdir="<<info.mRealDirection<<(info.mCollision ? ", collision!" : "");
+		each_string<<"pt "<<i<<": ("<<info.mPosition.x<<", "<<info.mPosition.y<<"), dir="<<toUType(info.mDirection)<<", realdir="<<info.mRealDirection<<(info.mCollision != CollisionType::NONE ? ", collision!" : "");
 		each.push_back(each_string.str());
 	}
 	std::ostringstream output;

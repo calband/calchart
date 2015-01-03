@@ -35,7 +35,6 @@ class wxBrush;
 class wxString;
 class CC_show;
 class CC_sheet;
-class CC_point;
 class CC_coord;
 struct CC_DrawCommand;
 class CalChartDoc;

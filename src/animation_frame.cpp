@@ -177,7 +177,7 @@ mWhenClosed(onClose)
 		wxT("Ignore"), wxT("Show"), wxT("Beep")
 	};
 	wxChoice *collis = new wxChoice(this, CALCHART__anim_collisions, wxDefaultPosition, wxDefaultSize, sizeof(collis_text)/sizeof(const wxString), collis_text);
-	collis->SetSelection(mAnimationView.GetCollisionType());
+	collis->SetSelection(toUType(mAnimationView.GetCollisionType()));
 	sizer1->Add(collis, centerWidget);
 	toprow->Add(sizer1, topRowSizerFlags);
 

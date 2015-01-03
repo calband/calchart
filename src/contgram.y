@@ -169,9 +169,9 @@ value
 	| rwREM
 		{ $$ = new ContValueREM(); }
 	| rwDOF
-		{ $$ = new ContValueVar(CONTVAR_DOF); }
+		{ $$ = new ContValueVar(ContVar::DOF); }
 	| rwDOH
-		{ $$ = new ContValueVar(CONTVAR_DOH); }
+		{ $$ = new ContValueVar(ContVar::DOH); }
 	| varvalue
 		{ $$ = $1; }
 	| function
@@ -197,36 +197,36 @@ function
 
 varvalue
 	: VARIABLE
-		{ unsigned i;
+		{ ContVar i = ContVar::Z;
 		  switch ($1) {
 		  case 'A':
 		  case 'a':
-		    i = 0;
+		    i = ContVar::A;
 		    break;
 		  case 'B':
 		  case 'b':
-		    i = 1;
+		    i = ContVar::B;
 		    break;
 		  case 'C':
 		  case 'c':
-		    i = 2;
+		    i = ContVar::C;
 		    break;
 		  case 'D':
 		  case 'd':
-		    i = 3;
+		    i = ContVar::D;
 		    break;
 		  case 'X':
 		  case 'x':
-		    i = 4;
+		    i = ContVar::X;
 		    break;
 		  case 'Y':
 		  case 'y':
-		    i = 5;
+		    i = ContVar::Y;
 		    break;
 		  case 'Z':
 		  case 'z':
 		  default:
-		    i = 6;
+		    i = ContVar::Z;
 		    break;
 		  }
 		  $$ = new ContValueVar(i);

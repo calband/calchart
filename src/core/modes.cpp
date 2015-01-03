@@ -74,7 +74,7 @@ ShowModeStandard::~ShowModeStandard() {}
 
 ShowMode::ShowType ShowModeStandard::GetType() const
 {
-	return SHOW_STANDARD;
+	return ShowType::STANDARD;
 }
 
 ShowModeSprShow::ShowModeSprShow(const std::string& nam,
@@ -106,25 +106,25 @@ ShowModeSprShow::~ShowModeSprShow()
 
 ShowMode::ShowType ShowModeSprShow::GetType() const
 {
-	return SHOW_SPRINGSHOW;
+	return ShowType::SPRINGSHOW;
 }
 
 
 std::unique_ptr<ShowMode>
 ShowModeStandard::CreateShowMode(const std::string& which, const ShowModeInfo_t& values)
 {
-	unsigned short whash = values[kwhash];
-	unsigned short ehash = values[kehash];
+	unsigned short whash = values[toUType(ArrayValues::kwhash)];
+	unsigned short ehash = values[toUType(ArrayValues::kehash)];
 	CC_coord bord1, bord2;
-	bord1.x = Int2Coord(values[kbord1_x]);
-	bord1.y = Int2Coord(values[kbord1_y]);
-	bord2.x = Int2Coord(values[kbord2_x]);
-	bord2.y = Int2Coord(values[kbord2_y]);
+	bord1.x = Int2Coord(values[toUType(ArrayValues::kbord1_x)]);
+	bord1.y = Int2Coord(values[toUType(ArrayValues::kbord1_y)]);
+	bord2.x = Int2Coord(values[toUType(ArrayValues::kbord2_x)]);
+	bord2.y = Int2Coord(values[toUType(ArrayValues::kbord2_y)]);
 	CC_coord size, offset;
-	offset.x = Int2Coord(-values[koffset_x]);
-	offset.y = Int2Coord(-values[koffset_y]);
-	size.x = Int2Coord(values[ksize_x]);
-	size.y = Int2Coord(values[ksize_y]);
+	offset.x = Int2Coord(-values[toUType(ArrayValues::koffset_x)]);
+	offset.y = Int2Coord(-values[toUType(ArrayValues::koffset_y)]);
+	size.x = Int2Coord(values[toUType(ArrayValues::ksize_x)]);
+	size.y = Int2Coord(values[toUType(ArrayValues::ksize_y)]);
 	return std::unique_ptr<ShowMode>(new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
 }
 
@@ -143,29 +143,29 @@ ShowModeStandard::CreateShowMode(const std::string& name,
 std::unique_ptr<ShowMode>
 ShowModeSprShow::CreateSpringShowMode(const std::string& which, const SpringShowModeInfo_t& values)
 {
-	unsigned char which_spr_yards = values[kwhich_spr_yards];
+	unsigned char which_spr_yards = values[toUType(ArrayValues::kwhich_spr_yards)];
 	CC_coord bord1, bord2;
-	bord1.x = Int2Coord(values[kbord1_x]);
-	bord1.y = Int2Coord(values[kbord1_y]);
-	bord2.x = Int2Coord(values[kbord2_x]);
-	bord2.y = Int2Coord(values[kbord2_y]);
+	bord1.x = Int2Coord(values[toUType(ArrayValues::kbord1_x)]);
+	bord1.y = Int2Coord(values[toUType(ArrayValues::kbord1_y)]);
+	bord2.x = Int2Coord(values[toUType(ArrayValues::kbord2_x)]);
+	bord2.y = Int2Coord(values[toUType(ArrayValues::kbord2_y)]);
 	
-	short mode_steps_x = values[kmode_steps_x];
-	short mode_steps_y = values[kmode_steps_y];
-	short mode_steps_w = values[kmode_steps_w];
-	short mode_steps_h = values[kmode_steps_h];
-	short eps_stage_x = values[keps_stage_x];
-	short eps_stage_y = values[keps_stage_y];
-	short eps_stage_w = values[keps_stage_w];
-	short eps_stage_h = values[keps_stage_h];
-	short eps_field_x = values[keps_field_x];
-	short eps_field_y = values[keps_field_y];
-	short eps_field_w = values[keps_field_w];
-	short eps_field_h = values[keps_field_h];
-	short eps_text_left = values[keps_text_left];
-	short eps_text_right = values[keps_text_right];
-	short eps_text_top = values[keps_text_top];
-	short eps_text_bottom = values[keps_text_bottom];
+	short mode_steps_x = values[toUType(ArrayValues::kmode_steps_x)];
+	short mode_steps_y = values[toUType(ArrayValues::kmode_steps_y)];
+	short mode_steps_w = values[toUType(ArrayValues::kmode_steps_w)];
+	short mode_steps_h = values[toUType(ArrayValues::kmode_steps_h)];
+	short eps_stage_x = values[toUType(ArrayValues::keps_stage_x)];
+	short eps_stage_y = values[toUType(ArrayValues::keps_stage_y)];
+	short eps_stage_w = values[toUType(ArrayValues::keps_stage_w)];
+	short eps_stage_h = values[toUType(ArrayValues::keps_stage_h)];
+	short eps_field_x = values[toUType(ArrayValues::keps_field_x)];
+	short eps_field_y = values[toUType(ArrayValues::keps_field_y)];
+	short eps_field_w = values[toUType(ArrayValues::keps_field_w)];
+	short eps_field_h = values[toUType(ArrayValues::keps_field_h)];
+	short eps_text_left = values[toUType(ArrayValues::keps_text_left)];
+	short eps_text_right = values[toUType(ArrayValues::keps_text_right)];
+	short eps_text_top = values[toUType(ArrayValues::keps_text_top)];
+	short eps_text_bottom = values[toUType(ArrayValues::keps_text_bottom)];
 	return std::unique_ptr<ShowMode>(new ShowModeSprShow(which, bord1, bord2,
 														 which_spr_yards,
 														 mode_steps_x, mode_steps_y,

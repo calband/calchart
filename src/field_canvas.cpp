@@ -51,9 +51,9 @@ FieldCanvas::FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom) :
 ClickDragCtrlScrollCanvas(frame, wxID_ANY),
 mFrame(frame),
 mView(static_cast<FieldView*>(view)),
-curr_lasso(CC_DRAG_BOX),
-curr_move(CC_MOVE_NORMAL),
-drag(CC_DRAG_NONE)
+curr_lasso(CC_DRAG_TYPES::BOX),
+curr_move(CC_MOVE_MODES::NORMAL),
+drag(CC_DRAG_TYPES::NONE)
 {
 	SetZoom(def_zoom);
 }
@@ -143,9 +143,9 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 		
 		switch (curr_move)
 		{
-			case CC_MOVE_LINE:
+			case CC_MOVE_MODES::LINE:
 				mFrame->SnapToGrid(pos);
-				BeginDrag(CC_DRAG_LINE, pos);
+				BeginDrag(CC_DRAG_TYPES::LINE, pos);
 
 				mTransformer = [this](const CC_coord&)
 				{
@@ -162,12 +162,12 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					return result;
 				};
 				break;
-			case CC_MOVE_ROTATE:
+			case CC_MOVE_MODES::ROTATE:
 				mFrame->SnapToGrid(pos);
 				if (curr_shape &&
 					(((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos))
 				{
-					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_arc(((CC_shape_1point*)
+					AddDrag(CC_DRAG_TYPES::LINE, std::unique_ptr<CC_shape>(new CC_shape_arc(((CC_shape_1point*)
 											  curr_shape.get())->GetOrigin(), pos)));
 
 					// set up the place where points moves
@@ -183,17 +183,17 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				}
 				else
 				{
-					BeginDrag(CC_DRAG_CROSS, pos);
+					BeginDrag(CC_DRAG_TYPES::CROSS, pos);
 				}
 				break;
-			case CC_MOVE_SHEAR:
+			case CC_MOVE_MODES::SHEAR:
 				mFrame->SnapToGrid(pos);
 				if (curr_shape &&
 					(((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos))
 				{
 					CC_coord vect(pos - ((CC_shape_1point*)curr_shape.get())->GetOrigin());
 					// rotate vect 90 degrees
-					AddDrag(CC_DRAG_LINE,
+					AddDrag(CC_DRAG_TYPES::LINE,
 							std::unique_ptr<CC_shape>(new CC_shape_angline(pos,CC_coord(-vect.y, vect.x))));
 
 					// set up the place where points moves
@@ -221,12 +221,12 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				}
 				else
 				{
-					BeginDrag(CC_DRAG_CROSS, pos);
+					BeginDrag(CC_DRAG_TYPES::CROSS, pos);
 				}
 				break;
-			case CC_MOVE_REFL:
+			case CC_MOVE_MODES::REFL:
 				mFrame->SnapToGrid(pos);
-				BeginDrag(CC_DRAG_LINE, pos);
+				BeginDrag(CC_DRAG_TYPES::LINE, pos);
 				
 				mTransformer = [this](const CC_coord&)
 				{
@@ -242,12 +242,12 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					return this->GetPoints(m);
 				};
 				break;
-			case CC_MOVE_SIZE:
+			case CC_MOVE_MODES::SIZE:
 				mFrame->SnapToGrid(pos);
 				if (curr_shape &&
 					(((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos))
 				{
-					AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
+					AddDrag(CC_DRAG_TYPES::LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
 					mTransformer = [this](const CC_coord&) -> std::map<unsigned, CC_coord>
 					{
 						auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
@@ -286,12 +286,12 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 				}
 				else
 				{
-					BeginDrag(CC_DRAG_CROSS, pos);
+					BeginDrag(CC_DRAG_TYPES::CROSS, pos);
 				}
 				break;
-			case CC_MOVE_GENIUS:
+			case CC_MOVE_MODES::GENIUS:
 				mFrame->SnapToGrid(pos);
-				AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
+				AddDrag(CC_DRAG_TYPES::LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
 				if (shape_list.size() > 2)
 				{
 					mTransformer = [this](const CC_coord&) -> std::map<unsigned, CC_coord>
@@ -337,7 +337,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 					};
 				}
 				break;
-			case CC_MOVE_SWAP:
+			case CC_MOVE_MODES::SWAP:
 			{
 				int targetDotIndex = mView->FindPoint(pos);
 				if (targetDotIndex >= 0) {
@@ -359,7 +359,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 			default:
 				switch (drag)
 			{
-				case CC_DRAG_POLY:
+				case CC_DRAG_TYPES::POLY:
 				{
 					auto* p = ((CC_lasso*)curr_shape.get())->FirstPoint();
 					float d;
@@ -409,7 +409,7 @@ FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 							mView->AddToSelection(select);
 						}
 						
-						BeginDrag(CC_DRAG_LINE, mView->PointPosition(i));
+						BeginDrag(CC_DRAG_TYPES::LINE, mView->PointPosition(i));
 						mTransformer = [this](const CC_coord&)
 						{
 							const CC_shape_2point *shape = (CC_shape_2point*)curr_shape.get();
@@ -456,78 +456,78 @@ FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 		{
 			switch (curr_move)
 			{
-				case CC_MOVE_LINE:
+				case CC_MOVE_MODES::LINE:
 					mView->DoMovePoints(mMovePoints);
-					mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+					mFrame->SetCurrentMove(CC_MOVE_MODES::NORMAL);
 					break;
-				case CC_MOVE_ROTATE:
+				case CC_MOVE_MODES::ROTATE:
 					if (shape_list.size() > 1)
 					{
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
-							BeginDrag(CC_DRAG_CROSS, pos);
+							BeginDrag(CC_DRAG_TYPES::CROSS, pos);
 						}
 						else
 						{
 							mView->DoMovePoints(mMovePoints);
-							mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+							mFrame->SetCurrentMove(CC_MOVE_MODES::NORMAL);
 						}
 					}
 					break;
-				case CC_MOVE_SHEAR:
+				case CC_MOVE_MODES::SHEAR:
 					if (shape_list.size() > 1)
 					{
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
-							BeginDrag(CC_DRAG_CROSS, pos);
+							BeginDrag(CC_DRAG_TYPES::CROSS, pos);
 						}
 						else
 						{
 							mView->DoMovePoints(mMovePoints);
-							mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+							mFrame->SetCurrentMove(CC_MOVE_MODES::NORMAL);
 						}
 					}
 					break;
-				case CC_MOVE_REFL:
+				case CC_MOVE_MODES::REFL:
 					if (shape->GetOrigin() != shape->GetPoint())
 					{
 						mView->DoMovePoints(mMovePoints);
 					}
-					mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+					mFrame->SetCurrentMove(CC_MOVE_MODES::NORMAL);
 					break;
-				case CC_MOVE_SIZE:
+				case CC_MOVE_MODES::SIZE:
 					if (shape_list.size() > 1)
 					{
 						if (shape->GetOrigin() == shape->GetPoint())
 						{
-							BeginDrag(CC_DRAG_CROSS, pos);
+							BeginDrag(CC_DRAG_TYPES::CROSS, pos);
 						}
 						else
 						{
 							mView->DoMovePoints(mMovePoints);
-							mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+							mFrame->SetCurrentMove(CC_MOVE_MODES::NORMAL);
 						}
 					}
 					break;
-				case CC_MOVE_GENIUS:
+				case CC_MOVE_MODES::GENIUS:
 					if (shape_list.size() > 2)
 					{
 						mView->DoMovePoints(mMovePoints);
-						mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+						mFrame->SetCurrentMove(CC_MOVE_MODES::NORMAL);
 					}
 					break;
 				default:
 					switch (drag)
 				{
-					case CC_DRAG_BOX:
+					case CC_DRAG_TYPES::BOX:
 						mView->SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(), event.AltDown());
 						EndDrag();
 						break;
-					case CC_DRAG_LINE:
+					case CC_DRAG_TYPES::LINE:
 						mView->DoMovePoints(mMovePoints);
 						EndDrag();
 						break;
-					case CC_DRAG_LASSO:
+					case CC_DRAG_TYPES::LASSO:
 						((CC_lasso*)curr_shape.get())->End();
 						mView->SelectWithLasso((CC_lasso*)curr_shape.get(), event.AltDown());
 						EndDrag();
@@ -549,7 +549,7 @@ FieldCanvas::OnMouseLeftDoubleClick(wxMouseEvent& event)
 	wxClientDC dc(this);
 	PrepareDC(dc);
 	
-	if (curr_shape && (CC_DRAG_POLY == drag))
+	if (curr_shape && (CC_DRAG_TYPES::POLY == drag))
 	{
 		mView->SelectWithLasso((CC_lasso*)curr_shape.get(), event.AltDown());
 		EndDrag();
@@ -564,7 +564,7 @@ FieldCanvas::OnMouseRightDown(wxMouseEvent& event)
 	wxClientDC dc(this);
 	PrepareDC(dc);
 	
-	if (curr_shape && (CC_DRAG_POLY == drag))
+	if (curr_shape && (CC_DRAG_TYPES::POLY == drag))
 	{
 		mView->SelectWithLasso((CC_lasso*)curr_shape.get(), event.AltDown());
 		EndDrag();
@@ -598,7 +598,7 @@ FieldCanvas::OnMouseMove(wxMouseEvent& event)
 			pos.y = (y - pos.y);
 
 			if ((event.Dragging() && event.LeftIsDown() && curr_shape)
-				|| (event.Moving() && curr_shape && (CC_DRAG_POLY == drag)))
+				|| (event.Moving() && curr_shape && (CC_DRAG_TYPES::POLY == drag)))
 			{
 				MoveDrag(pos);
 			}
@@ -663,19 +663,19 @@ FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
 	curr_shape.reset();
 	switch (type)
 	{
-		case CC_DRAG_BOX:
+		case CC_DRAG_TYPES::BOX:
 			AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_rect(start)));
 			break;
-		case CC_DRAG_POLY:
+		case CC_DRAG_TYPES::POLY:
 			AddDrag(type, std::unique_ptr<CC_shape>(new CC_poly(start)));
 			break;
-		case CC_DRAG_LASSO:
+		case CC_DRAG_TYPES::LASSO:
 			AddDrag(type, std::unique_ptr<CC_shape>(new CC_lasso(start)));
 			break;
-		case CC_DRAG_LINE:
+		case CC_DRAG_TYPES::LINE:
 			AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_line(start)));
 			break;
-		case CC_DRAG_CROSS:
+		case CC_DRAG_TYPES::CROSS:
 			AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_cross(start, Int2Coord(2))));
 		default:
 			break;
@@ -715,7 +715,7 @@ FieldCanvas::EndDrag()
 	mMovePoints.clear();
 	ClearShapes();
 	mTransformer = nullptr;
-	drag = CC_DRAG_NONE;
+	drag = CC_DRAG_TYPES::NONE;
 }
 
 bool
