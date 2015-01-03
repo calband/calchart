@@ -90,13 +90,13 @@ struct BeatAndBar {
  * Represents a "fragment" of the music score. A music score can be composed
  * of pieces from other scores, and each of those pieces is a "fragment."
  */
-struct Fragment {
+struct MusicScoreFragment {
 
 	/**
 	 * Constructor.
 	 * @param fragmentName The name of the fragment.
 	 */
-	Fragment(std::string fragmentName) : name(fragmentName) {};
+	MusicScoreFragment(std::string fragmentName) : name(fragmentName) {};
 
 	/**
 	 * The name of the fragment. This is convenient for users to differentiate
@@ -122,9 +122,9 @@ struct MusicScoreMoment {
 	 * @param bar The bar of the time that this object marks. Bar 0 is the first bar in the show.
 	 * @param beat The beat of the time that this object marks (relative to the start of the bar that it marks). Beat 0 is the first beat in the bar.
 	 */
-	MusicScoreMoment(const Fragment* scoreFragment, BarNumber bar, BeatNumber beat) : beatAndBar(bar, beat) { fragment.reset(scoreFragment); };
+	MusicScoreMoment(const MusicScoreFragment* scoreFragment, BarNumber bar, BeatNumber beat) : beatAndBar(bar, beat) { fragment.reset(scoreFragment); };
 
-	std::shared_ptr<const Fragment> fragment;
+	std::shared_ptr<const MusicScoreFragment> fragment;
 	BeatAndBar beatAndBar;
 
 	/**
@@ -202,7 +202,7 @@ public:
 	 * @param fragment The fragment with which the events are associated.
 	 * @return The number of recorded events associated with the given fragment.
 	 */
-	int getNumEvents(const Fragment* fragment) const;
+	int getNumEvents(const MusicScoreFragment* fragment) const;
 
 	/**
 	 * Returns a particular event, as well as the time at which it occurs.
@@ -210,7 +210,7 @@ public:
 	 * @param index The index of the target event (the first event has an index of 0).
 	 * @return The event having the given index, and the time at which it occurs.
 	 */
-	std::pair<MusicScoreMoment, EventType> getEvent(const Fragment* fragment, int index) const;
+	std::pair<MusicScoreMoment, EventType> getEvent(const MusicScoreFragment* fragment, int index) const;
 
 	/**
 	 * Returns the event that is assumed to be active by default when no other events are active.
@@ -223,7 +223,7 @@ public:
 	 * @param fragment The fragment with which the event is associated.
 	 * @param index The index of the target event (the first event has an index of 0).
 	 */
-	void removeEvent(const Fragment* fragment, int index);
+	void removeEvent(const MusicScoreFragment* fragment, int index);
 
 	/**
 	 * Clears all recorded events.
@@ -234,7 +234,7 @@ public:
 	 * Clears all events associated with a particular fragment.
 	 * @param fragment The fragment whose events should be cleared.
 	 */
-	void clearEvents(const Fragment* fragment);
+	void clearEvents(const MusicScoreFragment* fragment);
 
 protected:
 	/**
@@ -287,7 +287,7 @@ private:
 	/**
 	 * For each fragment, a sorted collection of all of the events in that fragment.
 	 */
-	std::unordered_map<const Fragment*, std::vector<std::pair<MusicScoreMoment, EventType>>> mEvents;
+	std::unordered_map<const MusicScoreFragment*, std::vector<std::pair<MusicScoreMoment, EventType>>> mEvents;
 
 	/**
 	 * When no other events are active, this one is assumed to be active by default.
@@ -436,7 +436,7 @@ CollectionOfMusicScoreEvents<EventType>::CollectionOfMusicScoreEvents(EventType 
 
 template <typename EventType>
 void CollectionOfMusicScoreEvents<EventType>::addEvent(MusicScoreMoment eventTime, EventType eventObj) {
-	const Fragment* eventFragment = eventTime.fragment.get();
+	const MusicScoreFragment* eventFragment = eventTime.fragment.get();
 	if (getNumEvents(eventFragment) == 0) {
 		mEvents.emplace(eventFragment, std::vector<std::pair<MusicScoreMoment, EventType>>());
 	}
@@ -470,7 +470,7 @@ int CollectionOfMusicScoreEvents<EventType>::getMostRecentEventIndex(MusicScoreM
 }
 
 template <typename EventType>
-int CollectionOfMusicScoreEvents<EventType>::getNumEvents(const Fragment* fragment) const {
+int CollectionOfMusicScoreEvents<EventType>::getNumEvents(const MusicScoreFragment* fragment) const {
 	if (mEvents.find(fragment) == mEvents.end()) {
 		return 0;
 	}
@@ -478,7 +478,7 @@ int CollectionOfMusicScoreEvents<EventType>::getNumEvents(const Fragment* fragme
 }
 
 template <typename EventType>
-std::pair<MusicScoreMoment, EventType> CollectionOfMusicScoreEvents<EventType>::getEvent(const Fragment* fragment, int index) const {
+std::pair<MusicScoreMoment, EventType> CollectionOfMusicScoreEvents<EventType>::getEvent(const MusicScoreFragment* fragment, int index) const {
 	if (index < 0 || index >= getNumEvents(fragment)) {
 		return getDefaultEvent();
 	}
@@ -492,7 +492,7 @@ std::pair<MusicScoreMoment, EventType> CollectionOfMusicScoreEvents<EventType>::
 }
 
 template <typename EventType>
-void CollectionOfMusicScoreEvents<EventType>::removeEvent(const Fragment* fragment, int index) {
+void CollectionOfMusicScoreEvents<EventType>::removeEvent(const MusicScoreFragment* fragment, int index) {
 	if (index < 0 || index >= getNumEvents(fragment)) {
 		return;
 	}
@@ -510,7 +510,7 @@ void CollectionOfMusicScoreEvents<EventType>::clearEvents() {
 }
 
 template <typename EventType>
-void CollectionOfMusicScoreEvents<EventType>::clearEvents(const Fragment* fragment) {
+void CollectionOfMusicScoreEvents<EventType>::clearEvents(const MusicScoreFragment* fragment) {
 	mEvents[fragment].clear();
 	mModCount++;
 }

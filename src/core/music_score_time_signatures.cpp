@@ -6,7 +6,7 @@ TimeSignaturesCollection::TimeSignaturesCollection(TimeSignature defaultEvent)
 : super(defaultEvent)
 {}
 
-void TimeSignaturesCollection::addTimeSignatureChange(const Fragment* fragment, BarNumber bar, TimeSignature newTimeSignature) {
+void TimeSignaturesCollection::addTimeSignatureChange(const MusicScoreFragment* fragment, BarNumber bar, TimeSignature newTimeSignature) {
 	addEvent(MusicScoreMoment(fragment, bar, 0), newTimeSignature);
 }
 

@@ -46,7 +46,7 @@ public:
 	 * @param bar The bar on which the change occurs.
 	 * @param newTimeSignature The new time signature after the change.
 	 */
-	void addTimeSignatureChange(const Fragment* fragment, BarNumber bar, TimeSignature newTimeSignature);
+	void addTimeSignatureChange(const MusicScoreFragment* fragment, BarNumber bar, TimeSignature newTimeSignature);
 
 	/**
 	 * Makes a browser to step through the show, beat by beat, and provide the current time.
