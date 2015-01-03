@@ -327,13 +327,13 @@ public:
 	 * Advances to the next beat.
 	 * @param amount The number of beats to advance by.
 	 */
-	void nextBeat(unsigned amount = 1);
+	virtual void nextBeat(unsigned amount = 1);
 
 	/**
 	 * Jumps back a beat.
 	 * @param amount The number of beats to jump back.
 	 */
-	void previousBeat(unsigned amount = 1);
+	virtual void previousBeat(unsigned amount = 1);
 
 	/**
 	 * Returns the current time that the browser is marking.
@@ -396,6 +396,11 @@ protected:
 	 * to track that event.
 	 */
 	inline void transitionBackUntilFinished();
+
+	/**
+	 * Make sure that the browser tracks the correct event.
+	 */
+	inline void fixCurrentEvent();
 
 	/**
 	 * Sets the current time for the browser.
@@ -527,7 +532,7 @@ void MusicScoreEventBrowser<EventType>::reset(MusicScoreMoment startTime)
 {
 	mOriginalModCount = mData->getModCount();
 	setCurrentTime(startTime);
-	mCurrentEventIndex = mData->getMostRecentEventIndex(getCurrentTime());
+	fixCurrentEvent();
 }
 
 template <typename EventType>
@@ -541,7 +546,7 @@ void MusicScoreEventBrowser<EventType>::nextBeat(unsigned amount) {
 		for (unsigned pushed = 0; pushed < amount; pushed++) {
 			pushForwardTime();
 		}
-		transitionForwardUntilFinished();
+		fixCurrentEvent();
 	}
 }
 
@@ -569,7 +574,7 @@ void MusicScoreEventBrowser<EventType>::previousBeat(unsigned amount) {
 		for (unsigned pushed = 0; pushed < amount; pushed++) {
 			pushBackTime();
 		}
-		transitionBackUntilFinished();
+		fixCurrentEvent();
 	}
 }
 
@@ -588,6 +593,16 @@ template <typename EventType>
 void MusicScoreEventBrowser<EventType>::transitionBackUntilFinished() {
 	while (checkTransitionBack()) {
 		executeTransitionBack();
+	}
+}
+
+template <typename EventType>
+void MusicScoreEventBrowser<EventType>::fixCurrentEvent() {
+	if (mCurrentEventIndex < 0 || mCurrentEventIndex >= mData->getNumEvents(getCurrentTime().fragment.get())) {
+		mCurrentEventIndex = mData->getMostRecentEventIndex(getCurrentTime());
+	} else {
+		transitionForwardUntilFinished();
+		transitionBackUntilFinished();
 	}
 }
 

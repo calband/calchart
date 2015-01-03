@@ -10,7 +10,7 @@ void MusicScoreJumpsCollection::addJump(MusicScoreMoment jumpTime, MusicScoreJum
 }
 
 MusicScoreJumpBrowser::MusicScoreJumpBrowser(const MusicScoreJumpsCollection* jumps, MusicScoreMomentBrowser* momentBrowser)
-: super(jumps, momentBrowser->getCurrentTime()), mMomentBrowser(momentBrowser)
+: mMomentBrowser(momentBrowser), super(jumps, momentBrowser->getCurrentTime())
 {}
 
 void MusicScoreJumpBrowser::reset(MusicScoreMoment startTime) {

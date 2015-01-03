@@ -41,6 +41,14 @@ public:
 	//MusicScoreMoment getTimeFromBeatNumber(const Fragment* fragment, int beat) const;
 
 	/**
+	 * Adds a time signature change to the specified time.
+	 * @param fragment The fragment during which the change occurs.
+	 * @param bar The bar on which the change occurs.
+	 * @param newTimeSignature The new time signature after the change.
+	 */
+	void addTimeSignatureChange(const Fragment* fragment, BarNumber bar, TimeSignature newTimeSignature);
+
+	/**
 	 * Makes a browser to step through the show, beat by beat, and provide the current time.
 	 * @param jumps A collection that keeps track of when the score jumps from one place to another.
 	 * @param startTime The time at which to start browsing.
