@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __PRINT_PS_H__
-#define __PRINT_PS_H__
+#pragma once
 
 #include "cc_types.h"
 
@@ -100,6 +99,3 @@ private:
 	float spr_step_size;
 	short step_width;
 };
-
-#endif // __PRINT_PS_H__
-

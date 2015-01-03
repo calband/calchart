@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _FIELD_UI_H_
-#define _FIELD_UI_H_
+#pragma once
 
 #include "calchartdoc.h"
 #include "CC_coord.h"
@@ -124,5 +123,3 @@ private:
 
     DECLARE_DYNAMIC_CLASS(FieldView)
 };
-
-#endif

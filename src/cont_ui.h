@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CONT_UI_H_
-#define _CONT_UI_H_
+#pragma once
 
 #include "calchartdoc.h"
 
@@ -103,5 +102,3 @@ private:
 
 	DECLARE_EVENT_TABLE()
 };
-
-#endif

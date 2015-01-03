@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _COLOR_SELECT_UI_H_
-#define _COLOR_SELECT_UI_H_
+#pragma once
 
 #include <wx/wx.h>
 #include <wx/bmpcbox.h>
@@ -62,5 +61,3 @@ private:
 	wxNotebook* mNotebook;
 	CalChartConfiguration mConfig;
 };
-
-#endif

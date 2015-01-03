@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __PRINT_PS_DIALOG_H__
-#define __PRINT_PS_DIALOG_H__
+#pragma once
 
 #include "platconf.h"
 
@@ -78,4 +77,3 @@ private:
 	wxCheckBox *check_cont, *check_pages, *check_overview;
 	std::set<size_t> mIsSheetPicked;
 };
-#endif

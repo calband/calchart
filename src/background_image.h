@@ -20,8 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _BACKGROUND_IMAGE_H_
-#define _BACKGROUND_IMAGE_H_
+#pragma once
 
 #include <wx/dc.h>
 #include <wx/event.h>
@@ -70,5 +69,3 @@ private:
 	};
 	std::shared_ptr<CalculateScaleAndMove> mScaleAndMove;
 };
-
-#endif // _BACKGROUND_IMAGE_H_

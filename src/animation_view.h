@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATION_VIEW_H_
-#define _ANIMATION_VIEW_H_
+#pragma once
 
 #include "animate.h"
 #include "calchartdoc.h"
@@ -101,5 +100,3 @@ private:
 	std::unique_ptr<Animation> mAnimation;
 	CollisionWarning mCollisionWarningType;
 };
-
-#endif // _ANIMATION_VIEW_H_

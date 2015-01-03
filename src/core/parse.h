@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _PARSE_H_
-#define _PARSE_H_
+#pragma once
 
 struct YYLTYPE
 {
@@ -30,5 +29,3 @@ struct YYLTYPE
 };
 
 extern YYLTYPE yylloc;
-
-#endif

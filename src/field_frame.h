@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _FIELD_FRAME_H_
-#define _FIELD_FRAME_H_
+#pragma once
 
 #include "cc_types.h"
 
@@ -158,5 +157,3 @@ public:
 private:
 	void refreshGhostOptionStates();
 };
-
-#endif
