@@ -50,6 +50,6 @@ float BoundDirectionSigned(float f);
 
 bool IsDiagonalDirection(float f);
 
-void CreateVector(CC_coord& c, float dir, float mag);
+CC_coord CreateVector(float dir, float mag);
 
-void CreateUnitVector(float& a, float& b, float dir);
+std::tuple<float, float> CreateUnitVector(float dir);

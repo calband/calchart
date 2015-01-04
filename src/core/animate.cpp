@@ -38,7 +38,7 @@
 
 extern int parsecontinuity();
 extern const char *yyinputbuffer;
-extern std::list<ContProcedure*> ParsedContinuity;
+extern std::list<std::unique_ptr<ContProcedure>> ParsedContinuity;
 
 std::string animate_err_msgs(size_t which)
 {
@@ -161,10 +161,6 @@ mCollisionAction(NULL)
 					{
 						theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, ParsedContinuity);
 					}
-				}
-				for (auto& proc : ParsedContinuity)
-				{
-					delete proc;
 				}
 				ParsedContinuity.clear();
 			}

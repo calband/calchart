@@ -36,7 +36,7 @@ int yyerror(const char *s);
 extern int yylex();
 extern void initscanner();
 
-std::list<ContProcedure*> ParsedContinuity;
+std::list<std::unique_ptr<ContProcedure>> ParsedContinuity;
 
 %}
 
@@ -90,7 +90,7 @@ proc_list
 	: // Empty
 		{}
 	| proc_list procedure
-		{ ParsedContinuity.push_back($2); }
+		{ ParsedContinuity.emplace_back($2); }
 	;
 
 procedure

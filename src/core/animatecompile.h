@@ -53,7 +53,7 @@ class AnimateCompile
 {
 public:
 // Compile a point
-	static AnimateCommands Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, std::list<ContProcedure*> const& proc);
+	static AnimateCommands Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, std::list<std::unique_ptr<ContProcedure>> const& proc);
 
 private:
 	AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned& beats_rem, CC_coord& pt, AnimationVariables& variablesStates, AnimationErrors& errors, AnimateCommands& cmds);
