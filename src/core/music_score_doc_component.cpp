@@ -45,7 +45,8 @@ void MusicScoreDocComponent::addScoreFragment(std::shared_ptr<MusicScoreFragment
 	}
 	mFragments.push_back(fragment);
 }
-void MusicScoreDocComponent::removeScoreFragment(int fragmentIndex, bool removeAssociatedEvents = true) {
+
+void MusicScoreDocComponent::removeScoreFragment(int fragmentIndex, bool removeAssociatedEvents) {
 	if (fragmentIndex < 0 || fragmentIndex >= getNumScoreFragments()) {
 		return;
 	}

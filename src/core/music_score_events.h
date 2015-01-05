@@ -294,7 +294,7 @@ protected:
 	 * @param eventTime The time at which the event occurs.
 	 * @param eventObj The event to add.
 	 */
-	bool addEvent(MusicScoreMoment eventTime, EventType eventObj);
+	void addEvent(MusicScoreMoment eventTime, EventType eventObj);
 
 private:
 	/**
