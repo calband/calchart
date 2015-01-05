@@ -85,6 +85,9 @@
     <ClCompile Include="..\..\src\core\music_score_bar_labels.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\music_score_doc_component.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
