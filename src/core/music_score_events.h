@@ -212,12 +212,6 @@ public:
 	std::pair<MusicScoreMoment, EventType> getEvent(const MusicScoreFragment* fragment, int index) const;
 
 	/**
-	 * Returns the event that is assumed to be active by default when no other events are active.
-	 * @return The event that is assumed to be active by default when no other events are active.
-	 */
-	std::pair<MusicScoreMoment, EventType> getDefaultEvent() const;
-
-	/**
 	 * Removes a particular event.
 	 * @param fragment The fragment with which the event is associated.
 	 * @param index The index of the target event (the first event has an index of 0).
@@ -235,6 +229,25 @@ public:
 	 */
 	void clearEvents(const MusicScoreFragment* fragment);
 
+	/**
+	 * Returns a list of all fragments that have events associated with them in this collection.
+	 * @return A vector containing all fragments with events.
+	 */
+	std::vector<const MusicScoreFragment*> getAllFragmentsWithEvents() const;
+
+	/**
+	 * Returns the default event used by this collection.
+	 * @return The default event.
+	 */
+	const EventType getDefaultEvent() const;
+
+
+	/**
+	 * Resets the default event to the specified one.
+	 * @param newDefault The new default event.
+	 */
+	void resetDefaultEvent(EventType newDefault);
+
 protected:
 	/**
 	 * Acts as a comparator for entries in the event list. It is used to make sure that the event
@@ -249,6 +262,12 @@ protected:
 		 */
 		bool operator() (std::pair<MusicScoreMoment, EventType> first, std::pair<MusicScoreMoment, EventType> second) { return first.first < second.first; };
 	};
+
+	/**
+	 * Returns the event that is assumed to be active by default when no other events are active.
+	 * @return The event that is assumed to be active by default when no other events are active.
+	 */
+	std::pair<MusicScoreMoment, EventType> getDefaultEventWithTime() const;
 
 	/**
 	 * Returns the most recent event that occurred before a given time.
@@ -275,7 +294,7 @@ protected:
 	 * @param eventTime The time at which the event occurs.
 	 * @param eventObj The event to add.
 	 */
-	void addEvent(MusicScoreMoment eventTime, EventType eventObj);
+	bool addEvent(MusicScoreMoment eventTime, EventType eventObj);
 
 private:
 	/**
@@ -479,15 +498,24 @@ int CollectionOfMusicScoreEvents<EventType>::getNumEvents(const MusicScoreFragme
 template <typename EventType>
 std::pair<MusicScoreMoment, EventType> CollectionOfMusicScoreEvents<EventType>::getEvent(const MusicScoreFragment* fragment, int index) const {
 	if (index < 0 || index >= getNumEvents(fragment)) {
-		return getDefaultEvent();
+		return getDefaultEventWithTime();
 	}
 	return mEvents.at(fragment)[index];
 }
 
 template <typename EventType>
-std::pair<MusicScoreMoment, EventType> CollectionOfMusicScoreEvents<EventType>::getDefaultEvent() const {
+std::pair<MusicScoreMoment, EventType> CollectionOfMusicScoreEvents<EventType>::getDefaultEventWithTime() const {
 	MusicScoreMoment time(nullptr, -1, -1);
-	return std::pair<MusicScoreMoment, EventType>(time, mDefaultEvent);
+	return std::pair<MusicScoreMoment, EventType>(time, getDefaultEvent());
+}
+
+template <typename EventType>
+std::vector<const MusicScoreFragment*> CollectionOfMusicScoreEvents<EventType>::getAllFragmentsWithEvents() const {
+	std::vector<const MusicScoreFragment*> returnVal;
+	for (auto iterator = mEvents.cbegin(); iterator != mEvents.cend(); iterator++) {
+		returnVal.push_back((*iterator).first);
+	}
+	return returnVal;
 }
 
 template <typename EventType>
@@ -512,6 +540,16 @@ template <typename EventType>
 void CollectionOfMusicScoreEvents<EventType>::clearEvents(const MusicScoreFragment* fragment) {
 	mEvents[fragment].clear();
 	mModCount++;
+}
+
+template <typename EventType>
+const EventType CollectionOfMusicScoreEvents<EventType>::getDefaultEvent() const {
+	return mDefaultEvent;
+}
+
+template <typename EventType>
+void CollectionOfMusicScoreEvents<EventType>::resetDefaultEvent(EventType newDefault) {
+	mDefaultEvent = newDefault;
 }
 
 template <typename EventType>
@@ -610,7 +648,7 @@ EventType MusicScoreEventBrowser<EventType>::getMostRecentEvent() const {
 	if (isValid()) {
 		return mData->getEvent(getCurrentTime().fragment.get(), mCurrentEventIndex).second;
 	} else {
-		return mData->getDefaultEvent().second;
+		return mData->getDefaultEvent();
 	}
 }
 
