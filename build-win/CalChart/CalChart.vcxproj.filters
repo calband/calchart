@@ -193,6 +193,9 @@
     <ClInclude Include="..\..\src\core\music_score_fragments.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\core\music_score_loaders.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />

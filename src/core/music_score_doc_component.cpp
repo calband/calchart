@@ -1,8 +1,5 @@
 #include "music_score_doc_component.h"
 
-MusicScoreDocComponent* MusicScoreDocComponent::loadFromFile(std::istream& stream);
-std::vector<uint8_t> MusicScoreDocComponent::serialize() const;
-
 MusicScoreDocComponent::MusicScoreDocComponent() {
 	mBarLabels.reset(new MusicScoreBarLabelsCollection(MusicScoreBarLabel("No Label")));
 	mJumps.reset(new MusicScoreJumpsCollection(MusicScoreJump(MusicScoreMoment(0, 0, 0))));
