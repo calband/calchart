@@ -1,5 +1,4 @@
-#ifndef _TIME_SIGNATURES_H_
-#define _TIME_SIGNATURES_H_
+#pragma once
 
 #include "music_score_events.h"
 
@@ -57,5 +56,3 @@ public:
 	MusicScoreMomentBrowser* makeMusicScoreMomentBrowser(const MusicScoreJumpsCollection* jumps, MusicScoreMoment startTime) const;
 };
 
-
-#endif

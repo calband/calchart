@@ -1,5 +1,4 @@
-#ifndef _MUSIC_SCORE_BAR_LABELS_H_
-#define _MUSIC_SCORE_BAR_LABELS_H_
+#pragma once
 
 #include "music_score_events.h"
 #include <string>
@@ -47,5 +46,3 @@ public:
 	 */
 	std::string getBarName(MusicScoreMoment time);
 };
-
-#endif

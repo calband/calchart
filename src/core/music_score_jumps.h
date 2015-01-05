@@ -1,5 +1,4 @@
-#ifndef _MUSIC_SCORE_JUMPS_H_
-#define _MUSIC_SCORE_JUMPS_H_
+#pragma once
 
 #include "music_score_events.h"
 #include "music_score_moment_browser.h"
@@ -94,5 +93,3 @@ protected:
 
 	friend class MusicScoreMomentBrowser;
 };
-
-#endif

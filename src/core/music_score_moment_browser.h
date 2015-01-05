@@ -1,5 +1,4 @@
-#ifndef _MUSIC_SCORE_MOMENT_BROWSER_H_
-#define _MUSIC_SCORE_MOMENT_BROWSER_H_
+#pragma once
 
 #include "music_score_events.h"
 #include "music_score_time_signatures.h"
@@ -67,5 +66,3 @@ protected:
 	friend class MusicScoreJumpBrowser;
 	friend class TimeSignaturesCollection;
 };
-
-#endif

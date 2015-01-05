@@ -100,6 +100,7 @@
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
     <ClInclude Include="..\..\src\core\music_score_bar_labels.h" />
+    <ClInclude Include="..\..\src\core\music_score_fragments.h" />
     <ClInclude Include="..\..\src\core\music_score_jumps.h" />
     <ClInclude Include="..\..\src\core\music_score_moment_browser.h" />
     <ClInclude Include="..\..\src\core\music_score_tempos.h" />

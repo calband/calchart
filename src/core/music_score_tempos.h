@@ -1,5 +1,4 @@
-#ifndef _MUSIC_SCORE_TEMPOS_H_
-#define _MUSIC_SCORE_TEMPOS_H_
+#pragma once
 
 #include "music_score_events.h"
 #include "music_score_jumps.h"
@@ -82,5 +81,3 @@ protected:
 
 	friend class MusicScoreTemposCollection;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _MUSIC_SCORE_EVENTS_H_
-#define _MUSIC_SCORE_EVENTS_H_
+#pragma once
 
 #include <vector>
 #include <algorithm>
@@ -624,5 +623,3 @@ MusicScoreMoment MusicScoreEventBrowser<EventType>::getMostRecentEventTime() con
 		return getCurrentTime();
 	}
 }
-
-#endif
