@@ -123,6 +123,7 @@
     <ClInclude Include="..\..\src\core\music_score_events.h" />
     <ClInclude Include="..\..\src\core\modes.h" />
     <ClInclude Include="..\..\src\core\music_score_doc_component.h" />
+    <ClInclude Include="..\..\src\core\music_score_unit_tests.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
     <ClInclude Include="..\..\src\core\print_ps.h" />
     <ClInclude Include="..\..\src\draw.h" />
@@ -177,6 +178,7 @@
     <ClCompile Include="..\..\src\core\music_score_moment_browser.cpp" />
     <ClCompile Include="..\..\src\core\music_score_tempos.cpp" />
     <ClCompile Include="..\..\src\core\music_score_time_signatures.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_unit_tests.cpp" />
     <ClCompile Include="..\..\src\core\print_ps.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />

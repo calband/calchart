@@ -47,21 +47,21 @@ CC_show::Create_CC_show()
 std::unique_ptr<CC_show>
 CC_show::Create_CC_show(std::istream& stream, uint32_t version) {
 	if (version > 0x303) {
-		return Create_CC_show_From_Stream_Fragment(std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>(), version);
+		std::vector<uint8_t> streamData = std::vector<uint8_t>(std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
+		return Create_CC_show_From_Serialized_Data(&streamData[0], streamData.size(), version);
 	}
 	return std::unique_ptr<CC_show>(new CC_show(stream, Version_3_3_and_earlier()));
 }
 
 std::unique_ptr<CC_show>
-CC_show::Create_CC_show_From_Stream_Fragment(std::istream_iterator<uint8_t> streamStart, std::istream_iterator<uint8_t> streamEnd, uint32_t version)
+CC_show::Create_CC_show_From_Serialized_Data(const uint8_t* dataStart, size_t dataSize, uint32_t version)
 {
 	if (version <= 0x303) {
 		return std::unique_ptr<CC_show>();
 	}
-	std::vector<uint8_t> data(streamStart, streamEnd);
 	// debug purposes, you can uncomment this line to have the show dumped
 	//	DoRecursiveParsing("", data.data(), data.data() + data.size());
-	return std::unique_ptr<CC_show>(new CC_show(data.data(), data.size(), Current_version_and_later()));
+	return std::unique_ptr<CC_show>(new CC_show(dataStart, dataSize, Current_version_and_later()));
 }
 
 // Create a new show

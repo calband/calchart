@@ -355,22 +355,21 @@ void CalChartDoc::LoadComponentsFromStream(std::istream& stream) {
 	}
 
 	stream.unsetf(std::ios::skipws);
-	std::istream_iterator<uint8_t> endOfStream;
-	std::istream_iterator<uint8_t> startOfStream(stream);
+	std::vector<uint8_t> streamData = std::vector<uint8_t>(std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
 
-	auto componentBlocks = CalChart::Parser::ParseOutLabels(startOfStream, endOfStream);
+
+	auto componentBlocks = CalChart::Parser::ParseOutLabels(streamData.begin(), streamData.end());
 
 	for (auto blockInfo : componentBlocks) {
-		std::istream_iterator<uint8_t> startOfBlock = std::get<1>(blockInfo);
-		std::istream_iterator<uint8_t> endOfBlock = startOfBlock;
-		for (size_t stepsToEndOfBlock = std::get<2>(blockInfo); stepsToEndOfBlock > 0; stepsToEndOfBlock++) {
-			endOfBlock++;
-		};
+		const uint8_t* startOfBlock = &(*std::get<1>(blockInfo));
+		size_t sizeOfBlock = std::get<2>(blockInfo);
 		switch (std::get<0>(blockInfo)) {
 		case INGL_SHOW:
-			mShow = CC_show::Create_CC_show_From_Stream_Fragment(startOfBlock, endOfBlock, version);
+			mShow = CC_show::Create_CC_show_From_Serialized_Data(startOfBlock, sizeOfBlock, version);
+			break;
 		case INGL_MUSC:
-			MusicScoreLoader::loadFromVersionedStream(startOfBlock, endOfBlock);
+			MusicScoreLoader::loadFromVersionedData(startOfBlock, sizeOfBlock);
+			break;
 		default:
 			break; //Ignore unknown blocks -- don't throw an error
 		}

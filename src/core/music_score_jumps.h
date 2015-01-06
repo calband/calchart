@@ -28,6 +28,10 @@ struct MusicScoreJump {
 	 * The time to jump to when this event is hit.
 	 */
 	MusicScoreMoment jumpTo;
+
+	bool operator==(const MusicScoreJump other) const {
+		return other.jumpTo == jumpTo;
+	}
 };
 
 /**

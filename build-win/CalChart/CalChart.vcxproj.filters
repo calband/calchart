@@ -91,6 +91,9 @@
     <ClCompile Include="..\..\src\core\music_score_loaders.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\music_score_unit_tests.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -197,6 +200,9 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\music_score_loaders.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\music_score_unit_tests.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

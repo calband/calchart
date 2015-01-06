@@ -32,15 +32,6 @@
  */
 class MusicScoreLoader {
 public:
-
-	/**
-	 * Loads a MusicScoreDocComponent from a stream with serialized data.
-	 * @param streamStart The start of the MusicScoreDocComponent block in the stream.
-	 * @param streamEnd The end of the MusicScoreDocComponent block in the stream.
-	 * @return A MusicScoreDocComponent, loaded from the stream.
-	 */
-	static MusicScoreDocComponent* loadFromVersionedStream(std::istream_iterator<uint8_t> streamStart, std::istream_iterator<uint8_t> streamEnd);
-
 	/**
 	 * Loads a MusicScoreDocComponent from serialized data. The data must begin with
 	 * a version string, so that the MusicScoreLoader can choose the appropriate

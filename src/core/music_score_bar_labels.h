@@ -17,6 +17,10 @@ struct MusicScoreBarLabel {
 	 * The label for the bar.
 	 */
 	std::string label;
+
+	bool operator==(const MusicScoreBarLabel other) const {
+		return other.label == label;
+	}
 };
 
 /**
@@ -35,7 +39,7 @@ public:
 	 * @param bar The bar that is being labeled.
 	 * @param label The label for the bar.
 	 */
-	void addBarLabel(const MusicScoreFragment* fragment, BarNumber bar, MusicScoreBarLabel label);
+	void addBarLabel(std::shared_ptr<const MusicScoreFragment> fragment, BarNumber bar, MusicScoreBarLabel label);
 
 	/**
 	 * Returns the name of the bar at the given time.

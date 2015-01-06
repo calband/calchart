@@ -22,6 +22,10 @@ struct MusicScoreTempo {
 	 * The tempo, in beats per minute.
 	 */
 	int32_t beatsPerMinute;
+
+	bool operator==(const MusicScoreTempo other) const {
+		return other.beatsPerMinute == beatsPerMinute;
+	}
 };
 
 /**

@@ -82,6 +82,15 @@ struct BeatAndBar {
 	inline bool operator>=(const BeatAndBar other) const {
 		return ((*this) > other || (*this) == other);
 	};
+
+	/**
+	 * Returns whether or not this object is not the same time as another.
+	 * @param other The time to compare to this one.
+	 * @return True if this object does not mark the same time as the other; false otherwise.
+	 */
+	inline bool operator!=(const BeatAndBar other) const {
+		return !((*this) == other);
+	};
 };
 
 /**
@@ -120,7 +129,7 @@ struct MusicScoreMoment {
 	 * @param bar The bar of the time that this object marks. Bar 0 is the first bar in the show.
 	 * @param beat The beat of the time that this object marks (relative to the start of the bar that it marks). Beat 0 is the first beat in the bar.
 	 */
-	MusicScoreMoment(const MusicScoreFragment* scoreFragment, BarNumber bar, BeatNumber beat) : beatAndBar(bar, beat), isValid(true) { fragment.reset(scoreFragment); };
+	MusicScoreMoment(std::shared_ptr<const MusicScoreFragment> scoreFragment, BarNumber bar, BeatNumber beat) : beatAndBar(bar, beat), isValid(true), fragment(scoreFragment) {};
 
 	std::shared_ptr<const MusicScoreFragment> fragment;
 	BeatAndBar beatAndBar;
@@ -178,6 +187,15 @@ struct MusicScoreMoment {
 	*/
 	inline bool operator>=(const MusicScoreMoment other) const {
 		return ((*this) > other || (*this) == other);
+	};
+
+	/**
+	 * Returns whether or not this object is not the same time as another.
+	 * @param other The time to compare to this one.
+	 * @return True if this object does not mark the same time as the other; false otherwise.
+	 */
+	inline bool operator!=(const MusicScoreMoment other) const {
+		return !((*this) == other);
 	};
 };
 
@@ -523,7 +541,7 @@ void CollectionOfMusicScoreEvents<EventType>::removeEvent(const MusicScoreFragme
 	if (index < 0 || index >= getNumEvents(fragment)) {
 		return;
 	}
-	mEvents[fragment].erase(mEvents.begin() + index);
+	mEvents[fragment].erase(mEvents[fragment].begin() + index);
 	mModCount++;
 	if (getNumEvents(fragment) == 0) {
 		mEvents.erase(fragment);
@@ -539,6 +557,7 @@ void CollectionOfMusicScoreEvents<EventType>::clearEvents() {
 template <typename EventType>
 void CollectionOfMusicScoreEvents<EventType>::clearEvents(const MusicScoreFragment* fragment) {
 	mEvents[fragment].clear();
+	mEvents.erase(fragment);
 	mModCount++;
 }
 

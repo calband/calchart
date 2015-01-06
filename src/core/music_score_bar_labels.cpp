@@ -4,7 +4,7 @@ MusicScoreBarLabelsCollection::MusicScoreBarLabelsCollection(MusicScoreBarLabel 
 : super(defaultEvent)
 {}
 
-void MusicScoreBarLabelsCollection::addBarLabel(const MusicScoreFragment* fragment, BarNumber bar, MusicScoreBarLabel label) {
+void MusicScoreBarLabelsCollection::addBarLabel(std::shared_ptr<const MusicScoreFragment> fragment, BarNumber bar, MusicScoreBarLabel label) {
 	addEvent(MusicScoreMoment(fragment, bar, 0), label);
 }
 

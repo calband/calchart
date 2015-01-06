@@ -7,11 +7,6 @@ std::unordered_map<std::string, std::shared_ptr<MusicScoreLoader>> MusicScoreLoa
 	{ "3.4.2", std::shared_ptr<MusicScoreLoader>(new MusicScoreLoader__3_4_2()) }
 };
 
-MusicScoreDocComponent* MusicScoreLoader::loadFromVersionedStream(std::istream_iterator<uint8_t> streamStart, std::istream_iterator<uint8_t> streamEnd) {
-	std::vector<uint8_t> data(streamStart, streamEnd);
-	return loadFromVersionedData(&data[0], data.size());
-}
-
 MusicScoreDocComponent* MusicScoreLoader::loadFromVersionedData(const uint8_t* data, size_t size) {
 	const uint8_t* upperBound = data + size;
 	std::string versionString = getVersionStringFromData(data, upperBound);
@@ -51,7 +46,7 @@ void MusicScoreLoader::serializeVersionString(std::vector<uint8_t>& data, std::s
 
 const char* MusicScoreLoader::findFirstNullCharacter(const char* buffer, const char* upperBound) {
 	for (; buffer < upperBound; buffer++) {
-		if ((*buffer) == '/0') {
+		if ((*buffer) == '\0') {
 			return buffer;
 		}
 	}
@@ -244,6 +239,7 @@ MusicScoreDocComponent* MusicScoreLoader__3_4_2::loadFromData(const uint8_t*& da
 				const uint8_t* blockStart = std::get<1>(dataBlockInfo);
 				size_t blockSize = std::get<2>(dataBlockInfo);
 				blocksToProcess[blockIndex].second(newMusicScore.get(), blockStart, blockSize);
+				break;
 			}
 		}
 		if (!blockProcessed) {
@@ -291,7 +287,7 @@ void MusicScoreLoader__3_4_2::parseTimeSignatures(MusicScoreDocComponent* buildT
 	};
 	const std::function<void(MusicScoreDocComponent*, MusicScoreMoment, TimeSignature)> eventLoadFunction =
 	[](MusicScoreDocComponent* buildTarget, MusicScoreMoment eventTime, TimeSignature eventObj) {
-		buildTarget->getTimeSignatures()->addTimeSignatureChange(eventTime.fragment.get(), eventTime.beatAndBar.bar, eventObj);
+		buildTarget->getTimeSignatures()->addTimeSignatureChange(eventTime.fragment, eventTime.beatAndBar.bar, eventObj);
 	};
 	const uint8_t* upperBound = blockToParse + blockSize;
 	buildTarget->getTimeSignatures()->resetDefaultEvent(parseIndividualTimeSignature(buildTarget, blockToParse, upperBound));
@@ -360,7 +356,7 @@ void MusicScoreLoader__3_4_2::parseBarLabels(MusicScoreDocComponent* buildTarget
 	};
 	const std::function<void(MusicScoreDocComponent*, MusicScoreMoment, MusicScoreBarLabel)> eventLoadFunction =
 	[](MusicScoreDocComponent* buildTarget, MusicScoreMoment eventTime, MusicScoreBarLabel eventObj) {
-		buildTarget->getBarLabels()->addBarLabel(eventTime.fragment.get(), eventTime.beatAndBar.bar, eventObj);
+		buildTarget->getBarLabels()->addBarLabel(eventTime.fragment, eventTime.beatAndBar.bar, eventObj);
 	};
 	const uint8_t* upperBound = blockToParse + blockSize;
 	parseMusicScoreEvents(buildTarget, blockToParse, upperBound, eventBuildFunction, eventLoadFunction);
@@ -387,7 +383,7 @@ MusicScoreMoment MusicScoreLoader__3_4_2::parseMusicScoreMoment(const MusicScore
 	dataToParse += sizeof(int32_t) / sizeof(uint8_t);
 	int32_t beatNumber = get_big_long(dataToParse);
 	dataToParse += sizeof(int32_t) / sizeof(uint8_t);
-	return MusicScoreMoment(buildTarget->getScoreFragment(fragmentId).get(), barNumber, beatNumber);
+	return MusicScoreMoment(buildTarget->getScoreFragment(fragmentId), barNumber, beatNumber);
 }
 
 template <typename EventType>

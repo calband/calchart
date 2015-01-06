@@ -12,15 +12,19 @@ class MusicScoreMomentBrowser;
 struct TimeSignature {
 
 	/**
-	* Constructor.
-	* @param beatsPerBar The number of beats in a bar.
-	*/
+	 * Constructor.
+	 * @param beatsPerBar The number of beats in a bar.
+	 */
 	TimeSignature(int32_t beatsPerBar) : beatsPerBar(beatsPerBar) {};
 
 	/**
-	* The number of beats per bar.
-	*/
+	 * The number of beats per bar.
+	 */
 	int32_t beatsPerBar;
+
+	bool operator==(const TimeSignature other) const {
+		return other.beatsPerBar == beatsPerBar;
+	}
 };
 
 /**
@@ -45,7 +49,7 @@ public:
 	 * @param bar The bar on which the change occurs.
 	 * @param newTimeSignature The new time signature after the change.
 	 */
-	void addTimeSignatureChange(const MusicScoreFragment* fragment, BarNumber bar, TimeSignature newTimeSignature);
+	void addTimeSignatureChange(std::shared_ptr<const MusicScoreFragment> fragment, BarNumber bar, TimeSignature newTimeSignature);
 
 	/**
 	 * Makes a browser to step through the show, beat by beat, and provide the current time.
