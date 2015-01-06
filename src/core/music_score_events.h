@@ -8,9 +8,8 @@
 template <typename EventType> class MusicScoreEventBrowser;
 
 
-typedef int BarNumber;
-typedef int BeatNumber;
-typedef int FragmentId;
+typedef int32_t BarNumber;
+typedef int32_t BeatNumber;
 
 /**
  * Marks a specific beat of a specific bar of music.
@@ -121,10 +120,11 @@ struct MusicScoreMoment {
 	 * @param bar The bar of the time that this object marks. Bar 0 is the first bar in the show.
 	 * @param beat The beat of the time that this object marks (relative to the start of the bar that it marks). Beat 0 is the first beat in the bar.
 	 */
-	MusicScoreMoment(const MusicScoreFragment* scoreFragment, BarNumber bar, BeatNumber beat) : beatAndBar(bar, beat) { fragment.reset(scoreFragment); };
+	MusicScoreMoment(const MusicScoreFragment* scoreFragment, BarNumber bar, BeatNumber beat) : beatAndBar(bar, beat), isValid(true) { fragment.reset(scoreFragment); };
 
 	std::shared_ptr<const MusicScoreFragment> fragment;
 	BeatAndBar beatAndBar;
+	bool isValid;
 
 	/**
 	 * Returns whether or not this moment occurs in the same fragment as another.

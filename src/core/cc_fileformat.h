@@ -31,6 +31,21 @@
 struct Version_3_3_and_earlier {};
 struct Current_version_and_later {};
 
+// CalChart File Format Changelog:
+//
+//
+// Version 3.4.2
+// 
+// The file format was changed in order to save the MusicScoreDocComponent. 
+// The information for the MusicScoreDocComponent was simply appended to the end of the file like this:
+//		show							= START , SHOW , MUSIC_DOC_COMPONENT;
+//		MUSIC_DOC_COMPONENT				= INGL_MUSC , MUSIC_SCORE_SAVE_VERSION , MUSIC_SCORE_DATA , MUSIC_DOC_COMPONENT_END
+//		MUSIC_SCORE_SAVE_VERSION		= null-terminated char*(versionString)
+//		MUSIC_DOC_COMPONENT_END			= INGL_END , INGL_MUSC
+// For a description of the format for MUSIC_SCORE_DATA, please look at music_score_loaders.h.
+// The INGL_MUSC and MUSIC_DOC_COMPONENT_END are written to the file by the CalChartDoc. The MUSIC_SCORE_SAVE_VERSION is written by
+// static methods of the MusicScoreLoader class, and the MUSIC_SCORE_DATA is written by instances of child classes of MusicScoreLoader.
+
 
 // Description of the CalChart file format layout, in modified Extended Backus–Naur Form
 // version 3.4.0 to current
@@ -190,6 +205,16 @@ struct Current_version_and_later {};
 #define INGL_PNTS Make4CharWord('P','N','T','S')
 #define INGL_PONT Make4CharWord('P','O','N','T')
 #define INGL_END  Make4CharWord('E','N','D',' ')
+
+
+//Added in version 3.4.2 to save information about the Music Score
+
+#define INGL_MUSC Make4CharWord('M','U','S','C')
+#define INGL_MFRG Make4CharWord('M','F','R','G')
+#define INGL_TSIG Make4CharWord('T','S','I','G')
+#define INGL_MJMP Make4CharWord('M','J','M','P')
+#define INGL_MTMP Make4CharWord('M','T','M','P')
+#define INGL_MLBL Make4CharWord('M','L','B','L')
 
 
 template <typename T>

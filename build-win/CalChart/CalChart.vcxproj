@@ -173,6 +173,7 @@
     <ClCompile Include="..\..\src\core\music_score_bar_labels.cpp" />
     <ClCompile Include="..\..\src\core\music_score_doc_component.cpp" />
     <ClCompile Include="..\..\src\core\music_score_jumps.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_loaders.cpp" />
     <ClCompile Include="..\..\src\core\music_score_moment_browser.cpp" />
     <ClCompile Include="..\..\src\core\music_score_tempos.cpp" />
     <ClCompile Include="..\..\src\core\music_score_time_signatures.cpp" />

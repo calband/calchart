@@ -15,12 +15,12 @@ struct TimeSignature {
 	* Constructor.
 	* @param beatsPerBar The number of beats in a bar.
 	*/
-	TimeSignature(unsigned beatsPerBar) : beatsPerBar(beatsPerBar) {};
+	TimeSignature(int32_t beatsPerBar) : beatsPerBar(beatsPerBar) {};
 
 	/**
 	* The number of beats per bar.
 	*/
-	int beatsPerBar;
+	int32_t beatsPerBar;
 };
 
 /**

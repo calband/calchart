@@ -16,12 +16,12 @@ struct MusicScoreTempo {
 	 * Constructor.
 	 * @param bpm The tempo in the score, in beats per minute.
 	 */
-	MusicScoreTempo(unsigned bpm) : beatsPerMinute(bpm) {};
+	MusicScoreTempo(int32_t bpm) : beatsPerMinute(bpm) {};
 
 	/**
 	 * The tempo, in beats per minute.
 	 */
-	unsigned beatsPerMinute;
+	int32_t beatsPerMinute;
 };
 
 /**
