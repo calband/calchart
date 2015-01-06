@@ -111,6 +111,10 @@ private:
 
 	void LoadComponentsFromStream(std::istream& stream);
 
+	std::vector<uint8_t> SerializeFileVersion() const;
+	std::vector<uint8_t> SerializeShow() const;
+	std::vector<uint8_t> SerializeMusicScore() const;
+
 public:
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
 	bool SetPrintableContinuity(unsigned current_sheet, const std::string& number, const std::string& lines);
