@@ -9,7 +9,7 @@ std::unordered_map<std::string, std::shared_ptr<MusicScoreLoader>> MusicScoreLoa
 
 MusicScoreDocComponent* MusicScoreLoader::loadFromVersionedStream(std::istream_iterator<uint8_t> streamStart, std::istream_iterator<uint8_t> streamEnd) {
 	std::vector<uint8_t> data(streamStart, streamEnd);
-	return loadFromVersionedData(data.data, data.size());
+	return loadFromVersionedData(&data[0], data.size());
 }
 
 MusicScoreDocComponent* MusicScoreLoader::loadFromVersionedData(const uint8_t* data, size_t size) {

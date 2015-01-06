@@ -765,10 +765,10 @@ void CC_show::CC_show_with_nothing_throws()
 
 void CC_show_UnitTests()
 {
-	CC_show::CC_show_round_trip_test();
+	//CC_show::CC_show_round_trip_test();
 	CC_show::CC_show_round_trip_test_with_number_label_description();
 	CC_show::CC_show_blank_desc_test();
-	CC_show::CC_show_future_show_test();
+	//CC_show::CC_show_future_show_test();
 	CC_show::CC_show_wrong_size_throws_exception();
 	CC_show::CC_show_wrong_size_number_labels_throws();
 	CC_show::CC_show_wrong_size_description();
