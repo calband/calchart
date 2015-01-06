@@ -252,7 +252,20 @@ MusicScoreDocComponent* MusicScoreLoader__3_4_2::loadFromData(const uint8_t*& da
 }
 
 void MusicScoreLoader__3_4_2::parseFragments(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const {
-
+	const uint8_t* upperBound = blockToParse + blockSize;
+	if (!testIfAdequateDataRemains(blockToParse, upperBound, sizeof(uint32_t))) {
+		throw CC_FileException("Could not determine how many fragments to parse.");
+	}
+	uint32_t numFragmentsToParse = get_big_long(blockToParse);
+	blockToParse += sizeof(uint32_t) / sizeof(uint8_t);
+	for (uint32_t parsedFragments = 0; parsedFragments < numFragmentsToParse; parsedFragments++) {
+		std::shared_ptr<MusicScoreFragment> newFragment;
+		newFragment.reset(new MusicScoreFragment(parseIndividualFragment(buildTarget, blockToParse, upperBound)));
+		buildTarget->addScoreFragment(newFragment);
+	}
+	if (!testIfAllDataUsed(blockToParse, upperBound)) {
+		throw CC_FileException("Unexpected data.");
+	}
 }
 
 MusicScoreFragment MusicScoreLoader__3_4_2::parseIndividualFragment(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const {
