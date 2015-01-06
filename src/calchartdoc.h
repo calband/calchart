@@ -24,6 +24,7 @@
 #define _CALCHARTDOC_H_
 
 #include "animate.h"
+#include "music_score_doc_component.h"
 
 #include <wx/wx.h>							  // For basic wx defines
 #include <wx/docview.h>							  // For basic wx defines
@@ -107,6 +108,8 @@ private:
 	T& SaveObjectGeneric(T& stream);
 	template <typename T>
 	T& SaveObjectInternal(T& stream);
+
+	void LoadComponentsFromStream(std::istream& stream);
 
 public:
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
@@ -196,6 +199,7 @@ private:
 	
 	std::unique_ptr<CC_show> mShow;
 	std::unique_ptr<const ShowMode> mMode;
+	std::unique_ptr<MusicScoreDocComponent> mMusicScore;
 	AutoSaveTimer mTimer;
 };
 

@@ -24,6 +24,7 @@
 
 #include "CalChartDoc.h"
 
+#include "ccvers.h"
 #include "cc_command.h"
 #include "confgr.h"
 #include "calchartapp.h"
@@ -37,10 +38,12 @@
 #include "cc_fileformat.h"
 #include "modes.h"
 #include "print_ps.h"
+#include "music_score_loaders.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
 #include <list>
+#include <iterator>
 
 
 IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_modified, wxObject)
@@ -252,17 +255,70 @@ wxOutputStream& CalChartDoc::SaveObject(wxOutputStream& stream)
 template <typename T>
 T& CalChartDoc::SaveObjectInternal(T& stream)
 {
-	auto data = mShow->SerializeShow();
-	stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
+	{
+		auto data = SerializeFileVersion();
+		stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
+	}
+	{
+		auto data = SerializeShow();
+		stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
+	}
+	{
+		auto data = SerializeMusicScore();
+		stream.write(reinterpret_cast<const char*>(&data[0]), data.size());
+	}
 	return stream;
 }
 
 template <>
 wxFFileOutputStream& CalChartDoc::SaveObjectInternal<wxFFileOutputStream>(wxFFileOutputStream& stream)
 {
-	auto data = mShow->SerializeShow();
-	stream.Write(&data[0], data.size());
+	{
+		auto data = SerializeFileVersion();
+		stream.Write(&data[0], data.size());
+	}
+	{
+		auto data = SerializeShow();
+		stream.Write(&data[0], data.size());
+	}
+	{
+		auto data = SerializeMusicScore();
+		stream.Write(&data[0], data.size());
+	}
 	return stream;
+}
+
+
+std::vector<uint8_t> CalChartDoc::SerializeShow() const {
+	using CalChart::Parser::Append;
+	using CalChart::Parser::Construct_block;
+	std::vector<uint8_t> result;
+	Append(result, Construct_block(INGL_SHOW, mShow->SerializeShow()));
+	return result;
+}
+
+std::vector<uint8_t> CalChartDoc::SerializeFileVersion() const {
+	using CalChart::Parser::Append;
+	using CalChart::Parser::Construct_block;
+	std::vector<uint8_t> result;
+	// show               = START , SHOW ;
+	// START              = INGL_INGL , INGL_VERS ;
+	// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) , SHOW_DATA , SHOW_END ;
+	// SHOW_END           = INGL_END , INGL_SHOW ;
+	Append(result, uint32_t{ INGL_INGL });
+	Append(result, uint16_t{ INGL_GURK >> 16 });
+	Append(result, uint8_t{ CC_MAJOR_VERSION + '0' });
+	Append(result, uint8_t{ CC_MINOR_VERSION + '0' });
+	Append(result, Construct_block(INGL_SHOW, mShow->SerializeShow()));
+	return result;
+}
+
+std::vector<uint8_t> CalChartDoc::SerializeMusicScore() const {
+	using CalChart::Parser::Append;
+	using CalChart::Parser::Construct_block;
+	std::vector<uint8_t> result;
+	Append(result, Construct_block(INGL_MUSC, MusicScoreLoader::serializeForLatestVersion(mMusicScore.get())));
+	return result;
 }
 
 template <typename T>
@@ -270,7 +326,13 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
 	try
 	{
-		mShow = CC_show::Create_CC_show(stream);
+		LoadComponentsFromStream(stream);
+		if (mShow.get() == nullptr) {
+			throw CC_FileException("Did not find show.");
+		}
+		if (mMusicScore.get() == nullptr) {
+			mMusicScore.reset(new MusicScoreDocComponent());
+		}
 	}
 	catch (CC_FileException& e) {
 		wxString message = wxT("Error encountered:\n");
@@ -280,6 +342,40 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
 	CalChartDoc_FinishedLoading finishedLoading;
 	UpdateAllViews(NULL, &finishedLoading);
 	return stream;
+}
+
+void CalChartDoc::LoadComponentsFromStream(std::istream& stream) {
+	ReadAndCheckID(stream, INGL_INGL);
+	uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
+	
+	if (version <= 0x303)
+	{
+		mShow = CC_show::Create_CC_show(stream, version);
+		return;
+	}
+
+	stream.unsetf(std::ios::skipws);
+	std::istream_iterator<uint8_t> endOfStream;
+	std::istream_iterator<uint8_t> startOfStream(stream);
+
+	auto componentBlocks = CalChart::Parser::ParseOutLabels(startOfStream, endOfStream);
+
+	for (auto blockInfo : componentBlocks) {
+		std::istream_iterator<uint8_t> startOfBlock = std::get<1>(blockInfo);
+		std::istream_iterator<uint8_t> endOfBlock = startOfBlock;
+		for (size_t stepsToEndOfBlock = std::get<2>(blockInfo); stepsToEndOfBlock > 0; stepsToEndOfBlock++) {
+			endOfBlock++;
+		};
+		switch (std::get<0>(blockInfo)) {
+		case INGL_SHOW:
+			mShow = CC_show::Create_CC_show_From_Stream_Fragment(startOfBlock, endOfBlock, version);
+		case INGL_MUSC:
+			MusicScoreLoader::loadFromVersionedStream(startOfBlock, endOfBlock);
+		default:
+			break; //Ignore unknown blocks -- don't throw an error
+		}
+	}
+	stream.clear();
 }
 
 #if wxUSE_STD_IOSTREAM
