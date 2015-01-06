@@ -34,13 +34,14 @@ class MusicScoreLoader {
 public:
 
 	/**
-	 * Loads a MusicScoreDocComponent from a stream. The stream must begin with
+	 * Loads a MusicScoreDocComponent from serialized data. The data must begin with
 	 * a version string, so that the MusicScoreLoader can choose the appropriate
 	 * loader to interpret it.
-	 * @param stream The stream of data, beginning with a version string.
-	 * @return A MusicScoreDocComponent, loaded from the stream; nullptr if unsuccessful.
+	 * @param data The serialized data to load from.
+	 * @param size The number of elements in the data array.
+	 * @return A MusicScoreDocComponent, loaded from the serialized data; nullptr if unsuccessful.
 	 */
-	static MusicScoreDocComponent* loadFromVersionedStream(std::istream& stream);
+	static MusicScoreDocComponent* loadFromVersionedData(const uint8_t* data, size_t size);
 
 	/**
 	 * Serializes a MusicScoreDocComponent as if saving it in the most recent file format.
@@ -51,11 +52,13 @@ public:
 	static std::vector<uint8_t> serializeForLatestVersion(const MusicScoreDocComponent* docComponent);
 
 	/**
-	* Loads the Music Score data from a stream.
-	* @param stream The stream, which does NOT come with a version string prepended.
-	* @return a MusicScoreDocComponent loaded from the stream.
+	* Loads the Music Score data from serialized data.
+	* @param data The serialized data to load from. This pointer will be incremented to the address where the
+	*   function stops reading.
+	* @param upperBound The address of the end of the data.
+	* @return a MusicScoreDocComponent loaded from the serialized data.
 	*/
-	virtual MusicScoreDocComponent* loadFromStream(std::istream& stream) const = 0;
+	virtual MusicScoreDocComponent* loadFromData(const uint8_t*& data, const uint8_t* upperBound) const = 0;
 
 	/**
 	* Serializes Music Score data so that it can be written to a file or stream.
@@ -65,6 +68,27 @@ public:
 	virtual void serialize(std::vector<uint8_t>& target, const MusicScoreDocComponent* docComponent) const = 0;
 protected:
 	/**
+	 * Returns the address of the first null character in the buffer.
+	 * @param buffer The beginning of the buffer.
+	 * @param upperBound The end of the buffer.
+	 * @return The address of the first null character in the buffer, or the address of
+	 *   the upper bound if no null character was found.
+	 */
+	static const char* findFirstNullCharacter(const char* buffer, const char* upperBound);
+
+	/**
+	 * Parses a null-terminated string from the beginning of a data buffer, if such a string
+	 * can be constructed between the beginning of the buffer and the upper bound.
+	 * If such a string can't be constructed, an error will be thrown.
+	 * @param buffer The data buffer to construct a string from. After the function completes, this
+	 *   value will point just beyond the end of the null character that terminated the generated string.
+	 * @param upperBound The upper bound on the buffer -- no string can be created with characters
+	 *   beyond or at this address.
+	 * @return A string constructed from the beginning of the data buffer, if possible.
+	 */
+	static std::string parseFirstStringWithinBounds(const uint8_t*& buffer, const uint8_t* upperBound);
+
+	/**
 	 * Returns the MusicScoreLoader associated with the given version string.
 	 * @param version The version string.
 	 * @return The MusicScoreLoader associated with the given version string; nullptr if no such
@@ -73,11 +97,13 @@ protected:
 	static const MusicScoreLoader* getLoaderForVersion(std::string version);
 
 	/**
-	 * Returns the version string at the beginning of the stream.
-	 * @param stream The stream with the version string.
-	 * @return The version string at the beginning of the stream.
+	 * Returns the version string at the beginning of the data.
+	 * @param data The serialized data to read from. This pointer will be incremented so that
+	 *   it points past the end of the version string, if the function is successful.
+	 * @param upperBound The address of the end of the data array.
+	 * @return The version string at the beginning of the data.
 	 */
-	static std::string getVersionStringFromStream(std::istream& stream);
+	static std::string getVersionStringFromData(const uint8_t*& data, const uint8_t* upperBound);
 
 	/**
 	 * Serializes the version string.
@@ -90,7 +116,7 @@ protected:
 	 * A collection of mappings from version strings to the MusicScoreLoader objects responsible for
 	 * saving and loading files of those versions.
 	 */
-	static std::unordered_map<std::string, std::unique_ptr<MusicScoreLoader>> VersionLoaders;
+	static std::unordered_map<std::string, std::shared_ptr<MusicScoreLoader>> VersionLoaders;
 
 	/**
 	 * The version string of the latest file format. This is the version that will be conformed to when
@@ -113,22 +139,26 @@ protected:
  *
  *		TIME_SIGNATURES						= INGL_TSIG , TIME_SIGNATURES_DATA , TIME_SIGNATURES_END;
  *		TIME_SIGNATURES_DATA				= ONE_TIME_SIGNATURE(defaultTimeSignature) , BigEndianUnsignedInt32(numTimeSignatures) , {ONE_TIME_SIGNATURE}* ;
- *		ONE_TIME_SIGNATURE					= MUSIC_SCORE_MOMENT_DATA(timeAtWhichTimeSigChangeOccurs) , BigEndianInt32(beatsPerBar);
+ *		ONE_TIME_SIGNATURE					= MUSIC_SCORE_MOMENT_DATA(timeAtWhichTimeSigChangeOccurs) , ONE_TIME_SIGNATURE_DATA;
+ *		ONE_TIME_SIGNATURE_DATA				= BigEndianInt32(beatsPerBar);
  *		TIME_SIGNATURES_END					= INGL_END , INGL_TSIG
  *
  *		JUMPS								= INGL_MJMP , JUMPS_DATA , JUMPS_END;
  *		JUMPS_DATA							= BigEndianUnsignedInt32(numJumps) , {ONE_JUMP}*
- *		ONE_JUMP							= MUSIC_SCORE_MOMENT_DATA(jumpFrom) , MUSIC_SCORE_MOMENT_DATA(jumpTo);
+ *		ONE_JUMP							= MUSIC_SCORE_MOMENT_DATA(jumpFrom) , ONE_JUMP_DATA;
+ *		ONE_JUMP_DATA						= MUSIC_SCORE_MOMENT_DATA(jumpTo);
  *		JUMPS_END							= INGL_END , INGL_MJMP
  *
  *		TEMPOS								= INGL_MTMP, TEMPOS_DATA , TEMPOS_END;
  *		TEMPOS_DATA							= ONE_TEMPO(defaultTempo), BigEndianUnsignedInt32(numTempoChanges) , {ONE_TEMPO}*
- *		ONE_TEMPO							= MUSIC_SCORE_MOMENT_DATA(timeAtWhichTempoChangeOccurs) ,  BigEndianInt32(beatsPerMinute);
+ *		ONE_TEMPO							= MUSIC_SCORE_MOMENT_DATA(timeAtWhichTempoChangeOccurs) ,  ONE_TEMPO_DATA;
+ *		ONE_TEMPO_DATA						= BigEndianInt32(beatsPerMinute);
  *		TEMPOS_END							= INGL_END , INGL_MTMP
  *
  *		BAR_LABELS							= INGL_MLBL , BAR_LABELS_DATA , BAR_LABELS_END;
  *		BAR_LABELS_DATA						= BigEndianUnsignedInt32(numBarLabels) , {ONE_BAR_LABEL}* 
- *		ONE_BAR_LABEL						= MUSIC_SCORE_MOMENT_DATA(barThatIsLabelled) , null-terminated char*(barLabel);
+ *		ONE_BAR_LABEL						= MUSIC_SCORE_MOMENT_DATA(barThatIsLabelled) , ONE_BAR_LABEL_DATA;
+ *		ONE_BAR_LABEL_DATA					= null-terminated char*(barLabel);
  *		BAR_LABELS_END						= INGL_END , INGL_MLBL
  *
  *		MUSIC_SCORE_MOMENT_DATA				= FRAGMENT_ID , BAR_NUMBER , BEAT_NUMBER;
@@ -144,7 +174,7 @@ protected:
  */
 class MusicScoreLoader__3_4_2 : public MusicScoreLoader {
 public:
-	virtual MusicScoreDocComponent* loadFromStream(std::istream& stream) const;
+	virtual MusicScoreDocComponent* loadFromData(const uint8_t*& data, const uint8_t* upperBound) const;
 	
 	virtual void serialize(std::vector<uint8_t>& target, const MusicScoreDocComponent* docComponent) const;
 protected:
@@ -170,7 +200,7 @@ protected:
 	 */
 	virtual void serializeTimeSignatures(std::vector<uint8_t>& data, const TimeSignaturesCollection* timeSignatures, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
-	 * Serializes ONE_TIME_SIGNATURE (see class description for details).
+	 * Serializes ONE_TIME_SIGNATURE_DATA (see class description for details).
 	 * @param data The vector to which the serialized data should be written.
 	 * @param timeSignature The time signature to serialize.
 	 */
@@ -185,7 +215,7 @@ protected:
 	 */
 	virtual void serializeJumps(std::vector<uint8_t>& data, const MusicScoreJumpsCollection* jumps, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
-	 * Serializes ONE_JUMP (see class description for details).
+	 * Serializes ONE_JUMP_DATA (see class description for details).
 	 * @param data The vector to which the serialized data should be written.
 	 * @param jump The jump to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
@@ -202,7 +232,7 @@ protected:
 	 */
 	virtual void serializeTempos(std::vector<uint8_t>& data, const MusicScoreTemposCollection* tempos, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
-	 * Serializes ONE_TEMPO (see class description for details).
+	 * Serializes ONE_TEMPO_DATA (see class description for details).
 	 * @param data The vector to which the serialized data should be written.
 	 * @param tempo The tempo to serialize.
 	 */
@@ -217,7 +247,7 @@ protected:
 	 */
 	virtual void serializeBarLabels(std::vector<uint8_t>& data, const MusicScoreBarLabelsCollection* barLabels, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
-	 * Serializes ONE_BAR_LABEL (see class description for details).
+	 * Serializes ONE_BAR_LABEL_DATA (see class description for details).
 	 * @param data The vector to which the serialized data should be written.
 	 * @param barLabel The bar label to serialize.
 	 */
@@ -270,5 +300,131 @@ protected:
 	 * @return The number of events in the CollectionOfMusicScoreEvents that will be serialized.
 	 */
 	template <typename EventType>
-	uint32_t countNumEventsToSerialize<EventType>(const CollectionOfMusicScoreEvents<EventType>* eventCollection, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
+	uint32_t countNumEventsToSerialize(const CollectionOfMusicScoreEvents<EventType>* eventCollection, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
+
+	/**
+	 * Loads FRAGMENT_DATA into the buildTarget (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param blockToParse The address of the beginning of the data block to load from.
+	 * @param blockSize the size of the block to load from.
+	 */
+	virtual void parseFragments(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const;
+	/**
+	 * Loads ONE_FRAGMENT and returns the result (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param dataToParse The address of the beginning of the data block to load from. After this
+	 *   function is called, this pointer will be incremented to point at the end of the data that
+	 *   was read.
+	 * @param upperBound The address of the end of the data that can be read by this function.
+	 * @return The result of loading one object from the data.
+	 */
+	virtual MusicScoreFragment parseIndividualFragment(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Loads TIME_SIGNATURES_DATA into the buildTarget (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param blockToParse The address of the beginning of the data block to load from.
+	 * @param blockSize the size of the block to load from.
+	 */
+	virtual void parseTimeSignatures(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const;
+	/**
+	 * Loads ONE_TIME_SIGNATURE_DATA and returns the result (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param dataToParse The address of the beginning of the data block to load from. After this
+	 *   function is called, this pointer will be incremented to point at the end of the data that
+	 *   was read.
+	 * @param upperBound The address of the end of the data that can be read by this function.
+	 * @return The result of loading one object from the data.
+	 */
+	virtual TimeSignature parseIndividualTimeSignature(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Loads JUMPS_DATA into the buildTarget (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param blockToParse The address of the beginning of the data block to load from.
+	 * @param blockSize the size of the block to load from.
+	 */
+	virtual void parseJumps(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const;
+	/**
+	 * Loads ONE_JUMP_DATA and returns the result (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param dataToParse The address of the beginning of the data block to load from. After this
+	 *   function is called, this pointer will be incremented to point at the end of the data that
+	 *   was read.
+	 * @param upperBound The address of the end of the data that can be read by this function.
+	 * @return The result of loading one object from the data.
+	 */
+	virtual MusicScoreJump parseIndividualJump(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Loads TEMPOS_DATA into the buildTarget (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param blockToParse The address of the beginning of the data block to load from.
+	 * @param blockSize the size of the block to load from.
+	 */
+	virtual void parseTempos(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const;
+	/**
+	 * Loads ONE_TEMPO_DATA and returns the result (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param dataToParse The address of the beginning of the data block to load from. After this
+	 *   function is called, this pointer will be incremented to point at the end of the data that
+	 *   was read.
+	 * @param upperBound The address of the end of the data that can be read by this function.
+	 * @return The result of loading one object from the data.
+	 */
+	virtual MusicScoreTempo parseIndividualTempo(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Loads BAR_LABELS_DATA into the buildTarget (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param blockToParse The address of the beginning of the data block to load from.
+	 * @param blockSize the size of the block to load from.
+	 */
+	virtual void parseBarLabels(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const;
+	/**
+	 * Loads ONE_BAR_LABEL_DATA and returns the result (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param dataToParse The address of the beginning of the data block to load from. After this
+	 *   function is called, this pointer will be incremented to point at the end of the data that
+	 *   was read.
+	 * @param upperBound The address of the end of the data that can be read by this function.
+	 * @return The result of loading one object from the data.
+	 */
+	virtual MusicScoreBarLabel parseIndividualBarLabel(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Loads MUSIC_SCORE_MOMENT_DATA and returns the result (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param dataToParse The address of the beginning of the data block to load from. After this
+	 *   function is called, this pointer will be incremented to point at the end of the data that
+	 *   was read.
+	 * @param upperBound The address of the end of the data that can be read by this function.
+	 * @return The result of loading one object from the data.
+	 */
+	virtual MusicScoreMoment parseMusicScoreMoment(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Builds all music events associated with a particular CollectionOfMusicScoreEvents object,
+	 * and loads them into that collection.
+	 * @param buildTarget The MusicScoreDocComponent being build from the serialized data.
+	 * @param upperBound The end of the data that can be used to build these events.
+	 * @param eventBuildFunction The function that will be used to build events from the serialized data.
+	 * @param eventLoadFunction The function that will be used to load the built events onto the build target.
+	 */
+	template <typename EventType>
+	void parseMusicScoreEvents(MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound,
+		std::function<EventType(const MusicScoreDocComponent*, const uint8_t*&, const uint8_t*)> eventBuildFunction,
+		std::function<void(MusicScoreDocComponent*, MusicScoreMoment, EventType)> eventLoadFunction) const;
+
+	/**
+	 * Tests to see if the amount of data between two bounds is at least equal to a
+	 * given number of bytes.
+	 * @param lowerBound The lower bound for the data.
+	 * @param upperBound The upper bound for the data.
+	 * @param requiredBytes The number of bytes that should be between the lower and upper bounds.
+	 * @return True if there are at least requiredBytes between the lower and upper bounds; false otherwise.
+	 */
+	bool testIfAdequateDataRemains(const uint8_t* lowerBound, const uint8_t* upperBound, size_t requiredBytes) const;
+
+	/**
+	 * Tests to see if there is any unprocessed data between the lower bound and upper bound.
+	 * @param lowerBound The lower bound.
+	 * @param upperBound The upper bound.
+	 * @return True if there is any unprocessed data between the lower and upper bound; false otherwise.
+	 */
+	bool testIfAllDataUsed(const uint8_t* lowerBound, const uint8_t* upperBound) const;
 };
