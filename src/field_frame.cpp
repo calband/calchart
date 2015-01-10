@@ -1340,6 +1340,6 @@ FieldFrame::GetShow()
 }
 
 void FieldFrame::OnCmdOpenMusicScoreEditor(wxCommandEvent& event) {
-	MusicScoreEditFrame* musicEditor = new MusicScoreEditFrame(static_cast<CalChartDoc*>(GetDocument())->getMusicScore(), this);
+	MusicScoreEditFrame* musicEditor = new MusicScoreEditFrame(*static_cast<CalChartDoc*>(GetDocument()), this);
 	musicEditor->Show();
 }

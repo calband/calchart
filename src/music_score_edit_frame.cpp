@@ -1,5 +1,6 @@
 #include "music_score_edit_frame.h"
 #include "ui_enums.h"
+#include "cc_command.h"
 
 #include <random>
 
@@ -250,7 +251,7 @@ public:
 	}
 
 	virtual wxPGProperty* insertEmptyProperty(MusicScoreDocComponent* musicScore, wxPropertyGrid* propertyGrid, wxPropertyCategory* category) {
-		wxPGProperty* newProperty = new wxStringProperty("Tempo", generateUniqueName(propertyGrid));
+		wxPGProperty* newProperty = new wxStringProperty("Jump", generateUniqueName(propertyGrid));
 		newProperty->Enable(false);
 		propertyGrid->AppendIn(category, newProperty);
 		wxPGProperty* childProp;
@@ -368,20 +369,20 @@ public:
 int fragmentPropertyComparator(wxPropertyGrid* grid, wxPGProperty* first, wxPGProperty* second) {
 	if (first->GetPropertyByName("Index") == nullptr) {
 		if (second->GetPropertyByName("Index") == nullptr) {
-			return -1;
+			return 1;
 		} else {
-			return -1;
+			return 1;
 		}
 	} else {
 		if (second->GetPropertyByName("Index") == nullptr) {
-			return 1;
+			return -1;
 		}
 	}
-	return second->GetPropertyByName("Index")->GetValue().GetLong() - first->GetPropertyByName("Index")->GetValue().GetLong();
+	return first->GetPropertyByName("Index")->GetValue().GetLong() - second->GetPropertyByName("Index")->GetValue().GetLong();
 }
 
-MusicScoreEditFrame::MusicScoreEditFrame(MusicScoreDocComponent* musicScore, wxWindow *parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-: mTargetMusicScore(musicScore), mLocalMusicScore(*musicScore), mFragmentEditor(nullptr)
+MusicScoreEditFrame::MusicScoreEditFrame(CalChartDoc& doc, wxWindow *parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
+: mDoc(doc), mLocalMusicScore(*mDoc.getMusicScore()), mFragmentEditor(nullptr), mModified(false)
 {
 	mFragCategoryHandlers.push_back(std::unique_ptr<FragmentEditor__CategoryHandler>(new FragmentEditor__TimeSigCategoryHandler()));
 	mFragCategoryHandlers.push_back(std::unique_ptr<FragmentEditor__CategoryHandler>(new FragmentEditor__JumpsCategoryHandler()));
@@ -391,7 +392,7 @@ MusicScoreEditFrame::MusicScoreEditFrame(MusicScoreDocComponent* musicScore, wxW
 }
 
 void MusicScoreEditFrame::onClose(wxCommandEvent& event) {
-	if (true) {//contentIsModified()) {
+	if (mModified) {
 		int choice = wxMessageBox(wxT("Changes were made.  Save changes before exiting?"), wxT("Save changes?"), wxYES_NO | wxCANCEL);
 		if (choice == wxYES) {
 			saveToMusicScoreDocComponent();
@@ -411,6 +412,7 @@ void MusicScoreEditFrame::onAddFragment(wxCommandEvent& evt) {
 	mFragmentList->InsertItem(mFragmentList->GetItemCount(), "New Fragment");
 	mLocalMusicScore.addScoreFragment(std::shared_ptr<MusicScoreFragment>(new MusicScoreFragment("New Fragment")));
 	resetFragmentEditWindow();
+	mModified = true;
 }
 
 void MusicScoreEditFrame::onPopupRenameFragment(wxCommandEvent& evt) {
@@ -426,17 +428,26 @@ void MusicScoreEditFrame::onPopupDeleteFragment(wxCommandEvent& evt) {
 	mLocalMusicScore.removeScoreFragment(*index);
 	delete index;
 	resetFragmentEditWindow();
+	mModified = true;
 }
 
 void MusicScoreEditFrame::onPopupDeleteFragmentProperty(wxCommandEvent& evt) {
 	wxPGProperty* prop = (wxPGProperty*)(((wxMenu*)evt.GetEventObject())->GetClientData());
 	wxPGProperty* category = prop;
+	wxPGProperty* base = category;
 	while (!category->IsCategory() || mFragCategoryToHandlerMap.find((wxPropertyCategory*)category) == mFragCategoryToHandlerMap.end()) {
+		base = category;
 		category = category->GetParent();
 	}
 	auto handler = mFragCategoryToHandlerMap[(wxPropertyCategory*)category];
 	handler->onPropertyDeleted(&mLocalMusicScore, mSelectedFragment, prop, mFragmentEditor, (wxPropertyCategory*)category);
+	bool replaceWithEmpty = (handler->propertyIsEmpty(base));
 	mFragmentEditor->DeleteProperty(prop);
+	if (replaceWithEmpty) {
+		handler->insertEmptyProperty(&mLocalMusicScore, mFragmentEditor, (wxPropertyCategory*)category);
+	}
+	mFragmentEditor->SortChildren(category);
+	mModified = true;
 }
 
 void MusicScoreEditFrame::onFragmentRightClick(wxListEvent& evt) {
@@ -468,6 +479,7 @@ void MusicScoreEditFrame::onFragmentPropertyChanged(wxPropertyGridEvent& evt) {
 	FragmentEditor__CategoryHandler& handler = *mFragCategoryToHandlerMap.at(category);
 	handler.onPropertyModified(&mLocalMusicScore, mSelectedFragment, prop, mFragmentEditor, category);
 	refreshEditorCategory(category);
+	mModified = true;
 }
 
 void MusicScoreEditFrame::onFragmentPropertyChanging(wxPropertyGridEvent& evt) {
@@ -559,7 +571,7 @@ void MusicScoreEditFrame::deselectFragmentIfSelected(std::shared_ptr<MusicScoreF
 }
 
 void MusicScoreEditFrame::saveToMusicScoreDocComponent() {
-	mTargetMusicScore->copyContentFrom(mLocalMusicScore);
+	mDoc.GetCommandProcessor()->Submit(new OverwriteMusicScoreCommand(mDoc, mLocalMusicScore));
 	mModified = false;
 }
 

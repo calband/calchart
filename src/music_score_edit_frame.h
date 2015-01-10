@@ -1,6 +1,7 @@
 #pragma once
 
 #include "music_score_doc_component.h"
+#include "calchartdoc.h"
 #include <wx/listctrl.h>
 #include <wx/panel.h>
 #include <wx/propgrid/propgrid.h>
@@ -88,7 +89,7 @@ public:
 	 * @param size The size of the window.
 	 * @param style The style of the window.
 	 */
-	MusicScoreEditFrame(MusicScoreDocComponent* musicScore, wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Music Score Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER);
+	MusicScoreEditFrame(CalChartDoc& doc, wxWindow *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Music Score Editor"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER);
 	
 
 	/**
@@ -227,10 +228,9 @@ private:
 	void refreshEditorCategory(wxPropertyCategory* category);
 
 	/**
-	 * The music score being edited through this window. This score is not changed until
-	 * the window is saved.
+	 * The calchart doc containing the music score to edit.
 	 */
-	MusicScoreDocComponent* mTargetMusicScore;
+	CalChartDoc& mDoc;
 
 	/**
 	 * A copy of the music score being edited. Changes are made to this one as the

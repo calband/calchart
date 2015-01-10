@@ -470,3 +470,12 @@ ToggleLabelVisibilityCommand::ToggleLabelVisibilityCommand(CalChartDoc& show)
 
 ToggleLabelVisibilityCommand::~ToggleLabelVisibilityCommand()
 {}
+
+
+OverwriteMusicScoreCommand::OverwriteMusicScoreCommand(CalChartDoc& show, MusicScoreDocComponent& newScore) 
+: super(show, "Change Music Score"), mNewScore(newScore)
+{}
+
+void OverwriteMusicScoreCommand::DoAction() {
+	mDoc.getMusicScore()->copyContentFrom(mNewScore);
+}
