@@ -215,6 +215,12 @@ public:
 	CollectionOfMusicScoreEvents(EventType defaultEvent);
 
 	/**
+	 * Makes this collection into a copy of the given one.
+	 * @param other The collection to copy from.
+	 */
+	void copyContentFrom(const CollectionOfMusicScoreEvents<EventType>* other);
+
+	/**
 	 * Returns the number of recorded events.
 	 * @param fragment The fragment with which the events are associated.
 	 * @return The number of recorded events associated with the given fragment.
@@ -469,6 +475,13 @@ template <typename EventType>
 CollectionOfMusicScoreEvents<EventType>::CollectionOfMusicScoreEvents(EventType defaultEvent)
 : mDefaultEvent(defaultEvent), mModCount(0)
 {}
+
+template <typename EventType>
+void CollectionOfMusicScoreEvents<EventType>::copyContentFrom(const CollectionOfMusicScoreEvents<EventType>* other) {
+	mModCount++;
+	mEvents = other->mEvents;
+	mDefaultEvent = other->mDefaultEvent;
+}
 
 template <typename EventType>
 void CollectionOfMusicScoreEvents<EventType>::addEvent(MusicScoreMoment eventTime, EventType eventObj) {

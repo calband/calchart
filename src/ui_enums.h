@@ -85,6 +85,7 @@ enum
 	CALCHART__AdjustBackgroundImage,
 	CALCHART__RemoveBackgroundImage,
 	CALCHART__ResetReferencePoint,
+	CALCHART__OpenMusicScoreEditor,
 
 	CALCHART__GhostOff,
 	CALCHART__GhostNextSheet,
@@ -118,6 +119,15 @@ enum
 	CALCHART__SplitViewVertical,
 	CALCHART__SplitViewUnsplit,
 	CALCHART__SplitViewSwapAnimateAndOmni,
+
+	CALCHART__MusicScore_PopupMenuRenameFragment,
+	CALCHART__MusicScore_PopupMenuDeleteFragment,
+	CALCHART__MusicScore_FragmentList,
+	CALCHART__MusicScore_FragmentEditor,
+	CALCHART__MusicScore_AddFragment,
+	CALCHART__MusicScore_Close,
+	CALCHART__MusicScore_Save,
+	CALCHART__MusicScore_PopupMenuDeleteFragmentProperty
 };
 
 #endif // _UI_ENUMS_H_

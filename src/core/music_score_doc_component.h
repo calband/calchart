@@ -18,6 +18,19 @@ public:
 	MusicScoreDocComponent();
 
 	/**
+	 * Copy constructor.
+	 * @param other The doc component to copy.
+	 */
+	MusicScoreDocComponent(const MusicScoreDocComponent& other);
+
+	/**
+	 * Changes this doc component so that it becomes a copy of the
+	 * given one.
+	 * @param other The doc to copy from.
+	 */
+	void copyContentFrom(const MusicScoreDocComponent& other);
+
+	/**
 	 * Returns the collection of all score jumps that occur in the show.
 	 * @return The collection of all score jumps.
 	 */

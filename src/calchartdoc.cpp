@@ -368,7 +368,7 @@ void CalChartDoc::LoadComponentsFromStream(std::istream& stream) {
 			mShow = CC_show::Create_CC_show_From_Serialized_Data(startOfBlock, sizeOfBlock, version);
 			break;
 		case INGL_MUSC:
-			MusicScoreLoader::loadFromVersionedData(startOfBlock, sizeOfBlock);
+			mMusicScore.reset(MusicScoreLoader::loadFromVersionedData(startOfBlock, sizeOfBlock));
 			break;
 		default:
 			break; //Ignore unknown blocks -- don't throw an error
@@ -644,4 +644,8 @@ CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_ya
 
 	PrintShowToPS printShowToPS(*mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetMode(), {{config_.Get_HeadFont().ToStdString(), config_.Get_MainFont().ToStdString(), config_.Get_NumberFont().ToStdString(), config_.Get_ContFont().ToStdString(), config_.Get_BoldFont().ToStdString(), config_.Get_ItalFont().ToStdString(), config_.Get_BoldItalFont().ToStdString() }}, config_.Get_PageWidth(), config_.Get_PageHeight(), config_.Get_PageOffsetX(), config_.Get_PageOffsetY(), config_.Get_PaperLength(), config_.Get_HeaderSize(), config_.Get_YardsSize(), config_.Get_TextSize(), config_.Get_DotRatio(), config_.Get_NumRatio(), config_.Get_PLineRatio(), config_.Get_SLineRatio(), config_.Get_ContRatio(), [&config_](size_t which) { return config_.Get_yard_text(which).ToStdString(); }, [&config_](size_t which) { return config_.Get_spr_line_text(which).ToStdString(); });
 	return printShowToPS(buffer, eps, mShow->GetCurrentSheetNum(), isPicked, GetTitle().ToStdString());
+}
+
+MusicScoreDocComponent* CalChartDoc::getMusicScore() {
+	return mMusicScore.get();
 }

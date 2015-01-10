@@ -7,6 +7,20 @@ MusicScoreDocComponent::MusicScoreDocComponent() {
 	mTempos.reset(new MusicScoreTemposCollection(MusicScoreTempo(120)));
 }
 
+MusicScoreDocComponent::MusicScoreDocComponent(const MusicScoreDocComponent& other)
+: MusicScoreDocComponent()
+{
+	copyContentFrom(other);
+}
+
+void MusicScoreDocComponent::copyContentFrom(const MusicScoreDocComponent& other) {
+	mBarLabels->copyContentFrom(other.mBarLabels.get());
+	mJumps->copyContentFrom(other.mJumps.get());
+	mTimeSignatures->copyContentFrom(other.mTimeSignatures.get());
+	mTempos->copyContentFrom(other.mTempos.get());
+	mFragments = other.mFragments;
+}
+
 MusicScoreJumpsCollection* MusicScoreDocComponent::getScoreJumps() {
 	return mJumps.get();
 }

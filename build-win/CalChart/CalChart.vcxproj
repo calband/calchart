@@ -100,6 +100,7 @@
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
     <ClInclude Include="..\..\src\core\music_score_bar_labels.h" />
+    <ClInclude Include="..\..\src\core\music_score_edit_frame.h" />
     <ClInclude Include="..\..\src\core\music_score_fragments.h" />
     <ClInclude Include="..\..\src\core\music_score_jumps.h" />
     <ClInclude Include="..\..\src\core\music_score_loaders.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="..\..\src\core\modes.cpp" />
     <ClCompile Include="..\..\src\core\music_score_bar_labels.cpp" />
     <ClCompile Include="..\..\src\core\music_score_doc_component.cpp" />
+    <ClCompile Include="..\..\src\core\music_score_edit_frame.cpp" />
     <ClCompile Include="..\..\src\core\music_score_jumps.cpp" />
     <ClCompile Include="..\..\src\core\music_score_loaders.cpp" />
     <ClCompile Include="..\..\src\core\music_score_moment_browser.cpp" />
