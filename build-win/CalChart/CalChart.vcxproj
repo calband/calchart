@@ -100,7 +100,6 @@
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
     <ClInclude Include="..\..\src\core\music_score_bar_labels.h" />
-    <ClInclude Include="..\..\src\core\music_score_edit_frame.h" />
     <ClInclude Include="..\..\src\core\music_score_fragments.h" />
     <ClInclude Include="..\..\src\core\music_score_jumps.h" />
     <ClInclude Include="..\..\src\core\music_score_loaders.h" />
@@ -133,6 +132,7 @@
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\linmath.h" />
+    <ClInclude Include="..\..\src\music_score_edit_frame.h" />
     <ClInclude Include="..\..\src\platconf.h" />
     <ClInclude Include="..\..\src\precomp.h" />
     <ClInclude Include="..\..\src\print_cont_ui.h" />
@@ -174,7 +174,6 @@
     <ClCompile Include="..\..\src\core\modes.cpp" />
     <ClCompile Include="..\..\src\core\music_score_bar_labels.cpp" />
     <ClCompile Include="..\..\src\core\music_score_doc_component.cpp" />
-    <ClCompile Include="..\..\src\core\music_score_edit_frame.cpp" />
     <ClCompile Include="..\..\src\core\music_score_jumps.cpp" />
     <ClCompile Include="..\..\src\core\music_score_loaders.cpp" />
     <ClCompile Include="..\..\src\core\music_score_moment_browser.cpp" />
@@ -187,6 +186,7 @@
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
+    <ClCompile Include="..\..\src\music_score_edit_frame.cpp" />
     <ClCompile Include="..\..\src\precomp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
