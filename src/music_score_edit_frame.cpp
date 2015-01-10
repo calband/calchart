@@ -32,10 +32,40 @@ public:
 	 */
 	virtual std::string getCategoryName() = 0;
 
+	/**
+	 * Given an event and its time, loads the properties of that event into a
+	 * property that will appear in the property grid.
+	 * @param musicScore The score which the event is from.
+	 * @param prop The property to load the attributes of the event into.
+	 * @param time The time at which the event occurs.
+	 * @param evt The event to load.
+	 */
 	virtual void loadPropertyFromEvent(MusicScoreDocComponent* musicScore, wxPGProperty* prop, MusicScoreMoment time, EventType evt) = 0;
+
+	/**
+	 * Saves a property to the score, after it has been converted to an event time and event object.
+	 * @param musicScore the score to save the property to.
+	 * @param eventTime The time at which the event occurred.
+	 * @param evt The event.
+	 */
 	virtual void savePropertyToScore(MusicScoreDocComponent* musicScore, MusicScoreMoment eventTime, EventType evt) = 0;
+
+	/**
+	 * Returns the event collection with which this handler associates. That is,
+	 * this is the event collection that the handler will add events to
+	 * and load them from.
+	 * @param musicScore The score which the collection is associated with.
+	 */
 	virtual CollectionOfMusicScoreEvents<EventType>* getEventCollection(MusicScoreDocComponent* musicScore) = 0;
+
 	virtual wxPGProperty* insertEmptyProperty(MusicScoreDocComponent* musicScore, wxPropertyGrid* propertyGrid, wxPropertyCategory* category) = 0;
+
+	/**
+	 * From a user-entered property, builds an event and the timing for that event.
+	 * @param musicScore The score with which the event will be associated.
+	 * @param fragment The fragment with which the event is associated. 
+	 * @param prop The property to build an event from.
+	 */
 	virtual std::pair<MusicScoreMoment, EventType> buildEventFromProperty(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPGProperty* prop) = 0;
 
 	/**
@@ -56,6 +86,15 @@ public:
 		}
 	}
 
+	/**
+	 * Updates the indices for each of the properties in a category. This is used when an
+	 * event is added/removed, and the indices of events after that one are shifted as a result.
+	 * @param category The category whose properties should have their indices shifted.
+	 * @param startIndex The first index associated with a property that should be affected by the shift.
+	 *   Note that this refers to the "Index" property of the properties in the category; it does not
+	 *   refer to the index that each property has relative to the category itself.
+	 * @param shift The amount to change the indices by.
+	 */
 	virtual void shiftPropertyIndices(wxPropertyCategory* category, unsigned startIndex, int shift) {
 		for (unsigned index = 0; index < category->GetChildCount(); index++) {
 			wxPGProperty* indexProperty = category->Item(index)->GetPropertyByName("Index");
@@ -65,6 +104,15 @@ public:
 		}
 	}
 	
+	/**
+	 * Given an event and the time for it, finds the index of that event in the music score.
+	 * @param musicScore The music score with that event.
+	 * @param fragment The fragment that the event is associated with.
+	 * @param time The time that the event occurs at.
+	 * @param evt The event.
+	 * @return The index at which the event occurs, or an index beyond all other event indices if
+	 *   the event is not found.
+	 */
 	unsigned getIndexOfEvent(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, MusicScoreMoment time, EventType evt) {
 		auto eventCollection = getEventCollection(musicScore);
 		for (unsigned index = 0; index < eventCollection->getNumEvents(fragment.get()); index++) {
@@ -76,6 +124,13 @@ public:
 		return eventCollection->getNumEvents(fragment.get());
 	}
 
+	/**
+	 * Saves the event represented by a property to the score.
+	 * @param musicScore The score to add the event to.
+	 * @param fragment The fragment that the event to add is associated with.
+	 * @param category The category which the property is in.
+	 * @param prop The property which describes the event to add.
+	 */
 	virtual void savePropertyToScore(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPropertyCategory* category, wxPGProperty* prop) {
 		if (propertyIsEmpty(prop)) {
 			return;
@@ -87,6 +142,13 @@ public:
 		shiftPropertyIndices(category, addIndex + 1, 1);
 	}
 
+	/**
+	 * Deletes the event represented by a property from the score.
+	 * @param musicScore The score to remove the event from.
+	 * @param fragment The fragment that the event to remove is associated with.
+	 * @param category The category which the property is in.
+	 * @param prop The property which describes the event to delete.
+	 */
 	virtual void deletePropertyFromScore(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPropertyCategory* category, wxPGProperty* prop) {
 		long index = getIndexFromProperty(prop);
 		if (index < 0) {
@@ -96,16 +158,33 @@ public:
 		shiftPropertyIndices(category, index, -1);
 	}
 
+	/**
+	 * Adds an index attribute to the given property, and initializes
+	 * it so that it points to no entry (index = -1).
+	 * @param prop The property to add an index to.
+	 */
 	virtual void appendIndexToProperty(wxPGProperty* prop) {
 		wxPGProperty* indexProp = new wxIntProperty("Index", wxPG_LABEL, -1);
 		prop->AppendChild(indexProp);
 		indexProp->Hide(true);
 	}
 
+	/**
+	 * Gets the index associated with a property.
+	 * @param The property to get the index of.
+	 * @return The index of the property.
+	 */
 	virtual long getIndexFromProperty(wxPGProperty* prop) {
 		return prop->GetPropertyByName("Index")->GetValue().GetLong();
 	}
 
+	/**
+	 * Generates a unique string name for an element in the property grid,
+	 * since elements cannot have the same underlying name and we don't
+	 * need them to be meaningful to us.
+	 * @param grid The grid for which the unique name should be generated.
+	 * @return A unique name for the grid.
+	 */
 	virtual std::string generateUniqueName(wxPropertyGrid* grid) {
 		std::string name;
 		do {
@@ -114,6 +193,12 @@ public:
 		return name;
 	}
 
+	/**
+	 * Gets the property nearest to the category which contains the given property.
+	 * @param category The category in which the property resides.
+	 * @param prop The property whose 'base' should be located.
+	 * @param An ancestor of the given property that is nearest to the category.
+	 */
 	virtual wxPGProperty* getBaseProperty(wxPropertyCategory* category, wxPGProperty* prop) {
 		wxPGProperty* base = prop;
 		while (base->GetParent() != category) {
@@ -366,6 +451,14 @@ public:
 	}
 };
 
+/**
+ * The comparator used to sort the properties in the fragment property grid.
+ * @param grid The grid that the properties are in.
+ * @param first The first property.
+ * @param second The second property.
+ * @return A positive number if the first property should come after the second; a negative number if the
+ *   first should come before the second; zero if the order is arbitrary.
+ */
 int fragmentPropertyComparator(wxPropertyGrid* grid, wxPGProperty* first, wxPGProperty* second) {
 	if (first->GetPropertyByName("Index") == nullptr) {
 		if (second->GetPropertyByName("Index") == nullptr) {
