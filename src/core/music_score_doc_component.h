@@ -122,6 +122,30 @@ public:
 	 * @return A shared pointer to the fragment at the given index; null if the index is invalid.
 	 */
 	std::shared_ptr<const MusicScoreFragment> getScoreFragment(int fragmentIndex) const;
+
+	/**
+	 * Returns the index of the given fragment.
+	 * @param fragment The fragment to get the index of.
+	 * @return The index of the given fragment, or -1 if it is not registered.
+	 */
+	int getIndexOfFragment(const MusicScoreFragment* fragment) const;
+
+	/**
+	 * Returns the time the show begins.
+	 * @return The place in the score where the show begins.
+	 */
+	MusicScoreMoment getStartMoment() const;
+
+	/**
+	 * Moves the start time to occur in the null fragment.
+	 */
+	void setStartFragmentToNullFragment();
+
+	/**
+	 * Moves the start time to occur in the fragment at the provided index.
+	 * @param fragmentIndex The index of the fragment to start in.
+	 */
+	void setStartFragmentToFragmentAtIndex(int fragmentIndex);
 private:
 	/**
 	 * All score fragments in the show.
@@ -147,4 +171,9 @@ private:
 	 * Records the tempo changes that occur throughout the show.
 	 */
 	std::unique_ptr<MusicScoreTemposCollection> mTempos;
+
+	/**
+	 * The moment at which the show starts in the music score.
+	 */
+	MusicScoreMoment mStartMoment;
 };

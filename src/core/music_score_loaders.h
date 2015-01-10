@@ -129,12 +129,16 @@ protected:
  *
  * The format for saving the MusicScoreDocComponent in version 3.4.2 is as follows:
  *
- *		MUSIC_SCORE_DATA					= FRAGMENTS , TIME_SIGNATURES , JUMPS , TEMPOS , BAR_LABELS;
+ *		MUSIC_SCORE_DATA					= FRAGMENTS , START_MOMENT, TIME_SIGNATURES , JUMPS , TEMPOS , BAR_LABELS;
  *
  *		FRAGMENTS							= INGL_MFRG , {FRAGMENTS_DATA}* , FRAGMENTS_END;
  *		FRAGMENTS_DATA						= BigEndianUnsignedInt32(numFragments) {ONE_FRAGMENT}*;
  *		ONE_FRAGMENT						= null-terminated char*
  *		FRAGMENTS_END						= INGL_END , INGL_MFRG
+ *
+ *		START_MOMENT						= INGL_MSTM , START_MOMENT_DATA , START_MOMENT_END;
+ *		START_MOMENT_DATA					= MUSIC_SCORE_MOMENT_DATA(startMoment);
+ *		START_MOMENT_END					= INGL_END , INGL_MSTM
  *
  *		TIME_SIGNATURES						= INGL_TSIG , TIME_SIGNATURES_DATA , TIME_SIGNATURES_END;
  *		TIME_SIGNATURES_DATA				= ONE_TIME_SIGNATURE(defaultTimeSignature) , BigEndianUnsignedInt32(numTimeSignatures) , {ONE_TIME_SIGNATURE}* ;
@@ -161,11 +165,12 @@ protected:
  *		BAR_LABELS_END						= INGL_END , INGL_MLBL
  *
  *		MUSIC_SCORE_MOMENT_DATA				= FRAGMENT_ID , BAR_NUMBER , BEAT_NUMBER;
- *		FRAGMENT_ID							= BigEndianUnsignedInt32(indexOfFragment_fragmentZeroIsFirstFragmentSaved);
+ *		FRAGMENT_ID							= BigEndianUnsignedInt32(indexOfFragment_fragmentZeroIsFirstFragmentSaved + 1, so that fragment 0 is null fragment);
  *		BAR_NUMBER							= BigEndianInt32(barNumber)
  *		BEAT_NUMBER							= BigEndianInt32(beatNumber)
  *
  *		INGL_MFRG							= 'M','F','R','G';
+ *		INGL_MSTM							= 'M','S','T','M';
  *		INGL_TSIG							= 'M','T','S','G';
  *		INGL_MJMP							= 'M','J','M','P';
  *		INGL_MTMP							= 'M','T','M','P';
@@ -191,11 +196,20 @@ protected:
 	virtual void serializeIndividualFragment(std::vector<uint8_t>& data, const MusicScoreFragment& fragment) const;
 
 	/**
+	 * Serializes START_MOMENT (see class description for details).
+	 * @param data The vector to which the serialized data should be written.
+	 * @param docComponent The MusicScoreDocComponent that is being serialized.
+	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
+	 */
+	virtual void serializeStartMoment(std::vector<uint8_t>& data, const MusicScoreDocComponent* docComponent, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
+
+	/**
 	 * Serializes TIME_SIGNATURES_DATA (see class description for details).
 	 * @param data The vector to which the serialized data should be written.
 	 * @param timeSignatures The collection of all time signatures to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 */
 	virtual void serializeTimeSignatures(std::vector<uint8_t>& data, const TimeSignaturesCollection* timeSignatures, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
@@ -210,7 +224,7 @@ protected:
 	 * @param data The vector to which the serialized data should be written.
 	 * @param jumps The collection of score jumps to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 */
 	virtual void serializeJumps(std::vector<uint8_t>& data, const MusicScoreJumpsCollection* jumps, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
@@ -218,7 +232,7 @@ protected:
 	 * @param data The vector to which the serialized data should be written.
 	 * @param jump The jump to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 */
 	virtual void serializeIndividualJump(std::vector<uint8_t>& data, const MusicScoreJump& jump, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 
@@ -227,7 +241,7 @@ protected:
 	 * @param data The vector to which the serialized data should be written.
 	 * @param tempos The collection of tempo changes to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 */
 	virtual void serializeTempos(std::vector<uint8_t>& data, const MusicScoreTemposCollection* tempos, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
@@ -242,7 +256,7 @@ protected:
 	 * @param data The vector to which the serialized data should be written.
 	 * @param barLabels The collection of bar labels to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 */
 	virtual void serializeBarLabels(std::vector<uint8_t>& data, const MusicScoreBarLabelsCollection* barLabels, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 	/**
@@ -257,16 +271,17 @@ protected:
 	 * @param data The vector to which the serialized data should be written.
 	 * @param moment The moment to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 */
 	virtual void serializeMusicScoreMoment(std::vector<uint8_t>& data, const MusicScoreMoment& moment, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const;
 
 	/**
-	 * Builds a map from score fragment to its index.
+	 * Builds a map from score fragment to its id. The id is the index plus one.
+	 * The null fragment has an index of 0.
 	 * @param docComponent The MusicScoreDocComponent containing the fragments.
-	 * @return A map from each score fragment in the MusicScoreDocComponent to its index.
+	 * @return A map from each score fragment in the MusicScoreDocComponent to its id.
 	 */
-	std::unordered_map<const MusicScoreFragment*, uint32_t> buildFragmentToIndexMap(const MusicScoreDocComponent* docComponent) const;
+	std::unordered_map<const MusicScoreFragment*, uint32_t> buildFragmentToIdMap(const MusicScoreDocComponent* docComponent) const;
 
 	/**
 	 * Serializes the events in a CollectionOfMusicScoreEvents. Only events associated with valid fragments
@@ -280,7 +295,7 @@ protected:
 	 * @param data The vector to which the serialized data should be written.
 	 * @param eventCollection The collection of events to serialize.
 	 * @param fragmentToIdMap A mapping from fragment pointer to id. The 'id' is the index of the fragment in
-	 *   the MusicScoreDocComponent.
+	 *   the MusicScoreDocComponent plus one. An id of zero is the null fragment.
 	 * @param serializeDefaultEvent True if the default event should be serialized; false otherwise.
 	 * @param eventSerializationFunction The function used to serialize an individual event in the
 	 *   CollectionOfMusicScoreEvents.
@@ -318,6 +333,13 @@ protected:
 	 * @return The result of loading one object from the data.
 	 */
 	virtual MusicScoreFragment parseIndividualFragment(const MusicScoreDocComponent* buildTarget, const uint8_t*& dataToParse, const uint8_t* upperBound) const;
+	/**
+	 * Loads START_MOMENT into the buildTarget (see class description for details).
+	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.
+	 * @param blockToParse The address of the beginning of the data block to load from.
+	 * @param blockSize the size of the block to load from.
+	 */
+	virtual void parseStartMoment(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const;
 	/**
 	 * Loads TIME_SIGNATURES_DATA into the buildTarget (see class description for details).
 	 * @param buildTarget The MusicScoreDocComponent that is being loaded from the data.

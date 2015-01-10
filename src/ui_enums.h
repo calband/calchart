@@ -127,7 +127,8 @@ enum
 	CALCHART__MusicScore_AddFragment,
 	CALCHART__MusicScore_Close,
 	CALCHART__MusicScore_Save,
-	CALCHART__MusicScore_PopupMenuDeleteFragmentProperty
+	CALCHART__MusicScore_PopupMenuDeleteFragmentProperty,
+	CALCHART__MusicScore_StartFragmentChoiceCtrl
 };
 
 #endif // _UI_ENUMS_H_

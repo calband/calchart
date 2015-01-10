@@ -160,6 +160,11 @@ public:
 	 * Called when a property is right-clicked.
 	 */
 	void onFragmentPropertyRightClicked(wxPropertyGridEvent& evt);
+
+	/**
+	 * Called when a start fragment is selected from the choice dropdown.
+	 */
+	void onStartFragmentSelected(wxCommandEvent& evt);
 private:
 	/**
 	 * Creates the window.
@@ -209,6 +214,11 @@ private:
 	void resetFragmentEditWindow();
 
 	/**
+	 * Syncs the start fragment choice with the fragments in the music score.
+	 */
+	void resetStartFragmentChoice();
+
+	/**
 	 * Deselects the given fragment if it is currently selected.
 	 * @param fragment The fragment to deselect.
 	 */
@@ -248,6 +258,11 @@ private:
 	 * The property grid used to edit the properties of a fragment.
 	 */
 	wxPropertyGrid* mFragmentEditor;
+
+	/**
+	 * The choice control used to select the start fragment.
+	 */
+	wxChoice* mStartFragmentChoice;
 
 	/**
 	 * The music score fragment that is selected from the fragments list.

@@ -67,11 +67,16 @@ void MusicScoreLoader__3_4_2::serialize(std::vector<uint8_t>& target, const Musi
 	using CalChart::Parser::Append;
 	using CalChart::Parser::Construct_block;
 	
-	std::unordered_map<const MusicScoreFragment*, uint32_t> fragmentToIdMap = buildFragmentToIndexMap(docComponent);
+	std::unordered_map<const MusicScoreFragment*, uint32_t> fragmentToIdMap = buildFragmentToIdMap(docComponent);
 	{
 		std::vector<uint8_t> fragmentsBlock;
 		serializeFragments(fragmentsBlock, docComponent);
 		Append(target, Construct_block(INGL_MFRG, fragmentsBlock));
+	}
+	{
+		std::vector<uint8_t> startMomentBlock;
+		serializeStartMoment(startMomentBlock, docComponent, fragmentToIdMap);
+		Append(target, Construct_block(INGL_MSTM, startMomentBlock));
 	}
 	{
 		std::vector<uint8_t> timeSignaturesBlock;
@@ -110,6 +115,11 @@ void MusicScoreLoader__3_4_2::serializeIndividualFragment(std::vector<uint8_t>& 
 
 	AppendAndNullTerminate(data, fragment.name);
 }
+
+void MusicScoreLoader__3_4_2::serializeStartMoment(std::vector<uint8_t>& data, const MusicScoreDocComponent* docComponent, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const {
+	serializeMusicScoreMoment(data, docComponent->getStartMoment(), fragmentToIdMap);
+}
+
 
 void MusicScoreLoader__3_4_2::serializeTimeSignatures(std::vector<uint8_t>& data, const TimeSignaturesCollection* timeSignatures, const std::unordered_map<const MusicScoreFragment*, uint32_t>& fragmentToIdMap) const {
 	const std::function<void(std::vector<uint8_t>&, const TimeSignature&, const std::unordered_map<const MusicScoreFragment*, uint32_t>&)> serializeFunc =
@@ -173,11 +183,12 @@ void MusicScoreLoader__3_4_2::serializeMusicScoreMoment(std::vector<uint8_t>& da
 	Append(data, (uint32_t)(moment.beatAndBar.beat));
 }
 
-std::unordered_map<const MusicScoreFragment*, uint32_t> MusicScoreLoader__3_4_2::buildFragmentToIndexMap(const MusicScoreDocComponent* docComponent) const {
+std::unordered_map<const MusicScoreFragment*, uint32_t> MusicScoreLoader__3_4_2::buildFragmentToIdMap(const MusicScoreDocComponent* docComponent) const {
 	std::unordered_map<const MusicScoreFragment*, uint32_t> returnVal;
 	for (unsigned index = 0; index < docComponent->getNumScoreFragments(); index++) {
-		returnVal.emplace(docComponent->getScoreFragment(index).get(), index);
+		returnVal.emplace(docComponent->getScoreFragment(index).get(), index + 1);
 	}
+	returnVal.emplace(nullptr, 0);
 	return returnVal;
 }
 
@@ -224,6 +235,7 @@ MusicScoreDocComponent* MusicScoreLoader__3_4_2::loadFromData(const uint8_t*& da
 
 	std::vector<std::pair<uint32_t, std::function<void(MusicScoreDocComponent*, const uint8_t*, size_t)>>> blocksToProcess = {
 		{ INGL_MFRG, makeParseFunction(&MusicScoreLoader__3_4_2::parseFragments) },
+		{ INGL_MSTM, makeParseFunction(&MusicScoreLoader__3_4_2::parseStartMoment) },
 		{ INGL_TSIG, makeParseFunction(&MusicScoreLoader__3_4_2::parseTimeSignatures) },
 		{ INGL_MJMP, makeParseFunction(&MusicScoreLoader__3_4_2::parseJumps) },
 		{ INGL_MTMP, makeParseFunction(&MusicScoreLoader__3_4_2::parseTempos) },
@@ -278,6 +290,19 @@ MusicScoreFragment MusicScoreLoader__3_4_2::parseIndividualFragment(const MusicS
 		throw CC_FileException("Could not parse Fragment.");
 	}
 	return MusicScoreFragment(fragmentName);
+}
+
+void MusicScoreLoader__3_4_2::parseStartMoment(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const {
+	const uint8_t* upperBound = blockToParse + blockSize;
+	MusicScoreMoment startMoment = parseMusicScoreMoment(buildTarget, blockToParse, upperBound);
+	if (!testIfAllDataUsed(blockToParse, upperBound)) {
+		throw CC_FileException("Unexpected data.");
+	}
+	if (startMoment.fragment.get() == nullptr) {
+		buildTarget->setStartFragmentToNullFragment();
+	} else {
+		buildTarget->setStartFragmentToFragmentAtIndex(buildTarget->getIndexOfFragment(startMoment.fragment.get()));
+	}
 }
 
 void MusicScoreLoader__3_4_2::parseTimeSignatures(MusicScoreDocComponent* buildTarget, const uint8_t* blockToParse, size_t blockSize) const {
@@ -383,7 +408,11 @@ MusicScoreMoment MusicScoreLoader__3_4_2::parseMusicScoreMoment(const MusicScore
 	dataToParse += sizeof(int32_t) / sizeof(uint8_t);
 	int32_t beatNumber = get_big_long(dataToParse);
 	dataToParse += sizeof(int32_t) / sizeof(uint8_t);
-	return MusicScoreMoment(buildTarget->getScoreFragment(fragmentId), barNumber, beatNumber);
+	std::shared_ptr<const MusicScoreFragment> fragment(nullptr);
+	if (fragmentId > 0) {
+		fragment = buildTarget->getScoreFragment(fragmentId - 1);
+	}
+	return MusicScoreMoment(fragment, barNumber, beatNumber);
 }
 
 template <typename EventType>

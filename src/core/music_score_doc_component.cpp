@@ -1,6 +1,8 @@
 #include "music_score_doc_component.h"
 
-MusicScoreDocComponent::MusicScoreDocComponent() {
+MusicScoreDocComponent::MusicScoreDocComponent() 
+: mStartMoment(std::shared_ptr<MusicScoreFragment>(nullptr), 0, 0)
+{
 	mBarLabels.reset(new MusicScoreBarLabelsCollection(MusicScoreBarLabel("No Label")));
 	mJumps.reset(new MusicScoreJumpsCollection(MusicScoreJump(MusicScoreMoment(0, 0, 0))));
 	mTimeSignatures.reset(new TimeSignaturesCollection(TimeSignature(4)));
@@ -19,6 +21,7 @@ void MusicScoreDocComponent::copyContentFrom(const MusicScoreDocComponent& other
 	mTimeSignatures->copyContentFrom(other.mTimeSignatures.get());
 	mTempos->copyContentFrom(other.mTempos.get());
 	mFragments = other.mFragments;
+	mStartMoment = other.mStartMoment;
 }
 
 MusicScoreJumpsCollection* MusicScoreDocComponent::getScoreJumps() {
@@ -72,6 +75,9 @@ void MusicScoreDocComponent::removeScoreFragment(int fragmentIndex, bool removeA
 		mTempos->clearEvents(fragment);
 	}
 	mFragments.erase(mFragments.begin() + fragmentIndex);
+	if (mStartMoment.fragment.get() == fragment) {
+		setStartFragmentToNullFragment();
+	}
 }
 
 bool MusicScoreDocComponent::scoreFragmentIsRegistered(const MusicScoreFragment* fragment) const {
@@ -100,3 +106,23 @@ std::shared_ptr<const MusicScoreFragment> MusicScoreDocComponent::getScoreFragme
 	return mFragments[fragmentIndex];
 }
 
+int MusicScoreDocComponent::getIndexOfFragment(const MusicScoreFragment* fragment) const {
+	for (unsigned index = 0; index < getNumScoreFragments(); index++) {
+		if (getScoreFragment(index).get() == fragment) {
+			return index;
+		}
+	}
+	return -1;
+}
+
+MusicScoreMoment MusicScoreDocComponent::getStartMoment() const {
+	return mStartMoment;
+}
+
+void MusicScoreDocComponent::setStartFragmentToNullFragment() {
+	mStartMoment.fragment.reset();
+}
+
+void MusicScoreDocComponent::setStartFragmentToFragmentAtIndex(int fragmentIndex) {
+	mStartMoment.fragment = getScoreFragment(fragmentIndex);
+}

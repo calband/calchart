@@ -211,6 +211,7 @@ struct Current_version_and_later {};
 //Added in version 3.4.2 to save information about the Music Score
 
 #define INGL_MUSC Make4CharWord('M','U','S','C')
+#define INGL_MSTM Make4CharWord('M','S','T','M')
 #define INGL_MFRG Make4CharWord('M','F','R','G')
 #define INGL_TSIG Make4CharWord('T','S','I','G')
 #define INGL_MJMP Make4CharWord('M','J','M','P')

@@ -20,6 +20,7 @@ EVT_LIST_END_LABEL_EDIT(CALCHART__MusicScore_FragmentList, MusicScoreEditFrame::
 EVT_PG_CHANGED(CALCHART__MusicScore_FragmentEditor, MusicScoreEditFrame::onFragmentPropertyChanged)
 EVT_PG_CHANGING(CALCHART__MusicScore_FragmentEditor, MusicScoreEditFrame::onFragmentPropertyChanging)
 EVT_PG_RIGHT_CLICK(CALCHART__MusicScore_FragmentEditor, MusicScoreEditFrame::onFragmentPropertyRightClicked)
+EVT_CHOICE(CALCHART__MusicScore_StartFragmentChoiceCtrl, MusicScoreEditFrame::onStartFragmentSelected)
 END_EVENT_TABLE()
 
 
@@ -257,7 +258,7 @@ public:
 	}
 
 	virtual void loadPropertyFromEvent(MusicScoreDocComponent* musicScore, wxPGProperty* prop, MusicScoreMoment time, TimeSignature evt) {
-		prop->GetPropertyByName("Bar")->SetValue(time.beatAndBar.bar);
+		prop->GetPropertyByName("Bar")->SetValue(time.beatAndBar.bar + 1);
 		prop->GetPropertyByName("Beats Per Bar")->SetValue(evt.beatsPerBar);
 	}
 
@@ -270,7 +271,7 @@ public:
 	}
 
 	virtual std::pair<MusicScoreMoment, TimeSignature> buildEventFromProperty(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPGProperty* prop) {
-		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong();
+		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong() - 1;
 		unsigned beatsPerBar = prop->GetPropertyByName("Beats Per Bar")->GetValue().GetLong();
 		return std::pair<MusicScoreMoment, TimeSignature>(MusicScoreMoment(fragment, bar, 0), TimeSignature(beatsPerBar));
 	}
@@ -281,6 +282,7 @@ public:
 		propertyGrid->AppendIn(category, newProperty);
 		wxPGProperty* childProp;
 		childProp = new wxUIntProperty("Bar");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxUIntProperty("Beats Per Bar");
@@ -297,21 +299,12 @@ public:
 		return "Score Jumps";
 	}
 
-	virtual long getIndexOfFragment(MusicScoreDocComponent* musicScore, std::shared_ptr<const MusicScoreFragment> fragment) {
-		for (unsigned checkIndex = 0; checkIndex < musicScore->getNumScoreFragments(); checkIndex++) {
-			if (musicScore->getScoreFragment(checkIndex) == fragment) {
-				return checkIndex;
-			}
-		}
-		return -1;
-	}
-
 	virtual void loadPropertyFromEvent(MusicScoreDocComponent* musicScore, wxPGProperty* prop, MusicScoreMoment time, MusicScoreJump evt) {
-		prop->GetPropertyByName("Start Bar")->SetValue(time.beatAndBar.bar);
-		prop->GetPropertyByName("Start Beat")->SetValue(time.beatAndBar.beat);
-		prop->GetPropertyByName("Destination Bar")->SetValue(evt.jumpTo.beatAndBar.bar);
-		prop->GetPropertyByName("Destination Beat")->SetValue(evt.jumpTo.beatAndBar.beat);
-		prop->GetPropertyByName("Destination Fragment")->SetValue(getIndexOfFragment(musicScore, evt.jumpTo.fragment));
+		prop->GetPropertyByName("Start Bar")->SetValue(time.beatAndBar.bar + 1);
+		prop->GetPropertyByName("Start Beat")->SetValue(time.beatAndBar.beat + 1);
+		prop->GetPropertyByName("Destination Bar")->SetValue(evt.jumpTo.beatAndBar.bar + 1);
+		prop->GetPropertyByName("Destination Beat")->SetValue(evt.jumpTo.beatAndBar.beat + 1);
+		prop->GetPropertyByName("Destination Fragment")->SetValue(musicScore->getIndexOfFragment(evt.jumpTo.fragment.get()));
 	}
 
 	virtual void savePropertyToScore(MusicScoreDocComponent* musicScore, MusicScoreMoment eventTime, MusicScoreJump evt) {
@@ -323,11 +316,11 @@ public:
 	}
 
 	virtual std::pair<MusicScoreMoment, MusicScoreJump> buildEventFromProperty(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPGProperty* prop) {
-		unsigned bar = prop->GetPropertyByName("Start Bar")->GetValue().GetLong();
-		unsigned beat = prop->GetPropertyByName("Start Beat")->GetValue().GetLong();
-		unsigned destBar = prop->GetPropertyByName("Destination Bar")->GetValue().GetLong();
-		unsigned destBeat = prop->GetPropertyByName("Destination Beat")->GetValue().GetLong();
-		long destFragIndex = prop->GetPropertyByName("Destination Fragment")->GetValue().GetLong();
+		unsigned bar = prop->GetPropertyByName("Start Bar")->GetValue().GetLong() - 1;
+		unsigned beat = prop->GetPropertyByName("Start Beat")->GetValue().GetLong() - 1;
+		unsigned destBar = prop->GetPropertyByName("Destination Bar")->GetValue().GetLong() - 1;
+		unsigned destBeat = prop->GetPropertyByName("Destination Beat")->GetValue().GetLong() - 1;
+		long destFragIndex = prop->GetPropertyByName("Destination Fragment")->GetValue().GetLong() - 1;
 		std::shared_ptr<MusicScoreFragment> destFrag;
 		if (destFragIndex >= 0) {
 			destFrag = musicScore->getScoreFragment(destFragIndex);
@@ -341,15 +334,19 @@ public:
 		propertyGrid->AppendIn(category, newProperty);
 		wxPGProperty* childProp;
 		childProp = new wxUIntProperty("Start Bar");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxUIntProperty("Start Beat");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxUIntProperty("Destination Bar");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxUIntProperty("Destination Beat");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxEnumProperty("Destination Fragment");
@@ -371,8 +368,8 @@ public:
 	}
 
 	virtual void loadPropertyFromEvent(MusicScoreDocComponent* musicScore, wxPGProperty* prop, MusicScoreMoment time, MusicScoreTempo evt) {
-		prop->GetPropertyByName("Bar")->SetValue(time.beatAndBar.bar);
-		prop->GetPropertyByName("Beat")->SetValue(time.beatAndBar.beat);
+		prop->GetPropertyByName("Bar")->SetValue(time.beatAndBar.bar + 1);
+		prop->GetPropertyByName("Beat")->SetValue(time.beatAndBar.beat + 1);
 		prop->GetPropertyByName("Beats Per Minute")->SetValue(evt.beatsPerMinute);
 	}
 
@@ -385,8 +382,8 @@ public:
 	}
 
 	virtual std::pair<MusicScoreMoment, MusicScoreTempo> buildEventFromProperty(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPGProperty* prop) {
-		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong();
-		unsigned beat = prop->GetPropertyByName("Beat")->GetValue().GetLong();
+		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong() - 1;
+		unsigned beat = prop->GetPropertyByName("Beat")->GetValue().GetLong() - 1;
 		unsigned bpm = prop->GetPropertyByName("Beats Per Minute")->GetValue().GetLong();
 		return std::pair<MusicScoreMoment, MusicScoreTempo>(MusicScoreMoment(fragment, bar, beat), MusicScoreTempo(bpm));
 	}
@@ -397,9 +394,11 @@ public:
 		propertyGrid->AppendIn(category, newProperty);
 		wxPGProperty* childProp;
 		childProp = new wxUIntProperty("Bar");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxUIntProperty("Beat");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxUIntProperty("Beats Per Minute");
@@ -417,7 +416,7 @@ public:
 	}
 
 	virtual void loadPropertyFromEvent(MusicScoreDocComponent* musicScore, wxPGProperty* prop, MusicScoreMoment time, MusicScoreBarLabel evt) {
-		prop->GetPropertyByName("Bar")->SetValue(time.beatAndBar.bar);
+		prop->GetPropertyByName("Bar")->SetValue(time.beatAndBar.bar + 1);
 		prop->GetPropertyByName("Bar Label")->SetValue(evt.label);
 	}
 
@@ -430,7 +429,7 @@ public:
 	}
 
 	virtual std::pair<MusicScoreMoment, MusicScoreBarLabel> buildEventFromProperty(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPGProperty* prop) {
-		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong();
+		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong() - 1;
 		std::string label = prop->GetPropertyByName("Label")->GetValue().GetString();
 		return std::pair<MusicScoreMoment, MusicScoreBarLabel>(MusicScoreMoment(fragment, bar, 0), MusicScoreBarLabel(label));
 	}
@@ -441,6 +440,7 @@ public:
 		propertyGrid->AppendIn(category, newProperty);
 		wxPGProperty* childProp;
 		childProp = new wxUIntProperty("Bar");
+		childProp->SetAttribute(wxPG_ATTR_MIN, 1);
 		childProp->SetValueToUnspecified();
 		newProperty->AppendChild(childProp);
 		childProp = new wxStringProperty("Label");
@@ -505,6 +505,7 @@ void MusicScoreEditFrame::onAddFragment(wxCommandEvent& evt) {
 	mFragmentList->InsertItem(mFragmentList->GetItemCount(), "New Fragment");
 	mLocalMusicScore.addScoreFragment(std::shared_ptr<MusicScoreFragment>(new MusicScoreFragment("New Fragment")));
 	resetFragmentEditWindow();
+	resetStartFragmentChoice();
 	mModified = true;
 }
 
@@ -521,6 +522,7 @@ void MusicScoreEditFrame::onPopupDeleteFragment(wxCommandEvent& evt) {
 	mLocalMusicScore.removeScoreFragment(*index);
 	delete index;
 	resetFragmentEditWindow();
+	resetStartFragmentChoice();
 	mModified = true;
 }
 
@@ -560,6 +562,7 @@ void MusicScoreEditFrame::onFragmentDeselected(wxListEvent& evt) {
 void MusicScoreEditFrame::onFragmentRenamed(wxListEvent& evt) {
 	mLocalMusicScore.getScoreFragment(evt.GetIndex())->name = evt.GetLabel();
 	resetFragmentEditWindow();
+	resetStartFragmentChoice();
 }
 
 void MusicScoreEditFrame::onFragmentPropertyChanged(wxPropertyGridEvent& evt) {
@@ -583,6 +586,15 @@ void MusicScoreEditFrame::onFragmentPropertyRightClicked(wxPropertyGridEvent& ev
 		return;
 	}
 	makeFragmentPropertyRightClickMenu(mFragmentEditor->GetPosition(), evt.GetProperty());
+}
+
+void MusicScoreEditFrame::onStartFragmentSelected(wxCommandEvent& evt) {
+	if (evt.GetSelection() > 0) {
+		mLocalMusicScore.setStartFragmentToFragmentAtIndex(evt.GetSelection() - 1);
+	} else {
+		mLocalMusicScore.setStartFragmentToNullFragment();
+	}
+	mModified = true;
 }
 
 bool MusicScoreEditFrame::Create(wxWindow *parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style) {
@@ -610,19 +622,22 @@ void MusicScoreEditFrame::createControls() {
 	mFragmentList->SetColumnWidth(0, 300);
 	mainSizer->Add(mFragmentList, wxGBPosition(1, 0), wxGBSpan(1, 1), wxEXPAND);
 
+	mainSizer->Add(new wxStaticText(this, wxID_ANY, wxT("The score will begin on Beat 1, Bar 1 of this fragment:")), wxGBPosition(2, 0), wxGBSpan(1, 1));
+	mStartFragmentChoice = new wxChoice(this, CALCHART__MusicScore_StartFragmentChoiceCtrl, wxDefaultPosition, wxSize(250, 30));
+	mainSizer->Add(mStartFragmentChoice, wxGBPosition(3, 0), wxGBSpan(1, 1));
+
 	wxBoxSizer *mainButtons = new wxBoxSizer(wxHORIZONTAL);
 	mainButtons->Add(new wxButton(this, CALCHART__MusicScore_Close, wxT("Close")));
 	mainButtons->Add(new wxButton(this, CALCHART__MusicScore_Save, wxT("Save")));
 	mainButtons->Add(new wxButton(this, CALCHART__MusicScore_AddFragment, wxT("Add Fragment")));
 
-	mainSizer->Add(mainButtons, wxGBPosition(2, 0), wxGBSpan(1, 1));
+	mainSizer->Add(mainButtons, wxGBPosition(4, 0), wxGBSpan(1, 1));
 
 	mFragmentEditor = new wxPropertyGrid(this, CALCHART__MusicScore_FragmentEditor, wxDefaultPosition, wxSize(300, 350));
 	mFragmentEditor->SetSortFunction(&fragmentPropertyComparator);
-	mainSizer->Add(mFragmentEditor, wxGBPosition(1, 1), wxGBSpan(2, 1), wxEXPAND);
+	mainSizer->Add(mFragmentEditor, wxGBPosition(0, 1), wxGBSpan(5, 1), wxEXPAND);
 
 	mainSizer->AddGrowableRow(1, 1);
-	mainSizer->AddGrowableRow(2, 1);
 	mainSizer->AddGrowableCol(1, 1);
 }
 
@@ -653,6 +668,20 @@ void MusicScoreEditFrame::resetFragmentEditWindow() {
 		mFragCategoryToHandlerMap.emplace(newCategory, &handler);
 		refreshEditorCategory(newCategory);
 		mFragmentEditor->Collapse(newCategory);
+	}
+}
+
+void MusicScoreEditFrame::resetStartFragmentChoice() {
+	mStartFragmentChoice->Clear();
+	mStartFragmentChoice->Insert("NO FRAGMENT", 0);
+	for (unsigned index = 0; index < mLocalMusicScore.getNumScoreFragments(); index++) {
+		mStartFragmentChoice->Insert(mLocalMusicScore.getScoreFragment(index)->name, index+1);
+	}
+	const MusicScoreFragment* fragment = mLocalMusicScore.getStartMoment().fragment.get();
+	if (fragment == nullptr) {
+		mStartFragmentChoice->Select(0);
+	} else {
+		mStartFragmentChoice->Select(mLocalMusicScore.getIndexOfFragment(fragment) + 1);
 	}
 }
 
@@ -695,4 +724,5 @@ void MusicScoreEditFrame::loadFrameContentFromMusicScore() {
 		mFragmentList->InsertItem(index, mLocalMusicScore.getScoreFragment(index)->name);
 	}
 	resetFragmentEditWindow();
+	resetStartFragmentChoice();
 }

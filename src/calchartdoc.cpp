@@ -56,6 +56,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 // Create a new show
 CalChartDoc::CalChartDoc() :
 mShow(CC_show::Create_CC_show()),
+mMusicScore(new MusicScoreDocComponent()),
 mMode(wxGetApp().GetMode(kShowModeStrings[0])),
 mTimer(*this)
 {

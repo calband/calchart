@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\src\core\music_score_unit_tests.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\show_animator.cpp" />
     <ClCompile Include="..\..\src\music_score_edit_frame.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -206,7 +207,11 @@
     <ClInclude Include="..\..\src\core\music_score_unit_tests.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\show_animator.h" />
     <ClInclude Include="..\..\src\music_score_edit_frame.h" />
+    <ClInclude Include="..\..\src\core\cc_fileformat.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />
