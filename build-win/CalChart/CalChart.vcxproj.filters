@@ -197,9 +197,6 @@
     <ClInclude Include="..\..\src\core\music_score_doc_component.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\music_score_fragments.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\music_score_loaders.h">
       <Filter>core</Filter>
     </ClInclude>
