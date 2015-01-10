@@ -172,6 +172,7 @@ public:
 	bool AlreadyHasPrintContinuity() const;
 	int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
 	
+	void overwriteMusicScore(const MusicScoreDocComponent& newScore);
 	MusicScoreDocComponent* getMusicScore();
 private:
 	// Autosaving:

@@ -2,9 +2,10 @@
 #include "music_score_moment_browser.h"
 
 MusicScoreMomentBrowser::MusicScoreMomentBrowser(const TimeSignaturesCollection* timeSignatures, const MusicScoreJumpsCollection* jumps, MusicScoreMoment startTime)
-: super(timeSignatures, startTime), mCurrentTime(startTime)
+: super(timeSignatures), mCurrentTime(startTime)
 {
 	mJumpBrowser.reset(new MusicScoreJumpBrowser(jumps, this));
+	reset(startTime);
 }
 
 void MusicScoreMomentBrowser::reset(MusicScoreMoment startTime) {
@@ -52,13 +53,15 @@ void MusicScoreMomentBrowser::pushBackTime() {
 void MusicScoreMomentBrowser::pushBackTimeIndependently() {
 	mCurrentTime.beatAndBar.beat--;
 	transitionBackUntilFinished();
-	mCurrentTime.beatAndBar.beat = getMostRecentEvent().beatsPerBar - 1;
-	mCurrentTime.beatAndBar.bar--;
+	if (mCurrentTime.beatAndBar.beat < 0) {
+		mCurrentTime.beatAndBar.beat = getMostRecentEvent().beatsPerBar - 1;
+		mCurrentTime.beatAndBar.bar--;
+	}
 
 }
 
 void MusicScoreMomentBrowser::executeTransitionBack() {
-	
+	super::executeTransitionBack();
 }
 
 

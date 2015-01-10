@@ -36,6 +36,9 @@ void MusicScoreTempoBrowser::pushBackTime() {
 }
 
 MusicScoreTempoBrowser::MusicScoreTempoBrowser(const MusicScoreTemposCollection* tempos, const MusicScoreJumpsCollection* jumps, const TimeSignaturesCollection* timeSignatures, MusicScoreMoment startTime)
-: mMomentBrowser(timeSignatures->makeMusicScoreMomentBrowser(jumps, startTime)), super(tempos, startTime)
-{}
+: super(tempos), mMomentBrowser(timeSignatures->makeMusicScoreMomentBrowser(jumps, startTime))
+{
+	reset(mMomentBrowser->getCurrentTime());
+}
+
 

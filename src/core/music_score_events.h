@@ -351,7 +351,7 @@ public:
 	 * @param source The structure whose events are being browsed.
 	 * @param startTime The time to start browsing from.
 	 */
-	MusicScoreEventBrowser(const CollectionOfMusicScoreEvents<EventType>* source, MusicScoreMoment startTime);
+	MusicScoreEventBrowser(const CollectionOfMusicScoreEvents<EventType>* source);
 
 	/**
 	 * If the browser has become invalid, it can be made valid again through this function.
@@ -590,11 +590,9 @@ int CollectionOfMusicScoreEvents<EventType>::getModCount() const {
 }
 
 template <typename EventType>
-MusicScoreEventBrowser<EventType>::MusicScoreEventBrowser(const CollectionOfMusicScoreEvents<EventType>* source, MusicScoreMoment startTime)
-: mData(source)
-{
-	reset(startTime);
-}
+MusicScoreEventBrowser<EventType>::MusicScoreEventBrowser(const CollectionOfMusicScoreEvents<EventType>* source)
+: mData(source), mCurrentEventIndex(-1)
+{}
 
 template <typename EventType>
 void MusicScoreEventBrowser<EventType>::reset(MusicScoreMoment startTime)
@@ -655,7 +653,7 @@ void MusicScoreEventBrowser<EventType>::executeTransitionBack() {
 template <typename EventType>
 bool MusicScoreEventBrowser<EventType>::checkTransitionBack() {
 	MusicScoreMoment currentTime = getCurrentTime();
-	return (mCurrentEventIndex > 0) && mData->getEvent(getCurrentTime().fragment.get(), mCurrentEventIndex).first > getCurrentTime();
+	return (mCurrentEventIndex >= 0) && mData->getEvent(getCurrentTime().fragment.get(), mCurrentEventIndex).first > getCurrentTime();
 }
 
 template <typename EventType>
@@ -667,7 +665,7 @@ void MusicScoreEventBrowser<EventType>::transitionBackUntilFinished() {
 
 template <typename EventType>
 void MusicScoreEventBrowser<EventType>::fixCurrentEvent() {
-	if (mCurrentEventIndex < 0 || mCurrentEventIndex >= mData->getNumEvents(getCurrentTime().fragment.get())) {
+	if (mCurrentEventIndex < -1 || mCurrentEventIndex >= mData->getNumEvents(getCurrentTime().fragment.get())) {
 		mCurrentEventIndex = mData->getMostRecentEventIndex(getCurrentTime());
 	} else {
 		transitionForwardUntilFinished();

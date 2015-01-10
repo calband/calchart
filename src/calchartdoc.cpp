@@ -650,3 +650,8 @@ CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_ya
 MusicScoreDocComponent* CalChartDoc::getMusicScore() {
 	return mMusicScore.get();
 }
+
+void CalChartDoc::overwriteMusicScore(const MusicScoreDocComponent& newScore) {
+	mMusicScore->copyContentFrom(newScore);
+	UpdateAllViews();
+}

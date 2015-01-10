@@ -477,5 +477,5 @@ OverwriteMusicScoreCommand::OverwriteMusicScoreCommand(CalChartDoc& show, MusicS
 {}
 
 void OverwriteMusicScoreCommand::DoAction() {
-	mDoc.getMusicScore()->copyContentFrom(mNewScore);
+	mDoc.overwriteMusicScore(mNewScore);
 }
