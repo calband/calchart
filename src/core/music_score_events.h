@@ -372,12 +372,6 @@ public:
 	virtual void nextBeat(unsigned amount = 1);
 
 	/**
-	 * Jumps back a beat.
-	 * @param amount The number of beats to jump back.
-	 */
-	virtual void previousBeat(unsigned amount = 1);
-
-	/**
 	 * Returns the current time that the browser is marking.
 	 * @return The current time marked by the browser.
 	 */
@@ -407,11 +401,6 @@ protected:
 	inline bool checkTransitionForward();
 
 	/**
-	 * Pushes to the next beat, without worrying about changes to the active event.
-	 */
-	virtual void pushBackTime() = 0;
-
-	/**
 	 * Causes the browser to track the next event.
 	 */
 	virtual void executeTransitionForward();
@@ -423,26 +412,13 @@ protected:
 	inline void transitionForwardUntilFinished();
 
 	/**
-	 * Checks if the browser's current event properly corresponds with the time that it is tracking.
-	 * @return True if the browser's current time corresponds with the previous event; false otherwise.
-	 */
-	inline bool checkTransitionBack();
-	
-	/**
-	 * Causes the browser to track the previous event.
-	 */
-	virtual void executeTransitionBack();
-
-	/**
-	 * If the browser should be tracking an event that occurred earlier than the one it is currently tracking, this will cause the browser
-	 * to track that event.
-	 */
-	inline void transitionBackUntilFinished();
-
-	/**
 	 * Make sure that the browser tracks the correct event.
+	 * @param forceReset Forces the browser to scan the collection from the
+	 *   beginning to find the correct event. Otherwise, the
+	 *   browser would use the knowledge of its history to find the correct
+	 *   event more efficiently.
 	 */
-	inline void fixCurrentEvent();
+	inline void fixCurrentEvent(bool forceReset = false);
 
 	/**
 	 * Sets the current time for the browser.
@@ -451,10 +427,27 @@ protected:
 	virtual void setCurrentTime(MusicScoreMoment newTime) = 0;
 protected:
 	/**
+	 * Records the time at which the event was most recently fixed.
+	 * @param newTime The time at which the event was most recently fixed.
+	 */
+	inline void setLastFixedTime(MusicScoreMoment newTime);
+
+	/**
+	 * Returns the time at which the tracked event was most recently fixed.
+	 * @return newTime The time at which the event was most recently fixed.
+	 */
+	inline MusicScoreMoment getLastFixedTime();
+
+	/**
 	 * The source data whose events are being browsed.
 	 */
 	const CollectionOfMusicScoreEvents<EventType>* mData;
 private:
+	/**
+	 * The time at which the tracked event was most recently fixed.
+	 */
+	MusicScoreMoment mLastFixedTime;
+
 	/**
 	 * The mod count for the source MeasureEventData structure when the browser was created. If the mod count changes from the original, we know that the structure has changed,
 	 * and thus know if the MeasureEventDataBrowser has become invalid.
@@ -591,7 +584,7 @@ int CollectionOfMusicScoreEvents<EventType>::getModCount() const {
 
 template <typename EventType>
 MusicScoreEventBrowser<EventType>::MusicScoreEventBrowser(const CollectionOfMusicScoreEvents<EventType>* source)
-: mData(source), mCurrentEventIndex(-1)
+: mData(source), mCurrentEventIndex(-1), mLastFixedTime(nullptr, -1, -1)
 {}
 
 template <typename EventType>
@@ -599,7 +592,7 @@ void MusicScoreEventBrowser<EventType>::reset(MusicScoreMoment startTime)
 {
 	mOriginalModCount = mData->getModCount();
 	setCurrentTime(startTime);
-	fixCurrentEvent();
+	fixCurrentEvent(true);
 }
 
 template <typename EventType>
@@ -636,41 +629,13 @@ void MusicScoreEventBrowser<EventType>::transitionForwardUntilFinished() {
 }
 
 template <typename EventType>
-void MusicScoreEventBrowser<EventType>::previousBeat(unsigned amount) {
-	if (isValid()) {
-		for (unsigned pushed = 0; pushed < amount; pushed++) {
-			pushBackTime();
-		}
-		fixCurrentEvent();
-	}
-}
-
-template <typename EventType>
-void MusicScoreEventBrowser<EventType>::executeTransitionBack() {
-	mCurrentEventIndex--;
-}
-
-template <typename EventType>
-bool MusicScoreEventBrowser<EventType>::checkTransitionBack() {
-	MusicScoreMoment currentTime = getCurrentTime();
-	return (mCurrentEventIndex >= 0) && mData->getEvent(getCurrentTime().fragment.get(), mCurrentEventIndex).first > getCurrentTime();
-}
-
-template <typename EventType>
-void MusicScoreEventBrowser<EventType>::transitionBackUntilFinished() {
-	while (checkTransitionBack()) {
-		executeTransitionBack();
-	}
-}
-
-template <typename EventType>
-void MusicScoreEventBrowser<EventType>::fixCurrentEvent() {
-	if (mCurrentEventIndex < -1 || mCurrentEventIndex >= mData->getNumEvents(getCurrentTime().fragment.get())) {
-		mCurrentEventIndex = mData->getMostRecentEventIndex(getCurrentTime());
-	} else {
+void MusicScoreEventBrowser<EventType>::fixCurrentEvent(bool forceReset) {
+	if (!forceReset && getLastFixedTime() <= getCurrentTime()) {
 		transitionForwardUntilFinished();
-		transitionBackUntilFinished();
+	} else {
+		mCurrentEventIndex = mData->getMostRecentEventIndex(getCurrentTime());
 	}
+	setLastFixedTime(getCurrentTime());
 }
 
 template <typename EventType>
@@ -690,4 +655,14 @@ MusicScoreMoment MusicScoreEventBrowser<EventType>::getMostRecentEventTime() con
 	else {
 		return getCurrentTime();
 	}
+}
+
+template <typename EventType>
+void MusicScoreEventBrowser<EventType>::setLastFixedTime(MusicScoreMoment newTime) {
+	mLastFixedTime = newTime;
+}
+
+template <typename EventType>
+MusicScoreMoment MusicScoreEventBrowser<EventType>::getLastFixedTime() {
+	return mLastFixedTime;
 }

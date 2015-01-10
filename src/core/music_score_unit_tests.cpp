@@ -473,44 +473,6 @@ void MusicScoreMomentBrowser__UnitTests::test__startATNonzeroTimeInUnregisteredF
 	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 6, 2));
 };
 
-void MusicScoreMomentBrowser__UnitTests::test__stepBackInGoodFragment() {
-	TimeSignaturesCollection timeSigs(TimeSignature(4));
-	timeSigs.addTimeSignatureChange(nullptr, 10, TimeSignature(8));
-	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-	jumps.addJump(MusicScoreMoment(nullptr, 20, 2), MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-
-	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 4, 2));
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 4, 2));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 4, 1));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 4, 0));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 3, 3));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 3, 2));
-	browser->previousBeat(4);
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 2, 2));
-};
-
-void MusicScoreMomentBrowser__UnitTests::test__stepBackInUnregisteredFragment() {
-	TimeSignaturesCollection timeSigs(TimeSignature(4));
-	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-
-	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 4, 2));
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 4, 2));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 4, 1));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 4, 0));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 3, 3));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 3, 2));
-	browser->previousBeat(4);
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 2, 2));
-};
-
 void MusicScoreMomentBrowser__UnitTests::test__stepOneTimeSigBound() {
 	TimeSignaturesCollection timeSigs(TimeSignature(4));
 	timeSigs.addTimeSignatureChange(nullptr, 10, TimeSignature(8));
@@ -529,46 +491,6 @@ void MusicScoreMomentBrowser__UnitTests::test__stepOneTimeSigBound() {
 	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 10, 2));
 	browser->nextBeat(8);
 	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 11, 2));
-};
-
-void MusicScoreMomentBrowser__UnitTests::test__backstepOneTimeSigBound() {
-	TimeSignaturesCollection timeSigs(TimeSignature(4));
-	timeSigs.addTimeSignatureChange(nullptr, 10, TimeSignature(8));
-	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-	jumps.addJump(MusicScoreMoment(nullptr, 20, 2), MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-
-	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 11, 2));
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 11, 2));
-	browser->previousBeat(8);
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 10, 2));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 10, 1));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 10, 0));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 9, 3));
-	browser->previousBeat(4);
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 8, 3));
-};
-
-void MusicScoreMomentBrowser__UnitTests::test__backstepOneJump() {
-	TimeSignaturesCollection timeSigs(TimeSignature(4));
-	timeSigs.addTimeSignatureChange(nullptr, 10, TimeSignature(2));
-	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-	jumps.addJump(MusicScoreMoment(nullptr, 20, 0), MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
-
-	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 0, 2));
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 0, 2));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 0, 1));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 0, 0));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 19, 1));
-	browser->previousBeat();
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 19, 0));
-	browser->previousBeat(2);
-	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 18, 0));
 };
 
 void MusicScoreMomentBrowser__UnitTests::test__stepOneJump() {
@@ -591,18 +513,59 @@ void MusicScoreMomentBrowser__UnitTests::test__stepOneJump() {
 	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 1, 2));
 };
 
+void MusicScoreMomentBrowser__UnitTests::test__startOnJump() {
+	TimeSignaturesCollection timeSigs(TimeSignature(4));
+	timeSigs.addTimeSignatureChange(nullptr, 10, TimeSignature(2));
+	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 20, 0), MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
+
+	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 20, 0));
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 0, 0));
+	browser->nextBeat();
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 0, 1));
+	browser->nextBeat();
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 0, 2));
+};
+
+void MusicScoreMomentBrowser__UnitTests::test__jumpSeries() {
+	TimeSignaturesCollection timeSigs(TimeSignature(4));
+	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 20, 0), MusicScoreJump(MusicScoreMoment(nullptr, 21, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 21, 0), MusicScoreJump(MusicScoreMoment(nullptr, 22, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 22, 0), MusicScoreJump(MusicScoreMoment(nullptr, 23, 0)));
+
+	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 19, 2));
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 19, 2));
+	browser->nextBeat();
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 19, 3));
+	browser->nextBeat();
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 23, 0));
+};
+
+void MusicScoreMomentBrowser__UnitTests::test__startOnJumpSeries() {
+	TimeSignaturesCollection timeSigs(TimeSignature(4));
+	MusicScoreJumpsCollection jumps(MusicScoreJump(MusicScoreMoment(nullptr, 0, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 20, 0), MusicScoreJump(MusicScoreMoment(nullptr, 21, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 21, 0), MusicScoreJump(MusicScoreMoment(nullptr, 22, 0)));
+	jumps.addJump(MusicScoreMoment(nullptr, 22, 0), MusicScoreJump(MusicScoreMoment(nullptr, 23, 0)));
+
+	MusicScoreMomentBrowser* browser = timeSigs.makeMusicScoreMomentBrowser(&jumps, MusicScoreMoment(nullptr, 20, 0));
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 23, 0));
+	browser->nextBeat();
+	assert(browser->getCurrentTime() == MusicScoreMoment(nullptr, 23, 1));
+};
+
 
 void MusicScoreMomentBrowser__UnitTests::runAllTests() {
 	test__defaultEventInGoodFragment();
 	test__defaultEventInUnregisteredFragment();
 	test__startAtNonzeroTimeInGoodFragment();
 	test__startATNonzeroTimeInUnregisteredFragment();
-	test__stepBackInGoodFragment();
-	test__stepBackInUnregisteredFragment();
 	test__stepOneTimeSigBound();
-	test__backstepOneTimeSigBound();
 	test__stepOneJump();
-	test__backstepOneJump();
+	test__startOnJump();
+	test__jumpSeries();
+	test__startOnJumpSeries();
 }
 
 

@@ -40,9 +40,6 @@ protected:
 
 	virtual void pushForwardTime();
 	void pushForwardTimeIndependently();
-	virtual void pushBackTime();
-	void pushBackTimeIndependently();
-	virtual void executeTransitionBack();
 
 	/**
 	 * The MusicScoreJumpBrowser that works in conjunction with this moment browser.

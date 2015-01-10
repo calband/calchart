@@ -77,9 +77,8 @@ protected:
 	virtual void setCurrentTime(MusicScoreMoment newTime);
 
 	virtual void pushForwardTime();
-	virtual void executeTransitionForward();
-	virtual void pushBackTime();
-	virtual void executeTransitionBack();
+
+	void jumpUntilSettled();
 
 	/**
 	 * The MusicScoreMomentBrowser that works in conjunction with this jump browser.

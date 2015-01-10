@@ -67,7 +67,6 @@ protected:
 	virtual void setCurrentTime(MusicScoreMoment newTime);
 
 	virtual void pushForwardTime();
-	virtual void pushBackTime();
 
 	/**
 	 * The MusicScoreMomentBrowser that keeps track of the current time.

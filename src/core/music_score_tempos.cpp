@@ -31,10 +31,6 @@ void MusicScoreTempoBrowser::pushForwardTime() {
 	mMomentBrowser->nextBeat();
 }
 
-void MusicScoreTempoBrowser::pushBackTime() {
-	mMomentBrowser->previousBeat();
-}
-
 MusicScoreTempoBrowser::MusicScoreTempoBrowser(const MusicScoreTemposCollection* tempos, const MusicScoreJumpsCollection* jumps, const TimeSignaturesCollection* timeSignatures, MusicScoreMoment startTime)
 : super(tempos), mMomentBrowser(timeSignatures->makeMusicScoreMomentBrowser(jumps, startTime))
 {

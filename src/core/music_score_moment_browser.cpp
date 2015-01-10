@@ -9,8 +9,7 @@ MusicScoreMomentBrowser::MusicScoreMomentBrowser(const TimeSignaturesCollection*
 }
 
 void MusicScoreMomentBrowser::reset(MusicScoreMoment startTime) {
-	resetIndependently(startTime);
-	mJumpBrowser->resetIndependently(startTime);
+	mJumpBrowser->reset(startTime);
 }
 
 MusicScoreMoment MusicScoreMomentBrowser::getCurrentTime() const {
@@ -18,7 +17,7 @@ MusicScoreMoment MusicScoreMomentBrowser::getCurrentTime() const {
 }
 
 bool MusicScoreMomentBrowser::isValid() const {
-	return isValidIndependently() && mJumpBrowser->isValidIndependently();
+	return mJumpBrowser->isValid();
 }
 
 bool MusicScoreMomentBrowser::isValidIndependently() const {
@@ -43,26 +42,7 @@ void MusicScoreMomentBrowser::pushForwardTimeIndependently() {
 		mCurrentTime.beatAndBar.beat = 0;
 		mCurrentTime.beatAndBar.bar++;
 	}
-	transitionForwardUntilFinished();
+	fixCurrentEvent();
 }
-
-void MusicScoreMomentBrowser::pushBackTime() {
-	mJumpBrowser->pushBackTime();
-}
-
-void MusicScoreMomentBrowser::pushBackTimeIndependently() {
-	mCurrentTime.beatAndBar.beat--;
-	transitionBackUntilFinished();
-	if (mCurrentTime.beatAndBar.beat < 0) {
-		mCurrentTime.beatAndBar.beat = getMostRecentEvent().beatsPerBar - 1;
-		mCurrentTime.beatAndBar.bar--;
-	}
-
-}
-
-void MusicScoreMomentBrowser::executeTransitionBack() {
-	super::executeTransitionBack();
-}
-
 
 

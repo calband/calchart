@@ -133,12 +133,11 @@ public:
 	static void test__defaultEventInUnregisteredFragment();
 	static void test__startAtNonzeroTimeInGoodFragment();
 	static void test__startATNonzeroTimeInUnregisteredFragment();
-	static void test__stepBackInGoodFragment();
-	static void test__stepBackInUnregisteredFragment();
 	static void test__stepOneTimeSigBound();
-	static void test__backstepOneTimeSigBound();
 	static void test__stepOneJump();
-	static void test__backstepOneJump();
+	static void test__startOnJump();
+	static void test__jumpSeries();
+	static void test__startOnJumpSeries();
 
 	static void runAllTests();
 };

@@ -32,32 +32,25 @@ bool MusicScoreJumpBrowser::isValidIndependently() const {
 
 void MusicScoreJumpBrowser::resetIndependently(MusicScoreMoment startTime) {
 	super::reset(startTime);
+	jumpUntilSettled();
 }
 
 void MusicScoreJumpBrowser::setCurrentTime(MusicScoreMoment newTime) {
-	mMomentBrowser->setCurrentTime(newTime);
+	//The current time should only be set through the moment browser -- all calls made through the jump browser should be ignored
 }
 
 void MusicScoreJumpBrowser::pushForwardTime() {
 	mMomentBrowser->pushForwardTimeIndependently();
-	transitionForwardUntilFinished();
+	jumpUntilSettled();
 }
 
-void MusicScoreJumpBrowser::executeTransitionForward() {
-	super::executeTransitionForward();
-	MusicScoreMoment newCurrentTime = getMostRecentEvent().jumpTo;
-	reset(newCurrentTime);
-}
-
-void MusicScoreJumpBrowser::pushBackTime() {
-	mMomentBrowser->pushBackTimeIndependently();
-	transitionBackUntilFinished();
-}
-
-void MusicScoreJumpBrowser::executeTransitionBack() {
-	MusicScoreMoment newCurrentTime = getMostRecentEventTime();
-	reset(newCurrentTime);
-	pushBackTime();
+void MusicScoreJumpBrowser::jumpUntilSettled() {
+	do {
+		fixCurrentEvent(); //Make sure that theevent we are pointing to is correct
+		if (getCurrentTime() == getMostRecentEventTime()) { //Jump, if it is time to jump
+			mMomentBrowser->resetIndependently(getMostRecentEvent().jumpTo); //Jump to the new time
+		}
+	} while (getCurrentTime() != getLastFixedTime());
 }
 
 
