@@ -135,7 +135,6 @@
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\music_score_edit_frame.h" />
     <ClInclude Include="..\..\src\platconf.h" />
-    <ClInclude Include="..\..\src\show_animator.h" />
     <ClInclude Include="..\..\src\precomp.h" />
     <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
@@ -189,9 +188,6 @@
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
     <ClCompile Include="..\..\src\music_score_edit_frame.cpp" />
-    <ClCompile Include="..\..\src\show_animator.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\src\precomp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
