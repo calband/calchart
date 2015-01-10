@@ -468,20 +468,20 @@ std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin, Iter 
 			return result;
 		}
 		auto name = get_big_long(begin);
-		shiftIterator(begin, 4);
+		begin += 4;
 		auto size = get_big_long(begin);
-		shiftIterator(begin, 4);
+		begin += 4;
 		length = std::distance(begin, end);
 		if (length < size+8)
 		{
 			return result;
 		}
 		auto data = begin;
-		shiftIterator(begin, size);
+		begin += size;
 		auto end = get_big_long(begin);
-		shiftIterator(begin, 4);
+		begin += 4;
 		auto end_name = get_big_long(begin);
-		shiftIterator(begin, 4);
+		begin += 4;
 		if ((end != INGL_END) || (end_name != name))
 		{
 			return result;
@@ -489,18 +489,6 @@ std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin, Iter 
 		result.push_back(std::tuple<uint32_t, Iter, size_t>(name, data, size));
 	}
 	return result;
-}
-
-template <typename Iter>
-inline void shiftIterator(Iter& iterator, unsigned amt) {
-	iterator += amt;
-}
-
-template <typename Type>
-inline void shiftIterator(std::istream_iterator<Type>& iterator, unsigned amt) {
-	for (unsigned counter = 0; counter < amt; counter++) {
-		iterator++;
-	}
 }
 
 struct PrintHeader
