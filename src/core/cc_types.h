@@ -22,7 +22,10 @@
 
 #pragma once
 
+#pragma warning (disable : 4005) //Suppress macro redefinition warnings in stdint.h -- the file redefines INT16_MAX and other similar defines
 #include <stdint.h>
+#pragma warning (default : 4005)
+
 #include <set>
 #include <string>
 

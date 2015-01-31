@@ -364,7 +364,7 @@ void Animation::EndCmd(unsigned i)
 void Animation::RefreshSheet()
 {
 	pts = sheets.at(curr_sheetnum).GetPoints();
-	for (auto i = 0; i < numpts; i++)
+	for (auto i = 0u; i < numpts; i++)
 	{
 		curr_cmds[i] = sheets.at(curr_sheetnum).GetCommandsBegin(i);
 		BeginCmd(i);

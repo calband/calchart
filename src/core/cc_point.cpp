@@ -76,7 +76,7 @@ mSym(SYMBOL_PLAIN)
 	}
 	mSym = static_cast<SYMBOL_TYPE>(*d);
 	++d;
-	mFlags.set(kPointLabelFlipped, *d);
+	mFlags.set(kPointLabelFlipped, (*d) > 0);
 	++d;
 	if (std::distance(&serialized_data[0], d) != serialized_data.size())
 	{

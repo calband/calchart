@@ -29,7 +29,6 @@
 #include <string>
 #include <set>
 #include <map>
-#include <stdint.h>
 #include <memory>
 
 class CC_sheet;
