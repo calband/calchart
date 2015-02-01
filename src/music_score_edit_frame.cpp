@@ -475,7 +475,7 @@ int fragmentPropertyComparator(wxPropertyGrid* grid, wxPGProperty* first, wxPGPr
 }
 
 MusicScoreEditFrame::MusicScoreEditFrame(CalChartDoc& doc, wxWindow *parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-: mDoc(doc), mLocalMusicScore(*mDoc.getMusicScore()), mFragmentEditor(nullptr), mModified(false)
+: mDoc(doc), mLocalMusicScore(mDoc.getMusicScore()), mFragmentEditor(nullptr), mModified(false)
 {
 	mFragCategoryHandlers.push_back(std::unique_ptr<FragmentEditor__CategoryHandler>(new FragmentEditor__TimeSigCategoryHandler()));
 	mFragCategoryHandlers.push_back(std::unique_ptr<FragmentEditor__CategoryHandler>(new FragmentEditor__JumpsCategoryHandler()));

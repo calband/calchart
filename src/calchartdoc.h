@@ -172,7 +172,8 @@ public:
 	int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
 	
 	void overwriteMusicScore(const MusicScoreDocComponent& newScore);
-	MusicScoreDocComponent* getMusicScore();
+	MusicScoreDocComponent& getMusicScore();
+	const MusicScoreDocComponent& getMusicScore() const;
 private:
 	// Autosaving:
 	// goal is to allow the user to have a recoverable file.

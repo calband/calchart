@@ -647,8 +647,12 @@ CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_ya
 	return printShowToPS(buffer, eps, mShow->GetCurrentSheetNum(), isPicked, GetTitle().ToStdString());
 }
 
-MusicScoreDocComponent* CalChartDoc::getMusicScore() {
-	return mMusicScore.get();
+MusicScoreDocComponent& CalChartDoc::getMusicScore() {
+	return *mMusicScore.get();
+}
+
+const MusicScoreDocComponent& CalChartDoc::getMusicScore() const {
+	return *mMusicScore.get();
 }
 
 void CalChartDoc::overwriteMusicScore(const MusicScoreDocComponent& newScore) {
