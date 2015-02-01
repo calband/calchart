@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_ONMIVIEW_CANVAS_H_
-#define _CC_ONMIVIEW_CANVAS_H_
+#pragma once
 
 #include <wx/glcanvas.h>
 
@@ -91,5 +90,3 @@ private:
 	
 	wxDECLARE_EVENT_TABLE();
 };
-
-#endif // _CC_ONMIVIEW_CANVAS_H_

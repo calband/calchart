@@ -19,6 +19,8 @@
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
+    <ClCompile Include="..\..\src\modes.cpp" />
+    <ClCompile Include="..\..\src\print_ps.cpp" />
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
     <ClCompile Include="..\..\src\setup_wizards.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
@@ -115,7 +117,9 @@
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\linmath.h" />
+    <ClInclude Include="..\..\src\modes.h" />
     <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\print_ps.h" />
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
     <ClInclude Include="..\..\src\setup_wizards.h" />
     <ClInclude Include="..\..\src\show_ui.h" />

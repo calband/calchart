@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _LINMATH_H_
-#define _LINMATH_H_
+#pragma once
 
 #include <math.h>
 
@@ -376,4 +375,3 @@ public:
 		vect[3].SetZ(1.0/d);
 	}
 };
-#endif

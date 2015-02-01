@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _PLATCONF_H_
-#define _PLATCONF_H_
+#pragma once
 
 #define cpp_cat(a,b) a ## b
 
@@ -49,6 +48,4 @@
 // Need to handle DOS-style text
 #ifdef __WXMSW__
 #define TEXT_DOS_STYLE
-#endif
-
 #endif

@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_TYPES_H_
-#define _CC_TYPES_H_
+#pragma once
 
 #include <stdint.h>
 #include <set>
@@ -64,5 +63,3 @@ enum CC_MOVE_MODES
 };
 
 typedef std::set<unsigned> SelectionList;
-
-#endif

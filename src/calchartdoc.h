@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CALCHARTDOC_H_
-#define _CALCHARTDOC_H_
+#pragma once
 
 #include "animate.h"
 #include "music_score_doc_component.h"
@@ -208,5 +207,3 @@ private:
 	std::unique_ptr<MusicScoreDocComponent> mMusicScore;
 	AutoSaveTimer mTimer;
 };
-
-#endif // _CALCHARTDOC_H_

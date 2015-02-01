@@ -1,5 +1,4 @@
-#ifndef _SINGLE_INSTANCE_IPC_H_
-#define _SINGLE_INSTANCE_IPC_H_
+#pragma once
 
 #include <memory>
 #include <functional>
@@ -30,5 +29,3 @@ protected:
 	StartStopFunc_t m_serverStartStop;
 	StartStopFunc_t m_clientStartStop;
 };
-
-#endif

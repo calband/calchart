@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __MATH_UTILS_H__
-#define __MATH_UTILS_H__
+#pragma once
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -54,5 +53,3 @@ bool IsDiagonalDirection(float f);
 void CreateVector(CC_coord& c, float dir, float mag);
 
 void CreateUnitVector(float& a, float& b, float dir);
-
-#endif

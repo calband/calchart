@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_SHOW_H_
-#define _CC_SHOW_H_
+#pragma once
 
 #include "cc_types.h"
 #include "cc_fileformat.h"
@@ -141,5 +140,3 @@ private:
 };
 
 void CC_show_UnitTests();
-
-#endif // _CC_SHOW_H_

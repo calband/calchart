@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _BASIC_UI_H_
-#define _BASIC_UI_H_
+#pragma once
 
 #include <wx/wx.h>
 #include <wx/toolbar.h>
@@ -39,7 +38,7 @@ public:
 		const wxString& value = wxEmptyString,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = wxTE_MULTILINE|wxHSCROLL);
+		long style = wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB);
 #ifdef TEXT_DOS_STYLE
 	wxString GetValue(void) const;
 #endif
@@ -141,5 +140,3 @@ public:
 protected:
 	virtual bool ShouldScrollOnMouseEvent(const wxMouseEvent &event) const;
 };
-
-#endif

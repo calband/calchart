@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATE_TYPES_H_
-#define _ANIMATE_TYPES_H_
+#pragma once
 
 #include "cc_coord.h"
 #include <string>
@@ -82,5 +81,3 @@ enum CollisionWarning
 std::string animate_err_msgs(size_t which);
 
 typedef CC_coord AnimatePoint;
-
-#endif // _ANIMATE_TYPES_H_

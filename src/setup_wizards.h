@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _SETUP_WIZARDS_H_
-#define _SETUP_WIZARDS_H_
+#pragma once
 
 #include <wx/wizard.h>
 
@@ -54,6 +53,3 @@ private:
 	wxArrayString modeStrings;
 	wxChoice *mChoice;
 };
-
-
-#endif

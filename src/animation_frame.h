@@ -20,8 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ANIMATION_FRAME_H_
-#define _ANIMATION_FRAME_H_
+#pragma once
 
 #include "animate.h"
 #include "animation_view.h"
@@ -138,6 +137,3 @@ private:
 	std::function<void ()> mWhenClosed;
 	wxDECLARE_EVENT_TABLE();
 };
-
-#endif // _ANIMATION_FRAME_H_
-

@@ -1,5 +1,4 @@
-#ifndef _GHOST_MODULE_H_
-#define _GHOST_MODULE_H_
+#pragma once
 
 class CC_sheet;
 class CalChartDoc;
@@ -30,5 +29,3 @@ private:
 	GhostSource mCurrentSource = disabled;
 	int mWhich = 0;
 };
-
-#endif
