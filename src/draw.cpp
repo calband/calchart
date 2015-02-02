@@ -64,13 +64,13 @@ void DrawArrow(wxDC& dc, const wxPoint& pt, wxCoord lineLength, bool pointRight)
 	dc.DrawLine(pt + wxPoint(-lineLength/2,ArrowSize), pt + wxPoint(lineLength/2,ArrowSize));
 	if (pointRight)
 	{
-		dc.DrawLine(pt + wxPoint(lineLength/2 - ArrowSize,0), pt + wxPoint(lineLength/2,ArrowSize));
-		dc.DrawLine(pt + wxPoint(lineLength/2 - ArrowSize,ArrowSize*2), pt + wxPoint(lineLength/2,ArrowSize));
+		dc.DrawLine(pt + wxPoint(lineLength/2 - (wxCoord)ArrowSize,0), pt + wxPoint(lineLength/2,ArrowSize));
+		dc.DrawLine(pt + wxPoint(lineLength/2 - (wxCoord)ArrowSize,ArrowSize*2), pt + wxPoint(lineLength/2,ArrowSize));
 	}
 	else
 	{
-		dc.DrawLine(pt + wxPoint(-(lineLength/2 - ArrowSize),0), pt + wxPoint(-lineLength/2,ArrowSize));
-		dc.DrawLine(pt + wxPoint(-(lineLength/2 - ArrowSize),ArrowSize*2), pt + wxPoint(-lineLength/2,ArrowSize));
+		dc.DrawLine(pt + wxPoint(-(lineLength/2 - (wxCoord)ArrowSize),0), pt + wxPoint(-lineLength/2,ArrowSize));
+		dc.DrawLine(pt + wxPoint(-(lineLength/2 - (wxCoord)ArrowSize),ArrowSize*2), pt + wxPoint(-lineLength/2,ArrowSize));
 	}
 }
 
@@ -439,7 +439,7 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config, const 
 	DrawMode(dc, config, *mode, ShowMode::kPrinting);
 	wxFont *pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxSWISS, wxNORMAL, wxNORMAL);
 	dc.SetFont(*pointLabelFont);
-	for (auto i = 0; i < pts.size(); i++)
+	for (auto i = 0u; i < pts.size(); i++)
 	{
 		const auto point = pts.at(i);
 		const auto pos = point.GetPos(ref) + mode->Offset();

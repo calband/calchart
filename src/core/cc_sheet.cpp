@@ -329,7 +329,7 @@ pts(numPoints)
 	};
 	auto parse_INGL_PNTS = [](CC_sheet* sheet, const uint8_t* ptr, size_t size)
 	{
-		for (auto i = 0; i < sheet->pts.size(); ++i)
+		for (auto i = 0u; i < sheet->pts.size(); ++i)
 		{
 			auto this_size = *ptr;
 			if (this_size > size)

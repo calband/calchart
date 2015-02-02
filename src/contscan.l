@@ -62,6 +62,9 @@ void initscanner() {
   if (YY_CURRENT_BUFFER != NULL) yy_flush_buffer(YY_CURRENT_BUFFER);
 }
 
+//Supress warnings in Flex's generated code
+#pragma warning (disable : 4018) //Disable the "'<': signed/unsigned mismatch" warning
+#pragma warning (disable : 4003) //Disable the "not enough actual parameters for macro 'yywrap'" warning
 %}
 
 %option noyywrap
@@ -145,3 +148,5 @@ COMMENT		"#"[^\n\f]*
 
 %%
 
+//Stop supressing warnings after Flex's generated code
+#pragma warning (default : 4018)
