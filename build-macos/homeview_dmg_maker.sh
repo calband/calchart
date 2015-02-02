@@ -3,7 +3,7 @@
 PROJECT=CalChartHomeView
 VERSION=3.4.2
 APP=CalChartHomeView.app
-CONFIG=Debug
+CONFIG=Release
 WC_DMG=wc.dmg
 WC_DIR=wc
 
