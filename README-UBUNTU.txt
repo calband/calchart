@@ -1,4 +1,5 @@
 Updated on 7/2/11 by Kyle Barlow
+(note, these instructions are way out of date.)
 
 Steps taken to get calchart to build on Ubuntu 10.04
 Feel free to change directories to your liking
