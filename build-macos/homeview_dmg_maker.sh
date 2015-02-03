@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT=CalChartHomeView
-VERSION=3.4.2
+VERSION=3.4.3
 APP=CalChartHomeView.app
 CONFIG=Release
 WC_DMG=wc.dmg
