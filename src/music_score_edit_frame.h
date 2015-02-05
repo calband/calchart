@@ -141,6 +141,11 @@ public:
 	void onFragmentDeselected(wxListEvent& evt);
 
 	/**
+	 * Called when the fragment starts being renamed.
+	 */
+	void onFragmentBeginRename(wxListEvent& evt);
+
+	/**
 	 * Called when a fragment is renamed.
 	 */
 	void onFragmentRenamed(wxListEvent& evt);

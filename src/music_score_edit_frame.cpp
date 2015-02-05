@@ -17,6 +17,7 @@ EVT_LIST_ITEM_RIGHT_CLICK(CALCHART__MusicScore_FragmentList, MusicScoreEditFrame
 EVT_LIST_ITEM_SELECTED(CALCHART__MusicScore_FragmentList, MusicScoreEditFrame::onFragmentSelected)
 EVT_LIST_ITEM_DESELECTED(CALCHART__MusicScore_FragmentList, MusicScoreEditFrame::onFragmentDeselected)
 EVT_LIST_END_LABEL_EDIT(CALCHART__MusicScore_FragmentList, MusicScoreEditFrame::onFragmentRenamed)
+EVT_LIST_BEGIN_LABEL_EDIT(CALCHART__MusicScore_FragmentList, MusicScoreEditFrame::onFragmentBeginRename)
 EVT_PG_CHANGED(CALCHART__MusicScore_FragmentEditor, MusicScoreEditFrame::onFragmentPropertyChanged)
 EVT_PG_CHANGING(CALCHART__MusicScore_FragmentEditor, MusicScoreEditFrame::onFragmentPropertyChanging)
 EVT_PG_RIGHT_CLICK(CALCHART__MusicScore_FragmentEditor, MusicScoreEditFrame::onFragmentPropertyRightClicked)
@@ -559,10 +560,15 @@ void MusicScoreEditFrame::onFragmentDeselected(wxListEvent& evt) {
 	resetFragmentEditWindow();
 }
 
+void MusicScoreEditFrame::onFragmentBeginRename(wxListEvent& evt) {
+	mFragmentEditor->Disable();
+}
+
 void MusicScoreEditFrame::onFragmentRenamed(wxListEvent& evt) {
 	mLocalMusicScore.getScoreFragment(evt.GetIndex())->name = evt.GetLabel();
 	resetFragmentEditWindow();
 	resetStartFragmentChoice();
+	mFragmentEditor->Enable();
 }
 
 void MusicScoreEditFrame::onFragmentPropertyChanged(wxPropertyGridEvent& evt) {
