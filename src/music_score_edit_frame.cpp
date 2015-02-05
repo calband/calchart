@@ -568,6 +568,9 @@ void MusicScoreEditFrame::onFragmentRenamed(wxListEvent& evt) {
 void MusicScoreEditFrame::onFragmentPropertyChanged(wxPropertyGridEvent& evt) {
 	wxPGProperty* prop = evt.GetProperty();
 	wxPGProperty* potentialCategory = prop;
+	if (mFragmentEditor->GetSelectedProperty() != nullptr) {
+		mFragmentEditor->RemoveFromSelection(mFragmentEditor->GetSelectedProperty()); //Make sure that all properties are unselected, because otherwise, when we sort, we may move around properties that are currently selected, and that really confuses the property grid
+	}
 	while (!potentialCategory->IsCategory()) {
 		potentialCategory = potentialCategory->GetParent();
 	}
