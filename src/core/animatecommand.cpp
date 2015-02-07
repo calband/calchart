@@ -100,15 +100,27 @@ void AnimateCommand::ClipBeats(unsigned beats)
 }
 
 
-AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
+AnimateCommandStationary::AnimateCommandStationary(unsigned beats, float direction)
 : AnimateCommand(beats), dir(AnimGetDirFromAngle(direction)), realdir(direction)
 {
 }
 
 
-AnimateDir AnimateCommandMT::Direction() const { return dir; }
+AnimateDir AnimateCommandStationary::Direction() const { return dir; }
 
-float AnimateCommandMT::RealDirection() const { return realdir; }
+
+float AnimateCommandStationary::RealDirection() const { return realdir; }
+
+
+AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
+: super(beats, direction)
+{};
+
+
+AnimateCommandClose::AnimateCommandClose(unsigned beats, float direction)
+: super(beats, direction)
+{}
+
 
 AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
 : AnimateCommandMT(beats, movement.Direction()), mVector(movement)

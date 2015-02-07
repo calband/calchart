@@ -49,7 +49,7 @@ std::list<ContProcedure*> ParsedContinuity;
 %}
 %token rwP rwNP rwR rwREM rwSP rwDOF rwDOH
 %token pBLAM pCOUNTERMARCH pDMCM pDMHS pEVEN pEWNS pFOUNTAIN pFM pFMTO
-%token pGRID pHSDM pHSCM pMAGIC pMARCH pMT pMTRM pNSEW pROTATE
+%token pGRID pHSDM pHSCM pMAGIC pMARCH pSTYMARCH pMT pCLOSE pCLOSERM pMTRM pNSEW pROTATE
 %token fDIR fDIRFROM fDIST fDISTFROM fEITHER fOPP fSTEP
 %token UNKNOWN_TOKEN
 
@@ -102,42 +102,78 @@ procedure
 		{ $$ = new ContProcSet($1, $3); }
 	| pBLAM
 		{ $$ = new ContProcBlam(); }
+	| pBLAM style
+		{ $$ = new ContProcBlam($2); }
 	| pCOUNTERMARCH point point value value value value
 		{ $$ = new ContProcCM($2, $3, $4, $5, $6, $7); }
+	| pCOUNTERMARCH point point value value value value style
+		{ $$ = new ContProcCM($2, $3, $4, $5, $6, $7, $8); }
 	| pDMCM point point value
 		{ $$ = new ContProcDMCM($2, $3, $4); }
+	| pDMCM point point value style
+		{ $$ = new ContProcDMCM($2, $3, $4, $5); }
 	| pDMHS point
 		{ $$ = new ContProcDMHS($2); }
+	| pDMHS point style
+		{ $$ = new ContProcDMHS($2, $3); }
 	| pEVEN value point
 		{ $$ = new ContProcEven($2, $3); }
+	| pEVEN value point style
+		{ $$ = new ContProcEven($2, $3, $4); }
 	| pEWNS point
 		{ $$ = new ContProcEWNS($2); }
+	| pEWNS point style
+		{ $$ = new ContProcEWNS($2, $3); }
 	| pFOUNTAIN value value point
 		{ $$ = new ContProcFountain($2, $3, NULL, NULL, $4); }
 	| pFOUNTAIN value value value value point
 		{ $$ = new ContProcFountain($2, $3, $4, $5, $6); }
+	| pFOUNTAIN value value point style style
+		{ $$ = new ContProcFountain($2, $3, NULL, NULL, $4, $5, $6); }
+	| pFOUNTAIN value value value value point style style
+		{ $$ = new ContProcFountain($2, $3, $4, $5, $6, $7, $8); }
 	| pFM value value
 		{ $$ = new ContProcFM($2, $3); }
+	| pFM value value style
+		{ $$ = new ContProcFM($2, $3, $4); }
 	| pFMTO point
 		{ $$ = new ContProcFMTO($2); }
+	| pFMTO point style
+		{ $$ = new ContProcFMTO($2, $3); }
 	| pGRID value
 		{ $$ = new ContProcGrid($2); }
 	| pHSCM point point value
 		{ $$ = new ContProcHSCM($2, $3, $4); }
+	| pHSCM point point value style
+		{ $$ = new ContProcHSCM($2, $3, $4, $5); }
 	| pHSDM point
 		{ $$ = new ContProcHSDM($2); }
+	| pHSDM point style
+		{ $$ = new ContProcHSDM($2, $3); }
 	| pMAGIC point
 		{ $$ = new ContProcMagic($2); }
 	| pMARCH value value value
 		{ $$ = new ContProcMarch($2, $3, $4, NULL); }
 	| pMARCH value value value value
 		{ $$ = new ContProcMarch($2, $3, $4, $5); }
+	| pSTYMARCH style value value
+		{ $$ = new ContProcMarch($2, $3, $4, NULL); }
 	| pMT value value
+		{ $$ = new ContProcMT($2, $3); }
+	| pMT value value style
 		{ $$ = new ContProcMT($2, $3); }
 	| pMTRM value
 		{ $$ = new ContProcMTRM($2); }
+	| pMTRM value style
+		{ $$ = new ContProcMTRM($2, $3); }
+	| pCLOSE value value
+		{ $$ = new ContProcClose($2, $3); }
+	| pCLOSERM value
+		{ $$ = new ContProcCloseRM($2); }
 	| pNSEW point
 		{ $$ = new ContProcNSEW($2); }
+	| pNSEW point style
+		{ $$ = new ContProcNSEW($2, $3); }
 	| pROTATE value value point
 		{ $$ = new ContProcRotate($2, $3, $4); }
 	;
@@ -180,6 +216,8 @@ value
 		{ $$ = $1; }
 	| function
 		{ $$ = $1; }
+	| style
+		{ $$ = new ContStepsizeFromStyle($1); }
 	;
 
 function

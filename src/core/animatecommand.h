@@ -60,17 +60,35 @@ protected:
 	unsigned mBeat;
 };
 
-class AnimateCommandMT : public AnimateCommand
+class AnimateCommandStationary : public AnimateCommand
 {
 public:
-	AnimateCommandMT(unsigned beats, float direction);
-	virtual ~AnimateCommandMT() = default;
+	AnimateCommandStationary(unsigned beats, float direction);
+	virtual ~AnimateCommandStationary() = default;
 
 	virtual AnimateDir Direction() const;
 	virtual float RealDirection() const;
 protected:
 	AnimateDir dir;
 	float realdir;
+};
+
+class AnimateCommandMT : public AnimateCommandStationary
+{
+private:
+	using super = AnimateCommandStationary;
+public:
+	AnimateCommandMT(unsigned beats, float direction);
+	virtual ~AnimateCommandMT() = default;
+};
+
+class AnimateCommandClose : public AnimateCommandStationary
+{
+private:
+	using super = AnimateCommandStationary;
+public:
+	AnimateCommandClose(unsigned beats, float direction);
+	virtual ~AnimateCommandClose() = default;
 };
 
 class AnimateCommandMove : public AnimateCommandMT

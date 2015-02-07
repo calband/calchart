@@ -180,13 +180,11 @@ ContValue *numbeats)
 
 
 ContToken::ContToken(): line(yylloc.first_line), col(yylloc.first_column) {}
-ContToken::~ContToken() {}
+
 std::ostream& ContToken::Print(std::ostream& os) const
 {
 	return os<<"["<<line<<","<<col<<"]: ";
 }
-
-ContPoint::~ContPoint() {}
 
 CC_coord ContPoint::Get(AnimateCompile* anim) const
 {
@@ -234,9 +232,6 @@ std::ostream& ContRefPoint::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"Ref Point "<<refnum;
 }
-
-
-ContValue::~ContValue() {}
 
 std::ostream& ContValue::Print(std::ostream& os) const
 {
@@ -318,14 +313,6 @@ std::ostream& ContValueDefined::Print(std::ostream& os) const
 	return os<<"Defined:"<<ContDefinedValue_strings[val];
 }
 
-
-ContValueAdd::~ContValueAdd()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
-}
-
-
 float ContValueAdd::Get(AnimateCompile* anim) const
 {
 	return (val1->Get(anim) + val2->Get(anim));
@@ -336,14 +323,6 @@ std::ostream& ContValueAdd::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<*val1<<" + "<<*val2;
 }
-
-
-ContValueSub::~ContValueSub()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
-}
-
 
 float ContValueSub::Get(AnimateCompile* anim) const
 {
@@ -356,14 +335,6 @@ std::ostream& ContValueSub::Print(std::ostream& os) const
 	return os<<*val1<<" - "<<*val2;
 }
 
-
-ContValueMult::~ContValueMult()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
-}
-
-
 float ContValueMult::Get(AnimateCompile* anim) const
 {
 	return (val1->Get(anim) * val2->Get(anim));
@@ -374,14 +345,6 @@ std::ostream& ContValueMult::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<*val1<<" * "<<*val2;
 }
-
-
-ContValueDiv::~ContValueDiv()
-{
-	if (val1) delete val1;
-	if (val2) delete val2;
-}
-
 
 float ContValueDiv::Get(AnimateCompile* anim) const
 {
@@ -404,13 +367,6 @@ std::ostream& ContValueDiv::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<*val1<<" / "<<*val2;
 }
-
-
-ContValueNeg::~ContValueNeg()
-{
-	if (val) delete val;
-}
-
 
 float ContValueNeg::Get(AnimateCompile* anim) const
 {
@@ -453,13 +409,6 @@ void ContValueVar::Set(AnimateCompile* anim, float v)
 	anim->SetVarValue(varnum, v);
 }
 
-
-ContFuncDir::~ContFuncDir()
-{
-	if (pnt) delete pnt;
-}
-
-
 float ContFuncDir::Get(AnimateCompile* anim) const
 {
 	CC_coord c = pnt->Get(anim);
@@ -475,14 +424,6 @@ std::ostream& ContFuncDir::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"Direction to "<<*pnt;
 }
-
-
-ContFuncDirFrom::~ContFuncDirFrom()
-{
-	if (pnt_start) delete pnt_start;
-	if (pnt_end) delete pnt_end;
-}
-
 
 float ContFuncDirFrom::Get(AnimateCompile* anim) const
 {
@@ -501,13 +442,6 @@ std::ostream& ContFuncDirFrom::Print(std::ostream& os) const
 	return os<<"Direction from "<<*pnt_start<<" to "<<*pnt_end;
 }
 
-
-ContFuncDist::~ContFuncDist()
-{
-	if (pnt) delete pnt;
-}
-
-
 float ContFuncDist::Get(AnimateCompile* anim) const
 {
 	CC_coord vector;
@@ -522,14 +456,6 @@ std::ostream& ContFuncDist::Print(std::ostream& os) const
 	return os<<"Distance to "<<*pnt;
 }
 
-
-ContFuncDistFrom::~ContFuncDistFrom()
-{
-	if (pnt_start) delete pnt_start;
-	if (pnt_end) delete pnt_end;
-}
-
-
 float ContFuncDistFrom::Get(AnimateCompile* anim) const
 {
 	CC_coord vector;
@@ -543,15 +469,6 @@ std::ostream& ContFuncDistFrom::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"Distance from "<<*pnt_start<<" to "<<*pnt_end;
 }
-
-
-ContFuncEither::~ContFuncEither()
-{
-	if (dir1) delete dir1;
-	if (dir2) delete dir2;
-	if (pnt) delete pnt;
-}
-
 
 float ContFuncEither::Get(AnimateCompile* anim) const
 {
@@ -580,13 +497,6 @@ std::ostream& ContFuncEither::Print(std::ostream& os) const
 	return os<<"Either direction to "<<*dir1<<" or "<<*dir2<<", depending on whichever is a shorter angle to "<<*pnt;
 }
 
-
-ContFuncOpp::~ContFuncOpp()
-{
-	if (dir) delete dir;
-}
-
-
 float ContFuncOpp::Get(AnimateCompile* anim) const
 {
 	return (dir->Get(anim) + 180.0f);
@@ -597,15 +507,6 @@ std::ostream& ContFuncOpp::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"opposite direction of "<<*dir;
 }
-
-
-ContFuncStep::~ContFuncStep()
-{
-	if (numbeats) delete numbeats;
-	if (blksize) delete blksize;
-	if (pnt) delete pnt;
-}
-
 
 float ContFuncStep::Get(AnimateCompile* anim) const
 {
@@ -621,22 +522,11 @@ std::ostream& ContFuncStep::Print(std::ostream& os) const
 	return os<<"Step drill at "<<*numbeats<<" beats for a block size of "<<*blksize<<" from point "<<*pnt;
 }
 
-
-ContProcedure::~ContProcedure() {}
-
 std::ostream& ContProcedure::Print(std::ostream& os) const
 {
 	super::Print(os);
 	return os<<"Procedure: ";
 }
-
-
-ContProcSet::~ContProcSet()
-{
-	if (var) delete var;
-	if (val) delete val;
-}
-
 
 void ContProcSet::Compile(AnimateCompile* anim)
 {
@@ -665,21 +555,9 @@ std::ostream& ContProcBlam::Print(std::ostream& os) const
 	return os<<"BLAM";
 }
 
-
-ContProcCM::~ContProcCM()
-{
-	if (pnt1) delete pnt1;
-	if (pnt2) delete pnt2;
-	if (stps) delete stps;
-	if (dir1) delete dir1;
-	if (dir2) delete dir2;
-	if (numbeats) delete numbeats;
-}
-
-
 void ContProcCM::Compile(AnimateCompile* anim)
 {
-	DoCounterMarch(this, anim, pnt1, pnt2, stps, dir1, dir2, numbeats);
+	DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), stps.get(), dir1.get(), dir2.get(), numbeats.get());
 }
 
 std::ostream& ContProcCM::Print(std::ostream& os) const
@@ -687,15 +565,6 @@ std::ostream& ContProcCM::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"CounterMarch starting at "<<*pnt1<<" passing through "<<*pnt2<<" stepping "<<*stps<<" off points, first moving "<<*dir1<<" then "<<*dir2<<" for number beats "<<*numbeats;
 }
-
-
-ContProcDMCM::~ContProcDMCM()
-{
-	if (pnt1) delete pnt1;
-	if (pnt2) delete pnt2;
-	if (numbeats) delete numbeats;
-}
-
 
 void ContProcDMCM::Compile(AnimateCompile* anim)
 {
@@ -712,7 +581,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 		{
 			ContValueDefined dir1(CC_SW);
 			ContValueDefined dir2(CC_W);
-			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+			DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), &steps, &dir1, &dir2, numbeats.get());
 			return;
 		}
 	}
@@ -722,7 +591,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 		{
 			ContValueDefined dir1(CC_SE);
 			ContValueDefined dir2(CC_W);
-			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+			DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), &steps, &dir1, &dir2, numbeats.get());
 			return;
 		}
 	}
@@ -732,7 +601,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 		{
 			ContValueDefined dir1(CC_NW);
 			ContValueDefined dir2(CC_E);
-			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+			DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), &steps, &dir1, &dir2, numbeats.get());
 			return;
 		}
 	}
@@ -742,7 +611,7 @@ void ContProcDMCM::Compile(AnimateCompile* anim)
 		{
 			ContValueDefined dir1(CC_NE);
 			ContValueDefined dir2(CC_E);
-			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dir1, &dir2, numbeats);
+			DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), &steps, &dir1, &dir2, numbeats.get());
 			return;
 		}
 	}
@@ -754,13 +623,6 @@ std::ostream& ContProcDMCM::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"Diagonal march CounterMarch starting at "<<*pnt1<<" passing through "<<*pnt2<<" for number beats"<<*numbeats;
 }
-
-
-ContProcDMHS::~ContProcDMHS()
-{
-	if (pnt) delete pnt;
-}
-
 
 void ContProcDMHS::Compile(AnimateCompile* anim)
 {
@@ -808,14 +670,6 @@ std::ostream& ContProcDMHS::Print(std::ostream& os) const
 	return os<<"Diagonal march then HighStep to "<<*pnt;
 }
 
-
-ContProcEven::~ContProcEven()
-{
-	if (stps) delete stps;
-	if (pnt) delete pnt;
-}
-
-
 void ContProcEven::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
@@ -837,13 +691,6 @@ std::ostream& ContProcEven::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"Even march of step size "<<*stps<<" to "<<*pnt;
 }
-
-
-ContProcEWNS::~ContProcEWNS()
-{
-	if (pnt) delete pnt;
-}
-
 
 void ContProcEWNS::Compile(AnimateCompile* anim)
 {
@@ -878,16 +725,6 @@ std::ostream& ContProcEWNS::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"March EastWest/NorthSouth to "<<*pnt;
 }
-
-
-ContProcFountain::~ContProcFountain()
-{
-	if (dir1) delete dir1;
-	if (dir2) delete dir2;
-	if (stepsize1) delete stepsize1;
-	if (stepsize2) delete stepsize2;
-}
-
 
 void ContProcFountain::Compile(AnimateCompile* anim)
 {
@@ -981,14 +818,6 @@ std::ostream& ContProcFountain::Print(std::ostream& os) const
 	return os<<"ending at "<<*pnt;
 }
 
-
-ContProcFM::~ContProcFM()
-{
-	if (stps) delete stps;
-	if (dir) delete dir;
-}
-
-
 void ContProcFM::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
@@ -1018,13 +847,6 @@ std::ostream& ContProcFM::Print(std::ostream& os) const
 	return os<<"Forward march for steps "<<*stps<<" in direction "<<*dir;
 }
 
-
-ContProcFMTO::~ContProcFMTO()
-{
-	if (pnt) delete pnt;
-}
-
-
 void ContProcFMTO::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
@@ -1041,13 +863,6 @@ std::ostream& ContProcFMTO::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"Forward march to "<<*pnt;
 }
-
-
-ContProcGrid::~ContProcGrid()
-{
-	if (grid) delete grid;
-}
-
 
 static inline Coord roundcoord(Coord a, Coord mod)
 {
@@ -1091,15 +906,6 @@ std::ostream& ContProcGrid::Print(std::ostream& os) const
 	return os<<"Move on Grid of "<<*grid<<" spacing";
 }
 
-
-ContProcHSCM::~ContProcHSCM()
-{
-	if (pnt1) delete pnt1;
-	if (pnt2) delete pnt2;
-	if (numbeats) delete numbeats;
-}
-
-
 void ContProcHSCM::Compile(AnimateCompile* anim)
 {
 	CC_coord r1, r2;
@@ -1113,7 +919,7 @@ void ContProcHSCM::Compile(AnimateCompile* anim)
 		{
 			ContValueDefined dirs(CC_S);
 			ContValueDefined dirw(CC_W);
-			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirs, &dirw, numbeats);
+			DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), &steps, &dirs, &dirw, numbeats.get());
 			return;
 		}
 	}
@@ -1123,7 +929,7 @@ void ContProcHSCM::Compile(AnimateCompile* anim)
 		{
 			ContValueDefined dirn(CC_N);
 			ContValueDefined dire(CC_E);
-			DoCounterMarch(this, anim, pnt1, pnt2, &steps, &dirn, &dire, numbeats);
+			DoCounterMarch(this, anim, pnt1.get(), pnt2.get(), &steps, &dirn, &dire, numbeats.get());
 			return;
 		}
 	}
@@ -1135,13 +941,6 @@ std::ostream& ContProcHSCM::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"High Step CounterMarch starting at "<<*pnt1<<" passing through "<<*pnt2<<" for number beats"<<*numbeats;
 }
-
-
-ContProcHSDM::~ContProcHSDM()
-{
-	if (pnt) delete pnt;
-}
-
 
 void ContProcHSDM::Compile(AnimateCompile* anim)
 {
@@ -1189,13 +988,6 @@ std::ostream& ContProcHSDM::Print(std::ostream& os) const
 	return os<<"HighStep then Diagonal march to "<<*pnt;
 }
 
-
-ContProcMagic::~ContProcMagic()
-{
-	if (pnt) delete pnt;
-}
-
-
 void ContProcMagic::Compile(AnimateCompile* anim)
 {
 	CC_coord c;
@@ -1207,17 +999,8 @@ void ContProcMagic::Compile(AnimateCompile* anim)
 std::ostream& ContProcMagic::Print(std::ostream& os) const
 {
 	super::Print(os);
-	return os<<"Magic step to "<<*pnt;
+	return os << "Magic step to " << *pnt;
 }
-
-
-ContProcMarch::~ContProcMarch()
-{
-	if (stpsize) delete stpsize;
-	if (stps) delete stps;
-	if (dir) delete dir;
-}
-
 
 void ContProcMarch::Compile(AnimateCompile* anim)
 {
@@ -1258,14 +1041,6 @@ std::ostream& ContProcMarch::Print(std::ostream& os) const
 	return os;
 }
 
-
-ContProcMT::~ContProcMT()
-{
-	if (numbeats) delete numbeats;
-	if (dir) delete dir;
-}
-
-
 void ContProcMT::Compile(AnimateCompile* anim)
 {
 	int b;
@@ -1283,13 +1058,6 @@ std::ostream& ContProcMT::Print(std::ostream& os) const
 	return os<<"MarkTime for "<<*numbeats<<" facing "<<*dir;
 }
 
-
-ContProcMTRM::~ContProcMTRM()
-{
-	if (dir) delete dir;
-}
-
-
 void ContProcMTRM::Compile(AnimateCompile* anim)
 {
 	anim->Append(std::make_shared<AnimateCommandMT>(anim->GetBeatsRemaining(), dir->Get(anim)), this);
@@ -1300,13 +1068,6 @@ std::ostream& ContProcMTRM::Print(std::ostream& os) const
 	super::Print(os);
 	return os<<"MarkTime for Remaining Beats facing "<<*dir;
 }
-
-
-ContProcNSEW::~ContProcNSEW()
-{
-	if (pnt) delete pnt;
-}
-
 
 void ContProcNSEW::Compile(AnimateCompile* anim)
 {
@@ -1340,14 +1101,6 @@ std::ostream& ContProcNSEW::Print(std::ostream& os) const
 {
 	super::Print(os);
 	return os<<"March NorthSouth/EastWest to "<<*pnt;
-}
-
-
-ContProcRotate::~ContProcRotate()
-{
-	if (ang) delete ang;
-	if (stps) delete stps;
-	if (pnt) delete pnt;
 }
 
 
@@ -1386,3 +1139,31 @@ std::ostream& ContProcRotate::Print(std::ostream& os) const
 	return os<<"Rotate at angle "<<*ang<<" for steps "<<*stps<<" around pivot point "<<*pnt;
 }
 
+
+void ContProcClose::Compile(AnimateCompile* anim)
+{
+	int b;
+
+	b = float2int(this, anim, numbeats->Get(anim));
+	if (b != 0)
+	{
+		anim->Append(std::make_shared<AnimateCommandClose>((unsigned)std::abs(b), dir->Get(anim)), this);
+	}
+}
+
+std::ostream& ContProcClose::Print(std::ostream& os) const
+{
+	super::Print(os);
+	return os << "Close for " << *numbeats << " facing " << *dir;
+}
+
+void ContProcCloseRM::Compile(AnimateCompile* anim)
+{
+	anim->Append(std::make_shared<AnimateCommandClose>(anim->GetBeatsRemaining(), dir->Get(anim)), this);
+}
+
+std::ostream& ContProcCloseRM::Print(std::ostream& os) const
+{
+	super::Print(os);
+	return os << "Close for Remaining Beats facing " << *dir;
+}

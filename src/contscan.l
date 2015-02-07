@@ -116,7 +116,8 @@ COMMENT		"#"[^\n\f]*
 "M"		yylval.d = CC_M; ReturnToken(DEFINECONST);
 "DM"		yylval.d = CC_DM; ReturnToken(DEFINECONST);
 "BLAM"		ReturnToken(pBLAM);
-"CLOSE"		ReturnToken(pMT);
+"CLOSE"		ReturnToken(pCLOSE);
+"CLOSERM"	ReturnToken(pCLOSERM);
 "COUNTERMARCH"	ReturnToken(pCOUNTERMARCH);
 "DMCM"		ReturnToken(pDMCM);
 "DMHS"		ReturnToken(pDMHS);
@@ -130,6 +131,7 @@ COMMENT		"#"[^\n\f]*
 "HSDM"		ReturnToken(pHSDM);
 "MAGIC"		ReturnToken(pMAGIC);
 "MARCH"		ReturnToken(pMARCH);
+"STYMARCH"	ReturnToken(pSTYMARCH);
 "MT"		ReturnToken(pMT);
 "MTRM"		ReturnToken(pMTRM);
 "NSEW"		ReturnToken(pNSEW);
