@@ -70,6 +70,9 @@
     <ClCompile Include="..\..\src\core\print_ps.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\step_style.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -149,6 +152,9 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\print_ps.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\step_style.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

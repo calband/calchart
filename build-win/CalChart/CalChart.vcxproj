@@ -116,6 +116,7 @@
     <ClInclude Include="..\..\src\core\modes.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
     <ClInclude Include="..\..\src\core\print_ps.h" />
+    <ClInclude Include="..\..\src\core\step_style.h" />
     <ClInclude Include="..\..\src\draw.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\core\modes.cpp" />
     <ClCompile Include="..\..\src\core\print_ps.cpp" />
+    <ClCompile Include="..\..\src\core\step_style.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />

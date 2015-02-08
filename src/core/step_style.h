@@ -2,6 +2,7 @@
 
 enum BaseStepStyle {
 	Undefined,
+	Close,
 	HighStep,
 	MiniMilitary,
 	ShowHigh,
@@ -41,65 +42,76 @@ private:
 	BaseStepStyle mBaseStyle;
 };
 
-class StepStyle_HighStep : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_HighStep();
-};
+namespace CoreStepStyles {
 
-class StepStyle_MiniMilitary : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_MiniMilitary();
-};
+	class Close : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		Close();
+	};
 
-class StepStyle_ShowHigh : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_ShowHigh();
-};
+	class HighStep : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		HighStep();
+	};
 
-class StepStyle_JerkyStep : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_JerkyStep();
-};
+	class MiniMilitary : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		MiniMilitary();
+	};
 
-class StepStyle_Grapevine : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_Grapevine();
-};
+	class ShowHigh : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		ShowHigh();
+	};
 
-class StepStyle_Military : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_Military();
-};
+	class JerkyStep : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		JerkyStep();
+	};
 
-class StepStyle_TunnelStep : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_TunnelStep();
-};
+	class Grapevine : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		Grapevine();
+	};
 
-class StepStyle_FullFieldStep : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_FullFieldStep();
-};
+	class Military : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		Military();
+	};
 
-class StepStyle_JogStep : public StepStyle {
-private:
-	using super = StepStyle;
-public:
-	StepStyle_JogStep();
-};
+	class TunnelStep : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		TunnelStep();
+	};
+
+	class FullFieldStep : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		FullFieldStep();
+	};
+
+	class JogStep : public StepStyle {
+	private:
+		using super = StepStyle;
+	public:
+		JogStep();
+	};
+
+}

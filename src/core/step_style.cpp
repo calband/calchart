@@ -1,6 +1,8 @@
 #include "step_style.h"
 #include "math_utils.h"
 
+using namespace CoreStepStyles;
+
 StepStyle::StepStyle(std::string briefName, BaseStepStyle baseStyle, float stepsize, float numBeatsPerStep, bool facingDirectionIsAbsolute, float facingDirection)
 : mBriefName(briefName), mBaseStyle(baseStyle), mStepSize(stepsize), mNumBeatsPerStep(numBeatsPerStep), mHasAbsoluteFacingDirection(facingDirectionIsAbsolute), mFacingDirection(facingDirection)
 {}
@@ -81,38 +83,42 @@ StepStyle StepStyle::deriveDiagonalStepSize() const {
 	return returnVal;
 }
 
-StepStyle_HighStep::StepStyle_HighStep()
+Close::Close()
+: super("CLOSE", BaseStepStyle::Close, 0, 0, false, 0)
+{}
+
+HighStep::HighStep()
 : super("HS", BaseStepStyle::HighStep, 1, 1, false, 0)
 {}
 
-StepStyle_MiniMilitary::StepStyle_MiniMilitary()
+MiniMilitary::MiniMilitary()
 : super("MM", BaseStepStyle::MiniMilitary, 1, 1, false, 0)
 {}
 
-StepStyle_ShowHigh::StepStyle_ShowHigh()
+ShowHigh::ShowHigh()
 : super("SH", BaseStepStyle::ShowHigh, 1, 2, false, 0)
 {}
 
-StepStyle_JerkyStep::StepStyle_JerkyStep()
+JerkyStep::JerkyStep()
 : super("JS", BaseStepStyle::JerkyStep, 1, 2, false, 0)
 {}
 
-StepStyle_Grapevine::StepStyle_Grapevine()
+Grapevine::Grapevine()
 : super("GV", BaseStepStyle::Grapevine, 1, 1, false, 90)
 {}
 
-StepStyle_Military::StepStyle_Military()
+Military::Military()
 : super("M", BaseStepStyle::Military, (8.0 / 6.0), 1, false, 0)
 {}
 
-StepStyle_TunnelStep::StepStyle_TunnelStep()
+TunnelStep::TunnelStep()
 : super("TS", BaseStepStyle::TunnelStep, (8.0 / 6.0), 1, false, 0)
 {}
 
-StepStyle_FullFieldStep::StepStyle_FullFieldStep()
+FullFieldStep::FullFieldStep()
 : super("FF", BaseStepStyle::FullFieldStep, 1, 1, false, 0)
 {}
 
-StepStyle_JogStep::StepStyle_JogStep()
+JogStep::JogStep()
 : super("JS", BaseStepStyle::JogStep, 1, 1, false, 0)
 {}
