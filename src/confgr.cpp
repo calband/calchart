@@ -284,7 +284,7 @@ CalChartConfiguration::ShowModeInfo_t GetConfigValue(const wxString& key, const 
 	wxString path = wxT("/SHOWMODES/") + key;
 	for (auto i=0; i < CalChartConfiguration::kShowModeValues; ++i)
 	{
-		values[i] = GetConfigPathKey<long>(path, ShowModeKeys[i], values[i]);
+		values[i] = GetConfigPathKey<long>(path, ShowModeKeys[i], def[i]);
 	}
 	return values;
 }
