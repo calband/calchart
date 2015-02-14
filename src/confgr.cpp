@@ -280,7 +280,7 @@ wxString ShowModeKeys[CalChartConfiguration::kShowModeValues] = { wxT("whash"), 
 template <>
 CalChartConfiguration::ShowModeInfo_t GetConfigValue(const wxString& key, const CalChartConfiguration::ShowModeInfo_t& def)
 {
-	CalChartConfiguration::ShowModeInfo_t values;
+	auto values = def;
 	wxString path = wxT("/SHOWMODES/") + key;
 	for (auto i=0; i < CalChartConfiguration::kShowModeValues; ++i)
 	{
@@ -321,7 +321,7 @@ wxString SpringShowModeKeys[CalChartConfiguration::kSpringShowModeValues] = { wx
 template <>
 CalChartConfiguration::SpringShowModeInfo_t GetConfigValue(const wxString& key, const CalChartConfiguration::SpringShowModeInfo_t& def)
 {
-	CalChartConfiguration::SpringShowModeInfo_t values;
+	auto values = def;
 	wxString path = wxT("/SPRINGSHOWMODES/") + key;
 	for (auto i=0; i < CalChartConfiguration::kSpringShowModeValues; ++i)
 	{
