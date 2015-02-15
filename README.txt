@@ -1,5 +1,5 @@
 --- CalChart README.txt ---
-Updated on 2/1/2015 by Richard Powell
+Updated on 2/14/2015 by Richard Powell
 ---
 
 CalChart version 3.4.3
@@ -23,6 +23,8 @@ Bugs addressed in this release:
 #98  Mac: cmd-c (copy) in Continuity editor closes instead of copies
 #111 "Edit print continuity" should allow tab entry
 #115 Preference color selection on Windows is screwed up
+#141 Field is blank
+#152 Prevent trivial error reports
 
 Build infrastructure issues addressed in this release:
 #42  Use precompiled headers
