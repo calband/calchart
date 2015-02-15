@@ -63,7 +63,7 @@ void
 AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
 {
 	dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-	DrawMode(*dc, config, GetShow()->GetMode(), ShowMode::kAnimation);
+	DrawMode(*dc, config, GetShow()->GetMode(), ShowMode_kAnimation);
 	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
 	if (mAnimation)
 	{

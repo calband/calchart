@@ -702,12 +702,14 @@ GetShowMode(const wxString& which)
 	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
 	if (iter != std::end(kShowModeStrings))
 	{
-		return ShowModeStandard::CreateShowMode(which.ToStdString(), CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter))));
+		auto item = static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter));
+		return ShowModeStandard::CreateShowMode(which.ToStdString(), [item]() { return CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(item); });
 	}
 	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
 	if (iter != std::end(kSpringShowModeStrings))
 	{
-		return ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter))));
+		auto item = static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter));
+		return ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), [item]() { return CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(item); });
 	}
 	return {};
 }

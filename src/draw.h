@@ -23,7 +23,6 @@
 #pragma once
 
 #include "cc_show.h"
-#include "modes.h"
 #include <wx/dc.h>
 #include <vector>
 #include <set>
@@ -42,6 +41,14 @@ class CC_textline;
 class CalChartConfiguration;
 typedef std::vector<CC_textline> CC_textline_list;
 
+typedef enum
+{
+	ShowMode_kFieldView,
+	ShowMode_kAnimation,
+	ShowMode_kPrinting,
+	ShowMode_kOmniView
+} HowToDraw;
+
 // draw the continuity starting at a specific offset
 void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref, bool primary);
 void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config, CC_coord origin, const SelectionList& selection_list, unsigned short numberPoints, const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref);
@@ -49,7 +56,7 @@ void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref
 void DrawCont(wxDC& dc, const CC_textline_list& print_continuity, const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC *dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, unsigned ref, bool landscape);
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config, const CalChartDoc& show, const CC_sheet& sheet, const std::map<unsigned, CC_coord>& positions);
-void DrawMode(wxDC& dc, const CalChartConfiguration& config, const ShowMode& mode, ShowMode::HowToDraw howToDraw);
+void DrawMode(wxDC& dc, const CalChartConfiguration& config, const ShowMode& mode, HowToDraw howToDraw);
 wxImage GetOmniLinesImage(const CalChartConfiguration& config, const ShowMode& mode);
 
 

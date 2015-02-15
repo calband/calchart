@@ -304,7 +304,7 @@ PrefCanvas::OnPaint(wxPaintEvent& event)
 	dc.Clear();
 
 	// Draw the field
-	DrawMode(dc, mConfig, *mMode, ShowMode::kFieldView);
+	DrawMode(dc, mConfig, *mMode, ShowMode_kFieldView);
 
 	CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
 	auto nextSheet = sheet;

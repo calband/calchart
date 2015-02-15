@@ -53,25 +53,16 @@ public:
 public:
 
 	virtual ShowType GetType() const = 0;
-	inline const CC_coord& Offset() const { return mOffset; };
-	inline CC_coord FieldOffset() const { return -(mOffset-mBorder1); }
-	inline const CC_coord& Size() const { return mSize; };
-	inline CC_coord FieldSize() const { return mSize-mBorder1-mBorder2; }
-	inline CC_coord MinPosition() const { return -mOffset; }
-	inline CC_coord MaxPosition() const { return mSize-mOffset; }
-	CC_coord Border1() const { return mBorder1; }
-	CC_coord Border2() const { return mBorder2; }
-	inline const std::string& GetName() const { return mName; };
+	CC_coord Offset() const { return mOffset() + mBorder1(); }
+	CC_coord FieldOffset() const { return -mOffset(); }
+	CC_coord Size() const { return mSize() + mBorder1() + mBorder2(); }
+	CC_coord FieldSize() const { return mSize(); }
+	CC_coord MinPosition() const { return -(mOffset() + mBorder1()); }
+	CC_coord MaxPosition() const { return mSize() - mOffset() + mBorder2(); }
+	CC_coord Border1() const { return mBorder1(); }
+	std::string GetName() const { return mName; };
 	CC_coord ClipPosition(const CC_coord& pos) const;
 
-public:
-	typedef enum
-	{
-		kFieldView,
-		kAnimation,
-		kPrinting,
-		kOmniView
-	} HowToDraw;
 
 protected:
 	// Users shouldn't create show modes, it should be done through derived classes
@@ -81,11 +72,17 @@ protected:
 			 const CC_coord& border1,
 			 const CC_coord& border2);
 
-	const CC_coord mOffset;
-	const CC_coord mSize;
-	const CC_coord mBorder1;
-	const CC_coord mBorder2;
+	ShowMode(const std::string& name,
+			 const std::function<CC_coord()>& size,
+			 const std::function<CC_coord()>& offset,
+			 const std::function<CC_coord()>& border1,
+			 const std::function<CC_coord()>& border2);
+
 private:
+	const std::function<CC_coord()> mOffset;
+	const std::function<CC_coord()> mSize;
+	const std::function<CC_coord()> mBorder1;
+	const std::function<CC_coord()> mBorder2;
 	std::string mName;
 };
 
@@ -95,6 +92,8 @@ public:
 	enum ArrayValues { kwhash, kehash, kbord1_x, kbord1_y, kbord2_x, kbord2_y, koffset_x, koffset_y, ksize_x, ksize_y, kShowModeValues };
 	using ShowModeInfo_t = std::array<long, kShowModeValues>;
 	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& which, const ShowModeInfo_t& values);
+	// it is expected that the caller will keep the valueGetter alive
+	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& which, const std::function<ShowModeInfo_t()>& valueGetter);
 	static std::unique_ptr<ShowMode> CreateShowMode(const std::string& name,
 													CC_coord size,
 													CC_coord offset,
@@ -111,15 +110,22 @@ private:
 					 CC_coord border2,
 					 unsigned short whash,
 					 unsigned short ehash);
+	ShowModeStandard(const std::string& name,
+					 const std::function<CC_coord()>& offset,
+					 const std::function<CC_coord()>& border1,
+					 const std::function<CC_coord()>& size,
+					 const std::function<CC_coord()>& border2,
+					 const std::function<unsigned short()>& whash,
+					 const std::function<unsigned short()>& ehash);
 public:
 	virtual ~ShowModeStandard();
 
 	virtual ShowType GetType() const;
-	inline unsigned short HashW() const { return mHashW; }
-	inline unsigned short HashE() const { return mHashE; }
+	unsigned short HashW() const { return mHashW(); }
+	unsigned short HashE() const { return mHashE(); }
 
 private:
-	const unsigned short mHashW, mHashE;
+	const std::function<unsigned short()> mHashW, mHashE;
 };
 
 class ShowModeSprShow : public ShowMode
@@ -129,6 +135,8 @@ public:
 	using SpringShowModeInfo_t = std::array<long, kShowModeValues>;
 
 	static std::unique_ptr<ShowMode> CreateSpringShowMode(const std::string& which, const SpringShowModeInfo_t& values);
+	// it is expected that the caller will keep the valueGetter alive
+	static std::unique_ptr<ShowMode> CreateSpringShowMode(const std::string& which, const std::function<SpringShowModeInfo_t()>& valueGetter);
 
 private:
 // Look at calchart.cfg for description of arguments
@@ -142,32 +150,42 @@ private:
 		short fld_w, short fld_h,
 		short txt_l, short txt_r,
 		short txt_tp, short txt_bm);
+	ShowModeSprShow(const std::string& name, const std::function<CC_coord()>& border1, const std::function<CC_coord()>& border2,
+		const std::function<unsigned char()>& which,
+		const std::function<short()>& stps_x, const std::function<short()>& stps_y,
+		const std::function<short()>& stps_w, const std::function<short()>& stps_h,
+		const std::function<short()>& stg_x, const std::function<short()>& stg_y,
+		const std::function<short()>& stg_w, const std::function<short()>& stg_h,
+		const std::function<short()>& fld_x, const std::function<short()>& fld_y,
+		const std::function<short()>& fld_w, const std::function<short()>& fld_h,
+		const std::function<short()>& txt_l, const std::function<short()>& txt_r,
+		const std::function<short()>& txt_tp, const std::function<short()>& txt_bm);
 public:
 	virtual ~ShowModeSprShow();
 
 	virtual ShowType GetType() const;
-	inline unsigned char WhichYards() const { return which_yards; }
-	inline short StageX() const { return stage_x; }
-	inline short StageY() const { return stage_y; }
-	inline short StageW() const { return stage_w; }
-	inline short StageH() const { return stage_h; }
-	inline short FieldX() const { return field_x; }
-	inline short FieldY() const { return field_y; }
-	inline short FieldW() const { return field_w; }
-	inline short FieldH() const { return field_h; }
-	inline short StepsX() const { return steps_x; }
-	inline short StepsY() const { return steps_y; }
-	inline short StepsW() const { return steps_w; }
-	inline short StepsH() const { return steps_h; }
-	inline short TextLeft() const { return text_left; }
-	inline short TextRight() const { return text_right; }
-	inline short TextTop() const { return text_top; }
-	inline short TextBottom() const { return text_bottom; }
+	unsigned char WhichYards() const { return which_yards(); }
+	short StageX() const { return stage_x(); }
+	short StageY() const { return stage_y(); }
+	short StageW() const { return stage_w(); }
+	short StageH() const { return stage_h(); }
+	short FieldX() const { return field_x(); }
+	short FieldY() const { return field_y(); }
+	short FieldW() const { return field_w(); }
+	short FieldH() const { return field_h(); }
+	short StepsX() const { return steps_x(); }
+	short StepsY() const { return steps_y(); }
+	short StepsW() const { return steps_w(); }
+	short StepsH() const { return steps_h(); }
+	short TextLeft() const { return text_left(); }
+	short TextRight() const { return text_right(); }
+	short TextTop() const { return text_top(); }
+	short TextBottom() const { return text_bottom(); }
 
 private:
-	unsigned char which_yards;
-	short stage_x, stage_y, stage_w, stage_h;
-	short field_x, field_y, field_w, field_h;
-	short steps_x, steps_y, steps_w, steps_h;
-	short text_left, text_right, text_top, text_bottom;
+	const std::function<unsigned char()> which_yards;
+	const std::function<short()> stage_x, stage_y, stage_w, stage_h;
+	const std::function<short()> field_x, field_y, field_w, field_h;
+	const std::function<short()> steps_x, steps_y, steps_w, steps_h;
+	const std::function<short()> text_left, text_right, text_top, text_bottom;
 };
