@@ -29,8 +29,8 @@ ShowMode::ShowMode(const std::string& name,
 				   const CC_coord& offset,
 				   const CC_coord& border1,
 				   const CC_coord& border2) :
-mOffset([=](){ return offset; }),
 mSize([=](){ return size; }),
+mOffset([=](){ return offset; }),
 mBorder1([=](){ return border1; }),
 mBorder2([=](){ return border2; }),
 mName(name)
@@ -42,8 +42,8 @@ ShowMode::ShowMode(const std::string& name,
 			 const std::function<CC_coord()>& offset,
 			 const std::function<CC_coord()>& border1,
 			 const std::function<CC_coord()>& border2) :
-mOffset(offset),
 mSize(size),
+mOffset(offset),
 mBorder1(border1),
 mBorder2(border2),
 mName(name)
@@ -90,7 +90,7 @@ ShowModeStandard::ShowModeStandard(const std::string& name,
 					 const std::function<CC_coord()>& border2,
 					 const std::function<unsigned short()>& whash,
 					 const std::function<unsigned short()>& ehash) :
-ShowMode(name, offset, size, border1, border2),
+ShowMode(name, size, offset, border1, border2),
 mHashW(whash),
 mHashE(ehash)
 {}
@@ -186,8 +186,8 @@ ShowModeStandard::CreateShowMode(const std::string& which, const ShowModeInfo_t&
 	unsigned short ehash = values[kehash];
 	CC_coord bord1{ Int2Coord(values[kbord1_x]), Int2Coord(values[kbord1_y]) };
 	CC_coord bord2{ Int2Coord(values[kbord2_x]), Int2Coord(values[kbord2_y]) };
-	CC_coord size{ Int2Coord(-values[koffset_x]), Int2Coord(-values[koffset_y]) };
-	CC_coord offset{ Int2Coord(values[ksize_x]), Int2Coord(values[ksize_y]) };
+	CC_coord offset{ Int2Coord(-values[koffset_x]), Int2Coord(-values[koffset_y]) };
+	CC_coord size{ Int2Coord(values[ksize_x]), Int2Coord(values[ksize_y]) };
 	return std::unique_ptr<ShowMode>(new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
 }
 

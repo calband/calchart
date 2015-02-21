@@ -79,8 +79,8 @@ protected:
 			 const std::function<CC_coord()>& border2);
 
 private:
-	const std::function<CC_coord()> mOffset;
 	const std::function<CC_coord()> mSize;
+	const std::function<CC_coord()> mOffset;
 	const std::function<CC_coord()> mBorder1;
 	const std::function<CC_coord()> mBorder2;
 	std::string mName;
