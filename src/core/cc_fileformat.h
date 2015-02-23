@@ -463,7 +463,7 @@ std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin, Iter 
 	std::vector<std::tuple<uint32_t, Iter, size_t>> result;
 	while (begin != end)
 	{
-		auto length = std::distance(begin, end);
+		auto length = (uint32_t)std::distance(begin, end);
 		if (length < 8)
 		{
 			return result;

@@ -1307,9 +1307,7 @@ FieldFrame::UpdatePanel()
 		mSheetSlider->Enable(false);
 	}
 
-	wxString buf;
-	GetDocument()->GetPrintableName(buf);
-	SetTitle(buf);
+	SetTitle(GetDocument()->GetUserReadableName());
 }
 
 

@@ -280,7 +280,7 @@ wxString ShowModeKeys[CalChartConfiguration::kShowModeValues] = { wxT("whash"), 
 template <>
 CalChartConfiguration::ShowModeInfo_t GetConfigValue(const wxString& key, const CalChartConfiguration::ShowModeInfo_t& def)
 {
-	CalChartConfiguration::ShowModeInfo_t values;
+	auto values = def;
 	wxString path = wxT("/SHOWMODES/") + key;
 	for (auto i=0; i < CalChartConfiguration::kShowModeValues; ++i)
 	{
@@ -321,7 +321,7 @@ wxString SpringShowModeKeys[CalChartConfiguration::kSpringShowModeValues] = { wx
 template <>
 CalChartConfiguration::SpringShowModeInfo_t GetConfigValue(const wxString& key, const CalChartConfiguration::SpringShowModeInfo_t& def)
 {
-	CalChartConfiguration::SpringShowModeInfo_t values;
+	auto values = def;
 	wxString path = wxT("/SPRINGSHOWMODES/") + key;
 	for (auto i=0; i < CalChartConfiguration::kSpringShowModeValues; ++i)
 	{
@@ -414,10 +414,10 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS( SLineRatio, double, 1.2);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( ContRatio, double, 0.2);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSModes, long, 0);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSLandscape, long, 0);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSOverview, long, 0);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoCont, long, 0);
-IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, long, 0);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSLandscape, bool, false);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSOverview, bool, false);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoCont, bool, false);
+IMPLEMENT_CONFIGURATION_FUNCTIONS( PrintPSDoContSheet, bool, false);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_X_4, float, kViewPoint_x_1);
 IMPLEMENT_CONFIGURATION_FUNCTIONS( OmniViewPoint_Y_4, float, kViewPoint_y_1);

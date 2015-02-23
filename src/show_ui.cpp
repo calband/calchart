@@ -376,7 +376,7 @@ void LayoutShowInfo(wxWindow *parent, bool putLastRowButtons)
 		wxButton *cancel = new wxButton(parent, wxID_CANCEL);
 		okCancelBox->Add(cancel, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	}
-	EnableLetter(*parent, label_type->GetSelection());
+	EnableLetter(*parent, label_type->GetSelection() == 1);
 }
 
 void ShowInfoReq::CreateControls()
@@ -410,7 +410,7 @@ bool ShowInfoReq::TransferDataToWindow()
 			label_letters->SetSelection(i);
 		}
 	}
-	EnableLetter(*this, labelType->GetSelection());
+	EnableLetter(*this, labelType->GetSelection() == 1);
 	return true;
 }
 
@@ -500,7 +500,7 @@ void ShowInfoReq::OnReset(wxCommandEvent&)
 void
 ShowInfoReq::OnCmd_label_type(wxCommandEvent& event)
 {
-	EnableLetter(*this, event.GetInt());
+	EnableLetter(*this, event.GetInt() == 1);
 	Refresh();
 }
 
@@ -536,7 +536,7 @@ bool ShowInfoReqWizard::TransferDataToWindow()
 		labelType->SetSelection(false);
 		pointsPerLine->SetValue(10);
 		label_letters->DeselectAll();
-		EnableLetter(*this, labelType->GetSelection());
+		EnableLetter(*this, labelType->GetSelection() == 1);
 		mTransferDataToWindowFirstTime = false;
 	}
 	return true;
@@ -620,7 +620,7 @@ bool ShowInfoReqWizard::Validate()
 void
 ShowInfoReqWizard::OnCmd_label_type(wxCommandEvent& event)
 {
-	EnableLetter(*this, event.GetInt());
+	EnableLetter(*this, event.GetInt() == 1);
 	Refresh();
 }
 

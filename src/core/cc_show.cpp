@@ -471,7 +471,7 @@ bool CC_show::SelectAll()
 
 bool CC_show::UnselectAll()
 {
-	bool changed = selectionList.size();
+	bool changed = selectionList.size() > 0;
 	selectionList.clear();
 //	UpdateAllViews();
 	return changed;

@@ -1,20 +1,34 @@
 --- CalChart README.txt ---
-Updated on 7/19/2014 by Richard Powell
+Updated on 2/1/2015 by Richard Powell
 ---
 
-CalChart version 3.4.2
+CalChart version 3.4.3
 
----
-What's new in this version?
----
+----------
 
-Bugs fixed and features added in this release:
-#24 Dot swap feature: You can swap two points on a stunt sheet
-#29 Add a ghost image of previous/next screen
-#40 Show Setup dialog: grey out letter labels when on numbers
-#68 Option to turn off point labels 
-#77 Omniview shows purple dots even when they're not colliding 
-#84 Copy and paste for pages in field view
+Release notes for 3.4.3
+
+Features addressed in this release:
+#103 Preview where dots should go on "moves"
+#109 Improved Preferences and config
+#114 Auto-zoom on Animation
+#116 use wxWidgets 3.0.2
+
+Bugs addressed in this release:
+#19  Preferences - Reset-All should not require a close and open
+#32  Make sure different versions play nicely
+#92  Group Select Doesn't Properly Report Number of Selected Dots
+#94  Inconsistent Use of Animation::GotoSheet(...)
+#96  Occasional Unhandled Exception when Changing Dot Type in Continuity Editor
+#98  Mac: cmd-c (copy) in Continuity editor closes instead of copies
+#111 "Edit print continuity" should allow tab entry
+#115 Preference color selection on Windows is screwed up
+
+Build infrastructure issues addressed in this release:
+#42  Use precompiled headers
+#90  Build warnings with Windows
+#122 Build Release for distribution
+#129 use pragma once instead of ifdef header guards
 
 ---
 What is CalChart?
@@ -86,6 +100,18 @@ For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
 Windows platforms, see the README-WINDOWS.txt.
 
 If you need to regenerate the help documentation, see the README-docs.txt
+
+----------
+
+Release notes for 3.4.2
+
+Bugs fixed and features added in this release:
+#24 Dot swap feature: You can swap two points on a stunt sheet
+#29 Add a ghost image of previous/next screen
+#40 Show Setup dialog: grey out letter labels when on numbers
+#68 Option to turn off point labels 
+#77 Omniview shows purple dots even when they're not colliding 
+#84 Copy and paste for pages in field view
 
 ----------
 

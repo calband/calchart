@@ -352,7 +352,7 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
 void
 PrintContinuityEditor::UpdateOrientation(wxCommandEvent&)
 {
-	mPrintContDisplay->SetOrientation(static_cast<wxChoice*>(FindWindow(PrintContinuityEditor_PrintOrientation))->GetSelection());
+	mPrintContDisplay->SetOrientation(static_cast<wxChoice*>(FindWindow(PrintContinuityEditor_PrintOrientation))->GetSelection() == 1);
 	Update();
 }
 

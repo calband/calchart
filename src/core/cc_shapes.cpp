@@ -309,7 +309,7 @@ CC_lasso::GetCC_DrawCommand(float x, float y) const
 	std::vector<CC_DrawCommand> result;
 	if (pntlist.size() > 1)
 	{
-		for (auto iter = 0; iter < pntlist.size()-1; ++iter)
+		for (auto iter = 0u; iter < pntlist.size()-1; ++iter)
 		{
 			result.push_back(CC_DrawCommand(x + pntlist.at(iter).x, y + pntlist.at(iter).y, x + pntlist.at(iter+1).x, y + pntlist.at(iter+1).y));
 		}
