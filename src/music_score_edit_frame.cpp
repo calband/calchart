@@ -4,7 +4,7 @@
 
 #include <random>
 
-#include <wx\gbsizer.h>
+#include <wx/gbsizer.h>
 
 BEGIN_EVENT_TABLE(MusicScoreEditFrame, wxFrame)
 EVT_BUTTON(CALCHART__MusicScore_Save, MusicScoreEditFrame::onSave)
@@ -431,7 +431,7 @@ public:
 
 	virtual std::pair<MusicScoreMoment, MusicScoreBarLabel> buildEventFromProperty(MusicScoreDocComponent* musicScore, std::shared_ptr<MusicScoreFragment> fragment, wxPGProperty* prop) {
 		unsigned bar = prop->GetPropertyByName("Bar")->GetValue().GetLong() - 1;
-		std::string label = prop->GetPropertyByName("Label")->GetValue().GetString();
+		std::string label = prop->GetPropertyByName("Label")->GetValue().GetString().ToStdString();
 		return std::pair<MusicScoreMoment, MusicScoreBarLabel>(MusicScoreMoment(fragment, bar, 0), MusicScoreBarLabel(label));
 	}
 
@@ -650,7 +650,7 @@ void MusicScoreEditFrame::createControls() {
 	mainSizer->AddGrowableCol(1, 1);
 }
 
-void MusicScoreEditFrame::makeFragmentRightClickMenu(wxPoint& position, long index) {
+void MusicScoreEditFrame::makeFragmentRightClickMenu(const wxPoint& position, long index) {
 	wxMenu popupMenu;
 	popupMenu.SetClientData(new long(index));
 	popupMenu.Append(CALCHART__MusicScore_PopupMenuRenameFragment, "Rename");
@@ -658,7 +658,7 @@ void MusicScoreEditFrame::makeFragmentRightClickMenu(wxPoint& position, long ind
 	PopupMenu(&popupMenu, position);
 }
 
-void MusicScoreEditFrame::makeFragmentPropertyRightClickMenu(wxPoint& position, wxPGProperty* clickedProp) {
+void MusicScoreEditFrame::makeFragmentPropertyRightClickMenu(const wxPoint& position, wxPGProperty* clickedProp) {
 	wxMenu popupMenu;
 	popupMenu.SetClientData(clickedProp);
 	popupMenu.Append(CALCHART__MusicScore_PopupMenuDeleteFragmentProperty, "Delete");

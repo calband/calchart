@@ -199,14 +199,14 @@ private:
 	 *   the popup menu. The index is the index of the fragment in the listctrl,
 	 *   not in the MusicScoreDocComponent.
 	 */
-	void makeFragmentRightClickMenu(wxPoint& position, long index);
+	void makeFragmentRightClickMenu(const wxPoint& position, long index);
 
 	/**
 	 * Builds a popup menu when a fragment property is right-clicked.
 	 * @param position The position at which to build the menu.
 	 * @param clickedProp The property that was right-clicked.
 	 */
-	void makeFragmentPropertyRightClickMenu(wxPoint& position, wxPGProperty* clickedProp);
+	void makeFragmentPropertyRightClickMenu(const wxPoint& position, wxPGProperty* clickedProp);
 
 	/**
 	 * Syncs the window with the content of the Music Score.
