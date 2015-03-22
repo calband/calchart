@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PROJECT=CalChart
-VERSION=3.4.2
+VERSION=3.4.3
 APP=CalChart.app
-CONFIG=Debug
+CONFIG=Release
 WC_DMG=wc.dmg
 WC_DIR=wc
 

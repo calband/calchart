@@ -38,7 +38,7 @@ public:
 		const wxString& value = wxEmptyString,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
-		long style = wxTE_MULTILINE|wxHSCROLL);
+		long style = wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB);
 #ifdef TEXT_DOS_STYLE
 	wxString GetValue(void) const;
 #endif

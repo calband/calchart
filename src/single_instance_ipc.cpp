@@ -192,7 +192,10 @@ void CCAppClient::Disconnect()
 
 bool CCAppClient::Connect(const wxString& host, const wxString& service, const wxString& topic)
 {
+	auto oldLogLevel = wxLog::GetLogLevel();
+	wxLog::SetLogLevel(wxLOG_FatalError); //Make sure that we don't throw errors to the user if the connection fails; we expect connections to fail when we are testing whether or not there is a server, and the user shouldn't be informed when we cannot find a server
 	mConnection = (CCAppClientConnection*)MakeConnection(host, service, topic);
+	wxLog::SetLogLevel(oldLogLevel);
 	return IsConnected();
 }
 

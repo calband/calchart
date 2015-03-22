@@ -207,11 +207,11 @@ NormalizeAngle(float angle)
 {
 	while (angle > 2*M_PI)
 	{
-		angle -= 2*M_PI;
+		angle -= (float)(2*M_PI);
 	}
 	while (angle < 0.0)
 	{
-		angle += 2*M_PI;
+		angle += (float)(2*M_PI);
 	}
 	return angle;
 }
@@ -414,7 +414,7 @@ wxGLContext(canvas)
     glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);			// to allow alpha values to be considered
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  // to allow alpha values to be considered
-	glClearColor(0.289,0.941,1.0,1.0);  // Default Background Color
+	glClearColor(0.289f,0.941f,1.0f,1.0f);  // Default Background Color
 	
     glGenTextures(WXSIZEOF(m_textures), m_textures);
 
@@ -732,8 +732,8 @@ CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 void
 CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 {
-	const float stepIncr = 0.3 * 3;
-	const float AngleStepIncr = 0.1 * 3;
+	const float stepIncr = 0.3f * 3;
+	const float AngleStepIncr = 0.1f * 3;
 	switch (event.GetKeyCode())
 	{
 			// predetermined camera angles:

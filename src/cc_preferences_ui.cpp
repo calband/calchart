@@ -1161,7 +1161,7 @@ bool SpringShowModeSetup::TransferDataToWindow()
 	for (size_t i = 0; i < 4; ++i)
 	{
 		wxCheckBox* checkbox = (wxCheckBox*) FindWindow(DISPLAY_YARDLINE_BELOW + i);
-		checkbox->SetValue(mSpringShowModeValues[mWhichMode][0] & (1<<i));
+		checkbox->SetValue((mSpringShowModeValues[mWhichMode][0] & (1<<i)) > 0);
 	}
 	for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1; i != mSpringShowModeValues[mWhichMode].end(); ++i)
 	{

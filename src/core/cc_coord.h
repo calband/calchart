@@ -24,8 +24,6 @@
 
 #include "cc_types.h"
 
-#include <stdint.h>
-
 #define COORD_SHIFT 4
 #define COORD_DECIMAL (1<<COORD_SHIFT)
 
