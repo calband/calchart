@@ -57,40 +57,36 @@ bool IsDiagonalDirection(float f)
 }
 
 
-void CreateVector(CC_coord& c, float dir, float mag)
+CC_coord CreateVector(float dir, float mag)
 {
-	float f;
-
 	dir = BoundDirection(dir);
 	if (IsDiagonalDirection(dir))
 	{
-		c.x = c.y = Float2Coord(mag);
-		if ((dir > 50.0) && (dir < 310.0)) c.x = -c.x;
-		if (dir < 180.0) c.y = -c.y;
+		CC_coord r{ Float2Coord(mag), Float2Coord(mag) };
+		if ((dir > 50.0) && (dir < 310.0)) r.x = -r.x;
+		if (dir < 180.0) r.y = -r.y;
+		return r;
 	}
 	else
 	{
-		f = mag * cos(Deg2Rad(dir));
-		c.x = Float2Coord(f);
-		f = mag * -sin(Deg2Rad(dir));
-		c.y = Float2Coord(f);
+		return CC_coord{ Float2Coord(mag * cos(Deg2Rad(dir))), Float2Coord(mag * -sin(Deg2Rad(dir))) };
 	}
 }
 
 
-void CreateUnitVector(float& a, float& b, float dir)
+std::tuple<float, float> CreateUnitVector(float dir)
 {
 	dir = BoundDirection(dir);
 	if (IsDiagonalDirection(dir))
 	{
-		a = b = 1.0;
-		if ((dir > 50.0) && (dir < 310.0)) a = -a;
-		if (dir < 180.0) b = -b;
+		std::tuple<float, float> result { 1.0, 1.0 };
+		if ((dir > 50.0) && (dir < 310.0)) std::get<0>(result) = -std::get<0>(result);
+		if (dir < 180.0) std::get<1>(result) = -std::get<0>(result);
+		return result;
 	}
 	else
 	{
-		a = cos(Deg2Rad(dir));
-		b = -sin(Deg2Rad(dir));
+		return std::tuple<float, float> { cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
 	}
 }
 

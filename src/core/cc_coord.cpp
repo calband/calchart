@@ -29,11 +29,7 @@
 // Get magnitude of vector
 float CC_coord::Magnitude() const
 {
-	float x_f, y_f;
-
-	x_f = Coord2Float(x);
-	y_f = Coord2Float(y);
-	return sqrt(x_f*x_f + y_f*y_f);
+	return std::hypot(Coord2Float(x), Coord2Float(y));
 }
 
 
@@ -54,12 +50,10 @@ float CC_coord::DM_Magnitude() const
 // Get direction of this vector
 float CC_coord::Direction() const
 {
-	float ang;
-
 	if (*this == 0) return 0.0;
 
-	ang = acos(Coord2Float(x)/Magnitude());		  // normalize
-	ang *= (float)(180.0/M_PI);							  // convert to degrees
+	auto ang = acos(Coord2Float(x)/Magnitude());  // normalize
+	ang *= 180.0/M_PI;							  // convert to degrees
 	if (y > 0) ang = (-ang);					  // check for > PI
 
 	return ang;
@@ -69,24 +63,20 @@ float CC_coord::Direction() const
 // Get direction from this coord to another
 float CC_coord::Direction(const CC_coord& c) const
 {
-	CC_coord vect = c - *this;
-
-	return vect.Direction();
+	return (c - *this).Direction();
 }
 
 
 // Returns the type of collision between this point and another
 CollisionType CC_coord::DetectCollision(const CC_coord& c) const
 {
-	Coord dx, dy, squaredDist, distOfOne;
-
-	dx = x - c.x;
-	dy = y - c.y;
+	auto dx = x - c.x;
+	auto dy = y - c.y;
 // Check for special cases to avoid multiplications
 	if (std::abs(dx) > Int2Coord(1)) return COLLISION_NONE;
 	if (std::abs(dy) > Int2Coord(1)) return COLLISION_NONE;
-	squaredDist = ((dx*dx) + (dy*dy));
-	distOfOne = Int2Coord(1) * Int2Coord(1);
+	auto squaredDist = ((dx*dx) + (dy*dy));
+	auto distOfOne = Int2Coord(1) * Int2Coord(1);
 	if (squaredDist < distOfOne) {
 		return COLLISION_INTERSECT;
 	}

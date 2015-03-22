@@ -55,7 +55,7 @@ error_markers(errors)
 
 
 AnimateCommands
-AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, std::list<ContProcedure*> const& procs)
+AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, std::list<std::unique_ptr<ContProcedure>> const& procs)
 {
 	AnimateCommands cmds;
 	unsigned beats_rem = c_sheet->GetBeats();
@@ -72,7 +72,7 @@ AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates
 			{
 //use EVEN REM NP
 				ContProcEven defcont(new ContValueFloat(beats_rem), new ContNextPoint());
-				defcont.Compile(&ac);
+				defcont.Compile(ac);
 				break;
 			}
 		}
@@ -80,13 +80,13 @@ AnimateCompile::Compile(const CC_show& show, AnimationVariables& variablesStates
 		{
 //use MTRM E
 			ContProcMTRM defcont(new ContValueDefined(CC_E));
-			defcont.Compile(&ac);
+			defcont.Compile(ac);
 		}
 	}
 
 	for (auto& proc : procs)
 	{
-		proc->Compile(&ac);
+		proc->Compile(ac);
 	}
 
 	if ((c_sheet + 1) != show.GetSheetEnd())
