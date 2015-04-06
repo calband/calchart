@@ -53,7 +53,9 @@ public:
 
 	// you can create a show in two ways, from nothing, or from an input stream
 	static std::unique_ptr<CC_show> Create_CC_show();
-	static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
+	static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream, uint32_t version);
+	// you can also create a show from a block of serialized data -- NOTE: THIS WILL FAIL FOR SHOW FILES OF VERSION 3.3 AND EARLIER
+	static std::unique_ptr<CC_show> Create_CC_show_From_Serialized_Data(const uint8_t* dataStart, size_t dataSize, uint32_t version);
 
 private:
 	CC_show();
@@ -64,8 +66,6 @@ private:
 public:
 	~CC_show();
 
-private:
-	std::vector<uint8_t> SerializeShowData() const;
 public:
 	// How we save and load a show:
 	std::vector<uint8_t> SerializeShow() const;

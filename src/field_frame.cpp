@@ -47,6 +47,7 @@
 #include "cc_sheet.h"
 #include "cc_point.h"
 #include "cc_fileformat.h"
+#include "music_score_edit_frame.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -120,6 +121,7 @@ EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
 EVT_MENU(CALCHART__SETDESCRIPTION, FieldFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
+EVT_MENU(CALCHART__OpenMusicScoreEditor, FieldFrame::OnCmdOpenMusicScoreEditor)
 EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
@@ -253,6 +255,7 @@ config(config_)
 	edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
 	edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
+	edit_menu->Append(CALCHART__OpenMusicScoreEditor, wxT("Open Music Score Editor..."), wxT("Opens the Music Score editor."));
 
 	wxMenu *anim_menu = new wxMenu;
 	anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
@@ -1334,3 +1337,7 @@ FieldFrame::GetShow()
 	return static_cast<CalChartDoc*>(GetDocument());
 }
 
+void FieldFrame::OnCmdOpenMusicScoreEditor(wxCommandEvent& event) {
+	MusicScoreEditFrame* musicEditor = new MusicScoreEditFrame(*static_cast<CalChartDoc*>(GetDocument()), this);
+	musicEditor->Show();
+}

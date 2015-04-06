@@ -26,6 +26,7 @@
 #include "cc_coord.h"
 #include "calchartdoc.h"
 #include "cc_show.h"
+#include "music_score_doc_component.h"
 #include <ostream>
 #include <deque>
 #include <map>
@@ -393,4 +394,16 @@ private:
 public:
 	ToggleLabelVisibilityCommand(CalChartDoc& show);
 	virtual ~ToggleLabelVisibilityCommand();
+};
+
+class OverwriteMusicScoreCommand : public BasicCalChartCommand
+{
+private:
+	using super = BasicCalChartCommand;
+public:
+	OverwriteMusicScoreCommand(CalChartDoc& show, MusicScoreDocComponent& newScore);
+protected:
+	virtual void DoAction();
+
+	MusicScoreDocComponent mNewScore;
 };

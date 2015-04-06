@@ -72,6 +72,7 @@ public:
 	void OnCmdSetDescription(wxCommandEvent& event);
 	void OnCmdSetMode(wxCommandEvent& event);
 	void OnCmdPoints(wxCommandEvent& event);
+	void OnCmdOpenMusicScoreEditor(wxCommandEvent& event);
 	void OnCmdAnimate(wxCommandEvent& event);
 	void OnCmdAbout(wxCommandEvent& event);
 	void OnCmdHelp(wxCommandEvent& event);

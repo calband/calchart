@@ -23,6 +23,7 @@
 #pragma once
 
 #include "animate.h"
+#include "music_score_doc_component.h"
 
 #include <wx/wx.h>							  // For basic wx defines
 #include <wx/docview.h>							  // For basic wx defines
@@ -107,6 +108,12 @@ private:
 	template <typename T>
 	T& SaveObjectInternal(T& stream);
 
+	void LoadComponentsFromStream(std::istream& stream);
+
+	std::vector<uint8_t> SerializeFileVersion() const;
+	std::vector<uint8_t> SerializeShow() const;
+	std::vector<uint8_t> SerializeMusicScore() const;
+
 public:
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
 	bool SetPrintableContinuity(unsigned current_sheet, const std::string& number, const std::string& lines);
@@ -164,6 +171,9 @@ public:
 	bool AlreadyHasPrintContinuity() const;
 	int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
 	
+	void overwriteMusicScore(const MusicScoreDocComponent& newScore);
+	MusicScoreDocComponent& getMusicScore();
+	const MusicScoreDocComponent& getMusicScore() const;
 private:
 	// Autosaving:
 	// goal is to allow the user to have a recoverable file.
@@ -195,5 +205,6 @@ private:
 	
 	std::unique_ptr<CC_show> mShow;
 	std::unique_ptr<const ShowMode> mMode;
+	std::unique_ptr<MusicScoreDocComponent> mMusicScore;
 	AutoSaveTimer mTimer;
 };
