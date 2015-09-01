@@ -526,6 +526,8 @@ CalChartConfiguration::Clear_ConfigColor(size_t selection)
 
 	auto default_value = ColorWidth_t(std::get<1>(ColorInfo[selection]), std::get<2>(ColorInfo[selection]));
 	SetConfigValue<ColorWidth_t>(std::get<0>(ColorInfo[selection]), default_value, default_value);
+	// clear out the cached value
+	mColorsAndWidth.erase(static_cast<CalChartColors>(selection));
 }
 
 ///// Show Configuration /////
@@ -561,6 +563,7 @@ CalChartConfiguration::Clear_ShowModeInfo(CalChartShowModes which)
 	
 	auto default_value = kShowModeDefaultValues[which];
 	SetConfigValue<ShowModeInfo_t>(kShowModeStrings[which], default_value, default_value);
+	mShowModeInfos.erase(which);
 }
 
 
@@ -595,6 +598,7 @@ CalChartConfiguration::Clear_SpringShowModeInfo(CalChartSpringShowModes which)
 	
 	auto default_value = kSpringShowModeDefaultValues[which];
 	SetConfigValue<SpringShowModeInfo_t>(kSpringShowModeStrings[which], default_value, default_value);
+	mSpringShowModeInfos.erase(which);
 }
 
 
@@ -637,6 +641,7 @@ CalChartConfiguration::Clear_yard_text(size_t which)
 	key.Printf(wxT("YardLines_%ld"), which);
 	auto default_value = yard_text_defaults[which];
 	SetConfigValue(key, default_value, default_value);
+	mYardTextInfos.erase(which);
 }
 
 wxString
@@ -677,6 +682,7 @@ CalChartConfiguration::Clear_spr_line_text(size_t which)
 	key.Printf(wxT("SpringShowLines_%ld"), which);
 	auto default_value = spr_line_text_defaults[which];
 	SetConfigValue(key, default_value, default_value);
+	mSprLineTextInfos.erase(which);
 }
 
 // function technically const because it is changing a mutable value
@@ -696,12 +702,14 @@ GetShowMode(const wxString& which)
 	auto iter = std::find(std::begin(kShowModeStrings), std::end(kShowModeStrings), which);
 	if (iter != std::end(kShowModeStrings))
 	{
-		return ShowModeStandard::CreateShowMode(which.ToStdString(), CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter))));
+		auto item = static_cast<CalChartShowModes>(std::distance(std::begin(kShowModeStrings), iter));
+		return ShowModeStandard::CreateShowMode(which.ToStdString(), [item]() { return CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(item); });
 	}
 	iter = std::find(std::begin(kSpringShowModeStrings), std::end(kSpringShowModeStrings), which);
 	if (iter != std::end(kSpringShowModeStrings))
 	{
-		return ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter))));
+		auto item = static_cast<CalChartSpringShowModes>(std::distance(std::begin(kSpringShowModeStrings), iter));
+		return ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), [item]() { return CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(item); });
 	}
 	return {};
 }

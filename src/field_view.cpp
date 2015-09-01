@@ -37,6 +37,7 @@
 #include "animatecommand.h"
 #include "cc_sheet.h"
 #include "cc_drawcommand.h"
+#include "modes.h"
 
 #include <wx/wizard.h>
 #include <wx/textfile.h>
@@ -81,7 +82,7 @@ FieldView::OnDraw(wxDC *dc)
 	{
 		// draw the field
 		CC_coord origin = mShow->GetMode().Offset();
-		DrawMode(*dc, mConfig, mShow->GetMode(), ShowMode::kFieldView);
+		DrawMode(*dc, mConfig, mShow->GetMode(), ShowMode_kFieldView);
 		
 
 		CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());

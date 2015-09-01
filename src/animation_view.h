@@ -81,8 +81,6 @@ public:
 
 	CC_continuity GetContinuityOnSheet(unsigned whichSheet, SYMBOL_TYPE whichSymbol) const;
 
-	const ShowMode& GetShowMode() const;
-
 	const CalChartDoc *GetShow() const;
 	CalChartDoc *GetShow();
 

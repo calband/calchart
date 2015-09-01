@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "modes.h"
 #include "single_instance_ipc.h"
 
 #include <wx/wx.h>

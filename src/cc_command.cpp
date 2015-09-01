@@ -25,6 +25,7 @@
 #include "calchartapp.h"
 #include "cc_sheet.h"
 #include "cc_continuity.h"
+#include "modes.h"
 #include <wx/utils.h>
 
 
