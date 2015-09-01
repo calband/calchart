@@ -1,4 +1,0 @@
-/* Click */
-light_source { <-350.0, 1000.0, 600.0> colour red 1.0 green 1.0 blue 1.0 }
-light_source { <0.0, 5000.0, 300.0> colour red 1.0 green 1.0 blue 1.0 }
-
