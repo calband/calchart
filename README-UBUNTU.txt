@@ -1,3 +1,10 @@
+NOTE (9/1/2015):
+CALCHART CURRENTLY DOES NOT BUILD FOR UBUNTU
+
+Old instructions for building on Ubuntu are included below.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 Updated on 7/2/11 by Kyle Barlow
 (note, these instructions are way out of date.)
 
