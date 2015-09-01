@@ -27,6 +27,7 @@
 #include <string>
 #include <array>
 #include <memory>
+#include <functional>
 
 #define SPR_YARD_LEFT 8
 #define SPR_YARD_RIGHT 4

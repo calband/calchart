@@ -5,6 +5,7 @@
 #include <wx/utils.h>
 #include <wx/stdpaths.h>
 #include <vector>
+#include <algorithm>
 #include <wx/ipc.h>
 
 
