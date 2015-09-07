@@ -4,6 +4,13 @@ These steps were written with Yosemite 10.10 and XCode 6.1.1.  Both should be on
 
 You also need to install the command line tools for Xcode.  See https://developer.apple.com/library/ios/technotes/tn2339/_index.html
 
+# Boost
+CalChart uses boost.  Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
+boost
+
+We assume that boost library is located at /opt/local/include.  If it is located somewhere else, you'll need to modify the Xcode project.
+
+# wxWidgets
 Note: These instructions assume you will build from source.  If you want to download from HomeBrew or some other package utility, you will have to modify xcode project to link to the appropriate place.
 Note: All lines starting with ‘$’ mean you should run them from the terminal.  Do not include the ‘$’ with the command :)
 

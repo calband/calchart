@@ -31,10 +31,18 @@ Build the following solutions
 Debug   | Win32
 Release | Win32
 
+## Download Boost
+Visit http://www.boost.org/ and download the latest version of Boost. 
+Place the downloaded Boost directory somewhere on your computer:
+	e.g. c:\boost
+Remember where you place this Boost directory. In the next section, I will refer to the directory as $YOUR_BOOST_DIRECTORY. In the example above, $YOUR_BOOST_DIRECTORY = `c:\boost`
+
 ## Add environment variables
 Go to Control Panel->System->Advanced System Settings->Environment Variables
 Add the following User variables:
 WXWIN=c:\wxWidgets-3.0.2
+BOOST_DIR=$YOUR_BOOST_DIRECTORY
+(see the `Download Boost` section above for the meaning of $YOUR_BOOST_DIRECTORY)
 
 ## Get calchart (you'll need to log in with your source forge account):
 Open cygwin and run the following:
