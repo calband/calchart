@@ -1766,6 +1766,7 @@
 					../resources,
 					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
 					"/usr/local/include/wx-3.0",
+					/opt/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
@@ -1813,6 +1814,7 @@
 					../resources,
 					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
 					"/usr/local/include/wx-3.0",
+					/opt/local/include,
 				);
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
