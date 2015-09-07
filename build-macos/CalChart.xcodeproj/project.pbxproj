@@ -24,196 +24,6 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C70C7A8C156ABC8800E14F1B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
-		C70C7A8D156ABC8800E14F1B /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
-		C70C7A8E156ABC8800E14F1B /* b0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A314DF77A800558ABA /* b0.tga */; };
-		C70C7A8F156ABC8800E14F1B /* b1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A414DF77A800558ABA /* b1.tga */; };
-		C70C7A90156ABC8800E14F1B /* b2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A514DF77A800558ABA /* b2.tga */; };
-		C70C7A91156ABC8800E14F1B /* bl0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A614DF77A800558ABA /* bl0.tga */; };
-		C70C7A92156ABC8800E14F1B /* bl1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A714DF77A800558ABA /* bl1.tga */; };
-		C70C7A93156ABC8800E14F1B /* bl2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A814DF77A800558ABA /* bl2.tga */; };
-		C70C7A94156ABC8800E14F1B /* bleachers.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2A914DF77A800558ABA /* bleachers.tga */; };
-		C70C7A95156ABC8800E14F1B /* br0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AA14DF77A800558ABA /* br0.tga */; };
-		C70C7A96156ABC8800E14F1B /* br1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AB14DF77A800558ABA /* br1.tga */; };
-		C70C7A97156ABC8800E14F1B /* br2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AC14DF77A800558ABA /* br2.tga */; };
-		C70C7A98156ABC8800E14F1B /* C.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AD14DF77A800558ABA /* C.tga */; };
-		C70C7A99156ABC8800E14F1B /* cal.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AE14DF77A800558ABA /* cal.tga */; };
-		C70C7A9A156ABC8800E14F1B /* calband.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2AF14DF77A800558ABA /* calband.tga */; };
-		C70C7A9B156ABC8800E14F1B /* california.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B014DF77A800558ABA /* california.tga */; };
-		C70C7A9C156ABC8800E14F1B /* crowd.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B114DF77A800558ABA /* crowd.tga */; };
-		C70C7A9D156ABC8800E14F1B /* Direction.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B214DF77A800558ABA /* Direction.tga */; };
-		C70C7A9E156ABC8800E14F1B /* eecs.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B314DF77A800558ABA /* eecs.tga */; };
-		C70C7A9F156ABC8800E14F1B /* endofshow.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B414DF77A800558ABA /* endofshow.tga */; };
-		C70C7AA0156ABC8800E14F1B /* f0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B514DF77A800558ABA /* f0.tga */; };
-		C70C7AA1156ABC8800E14F1B /* f0big.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B614DF77A800558ABA /* f0big.tga */; };
-		C70C7AA2156ABC8800E14F1B /* f1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B714DF77A800558ABA /* f1.tga */; };
-		C70C7AA3156ABC8800E14F1B /* f2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B814DF77A800558ABA /* f2.tga */; };
-		C70C7AA4156ABC8800E14F1B /* field.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2B914DF77A800558ABA /* field.tga */; };
-		C70C7AA5156ABC8800E14F1B /* fl0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BA14DF77A800558ABA /* fl0.tga */; };
-		C70C7AA6156ABC8800E14F1B /* fl1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BB14DF77A800558ABA /* fl1.tga */; };
-		C70C7AA7156ABC8800E14F1B /* fl2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BC14DF77A800558ABA /* fl2.tga */; };
-		C70C7AA8156ABC8800E14F1B /* fr0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BD14DF77A800558ABA /* fr0.tga */; };
-		C70C7AA9156ABC8800E14F1B /* fr1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BE14DF77A800558ABA /* fr1.tga */; };
-		C70C7AAA156ABC8800E14F1B /* fr2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2BF14DF77A800558ABA /* fr2.tga */; };
-		C70C7AAB156ABC8800E14F1B /* goalpost.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C014DF77A800558ABA /* goalpost.tga */; };
-		C70C7AAC156ABC8800E14F1B /* l0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C114DF77A800558ABA /* l0.tga */; };
-		C70C7AAD156ABC8800E14F1B /* l1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C214DF77A800558ABA /* l1.tga */; };
-		C70C7AAE156ABC8800E14F1B /* l2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C314DF77A800558ABA /* l2.tga */; };
-		C70C7AAF156ABC8800E14F1B /* lines.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C414DF77A800558ABA /* lines.tga */; };
-		C70C7AB0156ABC8800E14F1B /* pressbox.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C514DF77A800558ABA /* pressbox.tga */; };
-		C70C7AB1156ABC8800E14F1B /* r0.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C614DF77A800558ABA /* r0.tga */; };
-		C70C7AB2156ABC8800E14F1B /* r1.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C714DF77A800558ABA /* r1.tga */; };
-		C70C7AB3156ABC8800E14F1B /* r2.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C814DF77A800558ABA /* r2.tga */; };
-		C70C7AB4156ABC8800E14F1B /* sky.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2C914DF77A800558ABA /* sky.tga */; };
-		C70C7AB5156ABC8800E14F1B /* wall.tga in Resources */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
-		C70C7AB8156ABC8800E14F1B /* basic_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA96E117A6DBA00CC53E2 /* basic_ui.cpp */; };
-		C70C7AB9156ABC8800E14F1B /* confgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA973117A6DBA00CC53E2 /* confgr.cpp */; };
-		C70C7ABB156ABC8800E14F1B /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */; };
-		C70C7ABC156ABC8800E14F1B /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
-		C70C7ABE156ABC8800E14F1B /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
-		C70C7ABF156ABC8800E14F1B /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
-		C70C7AC0156ABC8800E14F1B /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
-		C70C7AC2156ABC8800E14F1B /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
-		C70C7AC8156ABC8800E14F1B /* cc_command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A845071398E7D8003AD23E /* cc_command.cpp */; };
-		C70C7AC9156ABC8800E14F1B /* cc_preferences_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */; };
-		C70C7ACA156ABC8800E14F1B /* top_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C72E2B071441150400118C03 /* top_frame.cpp */; };
-		C70C7ACC156ABC8800E14F1B /* background_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7B669741474E20300E28B63 /* background_image.cpp */; };
-		C70C7ACD156ABC8800E14F1B /* animation_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AC49AE14CCD51F00506C76 /* animation_frame.cpp */; };
-		C70C7ACE156ABC8800E14F1B /* animation_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A90814CFC5180038B6FE /* animation_canvas.cpp */; };
-		C70C7ACF156ABC8800E14F1B /* cc_omniview_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */; };
-		C70C7AD0156ABC8800E14F1B /* toolbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC23F14F06B7B00D46A7E /* toolbar.cpp */; };
-		C70C7AD1156ABC8800E14F1B /* animation_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC24414F0703800D46A7E /* animation_view.cpp */; };
-		C70C7AD6156ABC8800E14F1B /* setup_wizards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047D015609A1200D8C71B /* setup_wizards.cpp */; };
-		C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76B4EBA15694C770087FE94 /* print_ps_dialog.cpp */; };
-		C70C7ADC156ABC8800E14F1B /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
-		C70C7ADD156ABC8800E14F1B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
-		C70C7ADF156ABC8800E14F1B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD71479B385004E5C5B /* OpenGL.framework */; };
-		C70C7AE0156ABC8800E14F1B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
-		C70C7AE1156ABC8800E14F1B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
-		C70C7AE2156ABC8800E14F1B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD11479B356004E5C5B /* IOKit.framework */; };
-		C70C7AE3156ABC8800E14F1B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C70C7AE5156ABC8800E14F1B /* charthlp_macosxinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */; };
-		C70C7AE6156ABC8800E14F1B /* charthlp_macosxprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */; };
-		C70C7AE7156ABC8800E14F1B /* charthlp_geniusmove.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1781E13B7C6E800F65F4C /* charthlp_geniusmove.html */; };
-		C70C7AE8156ABC8800E14F1B /* charthlp_movepointsintoaline.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1781F13B7C6E800F65F4C /* charthlp_movepointsintoaline.html */; };
-		C70C7AE9156ABC8800E14F1B /* charthlp_reflectblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782013B7C6E800F65F4C /* charthlp_reflectblock.html */; };
-		C70C7AEA156ABC8800E14F1B /* charthlp_resizeblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782113B7C6E800F65F4C /* charthlp_resizeblock.html */; };
-		C70C7AEB156ABC8800E14F1B /* charthlp_rotateblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782213B7C6E800F65F4C /* charthlp_rotateblock.html */; };
-		C70C7AEC156ABC8800E14F1B /* charthlp_shearblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782313B7C6E800F65F4C /* charthlp_shearblock.html */; };
-		C70C7AED156ABC8800E14F1B /* charthlp_translatepoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */; };
-		C70C7AEE156ABC8800E14F1B /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
-		C70C7AEF156ABC8800E14F1B /* charthlp.con in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCB11CD594E001A4FA2 /* charthlp.con */; };
-		C70C7AF0156ABC8800E14F1B /* charthlp.hhc in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */; };
-		C70C7AF1156ABC8800E14F1B /* charthlp.hhk in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */; };
-		C70C7AF2156ABC8800E14F1B /* charthlp.hhp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */; };
-		C70C7AF3156ABC8800E14F1B /* charthlp.ref in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD011CD594E001A4FA2 /* charthlp.ref */; };
-		C70C7AF4156ABC8800E14F1B /* charthlp_acknowledge.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */; };
-		C70C7AF5156ABC8800E14F1B /* charthlp_animcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */; };
-		C70C7AF6156ABC8800E14F1B /* charthlp_animwin.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */; };
-		C70C7AF7156ABC8800E14F1B /* charthlp_basics.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD711CD594E001A4FA2 /* charthlp_basics.html */; };
-		C70C7AF8156ABC8800E14F1B /* charthlp_blam.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD811CD594E001A4FA2 /* charthlp_blam.html */; };
-		C70C7AF9156ABC8800E14F1B /* charthlp_bugs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD911CD594E001A4FA2 /* charthlp_bugs.html */; };
-		C70C7AFA156ABC8800E14F1B /* charthlp_close.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDA11CD594E001A4FA2 /* charthlp_close.html */; };
-		C70C7AFB156ABC8800E14F1B /* charthlp_comments.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDB11CD594E001A4FA2 /* charthlp_comments.html */; };
-		C70C7AFC156ABC8800E14F1B /* charthlp_contents.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDC11CD594E001A4FA2 /* charthlp_contents.html */; };
-		C70C7AFD156ABC8800E14F1B /* charthlp_copyright.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDD11CD594E001A4FA2 /* charthlp_copyright.html */; };
-		C70C7AFE156ABC8800E14F1B /* charthlp_countermarch.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDE11CD594E001A4FA2 /* charthlp_countermarch.html */; };
-		C70C7AFF156ABC8800E14F1B /* charthlp_dir.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDF11CD594E001A4FA2 /* charthlp_dir.html */; };
-		C70C7B00156ABC8800E14F1B /* charthlp_directions.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE011CD594E001A4FA2 /* charthlp_directions.html */; };
-		C70C7B01156ABC8800E14F1B /* charthlp_dirfrom.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE111CD594E001A4FA2 /* charthlp_dirfrom.html */; };
-		C70C7B02156ABC8800E14F1B /* charthlp_dist.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE211CD594E001A4FA2 /* charthlp_dist.html */; };
-		C70C7B03156ABC8800E14F1B /* charthlp_distfrom.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE311CD594E001A4FA2 /* charthlp_distfrom.html */; };
-		C70C7B04156ABC8800E14F1B /* charthlp_dmcm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE411CD594E001A4FA2 /* charthlp_dmcm.html */; };
-		C70C7B05156ABC8800E14F1B /* charthlp_dmhs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE511CD594E001A4FA2 /* charthlp_dmhs.html */; };
-		C70C7B06156ABC8800E14F1B /* charthlp_easyinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE611CD594E001A4FA2 /* charthlp_easyinstall.html */; };
-		C70C7B07156ABC8800E14F1B /* charthlp_editcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE711CD594E001A4FA2 /* charthlp_editcont.html */; };
-		C70C7B08156ABC8800E14F1B /* charthlp_either.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE811CD594E001A4FA2 /* charthlp_either.html */; };
-		C70C7B09156ABC8800E14F1B /* charthlp_even.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE911CD594E001A4FA2 /* charthlp_even.html */; };
-		C70C7B0A156ABC8800E14F1B /* charthlp_ewns.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEA11CD594E001A4FA2 /* charthlp_ewns.html */; };
-		C70C7B0B156ABC8800E14F1B /* charthlp_fm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEB11CD594E001A4FA2 /* charthlp_fm.html */; };
-		C70C7B0C156ABC8800E14F1B /* charthlp_fmto.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEC11CD594E001A4FA2 /* charthlp_fmto.html */; };
-		C70C7B0D156ABC8800E14F1B /* charthlp_fountain.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FED11CD594E001A4FA2 /* charthlp_fountain.html */; };
-		C70C7B0E156ABC8800E14F1B /* charthlp_functions.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEE11CD594E001A4FA2 /* charthlp_functions.html */; };
-		C70C7B0F156ABC8800E14F1B /* charthlp_future.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEF11CD594E001A4FA2 /* charthlp_future.html */; };
-		C70C7B10156ABC8800E14F1B /* charthlp_gpl.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF011CD594E001A4FA2 /* charthlp_gpl.html */; };
-		C70C7B11156ABC8800E14F1B /* charthlp_grid.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF111CD594E001A4FA2 /* charthlp_grid.html */; };
-		C70C7B12156ABC8800E14F1B /* charthlp_hscm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF211CD594E001A4FA2 /* charthlp_hscm.html */; };
-		C70C7B13156ABC8800E14F1B /* charthlp_hsdm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF311CD594E001A4FA2 /* charthlp_hsdm.html */; };
-		C70C7B14156ABC8800E14F1B /* charthlp_installing.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF411CD594E001A4FA2 /* charthlp_installing.html */; };
-		C70C7B15156ABC8800E14F1B /* charthlp_magic.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF511CD594E001A4FA2 /* charthlp_magic.html */; };
-		C70C7B16156ABC8800E14F1B /* charthlp_march.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF611CD594E001A4FA2 /* charthlp_march.html */; };
-		C70C7B17156ABC8800E14F1B /* charthlp_movement.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF811CD594E001A4FA2 /* charthlp_movement.html */; };
-		C70C7B18156ABC8800E14F1B /* charthlp_mt.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF911CD594E001A4FA2 /* charthlp_mt.html */; };
-		C70C7B19156ABC8800E14F1B /* charthlp_mtrm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFA11CD594E001A4FA2 /* charthlp_mtrm.html */; };
-		C70C7B1A156ABC8800E14F1B /* charthlp_newshow.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFB11CD594E001A4FA2 /* charthlp_newshow.html */; };
-		C70C7B1B156ABC8800E14F1B /* charthlp_notdone.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFC11CD594E001A4FA2 /* charthlp_notdone.html */; };
-		C70C7B1C156ABC8800E14F1B /* charthlp_nsew.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFD11CD594E001A4FA2 /* charthlp_nsew.html */; };
-		C70C7B1D156ABC8800E14F1B /* charthlp_numbers.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFE11CD594E001A4FA2 /* charthlp_numbers.html */; };
-		C70C7B1E156ABC8800E14F1B /* charthlp_obtaining.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFF11CD594E001A4FA2 /* charthlp_obtaining.html */; };
-		C70C7B1F156ABC8800E14F1B /* charthlp_opp.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500011CD594E001A4FA2 /* charthlp_opp.html */; };
-		C70C7B20156ABC8800E14F1B /* charthlp_overview.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500111CD594E001A4FA2 /* charthlp_overview.html */; };
-		C70C7B21156ABC8800E14F1B /* charthlp_pcontcodes.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500211CD594E001A4FA2 /* charthlp_pcontcodes.html */; };
-		C70C7B22156ABC8800E14F1B /* charthlp_points.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500311CD594E001A4FA2 /* charthlp_points.html */; };
-		C70C7B23156ABC8800E14F1B /* charthlp_printcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500411CD594E001A4FA2 /* charthlp_printcont.html */; };
-		C70C7B24156ABC8800E14F1B /* charthlp_problems.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500511CD594E001A4FA2 /* charthlp_problems.html */; };
-		C70C7B25156ABC8800E14F1B /* charthlp_procedures.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500611CD594E001A4FA2 /* charthlp_procedures.html */; };
-		C70C7B26156ABC8800E14F1B /* charthlp_refer.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500711CD594E001A4FA2 /* charthlp_refer.html */; };
-		C70C7B27156ABC8800E14F1B /* charthlp_refpoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500811CD594E001A4FA2 /* charthlp_refpoints.html */; };
-		C70C7B28156ABC8800E14F1B /* charthlp_reportingbugs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500911CD594E001A4FA2 /* charthlp_reportingbugs.html */; };
-		C70C7B29156ABC8800E14F1B /* charthlp_rotate.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500A11CD594E001A4FA2 /* charthlp_rotate.html */; };
-		C70C7B2A156ABC8800E14F1B /* charthlp_software.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500B11CD594E001A4FA2 /* charthlp_software.html */; };
-		C70C7B2B156ABC8800E14F1B /* charthlp_step.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500C11CD594E001A4FA2 /* charthlp_step.html */; };
-		C70C7B2C156ABC8800E14F1B /* charthlp_steps.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500D11CD594E001A4FA2 /* charthlp_steps.html */; };
-		C70C7B2D156ABC8800E14F1B /* charthlp_stepsizes.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500E11CD594E001A4FA2 /* charthlp_stepsizes.html */; };
-		C70C7B2E156ABC8800E14F1B /* charthlp_symbols.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500F11CD594E001A4FA2 /* charthlp_symbols.html */; };
-		C70C7B2F156ABC8800E14F1B /* charthlp_topic0.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501011CD594E001A4FA2 /* charthlp_topic0.html */; };
-		C70C7B30156ABC8800E14F1B /* charthlp_variables.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501411CD594E001A4FA2 /* charthlp_variables.html */; };
-		C70C7B31156ABC8800E14F1B /* charthlp_wininstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501511CD594E001A4FA2 /* charthlp_wininstall.html */; };
-		C70C7B32156ABC8800E14F1B /* charthlp_winprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */; };
-		C70C7B33156ABC8800E14F1B /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501711CD594E001A4FA2 /* contents.gif */; };
-		C70C7B34156ABC8800E14F1B /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
-		C70C7B35156ABC8800E14F1B /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
-		C70C7B37156ABC8800E14F1B /* b0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A314DF77A800558ABA /* b0.tga */; };
-		C70C7B38156ABC8800E14F1B /* b1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A414DF77A800558ABA /* b1.tga */; };
-		C70C7B39156ABC8800E14F1B /* b2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A514DF77A800558ABA /* b2.tga */; };
-		C70C7B3A156ABC8800E14F1B /* bl0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A614DF77A800558ABA /* bl0.tga */; };
-		C70C7B3B156ABC8800E14F1B /* bl1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A714DF77A800558ABA /* bl1.tga */; };
-		C70C7B3C156ABC8800E14F1B /* bl2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A814DF77A800558ABA /* bl2.tga */; };
-		C70C7B3D156ABC8800E14F1B /* bleachers.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2A914DF77A800558ABA /* bleachers.tga */; };
-		C70C7B3E156ABC8800E14F1B /* br0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AA14DF77A800558ABA /* br0.tga */; };
-		C70C7B3F156ABC8800E14F1B /* br1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AB14DF77A800558ABA /* br1.tga */; };
-		C70C7B40156ABC8800E14F1B /* br2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AC14DF77A800558ABA /* br2.tga */; };
-		C70C7B41156ABC8800E14F1B /* C.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AD14DF77A800558ABA /* C.tga */; };
-		C70C7B42156ABC8800E14F1B /* cal.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AE14DF77A800558ABA /* cal.tga */; };
-		C70C7B43156ABC8800E14F1B /* calband.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2AF14DF77A800558ABA /* calband.tga */; };
-		C70C7B44156ABC8800E14F1B /* california.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B014DF77A800558ABA /* california.tga */; };
-		C70C7B45156ABC8800E14F1B /* crowd.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B114DF77A800558ABA /* crowd.tga */; };
-		C70C7B46156ABC8800E14F1B /* Direction.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B214DF77A800558ABA /* Direction.tga */; };
-		C70C7B47156ABC8800E14F1B /* eecs.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B314DF77A800558ABA /* eecs.tga */; };
-		C70C7B48156ABC8800E14F1B /* endofshow.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B414DF77A800558ABA /* endofshow.tga */; };
-		C70C7B49156ABC8800E14F1B /* f0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B514DF77A800558ABA /* f0.tga */; };
-		C70C7B4A156ABC8800E14F1B /* f0big.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B614DF77A800558ABA /* f0big.tga */; };
-		C70C7B4B156ABC8800E14F1B /* f1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B714DF77A800558ABA /* f1.tga */; };
-		C70C7B4C156ABC8800E14F1B /* f2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B814DF77A800558ABA /* f2.tga */; };
-		C70C7B4D156ABC8800E14F1B /* field.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2B914DF77A800558ABA /* field.tga */; };
-		C70C7B4E156ABC8800E14F1B /* fl0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BA14DF77A800558ABA /* fl0.tga */; };
-		C70C7B4F156ABC8800E14F1B /* fl1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BB14DF77A800558ABA /* fl1.tga */; };
-		C70C7B50156ABC8800E14F1B /* fl2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BC14DF77A800558ABA /* fl2.tga */; };
-		C70C7B51156ABC8800E14F1B /* fr0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BD14DF77A800558ABA /* fr0.tga */; };
-		C70C7B52156ABC8800E14F1B /* fr1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BE14DF77A800558ABA /* fr1.tga */; };
-		C70C7B53156ABC8800E14F1B /* fr2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2BF14DF77A800558ABA /* fr2.tga */; };
-		C70C7B54156ABC8800E14F1B /* goalpost.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C014DF77A800558ABA /* goalpost.tga */; };
-		C70C7B55156ABC8800E14F1B /* l0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C114DF77A800558ABA /* l0.tga */; };
-		C70C7B56156ABC8800E14F1B /* l1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C214DF77A800558ABA /* l1.tga */; };
-		C70C7B57156ABC8800E14F1B /* l2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C314DF77A800558ABA /* l2.tga */; };
-		C70C7B58156ABC8800E14F1B /* lines.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C414DF77A800558ABA /* lines.tga */; };
-		C70C7B59156ABC8800E14F1B /* pressbox.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C514DF77A800558ABA /* pressbox.tga */; };
-		C70C7B5A156ABC8800E14F1B /* r0.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C614DF77A800558ABA /* r0.tga */; };
-		C70C7B5B156ABC8800E14F1B /* r1.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C714DF77A800558ABA /* r1.tga */; };
-		C70C7B5C156ABC8800E14F1B /* r2.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C814DF77A800558ABA /* r2.tga */; };
-		C70C7B5D156ABC8800E14F1B /* sky.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2C914DF77A800558ABA /* sky.tga */; };
-		C70C7B5E156ABC8800E14F1B /* wall.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
-		C713C8D9156C10A600776558 /* field_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047C6155F279000D8C71B /* field_view.cpp */; };
 		C72E2B091441150400118C03 /* top_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C72E2B071441150400118C03 /* top_frame.cpp */; };
 		C72F24BA14D4976E00758A0E /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
 		C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC23F14F06B7B00D46A7E /* toolbar.cpp */; };
@@ -405,7 +215,6 @@
 		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
 		E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
-		E803362B17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
 		E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
 		E803362D17EE1E3B00A58457 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
@@ -414,7 +223,6 @@
 		E803363117EE1E9700A58457 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		E803363317EE23F500A58457 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E803363617EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
-		E803363717EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E803363817EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E807BD5F17ED71F60052A53F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E807BD5E17ED71F60052A53F /* main.cpp */; };
 		E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E807BD6017ED71F60052A53F /* calchart_cmd.1 */; };
@@ -424,25 +232,15 @@
 		E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
 		E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
 		E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
-		E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
-		E813C4AF17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
 		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
-		E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
-		E878CCA117ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
 		E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
 		E884F39117A5E60C00831301 /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
 		E884F39217A5E60C00831301 /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
 		E884F39317A5E60C00831301 /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
-		E884F39417A5E62000831301 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
-		E884F39517A5E62000831301 /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
-		E884F39617A5E62000831301 /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
-		E884F39717A5E62000831301 /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
 		E884F39C17A5F09100831301 /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
-		E884F39D17A5F09100831301 /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
 		E884F3A017A631AD00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
-		E884F3A117A631AE00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
 		E89A41F51A23B74700A2FB3E /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
 		E89A41F61A23B74800A2FB3E /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
@@ -472,147 +270,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		C70C7AE4156ABC8800E14F1B /* Copy Docs */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = docs;
-			dstSubfolderSpec = 1;
-			files = (
-				C70C7AE5156ABC8800E14F1B /* charthlp_macosxinstall.html in Copy Docs */,
-				C70C7AE6156ABC8800E14F1B /* charthlp_macosxprinter.html in Copy Docs */,
-				C70C7AE7156ABC8800E14F1B /* charthlp_geniusmove.html in Copy Docs */,
-				C70C7AE8156ABC8800E14F1B /* charthlp_movepointsintoaline.html in Copy Docs */,
-				C70C7AE9156ABC8800E14F1B /* charthlp_reflectblock.html in Copy Docs */,
-				C70C7AEA156ABC8800E14F1B /* charthlp_resizeblock.html in Copy Docs */,
-				C70C7AEB156ABC8800E14F1B /* charthlp_rotateblock.html in Copy Docs */,
-				C70C7AEC156ABC8800E14F1B /* charthlp_shearblock.html in Copy Docs */,
-				C70C7AED156ABC8800E14F1B /* charthlp_translatepoints.html in Copy Docs */,
-				C70C7AEE156ABC8800E14F1B /* back.gif in Copy Docs */,
-				C70C7AEF156ABC8800E14F1B /* charthlp.con in Copy Docs */,
-				C70C7AF0156ABC8800E14F1B /* charthlp.hhc in Copy Docs */,
-				C70C7AF1156ABC8800E14F1B /* charthlp.hhk in Copy Docs */,
-				C70C7AF2156ABC8800E14F1B /* charthlp.hhp in Copy Docs */,
-				C70C7AF3156ABC8800E14F1B /* charthlp.ref in Copy Docs */,
-				C70C7AF4156ABC8800E14F1B /* charthlp_acknowledge.html in Copy Docs */,
-				C70C7AF5156ABC8800E14F1B /* charthlp_animcont.html in Copy Docs */,
-				C70C7AF6156ABC8800E14F1B /* charthlp_animwin.html in Copy Docs */,
-				C70C7AF7156ABC8800E14F1B /* charthlp_basics.html in Copy Docs */,
-				C70C7AF8156ABC8800E14F1B /* charthlp_blam.html in Copy Docs */,
-				C70C7AF9156ABC8800E14F1B /* charthlp_bugs.html in Copy Docs */,
-				C70C7AFA156ABC8800E14F1B /* charthlp_close.html in Copy Docs */,
-				C70C7AFB156ABC8800E14F1B /* charthlp_comments.html in Copy Docs */,
-				C70C7AFC156ABC8800E14F1B /* charthlp_contents.html in Copy Docs */,
-				C70C7AFD156ABC8800E14F1B /* charthlp_copyright.html in Copy Docs */,
-				C70C7AFE156ABC8800E14F1B /* charthlp_countermarch.html in Copy Docs */,
-				C70C7AFF156ABC8800E14F1B /* charthlp_dir.html in Copy Docs */,
-				C70C7B00156ABC8800E14F1B /* charthlp_directions.html in Copy Docs */,
-				C70C7B01156ABC8800E14F1B /* charthlp_dirfrom.html in Copy Docs */,
-				C70C7B02156ABC8800E14F1B /* charthlp_dist.html in Copy Docs */,
-				C70C7B03156ABC8800E14F1B /* charthlp_distfrom.html in Copy Docs */,
-				C70C7B04156ABC8800E14F1B /* charthlp_dmcm.html in Copy Docs */,
-				C70C7B05156ABC8800E14F1B /* charthlp_dmhs.html in Copy Docs */,
-				C70C7B06156ABC8800E14F1B /* charthlp_easyinstall.html in Copy Docs */,
-				C70C7B07156ABC8800E14F1B /* charthlp_editcont.html in Copy Docs */,
-				C70C7B08156ABC8800E14F1B /* charthlp_either.html in Copy Docs */,
-				C70C7B09156ABC8800E14F1B /* charthlp_even.html in Copy Docs */,
-				C70C7B0A156ABC8800E14F1B /* charthlp_ewns.html in Copy Docs */,
-				C70C7B0B156ABC8800E14F1B /* charthlp_fm.html in Copy Docs */,
-				C70C7B0C156ABC8800E14F1B /* charthlp_fmto.html in Copy Docs */,
-				C70C7B0D156ABC8800E14F1B /* charthlp_fountain.html in Copy Docs */,
-				C70C7B0E156ABC8800E14F1B /* charthlp_functions.html in Copy Docs */,
-				C70C7B0F156ABC8800E14F1B /* charthlp_future.html in Copy Docs */,
-				C70C7B10156ABC8800E14F1B /* charthlp_gpl.html in Copy Docs */,
-				C70C7B11156ABC8800E14F1B /* charthlp_grid.html in Copy Docs */,
-				C70C7B12156ABC8800E14F1B /* charthlp_hscm.html in Copy Docs */,
-				C70C7B13156ABC8800E14F1B /* charthlp_hsdm.html in Copy Docs */,
-				C70C7B14156ABC8800E14F1B /* charthlp_installing.html in Copy Docs */,
-				C70C7B15156ABC8800E14F1B /* charthlp_magic.html in Copy Docs */,
-				C70C7B16156ABC8800E14F1B /* charthlp_march.html in Copy Docs */,
-				C70C7B17156ABC8800E14F1B /* charthlp_movement.html in Copy Docs */,
-				C70C7B18156ABC8800E14F1B /* charthlp_mt.html in Copy Docs */,
-				C70C7B19156ABC8800E14F1B /* charthlp_mtrm.html in Copy Docs */,
-				C70C7B1A156ABC8800E14F1B /* charthlp_newshow.html in Copy Docs */,
-				C70C7B1B156ABC8800E14F1B /* charthlp_notdone.html in Copy Docs */,
-				C70C7B1C156ABC8800E14F1B /* charthlp_nsew.html in Copy Docs */,
-				C70C7B1D156ABC8800E14F1B /* charthlp_numbers.html in Copy Docs */,
-				C70C7B1E156ABC8800E14F1B /* charthlp_obtaining.html in Copy Docs */,
-				C70C7B1F156ABC8800E14F1B /* charthlp_opp.html in Copy Docs */,
-				C70C7B20156ABC8800E14F1B /* charthlp_overview.html in Copy Docs */,
-				C70C7B21156ABC8800E14F1B /* charthlp_pcontcodes.html in Copy Docs */,
-				C70C7B22156ABC8800E14F1B /* charthlp_points.html in Copy Docs */,
-				C70C7B23156ABC8800E14F1B /* charthlp_printcont.html in Copy Docs */,
-				C70C7B24156ABC8800E14F1B /* charthlp_problems.html in Copy Docs */,
-				C70C7B25156ABC8800E14F1B /* charthlp_procedures.html in Copy Docs */,
-				C70C7B26156ABC8800E14F1B /* charthlp_refer.html in Copy Docs */,
-				C70C7B27156ABC8800E14F1B /* charthlp_refpoints.html in Copy Docs */,
-				C70C7B28156ABC8800E14F1B /* charthlp_reportingbugs.html in Copy Docs */,
-				C70C7B29156ABC8800E14F1B /* charthlp_rotate.html in Copy Docs */,
-				C70C7B2A156ABC8800E14F1B /* charthlp_software.html in Copy Docs */,
-				C70C7B2B156ABC8800E14F1B /* charthlp_step.html in Copy Docs */,
-				C70C7B2C156ABC8800E14F1B /* charthlp_steps.html in Copy Docs */,
-				C70C7B2D156ABC8800E14F1B /* charthlp_stepsizes.html in Copy Docs */,
-				C70C7B2E156ABC8800E14F1B /* charthlp_symbols.html in Copy Docs */,
-				C70C7B2F156ABC8800E14F1B /* charthlp_topic0.html in Copy Docs */,
-				C70C7B30156ABC8800E14F1B /* charthlp_variables.html in Copy Docs */,
-				C70C7B31156ABC8800E14F1B /* charthlp_wininstall.html in Copy Docs */,
-				C70C7B32156ABC8800E14F1B /* charthlp_winprinter.html in Copy Docs */,
-				C70C7B33156ABC8800E14F1B /* contents.gif in Copy Docs */,
-				C70C7B34156ABC8800E14F1B /* forward.gif in Copy Docs */,
-				C70C7B35156ABC8800E14F1B /* up.gif in Copy Docs */,
-			);
-			name = "Copy Docs";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C70C7B36156ABC8800E14F1B /* Copy Images */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = image;
-			dstSubfolderSpec = 1;
-			files = (
-				C70C7B37156ABC8800E14F1B /* b0.tga in Copy Images */,
-				C70C7B38156ABC8800E14F1B /* b1.tga in Copy Images */,
-				C70C7B39156ABC8800E14F1B /* b2.tga in Copy Images */,
-				C70C7B3A156ABC8800E14F1B /* bl0.tga in Copy Images */,
-				C70C7B3B156ABC8800E14F1B /* bl1.tga in Copy Images */,
-				C70C7B3C156ABC8800E14F1B /* bl2.tga in Copy Images */,
-				C70C7B3D156ABC8800E14F1B /* bleachers.tga in Copy Images */,
-				C70C7B3E156ABC8800E14F1B /* br0.tga in Copy Images */,
-				C70C7B3F156ABC8800E14F1B /* br1.tga in Copy Images */,
-				C70C7B40156ABC8800E14F1B /* br2.tga in Copy Images */,
-				C70C7B41156ABC8800E14F1B /* C.tga in Copy Images */,
-				C70C7B42156ABC8800E14F1B /* cal.tga in Copy Images */,
-				C70C7B43156ABC8800E14F1B /* calband.tga in Copy Images */,
-				C70C7B44156ABC8800E14F1B /* california.tga in Copy Images */,
-				C70C7B45156ABC8800E14F1B /* crowd.tga in Copy Images */,
-				C70C7B46156ABC8800E14F1B /* Direction.tga in Copy Images */,
-				C70C7B47156ABC8800E14F1B /* eecs.tga in Copy Images */,
-				C70C7B48156ABC8800E14F1B /* endofshow.tga in Copy Images */,
-				C70C7B49156ABC8800E14F1B /* f0.tga in Copy Images */,
-				C70C7B4A156ABC8800E14F1B /* f0big.tga in Copy Images */,
-				C70C7B4B156ABC8800E14F1B /* f1.tga in Copy Images */,
-				C70C7B4C156ABC8800E14F1B /* f2.tga in Copy Images */,
-				C70C7B4D156ABC8800E14F1B /* field.tga in Copy Images */,
-				C70C7B4E156ABC8800E14F1B /* fl0.tga in Copy Images */,
-				C70C7B4F156ABC8800E14F1B /* fl1.tga in Copy Images */,
-				C70C7B50156ABC8800E14F1B /* fl2.tga in Copy Images */,
-				C70C7B51156ABC8800E14F1B /* fr0.tga in Copy Images */,
-				C70C7B52156ABC8800E14F1B /* fr1.tga in Copy Images */,
-				C70C7B53156ABC8800E14F1B /* fr2.tga in Copy Images */,
-				C70C7B54156ABC8800E14F1B /* goalpost.tga in Copy Images */,
-				C70C7B55156ABC8800E14F1B /* l0.tga in Copy Images */,
-				C70C7B56156ABC8800E14F1B /* l1.tga in Copy Images */,
-				C70C7B57156ABC8800E14F1B /* l2.tga in Copy Images */,
-				C70C7B58156ABC8800E14F1B /* lines.tga in Copy Images */,
-				C70C7B59156ABC8800E14F1B /* pressbox.tga in Copy Images */,
-				C70C7B5A156ABC8800E14F1B /* r0.tga in Copy Images */,
-				C70C7B5B156ABC8800E14F1B /* r1.tga in Copy Images */,
-				C70C7B5C156ABC8800E14F1B /* r2.tga in Copy Images */,
-				C70C7B5D156ABC8800E14F1B /* sky.tga in Copy Images */,
-				C70C7B5E156ABC8800E14F1B /* wall.tga in Copy Images */,
-			);
-			name = "Copy Images";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C774E2F314DF77B900558ABA /* Copy Images */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -774,7 +431,6 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChartHomeView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C70C7B64156ABC8A00E14F1B /* CalChartHomeView-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CalChartHomeView-Info.plist"; path = "/Users/rmpowell77/Development/calchart/trunk/build-macos/CalChartHomeView-Info.plist"; sourceTree = "<absolute>"; };
 		C72C5FDF155CD16100194225 /* cc_omniview_constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_omniview_constants.h; sourceTree = "<group>"; };
 		C72E2B071441150400118C03 /* top_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = top_frame.cpp; sourceTree = "<group>"; };
@@ -1017,20 +673,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C70C7ADB156ABC8800E14F1B /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C70C7ADC156ABC8800E14F1B /* GLUT.framework in Frameworks */,
-				C70C7ADD156ABC8800E14F1B /* WebKit.framework in Frameworks */,
-				C70C7ADF156ABC8800E14F1B /* OpenGL.framework in Frameworks */,
-				C70C7AE0156ABC8800E14F1B /* AudioToolbox.framework in Frameworks */,
-				C70C7AE1156ABC8800E14F1B /* Carbon.framework in Frameworks */,
-				C70C7AE2156ABC8800E14F1B /* IOKit.framework in Frameworks */,
-				C70C7AE3156ABC8800E14F1B /* Cocoa.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E807BD5917ED71F50052A53F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1063,7 +705,6 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* CalChart.app */,
-				C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */,
 				E807BD5C17ED71F50052A53F /* calchart_cmd */,
 			);
 			name = Products;
@@ -1395,26 +1036,6 @@
 			productReference = 8D1107320486CEB800E47090 /* CalChart.app */;
 			productType = "com.apple.product-type.application";
 		};
-		C70C7A8A156ABC8800E14F1B /* CalChartHomeView */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C70C7B5F156ABC8800E14F1B /* Build configuration list for PBXNativeTarget "CalChartHomeView" */;
-			buildPhases = (
-				C70C7A8B156ABC8800E14F1B /* Resources */,
-				C70C7AB6156ABC8800E14F1B /* Sources */,
-				C70C7ADB156ABC8800E14F1B /* Frameworks */,
-				C70C7AE4156ABC8800E14F1B /* Copy Docs */,
-				C70C7B36156ABC8800E14F1B /* Copy Images */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = CalChartHomeView;
-			productInstallPath = "$(HOME)/Applications";
-			productName = CalChart;
-			productReference = C70C7B62156ABC8800E14F1B /* CalChartHomeView.app */;
-			productType = "com.apple.product-type.application";
-		};
 		E807BD5B17ED71F50052A53F /* calchart_cmd */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E807BD6417ED71F60052A53F /* Build configuration list for PBXNativeTarget "calchart_cmd" */;
@@ -1456,7 +1077,6 @@
 			targets = (
 				E803363917EE289400A58457 /* All */,
 				8D1107260486CEB800E47090 /* CalChart */,
-				C70C7A8A156ABC8800E14F1B /* CalChartHomeView */,
 				E807BD5B17ED71F50052A53F /* calchart_cmd */,
 			);
 		};
@@ -1512,55 +1132,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C70C7A8B156ABC8800E14F1B /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C70C7A8C156ABC8800E14F1B /* InfoPlist.strings in Resources */,
-				C70C7A8D156ABC8800E14F1B /* calchart.icns in Resources */,
-				C70C7A8E156ABC8800E14F1B /* b0.tga in Resources */,
-				C70C7A8F156ABC8800E14F1B /* b1.tga in Resources */,
-				C70C7A90156ABC8800E14F1B /* b2.tga in Resources */,
-				C70C7A91156ABC8800E14F1B /* bl0.tga in Resources */,
-				C70C7A92156ABC8800E14F1B /* bl1.tga in Resources */,
-				C70C7A93156ABC8800E14F1B /* bl2.tga in Resources */,
-				C70C7A94156ABC8800E14F1B /* bleachers.tga in Resources */,
-				C70C7A95156ABC8800E14F1B /* br0.tga in Resources */,
-				C70C7A96156ABC8800E14F1B /* br1.tga in Resources */,
-				C70C7A97156ABC8800E14F1B /* br2.tga in Resources */,
-				C70C7A98156ABC8800E14F1B /* C.tga in Resources */,
-				C70C7A99156ABC8800E14F1B /* cal.tga in Resources */,
-				C70C7A9A156ABC8800E14F1B /* calband.tga in Resources */,
-				C70C7A9B156ABC8800E14F1B /* california.tga in Resources */,
-				C70C7A9C156ABC8800E14F1B /* crowd.tga in Resources */,
-				C70C7A9D156ABC8800E14F1B /* Direction.tga in Resources */,
-				C70C7A9E156ABC8800E14F1B /* eecs.tga in Resources */,
-				C70C7A9F156ABC8800E14F1B /* endofshow.tga in Resources */,
-				C70C7AA0156ABC8800E14F1B /* f0.tga in Resources */,
-				C70C7AA1156ABC8800E14F1B /* f0big.tga in Resources */,
-				C70C7AA2156ABC8800E14F1B /* f1.tga in Resources */,
-				C70C7AA3156ABC8800E14F1B /* f2.tga in Resources */,
-				C70C7AA4156ABC8800E14F1B /* field.tga in Resources */,
-				C70C7AA5156ABC8800E14F1B /* fl0.tga in Resources */,
-				C70C7AA6156ABC8800E14F1B /* fl1.tga in Resources */,
-				C70C7AA7156ABC8800E14F1B /* fl2.tga in Resources */,
-				C70C7AA8156ABC8800E14F1B /* fr0.tga in Resources */,
-				C70C7AA9156ABC8800E14F1B /* fr1.tga in Resources */,
-				C70C7AAA156ABC8800E14F1B /* fr2.tga in Resources */,
-				C70C7AAB156ABC8800E14F1B /* goalpost.tga in Resources */,
-				C70C7AAC156ABC8800E14F1B /* l0.tga in Resources */,
-				C70C7AAD156ABC8800E14F1B /* l1.tga in Resources */,
-				C70C7AAE156ABC8800E14F1B /* l2.tga in Resources */,
-				C70C7AAF156ABC8800E14F1B /* lines.tga in Resources */,
-				C70C7AB0156ABC8800E14F1B /* pressbox.tga in Resources */,
-				C70C7AB1156ABC8800E14F1B /* r0.tga in Resources */,
-				C70C7AB2156ABC8800E14F1B /* r1.tga in Resources */,
-				C70C7AB3156ABC8800E14F1B /* r2.tga in Resources */,
-				C70C7AB4156ABC8800E14F1B /* sky.tga in Resources */,
-				C70C7AB5156ABC8800E14F1B /* wall.tga in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1608,45 +1179,6 @@
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C70C7AB6156ABC8800E14F1B /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C70C7AB8156ABC8800E14F1B /* basic_ui.cpp in Sources */,
-				C70C7AB9156ABC8800E14F1B /* confgr.cpp in Sources */,
-				C70C7ABB156ABC8800E14F1B /* cont_ui.cpp in Sources */,
-				C70C7ABC156ABC8800E14F1B /* draw.cpp in Sources */,
-				C70C7ABE156ABC8800E14F1B /* show_ui.cpp in Sources */,
-				C70C7ABF156ABC8800E14F1B /* contgram.cpp in Sources */,
-				C70C7AC0156ABC8800E14F1B /* contscan.cpp in Sources */,
-				C70C7AC2156ABC8800E14F1B /* calchartapp.cpp in Sources */,
-				C70C7AC8156ABC8800E14F1B /* cc_command.cpp in Sources */,
-				C70C7AC9156ABC8800E14F1B /* cc_preferences_ui.cpp in Sources */,
-				E803362B17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
-				C70C7ACA156ABC8800E14F1B /* top_frame.cpp in Sources */,
-				C70C7ACC156ABC8800E14F1B /* background_image.cpp in Sources */,
-				C70C7ACD156ABC8800E14F1B /* animation_frame.cpp in Sources */,
-				C70C7ACE156ABC8800E14F1B /* animation_canvas.cpp in Sources */,
-				C70C7ACF156ABC8800E14F1B /* cc_omniview_canvas.cpp in Sources */,
-				C70C7AD0156ABC8800E14F1B /* toolbar.cpp in Sources */,
-				C70C7AD1156ABC8800E14F1B /* animation_view.cpp in Sources */,
-				E803363717EE27C500A58457 /* math_utils.cpp in Sources */,
-				C70C7AD6156ABC8800E14F1B /* setup_wizards.cpp in Sources */,
-				C70C7AD8156ABC8800E14F1B /* print_ps_dialog.cpp in Sources */,
-				C713C8D9156C10A600776558 /* field_view.cpp in Sources */,
-				E884F39417A5E62000831301 /* cc_coord.cpp in Sources */,
-				E884F39517A5E62000831301 /* cc_point.cpp in Sources */,
-				E884F39617A5E62000831301 /* cc_sheet.cpp in Sources */,
-				E884F39717A5E62000831301 /* cc_show.cpp in Sources */,
-				E884F39D17A5F09100831301 /* cc_continuity.cpp in Sources */,
-				E884F3A117A631AE00831301 /* animate.cpp in Sources */,
-				E813C4AD17A7886200705836 /* animatecommand.cpp in Sources */,
-				E813C4AF17A7886200705836 /* animatecompile.cpp in Sources */,
-				E878CC9D17ACA6AC009B1F1C /* cont.cpp in Sources */,
-				E878CCA117ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1841,49 +1373,6 @@
 			};
 			name = Release;
 		};
-		C70C7B60156ABC8800E14F1B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_FILE_OFFSET_BITS=64",
-					__WXMAC__,
-					__WXOSX__,
-					__WXOSX_COCOA__,
-					"BUILD_FOR_VIEWER=1",
-				);
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "CalChartHomeView-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				PRODUCT_NAME = CalChartHomeView;
-			};
-			name = Debug;
-		};
-		C70C7B61156ABC8800E14F1B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_FILE_OFFSET_BITS=64",
-					__WXMAC__,
-					__WXOSX__,
-					__WXOSX_COCOA__,
-					"BUILD_FOR_VIEWER=1",
-				);
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "CalChartHomeView-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				PRODUCT_NAME = CalChartHomeView;
-			};
-			name = Release;
-		};
 		E803363B17EE289400A58457 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1961,15 +1450,6 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C70C7B5F156ABC8800E14F1B /* Build configuration list for PBXNativeTarget "CalChartHomeView" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C70C7B60156ABC8800E14F1B /* Debug */,
-				C70C7B61156ABC8800E14F1B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
