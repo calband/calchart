@@ -25,6 +25,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cstdlib>
+#include <tuple>
 
 class CC_coord;
 
