@@ -33,14 +33,11 @@ static const double kEpsilon = 0.00001;
 template <typename T>
 bool IS_ZERO(const T& a)
 {
-	return std::abs(a) < kEpsilon;
+    return std::abs(a) < kEpsilon;
 }
 
 template <typename T>
-T Deg2Rad(const T& a)
-{
-	return a * M_PI/180.0;
-}
+T Deg2Rad(const T& a) { return a * M_PI / 180.0; }
 
 #define SQRT2 1.4142136
 

@@ -32,61 +32,70 @@ class AnimationView;
 class CCOmniView_GLContext;
 class CalChartConfiguration;
 
-struct viewpoint_t
-{
-	viewpoint_t(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) : x(x_), y(y_), z(z_) {}
-	float x, y, z;
+struct viewpoint_t {
+    viewpoint_t(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f)
+        : x(x_)
+        , y(y_)
+        , z(z_)
+    {
+    }
+    float x, y, z;
 };
 
-struct MarcherInfo
-{
-	MarcherInfo(float x_ = 0, float y_ = 0, float dir = 0) : direction(dir), x(x_), y(y_) {}
-	float direction;
-	float x;
-	float y;
+struct MarcherInfo {
+    MarcherInfo(float x_ = 0, float y_ = 0, float dir = 0)
+        : direction(dir)
+        , x(x_)
+        , y(y_)
+    {
+    }
+    float direction;
+    float x;
+    float y;
 };
 
-class CCOmniView_Canvas: public wxGLCanvas
-{
+class CCOmniView_Canvas : public wxGLCanvas {
 public:
-	CCOmniView_Canvas(AnimationView *view, wxWindow *frame, CalChartConfiguration& config, const wxSize& size = wxDefaultSize);
-	~CCOmniView_Canvas();
+    CCOmniView_Canvas(AnimationView* view, wxWindow* frame,
+        CalChartConfiguration& config,
+        const wxSize& size = wxDefaultSize);
+    ~CCOmniView_Canvas();
 
-	void SetView(AnimationView *view);
+    void SetView(AnimationView* view);
 
-	void OnPaint(wxPaintEvent& event);
-	void OnChar(wxKeyEvent& event);
-	void OnMouseMove(wxMouseEvent& event);
+    void OnPaint(wxPaintEvent& event);
+    void OnChar(wxKeyEvent& event);
+    void OnMouseMove(wxMouseEvent& event);
 
-	// negative -1 is to stop following
-	void OnCmd_FollowMarcher(int which);
-	void OnCmd_SaveCameraAngle(size_t which);
-	void OnCmd_GoToCameraAngle(size_t which);
-	void OnCmd_ToggleCrowd();
-	void OnCmd_ToggleMarching();
-	void OnCmd_ToggleShowOnlySelected();
+    // negative -1 is to stop following
+    void OnCmd_FollowMarcher(int which);
+    void OnCmd_SaveCameraAngle(size_t which);
+    void OnCmd_GoToCameraAngle(size_t which);
+    void OnCmd_ToggleCrowd();
+    void OnCmd_ToggleMarching();
+    void OnCmd_ToggleShowOnlySelected();
 
 private:
-	MarcherInfo GetMarcherInfo(size_t which) const;
-	std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
+    MarcherInfo GetMarcherInfo(size_t which) const;
+    std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
 
-	std::shared_ptr<CCOmniView_GLContext> m_glContext;
-	AnimationView *mAnimationView;
-	CalChartConfiguration& config;
-	viewpoint_t mViewPoint;
+    std::shared_ptr<CCOmniView_GLContext> m_glContext;
+    AnimationView* mAnimationView;
+    CalChartConfiguration& config;
+    viewpoint_t mViewPoint;
 
-	// a -1 means not following any marcher
-	int mFollowMarcher;
-	bool mCrowdOn;
-	bool mShowOnlySelected;
-	bool mShowMarching;
-	float mViewAngle, mViewAngleZ;
-	float mFOV;
-	
-	// for mouse camera move:
-	bool mShiftMoving;
-	wxPoint mStartShiftMoveMousePosition;
-	float mStartShiftMoveViewAngle, mStartShiftMoveViewAngleZ;
-	
-	wxDECLARE_EVENT_TABLE();
+    // a -1 means not following any marcher
+    int mFollowMarcher;
+    bool mCrowdOn;
+    bool mShowOnlySelected;
+    bool mShowMarching;
+    float mViewAngle, mViewAngleZ;
+    float mFOV;
+
+    // for mouse camera move:
+    bool mShiftMoving;
+    wxPoint mStartShiftMoveMousePosition;
+    float mStartShiftMoveViewAngle, mStartShiftMoveViewAngleZ;
+
+    wxDECLARE_EVENT_TABLE();
 };

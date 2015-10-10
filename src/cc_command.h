@@ -40,357 +40,332 @@ class Matrix;
 // BasicCalChartCommand
 // The low level command all other commands should inherit from.
 // Holds the show reference, and handles setting the modify-ness of the show.
-class BasicCalChartCommand : public wxCommand
-{
+class BasicCalChartCommand : public wxCommand {
 public:
-	BasicCalChartCommand(CalChartDoc& doc, const wxString cmdName);
-	// make destructor virtual and implement it to force abstract base class
-	virtual ~BasicCalChartCommand() = 0;
+    BasicCalChartCommand(CalChartDoc& doc, const wxString cmdName);
+    // make destructor virtual and implement it to force abstract base class
+    virtual ~BasicCalChartCommand() = 0;
 
-	virtual bool Do();
-	virtual bool Undo();
+    virtual bool Do();
+    virtual bool Undo();
 
 protected:
-	CalChartDoc& mDoc;
+    CalChartDoc& mDoc;
 
 private:
-	virtual void DoAction() = 0;
-	bool mDocModified;
-	CC_show mSnapShot;
+    virtual void DoAction() = 0;
+    bool mDocModified;
+    CC_show mSnapShot;
 };
 
 ///// Global show commands.  Changes settings to a whole show.
 
 // SetDescriptionCommand
 // Set the description of this show
-class SetDescriptionCommand : public BasicCalChartCommand
-{
+class SetDescriptionCommand : public BasicCalChartCommand {
 public:
-	SetDescriptionCommand(CalChartDoc& show, const wxString& newdescr);
-	virtual ~SetDescriptionCommand();
+    SetDescriptionCommand(CalChartDoc& show, const wxString& newdescr);
+    virtual ~SetDescriptionCommand();
 
 protected:
-	virtual void DoAction();
-	wxString mDescription;
+    virtual void DoAction();
+    wxString mDescription;
 };
-
 
 // SetModeCommand
 // Set show mode
-class SetModeCommand : public BasicCalChartCommand
-{
+class SetModeCommand : public BasicCalChartCommand {
 public:
-	SetModeCommand(CalChartDoc& show, const wxString& newmode);
-	virtual ~SetModeCommand();
+    SetModeCommand(CalChartDoc& show, const wxString& newmode);
+    virtual ~SetModeCommand();
 
 protected:
-	virtual void DoAction();
-	wxString mMode;
+    virtual void DoAction();
+    wxString mMode;
 };
-
 
 // SetShowInfoCommand
-// Sets the shows number of points and labels 
-class SetShowInfoCommand : public BasicCalChartCommand
-{
+// Sets the shows number of points and labels
+class SetShowInfoCommand : public BasicCalChartCommand {
 public:
-	SetShowInfoCommand(CalChartDoc& show, unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
-	virtual ~SetShowInfoCommand();
+    SetShowInfoCommand(CalChartDoc& show, unsigned numPoints, unsigned numColumns,
+        const std::vector<wxString>& labels);
+    virtual ~SetShowInfoCommand();
 
 protected:
-	virtual void DoAction();
-	unsigned mNumPoints;
-	unsigned mNumColumns;
-	std::vector<wxString> mLabels;
+    virtual void DoAction();
+    unsigned mNumPoints;
+    unsigned mNumColumns;
+    std::vector<wxString> mLabels;
 };
-
 
 ///// Sheet commands.  Changes settings on a sheet
 
 // SetSheetCommand:
 // Base class for other commands.  Will set sheet to the page they were
 // when command was created.
-class SetSheetCommand : public BasicCalChartCommand
-{
+class SetSheetCommand : public BasicCalChartCommand {
 public:
-	SetSheetCommand(CalChartDoc& show, const wxString cmdName);
-	// make destructor virtual and implement it to force abstract base class
-	virtual ~SetSheetCommand() = 0;
+    SetSheetCommand(CalChartDoc& show, const wxString cmdName);
+    // make destructor virtual and implement it to force abstract base class
+    virtual ~SetSheetCommand() = 0;
 
 protected:
-	virtual void DoAction();
-	const unsigned mSheetNum;
+    virtual void DoAction();
+    const unsigned mSheetNum;
 };
-
 
 // SetSheetTitleCommand
 // Set the description of the current sheet
-class SetSheetTitleCommand : public SetSheetCommand
-{
+class SetSheetTitleCommand : public SetSheetCommand {
 public:
-	SetSheetTitleCommand(CalChartDoc& show, const wxString& newname);
-	virtual ~SetSheetTitleCommand();
+    SetSheetTitleCommand(CalChartDoc& show, const wxString& newname);
+    virtual ~SetSheetTitleCommand();
 
 protected:
-	virtual void DoAction();
-	wxString mDescription;
+    virtual void DoAction();
+    wxString mDescription;
 };
-
 
 // SetSheetBeatsCommand
 // Set the beats of the current sheet
-class SetSheetBeatsCommand : public SetSheetCommand
-{
+class SetSheetBeatsCommand : public SetSheetCommand {
 public:
-	SetSheetBeatsCommand(CalChartDoc& show, unsigned short beats);
-	virtual ~SetSheetBeatsCommand();
+    SetSheetBeatsCommand(CalChartDoc& show, unsigned short beats);
+    virtual ~SetSheetBeatsCommand();
 
 protected:
-	virtual void DoAction();
-	unsigned short mBeats;
-};
-
-
-// AddSheetsCommand
-// For adding a container of sheets
-class AddSheetsCommand : public SetSheetCommand
-{
-public:
-	AddSheetsCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where);
-	virtual ~AddSheetsCommand();
-
-protected:
-	virtual void DoAction();
-	CC_show::CC_sheet_container_t mSheets;
-	const unsigned mWhere;
+    virtual void DoAction();
+    unsigned short mBeats;
 };
 
 // AddSheetsCommand
 // For adding a container of sheets
-class AddSheetsOtherShowCommand : public SetSheetCommand
-{
+class AddSheetsCommand : public SetSheetCommand {
 public:
-	AddSheetsOtherShowCommand(CalChartDoc& show, const CC_show::CC_sheet_container_t& sheets, unsigned where, unsigned endpoint);
-	virtual ~AddSheetsOtherShowCommand();
-    
+    AddSheetsCommand(CalChartDoc& show,
+        const CC_show::CC_sheet_container_t& sheets, unsigned where);
+    virtual ~AddSheetsCommand();
+
 protected:
-	virtual void DoAction();
-	CC_show::CC_sheet_container_t mSheets;
-	const unsigned mWhere;
+    virtual void DoAction();
+    CC_show::CC_sheet_container_t mSheets;
+    const unsigned mWhere;
+};
+
+// AddSheetsCommand
+// For adding a container of sheets
+class AddSheetsOtherShowCommand : public SetSheetCommand {
+public:
+    AddSheetsOtherShowCommand(CalChartDoc& show,
+        const CC_show::CC_sheet_container_t& sheets,
+        unsigned where, unsigned endpoint);
+    virtual ~AddSheetsOtherShowCommand();
+
+protected:
+    virtual void DoAction();
+    CC_show::CC_sheet_container_t mSheets;
+    const unsigned mWhere;
     const unsigned mEndpoint;
 };
 
 // RemoveSheetsCommand
 // For removing a sheets
-class RemoveSheetsCommand : public SetSheetCommand
-{
+class RemoveSheetsCommand : public SetSheetCommand {
 public:
-	RemoveSheetsCommand(CalChartDoc& show, unsigned where);
-	virtual ~RemoveSheetsCommand();
+    RemoveSheetsCommand(CalChartDoc& show, unsigned where);
+    virtual ~RemoveSheetsCommand();
 
 protected:
-	virtual void DoAction();
-	const unsigned mWhere;
-};
-
-
-// SettingPrintContinuityCommand
-// Setting the print continuity for a sheet
-class ImportPrintContinuityCommand : public SetSheetCommand
-{
-public:
-	ImportPrintContinuityCommand(CalChartDoc& show, const std::vector<std::string>& print_cont);
-	virtual ~ImportPrintContinuityCommand();
-	
-protected:
-	virtual void DoAction();
-	const std::vector<std::string> mPrintCont;
+    virtual void DoAction();
+    const unsigned mWhere;
 };
 
 // SettingPrintContinuityCommand
 // Setting the print continuity for a sheet
-class SetPrintContinuityCommand : public SetSheetCommand
-{
+class ImportPrintContinuityCommand : public SetSheetCommand {
 public:
-	SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet, const std::string& number, const std::string& print_cont);
-	virtual ~SetPrintContinuityCommand();
-	
+    ImportPrintContinuityCommand(CalChartDoc& show,
+        const std::vector<std::string>& print_cont);
+    virtual ~ImportPrintContinuityCommand();
+
 protected:
-	virtual void DoAction();
-	const unsigned mWhichSheet;
-	const std::string mNumber;
-	const std::string mPrintCont;
+    virtual void DoAction();
+    const std::vector<std::string> mPrintCont;
+};
+
+// SettingPrintContinuityCommand
+// Setting the print continuity for a sheet
+class SetPrintContinuityCommand : public SetSheetCommand {
+public:
+    SetPrintContinuityCommand(CalChartDoc& show, unsigned sheet,
+        const std::string& number,
+        const std::string& print_cont);
+    virtual ~SetPrintContinuityCommand();
+
+protected:
+    virtual void DoAction();
+    const unsigned mWhichSheet;
+    const std::string mNumber;
+    const std::string mPrintCont;
 };
 
 ///// Sheet and point commands.  Changes for points selected on a sheet
 // SetSheetAndSelectCommand:
-// Base class for other commands.  Will set selection and page to the state they were
+// Base class for other commands.  Will set selection and page to the state they
+// were
 // when command was created.
-class SetSheetAndSelectCommand : public SetSheetCommand
-{
+class SetSheetAndSelectCommand : public SetSheetCommand {
 public:
-	SetSheetAndSelectCommand(CalChartDoc& show, const wxString cmdName);
-	// make destructor virtual and implement it to force abstract base class
-	virtual ~SetSheetAndSelectCommand() = 0;
+    SetSheetAndSelectCommand(CalChartDoc& show, const wxString cmdName);
+    // make destructor virtual and implement it to force abstract base class
+    virtual ~SetSheetAndSelectCommand() = 0;
 
 protected:
-	virtual void DoAction();
-	const SelectionList mPoints;
+    virtual void DoAction();
+    const SelectionList mPoints;
 };
-
 
 // MovePointsOnSheetCommand:
-// Move points around on a sheet.  mPosition is a mapping of which point to two positions,
-// the original and new.  Do will move points to the new position, and undo will move them back.
+// Move points around on a sheet.  mPosition is a mapping of which point to two
+// positions,
+// the original and new.  Do will move points to the new position, and undo will
+// move them back.
 // Fill out the mPosition in the constructor.
-class MovePointsOnSheetCommand : public SetSheetAndSelectCommand
-{
+class MovePointsOnSheetCommand : public SetSheetAndSelectCommand {
 public:
-	MovePointsOnSheetCommand(CalChartDoc& show, unsigned ref);
-	// make destructor virtual and implement it to force abstract base class
-	virtual ~MovePointsOnSheetCommand() = 0;
+    MovePointsOnSheetCommand(CalChartDoc& show, unsigned ref);
+    // make destructor virtual and implement it to force abstract base class
+    virtual ~MovePointsOnSheetCommand() = 0;
 
 protected:
-	virtual void DoAction();
+    virtual void DoAction();
 
-	std::map<unsigned, CC_coord> mPositions;
-	const unsigned mRef;
+    std::map<unsigned, CC_coord> mPositions;
+    const unsigned mRef;
 };
 
-
-class RotatePointPositionsCommand : public MovePointsOnSheetCommand
-{
+class RotatePointPositionsCommand : public MovePointsOnSheetCommand {
 private:
-	using super = MovePointsOnSheetCommand;
-public:
-	RotatePointPositionsCommand(CalChartDoc& show, unsigned rotateAmount, unsigned ref);
-	virtual ~RotatePointPositionsCommand();
-};
+    using super = MovePointsOnSheetCommand;
 
+public:
+    RotatePointPositionsCommand(CalChartDoc& show, unsigned rotateAmount,
+        unsigned ref);
+    virtual ~RotatePointPositionsCommand();
+};
 
 // MovePointsCommand:
 // Move points to position
-class MovePointsCommand : public MovePointsOnSheetCommand
-{
+class MovePointsCommand : public MovePointsOnSheetCommand {
 private:
-	using super = MovePointsOnSheetCommand;
-public:
-	MovePointsCommand(CalChartDoc& show, const std::map<unsigned, CC_coord>& newPosition, unsigned ref);
-	virtual ~MovePointsCommand();
-};
+    using super = MovePointsOnSheetCommand;
 
+public:
+    MovePointsCommand(CalChartDoc& show,
+        const std::map<unsigned, CC_coord>& newPosition,
+        unsigned ref);
+    virtual ~MovePointsCommand();
+};
 
 // SetReferencePointToRef0 :
 // Reset a reference point position to ref point 0.
-class SetReferencePointToRef0 : public MovePointsOnSheetCommand
-{
+class SetReferencePointToRef0 : public MovePointsOnSheetCommand {
 public:
-	SetReferencePointToRef0(CalChartDoc& show, unsigned ref);
-	virtual ~SetReferencePointToRef0();
+    SetReferencePointToRef0(CalChartDoc& show, unsigned ref);
+    virtual ~SetReferencePointToRef0();
 };
-
 
 // SetContinuityIndexCommand:
 // Sets the symbol for the selected points, creating one if it doesn't exist
-class SetSymbolCommand : public SetSheetAndSelectCommand
-{
+class SetSymbolCommand : public SetSheetAndSelectCommand {
 public:
-	SetSymbolCommand(CalChartDoc& show, SYMBOL_TYPE sym);
-	virtual ~SetSymbolCommand();
+    SetSymbolCommand(CalChartDoc& show, SYMBOL_TYPE sym);
+    virtual ~SetSymbolCommand();
 
 protected:
-	virtual void DoAction();
-	std::map<unsigned, SYMBOL_TYPE> mSyms;
+    virtual void DoAction();
+    std::map<unsigned, SYMBOL_TYPE> mSyms;
 };
-
 
 // SetContinuityTextCommand
 // Sets the continuity text
-class SetContinuityTextCommand : public SetSheetAndSelectCommand
-{
+class SetContinuityTextCommand : public SetSheetAndSelectCommand {
 public:
-	SetContinuityTextCommand(CalChartDoc& show, SYMBOL_TYPE i, const wxString& text);
-	virtual ~SetContinuityTextCommand();
+    SetContinuityTextCommand(CalChartDoc& show, SYMBOL_TYPE i,
+        const wxString& text);
+    virtual ~SetContinuityTextCommand();
 
 protected:
-	virtual void DoAction();
-	SYMBOL_TYPE mWhichCont;
-	wxString mContinuity;
+    virtual void DoAction();
+    SYMBOL_TYPE mWhichCont;
+    wxString mContinuity;
 };
-
 
 // SetLabelCommand
 // Base class for setting the labels.  Set the mLabelPos with values
-class SetLabelCommand : public SetSheetAndSelectCommand
-{
+class SetLabelCommand : public SetSheetAndSelectCommand {
 public:
-	SetLabelCommand(CalChartDoc& show);
-	// make destructor virtual and implement it to force abstract base class
-	virtual ~SetLabelCommand() = 0;
+    SetLabelCommand(CalChartDoc& show);
+    // make destructor virtual and implement it to force abstract base class
+    virtual ~SetLabelCommand() = 0;
 
 protected:
-	virtual void DoAction();
+    virtual void DoAction();
 
-	std::map<unsigned, bool> mLabelPos;
+    std::map<unsigned, bool> mLabelPos;
 };
-
 
 // SetLabelRightCommand
 // Set label on right
-class SetLabelRightCommand : public SetLabelCommand
-{
+class SetLabelRightCommand : public SetLabelCommand {
 public:
-	SetLabelRightCommand(CalChartDoc& show, bool right);
-	virtual ~SetLabelRightCommand();
+    SetLabelRightCommand(CalChartDoc& show, bool right);
+    virtual ~SetLabelRightCommand();
 };
-
 
 // SetLabelFlipCommand
 // Set label on left
-class SetLabelFlipCommand : public SetLabelCommand
-{
+class SetLabelFlipCommand : public SetLabelCommand {
 public:
-	SetLabelFlipCommand(CalChartDoc& show);
-	virtual ~SetLabelFlipCommand();
+    SetLabelFlipCommand(CalChartDoc& show);
+    virtual ~SetLabelFlipCommand();
 };
-
 
 // SetLabelVisibilityCommand
 // Base class for setting label visibility
-class SetLabelVisibilityCommand : public SetSheetAndSelectCommand
-{
+class SetLabelVisibilityCommand : public SetSheetAndSelectCommand {
 private:
-	using super = SetSheetAndSelectCommand;
+    using super = SetSheetAndSelectCommand;
+
 public:
-	SetLabelVisibilityCommand(CalChartDoc& show);
-	virtual ~SetLabelVisibilityCommand() = 0;
+    SetLabelVisibilityCommand(CalChartDoc& show);
+    virtual ~SetLabelVisibilityCommand() = 0;
 
 protected:
-	virtual void DoAction();
+    virtual void DoAction();
 
-	std::map<unsigned, bool> mLabelVisibility;
+    std::map<unsigned, bool> mLabelVisibility;
 };
-
 
 // SetLabelVisibleCommand
 // Set label to be visible or invisible
-class SetLabelVisibleCommand : public SetLabelVisibilityCommand
-{
+class SetLabelVisibleCommand : public SetLabelVisibilityCommand {
 private:
-	using super = SetLabelVisibilityCommand;
-public:
-	SetLabelVisibleCommand(CalChartDoc& show, bool isVisible);
-	virtual ~SetLabelVisibleCommand();
-};
+    using super = SetLabelVisibilityCommand;
 
+public:
+    SetLabelVisibleCommand(CalChartDoc& show, bool isVisible);
+    virtual ~SetLabelVisibleCommand();
+};
 
 // ToggleVisibilityCommand
 // Toggle whether or not the label is visible
-class ToggleLabelVisibilityCommand : public SetLabelVisibilityCommand
-{
+class ToggleLabelVisibilityCommand : public SetLabelVisibilityCommand {
 private:
-	using super = SetLabelVisibilityCommand;
+    using super = SetLabelVisibilityCommand;
+
 public:
-	ToggleLabelVisibilityCommand(CalChartDoc& show);
-	virtual ~ToggleLabelVisibilityCommand();
+    ToggleLabelVisibilityCommand(CalChartDoc& show);
+    virtual ~ToggleLabelVisibilityCommand();
 };

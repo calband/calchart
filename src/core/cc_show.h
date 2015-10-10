@@ -44,98 +44,109 @@ class CC_coord;
 // either look at, or change.
 // A show can be loaded from a input stream
 
-class CC_show
-{
+class CC_show {
 public:
-	typedef std::vector<CC_sheet> CC_sheet_container_t;
-	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
-	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
+    typedef std::vector<CC_sheet> CC_sheet_container_t;
+    typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
+    typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
-	// you can create a show in two ways, from nothing, or from an input stream
-	static std::unique_ptr<CC_show> Create_CC_show();
-	static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
+    // you can create a show in two ways, from nothing, or from an input stream
+    static std::unique_ptr<CC_show> Create_CC_show();
+    static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
 
 private:
-	CC_show();
-	// using overloading with structs to determine which constructor to use
-	CC_show(std::istream& stream, Version_3_3_and_earlier);
-	CC_show(const uint8_t* ptr, size_t size, Current_version_and_later);
+    CC_show();
+    // using overloading with structs to determine which constructor to use
+    CC_show(std::istream& stream, Version_3_3_and_earlier);
+    CC_show(const uint8_t* ptr, size_t size, Current_version_and_later);
 
 public:
-	~CC_show();
+    ~CC_show();
 
 private:
-	std::vector<uint8_t> SerializeShowData() const;
-public:
-	// How we save and load a show:
-	std::vector<uint8_t> SerializeShow() const;
+    std::vector<uint8_t> SerializeShowData() const;
 
 public:
-	const std::string& GetDescr() const;
-	void SetDescr(const std::string& newdescr);
+    // How we save and load a show:
+    std::vector<uint8_t> SerializeShow() const;
 
-	void SetupNewShow();
-	size_t GetNumSheets() const;
+public:
+    const std::string& GetDescr() const;
+    void SetDescr(const std::string& newdescr);
 
-	CC_sheet_iterator_t GetSheetBegin();
-	const_CC_sheet_iterator_t GetSheetBegin() const;
-	CC_sheet_iterator_t GetSheetEnd();
-	const_CC_sheet_iterator_t GetSheetEnd() const;
+    void SetupNewShow();
+    size_t GetNumSheets() const;
 
-	const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
-	CC_sheet_iterator_t GetNthSheet(unsigned n);
-	const_CC_sheet_iterator_t GetCurrentSheet() const;
-	CC_sheet_iterator_t GetCurrentSheet();
-	unsigned GetCurrentSheetNum() const;
-	void SetCurrentSheet(unsigned n);
+    CC_sheet_iterator_t GetSheetBegin();
+    const_CC_sheet_iterator_t GetSheetBegin() const;
+    CC_sheet_iterator_t GetSheetEnd();
+    const_CC_sheet_iterator_t GetSheetEnd() const;
 
-	CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
-	void DeleteNthSheet(unsigned sheetidx);
-	void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
-	void InsertSheetInternal(const CC_sheet_container_t& nsheet, unsigned sheetidx);
-	void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
-	inline unsigned short GetNumPoints() const { return numpoints; }
-	void SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position);
-	bool RelabelSheets(unsigned sht);
+    const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
+    CC_sheet_iterator_t GetNthSheet(unsigned n);
+    const_CC_sheet_iterator_t GetCurrentSheet() const;
+    CC_sheet_iterator_t GetCurrentSheet();
+    unsigned GetCurrentSheetNum() const;
+    void SetCurrentSheet(unsigned n);
 
-	std::string GetPointLabel(unsigned i) const;
-	void SetPointLabel(const std::vector<std::string>& labels) { pt_labels = labels; }
-	inline const std::vector<std::string>& GetPointLabels() const { return pt_labels; }
+    CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
+    void DeleteNthSheet(unsigned sheetidx);
+    void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
+    void InsertSheetInternal(const CC_sheet_container_t& nsheet,
+        unsigned sheetidx);
+    void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
+    inline unsigned short GetNumPoints() const { return numpoints; }
+    void SetNumPoints(unsigned num, unsigned columns,
+        const CC_coord& new_march_position);
+    bool RelabelSheets(unsigned sht);
 
-	bool AlreadyHasPrintContinuity() const;
+    std::string GetPointLabel(unsigned i) const;
+    void SetPointLabel(const std::vector<std::string>& labels)
+    {
+        pt_labels = labels;
+    }
+    inline const std::vector<std::string>& GetPointLabels() const
+    {
+        return pt_labels;
+    }
 
-	// how to select points:
-	// Always select or unselect in groups
-	bool SelectAll();
-	bool UnselectAll();
-	void AddToSelection(const SelectionList& sl);
-	void SetSelection(const SelectionList& sl);
-	void RemoveFromSelection(const SelectionList& sl);
-	void ToggleSelection(const SelectionList& sl);
-	void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref);
-	inline bool IsSelected(unsigned i) const { return selectionList.count(i) != 0; }
-	inline const SelectionList& GetSelectionList() const { return selectionList; }
+    bool AlreadyHasPrintContinuity() const;
+
+    // how to select points:
+    // Always select or unselect in groups
+    bool SelectAll();
+    bool UnselectAll();
+    void AddToSelection(const SelectionList& sl);
+    void SetSelection(const SelectionList& sl);
+    void RemoveFromSelection(const SelectionList& sl);
+    void ToggleSelection(const SelectionList& sl);
+    void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected,
+        unsigned ref);
+    inline bool IsSelected(unsigned i) const
+    {
+        return selectionList.count(i) != 0;
+    }
+    inline const SelectionList& GetSelectionList() const { return selectionList; }
 
 private:
-	std::string descr;
-	unsigned short numpoints;
-	CC_sheet_container_t sheets;
-	std::vector<std::string> pt_labels;
-	SelectionList selectionList;	  // order of selections
-	unsigned mSheetNum;
+    std::string descr;
+    unsigned short numpoints;
+    CC_sheet_container_t sheets;
+    std::vector<std::string> pt_labels;
+    SelectionList selectionList; // order of selections
+    unsigned mSheetNum;
 
-	// unit tests
-	friend void CC_show_UnitTests();
-	static void CC_show_round_trip_test();
-	static void CC_show_round_trip_test_with_number_label_description();
-	static void CC_show_blank_desc_test();
-	static void CC_show_future_show_test();
-	static void CC_show_wrong_size_throws_exception();
-	static void CC_show_wrong_size_number_labels_throws();
-	static void CC_show_wrong_size_description();
-	static void CC_show_extra_cruft_ok();
-	static void CC_show_with_nothing_throws();
-
+    // unit tests
+    friend void CC_show_UnitTests();
+    static void CC_show_round_trip_test();
+    static void CC_show_round_trip_test_with_number_label_description();
+    static void CC_show_blank_desc_test();
+    static void CC_show_future_show_test();
+    static void CC_show_wrong_size_throws_exception();
+    static void CC_show_wrong_size_number_labels_throws();
+    static void CC_show_wrong_size_description();
+    static void CC_show_extra_cruft_ok();
+    static void CC_show_with_nothing_throws();
 };
 
 void CC_show_UnitTests();

@@ -26,21 +26,18 @@
 
 // TopFrame
 // Serves as the top frame that gets displayed when CalChart starts
-class TopFrame : public wxDocParentFrame
-{
-	DECLARE_CLASS(TopFrame)
+class TopFrame : public wxDocParentFrame {
+    DECLARE_CLASS(TopFrame)
 public:
-	TopFrame(wxDocManager *manager,
-			 wxFrame *frame,
-			 const wxString& title);
-	~TopFrame();
+    TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title);
+    ~TopFrame();
 
-	void OnCmdAbout(wxCommandEvent& event);
-	void OnCmdHelp(wxCommandEvent& event);
-	void OnCmdPreferences(wxCommandEvent& event);
+    void OnCmdAbout(wxCommandEvent& event);
+    void OnCmdHelp(wxCommandEvent& event);
+    void OnCmdPreferences(wxCommandEvent& event);
 
-	static void About();
-	static void Help();
+    static void About();
+    static void Help();
 
-	DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };

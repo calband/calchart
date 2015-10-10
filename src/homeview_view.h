@@ -36,35 +36,35 @@ class Animation;
 // Field:
 // Field is the editable overhead view of the marchers on the field.
 // This is where in the app you edit a marcher's location and continuity
-class HomeViewView : public wxView
-{
+class HomeViewView : public wxView {
 public:
-    FieldFrame *mFrame;
-  
+    FieldFrame* mFrame;
+
     HomeViewView();
     ~HomeViewView();
 
-    bool OnCreate(wxDocument *doc, long flags);
-    void OnDraw(wxDC *dc);
-    void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    bool OnCreate(wxDocument* doc, long flags);
+    void OnDraw(wxDC* dc);
+    void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
     bool OnClose(bool deleteWindow = true);
 
-	void OnWizardSetup(CC_show& show);
+    void OnWizardSetup(CC_show& show);
 
-	int FindPoint(CC_coord pos) const;
-	CC_coord PointPosition(int which) const;
+    int FindPoint(CC_coord pos) const;
+    CC_coord PointPosition(int which) const;
 
-	///// Change show attributes /////
-	void GoToSheet(size_t which);
-	void GoToNextSheet();
-	void GoToPrevSheet();
+    ///// Change show attributes /////
+    void GoToSheet(size_t which);
+    void GoToNextSheet();
+    void GoToPrevSheet();
 
-	///// Select /////
-	void SelectWithLasso(const CC_lasso *lasso, bool toggleSelected);
-	void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2, bool toggleSelected);
+    ///// Select /////
+    void SelectWithLasso(const CC_lasso* lasso, bool toggleSelected);
+    void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+        bool toggleSelected);
 
 private:
-	CC_show* mShow;
+    CC_show* mShow;
 
     DECLARE_DYNAMIC_CLASS(HomeView)
 };

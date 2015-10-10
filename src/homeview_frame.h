@@ -26,27 +26,27 @@
 #include <wx/docview.h>
 
 // Define the main editing frame
-class HomeViewFrame : public wxDocChildFrame
-{
+class HomeViewFrame : public wxDocChildFrame {
 public:
-	// HomeViewFrame will own the show that is passed in
-	HomeViewFrame(wxDocument* doc, wxView* view, wxDocParentFrame *frame, const wxPoint& pos, const wxSize& size);
-	~HomeViewFrame();
+    // HomeViewFrame will own the show that is passed in
+    HomeViewFrame(wxDocument* doc, wxView* view, wxDocParentFrame* frame,
+        const wxPoint& pos, const wxSize& size);
+    ~HomeViewFrame();
 
-	void OnCmdPrint(wxCommandEvent& event);
-	void OnCmdPrintPreview(wxCommandEvent& event);
-	void OnCmdLegacyPrint(wxCommandEvent& event);
-	void OnCmdLegacyPrintEPS(wxCommandEvent& event);
-	void OnCmdPageSetup(wxCommandEvent& event);
-	void OnCmdPreferences(wxCommandEvent& event);
-	void OnCmdClose(wxCommandEvent& event);
-	void OnCmdPoints(wxCommandEvent& event);
-	void OnCmdAnimate(wxCommandEvent& event);
-	void OnCmdOmniView(wxCommandEvent& event);
-	void OnCmdAbout(wxCommandEvent& event);
-	void OnCmdHelp(wxCommandEvent& event);
+    void OnCmdPrint(wxCommandEvent& event);
+    void OnCmdPrintPreview(wxCommandEvent& event);
+    void OnCmdLegacyPrint(wxCommandEvent& event);
+    void OnCmdLegacyPrintEPS(wxCommandEvent& event);
+    void OnCmdPageSetup(wxCommandEvent& event);
+    void OnCmdPreferences(wxCommandEvent& event);
+    void OnCmdClose(wxCommandEvent& event);
+    void OnCmdPoints(wxCommandEvent& event);
+    void OnCmdAnimate(wxCommandEvent& event);
+    void OnCmdOmniView(wxCommandEvent& event);
+    void OnCmdAbout(wxCommandEvent& event);
+    void OnCmdHelp(wxCommandEvent& event);
 
-	DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

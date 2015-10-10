@@ -41,64 +41,64 @@ class Matrix;
 class CalChartConfiguration;
 
 // Field Canvas controls how to paint and the first line control of user input
-class FieldCanvas : public ClickDragCtrlScrollCanvas
-{
-	using super = ClickDragCtrlScrollCanvas;
+class FieldCanvas : public ClickDragCtrlScrollCanvas {
+    using super = ClickDragCtrlScrollCanvas;
+
 public:
-// Basic functions
-	FieldCanvas(wxView *view, FieldFrame *frame, float def_zoom);
-	virtual ~FieldCanvas(void);
-	void OnPaint(wxPaintEvent& event);
-	void OnEraseBackground(wxEraseEvent& event);
-	virtual void OnMouseLeftDown(wxMouseEvent& event);
-	virtual void OnMouseLeftUp(wxMouseEvent& event);
-	virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);
-	virtual void OnMouseRightDown(wxMouseEvent& event);
-	virtual void OnMouseMove(wxMouseEvent& event);
-	void OnChar(wxKeyEvent& event);
+    // Basic functions
+    FieldCanvas(wxView* view, FieldFrame* frame, float def_zoom);
+    virtual ~FieldCanvas(void);
+    void OnPaint(wxPaintEvent& event);
+    void OnEraseBackground(wxEraseEvent& event);
+    virtual void OnMouseLeftDown(wxMouseEvent& event);
+    virtual void OnMouseLeftUp(wxMouseEvent& event);
+    virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);
+    virtual void OnMouseRightDown(wxMouseEvent& event);
+    virtual void OnMouseMove(wxMouseEvent& event);
+    void OnChar(wxKeyEvent& event);
 
-// Misc show functions
-	float ZoomToFitFactor() const;
-	virtual void SetZoom(float factor);
+    // Misc show functions
+    float ZoomToFitFactor() const;
+    virtual void SetZoom(float factor);
 
-	// return true on success
-	bool SetBackgroundImage(const wxImage& image);
-	void AdjustBackgroundImage(bool enable);
-	void RemoveBackgroundImage();
-	
-	CC_DRAG_TYPES GetCurrentLasso() const;
-	void SetCurrentLasso(CC_DRAG_TYPES lasso);
-	CC_MOVE_MODES GetCurrentMove() const;
-	// implies a call to EndDrag()
-	void SetCurrentMove(CC_MOVE_MODES move);
-	
+    // return true on success
+    bool SetBackgroundImage(const wxImage& image);
+    void AdjustBackgroundImage(bool enable);
+    void RemoveBackgroundImage();
+
+    CC_DRAG_TYPES GetCurrentLasso() const;
+    void SetCurrentLasso(CC_DRAG_TYPES lasso);
+    CC_MOVE_MODES GetCurrentMove() const;
+    // implies a call to EndDrag()
+    void SetCurrentMove(CC_MOVE_MODES move);
+
 private:
-	std::map<unsigned, CC_coord> GetPoints(const Matrix& transmat);
+    std::map<unsigned, CC_coord> GetPoints(const Matrix& transmat);
 
-	// Variables
-	FieldFrame *mFrame;
-	FieldView* mView;
-	CC_DRAG_TYPES curr_lasso;
-	CC_MOVE_MODES curr_move;
+    // Variables
+    FieldFrame* mFrame;
+    FieldView* mView;
+    CC_DRAG_TYPES curr_lasso;
+    CC_MOVE_MODES curr_move;
 
-	void ClearShapes();
+    void ClearShapes();
 
-	void BeginDrag(CC_DRAG_TYPES type, const CC_coord& start);
-	void AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
-	void MoveDrag(const CC_coord& end);
-	void EndDrag();
-	
-	CC_DRAG_TYPES drag;
-	typedef std::vector<std::shared_ptr<CC_shape>> ShapeList;
-	ShapeList shape_list;
-	std::shared_ptr<CC_shape> curr_shape;
+    void BeginDrag(CC_DRAG_TYPES type, const CC_coord& start);
+    void AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
+    void MoveDrag(const CC_coord& end);
+    void EndDrag();
 
-	// Background Picture
-	void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
-	void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
-	std::unique_ptr<BackgroundImage> mBackgroundImage;
-	std::map<unsigned, CC_coord> mMovePoints;
-	std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;
-	
-	DECLARE_EVENT_TABLE()
+    CC_DRAG_TYPES drag;
+    typedef std::vector<std::shared_ptr<CC_shape> > ShapeList;
+    ShapeList shape_list;
+    std::shared_ptr<CC_shape> curr_shape;
+
+    // Background Picture
+    void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
+    void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
+    std::unique_ptr<BackgroundImage> mBackgroundImage;
+    std::map<unsigned, CC_coord> mMovePoints;
+    std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;
+
+    DECLARE_EVENT_TABLE()
 };

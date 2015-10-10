@@ -35,31 +35,31 @@ class wxHtmlHelpController;
 DECLARE_APP(CalChartApp)
 
 // Define a new application
-class CalChartApp : public wxApp
-{
+class CalChartApp : public wxApp {
 public:
-	virtual bool OnInit();
-	virtual void MacOpenFile(const wxString &fileName);
-	virtual void MacOpenFiles(const wxArrayString &fileNames);
-	int OnExit();
+    virtual bool OnInit();
+    virtual void MacOpenFile(const wxString& fileName);
+    virtual void MacOpenFiles(const wxArrayString& fileNames);
+    int OnExit();
 
-	std::unique_ptr<ShowMode> GetMode(const wxString& which);
+    std::unique_ptr<ShowMode> GetMode(const wxString& which);
 
-	// the global help system:
-	wxHtmlHelpController& GetGlobalHelpController();
+    // the global help system:
+    wxHtmlHelpController& GetGlobalHelpController();
 
-	void OpenFile(const wxString &fileName);
-	void OpenFileOnHost(const wxString &filename);
+    void OpenFile(const wxString& fileName);
+    void OpenFileOnHost(const wxString& filename);
+
 private:
-	void ProcessArguments ();
+    void ProcessArguments();
 
-	void InitAppAsServer();
-	void InitAppAsClient();
-	void ExitAppAsServer();
-	void ExitAppAsClient();
+    void InitAppAsServer();
+    void InitAppAsClient();
+    void ExitAppAsServer();
+    void ExitAppAsClient();
 
-	wxDocManager* mDocManager;
-	std::unique_ptr<wxHtmlHelpController> mHelpController;
+    wxDocManager* mDocManager;
+    std::unique_ptr<wxHtmlHelpController> mHelpController;
 
-	std::unique_ptr<HostAppInterface> mHostInterface;
+    std::unique_ptr<HostAppInterface> mHostInterface;
 };

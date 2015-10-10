@@ -35,7 +35,7 @@
 
 #include <wx/docview.h>
 
-wxPrintDialogData *gPrintDialogData;
+wxPrintDialogData* gPrintDialogData;
 
 void CC_continuity_UnitTests();
 void CC_point_UnitTests();
@@ -46,141 +46,134 @@ void CC_sheet_UnitTests();
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
 
-wxHtmlHelpController&
-CalChartApp::GetGlobalHelpController()
+wxHtmlHelpController& CalChartApp::GetGlobalHelpController()
 {
-	return *mHelpController;
+    return *mHelpController;
 }
 
-void CalChartApp::MacOpenFile(const wxString &fileName)
+void CalChartApp::MacOpenFile(const wxString& fileName)
 {
-	OpenFileOnHost(fileName);
+    OpenFileOnHost(fileName);
 }
 
-void CalChartApp::MacOpenFiles(const wxArrayString &fileNames) {
-	for (int index = fileNames.GetCount() - 1; index >= 0; index--) {
-		MacOpenFile(fileNames[index]);
-	}
+void CalChartApp::MacOpenFiles(const wxArrayString& fileNames)
+{
+    for (int index = fileNames.GetCount() - 1; index >= 0; index--) {
+        MacOpenFile(fileNames[index]);
+    }
 }
 
 bool CalChartApp::OnInit()
 {
-	StartStopFunc_t asServer { [=](){ this->InitAppAsServer(); }, [=](){ this->ExitAppAsServer(); } };
-	StartStopFunc_t asClient { [=](){ this->InitAppAsClient(); }, [=](){ this->ExitAppAsClient(); } };
-	mHostInterface = HostAppInterface::Make(this, asServer, asClient);
-	return mHostInterface->OnInit();
+    StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); },
+        [=]() { this->ExitAppAsServer(); } };
+    StartStopFunc_t asClient{ [=]() { this->InitAppAsClient(); },
+        [=]() { this->ExitAppAsClient(); } };
+    mHostInterface = HostAppInterface::Make(this, asServer, asClient);
+    return mHostInterface->OnInit();
 }
 
 int CalChartApp::OnExit()
 {
-	mHostInterface.reset(); // calls ExitApp for client or server
-	return wxApp::OnExit();
+    mHostInterface.reset(); // calls ExitApp for client or server
+    return wxApp::OnExit();
 }
 
-
-
-
-void CalChartApp::OpenFileOnHost(const wxString &filename) {
-	mHostInterface->OpenFile(filename);
+void CalChartApp::OpenFileOnHost(const wxString& filename)
+{
+    mHostInterface->OpenFile(filename);
 }
 
-void CalChartApp::OpenFile(const wxString &fileName) {
-	mDocManager->CreateDocument(fileName, wxDOC_SILENT);
+void CalChartApp::OpenFile(const wxString& fileName)
+{
+    mDocManager->CreateDocument(fileName, wxDOC_SILENT);
 }
 
+void CalChartApp::InitAppAsServer()
+{
+    //// Create a document manager
+    mDocManager = new wxDocManager;
 
+    //// Create a template relating drawing documents to their views
+    (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""),
+        _T("shw"), _T("CalChart"), _T("Field View"),
+        CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
 
-void CalChartApp::InitAppAsServer() {
-	//// Create a document manager
-	mDocManager = new wxDocManager;
+    gPrintDialogData = new wxPrintDialogData();
+    mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
 
-	//// Create a template relating drawing documents to their views
-	(void) new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
-		CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
+    //// Create the main frame window
+    wxFrame* frame = new TopFrame(mDocManager, (wxFrame*)NULL, _T("CalChart"));
 
-	gPrintDialogData = new wxPrintDialogData();
-	mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
+    {
+        // Required for images in the online documentation
+        wxImage::AddHandler(new wxGIFHandler);
 
-	//// Create the main frame window
-	wxFrame *frame = new TopFrame(mDocManager, (wxFrame *)NULL, _T("CalChart"));
-
-	{
-		// Required for images in the online documentation
-		wxImage::AddHandler(new wxGIFHandler);
-
-		// Required for advanced HTML help
-		wxFileSystem::AddHandler(new wxZipFSHandler);
-		wxFileSystem::AddHandler(new wxArchiveFSHandler);
+        // Required for advanced HTML help
+        wxFileSystem::AddHandler(new wxZipFSHandler);
+        wxFileSystem::AddHandler(new wxArchiveFSHandler);
 
 #if defined(__APPLE__) && (__APPLE__)
-		wxString helpfile(wxT("CalChart.app/docs"));
+        wxString helpfile(wxT("CalChart.app/docs"));
 #else
-		wxString helpfile(wxT("docs"));
+        wxString helpfile(wxT("docs"));
 #endif
-		helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
-		if (!GetGlobalHelpController().AddBook(wxFileName(helpfile)))
-		{
-			wxLogError(wxT("Cannot find the help system."));
-		}
-	}
+        helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
+        if (!GetGlobalHelpController().AddBook(wxFileName(helpfile))) {
+            wxLogError(wxT("Cannot find the help system."));
+        }
+    }
 
 #ifndef __WXMAC__
-	frame->Show(true);
-#endif //ndef __WXMAC__
-	SetTopWindow(frame);
+    frame->Show(true);
+#endif // ndef __WXMAC__
+    SetTopWindow(frame);
 
-	// Get the file history
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/FileHistory"));
-	mDocManager->FileHistoryLoad(*config);
+    // Get the file history
+    wxConfigBase* config = wxConfigBase::Get();
+    config->SetPath(wxT("/FileHistory"));
+    mDocManager->FileHistoryLoad(*config);
 
-	CC_continuity_UnitTests();
-	CC_point_UnitTests();
-	CC_coord_UnitTests();
-	CC_show_UnitTests();
-	CC_sheet_UnitTests();
+    CC_continuity_UnitTests();
+    CC_point_UnitTests();
+    CC_coord_UnitTests();
+    CC_show_UnitTests();
+    CC_sheet_UnitTests();
 
-
-	ProcessArguments();
+    ProcessArguments();
 }
 
-void CalChartApp::InitAppAsClient() {
-	ProcessArguments();
-}
+void CalChartApp::InitAppAsClient() { ProcessArguments(); }
 
-void CalChartApp::ProcessArguments() {
-	if (argc > 1) {
-		OpenFileOnHost(argv[1]);
-	}
-}
-
-
-
-
-
-void CalChartApp::ExitAppAsServer() {
-	// Flush out the other commands
-	CalChartConfiguration::GetGlobalConfig().FlushWriteQueue();
-	// Get the file history
-	wxConfigBase *config = wxConfigBase::Get();
-	config->SetPath(wxT("/FileHistory"));
-	mDocManager->FileHistorySave(*config);
-	config->Flush();
-
-	if (gPrintDialogData) delete gPrintDialogData;
-
-	// delete the doc manager
-	delete wxDocManager::GetDocumentManager();
-
-	mHelpController.reset();
-}
-
-std::unique_ptr<ShowMode>
-CalChartApp::GetMode(const wxString& which)
+void CalChartApp::ProcessArguments()
 {
-	return GetShowMode(which);
+    if (argc > 1) {
+        OpenFileOnHost(argv[1]);
+    }
 }
 
-void CalChartApp::ExitAppAsClient() {
+void CalChartApp::ExitAppAsServer()
+{
+    // Flush out the other commands
+    CalChartConfiguration::GetGlobalConfig().FlushWriteQueue();
+    // Get the file history
+    wxConfigBase* config = wxConfigBase::Get();
+    config->SetPath(wxT("/FileHistory"));
+    mDocManager->FileHistorySave(*config);
+    config->Flush();
+
+    if (gPrintDialogData)
+        delete gPrintDialogData;
+
+    // delete the doc manager
+    delete wxDocManager::GetDocumentManager();
+
+    mHelpController.reset();
 }
 
+std::unique_ptr<ShowMode> CalChartApp::GetMode(const wxString& which)
+{
+    return GetShowMode(which);
+}
+
+void CalChartApp::ExitAppAsClient() {}
