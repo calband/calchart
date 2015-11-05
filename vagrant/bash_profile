@@ -1,1 +1,11 @@
+#  This script functions as the `.bash_profile` for the virtual
+#  machine. As such, it runs within the virtual machine each
+#  time `vagrant ssh` is used.
+
+#  Allow the `clang-format-3.6` program to be executed as 
+#+ `clang-format`
 alias clang-format='clang-format-3.6'
+
+#  Navigate to the home directory of calchart, which is shared with
+#  the virtual machine as `/vagrant`
+cd /vagrant
