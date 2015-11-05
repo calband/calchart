@@ -10,4 +10,6 @@ build-win/CalChart/CalChart.v12.suo
 build-win/CalChart/CalChart.sdf
 build-win/CalChart/CalChart.opensdf
 build-win/CalChart/ipch
-
+.DS_Store
+*~
+.vagrant
