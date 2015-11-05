@@ -72,11 +72,11 @@ private:
     bool eps;
     wxTextCtrl* text_cmd;
 #ifdef PRINT__RUN_CMD
-    wxTextCtrl *text_opts, *text_view_cmd, *text_view_opts;
+    wxTextCtrl* text_opts, *text_view_cmd, *text_view_opts;
 #endif
-    wxTextCtrl *text_x, *text_y, *text_width, *text_height, *text_length;
+    wxTextCtrl* text_x, *text_y, *text_width, *text_height, *text_length;
     wxTextCtrl* text_minyards;
-    wxRadioBox *radio_orient, *radio_method;
-    wxCheckBox *check_cont, *check_pages, *check_overview;
+    wxRadioBox* radio_orient, *radio_method;
+    wxCheckBox* check_cont, *check_pages, *check_overview;
     std::set<size_t> mIsSheetPicked;
 };

@@ -211,7 +211,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
                 AddDrag(CC_DRAG_LINE,
                     std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
                 mTransformer = [this](
-                    const CC_coord&) -> std::map<unsigned, CC_coord> {
+                                   const CC_coord&) -> std::map<unsigned, CC_coord> {
                     auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
                     CC_coord c1 = origin.GetOrigin();
                     const CC_shape_2point* shape = (CC_shape_2point*)curr_shape.get();
@@ -247,7 +247,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
             if (shape_list.size() > 2) {
                 mTransformer = [this](
-                    const CC_coord&) -> std::map<unsigned, CC_coord> {
+                                   const CC_coord&) -> std::map<unsigned, CC_coord> {
                     CC_shape_2point* v1 = (CC_shape_2point*)shape_list[0].get();
                     CC_shape_2point* v2 = (CC_shape_2point*)shape_list[1].get();
                     CC_shape_2point* v3 = (CC_shape_2point*)shape_list[2].get();

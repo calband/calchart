@@ -107,7 +107,7 @@ const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] = {
 const std::array<long, CalChartConfiguration::kSpringShowModeValues>
     kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM] = {
         { { 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232,
-            153, 438, 270, 12 } }
+           153, 438, 270, 12 } }
     };
 
 // Yard lines
@@ -374,28 +374,26 @@ void SetConfigValue(const wxString& key,
     }
 }
 
-#define IMPLEMENT_CONFIGURATION_FUNCTIONS(KeyName, Type, TheValue)                        \
-    static const wxString k##KeyName##Key = wxT(#KeyName);                                \
-    static const Type k##KeyName##Value = (TheValue);                                     \
-    Type CalChartConfiguration::Get_##KeyName() const                                     \
-    {                                                                                     \
-        if (!m##KeyName.first) {                                                          \
-            m##KeyName.second = GetConfigValue<Type>(k##KeyName##Key, k##KeyName##Value); \
-            m##KeyName.first = true;                                                      \
-        }                                                                                 \
-        return m##KeyName.second;                                                         \
-    }                                                                                     \
-    void CalChartConfiguration::Set_##KeyName(const Type& v)                              \
-    {                                                                                     \
-        mWriteQueue[k##KeyName##Key] = [v]() {                                            \
-            SetConfigValue<Type>(k##KeyName##Key, v, k##KeyName##Value);                  \
-        };                                                                                \
-        m##KeyName.first = true;                                                          \
-        m##KeyName.second = v;                                                            \
-    }                                                                                     \
-    void CalChartConfiguration::Clear_##KeyName()                                         \
-    {                                                                                     \
-        return Set_##KeyName(k##KeyName##Value);                                          \
+#define IMPLEMENT_CONFIGURATION_FUNCTIONS(KeyName, Type, TheValue)                                             \
+    static const wxString k##KeyName##Key = wxT(#KeyName);                                                     \
+    static const Type k##KeyName##Value = (TheValue);                                                          \
+    Type CalChartConfiguration::Get_##KeyName() const                                                          \
+    {                                                                                                          \
+        if (!m##KeyName.first) {                                                                               \
+            m##KeyName.second = GetConfigValue<Type>(k##KeyName##Key, k##KeyName##Value);                      \
+            m##KeyName.first = true;                                                                           \
+        }                                                                                                      \
+        return m##KeyName.second;                                                                              \
+    }                                                                                                          \
+    void CalChartConfiguration::Set_##KeyName(const Type& v)                                                   \
+    {                                                                                                          \
+        mWriteQueue[k##KeyName##Key] = [v]() { SetConfigValue<Type>(k##KeyName##Key, v, k##KeyName##Value); }; \
+        m##KeyName.first = true;                                                                               \
+        m##KeyName.second = v;                                                                                 \
+    }                                                                                                          \
+    void CalChartConfiguration::Clear_##KeyName()                                                              \
+    {                                                                                                          \
+        return Set_##KeyName(k##KeyName##Value);                                                               \
     }
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AutosaveInterval, long, 60);

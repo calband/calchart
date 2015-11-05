@@ -124,7 +124,7 @@ static const double kLowerNumberPosition[2][2] = {
 static const double kLowerNumberBox[2][4] = {
     { 1.0 - 90 / kSizeX, 708 / kSizeY, 56 / kSizeX, 22 / kSizeY },
     { 1.0 - 124 / kSizeXLandscape, 674 / kSizeYLandscape, 56 / kSizeXLandscape,
-        28 / kSizeYLandscape }
+     28 / kSizeYLandscape }
 };
 static const double kMusicLabelPosition[2][3] = {
     { 0.5, 60 / kSizeY, 240 / kSizeX },
@@ -187,7 +187,7 @@ static const wxString kLowerNorthLabel = wxT("north");
 static const double kLowerNorthArrow[2][3] = {
     { 1.0 - 52 / kSizeX, (570) / kSizeY, 40 / kSizeX },
     { 1.0 - 76 / kSizeXLandscape, (536) / kSizeYLandscape,
-        40 / kSizeXLandscape }
+     40 / kSizeXLandscape }
 };
 
 static const double kContinuityStart[2] = { 606 / kSizeY, 556 / kSizeYLandscape };

@@ -95,8 +95,7 @@ void CalChartApp::InitAppAsServer()
     mDocManager = new wxDocManager;
 
     //// Create a template relating drawing documents to their views
-    (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""),
-        _T("shw"), _T("CalChart"), _T("Field View"),
+    (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
         CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
 
     gPrintDialogData = new wxPrintDialogData();

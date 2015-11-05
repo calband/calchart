@@ -25,7 +25,7 @@ void AnimateShow(const char* show)
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
-            const std::string& error) {
+                    const std::string& error) {
             std::cout << "error" << error << "\n";
             return true;
         });
@@ -38,7 +38,7 @@ void PrintShow(const char* show)
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
-            const std::string& error) {
+                    const std::string& error) {
             std::cout << "error" << error << "\n";
             return true;
         });
@@ -133,7 +133,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     PrintShowToPS printShowToPS(
         *p, landscape, cont, contsheet, overview, 50, *mode,
         { { head_font_str, main_font_str, number_font_str, cont_font_str,
-            bold_font_str, ital_font_str, bold_ital_font_str } },
+           bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
         ContRatio, Get_yard_text, Get_spr_line_text);
