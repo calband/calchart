@@ -19,3 +19,4 @@ def vm_run_prog(program, args, verbose=False):
     print the `vagrant ssh` command used to execute the program.
     """
     vm_exec("%s %s" % (program, " ".join(args)), verbose=verbose)
+    
