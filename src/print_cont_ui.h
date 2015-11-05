@@ -33,71 +33,71 @@ class FancyTextPanel;
 class wxSplitterWindow;
 
 // View for linking CalChartDoc with PrintContinuityEditor
-class PrintContinuityEditorView : public wxView
-{
+class PrintContinuityEditorView : public wxView {
 public:
-	PrintContinuityEditorView();
-	~PrintContinuityEditorView();
-    virtual void OnDraw(wxDC *dc);
-    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    PrintContinuityEditorView();
+    ~PrintContinuityEditorView();
+    virtual void OnDraw(wxDC* dc);
+    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 
-	void DoSetPrintContinuity(unsigned which_sheet, const wxString& number, const wxString& cont);
+    void DoSetPrintContinuity(unsigned which_sheet, const wxString& number,
+        const wxString& cont);
 };
 
 // PrintContinuityEditor
 // The way you edit the continuity for individual marchers
-// This dialog should notify the user to save if there are any outstanding edits.
-class PrintContinuityEditor : public wxFrame
-{
-	friend class PrintContinuityEditorView;
+// This dialog should notify the user to save if there are any outstanding
+// edits.
+class PrintContinuityEditor : public wxFrame {
+    friend class PrintContinuityEditorView;
+
 public:
-	PrintContinuityEditor();
-	PrintContinuityEditor(CalChartDoc *dcr,
-		wxWindow *parent, wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Edit Print Continuity"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~PrintContinuityEditor();
+    PrintContinuityEditor();
+    PrintContinuityEditor(CalChartDoc* dcr, wxWindow* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Edit Print Continuity"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ~PrintContinuityEditor();
 
-	void OnCloseWindow(wxCommandEvent& event);
-	void OnCmdHelp(wxCommandEvent& event);
+    void OnCloseWindow(wxCommandEvent& event);
+    void OnCmdHelp(wxCommandEvent& event);
 
-	void Update();		  // Refresh all window controls
-// Update text window to current continuity
-// quick doesn't flush other windows
-	void UpdateText();
+    void Update(); // Refresh all window controls
+    // Update text window to current continuity
+    // quick doesn't flush other windows
+    void UpdateText();
 
-	void FlushText();						  // Flush changes in text window
+    void FlushText(); // Flush changes in text window
 
-	void SetInsertionPoint(int x, int y);
-	void UpdateOrientation(wxCommandEvent&);
+    void SetInsertionPoint(int x, int y);
+    void UpdateOrientation(wxCommandEvent&);
 
 private:
-	void Init();
+    void Init();
 
-	bool Create(CalChartDoc *shw,
-		wxWindow *parent, wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Select Points"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+    bool Create(CalChartDoc* shw, wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Select Points"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
 
-	void CreateControls();
+    void CreateControls();
 
-	void OnSave(wxCommandEvent&);
-	void OnDiscard(wxCommandEvent&);
-	void ContEditCurrent(wxCommandEvent&);
-	void OnKeyPress(wxCommandEvent&);
+    void OnSave(wxCommandEvent&);
+    void OnDiscard(wxCommandEvent&);
+    void ContEditCurrent(wxCommandEvent&);
+    void OnKeyPress(wxCommandEvent&);
 
-	void Save();
-	void Discard();
+    void Save();
+    void Discard();
 
-	CalChartDoc *mDoc;
-	PrintContinuityEditorView *mView;
-	FancyTextWin *mUserInput;
-	FancyTextPanel *mPrintContDisplay;
-	wxSplitterWindow *mSplitter;
+    CalChartDoc* mDoc;
+    PrintContinuityEditorView* mView;
+    FancyTextWin* mUserInput;
+    FancyTextPanel* mPrintContDisplay;
+    wxSplitterWindow* mSplitter;
 
-	DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };

@@ -30,46 +30,43 @@
 
 // Perhaps this should be put in namespace?
 
-class CC_point
-{
+class CC_point {
 public:
-	static const unsigned kNumRefPoints = 3;
-	CC_point();
-	CC_point(const CC_coord& pos);
+    static const unsigned kNumRefPoints = 3;
+    CC_point();
+    CC_point(const CC_coord& pos);
 
-	CC_point(const std::vector<uint8_t>& serialized_data);
-	std::vector<uint8_t> Serialize() const;
+    CC_point(const std::vector<uint8_t>& serialized_data);
+    std::vector<uint8_t> Serialize() const;
 
-	bool GetFlip() const;
-	void Flip(bool val = true);
-	void FlipToggle();
+    bool GetFlip() const;
+    void Flip(bool val = true);
+    void FlipToggle();
 
-	bool LabelIsVisible() const;
-	void SetLabelVisibility(bool isVisible);
+    bool LabelIsVisible() const;
+    void SetLabelVisibility(bool isVisible);
 
-	SYMBOL_TYPE GetSymbol() const;
-	void SetSymbol(SYMBOL_TYPE sym);
+    SYMBOL_TYPE GetSymbol() const;
+    void SetSymbol(SYMBOL_TYPE sym);
 
-	// reference points 0 is the point, refs are [1, kNumRefPoints]
-	CC_coord GetPos(unsigned ref = 0) const;
-	void SetPos(const CC_coord& c, unsigned ref = 0);
+    // reference points 0 is the point, refs are [1, kNumRefPoints]
+    CC_coord GetPos(unsigned ref = 0) const;
+    void SetPos(const CC_coord& c, unsigned ref = 0);
 
 private:
-	enum {
-		kPointLabelFlipped,
-		kLabelIsInvisible,
-		kTotalBits
-	};
-	
-	std::bitset<kTotalBits> mFlags;
-	// by having both a sym type and cont index, we can have several
-	// points share the same symbol but have different continuities.
-	SYMBOL_TYPE mSym;
-	CC_coord mPos;
-	CC_coord mRef[kNumRefPoints];
+    enum { kPointLabelFlipped,
+        kLabelIsInvisible,
+        kTotalBits };
 
-	friend struct CC_point_values;
-	friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
+    std::bitset<kTotalBits> mFlags;
+    // by having both a sym type and cont index, we can have several
+    // points share the same symbol but have different continuities.
+    SYMBOL_TYPE mSym;
+    CC_coord mPos;
+    CC_coord mRef[kNumRefPoints];
+
+    friend struct CC_point_values;
+    friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
 };
 
 void CC_point_UnitTests();

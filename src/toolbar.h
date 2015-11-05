@@ -27,16 +27,15 @@
 
 #include <vector>
 
-struct ToolBarEntry
-{
-	wxItemKind kind;
-	wxBitmap *bm;
-	wxString desc;
-	int id;
-	bool space;
+struct ToolBarEntry {
+    wxItemKind kind;
+    wxBitmap* bm;
+    wxString desc;
+    int id;
+    bool space;
 };
 
-void AddCoolToolBar(const std::vector<ToolBarEntry> &entries, wxFrame& frame);
+void AddCoolToolBar(const std::vector<ToolBarEntry>& entries, wxFrame& frame);
 std::vector<ToolBarEntry> GetSymbolsToolBar();
 std::vector<ToolBarEntry> GetMainToolBar();
 std::vector<ToolBarEntry> GetAnimationToolBar();

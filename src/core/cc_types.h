@@ -22,47 +22,64 @@
 
 #pragma once
 
-#pragma warning (disable : 4005) //Suppress macro redefinition warnings in stdint.h -- the file redefines INT16_MAX and other similar defines
+#pragma warning(disable : 4005) // Suppress macro redefinition warnings in
+// stdint.h -- the file redefines INT16_MAX and
+// other similar defines
 #include <stdint.h>
-#pragma warning (default : 4005)
+#pragma warning(default : 4005)
 
 #include <set>
 #include <string>
 
 typedef int16_t Coord;
 
-enum PSFONT_TYPE
-{
-	PSFONT_SYMBOL, PSFONT_NORM, PSFONT_BOLD, PSFONT_ITAL, PSFONT_BOLDITAL,
-	PSFONT_TAB
+enum PSFONT_TYPE {
+    PSFONT_SYMBOL,
+    PSFONT_NORM,
+    PSFONT_BOLD,
+    PSFONT_ITAL,
+    PSFONT_BOLDITAL,
+    PSFONT_TAB
 };
 
-enum SYMBOL_TYPE
-{
-	SYMBOLS_START = 0,
-	SYMBOL_PLAIN = 0, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
-	, MAX_NUM_SYMBOLS
+enum SYMBOL_TYPE {
+    SYMBOLS_START = 0,
+    SYMBOL_PLAIN = 0,
+    SYMBOL_SOL,
+    SYMBOL_BKSL,
+    SYMBOL_SL,
+    SYMBOL_X,
+    SYMBOL_SOLBKSL,
+    SYMBOL_SOLSL,
+    SYMBOL_SOLX,
+    MAX_NUM_SYMBOLS
 };
 
 static const SYMBOL_TYPE k_symbols[] = {
-	SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
-	SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+    SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
+    SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
 };
 
 std::string GetNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
 
-enum CC_DRAG_TYPES
-{
-	CC_DRAG_NONE, CC_DRAG_BOX, CC_DRAG_POLY,
-	CC_DRAG_LASSO, CC_DRAG_LINE, CC_DRAG_CROSS
+enum CC_DRAG_TYPES {
+    CC_DRAG_NONE,
+    CC_DRAG_BOX,
+    CC_DRAG_POLY,
+    CC_DRAG_LASSO,
+    CC_DRAG_LINE,
+    CC_DRAG_CROSS
 };
-enum CC_MOVE_MODES
-{
-	CC_MOVE_NORMAL, CC_MOVE_SWAP, CC_MOVE_LINE,
-	CC_MOVE_ROTATE, CC_MOVE_SHEAR, CC_MOVE_REFL, 
-	CC_MOVE_SIZE, CC_MOVE_GENIUS
+enum CC_MOVE_MODES {
+    CC_MOVE_NORMAL,
+    CC_MOVE_SWAP,
+    CC_MOVE_LINE,
+    CC_MOVE_ROTATE,
+    CC_MOVE_SHEAR,
+    CC_MOVE_REFL,
+    CC_MOVE_SIZE,
+    CC_MOVE_GENIUS
 };
 
 typedef std::set<unsigned> SelectionList;

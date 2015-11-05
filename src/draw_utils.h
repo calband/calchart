@@ -26,49 +26,72 @@
 #include <wx/dc.h>
 
 // helper classes for saving and restoring state
-class SaveAndRestore_DeviceOrigin
-{
-	wxDC& dc;
-	wxCoord origX, origY;
+class SaveAndRestore_DeviceOrigin {
+    wxDC& dc;
+    wxCoord origX, origY;
+
 public:
-	SaveAndRestore_DeviceOrigin(wxDC& dc_) : dc(dc_) { dc.GetDeviceOrigin(&origX, &origY); }
-	~SaveAndRestore_DeviceOrigin() { dc.SetDeviceOrigin(origX, origY); }
+    SaveAndRestore_DeviceOrigin(wxDC& dc_)
+        : dc(dc_)
+    {
+        dc.GetDeviceOrigin(&origX, &origY);
+    }
+    ~SaveAndRestore_DeviceOrigin() { dc.SetDeviceOrigin(origX, origY); }
 };
 
-class SaveAndRestore_UserScale
-{
-	wxDC& dc;
-	double origXscale, origYscale;
+class SaveAndRestore_UserScale {
+    wxDC& dc;
+    double origXscale, origYscale;
+
 public:
-	SaveAndRestore_UserScale(wxDC& dc_) : dc(dc_) { dc.GetUserScale(&origXscale, &origYscale); }
-	~SaveAndRestore_UserScale() { dc.SetUserScale(origXscale, origYscale); }
+    SaveAndRestore_UserScale(wxDC& dc_)
+        : dc(dc_)
+    {
+        dc.GetUserScale(&origXscale, &origYscale);
+    }
+    ~SaveAndRestore_UserScale() { dc.SetUserScale(origXscale, origYscale); }
 };
 
-class SaveAndRestore_TextForeground
-{
-	wxDC& dc;
-	wxColour origForegroundColor;
+class SaveAndRestore_TextForeground {
+    wxDC& dc;
+    wxColour origForegroundColor;
+
 public:
-	SaveAndRestore_TextForeground(wxDC& dc_) : dc(dc_), origForegroundColor(dc.GetTextForeground()) {}
-	~SaveAndRestore_TextForeground() { dc.SetTextForeground(origForegroundColor); }
+    SaveAndRestore_TextForeground(wxDC& dc_)
+        : dc(dc_)
+        , origForegroundColor(dc.GetTextForeground())
+    {
+    }
+    ~SaveAndRestore_TextForeground()
+    {
+        dc.SetTextForeground(origForegroundColor);
+    }
 };
 
-class SaveAndRestore_Font
-{
-	wxDC& dc;
-	wxFont origFont;
+class SaveAndRestore_Font {
+    wxDC& dc;
+    wxFont origFont;
+
 public:
-	SaveAndRestore_Font(wxDC& dc_) : dc(dc_), origFont(dc.GetFont()) {}
-	~SaveAndRestore_Font() { dc.SetFont(origFont); }
+    SaveAndRestore_Font(wxDC& dc_)
+        : dc(dc_)
+        , origFont(dc.GetFont())
+    {
+    }
+    ~SaveAndRestore_Font() { dc.SetFont(origFont); }
 };
 
-class SaveAndRestore_Brush
-{
-	wxDC& dc;
-	wxBrush origBrush;
+class SaveAndRestore_Brush {
+    wxDC& dc;
+    wxBrush origBrush;
+
 public:
-	SaveAndRestore_Brush(wxDC& dc_) : dc(dc_), origBrush(dc.GetBrush()) {}
-	~SaveAndRestore_Brush() { dc.SetBrush(origBrush); }
+    SaveAndRestore_Brush(wxDC& dc_)
+        : dc(dc_)
+        , origBrush(dc.GetBrush())
+    {
+    }
+    ~SaveAndRestore_Brush() { dc.SetBrush(origBrush); }
 };
 
 #endif // __DRAW_UTILS_H__

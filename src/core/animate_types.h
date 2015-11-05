@@ -26,56 +26,57 @@
 #include <string>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
-enum
-{
-	CONTVAR_A,
-	CONTVAR_B,
-	CONTVAR_C,
-	CONTVAR_D,
-	CONTVAR_X,
-	CONTVAR_Y,
-	CONTVAR_Z,
-	CONTVAR_DOF,
-	CONTVAR_DOH,
-	NUMCONTVARS
+enum {
+    CONTVAR_A,
+    CONTVAR_B,
+    CONTVAR_C,
+    CONTVAR_D,
+    CONTVAR_X,
+    CONTVAR_Y,
+    CONTVAR_Z,
+    CONTVAR_DOF,
+    CONTVAR_DOH,
+    NUMCONTVARS
 };
 
-enum AnimateDir
-{
-	ANIMDIR_N, ANIMDIR_NE, ANIMDIR_E, ANIMDIR_SE,
-	ANIMDIR_S, ANIMDIR_SW, ANIMDIR_W, ANIMDIR_NW
+enum AnimateDir {
+    ANIMDIR_N,
+    ANIMDIR_NE,
+    ANIMDIR_E,
+    ANIMDIR_SE,
+    ANIMDIR_S,
+    ANIMDIR_SW,
+    ANIMDIR_W,
+    ANIMDIR_NW
 };
 
-enum AnimateError
-{
-	ANIMERR_OUTOFTIME,
-	ANIMERR_EXTRATIME,
-	ANIMERR_WRONGPLACE,
-	ANIMERR_INVALID_CM,
-	ANIMERR_INVALID_FNTN,
-	ANIMERR_DIVISION_ZERO,
-	ANIMERR_UNDEFINED,
-	ANIMERR_SYNTAX,
-	ANIMERR_NONINT,
-	ANIMERR_NEGINT,
-	NUM_ANIMERR
+enum AnimateError {
+    ANIMERR_OUTOFTIME,
+    ANIMERR_EXTRATIME,
+    ANIMERR_WRONGPLACE,
+    ANIMERR_INVALID_CM,
+    ANIMERR_INVALID_FNTN,
+    ANIMERR_DIVISION_ZERO,
+    ANIMERR_UNDEFINED,
+    ANIMERR_SYNTAX,
+    ANIMERR_NONINT,
+    ANIMERR_NEGINT,
+    NUM_ANIMERR
 };
 
-enum MarchingStyle
-{
-	STYLE_HighStep,
-	STYLE_Military,
-	STYLE_ShowHigh,
-	STYLE_GrapeVine,
-	STYLE_JerkyStep,
-	STYLE_Close
+enum MarchingStyle {
+    STYLE_HighStep,
+    STYLE_Military,
+    STYLE_ShowHigh,
+    STYLE_GrapeVine,
+    STYLE_JerkyStep,
+    STYLE_Close
 };
 
-enum CollisionWarning
-{
-	COLLISION_RESPONSE_NONE,
-	COLLISION_RESPONSE_SHOW,
-	COLLISION_RESPONSE_BEEP
+enum CollisionWarning {
+    COLLISION_RESPONSE_NONE,
+    COLLISION_RESPONSE_SHOW,
+    COLLISION_RESPONSE_BEEP
 };
 
 std::string animate_err_msgs(size_t which);

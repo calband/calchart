@@ -35,54 +35,66 @@ class ContProcedure;
 class ContToken;
 class AnimateCommand;
 
-using AnimationVariables = std::array<std::map<unsigned,float>, NUMCONTVARS>;
+using AnimationVariables = std::array<std::map<unsigned, float>, NUMCONTVARS>;
 
-using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
+using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand> >;
 
-class AnimationErrors
-{
+class AnimationErrors {
 public:
-	bool AnyErrors() const { return !mErrorMarkers.empty(); }
-	std::map<AnimateError, ErrorMarker> GetErrors() const { return mErrorMarkers; }
-	void RegisterError(AnimateError err, const ContToken *token, unsigned curr_pt, SYMBOL_TYPE contsymbol);
+    bool AnyErrors() const { return !mErrorMarkers.empty(); }
+    std::map<AnimateError, ErrorMarker> GetErrors() const
+    {
+        return mErrorMarkers;
+    }
+    void RegisterError(AnimateError err, const ContToken* token, unsigned curr_pt,
+        SYMBOL_TYPE contsymbol);
+
 private:
-	std::map<AnimateError, ErrorMarker> mErrorMarkers;
+    std::map<AnimateError, ErrorMarker> mErrorMarkers;
 };
 
-class AnimateCompile
-{
+class AnimateCompile {
 public:
-// Compile a point
-	static AnimateCommands Compile(const CC_show& show, AnimationVariables& variablesStates, AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned pt_num, SYMBOL_TYPE cont_symbol, std::list<std::unique_ptr<ContProcedure>> const& proc);
+    // Compile a point
+    static AnimateCommands
+    Compile(const CC_show& show, AnimationVariables& variablesStates,
+        AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet,
+        unsigned pt_num, SYMBOL_TYPE cont_symbol,
+        std::list<std::unique_ptr<ContProcedure> > const& proc);
 
 private:
-	AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CC_show::const_CC_sheet_iterator_t c_sheet, unsigned& beats_rem, CC_coord& pt, AnimationVariables& variablesStates, AnimationErrors& errors, AnimateCommands& cmds);
+    AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num,
+        CC_show::const_CC_sheet_iterator_t c_sheet,
+        unsigned& beats_rem, CC_coord& pt,
+        AnimationVariables& variablesStates, AnimationErrors& errors,
+        AnimateCommands& cmds);
 
 public:
-	bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken *token);
-	void RegisterError(AnimateError err, const ContToken *token) const;
+    bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken* token);
+    void RegisterError(AnimateError err, const ContToken* token) const;
 
-	float GetVarValue(int varnum, const ContToken *token) const;
-	void SetVarValue(int varnum, float value);
+    float GetVarValue(int varnum, const ContToken* token) const;
+    void SetVarValue(int varnum, float value);
 
-	// helper functions to get information for building a command
-	AnimatePoint GetPointPosition() const { return pt; }
-	unsigned GetCurrentPoint() const { return curr_pt; }
-	unsigned GetBeatsRemaining() const { return beats_rem; }
-	AnimatePoint GetStartingPosition() const;
-	AnimatePoint GetEndingPosition(const ContToken *token) const;
-	AnimatePoint GetReferencePointPosition(unsigned refnum) const;
+    // helper functions to get information for building a command
+    AnimatePoint GetPointPosition() const { return pt; }
+    unsigned GetCurrentPoint() const { return curr_pt; }
+    unsigned GetBeatsRemaining() const { return beats_rem; }
+    AnimatePoint GetStartingPosition() const;
+    AnimatePoint GetEndingPosition(const ContToken* token) const;
+    AnimatePoint GetReferencePointPosition(unsigned refnum) const;
+
 private:
-	const CC_show& mShow;
-	const SYMBOL_TYPE contsymbol;
-	const unsigned curr_pt;
-	const CC_show::const_CC_sheet_iterator_t curr_sheet;
+    const CC_show& mShow;
+    const SYMBOL_TYPE contsymbol;
+    const unsigned curr_pt;
+    const CC_show::const_CC_sheet_iterator_t curr_sheet;
 
-	AnimatePoint& pt;
-	unsigned& beats_rem;
-	AnimationVariables& mVars;
-	AnimateCommands& cmds;
+    AnimatePoint& pt;
+    unsigned& beats_rem;
+    AnimationVariables& mVars;
+    AnimateCommands& cmds;
 
-	// this is effectively mutable;
-	AnimationErrors& error_markers;
+    // this is effectively mutable;
+    AnimationErrors& error_markers;
 };

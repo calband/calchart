@@ -26,24 +26,26 @@
 
 // points have a symbol index and a continuity index.  The continuity
 // numbers is the way that the points know what continity they use.
-// This allows multiple points to have different symbols but the same continuity.
-class CC_continuity
-{
+// This allows multiple points to have different symbols but the same
+// continuity.
+class CC_continuity {
 public:
-	CC_continuity();
-	~CC_continuity();
+    CC_continuity();
+    ~CC_continuity();
 
-	void SetText(const std::string& s);
-	void AppendText(const std::string& s);
-	const std::string& GetText() const;
+    void SetText(const std::string& s);
+    void AppendText(const std::string& s);
+    const std::string& GetText() const;
 
 private:
-	std::string text;
+    std::string text;
 
-friend bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
-friend void CC_continuity_UnitTests();
+    friend bool Check_CC_continuity(const CC_continuity&,
+        const struct CC_continuity_values&);
+    friend void CC_continuity_UnitTests();
 };
 
-bool Check_CC_continuity(const CC_continuity&, const struct CC_continuity_values&);
+bool Check_CC_continuity(const CC_continuity&,
+    const struct CC_continuity_values&);
 
 void CC_continuity_UnitTests();

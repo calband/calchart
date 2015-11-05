@@ -25,107 +25,120 @@
 #include "cc_types.h"
 
 #define COORD_SHIFT 4
-#define COORD_DECIMAL (1<<COORD_SHIFT)
+#define COORD_DECIMAL (1 << COORD_SHIFT)
 
-// RoundToCoord: Use when number is already in Coord format, just needs to be rounded
+// RoundToCoord: Use when number is already in Coord format, just needs to be
+// rounded
 template <typename T>
-static inline Coord RoundToCoord(T inCoord) { return static_cast<Coord>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5)); }
+static inline Coord RoundToCoord(T inCoord)
+{
+    return static_cast<Coord>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
+}
 
 // Float2Coord, Coord2Float
 //  Use when we want to convert to Coord system
 template <typename T>
-static inline Coord Float2Coord(T a) { return RoundToCoord(a * COORD_DECIMAL); }
+static inline Coord Float2Coord(T a)
+{
+    return RoundToCoord(a * COORD_DECIMAL);
+}
 template <typename T>
-static inline float Coord2Float(T a) { return a / (float)COORD_DECIMAL; }
+static inline float Coord2Float(T a)
+{
+    return a / (float)COORD_DECIMAL;
+}
 
 // Int2Coord, Coord2Int
 //  Use when we want to convert to Coord system
 template <typename T>
-static inline Coord Int2Coord(T a) { return a * COORD_DECIMAL; }
+static inline Coord Int2Coord(T a)
+{
+    return a * COORD_DECIMAL;
+}
 template <typename T>
-static inline int Coord2Int(T a) { return a / COORD_DECIMAL; }
+static inline int Coord2Int(T a)
+{
+    return a / COORD_DECIMAL;
+}
 
 enum CollisionType {
-	COLLISION_NONE = 0,
-	COLLISION_WARNING,
-	COLLISION_INTERSECT
+    COLLISION_NONE = 0,
+    COLLISION_WARNING,
+    COLLISION_INTERSECT
 };
 
-class CC_coord
-{
+class CC_coord {
 public:
-	CC_coord(Coord xval = 0, Coord yval = 0) : x(xval), y(yval) {}
+    CC_coord(Coord xval = 0, Coord yval = 0)
+        : x(xval)
+        , y(yval)
+    {
+    }
 
-	float Magnitude() const;
-	float DM_Magnitude() const;				  // check for diagonal military also
-	float Direction() const;
-	float Direction(const CC_coord& c) const;
+    float Magnitude() const;
+    float DM_Magnitude() const; // check for diagonal military also
+    float Direction() const;
+    float Direction(const CC_coord& c) const;
 
-	CollisionType DetectCollision(const CC_coord& c) const;
+    CollisionType DetectCollision(const CC_coord& c) const;
 
-	inline CC_coord& operator += (const CC_coord& c)
-	{
-		x += c.x; y += c.y;
-		return *this;
-	}
-	inline CC_coord& operator -= (const CC_coord& c)
-	{
-		x -= c.x; y -= c.y;
-		return *this;
-	}
-	inline CC_coord& operator *= (short s)
-	{
-		x *= s; y *= s;
-		return *this;
-	}
-	inline CC_coord& operator /= (short s)
-	{
-		x /= s; y /= s;
-		return *this;
-	}
+    inline CC_coord& operator+=(const CC_coord& c)
+    {
+        x += c.x;
+        y += c.y;
+        return *this;
+    }
+    inline CC_coord& operator-=(const CC_coord& c)
+    {
+        x -= c.x;
+        y -= c.y;
+        return *this;
+    }
+    inline CC_coord& operator*=(short s)
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    }
+    inline CC_coord& operator/=(short s)
+    {
+        x /= s;
+        y /= s;
+        return *this;
+    }
 
-	Coord x, y;
+    Coord x, y;
 };
-inline CC_coord operator + (const CC_coord& a, const CC_coord& b)
+inline CC_coord operator+(const CC_coord& a, const CC_coord& b)
 {
-	return CC_coord(a.x + b.x, a.y + b.y);
+    return CC_coord(a.x + b.x, a.y + b.y);
 }
 
-
-inline CC_coord operator - (const CC_coord& a, const CC_coord& b)
+inline CC_coord operator-(const CC_coord& a, const CC_coord& b)
 {
-	return CC_coord(a.x - b.x, a.y - b.y);
+    return CC_coord(a.x - b.x, a.y - b.y);
 }
 
-
-inline CC_coord operator * (const CC_coord& a, short s)
+inline CC_coord operator*(const CC_coord& a, short s)
 {
-	return CC_coord(a.x * s, a.y * s);
+    return CC_coord(a.x * s, a.y * s);
 }
 
-
-inline CC_coord operator / (const CC_coord& a, short s)
+inline CC_coord operator/(const CC_coord& a, short s)
 {
-	return CC_coord(a.x / s, a.y / s);
+    return CC_coord(a.x / s, a.y / s);
 }
 
+inline CC_coord operator-(const CC_coord& c) { return CC_coord(-c.x, -c.y); }
 
-inline CC_coord operator - (const CC_coord& c)
+inline int operator==(const CC_coord& a, const CC_coord& b)
 {
-	return CC_coord(-c.x, -c.y);
+    return ((a.x == b.x) && (a.y == b.y));
 }
 
-
-inline int operator == (const CC_coord& a, const CC_coord& b)
+inline int operator!=(const CC_coord& a, const CC_coord& b)
 {
-	return ((a.x == b.x) && (a.y == b.y));
+    return ((a.x != b.x) || (a.y != b.y));
 }
-
-
-inline int operator != (const CC_coord& a, const CC_coord& b)
-{
-	return ((a.x != b.x) || (a.y != b.y));
-}
-
 
 void CC_coord_UnitTests();

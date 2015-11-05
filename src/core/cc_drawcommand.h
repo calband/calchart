@@ -25,44 +25,51 @@
 
 #include "cc_coord.h"
 
-struct CC_DrawCommand
-{
-	typedef enum { Ignore, Line, Arc } DrawType;
-	DrawType mType;
-	int x1, y1, x2, y2;
-	int xc, yc;
-	// nothing version
-	CC_DrawCommand() : mType(Ignore) {}
+struct CC_DrawCommand {
+    typedef enum { Ignore,
+        Line,
+        Arc } DrawType;
+    DrawType mType;
+    int x1, y1, x2, y2;
+    int xc, yc;
+    // nothing version
+    CC_DrawCommand()
+        : mType(Ignore)
+    {
+    }
 
-	// Line version
-	CC_DrawCommand(int startx, int starty, int endx, int endy) :
-	mType(Line),
-	x1(startx),
-	y1(starty),
-	x2(endx),
-	y2(endy)
-	{}
+    // Line version
+    CC_DrawCommand(int startx, int starty, int endx, int endy)
+        : mType(Line)
+        , x1(startx)
+        , y1(starty)
+        , x2(endx)
+        , y2(endy)
+    {
+    }
 
-	// Line version
-	CC_DrawCommand(const CC_coord& start, const CC_coord& end) :
-	mType(Line),
-	x1(start.x),
-	y1(start.y),
-	x2(end.x),
-	y2(end.y)
-	{}
-	
-	// Arc version
-	CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx, int centery) :
-	mType(Arc),
-	x1(startx),
-	y1(starty),
-	x2(endx),
-	y2(endy),
-	xc(centerx),
-	yc(centery)
-	{}
+    // Line version
+    CC_DrawCommand(const CC_coord& start, const CC_coord& end)
+        : mType(Line)
+        , x1(start.x)
+        , y1(start.y)
+        , x2(end.x)
+        , y2(end.y)
+    {
+    }
 
+    // Arc version
+    CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx,
+        int centery)
+        : mType(Arc)
+        , x1(startx)
+        , y1(starty)
+        , x2(endx)
+        , y2(endy)
+        , xc(centerx)
+        , yc(centery)
+    {
+    }
 };
 
 #endif // _CC_DRAWCOMMAND_H_

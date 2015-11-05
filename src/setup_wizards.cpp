@@ -29,51 +29,46 @@
 #include <wx/wx.h>
 
 // page for giving a description
-SetDescriptionWizard::SetDescriptionWizard(wxWizard *parent) :
-wxWizardPageSimple(parent)
+SetDescriptionWizard::SetDescriptionWizard(wxWizard* parent)
+    : wxWizardPageSimple(parent)
 {
-	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-	SetSizer( topsizer );
-	wxStaticText* label = new wxStaticText(this, wxID_STATIC, 
-										   wxT("Enter a show description for your show:"), wxDefaultPosition, wxDefaultSize, 0);
-	topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	mText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(240, 100));
-	topsizer->Add(mText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	topsizer->Fit(this);
+    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topsizer);
+    wxStaticText* label = new wxStaticText(
+        this, wxID_STATIC, wxT("Enter a show description for your show:"),
+        wxDefaultPosition, wxDefaultSize, 0);
+    topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    mText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
+        wxSize(240, 100));
+    topsizer->Add(mText, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Fit(this);
 }
 
-wxString
-SetDescriptionWizard::GetValue()
-{
-	return mText->GetValue();
-}
+wxString SetDescriptionWizard::GetValue() { return mText->GetValue(); }
 
 // page for deciding the field type
-ChooseShowModeWizard::ChooseShowModeWizard(wxWizard *parent) :
-wxWizardPageSimple(parent)
+ChooseShowModeWizard::ChooseShowModeWizard(wxWizard* parent)
+    : wxWizardPageSimple(parent)
 {
-	for (auto mode : kShowModeStrings)
-	{
-		modeStrings.Add(mode);
-	}
-	for (auto mode : kSpringShowModeStrings)
-	{
-		modeStrings.Add(mode);
-	}
-	
-	wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-	SetSizer( topsizer );
-	wxStaticText* label = new wxStaticText(this, wxID_STATIC, 
-										   wxT("Choose a field to set your show:"), wxDefaultPosition, wxDefaultSize, 0);
-	topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	mChoice = new wxChoice(this, wxID_ANY, wxPoint(5,5), wxDefaultSize, modeStrings);
-	topsizer->Add(mChoice, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
-	topsizer->Fit(this);
+    for (auto mode : kShowModeStrings) {
+        modeStrings.Add(mode);
+    }
+    for (auto mode : kSpringShowModeStrings) {
+        modeStrings.Add(mode);
+    }
+
+    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topsizer);
+    wxStaticText* label = new wxStaticText(
+        this, wxID_STATIC, wxT("Choose a field to set your show:"),
+        wxDefaultPosition, wxDefaultSize, 0);
+    topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    mChoice = new wxChoice(this, wxID_ANY, wxPoint(5, 5), wxDefaultSize, modeStrings);
+    topsizer->Add(mChoice, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Fit(this);
 }
 
-wxString
-ChooseShowModeWizard::GetValue()
+wxString ChooseShowModeWizard::GetValue()
 {
-	return modeStrings[mChoice->GetSelection()];
+    return modeStrings[mChoice->GetSelection()];
 }
-

@@ -28,117 +28,110 @@
 
 #include <vector>
 
-class PointPickerView : public wxView
-{
+class PointPickerView : public wxView {
 public:
-	PointPickerView();
-	~PointPickerView();
-    virtual void OnDraw(wxDC *dc);
-    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    PointPickerView();
+    ~PointPickerView();
+    virtual void OnDraw(wxDC* dc);
+    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 };
 
-class PointPicker : public wxDialog
-{
+class PointPicker : public wxDialog {
 public:
-	PointPicker(CalChartDoc& shw,
-		wxWindow *parent, wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Select Points"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~PointPicker();
+    PointPicker(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Select Points"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ~PointPicker();
 
-	void Update();
+    void Update();
 
 private:
-	CalChartDoc& mShow;
-	PointPickerView *mView;
-	wxListBox *mList;
-	std::vector<wxString> mCachedLabels;
-	SelectionList mCachedSelection;
+    CalChartDoc& mShow;
+    PointPickerView* mView;
+    wxListBox* mList;
+    std::vector<wxString> mCachedLabels;
+    SelectionList mCachedSelection;
 
-	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Select Points"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+    bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Select Points"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
 
-	void CreateControls();
+    void CreateControls();
 
+    void PointPickerAll(wxCommandEvent&);
+    void PointPickerBySymbol(SYMBOL_TYPE which);
+    void PointPickerNone(wxCommandEvent&);
+    void PointPickerSelect(wxCommandEvent&);
 
-	void PointPickerAll(wxCommandEvent&);
-	void PointPickerBySymbol(SYMBOL_TYPE which);
-	void PointPickerNone(wxCommandEvent&);
-	void PointPickerSelect(wxCommandEvent&);
-
-	DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
-class ShowInfoReq : public wxDialog
-{
-	DECLARE_CLASS( ShowInfoReq )
-	DECLARE_EVENT_TABLE()
+class ShowInfoReq : public wxDialog {
+    DECLARE_CLASS(ShowInfoReq)
+    DECLARE_EVENT_TABLE()
 
 public:
-	ShowInfoReq(CalChartDoc& shw,
-		wxWindow *parent, wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Show Info"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~ShowInfoReq( );
+    ShowInfoReq(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Show Info"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ~ShowInfoReq();
 
 private:
-	bool Create(wxWindow *parent, wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("Show Info"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+    bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Show Info"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
 
-	void CreateControls();
+    void CreateControls();
 
     virtual bool Validate();
     virtual bool TransferDataToWindow();
     virtual bool TransferDataFromWindow();
 
-	// The data this dialog sets for the user
+    // The data this dialog sets for the user
 private:
-	unsigned mNumberPoints;
-	unsigned mNumberColumns;
-	std::vector<wxString> mLabels;
-	void OnCmd_label_type(wxCommandEvent& event);
+    unsigned mNumberPoints;
+    unsigned mNumberColumns;
+    std::vector<wxString> mLabels;
+    void OnCmd_label_type(wxCommandEvent& event);
 
 public:
-	unsigned GetNumberPoints() const { return mNumberPoints; }
-	unsigned GetNumberColumns() const { return mNumberColumns; }
-	std::vector<wxString> GetLabels() { return mLabels; }
+    unsigned GetNumberPoints() const { return mNumberPoints; }
+    unsigned GetNumberColumns() const { return mNumberColumns; }
+    std::vector<wxString> GetLabels() { return mLabels; }
 
 private:
-	CalChartDoc& mShow;
-	void OnReset(wxCommandEvent&);
+    CalChartDoc& mShow;
+    void OnReset(wxCommandEvent&);
 };
 
-class ShowInfoReqWizard : public wxWizardPageSimple
-{
-	DECLARE_CLASS( ShowInfoReqWizard )
-	DECLARE_EVENT_TABLE()
+class ShowInfoReqWizard : public wxWizardPageSimple {
+    DECLARE_CLASS(ShowInfoReqWizard)
+    DECLARE_EVENT_TABLE()
 public:
-	ShowInfoReqWizard(wxWizard *parent);
+    ShowInfoReqWizard(wxWizard* parent);
 
-	virtual bool TransferDataToWindow();
-	virtual bool TransferDataFromWindow();
-	virtual bool Validate();
+    virtual bool TransferDataToWindow();
+    virtual bool TransferDataFromWindow();
+    virtual bool Validate();
 
-	// The data this dialog sets for the user
+    // The data this dialog sets for the user
 private:
-	bool mTransferDataToWindowFirstTime;
-	unsigned mNumberPoints;
-	unsigned mNumberColumns;
-	std::vector<wxString> mLabels;
-	void OnCmd_label_type(wxCommandEvent& event);
+    bool mTransferDataToWindowFirstTime;
+    unsigned mNumberPoints;
+    unsigned mNumberColumns;
+    std::vector<wxString> mLabels;
+    void OnCmd_label_type(wxCommandEvent& event);
 
 public:
-	unsigned GetNumberPoints() const { return mNumberPoints; }
-	unsigned GetNumberColumns() const { return mNumberColumns; }
-	std::vector<wxString> GetLabels() { return mLabels; }
+    unsigned GetNumberPoints() const { return mNumberPoints; }
+    unsigned GetNumberColumns() const { return mNumberColumns; }
+    std::vector<wxString> GetLabels() { return mLabels; }
 };

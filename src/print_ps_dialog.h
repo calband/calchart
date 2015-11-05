@@ -31,49 +31,52 @@
 class CalChartDoc;
 class CalChartConfiguration;
 
-class PrintPostScriptDialog : public wxDialog
-{
-	DECLARE_CLASS( PrintPostScriptDialog )
-	DECLARE_EVENT_TABLE()
+class PrintPostScriptDialog : public wxDialog {
+    DECLARE_CLASS(PrintPostScriptDialog)
+    DECLARE_EVENT_TABLE()
 
-	public:
-	PrintPostScriptDialog( );
-	PrintPostScriptDialog(const CalChartDoc *doc, bool printEPS,
-		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
-		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~PrintPostScriptDialog( );
+public:
+    PrintPostScriptDialog();
+    PrintPostScriptDialog(const CalChartDoc* doc, bool printEPS, wxFrame* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Print Dialog"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ~PrintPostScriptDialog();
 
-	void Init();
+    void Init();
 
-	bool Create(const CalChartDoc *show, bool printEPS,
-		wxFrame *parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Print Dialog"),
-		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+    bool Create(const CalChartDoc* show, bool printEPS, wxFrame* parent,
+        wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Print Dialog"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
 
-	void CreateControls();
+    void CreateControls();
 
-	void ShowPrintSelect(wxCommandEvent&);
-	// because we modify setting, we need some way to reset them
-	void ResetDefaults(wxCommandEvent&);
+    void ShowPrintSelect(wxCommandEvent&);
+    // because we modify setting, we need some way to reset them
+    void ResetDefaults(wxCommandEvent&);
 
-	// use these to get and set default values
-	virtual bool TransferDataToWindow();
-	virtual bool TransferDataFromWindow();
+    // use these to get and set default values
+    virtual bool TransferDataToWindow();
+    virtual bool TransferDataFromWindow();
 
-// to print a show, call this function
-	void PrintShow(const CalChartConfiguration& config);
+    // to print a show, call this function
+    void PrintShow(const CalChartConfiguration& config);
 
 private:
-	const CalChartDoc* mShow;
-	bool eps;
-	wxTextCtrl *text_cmd;
+    const CalChartDoc* mShow;
+    bool eps;
+    wxTextCtrl* text_cmd;
 #ifdef PRINT__RUN_CMD
-	wxTextCtrl *text_opts, *text_view_cmd, *text_view_opts;
+    wxTextCtrl* text_opts, *text_view_cmd, *text_view_opts;
 #endif
-	wxTextCtrl *text_x, *text_y, *text_width, *text_height, *text_length;
-	wxTextCtrl *text_minyards;
-	wxRadioBox *radio_orient, *radio_method;
-	wxCheckBox *check_cont, *check_pages, *check_overview;
-	std::set<size_t> mIsSheetPicked;
+    wxTextCtrl* text_x, *text_y, *text_width, *text_height, *text_length;
+    wxTextCtrl* text_minyards;
+    wxRadioBox* radio_orient, *radio_method;
+    wxCheckBox* check_cont, *check_pages, *check_overview;
+    std::set<size_t> mIsSheetPicked;
 };
