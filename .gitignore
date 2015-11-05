@@ -13,3 +13,4 @@ build-win/CalChart/ipch
 .DS_Store
 *~
 .vagrant
+*.pyc
