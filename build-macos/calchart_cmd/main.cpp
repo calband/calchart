@@ -9,8 +9,10 @@
 #include "cc_show.h"
 #include "cc_sheet.h"
 #include "animate.h"
+#include "animatecompile.h"
 #include "print_ps.h"
 #include "modes.h"
+#include "cont.h"
 
 #include <iostream>
 #include <fstream>
@@ -25,7 +27,7 @@ void AnimateShow(const char* show)
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
-                    const std::string& error) {
+            const std::string& error) {
             std::cout << "error" << error << "\n";
             return true;
         });
@@ -38,7 +40,7 @@ void PrintShow(const char* show)
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
-                    const std::string& error) {
+            const std::string& error) {
             std::cout << "error" << error << "\n";
             return true;
         });
@@ -76,9 +78,17 @@ void DumpContinuity(const char* show)
         for (auto& symbol : k_symbols) {
             if (i->ContinuityInUse(symbol)) {
                 auto& cont = i->GetContinuityBySymbol(symbol);
-                std::cout << "sheet num " << sheet_num << ": symbol "
-                          << GetNameForSymbol(symbol) << ":\n";
-                std::cout << cont.GetText();
+                std::cout << "sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << ":\n";
+                std::cout << cont.GetText() << "\n";
+
+                AnimationErrors e;
+                auto continuity = Animation::ParseContinuity(cont.GetText(), e, symbol);
+                if (e.AnyErrors()) {
+                    std::cout << "Errors during compile\n";
+                }
+                for (auto& proc : continuity) {
+                    std::cout << *proc << "\n";
+                }
             }
         }
     }
@@ -133,7 +143,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     PrintShowToPS printShowToPS(
         *p, landscape, cont, contsheet, overview, 50, *mode,
         { { head_font_str, main_font_str, number_font_str, cont_font_str,
-           bold_font_str, ital_font_str, bold_ital_font_str } },
+            bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
         ContRatio, Get_yard_text, Get_spr_line_text);

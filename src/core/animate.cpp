@@ -115,8 +115,20 @@ private:
     unsigned numbeats;
 };
 
-Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
-    NotifyErrorList notifyErrorList)
+std::list<std::unique_ptr<ContProcedure> >
+Animation::ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol)
+{
+    yyinputbuffer = continuity.c_str();
+    // parse out the error
+    if (parsecontinuity() != 0) {
+        // Supply a generic parse error
+        ContToken dummy;
+        errors.RegisterError(ANIMERR_SYNTAX, &dummy, 0, current_symbol);
+    }
+    return std::move(ParsedContinuity);
+}
+
+Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
     : numpts(show.GetNumPoints())
     , pts(numpts)
     , curr_cmds(numpts)
@@ -127,8 +139,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
     AnimationVariables variablesStates;
 
     int sheetIndex = 0;
-    for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd();
-         ++curr_sheet) {
+    for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet) {
         mAnimSheetIndices.push_back(sheetIndex);
         if (!curr_sheet->IsInAnimation())
             continue;
@@ -141,8 +152,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
-                std::string tmpBuffer(current_continuity.GetText());
-                yyinputbuffer = tmpBuffer.c_str();
+                auto continuity = ParseContinuity(current_continuity.GetText(), errors, current_symbol);
                 if (notifyStatus) {
                     std::string message("Compiling \"");
                     message += curr_sheet->GetName().substr(0, 32);
@@ -151,28 +161,18 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
                     message += ("...");
                     notifyStatus(message);
                 }
-                // parse out the error
-                if (parsecontinuity() != 0) {
-                    // Supply a generic parse error
-                    ContToken dummy;
-                    errors.RegisterError(ANIMERR_SYNTAX, &dummy, 0, current_symbol);
+#if 1 // enable to see dump of continuity
+                {
+                    for (auto& proc : continuity) {
+                        std::cout << *proc << "\n";
+                    }
                 }
-#if 0 // enable to see dump of continuity
-				{
-					for (auto& proc : ParsedContinuity)
-					{
-						std::cout<<*proc<<"\n";
-					}
-				}
 #endif
                 for (unsigned j = 0; j < numpts; j++) {
                     if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol) {
-                        theCommands[j] = AnimateCompile::Compile(
-                            show, variablesStates, errors, curr_sheet, j, current_symbol,
-                            ParsedContinuity);
+                        theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
                     }
                 }
-                ParsedContinuity.clear();
             }
         }
         // Handle points that don't have continuity (shouldn't happen)
@@ -184,17 +184,14 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
         }
         for (unsigned j = 0; j < numpts; j++) {
             if (theCommands[j].empty()) {
-                theCommands[j] = AnimateCompile::Compile(
-                    show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
+                theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
             }
         }
         if (errors.AnyErrors() && notifyErrorList) {
             std::string message("Errors for \"");
             message += curr_sheet->GetName().substr(0, 32);
             message += ("\"");
-            if (notifyErrorList(errors.GetErrors(),
-                    std::distance(show.GetSheetBegin(), curr_sheet),
-                    message)) {
+            if (notifyErrorList(errors.GetErrors(), std::distance(show.GetSheetBegin(), curr_sheet), message)) {
                 break;
             }
         }
@@ -202,8 +199,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
         for (unsigned i = 0; i < numpts; i++) {
             thePoints.at(i) = curr_sheet->GetPosition(i);
         }
-        sheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(),
-            curr_sheet->GetBeats());
+        sheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
     }
 }
 

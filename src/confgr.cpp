@@ -107,7 +107,7 @@ const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM] = {
 const std::array<long, CalChartConfiguration::kSpringShowModeValues>
     kSpringShowModeDefaultValues[SPRINGSHOWMODE_NUM] = {
         { { 0xD, 8, 8, 8, 8, -16, -30, 32, 28, 0, 0, 571, 400, 163, 38, 265, 232,
-           153, 438, 270, 12 } }
+            153, 438, 270, 12 } }
     };
 
 // Yard lines

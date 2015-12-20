@@ -30,6 +30,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 
 AnimateDir AnimGetDirFromAngle(float ang);
 
@@ -37,6 +38,8 @@ class AnimateCommand;
 class AnimateSheet;
 struct CC_DrawCommand;
 class CC_show;
+class AnimationErrors;
+class ContProcedure;
 
 struct ErrorMarker {
     std::set<unsigned> pntgroup; // which points have this error
@@ -57,9 +60,10 @@ typedef std::function<bool(
 
 class Animation {
 public:
-    Animation(const CC_show& show, NotifyStatus notifyStatus,
-        NotifyErrorList notifyErrorList);
+    Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
     ~Animation();
+
+    static std::list<std::unique_ptr<ContProcedure> > ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol);
 
     // Returns true if changes made
     void GotoSheet(unsigned i);
@@ -105,8 +109,7 @@ public:
     // collection of position of each point, for debugging purposes
     std::pair<std::string, std::vector<std::string> > GetCurrentInfo() const;
 
-    std::vector<CC_DrawCommand> GenPathToDraw(unsigned point,
-        const CC_coord& offset) const;
+    std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
     AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
 private:

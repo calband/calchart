@@ -153,7 +153,7 @@ public:
     }
     inline const Matrix& operator*=(const Matrix& m)
     {
-        *this = *this* m;
+        *this = *this * m;
         return *this;
     }
     inline const Matrix& operator*=(LinElem s)

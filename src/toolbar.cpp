@@ -111,7 +111,7 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
         { wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
         { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso,
-         true },
+            true },
         { wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
         { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap },
         { wxITEM_RADIO, NULL, wxT("Move points into line"), CALCHART__line },
@@ -125,7 +125,7 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
         { wxITEM_NORMAL, NULL, wxT("Hide Label"), CALCHART__label_hide },
         { wxITEM_NORMAL, NULL, wxT("Toggle Label Visibility"),
-         CALCHART__label_visibility_toggle },
+            CALCHART__label_visibility_toggle },
         { wxITEM_NORMAL, NULL, wxT("Show Label"), CALCHART__label_show, true },
     };
     static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb) / sizeof(tb[0]));
@@ -170,11 +170,11 @@ std::vector<ToolBarEntry> GetAnimationToolBar()
         { wxITEM_NORMAL, NULL, wxT("Stop (space toggle)"), CALCHART__anim_stop },
         { wxITEM_NORMAL, NULL, wxT("Play (space toggle)"), CALCHART__anim_play },
         { wxITEM_NORMAL, NULL, wxT("Previous beat (left arrow)"),
-         CALCHART__anim_prev_beat },
+            CALCHART__anim_prev_beat },
         { wxITEM_NORMAL, NULL, wxT("Next beat (right arrow)"),
-         CALCHART__anim_next_beat },
+            CALCHART__anim_next_beat },
         { wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"),
-         CALCHART__anim_prev_sheet },
+            CALCHART__anim_prev_sheet },
         { wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
     };
     static std::vector<ToolBarEntry> sAnimTB(
