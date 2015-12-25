@@ -78,20 +78,118 @@ void DumpContinuity(const char* show)
         for (auto& symbol : k_symbols) {
             if (i->ContinuityInUse(symbol)) {
                 auto& cont = i->GetContinuityBySymbol(symbol);
-                std::cout << "sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << ":\n";
+                std::cout << "<--StartText sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << "-->\n";
                 std::cout << cont.GetText() << "\n";
+                std::cout << "<--EndText sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << "-->\n";
 
                 AnimationErrors e;
                 auto continuity = Animation::ParseContinuity(cont.GetText(), e, symbol);
+				std::cout << "<--Errors during compile-->\n";
                 if (e.AnyErrors()) {
-                    std::cout << "Errors during compile\n";
+					for (auto&& i : e.GetErrors())
+					{
+						std::cout<<"Error at ["<<i.second.line<<","<<i.second.col<<"] of type "<<i.first<<"\n";
+					}
                 }
+				std::cout << "<--End errors-->\n";
+                std::cout << "<--StartParsed-->\n";
                 for (auto& proc : continuity) {
                     std::cout << *proc << "\n";
                 }
+                std::cout << "<--EndParsed-->\n";
             }
         }
     }
+}
+
+void DumpContinuityText(std::string const& text)
+{
+	AnimationErrors e;
+	auto continuity = Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
+	if (e.AnyErrors()) {
+		std::cout << "Errors during compile\n";
+	}
+	for (auto& proc : continuity) {
+		std::cout << *proc << "\n";
+	}
+}
+
+void DoContinuityUnitTest(const char* test_cases)
+{
+	static const std::string BeginText = "<--StartText";
+	static const std::string EndText = "<--EndText";
+	static const std::string BeginParsed = "<--StartParsed-->";
+	static const std::string EndParsed = "<--EndParsed-->";
+	static const std::string BeginErrors = "<--Errors during compile-->";
+	static const std::string EndErrors = "<--End errors-->";
+
+	size_t numTestsRun = 0, numTestsPassed = 0;
+    std::ifstream input(test_cases);
+	while (!input.eof())
+	{
+		std::string d;
+		do {
+			getline(input, d);
+		} while (!input.eof() && (d.size() < BeginText.size() || !std::equal(BeginText.begin(), BeginText.end(), d.begin())));
+		std::string text;
+		getline(input, d);
+		bool firsttime = true;
+		while (!input.eof() && (d.size() < EndText.size() || !std::equal(EndText.begin(), EndText.end(), d.begin()))) {
+			if (!firsttime) {
+				text += "\n";
+			}
+			firsttime = false;
+			text += d;
+			getline(input, d);
+		}
+		do {
+			getline(input, d);
+		} while (!input.eof() && (d.size() < BeginErrors.size() || !std::equal(BeginErrors.begin(), BeginErrors.end(), d.begin())));
+		std::string errors;
+		getline(input, d);
+		while (!input.eof() && (d.size() < EndErrors.size() || !std::equal(EndErrors.begin(), EndErrors.end(), d.begin()))) {
+			errors += d + "\n";
+			getline(input, d);
+		}
+
+		do {
+			getline(input, d);
+		} while (!input.eof() && (d.size() < BeginParsed.size() || !std::equal(BeginParsed.begin(), BeginParsed.end(), d.begin())));
+		std::string parsed;
+		getline(input, d);
+		while (!input.eof() && (d.size() < EndParsed.size() || !std::equal(EndParsed.begin(), EndParsed.end(), d.begin()))) {
+			parsed += d + "\n";
+			getline(input, d);
+		}
+
+		AnimationErrors e;
+		auto continuity = Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
+		std::stringstream parsed_continuity;
+		for (auto& proc : continuity) {
+			parsed_continuity << *proc << "\n";
+		}
+		std::stringstream parse_errors;
+		if (e.AnyErrors()) {
+			for (auto&& i : e.GetErrors())
+			{
+				parse_errors<<"Error at ["<<i.second.line<<","<<i.second.col<<"] of type "<<i.first<<"\n";
+			}
+		}
+		auto parsed_cont = parsed_continuity.str();
+		if ((e.AnyErrors() && parse_errors.str() != errors) || !std::equal(parsed.begin(), parsed.end(), parsed_cont.begin(), parsed_cont.end())) {
+			std::cout<<"parse failed!\n";
+			std::cout<<"Found text: \n"<< text <<"\n";
+			std::cout<<"Found parse: \n"<< parsed <<"\n";
+			std::cout<<"Parse errors: \n"<< errors <<"\n";
+			std::cout<<"parsed_continuity: \n"<< parsed_cont <<"\n";
+			std::cout<<"has Parse Errors: \n"<<parse_errors.str()<<"\n";
+		}
+		else {
+			++numTestsPassed;
+		}
+		++numTestsRun;
+	}
+	std::cout<<"ContinuityTest "<<test_cases<<" complete.  Passed "<<numTestsPassed<<" out of "<<numTestsRun<<"\n";
 }
 
 void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
@@ -179,6 +277,8 @@ int verbose_flag = 1;
 int print_flag = 0;
 int animate_flag = 0;
 int dump_continuity = 0;
+int dump_continuity_text = 0;
+int unit_test_continuity = 0;
 int check_flag = 0;
 int psprint_flag = 0;
 
@@ -186,17 +286,23 @@ static struct option long_options[] = {
     /* These options set a flag. */
     { "print_show", no_argument, &print_flag, 1 }, // p
     { "check_flag", no_argument, &check_flag, 1 }, // c
-    { "dump_continuity", no_argument, &dump_continuity, 1 }, // c
+    { "dump_continuity", no_argument, &dump_continuity, 1 }, // d
+    { "dump_continuity_text", no_argument, &dump_continuity_text, 1 }, // D
+    { "unit_test_continuity", no_argument, &unit_test_continuity, 1 }, // U
     { "animate_flag", no_argument, &animate_flag, 1 }, // a
     { "psprint_flag", no_argument, &psprint_flag, 1 }, // P
     { 0, 0, 0, 0 }
 };
 
+namespace calchart {
+int main(int argc, char* argv[]);
+}
+
 int main(int argc, char* argv[])
 {
     opterr = 0;
     int c = 0;
-    while ((c = getopt(argc, argv, "cpadP")) != -1)
+    while ((c = getopt(argc, argv, "cpadDUP")) != -1)
         switch (c) {
         case 'p':
             print_flag = true;
@@ -206,6 +312,12 @@ int main(int argc, char* argv[])
             break;
         case 'd':
             dump_continuity = true;
+            break;
+        case 'D':
+            dump_continuity_text = true;
+            break;
+        case 'U':
+            unit_test_continuity = true;
             break;
         case 'c':
             check_flag = true;
@@ -224,6 +336,12 @@ int main(int argc, char* argv[])
             }
             if (dump_continuity) {
                 DumpContinuity(argv[optind]);
+            }
+            if (dump_continuity_text) {
+                DumpContinuityText(argv[optind]);
+            }
+            if (unit_test_continuity) {
+                DoContinuityUnitTest(argv[optind]);
             }
             if (check_flag) {
                 std::cout << "ContinuityCountDifferentThanSymbol ? "
