@@ -27,6 +27,8 @@
 #include "cc_point.h"
 #include "cc_text.h"
 #include "cc_fileformat.h"
+#include "json.h"
+#include "animate.h"
 
 #include <vector>
 #include <set>
@@ -99,6 +101,8 @@ public:
 	CC_textline_list GetPrintableContinuity() const;
 	std::string GetRawPrintContinuity() const;
 
+    JSONElement generateOnlineViewerObject(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet);
+    void sculptOnlineViewerObject(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet);
 private:
 	CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
 

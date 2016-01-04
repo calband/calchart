@@ -99,6 +99,10 @@ public:
     virtual wxOutputStream& SaveObject(wxOutputStream& stream);
     virtual wxInputStream& LoadObject(wxInputStream& stream);
 #endif
+    
+    // Exporting CalChart Online Viewer files
+    void exportViewerFile(std::string filepath);
+    
 private:
 	template <typename T>
 	T& LoadObjectGeneric(T& stream);

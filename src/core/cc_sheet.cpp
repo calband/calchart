@@ -24,6 +24,7 @@
 
 #include "cc_show.h"
 #include "cc_fileformat.h"
+#include "animatecommand.h"
 
 #include <sstream>
 #include <iostream>
@@ -43,6 +44,29 @@ const std::string contnames[MAX_NUM_SYMBOLS] =
 	"Solsl",
 	"Solx"
 };
+
+std::string onlineViewerSymbolName(SYMBOL_TYPE symbol) {
+    switch (symbol) {
+        case SYMBOL_PLAIN:
+            return "open";
+        case SYMBOL_SOL:
+            return "solid";
+        case SYMBOL_BKSL:
+            return "open-backslash";
+        case SYMBOL_SL:
+            return "open-forwardslash";
+        case SYMBOL_X:
+            return "open-x";
+        case SYMBOL_SOLBKSL:
+            return "solid-backslash";
+        case SYMBOL_SOLSL:
+            return "solid-forwardslash";
+        case SYMBOL_SOLX:
+            return "solid-x";
+        default:
+            return "ERR";
+    }
+}
 
 CC_sheet::CC_sheet(size_t numPoints) :
 mAnimationContinuity(MAX_NUM_SYMBOLS),
@@ -724,6 +748,61 @@ void
 CC_sheet::SetPoints(const std::vector<CC_point>& points)
 {
 	pts = points;
+}
+
+JSONElement CC_sheet::generateOnlineViewerObject(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) {
+    JSONElement newViewerObject = JSONElement::makeNull();
+    sculptOnlineViewerObject(newViewerObject, sheetNum, dotLabels, compiledSheet);
+    return newViewerObject;
+}
+
+void CC_sheet::sculptOnlineViewerObject(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) {
+    JSONDataObjectAccessor sheetObject = dest =  JSONElement::makeObject();
+    
+    sheetObject["label"] = std::to_string(sheetNum);
+    sheetObject["field_type"] = "college";
+    sheetObject["dot_types"] = JSONElement::makeArray();
+    sheetObject["dot_labels"] = JSONElement::makeObject();
+    sheetObject["continuities"] = JSONElement::makeObject();
+    sheetObject["beats"] = beats;
+    sheetObject["movements"] = JSONElement::makeObject();
+    
+    JSONDataObjectAccessor dotAssignments = sheetObject["dot_labels"];
+    
+    // Iterate through all dots and collect the unique dot types discovered while doing so
+    // As we discover the dot type of each dot, record the dot type assigment inside of dotAssignments
+    std::set<std::string> uniqueDotTypes;
+    for (unsigned i = 0; i < pts.size(); i++) {
+        std::string symbolName = onlineViewerSymbolName(pts[i].GetSymbol());
+        uniqueDotTypes.insert(symbolName);
+        dotAssignments[dotLabels[i]] = symbolName;
+    }
+    
+    JSONDataArrayAccessor dotTypes = sheetObject["dot_types"];
+    JSONDataObjectAccessor continuities = sheetObject["continuities"];
+    
+    // List all unique dot types for this sheet in dotTypes
+    // Also assign continuity text to each dot type
+    for (auto iter = uniqueDotTypes.begin(); iter != uniqueDotTypes.end(); iter++) {
+        dotTypes->pushBack(JSONElement::makeString(*iter));
+        continuities[*iter] = "MANUAL" + std::to_string(sheetNum);
+    }
+    
+    JSONDataObjectAccessor movements = sheetObject["movements"];
+    
+    // Animate each dot's continuities during this sheet, so that we can list its individual movements
+    for (unsigned ptIndex = 0; ptIndex < pts.size(); ptIndex++) {
+
+        JSONDataArrayAccessor movementsForPoint = movements[dotLabels[ptIndex]] = JSONElement::makeArray();
+        
+        AnimatePoint currPos(pts[ptIndex].GetPos().x, pts[ptIndex].GetPos().y);
+        
+        for (auto commandIter = compiledSheet.GetCommandsBegin(ptIndex); commandIter != compiledSheet.GetCommandsEnd(ptIndex); commandIter++) {
+            
+            movementsForPoint->pushBack((*commandIter)->generateOnlineViewerMovement(currPos));
+            (*commandIter)->ApplyForward(currPos);
+        }
+    }
 }
 
 

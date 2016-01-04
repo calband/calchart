@@ -37,6 +37,8 @@
 #include "cc_fileformat.h"
 #include "modes.h"
 #include "print_ps.h"
+#include "json.h"
+#include "json_export.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
@@ -293,6 +295,31 @@ wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
 	return LoadObjectGeneric<wxInputStream>(stream);
 }
 #endif
+
+void CalChartDoc::exportViewerFile(std::string filepath) {
+    std::ofstream outfile;
+    outfile.open(filepath);
+    std::ostream_iterator<char> outIter(outfile);
+    
+    JSONElement mainObjectElement = JSONElement::makeObject();
+    
+    JSONDataObjectAccessor mainObject = mainObjectElement;
+    
+    mainObject["meta"] = JSONElement::makeObject();
+    mainObject["show"] = JSONElement::makeNull();
+    
+    
+    JSONDataObjectAccessor metaObject = mainObject["meta"];
+    metaObject["version"] = ("1.0.0");
+    metaObject["index_name"] = "MANUAL";
+    metaObject["type"] = "viewer";
+    
+    mShow->sculptOnlineViewerObject(mainObject["show"], Animation(*mShow, nullptr, nullptr));
+    
+    JSONExporter::exportJSON(outIter, mainObjectElement);
+    
+    outfile.close();
+}
 
 void CalChartDoc::FlushAllTextWindows()
 {

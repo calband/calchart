@@ -22,6 +22,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <fstream>
 
 #include "field_frame.h"
 
@@ -157,6 +158,7 @@ EVT_MENU(CALCHART__setsym4, FieldFrame::OnCmd_setsym4)
 EVT_MENU(CALCHART__setsym5, FieldFrame::OnCmd_setsym5)
 EVT_MENU(CALCHART__setsym6, FieldFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, FieldFrame::OnCmd_setsym7)
+EVT_MENU(CALCHART__EXPORT_VIEWER_FILE, FieldFrame::OnCmdExportViewerFile)
 EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback, FieldFrame::slider_sheet_callback)
 EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
@@ -225,6 +227,7 @@ config(config_)
 	file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
 	file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."), wxT("Print show to PostScript"));
 	file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."), wxT("Print show to Encapsulated PostScript"));
+    file_menu->Append(CALCHART__EXPORT_VIEWER_FILE, wxT("Export for Online Viewer..."), wxT("Export show to be viewed using the CalChart Online Viewer"));
 	file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
 	file_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"), wxT("Close this window"));
 	file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
@@ -501,6 +504,13 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 			dialog.PrintShow(config);
 		}
 	}
+}
+
+void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event) {
+    if (GetShow())
+    {
+        GetShow()->exportViewerFile("/Users/kmdurand/Documents/testJSON.viewer");
+    }
 }
 
 

@@ -26,6 +26,25 @@
 #include "animatecommand.h"
 #include "cc_drawcommand.h"
 
+float Coord2ViewerXPos(Coord coord) {
+    return Coord2Float(coord) + (80);
+}
+
+float Coord2ViewerYPos(Coord coord) {
+    return Coord2Float(coord) + 42;
+}
+
+float Ang2Viewer(float angle) {
+    angle = -(angle - 90);
+    while (angle >= 360) {
+        angle -= 360;
+    }
+    while (angle < 0) {
+        angle += 360;
+    }
+    return angle;
+}
+
 AnimateCommand::AnimateCommand(unsigned beats)
 : mNumBeats(beats), mBeat(0)
 {
@@ -110,6 +129,20 @@ AnimateDir AnimateCommandMT::Direction() const { return dir; }
 
 float AnimateCommandMT::RealDirection() const { return realdir; }
 
+JSONElement AnimateCommandMT::generateOnlineViewerMovement(const CC_coord& start) const {
+    JSONElement moveElement = JSONElement::makeObject();
+    
+    JSONDataObjectAccessor move = moveElement;
+    
+    move["type"] = "mark";
+    move["beats"] = NumBeats();
+    move["facing"] = Ang2Viewer(Direction());
+    move["x"] = Coord2ViewerXPos(start.x);
+    move["y"] = Coord2ViewerYPos(start.y);
+    
+    return moveElement;
+}
+
 AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
 : AnimateCommandMT(beats, movement.Direction()), mVector(movement)
 {
@@ -183,6 +216,23 @@ void AnimateCommandMove::ClipBeats(unsigned beats)
 CC_DrawCommand AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const
 {
 	return CC_DrawCommand(pt.x + offset.x, pt.y + offset.y, pt.x + mVector.x + offset.x, pt.y + mVector.y + offset.y);
+}
+
+JSONElement AnimateCommandMove::generateOnlineViewerMovement(const CC_coord& start) const {
+    JSONElement moveElement = JSONElement::makeObject();
+    
+    JSONDataObjectAccessor move = moveElement;
+    
+    move["type"] = "even";
+    move["beats"] = NumBeats();
+    move["beats_per_step"] = 1;
+    move["x1"] = Coord2ViewerXPos(start.x);
+    move["y1"] = Coord2ViewerYPos(start.y);
+    move["x2"] = Coord2ViewerXPos(start.x + mVector.x);
+    move["y2"] = Coord2ViewerYPos(start.y + mVector.y);
+    move["facing"] = Ang2Viewer(mVector.Direction());
+    
+    return moveElement;
 }
 
 
@@ -276,5 +326,24 @@ CC_DrawCommand AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt, c
 	auto y_end = RoundToCoord(mOrigin.y - sin(end*M_PI/180.0)*mR) + offset.y;
 
 	return CC_DrawCommand(x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y);
+}
+
+JSONElement AnimateCommandRotate::generateOnlineViewerMovement(const CC_coord& start) const {
+    JSONElement moveElement = JSONElement::makeObject();
+
+    JSONDataObjectAccessor move = moveElement;
+    
+    move["type"] = "arc";
+    move["start_x"] = Coord2ViewerXPos(start.x);
+    move["start_y"] = Coord2ViewerYPos(start.y);
+    move["center_x"] = Coord2ViewerXPos(mOrigin.x);
+    move["center_y"] = Coord2ViewerYPos(mOrigin.y);
+    move["angle"] = Ang2Viewer(mAngEnd - mAngStart);
+    move["beats"] = NumBeats();
+    move["beats_per_step"] = 1;
+    // Check this
+    move["facing_offset"] = Ang2Viewer((mAngStart < mAngEnd) ? mFace : -mFace);
+
+    return moveElement;
 }
 

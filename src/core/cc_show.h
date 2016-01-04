@@ -24,12 +24,14 @@
 
 #include "cc_types.h"
 #include "cc_fileformat.h"
+#include "json.h"
 
 #include <vector>
 #include <string>
 #include <set>
 #include <map>
 #include <memory>
+#include "animate.h"
 
 class CC_sheet;
 class ShowMode;
@@ -116,6 +118,8 @@ public:
 	inline bool IsSelected(unsigned i) const { return selectionList.count(i) != 0; }
 	inline const SelectionList& GetSelectionList() const { return selectionList; }
 
+    JSONElement generateOnlineViewerObject(const Animation& compiledShow);
+    void sculptOnlineViewerObject(JSONElement& dest, const Animation& compiledShow);
 private:
 	std::string descr;
 	unsigned short numpoints;

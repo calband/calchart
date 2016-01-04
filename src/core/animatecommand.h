@@ -23,6 +23,7 @@
 #pragma once
 
 #include "animate.h"
+#include "json.h"
 
 struct CC_DrawCommand;
 
@@ -54,7 +55,8 @@ public:
 
 	// when we want to have the path drawn:
 	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;
-
+    
+    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const = 0;
 protected:
 	unsigned mNumBeats;
 	unsigned mBeat;
@@ -68,6 +70,8 @@ public:
 
 	virtual AnimateDir Direction() const;
 	virtual float RealDirection() const;
+    
+    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const;
 protected:
 	AnimateDir dir;
 	float realdir;
@@ -91,6 +95,7 @@ public:
 
 	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;
 
+    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const;
 private:
 	CC_coord mVector;
 };
@@ -114,6 +119,7 @@ public:
 
 	virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const CC_coord& offset) const;
 
+    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const;
 private:
 	CC_coord mOrigin;
 	float mR, mAngStart, mAngEnd;

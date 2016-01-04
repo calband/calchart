@@ -28,6 +28,7 @@
 #include "cc_shapes.h"
 #include "cc_fileformat.h"
 #include "ccvers.h"
+#include "json.h"
 
 #include <sstream>
 #include <functional>
@@ -575,6 +576,34 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsign
 	{
 		AddToSelection(sl);
 	}
+}
+
+JSONElement CC_show::generateOnlineViewerObject(const Animation& compiledShow) {
+    JSONElement newViewerObject = JSONElement::makeNull();
+    sculptOnlineViewerObject(newViewerObject, compiledShow);
+    return newViewerObject;
+}
+
+void CC_show::sculptOnlineViewerObject(JSONElement& dest, const Animation& compiledShow) {
+    JSONDataObjectAccessor showObject = dest = JSONElement::makeObject();
+    
+    showObject["title"] = "MANUAL";
+    showObject["year"] = "2015";
+    showObject["description"] = descr;
+    showObject["dot_labels"] = JSONElement::makeArray();
+    showObject["sheets"] = JSONElement::makeArray();
+    
+    JSONDataArrayAccessor dotLabels = showObject["dot_labels"];
+    for (unsigned i = 0; i < pt_labels.size(); i++) {
+        dotLabels->pushBack(JSONElement::makeString(pt_labels[i]));
+    }
+    
+    JSONDataArrayAccessor sheets = showObject["sheets"];
+    unsigned i = 0;
+    for (auto iter = GetSheetBegin(); iter != GetSheetEnd(); iter++, i++) {
+        sheets->pushBack(JSONElement::makeNull());
+        (*iter).sculptOnlineViewerObject(sheets->back(), i, pt_labels, compiledShow.sheets[i]);
+    }
 }
 
 
