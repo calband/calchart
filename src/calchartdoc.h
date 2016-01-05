@@ -101,7 +101,7 @@ public:
 #endif
     
     // Exporting CalChart Online Viewer files
-    void exportViewerFile(std::string filepath);
+    bool exportViewerFile(const wxString& filepath);
     
 private:
 	template <typename T>
@@ -110,6 +110,8 @@ private:
 	T& SaveObjectGeneric(T& stream);
 	template <typename T>
 	T& SaveObjectInternal(T& stream);
+    template <typename T>
+    bool exportViewerFileGeneric(T& outstream);
 
 public:
 	bool ImportPrintableContinuity(const std::vector<std::string>& lines);

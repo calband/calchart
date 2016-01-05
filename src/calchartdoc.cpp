@@ -296,10 +296,16 @@ wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
 }
 #endif
 
-void CalChartDoc::exportViewerFile(std::string filepath) {
-    std::ofstream outfile;
-    outfile.open(filepath);
-    std::ostream_iterator<char> outIter(outfile);
+bool CalChartDoc::exportViewerFile(const wxString& filepath) {
+    std::ofstream outfile(filepath.ToStdString());
+    bool success = outfile.good() && exportViewerFileGeneric(outfile);
+    outfile.close();
+    return success;
+}
+
+template <typename T>
+bool CalChartDoc::exportViewerFileGeneric(T& outstream) {
+    std::ostream_iterator<char> outIter(outstream);
     
     JSONElement mainObjectElement = JSONElement::makeObject();
     
@@ -316,9 +322,7 @@ void CalChartDoc::exportViewerFile(std::string filepath) {
     
     mShow->sculptOnlineViewerObject(mainObject["show"], Animation(*mShow, nullptr, nullptr));
     
-    JSONExporter::exportJSON(outIter, mainObjectElement);
-    
-    outfile.close();
+    return JSONExporter::exportJSON(outIter, mainObjectElement);
 }
 
 void CalChartDoc::FlushAllTextWindows()

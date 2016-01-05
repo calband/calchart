@@ -509,7 +509,15 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
 void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event) {
     if (GetShow())
     {
-        GetShow()->exportViewerFile("/Users/kmdurand/Documents/testJSON.viewer");
+        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+
+        if (saveFileDialog.ShowModal() == wxID_CANCEL)
+            return;
+        
+        if (!GetShow()->exportViewerFile(saveFileDialog.GetPath())) {
+            wxMessageBox(wxT("There was a problem exporting the viewer file.\n") + saveFileDialog.GetPath(), wxT("Exporting Viewer File"));
+            return;
+        }
     }
 }
 

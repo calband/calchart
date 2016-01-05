@@ -35,19 +35,12 @@ std::shared_ptr<JSONData> JSONData::makeNewArray(std::vector<JSONElement> array)
     return JSONDataArray::makeNewArray(array);
 }
 
-bool JSONData::isAuthorizedToEdit(const JSONElement* element) {
-    if (m_authorizedElement == nullptr) {
-        m_authorizedElement = element;
-    }
-    return element == m_authorizedElement;
-}
-
 JSONElement::JSONElement()
 : JSONElement(makeNull()) {
 }
 
 JSONElement::JSONElement(const JSONElement& other)
-: JSONElement(other.m_data) {
+: JSONElement(other.m_data->newCopy()) {
 }
 
 JSONElement::JSONElement(std::shared_ptr<JSONData> data)
@@ -83,9 +76,6 @@ std::weak_ptr<const JSONDataArray> JSONElement::dataAsArray() const {
 }
 
 std::weak_ptr<JSONData> JSONElement::data() {
-    while (!m_data->isAuthorizedToEdit(this)) {
-        m_data = m_data->newCopy();
-    }
     return m_data;
 }
 
@@ -333,8 +323,8 @@ JSONElement JSONDataObject::valueForKey(std::string key) const {
     return m_elements.at(key);
 }
 
-std::vector<std::pair<std::string, JSONElement>> JSONDataObject::items() const {
-    std::vector<std::pair<std::string, JSONElement>> items;
+std::vector<std::pair<const std::string&, const JSONElement&>> JSONDataObject::items() const {
+    std::vector<std::pair<const std::string&, const JSONElement&>> items;
     for (auto iter = itemsBegin(); iter != itemsEnd(); iter++) {
         items.push_back(*iter);
     }
@@ -411,8 +401,12 @@ JSONElement& JSONDataArray::back() {
     return m_elements.back();
 }
 
-std::vector<JSONElement> JSONDataArray::values() const {
-    return m_elements;
+std::vector<std::reference_wrapper<const JSONElement>> JSONDataArray::values() const {
+    std::vector<std::reference_wrapper<const JSONElement>> valuesVector;
+    for (auto iter = valuesBegin(); iter != valuesEnd(); iter++) {
+        valuesVector.push_back(std::ref(*iter));
+    }
+    return valuesVector;
 }
 
 std::vector<JSONElement>::const_iterator JSONDataArray::valuesBegin() const {

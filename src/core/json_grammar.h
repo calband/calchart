@@ -20,7 +20,7 @@ namespace phoenix = boost::phoenix;
 
 template <typename OutputIterator>
 struct JSONExport
-: karma::grammar<OutputIterator, const JSONElement()>
+: karma::grammar<OutputIterator, const JSONElement&()>
 {
     karma::rule<OutputIterator, void(const JSONElement&)> checkType(JSONData::JSONDataType dataType) {
         return &karma::int_(dataType)[karma::_1 = phoenix::bind(&JSONElement::type, karma::_r1)];
@@ -107,18 +107,18 @@ struct JSONExport
     
     
     
-    karma::rule<OutputIterator, const JSONElement()> mainObject;
-    karma::rule<OutputIterator, const JSONElement(unsigned)> newline_element;
-    karma::rule<OutputIterator, const JSONElement(unsigned)> element;
-    karma::rule<OutputIterator, const JSONElement()> inline_element;
+    karma::rule<OutputIterator, const JSONElement&()> mainObject;
+    karma::rule<OutputIterator, const JSONElement&(unsigned)> newline_element;
+    karma::rule<OutputIterator, const JSONElement&(unsigned)> element;
+    karma::rule<OutputIterator, const JSONElement&()> inline_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataNumber*>, JSONDataNumberConstAccessor()> number;
     karma::rule<OutputIterator, karma::locals<const JSONDataString*>,JSONDataStringConstAccessor()> string;
     karma::rule<OutputIterator, karma::locals<const JSONDataBoolean*>,JSONDataBooleanConstAccessor()> boolean;
     karma::rule<OutputIterator> null;
-    karma::rule<OutputIterator, const JSONElement(unsigned)> block_element;
+    karma::rule<OutputIterator, const JSONElement&(unsigned)> block_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataObject*>,JSONDataObjectConstAccessor(unsigned)> object;
-    karma::rule<OutputIterator, std::vector<std::pair<std::string, JSONElement>>&(unsigned)> objectContent;
-    karma::rule<OutputIterator, std::pair<std::string, JSONElement>(unsigned)> keyValPair;
+    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>&(unsigned)> objectContent;
+    karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&(unsigned)> keyValPair;
     karma::rule<OutputIterator, karma::locals<const JSONDataArray*>,JSONDataArrayConstAccessor(unsigned)> array;
-    karma::rule<OutputIterator, std::vector<JSONElement>&(unsigned)> arrayContent;
+    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>&(unsigned)> arrayContent;
 };

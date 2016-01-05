@@ -12,6 +12,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <functional>
 
 class JSONElement;
 class JSONData;
@@ -100,25 +101,8 @@ protected:
      @abstract Returns a pointer to a new deep copy of this JSONData object.
      */
     virtual std::shared_ptr<JSONData> newCopy() const = 0;
-protected:
-    /*!
-     @method isAuthorizedToEdit
-     @abstract Multiple JSONElement objects can read this data, but only one can edit.
-     This method will check whether a particular JSONElement is authorized to edit the
-     content of this JSONData; if not, then the JSONElement will need to make a copy of
-     the JSONData to edit instead. Whichever JSONElement first attempts to access the 
-     edit methods or expose a mutable copy of this JSONData will become authorized to
-     edit it.
-     @return True if the JSONElement can edit this JSONData object; false otherwise.
-     */
-    bool isAuthorizedToEdit(const JSONElement* element);
-
+    
 private:
-    /*!
-     @abstract The only JSONElement object which is authorized to modify the content of
-     this JSONData object directly. Others must make copies of this JSONData before editing.
-     */
-    const JSONElement* m_authorizedElement;
     
     friend class JSONElement; // JSONElement is a friend class so that it can have access to the makeNew mand newCopy methods
 };
@@ -270,7 +254,7 @@ public:
     
     JSONElement valueForKey(std::string key) const;
     
-    std::vector<std::pair<std::string, JSONElement>> items() const;
+    std::vector<std::pair<const std::string&, const JSONElement&>> items() const;
     std::map<std::string, JSONElement>::const_iterator itemsBegin() const;
     std::map<std::string, JSONElement>::const_iterator itemsEnd() const;
     
@@ -304,7 +288,7 @@ public:
     
     JSONElement valueAtIndex(unsigned i) const;
     
-    std::vector<JSONElement> values() const;
+    std::vector<std::reference_wrapper<const JSONElement>> values() const;
     std::vector<JSONElement>::const_iterator valuesBegin() const;
     std::vector<JSONElement>::const_iterator valuesEnd() const;
     
