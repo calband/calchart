@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <fstream>
-
 #include "CalChartDoc.h"
 
 #include "cc_command.h"
@@ -281,17 +279,7 @@ wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
 }
 #endif
 
-bool CalChartDoc::exportViewerFile(const wxString& filepath) {
-    std::ofstream outfile(filepath.ToStdString());
-    bool success = outfile.good() && exportViewerFileGeneric(outfile);
-    outfile.close();
-    return success;
-}
-
-template <typename T>
-bool CalChartDoc::exportViewerFileGeneric(T& outstream) {
-    std::ostream_iterator<char> outIter(outstream);
-    
+bool CalChartDoc::exportViewerFile(const wxString& filepath) {    
     JSONElement mainObjectElement = JSONElement::makeObject();
     
     JSONDataObjectAccessor mainObject = mainObjectElement;
@@ -307,7 +295,7 @@ bool CalChartDoc::exportViewerFileGeneric(T& outstream) {
     
     mShow->toOnlineViewerJSON(mainObject["show"], Animation(*mShow, nullptr, nullptr));
     
-    return JSONExporter::exportJSON(outIter, mainObjectElement);
+    return JSONExporter::exportJSON(filepath.ToStdString(), mainObjectElement);
 }
 
 void CalChartDoc::FlushAllTextWindows()

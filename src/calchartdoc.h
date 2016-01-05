@@ -114,18 +114,6 @@ private:
     T& SaveObjectGeneric(T& stream);
     template <typename T>
     T& SaveObjectInternal(T& stream);
-    
-    /*!
-     * @brief Exports viewer file content to an output stream.
-     * @tparam T The type of stream that the viewer file will
-     * be exported to. This should be a derivative of basic_ostream.
-     * @param outstream The stream that the viewer file content will
-     * be exported to.
-     * @return True if the viewer file content was successfully
-     * written to the output stream; false otherwise.
-     */
-    template <typename T>
-    bool exportViewerFileGeneric(T& outstream);
 
 public:
     bool ImportPrintableContinuity(const std::vector<std::string>& lines);

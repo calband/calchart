@@ -18,16 +18,32 @@
 namespace karma = boost::spirit::karma;
 namespace phoenix = boost::phoenix;
 
+/*!
+ * @brief A grammar which describes how to write a JSON output file
+ * from a JSONElement.
+ */
 template <typename OutputIterator>
-struct JSONExport
+struct JSONExportGrammar
 : karma::grammar<OutputIterator, const JSONElement&()>
 {
+    /*!
+     * @brief Generates a spirit::karma rule which determines 
+     * whether or not a JSONElement has a particular type.
+     * @details The returned rule takes a JSONElement as an
+     * inherited attribute, and will only succeed if that
+     * JSONElement's type matches the type that is expected.
+     * @param dataType The expected type for the JSONElement.
+     * The rule will fail if provided a JSONElement that does
+     * not have this type.
+     * @return A rule which only succeeds if the provided
+     * JSONElement has the specified type.
+     */
     karma::rule<OutputIterator, void(const JSONElement&)> checkType(JSONData::JSONDataType dataType) {
         return &karma::int_(dataType)[karma::_1 = phoenix::bind(&JSONElement::type, karma::_r1)];
     }
     
-    JSONExport()
-    : JSONExport::base_type(mainObject)
+    JSONExportGrammar()
+    : JSONExportGrammar::base_type(mainObject)
     {
         std::string indentation_string = "    ";
         auto indentationLevel = karma::_r1;
@@ -104,9 +120,6 @@ struct JSONExport
     karma::rule<OutputIterator, void(const JSONElement&)> isNull;
     karma::rule<OutputIterator, void(const JSONElement&)> isObject;
     karma::rule<OutputIterator, void(const JSONElement&)> isArray;
-    
-    
-    
     karma::rule<OutputIterator, const JSONElement&()> mainObject;
     karma::rule<OutputIterator, const JSONElement&(unsigned)> newline_element;
     karma::rule<OutputIterator, const JSONElement&(unsigned)> element;

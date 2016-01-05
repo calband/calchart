@@ -8,15 +8,13 @@
 
 #pragma once
 
-#include <iterator>
 #include "json.h"
 
 /*!
- @class JSONExporter
- @abstract A collection of methods used for exporting
- JSON files.
+ * @brief A class containing a collection of methods that can be 
+ * used for exporting JSON files.
  */
 class JSONExporter {
 public:
-    static bool exportJSON(std::ostream_iterator<char>& outIter, const JSONElement& json);
+    static bool exportJSON(const std::string& filename, const JSONElement& json);
 };
