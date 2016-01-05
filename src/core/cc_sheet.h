@@ -40,83 +40,87 @@ class CC_continuity;
 class CC_point;
 
 // CalChart Sheet
-// The CalChart sheet object is a collection of CC_point locations, the number of
+// The CalChart sheet object is a collection of CC_point locations, the number
+// of
 // beats and the different marcher's continuity.
 
-class CC_sheet
-{
+class CC_sheet {
 public:
-	CC_sheet(size_t numPoints);
-	CC_sheet(size_t numPoints, const std::string& newname);
-	CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
-	CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_and_later);
-	~CC_sheet();
+    CC_sheet(size_t numPoints);
+    CC_sheet(size_t numPoints, const std::string& newname);
+    CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
+    CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
+        Current_version_and_later);
+    ~CC_sheet();
 
 private:
-	std::vector<uint8_t> SerializeAllPoints() const;
-	std::vector<uint8_t> SerializeContinuityData() const;
-	std::vector<uint8_t> SerializePrintContinuityData() const;
-	std::vector<uint8_t> SerializeSheetData() const;
+    std::vector<uint8_t> SerializeAllPoints() const;
+    std::vector<uint8_t> SerializeContinuityData() const;
+    std::vector<uint8_t> SerializePrintContinuityData() const;
+    std::vector<uint8_t> SerializeSheetData() const;
+
 public:
-	std::vector<uint8_t> SerializeSheet() const;
+    std::vector<uint8_t> SerializeSheet() const;
 
-	// Observer functions
-	const CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
-	std::set<unsigned> SelectPointsBySymbol(SYMBOL_TYPE i) const;
-	bool ContinuityInUse(SYMBOL_TYPE idx) const;
+    // Observer functions
+    const CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
+    std::set<unsigned> SelectPointsBySymbol(SYMBOL_TYPE i) const;
+    bool ContinuityInUse(SYMBOL_TYPE idx) const;
 
-	// setting values on the stunt sheet
-	// * needs to be through command only *
-	void SetNumPoints(unsigned num, unsigned columns, const CC_coord& new_march_position);
+    // setting values on the stunt sheet
+    // * needs to be through command only *
+    void SetNumPoints(unsigned num, unsigned columns,
+        const CC_coord& new_march_position);
 
-	// continuity:
-	// * needs to be through command only *
-	void SetContinuityText(SYMBOL_TYPE sym, const std::string& text);
-	
-	// points:
-	int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
-	void RelabelSheet(const std::vector<size_t>& table);
+    // continuity:
+    // * needs to be through command only *
+    void SetContinuityText(SYMBOL_TYPE sym, const std::string& text);
 
-	std::string GetName() const;
-	void SetName(const std::string& newname);
-	std::string GetNumber() const;
-	void SetNumber(const std::string& newnumber);
+    // points:
+    int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
+    void RelabelSheet(const std::vector<size_t>& table);
 
-	// beats
-	unsigned short GetBeats() const;
-	void SetBeats(unsigned short b);
-	bool IsInAnimation() const { return (GetBeats() != 0); }
+    std::string GetName() const;
+    void SetName(const std::string& newname);
+    std::string GetNumber() const;
+    void SetNumber(const std::string& newnumber);
 
-	const CC_point& GetPoint(unsigned i) const;
-	CC_point& GetPoint(unsigned i);
-	std::vector<CC_point> GetPoints() const;
-	void SetPoints(const std::vector<CC_point>& points);
+    // beats
+    unsigned short GetBeats() const;
+    void SetBeats(unsigned short b);
+    bool IsInAnimation() const { return (GetBeats() != 0); }
 
-	CC_coord GetPosition(unsigned i, unsigned ref = 0) const;
-	void SetAllPositions(const CC_coord& val, unsigned i);
-	void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
+    const CC_point& GetPoint(unsigned i) const;
+    CC_point& GetPoint(unsigned i);
+    std::vector<CC_point> GetPoints() const;
+    void SetPoints(const std::vector<CC_point>& points);
 
-	// continuity that gets printed
-	void SetPrintableContinuity(const std::string& name, const std::string& lines);
-	CC_textline_list GetPrintableContinuity() const;
-	std::string GetRawPrintContinuity() const;
+    CC_coord GetPosition(unsigned i, unsigned ref = 0) const;
+    void SetAllPositions(const CC_coord& val, unsigned i);
+    void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
+
+    // continuity that gets printed
+    void SetPrintableContinuity(const std::string& name,
+        const std::string& lines);
+    CC_textline_list GetPrintableContinuity() const;
+    std::string GetRawPrintContinuity() const;
 
     JSONElement generateOnlineViewerObject(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet);
     void sculptOnlineViewerObject(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet);
 private:
-	CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
+    CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
 
-	typedef std::vector<CC_continuity> ContContainer;
-	ContContainer mAnimationContinuity;
+    typedef std::vector<CC_continuity> ContContainer;
+    ContContainer mAnimationContinuity;
 
-	CC_print_continuity mPrintableContinuity;
-	unsigned short beats;
-	std::vector<CC_point> pts;
-	std::string mName;
+    CC_print_continuity mPrintableContinuity;
+    unsigned short beats;
+    std::vector<CC_point> pts;
+    std::string mName;
 
-	// unit tests
-	friend void CC_sheet_UnitTests();
-	static void CC_sheet_round_trip_test();
+    // unit tests
+    friend void CC_sheet_UnitTests();
+    static void CC_sheet_round_trip_test();
 };
 
 void CC_sheet_UnitTests();

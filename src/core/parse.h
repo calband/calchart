@@ -22,10 +22,9 @@
 
 #pragma once
 
-struct YYLTYPE
-{
-	int first_line;
-	int first_column;
+struct YYLTYPE {
+    int first_line;
+    int first_column;
 };
 
 extern YYLTYPE yylloc;

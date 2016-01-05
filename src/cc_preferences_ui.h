@@ -28,36 +28,34 @@
 #include <wx/notebook.h>
 #include "confgr.h"
 
-class CalChartPreferences : public wxDialog
-{
-	DECLARE_CLASS( CalChartPreferences )
-	DECLARE_EVENT_TABLE()
+class CalChartPreferences : public wxDialog {
+    DECLARE_CLASS(CalChartPreferences)
+    DECLARE_EVENT_TABLE()
 
 public:
-	CalChartPreferences( );
-	CalChartPreferences( wxWindow *parent,
-		wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("CalChart Preferences"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
-	~CalChartPreferences( );
+    CalChartPreferences();
+    CalChartPreferences(wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("CalChart Preferences"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ~CalChartPreferences();
 
-	void Init();
+    void Init();
 
-	bool Create(wxWindow *parent,
-		wxWindowID id = wxID_ANY,
-		const wxString& caption = wxT("CalChart Preferences"),
-		const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize,
-		long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU );
+    bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("CalChart Preferences"),
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
 
-	void CreateControls();
+    void CreateControls();
 
-	bool TransferDataToWindow();
-	bool TransferDataFromWindow();
+    bool TransferDataToWindow();
+    bool TransferDataFromWindow();
+
 private:
-	void OnCmdResetAll(wxCommandEvent&);
-	wxNotebook* mNotebook;
-	CalChartConfiguration mConfig;
+    void OnCmdResetAll(wxCommandEvent&);
+    wxNotebook* mNotebook;
+    CalChartConfiguration mConfig;
 };

@@ -32,69 +32,72 @@ class AnimationFrame;
 class FieldView;
 class CalChartConfiguration;
 
-class AnimationView : public wxView
-{
+class AnimationView : public wxView {
 public:
-	AnimationView();
-	~AnimationView();
+    AnimationView();
+    ~AnimationView();
 
-//	virtual bool OnCreate(wxDocument *doc, long flags);
-//	virtual bool OnClose(bool deleteWindow = true);
-    virtual void OnDraw(wxDC *dc);
-    void OnDraw(wxDC *dc, const CalChartConfiguration& config);
-    virtual void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    //	virtual bool OnCreate(wxDocument *doc, long flags);
+    //	virtual bool OnClose(bool deleteWindow = true);
+    virtual void OnDraw(wxDC* dc);
+    void OnDraw(wxDC* dc, const CalChartConfiguration& config);
+    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 
-	void RefreshFrame();
+    void RefreshFrame();
 
-	void SetCollisionType(CollisionWarning col);
-	CollisionWarning GetCollisionType() const { return mCollisionWarningType; }
-	void SelectCollisions();
-	
-	void Generate();
+    void SetCollisionType(CollisionWarning col);
+    CollisionWarning GetCollisionType() const { return mCollisionWarningType; }
+    void SelectCollisions();
 
-	// true if changes made
-	bool PrevBeat();
-	bool NextBeat();
-	void GotoBeat(unsigned i);
-	bool PrevSheet();
-	bool NextSheet();
-	void GotoSheet(unsigned i);
-	void GotoAnimationSheet(unsigned i);
-	void SetSelection(const SelectionList& sl);
+    void Generate();
 
-	// info
-	int GetNumberSheets() const;
-	int GetCurrentSheet() const;
-	int GetNumberBeats() const;
-	int GetCurrentBeat() const;
-	
-	wxString GetStatusText() const;
+    // true if changes made
+    bool PrevBeat();
+    bool NextBeat();
+    void GotoBeat(unsigned i);
+    bool PrevSheet();
+    bool NextSheet();
+    void GotoSheet(unsigned i);
+    void GotoAnimationSheet(unsigned i);
+    void SetSelection(const SelectionList& sl);
 
-	std::pair<CC_coord, CC_coord> GetShowSizeAndOffset() const;
-	std::pair<CC_coord, CC_coord> GetMarcherSizeAndOffset() const;
+    // info
+    int GetNumberSheets() const;
+    int GetCurrentSheet() const;
+    int GetNumberBeats() const;
+    int GetCurrentBeat() const;
 
-	void UnselectMarchers();
-	void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd, long mouseYEnd, bool altDown);
-	
-	void ToggleTimer();
-	bool OnBeat() const;
+    wxString GetStatusText() const;
 
-	CC_continuity GetContinuityOnSheet(unsigned whichSheet, SYMBOL_TYPE whichSymbol) const;
+    std::pair<CC_coord, CC_coord> GetShowSizeAndOffset() const;
+    std::pair<CC_coord, CC_coord> GetMarcherSizeAndOffset() const;
 
-	const CalChartDoc *GetShow() const;
-	CalChartDoc *GetShow();
+    void UnselectMarchers();
+    void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd,
+        long mouseYEnd, bool altDown);
 
-	const Animation* GetAnimation() const;
+    void ToggleTimer();
+    bool OnBeat() const;
+
+    CC_continuity GetContinuityOnSheet(unsigned whichSheet,
+        SYMBOL_TYPE whichSymbol) const;
+
+    const CalChartDoc* GetShow() const;
+    CalChartDoc* GetShow();
+
+    const Animation* GetAnimation() const;
 
 private:
-	void OnNotifyStatus(const wxString& status);
-	bool OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message);
-	
-	bool mErrorOccurred;
-	
-	const AnimationFrame *GetAnimationFrame() const;
-	AnimationFrame *GetAnimationFrame();
+    void OnNotifyStatus(const wxString& status);
+    bool
+    OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers,
+        unsigned sheetnum, const wxString& message);
 
-	std::unique_ptr<Animation> mAnimation;
-	CollisionWarning mCollisionWarningType;
+    bool mErrorOccurred;
+
+    const AnimationFrame* GetAnimationFrame() const;
+    AnimationFrame* GetAnimationFrame();
+
+    std::unique_ptr<Animation> mAnimation;
+    CollisionWarning mCollisionWarningType;
 };

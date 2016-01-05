@@ -36,493 +36,400 @@
 
 #include <fstream>
 
+// IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
 
-//IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
-
-
-AnimationView::AnimationView() :
-mErrorOccurred(false),
-mCollisionWarningType(COLLISION_RESPONSE_SHOW)
+AnimationView::AnimationView()
+    : mErrorOccurred(false)
+    , mCollisionWarningType(COLLISION_RESPONSE_SHOW)
 {
 }
 
+AnimationView::~AnimationView() {}
 
-AnimationView::~AnimationView()
+void AnimationView::OnDraw(wxDC* dc)
 {
+    auto& config = CalChartConfiguration::GetGlobalConfig();
+    OnDraw(dc, config);
 }
 
-
-void
-AnimationView::OnDraw(wxDC *dc)
+void AnimationView::OnDraw(wxDC* dc, const CalChartConfiguration& config)
 {
-	auto& config = CalChartConfiguration::GetGlobalConfig();
-	OnDraw(dc, config);
+    dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
+    DrawMode(*dc, config, GetShow()->GetMode(), ShowMode_kAnimation);
+    const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
+    if (mAnimation) {
+        for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i) {
+            auto info = mAnimation->GetAnimateInfo(i);
+
+            if (checkForCollision && info.mCollision) {
+                if (info.mCollision == COLLISION_WARNING) {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(
+                        COLOR_POINT_ANIM_COLLISION_WARNING);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                }
+                else if (info.mCollision == COLLISION_INTERSECT) {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                }
+            }
+            else if (GetShow()->IsSelected(i)) {
+                switch (info.mDirection) {
+                case ANIMDIR_SW:
+                case ANIMDIR_W:
+                case ANIMDIR_NW: {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                } break;
+                case ANIMDIR_SE:
+                case ANIMDIR_E:
+                case ANIMDIR_NE: {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                } break;
+                default: {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_SIDE);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                }
+                }
+            }
+            else {
+                switch (info.mDirection) {
+                case ANIMDIR_SW:
+                case ANIMDIR_W:
+                case ANIMDIR_NW: {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                } break;
+                case ANIMDIR_SE:
+                case ANIMDIR_E:
+                case ANIMDIR_NE: {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                } break;
+                default: {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_SIDE);
+                    dc->SetBrush(brushAndPen.first);
+                    dc->SetPen(brushAndPen.second);
+                }
+                }
+            }
+            CC_coord position = info.mPosition;
+            unsigned long x = position.x + GetShow()->GetMode().Offset().x;
+            unsigned long y = position.y + GetShow()->GetMode().Offset().y;
+            dc->DrawRectangle(x - Int2Coord(1) / 2, y - Int2Coord(1) / 2,
+                Int2Coord(1), Int2Coord(1));
+        }
+    }
 }
 
-void
-AnimationView::OnDraw(wxDC *dc, const CalChartConfiguration& config)
-{
-	dc->SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-	DrawMode(*dc, config, GetShow()->GetMode(), ShowMode_kAnimation);
-	const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
-	if (mAnimation)
-	{
-		for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
-		{
-			auto info = mAnimation->GetAnimateInfo(i);
-
-			if (checkForCollision && info.mCollision)
-			{
-				if (info.mCollision == COLLISION_WARNING) {
-					auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
-					dc->SetBrush(brushAndPen.first);
-					dc->SetPen(brushAndPen.second);
-				} else if (info.mCollision == COLLISION_INTERSECT) {
-					auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
-					dc->SetBrush(brushAndPen.first);
-					dc->SetPen(brushAndPen.second);
-				}
-			}
-			else if (GetShow()->IsSelected(i))
-			{
-				switch (info.mDirection)
-				{
-					case ANIMDIR_SW:
-					case ANIMDIR_W:
-					case ANIMDIR_NW:
-					{
-						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
-						dc->SetBrush(brushAndPen.first);
-						dc->SetPen(brushAndPen.second);
-					}
-						break;
-					case ANIMDIR_SE:
-					case ANIMDIR_E:
-					case ANIMDIR_NE:
-					{
-						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
-						dc->SetBrush(brushAndPen.first);
-						dc->SetPen(brushAndPen.second);
-					}
-						break;
-					default:
-					{
-						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_SIDE);
-						dc->SetBrush(brushAndPen.first);
-						dc->SetPen(brushAndPen.second);
-					}
-				}
-			}
-			else
-			{
-				switch (info.mDirection)
-				{
-					case ANIMDIR_SW:
-					case ANIMDIR_W:
-					case ANIMDIR_NW:
-					{
-						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
-						dc->SetBrush(brushAndPen.first);
-						dc->SetPen(brushAndPen.second);
-					}
-						break;
-					case ANIMDIR_SE:
-					case ANIMDIR_E:
-					case ANIMDIR_NE:
-					{
-						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
-						dc->SetBrush(brushAndPen.first);
-						dc->SetPen(brushAndPen.second);
-					}
-						break;
-					default:
-					{
-						auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_SIDE);
-						dc->SetBrush(brushAndPen.first);
-						dc->SetPen(brushAndPen.second);
-					}
-				}
-			}
-			CC_coord position = info.mPosition;
-			unsigned long x = position.x+GetShow()->GetMode().Offset().x;
-			unsigned long y = position.y+GetShow()->GetMode().Offset().y;
-			dc->DrawRectangle(x - Int2Coord(1)/2, y - Int2Coord(1)/2, Int2Coord(1), Int2Coord(1));
-		}
-	}
-}
-
-
-void
-AnimationView::OnUpdate(wxView *sender, wxObject *hint)
+void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 {
     wxView::OnUpdate(sender, hint);
-	if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified)))
-	{
-		if (mAnimation)
-		{
-			mAnimation.reset();
-			RefreshFrame();
-		}
-	}
-	if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_FinishedLoading)))
-	{
-		Generate();
-	}
+    if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
+        if (mAnimation) {
+            mAnimation.reset();
+            RefreshFrame();
+        }
+    }
+    if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_FinishedLoading))) {
+        Generate();
+    }
 }
 
-
-void
-AnimationView::RefreshFrame()
+void AnimationView::RefreshFrame()
 {
-	GetAnimationFrame()->UpdatePanel();
-	GetAnimationFrame()->Refresh();
+    GetAnimationFrame()->UpdatePanel();
+    GetAnimationFrame()->Refresh();
 }
 
-
-void
-AnimationView::SetCollisionType(CollisionWarning col)
+void AnimationView::SetCollisionType(CollisionWarning col)
 {
-	mCollisionWarningType = col;
-	if (mAnimation)
-	{
-		mAnimation->SetCollisionAction(col == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
-	}
+    mCollisionWarningType = col;
+    if (mAnimation) {
+        mAnimation->SetCollisionAction(col == COLLISION_RESPONSE_BEEP ? wxBell
+                                                                      : NULL);
+    }
 }
 
-
-void
-AnimationView::SelectCollisions()
+void AnimationView::SelectCollisions()
 {
-	if (mAnimation)
-	{
-		SelectionList select;
-		for (unsigned i = 0; i < GetShow()->GetNumPoints(); i++)
-		{
-			auto info = mAnimation->GetAnimateInfo(i);
+    if (mAnimation) {
+        SelectionList select;
+        for (unsigned i = 0; i < GetShow()->GetNumPoints(); i++) {
+            auto info = mAnimation->GetAnimateInfo(i);
 
-			if (info.mCollision)
-			{
-				select.insert(i);
-			}
-		}
-		GetShow()->SetSelection(select);
-	}
+            if (info.mCollision) {
+                select.insert(i);
+            }
+        }
+        GetShow()->SetSelection(select);
+    }
 }
 
 //#define GENERATE_SHOW_DUMP 1
 
-void
-AnimationView::Generate()
+void AnimationView::Generate()
 {
-	GetAnimationFrame()->SetStatusText(wxT("Compiling..."));
-	mAnimation.reset();
-	
-	// flush out the show
-	GetShow()->FlushAllTextWindows();		  // get all changes in text windows
-	
-	// set our error indicator:
-	mErrorOccurred = false;
-	// (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
-	NotifyStatus notifyStatus = [this](const std::string& notice) { this->OnNotifyStatus(notice); };
-	NotifyErrorList notifyErrorList = [this](const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const std::string& message) {
-		return this->OnNotifyErrorList(error_markers, sheetnum, message);
-	};
-	mAnimation = GetShow()->NewAnimation(notifyStatus, notifyErrorList);
-	if (mAnimation && (mAnimation->GetNumberSheets() == 0))
-	{
-		mAnimation.reset();
-	}
-	if (mAnimation)
-	{
+    GetAnimationFrame()->SetStatusText(wxT("Compiling..."));
+    mAnimation.reset();
+
+    // flush out the show
+    GetShow()->FlushAllTextWindows(); // get all changes in text windows
+
+    // set our error indicator:
+    mErrorOccurred = false;
+    // (wxMessageBox(wxT("Ignore errors?"), wxT("Animate"), wxYES_NO) != wxYES);
+    NotifyStatus notifyStatus = [this](const std::string& notice) {
+        this->OnNotifyStatus(notice);
+    };
+    NotifyErrorList notifyErrorList = [this](
+        const std::map<AnimateError, ErrorMarker>& error_markers,
+        unsigned sheetnum, const std::string& message) {
+        return this->OnNotifyErrorList(error_markers, sheetnum, message);
+    };
+    mAnimation = GetShow()->NewAnimation(notifyStatus, notifyErrorList);
+    if (mAnimation && (mAnimation->GetNumberSheets() == 0)) {
+        mAnimation.reset();
+    }
+    if (mAnimation) {
 #if defined(GENERATE_SHOW_DUMP) && GENERATE_SHOW_DUMP
-		std::ofstream output((GetShow()->GetFilename() + wxT(".txt")).ToStdString().c_str());
-		mAnimation->GotoSheet(0);
-		do
-		{
-			output<<mAnimation->GetCurrentInfo();
-		} while (mAnimation->NextBeat());
+        std::ofstream output(
+            (GetShow()->GetFilename() + wxT(".txt")).ToStdString().c_str());
+        mAnimation->GotoSheet(0);
+        do {
+            output << mAnimation->GetCurrentInfo();
+        } while (mAnimation->NextBeat());
 #endif // GENERATE_SHOW_DUMP
 
-		mAnimation->SetCollisionAction(mCollisionWarningType == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
-		mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
-	}
-	GetAnimationFrame()->UpdatePanel();
-	GetAnimationFrame()->SetStatusText(mErrorOccurred ? wxT("Error during compilation") : wxT("Ready"));
-	GetAnimationFrame()->Refresh();
-	if (mErrorOccurred)
-	{
-		wxMessageBox(wxT("Error during compilation.  See Error pulldown below."), wxT("Errors occurred"), wxOK);
-	}
+        mAnimation->SetCollisionAction(
+            mCollisionWarningType == COLLISION_RESPONSE_BEEP ? wxBell : NULL);
+        mAnimation->GotoSheet(GetShow()->GetCurrentSheetNum());
+    }
+    GetAnimationFrame()->UpdatePanel();
+    GetAnimationFrame()->SetStatusText(
+        mErrorOccurred ? wxT("Error during compilation") : wxT("Ready"));
+    GetAnimationFrame()->Refresh();
+    if (mErrorOccurred) {
+        wxMessageBox(wxT("Error during compilation.  See Error pulldown below."),
+            wxT("Errors occurred"), wxOK);
+    }
 }
-
 
 // true if changes made
-bool
-AnimationView::PrevBeat()
+bool AnimationView::PrevBeat()
 {
-	if (mAnimation && mAnimation->PrevBeat())
-	{
-		RefreshFrame();
-		return true;
-	}
-	return false;
+    if (mAnimation && mAnimation->PrevBeat()) {
+        RefreshFrame();
+        return true;
+    }
+    return false;
 }
 
-
-bool
-AnimationView::NextBeat()
+bool AnimationView::NextBeat()
 {
-	if (mAnimation && mAnimation->NextBeat())
-	{
-		RefreshFrame();
-		return true;
-	}
-	return false;
+    if (mAnimation && mAnimation->NextBeat()) {
+        RefreshFrame();
+        return true;
+    }
+    return false;
 }
 
-
-void
-AnimationView::GotoBeat(unsigned i)
+void AnimationView::GotoBeat(unsigned i)
 {
-	if (mAnimation)
-	{
-		mAnimation->GotoBeat(i);
-		RefreshFrame();
-	}
+    if (mAnimation) {
+        mAnimation->GotoBeat(i);
+        RefreshFrame();
+    }
 }
 
-
-bool
-AnimationView::PrevSheet()
+bool AnimationView::PrevSheet()
 {
-	if (mAnimation && mAnimation->PrevSheet())
-	{
-		RefreshFrame();
-		return true;
-	}
-	return false;
+    if (mAnimation && mAnimation->PrevSheet()) {
+        RefreshFrame();
+        return true;
+    }
+    return false;
 }
 
-
-bool
-AnimationView::NextSheet()
+bool AnimationView::NextSheet()
 {
-	if (mAnimation && mAnimation->NextSheet())
-	{
-		RefreshFrame();
-		return true;
-	}
-	return false;
+    if (mAnimation && mAnimation->NextSheet()) {
+        RefreshFrame();
+        return true;
+    }
+    return false;
 }
 
-
-void
-AnimationView::GotoSheet(unsigned i)
+void AnimationView::GotoSheet(unsigned i)
 {
-	if (mAnimation)
-	{
-		mAnimation->GotoSheet(i);
-		RefreshFrame();
-	}
+    if (mAnimation) {
+        mAnimation->GotoSheet(i);
+        RefreshFrame();
+    }
 }
 
-void
-AnimationView::GotoAnimationSheet(unsigned i)
+void AnimationView::GotoAnimationSheet(unsigned i)
 {
-	if (mAnimation)
-	{
-		mAnimation->GotoAnimationSheet(i);
-		RefreshFrame();
-	}
+    if (mAnimation) {
+        mAnimation->GotoAnimationSheet(i);
+        RefreshFrame();
+    }
 }
 
-
-void
-AnimationView::SetSelection(const SelectionList& sl)
+void AnimationView::SetSelection(const SelectionList& sl)
 {
-	GetShow()->SetSelection(sl);
+    GetShow()->SetSelection(sl);
 }
 
-
-int
-AnimationView::GetNumberSheets() const
+int AnimationView::GetNumberSheets() const
 {
-	return (mAnimation) ? mAnimation->GetNumberSheets() : 0;
+    return (mAnimation) ? mAnimation->GetNumberSheets() : 0;
 }
 
-
-int
-AnimationView::GetCurrentSheet() const
+int AnimationView::GetCurrentSheet() const
 {
-	return (mAnimation) ? mAnimation->GetCurrentSheet() : 0;
+    return (mAnimation) ? mAnimation->GetCurrentSheet() : 0;
 }
 
-
-int
-AnimationView::GetNumberBeats() const
+int AnimationView::GetNumberBeats() const
 {
-	return (mAnimation) ? mAnimation->GetNumberBeats() : 0;
+    return (mAnimation) ? mAnimation->GetNumberBeats() : 0;
 }
 
-
-int
-AnimationView::GetCurrentBeat() const
+int AnimationView::GetCurrentBeat() const
 {
-	return (mAnimation) ? mAnimation->GetCurrentBeat() : 0;
+    return (mAnimation) ? mAnimation->GetCurrentBeat() : 0;
 }
 
-
-wxString
-AnimationView::GetStatusText() const
+wxString AnimationView::GetStatusText() const
 {
-	wxString tempbuf;
-	
-	if (mAnimation)
-	{
-		tempbuf.Printf(wxT("Beat %u of %u  Sheet %d of %d \"%.32s\""),
-					   mAnimation->GetCurrentBeat(), mAnimation->GetNumberBeats(),
-					   mAnimation->GetCurrentSheet()+1, mAnimation->GetNumberSheets(),
-					   mAnimation->GetCurrentSheetName().c_str());
-	}
-	else
-	{
-		tempbuf = wxT("No animation available");
-	}
-	return tempbuf;
-}
+    wxString tempbuf;
 
+    if (mAnimation) {
+        tempbuf.Printf(wxT("Beat %u of %u  Sheet %d of %d \"%.32s\""),
+            mAnimation->GetCurrentBeat(), mAnimation->GetNumberBeats(),
+            mAnimation->GetCurrentSheet() + 1,
+            mAnimation->GetNumberSheets(),
+            mAnimation->GetCurrentSheetName().c_str());
+    }
+    else {
+        tempbuf = wxT("No animation available");
+    }
+    return tempbuf;
+}
 
 // Return a bounding box of the show
-std::pair<CC_coord, CC_coord>
-AnimationView::GetShowSizeAndOffset() const
+std::pair<CC_coord, CC_coord> AnimationView::GetShowSizeAndOffset() const
 {
-	auto size = GetShow()->GetMode().Size();
-	return { size, CC_coord(0,0) };
+    auto size = GetShow()->GetMode().Size();
+    return { size, CC_coord(0, 0) };
 }
 
-// Return a bounding box of the show of where the marchers are.  If they are outside the show, we don't see them.
-std::pair<CC_coord, CC_coord>
-AnimationView::GetMarcherSizeAndOffset() const
+// Return a bounding box of the show of where the marchers are.  If they are
+// outside the show, we don't see them.
+std::pair<CC_coord, CC_coord> AnimationView::GetMarcherSizeAndOffset() const
 {
-	auto mode_size = GetShow()->GetMode().Size();
-	CC_coord bounding_box_upper_left = mode_size;
-	CC_coord bounding_box_low_right(0,0);
+    auto mode_size = GetShow()->GetMode().Size();
+    CC_coord bounding_box_upper_left = mode_size;
+    CC_coord bounding_box_low_right(0, 0);
 
-	for (unsigned i = 0; mAnimation && i < GetShow()->GetNumPoints(); ++i)
-	{
-		CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
-		bounding_box_upper_left = CC_coord(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
-		bounding_box_low_right = CC_coord(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
-	}
+    for (unsigned i = 0; mAnimation && i < GetShow()->GetNumPoints(); ++i) {
+        CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
+        bounding_box_upper_left = CC_coord(std::min(bounding_box_upper_left.x, position.x),
+            std::min(bounding_box_upper_left.y, position.y));
+        bounding_box_low_right = CC_coord(std::max(bounding_box_low_right.x, position.x),
+            std::max(bounding_box_low_right.y, position.y));
+    }
 
-	return { bounding_box_low_right-bounding_box_upper_left, mode_size/2 + bounding_box_upper_left };
+    return { bounding_box_low_right - bounding_box_upper_left,
+        mode_size / 2 + bounding_box_upper_left };
 }
 
-void
-AnimationView::UnselectMarchers()
-{
-	GetShow()->UnselectAll();
-}
+void AnimationView::UnselectMarchers() { GetShow()->UnselectAll(); }
 
-void
-AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
-								   long mouseXEnd, long mouseYEnd, bool altDown)
+void AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
+    long mouseXEnd, long mouseYEnd,
+    bool altDown)
 {
-	// otherwise, Select points within rectangle
-	Coord x_off = GetShow()->GetMode().Offset().x;
-	Coord y_off = GetShow()->GetMode().Offset().y;
-	CC_lasso lasso(CC_coord(mouseXStart-x_off, mouseYStart-y_off));
-	lasso.Append(CC_coord(mouseXStart-x_off, mouseYEnd-y_off));
-	lasso.Append(CC_coord(mouseXEnd-x_off, mouseYEnd-y_off));
-	lasso.Append(CC_coord(mouseXEnd-x_off, mouseYStart-y_off));
-	lasso.End();
-	SelectionList pointlist;
-	for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i)
-	{
-		CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
-		if (lasso.Inside(position))
-		{
-			pointlist.insert(i);
-		}
-	}
-	if (altDown)
-	{
-		GetShow()->ToggleSelection(pointlist);
-	}
-	else
-	{
-		GetShow()->AddToSelection(pointlist);
-	}
+    // otherwise, Select points within rectangle
+    Coord x_off = GetShow()->GetMode().Offset().x;
+    Coord y_off = GetShow()->GetMode().Offset().y;
+    CC_lasso lasso(CC_coord(mouseXStart - x_off, mouseYStart - y_off));
+    lasso.Append(CC_coord(mouseXStart - x_off, mouseYEnd - y_off));
+    lasso.Append(CC_coord(mouseXEnd - x_off, mouseYEnd - y_off));
+    lasso.Append(CC_coord(mouseXEnd - x_off, mouseYStart - y_off));
+    lasso.End();
+    SelectionList pointlist;
+    for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i) {
+        CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
+        if (lasso.Inside(position)) {
+            pointlist.insert(i);
+        }
+    }
+    if (altDown) {
+        GetShow()->ToggleSelection(pointlist);
+    }
+    else {
+        GetShow()->AddToSelection(pointlist);
+    }
 }
-
 
 // Keystroke command toggles the timer, but the timer
 // lives in the Frame.  So we have this weird path...
-void
-AnimationView::ToggleTimer()
-{
-	GetAnimationFrame()->ToggleTimer();
-}
+void AnimationView::ToggleTimer() { GetAnimationFrame()->ToggleTimer(); }
 
-
-bool
-AnimationView::OnBeat() const
-{
-	return GetAnimationFrame()->OnBeat();
-}
+bool AnimationView::OnBeat() const { return GetAnimationFrame()->OnBeat(); }
 
 CC_continuity
-AnimationView::GetContinuityOnSheet(unsigned whichSheet, SYMBOL_TYPE whichSymbol) const
+AnimationView::GetContinuityOnSheet(unsigned whichSheet,
+    SYMBOL_TYPE whichSymbol) const
 {
-	auto current_sheet = GetShow()->GetNthSheet(whichSheet);
-	return current_sheet->GetContinuityBySymbol(whichSymbol);
+    auto current_sheet = GetShow()->GetNthSheet(whichSheet);
+    return current_sheet->GetContinuityBySymbol(whichSymbol);
 }
 
-void
-AnimationView::OnNotifyStatus(const wxString& status)
+void AnimationView::OnNotifyStatus(const wxString& status)
 {
-	GetAnimationFrame()->SetStatusText(status);
+    GetAnimationFrame()->SetStatusText(status);
 }
 
-
-bool
-AnimationView::OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum, const wxString& message)
+bool AnimationView::OnNotifyErrorList(
+    const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum,
+    const wxString& message)
 {
-	GetAnimationFrame()->OnNotifyErrorList(error_markers, sheetnum, message);
-	mErrorOccurred = true;
-	return false;
+    GetAnimationFrame()->OnNotifyErrorList(error_markers, sheetnum, message);
+    mErrorOccurred = true;
+    return false;
 }
 
-const Animation*
-AnimationView::GetAnimation() const
+const Animation* AnimationView::GetAnimation() const
 {
-	return mAnimation.get();
+    return mAnimation.get();
 }
 
-AnimationFrame*
-AnimationView::GetAnimationFrame()
+AnimationFrame* AnimationView::GetAnimationFrame()
 {
-	return static_cast<AnimationFrame*>(GetFrame());
+    return static_cast<AnimationFrame*>(GetFrame());
 }
 
-
-const AnimationFrame*
-AnimationView::GetAnimationFrame() const
+const AnimationFrame* AnimationView::GetAnimationFrame() const
 {
-	return static_cast<const AnimationFrame*>(GetFrame());
+    return static_cast<const AnimationFrame*>(GetFrame());
 }
 
-
-CalChartDoc*
-AnimationView::GetShow()
+CalChartDoc* AnimationView::GetShow()
 {
-	return static_cast<CalChartDoc*>(GetDocument());
+    return static_cast<CalChartDoc*>(GetDocument());
 }
 
-
-const CalChartDoc*
-AnimationView::GetShow() const
+const CalChartDoc* AnimationView::GetShow() const
 {
-	return static_cast<const CalChartDoc*>(GetDocument());
+    return static_cast<const CalChartDoc*>(GetDocument());
 }
-

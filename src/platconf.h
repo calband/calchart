@@ -22,12 +22,13 @@
 
 #pragma once
 
-#define cpp_cat(a,b) a ## b
+#define cpp_cat(a, b) a##b
 
 // For creating icons and bitmaps
 // There are separate macros because XPM is used for icons
-#define ICON_NAME(name) cpp_cat(name,_xpm)
-#define BITMAP_NAME(name) (char *)cpp_cat(name,_bits), cpp_cat(name,_width), cpp_cat(name,_height)
+#define ICON_NAME(name) cpp_cat(name, _xpm)
+#define BITMAP_NAME(name) \
+    (char*) cpp_cat(name, _bits), cpp_cat(name, _width), cpp_cat(name, _height)
 
 // Run external programs to print or just write to files
 #ifndef __WXMSW__
@@ -42,7 +43,9 @@
 #endif
 
 // Wildcard in file selector
-#define FILE_WILDCARDS wxT("All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows (*.mas)|*.mas")
+#define FILE_WILDCARDS                                                           \
+    wxT("All shows (*.shw;*.mas)|*.shw;*.mas|New shows (*.shw)|*.shw|Old shows " \
+        "(*.mas)|*.mas")
 #define FILE_SAVE_WILDCARDS wxT("New shows (*.shw)|*.shw")
 
 // Need to handle DOS-style text

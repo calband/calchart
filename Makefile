@@ -144,6 +144,10 @@ depend::
 	rm -f depend
 	gcc -MM $(CXXFLAGS) $(SRCS) $(GENERATED_SRCS) > depend
 
+format::
+	find . -name "*.cpp" | xargs clang-format-3.6 -i
+	find . -name "*.h" | xargs clang-format-3.6 -i
+
 ifeq (depend,$(wildcard depend))
 include depend
 endif

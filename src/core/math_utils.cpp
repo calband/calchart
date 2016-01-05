@@ -30,64 +30,59 @@
 
 float BoundDirection(float f)
 {
-	while (f >= 360.0) f -= 360.0;
-	while (f < 0.0) f += 360.0;
-	return f;
+    while (f >= 360.0)
+        f -= 360.0;
+    while (f < 0.0)
+        f += 360.0;
+    return f;
 }
 
-float NormalizeAngle(float ang)
-{
-	return BoundDirection(ang);
-}
-
+float NormalizeAngle(float ang) { return BoundDirection(ang); }
 
 float BoundDirectionSigned(float f)
 {
-	while (f >= 180.0) f -= 360.0;
-	while (f < -180.0) f += 360.0;
-	return f;
+    while (f >= 180.0)
+        f -= 360.0;
+    while (f < -180.0)
+        f += 360.0;
+    return f;
 }
-
 
 bool IsDiagonalDirection(float f)
 {
-	f = BoundDirection(f);
-	return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) ||
-		IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
+    f = BoundDirection(f);
+    return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) || IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
 }
-
 
 CC_coord CreateVector(float dir, float mag)
 {
-	dir = BoundDirection(dir);
-	if (IsDiagonalDirection(dir))
-	{
-		CC_coord r{ Float2Coord(mag), Float2Coord(mag) };
-		if ((dir > 50.0) && (dir < 310.0)) r.x = -r.x;
-		if (dir < 180.0) r.y = -r.y;
-		return r;
-	}
-	else
-	{
-		return CC_coord{ Float2Coord(mag * cos(Deg2Rad(dir))), Float2Coord(mag * -sin(Deg2Rad(dir))) };
-	}
+    dir = BoundDirection(dir);
+    if (IsDiagonalDirection(dir)) {
+        CC_coord r{ Float2Coord(mag), Float2Coord(mag) };
+        if ((dir > 50.0) && (dir < 310.0))
+            r.x = -r.x;
+        if (dir < 180.0)
+            r.y = -r.y;
+        return r;
+    }
+    else {
+        return CC_coord{ Float2Coord(mag * cos(Deg2Rad(dir))),
+            Float2Coord(mag * -sin(Deg2Rad(dir))) };
+    }
 }
-
 
 std::tuple<float, float> CreateUnitVector(float dir)
 {
-	dir = BoundDirection(dir);
-	if (IsDiagonalDirection(dir))
-	{
-		std::tuple<float, float> result { 1.0, 1.0 };
-		if ((dir > 50.0) && (dir < 310.0)) std::get<0>(result) = -std::get<0>(result);
-		if (dir < 180.0) std::get<1>(result) = -std::get<0>(result);
-		return result;
-	}
-	else
-	{
-		return std::tuple<float, float> { cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
-	}
+    dir = BoundDirection(dir);
+    if (IsDiagonalDirection(dir)) {
+        std::tuple<float, float> result{ 1.0, 1.0 };
+        if ((dir > 50.0) && (dir < 310.0))
+            std::get<0>(result) = -std::get<0>(result);
+        if (dir < 180.0)
+            std::get<1>(result) = -std::get<0>(result);
+        return result;
+    }
+    else {
+        return std::tuple<float, float>{ cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
+    }
 }
-
-

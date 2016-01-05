@@ -30,26 +30,24 @@ class FancyTextWin;
 class wxChoice;
 
 // page for giving a description
-class SetDescriptionWizard : public wxWizardPageSimple
-{
+class SetDescriptionWizard : public wxWizardPageSimple {
 public:
-	SetDescriptionWizard(wxWizard *parent);
+    SetDescriptionWizard(wxWizard* parent);
 
-	wxString GetValue();
-	
+    wxString GetValue();
+
 private:
-	wxArrayString modeStrings;
-	FancyTextWin *mText;
+    wxArrayString modeStrings;
+    FancyTextWin* mText;
 };
 
 // page for deciding the field type
-class ChooseShowModeWizard : public wxWizardPageSimple
-{
+class ChooseShowModeWizard : public wxWizardPageSimple {
 public:
-	ChooseShowModeWizard(wxWizard *parent);
-	wxString GetValue();
-	
+    ChooseShowModeWizard(wxWizard* parent);
+    wxString GetValue();
+
 private:
-	wxArrayString modeStrings;
-	wxChoice *mChoice;
+    wxArrayString modeStrings;
+    wxChoice* mChoice;
 };

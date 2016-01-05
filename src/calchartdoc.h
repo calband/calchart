@@ -24,8 +24,8 @@
 
 #include "animate.h"
 
-#include <wx/wx.h>							  // For basic wx defines
-#include <wx/docview.h>							  // For basic wx defines
+#include <wx/wx.h> // For basic wx defines
+#include <wx/docview.h> // For basic wx defines
 
 #include <memory>
 #include <vector>
@@ -39,59 +39,56 @@ class CC_lasso;
 class Animation;
 class CalChartConfiguration;
 
-// The CalChartDoc_modified class is used for indicating to views if the doc has been modified
+// The CalChartDoc_modified class is used for indicating to views if the doc has
+// been modified
 // some views behave differently if the show has been modified
-class CalChartDoc_modified : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CalChartDoc_modified)
+class CalChartDoc_modified : public wxObject {
+    DECLARE_DYNAMIC_CLASS(CalChartDoc_modified)
 };
 
-// The CalChartDoc_modified class is used for indicating to views to save any text
-class CalChartDoc_FlushAllViews : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CalChartDoc_FlushAllViews)
+// The CalChartDoc_modified class is used for indicating to views to save any
+// text
+class CalChartDoc_FlushAllViews : public wxObject {
+    DECLARE_DYNAMIC_CLASS(CalChartDoc_FlushAllViews)
 };
 
-// The CalChartDoc_FinishedLoading class is used for indicating to views that a new file has been loaded
-class CalChartDoc_FinishedLoading : public wxObject
-{
-	DECLARE_DYNAMIC_CLASS(CalChartDoc_FinishedLoading)
+// The CalChartDoc_FinishedLoading class is used for indicating to views that a
+// new file has been loaded
+class CalChartDoc_FinishedLoading : public wxObject {
+    DECLARE_DYNAMIC_CLASS(CalChartDoc_FinishedLoading)
 };
 
-// The CalChartDoc_setup class is used for indicating to views to set up a new show
-class CalChartDoc_setup : public wxObject
-{
-DECLARE_DYNAMIC_CLASS(CalChartDoc_setup)
+// The CalChartDoc_setup class is used for indicating to views to set up a new
+// show
+class CalChartDoc_setup : public wxObject {
+    DECLARE_DYNAMIC_CLASS(CalChartDoc_setup)
 };
-
-
 
 // CalChart Document.
 // This holds the CC_show, the core part of CalChart.
-class CalChartDoc : public wxDocument
-{
-	DECLARE_DYNAMIC_CLASS(CalChartDoc)
+class CalChartDoc : public wxDocument {
+    DECLARE_DYNAMIC_CLASS(CalChartDoc)
 public:
-	typedef std::vector<CC_sheet> CC_sheet_container_t;
-	typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
-	typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
+    typedef std::vector<CC_sheet> CC_sheet_container_t;
+    typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
+    typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
-	CalChartDoc();
-	virtual ~CalChartDoc();
+    CalChartDoc();
+    virtual ~CalChartDoc();
 
-	// Override the wxDocument functions:
-	// Need to override OnOpenDoc so we can report errors, handle recovery file
-	virtual bool OnOpenDocument(const wxString& filename);
-	// Need to override OnOpenDoc so we can report errors, handle recovery file
-	virtual bool OnCloseDocument();
-	// Need to override OnNewDoc so we can start the setup wizard
-	virtual bool OnNewDocument();
-	// Need to override OnSaveDoc so we can handle recovery files
-	virtual bool OnSaveDocument(const wxString& filename);
-	// Update the views that the doc been modified
-	virtual void Modify(bool b);
+    // Override the wxDocument functions:
+    // Need to override OnOpenDoc so we can report errors, handle recovery file
+    virtual bool OnOpenDocument(const wxString& filename);
+    // Need to override OnOpenDoc so we can report errors, handle recovery file
+    virtual bool OnCloseDocument();
+    // Need to override OnNewDoc so we can start the setup wizard
+    virtual bool OnNewDocument();
+    // Need to override OnSaveDoc so we can handle recovery files
+    virtual bool OnSaveDocument(const wxString& filename);
+    // Update the views that the doc been modified
+    virtual void Modify(bool b);
 
-	// How we save and load a show:
+// How we save and load a show:
 #if wxUSE_STD_IOSTREAM
     virtual wxSTD ostream& SaveObject(wxSTD ostream& stream);
     virtual wxSTD istream& LoadObject(wxSTD istream& stream);
@@ -104,102 +101,111 @@ public:
     bool exportViewerFile(const wxString& filepath);
     
 private:
-	template <typename T>
-	T& LoadObjectGeneric(T& stream);
-	template <typename T>
-	T& SaveObjectGeneric(T& stream);
-	template <typename T>
-	T& SaveObjectInternal(T& stream);
+    template <typename T>
+    T& LoadObjectGeneric(T& stream);
+    template <typename T>
+    T& SaveObjectGeneric(T& stream);
+    template <typename T>
+    T& SaveObjectInternal(T& stream);
     template <typename T>
     bool exportViewerFileGeneric(T& outstream);
 
 public:
-	bool ImportPrintableContinuity(const std::vector<std::string>& lines);
-	bool SetPrintableContinuity(unsigned current_sheet, const std::string& number, const std::string& lines);
+    bool ImportPrintableContinuity(const std::vector<std::string>& lines);
+    bool SetPrintableContinuity(unsigned current_sheet, const std::string& number,
+        const std::string& lines);
 
-	void FlushAllTextWindows();
-	
-	std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
-	void SetupNewShow();
-	
-	const std::string& GetDescr() const;
-	void SetDescr(const std::string& newdescr);
+    void FlushAllTextWindows();
 
-	unsigned short GetNumSheets() const;
+    std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus,
+        NotifyErrorList notifyErrorList);
+    void SetupNewShow();
 
-	CC_sheet_iterator_t GetSheetBegin();
-	const_CC_sheet_iterator_t GetSheetBegin() const;
-	CC_sheet_iterator_t GetSheetEnd();
-	const_CC_sheet_iterator_t GetSheetEnd() const;
+    const std::string& GetDescr() const;
+    void SetDescr(const std::string& newdescr);
 
-	const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
-	CC_sheet_iterator_t GetNthSheet(unsigned n);
-	const_CC_sheet_iterator_t GetCurrentSheet() const;
-	CC_sheet_iterator_t GetCurrentSheet();
-	unsigned GetCurrentSheetNum() const;
-	void SetCurrentSheet(unsigned n);
+    unsigned short GetNumSheets() const;
 
-	CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
-	void DeleteNthSheet(unsigned sheetidx);
-	void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
-	void InsertSheetInternal(const CC_sheet_container_t& nsheet, unsigned sheetidx);
-	void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
-	unsigned short GetNumPoints() const;
-	void SetNumPoints(unsigned num, unsigned columns);
-	bool RelabelSheets(unsigned sht);
+    CC_sheet_iterator_t GetSheetBegin();
+    const_CC_sheet_iterator_t GetSheetBegin() const;
+    CC_sheet_iterator_t GetSheetEnd();
+    const_CC_sheet_iterator_t GetSheetEnd() const;
 
-	std::string GetPointLabel(unsigned i) const;
-	void SetPointLabel(const std::vector<std::string>& labels);
-	const std::vector<std::string>& GetPointLabels() const;
+    const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
+    CC_sheet_iterator_t GetNthSheet(unsigned n);
+    const_CC_sheet_iterator_t GetCurrentSheet() const;
+    CC_sheet_iterator_t GetCurrentSheet();
+    unsigned GetCurrentSheetNum() const;
+    void SetCurrentSheet(unsigned n);
 
-	// how to select points:
-	// Always select or unselect in groups
-	bool SelectAll();
-	bool UnselectAll();
-	void AddToSelection(const SelectionList& sl);
-	void SetSelection(const SelectionList& sl);
-	void RemoveFromSelection(const SelectionList& sl);
-	void ToggleSelection(const SelectionList& sl);
-	void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected, unsigned ref);
-	bool IsSelected(unsigned i) const;
-	const SelectionList& GetSelectionList() const;
+    CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
+    void DeleteNthSheet(unsigned sheetidx);
+    void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
+    void InsertSheetInternal(const CC_sheet_container_t& nsheet,
+        unsigned sheetidx);
+    void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
+    unsigned short GetNumPoints() const;
+    void SetNumPoints(unsigned num, unsigned columns);
+    bool RelabelSheets(unsigned sht);
 
-	const ShowMode& GetMode() const;
-	void SetMode(std::unique_ptr<const ShowMode> m);
+    std::string GetPointLabel(unsigned i) const;
+    void SetPointLabel(const std::vector<std::string>& labels);
+    const std::vector<std::string>& GetPointLabels() const;
 
-	bool AlreadyHasPrintContinuity() const;
-	int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
-	
+    // how to select points:
+    // Always select or unselect in groups
+    bool SelectAll();
+    bool UnselectAll();
+    void AddToSelection(const SelectionList& sl);
+    void SetSelection(const SelectionList& sl);
+    void RemoveFromSelection(const SelectionList& sl);
+    void ToggleSelection(const SelectionList& sl);
+    void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected,
+        unsigned ref);
+    bool IsSelected(unsigned i) const;
+    const SelectionList& GetSelectionList() const;
+
+    const ShowMode& GetMode() const;
+    void SetMode(std::unique_ptr<const ShowMode> m);
+
+    bool AlreadyHasPrintContinuity() const;
+    int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards,
+        const std::set<size_t>& isPicked,
+        const CalChartConfiguration& config_) const;
+
 private:
-	// Autosaving:
-	// goal is to allow the user to have a recoverable file.
-	// 
-	// When the timer goes off, and if the show is modified,
-	// we will write the file to a version of the file that the same
-	// but with the extension .shw~, to indicate that there is a recovery
-	// file at that location.
-	// When a file is opened, we first check to see if there is a temporary 
-	// file, and if there is, prompt the user to see if they would like use
-	// that file instead.
-	// When we save a file, the recovery file should be removed to prevent
-	// a false detection that the file writing failed.
-	static wxString TranslateNameToAutosaveName(const wxString& name);
-	void Autosave();
-	
-	class AutoSaveTimer: public wxTimer
-	{
-	public:
-		AutoSaveTimer(CalChartDoc& show) : mShow(show) {}
-		void Notify();
-	private:
-		CalChartDoc& mShow;
-	};
+    // Autosaving:
+    // goal is to allow the user to have a recoverable file.
+    //
+    // When the timer goes off, and if the show is modified,
+    // we will write the file to a version of the file that the same
+    // but with the extension .shw~, to indicate that there is a recovery
+    // file at that location.
+    // When a file is opened, we first check to see if there is a temporary
+    // file, and if there is, prompt the user to see if they would like use
+    // that file instead.
+    // When we save a file, the recovery file should be removed to prevent
+    // a false detection that the file writing failed.
+    static wxString TranslateNameToAutosaveName(const wxString& name);
+    void Autosave();
 
-	friend class BasicCalChartCommand;
-	CC_show ShowSnapShot() const;
-	void RestoreSnapShot(const CC_show& snapshot);
-	
-	std::unique_ptr<CC_show> mShow;
-	std::unique_ptr<const ShowMode> mMode;
-	AutoSaveTimer mTimer;
+    class AutoSaveTimer : public wxTimer {
+    public:
+        AutoSaveTimer(CalChartDoc& show)
+            : mShow(show)
+        {
+        }
+        void Notify();
+
+    private:
+        CalChartDoc& mShow;
+    };
+
+    friend class BasicCalChartCommand;
+    CC_show ShowSnapShot() const;
+    void RestoreSnapShot(const CC_show& snapshot);
+
+    std::unique_ptr<CC_show> mShow;
+    std::unique_ptr<const ShowMode> mMode;
+    AutoSaveTimer mTimer;
 };
