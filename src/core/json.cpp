@@ -43,6 +43,46 @@ JSONElement::JSONElement(const JSONElement& other)
 : JSONElement(other.m_data->newCopy()) {
 }
 
+JSONElement::JSONElement(const double& other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const int& other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const unsigned& other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const char* other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const std::string& other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const bool& other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const std::map<std::string, JSONElement>& other)
+: JSONElement() {
+    *this = other;
+}
+
+JSONElement::JSONElement(const std::vector<JSONElement>& other)
+: JSONElement() {
+    *this = other;
+}
+
 JSONElement::JSONElement(std::shared_ptr<JSONData> data)
 : m_data(data) {
 }
@@ -51,56 +91,8 @@ std::weak_ptr<const JSONData> JSONElement::data() const {
     return m_data;
 }
 
-std::weak_ptr<const JSONDataNumber> JSONElement::dataAsNumber() const {
-    return std::dynamic_pointer_cast<const JSONDataNumber>(data().lock());
-}
-
-std::weak_ptr<const JSONDataString> JSONElement::dataAsString() const {
-    return std::dynamic_pointer_cast<const JSONDataString>(data().lock());
-}
-
-std::weak_ptr<const JSONDataBoolean> JSONElement::dataAsBoolean() const {
-    return std::dynamic_pointer_cast<const JSONDataBoolean>(data().lock());
-}
-
-std::weak_ptr<const JSONDataNull> JSONElement::dataAsNull() const {
-    return std::dynamic_pointer_cast<const JSONDataNull>(data().lock());
-}
-
-std::weak_ptr<const JSONDataObject> JSONElement::dataAsObject() const {
-    return std::dynamic_pointer_cast<const JSONDataObject>(data().lock());
-}
-
-std::weak_ptr<const JSONDataArray> JSONElement::dataAsArray() const {
-    return std::dynamic_pointer_cast<const JSONDataArray>(data().lock());
-}
-
 std::weak_ptr<JSONData> JSONElement::data() {
     return m_data;
-}
-
-std::weak_ptr<JSONDataNumber> JSONElement::dataAsNumber() {
-    return std::dynamic_pointer_cast<JSONDataNumber>(data().lock());
-}
-
-std::weak_ptr<JSONDataString> JSONElement::dataAsString() {
-    return std::dynamic_pointer_cast<JSONDataString>(data().lock());
-}
-
-std::weak_ptr<JSONDataBoolean> JSONElement::dataAsBoolean() {
-    return std::dynamic_pointer_cast<JSONDataBoolean>(data().lock());
-}
-
-std::weak_ptr<JSONDataNull> JSONElement::dataAsNull() {
-    return std::dynamic_pointer_cast<JSONDataNull>(data().lock());
-}
-
-std::weak_ptr<JSONDataObject> JSONElement::dataAsObject() {
-    return std::dynamic_pointer_cast<JSONDataObject>(data().lock());
-}
-
-std::weak_ptr<JSONDataArray> JSONElement::dataAsArray() {
-    return std::dynamic_pointer_cast<JSONDataArray>(data().lock());
 }
 
 JSONElement& JSONElement::operator= (const JSONElement& other) {

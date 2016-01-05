@@ -24,20 +24,21 @@ class JSONDataObject;
 class JSONDataArray;
 
 /*!
- @class      JSONData
- @abstract   A JSON file is represented as a hierarchical
- structure of JSONElement objects that wrap
- JSONData objects. JSONData objects come in
- different flavors depending on the kind of data
- that is being stored. For example, numbers
- (floating point and integer alike) are stored
- within JSONDataNumber objects; strings, however, are
- stored within JSONDataString objects.
- JSONDataObjects are generally created on the heap,
- and are accessed through shared_ptr objects.
+ * @brief Contains the content of a JSONElement.
+ * @details JSONData objects can have one of several types 
+ * (e.g. Number, String, Boolean, etc.), and each type is
+ * associated with a value in the JSONData::JSONDataType
+ * enumeration. The `type()` method can be used to determine
+ * the type of the JSONData object. JSONData objects should
+ * never be accessed directly; instead, they should be accessed
+ * through JSONDataAccessor and JSONDataConstAccessor objects.
  */
 class JSONData {
 public:
+    /*
+     * @brief An enumeration which identifies each type of
+     * JSONData.
+     */
     enum JSONDataType {
         JSONDataTypeNumber,
         JSONDataTypeString,
@@ -48,70 +49,104 @@ public:
     };
     
     /*!
-     @method type
-     @abstract Returns the type of data contained within this JSONData object.
+     * @brief Returns the type of data contained within this
+     * JSONData object.
      */
     virtual JSONDataType type() const = 0;
 protected:
-    JSONData(); // Don't let the user create JSONData objects, except through JSONElement
+    /*!
+     * @brief Constructor.
+     * @details Note that this constructor is protected.
+     * JSONData objects cannot be created freely, since each
+     * of them must be coupled uniquely with a JSONElement.
+     * Consequently, JSONData objects are created indirectly
+     * by creating JSONElement objects.
+     */
+    JSONData();
     
     /*!
-     @method makeNewNumber
-     @abstract Creates a new JSONData object to represent the specified double value.
-     @param number The value to represent with a JSONData object.
+     * @brief Creates a new JSONData object to represent the
+     * specified double value.
+     * @param number The value to represent with a JSONData object.
      */
     static std::shared_ptr<JSONData> makeNewNumber(double number);
     
     /*!
-     @method makeNewString
-     @abstract Creates a new JSONData object to represent the specified string value.
-     @param string The value to represent with a JSONData object.
+     * @brief Creates a new JSONData object to represent the 
+     * specified string value.
+     * @param string The value to represent with a JSONData object.
      */
     static std::shared_ptr<JSONData> makeNewString(std::string string);
     
     /*!
-     @method makeNewString
-     @abstract Creates a new JSONData object to represent the specified boolean value.
-     @param boolean The value to represent with a JSONData object.
+     * @brief Creates a new JSONData object to represent the
+     * specified boolean value.
+     * @param boolean The value to represent with a JSONData object.
      */
     static std::shared_ptr<JSONData> makeNewBoolean(bool boolean);
     
     /*!
-     @method makeNewNull
-     @abstract Creates a new JSONData object to represent a 'null' value.
+     * @brief Creates a new JSONData object to represent a
+     * 'null' value.
      */
     static std::shared_ptr<JSONData> makeNewNull();
     
     /*!
-     @method makeNewObject
-     @abstract Creates a new JSONData object to represent a JSON object consisting of the key-value pairs contained within the provided map.
-     @param object A collection of key-value pairs that will be inserted into the new JSONData object.
+     * @brief Creates a new JSONData object to represent a
+     * JSON object consisting of the key-value pairs contained
+     * within the provided map.
+     * @param object A collection of key-value pairs that will
+     * be inserted into the new JSONData object.
      */
     static std::shared_ptr<JSONData> makeNewObject(std::map<std::string, JSONElement> object);
     
     /*!
-     @method makeNewArray
-     @abstract Creates a new JSONData object to represent a JSON array containing the provided values.
-     @param array
+     * @brief Creates a new JSONData object to represent a JSON
+     * array containing the provided values.
+     * @param array
      */
     static std::shared_ptr<JSONData> makeNewArray(std::vector<JSONElement> array);
     
     /*!
-     @method newCopy
-     @abstract Returns a pointer to a new deep copy of this JSONData object.
+     * @brief Returns a pointer to a new, deep copy of this
+     * JSONData object.
      */
     virtual std::shared_ptr<JSONData> newCopy() const = 0;
     
 private:
-    
-    friend class JSONElement; // JSONElement is a friend class so that it can have access to the makeNew mand newCopy methods
+    // JSONElement is a friend class so that it can have access
+    // to the makeNew mand newCopy methods
+    friend class JSONElement;
 };
 
-
+/*!
+ * @brief An element in a JSON hierarchy.
+ * @details JSON elements can contain several different types
+ * of data (e.g. Number, String, Boolean, etc.). A hierarchy
+ * can be constructed by composing a JSONElement from other 
+ * JSONElements, as is the case when a JSONElement is an 'object'
+ * or an 'array'. JSONElement objects can be created in a variety
+ * of ways: you can use the class's static 'make' methods
+ * (e.g. makeNumber, makeString, ...), or you can initialize
+ * using the `=` operator (e.g. element = 4; element = "string", ...).
+ * Note that the `=` operator will completely overwrite the content 
+ * of the JSONElement with something new; if you would like to
+ * manipulate the existing content (e.g. to add values to an array),
+ * use a JSONDataAccessor. JSONDataAccessor and JSONDataConstAccessor
+ * objects are also used to read the content of a JSONElement.
+ */
 class JSONElement {
 public:
     JSONElement();
     JSONElement(const JSONElement& other);
+    JSONElement(const double& other);
+    JSONElement(const int& other);
+    JSONElement(const unsigned& other);
+    JSONElement(const char* other);
+    JSONElement(const std::string& other);
+    JSONElement(const bool& other);
+    JSONElement(const std::map<std::string, JSONElement>& other);
+    JSONElement(const std::vector<JSONElement>& other);
     
     static JSONElement makeNumber(double number = 0);
     static JSONElement makeString(std::string string = "");
@@ -120,6 +155,11 @@ public:
     static JSONElement makeObject(std::map<std::string, JSONElement> object = std::map<std::string, JSONElement>());
     static JSONElement makeArray(std::vector<JSONElement> array = std::vector<JSONElement>());
     
+    /*!
+     * @brief Returns the type of data contained within this
+     * element.
+     * @return The type of data within this element.
+     */
     JSONData::JSONDataType type() const;
     
     JSONElement& operator= (const JSONElement& other);
@@ -136,22 +176,12 @@ protected:
     JSONElement(std::shared_ptr<JSONData> data);
     
     std::weak_ptr<const JSONData> data() const;
-    std::weak_ptr<const JSONDataNumber> dataAsNumber() const;
-    std::weak_ptr<const JSONDataString> dataAsString() const;
-    std::weak_ptr<const JSONDataBoolean> dataAsBoolean() const;
-    std::weak_ptr<const JSONDataNull> dataAsNull() const;
-    std::weak_ptr<const JSONDataObject> dataAsObject() const;
-    std::weak_ptr<const JSONDataArray> dataAsArray() const;
     std::weak_ptr<JSONData> data();
-    std::weak_ptr<JSONDataNumber> dataAsNumber();
-    std::weak_ptr<JSONDataString> dataAsString();
-    std::weak_ptr<JSONDataBoolean> dataAsBoolean();
-    std::weak_ptr<JSONDataNull> dataAsNull();
-    std::weak_ptr<JSONDataObject> dataAsObject();
-    std::weak_ptr<JSONDataArray> dataAsArray();
 private:
     std::shared_ptr<JSONData> m_data;
     
+    // Objects that need direct access to the JSONData within a JSONElement
+    // should inherit from JSONElementFriend
     friend class JSONElementFriend;
 };
 
