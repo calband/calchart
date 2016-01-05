@@ -64,7 +64,7 @@ struct JSONExport
         | isArray(karma::_val) << array(indentationLevel);
         
         // A JSON number
-        number = karma::eps[karma::_a = phoenix::bind(&JSONDataNumberConstAccessor::operator->, karma::_val)], karma::double_[karma::_1 = phoenix::bind(&JSONDataNumber::value, karma::_a)];
+        number = karma::eps[karma::_a = phoenix::bind(&JSONDataNumberConstAccessor::operator->, karma::_val)] << karma::double_[karma::_1 = phoenix::bind(&JSONDataNumber::value, karma::_a)];
         
         // A JSON string
         string = karma::eps[karma::_a = phoenix::bind(&JSONDataStringConstAccessor::operator->, karma::_val)] << '"' << karma::string[karma::_1 = phoenix::bind(&JSONDataString::value, karma::_a)] << '"';
