@@ -105,8 +105,31 @@ public:
     CC_textline_list GetPrintableContinuity() const;
     std::string GetRawPrintContinuity() const;
 
-    JSONElement generateOnlineViewerObject(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet);
-    void sculptOnlineViewerObject(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet);
+    /*!
+     * @brief Generates a JSONElement that could represent this
+     * sheet in an Online Viewer '.viewer' file.
+     * @param sheetNum The index of this sheet (NOT zero-indexed;
+     * the first sheet in the show should have a sheetNum of 1).
+     * @param dotLabels A vector which maps each dot index to its
+     * label (e.g. a valid label for dot 1 would be A1).
+     * @param compiledSheet An up-to-date animation of this sheet.
+     * @return A JSONElement which could represent this sheet in
+     * a '.viewer' file.
+     */
+    JSONElement toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const;
+    
+    /*!
+     * @brief Manipulates dest so that it contains a JSONElement that
+     * could represent this sheet in an Online Viewer '.viewer' file.
+     * @param dest A reference to the JSONElement which will be transformed
+     * into a JSON representation of this sheet.
+     * @param sheetNum The index of this sheet (NOT zero-indexed;
+     * the first sheet in the show should have a sheetNum of 1).
+     * @param dotLabels A vector which maps each dot index to its
+     * label (e.g. a valid label for dot 1 would be A1).
+     * @param compiledSheet An up-to-date animation of this sheet.
+     */
+    void toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const;
 private:
     CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
 

@@ -305,7 +305,7 @@ bool CalChartDoc::exportViewerFileGeneric(T& outstream) {
     metaObject["index_name"] = "MANUAL";
     metaObject["type"] = "viewer";
     
-    mShow->sculptOnlineViewerObject(mainObject["show"], Animation(*mShow, nullptr, nullptr));
+    mShow->toOnlineViewerJSON(mainObject["show"], Animation(*mShow, nullptr, nullptr));
     
     return JSONExporter::exportJSON(outIter, mainObjectElement);
 }

@@ -490,31 +490,34 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected,
     }
 }
 
-JSONElement CC_show::generateOnlineViewerObject(const Animation& compiledShow) {
+JSONElement CC_show::toOnlineViewerJSON(const Animation& compiledShow) const {
     JSONElement newViewerObject = JSONElement::makeNull();
-    sculptOnlineViewerObject(newViewerObject, compiledShow);
+    toOnlineViewerJSON(newViewerObject, compiledShow);
     return newViewerObject;
 }
 
-void CC_show::sculptOnlineViewerObject(JSONElement& dest, const Animation& compiledShow) {
-    JSONDataObjectAccessor showObject = dest = JSONElement::makeObject();
+void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const {
+    JSONDataObjectAccessor showObjectAccessor = dest = JSONElement::makeObject();
     
-    showObject["title"] = "MANUAL";
-    showObject["year"] = "2015";
-    showObject["description"] = descr;
-    showObject["dot_labels"] = JSONElement::makeArray();
-    showObject["sheets"] = JSONElement::makeArray();
+    // Setup the skeleton for the show's JSON representation
+    showObjectAccessor["title"] = "MANUAL"; // TODO; For now, this will be manually added to the exported file
+    showObjectAccessor["year"] = "2016"; // TODO; For now, this will be hard-coded to 2016
+    showObjectAccessor["description"] = descr;
+    showObjectAccessor["dot_labels"] = JSONElement::makeArray();
+    showObjectAccessor["sheets"] = JSONElement::makeArray();
     
-    JSONDataArrayAccessor dotLabels = showObject["dot_labels"];
+    // Fill in 'dot_labels' with the labels for each dot (e.g. A0, A1, A2, ...)
+    JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["dot_labels"];
     for (unsigned i = 0; i < pt_labels.size(); i++) {
-        dotLabels->pushBack(JSONElement::makeString(pt_labels[i]));
+        dotLabelsAccessor->pushBack(JSONElement::makeString(pt_labels[i]));
     }
     
-    JSONDataArrayAccessor sheets = showObject["sheets"];
+    // Fill in 'sheets' with the JSON representation of each sheet
+    JSONDataArrayAccessor sheetsAccessor = showObjectAccessor["sheets"];
     unsigned i = 0;
     for (auto iter = GetSheetBegin(); iter != GetSheetEnd(); iter++, i++) {
-        sheets->pushBack(JSONElement::makeNull());
-        (*iter).sculptOnlineViewerObject(sheets->back(), i, pt_labels, compiledShow.sheets[i]);
+        sheetsAccessor->pushBack(JSONElement::makeNull());
+        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i, pt_labels, compiledShow.sheets[i]);
     }
 }
 

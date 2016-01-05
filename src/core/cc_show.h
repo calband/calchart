@@ -130,8 +130,23 @@ public:
     }
     inline const SelectionList& GetSelectionList() const { return selectionList; }
 
-    JSONElement generateOnlineViewerObject(const Animation& compiledShow);
-    void sculptOnlineViewerObject(JSONElement& dest, const Animation& compiledShow);
+    /*!
+     * @brief Generates a JSONElement that could represent this
+     * show in an Online Viewer '.viewer' file.
+     * @param compiledShow An up-to-date Animation of the show.
+     * @return A JSONElement which could represent this show in
+     * a '.viewer' file.
+     */
+    JSONElement toOnlineViewerJSON(const Animation& compiledShow) const;
+    
+    /*!
+     * @brief Manipulates dest so that it contains a JSONElement that
+     * could represent this show in an Online Viewer '.viewer' file.
+     * @param dest A reference to the JSONElement which will be transformed
+     * into a JSON representation of this show.
+     * @param compiledShow An up-to-date Animation of the show.
+     */
+    void toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const;
 private:
     std::string descr;
     unsigned short numpoints;

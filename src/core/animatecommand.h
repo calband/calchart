@@ -56,7 +56,22 @@ public:
     virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
                                              const CC_coord& offset) const;
     
-    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const = 0;
+    /*!
+     * @brief Manipulates dest so that it contains a JSONElement that
+     * could represent this movement in an Online Viewer '.viewer' file.
+     * @param dest A reference to the JSONElement which will be transformed
+     * into a JSON representation of this movement.
+     * @param start The position at which this movement begins.
+     */
+    JSONElement toOnlineViewerJSON(const CC_coord& start) const;
+    /*!
+     * @brief Manipulates dest so that it contains a JSONElement that
+     * could represent this movement in an Online Viewer '.viewer' file.
+     * @param dest A reference to the JSONElement which will be transformed
+     * into a JSON representation of this movement.
+     * @param start The position at which this movement begins.
+     */
+    virtual void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const = 0;
 protected:
     unsigned mNumBeats;
     unsigned mBeat;
@@ -70,7 +85,7 @@ public:
     virtual AnimateDir Direction() const;
     virtual float RealDirection() const;
 
-    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const;
+    void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
 protected:
     AnimateDir dir;
     float realdir;
@@ -94,7 +109,7 @@ public:
     virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
         const CC_coord& offset) const;
 
-    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const;
+    void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
 private:
     CC_coord mVector;
 };
@@ -118,7 +133,7 @@ public:
     virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
         const CC_coord& offset) const;
 
-    virtual JSONElement generateOnlineViewerMovement(const CC_coord& start) const;
+    void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
 private:
     CC_coord mOrigin;
     float mR, mAngStart, mAngEnd;

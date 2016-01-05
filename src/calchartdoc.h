@@ -97,7 +97,14 @@ public:
     virtual wxInputStream& LoadObject(wxInputStream& stream);
 #endif
     
-    // Exporting CalChart Online Viewer files
+    /*!
+     * @brief Exports the show to a file that can be animated by
+     * the CalChart Online Viewer.
+     * @param filepath The filepath (relative or absolute) to which the
+     * Viewer file will be saved. Note that the CalChart Online Viewer
+     * expects a viewer file to end with the '.viewer' extension.
+     * @return True if the file was saved successfully; false otherwise.
+     */
     bool exportViewerFile(const wxString& filepath);
     
 private:
@@ -107,6 +114,16 @@ private:
     T& SaveObjectGeneric(T& stream);
     template <typename T>
     T& SaveObjectInternal(T& stream);
+    
+    /*!
+     * @brief Exports viewer file content to an output stream.
+     * @tparam T The type of stream that the viewer file will
+     * be exported to. This should be a derivative of basic_ostream.
+     * @param outstream The stream that the viewer file content will
+     * be exported to.
+     * @return True if the viewer file content was successfully
+     * written to the output stream; false otherwise.
+     */
     template <typename T>
     bool exportViewerFileGeneric(T& outstream);
 

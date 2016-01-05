@@ -103,6 +103,12 @@ float AnimateCommand::MotionDirection() const { return RealDirection(); }
 
 void AnimateCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
+JSONElement AnimateCommand::toOnlineViewerJSON(const CC_coord &start) const {
+    JSONElement newViewerObject = JSONElement::makeNull();
+    toOnlineViewerJSON(newViewerObject, start);
+    return newViewerObject;
+}
+
 AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
     : AnimateCommand(beats)
     , dir(AnimGetDirFromAngle(direction))
@@ -114,18 +120,14 @@ AnimateDir AnimateCommandMT::Direction() const { return dir; }
 
 float AnimateCommandMT::RealDirection() const { return realdir; }
 
-JSONElement AnimateCommandMT::generateOnlineViewerMovement(const CC_coord& start) const {
-    JSONElement moveElement = JSONElement::makeObject();
+void AnimateCommandMT::toOnlineViewerJSON(JSONElement &dest, const CC_coord &start) const {
+    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
     
-    JSONDataObjectAccessor move = moveElement;
-    
-    move["type"] = "mark";
-    move["beats"] = NumBeats();
-    move["facing"] = Ang2Viewer(Direction());
-    move["x"] = Coord2ViewerXPos(start.x);
-    move["y"] = Coord2ViewerYPos(start.y);
-    
-    return moveElement;
+    moveAccessor["type"] = "mark";
+    moveAccessor["beats"] = NumBeats();
+    moveAccessor["facing"] = Ang2Viewer(Direction());
+    moveAccessor["x"] = Coord2ViewerXPos(start.x);
+    moveAccessor["y"] = Coord2ViewerYPos(start.y);
 }
 
 AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
@@ -200,21 +202,17 @@ AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt,
         pt.y + mVector.y + offset.y);
 }
 
-JSONElement AnimateCommandMove::generateOnlineViewerMovement(const CC_coord& start) const {
-    JSONElement moveElement = JSONElement::makeObject();
+void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const {
+    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
     
-    JSONDataObjectAccessor move = moveElement;
-    
-    move["type"] = "even";
-    move["beats"] = NumBeats();
-    move["beats_per_step"] = 1;
-    move["x1"] = Coord2ViewerXPos(start.x);
-    move["y1"] = Coord2ViewerYPos(start.y);
-    move["x2"] = Coord2ViewerXPos(start.x + mVector.x);
-    move["y2"] = Coord2ViewerYPos(start.y + mVector.y);
-    move["facing"] = Ang2Viewer(mVector.Direction());
-    
-    return moveElement;
+    moveAccessor["type"] = "even";
+    moveAccessor["beats"] = NumBeats();
+    moveAccessor["beats_per_step"] = 1;
+    moveAccessor["x1"] = Coord2ViewerXPos(start.x);
+    moveAccessor["y1"] = Coord2ViewerYPos(start.y);
+    moveAccessor["x2"] = Coord2ViewerXPos(start.x + mVector.x);
+    moveAccessor["y2"] = Coord2ViewerYPos(start.y + mVector.y);
+    moveAccessor["facing"] = Ang2Viewer(mVector.Direction());
 }
 
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
@@ -310,22 +308,18 @@ AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt,
         mOrigin.y + offset.y);
 }
 
-JSONElement AnimateCommandRotate::generateOnlineViewerMovement(const CC_coord& start) const {
-    JSONElement moveElement = JSONElement::makeObject();
-
-    JSONDataObjectAccessor move = moveElement;
+void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const {
+    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
     
-    move["type"] = "arc";
-    move["start_x"] = Coord2ViewerXPos(start.x);
-    move["start_y"] = Coord2ViewerYPos(start.y);
-    move["center_x"] = Coord2ViewerXPos(mOrigin.x);
-    move["center_y"] = Coord2ViewerYPos(mOrigin.y);
-    move["angle"] = Ang2Viewer(mAngEnd - mAngStart);
-    move["beats"] = NumBeats();
-    move["beats_per_step"] = 1;
+    moveAccessor["type"] = "arc";
+    moveAccessor["start_x"] = Coord2ViewerXPos(start.x);
+    moveAccessor["start_y"] = Coord2ViewerYPos(start.y);
+    moveAccessor["center_x"] = Coord2ViewerXPos(mOrigin.x);
+    moveAccessor["center_y"] = Coord2ViewerYPos(mOrigin.y);
+    moveAccessor["angle"] = Ang2Viewer(mAngEnd - mAngStart);
+    moveAccessor["beats"] = NumBeats();
+    moveAccessor["beats_per_step"] = 1;
     // Check this
-    move["facing_offset"] = Ang2Viewer((mAngStart < mAngEnd) ? mFace : -mFace);
-
-    return moveElement;
+    moveAccessor["facing_offset"] = Ang2Viewer((mAngStart < mAngEnd) ? mFace : -mFace);
 }
 
