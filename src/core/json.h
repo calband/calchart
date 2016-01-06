@@ -1,10 +1,8 @@
-//
-//  json.hpp
-//  CalChart
-//
-//  Created by Kevin Durand on 11/16/15.
-//
-//
+/*!
+ * @file json.h
+ * @brief Defines classes that are used to represent
+ * and manipulate a JSON hierarchy.
+ */
 
 #pragma once
 

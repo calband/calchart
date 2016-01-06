@@ -1,10 +1,7 @@
-//
-//  json_grammar.h
-//  CalChart
-//
-//  Created by Kevin Durand on 11/17/15.
-//
-//
+/*!
+ * @file json_grammar.h
+ * @brief Defines the grammar for a JSON file.
+ */
 
 #pragma once
 

@@ -1,9 +1,8 @@
-//
-//  viewer_translator.h
-//  CalChart
-//
-//  Created by Kevin Durand on 1/5/16.
-//
+/*!
+ * @file viewer_translate.h
+ * @brief Contains utilities for translating values to
+ * their representations in the CalChart Online Viewer.
+ */
 //
 
 #pragma once

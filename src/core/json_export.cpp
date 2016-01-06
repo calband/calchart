@@ -1,10 +1,8 @@
-//
-//  json_export.cpp
-//  CalChart
-//
-//  Created by Kevin Durand on 1/4/16.
-//
-//
+/*!
+ * @file json_export.cpp
+ * @brief Implements the utilities defined in json_export.h
+ * for exporting JSON files.
+ */
 
 #include <fstream>
 #include <iterator>

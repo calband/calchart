@@ -1,10 +1,7 @@
-//
-//  json_export.h
-//  CalChart
-//
-//  Created by Kevin Durand on 1/4/15.
-//
-//
+/*!
+ * @file json_export.h
+ * @brief Defines utilities for exporting JSON files.
+ */
 
 #pragma once
 

@@ -1,10 +1,8 @@
-//
-//  viewer_translate.cpp
-//  CalChart
-//
-//  Created by Kevin Durand on 1/5/16.
-//
-//
+/*!
+ * @file viewer_translate.cpp
+ * @brief Implements the utilities found in
+ * viewer_translate.h.
+ */
 
 #include "viewer_translate.h"
 

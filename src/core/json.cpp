@@ -1,10 +1,8 @@
-//
-//  json.cpp
-//  CalChart
-//
-//  Created by Kevin Durand on 11/16/15.
-//
-//
+/*!
+ * @file json.cpp
+ * @brief Implements the classes defined in json.h for
+ * representing and manipulating a JSON hierarchy.
+ */
 
 #include "json.h"
 
