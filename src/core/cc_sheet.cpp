@@ -25,6 +25,7 @@
 #include "cc_show.h"
 #include "cc_fileformat.h"
 #include "animatecommand.h"
+#include "viewer_translate.h"
 
 #include <sstream>
 #include <iostream>
@@ -36,29 +37,6 @@
 const std::string contnames[MAX_NUM_SYMBOLS] = {
     "Plain", "Sol", "Bksl", "Sl", "X", "Solbksl", "Solsl", "Solx"
 };
-
-std::string onlineViewerSymbolName(SYMBOL_TYPE symbol) {
-    switch (symbol) {
-        case SYMBOL_PLAIN:
-            return "open";
-        case SYMBOL_SOL:
-            return "solid";
-        case SYMBOL_BKSL:
-            return "open-backslash";
-        case SYMBOL_SL:
-            return "open-forwardslash";
-        case SYMBOL_X:
-            return "open-x";
-        case SYMBOL_SOLBKSL:
-            return "solid-backslash";
-        case SYMBOL_SOLSL:
-            return "solid-forwardslash";
-        case SYMBOL_SOLX:
-            return "solid-x";
-        default:
-            return "ERR";
-    }
-}
 
 CC_sheet::CC_sheet(size_t numPoints)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
@@ -685,7 +663,7 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     // As we discover the dot type of each dot, record the dot type assigment inside of 'dot_labels'
     std::set<std::string> uniqueDotTypes;
     for (unsigned i = 0; i < pts.size(); i++) {
-        std::string symbolName = onlineViewerSymbolName(pts[i].GetSymbol());
+        std::string symbolName = ToOnlineViewer::symbolName(pts[i].GetSymbol());
         uniqueDotTypes.insert(symbolName);
         dotTypeAssignmentsAccessor[dotLabels[i]] = symbolName;
     }

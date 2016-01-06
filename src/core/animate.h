@@ -124,6 +124,8 @@ private:
     void EndCmd(unsigned i);
 
     void RefreshSheet();
+    
+    std::vector<const AnimateSheet> sheets;
 
     void CheckCollisions();
     CollisionAction_t mCollisionAction;
@@ -132,8 +134,6 @@ private:
     GetCommands(unsigned whichPoint) const;
 
     std::vector<int> mAnimSheetIndices;
-
-    std::vector<const AnimateSheet> sheets;
 };
 
 using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;

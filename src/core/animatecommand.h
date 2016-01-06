@@ -54,7 +54,7 @@ public:
 
     // when we want to have the path drawn:
     virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
-                                             const CC_coord& offset) const;
+        const CC_coord& offset) const;
     
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that

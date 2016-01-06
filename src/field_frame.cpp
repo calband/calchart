@@ -185,6 +185,7 @@ public:
         CC_show::const_CC_sheet_iterator_t sheet = mShow.GetNthSheet(pageNum - 1);
 
         int size = gPrintDialogData->GetPrintData().GetOrientation();
+
         DrawForPrinting(dc, config, mShow, *sheet, 0, 2 == size);
 
         return true;
