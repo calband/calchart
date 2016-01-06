@@ -192,7 +192,7 @@ private:
  */
 class JSONDataNumber : public JSONData {
 public:
-    virtual JSONData::JSONDataType type() const;
+    JSONData::JSONDataType type() const;
     
     double value() const;
     void setValue(const double& val);
@@ -202,7 +202,7 @@ public:
 protected:
     JSONDataNumber(double val);
     static std::shared_ptr<JSONDataNumber> makeNewNumber(double number);
-    virtual std::shared_ptr<JSONData> newCopy() const;
+    std::shared_ptr<JSONData> newCopy() const;
 private:
     double m_val;
     
@@ -215,7 +215,7 @@ private:
  */
 class JSONDataString : public JSONData {
 public:
-    virtual JSONData::JSONDataType type() const;
+    JSONData::JSONDataType type() const;
     
     std::string value() const;
     void setValue(const std::string& val);
@@ -225,7 +225,7 @@ public:
 protected:
     JSONDataString(std::string val);
     static std::shared_ptr<JSONDataString> makeNewString(std::string string);
-    virtual std::shared_ptr<JSONData> newCopy() const;
+    std::shared_ptr<JSONData> newCopy() const;
 private:
     std::string m_val;
     
@@ -238,7 +238,7 @@ private:
  */
 class JSONDataBoolean : public JSONData {
 public:
-    virtual JSONData::JSONDataType type() const;
+    JSONData::JSONDataType type() const;
 
     bool value() const;
     void setValue(const bool& val);
@@ -248,7 +248,7 @@ public:
 protected:
     JSONDataBoolean(bool val);
     static std::shared_ptr<JSONDataBoolean> makeNewBoolean(bool boolean);
-    virtual std::shared_ptr<JSONData> newCopy() const;
+    std::shared_ptr<JSONData> newCopy() const;
 private:
     bool m_val;
     
@@ -261,11 +261,11 @@ private:
  */
 class JSONDataNull : public JSONData {
 public:
-    virtual JSONData::JSONDataType type() const;
+    JSONData::JSONDataType type() const;
 protected:
     JSONDataNull();
     static std::shared_ptr<JSONDataNull> makeNewNull();
-    virtual std::shared_ptr<JSONData> newCopy() const;
+    std::shared_ptr<JSONData> newCopy() const;
 private:
     friend class JSONData;
 };
@@ -278,7 +278,7 @@ private:
  */
 class JSONDataObject : public JSONData {
 public:
-    virtual JSONData::JSONDataType type() const;
+    JSONData::JSONDataType type() const;
     
     unsigned long size() const;
     
@@ -299,7 +299,7 @@ public:
 protected:
     JSONDataObject(std::map<std::string, JSONElement> elements);
     static std::shared_ptr<JSONDataObject> makeNewObject(std::map<std::string, JSONElement> object);
-    virtual std::shared_ptr<JSONData> newCopy() const;
+    std::shared_ptr<JSONData> newCopy() const;
 private:
     std::map<std::string, JSONElement> m_elements;
     
@@ -307,12 +307,11 @@ private:
 };
 
 /*!
- @class      JSONDataArray
- @abstract   An array in a JSON hierarchy.
+ * @brief A JSON array.
  */
 class JSONDataArray : public JSONData {
 public:
-    virtual JSONData::JSONDataType type() const;
+    JSONData::JSONDataType type() const;
     
     unsigned long size() const;
     
@@ -335,7 +334,7 @@ public:
 protected:
     JSONDataArray(std::vector<JSONElement> elements);
     static std::shared_ptr<JSONDataArray> makeNewArray(std::vector<JSONElement> array);
-    virtual std::shared_ptr<JSONData> newCopy() const;
+    std::shared_ptr<JSONData> newCopy() const;
 private:
     std::vector<JSONElement> m_elements;
     

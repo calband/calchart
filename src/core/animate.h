@@ -109,8 +109,8 @@ public:
         const CC_coord& offset) const;
     AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
-    // FIX THIS!!! TEMPORARILY MADE PUBLIC
-    std::vector<const AnimateSheet> sheets;
+    std::vector<const AnimateSheet>::const_iterator sheetsBegin() const;
+    std::vector<const AnimateSheet>::const_iterator sheetsEnd() const;
 private:
     const unsigned numpts;
     std::vector<AnimatePoint> pts;
@@ -132,6 +132,8 @@ private:
     GetCommands(unsigned whichPoint) const;
 
     std::vector<int> mAnimSheetIndices;
+
+    std::vector<const AnimateSheet> sheets;
 };
 
 using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;

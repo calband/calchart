@@ -35,7 +35,7 @@ float Coord2ViewerYPos(Coord coord) {
 }
 
 float Ang2Viewer(float angle) {
-    angle = -(angle - 90);
+    angle = -(angle - 270);
     while (angle >= 360) {
         angle -= 360;
     }
@@ -125,7 +125,7 @@ void AnimateCommandMT::toOnlineViewerJSON(JSONElement &dest, const CC_coord &sta
     
     moveAccessor["type"] = "mark";
     moveAccessor["beats"] = NumBeats();
-    moveAccessor["facing"] = Ang2Viewer(Direction());
+    moveAccessor["facing"] = Ang2Viewer(RealDirection());
     moveAccessor["x"] = Coord2ViewerXPos(start.x);
     moveAccessor["y"] = Coord2ViewerYPos(start.y);
 }
@@ -212,7 +212,7 @@ void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& s
     moveAccessor["y1"] = Coord2ViewerYPos(start.y);
     moveAccessor["x2"] = Coord2ViewerXPos(start.x + mVector.x);
     moveAccessor["y2"] = Coord2ViewerYPos(start.y + mVector.y);
-    moveAccessor["facing"] = Ang2Viewer(mVector.Direction());
+    moveAccessor["facing"] = Ang2Viewer(MotionDirection());
 }
 
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
@@ -316,10 +316,9 @@ void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord&
     moveAccessor["start_y"] = Coord2ViewerYPos(start.y);
     moveAccessor["center_x"] = Coord2ViewerXPos(mOrigin.x);
     moveAccessor["center_y"] = Coord2ViewerYPos(mOrigin.y);
-    moveAccessor["angle"] = Ang2Viewer(mAngEnd - mAngStart);
+    moveAccessor["angle"] = -(mAngEnd - mAngStart);
     moveAccessor["beats"] = NumBeats();
     moveAccessor["beats_per_step"] = 1;
-    // Check this
-    moveAccessor["facing_offset"] = Ang2Viewer((mAngStart < mAngEnd) ? mFace : -mFace);
+    moveAccessor["facing_offset"] = -mFace + 90;
 }
 
