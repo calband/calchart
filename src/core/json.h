@@ -69,27 +69,27 @@ protected:
      * specified double value.
      * @param number The value to represent with a JSONData object.
      */
-    static std::shared_ptr<JSONData> makeNewNumber(double number);
+    static std::unique_ptr<JSONData> makeNewNumber(double number);
     
     /*!
      * @brief Creates a new JSONData object to represent the 
      * specified string value.
      * @param string The value to represent with a JSONData object.
      */
-    static std::shared_ptr<JSONData> makeNewString(std::string string);
+    static std::unique_ptr<JSONData> makeNewString(std::string string);
     
     /*!
      * @brief Creates a new JSONData object to represent the
      * specified boolean value.
      * @param boolean The value to represent with a JSONData object.
      */
-    static std::shared_ptr<JSONData> makeNewBoolean(bool boolean);
+    static std::unique_ptr<JSONData> makeNewBoolean(bool boolean);
     
     /*!
      * @brief Creates a new JSONData object to represent a
      * 'null' value.
      */
-    static std::shared_ptr<JSONData> makeNewNull();
+    static std::unique_ptr<JSONData> makeNewNull();
     
     /*!
      * @brief Creates a new JSONData object to represent a
@@ -98,20 +98,20 @@ protected:
      * @param object A collection of key-value pairs that will
      * be inserted into the new JSONData object.
      */
-    static std::shared_ptr<JSONData> makeNewObject(std::map<std::string, JSONElement> object);
+    static std::unique_ptr<JSONData> makeNewObject(std::map<std::string, JSONElement> object);
     
     /*!
      * @brief Creates a new JSONData object to represent a JSON
      * array containing the provided values.
      * @param array
      */
-    static std::shared_ptr<JSONData> makeNewArray(std::vector<JSONElement> array);
+    static std::unique_ptr<JSONData> makeNewArray(std::vector<JSONElement> array);
     
     /*!
      * @brief Returns a pointer to a new, deep copy of this
      * JSONData object.
      */
-    virtual std::shared_ptr<JSONData> newCopy() const = 0;
+    virtual std::unique_ptr<JSONData> newCopy() const = 0;
     
 private:
     // JSONElement is a friend class so that it can have access
@@ -173,12 +173,12 @@ public:
     JSONElement& operator= (const std::vector<JSONElement>& other);
     
 protected:
-    JSONElement(std::shared_ptr<JSONData> data);
+    JSONElement(std::unique_ptr<JSONData> data);
     
-    std::weak_ptr<const JSONData> data() const;
-    std::weak_ptr<JSONData> data();
+    const JSONData* data() const;
+    JSONData* data();
 private:
-    std::shared_ptr<JSONData> m_data;
+    std::unique_ptr<JSONData> m_data;
     
     // Objects that need direct access to the JSONData within a JSONElement
     // should inherit from JSONElementFriend
@@ -201,8 +201,8 @@ public:
     JSONDataNumber& operator= (const double& other);
 protected:
     JSONDataNumber(double val);
-    static std::shared_ptr<JSONDataNumber> makeNewNumber(double number);
-    std::shared_ptr<JSONData> newCopy() const;
+    static std::unique_ptr<JSONDataNumber> makeNewNumber(double number);
+    std::unique_ptr<JSONData> newCopy() const;
 private:
     double m_val;
     
@@ -224,8 +224,8 @@ public:
     JSONDataString& operator= (const std::string& other);
 protected:
     JSONDataString(std::string val);
-    static std::shared_ptr<JSONDataString> makeNewString(std::string string);
-    std::shared_ptr<JSONData> newCopy() const;
+    static std::unique_ptr<JSONDataString> makeNewString(std::string string);
+    std::unique_ptr<JSONData> newCopy() const;
 private:
     std::string m_val;
     
@@ -247,8 +247,8 @@ public:
     JSONDataBoolean& operator= (const bool& other);
 protected:
     JSONDataBoolean(bool val);
-    static std::shared_ptr<JSONDataBoolean> makeNewBoolean(bool boolean);
-    std::shared_ptr<JSONData> newCopy() const;
+    static std::unique_ptr<JSONDataBoolean> makeNewBoolean(bool boolean);
+    std::unique_ptr<JSONData> newCopy() const;
 private:
     bool m_val;
     
@@ -264,8 +264,8 @@ public:
     JSONData::JSONDataType type() const;
 protected:
     JSONDataNull();
-    static std::shared_ptr<JSONDataNull> makeNewNull();
-    std::shared_ptr<JSONData> newCopy() const;
+    static std::unique_ptr<JSONDataNull> makeNewNull();
+    std::unique_ptr<JSONData> newCopy() const;
 private:
     friend class JSONData;
 };
@@ -298,8 +298,8 @@ public:
     JSONElement& operator[] (const std::string& key);
 protected:
     JSONDataObject(std::map<std::string, JSONElement> elements);
-    static std::shared_ptr<JSONDataObject> makeNewObject(std::map<std::string, JSONElement> object);
-    std::shared_ptr<JSONData> newCopy() const;
+    static std::unique_ptr<JSONDataObject> makeNewObject(std::map<std::string, JSONElement> object);
+    std::unique_ptr<JSONData> newCopy() const;
 private:
     std::map<std::string, JSONElement> m_elements;
     
@@ -333,8 +333,8 @@ public:
     JSONElement& back();
 protected:
     JSONDataArray(std::vector<JSONElement> elements);
-    static std::shared_ptr<JSONDataArray> makeNewArray(std::vector<JSONElement> array);
-    std::shared_ptr<JSONData> newCopy() const;
+    static std::unique_ptr<JSONDataArray> makeNewArray(std::vector<JSONElement> array);
+    std::unique_ptr<JSONData> newCopy() const;
 private:
     std::vector<JSONElement> m_elements;
     
@@ -347,11 +347,11 @@ private:
  */
 class JSONElementFriend {
 protected:
-    std::weak_ptr<const JSONData> fetchDataFromElement(const JSONElement& element) const {
+    const JSONData* fetchDataFromElement(const JSONElement& element) const {
         return element.data();
     }
     
-    std::weak_ptr<JSONData> fetchDataFromElement(JSONElement& element) {
+    JSONData* fetchDataFromElement(JSONElement& element) {
         return element.data();
     }
 };
@@ -417,7 +417,7 @@ public:
 protected:
     
     const DataClass* dataPointer() const {
-        return std::dynamic_pointer_cast<const DataClass>(this->fetchDataFromElement(element()).lock()).get();
+        return dynamic_cast<const DataClass*>(this->fetchDataFromElement(element()));
     }
     
     const DataClass& dereference() const {
@@ -454,7 +454,7 @@ protected:
     using super::dataPointer;
     
     DataClass* dataPointer() {
-        return std::dynamic_pointer_cast<DataClass>(this->fetchDataFromElement(element()).lock()).get();
+        return dynamic_cast<DataClass*>(this->fetchDataFromElement(element()));
     }
     
     using super::dereference;

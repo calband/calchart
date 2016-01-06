@@ -11,27 +11,27 @@
 JSONData::JSONData() {
 }
 
-std::shared_ptr<JSONData> JSONData::makeNewNumber(double number) {
+std::unique_ptr<JSONData> JSONData::makeNewNumber(double number) {
     return JSONDataNumber::makeNewNumber(number);
 }
 
-std::shared_ptr<JSONData> JSONData::makeNewString(std::string string) {
+std::unique_ptr<JSONData> JSONData::makeNewString(std::string string) {
     return JSONDataString::makeNewString(string);
 }
 
-std::shared_ptr<JSONData> JSONData::makeNewBoolean(bool boolean) {
+std::unique_ptr<JSONData> JSONData::makeNewBoolean(bool boolean) {
     return JSONDataBoolean::makeNewBoolean(boolean);
 }
 
-std::shared_ptr<JSONData> JSONData::makeNewNull() {
+std::unique_ptr<JSONData> JSONData::makeNewNull() {
     return JSONDataNull::makeNewNull();
 }
 
-std::shared_ptr<JSONData> JSONData::makeNewObject(std::map<std::string, JSONElement> object) {
+std::unique_ptr<JSONData> JSONData::makeNewObject(std::map<std::string, JSONElement> object) {
     return JSONDataObject::makeNewObject(object);
 }
 
-std::shared_ptr<JSONData> JSONData::makeNewArray(std::vector<JSONElement> array) {
+std::unique_ptr<JSONData> JSONData::makeNewArray(std::vector<JSONElement> array) {
     return JSONDataArray::makeNewArray(array);
 }
 
@@ -83,20 +83,20 @@ JSONElement::JSONElement(const std::vector<JSONElement>& other)
     *this = other;
 }
 
-JSONElement::JSONElement(std::shared_ptr<JSONData> data)
-: m_data(data) {
+JSONElement::JSONElement(std::unique_ptr<JSONData> data)
+: m_data(std::move(data)) {
 }
 
-std::weak_ptr<const JSONData> JSONElement::data() const {
-    return m_data;
+const JSONData* JSONElement::data() const {
+    return m_data.get();
 }
 
-std::weak_ptr<JSONData> JSONElement::data() {
-    return m_data;
+JSONData* JSONElement::data() {
+    return m_data.get();
 }
 
 JSONElement& JSONElement::operator= (const JSONElement& other) {
-    m_data = other.m_data;
+    m_data = other.m_data->newCopy();
     return *this;
 }
 
@@ -172,8 +172,8 @@ JSONData::JSONDataType JSONDataNumber::type() const {
     return JSONData::JSONDataTypeNumber;
 }
 
-std::shared_ptr<JSONData> JSONDataNumber::newCopy() const {
-    return std::shared_ptr<JSONData>(new JSONDataNumber(m_val));
+std::unique_ptr<JSONData> JSONDataNumber::newCopy() const {
+    return std::unique_ptr<JSONData>(new JSONDataNumber(m_val));
 }
 
 double JSONDataNumber::value() const {
@@ -203,16 +203,16 @@ JSONDataNumber::JSONDataNumber(double val)
     
 }
 
-std::shared_ptr<JSONDataNumber> JSONDataNumber::makeNewNumber(double number) {
-    return std::shared_ptr<JSONDataNumber>(new JSONDataNumber(number));
+std::unique_ptr<JSONDataNumber> JSONDataNumber::makeNewNumber(double number) {
+    return std::unique_ptr<JSONDataNumber>(new JSONDataNumber(number));
 }
 
 JSONData::JSONDataType JSONDataString::type() const {
     return JSONData::JSONDataTypeString;
 }
 
-std::shared_ptr<JSONData> JSONDataString::newCopy() const {
-    return std::shared_ptr<JSONData>(new JSONDataString(m_val));
+std::unique_ptr<JSONData> JSONDataString::newCopy() const {
+    return std::unique_ptr<JSONData>(new JSONDataString(m_val));
 }
 
 std::string JSONDataString::value() const {
@@ -242,16 +242,16 @@ JSONDataString::JSONDataString(std::string val)
     
 }
 
-std::shared_ptr<JSONDataString> JSONDataString::makeNewString(std::string string) {
-    return std::shared_ptr<JSONDataString>(new JSONDataString(string));
+std::unique_ptr<JSONDataString> JSONDataString::makeNewString(std::string string) {
+    return std::unique_ptr<JSONDataString>(new JSONDataString(string));
 }
 
 JSONData::JSONDataType JSONDataBoolean::type() const {
     return JSONData::JSONDataTypeBoolean;
 }
 
-std::shared_ptr<JSONData> JSONDataBoolean::newCopy() const {
-    return std::shared_ptr<JSONData>(new JSONDataBoolean(m_val));
+std::unique_ptr<JSONData> JSONDataBoolean::newCopy() const {
+    return std::unique_ptr<JSONData>(new JSONDataBoolean(m_val));
 }
 
 bool JSONDataBoolean::value() const {
@@ -280,31 +280,31 @@ JSONDataBoolean::JSONDataBoolean(bool val)
 : m_val(val) {
 }
 
-std::shared_ptr<JSONDataBoolean> JSONDataBoolean::makeNewBoolean(bool boolean) {
-    return std::shared_ptr<JSONDataBoolean>(new JSONDataBoolean(boolean));
+std::unique_ptr<JSONDataBoolean> JSONDataBoolean::makeNewBoolean(bool boolean) {
+    return std::unique_ptr<JSONDataBoolean>(new JSONDataBoolean(boolean));
 }
 
 JSONData::JSONDataType JSONDataNull::type() const {
     return JSONData::JSONDataTypeNull;
 }
 
-std::shared_ptr<JSONData> JSONDataNull::newCopy() const {
-    return std::shared_ptr<JSONData>(new JSONDataNull());
+std::unique_ptr<JSONData> JSONDataNull::newCopy() const {
+    return std::unique_ptr<JSONData>(new JSONDataNull());
 }
 
 JSONDataNull::JSONDataNull() {
 }
 
-std::shared_ptr<JSONDataNull> JSONDataNull::makeNewNull() {
-    return std::shared_ptr<JSONDataNull>(new JSONDataNull());
+std::unique_ptr<JSONDataNull> JSONDataNull::makeNewNull() {
+    return std::unique_ptr<JSONDataNull>(new JSONDataNull());
 }
 
 JSONData::JSONDataType JSONDataObject::type() const {
     return JSONData::JSONDataTypeObject;
 }
 
-std::shared_ptr<JSONData> JSONDataObject::newCopy() const {
-    return std::shared_ptr<JSONData>(new JSONDataObject(m_elements));
+std::unique_ptr<JSONData> JSONDataObject::newCopy() const {
+    return std::unique_ptr<JSONData>(new JSONDataObject(m_elements));
 }
 
 unsigned long JSONDataObject::size() const {
@@ -335,8 +335,8 @@ JSONDataObject::JSONDataObject(std::map<std::string, JSONElement> elements)
 : m_elements(elements) {
 }
 
-std::shared_ptr<JSONDataObject> JSONDataObject::makeNewObject(std::map<std::string, JSONElement> object) {
-    return std::shared_ptr<JSONDataObject>(new JSONDataObject(object));
+std::unique_ptr<JSONDataObject> JSONDataObject::makeNewObject(std::map<std::string, JSONElement> object) {
+    return std::unique_ptr<JSONDataObject>(new JSONDataObject(object));
 }
 
 void JSONDataObject::setValueForKey(const std::string& key, JSONElement& element) {
@@ -377,8 +377,8 @@ JSONData::JSONDataType JSONDataArray::type() const {
     return JSONData::JSONDataTypeArray;
 }
 
-std::shared_ptr<JSONData> JSONDataArray::newCopy() const {
-    return std::shared_ptr<JSONData>(new JSONDataArray(m_elements));
+std::unique_ptr<JSONData> JSONDataArray::newCopy() const {
+    return std::unique_ptr<JSONData>(new JSONDataArray(m_elements));
 }
 
 unsigned long JSONDataArray::size() const {
@@ -413,8 +413,8 @@ JSONDataArray::JSONDataArray(std::vector<JSONElement> elements)
 : m_elements(elements) {
 }
 
-std::shared_ptr<JSONDataArray> JSONDataArray::makeNewArray(std::vector<JSONElement> array) {
-    return std::shared_ptr<JSONDataArray>(new JSONDataArray(array));
+std::unique_ptr<JSONDataArray> JSONDataArray::makeNewArray(std::vector<JSONElement> array) {
+    return std::unique_ptr<JSONDataArray>(new JSONDataArray(array));
 }
 
 void JSONDataArray::insertValueAtIndex(unsigned i, const JSONElement& element) {

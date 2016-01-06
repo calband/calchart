@@ -518,7 +518,7 @@ void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledSho
     auto animateSheetIter = compiledShow.sheetsBegin();
     for (auto iter = GetSheetBegin(); iter != GetSheetEnd(); iter++, i++, animateSheetIter++) {
         sheetsAccessor->pushBack(JSONElement::makeNull());
-        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i, pt_labels, *animateSheetIter);
+        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i+1, pt_labels, *animateSheetIter);
     }
 }
 
