@@ -292,7 +292,7 @@ bool CalChartDoc::exportViewerFile(const wxString& filepath) {
     
     JSONDataObjectAccessor metaObject = mainObject["meta"];
     metaObject["version"] = ("1.0.0");
-    metaObject["index_name"] = "MANUAL";
+    metaObject["index_name"] = "MANUAL"; // TODO; for now, manually add index_name to viewer file after saving
     metaObject["type"] = "viewer";
     
     mShow->toOnlineViewerJSON(mainObject["show"], Animation(*mShow, nullptr, nullptr));
