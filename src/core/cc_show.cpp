@@ -509,7 +509,7 @@ void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledSho
     // Fill in 'dot_labels' with the labels for each dot (e.g. A0, A1, A2, ...)
     JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["dot_labels"];
     for (unsigned i = 0; i < pt_labels.size(); i++) {
-        dotLabelsAccessor->pushBack(JSONElement::makeString(pt_labels[i]));
+        dotLabelsAccessor->pushBack(pt_labels[i]);
     }
     
     // Fill in 'sheets' with the JSON representation of each sheet

@@ -342,6 +342,10 @@ private:
     friend class JSONData;
 };
 
+/*!
+ * @brief A base class for any type that requires direct access to a
+ * JSONElement's data (as a JSONData object).
+ */
 class JSONElementFriend {
 protected:
     std::weak_ptr<const JSONData> fetchDataFromElement(const JSONElement& element) const {
@@ -353,6 +357,52 @@ protected:
     }
 };
 
+/*!
+ * @brief A base class for all JSONDataAccessor classes, which
+ * are used to edit and read the data inside of JSONElement objects
+ * without reassigning them.
+ * @details 
+ * @parblock
+ * If you would like to read or edit (without reassigning) the data 
+ * inside of a JSONElement, you must use some kind of JSONDataAccessor.
+ * For non-const JSONElements, you will need to use a derivative of
+ * the JSONDataAccessor class; for const JSONElements, you will need to
+ * use a derivative of the JSONDataConstAccessor class.
+ *
+ * A specialized JSONDataConstAccessor exists for each type of data
+ * that can exist in a JSONElement. You must use the correct type
+ * of accessor for the data contained within the JSONElement (e.g.
+ * you must use a JSONDataNumberAccessor or JSONDataNumberConstAccessor
+ * for a non-const or const Number type, respectively; similarly, you
+ * must use a JSONDataStringAccessor or JSONDataStringConstAccessor for 
+ * a non-const or const String type, respectively). You can use the 
+ * JSONElement::type method to determine the type of data in an element.
+ * 
+ * You can create a JSONDataConstAccessor either by explicitly calling 
+ * the constructor, or by using the `=` operator. Both techniques are
+ * shown below:
+ *
+ * @code
+ * JSONElement element = JSONElement::makeObject();
+ * JSONDataObjectAccessor accessor(element);
+ * accessor["key"] = 1;
+ * @endcode
+ *
+ * @code
+ * JSONElement element = JSONElement::makeArray();
+ * JSONDataArrayAccessor accessor = element;
+ * accessor->pushBack(1);
+ * @endcode
+ *
+ * An accessor's `->` operator can be used to access members of the
+ * JSONElement's JSONData object. In addition, you can use any of the
+ * operators which affect the JSONElement's JSONData object. This can
+ * be seen in the two examples above; the `[]` operator was used with
+ * the accessor of the first example to assign a value to a key in a
+ * JSON object, and the `->` operator was used to call the `pushBack`
+ * method of a JSON array.
+ * @endparblock
+ */
 template <class DataClass>
 class JSONDataAccessorBase : public JSONElementFriend {
 public:
@@ -378,6 +428,10 @@ protected:
     virtual const JSONElement& element() const = 0;
 };
 
+/*!
+ * @brief A derivative of JSONDataAccessorBase which is capable of
+ * accessing the data of a non-const JSONElement.
+ */
 template <class DataClass>
 class JSONDataAccessor : public JSONDataAccessorBase<DataClass> {
 private:
@@ -423,7 +477,10 @@ private:
     JSONElement* m_element;
 };
 
-
+/*!
+ * @brief A derivative of JSONDataAccessorBase which is capable of 
+ * accessing a the data of a const JSONElement.
+ */
 template <class DataClass>
 class JSONDataConstAccessor : public JSONDataAccessorBase<DataClass> {
 public:
@@ -444,6 +501,9 @@ private:
     const JSONElement* m_element;
 };
 
+/*!
+ * @brief A JSONDataAccessor for accessing a non-const JSON Number.
+ */
 class JSONDataNumberAccessor : public JSONDataAccessor<JSONDataNumber> {
 public:
     using JSONDataAccessor<JSONDataNumber>::JSONDataAccessor;
@@ -452,11 +512,17 @@ public:
     JSONDataNumberAccessor& operator= (const double& other);
 };
 
+/*!
+ * @brief A JSONDataConstAccessor for accessing a const JSON Number.
+ */
 class JSONDataNumberConstAccessor : public JSONDataConstAccessor<JSONDataNumber> {
 public:
     using JSONDataConstAccessor<JSONDataNumber>::JSONDataConstAccessor;
 };
 
+/*!
+ * @brief A JSONDataAccessor for accessing a non-const JSON String.
+ */
 class JSONDataStringAccessor : public JSONDataAccessor<JSONDataString> {
 public:
     using JSONDataAccessor<JSONDataString>::JSONDataAccessor;
@@ -465,11 +531,17 @@ public:
     JSONDataStringAccessor& operator= (const std::string& other);
 };
 
+/*!
+ * @brief A JSONDataConstAccessor for accessing a const JSON String.
+ */
 class JSONDataStringConstAccessor : public JSONDataConstAccessor<JSONDataString> {
 public:
     using JSONDataConstAccessor<JSONDataString>::JSONDataConstAccessor;
 };
 
+/*!
+ * @brief A JSONDataAccessor for accessing a non-const JSON Boolean.
+ */
 class JSONDataBooleanAccessor : public JSONDataAccessor<JSONDataBoolean> {
 public:
     using JSONDataAccessor<JSONDataBoolean>::JSONDataAccessor;
@@ -478,21 +550,33 @@ public:
     JSONDataBooleanAccessor& operator= (const bool& other);
 };
 
+/*!
+ * @brief A JSONDataConstAccessor for accessing a const JSON Boolean.
+ */
 class JSONDataBooleanConstAccessor : public JSONDataConstAccessor<JSONDataBoolean> {
 public:
     using JSONDataConstAccessor<JSONDataBoolean>::JSONDataConstAccessor;
 };
 
+/*!
+ * @brief A JSONDataAccessor for accessing a non-const JSON Null.
+ */
 class JSONDataNullAccessor : public JSONDataAccessor<JSONDataNull> {
 public:
     using JSONDataAccessor<JSONDataNull>::JSONDataAccessor;
 };
 
+/*!
+ * @brief A JSONDataConstAccessor for accessing a const JSON Null.
+ */
 class JSONDataNullConstAccessor : public JSONDataConstAccessor<JSONDataNull> {
 public:
     using JSONDataConstAccessor<JSONDataNull>::JSONDataConstAccessor;
 };
 
+/*!
+ * @brief A JSONDataAccessor for accessing a non-const JSON Array.
+ */
 class JSONDataArrayAccessor : public JSONDataAccessor<JSONDataArray> {
 public:
     using JSONDataAccessor<JSONDataArray>::JSONDataAccessor;
@@ -503,6 +587,9 @@ public:
     JSONElement& operator[] (int index);
 };
 
+/*!
+ * @brief A JSONDataConstAccessor for accessing a const JSON Array.
+ */
 class JSONDataArrayConstAccessor : public JSONDataConstAccessor<JSONDataArray> {
 public:
     using JSONDataConstAccessor<JSONDataArray>::JSONDataConstAccessor;
@@ -510,6 +597,9 @@ public:
     const JSONElement& operator[] (int index) const;
 };
 
+/*!
+ * @brief a JSONDataAccessor for accessing a non-const JSON Object.
+ */
 class JSONDataObjectAccessor : public JSONDataAccessor<JSONDataObject> {
 public:
     using JSONDataAccessor<JSONDataObject>::JSONDataAccessor;
@@ -520,6 +610,9 @@ public:
     JSONElement& operator[] (const std::string& key);
 };
 
+/*!
+ * @brief A JSONDataConstAccessor for accessing a const JSON Object.
+ */
 class JSONDataObjectConstAccessor : public JSONDataConstAccessor<JSONDataObject> {
 private:
 public:
