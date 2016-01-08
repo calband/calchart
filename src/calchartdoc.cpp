@@ -282,22 +282,22 @@ wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
 #endif
 
 bool CalChartDoc::exportViewerFile(const wxString& filepath) {    
-    JSONElement mainObjectElement = JSONElement::makeObject();
+    JSONElement mainObject = JSONElement::makeObject();
     
-    JSONDataObjectAccessor mainObject = mainObjectElement;
+    JSONDataObjectAccessor mainObjectAccessor = mainObject;
     
-    mainObject["meta"] = JSONElement::makeObject();
-    mainObject["show"] = JSONElement::makeNull();
+    mainObjectAccessor["meta"] = JSONElement::makeObject();
+    mainObjectAccessor["show"] = JSONElement::makeNull();
     
     
-    JSONDataObjectAccessor metaObject = mainObject["meta"];
-    metaObject["version"] = ("1.0.0");
-    metaObject["index_name"] = "MANUAL"; // TODO; for now, manually add index_name to viewer file after saving
-    metaObject["type"] = "viewer";
+    JSONDataObjectAccessor metaObjectAccessor = mainObjectAccessor["meta"];
+    metaObjectAccessor["version"] = ("1.0.0");
+    metaObjectAccessor["index_name"] = "MANUAL"; // TODO; for now, manually add index_name to viewer file after saving
+    metaObjectAccessor["type"] = "viewer";
     
-    mShow->toOnlineViewerJSON(mainObject["show"], Animation(*mShow, nullptr, nullptr));
+    mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow, nullptr, nullptr));
     
-    return JSONExporter::exportJSON(filepath.ToStdString(), mainObjectElement);
+    return JSONExporter::exportJSON(filepath.ToStdString(), mainObject);
 }
 
 void CalChartDoc::FlushAllTextWindows()

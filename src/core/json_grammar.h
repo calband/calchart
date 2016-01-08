@@ -42,11 +42,12 @@ struct JSONExportGrammar
     JSONExportGrammar()
     : JSONExportGrammar::base_type(mainObject)
     {
+        indentationLevel = 0;
         std::string indentation_string = "    ";
-        auto indentationLevel = karma::_r1;
-        auto increaseIndent = karma::eps[++indentationLevel];
-        auto decreaseIndent = karma::eps[--indentationLevel];
-        auto indent = karma::repeat(indentationLevel)[karma::lit(indentation_string)];
+        auto indentationLevelRef = phoenix::ref(indentationLevel);
+        auto increaseIndent = karma::eps[++indentationLevelRef];
+        auto decreaseIndent = karma::eps[--indentationLevelRef];
+        auto indent = karma::repeat(indentationLevelRef)[karma::lit(indentation_string)];
         auto begin_newline = karma::eol << indent;
         
         // Rules that will succeed only if the JSONElement is of a particular type
@@ -58,13 +59,13 @@ struct JSONExportGrammar
         isArray = checkType(JSONData::JSONDataTypeArray);
         
         // The outermost JSON object
-        mainObject = isObject(karma::_val) << element(0);
+        mainObject = isObject(karma::_val) << element;
         
         // An element which will start a new, indented line before printing
-        newline_element = begin_newline << element(indentationLevel);
+        newline_element = begin_newline << element;
         
         // An arbitrary element in a JSON hierarchy
-        element = inline_element | block_element(indentationLevel);
+        element = inline_element | block_element;
         
         // Elements that don't contain other elements
         inline_element = isNumber(karma::_val) << number
@@ -73,8 +74,8 @@ struct JSONExportGrammar
         | isNull(karma::_val) << null;
         
         // Elements which contain other elements
-        block_element = isObject(karma::_val) << object(indentationLevel)
-        | isArray(karma::_val) << array(indentationLevel);
+        block_element = isObject(karma::_val) << object
+        | isArray(karma::_val) << array;
         
         // A JSON number
         number = karma::eps[karma::_a = phoenix::bind(&JSONDataNumberConstAccessor::operator->, karma::_val)] << karma::double_[karma::_1 = phoenix::bind(&JSONDataNumber::value, karma::_a)];
@@ -91,26 +92,27 @@ struct JSONExportGrammar
         // A JSON object
         object = karma::eps[karma::_a = phoenix::bind(&JSONDataObjectConstAccessor::operator->, karma::_val)]
         << '{' << increaseIndent
-        << objectContent(indentationLevel)[karma::_1 = phoenix::bind(&JSONDataObject::items, karma::_a)]
+        << objectContent[karma::_1 = phoenix::bind(&JSONDataObject::items, karma::_a)]
         << decreaseIndent << begin_newline << '}';
         
         // The collection of 'key:value' mappings within a JSON object
-        objectContent = (keyValPair(indentationLevel) % ',');
+        objectContent = (keyValPair % ',');
         
         // A single 'key:value' mapping within a JSON object
-        keyValPair = begin_newline << '"' << karma::string << '"' << karma::lit(": ") << element(indentationLevel);
+        keyValPair = begin_newline << '"' << karma::string << '"' << karma::lit(": ") << element;
         
         // A JSON array
         array = karma::eps[karma::_a = phoenix::bind(&JSONDataArrayConstAccessor::operator->, karma::_val)]
         << '[' << increaseIndent
-        << arrayContent(indentationLevel)[karma::_1 = phoenix::bind(&JSONDataArray::values, karma::_a)]
+        << arrayContent[karma::_1 = phoenix::bind(&JSONDataArray::values, karma::_a)]
         << decreaseIndent << begin_newline << ']';
         
         // The list of values within a JSON array
-        arrayContent = (newline_element(indentationLevel) % ',');
+        arrayContent = (newline_element % ',');
         
         
     }
+    unsigned indentationLevel;
     karma::rule<OutputIterator, void(const JSONElement&)> isNumber;
     karma::rule<OutputIterator, void(const JSONElement&)> isString;
     karma::rule<OutputIterator, void(const JSONElement&)> isBoolean;
@@ -118,17 +120,17 @@ struct JSONExportGrammar
     karma::rule<OutputIterator, void(const JSONElement&)> isObject;
     karma::rule<OutputIterator, void(const JSONElement&)> isArray;
     karma::rule<OutputIterator, const JSONElement&()> mainObject;
-    karma::rule<OutputIterator, const JSONElement&(unsigned)> newline_element;
-    karma::rule<OutputIterator, const JSONElement&(unsigned)> element;
+    karma::rule<OutputIterator, const JSONElement&()> newline_element;
+    karma::rule<OutputIterator, const JSONElement&()> element;
     karma::rule<OutputIterator, const JSONElement&()> inline_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataNumber*>, JSONDataNumberConstAccessor()> number;
     karma::rule<OutputIterator, karma::locals<const JSONDataString*>,JSONDataStringConstAccessor()> string;
     karma::rule<OutputIterator, karma::locals<const JSONDataBoolean*>,JSONDataBooleanConstAccessor()> boolean;
     karma::rule<OutputIterator> null;
-    karma::rule<OutputIterator, const JSONElement&(unsigned)> block_element;
-    karma::rule<OutputIterator, karma::locals<const JSONDataObject*>,JSONDataObjectConstAccessor(unsigned)> object;
-    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>&(unsigned)> objectContent;
-    karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&(unsigned)> keyValPair;
-    karma::rule<OutputIterator, karma::locals<const JSONDataArray*>,JSONDataArrayConstAccessor(unsigned)> array;
-    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>&(unsigned)> arrayContent;
+    karma::rule<OutputIterator, const JSONElement&()> block_element;
+    karma::rule<OutputIterator, karma::locals<const JSONDataObject*>,JSONDataObjectConstAccessor()> object;
+    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>&()> objectContent;
+    karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&()> keyValPair;
+    karma::rule<OutputIterator, karma::locals<const JSONDataArray*>,JSONDataArrayConstAccessor()> array;
+    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>&()> arrayContent;
 };
