@@ -22,6 +22,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <fstream>
 
 #include "field_frame.h"
 
@@ -146,6 +147,7 @@ EVT_MENU(CALCHART__setsym4, FieldFrame::OnCmd_setsym4)
 EVT_MENU(CALCHART__setsym5, FieldFrame::OnCmd_setsym5)
 EVT_MENU(CALCHART__setsym6, FieldFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, FieldFrame::OnCmd_setsym7)
+EVT_MENU(CALCHART__EXPORT_VIEWER_FILE, FieldFrame::OnCmdExportViewerFile)
 EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
 EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback,
     FieldFrame::slider_sheet_callback)
@@ -235,6 +237,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Print show to PostScript"));
     file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."),
         wxT("Print show to Encapsulated PostScript"));
+    file_menu->Append(CALCHART__EXPORT_VIEWER_FILE, wxT("Export for Online Viewer..."), wxT("Export show to be viewed using the CalChart Online Viewer"));
     file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
     file_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"),
         wxT("Close this window"));
@@ -532,6 +535,21 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
             true, this);
         if (dialog.ShowModal() == wxID_OK) {
             dialog.PrintShow(config);
+        }
+    }
+}
+
+void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event) {
+    if (GetShow())
+    {
+        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+
+        if (saveFileDialog.ShowModal() == wxID_CANCEL)
+            return;
+        
+        if (!GetShow()->exportViewerFile(saveFileDialog.GetPath())) {
+            wxMessageBox(wxT("There was a problem exporting the viewer file.\n") + saveFileDialog.GetPath(), wxT("Exporting Viewer File"));
+            return;
         }
     }
 }

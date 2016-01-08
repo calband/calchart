@@ -24,6 +24,10 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C7071FF21C3B2CA8005481AC /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
+		C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
+		C7071FF61C3CAFAE005481AC /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
+		C7071FF71C3CB317005481AC /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
 		C72E2B091441150400118C03 /* top_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C72E2B071441150400118C03 /* top_frame.cpp */; };
 		C72F24BA14D4976E00758A0E /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
 		C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC23F14F06B7B00D46A7E /* toolbar.cpp */; };
@@ -111,6 +115,8 @@
 		C774E31B14DF77D300558ABA /* wall.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
 		C785A90C14CFC5190038B6FE /* animation_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A90814CFC5180038B6FE /* animation_canvas.cpp */; };
 		C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */; };
+		C78FDE5E1BFB14DF0069B914 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5C1BFB14DF0069B914 /* json.cpp */; };
+		C78FDE621BFC4A3B0069B914 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5C1BFB14DF0069B914 /* json.cpp */; };
 		C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A845071398E7D8003AD23E /* cc_command.cpp */; };
 		C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */; };
 		C7AC49B014CCD51F00506C76 /* animation_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AC49AE14CCD51F00506C76 /* animation_frame.cpp */; };
@@ -431,6 +437,10 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* CalChart-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CalChart-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* CalChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7071FF01C3B2B69005481AC /* json_grammar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = json_grammar.h; sourceTree = "<group>"; };
+		C7071FF11C3B2CA8005481AC /* json_export.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_export.cpp; sourceTree = "<group>"; };
+		C7071FF41C3CAF94005481AC /* viewer_translate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = viewer_translate.h; sourceTree = "<group>"; };
+		C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = viewer_translate.cpp; sourceTree = "<group>"; };
 		C72C5FDF155CD16100194225 /* cc_omniview_constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_omniview_constants.h; sourceTree = "<group>"; };
 		C72E2B071441150400118C03 /* top_frame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = top_frame.cpp; sourceTree = "<group>"; };
 		C72E2B081441150400118C03 /* top_frame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = top_frame.h; sourceTree = "<group>"; };
@@ -486,6 +496,9 @@
 		C785A90914CFC5180038B6FE /* animation_canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animation_canvas.h; sourceTree = "<group>"; };
 		C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_omniview_canvas.cpp; sourceTree = "<group>"; };
 		C785A91914D3D6620038B6FE /* cc_omniview_canvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_omniview_canvas.h; sourceTree = "<group>"; };
+		C78FDE5C1BFB14DF0069B914 /* json.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json.cpp; sourceTree = "<group>"; };
+		C78FDE5D1BFB14DF0069B914 /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
+		C78FDE601BFB160D0069B914 /* json_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json_export.h; sourceTree = "<group>"; };
 		C7A845071398E7D8003AD23E /* cc_command.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_command.cpp; sourceTree = "<group>"; };
 		C7A845081398E7D8003AD23E /* cc_command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_command.h; sourceTree = "<group>"; };
 		C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_preferences_ui.cpp; sourceTree = "<group>"; };
@@ -1007,6 +1020,13 @@
 				E803364117EE2E5400A58457 /* parse.h */,
 				E89A41F31A23B73F00A2FB3E /* print_ps.cpp */,
 				E89A41F41A23B73F00A2FB3E /* print_ps.h */,
+				C78FDE5C1BFB14DF0069B914 /* json.cpp */,
+				C78FDE5D1BFB14DF0069B914 /* json.h */,
+				C78FDE601BFB160D0069B914 /* json_export.h */,
+				C7071FF01C3B2B69005481AC /* json_grammar.h */,
+				C7071FF11C3B2CA8005481AC /* json_export.cpp */,
+				C7071FF41C3CAF94005481AC /* viewer_translate.h */,
+				C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -1153,12 +1173,14 @@
 				C7B669761474E20300E28B63 /* background_image.cpp in Sources */,
 				C7AC49B014CCD51F00506C76 /* animation_frame.cpp in Sources */,
 				C785A90C14CFC5190038B6FE /* animation_canvas.cpp in Sources */,
+				C78FDE5E1BFB14DF0069B914 /* json.cpp in Sources */,
 				C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */,
 				C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */,
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
 				E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */,
 				C7E047C8155F279000D8C71B /* field_view.cpp in Sources */,
 				C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */,
+				C7071FF61C3CAFAE005481AC /* viewer_translate.cpp in Sources */,
 				C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */,
 				C7E047D215609A1600D8C71B /* setup_wizards.cpp in Sources */,
 				C76B4EBC15694C770087FE94 /* print_ps_dialog.cpp in Sources */,
@@ -1173,6 +1195,7 @@
 				E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */,
 				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
 				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
+				C7071FF21C3B2CA8005481AC /* json_export.cpp in Sources */,
 				E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
@@ -1192,14 +1215,17 @@
 				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
 				E803362D17EE1E3B00A58457 /* animate.cpp in Sources */,
 				E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
+				C7071FF71C3CB317005481AC /* viewer_translate.cpp in Sources */,
 				E803363317EE23F500A58457 /* cont.cpp in Sources */,
 				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
 				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
+				C78FDE621BFC4A3B0069B914 /* json.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
 				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
 				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
 				E89A41F51A23B74700A2FB3E /* print_ps.cpp in Sources */,
+				C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */,
 				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

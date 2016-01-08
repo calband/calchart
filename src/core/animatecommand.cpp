@@ -25,6 +25,7 @@
 
 #include "animatecommand.h"
 #include "cc_drawcommand.h"
+#include "viewer_translate.h"
 
 AnimateCommand::AnimateCommand(unsigned beats)
     : mNumBeats(beats)
@@ -84,6 +85,12 @@ float AnimateCommand::MotionDirection() const { return RealDirection(); }
 
 void AnimateCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
+JSONElement AnimateCommand::toOnlineViewerJSON(const CC_coord &start) const {
+    JSONElement newViewerObject = JSONElement::makeNull();
+    toOnlineViewerJSON(newViewerObject, start);
+    return newViewerObject;
+}
+
 AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
     : AnimateCommand(beats)
     , dir(AnimGetDirFromAngle(direction))
@@ -94,6 +101,16 @@ AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
 AnimateDir AnimateCommandMT::Direction() const { return dir; }
 
 float AnimateCommandMT::RealDirection() const { return realdir; }
+
+void AnimateCommandMT::toOnlineViewerJSON(JSONElement &dest, const CC_coord &start) const {
+    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
+    
+    moveAccessor["type"] = "mark";
+    moveAccessor["beats"] = NumBeats();
+    moveAccessor["facing"] = ToOnlineViewer::angle(RealDirection());
+    moveAccessor["x"] = ToOnlineViewer::xPosition(start.x);
+    moveAccessor["y"] = ToOnlineViewer::yPosition(start.y);
+}
 
 AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
     : AnimateCommandMT(beats, movement.Direction())
@@ -165,6 +182,19 @@ AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt,
     return CC_DrawCommand(pt.x + offset.x, pt.y + offset.y,
         pt.x + mVector.x + offset.x,
         pt.y + mVector.y + offset.y);
+}
+
+void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const {
+    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
+    
+    moveAccessor["type"] = "even";
+    moveAccessor["beats"] = NumBeats();
+    moveAccessor["beats_per_step"] = 1;
+    moveAccessor["x1"] = ToOnlineViewer::xPosition(start.x);
+    moveAccessor["y1"] = ToOnlineViewer::yPosition(start.y);
+    moveAccessor["x2"] = ToOnlineViewer::xPosition(start.x + mVector.x);
+    moveAccessor["y2"] = ToOnlineViewer::yPosition(start.y + mVector.y);
+    moveAccessor["facing"] = ToOnlineViewer::angle(MotionDirection());
 }
 
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
@@ -259,3 +289,18 @@ AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt,
     return CC_DrawCommand(x_start, y_start, x_end, y_end, mOrigin.x + offset.x,
         mOrigin.y + offset.y);
 }
+
+void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const {
+    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
+    
+    moveAccessor["type"] = "arc";
+    moveAccessor["start_x"] = ToOnlineViewer::xPosition(start.x);
+    moveAccessor["start_y"] = ToOnlineViewer::yPosition(start.y);
+    moveAccessor["center_x"] = ToOnlineViewer::xPosition(mOrigin.x);
+    moveAccessor["center_y"] = ToOnlineViewer::yPosition(mOrigin.y);
+    moveAccessor["angle"] = -(mAngEnd - mAngStart);
+    moveAccessor["beats"] = NumBeats();
+    moveAccessor["beats_per_step"] = 1;
+    moveAccessor["facing_offset"] = -mFace + 90;
+}
+

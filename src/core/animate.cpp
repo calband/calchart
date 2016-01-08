@@ -83,38 +83,6 @@ AnimateDir AnimGetDirFromAngle(float ang)
     return ANIMDIR_N;
 }
 
-// AnimateSheet is a snapshot of CC_sheet
-class AnimateSheet {
-public:
-    AnimateSheet(const std::vector<AnimatePoint>& thePoints,
-        const std::vector<AnimateCommands>& theCommands,
-        const std::string& s, unsigned beats)
-        : mPoints(thePoints)
-        , commands(theCommands)
-        , name(s)
-        , numbeats(beats)
-    {
-    }
-    std::string GetName() const { return name; }
-    unsigned GetNumBeats() const { return numbeats; }
-    std::vector<AnimatePoint> GetPoints() const { return mPoints; }
-    AnimateCommands GetCommands(int which) const { return commands.at(which); }
-    AnimateCommands::const_iterator GetCommandsBegin(int which) const
-    {
-        return commands.at(which).begin();
-    }
-    AnimateCommands::const_iterator GetCommandsEnd(int which) const
-    {
-        return commands.at(which).end();
-    }
-
-private:
-    std::vector<AnimatePoint> mPoints; // should probably be const
-    std::vector<AnimateCommands> commands;
-    std::string name;
-    unsigned numbeats;
-};
-
 Animation::Animation(const CC_show& show, NotifyStatus notifyStatus,
     NotifyErrorList notifyErrorList)
     : numpts(show.GetNumPoints())
@@ -441,4 +409,12 @@ Animation::GetCurrentInfo() const
            << GetNumberSheets() << ")\n";
     output << "beat " << GetCurrentBeat() << " of " << GetNumberBeats() << "\n";
     return std::pair<std::string, std::vector<std::string> >(output.str(), each);
+}
+
+std::vector<const AnimateSheet>::const_iterator Animation::sheetsBegin() const {
+    return sheets.begin();
+}
+
+std::vector<const AnimateSheet>::const_iterator Animation::sheetsEnd() const {
+    return sheets.end();
 }
