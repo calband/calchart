@@ -3,10 +3,9 @@
 # dependencies on an OSX machine. This script is intended to be run on
 # an OSX version 10.10 or later. XCode should be installed before this
 # script is run. 
-# This script must be run with root privileges, and should be executed
-# using one of the following commands:
-#     sudo . osx-setup.sh
-#     sudo source osx-setup.sh
+# This script should be executed with one of the following commands:
+#     . osx-setup.sh
+#     source osx-setup.sh
 
 # Determines whether or not a function is installed to path
 # To use, pass the name of a program to this function
@@ -14,18 +13,6 @@
 # It will fail otherwise
 function not_on_path() {
 	return $([ -z "$(type $1 2>/dev/null)" ])
-}
-
-# Verifies that the user running the program has root privileges
-# Succeeds if the program is run with root privileges
-# Fails otherwise
-function verify_root_privaleges() {
-	# Refer to http://www.cyberciti.biz/tips/shell-root-user-check-script.html
-    if [[ $EUID -ne 0 ]]; then
-        echo "This script must be run as root"
-        return 1
-    fi
-    return 0
 }
 
 # Navigate to project root directory
@@ -74,7 +61,7 @@ function install_macports() {
 	    cd MacPorts-2.3.3/
 	    ./configure
 	    make
-	    make install
+	    sudo make install
 
 	    # Remove temporary directory
 	    cd ..
@@ -95,8 +82,8 @@ function install_macports() {
 # Fails otherwise
 function install_boost() {
 	echo "Installing Boost..."
-	port selfupdate
-	port install boost
+	sudo port selfupdate
+	sudo port install boost
 	return 0
 }
 
@@ -105,7 +92,7 @@ function install_boost() {
 # Fails otherwise
 function install_wxwidgets() {
 	wxwidgets_vers=3.0.2
-	if [ ! `not_on_path wx-config` ] ; then
+	if `not_on_path wx-config` ; then
 	    echo "Installing wxWidgets..."
 	    
 	    # Check to make sure that an OSX SDK is available
@@ -146,7 +133,7 @@ function install_wxwidgets() {
 		cd build-results
 		../configure --with-cocoa --with-macosx-version-min=10.7 --with-macosx-sdk=${sdk_dir}/${selected_sdk} --enable-debug --enable-debug_info --disable-shared CXXFLAGS="-std=c++11 -stdlib=libc++" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
 		make -j4
-		make install
+		sudo make install
 
 		# Remove temporary directory
 		cd ..
@@ -172,7 +159,6 @@ function build_generated_files() {
 	return 0
 }
 
-verify_root_privaleges &&
 install_xcode_command_line_tools && 
 install_macports && 
 install_boost &&
