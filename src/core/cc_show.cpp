@@ -28,6 +28,7 @@
 #include "cc_shapes.h"
 #include "cc_fileformat.h"
 #include "ccvers.h"
+#include "json.h"
 
 #include <sstream>
 #include <functional>
@@ -488,6 +489,39 @@ void CC_show::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected,
         AddToSelection(sl);
     }
 }
+
+JSONElement CC_show::toOnlineViewerJSON(const Animation& compiledShow) const {
+    JSONElement newViewerObject = JSONElement::makeNull();
+    toOnlineViewerJSON(newViewerObject, compiledShow);
+    return newViewerObject;
+}
+
+void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const {
+    JSONDataObjectAccessor showObjectAccessor = dest = JSONElement::makeObject();
+    
+    // Setup the skeleton for the show's JSON representation
+    showObjectAccessor["title"] = "MANUAL"; // TODO; For now, this will be manually added to the exported file
+    showObjectAccessor["year"] = "2016"; // TODO; For now, this will be hard-coded to 2016
+    showObjectAccessor["description"] = descr;
+    showObjectAccessor["dot_labels"] = JSONElement::makeArray();
+    showObjectAccessor["sheets"] = JSONElement::makeArray();
+    
+    // Fill in 'dot_labels' with the labels for each dot (e.g. A0, A1, A2, ...)
+    JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["dot_labels"];
+    for (unsigned i = 0; i < pt_labels.size(); i++) {
+        dotLabelsAccessor->pushBack(pt_labels[i]);
+    }
+    
+    // Fill in 'sheets' with the JSON representation of each sheet
+    JSONDataArrayAccessor sheetsAccessor = showObjectAccessor["sheets"];
+    unsigned i = 0;
+    auto animateSheetIter = compiledShow.sheetsBegin();
+    for (auto iter = GetSheetBegin(); iter != GetSheetEnd(); iter++, i++, animateSheetIter++) {
+        sheetsAccessor->pushBack(JSONElement::makeNull());
+        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i+1, pt_labels, *animateSheetIter);
+    }
+}
+
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
 #include <assert.h>

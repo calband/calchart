@@ -37,6 +37,8 @@
 #include "cc_fileformat.h"
 #include "modes.h"
 #include "print_ps.h"
+#include "json.h"
+#include "json_export.h"
 
 #include <wx/wfstream.h>
 #include <wx/textfile.h>
@@ -278,6 +280,25 @@ wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
     return LoadObjectGeneric<wxInputStream>(stream);
 }
 #endif
+
+bool CalChartDoc::exportViewerFile(const wxString& filepath) {    
+    JSONElement mainObject = JSONElement::makeObject();
+    
+    JSONDataObjectAccessor mainObjectAccessor = mainObject;
+    
+    mainObjectAccessor["meta"] = JSONElement::makeObject();
+    mainObjectAccessor["show"] = JSONElement::makeNull();
+    
+    
+    JSONDataObjectAccessor metaObjectAccessor = mainObjectAccessor["meta"];
+    metaObjectAccessor["version"] = ("1.0.0");
+    metaObjectAccessor["index_name"] = "MANUAL"; // TODO; for now, manually add index_name to viewer file after saving
+    metaObjectAccessor["type"] = "viewer";
+    
+    mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow, nullptr, nullptr));
+    
+    return JSONExporter::exportJSON(filepath.ToStdString(), mainObject);
+}
 
 void CalChartDoc::FlushAllTextWindows()
 {

@@ -24,6 +24,8 @@
 
 #include "cc_show.h"
 #include "cc_fileformat.h"
+#include "animatecommand.h"
+#include "viewer_translate.h"
 
 #include <sstream>
 #include <iostream>
@@ -636,6 +638,63 @@ const CC_point& CC_sheet::GetPoint(unsigned i) const { return pts[i]; }
 CC_point& CC_sheet::GetPoint(unsigned i) { return pts[i]; }
 
 std::vector<CC_point> CC_sheet::GetPoints() const { return pts; }
+
+JSONElement CC_sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const {
+    JSONElement newViewerObject = JSONElement::makeNull();
+    toOnlineViewerJSON(newViewerObject, sheetNum, dotLabels, compiledSheet);
+    return newViewerObject;
+}
+
+void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const {
+    JSONDataObjectAccessor sheetObjectAccessor = dest =  JSONElement::makeObject();
+    
+    // Create a skeleton for the JSON representation of a sheet
+    sheetObjectAccessor["label"] = std::to_string(sheetNum);
+    sheetObjectAccessor["field_type"] = "college";
+    sheetObjectAccessor["dot_types"] = JSONElement::makeArray();
+    sheetObjectAccessor["dot_labels"] = JSONElement::makeObject();
+    sheetObjectAccessor["continuities"] = JSONElement::makeObject();
+    sheetObjectAccessor["beats"] = beats;
+    sheetObjectAccessor["movements"] = JSONElement::makeObject();
+    
+    JSONDataObjectAccessor dotTypeAssignmentsAccessor = sheetObjectAccessor["dot_labels"];
+    
+    // Iterate through all dots and collect the unique dot types discovered while doing so
+    // As we discover the dot type of each dot, record the dot type assigment inside of 'dot_labels'
+    std::set<std::string> uniqueDotTypes;
+    for (unsigned i = 0; i < pts.size(); i++) {
+        std::string symbolName = ToOnlineViewer::symbolName(pts[i].GetSymbol());
+        uniqueDotTypes.insert(symbolName);
+        dotTypeAssignmentsAccessor[dotLabels[i]] = symbolName;
+    }
+    
+    JSONDataArrayAccessor dotTypesAccessor = sheetObjectAccessor["dot_types"];
+    JSONDataObjectAccessor continuitiesAccessor = sheetObjectAccessor["continuities"];
+    
+    // In 'dot_types', list all unique dot types that are used in this sheet
+    // In 'continuities', map a dot type to its printed continuity
+    for (auto iter = uniqueDotTypes.begin(); iter != uniqueDotTypes.end(); iter++) {
+        dotTypesAccessor->pushBack(JSONElement::makeString(*iter));
+        continuitiesAccessor[*iter] = "MANUAL SS" + std::to_string(sheetNum); // TODO; add printed continuities to viewer file manually for now
+    }
+    
+    JSONDataObjectAccessor movementsAccessor = sheetObjectAccessor["movements"];
+    
+    // In 'movements', make a series of commands to describe how a point should be animated over time in the Online Viewer
+    for (unsigned ptIndex = 0; ptIndex < pts.size(); ptIndex++) {
+        JSONDataArrayAccessor pointMovementsAccessor = movementsAccessor[dotLabels[ptIndex]] = JSONElement::makeArray();
+        
+        AnimatePoint currPos(pts[ptIndex].GetPos().x, pts[ptIndex].GetPos().y);
+        
+        for (auto commandIter = compiledSheet.GetCommandsBegin(ptIndex); commandIter != compiledSheet.GetCommandsEnd(ptIndex); commandIter++) {
+            
+            pointMovementsAccessor->pushBack(JSONElement::makeNull());
+            (*commandIter)->toOnlineViewerJSON(pointMovementsAccessor->back(), currPos);
+
+            (*commandIter)->ApplyForward(currPos);
+        }
+    }
+}
 
 void CC_sheet::SetPoints(const std::vector<CC_point>& points) { pts = points; }
 
