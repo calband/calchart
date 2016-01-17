@@ -26,7 +26,7 @@
 #include "math_utils.h"
 #include "animatecommand.h"
 #include "cc_sheet.h"
-//#include "cont.h"
+#include "cont.h"
 #include "parse.h"
 
 #include <vector>
@@ -51,7 +51,7 @@ int float2int(ParsedLocationInfo const& info, AnimateCompile& anim, float f)
 	int v = (int)floor(f+0.5);
 	if (std::abs(f - (float)v) >= COORD_DECIMAL)
 	{
-		anim.RegisterError(ANIMERR_NONINT, info.line, info.column);
+		anim.RegisterError(ANIMERR_NONINT, ContToken( info.line, info.column ));
 	}
 	return v;
 }
@@ -62,7 +62,7 @@ unsigned float2unsigned(ParsedLocationInfo const& info, AnimateCompile& anim, fl
 	int v = float2int(info, anim, f);
 	if (v < 0)
 	{
-		anim.RegisterError(ANIMERR_NEGINT, info.line, info.column);
+		anim.RegisterError(ANIMERR_NEGINT, ContToken( info.line, info.column ));
 		return 0;
 	}
 	else
@@ -82,11 +82,10 @@ void DoCounterMarch(ParsedLocationInfo const& info, AnimateCompile& anim, Point 
 	auto c = sin(Deg2Rad(d1 - d2));
 	if (IS_ZERO(c))
 	{
-		anim.RegisterError(ANIMERR_INVALID_CM, info.line, info.column);
+		anim.RegisterError(ANIMERR_INVALID_CM, ContToken( info.line, info.column ));
 		return;
 	}
-	CC_coord v1;
-	CreateVector(v1, d1, Get(anim, stps));
+	CC_coord v1 = CreateVector(d1, Get(anim, stps));
 	p[1] = Get(anim, pnt1) + v1;
 	CC_coord ref2 = Get(anim, pnt2);
 
@@ -96,8 +95,7 @@ void DoCounterMarch(ParsedLocationInfo const& info, AnimateCompile& anim, Point 
 	{
 		steps2 /= static_cast<float>(SQRT2);
 	}
-	CC_coord v2;
-	CreateVector(v2, d2, steps2);
+	CC_coord v2 = CreateVector(d2, steps2);
 	p[2] = p[1] + v2;
 	p[3] = ref2 - v1;
 	p[0] = p[3] - v2;
@@ -136,7 +134,7 @@ void DoCounterMarch(ParsedLocationInfo const& info, AnimateCompile& anim, Point 
 				else
 				{
 // Current point is not in path of countermarch
-					anim.RegisterError(ANIMERR_INVALID_CM, info.line, info.column);
+					anim.RegisterError(ANIMERR_INVALID_CM, ContToken( info.line, info.column ));
 					return;
 				}
 			}
@@ -150,7 +148,7 @@ void DoCounterMarch(ParsedLocationInfo const& info, AnimateCompile& anim, Point 
 		if (c <= beats)
 		{
 			beats -= c;
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(info, anim, c), v1), info.line, info.column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(info, anim, c), v1), ContToken( info.line, info.column )))
 			{
 				return;
 			}
@@ -160,19 +158,19 @@ void DoCounterMarch(ParsedLocationInfo const& info, AnimateCompile& anim, Point 
 			switch(leg)
 			{
 				case 0:
-					CreateVector(v1, d2+180.0f, beats);
+					v1 = CreateVector(d2+180.0f, beats);
 					break;
 				case 1:
-					CreateVector(v1, d1, beats);
+					v1 = CreateVector(d1, beats);
 					break;
 				case 2:
-					CreateVector(v1, d2, beats);
+					v1 = CreateVector(d2, beats);
 					break;
 				default:
-					CreateVector(v1, d1+180.0f, beats);
+					v1 = CreateVector(d1+180.0f, beats);
 					break;
 			}
-			anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(info, anim, beats), v1), info.line, info.column);
+			anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(info, anim, beats), v1), ContToken( info.line, info.column ));
 			return;
 		}
 		leg++;
@@ -217,7 +215,7 @@ std::ostream& StartPoint::Print(std::ostream& os) const
 
 CC_coord NextPoint::Get(AnimateCompile& anim) const
 {
-	return anim.GetEndingPosition();
+	return anim.GetEndingPosition(ContToken( line, column ));
 }
 
 std::ostream& NextPoint::Print(std::ostream& os) const
@@ -278,7 +276,7 @@ double ValueDiv::Get(AnimateCompile& anim) const
 	auto f = Get(anim, value2);
 	if (IS_ZERO(f))
 	{
-		anim.RegisterError(ANIMERR_DIVISION_ZERO, line, column);
+		anim.RegisterError(ANIMERR_DIVISION_ZERO, ContToken( line, column ));
 		return 0.0;
 	}
 	return Get(anim, value1) / f;
@@ -314,7 +312,7 @@ std::ostream& ValueREM::Print(std::ostream& os) const
 
 double Variable::Get(AnimateCompile& anim) const
 {
-	return anim.GetVarValue(varnum, line, column);
+	return anim.GetVarValue(varnum, ContToken( line, column ));
 }
 
 std::ostream& Variable::Print(std::ostream& os) const
@@ -334,7 +332,7 @@ double FunctionDir::Get(AnimateCompile& anim) const
 	CC_coord c = Get(anim, point);
 	if (c == anim.GetPointPosition())
 	{
-		anim.RegisterError(ANIMERR_UNDEFINED, line, column);
+		anim.RegisterError(ANIMERR_UNDEFINED, ContToken( line, column ));
 	}
 	return anim.GetPointPosition().Direction(c);
 }
@@ -352,7 +350,7 @@ double FunctionDirFrom::Get(AnimateCompile& anim) const
 	CC_coord end = Get(anim, point_end);
 	if (start == end)
 	{
-		anim.RegisterError(ANIMERR_UNDEFINED, line, column);
+		anim.RegisterError(ANIMERR_UNDEFINED, ContToken( line, column ));
 	}
 	return start.Direction(end);
 }
@@ -395,7 +393,7 @@ double FunctionEither::Get(AnimateCompile& anim) const
 	CC_coord c = Get(anim, point);
 	if (c == anim.GetPointPosition())
 	{
-		anim.RegisterError(ANIMERR_UNDEFINED, line, column);
+		anim.RegisterError(ANIMERR_UNDEFINED, ContToken( line, column ));
 		return Get(anim, dir1);
 	}
 
@@ -461,7 +459,7 @@ void ProcedureBlam::Compile(AnimateCompile& anim) const
 	using calchart::continuity::Get;
 	NextPoint np;
 	CC_coord c = np.Get(anim) - anim.GetPointPosition();
-	anim.Append(std::make_shared<AnimateCommandMove>(anim.GetBeatsRemaining(), c), line, column);
+	anim.Append(std::make_shared<AnimateCommandMove>(anim.GetBeatsRemaining(), c), ContToken( line, column ));
 }
 
 std::ostream& ProcedureBlam::Print(std::ostream& os) const
@@ -528,7 +526,7 @@ void ProcedureDMCM::Compile(AnimateCompile& anim) const
 			return;
 		}
 	}
-	anim.RegisterError(ANIMERR_INVALID_CM, line, column);
+	anim.RegisterError(ANIMERR_INVALID_CM, ContToken( line, column ));
 }
 
 std::ostream& ProcedureDMCM::Print(std::ostream& os) const
@@ -566,14 +564,14 @@ void ProcedureDMHS::Compile(AnimateCompile& anim) const
 	if (c_dm != 0)
 	{
 		auto b = Coord2Int(c_dm.x);
-		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm), line, column))
+		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm), ContToken( line, column )))
 		{
 			return;
 		}
 	}
 	if (c_hs != 0)
 	{
-		anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b_hs), c_hs), line, column);
+		anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b_hs), c_hs), ContToken( line, column ));
 	}
 }
 
@@ -589,11 +587,11 @@ void ProcedureEven::Compile(AnimateCompile& anim) const
 	int steps = float2int(*this, anim, Get(anim, stps));
 	if (steps < 0)
 	{
-		anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-steps, c, -c.Direction()), line, column);
+		anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-steps, c, -c.Direction()), ContToken( line, column ));
 	}
 	else
 	{
-		anim.Append(std::make_shared<AnimateCommandMove>((unsigned)steps, c), line, column);
+		anim.Append(std::make_shared<AnimateCommandMove>((unsigned)steps, c), ContToken( line, column ));
 	}
 }
 
@@ -611,7 +609,7 @@ void ProcedureEWNS::Compile(AnimateCompile& anim) const
 	{
 		CC_coord c2 = { 0, c1.y };
 		auto b = Coord2Int(c2.y);
-		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), line, column))
+		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), ContToken( line, column )))
 		{
 			return;
 		}
@@ -620,7 +618,7 @@ void ProcedureEWNS::Compile(AnimateCompile& anim) const
 	{
 		CC_coord c2 = { c1.x, 0 };
 		auto b = Coord2Int(c2.x);
-		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), line, column))
+		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), ContToken( line, column )))
 		{
 			return;
 		}
@@ -660,14 +658,14 @@ void ProcedureFountain1::Compile(AnimateCompile& anim) const
 			{
 				f1 = e/a;
 			}
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f1), v), line, column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f1), v), ContToken( line, column )))
 			{
 				return;
 			}
 		}
 		else
 		{
-			anim.RegisterError(ANIMERR_INVALID_FNTN, line, column);
+			anim.RegisterError(ANIMERR_INVALID_FNTN, ContToken( line, column ));
 			return;
 		}
 	}
@@ -678,7 +676,7 @@ void ProcedureFountain1::Compile(AnimateCompile& anim) const
 		{
 			v.x = Float2Coord(f2*a);
 			v.y = Float2Coord(f2*c);
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), line, column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), ContToken( line, column )))
 			{
 				return;
 			}
@@ -688,7 +686,7 @@ void ProcedureFountain1::Compile(AnimateCompile& anim) const
 		{
 			v.x = Float2Coord(f2*b);
 			v.y = Float2Coord(f2*d);
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), line, column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), ContToken( line, column )))
 			{
 				return;
 			}
@@ -707,9 +705,9 @@ void ProcedureFountain2::Compile(AnimateCompile& anim) const
 	float a, b, c, d, e, f;
 
 	auto f1 = Get(anim, dir1);
-	CreateUnitVector(a, c, f1);
+	std::tie(a, c) = CreateUnitVector(f1);
 	f1 = Get(anim, dir2);
-	CreateUnitVector(b, d, f1);
+	std::tie(b, d) = CreateUnitVector(f1);
 	auto v = Get(anim, pnt) - anim.GetPointPosition();
 	e = Coord2Float(v.x);
 	f = Coord2Float(v.y);
@@ -727,14 +725,14 @@ void ProcedureFountain2::Compile(AnimateCompile& anim) const
 			{
 				f1 = e/a;
 			}
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f1), v), line, column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f1), v), ContToken( line, column )))
 			{
 				return;
 			}
 		}
 		else
 		{
-			anim.RegisterError(ANIMERR_INVALID_FNTN, line, column);
+			anim.RegisterError(ANIMERR_INVALID_FNTN, ContToken( line, column ));
 			return;
 		}
 	}
@@ -745,7 +743,7 @@ void ProcedureFountain2::Compile(AnimateCompile& anim) const
 		{
 			v.x = Float2Coord(f2*a);
 			v.y = Float2Coord(f2*c);
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), line, column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), ContToken( line, column )))
 			{
 				return;
 			}
@@ -755,7 +753,7 @@ void ProcedureFountain2::Compile(AnimateCompile& anim) const
 		{
 			v.x = Float2Coord(f2*b);
 			v.y = Float2Coord(f2*d);
-			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), line, column))
+			if (!anim.Append(std::make_shared<AnimateCommandMove>(float2unsigned(*this, anim, f2), v), ContToken( line, column )))
 			{
 				return;
 			}
@@ -774,17 +772,16 @@ void ProcedureFM::Compile(AnimateCompile& anim) const
 	auto b = float2int(*this, anim, Get(anim, stps));
 	if (b != 0)
 	{
-		CC_coord c;
-		CreateVector(c, Get(anim, dir), Get(anim, stps));
+		CC_coord c = CreateVector(Get(anim, dir), Get(anim, stps));
 		if (c != 0)
 		{
 			if (b < 0)
 			{
-				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c, -c.Direction()), line, column);
+				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c, -c.Direction()), ContToken( line, column ));
 			}
 			else
 			{
-				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), line, column);
+				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), ContToken( line, column ));
 			}
 		}
 	}
@@ -801,7 +798,7 @@ void ProcedureFMTO::Compile(AnimateCompile& anim) const
 	auto c = Get(anim, pnt) - anim.GetPointPosition();
 	if (c != 0)
 	{
-		anim.Append(std::make_shared<AnimateCommandMove>((unsigned)c.DM_Magnitude(), c), line, column);
+		anim.Append(std::make_shared<AnimateCommandMove>((unsigned)c.DM_Magnitude(), c), ContToken( line, column ));
 	}
 }
 
@@ -841,7 +838,7 @@ void ProcedureGrid::Compile(AnimateCompile& anim) const
 	c -= anim.GetPointPosition();
 	if (c != 0)
 	{
-		anim.Append(std::make_shared<AnimateCommandMove>(0, c), line, column);
+		anim.Append(std::make_shared<AnimateCommandMove>(0, c), ContToken( line, column ));
 	}
 }
 
@@ -877,7 +874,7 @@ void ProcedureHSCM::Compile(AnimateCompile& anim) const
 			return;
 		}
 	}
-	anim.RegisterError(ANIMERR_INVALID_CM, line, column);
+	anim.RegisterError(ANIMERR_INVALID_CM, ContToken( line, column ));
 }
 
 std::ostream& ProcedureHSCM::Print(std::ostream& os) const
@@ -914,7 +911,7 @@ void ProcedureHSDM::Compile(AnimateCompile& anim) const
 	}
 	if (c_hs != 0)
 	{
-		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_hs), line, column))
+		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_hs), ContToken( line, column )))
 		{
 			return;
 		}
@@ -922,7 +919,7 @@ void ProcedureHSDM::Compile(AnimateCompile& anim) const
 	if (c_dm != 0)
 	{
 		b = Coord2Int(c_dm.x);
-		anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm), line, column);
+		anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm), ContToken( line, column ));
 	}
 }
 
@@ -935,7 +932,7 @@ std::ostream& ProcedureHSDM::Print(std::ostream& os) const
 void ProcedureMagic::Compile(AnimateCompile& anim) const
 {
 	auto c = Get(anim, pnt) - anim.GetPointPosition();
-	anim.Append(std::make_shared<AnimateCommandMove>(0, c), line, column);
+	anim.Append(std::make_shared<AnimateCommandMove>(0, c), ContToken( line, column ));
 }
 
 std::ostream& ProcedureMagic::Print(std::ostream& os) const
@@ -957,7 +954,7 @@ void ProcedureMarch1::Compile(AnimateCompile& anim) const
 		c.y = -(Float2Coord(sin(rads)*mag));
 		if (c != 0)
 		{
-			anim.Append(std::make_shared<AnimateCommandMove>((unsigned)std::abs(b), c, Get(anim, facedir)), line, column);
+			anim.Append(std::make_shared<AnimateCommandMove>((unsigned)std::abs(b), c, Get(anim, facedir)), ContToken( line, column ));
 		}
 	}
 }
@@ -983,11 +980,11 @@ void ProcedureMarch2::Compile(AnimateCompile& anim) const
 		{
 			if (b < 0)
 			{
-				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c, -c.Direction()), line, column);
+				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c, -c.Direction()), ContToken( line, column ));
 			}
 			else
 			{
-				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), line, column);
+				anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), ContToken( line, column ));
 			}
 		}
 	}
@@ -1004,7 +1001,7 @@ void ProcedureMT::Compile(AnimateCompile& anim) const
 	auto b = float2int(*this, anim, Get(anim, numbeats));
 	if (b != 0)
 	{
-		anim.Append(std::make_shared<AnimateCommandMT>((unsigned)std::abs(b), Get(anim, dir)), line, column);
+		anim.Append(std::make_shared<AnimateCommandMT>((unsigned)std::abs(b), Get(anim, dir)), ContToken( line, column ));
 	}
 }
 
@@ -1016,7 +1013,7 @@ std::ostream& ProcedureMT::Print(std::ostream& os) const
 
 void ProcedureMTRM::Compile(AnimateCompile& anim) const
 {
-	anim.Append(std::make_shared<AnimateCommandMT>(anim.GetBeatsRemaining(), Get(anim, dir)), line, column);
+	anim.Append(std::make_shared<AnimateCommandMT>(anim.GetBeatsRemaining(), Get(anim, dir)), ContToken( line, column ));
 }
 
 std::ostream& ProcedureMTRM::Print(std::ostream& os) const
@@ -1032,7 +1029,7 @@ void ProcedureNSEW::Compile(AnimateCompile& anim) const
 	{
 		CC_coord c2 = { c1.x, 0 };
 		auto b = Coord2Int(c2.x);
-		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), line, column))
+		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), ContToken( line, column )))
 		{
 			return;
 		}
@@ -1041,7 +1038,7 @@ void ProcedureNSEW::Compile(AnimateCompile& anim) const
 	{
 		CC_coord c2 = { 0, c1.y };
 		auto b = Coord2Int(c2.y);
-		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), line, column))
+		if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2), ContToken( line, column )))
 		{
 			return;
 		}
@@ -1062,7 +1059,7 @@ void ProcedureRotate::Compile(AnimateCompile& anim) const
 	auto rad = anim.GetPointPosition() - c;
 	float start_ang;
 	if (c == anim.GetPointPosition())
-		start_ang = anim.GetVarValue(CONTVAR_DOH, line, column);
+		start_ang = anim.GetVarValue(CONTVAR_DOH, ContToken( line, column ));
 	else
 		start_ang = c.Direction(anim.GetPointPosition());
 	auto b = float2int(*this, anim, Get(anim, stps));
@@ -1078,7 +1075,7 @@ void ProcedureRotate::Compile(AnimateCompile& anim) const
 		sqrt(static_cast<float>(rad.x*rad.x + rad.y*rad.y)),
 		start_ang, start_ang+angle,
 		backwards),
-		line, column);
+		ContToken( line, column ));
 }
 
 std::ostream& ProcedureRotate::Print(std::ostream& os) const

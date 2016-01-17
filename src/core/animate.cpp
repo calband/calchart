@@ -29,6 +29,7 @@
 #include "cc_point.h"
 #include "math_utils.h"
 #include "cc_drawcommand.h"
+#include "parse.h"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -90,8 +91,8 @@ Animation::ParseContinuity(std::string const& continuity, AnimationErrors& error
     // parse out the error
     if (parsecontinuity() != 0) {
         // Supply a generic parse error
-        ContToken dummy;
-        errors.RegisterError(ANIMERR_SYNTAX, &dummy, 0, current_symbol);
+        std::pair<int, int> dummy = { yylloc.first_line, yylloc.first_column };
+        errors.RegisterError(ANIMERR_SYNTAX, dummy, 0, current_symbol);
     }
     return std::move(ParsedContinuity);
 }

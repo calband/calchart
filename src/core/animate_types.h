@@ -26,7 +26,7 @@
 #include <string>
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
-enum {
+enum AnimateVar {
     CONTVAR_A,
     CONTVAR_B,
     CONTVAR_C,

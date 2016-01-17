@@ -46,6 +46,7 @@ enum ContDefinedValue {
 class ContToken {
 public:
     ContToken();
+    ContToken(int l, int c);
     virtual ~ContToken() = default; // base dtor marked virtual, implies all
     // derived classes dtors are virtual
     int line, col;

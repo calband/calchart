@@ -239,10 +239,8 @@
 		E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
 		E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
-		E83F86FD1C4C0337008FDC93 /* new_cont_grammar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83F86F91C4C0330008FDC93 /* new_cont_grammar.cpp */; };
-		E83F86FE1C4C0339008FDC93 /* new_cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83F86FB1C4C0330008FDC93 /* new_cont.cpp */; };
-		E83F86FF1C4C033C008FDC93 /* new_cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83F86FB1C4C0330008FDC93 /* new_cont.cpp */; };
-		E83F87001C4C033F008FDC93 /* new_cont_grammar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83F86F91C4C0330008FDC93 /* new_cont_grammar.cpp */; };
+		E83F87041C4C13FD008FDC93 /* new_cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83F86FB1C4C0330008FDC93 /* new_cont.cpp */; };
+		E83F87051C4C16D7008FDC93 /* new_cont_grammar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E83F86F91C4C0330008FDC93 /* new_cont_grammar.cpp */; };
 		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
 		E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
@@ -1186,7 +1184,6 @@
 				C7AC49B014CCD51F00506C76 /* animation_frame.cpp in Sources */,
 				C785A90C14CFC5190038B6FE /* animation_canvas.cpp in Sources */,
 				C78FDE5E1BFB14DF0069B914 /* json.cpp in Sources */,
-				E83F86FE1C4C0339008FDC93 /* new_cont.cpp in Sources */,
 				C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */,
 				C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */,
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
@@ -1210,7 +1207,6 @@
 				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
 				C7071FF21C3B2CA8005481AC /* json_export.cpp in Sources */,
 				E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */,
-				E83F86FD1C4C0337008FDC93 /* new_cont_grammar.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */,
@@ -1239,10 +1235,10 @@
 				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
 				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
 				E89A41F51A23B74700A2FB3E /* print_ps.cpp in Sources */,
-				E83F87001C4C033F008FDC93 /* new_cont_grammar.cpp in Sources */,
+				E83F87051C4C16D7008FDC93 /* new_cont_grammar.cpp in Sources */,
 				C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */,
 				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,
-				E83F86FF1C4C033C008FDC93 /* new_cont.cpp in Sources */,
+				E83F87041C4C13FD008FDC93 /* new_cont.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

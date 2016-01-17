@@ -46,7 +46,7 @@ public:
     {
         return mErrorMarkers;
     }
-    void RegisterError(AnimateError err, const ContToken* token, unsigned curr_pt,
+    void RegisterError(AnimateError err, std::pair<int,int> line_col, unsigned curr_pt,
         SYMBOL_TYPE contsymbol);
 
 private:
@@ -70,10 +70,10 @@ private:
         AnimateCommands& cmds);
 
 public:
-    bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken* token);
-    void RegisterError(AnimateError err, const ContToken* token) const;
+    bool Append(std::shared_ptr<AnimateCommand> cmd, ContToken const& token);
+    void RegisterError(AnimateError err, ContToken const& token) const;
 
-    float GetVarValue(int varnum, const ContToken* token) const;
+    float GetVarValue(int varnum, ContToken const& token) const;
     void SetVarValue(int varnum, float value);
 
     // helper functions to get information for building a command
@@ -81,7 +81,7 @@ public:
     unsigned GetCurrentPoint() const { return curr_pt; }
     unsigned GetBeatsRemaining() const { return beats_rem; }
     AnimatePoint GetStartingPosition() const;
-    AnimatePoint GetEndingPosition(const ContToken* token) const;
+    AnimatePoint GetEndingPosition(ContToken const& token) const;
     AnimatePoint GetReferencePointPosition(unsigned refnum) const;
 
 private:

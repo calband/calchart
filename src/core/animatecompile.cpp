@@ -25,14 +25,12 @@
 #include "animatecommand.h"
 #include "cc_sheet.h"
 
-void AnimationErrors::RegisterError(AnimateError err, const ContToken* token,
+void AnimationErrors::RegisterError(AnimateError err, std::pair<int,int> line_col,
     unsigned curr_pt, SYMBOL_TYPE contsymbol)
 {
     mErrorMarkers[err].contsymbol = contsymbol;
-    if (token != NULL) {
-        mErrorMarkers[err].line = token->line;
-        mErrorMarkers[err].col = token->col;
-    }
+	mErrorMarkers[err].line = line_col.first;
+	mErrorMarkers[err].col = line_col.second;
     mErrorMarkers[err].pntgroup.insert(curr_pt);
 }
 
@@ -93,19 +91,19 @@ AnimateCommands AnimateCompile::Compile(
         auto next_point = (c_sheet + 1)->GetPosition(pt_num);
         if (pt != next_point) {
             auto c = next_point - pt;
-            ac.RegisterError(ANIMERR_WRONGPLACE, NULL);
-            ac.Append(std::make_shared<AnimateCommandMove>(beats_rem, c), NULL);
+            ac.RegisterError(ANIMERR_WRONGPLACE, { 0, 0 });
+            ac.Append(std::make_shared<AnimateCommandMove>(beats_rem, c), { 0, 0 });
         }
     }
     if (beats_rem) {
-        ac.RegisterError(ANIMERR_EXTRATIME, NULL);
-        ac.Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), NULL);
+        ac.RegisterError(ANIMERR_EXTRATIME, { 0, 0 });
+        ac.Append(std::make_shared<AnimateCommandMT>(beats_rem, ANIMDIR_E), { 0, 0 });
     }
     return cmds;
 }
 
 bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd,
-    const ContToken* token)
+    ContToken const& token)
 {
     bool clipped;
 
@@ -130,12 +128,12 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd,
 }
 
 void AnimateCompile::RegisterError(AnimateError err,
-    const ContToken* token) const
+    ContToken const& token) const
 {
-    error_markers.RegisterError(err, token, curr_pt, contsymbol);
+    error_markers.RegisterError(err, { token.line, token.col }, curr_pt, contsymbol);
 }
 
-float AnimateCompile::GetVarValue(int varnum, const ContToken* token) const
+float AnimateCompile::GetVarValue(int varnum, ContToken const& token) const
 {
     auto i = mVars[varnum].find(curr_pt);
     if (i != mVars[varnum].end()) {
@@ -155,7 +153,7 @@ AnimatePoint AnimateCompile::GetStartingPosition() const
     return curr_sheet->GetPosition(GetCurrentPoint());
 }
 
-AnimatePoint AnimateCompile::GetEndingPosition(const ContToken* token) const
+AnimatePoint AnimateCompile::GetEndingPosition(ContToken const& token) const
 {
     CC_show::const_CC_sheet_iterator_t sheet = curr_sheet + 1;
 
