@@ -48,6 +48,7 @@
 #include "cc_sheet.h"
 #include "cc_point.h"
 #include "cc_fileformat.h"
+#include "e7_transition_solver.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -157,6 +158,7 @@ EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
 EVT_TOGGLEBUTTON(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
+EVT_MENU(CALCHART__E7TransitionSolver, FieldFrame::OnCmd_SolveTransition)
 EVT_SIZE(FieldFrame::OnSize)
 END_EVENT_TABLE()
 
@@ -288,6 +290,9 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     edit_menu->Append(CALCHART__ResetReferencePoint,
         wxT("Reset reference point..."),
         wxT("Reset the current reference point"));
+    edit_menu->Append(CALCHART__E7TransitionSolver,
+        wxT("Solve transition"),
+        wxT("Solve the transition to the next sheet automatically"));
 
     wxMenu* anim_menu = new wxMenu;
     anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"),
@@ -1285,4 +1290,17 @@ const CalChartDoc* FieldFrame::GetShow() const
 CalChartDoc* FieldFrame::GetShow()
 {
     return static_cast<CalChartDoc*>(GetDocument());
+}
+
+
+
+
+
+void FieldFrame::OnCmd_SolveTransition(wxCommandEvent &event) {
+    auto currSheet = GetShow()->GetCurrentSheet();
+    auto finalPositions = runSolver(*currSheet, *(currSheet+1));
+    CC_sheet& nextSheetRef = *(currSheet + 1);
+    for (auto i = 0; i < GetShow()->GetNumPoints(); i++) {
+        nextSheetRef.SetPosition(finalPositions[i], i);
+    }
 }
