@@ -26,7 +26,7 @@ Now you can build.  You'll first need to create a work directory, then configure
 
 	$ mkdir build-results
 	$ cd build-results
-	$ ../configure --with-cocoa --with-macosx-version-min=10.10 --with-macosx-sdk=/Applications/Tigris/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk --enable-debug --enable-debug_info --disable-shared --enable-cxx11  --without-liblzma
+	$ ../configure --with-cocoa --with-macosx-version-min=10.10 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk --enable-debug --enable-debug_info --disable-shared --enable-cxx11  --without-liblzma
 	$ make -j4
 
 (see http://forums.wxwidgets.org/viewtopic.php?f=19&t=37432 for more information about why you need to add the build options.)
