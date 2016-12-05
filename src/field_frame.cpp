@@ -111,10 +111,8 @@ EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
-EVT_MENU(CALCHART__AdjustBackgroundImage,
-    FieldFrame::OnCmd_AdjustBackgroundImage)
-EVT_MENU(CALCHART__RemoveBackgroundImage,
-    FieldFrame::OnCmd_RemoveBackgroundImage)
+EVT_MENU(CALCHART__AdjustBackgroundImageMode,
+    FieldFrame::OnCmd_AdjustBackgroundImageMode)
 EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
@@ -297,15 +295,11 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     backgroundimage_menu->Append(CALCHART__AddBackgroundImage,
         wxT("Add Background Image..."),
         wxT("Add a background image"));
-    backgroundimage_menu->Append(CALCHART__AdjustBackgroundImage,
-        wxT("Adjust Background Image..."),
-        wxT("Adjust a background image"));
-    backgroundimage_menu->Append(CALCHART__RemoveBackgroundImage,
-        wxT("Remove Background Image..."),
-        wxT("Remove a background image"));
+    backgroundimage_menu->AppendCheckItem(CALCHART__AdjustBackgroundImageMode,
+        wxT("Image Adjust Mode..."),
+        wxT("Mode to adjust background images"));
     backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
-    backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImage, false);
-    backgroundimage_menu->Enable(CALCHART__RemoveBackgroundImage, false);
+    backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImageMode, true);
 
     wxMenu* ghost_menu = new wxMenu;
     ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"),
@@ -963,25 +957,22 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
             wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
             return;
         }
-        if (!mCanvas->SetBackgroundImage(image)) {
+        if (!GetFieldView()->AddBackgroundImage(image)) {
             wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
             return;
         }
-        GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(true);
-        GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(true);
+		GetFieldView()->DoPictureAdjustment(true);
+        GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(true);
+		mCanvas->Refresh();
     }
 }
 
-void FieldFrame::OnCmd_AdjustBackgroundImage(wxCommandEvent& event)
+void FieldFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
 {
-    mCanvas->AdjustBackgroundImage(true);
-}
-
-void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
-{
-    mCanvas->RemoveBackgroundImage();
-    GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
-    GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
+	bool toggle = !GetFieldView()->DoingPictureAdjustment();
+	GetFieldView()->DoPictureAdjustment(toggle);
+	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+	mCanvas->Refresh();
 }
 
 void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)

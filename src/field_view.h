@@ -26,6 +26,7 @@
 #include "CC_coord.h"
 
 #include "ghost_module.h"
+#include "background_image.h"
 
 #include <wx/docview.h>
 
@@ -48,6 +49,7 @@ public:
     bool OnCreate(wxDocument* doc, long flags);
     void OnDraw(wxDC* dc);
     void DrawOtherPoints(wxDC& dc, const std::map<unsigned, CC_coord>& positions);
+    void OnDrawBackground(wxDC& dc);
     void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
     bool OnClose(bool deleteWindow = true);
 
@@ -106,6 +108,14 @@ public:
 
     GhostModule& getGhostModule() { return mGhostModule; };
 
+	void DoPictureAdjustment(bool enable);
+	bool DoingPictureAdjustment() const;
+    bool AddBackgroundImage(const wxImage& image);
+	void OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc);
+	void OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc);
+	void OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc);
+	void OnBackgroundImageDelete();
+
 private:
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
     AnimationFrame* mFrame;
@@ -117,6 +127,7 @@ private:
     void GeneratePaths();
     std::unique_ptr<Animation> mAnimation;
     bool mDrawPaths;
+	void UpdateBackgroundImages();
 
 private:
     GhostModule mGhostModule;
@@ -124,6 +135,9 @@ private:
     CalChartDoc* mShow;
     unsigned mCurrentReferencePoint;
     CalChartConfiguration& mConfig;
+    std::vector<BackgroundImage> mBackgroundImages;
+	bool mAdjustBackgroundMode;
+	int mWhichBackgroundIndex;
 
     DECLARE_DYNAMIC_CLASS(FieldView)
 };

@@ -770,3 +770,30 @@ void CC_sheet::CC_sheet_round_trip_test()
 }
 
 void CC_sheet_UnitTests() { CC_sheet::CC_sheet_round_trip_test(); }
+
+std::vector<CC_sheet::ImageData> CC_sheet::GetBackgroundImages() const
+{
+	return mBackgroundImages;
+}
+
+void CC_sheet::AddBackgroundImages(ImageData const& image)
+{
+	mBackgroundImages.push_back(image);
+}
+
+void CC_sheet::RemoveBackgroundImage(int which)
+{
+	if (which >= 0 && which < mBackgroundImages.size()) {
+		mBackgroundImages.erase(mBackgroundImages.begin() + which);
+	}
+}
+
+void CC_sheet::MoveBackgroundImage(int which, int left, int top, int scaled_width, int scaled_height)
+{
+	if (which >= 0 && which < mBackgroundImages.size()) {
+		mBackgroundImages.at(which).left = left;
+		mBackgroundImages.at(which).top = top;
+		mBackgroundImages.at(which).scaled_width = scaled_width;
+		mBackgroundImages.at(which).scaled_height = scaled_height;
+	}
+}

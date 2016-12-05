@@ -80,9 +80,8 @@ enum {
     CALCHART__slider_sheet_callback,
     CALCHART__refnum_callback,
     CALCHART__draw_paths,
+    CALCHART__AdjustBackgroundImageMode,
     CALCHART__AddBackgroundImage,
-    CALCHART__AdjustBackgroundImage,
-    CALCHART__RemoveBackgroundImage,
     CALCHART__ResetReferencePoint,
 
     CALCHART__GhostOff,

@@ -468,3 +468,60 @@ ToggleLabelVisibilityCommand::ToggleLabelVisibilityCommand(CalChartDoc& show)
 }
 
 ToggleLabelVisibilityCommand::~ToggleLabelVisibilityCommand() {}
+
+AddNewBackgroundImageCommand::AddNewBackgroundImageCommand(CalChartDoc& show, int x, int y, int width, int height,
+		std::vector<unsigned char> const& data,
+		std::vector<unsigned char> const& alpha)
+    : super(show, wxT("Adding Background Image"))
+	, m_x(x)
+	, m_y(y)
+	, m_width(width)
+	, m_height(height)
+	, m_data(data)
+	, m_alpha(alpha)
+{
+}
+
+AddNewBackgroundImageCommand::~AddNewBackgroundImageCommand() {}
+
+void AddNewBackgroundImageCommand::DoAction()
+{
+    super::DoAction(); // sets page
+    CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	sheet->AddBackgroundImages(CC_sheet::ImageData{ m_x, m_y, m_x+m_width, m_y + m_height, m_width, m_height, m_data, m_alpha });
+}
+
+RemoveBackgroundImageCommand::RemoveBackgroundImageCommand(CalChartDoc& show, int which)
+    : super(show, wxT("Removing Background Image"))
+	, m_which(which)
+{
+}
+
+RemoveBackgroundImageCommand::~RemoveBackgroundImageCommand() {}
+
+void RemoveBackgroundImageCommand::DoAction()
+{
+    super::DoAction(); // sets page
+    CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	sheet->RemoveBackgroundImage(m_which);
+}
+
+MoveBackgroundImage::MoveBackgroundImage(CalChartDoc& show, int which, int left, int top, int scaled_width, int scaled_height)
+    : super(show, wxT("Moving Background Image"))
+	, m_which(which)
+	, m_left(left)
+	, m_top(top)
+	, m_scaled_width(scaled_width)
+	, m_scaled_height(scaled_height)
+{
+}
+
+MoveBackgroundImage::~MoveBackgroundImage() {}
+
+void MoveBackgroundImage::DoAction()
+{
+    super::DoAction(); // sets page
+    CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
+	sheet->MoveBackgroundImage(m_which, m_left, m_top, m_scaled_width, m_scaled_height);
+}
+

@@ -130,6 +130,20 @@ public:
      * @param compiledSheet An up-to-date animation of this sheet.
      */
     void toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const;
+
+	struct ImageData {
+		int left, top;
+		int scaled_width, scaled_height;
+		int image_width, image_height;
+		std::vector<unsigned char> data;
+		std::vector<unsigned char> alpha;
+	};
+
+	std::vector<ImageData> GetBackgroundImages() const;
+	void AddBackgroundImages(ImageData const& image);
+	void RemoveBackgroundImage(int which);
+	void MoveBackgroundImage(int which, int left, int top, int scaled_width, int scaled_height);
+
 private:
     CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
 
@@ -140,6 +154,8 @@ private:
     unsigned short beats;
     std::vector<CC_point> pts;
     std::string mName;
+
+	std::vector<ImageData> mBackgroundImages;
 
     // unit tests
     friend void CC_sheet_UnitTests();
