@@ -108,6 +108,8 @@ public:
 
     GhostModule& getGhostModule() { return mGhostModule; };
 
+	void DoDrawBackground(bool enable);
+	bool DoingDrawBackground() const;
 	void DoPictureAdjustment(bool enable);
 	bool DoingPictureAdjustment() const;
     bool AddBackgroundImage(const wxImage& image);
@@ -136,6 +138,7 @@ private:
     unsigned mCurrentReferencePoint;
     CalChartConfiguration& mConfig;
     std::vector<BackgroundImage> mBackgroundImages;
+	bool mDrawBackground;
 	bool mAdjustBackgroundMode;
 	int mWhichBackgroundIndex;
 

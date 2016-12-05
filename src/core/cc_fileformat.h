@@ -224,6 +224,7 @@ struct Current_version_and_later {
 #define INGL_CONT Make4CharWord('C', 'O', 'N', 'T')
 #define INGL_ECNT Make4CharWord('E', 'C', 'N', 'T')
 #define INGL_PCNT Make4CharWord('P', 'C', 'N', 'T')
+#define INGL_BACK Make4CharWord('B', 'A', 'C', 'K')
 #define INGL_PNTS Make4CharWord('P', 'N', 'T', 'S')
 #define INGL_PONT Make4CharWord('P', 'O', 'N', 'T')
 #define INGL_END Make4CharWord('E', 'N', 'D', ' ')

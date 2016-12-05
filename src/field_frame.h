@@ -109,6 +109,7 @@ public:
 
     void OnCmd_AddBackgroundImage(wxCommandEvent& event);
     void OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event);
+    void OnCmd_ShowBackgroundImages(wxCommandEvent& event);
 
     void OnCmd_GhostOption(wxCommandEvent& event);
 

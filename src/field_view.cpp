@@ -123,6 +123,7 @@ void FieldView::DrawOtherPoints(wxDC& dc,
 
 void FieldView::OnDrawBackground(wxDC& dc)
 {
+	if (!mDrawBackground) return;
 	for (auto i = 0; i < mBackgroundImages.size(); ++i)
 	{
         mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
@@ -463,6 +464,16 @@ void FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 void FieldView::GeneratePaths()
 {
     mAnimation = mShow->NewAnimation(NotifyStatus(), NotifyErrorList());
+}
+
+void FieldView::DoDrawBackground(bool enable)
+{
+	mDrawBackground = enable;
+}
+
+bool FieldView::DoingDrawBackground() const
+{
+	return mDrawBackground;
 }
 
 void FieldView::DoPictureAdjustment(bool enable)

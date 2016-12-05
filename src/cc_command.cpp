@@ -488,7 +488,7 @@ void AddNewBackgroundImageCommand::DoAction()
 {
     super::DoAction(); // sets page
     CC_show::CC_sheet_iterator_t sheet = mDoc.GetCurrentSheet();
-	sheet->AddBackgroundImages(CC_sheet::ImageData{ m_x, m_y, m_x+m_width, m_y + m_height, m_width, m_height, m_data, m_alpha });
+	sheet->AddBackgroundImages(CC_sheet::ImageData{ m_x, m_y, m_width, m_height, m_width, m_height, m_data, m_alpha });
 }
 
 RemoveBackgroundImageCommand::RemoveBackgroundImageCommand(CalChartDoc& show, int which)

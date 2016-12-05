@@ -110,9 +110,9 @@ EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
 EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
+EVT_MENU(CALCHART__ShowBackgroundImages, FieldFrame::OnCmd_ShowBackgroundImages)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
-EVT_MENU(CALCHART__AdjustBackgroundImageMode,
-    FieldFrame::OnCmd_AdjustBackgroundImageMode)
+EVT_MENU(CALCHART__AdjustBackgroundImageMode, FieldFrame::OnCmd_AdjustBackgroundImageMode)
 EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
@@ -292,12 +292,16 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Open show in CalChart Viewer"));
 
     wxMenu* backgroundimage_menu = new wxMenu;
+    backgroundimage_menu->AppendCheckItem(CALCHART__ShowBackgroundImages,
+        wxT("Show Background Images"),
+        wxT("Toggle showing background images"));
     backgroundimage_menu->Append(CALCHART__AddBackgroundImage,
         wxT("Add Background Image..."),
         wxT("Add a background image"));
     backgroundimage_menu->AppendCheckItem(CALCHART__AdjustBackgroundImageMode,
         wxT("Image Adjust Mode..."),
         wxT("Mode to adjust background images"));
+    backgroundimage_menu->Enable(CALCHART__ShowBackgroundImages, true);
     backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
     backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImageMode, true);
 
@@ -962,6 +966,8 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
             return;
         }
 		GetFieldView()->DoPictureAdjustment(true);
+		GetFieldView()->DoDrawBackground(true);
+        GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(true);
         GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(true);
 		mCanvas->Refresh();
     }
@@ -972,6 +978,22 @@ void FieldFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
 	bool toggle = !GetFieldView()->DoingPictureAdjustment();
 	GetFieldView()->DoPictureAdjustment(toggle);
 	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+	if (toggle) {
+		GetFieldView()->DoDrawBackground(toggle);
+		GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
+	}
+	mCanvas->Refresh();
+}
+
+void FieldFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
+{
+	bool toggle = !GetFieldView()->DoingDrawBackground();
+	GetFieldView()->DoDrawBackground(toggle);
+	GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
+	if (!toggle) {
+		GetFieldView()->DoPictureAdjustment(toggle);
+		GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+	}
 	mCanvas->Refresh();
 }
 

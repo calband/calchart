@@ -82,6 +82,7 @@ enum {
     CALCHART__draw_paths,
     CALCHART__AdjustBackgroundImageMode,
     CALCHART__AddBackgroundImage,
+    CALCHART__ShowBackgroundImages,
     CALCHART__ResetReferencePoint,
 
     CALCHART__GhostOff,

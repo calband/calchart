@@ -57,6 +57,7 @@ private:
     std::vector<uint8_t> SerializeAllPoints() const;
     std::vector<uint8_t> SerializeContinuityData() const;
     std::vector<uint8_t> SerializePrintContinuityData() const;
+    std::vector<uint8_t> SerializeBackgroundImageData() const;
     std::vector<uint8_t> SerializeSheetData() const;
 
 public:
@@ -137,6 +138,9 @@ public:
 		int image_width, image_height;
 		std::vector<unsigned char> data;
 		std::vector<unsigned char> alpha;
+		ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
+		ImageData(uint8_t const* &d);
+		std::vector<uint8_t> Serialize() const;
 	};
 
 	std::vector<ImageData> GetBackgroundImages() const;
