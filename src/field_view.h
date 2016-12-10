@@ -62,18 +62,17 @@ public:
     void DoSetMode(const wxString& mode);
     void DoSetShowInfo(unsigned numPoints, unsigned numColumns,
         const std::vector<wxString>& labels);
-    bool DoSetSheetTitle(const wxString& descr);
+    void DoSetSheetTitle(const wxString& descr);
     bool DoSetSheetBeats(unsigned short beats);
     bool DoSetPointsLabel(bool right);
     bool DoSetPointsLabelFlip();
     bool DoSetPointsLabelVisibility(bool isVisible);
     bool DoTogglePointsLabelVisibility();
-    bool DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht,
-        unsigned where);
-    bool DoInsertSheetsOtherShow(const CalChartDoc::CC_sheet_container_t& sht,
-        unsigned where, unsigned endpoint);
+    void DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, unsigned where);
     bool DoDeleteSheet(unsigned where);
     bool DoImportPrintableContinuity(const wxString& file);
+    bool DoRelabel();
+    std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
 
     ///// query show attributes /////
     int FindPoint(CC_coord pos) const;
@@ -92,13 +91,14 @@ public:
     void SetReferencePoint(unsigned which);
 
     ///// Select /////
-    void UnselectAll() { mShow->UnselectAll(); }
+    void UnselectAll();
     void AddToSelection(const SelectionList& sl);
     void ToggleSelection(const SelectionList& sl);
     void SelectWithLasso(const CC_lasso* lasso, bool toggleSelected);
     void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
         bool toggleSelected);
     const SelectionList& GetSelectionList();
+    void SetSelection(const SelectionList& sl);
 
     ///// Drawing marcher's paths /////
     // call this when we need to generate the marcher's paths.

@@ -74,6 +74,17 @@ static void AddTextboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
     verticalsizer->Add(textsizer, sBasicSizerFlags);
 }
 
+static void AddCheckboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
+    int id, const wxString& caption,
+    long style = 0)
+{
+    wxBoxSizer* textsizer = new wxBoxSizer(wxVERTICAL);
+    textsizer->Add(new wxCheckBox(parent, id, caption, wxDefaultPosition,
+                       wxDefaultSize, style),
+        sBasicSizerFlags);
+    verticalsizer->Add(textsizer, sBasicSizerFlags);
+}
+
 template <typename Function>
 void AddTextboxWithCaptionAndAction(wxWindow* parent, wxBoxSizer* verticalsizer,
     int id, const wxString& caption,
@@ -164,10 +175,14 @@ private:
     void OnCmdResetAll(wxCommandEvent&);
 
     wxString mAutoSave_Interval;
+    bool mSetSheet_Undo;
+    bool mSelection_Undo;
 };
 
 enum {
     AUTOSAVE_INTERVAL = 1000,
+    SETSHEET_UNDO,
+    SELECTION_UNDO,
 };
 
 BEGIN_EVENT_TABLE(GeneralSetup, PreferencePage)
@@ -189,6 +204,10 @@ void GeneralSetup::CreateControls()
 
     AddTextboxWithCaption(this, sizer1, AUTOSAVE_INTERVAL,
         wxT("Autosave Interval"));
+    AddCheckboxWithCaption(this, sizer1, SETSHEET_UNDO,
+        wxT("Set Sheet is undo-able"));
+    AddCheckboxWithCaption(this, sizer1, SELECTION_UNDO,
+        wxT("Point selection is undo-able"));
 
     TransferDataToWindow();
 }
@@ -196,11 +215,15 @@ void GeneralSetup::CreateControls()
 void GeneralSetup::Init()
 {
     mAutoSave_Interval.Printf(wxT("%ld"), mConfig.Get_AutosaveInterval());
+    mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
+    mSelection_Undo = mConfig.Get_CommandUndoSelection();
 }
 
 bool GeneralSetup::TransferDataToWindow()
 {
     ((wxTextCtrl*)FindWindow(AUTOSAVE_INTERVAL))->SetValue(mAutoSave_Interval);
+    ((wxCheckBox*)FindWindow(SETSHEET_UNDO))->SetValue(mSetSheet_Undo);
+    ((wxCheckBox*)FindWindow(SELECTION_UNDO))->SetValue(mSelection_Undo);
     return true;
 }
 
@@ -212,6 +235,10 @@ bool GeneralSetup::TransferDataFromWindow()
     if (mAutoSave_Interval.ToLong(&val)) {
         mConfig.Set_AutosaveInterval(val);
     }
+    mSetSheet_Undo = ((wxCheckBox*)FindWindow(SETSHEET_UNDO))->GetValue();
+    mConfig.Set_CommandUndoSetSheet(mSetSheet_Undo);
+    mSelection_Undo = ((wxCheckBox*)FindWindow(SELECTION_UNDO))->GetValue();
+    mConfig.Set_CommandUndoSelection(mSelection_Undo);
     return true;
 }
 
@@ -267,35 +294,37 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     // Create a fake show with some points and selections to draw an example for
     // the user
     mShow = CC_show::Create_CC_show();
-    mShow->SetupNewShow();
-    mShow->SetNumPoints(4, 4, field_offset);
-    mShow->SetPointLabel(std::vector<std::string>{
+    auto labels = std::vector<std::string>{
         "unsel", "unsel", "sel", "sel",
-    });
-    CC_show::CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
-    sheet->GetPoint(0).SetSymbol(SYMBOL_X);
-    sheet->GetPoint(1).SetSymbol(SYMBOL_SOLX);
-    sheet->GetPoint(2).SetSymbol(SYMBOL_X);
-    sheet->GetPoint(3).SetSymbol(SYMBOL_SOLX);
+    };
+	mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
+	mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
+    mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
+    mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
+    mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);
+    mShow->Create_SetSymbolCommand(SYMBOL_SOLX).first(*mShow);
+    mShow->Create_SetSelectionCommand(SelectionList{}).first(*mShow);
 
     for (auto i = 0; i < 4; ++i) {
-        sheet->SetAllPositions(
-            field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)), i);
-        sheet->SetPosition(field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(6)),
-            i, 1);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 2).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 3).first(*mShow);
+
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(6)) } }, 1).first(*mShow);
     }
 
-    mShow->InsertSheet(*sheet, 1);
-    mShow->SetCurrentSheet(0);
-    sheet = mShow->GetCurrentSheet();
-    ++sheet;
+	mShow->Create_AddSheetsCommand(CC_show::CC_sheet_container_t{ *static_cast<CC_show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
+	mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
-        sheet->SetAllPositions(
-            field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)), i);
-        sheet->SetPosition(
-            field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 6)), i, 1);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 2).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 3).first(*mShow);
+
+        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 6)) } }, 1).first(*mShow);
     }
-    mShow->SetCurrentSheet(0);
+	mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
 
     auto point_start = offset + field_offset + CC_coord(Int2Coord(4), Int2Coord(2));
     mPathEnd = point_start + CC_coord(Int2Coord(0), Int2Coord(2));
@@ -324,7 +353,7 @@ void PrefCanvas::OnPaint(wxPaintEvent& event)
     // Draw the field
     DrawMode(dc, mConfig, *mMode, ShowMode_kFieldView);
 
-    CC_show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+    CC_show::const_CC_sheet_iterator_t sheet = static_cast<CC_show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet;
     ++nextSheet;
 

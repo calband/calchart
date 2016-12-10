@@ -9,7 +9,7 @@ void GhostModule::setGhostSource(GhostSource source, int which)
     mWhich = which;
 }
 
-CC_sheet* GhostModule::getGhostSheet(CalChartDoc* doc, int currentSheet) const
+CC_sheet const* GhostModule::getGhostSheet(CalChartDoc const* doc, int currentSheet) const
 {
     if ((doc == nullptr) || (mCurrentSource == disabled)) {
         return nullptr;

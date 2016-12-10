@@ -352,7 +352,10 @@ std::pair<CC_coord, CC_coord> AnimationView::GetMarcherSizeAndOffset() const
         mode_size / 2 + bounding_box_upper_left };
 }
 
-void AnimationView::UnselectMarchers() { GetShow()->UnselectAll(); }
+void AnimationView::UnselectMarchers()
+{
+    GetShow()->SetSelection(GetShow()->MakeUnselectAll());
+}
 
 void AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
     long mouseXEnd, long mouseYEnd,
@@ -374,10 +377,10 @@ void AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
         }
     }
     if (altDown) {
-        GetShow()->ToggleSelection(pointlist);
+        GetShow()->SetSelection(GetShow()->MakeToggleSelection(pointlist));
     }
     else {
-        GetShow()->AddToSelection(pointlist);
+        GetShow()->SetSelection(GetShow()->MakeAddToSelection(pointlist));
     }
 }
 

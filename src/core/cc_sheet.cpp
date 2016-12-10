@@ -492,8 +492,7 @@ std::set<unsigned> CC_sheet::SelectPointsBySymbol(SYMBOL_TYPE i) const
     return select;
 }
 
-void CC_sheet::SetNumPoints(unsigned num, unsigned columns,
-    const CC_coord& new_march_position)
+std::vector<CC_point> CC_sheet::NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const
 {
     unsigned i, cpy, col;
     CC_coord c;
@@ -512,19 +511,19 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns,
         }
         newpts[i] = CC_point(c);
     }
-    pts = newpts;
+	return newpts;
 }
 
-void CC_sheet::RelabelSheet(const std::vector<size_t>& table)
+std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) const
 {
     if (pts.size() != table.size()) {
         throw std::runtime_error("wrong size for Relabel");
     }
     std::vector<CC_point> newpts(pts.size());
     for (size_t i = 0; i < newpts.size(); i++) {
-        newpts[i] = pts[table[i]];
+        newpts.at(i) = pts.at(table.at(i));
     }
-    pts = newpts;
+	return newpts;
 }
 
 const CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const

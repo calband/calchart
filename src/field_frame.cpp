@@ -345,7 +345,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     CalChartDoc* show = static_cast<CalChartDoc*>(doc);
     SetTitle(show->GetTitle());
-    show->SetCurrentSheet(0);
 
     // Add the controls
     wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
@@ -615,11 +614,10 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
         endValue = beginValue;
     }
 
-    int currend = GetShow()->GetNumSheets();
     CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(beginValue - 1),
         (&show)->GetNthSheet(endValue));
-    GetFieldView()->DoInsertSheetsOtherShow(
-        sheets, GetFieldView()->GetCurrentSheetNum() + 1, currend - 1);
+    GetFieldView()->DoInsertSheets(
+        sheets, GetFieldView()->GetCurrentSheetNum() + 1);
 }
 
 void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
@@ -690,18 +688,12 @@ void FieldFrame::OnCmdDelete(wxCommandEvent& event)
     }
 }
 
+// grey out if we're on a sheet
 void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 {
     if (GetFieldView()->GetCurrentSheetNum() + 1 < GetFieldView()->GetNumSheets()) {
-        if (wxMessageBox(wxT("Relabeling sheets is not undoable.\nProceed?"),
-                wxT("Relabel sheets"), wxYES_NO)
-            == wxYES) {
-            if (!GetShow()->RelabelSheets(GetFieldView()->GetCurrentSheetNum()))
-                (void)wxMessageBox(wxT("Stuntsheets don't match"),
-                    wxT("Relabel sheets"));
-            else {
-                GetDocument()->Modify(true);
-            }
+        if (!GetFieldView()->DoRelabel()) {
+            (void)wxMessageBox(wxT("Stuntsheets don't match"), wxT("Relabel sheets"));
         }
     }
     else {
@@ -1038,34 +1030,19 @@ void FieldFrame::OnSize(wxSizeEvent& event)
 // Append a show with file selector
 void FieldFrame::AppendShow()
 {
-    wxString s;
-    unsigned currend;
-
-    s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString,
-        wxEmptyString, file_wild);
-    if (!s.IsEmpty()) {
-        CalChartDoc* shw = new CalChartDoc();
-        if (shw->OnOpenDocument(s)) {
-            if (shw->GetNumPoints() == GetShow()->GetNumPoints()) {
-                currend = GetShow()->GetNumSheets();
-                GetFieldView()->DoInsertSheets(
-                    CC_show::CC_sheet_container_t(shw->GetSheetBegin(),
-                        shw->GetSheetEnd()),
-                    currend);
-                // This is bad, we are relabeling outside of adding sheets...
-                if (!GetShow()->RelabelSheets(currend - 1))
-                    (void)wxMessageBox(wxT("Stuntsheets don't match"),
-                        wxT("Append Error"));
-            }
-            else {
-                (void)wxMessageBox(wxT("The blocksize doesn't match"),
-                    wxT("Append Error"));
-            }
-        }
-        else {
-            (void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
-        }
-        delete shw;
+    auto s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
+    if (s.IsEmpty()) {
+        return;
+    }
+    auto shw = std::make_unique<CalChartDoc>();
+    if (!shw->OnOpenDocument(s)) {
+        (void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
+        return;
+    }
+    auto result = GetFieldView()->DoAppendShow(std::move(shw));
+    if (!result.first) {
+        (void)wxMessageBox(result.second, wxT("Append Error"));
+        return;
     }
 }
 

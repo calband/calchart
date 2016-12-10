@@ -128,14 +128,19 @@ void PointPicker::CreateControls()
     Update();
 }
 
-void PointPicker::PointPickerAll(wxCommandEvent&) { mShow.SelectAll(); }
+void PointPicker::PointPickerAll(wxCommandEvent&)
+{
+    mShow.SetSelection(mShow.MakeSelectAll()); }
 
 void PointPicker::PointPickerBySymbol(SYMBOL_TYPE which)
 {
     mShow.SetSelection(mShow.GetCurrentSheet()->SelectPointsBySymbol(which));
 }
 
-void PointPicker::PointPickerNone(wxCommandEvent&) { mShow.UnselectAll(); }
+void PointPicker::PointPickerNone(wxCommandEvent&)
+{
+    mShow.SetSelection(mShow.MakeUnselectAll());
+}
 
 void PointPicker::PointPickerSelect(wxCommandEvent&)
 {
