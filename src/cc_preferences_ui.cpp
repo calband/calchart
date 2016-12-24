@@ -548,8 +548,8 @@ bool DrawingSetup::ClearValuesToDefault()
 
 void DrawingSetup::SetColor(int selection, int width, const wxColour& color)
 {
-    mCalChartPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxSOLID);
-    mCalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxSOLID);
+    mCalChartPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxPENSTYLE_SOLID);
+    mCalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
     mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection),
         mCalChartBrushes[selection],

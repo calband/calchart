@@ -532,9 +532,8 @@ CalChartConfiguration::Get_CalChartBrushAndPen(CalChartColors c) const
     }
     auto colorAndWidth = mColorsAndWidth[c];
     return {
-        *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorAndWidth), wxSOLID),
-        *wxThePenList->FindOrCreatePen(std::get<0>(colorAndWidth),
-            std::get<1>(colorAndWidth), wxSOLID)
+        *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorAndWidth), wxBRUSHSTYLE_SOLID),
+        *wxThePenList->FindOrCreatePen(std::get<0>(colorAndWidth), std::get<1>(colorAndWidth), wxPENSTYLE_SOLID)
     };
 }
 
