@@ -190,8 +190,7 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
     wxBoxSizer* toprow = new wxBoxSizer(wxHORIZONTAL);
     wxSizerFlags topRowSizerFlags = wxSizerFlags(0).Expand().Border(0, 5);
     wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
-    wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5).Align(
-        wxALIGN_CENTER_HORIZONTAL);
+    wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5);
 
     // Add the controls
     wxBoxSizer* sizer1 = new wxBoxSizer(wxVERTICAL);
@@ -250,7 +249,7 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
         mCanvas->SetStepsOutForMarchersZoom(event.GetPosition());
     });
     sizer2->Add(steps,
-        wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_RIGHT).Expand());
+        wxSizerFlags(0).Border(wxALL, 5));
     sizer1->Add(sizer2, centerWidget);
     toprow->Add(sizer1, topRowSizerFlags);
 
@@ -261,8 +260,7 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
     mErrorList->SetSelection(0);
     sizer1->Add(mErrorList, centerWidget);
     mErrorText = new FancyTextWin(this, wxID_ANY);
-    sizer1->Add(mErrorText, wxSizerFlags(1).Expand().Border(wxALL, 5).Align(
-                                wxALIGN_CENTER_HORIZONTAL));
+    sizer1->Add(mErrorText, wxSizerFlags(1).Expand().Border(wxALL, 5));
     toprow->Add(sizer1, topRowSizerFlags);
 
     topsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));

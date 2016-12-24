@@ -24,7 +24,6 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C7071FF21C3B2CA8005481AC /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
 		C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
 		C7071FF61C3CAFAE005481AC /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
 		C7071FF71C3CB317005481AC /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
@@ -125,8 +124,6 @@
 		C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA977117A6DBA00CC53E2 /* cont_ui.cpp */; };
 		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
 		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
-		C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
-		C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		C7B669761474E20300E28B63 /* background_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7B669741474E20300E28B63 /* background_image.cpp */; };
 		C7C5FBD21479B356004E5C5B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD11479B356004E5C5B /* IOKit.framework */; };
 		C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
@@ -225,8 +222,6 @@
 		E803362D17EE1E3B00A58457 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
 		E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
-		E803363017EE1E7B00A58457 /* contgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */; };
-		E803363117EE1E9700A58457 /* contscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */; };
 		E803363317EE23F500A58457 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E803363617EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E803363817EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
@@ -237,6 +232,7 @@
 		E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
 		E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
 		E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
+		E808BDB61DE4C130000668DE /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
 		E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
 		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
 		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
@@ -252,11 +248,36 @@
 		E89A41F61A23B74800A2FB3E /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
 		E89A41F91A23B77500A2FB3E /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F71A23B76B00A2FB3E /* modes.cpp */; };
 		E89A41FA1A23B77600A2FB3E /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F71A23B76B00A2FB3E /* modes.cpp */; };
+		E8ABF9261DE1000F003FD2A5 /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
+		E8ABF9291DE1046B003FD2A5 /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
 		E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		E8ABF9241DE0FFC0003FD2A5 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = sourcecode.lex;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
+			);
+			script = "flex -B -i -t $INPUT_FILE_PATH > $SCRIPT_OUTPUT_FILE_0";
+		};
+		E8ABF9251DE0FFE1003FD2A5 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = sourcecode.yacc;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
+			);
+			script = "bison -dv $INPUT_FILE_PATH -o $SCRIPT_OUTPUT_FILE_0";
+		};
+/* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
 		E803363D17EE28A100A58457 /* PBXContainerItemProxy */ = {
@@ -519,9 +540,6 @@
 		C7AFA984117A6DBA00CC53E2 /* platconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platconf.h; sourceTree = "<group>"; };
 		C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = show_ui.cpp; sourceTree = "<group>"; };
 		C7AFA98B117A6DBA00CC53E2 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show_ui.h; sourceTree = "<group>"; };
-		C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contgram.cpp; sourceTree = "<group>"; };
-		C7AFA9A2117A6E7200CC53E2 /* contgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = contgram.h; sourceTree = "<group>"; };
-		C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contscan.cpp; sourceTree = "<group>"; };
 		C7B669741474E20300E28B63 /* background_image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = background_image.cpp; sourceTree = "<group>"; };
 		C7B669751474E20300E28B63 /* background_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = background_image.h; sourceTree = "<group>"; };
 		C7C5FBD11479B356004E5C5B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
@@ -733,7 +751,6 @@
 				C7C5FBD31479B367004E5C5B /* Carbon.framework */,
 				C7C5FBD11479B356004E5C5B /* IOKit.framework */,
 				C7ED4FC511CD594E001A4FA2 /* docs */,
-				C7AFA9A0117A6E7200CC53E2 /* generated */,
 				C774E2A114DF777C00558ABA /* image */,
 				C7AFA969117A6DBA00CC53E2 /* src */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -873,17 +890,6 @@
 			);
 			name = src;
 			path = ../src;
-			sourceTree = SOURCE_ROOT;
-		};
-		C7AFA9A0117A6E7200CC53E2 /* generated */ = {
-			isa = PBXGroup;
-			children = (
-				C7AFA9A1117A6E7200CC53E2 /* contgram.cpp */,
-				C7AFA9A2117A6E7200CC53E2 /* contgram.h */,
-				C7AFA9A3117A6E7200CC53E2 /* contscan.cpp */,
-			);
-			name = generated;
-			path = ../generated;
 			sourceTree = SOURCE_ROOT;
 		};
 		C7ED4FC511CD594E001A4FA2 /* docs */ = {
@@ -1045,6 +1051,8 @@
 				C774E2F314DF77B900558ABA /* Copy Images */,
 			);
 			buildRules = (
+				E8ABF9251DE0FFE1003FD2A5 /* PBXBuildRule */,
+				E8ABF9241DE0FFC0003FD2A5 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -1163,8 +1171,6 @@
 				C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */,
 				E89A41F61A23B74800A2FB3E /* print_ps.cpp in Sources */,
 				C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */,
-				C7AFA9A4117A6E7200CC53E2 /* contgram.cpp in Sources */,
-				C7AFA9A5117A6E7200CC53E2 /* contscan.cpp in Sources */,
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
 				E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */,
 				C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */,
@@ -1176,6 +1182,7 @@
 				C78FDE5E1BFB14DF0069B914 /* json.cpp in Sources */,
 				C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */,
 				C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */,
+				E808BDB61DE4C130000668DE /* json_export.cpp in Sources */,
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
 				E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */,
 				C7E047C8155F279000D8C71B /* field_view.cpp in Sources */,
@@ -1193,9 +1200,10 @@
 				E803363617EE27C500A58457 /* math_utils.cpp in Sources */,
 				E884F3A017A631AD00831301 /* animate.cpp in Sources */,
 				E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */,
+				E8ABF9261DE1000F003FD2A5 /* contgram.y in Sources */,
 				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
 				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
-				C7071FF21C3B2CA8005481AC /* json_export.cpp in Sources */,
+				E8ABF9291DE1046B003FD2A5 /* contscan.l in Sources */,
 				E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
@@ -1209,7 +1217,6 @@
 			files = (
 				E807BD5F17ED71F60052A53F /* main.cpp in Sources */,
 				E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */,
-				E803363117EE1E9700A58457 /* contscan.cpp in Sources */,
 				E89A41FA1A23B77600A2FB3E /* modes.cpp in Sources */,
 				E803363817EE27C500A58457 /* math_utils.cpp in Sources */,
 				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
@@ -1218,7 +1225,6 @@
 				C7071FF71C3CB317005481AC /* viewer_translate.cpp in Sources */,
 				E803363317EE23F500A58457 /* cont.cpp in Sources */,
 				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
-				E803363017EE1E7B00A58457 /* contgram.cpp in Sources */,
 				C78FDE621BFC4A3B0069B914 /* json.cpp in Sources */,
 				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
 				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
@@ -1266,7 +1272,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.0/wx/wxprec.h";
+				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.1/wx/wxprec.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_FILE_OFFSET_BITS=64",
 					__WXMAC__,
@@ -1276,7 +1282,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = CalChart;
 			};
 			name = Debug;
@@ -1287,7 +1293,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.0/wx/wxprec.h";
+				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.1/wx/wxprec.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_FILE_OFFSET_BITS=64",
 					__WXMAC__,
@@ -1297,7 +1303,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = CalChart;
 			};
 			name = Release;
@@ -1320,27 +1326,27 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../resources,
-					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
-					"/usr/local/include/wx-3.0",
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.1",
+					"/usr/local/include/wx-3.1",
 					/opt/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
-					"-lwx_osx_cocoau_gl-3.0",
-					"-lwx_osx_cocoau_xrc-3.0",
-					"-lwx_osx_cocoau_html-3.0",
-					"-lwx_osx_cocoau_qa-3.0",
-					"-lwx_osx_cocoau_adv-3.0",
-					"-lwx_osx_cocoau_core-3.0",
-					"-lwx_baseu_xml-3.0",
-					"-lwx_baseu_net-3.0",
-					"-lwx_baseu-3.0",
+					"-lwx_osx_cocoau_gl-3.1",
+					"-lwx_osx_cocoau_xrc-3.1",
+					"-lwx_osx_cocoau_qa-3.1",
+					"-lwx_baseu_net-3.1",
+					"-lwx_osx_cocoau_html-3.1",
+					"-lwx_osx_cocoau_adv-3.1",
+					"-lwx_osx_cocoau_core-3.1",
+					"-lwx_baseu_xml-3.1",
+					"-lwx_baseu-3.1",
 					"-lexpat",
-					"-lwxregexu-3.0",
-					"-lwxtiff-3.0",
-					"-lwxjpeg-3.0",
-					"-lwxpng-3.0",
+					"-lwxregexu-3.1",
+					"-lwxtiff-3.1",
+					"-lwxjpeg-3.1",
+					"-lwxpng-3.1",
 					"-lz",
 					"-lpthread",
 					"-liconv",
@@ -1368,26 +1374,26 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../resources,
-					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.0",
-					"/usr/local/include/wx-3.0",
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.1",
+					"/usr/local/include/wx-3.1",
 					/opt/local/include,
 				);
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
-					"-lwx_osx_cocoau_gl-3.0",
-					"-lwx_osx_cocoau_xrc-3.0",
-					"-lwx_osx_cocoau_html-3.0",
-					"-lwx_osx_cocoau_qa-3.0",
-					"-lwx_osx_cocoau_adv-3.0",
-					"-lwx_osx_cocoau_core-3.0",
-					"-lwx_baseu_xml-3.0",
-					"-lwx_baseu_net-3.0",
-					"-lwx_baseu-3.0",
+					"-lwx_osx_cocoau_gl-3.1",
+					"-lwx_osx_cocoau_xrc-3.1",
+					"-lwx_osx_cocoau_qa-3.1",
+					"-lwx_baseu_net-3.1",
+					"-lwx_osx_cocoau_html-3.1",
+					"-lwx_osx_cocoau_adv-3.1",
+					"-lwx_osx_cocoau_core-3.1",
+					"-lwx_baseu_xml-3.1",
+					"-lwx_baseu-3.1",
 					"-lexpat",
-					"-lwxregexu-3.0",
-					"-lwxtiff-3.0",
-					"-lwxjpeg-3.0",
-					"-lwxpng-3.0",
+					"-lwxregexu-3.1",
+					"-lwxtiff-3.1",
+					"-lwxjpeg-3.1",
+					"-lwxpng-3.1",
 					"-lz",
 					"-lpthread",
 					"-liconv",
