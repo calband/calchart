@@ -348,8 +348,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     // Add the controls
     wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
     wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
-    wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5).Align(
-        wxALIGN_CENTER_HORIZONTAL);
+    wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5);
     wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* toprow = new wxBoxSizer(wxHORIZONTAL);
 

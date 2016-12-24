@@ -129,7 +129,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
                     message += ("...");
                     notifyStatus(message);
                 }
-#if 1 // enable to see dump of continuity
+#if 0 // enable to see dump of continuity
                 {
                     for (auto& proc : continuity) {
                         std::cout << *proc << "\n";
