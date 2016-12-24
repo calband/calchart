@@ -108,8 +108,8 @@ public:
     void OnChar(wxKeyEvent& event);
 
     void OnCmd_AddBackgroundImage(wxCommandEvent& event);
-    void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
-    void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
+    void OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event);
+    void OnCmd_ShowBackgroundImages(wxCommandEvent& event);
 
     void OnCmd_GhostOption(wxCommandEvent& event);
 

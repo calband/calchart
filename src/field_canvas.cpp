@@ -76,9 +76,7 @@ void FieldCanvas::OnPaint(wxPaintEvent& event,
     // draw the background
     PaintBackground(dc, config);
     // draw Background Image
-    if (mBackgroundImage) {
-        mBackgroundImage->OnPaint(dc);
-    }
+	mView->OnDrawBackground(dc);
 
     // draw the view
     mView->OnDraw(&dc);
@@ -117,8 +115,8 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
     x = dc.DeviceToLogicalX(x);
     y = dc.DeviceToLogicalY(y);
 
-    if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment()) {
-        mBackgroundImage->OnMouseLeftDown(event, dc);
+    if (mView->DoingPictureAdjustment()) {
+        mView->OnBackgroundMouseLeftDown(event, dc);
     }
     else {
         CC_coord pos = mView->GetShowFieldOffset();
@@ -370,8 +368,8 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
     x = dc.DeviceToLogicalX(x);
     y = dc.DeviceToLogicalY(y);
 
-    if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment()) {
-        mBackgroundImage->OnMouseLeftUp(event, dc);
+    if (mView->DoingPictureAdjustment()) {
+        mView->OnBackgroundMouseLeftUp(event, dc);
     }
     else {
         CC_coord pos = mView->GetShowFieldOffset();
@@ -495,8 +493,8 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
         x = dc.DeviceToLogicalX(x);
         y = dc.DeviceToLogicalY(y);
 
-        if (mBackgroundImage && mBackgroundImage->DoingPictureAdjustment()) {
-            mBackgroundImage->OnMouseMove(event, dc);
+        if (mView->DoingPictureAdjustment()) {
+            mView->OnBackgroundMouseMove(event, dc);
         }
         else {
             CC_coord pos = mView->GetShowFieldOffset();
@@ -518,6 +516,9 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
         mView->GoToPrevSheet();
     else if (event.GetKeyCode() == WXK_RIGHT)
         mView->GoToNextSheet();
+    else if (event.GetKeyCode() == WXK_DELETE || event.GetKeyCode() == WXK_NUMPAD_DELETE || event.GetKeyCode() == WXK_BACK) {
+		mView->OnBackgroundImageDelete();
+	}
     else
         event.Skip();
 }
@@ -607,37 +608,6 @@ void FieldCanvas::EndDrag()
     ClearShapes();
     mTransformer = nullptr;
     drag = CC_DRAG_NONE;
-}
-
-bool FieldCanvas::SetBackgroundImage(const wxImage& image)
-{
-    if (!image.IsOk()) {
-        return false;
-    }
-
-    wxClientDC dc(this);
-    PrepareDC(dc);
-    long x = 100;
-    long y = 100;
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
-
-    mBackgroundImage.reset(new BackgroundImage(image, x, y));
-    Refresh();
-    return true;
-}
-
-void FieldCanvas::AdjustBackgroundImage(bool enable)
-{
-    if (mBackgroundImage)
-        mBackgroundImage->DoPictureAdjustment(enable);
-    Refresh();
-}
-
-void FieldCanvas::RemoveBackgroundImage()
-{
-    mBackgroundImage.reset();
-    Refresh();
 }
 
 CC_DRAG_TYPES

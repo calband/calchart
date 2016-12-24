@@ -23,27 +23,57 @@
 #include "background_image.h"
 #include <algorithm>
 
-BackgroundImage::BackgroundImage(const wxImage& image, const wxCoord& x,
-    const wxCoord& y)
+BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_width, int scaled_height)
     : mImage(image)
     , mBitmapX(x)
     , mBitmapY(y)
-    , mDoBackgroundPicAdjust(true)
     , // always adjust when we get created
     mBackgroundAdjustType(kLast)
 {
-    mBitmap = wxBitmap(mImage);
-    mDoBackgroundPicAdjust = true;
+    mBitmap = wxBitmap(mImage.Scale(scaled_width, scaled_height, wxIMAGE_QUALITY_HIGH));
 }
+
+bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event,
+    const wxDC& dc) const
+{
+    long x, y;
+    event.GetPosition(&x, &y);
+    x = dc.DeviceToLogicalX(x);
+    y = dc.DeviceToLogicalY(y);
+
+    // where are we?
+    int height = mBitmap.GetHeight();
+    int width = mBitmap.GetWidth();
+    int middleX = mBitmapX + width / 2;
+    int middleY = mBitmapY + height / 2;
+    int where;
+    for (where = kUpperLeft; where < kLast; ++where) {
+        if (where == kMove) {
+			wxRect bitmapSquare(wxPoint(mBitmapX, mBitmapY),
+            wxSize(mBitmap.GetWidth(), mBitmap.GetHeight()));
+			if (bitmapSquare.Contains(x, y)) {
+				return true;
+			}
+		}
+        int offsetX = (where % 3) - 1;
+        int offsetY = (where / 3) - 1;
+        wxRect grabPoint(
+            middleX + (offsetX * (width / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
+            middleY + (offsetY * (height / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
+            dc.DeviceToLogicalXRel(kCircleSize * 2),
+            dc.DeviceToLogicalXRel(kCircleSize * 2));
+
+        if (grabPoint.Contains(x, y)) {
+            return true;
+        }
+    }
+	return false;
+}
+
 
 void BackgroundImage::OnMouseLeftDown(const wxMouseEvent& event,
     const wxDC& dc)
 {
-    if (!mDoBackgroundPicAdjust) {
-        // not adjusting picture, so we are done
-        return;
-    }
-
     long x, y;
     event.GetPosition(&x, &y);
     x = dc.DeviceToLogicalX(x);
@@ -83,26 +113,20 @@ void BackgroundImage::OnMouseLeftDown(const wxMouseEvent& event,
             wxPoint(x, y), mBitmapX, mBitmapY, mBitmap.GetWidth(),
             mBitmap.GetHeight(), mBackgroundAdjustType));
     }
-    else {
-        // give one last chance to the user.  If there click is within 1 circle of
-        // the, don't turn off adjust
-        wxRect bitmapSquare(wxPoint(mBitmapX, mBitmapY) - wxPoint(kCircleSize, kCircleSize),
-            wxSize(mBitmap.GetWidth(), mBitmap.GetHeight()) + wxSize(kCircleSize * 2, kCircleSize * 2));
-        if (!bitmapSquare.Contains(x, y)) {
-            mDoBackgroundPicAdjust = false;
-        }
-    }
 }
 
-void BackgroundImage::OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc)
+std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc)
 {
     if (mScaleAndMove) {
         // done moving, lock down the picture and make it pretty:
         mBitmap = wxBitmap(mImage.Scale(mBitmap.GetWidth(), mBitmap.GetHeight(),
             wxIMAGE_QUALITY_HIGH));
+		std::array<int, 4> data { {mBitmapX, mBitmapY, mBitmap.GetWidth(), mBitmap.GetHeight()} };
         mScaleAndMove.reset();
         mBackgroundAdjustType = kLast;
+		return data;
     }
+	return { { 0, 0, 0, 0 } };
 }
 
 void BackgroundImage::OnMouseMove(const wxMouseEvent& event, const wxDC& dc)
@@ -120,19 +144,19 @@ void BackgroundImage::OnMouseMove(const wxMouseEvent& event, const wxDC& dc)
     }
 }
 
-void BackgroundImage::OnPaint(wxDC& dc)
+void BackgroundImage::OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const
 {
     dc.DrawBitmap(mBitmap, mBitmapX, mBitmapY, true);
-    if (mDoBackgroundPicAdjust) {
+    if (drawPicAdjustDots) {
         // draw guide dots
         int height = mBitmap.GetHeight();
         int width = mBitmap.GetWidth();
         int middleX = mBitmapX + width / 2;
         int middleY = mBitmapY + height / 2;
-        dc.SetBrush(*wxCYAN_BRUSH);
-        dc.SetPen(*wxWHITE_PEN);
+        dc.SetBrush(*wxBLUE_BRUSH);
+        dc.SetPen(*wxBLUE_PEN);
         for (int where = kUpperLeft; where < kLast; ++where) {
-            dc.SetBrush(*wxCYAN_BRUSH);
+            dc.SetBrush(*wxBLUE_BRUSH);
             if (where == kMove)
                 continue;
             int offsetX = (where % 3) - 1;
@@ -144,6 +168,13 @@ void BackgroundImage::OnPaint(wxDC& dc)
                 middleX + (offsetX * (width / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))),
                 middleY + (offsetY * (height / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))),
                 dc.DeviceToLogicalXRel(kCircleSize));
+            if (selected && mBackgroundAdjustType != where) {
+                dc.SetBrush(*wxWHITE_BRUSH);
+				dc.DrawCircle(
+					middleX + (offsetX * (width / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))),
+					middleY + (offsetY * (height / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))),
+					dc.DeviceToLogicalXRel(kCircleSize*0.75));
+            }
         }
     }
 }
