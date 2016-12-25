@@ -687,3 +687,25 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_ToggleLabelVisibilityCommand()
 	cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ToggleLabelVisibilityCommand()));
 	return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Label Visibility"), cmds);
 }
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
+{
+	auto cmds = Create_SetSheetPair();
+	cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddNewBackgroundImageCommand(CC_sheet::ImageData{ left, top, image_width, image_height, image_width, image_height, data, alpha })));
+	return std::make_unique<CalChartDocCommand>(*this, wxT("Adding Background Image"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveBackgroundImageCommand(int which)
+{
+	auto cmds = Create_SetSheetPair();
+	cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RemoveBackgroundImageCommand(which)));
+	return std::make_unique<CalChartDocCommand>(*this, wxT("Removing Background Image"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height)
+{
+	auto cmds = Create_SetSheetPair();
+	cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MoveBackgroundImageCommand(which, left, top, scaled_width, scaled_height)));
+	return std::make_unique<CalChartDocCommand>(*this, wxT("Moving Background Image"), cmds);
+}
+

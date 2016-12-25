@@ -194,6 +194,9 @@ public:
     std::unique_ptr<wxCommand> Create_ToggleLabelFlipCommand();
     std::unique_ptr<wxCommand> Create_SetLabelVisibleCommand(bool isVisible);
     std::unique_ptr<wxCommand> Create_ToggleLabelVisibilityCommand();
+    std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
+    std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
+    std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
 
 private:
     static CC_doc_command_pair Inject_CalChartDocArg(CC_show_command_pair);

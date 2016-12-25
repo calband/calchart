@@ -143,10 +143,10 @@ public:
 		std::vector<uint8_t> Serialize() const;
 	};
 
-	std::vector<ImageData> GetBackgroundImages() const;
-	void AddBackgroundImages(ImageData const& image);
-	void RemoveBackgroundImage(int which);
-	void MoveBackgroundImage(int which, int left, int top, int scaled_width, int scaled_height);
+	std::vector<ImageData> const& GetBackgroundImages() const;
+	void AddBackgroundImage(ImageData const& image, size_t where);
+	void RemoveBackgroundImage(size_t which);
+	void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
 
 private:
     CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);

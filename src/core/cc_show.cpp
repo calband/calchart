@@ -856,6 +856,55 @@ CC_show_command_pair CC_show::Create_ToggleLabelVisibilityCommand() const
     return Create_SetLabelVisiblityCommand(visible);
 }
 
+CC_show_command_pair CC_show::Create_AddNewBackgroundImageCommand(CC_sheet::ImageData const& image) const
+{
+    auto sheet = GetCurrentSheet();
+	auto action = [sheet_num = mSheetNum, image, where = sheet->GetBackgroundImages().size()](CC_show& show) {
+        auto sheet = show.GetNthSheet(sheet_num);
+        sheet->AddBackgroundImage(image, where);
+    };
+	auto reaction = [sheet_num = mSheetNum, where = sheet->GetBackgroundImages().size()](CC_show& show) {
+        auto sheet = show.GetNthSheet(sheet_num);
+        sheet->RemoveBackgroundImage(where);
+    };
+	return CC_show_command_pair{ action, reaction };
+}
+
+CC_show_command_pair CC_show::Create_RemoveBackgroundImageCommand(int which) const
+{
+    auto sheet = GetCurrentSheet();
+    if (which >= sheet->GetBackgroundImages().size()) {
+        return { [](CC_show&){}, [](CC_show&){} };
+    }
+	auto action = [sheet_num = mSheetNum, which](CC_show& show) {
+        auto sheet = show.GetNthSheet(sheet_num);
+        sheet->RemoveBackgroundImage(which);
+    };
+	auto reaction = [sheet_num = mSheetNum, image = sheet->GetBackgroundImages().at(which), which](CC_show& show) {
+        auto sheet = show.GetNthSheet(sheet_num);
+        sheet->AddBackgroundImage(image, which);
+    };
+	return CC_show_command_pair{ action, reaction };
+}
+
+CC_show_command_pair CC_show::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const
+{
+    auto sheet = GetCurrentSheet();
+    auto current_left = sheet->GetBackgroundImages().at(which).left;
+    auto current_top = sheet->GetBackgroundImages().at(which).top;
+    auto current_scaled_width = sheet->GetBackgroundImages().at(which).scaled_width;
+    auto current_scaled_height = sheet->GetBackgroundImages().at(which).scaled_height;
+	auto action = [sheet_num = mSheetNum, which, left, top, scaled_width, scaled_height](CC_show& show) {
+        auto sheet = show.GetNthSheet(sheet_num);
+        sheet->MoveBackgroundImage(which, left, top, scaled_width, scaled_height);
+    };
+	auto reaction = [sheet_num = mSheetNum, which, current_left, current_top, current_scaled_width, current_scaled_height](CC_show& show) {
+        auto sheet = show.GetNthSheet(sheet_num);
+        sheet->MoveBackgroundImage(which, current_left, current_top, current_scaled_width, current_scaled_height);
+    };
+	return CC_show_command_pair{ action, reaction };
+}
+
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
 #include <assert.h>

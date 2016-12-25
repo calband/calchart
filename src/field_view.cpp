@@ -566,9 +566,8 @@ bool FieldView::AddBackgroundImage(const wxImage& image)
 		std::copy(a, a + width*height, alpha.data());
 	}
 	
-    GetDocument()->GetCommandProcessor()->Submit(
-        new AddNewBackgroundImageCommand(*mShow, x, y, width, height, data, alpha),
-        true);
+	auto cmd = mShow->Create_AddNewBackgroundImageCommand(x, y, width, height, data, alpha);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -594,9 +593,8 @@ void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 	if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())
 	{
 		auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
-		GetDocument()->GetCommandProcessor()->Submit(
-			new MoveBackgroundImage(*mShow, mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result)),
-			true);
+        auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
+		GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 	}
 }
 
@@ -613,9 +611,8 @@ void FieldView::OnBackgroundImageDelete()
 {
 	if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())) return;
 	// let the doc know we've removed a picture.
-	GetDocument()->GetCommandProcessor()->Submit(
-		new RemoveBackgroundImageCommand(*mShow, mWhichBackgroundIndex),
-		true);
+    auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);
+	GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 void FieldView::UpdateBackgroundImages()
