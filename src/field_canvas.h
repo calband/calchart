@@ -61,11 +61,6 @@ public:
     float ZoomToFitFactor() const;
     virtual void SetZoom(float factor);
 
-    // return true on success
-    bool SetBackgroundImage(const wxImage& image);
-    void AdjustBackgroundImage(bool enable);
-    void RemoveBackgroundImage();
-
     CC_DRAG_TYPES GetCurrentLasso() const;
     void SetCurrentLasso(CC_DRAG_TYPES lasso);
     CC_MOVE_MODES GetCurrentMove() const;
@@ -96,7 +91,6 @@ private:
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
     void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
-    std::unique_ptr<BackgroundImage> mBackgroundImage;
     std::map<unsigned, CC_coord> mMovePoints;
     std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;
 

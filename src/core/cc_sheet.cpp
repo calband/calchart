@@ -365,12 +365,19 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         }
         sheet->mPrintableContinuity = CC_print_continuity(print_name, print_cont);
     };
+    auto parse_INGL_BACK = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+		auto num = get_big_long(ptr); ptr += 4;
+		while (num--)
+		{
+			sheet->mBackgroundImages.emplace_back(ptr);
+		}
+    };
 
     static const std::map<uint32_t, std::function<void(CC_sheet*, const uint8_t*, size_t)> >
         parser = {
             { INGL_NAME, parse_INGL_NAME }, { INGL_DURA, parse_INGL_DURA },
             { INGL_PNTS, parse_INGL_PNTS }, { INGL_CONT, parse_INGL_CONT },
-            { INGL_PCNT, parse_INGL_PCNT },
+            { INGL_PCNT, parse_INGL_PCNT }, { INGL_BACK, parse_INGL_BACK },
         };
 
     auto table = CalChart::Parser::ParseOutLabels(ptr, ptr + size);
@@ -421,6 +428,17 @@ std::vector<uint8_t> CC_sheet::SerializePrintContinuityData() const
     return result;
 }
 
+std::vector<uint8_t> CC_sheet::SerializeBackgroundImageData() const
+{
+    std::vector<uint8_t> result;
+    CalChart::Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
+	for (auto&& i : mBackgroundImages)
+	{
+        CalChart::Parser::Append(result, i.Serialize());
+	}
+    return result;
+}
+
 std::vector<uint8_t> CC_sheet::SerializeSheetData() const
 {
     // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY,
@@ -449,6 +467,10 @@ std::vector<uint8_t> CC_sheet::SerializeSheetData() const
     CalChart::Parser::Append(result,
         CalChart::Parser::Construct_block(
                                  INGL_PCNT, SerializePrintContinuityData()));
+
+    // Write Continuity
+    CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
+                                 INGL_BACK, SerializeBackgroundImageData()));
 
     return result;
 }
@@ -769,3 +791,73 @@ void CC_sheet::CC_sheet_round_trip_test()
 }
 
 void CC_sheet_UnitTests() { CC_sheet::CC_sheet_round_trip_test(); }
+
+std::vector<CC_sheet::ImageData> CC_sheet::GetBackgroundImages() const
+{
+	return mBackgroundImages;
+}
+
+void CC_sheet::AddBackgroundImages(ImageData const& image)
+{
+	mBackgroundImages.push_back(image);
+}
+
+void CC_sheet::RemoveBackgroundImage(int which)
+{
+	if (which >= 0 && which < mBackgroundImages.size()) {
+		mBackgroundImages.erase(mBackgroundImages.begin() + which);
+	}
+}
+
+void CC_sheet::MoveBackgroundImage(int which, int left, int top, int scaled_width, int scaled_height)
+{
+	if (which >= 0 && which < mBackgroundImages.size()) {
+		mBackgroundImages.at(which).left = left;
+		mBackgroundImages.at(which).top = top;
+		mBackgroundImages.at(which).scaled_width = scaled_width;
+		mBackgroundImages.at(which).scaled_height = scaled_height;
+	}
+}
+
+CC_sheet::ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
+	: left(left)
+	, top(top)
+	, scaled_width(scaled_width)
+	, scaled_height(scaled_height)
+	, image_width(image_width)
+	, image_height(image_height)
+	, data(data)
+	, alpha(alpha)
+{
+}
+
+CC_sheet::ImageData::ImageData(uint8_t const*& d) {
+	left = get_big_long(d); d += 4;
+	top = get_big_long(d); d += 4;
+	scaled_width = get_big_long(d); d += 4;
+	scaled_height = get_big_long(d); d += 4;
+	image_width = get_big_long(d); d += 4;
+	image_height = get_big_long(d); d += 4;
+	auto data_size = get_big_long(d); d += 4;
+	data.assign(d, d + data_size); d += data_size;
+	auto alpha_size = get_big_long(d); d += 4;
+	alpha.assign(d, d + alpha_size); d += alpha_size;
+}
+
+std::vector<uint8_t> CC_sheet::ImageData::Serialize() const
+{
+    std::vector<uint8_t> result;
+    CalChart::Parser::Append(result, uint32_t(left));
+    CalChart::Parser::Append(result, uint32_t(top));
+    CalChart::Parser::Append(result, uint32_t(scaled_width));
+    CalChart::Parser::Append(result, uint32_t(scaled_height));
+    CalChart::Parser::Append(result, uint32_t(image_width));
+    CalChart::Parser::Append(result, uint32_t(image_height));
+	// we know data size, but let's put it in anyways
+    CalChart::Parser::Append(result, uint32_t(data.size()));
+    CalChart::Parser::Append(result, data);
+	// alpha could be zero
+    CalChart::Parser::Append(result, uint32_t(alpha.size()));
+    CalChart::Parser::Append(result, alpha);
+	return result;
+}

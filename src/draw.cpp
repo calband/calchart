@@ -200,9 +200,7 @@ void DrawSheetPoints(
     CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
 {
     SaveAndRestore_Font orig_font(dc);
-    wxFont* pointLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxSWISS,
-        wxNORMAL, wxNORMAL);
+    wxFont* pointLabelFont = wxTheFontList->FindOrCreateFont((int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*pointLabelFont);
     dc.SetTextForeground(
         config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
@@ -292,10 +290,10 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity,
     // font size, we scale to be no more than 256 pixels.
     font_size = std::min(font_size, 10);
 
-    wxFont* contPlainFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxNORMAL, wxNORMAL);
-    wxFont* contBoldFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxNORMAL, wxBOLD);
-    wxFont* contItalFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxITALIC, wxNORMAL);
-    wxFont* contBoldItalFont = wxTheFontList->FindOrCreateFont(font_size, wxMODERN, wxITALIC, wxBOLD);
+    wxFont* contPlainFont = wxTheFontList->FindOrCreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    wxFont* contBoldFont = wxTheFontList->FindOrCreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
+    wxFont* contItalFont = wxTheFontList->FindOrCreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_NORMAL);
+    wxFont* contBoldItalFont = wxTheFontList->FindOrCreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD);
 
     dc.SetFont(*contPlainFont);
     const wxCoord maxtexth = contPlainFont->GetPointSize() + 2;
@@ -512,8 +510,8 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
     // draw the field.
     DrawMode(dc, config, *mode, ShowMode_kPrinting);
     wxFont* pointLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxSWISS,
-        wxNORMAL, wxNORMAL);
+        (int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxFONTFAMILY_SWISS,
+        wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*pointLabelFont);
     for (auto i = 0u; i < pts.size(); i++) {
         const auto point = pts.at(i);
@@ -540,8 +538,8 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
     }
 
     // draw the header
-    dc.SetFont(*wxTheFontList->FindOrCreateFont(16, wxROMAN, wxNORMAL, wxBOLD));
-    dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxSOLID));
+    dc.SetFont(*wxTheFontList->FindOrCreateFont(16, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
 
     DrawCenteredText(dc, kHeader, wxPoint(pageW * kHeaderLocation[landscape][0],
                                       pageH * kHeaderLocation[landscape][1]));
@@ -557,7 +555,7 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
         pageW * kLowerNumberBox[landscape][2],
         pageH * kLowerNumberBox[landscape][3]);
 
-    dc.SetFont(*wxTheFontList->FindOrCreateFont(8, wxSWISS, wxNORMAL, wxNORMAL));
+    dc.SetFont(*wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
     DrawLineOverText(dc, kMusicLabel,
         wxPoint(pageW * kMusicLabelPosition[landscape][0],
@@ -712,8 +710,8 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
 {
     SaveAndRestore_Font orig_font(dc);
     wxFont* pointLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxSWISS,
-        wxNORMAL, wxNORMAL);
+        (int)Float2Coord(config.Get_DotRatio() * config.Get_NumRatio()), wxFONTFAMILY_SWISS,
+        wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*pointLabelFont);
     CC_coord origin = show.GetMode().Offset();
     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT);
@@ -857,7 +855,7 @@ void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 
     // Draw labels
     wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2Coord(config.Get_YardsSize()), wxSWISS, wxNORMAL, wxNORMAL);
+        (int)Float2Coord(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*yardLabelFont);
     for (int i = 0;
          (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kOmniView || howToDraw == ShowMode_kPrinting) && i < Coord2Int(fieldsize.x) / 8 + 1;
@@ -921,7 +919,7 @@ void ShowModeSprShow_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
 
     // Draw labels
     wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2Coord(config.Get_YardsSize()), wxSWISS, wxNORMAL, wxNORMAL);
+        (int)Float2Coord(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*yardLabelFont);
     for (int i = 0;
          (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && i < Coord2Int(fieldsize.x) / 8 + 1;

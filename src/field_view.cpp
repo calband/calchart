@@ -71,6 +71,7 @@ bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
                                 mConfig.Get_FieldFrameHeight()));
 #endif
 
+	UpdateBackgroundImages();
     mFrame->Show(true);
     Activate(true);
     return true;
@@ -121,6 +122,15 @@ void FieldView::DrawOtherPoints(wxDC& dc,
     DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
 
+void FieldView::OnDrawBackground(wxDC& dc)
+{
+	if (!mDrawBackground) return;
+	for (auto i = 0; i < mBackgroundImages.size(); ++i)
+	{
+        mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
+	}
+}
+
 void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
 {
     if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_setup))) {
@@ -136,6 +146,7 @@ void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
     else if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
         GeneratePaths();
     }
+	UpdateBackgroundImages();
 
     if (mFrame) {
         mFrame->UpdatePanel();
@@ -514,3 +525,122 @@ void FieldView::GeneratePaths()
 {
     mAnimation = mShow->NewAnimation(NotifyStatus(), NotifyErrorList());
 }
+
+void FieldView::DoDrawBackground(bool enable)
+{
+	mDrawBackground = enable;
+}
+
+bool FieldView::DoingDrawBackground() const
+{
+	return mDrawBackground;
+}
+
+void FieldView::DoPictureAdjustment(bool enable)
+{
+	mAdjustBackgroundMode = enable;
+}
+
+bool FieldView::DoingPictureAdjustment() const
+{
+	return mAdjustBackgroundMode;
+}
+
+bool FieldView::AddBackgroundImage(const wxImage& image)
+{
+    if (!image.IsOk()) {
+        return false;
+    }
+    long x = 100;
+    long y = 100;
+
+	auto width = image.GetWidth();
+	auto height = image.GetHeight();
+	std::vector<unsigned char> data(width*height*3);
+	auto d = image.GetData();
+	std::copy(d, d + width*height*3, data.data());
+	std::vector<unsigned char> alpha;
+	auto a = image.GetAlpha();
+	if (a) {
+		alpha.resize(width*height);
+		std::copy(a, a + width*height, alpha.data());
+	}
+	
+    GetDocument()->GetCommandProcessor()->Submit(
+        new AddNewBackgroundImageCommand(*mShow, x, y, width, height, data, alpha),
+        true);
+    return true;
+}
+
+void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
+{
+	if (!mAdjustBackgroundMode) return;
+	mWhichBackgroundIndex = -1;
+	for (auto i = 0; i < mBackgroundImages.size(); ++i)
+	{
+        if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
+			mWhichBackgroundIndex = i;
+		}
+	}
+	if (mWhichBackgroundIndex != -1)
+	{
+		mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftDown(event, dc);
+	}
+}
+
+void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
+{
+	if (!mAdjustBackgroundMode) return;
+	if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())
+	{
+		auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
+		GetDocument()->GetCommandProcessor()->Submit(
+			new MoveBackgroundImage(*mShow, mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result)),
+			true);
+	}
+}
+
+void FieldView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
+{
+	if (!mAdjustBackgroundMode) return;
+	if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())
+	{
+		mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
+	}
+}
+
+void FieldView::OnBackgroundImageDelete()
+{
+	if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())) return;
+	// let the doc know we've removed a picture.
+	GetDocument()->GetCommandProcessor()->Submit(
+		new RemoveBackgroundImageCommand(*mShow, mWhichBackgroundIndex),
+		true);
+}
+
+void FieldView::UpdateBackgroundImages()
+{
+	mBackgroundImages.clear();
+	if (mShow && mShow->GetNumSheets())
+	{
+		auto images = mShow->GetCurrentSheet()->GetBackgroundImages();
+		for (auto&& image : images)
+		{
+			// ugh...  not sure if there's a better way to pass data to image.
+			auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
+			std::copy(image.data.begin(), image.data.end(), d);
+			auto a = static_cast<unsigned char*>(nullptr);
+			if (image.alpha.size()) {
+				a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
+				std::copy(image.alpha.begin(), image.alpha.end(), a);
+				wxImage img(image.image_width, image.image_height, d, a);
+				mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+			}
+			else {
+				wxImage img(image.image_width, image.image_height, d);
+				mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+			}
+		}
+	}
+}
+

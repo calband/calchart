@@ -47,3 +47,59 @@ protected:
     bool mDocModified;
 	std::vector<CC_doc_command_pair> mCmds;
 };
+
+// AddNewBackgroundImage
+// Add a new image to the sheet
+class AddNewBackgroundImageCommand : public SetSheetCommand {
+private:
+    using super = SetSheetCommand;
+
+public:
+    AddNewBackgroundImageCommand(CalChartDoc& show, int x, int y, int width, int height,
+		std::vector<unsigned char> const& data,
+		std::vector<unsigned char> const& alpha);
+    virtual ~AddNewBackgroundImageCommand();
+protected:
+    virtual void DoAction();
+
+	int m_x;
+	int m_y;
+	int m_width;
+	int m_height;
+	std::vector<unsigned char> m_data;
+	std::vector<unsigned char> m_alpha;
+};
+
+// AddNewBackgroundImage
+// Add a new image to the sheet
+class RemoveBackgroundImageCommand : public SetSheetCommand {
+private:
+    using super = SetSheetCommand;
+
+public:
+    RemoveBackgroundImageCommand(CalChartDoc& show, int which);
+    virtual ~RemoveBackgroundImageCommand();
+protected:
+    virtual void DoAction();
+
+	int m_which;
+};
+
+// MoveBackgroundImage
+// Apply a move to a background image
+class MoveBackgroundImage : public SetSheetCommand {
+private:
+    using super = SetSheetCommand;
+
+public:
+    MoveBackgroundImage(CalChartDoc& show, int which, int left, int top, int scaled_width, int scaled_height);
+    virtual ~MoveBackgroundImage();
+protected:
+    virtual void DoAction();
+
+	int m_which;
+	int m_left;
+	int m_top;
+	int m_scaled_width;
+	int m_scaled_height;
+};
