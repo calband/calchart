@@ -175,12 +175,14 @@ private:
     void OnCmdResetAll(wxCommandEvent&);
 
     wxString mAutoSave_Interval;
+    bool mScroll_Natural;
     bool mSetSheet_Undo;
     bool mSelection_Undo;
 };
 
 enum {
     AUTOSAVE_INTERVAL = 1000,
+    SCROLL_NATURAL,
     SETSHEET_UNDO,
     SELECTION_UNDO,
 };
@@ -204,6 +206,8 @@ void GeneralSetup::CreateControls()
 
     AddTextboxWithCaption(this, sizer1, AUTOSAVE_INTERVAL,
         wxT("Autosave Interval"));
+    AddCheckboxWithCaption(this, sizer1, SCROLL_NATURAL,
+        wxT("Scroll Direction: Natural"));
     AddCheckboxWithCaption(this, sizer1, SETSHEET_UNDO,
         wxT("Set Sheet is undo-able"));
     AddCheckboxWithCaption(this, sizer1, SELECTION_UNDO,
@@ -215,6 +219,7 @@ void GeneralSetup::CreateControls()
 void GeneralSetup::Init()
 {
     mAutoSave_Interval.Printf(wxT("%ld"), mConfig.Get_AutosaveInterval());
+    mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
     mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
     mSelection_Undo = mConfig.Get_CommandUndoSelection();
 }
@@ -222,6 +227,7 @@ void GeneralSetup::Init()
 bool GeneralSetup::TransferDataToWindow()
 {
     ((wxTextCtrl*)FindWindow(AUTOSAVE_INTERVAL))->SetValue(mAutoSave_Interval);
+    ((wxCheckBox*)FindWindow(SCROLL_NATURAL))->SetValue(mScroll_Natural);
     ((wxCheckBox*)FindWindow(SETSHEET_UNDO))->SetValue(mSetSheet_Undo);
     ((wxCheckBox*)FindWindow(SELECTION_UNDO))->SetValue(mSelection_Undo);
     return true;
@@ -235,6 +241,8 @@ bool GeneralSetup::TransferDataFromWindow()
     if (mAutoSave_Interval.ToLong(&val)) {
         mConfig.Set_AutosaveInterval(val);
     }
+    mScroll_Natural = ((wxCheckBox*)FindWindow(SCROLL_NATURAL))->GetValue();
+    mConfig.Set_ScrollDirectionNatural(mScroll_Natural);
     mSetSheet_Undo = ((wxCheckBox*)FindWindow(SETSHEET_UNDO))->GetValue();
     mConfig.Set_CommandUndoSetSheet(mSetSheet_Undo);
     mSelection_Undo = ((wxCheckBox*)FindWindow(SELECTION_UNDO))->GetValue();
