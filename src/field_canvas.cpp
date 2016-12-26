@@ -520,12 +520,6 @@ void FieldCanvas::OnMousePinchToZoom(wxMouseEvent& event)
     Refresh();
 }
 
-void FieldCanvas::OnMouseWheel(wxMouseEvent& event)
-{
-    super::OnMouseWheel(event);
-    Refresh();
-}
-
 // Intercept character input
 void FieldCanvas::OnChar(wxKeyEvent& event)
 {

@@ -948,6 +948,8 @@ private:
 BEGIN_EVENT_TABLE(ShowModeSetupCanvas, ClickDragCtrlScrollCanvas)
 EVT_PAINT(ShowModeSetupCanvas::OnPaint)
 EVT_MOTION(ShowModeSetupCanvas::OnMouseMove)
+EVT_MAGNIFY(ShowModeSetupCanvas::OnMousePinchToZoom)
+EVT_MOUSEWHEEL(ShowModeSetupCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 ShowModeSetupCanvas::ShowModeSetupCanvas(CalChartConfiguration& config,
