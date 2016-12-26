@@ -465,6 +465,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameOmniAnimation, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool, false);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
+
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool, false);
 

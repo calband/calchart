@@ -35,15 +35,17 @@
 
 #include <wx/dcbuffer.h>
 
-BEGIN_EVENT_TABLE(FieldCanvas, CtrlScrollCanvas)
+BEGIN_EVENT_TABLE(FieldCanvas, ClickDragCtrlScrollCanvas)
 EVT_CHAR(FieldCanvas::OnChar)
 EVT_LEFT_DOWN(FieldCanvas::OnMouseLeftDown)
 EVT_LEFT_UP(FieldCanvas::OnMouseLeftUp)
 EVT_LEFT_DCLICK(FieldCanvas::OnMouseLeftDoubleClick)
 EVT_RIGHT_DOWN(FieldCanvas::OnMouseRightDown)
+EVT_MAGNIFY(FieldCanvas::OnMousePinchToZoom)
 EVT_MOTION(FieldCanvas::OnMouseMove)
 EVT_PAINT(FieldCanvas::OnPaint)
 EVT_ERASE_BACKGROUND(FieldCanvas::OnEraseBackground)
+EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
@@ -55,6 +57,7 @@ FieldCanvas::FieldCanvas(wxView* view, FieldFrame* frame, float def_zoom)
     , curr_move(CC_MOVE_NORMAL)
     , drag(CC_DRAG_NONE)
 {
+    SetCanvasSize(wxSize{mView->GetShowFieldSize().x, mView->GetShowFieldSize().y});
     SetZoom(def_zoom);
 }
 
@@ -509,6 +512,14 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
     Refresh();
 }
 
+// Allow clicking within pixels to close polygons
+void FieldCanvas::OnMousePinchToZoom(wxMouseEvent& event)
+{
+    super::OnMousePinchToZoom(event);
+    mFrame->do_zoom(GetZoom());
+    Refresh();
+}
+
 // Intercept character input
 void FieldCanvas::OnChar(wxKeyEvent& event)
 {
@@ -532,11 +543,7 @@ float FieldCanvas::ZoomToFitFactor() const
 
 void FieldCanvas::SetZoom(float factor)
 {
-    CtrlScrollCanvas::SetZoom(factor);
-    float f = GetZoom();
-    long newx = mView->GetShowFieldSize().x * f;
-    long newy = mView->GetShowFieldSize().y * f;
-    SetVirtualSize(newx, newy);
+    super::SetZoom(factor);
     Refresh();
 }
 
