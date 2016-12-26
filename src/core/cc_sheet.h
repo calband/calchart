@@ -70,8 +70,7 @@ public:
 
     // setting values on the stunt sheet
     // * needs to be through command only *
-    void SetNumPoints(unsigned num, unsigned columns,
-        const CC_coord& new_march_position);
+    std::vector<CC_point> NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const;
 
     // continuity:
     // * needs to be through command only *
@@ -79,7 +78,7 @@ public:
 
     // points:
     int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
-    void RelabelSheet(const std::vector<size_t>& table);
+    std::vector<CC_point> RemapPoints(const std::vector<size_t>& table) const;
 
     std::string GetName() const;
     void SetName(const std::string& newname);
@@ -99,6 +98,7 @@ public:
     CC_coord GetPosition(unsigned i, unsigned ref = 0) const;
     void SetAllPositions(const CC_coord& val, unsigned i);
     void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
+	void SetAllPoints(std::vector<CC_point> const& newpts);
 
     // continuity that gets printed
     void SetPrintableContinuity(const std::string& name,
@@ -143,10 +143,10 @@ public:
 		std::vector<uint8_t> Serialize() const;
 	};
 
-	std::vector<ImageData> GetBackgroundImages() const;
-	void AddBackgroundImages(ImageData const& image);
-	void RemoveBackgroundImage(int which);
-	void MoveBackgroundImage(int which, int left, int top, int scaled_width, int scaled_height);
+	std::vector<ImageData> const& GetBackgroundImages() const;
+	void AddBackgroundImage(ImageData const& image, size_t where);
+	void RemoveBackgroundImage(size_t which);
+	void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
 
 private:
     CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
