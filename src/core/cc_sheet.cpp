@@ -514,8 +514,7 @@ std::set<unsigned> CC_sheet::SelectPointsBySymbol(SYMBOL_TYPE i) const
     return select;
 }
 
-void CC_sheet::SetNumPoints(unsigned num, unsigned columns,
-    const CC_coord& new_march_position)
+std::vector<CC_point> CC_sheet::NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const
 {
     unsigned i, cpy, col;
     CC_coord c;
@@ -534,19 +533,19 @@ void CC_sheet::SetNumPoints(unsigned num, unsigned columns,
         }
         newpts[i] = CC_point(c);
     }
-    pts = newpts;
+	return newpts;
 }
 
-void CC_sheet::RelabelSheet(const std::vector<size_t>& table)
+std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) const
 {
     if (pts.size() != table.size()) {
         throw std::runtime_error("wrong size for Relabel");
     }
     std::vector<CC_point> newpts(pts.size());
     for (size_t i = 0; i < newpts.size(); i++) {
-        newpts[i] = pts[table[i]];
+        newpts.at(i) = pts.at(table.at(i));
     }
-    pts = newpts;
+	return newpts;
 }
 
 const CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
@@ -793,26 +792,27 @@ void CC_sheet::CC_sheet_round_trip_test()
 
 void CC_sheet_UnitTests() { CC_sheet::CC_sheet_round_trip_test(); }
 
-std::vector<CC_sheet::ImageData> CC_sheet::GetBackgroundImages() const
+std::vector<CC_sheet::ImageData> const& CC_sheet::GetBackgroundImages() const
 {
 	return mBackgroundImages;
 }
 
-void CC_sheet::AddBackgroundImages(ImageData const& image)
+void CC_sheet::AddBackgroundImage(ImageData const& image, size_t where)
 {
-	mBackgroundImages.push_back(image);
+    auto insert_point = mBackgroundImages.begin() + std::min(where, mBackgroundImages.size());
+	mBackgroundImages.insert(insert_point, image);
 }
 
-void CC_sheet::RemoveBackgroundImage(int which)
+void CC_sheet::RemoveBackgroundImage(size_t which)
 {
-	if (which >= 0 && which < mBackgroundImages.size()) {
+	if (which < mBackgroundImages.size()) {
 		mBackgroundImages.erase(mBackgroundImages.begin() + which);
 	}
 }
 
-void CC_sheet::MoveBackgroundImage(int which, int left, int top, int scaled_width, int scaled_height)
+void CC_sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height)
 {
-	if (which >= 0 && which < mBackgroundImages.size()) {
+	if (which < mBackgroundImages.size()) {
 		mBackgroundImages.at(which).left = left;
 		mBackgroundImages.at(which).top = top;
 		mBackgroundImages.at(which).scaled_width = scaled_width;

@@ -77,10 +77,8 @@ void ContinuityEditorView::OnUpdate(wxView* sender, wxObject* hint)
 void ContinuityEditorView::DoSetContinuityText(SYMBOL_TYPE which,
     const wxString& text)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetContinuityTextCommand(*static_cast<CalChartDoc*>(GetDocument()),
-            which, text),
-        true);
+	auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetContinuityTextCommand(which, text);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 ContinuityEditor::ContinuityEditor() { Init(); }
