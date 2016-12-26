@@ -86,9 +86,9 @@ ScrollZoomCanvas::ScrollZoomCanvas(wxWindow* parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size,
     long style)
     : wxScrolledWindow(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
-    , mOrigin(0, 0)
     , mOffset(0, 0)
     , mZoomFactor(1.0)
+    , mCanvasSize(GetSize())
 {
 }
 
@@ -100,39 +100,29 @@ void ScrollZoomCanvas::PrepareDC(wxDC& dc)
     dc.SetUserScale(mZoomFactor, mZoomFactor);
 }
 
-void ScrollZoomCanvas::SetZoom(float z) { mZoomFactor = z; }
-
-float ScrollZoomCanvas::GetZoom() const { return mZoomFactor; }
-
-void ScrollZoomCanvas::SetOffset(wxPoint newOffset)
+void ScrollZoomCanvas::SetCanvasSize(wxSize s)
 {
-    ChangeOffset(mOffset - newOffset);
+    mCanvasSize = s;
+}
+
+void ScrollZoomCanvas::SetZoom(float z)
+{
+    mZoomFactor = z;
+    auto newSize = mCanvasSize * mZoomFactor;
+    SetVirtualSize(newSize);
+}
+
+float ScrollZoomCanvas::GetZoom() const
+{
+    return mZoomFactor;
 }
 
 void ScrollZoomCanvas::ChangeOffset(wxPoint deltaOffset)
 {
-    mOffset += deltaOffset;
-    Scroll(-mOffset);
-    wxPoint start = GetViewStart();
-    mOffset = -start - mOrigin;
+    auto offset = GetViewStart();
+    offset += deltaOffset;
+    Scroll(offset);
 }
-
-wxPoint ScrollZoomCanvas::GetOffset() const { return mOffset; }
-
-void ScrollZoomCanvas::ResetScrollToOrigin() { ChangeOffset(-mOffset); }
-
-void ScrollZoomCanvas::SetOffsetOrigin(wxPoint newOrigin)
-{
-    ChangeOffsetOrigin(mOrigin - newOrigin);
-}
-
-void ScrollZoomCanvas::ChangeOffsetOrigin(wxPoint deltaOrigin)
-{
-    mOffset -= deltaOrigin;
-    mOrigin += deltaOrigin;
-}
-
-wxPoint ScrollZoomCanvas::GetOffsetOrigin() const { return mOrigin; }
 
 MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id,
     const wxPoint& pos,
@@ -150,29 +140,46 @@ void MouseMoveScrollCanvas::OnMouseMove(wxMouseEvent& event)
     wxPoint thisPos = event.GetPosition();
     mScrolledLastMove = false;
     if (ShouldScrollOnMouseEvent(event)) {
-        wxPoint changeInOffset = thisPos - mLastPos;
+        wxPoint changeInOffset = mLastPos - thisPos;
         ChangeOffset(changeInOffset);
         mScrolledLastMove = true;
     }
     mLastPos = thisPos;
 }
 
+void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
+{
+    // calculate where the point will be before and after, then adjust.
+    auto point_before = [this](auto&& event)
+    {
+        wxClientDC dc(this);
+        PrepareDC(dc);
+        auto mouse_point = mLastPos;
+        mouse_point.x = dc.DeviceToLogicalX(mouse_point.x);
+        mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
+        return mouse_point;
+    }(event);
+    SetZoom(GetZoom() * (1.0 + event.GetMagnification()));
+    auto point_after = [this](auto&& event)
+    {
+        wxClientDC dc(this);
+        PrepareDC(dc);
+        auto mouse_point = mLastPos;
+        mouse_point.x = dc.DeviceToLogicalX(mouse_point.x);
+        mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
+        return mouse_point;
+    }(event);
+    ChangeOffset((point_before-point_after)*GetZoom());
+}
+
+void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)
+{
+    auto pt = wxPoint(event.GetWheelAxis() == 1 ? event.GetWheelRotation() : 0, event.GetWheelAxis() == 0 ? (CalChartConfiguration::GetGlobalConfig().Get_ScrollDirectionNatural() ? -1 : 1) * event.GetWheelRotation() : 0);
+    ChangeOffset(pt);
+}
+
+
 bool MouseMoveScrollCanvas::IsScrolling() const { return mScrolledLastMove; }
-
-CtrlScrollCanvas::CtrlScrollCanvas(wxWindow* parent, wxWindowID id,
-    const wxPoint& pos, const wxSize& size,
-    long style)
-    : super(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
-{
-}
-
-CtrlScrollCanvas::~CtrlScrollCanvas() {}
-
-bool CtrlScrollCanvas::ShouldScrollOnMouseEvent(
-    const wxMouseEvent& event) const
-{
-    return event.ControlDown();
-}
 
 ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(wxWindow* parent,
     wxWindowID id,
@@ -188,5 +195,5 @@ ClickDragCtrlScrollCanvas::~ClickDragCtrlScrollCanvas() {}
 bool ClickDragCtrlScrollCanvas::ShouldScrollOnMouseEvent(
     const wxMouseEvent& event) const
 {
-    return event.Dragging() && super::ShouldScrollOnMouseEvent(event);
+    return event.Dragging() && event.ControlDown();
 }

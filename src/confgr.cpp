@@ -465,6 +465,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameOmniAnimation, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool, false);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
+
 // OBSOLETE Settigns
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);

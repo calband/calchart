@@ -55,6 +55,8 @@ public:
     virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);
     virtual void OnMouseRightDown(wxMouseEvent& event);
     virtual void OnMouseMove(wxMouseEvent& event);
+    virtual void OnMousePinchToZoom(wxMouseEvent& event);
+    virtual void OnMouseWheel(wxMouseEvent& event);
     void OnChar(wxKeyEvent& event);
 
     // Misc show functions

@@ -263,6 +263,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
 {
     auto field_offset = mMode->FieldOffset();
     auto offset = mMode->Offset();
+    SetCanvasSize(wxSize{mMode->Size().x, mMode->Size().y});
 
     // Create a fake show with some points and selections to draw an example for
     // the user
@@ -911,8 +912,6 @@ public:
     virtual void SetZoom(float factor);
 
 private:
-    void Rezoom();
-
     CalChartConfiguration& mConfig;
     std::unique_ptr<const ShowMode> mMode;
 };
@@ -951,7 +950,8 @@ void ShowModeSetupCanvas::SetMode(const std::string& which,
 {
     mMode = ShowModeStandard::CreateShowMode(
         which, [this, item]() { return this->mConfig.Get_ShowModeInfo(item); });
-    Rezoom();
+    SetCanvasSize(wxSize{mMode->Size().x, mMode->Size().y});
+    Refresh();
 }
 
 void ShowModeSetupCanvas::SetMode(const std::string& which,
@@ -960,20 +960,13 @@ void ShowModeSetupCanvas::SetMode(const std::string& which,
     mMode = ShowModeSprShow::CreateSpringShowMode(which, [this, item]() {
         return this->mConfig.Get_SpringShowModeInfo(item);
     });
-    Rezoom();
+    SetCanvasSize(wxSize{mMode->Size().x, mMode->Size().y});
+    Refresh();
 }
 
 void ShowModeSetupCanvas::SetZoom(float factor)
 {
-    CtrlScrollCanvas::SetZoom(factor);
-    Rezoom();
-}
-
-void ShowModeSetupCanvas::Rezoom()
-{
-    float f = GetZoom();
-    auto size = mMode->Size();
-    SetVirtualSize(size.x * f, size.y * f);
+    super::SetZoom(factor);
     Refresh();
 }
 

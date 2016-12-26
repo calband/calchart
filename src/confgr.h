@@ -189,6 +189,8 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool);
+
 public:
     // helpers for displaying different config attributes
     std::vector<wxString> GetColorNames() const;
