@@ -131,6 +131,8 @@ public:
     void refnum_callback(wxCommandEvent&);
     void OnEnableDrawPaths(wxCommandEvent&);
 
+    void do_zoom(float zoom_amount);
+
     void Setup();
     void SetDescription();
     void SetMode();

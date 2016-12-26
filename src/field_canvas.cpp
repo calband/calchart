@@ -516,6 +516,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
 void FieldCanvas::OnMousePinchToZoom(wxMouseEvent& event)
 {
     super::OnMousePinchToZoom(event);
+    mFrame->do_zoom(GetZoom());
     Refresh();
 }
 

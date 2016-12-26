@@ -1189,8 +1189,7 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
     else if (sel == sizeof(zoom_amounts) / sizeof(zoom_amounts[0])) {
         zoom_amount = mCanvas->ZoomToFitFactor();
     }
-    config.Set_FieldFrameZoom(zoom_amount);
-    mCanvas->SetZoom(zoom_amount);
+    do_zoom(zoom_amount);
 }
 
 void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
@@ -1216,10 +1215,15 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
         // return if not valid
         return;
     }
-    config.Set_FieldFrameZoom(zoom_amount);
-    // set the text to have '%' appended
-    zoomtxt += wxT("%");
+    do_zoom(zoom_amount);
+}
+
+void FieldFrame::do_zoom(float zoom_amount)
+{
+    wxString zoomtxt;
+    zoomtxt.sprintf(wxT("%d%%"), int(zoom_amount * 100.0));
     mZoomBox->SetValue(zoomtxt);
+    config.Set_FieldFrameZoom(zoom_amount);
     mCanvas->SetZoom(zoom_amount);
 }
 
