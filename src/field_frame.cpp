@@ -107,6 +107,7 @@ EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
 EVT_MENU(CALCHART__SETDESCRIPTION, FieldFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
+EVT_MENU(CALCHART__SELECT_ALL, FieldFrame::OnCmdSelectAll)
 EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
@@ -217,8 +218,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Create a new show"));
     file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"),
         wxT("Load a saved show"));
-    file_menu->Append(CALCHART__APPEND_FILE, wxT("&Append..."),
-        wxT("Append a show to the end"));
     file_menu->Append(CALCHART__IMPORT_CONT_FILE,
         wxT("&Import Continuity...\tCTRL-I"),
         wxT("Import continuity text"));
@@ -262,6 +261,8 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Insert a saved stuntsheet after this one"));
     edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"),
         wxT("Delete this stuntsheet"));
+    edit_menu->Append(CALCHART__APPEND_FILE, wxT("Append Show..."),
+        wxT("Append a show to the end"));
     edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"),
         wxT("Relabel all stuntsheets after this one"));
     edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"),
@@ -272,6 +273,8 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Set the show mode"));
     edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."),
         wxT("Select Points"));
+    edit_menu->Append(CALCHART__SELECT_ALL, wxT("Select &All...\tCTRL-A"),
+        wxT("Select All Points"));
     edit_menu->Append(CALCHART__SET_SHEET_TITLE,
         wxT("Set Sheet &Title...\tCTRL-T"),
         wxT("Change the title of this stuntsheet"));
@@ -316,7 +319,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Draw a ghost of a particular stuntsheet"));
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"),
+    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."),
         wxT("Information about the program"));
     help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"),
         wxT("Help on using CalChart"));
@@ -764,6 +767,13 @@ void FieldFrame::OnCmdPoints(wxCommandEvent& event)
         PointPicker* pp = new PointPicker(*GetShow(), this);
         // make it modeless:
         pp->Show();
+    }
+}
+
+void FieldFrame::OnCmdSelectAll(wxCommandEvent& event)
+{
+    if (GetShow()) {
+        GetShow()->SetSelection(GetShow()->MakeSelectAll());
     }
 }
 
