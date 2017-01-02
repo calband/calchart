@@ -77,7 +77,7 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     manager->FileHistoryUseMenu(file_menu);
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"),
+    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."),
         wxT("Information about the program"));
     // this comes up as a leak on Mac?
     help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"),
