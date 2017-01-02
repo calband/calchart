@@ -295,7 +295,7 @@ void ContinuityEditor::SetCurrent(unsigned i)
 void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 {
     CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
-    mDoc->SetSelection(sht->SelectPointsBySymbol(CurrentSymbolChoice()));
+    mDoc->SetSelection(sht->MakeSelectPointsBySymbol(CurrentSymbolChoice()));
 }
 
 void ContinuityEditor::OnSave(wxCommandEvent&) { Save(); }

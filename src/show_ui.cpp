@@ -134,7 +134,7 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 
 void PointPicker::PointPickerBySymbol(SYMBOL_TYPE which)
 {
-    mShow.SetSelection(mShow.GetCurrentSheet()->SelectPointsBySymbol(which));
+    mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
 }
 
 void PointPicker::PointPickerNone(wxCommandEvent&)

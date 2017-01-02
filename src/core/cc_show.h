@@ -96,7 +96,7 @@ public:
     CC_show_command_pair Create_SetLabelVisiblityCommand(std::map<unsigned, bool> const& new_visibility) const;
     CC_show_command_pair Create_SetLabelVisibleCommand(bool isVisible) const;
     CC_show_command_pair Create_ToggleLabelVisibilityCommand() const;
-    CC_show_command_pair Create_AddNewBackgroundImageCommand(CC_sheet::ImageData const& image) const;
+    CC_show_command_pair Create_AddNewBackgroundImageCommand(calchart_core::ImageData const& image) const;
     CC_show_command_pair Create_RemoveBackgroundImageCommand(int which) const;
     CC_show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 

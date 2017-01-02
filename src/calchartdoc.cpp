@@ -691,7 +691,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_ToggleLabelVisibilityCommand()
 std::unique_ptr<wxCommand> CalChartDoc::Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
 {
 	auto cmds = Create_SetSheetPair();
-	cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddNewBackgroundImageCommand(CC_sheet::ImageData{ left, top, image_width, image_height, image_width, image_height, data, alpha })));
+	cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddNewBackgroundImageCommand(calchart_core::ImageData{ left, top, image_width, image_height, image_width, image_height, data, alpha })));
 	return std::make_unique<CalChartDocCommand>(*this, wxT("Adding Background Image"), cmds);
 }
 

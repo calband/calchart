@@ -29,6 +29,7 @@
 #include "cc_fileformat.h"
 #include "json.h"
 #include "animate.h"
+#include "cc_image.h"
 
 #include <vector>
 #include <set>
@@ -63,48 +64,47 @@ private:
 public:
     std::vector<uint8_t> SerializeSheet() const;
 
-    // Observer functions
+    // continuity Functions
     const CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
-    std::set<unsigned> SelectPointsBySymbol(SYMBOL_TYPE i) const;
+    CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
     bool ContinuityInUse(SYMBOL_TYPE idx) const;
-
-    // setting values on the stunt sheet
-    // * needs to be through command only *
-    std::vector<CC_point> NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const;
-
-    // continuity:
-    // * needs to be through command only *
     void SetContinuityText(SYMBOL_TYPE sym, const std::string& text);
 
-    // points:
-    int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
-    std::vector<CC_point> RemapPoints(const std::vector<size_t>& table) const;
-
-    std::string GetName() const;
-    void SetName(const std::string& newname);
-    std::string GetNumber() const;
-    void SetNumber(const std::string& newnumber);
+    // print continuity
+    void SetPrintableContinuity(const std::string& name, const std::string& lines);
+    CC_textline_list GetPrintableContinuity() const;
+    std::string GetRawPrintContinuity() const;
 
     // beats
     unsigned short GetBeats() const;
     void SetBeats(unsigned short b);
     bool IsInAnimation() const { return (GetBeats() != 0); }
 
+    // points
     const CC_point& GetPoint(unsigned i) const;
     CC_point& GetPoint(unsigned i);
     std::vector<CC_point> GetPoints() const;
     void SetPoints(const std::vector<CC_point>& points);
-
+    int FindPoint(Coord x, Coord y, Coord searchBound, unsigned ref = 0) const;
+    std::vector<CC_point> RemapPoints(const std::vector<size_t>& table) const;
     CC_coord GetPosition(unsigned i, unsigned ref = 0) const;
     void SetAllPositions(const CC_coord& val, unsigned i);
     void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
 	void SetAllPoints(std::vector<CC_point> const& newpts);
+    SelectionList MakeSelectPointsBySymbol(SYMBOL_TYPE i) const;
+    std::vector<CC_point> NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const;
 
-    // continuity that gets printed
-    void SetPrintableContinuity(const std::string& name,
-        const std::string& lines);
-    CC_textline_list GetPrintableContinuity() const;
-    std::string GetRawPrintContinuity() const;
+    // titles
+    std::string GetName() const;
+    void SetName(const std::string& newname);
+    std::string GetNumber() const;
+    void SetNumber(const std::string& newnumber);
+
+    // image
+	std::vector<calchart_core::ImageData> const& GetBackgroundImages() const;
+	void AddBackgroundImage(calchart_core::ImageData const& image, size_t where);
+	void RemoveBackgroundImage(size_t which);
+	void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
 
     /*!
      * @brief Generates a JSONElement that could represent this
@@ -132,34 +132,13 @@ public:
      */
     void toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const;
 
-	struct ImageData {
-		int left, top;
-		int scaled_width, scaled_height;
-		int image_width, image_height;
-		std::vector<unsigned char> data;
-		std::vector<unsigned char> alpha;
-		ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
-		ImageData(uint8_t const* &d);
-		std::vector<uint8_t> Serialize() const;
-	};
-
-	std::vector<ImageData> const& GetBackgroundImages() const;
-	void AddBackgroundImage(ImageData const& image, size_t where);
-	void RemoveBackgroundImage(size_t which);
-	void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
-
 private:
-    CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
-
-    typedef std::vector<CC_continuity> ContContainer;
-    ContContainer mAnimationContinuity;
-
+    std::vector<CC_continuity> mAnimationContinuity;
     CC_print_continuity mPrintableContinuity;
-    unsigned short beats;
-    std::vector<CC_point> pts;
+    unsigned short mBeats;
+    std::vector<CC_point> mPoints;
     std::string mName;
-
-	std::vector<ImageData> mBackgroundImages;
+	std::vector<calchart_core::ImageData> mBackgroundImages;
 
     // unit tests
     friend void CC_sheet_UnitTests();

@@ -856,7 +856,7 @@ CC_show_command_pair CC_show::Create_ToggleLabelVisibilityCommand() const
     return Create_SetLabelVisiblityCommand(visible);
 }
 
-CC_show_command_pair CC_show::Create_AddNewBackgroundImageCommand(CC_sheet::ImageData const& image) const
+CC_show_command_pair CC_show::Create_AddNewBackgroundImageCommand(calchart_core::ImageData const& image) const
 {
     auto sheet = GetCurrentSheet();
 	auto action = [sheet_num = mSheetNum, image, where = sheet->GetBackgroundImages().size()](CC_show& show) {

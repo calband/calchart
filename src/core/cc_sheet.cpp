@@ -40,15 +40,15 @@ const std::string contnames[MAX_NUM_SYMBOLS] = {
 
 CC_sheet::CC_sheet(size_t numPoints)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , beats(1)
-    , pts(numPoints)
+    , mBeats(1)
+    , mPoints(numPoints)
 {
 }
 
 CC_sheet::CC_sheet(size_t numPoints, const std::string& newname)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , beats(1)
-    , pts(numPoints)
+    , mBeats(1)
+    , mPoints(numPoints)
     , mName(newname)
 {
 }
@@ -137,7 +137,7 @@ CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
 CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
     Version_3_3_and_earlier)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , pts(numPoints)
+    , mPoints(numPoints)
 {
     // Read in sheet name
     // <INGL_NAME><size><string + 1>
@@ -147,24 +147,24 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
     // read in the duration:
     // <INGL_DURA><4><duration>
     auto chunk = ReadCheckIDandSize(stream, INGL_DURA);
-    beats = chunk;
+    mBeats = chunk;
 
     // Point positions
     // <INGL_DURA><size><data>
     data = ReadCheckIDandFillData(stream, INGL_POS);
-    if (data.size() != size_t(pts.size() * 4)) {
+    if (data.size() != size_t(mPoints.size() * 4)) {
         throw CC_FileException("bad POS chunk");
     }
     {
         uint8_t* d = &data[0];
-        for (unsigned i = 0; i < pts.size(); ++i) {
+        for (unsigned i = 0; i < mPoints.size(); ++i) {
             CC_coord c;
             c.x = get_big_word(d);
             d += 2;
             c.y = get_big_word(d);
             d += 2;
             for (unsigned j = 0; j <= CC_point::kNumRefPoints; j++) {
-                pts[i].SetPos(c, j);
+                mPoints[i].SetPos(c, j);
             }
         }
     }
@@ -173,31 +173,31 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
     // read all the reference points
     while (INGL_REFP == name) {
         std::vector<uint8_t> data = FillData(stream);
-        if (data.size() != pts.size() * 4 + 2) {
+        if (data.size() != mPoints.size() * 4 + 2) {
             throw CC_FileException("Bad REFP chunk");
         }
         uint8_t* d = &data[0];
         unsigned ref = get_big_word(d);
         d += 2;
-        for (unsigned i = 0; i < pts.size(); i++) {
+        for (unsigned i = 0; i < mPoints.size(); i++) {
             CC_coord c;
             c.x = get_big_word(d);
             d += 2;
             c.y = get_big_word(d);
             d += 2;
-            pts[i].SetPos(c, ref);
+            mPoints[i].SetPos(c, ref);
         }
         name = ReadLong(stream);
     }
     // Point symbols
     while (INGL_SYMB == name) {
         std::vector<uint8_t> data = FillData(stream);
-        if (data.size() != pts.size()) {
+        if (data.size() != mPoints.size()) {
             throw CC_FileException("Bad SYMB chunk");
         }
         uint8_t* d = &data[0];
-        for (unsigned i = 0; i < pts.size(); i++) {
-            pts.at(i).SetSymbol((SYMBOL_TYPE)(*(d++)));
+        for (unsigned i = 0; i < mPoints.size(); i++) {
+            mPoints.at(i).SetSymbol((SYMBOL_TYPE)(*(d++)));
         }
         name = ReadLong(stream);
     }
@@ -208,12 +208,12 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
     while (INGL_TYPE == name) {
         has_type = true;
         std::vector<uint8_t> data = FillData(stream);
-        if (data.size() != pts.size()) {
+        if (data.size() != mPoints.size()) {
             throw CC_FileException("Bad TYPE chunk");
         }
         uint8_t* d = &data[0];
-        for (unsigned i = 0; i < pts.size(); i++) {
-            CheckInconsistancy(pts[i].GetSymbol(), *(d++), continity_for_symbol,
+        for (unsigned i = 0; i < mPoints.size(); i++) {
+            CheckInconsistancy(mPoints[i].GetSymbol(), *(d++), continity_for_symbol,
                 symbol_for_continuity, mName, i);
         }
         name = ReadLong(stream);
@@ -222,21 +222,21 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
     // if it isn't used
     if (!has_type) {
         // when a point doesn't have a cont_index, it is assumed to be 0
-        for (unsigned i = 0; i < pts.size(); i++) {
-            CheckInconsistancy(pts[i].GetSymbol(), 0, continity_for_symbol,
+        for (unsigned i = 0; i < mPoints.size(); i++) {
+            CheckInconsistancy(mPoints[i].GetSymbol(), 0, continity_for_symbol,
                 symbol_for_continuity, mName, i);
         }
     }
     // Point labels (left or right)
     while (INGL_LABL == name) {
         std::vector<uint8_t> data = FillData(stream);
-        if (data.size() != pts.size()) {
+        if (data.size() != mPoints.size()) {
             throw CC_FileException("Bad SYMB chunk");
         }
         uint8_t* d = &data[0];
-        for (unsigned i = 0; i < pts.size(); i++) {
+        for (unsigned i = 0; i < mPoints.size(); i++) {
             if (*(d++)) {
-                pts.at(i).Flip();
+                mPoints.at(i).Flip();
             }
         }
         name = ReadLong(stream);
@@ -290,7 +290,7 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
 CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
     Current_version_and_later)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
-    , pts(numPoints)
+    , mPoints(numPoints)
 {
     // construct the parser handlers
     auto parse_INGL_NAME = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
@@ -304,15 +304,15 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         if (4 != size) {
             throw CC_FileException("Incorrect size", INGL_DURA);
         }
-        sheet->beats = get_big_long(ptr);
+        sheet->mBeats = get_big_long(ptr);
     };
     auto parse_INGL_PNTS = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
-        for (auto i = 0u; i < sheet->pts.size(); ++i) {
+        for (auto i = 0u; i < sheet->mPoints.size(); ++i) {
             auto this_size = *ptr;
             if (this_size > size) {
                 throw CC_FileException("Incorrect size", INGL_PNTS);
             }
-            sheet->pts[i] = CC_point({ ptr + 1, ptr + 1 + this_size });
+            sheet->mPoints[i] = CC_point({ ptr + 1, ptr + 1 + this_size });
             ptr += this_size + 1;
             size -= this_size + 1;
         }
@@ -394,7 +394,7 @@ std::vector<uint8_t> CC_sheet::SerializeAllPoints() const
     // for each of the points, serialize them.  Don't need to wrap in block
     // because it's not specified that way
     std::vector<uint8_t> result;
-    for (const auto& i : pts) {
+    for (const auto& i : mPoints) {
         CalChart::Parser::Append(result, i.Serialize());
     }
     return result;
@@ -494,7 +494,7 @@ CC_sheet::~CC_sheet() {}
 int CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound,
     unsigned ref) const
 {
-    for (size_t i = 0; i < pts.size(); i++) {
+    for (size_t i = 0; i < mPoints.size(); i++) {
         CC_coord c = GetPosition(i, ref);
         if (((x + searchBound) >= c.x) && ((x - searchBound) <= c.x) && ((y + searchBound) >= c.y) && ((y - searchBound) <= c.y)) {
             return i;
@@ -503,11 +503,11 @@ int CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound,
     return -1;
 }
 
-std::set<unsigned> CC_sheet::SelectPointsBySymbol(SYMBOL_TYPE i) const
+SelectionList CC_sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
 {
     std::set<unsigned> select;
-    for (size_t j = 0; j < pts.size(); j++) {
-        if (pts.at(j).GetSymbol() == i) {
+    for (size_t j = 0; j < mPoints.size(); j++) {
+        if (mPoints.at(j).GetSymbol() == i) {
             select.insert(j);
         }
     }
@@ -520,9 +520,9 @@ std::vector<CC_point> CC_sheet::NewNumPointsPositions(unsigned num, unsigned col
     CC_coord c;
 
     std::vector<CC_point> newpts(num);
-    cpy = std::min<unsigned>(pts.size(), num);
+    cpy = std::min<unsigned>(mPoints.size(), num);
     for (i = 0; i < cpy; i++) {
-        newpts[i] = pts[i];
+        newpts[i] = mPoints[i];
     }
     for (c = new_march_position, col = 0; i < num;
          i++, col++, c.x += Int2Coord(2)) {
@@ -538,12 +538,12 @@ std::vector<CC_point> CC_sheet::NewNumPointsPositions(unsigned num, unsigned col
 
 std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) const
 {
-    if (pts.size() != table.size()) {
+    if (mPoints.size() != table.size()) {
         throw std::runtime_error("wrong size for Relabel");
     }
-    std::vector<CC_point> newpts(pts.size());
+    std::vector<CC_point> newpts(mPoints.size());
     for (size_t i = 0; i < newpts.size(); i++) {
-        newpts.at(i) = pts.at(table.at(i));
+        newpts.at(i) = mPoints.at(table.at(i));
     }
 	return newpts;
 }
@@ -566,7 +566,7 @@ void CC_sheet::SetContinuityText(SYMBOL_TYPE which, const std::string& text)
 bool CC_sheet::ContinuityInUse(SYMBOL_TYPE idx) const
 {
     // is any point using this symbol?
-    for (auto& point : pts) {
+    for (auto& point : mPoints) {
         if (point.GetSymbol() == idx) {
             return true;
         }
@@ -589,21 +589,21 @@ std::string CC_sheet::GetRawPrintContinuity() const
     return mPrintableContinuity.GetOriginalLine();
 }
 
-unsigned short CC_sheet::GetBeats() const { return beats; }
+unsigned short CC_sheet::GetBeats() const { return mBeats; }
 
-void CC_sheet::SetBeats(unsigned short b) { beats = b; }
+void CC_sheet::SetBeats(unsigned short b) { mBeats = b; }
 
 // Get position of point
 CC_coord CC_sheet::GetPosition(unsigned i, unsigned ref) const
 {
-    return pts[i].GetPos(ref);
+    return mPoints[i].GetPos(ref);
 }
 
 // Set position of point and all refs
 void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
 {
     for (unsigned j = 0; j <= CC_point::kNumRefPoints; j++) {
-        pts[i].SetPos(val, j);
+        mPoints[i].SetPos(val, j);
     }
 }
 
@@ -613,14 +613,14 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
     unsigned j;
     if (ref == 0) {
         for (j = 1; j <= CC_point::kNumRefPoints; j++) {
-            if (pts[i].GetPos(j) == pts[i].GetPos(0)) {
-                pts[i].SetPos(val, j);
+            if (mPoints[i].GetPos(j) == mPoints[i].GetPos(0)) {
+                mPoints[i].SetPos(val, j);
             }
         }
-        pts[i].SetPos(val);
+        mPoints[i].SetPos(val);
     }
     else {
-        pts[i].SetPos(val, ref);
+        mPoints[i].SetPos(val, ref);
     }
 }
 
@@ -654,11 +654,11 @@ CC_textline_list CC_sheet::GetPrintableContinuity() const
     return mPrintableContinuity.GetChunks();
 }
 
-const CC_point& CC_sheet::GetPoint(unsigned i) const { return pts[i]; }
+const CC_point& CC_sheet::GetPoint(unsigned i) const { return mPoints[i]; }
 
-CC_point& CC_sheet::GetPoint(unsigned i) { return pts[i]; }
+CC_point& CC_sheet::GetPoint(unsigned i) { return mPoints[i]; }
 
-std::vector<CC_point> CC_sheet::GetPoints() const { return pts; }
+std::vector<CC_point> CC_sheet::GetPoints() const { return mPoints; }
 
 JSONElement CC_sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const {
     JSONElement newViewerObject = JSONElement::makeNull();
@@ -675,7 +675,7 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     sheetObjectAccessor["dot_types"] = JSONElement::makeArray();
     sheetObjectAccessor["dot_labels"] = JSONElement::makeObject();
     sheetObjectAccessor["continuities"] = JSONElement::makeObject();
-    sheetObjectAccessor["beats"] = beats;
+    sheetObjectAccessor["beats"] = mBeats;
     sheetObjectAccessor["movements"] = JSONElement::makeObject();
     
     JSONDataObjectAccessor dotTypeAssignmentsAccessor = sheetObjectAccessor["dot_labels"];
@@ -683,8 +683,8 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     // Iterate through all dots and collect the unique dot types discovered while doing so
     // As we discover the dot type of each dot, record the dot type assigment inside of 'dot_labels'
     std::set<std::string> uniqueDotTypes;
-    for (unsigned i = 0; i < pts.size(); i++) {
-        std::string symbolName = ToOnlineViewer::symbolName(pts[i].GetSymbol());
+    for (unsigned i = 0; i < mPoints.size(); i++) {
+        std::string symbolName = ToOnlineViewer::symbolName(mPoints[i].GetSymbol());
         uniqueDotTypes.insert(symbolName);
         dotTypeAssignmentsAccessor[dotLabels[i]] = symbolName;
     }
@@ -702,10 +702,10 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     JSONDataObjectAccessor movementsAccessor = sheetObjectAccessor["movements"];
     
     // In 'movements', make a series of commands to describe how a point should be animated over time in the Online Viewer
-    for (unsigned ptIndex = 0; ptIndex < pts.size(); ptIndex++) {
+    for (unsigned ptIndex = 0; ptIndex < mPoints.size(); ptIndex++) {
         JSONDataArrayAccessor pointMovementsAccessor = movementsAccessor[dotLabels[ptIndex]] = JSONElement::makeArray();
         
-        AnimatePoint currPos(pts[ptIndex].GetPos().x, pts[ptIndex].GetPos().y);
+        AnimatePoint currPos(mPoints[ptIndex].GetPos().x, mPoints[ptIndex].GetPos().y);
         
         for (auto commandIter = compiledSheet.GetCommandsBegin(ptIndex); commandIter != compiledSheet.GetCommandsEnd(ptIndex); commandIter++) {
             
@@ -717,7 +717,7 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     }
 }
 
-void CC_sheet::SetPoints(const std::vector<CC_point>& points) { pts = points; }
+void CC_sheet::SetPoints(const std::vector<CC_point>& points) { mPoints = points; }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
 #include <assert.h>
@@ -792,12 +792,12 @@ void CC_sheet::CC_sheet_round_trip_test()
 
 void CC_sheet_UnitTests() { CC_sheet::CC_sheet_round_trip_test(); }
 
-std::vector<CC_sheet::ImageData> const& CC_sheet::GetBackgroundImages() const
+std::vector<calchart_core::ImageData> const& CC_sheet::GetBackgroundImages() const
 {
 	return mBackgroundImages;
 }
 
-void CC_sheet::AddBackgroundImage(ImageData const& image, size_t where)
+void CC_sheet::AddBackgroundImage(calchart_core::ImageData const& image, size_t where)
 {
     auto insert_point = mBackgroundImages.begin() + std::min(where, mBackgroundImages.size());
 	mBackgroundImages.insert(insert_point, image);
@@ -820,45 +820,3 @@ void CC_sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_w
 	}
 }
 
-CC_sheet::ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
-	: left(left)
-	, top(top)
-	, scaled_width(scaled_width)
-	, scaled_height(scaled_height)
-	, image_width(image_width)
-	, image_height(image_height)
-	, data(data)
-	, alpha(alpha)
-{
-}
-
-CC_sheet::ImageData::ImageData(uint8_t const*& d) {
-	left = get_big_long(d); d += 4;
-	top = get_big_long(d); d += 4;
-	scaled_width = get_big_long(d); d += 4;
-	scaled_height = get_big_long(d); d += 4;
-	image_width = get_big_long(d); d += 4;
-	image_height = get_big_long(d); d += 4;
-	auto data_size = get_big_long(d); d += 4;
-	data.assign(d, d + data_size); d += data_size;
-	auto alpha_size = get_big_long(d); d += 4;
-	alpha.assign(d, d + alpha_size); d += alpha_size;
-}
-
-std::vector<uint8_t> CC_sheet::ImageData::Serialize() const
-{
-    std::vector<uint8_t> result;
-    CalChart::Parser::Append(result, uint32_t(left));
-    CalChart::Parser::Append(result, uint32_t(top));
-    CalChart::Parser::Append(result, uint32_t(scaled_width));
-    CalChart::Parser::Append(result, uint32_t(scaled_height));
-    CalChart::Parser::Append(result, uint32_t(image_width));
-    CalChart::Parser::Append(result, uint32_t(image_height));
-	// we know data size, but let's put it in anyways
-    CalChart::Parser::Append(result, uint32_t(data.size()));
-    CalChart::Parser::Append(result, data);
-	// alpha could be zero
-    CalChart::Parser::Append(result, uint32_t(alpha.size()));
-    CalChart::Parser::Append(result, alpha);
-	return result;
-}
