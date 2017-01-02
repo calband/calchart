@@ -60,10 +60,10 @@ desired behavior.
 
 ##Building CalChart
 
-For building on MacOSX platforms, see the README-MACOSX.txt.  For building on
-Windows platforms, see the README-WINDOWS.txt.
+For building on MacOSX platforms, see the [README-MACOSX.md](README-MACOSX.md).  For building on
+Windows platforms, see the [README-WINDOWS.md](README-WINDOWS.md).
 
-If you need to regenerate the help documentation, see the README-docs.txt
+If you need to regenerate the help documentation, see the [README-docs.txt](README-docs.txt).
 
 
 # Release notes

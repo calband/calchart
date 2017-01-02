@@ -1,17 +1,19 @@
-# My steps for building for MacOSX.
+# Steps for building for MacOSX.
 
 These steps were written with Sierra 10.12 and XCode 8.2.1.  Both should be on the app store.  You *can* do earlier builds, but you may have to modify your install steps.
 
 You also need to install the command line tools for Xcode.  See https://developer.apple.com/library/ios/technotes/tn2339/_index.html
 
-# Boost
+## Boost
 CalChart uses boost.  Most tools will already be on your system, but you will need the following projects from macports (or fink).  See http://www.macports.org/:
-boost
+
+* boost
 
 We assume that boost library is located at /opt/local/include.  If it is located somewhere else, you'll need to modify the Xcode project.
 
-# wxWidgets
+## wxWidgets
 Note: These instructions assume you will build from source.  If you want to download from HomeBrew or some other package utility, you will have to modify xcode project to link to the appropriate place.
+
 Note: All lines starting with ‘$’ mean you should run them from the terminal.  Do not include the ‘$’ with the command :)
 
 ## Download and build 3.1 of wxWidgets
@@ -50,5 +52,4 @@ Also, as the project uses precompiled headers, you may have to modify the
 preconfigured header file path:
 GCC_PREFIX_HEADER = /usr/local/include/wx-3.1/wx/wxprec.h
 
-## Build and run the project.
-
+Build and run!
