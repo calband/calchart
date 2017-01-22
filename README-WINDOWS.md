@@ -48,7 +48,7 @@ Add the following User variables:
 ## Get calchart (you'll need to log in with your source forge account):
 Open cygwin and run the following:
 
-	$ git clone https://github.com/calband/calband.git /cygdrive/c/calchart
+	$ git clone https://github.com/calband/calchart.git /cygdrive/c/calchart
 
 (or cd to whereever you installed calchart)
 
