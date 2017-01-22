@@ -13,21 +13,13 @@ packages:
 * bison
 * flex
 
-## Get Visual C++ Express 2013 for Windows Desktop
-I use Visual C++ Express 2013 for Windows Desktop because it supports c99 and it is free.  If you have the Pro version, feel free to use that.
-Go to microsoft, download and install Visual C++ Express 2013 for Windows Desktop.
+## Get Visual Studio Community 2015
+We tried Visual Studio Community 2015.
 
 ## Download 3.1 of wxWidgets
 Go to wxwidgets.org and download the exe installer (which will put the source at c:\wxWidgets-3.1
 
 ## Make wxWidgets
-(I'm following the instructions at wiki.wxWidgets.org/Install)
-Open Visual C++ Express 2013 for Windows Desktop.
-Open the project wx_vc10.sln at wxWidgets-3.0.2\build\msw.  It should prompt you to migrate the project.
-Build the following solutions
-
-	Debug   | Win32
-	Release | Win32
 
 ## Download Boost
 Visit http://www.boost.org/ and download the latest version of Boost. 
@@ -41,7 +33,7 @@ Remember where you place this Boost directory. In the next section, I will refer
 Go to Control Panel->System->Advanced System Settings->Environment Variables
 Add the following User variables:
 
-	WXWIN=c:\wxWidgets-3.0.2
+	WXWIN=c:\wxWidgets-3.1
 	BOOST_DIR=$YOUR_BOOST_DIRECTORY
 
 (see the `Download Boost` section above for the meaning of $YOUR_BOOST_DIRECTORY)
