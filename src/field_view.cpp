@@ -71,7 +71,7 @@ bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
                                 mConfig.Get_FieldFrameHeight()));
 #endif
 
-	UpdateBackgroundImages();
+    UpdateBackgroundImages();
     mFrame->Show(true);
     Activate(true);
     return true;
@@ -124,11 +124,11 @@ void FieldView::DrawOtherPoints(wxDC& dc,
 
 void FieldView::OnDrawBackground(wxDC& dc)
 {
-	if (!mDrawBackground) return;
-	for (auto i = 0; i < mBackgroundImages.size(); ++i)
-	{
+    if (!mDrawBackground)
+        return;
+    for (auto i = 0; i < mBackgroundImages.size(); ++i) {
         mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
-	}
+    }
 }
 
 void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
@@ -146,7 +146,7 @@ void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
     else if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
         GeneratePaths();
     }
-	UpdateBackgroundImages();
+    UpdateBackgroundImages();
 
     if (mFrame) {
         mFrame->UpdatePanel();
@@ -187,8 +187,8 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     wizard->GetPageAreaSizer()->Add(page1);
     if (wizard->RunWizard(page1)) {
         auto labels = page1->GetLabels();
-		auto num = page1->GetNumberPoints();
-		auto columns = page1->GetNumberColumns();
+        auto num = page1->GetNumberPoints();
+        auto columns = page1->GetNumberColumns();
         std::vector<std::string> tlabels(labels.begin(), labels.end());
         auto newmode = wxGetApp().GetMode(page2->GetValue());
 
@@ -207,7 +207,7 @@ bool FieldView::DoRotatePointPositions(unsigned rotateAmount)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount, mCurrentReferencePoint);
+    auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount, mCurrentReferencePoint);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -216,7 +216,7 @@ bool FieldView::DoMovePoints(const std::map<unsigned, CC_coord>& newPositions)
 {
     if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint))
         return false;
-	auto cmd = mShow->Create_MovePointsCommand(newPositions, mCurrentReferencePoint);
+    auto cmd = mShow->Create_MovePointsCommand(newPositions, mCurrentReferencePoint);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -225,7 +225,7 @@ bool FieldView::DoResetReferencePoint()
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_SetReferencePointToRef0(mCurrentReferencePoint);
+    auto cmd = mShow->Create_SetReferencePointToRef0(mCurrentReferencePoint);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -234,40 +234,40 @@ bool FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_SetSymbolCommand(sym);
+    auto cmd = mShow->Create_SetSymbolCommand(sym);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
 bool FieldView::DoSetDescription(const wxString& descr)
 {
-	auto cmd = mShow->Create_SetDescriptionCommand(descr);
+    auto cmd = mShow->Create_SetDescriptionCommand(descr);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
 void FieldView::DoSetMode(const wxString& mode)
 {
-	auto cmd = mShow->Create_SetModeCommand(mode);
+    auto cmd = mShow->Create_SetModeCommand(mode);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 void FieldView::DoSetShowInfo(unsigned numPoints, unsigned numColumns,
     const std::vector<wxString>& labels)
 {
-	auto cmd = mShow->Create_SetShowInfoCommand(numPoints, numColumns, labels);
+    auto cmd = mShow->Create_SetShowInfoCommand(numPoints, numColumns, labels);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 void FieldView::DoSetSheetTitle(const wxString& descr)
 {
-	auto cmd = mShow->Create_SetSheetTitleCommand(descr);
+    auto cmd = mShow->Create_SetSheetTitleCommand(descr);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 bool FieldView::DoSetSheetBeats(unsigned short beats)
 {
-	auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
+    auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -276,7 +276,7 @@ bool FieldView::DoSetPointsLabel(bool right)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_SetLabelRightCommand(right);
+    auto cmd = mShow->Create_SetLabelRightCommand(right);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -285,7 +285,7 @@ bool FieldView::DoSetPointsLabelFlip()
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_ToggleLabelFlipCommand();
+    auto cmd = mShow->Create_ToggleLabelFlipCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -294,7 +294,7 @@ bool FieldView::DoSetPointsLabelVisibility(bool isVisible)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_SetLabelVisibleCommand(isVisible);
+    auto cmd = mShow->Create_SetLabelVisibleCommand(isVisible);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -303,7 +303,7 @@ bool FieldView::DoTogglePointsLabelVisibility()
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-	auto cmd = mShow->Create_ToggleLabelVisibilityCommand();
+    auto cmd = mShow->Create_ToggleLabelVisibilityCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -311,13 +311,13 @@ bool FieldView::DoTogglePointsLabelVisibility()
 void FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht,
     unsigned where)
 {
-	auto cmd = mShow->Create_AddSheetsCommand(sht, where);
+    auto cmd = mShow->Create_AddSheetsCommand(sht, where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 bool FieldView::DoDeleteSheet(unsigned where)
 {
-	auto cmd = mShow->Create_RemoveSheetCommand(where);
+    auto cmd = mShow->Create_RemoveSheetCommand(where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -367,7 +367,7 @@ bool FieldView::DoRelabel()
         return false;
     }
     // Apply remapping to the rest
-    auto cmd = mShow->Create_ApplyRelabelMapping(sheet_num+1, result.second);
+    auto cmd = mShow->Create_ApplyRelabelMapping(sheet_num + 1, result.second);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -378,14 +378,14 @@ std::pair<bool, std::string> FieldView::DoAppendShow(std::unique_ptr<CalChartDoc
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
         return { false, "The blocksize doesn't match" };
     }
-    auto last_sheet = mShow->GetNthSheet(GetNumSheets()-1);
+    auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
     auto next_sheet = other_show->GetSheetBegin();
     auto result = mShow->GetRelabelMapping(last_sheet, next_sheet);
     // check to see if there's a valid remapping
     if (!result.first) {
         return { false, "Last sheet doesn't match first sheet of other show" };
     }
-	auto cmd = mShow->Create_AppendShow(std::move(other_show));
+    auto cmd = mShow->Create_AppendShow(std::move(other_show));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return { true, "" };
 }
@@ -522,22 +522,22 @@ void FieldView::GeneratePaths()
 
 void FieldView::DoDrawBackground(bool enable)
 {
-	mDrawBackground = enable;
+    mDrawBackground = enable;
 }
 
 bool FieldView::DoingDrawBackground() const
 {
-	return mDrawBackground;
+    return mDrawBackground;
 }
 
 void FieldView::DoPictureAdjustment(bool enable)
 {
-	mAdjustBackgroundMode = enable;
+    mAdjustBackgroundMode = enable;
 }
 
 bool FieldView::DoingPictureAdjustment() const
 {
-	return mAdjustBackgroundMode;
+    return mAdjustBackgroundMode;
 }
 
 bool FieldView::AddBackgroundImage(const wxImage& image)
@@ -548,90 +548,87 @@ bool FieldView::AddBackgroundImage(const wxImage& image)
     long x = 100;
     long y = 100;
 
-	auto width = image.GetWidth();
-	auto height = image.GetHeight();
-	std::vector<unsigned char> data(width*height*3);
-	auto d = image.GetData();
-	std::copy(d, d + width*height*3, data.data());
-	std::vector<unsigned char> alpha;
-	auto a = image.GetAlpha();
-	if (a) {
-		alpha.resize(width*height);
-		std::copy(a, a + width*height, alpha.data());
-	}
-	
-	auto cmd = mShow->Create_AddNewBackgroundImageCommand(x, y, width, height, data, alpha);
+    auto width = image.GetWidth();
+    auto height = image.GetHeight();
+    std::vector<unsigned char> data(width * height * 3);
+    auto d = image.GetData();
+    std::copy(d, d + width * height * 3, data.data());
+    std::vector<unsigned char> alpha;
+    auto a = image.GetAlpha();
+    if (a) {
+        alpha.resize(width * height);
+        std::copy(a, a + width * height, alpha.data());
+    }
+
+    auto cmd = mShow->Create_AddNewBackgroundImageCommand(x, y, width, height, data, alpha);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
 void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
 {
-	if (!mAdjustBackgroundMode) return;
-	mWhichBackgroundIndex = -1;
-	for (auto i = 0; i < mBackgroundImages.size(); ++i)
-	{
+    if (!mAdjustBackgroundMode)
+        return;
+    mWhichBackgroundIndex = -1;
+    for (auto i = 0; i < mBackgroundImages.size(); ++i) {
         if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
-			mWhichBackgroundIndex = i;
-		}
-	}
-	if (mWhichBackgroundIndex != -1)
-	{
-		mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftDown(event, dc);
-	}
+            mWhichBackgroundIndex = i;
+        }
+    }
+    if (mWhichBackgroundIndex != -1) {
+        mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftDown(event, dc);
+    }
 }
 
 void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
-	if (!mAdjustBackgroundMode) return;
-	if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())
-	{
-		auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
+    if (!mAdjustBackgroundMode)
+        return;
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()) {
+        auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
         auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
-		GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-	}
+        GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    }
 }
 
 void FieldView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
 {
-	if (!mAdjustBackgroundMode) return;
-	if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())
-	{
-		mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
-	}
+    if (!mAdjustBackgroundMode)
+        return;
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()) {
+        mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
+    }
 }
 
 void FieldView::OnBackgroundImageDelete()
 {
-	if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size())) return;
-	// let the doc know we've removed a picture.
+    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()))
+        return;
+    // let the doc know we've removed a picture.
     auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);
-	GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 void FieldView::UpdateBackgroundImages()
 {
-	mBackgroundImages.clear();
-	if (mShow && mShow->GetNumSheets())
-	{
-		auto images = mShow->GetCurrentSheet()->GetBackgroundImages();
-		for (auto&& image : images)
-		{
-			// ugh...  not sure if there's a better way to pass data to image.
-			auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
-			std::copy(image.data.begin(), image.data.end(), d);
-			auto a = static_cast<unsigned char*>(nullptr);
-			if (image.alpha.size()) {
-				a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
-				std::copy(image.alpha.begin(), image.alpha.end(), a);
-				wxImage img(image.image_width, image.image_height, d, a);
-				mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-			}
-			else {
-				wxImage img(image.image_width, image.image_height, d);
-				mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-			}
-		}
-	}
+    mBackgroundImages.clear();
+    if (mShow && mShow->GetNumSheets()) {
+        auto images = mShow->GetCurrentSheet()->GetBackgroundImages();
+        for (auto&& image : images) {
+            // ugh...  not sure if there's a better way to pass data to image.
+            auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
+            std::copy(image.data.begin(), image.data.end(), d);
+            auto a = static_cast<unsigned char*>(nullptr);
+            if (image.alpha.size()) {
+                a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
+                std::copy(image.alpha.begin(), image.alpha.end(), a);
+                wxImage img(image.image_width, image.image_height, d, a);
+                mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+            }
+            else {
+                wxImage img(image.image_width, image.image_height, d);
+                mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+            }
+        }
+    }
 }
-

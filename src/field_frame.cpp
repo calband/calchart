@@ -534,14 +534,14 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event) {
-    if (GetShow())
-    {
-        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event)
+{
+    if (GetShow()) {
+        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
         if (saveFileDialog.ShowModal() == wxID_CANCEL)
             return;
-        
+
         if (!GetShow()->exportViewerFile(saveFileDialog.GetPath())) {
             wxMessageBox(wxT("There was a problem exporting the viewer file.\n") + saveFileDialog.GetPath(), wxT("Exporting Viewer File"));
             return;
@@ -962,36 +962,36 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
             wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
             return;
         }
-		GetFieldView()->DoPictureAdjustment(true);
-		GetFieldView()->DoDrawBackground(true);
+        GetFieldView()->DoPictureAdjustment(true);
+        GetFieldView()->DoDrawBackground(true);
         GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(true);
         GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(true);
-		mCanvas->Refresh();
+        mCanvas->Refresh();
     }
 }
 
 void FieldFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
 {
-	bool toggle = !GetFieldView()->DoingPictureAdjustment();
-	GetFieldView()->DoPictureAdjustment(toggle);
-	GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
-	if (toggle) {
-		GetFieldView()->DoDrawBackground(toggle);
-		GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
-	}
-	mCanvas->Refresh();
+    bool toggle = !GetFieldView()->DoingPictureAdjustment();
+    GetFieldView()->DoPictureAdjustment(toggle);
+    GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+    if (toggle) {
+        GetFieldView()->DoDrawBackground(toggle);
+        GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
+    }
+    mCanvas->Refresh();
 }
 
 void FieldFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
 {
-	bool toggle = !GetFieldView()->DoingDrawBackground();
-	GetFieldView()->DoDrawBackground(toggle);
-	GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
-	if (!toggle) {
-		GetFieldView()->DoPictureAdjustment(toggle);
-		GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
-	}
-	mCanvas->Refresh();
+    bool toggle = !GetFieldView()->DoingDrawBackground();
+    GetFieldView()->DoDrawBackground(toggle);
+    GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
+    if (!toggle) {
+        GetFieldView()->DoPictureAdjustment(toggle);
+        GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+    }
+    mCanvas->Refresh();
 }
 
 void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
@@ -1080,7 +1080,6 @@ std::pair<Coord, Coord> FieldFrame::GridChoice() const
 {
     return gridvalue[mGridChoice->GetSelection()];
 }
-
 
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {

@@ -23,8 +23,7 @@
 
 #include <vector>
 
-namespace calchart_core
-{
+namespace calchart_core {
 
 struct ImageData {
     int left, top;
@@ -33,8 +32,7 @@ struct ImageData {
     std::vector<unsigned char> data;
     std::vector<unsigned char> alpha;
     ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
-    ImageData(uint8_t const* &d);
+    ImageData(uint8_t const*& d);
     std::vector<uint8_t> Serialize() const;
 };
-
 }

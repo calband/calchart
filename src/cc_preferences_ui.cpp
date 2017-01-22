@@ -298,7 +298,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
 {
     auto field_offset = mMode->FieldOffset();
     auto offset = mMode->Offset();
-    SetCanvasSize(wxSize{mMode->Size().x, mMode->Size().y});
+    SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
 
     // Create a fake show with some points and selections to draw an example for
     // the user
@@ -306,8 +306,8 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     auto labels = std::vector<std::string>{
         "unsel", "unsel", "sel", "sel",
     };
-	mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
-	mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
+    mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
+    mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
     mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
     mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);
@@ -323,8 +323,8 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
         mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(6)) } }, 1).first(*mShow);
     }
 
-	mShow->Create_AddSheetsCommand(CC_show::CC_sheet_container_t{ *static_cast<CC_show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
-	mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
+    mShow->Create_AddSheetsCommand(CC_show::CC_sheet_container_t{ *static_cast<CC_show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
+    mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 0).first(*mShow);
         mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 1).first(*mShow);
@@ -333,7 +333,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
 
         mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 6)) } }, 1).first(*mShow);
     }
-	mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
+    mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
 
     auto point_start = offset + field_offset + CC_coord(Int2Coord(4), Int2Coord(2));
     mPathEnd = point_start + CC_coord(Int2Coord(0), Int2Coord(2));
@@ -989,7 +989,7 @@ void ShowModeSetupCanvas::SetMode(const std::string& which,
 {
     mMode = ShowModeStandard::CreateShowMode(
         which, [this, item]() { return this->mConfig.Get_ShowModeInfo(item); });
-    SetCanvasSize(wxSize{mMode->Size().x, mMode->Size().y});
+    SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
     Refresh();
 }
 
@@ -999,7 +999,7 @@ void ShowModeSetupCanvas::SetMode(const std::string& which,
     mMode = ShowModeSprShow::CreateSpringShowMode(which, [this, item]() {
         return this->mConfig.Get_SpringShowModeInfo(item);
     });
-    SetCanvasSize(wxSize{mMode->Size().x, mMode->Size().y});
+    SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
     Refresh();
 }
 

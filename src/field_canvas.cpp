@@ -57,7 +57,7 @@ FieldCanvas::FieldCanvas(wxView* view, FieldFrame* frame, float def_zoom)
     , curr_move(CC_MOVE_NORMAL)
     , drag(CC_DRAG_NONE)
 {
-    SetCanvasSize(wxSize{mView->GetShowFieldSize().x, mView->GetShowFieldSize().y});
+    SetCanvasSize(wxSize{ mView->GetShowFieldSize().x, mView->GetShowFieldSize().y });
     SetZoom(def_zoom);
 }
 
@@ -79,7 +79,7 @@ void FieldCanvas::OnPaint(wxPaintEvent& event,
     // draw the background
     PaintBackground(dc, config);
     // draw Background Image
-	mView->OnDrawBackground(dc);
+    mView->OnDrawBackground(dc);
 
     // draw the view
     mView->OnDraw(&dc);
@@ -528,8 +528,8 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
     else if (event.GetKeyCode() == WXK_RIGHT)
         mView->GoToNextSheet();
     else if (event.GetKeyCode() == WXK_DELETE || event.GetKeyCode() == WXK_NUMPAD_DELETE || event.GetKeyCode() == WXK_BACK) {
-		mView->OnBackgroundImageDelete();
-	}
+        mView->OnBackgroundImageDelete();
+    }
     if (event.GetKeyCode() == 'w') {
         MoveByKey(direction::north);
     }
@@ -620,7 +620,8 @@ void FieldCanvas::MoveDrag(const CC_coord& end)
     }
 }
 
-CC_coord FieldCanvas::GetMoveAmount(direction dir) {
+CC_coord FieldCanvas::GetMoveAmount(direction dir)
+{
     auto stepsize = std::get<0>(mFrame->GridChoice());
     stepsize = std::max(stepsize, Int2Coord(1));
     switch (dir) {
@@ -647,7 +648,6 @@ static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
         return a2;
 }
 
-
 CC_coord FieldCanvas::SnapToGrid(CC_coord c)
 {
     Coord gridn, grids;
@@ -662,7 +662,8 @@ CC_coord FieldCanvas::SnapToGrid(CC_coord c)
 
 void FieldCanvas::MoveByKey(direction dir)
 {
-    if (mView->GetSelectionList().empty()) return;
+    if (mView->GetSelectionList().empty())
+        return;
     std::map<unsigned, CC_coord> move_points;
     auto& select_list = mView->GetSelectionList();
     auto pos = GetMoveAmount(dir);

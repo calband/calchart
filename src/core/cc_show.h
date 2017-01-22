@@ -74,17 +74,17 @@ public:
     // How we save and load a show:
     std::vector<uint8_t> SerializeShow() const;
 
-	// Create command, consists of an action and undo action
-	CC_show_command_pair Create_SetDescriptionCommand(std::string const& descr) const;
-	CC_show_command_pair Create_SetCurrentSheetCommand(int n) const;
+    // Create command, consists of an action and undo action
+    CC_show_command_pair Create_SetDescriptionCommand(std::string const& descr) const;
+    CC_show_command_pair Create_SetCurrentSheetCommand(int n) const;
     CC_show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
-	CC_show_command_pair Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const;
-	CC_show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
-	CC_show_command_pair Create_SetSheetBeatsCommand(unsigned short beats) const;
-	CC_show_command_pair Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where) const;
-	CC_show_command_pair Create_RemoveSheetCommand(unsigned where) const;
+    CC_show_command_pair Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const;
+    CC_show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
+    CC_show_command_pair Create_SetSheetBeatsCommand(unsigned short beats) const;
+    CC_show_command_pair Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where) const;
+    CC_show_command_pair Create_RemoveSheetCommand(unsigned where) const;
     CC_show_command_pair Create_ApplyRelabelMapping(unsigned sheet_num_first, std::vector<size_t> const& mapping) const;
-    CC_show_command_pair Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string>> const& data) const;
+    CC_show_command_pair Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string> > const& data) const;
     CC_show_command_pair Create_MovePointsCommand(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const;
     CC_show_command_pair Create_RotatePointPositionsCommand(unsigned rotateAmount, unsigned ref) const;
     CC_show_command_pair Create_SetReferencePointToRef0(unsigned ref) const;
@@ -118,7 +118,7 @@ public:
     bool WillMovePoints(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const;
 
     // utility
-    std::pair<bool, std::vector<size_t>> GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
+    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
     SelectionList MakeSelectAll() const;
     SelectionList MakeUnselectAll() const;
     SelectionList MakeAddToSelection(const SelectionList& sl) const;
@@ -138,7 +138,7 @@ public:
      * a '.viewer' file.
      */
     JSONElement toOnlineViewerJSON(const Animation& compiledShow) const;
-    
+
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
      * could represent this show in an Online Viewer '.viewer' file.
@@ -152,7 +152,7 @@ public:
     void SetMode(ShowMode const* mode) { mMode = mode; }
 
 private:
-	// modification of show is private, and externally done through create and exeucte commands
+    // modification of show is private, and externally done through create and exeucte commands
     CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
     void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
     void InsertSheet(const CC_sheet_container_t& nsheet, unsigned sheetidx);

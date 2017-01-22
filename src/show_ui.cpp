@@ -130,7 +130,8 @@ void PointPicker::CreateControls()
 
 void PointPicker::PointPickerAll(wxCommandEvent&)
 {
-    mShow.SetSelection(mShow.MakeSelectAll()); }
+    mShow.SetSelection(mShow.MakeSelectAll());
+}
 
 void PointPicker::PointPickerBySymbol(SYMBOL_TYPE which)
 {

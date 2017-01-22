@@ -22,32 +22,42 @@
 #include "cc_image.h"
 #include "cc_fileformat.h"
 
-namespace calchart_core
-{
+namespace calchart_core {
 
 ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
-	: left(left)
-	, top(top)
-	, scaled_width(scaled_width)
-	, scaled_height(scaled_height)
-	, image_width(image_width)
-	, image_height(image_height)
-	, data(data)
-	, alpha(alpha)
+    : left(left)
+    , top(top)
+    , scaled_width(scaled_width)
+    , scaled_height(scaled_height)
+    , image_width(image_width)
+    , image_height(image_height)
+    , data(data)
+    , alpha(alpha)
 {
 }
 
-ImageData::ImageData(uint8_t const*& d) {
-	left = get_big_long(d); d += 4;
-	top = get_big_long(d); d += 4;
-	scaled_width = get_big_long(d); d += 4;
-	scaled_height = get_big_long(d); d += 4;
-	image_width = get_big_long(d); d += 4;
-	image_height = get_big_long(d); d += 4;
-	auto data_size = get_big_long(d); d += 4;
-	data.assign(d, d + data_size); d += data_size;
-	auto alpha_size = get_big_long(d); d += 4;
-	alpha.assign(d, d + alpha_size); d += alpha_size;
+ImageData::ImageData(uint8_t const*& d)
+{
+    left = get_big_long(d);
+    d += 4;
+    top = get_big_long(d);
+    d += 4;
+    scaled_width = get_big_long(d);
+    d += 4;
+    scaled_height = get_big_long(d);
+    d += 4;
+    image_width = get_big_long(d);
+    d += 4;
+    image_height = get_big_long(d);
+    d += 4;
+    auto data_size = get_big_long(d);
+    d += 4;
+    data.assign(d, d + data_size);
+    d += data_size;
+    auto alpha_size = get_big_long(d);
+    d += 4;
+    alpha.assign(d, d + alpha_size);
+    d += alpha_size;
 }
 
 std::vector<uint8_t> ImageData::Serialize() const
@@ -59,13 +69,12 @@ std::vector<uint8_t> ImageData::Serialize() const
     CalChart::Parser::Append(result, uint32_t(scaled_height));
     CalChart::Parser::Append(result, uint32_t(image_width));
     CalChart::Parser::Append(result, uint32_t(image_height));
-	// we know data size, but let's put it in anyways
+    // we know data size, but let's put it in anyways
     CalChart::Parser::Append(result, uint32_t(data.size()));
     CalChart::Parser::Append(result, data);
-	// alpha could be zero
+    // alpha could be zero
     CalChart::Parser::Append(result, uint32_t(alpha.size()));
     CalChart::Parser::Append(result, alpha);
-	return result;
+    return result;
 }
-
 }

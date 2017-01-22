@@ -31,9 +31,9 @@ class BackgroundImage {
 public:
     BackgroundImage(const wxImage& image, int x, int y, int scaled_width, int scaled_height);
 
-	bool MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const;
+    bool MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const;
     void OnMouseLeftDown(const wxMouseEvent& event, const wxDC& dc);
-	// returns left, top, width, height
+    // returns left, top, width, height
     std::array<int, 4> OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc);
     void OnMouseMove(const wxMouseEvent& event, const wxDC& dc);
     void OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const;

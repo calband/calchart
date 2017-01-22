@@ -366,11 +366,11 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         sheet->mPrintableContinuity = CC_print_continuity(print_name, print_cont);
     };
     auto parse_INGL_BACK = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
-		auto num = get_big_long(ptr); ptr += 4;
-		while (num--)
-		{
-			sheet->mBackgroundImages.emplace_back(ptr);
-		}
+        auto num = get_big_long(ptr);
+        ptr += 4;
+        while (num--) {
+            sheet->mBackgroundImages.emplace_back(ptr);
+        }
     };
 
     static const std::map<uint32_t, std::function<void(CC_sheet*, const uint8_t*, size_t)> >
@@ -432,10 +432,9 @@ std::vector<uint8_t> CC_sheet::SerializeBackgroundImageData() const
 {
     std::vector<uint8_t> result;
     CalChart::Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
-	for (auto&& i : mBackgroundImages)
-	{
+    for (auto&& i : mBackgroundImages) {
         CalChart::Parser::Append(result, i.Serialize());
-	}
+    }
     return result;
 }
 
@@ -470,7 +469,7 @@ std::vector<uint8_t> CC_sheet::SerializeSheetData() const
 
     // Write Continuity
     CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
-                                 INGL_BACK, SerializeBackgroundImageData()));
+                                         INGL_BACK, SerializeBackgroundImageData()));
 
     return result;
 }
@@ -533,7 +532,7 @@ std::vector<CC_point> CC_sheet::NewNumPointsPositions(unsigned num, unsigned col
         }
         newpts[i] = CC_point(c);
     }
-	return newpts;
+    return newpts;
 }
 
 std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) const
@@ -545,7 +544,7 @@ std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) co
     for (size_t i = 0; i < newpts.size(); i++) {
         newpts.at(i) = mPoints.at(table.at(i));
     }
-	return newpts;
+    return newpts;
 }
 
 const CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
@@ -660,15 +659,17 @@ CC_point& CC_sheet::GetPoint(unsigned i) { return mPoints[i]; }
 
 std::vector<CC_point> CC_sheet::GetPoints() const { return mPoints; }
 
-JSONElement CC_sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const {
+JSONElement CC_sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
+{
     JSONElement newViewerObject = JSONElement::makeNull();
     toOnlineViewerJSON(newViewerObject, sheetNum, dotLabels, compiledSheet);
     return newViewerObject;
 }
 
-void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const {
-    JSONDataObjectAccessor sheetObjectAccessor = dest =  JSONElement::makeObject();
-    
+void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
+{
+    JSONDataObjectAccessor sheetObjectAccessor = dest = JSONElement::makeObject();
+
     // Create a skeleton for the JSON representation of a sheet
     sheetObjectAccessor["label"] = std::to_string(sheetNum);
     sheetObjectAccessor["field_type"] = "college";
@@ -677,9 +678,9 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     sheetObjectAccessor["continuities"] = JSONElement::makeObject();
     sheetObjectAccessor["beats"] = mBeats;
     sheetObjectAccessor["movements"] = JSONElement::makeObject();
-    
+
     JSONDataObjectAccessor dotTypeAssignmentsAccessor = sheetObjectAccessor["dot_labels"];
-    
+
     // Iterate through all dots and collect the unique dot types discovered while doing so
     // As we discover the dot type of each dot, record the dot type assigment inside of 'dot_labels'
     std::set<std::string> uniqueDotTypes;
@@ -688,27 +689,27 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
         uniqueDotTypes.insert(symbolName);
         dotTypeAssignmentsAccessor[dotLabels[i]] = symbolName;
     }
-    
+
     JSONDataArrayAccessor dotTypesAccessor = sheetObjectAccessor["dot_types"];
     JSONDataObjectAccessor continuitiesAccessor = sheetObjectAccessor["continuities"];
-    
+
     // In 'dot_types', list all unique dot types that are used in this sheet
     // In 'continuities', map a dot type to its printed continuity
     for (auto iter = uniqueDotTypes.begin(); iter != uniqueDotTypes.end(); iter++) {
         dotTypesAccessor->pushBack(JSONElement::makeString(*iter));
         continuitiesAccessor[*iter] = "MANUAL SS" + std::to_string(sheetNum); // TODO; add printed continuities to viewer file manually for now
     }
-    
+
     JSONDataObjectAccessor movementsAccessor = sheetObjectAccessor["movements"];
-    
+
     // In 'movements', make a series of commands to describe how a point should be animated over time in the Online Viewer
     for (unsigned ptIndex = 0; ptIndex < mPoints.size(); ptIndex++) {
         JSONDataArrayAccessor pointMovementsAccessor = movementsAccessor[dotLabels[ptIndex]] = JSONElement::makeArray();
-        
+
         AnimatePoint currPos(mPoints[ptIndex].GetPos().x, mPoints[ptIndex].GetPos().y);
-        
+
         for (auto commandIter = compiledSheet.GetCommandsBegin(ptIndex); commandIter != compiledSheet.GetCommandsEnd(ptIndex); commandIter++) {
-            
+
             pointMovementsAccessor->pushBack(JSONElement::makeNull());
             (*commandIter)->toOnlineViewerJSON(pointMovementsAccessor->back(), currPos);
 
@@ -794,29 +795,28 @@ void CC_sheet_UnitTests() { CC_sheet::CC_sheet_round_trip_test(); }
 
 std::vector<calchart_core::ImageData> const& CC_sheet::GetBackgroundImages() const
 {
-	return mBackgroundImages;
+    return mBackgroundImages;
 }
 
 void CC_sheet::AddBackgroundImage(calchart_core::ImageData const& image, size_t where)
 {
     auto insert_point = mBackgroundImages.begin() + std::min(where, mBackgroundImages.size());
-	mBackgroundImages.insert(insert_point, image);
+    mBackgroundImages.insert(insert_point, image);
 }
 
 void CC_sheet::RemoveBackgroundImage(size_t which)
 {
-	if (which < mBackgroundImages.size()) {
-		mBackgroundImages.erase(mBackgroundImages.begin() + which);
-	}
+    if (which < mBackgroundImages.size()) {
+        mBackgroundImages.erase(mBackgroundImages.begin() + which);
+    }
 }
 
 void CC_sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height)
 {
-	if (which < mBackgroundImages.size()) {
-		mBackgroundImages.at(which).left = left;
-		mBackgroundImages.at(which).top = top;
-		mBackgroundImages.at(which).scaled_width = scaled_width;
-		mBackgroundImages.at(which).scaled_height = scaled_height;
-	}
+    if (which < mBackgroundImages.size()) {
+        mBackgroundImages.at(which).left = left;
+        mBackgroundImages.at(which).top = top;
+        mBackgroundImages.at(which).scaled_width = scaled_width;
+        mBackgroundImages.at(which).scaled_height = scaled_height;
+    }
 }
-

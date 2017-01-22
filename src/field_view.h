@@ -108,15 +108,15 @@ public:
 
     GhostModule& getGhostModule() { return mGhostModule; };
 
-	void DoDrawBackground(bool enable);
-	bool DoingDrawBackground() const;
-	void DoPictureAdjustment(bool enable);
-	bool DoingPictureAdjustment() const;
+    void DoDrawBackground(bool enable);
+    bool DoingDrawBackground() const;
+    void DoPictureAdjustment(bool enable);
+    bool DoingPictureAdjustment() const;
     bool AddBackgroundImage(const wxImage& image);
-	void OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc);
-	void OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc);
-	void OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc);
-	void OnBackgroundImageDelete();
+    void OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc);
+    void OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc);
+    void OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc);
+    void OnBackgroundImageDelete();
 
 private:
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
@@ -129,7 +129,7 @@ private:
     void GeneratePaths();
     std::unique_ptr<Animation> mAnimation;
     bool mDrawPaths;
-	void UpdateBackgroundImages();
+    void UpdateBackgroundImages();
 
 private:
     GhostModule mGhostModule;
@@ -138,9 +138,9 @@ private:
     unsigned mCurrentReferencePoint;
     CalChartConfiguration& mConfig;
     std::vector<BackgroundImage> mBackgroundImages;
-	bool mDrawBackground;
-	bool mAdjustBackgroundMode;
-	int mWhichBackgroundIndex;
+    bool mDrawBackground;
+    bool mAdjustBackgroundMode;
+    int mWhichBackgroundIndex;
 
     DECLARE_DYNAMIC_CLASS(FieldView)
 };

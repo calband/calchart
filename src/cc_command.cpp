@@ -39,17 +39,16 @@ CalChartDocCommand::CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_des
     : wxCommand(true, cmd_descr)
     , mDoc(doc)
     , mDocModified(doc.IsModified())
-	, mCmds(cmds)
+    , mCmds(cmds)
 {
 }
 
 // applying a command modifies the show
 bool CalChartDocCommand::Do()
 {
-	for (auto&& cmd : mCmds)
-	{
-		cmd.first(mDoc);
-	}
+    for (auto&& cmd : mCmds) {
+        cmd.first(mDoc);
+    }
     mDoc.Modify(true);
     return true;
 }
@@ -57,11 +56,10 @@ bool CalChartDocCommand::Do()
 // undoing a command puts the state back to original
 bool CalChartDocCommand::Undo()
 {
-	// apply undo in the reverse order
-	for (auto iter = mCmds.rbegin(); iter != mCmds.rend(); ++iter)
-	{
-		iter->second(mDoc);
-	}
+    // apply undo in the reverse order
+    for (auto iter = mCmds.rbegin(); iter != mCmds.rend(); ++iter) {
+        iter->second(mDoc);
+    }
     mDoc.Modify(mDocModified);
     return true;
 }

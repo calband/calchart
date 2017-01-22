@@ -114,6 +114,7 @@ public:
 
     std::vector<const AnimateSheet>::const_iterator sheetsBegin() const;
     std::vector<const AnimateSheet>::const_iterator sheetsEnd() const;
+
 private:
     const unsigned numpts;
     std::vector<AnimatePoint> pts;
@@ -127,7 +128,7 @@ private:
     void EndCmd(unsigned i);
 
     void RefreshSheet();
-    
+
     std::vector<AnimateSheet> sheets;
 
     void CheckCollisions();
@@ -139,18 +140,18 @@ private:
     std::vector<int> mAnimSheetIndices;
 };
 
-using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
+using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand> >;
 
 // AnimateSheet is a snapshot of CC_sheet
 class AnimateSheet {
 public:
     AnimateSheet(const std::vector<AnimatePoint>& thePoints,
-                 const std::vector<AnimateCommands>& theCommands,
-                 const std::string& s, unsigned beats)
-    : mPoints(thePoints)
-    , commands(theCommands)
-    , name(s)
-    , numbeats(beats)
+        const std::vector<AnimateCommands>& theCommands,
+        const std::string& s, unsigned beats)
+        : mPoints(thePoints)
+        , commands(theCommands)
+        , name(s)
+        , numbeats(beats)
     {
     }
     std::string GetName() const { return name; }
@@ -165,7 +166,7 @@ public:
     {
         return commands.at(which).end();
     }
-    
+
 private:
     std::vector<AnimatePoint> mPoints; // should probably be const
     std::vector<AnimateCommands> commands;

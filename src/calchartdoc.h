@@ -101,7 +101,7 @@ public:
     virtual wxOutputStream& SaveObject(wxOutputStream& stream);
     virtual wxInputStream& LoadObject(wxInputStream& stream);
 #endif
-    
+
     /*!
      * @brief Exports the show to a file that can be animated by
      * the CalChart Online Viewer.
@@ -111,7 +111,7 @@ public:
      * @return True if the file was saved successfully; false otherwise.
      */
     bool exportViewerFile(const wxString& filepath);
-    
+
 private:
     template <typename T>
     T& LoadObjectGeneric(T& stream);
@@ -122,7 +122,7 @@ private:
 
 public:
     // translates input into a mapping of which sheet to number,lines pair.
-    std::pair<bool, std::map<unsigned, std::pair<std::string, std::string>>> ImportPrintableContinuity(const std::vector<std::string>& lines) const;
+    std::pair<bool, std::map<unsigned, std::pair<std::string, std::string> > > ImportPrintableContinuity(const std::vector<std::string>& lines) const;
 
     void FlushAllTextWindows();
 
@@ -143,7 +143,7 @@ public:
     void SetCurrentSheet(unsigned n);
 
     unsigned short GetNumPoints() const;
-    std::pair<bool, std::vector<size_t>> GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
+    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
 
     std::string GetPointLabel(unsigned i) const;
     const std::vector<std::string>& GetPointLabels() const;
@@ -172,19 +172,19 @@ public:
         const std::set<size_t>& isPicked,
         const CalChartConfiguration& config_) const;
 
-	// create a set of commands to apply to the document.  This is the best way to interact with the doc.
-	std::unique_ptr<wxCommand> Create_SetDescriptionCommand(const wxString& newdescr);
-	std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
-	std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
-	std::unique_ptr<wxCommand> Create_SetModeCommand(const wxString& newmode);
-	std::unique_ptr<wxCommand> Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
-	std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
-	std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(unsigned short beats);
-	std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where);
-	std::unique_ptr<wxCommand> Create_RemoveSheetCommand(unsigned where);
-	std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(unsigned sheet, std::vector<size_t> const& mapping);
+    // create a set of commands to apply to the document.  This is the best way to interact with the doc.
+    std::unique_ptr<wxCommand> Create_SetDescriptionCommand(const wxString& newdescr);
+    std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
+    std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
+    std::unique_ptr<wxCommand> Create_SetModeCommand(const wxString& newmode);
+    std::unique_ptr<wxCommand> Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
+    std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
+    std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(unsigned short beats);
+    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where);
+    std::unique_ptr<wxCommand> Create_RemoveSheetCommand(unsigned where);
+    std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(unsigned sheet, std::vector<size_t> const& mapping);
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
-    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string>> const& data);
+    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string> > const& data);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<unsigned, CC_coord> const& new_positions, unsigned ref);
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(unsigned rotateAmount, unsigned ref);
     std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(unsigned ref);
@@ -200,8 +200,9 @@ public:
 
 private:
     static CC_doc_command_pair Inject_CalChartDocArg(CC_show_command_pair);
-	std::vector<CC_doc_command_pair> Create_SetSheetPair() const;
+    std::vector<CC_doc_command_pair> Create_SetSheetPair() const;
     std::vector<CC_doc_command_pair> Create_SetSheetAndSelectionPair() const;
+
 private:
     // Autosaving:
     // goal is to allow the user to have a recoverable file.

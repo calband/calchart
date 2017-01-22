@@ -150,8 +150,7 @@ void MouseMoveScrollCanvas::OnMouseMove(wxMouseEvent& event)
 void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
 {
     // calculate where the point will be before and after, then adjust.
-    auto point_before = [this](auto&& event)
-    {
+    auto point_before = [this](auto&& event) {
         wxClientDC dc(this);
         PrepareDC(dc);
         auto mouse_point = mLastPos;
@@ -160,8 +159,7 @@ void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
         return mouse_point;
     }(event);
     SetZoom(GetZoom() * (1.0 + event.GetMagnification()));
-    auto point_after = [this](auto&& event)
-    {
+    auto point_after = [this](auto&& event) {
         wxClientDC dc(this);
         PrepareDC(dc);
         auto mouse_point = mLastPos;
@@ -169,7 +167,7 @@ void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
         mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
         return mouse_point;
     }(event);
-    ChangeOffset((point_before-point_after)*GetZoom());
+    ChangeOffset((point_before - point_after) * GetZoom());
 }
 
 void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)
@@ -177,7 +175,6 @@ void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)
     auto pt = wxPoint(event.GetWheelAxis() == 1 ? event.GetWheelRotation() : 0, event.GetWheelAxis() == 0 ? (CalChartConfiguration::GetGlobalConfig().Get_ScrollDirectionNatural() ? -1 : 1) * event.GetWheelRotation() : 0);
     ChangeOffset(pt);
 }
-
 
 bool MouseMoveScrollCanvas::IsScrolling() const { return mScrolledLastMove; }
 

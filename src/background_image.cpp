@@ -49,12 +49,12 @@ bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event,
     int where;
     for (where = kUpperLeft; where < kLast; ++where) {
         if (where == kMove) {
-			wxRect bitmapSquare(wxPoint(mBitmapX, mBitmapY),
-            wxSize(mBitmap.GetWidth(), mBitmap.GetHeight()));
-			if (bitmapSquare.Contains(x, y)) {
-				return true;
-			}
-		}
+            wxRect bitmapSquare(wxPoint(mBitmapX, mBitmapY),
+                wxSize(mBitmap.GetWidth(), mBitmap.GetHeight()));
+            if (bitmapSquare.Contains(x, y)) {
+                return true;
+            }
+        }
         int offsetX = (where % 3) - 1;
         int offsetY = (where / 3) - 1;
         wxRect grabPoint(
@@ -67,9 +67,8 @@ bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event,
             return true;
         }
     }
-	return false;
+    return false;
 }
-
 
 void BackgroundImage::OnMouseLeftDown(const wxMouseEvent& event,
     const wxDC& dc)
@@ -121,12 +120,12 @@ std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent& event, con
         // done moving, lock down the picture and make it pretty:
         mBitmap = wxBitmap(mImage.Scale(mBitmap.GetWidth(), mBitmap.GetHeight(),
             wxIMAGE_QUALITY_HIGH));
-		std::array<int, 4> data { {mBitmapX, mBitmapY, mBitmap.GetWidth(), mBitmap.GetHeight()} };
+        std::array<int, 4> data{ { mBitmapX, mBitmapY, mBitmap.GetWidth(), mBitmap.GetHeight() } };
         mScaleAndMove.reset();
         mBackgroundAdjustType = kLast;
-		return data;
+        return data;
     }
-	return { { 0, 0, 0, 0 } };
+    return { { 0, 0, 0, 0 } };
 }
 
 void BackgroundImage::OnMouseMove(const wxMouseEvent& event, const wxDC& dc)
@@ -170,10 +169,10 @@ void BackgroundImage::OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) c
                 dc.DeviceToLogicalXRel(kCircleSize));
             if (selected && mBackgroundAdjustType != where) {
                 dc.SetBrush(*wxWHITE_BRUSH);
-				dc.DrawCircle(
-					middleX + (offsetX * (width / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))),
-					middleY + (offsetY * (height / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))),
-					dc.DeviceToLogicalXRel(kCircleSize*0.75));
+                dc.DrawCircle(
+                    middleX + (offsetX * (width / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))),
+                    middleY + (offsetY * (height / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))),
+                    dc.DeviceToLogicalXRel(kCircleSize * 0.75));
             }
         }
     }

@@ -45,12 +45,13 @@ public:
         JSONDataTypeArray,
         JSONDataTypeObject
     };
-    
+
     /*!
      * @brief Returns the type of data contained within this
      * JSONData object.
      */
     virtual JSONDataType type() const = 0;
+
 protected:
     /*!
      * @brief Constructor.
@@ -61,34 +62,34 @@ protected:
      * by creating JSONElement objects.
      */
     JSONData();
-    
+
     /*!
      * @brief Creates a new JSONData object to represent the
      * specified double value.
      * @param number The value to represent with a JSONData object.
      */
     static std::unique_ptr<JSONData> makeNewNumber(double number);
-    
+
     /*!
      * @brief Creates a new JSONData object to represent the 
      * specified string value.
      * @param string The value to represent with a JSONData object.
      */
     static std::unique_ptr<JSONData> makeNewString(std::string string);
-    
+
     /*!
      * @brief Creates a new JSONData object to represent the
      * specified boolean value.
      * @param boolean The value to represent with a JSONData object.
      */
     static std::unique_ptr<JSONData> makeNewBoolean(bool boolean);
-    
+
     /*!
      * @brief Creates a new JSONData object to represent a
      * 'null' value.
      */
     static std::unique_ptr<JSONData> makeNewNull();
-    
+
     /*!
      * @brief Creates a new JSONData object to represent a
      * JSON object consisting of the key-value pairs contained
@@ -97,20 +98,20 @@ protected:
      * be inserted into the new JSONData object.
      */
     static std::unique_ptr<JSONData> makeNewObject(std::map<std::string, JSONElement> object);
-    
+
     /*!
      * @brief Creates a new JSONData object to represent a JSON
      * array containing the provided values.
      * @param array
      */
     static std::unique_ptr<JSONData> makeNewArray(std::vector<JSONElement> array);
-    
+
     /*!
      * @brief Returns a pointer to a new, deep copy of this
      * JSONData object.
      */
     virtual std::unique_ptr<JSONData> newCopy() const = 0;
-    
+
 private:
     // JSONElement is a friend class so that it can have access
     // to the makeNew mand newCopy methods
@@ -145,39 +146,40 @@ public:
     JSONElement(const bool& other);
     JSONElement(const std::map<std::string, JSONElement>& other);
     JSONElement(const std::vector<JSONElement>& other);
-    
+
     static JSONElement makeNumber(double number = 0);
     static JSONElement makeString(std::string string = "");
     static JSONElement makeBoolean(bool boolean = false);
     static JSONElement makeNull();
     static JSONElement makeObject(std::map<std::string, JSONElement> object = std::map<std::string, JSONElement>());
     static JSONElement makeArray(std::vector<JSONElement> array = std::vector<JSONElement>());
-    
+
     /*!
      * @brief Returns the type of data contained within this
      * element.
      * @return The type of data within this element.
      */
     JSONData::JSONDataType type() const;
-    
-    JSONElement& operator= (const JSONElement& other);
-    JSONElement& operator= (const double& other);
-    JSONElement& operator= (const int& other);
-    JSONElement& operator= (const unsigned& other);
-    JSONElement& operator= (const char* other);
-    JSONElement& operator= (const std::string& other);
-    JSONElement& operator= (const bool& other);
-    JSONElement& operator= (const std::map<std::string, JSONElement>& other);
-    JSONElement& operator= (const std::vector<JSONElement>& other);
-    
+
+    JSONElement& operator=(const JSONElement& other);
+    JSONElement& operator=(const double& other);
+    JSONElement& operator=(const int& other);
+    JSONElement& operator=(const unsigned& other);
+    JSONElement& operator=(const char* other);
+    JSONElement& operator=(const std::string& other);
+    JSONElement& operator=(const bool& other);
+    JSONElement& operator=(const std::map<std::string, JSONElement>& other);
+    JSONElement& operator=(const std::vector<JSONElement>& other);
+
 protected:
     JSONElement(std::unique_ptr<JSONData> data);
-    
+
     const JSONData* data() const;
     JSONData* data();
+
 private:
     std::unique_ptr<JSONData> m_data;
-    
+
     // Objects that need direct access to the JSONData within a JSONElement
     // should inherit from JSONElementFriend
     friend class JSONElementFriend;
@@ -191,19 +193,21 @@ private:
 class JSONDataNumber : public JSONData {
 public:
     JSONData::JSONDataType type() const;
-    
+
     double value() const;
     void setValue(const double& val);
     void setValue(const JSONDataNumber& val);
-    JSONDataNumber& operator= (const JSONDataNumber& other);
-    JSONDataNumber& operator= (const double& other);
+    JSONDataNumber& operator=(const JSONDataNumber& other);
+    JSONDataNumber& operator=(const double& other);
+
 protected:
     JSONDataNumber(double val);
     static std::unique_ptr<JSONDataNumber> makeNewNumber(double number);
     std::unique_ptr<JSONData> newCopy() const;
+
 private:
     double m_val;
-    
+
     friend class JSONData;
 };
 
@@ -214,19 +218,21 @@ private:
 class JSONDataString : public JSONData {
 public:
     JSONData::JSONDataType type() const;
-    
+
     std::string value() const;
     void setValue(const std::string& val);
     void setValue(const JSONDataString& val);
-    JSONDataString& operator= (const JSONDataString& other);
-    JSONDataString& operator= (const std::string& other);
+    JSONDataString& operator=(const JSONDataString& other);
+    JSONDataString& operator=(const std::string& other);
+
 protected:
     JSONDataString(std::string val);
     static std::unique_ptr<JSONDataString> makeNewString(std::string string);
     std::unique_ptr<JSONData> newCopy() const;
+
 private:
     std::string m_val;
-    
+
     friend class JSONData;
 };
 
@@ -241,15 +247,17 @@ public:
     bool value() const;
     void setValue(const bool& val);
     void setValue(const JSONDataBoolean& val);
-    JSONDataBoolean& operator= (const JSONDataBoolean& other);
-    JSONDataBoolean& operator= (const bool& other);
+    JSONDataBoolean& operator=(const JSONDataBoolean& other);
+    JSONDataBoolean& operator=(const bool& other);
+
 protected:
     JSONDataBoolean(bool val);
     static std::unique_ptr<JSONDataBoolean> makeNewBoolean(bool boolean);
     std::unique_ptr<JSONData> newCopy() const;
+
 private:
     bool m_val;
-    
+
     friend class JSONData;
 };
 
@@ -260,10 +268,12 @@ private:
 class JSONDataNull : public JSONData {
 public:
     JSONData::JSONDataType type() const;
+
 protected:
     JSONDataNull();
     static std::unique_ptr<JSONDataNull> makeNewNull();
     std::unique_ptr<JSONData> newCopy() const;
+
 private:
     friend class JSONData;
 };
@@ -277,30 +287,32 @@ private:
 class JSONDataObject : public JSONData {
 public:
     JSONData::JSONDataType type() const;
-    
+
     unsigned long size() const;
-    
+
     JSONElement valueForKey(std::string key) const;
-    
-    std::vector<std::pair<const std::string&, const JSONElement&>> items() const;
+
+    std::vector<std::pair<const std::string&, const JSONElement&> > items() const;
     std::map<std::string, JSONElement>::const_iterator itemsBegin() const;
     std::map<std::string, JSONElement>::const_iterator itemsEnd() const;
-    
+
     void setValueForKey(const std::string& key, JSONElement& element);
     void erase(const std::string& key);
     void setValue(const JSONDataObject& other);
     void setValue(const std::map<std::string, JSONElement>& other);
-    JSONDataObject& operator= (const JSONDataObject& other);
-    JSONDataObject& operator= (const std::map<std::string, JSONElement>& other);
-    const JSONElement& operator[] (const std::string& key) const;
-    JSONElement& operator[] (const std::string& key);
+    JSONDataObject& operator=(const JSONDataObject& other);
+    JSONDataObject& operator=(const std::map<std::string, JSONElement>& other);
+    const JSONElement& operator[](const std::string& key) const;
+    JSONElement& operator[](const std::string& key);
+
 protected:
     JSONDataObject(std::map<std::string, JSONElement> elements);
     static std::unique_ptr<JSONDataObject> makeNewObject(std::map<std::string, JSONElement> object);
     std::unique_ptr<JSONData> newCopy() const;
+
 private:
     std::map<std::string, JSONElement> m_elements;
-    
+
     friend class JSONData;
 };
 
@@ -310,32 +322,34 @@ private:
 class JSONDataArray : public JSONData {
 public:
     JSONData::JSONDataType type() const;
-    
+
     unsigned long size() const;
-    
+
     JSONElement valueAtIndex(unsigned i) const;
-    
-    std::vector<std::reference_wrapper<const JSONElement>> values() const;
+
+    std::vector<std::reference_wrapper<const JSONElement> > values() const;
     std::vector<JSONElement>::const_iterator valuesBegin() const;
     std::vector<JSONElement>::const_iterator valuesEnd() const;
-    
+
     void insertValueAtIndex(unsigned i, const JSONElement& element);
     void eraseValueAtIndex(unsigned i);
     void pushBack(const JSONElement& element);
     void setValue(const JSONDataArray& other);
     void setValue(const std::vector<JSONElement>& other);
-    JSONDataArray& operator= (const JSONDataArray& other);
-    JSONDataArray& operator= (const std::vector<JSONElement>& other);
-    const JSONElement& operator[] (int index) const;
-    JSONElement& operator[] (int index);
+    JSONDataArray& operator=(const JSONDataArray& other);
+    JSONDataArray& operator=(const std::vector<JSONElement>& other);
+    const JSONElement& operator[](int index) const;
+    JSONElement& operator[](int index);
     JSONElement& back();
+
 protected:
     JSONDataArray(std::vector<JSONElement> elements);
     static std::unique_ptr<JSONDataArray> makeNewArray(std::vector<JSONElement> array);
     std::unique_ptr<JSONData> newCopy() const;
+
 private:
     std::vector<JSONElement> m_elements;
-    
+
     friend class JSONData;
 };
 
@@ -345,11 +359,13 @@ private:
  */
 class JSONElementFriend {
 protected:
-    const JSONData* fetchDataFromElement(const JSONElement& element) const {
+    const JSONData* fetchDataFromElement(const JSONElement& element) const
+    {
         return element.data();
     }
-    
-    JSONData* fetchDataFromElement(JSONElement& element) {
+
+    JSONData* fetchDataFromElement(JSONElement& element)
+    {
         return element.data();
     }
 };
@@ -403,25 +419,27 @@ protected:
 template <class DataClass>
 class JSONDataAccessorBase : public JSONElementFriend {
 public:
-    
-    const DataClass* operator-> () const {
+    const DataClass* operator->() const
+    {
         return dataPointer();
     }
-    
-    const DataClass& operator* () const {
+
+    const DataClass& operator*() const
+    {
         return dereference();
     }
-    
+
 protected:
-    
-    const DataClass* dataPointer() const {
+    const DataClass* dataPointer() const
+    {
         return dynamic_cast<const DataClass*>(this->fetchDataFromElement(element()));
     }
-    
-    const DataClass& dereference() const {
+
+    const DataClass& dereference() const
+    {
         return *dataPointer();
     }
-    
+
     virtual const JSONElement& element() const = 0;
 };
 
@@ -433,43 +451,49 @@ template <class DataClass>
 class JSONDataAccessor : public JSONDataAccessorBase<DataClass> {
 private:
     using super = JSONDataAccessorBase<DataClass>;
+
 public:
     JSONDataAccessor(JSONElement& element)
-    : m_element(&element)
-    {}
-    
+        : m_element(&element)
+    {
+    }
+
     JSONDataAccessor()
-    {}
-    
+    {
+    }
+
     using super::operator->;
-    
-    DataClass* operator-> () {
+
+    DataClass* operator->()
+    {
         return dataPointer();
     }
 
 protected:
-
     using super::dataPointer;
-    
-    DataClass* dataPointer() {
+
+    DataClass* dataPointer()
+    {
         return dynamic_cast<DataClass*>(this->fetchDataFromElement(element()));
     }
-    
+
     using super::dereference;
-    
-    DataClass& dereference() {
+
+    DataClass& dereference()
+    {
         return *dataPointer();
     }
-    
-    JSONElement& element() {
+
+    JSONElement& element()
+    {
         return *m_element;
     };
-    
-    const JSONElement& element() const {
+
+    const JSONElement& element() const
+    {
         return *m_element;
     };
-    
-    
+
 private:
     JSONElement* m_element;
 };
@@ -482,18 +506,20 @@ template <class DataClass>
 class JSONDataConstAccessor : public JSONDataAccessorBase<DataClass> {
 public:
     JSONDataConstAccessor(const JSONElement& element)
-    : m_element(&element)
-    {}
-    
+        : m_element(&element)
+    {
+    }
+
     JSONDataConstAccessor()
-    {}
-    
+    {
+    }
+
 protected:
-    
-    const JSONElement& element() const {
+    const JSONElement& element() const
+    {
         return *m_element;
     };
-    
+
 private:
     const JSONElement* m_element;
 };
@@ -504,9 +530,9 @@ private:
 class JSONDataNumberAccessor : public JSONDataAccessor<JSONDataNumber> {
 public:
     using JSONDataAccessor<JSONDataNumber>::JSONDataAccessor;
-    
-    JSONDataNumberAccessor& operator= (const JSONDataNumber& other);
-    JSONDataNumberAccessor& operator= (const double& other);
+
+    JSONDataNumberAccessor& operator=(const JSONDataNumber& other);
+    JSONDataNumberAccessor& operator=(const double& other);
 };
 
 /*!
@@ -523,9 +549,9 @@ public:
 class JSONDataStringAccessor : public JSONDataAccessor<JSONDataString> {
 public:
     using JSONDataAccessor<JSONDataString>::JSONDataAccessor;
-    
-    JSONDataStringAccessor& operator= (const JSONDataString& other);
-    JSONDataStringAccessor& operator= (const std::string& other);
+
+    JSONDataStringAccessor& operator=(const JSONDataString& other);
+    JSONDataStringAccessor& operator=(const std::string& other);
 };
 
 /*!
@@ -542,9 +568,9 @@ public:
 class JSONDataBooleanAccessor : public JSONDataAccessor<JSONDataBoolean> {
 public:
     using JSONDataAccessor<JSONDataBoolean>::JSONDataAccessor;
-    
-    JSONDataBooleanAccessor& operator= (const JSONDataBoolean& other);
-    JSONDataBooleanAccessor& operator= (const bool& other);
+
+    JSONDataBooleanAccessor& operator=(const JSONDataBoolean& other);
+    JSONDataBooleanAccessor& operator=(const bool& other);
 };
 
 /*!
@@ -577,11 +603,11 @@ public:
 class JSONDataArrayAccessor : public JSONDataAccessor<JSONDataArray> {
 public:
     using JSONDataAccessor<JSONDataArray>::JSONDataAccessor;
-    
-    JSONDataArrayAccessor& operator= (const JSONDataArray& other);
-    JSONDataArrayAccessor& operator= (const std::vector<JSONElement>& other);
-    const JSONElement& operator[] (int index) const;
-    JSONElement& operator[] (int index);
+
+    JSONDataArrayAccessor& operator=(const JSONDataArray& other);
+    JSONDataArrayAccessor& operator=(const std::vector<JSONElement>& other);
+    const JSONElement& operator[](int index) const;
+    JSONElement& operator[](int index);
 };
 
 /*!
@@ -590,8 +616,8 @@ public:
 class JSONDataArrayConstAccessor : public JSONDataConstAccessor<JSONDataArray> {
 public:
     using JSONDataConstAccessor<JSONDataArray>::JSONDataConstAccessor;
-    
-    const JSONElement& operator[] (int index) const;
+
+    const JSONElement& operator[](int index) const;
 };
 
 /*!
@@ -600,11 +626,11 @@ public:
 class JSONDataObjectAccessor : public JSONDataAccessor<JSONDataObject> {
 public:
     using JSONDataAccessor<JSONDataObject>::JSONDataAccessor;
-    
-    JSONDataObjectAccessor& operator= (const JSONDataObject& other);
-    JSONDataObjectAccessor& operator= (const std::map<std::string, JSONElement>& other);
-    const JSONElement& operator[] (const std::string& key) const;
-    JSONElement& operator[] (const std::string& key);
+
+    JSONDataObjectAccessor& operator=(const JSONDataObject& other);
+    JSONDataObjectAccessor& operator=(const std::map<std::string, JSONElement>& other);
+    const JSONElement& operator[](const std::string& key) const;
+    JSONElement& operator[](const std::string& key);
 };
 
 /*!
@@ -614,8 +640,6 @@ class JSONDataObjectConstAccessor : public JSONDataConstAccessor<JSONDataObject>
 private:
 public:
     using JSONDataConstAccessor<JSONDataObject>::JSONDataConstAccessor;
-    
-    const JSONElement& operator[] (const std::string& key) const;
+
+    const JSONElement& operator[](const std::string& key) const;
 };
-
-

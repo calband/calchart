@@ -407,10 +407,12 @@ Animation::GetCurrentInfo() const
     return std::pair<std::string, std::vector<std::string> >(output.str(), each);
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const {
+std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const
+{
     return sheets.begin();
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const {
+std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const
+{
     return sheets.end();
 }

@@ -83,7 +83,10 @@ private:
     void AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
     void MoveDrag(const CC_coord& end);
     void EndDrag();
-    enum class direction { north, east, south, west };
+    enum class direction { north,
+        east,
+        south,
+        west };
     void MoveByKey(direction);
     CC_coord GetMoveAmount(direction dir);
     CC_coord SnapToGrid(CC_coord c);

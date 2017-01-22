@@ -97,8 +97,8 @@ void PrintContinuityEditorView::DoSetPrintContinuity(unsigned which_sheet,
     const wxString& number,
     const wxString& cont)
 {
-    std::map<unsigned, std::pair<std::string, std::string>> data{ { which_sheet, {number.ToStdString(), cont.ToStdString() } } };
-	auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
+    std::map<unsigned, std::pair<std::string, std::string> > data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
+    auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
