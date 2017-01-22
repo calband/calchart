@@ -125,8 +125,6 @@ bool CC_point::GetFlip() const { return mFlags.test(kPointLabelFlipped); }
 
 void CC_point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
-void CC_point::FlipToggle() { mFlags.flip(kPointLabelFlipped); }
-
 bool CC_point::LabelIsVisible() const
 {
     return !mFlags.test(kLabelIsInvisible);
@@ -211,17 +209,6 @@ void CC_point_UnitTests()
     values.mFlags = 0;
     values.GetFlip = false;
     underTest.Flip(false);
-    assert(Check_CC_point(underTest, values));
-
-    // test flip toggle
-    values.mFlags = 1;
-    values.GetFlip = true;
-    underTest.FlipToggle();
-    assert(Check_CC_point(underTest, values));
-
-    values.mFlags = 0;
-    values.GetFlip = false;
-    underTest.FlipToggle();
     assert(Check_CC_point(underTest, values));
 
     // test visability

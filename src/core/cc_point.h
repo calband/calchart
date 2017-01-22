@@ -41,7 +41,6 @@ public:
 
     bool GetFlip() const;
     void Flip(bool val = true);
-    void FlipToggle();
 
     bool LabelIsVisible() const;
     void SetLabelVisibility(bool isVisible);

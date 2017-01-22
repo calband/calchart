@@ -55,7 +55,7 @@ struct ErrorMarker {
 
 typedef std::function<void(const std::string& notice)> NotifyStatus;
 typedef std::function<bool(
-    const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum,
+    const std::map<AnimateError, ErrorMarker>& error_markers, size_t sheetnum,
     const std::string& message)> NotifyErrorList;
 
 class Animation {
@@ -128,7 +128,7 @@ private:
 
     void RefreshSheet();
     
-    std::vector<const AnimateSheet> sheets;
+    std::vector<AnimateSheet> sheets;
 
     void CheckCollisions();
     CollisionAction_t mCollisionAction;
