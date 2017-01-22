@@ -37,10 +37,10 @@ SetDescriptionWizard::SetDescriptionWizard(wxWizard* parent)
     wxStaticText* label = new wxStaticText(
         this, wxID_STATIC, wxT("Enter a show description for your show:"),
         wxDefaultPosition, wxDefaultSize, 0);
-    topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Add(label, 0, wxALL, 5);
     mText = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxSize(240, 100));
-    topsizer->Add(mText, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Add(mText, 0, wxALL, 5);
     topsizer->Fit(this);
 }
 
@@ -62,9 +62,9 @@ ChooseShowModeWizard::ChooseShowModeWizard(wxWizard* parent)
     wxStaticText* label = new wxStaticText(
         this, wxID_STATIC, wxT("Choose a field to set your show:"),
         wxDefaultPosition, wxDefaultSize, 0);
-    topsizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Add(label, 0, wxALL, 5);
     mChoice = new wxChoice(this, wxID_ANY, wxPoint(5, 5), wxDefaultSize, modeStrings);
-    topsizer->Add(mChoice, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Add(mChoice, 0, wxALL, 5);
     topsizer->Fit(this);
 }
 

@@ -58,7 +58,7 @@ public:
 
     // you can create a show in two ways, from nothing, or from an input stream
     static std::unique_ptr<CC_show> Create_CC_show();
-    static std::unique_ptr<CC_show> Create_CC_show(std::string const& descr, unsigned num, unsigned columns, std::vector<std::string> const& labels, const CC_coord& new_march_position);
+    static std::unique_ptr<CC_show> Create_CC_show(unsigned num, unsigned columns, std::vector<std::string> const& labels, const CC_coord& new_march_position);
     static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
 
 private:
@@ -101,7 +101,7 @@ public:
     CC_show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 
     // Accessors
-    const std::string& GetDescr() const;
+    std::string GetDescr() const;
 
     const_CC_sheet_iterator_t GetSheetBegin() const;
     const_CC_sheet_iterator_t GetSheetEnd() const;

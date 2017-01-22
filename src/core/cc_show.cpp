@@ -47,10 +47,9 @@ std::unique_ptr<CC_show> CC_show::Create_CC_show()
     return show;
 }
 
-std::unique_ptr<CC_show> CC_show::Create_CC_show(std::string const& descr, unsigned num, unsigned columns, std::vector<std::string> const& labels, const CC_coord& new_march_position)
+std::unique_ptr<CC_show> CC_show::Create_CC_show(unsigned num, unsigned columns, std::vector<std::string> const& labels, const CC_coord& new_march_position)
 {
     auto show = Create_CC_show();
-    show->SetDescr(descr);
 	show->SetNumPoints(num, columns, labels, new_march_position);
     return show;
 }
@@ -123,7 +122,7 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
         // fail?
     }
 
-    // Optional: read in the point labels
+    // Optional: read in the description
     // <INGL_DESC><SIZE>
     if (INGL_DESC == name) {
         std::vector<uint8_t> data = FillData(stream);
@@ -284,7 +283,7 @@ std::vector<uint8_t> CC_show::SerializeShow() const
     return result;
 }
 
-const std::string& CC_show::GetDescr() const { return descr; }
+std::string CC_show::GetDescr() const { return descr; }
 
 void CC_show::SetDescr(const std::string& newdescr) { descr = newdescr; }
 
