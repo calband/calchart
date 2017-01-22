@@ -128,7 +128,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 
         switch (curr_move) {
         case CC_MOVE_LINE:
-            mFrame->SnapToGrid(pos);
+            pos = SnapToGrid(pos);
             BeginDrag(CC_DRAG_LINE, pos);
 
             mTransformer = [this](const CC_coord&) {
@@ -146,7 +146,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             };
             break;
         case CC_MOVE_ROTATE:
-            mFrame->SnapToGrid(pos);
+            pos = SnapToGrid(pos);
             if (curr_shape && (((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos)) {
                 AddDrag(CC_DRAG_LINE,
                     std::unique_ptr<CC_shape>(new CC_shape_arc(
@@ -165,7 +165,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             }
             break;
         case CC_MOVE_SHEAR:
-            mFrame->SnapToGrid(pos);
+            pos = SnapToGrid(pos);
             if (curr_shape && (((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos)) {
                 CC_coord vect(pos - ((CC_shape_1point*)curr_shape.get())->GetOrigin());
                 // rotate vect 90 degrees
@@ -194,7 +194,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             }
             break;
         case CC_MOVE_REFL:
-            mFrame->SnapToGrid(pos);
+            pos = SnapToGrid(pos);
             BeginDrag(CC_DRAG_LINE, pos);
 
             mTransformer = [this](const CC_coord&) {
@@ -207,7 +207,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             };
             break;
         case CC_MOVE_SIZE:
-            mFrame->SnapToGrid(pos);
+            pos = SnapToGrid(pos);
             if (curr_shape && (((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos)) {
                 AddDrag(CC_DRAG_LINE,
                     std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
@@ -244,7 +244,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             }
             break;
         case CC_MOVE_GENIUS:
-            mFrame->SnapToGrid(pos);
+            pos = SnapToGrid(pos);
             AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
             if (shape_list.size() > 2) {
                 mTransformer = [this](
@@ -530,6 +530,18 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
     else if (event.GetKeyCode() == WXK_DELETE || event.GetKeyCode() == WXK_NUMPAD_DELETE || event.GetKeyCode() == WXK_BACK) {
 		mView->OnBackgroundImageDelete();
 	}
+    if (event.GetKeyCode() == 'w') {
+        MoveByKey(direction::north);
+    }
+    if (event.GetKeyCode() == 'd') {
+        MoveByKey(direction::east);
+    }
+    if (event.GetKeyCode() == 's') {
+        MoveByKey(direction::south);
+    }
+    if (event.GetKeyCode() == 'a') {
+        MoveByKey(direction::west);
+    }
     else
         event.Skip();
 }
@@ -600,13 +612,64 @@ void FieldCanvas::AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape)
 void FieldCanvas::MoveDrag(const CC_coord& end)
 {
     if (curr_shape) {
-        CC_coord snapped = end;
-        mFrame->SnapToGrid(snapped);
+        CC_coord snapped = SnapToGrid(end);
         curr_shape->OnMove(end, snapped);
     }
     if (mTransformer) {
         mMovePoints = mTransformer(end);
     }
+}
+
+CC_coord FieldCanvas::GetMoveAmount(direction dir) {
+    auto stepsize = std::get<0>(mFrame->GridChoice());
+    stepsize = std::max(stepsize, Int2Coord(1));
+    switch (dir) {
+    case direction::north:
+        return { 0, static_cast<Coord>(-stepsize) };
+    case direction::east:
+        return { stepsize, 0 };
+    case direction::south:
+        return { 0, stepsize };
+    case direction::west:
+        return { static_cast<Coord>(-stepsize), 0 };
+    }
+}
+
+static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
+{
+    Coord a2 = (a + (n >> 1)) & (~(n - 1));
+    Coord h = s >> 1;
+    if ((a - a2) >= h)
+        return a2 + s;
+    else if ((a - a2) < -h)
+        return a2 - s;
+    else
+        return a2;
+}
+
+
+CC_coord FieldCanvas::SnapToGrid(CC_coord c)
+{
+    Coord gridn, grids;
+    std::tie(gridn, grids) = mFrame->GridChoice();
+
+    return {
+        c.x = SNAPGRID(c.x, gridn, grids),
+        // Adjust so 4 step grid will be on visible grid
+        c.y = SNAPGRID(c.y - Int2Coord(2), gridn, grids) + Int2Coord(2)
+    };
+}
+
+void FieldCanvas::MoveByKey(direction dir)
+{
+    if (mView->GetSelectionList().empty()) return;
+    std::map<unsigned, CC_coord> move_points;
+    auto& select_list = mView->GetSelectionList();
+    auto pos = GetMoveAmount(dir);
+    for (auto i = select_list.begin(); i != select_list.end(); ++i) {
+        move_points[*i] = mView->PointPosition(*i) + pos;
+    }
+    mView->DoMovePoints(move_points);
 }
 
 void FieldCanvas::EndDrag()

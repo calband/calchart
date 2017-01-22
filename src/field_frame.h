@@ -122,6 +122,8 @@ public:
     void ImportContFile();
 
     void SnapToGrid(CC_coord& c);
+    // Grid chioce distance (distance per beat), Grid placement lock (where to end)
+    std::pair<Coord, Coord> GridChoice() const;
     void UpdatePanel();
 
     void SetCurrentLasso(CC_DRAG_TYPES type);

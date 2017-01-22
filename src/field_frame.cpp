@@ -70,11 +70,7 @@ const int zoom_amounts[] = {
 
 static const wxChar* file_wild = FILE_WILDCARDS;
 
-struct GridValue {
-    Coord num, sub;
-};
-
-GridValue gridvalue[] = { { 1, 0 },
+std::pair<Coord, Coord> gridvalue[] = { { 1, 0 },
     { Int2Coord(1), 0 },
     { Int2Coord(2), 0 },
     { Int2Coord(4), 0 },
@@ -1080,30 +1076,11 @@ void FieldFrame::ImportContFile()
     }
 }
 
-static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
+std::pair<Coord, Coord> FieldFrame::GridChoice() const
 {
-    Coord a2 = (a + (n >> 1)) & (~(n - 1));
-    Coord h = s >> 1;
-    if ((a - a2) >= h)
-        return a2 + s;
-    else if ((a - a2) < -h)
-        return a2 - s;
-    else
-        return a2;
+    return gridvalue[mGridChoice->GetSelection()];
 }
 
-void FieldFrame::SnapToGrid(CC_coord& c)
-{
-    Coord gridn, grids;
-    int n = mGridChoice->GetSelection();
-
-    gridn = gridvalue[n].num;
-    grids = gridvalue[n].sub;
-
-    c.x = SNAPGRID(c.x, gridn, grids);
-    // Adjust so 4 step grid will be on visible grid
-    c.y = SNAPGRID(c.y - Int2Coord(2), gridn, grids) + Int2Coord(2);
-}
 
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
