@@ -472,7 +472,7 @@ ShowInfoReqWizard::ShowInfoReqWizard(wxWizard* parent)
     : wxWizardPageSimple(parent)
     , mTransferDataToWindowFirstTime(true)
     , mNumberPoints(1)
-    , mNumberColumns(1)
+    , mNumberColumns(8)
 {
     LayoutShowInfo(this, false);
     GetSizer()->Fit(this);

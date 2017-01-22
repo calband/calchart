@@ -359,10 +359,10 @@ CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
         new Animation(*mShow, notifyStatus, notifyErrorList));
 }
 
-void CalChartDoc::WizardSetupNewShow(unsigned num, unsigned columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode, std::string const& descr)
+void CalChartDoc::WizardSetupNewShow(unsigned num, unsigned columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode)
 {
 	SetMode(std::move(newmode));
-	mShow = CC_show::Create_CC_show(descr, num, columns, labels, mMode->FieldOffset());
+	mShow = CC_show::Create_CC_show(num, columns, labels, mMode->FieldOffset());
 	UpdateAllViews();
 }
 

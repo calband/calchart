@@ -182,12 +182,7 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     ChooseShowModeWizard* page2 = new ChooseShowModeWizard(wizard);
 
     // page 3:
-    // and maybe a description
-    SetDescriptionWizard* page3 = new SetDescriptionWizard(wizard);
-    // page 4:
-
     wxWizardPageSimple::Chain(page1, page2);
-    wxWizardPageSimple::Chain(page2, page3);
 
     wizard->GetPageAreaSizer()->Add(page1);
     if (wizard->RunWizard(page1)) {
@@ -196,9 +191,8 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
 		auto columns = page1->GetNumberColumns();
         std::vector<std::string> tlabels(labels.begin(), labels.end());
         auto newmode = wxGetApp().GetMode(page2->GetValue());
-        auto descr = page3->GetValue().ToStdString();
 
-        show.WizardSetupNewShow(num, columns, tlabels, std::move(newmode), descr);
+        show.WizardSetupNewShow(num, columns, tlabels, std::move(newmode));
     }
     else {
         wxMessageBox(wxT("Show setup not completed.\n")

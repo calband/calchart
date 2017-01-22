@@ -128,7 +128,7 @@ public:
 
     std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus,
         NotifyErrorList notifyErrorList);
-    void WizardSetupNewShow(unsigned num, unsigned columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode, std::string const& descr);
+    void WizardSetupNewShow(unsigned num, unsigned columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode);
 
     const std::string& GetDescr() const;
 
