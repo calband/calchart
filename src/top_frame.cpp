@@ -104,7 +104,7 @@ void TopFrame::About()
         wxT("CalChart v") wxT(STRINGIZE(CC_MAJOR_VERSION)) wxT(".") wxT(STRINGIZE(
             CC_MINOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_SUB_MINOR_VERSION))
             wxT("\nAuthors: Gurk Meeker, Richard Michael Powell\n")
-            wxT("\nContributors: Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n")
+            wxT("\nContributors: Brandon Chinn, Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n")
                 wxT("http://calchart.sourceforge.net\n") wxT(
                     "Copyright (c) 1994-2017\n")
                     wxT("\n") wxT("This program is free software: "
