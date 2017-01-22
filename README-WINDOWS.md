@@ -9,12 +9,9 @@ Get the latest cygwin (I used 1.7.25).  Set up with the standard instation, and 
 packages:
 
 * git
-* subversion
 * make
 * bison
 * flex
-* patch
-* autoconf
 
 ## Get Visual C++ Express 2013 for Windows Desktop
 I use Visual C++ Express 2013 for Windows Desktop because it supports c99 and it is free.  If you have the Pro version, feel free to use that.
