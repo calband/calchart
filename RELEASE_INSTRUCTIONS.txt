@@ -1,4 +1,10 @@
 ~=~=~=~=~=~=~=~=~=~=~
+Checklist
+* Did you run clang format on all the files? (clang-format -style="{BasedOnStyle: webkit}" -i src/*)
+* Did it build on both windows and mac?
+* Did you open and close some files?
+
+~=~=~=~=~=~=~=~=~=~=~
 
 How to release calchart:
 
