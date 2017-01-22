@@ -69,6 +69,30 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 # Release notes
 
 
+## Release notes for 3.4.4
+
+Features addressed in this release:
+
+* #117, #139, #149 CalChart Online Viewer File Exporter
+* #200 Have keys move selected dot
+* #183 Pinch to zoom
+* #185 We should try out treating Next/previous and Selection as undoable commands
+* #178 There should be a select all marchers command
+
+Bugs addressed in this release:
+
+* #202 Have new show column default to 8
+* #189 Make sure to add scroll direction preference
+* #190 Add scrolling to preference pane
+* #153 Field doesn't redraw if the mode has changed
+
+Build infrastructure issues addressed in this release:
+
+* #184 Revamp the command_do and undo
+* #174 update to wxWidgets 3.1
+* #148 Bring Back Boost
+* #155 Update authors
+
 ## Release notes for 3.4.3
 
 Features addressed in this release:
