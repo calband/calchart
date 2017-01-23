@@ -17,16 +17,16 @@ packages:
 We tried Visual Studio Community 2015.
 
 ## Download 3.1 of wxWidgets
-Go to wxwidgets.org and download the exe installer (which will put the source at c:\wxWidgets-3.1.0
+Go to wxwidgets.org.  Download and run the Windows Installer (which will put the source at c:\wxWidgets-3.1.0)
 
 ## Make wxWidgets
-(I'm following the instructions at wiki.wxWidgets.org/Install)
 Open the project wx_vc14.sln at wxWidgets-3.1.0\build\msw.  It should prompt you to migrate the project.
 Build the following solutions
 
        Debug   | Win32
        Release | Win32
 
+(additional instructions and information can be found at wiki.wxWidgets.org/Install)
 
 ## Download Boost
 Visit http://www.boost.org/ and download the latest version of Boost. 
