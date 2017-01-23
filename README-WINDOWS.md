@@ -1,6 +1,6 @@
 # Steps for building on Windows
 
-Install windows with at least 20 gigs space and 512 megs mem.
+Install windows with at least 64 gigs space and 8GB mem.
 Install all updates until it's happy
 
 ## Get the Tools
@@ -15,12 +15,13 @@ packages:
 
 ## Get Visual Studio Community 2015
 We tried Visual Studio Community 2015.
+You'll need to install the "Visual C++" "Common Tools for Visual C++ 2015".
 
 ## Download 3.1 of wxWidgets
 Go to wxwidgets.org.  Download and run the Windows Installer (which will put the source at c:\wxWidgets-3.1.0)
 
 ## Make wxWidgets
-Open the project wx_vc14.sln at wxWidgets-3.1.0\build\msw.  It should prompt you to migrate the project.
+Open the project wx_vc14.sln at wxWidgets-3.1.0\build\msw.
 Build the following solutions
 
        Debug   | Win32
@@ -57,7 +58,7 @@ Make Calchart's generated files:
 	$ make generate
 
 ## Make Calchart
-Open Visual C++ Express 2013 for Windows Desktop.
+Open Visual Studio.
 Open the solution file:
 ...\calchart\build-win\CalChart\CalChart.sln
 Build.  This will create the CalChart.exe.
