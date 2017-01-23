@@ -112,8 +112,8 @@ public:
     std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
     AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
-    std::vector<const AnimateSheet>::const_iterator sheetsBegin() const;
-    std::vector<const AnimateSheet>::const_iterator sheetsEnd() const;
+    std::vector<AnimateSheet>::const_iterator sheetsBegin() const;
+    std::vector<AnimateSheet>::const_iterator sheetsEnd() const;
 
 private:
     const unsigned numpts;
