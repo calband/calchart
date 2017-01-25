@@ -1299,7 +1299,6 @@
 				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
 				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
 				C74162F61DAF2EDC00F87B7D /* e7_transition_solver.cpp in Sources */,
-				C7071FF21C3B2CA8005481AC /* json_export.cpp in Sources */,
 				E8ABF9291DE1046B003FD2A5 /* contscan.l in Sources */,
 				E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
