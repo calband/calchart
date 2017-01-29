@@ -8,7 +8,7 @@ Checklist
 
 How to release calchart:
 
-The current calchart version is 3.4.3.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.4.3)
+The current calchart version is 3.4.4.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.4.4)
 
 0.1 Increment the versions in ccvers.h to CCVER
 
@@ -32,7 +32,9 @@ I use InnoSetup for creating the installer.  Get it from:
 http://www.jrsoftware.org/isinfo.php
 
 w1.3 CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
-  w1.3.a. Google and find the vcredist_x86.exe for Visual C++ 2013.  Download and save to \calchart\trunk\build-win.
+  w1.3.a. Find the file on your system:
+     find /cygdrive/c/ -name "vcredist_x86.exe"
+  w1.3.b. copy it to \calchart\trunk\build-win.
 
 w1.4 Build the setup.exe installer:
 Compile via Build->Compile.
@@ -55,14 +57,14 @@ The final product is CalChart-$CCVER.dmg
 ---
 
 2. Tag the depot
-$ git tag -a v3.4.3 -m "calchart-3.4.3”
-$ git push origin v3.4.3
+$ git tag -a v3.4.4 -m "calchart-3.4.4”
+$ git push origin v3.4.4
 
 3. Go to a temporary directory on your system to recheck at the tag.  This is to avoid having any unwanted files
 $ cd /tmp
 $ git clone https://github.com/calband/calchart.git calchart
 $ cd calchart
-$ git checkout v3.4.3
+$ git checkout v3.4.4
 
 4. Rebuild the release now that you have the tag (repeat instructions for step 1)
 
