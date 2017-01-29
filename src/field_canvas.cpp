@@ -113,7 +113,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxClientDC dc(this);
     PrepareDC(dc);
-    long x, y;
+    wxCoord x, y;
     event.GetPosition(&x, &y);
     x = dc.DeviceToLogicalX(x);
     y = dc.DeviceToLogicalY(y);
@@ -136,8 +136,8 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
                 auto start = shape->GetOrigin();
                 auto second = shape->GetPoint();
                 CC_coord curr_pos = start;
-                std::map<unsigned, CC_coord> result;
-                auto& select_list = mView->GetSelectionList();
+                std::map<int, CC_coord> result;
+                auto&& select_list = mView->GetSelectionList();
                 for (auto i = select_list.begin(); i != select_list.end();
                      ++i, curr_pos += second - start) {
                     result[*i] = curr_pos;
@@ -211,8 +211,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             if (curr_shape && (((CC_shape_1point*)curr_shape.get())->GetOrigin() != pos)) {
                 AddDrag(CC_DRAG_LINE,
                     std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
-                mTransformer = [this](
-                    const CC_coord&) -> std::map<unsigned, CC_coord> {
+                mTransformer = [this](const CC_coord&) {
                     auto& origin = dynamic_cast<CC_shape_1point&>(*shape_list[0]);
                     CC_coord c1 = origin.GetOrigin();
                     const CC_shape_2point* shape = (CC_shape_2point*)curr_shape.get();
@@ -236,7 +235,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
                         auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) * ScaleMatrix(Vector(sx, sy, 0)) * TranslationMatrix(Vector(c1.x, c1.y, 0));
                         return this->GetPoints(m);
                     }
-                    return std::map<unsigned, CC_coord>{};
+                    return std::map<int, CC_coord>{};
                 };
             }
             else {
@@ -247,8 +246,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             pos = SnapToGrid(pos);
             AddDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_line(pos)));
             if (shape_list.size() > 2) {
-                mTransformer = [this](
-                    const CC_coord&) -> std::map<unsigned, CC_coord> {
+                mTransformer = [this](const CC_coord&) {
                     CC_shape_2point* v1 = (CC_shape_2point*)shape_list[0].get();
                     CC_shape_2point* v2 = (CC_shape_2point*)shape_list[1].get();
                     CC_shape_2point* v3 = (CC_shape_2point*)shape_list[2].get();
@@ -261,7 +259,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
                     CC_coord e3 = v3->GetPoint();
                     auto d = (float)s1.x * (float)s2.y - (float)s2.x * (float)s1.y + (float)s3.x * (float)s1.y - (float)s1.x * (float)s3.y + (float)s2.x * (float)s3.y - (float)s3.x * (float)s2.y;
                     if (IS_ZERO(d)) {
-                        return std::map<unsigned, CC_coord>{};
+                        return std::map<int, CC_coord>{};
                     }
                     else {
                         Matrix A = Matrix(Vector(e1.x, e2.x, 0, e3.x), Vector(e1.y, e2.y, 0, e3.y),
@@ -346,8 +344,8 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
                     mTransformer = [this](const CC_coord&) {
                         const CC_shape_2point* shape = (CC_shape_2point*)curr_shape.get();
                         CC_coord pos = shape->GetPoint() - shape->GetOrigin();
-                        std::map<unsigned, CC_coord> result;
-                        auto& select_list = mView->GetSelectionList();
+                        std::map<int, CC_coord> result;
+                        auto&& select_list = mView->GetSelectionList();
                         for (auto i = select_list.begin(); i != select_list.end(); ++i) {
                             result[*i] = mView->PointPosition(*i) + pos;
                         }
@@ -366,10 +364,9 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 {
     wxClientDC dc(this);
     PrepareDC(dc);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
+    auto point = event.GetPosition();
+    auto x = dc.DeviceToLogicalX(point.x);
+    auto y = dc.DeviceToLogicalY(point.y);
 
     if (mView->DoingPictureAdjustment()) {
         mView->OnBackgroundMouseLeftUp(event, dc);
@@ -491,10 +488,9 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
     if (!IsScrolling()) {
         wxClientDC dc(this);
         PrepareDC(dc);
-        long x, y;
-        event.GetPosition(&x, &y);
-        x = dc.DeviceToLogicalX(x);
-        y = dc.DeviceToLogicalY(y);
+        auto point = event.GetPosition();
+        auto x = dc.DeviceToLogicalX(point.x);
+        auto y = dc.DeviceToLogicalY(point.y);
 
         if (mView->DoingPictureAdjustment()) {
             mView->OnBackgroundMouseMove(event, dc);
@@ -559,9 +555,9 @@ void FieldCanvas::SetZoom(float factor)
     Refresh();
 }
 
-std::map<unsigned, CC_coord> FieldCanvas::GetPoints(const Matrix& transmat)
+std::map<int, CC_coord> FieldCanvas::GetPoints(const Matrix& transmat)
 {
-    std::map<unsigned, CC_coord> result;
+    std::map<int, CC_coord> result;
     for (auto i : mView->GetSelectionList()) {
         auto c = mView->PointPosition(i);
         Vector v(c.x, c.y, 0);
@@ -634,6 +630,9 @@ CC_coord FieldCanvas::GetMoveAmount(direction dir)
     case direction::west:
         return { static_cast<Coord>(-stepsize), 0 };
     }
+    // on the offchance somebody gets here
+    return { 0, 0 };
+
 }
 
 static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
@@ -664,8 +663,8 @@ void FieldCanvas::MoveByKey(direction dir)
 {
     if (mView->GetSelectionList().empty())
         return;
-    std::map<unsigned, CC_coord> move_points;
-    auto& select_list = mView->GetSelectionList();
+    std::map<int, CC_coord> move_points;
+    auto&& select_list = mView->GetSelectionList();
     auto pos = GetMoveAmount(dir);
     for (auto i = select_list.begin(); i != select_list.end(); ++i) {
         move_points[*i] = mView->PointPosition(*i) + pos;

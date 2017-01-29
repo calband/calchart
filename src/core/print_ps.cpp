@@ -611,7 +611,7 @@ bool PrintShowToPS::SplitSheet(const CC_sheet& sheet) const
     /* find bounds */
     auto max_s = fmax;
     auto max_n = fmin;
-    for (unsigned i = 0; i < mShow.GetNumPoints(); i++) {
+    for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         if (sheet.GetPoint(i).GetPos().x < max_s)
             max_s = sheet.GetPoint(i).GetPos().x;
         if (sheet.GetPoint(i).GetPos().x > max_n)
@@ -660,7 +660,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
         /* find bounds */
         auto max_s = fmax;
         auto max_n = fmin;
-        for (unsigned i = 0; i < mShow.GetNumPoints(); i++) {
+        for (auto i = 0; i < mShow.GetNumPoints(); i++) {
             if (sheet.GetPoint(i).GetPos().x < max_s)
                 max_s = sheet.GetPoint(i).GetPos().x;
             if (sheet.GetPoint(i).GetPos().x > max_n)
@@ -738,7 +738,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
     }
     buffer << "/numberfont findfont " << (dot_w * 2 * mNumRatio)
            << " scalefont setfont\n";
-    for (unsigned i = 0; i < mShow.GetNumPoints(); i++) {
+    for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         if ((sheet.GetPoint(i).GetPos().x > clip_n) || (sheet.GetPoint(i).GetPos().x < clip_s))
             continue;
         float fieldheight = Coord2Float(fieldsize.y);
@@ -843,7 +843,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
     }
     buffer << "/numberfont findfont " << (dot_w * 2 * mNumRatio)
            << " scalefont setfont\n";
-    for (unsigned i = 0; i < mShow.GetNumPoints(); i++) {
+    for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         float dot_x = stage_field_x + (Coord2Float(sheet.GetPoint(i).GetPos().x) - modesprshow.StepsX()) / modesprshow.StepsW() * stage_field_w;
         float dot_y = stage_field_y + stage_field_h * (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y) - modesprshow.StepsY()) / modesprshow.StepsH());
         buffer << dot_x << " " << dot_y << " "
@@ -875,7 +875,7 @@ void PrintShowToPS::PrintOverview(std::ostream& buffer,
     float fieldy = Coord2Float(fieldoff.y);
     float fieldheight = Coord2Float(fieldsize.y);
 
-    for (unsigned i = 0; i < mShow.GetNumPoints(); i++) {
+    for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         buffer << ((Coord2Float(sheet.GetPoint(i).GetPos().x) - fieldx) / fieldwidth * width)
                << " " << ((1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y) - fieldy) / fieldheight) * height)
                << " dotbox\n";

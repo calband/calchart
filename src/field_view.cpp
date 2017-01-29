@@ -67,8 +67,8 @@ bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 #else
     mFrame = new FieldFrame(doc, this, mConfig,
         wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
-        wxPoint(50, 50), wxSize(mConfig.Get_FieldFrameWidth(),
-                                mConfig.Get_FieldFrameHeight()));
+        wxPoint(50, 50), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()),
+                                static_cast<int>(mConfig.Get_FieldFrameHeight())));
 #endif
 
     UpdateBackgroundImages();
@@ -117,7 +117,7 @@ void FieldView::OnDraw(wxDC* dc)
 // Sneakily gets used for default print/preview
 // as well as drawing on the screen.
 void FieldView::DrawOtherPoints(wxDC& dc,
-    const std::map<unsigned, CC_coord>& positions)
+    const std::map<int, CC_coord>& positions)
 {
     DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
@@ -126,7 +126,7 @@ void FieldView::OnDrawBackground(wxDC& dc)
 {
     if (!mDrawBackground)
         return;
-    for (auto i = 0; i < mBackgroundImages.size(); ++i) {
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
         mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
     }
 }
@@ -203,7 +203,7 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     wizard->Destroy();
 }
 
-bool FieldView::DoRotatePointPositions(unsigned rotateAmount)
+bool FieldView::DoRotatePointPositions(int rotateAmount)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
@@ -212,7 +212,7 @@ bool FieldView::DoRotatePointPositions(unsigned rotateAmount)
     return true;
 }
 
-bool FieldView::DoMovePoints(const std::map<unsigned, CC_coord>& newPositions)
+bool FieldView::DoMovePoints(const std::map<int, CC_coord>& newPositions)
 {
     if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint))
         return false;
@@ -252,7 +252,7 @@ void FieldView::DoSetMode(const wxString& mode)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void FieldView::DoSetShowInfo(unsigned numPoints, unsigned numColumns,
+void FieldView::DoSetShowInfo(int numPoints, int numColumns,
     const std::vector<wxString>& labels)
 {
     auto cmd = mShow->Create_SetShowInfoCommand(numPoints, numColumns, labels);
@@ -265,7 +265,7 @@ void FieldView::DoSetSheetTitle(const wxString& descr)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoSetSheetBeats(unsigned short beats)
+bool FieldView::DoSetSheetBeats(int beats)
 {
     auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -309,13 +309,13 @@ bool FieldView::DoTogglePointsLabelVisibility()
 }
 
 void FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht,
-    unsigned where)
+    int where)
 {
     auto cmd = mShow->Create_AddSheetsCommand(sht, where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoDeleteSheet(unsigned where)
+bool FieldView::DoDeleteSheet(int where)
 {
     auto cmd = mShow->Create_RemoveSheetCommand(where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -402,14 +402,7 @@ CC_coord FieldView::PointPosition(int which) const
     return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
 }
 
-CC_coord FieldView::GetShowFieldOffset() const
-{
-    return mShow->GetMode().Offset();
-}
-
-CC_coord FieldView::GetShowFieldSize() const { return mShow->GetMode().Size(); }
-
-void FieldView::GoToSheet(size_t which)
+void FieldView::GoToSheet(int which)
 {
     if (which < mShow->GetNumSheets()) {
         // This *could* be run through a command or run directly...
@@ -423,29 +416,10 @@ void FieldView::GoToSheet(size_t which)
     }
 }
 
-void FieldView::GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
-
-void FieldView::GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
-
-void FieldView::SetReferencePoint(unsigned which)
+void FieldView::SetReferencePoint(int which)
 {
     mCurrentReferencePoint = which;
     OnUpdate(this);
-}
-
-void FieldView::UnselectAll()
-{
-    SetSelection(mShow->MakeUnselectAll());
-}
-
-void FieldView::AddToSelection(const SelectionList& sl)
-{
-    SetSelection(mShow->MakeAddToSelection(sl));
-}
-
-void FieldView::ToggleSelection(const SelectionList& sl)
-{
-    SetSelection(mShow->MakeToggleSelection(sl));
 }
 
 // toggle selection means toggle it as selected to unselected
@@ -474,11 +448,6 @@ void FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
     SelectWithLasso(&lasso, toggleSelected);
 }
 
-const SelectionList& FieldView::GetSelectionList()
-{
-    return mShow->GetSelectionList();
-}
-
 void FieldView::SetSelection(const SelectionList& sl)
 {
     if (std::equal(mShow->GetSelectionList().begin(), mShow->GetSelectionList().end(), sl.begin(), sl.end()))
@@ -504,13 +473,12 @@ void FieldView::OnEnableDrawPaths(bool enable)
 
 void FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 {
-    if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum())) {
+    if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (mAnimation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         CC_coord origin = GetShowFieldOffset();
         mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
-        for (auto point = mShow->GetSelectionList().begin();
-             point != mShow->GetSelectionList().end(); ++point) {
-            DrawPath(dc, mConfig, mAnimation->GenPathToDraw(*point, origin),
-                mAnimation->EndPosition(*point, origin));
+        for (auto&& point : mShow->GetSelectionList()) {
+            DrawPath(dc, mConfig, mAnimation->GenPathToDraw(point, origin),
+                mAnimation->EndPosition(point, origin));
         }
     }
 }
@@ -545,8 +513,8 @@ bool FieldView::AddBackgroundImage(const wxImage& image)
     if (!image.IsOk()) {
         return false;
     }
-    long x = 100;
-    long y = 100;
+    auto x = 100;
+    auto y = 100;
 
     auto width = image.GetWidth();
     auto height = image.GetHeight();
@@ -570,7 +538,7 @@ void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
     if (!mAdjustBackgroundMode)
         return;
     mWhichBackgroundIndex = -1;
-    for (auto i = 0; i < mBackgroundImages.size(); ++i) {
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
         if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
             mWhichBackgroundIndex = i;
         }
@@ -584,7 +552,7 @@ void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
     if (!mAdjustBackgroundMode)
         return;
-    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()) {
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
         auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
         auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -595,14 +563,14 @@ void FieldView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
 {
     if (!mAdjustBackgroundMode)
         return;
-    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()) {
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
         mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
     }
 }
 
 void FieldView::OnBackgroundImageDelete()
 {
-    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()))
+    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())))
         return;
     // let the doc know we've removed a picture.
     auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);

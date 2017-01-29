@@ -63,9 +63,9 @@ private:
     class CalculateScaleAndMove {
     public:
         CalculateScaleAndMove(const wxPoint& startClick, wxCoord x, wxCoord y,
-            long width, long height,
+            wxCoord width, wxCoord height,
             eBackgroundAdjustType adjustType);
-        void operator()(long x, long y, wxCoord& topX, wxCoord& topY,
+        void operator()(wxCoord x, wxCoord y, wxCoord& topX, wxCoord& topY,
             wxCoord& width, wxCoord& height);
         wxPoint mStartClick;
         wxCoord mLeft, mTop;

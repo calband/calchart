@@ -43,8 +43,8 @@ public:
     void OnChar(wxKeyEvent& event);
     void SetZoomOnMarchers(bool zoomOnMarchers);
     bool GetZoomOnMarchers() const;
-    void SetStepsOutForMarchersZoom(size_t steps);
-    size_t GetStepsOutForMarchersZoom() const;
+    void SetStepsOutForMarchersZoom(int steps);
+    int GetStepsOutForMarchersZoom() const;
 
 private:
     AnimationView* mAnimationView;
@@ -52,14 +52,16 @@ private:
     float mUserScale = 1;
     std::pair<wxCoord, wxCoord> mUserOrigin = { 0, 0 };
     bool mZoomOnMarchers = false;
-    size_t mStepsOutForMarcherZoom = 4;
+    int mStepsOutForMarcherZoom = 4;
 
     void UpdateScaleAndOrigin();
 
     // for mouse and drawing
-    bool mMouseDown;
-    long mMouseXStart, mMouseYStart;
-    long mMouseXEnd, mMouseYEnd;
+    bool mMouseDown{};
+    wxCoord mMouseXStart{};
+    wxCoord mMouseYStart{};
+    wxCoord mMouseXEnd{};
+    wxCoord mMouseYEnd{};
 
     wxDECLARE_EVENT_TABLE();
 };

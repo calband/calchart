@@ -58,7 +58,7 @@ void CalChartApp::MacOpenFile(const wxString& fileName)
 
 void CalChartApp::MacOpenFiles(const wxArrayString& fileNames)
 {
-    for (int index = fileNames.GetCount() - 1; index >= 0; index--) {
+    for (auto index = 0; index < static_cast<int>(fileNames.GetCount()); ++index) {
         MacOpenFile(fileNames[index]);
     }
 }

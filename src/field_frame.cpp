@@ -610,8 +610,8 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
         endValue = beginValue;
     }
 
-    CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(beginValue - 1),
-        (&show)->GetNthSheet(endValue));
+    CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
+        (&show)->GetNthSheet(static_cast<int>(endValue)));
     GetFieldView()->DoInsertSheets(
         sheets, GetFieldView()->GetCurrentSheetNum() + 1);
 }
@@ -623,11 +623,11 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
             new wxCustomDataObject(kSheetDataClipboardFormat));
         std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
-        uint16_t numPoints = GetShow()->GetNumPoints();
+        auto numPoints = GetShow()->GetNumPoints();
 
-        int bytesForNumPoints = sizeof(numPoints);
-        int bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
-        int totalBytes = bytesForNumPoints + bytesForSheetData;
+        auto bytesForNumPoints = sizeof(numPoints);
+        auto bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
+        auto totalBytes = bytesForNumPoints + bytesForSheetData;
         std::vector<char> clipboardData(totalBytes);
         memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
         memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(),
@@ -742,7 +742,7 @@ void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
         if (!s.empty()) {
             long val;
             if (s.ToLong(&val)) {
-                GetFieldView()->DoSetSheetBeats(val);
+                GetFieldView()->DoSetSheetBeats(static_cast<int>(val));
             }
         }
     }
@@ -782,8 +782,8 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
     else if (GetShow()) {
         mAnimationFrame = new AnimationFrame(
             [this]() { this->ClearAnimationFrame(); }, GetShow(), config, GetView(),
-            this, wxSize(config.Get_AnimationFrameWidth(),
-                      config.Get_AnimationFrameHeight()));
+            this, wxSize(static_cast<int>(config.Get_AnimationFrameWidth()),
+                      static_cast<int>(config.Get_AnimationFrameHeight())));
     }
 }
 
@@ -1012,7 +1012,7 @@ void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
         long targetSheetNum = 0;
         if (targetSheet.ToLong(&targetSheetNum)) {
             GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific,
-                targetSheetNum - 1);
+                static_cast<int>(targetSheetNum) - 1);
         }
         else {
             wxMessageBox(wxT("The input must be a number."),

@@ -58,7 +58,7 @@ void AnimationView::OnDraw(wxDC* dc, const CalChartConfiguration& config)
     DrawMode(*dc, config, GetShow()->GetMode(), ShowMode_kAnimation);
     const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
     if (mAnimation) {
-        for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i) {
+        for (auto i = 0; i < GetShow()->GetNumPoints(); ++i) {
             auto info = mAnimation->GetAnimateInfo(i);
 
             if (checkForCollision && info.mCollision) {
@@ -121,8 +121,8 @@ void AnimationView::OnDraw(wxDC* dc, const CalChartConfiguration& config)
                 }
             }
             CC_coord position = info.mPosition;
-            unsigned long x = position.x + GetShow()->GetMode().Offset().x;
-            unsigned long y = position.y + GetShow()->GetMode().Offset().y;
+            auto x = position.x + GetShow()->GetMode().Offset().x;
+            auto y = position.y + GetShow()->GetMode().Offset().y;
             dc->DrawRectangle(x - Int2Coord(1) / 2, y - Int2Coord(1) / 2,
                 Int2Coord(1), Int2Coord(1));
         }
@@ -162,7 +162,7 @@ void AnimationView::SelectCollisions()
 {
     if (mAnimation) {
         SelectionList select;
-        for (unsigned i = 0; i < GetShow()->GetNumPoints(); i++) {
+        for (auto i = 0; i < GetShow()->GetNumPoints(); i++) {
             auto info = mAnimation->GetAnimateInfo(i);
 
             if (info.mCollision) {
@@ -340,7 +340,7 @@ std::pair<CC_coord, CC_coord> AnimationView::GetMarcherSizeAndOffset() const
     CC_coord bounding_box_upper_left = mode_size;
     CC_coord bounding_box_low_right(0, 0);
 
-    for (unsigned i = 0; mAnimation && i < GetShow()->GetNumPoints(); ++i) {
+    for (auto i = 0; mAnimation && i < GetShow()->GetNumPoints(); ++i) {
         CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
         bounding_box_upper_left = CC_coord(std::min(bounding_box_upper_left.x, position.x),
             std::min(bounding_box_upper_left.y, position.y));
@@ -370,7 +370,7 @@ void AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
     lasso.Append(CC_coord(mouseXEnd - x_off, mouseYStart - y_off));
     lasso.End();
     SelectionList pointlist;
-    for (unsigned i = 0; i < GetShow()->GetNumPoints(); ++i) {
+    for (auto i = 0; i < GetShow()->GetNumPoints(); ++i) {
         CC_coord position = mAnimation->GetAnimateInfo(i).mPosition;
         if (lasso.Inside(position)) {
             pointlist.insert(i);

@@ -493,7 +493,7 @@ CC_sheet::~CC_sheet() {}
 int CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound,
     unsigned ref) const
 {
-    for (size_t i = 0; i < mPoints.size(); i++) {
+    for (auto i = 0; i < static_cast<int>(mPoints.size()); i++) {
         CC_coord c = GetPosition(i, ref);
         if (((x + searchBound) >= c.x) && ((x - searchBound) <= c.x) && ((y + searchBound) >= c.y) && ((y - searchBound) <= c.y)) {
             return i;
@@ -504,8 +504,8 @@ int CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound,
 
 SelectionList CC_sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
 {
-    std::set<unsigned> select;
-    for (size_t j = 0; j < mPoints.size(); j++) {
+    SelectionList select;
+    for (auto j = 0; j < static_cast<int>(mPoints.size()); j++) {
         if (mPoints.at(j).GetSymbol() == i) {
             select.insert(j);
         }
@@ -513,24 +513,21 @@ SelectionList CC_sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
     return select;
 }
 
-std::vector<CC_point> CC_sheet::NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const
+std::vector<CC_point> CC_sheet::NewNumPointsPositions(int num, int columns, const CC_coord& new_march_position) const
 {
-    unsigned i, cpy, col;
-    CC_coord c;
-
-    std::vector<CC_point> newpts(num);
-    cpy = std::min<unsigned>(mPoints.size(), num);
-    for (i = 0; i < cpy; i++) {
-        newpts[i] = mPoints[i];
-    }
-    for (c = new_march_position, col = 0; i < num;
-         i++, col++, c.x += Int2Coord(2)) {
+    std::vector<CC_point> newpts(mPoints.begin(), mPoints.begin() + std::min<size_t>(mPoints.size(), num));
+    auto c = new_march_position;
+    auto col = 0;
+    auto num_left = num - newpts.size();
+    while (num_left--) {
+        newpts.push_back(c);
+        ++col;
+        c.x += Int2Coord(2);
         if (col >= columns) {
             c.x = new_march_position.x;
             c.y += Int2Coord(2);
             col = 0;
         }
-        newpts[i] = CC_point(c);
     }
     return newpts;
 }

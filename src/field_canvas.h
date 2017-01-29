@@ -69,7 +69,7 @@ public:
     void SetCurrentMove(CC_MOVE_MODES move);
 
 private:
-    std::map<unsigned, CC_coord> GetPoints(const Matrix& transmat);
+    std::map<int, CC_coord> GetPoints(const Matrix& transmat);
 
     // Variables
     FieldFrame* mFrame;
@@ -99,8 +99,8 @@ private:
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
     void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
-    std::map<unsigned, CC_coord> mMovePoints;
-    std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;
+    std::map<int, CC_coord> mMovePoints;
+    std::function<std::map<int, CC_coord>(const CC_coord&)> mTransformer;
 
     DECLARE_EVENT_TABLE()
 };

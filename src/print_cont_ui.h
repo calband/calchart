@@ -40,7 +40,7 @@ public:
     virtual void OnDraw(wxDC* dc);
     virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 
-    void DoSetPrintContinuity(unsigned which_sheet, const wxString& number,
+    void DoSetPrintContinuity(int which_sheet, const wxString& number,
         const wxString& cont);
 };
 

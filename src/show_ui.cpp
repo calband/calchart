@@ -124,7 +124,7 @@ void PointPicker::CreateControls()
 
     mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
         wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
-    topsizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center().Expand());
+    topsizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
     Update();
 }
 
@@ -156,12 +156,12 @@ void PointPicker::PointPickerSelect(wxCommandEvent&)
 
 void PointPicker::Update()
 {
-    auto& tshowLabels = mShow.GetPointLabels();
+    auto&& tshowLabels = mShow.GetPointLabels();
     std::vector<wxString> showLabels(tshowLabels.begin(), tshowLabels.end());
     if (mCachedLabels != showLabels) {
         mCachedLabels = showLabels;
         mList->Clear();
-        mList->Set(mCachedLabels.size(), &mCachedLabels[0]);
+        mList->Set(wxArrayString{mCachedLabels.size(), &mCachedLabels[0]});
     }
     auto showSelectionList = mShow.GetSelectionList();
     if (mCachedSelection != showSelectionList) {
@@ -175,13 +175,13 @@ void PointPicker::Update()
 
 static void CalculateLabels(const CalChartDoc& show,
     std::set<unsigned>& letters, bool& use_letters,
-    int& maxnum)
+    long& maxnum)
 {
     use_letters = false;
     maxnum = 1;
-    for (unsigned i = 0; i < show.GetNumPoints(); ++i) {
+    for (auto i = 0; i < show.GetNumPoints(); ++i) {
         wxString tmp = show.GetPointLabel(i);
-        size_t letterIndex = 0;
+        unsigned letterIndex = 0;
         if (!isdigit(tmp[0])) {
             use_letters = true;
             letterIndex += tmp[0] - 'A';
@@ -193,7 +193,7 @@ static void CalculateLabels(const CalChartDoc& show,
         }
         long num = 0;
         if (tmp.ToLong(&num)) {
-            maxnum = std::max<int>(maxnum, num + 1);
+            maxnum = std::max(maxnum, num + 1);
         }
         if (use_letters) {
             letters.insert(letterIndex);
@@ -366,7 +366,7 @@ bool ShowInfoReq::TransferDataToWindow()
 {
     std::set<unsigned> letters;
     bool use_letters;
-    int maxnum;
+    long maxnum;
     CalculateLabels(mShow, letters, use_letters, maxnum);
 
     wxSpinCtrl* pointsCtrl = (wxSpinCtrl*)FindWindow(ShowInfoReq_ID_POINTS_SPIN);
@@ -378,7 +378,7 @@ bool ShowInfoReq::TransferDataToWindow()
     pointsCtrl->SetValue(mShow.GetNumPoints());
     columnsCtrl->SetValue(10);
     labelType->SetSelection(use_letters);
-    pointsPerLine->SetValue(maxnum);
+    pointsPerLine->SetValue(static_cast<int>(maxnum));
     label_letters->DeselectAll();
     for (unsigned i = 0; i < label_letters->GetCount(); ++i) {
         if (letters.count(i)) {

@@ -97,9 +97,8 @@ Animation::ParseContinuity(std::string const& continuity, AnimationErrors& error
 }
 
 Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
-    : numpts(show.GetNumPoints())
-    , pts(numpts)
-    , curr_cmds(numpts)
+    : pts(show.GetNumPoints())
+    , curr_cmds(pts.size())
     , curr_sheetnum(0)
     , mCollisionAction(NULL)
 {
@@ -116,7 +115,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
 
         // Now parse continuity
         AnimationErrors errors;
-        std::vector<AnimateCommands> theCommands(numpts);
+        std::vector<AnimateCommands> theCommands(pts.size());
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
@@ -136,7 +135,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
                     }
                 }
 #endif
-                for (unsigned j = 0; j < numpts; j++) {
+                for (unsigned j = 0; j < pts.size(); j++) {
                     if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol) {
                         theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
                     }
@@ -150,7 +149,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
             message += ("\"...");
             notifyStatus(message);
         }
-        for (unsigned j = 0; j < numpts; j++) {
+        for (unsigned j = 0; j < pts.size(); j++) {
             if (theCommands[j].empty()) {
                 theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
             }
@@ -163,8 +162,8 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
                 break;
             }
         }
-        std::vector<AnimatePoint> thePoints(numpts);
-        for (unsigned i = 0; i < numpts; i++) {
+        std::vector<AnimatePoint> thePoints(pts.size());
+        for (unsigned i = 0; i < pts.size(); i++) {
             thePoints.at(i) = curr_sheet->GetPosition(i);
         }
         sheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
@@ -214,13 +213,13 @@ bool Animation::PrevBeat()
         if (curr_sheetnum == 0)
             return false;
         curr_sheetnum--;
-        for (i = 0; i < numpts; i++) {
+        for (i = 0; i < pts.size(); i++) {
             curr_cmds[i] = sheets.at(curr_sheetnum).GetCommandsEnd(i) - 1;
             EndCmd(i);
         }
         curr_beat = sheets.at(curr_sheetnum).GetNumBeats();
     }
-    for (i = 0; i < numpts; i++) {
+    for (i = 0; i < pts.size(); i++) {
         if (!(*curr_cmds.at(i))->PrevBeat(pts[i])) {
             // Advance to prev command, skipping zero beat commands
             if (curr_cmds[i] != sheets.at(curr_sheetnum).GetCommandsBegin(i)) {
@@ -246,7 +245,7 @@ bool Animation::NextBeat()
     if (curr_beat >= sheets.at(curr_sheetnum).GetNumBeats()) {
         return NextSheet();
     }
-    for (i = 0; i < numpts; i++) {
+    for (i = 0; i < pts.size(); i++) {
         if (!(*curr_cmds.at(i))->NextBeat(pts[i])) {
             // Advance to next command, skipping zero beat commands
             if ((curr_cmds[i] + 1) != sheets.at(curr_sheetnum).GetCommandsEnd(i)) {
@@ -302,7 +301,7 @@ void Animation::EndCmd(unsigned i)
 void Animation::RefreshSheet()
 {
     pts = sheets.at(curr_sheetnum).GetPoints();
-    for (auto i = 0u; i < numpts; i++) {
+    for (auto i = 0u; i < pts.size(); i++) {
         curr_cmds[i] = sheets.at(curr_sheetnum).GetCommandsBegin(i);
         BeginCmd(i);
     }
@@ -312,8 +311,8 @@ void Animation::RefreshSheet()
 void Animation::CheckCollisions()
 {
     mCollisions.clear();
-    for (unsigned i = 0; i < numpts; i++) {
-        for (unsigned j = i + 1; j < numpts; j++) {
+    for (unsigned i = 0; i < pts.size(); i++) {
+        for (unsigned j = i + 1; j < pts.size(); j++) {
             CollisionType collisionResult = pts[i].DetectCollision(pts[j]);
             if (collisionResult) {
                 if (!mCollisions.count(i) || mCollisions[i] < collisionResult) {
@@ -330,7 +329,7 @@ void Animation::CheckCollisions()
     }
 }
 
-Animation::animate_info_t Animation::GetAnimateInfo(unsigned which) const
+Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 {
     return Animation::animate_info_t(
         mCollisions.count(which) ? mCollisions.find(which)->second
@@ -339,21 +338,7 @@ Animation::animate_info_t Animation::GetAnimateInfo(unsigned which) const
         (*curr_cmds.at(which))->RealDirection(), pts.at(which));
 }
 
-int Animation::GetNumberSheets() const { return sheets.size(); }
-
-int Animation::GetCurrentSheet() const { return curr_sheetnum; }
-
-int Animation::GetNumberBeats() const
-{
-    return sheets.at(curr_sheetnum).GetNumBeats();
-}
-
-int Animation::GetCurrentBeat() const { return curr_beat; }
-
-std::string Animation::GetCurrentSheetName() const
-{
-    return sheets.at(curr_sheetnum).GetName();
-}
+int Animation::GetNumberSheets() const { return static_cast<int>(sheets.size()); }
 
 AnimateCommands Animation::GetCommands(unsigned whichPoint) const
 {
@@ -391,7 +376,7 @@ std::pair<std::string, std::vector<std::string> >
 Animation::GetCurrentInfo() const
 {
     std::vector<std::string> each;
-    for (size_t i = 0; i < numpts; ++i) {
+    for (auto i = 0; i < static_cast<int>(pts.size()); ++i) {
         std::ostringstream each_string;
         auto info = GetAnimateInfo(i);
         each_string << "pt " << i << ": (" << info.mPosition.x << ", "

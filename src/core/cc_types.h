@@ -22,12 +22,6 @@
 
 #pragma once
 
-#pragma warning(disable : 4005) // Suppress macro redefinition warnings in
-// stdint.h -- the file redefines INT16_MAX and
-// other similar defines
-#include <stdint.h>
-#pragma warning(default : 4005)
-
 #include <set>
 #include <string>
 
@@ -82,4 +76,4 @@ enum CC_MOVE_MODES {
     CC_MOVE_GENIUS
 };
 
-typedef std::set<unsigned> SelectionList;
+typedef std::set<int> SelectionList;

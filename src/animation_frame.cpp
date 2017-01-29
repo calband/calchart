@@ -178,7 +178,7 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
             mSplitter->SplitHorizontally(mSplitA, mSplitB);
         }
     }
-    mSplitter->SetSashPosition(config.Get_AnimationFrameSashPosition());
+    mSplitter->SetSashPosition(static_cast<int>(config.Get_AnimationFrameSashPosition()));
 
     AddCoolToolBar(GetAnimationToolBar(), *this);
 
@@ -470,7 +470,7 @@ void AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
         wxT("Follow Marcher"), wxT(""), wxOK | wxCANCEL);
     if (dialog.ShowModal() == wxID_OK) {
         wxString value = dialog.GetValue();
-        auto& labels = mAnimationView.GetShow()->GetPointLabels();
+        auto&& labels = mAnimationView.GetShow()->GetPointLabels();
         auto which = std::find(labels.begin(), labels.end(), value);
         if (which == labels.end()) {
             wxString upper_value = value.Upper();
@@ -484,10 +484,10 @@ void AnimationFrame::OnCmd_FollowMarcher(wxCommandEvent& event)
         }
         if (mOmniViewCanvas) {
             mOmniViewCanvas->OnCmd_FollowMarcher(
-                std::distance(labels.begin(), which));
+                static_cast<int>(std::distance(labels.begin(), which)));
         }
         SelectionList sl;
-        sl.insert(std::distance(labels.begin(), which));
+        sl.insert(static_cast<int>(std::distance(labels.begin(), which)));
         mAnimationView.SetSelection(sl);
     }
     Refresh();

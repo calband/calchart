@@ -77,7 +77,7 @@ CC_point::CC_point(const std::vector<uint8_t>& serialized_data)
     ++d;
     mFlags.set(kPointLabelFlipped, (*d) > 0);
     ++d;
-    if (std::distance(&serialized_data[0], d) != serialized_data.size()) {
+    if (static_cast<size_t>(std::distance(&serialized_data[0], d)) != serialized_data.size()) {
         throw CC_FileException("bad POS chunk");
     }
 }
