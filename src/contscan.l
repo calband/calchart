@@ -63,8 +63,10 @@ void initscanner() {
 }
 
 //Supress warnings in Flex's generated code
+#ifdef _MSC_VER
 #pragma warning (disable : 4018) //Disable the "'<': signed/unsigned mismatch" warning
 #pragma warning (disable : 4003) //Disable the "not enough actual parameters for macro 'yywrap'" warning
+#endif // _MSC_VER
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-register"
 %}
@@ -151,5 +153,7 @@ COMMENT		"#"[^\n\f]*
 %%
 
 //Stop supressing warnings after Flex's generated code
-#pragma clang diagnostic pop
+#ifdef _MSC_VER
 #pragma warning (default : 4018)
+#endif // _MSC_VER
+#pragma clang diagnostic pop

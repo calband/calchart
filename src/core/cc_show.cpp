@@ -287,11 +287,6 @@ void CC_show::SetDescr(const std::string& newdescr) { descr = newdescr; }
 
 int CC_show::GetNumSheets() const { return static_cast<int>(sheets.size()); }
 
-const std::vector<std::string>& CC_show::GetPointLabels() const
-{
-    return pt_labels;
-}
-
 CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(int sheetidx)
 {
     CC_sheet_iterator_t i = GetNthSheet(sheetidx);
@@ -434,12 +429,12 @@ SelectionList CC_show::MakeRemoveFromSelection(const SelectionList& sl) const
 SelectionList CC_show::MakeToggleSelection(const SelectionList& sl) const
 {
     SelectionList slcopy = selectionList;
-    for (SelectionList::const_iterator i = sl.begin(); i != sl.end(); ++i) {
-        if (slcopy.count(*i)) {
-            slcopy.erase(*i);
+    for (auto i : sl) {
+        if (slcopy.count(i)) {
+            slcopy.erase(i);
         }
         else {
-            slcopy.insert(*i);
+            slcopy.insert(i);
         }
     }
     return slcopy;
@@ -461,16 +456,6 @@ SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, int ref) const
         }
     }
     return sl;
-}
-
-bool CC_show::IsSelected(int i) const
-{
-    return selectionList.count(i) != 0;
-}
-
-const SelectionList& CC_show::GetSelectionList() const
-{
-    return selectionList;
 }
 
 JSONElement CC_show::toOnlineViewerJSON(const Animation& compiledShow) const

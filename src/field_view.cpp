@@ -476,10 +476,9 @@ void FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
     if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (mAnimation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         CC_coord origin = GetShowFieldOffset();
         mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
-        for (auto point = mShow->GetSelectionList().begin();
-             point != mShow->GetSelectionList().end(); ++point) {
-            DrawPath(dc, mConfig, mAnimation->GenPathToDraw(*point, origin),
-                mAnimation->EndPosition(*point, origin));
+        for (auto&& point : mShow->GetSelectionList()) {
+            DrawPath(dc, mConfig, mAnimation->GenPathToDraw(point, origin),
+                mAnimation->EndPosition(point, origin));
         }
     }
 }

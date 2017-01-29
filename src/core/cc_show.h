@@ -111,7 +111,7 @@ public:
     auto GetCurrentSheetNum() const { return mSheetNum; }
     auto GetNumPoints() const { return numpoints; }
     std::string GetPointLabel(int i) const;
-    const std::vector<std::string>& GetPointLabels() const;
+    auto GetPointLabels() const { return pt_labels; }
 
     bool AlreadyHasPrintContinuity() const;
 
@@ -127,8 +127,8 @@ public:
     SelectionList MakeSelectWithLasso(const CC_lasso& lasso, int ref) const;
 
     // Point selection
-    bool IsSelected(int i) const;
-    const SelectionList& GetSelectionList() const;
+    auto IsSelected(int i) const { return selectionList.count(i) != 0; }
+    auto GetSelectionList() const { return selectionList; }
 
     /*!
      * @brief Generates a JSONElement that could represent this

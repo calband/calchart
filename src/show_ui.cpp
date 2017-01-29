@@ -124,7 +124,7 @@ void PointPicker::CreateControls()
 
     mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
         wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
-    topsizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center().Expand());
+    topsizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
     Update();
 }
 
