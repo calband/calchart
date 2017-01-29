@@ -532,14 +532,14 @@ void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledSho
     JSONDataObjectAccessor showObjectAccessor = dest = JSONElement::makeObject();
 
     // Setup the skeleton for the show's JSON representation
-    showObjectAccessor["title"] = "MANUAL"; // TODO; For now, this will be manually added to the exported file
-    showObjectAccessor["year"] = "2016"; // TODO; For now, this will be hard-coded to 2016
+    showObjectAccessor["title"] = "(MANUAL) the show title that you want people to see goes here"; // TODO; For now, this will be manually added to the exported file
+    showObjectAccessor["year"] = "(MANUAL) enter show year (e.g. 2017)"; // TODO; Should eventually save automatically
     showObjectAccessor["description"] = descr;
-    showObjectAccessor["dot_labels"] = JSONElement::makeArray();
+    showObjectAccessor["labels"] = JSONElement::makeArray();
     showObjectAccessor["sheets"] = JSONElement::makeArray();
 
     // Fill in 'dot_labels' with the labels for each dot (e.g. A0, A1, A2, ...)
-    JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["dot_labels"];
+    JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["labels"];
     for (unsigned i = 0; i < pt_labels.size(); i++) {
         dotLabelsAccessor->pushBack(pt_labels[i]);
     }

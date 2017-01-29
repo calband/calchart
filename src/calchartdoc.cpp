@@ -264,7 +264,7 @@ bool CalChartDoc::exportViewerFile(const wxString& filepath)
 
     JSONDataObjectAccessor metaObjectAccessor = mainObjectAccessor["meta"];
     metaObjectAccessor["version"] = ("1.0.0");
-    metaObjectAccessor["index_name"] = "MANUAL"; // TODO; for now, manually add index_name to viewer file after saving
+    metaObjectAccessor["index_name"] = "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)"; // TODO; for now, manually add index_name to viewer file after saving
     metaObjectAccessor["type"] = "viewer";
 
     mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow, nullptr, nullptr));
