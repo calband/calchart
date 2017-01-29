@@ -76,4 +76,4 @@ enum CC_MOVE_MODES {
     CC_MOVE_GENIUS
 };
 
-typedef std::set<unsigned> SelectionList;
+typedef std::set<int> SelectionList;

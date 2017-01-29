@@ -142,3 +142,4 @@ inline int operator!=(const CC_coord& a, const CC_coord& b)
 }
 
 void CC_coord_UnitTests();
+

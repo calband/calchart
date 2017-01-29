@@ -131,4 +131,4 @@ struct JSONExportGrammar
     karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&()> keyValPair;
     karma::rule<OutputIterator, karma::locals<const JSONDataArray*>, JSONDataArrayConstAccessor()> array;
     karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement> >&()> arrayContent;
-};
+    };

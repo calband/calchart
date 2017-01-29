@@ -92,7 +92,7 @@ public:
     void SetPosition(const CC_coord& val, unsigned i, unsigned ref = 0);
     void SetAllPoints(std::vector<CC_point> const& newpts);
     SelectionList MakeSelectPointsBySymbol(SYMBOL_TYPE i) const;
-    std::vector<CC_point> NewNumPointsPositions(unsigned num, unsigned columns, const CC_coord& new_march_position) const;
+    std::vector<CC_point> NewNumPointsPositions(int num, int columns, const CC_coord& new_march_position) const;
 
     // titles
     std::string GetName() const;

@@ -143,3 +143,4 @@ private:
     float mR, mAngStart, mAngEnd;
     float mFace;
 };
+

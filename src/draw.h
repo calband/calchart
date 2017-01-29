@@ -68,7 +68,7 @@ void DrawForPrinting(wxDC* dc, const CalChartConfiguration& config,
     unsigned ref, bool landscape);
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     const CalChartDoc& show, const CC_sheet& sheet,
-    const std::map<unsigned, CC_coord>& positions);
+    const std::map<int, CC_coord>& positions);
 void DrawMode(wxDC& dc, const CalChartConfiguration& config,
     const ShowMode& mode, HowToDraw howToDraw);
 wxImage GetOmniLinesImage(const CalChartConfiguration& config,

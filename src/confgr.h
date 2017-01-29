@@ -203,7 +203,7 @@ public:
     std::vector<wxString> Get_spr_line_text_index() const;
 
     // Colors
-    using ColorWidth_t = std::pair<wxColour, long>;
+    using ColorWidth_t = std::pair<wxColour, int>;
     mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth;
     std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
     void Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush,

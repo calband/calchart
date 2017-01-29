@@ -127,10 +127,9 @@ void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
     wxClientDC dc(this);
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
+    auto point = event.GetPosition();
+    auto x = dc.DeviceToLogicalX(point.x);
+    auto y = dc.DeviceToLogicalY(point.y);
 
     if (!event.AltDown() && !event.ShiftDown()) {
         mAnimationView->UnselectMarchers();
@@ -146,12 +145,9 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
     wxClientDC dc(this);
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
-    mMouseXEnd = x;
-    mMouseYEnd = y;
+    auto point = event.GetPosition();
+    mMouseXEnd = dc.DeviceToLogicalX(point.x);
+    mMouseYEnd = dc.DeviceToLogicalY(point.y);
     mMouseDown = false;
 
     // if mouse lifted very close to where clicked, then it is a previous beat
@@ -182,12 +178,9 @@ void AnimationCanvas::OnMouseMove(wxMouseEvent& event)
     wxClientDC dc(this);
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
-    mMouseXEnd = x;
-    mMouseYEnd = y;
+    auto point = event.GetPosition();
+    mMouseXEnd = dc.DeviceToLogicalX(point.x);
+    mMouseYEnd = dc.DeviceToLogicalY(point.y);
     if (event.Dragging()) {
         Refresh();
     }
@@ -220,12 +213,12 @@ void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
     Refresh();
 }
 
-size_t AnimationCanvas::GetStepsOutForMarchersZoom() const
+int AnimationCanvas::GetStepsOutForMarchersZoom() const
 {
     return mStepsOutForMarcherZoom;
 }
 
-void AnimationCanvas::SetStepsOutForMarchersZoom(size_t steps)
+void AnimationCanvas::SetStepsOutForMarchersZoom(int steps)
 {
     mStepsOutForMarcherZoom = steps;
     Refresh();

@@ -78,22 +78,22 @@ public:
     CC_show_command_pair Create_SetDescriptionCommand(std::string const& descr) const;
     CC_show_command_pair Create_SetCurrentSheetCommand(int n) const;
     CC_show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
-    CC_show_command_pair Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const;
+    CC_show_command_pair Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const;
     CC_show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
-    CC_show_command_pair Create_SetSheetBeatsCommand(unsigned short beats) const;
-    CC_show_command_pair Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where) const;
-    CC_show_command_pair Create_RemoveSheetCommand(unsigned where) const;
-    CC_show_command_pair Create_ApplyRelabelMapping(unsigned sheet_num_first, std::vector<size_t> const& mapping) const;
-    CC_show_command_pair Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string> > const& data) const;
-    CC_show_command_pair Create_MovePointsCommand(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const;
-    CC_show_command_pair Create_RotatePointPositionsCommand(unsigned rotateAmount, unsigned ref) const;
-    CC_show_command_pair Create_SetReferencePointToRef0(unsigned ref) const;
+    CC_show_command_pair Create_SetSheetBeatsCommand(int beats) const;
+    CC_show_command_pair Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where) const;
+    CC_show_command_pair Create_RemoveSheetCommand(int where) const;
+    CC_show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
+    CC_show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const;
+    CC_show_command_pair Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const;
+    CC_show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
+    CC_show_command_pair Create_SetReferencePointToRef0(int ref) const;
     CC_show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
     CC_show_command_pair Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const;
-    CC_show_command_pair Create_SetLabelFlipCommand(std::map<unsigned, bool> const& new_flip) const;
+    CC_show_command_pair Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const;
     CC_show_command_pair Create_SetLabelRightCommand(bool right) const;
     CC_show_command_pair Create_ToggleLabelFlipCommand() const;
-    CC_show_command_pair Create_SetLabelVisiblityCommand(std::map<unsigned, bool> const& new_visibility) const;
+    CC_show_command_pair Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const;
     CC_show_command_pair Create_SetLabelVisibleCommand(bool isVisible) const;
     CC_show_command_pair Create_ToggleLabelVisibilityCommand() const;
     CC_show_command_pair Create_AddNewBackgroundImageCommand(calchart_core::ImageData const& image) const;
@@ -101,21 +101,21 @@ public:
     CC_show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 
     // Accessors
-    std::string GetDescr() const;
+    auto GetDescr() const { return descr; }
 
-    const_CC_sheet_iterator_t GetSheetBegin() const;
-    const_CC_sheet_iterator_t GetSheetEnd() const;
-    const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
-    const_CC_sheet_iterator_t GetCurrentSheet() const;
-    size_t GetNumSheets() const;
-    unsigned GetCurrentSheetNum() const;
-    unsigned short GetNumPoints() const;
-    std::string GetPointLabel(unsigned i) const;
+    auto GetSheetBegin() const { return sheets.begin(); }
+    auto GetSheetEnd() const { return sheets.end(); }
+    auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
+    auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
+    int GetNumSheets() const;
+    auto GetCurrentSheetNum() const { return mSheetNum; }
+    auto GetNumPoints() const { return numpoints; }
+    std::string GetPointLabel(int i) const;
     const std::vector<std::string>& GetPointLabels() const;
 
     bool AlreadyHasPrintContinuity() const;
 
-    bool WillMovePoints(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const;
+    bool WillMovePoints(std::map<int, CC_coord> const& new_positions, int ref) const;
 
     // utility
     std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
@@ -124,10 +124,10 @@ public:
     SelectionList MakeAddToSelection(const SelectionList& sl) const;
     SelectionList MakeRemoveFromSelection(const SelectionList& sl) const;
     SelectionList MakeToggleSelection(const SelectionList& sl) const;
-    SelectionList MakeSelectWithLasso(const CC_lasso& lasso, unsigned ref) const;
+    SelectionList MakeSelectWithLasso(const CC_lasso& lasso, int ref) const;
 
     // Point selection
-    bool IsSelected(unsigned i) const;
+    bool IsSelected(int i) const;
     const SelectionList& GetSelectionList() const;
 
     /*!
@@ -153,32 +153,32 @@ public:
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
-    CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
-    void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
-    void InsertSheet(const CC_sheet_container_t& nsheet, unsigned sheetidx);
-    void SetCurrentSheet(unsigned n);
+    CC_sheet_container_t RemoveNthSheet(int sheetidx);
+    void InsertSheet(const CC_sheet& nsheet, int sheetidx);
+    void InsertSheet(const CC_sheet_container_t& nsheet, int sheetidx);
+    void SetCurrentSheet(int n);
     void SetSelection(const SelectionList& sl);
 
-    void SetNumPoints(unsigned num, unsigned columns, const std::vector<std::string>& labels, const CC_coord& new_march_position);
+    void SetNumPoints(int num, int columns, const std::vector<std::string>& labels, const CC_coord& new_march_position);
     void SetPointLabel(const std::vector<std::string>& labels);
 
     void SetDescr(const std::string& newdescr);
 
-    CC_sheet_iterator_t GetSheetBegin();
-    CC_sheet_iterator_t GetSheetEnd();
-    CC_sheet_iterator_t GetNthSheet(unsigned n);
-    CC_sheet_iterator_t GetCurrentSheet();
+    auto GetSheetBegin() { return sheets.begin(); }
+    auto GetSheetEnd() { return sheets.end(); }
+    auto GetNthSheet(unsigned n) { return GetSheetBegin() + n; }
+    auto GetCurrentSheet() { return GetNthSheet(mSheetNum); }
 
     // implementation and helper functions
     std::vector<uint8_t> SerializeShowData() const;
 
     // members
     std::string descr;
-    unsigned short numpoints;
+    int numpoints;
     CC_sheet_container_t sheets;
     std::vector<std::string> pt_labels;
     SelectionList selectionList; // order of selections
-    unsigned mSheetNum;
+    int mSheetNum;
     ShowMode const* mMode = nullptr;
 
     // unit tests

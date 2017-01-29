@@ -99,7 +99,7 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 
     std::ostringstream buffer;
 
-    int n = mShow->PrintToPS(buffer, eps, overview, minyards, mIsSheetPicked, config);
+    int n = mShow->PrintToPS(buffer, eps, overview, static_cast<int>(minyards), mIsSheetPicked, config);
     // stream to file:
     {
         wxFFileOutputStream outstream(s);
@@ -135,7 +135,7 @@ void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
     for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin();
          sheet != mShow->GetSheetEnd(); ++sheet) {
         if (mIsSheetPicked.count(std::distance(mShow->GetSheetBegin(), sheet))) {
-            markedChoices.Add(std::distance(mShow->GetSheetBegin(), sheet));
+            markedChoices.Add(static_cast<int>(std::distance(mShow->GetSheetBegin(), sheet)));
         }
     }
     dialog.SetSelections(markedChoices);
@@ -398,7 +398,7 @@ bool PrintPostScriptDialog::TransferDataToWindow()
     text_cmd->SetValue(config.Get_PrintFile());
 #endif
     radio_orient->SetSelection(config.Get_PrintPSLandscape());
-    radio_method->SetSelection(config.Get_PrintPSModes());
+    radio_method->SetSelection(static_cast<int>(config.Get_PrintPSModes()));
     check_overview->SetValue(config.Get_PrintPSOverview());
     check_cont->SetValue(config.Get_PrintPSDoCont());
     if (check_pages) {

@@ -110,7 +110,7 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
         std::vector<uint8_t> data = FillData(stream);
         std::vector<std::string> labels;
         const char* str = (const char*)&data[0];
-        for (unsigned i = 0; i < GetNumPoints(); i++) {
+        for (auto i = 0; i < GetNumPoints(); i++) {
             labels.push_back(str);
             str += strlen(str) + 1;
         }
@@ -138,7 +138,7 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
         ReadAndCheckID(stream, INGL_SHET);
 
         CC_sheet sheet(GetNumPoints(), stream, ver);
-        InsertSheet(sheet, static_cast<unsigned>(GetNumSheets()));
+        InsertSheet(sheet, GetNumSheets());
 
         // ReadAndCheckID(stream, INGL_END);
         ReadAndCheckID(stream, INGL_SHET);
@@ -171,7 +171,7 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     auto parse_INGL_LABL = [](CC_show* show, const uint8_t* ptr, size_t size) {
         std::vector<std::string> labels;
         auto str = (const char*)ptr;
-        for (unsigned i = 0; i < show->GetNumPoints(); i++) {
+        for (auto i = 0; i < show->GetNumPoints(); i++) {
             labels.push_back(str);
             auto length = strlen(str) + 1;
             if (length > size) {
@@ -195,7 +195,7 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     auto parse_INGL_SHET = [](CC_show* show, const uint8_t* ptr, size_t size) {
         CC_sheet sheet(show->GetNumPoints(), ptr, size,
             Current_version_and_later());
-        show->InsertSheet(sheet, static_cast<unsigned>(show->GetNumSheets()));
+        show->InsertSheet(sheet, show->GetNumSheets());
     };
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](CC_show* show, const uint8_t* ptr, size_t size) {
@@ -242,7 +242,7 @@ std::vector<uint8_t> CC_show::SerializeShowData() const
     std::vector<uint8_t> result;
     // SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
     // Write NUM_MARCH
-    Append(result, Construct_block(INGL_SIZE, uint32_t{ GetNumPoints() }));
+    Append(result, Construct_block(INGL_SIZE, static_cast<uint32_t>( GetNumPoints() )));
 
     // Write LABEL
     std::vector<char> labels;
@@ -283,62 +283,16 @@ std::vector<uint8_t> CC_show::SerializeShow() const
     return result;
 }
 
-std::string CC_show::GetDescr() const { return descr; }
-
 void CC_show::SetDescr(const std::string& newdescr) { descr = newdescr; }
 
-size_t CC_show::GetNumSheets() const { return sheets.size(); }
-
-CC_show::CC_sheet_iterator_t CC_show::GetSheetBegin() { return sheets.begin(); }
-
-CC_show::const_CC_sheet_iterator_t CC_show::GetSheetBegin() const
-{
-    return sheets.begin();
-}
-
-CC_show::CC_sheet_iterator_t CC_show::GetSheetEnd() { return sheets.end(); }
-
-CC_show::const_CC_sheet_iterator_t CC_show::GetSheetEnd() const
-{
-    return sheets.end();
-}
-
-CC_show::const_CC_sheet_iterator_t CC_show::GetCurrentSheet() const
-{
-    return GetNthSheet(mSheetNum);
-}
-
-CC_show::CC_sheet_iterator_t CC_show::GetCurrentSheet()
-{
-    return GetNthSheet(mSheetNum);
-}
-
-unsigned CC_show::GetCurrentSheetNum() const
-{
-    return mSheetNum;
-}
-
-unsigned short CC_show::GetNumPoints() const
-{
-    return numpoints;
-}
+int CC_show::GetNumSheets() const { return static_cast<int>(sheets.size()); }
 
 const std::vector<std::string>& CC_show::GetPointLabels() const
 {
     return pt_labels;
 }
 
-CC_show::const_CC_sheet_iterator_t CC_show::GetNthSheet(unsigned n) const
-{
-    return GetSheetBegin() + n;
-}
-
-CC_show::CC_sheet_iterator_t CC_show::GetNthSheet(unsigned n)
-{
-    return GetSheetBegin() + n;
-}
-
-CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
+CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(int sheetidx)
 {
     CC_sheet_iterator_t i = GetNthSheet(sheetidx);
     CC_sheet_container_t shts(1, *i);
@@ -348,15 +302,15 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
         SetCurrentSheet(GetCurrentSheetNum() - 1);
     }
     if (GetCurrentSheetNum() >= GetNumSheets()) {
-        SetCurrentSheet(static_cast<unsigned>(GetNumSheets()) - 1);
+        SetCurrentSheet(GetNumSheets() - 1);
     }
 
     return shts;
 }
 
-void CC_show::SetCurrentSheet(unsigned n) { mSheetNum = n; }
+void CC_show::SetCurrentSheet(int n) { mSheetNum = n; }
 
-void CC_show::InsertSheet(const CC_sheet& sheet, unsigned sheetidx)
+void CC_show::InsertSheet(const CC_sheet& sheet, int sheetidx)
 {
     sheets.insert(sheets.begin() + sheetidx, sheet);
     if (sheetidx <= GetCurrentSheetNum())
@@ -364,7 +318,7 @@ void CC_show::InsertSheet(const CC_sheet& sheet, unsigned sheetidx)
 }
 
 void CC_show::InsertSheet(const CC_sheet_container_t& sheet,
-    unsigned sheetidx)
+    int sheetidx)
 {
     sheets.insert(sheets.begin() + sheetidx, sheet.begin(), sheet.end());
     if (sheetidx <= GetCurrentSheetNum())
@@ -372,9 +326,9 @@ void CC_show::InsertSheet(const CC_sheet_container_t& sheet,
 }
 
 // warning, the labels might not match up
-void CC_show::SetNumPoints(unsigned num, unsigned columns, const std::vector<std::string>& labels, const CC_coord& new_march_position)
+void CC_show::SetNumPoints(int num, int columns, const std::vector<std::string>& labels, const CC_coord& new_march_position)
 {
-    if (num != labels.size()) {
+    if (num != static_cast<int>(labels.size())) {
         throw std::runtime_error("set num points with num=" + std::to_string(num) + " doesn't match number of labels=" + std::to_string(labels.size()));
     }
     for (CC_sheet_iterator_t sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
@@ -394,13 +348,12 @@ void CC_show::SetPointLabel(const std::vector<std::string>& labels)
 // so that they match with this current sheet
 std::pair<bool, std::vector<size_t> > CC_show::GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const
 {
-    unsigned i, j;
-
     std::vector<size_t> table(GetNumPoints());
     std::vector<unsigned> used_table(GetNumPoints());
 
-    for (i = 0; i < GetNumPoints(); i++) {
-        for (j = 0; j < GetNumPoints(); j++) {
+    for (auto i = 0; i < GetNumPoints(); i++) {
+        auto j = 0;
+        for (; j < GetNumPoints(); j++) {
             if (!used_table[j]) {
                 if (source_sheet->GetPosition(i) == target_sheets->GetPosition(j)) {
                     table[i] = j;
@@ -418,9 +371,9 @@ std::pair<bool, std::vector<size_t> > CC_show::GetRelabelMapping(const_CC_sheet_
     return { true, table };
 }
 
-std::string CC_show::GetPointLabel(unsigned i) const
+std::string CC_show::GetPointLabel(int i) const
 {
-    if (i >= pt_labels.size())
+    if (i >= static_cast<int>(pt_labels.size()))
         return "";
     return pt_labels.at(i);
 }
@@ -435,7 +388,7 @@ bool CC_show::AlreadyHasPrintContinuity() const
     return false;
 }
 
-bool CC_show::WillMovePoints(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const
+bool CC_show::WillMovePoints(std::map<int, CC_coord> const& new_positions, int ref) const
 {
     auto sheet = GetCurrentSheet();
     for (auto&& index : new_positions) {
@@ -494,7 +447,7 @@ SelectionList CC_show::MakeToggleSelection(const SelectionList& sl) const
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, unsigned ref) const
+SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, int ref) const
 {
     if (!lasso.FirstPoint()) {
         return {};
@@ -502,7 +455,7 @@ SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, unsigned ref) 
 
     SelectionList sl;
     CC_show::const_CC_sheet_iterator_t sheet = GetCurrentSheet();
-    for (unsigned i = 0; i < GetNumPoints(); i++) {
+    for (int i = 0; i < GetNumPoints(); i++) {
         if (lasso.Inside(sheet->GetPosition(i, ref))) {
             sl.insert(i);
         }
@@ -510,7 +463,7 @@ SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, unsigned ref) 
     return sl;
 }
 
-bool CC_show::IsSelected(unsigned i) const
+bool CC_show::IsSelected(int i) const
 {
     return selectionList.count(i) != 0;
 }
@@ -575,7 +528,7 @@ CC_show_command_pair CC_show::Create_SetSelectionCommand(const SelectionList& sl
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const
+CC_show_command_pair CC_show::Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const
 {
     auto action = [numPoints, numColumns, labels, new_march_position](CC_show& show) { show.SetNumPoints(numPoints, numColumns, labels, new_march_position); };
     // need to go through and save all the positions and labels for later
@@ -602,21 +555,21 @@ CC_show_command_pair CC_show::Create_SetSheetTitleCommand(std::string const& new
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetSheetBeatsCommand(unsigned short beats) const
+CC_show_command_pair CC_show::Create_SetSheetBeatsCommand(int beats) const
 {
     auto action = [ whichSheet = mSheetNum, beats ](CC_show & show) { show.sheets.at(whichSheet).SetBeats(beats); };
     auto reaction = [ whichSheet = mSheetNum, beats = sheets.at(mSheetNum).GetBeats() ](CC_show & show) { show.sheets.at(whichSheet).SetBeats(beats); };
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where) const
+CC_show_command_pair CC_show::Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where) const
 {
     auto action = [sheets, where](CC_show& show) { show.InsertSheet(sheets, where); };
     auto reaction = [sheets, where](CC_show& show) { auto num_times = sheets.size(); while (num_times--) show.RemoveNthSheet(where); };
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_RemoveSheetCommand(unsigned where) const
+CC_show_command_pair CC_show::Create_RemoveSheetCommand(int where) const
 {
     CC_sheet_container_t old_shts(1, *GetNthSheet(where));
     auto action = [where](CC_show& show) { show.RemoveNthSheet(where); };
@@ -625,7 +578,7 @@ CC_show_command_pair CC_show::Create_RemoveSheetCommand(unsigned where) const
 }
 
 // remapping gets applied on this sheet till the last one
-CC_show_command_pair CC_show::Create_ApplyRelabelMapping(unsigned sheet_num_first, std::vector<size_t> const& mapping) const
+CC_show_command_pair CC_show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const
 {
     std::vector<std::vector<CC_point> > current_pos;
     for (auto s = GetNthSheet(sheet_num_first); s != GetSheetEnd(); ++s) {
@@ -650,7 +603,7 @@ CC_show_command_pair CC_show::Create_ApplyRelabelMapping(unsigned sheet_num_firs
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string> > const& data) const
+CC_show_command_pair CC_show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const
 {
     std::map<unsigned, std::pair<std::string, std::string> > undo_data;
     for (auto&& i : data) {
@@ -669,7 +622,7 @@ CC_show_command_pair CC_show::Create_SetPrintableContinuity(std::map<unsigned, s
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_MovePointsCommand(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const
+CC_show_command_pair CC_show::Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const
 {
     auto sheet = GetCurrentSheet();
     std::map<unsigned, CC_coord> original_positions;
@@ -695,7 +648,7 @@ CC_show_command_pair CC_show::Create_MovePointsCommand(std::map<unsigned, CC_coo
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_RotatePointPositionsCommand(unsigned rotateAmount, unsigned ref) const
+CC_show_command_pair CC_show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const
 {
     // construct a vector of point indices in order
     std::vector<unsigned> pointIndices;
@@ -712,16 +665,16 @@ CC_show_command_pair CC_show::Create_RotatePointPositionsCommand(unsigned rotate
         finalPositions.end());
 
     // put things into place.
-    std::map<unsigned, CC_coord> positions;
+    std::map<int, CC_coord> positions;
     for (int index = static_cast<int>(pointIndices.size()) - 1; index >= 0; index--) {
         positions[pointIndices[index]] = finalPositions[index];
     }
     return Create_MovePointsCommand(positions, ref);
 }
 
-CC_show_command_pair CC_show::Create_SetReferencePointToRef0(unsigned ref) const
+CC_show_command_pair CC_show::Create_SetReferencePointToRef0(int ref) const
 {
-    std::map<unsigned, CC_coord> positions;
+    std::map<int, CC_coord> positions;
     auto sheet = GetCurrentSheet();
     // for selected points, set the reference point to ref0
     // this should be per selection list defect #179
@@ -775,7 +728,7 @@ CC_show_command_pair CC_show::Create_SetContinuityTextCommand(SYMBOL_TYPE which_
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetLabelFlipCommand(std::map<unsigned, bool> const& new_flip) const
+CC_show_command_pair CC_show::Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const
 {
     auto sheet = GetCurrentSheet();
     std::map<unsigned, bool> original_flip;
@@ -801,7 +754,7 @@ CC_show_command_pair CC_show::Create_SetLabelFlipCommand(std::map<unsigned, bool
 
 CC_show_command_pair CC_show::Create_SetLabelRightCommand(bool right) const
 {
-    std::map<unsigned, bool> flips;
+    std::map<int, bool> flips;
     for (auto&& i : selectionList) {
         flips[i] = right;
     }
@@ -810,7 +763,7 @@ CC_show_command_pair CC_show::Create_SetLabelRightCommand(bool right) const
 
 CC_show_command_pair CC_show::Create_ToggleLabelFlipCommand() const
 {
-    std::map<unsigned, bool> flips;
+    std::map<int, bool> flips;
     auto sheet = GetCurrentSheet();
     for (auto&& i : selectionList) {
         flips[i] = !sheet->GetPoint(i).GetFlip();
@@ -818,10 +771,10 @@ CC_show_command_pair CC_show::Create_ToggleLabelFlipCommand() const
     return Create_SetLabelFlipCommand(flips);
 }
 
-CC_show_command_pair CC_show::Create_SetLabelVisiblityCommand(std::map<unsigned, bool> const& new_visibility) const
+CC_show_command_pair CC_show::Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const
 {
     auto sheet = GetCurrentSheet();
-    std::map<unsigned, bool> original_visibility;
+    std::map<int, bool> original_visibility;
     for (auto&& index : new_visibility) {
         original_visibility[index.first] = sheet->GetPoint(index.first).LabelIsVisible();
     }
@@ -844,7 +797,7 @@ CC_show_command_pair CC_show::Create_SetLabelVisiblityCommand(std::map<unsigned,
 
 CC_show_command_pair CC_show::Create_SetLabelVisibleCommand(bool isVisible) const
 {
-    std::map<unsigned, bool> visible;
+    std::map<int, bool> visible;
     for (auto&& i : selectionList) {
         visible[i] = isVisible;
     }
@@ -853,7 +806,7 @@ CC_show_command_pair CC_show::Create_SetLabelVisibleCommand(bool isVisible) cons
 
 CC_show_command_pair CC_show::Create_ToggleLabelVisibilityCommand() const
 {
-    std::map<unsigned, bool> visible;
+    std::map<int, bool> visible;
     auto sheet = GetCurrentSheet();
     for (auto&& i : selectionList) {
         visible[i] = !sheet->GetPoint(i).LabelIsVisible();

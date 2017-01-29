@@ -122,52 +122,53 @@ private:
 
 public:
     // translates input into a mapping of which sheet to number,lines pair.
-    std::pair<bool, std::map<unsigned, std::pair<std::string, std::string> > > ImportPrintableContinuity(const std::vector<std::string>& lines) const;
+    std::pair<bool, std::map<int, std::pair<std::string, std::string> > > ImportPrintableContinuity(const std::vector<std::string>& lines) const;
 
     void FlushAllTextWindows();
 
     std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus,
         NotifyErrorList notifyErrorList);
-    void WizardSetupNewShow(unsigned num, unsigned columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode);
+    void WizardSetupNewShow(int num, int columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode);
 
-    std::string GetDescr() const;
+    auto GetDescr() const { return mShow->GetDescr(); }
 
-    unsigned short GetNumSheets() const;
+    auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
-    const_CC_sheet_iterator_t GetSheetBegin() const;
-    const_CC_sheet_iterator_t GetSheetEnd() const;
-    const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
-    const_CC_sheet_iterator_t GetCurrentSheet() const;
+    auto GetSheetBegin() const { return static_cast<CC_show const&>(*mShow).GetSheetBegin(); }
+    auto GetSheetEnd() const { return static_cast<CC_show const&>(*mShow).GetSheetEnd(); }
+    auto GetNthSheet(int n) const { return static_cast<CC_show const&>(*mShow).GetNthSheet(n); }
+    auto GetCurrentSheet() const { return static_cast<CC_show const&>(*mShow).GetCurrentSheet(); }
 
-    unsigned GetCurrentSheetNum() const;
-    void SetCurrentSheet(unsigned n);
+    auto GetCurrentSheetNum() const { return static_cast<CC_show const&>(*mShow).GetCurrentSheetNum(); }
+    void SetCurrentSheet(int n);
 
-    unsigned short GetNumPoints() const;
+    auto GetNumPoints() const { return mShow->GetNumPoints(); }
     std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
 
-    std::string GetPointLabel(unsigned i) const;
-    const std::vector<std::string>& GetPointLabels() const;
+    auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
+
+    auto GetPointLabels() const { return mShow->GetPointLabels(); }
 
     // how to select points
     // Utility functions for constructing new selection lists
     // Then you push the selection list with the Create_SetSelectionCommand
-    SelectionList MakeSelectAll() const;
-    SelectionList MakeUnselectAll() const;
-    SelectionList MakeAddToSelection(const SelectionList& sl) const;
-    SelectionList MakeRemoveFromSelection(const SelectionList& sl) const;
-    SelectionList MakeToggleSelection(const SelectionList& sl) const;
-    SelectionList MakeSelectWithLasso(const CC_lasso& lasso, unsigned ref) const;
+    auto MakeSelectAll() const { return mShow->MakeSelectAll(); }
+    auto MakeUnselectAll() const { return mShow->MakeUnselectAll(); }
+    auto MakeAddToSelection(const SelectionList& sl) const { return mShow->MakeAddToSelection(sl); }
+    auto MakeRemoveFromSelection(const SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
+    auto MakeToggleSelection(const SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
+    auto MakeSelectWithLasso(const CC_lasso& lasso, int ref) const { return mShow->MakeSelectWithLasso(lasso, ref); }
 
     void SetSelection(const SelectionList& sl);
 
-    bool IsSelected(unsigned i) const;
-    const SelectionList& GetSelectionList() const;
+    auto IsSelected(int i) const { return mShow->IsSelected(i); }
+    auto GetSelectionList() const { return mShow->GetSelectionList(); }
 
     const ShowMode& GetMode() const;
     void SetMode(std::unique_ptr<const ShowMode> m);
 
-    bool AlreadyHasPrintContinuity() const;
-    bool WillMovePoints(std::map<unsigned, CC_coord> const& new_positions, unsigned ref) const;
+    auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
+    auto WillMovePoints(std::map<int, CC_coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
     int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards,
         const std::set<size_t>& isPicked,
         const CalChartConfiguration& config_) const;
@@ -177,17 +178,17 @@ public:
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
     std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetModeCommand(const wxString& newmode);
-    std::unique_ptr<wxCommand> Create_SetShowInfoCommand(unsigned numPoints, unsigned numColumns, const std::vector<wxString>& labels);
+    std::unique_ptr<wxCommand> Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<wxString>& labels);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
-    std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(unsigned short beats);
-    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, unsigned where);
-    std::unique_ptr<wxCommand> Create_RemoveSheetCommand(unsigned where);
-    std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(unsigned sheet, std::vector<size_t> const& mapping);
+    std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
+    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where);
+    std::unique_ptr<wxCommand> Create_RemoveSheetCommand(int where);
+    std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
-    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<unsigned, std::pair<std::string, std::string> > const& data);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<unsigned, CC_coord> const& new_positions, unsigned ref);
-    std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(unsigned rotateAmount, unsigned ref);
-    std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(unsigned ref);
+    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data);
+    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref);
+    std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
+    std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(int ref);
     std::unique_ptr<wxCommand> Create_SetSymbolCommand(SYMBOL_TYPE sym);
     std::unique_ptr<wxCommand> Create_SetContinuityTextCommand(SYMBOL_TYPE i, const wxString& text);
     std::unique_ptr<wxCommand> Create_SetLabelRightCommand(bool right);
@@ -230,10 +231,6 @@ private:
     private:
         CalChartDoc& mShow;
     };
-
-    friend class BasicCalChartCommand;
-    CC_show ShowSnapShot() const;
-    void RestoreSnapShot(const CC_show& snapshot);
 
     std::unique_ptr<CC_show> mShow;
     std::unique_ptr<const ShowMode> mMode;

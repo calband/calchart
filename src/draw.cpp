@@ -86,9 +86,9 @@ void DrawArrow(wxDC& dc, const wxPoint& pt, wxCoord lineLength,
 }
 
 // calculate the distance for tab stops
-size_t TabStops(size_t which, bool landscape)
+auto TabStops(size_t which, bool landscape)
 {
-    size_t tab = 0;
+    auto tab = 0;
     while (which > 4) {
         which--;
         tab += (landscape) ? 8 : 6;
@@ -204,7 +204,7 @@ void DrawSheetPoints(
     dc.SetFont(*pointLabelFont);
     dc.SetTextForeground(
         config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
-    for (size_t i = 0; i < numberPoints; i++) {
+    for (unsigned i = 0; i < numberPoints; i++) {
         wxBrush fillBrush;
         if (selection_list.count(i)) {
             auto brushAndPen = config.Get_CalChartBrushAndPen(selectedColor);
@@ -276,9 +276,9 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity,
 
     dc.SetTextForeground(*wxBLACK);
 
-    int pageMiddle = (bounding.GetWidth() / 2);
+    auto pageMiddle = (bounding.GetWidth() / 2);
 
-    size_t numLines = 0;
+    auto numLines = 0;
     for (auto text = print_continuity.begin(); text != print_continuity.end();
          ++text) {
         if (text->GetOnSheet()) {
@@ -286,7 +286,7 @@ void DrawCont(wxDC& dc, const CC_textline_list& print_continuity,
         }
     }
 
-    int font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1) * 2) / (numLines ? numLines : 1);
+    auto font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1) * 2) / (numLines ? numLines : 1);
     // font size, we scale to be no more than 256 pixels.
     font_size = std::min(font_size, 10);
 
@@ -653,8 +653,8 @@ void DrawPointHelper(wxDC& dc, const CalChartConfiguration& config,
     const float slineoff = offset * config.Get_SLineRatio();
     float textoff = offset * 1.25;
 
-    long x = pos.x;
-    long y = pos.y;
+    auto x = pos.x;
+    auto y = pos.y;
     switch (point.GetSymbol()) {
     case SYMBOL_SOL:
     case SYMBOL_SOLBKSL:
@@ -706,7 +706,7 @@ void DrawPoint(wxDC& dc, const CalChartConfiguration& config,
 
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     const CalChartDoc& show, const CC_sheet& sheet,
-    const std::map<unsigned, CC_coord>& positions)
+    const std::map<int, CC_coord>& positions)
 {
     SaveAndRestore_Font orig_font(dc);
     wxFont* pointLabelFont = wxTheFontList->FindOrCreateFont(

@@ -32,7 +32,7 @@ YYLTYPE yylloc;		/* line and column of token */
 int yycolno;
 
 const char *yyinputbuffer;
-int yyinputbufferlen;
+size_t yyinputbufferlen;
 
 #define YY_NO_UNPUT
 

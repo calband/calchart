@@ -76,7 +76,7 @@ public:
     void OnCmd_ToggleShowOnlySelected();
 
 private:
-    MarcherInfo GetMarcherInfo(size_t which) const;
+    MarcherInfo GetMarcherInfo(int which) const;
     std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
 
     std::shared_ptr<CCOmniView_GLContext> m_glContext;

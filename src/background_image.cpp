@@ -36,10 +36,9 @@ BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_
 bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event,
     const wxDC& dc) const
 {
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
+    auto point = event.GetPosition();
+    auto x = dc.DeviceToLogicalX(point.x);
+    auto y = dc.DeviceToLogicalY(point.y);
 
     // where are we?
     int height = mBitmap.GetHeight();
@@ -73,10 +72,9 @@ bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event,
 void BackgroundImage::OnMouseLeftDown(const wxMouseEvent& event,
     const wxDC& dc)
 {
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
+    auto point = event.GetPosition();
+    auto x = dc.DeviceToLogicalX(point.x);
+    auto y = dc.DeviceToLogicalY(point.y);
 
     // where are we?
     int height = mBitmap.GetHeight();
@@ -130,10 +128,9 @@ std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent& event, con
 
 void BackgroundImage::OnMouseMove(const wxMouseEvent& event, const wxDC& dc)
 {
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
+    auto point = event.GetPosition();
+    auto x = dc.DeviceToLogicalX(point.x);
+    auto y = dc.DeviceToLogicalY(point.y);
 
     if (event.Dragging() && event.LeftIsDown() && mScaleAndMove) {
         wxCoord width = mBitmap.GetWidth();
@@ -179,7 +176,7 @@ void BackgroundImage::OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) c
 }
 
 BackgroundImage::CalculateScaleAndMove::CalculateScaleAndMove(
-    const wxPoint& startClick, wxCoord x, wxCoord y, long width, long height,
+    const wxPoint& startClick, wxCoord x, wxCoord y, wxCoord width, wxCoord height,
     eBackgroundAdjustType adjustType)
     : mStartClick(startClick)
     , mLeft(x)
@@ -192,7 +189,7 @@ BackgroundImage::CalculateScaleAndMove::CalculateScaleAndMove(
 }
 
 void BackgroundImage::CalculateScaleAndMove::
-operator()(long x, long y, wxCoord& topX, wxCoord& topY, wxCoord& width,
+operator()(wxCoord x, wxCoord y, wxCoord& topX, wxCoord& topY, wxCoord& width,
     wxCoord& height)
 {
     switch (mAdjustType) {
@@ -222,8 +219,8 @@ operator()(long x, long y, wxCoord& topX, wxCoord& topY, wxCoord& width,
         break;
     // we should keep the aspect ratio
     case kUpperLeft:
-        x = std::max<long>(x, mRight - std::abs(y - mBottom) * mAspectRatio / 1.0);
-        y = std::max<long>(y, mBottom - std::abs(x - mRight) * 1.0 / mAspectRatio);
+        x = std::max<wxCoord>(x, mRight - std::abs(y - mBottom) * mAspectRatio / 1.0);
+        y = std::max<wxCoord>(y, mBottom - std::abs(x - mRight) * 1.0 / mAspectRatio);
         if (x < mRight) {
             topX = x;
             width = mRight - x;
@@ -234,8 +231,8 @@ operator()(long x, long y, wxCoord& topX, wxCoord& topY, wxCoord& width,
         }
         break;
     case kUpperRight:
-        x = std::min<long>(x, mLeft + std::abs(y - mBottom) * mAspectRatio / 1.0);
-        y = std::max<long>(y, mBottom - std::abs(x - mLeft) * 1.0 / mAspectRatio);
+        x = std::min<wxCoord>(x, mLeft + std::abs(y - mBottom) * mAspectRatio / 1.0);
+        y = std::max<wxCoord>(y, mBottom - std::abs(x - mLeft) * 1.0 / mAspectRatio);
         if (topX < x)
             width = x - topX;
         if (y < mBottom) {
@@ -244,8 +241,8 @@ operator()(long x, long y, wxCoord& topX, wxCoord& topY, wxCoord& width,
         }
         break;
     case kLowerLeft:
-        x = std::max<long>(x, mRight - std::abs(y - mTop) * mAspectRatio / 1.0);
-        y = std::min<long>(y, mTop + std::abs(x - mRight) * 1.0 / mAspectRatio);
+        x = std::max<wxCoord>(x, mRight - std::abs(y - mTop) * mAspectRatio / 1.0);
+        y = std::min<wxCoord>(y, mTop + std::abs(x - mRight) * 1.0 / mAspectRatio);
         if (x < mRight) {
             topX = x;
             width = mRight - x;
@@ -254,8 +251,8 @@ operator()(long x, long y, wxCoord& topX, wxCoord& topY, wxCoord& width,
             height = y - topY;
         break;
     case kLowerRight:
-        x = std::min<long>(x, mLeft + std::abs(y - mTop) * mAspectRatio / 1.0);
-        y = std::min<long>(y, mTop + std::abs(x - mLeft) * 1.0 / mAspectRatio);
+        x = std::min<wxCoord>(x, mLeft + std::abs(y - mTop) * mAspectRatio / 1.0);
+        y = std::min<wxCoord>(y, mTop + std::abs(x - mLeft) * 1.0 / mAspectRatio);
         if (topX < x)
             width = x - topX;
         if (topY < y)
