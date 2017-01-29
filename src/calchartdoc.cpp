@@ -278,7 +278,7 @@ void CalChartDoc::FlushAllTextWindows()
     UpdateAllViews(NULL, &flushMod);
 }
 
-const std::string& CalChartDoc::GetDescr() const { return mShow->GetDescr(); }
+std::string CalChartDoc::GetDescr() const { return mShow->GetDescr(); }
 
 void CalChartDoc::Modify(bool b)
 {

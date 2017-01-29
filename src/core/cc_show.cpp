@@ -138,7 +138,7 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
         ReadAndCheckID(stream, INGL_SHET);
 
         CC_sheet sheet(GetNumPoints(), stream, ver);
-        InsertSheet(sheet, GetNumSheets());
+        InsertSheet(sheet, static_cast<unsigned>(GetNumSheets()));
 
         // ReadAndCheckID(stream, INGL_END);
         ReadAndCheckID(stream, INGL_SHET);
@@ -195,7 +195,7 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     auto parse_INGL_SHET = [](CC_show* show, const uint8_t* ptr, size_t size) {
         CC_sheet sheet(show->GetNumPoints(), ptr, size,
             Current_version_and_later());
-        show->InsertSheet(sheet, show->GetNumSheets());
+        show->InsertSheet(sheet, static_cast<unsigned>(show->GetNumSheets()));
     };
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](CC_show* show, const uint8_t* ptr, size_t size) {
@@ -348,7 +348,7 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(unsigned sheetidx)
         SetCurrentSheet(GetCurrentSheetNum() - 1);
     }
     if (GetCurrentSheetNum() >= GetNumSheets()) {
-        SetCurrentSheet(GetNumSheets() - 1);
+        SetCurrentSheet(static_cast<unsigned>(GetNumSheets()) - 1);
     }
 
     return shts;
@@ -449,7 +449,7 @@ bool CC_show::WillMovePoints(std::map<unsigned, CC_coord> const& new_positions, 
 SelectionList CC_show::MakeSelectAll() const
 {
     SelectionList sl;
-    for (size_t i = 0; i < numpoints; ++i)
+    for (auto i = 0; i < numpoints; ++i)
         sl.insert(i);
     return sl;
 }
@@ -586,7 +586,7 @@ CC_show_command_pair CC_show::Create_SetShowInfoCommand(unsigned numPoints, unsi
         old_points.emplace_back(sheet.GetPoints());
     }
     auto reaction = [old_numpoints, old_labels, old_points](CC_show& show) {
-        for (auto i = 0; i < show.sheets.size(); ++i) {
+        for (auto i = 0ul; i < show.sheets.size(); ++i) {
             show.sheets.at(i).SetPoints(old_points.at(i));
         }
         show.numpoints = old_numpoints;
@@ -713,7 +713,7 @@ CC_show_command_pair CC_show::Create_RotatePointPositionsCommand(unsigned rotate
 
     // put things into place.
     std::map<unsigned, CC_coord> positions;
-    for (int index = pointIndices.size() - 1; index >= 0; index--) {
+    for (int index = static_cast<int>(pointIndices.size()) - 1; index >= 0; index--) {
         positions[pointIndices[index]] = finalPositions[index];
     }
     return Create_MovePointsCommand(positions, ref);
@@ -880,7 +880,7 @@ CC_show_command_pair CC_show::Create_AddNewBackgroundImageCommand(calchart_core:
 CC_show_command_pair CC_show::Create_RemoveBackgroundImageCommand(int which) const
 {
     auto sheet = GetCurrentSheet();
-    if (which >= sheet->GetBackgroundImages().size()) {
+    if (static_cast<size_t>(which) >= sheet->GetBackgroundImages().size()) {
         return { [](CC_show&) {}, [](CC_show&) {} };
     }
     auto action = [ sheet_num = mSheetNum, which ](CC_show & show)

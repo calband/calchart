@@ -211,14 +211,14 @@ public:
     void Clear_ConfigColor(size_t selection);
 
     // Shows
-    static const size_t kShowModeValues = 10;
+    static constexpr auto kShowModeValues = 10;
     using ShowModeInfo_t = std::array<long, kShowModeValues>;
     mutable std::map<CalChartShowModes, ShowModeInfo_t> mShowModeInfos;
     ShowModeInfo_t Get_ShowModeInfo(CalChartShowModes which) const;
     void Set_ShowModeInfo(CalChartShowModes which, const ShowModeInfo_t& values);
     void Clear_ShowModeInfo(CalChartShowModes which);
 
-    static const size_t kSpringShowModeValues = 21;
+    static constexpr int kSpringShowModeValues = 21;
     using SpringShowModeInfo_t = std::array<long, kSpringShowModeValues>;
     mutable std::map<CalChartSpringShowModes, SpringShowModeInfo_t>
         mSpringShowModeInfos;

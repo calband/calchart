@@ -1009,6 +1009,7 @@
 				E884F38817A5E60C00831301 /* cc_coord.cpp */,
 				E884F38917A5E60C00831301 /* cc_coord.h */,
 				E803362617EE1A5E00A58457 /* cc_drawcommand.h */,
+				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E803362717EE1C3700A58457 /* cc_fileformat.h */,
 				E834B0871E1A1F8400C90974 /* cc_image.cpp */,
 				E834B0881E1A1F8400C90974 /* cc_image.h */,
@@ -1016,7 +1017,6 @@
 				E884F38B17A5E60C00831301 /* cc_point.h */,
 				E803362817EE1C5F00A58457 /* cc_shapes.cpp */,
 				E803362917EE1C5F00A58457 /* cc_shapes.h */,
-				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E884F38D17A5E60C00831301 /* cc_sheet.h */,
 				E884F38E17A5E60C00831301 /* cc_show.cpp */,
 				E884F38F17A5E60C00831301 /* cc_show.h */,
@@ -1331,6 +1331,7 @@
 					__WXOSX_COCOA__,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../resources,
@@ -1379,6 +1380,7 @@
 					__WXOSX_COCOA__,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../resources,

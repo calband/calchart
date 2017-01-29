@@ -29,20 +29,20 @@
 #include <memory>
 #include <functional>
 
-#define SPR_YARD_LEFT 8
-#define SPR_YARD_RIGHT 4
-#define SPR_YARD_ABOVE 2
-#define SPR_YARD_BELOW 1
+static constexpr auto SPR_YARD_LEFT = 8;
+static constexpr auto SPR_YARD_RIGHT = 4;
+static constexpr auto SPR_YARD_ABOVE = 2;
+static constexpr auto SPR_YARD_BELOW = 1;
 
-static const size_t kYardTextValues = 53;
-static const size_t kSprLineTextValues = 5;
+static constexpr auto kYardTextValues = 53;
+static constexpr auto kSprLineTextValues = 5;
 
-static const int kFieldStepSizeNorthSouth[2] = { 96, 160 };
-static const int kFieldStepSizeEastWest = 84;
-static const int kFieldStepSizeSouthEdgeFromCenter[2] = { 48, 80 };
-static const int kFieldStepSizeWestEdgeFromCenter = 42;
-static const int kFieldStepWestHashFromWestSideline = 32;
-static const int kFieldStepEastHashFromWestSideline = 52;
+static constexpr int kFieldStepSizeNorthSouth[2] = { 96, 160 };
+static constexpr auto kFieldStepSizeEastWest = 84;
+static constexpr int kFieldStepSizeSouthEdgeFromCenter[2] = { 48, 80 };
+static constexpr auto kFieldStepSizeWestEdgeFromCenter = 42;
+static constexpr auto kFieldStepWestHashFromWestSideline = 32;
+static constexpr auto kFieldStepEastHashFromWestSideline = 52;
 
 class ShowMode {
 public:

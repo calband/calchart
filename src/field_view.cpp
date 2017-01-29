@@ -126,7 +126,7 @@ void FieldView::OnDrawBackground(wxDC& dc)
 {
     if (!mDrawBackground)
         return;
-    for (auto i = 0; i < mBackgroundImages.size(); ++i) {
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
         mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
     }
 }
@@ -570,7 +570,7 @@ void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
     if (!mAdjustBackgroundMode)
         return;
     mWhichBackgroundIndex = -1;
-    for (auto i = 0; i < mBackgroundImages.size(); ++i) {
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
         if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
             mWhichBackgroundIndex = i;
         }
@@ -584,7 +584,7 @@ void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
     if (!mAdjustBackgroundMode)
         return;
-    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()) {
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
         auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
         auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -595,14 +595,14 @@ void FieldView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
 {
     if (!mAdjustBackgroundMode)
         return;
-    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()) {
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
         mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
     }
 }
 
 void FieldView::OnBackgroundImageDelete()
 {
-    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < mBackgroundImages.size()))
+    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())))
         return;
     // let the doc know we've removed a picture.
     auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);

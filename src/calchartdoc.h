@@ -130,7 +130,7 @@ public:
         NotifyErrorList notifyErrorList);
     void WizardSetupNewShow(unsigned num, unsigned columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode);
 
-    const std::string& GetDescr() const;
+    std::string GetDescr() const;
 
     unsigned short GetNumSheets() const;
 

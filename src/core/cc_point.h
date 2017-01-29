@@ -32,7 +32,7 @@
 
 class CC_point {
 public:
-    static const unsigned kNumRefPoints = 3;
+    static constexpr auto kNumRefPoints = 3;
     CC_point();
     CC_point(const CC_coord& pos);
 
