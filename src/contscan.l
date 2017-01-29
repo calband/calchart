@@ -67,8 +67,10 @@ void initscanner() {
 #pragma warning (disable : 4018) //Disable the "'<': signed/unsigned mismatch" warning
 #pragma warning (disable : 4003) //Disable the "not enough actual parameters for macro 'yywrap'" warning
 #endif // _MSC_VER
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-register"
+#endif // __clang__
 %}
 
 %option noyywrap
@@ -156,4 +158,6 @@ COMMENT		"#"[^\n\f]*
 #ifdef _MSC_VER
 #pragma warning (default : 4018)
 #endif // _MSC_VER
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif // __clang__
