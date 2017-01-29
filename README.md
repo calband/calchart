@@ -85,6 +85,8 @@ Bugs addressed in this release:
 * #189 Make sure to add scroll direction preference
 * #190 Add scrolling to preference pane
 * #153 Field doesn't redraw if the mode has changed
+* #206 Viewer File Exporter: Format an Empty Array Where Manual Input is Required
+
 
 Build infrastructure issues addressed in this release:
 
