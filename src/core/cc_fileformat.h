@@ -475,7 +475,7 @@ namespace Parser {
             auto size = get_big_long(begin);
             begin += 4;
             length = std::distance(begin, end);
-            if (length < size + 8) {
+            if (static_cast<uint32_t>(length) < size + 8) {
                 return result;
             }
             auto data = begin;

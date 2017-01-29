@@ -630,6 +630,9 @@ CC_coord FieldCanvas::GetMoveAmount(direction dir)
     case direction::west:
         return { static_cast<Coord>(-stepsize), 0 };
     }
+    // on the offchance somebody gets here
+    return { 0, 0 };
+
 }
 
 static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
