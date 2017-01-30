@@ -404,7 +404,7 @@ CC_coord FieldView::PointPosition(int which) const
 
 void FieldView::GoToSheet(int which)
 {
-    if (which < mShow->GetNumSheets()) {
+    if (which >= 0 && which < mShow->GetNumSheets()) {
         // This *could* be run through a command or run directly...
         if (mConfig.Get_CommandUndoSetSheet()) {
             auto cmd = mShow->Create_SetCurrentSheetCommand(which);
