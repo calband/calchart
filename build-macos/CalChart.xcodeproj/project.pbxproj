@@ -256,6 +256,8 @@
 		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
+		E8ED12FC1E3EA5C900DAF593 /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
+		E8ED12FD1E3EA5CC00DAF593 /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -278,6 +280,26 @@
 				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
 			);
 			script = "bison -dv $INPUT_FILE_PATH -o $SCRIPT_OUTPUT_FILE_0";
+		};
+		E8ED12FE1E3EA69000DAF593 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = sourcecode.yacc;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
+			);
+			script = "bison -dv $INPUT_FILE_PATH -o $SCRIPT_OUTPUT_FILE_0";
+		};
+		E8ED12FF1E3EA6A800DAF593 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = sourcecode.lex;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
+			);
+			script = "flex -B -i -t $INPUT_FILE_PATH > $SCRIPT_OUTPUT_FILE_0";
 		};
 /* End PBXBuildRule section */
 
@@ -1077,6 +1099,8 @@
 				E807BD5A17ED71F50052A53F /* CopyFiles */,
 			);
 			buildRules = (
+				E8ED12FE1E3EA69000DAF593 /* PBXBuildRule */,
+				E8ED12FF1E3EA6A800DAF593 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -1226,6 +1250,7 @@
 				E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */,
 				E89A41FA1A23B77600A2FB3E /* modes.cpp in Sources */,
 				E803363817EE27C500A58457 /* math_utils.cpp in Sources */,
+				E8ED12FC1E3EA5C900DAF593 /* contgram.y in Sources */,
 				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
 				E803362D17EE1E3B00A58457 /* animate.cpp in Sources */,
 				E834B08A1E1A241700C90974 /* cc_image.cpp in Sources */,
@@ -1239,6 +1264,7 @@
 				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
 				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
 				E89A41F51A23B74700A2FB3E /* print_ps.cpp in Sources */,
+				E8ED12FD1E3EA5CC00DAF593 /* contscan.l in Sources */,
 				C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */,
 				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,
 			);
