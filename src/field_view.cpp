@@ -450,7 +450,8 @@ void FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
 
 void FieldView::SetSelection(const SelectionList& sl)
 {
-    if (std::equal(mShow->GetSelectionList().begin(), mShow->GetSelectionList().end(), sl.begin(), sl.end()))
+    auto current_sl = mShow->GetSelectionList();
+    if (std::equal(current_sl.begin(), current_sl.end(), sl.begin(), sl.end()))
         return;
     // This *could* be run through a command or run directly...
     if (mConfig.Get_CommandUndoSelection()) {
