@@ -170,6 +170,10 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     };
     auto parse_INGL_LABL = [](CC_show* show, const uint8_t* ptr, size_t size) {
         std::vector<std::string> labels;
+        if (!size && show->GetNumPoints()) {
+            throw CC_FileException("Label the wrong size", INGL_LABL);
+        }
+        // restrict search to the size we're given
         auto str = (const char*)ptr;
         for (auto i = 0; i < show->GetNumPoints(); i++) {
             labels.push_back(str);
