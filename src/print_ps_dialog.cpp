@@ -230,7 +230,7 @@ void PrintPostScriptDialog::CreateControls()
     wxButton* resetdefaults = new wxButton(this, CC_PRINT_BUTTON_RESET_DEFAULTS, wxT("&Reset Values"));
     horizontalsizer->Add(resetdefaults, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-    topsizer->Add(horizontalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Add(horizontalsizer, 0, wxALL, 5);
 
     wxBoxSizer* verticalsizer = NULL;
 #ifdef PRINT__RUN_CMD
