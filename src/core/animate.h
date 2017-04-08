@@ -41,18 +41,6 @@ class CC_show;
 class AnimationErrors;
 class ContProcedure;
 
-struct ErrorMarker {
-    SelectionList pntgroup; // which points have this error
-    SYMBOL_TYPE contsymbol; // which continuity
-    int line, col; // where
-    ErrorMarker()
-        : contsymbol(SYMBOL_PLAIN)
-        , line(-1)
-        , col(-1)
-    {
-    }
-};
-
 typedef std::function<void(const std::string& notice)> NotifyStatus;
 typedef std::function<bool(
     const std::map<AnimateError, ErrorMarker>& error_markers, size_t sheetnum,
@@ -72,15 +60,15 @@ public:
         , numbeats(beats)
     {
     }
-    std::string GetName() const { return name; }
-    unsigned GetNumBeats() const { return numbeats; }
-    std::vector<AnimatePoint> GetPoints() const { return mPoints; }
-    AnimateCommands GetCommands(int which) const { return commands.at(which); }
-    AnimateCommands::const_iterator GetCommandsBegin(int which) const
+    auto GetName() const { return name; }
+    auto GetNumBeats() const { return numbeats; }
+    auto GetPoints() const { return mPoints; }
+    auto GetCommands(int which) const { return commands.at(which); }
+    auto GetCommandsBegin(int which) const
     {
         return commands.at(which).begin();
     }
-    AnimateCommands::const_iterator GetCommandsEnd(int which) const
+    auto GetCommandsEnd(int which) const
     {
         return commands.at(which).end();
     }
@@ -146,30 +134,26 @@ public:
     std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
     AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
-    std::vector<AnimateSheet>::const_iterator sheetsBegin() const;
-    std::vector<AnimateSheet>::const_iterator sheetsEnd() const;
+    auto sheetsBegin() const { return sheets.begin(); }
+    auto sheetsEnd() const { return sheets.end(); }
 
 private:
     std::vector<AnimatePoint> pts;
-    std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator>
-        curr_cmds; // pointer to the current command
+    std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator> curr_cmds; // pointer to the current command
     std::map<unsigned, CollisionType> mCollisions;
     unsigned curr_sheetnum;
     unsigned curr_beat;
+    std::vector<AnimateSheet> sheets;
+    CollisionAction_t mCollisionAction;
+    std::vector<int> mAnimSheetIndices;
 
     void BeginCmd(unsigned i);
     void EndCmd(unsigned i);
 
     void RefreshSheet();
 
-    std::vector<AnimateSheet> sheets;
-
     void CheckCollisions();
-    CollisionAction_t mCollisionAction;
 
-    std::vector<std::shared_ptr<AnimateCommand> >
-    GetCommands(unsigned whichPoint) const;
-
-    std::vector<int> mAnimSheetIndices;
+    std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
 };
 

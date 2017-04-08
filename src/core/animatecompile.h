@@ -41,11 +41,8 @@ using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand> >;
 
 class AnimationErrors {
 public:
-    bool AnyErrors() const { return !mErrorMarkers.empty(); }
-    std::map<AnimateError, ErrorMarker> GetErrors() const
-    {
-        return mErrorMarkers;
-    }
+    auto AnyErrors() const { return !mErrorMarkers.empty(); }
+    auto GetErrors() const { return mErrorMarkers; }
     void RegisterError(AnimateError err, const ContToken* token, unsigned curr_pt,
         SYMBOL_TYPE contsymbol);
 
@@ -53,21 +50,25 @@ private:
     std::map<AnimateError, ErrorMarker> mErrorMarkers;
 };
 
+struct AnimateState {
+    AnimatePoint pt{};
+    unsigned beats_rem{};
+    AnimationVariables mVars{};
+    AnimationErrors error_markers{};
+    AnimateCommands cmds{};
+};
+
 class AnimateCompile {
 public:
     // Compile a point
-    static AnimateCommands
-    Compile(const CC_show& show, AnimationVariables& variablesStates,
-        AnimationErrors& errors, CC_show::const_CC_sheet_iterator_t c_sheet,
+    static std::tuple<AnimateCommands, AnimationVariables, AnimationErrors>
+    Compile(const CC_show& show, AnimationVariables variablesStates,
+        AnimationErrors errors, CC_show::const_CC_sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
         std::list<std::unique_ptr<ContProcedure> > const& proc);
 
 private:
-    AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num,
-        CC_show::const_CC_sheet_iterator_t c_sheet,
-        unsigned& beats_rem, CC_coord& pt,
-        AnimationVariables& variablesStates, AnimationErrors& errors,
-        AnimateCommands& cmds);
+    AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CC_show::const_CC_sheet_iterator_t c_sheet, AnimateState& state);
 
 public:
     bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken* token);
@@ -77,9 +78,9 @@ public:
     void SetVarValue(int varnum, float value);
 
     // helper functions to get information for building a command
-    AnimatePoint GetPointPosition() const { return pt; }
-    unsigned GetCurrentPoint() const { return curr_pt; }
-    unsigned GetBeatsRemaining() const { return beats_rem; }
+    auto GetPointPosition() const { return mState.pt; }
+    auto GetCurrentPoint() const { return curr_pt; }
+    auto GetBeatsRemaining() const { return mState.beats_rem; }
     AnimatePoint GetStartingPosition() const;
     AnimatePoint GetEndingPosition(const ContToken* token) const;
     AnimatePoint GetReferencePointPosition(unsigned refnum) const;
@@ -90,11 +91,5 @@ private:
     const unsigned curr_pt;
     const CC_show::const_CC_sheet_iterator_t curr_sheet;
 
-    AnimatePoint& pt;
-    unsigned& beats_rem;
-    AnimationVariables& mVars;
-    AnimateCommands& cmds;
-
-    // this is effectively mutable;
-    AnimationErrors& error_markers;
+    AnimateState& mState;
 };

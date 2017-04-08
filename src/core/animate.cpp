@@ -40,20 +40,6 @@ extern int parsecontinuity();
 extern const char* yyinputbuffer;
 extern std::list<std::unique_ptr<ContProcedure> > ParsedContinuity;
 
-std::string animate_err_msgs(size_t which)
-{
-    const std::string s_animate_err_msgs[] = {
-        "Ran out of time", "Not enough to do", "Didn't make it to position",
-        "Invalid countermarch", "Invalid fountain", "Division by zero",
-        "Undefined value", "Syntax error", "Non-integer value",
-        "Negative value",
-    };
-    if (which < sizeof(s_animate_err_msgs) / sizeof(std::string)) {
-        return s_animate_err_msgs[which];
-    }
-    return "";
-}
-
 AnimateDir AnimGetDirFromAngle(float ang)
 {
     ang = NormalizeAngle(ang);
@@ -137,7 +123,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
 #endif
                 for (unsigned j = 0; j < pts.size(); j++) {
                     if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol) {
-                        theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
+                        std::tie(theCommands[j], variablesStates, errors) = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
                     }
                 }
             }
@@ -151,7 +137,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
         }
         for (unsigned j = 0; j < pts.size(); j++) {
             if (theCommands[j].empty()) {
-                theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
+                std::tie(theCommands[j], variablesStates, errors) = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
             }
         }
         if (errors.AnyErrors() && notifyErrorList) {
@@ -392,12 +378,3 @@ Animation::GetCurrentInfo() const
     return std::pair<std::string, std::vector<std::string> >(output.str(), each);
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const
-{
-    return sheets.begin();
-}
-
-std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const
-{
-    return sheets.end();
-}
