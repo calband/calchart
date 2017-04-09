@@ -163,7 +163,7 @@ void FieldCanvas::OnMouseLeftDown_CC_MOVE_ROTATE(CC_coord pos)
     pos = SnapToGrid(pos);
     // rotate is a 2-distinct mouse click action
     if (shape_list.empty()) {
-        BeginDrag(CC_DRAG_CROSS, pos);
+        BeginDrag(CC_DRAG_CROSSHAIRS, pos);
     }
     else if (((CC_shape_1point*)shape_list.back().get())->GetOrigin() != pos) {
         // and this is a point not on the origin.
@@ -187,7 +187,7 @@ void FieldCanvas::OnMouseLeftUp_CC_MOVE_ROTATE(CC_coord pos)
         const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
         if (shape->GetOrigin() == shape->GetPoint()) {
             // reset
-            BeginDrag(CC_DRAG_CROSS, pos);
+            BeginDrag(CC_DRAG_CROSSHAIRS, pos);
         }
         else {
             // apply move
@@ -202,7 +202,7 @@ void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHEAR(CC_coord pos)
     pos = SnapToGrid(pos);
     // shear is a 2-distinct mouse click action
     if (shape_list.empty()) {
-        BeginDrag(CC_DRAG_CROSS, pos);
+        BeginDrag(CC_DRAG_CROSSHAIRS, pos);
     }
     else if (((CC_shape_1point*)shape_list.back().get())->GetOrigin() != pos) {
         CC_coord vect(pos - ((CC_shape_1point*)shape_list.back().get())->GetOrigin());
@@ -235,7 +235,7 @@ void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHEAR(CC_coord pos)
     if (shape_list.size() > 1) {
         const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
         if (shape->GetOrigin() == shape->GetPoint()) {
-            BeginDrag(CC_DRAG_CROSS, pos);
+            BeginDrag(CC_DRAG_CROSSHAIRS, pos);
         }
         else {
             mView.DoMovePoints(mMovePoints);
@@ -273,7 +273,7 @@ void FieldCanvas::OnMouseLeftDown_CC_MOVE_SIZE(CC_coord pos)
     pos = SnapToGrid(pos);
     // move is a 2-distinct mouse click action
     if (shape_list.empty()) {
-        BeginDrag(CC_DRAG_CROSS, pos);
+        BeginDrag(CC_DRAG_CROSSHAIRS, pos);
     }
     else if (((CC_shape_1point*)shape_list.back().get())->GetOrigin() != pos) {
         AddDrag(CC_DRAG_LINE,
@@ -312,7 +312,7 @@ void FieldCanvas::OnMouseLeftUp_CC_MOVE_SIZE(CC_coord pos)
     if (shape_list.size() > 1) {
         const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
         if (shape->GetOrigin() == shape->GetPoint()) {
-            BeginDrag(CC_DRAG_CROSS, pos);
+            BeginDrag(CC_DRAG_CROSSHAIRS, pos);
         }
         else {
             mView.DoMovePoints(mMovePoints);
@@ -389,6 +389,208 @@ void FieldCanvas::OnMouseLeftDown_CC_MOVE_SWAP(CC_coord pos)
     else {
         mView.UnselectAll();
     }
+}
+
+void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_LINE(CC_coord pos)
+{
+    pos = SnapToGrid(pos);
+
+    // move is a 1 mouse click action
+    BeginDrag(CC_DRAG_LINE, pos);
+
+    mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+        assert(shape_list.size() == 1);
+        const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
+        auto start = shape->GetOrigin();
+        auto second = shape->GetPoint();
+        auto curr_pos = start;
+        std::map<int, CC_coord> result;
+        auto&& select_list = view.GetSelectionList();
+        auto distance = select_list.size() ? (second - start)/select_list.size() : start;
+        for (auto i = select_list.begin(); i != select_list.end(); ++i, curr_pos += distance) {
+            // should this have a snap to grid?
+            result[*i] = curr_pos;
+        }
+        return result;
+    };
+}
+
+void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_LINE(CC_coord pos)
+{
+    mView.DoMovePoints(mMovePoints);
+    SetCurrentMoveInternal(CC_MOVE_NORMAL);
+}
+
+void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_ELLIPSE(CC_coord pos)
+{
+    pos = SnapToGrid(pos);
+
+    // move is a 1 mouse click action
+    BeginDrag(CC_DRAG_SHAPE_ELLIPSE, pos);
+
+    mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+        assert(shape_list.size() == 1);
+        const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
+        const auto start = shape->GetOrigin();
+        const auto end = shape->GetPoint();
+        const auto center = start + (end - start)/2;
+        const auto a = (end.x - start.x)/2.0;
+        const auto b = (end.y - start.y)/2.0;
+        std::map<int, CC_coord> result;
+        auto&& select_list = view.GetSelectionList();
+        auto amount = (2.0 * M_PI)/select_list.size();
+        auto angle = -M_PI/2.0;
+        for (auto i = select_list.begin(); i != select_list.end(); ++i, angle += amount) {
+            // should this have a snap to grid?
+            if ((angle > M_PI/2.0) && (angle <= 3.0*M_PI/2.0)) {
+                result[*i] = center + CC_coord(-(a*b)/(sqrt(pow(b,2) + pow(a,2)*pow(tan(angle),2))), -(a*b*tan(angle))/(sqrt(pow(b,2) + pow(a,2)*pow(tan(angle),2))));
+            } else {
+                result[*i] = center + CC_coord((a*b)/(sqrt(pow(b,2) + pow(a,2)*pow(tan(angle),2))), (a*b*tan(angle))/(sqrt(pow(b,2) + pow(a,2)*pow(tan(angle),2))));
+            }
+        }
+        return result;
+    };
+}
+
+void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_ELLIPSE(CC_coord pos)
+{
+    mView.DoMovePoints(mMovePoints);
+    SetCurrentMoveInternal(CC_MOVE_NORMAL);
+}
+
+void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_RECTANGLE(CC_coord pos)
+{
+    pos = SnapToGrid(pos);
+
+    // move is a 1 mouse click action
+    BeginDrag(CC_DRAG_BOX, pos);
+
+    mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+        assert(shape_list.size() == 1);
+        const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
+        const auto start = shape->GetOrigin();
+        const auto end = shape->GetPoint();
+        const auto a = (end.x - start.x);
+        const auto b = (end.y - start.y);
+        const auto perimeter = a*2.0 + b*2.0;
+        std::map<int, CC_coord> result;
+        auto&& select_list = view.GetSelectionList();
+        auto each_segment = perimeter/select_list.size();
+        auto total_distance = 0.0;
+        for (auto i = select_list.begin(); i != select_list.end(); ++i, total_distance += each_segment) {
+            if (total_distance < a) {
+                result[*i] = start + CC_coord(total_distance, 0);
+            }
+            else if (total_distance < (a+b)) {
+                result[*i] = start + CC_coord(a, total_distance-a);
+            }
+            else if (total_distance < (2.0*a+b)) {
+                result[*i] = start + CC_coord(a-(total_distance - (a+b)), b);
+            }
+            else {
+                result[*i] = start + CC_coord(0, b-(total_distance - (2*a+b)));
+            }
+        }
+        return result;
+    };
+}
+
+void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_RECTANGLE(CC_coord pos)
+{
+    mView.DoMovePoints(mMovePoints);
+    SetCurrentMoveInternal(CC_MOVE_NORMAL);
+}
+
+void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_X(CC_coord pos)
+{
+    pos = SnapToGrid(pos);
+
+    // move is a 1 mouse click action
+    BeginDrag(CC_DRAG_SHAPE_X, pos);
+
+    mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+        assert(shape_list.size() == 1);
+        const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
+        const auto start1 = shape->GetOrigin();
+        const auto end1 = shape->GetPoint();
+        const auto start2 = CC_coord(start1.x, end1.y);
+        const auto end2 = CC_coord(end1.x, start1.y);
+        auto&& select_list = view.GetSelectionList();
+        auto num_squares = (select_list.size() + 2)/4;
+        auto iter = select_list.begin();
+
+        std::map<int, CC_coord> result;
+        for (auto i = 0u; i < num_squares; ++i)
+        {
+            result[*iter++] = start1 + (end1 - start1)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+            result[*iter++] = end2 - (end2 - start2)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+            result[*iter++] = start2 + (end2 - start2)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+            result[*iter++] = end1 - (end1 - start1)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+        }
+        if (iter != select_list.end())
+        {
+            result[*iter++] = start1 + (end1 - start1)/2;
+        }
+        assert(iter == select_list.end());
+        return result;
+    };
+}
+
+void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_X(CC_coord pos)
+{
+    mView.DoMovePoints(mMovePoints);
+    SetCurrentMoveInternal(CC_MOVE_NORMAL);
+}
+
+void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_CROSS(CC_coord pos)
+{
+    pos = SnapToGrid(pos);
+
+    // move is a 1 mouse click action
+    BeginDrag(CC_DRAG_SHAPE_CROSS, pos);
+
+    mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+        assert(shape_list.size() == 1);
+        const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
+        const auto o = shape->GetOrigin();
+        const auto p = shape->GetPoint();
+        const auto start1 = CC_coord(o.x, o.y + (p.y - o.y)/2);
+        const auto end1 = CC_coord(p.x, o.y + (p.y - o.y)/2);
+        const auto start2 = CC_coord(o.x + (p.x - o.x)/2, o.y);
+        const auto end2 = CC_coord(o.x + (p.x - o.x)/2, p.y);
+        auto&& select_list = view.GetSelectionList();
+        auto num_squares = (select_list.size() + 2)/4;
+        auto iter = select_list.begin();
+
+        std::map<int, CC_coord> result;
+        for (auto i = 0u; i < num_squares; ++i)
+        {
+            result[*iter++] = start1 + (end1 - start1)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+            result[*iter++] = end2 - (end2 - start2)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+            result[*iter++] = start2 + (end2 - start2)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+            result[*iter++] = end1 - (end1 - start1)/(2*num_squares)*i;
+            if (iter == select_list.end()) break;
+        }
+        if (iter != select_list.end())
+        {
+            result[*iter++] = start1 + (end1 - start1)/2;
+        }
+        assert(iter == select_list.end());
+        return result;
+    };
+}
+
+void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_CROSS(CC_coord pos)
+{
+    mView.DoMovePoints(mMovePoints);
+    SetCurrentMoveInternal(CC_MOVE_NORMAL);
 }
 
 void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos)
@@ -496,25 +698,37 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 
         switch (curr_move) {
         case CC_MOVE_LINE:
-            OnMouseLeftDown_CC_MOVE_LINE(pos);
+            OnMouseLeftDown_CC_MOVE_SHAPE_LINE(pos);
             break;
         case CC_MOVE_ROTATE:
-            OnMouseLeftDown_CC_MOVE_ROTATE(pos);
+            OnMouseLeftDown_CC_MOVE_SHAPE_X(pos);
             break;
         case CC_MOVE_SHEAR:
-            OnMouseLeftDown_CC_MOVE_SHEAR(pos);
+            OnMouseLeftDown_CC_MOVE_SHAPE_CROSS(pos);
             break;
         case CC_MOVE_REFL:
-            OnMouseLeftDown_CC_MOVE_REFL(pos);
+            OnMouseLeftDown_CC_MOVE_SHAPE_ELLIPSE(pos);
             break;
         case CC_MOVE_SIZE:
-            OnMouseLeftDown_CC_MOVE_SIZE(pos);
+            OnMouseLeftDown_CC_MOVE_SHAPE_RECTANGLE(pos);
             break;
         case CC_MOVE_GENIUS:
             OnMouseLeftDown_CC_MOVE_GENIUS(pos);
             break;
         case CC_MOVE_SWAP:
             OnMouseLeftDown_CC_MOVE_SWAP(pos);
+            break;
+        case CC_MOVE_SHAPE_LINE:
+            OnMouseLeftDown_CC_MOVE_SHAPE_LINE(pos);
+            break;
+        case CC_MOVE_SHAPE_ELLIPSE:
+            OnMouseLeftDown_CC_MOVE_SHAPE_ELLIPSE(pos);
+            break;
+        case CC_MOVE_SHAPE_X:
+            OnMouseLeftDown_CC_MOVE_SHAPE_X(pos);
+            break;
+        case CC_MOVE_SHAPE_CROSS:
+            OnMouseLeftDown_CC_MOVE_SHAPE_CROSS(pos);
             break;
         default:
             OnMouseLeftDown_default(event, pos);
@@ -544,22 +758,34 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
         if (!shape_list.empty()) {
             switch (curr_move) {
             case CC_MOVE_LINE:
-                OnMouseLeftUp_CC_MOVE_LINE(pos);
+                OnMouseLeftUp_CC_MOVE_SHAPE_LINE(pos);
                 break;
             case CC_MOVE_ROTATE:
-                OnMouseLeftUp_CC_MOVE_ROTATE(pos);
+                OnMouseLeftUp_CC_MOVE_SHAPE_X(pos);
                 break;
             case CC_MOVE_SHEAR:
-                OnMouseLeftUp_CC_MOVE_SHEAR(pos);
+                OnMouseLeftUp_CC_MOVE_SHAPE_CROSS(pos);
                 break;
             case CC_MOVE_REFL:
-                OnMouseLeftUp_CC_MOVE_REFL(pos);
+                OnMouseLeftUp_CC_MOVE_SHAPE_ELLIPSE(pos);
                 break;
             case CC_MOVE_SIZE:
-                OnMouseLeftUp_CC_MOVE_SIZE(pos);
+                OnMouseLeftUp_CC_MOVE_SHAPE_RECTANGLE(pos);
                 break;
             case CC_MOVE_GENIUS:
                 OnMouseLeftUp_CC_MOVE_GENIUS(pos);
+                break;
+            case CC_MOVE_SHAPE_LINE:
+                OnMouseLeftUp_CC_MOVE_SHAPE_LINE(pos);
+                break;
+            case CC_MOVE_SHAPE_ELLIPSE:
+                OnMouseLeftUp_CC_MOVE_SHAPE_ELLIPSE(pos);
+                break;
+            case CC_MOVE_SHAPE_X:
+                OnMouseLeftUp_CC_MOVE_SHAPE_X(pos);
+                break;
+            case CC_MOVE_SHAPE_CROSS:
+                OnMouseLeftUp_CC_MOVE_SHAPE_CROSS(pos);
                 break;
             default:
                 OnMouseLeftUp_default(event);
@@ -688,9 +914,18 @@ void FieldCanvas::BeginDrag(CC_DRAG_TYPES type, const CC_coord& start)
     case CC_DRAG_LINE:
         AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_line(start)));
         break;
-    case CC_DRAG_CROSS:
-        AddDrag(type,
-            std::unique_ptr<CC_shape>(new CC_shape_cross(start, Int2Coord(2))));
+    case CC_DRAG_CROSSHAIRS:
+        AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_crosshairs(start, Int2Coord(2))));
+        break;
+    case CC_DRAG_SHAPE_ELLIPSE:
+        AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_ellipse(start)));
+        break;
+    case CC_DRAG_SHAPE_X:
+        AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_x(start)));
+        break;
+    case CC_DRAG_SHAPE_CROSS:
+        AddDrag(type, std::unique_ptr<CC_shape>(new CC_shape_cross(start)));
+        break;
     default:
         break;
     }

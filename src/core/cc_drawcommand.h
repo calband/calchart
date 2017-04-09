@@ -28,7 +28,8 @@
 struct CC_DrawCommand {
     typedef enum { Ignore,
         Line,
-        Arc } DrawType;
+        Arc,
+        Ellipse } DrawType;
     DrawType mType;
     int x1, y1, x2, y2;
     int xc, yc;
@@ -68,6 +69,26 @@ struct CC_DrawCommand {
         , y2(endy)
         , xc(centerx)
         , yc(centery)
+    {
+    }
+
+    // Generic version
+    CC_DrawCommand(DrawType t, int startx, int starty, int endx, int endy)
+        : mType(t)
+        , x1(startx)
+        , y1(starty)
+        , x2(endx)
+        , y2(endy)
+    {
+    }
+
+    // Generic version
+    CC_DrawCommand(DrawType t, const CC_coord& start, const CC_coord& end)
+        : mType(t)
+        , x1(start.x)
+        , y1(start.y)
+        , x2(end.x)
+        , y2(end.y)
     {
     }
 };

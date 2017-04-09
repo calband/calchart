@@ -51,11 +51,11 @@ protected:
     CC_coord origin;
 };
 
-class CC_shape_cross : public CC_shape_1point {
+class CC_shape_crosshairs : public CC_shape_1point {
 public:
-    CC_shape_cross(const CC_coord& p, Coord width)
+    CC_shape_crosshairs(const CC_coord& p, Coord width)
         : CC_shape_1point(p)
-        , cross_width(width)
+        , crosshairs_width(width)
     {
     }
 
@@ -64,7 +64,7 @@ public:
         float y) const override;
 
 protected:
-    Coord cross_width;
+    Coord crosshairs_width;
 };
 
 class CC_shape_2point : public CC_shape_1point {
@@ -95,6 +95,54 @@ public:
     {
     }
     CC_shape_line(const CC_coord& p1, const CC_coord& p2)
+        : CC_shape_2point(p1, p2)
+    {
+    }
+
+    virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p) override;
+    virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x,
+        float y) const override;
+};
+
+class CC_shape_x : public CC_shape_2point {
+public:
+    CC_shape_x(const CC_coord& p)
+        : CC_shape_2point(p)
+    {
+    }
+    CC_shape_x(const CC_coord& p1, const CC_coord& p2)
+        : CC_shape_2point(p1, p2)
+    {
+    }
+
+    virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p) override;
+    virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x,
+        float y) const override;
+};
+
+class CC_shape_cross : public CC_shape_2point {
+public:
+    CC_shape_cross(const CC_coord& p)
+        : CC_shape_2point(p)
+    {
+    }
+    CC_shape_cross(const CC_coord& p1, const CC_coord& p2)
+        : CC_shape_2point(p1, p2)
+    {
+    }
+
+    virtual void OnMove(const CC_coord& p, const CC_coord& snapped_p) override;
+    virtual std::vector<CC_DrawCommand> GetCC_DrawCommand(float x,
+        float y) const override;
+};
+
+class CC_shape_ellipse : public CC_shape_2point {
+public:
+    CC_shape_ellipse(const CC_coord& p)
+        : CC_shape_2point(p)
+    {
+    }
+    CC_shape_ellipse(const CC_coord& p1, const CC_coord& p2)
         : CC_shape_2point(p1, p2)
     {
     }

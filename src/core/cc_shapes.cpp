@@ -31,19 +31,19 @@ void CC_shape_1point::OnMove(const CC_coord& p, const CC_coord&)
     MoveOrigin(p);
 }
 
-void CC_shape_cross::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+void CC_shape_crosshairs::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
     MoveOrigin(snapped_p);
 }
 
-std::vector<CC_DrawCommand> CC_shape_cross::GetCC_DrawCommand(float x,
+std::vector<CC_DrawCommand> CC_shape_crosshairs::GetCC_DrawCommand(float x,
     float y) const
 {
     std::vector<CC_DrawCommand> result;
-    result.emplace_back(origin.x + x - cross_width, origin.y + y - cross_width,
-        origin.x + x + cross_width, origin.y + y + cross_width);
-    result.emplace_back(origin.x + x + cross_width, origin.y + y - cross_width,
-        origin.x + x - cross_width, origin.y + y + cross_width);
+    result.emplace_back(origin.x + x - crosshairs_width, origin.y + y - crosshairs_width,
+        origin.x + x + crosshairs_width, origin.y + y + crosshairs_width);
+    result.emplace_back(origin.x + x + crosshairs_width, origin.y + y - crosshairs_width,
+        origin.x + x - crosshairs_width, origin.y + y + crosshairs_width);
     return result;
 }
 
@@ -62,6 +62,47 @@ std::vector<CC_DrawCommand> CC_shape_line::GetCC_DrawCommand(float x,
 {
     std::vector<CC_DrawCommand> result;
     result.emplace_back(origin.x + x, origin.y + y, point.x + x, point.y + y);
+    return result;
+}
+
+void CC_shape_x::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+{
+    MovePoint(snapped_p);
+}
+
+std::vector<CC_DrawCommand> CC_shape_x::GetCC_DrawCommand(float x,
+    float y) const
+{
+    std::vector<CC_DrawCommand> result;
+    result.emplace_back(origin.x + x, origin.y + y, point.x + x, point.y + y);
+    result.emplace_back(point.x + x, origin.y + y, origin.x + x, point.y + y);
+    return result;
+}
+
+void CC_shape_cross::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+{
+    MovePoint(snapped_p);
+}
+
+std::vector<CC_DrawCommand> CC_shape_cross::GetCC_DrawCommand(float x,
+    float y) const
+{
+    std::vector<CC_DrawCommand> result;
+    result.emplace_back(origin.x + (point.x - origin.x)/2 + x, origin.y + y, origin.x + (point.x - origin.x)/2 + x, point.y + y);
+    result.emplace_back(origin.x + x, origin.y + (point.y - origin.y)/2 + y, point.x + x, origin.y + (point.y - origin.y)/2 + y);
+    return result;
+}
+
+void CC_shape_ellipse::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+{
+    MovePoint(snapped_p);
+}
+
+std::vector<CC_DrawCommand> CC_shape_ellipse::GetCC_DrawCommand(float x,
+    float y) const
+{
+    std::vector<CC_DrawCommand> result;
+    result.emplace_back(CC_DrawCommand::Ellipse, origin.x + x, origin.y + y, point.x + x, point.y + y);
     return result;
 }
 
