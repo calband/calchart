@@ -246,7 +246,7 @@ std::vector<uint8_t> CC_show::SerializeShowData() const
     std::vector<uint8_t> result;
     // SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
     // Write NUM_MARCH
-    Append(result, Construct_block(INGL_SIZE, static_cast<uint32_t>( GetNumPoints() )));
+    Append(result, Construct_block(INGL_SIZE, static_cast<uint32_t>(GetNumPoints())));
 
     // Write LABEL
     std::vector<char> labels;

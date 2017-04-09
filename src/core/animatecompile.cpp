@@ -52,7 +52,7 @@ AnimateCompile::Compile(
     unsigned pt_num, SYMBOL_TYPE cont_symbol,
     std::list<std::unique_ptr<ContProcedure> > const& procs)
 {
-    AnimateState state {
+    AnimateState state{
         c_sheet->GetPosition(pt_num),
         c_sheet->GetBeats(),
         variablesStates,

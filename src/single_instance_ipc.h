@@ -30,4 +30,3 @@ protected:
     StartStopFunc_t m_serverStartStop;
     StartStopFunc_t m_clientStartStop;
 };
-

@@ -88,8 +88,8 @@ std::vector<CC_DrawCommand> CC_shape_cross::GetCC_DrawCommand(float x,
     float y) const
 {
     std::vector<CC_DrawCommand> result;
-    result.emplace_back(origin.x + (point.x - origin.x)/2 + x, origin.y + y, origin.x + (point.x - origin.x)/2 + x, point.y + y);
-    result.emplace_back(origin.x + x, origin.y + (point.y - origin.y)/2 + y, point.x + x, origin.y + (point.y - origin.y)/2 + y);
+    result.emplace_back(origin.x + (point.x - origin.x) / 2 + x, origin.y + y, origin.x + (point.x - origin.x) / 2 + x, point.y + y);
+    result.emplace_back(origin.x + x, origin.y + (point.y - origin.y) / 2 + y, point.x + x, origin.y + (point.y - origin.y) / 2 + y);
     return result;
 }
 

@@ -377,4 +377,3 @@ Animation::GetCurrentInfo() const
     output << "beat " << GetCurrentBeat() << " of " << GetNumberBeats() << "\n";
     return std::pair<std::string, std::vector<std::string> >(output.str(), each);
 }
-

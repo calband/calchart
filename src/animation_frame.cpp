@@ -82,9 +82,8 @@ END_EVENT_TABLE()
 AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
     CalChartConfiguration& config_, wxView* view,
     wxFrame* parent, const wxSize& size)
-    :
-    wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition,
-        size)
+    : wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition,
+          size)
     , config(config_)
     , mCanvas(NULL)
     , mOmniViewCanvas(NULL)

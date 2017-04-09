@@ -1408,7 +1408,7 @@ void SpringShowModeSetup::CreateControls()
         0, wxALIGN_LEFT | wxALL, 5);
     wxChoice* textchoice = new wxChoice(this, SPRING_SHOW_LINE_MARKING, wxDefaultPosition,
         wxDefaultSize,
-        wxArrayString{ mConfig.Get_spr_line_text_index().size(), mConfig.Get_spr_line_text_index().data()});
+        wxArrayString{ mConfig.Get_spr_line_text_index().size(), mConfig.Get_spr_line_text_index().data() });
     textchoice->SetSelection(0);
     textsizer->Add(textchoice);
     auto show_line_value = new wxTextCtrl(this, SPRING_SHOW_LINE_VALUE, wxEmptyString,

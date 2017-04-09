@@ -161,7 +161,7 @@ void PointPicker::Update()
     if (mCachedLabels != showLabels) {
         mCachedLabels = showLabels;
         mList->Clear();
-        mList->Set(wxArrayString{mCachedLabels.size(), &mCachedLabels[0]});
+        mList->Set(wxArrayString{ mCachedLabels.size(), &mCachedLabels[0] });
     }
     auto showSelectionList = mShow.GetSelectionList();
     if (mCachedSelection != showSelectionList) {

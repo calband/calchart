@@ -156,4 +156,3 @@ private:
 
     std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
 };
-

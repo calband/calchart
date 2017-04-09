@@ -70,8 +70,6 @@ public:
     void SetCurrentMove(CC_MOVE_MODES move);
 
 private:
-//    std::map<int, CC_coord> GetTransformedPoints(const Matrix& transmat);
-
     // Variables
     FieldFrame* mFrame;
     FieldView& mView;
@@ -91,7 +89,7 @@ private:
     CC_coord SnapToGrid(CC_coord c);
 
     CC_DRAG_TYPES drag;
-    using ShapeList = std::vector<std::unique_ptr<CC_shape>>;
+    using ShapeList = std::vector<std::unique_ptr<CC_shape> >;
     ShapeList shape_list;
 
     // Background Picture

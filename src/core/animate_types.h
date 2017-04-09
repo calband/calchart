@@ -99,4 +99,3 @@ struct ErrorMarker {
     SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity
     int line = -1, col = -1; // where
 };
-
