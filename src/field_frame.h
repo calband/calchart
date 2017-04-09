@@ -86,6 +86,11 @@ public:
     void OnCmd_lasso(wxCommandEvent& event);
     void OnCmd_move(wxCommandEvent& event);
     void OnCmd_swap(wxCommandEvent& event);
+    void OnCmd_shape_line(wxCommandEvent& event);
+    void OnCmd_shape_x(wxCommandEvent& event);
+    void OnCmd_shape_cross(wxCommandEvent& event);
+    void OnCmd_shape_box(wxCommandEvent& event);
+    void OnCmd_shape_ellipse(wxCommandEvent& event);
     void OnCmd_line(wxCommandEvent& event);
     void OnCmd_rot(wxCommandEvent& event);
     void OnCmd_shear(wxCommandEvent& event);

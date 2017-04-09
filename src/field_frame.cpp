@@ -121,6 +121,11 @@ EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
 EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
 EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
 EVT_MENU(CALCHART__swap, FieldFrame::OnCmd_swap)
+EVT_MENU(CALCHART__shape_line, FieldFrame::OnCmd_shape_line)
+EVT_MENU(CALCHART__shape_x, FieldFrame::OnCmd_shape_x)
+EVT_MENU(CALCHART__shape_cross, FieldFrame::OnCmd_shape_cross)
+EVT_MENU(CALCHART__shape_box, FieldFrame::OnCmd_shape_box)
+EVT_MENU(CALCHART__shape_ellipse, FieldFrame::OnCmd_shape_ellipse)
 EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
 EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
 EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
@@ -826,6 +831,31 @@ void FieldFrame::OnCmd_move(wxCommandEvent& event)
 void FieldFrame::OnCmd_swap(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SWAP);
+}
+
+void FieldFrame::OnCmd_shape_line(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_LINE);
+}
+
+void FieldFrame::OnCmd_shape_x(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_X);
+}
+
+void FieldFrame::OnCmd_shape_cross(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_CROSS);
+}
+
+void FieldFrame::OnCmd_shape_box(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_RECTANGLE);
+}
+
+void FieldFrame::OnCmd_shape_ellipse(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_ELLIPSE);
 }
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)

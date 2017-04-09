@@ -698,19 +698,19 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 
         switch (curr_move) {
         case CC_MOVE_LINE:
-            OnMouseLeftDown_CC_MOVE_SHAPE_LINE(pos);
+            OnMouseLeftDown_CC_MOVE_LINE(pos);
             break;
         case CC_MOVE_ROTATE:
-            OnMouseLeftDown_CC_MOVE_SHAPE_X(pos);
+            OnMouseLeftDown_CC_MOVE_ROTATE(pos);
             break;
         case CC_MOVE_SHEAR:
-            OnMouseLeftDown_CC_MOVE_SHAPE_CROSS(pos);
+            OnMouseLeftDown_CC_MOVE_SHEAR(pos);
             break;
         case CC_MOVE_REFL:
-            OnMouseLeftDown_CC_MOVE_SHAPE_ELLIPSE(pos);
+            OnMouseLeftDown_CC_MOVE_REFL(pos);
             break;
         case CC_MOVE_SIZE:
-            OnMouseLeftDown_CC_MOVE_SHAPE_RECTANGLE(pos);
+            OnMouseLeftDown_CC_MOVE_SIZE(pos);
             break;
         case CC_MOVE_GENIUS:
             OnMouseLeftDown_CC_MOVE_GENIUS(pos);
@@ -723,6 +723,9 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             break;
         case CC_MOVE_SHAPE_ELLIPSE:
             OnMouseLeftDown_CC_MOVE_SHAPE_ELLIPSE(pos);
+            break;
+        case CC_MOVE_SHAPE_RECTANGLE:
+            OnMouseLeftDown_CC_MOVE_SHAPE_RECTANGLE(pos);
             break;
         case CC_MOVE_SHAPE_X:
             OnMouseLeftDown_CC_MOVE_SHAPE_X(pos);
@@ -758,19 +761,19 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
         if (!shape_list.empty()) {
             switch (curr_move) {
             case CC_MOVE_LINE:
-                OnMouseLeftUp_CC_MOVE_SHAPE_LINE(pos);
+                OnMouseLeftUp_CC_MOVE_LINE(pos);
                 break;
             case CC_MOVE_ROTATE:
-                OnMouseLeftUp_CC_MOVE_SHAPE_X(pos);
+                OnMouseLeftUp_CC_MOVE_ROTATE(pos);
                 break;
             case CC_MOVE_SHEAR:
-                OnMouseLeftUp_CC_MOVE_SHAPE_CROSS(pos);
+                OnMouseLeftUp_CC_MOVE_SHEAR(pos);
                 break;
             case CC_MOVE_REFL:
-                OnMouseLeftUp_CC_MOVE_SHAPE_ELLIPSE(pos);
+                OnMouseLeftUp_CC_MOVE_REFL(pos);
                 break;
             case CC_MOVE_SIZE:
-                OnMouseLeftUp_CC_MOVE_SHAPE_RECTANGLE(pos);
+                OnMouseLeftUp_CC_MOVE_SIZE(pos);
                 break;
             case CC_MOVE_GENIUS:
                 OnMouseLeftUp_CC_MOVE_GENIUS(pos);
@@ -780,6 +783,9 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
                 break;
             case CC_MOVE_SHAPE_ELLIPSE:
                 OnMouseLeftUp_CC_MOVE_SHAPE_ELLIPSE(pos);
+                break;
+            case CC_MOVE_SHAPE_RECTANGLE:
+                OnMouseLeftUp_CC_MOVE_SHAPE_RECTANGLE(pos);
                 break;
             case CC_MOVE_SHAPE_X:
                 OnMouseLeftUp_CC_MOVE_SHAPE_X(pos);
