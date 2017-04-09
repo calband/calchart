@@ -128,6 +128,7 @@ public:
 
     void SetCurrentLasso(CC_DRAG_TYPES type);
     void SetCurrentMove(CC_MOVE_MODES type);
+    void CanvasSetCurrentMove(CC_MOVE_MODES type);
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
     void slider_sheet_callback(wxScrollEvent&);

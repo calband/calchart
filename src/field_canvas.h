@@ -39,6 +39,7 @@ class BackgroundImage;
 class CC_coord;
 class Matrix;
 class CalChartConfiguration;
+class CC_shape_2point;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas {
@@ -46,8 +47,8 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(wxView* view, FieldFrame* frame, float def_zoom);
-    virtual ~FieldCanvas(void);
+    FieldCanvas(FieldView& view, FieldFrame* frame, float def_zoom);
+    virtual ~FieldCanvas() = default;
     void OnPaint(wxPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     virtual void OnMouseLeftDown(wxMouseEvent& event);
@@ -69,15 +70,13 @@ public:
     void SetCurrentMove(CC_MOVE_MODES move);
 
 private:
-    std::map<int, CC_coord> GetPoints(const Matrix& transmat);
+//    std::map<int, CC_coord> GetTransformedPoints(const Matrix& transmat);
 
     // Variables
     FieldFrame* mFrame;
-    FieldView* mView;
+    FieldView& mView;
     CC_DRAG_TYPES curr_lasso;
     CC_MOVE_MODES curr_move;
-
-    void ClearShapes();
 
     void BeginDrag(CC_DRAG_TYPES type, const CC_coord& start);
     void AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
@@ -92,15 +91,43 @@ private:
     CC_coord SnapToGrid(CC_coord c);
 
     CC_DRAG_TYPES drag;
-    typedef std::vector<std::shared_ptr<CC_shape> > ShapeList;
+    using ShapeList = std::vector<std::unique_ptr<CC_shape>>;
     ShapeList shape_list;
-    std::shared_ptr<CC_shape> curr_shape;
 
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
     void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
+    void PaintShapes(wxDC& dc, const CalChartConfiguration& config);
+
+    void OnMouseLeftDown_CC_MOVE_LINE(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_LINE(CC_coord pos);
+
+    void OnMouseLeftDown_CC_MOVE_ROTATE(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_ROTATE(CC_coord pos);
+
+    void OnMouseLeftDown_CC_MOVE_SHEAR(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_SHEAR(CC_coord pos);
+
+    void OnMouseLeftDown_CC_MOVE_REFL(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_REFL(CC_coord pos);
+
+    void OnMouseLeftDown_CC_MOVE_SIZE(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_SIZE(CC_coord pos);
+
+    void OnMouseLeftDown_CC_MOVE_GENIUS(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_GENIUS(CC_coord pos);
+
+    void OnMouseLeftDown_CC_MOVE_SWAP(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_SWAP(CC_coord pos);
+
+    void OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos);
+    void OnMouseLeftUp_default(wxMouseEvent& event);
+
+    // implies a call to EndDrag()
+    void SetCurrentMoveInternal(CC_MOVE_MODES move);
+
     std::map<int, CC_coord> mMovePoints;
-    std::function<std::map<int, CC_coord>(const CC_coord&)> mTransformer;
+    std::function<std::map<int, CC_coord>(ShapeList const& shape_list, FieldView const&)> mTransformer;
 
     DECLARE_EVENT_TABLE()
 };

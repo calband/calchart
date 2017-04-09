@@ -336,7 +336,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     // Add the field canvas
     this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
-    mCanvas = new FieldCanvas(view, this, config.Get_FieldFrameZoom());
+    mCanvas = new FieldCanvas(*static_cast<FieldView*>(view), this, config.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
@@ -1100,6 +1100,14 @@ void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
     tb->ToggleTool(CALCHART__move + type, true);
 
     mCanvas->SetCurrentMove(type);
+}
+
+// call by the canvas to inform that the move has been set.  Don't call back to canvas
+void FieldFrame::CanvasSetCurrentMove(CC_MOVE_MODES type)
+{
+    // retoggle the tool because we want it to draw as selected
+    wxToolBar* tb = GetToolBar();
+    tb->ToggleTool(CALCHART__move + type, true);
 }
 
 void FieldFrame::Setup()
