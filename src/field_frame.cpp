@@ -823,14 +823,14 @@ void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
     SetCurrentLasso(CC_DRAG_LASSO);
 }
 
+void FieldFrame::OnCmd_swap(wxCommandEvent& event)
+{
+    SetCurrentLasso(CC_DRAG_SWAP);
+}
+
 void FieldFrame::OnCmd_move(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_NORMAL);
-}
-
-void FieldFrame::OnCmd_swap(wxCommandEvent& event)
-{
-    SetCurrentMove(CC_MOVE_SWAP);
 }
 
 void FieldFrame::OnCmd_shape_line(wxCommandEvent& event)
@@ -1114,9 +1114,7 @@ std::pair<Coord, Coord> FieldFrame::GridChoice() const
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
     // retoggle the tool because we want it to draw as selected
-    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO)
-            ? CALCHART__lasso
-            : CALCHART__box;
+    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : (type == CC_DRAG_SWAP) ? CALCHART__swap : CALCHART__box;
     wxToolBar* tb = GetToolBar();
     tb->ToggleTool(toggleID, true);
 

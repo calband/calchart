@@ -115,10 +115,9 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
         { wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
         { wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
-        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso,
-            true },
+        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso },
+        { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap, true },
         { wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
-        { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap },
         { wxITEM_RADIO, NULL, wxT("Shape points in a line"), CALCHART__shape_line },
         { wxITEM_RADIO, NULL, wxT("Shape points in an x"), CALCHART__shape_x },
         { wxITEM_RADIO, NULL, wxT("Shape points in a cross"), CALCHART__shape_cross },
@@ -148,8 +147,8 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_box));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_poly));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_lasso));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_mv));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_swap));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_mv));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_line));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_x));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_cross));

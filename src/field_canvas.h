@@ -63,9 +63,9 @@ public:
     float ZoomToFitFactor() const;
     virtual void SetZoom(float factor);
 
-    CC_DRAG_TYPES GetCurrentLasso() const;
+    auto GetCurrentLasso() const { return curr_lasso; }
     void SetCurrentLasso(CC_DRAG_TYPES lasso);
-    CC_MOVE_MODES GetCurrentMove() const;
+    auto GetCurrentMove() const { return curr_move; }
     // implies a call to EndDrag()
     void SetCurrentMove(CC_MOVE_MODES move);
 
@@ -115,9 +115,6 @@ private:
     void OnMouseLeftDown_CC_MOVE_GENIUS(CC_coord pos);
     void OnMouseLeftUp_CC_MOVE_GENIUS(CC_coord pos);
 
-    void OnMouseLeftDown_CC_MOVE_SWAP(CC_coord pos);
-    void OnMouseLeftUp_CC_MOVE_SWAP(CC_coord pos);
-
     void OnMouseLeftDown_CC_MOVE_SHAPE_LINE(CC_coord pos);
     void OnMouseLeftUp_CC_MOVE_SHAPE_LINE(CC_coord pos);
 
@@ -135,6 +132,8 @@ private:
 
     void OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos);
     void OnMouseLeftUp_default(wxMouseEvent& event);
+
+    void OnMouseLeftDown_CC_DRAG_SWAP(CC_coord pos);
 
     // implies a call to EndDrag()
     void SetCurrentMoveInternal(CC_MOVE_MODES move);

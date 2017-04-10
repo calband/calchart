@@ -369,26 +369,6 @@ void FieldCanvas::OnMouseLeftUp_CC_MOVE_GENIUS(CC_coord pos)
     }
 }
 
-void FieldCanvas::OnMouseLeftDown_CC_MOVE_SWAP(CC_coord pos)
-{
-    int targetDotIndex = mView.FindPoint(pos);
-    if (targetDotIndex >= 0) {
-        SelectionList targetDot;
-        targetDot.insert(targetDotIndex);
-        if (mView.GetSelectionList().size() != 1) {
-            mView.UnselectAll();
-        }
-        mView.AddToSelection(targetDot);
-        if (mView.GetSelectionList().size() == 2) {
-            mView.DoRotatePointPositions(1);
-            mView.UnselectAll();
-        }
-    }
-    else {
-        mView.UnselectAll();
-    }
-}
-
 void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_LINE(CC_coord pos)
 {
     pos = SnapToGrid(pos);
@@ -404,7 +384,7 @@ void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_LINE(CC_coord pos)
         auto curr_pos = start;
         std::map<int, CC_coord> result;
         auto&& select_list = view.GetSelectionList();
-        auto distance = select_list.size() ? (second - start) / select_list.size() : start;
+        auto distance = (select_list.size() > 1) ? (second - start) / (select_list.size() - 1) : start;
         for (auto i = select_list.begin(); i != select_list.end(); ++i, curr_pos += distance) {
             // should this have a snap to grid?
             result[*i] = curr_pos;
@@ -599,8 +579,7 @@ void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_CROSS(CC_coord pos)
 void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos)
 {
     static constexpr auto CLOSE_ENOUGH_TO_CLOSE = 10;
-    switch (drag) {
-    case CC_DRAG_POLY: {
+    if (drag == CC_DRAG_POLY) {
         auto* p = ((CC_lasso*)shape_list.back().get())->FirstPoint();
         if (p != NULL) {
             // need to know where the scale is, so we need the device.
@@ -614,43 +593,45 @@ void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos)
                     mView.SelectWithLasso((CC_lasso*)shape_list.back().get(),
                         event.AltDown());
                     EndDrag();
-                    break;
+                    return;
                 }
             }
         }
         ((CC_lasso*)shape_list.back().get())->Append(pos);
-    } break;
-    default:
-        if (!(event.ShiftDown() || event.AltDown())) {
-            mView.UnselectAll();
-        }
-        auto i = mView.FindPoint(pos);
-        if (i < 0) {
-            // if no point selected, we grab using the current lasso
-            BeginDrag(curr_lasso, pos);
+        return;
+    }
+    if (curr_lasso == CC_DRAG_SWAP) {
+        OnMouseLeftDown_CC_DRAG_SWAP(pos);
+    }
+    if (!(event.ShiftDown() || event.AltDown())) {
+        mView.UnselectAll();
+    }
+    auto i = mView.FindPoint(pos);
+    if (i < 0) {
+        // if no point selected, we grab using the current lasso
+        BeginDrag(curr_lasso, pos);
+    }
+    else {
+        SelectionList select;
+        select.insert(i);
+        if (event.AltDown()) {
+            mView.ToggleSelection(select);
         }
         else {
-            SelectionList select;
-            select.insert(i);
-            if (event.AltDown()) {
-                mView.ToggleSelection(select);
-            }
-            else {
-                mView.AddToSelection(select);
-            }
-
-            BeginDrag(CC_DRAG_LINE, mView.PointPosition(i));
-            mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
-                const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
-                CC_coord pos = shape->GetPoint() - shape->GetOrigin();
-                std::map<int, CC_coord> result;
-                auto&& select_list = view.GetSelectionList();
-                for (auto i = select_list.begin(); i != select_list.end(); ++i) {
-                    result[*i] = view.PointPosition(*i) + pos;
-                }
-                return result;
-            };
+            mView.AddToSelection(select);
         }
+
+        BeginDrag(CC_DRAG_LINE, mView.PointPosition(i));
+        mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+            const CC_shape_2point* shape = (CC_shape_2point*)shape_list.back().get();
+            CC_coord pos = shape->GetPoint() - shape->GetOrigin();
+            std::map<int, CC_coord> result;
+            auto&& select_list = view.GetSelectionList();
+            for (auto i = select_list.begin(); i != select_list.end(); ++i) {
+                result[*i] = view.PointPosition(*i) + pos;
+            }
+            return result;
+        };
     }
 }
 
@@ -674,6 +655,26 @@ void FieldCanvas::OnMouseLeftUp_default(wxMouseEvent& event)
         break;
     default:
         break;
+    }
+}
+
+void FieldCanvas::OnMouseLeftDown_CC_DRAG_SWAP(CC_coord pos)
+{
+    int targetDotIndex = mView.FindPoint(pos);
+    if (targetDotIndex >= 0) {
+        SelectionList targetDot;
+        targetDot.insert(targetDotIndex);
+        if (mView.GetSelectionList().size() != 1) {
+            mView.UnselectAll();
+        }
+        mView.AddToSelection(targetDot);
+        if (mView.GetSelectionList().size() == 2) {
+            mView.DoRotatePointPositions(1);
+            mView.UnselectAll();
+        }
+    }
+    else {
+        mView.UnselectAll();
     }
 }
 
@@ -713,9 +714,6 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             break;
         case CC_MOVE_GENIUS:
             OnMouseLeftDown_CC_MOVE_GENIUS(pos);
-            break;
-        case CC_MOVE_SWAP:
-            OnMouseLeftDown_CC_MOVE_SWAP(pos);
             break;
         case CC_MOVE_SHAPE_LINE:
             OnMouseLeftDown_CC_MOVE_SHAPE_LINE(pos);
@@ -1016,13 +1014,7 @@ void FieldCanvas::EndDrag()
     drag = CC_DRAG_NONE;
 }
 
-CC_DRAG_TYPES
-FieldCanvas::GetCurrentLasso() const { return curr_lasso; }
-
 void FieldCanvas::SetCurrentLasso(CC_DRAG_TYPES lasso) { curr_lasso = lasso; }
-
-CC_MOVE_MODES
-FieldCanvas::GetCurrentMove() const { return curr_move; }
 
 // implies a call to EndDrag()
 void FieldCanvas::SetCurrentMove(CC_MOVE_MODES move)
