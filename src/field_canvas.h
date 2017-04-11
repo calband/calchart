@@ -130,6 +130,9 @@ private:
     void OnMouseLeftDown_CC_MOVE_SHAPE_RECTANGLE(CC_coord pos);
     void OnMouseLeftUp_CC_MOVE_SHAPE_RECTANGLE(CC_coord pos);
 
+    void OnMouseLeftDown_CC_MOVE_SHAPE_DRAW(CC_coord pos);
+    void OnMouseLeftUp_CC_MOVE_SHAPE_DRAW(CC_coord pos);
+
     void OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos);
     void OnMouseLeftUp_default(wxMouseEvent& event);
 

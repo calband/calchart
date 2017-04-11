@@ -126,6 +126,7 @@ EVT_MENU(CALCHART__shape_x, FieldFrame::OnCmd_shape_x)
 EVT_MENU(CALCHART__shape_cross, FieldFrame::OnCmd_shape_cross)
 EVT_MENU(CALCHART__shape_box, FieldFrame::OnCmd_shape_box)
 EVT_MENU(CALCHART__shape_ellipse, FieldFrame::OnCmd_shape_ellipse)
+EVT_MENU(CALCHART__shape_draw, FieldFrame::OnCmd_shape_draw)
 EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
 EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
 EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
@@ -856,6 +857,11 @@ void FieldFrame::OnCmd_shape_box(wxCommandEvent& event)
 void FieldFrame::OnCmd_shape_ellipse(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_ELLIPSE);
+}
+
+void FieldFrame::OnCmd_shape_draw(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_DRAW);
 }
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)

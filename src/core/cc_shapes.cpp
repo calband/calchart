@@ -22,6 +22,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <numeric>
 
 #include "cc_shapes.h"
 #include "cc_drawcommand.h"
@@ -215,6 +216,70 @@ void CC_lasso::End()
 }
 
 void CC_lasso::Append(const CC_coord& p) { pntlist.push_back(p); }
+
+float CC_lasso::GetDistance() const
+{
+    if (pntlist.empty()) {
+        return {};
+    }
+    auto iter = pntlist.begin();
+    auto curr_pnt = *iter++;
+    auto total = 0.0f;
+    while (iter != pntlist.end()) {
+        total += std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+        curr_pnt = *iter++;
+    }
+    return total;
+}
+
+std::vector<CC_coord> CC_lasso::GetPointsOnLine(int numpnts) const
+{
+    if (numpnts < 1 || pntlist.size() < 1) {
+        return {};
+    }
+    std::vector<CC_coord> results;
+    results.push_back(pntlist.front());
+    if (numpnts < 2) {
+        return results;
+    }
+
+    if (pntlist.size() < 2) {
+        return std::vector<CC_coord>(numpnts, *FirstPoint());
+    }
+
+    const auto each_segment = GetDistance() / (numpnts - 1);
+    auto iter = pntlist.begin();
+    auto curr_pnt = *iter++;
+    auto curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+    auto running_dist = each_segment;
+    while (iter != pntlist.end()) {
+        if (running_dist > curr_dist) {
+            running_dist -= curr_dist;
+            curr_pnt = *iter++;
+            curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+        }
+        else {
+            auto dist_vector = (*iter - curr_pnt);
+            auto factor = (running_dist / curr_dist);
+            dist_vector *= factor;
+            auto new_pnt = curr_pnt + dist_vector;
+
+            results.push_back(new_pnt);
+            // emergency rip chord on rounding cases
+            if (static_cast<int>(results.size()) == numpnts) {
+                return results;
+            }
+            curr_pnt = new_pnt;
+            curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+            running_dist = each_segment;
+        }
+    }
+    // emergency rip chord on rounding cases
+    while (static_cast<int>(results.size()) < numpnts) {
+        results.push_back(pntlist.back());
+    }
+    return results;
+}
 
 // Test if inside polygon using odd-even rule
 bool CC_lasso::Inside(const CC_coord& p) const

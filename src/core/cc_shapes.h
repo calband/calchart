@@ -215,12 +215,13 @@ public:
     {
         return pntlist.empty() ? nullptr : &pntlist.front();
     }
+    std::vector<CC_coord> GetPointsOnLine(int numpnts) const;
 
 private:
     static bool CrossesLine(const CC_coord& start, const CC_coord& end,
         const CC_coord& p);
-    typedef std::vector<CC_coord> PointList;
-    PointList pntlist;
+    float GetDistance() const;
+    std::vector<CC_coord> pntlist;
 };
 
 class CC_poly : public CC_lasso {

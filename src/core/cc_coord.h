@@ -94,13 +94,15 @@ public:
         y -= c.y;
         return *this;
     }
-    CC_coord& operator*=(short s)
+    template <typename T>
+    CC_coord& operator*=(T s)
     {
         x *= s;
         y *= s;
         return *this;
     }
-    CC_coord& operator/=(short s)
+    template <typename T>
+    CC_coord& operator/=(T s)
     {
         x /= s;
         y /= s;
@@ -120,12 +122,14 @@ inline CC_coord operator-(const CC_coord& a, const CC_coord& b)
     return CC_coord(a.x - b.x, a.y - b.y);
 }
 
-inline CC_coord operator*(const CC_coord& a, short s)
+template <typename T>
+inline CC_coord operator*(const CC_coord& a, T s)
 {
     return CC_coord(a.x * s, a.y * s);
 }
 
-inline CC_coord operator/(const CC_coord& a, short s)
+template <typename T>
+inline CC_coord operator/(const CC_coord& a, T s)
 {
     return CC_coord(a.x / s, a.y / s);
 }

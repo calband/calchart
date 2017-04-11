@@ -62,6 +62,7 @@ enum {
     CALCHART__shape_cross,
     CALCHART__shape_box,
     CALCHART__shape_ellipse,
+    CALCHART__shape_draw,
     CALCHART__line,
     CALCHART__rot,
     CALCHART__shear,

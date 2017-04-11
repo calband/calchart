@@ -480,6 +480,34 @@ void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_RECTANGLE(CC_coord pos)
     SetCurrentMoveInternal(CC_MOVE_NORMAL);
 }
 
+void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_DRAW(CC_coord pos)
+{
+    pos = SnapToGrid(pos);
+
+    // move is a 1 mouse click action
+    BeginDrag(CC_DRAG_LASSO, pos);
+
+    mTransformer = [](ShapeList const& shape_list, FieldView const& view) {
+        assert(shape_list.size() == 1);
+        auto* shape = (CC_lasso const*)shape_list.back().get();
+        std::map<int, CC_coord> result;
+        auto&& select_list = view.GetSelectionList();
+        auto points = shape->GetPointsOnLine(static_cast<int>(select_list.size()));
+        auto iter = points.begin();
+        assert(points.size() == select_list.size());
+        for (auto i = select_list.begin(); i != select_list.end(); ++i, ++iter) {
+            result[*i] = *iter;
+        }
+        return result;
+    };
+}
+
+void FieldCanvas::OnMouseLeftUp_CC_MOVE_SHAPE_DRAW(CC_coord pos)
+{
+    mView.DoMovePoints(mMovePoints);
+    SetCurrentMoveInternal(CC_MOVE_NORMAL);
+}
+
 void FieldCanvas::OnMouseLeftDown_CC_MOVE_SHAPE_X(CC_coord pos)
 {
     pos = SnapToGrid(pos);
@@ -730,6 +758,9 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
         case CC_MOVE_SHAPE_CROSS:
             OnMouseLeftDown_CC_MOVE_SHAPE_CROSS(pos);
             break;
+        case CC_MOVE_SHAPE_DRAW:
+            OnMouseLeftDown_CC_MOVE_SHAPE_DRAW(pos);
+            break;
         default:
             OnMouseLeftDown_default(event, pos);
             break;
@@ -789,6 +820,9 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
                 break;
             case CC_MOVE_SHAPE_CROSS:
                 OnMouseLeftUp_CC_MOVE_SHAPE_CROSS(pos);
+                break;
+            case CC_MOVE_SHAPE_DRAW:
+                OnMouseLeftUp_CC_MOVE_SHAPE_DRAW(pos);
                 break;
             default:
                 OnMouseLeftUp_default(event);

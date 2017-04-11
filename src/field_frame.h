@@ -91,6 +91,7 @@ public:
     void OnCmd_shape_cross(wxCommandEvent& event);
     void OnCmd_shape_box(wxCommandEvent& event);
     void OnCmd_shape_ellipse(wxCommandEvent& event);
+    void OnCmd_shape_draw(wxCommandEvent& event);
     void OnCmd_line(wxCommandEvent& event);
     void OnCmd_rot(wxCommandEvent& event);
     void OnCmd_shear(wxCommandEvent& event);
