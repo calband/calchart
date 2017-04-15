@@ -737,6 +737,9 @@ void DrawCC_DrawCommandList(wxDC& dc,
         case CC_DrawCommand::Arc:
             dc.DrawArc(iter->x1, iter->y1, iter->x2, iter->y2, iter->xc, iter->yc);
             break;
+        case CC_DrawCommand::Ellipse:
+            dc.DrawEllipse(iter->x1, iter->y1, iter->x2 - iter->x1, iter->y2 - iter->y1);
+            break;
         case CC_DrawCommand::Ignore:
             break;
         }

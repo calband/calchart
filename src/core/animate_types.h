@@ -64,6 +64,19 @@ enum AnimateError {
     NUM_ANIMERR
 };
 
+static const std::string s_animate_err_msgs[NUM_ANIMERR] = {
+    "Ran out of time",
+    "Not enough to do",
+    "Didn't make it to position",
+    "Invalid countermarch",
+    "Invalid fountain",
+    "Division by zero",
+    "Undefined value",
+    "Syntax error",
+    "Non-integer value",
+    "Negative value",
+};
+
 enum MarchingStyle {
     STYLE_HighStep,
     STYLE_Military,
@@ -79,6 +92,10 @@ enum CollisionWarning {
     COLLISION_RESPONSE_BEEP
 };
 
-std::string animate_err_msgs(size_t which);
+using AnimatePoint = CC_coord;
 
-typedef CC_coord AnimatePoint;
+struct ErrorMarker {
+    SelectionList pntgroup; // which points have this error
+    SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity
+    int line = -1, col = -1; // where
+};

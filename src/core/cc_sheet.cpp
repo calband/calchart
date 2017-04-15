@@ -694,10 +694,10 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     // In 'continuities', map a dot type to its printed continuity
     for (auto iter = uniqueDotTypes.begin(); iter != uniqueDotTypes.end(); iter++) {
         dotTypesAccessor->pushBack(JSONElement::makeString(*iter));
-        
+
         continuitiesAccessor[*iter] = JSONElement::makeArray();
         JSONDataArrayAccessor contArrayAccessor = continuitiesAccessor[*iter];
-        
+
         contArrayAccessor->pushBack("(MANUAL) first continuity instruction goes here for SS" + std::to_string(sheetNum)); // TODO; add printed continuities to viewer file manually for now
         contArrayAccessor->pushBack("(MANUAL) second instruction");
         contArrayAccessor->pushBack("(MANUAL) third instruction...");

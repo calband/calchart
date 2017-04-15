@@ -100,7 +100,7 @@ public:
     void SelectWithLasso(const CC_lasso* lasso, bool toggleSelected);
     void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
         bool toggleSelected);
-    auto GetSelectionList() { return mShow->GetSelectionList(); }
+    auto GetSelectionList() const { return mShow->GetSelectionList(); }
     void SetSelection(const SelectionList& sl);
 
     ///// Drawing marcher's paths /////

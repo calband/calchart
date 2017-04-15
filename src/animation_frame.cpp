@@ -21,14 +21,13 @@
 */
 
 #include "animation_frame.h"
-#include "animation_view.h"
 #include "animation_canvas.h"
-#include "basic_ui.h"
 #include "cc_omniview_canvas.h"
 #include "toolbar.h"
 #include "ui_enums.h"
 #include "basic_ui.h"
 #include "confgr.h"
+#include "calchartdoc.h"
 
 #include <wx/timer.h>
 #include <wx/splitter.h>
@@ -83,17 +82,8 @@ END_EVENT_TABLE()
 AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
     CalChartConfiguration& config_, wxView* view,
     wxFrame* parent, const wxSize& size)
-    :
-#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-    wxDocChildFrame(doc, view, parent, wxID_ANY, wxT("CalChart Viewer"),
-        wxDefaultPosition, size)
-    ,
-#else
-    wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition,
-        size)
-    ,
-#endif
-    mAnimationView()
+    : wxFrame(parent, wxID_ANY, wxT("CalChart Viewer"), wxDefaultPosition,
+          size)
     , config(config_)
     , mCanvas(NULL)
     , mOmniViewCanvas(NULL)
@@ -183,8 +173,8 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
     AddCoolToolBar(GetAnimationToolBar(), *this);
 
     // set up the frame
-    this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-    this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
+    SetSizeHints(wxDefaultSize, wxDefaultSize);
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* toprow = new wxBoxSizer(wxHORIZONTAL);
@@ -270,7 +260,7 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
 
     SetSizer(topsizer);
     topsizer->SetSizeHints(this); // set size hints to honour minimum size
-    this->Layout();
+    Layout();
 
     mAnimationView.Generate();
 
@@ -296,8 +286,8 @@ AnimationFrame::~AnimationFrame()
 void AnimationFrame::OnSize(wxSizeEvent& event)
 {
     // HACK: Prevent width and height from growing out of control
-    int w = event.GetSize().GetWidth();
-    int h = event.GetSize().GetHeight();
+    auto w = event.GetSize().GetWidth();
+    auto h = event.GetSize().GetHeight();
     config.Set_AnimationFrameWidth((w > 1200) ? 1200 : w);
     config.Set_AnimationFrameHeight((h > 700) ? 700 : h);
     super::OnSize(event);
@@ -327,36 +317,12 @@ void AnimationFrame::OnCmdClose(wxCloseEvent& event)
     Destroy();
 }
 
-void AnimationFrame::OnCmd_anim_stop(wxCommandEvent& event) { StopTimer(); }
-
-void AnimationFrame::OnCmd_anim_play(wxCommandEvent& event) { StartTimer(); }
-
-void AnimationFrame::OnCmd_anim_prev_beat(wxCommandEvent& event)
-{
-    mAnimationView.PrevBeat();
-}
-
-void AnimationFrame::OnCmd_anim_next_beat(wxCommandEvent& event)
-{
-    mAnimationView.NextBeat();
-}
-
 void AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 {
     // next_beat could come from the timer.  If so, stop the timer.
     if (!mAnimationView.NextBeat()) {
         StopTimer();
     }
-}
-
-void AnimationFrame::OnCmd_anim_prev_sheet(wxCommandEvent& event)
-{
-    mAnimationView.PrevSheet();
-}
-
-void AnimationFrame::OnCmd_anim_next_sheet(wxCommandEvent& event)
-{
-    mAnimationView.NextSheet();
 }
 
 void AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
@@ -682,10 +648,6 @@ void AnimationFrame::StopTimer()
     mTimerOn = false;
 }
 
-unsigned AnimationFrame::GetTempo() const { return mTempo; }
-
-void AnimationFrame::SetTempo(unsigned tempo) { mTempo = tempo; }
-
 void AnimationFrame::OnNotifyErrorList(
     const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum,
     const wxString& message)
@@ -693,7 +655,7 @@ void AnimationFrame::OnNotifyErrorList(
     for (auto& i : error_markers) {
         wxString error_string;
         error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message,
-            animate_err_msgs(i.first));
+            s_animate_err_msgs[i.first]);
         mErrorList->Append(error_string);
         mErrorMarkers.push_back(
             std::pair<ErrorMarker, unsigned>(i.second, sheetnum));

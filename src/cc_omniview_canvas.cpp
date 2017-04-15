@@ -27,6 +27,7 @@
 #include "animation_frame.h"
 #include "cc_omniview_constants.h"
 #include "draw.h"
+#include "calchartdoc.h"
 
 #include <wx/dcbuffer.h>
 

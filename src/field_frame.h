@@ -86,6 +86,12 @@ public:
     void OnCmd_lasso(wxCommandEvent& event);
     void OnCmd_move(wxCommandEvent& event);
     void OnCmd_swap(wxCommandEvent& event);
+    void OnCmd_shape_line(wxCommandEvent& event);
+    void OnCmd_shape_x(wxCommandEvent& event);
+    void OnCmd_shape_cross(wxCommandEvent& event);
+    void OnCmd_shape_box(wxCommandEvent& event);
+    void OnCmd_shape_ellipse(wxCommandEvent& event);
+    void OnCmd_shape_draw(wxCommandEvent& event);
     void OnCmd_line(wxCommandEvent& event);
     void OnCmd_rot(wxCommandEvent& event);
     void OnCmd_shear(wxCommandEvent& event);
@@ -128,6 +134,7 @@ public:
 
     void SetCurrentLasso(CC_DRAG_TYPES type);
     void SetCurrentMove(CC_MOVE_MODES type);
+    void CanvasSetCurrentMove(CC_MOVE_MODES type);
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
     void slider_sheet_callback(wxScrollEvent&);

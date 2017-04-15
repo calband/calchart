@@ -31,6 +31,12 @@
 #include "tb_lasso.xbm"
 #include "tb_mv.xbm"
 #include "tb_swap.xbm"
+#include "tb_shape_line.xbm"
+#include "tb_shape_x.xbm"
+#include "tb_shape_cross.xbm"
+#include "tb_shape_box.xbm"
+#include "tb_shape_ellipse.xbm"
+#include "tb_shape_draw.xbm"
 #include "tb_line.xbm"
 #include "tb_rot.xbm"
 #include "tb_shr.xbm"
@@ -110,10 +116,15 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
         { wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
         { wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
-        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso,
-            true },
+        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso },
+        { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap, true },
         { wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
-        { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap },
+        { wxITEM_RADIO, NULL, wxT("Shape points in a line"), CALCHART__shape_line },
+        { wxITEM_RADIO, NULL, wxT("Shape points in an x"), CALCHART__shape_x },
+        { wxITEM_RADIO, NULL, wxT("Shape points in a cross"), CALCHART__shape_cross },
+        { wxITEM_RADIO, NULL, wxT("Shape points in a box"), CALCHART__shape_box },
+        { wxITEM_RADIO, NULL, wxT("Shape points in an ellipse"), CALCHART__shape_ellipse },
+        { wxITEM_RADIO, NULL, wxT("Shape points by drawing"), CALCHART__shape_draw },
         { wxITEM_RADIO, NULL, wxT("Move points into line"), CALCHART__line },
         { wxITEM_RADIO, NULL, wxT("Rotate block"), CALCHART__rot },
         { wxITEM_RADIO, NULL, wxT("Shear block"), CALCHART__shear },
@@ -138,8 +149,14 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_box));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_poly));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_lasso));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_mv));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_swap));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_mv));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_line));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_x));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_cross));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_box));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_ellipse));
+        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shape_draw));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_line));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_rot));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_shr));

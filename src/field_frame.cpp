@@ -121,6 +121,12 @@ EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
 EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
 EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
 EVT_MENU(CALCHART__swap, FieldFrame::OnCmd_swap)
+EVT_MENU(CALCHART__shape_line, FieldFrame::OnCmd_shape_line)
+EVT_MENU(CALCHART__shape_x, FieldFrame::OnCmd_shape_x)
+EVT_MENU(CALCHART__shape_cross, FieldFrame::OnCmd_shape_cross)
+EVT_MENU(CALCHART__shape_box, FieldFrame::OnCmd_shape_box)
+EVT_MENU(CALCHART__shape_ellipse, FieldFrame::OnCmd_shape_ellipse)
+EVT_MENU(CALCHART__shape_draw, FieldFrame::OnCmd_shape_draw)
 EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
 EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
 EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
@@ -336,7 +342,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     // Add the field canvas
     this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
-    mCanvas = new FieldCanvas(view, this, config.Get_FieldFrameZoom());
+    mCanvas = new FieldCanvas(*static_cast<FieldView*>(view), this, config.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
@@ -818,14 +824,44 @@ void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
     SetCurrentLasso(CC_DRAG_LASSO);
 }
 
+void FieldFrame::OnCmd_swap(wxCommandEvent& event)
+{
+    SetCurrentLasso(CC_DRAG_SWAP);
+}
+
 void FieldFrame::OnCmd_move(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_NORMAL);
 }
 
-void FieldFrame::OnCmd_swap(wxCommandEvent& event)
+void FieldFrame::OnCmd_shape_line(wxCommandEvent& event)
 {
-    SetCurrentMove(CC_MOVE_SWAP);
+    SetCurrentMove(CC_MOVE_SHAPE_LINE);
+}
+
+void FieldFrame::OnCmd_shape_x(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_X);
+}
+
+void FieldFrame::OnCmd_shape_cross(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_CROSS);
+}
+
+void FieldFrame::OnCmd_shape_box(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_RECTANGLE);
+}
+
+void FieldFrame::OnCmd_shape_ellipse(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_ELLIPSE);
+}
+
+void FieldFrame::OnCmd_shape_draw(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_DRAW);
 }
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)
@@ -1084,9 +1120,7 @@ std::pair<Coord, Coord> FieldFrame::GridChoice() const
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
     // retoggle the tool because we want it to draw as selected
-    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO)
-            ? CALCHART__lasso
-            : CALCHART__box;
+    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : (type == CC_DRAG_SWAP) ? CALCHART__swap : CALCHART__box;
     wxToolBar* tb = GetToolBar();
     tb->ToggleTool(toggleID, true);
 
@@ -1100,6 +1134,14 @@ void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
     tb->ToggleTool(CALCHART__move + type, true);
 
     mCanvas->SetCurrentMove(type);
+}
+
+// call by the canvas to inform that the move has been set.  Don't call back to canvas
+void FieldFrame::CanvasSetCurrentMove(CC_MOVE_MODES type)
+{
+    // retoggle the tool because we want it to draw as selected
+    wxToolBar* tb = GetToolBar();
+    tb->ToggleTool(CALCHART__move + type, true);
 }
 
 void FieldFrame::Setup()
