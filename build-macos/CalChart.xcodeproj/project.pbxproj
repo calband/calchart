@@ -256,6 +256,7 @@
 		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
+		E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */; };
 		E8ED12FC1E3EA5C900DAF593 /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
 		E8ED12FD1E3EA5CC00DAF593 /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
 /* End PBXBuildFile section */
@@ -712,6 +713,8 @@
 		E8B89DDC186F7C50004DE7DF /* print_cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_cont_ui.h; sourceTree = "<group>"; };
 		E8E2E1051962870B002453E8 /* ghost_module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ghost_module.cpp; sourceTree = "<group>"; };
 		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
+		E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas_shapes.cpp; sourceTree = "<group>"; };
+		E8EA87F91EA3E2C3005D963F /* field_canvas_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_canvas_shapes.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -888,6 +891,8 @@
 				C7AFA97B117A6DBA00CC53E2 /* draw.cpp */,
 				E884F3A217A631BB00831301 /* draw.h */,
 				E803A0C7193BA54900C5F2D5 /* draw_utils.h */,
+				E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */,
+				E8EA87F91EA3E2C3005D963F /* field_canvas_shapes.h */,
 				C7E047CA155F7B8900D8C71B /* field_canvas.cpp */,
 				C7E047CB155F7B8A00D8C71B /* field_canvas.h */,
 				C7E047CD155F892400D8C71B /* field_frame.cpp */,
@@ -1233,6 +1238,7 @@
 				E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */,
 				E8ABF9261DE1000F003FD2A5 /* contgram.y in Sources */,
 				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
+				E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */,
 				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
 				E8ABF9291DE1046B003FD2A5 /* contscan.l in Sources */,
 				E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */,

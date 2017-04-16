@@ -216,6 +216,7 @@ public:
         return pntlist.empty() ? nullptr : &pntlist.front();
     }
     std::vector<CC_coord> GetPointsOnLine(int numpnts) const;
+    auto NumPoints() const { return pntlist.size(); }
 
 private:
     static bool CrossesLine(const CC_coord& start, const CC_coord& end,
