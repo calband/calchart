@@ -254,7 +254,8 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
         pos.x = (x - pos.x);
         pos.y = (y - pos.y);
 
-        if (m_move_points) {
+        if (curr_move != CC_MOVE_NORMAL) {
+            m_move_points = Create_MovePoints(curr_move);
             m_move_points->OnMouseLeftDown(SnapToGrid(pos));
         }
         else {
@@ -284,8 +285,7 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
         if (m_move_points) {
             if (m_move_points->OnMouseUpDone(pos)) {
                 mView.DoMovePoints(mMovePoints);
-                mMovePoints.clear();
-                m_move_points.reset();
+                mFrame->SetCurrentMove(CC_MOVE_NORMAL);
             }
         }
         if (!(m_select_shape_list.empty())) {
@@ -341,10 +341,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
             pos.x = (x - pos.x);
             pos.y = (y - pos.y);
 
-            if (event.Dragging() && event.LeftIsDown() && !m_select_shape_list.empty()) {
-                MoveDrag(pos);
-            }
-            if (event.Dragging() && event.LeftIsDown() && m_move_points) {
+            if (event.Dragging() && event.LeftIsDown()) {
                 MoveDrag(pos);
             }
             if (event.Moving() && !m_select_shape_list.empty() && (CC_DRAG_POLY == select_drag)) {
@@ -408,38 +405,32 @@ void FieldCanvas::BeginSelectDrag(CC_DRAG_TYPES type, const CC_coord& start)
     m_select_shape_list.clear();
     switch (type) {
     case CC_DRAG_BOX:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_shape_rect(start)));
+        m_select_shape_list.emplace_back(new CC_shape_rect(start));
         break;
     case CC_DRAG_POLY:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_poly(start)));
+        m_select_shape_list.emplace_back(new CC_poly(start));
         break;
     case CC_DRAG_LASSO:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_lasso(start)));
+        m_select_shape_list.emplace_back(new CC_lasso(start));
         break;
     case CC_DRAG_LINE:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_shape_line(start)));
+        m_select_shape_list.emplace_back(new CC_shape_line(start));
         break;
     case CC_DRAG_CROSSHAIRS:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_shape_crosshairs(start, Int2Coord(2))));
+        m_select_shape_list.emplace_back(new CC_shape_crosshairs(start, Int2Coord(2)));
         break;
     case CC_DRAG_SHAPE_ELLIPSE:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_shape_ellipse(start)));
+        m_select_shape_list.emplace_back(new CC_shape_ellipse(start));
         break;
     case CC_DRAG_SHAPE_X:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_shape_x(start)));
+        m_select_shape_list.emplace_back(new CC_shape_x(start));
         break;
     case CC_DRAG_SHAPE_CROSS:
-        AddSelectDrag(type, std::unique_ptr<CC_shape>(new CC_shape_cross(start)));
+        m_select_shape_list.emplace_back(new CC_shape_cross(start));
         break;
     default:
         break;
     }
-}
-
-void FieldCanvas::AddSelectDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape)
-{
-    select_drag = type;
-    m_select_shape_list.emplace_back(std::move(shape));
 }
 
 void FieldCanvas::MoveDrag(const CC_coord& end)
@@ -519,6 +510,7 @@ void FieldCanvas::MoveByKey(direction dir)
 void FieldCanvas::EndDrag()
 {
     mMovePoints.clear();
+    m_move_points.reset();
     m_select_shape_list.clear();
     select_drag = CC_DRAG_NONE;
 }
@@ -530,6 +522,5 @@ void FieldCanvas::SetCurrentMove(CC_MOVE_MODES move)
 {
     EndDrag();
     curr_move = move;
-    m_move_points = Create_MovePoints(curr_move);
 }
 

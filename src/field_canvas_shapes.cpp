@@ -492,9 +492,8 @@ std::map<int, CC_coord> MovePoints_CC_MOVE_SHAPE_LINE::TransformPoints(std::map<
     auto second = shape->GetPoint();
     auto curr_pos = start;
     std::map<int, CC_coord> result;
-    auto distance = (select_list.size() > 1) ? (second - start) / (select_list.size() - 1) : start;
+    auto distance = (select_list.size() > 1) ? (second - start) / static_cast<float>(select_list.size() - 1) : start;
     for (auto i = select_list.begin(); i != select_list.end(); ++i, curr_pos += distance) {
-        // should this have a snap to grid?
         result[i->first] = curr_pos;
     }
     return result;

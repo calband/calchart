@@ -79,9 +79,11 @@ private:
     CC_DRAG_TYPES curr_lasso = CC_DRAG_BOX;
     CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
     std::unique_ptr<MovePoints> m_move_points;
+    std::map<int, CC_coord> mMovePoints;
+    CC_DRAG_TYPES select_drag = CC_DRAG_NONE;
+    ShapeList m_select_shape_list;
 
     void BeginSelectDrag(CC_DRAG_TYPES type, const CC_coord& start);
-    void AddSelectDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
     void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
     void MoveDrag(const CC_coord& end);
     void EndDrag();
@@ -92,9 +94,6 @@ private:
     void MoveByKey(direction);
     CC_coord GetMoveAmount(direction dir);
     CC_coord SnapToGrid(CC_coord c);
-
-    CC_DRAG_TYPES select_drag = CC_DRAG_NONE;
-    ShapeList m_select_shape_list;
 
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
@@ -111,11 +110,6 @@ private:
     void OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CC_coord pos);
     void OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CC_coord);
     void OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CC_coord);
-
-    // implies a call to EndDrag()
-    void SetCurrentMoveInternal(CC_MOVE_MODES move);
-
-    std::map<int, CC_coord> mMovePoints;
 
     DECLARE_EVENT_TABLE()
 };
