@@ -58,7 +58,7 @@ public:
 
     // you can create a show in two ways, from nothing, or from an input stream
     static std::unique_ptr<CC_show> Create_CC_show();
-    static std::unique_ptr<CC_show> Create_CC_show(unsigned num, unsigned columns, std::vector<std::string> const& labels, const CC_coord& new_march_position);
+    static std::unique_ptr<CC_show> Create_CC_show(std::vector<std::string> const& labels, unsigned columns, CC_coord const& new_march_position);
     static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
 
 private:
@@ -75,10 +75,9 @@ public:
     std::vector<uint8_t> SerializeShow() const;
 
     // Create command, consists of an action and undo action
-    CC_show_command_pair Create_SetDescriptionCommand(std::string const& descr) const;
     CC_show_command_pair Create_SetCurrentSheetCommand(int n) const;
     CC_show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
-    CC_show_command_pair Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const;
+    CC_show_command_pair Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, CC_coord const& new_march_position) const;
     CC_show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
     CC_show_command_pair Create_SetSheetBeatsCommand(int beats) const;
     CC_show_command_pair Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where) const;
@@ -101,17 +100,15 @@ public:
     CC_show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 
     // Accessors
-    auto GetDescr() const { return descr; }
-
     auto GetSheetBegin() const { return sheets.begin(); }
     auto GetSheetEnd() const { return sheets.end(); }
     auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
     auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
     int GetNumSheets() const;
     auto GetCurrentSheetNum() const { return mSheetNum; }
-    auto GetNumPoints() const { return numpoints; }
+    auto GetNumPoints() const { return static_cast<int>(m_pt_labels.size()); }
     std::string GetPointLabel(int i) const;
-    auto GetPointLabels() const { return pt_labels; }
+    auto GetPointLabels() const { return m_pt_labels; }
 
     bool AlreadyHasPrintContinuity() const;
 
@@ -159,10 +156,13 @@ private:
     void SetCurrentSheet(int n);
     void SetSelection(const SelectionList& sl);
 
-    void SetNumPoints(int num, int columns, const std::vector<std::string>& labels, const CC_coord& new_march_position);
+    void SetNumPoints(std::vector<std::string> const& labels, int columns, CC_coord const& new_march_position);
     void SetPointLabel(const std::vector<std::string>& labels);
 
-    void SetDescr(const std::string& newdescr);
+    // Descriptions aren't used, but keeping this alive.  See issue #203
+    auto GetDescr() const { return m_descr; }
+    void SetDescr(std::string const& newdescr) { m_descr = newdescr; }
+
 
     auto GetSheetBegin() { return sheets.begin(); }
     auto GetSheetEnd() { return sheets.end(); }
@@ -173,10 +173,9 @@ private:
     std::vector<uint8_t> SerializeShowData() const;
 
     // members
-    std::string descr;
-    int numpoints;
+    std::string m_descr;
     CC_sheet_container_t sheets;
-    std::vector<std::string> pt_labels;
+    std::vector<std::string> m_pt_labels;
     SelectionList selectionList; // order of selections
     int mSheetNum;
     ShowMode const* mMode = nullptr;

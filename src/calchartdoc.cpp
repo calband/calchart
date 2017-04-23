@@ -326,10 +326,10 @@ CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
         new Animation(*mShow, notifyStatus, notifyErrorList));
 }
 
-void CalChartDoc::WizardSetupNewShow(int num, int columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode)
+void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<ShowMode> newmode)
 {
     SetMode(std::move(newmode));
-    mShow = CC_show::Create_CC_show(num, columns, labels, mMode->FieldOffset());
+    mShow = CC_show::Create_CC_show(labels, columns, mMode->FieldOffset());
     UpdateAllViews();
 }
 
@@ -416,12 +416,6 @@ std::vector<CalChartDocCommand::CC_doc_command_pair> CalChartDoc::Create_SetShee
 
 // This will create an array of actions where the first one is to set the sheet and the second is to set the selection
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetDescriptionCommand(const wxString& newdescr)
-{
-    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetDescriptionCommand(newdescr.ToStdString()));
-    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Description"), show_cmds);
-}
-
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetCommand(int n)
 {
     auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetCurrentSheetCommand(n));
@@ -453,10 +447,10 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetModeCommand(const wxString& ne
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set Mode"), CalChartDocCommand::CC_doc_command_pair{ action, reaction });
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<wxString>& labels)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns)
 {
     auto tlabels = std::vector<std::string>(labels.begin(), labels.end());
-    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetShowInfoCommand(numPoints, numColumns, tlabels, mMode->FieldOffset()));
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetShowInfoCommand(tlabels, numColumns, mMode->FieldOffset()));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set show info"), show_cmds);
 }
 

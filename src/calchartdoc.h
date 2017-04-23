@@ -128,9 +128,7 @@ public:
 
     std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus,
         NotifyErrorList notifyErrorList);
-    void WizardSetupNewShow(int num, int columns, std::vector<std::string> const& labels, std::unique_ptr<ShowMode> newmode);
-
-    auto GetDescr() const { return mShow->GetDescr(); }
+    void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<ShowMode> newmode);
 
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
@@ -174,11 +172,10 @@ public:
         const CalChartConfiguration& config_) const;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
-    std::unique_ptr<wxCommand> Create_SetDescriptionCommand(const wxString& newdescr);
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
     std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetModeCommand(const wxString& newmode);
-    std::unique_ptr<wxCommand> Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<wxString>& labels);
+    std::unique_ptr<wxCommand> Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
     std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
     std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where);

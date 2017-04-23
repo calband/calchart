@@ -61,10 +61,8 @@ public:
     bool DoMovePoints(const std::map<int, CC_coord>& transmat);
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
-    bool DoSetDescription(const wxString& descr);
     void DoSetMode(const wxString& mode);
-    void DoSetShowInfo(int numPoints, int numColumns,
-        const std::vector<wxString>& labels);
+    void DoSetShowInfo(const std::vector<wxString>& labels, int numColumns);
     void DoSetSheetTitle(const wxString& descr);
     bool DoSetSheetBeats(int beats);
     bool DoSetPointsLabel(bool right);

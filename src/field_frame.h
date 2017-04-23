@@ -71,7 +71,6 @@ public:
     void OnCmdSetSheetTitle(wxCommandEvent& event);
     void OnCmdSetBeats(wxCommandEvent& event);
     void OnCmdSetup(wxCommandEvent& event);
-    void OnCmdSetDescription(wxCommandEvent& event);
     void OnCmdSetMode(wxCommandEvent& event);
     void OnCmdPoints(wxCommandEvent& event);
     void OnCmdSelectAll(wxCommandEvent& event);
@@ -144,7 +143,6 @@ public:
     void do_zoom(float zoom_amount);
 
     void Setup();
-    void SetDescription();
     void SetMode();
 
     const FieldCanvas* GetCanvas() const { return mCanvas; }
