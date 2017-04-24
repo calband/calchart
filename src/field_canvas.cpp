@@ -369,6 +369,7 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
         mView.GoToNextSheet();
     else if (event.GetKeyCode() == WXK_DELETE || event.GetKeyCode() == WXK_NUMPAD_DELETE || event.GetKeyCode() == WXK_BACK) {
         mView.OnBackgroundImageDelete();
+        mView.DoDeletePoints();
     }
     if (event.GetKeyCode() == 'w') {
         MoveByKey(direction::north);

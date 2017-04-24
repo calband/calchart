@@ -329,6 +329,16 @@ void CC_show::SetNumPoints(std::vector<std::string> const& labels, int columns, 
     SetPointLabel(labels);
 }
 
+void CC_show::DeletePoints(SelectionList const& sl)
+{
+    for (auto iter = sl.rbegin(); iter != sl.rend(); ++iter) {
+        m_pt_labels.erase(m_pt_labels.begin() + *iter);
+    }
+    for (auto&& sht : sheets) {
+        sht.DeletePoints(sl);
+    }
+}
+
 void CC_show::SetPointLabel(const std::vector<std::string>& labels)
 {
     m_pt_labels = labels;
@@ -615,6 +625,27 @@ CC_show_command_pair CC_show::Create_MovePointsCommand(std::map<int, CC_coord> c
             auto position = (show.mMode ? show.mMode->ClipPosition(i.second) : i.second);
             sheet->SetPosition(position, i.first, ref);
         }
+    };
+    return CC_show_command_pair{ action, reaction };
+}
+
+CC_show_command_pair CC_show::Create_DeletePointsCommand() const
+{
+    auto action = [selectionList = selectionList](CC_show& show) {
+        show.DeletePoints(selectionList);
+        show.SetSelection({});
+    };
+    // need to go through and save all the positions and labels for later
+    auto old_labels = m_pt_labels;
+    std::vector<std::vector<CC_point> > old_points;
+    for (auto&& sheet : sheets) {
+        old_points.emplace_back(sheet.GetPoints());
+    }
+    auto reaction = [old_labels, old_points](CC_show& show) {
+        for (auto i = 0ul; i < show.sheets.size(); ++i) {
+            show.sheets.at(i).SetPoints(old_points.at(i));
+        }
+        show.SetPointLabel(old_labels);
     };
     return CC_show_command_pair{ action, reaction };
 }

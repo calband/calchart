@@ -93,6 +93,7 @@ public:
     void SetAllPoints(std::vector<CC_point> const& newpts);
     SelectionList MakeSelectPointsBySymbol(SYMBOL_TYPE i) const;
     std::vector<CC_point> NewNumPointsPositions(int num, int columns, const CC_coord& new_march_position) const;
+    void DeletePoints(SelectionList const& sl);
 
     // titles
     std::string GetName() const;

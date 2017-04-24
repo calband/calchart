@@ -85,6 +85,7 @@ public:
     CC_show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
     CC_show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const;
     CC_show_command_pair Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const;
+    CC_show_command_pair Create_DeletePointsCommand() const;
     CC_show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
     CC_show_command_pair Create_SetReferencePointToRef0(int ref) const;
     CC_show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
@@ -157,6 +158,7 @@ private:
     void SetSelection(const SelectionList& sl);
 
     void SetNumPoints(std::vector<std::string> const& labels, int columns, CC_coord const& new_march_position);
+    void DeletePoints(SelectionList const& sl);
     void SetPointLabel(const std::vector<std::string>& labels);
 
     // Descriptions aren't used, but keeping this alive.  See issue #203

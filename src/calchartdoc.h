@@ -184,6 +184,7 @@ public:
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
     std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref);
+    std::unique_ptr<wxCommand> Create_DeletePointsCommand();
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
     std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(int ref);
     std::unique_ptr<wxCommand> Create_SetSymbolCommand(SYMBOL_TYPE sym);
