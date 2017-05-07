@@ -306,8 +306,8 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     auto labels = std::vector<std::string>{
         "unsel", "unsel", "sel", "sel",
     };
-    mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
-    mShow->Create_SetShowInfoCommand(4, 4, labels, field_offset).first(*mShow);
+    mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
+    mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
     mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
     mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);

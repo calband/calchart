@@ -47,10 +47,10 @@ std::unique_ptr<CC_show> CC_show::Create_CC_show()
     return show;
 }
 
-std::unique_ptr<CC_show> CC_show::Create_CC_show(unsigned num, unsigned columns, std::vector<std::string> const& labels, const CC_coord& new_march_position)
+std::unique_ptr<CC_show> CC_show::Create_CC_show(std::vector<std::string> const& labels, unsigned columns, CC_coord const& new_march_position)
 {
     auto show = Create_CC_show();
-    show->SetNumPoints(num, columns, labels, new_march_position);
+    show->SetNumPoints(labels, columns, new_march_position);
     return show;
 }
 
@@ -78,8 +78,7 @@ std::unique_ptr<CC_show> CC_show::Create_CC_show(std::istream& stream)
 
 // Create a new show
 CC_show::CC_show()
-    : numpoints(0)
-    , mSheetNum(0)
+    : mSheetNum(0)
 {
 }
 
@@ -87,8 +86,7 @@ CC_show::CC_show()
 // Recommend that you don't touch this unless you know what you are doing.
 // Constructor for shows 3.3 and ealier.
 CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
-    : numpoints(0)
-    , mSheetNum(0)
+    : mSheetNum(0)
 {
     // caller should have stripped off INGL and GURK headers
     /*
@@ -100,8 +98,8 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
     // Handle show info
     // read in the size:
     // <INGL_SIZE><4><# points>
-    numpoints = ReadCheckIDandSize(stream, INGL_SIZE);
-    pt_labels.assign(numpoints, std::string());
+    auto numpoints = ReadCheckIDandSize(stream, INGL_SIZE);
+    m_pt_labels.assign(numpoints, std::string());
 
     uint32_t name = ReadLong(stream);
     // Optional: read in the point labels
@@ -154,8 +152,7 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
 // -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
 
 CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
-    : numpoints(0)
-    , mSheetNum(0)
+    : mSheetNum(0)
 {
     // caller should have stripped off INGL and GURK headers
 
@@ -165,8 +162,8 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
         if (4 != size) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
-        show->numpoints = get_big_long(ptr);
-        show->pt_labels.assign(show->numpoints, std::string());
+        auto numpoints = get_big_long(ptr);
+        show->m_pt_labels.assign(numpoints, std::string());
     };
     auto parse_INGL_LABL = [](CC_show* show, const uint8_t* ptr, size_t size) {
         std::vector<std::string> labels;
@@ -250,7 +247,7 @@ std::vector<uint8_t> CC_show::SerializeShowData() const
 
     // Write LABEL
     std::vector<char> labels;
-    for (auto& i : pt_labels) {
+    for (auto& i : m_pt_labels) {
         AppendAndNullTerminate(labels, i);
     }
     Append(result, Construct_block(INGL_LABL, labels));
@@ -286,8 +283,6 @@ std::vector<uint8_t> CC_show::SerializeShow() const
     Append(result, Construct_block(INGL_SHOW, SerializeShowData()));
     return result;
 }
-
-void CC_show::SetDescr(const std::string& newdescr) { descr = newdescr; }
 
 int CC_show::GetNumSheets() const { return static_cast<int>(sheets.size()); }
 
@@ -325,22 +320,18 @@ void CC_show::InsertSheet(const CC_sheet_container_t& sheet,
 }
 
 // warning, the labels might not match up
-void CC_show::SetNumPoints(int num, int columns, const std::vector<std::string>& labels, const CC_coord& new_march_position)
+void CC_show::SetNumPoints(std::vector<std::string> const& labels, int columns, CC_coord const& new_march_position)
 {
-    if (num != static_cast<int>(labels.size())) {
-        throw std::runtime_error("set num points with num=" + std::to_string(num) + " doesn't match number of labels=" + std::to_string(labels.size()));
-    }
     for (CC_sheet_iterator_t sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
-        auto pts = sht->NewNumPointsPositions(num, columns, new_march_position);
+        auto pts = sht->NewNumPointsPositions(static_cast<int>(labels.size()), columns, new_march_position);
         sht->SetPoints(pts);
     }
-    numpoints = num;
     SetPointLabel(labels);
 }
 
 void CC_show::SetPointLabel(const std::vector<std::string>& labels)
 {
-    pt_labels = labels;
+    m_pt_labels = labels;
 }
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
@@ -372,9 +363,9 @@ std::pair<bool, std::vector<size_t> > CC_show::GetRelabelMapping(const_CC_sheet_
 
 std::string CC_show::GetPointLabel(int i) const
 {
-    if (i >= static_cast<int>(pt_labels.size()))
+    if (i >= static_cast<int>(m_pt_labels.size()))
         return "";
-    return pt_labels.at(i);
+    return m_pt_labels.at(i);
 }
 
 bool CC_show::AlreadyHasPrintContinuity() const
@@ -401,7 +392,7 @@ bool CC_show::WillMovePoints(std::map<int, CC_coord> const& new_positions, int r
 SelectionList CC_show::MakeSelectAll() const
 {
     SelectionList sl;
-    for (auto i = 0; i < numpoints; ++i)
+    for (auto i = 0u; i < m_pt_labels.size(); ++i)
         sl.insert(i);
     return sl;
 }
@@ -476,14 +467,14 @@ void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledSho
     // Setup the skeleton for the show's JSON representation
     showObjectAccessor["title"] = "(MANUAL) the show title that you want people to see goes here"; // TODO; For now, this will be manually added to the exported file
     showObjectAccessor["year"] = "(MANUAL) enter show year (e.g. 2017)"; // TODO; Should eventually save automatically
-    showObjectAccessor["description"] = descr;
+    showObjectAccessor["description"] = m_descr;
     showObjectAccessor["labels"] = JSONElement::makeArray();
     showObjectAccessor["sheets"] = JSONElement::makeArray();
 
     // Fill in 'dot_labels' with the labels for each dot (e.g. A0, A1, A2, ...)
     JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["labels"];
-    for (unsigned i = 0; i < pt_labels.size(); i++) {
-        dotLabelsAccessor->pushBack(pt_labels[i]);
+    for (unsigned i = 0; i < m_pt_labels.size(); i++) {
+        dotLabelsAccessor->pushBack(m_pt_labels[i]);
     }
 
     // Fill in 'sheets' with the JSON representation of each sheet
@@ -492,15 +483,8 @@ void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledSho
     auto animateSheetIter = compiledShow.sheetsBegin();
     for (auto iter = GetSheetBegin(); iter != GetSheetEnd(); iter++, i++, animateSheetIter++) {
         sheetsAccessor->pushBack(JSONElement::makeNull());
-        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i + 1, pt_labels, *animateSheetIter);
+        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i + 1, m_pt_labels, *animateSheetIter);
     }
-}
-
-CC_show_command_pair CC_show::Create_SetDescriptionCommand(std::string const& descr) const
-{
-    auto action = [mDescr = descr](CC_show & show) { show.SetDescr(mDescr); };
-    auto reaction = [mDescr = GetDescr()](CC_show & show) { show.SetDescr(mDescr); };
-    return CC_show_command_pair{ action, reaction };
 }
 
 CC_show_command_pair CC_show::Create_SetCurrentSheetCommand(int n) const
@@ -517,21 +501,19 @@ CC_show_command_pair CC_show::Create_SetSelectionCommand(const SelectionList& sl
     return CC_show_command_pair{ action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetShowInfoCommand(int numPoints, int numColumns, const std::vector<std::string>& labels, const CC_coord& new_march_position) const
+CC_show_command_pair CC_show::Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, CC_coord const& new_march_position) const
 {
-    auto action = [numPoints, numColumns, labels, new_march_position](CC_show& show) { show.SetNumPoints(numPoints, numColumns, labels, new_march_position); };
+    auto action = [labels, numColumns, new_march_position](CC_show& show) { show.SetNumPoints(labels, numColumns, new_march_position); };
     // need to go through and save all the positions and labels for later
-    auto old_numpoints = numpoints;
-    auto old_labels = pt_labels;
+    auto old_labels = m_pt_labels;
     std::vector<std::vector<CC_point> > old_points;
     for (auto&& sheet : sheets) {
         old_points.emplace_back(sheet.GetPoints());
     }
-    auto reaction = [old_numpoints, old_labels, old_points](CC_show& show) {
+    auto reaction = [old_labels, old_points](CC_show& show) {
         for (auto i = 0ul; i < show.sheets.size(); ++i) {
             show.sheets.at(i).SetPoints(old_points.at(i));
         }
-        show.numpoints = old_numpoints;
         show.SetPointLabel(old_labels);
     };
     return CC_show_command_pair{ action, reaction };

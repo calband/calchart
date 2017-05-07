@@ -187,12 +187,11 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     wizard->GetPageAreaSizer()->Add(page1);
     if (wizard->RunWizard(page1)) {
         auto labels = page1->GetLabels();
-        auto num = page1->GetNumberPoints();
         auto columns = page1->GetNumberColumns();
         std::vector<std::string> tlabels(labels.begin(), labels.end());
         auto newmode = wxGetApp().GetMode(page2->GetValue());
 
-        show.WizardSetupNewShow(num, columns, tlabels, std::move(newmode));
+        show.WizardSetupNewShow(tlabels, columns, std::move(newmode));
     }
     else {
         wxMessageBox(wxT("Show setup not completed.\n")
@@ -239,23 +238,15 @@ bool FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
     return true;
 }
 
-bool FieldView::DoSetDescription(const wxString& descr)
-{
-    auto cmd = mShow->Create_SetDescriptionCommand(descr);
-    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    return true;
-}
-
 void FieldView::DoSetMode(const wxString& mode)
 {
     auto cmd = mShow->Create_SetModeCommand(mode);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void FieldView::DoSetShowInfo(int numPoints, int numColumns,
-    const std::vector<wxString>& labels)
+void FieldView::DoSetShowInfo(const std::vector<wxString>& labels, int numColumns)
 {
-    auto cmd = mShow->Create_SetShowInfoCommand(numPoints, numColumns, labels);
+    auto cmd = mShow->Create_SetShowInfoCommand(labels, numColumns);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 

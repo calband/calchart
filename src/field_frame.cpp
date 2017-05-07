@@ -100,7 +100,6 @@ EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, FieldFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_SHEET_TITLE, FieldFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, FieldFrame::OnCmdSetBeats)
 EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
-EVT_MENU(CALCHART__SETDESCRIPTION, FieldFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
 EVT_MENU(CALCHART__SELECT_ALL, FieldFrame::OnCmdSelectAll)
@@ -269,8 +268,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Relabel all stuntsheets after this one"));
     edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"),
         wxT("Setup number of marchers"));
-    edit_menu->Append(CALCHART__SETDESCRIPTION, wxT("Set Show &Description..."),
-        wxT("Set the show description"));
     edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."),
         wxT("Set the show mode"));
     edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."),
@@ -756,11 +753,6 @@ void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
 
 void FieldFrame::OnCmdSetup(wxCommandEvent& event) { Setup(); }
 
-void FieldFrame::OnCmdSetDescription(wxCommandEvent& event)
-{
-    SetDescription();
-}
-
 void FieldFrame::OnCmdSetMode(wxCommandEvent& event) { SetMode(); }
 
 void FieldFrame::OnCmdPoints(wxCommandEvent& event)
@@ -1149,21 +1141,7 @@ void FieldFrame::Setup()
     if (GetShow()) {
         ShowInfoReq dialog(*GetShow(), this);
         if (dialog.ShowModal() == wxID_OK) {
-            GetFieldView()->DoSetShowInfo(dialog.GetNumberPoints(),
-                dialog.GetNumberColumns(),
-                dialog.GetLabels());
-        }
-    }
-}
-
-void FieldFrame::SetDescription()
-{
-    if (GetShow()) {
-        wxTextEntryDialog dialog(this, wxT("Please modify the show description\n"),
-            wxT("Edit show description\n"),
-            GetShow()->GetDescr(), wxOK | wxCANCEL);
-        if (dialog.ShowModal() == wxID_OK) {
-            GetFieldView()->DoSetDescription(dialog.GetValue());
+            GetFieldView()->DoSetShowInfo(dialog.GetLabels(), dialog.GetNumberColumns());
         }
     }
 }
