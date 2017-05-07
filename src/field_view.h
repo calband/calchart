@@ -59,6 +59,7 @@ public:
     ///// Modify the show /////
     bool DoRotatePointPositions(int rotateAmount);
     bool DoMovePoints(const std::map<int, CC_coord>& transmat);
+    bool DoDeletePoints();
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
     void DoSetMode(const wxString& mode);

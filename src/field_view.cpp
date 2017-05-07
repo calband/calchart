@@ -220,6 +220,15 @@ bool FieldView::DoMovePoints(const std::map<int, CC_coord>& newPositions)
     return true;
 }
 
+bool FieldView::DoDeletePoints()
+{
+    if (mShow->GetSelectionList().size() == 0)
+        return false;
+    auto cmd = mShow->Create_DeletePointsCommand();
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return true;
+}
+
 bool FieldView::DoResetReferencePoint()
 {
     if (mShow->GetSelectionList().size() == 0)

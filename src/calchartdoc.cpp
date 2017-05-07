@@ -522,6 +522,13 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(std::map<int, C
     return std::make_unique<CalChartDocCommand>(*this, wxT("Move Points"), cmds);
 }
 
+std::unique_ptr<wxCommand> CalChartDoc::Create_DeletePointsCommand()
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_DeletePointsCommand()));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Delete Points"), cmds);
+}
+
 std::unique_ptr<wxCommand> CalChartDoc::Create_RotatePointPositionsCommand(int rotateAmount, int ref)
 {
     auto cmds = Create_SetSheetAndSelectionPair();

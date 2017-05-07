@@ -532,6 +532,13 @@ std::vector<CC_point> CC_sheet::NewNumPointsPositions(int num, int columns, cons
     return newpts;
 }
 
+void CC_sheet::DeletePoints(SelectionList const& sl)
+{
+    for (auto iter = sl.rbegin(); iter != sl.rend(); ++iter) {
+        mPoints.erase(mPoints.begin() + *iter);
+    }
+}
+
 std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) const
 {
     if (mPoints.size() != table.size()) {
