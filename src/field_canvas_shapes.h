@@ -34,8 +34,7 @@ class CC_shape;
 class CC_coord;
 class CalChartConfiguration;
 
-class FieldCanvasShapes
-{
+class FieldCanvasShapes {
 public:
     virtual ~FieldCanvasShapes() = default;
     void OnMove(const CC_coord& p, const CC_coord& snapped_p);
@@ -51,12 +50,9 @@ protected:
     CC_DRAG_TYPES move_drag = CC_DRAG_NONE;
 };
 
-class MovePoints : public FieldCanvasShapes
-{
+class MovePoints : public FieldCanvasShapes {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const = 0;
 };
 
 std::unique_ptr<MovePoints> Create_MovePoints(CC_MOVE_MODES);
-
-

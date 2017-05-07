@@ -25,7 +25,6 @@
 #include "field_view.h"
 #include "field_frame.h"
 #include "confgr.h"
-#include "modes.h"
 #include "linmath.h"
 #include "math_utils.h"
 #include "background_image.h"
@@ -48,7 +47,6 @@ EVT_PAINT(FieldCanvas::OnPaint)
 EVT_ERASE_BACKGROUND(FieldCanvas::OnEraseBackground)
 EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
-
 
 // Define a constructor for field canvas
 FieldCanvas::FieldCanvas(FieldView& view, FieldFrame* frame, float def_zoom)
@@ -445,11 +443,12 @@ void FieldCanvas::MoveDrag(const CC_coord& end)
         for (auto i : mView.GetSelectionList()) {
             selected_points[i] = mView.PointPosition(i);
         }
-        
+
         mMovePoints = m_move_points->TransformPoints(selected_points);
         for (auto& i : mMovePoints) {
-            i.second = SnapToGrid(i.second);
+            i.second = mView.ClipPositionToShowMode(SnapToGrid(i.second));
         }
+        // saturate by mode
     }
 }
 
@@ -503,8 +502,9 @@ void FieldCanvas::MoveByKey(direction dir)
     auto&& select_list = mView.GetSelectionList();
     auto pos = GetMoveAmount(dir);
     for (auto i = select_list.begin(); i != select_list.end(); ++i) {
-        move_points[*i] = mView.PointPosition(*i) + pos;
+        move_points[*i] = mView.ClipPositionToShowMode(mView.PointPosition(*i) + pos);
     }
+    // saturate by mode
     mView.DoMovePoints(move_points);
 }
 
@@ -524,4 +524,3 @@ void FieldCanvas::SetCurrentMove(CC_MOVE_MODES move)
     EndDrag();
     curr_move = move;
 }
-

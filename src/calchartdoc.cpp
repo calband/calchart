@@ -22,7 +22,7 @@
 
 #include <fstream>
 
-#include "CalChartDoc.h"
+#include "calchartdoc.h"
 
 #include "cc_command.h"
 #include "confgr.h"
@@ -353,7 +353,6 @@ void CalChartDoc::SetMode(std::unique_ptr<const ShowMode> m)
         throw std::runtime_error("Cannot use NULL ShowMode");
     }
     std::swap(mMode, m);
-    mShow->SetMode(mMode.get());
     UpdateAllViews();
 }
 

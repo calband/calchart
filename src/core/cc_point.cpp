@@ -121,19 +121,9 @@ std::vector<uint8_t> CC_point::Serialize() const
     return result;
 }
 
-bool CC_point::GetFlip() const { return mFlags.test(kPointLabelFlipped); }
-
 void CC_point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
-bool CC_point::LabelIsVisible() const
-{
-    return !mFlags.test(kLabelIsInvisible);
-}
-
-void CC_point::SetLabelVisibility(bool isVisible)
-{
-    mFlags.set(kLabelIsInvisible, !isVisible);
-}
+void CC_point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }
 
 CC_coord CC_point::GetPos(unsigned ref) const
 {
@@ -157,9 +147,6 @@ void CC_point::SetPos(const CC_coord& c, unsigned ref)
     }
     mRef[ref - 1] = c;
 }
-
-SYMBOL_TYPE
-CC_point::GetSymbol() const { return mSym; }
 
 void CC_point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
 

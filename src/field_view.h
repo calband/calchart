@@ -23,7 +23,7 @@
 #pragma once
 
 #include "calchartdoc.h"
-#include "CC_coord.h"
+#include "cc_coord.h"
 #include "modes.h"
 
 #include "ghost_module.h"
@@ -84,6 +84,7 @@ public:
 
     auto GetShowFieldOffset() const { return mShow->GetMode().Offset(); }
     auto GetShowFieldSize() const { return mShow->GetMode().Size(); }
+    auto ClipPositionToShowMode(CC_coord const& pos) const { return mShow->GetMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
     void GoToSheet(int which);
