@@ -31,96 +31,83 @@
 
 #include <wx/dcbuffer.h>
 
-class MovePoints_CC_MOVE_NORMAL : public MovePoints
-{
+class MovePoints_CC_MOVE_NORMAL : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_LINE : public MovePoints
-{
+class MovePoints_CC_MOVE_LINE : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_ROTATE : public MovePoints
-{
-public:
-    virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CC_coord pos) override;
-    virtual bool OnMouseUpDone(CC_coord const&) override;
-};
-
-class MovePoints_CC_MOVE_SHEAR : public MovePoints
-{
+class MovePoints_CC_MOVE_ROTATE : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
     virtual bool OnMouseUpDone(CC_coord const&) override;
 };
 
-class MovePoints_CC_MOVE_REFL : public MovePoints
-{
-public:
-    virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CC_coord pos) override;
-};
-
-class MovePoints_CC_MOVE_SIZE : public MovePoints
-{
+class MovePoints_CC_MOVE_SHEAR : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
     virtual bool OnMouseUpDone(CC_coord const&) override;
 };
 
-class MovePoints_CC_MOVE_GENIUS : public MovePoints
-{
+class MovePoints_CC_MOVE_REFL : public MovePoints {
+public:
+    virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
+    virtual void OnMouseLeftDown(CC_coord pos) override;
+};
+
+class MovePoints_CC_MOVE_SIZE : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
     virtual bool OnMouseUpDone(CC_coord const&) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_LINE : public MovePoints
-{
+class MovePoints_CC_MOVE_GENIUS : public MovePoints {
+public:
+    virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
+    virtual void OnMouseLeftDown(CC_coord pos) override;
+    virtual bool OnMouseUpDone(CC_coord const&) override;
+};
+
+class MovePoints_CC_MOVE_SHAPE_LINE : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_ELLIPSE : public MovePoints
-{
+class MovePoints_CC_MOVE_SHAPE_ELLIPSE : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_RECTANGLE : public MovePoints
-{
+class MovePoints_CC_MOVE_SHAPE_RECTANGLE : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_DRAW : public MovePoints
-{
+class MovePoints_CC_MOVE_SHAPE_DRAW : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_X : public MovePoints
-{
+class MovePoints_CC_MOVE_SHAPE_X : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_CROSS : public MovePoints
-{
+class MovePoints_CC_MOVE_SHAPE_CROSS : public MovePoints {
 public:
     virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CC_coord pos) override;
@@ -130,7 +117,7 @@ std::unique_ptr<MovePoints> Create_MovePoints(CC_MOVE_MODES curr_move)
 {
     switch (curr_move) {
     case CC_MOVE_NORMAL:
-        return std::make_unique<MovePoints_CC_MOVE_LINE>();
+        return std::make_unique<MovePoints_CC_MOVE_NORMAL>();
     case CC_MOVE_SHAPE_LINE:
         return std::make_unique<MovePoints_CC_MOVE_SHAPE_LINE>();
     case CC_MOVE_SHAPE_X:
@@ -219,7 +206,6 @@ void FieldCanvasShapes::OnMove(const CC_coord& p, const CC_coord& snapped_p)
     }
 }
 
-
 void MovePoints_CC_MOVE_LINE::OnMouseLeftDown(CC_coord pos)
 {
     BeginMoveDrag(CC_DRAG_LINE, pos);
@@ -307,7 +293,7 @@ void MovePoints_CC_MOVE_SHEAR::OnMouseLeftDown(CC_coord pos)
         CC_coord vect(pos - ((CC_shape_1point*)m_shape_list.back().get())->GetOrigin());
         // rotate vect 90 degrees
         AddMoveDrag(CC_DRAG_LINE, std::unique_ptr<CC_shape>(new CC_shape_angline(
-                                  pos, CC_coord(-vect.y, vect.x))));
+                                      pos, CC_coord(-vect.y, vect.x))));
     }
 }
 
@@ -673,5 +659,3 @@ std::map<int, CC_coord> MovePoints_CC_MOVE_SHAPE_CROSS::TransformPoints(std::map
     assert(iter == select_list.end());
     return result;
 }
-
-

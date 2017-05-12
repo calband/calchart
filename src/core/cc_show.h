@@ -35,7 +35,6 @@
 #include "cc_sheet.h"
 
 class CC_sheet;
-class ShowMode;
 class ShowUndoList;
 class CC_lasso;
 class CalChartDoc;
@@ -101,15 +100,15 @@ public:
     CC_show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 
     // Accessors
-    auto GetSheetBegin() const { return sheets.begin(); }
-    auto GetSheetEnd() const { return sheets.end(); }
+    auto GetSheetBegin() const { return mSheets.begin(); }
+    auto GetSheetEnd() const { return mSheets.end(); }
     auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
     auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
     int GetNumSheets() const;
     auto GetCurrentSheetNum() const { return mSheetNum; }
-    auto GetNumPoints() const { return static_cast<int>(m_pt_labels.size()); }
+    auto GetNumPoints() const { return static_cast<int>(mPtLabels.size()); }
     std::string GetPointLabel(int i) const;
-    auto GetPointLabels() const { return m_pt_labels; }
+    auto GetPointLabels() const { return mPtLabels; }
 
     bool AlreadyHasPrintContinuity() const;
 
@@ -125,8 +124,8 @@ public:
     SelectionList MakeSelectWithLasso(const CC_lasso& lasso, int ref) const;
 
     // Point selection
-    auto IsSelected(int i) const { return selectionList.count(i) != 0; }
-    auto GetSelectionList() const { return selectionList; }
+    auto IsSelected(int i) const { return mSelectionList.count(i) != 0; }
+    auto GetSelectionList() const { return mSelectionList; }
 
     /*!
      * @brief Generates a JSONElement that could represent this
@@ -146,9 +145,6 @@ public:
      */
     void toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const;
 
-    // This is something we should try to get rid of.
-    void SetMode(ShowMode const* mode) { mMode = mode; }
-
 private:
     // modification of show is private, and externally done through create and exeucte commands
     CC_sheet_container_t RemoveNthSheet(int sheetidx);
@@ -162,12 +158,11 @@ private:
     void SetPointLabel(const std::vector<std::string>& labels);
 
     // Descriptions aren't used, but keeping this alive.  See issue #203
-    auto GetDescr() const { return m_descr; }
-    void SetDescr(std::string const& newdescr) { m_descr = newdescr; }
+    auto GetDescr() const { return mDescr; }
+    void SetDescr(std::string const& newdescr) { mDescr = newdescr; }
 
-
-    auto GetSheetBegin() { return sheets.begin(); }
-    auto GetSheetEnd() { return sheets.end(); }
+    auto GetSheetBegin() { return mSheets.begin(); }
+    auto GetSheetEnd() { return mSheets.end(); }
     auto GetNthSheet(unsigned n) { return GetSheetBegin() + n; }
     auto GetCurrentSheet() { return GetNthSheet(mSheetNum); }
 
@@ -175,12 +170,11 @@ private:
     std::vector<uint8_t> SerializeShowData() const;
 
     // members
-    std::string m_descr;
-    CC_sheet_container_t sheets;
-    std::vector<std::string> m_pt_labels;
-    SelectionList selectionList; // order of selections
+    std::string mDescr;
+    CC_sheet_container_t mSheets;
+    std::vector<std::string> mPtLabels;
+    SelectionList mSelectionList; // order of selections
     int mSheetNum;
-    ShowMode const* mMode = nullptr;
 
     // unit tests
     friend void CC_show_UnitTests();

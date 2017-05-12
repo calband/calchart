@@ -39,13 +39,13 @@ public:
     CC_point(const std::vector<uint8_t>& serialized_data);
     std::vector<uint8_t> Serialize() const;
 
-    bool GetFlip() const;
+    auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
     void Flip(bool val = true);
 
-    bool LabelIsVisible() const;
+    auto LabelIsVisible() const { return !mFlags.test(kLabelIsInvisible); }
     void SetLabelVisibility(bool isVisible);
 
-    SYMBOL_TYPE GetSymbol() const;
+    auto GetSymbol() const { return mSym; }
     void SetSymbol(SYMBOL_TYPE sym);
 
     // reference points 0 is the point, refs are [1, kNumRefPoints]

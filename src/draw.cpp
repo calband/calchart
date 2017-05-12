@@ -25,7 +25,6 @@
 #include <wx/dc.h>
 #include <wx/dcmemory.h>
 #include "confgr.h"
-#include "modes.h"
 #include "calchartdoc.h"
 #include "cc_show.h"
 #include "cc_sheet.h"
