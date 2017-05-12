@@ -195,7 +195,9 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     auto parse_INGL_SHET = [](CC_show* show, const uint8_t* ptr, size_t size) {
         CC_sheet sheet(show->GetNumPoints(), ptr, size,
             Current_version_and_later());
+        auto sheet_num = show->GetCurrentSheetNum();
         show->InsertSheet(sheet, show->GetNumSheets());
+        show->SetCurrentSheet(sheet_num);
     };
     auto parse_INGL_SELE = [](CC_show* show, const uint8_t* ptr, size_t size) {
         if ((size % 4) != 0) {
@@ -244,9 +246,6 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     if (!found_show) {
         throw CC_FileException("did not find show", INGL_SHOW);
     }
-
-    // now set the show to sheet 0
-    //    mSheetNum = 0;
 }
 
 // Destroy a show
