@@ -135,6 +135,8 @@ void TopFrame::About()
             "see "
             "<http://www.gnu.org/licenses/>.\n")
         wxT("\n")
+        wxT("Report issues to:\nhttps://github.com/calband/calchart/issues/new\n")
+        wxT("\n")
         wxT("Compiled on ")
         __TDATE__ wxT(" at ") __TTIME__,
         wxT("About CalChart"));
