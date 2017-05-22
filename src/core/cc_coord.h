@@ -106,18 +106,18 @@ public:
         y /= s;
         return *this;
     }
-	CC_coord& operator*=(double s)
-	{
-		x *= s;
-		y *= s;
-		return *this;
-	}
-	CC_coord& operator/=(double s)
-	{
-		x /= s;
-		y /= s;
-		return *this;
-	}
+    CC_coord& operator*=(double s)
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    }
+    CC_coord& operator/=(double s)
+    {
+        x /= s;
+        y /= s;
+        return *this;
+    }
 
     Coord x, y;
 };
