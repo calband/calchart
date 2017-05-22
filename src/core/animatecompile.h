@@ -51,11 +51,11 @@ private:
 };
 
 struct AnimateState {
-    AnimatePoint pt{};
-    unsigned beats_rem{};
-    AnimationVariables mVars{};
-    AnimationErrors error_markers{};
-    AnimateCommands cmds{};
+    AnimatePoint pt;
+    unsigned beats_rem;
+    AnimationVariables mVars;
+    AnimationErrors error_markers;
+    AnimateCommands cmds;
 };
 
 class AnimateCompile {

@@ -133,15 +133,15 @@ private:
     void UpdateBackgroundImages();
 
 private:
-    GhostModule mGhostModule;
+	GhostModule mGhostModule{};
 
-    CalChartDoc* mShow;
-    int mCurrentReferencePoint;
+	CalChartDoc* mShow{};
+	int mCurrentReferencePoint{};
     CalChartConfiguration& mConfig;
     std::vector<BackgroundImage> mBackgroundImages;
-    bool mDrawBackground;
-    bool mAdjustBackgroundMode;
-    int mWhichBackgroundIndex;
+	bool mDrawBackground{};
+	bool mAdjustBackgroundMode{};
+	int mWhichBackgroundIndex{};
 
     DECLARE_DYNAMIC_CLASS(FieldView)
 };

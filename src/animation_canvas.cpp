@@ -97,7 +97,7 @@ static auto CalcUserScaleAndOffset(std::pair<CC_coord, CC_coord> const& sizeAndO
     auto plus_windowx = windowSize.x / 2 - scaledx;
     auto plus_windowy = windowSize.y / 2 - scaledy;
 
-    return std::pair<float, std::pair<wxCoord, wxCoord> >{ userScale, { plus_windowx, plus_windowy } };
+    return std::pair<double, std::pair<wxCoord, wxCoord> >{ userScale, { plus_windowx, plus_windowy } };
 }
 
 void AnimationCanvas::UpdateScaleAndOrigin()

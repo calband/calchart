@@ -31,7 +31,9 @@
 #include "json.h"
 
 #include <sstream>
+#include <iterator>
 #include <functional>
+#include <algorithm>
 
 static const std::string k_nofile_str = "Unable to open file";
 static const std::string k_badcont_str = "Error in continuity file";

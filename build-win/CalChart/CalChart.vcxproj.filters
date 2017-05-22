@@ -17,6 +17,7 @@
     <ClCompile Include="..\..\src\cont_ui.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
+    <ClCompile Include="..\..\src\field_canvas_shapes.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
+    <ClInclude Include="..\..\src\field_canvas_shapes.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\linmath.h" />
