@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT=CalChart
-VERSION=3.4.4
+VERSION=3.5.0
 APP=CalChart.app
 CONFIG=Release
 WC_DMG=wc.dmg
