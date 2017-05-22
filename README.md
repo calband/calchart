@@ -69,6 +69,26 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 # Release notes
 
 
+## Release notes for 3.5.0
+
+Features addressed in this release:
+
+* #120, #121 Save current_sheet and selection list with the show when saving
+* #209 Delete one point
+* #198 Shape Palette, and able to draw curves
+
+Bugs addressed in this release:
+
+* #199 Snap to grid when moving points
+* #203 Removing unused Description Field
+* #11 Background images should be undoable
+* #105, #104 Background images should be part of the show
+
+Build infrastructure issues addressed in this release:
+
+* #128 clang-format all code
+
+
 ## Release notes for 3.4.4
 
 Features addressed in this release:
