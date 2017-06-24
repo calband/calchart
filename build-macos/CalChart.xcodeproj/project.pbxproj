@@ -127,6 +127,7 @@
 		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
 		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
 		C7B669761474E20300E28B63 /* background_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7B669741474E20300E28B63 /* background_image.cpp */; };
+		C7C2CCB71EFF08AF000335BA /* e7_transition_solver_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7C2CCB61EFF08AF000335BA /* e7_transition_solver_ui.cpp */; };
 		C7C5FBD21479B356004E5C5B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD11479B356004E5C5B /* IOKit.framework */; };
 		C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
 		C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
@@ -566,6 +567,8 @@
 		C7AFA98B117A6DBA00CC53E2 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show_ui.h; sourceTree = "<group>"; };
 		C7B669741474E20300E28B63 /* background_image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = background_image.cpp; sourceTree = "<group>"; };
 		C7B669751474E20300E28B63 /* background_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = background_image.h; sourceTree = "<group>"; };
+		C7C2CCB51EFF089E000335BA /* e7_transition_solver_ui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = e7_transition_solver_ui.h; sourceTree = "<group>"; };
+		C7C2CCB61EFF08AF000335BA /* e7_transition_solver_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = e7_transition_solver_ui.cpp; sourceTree = "<group>"; };
 		C7C5FBD11479B356004E5C5B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		C7C5FBD31479B367004E5C5B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -1128,6 +1131,8 @@
 				C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */,
 				C74162F41DAF2EDC00F87B7D /* e7_transition_solver.cpp */,
 				C74162F51DAF2EDC00F87B7D /* e7_transition_solver.h */,
+				C7C2CCB51EFF089E000335BA /* e7_transition_solver_ui.h */,
+				C7C2CCB61EFF08AF000335BA /* e7_transition_solver_ui.cpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -1305,6 +1310,7 @@
 				C74162EE1DAF2DF600F87B7D /* munkres.cpp in Sources */,
 				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */,
+				C7C2CCB71EFF08AF000335BA /* e7_transition_solver_ui.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

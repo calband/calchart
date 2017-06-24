@@ -14,4 +14,4 @@
 
 
 
-std::vector<CC_coord> runSolver(const CC_sheet& sheet1, const CC_sheet& sheet2);
+std::tuple<bool, std::vector<CC_coord>, std::vector<CC_coord>, std::vector<std::string>, std::vector<SYMBOL_TYPE>> runSolver(const CC_sheet& sheet1, const CC_sheet& sheet2, unsigned numBeats);

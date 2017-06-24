@@ -48,7 +48,7 @@
 #include "cc_sheet.h"
 #include "cc_point.h"
 #include "cc_fileformat.h"
-#include "e7_transition_solver.h"
+#include "e7_transition_solver_ui.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -1296,10 +1296,50 @@ CalChartDoc* FieldFrame::GetShow()
 
 
 void FieldFrame::OnCmd_SolveTransition(wxCommandEvent &event) {
-    auto currSheet = GetShow()->GetCurrentSheet();
-    auto finalPositions = runSolver(*currSheet, *(currSheet+1));
-    CC_sheet& nextSheetRef = *(currSheet + 1);
-    for (auto i = 0; i < GetShow()->GetNumPoints(); i++) {
-        nextSheetRef.SetPosition(finalPositions[i], i);
+//    auto currSheet = GetShow()->GetCurrentSheet();
+//    bool foundSolution;
+//    std::vector<CC_coord> finalStartPositions;
+//    std::vector<CC_coord> finalPositions;
+//    std::vector<std::string> finalContinuities;
+//    std::vector<SYMBOL_TYPE> finalDotTypes;
+//    
+//    unsigned upperBeatLimit = currSheet->GetBeats()/2;
+//    unsigned lowerBeatLimit = 0;
+//    unsigned lastSuccessfulNumBeats = 0;
+//    unsigned lastNumBeats = 0;
+//    unsigned numBeats = upperBeatLimit;
+//    while (numBeats != lastNumBeats)
+//    {
+//        std::tie(foundSolution, finalStartPositions, finalPositions, finalContinuities, finalDotTypes) = runSolver(*currSheet, *(currSheet+1), numBeats * 2);
+//        if (foundSolution) {
+//            upperBeatLimit = numBeats;
+//            lastSuccessfulNumBeats = numBeats;
+//        } else {
+//            lowerBeatLimit = numBeats;
+//        }
+//
+//        lastNumBeats = numBeats;
+//        numBeats = lowerBeatLimit + ((upperBeatLimit - lowerBeatLimit) / 2);
+//    }
+//    std::tie(foundSolution, finalStartPositions, finalPositions, finalContinuities, finalDotTypes) = runSolver(*currSheet, *(currSheet+1), lastSuccessfulNumBeats * 2);
+//    if (foundSolution)
+//    {
+//        CC_sheet& thisSheetRef = *(currSheet);
+//        for (SYMBOL_TYPE symbol = SYMBOLS_START; symbol < MAX_NUM_SYMBOLS; symbol = (SYMBOL_TYPE)(((unsigned)symbol) + 1))
+//        {
+//            thisSheetRef.SetContinuityText(symbol, finalContinuities[(unsigned)symbol]);
+//        }
+//        CC_sheet& nextSheetRef = *(currSheet + 1);
+//        for (auto i = 0; i < GetShow()->GetNumPoints(); i++) {
+//            nextSheetRef.SetPosition(finalPositions[i], i);
+//            thisSheetRef.GetPoint(i).SetSymbol(finalDotTypes[i]);
+//            thisSheetRef.SetPosition(finalStartPositions[i], i);
+//        }
+//        numBeats -= 2;
+//    }
+    
+    if (GetShow()) {
+        TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxT("Transition Solver"));
+        transitionSolver->Show();
     }
 }
