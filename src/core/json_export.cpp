@@ -22,23 +22,18 @@
  * output iterator; false otherwise.
  */
 template <typename T>
-static bool exportJSONGeneric(T& outIter, const JSONElement& json) {
+static bool exportJSONGeneric(T& outIter, const JSONElement& json)
+{
     JSONExportGrammar<T> exportGenerator;
-    
+
     return boost::spirit::karma::generate(outIter, exportGenerator, json);
 }
 
-bool JSONExporter::exportJSON(const std::string& filename, const JSONElement& json) {
+bool JSONExporter::exportJSON(const std::string& filename, const JSONElement& json)
+{
     std::ofstream outfile(filename);
     std::ostream_iterator<char> outIter = outfile;
     bool success = outfile.good() && exportJSONGeneric(outIter, json);
     outfile.close();
     return success;
 }
-
-
-
-
-
-
-

@@ -33,6 +33,7 @@ struct Version_3_3_and_earlier {
 struct Current_version_and_later {
 };
 
+// clang-format off
 // Description of the CalChart file format layout, in modified Extended
 // Backus–Naur Form
 // version 3.4.0 to current
@@ -50,59 +51,48 @@ struct Current_version_and_later {
 //
 // show               = START , SHOW ;
 // START              = INGL_INGL , INGL_VERS ;
-// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) ,
-// SHOW_DATA , SHOW_END ;
-// SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* , /**/
-// ;
+// SHOW               = INGL_SHOW , BigEndianInt32(DataTill_SHOW_END) , SHOW_DATA , SHOW_END ;
+// SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* , [ SELECTION ], CURRENT_SHEET, /**/ ;
 // SHOW_END           = INGL_END , INGL_SHOW ;
-// NUM_MARCH          = INGL_SIZE , BigEndianInt32(4) , NUM_MARCH_DATA ,
-// NUM_MARCH_END;
+// NUM_MARCH          = INGL_SIZE , BigEndianInt32(4) , NUM_MARCH_DATA , NUM_MARCH_END ;
 // NUM_MARCH_DATA     = BigEndianInt32( number of marchers ) ;
 // NUM_MARCH_END      = INGL_END , INGL_SIZE ;
-// LABEL              = INGL_LABL , BigEndianInt32(DataTill_LABEL_END) ,
-// LABEL_DATA , LABEL_END;
+// LABEL              = INGL_LABL , BigEndianInt32(DataTill_LABEL_END) , LABEL_DATA , LABEL_END ;
 // LABEL_DATA         = { Null-terminated_char* }* ;
 // LABEL_END          = INGL_END , INGL_LABL ;
-// DESCRIPTION        = INGL_DESC , BigEndianInt32(DataTill_DESCRIPTION_END) ,
-// DESCRIPTION_DATA , DESCRIPTION_END ;
+// DESCRIPTION        = INGL_DESC , BigEndianInt32(DataTill_DESCRIPTION_END) , DESCRIPTION_DATA , DESCRIPTION_END ;
 // DESCRIPTION_DATA   = Null-terminated_char* ;
 // DESCRIPTION_END    = INGL_END , INGL_DESC ;
-// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) ,
-// SHEET_DATA , SHEET_END ;
-// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY ,
-// PRINT_CONTINUITY , /**/ ;
+// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
+// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY , PRINT_CONTINUITY , /**/ ;
 // SHEET_END          = INGL_END , INGL_SHET ;
-// NAME               = INGL_NAME , BigEndianInt32(DataTill_NAME_END) ,
-// NAME_DATA , NAME_END ;
+// SELECTION          = INGL_SELE , BigEndianInt32(DataTill_SELECTION_END) , SELECTION_DATA , SELECTION_END ;
+// SELECTION_DATA     = BigEndianInt32(SelectedPoint)* ;
+// SELECTION_END      = INGL_END , INGL_SELE ;
+// CURRENT_SHEET      = INGL_CURR , BigEndianInt32(4) , CURRENT_SHEET_DATA , NUM_MARCH_END ;
+// CURRENT_SHEET_DATA = BigEndianInt32( page selected ) ;
+// CURRENT_SHEET_END  = INGL_END , INGL_CURR ;
+// NAME               = INGL_NAME , BigEndianInt32(DataTill_NAME_END) , NAME_DATA , NAME_END ;
 // NAME_DATA          = Null-terminated_char* ;
 // NAME_END           = INGL_END , INGL_NAME ;
-// DURATION           = INGL_DURA , BigEndianInt32(4) , DURATION_DATA ,
-// DURATION_END;
+// DURATION           = INGL_DURA , BigEndianInt32(4) , DURATION_DATA , DURATION_END;
 // DURATION_DATA      = BigEndianInt32(number of beats) ;
 // DURATION_END       = INGL_END , INGL_DURA ;
-// ALL_POINTS         = INGL_PNTS , BigEndianInt32(DataTill_ALL_POINTS_END) ,
-// ALL_POINTS_DATA , ALL_POINTS_END ;
+// ALL_POINTS         = INGL_PNTS , BigEndianInt32(DataTill_ALL_POINTS_END) , ALL_POINTS_DATA , ALL_POINTS_END ;
 // ALL_POINTS_DATA    = { EACH_POINT_DATA }* ;
 // ALL_POINTS_END     = INGL_END , INGL_PNTS ;
-// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) ,
-// POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
+// EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) , POSITION_DATA , REF_POSITION_DATA , POINT_SYMBOL_DATA , POINT_LABEL_FLIP ;
 // POSITION_DATA      = BigEndianInt16( x ) , BigEndianInt16( y ) ;
-// REF_POSITION_DATA  = BigEndianInt8( num ref pts ) , { BigEndianInt8( which
-// reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
+// REF_POSITION_DATA  = BigEndianInt8( num ref pts ) , { BigEndianInt8( which reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
 // POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
 // POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
-// CONTINUITY         = INGL_CONT , BigEndianInt32(DataTill_CONTINUITY_END)) ,
-// CONTINUITY_DATA , CONTINUITY_END;
+// CONTINUITY         = INGL_CONT , BigEndianInt32(DataTill_CONTINUITY_END)) , CONTINUITY_DATA , CONTINUITY_END ;
 // CONTINUITY_DATA    = { EACH_CONTINUITY }* ;
 // CONTINUITY_END     = INGL_END , INGL_CONT ;
-// EACH_CONTINUITY    = INGL_ECNT ,
-// BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA ,
-// EACH_CONTINUITY_END;
+// EACH_CONTINUITY    = INGL_ECNT , BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA , EACH_CONTINUITY_END ;
 // EACH_CONTINUITY_DATA = BigEndianInt8( symbol ) , Null-terminated char* ;
 // EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
-// PRINT_CONTINUITY   = INGL_PCNT ,
-// BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA ,
-// PRINT_CONTINUITY_END;
+// PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END ;
 // PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
 // PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
 //
@@ -110,7 +100,9 @@ struct Current_version_and_later {
 // INGL_GURK = 'G','U','R','K' ;
 // INGL_SHOW = 'S','H','O','W' ;
 // INGL_SHET = 'S','H','E','T' ;
+// INGL_SELE = 'S','E','L','E' ;
 // INGL_SIZE = 'S','I','Z','E' ;
+// INGL_CURR = 'C','U','R','R' ;
 // INGL_LABL = 'L','A','B','L' ;
 // INGL_MODE = 'M','O','D','E' ;
 // INGL_DESC = 'D','E','S','C' ;
@@ -129,37 +121,27 @@ struct Current_version_and_later {
 // version 3.1.0 to 3.3.5
 // show = START , SHOW ;
 // START = INGL_INGL , INGL_GURK ;
-// SHOW = INGL_SHOW , SIZE , { LABEL } , { DESCRIPTION } , { SHEET } , SHOW_END
-// ;
+// SHOW = INGL_SHOW , SIZE , { LABEL } , { DESCRIPTION } , { SHEET } , SHOW_END ;
 // SIZE = INGL_SIZE , BigEndianInt32(4) , BigEndianInt32( number of marchers ) ;
 // LABEL = INGL_LABL , BigEndianInt32(Sizeof(LABEL_DATA)) , LABEL_DATA ;
 // LABEL_DATA = { Null-terminated char* } ;
-// DESCRIPTION = INGL_DESC , BigEndianInt32(Sizeof(DESCRIPTION_DATA)) ,
-// DESCRIPTION_DATA ;
+// DESCRIPTION = INGL_DESC , BigEndianInt32(Sizeof(DESCRIPTION_DATA)) , DESCRIPTION_DATA ;
 // DESCRIPTION_DATA = Null-terminated char* ;
-// SHEET = INGL_GURK , INGL_SHET , NAME , DURATION , POSITION , [ REF_POSITION ]
-// , [ POINT_SYMBOL ] , [ POINT_CONT_INDEX ] , [ POINT_LABEL_FLIP ] , {
-// CONTINUITY } , SHEET_END ;
+// SHEET = INGL_GURK , INGL_SHET , NAME , DURATION , POSITION , [ REF_POSITION ] , [ POINT_SYMBOL ] , [ POINT_CONT_INDEX ] , [ POINT_LABEL_FLIP ] ,  CONTINUITY } , SHEET_END ;
 // NAME = INGL_NAME , BigEndianInt32(Sizeof(NAME_DATA)) , NAME_DATA ;
 // NAME_DATA = Null-terminated char* ;
 // DURATION = INGL_DURA , BigEndianInt32(4) , BigEndianInt32(number of beats) ;
 // POSITION = INGL_POS , BigEndianInt32(Sizeof(POSITION_DATA)) , POSITION_DATA ;
 // POSITION_DATA = { BigEndianInt16( x ) , BigEndianInt16( y ) } ;
-// REF_POSITION = INGL_REFP , BigEndianInt32(Sizeof(REF_POSITION_DATA)) ,
-// REF_POSITION_DATA ;
-// REF_POSITION_DATA = BigEndianInt16( which reference point ) , {
-// BigEndianInt16( x ) , BigEndianInt16( y ) } ;
-// POINT_SYMBOL = INGL_SYMB , BigEndianInt32(Sizeof(POINT_SYMBOL_DATA)) ,
-// POINT_SYMBOL_DATA ;
+// REF_POSITION = INGL_REFP , BigEndianInt32(Sizeof(REF_POSITION_DATA)) , REF_POSITION_DATA ;
+// REF_POSITION_DATA = BigEndianInt16( which reference point ) , { BigEndianInt16( x ) , BigEndianInt16( y ) } ;
+// POINT_SYMBOL = INGL_SYMB , BigEndianInt32(Sizeof(POINT_SYMBOL_DATA)) , POINT_SYMBOL_DATA ;
 // POINT_SYMBOL_DATA = { BigEndianInt8( which symbol type ) } ;
-// POINT_CONT_INDEX = INGL_TYPE , BigEndianInt32(Sizeof(POINT_CONT_INDEX_DATA))
-// , POINT_CONT_INDEX_DATA ;
+// POINT_CONT_INDEX = INGL_TYPE , BigEndianInt32(Sizeof(POINT_CONT_INDEX_DATA)) , POINT_CONT_INDEX_DATA ;
 // POINT_CONT_INDEX_DATA = { BigEndianInt8( which continuity index ) } ;
-// POINT_LABEL_FLIP = INGL_LABL , BigEndianInt32(Sizeof(POINT_LABEL_FLIP_DATA))
-// , POINT_LABEL_FLIP_DATA ;
+// POINT_LABEL_FLIP = INGL_LABL , BigEndianInt32(Sizeof(POINT_LABEL_FLIP_DATA)) , POINT_LABEL_FLIP_DATA ;
 // POINT_LABEL_FLIP_DATA = { BigEndianInt8( label flipped ) } ;
-// CONTINUITY = INGL_CONT , BigEndianInt32(Sizeof(CONTINUITY_DATA)) ,
-// CONTINUITY_DATA ;
+// CONTINUITY = INGL_CONT , BigEndianInt32(Sizeof(CONTINUITY_DATA)) , CONTINUITY_DATA ;
 // CONTINUITY_DATA = CONTINUITY_INDEX , CONTINUITY_NAME , CONTINUITY_TEXT ;
 // CONTINUITY_INDEX = BigEndianInt8( index );
 // CONTINUITY_NAME = Null-terminated char* ;
@@ -204,6 +186,7 @@ struct Current_version_and_later {
 // If POINT_LABEL_FLIP is not supplied, all points assumed to be not flipped
 
 // version 0 to 3.1 unknown
+// clang-format on
 
 #define Make4CharWord(a, b, c, d) (((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
 
@@ -211,7 +194,9 @@ struct Current_version_and_later {
 #define INGL_GURK Make4CharWord('G', 'U', 'R', 'K')
 #define INGL_SHOW Make4CharWord('S', 'H', 'O', 'W')
 #define INGL_SHET Make4CharWord('S', 'H', 'E', 'T')
+#define INGL_SELE Make4CharWord('S', 'E', 'L', 'E')
 #define INGL_SIZE Make4CharWord('S', 'I', 'Z', 'E')
+#define INGL_CURR Make4CharWord('C', 'U', 'R', 'R')
 #define INGL_LABL Make4CharWord('L', 'A', 'B', 'L')
 #define INGL_MODE Make4CharWord('M', 'O', 'D', 'E')
 #define INGL_DESC Make4CharWord('D', 'E', 'S', 'C')
@@ -224,6 +209,7 @@ struct Current_version_and_later {
 #define INGL_CONT Make4CharWord('C', 'O', 'N', 'T')
 #define INGL_ECNT Make4CharWord('E', 'C', 'N', 'T')
 #define INGL_PCNT Make4CharWord('P', 'C', 'N', 'T')
+#define INGL_BACK Make4CharWord('B', 'A', 'C', 'K')
 #define INGL_PNTS Make4CharWord('P', 'N', 'T', 'S')
 #define INGL_PONT Make4CharWord('P', 'O', 'N', 'T')
 #define INGL_END Make4CharWord('E', 'N', 'D', ' ')
@@ -465,7 +451,7 @@ namespace Parser {
     {
         std::vector<std::tuple<uint32_t, Iter, size_t> > result;
         while (begin != end) {
-            auto length = (uint32_t)std::distance(begin, end);
+            auto length = std::distance(begin, end);
             if (length < 8) {
                 return result;
             }
@@ -474,7 +460,7 @@ namespace Parser {
             auto size = get_big_long(begin);
             begin += 4;
             length = std::distance(begin, end);
-            if (length < size + 8) {
+            if (static_cast<uint32_t>(length) < size + 8) {
                 return result;
             }
             auto data = begin;

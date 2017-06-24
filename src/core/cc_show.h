@@ -32,13 +32,16 @@
 #include <map>
 #include <memory>
 #include "animate.h"
+#include "cc_sheet.h"
 
 class CC_sheet;
-class ShowMode;
 class ShowUndoList;
 class CC_lasso;
 class CalChartDoc;
 class CC_coord;
+
+using CC_show_command = std::function<void(CC_show&)>;
+using CC_show_command_pair = std::pair<CC_show_command, CC_show_command>;
 
 // CalChart Show
 // The CalChart show object is what most parts of the system interact with
@@ -54,6 +57,7 @@ public:
 
     // you can create a show in two ways, from nothing, or from an input stream
     static std::unique_ptr<CC_show> Create_CC_show();
+    static std::unique_ptr<CC_show> Create_CC_show(std::vector<std::string> const& labels, unsigned columns, CC_coord const& new_march_position);
     static std::unique_ptr<CC_show> Create_CC_show(std::istream& stream);
 
 private:
@@ -65,70 +69,63 @@ private:
 public:
     ~CC_show();
 
-private:
-    std::vector<uint8_t> SerializeShowData() const;
-
 public:
     // How we save and load a show:
     std::vector<uint8_t> SerializeShow() const;
 
-public:
-    const std::string& GetDescr() const;
-    void SetDescr(const std::string& newdescr);
+    // Create command, consists of an action and undo action
+    CC_show_command_pair Create_SetCurrentSheetCommand(int n) const;
+    CC_show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
+    CC_show_command_pair Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, CC_coord const& new_march_position) const;
+    CC_show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
+    CC_show_command_pair Create_SetSheetBeatsCommand(int beats) const;
+    CC_show_command_pair Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where) const;
+    CC_show_command_pair Create_RemoveSheetCommand(int where) const;
+    CC_show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
+    CC_show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const;
+    CC_show_command_pair Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const;
+    CC_show_command_pair Create_DeletePointsCommand() const;
+    CC_show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
+    CC_show_command_pair Create_SetReferencePointToRef0(int ref) const;
+    CC_show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
+    CC_show_command_pair Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const;
+    CC_show_command_pair Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const;
+    CC_show_command_pair Create_SetLabelRightCommand(bool right) const;
+    CC_show_command_pair Create_ToggleLabelFlipCommand() const;
+    CC_show_command_pair Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const;
+    CC_show_command_pair Create_SetLabelVisibleCommand(bool isVisible) const;
+    CC_show_command_pair Create_ToggleLabelVisibilityCommand() const;
+    CC_show_command_pair Create_AddNewBackgroundImageCommand(calchart_core::ImageData const& image) const;
+    CC_show_command_pair Create_RemoveBackgroundImageCommand(int which) const;
+    CC_show_command_pair Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const;
 
-    void SetupNewShow();
-    size_t GetNumSheets() const;
-
-    CC_sheet_iterator_t GetSheetBegin();
-    const_CC_sheet_iterator_t GetSheetBegin() const;
-    CC_sheet_iterator_t GetSheetEnd();
-    const_CC_sheet_iterator_t GetSheetEnd() const;
-
-    const_CC_sheet_iterator_t GetNthSheet(unsigned n) const;
-    CC_sheet_iterator_t GetNthSheet(unsigned n);
-    const_CC_sheet_iterator_t GetCurrentSheet() const;
-    CC_sheet_iterator_t GetCurrentSheet();
-    unsigned GetCurrentSheetNum() const;
-    void SetCurrentSheet(unsigned n);
-
-    CC_sheet_container_t RemoveNthSheet(unsigned sheetidx);
-    void DeleteNthSheet(unsigned sheetidx);
-    void InsertSheetInternal(const CC_sheet& nsheet, unsigned sheetidx);
-    void InsertSheetInternal(const CC_sheet_container_t& nsheet,
-        unsigned sheetidx);
-    void InsertSheet(const CC_sheet& nsheet, unsigned sheetidx);
-    inline unsigned short GetNumPoints() const { return numpoints; }
-    void SetNumPoints(unsigned num, unsigned columns,
-        const CC_coord& new_march_position);
-    bool RelabelSheets(unsigned sht);
-
-    std::string GetPointLabel(unsigned i) const;
-    void SetPointLabel(const std::vector<std::string>& labels)
-    {
-        pt_labels = labels;
-    }
-    inline const std::vector<std::string>& GetPointLabels() const
-    {
-        return pt_labels;
-    }
+    // Accessors
+    auto GetSheetBegin() const { return mSheets.begin(); }
+    auto GetSheetEnd() const { return mSheets.end(); }
+    auto GetNthSheet(unsigned n) const { return GetSheetBegin() + n; }
+    auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
+    int GetNumSheets() const;
+    auto GetCurrentSheetNum() const { return mSheetNum; }
+    auto GetNumPoints() const { return static_cast<int>(mPtLabels.size()); }
+    std::string GetPointLabel(int i) const;
+    auto GetPointLabels() const { return mPtLabels; }
 
     bool AlreadyHasPrintContinuity() const;
 
-    // how to select points:
-    // Always select or unselect in groups
-    bool SelectAll();
-    bool UnselectAll();
-    void AddToSelection(const SelectionList& sl);
-    void SetSelection(const SelectionList& sl);
-    void RemoveFromSelection(const SelectionList& sl);
-    void ToggleSelection(const SelectionList& sl);
-    void SelectWithLasso(const CC_lasso& lasso, bool toggleSelected,
-        unsigned ref);
-    inline bool IsSelected(unsigned i) const
-    {
-        return selectionList.count(i) != 0;
-    }
-    inline const SelectionList& GetSelectionList() const { return selectionList; }
+    bool WillMovePoints(std::map<int, CC_coord> const& new_positions, int ref) const;
+
+    // utility
+    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
+    SelectionList MakeSelectAll() const;
+    SelectionList MakeUnselectAll() const;
+    SelectionList MakeAddToSelection(const SelectionList& sl) const;
+    SelectionList MakeRemoveFromSelection(const SelectionList& sl) const;
+    SelectionList MakeToggleSelection(const SelectionList& sl) const;
+    SelectionList MakeSelectWithLasso(const CC_lasso& lasso, int ref) const;
+
+    // Point selection
+    auto IsSelected(int i) const { return mSelectionList.count(i) != 0; }
+    auto GetSelectionList() const { return mSelectionList; }
 
     /*!
      * @brief Generates a JSONElement that could represent this
@@ -138,7 +135,7 @@ public:
      * a '.viewer' file.
      */
     JSONElement toOnlineViewerJSON(const Animation& compiledShow) const;
-    
+
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
      * could represent this show in an Online Viewer '.viewer' file.
@@ -147,13 +144,37 @@ public:
      * @param compiledShow An up-to-date Animation of the show.
      */
     void toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const;
+
 private:
-    std::string descr;
-    unsigned short numpoints;
-    CC_sheet_container_t sheets;
-    std::vector<std::string> pt_labels;
-    SelectionList selectionList; // order of selections
-    unsigned mSheetNum;
+    // modification of show is private, and externally done through create and exeucte commands
+    CC_sheet_container_t RemoveNthSheet(int sheetidx);
+    void InsertSheet(const CC_sheet& nsheet, int sheetidx);
+    void InsertSheet(const CC_sheet_container_t& nsheet, int sheetidx);
+    void SetCurrentSheet(int n);
+    void SetSelection(const SelectionList& sl);
+
+    void SetNumPoints(std::vector<std::string> const& labels, int columns, CC_coord const& new_march_position);
+    void DeletePoints(SelectionList const& sl);
+    void SetPointLabel(const std::vector<std::string>& labels);
+
+    // Descriptions aren't used, but keeping this alive.  See issue #203
+    auto GetDescr() const { return mDescr; }
+    void SetDescr(std::string const& newdescr) { mDescr = newdescr; }
+
+    auto GetSheetBegin() { return mSheets.begin(); }
+    auto GetSheetEnd() { return mSheets.end(); }
+    auto GetNthSheet(unsigned n) { return GetSheetBegin() + n; }
+    auto GetCurrentSheet() { return GetNthSheet(mSheetNum); }
+
+    // implementation and helper functions
+    std::vector<uint8_t> SerializeShowData() const;
+
+    // members
+    std::string mDescr;
+    CC_sheet_container_t mSheets;
+    std::vector<std::string> mPtLabels;
+    SelectionList mSelectionList; // order of selections
+    int mSheetNum;
 
     // unit tests
     friend void CC_show_UnitTests();

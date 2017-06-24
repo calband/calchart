@@ -107,7 +107,7 @@ docs/charthlp.tex.tar.gz: $(TEXDOCS)
 ps: docs/charthlp.ps
 html: docs/charthlp_contents.html
 
-$(WINOBJDIR)/README.txt : README.txt
+$(WINOBJDIR)/README.txt : README.md
 	sed 's/$$/\r/' $< > $@
 
 chartsrc.tar.gz: $(ALLSRCS)

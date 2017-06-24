@@ -22,12 +22,6 @@
 
 #pragma once
 
-#pragma warning(disable : 4005) // Suppress macro redefinition warnings in
-// stdint.h -- the file redefines INT16_MAX and
-// other similar defines
-#include <stdint.h>
-#pragma warning(default : 4005)
-
 #include <set>
 #include <string>
 
@@ -69,17 +63,27 @@ enum CC_DRAG_TYPES {
     CC_DRAG_POLY,
     CC_DRAG_LASSO,
     CC_DRAG_LINE,
-    CC_DRAG_CROSS
+    CC_DRAG_CROSSHAIRS,
+    CC_DRAG_SHAPE_ELLIPSE,
+    CC_DRAG_SHAPE_X,
+    CC_DRAG_SHAPE_CROSS,
+    CC_DRAG_SWAP,
 };
+
 enum CC_MOVE_MODES {
     CC_MOVE_NORMAL,
-    CC_MOVE_SWAP,
+    CC_MOVE_SHAPE_LINE,
+    CC_MOVE_SHAPE_X,
+    CC_MOVE_SHAPE_CROSS,
+    CC_MOVE_SHAPE_RECTANGLE,
+    CC_MOVE_SHAPE_ELLIPSE,
+    CC_MOVE_SHAPE_DRAW,
     CC_MOVE_LINE,
     CC_MOVE_ROTATE,
     CC_MOVE_SHEAR,
     CC_MOVE_REFL,
     CC_MOVE_SIZE,
-    CC_MOVE_GENIUS
+    CC_MOVE_GENIUS,
 };
 
-typedef std::set<unsigned> SelectionList;
+typedef std::set<int> SelectionList;

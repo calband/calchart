@@ -99,7 +99,7 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 
     std::ostringstream buffer;
 
-    int n = mShow->PrintToPS(buffer, eps, overview, minyards, mIsSheetPicked, config);
+    int n = mShow->PrintToPS(buffer, eps, overview, static_cast<int>(minyards), mIsSheetPicked, config);
     // stream to file:
     {
         wxFFileOutputStream outstream(s);
@@ -135,7 +135,7 @@ void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
     for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin();
          sheet != mShow->GetSheetEnd(); ++sheet) {
         if (mIsSheetPicked.count(std::distance(mShow->GetSheetBegin(), sheet))) {
-            markedChoices.Add(std::distance(mShow->GetSheetBegin(), sheet));
+            markedChoices.Add(static_cast<int>(std::distance(mShow->GetSheetBegin(), sheet)));
         }
     }
     dialog.SetSelections(markedChoices);
@@ -230,7 +230,7 @@ void PrintPostScriptDialog::CreateControls()
     wxButton* resetdefaults = new wxButton(this, CC_PRINT_BUTTON_RESET_DEFAULTS, wxT("&Reset Values"));
     horizontalsizer->Add(resetdefaults, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-    topsizer->Add(horizontalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    topsizer->Add(horizontalsizer, 0, wxALL, 5);
 
     wxBoxSizer* verticalsizer = NULL;
 #ifdef PRINT__RUN_CMD
@@ -398,7 +398,7 @@ bool PrintPostScriptDialog::TransferDataToWindow()
     text_cmd->SetValue(config.Get_PrintFile());
 #endif
     radio_orient->SetSelection(config.Get_PrintPSLandscape());
-    radio_method->SetSelection(config.Get_PrintPSModes());
+    radio_method->SetSelection(static_cast<int>(config.Get_PrintPSModes()));
     check_overview->SetValue(config.Get_PrintPSOverview());
     check_cont->SetValue(config.Get_PrintPSDoCont());
     if (check_pages) {

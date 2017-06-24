@@ -23,9 +23,11 @@
 #pragma once
 
 #include "calchartdoc.h"
-#include "CC_coord.h"
+#include "cc_coord.h"
+#include "modes.h"
 
 #include "ghost_module.h"
+#include "background_image.h"
 
 #include <wx/docview.h>
 
@@ -47,64 +49,75 @@ public:
 
     bool OnCreate(wxDocument* doc, long flags);
     void OnDraw(wxDC* dc);
-    void DrawOtherPoints(wxDC& dc, const std::map<unsigned, CC_coord>& positions);
+    void DrawOtherPoints(wxDC& dc, const std::map<int, CC_coord>& positions);
+    void OnDrawBackground(wxDC& dc);
     void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
     bool OnClose(bool deleteWindow = true);
 
     void OnWizardSetup(CalChartDoc& show);
 
     ///// Modify the show /////
-    bool DoRotatePointPositions(unsigned rotateAmount);
-    bool DoMovePoints(const std::map<unsigned, CC_coord>& transmat);
+    bool DoRotatePointPositions(int rotateAmount);
+    bool DoMovePoints(const std::map<int, CC_coord>& transmat);
+    bool DoDeletePoints();
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
-    bool DoSetDescription(const wxString& descr);
     void DoSetMode(const wxString& mode);
-    void DoSetShowInfo(unsigned numPoints, unsigned numColumns,
-        const std::vector<wxString>& labels);
-    bool DoSetSheetTitle(const wxString& descr);
-    bool DoSetSheetBeats(unsigned short beats);
+    void DoSetShowInfo(const std::vector<wxString>& labels, int numColumns);
+    void DoSetSheetTitle(const wxString& descr);
+    bool DoSetSheetBeats(int beats);
     bool DoSetPointsLabel(bool right);
     bool DoSetPointsLabelFlip();
     bool DoSetPointsLabelVisibility(bool isVisible);
     bool DoTogglePointsLabelVisibility();
-    bool DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht,
-        unsigned where);
-    bool DoInsertSheetsOtherShow(const CalChartDoc::CC_sheet_container_t& sht,
-        unsigned where, unsigned endpoint);
-    bool DoDeleteSheet(unsigned where);
+    void DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, int where);
+    bool DoDeleteSheet(int where);
     bool DoImportPrintableContinuity(const wxString& file);
+    bool DoRelabel();
+    std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
 
     ///// query show attributes /////
     int FindPoint(CC_coord pos) const;
     CC_coord PointPosition(int which) const;
-    unsigned GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
-    unsigned short GetNumSheets() const { return mShow->GetNumSheets(); }
+    auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
+    auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
-    CC_coord GetShowFieldOffset() const;
-    CC_coord GetShowFieldSize() const;
+    auto GetShowFieldOffset() const { return mShow->GetMode().Offset(); }
+    auto GetShowFieldSize() const { return mShow->GetMode().Size(); }
+    auto ClipPositionToShowMode(CC_coord const& pos) const { return mShow->GetMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
-    void GoToSheet(size_t which);
-    void GoToNextSheet();
-    void GoToPrevSheet();
+    void GoToSheet(int which);
+    void GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
+    void GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
 
-    void SetReferencePoint(unsigned which);
+    void SetReferencePoint(int which);
 
     ///// Select /////
-    void UnselectAll() { mShow->UnselectAll(); }
-    void AddToSelection(const SelectionList& sl);
-    void ToggleSelection(const SelectionList& sl);
+    void UnselectAll() { SetSelection(mShow->MakeUnselectAll()); }
+    void AddToSelection(const SelectionList& sl) { SetSelection(mShow->MakeAddToSelection(sl)); }
+    void ToggleSelection(const SelectionList& sl) { SetSelection(mShow->MakeToggleSelection(sl)); }
     void SelectWithLasso(const CC_lasso* lasso, bool toggleSelected);
     void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
         bool toggleSelected);
-    const SelectionList& GetSelectionList();
+    auto GetSelectionList() const { return mShow->GetSelectionList(); }
+    void SetSelection(const SelectionList& sl);
 
     ///// Drawing marcher's paths /////
     // call this when we need to generate the marcher's paths.
     void OnEnableDrawPaths(bool enable);
 
     GhostModule& getGhostModule() { return mGhostModule; };
+
+    void DoDrawBackground(bool enable);
+    bool DoingDrawBackground() const;
+    void DoPictureAdjustment(bool enable);
+    bool DoingPictureAdjustment() const;
+    bool AddBackgroundImage(const wxImage& image);
+    void OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc);
+    void OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc);
+    void OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc);
+    void OnBackgroundImageDelete();
 
 private:
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
@@ -117,13 +130,18 @@ private:
     void GeneratePaths();
     std::unique_ptr<Animation> mAnimation;
     bool mDrawPaths;
+    void UpdateBackgroundImages();
 
 private:
-    GhostModule mGhostModule;
+    GhostModule mGhostModule{};
 
-    CalChartDoc* mShow;
-    unsigned mCurrentReferencePoint;
+    CalChartDoc* mShow{};
+    int mCurrentReferencePoint{};
     CalChartConfiguration& mConfig;
+    std::vector<BackgroundImage> mBackgroundImages;
+    bool mDrawBackground{};
+    bool mAdjustBackgroundMode{};
+    int mWhichBackgroundIndex{};
 
     DECLARE_DYNAMIC_CLASS(FieldView)
 };

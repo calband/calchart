@@ -22,6 +22,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <numeric>
 
 #include "cc_shapes.h"
 #include "cc_drawcommand.h"
@@ -31,19 +32,19 @@ void CC_shape_1point::OnMove(const CC_coord& p, const CC_coord&)
     MoveOrigin(p);
 }
 
-void CC_shape_cross::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+void CC_shape_crosshairs::OnMove(const CC_coord& p, const CC_coord& snapped_p)
 {
     MoveOrigin(snapped_p);
 }
 
-std::vector<CC_DrawCommand> CC_shape_cross::GetCC_DrawCommand(float x,
+std::vector<CC_DrawCommand> CC_shape_crosshairs::GetCC_DrawCommand(float x,
     float y) const
 {
     std::vector<CC_DrawCommand> result;
-    result.emplace_back(origin.x + x - cross_width, origin.y + y - cross_width,
-        origin.x + x + cross_width, origin.y + y + cross_width);
-    result.emplace_back(origin.x + x + cross_width, origin.y + y - cross_width,
-        origin.x + x - cross_width, origin.y + y + cross_width);
+    result.emplace_back(origin.x + x - crosshairs_width, origin.y + y - crosshairs_width,
+        origin.x + x + crosshairs_width, origin.y + y + crosshairs_width);
+    result.emplace_back(origin.x + x + crosshairs_width, origin.y + y - crosshairs_width,
+        origin.x + x - crosshairs_width, origin.y + y + crosshairs_width);
     return result;
 }
 
@@ -62,6 +63,47 @@ std::vector<CC_DrawCommand> CC_shape_line::GetCC_DrawCommand(float x,
 {
     std::vector<CC_DrawCommand> result;
     result.emplace_back(origin.x + x, origin.y + y, point.x + x, point.y + y);
+    return result;
+}
+
+void CC_shape_x::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+{
+    MovePoint(snapped_p);
+}
+
+std::vector<CC_DrawCommand> CC_shape_x::GetCC_DrawCommand(float x,
+    float y) const
+{
+    std::vector<CC_DrawCommand> result;
+    result.emplace_back(origin.x + x, origin.y + y, point.x + x, point.y + y);
+    result.emplace_back(point.x + x, origin.y + y, origin.x + x, point.y + y);
+    return result;
+}
+
+void CC_shape_cross::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+{
+    MovePoint(snapped_p);
+}
+
+std::vector<CC_DrawCommand> CC_shape_cross::GetCC_DrawCommand(float x,
+    float y) const
+{
+    std::vector<CC_DrawCommand> result;
+    result.emplace_back(origin.x + (point.x - origin.x) / 2 + x, origin.y + y, origin.x + (point.x - origin.x) / 2 + x, point.y + y);
+    result.emplace_back(origin.x + x, origin.y + (point.y - origin.y) / 2 + y, point.x + x, origin.y + (point.y - origin.y) / 2 + y);
+    return result;
+}
+
+void CC_shape_ellipse::OnMove(const CC_coord& p, const CC_coord& snapped_p)
+{
+    MovePoint(snapped_p);
+}
+
+std::vector<CC_DrawCommand> CC_shape_ellipse::GetCC_DrawCommand(float x,
+    float y) const
+{
+    std::vector<CC_DrawCommand> result;
+    result.emplace_back(CC_DrawCommand::Ellipse, origin.x + x, origin.y + y, point.x + x, point.y + y);
     return result;
 }
 
@@ -174,6 +216,70 @@ void CC_lasso::End()
 }
 
 void CC_lasso::Append(const CC_coord& p) { pntlist.push_back(p); }
+
+float CC_lasso::GetDistance() const
+{
+    if (pntlist.empty()) {
+        return {};
+    }
+    auto iter = pntlist.begin();
+    auto curr_pnt = *iter++;
+    auto total = 0.0f;
+    while (iter != pntlist.end()) {
+        total += std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+        curr_pnt = *iter++;
+    }
+    return total;
+}
+
+std::vector<CC_coord> CC_lasso::GetPointsOnLine(int numpnts) const
+{
+    if (numpnts < 1 || pntlist.size() < 1) {
+        return {};
+    }
+    std::vector<CC_coord> results;
+    results.push_back(pntlist.front());
+    if (numpnts < 2) {
+        return results;
+    }
+
+    if (pntlist.size() < 2) {
+        return std::vector<CC_coord>(numpnts, *FirstPoint());
+    }
+
+    const auto each_segment = GetDistance() / (numpnts - 1);
+    auto iter = pntlist.begin();
+    auto curr_pnt = *iter++;
+    auto curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+    auto running_dist = each_segment;
+    while (iter != pntlist.end()) {
+        if (running_dist > curr_dist) {
+            running_dist -= curr_dist;
+            curr_pnt = *iter++;
+            curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+        }
+        else {
+            auto dist_vector = (*iter - curr_pnt);
+            auto factor = (running_dist / curr_dist);
+            dist_vector *= factor;
+            auto new_pnt = curr_pnt + dist_vector;
+
+            results.push_back(new_pnt);
+            // emergency rip chord on rounding cases
+            if (static_cast<int>(results.size()) == numpnts) {
+                return results;
+            }
+            curr_pnt = new_pnt;
+            curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
+            running_dist = each_segment;
+        }
+    }
+    // emergency rip chord on rounding cases
+    while (static_cast<int>(results.size()) < numpnts) {
+        results.push_back(pntlist.back());
+    }
+    return results;
+}
 
 // Test if inside polygon using odd-even rule
 bool CC_lasso::Inside(const CC_coord& p) const

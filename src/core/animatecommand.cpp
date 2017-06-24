@@ -85,7 +85,8 @@ float AnimateCommand::MotionDirection() const { return RealDirection(); }
 
 void AnimateCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
-JSONElement AnimateCommand::toOnlineViewerJSON(const CC_coord &start) const {
+JSONElement AnimateCommand::toOnlineViewerJSON(const CC_coord& start) const
+{
     JSONElement newViewerObject = JSONElement::makeNull();
     toOnlineViewerJSON(newViewerObject, start);
     return newViewerObject;
@@ -102,9 +103,10 @@ AnimateDir AnimateCommandMT::Direction() const { return dir; }
 
 float AnimateCommandMT::RealDirection() const { return realdir; }
 
-void AnimateCommandMT::toOnlineViewerJSON(JSONElement &dest, const CC_coord &start) const {
+void AnimateCommandMT::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const
+{
     JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
-    
+
     moveAccessor["type"] = "mark";
     moveAccessor["beats"] = NumBeats();
     moveAccessor["facing"] = ToOnlineViewer::angle(RealDirection());
@@ -184,9 +186,10 @@ AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt,
         pt.y + mVector.y + offset.y);
 }
 
-void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const {
+void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const
+{
     JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
-    
+
     moveAccessor["type"] = "even";
     moveAccessor["beats"] = NumBeats();
     moveAccessor["beats_per_step"] = 1;
@@ -290,9 +293,10 @@ AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt,
         mOrigin.y + offset.y);
 }
 
-void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const {
+void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const
+{
     JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
-    
+
     moveAccessor["type"] = "arc";
     moveAccessor["start_x"] = ToOnlineViewer::xPosition(start.x);
     moveAccessor["start_y"] = ToOnlineViewer::yPosition(start.y);
@@ -303,4 +307,3 @@ void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord&
     moveAccessor["beats_per_step"] = 1;
     moveAccessor["facing_offset"] = -mFace + 90;
 }
-

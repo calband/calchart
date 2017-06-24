@@ -24,13 +24,13 @@
 
 #include "cc_types.h"
 
-#define COORD_SHIFT 4
-#define COORD_DECIMAL (1 << COORD_SHIFT)
+constexpr auto COORD_SHIFT = 4;
+constexpr auto COORD_DECIMAL = (1 << COORD_SHIFT);
 
 // RoundToCoord: Use when number is already in Coord format, just needs to be
 // rounded
 template <typename T>
-static inline Coord RoundToCoord(T inCoord)
+auto RoundToCoord(T inCoord)
 {
     return static_cast<Coord>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
 }
@@ -38,12 +38,12 @@ static inline Coord RoundToCoord(T inCoord)
 // Float2Coord, Coord2Float
 //  Use when we want to convert to Coord system
 template <typename T>
-static inline Coord Float2Coord(T a)
+auto Float2Coord(T a)
 {
-    return RoundToCoord(a * COORD_DECIMAL);
+    return static_cast<Coord>(RoundToCoord(a * COORD_DECIMAL));
 }
 template <typename T>
-static inline float Coord2Float(T a)
+auto Coord2Float(T a)
 {
     return a / (float)COORD_DECIMAL;
 }
@@ -51,14 +51,14 @@ static inline float Coord2Float(T a)
 // Int2Coord, Coord2Int
 //  Use when we want to convert to Coord system
 template <typename T>
-static inline Coord Int2Coord(T a)
+auto Int2Coord(T a)
 {
-    return a * COORD_DECIMAL;
+    return static_cast<Coord>(a * COORD_DECIMAL);
 }
 template <typename T>
-static inline int Coord2Int(T a)
+auto Coord2Int(T a)
 {
-    return a / COORD_DECIMAL;
+    return static_cast<int>(a / COORD_DECIMAL);
 }
 
 enum CollisionType {
@@ -82,25 +82,37 @@ public:
 
     CollisionType DetectCollision(const CC_coord& c) const;
 
-    inline CC_coord& operator+=(const CC_coord& c)
+    CC_coord& operator+=(const CC_coord& c)
     {
         x += c.x;
         y += c.y;
         return *this;
     }
-    inline CC_coord& operator-=(const CC_coord& c)
+    CC_coord& operator-=(const CC_coord& c)
     {
         x -= c.x;
         y -= c.y;
         return *this;
     }
-    inline CC_coord& operator*=(short s)
+    CC_coord& operator*=(short s)
     {
         x *= s;
         y *= s;
         return *this;
     }
-    inline CC_coord& operator/=(short s)
+    CC_coord& operator/=(short s)
+    {
+        x /= s;
+        y /= s;
+        return *this;
+    }
+    CC_coord& operator*=(double s)
+    {
+        x *= s;
+        y *= s;
+        return *this;
+    }
+    CC_coord& operator/=(double s)
     {
         x /= s;
         y /= s;
@@ -109,6 +121,7 @@ public:
 
     Coord x, y;
 };
+
 inline CC_coord operator+(const CC_coord& a, const CC_coord& b)
 {
     return CC_coord(a.x + b.x, a.y + b.y);

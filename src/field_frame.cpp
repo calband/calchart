@@ -71,11 +71,7 @@ const int zoom_amounts[] = {
 
 static const wxChar* file_wild = FILE_WILDCARDS;
 
-struct GridValue {
-    Coord num, sub;
-};
-
-GridValue gridvalue[] = { { 1, 0 },
+std::pair<Coord, Coord> gridvalue[] = { { 1, 0 },
     { Int2Coord(1), 0 },
     { Int2Coord(2), 0 },
     { Int2Coord(4), 0 },
@@ -105,17 +101,15 @@ EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, FieldFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_SHEET_TITLE, FieldFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, FieldFrame::OnCmdSetBeats)
 EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
-EVT_MENU(CALCHART__SETDESCRIPTION, FieldFrame::OnCmdSetDescription)
 EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
 EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
+EVT_MENU(CALCHART__SELECT_ALL, FieldFrame::OnCmdSelectAll)
 EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
 EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
+EVT_MENU(CALCHART__ShowBackgroundImages, FieldFrame::OnCmd_ShowBackgroundImages)
 EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
-EVT_MENU(CALCHART__AdjustBackgroundImage,
-    FieldFrame::OnCmd_AdjustBackgroundImage)
-EVT_MENU(CALCHART__RemoveBackgroundImage,
-    FieldFrame::OnCmd_RemoveBackgroundImage)
+EVT_MENU(CALCHART__AdjustBackgroundImageMode, FieldFrame::OnCmd_AdjustBackgroundImageMode)
 EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
@@ -127,6 +121,12 @@ EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
 EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
 EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
 EVT_MENU(CALCHART__swap, FieldFrame::OnCmd_swap)
+EVT_MENU(CALCHART__shape_line, FieldFrame::OnCmd_shape_line)
+EVT_MENU(CALCHART__shape_x, FieldFrame::OnCmd_shape_x)
+EVT_MENU(CALCHART__shape_cross, FieldFrame::OnCmd_shape_cross)
+EVT_MENU(CALCHART__shape_box, FieldFrame::OnCmd_shape_box)
+EVT_MENU(CALCHART__shape_ellipse, FieldFrame::OnCmd_shape_ellipse)
+EVT_MENU(CALCHART__shape_draw, FieldFrame::OnCmd_shape_draw)
 EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
 EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
 EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
@@ -221,8 +221,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Create a new show"));
     file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"),
         wxT("Load a saved show"));
-    file_menu->Append(CALCHART__APPEND_FILE, wxT("&Append..."),
-        wxT("Append a show to the end"));
     file_menu->Append(CALCHART__IMPORT_CONT_FILE,
         wxT("&Import Continuity...\tCTRL-I"),
         wxT("Import continuity text"));
@@ -266,16 +264,18 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Insert a saved stuntsheet after this one"));
     edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"),
         wxT("Delete this stuntsheet"));
+    edit_menu->Append(CALCHART__APPEND_FILE, wxT("Append Show..."),
+        wxT("Append a show to the end"));
     edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"),
         wxT("Relabel all stuntsheets after this one"));
     edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"),
         wxT("Setup number of marchers"));
-    edit_menu->Append(CALCHART__SETDESCRIPTION, wxT("Set Show &Description..."),
-        wxT("Set the show description"));
     edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."),
         wxT("Set the show mode"));
     edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."),
         wxT("Select Points"));
+    edit_menu->Append(CALCHART__SELECT_ALL, wxT("Select &All...\tCTRL-A"),
+        wxT("Select All Points"));
     edit_menu->Append(CALCHART__SET_SHEET_TITLE,
         wxT("Set Sheet &Title...\tCTRL-T"),
         wxT("Change the title of this stuntsheet"));
@@ -299,18 +299,18 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Open show in CalChart Viewer"));
 
     wxMenu* backgroundimage_menu = new wxMenu;
+    backgroundimage_menu->AppendCheckItem(CALCHART__ShowBackgroundImages,
+        wxT("Show Background Images"),
+        wxT("Toggle showing background images"));
     backgroundimage_menu->Append(CALCHART__AddBackgroundImage,
         wxT("Add Background Image..."),
         wxT("Add a background image"));
-    backgroundimage_menu->Append(CALCHART__AdjustBackgroundImage,
-        wxT("Adjust Background Image..."),
-        wxT("Adjust a background image"));
-    backgroundimage_menu->Append(CALCHART__RemoveBackgroundImage,
-        wxT("Remove Background Image..."),
-        wxT("Remove a background image"));
+    backgroundimage_menu->AppendCheckItem(CALCHART__AdjustBackgroundImageMode,
+        wxT("Image Adjust Mode..."),
+        wxT("Mode to adjust background images"));
+    backgroundimage_menu->Enable(CALCHART__ShowBackgroundImages, true);
     backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
-    backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImage, false);
-    backgroundimage_menu->Enable(CALCHART__RemoveBackgroundImage, false);
+    backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImageMode, true);
 
     wxMenu* ghost_menu = new wxMenu;
     ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"),
@@ -323,7 +323,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         wxT("Draw a ghost of a particular stuntsheet"));
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"),
+    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."),
         wxT("Information about the program"));
     help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"),
         wxT("Help on using CalChart"));
@@ -344,13 +344,12 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     // Add the field canvas
     this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
-    mCanvas = new FieldCanvas(view, this, config.Get_FieldFrameZoom());
+    mCanvas = new FieldCanvas(*static_cast<FieldView*>(view), this, config.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
     CalChartDoc* show = static_cast<CalChartDoc*>(doc);
     SetTitle(show->GetTitle());
-    show->SetCurrentSheet(0);
 
     // Add the controls
     wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
@@ -543,14 +542,14 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event) {
-    if (GetShow())
-    {
-        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event)
+{
+    if (GetShow()) {
+        wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
         if (saveFileDialog.ShowModal() == wxID_CANCEL)
             return;
-        
+
         if (!GetShow()->exportViewerFile(saveFileDialog.GetPath())) {
             wxMessageBox(wxT("There was a problem exporting the viewer file.\n") + saveFileDialog.GetPath(), wxT("Exporting Viewer File"));
             return;
@@ -619,11 +618,10 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
         endValue = beginValue;
     }
 
-    int currend = GetShow()->GetNumSheets();
-    CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(beginValue - 1),
-        (&show)->GetNthSheet(endValue));
-    GetFieldView()->DoInsertSheetsOtherShow(
-        sheets, GetFieldView()->GetCurrentSheetNum() + 1, currend - 1);
+    CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
+        (&show)->GetNthSheet(static_cast<int>(endValue)));
+    GetFieldView()->DoInsertSheets(
+        sheets, GetFieldView()->GetCurrentSheetNum() + 1);
 }
 
 void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
@@ -633,11 +631,11 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
             new wxCustomDataObject(kSheetDataClipboardFormat));
         std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
 
-        uint16_t numPoints = GetShow()->GetNumPoints();
+        auto numPoints = GetShow()->GetNumPoints();
 
-        int bytesForNumPoints = sizeof(numPoints);
-        int bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
-        int totalBytes = bytesForNumPoints + bytesForSheetData;
+        auto bytesForNumPoints = sizeof(numPoints);
+        auto bytesForSheetData = serializedSheet.size() * sizeof(uint8_t);
+        auto totalBytes = bytesForNumPoints + bytesForSheetData;
         std::vector<char> clipboardData(totalBytes);
         memcpy(clipboardData.data(), &numPoints, bytesForNumPoints);
         memcpy(clipboardData.data() + bytesForNumPoints, serializedSheet.data(),
@@ -694,18 +692,12 @@ void FieldFrame::OnCmdDelete(wxCommandEvent& event)
     }
 }
 
+// grey out if we're on a sheet
 void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 {
     if (GetFieldView()->GetCurrentSheetNum() + 1 < GetFieldView()->GetNumSheets()) {
-        if (wxMessageBox(wxT("Relabeling sheets is not undoable.\nProceed?"),
-                wxT("Relabel sheets"), wxYES_NO)
-            == wxYES) {
-            if (!GetShow()->RelabelSheets(GetFieldView()->GetCurrentSheetNum()))
-                (void)wxMessageBox(wxT("Stuntsheets don't match"),
-                    wxT("Relabel sheets"));
-            else {
-                GetDocument()->Modify(true);
-            }
+        if (!GetFieldView()->DoRelabel()) {
+            (void)wxMessageBox(wxT("Stuntsheets don't match"), wxT("Relabel sheets"));
         }
     }
     else {
@@ -758,18 +750,13 @@ void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
         if (!s.empty()) {
             long val;
             if (s.ToLong(&val)) {
-                GetFieldView()->DoSetSheetBeats(val);
+                GetFieldView()->DoSetSheetBeats(static_cast<int>(val));
             }
         }
     }
 }
 
 void FieldFrame::OnCmdSetup(wxCommandEvent& event) { Setup(); }
-
-void FieldFrame::OnCmdSetDescription(wxCommandEvent& event)
-{
-    SetDescription();
-}
 
 void FieldFrame::OnCmdSetMode(wxCommandEvent& event) { SetMode(); }
 
@@ -782,6 +769,13 @@ void FieldFrame::OnCmdPoints(wxCommandEvent& event)
     }
 }
 
+void FieldFrame::OnCmdSelectAll(wxCommandEvent& event)
+{
+    if (GetShow()) {
+        GetShow()->SetSelection(GetShow()->MakeSelectAll());
+    }
+}
+
 void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
 {
     // we want to have only animation frame at a time
@@ -791,8 +785,8 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
     else if (GetShow()) {
         mAnimationFrame = new AnimationFrame(
             [this]() { this->ClearAnimationFrame(); }, GetShow(), config, GetView(),
-            this, wxSize(config.Get_AnimationFrameWidth(),
-                      config.Get_AnimationFrameHeight()));
+            this, wxSize(static_cast<int>(config.Get_AnimationFrameWidth()),
+                      static_cast<int>(config.Get_AnimationFrameHeight())));
     }
 }
 
@@ -827,14 +821,44 @@ void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
     SetCurrentLasso(CC_DRAG_LASSO);
 }
 
+void FieldFrame::OnCmd_swap(wxCommandEvent& event)
+{
+    SetCurrentLasso(CC_DRAG_SWAP);
+}
+
 void FieldFrame::OnCmd_move(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_NORMAL);
 }
 
-void FieldFrame::OnCmd_swap(wxCommandEvent& event)
+void FieldFrame::OnCmd_shape_line(wxCommandEvent& event)
 {
-    SetCurrentMove(CC_MOVE_SWAP);
+    SetCurrentMove(CC_MOVE_SHAPE_LINE);
+}
+
+void FieldFrame::OnCmd_shape_x(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_X);
+}
+
+void FieldFrame::OnCmd_shape_cross(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_CROSS);
+}
+
+void FieldFrame::OnCmd_shape_box(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_RECTANGLE);
+}
+
+void FieldFrame::OnCmd_shape_ellipse(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_ELLIPSE);
+}
+
+void FieldFrame::OnCmd_shape_draw(wxCommandEvent& event)
+{
+    SetCurrentMove(CC_MOVE_SHAPE_DRAW);
 }
 
 void FieldFrame::OnCmd_line(wxCommandEvent& event)
@@ -967,25 +991,40 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
             wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
             return;
         }
-        if (!mCanvas->SetBackgroundImage(image)) {
+        if (!GetFieldView()->AddBackgroundImage(image)) {
             wxLogError(wxT("Couldn't load image from '%s'."), filename.c_str());
             return;
         }
-        GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(true);
-        GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(true);
+        GetFieldView()->DoPictureAdjustment(true);
+        GetFieldView()->DoDrawBackground(true);
+        GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(true);
+        GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(true);
+        mCanvas->Refresh();
     }
 }
 
-void FieldFrame::OnCmd_AdjustBackgroundImage(wxCommandEvent& event)
+void FieldFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
 {
-    mCanvas->AdjustBackgroundImage(true);
+    bool toggle = !GetFieldView()->DoingPictureAdjustment();
+    GetFieldView()->DoPictureAdjustment(toggle);
+    GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+    if (toggle) {
+        GetFieldView()->DoDrawBackground(toggle);
+        GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
+    }
+    mCanvas->Refresh();
 }
 
-void FieldFrame::OnCmd_RemoveBackgroundImage(wxCommandEvent& event)
+void FieldFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
 {
-    mCanvas->RemoveBackgroundImage();
-    GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImage)->Enable(false);
-    GetMenuBar()->FindItem(CALCHART__RemoveBackgroundImage)->Enable(false);
+    bool toggle = !GetFieldView()->DoingDrawBackground();
+    GetFieldView()->DoDrawBackground(toggle);
+    GetMenuBar()->FindItem(CALCHART__ShowBackgroundImages)->Check(toggle);
+    if (!toggle) {
+        GetFieldView()->DoPictureAdjustment(toggle);
+        GetMenuBar()->FindItem(CALCHART__AdjustBackgroundImageMode)->Check(toggle);
+    }
+    mCanvas->Refresh();
 }
 
 void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
@@ -1006,7 +1045,7 @@ void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
         long targetSheetNum = 0;
         if (targetSheet.ToLong(&targetSheetNum)) {
             GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific,
-                targetSheetNum - 1);
+                static_cast<int>(targetSheetNum) - 1);
         }
         else {
             wxMessageBox(wxT("The input must be a number."),
@@ -1042,34 +1081,19 @@ void FieldFrame::OnSize(wxSizeEvent& event)
 // Append a show with file selector
 void FieldFrame::AppendShow()
 {
-    wxString s;
-    unsigned currend;
-
-    s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString,
-        wxEmptyString, file_wild);
-    if (!s.IsEmpty()) {
-        CalChartDoc* shw = new CalChartDoc();
-        if (shw->OnOpenDocument(s)) {
-            if (shw->GetNumPoints() == GetShow()->GetNumPoints()) {
-                currend = GetShow()->GetNumSheets();
-                GetFieldView()->DoInsertSheets(
-                    CC_show::CC_sheet_container_t(shw->GetSheetBegin(),
-                        shw->GetSheetEnd()),
-                    currend);
-                // This is bad, we are relabeling outside of adding sheets...
-                if (!GetShow()->RelabelSheets(currend - 1))
-                    (void)wxMessageBox(wxT("Stuntsheets don't match"),
-                        wxT("Append Error"));
-            }
-            else {
-                (void)wxMessageBox(wxT("The blocksize doesn't match"),
-                    wxT("Append Error"));
-            }
-        }
-        else {
-            (void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
-        }
-        delete shw;
+    auto s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
+    if (s.IsEmpty()) {
+        return;
+    }
+    auto shw = std::make_unique<CalChartDoc>();
+    if (!shw->OnOpenDocument(s)) {
+        (void)wxMessageBox(wxT("Error Opening show"), wxT("Load Error"));
+        return;
+    }
+    auto result = GetFieldView()->DoAppendShow(std::move(shw));
+    if (!result.first) {
+        (void)wxMessageBox(result.second, wxT("Append Error"));
+        return;
     }
 }
 
@@ -1085,37 +1109,15 @@ void FieldFrame::ImportContFile()
     }
 }
 
-static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
+std::pair<Coord, Coord> FieldFrame::GridChoice() const
 {
-    Coord a2 = (a + (n >> 1)) & (~(n - 1));
-    Coord h = s >> 1;
-    if ((a - a2) >= h)
-        return a2 + s;
-    else if ((a - a2) < -h)
-        return a2 - s;
-    else
-        return a2;
-}
-
-void FieldFrame::SnapToGrid(CC_coord& c)
-{
-    Coord gridn, grids;
-    int n = mGridChoice->GetSelection();
-
-    gridn = gridvalue[n].num;
-    grids = gridvalue[n].sub;
-
-    c.x = SNAPGRID(c.x, gridn, grids);
-    // Adjust so 4 step grid will be on visible grid
-    c.y = SNAPGRID(c.y - Int2Coord(2), gridn, grids) + Int2Coord(2);
+    return gridvalue[mGridChoice->GetSelection()];
 }
 
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
     // retoggle the tool because we want it to draw as selected
-    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO)
-            ? CALCHART__lasso
-            : CALCHART__box;
+    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : (type == CC_DRAG_SWAP) ? CALCHART__swap : CALCHART__box;
     wxToolBar* tb = GetToolBar();
     tb->ToggleTool(toggleID, true);
 
@@ -1131,26 +1133,20 @@ void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
     mCanvas->SetCurrentMove(type);
 }
 
+// call by the canvas to inform that the move has been set.  Don't call back to canvas
+void FieldFrame::CanvasSetCurrentMove(CC_MOVE_MODES type)
+{
+    // retoggle the tool because we want it to draw as selected
+    wxToolBar* tb = GetToolBar();
+    tb->ToggleTool(CALCHART__move + type, true);
+}
+
 void FieldFrame::Setup()
 {
     if (GetShow()) {
         ShowInfoReq dialog(*GetShow(), this);
         if (dialog.ShowModal() == wxID_OK) {
-            GetFieldView()->DoSetShowInfo(dialog.GetNumberPoints(),
-                dialog.GetNumberColumns(),
-                dialog.GetLabels());
-        }
-    }
-}
-
-void FieldFrame::SetDescription()
-{
-    if (GetShow()) {
-        wxTextEntryDialog dialog(this, wxT("Please modify the show description\n"),
-            wxT("Edit show description\n"),
-            GetShow()->GetDescr(), wxOK | wxCANCEL);
-        if (dialog.ShowModal() == wxID_OK) {
-            GetFieldView()->DoSetDescription(dialog.GetValue());
+            GetFieldView()->DoSetShowInfo(dialog.GetLabels(), dialog.GetNumberColumns());
         }
     }
 }
@@ -1204,8 +1200,7 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
     else if (sel == sizeof(zoom_amounts) / sizeof(zoom_amounts[0])) {
         zoom_amount = mCanvas->ZoomToFitFactor();
     }
-    config.Set_FieldFrameZoom(zoom_amount);
-    mCanvas->SetZoom(zoom_amount);
+    do_zoom(zoom_amount);
 }
 
 void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
@@ -1231,10 +1226,15 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
         // return if not valid
         return;
     }
-    config.Set_FieldFrameZoom(zoom_amount);
-    // set the text to have '%' appended
-    zoomtxt += wxT("%");
+    do_zoom(zoom_amount);
+}
+
+void FieldFrame::do_zoom(float zoom_amount)
+{
+    wxString zoomtxt;
+    zoomtxt.sprintf(wxT("%d%%"), int(zoom_amount * 100.0));
     mZoomBox->SetValue(zoomtxt);
+    config.Set_FieldFrameZoom(zoom_amount);
     mCanvas->SetZoom(zoom_amount);
 }
 

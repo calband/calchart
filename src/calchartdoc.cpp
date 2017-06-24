@@ -22,7 +22,7 @@
 
 #include <fstream>
 
-#include "CalChartDoc.h"
+#include "calchartdoc.h"
 
 #include "cc_command.h"
 #include "confgr.h"
@@ -57,7 +57,7 @@ CalChartDoc::CalChartDoc()
     , mMode(wxGetApp().GetMode(kShowModeStrings[0]))
     , mTimer(*this)
 {
-    mTimer.Start(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval() * 1000);
+    mTimer.Start(static_cast<int>(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()) * 1000);
 }
 
 // When a file is opened, we first check to see if there is a temporary
@@ -137,12 +137,13 @@ bool CalChartDoc::OnSaveDocument(const wxString& filename)
 // Destroy a show
 CalChartDoc::~CalChartDoc() {}
 
-bool CalChartDoc::ImportPrintableContinuity(
-    const std::vector<std::string>& lines)
+std::pair<bool, std::map<int, std::pair<std::string, std::string> > > CalChartDoc::ImportPrintableContinuity(
+    const std::vector<std::string>& lines) const
 {
+    std::map<int, std::pair<std::string, std::string> > result;
     // should this first clear out all the continuity?
     if (lines.empty()) {
-        return true; // done, technically
+        return { false, {} }; // done, technically
     }
     try {
         // check to make sure the first line starts with %%
@@ -152,7 +153,7 @@ bool CalChartDoc::ImportPrintableContinuity(
         }
 
         // first, split the lines into groups for each page
-        unsigned sheet = 0;
+        auto sheet = 0;
         std::string number(lines.front(), 2);
         std::string current_print_cont;
         bool first_line = true;
@@ -160,7 +161,7 @@ bool CalChartDoc::ImportPrintableContinuity(
             // new sheet; push the current one into the map and reset it for the next
             // time
             if ((line->length() >= 2) && (line->at(0) == '%') && (line->at(1) == '%')) {
-                GetNthSheet(sheet)->SetPrintableContinuity(number, current_print_cont);
+                result[sheet] = { number, current_print_cont };
                 number = std::string(*line, 2);
                 current_print_cont.clear();
                 ++sheet;
@@ -182,38 +183,9 @@ bool CalChartDoc::ImportPrintableContinuity(
         wxString message = wxT("Error encountered:\n");
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
-        return false;
+        return { false, {} };
     }
-    UpdateAllViews();
-
-    return true;
-}
-
-bool CalChartDoc::SetPrintableContinuity(unsigned current_sheet,
-    const std::string& number,
-    const std::string& lines)
-{
-    // should this first clear out all the continuity?
-    if (lines.empty()) {
-        return true; // done, technically
-    }
-    try {
-        // check to make sure the first line starts with %%
-        if (current_sheet >= GetNumSheets()) {
-            // out of rang
-            throw std::runtime_error("Continuity sheet out of range");
-        }
-        GetNthSheet(current_sheet)->SetPrintableContinuity(number, lines);
-    }
-    catch (CC_FileException& e) {
-        wxString message = wxT("Error encountered:\n");
-        message += e.what();
-        wxMessageBox(message, wxT("Error!"));
-        return false;
-    }
-    UpdateAllViews();
-
-    return true;
+    return { true, result };
 }
 
 template <typename T>
@@ -281,22 +253,22 @@ wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
 }
 #endif
 
-bool CalChartDoc::exportViewerFile(const wxString& filepath) {    
+bool CalChartDoc::exportViewerFile(const wxString& filepath)
+{
     JSONElement mainObject = JSONElement::makeObject();
-    
+
     JSONDataObjectAccessor mainObjectAccessor = mainObject;
-    
+
     mainObjectAccessor["meta"] = JSONElement::makeObject();
     mainObjectAccessor["show"] = JSONElement::makeNull();
-    
-    
+
     JSONDataObjectAccessor metaObjectAccessor = mainObjectAccessor["meta"];
     metaObjectAccessor["version"] = ("1.0.0");
-    metaObjectAccessor["index_name"] = "MANUAL"; // TODO; for now, manually add index_name to viewer file after saving
+    metaObjectAccessor["index_name"] = "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)"; // TODO; for now, manually add index_name to viewer file after saving
     metaObjectAccessor["type"] = "viewer";
-    
+
     mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow, nullptr, nullptr));
-    
+
     return JSONExporter::exportJSON(filepath.ToStdString(), mainObject);
 }
 
@@ -304,14 +276,6 @@ void CalChartDoc::FlushAllTextWindows()
 {
     CalChartDoc_FlushAllViews flushMod;
     UpdateAllViews(NULL, &flushMod);
-}
-
-const std::string& CalChartDoc::GetDescr() const { return mShow->GetDescr(); }
-
-void CalChartDoc::SetDescr(const std::string& newdescr)
-{
-    mShow->SetDescr(newdescr);
-    UpdateAllViews();
 }
 
 void CalChartDoc::Modify(bool b)
@@ -347,62 +311,11 @@ void CalChartDoc::Autosave()
     }
 }
 
-CalChartDoc::const_CC_sheet_iterator_t
-CalChartDoc::GetNthSheet(unsigned n) const
+void CalChartDoc::SetCurrentSheet(int n)
 {
-    return mShow->GetNthSheet(n);
-}
-
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetNthSheet(unsigned n)
-{
-    return mShow->GetNthSheet(n);
-}
-
-CC_show::CC_sheet_container_t CalChartDoc::RemoveNthSheet(unsigned sheetidx)
-{
-    auto result = mShow->RemoveNthSheet(sheetidx);
+    auto cmd = mShow->Create_SetCurrentSheetCommand(n);
+    cmd.first(*mShow);
     UpdateAllViews();
-    return result;
-}
-
-void CalChartDoc::SetCurrentSheet(unsigned n)
-{
-    mShow->SetCurrentSheet(n);
-    UpdateAllViews();
-}
-
-CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetCurrentSheet() const
-{
-    return mShow->GetCurrentSheet();
-}
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetCurrentSheet()
-{
-    return mShow->GetCurrentSheet();
-}
-unsigned short CalChartDoc::GetNumSheets() const
-{
-    return mShow->GetNumSheets();
-}
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetSheetBegin()
-{
-    return mShow->GetSheetBegin();
-}
-CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetBegin() const
-{
-    return mShow->GetSheetBegin();
-}
-CalChartDoc::CC_sheet_iterator_t CalChartDoc::GetSheetEnd()
-{
-    return mShow->GetSheetEnd();
-}
-CalChartDoc::const_CC_sheet_iterator_t CalChartDoc::GetSheetEnd() const
-{
-    return mShow->GetSheetEnd();
-}
-
-unsigned CalChartDoc::GetCurrentSheetNum() const
-{
-    return mShow->GetCurrentSheetNum();
 }
 
 std::unique_ptr<Animation>
@@ -413,116 +326,23 @@ CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
         new Animation(*mShow, notifyStatus, notifyErrorList));
 }
 
-void CalChartDoc::SetupNewShow()
+void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<ShowMode> newmode)
 {
-    mShow->SetupNewShow();
+    SetMode(std::move(newmode));
+    mShow = CC_show::Create_CC_show(labels, columns, mMode->FieldOffset());
     UpdateAllViews();
 }
 
-void CalChartDoc::InsertSheetInternal(const CC_sheet& sheet,
-    unsigned sheetidx)
+std::pair<bool, std::vector<size_t> > CalChartDoc::GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const
 {
-    mShow->InsertSheetInternal(sheet, sheetidx);
-    UpdateAllViews();
-}
-
-void CalChartDoc::InsertSheetInternal(const CC_sheet_container_t& sheet,
-    unsigned sheetidx)
-{
-    mShow->InsertSheetInternal(sheet, sheetidx);
-    UpdateAllViews();
-}
-
-void CalChartDoc::InsertSheet(const CC_sheet& nsheet, unsigned sheetidx)
-{
-    mShow->InsertSheet(nsheet, sheetidx);
-    UpdateAllViews();
-}
-
-// warning, the labels might not match up
-void CalChartDoc::SetNumPoints(unsigned num, unsigned columns)
-{
-    mShow->SetNumPoints(num, columns, mMode->FieldOffset());
-    UpdateAllViews();
-}
-
-unsigned short CalChartDoc::GetNumPoints() const
-{
-    return mShow->GetNumPoints();
-}
-
-bool CalChartDoc::RelabelSheets(unsigned sht)
-{
-    auto result = mShow->RelabelSheets(sht);
-    UpdateAllViews();
-    return result;
-}
-
-std::string CalChartDoc::GetPointLabel(unsigned i) const
-{
-    return mShow->GetPointLabel(i);
-}
-
-void CalChartDoc::SetPointLabel(const std::vector<std::string>& labels)
-{
-    mShow->SetPointLabel(labels);
-    UpdateAllViews();
-}
-
-const std::vector<std::string>& CalChartDoc::GetPointLabels() const
-{
-    return mShow->GetPointLabels();
-}
-
-bool CalChartDoc::SelectAll()
-{
-    auto result = mShow->SelectAll();
-    UpdateAllViews();
-    return result;
-}
-
-bool CalChartDoc::UnselectAll()
-{
-    auto result = mShow->UnselectAll();
-    UpdateAllViews();
-    return result;
+    return mShow->GetRelabelMapping(source_sheet, target_sheets);
 }
 
 void CalChartDoc::SetSelection(const SelectionList& sl)
 {
-    mShow->SetSelection(sl);
+    auto cmd = mShow->Create_SetSelectionCommand(sl);
+    cmd.first(*mShow);
     UpdateAllViews();
-}
-
-void CalChartDoc::AddToSelection(const SelectionList& sl)
-{
-    mShow->AddToSelection(sl);
-    UpdateAllViews();
-}
-
-void CalChartDoc::RemoveFromSelection(const SelectionList& sl)
-{
-    mShow->RemoveFromSelection(sl);
-    UpdateAllViews();
-}
-
-void CalChartDoc::ToggleSelection(const SelectionList& sl)
-{
-    mShow->ToggleSelection(sl);
-    UpdateAllViews();
-}
-
-void CalChartDoc::SelectWithLasso(const CC_lasso& lasso, bool toggleSelected,
-    unsigned ref)
-{
-    mShow->SelectWithLasso(lasso, toggleSelected, ref);
-    UpdateAllViews();
-}
-
-bool CalChartDoc::IsSelected(unsigned i) const { return mShow->IsSelected(i); }
-const SelectionList& CalChartDoc::GetSelectionList() const
-{
-    return mShow->GetSelectionList();
 }
 
 const ShowMode& CalChartDoc::GetMode() const { return *mMode; }
@@ -534,18 +354,6 @@ void CalChartDoc::SetMode(std::unique_ptr<const ShowMode> m)
     }
     std::swap(mMode, m);
     UpdateAllViews();
-}
-
-CC_show CalChartDoc::ShowSnapShot() const { return *mShow.get(); }
-
-void CalChartDoc::RestoreSnapShot(const CC_show& snapshot)
-{
-    mShow.reset(new CC_show(snapshot));
-}
-
-bool CalChartDoc::AlreadyHasPrintContinuity() const
-{
-    return mShow->AlreadyHasPrintContinuity();
 }
 
 int CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview,
@@ -579,4 +387,220 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview,
         });
     return printShowToPS(buffer, eps, mShow->GetCurrentSheetNum(), isPicked,
         GetTitle().ToStdString());
+}
+
+// CalChartDocCommand consist of the action to perform, and the reverse action to undo.
+// Essentially these are lambdas that capture what needs to be applied.
+
+CalChartDocCommand::CC_doc_command_pair CalChartDoc::Inject_CalChartDocArg(CC_show_command_pair show_cmds)
+{
+    auto action = [cmd = show_cmds.first](CalChartDoc & doc) { cmd(*doc.mShow); };
+    auto reaction = [cmd = show_cmds.second](CalChartDoc & doc) { cmd(*doc.mShow); };
+    return { action, reaction };
+}
+
+// This will create an array of actions where the first one is to set the sheet
+std::vector<CalChartDocCommand::CC_doc_command_pair> CalChartDoc::Create_SetSheetPair() const
+{
+    return { Inject_CalChartDocArg(mShow->Create_SetCurrentSheetCommand(mShow->GetCurrentSheetNum())) };
+}
+
+// This will create an array of actions where the first one is to set the sheet
+std::vector<CalChartDocCommand::CC_doc_command_pair> CalChartDoc::Create_SetSheetAndSelectionPair() const
+{
+    auto SetSheet_cmds = Create_SetSheetPair();
+    SetSheet_cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSelectionCommand(mShow->GetSelectionList())));
+    return SetSheet_cmds;
+}
+
+// This will create an array of actions where the first one is to set the sheet and the second is to set the selection
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetCommand(int n)
+{
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetCurrentSheetCommand(n));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Current Sheet"), show_cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetSelectionCommand(const SelectionList& sl)
+{
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetSelectionCommand(sl));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Selection"), show_cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetModeCommand(const wxString& newmode)
+{
+    auto action = [mode = newmode](CalChartDoc & doc)
+    {
+        auto newmode = wxGetApp().GetMode(mode);
+        if (newmode) {
+            doc.SetMode(std::move(newmode));
+        }
+    };
+    auto reaction = [mode = mMode->GetName()](CalChartDoc & doc)
+    {
+        auto newmode = wxGetApp().GetMode(mode);
+        if (newmode) {
+            doc.SetMode(std::move(newmode));
+        }
+    };
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Mode"), CalChartDocCommand::CC_doc_command_pair{ action, reaction });
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns)
+{
+    auto tlabels = std::vector<std::string>(labels.begin(), labels.end());
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetShowInfoCommand(tlabels, numColumns, mMode->FieldOffset()));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set show info"), show_cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetSheetTitleCommand(const wxString& newname)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSheetTitleCommand(std::string(newname))));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set title"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetSheetBeatsCommand(int beats)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSheetBeatsCommand(beats)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set beats"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, where)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Adding Sheets"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveSheetCommand(int where)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RemoveSheetCommand(where)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Removing Sheet"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ApplyRelabelMapping(sheet, mapping)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Point Remapping"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalChartDoc> other_show)
+{
+    auto currend = mShow->GetNumSheets();
+    auto last_sheet = static_cast<CC_show const&>(*mShow).GetNthSheet(currend - 1);
+    auto next_sheet = other_show->GetSheetBegin();
+    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet);
+
+    // create a command to run on the other show.  This is how to apply changes
+    // yes, this is weird.  Create a command and then immediately run it on the copy.  This is to apply the remap.
+    other_show->mShow->Create_ApplyRelabelMapping(0, result.second).first(*other_show->mShow);
+
+    // get the sheets we want to append
+    auto sheets = CC_show::CC_sheet_container_t(other_show->GetSheetBegin(), other_show->GetSheetEnd());
+
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, currend)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Append Show"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetPrintableContinuity(data)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Continuity"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(new_positions, ref)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Move Points"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_DeletePointsCommand()
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_DeletePointsCommand()));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Delete Points"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_RotatePointPositionsCommand(int rotateAmount, int ref)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RotatePointPositionsCommand(rotateAmount, ref)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Rotate Points"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetReferencePointToRef0(int ref)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetReferencePointToRef0(ref)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Reset Reference Point"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetSymbolCommand(SYMBOL_TYPE sym)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSymbolCommand(sym)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Continuity Symbol"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetContinuityTextCommand(SYMBOL_TYPE i, const wxString& text)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityTextCommand(i, text.ToStdString())));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Continuity Text"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetLabelRightCommand(bool right)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetLabelRightCommand(right)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Labels"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_ToggleLabelFlipCommand()
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ToggleLabelFlipCommand()));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Labels"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetLabelVisibleCommand(bool isVisible)
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetLabelVisibleCommand(isVisible)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Label Visibility"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_ToggleLabelVisibilityCommand()
+{
+    auto cmds = Create_SetSheetAndSelectionPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ToggleLabelVisibilityCommand()));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Label Visibility"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddNewBackgroundImageCommand(calchart_core::ImageData{ left, top, image_width, image_height, image_width, image_height, data, alpha })));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Adding Background Image"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_RemoveBackgroundImageCommand(int which)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_RemoveBackgroundImageCommand(which)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Removing Background Image"), cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height)
+{
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MoveBackgroundImageCommand(which, left, top, scaled_width, scaled_height)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Moving Background Image"), cmds);
 }

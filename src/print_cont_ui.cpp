@@ -93,15 +93,13 @@ void PrintContinuityEditorView::OnUpdate(wxView* sender, wxObject* hint)
     }
 }
 
-void PrintContinuityEditorView::DoSetPrintContinuity(unsigned which_sheet,
+void PrintContinuityEditorView::DoSetPrintContinuity(int which_sheet,
     const wxString& number,
     const wxString& cont)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetPrintContinuityCommand(*static_cast<CalChartDoc*>(GetDocument()),
-            which_sheet, number.ToStdString(),
-            cont.ToStdString()),
-        true);
+    std::map<int, std::pair<std::string, std::string> > data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
+    auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 PrintContinuityEditor::PrintContinuityEditor() { Init(); }
@@ -309,7 +307,7 @@ void PrintContinuityEditor::FlushText()
     try {
         if ((mUserInput->GetValue() != current_sheet->GetRawPrintContinuity()) || (text->GetValue() != current_sheet->GetNumber())) {
             mView->DoSetPrintContinuity(
-                std::distance(mDoc->GetSheetBegin(), current_sheet), text->GetValue(),
+                static_cast<int>(std::distance(mDoc->GetSheetBegin(), current_sheet)), text->GetValue(),
                 mUserInput->GetValue());
         }
     }

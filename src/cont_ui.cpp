@@ -77,10 +77,8 @@ void ContinuityEditorView::OnUpdate(wxView* sender, wxObject* hint)
 void ContinuityEditorView::DoSetContinuityText(SYMBOL_TYPE which,
     const wxString& text)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetContinuityTextCommand(*static_cast<CalChartDoc*>(GetDocument()),
-            which, text),
-        true);
+    auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetContinuityTextCommand(which, text);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 ContinuityEditor::ContinuityEditor() { Init(); }
@@ -297,7 +295,7 @@ void ContinuityEditor::SetCurrent(unsigned i)
 void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 {
     CC_show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
-    mDoc->SetSelection(sht->SelectPointsBySymbol(CurrentSymbolChoice()));
+    mDoc->SetSelection(sht->MakeSelectPointsBySymbol(CurrentSymbolChoice()));
 }
 
 void ContinuityEditor::OnSave(wxCommandEvent&) { Save(); }

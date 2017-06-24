@@ -71,9 +71,9 @@ public:
     void OnCmdSetSheetTitle(wxCommandEvent& event);
     void OnCmdSetBeats(wxCommandEvent& event);
     void OnCmdSetup(wxCommandEvent& event);
-    void OnCmdSetDescription(wxCommandEvent& event);
     void OnCmdSetMode(wxCommandEvent& event);
     void OnCmdPoints(wxCommandEvent& event);
+    void OnCmdSelectAll(wxCommandEvent& event);
     void OnCmdAnimate(wxCommandEvent& event);
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
@@ -85,6 +85,12 @@ public:
     void OnCmd_lasso(wxCommandEvent& event);
     void OnCmd_move(wxCommandEvent& event);
     void OnCmd_swap(wxCommandEvent& event);
+    void OnCmd_shape_line(wxCommandEvent& event);
+    void OnCmd_shape_x(wxCommandEvent& event);
+    void OnCmd_shape_cross(wxCommandEvent& event);
+    void OnCmd_shape_box(wxCommandEvent& event);
+    void OnCmd_shape_ellipse(wxCommandEvent& event);
+    void OnCmd_shape_draw(wxCommandEvent& event);
     void OnCmd_line(wxCommandEvent& event);
     void OnCmd_rot(wxCommandEvent& event);
     void OnCmd_shear(wxCommandEvent& event);
@@ -108,8 +114,8 @@ public:
     void OnChar(wxKeyEvent& event);
 
     void OnCmd_AddBackgroundImage(wxCommandEvent& event);
-    void OnCmd_AdjustBackgroundImage(wxCommandEvent& event);
-    void OnCmd_RemoveBackgroundImage(wxCommandEvent& event);
+    void OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event);
+    void OnCmd_ShowBackgroundImages(wxCommandEvent& event);
 
     void OnCmd_GhostOption(wxCommandEvent& event);
 
@@ -123,18 +129,22 @@ public:
     void ImportContFile();
 
     void SnapToGrid(CC_coord& c);
+    // Grid chioce distance (distance per beat), Grid placement lock (where to end)
+    std::pair<Coord, Coord> GridChoice() const;
     void UpdatePanel();
 
     void SetCurrentLasso(CC_DRAG_TYPES type);
     void SetCurrentMove(CC_MOVE_MODES type);
+    void CanvasSetCurrentMove(CC_MOVE_MODES type);
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
     void slider_sheet_callback(wxScrollEvent&);
     void refnum_callback(wxCommandEvent&);
     void OnEnableDrawPaths(wxCommandEvent&);
 
+    void do_zoom(float zoom_amount);
+
     void Setup();
-    void SetDescription();
     void SetMode();
 
     const FieldCanvas* GetCanvas() const { return mCanvas; }

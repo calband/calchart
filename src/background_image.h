@@ -25,18 +25,18 @@
 #include <wx/dc.h>
 #include <wx/event.h>
 #include <memory>
+#include <array>
 
 class BackgroundImage {
 public:
-    BackgroundImage(const wxImage& image, const wxCoord& x, const wxCoord& y);
+    BackgroundImage(const wxImage& image, int x, int y, int scaled_width, int scaled_height);
 
+    bool MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const;
     void OnMouseLeftDown(const wxMouseEvent& event, const wxDC& dc);
-    void OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc);
+    // returns left, top, width, height
+    std::array<int, 4> OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc);
     void OnMouseMove(const wxMouseEvent& event, const wxDC& dc);
-    void OnPaint(wxDC& dc);
-
-    bool DoingPictureAdjustment() { return mDoBackgroundPicAdjust; }
-    void DoPictureAdjustment(bool enable) { mDoBackgroundPicAdjust = enable; }
+    void OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const;
 
 private:
     static const long kCircleSize = 6;
@@ -45,7 +45,6 @@ private:
     wxBitmap mBitmap;
     wxCoord mBitmapX, mBitmapY;
 
-    bool mDoBackgroundPicAdjust;
     // what type of background adjustments could we do
     typedef enum {
         kUpperLeft = 0,
@@ -64,9 +63,9 @@ private:
     class CalculateScaleAndMove {
     public:
         CalculateScaleAndMove(const wxPoint& startClick, wxCoord x, wxCoord y,
-            long width, long height,
+            wxCoord width, wxCoord height,
             eBackgroundAdjustType adjustType);
-        void operator()(long x, long y, wxCoord& topX, wxCoord& topY,
+        void operator()(wxCoord x, wxCoord y, wxCoord& topX, wxCoord& topY,
             wxCoord& width, wxCoord& height);
         wxPoint mStartClick;
         wxCoord mLeft, mTop;

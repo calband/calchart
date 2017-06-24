@@ -55,7 +55,7 @@ public:
     // when we want to have the path drawn:
     virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
         const CC_coord& offset) const;
-    
+
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
      * could represent this movement in an Online Viewer '.viewer' file.
@@ -72,6 +72,7 @@ public:
      * @param start The position at which this movement begins.
      */
     virtual void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const = 0;
+
 protected:
     unsigned mNumBeats;
     unsigned mBeat;
@@ -86,6 +87,7 @@ public:
     virtual float RealDirection() const;
 
     void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
+
 protected:
     AnimateDir dir;
     float realdir;
@@ -110,6 +112,7 @@ public:
         const CC_coord& offset) const;
 
     void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
+
 private:
     CC_coord mVector;
 };
@@ -134,6 +137,7 @@ public:
         const CC_coord& offset) const;
 
     void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
+
 private:
     CC_coord mOrigin;
     float mR, mAngStart, mAngEnd;

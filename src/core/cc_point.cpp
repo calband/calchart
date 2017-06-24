@@ -77,7 +77,7 @@ CC_point::CC_point(const std::vector<uint8_t>& serialized_data)
     ++d;
     mFlags.set(kPointLabelFlipped, (*d) > 0);
     ++d;
-    if (std::distance(&serialized_data[0], d) != serialized_data.size()) {
+    if (static_cast<size_t>(std::distance(&serialized_data[0], d)) != serialized_data.size()) {
         throw CC_FileException("bad POS chunk");
     }
 }
@@ -121,21 +121,9 @@ std::vector<uint8_t> CC_point::Serialize() const
     return result;
 }
 
-bool CC_point::GetFlip() const { return mFlags.test(kPointLabelFlipped); }
-
 void CC_point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
-void CC_point::FlipToggle() { mFlags.flip(kPointLabelFlipped); }
-
-bool CC_point::LabelIsVisible() const
-{
-    return !mFlags.test(kLabelIsInvisible);
-}
-
-void CC_point::SetLabelVisibility(bool isVisible)
-{
-    mFlags.set(kLabelIsInvisible, !isVisible);
-}
+void CC_point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }
 
 CC_coord CC_point::GetPos(unsigned ref) const
 {
@@ -159,9 +147,6 @@ void CC_point::SetPos(const CC_coord& c, unsigned ref)
     }
     mRef[ref - 1] = c;
 }
-
-SYMBOL_TYPE
-CC_point::GetSymbol() const { return mSym; }
 
 void CC_point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
 
@@ -211,17 +196,6 @@ void CC_point_UnitTests()
     values.mFlags = 0;
     values.GetFlip = false;
     underTest.Flip(false);
-    assert(Check_CC_point(underTest, values));
-
-    // test flip toggle
-    values.mFlags = 1;
-    values.GetFlip = true;
-    underTest.FlipToggle();
-    assert(Check_CC_point(underTest, values));
-
-    values.mFlags = 0;
-    values.GetFlip = false;
-    underTest.FlipToggle();
     assert(Check_CC_point(underTest, values));
 
     // test visability

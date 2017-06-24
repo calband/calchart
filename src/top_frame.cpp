@@ -77,7 +77,7 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     manager->FileHistoryUseMenu(file_menu);
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart...\tCTRL-A"),
+    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."),
         wxT("Information about the program"));
     // this comes up as a leak on Mac?
     help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"),
@@ -100,36 +100,47 @@ void TopFrame::OnCmdHelp(wxCommandEvent& event) { TopFrame::Help(); }
 
 void TopFrame::About()
 {
+    // clang-format off
     (void)wxMessageBox(
-        wxT("CalChart v") wxT(STRINGIZE(CC_MAJOR_VERSION)) wxT(".") wxT(STRINGIZE(
-            CC_MINOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_SUB_MINOR_VERSION))
-            wxT("\nAuthor: Gurk Meeker, Richard Michael Powell\n")
-                wxT("http://calchart.sourceforge.net\n") wxT(
-                    "Copyright (c) 1994-2011 Garrick Meeker, Richard Michael "
-                    "Powell\n") wxT("\n") wxT("This program is free software: "
-                                              "you can redistribute it and/or "
-                                              "modify\n")
-                    wxT("it under the terms of the GNU General Public License as "
-                        "published by\n") wxT("the Free Software Foundation, "
-                                              "either "
-                                              "version 3 of the License, or\n")
-                        wxT("(at your option) any later version.\n") wxT(
-                            "\n") wxT("This program is distributed in the hope "
-                                      "that it will be "
-                                      "useful,\n")
-                            wxT("but WITHOUT ANY WARRANTY; without even "
-                                "the implied warranty of\n")
-                                wxT("MERCHANTABILITY or FITNESS FOR A PARTICULAR "
-                                    "PURPOSE.  See the\n")
-                                    wxT("GNU General Public License for more "
-                                        "details.\n") wxT("\n") wxT("You should have received a copy of "
-                                                                    "the GNU General Public License\n")
-                                        wxT("along with this program.  If not, "
-                                            "see "
-                                            "<http://www.gnu.org/licenses/>.\n")
-                                            wxT("\n") wxT("Compiled on ")
-                                                __TDATE__ wxT(" at ") __TTIME__,
+        wxT("CalChart v")
+        wxT(STRINGIZE(CC_MAJOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_MINOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_SUB_MINOR_VERSION))
+        wxT("\nAuthors: Gurk Meeker, Richard Michael Powell\n")
+        wxT("\nContributors: Brandon Chinn, Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n")
+        wxT("http://calchart.sourceforge.net\n")
+        wxT("Copyright (c) 1994-2017\n")
+        wxT("\n")
+        wxT("This program is free software: "
+            "you can redistribute it and/or "
+            "modify\n")
+        wxT("it under the terms of the GNU General Public License as "
+            "published by\n")
+        wxT("the Free Software Foundation, "
+            "either "
+            "version 3 of the License, or\n")
+        wxT("(at your option) any later version.\n")
+        wxT("\n")
+        wxT("This program is distributed in the hope "
+            "that it will be "
+            "useful,\n")
+        wxT("but WITHOUT ANY WARRANTY; without even "
+            "the implied warranty of\n")
+        wxT("MERCHANTABILITY or FITNESS FOR A PARTICULAR "
+            "PURPOSE.  See the\n")
+        wxT("GNU General Public License for more "
+            "details.\n")
+        wxT("\n")
+        wxT("You should have received a copy of "
+            "the GNU General Public License\n")
+        wxT("along with this program.  If not, "
+            "see "
+            "<http://www.gnu.org/licenses/>.\n")
+        wxT("\n")
+        wxT("Report issues to:\nhttps://github.com/calband/calchart/issues/new\n")
+        wxT("\n")
+        wxT("Compiled on ")
+        __TDATE__ wxT(" at ") __TTIME__,
         wxT("About CalChart"));
+    // clang-format on
 }
 
 void TopFrame::Help()

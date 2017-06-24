@@ -1,3 +1,4 @@
+#pragma once
 /*
  * AnimationView.h
  * Header for animation user interface
@@ -20,33 +21,34 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
+#include "animate_types.h"
 #include "animate.h"
-#include "calchartdoc.h"
-#include "cc_continuity.h"
+
+#include <wx/docview.h>
 
 #include <memory>
+#include <map>
 
 class AnimationFrame;
 class FieldView;
 class CalChartConfiguration;
+class CC_continuity;
+class CalChartDoc;
+class Animation;
 
 class AnimationView : public wxView {
 public:
     AnimationView();
-    ~AnimationView();
+    ~AnimationView() = default;
 
-    //	virtual bool OnCreate(wxDocument *doc, long flags);
-    //	virtual bool OnClose(bool deleteWindow = true);
-    virtual void OnDraw(wxDC* dc);
-    void OnDraw(wxDC* dc, const CalChartConfiguration& config);
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
+    virtual void OnDraw(wxDC* dc) override;
+    void OnDraw(wxDC& dc, const CalChartConfiguration& config);
+    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
 
     void RefreshFrame();
 
     void SetCollisionType(CollisionWarning col);
-    CollisionWarning GetCollisionType() const { return mCollisionWarningType; }
+    auto GetCollisionType() const { return mCollisionWarningType; }
     void SelectCollisions();
 
     void Generate();
@@ -62,10 +64,10 @@ public:
     void SetSelection(const SelectionList& sl);
 
     // info
-    int GetNumberSheets() const;
-    int GetCurrentSheet() const;
-    int GetNumberBeats() const;
-    int GetCurrentBeat() const;
+    auto GetNumberSheets() const { return (mAnimation) ? mAnimation->GetNumberSheets() : 0; }
+    auto GetCurrentSheet() const { return (mAnimation) ? mAnimation->GetCurrentSheet() : 0; }
+    int GetNumberBeats() const { return (mAnimation) ? mAnimation->GetNumberBeats() : 0; }
+    int GetCurrentBeat() const { return (mAnimation) ? mAnimation->GetCurrentBeat() : 0; }
 
     wxString GetStatusText() const;
 
@@ -89,8 +91,7 @@ public:
 
 private:
     void OnNotifyStatus(const wxString& status);
-    bool
-    OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers,
+    bool OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers,
         unsigned sheetnum, const wxString& message);
 
     bool mErrorOccurred;

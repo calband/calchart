@@ -465,6 +465,11 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameOmniAnimation, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool, false);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
+
+IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool, false);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool, false);
+
 // OBSOLETE Settigns
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);
@@ -532,9 +537,8 @@ CalChartConfiguration::Get_CalChartBrushAndPen(CalChartColors c) const
     }
     auto colorAndWidth = mColorsAndWidth[c];
     return {
-        *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorAndWidth), wxSOLID),
-        *wxThePenList->FindOrCreatePen(std::get<0>(colorAndWidth),
-            std::get<1>(colorAndWidth), wxSOLID)
+        *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorAndWidth), wxBRUSHSTYLE_SOLID),
+        *wxThePenList->FindOrCreatePen(std::get<0>(colorAndWidth), std::get<1>(colorAndWidth), wxPENSTYLE_SOLID)
     };
 }
 

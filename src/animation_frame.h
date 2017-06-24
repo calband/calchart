@@ -1,3 +1,4 @@
+#pragma once
 /*
  * animation_frame.h
  * Header for AnimationFrame
@@ -20,15 +21,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "animate.h"
+#include "animate_types.h"
 #include "animation_view.h"
 
 #include <wx/wx.h>
 #include <wx/docview.h>
 
 #include <functional>
+#include <map>
 
 class AnimationView;
 class AnimationCanvas;
@@ -37,15 +37,9 @@ class FancyTextWin;
 class wxSplitterWindow;
 class CalChartConfiguration;
 
-#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-typedef wxDocChildFrame AnimationFrameParent;
-#else
-typedef wxFrame AnimationFrameParent;
-#endif
-
-class AnimationFrame : public AnimationFrameParent {
+class AnimationFrame : public wxFrame {
 public:
-    typedef AnimationFrameParent super;
+    using super = wxFrame;
 
     AnimationFrame(std::function<void()> onClose, wxDocument* doc,
         CalChartConfiguration& config, wxView* view, wxFrame* parent,
@@ -59,13 +53,13 @@ public:
     void OnCmdClose(wxCommandEvent& event) { Close(); }
     void OnCmdClose(wxCloseEvent& event);
 
-    void OnCmd_anim_stop(wxCommandEvent& event);
-    void OnCmd_anim_play(wxCommandEvent& event);
-    void OnCmd_anim_prev_beat(wxCommandEvent& event);
-    void OnCmd_anim_next_beat(wxCommandEvent& event);
+    void OnCmd_anim_stop(wxCommandEvent& event) { StopTimer(); }
+    void OnCmd_anim_play(wxCommandEvent& event) { StartTimer(); }
+    void OnCmd_anim_prev_beat(wxCommandEvent& event) { mAnimationView.PrevBeat(); }
+    void OnCmd_anim_next_beat(wxCommandEvent& event) { mAnimationView.NextBeat(); }
     void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
-    void OnCmd_anim_prev_sheet(wxCommandEvent& event);
-    void OnCmd_anim_next_sheet(wxCommandEvent& event);
+    void OnCmd_anim_prev_sheet(wxCommandEvent& event) { mAnimationView.PrevSheet(); }
+    void OnCmd_anim_next_sheet(wxCommandEvent& event) { mAnimationView.NextSheet(); }
     void OnCmd_anim_collisions(wxCommandEvent& event);
     void OnCmd_anim_errors(wxCommandEvent& event);
     void OnSlider_anim_tempo(wxSpinEvent& event);
@@ -131,8 +125,8 @@ private:
     // timer stuff:
     void StartTimer();
     void StopTimer();
-    unsigned GetTempo() const;
-    void SetTempo(unsigned tempo);
+    auto GetTempo() const { return mTempo; }
+    void SetTempo(unsigned tempo) { mTempo = tempo; }
     wxTimer* mTimer;
     unsigned mTempo;
     bool mTimerOn;

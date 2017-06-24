@@ -1,3 +1,4 @@
+#pragma once
 /*
  * animation_canvas.h
  * Header for animation canvas interface
@@ -20,20 +21,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <wx/wx.h>
 
 class AnimationView;
-class CC_coord;
 
 class AnimationCanvas : public wxPanel {
 public:
-    AnimationCanvas(AnimationView* view, wxWindow* parent,
-        const wxSize& size = wxDefaultSize);
-    ~AnimationCanvas();
+    AnimationCanvas(AnimationView* view, wxWindow* parent);
+    ~AnimationCanvas() = default;
 
-    void SetView(AnimationView* view);
+    void SetView(AnimationView* view) { mAnimationView = view; }
 
     void OnPaint(wxPaintEvent& event);
     void OnLeftDownMouseEvent(wxMouseEvent& event);
@@ -42,24 +39,26 @@ public:
     void OnMouseMove(wxMouseEvent& event);
     void OnChar(wxKeyEvent& event);
     void SetZoomOnMarchers(bool zoomOnMarchers);
-    bool GetZoomOnMarchers() const;
-    void SetStepsOutForMarchersZoom(size_t steps);
-    size_t GetStepsOutForMarchersZoom() const;
+    auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
+    void SetStepsOutForMarchersZoom(int steps);
+    auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
 
 private:
     AnimationView* mAnimationView;
 
-    float mUserScale = 1;
+    float mUserScale = 1.0f;
     std::pair<wxCoord, wxCoord> mUserOrigin = { 0, 0 };
     bool mZoomOnMarchers = false;
-    size_t mStepsOutForMarcherZoom = 4;
+    int mStepsOutForMarcherZoom = 4;
 
     void UpdateScaleAndOrigin();
 
     // for mouse and drawing
-    bool mMouseDown;
-    long mMouseXStart, mMouseYStart;
-    long mMouseXEnd, mMouseYEnd;
+    bool mMouseDown{};
+    wxCoord mMouseXStart{};
+    wxCoord mMouseYStart{};
+    wxCoord mMouseXEnd{};
+    wxCoord mMouseYEnd{};
 
     wxDECLARE_EVENT_TABLE();
 };

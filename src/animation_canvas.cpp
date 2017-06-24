@@ -35,17 +35,11 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(AnimationView* view, wxWindow* parent,
-    const wxSize& size)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, size)
+AnimationCanvas::AnimationCanvas(AnimationView* view, wxWindow* parent)
+    : wxPanel(parent)
     , mAnimationView(view)
-    , mMouseDown(false)
 {
 }
-
-AnimationCanvas::~AnimationCanvas() {}
-
-void AnimationCanvas::SetView(AnimationView* view) { mAnimationView = view; }
 
 void AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
@@ -59,32 +53,33 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
     dc.Clear();
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
+
+    // draw the box
     if (mMouseDown) {
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
         dc.DrawRectangle(mMouseXStart, mMouseYStart, mMouseXEnd - mMouseXStart,
             mMouseYEnd - mMouseYStart);
     }
+    // draw the view
     if (mAnimationView) {
-        mAnimationView->OnDraw(&dc, config);
+        mAnimationView->OnDraw(dc, config);
     }
 }
 
 // utilities
-static std::pair<float, std::pair<wxCoord, wxCoord> >
-CalcUserScaleAndOffset(const std::pair<CC_coord, CC_coord>& sizeAndOffset,
-    const wxSize& windowSize)
+static auto CalcUserScaleAndOffset(std::pair<CC_coord, CC_coord> const& sizeAndOffset, wxSize const& windowSize)
 {
-    float newX = windowSize.x;
-    float newY = windowSize.y;
-    float showSizeX = sizeAndOffset.first.x;
-    float showSizeY = sizeAndOffset.first.y;
-    float x = (showSizeX) ? showSizeX : newX;
-    float y = (showSizeY) ? showSizeY : newY;
+    auto newX = static_cast<float>(windowSize.x);
+    auto newY = static_cast<float>(windowSize.y);
+    auto showSizeX = static_cast<float>(sizeAndOffset.first.x);
+    auto showSizeY = static_cast<float>(sizeAndOffset.first.y);
+    auto x = (showSizeX) ? showSizeX : newX;
+    auto y = (showSizeY) ? showSizeY : newY;
 
-    float showAspectRatio = x / y;
-    float newSizeRatio = newX / newY;
-    float newvalue = 1.0;
+    auto showAspectRatio = x / y;
+    auto newSizeRatio = newX / newY;
+    auto newvalue = 1.0;
     // always choose x when the new aspect ratio is smaller than the show.
     // This will keep the whole field on in the canvas
     if (newSizeRatio < showAspectRatio) {
@@ -93,7 +88,7 @@ CalcUserScaleAndOffset(const std::pair<CC_coord, CC_coord>& sizeAndOffset,
     else {
         newvalue = newY / (float)Coord2Int(y);
     }
-    float userScale = newvalue * (Coord2Int(1 << 16) / 65536.0);
+    auto userScale = newvalue * (Coord2Int(1 << 16) / 65536.0);
 
     auto offsetx = sizeAndOffset.second.x + sizeAndOffset.first.x / 2;
     auto offsety = sizeAndOffset.second.y + sizeAndOffset.first.y / 2;
@@ -102,7 +97,7 @@ CalcUserScaleAndOffset(const std::pair<CC_coord, CC_coord>& sizeAndOffset,
     auto plus_windowx = windowSize.x / 2 - scaledx;
     auto plus_windowy = windowSize.y / 2 - scaledy;
 
-    return { userScale, { plus_windowx, plus_windowy } };
+    return std::pair<double, std::pair<wxCoord, wxCoord> >{ userScale, { plus_windowx, plus_windowy } };
 }
 
 void AnimationCanvas::UpdateScaleAndOrigin()
@@ -127,10 +122,9 @@ void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
     wxClientDC dc(this);
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
+    auto point = event.GetPosition();
+    auto x = dc.DeviceToLogicalX(point.x);
+    auto y = dc.DeviceToLogicalY(point.y);
 
     if (!event.AltDown() && !event.ShiftDown()) {
         mAnimationView->UnselectMarchers();
@@ -146,12 +140,9 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
     wxClientDC dc(this);
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
-    mMouseXEnd = x;
-    mMouseYEnd = y;
+    auto point = event.GetPosition();
+    mMouseXEnd = dc.DeviceToLogicalX(point.x);
+    mMouseYEnd = dc.DeviceToLogicalY(point.y);
     mMouseDown = false;
 
     // if mouse lifted very close to where clicked, then it is a previous beat
@@ -182,12 +173,9 @@ void AnimationCanvas::OnMouseMove(wxMouseEvent& event)
     wxClientDC dc(this);
     dc.SetUserScale(mUserScale, mUserScale);
     dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    long x, y;
-    event.GetPosition(&x, &y);
-    x = dc.DeviceToLogicalX(x);
-    y = dc.DeviceToLogicalY(y);
-    mMouseXEnd = x;
-    mMouseYEnd = y;
+    auto point = event.GetPosition();
+    mMouseXEnd = dc.DeviceToLogicalX(point.x);
+    mMouseYEnd = dc.DeviceToLogicalY(point.y);
     if (event.Dragging()) {
         Refresh();
     }
@@ -212,20 +200,13 @@ void AnimationCanvas::OnChar(wxKeyEvent& event)
     }
 }
 
-bool AnimationCanvas::GetZoomOnMarchers() const { return mZoomOnMarchers; }
-
 void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
 {
     mZoomOnMarchers = zoomOnMarchers;
     Refresh();
 }
 
-size_t AnimationCanvas::GetStepsOutForMarchersZoom() const
-{
-    return mStepsOutForMarcherZoom;
-}
-
-void AnimationCanvas::SetStepsOutForMarchersZoom(size_t steps)
+void AnimationCanvas::SetStepsOutForMarchersZoom(int steps)
 {
     mStepsOutForMarcherZoom = steps;
     Refresh();

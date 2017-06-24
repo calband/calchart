@@ -39,6 +39,10 @@ class BackgroundImage;
 class CC_coord;
 class Matrix;
 class CalChartConfiguration;
+class CC_shape_2point;
+class MovePoints;
+
+using ShapeList = std::vector<std::unique_ptr<CC_shape> >;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas {
@@ -46,8 +50,8 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(wxView* view, FieldFrame* frame, float def_zoom);
-    virtual ~FieldCanvas(void);
+    FieldCanvas(FieldView& view, FieldFrame* frame, float def_zoom);
+    virtual ~FieldCanvas() = default;
     void OnPaint(wxPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     virtual void OnMouseLeftDown(wxMouseEvent& event);
@@ -55,50 +59,57 @@ public:
     virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);
     virtual void OnMouseRightDown(wxMouseEvent& event);
     virtual void OnMouseMove(wxMouseEvent& event);
+    virtual void OnMousePinchToZoom(wxMouseEvent& event);
     void OnChar(wxKeyEvent& event);
 
     // Misc show functions
     float ZoomToFitFactor() const;
     virtual void SetZoom(float factor);
 
-    // return true on success
-    bool SetBackgroundImage(const wxImage& image);
-    void AdjustBackgroundImage(bool enable);
-    void RemoveBackgroundImage();
-
-    CC_DRAG_TYPES GetCurrentLasso() const;
+    auto GetCurrentLasso() const { return curr_lasso; }
     void SetCurrentLasso(CC_DRAG_TYPES lasso);
-    CC_MOVE_MODES GetCurrentMove() const;
+    auto GetCurrentMove() const { return curr_move; }
     // implies a call to EndDrag()
     void SetCurrentMove(CC_MOVE_MODES move);
 
 private:
-    std::map<unsigned, CC_coord> GetPoints(const Matrix& transmat);
-
     // Variables
     FieldFrame* mFrame;
-    FieldView* mView;
-    CC_DRAG_TYPES curr_lasso;
-    CC_MOVE_MODES curr_move;
+    FieldView& mView;
+    CC_DRAG_TYPES curr_lasso = CC_DRAG_BOX;
+    CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
+    std::unique_ptr<MovePoints> m_move_points;
+    std::map<int, CC_coord> mMovePoints;
+    CC_DRAG_TYPES select_drag = CC_DRAG_NONE;
+    ShapeList m_select_shape_list;
 
-    void ClearShapes();
-
-    void BeginDrag(CC_DRAG_TYPES type, const CC_coord& start);
-    void AddDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
+    void BeginSelectDrag(CC_DRAG_TYPES type, const CC_coord& start);
+    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
     void MoveDrag(const CC_coord& end);
     void EndDrag();
-
-    CC_DRAG_TYPES drag;
-    typedef std::vector<std::shared_ptr<CC_shape> > ShapeList;
-    ShapeList shape_list;
-    std::shared_ptr<CC_shape> curr_shape;
+    enum class direction { north,
+        east,
+        south,
+        west };
+    void MoveByKey(direction);
+    CC_coord GetMoveAmount(direction dir);
+    CC_coord SnapToGrid(CC_coord c);
 
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
     void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
-    std::unique_ptr<BackgroundImage> mBackgroundImage;
-    std::map<unsigned, CC_coord> mMovePoints;
-    std::function<std::map<unsigned, CC_coord>(const CC_coord&)> mTransformer;
+    void PaintShapes(wxDC& dc, CalChartConfiguration const& config, ShapeList const&);
+    void PaintSelectShapes(wxDC& dc, CalChartConfiguration const& config);
+    void PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config);
+
+    void OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos);
+    void OnMouseLeftUp_default(wxMouseEvent& event, CC_coord pos);
+
+    void OnMouseLeftDown_CC_DRAG_SWAP(CC_coord pos);
+
+    void OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CC_coord pos);
+    void OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CC_coord);
+    void OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CC_coord);
 
     DECLARE_EVENT_TABLE()
 };

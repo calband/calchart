@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,14 +19,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core;$(BOOST_DIR)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WINVER=0x0500;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
@@ -53,14 +53,14 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxmsw30ud_core.lib;wxbase30ud.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxmsw31ud_core.lib;wxbase31ud.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
     <CustomBuildStep>
       <Command>mkdir $(TargetDir)\docs</Command>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>xcopy /I /Y $(ProjectDir)\..\..\docs $(TargetDir)\docs</Command>
+      <Command>xcopy /I /Y "$(ProjectDir)\..\..\docs" "$(TargetDir)\docs"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -70,7 +70,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core;$(BOOST_DIR)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WINVER=0x0400;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WINVER=0x0500;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -78,7 +78,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(WXWIN)\lib\vc_lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxmsw30u_core.lib;wxbase30u.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxmsw31u_core.lib;wxbase31u.lib;comctl32.lib;rpcrt4.lib;winmm.lib;advapi32.lib;wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /I /Y $(ProjectDir)\..\..\docs $(TargetDir)\docs</Command>
@@ -105,6 +105,9 @@
     <ClInclude Include="..\..\src\core\animate_types.h" />
     <ClInclude Include="..\..\src\core\cc_continuity.h" />
     <ClInclude Include="..\..\src\core\cc_coord.h" />
+    <ClInclude Include="..\..\src\core\cc_drawcommand.h" />
+    <ClInclude Include="..\..\src\core\cc_fileformat.h" />
+    <ClInclude Include="..\..\src\core\cc_image.h" />
     <ClInclude Include="..\..\src\core\cc_point.h" />
     <ClInclude Include="..\..\src\core\cc_shapes.h" />
     <ClInclude Include="..\..\src\core\cc_sheet.h" />
@@ -112,12 +115,18 @@
     <ClInclude Include="..\..\src\core\cc_text.h" />
     <ClInclude Include="..\..\src\core\cc_types.h" />
     <ClInclude Include="..\..\src\core\cont.h" />
+    <ClInclude Include="..\..\src\core\json.h" />
+    <ClInclude Include="..\..\src\core\json_export.h" />
+    <ClInclude Include="..\..\src\core\json_grammar.h" />
     <ClInclude Include="..\..\src\core\math_utils.h" />
     <ClInclude Include="..\..\src\core\modes.h" />
     <ClInclude Include="..\..\src\core\parse.h" />
     <ClInclude Include="..\..\src\core\print_ps.h" />
+    <ClInclude Include="..\..\src\core\viewer_translate.h" />
     <ClInclude Include="..\..\src\draw.h" />
+    <ClInclude Include="..\..\src\draw_utils.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
+    <ClInclude Include="..\..\src\field_canvas_shapes.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
@@ -153,17 +162,22 @@
     <ClCompile Include="..\..\src\core\animatecompile.cpp" />
     <ClCompile Include="..\..\src\core\cc_continuity.cpp" />
     <ClCompile Include="..\..\src\core\cc_coord.cpp" />
+    <ClCompile Include="..\..\src\core\cc_image.cpp" />
     <ClCompile Include="..\..\src\core\cc_point.cpp" />
     <ClCompile Include="..\..\src\core\cc_shapes.cpp" />
     <ClCompile Include="..\..\src\core\cc_sheet.cpp" />
     <ClCompile Include="..\..\src\core\cc_show.cpp" />
     <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
+    <ClCompile Include="..\..\src\core\json.cpp" />
+    <ClCompile Include="..\..\src\core\json_export.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\core\modes.cpp" />
     <ClCompile Include="..\..\src\core\print_ps.cpp" />
+    <ClCompile Include="..\..\src\core\viewer_translate.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
+    <ClCompile Include="..\..\src\field_canvas_shapes.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />

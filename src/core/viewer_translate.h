@@ -29,7 +29,7 @@ public:
      * @return An Online Viewer field x-coordinate.
      */
     static float xPosition(Coord coord);
-    
+
     /*!
      * @brief Translates a CalChart field y-coordinate
      * to a CalChart Online Viewer field y-coordinate.
@@ -45,7 +45,7 @@ public:
      * @return An Online Viewer field y-coordinate.
      */
     static float yPosition(Coord coord);
-    
+
     /*!
      * @brief Translates a CalChart angle to a
      * CalChart Online Viewer angle.
@@ -58,7 +58,7 @@ public:
      * @return An Online Viewer angle.
      */
     static float angle(float angle);
-    
+
     /*!
      * @brief Translates a CalChart enumerated
      * symbol type to its equivalent string

@@ -27,6 +27,7 @@
 #include "animation_frame.h"
 #include "cc_omniview_constants.h"
 #include "draw.h"
+#include "calchartdoc.h"
 
 #include <wx/dcbuffer.h>
 
@@ -221,11 +222,11 @@ static bool LoadTextureWithImage(const wxImage& image, GLuint& texture)
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     if (image.HasAlpha()) {
-        const size_t width = image.GetWidth();
-        const size_t height = image.GetHeight();
+        const auto width = image.GetWidth();
+        const auto height = image.GetHeight();
         std::vector<uint8_t> mixedAlpha(width * height * 4);
-        for (size_t y = 0; y < height; ++y) {
-            for (size_t x = 0; x < width; ++x) {
+        for (auto y = 0; y < height; ++y) {
+            for (auto x = 0; x < width; ++x) {
                 mixedAlpha.at(x * 4 + (y * width * 4) + 0) = image.GetRed(x, y);
                 mixedAlpha.at(x * 4 + (y * width * 4) + 1) = image.GetGreen(x, y);
                 mixedAlpha.at(x * 4 + (y * width * 4) + 2) = image.GetBlue(x, y);
@@ -625,7 +626,7 @@ CCOmniView_Canvas::~CCOmniView_Canvas() {}
 
 void CCOmniView_Canvas::SetView(AnimationView* view) { mAnimationView = view; }
 
-MarcherInfo CCOmniView_Canvas::GetMarcherInfo(size_t which) const
+MarcherInfo CCOmniView_Canvas::GetMarcherInfo(int which) const
 {
     MarcherInfo info;
     if (mAnimationView && mAnimationView->GetAnimation()) {
@@ -645,7 +646,7 @@ std::multimap<double, MarcherInfo>
 CCOmniView_Canvas::ParseAndDraw3dMarchers() const
 {
     std::multimap<double, MarcherInfo> result;
-    for (size_t i = 0; (i < mAnimationView->GetShow()->GetNumPoints()); ++i) {
+    for (auto i = 0; (i < mAnimationView->GetShow()->GetNumPoints()); ++i) {
         if (mShowOnlySelected && !mAnimationView->GetShow()->IsSelected(i)) {
             continue;
         }

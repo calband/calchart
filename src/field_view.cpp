@@ -37,7 +37,6 @@
 #include "animatecommand.h"
 #include "cc_sheet.h"
 #include "cc_drawcommand.h"
-#include "modes.h"
 
 #include <wx/wizard.h>
 #include <wx/textfile.h>
@@ -59,6 +58,7 @@ FieldView::~FieldView() {}
 bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 {
     mShow = static_cast<CalChartDoc*>(doc);
+    mShow->SetCurrentSheet(0);
 #if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
     mFrame = new AnimationFrame(
         NULL, doc, this,
@@ -66,10 +66,11 @@ bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 #else
     mFrame = new FieldFrame(doc, this, mConfig,
         wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
-        wxPoint(50, 50), wxSize(mConfig.Get_FieldFrameWidth(),
-                                mConfig.Get_FieldFrameHeight()));
+        wxPoint(50, 50), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()),
+                                static_cast<int>(mConfig.Get_FieldFrameHeight())));
 #endif
 
+    UpdateBackgroundImages();
     mFrame->Show(true);
     Activate(true);
     return true;
@@ -84,7 +85,7 @@ void FieldView::OnDraw(wxDC* dc)
         CC_coord origin = mShow->GetMode().Offset();
         DrawMode(*dc, mConfig, mShow->GetMode(), ShowMode_kFieldView);
 
-        CC_sheet* ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
+        auto ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
 
         if (ghostSheet != nullptr) {
             DrawGhostSheet(*dc, mConfig, origin, SelectionList(),
@@ -115,9 +116,18 @@ void FieldView::OnDraw(wxDC* dc)
 // Sneakily gets used for default print/preview
 // as well as drawing on the screen.
 void FieldView::DrawOtherPoints(wxDC& dc,
-    const std::map<unsigned, CC_coord>& positions)
+    const std::map<int, CC_coord>& positions)
 {
     DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
+}
+
+void FieldView::OnDrawBackground(wxDC& dc)
+{
+    if (!mDrawBackground)
+        return;
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
+        mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
+    }
 }
 
 void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
@@ -125,8 +135,6 @@ void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
     if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_setup))) {
         // give our show a first page
         CalChartDoc* show = static_cast<CalChartDoc*>(GetDocument());
-
-        show->SetupNewShow();
 
         // Set up everything else
         OnWizardSetup(*show);
@@ -137,6 +145,7 @@ void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
     else if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
         GeneratePaths();
     }
+    UpdateBackgroundImages();
 
     if (mFrame) {
         mFrame->UpdatePanel();
@@ -172,24 +181,16 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     ChooseShowModeWizard* page2 = new ChooseShowModeWizard(wizard);
 
     // page 3:
-    // and maybe a description
-    SetDescriptionWizard* page3 = new SetDescriptionWizard(wizard);
-    // page 4:
-
     wxWizardPageSimple::Chain(page1, page2);
-    wxWizardPageSimple::Chain(page2, page3);
 
     wizard->GetPageAreaSizer()->Add(page1);
     if (wizard->RunWizard(page1)) {
-        show.SetNumPoints(page1->GetNumberPoints(), page1->GetNumberColumns());
         auto labels = page1->GetLabels();
+        auto columns = page1->GetNumberColumns();
         std::vector<std::string> tlabels(labels.begin(), labels.end());
-        show.SetPointLabel(tlabels);
         auto newmode = wxGetApp().GetMode(page2->GetValue());
-        if (newmode) {
-            show.SetMode(std::move(newmode));
-        }
-        show.SetDescr(page3->GetValue().ToStdString());
+
+        show.WizardSetupNewShow(tlabels, columns, std::move(newmode));
     }
     else {
         wxMessageBox(wxT("Show setup not completed.\n")
@@ -200,29 +201,39 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     wizard->Destroy();
 }
 
-bool FieldView::DoRotatePointPositions(unsigned rotateAmount)
-{
-    GetDocument()->GetCommandProcessor()->Submit(
-        new RotatePointPositionsCommand(*mShow, rotateAmount,
-            mCurrentReferencePoint),
-        true);
-    return true;
-}
-
-bool FieldView::DoMovePoints(const std::map<unsigned, CC_coord>& newPositions)
+bool FieldView::DoRotatePointPositions(int rotateAmount)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-    GetDocument()->GetCommandProcessor()->Submit(
-        new MovePointsCommand(*mShow, newPositions, mCurrentReferencePoint),
-        true);
+    auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount, mCurrentReferencePoint);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return true;
+}
+
+bool FieldView::DoMovePoints(const std::map<int, CC_coord>& newPositions)
+{
+    if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint))
+        return false;
+    auto cmd = mShow->Create_MovePointsCommand(newPositions, mCurrentReferencePoint);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return true;
+}
+
+bool FieldView::DoDeletePoints()
+{
+    if (mShow->GetSelectionList().size() == 0)
+        return false;
+    auto cmd = mShow->Create_DeletePointsCommand();
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
 bool FieldView::DoResetReferencePoint()
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetReferencePointToRef0(*mShow, mCurrentReferencePoint), true);
+    if (mShow->GetSelectionList().size() == 0)
+        return false;
+    auto cmd = mShow->Create_SetReferencePointToRef0(mCurrentReferencePoint);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -230,42 +241,33 @@ bool FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetSymbolCommand(*mShow, sym), true);
-    return true;
-}
-
-bool FieldView::DoSetDescription(const wxString& descr)
-{
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetDescriptionCommand(*mShow, descr), true);
+    auto cmd = mShow->Create_SetSymbolCommand(sym);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
 void FieldView::DoSetMode(const wxString& mode)
 {
-    GetDocument()->GetCommandProcessor()->Submit(new SetModeCommand(*mShow, mode),
-        true);
+    auto cmd = mShow->Create_SetModeCommand(mode);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void FieldView::DoSetShowInfo(unsigned numPoints, unsigned numColumns,
-    const std::vector<wxString>& labels)
+void FieldView::DoSetShowInfo(const std::vector<wxString>& labels, int numColumns)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetShowInfoCommand(*mShow, numPoints, numColumns, labels), true);
+    auto cmd = mShow->Create_SetShowInfoCommand(labels, numColumns);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoSetSheetTitle(const wxString& descr)
+void FieldView::DoSetSheetTitle(const wxString& descr)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetSheetTitleCommand(*mShow, descr), true);
-    return true;
+    auto cmd = mShow->Create_SetSheetTitleCommand(descr);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoSetSheetBeats(unsigned short beats)
+bool FieldView::DoSetSheetBeats(int beats)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetSheetBeatsCommand(*mShow, beats), true);
+    auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -273,8 +275,8 @@ bool FieldView::DoSetPointsLabel(bool right)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetLabelRightCommand(*mShow, right), true);
+    auto cmd = mShow->Create_SetLabelRightCommand(right);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -282,8 +284,8 @@ bool FieldView::DoSetPointsLabelFlip()
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-    GetDocument()->GetCommandProcessor()->Submit(new SetLabelFlipCommand(*mShow),
-        true);
+    auto cmd = mShow->Create_ToggleLabelFlipCommand();
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -291,8 +293,8 @@ bool FieldView::DoSetPointsLabelVisibility(bool isVisible)
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-    GetDocument()->GetCommandProcessor()->Submit(
-        new SetLabelVisibleCommand(*mShow, isVisible), true);
+    auto cmd = mShow->Create_SetLabelVisibleCommand(isVisible);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -300,32 +302,22 @@ bool FieldView::DoTogglePointsLabelVisibility()
 {
     if (mShow->GetSelectionList().size() == 0)
         return false;
-    GetDocument()->GetCommandProcessor()->Submit(
-        new ToggleLabelVisibilityCommand(*mShow), true);
+    auto cmd = mShow->Create_ToggleLabelVisibilityCommand();
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht,
-    unsigned where)
+void FieldView::DoInsertSheets(const CC_show::CC_sheet_container_t& sht,
+    int where)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new AddSheetsCommand(*mShow, sht, where), true);
-    return true;
+    auto cmd = mShow->Create_AddSheetsCommand(sht, where);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoInsertSheetsOtherShow(
-    const CC_show::CC_sheet_container_t& sht, unsigned where,
-    unsigned endpoint)
+bool FieldView::DoDeleteSheet(int where)
 {
-    GetDocument()->GetCommandProcessor()->Submit(
-        new AddSheetsOtherShowCommand(*mShow, sht, where, endpoint), true);
-    return true;
-}
-
-bool FieldView::DoDeleteSheet(unsigned where)
-{
-    GetDocument()->GetCommandProcessor()->Submit(
-        new RemoveSheetsCommand(*mShow, where), true);
+    auto cmd = mShow->Create_RemoveSheetCommand(where);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
@@ -353,9 +345,48 @@ bool FieldView::DoImportPrintableContinuity(const wxString& file)
             return true;
         }
     }
-    auto result = GetDocument()->GetCommandProcessor()->Submit(
-        new ImportPrintContinuityCommand(*mShow, lines));
-    return result;
+    auto data = mShow->ImportPrintableContinuity(lines);
+    if (data.first) {
+        auto cmd = mShow->Create_SetPrintableContinuity(data.second);
+        GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+        return true;
+    }
+    return false;
+}
+
+bool FieldView::DoRelabel()
+{
+    auto sheet_num = GetCurrentSheetNum();
+    auto current_sheet = mShow->GetNthSheet(GetCurrentSheetNum());
+    auto next_sheet = current_sheet + 1;
+    // get a relabel mapping based on the current sheet.
+    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet);
+    // check to see if there's a valid remapping
+    if (!result.first) {
+        return false;
+    }
+    // Apply remapping to the rest
+    auto cmd = mShow->Create_ApplyRelabelMapping(sheet_num + 1, result.second);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return true;
+}
+
+// append is an insert with a relabel
+std::pair<bool, std::string> FieldView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show)
+{
+    if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
+        return { false, "The blocksize doesn't match" };
+    }
+    auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
+    auto next_sheet = other_show->GetSheetBegin();
+    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet);
+    // check to see if there's a valid remapping
+    if (!result.first) {
+        return { false, "Last sheet doesn't match first sheet of other show" };
+    }
+    auto cmd = mShow->Create_AppendShow(std::move(other_show));
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return { true, "" };
 }
 
 int FieldView::FindPoint(CC_coord pos) const
@@ -370,45 +401,38 @@ CC_coord FieldView::PointPosition(int which) const
     return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
 }
 
-CC_coord FieldView::GetShowFieldOffset() const
+void FieldView::GoToSheet(int which)
 {
-    return mShow->GetMode().Offset();
-}
-
-CC_coord FieldView::GetShowFieldSize() const { return mShow->GetMode().Size(); }
-
-void FieldView::GoToSheet(size_t which)
-{
-    if (which < mShow->GetNumSheets()) {
-        mShow->SetCurrentSheet(which);
+    if (which >= 0 && which < mShow->GetNumSheets()) {
+        // This *could* be run through a command or run directly...
+        if (mConfig.Get_CommandUndoSetSheet()) {
+            auto cmd = mShow->Create_SetCurrentSheetCommand(which);
+            GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+        }
+        else {
+            mShow->SetCurrentSheet(which);
+        }
     }
 }
 
-void FieldView::GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
-
-void FieldView::GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
-
-void FieldView::SetReferencePoint(unsigned which)
+void FieldView::SetReferencePoint(int which)
 {
     mCurrentReferencePoint = which;
     OnUpdate(this);
-}
-
-void FieldView::AddToSelection(const SelectionList& sl)
-{
-    mShow->AddToSelection(sl);
-}
-
-void FieldView::ToggleSelection(const SelectionList& sl)
-{
-    mShow->ToggleSelection(sl);
 }
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
 void FieldView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 {
-    mShow->SelectWithLasso(*lasso, toggleSelected, mCurrentReferencePoint);
+    auto select = mShow->MakeSelectWithLasso(*lasso, mCurrentReferencePoint);
+    if (toggleSelected) {
+        select = mShow->MakeToggleSelection(select);
+    }
+    else {
+        select = mShow->MakeAddToSelection(select);
+    }
+    SetSelection(select);
 }
 
 // Select points within rectangle
@@ -423,9 +447,19 @@ void FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
     SelectWithLasso(&lasso, toggleSelected);
 }
 
-const SelectionList& FieldView::GetSelectionList()
+void FieldView::SetSelection(const SelectionList& sl)
 {
-    return mShow->GetSelectionList();
+    auto current_sl = mShow->GetSelectionList();
+    if (std::equal(current_sl.begin(), current_sl.end(), sl.begin(), sl.end()))
+        return;
+    // This *could* be run through a command or run directly...
+    if (mConfig.Get_CommandUndoSelection()) {
+        auto cmd = mShow->Create_SetSelectionCommand(sl);
+        GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    }
+    else {
+        mShow->SetSelection(sl);
+    }
 }
 
 void FieldView::OnEnableDrawPaths(bool enable)
@@ -439,13 +473,12 @@ void FieldView::OnEnableDrawPaths(bool enable)
 
 void FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 {
-    if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (static_cast<unsigned>(mAnimation->GetNumberSheets()) > mShow->GetCurrentSheetNum())) {
+    if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (mAnimation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         CC_coord origin = GetShowFieldOffset();
         mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
-        for (auto point = mShow->GetSelectionList().begin();
-             point != mShow->GetSelectionList().end(); ++point) {
-            DrawPath(dc, mConfig, mAnimation->GenPathToDraw(*point, origin),
-                mAnimation->EndPosition(*point, origin));
+        for (auto&& point : mShow->GetSelectionList()) {
+            DrawPath(dc, mConfig, mAnimation->GenPathToDraw(point, origin),
+                mAnimation->EndPosition(point, origin));
         }
     }
 }
@@ -453,4 +486,117 @@ void FieldView::DrawPaths(wxDC& dc, const CC_sheet& sheet)
 void FieldView::GeneratePaths()
 {
     mAnimation = mShow->NewAnimation(NotifyStatus(), NotifyErrorList());
+}
+
+void FieldView::DoDrawBackground(bool enable)
+{
+    mDrawBackground = enable;
+}
+
+bool FieldView::DoingDrawBackground() const
+{
+    return mDrawBackground;
+}
+
+void FieldView::DoPictureAdjustment(bool enable)
+{
+    mAdjustBackgroundMode = enable;
+}
+
+bool FieldView::DoingPictureAdjustment() const
+{
+    return mAdjustBackgroundMode;
+}
+
+bool FieldView::AddBackgroundImage(const wxImage& image)
+{
+    if (!image.IsOk()) {
+        return false;
+    }
+    auto x = 100;
+    auto y = 100;
+
+    auto width = image.GetWidth();
+    auto height = image.GetHeight();
+    std::vector<unsigned char> data(width * height * 3);
+    auto d = image.GetData();
+    std::copy(d, d + width * height * 3, data.data());
+    std::vector<unsigned char> alpha;
+    auto a = image.GetAlpha();
+    if (a) {
+        alpha.resize(width * height);
+        std::copy(a, a + width * height, alpha.data());
+    }
+
+    auto cmd = mShow->Create_AddNewBackgroundImageCommand(x, y, width, height, data, alpha);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return true;
+}
+
+void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
+{
+    if (!mAdjustBackgroundMode)
+        return;
+    mWhichBackgroundIndex = -1;
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
+        if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
+            mWhichBackgroundIndex = i;
+        }
+    }
+    if (mWhichBackgroundIndex != -1) {
+        mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftDown(event, dc);
+    }
+}
+
+void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
+{
+    if (!mAdjustBackgroundMode)
+        return;
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
+        auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
+        auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
+        GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    }
+}
+
+void FieldView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
+{
+    if (!mAdjustBackgroundMode)
+        return;
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
+        mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
+    }
+}
+
+void FieldView::OnBackgroundImageDelete()
+{
+    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())))
+        return;
+    // let the doc know we've removed a picture.
+    auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
+void FieldView::UpdateBackgroundImages()
+{
+    mBackgroundImages.clear();
+    if (mShow && mShow->GetNumSheets()) {
+        auto images = mShow->GetCurrentSheet()->GetBackgroundImages();
+        for (auto&& image : images) {
+            // ugh...  not sure if there's a better way to pass data to image.
+            auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
+            std::copy(image.data.begin(), image.data.end(), d);
+            auto a = static_cast<unsigned char*>(nullptr);
+            if (image.alpha.size()) {
+                a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
+                std::copy(image.alpha.begin(), image.alpha.end(), a);
+                wxImage img(image.image_width, image.image_height, d, a);
+                mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+            }
+            else {
+                wxImage img(image.image_width, image.image_height, d);
+                mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+            }
+        }
+    }
 }

@@ -189,6 +189,11 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool);
+
+    DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool);
+
 public:
     // helpers for displaying different config attributes
     std::vector<wxString> GetColorNames() const;
@@ -198,7 +203,7 @@ public:
     std::vector<wxString> Get_spr_line_text_index() const;
 
     // Colors
-    using ColorWidth_t = std::pair<wxColour, long>;
+    using ColorWidth_t = std::pair<wxColour, int>;
     mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth;
     std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
     void Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush,
@@ -206,14 +211,14 @@ public:
     void Clear_ConfigColor(size_t selection);
 
     // Shows
-    static const size_t kShowModeValues = 10;
+    static constexpr auto kShowModeValues = 10;
     using ShowModeInfo_t = std::array<long, kShowModeValues>;
     mutable std::map<CalChartShowModes, ShowModeInfo_t> mShowModeInfos;
     ShowModeInfo_t Get_ShowModeInfo(CalChartShowModes which) const;
     void Set_ShowModeInfo(CalChartShowModes which, const ShowModeInfo_t& values);
     void Clear_ShowModeInfo(CalChartShowModes which);
 
-    static const size_t kSpringShowModeValues = 21;
+    static constexpr int kSpringShowModeValues = 21;
     using SpringShowModeInfo_t = std::array<long, kSpringShowModeValues>;
     mutable std::map<CalChartSpringShowModes, SpringShowModeInfo_t>
         mSpringShowModeInfos;

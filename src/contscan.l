@@ -32,7 +32,7 @@ YYLTYPE yylloc;		/* line and column of token */
 int yycolno;
 
 const char *yyinputbuffer;
-int yyinputbufferlen;
+size_t yyinputbufferlen;
 
 #define YY_NO_UNPUT
 
@@ -63,8 +63,14 @@ void initscanner() {
 }
 
 //Supress warnings in Flex's generated code
+#ifdef _MSC_VER
 #pragma warning (disable : 4018) //Disable the "'<': signed/unsigned mismatch" warning
 #pragma warning (disable : 4003) //Disable the "not enough actual parameters for macro 'yywrap'" warning
+#endif // _MSC_VER
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+#endif // __clang__
 %}
 
 %option noyywrap
@@ -149,4 +155,9 @@ COMMENT		"#"[^\n\f]*
 %%
 
 //Stop supressing warnings after Flex's generated code
+#ifdef _MSC_VER
 #pragma warning (default : 4018)
+#endif // _MSC_VER
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif // __clang__

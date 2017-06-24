@@ -55,7 +55,7 @@ void PrintShow(const char* show)
         if (currentInfo.first != oldInfo.first) {
             std::cout << currentInfo.first << "\n";
         }
-        for (auto i = 0; i < currentInfo.second.size(); ++i) {
+        for (auto i = 0ul; i < currentInfo.second.size(); ++i) {
             if (i < oldInfo.second.size() && oldInfo.second.at(i) == currentInfo.second.at(i)) {
                 continue;
             }

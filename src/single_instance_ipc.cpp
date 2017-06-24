@@ -123,7 +123,7 @@ wxString CCAppServer::GetServerName()
 {
     wxString name = wxGetUserId() + wxStandardPaths::Get().GetExecutablePath();
     std::hash<std::string> nameHasher;
-    unsigned int hash = nameHasher(name.ToStdString());
+    auto hash = nameHasher(name.ToStdString());
     int16_t sizedHash = hash;
     wxString returnVal;
     returnVal << sizedHash;

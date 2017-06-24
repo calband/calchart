@@ -50,7 +50,7 @@ float CC_coord::Direction() const
         return 0.0;
 
     auto ang = acos(Coord2Float(x) / Magnitude()); // normalize
-    ang *= 180.0 / M_PI; // convert to degrees
+    ang *= static_cast<float>(180.0 / M_PI); // convert to degrees
     if (y > 0)
         ang = (-ang); // check for > PI
 
