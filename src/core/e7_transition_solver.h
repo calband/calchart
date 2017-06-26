@@ -64,5 +64,14 @@ struct TransitionSolverResult {
     std::vector<SYMBOL_TYPE> marcherDotTypes;
 };
 
+class TransitionSolverDelegate {
+public:
+    virtual void OnProgress(double progress) = 0;
+    virtual void OnSubtaskProgress(double progress) = 0;
+    virtual void OnNewPreferredSolution(unsigned numBeatsInSolution) = 0;
+    virtual void OnCalculationComplete(TransitionSolverResult finalSolution) = 0;
+    virtual bool ShouldAbortCalculation() = 0;
+};
+
 std::vector<std::string> validateSheetForTransitionSolver(const CC_sheet& sheet);
-TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_sheet& sheet2, TransitionSolverParams params);
+TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_sheet& sheet2, TransitionSolverParams params, TransitionSolverDelegate *delegate);

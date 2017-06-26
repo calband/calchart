@@ -41,6 +41,12 @@ enum
     CALCHART__TRANSITION_SOLVER__ADD_GROUP_DESTINATIONS,
     CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_DESTINATIONS,
     CALCHART__TRANSITION_SOLVER__SELECT_GROUP_DESTINATIONS,
+    CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS,
+    CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS,
+    CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND,
+    CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE,
+    CALCHART__TRANSITION_SOLVER__CANCEL_CALCULATION,
+    CALCHART__TRANSITION_SOLVER__FINISH_CALCULATION_NOW_AND_APPLY,
 };
 
 BEGIN_EVENT_TABLE(TransitionSolverFrame, wxFrame)
@@ -75,21 +81,12 @@ void TransitionSolverView::OnUpdate(wxView* sender, wxObject* hint)
     frame->Update();
 }
 
-std::pair<bool, unsigned> TransitionSolverView::SolveTransition(TransitionSolverParams params)
+void TransitionSolverView::ApplyTransitionSolution(TransitionSolverResult solution)
 {
-    TransitionSolverResult          solution;
-    const auto                      sheetIterAtCurrSheet = static_cast<CalChartDoc *>(GetDocument())->GetCurrentSheet();
-    const CC_sheet                  &startSheet = *sheetIterAtCurrSheet;
-    const CC_sheet                  &destinationSheet = *(sheetIterAtCurrSheet + 1);
-    
-    solution = runTransitionSolver(startSheet, destinationSheet, params);
-    
     if (solution.successfullySolved)
     {
         GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetTransitionCommand(solution.finalPositions, solution.continuities, solution.marcherDotTypes).release());
     }
-    
-    return std::make_tuple(solution.successfullySolved, solution.numBeatsOfMovement);
 }
 
 void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers)
@@ -101,6 +98,374 @@ void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers)
     }
     GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionCommand(selectionList).release());
 }
+
+class TransitionSolverProgressFrame : public wxDialog {
+    using super = wxDialog;
+private:
+    class ProgressNotification : public wxObject {
+    public:
+        ProgressNotification(double progress) : mProgress(progress) {};
+        
+        double mProgress;
+    };
+    
+    class NewBestSolutionFoundNotification : public wxObject {
+    public:
+        NewBestSolutionFoundNotification(unsigned numBeatsInSolution) : mNumBeatsInSolution(numBeatsInSolution) {};
+        
+        unsigned mNumBeatsInSolution;
+    };
+    
+    class FinalCalculationResultNotification : public wxObject {
+    public:
+        FinalCalculationResultNotification(const TransitionSolverResult &result) : mResult(result) {};
+        
+        TransitionSolverResult mResult;
+    };
+    
+    class TransitionSolverThread : public wxThread, public TransitionSolverDelegate {
+    public:
+        TransitionSolverThread(TransitionSolverProgressFrame *progressFrame);
+    private:
+        void OnProgress(double progress) override;
+        void OnSubtaskProgress(double progress) override;
+        void OnNewPreferredSolution(unsigned numBeatsInSolution) override;
+        void OnCalculationComplete(TransitionSolverResult finalSolution) override;
+        bool ShouldAbortCalculation() override;
+        
+        void *Entry() override;
+        
+        TransitionSolverProgressFrame   *mProgressFrame;
+    };
+public:
+    TransitionSolverProgressFrame();
+    TransitionSolverProgressFrame(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent, wxWindowID id = wxID_ANY,
+                                  const wxString& caption = wxT("Solving Transition..."),
+                                  const wxPoint& pos = wxDefaultPosition,
+                                  const wxSize& size = wxDefaultSize,
+                                  long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    
+    void OnCancel(wxCommandEvent &event);
+    void OnFinishNowAndApply(wxCommandEvent &event);
+    void OnProgressUpdate(wxCommandEvent &event);
+    void OnSubtaskProgressUpdate(wxCommandEvent &event);
+    void OnNewBestSolutionFound(wxCommandEvent &event);
+    void OnCalculationComplete(wxCommandEvent &event);
+    
+    void Update() override;
+    void SyncControlsWithCurrentState();
+    
+private:
+    
+    void Init();
+    bool Create(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent, wxWindowID id = wxID_ANY,
+                const wxString& caption = wxT("Solving Transition..."),
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    void CreateControls();
+    
+    void ApplySolution();
+    
+    TransitionSolverThread                          *mTaskThread;
+    TransitionSolverView                            *mView;
+
+    std::atomic<bool>                               mShouldAbortCalculation;
+    bool                                            mShouldApplyResultOnCompletion;
+    
+    bool                                            mSolutionFound;
+    double                                          mProgress;
+    double                                          mSubtaskProgress;
+    unsigned                                        mNumBeatsInBestResult;
+    TransitionSolverResult                          mFinalResult;
+
+    TransitionSolverParams                          mSolverParams;
+    
+    wxGauge                                         *mProgressBar;
+    wxGauge                                         *mSubtaskProgressBar;
+    wxStaticText                                    *mBestSolutionDescription;
+    wxButton                                        *mAcceptButton;
+    
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_DECLARE_EVENT_TYPES()
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT)
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT)
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT)
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT)
+
+BEGIN_EVENT_TABLE(TransitionSolverProgressFrame, wxDialog)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, TransitionSolverProgressFrame::OnProgressUpdate)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, TransitionSolverProgressFrame::OnSubtaskProgressUpdate)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, TransitionSolverProgressFrame::OnNewBestSolutionFound)
+EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, TransitionSolverProgressFrame::OnCalculationComplete)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CANCEL_CALCULATION, TransitionSolverProgressFrame::OnCancel)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__FINISH_CALCULATION_NOW_AND_APPLY, TransitionSolverProgressFrame::OnFinishNowAndApply)
+END_EVENT_TABLE()
+
+TransitionSolverProgressFrame::TransitionSolverProgressFrame() { Init(); }
+
+TransitionSolverProgressFrame::TransitionSolverProgressFrame(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
+                                                             wxWindowID id, const wxString& caption,
+                                                             const wxPoint& pos, const wxSize& size,
+                                                             long style)
+{
+    Init();
+    
+    Create(params, view, parent, id, caption, pos, size, style);
+}
+
+void TransitionSolverProgressFrame::Init() {}
+
+bool TransitionSolverProgressFrame::Create(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
+                                           wxWindowID id, const wxString& caption,
+                                           const wxPoint& pos, const wxSize& size,
+                                           long style)
+{
+    if (!wxDialog::Create(parent, id, caption, pos, size, style))
+        return false;
+    
+    mView = view;
+    mSolverParams = params;
+    mProgress = 0;
+    mNumBeatsInBestResult = 0;
+    mSolutionFound = false;
+    mShouldAbortCalculation = false;
+    mShouldApplyResultOnCompletion = true;
+    mTaskThread = new TransitionSolverThread(this);
+    mTaskThread->Create();
+    mTaskThread->Run();
+    
+    CreateControls();
+    
+    // This fits the dalog to the minimum size dictated by the sizers
+    GetSizer()->Fit(this);
+    // This ensures that the dialog cannot be smaller than the minimum size
+    GetSizer()->SetSizeHints(this);
+    
+    Center();
+    
+    // now update the current screen
+    Update();
+    
+    return true;
+}
+
+void TransitionSolverProgressFrame::CreateControls()
+{
+    // create a sizer for laying things out top down:
+    wxBoxSizer* topLevelSizer = new wxBoxSizer(wxVERTICAL);
+    {
+        wxStaticText    *heading;
+        wxStaticText    *status;
+        wxBoxSizer      *buttons;
+        
+        heading = new wxStaticText(this, wxID_STATIC, wxT("Working on a solution..."));
+        
+        mProgressBar = new wxGauge(this, wxID_ANY, 500);
+        
+        mSubtaskProgressBar = new wxGauge(this, wxID_ANY, 500);
+        
+        status = new wxStaticText(this, wxID_STATIC, wxT("Best solution so far:"));
+        
+        mBestSolutionDescription = new wxStaticText(this, wxID_STATIC, wxT("No solution found"));
+        
+        buttons = new wxBoxSizer(wxHORIZONTAL);
+        {
+            wxButton    *cancelButton;
+            
+            mAcceptButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__FINISH_CALCULATION_NOW_AND_APPLY, wxT("Finish Now and Apply"));
+            
+            cancelButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__CANCEL_CALCULATION, wxT("Cancel"));
+            
+            buttons->Add(cancelButton);
+            buttons->Add(mAcceptButton);
+        }
+        
+        topLevelSizer->Add(heading);
+        topLevelSizer->Add(mProgressBar, 0, wxGROW | wxALL, 5);
+        topLevelSizer->Add(mSubtaskProgressBar, 0, wxGROW | wxALL, 5);
+        topLevelSizer->Add(status);
+        topLevelSizer->Add(mBestSolutionDescription);
+        topLevelSizer->Add(buttons);
+    }
+    
+    SyncControlsWithCurrentState();
+    SetSizer(topLevelSizer);
+}
+
+void TransitionSolverProgressFrame::SyncControlsWithCurrentState()
+{
+    // Display the current estimation of progress
+    mProgressBar->SetValue(mProgressBar->GetRange() * mProgress);
+    mSubtaskProgressBar->SetValue(mSubtaskProgressBar->GetRange() * mSubtaskProgress);
+    
+    // Check the current best solution; if one exists, display information about it
+    if (mSolutionFound) {
+        mBestSolutionDescription->SetLabel("Solution found that lasts " + std::to_string(mNumBeatsInBestResult) + " beats");
+    } else {
+        mBestSolutionDescription->SetLabel("No solution found");
+    }
+    
+    // If a solution exists, enable the 'Finish Now' button
+    if (mSolutionFound) {
+        mAcceptButton->Enable();
+    } else {
+        mAcceptButton->Disable();
+    }
+}
+
+void TransitionSolverProgressFrame::Update()
+{
+    super::Update();
+    SyncControlsWithCurrentState();
+}
+
+void TransitionSolverProgressFrame::OnCancel(wxCommandEvent &event)
+{
+    mShouldAbortCalculation = true;
+    mShouldApplyResultOnCompletion = false;
+}
+
+void TransitionSolverProgressFrame::OnFinishNowAndApply(wxCommandEvent &event)
+{
+    mShouldAbortCalculation = true;
+    mShouldApplyResultOnCompletion = true;
+}
+
+void TransitionSolverProgressFrame::OnProgressUpdate(wxCommandEvent &event)
+{
+    // Extract the level of progress we've now achieved
+    ProgressNotification        *progressNotification;
+    
+    progressNotification = static_cast<ProgressNotification *>(event.GetClientData());
+    mProgress = progressNotification->mProgress;
+    
+    // Update the window to reflect the new changes
+    SyncControlsWithCurrentState();
+}
+
+void TransitionSolverProgressFrame::OnSubtaskProgressUpdate(wxCommandEvent &event)
+{
+    // Extract the level of progress we've now achieved
+    ProgressNotification        *progressNotification;
+    
+    progressNotification = static_cast<ProgressNotification *>(event.GetClientData());
+    mSubtaskProgress = progressNotification->mProgress;
+    
+    // Update the window to reflect the new changes
+    SyncControlsWithCurrentState();
+}
+
+void TransitionSolverProgressFrame::OnNewBestSolutionFound(wxCommandEvent &event)
+{
+    // Get some information about the new best solution
+    NewBestSolutionFoundNotification    *solutionNotification;
+    
+    solutionNotification = static_cast<NewBestSolutionFoundNotification *>(event.GetClientData());
+    mSolutionFound = true;
+    mNumBeatsInBestResult = solutionNotification->mNumBeatsInSolution;
+    
+    // Update the window to reflect the new changes
+    SyncControlsWithCurrentState();
+}
+
+void TransitionSolverProgressFrame::OnCalculationComplete(wxCommandEvent &event)
+{
+    // Get information about the solution
+    FinalCalculationResultNotification    *solutionNotification;
+    
+    solutionNotification = static_cast<FinalCalculationResultNotification *>(event.GetClientData());
+    mFinalResult = solutionNotification->mResult;
+    if (mShouldApplyResultOnCompletion) {
+        wxMessageDialog                 *completionDialog;
+        std::string                     resultSummary;
+        
+        ApplySolution();
+        
+        if (mFinalResult.successfullySolved) {
+            resultSummary = "Successfully found a solution with a duration of " + std::to_string(mFinalResult.numBeatsOfMovement) + " beats.";
+        } else {
+            resultSummary = "Could not find a solution. Please adjust the transition parameters and try again.";
+        }
+        
+        completionDialog = new wxMessageDialog(this, "Calculation Complete", resultSummary);
+        
+        completionDialog->ShowModal();
+    }
+    
+    // We're finished; go ahead and close
+    Close();
+}
+
+void TransitionSolverProgressFrame::ApplySolution()
+{
+    mView->ApplyTransitionSolution(mFinalResult);
+}
+
+TransitionSolverProgressFrame::TransitionSolverThread::TransitionSolverThread(TransitionSolverProgressFrame *progressFrame)
+: mProgressFrame(progressFrame)
+{}
+
+void TransitionSolverProgressFrame::TransitionSolverThread::OnProgress(double progress)
+{
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, GetId());
+    event->SetClientData(new ProgressNotification(progress));
+    wxQueueEvent(mProgressFrame, event);
+}
+
+void TransitionSolverProgressFrame::TransitionSolverThread::OnSubtaskProgress(double progress)
+{
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, GetId());
+    event->SetClientData(new ProgressNotification(progress));
+    wxQueueEvent(mProgressFrame, event);
+}
+
+void TransitionSolverProgressFrame::TransitionSolverThread::OnNewPreferredSolution(unsigned numBeatsInSolution)
+{
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, GetId());
+    event->SetClientData(new NewBestSolutionFoundNotification(numBeatsInSolution));
+    wxQueueEvent(mProgressFrame, event);
+}
+
+void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(TransitionSolverResult finalSolution)
+{
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, GetId());
+    event->SetClientData(new FinalCalculationResultNotification(finalSolution));
+    wxQueueEvent(mProgressFrame, event);
+}
+
+bool TransitionSolverProgressFrame::TransitionSolverThread::ShouldAbortCalculation()
+{
+    return mProgressFrame->mShouldAbortCalculation;
+}
+
+void *TransitionSolverProgressFrame::TransitionSolverThread::Entry()
+{
+    CalChartDoc         *doc;
+    
+    doc = static_cast<CalChartDoc *>(mProgressFrame->mView->GetDocument());
+    
+    runTransitionSolver(*doc->GetCurrentSheet(), *(doc->GetCurrentSheet() + 1), mProgressFrame->mSolverParams, this);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 TransitionSolverFrame::TransitionSolverFrame() { Init(); }
 
@@ -881,22 +1246,12 @@ void TransitionSolverFrame::OnSelectDestinations(wxCommandEvent &event)
 
 void TransitionSolverFrame::Apply()
 {
-    bool                wasSuccessful;
-    unsigned            numBeats;
-    wxMessageDialog     *completionDialog;
-    std::string         resultSummary;
+    TransitionSolverProgressFrame   *progressFrame;
     
-    std::tie(wasSuccessful, numBeats) = mView->SolveTransition(mSolverParams);
+    // Create a modal window that will run the transition solver for us, and will apply the result when it finishes
+    progressFrame = new TransitionSolverProgressFrame(mSolverParams, mView, this);
     
-    if (wasSuccessful) {
-        resultSummary = "Successfully found a solution with a duration of " + std::to_string(numBeats) + " beats.";
-    } else {
-        resultSummary = "Could not find a solution. Please adjust the transition parameters and try again.";
-    }
-    
-    completionDialog = new wxMessageDialog(this, "Calculation Complete", resultSummary);
-    
-    completionDialog->ShowModal();
+    progressFrame->ShowModal();
 }
 
 std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFrame::ValidateForTransitionSolver()
@@ -905,6 +1260,19 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     std::vector<std::string>        secondSheetErrors;
     const auto                      sheetIterOnFirstSheet = mDoc->GetCurrentSheet();
     const auto                      endSheetIter = mDoc->GetSheetEnd();
+    unsigned                        numInstructions;
+    
+    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++)
+    {
+        if (mSolverParams.availableInstructionsMask[i])
+        {
+            numInstructions++;
+        }
+    }
+    if (numInstructions == 0)
+    {
+        firstSheetErrors.push_back("No command options have been provided.");
+    }
     
     if (sheetIterOnFirstSheet != endSheetIter)
     {

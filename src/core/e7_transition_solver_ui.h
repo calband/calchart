@@ -26,7 +26,7 @@ public:
     virtual void OnDraw(wxDC* dc) override;
     virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
     
-    std::pair<bool, unsigned> SolveTransition(TransitionSolverParams params);
+    void ApplyTransitionSolution(TransitionSolverResult solution);
     void SelectMarchers(std::set<unsigned> marchers);
 };
 
@@ -46,6 +46,7 @@ public:
     
     void OnCloseWindow(wxCommandEvent &event);
     void OnApply(wxCommandEvent &event);
+    void OnSolutionCompleted(wxEvent &event);
     void OnChooseAlgorithm(wxCommandEvent &event);
     void OnEditAllowedCommands(wxCommandEvent &event);
     void OnAddNewGroup(wxCommandEvent &event);
@@ -71,7 +72,7 @@ public:
 private:
     void Init();
     bool Create(CalChartDoc* shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-                const wxString& caption = wxT("Select Points"),
+                const wxString& caption = wxT("Solve Transition"),
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
                 long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
