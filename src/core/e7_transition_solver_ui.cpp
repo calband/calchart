@@ -21,8 +21,9 @@
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
 
-enum
-{
+#pragma mark -
+
+enum {
     CALCHART__TRANSITION_SOLVER__CLOSE,
     CALCHART__TRANSITION_SOLVER__APPLY,
     CALCHART__TRANSITION_SOLVER__SELECT_ALGORITHM,
@@ -49,55 +50,19 @@ enum
     CALCHART__TRANSITION_SOLVER__FINISH_CALCULATION_NOW_AND_APPLY,
 };
 
-BEGIN_EVENT_TABLE(TransitionSolverFrame, wxFrame)
-EVT_MENU(CALCHART__TRANSITION_SOLVER__CLOSE, TransitionSolverFrame::OnCloseWindow)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CLOSE, TransitionSolverFrame::OnCloseWindow)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__APPLY, TransitionSolverFrame::OnApply)
-EVT_CHOICE(CALCHART__TRANSITION_SOLVER__SELECT_ALGORITHM, TransitionSolverFrame::OnChooseAlgorithm)
-EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__EDIT_ALLOWED_COMMANDS, TransitionSolverFrame::OnEditAllowedCommands)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__ADD_NEW_GROUP, TransitionSolverFrame::OnAddNewGroup)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__REMOVE_GROUP, TransitionSolverFrame::OnRemoveGroup)
-EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__SELECT_GROUP, TransitionSolverFrame::OnSelectGroup)
-EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__NULL, TransitionSolverFrame::OnNullEvent)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_MEMBERS, TransitionSolverFrame::OnClearMembers)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SET_GROUP_MEMBERS, TransitionSolverFrame::OnSetMembers)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__ADD_GROUP_MEMBERS, TransitionSolverFrame::OnAddMembers)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_MEMBERS, TransitionSolverFrame::OnRemoveMembers)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SELECT_GROUP_MEMBERS, TransitionSolverFrame::OnSelectMembers)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_DESTINATIONS, TransitionSolverFrame::OnClearDestinations)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SET_GROUP_DESTINATIONS, TransitionSolverFrame::OnSetDestinations)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__ADD_GROUP_DESTINATIONS, TransitionSolverFrame::OnAddDestinations)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_DESTINATIONS, TransitionSolverFrame::OnRemoveDestinations)
-EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SELECT_GROUP_DESTINATIONS, TransitionSolverFrame::OnSelectDestinations)
-END_EVENT_TABLE()
+BEGIN_DECLARE_EVENT_TYPES()
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND)
+DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE)
+END_DECLARE_EVENT_TYPES()
 
-TransitionSolverView::TransitionSolverView() {}
-TransitionSolverView::~TransitionSolverView() {}
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT)
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT)
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT)
+DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT)
 
-void TransitionSolverView::OnDraw(wxDC* dc) {}
-void TransitionSolverView::OnUpdate(wxView* sender, wxObject* hint)
-{
-    TransitionSolverFrame* frame = static_cast<TransitionSolverFrame*>(GetFrame());
-    frame->Update();
-}
-
-void TransitionSolverView::ApplyTransitionSolution(TransitionSolverResult solution)
-{
-    if (solution.successfullySolved)
-    {
-        GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetTransitionCommand(solution.finalPositions, solution.continuities, solution.marcherDotTypes).release());
-    }
-}
-
-void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers)
-{
-    std::set<int> selectionList;
-    for (unsigned marcher : marchers)
-    {
-        selectionList.insert(marcher);
-    }
-    GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionCommand(selectionList).release());
-}
+#pragma mark - TransitionSolverProgressFrame Declaration
 
 class TransitionSolverProgressFrame : public wxDialog {
     using super = wxDialog;
@@ -169,7 +134,7 @@ private:
     
     TransitionSolverThread                          *mTaskThread;
     TransitionSolverView                            *mView;
-
+    
     std::atomic<bool>                               mShouldAbortCalculation;
     bool                                            mShouldApplyResultOnCompletion;
     
@@ -178,7 +143,7 @@ private:
     double                                          mSubtaskProgress;
     unsigned                                        mNumBeatsInBestResult;
     TransitionSolverResult                          mFinalResult;
-
+    
     TransitionSolverParams                          mSolverParams;
     
     wxGauge                                         *mProgressBar;
@@ -189,18 +154,6 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-BEGIN_DECLARE_EVENT_TYPES()
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS)
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS)
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND)
-DECLARE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE)
-END_DECLARE_EVENT_TYPES()
-
-DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT)
-DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT)
-DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT)
-DEFINE_EVENT_TYPE(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT)
-
 BEGIN_EVENT_TABLE(TransitionSolverProgressFrame, wxDialog)
 EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, TransitionSolverProgressFrame::OnProgressUpdate)
 EVT_COMMAND(wxID_ANY, CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, TransitionSolverProgressFrame::OnSubtaskProgressUpdate)
@@ -210,13 +163,64 @@ EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CANCEL_CALCULATION, TransitionSolverProg
 EVT_BUTTON(CALCHART__TRANSITION_SOLVER__FINISH_CALCULATION_NOW_AND_APPLY, TransitionSolverProgressFrame::OnFinishNowAndApply)
 END_EVENT_TABLE()
 
+
+BEGIN_EVENT_TABLE(TransitionSolverFrame, wxFrame)
+EVT_MENU(CALCHART__TRANSITION_SOLVER__CLOSE, TransitionSolverFrame::OnCloseWindow)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CLOSE, TransitionSolverFrame::OnCloseWindow)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__APPLY, TransitionSolverFrame::OnApply)
+EVT_CHOICE(CALCHART__TRANSITION_SOLVER__SELECT_ALGORITHM, TransitionSolverFrame::OnChooseAlgorithm)
+EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__EDIT_ALLOWED_COMMANDS, TransitionSolverFrame::OnEditAllowedCommands)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__ADD_NEW_GROUP, TransitionSolverFrame::OnAddNewGroup)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__REMOVE_GROUP, TransitionSolverFrame::OnRemoveGroup)
+EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__SELECT_GROUP, TransitionSolverFrame::OnSelectGroup)
+EVT_LISTBOX(CALCHART__TRANSITION_SOLVER__NULL, TransitionSolverFrame::OnNullEvent)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_MEMBERS, TransitionSolverFrame::OnClearMembers)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SET_GROUP_MEMBERS, TransitionSolverFrame::OnSetMembers)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__ADD_GROUP_MEMBERS, TransitionSolverFrame::OnAddMembers)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_MEMBERS, TransitionSolverFrame::OnRemoveMembers)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SELECT_GROUP_MEMBERS, TransitionSolverFrame::OnSelectMembers)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_DESTINATIONS, TransitionSolverFrame::OnClearDestinations)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SET_GROUP_DESTINATIONS, TransitionSolverFrame::OnSetDestinations)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__ADD_GROUP_DESTINATIONS, TransitionSolverFrame::OnAddDestinations)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_DESTINATIONS, TransitionSolverFrame::OnRemoveDestinations)
+EVT_BUTTON(CALCHART__TRANSITION_SOLVER__SELECT_GROUP_DESTINATIONS, TransitionSolverFrame::OnSelectDestinations)
+END_EVENT_TABLE()
+
+#pragma mark - TransitionSolverView Implementation
+
+TransitionSolverView::TransitionSolverView() {}
+TransitionSolverView::~TransitionSolverView() {}
+
+void TransitionSolverView::OnDraw(wxDC* dc) {}
+void TransitionSolverView::OnUpdate(wxView* sender, wxObject* hint) {
+    TransitionSolverFrame* frame = static_cast<TransitionSolverFrame*>(GetFrame());
+    frame->Update();
+}
+
+void TransitionSolverView::ApplyTransitionSolution(TransitionSolverResult solution) {
+    if (solution.successfullySolved)
+    {
+        GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetTransitionCommand(solution.finalPositions, solution.continuities, solution.marcherDotTypes).release());
+    }
+}
+
+void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers) {
+    std::set<int> selectionList;
+    for (unsigned marcher : marchers)
+    {
+        selectionList.insert(marcher);
+    }
+    GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionCommand(selectionList).release());
+}
+
+#pragma mark - TransitionSolverProgressFrame Implementation
+
 TransitionSolverProgressFrame::TransitionSolverProgressFrame() { Init(); }
 
 TransitionSolverProgressFrame::TransitionSolverProgressFrame(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
                                                              wxWindowID id, const wxString& caption,
                                                              const wxPoint& pos, const wxSize& size,
-                                                             long style)
-{
+                                                             long style) {
     Init();
     
     Create(params, view, parent, id, caption, pos, size, style);
@@ -227,8 +231,7 @@ void TransitionSolverProgressFrame::Init() {}
 bool TransitionSolverProgressFrame::Create(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
                                            wxWindowID id, const wxString& caption,
                                            const wxPoint& pos, const wxSize& size,
-                                           long style)
-{
+                                           long style) {
     if (!wxDialog::Create(parent, id, caption, pos, size, style))
         return false;
     
@@ -258,8 +261,7 @@ bool TransitionSolverProgressFrame::Create(TransitionSolverParams params, Transi
     return true;
 }
 
-void TransitionSolverProgressFrame::CreateControls()
-{
+void TransitionSolverProgressFrame::CreateControls() {
     // create a sizer for laying things out top down:
     wxBoxSizer* topLevelSizer = new wxBoxSizer(wxVERTICAL);
     {
@@ -301,8 +303,7 @@ void TransitionSolverProgressFrame::CreateControls()
     SetSizer(topLevelSizer);
 }
 
-void TransitionSolverProgressFrame::SyncControlsWithCurrentState()
-{
+void TransitionSolverProgressFrame::SyncControlsWithCurrentState() {
     // Display the current estimation of progress
     mProgressBar->SetValue(mProgressBar->GetRange() * mProgress);
     mSubtaskProgressBar->SetValue(mSubtaskProgressBar->GetRange() * mSubtaskProgress);
@@ -322,26 +323,22 @@ void TransitionSolverProgressFrame::SyncControlsWithCurrentState()
     }
 }
 
-void TransitionSolverProgressFrame::Update()
-{
+void TransitionSolverProgressFrame::Update() {
     super::Update();
     SyncControlsWithCurrentState();
 }
 
-void TransitionSolverProgressFrame::OnCancel(wxCommandEvent &event)
-{
+void TransitionSolverProgressFrame::OnCancel(wxCommandEvent &event) {
     mShouldAbortCalculation = true;
     mShouldApplyResultOnCompletion = false;
 }
 
-void TransitionSolverProgressFrame::OnFinishNowAndApply(wxCommandEvent &event)
-{
+void TransitionSolverProgressFrame::OnFinishNowAndApply(wxCommandEvent &event) {
     mShouldAbortCalculation = true;
     mShouldApplyResultOnCompletion = true;
 }
 
-void TransitionSolverProgressFrame::OnProgressUpdate(wxCommandEvent &event)
-{
+void TransitionSolverProgressFrame::OnProgressUpdate(wxCommandEvent &event) {
     // Extract the level of progress we've now achieved
     ProgressNotification        *progressNotification;
     
@@ -352,8 +349,7 @@ void TransitionSolverProgressFrame::OnProgressUpdate(wxCommandEvent &event)
     SyncControlsWithCurrentState();
 }
 
-void TransitionSolverProgressFrame::OnSubtaskProgressUpdate(wxCommandEvent &event)
-{
+void TransitionSolverProgressFrame::OnSubtaskProgressUpdate(wxCommandEvent &event) {
     // Extract the level of progress we've now achieved
     ProgressNotification        *progressNotification;
     
@@ -364,8 +360,7 @@ void TransitionSolverProgressFrame::OnSubtaskProgressUpdate(wxCommandEvent &even
     SyncControlsWithCurrentState();
 }
 
-void TransitionSolverProgressFrame::OnNewBestSolutionFound(wxCommandEvent &event)
-{
+void TransitionSolverProgressFrame::OnNewBestSolutionFound(wxCommandEvent &event) {
     // Get some information about the new best solution
     NewBestSolutionFoundNotification    *solutionNotification;
     
@@ -377,8 +372,7 @@ void TransitionSolverProgressFrame::OnNewBestSolutionFound(wxCommandEvent &event
     SyncControlsWithCurrentState();
 }
 
-void TransitionSolverProgressFrame::OnCalculationComplete(wxCommandEvent &event)
-{
+void TransitionSolverProgressFrame::OnCalculationComplete(wxCommandEvent &event) {
     // Get information about the solution
     FinalCalculationResultNotification    *solutionNotification;
     
@@ -405,8 +399,7 @@ void TransitionSolverProgressFrame::OnCalculationComplete(wxCommandEvent &event)
     Close();
 }
 
-void TransitionSolverProgressFrame::ApplySolution()
-{
+void TransitionSolverProgressFrame::ApplySolution() {
     mView->ApplyTransitionSolution(mFinalResult);
 }
 
@@ -414,66 +407,52 @@ TransitionSolverProgressFrame::TransitionSolverThread::TransitionSolverThread(Tr
 : mProgressFrame(progressFrame)
 {}
 
-void TransitionSolverProgressFrame::TransitionSolverThread::OnProgress(double progress)
-{
-    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, GetId());
+void TransitionSolverProgressFrame::TransitionSolverThread::OnProgress(double progress) {
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_PROGRESS_EVT, wxID_ANY);
     event->SetClientData(new ProgressNotification(progress));
     wxQueueEvent(mProgressFrame, event);
 }
 
-void TransitionSolverProgressFrame::TransitionSolverThread::OnSubtaskProgress(double progress)
-{
-    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, GetId());
+void TransitionSolverProgressFrame::TransitionSolverThread::OnSubtaskProgress(double progress) {
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_SUBTASK_PROGRESS_EVT, wxID_ANY);
     event->SetClientData(new ProgressNotification(progress));
     wxQueueEvent(mProgressFrame, event);
 }
 
-void TransitionSolverProgressFrame::TransitionSolverThread::OnNewPreferredSolution(unsigned numBeatsInSolution)
-{
-    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, GetId());
+void TransitionSolverProgressFrame::TransitionSolverThread::OnNewPreferredSolution(unsigned numBeatsInSolution) {
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__TRANSITION_SOLUTION_FOUND_EVT, wxID_ANY);
     event->SetClientData(new NewBestSolutionFoundNotification(numBeatsInSolution));
     wxQueueEvent(mProgressFrame, event);
 }
 
-void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(TransitionSolverResult finalSolution)
-{
-    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, GetId());
+void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(TransitionSolverResult finalSolution) {
+    wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, wxID_ANY);
     event->SetClientData(new FinalCalculationResultNotification(finalSolution));
     wxQueueEvent(mProgressFrame, event);
 }
 
-bool TransitionSolverProgressFrame::TransitionSolverThread::ShouldAbortCalculation()
-{
+bool TransitionSolverProgressFrame::TransitionSolverThread::ShouldAbortCalculation() {
     return mProgressFrame->mShouldAbortCalculation;
 }
 
-void *TransitionSolverProgressFrame::TransitionSolverThread::Entry()
-{
+void *TransitionSolverProgressFrame::TransitionSolverThread::Entry() {
     CalChartDoc         *doc;
     
     doc = static_cast<CalChartDoc *>(mProgressFrame->mView->GetDocument());
     
     runTransitionSolver(*doc->GetCurrentSheet(), *(doc->GetCurrentSheet() + 1), mProgressFrame->mSolverParams, this);
+    
+    return nullptr;
 }
 
-
-
-
-
-
-
-
-
-
-
+#pragma mark - TransitionSolverFrame Implementation
 
 TransitionSolverFrame::TransitionSolverFrame() { Init(); }
 
 TransitionSolverFrame::TransitionSolverFrame(CalChartDoc* show, wxWindow* parent,
                                              wxWindowID id, const wxString& caption,
                                              const wxPoint& pos, const wxSize& size,
-                                             long style)
-{
+                                             long style) {
     Init();
     
     Create(show, parent, id, caption, pos, size, style);
@@ -484,10 +463,10 @@ void TransitionSolverFrame::Init() {}
 bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
                                    wxWindowID id, const wxString& caption,
                                    const wxPoint& pos, const wxSize& size,
-                                   long style)
-{
-    if (!wxFrame::Create(parent, id, caption, pos, size, style))
+                                   long style) {
+    if (!wxFrame::Create(parent, id, caption, pos, size, style)) {
         return false;
+    }
     
     mDoc = show;
     mView = new TransitionSolverView;
@@ -495,8 +474,7 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
     mView->SetFrame(this);
     mSelectedGroup = -1;
     mSolverParams.algorithm = TransitionSolverParams::AlgorithmIdentifier::BEGIN;
-    for (unsigned i = 0; i < mSolverParams.availableInstructionsMask.size(); i++)
-    {
+    for (unsigned i = 0; i < mSolverParams.availableInstructionsMask.size(); i++) {
         mSolverParams.availableInstructionsMask[i] = true;
         mSolverParams.availableInstructions[i].waitBeats = (i / (unsigned)TransitionSolverParams::InstructionOption::Pattern::END) * 2;
         mSolverParams.availableInstructions[i].movementPattern = (TransitionSolverParams::InstructionOption::Pattern)(i % (unsigned)TransitionSolverParams::InstructionOption::Pattern::END);
@@ -517,8 +495,7 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
     return true;
 }
 
-void TransitionSolverFrame::CreateControls()
-{
+void TransitionSolverFrame::CreateControls() {
     // menu bar
     wxMenu* cont_menu = new wxMenu;
     cont_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"),
@@ -817,35 +794,28 @@ void TransitionSolverFrame::CreateControls()
     SetSizer(topLevelSizer);
 }
 
-TransitionSolverFrame::~TransitionSolverFrame()
-{
-    if (mView)
-    {
+TransitionSolverFrame::~TransitionSolverFrame() {
+    if (mView) {
         delete mView;
     }
 }
 
-void TransitionSolverFrame::OnCloseWindow(wxCommandEvent& event)
-{
+void TransitionSolverFrame::OnCloseWindow(wxCommandEvent& event) {
     Close();
 }
 
-void TransitionSolverFrame::Update()
-{
+void TransitionSolverFrame::Update() {
     super::Update();
     SyncControlsWithCurrentState();
 }
 
 
-void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
-{
+void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
     unsigned        numSelectedCommands = 0;
     
     mInstructionOptions.clear();
-    for (unsigned waitBeats = 0; waitBeats < (*mDoc->GetCurrentSheet()).GetBeats(); waitBeats+=2)
-    {
-        for (TransitionSolverParams::InstructionOption::Pattern pattern = TransitionSolverParams::InstructionOption::Pattern::BEGIN; pattern != TransitionSolverParams::InstructionOption::Pattern::END; pattern = (TransitionSolverParams::InstructionOption::Pattern)(((unsigned)pattern) + 1))
-        {
+    for (unsigned waitBeats = 0; waitBeats < (*mDoc->GetCurrentSheet()).GetBeats(); waitBeats+=2) {
+        for (TransitionSolverParams::InstructionOption::Pattern pattern = TransitionSolverParams::InstructionOption::Pattern::BEGIN; pattern != TransitionSolverParams::InstructionOption::Pattern::END; pattern = (TransitionSolverParams::InstructionOption::Pattern)(((unsigned)pattern) + 1)) {
             TransitionSolverParams::InstructionOption   instruction;
             
             instruction.movementPattern = pattern;
@@ -859,12 +829,10 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
     {
         std::vector<wxString> commandLabels;
         
-        for (TransitionSolverParams::InstructionOption instruction : mInstructionOptions)
-        {
+        for (TransitionSolverParams::InstructionOption instruction : mInstructionOptions) {
             std::string         label;
             
-            switch (instruction.movementPattern)
-            {
+            switch (instruction.movementPattern) {
                 case TransitionSolverParams::InstructionOption::Pattern::EWNS:
                     label = "EWNS";
                     break;
@@ -890,8 +858,7 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
         mAvailableCommandsControl->Set(wxArrayString{ commandLabels.size(), &commandLabels[0] });
         
         // Update the commands
-        for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++)
-        {
+        for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
             TransitionSolverParams::InstructionOption   &instruction = mSolverParams.availableInstructions[i];
             unsigned                                    commandIndex;
             
@@ -908,8 +875,7 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
     mNumSelectedInstructionsIndicator->SetLabel(std::to_string(numSelectedCommands));
 }
 
-void TransitionSolverFrame::SyncGroupControlsWithCurrentState()
-{
+void TransitionSolverFrame::SyncGroupControlsWithCurrentState() {
     size_t          numPointsInSelection;
     
     numPointsInSelection = mDoc->GetSelectionList().size();
@@ -918,35 +884,30 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState()
     {
         std::vector<wxString>       groupLabels;
         
-        for (unsigned i = 0; i < mGroupNames.size(); i++)
-        {
+        for (unsigned i = 0; i < mGroupNames.size(); i++) {
             groupLabels.push_back(mGroupNames[i]);
         }
         
         mCurrentGroupControl->Clear();
         mCurrentGroupControl->Set(wxArrayString{ groupLabels.size(), &groupLabels[0] });
         
-        if (mSelectedGroup != -1)
-        {
+        if (mSelectedGroup != -1) {
             mCurrentGroupControl->SetSelection(mSelectedGroup);
         }
     }
     
     // Display the current groups
-    if (mSelectedGroup != -1)
-    {
+    if (mSelectedGroup != -1) {
         TransitionSolverParams::GroupParams         &group = mSolverParams.groups[mSelectedGroup];
         
         std::vector<wxString>                       memberLabels;
         std::vector<wxString>                       destinationLabels;
         
-        for (auto marcher : group.marchers)
-        {
+        for (auto marcher : group.marchers) {
             memberLabels.push_back(mDoc->GetPointLabel(marcher));
         }
         
-        for (auto destination : group.allowedDestinations)
-        {
+        for (auto destination : group.allowedDestinations) {
             destinationLabels.push_back(mDoc->GetPointLabel(destination));
         }
         
@@ -968,33 +929,26 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState()
             mRemoveSelectionFromDestinationsButton,
         };
         
-        for (wxButton *button : buttonsDependentOnSelectionSize)
-        {
-            if (mSelectedGroup != -1 && numPointsInSelection)
-            {
+        for (wxButton *button : buttonsDependentOnSelectionSize) {
+            if (mSelectedGroup != -1 && numPointsInSelection) {
                 button->Enable();
             }
-            else
-            {
+            else {
                 button->Disable();
             }
         }
         
-        if (mSelectedGroup != -1)
-        {
+        if (mSelectedGroup != -1) {
             mSelectMembersButton->Enable();
             mSelectDestinationsButton->Enable();
-        }
-        else
-        {
+        } else {
             mSelectMembersButton->Disable();
             mSelectDestinationsButton->Disable();
         }
     }
 }
 
-void TransitionSolverFrame::SyncControlsWithCurrentState()
-{
+void TransitionSolverFrame::SyncControlsWithCurrentState() {
     size_t          numPointsInSelection;
     
     numPointsInSelection = mDoc->GetSelectionList().size();
@@ -1011,8 +965,7 @@ void TransitionSolverFrame::SyncControlsWithCurrentState()
 
 #pragma mark - UI ENDPOINTS
 
-void TransitionSolverFrame::OnApply(wxCommandEvent&)
-{
+void TransitionSolverFrame::OnApply(wxCommandEvent&) {
     std::vector<std::string>        firstSheetErrors;
     std::vector<std::string>        secondSheetErrors;
     
@@ -1046,20 +999,16 @@ void TransitionSolverFrame::OnApply(wxCommandEvent&)
         
         errorDialog = new wxMessageDialog(this, finalErrorDetails, finalErrorMessage);
         errorDialog->ShowModal();
-    }
-    else
-    {
+    } else {
         Apply();
     }
 }
 
-void TransitionSolverFrame::OnChooseAlgorithm(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnChooseAlgorithm(wxCommandEvent &event) {
     ChooseAlgorithm((TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
 }
 
-void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event) {
     std::set<unsigned>              listSelections;
     std::set<unsigned>              previouslySelectedCommands;
     std::vector<unsigned>           commandsToSelect;
@@ -1067,16 +1016,13 @@ void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event)
     unsigned                        numListSelections;
     
     numListSelections = mAvailableCommandsControl->GetSelections(rawListSelections);
-    for (unsigned i = 0; i < rawListSelections.size(); i++)
-    {
+    for (unsigned i = 0; i < rawListSelections.size(); i++) {
         listSelections.insert(rawListSelections[i]);
     }
     
     // Get a list of everything that is selected in the list now
-    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++)
-    {
-        if (mSolverParams.availableInstructionsMask[i])
-        {
+    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
+        if (mSolverParams.availableInstructionsMask[i]) {
             TransitionSolverParams::InstructionOption   &instruction = mSolverParams.availableInstructions[i];
             unsigned commandIndex;
             
@@ -1087,35 +1033,29 @@ void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event)
     }
     
     // First add the commands that we already have selected, if they're still selected
-    for (unsigned commandIndex : previouslySelectedCommands)
-    {
-        if (listSelections.find(commandIndex) != listSelections.end())
-        {
+    for (unsigned commandIndex : previouslySelectedCommands) {
+        if (listSelections.find(commandIndex) != listSelections.end()) {
             commandsToSelect.push_back(commandIndex);
             listSelections.erase(commandIndex);
         }
     }
     
     // Then, add the commands that we haven't selected yet
-    for (unsigned commandIndex : listSelections)
-    {
+    for (unsigned commandIndex : listSelections) {
         commandsToSelect.push_back(commandIndex);
     }
     
-    if (commandsToSelect.size() > 8)
-    {
+    if (commandsToSelect.size() > 8) {
         commandsToSelect.erase(commandsToSelect.begin() + 8, commandsToSelect.end());
     }
     
     SetAllowedCommands(commandsToSelect);
     
     // Deselect anything that shouldn't be selected
-    for (unsigned commandIndex : commandsToSelect)
-    {
+    for (unsigned commandIndex : commandsToSelect) {
         listSelections.erase(commandIndex);
     }
-    for (unsigned commandIndex : listSelections)
-    {
+    for (unsigned commandIndex : listSelections) {
         mAvailableCommandsControl->Deselect(commandIndex);
         numListSelections--;
     }
@@ -1123,129 +1063,105 @@ void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event)
     mNumSelectedInstructionsIndicator->SetLabel(std::to_string(numListSelections));
 }
 
-void TransitionSolverFrame::OnAddNewGroup(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnAddNewGroup(wxCommandEvent &event) {
     AddNewGroup(mNewGroupNameControl->GetValue().ToStdString());
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnRemoveGroup(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnRemoveGroup(wxCommandEvent &event) {
     RemoveGroup(mSelectedGroup);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnSelectGroup(wxCommandEvent &event)
-{
-    if (mCurrentGroupControl->GetSelection() == wxNOT_FOUND)
-    {
+void TransitionSolverFrame::OnSelectGroup(wxCommandEvent &event) {
+    if (mCurrentGroupControl->GetSelection() == wxNOT_FOUND) {
         UnselectGroup();
-    }
-    else
-    {
+    } else {
         SelectGroup(mCurrentGroupControl->GetSelection());
     }
     
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnNullEvent(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnNullEvent(wxCommandEvent &event) {
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnClearMembers(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnClearMembers(wxCommandEvent &event) {
     ClearMembers();
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnSetMembers(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnSetMembers(wxCommandEvent &event) {
     std::set<unsigned> selection;
-    for (int marcher : mDoc->GetSelectionList())
-    {
+    for (int marcher : mDoc->GetSelectionList()) {
         selection.insert((unsigned)marcher);
     }
     SetMembers(selection);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnAddMembers(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnAddMembers(wxCommandEvent &event) {
     std::set<unsigned> selection;
-    for (int marcher : mDoc->GetSelectionList())
-    {
+    for (int marcher : mDoc->GetSelectionList()) {
         selection.insert((unsigned)marcher);
     }
     AddMembers(selection);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnRemoveMembers(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnRemoveMembers(wxCommandEvent &event) {
     std::set<unsigned> selection;
-    for (int marcher : mDoc->GetSelectionList())
-    {
+    for (int marcher : mDoc->GetSelectionList()) {
         selection.insert((unsigned)marcher);
     }
     RemoveMembers(selection);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnSelectMembers(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnSelectMembers(wxCommandEvent &event) {
     mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].marchers);
 }
 
-void TransitionSolverFrame::OnClearDestinations(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnClearDestinations(wxCommandEvent &event) {
     ClearDestinations();
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnSetDestinations(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnSetDestinations(wxCommandEvent &event) {
     std::set<unsigned> selection;
-    for (int marcher : mDoc->GetSelectionList())
-    {
+    for (int marcher : mDoc->GetSelectionList()) {
         selection.insert((unsigned)marcher);
     }
     SetDestinations(selection);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnAddDestinations(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnAddDestinations(wxCommandEvent &event) {
     std::set<unsigned> selection;
-    for (int marcher : mDoc->GetSelectionList())
-    {
+    for (int marcher : mDoc->GetSelectionList()) {
         selection.insert((unsigned)marcher);
     }
     AddDestinations(selection);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnRemoveDestinations(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnRemoveDestinations(wxCommandEvent &event) {
     std::set<unsigned> selection;
-    for (int marcher : mDoc->GetSelectionList())
-    {
+    for (int marcher : mDoc->GetSelectionList()) {
         selection.insert((unsigned)marcher);
     }
     RemoveDestinations(selection);
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnSelectDestinations(wxCommandEvent &event)
-{
+void TransitionSolverFrame::OnSelectDestinations(wxCommandEvent &event) {
     mView->SelectMarchers(mSolverParams.groups[mSelectedGroup].allowedDestinations);
 }
 
 #pragma mark - UNDER-THE-UI
 
-void TransitionSolverFrame::Apply()
-{
+void TransitionSolverFrame::Apply() {
     TransitionSolverProgressFrame   *progressFrame;
     
     // Create a modal window that will run the transition solver for us, and will apply the result when it finishes
@@ -1254,142 +1170,112 @@ void TransitionSolverFrame::Apply()
     progressFrame->ShowModal();
 }
 
-std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFrame::ValidateForTransitionSolver()
-{
+std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFrame::ValidateForTransitionSolver() {
     std::vector<std::string>        firstSheetErrors;
     std::vector<std::string>        secondSheetErrors;
     const auto                      sheetIterOnFirstSheet = mDoc->GetCurrentSheet();
     const auto                      endSheetIter = mDoc->GetSheetEnd();
-    unsigned                        numInstructions;
+    unsigned                        numInstructions = 0;
     
-    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++)
-    {
-        if (mSolverParams.availableInstructionsMask[i])
-        {
+    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
+        if (mSolverParams.availableInstructionsMask[i]) {
             numInstructions++;
         }
     }
-    if (numInstructions == 0)
-    {
+    if (numInstructions == 0) {
         firstSheetErrors.push_back("No command options have been provided.");
     }
     
-    if (sheetIterOnFirstSheet != endSheetIter)
-    {
+    if (sheetIterOnFirstSheet != endSheetIter) {
         const CC_sheet                      &firstSheet = *sheetIterOnFirstSheet;
         
         firstSheetErrors = validateSheetForTransitionSolver(firstSheet);
-    }
-    else
-    {
+    } else {
         firstSheetErrors.push_back("No first sheet exists.\n");
     }
     
-    if ((sheetIterOnFirstSheet + 1) != endSheetIter)
-    {
+    if ((sheetIterOnFirstSheet + 1) != endSheetIter) {
         const CC_sheet                      &secondSheet = *(sheetIterOnFirstSheet + 1);
         
         secondSheetErrors = validateSheetForTransitionSolver(secondSheet);
-    }
-    else
-    {
+    } else {
         secondSheetErrors.push_back("No next sheet exists.\n");
     }
     
     return std::make_pair(firstSheetErrors, secondSheetErrors);
 }
 
-void TransitionSolverFrame::ChooseAlgorithm(TransitionSolverParams::AlgorithmIdentifier algorithm)
-{
+void TransitionSolverFrame::ChooseAlgorithm(TransitionSolverParams::AlgorithmIdentifier algorithm) {
     mSolverParams.algorithm = algorithm;
 }
 
-void TransitionSolverFrame::SetAllowedCommands(std::vector<unsigned> commandIndices)
-{
-    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++)
-    {
+void TransitionSolverFrame::SetAllowedCommands(std::vector<unsigned> commandIndices) {
+    for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
         mSolverParams.availableInstructionsMask[i] = false;
     }
     
-    for (unsigned i = 0; i < std::min(commandIndices.size(), mSolverParams.availableInstructions.size()); i++)
-    {
+    for (unsigned i = 0; i < std::min(commandIndices.size(), mSolverParams.availableInstructions.size()); i++) {
         mSolverParams.availableInstructions[i] = mInstructionOptions[commandIndices[i]];
         mSolverParams.availableInstructionsMask[i] = true;
     }
 }
 
-void TransitionSolverFrame::AddNewGroup(std::string groupName)
-{
+void TransitionSolverFrame::AddNewGroup(std::string groupName) {
     mSolverParams.groups.push_back(TransitionSolverParams::GroupParams());
     mGroupNames.push_back(groupName);
 }
 
-void TransitionSolverFrame::RemoveGroup(unsigned groupIndex)
-{
+void TransitionSolverFrame::RemoveGroup(unsigned groupIndex) {
     mSolverParams.groups.erase(mSolverParams.groups.begin() + groupIndex);
     mGroupNames.erase(mGroupNames.begin() + groupIndex);
 }
 
-void TransitionSolverFrame::SelectGroup(unsigned groupIndex)
-{
+void TransitionSolverFrame::SelectGroup(unsigned groupIndex) {
     mSelectedGroup = groupIndex;
 }
 
-void TransitionSolverFrame::UnselectGroup()
-{
+void TransitionSolverFrame::UnselectGroup() {
     mSelectedGroup = -1;
 }
 
-void TransitionSolverFrame::ClearMembers()
-{
+void TransitionSolverFrame::ClearMembers() {
     mSolverParams.groups[mSelectedGroup].marchers.clear();
 }
 
-void TransitionSolverFrame::SetMembers(std::set<unsigned> marchers)
-{
+void TransitionSolverFrame::SetMembers(std::set<unsigned> marchers) {
     ClearMembers();
     AddMembers(marchers);
 }
 
-void TransitionSolverFrame::AddMembers(std::set<unsigned> marchers)
-{
-    for (auto iter = marchers.begin(); iter != marchers.end(); iter++)
-    {
+void TransitionSolverFrame::AddMembers(std::set<unsigned> marchers) {
+    for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].marchers.insert(*iter);
     }
 }
 
-void TransitionSolverFrame::RemoveMembers(std::set<unsigned> marchers)
-{
-    for (auto iter = marchers.begin(); iter != marchers.end(); iter++)
-    {
+void TransitionSolverFrame::RemoveMembers(std::set<unsigned> marchers) {
+    for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].marchers.erase(*iter);
     }
 }
 
-void TransitionSolverFrame::ClearDestinations()
-{
+void TransitionSolverFrame::ClearDestinations() {
     mSolverParams.groups[mSelectedGroup].allowedDestinations.clear();
 }
 
-void TransitionSolverFrame::SetDestinations(std::set<unsigned> marchers)
-{
+void TransitionSolverFrame::SetDestinations(std::set<unsigned> marchers) {
     ClearDestinations();
     AddDestinations(marchers);
 }
 
-void TransitionSolverFrame::AddDestinations(std::set<unsigned> marchers)
-{
-    for (auto iter = marchers.begin(); iter != marchers.end(); iter++)
-    {
+void TransitionSolverFrame::AddDestinations(std::set<unsigned> marchers) {
+    for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].allowedDestinations.insert(*iter);
     }
 }
 
-void TransitionSolverFrame::RemoveDestinations(std::set<unsigned> marchers)
-{
-    for (auto iter = marchers.begin(); iter != marchers.end(); iter++)
-    {
+void TransitionSolverFrame::RemoveDestinations(std::set<unsigned> marchers) {
+    for (auto iter = marchers.begin(); iter != marchers.end(); iter++) {
         mSolverParams.groups[mSelectedGroup].allowedDestinations.erase(*iter);
     }
 }

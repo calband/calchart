@@ -178,6 +178,7 @@ private:
     mutable std::vector<std::vector<std::map<unsigned, SolverCoord>>> m_collisions;
     mutable std::vector<std::vector<std::vector<std::set<unsigned>>>> m_marcherGrid;
     mutable std::vector<MarcherClippedMovementState> m_clippedMarchers;
+    std::set<unsigned> m_disabledMarchers;
     
     // Cached states
     mutable bool m_cachedCollisionsNeedRefresh;
@@ -188,6 +189,9 @@ private:
     
 public:
     bool isSolved() const;
+    
+    void disableMarcher(unsigned which);
+    void enableMarcher(unsigned which);
     
     void reinstructMarcher(unsigned which, const MovingMarcher& newMarcherAnimation);
     void clipToBeat(unsigned clipBeat);
@@ -267,11 +271,29 @@ CollisionSpace::CollisionSpace(unsigned gridXSize, unsigned gridYSize, const std
 }
 
 bool CollisionSpace::isSolved() const {
-    return (m_clipBeat == m_numBeats) && (collectCollisionPairs().size() == 0) && (getMarchersWithIncompleteTransitions().size() == 0);
+    return (m_clipBeat == m_numBeats) && (collectCollisionPairs().size() == 0) && (getMarchersWithIncompleteTransitions().size() == 0 && m_disabledMarchers.size() == 0);
 }
 
 std::set<unsigned> CollisionSpace::getMarchersWithIncompleteTransitions() const {
     return m_incompleteTransitions;
+}
+
+void CollisionSpace::disableMarcher(unsigned which)
+{
+    if (m_disabledMarchers.find(which) == m_disabledMarchers.end())
+    {
+        m_disabledMarchers.insert(which);
+        reinstructMarcher(which, m_marchers[which]);
+    }
+}
+
+void CollisionSpace::enableMarcher(unsigned which)
+{
+    if (m_disabledMarchers.find(which) != m_disabledMarchers.end())
+    {
+        m_disabledMarchers.erase(which);
+        reinstructMarcher(which, m_marchers[which]);
+    }
 }
 
 std::vector<Collision> CollisionSpace::collectCollisionPairs() const {
@@ -443,7 +465,13 @@ void CollisionSpace::reinstructMarcher(unsigned which, const MovingMarcher& newM
     m_cachedCollisionsNeedRefresh = true;
     
     rollbackMarcherInstructions(which);
-    instructMarcher(which, newMarcherAnimation);
+    
+    if (m_disabledMarchers.find(which) != m_disabledMarchers.end())
+    {
+        m_marchers[which] = newMarcherAnimation;
+    } else {
+        instructMarcher(which, newMarcherAnimation);
+    }
 }
 
 void CollisionSpace::clipToBeat(unsigned clipBeat) {
@@ -1393,8 +1421,105 @@ namespace e7SoverEliceiriHershkovitz {
     
 void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::InstructionOption> &instructionOptions, TransitionSolverDelegate *delegate)
 {
+    // Prioritize commands in the order that we will be willing to give them to a marcher
+    // We're much more willing to change direction than to increase the number of wait beats
+    std::vector<TransitionSolverParams::InstructionOption> prioritizedInstructionOptions = instructionOptions;
+    auto comparator = [](const TransitionSolverParams::InstructionOption &first, const TransitionSolverParams::InstructionOption &second) {
+        if (first.waitBeats == second.waitBeats) {
+            return first.movementPattern < second.movementPattern;
+        } else {
+            return first.waitBeats < second.waitBeats;
+        }
+    };
+    std::sort(prioritizedInstructionOptions.begin(), prioritizedInstructionOptions.end(), comparator);
     
-
+    // Create a mapping of all of the marchers to their current instructions
+    std::vector<unsigned> activeInstructions;
+    for (unsigned i = 0; i < marcherSolutions.size(); i++)
+    {
+        activeInstructions.push_back(0);
+    }
+    
+    // Create an initial order for setting down our marchers
+    std::vector<unsigned> marchOrder;
+    for (unsigned i = 0; i < marcherSolutions.size(); i++)
+    {
+        marchOrder.push_back(i);
+    }
+    
+    std::vector<unsigned> unplacedMarchers = marchOrder;
+    const unsigned maxIterations = 500;
+    for (unsigned numIterations = 0; numIterations < maxIterations || collisionSpace.isSolved(); numIterations++)
+    {
+        if (delegate)
+        {
+            delegate->OnSubtaskProgress(std::max((double)(marchOrder.size() - unplacedMarchers.size()) / (double)marchOrder.size(), (double)numIterations / (double)maxIterations));
+            if (delegate->ShouldAbortCalculation())
+            {
+                break;
+            }
+        }
+        
+        // Reset all of the marchers -- we will place them back one-by-one
+        for (unsigned i = 0; i < marcherSolutions.size(); i++)
+        {
+            collisionSpace.disableMarcher(i);
+        }
+        
+        // Place marchers onto the field in the march order
+        unplacedMarchers.clear();
+        for (unsigned marcher : marchOrder)
+        {
+            // Re-enable the marcher
+            collisionSpace.enableMarcher(marcher);
+            
+            // Reset the marcher instruction back to one with the lowest wait time
+            for (unsigned i = 0; i < prioritizedInstructionOptions.size(); i++)
+            {
+                if (prioritizedInstructionOptions[activeInstructions[marcher]].movementPattern == prioritizedInstructionOptions[i].movementPattern)
+                {
+                    activeInstructions[marcher] = i;
+                    break;
+                }
+            }
+            
+            for (; activeInstructions[marcher] < prioritizedInstructionOptions.size(); activeInstructions[marcher]++)
+            {
+                MovingMarcher newMoveInstructions;
+                e7ChiuZamoraMalani::recalculateMarcher(newMoveInstructions, marcherSolutions[marcher], prioritizedInstructionOptions[activeInstructions[marcher]], marcherSolutions[marcher].endPos);
+                
+                if (collisionSpace.collectCollisionPairs().size() == 0 && collisionSpace.getMarchersWithIncompleteTransitions().size() == 0) {
+                    break;
+                }
+                
+            }
+            
+            if (activeInstructions[marcher] == prioritizedInstructionOptions.size()) {
+                activeInstructions[marcher] = 0;
+                unplacedMarchers.push_back(marcher);
+                collisionSpace.disableMarcher(marcher);
+            }
+        }
+        
+        // Remove all of the marchers that need to be re-prioritized
+        {
+            auto unplacedIter = unplacedMarchers.begin();
+            for (auto marchersIter = marchOrder.begin(); marchersIter != marchOrder.end() && unplacedIter != unplacedMarchers.end(); marchersIter++)
+            {
+                if (*marchersIter == *unplacedIter)
+                {
+                    marchOrder.erase(marchersIter--);
+                    unplacedIter++;
+                }
+            }
+        }
+        
+        // Shuffle the people who need priority of replacement
+        std::random_shuffle(unplacedMarchers.begin(), unplacedMarchers.end());
+        
+        // Re-add the unplaced marchers with higher priority
+        marchOrder.insert(marchOrder.begin(), unplacedMarchers.begin(), unplacedMarchers.end());
+    }
 };
     
     
@@ -1590,17 +1715,18 @@ TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_shee
     
     scaledBeatCapForBestSolution = 0;
     scaledHighestBeatCap = (sheet1.GetBeats() + (sheet1.GetBeats() / 2)) / 2;
-    scaledBeatCapForCurrentCalculation = scaledHighestBeatCap;
+    scaledBeatCapForCurrentCalculation = 0;
     numBeatsOfMovementInBestSolution = sheet1.GetBeats();
+    finalResult.successfullySolved = false;
     
     if (params.algorithm == TransitionSolverParams::AlgorithmIdentifier::E7_ALGORITHM__NAMINIASL_RAMIREZ_ZHANG)
     {
-        scaledBeatCapForCurrentCalculation = (sheet1.GetBeats() / 2);
+        scaledHighestBeatCap = (sheet1.GetBeats() / 2);
     }
     
-    while (scaledBeatCapForCurrentCalculation > 0) {
+    while (scaledBeatCapForCurrentCalculation <= scaledHighestBeatCap) {
         if (delegate) {
-            delegate->OnProgress(((double)scaledHighestBeatCap - scaledBeatCapForCurrentCalculation) / (double)scaledHighestBeatCap);
+            delegate->OnProgress(((double)scaledBeatCapForCurrentCalculation) / (double)scaledHighestBeatCap);
             if (delegate->ShouldAbortCalculation())
             {
                 break;
@@ -1616,6 +1742,7 @@ TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_shee
             {
                 numBeatsOfMovementInBestSolution = recentResult.numBeatsOfMovement;
                 scaledBeatCapForBestSolution = scaledBeatCapForCurrentCalculation;
+                finalResult = recentResult;
                 if (delegate)
                 {
                     delegate->OnNewPreferredSolution(numBeatsOfMovementInBestSolution);
@@ -1624,7 +1751,7 @@ TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_shee
 
         }
         
-        scaledBeatCapForCurrentCalculation -= 1;
+        scaledBeatCapForCurrentCalculation += 1;
     }
     
 
@@ -1664,7 +1791,6 @@ TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_shee
 //        scaledBeatCapForCurrentCalculation = scaledBeatLimits.first + ((scaledBeatLimits.second - scaledBeatLimits.first) / 2);
 //    }
     
-    finalResult = runSolverWithExplicitBeatCap(sheet1, sheet2, params, scaledBeatCapForBestSolution * 2, nullptr);
     if (delegate)
     {
         delegate->OnCalculationComplete(finalResult);

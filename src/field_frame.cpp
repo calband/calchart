@@ -1068,6 +1068,13 @@ void FieldFrame::OnCmd_ResetReferencePoint(wxCommandEvent& event)
     GetFieldView()->DoResetReferencePoint();
 }
 
+void FieldFrame::OnCmd_SolveTransition(wxCommandEvent &event) {
+    if (GetShow()) {
+        TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxT("Transition Solver"));
+        transitionSolver->Show();
+    }
+}
+
 void FieldFrame::OnSize(wxSizeEvent& event)
 {
     // HACK: Prevent width and height from growing out of control
@@ -1289,15 +1296,4 @@ const CalChartDoc* FieldFrame::GetShow() const
 CalChartDoc* FieldFrame::GetShow()
 {
     return static_cast<CalChartDoc*>(GetDocument());
-}
-
-
-
-
-
-void FieldFrame::OnCmd_SolveTransition(wxCommandEvent &event) {
-    if (GetShow()) {
-        TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxT("Transition Solver"));
-        transitionSolver->Show();
-    }
 }
