@@ -97,15 +97,13 @@ private:
 
     // The data this dialog sets for the user
 private:
-    unsigned mNumberPoints;
     unsigned mNumberColumns;
     std::vector<wxString> mLabels;
     void OnCmd_label_type(wxCommandEvent& event);
 
 public:
-    unsigned GetNumberPoints() const { return mNumberPoints; }
-    unsigned GetNumberColumns() const { return mNumberColumns; }
-    std::vector<wxString> GetLabels() { return mLabels; }
+    auto GetNumberColumns() const { return mNumberColumns; }
+    auto GetLabels() const { return mLabels; }
 
 private:
     CalChartDoc& mShow;
@@ -125,13 +123,11 @@ public:
     // The data this dialog sets for the user
 private:
     bool mTransferDataToWindowFirstTime;
-    unsigned mNumberPoints;
     unsigned mNumberColumns;
     std::vector<wxString> mLabels;
     void OnCmd_label_type(wxCommandEvent& event);
 
 public:
-    unsigned GetNumberPoints() const { return mNumberPoints; }
-    unsigned GetNumberColumns() const { return mNumberColumns; }
-    std::vector<wxString> GetLabels() { return mLabels; }
+    auto GetNumberColumns() const { return mNumberColumns; }
+    auto GetLabels() const { return mLabels; }
 };
