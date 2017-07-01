@@ -120,6 +120,8 @@ public:
     void OnCmd_GhostOption(wxCommandEvent& event);
 
     void OnCmd_ResetReferencePoint(wxCommandEvent& event);
+    
+    void OnCmd_SolveTransition(wxCommandEvent& event);
 
     void OnSize(wxSizeEvent& event);
 

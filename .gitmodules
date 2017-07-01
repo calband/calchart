@@ -1,0 +1,3 @@
+[submodule "submodules/munkres-cpp"]
+	path = submodules/munkres-cpp
+	url = https://github.com/saebyn/munkres-cpp.git

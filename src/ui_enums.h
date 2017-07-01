@@ -123,4 +123,6 @@ enum {
     CALCHART__SplitViewVertical,
     CALCHART__SplitViewUnsplit,
     CALCHART__SplitViewSwapAnimateAndOmni,
+    
+    CALCHART__E7TransitionSolver,
 };
