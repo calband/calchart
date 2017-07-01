@@ -374,7 +374,8 @@ std::vector<wxString> GenNumberLabels(int num)
     return results;
 }
 
-auto NumberLabelsSet(wxListBox const* label_letters) {
+auto NumberLabelsSet(wxListBox const* label_letters)
+{
     auto numlabels = 0;
     for (auto i = 0u; i < label_letters->GetCount(); i++) {
         if (label_letters->IsSelected(i)) {
@@ -388,8 +389,7 @@ std::vector<wxString> GenLetterLabels(int numPerLetter, int num, wxListBox const
 {
     std::vector<wxString> results;
     // Letters
-    if (NumberLabelsSet(label_letters))
-    {
+    if (NumberLabelsSet(label_letters)) {
         auto letr = 0;
         while (num > 0) {
             if (label_letters->IsSelected(letr)) {
