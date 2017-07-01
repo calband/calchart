@@ -84,12 +84,10 @@ public:
     CC_show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
     CC_show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const;
     CC_show_command_pair Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const;
-    CC_show_command_pair Create_MovePointsCommand(int whichSheet, std::map<int, CC_coord> const& new_positions, int ref) const;
     CC_show_command_pair Create_DeletePointsCommand() const;
     CC_show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
     CC_show_command_pair Create_SetReferencePointToRef0(int ref) const;
     CC_show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
-    CC_show_command_pair Create_SetSymbolCommand(const SelectionList &whichDots, SYMBOL_TYPE sym) const;
     CC_show_command_pair Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const;
     CC_show_command_pair Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const;
     CC_show_command_pair Create_SetLabelRightCommand(bool right) const;

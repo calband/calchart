@@ -184,7 +184,6 @@ public:
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
     std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CC_coord> const& new_positions, int ref);
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
     std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(int ref);
@@ -197,7 +196,6 @@ public:
     std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
     std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
     std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
-    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CC_coord> &finalPositions, const std::map<SYMBOL_TYPE, std::string> &continuities, const std::vector<SYMBOL_TYPE> &marcherDotTypes);
 
 private:
     static CC_doc_command_pair Inject_CalChartDocArg(CC_show_command_pair);
