@@ -1545,6 +1545,22 @@ bool DestinationConstraints::destinationIsAllowed(unsigned marcher, SolverCoord 
 // ==============================================
 // ===-- ALGORITHM BY: CHIU, ZAMORA, MALANI --===
 // ==============================================
+// Algorithm Outline:
+// ---
+// - Using the Hungarian Algorithm, come up with an initial set of destination assignments for the marchers
+//   (arbitrarily assign paths for getting to those destinations)
+// - Until a solution for the transition is found, do the following:
+//     - Iterate over successively larger transition durations, starting from zero and ending at the maximum duration for
+//       the transition; for each truncated duration, do the following:
+//        - Identify all pairs of colliding marchers
+//        - For each pair of colliding marchers:
+//            - Attempt all options for solving the collision in isolation, which are:
+//               (1) Swap the marchers' destinations
+//               (2) Change the shapes of the paths that the marchers follow to reach their destinations
+//               (3) Change the amount of time that the marchers wait before departing for their destinations
+//            - Of all of the attempted options, select the one that overall solves the most collisions over the entire field
+//            - Assign new instructions and destinations to the colliding marchers to reflect the selected option
+
 
 namespace e7ChiuZamoraMalani {
 
@@ -1784,8 +1800,19 @@ namespace e7ChiuZamoraMalani {
 // ---
 // - Using the Hungarian Algorithm, come up with an initial set of destination assignments for the marchers
 //   (arbitrarily assign paths for getting to those destinations)
-// - Iterate over each
-
+// - Iterate over successively larger transition durations, starting from zero and ending at the maximum duration for
+//   the transition; for each truncated duration, do the following:
+//    - Repeat the following steps a fixed number of times, in an attempt to solve all collisions occuring up to and including
+//       this beat
+//        - Identify all pairs of colliding marchers
+//        - For each pair of colliding marchers:
+//            - Attempt all options for solving the collision in isolation, which are:
+//               (1) Swap the marchers' destinations
+//               (2) Change the shapes of the paths that the marchers follow to reach their destinations
+//               (3) Change the amount of time that the marchers wait before departing for their destinations
+//            - Select the first option that is found to solve the collision between the two marchers (ignoring any collisions
+//               produced for other marchers)
+//            - Assign new instructions and destinations to the colliding marchers to reflect the selected option
 
 namespace e7NaminiaslRamirezZhang {
     // Very similar to ChiuZamoraMalani
