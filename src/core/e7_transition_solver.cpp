@@ -6,12 +6,13 @@
 //
 //
 
-#include "e7_transition_solver.h"
-#include "munkres.h"
 #include <math.h>
 #include <limits>
 #include <fstream>
 #include <algorithm>
+
+#include "e7_transition_solver.h"
+#include "munkres.h"
 
 # pragma mark - Shared
 
@@ -19,7 +20,15 @@
 // ===-- SHARED --===
 // ==================
 
-
+/*!
+ * @brief Represents a coordinate in the TransitionSolver.
+ * @discussion In the TransitionSolver, a marcher moves at a rate of
+ * one unit x or one unit y in each beat. These coordinates, however,
+ * can be scaled if the rate of time is scaled as well. For example, if
+ * one unit x and one unit y are scaled to represent the distance that
+ * a marcher moves over two beats, then one 'beat' in the solver should
+ * be scaled to represent two actual beats.
+ */
 class SolverCoord {
 public:
     static const unsigned kFieldWidthInSteps = (100 / 5) * 8; // 100 yards, 8 steps per yard
@@ -48,6 +57,7 @@ public:
     bool operator==(const SolverCoord& other) const {
         return (this->x == other.x && this->y == other.y);
     }
+    
     bool operator==(int32_t scalar) const {
         return (this->x == scalar && this->y == scalar);
     }
@@ -57,31 +67,37 @@ public:
         this->y = other.y;
         return *this;
     }
+    
     SolverCoord& operator+=(const SolverCoord& other) {
         this->x += other.x;
         this->y += other.y;
         return *this;
     }
+    
     SolverCoord& operator-=(const SolverCoord& other) {
         this->x -= other.x;
         this->y -= other.y;
         return *this;
     }
+    
     SolverCoord& operator*=(int32_t scalar) {
         this->x *= scalar;
         this->y *= scalar;
         return *this;
     }
+    
     SolverCoord& operator/=(int32_t scalar) {
         this->x /= scalar;
         this->y /= scalar;
         return *this;
     }
+    
     SolverCoord& operator+=(int32_t scalar) {
         this->x += scalar;
         this->y += scalar;
         return *this;
     }
+    
     SolverCoord& operator-=(int32_t scalar) {
         this->x -= scalar;
         this->y -= scalar;
@@ -93,26 +109,31 @@ public:
         newCoord += other;
         return newCoord;
     }
+    
     SolverCoord operator-(const SolverCoord& other) const {
         SolverCoord newCoord = *this;
         newCoord -= other;
         return newCoord;
     }
+    
     SolverCoord operator*(int32_t scalar) const {
         SolverCoord newCoord = *this;
         newCoord *= scalar;
         return newCoord;
     }
+    
     SolverCoord operator/(int32_t scalar) const {
         SolverCoord newCoord = *this;
         newCoord /= scalar;
         return newCoord;
     }
+    
     SolverCoord operator+(int32_t scalar) const {
         SolverCoord newCoord = *this;
         newCoord += scalar;
         return newCoord;
     }
+    
     SolverCoord operator-(int32_t scalar) const {
         SolverCoord newCoord = *this;
         newCoord -= scalar;
@@ -125,107 +146,498 @@ public:
     
 };
 
+/*!
+ * @brief Represents a collision within the collision space.
+ */
 struct Collision {
+    /*!
+     * @brief The beat on which the collision occurred.
+     */
     unsigned beat;
+    
+    /*!
+     * @brief The index of the first marcher involved in the collision.
+     */
     unsigned firstMarcher;
+    
+    /*!
+     * @brief The index of the second marcher involved in the collision.
+     */
     unsigned secondMarcher;
-    CC_coord position;
+    
+    /*!
+     * @brief The coordinate at which the collision occurred, within the coordinate system
+     * used by the Transition Solver.
+     */
+    SolverCoord position;
     
     bool operator==(const Collision &other) const
     {
         return (beat == other.beat && ((firstMarcher == other.firstMarcher && secondMarcher == other.secondMarcher) || (firstMarcher == other.secondMarcher && secondMarcher == other.firstMarcher)) && position == other.position);
     }
+    
+    bool operator!=(const Collision &other) const
+    {
+        return !(*this == other);
+    }
 };
 
+/*!
+ * @brief Contains the instructions for how a marcher will move during a
+ * transition.
+ * @detail Movements are broken down into a maximum of four segments:
+ * a wait segment, followed by two move segments, followed by a final wait segment.
+ * The durations of the first three segments are provided explicitly, but the
+ * duration of the final wait segment is given implicit, and fills whatever time
+ * remains during the transition starting from the end of the second move segment.
+ * During each move segment, the marcher moves in a straight line, and the amount
+ * that the marcher moves on each beat is given by the step vector associated with
+ * the segment.
+ */
 struct MovingMarcher {
+    /*!
+     * @brief The number of beats that the marcher will initially wait before moving.
+     */
     unsigned waitBeats;
+    
+    /*!
+     * @brief Vectors defining how far a marcher will move on each beat during each
+     * of its two movement phases.
+     * @detail Note that the marcher should not move more than one unit along any
+     * given axis in a single beat. Otherwise, the marcher may travel through other marchers
+     * without flagging a collision in the collision space.
+     */
     std::pair<SolverCoord, SolverCoord> stepVectors;
+    
+    /*!
+     * @brief Defines the duration of each of the marcher's two movement phases.
+     */
     std::pair<unsigned, unsigned> numSteps;
+    
+    /*!
+     * @brief Defines the location at which the marcher's movement begins (which
+     * is analogous to the marcher's location on beat zero).
+     */
     SolverCoord startPos;
     
     bool operator==(const MovingMarcher &other) const {
         return waitBeats == other.waitBeats && stepVectors == other.stepVectors && numSteps == other.numSteps && startPos == other.startPos;
     }
+    
+    bool operator!=(const MovingMarcher &other) const {
+        return !(*this == other);
+    }
 };
 
-struct MarcherMoveSegments {
+/*!
+ * @brief Describes the beat numbers on which a marcher transitions
+ * between its various phases of movement.
+ */
+struct MarcherMoveSchedule {
+    /*!
+     * @brief This is the last beat on which the marcher should wait
+     * before it begins to move.
+     */
     unsigned lastBeatOfWait;
+    
+    /*!
+     * @brief This is the last beat on which the marcher should move
+     * along its first step vector.
+     */
     unsigned lastBeatOfFirstMove;
+    
+    /*!
+     * @brief This is the last beat on which the marcher should move
+     * along its second step vector.
+     */
     unsigned lastBeatOfSecondMove;
 };
 
-struct MarcherClippedMovementState
+/*!
+ * @brief Represents the state of a marcher at some beat during
+ * a transition.
+ */
+struct MarcherSnapshot
 {
-    MarcherMoveSegments     moveSegments;
     SolverCoord             currentPosition;
     unsigned                currentBeat;
 };
-
-struct NotEnoughTimeException {};
-
 
 class CollisionSpace {
 public:
     CollisionSpace(unsigned gridXSize, unsigned gridYSize, const std::vector<SolverCoord>& marcherStartPositions, unsigned maxBeats);
 private:
-    // Overall state (these are accurate up to numBeats)
+    // ------------------------------
+    // --- ACCURATE FOR ALL BEATS ---
+    // ------------------------------
+    
+    /*!
+     * @brief The maximum number of beats allowed in the transition that is monitored
+     * by this collision space.
+     * @discussion The first beat in the transition is the zeroth beat. After that,
+     * the number of beats of movement in the transition is m_numBeats.
+     */
     unsigned m_numBeats;
+    
+    /*!
+     * @brief Associates each marcher index with the instruction for that marcher
+     * within the collision space.
+     */
     std::vector<MovingMarcher> m_marchers;
+    
+    /*!
+     * @brief Contains the indices of all marchers who, given their current instruction
+     * set, will not make it to their destinations within the current number of beats.
+     */
     std::set<unsigned> m_incompleteTransitions;
     
-    // Grid state (all of these are accurate up to the clip beat)
+    /*!
+     * @brief Records the current clip beat.
+     * @discussion The clip beat is used to focus the collision space on a reduced number
+     * of beats, so that collisions can be detected in that range without needing to
+     * calculate and track all collisions in the entire timespan that is covered by the
+     * collision space.
+     */
     unsigned m_clipBeat;
-    mutable std::vector<std::vector<std::map<unsigned, SolverCoord>>> m_collisions;
-    mutable std::vector<std::vector<std::vector<std::set<unsigned>>>> m_marcherGrid;
-    mutable std::vector<MarcherClippedMovementState> m_clippedMarchers;
+    
+    /*!
+     * @brief A set containing the indices of all currently disabled marchers.
+     * @detail When a marcher is disabled, all of its collisions (with the exception
+     * of those occurring on the zeroth beat) are disregarded.
+     */
     std::set<unsigned> m_disabledMarchers;
     
-    // Cached states
+    /*!
+     * @brief A cached list of the move schedule for each marcher.
+     */
+     mutable std::vector<MarcherMoveSchedule> m_moveSchedules;
+    
+    // ------------------------------------------------
+    // --- ACCURATE UP TO (AND INCLUDING) CLIP BEAT ---
+    // ------------------------------------------------
+    
+    /*!
+     * @brief Records all of the collisions occuring at each grid position, on each beat.
+     * @detail m_collisions[i][j][t], if it exists, contains the site of the collision
+     * between the marchers with indices i and j on beat t. If no entry exists for time
+     * t in m_collisions[i][j], then there is no collision between marchers i and j
+     * on that beat. Note that this is only accurate up to the clip beat; no collisions
+     * are recorded for any beat after the clip beat.
+     */
+    mutable std::vector<std::vector<std::map<unsigned, SolverCoord>>> m_collisions;
+    
+    /*!
+     * @brief Records all of the marchers that are present at each grid position, on each beat.
+     * @detail m_marcherGrid[x][y][t] is a set containing the indices of all  marchers
+     * that reside at grid location (x, y) on beat t.
+     * m_marcherGrid is reliable up to (and including) the clip beat. All locations are empty
+     * for all beats after the clip beat.
+     */
+    mutable std::vector<std::vector<std::vector<std::set<unsigned>>>> m_marcherGrid;
+    
+    /*!
+     * @brief Captures the state of all marchers on the current clip beat (that is, where they
+     * are, and where they are going).
+     * @detail Note that each marcher is associated with its own current beat. When you change
+     * the clip beat, all marchers should be updated until they maintain the same current beat.
+     * The exception is disabled marchers, which keep a current beat of zero regardless of the
+     * clip beat for the collision space.
+     */
+    mutable std::vector<MarcherSnapshot> m_clippedMarchers;
+    
+    // ------------------------------------------
+    // --- ACCURATE WHILE CACHE IS MAINTAINED ---
+    // ------------------------------------------
+    
+    /*!
+     * @brief Denotes whether or not the current value of m_cachedCollisionPairs
+     * is accurate.
+     * @detail A value of true indicates that m_cachedCollisionPairs is not
+     * currently accurate. A value of false indicates that m_cachedCollisionPairs
+     * is accurate.
+     */
     mutable bool m_cachedCollisionsNeedRefresh;
+    
+    /*!
+     * @brief If m_cachedCollisionPairs is accurate, then this value will indicate
+     * the beat for which it contains the collisions.
+     * @detail The value is undefined if the value of m_cachedCollisionPairs is not
+     * accurate. Use m_cachedCollisionsNeedRefresh to determine whether or not
+     * m_cachedCollisionPairs is accurate.
+     */
     mutable unsigned m_cachedCollisionsBeat;
+    
+    /*!
+     * @brief Unless it needs to be refreshed, contains a list of all of the
+     * collisions occurring up to and including a particular beat.
+     * @detail This will keep track of all collisions occurring up to and
+     * including m_cachedCollisionsBeat. To identify whether or not this value
+     * is accurate, check m_cachedCollisionsNeedRefresh.
+     */
     mutable std::vector<Collision> m_cachedCollisionPairs;
+    
+    /*!
+     * @brief Denotes whether or not the current value of m_cachedCollisionsForClipBeat
+     * is accurate.
+     * @detail A value of true indicates that m_cachedCollisionsForClipBeat is not
+     * currently accurate. A value of false indicates that m_cachedCollisionsForClipBeat
+     * is currently accurate.
+     */
     mutable bool m_clipBeatCollisionsNeedRefresh;
+    
+    /*!
+     * @brief Unless it needs to be refreshed, contains a list of all of the
+     * collisions occurring up to and including the current clip beat.
+     * @detail To identify whether or not this value is currently accurate, check
+     * m_clipBeatCollisionsNeedRefresh.
+     */
     mutable std::vector<Collision> m_cachedCollisionsForClipBeat;
     
 public:
+    /*!
+     * @brief Identifies whether or not the transition is completely solved.
+     * @detail The criteria for a transition to be solved are as follows:
+     * - All marchers are enabled, and are thus accounted for in the transition
+     * - The transition is not clipped short (meaning the clip beat is equal to the number
+     *   of beats available for the transition)
+     * - All marchers reach their destinations within the number of beats allowed for
+     *   the transition.
+     * - There are no collisions during the transition
+     * @return True if the transition is completely solved; false otherwise.
+     */
     bool isSolved() const;
     
+    /*!
+     * @brief Disables the marcher with the given index, so that it is removed from the
+     * collision space for all beats (with the exception of beat zero).
+     * @param which The index of the marcher to disable.
+     */
     void disableMarcher(unsigned which);
+    /*!
+     * @brief Enables the marcher with the given index, ensuring that it is accounted for
+     * in the collision space for all beats up to and including the current clip beat.
+     * @param The index of the marcher to enable.
+     */
     void enableMarcher(unsigned which);
     
+    /*!
+     * @brief Issues a new set of instructions to the specified marcher.
+     * @detail A marcher can be reinstructed whether or not it is currently enabled.
+     * @param which The index of the marcher to assign a new set of instructions to.
+     * @param newMarcherAnimation The new instructions to assign to the marcher.
+     */
     void reinstructMarcher(unsigned which, const MovingMarcher& newMarcherAnimation);
+    /*!
+     * @brief Sets the maximum number of beats that the collision space will actively
+     * focus on in the transition.
+     * @detail The collision space will track collisions up to and including the current
+     * clip beat. When the clip beat is set, the collision space ignores any unneccessary
+     * calculations that are relevant to beats after the clip beat. Setting a clip
+     * beat is good for automatically filtering collisions, and for speeding up calculations.
+     * @param The new clip beat. Regardless of how large this value is, it will always get
+     * capped at the number of beats in the transition.
+     */
     void clipToBeat(unsigned clipBeat);
     
+    /*!
+     * @brief Gets a set containing the indices of marchers who cannot reach their destinations
+     * before the end of the transition, given their current instructions.
+     * @return A set containing the indices of marchers who cannot reach their destinations
+     * in the allotted amount of time for the transition.
+     */
     std::set<unsigned> getMarchersWithIncompleteTransitions() const;
     
+    /*!
+     * @brief Collects together all collisions occuring up to and including the current clip
+     * beat, and returns a filtered version such that, for any pair of marchers, only the first
+     * collision between them is included.
+     * @return A filtered list of collisions containing at most one collision per pair of marchers;
+     * each collision represents the first collision occuring between a pair of marchers.
+     */
     std::vector<Collision> collectCollisionPairs() const;
+    /*!
+     * @brief Collects together all collisions occuring up to and including the specified
+     * beat, and returns a filtered version such that, for any pair of marchers, only the first
+     * collision between them is included.
+     * @param The latest beat for which collisions should be collected.
+     * @return A filtered list of collisions containing at most one collision per pair of marchers;
+     * each collision represents the first collision occuring between a pair of marchers.
+     */
     std::vector<Collision> collectCollisionPairs(unsigned maxBeat) const;
+    /*!
+     * @brief Returns the number of beats between the beginning of the transition and the
+     * first collision between a particular pair of marchers.
+     * @param marcher1 The index of the first marcher involved in the collisions.
+     * @param marcher2 The index of the second marcher involved in the collisions.
+     * @return The number of beats between the beginning of the transition and the first
+     * collision between the two specified marchers.
+     */
     unsigned beatsBeforeCollisionBetweenMarchers(unsigned marcher1, unsigned marcher2) const;
-    unsigned lastBeatContainingMovement() const;
+    /*!
+     * @brief Returns the earliest beat at which all marchers have completed
+     * their movements.
+     * @detail The value returned by this method is capped to the current clip beat.
+     * If any marchers are still in the process of moving at the current clip beat,
+     * then this value will not return an accurate result.
+     * @return The earliest beat at which all marchers have completed their movements.
+     */
+    unsigned firstBeatAfterMovment() const;
     
+    /*!
+     * @brief Returns the movement instruction that is currently assigned to the marcher
+     * with the given index.
+     * @param marcherIndex The index of the marcher whose instruction will be accessed.
+     * @return The movement instruction that is currently assigned to the specified
+     * marcher.
+     */
     const MovingMarcher& getMarcherInstruction(unsigned marcherIndex) const;
 private:
     std::vector<Collision> _collectCollisionPairs(unsigned maxBeat) const;
     
-    MarcherMoveSegments clipMarcherMovement(const MarcherMoveSegments& movement, unsigned beat) const;
-    MarcherMoveSegments getClippedMarcherMovement(unsigned which, unsigned beat) const;
+    /*!
+     * @brief Clips the movement schedule for a marcher, such no movement
+     * occurs on or after the specified beat.
+     * @param movement The original movement schedule for a marcher. This 
+     * is the schedule that will be clipped.
+     * @param beat The beat to which the schedule shall be clipped.
+     * @return The adjusted movement schedule, with no movement phase persisting
+     * past the specified beat number.
+     */
+    MarcherMoveSchedule clipMarcherSchedule(const MarcherMoveSchedule& movement, unsigned beat) const;
+    /*!
+     * @brief Clips the movement schedule for a marcher, such no movement
+     * occurs on or after the specified beat.
+     * @param which The index of the marcher whose movement schedule should
+     * be clipped.
+     * @param beat The beat to which the schedule shall be clipped.
+     * @return The adjusted movement schedule, with no movement phase persisting
+     * past the specified beat number.
+     */
+    MarcherMoveSchedule getClippedMarcherSchedule(unsigned which, unsigned beat) const;
     
+    /*!
+     * @brief Advances the current snapshot for the marcher with the given index
+     * by the designated number of beats.
+     * @param which The index of the marcher whose snapshot should be advanced.
+     * @param numBeats The number of beats by which the marcher's snapshot should
+     * be advanced.
+     */
     void advanceMarcher(unsigned which, unsigned numBeats);
+    /*!
+     * @brief Regresses the snapshot for the designated marcher to beat zero,
+     * and removes the marcher from any position in the collision space at any
+     * beat after that.
+     * @param The index of the marcher that should be retracted from the collision
+     * space for all beats after beat zero.
+     */
     void rollbackMarcherInstructions(unsigned which);
+    /*!
+     * @brief Issues an instruction to a marcher that currently has no instruction.
+     * @detail This should only be used when first setting up a marcher, or right
+     * after rolling back a marcher. It assumes that the marcher's current snapshot
+     * is positioned at beat zero, and it will advance the snapshot according to the
+     * new instruction until the marcher reaches the current clip beat.
+     * @param which The index of the marcher that should accept the new instruction.
+     * @param newInstruction The new instruction to assign to the marcher.
+     */
     void instructMarcher(unsigned which, const MovingMarcher& newInstructions);
     
+    /*!
+     * @brief Returns the indices of all marchers present at a particular
+     * location at a particular
+     * time.
+     * @param gridX The x coordinate of the position containing the returned
+     * marchers, where the coordinate system matches the one that is understood
+     * by SolverCoords.
+     * @param gridY The y coordinate of the position containing the returned
+     * marchers, where the coordinate system matches the one that is understood
+     * by SolverCoords.
+     * @param beat The beat on which to check the occupants of the provided location.
+     * @return A set containing the indices of all marchers present at location
+     * (gridX, gridY) on provided beat.
+     */
     const std::set<unsigned>& getMarchersAt(unsigned gridX, unsigned gridY, unsigned beat) const;
+    /*!
+     * @brief Returns the indices of all marchers present at a particular 
+     * location at a particular
+     * time.
+     * @param gridX The x coordinate of the position containing the returned
+     * marchers, where the coordinate system matches the one that is understood
+     * by SolverCoords.
+     * @param gridY The y coordinate of the position containing the returned
+     * marchers, where the coordinate system matches the one that is understood
+     * by SolverCoords.
+     * @param beat The beat on which to check the occupants of the provided location.
+     * @return A set containing the indices of all marchers present at location
+     * (gridX, gridY) on provided beat.
+     */
     std::set<unsigned>& getMarchersAt(unsigned gridX, unsigned gridY, unsigned beat);
     
     void _forgetCollision(unsigned firstMarcher, unsigned secondMarcher, unsigned beat);
     void _registerCollision(unsigned firstMarcher, unsigned secondMarcher, unsigned beat, SolverCoord pos);
     
+    /*!
+     * @brief Unregisters any collisions between two marchers taking place
+     * on a particular beat.
+     * @param firstMarcher The index of one of the first marcher that is not
+     * involved in a collision.
+     * @param secondMarcher The index of the second marcher that is not involved
+     * in a collision.
+     * @param beat The beat from which to remove any record of collisions between
+     * the specified two marchers.
+     */
     void forgetCollision(unsigned firstMarcher, unsigned secondMarcher, unsigned beat);
+    /*!
+     * @brief Registers a collision between two marchers at a particular
+     * location on a particular beat.
+     * @param firstMarcher The index of one of the marchers involved in the
+     * collision.
+     * @param secondMarcher The index of the other marcher involved in the collision.
+     * @param beat The beat on which the collision occurs.
+     * @param pos The position at which the collision occurs.
+     */
     void registerCollision(unsigned firstMarcher, unsigned secondMarcher, unsigned beat, SolverCoord pos);
     
+    /*!
+     * @brief Within the collision space, registers a marcher as being absent
+     * from a particular location at a particular time.
+     * @param marcher The index of the marcher being placed in the collision space
+     * at a particular moment.
+     * @param gridX The x coordinate from which the marcher is being removed, where the
+     * coordinate system matches the coordinate system understood by SolverCoords.
+     * @param gridY The y coordinate from which the marcher is being removed, where the
+     * coordinate system matches the coordinate system understood by SolverCoords.
+     * @param moveVectorFromPrevBeat Identifies the movement that the marcher made
+     * during the beat before this one, which originally brought it to this location from
+     * which it is now being removed.
+     */
     void removeMarcher(unsigned marcher, unsigned gridX, unsigned gridY, unsigned beat, const SolverCoord &moveVectorFromPrevBeat);
+    /*!
+     * @brief Within the collision space, registers the location of a particular
+     * marcher at a particular time.
+     * @param marcher The index of the marcher being placed in the collision space
+     * at a particular moment.
+     * @param gridX The x coordinate at which the marcher is being placed, where the 
+     * coordinate system matches the coordinate system understood by SolverCoords.
+     * @param gridY The y coordinate at which the marcher is being placed, where the
+     * coordinate system matches the coordinate system understood by SolverCoords.
+     * @param moveVectorFromPrevBeat Identifies the movement that the marcher made
+     * during the last beat which brought it to the location where it is now being placed.
+     */
     void placeMarcher(unsigned marcher, unsigned gridX, unsigned gridY, unsigned beat, const SolverCoord &moveVectorFromPrevBeat);
     
+    /*!
+     * @brief Acquires a list of all marchers that travel from a specific
+     * start location on a specific beat to a specific destination on the
+     * next beat.
+     * @param startBeat The beat during which the marchers are at the specified
+     * start coordinate.
+     * @param firstCoord The coordinate at which all of the marcher start.
+     * @param secondCoord The coordinate to which all of the marchers move by
+     * the next beat.
+     * @return A set of the indices of all marchers who start at firstCoord on
+     * startBeat and end on secondCoord at time (startBeat + 1).
+     */
     std::set<unsigned> getMarchersWithMovePattern(unsigned startBeat, SolverCoord firstCoord, SolverCoord secondCoord) const;
 };
 
@@ -248,6 +660,7 @@ CollisionSpace::CollisionSpace(unsigned gridXSize, unsigned gridYSize, const std
     }
     m_marchers.resize(marcherStartPositions.size());
     m_clippedMarchers.resize(marcherStartPositions.size());
+    m_moveSchedules.resize(marcherStartPositions.size());
     for (unsigned marcherIndex = 0; marcherIndex < marcherStartPositions.size(); marcherIndex++) {
         MovingMarcher marcher = {
             .waitBeats = 0,
@@ -255,16 +668,16 @@ CollisionSpace::CollisionSpace(unsigned gridXSize, unsigned gridYSize, const std
             .numSteps = { 0, 0 },
             .startPos = marcherStartPositions.at(marcherIndex)
         };
-        MarcherMoveSegments moveBreakdown = {
+        MarcherMoveSchedule moveBreakdown = {
             .lastBeatOfWait = 0,
             .lastBeatOfFirstMove = 0,
             .lastBeatOfSecondMove = 0
         };
         m_clippedMarchers[marcherIndex] = {
-            .moveSegments = moveBreakdown,
             .currentPosition = marcher.startPos,
             .currentBeat = 0
         };
+        m_moveSchedules[marcherIndex] = moveBreakdown;
         placeMarcher(marcherIndex, marcher.startPos.x, marcher.startPos.y, 0, SolverCoord(0,0));
         instructMarcher(marcherIndex, marcher);
     }
@@ -348,19 +761,19 @@ unsigned CollisionSpace::beatsBeforeCollisionBetweenMarchers(unsigned marcher1, 
     return firstColBeat;
 }
 
-unsigned CollisionSpace::lastBeatContainingMovement() const
+unsigned CollisionSpace::firstBeatAfterMovment() const
 {
     unsigned            maxMoveBeat = 0;
     
     for (unsigned i = 0; i < m_marchers.size(); i++)
     {
-        MarcherMoveSegments     moveSegments;
+        MarcherMoveSchedule     moveSchedule;
         
-        moveSegments = getClippedMarcherMovement(i, m_clipBeat);
+        moveSchedule = getClippedMarcherSchedule(i, m_clipBeat);
         
-        if (moveSegments.lastBeatOfSecondMove > maxMoveBeat)
+        if (moveSchedule.lastBeatOfSecondMove > maxMoveBeat)
         {
-            maxMoveBeat = moveSegments.lastBeatOfSecondMove;
+            maxMoveBeat = moveSchedule.lastBeatOfSecondMove;
         }
     }
     
@@ -371,8 +784,8 @@ const MovingMarcher& CollisionSpace::getMarcherInstruction(unsigned marcherIndex
     return m_marchers.at(marcherIndex);
 }
 
-MarcherMoveSegments CollisionSpace::clipMarcherMovement(const MarcherMoveSegments& movement, unsigned beat) const {
-    MarcherMoveSegments result = {
+MarcherMoveSchedule CollisionSpace::clipMarcherSchedule(const MarcherMoveSchedule& movement, unsigned beat) const {
+    MarcherMoveSchedule result = {
         .lastBeatOfWait = std::min(movement.lastBeatOfWait, beat),
         .lastBeatOfFirstMove = std::min(movement.lastBeatOfFirstMove, beat),
         .lastBeatOfSecondMove = std::min(movement.lastBeatOfSecondMove, beat)
@@ -380,8 +793,8 @@ MarcherMoveSegments CollisionSpace::clipMarcherMovement(const MarcherMoveSegment
     return result;
 }
 
-MarcherMoveSegments CollisionSpace::getClippedMarcherMovement(unsigned which, unsigned beat) const {
-    return clipMarcherMovement(m_clippedMarchers[which].moveSegments, beat);
+MarcherMoveSchedule CollisionSpace::getClippedMarcherSchedule(unsigned which, unsigned beat) const {
+    return clipMarcherSchedule(m_moveSchedules[which], beat);
 }
 
 void CollisionSpace::rollbackMarcherInstructions(unsigned which) {
@@ -389,7 +802,7 @@ void CollisionSpace::rollbackMarcherInstructions(unsigned which) {
     SolverCoord pos = marcher.startPos;
     unsigned beat = 0;
     
-    MarcherMoveSegments marcherMovements = getClippedMarcherMovement(which, m_clippedMarchers[which].currentBeat);
+    MarcherMoveSchedule marcherMovements = getClippedMarcherSchedule(which, m_clippedMarchers[which].currentBeat);
     
     m_incompleteTransitions.erase(which);
     
@@ -418,13 +831,13 @@ void CollisionSpace::instructMarcher(unsigned which, const MovingMarcher& newIns
     m_marchers[which] = newInstructions;
     auto& marcher = m_marchers[which];
     
-    MarcherClippedMovementState &clippedMarcher = m_clippedMarchers[which];
+    MarcherMoveSchedule &moveSchedule = m_moveSchedules[which];
     
-    clippedMarcher.moveSegments.lastBeatOfWait = marcher.waitBeats;
-    clippedMarcher.moveSegments.lastBeatOfFirstMove = clippedMarcher.moveSegments.lastBeatOfWait + marcher.numSteps.first;
-    clippedMarcher.moveSegments.lastBeatOfSecondMove = clippedMarcher.moveSegments.lastBeatOfFirstMove + marcher.numSteps.second;
+    moveSchedule.lastBeatOfWait = marcher.waitBeats;
+    moveSchedule.lastBeatOfFirstMove = moveSchedule.lastBeatOfWait + marcher.numSteps.first;
+    moveSchedule.lastBeatOfSecondMove = moveSchedule.lastBeatOfFirstMove + marcher.numSteps.second;
     
-    if (clippedMarcher.moveSegments.lastBeatOfSecondMove > m_numBeats)
+    if (moveSchedule.lastBeatOfSecondMove > m_numBeats)
     {
         m_incompleteTransitions.insert(which);
     }
@@ -434,20 +847,20 @@ void CollisionSpace::instructMarcher(unsigned which, const MovingMarcher& newIns
 
 void CollisionSpace::advanceMarcher(unsigned which, unsigned numBeats) {
     auto& marcher = m_marchers[which];
-    auto moveSegments = getClippedMarcherMovement(which, m_clipBeat);
+    auto moveSchedule = getClippedMarcherSchedule(which, m_clipBeat);
     
-    MarcherClippedMovementState &clippedMarcher = m_clippedMarchers[which];
+    MarcherSnapshot &clippedMarcher = m_clippedMarchers[which];
     SolverCoord pos = clippedMarcher.currentPosition;
     unsigned beat = clippedMarcher.currentBeat + 1;
     
-    for (; beat <= moveSegments.lastBeatOfWait && numBeats > 0; beat++, numBeats--) {
+    for (; beat <= moveSchedule.lastBeatOfWait && numBeats > 0; beat++, numBeats--) {
         placeMarcher(which, pos.x, pos.y, beat, SolverCoord(0,0));
     }
-    for (; beat <= moveSegments.lastBeatOfFirstMove && numBeats > 0; beat++, numBeats--) {
+    for (; beat <= moveSchedule.lastBeatOfFirstMove && numBeats > 0; beat++, numBeats--) {
         pos += marcher.stepVectors.first;
         placeMarcher(which, pos.x, pos.y, beat, marcher.stepVectors.first);
     }
-    for (; beat <= moveSegments.lastBeatOfSecondMove && numBeats > 0; beat++, numBeats--) {
+    for (; beat <= moveSchedule.lastBeatOfSecondMove && numBeats > 0; beat++, numBeats--) {
         pos += marcher.stepVectors.second;
         placeMarcher(which, pos.x, pos.y, beat, marcher.stepVectors.second);
     }
@@ -604,6 +1017,13 @@ std::set<unsigned> CollisionSpace::getMarchersWithMovePattern(unsigned startBeat
     return result;
 }
 
+/*!
+ * @brief Converts all of the point positions in a CalChart stuntsheet into the SolverCoord
+ * coordinate system, and pushes the converted positions into a provided vector.
+ * @param sheet The CalChart stuntsheet whose dot positions will be converted.
+ * @param positions A reference to the target vector that will receive all of the new
+ * converted dot positions.
+ */
 void fillPositionsFromSheet(const CC_sheet& sheet, std::vector<SolverCoord>& positions) {
     auto points = sheet.GetPoints();
     for (size_t i = 0; i < points.size(); i++) {
@@ -611,6 +1031,27 @@ void fillPositionsFromSheet(const CC_sheet& sheet, std::vector<SolverCoord>& pos
     }
 }
 
+/*!
+ * @brief Creates a matrix of distances to be used with the Hungarian Algorithm,
+ * for assigning marchers to destinations in such a way as to attempt to minimize
+ * the total distance traveled by the marchers.
+ * @detail In the returned matrix, the value at matrix(i,j) gives the manhattan
+ * distance from the start location of the marcher at index i to the destination
+ * at index j. The manhattan distance is equal to the number of steps that the
+ * marcher would take to the destination, if it were following a NSEW or EWNS move
+ * pattern. If the marcher cannot reach a particular destination within the number
+ * of beats allowed for the transition, then the distance for that marcher to
+ * that destination will be replaced by some huge number, effectively indicating
+ * that the destination is impossible to reach.
+ * @param startPositions A list of all of the marcher start locations, indexed
+ * by the indices of the marchers that start at those locations.
+ * @param endPositions A list of all of the possible destinations that the marchers
+ * can reach.
+ * @param numBeats The maximum number of beats available for the transition.
+ * @return A matrix cataloguing the costs associated with moving each marcher
+ * to each potential destination. The cost associated with moving marcher i to
+ * destination j can be found at matrix position matrix(i,j).
+ */
 Matrix<double> makeHungarianDistanceMatrix(const std::vector<SolverCoord>& startPositions, const std::vector<SolverCoord>& endPositions, unsigned numBeats) {
     size_t numMarchers = startPositions.size();
     Matrix<double> matrix = Matrix<double>(numMarchers, numMarchers);
@@ -627,17 +1068,6 @@ Matrix<double> makeHungarianDistanceMatrix(const std::vector<SolverCoord>& start
     }
     return matrix;
 }
-
-enum PathInstruction
-{
-    PATH_DEGENERATE_STRAIGHT = 0, // A straight-line path; can be replaced with any other instruction type
-    PATH_EWNS,
-    PATH_NSEW,
-    PATH_DEGENERATE_DIAGONAL, // A degenerate diagonal path; can be replaced by DMHS or HSDM
-    PATH_DMHS,
-    PATH_HSDM,
-    PATH_INVALID
-};
 
 enum CompassDirection
 {
@@ -670,6 +1100,12 @@ const SolverCoord kMoveVectorsByDirection[COMPASS_INVALID + 1] = {
     /* kMoveVectorsByDirection[COMPASS_INVALID] = */    -kZeroVector
 };
 
+/*!
+ * @brief A two-dimentional array that can be used to translate a
+ * movement vector into the compass direction for that vector.
+ * @detail kDirectionByMoveVector[x][y] will give the compass
+ * direction associated with a movement vector (x,y).
+ */
 const CompassDirection kDirectionByMoveVector[3][3] = {
     { COMPASS_SW, COMPASS_S, COMPASS_SE},
     { COMPASS_W, COMPASS_INVALID, COMPASS_E},
@@ -685,14 +1121,7 @@ struct PathAxes {
 struct MarcherSolution {
     SolverCoord startPos;
     SolverCoord endPos;
-    unsigned waitBeats;
-    PathInstruction instruction;
-};
-
-struct MarcherSolverState {
-    PathAxes pathAxes;
-    std::pair<SolverCoord, SolverCoord> stepVectors;
-    std::pair<unsigned, unsigned> numSteps;
+    TransitionSolverParams::MarcherInstruction instruction;
 };
 
 PathAxes calcPathAxes(SolverCoord startPos, SolverCoord endPos) {
@@ -716,24 +1145,21 @@ PathAxes calcPathAxes(SolverCoord startPos, SolverCoord endPos) {
     return result;
 }
 
-std::pair<SolverCoord, SolverCoord> calcStepVectors(PathAxes axes, PathInstruction instruction) {
+std::pair<SolverCoord, SolverCoord> calcStepVectors(PathAxes axes, const TransitionSolverParams::MarcherInstruction &instruction) {
     std::pair<SolverCoord, SolverCoord> stepVectors;
     bool majorStepIsFirst = false;
     SolverCoord majorStep = kMoveVectorsByDirection[axes.majorAxis];
     SolverCoord minorStep = kMoveVectorsByDirection[axes.minorAxis];
-    switch (instruction) {
-        case PATH_DEGENERATE_STRAIGHT:
-            majorStepIsFirst = true;
-        case PATH_EWNS:
+    switch (instruction.movementPattern) {
+        case TransitionSolverParams::MarcherInstruction::Pattern::EWNS:
             majorStepIsFirst = !(minorStep.y != 0);
             break;
-        case PATH_NSEW:
+        case TransitionSolverParams::MarcherInstruction::Pattern::NSEW:
             majorStepIsFirst = !(minorStep.x != 0);
             break;
-        case PATH_DEGENERATE_DIAGONAL:
-        case PATH_HSDM:
+        case TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
             majorStepIsFirst = true;
-        case PATH_DMHS:
+        case TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
             minorStep += majorStep;
             break;
         default:
@@ -755,6 +1181,21 @@ std::pair<SolverCoord, SolverCoord> calcStepVectors(PathAxes axes, PathInstructi
     return stepVectors;
 }
 
+/*!
+ * @brief Given two step vectors, a start position, and a destination, this solves the number of steps
+ * that a marcher must move along each of these step vectors in order to reach the destination
+ * from the start position.
+ * @param startPos The start position of the movement.
+ * @param endPos The final destination of the movement.
+ * @param stepVector1 A vector containing the number of x-units and y-units that are traversed on each
+ * step of a marcher's first movement phase.
+ * @param stepVector2 A vector containing the number of x-units and y-units that are traversed on each
+ * step of a marcher's second movment phase.
+ * @return A pair of floats indicating the number of steps that a marcher must move along each step
+ * vector in order to reach the destination position from the start position. The first element
+ * in the pair is the number of steps that should be moved along the first move vector; the second
+ * element in the pair is the number of steps that should be moved along the second move vector.
+ */
 std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord endPos, SolverCoord stepVector1, SolverCoord stepVector2) {
     // In this function, we ASSUME that stepVector1 and stepVector2 are orthogonal -- if this isn't true our calculations will be bogus
 
@@ -830,27 +1271,10 @@ std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord end
     }
 }
 
-void setupMarcherSolutionPath(MarcherSolution& marcherSolution, const TransitionSolverParams::InstructionOption &instruction, SolverCoord newDestination)
+void setupMarcherSolutionPath(MarcherSolution& marcherSolution, const TransitionSolverParams::MarcherInstruction &instruction, SolverCoord newDestination)
 {
     marcherSolution.endPos = newDestination;
-    marcherSolution.waitBeats = instruction.waitBeats;
-    switch (instruction.movementPattern)
-    {
-        case TransitionSolverParams::InstructionOption::Pattern::EWNS:
-            marcherSolution.instruction = PATH_EWNS;
-            break;
-        case TransitionSolverParams::InstructionOption::Pattern::NSEW:
-            marcherSolution.instruction = PATH_NSEW;
-            break;
-        case TransitionSolverParams::InstructionOption::Pattern::DMHS:
-            marcherSolution.instruction = PATH_DMHS;
-            break;
-        case TransitionSolverParams::InstructionOption::Pattern::HSDM:
-            marcherSolution.instruction = PATH_HSDM;
-            break;
-        default:
-            break;
-    }
+    marcherSolution.instruction = instruction;
 }
 
 MovingMarcher calculateMovementFromSolution(const MarcherSolution& marcher)
@@ -860,7 +1284,7 @@ MovingMarcher calculateMovementFromSolution(const MarcherSolution& marcher)
     std::pair<float, float> numSteps = calcStepsInEachDir(marcher.startPos, marcher.endPos, stepVectors.first, stepVectors.second);
     
     MovingMarcher marcherAnim;
-    marcherAnim.waitBeats = marcher.waitBeats;
+    marcherAnim.waitBeats = marcher.instruction.waitBeats;
     marcherAnim.stepVectors = stepVectors;
     marcherAnim.numSteps = numSteps;
     marcherAnim.startPos = marcher.startPos;
@@ -990,7 +1414,7 @@ std::vector<SolverCoord> FileReader::readFinalFile(std::string filepath)
 class DestinationConstraints
 {
 public:
-    DestinationConstraints(const std::vector<TransitionSolverParams::GroupParams> &groupConstraints, const std::vector<SolverCoord> &destinations);
+    DestinationConstraints(const std::vector<TransitionSolverParams::GroupConstraint> &groupConstraints, const std::vector<SolverCoord> &destinations);
     
     bool destinationIsAllowed(unsigned marcher, unsigned destination) const;
     bool destinationIsAllowed(unsigned marcher, SolverCoord destination) const;
@@ -1014,9 +1438,9 @@ private:
 };
 
 
-DestinationConstraints::DestinationConstraints(const std::vector<TransitionSolverParams::GroupParams> &groupConstraints, const std::vector<SolverCoord> &destinations)
+DestinationConstraints::DestinationConstraints(const std::vector<TransitionSolverParams::GroupConstraint> &groupConstraints, const std::vector<SolverCoord> &destinations)
 {
-    for (TransitionSolverParams::GroupParams group : groupConstraints) {
+    for (TransitionSolverParams::GroupConstraint group : groupConstraints) {
         for (auto marcher : group.marchers)
         {
             for (auto destination : group.allowedDestinations)
@@ -1058,191 +1482,216 @@ bool DestinationConstraints::destinationIsAllowed(unsigned marcher, SolverCoord 
 
 namespace e7ChiuZamoraMalani {
 
-// First: swapLDirections, first player
-// Second: swapLDirections, second player
-// Third: numWaits, first player
-// Fourth: numWaits, second player
-// Fifth: swapPositions
-struct SolutionAdjustmentInstruction {
-    unsigned instructionForMarcher1;
-    unsigned instructionForMarcher2;
-    bool swapMarchers;
-};
+    /*!
+     * @brief Describes a potential option for solving a collision
+     * between two marchers.
+     * @discussion When considering a collision between two marchers
+     * in isolation, you can solve the collision using some combination
+     * of three actions. First, you can swap the destinations of the two
+     * marchers. Second, you can change the paths that each marcher will
+     * use to reach their destination. Third, you can change the amount
+     * of time that each marcher waits before moving. The second and
+     * third actions can be summarized by the instructions assigned to
+     * each marcher.
+     */
+    struct SolutionAdjustmentInstruction {
+        /*!
+         * @brief The index of the instruction that will be assigned
+         * to the first marcher involved in the collision.
+         */
+        unsigned instructionForMarcher1;
+        
+        /*!
+         * @brief The index of the instruction that will be assigned
+         * to the second marcher involved in the collision.
+         */
+        unsigned instructionForMarcher2;
+        
+        /*!
+         * @brief True if the marchers' destinations should be swapped;
+         * false otherwise.
+         */
+        bool swapMarchers;
+    };
 
-struct AdjustmentInstructionSorter {
-    
-    AdjustmentInstructionSorter(const std::vector<TransitionSolverParams::InstructionOption> &instructionOptions) : instructionOptions(instructionOptions) {};
-    
-    const std::vector<TransitionSolverParams::InstructionOption> instructionOptions;
-    
-    bool operator()(const SolutionAdjustmentInstruction &first,const SolutionAdjustmentInstruction &second) {
-        unsigned                                                waitBeats1;
-        unsigned                                                waitBeats2;
-        unsigned                                                marchPattern1;
-        unsigned                                                marchPattern2;
+    /*!
+     * @brief A comparator that sorts SolutionAdjustmentInstructions
+     * such that, when solving a collision in isolation, the adjustments
+     * that are listed earlier should be tried before those that are listed later.
+     */
+    struct AdjustmentInstructionSorter {
         
-        waitBeats1 = instructionOptions.at(first.instructionForMarcher1).waitBeats + instructionOptions.at(first.instructionForMarcher2).waitBeats;
-        waitBeats2 = instructionOptions.at(second.instructionForMarcher1).waitBeats + instructionOptions.at(second.instructionForMarcher2).waitBeats;
+        AdjustmentInstructionSorter(const std::vector<TransitionSolverParams::MarcherInstruction> &instructionOptions) : instructionOptions(instructionOptions) {};
         
-        marchPattern1 = (unsigned)instructionOptions[first.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[first.instructionForMarcher2].movementPattern;
-        marchPattern2 = (unsigned)instructionOptions[second.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[second.instructionForMarcher2].movementPattern;
+        const std::vector<TransitionSolverParams::MarcherInstruction> instructionOptions;
         
-        if (waitBeats1 == waitBeats2) {
-            if (marchPattern1 == marchPattern2) {
-                return !first.swapMarchers;
+        bool operator()(const SolutionAdjustmentInstruction &first,const SolutionAdjustmentInstruction &second) {
+            unsigned                                                waitBeats1;
+            unsigned                                                waitBeats2;
+            unsigned                                                marchPattern1;
+            unsigned                                                marchPattern2;
+            
+            waitBeats1 = instructionOptions.at(first.instructionForMarcher1).waitBeats + instructionOptions.at(first.instructionForMarcher2).waitBeats;
+            waitBeats2 = instructionOptions.at(second.instructionForMarcher1).waitBeats + instructionOptions.at(second.instructionForMarcher2).waitBeats;
+            
+            marchPattern1 = (unsigned)instructionOptions[first.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[first.instructionForMarcher2].movementPattern;
+            marchPattern2 = (unsigned)instructionOptions[second.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[second.instructionForMarcher2].movementPattern;
+            
+            if (waitBeats1 == waitBeats2) {
+                if (marchPattern1 == marchPattern2) {
+                    return !first.swapMarchers;
+                } else {
+                    return marchPattern1 < marchPattern2;
+                }
             } else {
-                return marchPattern1 < marchPattern2;
-            }
-        } else {
-            return waitBeats1 < waitBeats2;
-        }
-    }
-};
-
-std::vector<SolutionAdjustmentInstruction> unfilteredAdjustmentOptions(const std::vector<TransitionSolverParams::InstructionOption> &instructionOptions)
-{
-    std::vector<SolutionAdjustmentInstruction> allOptions;
-    for (unsigned inst1 = 0; inst1 < instructionOptions.size(); inst1++) {
-        for (unsigned inst2 = 0; inst2 < instructionOptions.size(); inst2++) {
-            for (bool swapPositions : {false, true}) {
-                allOptions.push_back({inst1, inst2, swapPositions});
+                return waitBeats1 < waitBeats2;
             }
         }
-    }
-    std::sort(allOptions.begin(), allOptions.end(), AdjustmentInstructionSorter(instructionOptions));
-    return allOptions;
-}
+    };
 
-void recalculateMarcher(MovingMarcher& marcher,MarcherSolution& marcherSolution, const TransitionSolverParams::InstructionOption &instruction, SolverCoord newDestination)
-{
-    setupMarcherSolutionPath(marcherSolution, instruction, newDestination);
-    
-    marcher = calculateMovementFromSolution(marcherSolution);
-}
-    
-
-void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::InstructionOption> &instructionOptions, TransitionSolverDelegate *delegate)
-{
-    const std::vector<SolutionAdjustmentInstruction> unfilteredOptions = unfilteredAdjustmentOptions(instructionOptions);
-    
-    std::vector<Collision> collisionPairs;
-    std::vector<bool> degeneratePaths;
-    std::map<std::pair<unsigned, unsigned>, unsigned> allActiveOptions;
-    
-    for (unsigned i = 0; i < marcherSolutions.size(); i++) {
-        SolverCoord marcherMoveDiff = marcherSolutions[i].endPos - marcherSolutions[i].startPos;
-        degeneratePaths.push_back(marcherMoveDiff.x == 0 || marcherMoveDiff.y == 0);
-    }
-    
-    bool progress = true;
-    unsigned originalNumCollisions = (unsigned)collisionSpace.collectCollisionPairs().size();
-    unsigned leastNumCollisions = originalNumCollisions;
-    unsigned numIterationsWithoutOverallImprovement = 0;
-    while (!collisionSpace.isSolved() && progress && numIterationsWithoutOverallImprovement < 10) {
-        
-        progress = false;
-        if (delegate)
-        {
-            double progress;
-            
-            if (originalNumCollisions > collisionSpace.collectCollisionPairs().size()) {
-                progress = (double)(originalNumCollisions - collisionSpace.collectCollisionPairs().size()) / (double)originalNumCollisions;
-            } else {
-                progress = 1;
-            }
-            
-            delegate->OnSubtaskProgress(progress);
-            
-            if (delegate->ShouldAbortCalculation())
-            {
-                break;
-            }
-        }
-        
-        for (unsigned beat = 0; beat <= maxBeats; beat++) {
-            
-            collisionSpace.clipToBeat(beat);
-            collisionPairs = collisionSpace.collectCollisionPairs(beat);
-            
-            for (unsigned collisionIndex = 0; collisionIndex < collisionPairs.size(); collisionIndex++) {
-                Collision& col = collisionPairs[collisionIndex];
-                
-                // For each pair of colliding marchers, select the appropriate set of options for solving the collision
-                const std::vector<SolutionAdjustmentInstruction>* adjustmentOptionsPtr;
-                adjustmentOptionsPtr = &unfilteredOptions;
-                const std::vector<SolutionAdjustmentInstruction>& adjustmentOptions = *adjustmentOptionsPtr;
-                
-                // Find the most recent option that was used to fix the collision; start from there when figuring out what to do next with them
-                unsigned activeOptionIndex = allActiveOptions[{col.firstMarcher, col.secondMarcher}];
-                SolutionAdjustmentInstruction activeOption = adjustmentOptions.at(activeOptionIndex);
-                
-                // Keep working on the collision until you find a solution
-                MarcherSolution mutableMarcherSolution1 = marcherSolutions[col.firstMarcher];
-                MarcherSolution mutableMarcherSolution2 = marcherSolutions[col.secondMarcher];
-                for (unsigned newOptionIndex = activeOptionIndex + 1;; newOptionIndex++) {
-                    
-                    if (newOptionIndex >= adjustmentOptions.size()) {
-                        newOptionIndex = 0;
-                    }
-                    
-                    SolutionAdjustmentInstruction newOption = adjustmentOptions.at(newOptionIndex);
-                    
-                    MovingMarcher marcherMove1 = collisionSpace.getMarcherInstruction(col.firstMarcher);
-                    MovingMarcher marcherMove2 = collisionSpace.getMarcherInstruction(col.secondMarcher);
-                    
-                    bool badSolutionDuration = false;
-                    bool badSolutionDestination = false;
-                    
-                    SolverCoord destination1 = mutableMarcherSolution1.endPos;
-                    SolverCoord destination2 = mutableMarcherSolution2.endPos;
-                    if (newOption.swapMarchers != activeOption.swapMarchers)
-                    {
-                        SolverCoord tmp = destination1;
-                        destination1 = destination2;
-                        destination2 = tmp;
-                    }
-                    
-                    recalculateMarcher(marcherMove1, mutableMarcherSolution1, instructionOptions[newOption.instructionForMarcher1], destination1);
-                    recalculateMarcher(marcherMove2, mutableMarcherSolution2, instructionOptions[newOption.instructionForMarcher2], destination2);
-                    badSolutionDuration = (marcherMove1.waitBeats + marcherMove1.numSteps.first + marcherMove1.numSteps.second > maxBeats) || (marcherMove2.waitBeats + marcherMove2.numSteps.first + marcherMove2.numSteps.second > maxBeats);
-                    badSolutionDestination = !destinationConstraints.destinationIsAllowed(col.firstMarcher, mutableMarcherSolution1.endPos) || !destinationConstraints.destinationIsAllowed(col.secondMarcher, mutableMarcherSolution2.endPos);
-                    
-                    activeOption = newOption;
-                    if ((badSolutionDuration || badSolutionDestination) && newOptionIndex != activeOptionIndex)
-                    {
-                        continue;
-                    }
-                    
-                    collisionSpace.reinstructMarcher(col.firstMarcher, marcherMove1);
-                    collisionSpace.reinstructMarcher(col.secondMarcher, marcherMove2);
-
-                    allActiveOptions[{col.firstMarcher, col.secondMarcher}] = newOptionIndex;
-                    marcherSolutions[col.firstMarcher] = mutableMarcherSolution1;
-                    marcherSolutions[col.secondMarcher] = mutableMarcherSolution2;
-                    
-                    // If the collision was solved, go ahead and break from this
-                    unsigned beatsWithoutCollision = collisionSpace.beatsBeforeCollisionBetweenMarchers(col.firstMarcher, col.secondMarcher);
-                    if (beatsWithoutCollision > beat) {
-                        progress  = true;
-                        break;
-                    }
-                    if (newOptionIndex == activeOptionIndex) {
-                        break;
-                    }
+    std::vector<SolutionAdjustmentInstruction> unfilteredAdjustmentOptions(const std::vector<TransitionSolverParams::MarcherInstruction> &instructionOptions)
+    {
+        std::vector<SolutionAdjustmentInstruction> allOptions;
+        for (unsigned inst1 = 0; inst1 < instructionOptions.size(); inst1++) {
+            for (unsigned inst2 = 0; inst2 < instructionOptions.size(); inst2++) {
+                for (bool swapPositions : {false, true}) {
+                    allOptions.push_back({inst1, inst2, swapPositions});
                 }
             }
         }
+        std::sort(allOptions.begin(), allOptions.end(), AdjustmentInstructionSorter(instructionOptions));
+        return allOptions;
+    }
+
+    void recalculateMarcher(MovingMarcher& marcher,MarcherSolution& marcherSolution, const TransitionSolverParams::MarcherInstruction &instruction, SolverCoord newDestination)
+    {
+        setupMarcherSolutionPath(marcherSolution, instruction, newDestination);
         
-        unsigned numCollisions = (unsigned)collisionSpace.collectCollisionPairs().size();
-        if (numCollisions < leastNumCollisions) {
-            numIterationsWithoutOverallImprovement = 0;
-            leastNumCollisions = numCollisions;
-        } else {
-            numIterationsWithoutOverallImprovement++;
+        marcher = calculateMovementFromSolution(marcherSolution);
+    }
+        
+
+    void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::MarcherInstruction> &instructionOptions, TransitionSolverDelegate *delegate)
+    {
+        const std::vector<SolutionAdjustmentInstruction> unfilteredOptions = unfilteredAdjustmentOptions(instructionOptions);
+        
+        std::vector<Collision> collisionPairs;
+        std::vector<bool> degeneratePaths;
+        std::map<std::pair<unsigned, unsigned>, unsigned> allActiveOptions;
+        
+        for (unsigned i = 0; i < marcherSolutions.size(); i++) {
+            SolverCoord marcherMoveDiff = marcherSolutions[i].endPos - marcherSolutions[i].startPos;
+            degeneratePaths.push_back(marcherMoveDiff.x == 0 || marcherMoveDiff.y == 0);
+        }
+        
+        bool progress = true;
+        unsigned originalNumCollisions = (unsigned)collisionSpace.collectCollisionPairs().size();
+        unsigned leastNumCollisions = originalNumCollisions;
+        unsigned numIterationsWithoutOverallImprovement = 0;
+        while (!collisionSpace.isSolved() && progress && numIterationsWithoutOverallImprovement < 10) {
+            
+            progress = false;
+            if (delegate)
+            {
+                double progress;
+                
+                if (originalNumCollisions > collisionSpace.collectCollisionPairs().size()) {
+                    progress = (double)(originalNumCollisions - collisionSpace.collectCollisionPairs().size()) / (double)originalNumCollisions;
+                } else {
+                    progress = 1;
+                }
+                
+                delegate->OnSubtaskProgress(progress);
+                
+                if (delegate->ShouldAbortCalculation())
+                {
+                    break;
+                }
+            }
+            
+            for (unsigned beat = 0; beat <= maxBeats; beat++) {
+                
+                collisionSpace.clipToBeat(beat);
+                collisionPairs = collisionSpace.collectCollisionPairs(beat);
+                
+                for (unsigned collisionIndex = 0; collisionIndex < collisionPairs.size(); collisionIndex++) {
+                    Collision& col = collisionPairs[collisionIndex];
+                    
+                    // For each pair of colliding marchers, select the appropriate set of options for solving the collision
+                    const std::vector<SolutionAdjustmentInstruction>* adjustmentOptionsPtr;
+                    adjustmentOptionsPtr = &unfilteredOptions;
+                    const std::vector<SolutionAdjustmentInstruction>& adjustmentOptions = *adjustmentOptionsPtr;
+                    
+                    // Find the most recent option that was used to fix the collision; start from there when figuring out what to do next with them
+                    unsigned activeOptionIndex = allActiveOptions[{col.firstMarcher, col.secondMarcher}];
+                    SolutionAdjustmentInstruction activeOption = adjustmentOptions.at(activeOptionIndex);
+                    
+                    // Keep working on the collision until you find a solution
+                    MarcherSolution mutableMarcherSolution1 = marcherSolutions[col.firstMarcher];
+                    MarcherSolution mutableMarcherSolution2 = marcherSolutions[col.secondMarcher];
+                    for (unsigned newOptionIndex = activeOptionIndex + 1;; newOptionIndex++) {
+                        
+                        if (newOptionIndex >= adjustmentOptions.size()) {
+                            newOptionIndex = 0;
+                        }
+                        
+                        SolutionAdjustmentInstruction newOption = adjustmentOptions.at(newOptionIndex);
+                        
+                        MovingMarcher marcherMove1 = collisionSpace.getMarcherInstruction(col.firstMarcher);
+                        MovingMarcher marcherMove2 = collisionSpace.getMarcherInstruction(col.secondMarcher);
+                        
+                        bool badSolutionDuration = false;
+                        bool badSolutionDestination = false;
+                        
+                        SolverCoord destination1 = mutableMarcherSolution1.endPos;
+                        SolverCoord destination2 = mutableMarcherSolution2.endPos;
+                        if (newOption.swapMarchers != activeOption.swapMarchers)
+                        {
+                            SolverCoord tmp = destination1;
+                            destination1 = destination2;
+                            destination2 = tmp;
+                        }
+                        
+                        recalculateMarcher(marcherMove1, mutableMarcherSolution1, instructionOptions[newOption.instructionForMarcher1], destination1);
+                        recalculateMarcher(marcherMove2, mutableMarcherSolution2, instructionOptions[newOption.instructionForMarcher2], destination2);
+                        badSolutionDuration = (marcherMove1.waitBeats + marcherMove1.numSteps.first + marcherMove1.numSteps.second > maxBeats) || (marcherMove2.waitBeats + marcherMove2.numSteps.first + marcherMove2.numSteps.second > maxBeats);
+                        badSolutionDestination = !destinationConstraints.destinationIsAllowed(col.firstMarcher, mutableMarcherSolution1.endPos) || !destinationConstraints.destinationIsAllowed(col.secondMarcher, mutableMarcherSolution2.endPos);
+                        
+                        activeOption = newOption;
+                        if ((badSolutionDuration || badSolutionDestination) && newOptionIndex != activeOptionIndex)
+                        {
+                            continue;
+                        }
+                        
+                        collisionSpace.reinstructMarcher(col.firstMarcher, marcherMove1);
+                        collisionSpace.reinstructMarcher(col.secondMarcher, marcherMove2);
+
+                        allActiveOptions[{col.firstMarcher, col.secondMarcher}] = newOptionIndex;
+                        marcherSolutions[col.firstMarcher] = mutableMarcherSolution1;
+                        marcherSolutions[col.secondMarcher] = mutableMarcherSolution2;
+                        
+                        // If the collision was solved, go ahead and break from this
+                        unsigned beatsWithoutCollision = collisionSpace.beatsBeforeCollisionBetweenMarchers(col.firstMarcher, col.secondMarcher);
+                        if (beatsWithoutCollision > beat) {
+                            progress  = true;
+                            break;
+                        }
+                        if (newOptionIndex == activeOptionIndex) {
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            unsigned numCollisions = (unsigned)collisionSpace.collectCollisionPairs().size();
+            if (numCollisions < leastNumCollisions) {
+                numIterationsWithoutOverallImprovement = 0;
+                leastNumCollisions = numCollisions;
+            } else {
+                numIterationsWithoutOverallImprovement++;
+            }
         }
     }
-}
-    
 
 }
 
@@ -1251,6 +1700,12 @@ void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSp
 // ===================================================
 // ===-- ALGORITHM BY: NAMINI ASL, RAMIREZ, ZHANG --===
 // ===================================================
+// Algorithm Outline:
+// ---
+// - Using the Hungarian Algorithm, come up with an initial set of destination assignments for the marchers
+//   (arbitrarily assign paths for getting to those destinations)
+// - Iterate over each
+
 
 namespace e7NaminiaslRamirezZhang {
     // Very similar to ChiuZamoraMalani
@@ -1259,7 +1714,7 @@ namespace e7NaminiaslRamirezZhang {
     // Second, we look through ALL options for each marcher, and choose the one that offers the LEAST number of collisions
 using namespace e7ChiuZamoraMalani;
 
-void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::InstructionOption> &instructionOptions, TransitionSolverDelegate *delegate)
+void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::MarcherInstruction> &instructionOptions, TransitionSolverDelegate *delegate)
 {
     const std::vector<SolutionAdjustmentInstruction> unfilteredOptions = unfilteredAdjustmentOptions(instructionOptions);
     
@@ -1404,123 +1859,134 @@ void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSp
 // ======================================================
 // ===-- ALGORITHM BY: SOVER, ELICEIRI, HERSHKOVITZ --===
 // ======================================================
+// Algorithm Outline:
+// ---
+// - Using the Hungarian Algorithm, come up with an initial set of destination assignments for the marchers
+//   (arbitrarily assign paths for getting to those destinations)
+// - Arbitrarily decide an initial 'march order' for the marchers; this is the order in which we will place the
+//   marchers onto the field
+// - Until we've found a solution:
+//    - Wipe the field clean, so that there are no marchers on it
+//    - Iterate over each of the marchers, in the order dictated by the current 'march order'; for each of them,
+//      do the following:
+//       - For the current marcher, iterate over all paths that can be used to bring the marcher to its destination
+//         (while altering the path, take care to prioritize altering the shape of the path over altering the number
+//         of beats that the marcher will initially wait before moving)
+//          - Try to place that marcher onto the field using the current path
+//          - If the marcher can be placed without causing any collisions, then move onto the next marcher
+//          - Otherwise, keep searching through the possiple paths
+//       - If we can iterate over all potential paths without finding one that we can assign to the marcher without
+//         causing collisions, then keep the marcher off the field and add it to a list of unplaced marchers
+//    - Now that we've iterated over all of our marchers, check to see if we successfully placed them all
+//       - If all of the marchers are placed, then we're done
+//       - Otherwise, if we have marchers in our list of unplaced marchers, then we reorganize the march order so that
+//          those unplaced marchers are moved to the front (the remaining marchers are kept in the same march order, relative
+//          to one another, as before)
 
 namespace e7SoverEliceiriHershkovitz {
     
-    // Assign initially by munkres
-    // Get collisions
-    // Create a placement order
-    // Place marcher with an initial direction, wait, and target
-    // Check against other marchers with those instructions
-    // If it collides, then try to add a wait
-    // If that doesn't work, add to the 'did not finish' list
-    
-    // Then -- RESET EVERYTHING
-    // Give priority to everything that did not finish, and do it all again
-
-    
-void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::InstructionOption> &instructionOptions, TransitionSolverDelegate *delegate)
-{
-    // Prioritize commands in the order that we will be willing to give them to a marcher
-    // We're much more willing to change direction than to increase the number of wait beats
-    std::vector<TransitionSolverParams::InstructionOption> prioritizedInstructionOptions = instructionOptions;
-    auto comparator = [](const TransitionSolverParams::InstructionOption &first, const TransitionSolverParams::InstructionOption &second) {
-        if (first.waitBeats == second.waitBeats) {
-            return first.movementPattern < second.movementPattern;
-        } else {
-            return first.waitBeats < second.waitBeats;
-        }
-    };
-    std::sort(prioritizedInstructionOptions.begin(), prioritizedInstructionOptions.end(), comparator);
-    
-    // Create a mapping of all of the marchers to their current instructions
-    std::vector<unsigned> activeInstructions;
-    for (unsigned i = 0; i < marcherSolutions.size(); i++)
+    void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const  DestinationConstraints &destinationConstraints, const std::vector<TransitionSolverParams::MarcherInstruction> &instructionOptions, TransitionSolverDelegate *delegate)
     {
-        activeInstructions.push_back(0);
-    }
-    
-    // Create an initial order for setting down our marchers
-    std::vector<unsigned> marchOrder;
-    for (unsigned i = 0; i < marcherSolutions.size(); i++)
-    {
-        marchOrder.push_back(i);
-    }
-    
-    std::vector<unsigned> unplacedMarchers = marchOrder;
-    const unsigned maxIterations = 500;
-    for (unsigned numIterations = 0; numIterations < maxIterations || collisionSpace.isSolved(); numIterations++)
-    {
-        if (delegate)
-        {
-            delegate->OnSubtaskProgress(std::max((double)(marchOrder.size() - unplacedMarchers.size()) / (double)marchOrder.size(), (double)numIterations / (double)maxIterations));
-            if (delegate->ShouldAbortCalculation())
-            {
-                break;
+        // Prioritize commands in the order that we will be willing to give them to a marcher
+        // We're much more willing to change direction than to increase the number of wait beats
+        std::vector<TransitionSolverParams::MarcherInstruction> prioritizedInstructionOptions = instructionOptions;
+        auto comparator = [](const TransitionSolverParams::MarcherInstruction &first, const TransitionSolverParams::MarcherInstruction &second) {
+            if (first.waitBeats == second.waitBeats) {
+                return first.movementPattern < second.movementPattern;
+            } else {
+                return first.waitBeats < second.waitBeats;
             }
-        }
+        };
+        std::sort(prioritizedInstructionOptions.begin(), prioritizedInstructionOptions.end(), comparator);
         
-        // Reset all of the marchers -- we will place them back one-by-one
+        // Create a mapping of all of the marchers to their current instructions
+        std::vector<unsigned> activeInstructions;
         for (unsigned i = 0; i < marcherSolutions.size(); i++)
         {
-            collisionSpace.disableMarcher(i);
+            activeInstructions.push_back(0);
         }
         
-        // Place marchers onto the field in the march order
-        unplacedMarchers.clear();
-        for (unsigned marcher : marchOrder)
+        // Create an initial order for setting down our marchers
+        std::vector<unsigned> marchOrder;
+        for (unsigned i = 0; i < marcherSolutions.size(); i++)
         {
-            // Re-enable the marcher
-            collisionSpace.enableMarcher(marcher);
-            
-            // Reset the marcher instruction back to one with the lowest wait time
-            for (unsigned i = 0; i < prioritizedInstructionOptions.size(); i++)
+            marchOrder.push_back(i);
+        }
+        
+        std::vector<unsigned> unplacedMarchers = marchOrder;
+        const unsigned maxIterations = 500;
+        for (unsigned numIterations = 0; numIterations < maxIterations || collisionSpace.isSolved(); numIterations++)
+        {
+            if (delegate)
             {
-                if (prioritizedInstructionOptions[activeInstructions[marcher]].movementPattern == prioritizedInstructionOptions[i].movementPattern)
+                delegate->OnSubtaskProgress(std::max((double)(marchOrder.size() - unplacedMarchers.size()) / (double)marchOrder.size(), (double)numIterations / (double)maxIterations));
+                if (delegate->ShouldAbortCalculation())
                 {
-                    activeInstructions[marcher] = i;
                     break;
                 }
             }
             
-            for (; activeInstructions[marcher] < prioritizedInstructionOptions.size(); activeInstructions[marcher]++)
+            // Reset all of the marchers -- we will place them back one-by-one
+            for (unsigned i = 0; i < marcherSolutions.size(); i++)
             {
-                MovingMarcher newMoveInstructions;
-                e7ChiuZamoraMalani::recalculateMarcher(newMoveInstructions, marcherSolutions[marcher], prioritizedInstructionOptions[activeInstructions[marcher]], marcherSolutions[marcher].endPos);
-                
-                if (collisionSpace.collectCollisionPairs().size() == 0 && collisionSpace.getMarchersWithIncompleteTransitions().size() == 0) {
-                    break;
-                }
-                
+                collisionSpace.disableMarcher(i);
             }
             
-            if (activeInstructions[marcher] == prioritizedInstructionOptions.size()) {
-                activeInstructions[marcher] = 0;
-                unplacedMarchers.push_back(marcher);
-                collisionSpace.disableMarcher(marcher);
-            }
-        }
-        
-        // Remove all of the marchers that need to be re-prioritized
-        {
-            auto unplacedIter = unplacedMarchers.begin();
-            for (auto marchersIter = marchOrder.begin(); marchersIter != marchOrder.end() && unplacedIter != unplacedMarchers.end(); marchersIter++)
+            // Place marchers onto the field in the march order
+            unplacedMarchers.clear();
+            for (unsigned marcher : marchOrder)
             {
-                if (*marchersIter == *unplacedIter)
+                // Re-enable the marcher
+                collisionSpace.enableMarcher(marcher);
+                
+                // Reset the marcher instruction back to one with the lowest wait time
+                for (unsigned i = 0; i < prioritizedInstructionOptions.size(); i++)
                 {
-                    marchOrder.erase(marchersIter--);
-                    unplacedIter++;
+                    if (prioritizedInstructionOptions[activeInstructions[marcher]].movementPattern == prioritizedInstructionOptions[i].movementPattern)
+                    {
+                        activeInstructions[marcher] = i;
+                        break;
+                    }
+                }
+                
+                for (; activeInstructions[marcher] < prioritizedInstructionOptions.size(); activeInstructions[marcher]++)
+                {
+                    MovingMarcher newMoveInstructions;
+                    e7ChiuZamoraMalani::recalculateMarcher(newMoveInstructions, marcherSolutions[marcher], prioritizedInstructionOptions[activeInstructions[marcher]], marcherSolutions[marcher].endPos);
+                    
+                    if (collisionSpace.collectCollisionPairs().size() == 0 && collisionSpace.getMarchersWithIncompleteTransitions().size() == 0) {
+                        break;
+                    }
+                    
+                }
+                
+                if (activeInstructions[marcher] == prioritizedInstructionOptions.size()) {
+                    activeInstructions[marcher] = 0;
+                    unplacedMarchers.push_back(marcher);
+                    collisionSpace.disableMarcher(marcher);
                 }
             }
+            
+            // Remove all of the marchers that need to be re-prioritized
+            {
+                auto unplacedIter = unplacedMarchers.begin();
+                for (auto marchersIter = marchOrder.begin(); marchersIter != marchOrder.end() && unplacedIter != unplacedMarchers.end(); marchersIter++)
+                {
+                    if (*marchersIter == *unplacedIter)
+                    {
+                        marchOrder.erase(marchersIter--);
+                        unplacedIter++;
+                    }
+                }
+            }
+            
+            // Shuffle the people who need priority of replacement
+            std::random_shuffle(unplacedMarchers.begin(), unplacedMarchers.end());
+            
+            // Re-add the unplaced marchers with higher priority
+            marchOrder.insert(marchOrder.begin(), unplacedMarchers.begin(), unplacedMarchers.end());
         }
-        
-        // Shuffle the people who need priority of replacement
-        std::random_shuffle(unplacedMarchers.begin(), unplacedMarchers.end());
-        
-        // Re-add the unplaced marchers with higher priority
-        marchOrder.insert(marchOrder.begin(), unplacedMarchers.begin(), unplacedMarchers.end());
-    }
-};
+    };
     
     
 }
@@ -1531,25 +1997,21 @@ void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSp
 // ===-- FINAL SOLVER --===
 // ========================
 
-std::vector<std::string> validateSheetForTransitionSolver(const CC_sheet& sheet)
-{
+std::vector<std::string> validateSheetForTransitionSolver(const CC_sheet& sheet) {
     std::vector<std::string>            errors;
     
     // Verify that all points are in the grid, and that all of them can be converted to and from solver space
-    for (unsigned i = 0; i < sheet.GetPoints().size(); i++)
-    {
+    for (unsigned i = 0; i < sheet.GetPoints().size(); i++) {
         CC_coord            showPosition;
         SolverCoord         solverPosition;
         
         showPosition = sheet.GetPoint(i).GetPos();
         solverPosition = SolverCoord::fromShowSpace(showPosition);
         
-        if (solverPosition.x % 2 != 0 || solverPosition.y % 2 != 0)
-        {
+        if (solverPosition.x % 2 != 0 || solverPosition.y % 2 != 0) {
             errors.push_back("Marcher " + std::to_string(i) + " is not located on a 2-step grid.");
         }
-        if (solverPosition.toShowSpace() != showPosition)
-        {
+        if (solverPosition.toShowSpace() != showPosition) {
             errors.push_back("Bad location for marcher " + std::to_string(i));
         }
         
@@ -1562,6 +2024,7 @@ TransitionSolverResult runSolverWithExplicitBeatCap(const CC_sheet& sheet1, cons
     
     TransitionSolverResult      results;
     
+    // Convert the start and end locations of the stuntsheets so that they are represented in the SolverCoord coordinate system
     std::vector<SolverCoord> startPositions;
     std::vector<SolverCoord> endPositions;
     fillPositionsFromSheet(sheet1, startPositions);
@@ -1571,33 +2034,35 @@ TransitionSolverResult runSolverWithExplicitBeatCap(const CC_sheet& sheet1, cons
     auto fieldHeight = SolverCoord::kFieldHeightInSteps;
     unsigned maxBeats = numBeats;
     
-    // Decrease the resolution of the problem
+    // Scale the field and the transition duration by half, so that we can perform less calculations
     fieldWidth /= 2;
     fieldHeight /= 2;
     maxBeats /= 2;
-    for (unsigned i = 0; i < startPositions.size(); i++)
-    {
+    for (unsigned i = 0; i < startPositions.size(); i++) {
         startPositions[i] /= 2;
         endPositions[i] /= 2;
     }
     
+    // Generate a preliminary cost matrix for the hungarian algorithm
+    // This will minimize the distance travelled by our marchers (assuming they are moving either EWNS or NSEW) to get to the next stuntsheet, while assigning only one marcher to each destination
+    // We will use this to assign reasonable destinations to each marcher to start
     Matrix<double>              distances;
     DestinationConstraints      destinationConstraints(params.groups, endPositions);
     distances = makeHungarianDistanceMatrix(startPositions, endPositions, maxBeats);
-    for (unsigned i = 0; i < startPositions.size(); i++)
-    {
-        for (unsigned k = 0; k < endPositions.size(); k++)
-        {
-            if (!destinationConstraints.destinationIsAllowed(i, k))
-            {
+    
+    // Here, we take into account the constraints that were passed to us in the TransitionSolverParams
+    // For any assignment that matches a marcher to a destination that is not listed as one of its allowed destinations in the group constraints, we'll make the cost outrageously large
+    for (unsigned i = 0; i < startPositions.size(); i++) {
+        for (unsigned k = 0; k < endPositions.size(); k++) {
+            if (!destinationConstraints.destinationIsAllowed(i, k)) {
                 distances(i, k) = std::numeric_limits<double>::max();
             }
         }
     }
     
+    // Use the hungarian algorithm to come up with a reasonable destination for each marcher (ignoring collisions)
     Munkres<double> solver;
     solver.solve(distances);
-    
     std::vector<unsigned> assignments;
     for (size_t i = 0; i < startPositions.size(); i++) {
         for (size_t j = 0; j < startPositions.size(); j++) {
@@ -1611,11 +2076,9 @@ TransitionSolverResult runSolverWithExplicitBeatCap(const CC_sheet& sheet1, cons
     
     CollisionSpace collisionSpace(fieldWidth, fieldHeight, startPositions, maxBeats);
     
-    std::vector<TransitionSolverParams::InstructionOption> instructionOptions;
-    for (unsigned i = 0; i < params.availableInstructions.size(); i++)
-    {
-        if (params.availableInstructionsMask[i])
-        {
+    std::vector<TransitionSolverParams::MarcherInstruction> instructionOptions;
+    for (unsigned i = 0; i < params.availableInstructions.size(); i++) {
+        if (params.availableInstructionsMask[i]) {
             instructionOptions.push_back(params.availableInstructions[i]);
             instructionOptions[i].waitBeats /= 2;
         }
@@ -1628,12 +2091,10 @@ TransitionSolverResult runSolverWithExplicitBeatCap(const CC_sheet& sheet1, cons
         refreshMarcherPathInCollisionSpace(collisionSpace, (unsigned)i, marcherSolutions[i]);
     }
     
-    if (delegate)
-    {
+    if (delegate) {
         delegate->OnSubtaskProgress(0);
     }
-    switch (params.algorithm)
-    {
+    switch (params.algorithm) {
         case TransitionSolverParams::AlgorithmIdentifier::E7_ALGORITHM__CHIU_ZAMORA_MALANI:
             e7ChiuZamoraMalani::iterateSolution(marcherSolutions, collisionSpace, maxBeats, destinationConstraints, instructionOptions, delegate);
             break;
@@ -1646,59 +2107,54 @@ TransitionSolverResult runSolverWithExplicitBeatCap(const CC_sheet& sheet1, cons
         default:
             break;
     }
-    if (delegate)
-    {
+    if (delegate) {
         delegate->OnSubtaskProgress(1);
     }
     
+    // Indicate the quality of the solution (or lack thereof) that we found
     results.successfullySolved = collisionSpace.isSolved();
-    results.numBeatsOfMovement = collisionSpace.lastBeatContainingMovement() * 2;
+    results.numBeatsOfMovement = collisionSpace.firstBeatAfterMovment() * 2;
     
+    // Assign a final position to each marcher
     for (size_t i = 0; i < assignments.size(); i++) {
         results.finalPositions.push_back(SolverCoord::toShowSpace(marcherSolutions[i].endPos * 2)); // Make sure to scale the solution back up
     }
     
-    std::map<std::pair<PathInstruction, unsigned>, SYMBOL_TYPE> instructionToDotType;
-    for (unsigned i = 0; i < instructionOptions.size(); i++)
-    {
+    // Assign a dot type for each marcher instruction that was allowed for the Transition Solver
+    // For each of those dot types, generate the continuity text that represents the associated instruction
+    std::map<std::pair<TransitionSolverParams::MarcherInstruction::Pattern, unsigned>, SYMBOL_TYPE> instructionToDotType;
+    for (unsigned i = 0; i < instructionOptions.size(); i++) {
         SYMBOL_TYPE                                         dotType = (SYMBOL_TYPE)i;
         std::string                                         instructionString;
-        const TransitionSolverParams::InstructionOption     &instruction = instructionOptions.at(i);;
+        const TransitionSolverParams::MarcherInstruction    &instruction = instructionOptions.at(i);;
         
-        switch (instruction.movementPattern)
-        {
-            case TransitionSolverParams::InstructionOption::Pattern::EWNS:
-                instructionToDotType[std::make_pair(PATH_EWNS, instruction.waitBeats)] = dotType;
-                instructionToDotType[std::make_pair(PATH_DEGENERATE_STRAIGHT, instruction.waitBeats)] = dotType;
+        instructionToDotType[std::make_pair(instruction.movementPattern, instruction.waitBeats)] = dotType;
+        
+        switch (instruction.movementPattern) {
+            case TransitionSolverParams::MarcherInstruction::Pattern::EWNS:
                 instructionString = "ewns";
                 break;
-            case TransitionSolverParams::InstructionOption::Pattern::NSEW:
-                instructionToDotType[std::make_pair(PATH_NSEW, instruction.waitBeats)] = dotType;
-                instructionToDotType[std::make_pair(PATH_DEGENERATE_STRAIGHT, instruction.waitBeats)] = dotType;
+            case TransitionSolverParams::MarcherInstruction::Pattern::NSEW:
                 instructionString = "nsew";
                 break;
-            case TransitionSolverParams::InstructionOption::Pattern::DMHS:
-                instructionToDotType[std::make_pair(PATH_DMHS, instruction.waitBeats)] = dotType;
-                instructionToDotType[std::make_pair(PATH_DEGENERATE_DIAGONAL, instruction.waitBeats)] = dotType;
+            case TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
                 instructionString = "dmhs";
                 break;
-            case TransitionSolverParams::InstructionOption::Pattern::HSDM:
-                instructionToDotType[std::make_pair(PATH_HSDM, instruction.waitBeats)] = dotType;
-                instructionToDotType[std::make_pair(PATH_DEGENERATE_DIAGONAL, instruction.waitBeats)] = dotType;
+            case TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
                 instructionString = "hsdm";
                 break;
             default:
                 break;
         }
         
-        results.continuities[dotType] = "mt " + std::to_string(instruction.waitBeats * 2) + " e" + "\n" + instructionString + " np";
+        results.continuities[dotType] = "mt " + std::to_string(instruction.waitBeats * 2) + " e" + "\n" + instructionString + " np\n" + "mtrm e";
     }
     
-    for (unsigned i = 0; i < marcherSolutions.size(); i++)
-    {
+    // Assign a dot type to each of the marchers that corresponds to the instruction that it was given
+    for (unsigned i = 0; i < marcherSolutions.size(); i++) {
         const MarcherSolution &solution = marcherSolutions[i];
         
-        results.marcherDotTypes.push_back(instructionToDotType[std::make_pair(solution.instruction, solution.waitBeats)]);
+        results.marcherDotTypes.push_back(instructionToDotType[std::make_pair(solution.instruction.movementPattern, solution.instruction.waitBeats)]);
     }
     
     return results;
@@ -1711,88 +2167,45 @@ TransitionSolverResult runTransitionSolver(const CC_sheet& sheet1, const CC_shee
     unsigned                            scaledHighestBeatCap;
     unsigned                            scaledBeatCapForBestSolution;
     unsigned                            scaledBeatCapForCurrentCalculation;
-    unsigned                            numBeatsOfMovementInBestSolution;
     
     scaledBeatCapForBestSolution = 0;
     scaledHighestBeatCap = (sheet1.GetBeats() + (sheet1.GetBeats() / 2)) / 2;
     scaledBeatCapForCurrentCalculation = 0;
-    numBeatsOfMovementInBestSolution = sheet1.GetBeats();
     finalResult.successfullySolved = false;
+    finalResult.numBeatsOfMovement = sheet1.GetBeats();
     
-    if (params.algorithm == TransitionSolverParams::AlgorithmIdentifier::E7_ALGORITHM__NAMINIASL_RAMIREZ_ZHANG)
-    {
-        scaledHighestBeatCap = (sheet1.GetBeats() / 2);
-    }
-    
+    // Try to solve the transition at different transition durations, starting from 0 and increasing to from there
+    // This will give us chances to find different solutions to the problem, and we can choose the best solution from the options
+    // Since the best options are more likely to be found when we force a shorter number of beats in the transition, we'll start the transition duration at zero and count up
     while (scaledBeatCapForCurrentCalculation <= scaledHighestBeatCap) {
+        
+        // If a delegate was provided, indicate the current process, and offer an opportunity to end the calculation prematurely
         if (delegate) {
             delegate->OnProgress(((double)scaledBeatCapForCurrentCalculation) / (double)scaledHighestBeatCap);
-            if (delegate->ShouldAbortCalculation())
-            {
+            if (delegate->ShouldAbortCalculation()) {
                 break;
             }
         }
         
+        // Solve the transition for the current transition duration
         recentResult = runSolverWithExplicitBeatCap(sheet1, sheet2, params, scaledBeatCapForCurrentCalculation * 2, delegate);
         
+        // If a solution was successfully found, compare it to our current favorite solution, and remember the new one instead if it is better
         if (recentResult.successfullySolved) {
-            printf("%d, %d\n", scaledBeatCapForCurrentCalculation, recentResult.numBeatsOfMovement);
-            
-            if (recentResult.numBeatsOfMovement <= numBeatsOfMovementInBestSolution)
-            {
-                numBeatsOfMovementInBestSolution = recentResult.numBeatsOfMovement;
+            if (recentResult.numBeatsOfMovement <= finalResult.numBeatsOfMovement) {
                 scaledBeatCapForBestSolution = scaledBeatCapForCurrentCalculation;
                 finalResult = recentResult;
-                if (delegate)
-                {
-                    delegate->OnNewPreferredSolution(numBeatsOfMovementInBestSolution);
+                if (delegate) {
+                    delegate->OnNewPreferredSolution(finalResult.numBeatsOfMovement);
                 }
             }
-
         }
         
         scaledBeatCapForCurrentCalculation += 1;
     }
     
-
-// BINARY SEARCH VERSION -- turns out to be less-good
-//    TransitionSolverResult              recentResult;
-//    std::pair<unsigned, unsigned>       scaledBeatLimits;
-//    unsigned                            scaledBeatCapForBestSolution;
-//    unsigned                            scaledBeatCapForPreviousCalculation;
-//    unsigned                            scaledBeatCapForCurrentCalculation;
-//    unsigned                            numBeatsOfMovementInBestSolution;
-//    
-//    scaledBeatLimits.first = 0;
-//    scaledBeatLimits.second = sheet1.GetBeats() / 2;
-//    scaledBeatLimits.second += scaledBeatLimits.second / 2;
-//    scaledBeatCapForBestSolution = 0;
-//    scaledBeatCapForCurrentCalculation = scaledBeatLimits.second;
-//    scaledBeatCapForPreviousCalculation = 0;
-//    numBeatsOfMovementInBestSolution = sheet1.GetBeats();
-//
-//    while (scaledBeatCapForCurrentCalculation != scaledBeatCapForPreviousCalculation) {
-//        recentResult = runSolverWithExplicitBeatCap(sheet1, sheet2, params, scaledBeatCapForCurrentCalculation * 2);
-//        
-//        if (recentResult.successfullySolved) {
-//            scaledBeatLimits.second = scaledBeatCapForCurrentCalculation;
-//            
-//            if (recentResult.numBeatsOfMovement <= numBeatsOfMovementInBestSolution)
-//            {
-//                numBeatsOfMovementInBestSolution = recentResult.numBeatsOfMovement;
-//                scaledBeatCapForBestSolution = scaledBeatCapForCurrentCalculation;
-//            }
-//            
-//        } else {
-//                scaledBeatLimits.first = scaledBeatCapForCurrentCalculation;
-//        }
-//
-//        scaledBeatCapForPreviousCalculation = scaledBeatCapForCurrentCalculation;
-//        scaledBeatCapForCurrentCalculation = scaledBeatLimits.first + ((scaledBeatLimits.second - scaledBeatLimits.first) / 2);
-//    }
-    
-    if (delegate)
-    {
+    // Inform the delegate of the final solution, if a delegate exists
+    if (delegate) {
         delegate->OnCalculationComplete(finalResult);
     }
     return finalResult;

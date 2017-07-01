@@ -6,6 +6,11 @@
 //
 //
 
+#include <wx/help.h>
+#include <wx/html/helpctrl.h>
+#include <wx/statline.h>
+#include <wx/msgdlg.h>
+
 #include "e7_transition_solver_ui.h"
 #include "basic_ui.h"
 #include "confgr.h"
@@ -15,11 +20,6 @@
 #include "calchartapp.h"
 #include "calchartdoc.h"
 #include "cc_show.h"
-
-#include <wx/help.h>
-#include <wx/html/helpctrl.h>
-#include <wx/statline.h>
-#include <wx/msgdlg.h>
 
 #pragma mark -
 
@@ -476,8 +476,8 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
     mSolverParams.algorithm = TransitionSolverParams::AlgorithmIdentifier::BEGIN;
     for (unsigned i = 0; i < mSolverParams.availableInstructionsMask.size(); i++) {
         mSolverParams.availableInstructionsMask[i] = true;
-        mSolverParams.availableInstructions[i].waitBeats = (i / (unsigned)TransitionSolverParams::InstructionOption::Pattern::END) * 2;
-        mSolverParams.availableInstructions[i].movementPattern = (TransitionSolverParams::InstructionOption::Pattern)(i % (unsigned)TransitionSolverParams::InstructionOption::Pattern::END);
+        mSolverParams.availableInstructions[i].waitBeats = (i / (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END) * 2;
+        mSolverParams.availableInstructions[i].movementPattern = (TransitionSolverParams::MarcherInstruction::Pattern)(i % (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END);
     }
     
     CreateControls();
@@ -815,8 +815,8 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
     
     mInstructionOptions.clear();
     for (unsigned waitBeats = 0; waitBeats < (*mDoc->GetCurrentSheet()).GetBeats(); waitBeats+=2) {
-        for (TransitionSolverParams::InstructionOption::Pattern pattern = TransitionSolverParams::InstructionOption::Pattern::BEGIN; pattern != TransitionSolverParams::InstructionOption::Pattern::END; pattern = (TransitionSolverParams::InstructionOption::Pattern)(((unsigned)pattern) + 1)) {
-            TransitionSolverParams::InstructionOption   instruction;
+        for (TransitionSolverParams::MarcherInstruction::Pattern pattern = TransitionSolverParams::MarcherInstruction::Pattern::BEGIN; pattern != TransitionSolverParams::MarcherInstruction::Pattern::END; pattern = (TransitionSolverParams::MarcherInstruction::Pattern)(((unsigned)pattern) + 1)) {
+            TransitionSolverParams::MarcherInstruction      instruction;
             
             instruction.movementPattern = pattern;
             instruction.waitBeats = waitBeats;
@@ -829,20 +829,20 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
     {
         std::vector<wxString> commandLabels;
         
-        for (TransitionSolverParams::InstructionOption instruction : mInstructionOptions) {
+        for (TransitionSolverParams::MarcherInstruction instruction : mInstructionOptions) {
             std::string         label;
             
             switch (instruction.movementPattern) {
-                case TransitionSolverParams::InstructionOption::Pattern::EWNS:
+                case TransitionSolverParams::MarcherInstruction::Pattern::EWNS:
                     label = "EWNS";
                     break;
-                case TransitionSolverParams::InstructionOption::Pattern::NSEW:
+                case TransitionSolverParams::MarcherInstruction::Pattern::NSEW:
                     label = "NSEW";
                     break;
-                case TransitionSolverParams::InstructionOption::Pattern::DMHS:
+                case TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
                     label = "DMHS";
                     break;
-                case TransitionSolverParams::InstructionOption::Pattern::HSDM:
+                case TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
                     label = "HSDM";
                     break;
                 default:
@@ -859,10 +859,10 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
         
         // Update the commands
         for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
-            TransitionSolverParams::InstructionOption   &instruction = mSolverParams.availableInstructions[i];
+            TransitionSolverParams::MarcherInstruction  &instruction = mSolverParams.availableInstructions[i];
             unsigned                                    commandIndex;
             
-            commandIndex = (unsigned)TransitionSolverParams::InstructionOption::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
+            commandIndex = (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
             
             if (mSolverParams.availableInstructionsMask[i] && commandIndex < commandLabels.size())
             {
@@ -898,7 +898,7 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState() {
     
     // Display the current groups
     if (mSelectedGroup != -1) {
-        TransitionSolverParams::GroupParams         &group = mSolverParams.groups[mSelectedGroup];
+        TransitionSolverParams::GroupConstraint     &group = mSolverParams.groups[mSelectedGroup];
         
         std::vector<wxString>                       memberLabels;
         std::vector<wxString>                       destinationLabels;
@@ -1023,10 +1023,10 @@ void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event) {
     // Get a list of everything that is selected in the list now
     for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
         if (mSolverParams.availableInstructionsMask[i]) {
-            TransitionSolverParams::InstructionOption   &instruction = mSolverParams.availableInstructions[i];
+            TransitionSolverParams::MarcherInstruction      &instruction = mSolverParams.availableInstructions[i];
             unsigned commandIndex;
             
-            commandIndex = (unsigned)TransitionSolverParams::InstructionOption::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
+            commandIndex = (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
             
             previouslySelectedCommands.insert(commandIndex);
         }
@@ -1221,7 +1221,7 @@ void TransitionSolverFrame::SetAllowedCommands(std::vector<unsigned> commandIndi
 }
 
 void TransitionSolverFrame::AddNewGroup(std::string groupName) {
-    mSolverParams.groups.push_back(TransitionSolverParams::GroupParams());
+    mSolverParams.groups.push_back(TransitionSolverParams::GroupConstraint());
     mGroupNames.push_back(groupName);
 }
 

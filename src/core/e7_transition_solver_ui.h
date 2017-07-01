@@ -8,13 +8,11 @@
 
 #pragma once
 
-#include "calchartdoc.h"
-#include "e7_transition_solver.h"
-
-#include <array>
 #include <wx/docview.h>
 #include <wx/dialog.h>
 
+#include "calchartdoc.h"
+#include "e7_transition_solver.h"
 
 // View for linking CalChartDoc with the Transition Solver
 class TransitionSolverView : public wxView {
@@ -95,7 +93,7 @@ private:
     void AddDestinations(std::set<unsigned> marchers);
     void RemoveDestinations(std::set<unsigned> marchers);
     
-    std::vector<TransitionSolverParams::InstructionOption> mInstructionOptions;
+    std::vector<TransitionSolverParams::MarcherInstruction> mInstructionOptions;
     int mSelectedGroup;
     std::vector<std::string> mGroupNames;
     
