@@ -41,6 +41,15 @@ Get calchart (you'll need to log in with your source forge account):
 
 	$ git clone https://github.com/calband/calchart.git ~/calchart
 
+Navigate to the directory where you cloned CalChart on your computer:
+
+	$ cd ~/calchart
+
+Download the required submodules:
+
+	$ git submodule init
+	$ git submodule update
+
 If you need to rebuild the documentation, refer to the README-DOC.txt
 
 Now open the xcode project in build-macosx/CalChart.xcodeproj.  If you installed to a different directory, or used different build options, you're settings may be slightly different than what CalChart.xcodeproj is expecting.  You can check to see the options that wx-config needs by running:

@@ -57,6 +57,11 @@ Make Calchart's generated files:
 
 	$ make generate
 
+Download the necessary submodules:
+
+	$ git submodule init
+	$ git submodule update
+
 ## Make Calchart
 Open Visual Studio.
 Open the solution file:
