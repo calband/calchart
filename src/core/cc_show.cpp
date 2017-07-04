@@ -635,19 +635,24 @@ CC_show_command_pair CC_show::Create_SetPrintableContinuity(std::map<int, std::p
 
 CC_show_command_pair CC_show::Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const
 {
-    auto sheet = GetCurrentSheet();
+    return Create_MovePointsCommand(GetCurrentSheetNum(), new_positions, ref);
+}
+
+CC_show_command_pair CC_show::Create_MovePointsCommand(int whichSheet, std::map<int, CC_coord> const& new_positions, int ref) const
+{
+    auto sheet = GetNthSheet(whichSheet);
     std::map<unsigned, CC_coord> original_positions;
     for (auto&& index : new_positions) {
         original_positions[index.first] = sheet->GetPosition(index.first, ref);
     }
-    auto action = [ sheet_num = mSheetNum, new_positions, ref ](CC_show & show)
+    auto action = [ sheet_num = whichSheet, new_positions, ref ](CC_show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
     };
-    auto reaction = [ sheet_num = mSheetNum, original_positions, ref ](CC_show & show)
+    auto reaction = [ sheet_num = whichSheet, original_positions, ref ](CC_show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_positions) {
@@ -718,10 +723,15 @@ CC_show_command_pair CC_show::Create_SetReferencePointToRef0(int ref) const
 
 CC_show_command_pair CC_show::Create_SetSymbolCommand(SYMBOL_TYPE sym) const
 {
+    return Create_SetSymbolCommand(mSelectionList, sym);
+}
+
+CC_show_command_pair CC_show::Create_SetSymbolCommand(const SelectionList &selectionList, SYMBOL_TYPE sym) const
+{
     std::map<unsigned, SYMBOL_TYPE> new_sym;
     std::map<unsigned, SYMBOL_TYPE> original_sym;
     auto sheet = GetCurrentSheet();
-    for (auto&& i : mSelectionList) {
+    for (auto&& i : selectionList) {
         // Only do work on points that have different symbols
         if (sym != sheet->GetPoint(i).GetSymbol()) {
             new_sym[i] = sym;
