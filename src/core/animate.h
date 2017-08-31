@@ -134,9 +134,8 @@ public:
     std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
     AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
 
-    auto sheetsBegin() const { return sheets.begin(); }
-    auto sheetsEnd() const { return sheets.end(); }
-
+    std::vector<AnimateSheet>::const_iterator sheetsBegin() const;
+    std::vector<AnimateSheet>::const_iterator sheetsEnd() const;
 private:
     std::vector<AnimatePoint> pts;
     std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator> curr_cmds; // pointer to the current command
@@ -151,7 +150,6 @@ private:
     void EndCmd(unsigned i);
 
     void RefreshSheet();
-
     void CheckCollisions();
 
     std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
