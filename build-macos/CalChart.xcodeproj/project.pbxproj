@@ -267,6 +267,8 @@
 		E8C5F7B81FDC6A3200C84D3E /* e7_transition_solver_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7B71FDC6A2800C84D3E /* e7_transition_solver_ui.cpp */; };
 		E8C5F7BB1FDC6BD000C84D3E /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
 		E8C5F7BC1FDC6BD400C84D3E /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
+		E8C5F7C61FDC6EE100C84D3E /* libcalchart_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */; };
+		E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 		E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */; };
 /* End PBXBuildFile section */
@@ -317,6 +319,13 @@
 			remoteInfo = calchart_core;
 		};
 		E8C5F7B31FDC692E00C84D3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8C5F7751FDC677C00C84D3E;
+			remoteInfo = calchart_core;
+		};
+		E8C5F7C71FDC6EE100C84D3E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
@@ -740,6 +749,9 @@
 		E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcalchart_core.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8C5F7B61FDC6A2800C84D3E /* e7_transition_solver_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = e7_transition_solver_ui.h; sourceTree = "<group>"; };
 		E8C5F7B71FDC6A2800C84D3E /* e7_transition_solver_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = e7_transition_solver_ui.cpp; sourceTree = "<group>"; };
+		E8C5F7C11FDC6EE000C84D3E /* calchart_core_tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = calchart_core_tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8C5F7C51FDC6EE100C84D3E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_show_test.mm; sourceTree = "<group>"; };
 		E8E2E1051962870B002453E8 /* ghost_module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ghost_module.cpp; sourceTree = "<group>"; };
 		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
 		E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas_shapes.cpp; sourceTree = "<group>"; };
@@ -777,6 +789,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E8C5F7BE1FDC6EE000C84D3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8C5F7C61FDC6EE100C84D3E /* libcalchart_core.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -804,6 +824,7 @@
 				8D1107320486CEB800E47090 /* CalChart.app */,
 				E807BD5C17ED71F50052A53F /* calchart_cmd */,
 				E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */,
+				E8C5F7C11FDC6EE000C84D3E /* calchart_core_tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -824,6 +845,7 @@
 				C7AFA969117A6DBA00CC53E2 /* src */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				E807BD5D17ED71F60052A53F /* calchart_cmd */,
+				E8C5F7C21FDC6EE100C84D3E /* calchart_core_tests */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -1182,6 +1204,15 @@
 			path = core;
 			sourceTree = "<group>";
 		};
+		E8C5F7C21FDC6EE100C84D3E /* calchart_core_tests */ = {
+			isa = PBXGroup;
+			children = (
+				E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */,
+				E8C5F7C51FDC6EE100C84D3E /* Info.plist */,
+			);
+			path = calchart_core_tests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1253,6 +1284,24 @@
 			productReference = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		E8C5F7C01FDC6EE000C84D3E /* calchart_core_tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8C5F7C91FDC6EE100C84D3E /* Build configuration list for PBXNativeTarget "calchart_core_tests" */;
+			buildPhases = (
+				E8C5F7BD1FDC6EE000C84D3E /* Sources */,
+				E8C5F7BE1FDC6EE000C84D3E /* Frameworks */,
+				E8C5F7BF1FDC6EE000C84D3E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E8C5F7C81FDC6EE100C84D3E /* PBXTargetDependency */,
+			);
+			name = calchart_core_tests;
+			productName = calchart_core_tests;
+			productReference = E8C5F7C11FDC6EE000C84D3E /* calchart_core_tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1262,6 +1311,10 @@
 				LastUpgradeCheck = 0820;
 				TargetAttributes = {
 					E8C5F7751FDC677C00C84D3E = {
+						CreatedOnToolsVersion = 9.1;
+						ProvisioningStyle = Automatic;
+					};
+					E8C5F7C01FDC6EE000C84D3E = {
 						CreatedOnToolsVersion = 9.1;
 						ProvisioningStyle = Automatic;
 					};
@@ -1285,6 +1338,7 @@
 				8D1107260486CEB800E47090 /* CalChart */,
 				E807BD5B17ED71F50052A53F /* calchart_cmd */,
 				E8C5F7751FDC677C00C84D3E /* calchart_core */,
+				E8C5F7C01FDC6EE000C84D3E /* calchart_core_tests */,
 			);
 		};
 /* End PBXProject section */
@@ -1336,6 +1390,13 @@
 				C774E2F014DF77A800558ABA /* r2.tga in Resources */,
 				C774E2F114DF77A800558ABA /* sky.tga in Resources */,
 				C774E2F214DF77A800558ABA /* wall.tga in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8C5F7BF1FDC6EE000C84D3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1437,6 +1498,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E8C5F7BD1FDC6EE000C84D3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1459,6 +1528,11 @@
 			isa = PBXTargetDependency;
 			target = E8C5F7751FDC677C00C84D3E /* calchart_core */;
 			targetProxy = E8C5F7B31FDC692E00C84D3E /* PBXContainerItemProxy */;
+		};
+		E8C5F7C81FDC6EE100C84D3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8C5F7751FDC677C00C84D3E /* calchart_core */;
+			targetProxy = E8C5F7C71FDC6EE100C84D3E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1733,6 +1807,83 @@
 			};
 			name = Release;
 		};
+		E8C5F7CA1FDC6EE100C84D3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = calchart_core_tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "calband.calchart-core-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E8C5F7CB1FDC6EE100C84D3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = calchart_core_tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "calband.calchart-core-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1777,6 +1928,15 @@
 			buildConfigurations = (
 				E8C5F77E1FDC677C00C84D3E /* Debug */,
 				E8C5F77F1FDC677C00C84D3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8C5F7C91FDC6EE100C84D3E /* Build configuration list for PBXNativeTarget "calchart_core_tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8C5F7CA1FDC6EE100C84D3E /* Debug */,
+				E8C5F7CB1FDC6EE100C84D3E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
