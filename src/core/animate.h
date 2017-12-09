@@ -37,7 +37,9 @@ AnimateDir AnimGetDirFromAngle(float ang);
 class AnimateCommand;
 class AnimateSheet;
 struct CC_DrawCommand;
-class CC_show;
+namespace CalChart {
+class show;
+}
 class AnimationErrors;
 class ContProcedure;
 
@@ -82,7 +84,7 @@ private:
 
 class Animation {
 public:
-    Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
+    Animation(const CalChart::show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
     ~Animation();
 
     static std::list<std::unique_ptr<ContProcedure> > ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol);

@@ -53,7 +53,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
-    : mShow(CC_show::Create_CC_show())
+    : mShow(CalChart::show::Create_CC_show())
     , mMode(wxGetApp().GetMode(kShowModeStrings[0]))
     , mTimer(*this)
 {
@@ -229,7 +229,7 @@ template <typename T>
 T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
     try {
-        mShow = CC_show::Create_CC_show(stream);
+        mShow = CalChart::show::Create_CC_show(stream);
     }
     catch (CC_FileException& e) {
         wxString message = wxT("Error encountered:\n");
@@ -329,7 +329,7 @@ CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
 void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<ShowMode> newmode)
 {
     SetMode(std::move(newmode));
-    mShow = CC_show::Create_CC_show(labels, columns, mMode->FieldOffset());
+    mShow = CalChart::show::Create_CC_show(labels, columns, mMode->FieldOffset());
     UpdateAllViews();
 }
 
@@ -467,7 +467,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSheetBeatsCommand(int beats)
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set beats"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where)
+std::unique_ptr<wxCommand> CalChartDoc::Create_AddSheetsCommand(const CalChart::show::CC_sheet_container_t& sheets, int where)
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, where)));
@@ -491,7 +491,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_ApplyRelabelMapping(int sheet, st
 std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalChartDoc> other_show)
 {
     auto currend = mShow->GetNumSheets();
-    auto last_sheet = static_cast<CC_show const&>(*mShow).GetNthSheet(currend - 1);
+    auto last_sheet = static_cast<CalChart::show const&>(*mShow).GetNthSheet(currend - 1);
     auto next_sheet = other_show->GetSheetBegin();
     auto result = mShow->GetRelabelMapping(last_sheet, next_sheet);
 
@@ -500,7 +500,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalCha
     other_show->mShow->Create_ApplyRelabelMapping(0, result.second).first(*other_show->mShow);
 
     // get the sheets we want to append
-    auto sheets = CC_show::CC_sheet_container_t(other_show->GetSheetBegin(), other_show->GetSheetEnd());
+    auto sheets = CalChart::show::CC_sheet_container_t(other_show->GetSheetBegin(), other_show->GetSheetEnd());
 
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddSheetsCommand(sheets, currend)));
@@ -594,7 +594,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_ToggleLabelVisibilityCommand()
 std::unique_ptr<wxCommand> CalChartDoc::Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
 {
     auto cmds = Create_SetSheetPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddNewBackgroundImageCommand(calchart_core::ImageData{ left, top, image_width, image_height, image_width, image_height, data, alpha })));
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_AddNewBackgroundImageCommand(CalChart::ImageData{ left, top, image_width, image_height, image_width, image_height, data, alpha })));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Adding Background Image"), cmds);
 }
 

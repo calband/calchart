@@ -194,7 +194,7 @@ static const double kContinuityStart[2] = { 606 / kSizeY, 556 / kSizeYLandscape 
 void DrawSheetPoints(
     wxDC& dc, const CalChartConfiguration& config, CC_coord origin,
     const SelectionList& selection_list, unsigned short numberPoints,
-    const std::vector<std::string>& labels, const CC_sheet& sheet, unsigned ref,
+    const std::vector<std::string>& labels, const CalChart::sheet& sheet, unsigned ref,
     CalChartColors unselectedColor, CalChartColors selectedColor,
     CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
 {
@@ -229,7 +229,7 @@ void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config,
     CC_coord origin, const SelectionList& selection_list,
     unsigned short numberPoints,
     const std::vector<std::string>& labels,
-    const CC_sheet& sheet, unsigned ref)
+    const CalChart::sheet& sheet, unsigned ref)
 {
     DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels,
         sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT_HLIT,
@@ -239,7 +239,7 @@ void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config,
 void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin,
     const SelectionList& selection_list,
     unsigned short numberPoints,
-    const std::vector<std::string>& labels, const CC_sheet& sheet,
+    const std::vector<std::string>& labels, const CalChart::sheet& sheet,
     unsigned ref, bool primary)
 {
     CalChartColors unselectedColor, selectedColor, unselectedTextColor,
@@ -479,7 +479,7 @@ GetMarcherBoundingBox(const std::vector<CC_point>& pts)
 }
 
 void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CC_sheet& sheet,
+    const CalChartDoc& show, const CalChart::sheet& sheet,
     unsigned ref, bool landscape)
 {
     // set up everything to be restored after we print
@@ -610,7 +610,7 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
 }
 
 void DrawForPrinting(wxDC* printerdc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CC_sheet& sheet,
+    const CalChartDoc& show, const CalChart::sheet& sheet,
     unsigned ref, bool landscape)
 {
     auto boundingBox = GetMarcherBoundingBox(sheet.GetPoints());
@@ -704,7 +704,7 @@ void DrawPoint(wxDC& dc, const CalChartConfiguration& config,
 }
 
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CC_sheet& sheet,
+    const CalChartDoc& show, const CalChart::sheet& sheet,
     const std::map<int, CC_coord>& positions)
 {
     SaveAndRestore_Font orig_font(dc);

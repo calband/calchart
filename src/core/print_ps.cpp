@@ -240,7 +240,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 }
 
 PrintShowToPS::PrintShowToPS(
-    const CC_show& show, bool PrintLandscape, bool PrintDoCont,
+    const CalChart::show& show, bool PrintLandscape, bool PrintDoCont,
     bool PrintDoContSheet, bool PrintOverview, int min_yards,
     ShowMode const& mode, std::array<std::string, 7> const& fonts_,
     double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY,
@@ -445,7 +445,7 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps,
     const std::set<size_t>& isPicked,
     short num_pages) const
 {
-    CC_show::const_CC_sheet_iterator_t curr_sheet = mShow.GetSheetBegin();
+    CalChart::show::const_CC_sheet_iterator_t curr_sheet = mShow.GetSheetBegin();
     if (eps) {
         curr_sheet += curr_ss;
     }
@@ -522,7 +522,7 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
 }
 
 void PrintShowToPS::PrintContSections(std::ostream& buffer,
-    const CC_sheet& sheet) const
+    const CalChart::sheet& sheet) const
 {
     const auto& continuity = sheet.GetPrintableContinuity();
     auto cont_len = std::count_if(continuity.begin(), continuity.end(),
@@ -603,7 +603,7 @@ void PrintShowToPS::print_start_page(std::ostream& buffer, bool landscape,
     buffer << (translate_x) << " " << (translate_y) << " translate\n";
 }
 
-bool PrintShowToPS::SplitSheet(const CC_sheet& sheet) const
+bool PrintShowToPS::SplitSheet(const CalChart::sheet& sheet) const
 {
     Coord fmin = mMode.FieldOffset().x;
     Coord fmax = mMode.FieldSize().x + fmin;
@@ -626,7 +626,7 @@ bool PrintShowToPS::SplitSheet(const CC_sheet& sheet) const
     return (Coord2Int((max_n - max_s) + ((max_s + fmin) % Int2Coord(8))) > step_width);
 }
 
-void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
+void PrintShowToPS::PrintStandard(std::ostream& buffer, const CalChart::sheet& sheet,
     bool split_sheet) const
 {
     RAII_setprecision<std::ostream> tmp_(buffer);
@@ -759,7 +759,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
 }
 
 void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
-    const CC_sheet& sheet) const
+    const CalChart::sheet& sheet) const
 {
     std::string namestr(sheet.GetName());
     std::string numberstr(sheet.GetNumber());
@@ -859,7 +859,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
 }
 
 void PrintShowToPS::PrintOverview(std::ostream& buffer,
-    const CC_sheet& sheet) const
+    const CalChart::sheet& sheet) const
 {
     buffer << "%%Page: " << sheet.GetName() << "\n";
 

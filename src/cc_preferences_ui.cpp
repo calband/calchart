@@ -274,7 +274,7 @@ public:
 private:
     void OnEraseBackground(wxEraseEvent& event);
 
-    std::unique_ptr<CC_show> mShow;
+    std::unique_ptr<CalChart::show> mShow;
     std::unique_ptr<const ShowMode> mMode;
     CalChartConfiguration& mConfig;
     std::vector<CC_DrawCommand> mPath;
@@ -302,7 +302,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
 
     // Create a fake show with some points and selections to draw an example for
     // the user
-    mShow = CC_show::Create_CC_show();
+    mShow = CalChart::show::Create_CC_show();
     auto labels = std::vector<std::string>{
         "unsel", "unsel", "sel", "sel",
     };
@@ -323,7 +323,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
         mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(6)) } }, 1).first(*mShow);
     }
 
-    mShow->Create_AddSheetsCommand(CC_show::CC_sheet_container_t{ *static_cast<CC_show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
+    mShow->Create_AddSheetsCommand(CalChart::show::CC_sheet_container_t{ *static_cast<CalChart::show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
     mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 0).first(*mShow);
@@ -362,7 +362,7 @@ void PrefCanvas::OnPaint(wxPaintEvent& event)
     // Draw the field
     DrawMode(dc, mConfig, *mMode, ShowMode_kFieldView);
 
-    CC_show::const_CC_sheet_iterator_t sheet = static_cast<CC_show const&>(*mShow).GetCurrentSheet();
+    CalChart::show::const_CC_sheet_iterator_t sheet = static_cast<CalChart::show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet;
     ++nextSheet;
 

@@ -33,10 +33,12 @@
 #include <vector>
 #include <set>
 
-class CC_sheet;
 class ShowMode;
 class ShowUndoList;
-class CC_show;
+namespace CalChart {
+class show;
+class sheet;
+}
 class CC_lasso;
 class Animation;
 class CalChartConfiguration;
@@ -70,11 +72,11 @@ class CalChartDoc_setup : public wxObject {
 };
 
 // CalChart Document.
-// This holds the CC_show, the core part of CalChart.
+// This holds the CalChart::show, the core part of CalChart.
 class CalChartDoc : public wxDocument {
     DECLARE_DYNAMIC_CLASS(CalChartDoc)
 public:
-    typedef std::vector<CC_sheet> CC_sheet_container_t;
+    typedef std::vector<CalChart::sheet> CC_sheet_container_t;
     typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
     typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
@@ -132,12 +134,12 @@ public:
 
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
-    auto GetSheetBegin() const { return static_cast<CC_show const&>(*mShow).GetSheetBegin(); }
-    auto GetSheetEnd() const { return static_cast<CC_show const&>(*mShow).GetSheetEnd(); }
-    auto GetNthSheet(int n) const { return static_cast<CC_show const&>(*mShow).GetNthSheet(n); }
-    auto GetCurrentSheet() const { return static_cast<CC_show const&>(*mShow).GetCurrentSheet(); }
+    auto GetSheetBegin() const { return static_cast<CalChart::show const&>(*mShow).GetSheetBegin(); }
+    auto GetSheetEnd() const { return static_cast<CalChart::show const&>(*mShow).GetSheetEnd(); }
+    auto GetNthSheet(int n) const { return static_cast<CalChart::show const&>(*mShow).GetNthSheet(n); }
+    auto GetCurrentSheet() const { return static_cast<CalChart::show const&>(*mShow).GetCurrentSheet(); }
 
-    auto GetCurrentSheetNum() const { return static_cast<CC_show const&>(*mShow).GetCurrentSheetNum(); }
+    auto GetCurrentSheetNum() const { return static_cast<CalChart::show const&>(*mShow).GetCurrentSheetNum(); }
     void SetCurrentSheet(int n);
 
     auto GetNumPoints() const { return mShow->GetNumPoints(); }
@@ -178,7 +180,7 @@ public:
     std::unique_ptr<wxCommand> Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
     std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
-    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where);
+    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CalChart::show::CC_sheet_container_t& sheets, int where);
     std::unique_ptr<wxCommand> Create_RemoveSheetCommand(int where);
     std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
@@ -232,7 +234,7 @@ private:
         CalChartDoc& mShow;
     };
 
-    std::unique_ptr<CC_show> mShow;
+    std::unique_ptr<CalChart::show> mShow;
     std::unique_ptr<const ShowMode> mMode;
     AutoSaveTimer mTimer;
 };

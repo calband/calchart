@@ -35,7 +35,6 @@
 #include <set>
 #include <string>
 
-class CC_show;
 class CC_coord;
 class CC_continuity;
 class CC_point;
@@ -45,14 +44,16 @@ class CC_point;
 // of
 // beats and the different marcher's continuity.
 
-class CC_sheet {
+namespace CalChart {
+
+class sheet {
 public:
-    CC_sheet(size_t numPoints);
-    CC_sheet(size_t numPoints, const std::string& newname);
-    CC_sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
-    CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
+    sheet(size_t numPoints);
+    sheet(size_t numPoints, const std::string& newname);
+    sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
+    sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         Current_version_and_later);
-    ~CC_sheet();
+    ~sheet();
 
 private:
     std::vector<uint8_t> SerializeAllPoints() const;
@@ -66,7 +67,6 @@ public:
 
     // continuity Functions
     const CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
-    CC_continuity& GetContinuityBySymbol(SYMBOL_TYPE i);
     bool ContinuityInUse(SYMBOL_TYPE idx) const;
     void SetContinuityText(SYMBOL_TYPE sym, const std::string& text);
 
@@ -102,8 +102,8 @@ public:
     void SetNumber(const std::string& newnumber);
 
     // image
-    std::vector<calchart_core::ImageData> const& GetBackgroundImages() const;
-    void AddBackgroundImage(calchart_core::ImageData const& image, size_t where);
+    std::vector<CalChart::ImageData> const& GetBackgroundImages() const;
+    void AddBackgroundImage(CalChart::ImageData const& image, size_t where);
     void RemoveBackgroundImage(size_t which);
     void MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height);
 
@@ -139,11 +139,14 @@ private:
     unsigned short mBeats;
     std::vector<CC_point> mPoints;
     std::string mName;
-    std::vector<calchart_core::ImageData> mBackgroundImages;
+    std::vector<CalChart::ImageData> mBackgroundImages;
 
     // unit tests
-    friend void CC_sheet_UnitTests();
-    static void CC_sheet_round_trip_test();
+    friend void sheet_UnitTests();
+    static void sheet_round_trip_test();
 };
 
-void CC_sheet_UnitTests();
+void sheet_UnitTests();
+
+}
+

@@ -82,7 +82,7 @@ Animation::ParseContinuity(std::string const& continuity, AnimationErrors& error
     return std::move(ParsedContinuity);
 }
 
-Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
+Animation::Animation(const CalChart::show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
     : pts(show.GetNumPoints())
     , curr_cmds(pts.size())
     , curr_sheetnum(0)
@@ -110,7 +110,7 @@ Animation::Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyError
                     std::string message("Compiling \"");
                     message += curr_sheet->GetName().substr(0, 32);
                     message += ("\" ");
-                    message += GetNameForSymbol(current_symbol).substr(0, 32);
+                    message += CalChart::GetNameForSymbol(current_symbol).substr(0, 32);
                     message += ("...");
                     notifyStatus(message);
                 }

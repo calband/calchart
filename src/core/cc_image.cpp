@@ -22,7 +22,7 @@
 #include "cc_image.h"
 #include "cc_fileformat.h"
 
-namespace calchart_core {
+namespace CalChart {
 
 ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
     : left(left)

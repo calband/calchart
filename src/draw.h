@@ -32,7 +32,9 @@
 class wxBrush;
 class wxString;
 class CC_show;
-class CC_sheet;
+namespace CalChart {
+class sheet;
+}
 class CC_point;
 class CC_coord;
 struct CC_DrawCommand;
@@ -52,32 +54,32 @@ typedef enum {
 void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CC_coord origin,
     const SelectionList& selection_list,
     unsigned short numberPoints,
-    const std::vector<std::string>& labels, const CC_sheet& sheet,
+    const std::vector<std::string>& labels, const CalChart::sheet& sheet,
     unsigned ref, bool primary);
 void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config,
     CC_coord origin, const SelectionList& selection_list,
     unsigned short numberPoints,
     const std::vector<std::string>& labels,
-    const CC_sheet& sheet, unsigned ref);
-void Draw(wxDC& dc, const CalChartDoc& show, const CC_sheet& sheet,
+    const CalChart::sheet& sheet, unsigned ref);
+void Draw(wxDC& dc, const CalChartDoc& show, const CalChart::sheet& sheet,
     unsigned ref, bool primary);
 void DrawCont(wxDC& dc, const CC_textline_list& print_continuity,
     const wxRect& bounding, bool landscape);
 void DrawForPrinting(wxDC* dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CC_sheet& sheet,
+    const CalChartDoc& show, const CalChart::sheet& sheet,
     unsigned ref, bool landscape);
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CC_sheet& sheet,
+    const CalChartDoc& show, const CalChart::sheet& sheet,
     const std::map<int, CC_coord>& positions);
 void DrawMode(wxDC& dc, const CalChartConfiguration& config,
     const ShowMode& mode, HowToDraw howToDraw);
 wxImage GetOmniLinesImage(const CalChartConfiguration& config,
     const ShowMode& mode);
 
-void PrintStandard(std::ostream& buffer, const CC_sheet& sheet);
-void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet);
-void PrintOverview(std::ostream& buffer, const CC_sheet& sheet);
-void PrintCont(std::ostream& buffer, const CC_sheet& sheet);
+void PrintStandard(std::ostream& buffer, const CalChart::sheet& sheet);
+void PrintSpringshow(std::ostream& buffer, const CalChart::sheet& sheet);
+void PrintOverview(std::ostream& buffer, const CalChart::sheet& sheet);
+void PrintCont(std::ostream& buffer, const CalChart::sheet& sheet);
 
 // We break this out of the class to make CalChart internals more cross platform
 // Draw the point

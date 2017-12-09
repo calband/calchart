@@ -23,7 +23,7 @@
 
 #include <vector>
 
-namespace calchart_core {
+namespace CalChart {
 
 struct ImageData {
     int left, top;

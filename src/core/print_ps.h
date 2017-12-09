@@ -29,8 +29,10 @@
 #include <functional>
 #include <array>
 
-class CC_sheet;
-class CC_show;
+namespace CalChart {
+class show;
+class sheet;
+}
 class CC_textline;
 class ShowMode;
 
@@ -46,7 +48,7 @@ class ShowMode;
 
 class PrintShowToPS {
 public:
-    PrintShowToPS(const CC_show&, bool PrintLandscape, bool PrintDoCont,
+    PrintShowToPS(const CalChart::show&, bool PrintLandscape, bool PrintDoCont,
         bool PrintDoContSheet, bool PrintOverview, int min_yards,
         ShowMode const& mode, std::array<std::string, 7> const& fonts_,
         double PageWidth, double PageHeight, double PageOffsetX,
@@ -63,16 +65,16 @@ public:
 
 private:
     short PrintContinuitySheets(std::ostream& buffer, short num_pages) const;
-    void PrintContSections(std::ostream& buffer, const CC_sheet& sheet) const;
-    void PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
+    void PrintContSections(std::ostream& buffer, const CalChart::sheet& sheet) const;
+    void PrintStandard(std::ostream& buffer, const CalChart::sheet& sheet,
         bool split_sheet) const;
-    void PrintSpringshow(std::ostream& buffer, const CC_sheet& sheet) const;
-    void PrintOverview(std::ostream& buffer, const CC_sheet& sheet) const;
+    void PrintSpringshow(std::ostream& buffer, const CalChart::sheet& sheet) const;
+    void PrintOverview(std::ostream& buffer, const CalChart::sheet& sheet) const;
     void gen_cont_line(std::ostream& buffer, const CC_textline& line,
         PSFONT_TYPE currfontnum, float fontsize) const;
     void print_start_page(std::ostream& buffer, bool landscape,
         double translate_x, double translate_y) const;
-    bool SplitSheet(const CC_sheet& sheet) const;
+    bool SplitSheet(const CalChart::sheet& sheet) const;
     void PrintHeader(std::ostream& buffer, bool eps,
         const std::string& title) const;
     void PrintFieldDefinition(std::ostream& buffer) const;
@@ -80,7 +82,7 @@ private:
     short PrintSheets(std::ostream& buffer, bool eps, unsigned curr_ss,
         const std::set<size_t>& isPicked, short num_pages) const;
 
-    const CC_show& mShow;
+    const CalChart::show& mShow;
     bool mPrintLandscape;
     bool mPrintDoCont;
     bool mPrintDoContSheet;

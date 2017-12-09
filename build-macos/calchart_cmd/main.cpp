@@ -23,7 +23,7 @@
 void AnimateShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<CC_show> p(CC_show::Create_CC_show(input));
+    std::unique_ptr<CalChart::show> p(CalChart::show::Create_CC_show(input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -36,7 +36,7 @@ void AnimateShow(const char* show)
 void PrintShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<CC_show> p(CC_show::Create_CC_show(input));
+    std::unique_ptr<CalChart::show> p(CalChart::show::Create_CC_show(input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -68,7 +68,7 @@ void PrintShow(const char* show)
 void DumpContinuity(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<const CC_show> p(CC_show::Create_CC_show(input));
+    std::unique_ptr<const CalChart::show> p(CalChart::show::Create_CC_show(input));
     auto sheet_num = 0;
     for (auto i = p->GetSheetBegin(); i != p->GetSheetEnd(); ++i, ++sheet_num) {
         static const SYMBOL_TYPE k_symbols[] = {
@@ -78,9 +78,9 @@ void DumpContinuity(const char* show)
         for (auto& symbol : k_symbols) {
             if (i->ContinuityInUse(symbol)) {
                 auto& cont = i->GetContinuityBySymbol(symbol);
-                std::cout << "<--StartText sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << "-->\n";
+                std::cout << "<--StartText sheet num " << sheet_num << ": symbol " << CalChart::GetNameForSymbol(symbol) << "-->\n";
                 std::cout << cont.GetText() << "\n";
-                std::cout << "<--EndText sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << "-->\n";
+                std::cout << "<--EndText sheet num " << sheet_num << ": symbol " << CalChart::GetNameForSymbol(symbol) << "-->\n";
 
                 AnimationErrors e;
                 auto continuity = Animation::ParseContinuity(cont.GetText(), e, symbol);
@@ -196,7 +196,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     bool overview, std::string const& outfile)
 {
     std::ifstream input(show);
-    std::unique_ptr<const CC_show> p(CC_show::Create_CC_show(input));
+    std::unique_ptr<const CalChart::show> p(CalChart::show::Create_CC_show(input));
 
     std::ofstream output(outfile);
 
@@ -261,7 +261,7 @@ bool ContinuityCountDifferentThanSymbol(const char* show)
     if (!input.is_open()) {
         throw std::runtime_error("could not open file");
     }
-    std::unique_ptr<CC_show> p(CC_show::Create_CC_show(input));
+    std::unique_ptr<CalChart::show> p(CalChart::show::Create_CC_show(input));
     return false;
 }
 

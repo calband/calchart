@@ -29,7 +29,9 @@
 class CC_coord;
 class wxComboBox;
 class wxSlider;
-class CC_show;
+namespace CalChart {
+class show;
+}
 
 class FieldCanvas;
 class FieldView;

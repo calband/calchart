@@ -54,8 +54,10 @@ static const SYMBOL_TYPE k_symbols[] = {
     SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
 };
 
+namespace CalChart {
 std::string GetNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
+}
 
 enum CC_DRAG_TYPES {
     CC_DRAG_NONE,
