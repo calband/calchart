@@ -184,7 +184,7 @@ public:
     virtual bool OnPrintPage(int pageNum)
     {
         wxDC* dc = wxPrintout::GetDC();
-        CalChart::show::const_CC_sheet_iterator_t sheet = mShow.GetNthSheet(pageNum - 1);
+        auto sheet = mShow.GetNthSheet(pageNum - 1);
 
         int size = gPrintDialogData->GetPrintData().GetOrientation();
 
@@ -566,14 +566,14 @@ void FieldFrame::OnCmdPreferences(wxCommandEvent& event)
 
 void FieldFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
-    CalChart::show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
+    CalChart::Show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
     GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
     GetFieldView()->GoToPrevSheet();
 }
 
 void FieldFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
-    CalChart::show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
+    CalChart::Show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
     GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum() + 1);
     GetFieldView()->GoToNextSheet();
 }
@@ -618,7 +618,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
         endValue = beginValue;
     }
 
-    CalChart::show::CC_sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
+    CalChart::Show::CC_sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
         (&show)->GetNthSheet(static_cast<int>(endValue)));
     GetFieldView()->DoInsertSheets(
         sheets, GetFieldView()->GetCurrentSheetNum() + 1);
@@ -676,8 +676,8 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
             std::istream_iterator<uint8_t> theEnd{};
             std::vector<uint8_t> data(theBegin, theEnd);
 
-            CalChart::show::CC_sheet_container_t sht(
-                1, CalChart::sheet(numPoints, data.data(), data.size(),
+            CalChart::Show::CC_sheet_container_t sht(
+                1, CalChart::Sheet(numPoints, data.data(), data.size(),
                        Current_version_and_later()));
             GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
         }
@@ -1248,7 +1248,7 @@ void FieldFrame::do_zoom(float zoom_amount)
 void FieldFrame::UpdatePanel()
 {
     wxString tempbuf;
-    CalChart::show::const_CC_sheet_iterator_t sht = GetShow()->GetCurrentSheet();
+    auto sht = GetShow()->GetCurrentSheet();
     unsigned num = GetShow()->GetNumSheets();
     unsigned curr = GetFieldView()->GetCurrentSheetNum() + 1;
 

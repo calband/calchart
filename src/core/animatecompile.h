@@ -62,13 +62,13 @@ class AnimateCompile {
 public:
     // Compile a point
     static std::tuple<AnimateCommands, AnimationVariables, AnimationErrors>
-    Compile(const CalChart::show& show, AnimationVariables variablesStates,
-        AnimationErrors errors, CalChart::show::const_CC_sheet_iterator_t c_sheet,
+    Compile(const CalChart::Show& show, AnimationVariables variablesStates,
+        AnimationErrors errors, CalChart::Show::const_CC_sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
         std::list<std::unique_ptr<ContProcedure> > const& proc);
 
 private:
-    AnimateCompile(const CalChart::show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CalChart::show::const_CC_sheet_iterator_t c_sheet, AnimateState& state);
+    AnimateCompile(const CalChart::Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CalChart::Show::const_CC_sheet_iterator_t c_sheet, AnimateState& state);
 
 public:
     bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken* token);
@@ -86,10 +86,10 @@ public:
     AnimatePoint GetReferencePointPosition(unsigned refnum) const;
 
 private:
-    const CalChart::show& mShow;
+    const CalChart::Show& mShow;
     const SYMBOL_TYPE contsymbol;
     const unsigned curr_pt;
-    const CalChart::show::const_CC_sheet_iterator_t curr_sheet;
+    const CalChart::Show::const_CC_sheet_iterator_t curr_sheet;
 
     AnimateState& mState;
 };

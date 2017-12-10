@@ -46,14 +46,14 @@ class CC_point;
 
 namespace CalChart {
 
-class sheet {
+class Sheet {
 public:
-    sheet(size_t numPoints);
-    sheet(size_t numPoints, const std::string& newname);
-    sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
-    sheet(size_t numPoints, const uint8_t* ptr, size_t size,
+    Sheet(size_t numPoints);
+    Sheet(size_t numPoints, const std::string& newname);
+    Sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
+    Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         Current_version_and_later);
-    ~sheet();
+    ~Sheet();
 
 private:
     std::vector<uint8_t> SerializeAllPoints() const;

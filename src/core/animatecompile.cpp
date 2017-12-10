@@ -36,7 +36,7 @@ void AnimationErrors::RegisterError(AnimateError err, const ContToken* token,
     mErrorMarkers[err].pntgroup.insert(curr_pt);
 }
 
-AnimateCompile::AnimateCompile(const CalChart::show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CalChart::show::const_CC_sheet_iterator_t c_sheet, AnimateState& state)
+AnimateCompile::AnimateCompile(const CalChart::Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CalChart::Show::const_CC_sheet_iterator_t c_sheet, AnimateState& state)
     : mShow(show)
     , contsymbol(cont_symbol)
     , curr_pt(pt_num)
@@ -47,8 +47,8 @@ AnimateCompile::AnimateCompile(const CalChart::show& show, SYMBOL_TYPE cont_symb
 
 std::tuple<AnimateCommands, AnimationVariables, AnimationErrors>
 AnimateCompile::Compile(
-    const CalChart::show& show, AnimationVariables variablesStates,
-    AnimationErrors errors, CalChart::show::const_CC_sheet_iterator_t c_sheet,
+    const CalChart::Show& show, AnimationVariables variablesStates,
+    AnimationErrors errors, CalChart::Show::const_CC_sheet_iterator_t c_sheet,
     unsigned pt_num, SYMBOL_TYPE cont_symbol,
     std::list<std::unique_ptr<ContProcedure> > const& procs)
 {
@@ -146,7 +146,7 @@ AnimatePoint AnimateCompile::GetStartingPosition() const
 
 AnimatePoint AnimateCompile::GetEndingPosition(const ContToken* token) const
 {
-    CalChart::show::const_CC_sheet_iterator_t sheet = curr_sheet + 1;
+    CalChart::Show::const_CC_sheet_iterator_t sheet = curr_sheet + 1;
 
     while (1) {
         if (sheet == mShow.GetSheetEnd()) {

@@ -59,8 +59,6 @@ public:
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
      * could represent this movement in an Online Viewer '.viewer' file.
-     * @param dest A reference to the JSONElement which will be transformed
-     * into a JSON representation of this movement.
      * @param start The position at which this movement begins.
      */
     JSONElement toOnlineViewerJSON(const CC_coord& start) const;

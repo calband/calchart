@@ -1009,7 +1009,7 @@ std::set<unsigned> CollisionSpace::getMarchersWithMovePattern(unsigned startBeat
  * @param positions A reference to the target vector that will receive all of the new
  * converted dot positions.
  */
-void convertPositionsOnSheetToSolverSpace(const CalChart::sheet& sheet, std::vector<SolverCoord>& positions) {
+void convertPositionsOnSheetToSolverSpace(const CalChart::Sheet& sheet, std::vector<SolverCoord>& positions) {
     auto points = sheet.GetPoints();
     for (size_t i = 0; i < points.size(); i++) {
         positions.push_back(SolverCoord::fromShowSpace(points[i].GetPos()));
@@ -2072,7 +2072,7 @@ namespace e7SoverEliceiriHershkovitz {
 // ===-- FINAL SOLVER --===
 // ========================
 
-std::vector<std::string> validateSheetForTransitionSolver(const CalChart::sheet& sheet) {
+std::vector<std::string> validateSheetForTransitionSolver(const CalChart::Sheet& sheet) {
     std::vector<std::string>            errors;
     
     // Verify that all points are in the grid, and that all of them can be converted to and from solver space
@@ -2095,7 +2095,7 @@ std::vector<std::string> validateSheetForTransitionSolver(const CalChart::sheet&
     return errors;
 }
 
-TransitionSolverResult runSolverWithExplicitBeatCap(const CalChart::sheet& sheet1, const CalChart::sheet& sheet2, TransitionSolverParams params, unsigned numBeats, TransitionSolverDelegate *delegate) {
+TransitionSolverResult runSolverWithExplicitBeatCap(const CalChart::Sheet& sheet1, const CalChart::Sheet& sheet2, TransitionSolverParams params, unsigned numBeats, TransitionSolverDelegate *delegate) {
     
     TransitionSolverResult      results;
     
@@ -2237,7 +2237,7 @@ TransitionSolverResult runSolverWithExplicitBeatCap(const CalChart::sheet& sheet
     return results;
 }
 
-TransitionSolverResult runTransitionSolver(const CalChart::sheet& sheet1, const CalChart::sheet& sheet2, TransitionSolverParams params, TransitionSolverDelegate *delegate) {
+TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const CalChart::Sheet& sheet2, TransitionSolverParams params, TransitionSolverDelegate *delegate) {
     
     TransitionSolverResult              finalResult;
     TransitionSolverResult              recentResult;

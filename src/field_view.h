@@ -126,7 +126,7 @@ private:
     FieldFrame* mFrame;
 #endif
 
-    void DrawPaths(wxDC& dc, const CalChart::sheet& sheet);
+    void DrawPaths(wxDC& dc, const CalChart::Sheet& sheet);
     void GeneratePaths();
     std::unique_ptr<Animation> mAnimation;
     bool mDrawPaths;

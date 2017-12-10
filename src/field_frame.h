@@ -30,7 +30,7 @@ class CC_coord;
 class wxComboBox;
 class wxSlider;
 namespace CalChart {
-class show;
+class Show;
 }
 
 class FieldCanvas;

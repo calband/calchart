@@ -93,7 +93,7 @@ void FieldView::OnDraw(wxDC* dc)
                 *ghostSheet, 0);
         }
 
-        CalChart::show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+        CalChart::Show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
         if (sheet != mShow->GetSheetEnd()) {
             if (mCurrentReferencePoint > 0) {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
@@ -307,7 +307,7 @@ bool FieldView::DoTogglePointsLabelVisibility()
     return true;
 }
 
-void FieldView::DoInsertSheets(const CalChart::show::CC_sheet_container_t& sht,
+void FieldView::DoInsertSheets(const CalChart::Show::CC_sheet_container_t& sht,
     int where)
 {
     auto cmd = mShow->Create_AddSheetsCommand(sht, where);
@@ -471,7 +471,7 @@ void FieldView::OnEnableDrawPaths(bool enable)
     mFrame->Refresh();
 }
 
-void FieldView::DrawPaths(wxDC& dc, const CalChart::sheet& sheet)
+void FieldView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
 {
     if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (mAnimation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         CC_coord origin = GetShowFieldOffset();

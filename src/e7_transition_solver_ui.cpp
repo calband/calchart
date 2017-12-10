@@ -1187,7 +1187,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     }
     
     if (sheetIterOnFirstSheet != endSheetIter) {
-        const CalChart::sheet                      &firstSheet = *sheetIterOnFirstSheet;
+        const CalChart::Sheet                      &firstSheet = *sheetIterOnFirstSheet;
         
         firstSheetErrors = validateSheetForTransitionSolver(firstSheet);
     } else {
@@ -1195,7 +1195,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     }
     
     if ((sheetIterOnFirstSheet + 1) != endSheetIter) {
-        const CalChart::sheet                      &secondSheet = *(sheetIterOnFirstSheet + 1);
+        const CalChart::Sheet                      &secondSheet = *(sheetIterOnFirstSheet + 1);
         
         secondSheetErrors = validateSheetForTransitionSolver(secondSheet);
     } else {

@@ -82,7 +82,7 @@ Animation::ParseContinuity(std::string const& continuity, AnimationErrors& error
     return std::move(ParsedContinuity);
 }
 
-Animation::Animation(const CalChart::show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
+Animation::Animation(const CalChart::Show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
     : pts(show.GetNumPoints())
     , curr_cmds(pts.size())
     , curr_sheetnum(0)

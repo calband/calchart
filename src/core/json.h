@@ -102,7 +102,7 @@ protected:
     /*!
      * @brief Creates a new JSONData object to represent a JSON
      * array containing the provided values.
-     * @param array
+     * @param array Array to be created
      */
     static std::unique_ptr<JSONData> makeNewArray(std::vector<JSONElement> array);
 

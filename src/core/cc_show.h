@@ -39,11 +39,11 @@ class CC_lasso;
 class CalChartDoc;
 class CC_coord;
 namespace CalChart {
-class show;
-class sheet;
+class Show;
+class Sheet;
 }
 
-using CC_show_command = std::function<void(CalChart::show&)>;
+using CC_show_command = std::function<void(CalChart::Show&)>;
 using CC_show_command_pair = std::pair<CC_show_command, CC_show_command>;
 
 // CalChart Show
@@ -54,25 +54,25 @@ using CC_show_command_pair = std::pair<CC_show_command, CC_show_command>;
 
 namespace CalChart {
 
-class show {
+class Show {
 public:
-    typedef std::vector<CalChart::sheet> CC_sheet_container_t;
+    typedef std::vector<CalChart::Sheet> CC_sheet_container_t;
     typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
     typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
 
     // you can create a show in two ways, from nothing, or from an input stream
-    static std::unique_ptr<show> Create_CC_show();
-    static std::unique_ptr<show> Create_CC_show(std::vector<std::string> const& labels, unsigned columns, CC_coord const& new_march_position);
-    static std::unique_ptr<show> Create_CC_show(std::istream& stream);
+    static std::unique_ptr<Show> Create_CC_show();
+    static std::unique_ptr<Show> Create_CC_show(std::vector<std::string> const& labels, unsigned columns, CC_coord const& new_march_position);
+    static std::unique_ptr<Show> Create_CC_show(std::istream& stream);
 
 private:
-    show();
+    Show();
     // using overloading with structs to determine which constructor to use
-    show(std::istream& stream, Version_3_3_and_earlier);
-    show(const uint8_t* ptr, size_t size, Current_version_and_later);
+    Show(std::istream& stream, Version_3_3_and_earlier);
+    Show(const uint8_t* ptr, size_t size, Current_version_and_later);
 
 public:
-    ~show();
+    ~Show();
 
 public:
     // How we save and load a show:
@@ -84,7 +84,7 @@ public:
     CC_show_command_pair Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, CC_coord const& new_march_position) const;
     CC_show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
     CC_show_command_pair Create_SetSheetBeatsCommand(int beats) const;
-    CC_show_command_pair Create_AddSheetsCommand(const show::CC_sheet_container_t& sheets, int where) const;
+    CC_show_command_pair Create_AddSheetsCommand(const Show::CC_sheet_container_t& sheets, int where) const;
     CC_show_command_pair Create_RemoveSheetCommand(int where) const;
     CC_show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
     CC_show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const;
@@ -155,7 +155,7 @@ public:
 private:
     // modification of show is private, and externally done through create and exeucte commands
     CC_sheet_container_t RemoveNthSheet(int sheetidx);
-    void InsertSheet(const CalChart::sheet& nsheet, int sheetidx);
+    void InsertSheet(const CalChart::Sheet& nsheet, int sheetidx);
     void InsertSheet(const CC_sheet_container_t& nsheet, int sheetidx);
     void SetCurrentSheet(int n);
     void SetSelection(const SelectionList& sl);

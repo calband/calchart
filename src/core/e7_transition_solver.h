@@ -235,7 +235,7 @@ public:
  * as an input to the transition solver. If the error list is empty, there were no issues,
  * and the stuntsheet can safely be used as an input.
  */
-std::vector<std::string> validateSheetForTransitionSolver(const CalChart::sheet& sheet);
+std::vector<std::string> validateSheetForTransitionSolver(const CalChart::Sheet& sheet);
 
 /*!
  * @brief Solve the transition between the two provided stuntsheets.
@@ -246,4 +246,4 @@ std::vector<std::string> validateSheetForTransitionSolver(const CalChart::sheet&
  * solver as it runs, and that can take some role in deciding when the task should abort.
  * @result The solution for the transition between the provided stuntsheets.
  */
-TransitionSolverResult runTransitionSolver(const CalChart::sheet& sheet1, const CalChart::sheet& sheet2, TransitionSolverParams params, TransitionSolverDelegate *delegate);
+TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const CalChart::Sheet& sheet2, TransitionSolverParams params, TransitionSolverDelegate *delegate);

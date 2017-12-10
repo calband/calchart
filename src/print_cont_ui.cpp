@@ -278,7 +278,7 @@ void PrintContinuityEditor::UpdateText()
 {
     mUserInput->Clear();
     mUserInput->DiscardEdits();
-    CalChart::show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
+    auto current_sheet = mDoc->GetCurrentSheet();
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     text->SetValue(current_sheet->GetNumber());
