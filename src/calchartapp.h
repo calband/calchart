@@ -29,7 +29,9 @@
 #include <memory>
 
 class CalChartApp;
+namespace CalChart {
 class ShowMode;
+}
 class wxHtmlHelpController;
 
 DECLARE_APP(CalChartApp)
@@ -42,7 +44,7 @@ public:
     virtual void MacOpenFiles(const wxArrayString& fileNames);
     int OnExit();
 
-    std::unique_ptr<ShowMode> GetMode(const wxString& which);
+    std::unique_ptr<CalChart::ShowMode> GetMode(const wxString& which);
 
     // the global help system:
     wxHtmlHelpController& GetGlobalHelpController();

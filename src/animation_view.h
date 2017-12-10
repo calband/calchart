@@ -32,9 +32,11 @@
 class AnimationFrame;
 class FieldView;
 class CalChartConfiguration;
-class CC_continuity;
-class CalChartDoc;
+namespace CalChart {
+class Continuity;
 class Animation;
+}
+class CalChartDoc;
 
 class AnimationView : public wxView {
 public:
@@ -47,7 +49,7 @@ public:
 
     void RefreshFrame();
 
-    void SetCollisionType(CollisionWarning col);
+    void SetCollisionType(CalChart::CollisionWarning col);
     auto GetCollisionType() const { return mCollisionWarningType; }
     void SelectCollisions();
 
@@ -71,8 +73,8 @@ public:
 
     wxString GetStatusText() const;
 
-    std::pair<CC_coord, CC_coord> GetShowSizeAndOffset() const;
-    std::pair<CC_coord, CC_coord> GetMarcherSizeAndOffset() const;
+    std::pair<CalChart::Coord, CalChart::Coord> GetShowSizeAndOffset() const;
+    std::pair<CalChart::Coord, CalChart::Coord> GetMarcherSizeAndOffset() const;
 
     void UnselectMarchers();
     void SelectMarchersInBox(long mouseXStart, long mouseYStart, long mouseXEnd,
@@ -81,17 +83,17 @@ public:
     void ToggleTimer();
     bool OnBeat() const;
 
-    CC_continuity GetContinuityOnSheet(unsigned whichSheet,
+    CalChart::Continuity GetContinuityOnSheet(unsigned whichSheet,
         SYMBOL_TYPE whichSymbol) const;
 
     const CalChartDoc* GetShow() const;
     CalChartDoc* GetShow();
 
-    const Animation* GetAnimation() const;
+    const CalChart::Animation* GetAnimation() const;
 
 private:
     void OnNotifyStatus(const wxString& status);
-    bool OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers,
+    bool OnNotifyErrorList(const std::map<CalChart::AnimateError, CalChart::ErrorMarker>& error_markers,
         unsigned sheetnum, const wxString& message);
 
     bool mErrorOccurred;
@@ -99,6 +101,6 @@ private:
     const AnimationFrame* GetAnimationFrame() const;
     AnimationFrame* GetAnimationFrame();
 
-    std::unique_ptr<Animation> mAnimation;
-    CollisionWarning mCollisionWarningType;
+    std::unique_ptr<CalChart::Animation> mAnimation;
+    CalChart::CollisionWarning mCollisionWarningType;
 };

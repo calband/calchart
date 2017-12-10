@@ -29,9 +29,9 @@
 #include "math_utils.h"
 #include "background_image.h"
 #include "cc_shapes.h"
-#include "cc_drawcommand.h"
 #include "draw.h"
 #include "field_canvas_shapes.h"
+#include "cc_drawcommand.h"
 
 #include <wx/dcbuffer.h>
 
@@ -127,7 +127,7 @@ void FieldCanvas::PaintMoveShapes(wxDC& dc,
 // We have a empty erase background to improve redraw performance.
 void FieldCanvas::OnEraseBackground(wxEraseEvent& event) {}
 
-void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos)
+void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CalChart::Coord pos)
 {
     if (select_drag == CC_DRAG_POLY) {
         return;
@@ -158,46 +158,46 @@ void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos)
     }
 }
 
-void FieldCanvas::OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CC_coord)
+void FieldCanvas::OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CalChart::Coord)
 {
-    const CC_shape_2point* shape = (CC_shape_2point*)m_select_shape_list.back().get();
+    auto* shape = (CalChart::Shape_2point*)m_select_shape_list.back().get();
     mView.SelectPointsInRect(shape->GetOrigin(), shape->GetPoint(),
         event.AltDown());
     EndDrag();
 }
 
-void FieldCanvas::OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CC_coord pos)
+void FieldCanvas::OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CalChart::Coord pos)
 {
-    ((CC_lasso*)m_select_shape_list.back().get())->End();
-    mView.SelectWithLasso((CC_lasso*)m_select_shape_list.back().get(), event.AltDown());
+    ((CalChart::Lasso*)m_select_shape_list.back().get())->End();
+    mView.SelectWithLasso((CalChart::Lasso*)m_select_shape_list.back().get(), event.AltDown());
     EndDrag();
 }
 
-void FieldCanvas::OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CC_coord pos)
+void FieldCanvas::OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CalChart::Coord pos)
 {
     static constexpr auto CLOSE_ENOUGH_TO_CLOSE = 10;
-    auto* p = ((CC_lasso*)m_select_shape_list.back().get())->FirstPoint();
-    auto numPnts = ((CC_lasso*)m_select_shape_list.back().get())->NumPoints();
+    auto* p = ((CalChart::Lasso*)m_select_shape_list.back().get())->FirstPoint();
+    auto numPnts = ((CalChart::Lasso*)m_select_shape_list.back().get())->NumPoints();
     if (p != NULL && numPnts > 2) {
         // need to know where the scale is, so we need the device.
         wxClientDC dc(this);
         PrepareDC(dc);
-        Coord polydist = dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
+        auto polydist = dc.DeviceToLogicalXRel(CLOSE_ENOUGH_TO_CLOSE);
         auto d = p->x - pos.x;
         if (std::abs(d) < polydist) {
             d = p->y - pos.y;
             if (std::abs(d) < polydist) {
-                mView.SelectWithLasso((CC_lasso*)m_select_shape_list.back().get(),
+                mView.SelectWithLasso((CalChart::Lasso*)m_select_shape_list.back().get(),
                     event.AltDown());
                 EndDrag();
                 return;
             }
         }
     }
-    ((CC_lasso*)m_select_shape_list.back().get())->Append(pos);
+    ((CalChart::Lasso*)m_select_shape_list.back().get())->Append(pos);
 }
 
-void FieldCanvas::OnMouseLeftUp_default(wxMouseEvent& event, CC_coord pos)
+void FieldCanvas::OnMouseLeftUp_default(wxMouseEvent& event, CalChart::Coord pos)
 {
     switch (select_drag) {
     case CC_DRAG_BOX:
@@ -214,7 +214,7 @@ void FieldCanvas::OnMouseLeftUp_default(wxMouseEvent& event, CC_coord pos)
     }
 }
 
-void FieldCanvas::OnMouseLeftDown_CC_DRAG_SWAP(CC_coord pos)
+void FieldCanvas::OnMouseLeftDown_CC_DRAG_SWAP(CalChart::Coord pos)
 {
     int targetDotIndex = mView.FindPoint(pos);
     if (targetDotIndex >= 0) {
@@ -248,7 +248,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
         mView.OnBackgroundMouseLeftDown(event, dc);
     }
     else {
-        CC_coord pos = mView.GetShowFieldOffset();
+        CalChart::Coord pos = mView.GetShowFieldOffset();
         pos.x = (x - pos.x);
         pos.y = (y - pos.y);
 
@@ -276,7 +276,7 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
         mView.OnBackgroundMouseLeftUp(event, dc);
     }
     else {
-        CC_coord pos = mView.GetShowFieldOffset();
+        CalChart::Coord pos = mView.GetShowFieldOffset();
         pos.x = (x - pos.x);
         pos.y = (y - pos.y);
 
@@ -300,7 +300,7 @@ void FieldCanvas::OnMouseLeftDoubleClick(wxMouseEvent& event)
     PrepareDC(dc);
 
     if (!m_select_shape_list.empty() && (CC_DRAG_POLY == select_drag)) {
-        mView.SelectWithLasso((CC_lasso*)m_select_shape_list.back().get(), event.AltDown());
+        mView.SelectWithLasso((CalChart::Lasso*)m_select_shape_list.back().get(), event.AltDown());
         EndDrag();
     }
     Refresh();
@@ -313,7 +313,7 @@ void FieldCanvas::OnMouseRightDown(wxMouseEvent& event)
     PrepareDC(dc);
 
     if (!m_select_shape_list.empty() && (CC_DRAG_POLY == select_drag)) {
-        mView.SelectWithLasso((CC_lasso*)m_select_shape_list.back().get(), event.AltDown());
+        mView.SelectWithLasso((CalChart::Lasso*)m_select_shape_list.back().get(), event.AltDown());
         EndDrag();
     }
     Refresh();
@@ -335,7 +335,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
             mView.OnBackgroundMouseMove(event, dc);
         }
         else {
-            CC_coord pos = mView.GetShowFieldOffset();
+            CalChart::Coord pos = mView.GetShowFieldOffset();
             pos.x = (x - pos.x);
             pos.y = (y - pos.y);
 
@@ -398,48 +398,48 @@ void FieldCanvas::SetZoom(float factor)
     Refresh();
 }
 
-void FieldCanvas::BeginSelectDrag(CC_DRAG_TYPES type, const CC_coord& start)
+void FieldCanvas::BeginSelectDrag(CC_DRAG_TYPES type, const CalChart::Coord& start)
 {
     select_drag = type;
     m_select_shape_list.clear();
     switch (type) {
     case CC_DRAG_BOX:
-        m_select_shape_list.emplace_back(new CC_shape_rect(start));
+        m_select_shape_list.emplace_back(new CalChart::Shape_rect(start));
         break;
     case CC_DRAG_POLY:
-        m_select_shape_list.emplace_back(new CC_poly(start));
+        m_select_shape_list.emplace_back(new CalChart::Poly(start));
         break;
     case CC_DRAG_LASSO:
-        m_select_shape_list.emplace_back(new CC_lasso(start));
+        m_select_shape_list.emplace_back(new CalChart::Lasso(start));
         break;
     case CC_DRAG_LINE:
-        m_select_shape_list.emplace_back(new CC_shape_line(start));
+        m_select_shape_list.emplace_back(new CalChart::Shape_line(start));
         break;
     case CC_DRAG_CROSSHAIRS:
-        m_select_shape_list.emplace_back(new CC_shape_crosshairs(start, Int2Coord(2)));
+        m_select_shape_list.emplace_back(new CalChart::Shape_crosshairs(start, Int2CoordUnits(2)));
         break;
     case CC_DRAG_SHAPE_ELLIPSE:
-        m_select_shape_list.emplace_back(new CC_shape_ellipse(start));
+        m_select_shape_list.emplace_back(new CalChart::Shape_ellipse(start));
         break;
     case CC_DRAG_SHAPE_X:
-        m_select_shape_list.emplace_back(new CC_shape_x(start));
+        m_select_shape_list.emplace_back(new CalChart::Shape_x(start));
         break;
     case CC_DRAG_SHAPE_CROSS:
-        m_select_shape_list.emplace_back(new CC_shape_cross(start));
+        m_select_shape_list.emplace_back(new CalChart::Shape_cross(start));
         break;
     default:
         break;
     }
 }
 
-void FieldCanvas::MoveDrag(const CC_coord& end)
+void FieldCanvas::MoveDrag(const CalChart::Coord& end)
 {
     if (!m_select_shape_list.empty()) {
         m_select_shape_list.back()->OnMove(end, SnapToGrid(end));
     }
     if (m_move_points) {
         m_move_points->OnMove(end, SnapToGrid(end));
-        std::map<int, CC_coord> selected_points;
+        std::map<int, CalChart::Coord> selected_points;
         for (auto i : mView.GetSelectionList()) {
             selected_points[i] = mView.PointPosition(i);
         }
@@ -452,28 +452,28 @@ void FieldCanvas::MoveDrag(const CC_coord& end)
     }
 }
 
-CC_coord FieldCanvas::GetMoveAmount(direction dir)
+CalChart::Coord FieldCanvas::GetMoveAmount(direction dir)
 {
     auto stepsize = std::get<0>(mFrame->GridChoice());
-    stepsize = std::max(stepsize, Int2Coord(1));
+    stepsize = std::max(stepsize, Int2CoordUnits(1));
     switch (dir) {
     case direction::north:
-        return { 0, static_cast<Coord>(-stepsize) };
+        return { 0, static_cast<CalChart::Coord::units>(-stepsize) };
     case direction::east:
         return { stepsize, 0 };
     case direction::south:
         return { 0, stepsize };
     case direction::west:
-        return { static_cast<Coord>(-stepsize), 0 };
+        return { static_cast<CalChart::Coord::units>(-stepsize), 0 };
     }
     // on the offchance somebody gets here
     return { 0, 0 };
 }
 
-static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
+static inline CalChart::Coord::units SNAPGRID(CalChart::Coord::units a, CalChart::Coord::units n, CalChart::Coord::units s)
 {
-    Coord a2 = (a + (n >> 1)) & (~(n - 1));
-    Coord h = s >> 1;
+    auto a2 = (a + (n >> 1)) & (~(n - 1));
+    auto h = s >> 1;
     if ((a - a2) >= h)
         return a2 + s;
     else if ((a - a2) < -h)
@@ -482,15 +482,15 @@ static inline Coord SNAPGRID(Coord a, Coord n, Coord s)
         return a2;
 }
 
-CC_coord FieldCanvas::SnapToGrid(CC_coord c)
+CalChart::Coord FieldCanvas::SnapToGrid(CalChart::Coord c)
 {
-    Coord gridn, grids;
+    CalChart::Coord::units gridn, grids;
     std::tie(gridn, grids) = mFrame->GridChoice();
 
     return {
         c.x = SNAPGRID(c.x, gridn, grids),
         // Adjust so 4 step grid will be on visible grid
-        c.y = SNAPGRID(c.y - Int2Coord(2), gridn, grids) + Int2Coord(2)
+        c.y = SNAPGRID(c.y - Int2CoordUnits(2), gridn, grids) + Int2CoordUnits(2)
     };
 }
 
@@ -498,7 +498,7 @@ void FieldCanvas::MoveByKey(direction dir)
 {
     if (mView.GetSelectionList().empty())
         return;
-    std::map<int, CC_coord> move_points;
+    std::map<int, CalChart::Coord> move_points;
     auto&& select_list = mView.GetSelectionList();
     auto pos = GetMoveAmount(dir);
     for (auto i = select_list.begin(); i != select_list.end(); ++i) {

@@ -67,14 +67,14 @@ public:
     FancyTextPanel(wxWindow* parent);
 
     void OnPaint(wxPaintEvent& event);
-    void SetPrintContinuity(const CC_textline_list& print_continuity)
+    void SetPrintContinuity(const CalChart::Textline_list& print_continuity)
     {
         m_print_continuity = print_continuity;
     }
     void SetOrientation(bool landscape) { m_landscape = landscape; }
 
 private:
-    CC_textline_list m_print_continuity;
+    CalChart::Textline_list m_print_continuity;
     bool m_landscape;
 };
 
@@ -278,7 +278,7 @@ void PrintContinuityEditor::UpdateText()
 {
     mUserInput->Clear();
     mUserInput->DiscardEdits();
-    CalChart::show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
+    auto current_sheet = mDoc->GetCurrentSheet();
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(PrintContinuityEditor_PrintNumber);
     text->SetValue(current_sheet->GetNumber());

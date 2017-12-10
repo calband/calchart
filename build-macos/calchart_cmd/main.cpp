@@ -23,10 +23,10 @@
 void AnimateShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<CalChart::show> p(CalChart::show::Create_CC_show(input));
-    Animation a(*p,
+    std::unique_ptr<CalChart::Show> p(CalChart::Show::Create_CC_show(input));
+    CalChart::Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
-        [](const std::map<AnimateError, ErrorMarker>&, unsigned,
+        [](const std::map<CalChart::AnimateError, CalChart::ErrorMarker>&, unsigned,
             const std::string& error) {
             std::cout << "error" << error << "\n";
             return true;
@@ -36,10 +36,10 @@ void AnimateShow(const char* show)
 void PrintShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<CalChart::show> p(CalChart::show::Create_CC_show(input));
-    Animation a(*p,
+    std::unique_ptr<CalChart::Show> p(CalChart::Show::Create_CC_show(input));
+    CalChart::Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
-        [](const std::map<AnimateError, ErrorMarker>&, unsigned,
+        [](const std::map<CalChart::AnimateError, CalChart::ErrorMarker>&, unsigned,
             const std::string& error) {
             std::cout << "error" << error << "\n";
             return true;
@@ -68,7 +68,7 @@ void PrintShow(const char* show)
 void DumpContinuity(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<const CalChart::show> p(CalChart::show::Create_CC_show(input));
+    std::unique_ptr<const CalChart::Show> p(CalChart::Show::Create_CC_show(input));
     auto sheet_num = 0;
     for (auto i = p->GetSheetBegin(); i != p->GetSheetEnd(); ++i, ++sheet_num) {
         static const SYMBOL_TYPE k_symbols[] = {
@@ -82,8 +82,8 @@ void DumpContinuity(const char* show)
                 std::cout << cont.GetText() << "\n";
                 std::cout << "<--EndText sheet num " << sheet_num << ": symbol " << CalChart::GetNameForSymbol(symbol) << "-->\n";
 
-                AnimationErrors e;
-                auto continuity = Animation::ParseContinuity(cont.GetText(), e, symbol);
+                CalChart::AnimationErrors e;
+                auto continuity = CalChart::Animation::ParseContinuity(cont.GetText(), e, symbol);
 				std::cout << "<--Errors during compile-->\n";
                 if (e.AnyErrors()) {
 					for (auto&& i : e.GetErrors())
@@ -104,8 +104,8 @@ void DumpContinuity(const char* show)
 
 void DumpContinuityText(std::string const& text)
 {
-	AnimationErrors e;
-	auto continuity = Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
+	CalChart::AnimationErrors e;
+	auto continuity = CalChart::Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
 	if (e.AnyErrors()) {
 		std::cout << "Errors during compile\n";
 	}
@@ -162,8 +162,8 @@ void DoContinuityUnitTest(const char* test_cases)
 			getline(input, d);
 		}
 
-		AnimationErrors e;
-		auto continuity = Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
+		CalChart::AnimationErrors e;
+		auto continuity = CalChart::Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
 		std::stringstream parsed_continuity;
 		for (auto& proc : continuity) {
 			parsed_continuity << *proc << "\n";
@@ -196,7 +196,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     bool overview, std::string const& outfile)
 {
     std::ifstream input(show);
-    std::unique_ptr<const CalChart::show> p(CalChart::show::Create_CC_show(input));
+    std::unique_ptr<const CalChart::Show> p(CalChart::Show::Create_CC_show(input));
 
     std::ofstream output(outfile);
 
@@ -235,10 +235,10 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     };
     auto Get_spr_line_text = Get_yard_text;
 
-    auto mode = ShowModeStandard::CreateShowMode(
+    auto mode = CalChart::ShowModeStandard::CreateShowMode(
         "Standard", { { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } });
 
-    PrintShowToPS printShowToPS(
+    CalChart::PrintShowToPS printShowToPS(
         *p, landscape, cont, contsheet, overview, 50, *mode,
         { { head_font_str, main_font_str, number_font_str, cont_font_str,
             bold_font_str, ital_font_str, bold_ital_font_str } },
@@ -261,7 +261,7 @@ bool ContinuityCountDifferentThanSymbol(const char* show)
     if (!input.is_open()) {
         throw std::runtime_error("could not open file");
     }
-    std::unique_ptr<CalChart::show> p(CalChart::show::Create_CC_show(input));
+    std::unique_ptr<CalChart::Show> p(CalChart::Show::Create_CC_show(input));
     return false;
 }
 

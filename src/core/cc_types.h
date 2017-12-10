@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_types.h
  * Definitions for the types
@@ -20,12 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <set>
 #include <string>
-
-typedef int16_t Coord;
 
 enum PSFONT_TYPE {
     PSFONT_SYMBOL,

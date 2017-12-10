@@ -328,7 +328,7 @@ void AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 void AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 {
     mAnimationView.SetCollisionType(
-        static_cast<CollisionWarning>(event.GetSelection()));
+        static_cast<CalChart::CollisionWarning>(event.GetSelection()));
     Refresh();
 }
 
@@ -341,7 +341,7 @@ void AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
         mAnimationView.GotoSheet(mErrorMarkers.at(which).second);
 
         mErrorText->Clear();
-        CC_continuity c = mAnimationView.GetContinuityOnSheet(
+        CalChart::Continuity c = mAnimationView.GetContinuityOnSheet(
             mErrorMarkers.at(which).second,
             mErrorMarkers.at(which).first.contsymbol);
         if (!c.GetText().empty()) {
@@ -649,15 +649,13 @@ void AnimationFrame::StopTimer()
 }
 
 void AnimationFrame::OnNotifyErrorList(
-    const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum,
+    const std::map<CalChart::AnimateError, CalChart::ErrorMarker>& error_markers, unsigned sheetnum,
     const wxString& message)
 {
     for (auto& i : error_markers) {
         wxString error_string;
-        error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message,
-            s_animate_err_msgs[i.first]);
+        error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, CalChart::s_animate_err_msgs[i.first]);
         mErrorList->Append(error_string);
-        mErrorMarkers.push_back(
-            std::pair<ErrorMarker, unsigned>(i.second, sheetnum));
+        mErrorMarkers.emplace_back(i.second, sheetnum);
     }
 }

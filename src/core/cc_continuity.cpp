@@ -23,67 +23,68 @@
 #include "cc_continuity.h"
 #include <assert.h>
 
-using std::string;
+namespace CalChart {
 
-CC_continuity::CC_continuity() {}
+Continuity::Continuity() {}
 
-CC_continuity::~CC_continuity() {}
+Continuity::~Continuity() {}
 
-void CC_continuity::SetText(const string& s) { text = s; }
+void Continuity::SetText(const std::string& s) { text = s; }
 
-void CC_continuity::AppendText(const string& s) { text.append(s); }
+void Continuity::AppendText(const std::string& s) { text.append(s); }
 
-const string& CC_continuity::GetText() const { return text; }
+const std::string& Continuity::GetText() const { return text; }
 
 // Test Suite stuff
-struct CC_continuity_values {
-    string text;
-    string GetText;
+struct Continuity_values {
+    std::string text;
+    std::string GetText;
 };
 
-bool Check_CC_continuity(const CC_continuity& underTest,
-    const CC_continuity_values& values)
+bool Check_Continuity(const Continuity& underTest,
+    const Continuity_values& values)
 {
     return (underTest.text == values.text) && (underTest.GetText() == values.GetText);
 }
 
-void CC_continuity_UnitTests()
+void Continuity_UnitTests()
 {
     // test some defaults:
-    CC_continuity_values values;
+    Continuity_values values;
     values.text = "";
     values.GetText = values.text;
 
     // test defaults
-    CC_continuity underTest;
-    assert(Check_CC_continuity(underTest, values));
+    Continuity underTest;
+    assert(Check_Continuity(underTest, values));
 
     // test defaults with different init
-    CC_continuity underTest2;
+    Continuity underTest2;
     values.GetText = values.text;
-    assert(Check_CC_continuity(underTest2, values));
+    assert(Check_Continuity(underTest2, values));
 
     // Set some text
     underTest2.SetText("this is some text");
     values.text = "this is some text";
     values.GetText = values.text;
-    assert(Check_CC_continuity(underTest2, values));
+    assert(Check_Continuity(underTest2, values));
 
     // Append some more text
     underTest2.AppendText("Adding more");
     values.text = "this is some textAdding more";
     values.GetText = values.text;
-    assert(Check_CC_continuity(underTest2, values));
+    assert(Check_Continuity(underTest2, values));
 
     // Set some text
     underTest2.SetText("different words");
     values.text = "different words";
     values.GetText = values.text;
-    assert(Check_CC_continuity(underTest2, values));
+    assert(Check_Continuity(underTest2, values));
 
     // Reset text
     underTest2.SetText("");
     values.text = "";
     values.GetText = values.text;
-    assert(Check_CC_continuity(underTest2, values));
+    assert(Check_Continuity(underTest2, values));
+}
 }

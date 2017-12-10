@@ -38,7 +38,9 @@
 
 extern int parsecontinuity();
 extern const char* yyinputbuffer;
-extern std::list<std::unique_ptr<ContProcedure> > ParsedContinuity;
+extern std::list<std::unique_ptr<CalChart::ContProcedure> > ParsedContinuity;
+
+namespace CalChart {
 
 AnimateDir AnimGetDirFromAngle(float ang)
 {
@@ -82,7 +84,7 @@ Animation::ParseContinuity(std::string const& continuity, AnimationErrors& error
     return std::move(ParsedContinuity);
 }
 
-Animation::Animation(const CalChart::show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
+Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
     : pts(show.GetNumPoints())
     , curr_cmds(pts.size())
     , curr_sheetnum(0)
@@ -110,7 +112,7 @@ Animation::Animation(const CalChart::show& show, NotifyStatus notifyStatus, Noti
                     std::string message("Compiling \"");
                     message += curr_sheet->GetName().substr(0, 32);
                     message += ("\" ");
-                    message += CalChart::GetNameForSymbol(current_symbol).substr(0, 32);
+                    message += GetNameForSymbol(current_symbol).substr(0, 32);
                     message += ("...");
                     notifyStatus(message);
                 }
@@ -299,7 +301,7 @@ void Animation::CheckCollisions()
     mCollisions.clear();
     for (unsigned i = 0; i < pts.size(); i++) {
         for (unsigned j = i + 1; j < pts.size(); j++) {
-            CollisionType collisionResult = pts[i].DetectCollision(pts[j]);
+            auto collisionResult = pts[i].DetectCollision(pts[j]);
             if (collisionResult) {
                 if (!mCollisions.count(i) || mCollisions[i] < collisionResult) {
                     mCollisions[i] = collisionResult;
@@ -319,7 +321,7 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 {
     return Animation::animate_info_t(
         mCollisions.count(which) ? mCollisions.find(which)->second
-                                 : COLLISION_NONE,
+                                 : Coord::COLLISION_NONE,
         (*curr_cmds.at(which))->Direction(),
         (*curr_cmds.at(which))->RealDirection(), pts.at(which));
 }
@@ -331,12 +333,12 @@ AnimateCommands Animation::GetCommands(unsigned whichPoint) const
     return sheets.at(curr_sheetnum).GetCommands(whichPoint);
 }
 
-std::vector<CC_DrawCommand>
-Animation::GenPathToDraw(unsigned point, const CC_coord& offset) const
+std::vector<DrawCommand>
+Animation::GenPathToDraw(unsigned point, const Coord& offset) const
 {
     auto animation_commands = GetCommands(point);
     auto position = pts.at(point);
-    std::vector<CC_DrawCommand> draw_commands;
+    std::vector<DrawCommand> draw_commands;
     for (auto commands = animation_commands.begin();
          commands != animation_commands.end(); ++commands) {
         draw_commands.push_back((*commands)->GenCC_DrawCommand(position, offset));
@@ -346,7 +348,7 @@ Animation::GenPathToDraw(unsigned point, const CC_coord& offset) const
 }
 
 AnimatePoint Animation::EndPosition(unsigned point,
-    const CC_coord& offset) const
+    const Coord& offset) const
 {
     auto animation_commands = GetCommands(point);
     auto position = pts.at(point);
@@ -376,4 +378,5 @@ Animation::GetCurrentInfo() const
            << GetNumberSheets() << ")\n";
     output << "beat " << GetCurrentBeat() << " of " << GetNumberBeats() << "\n";
     return std::pair<std::string, std::vector<std::string> >(output.str(), each);
+}
 }

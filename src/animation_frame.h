@@ -81,7 +81,7 @@ public:
     bool OnBeat() const;
 
     void
-    OnNotifyErrorList(const std::map<AnimateError, ErrorMarker>& error_markers,
+    OnNotifyErrorList(const std::map<CalChart::AnimateError, CalChart::ErrorMarker>& error_markers,
         unsigned sheetnum, const wxString& message);
 
     // controlling how the screen splits between views
@@ -119,7 +119,7 @@ private:
 
     // continuity errors:
     wxChoice* mErrorList;
-    std::vector<std::pair<ErrorMarker, unsigned> > mErrorMarkers;
+    std::vector<std::pair<CalChart::ErrorMarker, unsigned> > mErrorMarkers;
     FancyTextWin* mErrorText;
 
     // timer stuff:

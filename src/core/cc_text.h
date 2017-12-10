@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_text.h
  * textchunk and textline
@@ -20,15 +21,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "cc_types.h"
 
 #include <string>
 #include <vector>
 
-struct CC_textchunk {
-    CC_textchunk()
+namespace CalChart {
+
+struct Textchunk {
+    Textchunk()
         : text()
         , font(PSFONT_NORM)
     {
@@ -37,39 +38,40 @@ struct CC_textchunk {
     enum PSFONT_TYPE font;
 };
 
-typedef std::vector<CC_textchunk> CC_textchunk_list;
+using Textchunk_list = std::vector<Textchunk>;
 
-class CC_textline {
+class Textline {
 private:
-    friend class CC_print_continuity;
-    CC_textline(std::string line, PSFONT_TYPE& currfontnum);
+    friend class Print_continuity;
+    Textline(std::string line, PSFONT_TYPE& currfontnum);
 
 public:
-    CC_textchunk_list GetChunks() const { return chunks; }
+    Textchunk_list GetChunks() const { return chunks; }
     bool GetCenter() const { return center; }
     bool GetOnMain() const { return on_main; }
     bool GetOnSheet() const { return on_sheet; }
 
 private:
-    CC_textchunk_list chunks;
+    Textchunk_list chunks;
     bool center;
     bool on_main;
     bool on_sheet;
 };
 
-typedef std::vector<CC_textline> CC_textline_list;
+using Textline_list = std::vector<Textline>;
 
-class CC_print_continuity {
+class Print_continuity {
 public:
-    CC_print_continuity();
-    CC_print_continuity(const std::string& data);
-    CC_print_continuity(const std::string& number, const std::string& data);
-    CC_textline_list GetChunks() const;
-    std::string GetOriginalLine() const;
-    std::string GetPrintNumber() const;
+    Print_continuity();
+    Print_continuity(const std::string& data);
+    Print_continuity(const std::string& number, const std::string& data);
+    auto GetChunks() const { return mPrintChunks; }
+    auto GetOriginalLine() const { return mOriginalLine; }
+    auto GetPrintNumber() const { return mNumber; }
 
 private:
-    CC_textline_list mPrintChunks;
+    Textline_list mPrintChunks;
     std::string mOriginalLine;
     std::string mNumber;
 };
+}

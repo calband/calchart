@@ -26,6 +26,8 @@
 #include "cont.h"
 #include "parse.h"
 
+namespace CalChart {
+
 static const std::string ContDefinedValue_strings[] = {
     "N", "NW", "W", "SW", "S", "SE", "E", "NE",
     "HS", "MM", "SH", "JS", "GV", "M", "DM"
@@ -72,7 +74,7 @@ void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
 
     auto v1 = CreateVector(d1, steps1);
 
-    CC_coord p[4];
+    Coord p[4];
     p[1] = ref1 + v1;
     auto steps2 = (ref2 - p[1]).Magnitude() * sin(Deg2Rad(ref2.Direction(p[1]) - d1)) / c;
     if (IsDiagonalDirection(d2)) {
@@ -163,7 +165,7 @@ std::ostream& ContToken::Print(std::ostream& os) const
     return os << "[" << line << "," << col << "]: ";
 }
 
-CC_coord ContPoint::Get(AnimateCompile& anim) const
+Coord ContPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetPointPosition();
 }
@@ -174,7 +176,7 @@ std::ostream& ContPoint::Print(std::ostream& os) const
     return os << "Point:";
 }
 
-CC_coord ContStartPoint::Get(AnimateCompile& anim) const
+Coord ContStartPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetStartingPosition();
 }
@@ -185,7 +187,7 @@ std::ostream& ContStartPoint::Print(std::ostream& os) const
     return os << "Start Point";
 }
 
-CC_coord ContNextPoint::Get(AnimateCompile& anim) const
+Coord ContNextPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetEndingPosition(this);
 }
@@ -196,7 +198,7 @@ std::ostream& ContNextPoint::Print(std::ostream& os) const
     return os << "Next Point";
 }
 
-CC_coord ContRefPoint::Get(AnimateCompile& anim) const
+Coord ContRefPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetReferencePointPosition(refnum);
 }
@@ -376,9 +378,7 @@ std::ostream& ContFuncDist::Print(std::ostream& os) const
 
 float ContFuncDistFrom::Get(AnimateCompile& anim) const
 {
-    CC_coord vector;
-
-    vector = pnt_end->Get(anim) - pnt_start->Get(anim);
+    auto vector = pnt_end->Get(anim) - pnt_start->Get(anim);
     return vector.Magnitude();
 }
 
@@ -491,7 +491,7 @@ void ContProcDMCM::Compile(AnimateCompile& anim)
     auto r1 = pnt1->Get(anim);
     auto r2 = pnt2->Get(anim);
     auto c = r2.x - r1.x;
-    if (c == (r2.y - r1.y + Int2Coord(2))) {
+    if (c == (r2.y - r1.y + Int2CoordUnits(2))) {
         if (c >= 0) {
             ContValueDefined dir1(CC_SW);
             ContValueDefined dir2(CC_W);
@@ -499,7 +499,7 @@ void ContProcDMCM::Compile(AnimateCompile& anim)
             return;
         }
     }
-    else if (c == (r1.y - r2.y - Int2Coord(2))) {
+    else if (c == (r1.y - r2.y - Int2CoordUnits(2))) {
         if (c >= 0) {
             ContValueDefined dir1(CC_SE);
             ContValueDefined dir2(CC_W);
@@ -507,7 +507,7 @@ void ContProcDMCM::Compile(AnimateCompile& anim)
             return;
         }
     }
-    else if (c == (r1.y - r2.y + Int2Coord(2))) {
+    else if (c == (r1.y - r2.y + Int2CoordUnits(2))) {
         if (c <= 0) {
             ContValueDefined dir1(CC_NW);
             ContValueDefined dir2(CC_E);
@@ -515,7 +515,7 @@ void ContProcDMCM::Compile(AnimateCompile& anim)
             return;
         }
     }
-    else if (c == (r2.y - r1.y - Int2Coord(2))) {
+    else if (c == (r2.y - r1.y - Int2CoordUnits(2))) {
         if (c <= 0) {
             ContValueDefined dir1(CC_NE);
             ContValueDefined dir2(CC_E);
@@ -537,7 +537,7 @@ void ContProcDMHS::Compile(AnimateCompile& anim)
 {
     short b_hs;
 
-    CC_coord c_hs, c_dm;
+    Coord c_hs, c_dm;
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     if (std::abs(c.x) > std::abs(c.y)) {
         // adjust sign
@@ -546,7 +546,7 @@ void ContProcDMHS::Compile(AnimateCompile& anim)
         // adjust sign
         c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y;
         c_dm.y = c.y;
-        b_hs = Coord2Int(c_hs.x);
+        b_hs = CoordUnits2Int(c_hs.x);
     }
     else {
         c_hs.x = 0;
@@ -555,10 +555,10 @@ void ContProcDMHS::Compile(AnimateCompile& anim)
         c_dm.x = c.x;
         // adjust sign
         c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x;
-        b_hs = Coord2Int(c_hs.y);
+        b_hs = CoordUnits2Int(c_hs.y);
     }
     if (c_dm != 0) {
-        auto b = Coord2Int(c_dm.x);
+        auto b = CoordUnits2Int(c_dm.x);
         if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm),
                 this)) {
             return;
@@ -600,16 +600,16 @@ void ContProcEWNS::Compile(AnimateCompile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.y != 0) {
-        CC_coord c2{ 0, c1.y };
-        auto b = Coord2Int(c2.y);
+        Coord c2{ 0, c1.y };
+        auto b = CoordUnits2Int(c2.y);
         if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
                 this)) {
             return;
         }
     }
     if (c1.x != 0) {
-        CC_coord c2{ c1.x, 0 };
-        auto b = Coord2Int(c2.x);
+        Coord c2{ c1.x, 0 };
+        auto b = CoordUnits2Int(c2.x);
         if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
                 this)) {
             return;
@@ -646,8 +646,8 @@ void ContProcFountain::Compile(AnimateCompile& anim)
         std::tie(b, d) = CreateUnitVector(f1);
     }
     auto v = pnt->Get(anim) - anim.GetPointPosition();
-    auto e = Coord2Float(v.x);
-    auto f = Coord2Float(v.y);
+    auto e = CoordUnits2Float(v.x);
+    auto f = CoordUnits2Float(v.y);
     f1 = a * d - b * c;
     if (IS_ZERO(f1)) {
         if (IS_ZERO(a - b) && IS_ZERO(c - d) && IS_ZERO(e * c - a * f)) {
@@ -672,8 +672,8 @@ void ContProcFountain::Compile(AnimateCompile& anim)
     else {
         auto f2 = (d * e - b * f) / f1;
         if (!IS_ZERO(f2)) {
-            v.x = Float2Coord(f2 * a);
-            v.y = Float2Coord(f2 * c);
+            v.x = Float2CoordUnits(f2 * a);
+            v.y = Float2CoordUnits(f2 * c);
             if (!anim.Append(std::make_shared<AnimateCommandMove>(
                                  float2unsigned(this, anim, f2), v),
                     this)) {
@@ -682,8 +682,8 @@ void ContProcFountain::Compile(AnimateCompile& anim)
         }
         f2 = (a * f - c * e) / f1;
         if (!IS_ZERO(f2)) {
-            v.x = Float2Coord(f2 * b);
-            v.y = Float2Coord(f2 * d);
+            v.x = Float2CoordUnits(f2 * b);
+            v.y = Float2CoordUnits(f2 * d);
             if (!anim.Append(std::make_shared<AnimateCommandMove>(
                                  float2unsigned(this, anim, f2), v),
                     this)) {
@@ -744,7 +744,7 @@ std::ostream& ContProcFMTO::Print(std::ostream& os) const
     return os << "Forward march to " << *pnt;
 }
 
-static inline Coord roundcoord(Coord a, Coord mod)
+static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
 {
     mod = std::abs(mod);
     if (mod > 0) {
@@ -760,12 +760,12 @@ static inline Coord roundcoord(Coord a, Coord mod)
 
 void ContProcGrid::Compile(AnimateCompile& anim)
 {
-    auto gridc = Float2Coord(grid->Get(anim));
+    auto gridc = Float2CoordUnits(grid->Get(anim));
 
-    CC_coord c;
+    Coord c;
     c.x = roundcoord(anim.GetPointPosition().x, gridc);
     // Adjust so 4 step grid will be on visible grid
-    c.y = roundcoord(anim.GetPointPosition().y - Int2Coord(2), gridc) + Int2Coord(2);
+    c.y = roundcoord(anim.GetPointPosition().y - Int2CoordUnits(2), gridc) + Int2CoordUnits(2);
 
     c -= anim.GetPointPosition();
     if (c != 0) {
@@ -785,7 +785,7 @@ void ContProcHSCM::Compile(AnimateCompile& anim)
 
     auto r1 = pnt1->Get(anim);
     auto r2 = pnt2->Get(anim);
-    if ((r1.y - r2.y) == Int2Coord(2)) {
+    if ((r1.y - r2.y) == Int2CoordUnits(2)) {
         if (r2.x >= r1.x) {
             ContValueDefined dirs(CC_S);
             ContValueDefined dirw(CC_W);
@@ -793,7 +793,7 @@ void ContProcHSCM::Compile(AnimateCompile& anim)
             return;
         }
     }
-    else if ((r1.y - r2.y) == -Int2Coord(2)) {
+    else if ((r1.y - r2.y) == -Int2CoordUnits(2)) {
         if (r1.x >= r2.x) {
             ContValueDefined dirn(CC_N);
             ContValueDefined dire(CC_E);
@@ -813,7 +813,7 @@ std::ostream& ContProcHSCM::Print(std::ostream& os) const
 
 void ContProcHSDM::Compile(AnimateCompile& anim)
 {
-    CC_coord c_hs, c_dm;
+    Coord c_hs, c_dm;
     short b;
 
     auto c = pnt->Get(anim) - anim.GetPointPosition();
@@ -824,7 +824,7 @@ void ContProcHSDM::Compile(AnimateCompile& anim)
         // adjust sign
         c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y;
         c_dm.y = c.y;
-        b = Coord2Int(c_hs.x);
+        b = CoordUnits2Int(c_hs.x);
     }
     else {
         c_hs.x = 0;
@@ -833,7 +833,7 @@ void ContProcHSDM::Compile(AnimateCompile& anim)
         c_dm.x = c.x;
         // adjust sign
         c_dm.y = ((c.x < 0) != (c.y < 0)) ? -c.x : c.x;
-        b = Coord2Int(c_hs.y);
+        b = CoordUnits2Int(c_hs.y);
     }
     if (c_hs != 0) {
         if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_hs),
@@ -842,7 +842,7 @@ void ContProcHSDM::Compile(AnimateCompile& anim)
         }
     }
     if (c_dm != 0) {
-        b = Coord2Int(c_dm.x);
+        b = CoordUnits2Int(c_dm.x);
         anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm), this);
     }
 }
@@ -871,8 +871,8 @@ void ContProcMarch::Compile(AnimateCompile& anim)
     if (b != 0) {
         auto rads = Deg2Rad(dir->Get(anim));
         auto mag = stpsize->Get(anim) * stps->Get(anim);
-        CC_coord c{ Float2Coord(cos(rads) * mag),
-            static_cast<Coord>(-Float2Coord(sin(rads) * mag)) };
+        Coord c{ Float2CoordUnits(cos(rads) * mag),
+            static_cast<Coord::units>(-Float2CoordUnits(sin(rads) * mag)) };
         if (c != 0) {
             if (facedir)
                 anim.Append(std::make_shared<AnimateCommandMove>((unsigned)std::abs(b),
@@ -933,16 +933,16 @@ void ContProcNSEW::Compile(AnimateCompile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.x != 0) {
-        CC_coord c2{ c1.x, 0 };
-        auto b = Coord2Int(c2.x);
+        Coord c2{ c1.x, 0 };
+        auto b = CoordUnits2Int(c2.x);
         if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
                 this)) {
             return;
         }
     }
     if (c1.y != 0) {
-        CC_coord c2{ 0, c1.y };
-        auto b = Coord2Int(c2.y);
+        Coord c2{ 0, c1.y };
+        auto b = CoordUnits2Int(c2.y);
         if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
                 this)) {
             return;
@@ -986,4 +986,5 @@ std::ostream& ContProcRotate::Print(std::ostream& os) const
     super::Print(os);
     return os << "Rotate at angle " << *ang << " for steps " << *stps
               << " around pivot point " << *pnt;
+}
 }

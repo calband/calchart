@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_fileformat.h
  * File format layout and utilities
@@ -20,13 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_FILEFORMAT_H_
-#define _CC_FILEFORMAT_H_
-
 #include <stdexcept>
 #include <sstream>
 #include <vector>
 #include <map>
+
+namespace CalChart {
 
 struct Version_3_3_and_earlier {
 };
@@ -432,7 +432,6 @@ inline void WriteStr(T& stream, const char* str)
     Write(stream, str, strlen(str) + 1);
 }
 
-namespace CalChart {
 namespace Parser {
 
     template <typename Iter>
@@ -558,5 +557,3 @@ namespace Parser {
     }
 }
 }
-
-#endif // _CC_FILEFORMAT_H_

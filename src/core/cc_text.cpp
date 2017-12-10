@@ -24,7 +24,9 @@
 
 #include <sstream>
 
-CC_textline::CC_textline(std::string line, PSFONT_TYPE& currfontnum)
+namespace CalChart {
+
+Textline::Textline(std::string line, PSFONT_TYPE& currfontnum)
     : center(false)
     , on_main(true)
     , on_sheet(true)
@@ -47,7 +49,7 @@ CC_textline::CC_textline(std::string line, PSFONT_TYPE& currfontnum)
         // first take care of any tabs
         if (line.at(0) == '\t') {
             if (line.length() > 1) {
-                CC_textchunk new_text;
+                Textchunk new_text;
                 new_text.font = PSFONT_TAB;
                 chunks.push_back(new_text);
             }
@@ -56,7 +58,7 @@ CC_textline::CC_textline(std::string line, PSFONT_TYPE& currfontnum)
         }
         // now check to see if we have any special person marks
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's'))) {
-            CC_textchunk new_text;
+            Textchunk new_text;
             new_text.font = PSFONT_SYMBOL;
             if (tolower(line.at(1)) == 'p') {
                 switch (tolower(line.at(2))) {
@@ -113,7 +115,7 @@ CC_textline::CC_textline(std::string line, PSFONT_TYPE& currfontnum)
         }
         auto pos = line.find_first_of("\\\t", 1);
 
-        CC_textchunk new_text;
+        Textchunk new_text;
         new_text.font = currfontnum;
         new_text.text = line.substr(0, pos);
         chunks.push_back(new_text);
@@ -121,20 +123,20 @@ CC_textline::CC_textline(std::string line, PSFONT_TYPE& currfontnum)
     }
 }
 
-CC_print_continuity::CC_print_continuity() {}
+Print_continuity::Print_continuity() {}
 
-CC_print_continuity::CC_print_continuity(const std::string& data)
+Print_continuity::Print_continuity(const std::string& data)
     : mOriginalLine(data)
 {
     std::istringstream reader(data);
     std::string line;
     PSFONT_TYPE currfontnum = PSFONT_NORM;
     while (std::getline(reader, line, '\n')) {
-        mPrintChunks.push_back(CC_textline(line, currfontnum));
+        mPrintChunks.push_back(Textline(line, currfontnum));
     }
 }
 
-CC_print_continuity::CC_print_continuity(const std::string& number,
+Print_continuity::Print_continuity(const std::string& number,
     const std::string& data)
     : mOriginalLine(data)
     , mNumber(number)
@@ -143,15 +145,7 @@ CC_print_continuity::CC_print_continuity(const std::string& number,
     std::string line;
     PSFONT_TYPE currfontnum = PSFONT_NORM;
     while (std::getline(reader, line, '\n')) {
-        mPrintChunks.push_back(CC_textline(line, currfontnum));
+        mPrintChunks.push_back(Textline(line, currfontnum));
     }
 }
-
-CC_textline_list CC_print_continuity::GetChunks() const { return mPrintChunks; }
-
-std::string CC_print_continuity::GetOriginalLine() const
-{
-    return mOriginalLine;
 }
-
-std::string CC_print_continuity::GetPrintNumber() const { return mNumber; }

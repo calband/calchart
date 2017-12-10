@@ -222,7 +222,7 @@ void ContinuityEditor::OnCmdHelp(wxCommandEvent& event)
 
 void ContinuityEditor::Update()
 {
-    CalChart::show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
+    auto sht = mDoc->GetCurrentSheet();
 
     mContinuityChoices->Clear();
     for (auto& curranimcont : k_symbols) {
@@ -252,8 +252,8 @@ SYMBOL_TYPE ContinuityEditor::CurrentSymbolChoice() const
 void ContinuityEditor::UpdateText()
 {
     mUserInput->Clear();
-    CalChart::show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
-    const CC_continuity& c = current_sheet->GetContinuityBySymbol(CurrentSymbolChoice());
+    auto current_sheet = mDoc->GetCurrentSheet();
+    auto& c = current_sheet->GetContinuityBySymbol(CurrentSymbolChoice());
     if (!c.GetText().empty()) {
         mUserInput->WriteText(c.GetText());
         mUserInput->SetInsertionPoint(0);
@@ -274,8 +274,8 @@ void ContinuityEditor::FlushText()
     wxString conttext;
 
     conttext = mUserInput->GetValue();
-    CalChart::show::const_CC_sheet_iterator_t current_sheet = mDoc->GetCurrentSheet();
-    const CC_continuity& cont = current_sheet->GetContinuityBySymbol(CurrentSymbolChoice());
+    auto current_sheet = mDoc->GetCurrentSheet();
+    auto& cont = current_sheet->GetContinuityBySymbol(CurrentSymbolChoice());
     if (conttext != cont.GetText()) {
         mView->DoSetContinuityText(CurrentSymbolChoice(), conttext);
     }
@@ -294,7 +294,7 @@ void ContinuityEditor::SetCurrent(unsigned i)
 
 void ContinuityEditor::ContEditSelect(wxCommandEvent&)
 {
-    CalChart::show::const_CC_sheet_iterator_t sht = mDoc->GetCurrentSheet();
+    auto sht = mDoc->GetCurrentSheet();
     mDoc->SetSelection(sht->MakeSelectPointsBySymbol(CurrentSymbolChoice()));
 }
 

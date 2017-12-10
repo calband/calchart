@@ -1,3 +1,4 @@
+#pragma once
 /*
  * animate_types.h
  * collection of types and enums for animation
@@ -20,10 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "cc_coord.h"
+#include "cc_types.h"
 #include <string>
+
+namespace CalChart {
 
 // Number of variables in continuity language (A B C D X Y Z DOF DOH)
 enum {
@@ -92,10 +94,11 @@ enum CollisionWarning {
     COLLISION_RESPONSE_BEEP
 };
 
-using AnimatePoint = CC_coord;
+using AnimatePoint = Coord;
 
 struct ErrorMarker {
     SelectionList pntgroup; // which points have this error
     SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity
     int line = -1, col = -1; // where
 };
+}

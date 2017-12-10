@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_continuity.h
  * Definitions for the continuity classes
@@ -20,18 +21,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <string>
 
 // points have a symbol index and a continuity index.  The continuity
 // numbers is the way that the points know what continity they use.
 // This allows multiple points to have different symbols but the same
 // continuity.
-class CC_continuity {
+namespace CalChart {
+
+class Continuity {
 public:
-    CC_continuity();
-    ~CC_continuity();
+    Continuity();
+    ~Continuity();
 
     void SetText(const std::string& s);
     void AppendText(const std::string& s);
@@ -40,12 +41,13 @@ public:
 private:
     std::string text;
 
-    friend bool Check_CC_continuity(const CC_continuity&,
-        const struct CC_continuity_values&);
-    friend void CC_continuity_UnitTests();
+    friend bool Check_Continuity(const Continuity&,
+        const struct Continuity_values&);
+    friend void Continuity_UnitTests();
 };
 
-bool Check_CC_continuity(const CC_continuity&,
-    const struct CC_continuity_values&);
+bool Check_Continuity(const Continuity&,
+    const struct Continuity_values&);
 
-void CC_continuity_UnitTests();
+void Continuity_UnitTests();
+}

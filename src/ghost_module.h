@@ -1,7 +1,7 @@
 #pragma once
 
 namespace CalChart {
-class sheet;
+class Sheet;
 }
 
 class CalChartDoc;
@@ -26,7 +26,7 @@ public:
        * Returns the sheet having the ghost formation to draw.
        * @return The sheet having the ghost formation to draw.
        */
-    CalChart::sheet const* getGhostSheet(CalChartDoc const* doc, int currentSheet) const;
+    CalChart::Sheet const* getGhostSheet(CalChartDoc const* doc, int currentSheet) const;
     /**
        * Returns whether or not ghost formations are active.
        * @return True if the ghost formations are currently active; false

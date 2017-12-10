@@ -33,13 +33,13 @@
 #include <vector>
 #include <set>
 
-class ShowMode;
-class ShowUndoList;
+class CalChartDoc;
 namespace CalChart {
-class show;
-class sheet;
+class ShowMode;
+class Show;
+class Sheet;
+class Lasso;
 }
-class CC_lasso;
 class Animation;
 class CalChartConfiguration;
 
@@ -72,14 +72,10 @@ class CalChartDoc_setup : public wxObject {
 };
 
 // CalChart Document.
-// This holds the CalChart::show, the core part of CalChart.
+// This holds the CalChart::Show, the core part of CalChart.
 class CalChartDoc : public wxDocument {
     DECLARE_DYNAMIC_CLASS(CalChartDoc)
 public:
-    typedef std::vector<CalChart::sheet> CC_sheet_container_t;
-    typedef CC_sheet_container_t::iterator CC_sheet_iterator_t;
-    typedef CC_sheet_container_t::const_iterator const_CC_sheet_iterator_t;
-
     CalChartDoc();
     virtual ~CalChartDoc();
 
@@ -128,22 +124,22 @@ public:
 
     void FlushAllTextWindows();
 
-    std::unique_ptr<Animation> NewAnimation(NotifyStatus notifyStatus,
-        NotifyErrorList notifyErrorList);
-    void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<ShowMode> newmode);
+    std::unique_ptr<CalChart::Animation> NewAnimation(CalChart::NotifyStatus notifyStatus,
+        CalChart::NotifyErrorList notifyErrorList);
+    void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<CalChart::ShowMode> newmode);
 
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
-    auto GetSheetBegin() const { return static_cast<CalChart::show const&>(*mShow).GetSheetBegin(); }
-    auto GetSheetEnd() const { return static_cast<CalChart::show const&>(*mShow).GetSheetEnd(); }
-    auto GetNthSheet(int n) const { return static_cast<CalChart::show const&>(*mShow).GetNthSheet(n); }
-    auto GetCurrentSheet() const { return static_cast<CalChart::show const&>(*mShow).GetCurrentSheet(); }
+    auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
+    auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
+    auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
+    auto GetCurrentSheet() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet(); }
 
-    auto GetCurrentSheetNum() const { return static_cast<CalChart::show const&>(*mShow).GetCurrentSheetNum(); }
+    auto GetCurrentSheetNum() const { return static_cast<CalChart::Show const&>(*mShow).GetCurrentSheetNum(); }
     void SetCurrentSheet(int n);
 
     auto GetNumPoints() const { return mShow->GetNumPoints(); }
-    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const;
+    std::pair<bool, std::vector<size_t> > GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets) const;
 
     auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
 
@@ -157,18 +153,18 @@ public:
     auto MakeAddToSelection(const SelectionList& sl) const { return mShow->MakeAddToSelection(sl); }
     auto MakeRemoveFromSelection(const SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
     auto MakeToggleSelection(const SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
-    auto MakeSelectWithLasso(const CC_lasso& lasso, int ref) const { return mShow->MakeSelectWithLasso(lasso, ref); }
+    auto MakeSelectWithLasso(const CalChart::Lasso& lasso, int ref) const { return mShow->MakeSelectWithLasso(lasso, ref); }
 
     void SetSelection(const SelectionList& sl);
 
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
 
-    const ShowMode& GetMode() const;
-    void SetMode(std::unique_ptr<const ShowMode> m);
+    const CalChart::ShowMode& GetMode() const;
+    void SetMode(std::unique_ptr<const CalChart::ShowMode> m);
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
-    auto WillMovePoints(std::map<int, CC_coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
+    auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
     int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards,
         const std::set<size_t>& isPicked,
         const CalChartConfiguration& config_) const;
@@ -180,13 +176,13 @@ public:
     std::unique_ptr<wxCommand> Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
     std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
-    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CalChart::show::CC_sheet_container_t& sheets, int where);
+    std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CalChart::Show::Sheet_container_t& sheets, int where);
     std::unique_ptr<wxCommand> Create_RemoveSheetCommand(int where);
     std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
     std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CC_coord> const& new_positions, int ref);
+    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions, int ref);
+    std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions, int ref);
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
     std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(int ref);
@@ -199,10 +195,10 @@ public:
     std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
     std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
     std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
-    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CC_coord> &finalPositions, const std::map<SYMBOL_TYPE, std::string> &continuities, const std::vector<SYMBOL_TYPE> &marcherDotTypes);
+    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord> &finalPositions, const std::map<SYMBOL_TYPE, std::string> &continuities, const std::vector<SYMBOL_TYPE> &marcherDotTypes);
 
 private:
-    static CC_doc_command_pair Inject_CalChartDocArg(CC_show_command_pair);
+    static CC_doc_command_pair Inject_CalChartDocArg(CalChart::Show_command_pair);
     std::vector<CC_doc_command_pair> Create_SetSheetPair() const;
     std::vector<CC_doc_command_pair> Create_SetSheetAndSelectionPair() const;
 
@@ -234,7 +230,7 @@ private:
         CalChartDoc& mShow;
     };
 
-    std::unique_ptr<CalChart::show> mShow;
-    std::unique_ptr<const ShowMode> mMode;
+    std::unique_ptr<CalChart::Show> mShow;
+    std::unique_ptr<const CalChart::ShowMode> mMode;
     AutoSaveTimer mTimer;
 };

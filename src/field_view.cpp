@@ -82,7 +82,7 @@ void FieldView::OnDraw(wxDC* dc)
 {
     if (mShow) {
         // draw the field
-        CC_coord origin = mShow->GetMode().Offset();
+        auto origin = mShow->GetMode().Offset();
         DrawMode(*dc, mConfig, mShow->GetMode(), ShowMode_kFieldView);
 
         auto ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
@@ -93,7 +93,7 @@ void FieldView::OnDraw(wxDC* dc)
                 *ghostSheet, 0);
         }
 
-        CalChart::show::const_CC_sheet_iterator_t sheet = mShow->GetCurrentSheet();
+        auto sheet = mShow->GetCurrentSheet();
         if (sheet != mShow->GetSheetEnd()) {
             if (mCurrentReferencePoint > 0) {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
@@ -116,7 +116,7 @@ void FieldView::OnDraw(wxDC* dc)
 // Sneakily gets used for default print/preview
 // as well as drawing on the screen.
 void FieldView::DrawOtherPoints(wxDC& dc,
-    const std::map<int, CC_coord>& positions)
+    const std::map<int, CalChart::Coord>& positions)
 {
     DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
@@ -210,7 +210,7 @@ bool FieldView::DoRotatePointPositions(int rotateAmount)
     return true;
 }
 
-bool FieldView::DoMovePoints(const std::map<int, CC_coord>& newPositions)
+bool FieldView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
 {
     if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint))
         return false;
@@ -307,7 +307,7 @@ bool FieldView::DoTogglePointsLabelVisibility()
     return true;
 }
 
-void FieldView::DoInsertSheets(const CalChart::show::CC_sheet_container_t& sht,
+void FieldView::DoInsertSheets(const CalChart::Show::Sheet_container_t& sht,
     int where)
 {
     auto cmd = mShow->Create_AddSheetsCommand(sht, where);
@@ -389,14 +389,14 @@ std::pair<bool, std::string> FieldView::DoAppendShow(std::unique_ptr<CalChartDoc
     return { true, "" };
 }
 
-int FieldView::FindPoint(CC_coord pos) const
+int FieldView::FindPoint(CalChart::Coord pos) const
 {
     return mShow->GetCurrentSheet()->FindPoint(
-        pos.x, pos.y, Float2Coord(mConfig.Get_DotRatio()),
+        pos, Float2CoordUnits(mConfig.Get_DotRatio()),
         mCurrentReferencePoint);
 }
 
-CC_coord FieldView::PointPosition(int which) const
+CalChart::Coord FieldView::PointPosition(int which) const
 {
     return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
 }
@@ -423,7 +423,7 @@ void FieldView::SetReferencePoint(int which)
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-void FieldView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
+void FieldView::SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected)
 {
     auto select = mShow->MakeSelectWithLasso(*lasso, mCurrentReferencePoint);
     if (toggleSelected) {
@@ -436,13 +436,13 @@ void FieldView::SelectWithLasso(const CC_lasso* lasso, bool toggleSelected)
 }
 
 // Select points within rectangle
-void FieldView::SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+void FieldView::SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2,
     bool toggleSelected)
 {
-    CC_lasso lasso(c1);
-    lasso.Append(CC_coord(c1.x, c2.y));
+    CalChart::Lasso lasso(c1);
+    lasso.Append(CalChart::Coord(c1.x, c2.y));
     lasso.Append(c2);
-    lasso.Append(CC_coord(c2.x, c1.y));
+    lasso.Append(CalChart::Coord(c2.x, c1.y));
     lasso.End();
     SelectWithLasso(&lasso, toggleSelected);
 }
@@ -471,10 +471,10 @@ void FieldView::OnEnableDrawPaths(bool enable)
     mFrame->Refresh();
 }
 
-void FieldView::DrawPaths(wxDC& dc, const CalChart::sheet& sheet)
+void FieldView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
 {
     if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (mAnimation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
-        CC_coord origin = GetShowFieldOffset();
+        auto origin = GetShowFieldOffset();
         mAnimation->GotoSheet(mShow->GetCurrentSheetNum());
         for (auto&& point : mShow->GetSelectionList()) {
             DrawPath(dc, mConfig, mAnimation->GenPathToDraw(point, origin),
@@ -485,7 +485,7 @@ void FieldView::DrawPaths(wxDC& dc, const CalChart::sheet& sheet)
 
 void FieldView::GeneratePaths()
 {
-    mAnimation = mShow->NewAnimation(NotifyStatus(), NotifyErrorList());
+    mAnimation = mShow->NewAnimation(CalChart::NotifyStatus{}, CalChart::NotifyErrorList{});
 }
 
 void FieldView::DoDrawBackground(bool enable)

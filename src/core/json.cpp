@@ -6,6 +6,8 @@
 
 #include "json.h"
 
+namespace CalChart {
+
 JSONData::JSONData()
 {
 }
@@ -642,4 +644,5 @@ JSONElement& JSONDataObjectAccessor::operator[](const std::string& key)
 const JSONElement& JSONDataObjectConstAccessor::operator[](const std::string& key) const
 {
     return dereference()[key];
+}
 }

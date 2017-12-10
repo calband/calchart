@@ -34,15 +34,17 @@
 
 class FieldView;
 class FieldFrame;
-class CC_shape;
 class BackgroundImage;
-class CC_coord;
+namespace CalChart {
+class Shape;
+class Coord;
+class Shape_2point;
+}
 class Matrix;
 class CalChartConfiguration;
-class CC_shape_2point;
 class MovePoints;
 
-using ShapeList = std::vector<std::unique_ptr<CC_shape> >;
+using ShapeList = std::vector<std::unique_ptr<CalChart::Shape> >;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas {
@@ -79,21 +81,21 @@ private:
     CC_DRAG_TYPES curr_lasso = CC_DRAG_BOX;
     CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
     std::unique_ptr<MovePoints> m_move_points;
-    std::map<int, CC_coord> mMovePoints;
+    std::map<int, CalChart::Coord> mMovePoints;
     CC_DRAG_TYPES select_drag = CC_DRAG_NONE;
     ShapeList m_select_shape_list;
 
-    void BeginSelectDrag(CC_DRAG_TYPES type, const CC_coord& start);
-    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
-    void MoveDrag(const CC_coord& end);
+    void BeginSelectDrag(CC_DRAG_TYPES type, const CalChart::Coord& start);
+    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CalChart::Shape> shape);
+    void MoveDrag(const CalChart::Coord& end);
     void EndDrag();
     enum class direction { north,
         east,
         south,
         west };
     void MoveByKey(direction);
-    CC_coord GetMoveAmount(direction dir);
-    CC_coord SnapToGrid(CC_coord c);
+    CalChart::Coord GetMoveAmount(direction dir);
+    CalChart::Coord SnapToGrid(CalChart::Coord c);
 
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
@@ -102,14 +104,14 @@ private:
     void PaintSelectShapes(wxDC& dc, CalChartConfiguration const& config);
     void PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config);
 
-    void OnMouseLeftDown_default(wxMouseEvent& event, CC_coord pos);
-    void OnMouseLeftUp_default(wxMouseEvent& event, CC_coord pos);
+    void OnMouseLeftDown_default(wxMouseEvent& event, CalChart::Coord pos);
+    void OnMouseLeftUp_default(wxMouseEvent& event, CalChart::Coord pos);
 
-    void OnMouseLeftDown_CC_DRAG_SWAP(CC_coord pos);
+    void OnMouseLeftDown_CC_DRAG_SWAP(CalChart::Coord pos);
 
-    void OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CC_coord pos);
-    void OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CC_coord);
-    void OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CC_coord);
+    void OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CalChart::Coord pos);
+    void OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CalChart::Coord);
+    void OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CalChart::Coord);
 
     DECLARE_EVENT_TABLE()
 };

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * modes.h
  * Definitions for the show mode classes
@@ -20,14 +21,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "cc_coord.h"
 
 #include <string>
 #include <array>
 #include <memory>
 #include <functional>
+
+namespace CalChart {
 
 static constexpr auto SPR_YARD_LEFT = 8;
 static constexpr auto SPR_YARD_RIGHT = 4;
@@ -53,33 +54,33 @@ public:
 
 public:
     virtual ShowType GetType() const = 0;
-    CC_coord Offset() const { return mOffset() + mBorder1(); }
-    CC_coord FieldOffset() const { return -mOffset(); }
-    CC_coord Size() const { return mSize() + mBorder1() + mBorder2(); }
-    CC_coord FieldSize() const { return mSize(); }
-    CC_coord MinPosition() const { return -(mOffset() + mBorder1()); }
-    CC_coord MaxPosition() const { return mSize() - mOffset() + mBorder2(); }
-    CC_coord Border1() const { return mBorder1(); }
-    std::string GetName() const { return mName; };
-    CC_coord ClipPosition(const CC_coord& pos) const;
+    auto Offset() const { return mOffset() + mBorder1(); }
+    auto FieldOffset() const { return -mOffset(); }
+    auto Size() const { return mSize() + mBorder1() + mBorder2(); }
+    auto FieldSize() const { return mSize(); }
+    auto MinPosition() const { return -(mOffset() + mBorder1()); }
+    auto MaxPosition() const { return mSize() - mOffset() + mBorder2(); }
+    auto Border1() const { return mBorder1(); }
+    auto GetName() const { return mName; };
+    CalChart::Coord ClipPosition(const CalChart::Coord& pos) const;
 
 protected:
     // Users shouldn't create show modes, it should be done through derived
     // classes
-    ShowMode(const std::string& name, const CC_coord& size,
-        const CC_coord& offset, const CC_coord& border1,
-        const CC_coord& border2);
+    ShowMode(const std::string& name, const CalChart::Coord& size,
+        const CalChart::Coord& offset, const CalChart::Coord& border1,
+        const CalChart::Coord& border2);
 
-    ShowMode(const std::string& name, const std::function<CC_coord()>& size,
-        const std::function<CC_coord()>& offset,
-        const std::function<CC_coord()>& border1,
-        const std::function<CC_coord()>& border2);
+    ShowMode(const std::string& name, const std::function<CalChart::Coord()>& size,
+        const std::function<CalChart::Coord()>& offset,
+        const std::function<CalChart::Coord()>& border1,
+        const std::function<CalChart::Coord()>& border2);
 
 private:
-    const std::function<CC_coord()> mSize;
-    const std::function<CC_coord()> mOffset;
-    const std::function<CC_coord()> mBorder1;
-    const std::function<CC_coord()> mBorder2;
+    const std::function<CalChart::Coord()> mSize;
+    const std::function<CalChart::Coord()> mOffset;
+    const std::function<CalChart::Coord()> mBorder1;
+    const std::function<CalChart::Coord()> mBorder2;
     std::string mName;
 };
 
@@ -106,19 +107,19 @@ public:
     CreateShowMode(const std::string& which,
         const std::function<ShowModeInfo_t()>& valueGetter);
     static std::unique_ptr<ShowMode>
-    CreateShowMode(const std::string& name, CC_coord size, CC_coord offset,
-        CC_coord border1, CC_coord border2, unsigned short whash,
+    CreateShowMode(const std::string& name, CalChart::Coord size, CalChart::Coord offset,
+        CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
         unsigned short ehash);
 
 private:
-    ShowModeStandard(const std::string& name, CC_coord size, CC_coord offset,
-        CC_coord border1, CC_coord border2, unsigned short whash,
+    ShowModeStandard(const std::string& name, CalChart::Coord size, CalChart::Coord offset,
+        CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
         unsigned short ehash);
     ShowModeStandard(const std::string& name,
-        const std::function<CC_coord()>& offset,
-        const std::function<CC_coord()>& border1,
-        const std::function<CC_coord()>& size,
-        const std::function<CC_coord()>& border2,
+        const std::function<CalChart::Coord()>& offset,
+        const std::function<CalChart::Coord()>& border1,
+        const std::function<CalChart::Coord()>& size,
+        const std::function<CalChart::Coord()>& border2,
         const std::function<unsigned short()>& whash,
         const std::function<unsigned short()>& ehash);
 
@@ -171,15 +172,15 @@ public:
 
 private:
     // Look at calchart.cfg for description of arguments
-    ShowModeSprShow(const std::string& name, CC_coord border1, CC_coord border2,
+    ShowModeSprShow(const std::string& name, CalChart::Coord border1, CalChart::Coord border2,
         unsigned char which, short stps_x, short stps_y, short stps_w,
         short stps_h, short stg_x, short stg_y, short stg_w,
         short stg_h, short fld_x, short fld_y, short fld_w,
         short fld_h, short txt_l, short txt_r, short txt_tp,
         short txt_bm);
     ShowModeSprShow(
-        const std::string& name, const std::function<CC_coord()>& border1,
-        const std::function<CC_coord()>& border2,
+        const std::string& name, const std::function<CalChart::Coord()>& border1,
+        const std::function<CalChart::Coord()>& border2,
         const std::function<unsigned char()>& which,
         const std::function<short()>& stps_x,
         const std::function<short()>& stps_y,
@@ -221,3 +222,4 @@ private:
     const std::function<short()> steps_x, steps_y, steps_w, steps_h;
     const std::function<short()> text_left, text_right, text_top, text_bottom;
 };
+}
