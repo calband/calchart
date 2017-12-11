@@ -21,11 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstdint>
+
 namespace CalChart {
 
 class Coord {
 public:
-    using units = int;
+    using units = int16_t;
 
     Coord(Coord::units xval = 0, Coord::units yval = 0)
         : x(xval)
@@ -83,7 +85,7 @@ public:
         return *this;
     }
 
-    int x, y;
+    units x, y;
 };
 
 inline Coord operator+(const Coord& a, const Coord& b)
