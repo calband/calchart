@@ -34,6 +34,8 @@
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
 
+using namespace CalChart;
+
 BEGIN_EVENT_TABLE(AnimationFrame, AnimationFrame::super)
 EVT_MENU(CALCHART__anim_reanimate, AnimationFrame::OnCmdReanimate)
 EVT_MENU(CALCHART__anim_select_coll, AnimationFrame::OnCmdSelectCollisions)
@@ -328,7 +330,7 @@ void AnimationFrame::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 void AnimationFrame::OnCmd_anim_collisions(wxCommandEvent& event)
 {
     mAnimationView.SetCollisionType(
-        static_cast<CalChart::CollisionWarning>(event.GetSelection()));
+        static_cast<CollisionWarning>(event.GetSelection()));
     Refresh();
 }
 
@@ -341,7 +343,7 @@ void AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
         mAnimationView.GotoSheet(mErrorMarkers.at(which).second);
 
         mErrorText->Clear();
-        CalChart::Continuity c = mAnimationView.GetContinuityOnSheet(
+        Continuity c = mAnimationView.GetContinuityOnSheet(
             mErrorMarkers.at(which).second,
             mErrorMarkers.at(which).first.contsymbol);
         if (!c.GetText().empty()) {
@@ -649,12 +651,13 @@ void AnimationFrame::StopTimer()
 }
 
 void AnimationFrame::OnNotifyErrorList(
-    const std::map<CalChart::AnimateError, CalChart::ErrorMarker>& error_markers, unsigned sheetnum,
+    const std::map<AnimateError, ErrorMarker>& error_markers, unsigned sheetnum,
     const wxString& message)
 {
     for (auto& i : error_markers) {
         wxString error_string;
-        error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message, CalChart::s_animate_err_msgs[i.first]);
+        error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message,
+            s_animate_err_msgs[i.first]);
         mErrorList->Append(error_string);
         mErrorMarkers.emplace_back(i.second, sheetnum);
     }
