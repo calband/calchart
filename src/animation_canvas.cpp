@@ -68,7 +68,7 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
 }
 
 // utilities
-static auto CalcUserScaleAndOffset(std::pair<CC_coord, CC_coord> const& sizeAndOffset, wxSize const& windowSize)
+static auto CalcUserScaleAndOffset(std::pair<CalChart::Coord, CalChart::Coord> const& sizeAndOffset, wxSize const& windowSize)
 {
     auto newX = static_cast<float>(windowSize.x);
     auto newY = static_cast<float>(windowSize.y);
@@ -83,12 +83,12 @@ static auto CalcUserScaleAndOffset(std::pair<CC_coord, CC_coord> const& sizeAndO
     // always choose x when the new aspect ratio is smaller than the show.
     // This will keep the whole field on in the canvas
     if (newSizeRatio < showAspectRatio) {
-        newvalue = newX / (float)Coord2Int(x);
+        newvalue = newX / (float)CoordUnits2Int(x);
     }
     else {
-        newvalue = newY / (float)Coord2Int(y);
+        newvalue = newY / (float)CoordUnits2Int(y);
     }
-    auto userScale = newvalue * (Coord2Int(1 << 16) / 65536.0);
+    auto userScale = newvalue * (CoordUnits2Int(1 << 16) / 65536.0);
 
     auto offsetx = sizeAndOffset.second.x + sizeAndOffset.first.x / 2;
     auto offsety = sizeAndOffset.second.y + sizeAndOffset.first.y / 2;
@@ -108,9 +108,9 @@ void AnimationCanvas::UpdateScaleAndOrigin()
     auto boundingBox = mZoomOnMarchers ? mAnimationView->GetMarcherSizeAndOffset()
                                        : mAnimationView->GetShowSizeAndOffset();
     if (mZoomOnMarchers) {
-        auto amount = Int2Coord(mStepsOutForMarcherZoom);
-        boundingBox.first += CC_coord(amount, amount) * 2;
-        boundingBox.second -= CC_coord(amount, amount);
+        auto amount = Int2CoordUnits(mStepsOutForMarcherZoom);
+        boundingBox.first += CalChart::Coord(amount, amount) * 2;
+        boundingBox.second -= CalChart::Coord(amount, amount);
     }
     auto userScaleAndOffset = CalcUserScaleAndOffset(boundingBox, window_size);
     mUserScale = userScaleAndOffset.first;
@@ -147,7 +147,7 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 
     // if mouse lifted very close to where clicked, then it is a previous beat
     // move
-    if ((std::abs(mMouseXEnd - mMouseXStart) < Int2Coord(1) / 2) && (std::abs(mMouseYEnd - mMouseYStart) < Int2Coord(1) / 2)) {
+    if ((std::abs(mMouseXEnd - mMouseXStart) < Int2CoordUnits(1) / 2) && (std::abs(mMouseYEnd - mMouseYStart) < Int2CoordUnits(1) / 2)) {
         if (mAnimationView) {
             mAnimationView->PrevBeat();
         }

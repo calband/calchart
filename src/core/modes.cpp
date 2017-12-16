@@ -24,9 +24,11 @@
 
 #include <algorithm>
 
-ShowMode::ShowMode(const std::string& name, const CC_coord& size,
-    const CC_coord& offset, const CC_coord& border1,
-    const CC_coord& border2)
+namespace CalChart {
+
+ShowMode::ShowMode(const std::string& name, const CalChart::Coord& size,
+    const CalChart::Coord& offset, const CalChart::Coord& border1,
+    const CalChart::Coord& border2)
     : mSize([=]() { return size; })
     , mOffset([=]() { return offset; })
     , mBorder1([=]() { return border1; })
@@ -36,10 +38,10 @@ ShowMode::ShowMode(const std::string& name, const CC_coord& size,
 }
 
 ShowMode::ShowMode(const std::string& name,
-    const std::function<CC_coord()>& size,
-    const std::function<CC_coord()>& offset,
-    const std::function<CC_coord()>& border1,
-    const std::function<CC_coord()>& border2)
+    const std::function<CalChart::Coord()>& size,
+    const std::function<CalChart::Coord()>& offset,
+    const std::function<CalChart::Coord()>& border1,
+    const std::function<CalChart::Coord()>& border2)
     : mSize(size)
     , mOffset(offset)
     , mBorder1(border1)
@@ -50,12 +52,12 @@ ShowMode::ShowMode(const std::string& name,
 
 ShowMode::~ShowMode() {}
 
-CC_coord ShowMode::ClipPosition(const CC_coord& pos) const
+CalChart::Coord ShowMode::ClipPosition(const CalChart::Coord& pos) const
 {
     auto min = MinPosition();
     auto max = MaxPosition();
 
-    CC_coord clipped;
+    CalChart::Coord clipped;
     if (pos.x < min.x)
         clipped.x = min.x;
     else if (pos.x > max.x)
@@ -71,9 +73,9 @@ CC_coord ShowMode::ClipPosition(const CC_coord& pos) const
     return clipped;
 }
 
-ShowModeStandard::ShowModeStandard(const std::string& name, CC_coord size,
-    CC_coord offset, CC_coord border1,
-    CC_coord border2, unsigned short hashw,
+ShowModeStandard::ShowModeStandard(const std::string& name, CalChart::Coord size,
+    CalChart::Coord offset, CalChart::Coord border1,
+    CalChart::Coord border2, unsigned short hashw,
     unsigned short hashe)
     : ShowMode(name, size, offset, border1, border2)
     , mHashW([=]() { return hashw; })
@@ -82,10 +84,10 @@ ShowModeStandard::ShowModeStandard(const std::string& name, CC_coord size,
 }
 
 ShowModeStandard::ShowModeStandard(const std::string& name,
-    const std::function<CC_coord()>& size,
-    const std::function<CC_coord()>& offset,
-    const std::function<CC_coord()>& border1,
-    const std::function<CC_coord()>& border2,
+    const std::function<CalChart::Coord()>& size,
+    const std::function<CalChart::Coord()>& offset,
+    const std::function<CalChart::Coord()>& border1,
+    const std::function<CalChart::Coord()>& border2,
     const std::function<unsigned short()>& whash,
     const std::function<unsigned short()>& ehash)
     : ShowMode(name, size, offset, border1, border2)
@@ -98,16 +100,16 @@ ShowModeStandard::~ShowModeStandard() {}
 
 ShowMode::ShowType ShowModeStandard::GetType() const { return SHOW_STANDARD; }
 
-ShowModeSprShow::ShowModeSprShow(const std::string& nam, CC_coord bord1,
-    CC_coord bord2, unsigned char which,
+ShowModeSprShow::ShowModeSprShow(const std::string& nam, CalChart::Coord bord1,
+    CalChart::Coord bord2, unsigned char which,
     short stps_x, short stps_y, short stps_w,
     short stps_h, short stg_x, short stg_y,
     short stg_w, short stg_h, short fld_x,
     short fld_y, short fld_w, short fld_h,
     short txt_l, short txt_r, short txt_tp,
     short txt_bm)
-    : ShowMode(nam, CC_coord(Int2Coord(stps_w), Int2Coord(stps_h)),
-          CC_coord(Int2Coord(-stps_x), Int2Coord(-stps_y)), bord1, bord2)
+    : ShowMode(nam, CalChart::Coord(Int2CoordUnits(stps_w), Int2CoordUnits(stps_h)),
+          CalChart::Coord(Int2CoordUnits(-stps_x), Int2CoordUnits(-stps_y)), bord1, bord2)
     , which_yards([=]() { return which; })
     , stage_x([=]() { return stg_x; })
     , stage_y([=]() { return stg_y; })
@@ -129,8 +131,8 @@ ShowModeSprShow::ShowModeSprShow(const std::string& nam, CC_coord bord1,
 }
 
 ShowModeSprShow::ShowModeSprShow(
-    const std::string& nam, const std::function<CC_coord()>& bord1,
-    const std::function<CC_coord()>& bord2,
+    const std::string& nam, const std::function<CalChart::Coord()>& bord1,
+    const std::function<CalChart::Coord()>& bord2,
     const std::function<unsigned char()>& which,
     const std::function<short()>& stps_x, const std::function<short()>& stps_y,
     const std::function<short()>& stps_w, const std::function<short()>& stps_h,
@@ -142,9 +144,9 @@ ShowModeSprShow::ShowModeSprShow(
     const std::function<short()>& txt_tp, const std::function<short()>& txt_bm)
     : ShowMode(
           nam,
-          [=]() { return CC_coord(Int2Coord(stps_w()), Int2Coord(stps_h())); },
+          [=]() { return CalChart::Coord(Int2CoordUnits(stps_w()), Int2CoordUnits(stps_h())); },
           [=]() {
-              return CC_coord(Int2Coord(-stps_x()), Int2Coord(-stps_y()));
+              return CalChart::Coord(Int2CoordUnits(-stps_x()), Int2CoordUnits(-stps_y()));
           },
           bord1, bord2)
     , which_yards(which)
@@ -177,10 +179,10 @@ ShowModeStandard::CreateShowMode(const std::string& which,
 {
     unsigned short whash = values[kwhash];
     unsigned short ehash = values[kehash];
-    CC_coord bord1{ Int2Coord(values[kbord1_x]), Int2Coord(values[kbord1_y]) };
-    CC_coord bord2{ Int2Coord(values[kbord2_x]), Int2Coord(values[kbord2_y]) };
-    CC_coord offset{ Int2Coord(-values[koffset_x]), Int2Coord(-values[koffset_y]) };
-    CC_coord size{ Int2Coord(values[ksize_x]), Int2Coord(values[ksize_y]) };
+    CalChart::Coord bord1{ Int2CoordUnits(values[kbord1_x]), Int2CoordUnits(values[kbord1_y]) };
+    CalChart::Coord bord2{ Int2CoordUnits(values[kbord2_x]), Int2CoordUnits(values[kbord2_y]) };
+    CalChart::Coord offset{ Int2CoordUnits(-values[koffset_x]), Int2CoordUnits(-values[koffset_y]) };
+    CalChart::Coord size{ Int2CoordUnits(values[ksize_x]), Int2CoordUnits(values[ksize_y]) };
     return std::unique_ptr<ShowMode>(
         new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
 }
@@ -192,28 +194,28 @@ std::unique_ptr<ShowMode> ShowModeStandard::CreateShowMode(
     auto whash = [valueGetter]() { return valueGetter()[kwhash]; };
     auto ehash = [valueGetter]() { return valueGetter()[kehash]; };
     auto bord1 = [valueGetter]() {
-        return CC_coord{ Int2Coord(valueGetter()[kbord1_x]),
-            Int2Coord(valueGetter()[kbord1_y]) };
+        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord1_x]),
+            Int2CoordUnits(valueGetter()[kbord1_y]) };
     };
     auto bord2 = [valueGetter]() {
-        return CC_coord{ Int2Coord(valueGetter()[kbord2_x]),
-            Int2Coord(valueGetter()[kbord2_y]) };
+        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord2_x]),
+            Int2CoordUnits(valueGetter()[kbord2_y]) };
     };
     auto offset = [valueGetter]() {
-        return CC_coord{ Int2Coord(-valueGetter()[koffset_x]),
-            Int2Coord(-valueGetter()[koffset_y]) };
+        return CalChart::Coord{ Int2CoordUnits(-valueGetter()[koffset_x]),
+            Int2CoordUnits(-valueGetter()[koffset_y]) };
     };
     auto size = [valueGetter]() {
-        return CC_coord{ Int2Coord(valueGetter()[ksize_x]),
-            Int2Coord(valueGetter()[ksize_y]) };
+        return CalChart::Coord{ Int2CoordUnits(valueGetter()[ksize_x]),
+            Int2CoordUnits(valueGetter()[ksize_y]) };
     };
     return std::unique_ptr<ShowMode>(
         new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
 }
 
 std::unique_ptr<ShowMode> ShowModeStandard::CreateShowMode(
-    const std::string& name, CC_coord size, CC_coord offset, CC_coord border1,
-    CC_coord border2, unsigned short whash, unsigned short ehash)
+    const std::string& name, CalChart::Coord size, CalChart::Coord offset, CalChart::Coord border1,
+    CalChart::Coord border2, unsigned short whash, unsigned short ehash)
 {
     return std::unique_ptr<ShowMode>(
         new ShowModeStandard(name, size, offset, border1, border2, whash, ehash));
@@ -224,11 +226,11 @@ ShowModeSprShow::CreateSpringShowMode(const std::string& which,
     const SpringShowModeInfo_t& values)
 {
     unsigned char which_spr_yards = values[kwhich_spr_yards];
-    CC_coord bord1, bord2;
-    bord1.x = Int2Coord(values[kbord1_x]);
-    bord1.y = Int2Coord(values[kbord1_y]);
-    bord2.x = Int2Coord(values[kbord2_x]);
-    bord2.y = Int2Coord(values[kbord2_y]);
+    CalChart::Coord bord1, bord2;
+    bord1.x = Int2CoordUnits(values[kbord1_x]);
+    bord1.y = Int2CoordUnits(values[kbord1_y]);
+    bord2.x = Int2CoordUnits(values[kbord2_x]);
+    bord2.y = Int2CoordUnits(values[kbord2_y]);
 
     short mode_steps_x = values[kmode_steps_x];
     short mode_steps_y = values[kmode_steps_y];
@@ -261,12 +263,12 @@ std::unique_ptr<ShowMode> ShowModeSprShow::CreateSpringShowMode(
         return valueGetter()[kwhich_spr_yards];
     };
     auto bord1 = [valueGetter]() {
-        return CC_coord{ Int2Coord(valueGetter()[kbord1_x]),
-            Int2Coord(valueGetter()[kbord1_y]) };
+        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord1_x]),
+            Int2CoordUnits(valueGetter()[kbord1_y]) };
     };
     auto bord2 = [valueGetter]() {
-        return CC_coord{ Int2Coord(valueGetter()[kbord2_x]),
-            Int2Coord(valueGetter()[kbord2_y]) };
+        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord2_x]),
+            Int2CoordUnits(valueGetter()[kbord2_y]) };
     };
 
     auto mode_steps_x = [valueGetter]() { return valueGetter()[kmode_steps_x]; };
@@ -296,4 +298,5 @@ std::unique_ptr<ShowMode> ShowModeSprShow::CreateSpringShowMode(
         mode_steps_w, mode_steps_h, eps_stage_x, eps_stage_y, eps_stage_w,
         eps_stage_h, eps_field_x, eps_field_y, eps_field_w, eps_field_h,
         eps_text_left, eps_text_right, eps_text_top, eps_text_bottom));
+}
 }

@@ -38,6 +38,8 @@
 #include <string>
 #include <sstream>
 
+namespace CalChart {
+
 // from
 // http://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
 // there is no snprint on visual c++ 2010
@@ -139,12 +141,12 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
     float spr_step_size;
     short step_width;
 
-    CC_coord fullsize = mode.Size();
-    CC_coord fieldsize = mode.FieldSize();
-    float fullwidth = Coord2Float(fullsize.x);
-    float fullheight = Coord2Float(fullsize.y);
-    float fieldwidth = Coord2Float(fieldsize.x);
-    float fieldheight = Coord2Float(fieldsize.y);
+    auto fullsize = mode.Size();
+    auto fieldsize = mode.FieldSize();
+    float fullwidth = CoordUnits2Float(fullsize.x);
+    float fullheight = CoordUnits2Float(fullsize.y);
+    float fieldwidth = CoordUnits2Float(fieldsize.x);
+    float fieldheight = CoordUnits2Float(fieldsize.y);
 
     /* first, calculate dimensions */
     if (!overview) {
@@ -153,8 +155,8 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
             std::tie(width, height, real_width, real_height, field_y) = CalcValues(
                 PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
             step_width = (short)(width / (height / (fullheight + 8.0)));
-            if (step_width > Coord2Int(fieldsize.x)) {
-                step_width = Coord2Int(fieldsize.x);
+            if (step_width > CoordUnits2Int(fieldsize.x)) {
+                step_width = CoordUnits2Int(fieldsize.x);
             }
             min_yards = min_yards * 16 / 10;
             if (step_width > min_yards) {
@@ -240,7 +242,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 }
 
 PrintShowToPS::PrintShowToPS(
-    const CC_show& show, bool PrintLandscape, bool PrintDoCont,
+    const Show& show, bool PrintLandscape, bool PrintDoCont,
     bool PrintDoContSheet, bool PrintOverview, int min_yards,
     ShowMode const& mode, std::array<std::string, 7> const& fonts_,
     double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY,
@@ -445,7 +447,7 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps,
     const std::set<size_t>& isPicked,
     short num_pages) const
 {
-    CC_show::const_CC_sheet_iterator_t curr_sheet = mShow.GetSheetBegin();
+    auto curr_sheet = mShow.GetSheetBegin();
     if (eps) {
         curr_sheet += curr_ss;
     }
@@ -522,11 +524,11 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
 }
 
 void PrintShowToPS::PrintContSections(std::ostream& buffer,
-    const CC_sheet& sheet) const
+    const Sheet& sheet) const
 {
     const auto& continuity = sheet.GetPrintableContinuity();
     auto cont_len = std::count_if(continuity.begin(), continuity.end(),
-        [](const CC_textline& c) { return c.GetOnSheet(); });
+        [](auto&& c) { return c.GetOnSheet(); });
     if (cont_len == 0)
         return;
 
@@ -544,7 +546,7 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer,
     }
 }
 
-void PrintShowToPS::gen_cont_line(std::ostream& buffer, const CC_textline& line,
+void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
     PSFONT_TYPE currfontnum,
     float fontsize) const
 {
@@ -603,10 +605,10 @@ void PrintShowToPS::print_start_page(std::ostream& buffer, bool landscape,
     buffer << (translate_x) << " " << (translate_y) << " translate\n";
 }
 
-bool PrintShowToPS::SplitSheet(const CC_sheet& sheet) const
+bool PrintShowToPS::SplitSheet(const Sheet& sheet) const
 {
-    Coord fmin = mMode.FieldOffset().x;
-    Coord fmax = mMode.FieldSize().x + fmin;
+    auto fmin = mMode.FieldOffset().x;
+    auto fmax = mMode.FieldSize().x + fmin;
 
     /* find bounds */
     auto max_s = fmax;
@@ -623,25 +625,25 @@ bool PrintShowToPS::SplitSheet(const CC_sheet& sheet) const
     if (max_n > fmax)
         max_n = fmax;
 
-    return (Coord2Int((max_n - max_s) + ((max_s + fmin) % Int2Coord(8))) > step_width);
+    return (CoordUnits2Int((max_n - max_s) + ((max_s + fmin) % Int2CoordUnits(8))) > step_width);
 }
 
-void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
+void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
     bool split_sheet) const
 {
     RAII_setprecision<std::ostream> tmp_(buffer);
     buffer.precision(2);
-    CC_coord fieldsize = mMode.FieldSize();
-    CC_coord fieldoff = mMode.FieldOffset();
-    Coord pmin = mMode.MinPosition().x;
-    Coord pmax = mMode.MaxPosition().x;
-    Coord fmin = mMode.FieldOffset().x;
-    Coord fmax = mMode.FieldSize().x + fmin;
+    auto fieldsize = mMode.FieldSize();
+    auto fieldoff = mMode.FieldOffset();
+    auto pmin = mMode.MinPosition().x;
+    auto pmax = mMode.MaxPosition().x;
+    auto fmin = mMode.FieldOffset().x;
+    auto fmax = mMode.FieldSize().x + fmin;
 
     std::string namestr(sheet.GetName());
     std::string numberstr(sheet.GetNumber());
 
-    Coord clip_s, clip_n;
+    Coord::units clip_s, clip_n;
     short step_offset;
     if (split_sheet) {
         buffer << "%%Page: " << namestr << "(N)\n";
@@ -651,9 +653,9 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
         else {
             buffer << "/pagenumtext () def\n";
         }
-        step_offset = Coord2Int(fieldsize.x) - step_width;
+        step_offset = CoordUnits2Int(fieldsize.x) - step_width;
         /* south yardline */
-        clip_s = Int2Coord(step_offset) + fmin;
+        clip_s = Int2CoordUnits(step_offset) + fmin;
         clip_n = pmax;
     }
     else {
@@ -683,7 +685,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
             }
             step_offset = 0;
             clip_s = pmin;
-            clip_n = Int2Coord(step_width) + fmin; /* north yardline */
+            clip_n = Int2CoordUnits(step_width) + fmin; /* north yardline */
         }
         else {
             buffer << "%%Page: " << namestr << "\n";
@@ -693,19 +695,19 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
             else {
                 buffer << "/pagenumtext () def\n";
             }
-            step_offset = (Coord2Int(mMode.FieldSize().x) - step_width) / 2;
+            step_offset = (CoordUnits2Int(mMode.FieldSize().x) - step_width) / 2;
             step_offset = (step_offset / 8) * 8;
             clip_s = pmin;
             clip_n = pmax;
-            short x_s = Coord2Int(max_s) - Coord2Int(fmin);
-            short x_n = Coord2Int(max_n) - Coord2Int(fmin);
+            short x_s = CoordUnits2Int(max_s) - CoordUnits2Int(fmin);
+            short x_n = CoordUnits2Int(max_n) - CoordUnits2Int(fmin);
             if ((x_s < step_offset) || (x_n > (step_offset + step_width))) {
                 /* Recenter formation */
                 step_offset = x_s - (step_width - (x_n - x_s)) / 2;
                 if (step_offset < 0)
                     step_offset = 0;
-                else if ((step_offset + step_width) > Coord2Int(mMode.FieldSize().x))
-                    step_offset = Coord2Int(mMode.FieldSize().x) - step_width;
+                else if ((step_offset + step_width) > CoordUnits2Int(mMode.FieldSize().x))
+                    step_offset = CoordUnits2Int(mMode.FieldSize().x) - step_width;
                 step_offset = (step_offset / 8) * 8;
             }
         }
@@ -722,7 +724,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
                << (step_size * j) << " def\n";
         buffer << "/y " << (field_h + (step_size / 2)) << " def\n";
         std::string yardstr(mGet_yard_text(
-            (step_offset + (kYardTextValues - 1) * 4 + Coord2Int(fieldoff.x) + j) / 8));
+            (step_offset + (kYardTextValues - 1) * 4 + CoordUnits2Int(fieldoff.x) + j) / 8));
         buffer << "(" << yardstr << ") dup centerText\n";
         buffer << "/y " << (-(step_size * 2)) << " def\n";
         buffer << "centerText\n";
@@ -741,11 +743,11 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
     for (auto i = 0; i < mShow.GetNumPoints(); i++) {
         if ((sheet.GetPoint(i).GetPos().x > clip_n) || (sheet.GetPoint(i).GetPos().x < clip_s))
             continue;
-        float fieldheight = Coord2Float(fieldsize.y);
-        float fieldoffx = Coord2Float(fieldoff.x);
-        float fieldoffy = Coord2Float(fieldoff.y);
-        float dot_x = (Coord2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
-        float dot_y = (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y) - fieldoffy) / fieldheight) * field_h;
+        float fieldheight = CoordUnits2Float(fieldsize.y);
+        float fieldoffx = CoordUnits2Float(fieldoff.x);
+        float fieldoffy = CoordUnits2Float(fieldoff.y);
+        float dot_x = (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
+        float dot_y = (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - fieldoffy) / fieldheight) * field_h;
         buffer << dot_x << " " << dot_y << " "
                << dot_routines[sheet.GetPoint(i).GetSymbol()] << "\n";
         buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y
@@ -759,7 +761,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const CC_sheet& sheet,
 }
 
 void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
-    const CC_sheet& sheet) const
+    const Sheet& sheet) const
 {
     std::string namestr(sheet.GetName());
     std::string numberstr(sheet.GetNumber());
@@ -844,8 +846,8 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
     buffer << "/numberfont findfont " << (dot_w * 2 * mNumRatio)
            << " scalefont setfont\n";
     for (auto i = 0; i < mShow.GetNumPoints(); i++) {
-        float dot_x = stage_field_x + (Coord2Float(sheet.GetPoint(i).GetPos().x) - modesprshow.StepsX()) / modesprshow.StepsW() * stage_field_w;
-        float dot_y = stage_field_y + stage_field_h * (1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y) - modesprshow.StepsY()) / modesprshow.StepsH());
+        float dot_x = stage_field_x + (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - modesprshow.StepsX()) / modesprshow.StepsW() * stage_field_w;
+        float dot_y = stage_field_y + stage_field_h * (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - modesprshow.StepsY()) / modesprshow.StepsH());
         buffer << dot_x << " " << dot_y << " "
                << dot_routines[sheet.GetPoint(i).GetSymbol()] << "\n";
         buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y
@@ -859,25 +861,26 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
 }
 
 void PrintShowToPS::PrintOverview(std::ostream& buffer,
-    const CC_sheet& sheet) const
+    const Sheet& sheet) const
 {
     buffer << "%%Page: " << sheet.GetName() << "\n";
 
     print_start_page(buffer, mPrintLandscape, field_x, field_y);
 
     buffer << "drawfield\n";
-    CC_coord fieldoff = mMode.FieldOffset();
-    CC_coord fieldsize = mMode.FieldSize();
-    float fieldwidth = Coord2Float(fieldsize.x);
+    auto fieldoff = mMode.FieldOffset();
+    auto fieldsize = mMode.FieldSize();
+    float fieldwidth = CoordUnits2Float(fieldsize.x);
     buffer << "/w " << (width / fieldwidth * 2.0 / 3.0) << " def\n";
 
-    float fieldx = Coord2Float(fieldoff.x);
-    float fieldy = Coord2Float(fieldoff.y);
-    float fieldheight = Coord2Float(fieldsize.y);
+    float fieldx = CoordUnits2Float(fieldoff.x);
+    float fieldy = CoordUnits2Float(fieldoff.y);
+    float fieldheight = CoordUnits2Float(fieldsize.y);
 
     for (auto i = 0; i < mShow.GetNumPoints(); i++) {
-        buffer << ((Coord2Float(sheet.GetPoint(i).GetPos().x) - fieldx) / fieldwidth * width)
-               << " " << ((1.0 - (Coord2Float(sheet.GetPoint(i).GetPos().y) - fieldy) / fieldheight) * height)
+        buffer << ((CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - fieldx) / fieldwidth * width)
+               << " " << ((1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - fieldy) / fieldheight) * height)
                << " dotbox\n";
     }
+}
 }

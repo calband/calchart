@@ -1,3 +1,4 @@
+#pragma once
 /*
  * CC_DrawCommand.h
  * Class for how to draw
@@ -20,12 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CC_DRAWCOMMAND_H_
-#define _CC_DRAWCOMMAND_H_
-
 #include "cc_coord.h"
 
-struct CC_DrawCommand {
+namespace CalChart {
+
+struct DrawCommand {
     typedef enum { Ignore,
         Line,
         Arc,
@@ -34,13 +34,13 @@ struct CC_DrawCommand {
     int x1, y1, x2, y2;
     int xc, yc;
     // nothing version
-    CC_DrawCommand()
+    DrawCommand()
         : mType(Ignore)
     {
     }
 
     // Line version
-    CC_DrawCommand(int startx, int starty, int endx, int endy)
+    DrawCommand(int startx, int starty, int endx, int endy)
         : mType(Line)
         , x1(startx)
         , y1(starty)
@@ -50,7 +50,7 @@ struct CC_DrawCommand {
     }
 
     // Line version
-    CC_DrawCommand(const CC_coord& start, const CC_coord& end)
+    DrawCommand(const Coord& start, const Coord& end)
         : mType(Line)
         , x1(start.x)
         , y1(start.y)
@@ -60,7 +60,7 @@ struct CC_DrawCommand {
     }
 
     // Arc version
-    CC_DrawCommand(int startx, int starty, int endx, int endy, int centerx,
+    DrawCommand(int startx, int starty, int endx, int endy, int centerx,
         int centery)
         : mType(Arc)
         , x1(startx)
@@ -73,7 +73,7 @@ struct CC_DrawCommand {
     }
 
     // Generic version
-    CC_DrawCommand(DrawType t, int startx, int starty, int endx, int endy)
+    DrawCommand(DrawType t, int startx, int starty, int endx, int endy)
         : mType(t)
         , x1(startx)
         , y1(starty)
@@ -83,7 +83,7 @@ struct CC_DrawCommand {
     }
 
     // Generic version
-    CC_DrawCommand(DrawType t, const CC_coord& start, const CC_coord& end)
+    DrawCommand(DrawType t, const Coord& start, const Coord& end)
         : mType(t)
         , x1(start.x)
         , y1(start.y)
@@ -92,5 +92,4 @@ struct CC_DrawCommand {
     {
     }
 };
-
-#endif // _CC_DRAWCOMMAND_H_
+}

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * parse.h
  * Classes for parsing continuity
@@ -19,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 struct YYLTYPE {
     int first_line;

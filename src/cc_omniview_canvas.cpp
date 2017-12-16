@@ -633,11 +633,11 @@ MarcherInfo CCOmniView_Canvas::GetMarcherInfo(int which) const
         auto anim_info = mAnimationView->GetAnimation()->GetAnimateInfo(which);
         info.direction = NormalizeAngle((anim_info.mRealDirection * M_PI / 180.0));
 
-        CC_coord position = anim_info.mPosition;
-        info.x = Coord2Float(position.x);
+        CalChart::Coord position = anim_info.mPosition;
+        info.x = CoordUnits2Float(position.x);
         // because the coordinate system for continuity and OpenGL are different,
         // correct here.
-        info.y = -1.0 * Coord2Float(position.y);
+        info.y = -1.0 * CoordUnits2Float(position.y);
     }
     return info;
 }
@@ -748,11 +748,11 @@ void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-    CC_coord fieldSize = mAnimationView
+    CalChart::Coord fieldSize = mAnimationView
         ? mAnimationView->GetShow()->GetMode().FieldSize()
-        : CC_coord(160, 80);
-    float FieldEW = Coord2Float(fieldSize.y);
-    float FieldNS = Coord2Float(fieldSize.x);
+        : CalChart::Coord(160, 80);
+    float FieldEW = CoordUnits2Float(fieldSize.y);
+    float FieldNS = CoordUnits2Float(fieldSize.x);
 
     glClear(GL_COLOR_BUFFER_BIT);
     // set our view point:

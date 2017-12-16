@@ -125,14 +125,14 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 {
     wxArrayString choices;
-    for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin();
+    for (auto sheet = mShow->GetSheetBegin();
          sheet != mShow->GetSheetEnd(); ++sheet) {
         choices.Add(sheet->GetName());
     }
     wxMultiChoiceDialog dialog(this, wxT("Choose which pages to print"),
         wxT("Pagest to Print"), choices);
     wxArrayInt markedChoices;
-    for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin();
+    for (auto sheet = mShow->GetSheetBegin();
          sheet != mShow->GetSheetEnd(); ++sheet) {
         if (mIsSheetPicked.count(std::distance(mShow->GetSheetBegin(), sheet))) {
             markedChoices.Add(static_cast<int>(std::distance(mShow->GetSheetBegin(), sheet)));
@@ -195,7 +195,7 @@ bool PrintPostScriptDialog::Create(const CalChartDoc* show, bool printEPS,
     if (!wxDialog::Create(parent, id, caption, pos, size, style))
         return false;
     mShow = show;
-    for (CC_show::const_CC_sheet_iterator_t sheet = mShow->GetSheetBegin();
+    for (auto sheet = mShow->GetSheetBegin();
          sheet != mShow->GetSheetEnd(); ++sheet) {
         mIsSheetPicked.insert(std::distance(mShow->GetSheetBegin(), sheet));
     }

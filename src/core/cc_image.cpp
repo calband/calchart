@@ -22,7 +22,7 @@
 #include "cc_image.h"
 #include "cc_fileformat.h"
 
-namespace calchart_core {
+namespace CalChart {
 
 ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha)
     : left(left)
@@ -63,18 +63,18 @@ ImageData::ImageData(uint8_t const*& d)
 std::vector<uint8_t> ImageData::Serialize() const
 {
     std::vector<uint8_t> result;
-    CalChart::Parser::Append(result, uint32_t(left));
-    CalChart::Parser::Append(result, uint32_t(top));
-    CalChart::Parser::Append(result, uint32_t(scaled_width));
-    CalChart::Parser::Append(result, uint32_t(scaled_height));
-    CalChart::Parser::Append(result, uint32_t(image_width));
-    CalChart::Parser::Append(result, uint32_t(image_height));
+    Parser::Append(result, uint32_t(left));
+    Parser::Append(result, uint32_t(top));
+    Parser::Append(result, uint32_t(scaled_width));
+    Parser::Append(result, uint32_t(scaled_height));
+    Parser::Append(result, uint32_t(image_width));
+    Parser::Append(result, uint32_t(image_height));
     // we know data size, but let's put it in anyways
-    CalChart::Parser::Append(result, uint32_t(data.size()));
-    CalChart::Parser::Append(result, data);
+    Parser::Append(result, uint32_t(data.size()));
+    Parser::Append(result, data);
     // alpha could be zero
-    CalChart::Parser::Append(result, uint32_t(alpha.size()));
-    CalChart::Parser::Append(result, alpha);
+    Parser::Append(result, uint32_t(alpha.size()));
+    Parser::Append(result, alpha);
     return result;
 }
 }

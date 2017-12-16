@@ -15,8 +15,12 @@
 @implementation cc_show_tests
 
 - (void)test_default_equal {
-    auto empty_show = CC_show::Create_CC_show();
+    auto empty_show = CalChart::Show::Create_CC_show();
     XCTAssert(empty_show);
+}
+
+- (void)test_builtin {
+    CalChart::Show_UnitTests();
 }
 
 @end

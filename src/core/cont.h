@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cont.h
  * Classes for continuity
@@ -20,10 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "animatecompile.h"
 #include <iosfwd>
+
+namespace CalChart {
 
 enum ContDefinedValue {
     CC_N,
@@ -62,7 +63,7 @@ class ContPoint : public ContToken {
 
 public:
     ContPoint() {}
-    virtual CC_coord Get(AnimateCompile& anim) const;
+    virtual Coord Get(AnimateCompile& anim) const;
     virtual std::ostream& Print(std::ostream&) const override;
 };
 
@@ -71,7 +72,7 @@ class ContStartPoint : public ContPoint {
 
 public:
     ContStartPoint() {}
-    virtual CC_coord Get(AnimateCompile& anim) const override;
+    virtual Coord Get(AnimateCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
 };
 
@@ -80,7 +81,7 @@ class ContNextPoint : public ContPoint {
 
 public:
     ContNextPoint() {}
-    virtual CC_coord Get(AnimateCompile& anim) const override;
+    virtual Coord Get(AnimateCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
 };
 
@@ -92,7 +93,7 @@ public:
         : refnum(n)
     {
     }
-    virtual CC_coord Get(AnimateCompile& anim) const override;
+    virtual Coord Get(AnimateCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
 
 private:
@@ -673,3 +674,4 @@ private:
     std::unique_ptr<ContValue> ang, stps;
     std::unique_ptr<ContPoint> pnt;
 };
+}

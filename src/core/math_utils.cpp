@@ -54,11 +54,11 @@ bool IsDiagonalDirection(float f)
     return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) || IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
 }
 
-CC_coord CreateVector(float dir, float mag)
+CalChart::Coord CreateVector(float dir, float mag)
 {
     dir = BoundDirection(dir);
     if (IsDiagonalDirection(dir)) {
-        CC_coord r{ Float2Coord(mag), Float2Coord(mag) };
+        CalChart::Coord r{ Float2CoordUnits(mag), Float2CoordUnits(mag) };
         if ((dir > 50.0) && (dir < 310.0))
             r.x = -r.x;
         if (dir < 180.0)
@@ -66,8 +66,8 @@ CC_coord CreateVector(float dir, float mag)
         return r;
     }
     else {
-        return CC_coord{ Float2Coord(mag * cos(Deg2Rad(dir))),
-            Float2Coord(mag * -sin(Deg2Rad(dir))) };
+        return { Float2CoordUnits(mag * cos(Deg2Rad(dir))),
+            Float2CoordUnits(mag * -sin(Deg2Rad(dir))) };
     }
 }
 

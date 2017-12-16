@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_image.h
  */
@@ -19,11 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <vector>
 
-namespace calchart_core {
+namespace CalChart {
 
 struct ImageData {
     int left, top;

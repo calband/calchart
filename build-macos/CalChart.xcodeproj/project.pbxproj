@@ -217,51 +217,30 @@
 		E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E807BD6017ED71F60052A53F /* calchart_cmd.1 */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
 		E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
+		E8A9B7471FDC89020080015A /* cc_sheet_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B7461FDC89010080015A /* cc_sheet_test.mm */; };
+		E8A9B7481FDD88A40080015A /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
+		E8A9B74C1FDD95D70080015A /* cc_point_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B7491FDD95D70080015A /* cc_point_test.mm */; };
+		E8A9B74D1FDD95D70080015A /* cc_coord_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */; };
+		E8A9B74E1FDD95D70080015A /* cc_continuity_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B74B1FDD95D70080015A /* cc_continuity_test.mm */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
-		E8C5F7811FDC67BA00C84D3E /* animate_types.h in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A717A7886100705836 /* animate_types.h */; };
 		E8C5F7821FDC67BA00C84D3E /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
-		E8C5F7831FDC67BA00C84D3E /* animate.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F39F17A631AD00831301 /* animate.h */; };
 		E8C5F7841FDC67BA00C84D3E /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
-		E8C5F7851FDC67BA00C84D3E /* animatecommand.h in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A917A7886100705836 /* animatecommand.h */; };
 		E8C5F7861FDC67BA00C84D3E /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
-		E8C5F7871FDC67BA00C84D3E /* animatecompile.h in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AB17A7886200705836 /* animatecompile.h */; };
 		E8C5F7881FDC67BA00C84D3E /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
-		E8C5F7891FDC67BA00C84D3E /* cc_continuity.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F39A17A5F09000831301 /* cc_continuity.h */; };
 		E8C5F78A1FDC67BA00C84D3E /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
-		E8C5F78B1FDC67BA00C84D3E /* cc_coord.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F38917A5E60C00831301 /* cc_coord.h */; };
-		E8C5F78C1FDC67BA00C84D3E /* cc_drawcommand.h in Sources */ = {isa = PBXBuildFile; fileRef = E803362617EE1A5E00A58457 /* cc_drawcommand.h */; };
 		E8C5F78D1FDC67BA00C84D3E /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
-		E8C5F78E1FDC67BA00C84D3E /* cc_fileformat.h in Sources */ = {isa = PBXBuildFile; fileRef = E803362717EE1C3700A58457 /* cc_fileformat.h */; };
 		E8C5F78F1FDC67BA00C84D3E /* cc_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E834B0871E1A1F8400C90974 /* cc_image.cpp */; };
-		E8C5F7901FDC67BA00C84D3E /* cc_image.h in Sources */ = {isa = PBXBuildFile; fileRef = E834B0881E1A1F8400C90974 /* cc_image.h */; };
 		E8C5F7911FDC67BA00C84D3E /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
-		E8C5F7921FDC67BA00C84D3E /* cc_point.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F38B17A5E60C00831301 /* cc_point.h */; };
 		E8C5F7931FDC67BA00C84D3E /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
-		E8C5F7941FDC67BA00C84D3E /* cc_shapes.h in Sources */ = {isa = PBXBuildFile; fileRef = E803362917EE1C5F00A58457 /* cc_shapes.h */; };
-		E8C5F7951FDC67BA00C84D3E /* cc_sheet.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F38D17A5E60C00831301 /* cc_sheet.h */; };
 		E8C5F7961FDC67BA00C84D3E /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
-		E8C5F7971FDC67BA00C84D3E /* cc_show.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F38F17A5E60C00831301 /* cc_show.h */; };
 		E8C5F7981FDC67BA00C84D3E /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
-		E8C5F7991FDC67BA00C84D3E /* cc_text.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F39817A5EFD400831301 /* cc_text.h */; };
-		E8C5F79A1FDC67BA00C84D3E /* cc_types.h in Sources */ = {isa = PBXBuildFile; fileRef = E884F39B17A5F09100831301 /* cc_types.h */; };
 		E8C5F79B1FDC67BA00C84D3E /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
-		E8C5F79C1FDC67BA00C84D3E /* cont.h in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9B17ACA6AC009B1F1C /* cont.h */; };
 		E8C5F79D1FDC67BA00C84D3E /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
-		E8C5F79E1FDC67BA00C84D3E /* math_utils.h in Sources */ = {isa = PBXBuildFile; fileRef = E803363517EE27C500A58457 /* math_utils.h */; };
 		E8C5F79F1FDC67BA00C84D3E /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F71A23B76B00A2FB3E /* modes.cpp */; };
-		E8C5F7A01FDC67BA00C84D3E /* modes.h in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F81A23B76B00A2FB3E /* modes.h */; };
-		E8C5F7A11FDC67BA00C84D3E /* parse.h in Sources */ = {isa = PBXBuildFile; fileRef = E803364117EE2E5400A58457 /* parse.h */; };
-		E8C5F7A21FDC67BA00C84D3E /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
-		E8C5F7A31FDC67BA00C84D3E /* print_ps.h in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F41A23B73F00A2FB3E /* print_ps.h */; };
 		E8C5F7A41FDC67BA00C84D3E /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5C1BFB14DF0069B914 /* json.cpp */; };
-		E8C5F7A51FDC67BA00C84D3E /* json.h in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5D1BFB14DF0069B914 /* json.h */; };
-		E8C5F7A61FDC67BA00C84D3E /* json_export.h in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE601BFB160D0069B914 /* json_export.h */; };
-		E8C5F7A71FDC67BA00C84D3E /* json_grammar.h in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF01C3B2B69005481AC /* json_grammar.h */; };
 		E8C5F7A81FDC67BA00C84D3E /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
-		E8C5F7A91FDC67BA00C84D3E /* viewer_translate.h in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF41C3CAF94005481AC /* viewer_translate.h */; };
 		E8C5F7AA1FDC67BA00C84D3E /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
 		E8C5F7AB1FDC67BA00C84D3E /* e7_transition_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C74162F41DAF2EDC00F87B7D /* e7_transition_solver.cpp */; };
-		E8C5F7AC1FDC67BA00C84D3E /* e7_transition_solver.h in Sources */ = {isa = PBXBuildFile; fileRef = C74162F51DAF2EDC00F87B7D /* e7_transition_solver.h */; };
 		E8C5F7B11FDC67E700C84D3E /* libcalchart_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */; };
 		E8C5F7B51FDC693300C84D3E /* libcalchart_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */; };
 		E8C5F7B81FDC6A3200C84D3E /* e7_transition_solver_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7B71FDC6A2800C84D3E /* e7_transition_solver_ui.cpp */; };
@@ -743,6 +722,10 @@
 		E89A41F41A23B73F00A2FB3E /* print_ps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_ps.h; sourceTree = "<group>"; };
 		E89A41F71A23B76B00A2FB3E /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modes.cpp; sourceTree = "<group>"; };
 		E89A41F81A23B76B00A2FB3E /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
+		E8A9B7461FDC89010080015A /* cc_sheet_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_sheet_test.mm; sourceTree = "<group>"; };
+		E8A9B7491FDD95D70080015A /* cc_point_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_point_test.mm; sourceTree = "<group>"; };
+		E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_coord_test.mm; sourceTree = "<group>"; };
+		E8A9B74B1FDD95D70080015A /* cc_continuity_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_continuity_test.mm; sourceTree = "<group>"; };
 		E8B89DD8186F5655004DE7DF /* cc_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_text.cpp; sourceTree = "<group>"; };
 		E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_cont_ui.cpp; sourceTree = "<group>"; };
 		E8B89DDC186F7C50004DE7DF /* print_cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_cont_ui.h; sourceTree = "<group>"; };
@@ -1168,7 +1151,6 @@
 				E884F38817A5E60C00831301 /* cc_coord.cpp */,
 				E884F38917A5E60C00831301 /* cc_coord.h */,
 				E803362617EE1A5E00A58457 /* cc_drawcommand.h */,
-				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E803362717EE1C3700A58457 /* cc_fileformat.h */,
 				E834B0871E1A1F8400C90974 /* cc_image.cpp */,
 				E834B0881E1A1F8400C90974 /* cc_image.h */,
@@ -1176,6 +1158,7 @@
 				E884F38B17A5E60C00831301 /* cc_point.h */,
 				E803362817EE1C5F00A58457 /* cc_shapes.cpp */,
 				E803362917EE1C5F00A58457 /* cc_shapes.h */,
+				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E884F38D17A5E60C00831301 /* cc_sheet.h */,
 				E884F38E17A5E60C00831301 /* cc_show.cpp */,
 				E884F38F17A5E60C00831301 /* cc_show.h */,
@@ -1196,8 +1179,8 @@
 				C78FDE601BFB160D0069B914 /* json_export.h */,
 				C7071FF01C3B2B69005481AC /* json_grammar.h */,
 				C7071FF11C3B2CA8005481AC /* json_export.cpp */,
-				C7071FF41C3CAF94005481AC /* viewer_translate.h */,
 				C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */,
+				C7071FF41C3CAF94005481AC /* viewer_translate.h */,
 				C74162F41DAF2EDC00F87B7D /* e7_transition_solver.cpp */,
 				C74162F51DAF2EDC00F87B7D /* e7_transition_solver.h */,
 			);
@@ -1207,6 +1190,10 @@
 		E8C5F7C21FDC6EE100C84D3E /* calchart_core_tests */ = {
 			isa = PBXGroup;
 			children = (
+				E8A9B74B1FDD95D70080015A /* cc_continuity_test.mm */,
+				E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */,
+				E8A9B7491FDD95D70080015A /* cc_point_test.mm */,
+				E8A9B7461FDC89010080015A /* cc_sheet_test.mm */,
 				E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */,
 				E8C5F7C51FDC6EE100C84D3E /* Info.plist */,
 			);
@@ -1449,52 +1436,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E8C5F7811FDC67BA00C84D3E /* animate_types.h in Sources */,
 				E8C5F7821FDC67BA00C84D3E /* animate.cpp in Sources */,
-				E8C5F7831FDC67BA00C84D3E /* animate.h in Sources */,
 				E8C5F7841FDC67BA00C84D3E /* animatecommand.cpp in Sources */,
-				E8C5F7851FDC67BA00C84D3E /* animatecommand.h in Sources */,
 				E8C5F7861FDC67BA00C84D3E /* animatecompile.cpp in Sources */,
-				E8C5F7871FDC67BA00C84D3E /* animatecompile.h in Sources */,
 				E8C5F7881FDC67BA00C84D3E /* cc_continuity.cpp in Sources */,
-				E8C5F7891FDC67BA00C84D3E /* cc_continuity.h in Sources */,
 				E8C5F7BB1FDC6BD000C84D3E /* contgram.y in Sources */,
 				E8C5F78A1FDC67BA00C84D3E /* cc_coord.cpp in Sources */,
-				E8C5F78B1FDC67BA00C84D3E /* cc_coord.h in Sources */,
-				E8C5F78C1FDC67BA00C84D3E /* cc_drawcommand.h in Sources */,
 				E8C5F78D1FDC67BA00C84D3E /* cc_sheet.cpp in Sources */,
-				E8C5F78E1FDC67BA00C84D3E /* cc_fileformat.h in Sources */,
 				E8C5F78F1FDC67BA00C84D3E /* cc_image.cpp in Sources */,
-				E8C5F7901FDC67BA00C84D3E /* cc_image.h in Sources */,
 				E8C5F7911FDC67BA00C84D3E /* cc_point.cpp in Sources */,
-				E8C5F7921FDC67BA00C84D3E /* cc_point.h in Sources */,
 				E8C5F7931FDC67BA00C84D3E /* cc_shapes.cpp in Sources */,
-				E8C5F7941FDC67BA00C84D3E /* cc_shapes.h in Sources */,
-				E8C5F7951FDC67BA00C84D3E /* cc_sheet.h in Sources */,
 				E8C5F7961FDC67BA00C84D3E /* cc_show.cpp in Sources */,
-				E8C5F7971FDC67BA00C84D3E /* cc_show.h in Sources */,
 				E8C5F7981FDC67BA00C84D3E /* cc_text.cpp in Sources */,
-				E8C5F7991FDC67BA00C84D3E /* cc_text.h in Sources */,
-				E8C5F79A1FDC67BA00C84D3E /* cc_types.h in Sources */,
 				E8C5F7BC1FDC6BD400C84D3E /* contscan.l in Sources */,
 				E8C5F79B1FDC67BA00C84D3E /* cont.cpp in Sources */,
-				E8C5F79C1FDC67BA00C84D3E /* cont.h in Sources */,
 				E8C5F79D1FDC67BA00C84D3E /* math_utils.cpp in Sources */,
-				E8C5F79E1FDC67BA00C84D3E /* math_utils.h in Sources */,
 				E8C5F79F1FDC67BA00C84D3E /* modes.cpp in Sources */,
-				E8C5F7A01FDC67BA00C84D3E /* modes.h in Sources */,
-				E8C5F7A11FDC67BA00C84D3E /* parse.h in Sources */,
-				E8C5F7A21FDC67BA00C84D3E /* print_ps.cpp in Sources */,
-				E8C5F7A31FDC67BA00C84D3E /* print_ps.h in Sources */,
+				E8A9B7481FDD88A40080015A /* print_ps.cpp in Sources */,
 				E8C5F7A41FDC67BA00C84D3E /* json.cpp in Sources */,
-				E8C5F7A51FDC67BA00C84D3E /* json.h in Sources */,
-				E8C5F7A61FDC67BA00C84D3E /* json_export.h in Sources */,
-				E8C5F7A71FDC67BA00C84D3E /* json_grammar.h in Sources */,
 				E8C5F7A81FDC67BA00C84D3E /* json_export.cpp in Sources */,
-				E8C5F7A91FDC67BA00C84D3E /* viewer_translate.h in Sources */,
 				E8C5F7AA1FDC67BA00C84D3E /* viewer_translate.cpp in Sources */,
 				E8C5F7AB1FDC67BA00C84D3E /* e7_transition_solver.cpp in Sources */,
-				E8C5F7AC1FDC67BA00C84D3E /* e7_transition_solver.h in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1503,6 +1465,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */,
+				E8A9B7471FDC89020080015A /* cc_sheet_test.mm in Sources */,
+				E8A9B74C1FDD95D70080015A /* cc_point_test.mm in Sources */,
+				E8A9B74E1FDD95D70080015A /* cc_continuity_test.mm in Sources */,
+				E8A9B74D1FDD95D70080015A /* cc_coord_test.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1570,7 +1536,6 @@
 					/opt/local/include,
 				);
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
 					"-lwx_osx_cocoau_gl-3.1",
@@ -1616,7 +1581,6 @@
 					/opt/local/include,
 				);
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_LDFLAGS = (
 					"-L/usr/local/lib",
 					"-lwx_osx_cocoau_gl-3.1",
@@ -1670,6 +1634,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wall";
@@ -1703,6 +1668,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wall";
 			};

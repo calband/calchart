@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_coord.h
  * Definitions for the coordinate classes
@@ -20,56 +21,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <cstdint>
 
-#include "cc_types.h"
+namespace CalChart {
 
-constexpr auto COORD_SHIFT = 4;
-constexpr auto COORD_DECIMAL = (1 << COORD_SHIFT);
-
-// RoundToCoord: Use when number is already in Coord format, just needs to be
-// rounded
-template <typename T>
-auto RoundToCoord(T inCoord)
-{
-    return static_cast<Coord>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
-}
-
-// Float2Coord, Coord2Float
-//  Use when we want to convert to Coord system
-template <typename T>
-auto Float2Coord(T a)
-{
-    return static_cast<Coord>(RoundToCoord(a * COORD_DECIMAL));
-}
-template <typename T>
-auto Coord2Float(T a)
-{
-    return a / (float)COORD_DECIMAL;
-}
-
-// Int2Coord, Coord2Int
-//  Use when we want to convert to Coord system
-template <typename T>
-auto Int2Coord(T a)
-{
-    return static_cast<Coord>(a * COORD_DECIMAL);
-}
-template <typename T>
-auto Coord2Int(T a)
-{
-    return static_cast<int>(a / COORD_DECIMAL);
-}
-
-enum CollisionType {
-    COLLISION_NONE = 0,
-    COLLISION_WARNING,
-    COLLISION_INTERSECT
-};
-
-class CC_coord {
+class Coord {
 public:
-    CC_coord(Coord xval = 0, Coord yval = 0)
+    using units = int16_t;
+
+    Coord(Coord::units xval = 0, Coord::units yval = 0)
         : x(xval)
         , y(yval)
     {
@@ -78,80 +38,124 @@ public:
     float Magnitude() const;
     float DM_Magnitude() const; // check for diagonal military also
     float Direction() const;
-    float Direction(const CC_coord& c) const;
+    float Direction(const Coord& c) const;
 
-    CollisionType DetectCollision(const CC_coord& c) const;
+    enum CollisionType {
+        COLLISION_NONE = 0,
+        COLLISION_WARNING,
+        COLLISION_INTERSECT
+    };
 
-    CC_coord& operator+=(const CC_coord& c)
+    CollisionType DetectCollision(const Coord& c) const;
+
+    Coord& operator+=(const Coord& c)
     {
         x += c.x;
         y += c.y;
         return *this;
     }
-    CC_coord& operator-=(const CC_coord& c)
+    Coord& operator-=(const Coord& c)
     {
         x -= c.x;
         y -= c.y;
         return *this;
     }
-    CC_coord& operator*=(short s)
+    Coord& operator*=(int s)
     {
         x *= s;
         y *= s;
         return *this;
     }
-    CC_coord& operator/=(short s)
+    Coord& operator/=(int s)
     {
         x /= s;
         y /= s;
         return *this;
     }
-    CC_coord& operator*=(double s)
+    Coord& operator*=(double s)
     {
         x *= s;
         y *= s;
         return *this;
     }
-    CC_coord& operator/=(double s)
+    Coord& operator/=(double s)
     {
         x /= s;
         y /= s;
         return *this;
     }
 
-    Coord x, y;
+    units x, y;
 };
 
-inline CC_coord operator+(const CC_coord& a, const CC_coord& b)
+inline Coord operator+(const Coord& a, const Coord& b)
 {
-    return CC_coord(a.x + b.x, a.y + b.y);
+    return Coord(a.x + b.x, a.y + b.y);
 }
 
-inline CC_coord operator-(const CC_coord& a, const CC_coord& b)
+inline Coord operator-(const Coord& a, const Coord& b)
 {
-    return CC_coord(a.x - b.x, a.y - b.y);
+    return Coord(a.x - b.x, a.y - b.y);
 }
 
-inline CC_coord operator*(const CC_coord& a, short s)
+inline Coord operator*(const Coord& a, int s)
 {
-    return CC_coord(a.x * s, a.y * s);
+    return Coord(a.x * s, a.y * s);
 }
 
-inline CC_coord operator/(const CC_coord& a, short s)
+inline Coord operator/(const Coord& a, int s)
 {
-    return CC_coord(a.x / s, a.y / s);
+    return Coord(a.x / s, a.y / s);
 }
 
-inline CC_coord operator-(const CC_coord& c) { return CC_coord(-c.x, -c.y); }
+inline Coord operator-(const Coord& c) { return Coord(-c.x, -c.y); }
 
-inline int operator==(const CC_coord& a, const CC_coord& b)
+inline bool operator==(const Coord& a, const Coord& b)
 {
     return ((a.x == b.x) && (a.y == b.y));
 }
 
-inline int operator!=(const CC_coord& a, const CC_coord& b)
+inline bool operator!=(const Coord& a, const Coord& b)
 {
     return ((a.x != b.x) || (a.y != b.y));
 }
 
-void CC_coord_UnitTests();
+void Coord_UnitTests();
+}
+
+constexpr auto COORD_SHIFT = 4;
+constexpr auto COORD_DECIMAL = (1 << COORD_SHIFT);
+
+// RoundToCoordUnits: Use when number is already in Coord format, just needs to be
+// rounded
+template <typename T>
+auto RoundToCoordUnits(T inCoord)
+{
+    return static_cast<CalChart::Coord::units>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
+}
+
+// RoundToCoordUnits, CoordUnits2Float
+//  Use when we want to convert to Coord system
+template <typename T>
+auto Float2CoordUnits(T a)
+{
+    return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * COORD_DECIMAL));
+}
+template <typename T>
+auto CoordUnits2Float(T a)
+{
+    return a / (float)COORD_DECIMAL;
+}
+
+// Int2CoordUnits, CoordUnits2Int
+//  Use when we want to convert to Coord system
+template <typename T>
+auto Int2CoordUnits(T a)
+{
+    return static_cast<CalChart::Coord::units>(a * COORD_DECIMAL);
+}
+template <typename T>
+auto CoordUnits2Int(T a)
+{
+    return static_cast<int>(a / COORD_DECIMAL);
+}

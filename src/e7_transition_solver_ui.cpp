@@ -83,19 +83,19 @@ private:
     
     class FinalCalculationResultNotification : public wxObject {
     public:
-        FinalCalculationResultNotification(const TransitionSolverResult &result) : mResult(result) {};
+        FinalCalculationResultNotification(const CalChart::TransitionSolverResult &result) : mResult(result) {};
         
-        TransitionSolverResult mResult;
+        CalChart::TransitionSolverResult mResult;
     };
     
-    class TransitionSolverThread : public wxThread, public TransitionSolverDelegate {
+    class TransitionSolverThread : public wxThread, public CalChart::TransitionSolverDelegate {
     public:
         TransitionSolverThread(TransitionSolverProgressFrame *progressFrame);
     private:
         void OnProgress(double progress) override;
         void OnSubtaskProgress(double progress) override;
         void OnNewPreferredSolution(unsigned numBeatsInSolution) override;
-        void OnCalculationComplete(TransitionSolverResult finalSolution) override;
+        void OnCalculationComplete(CalChart::TransitionSolverResult finalSolution) override;
         bool ShouldAbortCalculation() override;
         
         void *Entry() override;
@@ -104,7 +104,7 @@ private:
     };
 public:
     TransitionSolverProgressFrame();
-    TransitionSolverProgressFrame(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent, wxWindowID id = wxID_ANY,
+    TransitionSolverProgressFrame(CalChart::TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent, wxWindowID id = wxID_ANY,
                                   const wxString& caption = wxT("Solving Transition..."),
                                   const wxPoint& pos = wxDefaultPosition,
                                   const wxSize& size = wxDefaultSize,
@@ -123,7 +123,7 @@ public:
 private:
     
     void Init();
-    bool Create(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent, wxWindowID id = wxID_ANY,
+    bool Create(CalChart::TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent, wxWindowID id = wxID_ANY,
                 const wxString& caption = wxT("Solving Transition..."),
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -142,9 +142,9 @@ private:
     double                                          mProgress;
     double                                          mSubtaskProgress;
     unsigned                                        mNumBeatsInBestResult;
-    TransitionSolverResult                          mFinalResult;
+    CalChart::TransitionSolverResult                mFinalResult;
     
-    TransitionSolverParams                          mSolverParams;
+    CalChart::TransitionSolverParams                mSolverParams;
     
     wxGauge                                         *mProgressBar;
     wxGauge                                         *mSubtaskProgressBar;
@@ -197,7 +197,7 @@ void TransitionSolverView::OnUpdate(wxView* sender, wxObject* hint) {
     frame->Update();
 }
 
-void TransitionSolverView::ApplyTransitionSolution(TransitionSolverResult solution) {
+void TransitionSolverView::ApplyTransitionSolution(CalChart::TransitionSolverResult solution) {
     if (solution.successfullySolved)
     {
         GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetTransitionCommand(solution.finalPositions, solution.continuities, solution.marcherDotTypes).release());
@@ -217,7 +217,7 @@ void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers) {
 
 TransitionSolverProgressFrame::TransitionSolverProgressFrame() { Init(); }
 
-TransitionSolverProgressFrame::TransitionSolverProgressFrame(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
+TransitionSolverProgressFrame::TransitionSolverProgressFrame(CalChart::TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
                                                              wxWindowID id, const wxString& caption,
                                                              const wxPoint& pos, const wxSize& size,
                                                              long style) {
@@ -228,7 +228,7 @@ TransitionSolverProgressFrame::TransitionSolverProgressFrame(TransitionSolverPar
 
 void TransitionSolverProgressFrame::Init() {}
 
-bool TransitionSolverProgressFrame::Create(TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
+bool TransitionSolverProgressFrame::Create(CalChart::TransitionSolverParams params, TransitionSolverView *view, wxWindow* parent,
                                            wxWindowID id, const wxString& caption,
                                            const wxPoint& pos, const wxSize& size,
                                            long style) {
@@ -425,7 +425,7 @@ void TransitionSolverProgressFrame::TransitionSolverThread::OnNewPreferredSoluti
     wxQueueEvent(mProgressFrame, event);
 }
 
-void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(TransitionSolverResult finalSolution) {
+void TransitionSolverProgressFrame::TransitionSolverThread::OnCalculationComplete(CalChart::TransitionSolverResult finalSolution) {
     wxCommandEvent *event = new wxCommandEvent(CALCHART__TRANSITION_SOLVER__CALCULATION_COMPLETE_EVT, wxID_ANY);
     event->SetClientData(new FinalCalculationResultNotification(finalSolution));
     wxQueueEvent(mProgressFrame, event);
@@ -473,11 +473,11 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
     mView->SetDocument(show);
     mView->SetFrame(this);
     mSelectedGroup = -1;
-    mSolverParams.algorithm = TransitionSolverParams::AlgorithmIdentifier::BEGIN;
+    mSolverParams.algorithm = CalChart::TransitionSolverParams::AlgorithmIdentifier::BEGIN;
     for (unsigned i = 0; i < mSolverParams.availableInstructionsMask.size(); i++) {
         mSolverParams.availableInstructionsMask[i] = true;
-        mSolverParams.availableInstructions[i].waitBeats = (i / (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END) * 2;
-        mSolverParams.availableInstructions[i].movementPattern = (TransitionSolverParams::MarcherInstruction::Pattern)(i % (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END);
+        mSolverParams.availableInstructions[i].waitBeats = (i / (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END) * 2;
+        mSolverParams.availableInstructions[i].movementPattern = (CalChart::TransitionSolverParams::MarcherInstruction::Pattern)(i % (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END);
     }
     
     CreateControls();
@@ -546,7 +546,7 @@ void TransitionSolverFrame::CreateControls() {
             label = new wxStaticText(this, wxID_STATIC, wxT("Select an algorithm: "));
             
             mAlgorithmChoiceControl = new wxChoice(this, CALCHART__TRANSITION_SOLVER__SELECT_ALGORITHM, wxDefaultPosition,
-                                                   wxDefaultSize, TransitionSolverParams::AlgorithmIdentifier::END, algorithmChoices);
+                                                   wxDefaultSize, CalChart::TransitionSolverParams::AlgorithmIdentifier::END, algorithmChoices);
             
             algorithmSelectionRegion->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
             algorithmSelectionRegion->Add(mAlgorithmChoiceControl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
@@ -815,8 +815,8 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
     
     mInstructionOptions.clear();
     for (unsigned waitBeats = 0; waitBeats < (*mDoc->GetCurrentSheet()).GetBeats(); waitBeats+=2) {
-        for (TransitionSolverParams::MarcherInstruction::Pattern pattern = TransitionSolverParams::MarcherInstruction::Pattern::BEGIN; pattern != TransitionSolverParams::MarcherInstruction::Pattern::END; pattern = (TransitionSolverParams::MarcherInstruction::Pattern)(((unsigned)pattern) + 1)) {
-            TransitionSolverParams::MarcherInstruction      instruction;
+        for (CalChart::TransitionSolverParams::MarcherInstruction::Pattern pattern = CalChart::TransitionSolverParams::MarcherInstruction::Pattern::BEGIN; pattern != CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END; pattern = (CalChart::TransitionSolverParams::MarcherInstruction::Pattern)(((unsigned)pattern) + 1)) {
+            CalChart::TransitionSolverParams::MarcherInstruction      instruction;
             
             instruction.movementPattern = pattern;
             instruction.waitBeats = waitBeats;
@@ -829,20 +829,20 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
     {
         std::vector<wxString> commandLabels;
         
-        for (TransitionSolverParams::MarcherInstruction instruction : mInstructionOptions) {
+        for (CalChart::TransitionSolverParams::MarcherInstruction instruction : mInstructionOptions) {
             std::string         label;
             
             switch (instruction.movementPattern) {
-                case TransitionSolverParams::MarcherInstruction::Pattern::EWNS:
+                case CalChart::TransitionSolverParams::MarcherInstruction::Pattern::EWNS:
                     label = "EWNS";
                     break;
-                case TransitionSolverParams::MarcherInstruction::Pattern::NSEW:
+                case CalChart::TransitionSolverParams::MarcherInstruction::Pattern::NSEW:
                     label = "NSEW";
                     break;
-                case TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
+                case CalChart::TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
                     label = "DMHS";
                     break;
-                case TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
+                case CalChart::TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
                     label = "HSDM";
                     break;
                 default:
@@ -859,10 +859,10 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState() {
         
         // Update the commands
         for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
-            TransitionSolverParams::MarcherInstruction  &instruction = mSolverParams.availableInstructions[i];
+            CalChart::TransitionSolverParams::MarcherInstruction  &instruction = mSolverParams.availableInstructions[i];
             unsigned                                    commandIndex;
             
-            commandIndex = (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
+            commandIndex = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
             
             if (mSolverParams.availableInstructionsMask[i] && commandIndex < commandLabels.size())
             {
@@ -898,7 +898,7 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState() {
     
     // Display the current groups
     if (mSelectedGroup != -1) {
-        TransitionSolverParams::GroupConstraint     &group = mSolverParams.groups[mSelectedGroup];
+        CalChart::TransitionSolverParams::GroupConstraint     &group = mSolverParams.groups[mSelectedGroup];
         
         std::vector<wxString>                       memberLabels;
         std::vector<wxString>                       destinationLabels;
@@ -1005,7 +1005,7 @@ void TransitionSolverFrame::OnApply(wxCommandEvent&) {
 }
 
 void TransitionSolverFrame::OnChooseAlgorithm(wxCommandEvent &event) {
-    ChooseAlgorithm((TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
+    ChooseAlgorithm((CalChart::TransitionSolverParams::AlgorithmIdentifier)event.GetSelection());
 }
 
 void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event) {
@@ -1023,10 +1023,10 @@ void TransitionSolverFrame::OnEditAllowedCommands(wxCommandEvent &event) {
     // Get a list of everything that is selected in the list now
     for (unsigned i = 0; i < mSolverParams.availableInstructions.size(); i++) {
         if (mSolverParams.availableInstructionsMask[i]) {
-            TransitionSolverParams::MarcherInstruction      &instruction = mSolverParams.availableInstructions[i];
+            CalChart::TransitionSolverParams::MarcherInstruction      &instruction = mSolverParams.availableInstructions[i];
             unsigned commandIndex;
             
-            commandIndex = (unsigned)TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
+            commandIndex = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats/2) + ((unsigned)instruction.movementPattern);
             
             previouslySelectedCommands.insert(commandIndex);
         }
@@ -1187,7 +1187,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     }
     
     if (sheetIterOnFirstSheet != endSheetIter) {
-        const CC_sheet                      &firstSheet = *sheetIterOnFirstSheet;
+        const CalChart::Sheet                      &firstSheet = *sheetIterOnFirstSheet;
         
         firstSheetErrors = validateSheetForTransitionSolver(firstSheet);
     } else {
@@ -1195,7 +1195,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     }
     
     if ((sheetIterOnFirstSheet + 1) != endSheetIter) {
-        const CC_sheet                      &secondSheet = *(sheetIterOnFirstSheet + 1);
+        const CalChart::Sheet                      &secondSheet = *(sheetIterOnFirstSheet + 1);
         
         secondSheetErrors = validateSheetForTransitionSolver(secondSheet);
     } else {
@@ -1205,7 +1205,7 @@ std::pair<std::vector<std::string>, std::vector<std::string>> TransitionSolverFr
     return std::make_pair(firstSheetErrors, secondSheetErrors);
 }
 
-void TransitionSolverFrame::ChooseAlgorithm(TransitionSolverParams::AlgorithmIdentifier algorithm) {
+void TransitionSolverFrame::ChooseAlgorithm(CalChart::TransitionSolverParams::AlgorithmIdentifier algorithm) {
     mSolverParams.algorithm = algorithm;
 }
 
@@ -1221,7 +1221,7 @@ void TransitionSolverFrame::SetAllowedCommands(std::vector<unsigned> commandIndi
 }
 
 void TransitionSolverFrame::AddNewGroup(std::string groupName) {
-    mSolverParams.groups.push_back(TransitionSolverParams::GroupConstraint());
+    mSolverParams.groups.push_back(CalChart::TransitionSolverParams::GroupConstraint());
     mGroupNames.push_back(groupName);
 }
 

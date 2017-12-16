@@ -1,6 +1,9 @@
 #pragma once
 
-class CC_sheet;
+namespace CalChart {
+class Sheet;
+}
+
 class CalChartDoc;
 /**
  * The part of the Field Frame that controls the active ghosted formation.
@@ -23,7 +26,7 @@ public:
        * Returns the sheet having the ghost formation to draw.
        * @return The sheet having the ghost formation to draw.
        */
-    CC_sheet const* getGhostSheet(CalChartDoc const* doc, int currentSheet) const;
+    CalChart::Sheet const* getGhostSheet(CalChartDoc const* doc, int currentSheet) const;
     /**
        * Returns whether or not ghost formations are active.
        * @return True if the ghost formations are currently active; false

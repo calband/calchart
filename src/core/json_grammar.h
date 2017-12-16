@@ -1,9 +1,8 @@
+#pragma once
 /*!
  * @file json_grammar.h
  * @brief Defines the grammar for a JSON file.
  */
-
-#pragma once
 
 #include <boost/spirit/include/karma_string.hpp>
 #include <boost/fusion/include/std_pair.hpp>
@@ -14,6 +13,8 @@
 
 namespace karma = boost::spirit::karma;
 namespace phoenix = boost::phoenix;
+
+namespace CalChart {
 
 /*!
  * @brief A grammar which describes how to write a JSON output file
@@ -132,3 +133,4 @@ struct JSONExportGrammar
     karma::rule<OutputIterator, karma::locals<const JSONDataArray*>, JSONDataArrayConstAccessor()> array;
     karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement> >&()> arrayContent;
 };
+}

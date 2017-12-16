@@ -38,6 +38,8 @@
 #include <wx/listbook.h>
 #include <wx/dcbuffer.h>
 
+using namespace CalChart;
+
 // how the preferences work:
 // preference dialog create a copy of the CalChart config from which to read and
 // set values
@@ -274,12 +276,12 @@ public:
 private:
     void OnEraseBackground(wxEraseEvent& event);
 
-    std::unique_ptr<CC_show> mShow;
-    std::unique_ptr<const ShowMode> mMode;
+    std::unique_ptr<CalChart::Show> mShow;
+    std::unique_ptr<const CalChart::ShowMode> mMode;
     CalChartConfiguration& mConfig;
-    std::vector<CC_DrawCommand> mPath;
-    CC_coord mPathEnd;
-    std::vector<CC_DrawCommand> mShape;
+    std::vector<CalChart::DrawCommand> mPath;
+    CalChart::Coord mPathEnd;
+    std::vector<CalChart::DrawCommand> mShape;
 };
 
 BEGIN_EVENT_TABLE(PrefCanvas, ClickDragCtrlScrollCanvas)
@@ -290,10 +292,10 @@ END_EVENT_TABLE()
 PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     : super(parent, wxID_ANY, wxDefaultPosition, wxSize(640, 240))
     , mMode(ShowModeStandard::CreateShowMode(
-          "", CC_coord(Int2Coord(160), Int2Coord(84)),
-          CC_coord(Int2Coord(80), Int2Coord(42)),
-          CC_coord(Int2Coord(4), Int2Coord(4)),
-          CC_coord(Int2Coord(4), Int2Coord(4)), Int2Coord(32), Int2Coord(52)))
+          "", Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
+          Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
+          Coord(Int2CoordUnits(4), Int2CoordUnits(4)),
+          Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52)))
     , mConfig(config)
 {
     auto field_offset = mMode->FieldOffset();
@@ -302,7 +304,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
 
     // Create a fake show with some points and selections to draw an example for
     // the user
-    mShow = CC_show::Create_CC_show();
+    mShow = Show::Create_CC_show();
     auto labels = std::vector<std::string>{
         "unsel", "unsel", "sel", "sel",
     };
@@ -315,36 +317,36 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     mShow->Create_SetSelectionCommand(SelectionList{}).first(*mShow);
 
     for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(2)) } }, 3).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 2).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 3).first(*mShow);
 
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(i * 4), Int2Coord(6)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(6)) } }, 1).first(*mShow);
     }
 
-    mShow->Create_AddSheetsCommand(CC_show::CC_sheet_container_t{ *static_cast<CC_show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
+    mShow->Create_AddSheetsCommand(Show::Sheet_container_t{ *static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
     mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 2)) } }, 3).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 2).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 3).first(*mShow);
 
-        mShow->Create_MovePointsCommand({ { i, field_offset + CC_coord(Int2Coord(18 + i * 4), Int2Coord(2 + 6)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 6)) } }, 1).first(*mShow);
     }
     mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
 
-    auto point_start = offset + field_offset + CC_coord(Int2Coord(4), Int2Coord(2));
-    mPathEnd = point_start + CC_coord(Int2Coord(0), Int2Coord(2));
-    mPath.push_back(CC_DrawCommand(point_start, mPathEnd));
+    auto point_start = offset + field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
+    mPathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
+    mPath.emplace_back(point_start, mPathEnd);
     point_start = mPathEnd;
-    mPathEnd += CC_coord(Int2Coord(18), Int2Coord(0));
-    mPath.push_back(CC_DrawCommand(point_start, mPathEnd));
+    mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
+    mPath.emplace_back(point_start, mPathEnd);
 
-    auto shape_start = field_offset + CC_coord(Int2Coord(18), Int2Coord(-2));
-    auto shape_end = shape_start + CC_coord(Int2Coord(4), Int2Coord(4));
-    CC_shape_rect rect(shape_start, shape_end);
+    auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
+    auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
+    Shape_rect rect(shape_start, shape_end);
     mShape = rect.GetCC_DrawCommand(offset.x, offset.y);
 }
 
@@ -362,7 +364,7 @@ void PrefCanvas::OnPaint(wxPaintEvent& event)
     // Draw the field
     DrawMode(dc, mConfig, *mMode, ShowMode_kFieldView);
 
-    CC_show::const_CC_sheet_iterator_t sheet = static_cast<CC_show const&>(*mShow).GetCurrentSheet();
+    auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet;
     ++nextSheet;
 

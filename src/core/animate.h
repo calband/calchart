@@ -1,3 +1,4 @@
+#pragma once
 /*
  * animate.h
  * Classes for animating shows
@@ -20,8 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "animate_types.h"
 #include "cc_coord.h"
 
@@ -32,12 +31,14 @@
 #include <vector>
 #include <list>
 
+namespace CalChart {
+
 AnimateDir AnimGetDirFromAngle(float ang);
 
 class AnimateCommand;
 class AnimateSheet;
-struct CC_DrawCommand;
-class CC_show;
+struct DrawCommand;
+class Show;
 class AnimationErrors;
 class ContProcedure;
 
@@ -82,7 +83,7 @@ private:
 
 class Animation {
 public:
-    Animation(const CC_show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
+    Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
     ~Animation();
 
     static std::list<std::unique_ptr<ContProcedure> > ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol);
@@ -111,8 +112,8 @@ public:
         int mCollision;
         AnimateDir mDirection;
         float mRealDirection;
-        CC_coord mPosition;
-        animate_info_t(int col, AnimateDir dir, float rdir, CC_coord pos)
+        Coord mPosition;
+        animate_info_t(int col, AnimateDir dir, float rdir, Coord pos)
             : mCollision(col)
             , mDirection(dir)
             , mRealDirection(rdir)
@@ -131,8 +132,8 @@ public:
     // collection of position of each point, for debugging purposes
     std::pair<std::string, std::vector<std::string> > GetCurrentInfo() const;
 
-    std::vector<CC_DrawCommand> GenPathToDraw(unsigned point, const CC_coord& offset) const;
-    AnimatePoint EndPosition(unsigned point, const CC_coord& offset) const;
+    std::vector<DrawCommand> GenPathToDraw(unsigned point, const Coord& offset) const;
+    AnimatePoint EndPosition(unsigned point, const Coord& offset) const;
 
     auto sheetsBegin() const { return sheets.begin(); }
     auto sheetsEnd() const { return sheets.end(); }
@@ -140,7 +141,7 @@ public:
 private:
     std::vector<AnimatePoint> pts;
     std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator> curr_cmds; // pointer to the current command
-    std::map<unsigned, CollisionType> mCollisions;
+    std::map<unsigned, Coord::CollisionType> mCollisions;
     unsigned curr_sheetnum;
     unsigned curr_beat;
     std::vector<AnimateSheet> sheets;
@@ -156,3 +157,4 @@ private:
 
     std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
 };
+}

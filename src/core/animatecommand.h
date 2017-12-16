@@ -1,3 +1,4 @@
+#pragma once
 /*
  * animate.h
  * Classes for animating shows
@@ -20,12 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "animate.h"
 #include "json.h"
 
-struct CC_DrawCommand;
+namespace CalChart {
+
+struct DrawCommand;
 
 class AnimateCommand {
 public:
@@ -53,17 +54,14 @@ public:
     virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
 
     // when we want to have the path drawn:
-    virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
-        const CC_coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const;
 
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
      * could represent this movement in an Online Viewer '.viewer' file.
-     * @param dest A reference to the JSONElement which will be transformed
-     * into a JSON representation of this movement.
      * @param start The position at which this movement begins.
      */
-    JSONElement toOnlineViewerJSON(const CC_coord& start) const;
+    JSONElement toOnlineViewerJSON(const Coord& start) const;
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
      * could represent this movement in an Online Viewer '.viewer' file.
@@ -71,7 +69,7 @@ public:
      * into a JSON representation of this movement.
      * @param start The position at which this movement begins.
      */
-    virtual void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const = 0;
+    virtual void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const = 0;
 
 protected:
     unsigned mNumBeats;
@@ -86,7 +84,7 @@ public:
     virtual AnimateDir Direction() const;
     virtual float RealDirection() const;
 
-    void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
+    void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
 
 protected:
     AnimateDir dir;
@@ -95,8 +93,8 @@ protected:
 
 class AnimateCommandMove : public AnimateCommandMT {
 public:
-    AnimateCommandMove(unsigned beats, CC_coord movement);
-    AnimateCommandMove(unsigned beats, CC_coord movement, float direction);
+    AnimateCommandMove(unsigned beats, Coord movement);
+    AnimateCommandMove(unsigned beats, Coord movement, float direction);
     virtual ~AnimateCommandMove() = default;
 
     virtual bool NextBeat(AnimatePoint& pt);
@@ -108,18 +106,17 @@ public:
     virtual float MotionDirection() const;
     virtual void ClipBeats(unsigned beats);
 
-    virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
-        const CC_coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const;
 
-    void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
+    void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
 
 private:
-    CC_coord mVector;
+    Coord mVector;
 };
 
 class AnimateCommandRotate : public AnimateCommand {
 public:
-    AnimateCommandRotate(unsigned beats, CC_coord cntr, float rad, float ang1,
+    AnimateCommandRotate(unsigned beats, Coord cntr, float rad, float ang1,
         float ang2, bool backwards = false);
     virtual ~AnimateCommandRotate() = default;
 
@@ -133,13 +130,13 @@ public:
     virtual float RealDirection() const;
     virtual void ClipBeats(unsigned beats);
 
-    virtual CC_DrawCommand GenCC_DrawCommand(const AnimatePoint& pt,
-        const CC_coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const;
 
-    void toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const;
+    void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
 
 private:
-    CC_coord mOrigin;
+    Coord mOrigin;
     float mR, mAngStart, mAngEnd;
     float mFace;
 };
+}
