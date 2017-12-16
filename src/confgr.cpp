@@ -36,6 +36,8 @@
 #include "modes.h"
 #include "cc_omniview_constants.h"
 
+using namespace CalChart;
+
 const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] = {
     std::tuple<wxString, wxString, int>(wxT("FIELD"), wxT("FOREST GREEN"), 1),
     std::tuple<wxString, wxString, int>(wxT("FIELD DETAIL"), wxT("WHITE"), 1),
@@ -111,7 +113,7 @@ const std::array<long, CalChartConfiguration::kSpringShowModeValues>
     };
 
 // Yard lines
-const wxString yard_text_defaults[CalChart::kYardTextValues] = {
+const wxString yard_text_defaults[kYardTextValues] = {
     wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"),
     wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"),
     wxT("B"), wxT("A"), wxT("-10"), wxT("-5"), wxT("0"), wxT("5"),
@@ -123,7 +125,7 @@ const wxString yard_text_defaults[CalChart::kYardTextValues] = {
     wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
 };
 
-const wxString yard_text_index[CalChart::kYardTextValues] = {
+const wxString yard_text_index[kYardTextValues] = {
     wxT("N"), wxT("M"), wxT("L"), wxT("K"), wxT("J"), wxT("I"),
     wxT("H"), wxT("G"), wxT("F"), wxT("E"), wxT("D"), wxT("C"),
     wxT("B"), wxT("A"), wxT("-10"), wxT("-5"), wxT("0"), wxT("5"),
@@ -135,11 +137,11 @@ const wxString yard_text_index[CalChart::kYardTextValues] = {
     wxT("J"), wxT("K"), wxT("L"), wxT("M"), wxT("N")
 };
 
-const wxString spr_line_text_defaults[CalChart::kSprLineTextValues] = {
+const wxString spr_line_text_defaults[kSprLineTextValues] = {
     wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
 
-const wxString spr_line_text_index[CalChart::kSprLineTextValues] = {
+const wxString spr_line_text_index[kSprLineTextValues] = {
     wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
 };
 
@@ -574,7 +576,7 @@ void CalChartConfiguration::Clear_ConfigColor(size_t selection)
 
 ///// Show Configuration /////
 
-CalChart::ShowModeStandard::ShowModeInfo_t
+ShowModeStandard::ShowModeInfo_t
 CalChartConfiguration::Get_ShowModeInfo(CalChartShowModes which) const
 {
     if (which >= SHOWMODE_NUM)
@@ -653,7 +655,7 @@ void CalChartConfiguration::Clear_SpringShowModeInfo(
 // Yard Lines
 wxString CalChartConfiguration::Get_yard_text(size_t which) const
 {
-    if (which >= CalChart::kYardTextValues)
+    if (which >= kYardTextValues)
         throw std::runtime_error("Error, exceeding kYardTextValues size");
 
     if (!mYardTextInfos.count(which)) {
@@ -666,7 +668,7 @@ wxString CalChartConfiguration::Get_yard_text(size_t which) const
 
 void CalChartConfiguration::Set_yard_text(size_t which, const wxString& value)
 {
-    if (which >= CalChart::kYardTextValues)
+    if (which >= kYardTextValues)
         throw std::runtime_error("Error, exceeding kYardTextValues size");
 
     wxString key;
@@ -680,7 +682,7 @@ void CalChartConfiguration::Set_yard_text(size_t which, const wxString& value)
 
 void CalChartConfiguration::Clear_yard_text(size_t which)
 {
-    if (which >= CalChart::kYardTextValues)
+    if (which >= kYardTextValues)
         throw std::runtime_error("Error, exceeding kYardTextValues size");
 
     wxString key;
@@ -692,7 +694,7 @@ void CalChartConfiguration::Clear_yard_text(size_t which)
 
 wxString CalChartConfiguration::Get_spr_line_text(size_t which) const
 {
-    if (which >= CalChart::kSprLineTextValues)
+    if (which >= kSprLineTextValues)
         throw std::runtime_error("Error, exceeding kSprLineTextValues size");
 
     if (!mSprLineTextInfos.count(which)) {
@@ -706,7 +708,7 @@ wxString CalChartConfiguration::Get_spr_line_text(size_t which) const
 void CalChartConfiguration::Set_spr_line_text(size_t which,
     const wxString& value)
 {
-    if (which >= CalChart::kSprLineTextValues)
+    if (which >= kSprLineTextValues)
         throw std::runtime_error("Error, exceeding kSprLineTextValues size");
 
     wxString key;
@@ -720,7 +722,7 @@ void CalChartConfiguration::Set_spr_line_text(size_t which,
 
 void CalChartConfiguration::Clear_spr_line_text(size_t which)
 {
-    if (which >= CalChart::kSprLineTextValues)
+    if (which >= kSprLineTextValues)
         throw std::runtime_error("Error, exceeding kSprLineTextValues size");
 
     wxString key;
@@ -739,14 +741,14 @@ void CalChartConfiguration::FlushWriteQueue() const
     mWriteQueue.clear();
 }
 
-std::unique_ptr<CalChart::ShowMode> GetShowMode(const wxString& which)
+std::unique_ptr<ShowMode> GetShowMode(const wxString& which)
 {
     auto iter = std::find(std::begin(kShowModeStrings),
         std::end(kShowModeStrings), which);
     if (iter != std::end(kShowModeStrings)) {
         auto item = static_cast<CalChartShowModes>(
             std::distance(std::begin(kShowModeStrings), iter));
-        return CalChart::ShowModeStandard::CreateShowMode(which.ToStdString(), [item]() {
+        return ShowModeStandard::CreateShowMode(which.ToStdString(), [item]() {
             return CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(item);
         });
     }
@@ -755,7 +757,7 @@ std::unique_ptr<CalChart::ShowMode> GetShowMode(const wxString& which)
     if (iter != std::end(kSpringShowModeStrings)) {
         auto item = static_cast<CalChartSpringShowModes>(
             std::distance(std::begin(kSpringShowModeStrings), iter));
-        return CalChart::ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), [item]() {
+        return ShowModeSprShow::CreateSpringShowMode(which.ToStdString(), [item]() {
             return CalChartConfiguration::GetGlobalConfig().Get_SpringShowModeInfo(
                 item);
         });

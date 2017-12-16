@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "animate.h"
 #include "cc_show.h"
 
 #include <wx/wx.h> // For basic wx defines
@@ -39,8 +38,8 @@ class ShowMode;
 class Show;
 class Sheet;
 class Lasso;
-}
 class Animation;
+}
 class CalChartConfiguration;
 
 using CC_doc_command = std::function<void(CalChartDoc&)>;

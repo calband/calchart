@@ -38,6 +38,8 @@
 #include <wx/listbook.h>
 #include <wx/dcbuffer.h>
 
+using namespace CalChart;
+
 // how the preferences work:
 // preference dialog create a copy of the CalChart config from which to read and
 // set values
@@ -289,11 +291,11 @@ END_EVENT_TABLE()
 
 PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     : super(parent, wxID_ANY, wxDefaultPosition, wxSize(640, 240))
-    , mMode(CalChart::ShowModeStandard::CreateShowMode(
-          "", CalChart::Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
-          CalChart::Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
-          CalChart::Coord(Int2CoordUnits(4), Int2CoordUnits(4)),
-          CalChart::Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52)))
+    , mMode(ShowModeStandard::CreateShowMode(
+          "", Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
+          Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
+          Coord(Int2CoordUnits(4), Int2CoordUnits(4)),
+          Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52)))
     , mConfig(config)
 {
     auto field_offset = mMode->FieldOffset();
@@ -302,7 +304,7 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
 
     // Create a fake show with some points and selections to draw an example for
     // the user
-    mShow = CalChart::Show::Create_CC_show();
+    mShow = Show::Create_CC_show();
     auto labels = std::vector<std::string>{
         "unsel", "unsel", "sel", "sel",
     };
@@ -315,36 +317,36 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     mShow->Create_SetSelectionCommand(SelectionList{}).first(*mShow);
 
     for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 3).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 2).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 3).first(*mShow);
 
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(i * 4), Int2CoordUnits(6)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(6)) } }, 1).first(*mShow);
     }
 
-    mShow->Create_AddSheetsCommand(CalChart::Show::Sheet_container_t{ *static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
+    mShow->Create_AddSheetsCommand(Show::Sheet_container_t{ *static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
     mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
     for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 3).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 2).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 3).first(*mShow);
 
-        mShow->Create_MovePointsCommand({ { i, field_offset + CalChart::Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 6)) } }, 1).first(*mShow);
+        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 6)) } }, 1).first(*mShow);
     }
     mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
 
-    auto point_start = offset + field_offset + CalChart::Coord(Int2CoordUnits(4), Int2CoordUnits(2));
-    mPathEnd = point_start + CalChart::Coord(Int2CoordUnits(0), Int2CoordUnits(2));
+    auto point_start = offset + field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
+    mPathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
     mPath.emplace_back(point_start, mPathEnd);
     point_start = mPathEnd;
-    mPathEnd += CalChart::Coord(Int2CoordUnits(18), Int2CoordUnits(0));
+    mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
     mPath.emplace_back(point_start, mPathEnd);
 
-    auto shape_start = field_offset + CalChart::Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
-    auto shape_end = shape_start + CalChart::Coord(Int2CoordUnits(4), Int2CoordUnits(4));
-    CalChart::Shape_rect rect(shape_start, shape_end);
+    auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
+    auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
+    Shape_rect rect(shape_start, shape_end);
     mShape = rect.GetCC_DrawCommand(offset.x, offset.y);
 }
 
@@ -843,11 +845,11 @@ bool PSPrintingSetUp::TransferDataToWindow()
     buf.Printf(wxT("%.2f"), mPrintValues[7]);
     text->SetValue(buf);
 
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + CalChart::ShowModeSprShow::keps_stage_x;
+    for (auto i = mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x;
          i != mSpringShowModeValues[mWhichMode].end(); ++i) {
         wxString buf;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            EPS_STAGE_X + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - CalChart::ShowModeSprShow::keps_stage_x);
+            EPS_STAGE_X + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - ShowModeSprShow::keps_stage_x);
         buf.Printf(wxT("%ld"), *i);
         text->SetValue(buf);
     }
@@ -894,11 +896,11 @@ bool PSPrintingSetUp::TransferDataFromWindow()
     mConfig.Set_TextSize(mPrintValues[2]);
     mConfig.Set_ContRatio(mPrintValues[7]);
 
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + CalChart::ShowModeSprShow::keps_stage_x;
+    for (auto i = mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x;
          i != mSpringShowModeValues[mWhichMode].end(); ++i) {
         long val;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            EPS_STAGE_X + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - CalChart::ShowModeSprShow::keps_stage_x);
+            EPS_STAGE_X + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - ShowModeSprShow::keps_stage_x);
         text->GetValue().ToLong(&val);
         *i = val;
     }
@@ -950,7 +952,7 @@ public:
 
 private:
     CalChartConfiguration& mConfig;
-    std::unique_ptr<const CalChart::ShowMode> mMode;
+    std::unique_ptr<const ShowMode> mMode;
 };
 
 BEGIN_EVENT_TABLE(ShowModeSetupCanvas, ClickDragCtrlScrollCanvas)
@@ -987,7 +989,7 @@ void ShowModeSetupCanvas::OnPaint(wxPaintEvent& event)
 void ShowModeSetupCanvas::SetMode(const std::string& which,
     CalChartShowModes item)
 {
-    mMode = CalChart::ShowModeStandard::CreateShowMode(
+    mMode = ShowModeStandard::CreateShowMode(
         which, [this, item]() { return this->mConfig.Get_ShowModeInfo(item); });
     SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
     Refresh();
@@ -996,7 +998,7 @@ void ShowModeSetupCanvas::SetMode(const std::string& which,
 void ShowModeSetupCanvas::SetMode(const std::string& which,
     CalChartSpringShowModes item)
 {
-    mMode = CalChart::ShowModeSprShow::CreateSpringShowMode(which, [this, item]() {
+    mMode = ShowModeSprShow::CreateSpringShowMode(which, [this, item]() {
         return this->mConfig.Get_SpringShowModeInfo(item);
     });
     SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
@@ -1039,7 +1041,7 @@ private:
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice(wxCommandEvent&);
     CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];
-    wxString mYardText[CalChart::kYardTextValues];
+    wxString mYardText[kYardTextValues];
     int mWhichMode;
     int mWhichYardLine;
 };
@@ -1172,7 +1174,7 @@ void ShowModeSetup::Init()
     for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
         mShowModeValues[i] = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(i));
     }
-    for (size_t i = 0; i < CalChart::kYardTextValues; ++i) {
+    for (size_t i = 0; i < kYardTextValues; ++i) {
         mYardText[i] = mConfig.Get_yard_text(i);
     }
 }
@@ -1215,7 +1217,7 @@ bool ShowModeSetup::TransferDataFromWindow()
     // grab whatever's in the box
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
-    for (size_t i = 0; i < CalChart::kYardTextValues; ++i) {
+    for (size_t i = 0; i < kYardTextValues; ++i) {
         mConfig.Set_yard_text(i, mYardText[i]);
     }
 
@@ -1227,7 +1229,7 @@ bool ShowModeSetup::ClearValuesToDefault()
     for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
         mConfig.Clear_ShowModeInfo(static_cast<CalChartShowModes>(i));
     }
-    for (auto i = 0; i < CalChart::kYardTextValues; ++i) {
+    for (auto i = 0; i < kYardTextValues; ++i) {
         mConfig.Clear_yard_text(i);
     }
     Init();
@@ -1253,7 +1255,7 @@ void ShowModeSetup::OnCmdChoice(wxCommandEvent&)
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
     // update mode
-    for (size_t i = 0; i < CalChart::kYardTextValues; ++i) {
+    for (size_t i = 0; i < kYardTextValues; ++i) {
         mConfig.Set_yard_text(i, mYardText[i]);
     }
 
@@ -1296,7 +1298,7 @@ private:
     void OnCmdChoice(wxCommandEvent&);
     CalChartConfiguration::SpringShowModeInfo_t
         mSpringShowModeValues[SPRINGSHOWMODE_NUM];
-    wxString mYardText[CalChart::kSprLineTextValues];
+    wxString mYardText[kSprLineTextValues];
     int mWhichMode;
     int mWhichYardLine;
 };
@@ -1457,7 +1459,7 @@ void SpringShowModeSetup::Init()
     for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
         mSpringShowModeValues[i] = mConfig.Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
     }
-    for (size_t i = 0; i < CalChart::kSprLineTextValues; ++i) {
+    for (size_t i = 0; i < kSprLineTextValues; ++i) {
         mYardText[i] = mConfig.Get_spr_line_text(i);
     }
 }
@@ -1470,7 +1472,7 @@ bool SpringShowModeSetup::TransferDataToWindow()
         checkbox->SetValue((mSpringShowModeValues[mWhichMode][0] & (1 << i)) > 0);
     }
     for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1;
-         i != (mSpringShowModeValues[mWhichMode].begin() + CalChart::ShowModeSprShow::keps_stage_x);
+         i != (mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x);
          ++i) {
         wxString buf;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
@@ -1496,7 +1498,7 @@ bool SpringShowModeSetup::TransferDataFromWindow()
         mSpringShowModeValues[mWhichMode][0] |= checkbox->IsChecked() ? (1 << i) : 0;
     }
     for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1;
-         i != (mSpringShowModeValues[mWhichMode].begin() + CalChart::ShowModeSprShow::keps_stage_x);
+         i != (mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x);
          ++i) {
         long val;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
@@ -1514,7 +1516,7 @@ bool SpringShowModeSetup::TransferDataFromWindow()
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SPRING_SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
-    for (size_t i = 0; i < CalChart::kSprLineTextValues; ++i) {
+    for (size_t i = 0; i < kSprLineTextValues; ++i) {
         mConfig.Set_spr_line_text(i, mYardText[i]);
     }
 
@@ -1526,7 +1528,7 @@ bool SpringShowModeSetup::ClearValuesToDefault()
     for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
         mConfig.Clear_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
     }
-    for (auto i = 0; i < CalChart::kSprLineTextValues; ++i) {
+    for (auto i = 0; i < kSprLineTextValues; ++i) {
         mConfig.Clear_spr_line_text(i);
     }
     Init();
@@ -1542,7 +1544,7 @@ void SpringShowModeSetup::OnCmdChoice(wxCommandEvent&)
         mSpringShowModeValues[mWhichMode][0] |= checkbox->IsChecked() ? (1 << i) : 0;
     }
     for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1;
-         i != (mSpringShowModeValues[mWhichMode].begin() + CalChart::ShowModeSprShow::keps_stage_x);
+         i != (mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x);
          ++i) {
         long val;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
@@ -1558,7 +1560,7 @@ void SpringShowModeSetup::OnCmdChoice(wxCommandEvent&)
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SPRING_SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
     // update mode
-    for (size_t i = 0; i < CalChart::kSprLineTextValues; ++i) {
+    for (size_t i = 0; i < kSprLineTextValues; ++i) {
         mConfig.Set_spr_line_text(i, mYardText[i]);
     }
 
