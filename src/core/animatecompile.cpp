@@ -47,10 +47,10 @@ AnimateCompile::AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsign
 {
 }
 
-std::tuple<AnimateCommands, AnimationVariables, AnimationErrors>
+AnimateCommands
 AnimateCompile::Compile(
-    const Show& show, AnimationVariables variablesStates,
-    AnimationErrors errors, Show::const_Sheet_iterator_t c_sheet,
+    const Show& show, AnimationVariables& variablesStates,
+    AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
     unsigned pt_num, SYMBOL_TYPE cont_symbol,
     std::list<std::unique_ptr<ContProcedure> > const& procs)
 {
@@ -98,7 +98,7 @@ AnimateCompile::Compile(
         ac.RegisterError(ANIMERR_EXTRATIME, NULL);
         ac.Append(std::make_shared<AnimateCommandMT>(state.beats_rem, ANIMDIR_E), NULL);
     }
-    return { state.cmds, state.mVars, state.error_markers };
+    return state.cmds;
 }
 
 bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd,

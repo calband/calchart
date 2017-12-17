@@ -52,17 +52,17 @@ private:
 struct AnimateState {
     AnimatePoint pt;
     unsigned beats_rem;
-    AnimationVariables mVars;
-    AnimationErrors error_markers;
+    AnimationVariables& mVars;
+    AnimationErrors& error_markers;
     AnimateCommands cmds;
 };
 
 class AnimateCompile {
 public:
     // Compile a point
-    static std::tuple<AnimateCommands, AnimationVariables, AnimationErrors>
-    Compile(const Show& show, AnimationVariables variablesStates,
-        AnimationErrors errors, Show::const_Sheet_iterator_t c_sheet,
+    static AnimateCommands
+    Compile(const Show& show, AnimationVariables& variablesStates,
+        AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
         std::list<std::unique_ptr<ContProcedure> > const& proc);
 

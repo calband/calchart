@@ -125,7 +125,7 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
 #endif
                 for (unsigned j = 0; j < pts.size(); j++) {
                     if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol) {
-                        std::tie(theCommands[j], variablesStates, errors) = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
+                        theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
                     }
                 }
             }
@@ -139,7 +139,7 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
         }
         for (unsigned j = 0; j < pts.size(); j++) {
             if (theCommands[j].empty()) {
-                std::tie(theCommands[j], variablesStates, errors) = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
+                theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
             }
         }
         if (errors.AnyErrors() && notifyErrorList) {
