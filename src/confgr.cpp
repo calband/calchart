@@ -36,6 +36,8 @@
 #include "modes.h"
 #include "cc_omniview_constants.h"
 
+using namespace CalChart;
+
 const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] = {
     std::tuple<wxString, wxString, int>(wxT("FIELD"), wxT("FOREST GREEN"), 1),
     std::tuple<wxString, wxString, int>(wxT("FIELD DETAIL"), wxT("WHITE"), 1),

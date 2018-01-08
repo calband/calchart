@@ -37,11 +37,13 @@
 
 wxPrintDialogData* gPrintDialogData;
 
-void CC_continuity_UnitTests();
-void CC_point_UnitTests();
-void CC_coord_UnitTests();
-void CC_show_UnitTests();
-void CC_sheet_UnitTests();
+namespace CalChart {
+void Coord_UnitTests();
+void Point_UnitTests();
+void Show_UnitTests();
+void Sheet_UnitTests();
+void Continuity_UnitTests();
+}
 
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
@@ -133,11 +135,11 @@ void CalChartApp::InitAppAsServer()
     config->SetPath(wxT("/FileHistory"));
     mDocManager->FileHistoryLoad(*config);
 
-    CC_continuity_UnitTests();
-    CC_point_UnitTests();
-    CC_coord_UnitTests();
-    CC_show_UnitTests();
-    CC_sheet_UnitTests();
+    CalChart::Continuity_UnitTests();
+    CalChart::Point_UnitTests();
+    CalChart::Coord_UnitTests();
+    CalChart::Show_UnitTests();
+    CalChart::Sheet_UnitTests();
 
     ProcessArguments();
 }
@@ -170,7 +172,7 @@ void CalChartApp::ExitAppAsServer()
     mHelpController.reset();
 }
 
-std::unique_ptr<ShowMode> CalChartApp::GetMode(const wxString& which)
+std::unique_ptr<CalChart::ShowMode> CalChartApp::GetMode(const wxString& which)
 {
     return GetShowMode(which);
 }

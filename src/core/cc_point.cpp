@@ -27,16 +27,18 @@
 #include <stdexcept>
 #include <sstream>
 
-CC_point::CC_point()
+namespace CalChart {
+
+Point::Point()
     : mSym(SYMBOL_PLAIN)
 {
 }
 
-CC_point::CC_point(const CC_coord& p)
+Point::Point(const Coord& p)
     : mSym(SYMBOL_PLAIN)
     , mPos(p)
 {
-    for (unsigned j = 0; j < CC_point::kNumRefPoints; j++) {
+    for (unsigned j = 0; j < Point::kNumRefPoints; j++) {
         mRef[j] = mPos;
     }
 }
@@ -48,7 +50,7 @@ CC_point::CC_point(const CC_coord& p)
 // reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
 // POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
 // POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
-CC_point::CC_point(const std::vector<uint8_t>& serialized_data)
+Point::Point(const std::vector<uint8_t>& serialized_data)
     : mSym(SYMBOL_PLAIN)
 {
     const uint8_t* d = &serialized_data[0];
@@ -59,7 +61,7 @@ CC_point::CC_point(const std::vector<uint8_t>& serialized_data)
         d += 2;
     }
     // set all the reference points
-    for (unsigned j = 0; j < CC_point::kNumRefPoints; j++) {
+    for (unsigned j = 0; j < Point::kNumRefPoints; j++) {
         mRef[j] = mPos;
     }
 
@@ -82,11 +84,11 @@ CC_point::CC_point(const std::vector<uint8_t>& serialized_data)
     }
 }
 
-std::vector<uint8_t> CC_point::Serialize() const
+std::vector<uint8_t> Point::Serialize() const
 {
     // how many reference points are we going to write?
     uint8_t num_ref_pts = 0;
-    for (auto j = 1; j <= CC_point::kNumRefPoints; j++) {
+    for (auto j = 1; j <= Point::kNumRefPoints; j++) {
         if (GetPos(j) != GetPos(0)) {
             ++num_ref_pts;
         }
@@ -96,36 +98,36 @@ std::vector<uint8_t> CC_point::Serialize() const
     // Write block size
 
     // Write POSITIONw
-    CalChart::Parser::Append(result, uint16_t(GetPos().x));
-    CalChart::Parser::Append(result, uint16_t(GetPos().y));
+    Parser::Append(result, uint16_t(GetPos().x));
+    Parser::Append(result, uint16_t(GetPos().y));
 
     // Write REF_POS
-    CalChart::Parser::Append(result, uint8_t(num_ref_pts));
+    Parser::Append(result, uint8_t(num_ref_pts));
     if (num_ref_pts) {
-        for (auto j = 1; j <= CC_point::kNumRefPoints; j++) {
+        for (auto j = 1; j <= Point::kNumRefPoints; j++) {
             if (GetPos(j) != GetPos(0)) {
-                CalChart::Parser::Append(result, uint8_t(j));
-                CalChart::Parser::Append(result, uint16_t(GetPos(j).x));
-                CalChart::Parser::Append(result, uint16_t(GetPos(j).y));
+                Parser::Append(result, uint8_t(j));
+                Parser::Append(result, uint16_t(GetPos(j).x));
+                Parser::Append(result, uint16_t(GetPos(j).y));
             }
         }
     }
 
     // Write POSITION
-    CalChart::Parser::Append(result, uint8_t(GetSymbol()));
+    Parser::Append(result, uint8_t(GetSymbol()));
 
     // Point labels (left or right)
-    CalChart::Parser::Append(result, uint8_t(GetFlip()));
+    Parser::Append(result, uint8_t(GetFlip()));
     result.insert(result.begin(), uint8_t(result.size()));
 
     return result;
 }
 
-void CC_point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
+void Point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
-void CC_point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }
+void Point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }
 
-CC_coord CC_point::GetPos(unsigned ref) const
+Coord Point::GetPos(unsigned ref) const
 {
     if (ref == 0) {
         return mPos;
@@ -136,7 +138,7 @@ CC_coord CC_point::GetPos(unsigned ref) const
     return mRef[ref - 1];
 }
 
-void CC_point::SetPos(const CC_coord& c, unsigned ref)
+void Point::SetPos(const Coord& c, unsigned ref)
 {
     if (ref == 0) {
         mPos = c;
@@ -148,67 +150,68 @@ void CC_point::SetPos(const CC_coord& c, unsigned ref)
     mRef[ref - 1] = c;
 }
 
-void CC_point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
+void Point::SetSymbol(SYMBOL_TYPE s) { mSym = s; }
 
 // Test Suite stuff
-struct CC_point_values {
-    std::bitset<CC_point::kTotalBits> mFlags;
+struct Point_values {
+    std::bitset<Point::kTotalBits> mFlags;
     SYMBOL_TYPE mSym;
-    CC_coord mPos;
-    CC_coord mRef[CC_point::kNumRefPoints];
+    Coord mPos;
+    Coord mRef[Point::kNumRefPoints];
     bool GetFlip;
     bool Visable;
 };
 
-bool Check_CC_point(const CC_point& underTest, const CC_point_values& values)
+bool Check_Point(const Point& underTest, const Point_values& values)
 {
     bool running_value = true;
-    for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
+    for (unsigned i = 0; i < Point::kNumRefPoints; ++i)
         running_value = running_value && (underTest.mRef[i] == values.mRef[i]);
     return running_value && (underTest.mFlags == values.mFlags) && (underTest.mSym == values.mSym) && (underTest.mPos == values.mPos) && (underTest.GetFlip() == values.GetFlip) && (underTest.LabelIsVisible() == values.Visable);
 }
 
-void CC_point_UnitTests()
+void Point_UnitTests()
 {
     // test some defaults:
-    CC_point_values values;
+    Point_values values;
     values.mFlags = 0;
     values.mSym = SYMBOL_PLAIN;
-    values.mPos = CC_coord();
-    for (unsigned i = 0; i < CC_point::kNumRefPoints; ++i)
-        values.mRef[i] = CC_coord();
+    values.mPos = Coord();
+    for (unsigned i = 0; i < Point::kNumRefPoints; ++i)
+        values.mRef[i] = Coord();
     values.GetFlip = false;
     values.Visable = true;
 
     // test defaults
-    CC_point underTest;
-    assert(Check_CC_point(underTest, values));
+    Point underTest;
+    assert(Check_Point(underTest, values));
 
     // test flip
     underTest.Flip(false);
-    assert(Check_CC_point(underTest, values));
+    assert(Check_Point(underTest, values));
 
     values.mFlags = 1;
     values.GetFlip = true;
     underTest.Flip(true);
-    assert(Check_CC_point(underTest, values));
+    assert(Check_Point(underTest, values));
 
     values.mFlags = 0;
     values.GetFlip = false;
     underTest.Flip(false);
-    assert(Check_CC_point(underTest, values));
+    assert(Check_Point(underTest, values));
 
     // test visability
     underTest.SetLabelVisibility(true);
-    assert(Check_CC_point(underTest, values));
+    assert(Check_Point(underTest, values));
 
     values.mFlags = 2;
     values.Visable = false;
     underTest.SetLabelVisibility(false);
-    assert(Check_CC_point(underTest, values));
+    assert(Check_Point(underTest, values));
 
     values.mFlags = 0;
     values.Visable = true;
     underTest.SetLabelVisibility(true);
-    assert(Check_CC_point(underTest, values));
+    assert(Check_Point(underTest, values));
+}
 }

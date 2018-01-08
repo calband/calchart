@@ -30,29 +30,31 @@
 #include <functional>
 #include <map>
 
-class CC_shape;
-class CC_coord;
+namespace CalChart {
+class Shape;
+class Coord;
+}
 class CalChartConfiguration;
 
 class FieldCanvasShapes {
 public:
     virtual ~FieldCanvasShapes() = default;
-    void OnMove(const CC_coord& p, const CC_coord& snapped_p);
+    void OnMove(const CalChart::Coord& p, const CalChart::Coord& snapped_p);
     auto& GetShapeList() const { return m_shape_list; }
 
-    virtual void OnMouseLeftDown(CC_coord pos) = 0;
-    virtual bool OnMouseUpDone(CC_coord const&) { return true; }
+    virtual void OnMouseLeftDown(CalChart::Coord pos) = 0;
+    virtual bool OnMouseUpDone(CalChart::Coord const&) { return true; }
 protected:
-    void BeginMoveDrag(CC_DRAG_TYPES type, const CC_coord& start);
-    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CC_shape> shape);
+    void BeginMoveDrag(CC_DRAG_TYPES type, const CalChart::Coord& start);
+    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CalChart::Shape> shape);
 
-    std::vector<std::unique_ptr<CC_shape> > m_shape_list;
+    std::vector<std::unique_ptr<CalChart::Shape> > m_shape_list;
     CC_DRAG_TYPES move_drag = CC_DRAG_NONE;
 };
 
 class MovePoints : public FieldCanvasShapes {
 public:
-    virtual std::map<int, CC_coord> TransformPoints(std::map<int, CC_coord> const& select_list) const = 0;
+    virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const = 0;
 };
 
 std::unique_ptr<MovePoints> Create_MovePoints(CC_MOVE_MODES);

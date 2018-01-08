@@ -27,16 +27,17 @@
 #include "cc_drawcommand.h"
 #include "viewer_translate.h"
 
+namespace CalChart {
+
 AnimateCommand::AnimateCommand(unsigned beats)
     : mNumBeats(beats)
     , mBeat(0)
 {
 }
 
-CC_DrawCommand AnimateCommand::GenCC_DrawCommand(const AnimatePoint& pt,
-    const CC_coord& offset) const
+DrawCommand AnimateCommand::GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const
 {
-    return CC_DrawCommand();
+    return DrawCommand();
 }
 
 bool AnimateCommand::Begin(AnimatePoint& pt)
@@ -85,7 +86,7 @@ float AnimateCommand::MotionDirection() const { return RealDirection(); }
 
 void AnimateCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
-JSONElement AnimateCommand::toOnlineViewerJSON(const CC_coord& start) const
+JSONElement AnimateCommand::toOnlineViewerJSON(const Coord& start) const
 {
     JSONElement newViewerObject = JSONElement::makeNull();
     toOnlineViewerJSON(newViewerObject, start);
@@ -103,7 +104,7 @@ AnimateDir AnimateCommandMT::Direction() const { return dir; }
 
 float AnimateCommandMT::RealDirection() const { return realdir; }
 
-void AnimateCommandMT::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const
+void AnimateCommandMT::toOnlineViewerJSON(JSONElement& dest, const Coord& start) const
 {
     JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
 
@@ -114,13 +115,13 @@ void AnimateCommandMT::toOnlineViewerJSON(JSONElement& dest, const CC_coord& sta
     moveAccessor["y"] = ToOnlineViewer::yPosition(start.y);
 }
 
-AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement)
+AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement)
     : AnimateCommandMT(beats, movement.Direction())
     , mVector(movement)
 {
 }
 
-AnimateCommandMove::AnimateCommandMove(unsigned beats, CC_coord movement,
+AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement,
     float direction)
     : AnimateCommandMT(beats, direction)
     , mVector(movement)
@@ -177,16 +178,15 @@ void AnimateCommandMove::ClipBeats(unsigned beats)
     AnimateCommand::ClipBeats(beats);
 }
 
-CC_DrawCommand
-AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt,
-    const CC_coord& offset) const
+DrawCommand
+AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const
 {
-    return CC_DrawCommand(pt.x + offset.x, pt.y + offset.y,
+    return { pt.x + offset.x, pt.y + offset.y,
         pt.x + mVector.x + offset.x,
-        pt.y + mVector.y + offset.y);
+        pt.y + mVector.y + offset.y };
 }
 
-void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const
+void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const Coord& start) const
 {
     JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
 
@@ -200,7 +200,7 @@ void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const CC_coord& s
     moveAccessor["facing"] = ToOnlineViewer::angle(MotionDirection());
 }
 
-AnimateCommandRotate::AnimateCommandRotate(unsigned beats, CC_coord cntr,
+AnimateCommandRotate::AnimateCommandRotate(unsigned beats, Coord cntr,
     float rad, float ang1, float ang2,
     bool backwards)
     : AnimateCommand(beats)
@@ -221,8 +221,8 @@ bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
     float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
                                 : mAngStart)
         * M_PI / 180.0;
-    pt.x = RoundToCoord(mOrigin.x + cos(curr_ang) * mR);
-    pt.y = RoundToCoord(mOrigin.y - sin(curr_ang) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
     return b;
 }
 
@@ -232,8 +232,8 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
         float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
                                     : mAngStart)
             * M_PI / 180.0;
-        pt.x = RoundToCoord(mOrigin.x + cos(curr_ang) * mR);
-        pt.y = RoundToCoord(mOrigin.y - sin(curr_ang) * mR);
+        pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
+        pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
         return true;
     }
     else {
@@ -244,15 +244,15 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
 void AnimateCommandRotate::ApplyForward(AnimatePoint& pt)
 {
     AnimateCommand::ApplyForward(pt);
-    pt.x = RoundToCoord(mOrigin.x + cos(mAngEnd * M_PI / 180.0) * mR);
-    pt.y = RoundToCoord(mOrigin.y - sin(mAngEnd * M_PI / 180.0) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngEnd * M_PI / 180.0) * mR);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngEnd * M_PI / 180.0) * mR);
 }
 
 void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt)
 {
     AnimateCommand::ApplyBackward(pt);
-    pt.x = RoundToCoord(mOrigin.x + cos(mAngStart * M_PI / 180.0) * mR);
-    pt.y = RoundToCoord(mOrigin.y - sin(mAngStart * M_PI / 180.0) * mR);
+    pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngStart * M_PI / 180.0) * mR);
+    pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngStart * M_PI / 180.0) * mR);
 }
 
 AnimateDir AnimateCommandRotate::Direction() const
@@ -278,22 +278,20 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
     AnimateCommand::ClipBeats(beats);
 }
 
-CC_DrawCommand
-AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt,
-    const CC_coord& offset) const
+DrawCommand
+AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const
 {
     float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
-    auto x_start = RoundToCoord(mOrigin.x + cos(start * M_PI / 180.0) * mR) + offset.x;
-    auto y_start = RoundToCoord(mOrigin.y - sin(start * M_PI / 180.0) * mR) + offset.y;
-    auto x_end = RoundToCoord(mOrigin.x + cos(end * M_PI / 180.0) * mR) + offset.x;
-    auto y_end = RoundToCoord(mOrigin.y - sin(end * M_PI / 180.0) * mR) + offset.y;
+    auto x_start = RoundToCoordUnits(mOrigin.x + cos(start * M_PI / 180.0) * mR) + offset.x;
+    auto y_start = RoundToCoordUnits(mOrigin.y - sin(start * M_PI / 180.0) * mR) + offset.y;
+    auto x_end = RoundToCoordUnits(mOrigin.x + cos(end * M_PI / 180.0) * mR) + offset.x;
+    auto y_end = RoundToCoordUnits(mOrigin.y - sin(end * M_PI / 180.0) * mR) + offset.y;
 
-    return CC_DrawCommand(x_start, y_start, x_end, y_end, mOrigin.x + offset.x,
-        mOrigin.y + offset.y);
+    return { x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
 }
 
-void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord& start) const
+void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const Coord& start) const
 {
     JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
 
@@ -306,4 +304,5 @@ void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const CC_coord&
     moveAccessor["beats"] = NumBeats();
     moveAccessor["beats_per_step"] = 1;
     moveAccessor["facing_offset"] = -mFace + 90;
+}
 }

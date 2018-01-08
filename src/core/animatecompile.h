@@ -1,3 +1,4 @@
+#pragma once
 /*
  * animate.h
  * Classes for animating shows
@@ -20,8 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "animate_types.h"
 #include "animate.h"
 #include "cc_show.h"
@@ -31,12 +30,12 @@
 #include <memory>
 #include <list>
 
+namespace CalChart {
+
 class ContProcedure;
 class ContToken;
 class AnimateCommand;
-
 using AnimationVariables = std::array<std::map<unsigned, float>, NUMCONTVARS>;
-
 using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand> >;
 
 class AnimationErrors {
@@ -62,13 +61,13 @@ class AnimateCompile {
 public:
     // Compile a point
     static std::tuple<AnimateCommands, AnimationVariables, AnimationErrors>
-    Compile(const CC_show& show, AnimationVariables variablesStates,
-        AnimationErrors errors, CC_show::const_CC_sheet_iterator_t c_sheet,
+    Compile(const Show& show, AnimationVariables variablesStates,
+        AnimationErrors errors, Show::const_Sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
         std::list<std::unique_ptr<ContProcedure> > const& proc);
 
 private:
-    AnimateCompile(const CC_show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, CC_show::const_CC_sheet_iterator_t c_sheet, AnimateState& state);
+    AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state);
 
 public:
     bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken* token);
@@ -86,10 +85,11 @@ public:
     AnimatePoint GetReferencePointPosition(unsigned refnum) const;
 
 private:
-    const CC_show& mShow;
+    const Show& mShow;
     const SYMBOL_TYPE contsymbol;
     const unsigned curr_pt;
-    const CC_show::const_CC_sheet_iterator_t curr_sheet;
+    const Show::const_Sheet_iterator_t curr_sheet;
 
     AnimateState& mState;
 };
+}

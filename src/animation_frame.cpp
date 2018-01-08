@@ -34,6 +34,8 @@
 #include <wx/spinctrl.h>
 #include <wx/tglbtn.h>
 
+using namespace CalChart;
+
 BEGIN_EVENT_TABLE(AnimationFrame, AnimationFrame::super)
 EVT_MENU(CALCHART__anim_reanimate, AnimationFrame::OnCmdReanimate)
 EVT_MENU(CALCHART__anim_select_coll, AnimationFrame::OnCmdSelectCollisions)
@@ -341,7 +343,7 @@ void AnimationFrame::OnCmd_anim_errors(wxCommandEvent& event)
         mAnimationView.GotoSheet(mErrorMarkers.at(which).second);
 
         mErrorText->Clear();
-        CC_continuity c = mAnimationView.GetContinuityOnSheet(
+        Continuity c = mAnimationView.GetContinuityOnSheet(
             mErrorMarkers.at(which).second,
             mErrorMarkers.at(which).first.contsymbol);
         if (!c.GetText().empty()) {
@@ -657,7 +659,6 @@ void AnimationFrame::OnNotifyErrorList(
         error_string.Printf(wxT("Sheet %d: \"%.32s\": %.32s"), sheetnum, message,
             s_animate_err_msgs[i.first]);
         mErrorList->Append(error_string);
-        mErrorMarkers.push_back(
-            std::pair<ErrorMarker, unsigned>(i.second, sheetnum));
+        mErrorMarkers.emplace_back(i.second, sheetnum);
     }
 }

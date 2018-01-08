@@ -34,18 +34,20 @@
 #include <algorithm>
 #include <functional>
 
+namespace CalChart {
+
 const std::string contnames[MAX_NUM_SYMBOLS] = {
     "Plain", "Sol", "Bksl", "Sl", "X", "Solbksl", "Solsl", "Solx"
 };
 
-CC_sheet::CC_sheet(size_t numPoints)
+Sheet::Sheet(size_t numPoints)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mBeats(1)
     , mPoints(numPoints)
 {
 }
 
-CC_sheet::CC_sheet(size_t numPoints, const std::string& newname)
+Sheet::Sheet(size_t numPoints, const std::string& newname)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mBeats(1)
     , mPoints(numPoints)
@@ -134,7 +136,7 @@ CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
 }
 
 // Constructor for shows 3.3 and ealier.
-CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
+Sheet::Sheet(size_t numPoints, std::istream& stream,
     Version_3_3_and_earlier)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
@@ -158,12 +160,12 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
     {
         uint8_t* d = &data[0];
         for (unsigned i = 0; i < mPoints.size(); ++i) {
-            CC_coord c;
+            Coord c;
             c.x = get_big_word(d);
             d += 2;
             c.y = get_big_word(d);
             d += 2;
-            for (unsigned j = 0; j <= CC_point::kNumRefPoints; j++) {
+            for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
                 mPoints[i].SetPos(c, j);
             }
         }
@@ -180,7 +182,7 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
         unsigned ref = get_big_word(d);
         d += 2;
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            CC_coord c;
+            Coord c;
             c.x = get_big_word(d);
             d += 2;
             c.y = get_big_word(d);
@@ -280,39 +282,39 @@ CC_sheet::CC_sheet(size_t numPoints, std::istream& stream,
             }
         }
         std::string textstr(text);
-        GetContinuityBySymbol(symbol_index).SetText(textstr);
+        mAnimationContinuity.at(symbol_index).SetText(textstr);
 
         name = ReadLong(stream);
     }
 }
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
+Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
     Current_version_and_later)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
     // construct the parser handlers
-    auto parse_INGL_NAME = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_NAME = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         auto str = (const char*)ptr;
         if (size != (strlen(str) + 1)) {
             throw CC_FileException("Description the wrong size", INGL_NAME);
         }
         sheet->mName = str;
     };
-    auto parse_INGL_DURA = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_DURA = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         if (4 != size) {
             throw CC_FileException("Incorrect size", INGL_DURA);
         }
         sheet->mBeats = get_big_long(ptr);
     };
-    auto parse_INGL_PNTS = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_PNTS = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         for (auto i = 0u; i < sheet->mPoints.size(); ++i) {
             auto this_size = *ptr;
             if (this_size > size) {
                 throw CC_FileException("Incorrect size", INGL_PNTS);
             }
-            sheet->mPoints[i] = CC_point({ ptr + 1, ptr + 1 + this_size });
+            sheet->mPoints[i] = Point({ ptr + 1, ptr + 1 + this_size });
             ptr += this_size + 1;
             size -= this_size + 1;
         }
@@ -320,7 +322,7 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
             throw CC_FileException("Incorrect size", INGL_PNTS);
         }
     };
-    auto parse_INGL_ECNT = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_ECNT = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         if (size < 2) // one byte num + 1 nil minimum
         {
             throw CC_FileException("Bad cont chunk", INGL_ECNT);
@@ -340,16 +342,16 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
             throw CC_FileException("No viable symbol for name", INGL_ECNT);
         }
         std::string textstr(text);
-        sheet->GetContinuityBySymbol(symbol_index).SetText(textstr);
+        sheet->mAnimationContinuity.at(symbol_index).SetText(textstr);
     };
-    auto parse_INGL_CONT = [parse_INGL_ECNT](CC_sheet* sheet, const uint8_t* ptr,
+    auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, const uint8_t* ptr,
         size_t size) {
-        static const std::map<uint32_t, std::function<void(CC_sheet*, const uint8_t*, size_t)> >
+        static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)> >
             parser = {
                 { INGL_ECNT, parse_INGL_ECNT },
             };
 
-        auto table = CalChart::Parser::ParseOutLabels(ptr, ptr + size);
+        auto table = Parser::ParseOutLabels(ptr, ptr + size);
         for (auto& i : table) {
             auto the_parser = parser.find(std::get<0>(i));
             if (the_parser != parser.end()) {
@@ -357,15 +359,15 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
             }
         }
     };
-    auto parse_INGL_PCNT = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_PCNT = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         const char* print_name = (const char*)ptr;
         const char* print_cont = print_name + strlen(print_name) + 1;
         if ((strlen(print_name) + 1 + strlen(print_cont) + 1) != size) {
             throw CC_FileException("Bad Print cont chunk", INGL_PCNT);
         }
-        sheet->mPrintableContinuity = CC_print_continuity(print_name, print_cont);
+        sheet->mPrintableContinuity = Print_continuity(print_name, print_cont);
     };
-    auto parse_INGL_BACK = [](CC_sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_BACK = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         auto num = get_big_long(ptr);
         ptr += 4;
         while (num--) {
@@ -373,14 +375,14 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         }
     };
 
-    static const std::map<uint32_t, std::function<void(CC_sheet*, const uint8_t*, size_t)> >
+    static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)> >
         parser = {
             { INGL_NAME, parse_INGL_NAME }, { INGL_DURA, parse_INGL_DURA },
             { INGL_PNTS, parse_INGL_PNTS }, { INGL_CONT, parse_INGL_CONT },
             { INGL_PCNT, parse_INGL_PCNT }, { INGL_BACK, parse_INGL_BACK },
         };
 
-    auto table = CalChart::Parser::ParseOutLabels(ptr, ptr + size);
+    auto table = Parser::ParseOutLabels(ptr, ptr + size);
     for (auto& i : table) {
         auto the_parser = parser.find(std::get<0>(i));
         if (the_parser != parser.end()) {
@@ -389,56 +391,56 @@ CC_sheet::CC_sheet(size_t numPoints, const uint8_t* ptr, size_t size,
     }
 }
 
-std::vector<uint8_t> CC_sheet::SerializeAllPoints() const
+std::vector<uint8_t> Sheet::SerializeAllPoints() const
 {
     // for each of the points, serialize them.  Don't need to wrap in block
     // because it's not specified that way
     std::vector<uint8_t> result;
     for (const auto& i : mPoints) {
-        CalChart::Parser::Append(result, i.Serialize());
+        Parser::Append(result, i.Serialize());
     }
     return result;
 }
 
-std::vector<uint8_t> CC_sheet::SerializeContinuityData() const
+std::vector<uint8_t> Sheet::SerializeContinuityData() const
 {
     // for each continuity in use, serialize them.
     std::vector<uint8_t> result;
     for (auto& current_symbol : k_symbols) {
         if (ContinuityInUse(current_symbol)) {
             std::vector<uint8_t> continuity;
-            CalChart::Parser::Append(continuity,
+            Parser::Append(continuity,
                 static_cast<uint8_t>(current_symbol));
-            CalChart::Parser::AppendAndNullTerminate(
-                continuity, GetContinuityBySymbol(current_symbol).GetText());
-            CalChart::Parser::Append(
-                result, CalChart::Parser::Construct_block(INGL_ECNT, continuity));
+            Parser::AppendAndNullTerminate(
+                continuity, mAnimationContinuity.at(current_symbol).GetText());
+            Parser::Append(
+                result, Parser::Construct_block(INGL_ECNT, continuity));
         }
     }
     return result;
 }
 
-std::vector<uint8_t> CC_sheet::SerializePrintContinuityData() const
+std::vector<uint8_t> Sheet::SerializePrintContinuityData() const
 {
     std::vector<uint8_t> result;
-    CalChart::Parser::AppendAndNullTerminate(
+    Parser::AppendAndNullTerminate(
         result, mPrintableContinuity.GetPrintNumber());
-    CalChart::Parser::AppendAndNullTerminate(
+    Parser::AppendAndNullTerminate(
         result, mPrintableContinuity.GetOriginalLine());
     return result;
 }
 
-std::vector<uint8_t> CC_sheet::SerializeBackgroundImageData() const
+std::vector<uint8_t> Sheet::SerializeBackgroundImageData() const
 {
     std::vector<uint8_t> result;
-    CalChart::Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
+    Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
     for (auto&& i : mBackgroundImages) {
-        CalChart::Parser::Append(result, i.Serialize());
+        Parser::Append(result, i.Serialize());
     }
     return result;
 }
 
-std::vector<uint8_t> CC_sheet::SerializeSheetData() const
+std::vector<uint8_t> Sheet::SerializeSheetData() const
 {
     // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY,
     // PRINT_CONTINUITY ;
@@ -446,30 +448,30 @@ std::vector<uint8_t> CC_sheet::SerializeSheetData() const
     std::vector<uint8_t> result;
     // Write NAME
     std::vector<uint8_t> tstring;
-    CalChart::Parser::AppendAndNullTerminate(tstring, GetName());
-    CalChart::Parser::Append(
-        result, CalChart::Parser::Construct_block(INGL_NAME, tstring));
+    Parser::AppendAndNullTerminate(tstring, GetName());
+    Parser::Append(
+        result, Parser::Construct_block(INGL_NAME, tstring));
 
     // Write DURATION
-    CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
-                                         INGL_DURA, uint32_t{ GetBeats() }));
+    Parser::Append(result, Parser::Construct_block(
+                               INGL_DURA, uint32_t{ GetBeats() }));
 
     // Write ALL_POINTS
-    CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
-                                         INGL_PNTS, SerializeAllPoints()));
+    Parser::Append(result, Parser::Construct_block(
+                               INGL_PNTS, SerializeAllPoints()));
 
     // Write Continuity
-    CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
-                                         INGL_CONT, SerializeContinuityData()));
+    Parser::Append(result, Parser::Construct_block(
+                               INGL_CONT, SerializeContinuityData()));
 
     // Write Continuity
-    CalChart::Parser::Append(result,
-        CalChart::Parser::Construct_block(
-                                 INGL_PCNT, SerializePrintContinuityData()));
+    Parser::Append(result,
+        Parser::Construct_block(
+                       INGL_PCNT, SerializePrintContinuityData()));
 
     // Write Continuity
-    CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
-                                         INGL_BACK, SerializeBackgroundImageData()));
+    Parser::Append(result, Parser::Construct_block(
+                               INGL_BACK, SerializeBackgroundImageData()));
 
     return result;
 }
@@ -479,30 +481,30 @@ std::vector<uint8_t> CC_sheet::SerializeSheetData() const
 // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, [
 // PRINT_CONTINUITY ] ;
 // SHEET_END          = INGL_END , INGL_SHET ;
-std::vector<uint8_t> CC_sheet::SerializeSheet() const
+std::vector<uint8_t> Sheet::SerializeSheet() const
 {
     std::vector<uint8_t> result;
-    CalChart::Parser::Append(result, CalChart::Parser::Construct_block(
-                                         INGL_SHET, SerializeSheetData()));
+    Parser::Append(result, Parser::Construct_block(
+                               INGL_SHET, SerializeSheetData()));
     return result;
 }
 
-CC_sheet::~CC_sheet() {}
+Sheet::~Sheet() {}
 
 // Find point at certain coords
-int CC_sheet::FindPoint(Coord x, Coord y, Coord searchBound,
+int Sheet::FindPoint(Coord where, Coord::units searchBound,
     unsigned ref) const
 {
     for (auto i = 0; i < static_cast<int>(mPoints.size()); i++) {
-        CC_coord c = GetPosition(i, ref);
-        if (((x + searchBound) >= c.x) && ((x - searchBound) <= c.x) && ((y + searchBound) >= c.y) && ((y - searchBound) <= c.y)) {
+        Coord c = GetPosition(i, ref);
+        if (((where.x + searchBound) >= c.x) && ((where.x - searchBound) <= c.x) && ((where.y + searchBound) >= c.y) && ((where.y - searchBound) <= c.y)) {
             return i;
         }
     }
     return -1;
 }
 
-SelectionList CC_sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
+SelectionList Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
 {
     SelectionList select;
     for (auto j = 0; j < static_cast<int>(mPoints.size()); j++) {
@@ -513,60 +515,55 @@ SelectionList CC_sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
     return select;
 }
 
-std::vector<CC_point> CC_sheet::NewNumPointsPositions(int num, int columns, const CC_coord& new_march_position) const
+std::vector<Point> Sheet::NewNumPointsPositions(int num, int columns, const Coord& new_march_position) const
 {
-    std::vector<CC_point> newpts(mPoints.begin(), mPoints.begin() + std::min<size_t>(mPoints.size(), num));
+    std::vector<Point> newpts(mPoints.begin(), mPoints.begin() + std::min<size_t>(mPoints.size(), num));
     auto c = new_march_position;
     auto col = 0;
     auto num_left = num - newpts.size();
     while (num_left--) {
         newpts.push_back(c);
         ++col;
-        c.x += Int2Coord(2);
+        c.x += Int2CoordUnits(2);
         if (col >= columns) {
             c.x = new_march_position.x;
-            c.y += Int2Coord(2);
+            c.y += Int2CoordUnits(2);
             col = 0;
         }
     }
     return newpts;
 }
 
-void CC_sheet::DeletePoints(SelectionList const& sl)
+void Sheet::DeletePoints(SelectionList const& sl)
 {
     for (auto iter = sl.rbegin(); iter != sl.rend(); ++iter) {
         mPoints.erase(mPoints.begin() + *iter);
     }
 }
 
-std::vector<CC_point> CC_sheet::RemapPoints(const std::vector<size_t>& table) const
+std::vector<Point> Sheet::RemapPoints(const std::vector<size_t>& table) const
 {
     if (mPoints.size() != table.size()) {
         throw std::runtime_error("wrong size for Relabel");
     }
-    std::vector<CC_point> newpts(mPoints.size());
+    std::vector<Point> newpts(mPoints.size());
     for (size_t i = 0; i < newpts.size(); i++) {
         newpts.at(i) = mPoints.at(table.at(i));
     }
     return newpts;
 }
 
-const CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
+const Continuity& Sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
 {
     return mAnimationContinuity.at(i);
 }
 
-CC_continuity& CC_sheet::GetContinuityBySymbol(SYMBOL_TYPE i)
+void Sheet::SetContinuityText(SYMBOL_TYPE which, const std::string& text)
 {
-    return mAnimationContinuity.at(i);
+    mAnimationContinuity.at(which).SetText(text);
 }
 
-void CC_sheet::SetContinuityText(SYMBOL_TYPE which, const std::string& text)
-{
-    GetContinuityBySymbol(which).SetText(text);
-}
-
-bool CC_sheet::ContinuityInUse(SYMBOL_TYPE idx) const
+bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
 {
     // is any point using this symbol?
     for (auto& point : mPoints) {
@@ -578,44 +575,44 @@ bool CC_sheet::ContinuityInUse(SYMBOL_TYPE idx) const
     return !GetContinuityBySymbol(idx).GetText().empty();
 }
 
-std::string CC_sheet::GetName() const { return mName; }
+std::string Sheet::GetName() const { return mName; }
 
-void CC_sheet::SetName(const std::string& newname) { mName = newname; }
+void Sheet::SetName(const std::string& newname) { mName = newname; }
 
-std::string CC_sheet::GetNumber() const
+std::string Sheet::GetNumber() const
 {
     return mPrintableContinuity.GetPrintNumber();
 }
 
-std::string CC_sheet::GetRawPrintContinuity() const
+std::string Sheet::GetRawPrintContinuity() const
 {
     return mPrintableContinuity.GetOriginalLine();
 }
 
-unsigned short CC_sheet::GetBeats() const { return mBeats; }
+unsigned short Sheet::GetBeats() const { return mBeats; }
 
-void CC_sheet::SetBeats(unsigned short b) { mBeats = b; }
+void Sheet::SetBeats(unsigned short b) { mBeats = b; }
 
 // Get position of point
-CC_coord CC_sheet::GetPosition(unsigned i, unsigned ref) const
+Coord Sheet::GetPosition(unsigned i, unsigned ref) const
 {
     return mPoints[i].GetPos(ref);
 }
 
 // Set position of point and all refs
-void CC_sheet::SetAllPositions(const CC_coord& val, unsigned i)
+void Sheet::SetAllPositions(const Coord& val, unsigned i)
 {
-    for (unsigned j = 0; j <= CC_point::kNumRefPoints; j++) {
+    for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
         mPoints[i].SetPos(val, j);
     }
 }
 
 // Set position of point
-void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
+void Sheet::SetPosition(const Coord& val, unsigned i, unsigned ref)
 {
     unsigned j;
     if (ref == 0) {
-        for (j = 1; j <= CC_point::kNumRefPoints; j++) {
+        for (j = 1; j <= Point::kNumRefPoints; j++) {
             if (mPoints[i].GetPos(j) == mPoints[i].GetPos(0)) {
                 mPoints[i].SetPos(val, j);
             }
@@ -646,31 +643,31 @@ void CC_sheet::SetPosition(const CC_coord& val, unsigned i, unsigned ref)
  * also, there are three tab stops set for standard continuity format
  */
 
-void CC_sheet::SetPrintableContinuity(const std::string& name,
+void Sheet::SetPrintableContinuity(const std::string& name,
     const std::string& lines)
 {
-    mPrintableContinuity = CC_print_continuity(name, lines);
+    mPrintableContinuity = Print_continuity(name, lines);
 }
 
-CC_textline_list CC_sheet::GetPrintableContinuity() const
+Textline_list Sheet::GetPrintableContinuity() const
 {
     return mPrintableContinuity.GetChunks();
 }
 
-const CC_point& CC_sheet::GetPoint(unsigned i) const { return mPoints[i]; }
+const Point& Sheet::GetPoint(unsigned i) const { return mPoints[i]; }
 
-CC_point& CC_sheet::GetPoint(unsigned i) { return mPoints[i]; }
+Point& Sheet::GetPoint(unsigned i) { return mPoints[i]; }
 
-std::vector<CC_point> CC_sheet::GetPoints() const { return mPoints; }
+std::vector<Point> Sheet::GetPoints() const { return mPoints; }
 
-JSONElement CC_sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
+JSONElement Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
 {
     JSONElement newViewerObject = JSONElement::makeNull();
     toOnlineViewerJSON(newViewerObject, sheetNum, dotLabels, compiledSheet);
     return newViewerObject;
 }
 
-void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
+void Sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
 {
     JSONDataObjectAccessor sheetObjectAccessor = dest = JSONElement::makeObject();
 
@@ -728,23 +725,23 @@ void CC_sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vec
     }
 }
 
-void CC_sheet::SetPoints(const std::vector<CC_point>& points) { mPoints = points; }
+void Sheet::SetPoints(const std::vector<Point>& points) { mPoints = points; }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
 #include <assert.h>
-using namespace CalChart::Parser;
+using namespace Parser;
 
-void CC_sheet::CC_sheet_round_trip_test()
+void Sheet::sheet_round_trip_test()
 {
     {
-        auto blank_sheet = CC_sheet::CC_sheet(0);
+        auto blank_sheet = Sheet::Sheet(0);
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto table = CalChart::Parser::ParseOutLabels(blank_sheet_data.data(),
+        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
             blank_sheet_data.data() + blank_sheet_data.size());
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = CC_sheet::CC_sheet(0, std::get<1>(table.front()),
+        auto re_read_sheet = Sheet::Sheet(0, std::get<1>(table.front()),
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
@@ -753,14 +750,14 @@ void CC_sheet::CC_sheet_round_trip_test()
         assert(is_equal);
     }
     {
-        auto blank_sheet = CC_sheet::CC_sheet(0, "new_sheet");
+        auto blank_sheet = Sheet::Sheet(0, "new_sheet");
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto table = CalChart::Parser::ParseOutLabels(blank_sheet_data.data(),
+        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
             blank_sheet_data.data() + blank_sheet_data.size());
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = CC_sheet::CC_sheet(0, std::get<1>(table.front()),
+        auto re_read_sheet = Sheet::Sheet(0, std::get<1>(table.front()),
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
@@ -769,24 +766,24 @@ void CC_sheet::CC_sheet_round_trip_test()
         assert(is_equal);
     }
     {
-        auto blank_sheet = CC_sheet::CC_sheet(1, "new_sheet");
+        auto blank_sheet = Sheet::Sheet(1, "new_sheet");
         blank_sheet.SetName("new_name");
-        blank_sheet.SetPosition(CC_coord(10, 10), 0);
-        blank_sheet.SetPosition(CC_coord(20, 10), 0, 1);
-        blank_sheet.SetPosition(CC_coord(30, 40), 0, 2);
-        blank_sheet.SetPosition(CC_coord(52, 50), 0, 3);
+        blank_sheet.SetPosition(Coord(10, 10), 0);
+        blank_sheet.SetPosition(Coord(20, 10), 0, 1);
+        blank_sheet.SetPosition(Coord(30, 40), 0, 2);
+        blank_sheet.SetPosition(Coord(52, 50), 0, 3);
         blank_sheet.SetBeats(13);
-        blank_sheet.GetContinuityBySymbol(SYMBOL_PLAIN).SetText("continuity test");
-        blank_sheet.mPrintableContinuity = CC_print_continuity{
+        blank_sheet.mAnimationContinuity.at(SYMBOL_PLAIN).SetText("continuity test");
+        blank_sheet.mPrintableContinuity = Print_continuity{
             "number 1", "duuuude, writing this testing is boring"
         };
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
-        auto table = CalChart::Parser::ParseOutLabels(blank_sheet_data.data(),
+        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
             blank_sheet_data.data() + blank_sheet_data.size());
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = CC_sheet::CC_sheet(1, std::get<1>(table.front()),
+        auto re_read_sheet = Sheet::Sheet(1, std::get<1>(table.front()),
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
@@ -801,27 +798,27 @@ void CC_sheet::CC_sheet_round_trip_test()
     }
 }
 
-void CC_sheet_UnitTests() { CC_sheet::CC_sheet_round_trip_test(); }
+void Sheet_UnitTests() { Sheet::sheet_round_trip_test(); }
 
-std::vector<calchart_core::ImageData> const& CC_sheet::GetBackgroundImages() const
+std::vector<ImageData> const& Sheet::GetBackgroundImages() const
 {
     return mBackgroundImages;
 }
 
-void CC_sheet::AddBackgroundImage(calchart_core::ImageData const& image, size_t where)
+void Sheet::AddBackgroundImage(ImageData const& image, size_t where)
 {
     auto insert_point = mBackgroundImages.begin() + std::min(where, mBackgroundImages.size());
     mBackgroundImages.insert(insert_point, image);
 }
 
-void CC_sheet::RemoveBackgroundImage(size_t which)
+void Sheet::RemoveBackgroundImage(size_t which)
 {
     if (which < mBackgroundImages.size()) {
         mBackgroundImages.erase(mBackgroundImages.begin() + which);
     }
 }
 
-void CC_sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height)
+void Sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_width, int scaled_height)
 {
     if (which < mBackgroundImages.size()) {
         mBackgroundImages.at(which).left = left;
@@ -829,4 +826,5 @@ void CC_sheet::MoveBackgroundImage(size_t which, int left, int top, int scaled_w
         mBackgroundImages.at(which).scaled_width = scaled_width;
         mBackgroundImages.at(which).scaled_height = scaled_height;
     }
+}
 }

@@ -35,33 +35,34 @@
 #include <functional>
 #include <algorithm>
 
+namespace CalChart {
 static const std::string k_nofile_str = "Unable to open file";
 static const std::string k_badcont_str = "Error in continuity file";
 static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
 
 // you can create a show in two ways, from scratch, or from an input stream
-std::unique_ptr<CC_show> CC_show::Create_CC_show()
+std::unique_ptr<Show> Show::Create_CC_show()
 {
-    auto show = std::unique_ptr<CC_show>(new CC_show());
-    show->InsertSheet(CC_sheet(show->GetNumPoints(), "1"), 0);
+    auto show = std::unique_ptr<Show>(new Show());
+    show->InsertSheet(Sheet(show->GetNumPoints(), "1"), 0);
     show->SetCurrentSheet(0);
     return show;
 }
 
-std::unique_ptr<CC_show> CC_show::Create_CC_show(std::vector<std::string> const& labels, unsigned columns, CC_coord const& new_march_position)
+std::unique_ptr<Show> Show::Create_CC_show(std::vector<std::string> const& labels, unsigned columns, Coord const& new_march_position)
 {
     auto show = Create_CC_show();
     show->SetNumPoints(labels, columns, new_march_position);
     return show;
 }
 
-std::unique_ptr<CC_show> CC_show::Create_CC_show(std::istream& stream)
+std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
 {
     ReadAndCheckID(stream, INGL_INGL);
     uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
     if (version <= 0x303) {
-        return std::unique_ptr<CC_show>(
-            new CC_show(stream, Version_3_3_and_earlier()));
+        return std::unique_ptr<Show>(
+            new Show(stream, Version_3_3_and_earlier()));
     }
 
     // read the whole stream into a block, making sure we don't skip white space
@@ -73,12 +74,12 @@ std::unique_ptr<CC_show> CC_show::Create_CC_show(std::istream& stream)
 
     // debug purposes, you can uncomment this line to have the show dumped
     //	DoRecursiveParsing("", data.data(), data.data() + data.size());
-    return std::unique_ptr<CC_show>(
-        new CC_show(data.data(), data.size(), Current_version_and_later()));
+    return std::unique_ptr<Show>(
+        new Show(data.data(), data.size(), Current_version_and_later()));
 }
 
 // Create a new show
-CC_show::CC_show()
+Show::Show()
     : mSheetNum(0)
 {
 }
@@ -86,7 +87,7 @@ CC_show::CC_show()
 // -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
 // Recommend that you don't touch this unless you know what you are doing.
 // Constructor for shows 3.3 and ealier.
-CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
+Show::Show(std::istream& stream, Version_3_3_and_earlier ver)
     : mSheetNum(0)
 {
     // caller should have stripped off INGL and GURK headers
@@ -136,7 +137,7 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
     while (INGL_GURK == name) {
         ReadAndCheckID(stream, INGL_SHET);
 
-        CC_sheet sheet(GetNumPoints(), stream, ver);
+        Sheet sheet(GetNumPoints(), stream, ver);
         InsertSheet(sheet, GetNumSheets());
 
         // ReadAndCheckID(stream, INGL_END);
@@ -152,21 +153,21 @@ CC_show::CC_show(std::istream& stream, Version_3_3_and_earlier ver)
 }
 // -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
 
-CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
+Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     : mSheetNum(0)
 {
     // caller should have stripped off INGL and GURK headers
 
     // construct the parser handlers
     // TODO: Why can't I capture this here?
-    auto parse_INGL_SIZE = [](CC_show* show, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_SIZE = [](Show* show, const uint8_t* ptr, size_t size) {
         if (4 != size) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
         auto numpoints = get_big_long(ptr);
         show->mPtLabels.assign(numpoints, std::string());
     };
-    auto parse_INGL_LABL = [](CC_show* show, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_LABL = [](Show* show, const uint8_t* ptr, size_t size) {
         std::vector<std::string> labels;
         if (!size && show->GetNumPoints()) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
@@ -187,21 +188,21 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
         }
         show->SetPointLabel(labels);
     };
-    auto parse_INGL_DESC = [](CC_show* show, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_DESC = [](Show* show, const uint8_t* ptr, size_t size) {
         auto str = (const char*)ptr;
         if (size != (strlen(str) + 1)) {
             throw CC_FileException("Description the wrong size", INGL_DESC);
         }
         show->SetDescr(std::string(str, strlen(str)));
     };
-    auto parse_INGL_SHET = [](CC_show* show, const uint8_t* ptr, size_t size) {
-        CC_sheet sheet(show->GetNumPoints(), ptr, size,
+    auto parse_INGL_SHET = [](Show* show, const uint8_t* ptr, size_t size) {
+        Sheet sheet(show->GetNumPoints(), ptr, size,
             Current_version_and_later());
         auto sheet_num = show->GetCurrentSheetNum();
         show->InsertSheet(sheet, show->GetNumSheets());
         show->SetCurrentSheet(sheet_num);
     };
-    auto parse_INGL_SELE = [](CC_show* show, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_SELE = [](Show* show, const uint8_t* ptr, size_t size) {
         if ((size % 4) != 0) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
@@ -211,15 +212,15 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
             size -= 4;
         }
     };
-    auto parse_INGL_CURR = [](CC_show* show, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_CURR = [](Show* show, const uint8_t* ptr, size_t size) {
         if (4 != size) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
         show->mSheetNum = get_big_long(ptr);
     };
     // [=] needed here to pull in the parse functions
-    auto parse_INGL_SHOW = [=](CC_show* show, const uint8_t* ptr, size_t size) {
-        static const std::map<uint32_t, std::function<void(CC_show * show, const uint8_t*, size_t)> >
+    auto parse_INGL_SHOW = [=](Show* show, const uint8_t* ptr, size_t size) {
+        static const std::map<uint32_t, std::function<void(Show * show, const uint8_t*, size_t)> >
             parser = {
                 { INGL_SIZE, parse_INGL_SIZE },
                 { INGL_LABL, parse_INGL_LABL },
@@ -228,7 +229,7 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
                 { INGL_SELE, parse_INGL_SELE },
                 { INGL_CURR, parse_INGL_CURR },
             };
-        auto table = CalChart::Parser::ParseOutLabels(ptr, ptr + size);
+        auto table = Parser::ParseOutLabels(ptr, ptr + size);
         for (auto& i : table) {
             auto the_parser = parser.find(std::get<0>(i));
             if (the_parser != parser.end()) {
@@ -237,7 +238,7 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
         }
     };
 
-    auto table = CalChart::Parser::ParseOutLabels(ptr, ptr + size);
+    auto table = Parser::ParseOutLabels(ptr, ptr + size);
     bool found_show = false;
     for (auto& i : table) {
         if (std::get<0>(i) == INGL_SHOW) {
@@ -251,13 +252,13 @@ CC_show::CC_show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
 }
 
 // Destroy a show
-CC_show::~CC_show() {}
+Show::~Show() {}
 
-std::vector<uint8_t> CC_show::SerializeShowData() const
+std::vector<uint8_t> Show::SerializeShowData() const
 {
-    using CalChart::Parser::Append;
-    using CalChart::Parser::AppendAndNullTerminate;
-    using CalChart::Parser::Construct_block;
+    using Parser::Append;
+    using Parser::AppendAndNullTerminate;
+    using Parser::Construct_block;
     std::vector<uint8_t> result;
     // SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
     // Write NUM_MARCH
@@ -296,10 +297,10 @@ std::vector<uint8_t> CC_show::SerializeShowData() const
     return result;
 }
 
-std::vector<uint8_t> CC_show::SerializeShow() const
+std::vector<uint8_t> Show::SerializeShow() const
 {
-    using CalChart::Parser::Append;
-    using CalChart::Parser::Construct_block;
+    using Parser::Append;
+    using Parser::Construct_block;
     std::vector<uint8_t> result;
     // show               = START , SHOW ;
     // START              = INGL_INGL , INGL_VERS ;
@@ -314,12 +315,12 @@ std::vector<uint8_t> CC_show::SerializeShow() const
     return result;
 }
 
-int CC_show::GetNumSheets() const { return static_cast<int>(mSheets.size()); }
+int Show::GetNumSheets() const { return static_cast<int>(mSheets.size()); }
 
-CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(int sheetidx)
+Show::Sheet_container_t Show::RemoveNthSheet(int sheetidx)
 {
-    CC_sheet_iterator_t i = GetNthSheet(sheetidx);
-    CC_sheet_container_t shts(1, *i);
+    auto i = GetNthSheet(sheetidx);
+    Sheet_container_t shts(1, *i);
     mSheets.erase(i);
 
     if (sheetidx < GetCurrentSheetNum()) {
@@ -332,16 +333,16 @@ CC_show::CC_sheet_container_t CC_show::RemoveNthSheet(int sheetidx)
     return shts;
 }
 
-void CC_show::SetCurrentSheet(int n) { mSheetNum = n; }
+void Show::SetCurrentSheet(int n) { mSheetNum = n; }
 
-void CC_show::InsertSheet(const CC_sheet& sheet, int sheetidx)
+void Show::InsertSheet(const Sheet& sheet, int sheetidx)
 {
     mSheets.insert(mSheets.begin() + sheetidx, sheet);
     if (sheetidx <= GetCurrentSheetNum())
         SetCurrentSheet(GetCurrentSheetNum() + 1);
 }
 
-void CC_show::InsertSheet(const CC_sheet_container_t& sheet,
+void Show::InsertSheet(const Sheet_container_t& sheet,
     int sheetidx)
 {
     mSheets.insert(mSheets.begin() + sheetidx, sheet.begin(), sheet.end());
@@ -350,16 +351,16 @@ void CC_show::InsertSheet(const CC_sheet_container_t& sheet,
 }
 
 // warning, the labels might not match up
-void CC_show::SetNumPoints(std::vector<std::string> const& labels, int columns, CC_coord const& new_march_position)
+void Show::SetNumPoints(std::vector<std::string> const& labels, int columns, Coord const& new_march_position)
 {
-    for (CC_sheet_iterator_t sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
+    for (auto sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
         auto pts = sht->NewNumPointsPositions(static_cast<int>(labels.size()), columns, new_march_position);
         sht->SetPoints(pts);
     }
     SetPointLabel(labels);
 }
 
-void CC_show::DeletePoints(SelectionList const& sl)
+void Show::DeletePoints(SelectionList const& sl)
 {
     for (auto iter = sl.rbegin(); iter != sl.rend(); ++iter) {
         mPtLabels.erase(mPtLabels.begin() + *iter);
@@ -369,14 +370,14 @@ void CC_show::DeletePoints(SelectionList const& sl)
     }
 }
 
-void CC_show::SetPointLabel(const std::vector<std::string>& labels)
+void Show::SetPointLabel(const std::vector<std::string>& labels)
 {
     mPtLabels = labels;
 }
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
 // so that they match with this current sheet
-std::pair<bool, std::vector<size_t> > CC_show::GetRelabelMapping(const_CC_sheet_iterator_t source_sheet, const_CC_sheet_iterator_t target_sheets) const
+std::pair<bool, std::vector<size_t> > Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets) const
 {
     std::vector<size_t> table(GetNumPoints());
     std::vector<unsigned> used_table(GetNumPoints());
@@ -401,14 +402,14 @@ std::pair<bool, std::vector<size_t> > CC_show::GetRelabelMapping(const_CC_sheet_
     return { true, table };
 }
 
-std::string CC_show::GetPointLabel(int i) const
+std::string Show::GetPointLabel(int i) const
 {
     if (i >= static_cast<int>(mPtLabels.size()))
         return "";
     return mPtLabels.at(i);
 }
 
-bool CC_show::AlreadyHasPrintContinuity() const
+bool Show::AlreadyHasPrintContinuity() const
 {
     for (auto& i : mSheets) {
         if (i.GetPrintableContinuity().size() > 0) {
@@ -418,7 +419,7 @@ bool CC_show::AlreadyHasPrintContinuity() const
     return false;
 }
 
-bool CC_show::WillMovePoints(std::map<int, CC_coord> const& new_positions, int ref) const
+bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const
 {
     auto sheet = GetCurrentSheet();
     for (auto&& index : new_positions) {
@@ -429,7 +430,7 @@ bool CC_show::WillMovePoints(std::map<int, CC_coord> const& new_positions, int r
     return false;
 }
 
-SelectionList CC_show::MakeSelectAll() const
+SelectionList Show::MakeSelectAll() const
 {
     SelectionList sl;
     for (auto i = 0u; i < mPtLabels.size(); ++i)
@@ -437,31 +438,31 @@ SelectionList CC_show::MakeSelectAll() const
     return sl;
 }
 
-SelectionList CC_show::MakeUnselectAll() const
+SelectionList Show::MakeUnselectAll() const
 {
     return {};
 }
 
-void CC_show::SetSelection(const SelectionList& sl)
+void Show::SetSelection(const SelectionList& sl)
 {
     mSelectionList = sl;
 }
 
-SelectionList CC_show::MakeAddToSelection(const SelectionList& sl) const
+SelectionList Show::MakeAddToSelection(const SelectionList& sl) const
 {
     SelectionList slcopy = mSelectionList;
     slcopy.insert(sl.begin(), sl.end());
     return slcopy;
 }
 
-SelectionList CC_show::MakeRemoveFromSelection(const SelectionList& sl) const
+SelectionList Show::MakeRemoveFromSelection(const SelectionList& sl) const
 {
     SelectionList slcopy = mSelectionList;
     slcopy.erase(sl.begin(), sl.end());
     return slcopy;
 }
 
-SelectionList CC_show::MakeToggleSelection(const SelectionList& sl) const
+SelectionList Show::MakeToggleSelection(const SelectionList& sl) const
 {
     SelectionList slcopy = mSelectionList;
     for (auto i : sl) {
@@ -477,14 +478,14 @@ SelectionList CC_show::MakeToggleSelection(const SelectionList& sl) const
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, int ref) const
+SelectionList Show::MakeSelectWithLasso(const Lasso& lasso, int ref) const
 {
     if (!lasso.FirstPoint()) {
         return {};
     }
 
     SelectionList sl;
-    CC_show::const_CC_sheet_iterator_t sheet = GetCurrentSheet();
+    auto sheet = GetCurrentSheet();
     for (int i = 0; i < GetNumPoints(); i++) {
         if (lasso.Inside(sheet->GetPosition(i, ref))) {
             sl.insert(i);
@@ -493,14 +494,14 @@ SelectionList CC_show::MakeSelectWithLasso(const CC_lasso& lasso, int ref) const
     return sl;
 }
 
-JSONElement CC_show::toOnlineViewerJSON(const Animation& compiledShow) const
+JSONElement Show::toOnlineViewerJSON(const Animation& compiledShow) const
 {
     JSONElement newViewerObject = JSONElement::makeNull();
     toOnlineViewerJSON(newViewerObject, compiledShow);
     return newViewerObject;
 }
 
-void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const
+void Show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const
 {
     JSONDataObjectAccessor showObjectAccessor = dest = JSONElement::makeObject();
 
@@ -527,83 +528,83 @@ void CC_show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledSho
     }
 }
 
-CC_show_command_pair CC_show::Create_SetCurrentSheetCommand(int n) const
+Show_command_pair Show::Create_SetCurrentSheetCommand(int n) const
 {
-    auto action = [n = n](CC_show & show) { show.SetCurrentSheet(n); };
-    auto reaction = [n = mSheetNum](CC_show & show) { show.SetCurrentSheet(n); };
-    return CC_show_command_pair{ action, reaction };
+    auto action = [n = n](Show & show) { show.SetCurrentSheet(n); };
+    auto reaction = [n = mSheetNum](Show & show) { show.SetCurrentSheet(n); };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetSelectionCommand(const SelectionList& sl) const
+Show_command_pair Show::Create_SetSelectionCommand(const SelectionList& sl) const
 {
-    auto action = [sl](CC_show& show) { show.SetSelection(sl); };
-    auto reaction = [sl = mSelectionList](CC_show & show) { show.SetSelection(sl); };
-    return CC_show_command_pair{ action, reaction };
+    auto action = [sl](Show& show) { show.SetSelection(sl); };
+    auto reaction = [sl = mSelectionList](Show & show) { show.SetSelection(sl); };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, CC_coord const& new_march_position) const
+Show_command_pair Show::Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, Coord const& new_march_position) const
 {
-    auto action = [labels, numColumns, new_march_position](CC_show& show) { show.SetNumPoints(labels, numColumns, new_march_position); };
+    auto action = [labels, numColumns, new_march_position](Show& show) { show.SetNumPoints(labels, numColumns, new_march_position); };
     // need to go through and save all the positions and labels for later
     auto old_labels = mPtLabels;
-    std::vector<std::vector<CC_point> > old_points;
+    std::vector<std::vector<Point> > old_points;
     for (auto&& sheet : mSheets) {
         old_points.emplace_back(sheet.GetPoints());
     }
-    auto reaction = [old_labels, old_points](CC_show& show) {
+    auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
             show.mSheets.at(i).SetPoints(old_points.at(i));
         }
         show.SetPointLabel(old_labels);
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetSheetTitleCommand(std::string const& newname) const
+Show_command_pair Show::Create_SetSheetTitleCommand(std::string const& newname) const
 {
-    auto action = [ whichSheet = mSheetNum, newname ](CC_show & show) { show.mSheets.at(whichSheet).SetName(newname); };
-    auto reaction = [ whichSheet = mSheetNum, newname = mSheets.at(mSheetNum).GetName() ](CC_show & show) { show.mSheets.at(whichSheet).SetName(newname); };
-    return CC_show_command_pair{ action, reaction };
+    auto action = [ whichSheet = mSheetNum, newname ](Show & show) { show.mSheets.at(whichSheet).SetName(newname); };
+    auto reaction = [ whichSheet = mSheetNum, newname = mSheets.at(mSheetNum).GetName() ](Show & show) { show.mSheets.at(whichSheet).SetName(newname); };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetSheetBeatsCommand(int beats) const
+Show_command_pair Show::Create_SetSheetBeatsCommand(int beats) const
 {
-    auto action = [ whichSheet = mSheetNum, beats ](CC_show & show) { show.mSheets.at(whichSheet).SetBeats(beats); };
-    auto reaction = [ whichSheet = mSheetNum, beats = mSheets.at(mSheetNum).GetBeats() ](CC_show & show) { show.mSheets.at(whichSheet).SetBeats(beats); };
-    return CC_show_command_pair{ action, reaction };
+    auto action = [ whichSheet = mSheetNum, beats ](Show & show) { show.mSheets.at(whichSheet).SetBeats(beats); };
+    auto reaction = [ whichSheet = mSheetNum, beats = mSheets.at(mSheetNum).GetBeats() ](Show & show) { show.mSheets.at(whichSheet).SetBeats(beats); };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_AddSheetsCommand(const CC_show::CC_sheet_container_t& sheets, int where) const
+Show_command_pair Show::Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const
 {
-    auto action = [sheets, where](CC_show& show) { show.InsertSheet(sheets, where); };
-    auto reaction = [sheets, where](CC_show& show) { auto num_times = sheets.size(); while (num_times--) show.RemoveNthSheet(where); };
-    return CC_show_command_pair{ action, reaction };
+    auto action = [sheets, where](Show& show) { show.InsertSheet(sheets, where); };
+    auto reaction = [sheets, where](Show& show) { auto num_times = sheets.size(); while (num_times--) show.RemoveNthSheet(where); };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_RemoveSheetCommand(int where) const
+Show_command_pair Show::Create_RemoveSheetCommand(int where) const
 {
-    CC_sheet_container_t old_shts(1, *GetNthSheet(where));
-    auto action = [where](CC_show& show) { show.RemoveNthSheet(where); };
-    auto reaction = [old_shts, where](CC_show& show) { show.InsertSheet(old_shts, where); };
-    return CC_show_command_pair{ action, reaction };
+    Sheet_container_t old_shts(1, *GetNthSheet(where));
+    auto action = [where](Show& show) { show.RemoveNthSheet(where); };
+    auto reaction = [old_shts, where](Show& show) { show.InsertSheet(old_shts, where); };
+    return { action, reaction };
 }
 
 // remapping gets applied on this sheet till the last one
-CC_show_command_pair CC_show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const
+Show_command_pair Show::Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const
 {
-    std::vector<std::vector<CC_point> > current_pos;
+    std::vector<std::vector<Point> > current_pos;
     for (auto s = GetNthSheet(sheet_num_first); s != GetSheetEnd(); ++s) {
         current_pos.emplace_back(s->GetPoints());
     }
     // first gather where all the points are;
-    auto action = [sheet_num_first, mapping](CC_show& show) {
+    auto action = [sheet_num_first, mapping](Show& show) {
         auto s = show.GetNthSheet(sheet_num_first);
         while (s != show.GetSheetEnd()) {
             s->SetPoints(s->RemapPoints(mapping));
             ++s;
         }
     };
-    auto reaction = [sheet_num_first, current_pos](CC_show& show) {
+    auto reaction = [sheet_num_first, current_pos](Show& show) {
         auto i = 0;
         auto s = show.GetNthSheet(sheet_num_first);
         while (s != show.GetSheetEnd()) {
@@ -611,87 +612,87 @@ CC_show_command_pair CC_show::Create_ApplyRelabelMapping(int sheet_num_first, st
             ++s;
         }
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const
+Show_command_pair Show::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const
 {
     std::map<unsigned, std::pair<std::string, std::string> > undo_data;
     for (auto&& i : data) {
         undo_data[i.first] = { GetNthSheet(i.first)->GetNumber(), GetNthSheet(i.first)->GetRawPrintContinuity() };
     }
-    auto action = [data](CC_show& show) {
+    auto action = [data](Show& show) {
         for (auto&& i : data) {
             show.GetNthSheet(i.first)->SetPrintableContinuity(i.second.first, i.second.second);
         }
     };
-    auto reaction = [undo_data](CC_show& show) {
+    auto reaction = [undo_data](Show& show) {
         for (auto&& i : undo_data) {
             show.GetNthSheet(i.first)->SetPrintableContinuity(i.second.first, i.second.second);
         }
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_MovePointsCommand(std::map<int, CC_coord> const& new_positions, int ref) const
+Show_command_pair Show::Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const
 {
     return Create_MovePointsCommand(GetCurrentSheetNum(), new_positions, ref);
 }
 
-CC_show_command_pair CC_show::Create_MovePointsCommand(int whichSheet, std::map<int, CC_coord> const& new_positions, int ref) const
+Show_command_pair Show::Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const
 {
     auto sheet = GetNthSheet(whichSheet);
-    std::map<unsigned, CC_coord> original_positions;
+    std::map<unsigned, Coord> original_positions;
     for (auto&& index : new_positions) {
         original_positions[index.first] = sheet->GetPosition(index.first, ref);
     }
-    auto action = [ sheet_num = whichSheet, new_positions, ref ](CC_show & show)
+    auto action = [ sheet_num = whichSheet, new_positions, ref ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
     };
-    auto reaction = [ sheet_num = whichSheet, original_positions, ref ](CC_show & show)
+    auto reaction = [ sheet_num = whichSheet, original_positions, ref ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_positions) {
             sheet->SetPosition(i.second, i.first, ref);
         }
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_DeletePointsCommand() const
+Show_command_pair Show::Create_DeletePointsCommand() const
 {
-    auto action = [selectionList = mSelectionList](CC_show & show)
+    auto action = [selectionList = mSelectionList](Show & show)
     {
         show.DeletePoints(selectionList);
         show.SetSelection({});
     };
     // need to go through and save all the positions and labels for later
     auto old_labels = mPtLabels;
-    std::vector<std::vector<CC_point> > old_points;
+    std::vector<std::vector<Point> > old_points;
     for (auto&& sheet : mSheets) {
         old_points.emplace_back(sheet.GetPoints());
     }
-    auto reaction = [old_labels, old_points](CC_show& show) {
+    auto reaction = [old_labels, old_points](Show& show) {
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
             show.mSheets.at(i).SetPoints(old_points.at(i));
         }
         show.SetPointLabel(old_labels);
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const
+Show_command_pair Show::Create_RotatePointPositionsCommand(int rotateAmount, int ref) const
 {
     // construct a vector of point indices in order
     std::vector<unsigned> pointIndices;
     std::copy(mSelectionList.begin(), mSelectionList.end(), std::back_inserter(pointIndices));
 
     // construct a vector of point positions, rotated by rotate amount
-    std::vector<CC_coord> finalPositions;
+    std::vector<Coord> finalPositions;
     auto sheet = GetCurrentSheet();
     std::transform(mSelectionList.begin(), mSelectionList.end(),
         std::back_inserter(finalPositions),
@@ -701,16 +702,16 @@ CC_show_command_pair CC_show::Create_RotatePointPositionsCommand(int rotateAmoun
         finalPositions.end());
 
     // put things into place.
-    std::map<int, CC_coord> positions;
+    std::map<int, Coord> positions;
     for (int index = static_cast<int>(pointIndices.size()) - 1; index >= 0; index--) {
         positions[pointIndices[index]] = finalPositions[index];
     }
     return Create_MovePointsCommand(positions, ref);
 }
 
-CC_show_command_pair CC_show::Create_SetReferencePointToRef0(int ref) const
+Show_command_pair Show::Create_SetReferencePointToRef0(int ref) const
 {
-    std::map<int, CC_coord> positions;
+    std::map<int, Coord> positions;
     auto sheet = GetCurrentSheet();
     // for selected points, set the reference point to ref0
     // this should be per selection list defect #179
@@ -721,12 +722,12 @@ CC_show_command_pair CC_show::Create_SetReferencePointToRef0(int ref) const
     return Create_MovePointsCommand(positions, ref);
 }
 
-CC_show_command_pair CC_show::Create_SetSymbolCommand(SYMBOL_TYPE sym) const
+Show_command_pair Show::Create_SetSymbolCommand(SYMBOL_TYPE sym) const
 {
     return Create_SetSymbolCommand(mSelectionList, sym);
 }
 
-CC_show_command_pair CC_show::Create_SetSymbolCommand(const SelectionList &selectionList, SYMBOL_TYPE sym) const
+Show_command_pair Show::Create_SetSymbolCommand(const SelectionList& selectionList, SYMBOL_TYPE sym) const
 {
     std::map<unsigned, SYMBOL_TYPE> new_sym;
     std::map<unsigned, SYMBOL_TYPE> original_sym;
@@ -738,62 +739,62 @@ CC_show_command_pair CC_show::Create_SetSymbolCommand(const SelectionList &selec
             original_sym[i] = sheet->GetPoint(i).GetSymbol();
         }
     }
-    auto action = [ sheet_num = mSheetNum, new_sym ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, new_sym ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_sym) {
             sheet->GetPoint(i.first).SetSymbol(i.second);
         }
     };
-    auto reaction = [ sheet_num = mSheetNum, original_sym ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, original_sym ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_sym) {
             sheet->GetPoint(i.first).SetSymbol(i.second);
         }
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const
+Show_command_pair Show::Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const
 {
     std::string original_cont = GetCurrentSheet()->GetContinuityBySymbol(which_sym).GetText();
-    auto action = [ sheet_num = mSheetNum, which_sym, text ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, which_sym, text ](Show & show)
     {
         show.GetNthSheet(sheet_num)->SetContinuityText(which_sym, text);
     };
-    auto reaction = [ sheet_num = mSheetNum, which_sym, original_cont ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, which_sym, original_cont ](Show & show)
     {
         show.GetNthSheet(sheet_num)->SetContinuityText(which_sym, original_cont);
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const
+Show_command_pair Show::Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const
 {
     auto sheet = GetCurrentSheet();
     std::map<unsigned, bool> original_flip;
     for (auto&& index : new_flip) {
         original_flip[index.first] = sheet->GetPoint(index.first).GetFlip();
     }
-    auto action = [ sheet_num = mSheetNum, new_flip ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, new_flip ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_flip) {
             sheet->GetPoint(i.first).Flip(i.second);
         }
     };
-    auto reaction = [ sheet_num = mSheetNum, original_flip ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, original_flip ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_flip) {
             sheet->GetPoint(i.first).Flip(i.second);
         }
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetLabelRightCommand(bool right) const
+Show_command_pair Show::Create_SetLabelRightCommand(bool right) const
 {
     std::map<int, bool> flips;
     for (auto&& i : mSelectionList) {
@@ -802,7 +803,7 @@ CC_show_command_pair CC_show::Create_SetLabelRightCommand(bool right) const
     return Create_SetLabelFlipCommand(flips);
 }
 
-CC_show_command_pair CC_show::Create_ToggleLabelFlipCommand() const
+Show_command_pair Show::Create_ToggleLabelFlipCommand() const
 {
     std::map<int, bool> flips;
     auto sheet = GetCurrentSheet();
@@ -812,31 +813,31 @@ CC_show_command_pair CC_show::Create_ToggleLabelFlipCommand() const
     return Create_SetLabelFlipCommand(flips);
 }
 
-CC_show_command_pair CC_show::Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const
+Show_command_pair Show::Create_SetLabelVisiblityCommand(std::map<int, bool> const& new_visibility) const
 {
     auto sheet = GetCurrentSheet();
     std::map<int, bool> original_visibility;
     for (auto&& index : new_visibility) {
         original_visibility[index.first] = sheet->GetPoint(index.first).LabelIsVisible();
     }
-    auto action = [ sheet_num = mSheetNum, new_visibility ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, new_visibility ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_visibility) {
             sheet->GetPoint(i.first).SetLabelVisibility(i.second);
         }
     };
-    auto reaction = [ sheet_num = mSheetNum, original_visibility ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, original_visibility ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_visibility) {
             sheet->GetPoint(i.first).SetLabelVisibility(i.second);
         }
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_SetLabelVisibleCommand(bool isVisible) const
+Show_command_pair Show::Create_SetLabelVisibleCommand(bool isVisible) const
 {
     std::map<int, bool> visible;
     for (auto&& i : mSelectionList) {
@@ -845,7 +846,7 @@ CC_show_command_pair CC_show::Create_SetLabelVisibleCommand(bool isVisible) cons
     return Create_SetLabelVisiblityCommand(visible);
 }
 
-CC_show_command_pair CC_show::Create_ToggleLabelVisibilityCommand() const
+Show_command_pair Show::Create_ToggleLabelVisibilityCommand() const
 {
     std::map<int, bool> visible;
     auto sheet = GetCurrentSheet();
@@ -855,64 +856,64 @@ CC_show_command_pair CC_show::Create_ToggleLabelVisibilityCommand() const
     return Create_SetLabelVisiblityCommand(visible);
 }
 
-CC_show_command_pair CC_show::Create_AddNewBackgroundImageCommand(calchart_core::ImageData const& image) const
+Show_command_pair Show::Create_AddNewBackgroundImageCommand(ImageData const& image) const
 {
     auto sheet = GetCurrentSheet();
-    auto action = [ sheet_num = mSheetNum, image, where = sheet->GetBackgroundImages().size() ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, image, where = sheet->GetBackgroundImages().size() ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->AddBackgroundImage(image, where);
     };
-    auto reaction = [ sheet_num = mSheetNum, where = sheet->GetBackgroundImages().size() ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, where = sheet->GetBackgroundImages().size() ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->RemoveBackgroundImage(where);
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_RemoveBackgroundImageCommand(int which) const
+Show_command_pair Show::Create_RemoveBackgroundImageCommand(int which) const
 {
     auto sheet = GetCurrentSheet();
     if (static_cast<size_t>(which) >= sheet->GetBackgroundImages().size()) {
-        return { [](CC_show&) {}, [](CC_show&) {} };
+        return { [](Show&) {}, [](Show&) {} };
     }
-    auto action = [ sheet_num = mSheetNum, which ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, which ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->RemoveBackgroundImage(which);
     };
-    auto reaction = [ sheet_num = mSheetNum, image = sheet->GetBackgroundImages().at(which), which ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, image = sheet->GetBackgroundImages().at(which), which ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->AddBackgroundImage(image, which);
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
-CC_show_command_pair CC_show::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const
+Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height) const
 {
     auto sheet = GetCurrentSheet();
     auto current_left = sheet->GetBackgroundImages().at(which).left;
     auto current_top = sheet->GetBackgroundImages().at(which).top;
     auto current_scaled_width = sheet->GetBackgroundImages().at(which).scaled_width;
     auto current_scaled_height = sheet->GetBackgroundImages().at(which).scaled_height;
-    auto action = [ sheet_num = mSheetNum, which, left, top, scaled_width, scaled_height ](CC_show & show)
+    auto action = [ sheet_num = mSheetNum, which, left, top, scaled_width, scaled_height ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->MoveBackgroundImage(which, left, top, scaled_width, scaled_height);
     };
-    auto reaction = [ sheet_num = mSheetNum, which, current_left, current_top, current_scaled_width, current_scaled_height ](CC_show & show)
+    auto reaction = [ sheet_num = mSheetNum, which, current_left, current_top, current_scaled_width, current_scaled_height ](Show & show)
     {
         auto sheet = show.GetNthSheet(sheet_num);
         sheet->MoveBackgroundImage(which, current_left, current_top, current_scaled_width, current_scaled_height);
     };
-    return CC_show_command_pair{ action, reaction };
+    return { action, reaction };
 }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
 #include <assert.h>
-using namespace CalChart::Parser;
+using namespace Parser;
 
 static std::vector<char>
 Construct_show_zero_points_zero_labels_zero_description()
@@ -956,20 +957,20 @@ static std::vector<char> Construct_show_zero_points_zero_labels_1_sheet_and_rand
     return Construct_block(INGL_SHOW, show_data);
 }
 
-void CC_show::CC_show_round_trip_test()
+void Show::CC_show_round_trip_test()
 {
-    auto blank_show = CC_show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show();
     auto blank_show_data = blank_show->SerializeShow();
     std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
     std::istringstream is(std::string{ char_data.data(), char_data.size() });
-    auto re_read_show = CC_show::Create_CC_show(is);
+    auto re_read_show = Show::Create_CC_show(is);
     auto re_read_show_data = re_read_show->SerializeShow();
     bool is_equal = blank_show_data.size() == re_read_show_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(),
                                                                               re_read_show_data.begin());
     assert(is_equal);
 }
 
-void CC_show::CC_show_round_trip_test_with_number_label_description()
+void Show::CC_show_round_trip_test_with_number_label_description()
 {
     std::vector<char> point_data;
     Append(point_data, uint32_t{ 1 });
@@ -985,7 +986,7 @@ void CC_show::CC_show_round_trip_test_with_number_label_description()
     Append(data, Construct_block(INGL_CURR, curr_data));
     auto show_data = Construct_block(INGL_SHOW, data);
 
-    CC_show show1((const uint8_t*)show_data.data(), show_data.size(),
+    Show show1((const uint8_t*)show_data.data(), show_data.size(),
         Current_version_and_later());
     auto show1_data = show1.SerializeShow();
     // eat header
@@ -1000,10 +1001,10 @@ void CC_show::CC_show_round_trip_test_with_number_label_description()
     assert(show1.GetDescr() == "description");
 }
 
-void CC_show::CC_show_blank_desc_test()
+void Show::CC_show_blank_desc_test()
 {
     auto show_zero_points_zero_labels_zero_description = Construct_show_zero_points_zero_labels_zero_description();
-    CC_show show1(
+    Show show1(
         (const uint8_t*)show_zero_points_zero_labels_zero_description.data(),
         show_zero_points_zero_labels_zero_description.size(),
         Current_version_and_later());
@@ -1016,7 +1017,7 @@ void CC_show::CC_show_blank_desc_test()
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
-    CC_show show2((const uint8_t*)show_zero_points_zero_labels.data(),
+    Show show2((const uint8_t*)show_zero_points_zero_labels.data(),
         show_zero_points_zero_labels.size(),
         Current_version_and_later());
     auto show2_data = show2.SerializeShow();
@@ -1027,19 +1028,19 @@ void CC_show::CC_show_blank_desc_test()
 }
 
 // confirm we try to handle shows from the future
-void CC_show::CC_show_future_show_test()
+void Show::CC_show_future_show_test()
 {
     // how?  By creating a show from scratch, then modifying the version; make
     // sure that we load it, and it looks the same
     // except the data gets reverted
-    auto blank_show = CC_show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show();
     auto blank_show_data = blank_show->SerializeShow();
     std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
     assert(char_data.at(6) - '0' == CC_MAJOR_VERSION && char_data.at(7) - '0' == CC_MINOR_VERSION);
     ++char_data.at(6);
     ++char_data.at(7);
     std::istringstream is(std::string{ char_data.data(), char_data.size() });
-    auto re_read_show = CC_show::Create_CC_show(is);
+    auto re_read_show = Show::Create_CC_show(is);
     auto re_read_show_data = blank_show->SerializeShow();
     --char_data.at(6);
     --char_data.at(7);
@@ -1048,13 +1049,13 @@ void CC_show::CC_show_future_show_test()
     assert(is_equal);
 }
 
-void CC_show::CC_show_wrong_size_throws_exception()
+void Show::CC_show_wrong_size_throws_exception()
 {
     auto points_3(Construct_block(INGL_SIZE, std::vector<char>(3)));
     auto show_data = Construct_block(INGL_SHOW, points_3);
     bool hit_exception = false;
     try {
-        CC_show show1((const uint8_t*)show_data.data(), show_data.size(),
+        Show show1((const uint8_t*)show_data.data(), show_data.size(),
             Current_version_and_later());
     }
     catch (const CC_FileException&) {
@@ -1064,7 +1065,7 @@ void CC_show::CC_show_wrong_size_throws_exception()
 }
 
 // too large, and too small
-void CC_show::CC_show_wrong_size_number_labels_throws()
+void Show::CC_show_wrong_size_number_labels_throws()
 {
     {
         std::vector<char> point_data(4);
@@ -1076,7 +1077,7 @@ void CC_show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            CC_show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1((const uint8_t*)show_data.data(), show_data.size(),
                 Current_version_and_later());
         }
         catch (const CC_FileException&) {
@@ -1095,7 +1096,7 @@ void CC_show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            CC_show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1((const uint8_t*)show_data.data(), show_data.size(),
                 Current_version_and_later());
         }
         catch (const CC_FileException&) {
@@ -1106,7 +1107,7 @@ void CC_show::CC_show_wrong_size_number_labels_throws()
 }
 
 // too large, and too small
-void CC_show::CC_show_wrong_size_description()
+void Show::CC_show_wrong_size_description()
 {
     {
         auto no_points(Construct_block(INGL_SIZE, std::vector<char>(4)));
@@ -1120,7 +1121,7 @@ void CC_show::CC_show_wrong_size_description()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            CC_show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1((const uint8_t*)show_data.data(), show_data.size(),
                 Current_version_and_later());
         }
         catch (const CC_FileException&) {
@@ -1131,15 +1132,15 @@ void CC_show::CC_show_wrong_size_description()
 }
 
 // extra cruft ok
-void CC_show::CC_show_extra_cruft_ok()
+void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    CC_show show1((const uint8_t*)extra_cruft.data(), extra_cruft.size(),
+    Show show1((const uint8_t*)extra_cruft.data(), extra_cruft.size(),
         Current_version_and_later());
     auto show1_data = show1.SerializeShow();
 
-    auto blank_show = CC_show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show();
     auto blank_show_data = blank_show->SerializeShow();
     auto is_equal = blank_show_data.size() == show1_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(),
                                                                        show1_data.begin());
@@ -1147,12 +1148,12 @@ void CC_show::CC_show_extra_cruft_ok()
 }
 
 // show with nothing should fail:
-void CC_show::CC_show_with_nothing_throws()
+void Show::CC_show_with_nothing_throws()
 {
     std::vector<char> empty{};
     bool hit_exception = false;
     try {
-        CC_show show1((const uint8_t*)empty.data(), empty.size(),
+        Show show1((const uint8_t*)empty.data(), empty.size(),
             Current_version_and_later());
     }
     catch (const CC_FileException&) {
@@ -1161,15 +1162,16 @@ void CC_show::CC_show_with_nothing_throws()
     assert(hit_exception);
 }
 
-void CC_show_UnitTests()
+void Show_UnitTests()
 {
-    CC_show::CC_show_round_trip_test();
-    CC_show::CC_show_round_trip_test_with_number_label_description();
-    CC_show::CC_show_blank_desc_test();
-    CC_show::CC_show_future_show_test();
-    CC_show::CC_show_wrong_size_throws_exception();
-    CC_show::CC_show_wrong_size_number_labels_throws();
-    CC_show::CC_show_wrong_size_description();
-    CC_show::CC_show_extra_cruft_ok();
-    CC_show::CC_show_with_nothing_throws();
+    Show::CC_show_round_trip_test();
+    Show::CC_show_round_trip_test_with_number_label_description();
+    Show::CC_show_blank_desc_test();
+    Show::CC_show_future_show_test();
+    Show::CC_show_wrong_size_throws_exception();
+    Show::CC_show_wrong_size_number_labels_throws();
+    Show::CC_show_wrong_size_description();
+    Show::CC_show_extra_cruft_ok();
+    Show::CC_show_with_nothing_throws();
+}
 }

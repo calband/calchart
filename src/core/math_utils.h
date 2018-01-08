@@ -1,3 +1,4 @@
+#pragma once
 /*
  * math_utils.h
  * Math utility functions
@@ -20,14 +21,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cstdlib>
 #include <tuple>
 
-class CC_coord;
+namespace CalChart {
+class Coord;
+}
 
 static const double kEpsilon = 0.00001;
 template <typename T>
@@ -48,6 +49,6 @@ float BoundDirectionSigned(float f);
 
 bool IsDiagonalDirection(float f);
 
-CC_coord CreateVector(float dir, float mag);
+CalChart::Coord CreateVector(float dir, float mag);
 
 std::tuple<float, float> CreateUnitVector(float dir);

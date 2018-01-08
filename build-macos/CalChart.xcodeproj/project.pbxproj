@@ -24,13 +24,9 @@
 /* Begin PBXBuildFile section */
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
-		C7071FF61C3CAFAE005481AC /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
-		C7071FF71C3CB317005481AC /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
 		C72E2B091441150400118C03 /* top_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C72E2B071441150400118C03 /* top_frame.cpp */; };
 		C72F24BA14D4976E00758A0E /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C72F24B914D4976E00758A0E /* GLUT.framework */; };
 		C74162EE1DAF2DF600F87B7D /* munkres.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C74162E31DAF2D8800F87B7D /* munkres.cpp */; };
-		C74162F61DAF2EDC00F87B7D /* e7_transition_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C74162F41DAF2EDC00F87B7D /* e7_transition_solver.cpp */; };
 		C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC23F14F06B7B00D46A7E /* toolbar.cpp */; };
 		C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C75CC24414F0703800D46A7E /* animation_view.cpp */; };
 		C76B4EBC15694C770087FE94 /* print_ps_dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C76B4EBA15694C770087FE94 /* print_ps_dialog.cpp */; };
@@ -116,8 +112,6 @@
 		C774E31B14DF77D300558ABA /* wall.tga in Copy Images */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
 		C785A90C14CFC5190038B6FE /* animation_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A90814CFC5180038B6FE /* animation_canvas.cpp */; };
 		C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C785A91814D3D6620038B6FE /* cc_omniview_canvas.cpp */; };
-		C78FDE5E1BFB14DF0069B914 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5C1BFB14DF0069B914 /* json.cpp */; };
-		C78FDE621BFC4A3B0069B914 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5C1BFB14DF0069B914 /* json.cpp */; };
 		C7A845091398E7D8003AD23E /* cc_command.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A845071398E7D8003AD23E /* cc_command.cpp */; };
 		C7A8451C1398E8D5003AD23E /* cc_preferences_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7A8451A1398E8D5003AD23E /* cc_preferences_ui.cpp */; };
 		C7AC49B014CCD51F00506C76 /* animation_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AC49AE14CCD51F00506C76 /* animation_frame.cpp */; };
@@ -127,7 +121,6 @@
 		C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97B117A6DBA00CC53E2 /* draw.cpp */; };
 		C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA98A117A6DBA00CC53E2 /* show_ui.cpp */; };
 		C7B669761474E20300E28B63 /* background_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7B669741474E20300E28B63 /* background_image.cpp */; };
-		C7C2CCB71EFF08AF000335BA /* e7_transition_solver_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7C2CCB61EFF08AF000335BA /* e7_transition_solver_ui.cpp */; };
 		C7C5FBD21479B356004E5C5B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD11479B356004E5C5B /* IOKit.framework */; };
 		C7C5FBD41479B367004E5C5B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD31479B367004E5C5B /* Carbon.framework */; };
 		C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
@@ -220,52 +213,47 @@
 		C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501711CD594E001A4FA2 /* contents.gif */; };
 		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
 		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
-		E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
-		E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
-		E803362D17EE1E3B00A58457 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
-		E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
-		E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
-		E803363317EE23F500A58457 /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
-		E803363617EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
-		E803363817EE27C500A58457 /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
 		E807BD5F17ED71F60052A53F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E807BD5E17ED71F60052A53F /* main.cpp */; };
 		E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E807BD6017ED71F60052A53F /* calchart_cmd.1 */; };
-		E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
-		E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
-		E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
-		E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
-		E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
-		E808BDB61DE4C130000668DE /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
-		E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
-		E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
-		E834B0891E1A241500C90974 /* cc_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E834B0871E1A1F8400C90974 /* cc_image.cpp */; };
-		E834B08A1E1A241700C90974 /* cc_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E834B0871E1A1F8400C90974 /* cc_image.cpp */; };
-		E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
-		E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
-		E884F39117A5E60C00831301 /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
-		E884F39217A5E60C00831301 /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
-		E884F39317A5E60C00831301 /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
-		E884F39C17A5F09100831301 /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
-		E884F3A017A631AD00831301 /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
 		E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
-		E89A41F51A23B74700A2FB3E /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
-		E89A41F61A23B74800A2FB3E /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
-		E89A41F91A23B77500A2FB3E /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F71A23B76B00A2FB3E /* modes.cpp */; };
-		E89A41FA1A23B77600A2FB3E /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F71A23B76B00A2FB3E /* modes.cpp */; };
-		E8ABF9261DE1000F003FD2A5 /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
-		E8ABF9291DE1046B003FD2A5 /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
-		E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
-		E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
+		E8A9B7471FDC89020080015A /* cc_sheet_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B7461FDC89010080015A /* cc_sheet_test.mm */; };
+		E8A9B7481FDD88A40080015A /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
+		E8A9B74C1FDD95D70080015A /* cc_point_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B7491FDD95D70080015A /* cc_point_test.mm */; };
+		E8A9B74D1FDD95D70080015A /* cc_coord_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */; };
+		E8A9B74E1FDD95D70080015A /* cc_continuity_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B74B1FDD95D70080015A /* cc_continuity_test.mm */; };
 		E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */; };
+		E8C5F7821FDC67BA00C84D3E /* animate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39E17A631AD00831301 /* animate.cpp */; };
+		E8C5F7841FDC67BA00C84D3E /* animatecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4A817A7886100705836 /* animatecommand.cpp */; };
+		E8C5F7861FDC67BA00C84D3E /* animatecompile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E813C4AA17A7886200705836 /* animatecompile.cpp */; };
+		E8C5F7881FDC67BA00C84D3E /* cc_continuity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F39917A5F09000831301 /* cc_continuity.cpp */; };
+		E8C5F78A1FDC67BA00C84D3E /* cc_coord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38817A5E60C00831301 /* cc_coord.cpp */; };
+		E8C5F78D1FDC67BA00C84D3E /* cc_sheet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38C17A5E60C00831301 /* cc_sheet.cpp */; };
+		E8C5F78F1FDC67BA00C84D3E /* cc_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E834B0871E1A1F8400C90974 /* cc_image.cpp */; };
+		E8C5F7911FDC67BA00C84D3E /* cc_point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38A17A5E60C00831301 /* cc_point.cpp */; };
+		E8C5F7931FDC67BA00C84D3E /* cc_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803362817EE1C5F00A58457 /* cc_shapes.cpp */; };
+		E8C5F7961FDC67BA00C84D3E /* cc_show.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E884F38E17A5E60C00831301 /* cc_show.cpp */; };
+		E8C5F7981FDC67BA00C84D3E /* cc_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B89DD8186F5655004DE7DF /* cc_text.cpp */; };
+		E8C5F79B1FDC67BA00C84D3E /* cont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9A17ACA6AC009B1F1C /* cont.cpp */; };
+		E8C5F79D1FDC67BA00C84D3E /* math_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E803363417EE27C500A58457 /* math_utils.cpp */; };
+		E8C5F79F1FDC67BA00C84D3E /* modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F71A23B76B00A2FB3E /* modes.cpp */; };
+		E8C5F7A41FDC67BA00C84D3E /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C78FDE5C1BFB14DF0069B914 /* json.cpp */; };
+		E8C5F7A81FDC67BA00C84D3E /* json_export.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF11C3B2CA8005481AC /* json_export.cpp */; };
+		E8C5F7AA1FDC67BA00C84D3E /* viewer_translate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */; };
+		E8C5F7AB1FDC67BA00C84D3E /* e7_transition_solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C74162F41DAF2EDC00F87B7D /* e7_transition_solver.cpp */; };
+		E8C5F7B11FDC67E700C84D3E /* libcalchart_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */; };
+		E8C5F7B51FDC693300C84D3E /* libcalchart_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */; };
+		E8C5F7B81FDC6A3200C84D3E /* e7_transition_solver_ui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7B71FDC6A2800C84D3E /* e7_transition_solver_ui.cpp */; };
+		E8C5F7BB1FDC6BD000C84D3E /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
+		E8C5F7BC1FDC6BD400C84D3E /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
+		E8C5F7C61FDC6EE100C84D3E /* libcalchart_core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */; };
+		E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 		E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */; };
-		E8ED12FC1E3EA5C900DAF593 /* contgram.y in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA979117A6DBA00CC53E2 /* contgram.y */; };
-		E8ED12FD1E3EA5CC00DAF593 /* contscan.l in Sources */ = {isa = PBXBuildFile; fileRef = C7AFA97A117A6DBA00CC53E2 /* contscan.l */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		E8ABF9241DE0FFC0003FD2A5 /* PBXBuildRule */ = {
+		E8C5F7B91FDC6B5700C84D3E /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			fileType = sourcecode.lex;
@@ -275,7 +263,7 @@
 			);
 			script = "flex -B -i -t $INPUT_FILE_PATH > $SCRIPT_OUTPUT_FILE_0";
 		};
-		E8ABF9251DE0FFE1003FD2A5 /* PBXBuildRule */ = {
+		E8C5F7BA1FDC6B6C00C84D3E /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			fileType = sourcecode.yacc;
@@ -284,26 +272,6 @@
 				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
 			);
 			script = "bison -dv $INPUT_FILE_PATH -o $SCRIPT_OUTPUT_FILE_0";
-		};
-		E8ED12FE1E3EA69000DAF593 /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			fileType = sourcecode.yacc;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
-			);
-			script = "bison -dv $INPUT_FILE_PATH -o $SCRIPT_OUTPUT_FILE_0";
-		};
-		E8ED12FF1E3EA6A800DAF593 /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			fileType = sourcecode.lex;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILE_DIR)/$(INPUT_FILE_BASE).cpp",
-			);
-			script = "flex -B -i -t $INPUT_FILE_PATH > $SCRIPT_OUTPUT_FILE_0";
 		};
 /* End PBXBuildRule section */
 
@@ -321,6 +289,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = E807BD5B17ED71F50052A53F;
 			remoteInfo = calchart_cmd;
+		};
+		E8C5F7AF1FDC67E100C84D3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8C5F7751FDC677C00C84D3E;
+			remoteInfo = calchart_core;
+		};
+		E8C5F7B31FDC692E00C84D3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8C5F7751FDC677C00C84D3E;
+			remoteInfo = calchart_core;
+		};
+		E8C5F7C71FDC6EE100C84D3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8C5F7751FDC677C00C84D3E;
+			remoteInfo = calchart_core;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -592,8 +581,6 @@
 		C7AFA98B117A6DBA00CC53E2 /* show_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = show_ui.h; sourceTree = "<group>"; };
 		C7B669741474E20300E28B63 /* background_image.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = background_image.cpp; sourceTree = "<group>"; };
 		C7B669751474E20300E28B63 /* background_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = background_image.h; sourceTree = "<group>"; };
-		C7C2CCB51EFF089E000335BA /* e7_transition_solver_ui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = e7_transition_solver_ui.h; sourceTree = "<group>"; };
-		C7C2CCB61EFF08AF000335BA /* e7_transition_solver_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = e7_transition_solver_ui.cpp; sourceTree = "<group>"; };
 		C7C5FBD11479B356004E5C5B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		C7C5FBD31479B367004E5C5B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -735,9 +722,19 @@
 		E89A41F41A23B73F00A2FB3E /* print_ps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_ps.h; sourceTree = "<group>"; };
 		E89A41F71A23B76B00A2FB3E /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modes.cpp; sourceTree = "<group>"; };
 		E89A41F81A23B76B00A2FB3E /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
+		E8A9B7461FDC89010080015A /* cc_sheet_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_sheet_test.mm; sourceTree = "<group>"; };
+		E8A9B7491FDD95D70080015A /* cc_point_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_point_test.mm; sourceTree = "<group>"; };
+		E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_coord_test.mm; sourceTree = "<group>"; };
+		E8A9B74B1FDD95D70080015A /* cc_continuity_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_continuity_test.mm; sourceTree = "<group>"; };
 		E8B89DD8186F5655004DE7DF /* cc_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_text.cpp; sourceTree = "<group>"; };
 		E8B89DDB186F7C50004DE7DF /* print_cont_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = print_cont_ui.cpp; sourceTree = "<group>"; };
 		E8B89DDC186F7C50004DE7DF /* print_cont_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_cont_ui.h; sourceTree = "<group>"; };
+		E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libcalchart_core.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8C5F7B61FDC6A2800C84D3E /* e7_transition_solver_ui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = e7_transition_solver_ui.h; sourceTree = "<group>"; };
+		E8C5F7B71FDC6A2800C84D3E /* e7_transition_solver_ui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = e7_transition_solver_ui.cpp; sourceTree = "<group>"; };
+		E8C5F7C11FDC6EE000C84D3E /* calchart_core_tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = calchart_core_tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8C5F7C51FDC6EE100C84D3E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_show_test.mm; sourceTree = "<group>"; };
 		E8E2E1051962870B002453E8 /* ghost_module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ghost_module.cpp; sourceTree = "<group>"; };
 		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
 		E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas_shapes.cpp; sourceTree = "<group>"; };
@@ -749,6 +746,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8C5F7B11FDC67E700C84D3E /* libcalchart_core.a in Frameworks */,
 				C72F24BA14D4976E00758A0E /* GLUT.framework in Frameworks */,
 				C7C5FBDC1479B3F8004E5C5B /* WebKit.framework in Frameworks */,
 				C7C5FBD81479B385004E5C5B /* OpenGL.framework in Frameworks */,
@@ -763,6 +761,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8C5F7B51FDC693300C84D3E /* libcalchart_core.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8C5F7731FDC677C00C84D3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8C5F7BE1FDC6EE000C84D3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8C5F7C61FDC6EE100C84D3E /* libcalchart_core.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,6 +806,8 @@
 			children = (
 				8D1107320486CEB800E47090 /* CalChart.app */,
 				E807BD5C17ED71F50052A53F /* calchart_cmd */,
+				E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */,
+				E8C5F7C11FDC6EE000C84D3E /* calchart_core_tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -812,6 +828,7 @@
 				C7AFA969117A6DBA00CC53E2 /* src */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				E807BD5D17ED71F60052A53F /* calchart_cmd */,
+				E8C5F7C21FDC6EE100C84D3E /* calchart_core_tests */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -987,6 +1004,8 @@
 				C7AFA97B117A6DBA00CC53E2 /* draw.cpp */,
 				E884F3A217A631BB00831301 /* draw.h */,
 				E803A0C7193BA54900C5F2D5 /* draw_utils.h */,
+				E8C5F7B71FDC6A2800C84D3E /* e7_transition_solver_ui.cpp */,
+				E8C5F7B61FDC6A2800C84D3E /* e7_transition_solver_ui.h */,
 				E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */,
 				E8EA87F91EA3E2C3005D963F /* field_canvas_shapes.h */,
 				C7E047CA155F7B8900D8C71B /* field_canvas.cpp */,
@@ -1132,7 +1151,6 @@
 				E884F38817A5E60C00831301 /* cc_coord.cpp */,
 				E884F38917A5E60C00831301 /* cc_coord.h */,
 				E803362617EE1A5E00A58457 /* cc_drawcommand.h */,
-				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E803362717EE1C3700A58457 /* cc_fileformat.h */,
 				E834B0871E1A1F8400C90974 /* cc_image.cpp */,
 				E834B0881E1A1F8400C90974 /* cc_image.h */,
@@ -1140,6 +1158,7 @@
 				E884F38B17A5E60C00831301 /* cc_point.h */,
 				E803362817EE1C5F00A58457 /* cc_shapes.cpp */,
 				E803362917EE1C5F00A58457 /* cc_shapes.h */,
+				E884F38C17A5E60C00831301 /* cc_sheet.cpp */,
 				E884F38D17A5E60C00831301 /* cc_sheet.h */,
 				E884F38E17A5E60C00831301 /* cc_show.cpp */,
 				E884F38F17A5E60C00831301 /* cc_show.h */,
@@ -1160,17 +1179,38 @@
 				C78FDE601BFB160D0069B914 /* json_export.h */,
 				C7071FF01C3B2B69005481AC /* json_grammar.h */,
 				C7071FF11C3B2CA8005481AC /* json_export.cpp */,
-				C7071FF41C3CAF94005481AC /* viewer_translate.h */,
 				C7071FF51C3CAFAE005481AC /* viewer_translate.cpp */,
+				C7071FF41C3CAF94005481AC /* viewer_translate.h */,
 				C74162F41DAF2EDC00F87B7D /* e7_transition_solver.cpp */,
 				C74162F51DAF2EDC00F87B7D /* e7_transition_solver.h */,
-				C7C2CCB51EFF089E000335BA /* e7_transition_solver_ui.h */,
-				C7C2CCB61EFF08AF000335BA /* e7_transition_solver_ui.cpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
 		};
+		E8C5F7C21FDC6EE100C84D3E /* calchart_core_tests */ = {
+			isa = PBXGroup;
+			children = (
+				E8A9B74B1FDD95D70080015A /* cc_continuity_test.mm */,
+				E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */,
+				E8A9B7491FDD95D70080015A /* cc_point_test.mm */,
+				E8A9B7461FDC89010080015A /* cc_sheet_test.mm */,
+				E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */,
+				E8C5F7C51FDC6EE100C84D3E /* Info.plist */,
+			);
+			path = calchart_core_tests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		E8C5F7741FDC677C00C84D3E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		8D1107260486CEB800E47090 /* CalChart */ = {
@@ -1184,10 +1224,9 @@
 				C774E2F314DF77B900558ABA /* Copy Images */,
 			);
 			buildRules = (
-				E8ABF9251DE0FFE1003FD2A5 /* PBXBuildRule */,
-				E8ABF9241DE0FFC0003FD2A5 /* PBXBuildRule */,
 			);
 			dependencies = (
+				E8C5F7B01FDC67E100C84D3E /* PBXTargetDependency */,
 			);
 			name = CalChart;
 			productInstallPath = "$(HOME)/Applications";
@@ -1204,15 +1243,51 @@
 				E807BD5A17ED71F50052A53F /* CopyFiles */,
 			);
 			buildRules = (
-				E8ED12FE1E3EA69000DAF593 /* PBXBuildRule */,
-				E8ED12FF1E3EA6A800DAF593 /* PBXBuildRule */,
 			);
 			dependencies = (
+				E8C5F7B41FDC692E00C84D3E /* PBXTargetDependency */,
 			);
 			name = calchart_cmd;
 			productName = calchart_cmd;
 			productReference = E807BD5C17ED71F50052A53F /* calchart_cmd */;
 			productType = "com.apple.product-type.tool";
+		};
+		E8C5F7751FDC677C00C84D3E /* calchart_core */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8C5F7801FDC677C00C84D3E /* Build configuration list for PBXNativeTarget "calchart_core" */;
+			buildPhases = (
+				E8C5F7721FDC677C00C84D3E /* Sources */,
+				E8C5F7731FDC677C00C84D3E /* Frameworks */,
+				E8C5F7741FDC677C00C84D3E /* Headers */,
+			);
+			buildRules = (
+				E8C5F7BA1FDC6B6C00C84D3E /* PBXBuildRule */,
+				E8C5F7B91FDC6B5700C84D3E /* PBXBuildRule */,
+			);
+			dependencies = (
+			);
+			name = calchart_core;
+			productName = calchart_core;
+			productReference = E8C5F7761FDC677C00C84D3E /* libcalchart_core.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		E8C5F7C01FDC6EE000C84D3E /* calchart_core_tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8C5F7C91FDC6EE100C84D3E /* Build configuration list for PBXNativeTarget "calchart_core_tests" */;
+			buildPhases = (
+				E8C5F7BD1FDC6EE000C84D3E /* Sources */,
+				E8C5F7BE1FDC6EE000C84D3E /* Frameworks */,
+				E8C5F7BF1FDC6EE000C84D3E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E8C5F7C81FDC6EE100C84D3E /* PBXTargetDependency */,
+			);
+			name = calchart_core_tests;
+			productName = calchart_core_tests;
+			productReference = E8C5F7C11FDC6EE000C84D3E /* calchart_core_tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -1221,6 +1296,16 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0820;
+				TargetAttributes = {
+					E8C5F7751FDC677C00C84D3E = {
+						CreatedOnToolsVersion = 9.1;
+						ProvisioningStyle = Automatic;
+					};
+					E8C5F7C01FDC6EE000C84D3E = {
+						CreatedOnToolsVersion = 9.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "CalChart" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1239,6 +1324,8 @@
 				E803363917EE289400A58457 /* All */,
 				8D1107260486CEB800E47090 /* CalChart */,
 				E807BD5B17ED71F50052A53F /* calchart_cmd */,
+				E8C5F7751FDC677C00C84D3E /* calchart_core */,
+				E8C5F7C01FDC6EE000C84D3E /* calchart_core_tests */,
 			);
 		};
 /* End PBXProject section */
@@ -1293,6 +1380,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E8C5F7BF1FDC6EE000C84D3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1301,10 +1395,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				C7AFA990117A6DBA00CC53E2 /* basic_ui.cpp in Sources */,
+				E8C5F7B81FDC6A3200C84D3E /* e7_transition_solver_ui.cpp in Sources */,
 				C7AFA992117A6DBA00CC53E2 /* confgr.cpp in Sources */,
 				C7AFA994117A6DBA00CC53E2 /* cont_ui.cpp in Sources */,
 				C7AFA997117A6DBA00CC53E2 /* draw.cpp in Sources */,
-				E89A41F61A23B74800A2FB3E /* print_ps.cpp in Sources */,
 				C7AFA99E117A6DBA00CC53E2 /* show_ui.cpp in Sources */,
 				C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */,
 				E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */,
@@ -1314,40 +1408,19 @@
 				C7B669761474E20300E28B63 /* background_image.cpp in Sources */,
 				C7AC49B014CCD51F00506C76 /* animation_frame.cpp in Sources */,
 				C785A90C14CFC5190038B6FE /* animation_canvas.cpp in Sources */,
-				C78FDE5E1BFB14DF0069B914 /* json.cpp in Sources */,
 				C785A91A14D3D6620038B6FE /* cc_omniview_canvas.cpp in Sources */,
 				C75CC24114F06B7B00D46A7E /* toolbar.cpp in Sources */,
-				E808BDB61DE4C130000668DE /* json_export.cpp in Sources */,
 				C75CC24614F0703800D46A7E /* animation_view.cpp in Sources */,
 				E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */,
 				C7E047C8155F279000D8C71B /* field_view.cpp in Sources */,
-				E834B0891E1A241500C90974 /* cc_image.cpp in Sources */,
 				C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */,
-				C7071FF61C3CAFAE005481AC /* viewer_translate.cpp in Sources */,
 				C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */,
 				C7E047D215609A1600D8C71B /* setup_wizards.cpp in Sources */,
 				C76B4EBC15694C770087FE94 /* print_ps_dialog.cpp in Sources */,
-				E884F39017A5E60C00831301 /* cc_coord.cpp in Sources */,
-				E89A41F91A23B77500A2FB3E /* modes.cpp in Sources */,
-				E884F39117A5E60C00831301 /* cc_point.cpp in Sources */,
-				E884F39217A5E60C00831301 /* cc_sheet.cpp in Sources */,
-				E884F39317A5E60C00831301 /* cc_show.cpp in Sources */,
-				E884F39C17A5F09100831301 /* cc_continuity.cpp in Sources */,
-				E803363617EE27C500A58457 /* math_utils.cpp in Sources */,
-				E884F3A017A631AD00831301 /* animate.cpp in Sources */,
-				E813C4AC17A7886200705836 /* animatecommand.cpp in Sources */,
-				E8ABF9261DE1000F003FD2A5 /* contgram.y in Sources */,
-				E813C4AE17A7886200705836 /* animatecompile.cpp in Sources */,
 				E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */,
-				E878CC9C17ACA6AC009B1F1C /* cont.cpp in Sources */,
-				C74162F61DAF2EDC00F87B7D /* e7_transition_solver.cpp in Sources */,
-				E8ABF9291DE1046B003FD2A5 /* contscan.l in Sources */,
-				E8B89DD9186F73A4004DE7DF /* cc_text.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 				C74162EE1DAF2DF600F87B7D /* munkres.cpp in Sources */,
-				E803362A17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
 				E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */,
-				C7C2CCB71EFF08AF000335BA /* e7_transition_solver_ui.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1356,26 +1429,46 @@
 			buildActionMask = 2147483647;
 			files = (
 				E807BD5F17ED71F60052A53F /* main.cpp in Sources */,
-				E807BD6617ED87650052A53F /* cc_continuity.cpp in Sources */,
-				E89A41FA1A23B77600A2FB3E /* modes.cpp in Sources */,
-				E803363817EE27C500A58457 /* math_utils.cpp in Sources */,
-				E8ED12FC1E3EA5C900DAF593 /* contgram.y in Sources */,
-				E807BD6917ED89E30052A53F /* cc_coord.cpp in Sources */,
-				E803362D17EE1E3B00A58457 /* animate.cpp in Sources */,
-				E834B08A1E1A241700C90974 /* cc_image.cpp in Sources */,
-				E803362C17EE1C5F00A58457 /* cc_shapes.cpp in Sources */,
-				C7071FF71C3CB317005481AC /* viewer_translate.cpp in Sources */,
-				E803363317EE23F500A58457 /* cont.cpp in Sources */,
-				E807BD6A17ED8A2D0052A53F /* cc_point.cpp in Sources */,
-				C78FDE621BFC4A3B0069B914 /* json.cpp in Sources */,
-				E8B89DDA186F73A5004DE7DF /* cc_text.cpp in Sources */,
-				E807BD6B17ED8A880052A53F /* cc_sheet.cpp in Sources */,
-				E803362F17EE1E6D00A58457 /* animatecommand.cpp in Sources */,
-				E807BD6C17ED8A9C0052A53F /* cc_show.cpp in Sources */,
-				E89A41F51A23B74700A2FB3E /* print_ps.cpp in Sources */,
-				E8ED12FD1E3EA5CC00DAF593 /* contscan.l in Sources */,
-				C7071FF31C3B2D90005481AC /* json_export.cpp in Sources */,
-				E803362E17EE1E6600A58457 /* animatecompile.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8C5F7721FDC677C00C84D3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8C5F7821FDC67BA00C84D3E /* animate.cpp in Sources */,
+				E8C5F7841FDC67BA00C84D3E /* animatecommand.cpp in Sources */,
+				E8C5F7861FDC67BA00C84D3E /* animatecompile.cpp in Sources */,
+				E8C5F7881FDC67BA00C84D3E /* cc_continuity.cpp in Sources */,
+				E8C5F7BB1FDC6BD000C84D3E /* contgram.y in Sources */,
+				E8C5F78A1FDC67BA00C84D3E /* cc_coord.cpp in Sources */,
+				E8C5F78D1FDC67BA00C84D3E /* cc_sheet.cpp in Sources */,
+				E8C5F78F1FDC67BA00C84D3E /* cc_image.cpp in Sources */,
+				E8C5F7911FDC67BA00C84D3E /* cc_point.cpp in Sources */,
+				E8C5F7931FDC67BA00C84D3E /* cc_shapes.cpp in Sources */,
+				E8C5F7961FDC67BA00C84D3E /* cc_show.cpp in Sources */,
+				E8C5F7981FDC67BA00C84D3E /* cc_text.cpp in Sources */,
+				E8C5F7BC1FDC6BD400C84D3E /* contscan.l in Sources */,
+				E8C5F79B1FDC67BA00C84D3E /* cont.cpp in Sources */,
+				E8C5F79D1FDC67BA00C84D3E /* math_utils.cpp in Sources */,
+				E8C5F79F1FDC67BA00C84D3E /* modes.cpp in Sources */,
+				E8A9B7481FDD88A40080015A /* print_ps.cpp in Sources */,
+				E8C5F7A41FDC67BA00C84D3E /* json.cpp in Sources */,
+				E8C5F7A81FDC67BA00C84D3E /* json_export.cpp in Sources */,
+				E8C5F7AA1FDC67BA00C84D3E /* viewer_translate.cpp in Sources */,
+				E8C5F7AB1FDC67BA00C84D3E /* e7_transition_solver.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8C5F7BD1FDC6EE000C84D3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */,
+				E8A9B7471FDC89020080015A /* cc_sheet_test.mm in Sources */,
+				E8A9B74C1FDD95D70080015A /* cc_point_test.mm in Sources */,
+				E8A9B74E1FDD95D70080015A /* cc_continuity_test.mm in Sources */,
+				E8A9B74D1FDD95D70080015A /* cc_coord_test.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1391,6 +1484,21 @@
 			isa = PBXTargetDependency;
 			target = E807BD5B17ED71F50052A53F /* calchart_cmd */;
 			targetProxy = E803363F17EE28A100A58457 /* PBXContainerItemProxy */;
+		};
+		E8C5F7B01FDC67E100C84D3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8C5F7751FDC677C00C84D3E /* calchart_core */;
+			targetProxy = E8C5F7AF1FDC67E100C84D3E /* PBXContainerItemProxy */;
+		};
+		E8C5F7B41FDC692E00C84D3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8C5F7751FDC677C00C84D3E /* calchart_core */;
+			targetProxy = E8C5F7B31FDC692E00C84D3E /* PBXContainerItemProxy */;
+		};
+		E8C5F7C81FDC6EE100C84D3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8C5F7751FDC677C00C84D3E /* calchart_core */;
+			targetProxy = E8C5F7C71FDC6EE100C84D3E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1411,9 +1519,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.1/wx/wxprec.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1422,10 +1527,35 @@
 					__WXOSX__,
 					__WXOSX_COCOA__,
 					WX_PRECOMP,
+					"$(inherited)",
 				);
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					../resources,
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.1",
+					"/usr/local/include/wx-3.1",
+					/opt/local/include,
+				);
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_LDFLAGS = (
+					"-L/usr/local/lib",
+					"-lwx_osx_cocoau_gl-3.1",
+					"-lwx_osx_cocoau_xrc-3.1",
+					"-lwx_osx_cocoau_qa-3.1",
+					"-lwx_baseu_net-3.1",
+					"-lwx_osx_cocoau_html-3.1",
+					"-lwx_osx_cocoau_adv-3.1",
+					"-lwx_osx_cocoau_core-3.1",
+					"-lwx_baseu_xml-3.1",
+					"-lwx_baseu-3.1",
+					"-lexpat",
+					"-lwxregexu-3.1",
+					"-lwxtiff-3.1",
+					"-lwxjpeg-3.1",
+					"-lwxpng-3.1",
+					"-lz",
+					"-lpthread",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.calband.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = CalChart;
 			};
@@ -1435,7 +1565,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "/usr/local/include/wx-3.1/wx/wxprec.h";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1445,9 +1574,33 @@
 					__WXOSX_COCOA__,
 					WX_PRECOMP,
 				);
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					../resources,
+					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.1",
+					"/usr/local/include/wx-3.1",
+					/opt/local/include,
+				);
 				INFOPLIST_FILE = "CalChart-Info.plist";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_LDFLAGS = (
+					"-L/usr/local/lib",
+					"-lwx_osx_cocoau_gl-3.1",
+					"-lwx_osx_cocoau_xrc-3.1",
+					"-lwx_osx_cocoau_qa-3.1",
+					"-lwx_baseu_net-3.1",
+					"-lwx_osx_cocoau_html-3.1",
+					"-lwx_osx_cocoau_adv-3.1",
+					"-lwx_osx_cocoau_core-3.1",
+					"-lwx_baseu_xml-3.1",
+					"-lwx_baseu-3.1",
+					"-lexpat",
+					"-lwxregexu-3.1",
+					"-lwxtiff-3.1",
+					"-lwxjpeg-3.1",
+					"-lwxpng-3.1",
+					"-lz",
+					"-lpthread",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.calband.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = CalChart;
 			};
@@ -1471,15 +1624,8 @@
 				CURRENT_PROJECT_VERSION = 3.4.4;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_FILE_OFFSET_BITS=64",
-					__WXMAC__,
-					__WXOSX__,
-					__WXOSX_COCOA__,
-				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1488,33 +1634,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../resources,
-					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.1",
-					"/usr/local/include/wx-3.1",
-					/opt/local/include,
-				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"-L/usr/local/lib",
-					"-lwx_osx_cocoau_gl-3.1",
-					"-lwx_osx_cocoau_xrc-3.1",
-					"-lwx_osx_cocoau_qa-3.1",
-					"-lwx_baseu_net-3.1",
-					"-lwx_osx_cocoau_html-3.1",
-					"-lwx_osx_cocoau_adv-3.1",
-					"-lwx_osx_cocoau_core-3.1",
-					"-lwx_baseu_xml-3.1",
-					"-lwx_baseu-3.1",
-					"-lexpat",
-					"-lwxregexu-3.1",
-					"-lwxtiff-3.1",
-					"-lwxjpeg-3.1",
-					"-lwxpng-3.1",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-				);
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wall";
 			};
@@ -1538,14 +1659,7 @@
 				CURRENT_PROJECT_VERSION = 3.4.4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_FILE_OFFSET_BITS=64",
-					__WXMAC__,
-					__WXOSX__,
-					__WXOSX_COCOA__,
-				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1554,32 +1668,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../resources,
-					"/usr/local/lib/wx/include/osx_cocoa-unicode-static-3.1",
-					"/usr/local/include/wx-3.1",
-					/opt/local/include,
-				);
-				OTHER_LDFLAGS = (
-					"-L/usr/local/lib",
-					"-lwx_osx_cocoau_gl-3.1",
-					"-lwx_osx_cocoau_xrc-3.1",
-					"-lwx_osx_cocoau_qa-3.1",
-					"-lwx_baseu_net-3.1",
-					"-lwx_osx_cocoau_html-3.1",
-					"-lwx_osx_cocoau_adv-3.1",
-					"-lwx_osx_cocoau_core-3.1",
-					"-lwx_baseu_xml-3.1",
-					"-lwx_baseu-3.1",
-					"-lexpat",
-					"-lwxregexu-3.1",
-					"-lwxtiff-3.1",
-					"-lwxjpeg-3.1",
-					"-lwxpng-3.1",
-					"-lz",
-					"-lpthread",
-					"-liconv",
-				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wall";
 			};
@@ -1602,23 +1691,11 @@
 		E807BD6217ED71F60052A53F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1626,17 +1703,149 @@
 		E807BD6317ED71F60052A53F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		E8C5F77E1FDC677C00C84D3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				HEADER_SEARCH_PATHS = (
+					../resources,
+					/opt/local/include,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E8C5F77F1FDC677C00C84D3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				HEADER_SEARCH_PATHS = (
+					../resources,
+					/opt/local/include,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		E8C5F7CA1FDC6EE100C84D3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = calchart_core_tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "calband.calchart-core-tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E8C5F7CB1FDC6EE100C84D3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = calchart_core_tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "calband.calchart-core-tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -1676,6 +1885,24 @@
 			buildConfigurations = (
 				E807BD6217ED71F60052A53F /* Debug */,
 				E807BD6317ED71F60052A53F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8C5F7801FDC677C00C84D3E /* Build configuration list for PBXNativeTarget "calchart_core" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8C5F77E1FDC677C00C84D3E /* Debug */,
+				E8C5F77F1FDC677C00C84D3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8C5F7C91FDC6EE100C84D3E /* Build configuration list for PBXNativeTarget "calchart_core_tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8C5F7CA1FDC6EE100C84D3E /* Debug */,
+				E8C5F7CB1FDC6EE100C84D3E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

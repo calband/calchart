@@ -26,17 +26,19 @@
 #include "cc_coord.h"
 #include <cstdlib>
 
+namespace CalChart {
+
 // Get magnitude of vector
-float CC_coord::Magnitude() const
+float Coord::Magnitude() const
 {
-    return std::hypot(Coord2Float(x), Coord2Float(y));
+    return std::hypot(CoordUnits2Float(x), CoordUnits2Float(y));
 }
 
 // Get magnitude, but check for diagonal military
-float CC_coord::DM_Magnitude() const
+float Coord::DM_Magnitude() const
 {
     if ((x == y) || (x == -y)) {
-        return Coord2Float(std::abs(x));
+        return CoordUnits2Float(std::abs(x));
     }
     else {
         return Magnitude();
@@ -44,12 +46,12 @@ float CC_coord::DM_Magnitude() const
 }
 
 // Get direction of this vector
-float CC_coord::Direction() const
+float Coord::Direction() const
 {
     if (*this == 0)
         return 0.0;
 
-    auto ang = acos(Coord2Float(x) / Magnitude()); // normalize
+    auto ang = acos(CoordUnits2Float(x) / Magnitude()); // normalize
     ang *= static_cast<float>(180.0 / M_PI); // convert to degrees
     if (y > 0)
         ang = (-ang); // check for > PI
@@ -58,23 +60,23 @@ float CC_coord::Direction() const
 }
 
 // Get direction from this coord to another
-float CC_coord::Direction(const CC_coord& c) const
+float Coord::Direction(const Coord& c) const
 {
     return (c - *this).Direction();
 }
 
 // Returns the type of collision between this point and another
-CollisionType CC_coord::DetectCollision(const CC_coord& c) const
+Coord::CollisionType Coord::DetectCollision(const Coord& c) const
 {
     auto dx = x - c.x;
     auto dy = y - c.y;
     // Check for special cases to avoid multiplications
-    if (std::abs(dx) > Int2Coord(1))
+    if (std::abs(dx) > Int2CoordUnits(1))
         return COLLISION_NONE;
-    if (std::abs(dy) > Int2Coord(1))
+    if (std::abs(dy) > Int2CoordUnits(1))
         return COLLISION_NONE;
     auto squaredDist = ((dx * dx) + (dy * dy));
-    auto distOfOne = Int2Coord(1) * Int2Coord(1);
+    auto distOfOne = Int2CoordUnits(1) * Int2CoordUnits(1);
     if (squaredDist < distOfOne) {
         return COLLISION_INTERSECT;
     }
@@ -89,21 +91,21 @@ CollisionType CC_coord::DetectCollision(const CC_coord& c) const
 #include <assert.h>
 
 // Test Suite stuff
-struct CC_coord_values {
-    Coord x, y;
+struct Coord_values {
+    Coord::units x, y;
 };
 
-bool Check_CC_coord(const CC_coord& underTest, const CC_coord_values& values)
+bool Check_Coord(const Coord& underTest, const Coord_values& values)
 {
     return (underTest.x == values.x) && (underTest.y == values.y);
 }
 
-void CC_coord_UnitTests()
+void Coord_UnitTests()
 {
     static const size_t kNumRand = 10;
     // test some defaults:
     {
-        CC_coord undertest;
+        Coord undertest;
         assert(0.0 == undertest.Magnitude());
         assert(0.0 == undertest.DM_Magnitude());
         assert(0.0 == undertest.Direction());
@@ -111,25 +113,25 @@ void CC_coord_UnitTests()
 
     // test equality:
     for (size_t i = 0; i < kNumRand; ++i) {
-        Coord x1, y1, x2, y2;
+        Coord::units x1, y1, x2, y2;
         x1 = rand();
         y1 = rand();
         x2 = rand();
         y2 = rand();
-        CC_coord undertest1(x1, y1);
-        CC_coord undertest2(x2, y2);
+        Coord undertest1(x1, y1);
+        Coord undertest2(x2, y2);
         assert(x1 == undertest1.x);
         assert(y1 == undertest1.y);
         assert(x2 == undertest2.x);
         assert(y2 == undertest2.y);
-        assert(CC_coord(x1, y1) == undertest1);
-        assert(CC_coord(x2, y2) == undertest2);
-        assert(!(CC_coord(x1, y1) != undertest1));
-        assert(!(CC_coord(x2, y2) != undertest2));
+        assert(Coord(x1, y1) == undertest1);
+        assert(Coord(x2, y2) == undertest2);
+        assert(!(Coord(x1, y1) != undertest1));
+        assert(!(Coord(x2, y2) != undertest2));
 
-        CC_coord newValue;
+        Coord newValue;
 
-        Coord x3, y3;
+        Coord::units x3, y3;
 
         newValue = undertest1 + undertest2;
         x3 = undertest1.x + undertest2.x;
@@ -177,4 +179,5 @@ void CC_coord_UnitTests()
             assert((y3) == newValue.y);
         }
     }
+}
 }

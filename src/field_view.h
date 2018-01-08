@@ -49,7 +49,7 @@ public:
 
     bool OnCreate(wxDocument* doc, long flags);
     void OnDraw(wxDC* dc);
-    void DrawOtherPoints(wxDC& dc, const std::map<int, CC_coord>& positions);
+    void DrawOtherPoints(wxDC& dc, const std::map<int, CalChart::Coord>& positions);
     void OnDrawBackground(wxDC& dc);
     void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
     bool OnClose(bool deleteWindow = true);
@@ -58,7 +58,7 @@ public:
 
     ///// Modify the show /////
     bool DoRotatePointPositions(int rotateAmount);
-    bool DoMovePoints(const std::map<int, CC_coord>& transmat);
+    bool DoMovePoints(const std::map<int, CalChart::Coord>& transmat);
     bool DoDeletePoints();
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
@@ -70,21 +70,21 @@ public:
     bool DoSetPointsLabelFlip();
     bool DoSetPointsLabelVisibility(bool isVisible);
     bool DoTogglePointsLabelVisibility();
-    void DoInsertSheets(const CalChartDoc::CC_sheet_container_t& sht, int where);
+    void DoInsertSheets(const CalChart::Show::Sheet_container_t& sht, int where);
     bool DoDeleteSheet(int where);
     bool DoImportPrintableContinuity(const wxString& file);
     bool DoRelabel();
     std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
 
     ///// query show attributes /////
-    int FindPoint(CC_coord pos) const;
-    CC_coord PointPosition(int which) const;
+    int FindPoint(CalChart::Coord pos) const;
+    CalChart::Coord PointPosition(int which) const;
     auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
     auto GetShowFieldOffset() const { return mShow->GetMode().Offset(); }
     auto GetShowFieldSize() const { return mShow->GetMode().Size(); }
-    auto ClipPositionToShowMode(CC_coord const& pos) const { return mShow->GetMode().ClipPosition(pos); }
+    auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
     void GoToSheet(int which);
@@ -97,8 +97,8 @@ public:
     void UnselectAll() { SetSelection(mShow->MakeUnselectAll()); }
     void AddToSelection(const SelectionList& sl) { SetSelection(mShow->MakeAddToSelection(sl)); }
     void ToggleSelection(const SelectionList& sl) { SetSelection(mShow->MakeToggleSelection(sl)); }
-    void SelectWithLasso(const CC_lasso* lasso, bool toggleSelected);
-    void SelectPointsInRect(const CC_coord& c1, const CC_coord& c2,
+    void SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected);
+    void SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2,
         bool toggleSelected);
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
     void SetSelection(const SelectionList& sl);
@@ -126,9 +126,9 @@ private:
     FieldFrame* mFrame;
 #endif
 
-    void DrawPaths(wxDC& dc, const CC_sheet& sheet);
+    void DrawPaths(wxDC& dc, const CalChart::Sheet& sheet);
     void GeneratePaths();
-    std::unique_ptr<Animation> mAnimation;
+    std::unique_ptr<CalChart::Animation> mAnimation;
     bool mDrawPaths;
     void UpdateBackgroundImages();
 

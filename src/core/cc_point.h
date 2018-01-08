@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_point.h
  * Definitions for the point classes
@@ -20,23 +21,21 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "cc_types.h"
 #include "cc_coord.h"
 
 #include <bitset>
 #include <vector>
 
-// Perhaps this should be put in namespace?
+namespace CalChart {
 
-class CC_point {
+class Point {
 public:
     static constexpr auto kNumRefPoints = 3;
-    CC_point();
-    CC_point(const CC_coord& pos);
+    Point();
+    Point(const Coord& pos);
 
-    CC_point(const std::vector<uint8_t>& serialized_data);
+    Point(const std::vector<uint8_t>& serialized_data);
     std::vector<uint8_t> Serialize() const;
 
     auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
@@ -49,8 +48,8 @@ public:
     void SetSymbol(SYMBOL_TYPE sym);
 
     // reference points 0 is the point, refs are [1, kNumRefPoints]
-    CC_coord GetPos(unsigned ref = 0) const;
-    void SetPos(const CC_coord& c, unsigned ref = 0);
+    Coord GetPos(unsigned ref = 0) const;
+    void SetPos(const Coord& c, unsigned ref = 0);
 
 private:
     enum { kPointLabelFlipped,
@@ -61,11 +60,12 @@ private:
     // by having both a sym type and cont index, we can have several
     // points share the same symbol but have different continuities.
     SYMBOL_TYPE mSym;
-    CC_coord mPos;
-    CC_coord mRef[kNumRefPoints];
+    Coord mPos;
+    Coord mRef[kNumRefPoints];
 
-    friend struct CC_point_values;
-    friend bool Check_CC_point(const CC_point&, const struct CC_point_values&);
+    friend struct Point_values;
+    friend bool Check_Point(const Point&, const struct Point_values&);
 };
 
-void CC_point_UnitTests();
+void Point_UnitTests();
+}

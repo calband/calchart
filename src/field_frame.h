@@ -23,13 +23,15 @@
 #pragma once
 
 #include "cc_types.h"
+#include "cc_coord.h"
 
 #include <wx/docview.h>
 
-class CC_coord;
 class wxComboBox;
 class wxSlider;
-class CC_show;
+namespace CalChart {
+class Show;
+}
 
 class FieldCanvas;
 class FieldView;
@@ -128,9 +130,9 @@ public:
     void AppendShow();
     void ImportContFile();
 
-    void SnapToGrid(CC_coord& c);
+    void SnapToGrid(CalChart::Coord& c);
     // Grid chioce distance (distance per beat), Grid placement lock (where to end)
-    std::pair<Coord, Coord> GridChoice() const;
+    std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
     void UpdatePanel();
 
     void SetCurrentLasso(CC_DRAG_TYPES type);

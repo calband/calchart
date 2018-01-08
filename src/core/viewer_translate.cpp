@@ -6,14 +6,16 @@
 
 #include "viewer_translate.h"
 
-float ToOnlineViewer::xPosition(Coord coord)
+namespace CalChart {
+
+float ToOnlineViewer::xPosition(CalChart::Coord::units coord)
 {
-    return Coord2Float(coord) + (80); // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
+    return CoordUnits2Float(coord) + (80); // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
 }
 
-float ToOnlineViewer::yPosition(Coord coord)
+float ToOnlineViewer::yPosition(CalChart::Coord::units coord)
 {
-    return Coord2Float(coord) + 42; // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
+    return CoordUnits2Float(coord) + 42; // TODO; the Online Viewer is only prepared for normal-sized fields, so we'll assume those dimensions for now
 }
 
 float ToOnlineViewer::angle(float angle)
@@ -50,4 +52,5 @@ std::string ToOnlineViewer::symbolName(SYMBOL_TYPE symbol)
     default:
         return "ERR";
     }
+}
 }

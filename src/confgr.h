@@ -35,7 +35,9 @@ class wxPen;
 class wxBrush;
 class wxPathList;
 class wxColour;
+namespace CalChart {
 class ShowMode;
+}
 
 enum CalChartColors {
     COLOR_FIELD,
@@ -241,4 +243,4 @@ public:
 };
 
 // to find a specific Show:
-std::unique_ptr<ShowMode> GetShowMode(const wxString& which);
+std::unique_ptr<CalChart::ShowMode> GetShowMode(const wxString& which);

@@ -1,3 +1,4 @@
+#pragma once
 /*!
  * @file viewer_translate.h
  * @brief Contains utilities for translating values to
@@ -5,9 +6,10 @@
  */
 //
 
-#pragma once
-
+#include "cc_types.h"
 #include "cc_coord.h"
+
+namespace CalChart {
 
 /*!
  * @brief A collection of methods used for translating values
@@ -28,7 +30,7 @@ public:
      * @param coord A CalChart field x-coordinate.
      * @return An Online Viewer field x-coordinate.
      */
-    static float xPosition(Coord coord);
+    static float xPosition(CalChart::Coord::units coord);
 
     /*!
      * @brief Translates a CalChart field y-coordinate
@@ -44,7 +46,7 @@ public:
      * @param coord A CalChart field y-coordinate.
      * @return An Online Viewer field y-coordinate.
      */
-    static float yPosition(Coord coord);
+    static float yPosition(CalChart::Coord::units coord);
 
     /*!
      * @brief Translates a CalChart angle to a
@@ -70,3 +72,4 @@ public:
      */
     static std::string symbolName(SYMBOL_TYPE symbol);
 };
+}

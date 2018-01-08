@@ -10,6 +10,8 @@
 #include "json_export.h"
 #include "json_grammar.h"
 
+namespace CalChart {
+
 /*!
  * @brief Exports a JSON file to an arbitrary output iterator.
  * @tparam T The output iterator type.
@@ -36,4 +38,5 @@ bool JSONExporter::exportJSON(const std::string& filename, const JSONElement& js
     bool success = outfile.good() && exportJSONGeneric(outIter, json);
     outfile.close();
     return success;
+}
 }

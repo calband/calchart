@@ -71,12 +71,12 @@ const int zoom_amounts[] = {
 
 static const wxChar* file_wild = FILE_WILDCARDS;
 
-std::pair<Coord, Coord> gridvalue[] = { { 1, 0 },
-    { Int2Coord(1), 0 },
-    { Int2Coord(2), 0 },
-    { Int2Coord(4), 0 },
-    { Int2Coord(4), static_cast<Coord>(Int2Coord(4) / 3) },
-    { Int2Coord(8), static_cast<Coord>(Int2Coord(8) / 3) } };
+std::pair<CalChart::Coord::units, CalChart::Coord::units> gridvalue[] = { { 1, 0 },
+    { Int2CoordUnits(1), 0 },
+    { Int2CoordUnits(2), 0 },
+    { Int2CoordUnits(4), 0 },
+    { Int2CoordUnits(4), static_cast<CalChart::Coord::units>(Int2CoordUnits(4) / 3) },
+    { Int2CoordUnits(8), static_cast<CalChart::Coord::units>(Int2CoordUnits(8) / 3) } };
 
 extern wxPrintDialogData* gPrintDialogData;
 
@@ -184,7 +184,7 @@ public:
     virtual bool OnPrintPage(int pageNum)
     {
         wxDC* dc = wxPrintout::GetDC();
-        CC_show::const_CC_sheet_iterator_t sheet = mShow.GetNthSheet(pageNum - 1);
+        auto sheet = mShow.GetNthSheet(pageNum - 1);
 
         int size = gPrintDialogData->GetPrintData().GetOrientation();
 
@@ -400,7 +400,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
         mRefChoice = new wxChoice(this, CALCHART__refnum_callback);
         mRefChoice->Append(wxT("Off"));
-        for (i = 1; i <= CC_point::kNumRefPoints; i++) {
+        for (i = 1; i <= CalChart::Point::kNumRefPoints; i++) {
             buf.sprintf(wxT("%u"), i);
             mRefChoice->Append(buf);
         }
@@ -566,14 +566,14 @@ void FieldFrame::OnCmdPreferences(wxCommandEvent& event)
 
 void FieldFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
-    CC_show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
+    CalChart::Show::Sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
     GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
     GetFieldView()->GoToPrevSheet();
 }
 
 void FieldFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
-    CC_show::CC_sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
+    CalChart::Show::Sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
     GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum() + 1);
     GetFieldView()->GoToNextSheet();
 }
@@ -618,7 +618,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
         endValue = beginValue;
     }
 
-    CC_show::CC_sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
+    CalChart::Show::Sheet_container_t sheets((&show)->GetNthSheet(static_cast<int>(beginValue) - 1),
         (&show)->GetNthSheet(static_cast<int>(endValue)));
     GetFieldView()->DoInsertSheets(
         sheets, GetFieldView()->GetCurrentSheetNum() + 1);
@@ -668,17 +668,17 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
             sheetStream.write((char*)(clipboardObject.GetData()) + sizeof(numPoints),
                 clipboardObject.GetDataSize() - sizeof(numPoints));
 
-            ReadLong(sheetStream);
-            ReadLong(sheetStream);
+            CalChart::ReadLong(sheetStream);
+            CalChart::ReadLong(sheetStream);
 
             sheetStream.unsetf(std::ios_base::skipws);
             std::istream_iterator<uint8_t> theBegin(sheetStream);
             std::istream_iterator<uint8_t> theEnd{};
             std::vector<uint8_t> data(theBegin, theEnd);
 
-            CC_show::CC_sheet_container_t sht(
-                1, CC_sheet(numPoints, data.data(), data.size(),
-                       Current_version_and_later()));
+            CalChart::Show::Sheet_container_t sht(
+                1, CalChart::Sheet(numPoints, data.data(), data.size(),
+                       CalChart::Current_version_and_later()));
             GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
         }
         wxTheClipboard->Close();
@@ -1116,7 +1116,7 @@ void FieldFrame::ImportContFile()
     }
 }
 
-std::pair<Coord, Coord> FieldFrame::GridChoice() const
+std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::GridChoice() const
 {
     return gridvalue[mGridChoice->GetSelection()];
 }
@@ -1248,7 +1248,7 @@ void FieldFrame::do_zoom(float zoom_amount)
 void FieldFrame::UpdatePanel()
 {
     wxString tempbuf;
-    CC_show::const_CC_sheet_iterator_t sht = GetShow()->GetCurrentSheet();
+    auto sht = GetShow()->GetCurrentSheet();
     unsigned num = GetShow()->GetNumSheets();
     unsigned curr = GetFieldView()->GetCurrentSheetNum() + 1;
 
