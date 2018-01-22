@@ -253,7 +253,9 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
         pos.y = (y - pos.y);
 
         if (curr_move != CC_MOVE_NORMAL) {
-            m_move_points = Create_MovePoints(curr_move);
+            if (!m_move_points) {
+                m_move_points = Create_MovePoints(curr_move);
+            }
             m_move_points->OnMouseLeftDown(SnapToGrid(pos));
         }
         else {
