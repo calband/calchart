@@ -693,19 +693,19 @@ CollisionSpace::CollisionSpace(unsigned gridXSize, unsigned gridYSize, const std
     m_moveSchedules.resize(marcherStartPositions.size());
     for (unsigned marcherIndex = 0; marcherIndex < marcherStartPositions.size(); marcherIndex++) {
         MovingMarcher marcher = {
-            .waitBeats = 0,
-            .stepVectors = { SolverCoord(), SolverCoord() },
-            .numSteps = { 0, 0 },
-            .startPos = marcherStartPositions.at(marcherIndex)
+            0,
+            { SolverCoord(), SolverCoord() },
+            { 0, 0 },
+            marcherStartPositions.at(marcherIndex)
         };
         MarcherMoveSchedule moveBreakdown = {
-            .lastBeatOfWait = 0,
-            .lastBeatOfFirstMove = 0,
-            .lastBeatOfSecondMove = 0
+            0,
+            0,
+            0
         };
         m_clippedMarchers[marcherIndex] = {
-            .currentPosition = marcher.startPos,
-            .currentBeat = 0
+            marcher.startPos,
+            0
         };
         m_moveSchedules[marcherIndex] = moveBreakdown;
         placeMarcher(marcherIndex, marcher.startPos.x, marcher.startPos.y, 0, SolverCoord(0, 0));
@@ -818,9 +818,9 @@ const MovingMarcher& CollisionSpace::getMarcherInstruction(unsigned marcherIndex
 MarcherMoveSchedule CollisionSpace::clipMarcherSchedule(const MarcherMoveSchedule& movement, unsigned beat) const
 {
     MarcherMoveSchedule result = {
-        .lastBeatOfWait = std::min(movement.lastBeatOfWait, beat),
-        .lastBeatOfFirstMove = std::min(movement.lastBeatOfFirstMove, beat),
-        .lastBeatOfSecondMove = std::min(movement.lastBeatOfSecondMove, beat)
+        std::min(movement.lastBeatOfWait, beat),
+        std::min(movement.lastBeatOfFirstMove, beat),
+        std::min(movement.lastBeatOfSecondMove, beat)
     };
     return result;
 }
@@ -1686,15 +1686,26 @@ namespace e7ChiuZamoraMalani {
             marchPattern1 = (unsigned)instructionOptions[first.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[first.instructionForMarcher2].movementPattern;
             marchPattern2 = (unsigned)instructionOptions[second.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[second.instructionForMarcher2].movementPattern;
 
-            if (waitBeats1 == waitBeats2) {
-                if (marchPattern1 == marchPattern2) {
-                    return !first.swapMarchers;
-                }
-                else {
+            if (waitBeats1 == waitBeats2) 
+            {
+                if (marchPattern1 == marchPattern2) 
+                {
+					if (first.swapMarchers == second.swapMarchers)
+					{
+						return false;
+					}
+					else
+					{
+						return !first.swapMarchers;
+					}
+                } 
+                else
+                {
                     return marchPattern1 < marchPattern2;
                 }
-            }
-            else {
+            } 
+            else 
+            {
                 return waitBeats1 < waitBeats2;
             }
         }

@@ -43,7 +43,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core;$(BOOST_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core;$(BOOST_DIR);..\..\submodules\munkres-cpp\src;..\..\submodules\munkres-cpp\src\adapters</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WINVER=0x0500;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -69,7 +69,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core;$(BOOST_DIR)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXWIN)\include;$(WXWIN)\include\msvc;..\..\resources;..\..\src;..\..\src\core;$(BOOST_DIR);..\..\submodules\munkres-cpp\src;..\..\submodules\munkres-cpp\src\adapters</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WINVER=0x0500;__WXMSW__;_WINDOWS;wxUSE_GUI=1;_UNICODE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;YY_NO_UNISTD_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
@@ -115,6 +115,8 @@
     <ClInclude Include="..\..\src\core\cc_text.h" />
     <ClInclude Include="..\..\src\core\cc_types.h" />
     <ClInclude Include="..\..\src\core\cont.h" />
+    <ClInclude Include="..\..\src\core\e7_transition_solver.h" />
+    <ClInclude Include="..\..\src\core\e7_transition_solver_ui.h" />
     <ClInclude Include="..\..\src\core\json.h" />
     <ClInclude Include="..\..\src\core\json_export.h" />
     <ClInclude Include="..\..\src\core\json_grammar.h" />
@@ -141,6 +143,12 @@
     <ClInclude Include="..\..\src\toolbar.h" />
     <ClInclude Include="..\..\src\top_frame.h" />
     <ClInclude Include="..\..\src\ui_enums.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\adapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\matrix.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\munkres.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\generated\contgram.cpp" />
@@ -169,6 +177,8 @@
     <ClCompile Include="..\..\src\core\cc_show.cpp" />
     <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
+    <ClCompile Include="..\..\src\core\e7_transition_solver.cpp" />
+    <ClCompile Include="..\..\src\core\e7_transition_solver_ui.cpp" />
     <ClCompile Include="..\..\src\core\json.cpp" />
     <ClCompile Include="..\..\src\core\json_export.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
@@ -191,6 +201,12 @@
     <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
     <ClCompile Include="..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\adapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\matrix.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\munkres.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc">

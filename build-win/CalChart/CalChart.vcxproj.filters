@@ -15,74 +15,46 @@
     <ClCompile Include="..\..\src\cc_preferences_ui.cpp" />
     <ClCompile Include="..\..\src\confgr.cpp" />
     <ClCompile Include="..\..\src\cont_ui.cpp" />
+    <ClCompile Include="..\..\src\core\animate.cpp" />
+    <ClCompile Include="..\..\src\core\animatecommand.cpp" />
+    <ClCompile Include="..\..\src\core\animatecompile.cpp" />
+    <ClCompile Include="..\..\src\core\cc_continuity.cpp" />
+    <ClCompile Include="..\..\src\core\cc_coord.cpp" />
+    <ClCompile Include="..\..\src\core\cc_image.cpp" />
+    <ClCompile Include="..\..\src\core\cc_point.cpp" />
+    <ClCompile Include="..\..\src\core\cc_shapes.cpp" />
+    <ClCompile Include="..\..\src\core\cc_sheet.cpp" />
+    <ClCompile Include="..\..\src\core\cc_show.cpp" />
+    <ClCompile Include="..\..\src\core\cc_text.cpp" />
+    <ClCompile Include="..\..\src\core\cont.cpp" />
+    <ClCompile Include="..\..\src\core\json.cpp" />
+    <ClCompile Include="..\..\src\core\json_export.cpp" />
+    <ClCompile Include="..\..\src\core\math_utils.cpp" />
+    <ClCompile Include="..\..\src\core\modes.cpp" />
+    <ClCompile Include="..\..\src\core\print_ps.cpp" />
+    <ClCompile Include="..\..\src\core\viewer_translate.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_canvas_shapes.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
+    <ClCompile Include="..\..\src\ghost_module.cpp" />
+    <ClCompile Include="..\..\src\precomp.cpp" />
+    <ClCompile Include="..\..\src\print_cont_ui.cpp" />
     <ClCompile Include="..\..\src\print_ps_dialog.cpp" />
     <ClCompile Include="..\..\src\setup_wizards.cpp" />
     <ClCompile Include="..\..\src\show_ui.cpp" />
+    <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
     <ClCompile Include="..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
-    <ClCompile Include="..\..\src\core\animate.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\animatecommand.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\animatecompile.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_continuity.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_coord.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_point.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_shapes.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_sheet.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_show.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_text.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cont.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\math_utils.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\print_cont_ui.cpp" />
-    <ClCompile Include="..\..\src\single_instance_ipc.cpp" />
-    <ClCompile Include="..\..\src\ghost_module.cpp" />
-    <ClCompile Include="..\..\src\precomp.cpp" />
-    <ClCompile Include="..\..\src\core\modes.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\print_ps.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\cc_image.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\json.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\json_export.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\viewer_translate.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
+    <ClCompile Include="..\..\src\core\e7_transition_solver.cpp" />
+    <ClCompile Include="..\..\src\core\e7_transition_solver_ui.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\matrix.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\munkres.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\adapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.cpp" />
+    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -99,94 +71,56 @@
     <ClInclude Include="..\..\src\cc_preferences_ui.h" />
     <ClInclude Include="..\..\src\confgr.h" />
     <ClInclude Include="..\..\src\cont_ui.h" />
+    <ClInclude Include="..\..\src\core\animate.h" />
+    <ClInclude Include="..\..\src\core\animatecommand.h" />
+    <ClInclude Include="..\..\src\core\animatecompile.h" />
+    <ClInclude Include="..\..\src\core\animate_types.h" />
+    <ClInclude Include="..\..\src\core\cc_continuity.h" />
+    <ClInclude Include="..\..\src\core\cc_coord.h" />
+    <ClInclude Include="..\..\src\core\cc_drawcommand.h" />
+    <ClInclude Include="..\..\src\core\cc_fileformat.h" />
+    <ClInclude Include="..\..\src\core\cc_image.h" />
+    <ClInclude Include="..\..\src\core\cc_point.h" />
+    <ClInclude Include="..\..\src\core\cc_shapes.h" />
+    <ClInclude Include="..\..\src\core\cc_sheet.h" />
+    <ClInclude Include="..\..\src\core\cc_show.h" />
+    <ClInclude Include="..\..\src\core\cc_text.h" />
+    <ClInclude Include="..\..\src\core\cc_types.h" />
+    <ClInclude Include="..\..\src\core\cont.h" />
+    <ClInclude Include="..\..\src\core\json.h" />
+    <ClInclude Include="..\..\src\core\json_export.h" />
+    <ClInclude Include="..\..\src\core\json_grammar.h" />
+    <ClInclude Include="..\..\src\core\math_utils.h" />
+    <ClInclude Include="..\..\src\core\modes.h" />
+    <ClInclude Include="..\..\src\core\parse.h" />
+    <ClInclude Include="..\..\src\core\print_ps.h" />
+    <ClInclude Include="..\..\src\core\viewer_translate.h" />
+    <ClInclude Include="..\..\src\draw.h" />
+    <ClInclude Include="..\..\src\draw_utils.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_canvas_shapes.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
     <ClInclude Include="..\..\src\field_view.h" />
+    <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\linmath.h" />
     <ClInclude Include="..\..\src\platconf.h" />
+    <ClInclude Include="..\..\src\precomp.h" />
+    <ClInclude Include="..\..\src\print_cont_ui.h" />
     <ClInclude Include="..\..\src\print_ps_dialog.h" />
     <ClInclude Include="..\..\src\setup_wizards.h" />
     <ClInclude Include="..\..\src\show_ui.h" />
+    <ClInclude Include="..\..\src\single_instance_ipc.h" />
     <ClInclude Include="..\..\src\toolbar.h" />
     <ClInclude Include="..\..\src\top_frame.h" />
     <ClInclude Include="..\..\src\ui_enums.h" />
-    <ClInclude Include="..\..\src\core\animate_types.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\animate.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\animatecommand.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\animatecompile.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_continuity.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_coord.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_point.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_shapes.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_sheet.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_show.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_text.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_types.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cont.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\math_utils.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\print_cont_ui.h" />
-    <ClInclude Include="..\..\src\core\parse.h" />
-    <ClInclude Include="..\..\src\single_instance_ipc.h" />
-    <ClInclude Include="..\..\src\ghost_module.h" />
-    <ClInclude Include="..\..\src\draw.h" />
-    <ClInclude Include="..\..\src\precomp.h" />
-    <ClInclude Include="..\..\src\core\modes.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\print_ps.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_drawcommand.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_fileformat.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\cc_image.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\json.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\json_export.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\json_grammar.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\viewer_translate.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\draw_utils.h" />
+    <ClInclude Include="..\..\src\core\e7_transition_solver.h" />
+    <ClInclude Include="..\..\src\core\e7_transition_solver_ui.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\munkres.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\matrix.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\adapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.h" />
+    <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />
@@ -194,10 +128,5 @@
   <ItemGroup>
     <None Include="..\..\src\contgram.y" />
     <None Include="..\..\src\contscan.l" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="core">
-      <UniqueIdentifier>{2666d93e-2ad0-4eac-a0db-5304526bfdb7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>

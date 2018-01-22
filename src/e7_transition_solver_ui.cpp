@@ -11,6 +11,8 @@
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
 
+#include <atomic>
+
 #include "e7_transition_solver_ui.h"
 #include "basic_ui.h"
 #include "confgr.h"
@@ -240,7 +242,7 @@ bool TransitionSolverProgressFrame::Create(CalChart::TransitionSolverParams para
     mProgress = 0;
     mNumBeatsInBestResult = 0;
     mSolutionFound = false;
-    mShouldAbortCalculation = false;
+	mShouldAbortCalculation = false;
     mShouldApplyResultOnCompletion = true;
     mTaskThread = new TransitionSolverThread(this);
     mTaskThread->Create();
@@ -889,7 +891,7 @@ void TransitionSolverFrame::SyncGroupControlsWithCurrentState() {
         }
         
         mCurrentGroupControl->Clear();
-        mCurrentGroupControl->Set(wxArrayString{ groupLabels.size(), &groupLabels[0] });
+        mCurrentGroupControl->Set(wxArrayString{ groupLabels.size(), mGroupNames.size() ? &groupLabels[0] : nullptr });
         
         if (mSelectedGroup != -1) {
             mCurrentGroupControl->SetSelection(mSelectedGroup);
