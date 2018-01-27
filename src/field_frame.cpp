@@ -1090,6 +1090,7 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 
 void FieldFrame::do_zoom(float zoom_amount)
 {
+    zoom_amount = std::max(zoom_amount, 0.01f);
     mControls->SetZoomAmount(zoom_amount);
     config.Set_FieldFrameZoom(zoom_amount);
     mCanvas->SetZoom(zoom_amount);
