@@ -387,3 +387,6 @@ std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const {
 std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const {
     return sheets.end();
 }
+
+}
+

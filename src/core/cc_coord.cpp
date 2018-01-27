@@ -34,6 +34,12 @@ float Coord::Magnitude() const
     return std::hypot(CoordUnits2Float(x), CoordUnits2Float(y));
 }
 
+// Get distance of point to other
+float Coord::Distance(Coord const& other) const
+{
+    return std::hypot(other.x - x, other.y - y);
+}
+
 // Get magnitude, but check for diagonal military
 float Coord::DM_Magnitude() const
 {
