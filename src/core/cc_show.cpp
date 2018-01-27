@@ -715,8 +715,7 @@ Show_command_pair Show::Create_SetReferencePointToRef0(int ref) const
     auto sheet = GetCurrentSheet();
     // for selected points, set the reference point to ref0
     // this should be per selection list defect #179
-    //for (auto&& i : selectionList) {
-    for (auto i = 0; i != GetNumPoints(); ++i) {
+    for (auto&& i : mSelectionList) {
         positions[i] = sheet->GetPosition(i, 0);
     }
     return Create_MovePointsCommand(positions, ref);
