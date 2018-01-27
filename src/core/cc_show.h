@@ -115,7 +115,7 @@ public:
     bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
 
     // utility
-    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets) const;
+    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
     SelectionList MakeSelectAll() const;
     SelectionList MakeUnselectAll() const;
     SelectionList MakeAddToSelection(const SelectionList& sl) const;

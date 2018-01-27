@@ -23,6 +23,7 @@
 #pragma once
 
 #include "cc_show.h"
+#include "cc_coord.h"
 
 #include <wx/wx.h> // For basic wx defines
 #include <wx/docview.h> // For basic wx defines
@@ -138,7 +139,7 @@ public:
     void SetCurrentSheet(int n);
 
     auto GetNumPoints() const { return mShow->GetNumPoints(); }
-    std::pair<bool, std::vector<size_t> > GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets) const;
+    std::pair<bool, std::vector<size_t> > GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
 
     auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
 
@@ -178,7 +179,7 @@ public:
     std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CalChart::Show::Sheet_container_t& sheets, int where);
     std::unique_ptr<wxCommand> Create_RemoveSheetCommand(int where);
     std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
-    std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets);
+    std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets, CalChart::Coord::units tolerance);
     std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions, int ref);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions, int ref);

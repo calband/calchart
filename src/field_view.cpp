@@ -360,7 +360,7 @@ bool FieldView::DoRelabel()
     auto current_sheet = mShow->GetNthSheet(GetCurrentSheetNum());
     auto next_sheet = current_sheet + 1;
     // get a relabel mapping based on the current sheet.
-    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet);
+    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, Float2CoordUnits(mConfig.Get_DotRatio()));
     // check to see if there's a valid remapping
     if (!result.first) {
         return false;
@@ -379,12 +379,12 @@ std::pair<bool, std::string> FieldView::DoAppendShow(std::unique_ptr<CalChartDoc
     }
     auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
     auto next_sheet = other_show->GetSheetBegin();
-    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet);
+    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, Float2CoordUnits(mConfig.Get_DotRatio()));
     // check to see if there's a valid remapping
     if (!result.first) {
         return { false, "Last sheet doesn't match first sheet of other show" };
     }
-    auto cmd = mShow->Create_AppendShow(std::move(other_show));
+    auto cmd = mShow->Create_AppendShow(std::move(other_show), Float2CoordUnits(mConfig.Get_DotRatio()));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return { true, "" };
 }
