@@ -1,0 +1,281 @@
+%%1
+
+~\bsUNIVERSITY OF CALIFORNIA MARCHING BAND
+
+~NEW MILLENIUM RADIO JAMS\be 
+
+~\bsThousand Miles\be 
+
+1	1/1	All:	Stand and Play Intro (16 beats)
+	5/1	\po:	FMHS EW/NS to SS 2 [MTHS E]
+		\so:	FMHS 2 S
+			FMHS EW/NS to SS 2 [MTHS E]
+
+64 Beats Total
+
+%%2 
+
+2	17/1	\po:	FMHS EW/NS to SS 3 [MTHS E]
+		\so:	GVFE 4 N [MTHS E]
+		\pb:	GVFE 2 N [MTHS E]
+		\ps:	GVFE 6 N [MTHS E]
+		\px:	GVFE 8 N [MTHS E]
+
+8 Beats Total
+
+%%3
+
+3	19/1	\po:	FMHS EW/NS to SS 4 [MTHS E]
+		\so:	GVFE 4 N [MTHS E]
+		\pb:	GVFE 2 N [MTHS E]
+		\ps:	GVFE 6 N [MTHS E]
+		\px:	GVFE 8 N [MTHS E]
+
+8 Beats Total
+
+%%4
+
+4	21/1	\po:	FMHS EW/NS to SS 5 [MTHS E]
+		\so:	GVFE 4 N [MTHS E]
+		\pb:	GVFE 2 N [MTHS E]
+		\ps:	GVFE 6 N [MTHS E]
+		\px:	GVFE 8 N [MTHS E]
+
+8 Beats Total
+
+%%5
+
+5	23/1	\po:	FMHS EW/NS to SS 6 [MTHS E]
+		\so:	GVFE 4 N [MTHS E]
+		\pb:	GVFE 2 N [MTHS E]
+		\ps:	GVFE 6 N [MTHS E]
+		\px:	GVFE 8 N [MTHS E]
+
+16 Beats Total
+
+%%6
+
+~\bsStacy's Mom\be 
+
+6	27/1	\po:	FMHS NS/EW to SS 7 [MTHS W]
+		\so:	FMHS EW/NS to SS 7 [MTHS W]
+
+16 Beats Total
+
+%%7
+
+7	31/1	\po:	FMHS EW/NS to SS 8 [MTHS W]
+
+64 Beats Total
+
+%%8
+
+8	47/1	\po:	FMHS NS/EW to SS 9 [MTHS W]
+		\so:	FMHS EW/NS to SS 9 [MTHS W]
+		\pb:	GVFW 16 S [MTHS W]
+		\ps:	GVFW 16 N [MTHS W]
+
+16 Beats Total
+
+%%9
+
+9	51/1	\po:	FMHS NS/EW to SS 10 [MTHS W]
+		\so:	FMHS EW/NS to SS 10 [MTHS W]
+		\pb:	FMDHS/HS to SS 10 [MTHS W]
+		\ps:	MTHS 16 W
+			FMHS EW/NS to SS 10 [MTHS W]
+
+32 Beats Total
+
+%%10
+
+10	59/1	\po:	FMHS EW/NS to SS 11 [Close W]
+		\so:	Exexute Countermarch CW 16 Beats
+			Execute Countermarch CCW 16 Beats [Close W]
+		\pb:	Execute Countermarch CCW 16 Beats
+			Execute Countermarch CW 16 Beats [Close W]
+
+32 Beats Total
+
+%%11
+
+~\bsStory of a Girl\be 
+
+11	67/1	All:	CATCH THE PICK UP
+	68/1	\po:	FMHS NS/EW to SS 12 [MTHS E]
+		\so:	FMHS EW/NS to SS 12 [MTHS E]
+		\pb:	FMDHS 8 SE
+			FMHS NS/EW to SS 12 [MTHS E]
+		\ps:	FMDHS 8 SE
+			FMHS EW/NS to SS 12 [MTHS E]
+
+60 Beats Total
+
+%%12
+
+12	82/1    \po:	FMHS EW/NS to SS Hogballs [MTHS E]
+		\so:	FMHS/DHS to SS Hogballs [MTHS E]
+		\pb:	MTHS 8 E
+			FMHS/DHS to SS Hogballs [MTHS E]
+
+16 Beats Total
+
+%%Hogballs
+
+Hogballs  86/1    \po:	  FMHS NS/EW to SS 14 [MTHS E]
+		  \so:	  FMDHS 8 SE
+			  FMHS NS/EW to SS 14 [MTHS E]
+
+24 Beats Total
+
+%%14
+
+~\bsCrazy\be 
+
+14	92/1	All:	Execute Crazy Continuity
+	93/1	\po:	FMHS EW/NS to SS 15 [MTHS W]
+		\so:	FMHS NS/EW to SS 15 [MTHS W]
+		\pb:	FMHS/DHS to SS 15 [MTHS W]
+		\ps:	FMDHS/HS to SS 15 [MTHS W]
+		\px:	MTHS 4 W
+			FMHS NS/EW to SS 15 [MTHS W]
+		\sb:	MTHS 6 W
+			FMHS EW/NS to SS 15 [MTHS W]
+		\ss:	FMDHS 8 NW
+			FMHS/DHS to SS 15 [MTHS W]
+		\sx:	FMDHS 8 NW
+			FMHS 12 W
+			FMHS/DHS to SS 15 [MTHS W]
+
+36 Beats Total
+
+%%15
+
+15	101/1	\po:	Even Step 8 HS to SS 16
+		\so:	MTHS W
+
+8 Beats Total
+
+%%16
+
+16	103/1	\po:	Even Step 16 HS to SS 17
+		\so:	MTHS W
+
+16 Beats Total
+
+%%17
+
+17	107/1	\po:	Even Step 8 HS to SS 18
+		\so:	MTHS W
+
+8 Beats Total
+
+%%18
+
+18	109/1	\po:	MTHS 4 E [MTHS W]
+		\so:	MTHS 4 W
+			MTHS 4 E [MTHS W]
+		\pb:	MTHS 8 W
+			MTHS 4 E [MTHS W]
+		\ps:	MTHS 12 W
+			MTHS 4 E [MTHS W]
+		\px:	MTHS 16 W
+			MTHS 4 E [MTHS W]
+
+32 Beats Total
+
+%%19
+
+~\bsSince U Been Gone\be 
+
+19	117/1	\po:	FMHS EW/NS to SS 20 [MTHS E]
+		\so:	FMHS NS/EW to SS 20 [MTHS E]
+		\pb:	FMDHS/HS to SS 20 [MTHS E]
+		\ps:	FMHS/DHS to SS 20 [MTHS E]
+		\px:	MTHS 8 E
+			FMHS EW/NS to SS 20 [MTHS E]
+
+40 Beats Total
+
+%%20
+
+20	127/1	All:	MTHS 10 E
+			FMHS 6 E
+	131/1	\po:	FMHS EW/NS to SS 21 [MTHS E]
+		\so:	FMHS NS/EW to SS 21 [MTHS E]
+
+56 Beats Total
+
+%%21
+
+21	141/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21A [MTHS E]
+
+4 Beats Total
+
+%%21A
+
+21A	142/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21B [MTHS E]
+
+4 Beats Total
+
+%%21B
+
+21B	143/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21C [MTHS E]
+
+4 Beats Total
+
+%%21C
+
+21C	144/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21D [MTHS E]
+
+4 Beats Total
+
+%%21D
+
+21D	145/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21E [MTHS E]
+
+4 Beats Total
+
+%%21E
+
+21E	146/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21F [MTHS E]
+
+4 Beats Total
+
+%%21F
+
+21F	147/1	\po:	MTHS E
+		\so:	Even Step 4 HS to SS 21G [MTHS E]
+
+8 Beats Total
+
+%%21G
+
+21G	149/1	\po:	FMHS EW/NS to SS 22 [MTHS E]
+		\so:	FMHS NS/EW to SS 22 [MTHS E]
+		\pb:	FMDHS/HS to SS 22 [MTHS E]
+
+24 Beats Total
+
+%%22
+
+22	155/1	All:	Even Step 8 HS to SS 22A [MTHS E]
+
+8 Beats Total
+
+%%22A
+
+22A	157/1	\po:	Even Step 16 HS to SS 23 [Close E]
+		\so:	Even Step 8 HS to SS 23 [Close E]
+
+40 Beats Total
+
+%%23
+
+~\bsGO BEARS! BEAT THE TROJANS!\be 
