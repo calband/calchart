@@ -52,7 +52,7 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(FieldView& view, FieldFrame* frame, float def_zoom);
+    FieldCanvas(wxWindow* win, FieldView& view, FieldFrame* frame, float def_zoom);
     virtual ~FieldCanvas() = default;
     void OnPaint(wxPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);

@@ -135,7 +135,7 @@ constexpr auto COORD_DECIMAL = (1 << COORD_SHIFT);
 // RoundToCoordUnits: Use when number is already in Coord format, just needs to be
 // rounded
 template <typename T>
-auto RoundToCoordUnits(T inCoord)
+constexpr auto RoundToCoordUnits(T inCoord)
 {
     return static_cast<CalChart::Coord::units>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
 }
@@ -143,12 +143,12 @@ auto RoundToCoordUnits(T inCoord)
 // RoundToCoordUnits, CoordUnits2Float
 //  Use when we want to convert to Coord system
 template <typename T>
-auto Float2CoordUnits(T a)
+constexpr auto Float2CoordUnits(T a)
 {
     return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * COORD_DECIMAL));
 }
 template <typename T>
-auto CoordUnits2Float(T a)
+constexpr auto CoordUnits2Float(T a)
 {
     return a / (float)COORD_DECIMAL;
 }
@@ -156,12 +156,12 @@ auto CoordUnits2Float(T a)
 // Int2CoordUnits, CoordUnits2Int
 //  Use when we want to convert to Coord system
 template <typename T>
-auto Int2CoordUnits(T a)
+constexpr auto Int2CoordUnits(T a)
 {
     return static_cast<CalChart::Coord::units>(a * COORD_DECIMAL);
 }
 template <typename T>
-auto CoordUnits2Int(T a)
+constexpr auto CoordUnits2Int(T a)
 {
     return static_cast<int>(a / COORD_DECIMAL);
 }
