@@ -758,20 +758,54 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     dc.DrawEllipse(end.x - circ_r / 2, end.y - circ_r / 2, circ_r, circ_r);
 }
 
+static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfiguration& config,
+    const CalChart::ShowModeStandard& mode,
+    HowToDraw howToDraw)
+{
+    if (howToDraw == ShowMode_kAnimation) {
+        return;
+    }
+    const auto fieldsize = mode.FieldSize();
+    const auto border1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
+    const auto offsetx = 0; //-fieldsize.x/2;
+    const auto offsety = 0; //-fieldsize.y/2;
+    const auto borderoffsetx = 0; //-border1.x;
+    const auto borderoffsety = 0; //-border1.y;
+
+    // set color so when we make background box it blends
+    dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+    dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+    // Draw labels
+    wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
+        (int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    dc.SetFont(*yardLabelFont);
+    for (int i = 0; i < CoordUnits2Int(fieldsize.x) / 8 + 1; i++) {
+        auto fieldedge = mode.Offset() - mode.Border1();
+        wxCoord textw, texth, textd;
+        auto text = config.Get_yard_text(
+            i + (-CoordUnits2Int(fieldedge.x) + (CalChart::kYardTextValues - 1) * 4) / 8);
+        dc.GetTextExtent(text, &textw, &texth, &textd);
+        const auto top_row_x = offsetx + Int2CoordUnits(i * 8) - textw / 2 + border1.x + borderoffsetx;
+        const auto top_row_y = std::max(border1.y + borderoffsety - offsety - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0), dc.DeviceToLogicalY(0));
+        const auto bottom_row_x = top_row_x;
+        const auto bottom_row_y = border1.y + borderoffsety + fieldsize.y - offsety - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0);
+        dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
+        dc.DrawText(text, top_row_x, top_row_y);
+        dc.DrawText(text, bottom_row_x, bottom_row_y);
+    }
+}
+
 void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
     const CalChart::ShowModeStandard& mode,
     HowToDraw howToDraw)
 {
     wxPoint points[5];
-    auto fieldsize = mode.FieldSize();
-    auto border1 = mode.Border1();
-    if (howToDraw == ShowMode_kOmniView) {
-        border1 = CalChart::Coord(0, 0);
-    }
-    auto offsetx = 0; //-fieldsize.x/2;
-    auto offsety = 0; //-fieldsize.y/2;
-    auto borderoffsetx = 0; //-border1.x;
-    auto borderoffsety = 0; //-border1.y;
+    const auto fieldsize = mode.FieldSize();
+    const auto border1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
+    const auto offsetx = 0; //-fieldsize.x/2;
+    const auto offsety = 0; //-fieldsize.y/2;
+    const auto borderoffsetx = 0; //-border1.x;
+    const auto borderoffsety = 0; //-border1.y;
 
     points[0] = wxPoint(0 + offsetx, 0 + offsety);
     points[1] = wxPoint(fieldsize.x + offsetx, 0 + offsety);
@@ -856,22 +890,7 @@ void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
     }
 
     // Draw labels
-    wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    dc.SetFont(*yardLabelFont);
-    for (int i = 0;
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kOmniView || howToDraw == ShowMode_kPrinting) && i < CoordUnits2Int(fieldsize.x) / 8 + 1;
-         i++) {
-        auto fieldedge = mode.Offset() - mode.Border1();
-        wxCoord textw, texth, textd;
-        auto text = config.Get_yard_text(
-            i + (-CoordUnits2Int(fieldedge.x) + (CalChart::kYardTextValues - 1) * 4) / 8);
-        dc.GetTextExtent(text, &textw, &texth, &textd);
-        dc.DrawText(text, offsetx + Int2CoordUnits(i * 8) - textw / 2 + border1.x + borderoffsetx,
-            border1.y + borderoffsety - offsety - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0));
-        dc.DrawText(text, offsetx + Int2CoordUnits(i * 8) - textw / 2 + border1.x + borderoffsetx,
-            border1.y + borderoffsety + fieldsize.y - offsety - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0));
-    }
+    ShowModeStandard_DrawHelper_Labels(dc, config, mode, howToDraw);
 }
 
 void ShowModeSprShow_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
