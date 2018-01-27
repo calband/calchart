@@ -250,6 +250,7 @@
 		E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 		E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */; };
+		E8FDB95E201D3C01004307CC /* field_frame_controls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FDB95D201D3BF3004307CC /* field_frame_controls.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -739,6 +740,8 @@
 		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
 		E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas_shapes.cpp; sourceTree = "<group>"; };
 		E8EA87F91EA3E2C3005D963F /* field_canvas_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_canvas_shapes.h; sourceTree = "<group>"; };
+		E8FDB95C201D3BF3004307CC /* field_frame_controls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_frame_controls.h; sourceTree = "<group>"; };
+		E8FDB95D201D3BF3004307CC /* field_frame_controls.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_frame_controls.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1010,6 +1013,8 @@
 				E8EA87F91EA3E2C3005D963F /* field_canvas_shapes.h */,
 				C7E047CA155F7B8900D8C71B /* field_canvas.cpp */,
 				C7E047CB155F7B8A00D8C71B /* field_canvas.h */,
+				E8FDB95D201D3BF3004307CC /* field_frame_controls.cpp */,
+				E8FDB95C201D3BF3004307CC /* field_frame_controls.h */,
 				C7E047CD155F892400D8C71B /* field_frame.cpp */,
 				C7E047CE155F892400D8C71B /* field_frame.h */,
 				C7E047C6155F279000D8C71B /* field_view.cpp */,
@@ -1420,6 +1425,7 @@
 				E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */,
 				E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */,
 				C74162EE1DAF2DF600F87B7D /* munkres.cpp in Sources */,
+				E8FDB95E201D3C01004307CC /* field_frame_controls.cpp in Sources */,
 				E8B89DDD186F7C50004DE7DF /* print_cont_ui.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

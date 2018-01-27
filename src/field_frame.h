@@ -34,6 +34,7 @@ class Show;
 }
 
 class FieldCanvas;
+class FieldFrameControls;
 class FieldView;
 class CalChartDoc;
 class CalChartConfiguration;
@@ -130,7 +131,6 @@ public:
     void AppendShow();
     void ImportContFile();
 
-    void SnapToGrid(CalChart::Coord& c);
     // Grid chioce distance (distance per beat), Grid placement lock (where to end)
     std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
     void UpdatePanel();
@@ -140,7 +140,6 @@ public:
     void CanvasSetCurrentMove(CC_MOVE_MODES type);
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
-    void slider_sheet_callback(wxScrollEvent&);
     void refnum_callback(wxCommandEvent&);
     void OnEnableDrawPaths(wxCommandEvent&);
 
@@ -158,10 +157,7 @@ public:
     const CalChartDoc* GetShow() const;
     CalChartDoc* GetShow();
 
-    wxChoice* mGridChoice;
-    wxChoice* mRefChoice;
-    wxComboBox* mZoomBox;
-    wxSlider* mSheetSlider;
+    FieldFrameControls* mControls;
 
     FieldCanvas* mCanvas;
 
