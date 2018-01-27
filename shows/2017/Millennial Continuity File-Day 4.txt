@@ -1,0 +1,181 @@
+%%1
+~\bsUniversity of California Marching Band
+~Millennial Show
+~Fire Burning\be
+
+1	1/1 	All: 	Stand and Play Intro 16 E
+		\po:	FMHS EW/NS TO SS 2 [MTHS E]
+		\so:	FMHS NS/EW TO SS 2 [MTHS E]
+		\pb:	FMDHS/HS TO SS 2 [MTHS E]	
+
+64 Beats Total
+
+%%2
+2	17/1	\po:	MTHS 16 E
+		\so:	MTHS 16 W	
+
+16 Beats Total
+
+%%3
+3	17/1	\po:	MTHS 16 E
+		\so:	MTHS 4 W
+			MTHS 4 E
+			MTHS 4 W
+			MTHS 4 E
+		\pb:	MTHS 4 E
+			MTHS 4 W
+			MTHS 4 E
+			MTHS 4 W
+		\ps:	MTHS 2 E [Right Back Pivot on Beat 2] 
+			MTHS 4 W
+			MTHS 4 E 
+			MTHS 4 W
+		\px:	MTHS 2 W [Right Back Pivot on Beat 2]
+			MTHS 4 E
+			MTHS 4 W
+			MTHS 4 E 
+		
+16 Beats Total
+
+%%4
+4	25/1	\po:	FMHS EW/NS TO SS 5 [MTHS E]
+		\so:	FMHS NS/EW TO SS 5 [MTHS E]
+		\pb:	FMDHS/HS TO SS 5 [MTHS E] 
+		\ss:	MTHS 8 E
+				FMHS NS/EW TO SS 5 [MTHS E]
+		\px: 	MTHS 4 E
+			FMHS NS/EW TO SS 5 [MTHS E]
+		\sb:	FMHS 4 W
+				FMHS/DHS TO SS 5 [MTHS E]
+		All:	Hup Vamp on Beat 48 Facing E 
+
+64 Beats Total
+
+%%5
+5	41/1	\po:	Pivot Vamp To Face West
+		\pb:	Pivot Vamp to Face West on Beat 1 
+		\ps:	Pivot Vamp to Face West on Beat 2 
+		\px:	Pivot Vamp to Face West on Beat 3 
+
+4 Beats Total
+
+%%6
+~\bsWhatcha Say\be
+
+6	42/1	\po:	FMDHS/HS TO SS 7 [MTHS W] 
+		\so:	FMHS NS/EW TO SS 7 [MTHS W]
+		\px:	FMHS/DHS TO SS 7 [MTHS W]
+
+32 Beats Total
+
+%%7
+7	50/1	\po:	FMDHS/HS TO SS 8 [MTHS W]
+		\ps:	FMHS EW/NS TO SS 8 [MTHS W]
+		\px:	FMHS/DHS TO SS 8 [MTHS W]
+
+32 Beats Total
+
+%%8
+8	58/1	\po:	FMMM FACING W TO SS 9 [MTMM W]
+
+32 Beats Total
+
+%%9
+~\bsDown\be
+
+9	66/1	\po:	FMMM FACING W TO SS 10 [MTMM W]
+		
+20 Beats Total
+
+%%10
+
+10	71/1	\po:	FMDHS/HS TO SS 11 [MTHS E] 
+
+12 Beats Total
+
+%%11
+11	74/1	\po:	MTMM 32 E
+		\so:	Execute Gate Turn Mini Military 32 beats 180 degrees Clockwise around R1
+		\px:	Execute Gate Turn Mini Military 32 beats 180 degrees Counter-clockwise around R1
+		
+32 Beats Total
+
+%%12
+12	82/1	\po:	FMHS EW/NS TO SS Hogballs [MTHS E]
+		\pb: 	FMDHS/HS TO SS Hogballs [MTHS E]
+
+44 Beats Total
+
+%%Hogballs
+Hogballs 93/1	\po:	FMHS 10 E (First arrow)
+					MTHS 10 E
+		\so:	MTHS 2 E (Second arrow)
+			FMHS 10 E
+			MTHS 8 E
+		\pb:	MTHS 4 E
+			FMHS 10 E
+			MTHS 4 E
+
+20 Beats Total
+
+%%14
+14	98/1	\po:	FMHS EW/NS TO SS 15 [MTHS W]
+		\so:	FMHS NS/EW TO SS 15 [MTHS W]
+		\pb:	FMDHS/HS TO SS 15 [MTHS W]
+	
+32 Beats Total
+
+%%15
+~\bsDisturbia\be
+
+15	106/1	\po:	MTHS 16 W
+		\so: 	MTHS 4 W
+			FMHS EW/NS TO SS 16 [MTHS W]
+
+16 Beats Total
+
+%%16
+
+16	110/1	\po:	FMHS EW/NS TO SS 17 [MTHS W]
+		\so:	FMHS NS/EW TO SS 17 [MTHS W]
+		\pb:	FMDHS/HS TO SS 17 [MTHS W]
+
+48 Beats Total
+
+%%17
+17	122/1	\po:	MTHS 48 W
+		\so:	FMHS EW/NS TO SS 18 [MTHS W]
+
+48 Beats Total
+
+%%18
+~\bsI Gotta Feeling\be 
+
+18	134/1	\po:	MTHS 32 E
+		\so:	FMHS EW/NS TO SS 19 [MTHS E]
+
+32 Beats Total
+
+%%19
+19	142/1	\po:	FMHS EW/NS TO SS 20 [MTHS E]
+		\so:	FMHS NS/EW TO SS 20 [MTHS E]
+		\pb:	FMDHS/HS TO SS 20 [MTHS E]
+
+48 Beats Total 
+
+%%20
+20	154/1	\po:	FMHS EW/NS TO SS 21 [MTHS E]		
+		\so:	FMHS NS/EW TO SS 21 [MTHS E]
+		\px:	FMHS EW/NS TO SS 21 [MTHS W]
+		\sx:	FMHS NS/EW TO SS 21 [MTHS W]
+
+48 Beats Total
+
+%%21
+21	166/1	\po:	Hup Vamp E
+		\so:	Pivot Vamp to Face East
+4 Beats Total
+
+
+
+~\bsGO BEARS! BEAT the Rebel Black Bear!!! Love STUNT 2k17 <3 
