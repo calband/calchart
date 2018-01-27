@@ -49,8 +49,8 @@ EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(FieldView& view, FieldFrame* frame, float def_zoom)
-    : ClickDragCtrlScrollCanvas(frame, wxID_ANY)
+FieldCanvas::FieldCanvas(wxWindow* win, FieldView& view, FieldFrame* frame, float def_zoom)
+    : ClickDragCtrlScrollCanvas(win, wxID_ANY)
     , mFrame(frame)
     , mView(view)
 {
