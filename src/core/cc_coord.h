@@ -36,6 +36,7 @@ public:
     }
 
     float Magnitude() const;
+    float Distance(Coord const&) const;
     float DM_Magnitude() const; // check for diagonal military also
     float Direction() const;
     float Direction(const Coord& c) const;
@@ -113,6 +114,11 @@ inline Coord operator-(const Coord& c) { return Coord(-c.x, -c.y); }
 inline bool operator==(const Coord& a, const Coord& b)
 {
     return ((a.x == b.x) && (a.y == b.y));
+}
+
+inline bool operator<(const Coord& a, const Coord& b)
+{
+    return (a.y == b.y) ? (a.x < b.x) : (a.y < b.y);
 }
 
 inline bool operator!=(const Coord& a, const Coord& b)

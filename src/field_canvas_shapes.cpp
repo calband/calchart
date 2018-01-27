@@ -158,6 +158,20 @@ static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix& transma
     return result;
 }
 
+static std::vector<int> get_ordered_selection(std::map<int, CalChart::Coord> const& select_list)
+{
+    // stuff all the points into a map, which will order them.  Then pull out the points.
+    std::map<CalChart::Coord, int> ordered;
+    for (auto&& i : select_list) {
+        ordered[i.second] = i.first;
+    }
+    std::vector<int> result;
+    for (auto&& i : ordered) {
+        result.push_back(i.second);
+    }
+    return result;
+}
+
 void FieldCanvasShapes::BeginMoveDrag(CC_DRAG_TYPES type, const CalChart::Coord& start)
 {
     move_drag = type;
@@ -218,9 +232,11 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_LINE::TransformPoints(std::map
     auto second = shape->GetPoint();
     auto curr_pos = start;
     std::map<int, CalChart::Coord> result;
-    for (auto i = select_list.begin(); i != select_list.end(); ++i, curr_pos += second - start) {
+    auto ordered = get_ordered_selection(select_list);
+    for (auto i : ordered) {
         // should this have a snap to grid?
-        result[i->first] = curr_pos;
+        result[i] = curr_pos;
+        curr_pos += second - start;
     }
     return result;
 }
@@ -476,8 +492,10 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_LINE::TransformPoints(st
     auto curr_pos = start;
     std::map<int, CalChart::Coord> result;
     auto distance = (select_list.size() > 1) ? (second - start) / static_cast<float>(select_list.size() - 1) : start;
-    for (auto i = select_list.begin(); i != select_list.end(); ++i, curr_pos += distance) {
-        result[i->first] = curr_pos;
+    auto ordered = get_ordered_selection(select_list);
+    for (auto i : ordered) {
+        result[i] = curr_pos;
+        curr_pos += distance;
     }
     return result;
 }
@@ -500,14 +518,16 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_ELLIPSE::TransformPoints
     std::map<int, CalChart::Coord> result;
     auto amount = (2.0 * M_PI) / select_list.size();
     auto angle = -M_PI / 2.0;
-    for (auto i = select_list.begin(); i != select_list.end(); ++i, angle += amount) {
+    auto ordered = get_ordered_selection(select_list);
+    for (auto i : ordered) {
         // should this have a snap to grid?
         if ((angle > M_PI / 2.0) && (angle <= 3.0 * M_PI / 2.0)) {
-            result[i->first] = center + CalChart::Coord(-(a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), -(a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
+            result[i] = center + CalChart::Coord(-(a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), -(a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
         }
         else {
-            result[i->first] = center + CalChart::Coord((a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), (a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
+            result[i] = center + CalChart::Coord((a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), (a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
         }
+        angle += amount;
     }
     return result;
 }
@@ -530,19 +550,21 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_RECTANGLE::TransformPoin
     std::map<int, CalChart::Coord> result;
     auto each_segment = perimeter / select_list.size();
     auto total_distance = 0.0;
-    for (auto i = select_list.begin(); i != select_list.end(); ++i, total_distance += each_segment) {
+    auto ordered = get_ordered_selection(select_list);
+    for (auto i : ordered) {
         if (total_distance < a) {
-            result[i->first] = start + CalChart::Coord(total_distance, 0);
+            result[i] = start + CalChart::Coord(total_distance, 0);
         }
         else if (total_distance < (a + b)) {
-            result[i->first] = start + CalChart::Coord(a, total_distance - a);
+            result[i] = start + CalChart::Coord(a, total_distance - a);
         }
         else if (total_distance < (2.0 * a + b)) {
-            result[i->first] = start + CalChart::Coord(a - (total_distance - (a + b)), b);
+            result[i] = start + CalChart::Coord(a - (total_distance - (a + b)), b);
         }
         else {
-            result[i->first] = start + CalChart::Coord(0, b - (total_distance - (2 * a + b)));
+            result[i] = start + CalChart::Coord(0, b - (total_distance - (2 * a + b)));
         }
+        total_distance += each_segment;
     }
     return result;
 }
@@ -561,8 +583,10 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_DRAW::TransformPoints(st
     auto points = shape->GetPointsOnLine(static_cast<int>(select_list.size()));
     auto iter = points.begin();
     assert(points.size() == select_list.size());
-    for (auto i = select_list.begin(); i != select_list.end(); ++i, ++iter) {
-        result[i->first] = *iter;
+    auto ordered = get_ordered_selection(select_list);
+    for (auto i : ordered) {
+        result[i] = *iter;
+        ++iter;
     }
     return result;
 }
