@@ -334,9 +334,9 @@ void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int
     UpdateAllViews();
 }
 
-std::pair<bool, std::vector<size_t> > CalChartDoc::GetRelabelMapping(Show::const_Sheet_iterator_t source_sheet, Show::const_Sheet_iterator_t target_sheets) const
+std::pair<bool, std::vector<size_t> > CalChartDoc::GetRelabelMapping(Show::const_Sheet_iterator_t source_sheet, Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
 {
-    return mShow->GetRelabelMapping(source_sheet, target_sheets);
+    return mShow->GetRelabelMapping(source_sheet, target_sheets, tolerance);
 }
 
 void CalChartDoc::SetSelection(const SelectionList& sl)
@@ -489,12 +489,12 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_ApplyRelabelMapping(int sheet, st
     return std::make_unique<CalChartDocCommand>(*this, wxT("Point Remapping"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalChartDoc> other_show)
+std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalChartDoc> other_show, CalChart::Coord::units tolerance)
 {
     auto currend = mShow->GetNumSheets();
     auto last_sheet = static_cast<Show const&>(*mShow).GetNthSheet(currend - 1);
     auto next_sheet = other_show->GetSheetBegin();
-    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet);
+    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, tolerance);
 
     // create a command to run on the other show.  This is how to apply changes
     // yes, this is weird.  Create a command and then immediately run it on the copy.  This is to apply the remap.

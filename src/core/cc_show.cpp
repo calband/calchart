@@ -377,7 +377,7 @@ void Show::SetPointLabel(const std::vector<std::string>& labels)
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
 // so that they match with this current sheet
-std::pair<bool, std::vector<size_t> > Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets) const
+std::pair<bool, std::vector<size_t> > Show::GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
 {
     std::vector<size_t> table(GetNumPoints());
     std::vector<unsigned> used_table(GetNumPoints());
@@ -386,7 +386,7 @@ std::pair<bool, std::vector<size_t> > Show::GetRelabelMapping(const_Sheet_iterat
         auto j = 0;
         for (; j < GetNumPoints(); j++) {
             if (!used_table[j]) {
-                if (source_sheet->GetPosition(i) == target_sheets->GetPosition(j)) {
+                if (source_sheet->GetPosition(i).Distance(target_sheets->GetPosition(j)) < tolerance) {
                     table[i] = j;
                     used_table[j] = true;
                     break;
