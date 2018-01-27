@@ -49,6 +49,7 @@
 #include "cc_point.h"
 #include "cc_fileformat.h"
 #include "e7_transition_solver_ui.h"
+#include "field_frame_controls.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
@@ -61,22 +62,7 @@
 
 const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
-const wxString gridtext[] = {
-    wxT("None"), wxT("1"), wxT("2"), wxT("4"), wxT("Mil"), wxT("2-Mil"),
-};
-
-const int zoom_amounts[] = {
-    500, 200, 150, 100, 75, 50, 25, 10,
-};
-
 static const wxChar* file_wild = FILE_WILDCARDS;
-
-std::pair<CalChart::Coord::units, CalChart::Coord::units> gridvalue[] = { { 1, 0 },
-    { Int2CoordUnits(1), 0 },
-    { Int2CoordUnits(2), 0 },
-    { Int2CoordUnits(4), 0 },
-    { Int2CoordUnits(4), static_cast<CalChart::Coord::units>(Int2CoordUnits(4) / 3) },
-    { Int2CoordUnits(8), static_cast<CalChart::Coord::units>(Int2CoordUnits(8) / 3) } };
 
 extern wxPrintDialogData* gPrintDialogData;
 
@@ -138,8 +124,7 @@ EVT_MENU(CALCHART__label_right, FieldFrame::OnCmd_label_right)
 EVT_MENU(CALCHART__label_flip, FieldFrame::OnCmd_label_flip)
 EVT_MENU(CALCHART__label_hide, FieldFrame::OnCmd_label_hide)
 EVT_MENU(CALCHART__label_show, FieldFrame::OnCmd_label_show)
-EVT_MENU(CALCHART__label_visibility_toggle,
-    FieldFrame::OnCmd_label_visibility_toggle)
+EVT_MENU(CALCHART__label_visibility_toggle, FieldFrame::OnCmd_label_visibility_toggle)
 EVT_MENU(CALCHART__setsym0, FieldFrame::OnCmd_setsym0)
 EVT_MENU(CALCHART__setsym1, FieldFrame::OnCmd_setsym1)
 EVT_MENU(CALCHART__setsym2, FieldFrame::OnCmd_setsym2)
@@ -150,12 +135,10 @@ EVT_MENU(CALCHART__setsym6, FieldFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, FieldFrame::OnCmd_setsym7)
 EVT_MENU(CALCHART__EXPORT_VIEWER_FILE, FieldFrame::OnCmdExportViewerFile)
 EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
-EVT_COMMAND_SCROLL(CALCHART__slider_sheet_callback,
-    FieldFrame::slider_sheet_callback)
 EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
 EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
-EVT_TOGGLEBUTTON(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
+EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_MENU(CALCHART__E7TransitionSolver, FieldFrame::OnCmd_SolveTransition)
@@ -217,30 +200,19 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     // Make a menubar
     wxMenu* file_menu = new wxMenu;
-    file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"),
-        wxT("Create a new show"));
-    file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"),
-        wxT("Load a saved show"));
-    file_menu->Append(CALCHART__IMPORT_CONT_FILE,
-        wxT("&Import Continuity...\tCTRL-I"),
-        wxT("Import continuity text"));
+    file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
+    file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
+    file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity...\tCTRL-I"), wxT("Import continuity text"));
     file_menu->Append(wxID_SAVE, wxT("&Save\tCTRL-S"), wxT("Save show"));
-    file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"),
-        wxT("Save show as a new name"));
-    file_menu->Append(CALCHART__wxID_PRINT, wxT("&Print...\tCTRL-P"),
-        wxT("Print this show"));
-    file_menu->Append(CALCHART__wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"),
-        wxT("Preview this show"));
-    file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"),
-        wxT("Setup Pages"));
-    file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."),
-        wxT("Print show to PostScript"));
-    file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."),
-        wxT("Print show to Encapsulated PostScript"));
+    file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"), wxT("Save show as a new name"));
+    file_menu->Append(CALCHART__wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
+    file_menu->Append(CALCHART__wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"), wxT("Preview this show"));
+    file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
+    file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."), wxT("Print show to PostScript"));
+    file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."), wxT("Print show to Encapsulated PostScript"));
     file_menu->Append(CALCHART__EXPORT_VIEWER_FILE, wxT("Export for Online Viewer..."), wxT("Export show to be viewed using the CalChart Online Viewer"));
     file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
-    file_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"),
-        wxT("Close this window"));
+    file_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"), wxT("Close this window"));
     file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
     // A nice touch: a history of files visited. Use this menu.
@@ -250,83 +222,45 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     wxMenu* edit_menu = new wxMenu;
     edit_menu->Append(wxID_UNDO, wxT("&Undo\tCTRL-Z"));
     edit_menu->Append(wxID_REDO, wxT("&Redo\tCTRL-SHIFT-Z"));
-    edit_menu->Append(CALCHART__COPY_SHEET, wxT("&Copy Sheet\tCTRL-C"),
-        wxT("Copy the current stuntsheet"));
-    edit_menu->Append(CALCHART__PASTE_SHEET, wxT("&Paste Sheet\tCTRL-V"),
-        wxT("Paste the current stuntsheet"));
-    edit_menu->Append(CALCHART__INSERT_BEFORE,
-        wxT("&Insert Sheet Before\tCTRL-["),
-        wxT("Insert a new stuntsheet before this one"));
-    edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"),
-        wxT("Insert a new stuntsheet after this one"));
-    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW,
-        wxT("Insert Sheets From Other Show..."),
-        wxT("Insert a saved stuntsheet after this one"));
-    edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"),
-        wxT("Delete this stuntsheet"));
-    edit_menu->Append(CALCHART__APPEND_FILE, wxT("Append Show..."),
-        wxT("Append a show to the end"));
-    edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"),
-        wxT("Relabel all stuntsheets after this one"));
-    edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"),
-        wxT("Setup number of marchers"));
-    edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."),
-        wxT("Set the show mode"));
-    edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."),
-        wxT("Select Points"));
-    edit_menu->Append(CALCHART__SELECT_ALL, wxT("Select &All...\tCTRL-A"),
-        wxT("Select All Points"));
-    edit_menu->Append(CALCHART__SET_SHEET_TITLE,
-        wxT("Set Sheet &Title...\tCTRL-T"),
-        wxT("Change the title of this stuntsheet"));
-    edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"),
-        wxT("Change the number of beats for this stuntsheet"));
-    edit_menu->Append(CALCHART__EDIT_CONTINUITY,
-        wxT("&Edit Continuity...\tCTRL-E"),
-        wxT("Edit continuity for this stuntsheet"));
-    edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY,
-        wxT("Edit Print Continuity..."),
-        wxT("Edit Print continuity for this stuntsheet"));
-    edit_menu->Append(CALCHART__ResetReferencePoint,
-        wxT("Reset reference point..."),
-        wxT("Reset the current reference point"));
-    edit_menu->Append(CALCHART__E7TransitionSolver,
-        wxT("Solve transition"),
-        wxT("Solve the transition to the next sheet automatically"));
+    edit_menu->Append(CALCHART__COPY_SHEET, wxT("&Copy Sheet\tCTRL-C"), wxT("Copy the current stuntsheet"));
+    edit_menu->Append(CALCHART__PASTE_SHEET, wxT("&Paste Sheet\tCTRL-V"), wxT("Paste the current stuntsheet"));
+    edit_menu->Append(CALCHART__INSERT_BEFORE, wxT("&Insert Sheet Before\tCTRL-["), wxT("Insert a new stuntsheet before this one"));
+    edit_menu->Append(CALCHART__INSERT_AFTER, wxT("Insert Sheet &After\tCTRL-]"), wxT("Insert a new stuntsheet after this one"));
+    edit_menu->Append(CALCHART__INSERT_OTHER_SHOW, wxT("Insert Sheets From Other Show..."), wxT("Insert a saved stuntsheet after this one"));
+    edit_menu->Append(wxID_DELETE, wxT("&Delete Sheet\tCTRL-DEL"), wxT("Delete this stuntsheet"));
+    edit_menu->Append(CALCHART__APPEND_FILE, wxT("Append Show..."), wxT("Append a show to the end"));
+    edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
+    edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"), wxT("Setup number of marchers"));
+    edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."), wxT("Set the show mode"));
+    edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
+    edit_menu->Append(CALCHART__SELECT_ALL, wxT("Select &All...\tCTRL-A"), wxT("Select All Points"));
+    edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
+    edit_menu->Append(CALCHART__SET_BEATS, wxT("Set &Beats...\tCTRL-B"), wxT("Change the number of beats for this stuntsheet"));
+    edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
+    edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
+    edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
+    edit_menu->Append(CALCHART__E7TransitionSolver, wxT("Solve transition"), wxT("Solve the transition to the next sheet automatically"));
 
     wxMenu* anim_menu = new wxMenu;
-    anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"),
-        wxT("Open show in CalChart Viewer"));
+    anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
 
     wxMenu* backgroundimage_menu = new wxMenu;
-    backgroundimage_menu->AppendCheckItem(CALCHART__ShowBackgroundImages,
-        wxT("Show Background Images"),
-        wxT("Toggle showing background images"));
-    backgroundimage_menu->Append(CALCHART__AddBackgroundImage,
-        wxT("Add Background Image..."),
-        wxT("Add a background image"));
-    backgroundimage_menu->AppendCheckItem(CALCHART__AdjustBackgroundImageMode,
-        wxT("Image Adjust Mode..."),
-        wxT("Mode to adjust background images"));
+    backgroundimage_menu->AppendCheckItem(CALCHART__ShowBackgroundImages, wxT("Show Background Images"), wxT("Toggle showing background images"));
+    backgroundimage_menu->Append(CALCHART__AddBackgroundImage, wxT("Add Background Image..."), wxT("Add a background image"));
+    backgroundimage_menu->AppendCheckItem(CALCHART__AdjustBackgroundImageMode, wxT("Image Adjust Mode..."), wxT("Mode to adjust background images"));
     backgroundimage_menu->Enable(CALCHART__ShowBackgroundImages, true);
     backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
     backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImageMode, true);
 
     wxMenu* ghost_menu = new wxMenu;
-    ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"),
-        wxT("Turn off ghost view"));
-    ghost_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"),
-        wxT("Draw a ghost of the next stuntsheet"));
-    ghost_menu->Append(CALCHART__GhostPreviousSheet, wxT("Ghost Previous Sheet"),
-        wxT("Draw a ghost of the previous stuntsheet"));
-    ghost_menu->Append(CALCHART__GhostNthSheet, wxT("Ghost Particular Sheet..."),
-        wxT("Draw a ghost of a particular stuntsheet"));
+    ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
+    ghost_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
+    ghost_menu->Append(CALCHART__GhostPreviousSheet, wxT("Ghost Previous Sheet"), wxT("Draw a ghost of the previous stuntsheet"));
+    ghost_menu->Append(CALCHART__GhostNthSheet, wxT("Ghost Particular Sheet..."), wxT("Draw a ghost of a particular stuntsheet"));
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."),
-        wxT("Information about the program"));
-    help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"),
-        wxT("Help on using CalChart"));
+    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
+    help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
 
     wxMenuBar* menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, wxT("&File"));
@@ -341,96 +275,29 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     // Add a toolbar
     AddCoolToolBar(GetMainToolBar(), *this);
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
+    // sanity: Don't let the user zoom too low
+    {
+        auto zoom_size = config.Get_FieldFrameZoom();
+        if (zoom_size < 0.01) {
+            config.Set_FieldFrameZoom(0.01);
+        }
+    }
 
-    // Add the field canvas
-    this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
-    mCanvas = new FieldCanvas(*static_cast<FieldView*>(view), this, config.Get_FieldFrameZoom());
+    // split out the controls from the canvas
+    auto split_window = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
+    mControls = new FieldFrameControls(split_window, config.Get_FieldFrameZoom());
+
+    mCanvas = new FieldCanvas(split_window, *static_cast<FieldView*>(view), this, config.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
+    split_window->SplitHorizontally(mControls, mCanvas);
+    auto control_size = mControls->GetSizer()->GetMinSize();
+    split_window->SetSashPosition(control_size.y + 5);
+
     CalChartDoc* show = static_cast<CalChartDoc*>(doc);
     SetTitle(show->GetTitle());
-
-    // Add the controls
-    wxSizerFlags topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
-    wxSizerFlags centerText = wxSizerFlags(0).Border(wxALL, 5).Align(wxALIGN_CENTER_HORIZONTAL);
-    wxSizerFlags centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5);
-    wxBoxSizer* fullsizer = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* toprow = new wxBoxSizer(wxHORIZONTAL);
-
-    // Grid choice
-    wxBoxSizer* sizer1 = new wxBoxSizer(wxVERTICAL);
-    sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Grid Spacing")),
-        centerText);
-    mGridChoice = new wxChoice(this, -1, wxPoint(-1, -1), wxSize(-1, -1),
-        sizeof(gridtext) / sizeof(wxString), gridtext);
-    mGridChoice->SetSelection(2);
-    sizer1->Add(mGridChoice, centerWidget);
-    toprow->Add(sizer1, topRowSizerFlags);
-
-    // Zoom slider
-    sizer1 = new wxBoxSizer(wxVERTICAL);
-    sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Zoom")), centerText);
-    wxArrayString zoomtext;
-    for (size_t i = 0; i < sizeof(zoom_amounts) / (sizeof(zoom_amounts[0]));
-         ++i) {
-        wxString buf;
-        buf.sprintf(wxT("%d%%"), zoom_amounts[i]);
-        zoomtext.Add(buf);
-    }
-    zoomtext.Add(wxT("Fit"));
-    mZoomBox = new wxComboBox(this, CALCHART__slider_zoom, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, zoomtext,
-        wxTE_PROCESS_ENTER);
-    // set the text to the default zoom level
-    if (mZoomBox) {
-        wxString zoomtxt;
-        zoomtxt.sprintf("%d%%", (int)(config.Get_FieldFrameZoom() * 100));
-        mZoomBox->SetValue(zoomtxt);
-    }
-    sizer1->Add(mZoomBox, centerWidget);
-    toprow->Add(sizer1, topRowSizerFlags);
-
-    // Reference choice
-    sizer1 = new wxBoxSizer(wxVERTICAL);
-    sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Ref Group")), centerText);
-    {
-        wxString buf;
-        unsigned i;
-
-        mRefChoice = new wxChoice(this, CALCHART__refnum_callback);
-        mRefChoice->Append(wxT("Off"));
-        for (i = 1; i <= CalChart::Point::kNumRefPoints; i++) {
-            buf.sprintf(wxT("%u"), i);
-            mRefChoice->Append(buf);
-        }
-    }
-    sizer1->Add(mRefChoice, centerWidget);
-    toprow->Add(sizer1, topRowSizerFlags);
-
-    sizer1 = new wxBoxSizer(wxVERTICAL);
-    sizer1->Add(new wxButton(this, CALCHART__ResetReferencePoint,
-                    wxT("Reset Ref Points")),
-        centerWidget);
-    toprow->Add(sizer1, topRowSizerFlags);
-
-    sizer1 = new wxBoxSizer(wxVERTICAL);
-    wxToggleButton* checkbox = new wxToggleButton(this, CALCHART__draw_paths, wxT("Draw Paths"));
-    checkbox->SetValue(false);
-    sizer1->Add(checkbox, centerWidget);
-    toprow->Add(sizer1, topRowSizerFlags);
-
-    // Sheet slider (will get set later with UpdatePanel())
-    sizer1 = new wxBoxSizer(wxVERTICAL);
-    sizer1->Add(new wxStaticText(this, wxID_ANY, wxT("Sheet")), centerText);
-    // on Mac using wxSL_LABELS will cause a crash?
-    mSheetSlider = new wxSlider(this, CALCHART__slider_sheet_callback, 1, 1, 2,
-        wxDefaultPosition, wxDefaultSize,
-        wxSL_HORIZONTAL | wxSL_LABELS);
-    sizer1->Add(mSheetSlider, centerWidget);
-    toprow->Add(sizer1, topRowSizerFlags);
-
-    fullsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));
 
     // Update the command processor with the undo/redo menu items
     edit_menu->FindItem(wxID_UNDO)->Enable(false);
@@ -444,10 +311,10 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
 
     // Show the frame
     UpdatePanel();
+    mCanvas->wxWindow::SetFocus();
+    
     mCanvas->Refresh();
 
-    fullsizer->Add(mCanvas, 1, wxEXPAND);
-    SetSizer(fullsizer);
     // re-set the size
     SetSize(size);
     Show(true);
@@ -1118,7 +985,7 @@ void FieldFrame::ImportContFile()
 
 std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::GridChoice() const
 {
-    return gridvalue[mGridChoice->GetSelection()];
+    return mControls->GridChoice();
 }
 
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
@@ -1184,7 +1051,7 @@ void FieldFrame::SetMode()
 
 void FieldFrame::refnum_callback(wxCommandEvent&)
 {
-    GetFieldView()->SetReferencePoint(mRefChoice->GetSelection());
+    GetFieldView()->SetReferencePoint(mControls->GetRefChoice());
 }
 
 void FieldFrame::OnEnableDrawPaths(wxCommandEvent& event)
@@ -1192,19 +1059,10 @@ void FieldFrame::OnEnableDrawPaths(wxCommandEvent& event)
     GetFieldView()->OnEnableDrawPaths(event.IsChecked());
 }
 
-void FieldFrame::slider_sheet_callback(wxScrollEvent&)
-{
-    GetFieldView()->GoToSheet(mSheetSlider->GetValue() - 1);
-}
-
 void FieldFrame::zoom_callback(wxCommandEvent& event)
 {
-    size_t sel = event.GetInt();
-    float zoom_amount = 1.0;
-    if (sel < sizeof(zoom_amounts) / sizeof(zoom_amounts[0])) {
-        zoom_amount = zoom_amounts[sel] / 100.0;
-    }
-    else if (sel == sizeof(zoom_amounts) / sizeof(zoom_amounts[0])) {
+    auto zoom_amount = mControls->GetZoomAmount();
+    if (zoom_amount == 0) {
         zoom_amount = mCanvas->ZoomToFitFactor();
     }
     do_zoom(zoom_amount);
@@ -1212,24 +1070,18 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
 
 void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 {
-    wxString zoomtxt = mZoomBox->GetValue();
+    auto zoomtxt = static_cast<wxComboBox*>(FindWindow(event.GetId()))->GetValue();
     // strip the trailing '%' if it exists
     if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%'))) {
         zoomtxt.RemoveLast();
     }
-    long zoomnum = 100;
-    float zoom_amount = 1.0;
-    int zoommax = zoom_amounts[0];
-    int zoommin = zoom_amounts[sizeof(zoom_amounts) / sizeof(zoom_amounts[0]) - 1];
-    if (zoomtxt.ToLong(&zoomnum) && (zoomnum >= zoommin && zoomnum <= zoommax)) {
-        zoom_amount = zoomnum / 100.0;
+    double zoom_amount = 1.0;
+    if (zoomtxt.ToDouble(&zoom_amount)) {
+        zoom_amount /= 100.0;
     }
     else {
-        wxString msg;
-        msg.sprintf(wxT("Please enter a valid number between %d and %d\n"), zoommin,
-            zoommax);
+        wxString msg("Please enter a valid number\n");
         wxMessageBox(msg, wxT("Invalid number"), wxICON_INFORMATION | wxOK);
-        mZoomBox->SetValue(wxT(""));
         // return if not valid
         return;
     }
@@ -1238,9 +1090,7 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 
 void FieldFrame::do_zoom(float zoom_amount)
 {
-    wxString zoomtxt;
-    zoomtxt.sprintf(wxT("%d%%"), int(zoom_amount * 100.0));
-    mZoomBox->SetValue(zoomtxt);
+    mControls->SetZoomAmount(zoom_amount);
     config.Set_FieldFrameZoom(zoom_amount);
     mCanvas->SetZoom(zoom_amount);
 }
@@ -1262,18 +1112,6 @@ void FieldFrame::UpdatePanel()
     tempbuf << GetShow()->GetSelectionList().size() << wxT(" of ")
             << GetShow()->GetNumPoints() << wxT(" selected");
     SetStatusText(tempbuf, 2);
-
-    if (num > 1) {
-        mSheetSlider->Enable(true);
-        if ((unsigned)mSheetSlider->GetMax() != num)
-            mSheetSlider->SetValue(1); // So Motif doesn't complain about value
-        mSheetSlider->SetRange(1, num);
-        if ((unsigned)mSheetSlider->GetValue() != curr)
-            mSheetSlider->SetValue(curr);
-    }
-    else {
-        mSheetSlider->Enable(false);
-    }
 
     SetTitle(GetDocument()->GetUserReadableName());
 }
