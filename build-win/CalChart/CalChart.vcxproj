@@ -116,7 +116,6 @@
     <ClInclude Include="..\..\src\core\cc_types.h" />
     <ClInclude Include="..\..\src\core\cont.h" />
     <ClInclude Include="..\..\src\core\e7_transition_solver.h" />
-    <ClInclude Include="..\..\src\core\e7_transition_solver_ui.h" />
     <ClInclude Include="..\..\src\core\json.h" />
     <ClInclude Include="..\..\src\core\json_export.h" />
     <ClInclude Include="..\..\src\core\json_grammar.h" />
@@ -127,9 +126,11 @@
     <ClInclude Include="..\..\src\core\viewer_translate.h" />
     <ClInclude Include="..\..\src\draw.h" />
     <ClInclude Include="..\..\src\draw_utils.h" />
+    <ClInclude Include="..\..\src\e7_transition_solver_ui.h" />
     <ClInclude Include="..\..\src\field_canvas.h" />
     <ClInclude Include="..\..\src\field_canvas_shapes.h" />
     <ClInclude Include="..\..\src\field_frame.h" />
+    <ClInclude Include="..\..\src\field_frame_controls.h" />
     <ClInclude Include="..\..\src\field_view.h" />
     <ClInclude Include="..\..\src\ghost_module.h" />
     <ClInclude Include="..\..\src\linmath.h" />
@@ -178,17 +179,18 @@
     <ClCompile Include="..\..\src\core\cc_text.cpp" />
     <ClCompile Include="..\..\src\core\cont.cpp" />
     <ClCompile Include="..\..\src\core\e7_transition_solver.cpp" />
-    <ClCompile Include="..\..\src\core\e7_transition_solver_ui.cpp" />
     <ClCompile Include="..\..\src\core\json.cpp" />
     <ClCompile Include="..\..\src\core\json_export.cpp" />
     <ClCompile Include="..\..\src\core\math_utils.cpp" />
     <ClCompile Include="..\..\src\core\modes.cpp" />
     <ClCompile Include="..\..\src\core\print_ps.cpp" />
     <ClCompile Include="..\..\src\core\viewer_translate.cpp" />
+    <ClCompile Include="..\..\src\e7_transition_solver_ui.cpp" />
     <ClCompile Include="..\..\src\draw.cpp" />
     <ClCompile Include="..\..\src\field_canvas.cpp" />
     <ClCompile Include="..\..\src\field_canvas_shapes.cpp" />
     <ClCompile Include="..\..\src\field_frame.cpp" />
+    <ClCompile Include="..\..\src\field_frame_controls.cpp" />
     <ClCompile Include="..\..\src\field_view.cpp" />
     <ClCompile Include="..\..\src\ghost_module.cpp" />
     <ClCompile Include="..\..\src\precomp.cpp">
@@ -204,8 +206,6 @@
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\adapter.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.cpp" />
-    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.cpp" />
-    <ClCompile Include="..\..\submodules\munkres-cpp\src\matrix.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\munkres.cpp" />
   </ItemGroup>
   <ItemGroup>

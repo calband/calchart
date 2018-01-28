@@ -48,13 +48,12 @@
     <ClCompile Include="..\..\src\toolbar.cpp" />
     <ClCompile Include="..\..\src\top_frame.cpp" />
     <ClCompile Include="..\..\src\core\e7_transition_solver.cpp" />
-    <ClCompile Include="..\..\src\core\e7_transition_solver_ui.cpp" />
-    <ClCompile Include="..\..\submodules\munkres-cpp\src\matrix.cpp" />
+    <ClCompile Include="..\..\src\e7_transition_solver_ui.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\munkres.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\adapter.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.cpp" />
-    <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.cpp" />
+    <ClCompile Include="..\..\src\field_frame_controls.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -114,13 +113,14 @@
     <ClInclude Include="..\..\src\top_frame.h" />
     <ClInclude Include="..\..\src\ui_enums.h" />
     <ClInclude Include="..\..\src\core\e7_transition_solver.h" />
-    <ClInclude Include="..\..\src\core\e7_transition_solver_ui.h" />
+    <ClInclude Include="..\..\src\e7_transition_solver_ui.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\munkres.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\matrix.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2dvectordapter.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\adapter.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.h" />
+    <ClInclude Include="..\..\src\field_frame_controls.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />
