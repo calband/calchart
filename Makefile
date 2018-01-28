@@ -26,6 +26,7 @@ SRCS = $(wildcard $(SRCDIR)/*.cpp)
 
 GENERATED_BASES = $(SRCDIR)/contscan.l $(SRCDIR)/contgram.y
 GENERATED_SRCS = $(GENDIR)/contscan.cpp $(GENDIR)/contgram.cpp
+GENERATED_FILES = $(GENERATED_SRCS)
 
 OBJS += $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS)) 
 OBJS += $(patsubst $(GENDIR)/%.cpp, $(OBJDIR)/%.o, $(GENERATED_SRCS))
