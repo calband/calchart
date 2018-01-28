@@ -1,7 +1,7 @@
 #include "ghost_module.h"
 
-#include "cc_sheet.h"
 #include "calchartdoc.h"
+#include "cc_sheet.h"
 
 void GhostModule::setGhostSource(GhostSource source, int which)
 {
@@ -14,9 +14,7 @@ CalChart::Sheet const* GhostModule::getGhostSheet(CalChartDoc const* doc, int cu
     if ((doc == nullptr) || (mCurrentSource == disabled)) {
         return nullptr;
     }
-    auto targetSheet = (mCurrentSource == next) ? currentSheet + 1 : (mCurrentSource == previous)
-            ? currentSheet - 1
-            : mWhich;
+    auto targetSheet = (mCurrentSource == next) ? currentSheet + 1 : (mCurrentSource == previous) ? currentSheet - 1 : mWhich;
     if (targetSheet >= 0 && targetSheet < doc->GetNumSheets()) {
         return &(*(doc->GetNthSheet(targetSheet)));
     }

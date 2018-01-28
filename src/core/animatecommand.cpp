@@ -150,8 +150,7 @@ bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
             ? ((long)mBeat * mVector.y / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.y / (short)mNumBeats)
             : 0;
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }
@@ -235,8 +234,7 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
         pt.x = RoundToCoordUnits(mOrigin.x + cos(curr_ang) * mR);
         pt.y = RoundToCoordUnits(mOrigin.y - sin(curr_ang) * mR);
         return true;
-    }
-    else {
+    } else {
         return false;
     }
 }
@@ -267,8 +265,7 @@ float AnimateCommandRotate::RealDirection() const
         : mAngStart;
     if (mAngEnd > mAngStart) {
         return curr_ang + mFace;
-    }
-    else {
+    } else {
         return curr_ang - mFace;
     }
 }

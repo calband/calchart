@@ -384,9 +384,9 @@ JSONElement JSONDataObject::valueForKey(std::string key) const
     return m_elements.at(key);
 }
 
-std::vector<std::pair<const std::string&, const JSONElement&> > JSONDataObject::items() const
+std::vector<std::pair<const std::string&, const JSONElement&>> JSONDataObject::items() const
 {
-    std::vector<std::pair<const std::string&, const JSONElement&> > items;
+    std::vector<std::pair<const std::string&, const JSONElement&>> items;
     for (auto iter = itemsBegin(); iter != itemsEnd(); iter++) {
         items.push_back(*iter);
     }
@@ -480,9 +480,9 @@ JSONElement& JSONDataArray::back()
     return m_elements.back();
 }
 
-std::vector<std::reference_wrapper<const JSONElement> > JSONDataArray::values() const
+std::vector<std::reference_wrapper<const JSONElement>> JSONDataArray::values() const
 {
-    std::vector<std::reference_wrapper<const JSONElement> > valuesVector;
+    std::vector<std::reference_wrapper<const JSONElement>> valuesVector;
     for (auto iter = valuesBegin(); iter != valuesEnd(); iter++) {
         valuesVector.push_back(std::ref(*iter));
     }

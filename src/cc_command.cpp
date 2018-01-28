@@ -21,10 +21,10 @@
 */
 
 #include "cc_command.h"
-#include "linmath.h"
 #include "calchartapp.h"
-#include "cc_sheet.h"
 #include "cc_continuity.h"
+#include "cc_sheet.h"
+#include "linmath.h"
 #include <wx/utils.h>
 
 // SetDescriptionCommand

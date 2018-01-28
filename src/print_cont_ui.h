@@ -24,8 +24,8 @@
 
 #include "calchartdoc.h"
 
-#include <wx/docview.h>
 #include <wx/dialog.h>
+#include <wx/docview.h>
 
 class PrintContinuityEditor;
 class FancyTextWin;

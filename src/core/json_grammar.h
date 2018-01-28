@@ -4,9 +4,9 @@
  * @brief Defines the grammar for a JSON file.
  */
 
-#include <boost/spirit/include/karma_string.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/karma.hpp>
+#include <boost/spirit/include/karma_string.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 
 #include "json.h"
@@ -128,9 +128,9 @@ struct JSONExportGrammar
     karma::rule<OutputIterator> null;
     karma::rule<OutputIterator, const JSONElement&()> block_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataObject*>, JSONDataObjectConstAccessor()> object;
-    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&> >&()> objectContent;
+    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>&()> objectContent;
     karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&()> keyValPair;
     karma::rule<OutputIterator, karma::locals<const JSONDataArray*>, JSONDataArrayConstAccessor()> array;
-    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement> >&()> arrayContent;
+    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>&()> arrayContent;
 };
 }

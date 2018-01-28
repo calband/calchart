@@ -22,17 +22,17 @@
 
 #include "animation_frame.h"
 #include "animation_canvas.h"
+#include "basic_ui.h"
+#include "calchartdoc.h"
 #include "cc_omniview_canvas.h"
+#include "confgr.h"
 #include "toolbar.h"
 #include "ui_enums.h"
-#include "basic_ui.h"
-#include "confgr.h"
-#include "calchartdoc.h"
 
-#include <wx/timer.h>
-#include <wx/splitter.h>
 #include <wx/spinctrl.h>
+#include <wx/splitter.h>
 #include <wx/tglbtn.h>
+#include <wx/timer.h>
 
 using namespace CalChart;
 
@@ -165,8 +165,7 @@ AnimationFrame::AnimationFrame(std::function<void()> onClose, wxDocument* doc,
     if (config.Get_AnimationFrameSplitScreen()) {
         if (config.Get_AnimationFrameSplitVertical()) {
             mSplitter->SplitVertically(mSplitA, mSplitB);
-        }
-        else {
+        } else {
             mSplitter->SplitHorizontally(mSplitA, mSplitB);
         }
     }
@@ -379,8 +378,7 @@ void AnimationFrame::OnSlider_anim_gotobeat(wxScrollEvent& event)
     if (OnSlider_shouldTransitionToNextSheet(event)) {
         beatChangeIsInternal = false;
         TransitionToNextSheet();
-    }
-    else if (OnSlider_shouldTransitionToPreviousSheet(event)) {
+    } else if (OnSlider_shouldTransitionToPreviousSheet(event)) {
         beatChangeIsInternal = false;
         TransitionToPreviousSheet();
     }
@@ -538,8 +536,7 @@ void AnimationFrame::UpdatePanel()
         mSheetSlider->SetRange(1, num);
         if (mSheetSlider->GetValue() != curr)
             mSheetSlider->SetValue(curr);
-    }
-    else {
+    } else {
         mSheetSlider->Enable(false);
     }
 
@@ -553,8 +550,7 @@ void AnimationFrame::UpdatePanel()
         mBeatSlider->SetRange(0, num);
         if (mBeatSlider->GetValue() != curr)
             mBeatSlider->SetValue(curr);
-    }
-    else {
+    } else {
         mBeatSlider->Enable(false);
     }
     SetStatusText(mAnimationView.GetStatusText(), 1);
@@ -607,8 +603,7 @@ void AnimationFrame::OnCmd_SwapAnimateAndOmni(wxCommandEvent& event)
         !config.Get_AnimationFrameOmniAnimation());
     if (mode == wxSPLIT_HORIZONTAL) {
         mSplitter->SplitHorizontally(mSplitA, mSplitB);
-    }
-    else if (mode == wxSPLIT_VERTICAL) {
+    } else if (mode == wxSPLIT_VERTICAL) {
         mSplitter->SplitVertically(mSplitA, mSplitB);
     }
     if (!isSplit) {
@@ -638,8 +633,7 @@ void AnimationFrame::StartTimer()
     if (!mTimer->Start(60000 / GetTempo())) {
         SetStatusText(wxT("Could not set tempo!"));
         mTimerOn = false;
-    }
-    else {
+    } else {
         mTimerOn = true;
     }
 }

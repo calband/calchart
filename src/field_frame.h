@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "cc_types.h"
 #include "cc_coord.h"
+#include "cc_types.h"
 
 #include <wx/docview.h>
 
@@ -123,7 +123,7 @@ public:
     void OnCmd_GhostOption(wxCommandEvent& event);
 
     void OnCmd_ResetReferencePoint(wxCommandEvent& event);
-    
+
     void OnCmd_SolveTransition(wxCommandEvent& event);
 
     void OnSize(wxSizeEvent& event);

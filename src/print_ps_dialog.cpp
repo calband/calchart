@@ -23,17 +23,17 @@
 
 #include "print_ps_dialog.h"
 
-#include "show_ui.h"
-#include "confgr.h"
 #include "cc_sheet.h"
-#include "print_ps.h"
 #include "cc_show.h"
+#include "confgr.h"
+#include "print_ps.h"
+#include "show_ui.h"
 #include <set>
 
+#include <iterator>
+#include <sstream>
 #include <wx/filename.h>
 #include <wx/wfstream.h>
-#include <sstream>
-#include <iterator>
 
 enum { CC_PRINT_ORIENT_PORTRAIT,
     CC_PRINT_ORIENT_LANDSCAPE };
@@ -319,8 +319,7 @@ void PrintPostScriptDialog::CreateControls()
     if (!eps) {
         check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
         horizontalsizer->Add(check_pages, 0, wxALL, 5);
-    }
-    else {
+    } else {
         check_pages = NULL;
     }
     topsizer->Add(horizontalsizer, 0, wxALL, 5);

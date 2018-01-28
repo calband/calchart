@@ -24,8 +24,8 @@
 #include <cmath>
 #include <numeric>
 
-#include "cc_shapes.h"
 #include "cc_drawcommand.h"
+#include "cc_shapes.h"
 
 namespace CalChart {
 
@@ -157,8 +157,7 @@ std::vector<DrawCommand> Shape_arc::GetCC_DrawCommand(float x,
         result.emplace_back(origin.x + x + d * cos(r), origin.y + y + -d * sin(r),
             origin.x + x + d * cos(r0), origin.y + y + -d * sin(r0),
             origin.x + x, origin.y + y);
-    }
-    else {
+    } else {
         result.emplace_back(origin.x + x + d * cos(r0), origin.y + y + -d * sin(r0),
             origin.x + x + d * cos(r), origin.y + y + -d * sin(r),
             origin.x + x, origin.y + y);
@@ -174,16 +173,14 @@ std::vector<DrawCommand> Shape_rect::GetCC_DrawCommand(float x,
     if (origin.x < point.x) {
         x += origin.x;
         w = point.x - origin.x + 1;
-    }
-    else {
+    } else {
         x += point.x;
         w = origin.x - point.x + 1;
     }
     if (origin.y < point.y) {
         y += origin.y;
         h = point.y - origin.y + 1;
-    }
-    else {
+    } else {
         y += point.y;
         h = origin.y - point.y + 1;
     }
@@ -259,8 +256,7 @@ std::vector<Coord> Lasso::GetPointsOnLine(int numpnts) const
             running_dist -= curr_dist;
             curr_pnt = *iter++;
             curr_dist = std::hypot(iter->x - curr_pnt.x, iter->y - curr_pnt.y);
-        }
-        else {
+        } else {
             auto dist_vector = (*iter - curr_pnt);
             auto factor = (running_dist / curr_dist);
             dist_vector *= factor;
@@ -332,8 +328,7 @@ bool Lasso::CrossesLine(const Coord& start, const Coord& end,
         if (!((p.y <= start.y) && (p.y > end.y))) {
             return false;
         }
-    }
-    else {
+    } else {
         if (!((p.y <= end.y) && (p.y > start.y))) {
             return false;
         }

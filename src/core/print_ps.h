@@ -23,10 +23,10 @@
 
 #include "cc_types.h"
 
+#include <array>
+#include <functional>
 #include <iostream>
 #include <set>
-#include <functional>
-#include <array>
 
 namespace CalChart {
 

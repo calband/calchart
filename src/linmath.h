@@ -178,11 +178,11 @@ public:
         return Matrix(Vector(b.vect[0] * at.vect[0], b.vect[0] * at.vect[1],
                           b.vect[0] * at.vect[2], b.vect[0] * at.vect[3]),
             Vector(b.vect[1] * at.vect[0], b.vect[1] * at.vect[1],
-                          b.vect[1] * at.vect[2], b.vect[1] * at.vect[3]),
+                b.vect[1] * at.vect[2], b.vect[1] * at.vect[3]),
             Vector(b.vect[2] * at.vect[0], b.vect[2] * at.vect[1],
-                          b.vect[2] * at.vect[2], b.vect[2] * at.vect[3]),
+                b.vect[2] * at.vect[2], b.vect[2] * at.vect[3]),
             Vector(b.vect[3] * at.vect[0], b.vect[3] * at.vect[1],
-                          b.vect[3] * at.vect[2], b.vect[3] * at.vect[3]));
+                b.vect[3] * at.vect[2], b.vect[3] * at.vect[3]));
     }
     inline friend Vector operator*(const Matrix& a, const Vector& b)
     {

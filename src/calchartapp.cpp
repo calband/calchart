@@ -21,17 +21,17 @@
 */
 
 #include "calchartapp.h"
-#include "calchartdoc.h"
-#include "top_frame.h"
-#include "modes.h"
-#include "confgr.h"
 #include "basic_ui.h"
-#include "platconf.h"
+#include "calchartdoc.h"
+#include "confgr.h"
 #include "field_view.h"
+#include "modes.h"
+#include "platconf.h"
+#include "top_frame.h"
 
+#include <wx/fs_zip.h>
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
-#include <wx/fs_zip.h>
 
 #include <wx/docview.h>
 

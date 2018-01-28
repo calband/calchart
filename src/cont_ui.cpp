@@ -20,20 +20,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "basic_ui.h"
 #include "cont_ui.h"
-#include "confgr.h"
-#include "cc_sheet.h"
-#include "cc_continuity.h"
-#include "cc_command.h"
+#include "basic_ui.h"
 #include "calchartapp.h"
 #include "calchartdoc.h"
+#include "cc_command.h"
+#include "cc_continuity.h"
+#include "cc_sheet.h"
 #include "cc_show.h"
+#include "confgr.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
-#include <wx/statline.h>
 #include <wx/msgdlg.h>
+#include <wx/statline.h>
 
 enum {
     CALCHART__CONT_CLOSE = 100,
@@ -68,8 +68,7 @@ void ContinuityEditorView::OnUpdate(wxView* sender, wxObject* hint)
     ContinuityEditor* editor = static_cast<ContinuityEditor*>(GetFrame());
     if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_FlushAllViews))) {
         editor->FlushText();
-    }
-    else {
+    } else {
         editor->Update();
     }
 }

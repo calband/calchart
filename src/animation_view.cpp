@@ -23,14 +23,14 @@
 #include "animation_view.h"
 #include "animation_frame.h"
 #include "basic_ui.h"
-#include "modes.h"
-#include "confgr.h"
-#include "cc_shapes.h"
 #include "calchartapp.h"
 #include "calchartdoc.h"
-#include "top_frame.h"
+#include "cc_shapes.h"
 #include "cc_sheet.h"
+#include "confgr.h"
 #include "draw.h"
+#include "modes.h"
+#include "top_frame.h"
 
 #include <wx/dcbuffer.h>
 
@@ -66,14 +66,12 @@ void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
                         COLOR_POINT_ANIM_COLLISION_WARNING);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
-                }
-                else if (info.mCollision == Coord::COLLISION_INTERSECT) {
+                } else if (info.mCollision == Coord::COLLISION_INTERSECT) {
                     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
                 }
-            }
-            else if (GetShow()->IsSelected(i)) {
+            } else if (GetShow()->IsSelected(i)) {
                 switch (info.mDirection) {
                 case ANIMDIR_SW:
                 case ANIMDIR_W:
@@ -95,8 +93,7 @@ void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
                     dc.SetPen(brushAndPen.second);
                 }
                 }
-            }
-            else {
+            } else {
                 switch (info.mDirection) {
                 case ANIMDIR_SW:
                 case ANIMDIR_W:
@@ -189,8 +186,8 @@ void AnimationView::Generate()
         this->OnNotifyStatus(notice);
     };
     NotifyErrorList notifyErrorList = [this](
-        const std::map<AnimateError, ErrorMarker>& error_markers,
-        unsigned sheetnum, const std::string& message) {
+                                          const std::map<AnimateError, ErrorMarker>& error_markers,
+                                          unsigned sheetnum, const std::string& message) {
         return this->OnNotifyErrorList(error_markers, sheetnum, message);
     };
     mAnimation = GetShow()->NewAnimation(notifyStatus, notifyErrorList);
@@ -297,8 +294,7 @@ wxString AnimationView::GetStatusText() const
             mAnimation->GetCurrentSheet() + 1,
             mAnimation->GetNumberSheets(),
             mAnimation->GetCurrentSheetName().c_str());
-    }
-    else {
+    } else {
         tempbuf = wxT("No animation available");
     }
     return tempbuf;
@@ -357,8 +353,7 @@ void AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
     }
     if (altDown) {
         GetShow()->SetSelection(GetShow()->MakeToggleSelection(pointlist));
-    }
-    else {
+    } else {
         GetShow()->SetSelection(GetShow()->MakeAddToSelection(pointlist));
     }
 }

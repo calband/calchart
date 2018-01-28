@@ -24,12 +24,12 @@
 #include "animate_types.h"
 #include "cc_coord.h"
 
-#include <memory>
 #include <functional>
+#include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
-#include <list>
 
 namespace CalChart {
 
@@ -45,9 +45,10 @@ class ContProcedure;
 typedef std::function<void(const std::string& notice)> NotifyStatus;
 typedef std::function<bool(
     const std::map<AnimateError, ErrorMarker>& error_markers, size_t sheetnum,
-    const std::string& message)> NotifyErrorList;
+    const std::string& message)>
+    NotifyErrorList;
 
-using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand> >;
+using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
 
 // AnimateSheet is a snapshot of CC_sheet
 class AnimateSheet {
@@ -86,7 +87,7 @@ public:
     Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
     ~Animation();
 
-    static std::list<std::unique_ptr<ContProcedure> > ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol);
+    static std::list<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol);
 
     // Returns true if changes made
     void GotoSheet(unsigned i);
@@ -130,16 +131,17 @@ public:
     auto GetCurrentSheetName() const { return sheets.at(curr_sheetnum).GetName(); }
 
     // collection of position of each point, for debugging purposes
-    std::pair<std::string, std::vector<std::string> > GetCurrentInfo() const;
+    std::pair<std::string, std::vector<std::string>> GetCurrentInfo() const;
 
     std::vector<DrawCommand> GenPathToDraw(unsigned point, const Coord& offset) const;
     AnimatePoint EndPosition(unsigned point, const Coord& offset) const;
 
     std::vector<AnimateSheet>::const_iterator sheetsBegin() const;
     std::vector<AnimateSheet>::const_iterator sheetsEnd() const;
+
 private:
     std::vector<AnimatePoint> pts;
-    std::vector<std::vector<std::shared_ptr<AnimateCommand> >::const_iterator> curr_cmds; // pointer to the current command
+    std::vector<std::vector<std::shared_ptr<AnimateCommand>>::const_iterator> curr_cmds; // pointer to the current command
     std::map<unsigned, Coord::CollisionType> mCollisions;
     unsigned curr_sheetnum;
     unsigned curr_beat;
@@ -153,6 +155,6 @@ private:
     void RefreshSheet();
     void CheckCollisions();
 
-    std::vector<std::shared_ptr<AnimateCommand> > GetCommands(unsigned whichPoint) const;
+    std::vector<std::shared_ptr<AnimateCommand>> GetCommands(unsigned whichPoint) const;
 };
 }

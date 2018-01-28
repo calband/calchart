@@ -6,8 +6,8 @@
  */
 //
 
-#include "cc_types.h"
 #include "cc_coord.h"
+#include "cc_types.h"
 
 namespace CalChart {
 

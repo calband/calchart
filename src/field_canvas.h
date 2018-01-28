@@ -27,10 +27,10 @@
 
 #include <wx/docview.h>
 
-#include <vector>
-#include <memory>
 #include <functional>
 #include <map>
+#include <memory>
+#include <vector>
 
 class FieldView;
 class FieldFrame;
@@ -44,7 +44,7 @@ class Matrix;
 class CalChartConfiguration;
 class MovePoints;
 
-using ShapeList = std::vector<std::unique_ptr<CalChart::Shape> >;
+using ShapeList = std::vector<std::unique_ptr<CalChart::Shape>>;
 
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas {

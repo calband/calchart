@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "math_utils.h"
+#include "cont.h"
 #include "animatecommand.h"
 #include "cc_sheet.h"
-#include "cont.h"
+#include "math_utils.h"
 #include "parse.h"
 
 namespace CalChart {
@@ -49,8 +49,7 @@ unsigned float2unsigned(const ContProcedure* proc, AnimateCompile& anim,
     if (v < 0) {
         anim.RegisterError(ANIMERR_NEGINT, proc);
         return 0;
-    }
-    else {
+    } else {
         return (unsigned)v;
     }
 }
@@ -90,26 +89,22 @@ void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
     auto leg = 0;
     if ((v1 != 0) && (IS_ZERO(c))) {
         leg = 1;
-    }
-    else {
+    } else {
         v1 = p[2] - anim.GetPointPosition();
         c = BoundDirectionSigned(v1.Direction() - d2);
         if ((v1 != 0) && (IS_ZERO(c))) {
             leg = 2;
-        }
-        else {
+        } else {
             v1 = p[3] - anim.GetPointPosition();
             c = BoundDirectionSigned(v1.Direction() - d1 - 180.0f);
             if ((v1 != 0) && (IS_ZERO(c))) {
                 leg = 3;
-            }
-            else {
+            } else {
                 v1 = p[0] - anim.GetPointPosition();
                 c = BoundDirectionSigned(v1.Direction() - d2 - 180.0f);
                 if ((v1 != 0) && (IS_ZERO(c))) {
                     leg = 0;
-                }
-                else {
+                } else {
                     // Current point is not in path of countermarch
                     anim.RegisterError(ANIMERR_INVALID_CM, &proc);
                     return;
@@ -128,8 +123,7 @@ void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
                     &proc)) {
                 return;
             }
-        }
-        else {
+        } else {
             switch (leg) {
             case 0:
                 v1 = CreateVector(d2 + 180.0f, beats);
@@ -226,13 +220,20 @@ std::ostream& ContValueFloat::Print(std::ostream& os) const
 float ContValueDefined::Get(AnimateCompile&) const
 {
     static const std::map<ContDefinedValue, float> mapping = {
-        { CC_NW, 45.0 }, { CC_W, 90.0 },
-        { CC_SW, 135.0 }, { CC_S, 180.0 },
-        { CC_SE, 225.0 }, { CC_E, 270.0 },
-        { CC_NE, 315.0 }, { CC_HS, 1.0 },
-        { CC_MM, 1.0 }, { CC_SH, 0.5 },
-        { CC_JS, 0.5 }, { CC_GV, 1.0 },
-        { CC_M, 4.0f / 3 }, { CC_DM, static_cast<float>(SQRT2) },
+        { CC_NW, 45.0 },
+        { CC_W, 90.0 },
+        { CC_SW, 135.0 },
+        { CC_S, 180.0 },
+        { CC_SE, 225.0 },
+        { CC_E, 270.0 },
+        { CC_NE, 315.0 },
+        { CC_HS, 1.0 },
+        { CC_MM, 1.0 },
+        { CC_SH, 0.5 },
+        { CC_JS, 0.5 },
+        { CC_GV, 1.0 },
+        { CC_M, 4.0f / 3 },
+        { CC_DM, static_cast<float>(SQRT2) },
     };
     auto i = mapping.find(val);
     if (i != mapping.end()) {
@@ -286,8 +287,7 @@ float ContValueDiv::Get(AnimateCompile& anim) const
     if (IS_ZERO(f)) {
         anim.RegisterError(ANIMERR_DIVISION_ZERO, this);
         return 0.0;
-    }
-    else {
+    } else {
         return (val1->Get(anim) / f);
     }
 }
@@ -498,24 +498,21 @@ void ContProcDMCM::Compile(AnimateCompile& anim)
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
-    }
-    else if (c == (r1.y - r2.y - Int2CoordUnits(2))) {
+    } else if (c == (r1.y - r2.y - Int2CoordUnits(2))) {
         if (c >= 0) {
             ContValueDefined dir1(CC_SE);
             ContValueDefined dir2(CC_W);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
-    }
-    else if (c == (r1.y - r2.y + Int2CoordUnits(2))) {
+    } else if (c == (r1.y - r2.y + Int2CoordUnits(2))) {
         if (c <= 0) {
             ContValueDefined dir1(CC_NW);
             ContValueDefined dir2(CC_E);
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dir1, dir2, *numbeats);
             return;
         }
-    }
-    else if (c == (r2.y - r1.y - Int2CoordUnits(2))) {
+    } else if (c == (r2.y - r1.y - Int2CoordUnits(2))) {
         if (c <= 0) {
             ContValueDefined dir1(CC_NE);
             ContValueDefined dir2(CC_E);
@@ -547,8 +544,7 @@ void ContProcDMHS::Compile(AnimateCompile& anim)
         c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y;
         c_dm.y = c.y;
         b_hs = CoordUnits2Int(c_hs.x);
-    }
-    else {
+    } else {
         c_hs.x = 0;
         // adjust sign
         c_hs.y = ((c.x < 0) != (c.y < 0)) ? c.y + c.x : c.y - c.x;
@@ -584,8 +580,7 @@ void ContProcEven::Compile(AnimateCompile& anim)
         anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-steps, c,
                         -c.Direction()),
             this);
-    }
-    else {
+    } else {
         anim.Append(std::make_shared<AnimateCommandMove>((unsigned)steps, c), this);
     }
 }
@@ -632,8 +627,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
         auto f2 = stepsize1->Get(anim);
         a = f2 * cos(Deg2Rad(f1));
         c = f2 * -sin(Deg2Rad(f1));
-    }
-    else {
+    } else {
         std::tie(a, c) = CreateUnitVector(f1);
     }
     f1 = dir2->Get(anim);
@@ -641,8 +635,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
         auto f2 = stepsize2->Get(anim);
         b = f2 * cos(Deg2Rad(f1));
         d = f2 * -sin(Deg2Rad(f1));
-    }
-    else {
+    } else {
         std::tie(b, d) = CreateUnitVector(f1);
     }
     auto v = pnt->Get(anim) - anim.GetPointPosition();
@@ -654,8 +647,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
             // Special case: directions are same
             if (IS_ZERO(c)) {
                 f1 = f / c;
-            }
-            else {
+            } else {
                 f1 = e / a;
             }
             if (!anim.Append(std::make_shared<AnimateCommandMove>(
@@ -663,13 +655,11 @@ void ContProcFountain::Compile(AnimateCompile& anim)
                     this)) {
                 return;
             }
-        }
-        else {
+        } else {
             anim.RegisterError(ANIMERR_INVALID_FNTN, this);
             return;
         }
-    }
-    else {
+    } else {
         auto f2 = (d * e - b * f) / f1;
         if (!IS_ZERO(f2)) {
             v.x = Float2CoordUnits(f2 * a);
@@ -714,8 +704,7 @@ void ContProcFM::Compile(AnimateCompile& anim)
                 anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c,
                                 -c.Direction()),
                     this);
-            }
-            else {
+            } else {
                 anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), this);
             }
         }
@@ -750,8 +739,7 @@ static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
     if (mod > 0) {
         if (a < 0) {
             a = ((a - (mod / 2)) / mod) * mod;
-        }
-        else {
+        } else {
             a = ((a + (mod / 2)) / mod) * mod;
         }
     }
@@ -792,8 +780,7 @@ void ContProcHSCM::Compile(AnimateCompile& anim)
             DoCounterMarch(*this, anim, *pnt1, *pnt2, steps, dirs, dirw, *numbeats);
             return;
         }
-    }
-    else if ((r1.y - r2.y) == -Int2CoordUnits(2)) {
+    } else if ((r1.y - r2.y) == -Int2CoordUnits(2)) {
         if (r1.x >= r2.x) {
             ContValueDefined dirn(CC_N);
             ContValueDefined dire(CC_E);
@@ -825,8 +812,7 @@ void ContProcHSDM::Compile(AnimateCompile& anim)
         c_dm.x = ((c.x < 0) != (c.y < 0)) ? -c.y : c.y;
         c_dm.y = c.y;
         b = CoordUnits2Int(c_hs.x);
-    }
-    else {
+    } else {
         c_hs.x = 0;
         // adjust sign
         c_hs.y = ((c.x < 0) != (c.y < 0)) ? c.y + c.x : c.y - c.x;
@@ -882,8 +868,7 @@ void ContProcMarch::Compile(AnimateCompile& anim)
                 anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c,
                                 -c.Direction()),
                     this);
-            }
-            else {
+            } else {
                 anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), this);
             }
         }

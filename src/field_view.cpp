@@ -24,22 +24,22 @@
 #include "field_canvas.h"
 #include "field_frame.h"
 
-#include "calchartapp.h"
-#include "confgr.h"
-#include "top_frame.h"
 #include "animate.h"
-#include "show_ui.h"
-#include "cc_command.h"
-#include "cc_shapes.h"
-#include "setup_wizards.h"
-#include "animation_frame.h"
-#include "draw.h"
 #include "animatecommand.h"
-#include "cc_sheet.h"
+#include "animation_frame.h"
+#include "calchartapp.h"
+#include "cc_command.h"
 #include "cc_drawcommand.h"
+#include "cc_shapes.h"
+#include "cc_sheet.h"
+#include "confgr.h"
+#include "draw.h"
+#include "setup_wizards.h"
+#include "show_ui.h"
+#include "top_frame.h"
 
-#include <wx/wizard.h>
 #include <wx/textfile.h>
+#include <wx/wizard.h>
 
 IMPLEMENT_DYNAMIC_CLASS(FieldView, wxView)
 
@@ -66,8 +66,7 @@ bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 #else
     mFrame = new FieldFrame(doc, this, mConfig,
         wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
-        wxPoint(50, 50), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()),
-                                static_cast<int>(mConfig.Get_FieldFrameHeight())));
+        wxPoint(50, 50), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()), static_cast<int>(mConfig.Get_FieldFrameHeight())));
 #endif
 
     UpdateBackgroundImages();
@@ -102,8 +101,7 @@ void FieldView::OnDraw(wxDC* dc)
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointLabels(),
                     *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
-            }
-            else {
+            } else {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointLabels(),
                     *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
@@ -141,8 +139,7 @@ void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
 
         // make the show modified so it gets repainted
         show->Modify(true);
-    }
-    else if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
+    } else if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
         GeneratePaths();
     }
     UpdateBackgroundImages();
@@ -191,8 +188,7 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
         auto newmode = wxGetApp().GetMode(page2->GetValue());
 
         show.WizardSetupNewShow(tlabels, columns, std::move(newmode));
-    }
-    else {
+    } else {
         wxMessageBox(wxT("Show setup not completed.\n")
                          wxT("You can change the number of marchers\n")
                              wxT("and show mode via the menu options"),
@@ -408,8 +404,7 @@ void FieldView::GoToSheet(int which)
         if (mConfig.Get_CommandUndoSetSheet()) {
             auto cmd = mShow->Create_SetCurrentSheetCommand(which);
             GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-        }
-        else {
+        } else {
             mShow->SetCurrentSheet(which);
         }
     }
@@ -428,8 +423,7 @@ void FieldView::SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelecte
     auto select = mShow->MakeSelectWithLasso(*lasso, mCurrentReferencePoint);
     if (toggleSelected) {
         select = mShow->MakeToggleSelection(select);
-    }
-    else {
+    } else {
         select = mShow->MakeAddToSelection(select);
     }
     SetSelection(select);
@@ -456,8 +450,7 @@ void FieldView::SetSelection(const SelectionList& sl)
     if (mConfig.Get_CommandUndoSelection()) {
         auto cmd = mShow->Create_SetSelectionCommand(sl);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
-    }
-    else {
+    } else {
         mShow->SetSelection(sl);
     }
 }
@@ -592,8 +585,7 @@ void FieldView::UpdateBackgroundImages()
                 std::copy(image.alpha.begin(), image.alpha.end(), a);
                 wxImage img(image.image_width, image.image_height, d, a);
                 mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-            }
-            else {
+            } else {
                 wxImage img(image.image_width, image.image_height, d);
                 mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
             }

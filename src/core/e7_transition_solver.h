@@ -256,4 +256,3 @@ std::vector<std::string> validateSheetForTransitionSolver(const CalChart::Sheet&
  */
 TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const CalChart::Sheet& sheet2, TransitionSolverParams params, TransitionSolverDelegate* delegate);
 }
-

@@ -6,10 +6,10 @@
 //
 //
 
-#include <math.h>
-#include <limits>
-#include <fstream>
 #include <algorithm>
+#include <fstream>
+#include <limits>
+#include <math.h>
 
 #include "e7_transition_solver.h"
 #include "munkres.h"
@@ -350,7 +350,7 @@ private:
      * on that beat. Note that this is only accurate up to the clip beat; no collisions
      * are recorded for any beat after the clip beat.
      */
-    mutable std::vector<std::vector<std::map<unsigned, SolverCoord> > > m_collisions;
+    mutable std::vector<std::vector<std::map<unsigned, SolverCoord>>> m_collisions;
 
     /*!
      * @brief Records all of the marchers that are present at each grid position, on each beat.
@@ -359,7 +359,7 @@ private:
      * m_marcherGrid is reliable up to (and including) the clip beat. All locations are empty
      * for all beats after the clip beat.
      */
-    mutable std::vector<std::vector<std::vector<std::set<unsigned> > > > m_marcherGrid;
+    mutable std::vector<std::vector<std::vector<std::set<unsigned>>>> m_marcherGrid;
 
     /*!
      * @brief Captures the state of all marchers on the current clip beat (that is, where they
@@ -916,8 +916,7 @@ void CollisionSpace::reinstructMarcher(unsigned which, const MovingMarcher& newM
 
     if (m_disabledMarchers.find(which) != m_disabledMarchers.end()) {
         m_marchers[which] = newMarcherAnimation;
-    }
-    else {
+    } else {
         instructMarcher(which, newMarcherAnimation);
     }
 }
@@ -932,8 +931,7 @@ void CollisionSpace::clipToBeat(unsigned clipBeat)
         for (unsigned i = 0; i < m_marchers.size(); i++) {
             advanceMarcher(i, clipBeat - m_clipBeat);
         }
-    }
-    else {
+    } else {
         for (unsigned i = 0; i < m_marchers.size(); i++) {
             reinstructMarcher(i, m_marchers[i]);
         }
@@ -942,8 +940,7 @@ void CollisionSpace::clipToBeat(unsigned clipBeat)
     if (clipBeat != m_clipBeat) {
         if (m_clipBeat == m_cachedCollisionsBeat && !m_cachedCollisionsNeedRefresh) {
             m_cachedCollisionsForClipBeat = m_cachedCollisionPairs;
-        }
-        else {
+        } else {
             // Require caches to update
             m_clipBeatCollisionsNeedRefresh = true;
             m_cachedCollisionsNeedRefresh = true;
@@ -987,8 +984,7 @@ void CollisionSpace::forgetCollision(unsigned int firstMarcher, unsigned int sec
 {
     if (firstMarcher < secondMarcher) {
         _forgetCollision(firstMarcher, secondMarcher, beat);
-    }
-    else {
+    } else {
         _forgetCollision(secondMarcher, firstMarcher, beat);
     }
 }
@@ -997,8 +993,7 @@ void CollisionSpace::registerCollision(unsigned int firstMarcher, unsigned int s
 {
     if (firstMarcher < secondMarcher) {
         _registerCollision(firstMarcher, secondMarcher, beat, pos);
-    }
-    else {
+    } else {
         _registerCollision(secondMarcher, firstMarcher, beat, pos);
     }
 }
@@ -1104,8 +1099,7 @@ Matrix<double> makeHungarianDistanceMatrix(const std::vector<SolverCoord>& start
             unsigned manhattanDist = abs(diff.x) + abs(diff.y);
             if (manhattanDist > numBeats) {
                 matrix(j, i) = std::numeric_limits<double>::max(); //std::numeric_limits<double>::infinity();
-            }
-            else {
+            } else {
                 matrix(j, i) = manhattanDist + 1;
             }
         }
@@ -1249,8 +1243,7 @@ PathAxes calcPathAxes(SolverCoord startPos, SolverCoord endPos)
     if (absDiffX > absDiffY) {
         result.majorAxis = (CardinalCompassDirection)kDirectionFromMoveVector[diff.x + 1][1];
         result.minorAxis = (CardinalCompassDirection)kDirectionFromMoveVector[1][diff.y + 1];
-    }
-    else {
+    } else {
         result.majorAxis = (CardinalCompassDirection)kDirectionFromMoveVector[1][diff.y + 1];
         result.minorAxis = (CardinalCompassDirection)kDirectionFromMoveVector[diff.x + 1][1];
     }
@@ -1294,8 +1287,7 @@ std::pair<SolverCoord, SolverCoord> calcStepVectors(PathAxes axes, const Transit
     if (majorStepIsFirst) {
         stepVectors.first = majorStep;
         stepVectors.second = minorStep;
-    }
-    else {
+    } else {
         stepVectors.first = minorStep;
         stepVectors.second = majorStep;
     }
@@ -1331,8 +1323,7 @@ std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord end
     if (swap) {
         vec1 = stepVector2;
         vec2 = stepVector1;
-    }
-    else {
+    } else {
         vec1 = stepVector1;
         vec2 = stepVector2;
     }
@@ -1361,23 +1352,19 @@ std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord end
         // numStepsLeg2 = (moveVector.y - (a * stepVector1.y)) / (stepVector2.y - (b * stepVector1.y))
         if (vec2.x == 0 && vec2.y == 0) {
             numSteps2 = 0;
-        }
-        else {
+        } else {
             numSteps2 = (moveVector.y - (a * vec1.y)) / (vec2.y - (b * vec1.y));
         }
 
         numSteps1 = a - (b * numSteps2);
-    }
-    else {
+    } else {
         if (vec1.y != 0) {
             numSteps1 = moveVector.y / vec1.y;
             numSteps2 = 0;
-        }
-        else if (vec2.y != 0) {
+        } else if (vec2.y != 0) {
             numSteps1 = 0;
             numSteps2 = moveVector.y / vec2.y;
-        }
-        else {
+        } else {
             numSteps1 = 0;
             numSteps2 = 0;
         }
@@ -1385,8 +1372,7 @@ std::pair<float, float> calcStepsInEachDir(SolverCoord startPos, SolverCoord end
 
     if (swap) {
         return { numSteps2, numSteps1 };
-    }
-    else {
+    } else {
         return { numSteps1, numSteps2 };
     }
 }
@@ -1562,15 +1548,14 @@ private:
             bool result;
             if (first.x == second.x) {
                 result = (first.y < second.y);
-            }
-            else {
+            } else {
                 result = (first.x < second.x);
             }
             return result;
         }
     };
 
-    std::map<unsigned, std::set<unsigned> > m_allowedDestinations;
+    std::map<unsigned, std::set<unsigned>> m_allowedDestinations;
     std::map<SolverCoord, unsigned, SolverCoordCompare> m_destinationPositionsToIndices;
 };
 
@@ -1686,26 +1671,17 @@ namespace e7ChiuZamoraMalani {
             marchPattern1 = (unsigned)instructionOptions[first.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[first.instructionForMarcher2].movementPattern;
             marchPattern2 = (unsigned)instructionOptions[second.instructionForMarcher1].movementPattern + (unsigned)instructionOptions[second.instructionForMarcher2].movementPattern;
 
-            if (waitBeats1 == waitBeats2) 
-            {
-                if (marchPattern1 == marchPattern2) 
-                {
-					if (first.swapMarchers == second.swapMarchers)
-					{
-						return false;
-					}
-					else
-					{
-						return !first.swapMarchers;
-					}
-                } 
-                else
-                {
+            if (waitBeats1 == waitBeats2) {
+                if (marchPattern1 == marchPattern2) {
+                    if (first.swapMarchers == second.swapMarchers) {
+                        return false;
+                    } else {
+                        return !first.swapMarchers;
+                    }
+                } else {
                     return marchPattern1 < marchPattern2;
                 }
-            } 
-            else 
-            {
+            } else {
                 return waitBeats1 < waitBeats2;
             }
         }
@@ -1779,8 +1755,7 @@ namespace e7ChiuZamoraMalani {
 
                 if (originalNumCollisions > collisionSpace.collectCollisionPairs().size()) {
                     progress = (double)(originalNumCollisions - collisionSpace.collectCollisionPairs().size()) / (double)originalNumCollisions;
-                }
-                else {
+                } else {
                     progress = 1;
                 }
 
@@ -1867,8 +1842,7 @@ namespace e7ChiuZamoraMalani {
             if (numCollisions < leastNumCollisions) {
                 numIterationsWithoutOverallImprovement = 0;
                 leastNumCollisions = numCollisions;
-            }
-            else {
+            } else {
                 numIterationsWithoutOverallImprovement++;
             }
         }
@@ -2049,8 +2023,7 @@ namespace e7SoverEliceiriHershkovitz {
         auto comparator = [](const TransitionSolverParams::MarcherInstruction& first, const TransitionSolverParams::MarcherInstruction& second) {
             if (first.waitBeats == second.waitBeats) {
                 return first.movementPattern < second.movementPattern;
-            }
-            else {
+            } else {
                 return first.waitBeats < second.waitBeats;
             }
         };

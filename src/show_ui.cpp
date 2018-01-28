@@ -21,12 +21,12 @@
 */
 
 #include "show_ui.h"
-#include "toolbar.h"
 #include "cc_sheet.h"
+#include "toolbar.h"
 #include <algorithm>
 #include <ctype.h>
-#include <wx/statline.h>
 #include <wx/spinctrl.h>
+#include <wx/statline.h>
 
 static const size_t kMaxPoints = 1000;
 
@@ -403,8 +403,7 @@ std::vector<wxString> GenLetterLabels(int numPerLetter, int num, wxListBox const
             }
             ++letr;
         }
-    }
-    else {
+    } else {
         auto letr = 0;
         while (num > 0) {
             int n = std::min(num, numPerLetter);
@@ -412,8 +411,7 @@ std::vector<wxString> GenLetterLabels(int numPerLetter, int num, wxListBox const
                 wxString buffer;
                 if (letr >= 26) {
                     buffer.Printf(wxT("%c%c%u"), 'A' + letr - 26, 'A' + letr - 26, i);
-                }
-                else {
+                } else {
                     buffer.Printf(wxT("%c%u"), 'A' + letr, i);
                 }
                 results.push_back(buffer);
@@ -487,8 +485,7 @@ bool ShowInfoReq::TransferDataFromWindow()
 
     if (labelType->GetSelection() == 0) {
         mLabels = GenNumberLabels(numberPoints);
-    }
-    else {
+    } else {
         // Letters
         mLabels = GenLetterLabels(pointsPerLine->GetValue(), numberPoints, label_letters);
     }
@@ -554,8 +551,7 @@ bool ShowInfoReqWizard::TransferDataFromWindow()
 
     if (labelType->GetSelection() == 0) {
         mLabels = GenNumberLabels(numberPoints);
-    }
-    else {
+    } else {
         // Letters
         mLabels = GenLetterLabels(pointsPerLine->GetValue(), numberPoints, label_letters);
     }

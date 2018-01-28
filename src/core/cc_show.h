@@ -21,17 +21,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_types.h"
 #include "cc_fileformat.h"
+#include "cc_types.h"
 #include "json.h"
 
-#include <vector>
-#include <string>
-#include <set>
-#include <map>
-#include <memory>
 #include "animate.h"
 #include "cc_sheet.h"
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace CalChart {
 class Lasso;
@@ -80,7 +80,7 @@ public:
     Show_command_pair Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const;
     Show_command_pair Create_RemoveSheetCommand(int where) const;
     Show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
-    Show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data) const;
+    Show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const;
     Show_command_pair Create_MovePointsCommand(std::map<int, Coord> const& new_positions, int ref) const;
     Show_command_pair Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const;
     Show_command_pair Create_DeletePointsCommand() const;
@@ -115,7 +115,7 @@ public:
     bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
 
     // utility
-    std::pair<bool, std::vector<size_t> > GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
+    std::pair<bool, std::vector<size_t>> GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
     SelectionList MakeSelectAll() const;
     SelectionList MakeUnselectAll() const;
     SelectionList MakeAddToSelection(const SelectionList& sl) const;

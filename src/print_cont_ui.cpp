@@ -20,24 +20,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "basic_ui.h"
 #include "print_cont_ui.h"
-#include "cc_sheet.h"
-#include "cc_command.h"
+#include "basic_ui.h"
 #include "calchartapp.h"
+#include "cc_command.h"
+#include "cc_sheet.h"
 #include "cc_text.h"
 #include "draw.h"
 
+#include <wx/dcbuffer.h>
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
-#include <wx/statline.h>
 #include <wx/msgdlg.h>
-#include <wx/dcbuffer.h>
 #include <wx/splitter.h>
+#include <wx/statline.h>
 
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
 
 enum {
     CALCHART__CONT_NEW = 100,
@@ -87,8 +87,7 @@ void PrintContinuityEditorView::OnUpdate(wxView* sender, wxObject* hint)
     PrintContinuityEditor* editor = static_cast<PrintContinuityEditor*>(GetFrame());
     if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_FlushAllViews))) {
         editor->FlushText();
-    }
-    else {
+    } else {
         editor->Update();
     }
 }
@@ -97,7 +96,7 @@ void PrintContinuityEditorView::DoSetPrintContinuity(int which_sheet,
     const wxString& number,
     const wxString& cont)
 {
-    std::map<int, std::pair<std::string, std::string> > data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
+    std::map<int, std::pair<std::string, std::string>> data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
     auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
@@ -310,8 +309,7 @@ void PrintContinuityEditor::FlushText()
                 static_cast<int>(std::distance(mDoc->GetSheetBegin(), current_sheet)), text->GetValue(),
                 mUserInput->GetValue());
         }
-    }
-    catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
         wxMessageBox(message, wxT("Print continuity cannot be changed."));

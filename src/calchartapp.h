@@ -24,9 +24,9 @@
 
 #include "single_instance_ipc.h"
 
-#include <wx/wx.h>
-#include <wx/docview.h>
 #include <memory>
+#include <wx/docview.h>
+#include <wx/wx.h>
 
 class CalChartApp;
 namespace CalChart {

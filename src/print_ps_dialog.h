@@ -24,9 +24,9 @@
 
 #include "platconf.h"
 
-#include <wx/wx.h>
-#include <wx/dialog.h>
 #include <set>
+#include <wx/dialog.h>
+#include <wx/wx.h>
 
 class CalChartDoc;
 class CalChartConfiguration;

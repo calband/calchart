@@ -21,10 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdexcept>
-#include <sstream>
-#include <vector>
 #include <map>
+#include <sstream>
+#include <stdexcept>
+#include <vector>
 
 namespace CalChart {
 
@@ -445,10 +445,10 @@ namespace Parser {
     }
 
     template <typename Iter>
-    std::vector<std::tuple<uint32_t, Iter, size_t> > ParseOutLabels(Iter begin,
+    std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin,
         Iter end)
     {
-        std::vector<std::tuple<uint32_t, Iter, size_t> > result;
+        std::vector<std::tuple<uint32_t, Iter, size_t>> result;
         while (begin != end) {
             auto length = std::distance(begin, end);
             if (length < 8) {

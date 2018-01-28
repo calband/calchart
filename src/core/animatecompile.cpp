@@ -21,9 +21,9 @@
 */
 
 #include "animatecompile.h"
-#include "cont.h"
 #include "animatecommand.h"
 #include "cc_sheet.h"
+#include "cont.h"
 
 namespace CalChart {
 
@@ -52,7 +52,7 @@ AnimateCompile::Compile(
     const Show& show, AnimationVariables& variablesStates,
     AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
     unsigned pt_num, SYMBOL_TYPE cont_symbol,
-    std::list<std::unique_ptr<ContProcedure> > const& procs)
+    std::list<std::unique_ptr<ContProcedure>> const& procs)
 {
     AnimateState state{
         c_sheet->GetPosition(pt_num),

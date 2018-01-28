@@ -22,10 +22,10 @@
 
 #include "field_canvas_shapes.h"
 
-#include "linmath.h"
-#include "confgr.h"
 #include "cc_shapes.h"
+#include "confgr.h"
 #include "draw.h"
+#include "linmath.h"
 #include "math_utils.h"
 
 #include <wx/dcbuffer.h>
@@ -262,8 +262,7 @@ void MovePoints_CC_MOVE_ROTATE::OnMouseLeftDown(CalChart::Coord pos)
     // rotate is a 2-distinct mouse click action
     if (m_shape_list.empty()) {
         BeginMoveDrag(CC_DRAG_CROSSHAIRS, pos);
-    }
-    else if (static_cast<CalChart::Shape_1point*>(m_shape_list.back().get())->GetOrigin() != pos) {
+    } else if (static_cast<CalChart::Shape_1point*>(m_shape_list.back().get())->GetOrigin() != pos) {
         // and this is a point not on the origin.
         AddMoveDrag(CC_DRAG_LINE,
             std::make_unique<CalChart::Shape_arc>(
@@ -275,8 +274,7 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_ROTATE::TransformPoints(std::m
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    }
-    else {
+    } else {
         auto start = dynamic_cast<CalChart::Shape_1point const&>(*m_shape_list[0]).GetOrigin();
         auto r = -((CalChart::Shape_arc*)m_shape_list.back().get())->GetAngle();
         auto m = TranslationMatrix(Vector(-start.x, -start.y, 0)) * ZRotationMatrix(r) * TranslationMatrix(Vector(start.x, start.y, 0));
@@ -303,8 +301,7 @@ void MovePoints_CC_MOVE_SHEAR::OnMouseLeftDown(CalChart::Coord pos)
     // shear is a 2-distinct mouse click action
     if (m_shape_list.empty()) {
         BeginMoveDrag(CC_DRAG_CROSSHAIRS, pos);
-    }
-    else if (((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin() != pos) {
+    } else if (((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin() != pos) {
         CalChart::Coord vect(pos - ((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin());
         // rotate vect 90 degrees
         AddMoveDrag(CC_DRAG_LINE, std::make_unique<CalChart::Shape_angline>(pos, CalChart::Coord(-vect.y, vect.x)));
@@ -315,8 +312,7 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHEAR::TransformPoints(std::ma
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    }
-    else {
+    } else {
         assert(m_shape_list.size() == 2);
         auto start = dynamic_cast<CalChart::Shape_1point&>(*m_shape_list[0]).GetOrigin();
         auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -370,8 +366,7 @@ void MovePoints_CC_MOVE_SIZE::OnMouseLeftDown(CalChart::Coord pos)
     // move is a 2-distinct mouse click action
     if (m_shape_list.empty()) {
         BeginMoveDrag(CC_DRAG_CROSSHAIRS, pos);
-    }
-    else if (((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin() != pos) {
+    } else if (((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin() != pos) {
         AddMoveDrag(CC_DRAG_LINE, std::make_unique<CalChart::Shape_line>(pos));
     }
 }
@@ -380,8 +375,7 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SIZE::TransformPoints(std::map
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    }
-    else {
+    } else {
         auto& origin = dynamic_cast<CalChart::Shape_1point&>(*m_shape_list[0]);
         auto c1 = origin.GetOrigin();
         auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -392,14 +386,12 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SIZE::TransformPoints(std::map
         if ((c2.x != 0) || (c2.y != 0)) {
             if (c2.x != 0) {
                 sx /= c2.x;
-            }
-            else {
+            } else {
                 sx = 1;
             }
             if (c2.y != 0) {
                 sy /= c2.y;
-            }
-            else {
+            } else {
                 sy = 1;
             }
             auto m = TranslationMatrix(Vector(-c1.x, -c1.y, 0)) * ScaleMatrix(Vector(sx, sy, 0)) * TranslationMatrix(Vector(c1.x, c1.y, 0));
@@ -435,8 +427,7 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_GENIUS::TransformPoints(std::m
 {
     if (m_shape_list.size() < 2) {
         return select_list;
-    }
-    else {
+    } else {
         auto* v1 = (CalChart::Shape_2point*)m_shape_list[0].get();
         auto* v2 = (CalChart::Shape_2point*)m_shape_list[1].get();
         auto* v3 = (CalChart::Shape_2point*)m_shape_list[2].get();
@@ -450,8 +441,7 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_GENIUS::TransformPoints(std::m
         auto d = (float)s1.x * (float)s2.y - (float)s2.x * (float)s1.y + (float)s3.x * (float)s1.y - (float)s1.x * (float)s3.y + (float)s2.x * (float)s3.y - (float)s3.x * (float)s2.y;
         if (IS_ZERO(d)) {
             return std::map<int, CalChart::Coord>{};
-        }
-        else {
+        } else {
             Matrix A = Matrix(Vector(e1.x, e2.x, 0, e3.x), Vector(e1.y, e2.y, 0, e3.y),
                 Vector(0, 0, 0, 0), Vector(1, 1, 0, 1));
             Matrix Binv = Matrix(
@@ -523,8 +513,7 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_ELLIPSE::TransformPoints
         // should this have a snap to grid?
         if ((angle > M_PI / 2.0) && (angle <= 3.0 * M_PI / 2.0)) {
             result[i] = center + CalChart::Coord(-(a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), -(a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
-        }
-        else {
+        } else {
             result[i] = center + CalChart::Coord((a * b) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))), (a * b * tan(angle)) / (sqrt(pow(b, 2) + pow(a, 2) * pow(tan(angle), 2))));
         }
         angle += amount;
@@ -554,14 +543,11 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_RECTANGLE::TransformPoin
     for (auto i : ordered) {
         if (total_distance < a) {
             result[i] = start + CalChart::Coord(total_distance, 0);
-        }
-        else if (total_distance < (a + b)) {
+        } else if (total_distance < (a + b)) {
             result[i] = start + CalChart::Coord(a, total_distance - a);
-        }
-        else if (total_distance < (2.0 * a + b)) {
+        } else if (total_distance < (2.0 * a + b)) {
             result[i] = start + CalChart::Coord(a - (total_distance - (a + b)), b);
-        }
-        else {
+        } else {
             result[i] = start + CalChart::Coord(0, b - (total_distance - (2 * a + b)));
         }
         total_distance += each_segment;

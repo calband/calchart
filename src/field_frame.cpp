@@ -21,44 +21,44 @@
 */
 
 #include <cstring>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 #include "field_frame.h"
 
-#include "platconf.h"
-#include "cc_coord.h"
-#include "field_canvas.h"
-#include "cc_show.h"
-#include "top_frame.h"
-#include "calchartapp.h"
-#include "print_ps_dialog.h"
-#include "cc_preferences_ui.h"
-#include "modes.h"
-#include "confgr.h"
-#include "ccvers.h"
-#include "cont_ui.h"
-#include "print_cont_ui.h"
-#include "show_ui.h"
 #include "animation_frame.h"
-#include "toolbar.h"
-#include "ui_enums.h"
-#include "field_view.h"
-#include "draw.h"
-#include "cc_sheet.h"
-#include "cc_point.h"
+#include "calchartapp.h"
+#include "cc_coord.h"
 #include "cc_fileformat.h"
+#include "cc_point.h"
+#include "cc_preferences_ui.h"
+#include "cc_sheet.h"
+#include "cc_show.h"
+#include "ccvers.h"
+#include "confgr.h"
+#include "cont_ui.h"
+#include "draw.h"
 #include "e7_transition_solver_ui.h"
+#include "field_canvas.h"
 #include "field_frame_controls.h"
+#include "field_view.h"
+#include "modes.h"
+#include "platconf.h"
+#include "print_cont_ui.h"
+#include "print_ps_dialog.h"
+#include "show_ui.h"
+#include "toolbar.h"
+#include "top_frame.h"
+#include "ui_enums.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
 #ifdef __WXMSW__
 #include <wx/helpwin.h>
 #endif
+#include <wx/clipbrd.h>
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
-#include <wx/clipbrd.h>
 
 const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
@@ -312,7 +312,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     // Show the frame
     UpdatePanel();
     mCanvas->wxWindow::SetFocus();
-    
+
     mCanvas->Refresh();
 
     // re-set the size
@@ -345,12 +345,10 @@ void FieldFrame::OnCmdPrint(wxCommandEvent& event)
         if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
             wxMessageBox(wxT("A problem was encountered when trying to print"),
                 wxT("Printing"), wxOK);
-        }
-        else {
+        } else {
             wxMessageBox(wxT("Printing cancelled"), wxT("Printing"), wxOK);
         }
-    }
-    else {
+    } else {
         *gPrintDialogData = printer.GetPrintDialogData();
     }
 }
@@ -478,8 +476,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
             (void)wxMessageBox(wxT("Not a valid sheet number"), wxT("Insert Failed"));
             return;
         }
-    }
-    else {
+    } else {
         // don't ask user if the first sheet they want to copy over is the last
         // sheet in the show being copied from
         endValue = beginValue;
@@ -544,8 +541,7 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
             std::vector<uint8_t> data(theBegin, theEnd);
 
             CalChart::Show::Sheet_container_t sht(
-                1, CalChart::Sheet(numPoints, data.data(), data.size(),
-                       CalChart::Current_version_and_later()));
+                1, CalChart::Sheet(numPoints, data.data(), data.size(), CalChart::Current_version_and_later()));
             GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
         }
         wxTheClipboard->Close();
@@ -566,8 +562,7 @@ void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
         if (!GetFieldView()->DoRelabel()) {
             (void)wxMessageBox(wxT("Stuntsheets don't match"), wxT("Relabel sheets"));
         }
-    }
-    else {
+    } else {
         (void)wxMessageBox(wxT("This can't used on the last stuntsheet"),
             wxT("Relabel sheets"));
     }
@@ -648,12 +643,10 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
     // we want to have only animation frame at a time
     if (mAnimationFrame) {
         mAnimationFrame->Raise();
-    }
-    else if (GetShow()) {
+    } else if (GetShow()) {
         mAnimationFrame = new AnimationFrame(
             [this]() { this->ClearAnimationFrame(); }, GetShow(), config, GetView(),
-            this, wxSize(static_cast<int>(config.Get_AnimationFrameWidth()),
-                      static_cast<int>(config.Get_AnimationFrameHeight())));
+            this, wxSize(static_cast<int>(config.Get_AnimationFrameWidth()), static_cast<int>(config.Get_AnimationFrameHeight())));
     }
 }
 
@@ -851,7 +844,7 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
 #if wxUSE_PCX
                             wxT("|PCX files (*.pcx)|*.pcx")
 #endif
-            );
+    );
     if (!filename.empty()) {
         wxImage image;
         if (!image.LoadFile(filename)) {
@@ -913,8 +906,7 @@ void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
         if (targetSheet.ToLong(&targetSheetNum)) {
             GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific,
                 static_cast<int>(targetSheetNum) - 1);
-        }
-        else {
+        } else {
             wxMessageBox(wxT("The input must be a number."),
                 wxT("Operation failed."));
         }
@@ -935,7 +927,8 @@ void FieldFrame::OnCmd_ResetReferencePoint(wxCommandEvent& event)
     GetFieldView()->DoResetReferencePoint();
 }
 
-void FieldFrame::OnCmd_SolveTransition(wxCommandEvent &event) {
+void FieldFrame::OnCmd_SolveTransition(wxCommandEvent& event)
+{
     if (GetShow()) {
         TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxT("Transition Solver"));
         transitionSolver->Show();
@@ -1078,8 +1071,7 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
     double zoom_amount = 1.0;
     if (zoomtxt.ToDouble(&zoom_amount)) {
         zoom_amount /= 100.0;
-    }
-    else {
+    } else {
         wxString msg("Please enter a valid number\n");
         wxMessageBox(msg, wxT("Invalid number"), wxICON_INFORMATION | wxOK);
         // return if not valid

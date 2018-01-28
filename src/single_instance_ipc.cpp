@@ -2,11 +2,11 @@
 #include "single_instance_ipc.h"
 #include "calchartapp.h"
 
-#include <wx/utils.h>
-#include <wx/stdpaths.h>
-#include <vector>
 #include <algorithm>
+#include <vector>
 #include <wx/ipc.h>
+#include <wx/stdpaths.h>
+#include <wx/utils.h>
 
 const wxString OPEN_FILE = "OpenFile";
 

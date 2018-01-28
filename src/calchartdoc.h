@@ -22,16 +22,16 @@
 
 #pragma once
 
-#include "cc_show.h"
 #include "cc_coord.h"
+#include "cc_show.h"
 
-#include <wx/wx.h> // For basic wx defines
-#include <wx/docview.h> // For basic wx defines
 #include <wx/cmdproc.h>
+#include <wx/docview.h> // For basic wx defines
+#include <wx/wx.h> // For basic wx defines
 
 #include <memory>
-#include <vector>
 #include <set>
+#include <vector>
 
 class CalChartDoc;
 namespace CalChart {
@@ -120,7 +120,7 @@ private:
 
 public:
     // translates input into a mapping of which sheet to number,lines pair.
-    std::pair<bool, std::map<int, std::pair<std::string, std::string> > > ImportPrintableContinuity(const std::vector<std::string>& lines) const;
+    std::pair<bool, std::map<int, std::pair<std::string, std::string>>> ImportPrintableContinuity(const std::vector<std::string>& lines) const;
 
     void FlushAllTextWindows();
 
@@ -139,7 +139,7 @@ public:
     void SetCurrentSheet(int n);
 
     auto GetNumPoints() const { return mShow->GetNumPoints(); }
-    std::pair<bool, std::vector<size_t> > GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
+    std::pair<bool, std::vector<size_t>> GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
 
     auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
 
@@ -180,7 +180,7 @@ public:
     std::unique_ptr<wxCommand> Create_RemoveSheetCommand(int where);
     std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets, CalChart::Coord::units tolerance);
-    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data);
+    std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions, int ref);
     std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions, int ref);
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
@@ -195,7 +195,7 @@ public:
     std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
     std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
     std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
-    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord> &finalPositions, const std::map<SYMBOL_TYPE, std::string> &continuities, const std::vector<SYMBOL_TYPE> &marcherDotTypes);
+    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord>& finalPositions, const std::map<SYMBOL_TYPE, std::string>& continuities, const std::vector<SYMBOL_TYPE>& marcherDotTypes);
 
 private:
     static CC_doc_command_pair Inject_CalChartDocArg(CalChart::Show_command_pair);

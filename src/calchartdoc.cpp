@@ -24,25 +24,25 @@
 
 #include "calchartdoc.h"
 
-#include "cc_command.h"
-#include "confgr.h"
 #include "calchartapp.h"
-#include "cc_sheet.h"
+#include "cc_command.h"
 #include "cc_continuity.h"
-#include "cc_point.h"
-#include "math_utils.h"
-#include "cc_shapes.h"
-#include "platconf.h"
-#include "draw.h"
 #include "cc_fileformat.h"
-#include "modes.h"
-#include "print_ps.h"
+#include "cc_point.h"
+#include "cc_shapes.h"
+#include "cc_sheet.h"
+#include "confgr.h"
+#include "draw.h"
 #include "json.h"
 #include "json_export.h"
+#include "math_utils.h"
+#include "modes.h"
+#include "platconf.h"
+#include "print_ps.h"
 
-#include <wx/wfstream.h>
-#include <wx/textfile.h>
 #include <list>
+#include <wx/textfile.h>
+#include <wx/wfstream.h>
 
 using namespace CalChart;
 
@@ -139,10 +139,10 @@ bool CalChartDoc::OnSaveDocument(const wxString& filename)
 // Destroy a show
 CalChartDoc::~CalChartDoc() {}
 
-std::pair<bool, std::map<int, std::pair<std::string, std::string> > > CalChartDoc::ImportPrintableContinuity(
+std::pair<bool, std::map<int, std::pair<std::string, std::string>>> CalChartDoc::ImportPrintableContinuity(
     const std::vector<std::string>& lines) const
 {
-    std::map<int, std::pair<std::string, std::string> > result;
+    std::map<int, std::pair<std::string, std::string>> result;
     // should this first clear out all the continuity?
     if (lines.empty()) {
         return { false, {} }; // done, technically
@@ -180,8 +180,7 @@ std::pair<bool, std::map<int, std::pair<std::string, std::string> > > CalChartDo
             first_line = false;
             current_print_cont += *line;
         }
-    }
-    catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
@@ -232,8 +231,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
     try {
         mShow = Show::Create_CC_show(stream);
-    }
-    catch (CC_FileException& e) {
+    } catch (CC_FileException& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
@@ -334,7 +332,7 @@ void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int
     UpdateAllViews();
 }
 
-std::pair<bool, std::vector<size_t> > CalChartDoc::GetRelabelMapping(Show::const_Sheet_iterator_t source_sheet, Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
+std::pair<bool, std::vector<size_t>> CalChartDoc::GetRelabelMapping(Show::const_Sheet_iterator_t source_sheet, Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const
 {
     return mShow->GetRelabelMapping(source_sheet, target_sheets, tolerance);
 }
@@ -395,8 +393,8 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview,
 
 CalChartDocCommand::CC_doc_command_pair CalChartDoc::Inject_CalChartDocArg(Show_command_pair show_cmds)
 {
-    auto action = [cmd = show_cmds.first](CalChartDoc & doc) { cmd(*doc.mShow); };
-    auto reaction = [cmd = show_cmds.second](CalChartDoc & doc) { cmd(*doc.mShow); };
+    auto action = [cmd = show_cmds.first](CalChartDoc& doc) { cmd(*doc.mShow); };
+    auto reaction = [cmd = show_cmds.second](CalChartDoc& doc) { cmd(*doc.mShow); };
     return { action, reaction };
 }
 
@@ -430,15 +428,13 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSelectionCommand(const Selecti
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetModeCommand(const wxString& newmode)
 {
-    auto action = [mode = newmode](CalChartDoc & doc)
-    {
+    auto action = [mode = newmode](CalChartDoc& doc) {
         auto newmode = wxGetApp().GetMode(mode);
         if (newmode) {
             doc.SetMode(std::move(newmode));
         }
     };
-    auto reaction = [mode = mMode->GetName()](CalChartDoc & doc)
-    {
+    auto reaction = [mode = mMode->GetName()](CalChartDoc& doc) {
         auto newmode = wxGetApp().GetMode(mode);
         if (newmode) {
             doc.SetMode(std::move(newmode));
@@ -508,7 +504,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_AppendShow(std::unique_ptr<CalCha
     return std::make_unique<CalChartDocCommand>(*this, wxT("Append Show"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string> > const& data)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data)
 {
     auto cmds = Create_SetSheetPair();
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetPrintableContinuity(data)));
@@ -613,51 +609,43 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_MoveBackgroundImageCommand(int wh
     return std::make_unique<CalChartDocCommand>(*this, wxT("Moving Background Image"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::vector<Coord> &finalPositions, const std::map<SYMBOL_TYPE, std::string> &continuities, const std::vector<SYMBOL_TYPE> &marcherDotTypes)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::vector<Coord>& finalPositions, const std::map<SYMBOL_TYPE, std::string>& continuities, const std::vector<SYMBOL_TYPE>& marcherDotTypes)
 {
-    std::map<int, Coord>    positionAssignments;
-    
-    for (unsigned marcher = 0; marcher < finalPositions.size(); marcher++)
-    {
+    std::map<int, Coord> positionAssignments;
+
+    for (unsigned marcher = 0; marcher < finalPositions.size(); marcher++) {
         positionAssignments[marcher] = finalPositions.at(marcher);
     }
-    
+
     auto cmds = Create_SetSheetAndSelectionPair();
-    
+
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(GetCurrentSheetNum() + 1, positionAssignments, 0)));
-    
-    for (auto contIter = continuities.begin(); contIter != continuities.end(); contIter++)
-    {
+
+    for (auto contIter = continuities.begin(); contIter != continuities.end(); contIter++) {
         cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityTextCommand(contIter->first, contIter->second)));
     }
-    
+
     std::set<SYMBOL_TYPE> processedSymbols;
-    for (unsigned firstMarcherWithSymbol = 0; firstMarcherWithSymbol < marcherDotTypes.size(); firstMarcherWithSymbol++)
-    {
-        SelectionList           marchersWithSymbol;
-        SYMBOL_TYPE             symbolToProcess;
-        
+    for (unsigned firstMarcherWithSymbol = 0; firstMarcherWithSymbol < marcherDotTypes.size(); firstMarcherWithSymbol++) {
+        SelectionList marchersWithSymbol;
+        SYMBOL_TYPE symbolToProcess;
+
         symbolToProcess = marcherDotTypes.at(firstMarcherWithSymbol);
-        
-        if (processedSymbols.find(symbolToProcess) != processedSymbols.end())
-        {
+
+        if (processedSymbols.find(symbolToProcess) != processedSymbols.end()) {
             continue; // Skip any symbols that we've already processed
-        }
-        else
-        {
+        } else {
             processedSymbols.insert(symbolToProcess);
         }
-        
-        for (unsigned marcher = firstMarcherWithSymbol; marcher < marcherDotTypes.size(); marcher++)
-        {
-            if (marcherDotTypes.at(marcher) == symbolToProcess)
-            {
+
+        for (unsigned marcher = firstMarcherWithSymbol; marcher < marcherDotTypes.size(); marcher++) {
+            if (marcherDotTypes.at(marcher) == symbolToProcess) {
                 marchersWithSymbol.insert(marcher);
             }
         }
-        
+
         cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetSymbolCommand(marchersWithSymbol, symbolToProcess)));
     }
-    
+
     return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Transition"), cmds);
 }

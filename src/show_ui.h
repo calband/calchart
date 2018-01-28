@@ -23,8 +23,8 @@
 #pragma once
 
 #include "calchartdoc.h"
-#include <wx/wizard.h>
 #include <wx/docview.h>
+#include <wx/wizard.h>
 
 #include <vector>
 

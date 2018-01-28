@@ -45,8 +45,7 @@ float Coord::DM_Magnitude() const
 {
     if ((x == y) || (x == -y)) {
         return CoordUnits2Float(std::abs(x));
-    }
-    else {
+    } else {
         return Magnitude();
     }
 }
@@ -85,11 +84,9 @@ Coord::CollisionType Coord::DetectCollision(const Coord& c) const
     auto distOfOne = Int2CoordUnits(1) * Int2CoordUnits(1);
     if (squaredDist < distOfOne) {
         return COLLISION_INTERSECT;
-    }
-    else if (squaredDist == distOfOne) {
+    } else if (squaredDist == distOfOne) {
         return COLLISION_WARNING;
-    }
-    else {
+    } else {
         return COLLISION_NONE;
     }
 }

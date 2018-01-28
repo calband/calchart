@@ -23,10 +23,10 @@
 
 #include "cc_coord.h"
 
-#include <string>
 #include <array>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <string>
 
 namespace CalChart {
 

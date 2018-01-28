@@ -22,9 +22,9 @@
 
 #include "top_frame.h"
 #include "basic_ui.h"
-#include "ccvers.h"
-#include "cc_preferences_ui.h"
 #include "calchartapp.h"
+#include "cc_preferences_ui.h"
+#include "ccvers.h"
 
 #include <wx/dnd.h>
 #include <wx/html/helpctrl.h>

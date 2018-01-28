@@ -21,22 +21,21 @@
 */
 
 #include "cc_preferences_ui.h"
-#include "cc_drawcommand.h"
-#include "confgr.h"
-#include "modes.h"
-#include "draw.h"
-#include "cc_sheet.h"
 #include "basic_ui.h"
 #include "calchartdoc.h"
+#include "cc_drawcommand.h"
 #include "cc_shapes.h"
+#include "cc_sheet.h"
+#include "confgr.h"
 #include "draw.h"
+#include "modes.h"
 
 #include <wx/colordlg.h>
-#include <wx/stattext.h>
-#include <wx/statline.h>
-#include <wx/notebook.h>
-#include <wx/listbook.h>
 #include <wx/dcbuffer.h>
+#include <wx/listbook.h>
+#include <wx/notebook.h>
+#include <wx/statline.h>
+#include <wx/stattext.h>
 
 using namespace CalChart;
 
@@ -306,7 +305,10 @@ PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     // the user
     mShow = Show::Create_CC_show();
     auto labels = std::vector<std::string>{
-        "unsel", "unsel", "sel", "sel",
+        "unsel",
+        "unsel",
+        "sel",
+        "sel",
     };
     mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
     mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);

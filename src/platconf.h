@@ -28,7 +28,7 @@
 // There are separate macros because XPM is used for icons
 #define ICON_NAME(name) cpp_cat(name, _xpm)
 #define BITMAP_NAME(name) \
-    (char*) cpp_cat(name, _bits), cpp_cat(name, _width), cpp_cat(name, _height)
+    (char*)cpp_cat(name, _bits), cpp_cat(name, _width), cpp_cat(name, _height)
 
 // Run external programs to print or just write to files
 #ifndef __WXMSW__

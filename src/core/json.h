@@ -5,11 +5,11 @@
  * and manipulate a JSON hierarchy.
  */
 
-#include <memory>
-#include <map>
-#include <vector>
-#include <string>
 #include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace CalChart {
 
@@ -293,7 +293,7 @@ public:
 
     JSONElement valueForKey(std::string key) const;
 
-    std::vector<std::pair<const std::string&, const JSONElement&> > items() const;
+    std::vector<std::pair<const std::string&, const JSONElement&>> items() const;
     std::map<std::string, JSONElement>::const_iterator itemsBegin() const;
     std::map<std::string, JSONElement>::const_iterator itemsEnd() const;
 
@@ -328,7 +328,7 @@ public:
 
     JSONElement valueAtIndex(unsigned i) const;
 
-    std::vector<std::reference_wrapper<const JSONElement> > values() const;
+    std::vector<std::reference_wrapper<const JSONElement>> values() const;
     std::vector<JSONElement>::const_iterator valuesBegin() const;
     std::vector<JSONElement>::const_iterator valuesEnd() const;
 

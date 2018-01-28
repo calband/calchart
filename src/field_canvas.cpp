@@ -22,16 +22,16 @@
 
 #include "field_canvas.h"
 
-#include "field_view.h"
-#include "field_frame.h"
-#include "confgr.h"
-#include "linmath.h"
-#include "math_utils.h"
 #include "background_image.h"
+#include "cc_drawcommand.h"
 #include "cc_shapes.h"
+#include "confgr.h"
 #include "draw.h"
 #include "field_canvas_shapes.h"
-#include "cc_drawcommand.h"
+#include "field_frame.h"
+#include "field_view.h"
+#include "linmath.h"
+#include "math_utils.h"
 
 #include <wx/dcbuffer.h>
 
@@ -142,14 +142,12 @@ void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CalChart::Coord p
     if (i < 0) {
         // if no point selected, we grab using the current lasso
         BeginSelectDrag(curr_lasso, pos);
-    }
-    else {
+    } else {
         SelectionList select;
         select.insert(i);
         if (event.AltDown()) {
             mView.ToggleSelection(select);
-        }
-        else {
+        } else {
             mView.AddToSelection(select);
         }
 
@@ -228,8 +226,7 @@ void FieldCanvas::OnMouseLeftDown_CC_DRAG_SWAP(CalChart::Coord pos)
             mView.DoRotatePointPositions(1);
             mView.UnselectAll();
         }
-    }
-    else {
+    } else {
         mView.UnselectAll();
     }
 }
@@ -246,8 +243,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
 
     if (mView.DoingPictureAdjustment()) {
         mView.OnBackgroundMouseLeftDown(event, dc);
-    }
-    else {
+    } else {
         CalChart::Coord pos = mView.GetShowFieldOffset();
         pos.x = (x - pos.x);
         pos.y = (y - pos.y);
@@ -257,8 +253,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
                 m_move_points = Create_MovePoints(curr_move);
             }
             m_move_points->OnMouseLeftDown(SnapToGrid(pos));
-        }
-        else {
+        } else {
             OnMouseLeftDown_default(event, pos);
         }
     }
@@ -276,8 +271,7 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
 
     if (mView.DoingPictureAdjustment()) {
         mView.OnBackgroundMouseLeftUp(event, dc);
-    }
-    else {
+    } else {
         CalChart::Coord pos = mView.GetShowFieldOffset();
         pos.x = (x - pos.x);
         pos.y = (y - pos.y);
@@ -335,8 +329,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
 
         if (mView.DoingPictureAdjustment()) {
             mView.OnBackgroundMouseMove(event, dc);
-        }
-        else {
+        } else {
             CalChart::Coord pos = mView.GetShowFieldOffset();
             pos.x = (x - pos.x);
             pos.y = (y - pos.y);
@@ -382,8 +375,7 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
     }
     if (event.GetKeyCode() == 'a') {
         MoveByKey(direction::west);
-    }
-    else
+    } else
         event.Skip();
 }
 

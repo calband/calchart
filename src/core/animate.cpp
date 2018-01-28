@@ -21,24 +21,24 @@
 */
 
 #include "animate.h"
-#include "cc_show.h"
 #include "animatecommand.h"
-#include "cont.h"
-#include "cc_sheet.h"
 #include "cc_continuity.h"
-#include "cc_point.h"
-#include "math_utils.h"
 #include "cc_drawcommand.h"
+#include "cc_point.h"
+#include "cc_sheet.h"
+#include "cc_show.h"
+#include "cont.h"
+#include "math_utils.h"
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <string>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 extern int parsecontinuity();
 extern const char* yyinputbuffer;
-extern std::list<std::unique_ptr<CalChart::ContProcedure> > ParsedContinuity;
+extern std::list<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
 
 namespace CalChart {
 
@@ -71,7 +71,7 @@ AnimateDir AnimGetDirFromAngle(float ang)
     return ANIMDIR_N;
 }
 
-std::list<std::unique_ptr<ContProcedure> >
+std::list<std::unique_ptr<ContProcedure>>
 Animation::ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol)
 {
     yyinputbuffer = continuity.c_str();
@@ -178,13 +178,11 @@ bool Animation::NextSheet()
         curr_sheetnum++;
         RefreshSheet();
         CheckCollisions();
-    }
-    else {
+    } else {
         if (curr_beat >= sheets.at(curr_sheetnum).GetNumBeats()) {
             if (sheets.at(curr_sheetnum).GetNumBeats() == 0) {
                 curr_beat = 0;
-            }
-            else {
+            } else {
                 curr_beat = sheets.at(curr_sheetnum).GetNumBeats() - 1;
             }
         }
@@ -360,7 +358,7 @@ AnimatePoint Animation::EndPosition(unsigned point,
     return position;
 }
 
-std::pair<std::string, std::vector<std::string> >
+std::pair<std::string, std::vector<std::string>>
 Animation::GetCurrentInfo() const
 {
     std::vector<std::string> each;
@@ -377,16 +375,16 @@ Animation::GetCurrentInfo() const
     output << GetCurrentSheetName() << " (" << GetCurrentSheet() << " of "
            << GetNumberSheets() << ")\n";
     output << "beat " << GetCurrentBeat() << " of " << GetNumberBeats() << "\n";
-    return std::pair<std::string, std::vector<std::string> >(output.str(), each);
+    return std::pair<std::string, std::vector<std::string>>(output.str(), each);
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const {
+std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const
+{
     return sheets.begin();
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const {
+std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const
+{
     return sheets.end();
 }
-
 }
-

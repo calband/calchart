@@ -22,9 +22,9 @@
 
 #include "print_ps.h"
 
-#include "modes.h"
-#include "cc_show.h"
 #include "cc_sheet.h"
+#include "cc_show.h"
+#include "modes.h"
 
 #include "prolog0.h"
 #include "prolog1.h"
@@ -34,9 +34,9 @@
 #include "setup2.h"
 #include "zllrbach.h"
 
-#include <time.h>
-#include <string>
 #include <sstream>
+#include <string>
+#include <time.h>
 
 namespace CalChart {
 
@@ -50,12 +50,22 @@ namespace CalChart {
 #define DPI 72
 
 static const char* dot_routines[] = {
-    "dotplain", "dotsolid", "dotbs", "dotsl",
-    "dotx", "dotsolbs", "dotsolsl", "dotsolx",
+    "dotplain",
+    "dotsolid",
+    "dotbs",
+    "dotsl",
+    "dotx",
+    "dotsolbs",
+    "dotsolsl",
+    "dotsolx",
 };
 
 static const char* fontnames[] = {
-    "CalChart", "contfont", "boldfont", "italfont", "bolditalfont",
+    "CalChart",
+    "contfont",
+    "boldfont",
+    "italfont",
+    "bolditalfont",
 };
 
 template <typename IOS>
@@ -105,19 +115,16 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth,
         if (PrintDoCont) {
             height = PageWidth * (1.0 - ContRatio) * DPI;
             field_y = PageWidth * ContRatio * DPI;
-        }
-        else {
+        } else {
             height = PageWidth * DPI;
             field_y = 0;
         }
-    }
-    else {
+    } else {
         width = PageWidth * DPI;
         if (PrintDoCont) {
             height = PageHeight * (1.0 - ContRatio) * DPI;
             field_y = PageHeight * ContRatio * DPI;
-        }
-        else {
+        } else {
             height = PageHeight * DPI;
             field_y = 0;
         }
@@ -169,8 +176,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
                     field_h *= width * step_width / (step_width + 4) / field_w;
                     field_w = width * step_width / (step_width + 4);
                 }
-            }
-            else {
+            } else {
                 /* Decrease height to get minimum size */
                 field_w = width;
                 field_h = width * fieldheight / min_yards;
@@ -203,20 +209,17 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
             stage_field_y = field_h * springShow.FieldY() / springShow.StageH();
         } break;
         }
-    }
-    else {
+    } else {
         if (PrintLandscape) {
             width = PageHeight * DPI;
             height = PageWidth * DPI;
-        }
-        else {
+        } else {
             width = PageWidth * DPI;
             height = PageHeight * DPI;
         }
         if ((width * (fullheight / fullwidth)) > height) {
             width = height * (fullwidth / fullheight);
-        }
-        else {
+        } else {
             height = width * (fullheight / fullwidth);
         }
         width--;
@@ -224,8 +227,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
         if (PrintLandscape) {
             real_width = height;
             real_height = width;
-        }
-        else {
+        } else {
             real_width = width;
             real_height = height;
         }
@@ -329,8 +331,7 @@ void PrintShowToPS::PrintHeader(std::ostream& buffer, bool eps,
 {
     if (eps) {
         buffer << "%!PS-Adobe-3.0 EPSF-3.0\n";
-    }
-    else {
+    } else {
         buffer << "%!PS-Adobe-3.0\n";
     }
 
@@ -425,8 +426,7 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
             buffer << "%%EndSetup\n";
         } break;
         }
-    }
-    else {
+    } else {
         // this may throw if not doing spring show..
         const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
         buffer << "%%BeginProlog\n";
@@ -471,8 +471,7 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps,
                     PrintSpringshow(buffer, *curr_sheet);
                     break;
                 }
-            }
-            else {
+            } else {
                 PrintOverview(buffer, *curr_sheet);
             }
             if (eps)
@@ -556,12 +555,10 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
         if (part.font == PSFONT_TAB) {
             if (++tabstop > 3) {
                 buffer << "space_over\n";
-            }
-            else {
+            } else {
                 buffer << "tab" << tabstop << " do_tab\n";
             }
-        }
-        else {
+        } else {
             if (part.font != currfontnum) {
                 buffer << "/" << fontnames[part.font];
                 buffer << " findfont " << fontsize << " scalefont setfont\n";
@@ -582,8 +579,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
                 if (!temp_buf.empty()) {
                     if (line.GetCenter()) {
                         buffer << "(" << temp_buf << ") centerText\n";
-                    }
-                    else {
+                    } else {
                         buffer << "(" << temp_buf << ") leftText\n";
                     }
                 }
@@ -649,16 +645,14 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
         buffer << "%%Page: " << namestr << "(N)\n";
         if (!sheet.GetNumber().empty()) {
             buffer << "/pagenumtext (" << numberstr << "N) def\n";
-        }
-        else {
+        } else {
             buffer << "/pagenumtext () def\n";
         }
         step_offset = CoordUnits2Int(fieldsize.x) - step_width;
         /* south yardline */
         clip_s = Int2CoordUnits(step_offset) + fmin;
         clip_n = pmax;
-    }
-    else {
+    } else {
         /* find bounds */
         auto max_s = fmax;
         auto max_n = fmin;
@@ -679,20 +673,17 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
             buffer << "%%Page: " << namestr << "(S)\n";
             if (!sheet.GetNumber().empty()) {
                 buffer << "/pagenumtext (" << numberstr << "S) def\n";
-            }
-            else {
+            } else {
                 buffer << "/pagenumtext () def\n";
             }
             step_offset = 0;
             clip_s = pmin;
             clip_n = Int2CoordUnits(step_width) + fmin; /* north yardline */
-        }
-        else {
+        } else {
             buffer << "%%Page: " << namestr << "\n";
             if (!sheet.GetNumber().empty()) {
                 buffer << "/pagenumtext (" << numberstr << ") def\n";
-            }
-            else {
+            } else {
                 buffer << "/pagenumtext () def\n";
             }
             step_offset = (CoordUnits2Int(mMode.FieldSize().x) - step_width) / 2;
@@ -769,8 +760,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
     buffer << "%%Page: " << namestr << "\n";
     if (!sheet.GetNumber().empty()) {
         buffer << "/pagenumtext (" << numberstr << ") def\n";
-    }
-    else {
+    } else {
         buffer << "/pagenumtext () def\n";
     }
 

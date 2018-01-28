@@ -22,20 +22,20 @@
 
 #include "draw.h"
 
-#include <wx/dc.h>
-#include <wx/dcmemory.h>
-#include "confgr.h"
-#include "calchartdoc.h"
-#include "cc_show.h"
-#include "cc_sheet.h"
-#include "cc_point.h"
-#include "cc_text.h"
 #include "animate.h"
 #include "animatecommand.h"
-#include "draw_utils.h"
+#include "calchartdoc.h"
 #include "cc_drawcommand.h"
+#include "cc_point.h"
+#include "cc_sheet.h"
+#include "cc_show.h"
+#include "cc_text.h"
+#include "confgr.h"
+#include "draw_utils.h"
 #include "modes.h"
 #include <memory>
+#include <wx/dc.h>
+#include <wx/dcmemory.h>
 
 extern wxFont* pointLabelFont;
 
@@ -74,8 +74,7 @@ void DrawArrow(wxDC& dc, const wxPoint& pt, wxCoord lineLength,
             pt + wxPoint(lineLength / 2, ArrowSize));
         dc.DrawLine(pt + wxPoint(lineLength / 2 - (wxCoord)ArrowSize, ArrowSize * 2),
             pt + wxPoint(lineLength / 2, ArrowSize));
-    }
-    else {
+    } else {
         dc.DrawLine(pt + wxPoint(-(lineLength / 2 - (wxCoord)ArrowSize), 0),
             pt + wxPoint(-lineLength / 2, ArrowSize));
         dc.DrawLine(
@@ -212,8 +211,7 @@ void DrawSheetPoints(
             dc.SetPen(brushAndPen.second);
             dc.SetTextForeground(
                 config.Get_CalChartBrushAndPen(selectedTextColor).second.GetColour());
-        }
-        else {
+        } else {
             auto brushAndPen = config.Get_CalChartBrushAndPen(unselectedColor);
             fillBrush = brushAndPen.first;
             dc.SetBrush(brushAndPen.first);
@@ -249,8 +247,7 @@ void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CalChart::Coord o
         selectedColor = COLOR_POINT_HILIT;
         unselectedTextColor = COLOR_POINT_TEXT;
         selectedTextColor = COLOR_POINT_HILIT_TEXT;
-    }
-    else {
+    } else {
         unselectedColor = COLOR_REF_POINT;
         selectedColor = COLOR_REF_POINT_HILIT;
         unselectedTextColor = COLOR_REF_POINT_TEXT;
@@ -412,8 +409,7 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
                     }
                     x += d;
                 }
-            }
-            else {
+            } else {
                 if (!do_tab) {
                     wxCoord textw, texth;
                     dc.GetTextExtent(c.text, &textw, &texth);
@@ -447,8 +443,7 @@ CreateFieldForPrinting(int left_limit, int right_limit, bool landscape)
     auto left_edge = -CalChart::kFieldStepSizeSouthEdgeFromCenter[landscape];
     if (left_limit < left_edge) {
         left_edge = left_limit;
-    }
-    else if ((left_edge + siz.x) < right_limit) {
+    } else if ((left_edge + siz.x) < right_limit) {
         left_edge = right_limit - siz.x;
     }
     CalChart::Coord off = { Int2CoordUnits(-left_edge),
@@ -529,8 +524,7 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
         dc.SetUserScale(pageW / kSizeXLandscape, pageH / kSizeYLandscape);
         pageW = kSizeXLandscape;
         pageH = kSizeYLandscape;
-    }
-    else {
+    } else {
         dc.SetUserScale(pageW / kSizeX, pageH / kSizeY);
         pageW = kSizeX;
         pageH = kSizeY;
@@ -540,15 +534,14 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
     dc.SetFont(*wxTheFontList->FindOrCreateFont(16, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 1, wxPENSTYLE_SOLID));
 
-    DrawCenteredText(dc, kHeader, wxPoint(pageW * kHeaderLocation[landscape][0],
-                                      pageH * kHeaderLocation[landscape][1]));
+    DrawCenteredText(dc, kHeader, wxPoint(pageW * kHeaderLocation[landscape][0], pageH * kHeaderLocation[landscape][1]));
 
     DrawCenteredText(dc, sheet.GetNumber(),
         wxPoint(pageW * kUpperNumberPosition[landscape][0],
-                         pageH * kUpperNumberPosition[landscape][1]));
+            pageH * kUpperNumberPosition[landscape][1]));
     DrawCenteredText(dc, sheet.GetNumber(),
         wxPoint(pageW * kLowerNumberPosition[landscape][0],
-                         pageH * kLowerNumberPosition[landscape][1]));
+            pageH * kLowerNumberPosition[landscape][1]));
     dc.DrawRectangle(pageW * kLowerNumberBox[landscape][0],
         pageH * kLowerNumberBox[landscape][1],
         pageW * kLowerNumberBox[landscape][2],
@@ -558,48 +551,44 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
 
     DrawLineOverText(dc, kMusicLabel,
         wxPoint(pageW * kMusicLabelPosition[landscape][0],
-                         pageH * kMusicLabelPosition[landscape][1]),
+            pageH * kMusicLabelPosition[landscape][1]),
         pageW * kMusicLabelPosition[landscape][2]);
     DrawLineOverText(dc, kFormationLabel,
         wxPoint(pageW * kFormationLabelPosition[landscape][0],
-                         pageH * kFormationLabelPosition[landscape][1]),
+            pageH * kFormationLabelPosition[landscape][1]),
         pageW * kFormationLabelPosition[landscape][2]);
     DrawLineOverText(dc, kGameLabel,
         wxPoint(pageW * kGameLabelPosition[landscape][0],
-                         pageH * kGameLabelPosition[landscape][1]),
+            pageH * kGameLabelPosition[landscape][1]),
         pageW * kGameLabelPosition[landscape][2]);
     DrawLineOverText(dc, kPageLabel,
         wxPoint(pageW * kPageLabelPosition[landscape][0],
-                         pageH * kPageLabelPosition[landscape][1]),
+            pageH * kPageLabelPosition[landscape][1]),
         pageW * kPageLabelPosition[landscape][2]);
     DrawCenteredText(dc, kSideLabel,
         wxPoint(pageW * kSideLabelPosition[landscape][0],
-                         pageH * kSideLabelPosition[landscape][1]));
+            pageH * kSideLabelPosition[landscape][1]));
 
     // draw arrows
     DrawCenteredText(dc, kUpperSouthLabel,
         wxPoint(pageW * kUpperSouthPosition[landscape][0],
-                         pageH * kUpperSouthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(pageW * kUpperSouthArrow[landscape][0],
-                      pageH * kUpperSouthArrow[landscape][1]),
+            pageH * kUpperSouthPosition[landscape][1]));
+    DrawArrow(dc, wxPoint(pageW * kUpperSouthArrow[landscape][0], pageH * kUpperSouthArrow[landscape][1]),
         pageW * kUpperSouthArrow[landscape][2], false);
     DrawCenteredText(dc, kUpperNorthLabel,
         wxPoint(pageW * kUpperNorthPosition[landscape][0],
-                         pageH * kUpperNorthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(pageW * kUpperNorthArrow[landscape][0],
-                      pageH * kUpperNorthArrow[landscape][1]),
+            pageH * kUpperNorthPosition[landscape][1]));
+    DrawArrow(dc, wxPoint(pageW * kUpperNorthArrow[landscape][0], pageH * kUpperNorthArrow[landscape][1]),
         pageW * kUpperNorthArrow[landscape][2], true);
     DrawCenteredText(dc, kLowerSouthLabel,
         wxPoint(pageW * kLowerSouthPosition[landscape][0],
-                         pageH * kLowerSouthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(pageW * kLowerSouthArrow[landscape][0],
-                      pageH * kLowerSouthArrow[landscape][1]),
+            pageH * kLowerSouthPosition[landscape][1]));
+    DrawArrow(dc, wxPoint(pageW * kLowerSouthArrow[landscape][0], pageH * kLowerSouthArrow[landscape][1]),
         pageW * kLowerSouthArrow[landscape][2], false);
     DrawCenteredText(dc, kLowerNorthLabel,
         wxPoint(pageW * kLowerNorthPosition[landscape][0],
-                         pageH * kLowerNorthPosition[landscape][1]));
-    DrawArrow(dc, wxPoint(pageW * kLowerNorthArrow[landscape][0],
-                      pageH * kLowerNorthArrow[landscape][1]),
+            pageH * kLowerNorthPosition[landscape][1]));
+    DrawArrow(dc, wxPoint(pageW * kLowerNorthArrow[landscape][0], pageH * kLowerNorthArrow[landscape][1]),
         pageW * kLowerNorthArrow[landscape][2], true);
 
     DrawCont(
@@ -994,8 +983,7 @@ void DrawMode(wxDC& dc, const CalChartConfiguration& config,
     try {
         auto real_mode = dynamic_cast<const CalChart::ShowModeStandard&>(mode);
         ShowModeStandard_DrawHelper(dc, config, real_mode, howToDraw);
-    }
-    catch (std::bad_cast&) {
+    } catch (std::bad_cast&) {
         // now try as spring show
         auto real_mode = dynamic_cast<const CalChart::ShowModeSprShow&>(mode);
         ShowModeSprShow_DrawHelper(dc, config, real_mode, howToDraw);

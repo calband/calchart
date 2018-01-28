@@ -22,10 +22,10 @@
 
 #pragma once
 
+#include <array>
+#include <memory>
 #include <wx/dc.h>
 #include <wx/event.h>
-#include <memory>
-#include <array>
 
 class BackgroundImage {
 public:

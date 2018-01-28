@@ -21,13 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate_types.h"
 #include "animate.h"
+#include "animate_types.h"
 
 #include <wx/docview.h>
 
-#include <memory>
 #include <map>
+#include <memory>
 
 class AnimationFrame;
 class FieldView;

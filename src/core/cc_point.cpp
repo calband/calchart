@@ -24,8 +24,8 @@
 #include "cc_fileformat.h"
 
 #include <assert.h>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 namespace CalChart {
 

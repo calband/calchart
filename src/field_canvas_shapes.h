@@ -25,10 +25,10 @@
 
 #include <wx/docview.h>
 
-#include <vector>
-#include <memory>
 #include <functional>
 #include <map>
+#include <memory>
+#include <vector>
 
 namespace CalChart {
 class Shape;
@@ -44,11 +44,12 @@ public:
 
     virtual void OnMouseLeftDown(CalChart::Coord pos) = 0;
     virtual bool OnMouseUpDone(CalChart::Coord const&) { return true; }
+
 protected:
     void BeginMoveDrag(CC_DRAG_TYPES type, const CalChart::Coord& start);
     void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CalChart::Shape> shape);
 
-    std::vector<std::unique_ptr<CalChart::Shape> > m_shape_list;
+    std::vector<std::unique_ptr<CalChart::Shape>> m_shape_list;
     CC_DRAG_TYPES move_drag = CC_DRAG_NONE;
 };
 

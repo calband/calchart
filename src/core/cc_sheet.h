@@ -21,18 +21,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_types.h"
+#include "animate.h"
 #include "cc_continuity.h"
+#include "cc_fileformat.h"
+#include "cc_image.h"
 #include "cc_point.h"
 #include "cc_text.h"
-#include "cc_fileformat.h"
+#include "cc_types.h"
 #include "json.h"
-#include "animate.h"
-#include "cc_image.h"
 
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 // CalChart Sheet
 // The CalChart sheet object is a collection of CC_point locations, the number

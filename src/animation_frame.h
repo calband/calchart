@@ -24,8 +24,8 @@
 #include "animate_types.h"
 #include "animation_view.h"
 
-#include <wx/wx.h>
 #include <wx/docview.h>
+#include <wx/wx.h>
 
 #include <functional>
 #include <map>
@@ -119,7 +119,7 @@ private:
 
     // continuity errors:
     wxChoice* mErrorList;
-    std::vector<std::pair<CalChart::ErrorMarker, unsigned> > mErrorMarkers;
+    std::vector<std::pair<CalChart::ErrorMarker, unsigned>> mErrorMarkers;
     FancyTextWin* mErrorText;
 
     // timer stuff:

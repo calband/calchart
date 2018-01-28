@@ -22,13 +22,13 @@
 
 #pragma once
 
+#include "calchartdoc.h"
 #include "cc_continuity.h"
 #include "cc_coord.h"
-#include "calchartdoc.h"
 #include "cc_show.h"
-#include <ostream>
 #include <deque>
 #include <map>
+#include <ostream>
 #include <wx/cmdproc.h>
 
 class CalChartDocCommand : public wxCommand {

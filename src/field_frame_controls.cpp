@@ -20,11 +20,16 @@
 */
 
 #include "field_frame_controls.h"
-#include "ui_enums.h"
 #include "cc_point.h"
+#include "ui_enums.h"
 
 static const wxString gridtext[] = {
-    wxT("None"), wxT("1"), wxT("2"), wxT("4"), wxT("Mil"), wxT("2-Mil"),
+    wxT("None"),
+    wxT("1"),
+    wxT("2"),
+    wxT("4"),
+    wxT("Mil"),
+    wxT("2-Mil"),
 };
 
 // zero is special and means fit

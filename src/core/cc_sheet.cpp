@@ -22,17 +22,17 @@
 
 #include "cc_sheet.h"
 
-#include "cc_show.h"
-#include "cc_fileformat.h"
 #include "animatecommand.h"
+#include "cc_fileformat.h"
+#include "cc_show.h"
 #include "viewer_translate.h"
 
-#include <sstream>
+#include <algorithm>
+#include <cctype>
+#include <functional>
 #include <iostream>
 #include <map>
-#include <cctype>
-#include <algorithm>
-#include <functional>
+#include <sstream>
 
 namespace CalChart {
 
@@ -102,8 +102,7 @@ CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
     if (continity_for_symbol.count(symbol) == 0) {
         // we haven't seen this symbol->cont_index yet
         continity_for_symbol[symbol] = cont_index;
-    }
-    else {
+    } else {
         if (continity_for_symbol[symbol] != cont_index) {
             std::stringstream buf;
             buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
@@ -119,8 +118,7 @@ CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
     }
     if (symbol_for_continuity.count(cont_index) == 0) {
         symbol_for_continuity[cont_index] = symbol;
-    }
-    else {
+    } else {
         if (symbol_for_continuity[cont_index] != symbol) {
             std::stringstream buf;
             buf << "Error, symbol inconsistency on sheet \"" << sheet_name << "\".\n";
@@ -345,8 +343,8 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         sheet->mAnimationContinuity.at(symbol_index).SetText(textstr);
     };
     auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, const uint8_t* ptr,
-        size_t size) {
-        static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)> >
+                               size_t size) {
+        static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
             parser = {
                 { INGL_ECNT, parse_INGL_ECNT },
             };
@@ -375,11 +373,14 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         }
     };
 
-    static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)> >
+    static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
         parser = {
-            { INGL_NAME, parse_INGL_NAME }, { INGL_DURA, parse_INGL_DURA },
-            { INGL_PNTS, parse_INGL_PNTS }, { INGL_CONT, parse_INGL_CONT },
-            { INGL_PCNT, parse_INGL_PCNT }, { INGL_BACK, parse_INGL_BACK },
+            { INGL_NAME, parse_INGL_NAME },
+            { INGL_DURA, parse_INGL_DURA },
+            { INGL_PNTS, parse_INGL_PNTS },
+            { INGL_CONT, parse_INGL_CONT },
+            { INGL_PCNT, parse_INGL_PCNT },
+            { INGL_BACK, parse_INGL_BACK },
         };
 
     auto table = Parser::ParseOutLabels(ptr, ptr + size);
@@ -453,25 +454,21 @@ std::vector<uint8_t> Sheet::SerializeSheetData() const
         result, Parser::Construct_block(INGL_NAME, tstring));
 
     // Write DURATION
-    Parser::Append(result, Parser::Construct_block(
-                               INGL_DURA, uint32_t{ GetBeats() }));
+    Parser::Append(result, Parser::Construct_block(INGL_DURA, uint32_t{ GetBeats() }));
 
     // Write ALL_POINTS
-    Parser::Append(result, Parser::Construct_block(
-                               INGL_PNTS, SerializeAllPoints()));
+    Parser::Append(result, Parser::Construct_block(INGL_PNTS, SerializeAllPoints()));
 
     // Write Continuity
-    Parser::Append(result, Parser::Construct_block(
-                               INGL_CONT, SerializeContinuityData()));
+    Parser::Append(result, Parser::Construct_block(INGL_CONT, SerializeContinuityData()));
 
     // Write Continuity
     Parser::Append(result,
         Parser::Construct_block(
-                       INGL_PCNT, SerializePrintContinuityData()));
+            INGL_PCNT, SerializePrintContinuityData()));
 
     // Write Continuity
-    Parser::Append(result, Parser::Construct_block(
-                               INGL_BACK, SerializeBackgroundImageData()));
+    Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageData()));
 
     return result;
 }
@@ -484,8 +481,7 @@ std::vector<uint8_t> Sheet::SerializeSheetData() const
 std::vector<uint8_t> Sheet::SerializeSheet() const
 {
     std::vector<uint8_t> result;
-    Parser::Append(result, Parser::Construct_block(
-                               INGL_SHET, SerializeSheetData()));
+    Parser::Append(result, Parser::Construct_block(INGL_SHET, SerializeSheetData()));
     return result;
 }
 
@@ -618,8 +614,7 @@ void Sheet::SetPosition(const Coord& val, unsigned i, unsigned ref)
             }
         }
         mPoints[i].SetPos(val);
-    }
-    else {
+    } else {
         mPoints[i].SetPos(val, ref);
     }
 }
@@ -745,8 +740,7 @@ void Sheet::sheet_round_trip_test()
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(),
-                                                                                    re_read_sheet_data.begin());
+        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         assert(is_equal);
     }
     {
@@ -761,8 +755,7 @@ void Sheet::sheet_round_trip_test()
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(),
-                                                                                    re_read_sheet_data.begin());
+        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         assert(is_equal);
     }
     {
@@ -787,8 +780,7 @@ void Sheet::sheet_round_trip_test()
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(),
-                                                                                    re_read_sheet_data.begin());
+        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         //		auto mismatch_at = std::mismatch(blank_sheet_data.begin(),
         // blank_sheet_data.end(), re_read_sheet_data.begin());
         //		std::cout<<"mismatch at

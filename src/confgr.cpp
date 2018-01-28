@@ -20,21 +20,21 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/utils.h>
-#include <wx/brush.h>
-#include <wx/colour.h>
-#include <wx/pen.h>
-#include <wx/config.h>
-#include <wx/confbase.h>
-#include <wx/file.h>
+#include <array>
 #include <ctype.h>
 #include <string>
-#include <array>
+#include <wx/brush.h>
+#include <wx/colour.h>
+#include <wx/confbase.h>
+#include <wx/config.h>
+#include <wx/file.h>
+#include <wx/pen.h>
+#include <wx/utils.h>
 
 #include "calchartapp.h"
+#include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "modes.h"
-#include "cc_omniview_constants.h"
 
 using namespace CalChart;
 
@@ -138,11 +138,19 @@ const wxString yard_text_index[kYardTextValues] = {
 };
 
 const wxString spr_line_text_defaults[kSprLineTextValues] = {
-    wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
+    wxT("A"),
+    wxT("B"),
+    wxT("C"),
+    wxT("D"),
+    wxT("E"),
 };
 
 const wxString spr_line_text_index[kSprLineTextValues] = {
-    wxT("A"), wxT("B"), wxT("C"), wxT("D"), wxT("E"),
+    wxT("A"),
+    wxT("B"),
+    wxT("C"),
+    wxT("D"),
+    wxT("E"),
 };
 
 static CalChartConfiguration& GetConfig()

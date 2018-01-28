@@ -26,8 +26,8 @@
 #include "cc_coord.h"
 #include "modes.h"
 
-#include "ghost_module.h"
 #include "background_image.h"
+#include "ghost_module.h"
 
 #include <wx/docview.h>
 

@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include <wx/string.h>
-#include <wx/gdicmn.h>
-#include <vector>
+#include <array>
 #include <functional>
 #include <map>
-#include <array>
 #include <memory>
+#include <vector>
+#include <wx/gdicmn.h>
+#include <wx/string.h>
 
 // forward declare
 class wxPen;
@@ -110,7 +110,7 @@ public:
     void FlushWriteQueue() const;
 
 private:
-    mutable std::map<wxString, std::function<void()> > mWriteQueue;
+    mutable std::map<wxString, std::function<void()>> mWriteQueue;
 
 // macro for declaring configuration Get_, Set_, and Clear_
 #define DECLARE_CONFIGURATION_FUNCTIONS(Key, Type) \

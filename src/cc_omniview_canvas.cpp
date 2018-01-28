@@ -21,13 +21,13 @@
 */
 
 #include "cc_omniview_canvas.h"
-#include "animation_view.h"
-#include "confgr.h"
-#include "modes.h"
 #include "animation_frame.h"
-#include "cc_omniview_constants.h"
-#include "draw.h"
+#include "animation_view.h"
 #include "calchartdoc.h"
+#include "cc_omniview_constants.h"
+#include "confgr.h"
+#include "draw.h"
+#include "modes.h"
 
 #include <wx/dcbuffer.h>
 
@@ -235,8 +235,7 @@ static bool LoadTextureWithImage(const wxImage& image, GLuint& texture)
         }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
             GL_UNSIGNED_BYTE, &mixedAlpha[0]);
-    }
-    else {
+    } else {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.GetWidth(), image.GetHeight(),
             0, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
     }
@@ -294,38 +293,31 @@ static WhichImageEnum GetMarcherTextureAndPoints(float cameraAngleToMarcher,
         y2 -= 0.45f;
         x1 -= 0.45f;
         x2 += 0.45f;
-    }
-    else if (cameraAngleToMarcher >= 3.0 * M_PI / 8.0 && cameraAngleToMarcher < 5.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 3.0 * M_PI / 8.0 && cameraAngleToMarcher < 5.0 * M_PI / 8.0) {
         x1 -= 0.45f;
         x2 += 0.45f;
-    }
-    else if (cameraAngleToMarcher >= 5.0 * M_PI / 8.0 && cameraAngleToMarcher < 7.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 5.0 * M_PI / 8.0 && cameraAngleToMarcher < 7.0 * M_PI / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
         x1 -= 0.45f;
         x2 += 0.45f;
-    }
-    else if (cameraAngleToMarcher >= 7.0 * M_PI / 8.0 && cameraAngleToMarcher < 9.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 7.0 * M_PI / 8.0 && cameraAngleToMarcher < 9.0 * M_PI / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
-    }
-    else if (cameraAngleToMarcher >= 9.0 * M_PI / 8.0 && cameraAngleToMarcher < 11.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 9.0 * M_PI / 8.0 && cameraAngleToMarcher < 11.0 * M_PI / 8.0) {
         y1 -= 0.45f;
         y2 += 0.45f;
         x1 += 0.45f;
         x2 -= 0.45f;
-    }
-    else if (cameraAngleToMarcher >= 11.0 * M_PI / 8.0 && cameraAngleToMarcher < 13.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 11.0 * M_PI / 8.0 && cameraAngleToMarcher < 13.0 * M_PI / 8.0) {
         x1 += 0.45f;
         x2 -= 0.45f;
-    }
-    else if (cameraAngleToMarcher >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
+    } else if (cameraAngleToMarcher >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
         y1 += 0.45f;
         y2 -= 0.45f;
         x1 += 0.45f;
         x2 -= 0.45f;
-    }
-    else // if (cameraAngleToMarcher >= 15.0*M_PI/8.0 || cameraAngleToMarcher <
+    } else // if (cameraAngleToMarcher >= 15.0*M_PI/8.0 || cameraAngleToMarcher <
     // 1.0*M_PI/8.0) // and everything else
     {
         y1 += 0.45f;
@@ -334,26 +326,19 @@ static WhichImageEnum GetMarcherTextureAndPoints(float cameraAngleToMarcher,
 
     if (relativeAngle >= 1.0 * M_PI / 8.0 && relativeAngle < 3.0 * M_PI / 8.0) {
         return kBR0;
-    }
-    else if (relativeAngle >= 3.0 * M_PI / 8.0 && relativeAngle < 5.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 3.0 * M_PI / 8.0 && relativeAngle < 5.0 * M_PI / 8.0) {
         return kR0;
-    }
-    else if (relativeAngle >= 5.0 * M_PI / 8.0 && relativeAngle < 7.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 5.0 * M_PI / 8.0 && relativeAngle < 7.0 * M_PI / 8.0) {
         return kFR0;
-    }
-    else if (relativeAngle >= 7.0 * M_PI / 8.0 && relativeAngle < 9.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 7.0 * M_PI / 8.0 && relativeAngle < 9.0 * M_PI / 8.0) {
         return kF0;
-    }
-    else if (relativeAngle >= 9.0 * M_PI / 8.0 && relativeAngle < 11.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 9.0 * M_PI / 8.0 && relativeAngle < 11.0 * M_PI / 8.0) {
         return kFL0;
-    }
-    else if (relativeAngle >= 11.0 * M_PI / 8.0 && relativeAngle < 13.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 11.0 * M_PI / 8.0 && relativeAngle < 13.0 * M_PI / 8.0) {
         return kL0;
-    }
-    else if (relativeAngle >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
+    } else if (relativeAngle >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
         return kBL0;
-    }
-    else // if (relativeAngle >= 15.0*M_PI/8.0 || relativeAngle < 1.0*M_PI/8.0)
+    } else // if (relativeAngle >= 15.0*M_PI/8.0 || relativeAngle < 1.0*M_PI/8.0)
     // // and everything else
     {
         return kB0;
@@ -1000,8 +985,7 @@ void CCOmniView_Canvas::OnMouseMove(wxMouseEvent& event)
         mViewAngle = mStartShiftMoveViewAngle + sin(delta.x / static_cast<float>(ClientSize.x));
         mViewAngleZ = mStartShiftMoveViewAngleZ + sin(delta.y / static_cast<float>(ClientSize.y));
         Refresh();
-    }
-    else {
+    } else {
         mShiftMoving = false;
     }
 }

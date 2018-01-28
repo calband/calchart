@@ -1,13 +1,13 @@
 #pragma once
 
-#include <memory>
 #include <functional>
+#include <memory>
 
 #include <wx/string.h>
 
 class CalChartApp;
 
-using StartStopFunc_t = std::pair<std::function<void()>, std::function<void()> >;
+using StartStopFunc_t = std::pair<std::function<void()>, std::function<void()>>;
 
 // The HostAppInterface will determine if the App is a server, client or
 // independent app.

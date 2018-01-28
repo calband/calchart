@@ -21,14 +21,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate_types.h"
 #include "animate.h"
+#include "animate_types.h"
 #include "cc_show.h"
 
-#include <vector>
 #include <array>
-#include <memory>
 #include <list>
+#include <memory>
+#include <vector>
 
 namespace CalChart {
 
@@ -36,7 +36,7 @@ class ContProcedure;
 class ContToken;
 class AnimateCommand;
 using AnimationVariables = std::array<std::map<unsigned, float>, NUMCONTVARS>;
-using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand> >;
+using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
 
 class AnimationErrors {
 public:
@@ -64,7 +64,7 @@ public:
     Compile(const Show& show, AnimationVariables& variablesStates,
         AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
-        std::list<std::unique_ptr<ContProcedure> > const& proc);
+        std::list<std::unique_ptr<ContProcedure>> const& proc);
 
 private:
     AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state);

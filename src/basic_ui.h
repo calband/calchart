@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <wx/wx.h>
 #include <wx/toolbar.h>
+#include <wx/wx.h>
 
 #include <vector>
 

@@ -64,8 +64,7 @@ CalChart::Coord CreateVector(float dir, float mag)
         if (dir < 180.0)
             r.y = -r.y;
         return r;
-    }
-    else {
+    } else {
         return { Float2CoordUnits(mag * cos(Deg2Rad(dir))),
             Float2CoordUnits(mag * -sin(Deg2Rad(dir))) };
     }
@@ -81,8 +80,7 @@ std::tuple<float, float> CreateUnitVector(float dir)
         if (dir < 180.0)
             std::get<1>(result) = -std::get<0>(result);
         return result;
-    }
-    else {
+    } else {
         return std::tuple<float, float>{ cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
     }
 }

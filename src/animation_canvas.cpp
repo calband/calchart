@@ -84,8 +84,7 @@ static auto CalcUserScaleAndOffset(std::pair<CalChart::Coord, CalChart::Coord> c
     // This will keep the whole field on in the canvas
     if (newSizeRatio < showAspectRatio) {
         newvalue = newX / (float)CoordUnits2Int(x);
-    }
-    else {
+    } else {
         newvalue = newY / (float)CoordUnits2Int(y);
     }
     auto userScale = newvalue * (CoordUnits2Int(1 << 16) / 65536.0);
@@ -97,7 +96,7 @@ static auto CalcUserScaleAndOffset(std::pair<CalChart::Coord, CalChart::Coord> c
     auto plus_windowx = windowSize.x / 2 - scaledx;
     auto plus_windowy = windowSize.y / 2 - scaledy;
 
-    return std::pair<double, std::pair<wxCoord, wxCoord> >{ userScale, { plus_windowx, plus_windowy } };
+    return std::pair<double, std::pair<wxCoord, wxCoord>>{ userScale, { plus_windowx, plus_windowy } };
 }
 
 void AnimationCanvas::UpdateScaleAndOrigin()
@@ -151,8 +150,7 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
         if (mAnimationView) {
             mAnimationView->PrevBeat();
         }
-    }
-    else {
+    } else {
         if (mAnimationView) {
             mAnimationView->SelectMarchersInBox(
                 mMouseXStart, mMouseYStart, mMouseXEnd, mMouseYEnd, event.AltDown());
@@ -190,12 +188,10 @@ void AnimationCanvas::OnChar(wxKeyEvent& event)
             mAnimationView->NextBeat();
         else if (event.GetKeyCode() == WXK_SPACE) {
             mAnimationView->ToggleTimer();
-        }
-        else {
+        } else {
             event.Skip();
         }
-    }
-    else {
+    } else {
         event.Skip();
     }
 }

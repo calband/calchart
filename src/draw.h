@@ -22,11 +22,11 @@
 */
 
 #include "cc_show.h"
-#include <wx/dc.h>
-#include <vector>
-#include <set>
-#include <map>
 #include "confgr.h"
+#include <map>
+#include <set>
+#include <vector>
+#include <wx/dc.h>
 
 class wxBrush;
 class wxString;

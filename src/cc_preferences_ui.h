@@ -22,11 +22,11 @@
 
 #pragma once
 
-#include <wx/wx.h>
-#include <wx/bmpcbox.h>
-#include <wx/spinctrl.h>
-#include <wx/notebook.h>
 #include "confgr.h"
+#include <wx/bmpcbox.h>
+#include <wx/notebook.h>
+#include <wx/spinctrl.h>
+#include <wx/wx.h>
 
 class CalChartPreferences : public wxDialog {
     DECLARE_CLASS(CalChartPreferences)
