@@ -30,51 +30,37 @@
 
 static const size_t kMaxPoints = 1000;
 
-enum {
-    PointPicker_PointPickerAll = 1100,
-    PointPicker_PointPickerNone,
-    PointPicker_PointPickerList,
+class PointPickerView : public wxView {
+public:
+    PointPickerView() = default;
+    ~PointPickerView() = default;
+    virtual void OnDraw(wxDC* dc) {}
+    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 };
 
-BEGIN_EVENT_TABLE(PointPicker, wxDialog)
-EVT_BUTTON(PointPicker_PointPickerAll, PointPicker::PointPickerAll)
-EVT_BUTTON(PointPicker_PointPickerNone, PointPicker::PointPickerNone)
-EVT_LISTBOX(PointPicker_PointPickerList, PointPicker::PointPickerSelect)
-EVT_LISTBOX_DCLICK(PointPicker_PointPickerList, PointPicker::PointPickerAll)
-END_EVENT_TABLE()
-
-PointPickerView::PointPickerView() {}
-PointPickerView::~PointPickerView() {}
-
-void PointPickerView::OnDraw(wxDC* dc) {}
 void PointPickerView::OnUpdate(wxView* sender, wxObject* hint)
 {
     static_cast<PointPicker*>(GetFrame())->Update();
 }
 
+enum {
+    PointPicker_PointPickerAll = 1100,
+    PointPicker_PointPickerList,
+};
+
+BEGIN_EVENT_TABLE(PointPicker, wxDialog)
+EVT_LISTBOX(PointPicker_PointPickerList, PointPicker::PointPickerSelect)
+EVT_LISTBOX_DCLICK(PointPicker_PointPickerList, PointPicker::PointPickerAll)
+END_EVENT_TABLE()
+
 PointPicker::PointPicker(CalChartDoc& shw, wxWindow* parent, wxWindowID id,
     const wxString& caption, const wxPoint& pos,
     const wxSize& size, long style)
-    : mShow(shw)
+    : super(parent, id, caption, pos, size, style)
+    , mShow(shw)
+    , mView(std::make_unique<PointPickerView>())
 {
-    Create(parent, id, caption, pos, size, style);
-}
-
-PointPicker::~PointPicker()
-{
-    if (mView)
-        delete mView;
-}
-
-bool PointPicker::Create(wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
-{
-    if (!wxDialog::Create(parent, id, caption, pos, size, style))
-        return false;
-
     // give this a view so it can pick up document changes
-    mView = new PointPickerView;
     mView->SetDocument(&mShow);
     mView->SetFrame(this);
 
@@ -86,41 +72,46 @@ bool PointPicker::Create(wxWindow* parent, wxWindowID id,
     GetSizer()->SetSizeHints(this);
 
     Center();
-
-    return true;
 }
 
 void PointPicker::CreateControls()
 {
     // create a sizer for laying things out top down:
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+    auto topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
 
     // add buttons to the top row
-    wxBoxSizer* top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxButton* closeBut = new wxButton(this, wxID_OK, wxT("&Close"));
-    closeBut->SetDefault();
-    top_button_sizer->Add(closeBut, wxSizerFlags(0).Border(wxALL, 5));
-
-    wxButton* setnumBut = new wxButton(this, PointPicker_PointPickerAll, wxT("&All"));
-    top_button_sizer->Add(setnumBut, wxSizerFlags(0).Border(wxALL, 5));
-
-    wxButton* setlabBut = new wxButton(this, PointPicker_PointPickerNone, wxT("&None"));
-    top_button_sizer->Add(setlabBut, wxSizerFlags(0).Border(wxALL, 5));
-
+    auto top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
     topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
+
+    auto button = new wxButton(this, wxID_OK, wxT("&Close"));
+    top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 5));
+    button->SetDefault();
+
+    button = new wxButton(this, PointPicker_PointPickerAll, wxT("&All"));
+    top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 5));
+    button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mShow.SetSelection(mShow.MakeSelectAll());
+    });
+
+    button = new wxButton(this, wxID_ANY, wxT("&None"));
+    top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 5));
+    button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        mShow.SetSelection(mShow.MakeUnselectAll());
+    });
 
     top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
+    topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
+
     auto symbols = GetSymbolsToolBar();
     for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
-        auto button = new wxBitmapButton(this, wxID_ANY, *(iter->bm));
-        SYMBOL_TYPE which = static_cast<SYMBOL_TYPE>(std::distance(symbols.begin(), iter));
-        button->Bind(wxEVT_BUTTON, [this, which](wxCommandEvent&) {
-            PointPickerBySymbol(which);
-        });
+        button = new wxBitmapButton(this, wxID_ANY, *(iter->bm));
         top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 2));
+        auto which = static_cast<SYMBOL_TYPE>(std::distance(symbols.begin(), iter));
+        button->Bind(wxEVT_BUTTON, [this, which](wxCommandEvent&) {
+            mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
+        });
     }
-    topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
 
     mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
         wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
@@ -131,16 +122,6 @@ void PointPicker::CreateControls()
 void PointPicker::PointPickerAll(wxCommandEvent&)
 {
     mShow.SetSelection(mShow.MakeSelectAll());
-}
-
-void PointPicker::PointPickerBySymbol(SYMBOL_TYPE which)
-{
-    mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
-}
-
-void PointPicker::PointPickerNone(wxCommandEvent&)
-{
-    mShow.SetSelection(mShow.MakeUnselectAll());
 }
 
 void PointPicker::PointPickerSelect(wxCommandEvent&)

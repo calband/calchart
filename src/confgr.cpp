@@ -480,6 +480,10 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool, false);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameFieldThumbnailVisibility, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameFieldControlsVisibility, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameContinuityInfoVisibility, bool, true);
+
 // OBSOLETE Settigns
 // "MainFrameZoom" now obsolete with version post 3.2, use "MainFrameZoom2"
 // IMPLEMENT_CONFIGURATION_FUNCTIONS( MainFrameZoom, float, 0.5);

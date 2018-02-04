@@ -35,9 +35,13 @@ class Show;
 
 class FieldCanvas;
 class FieldFrameControls;
+class FieldBrowser;
+class ContinuityBrowser;
 class FieldView;
 class CalChartDoc;
 class CalChartConfiguration;
+class wxSplitterWindow;
+class wxSplitterEvent;
 
 // Define the main editing frame
 class FieldFrame : public wxDocChildFrame {
@@ -121,12 +125,18 @@ public:
     void OnCmd_ShowBackgroundImages(wxCommandEvent& event);
 
     void OnCmd_GhostOption(wxCommandEvent& event);
+    void OnCmd_AdjustViews(wxCommandEvent& event);
 
     void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 
     void OnCmd_SolveTransition(wxCommandEvent& event);
 
     void OnSize(wxSizeEvent& event);
+
+    void OnSplitDclick(wxSplitterEvent& event);
+    void OnCmd_ZoomFit(wxCommandEvent&);
+    void OnCmd_ZoomIn(wxCommandEvent&);
+    void OnCmd_ZoomOut(wxCommandEvent&);
 
     void AppendShow();
     void ImportContFile();
@@ -157,15 +167,23 @@ public:
     const CalChartDoc* GetShow() const;
     CalChartDoc* GetShow();
 
-    FieldFrameControls* mControls;
-
-    FieldCanvas* mCanvas;
-
-    wxWindow* mAnimationFrame;
-    CalChartConfiguration& config;
     void ClearAnimationFrame();
 
-    DECLARE_EVENT_TABLE()
 private:
     void refreshGhostOptionStates();
+    void ChangeFieldThumbnailVisibility(bool show);
+    void ChangeFieldControlsVisibility(bool show);
+    void ChangeContinuityInfoVisibility(bool show);
+
+    FieldFrameControls* mControls;
+    FieldCanvas* mCanvas;
+    FieldBrowser* mFieldBrowser;
+    ContinuityBrowser* mContinuityBrowser;
+    wxSplitterWindow* mFieldThumbnailSplit;
+    wxSplitterWindow* mContinuityInfoSplit;
+    wxSplitterWindow* mFieldControlSplit;
+    wxWindow* mAnimationFrame;
+    CalChartConfiguration& mConfig;
+
+    DECLARE_EVENT_TABLE()
 };

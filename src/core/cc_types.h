@@ -53,6 +53,7 @@ static const SYMBOL_TYPE k_symbols[] = {
 
 namespace CalChart {
 std::string GetNameForSymbol(SYMBOL_TYPE which);
+std::string GetLongNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
 }
 

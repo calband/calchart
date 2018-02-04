@@ -28,43 +28,31 @@
 
 #include <vector>
 
-class PointPickerView : public wxView {
-public:
-    PointPickerView();
-    ~PointPickerView();
-    virtual void OnDraw(wxDC* dc);
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
-};
+class PointPickerView;
 
 class PointPicker : public wxDialog {
+    using super = wxDialog;
+
 public:
     PointPicker(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("Select Points"),
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~PointPicker();
+    ~PointPicker() = default;
 
     void Update();
 
 private:
     CalChartDoc& mShow;
-    PointPickerView* mView;
+    std::unique_ptr<PointPickerView> mView;
     wxListBox* mList;
     std::vector<wxString> mCachedLabels;
     SelectionList mCachedSelection;
 
-    bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Select Points"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-
     void CreateControls();
 
     void PointPickerAll(wxCommandEvent&);
-    void PointPickerBySymbol(SYMBOL_TYPE which);
-    void PointPickerNone(wxCommandEvent&);
     void PointPickerSelect(wxCommandEvent&);
 
     DECLARE_EVENT_TABLE()
