@@ -37,9 +37,12 @@ public:
     double GetZoomAmount() const;
     void SetZoomAmount(double zoom);
     int GetRefChoice() const;
+    int GetGhostChoice() const;
+    void SetGhostChoice(int which);
 
 private:
     wxChoice* mGridChoice;
     wxComboBox* mZoomBox;
     wxChoice* mRefChoice;
+    wxChoice* mGhostChoice;
 };

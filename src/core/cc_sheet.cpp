@@ -40,6 +40,10 @@ const std::string contnames[MAX_NUM_SYMBOLS] = {
     "Plain", "Sol", "Bksl", "Sl", "X", "Solbksl", "Solsl", "Solx"
 };
 
+const std::string long_contnames[MAX_NUM_SYMBOLS] = {
+    "Plain", "Solid", "Backslash", "Slash", "Crossed", "Solid Backslash", "Solid Slash", "Solid Crossed"
+};
+
 Sheet::Sheet(size_t numPoints)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mBeats(1)
@@ -90,6 +94,14 @@ std::string GetNameForSymbol(SYMBOL_TYPE which)
         return "";
     }
     return contnames[which];
+}
+
+std::string GetLongNameForSymbol(SYMBOL_TYPE which)
+{
+    if (which > MAX_NUM_SYMBOLS) {
+        return "";
+    }
+    return long_contnames[which];
 }
 
 static void

@@ -196,6 +196,10 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameFieldThumbnailVisibility, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameFieldControlsVisibility, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameContinuityInfoVisibility, bool);
+
 public:
     // helpers for displaying different config attributes
     std::vector<wxString> GetColorNames() const;

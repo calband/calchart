@@ -41,6 +41,7 @@
 #include "e7_transition_solver_ui.h"
 #include "field_canvas.h"
 #include "field_frame_controls.h"
+#include "field_mini_browser.h"
 #include "field_view.h"
 #include "modes.h"
 #include "platconf.h"
@@ -100,6 +101,12 @@ EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__GhostNthSheet, FieldFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__ViewFieldThumbnail, FieldFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewFieldControls, FieldFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewContinuityInfo, FieldFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewZoomFit, FieldFrame::OnCmd_ZoomFit)
+EVT_MENU(CALCHART__ViewZoomIn, FieldFrame::OnCmd_ZoomIn)
+EVT_MENU(CALCHART__ViewZoomOut, FieldFrame::OnCmd_ZoomOut)
 EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
 EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
 EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
@@ -138,11 +145,15 @@ EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
 EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
 EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
+EVT_CHOICE(CALCHART__GhostControls, FieldFrame::OnCmd_GhostOption)
 EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
 EVT_MENU(CALCHART__E7TransitionSolver, FieldFrame::OnCmd_SolveTransition)
 EVT_SIZE(FieldFrame::OnSize)
+EVT_SPLITTER_DCLICK(CALCHART__ViewFieldThumbnail, FieldFrame::OnSplitDclick)
+EVT_SPLITTER_DCLICK(CALCHART__ViewFieldControls, FieldFrame::OnSplitDclick)
+EVT_SPLITTER_DCLICK(CALCHART__ViewContinuityInfo, FieldFrame::OnSplitDclick)
 END_EVENT_TABLE()
 
 class MyPrintout : public wxPrintout {
@@ -151,7 +162,7 @@ public:
         const CalChartConfiguration& config_)
         : wxPrintout(title)
         , mShow(show)
-        , config(config_)
+        , mConfig(config_)
     {
     }
     virtual ~MyPrintout() {}
@@ -171,12 +182,12 @@ public:
 
         int size = gPrintDialogData->GetPrintData().GetOrientation();
 
-        DrawForPrinting(dc, config, mShow, *sheet, 0, 2 == size);
+        DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
 
         return true;
     }
     const CalChartDoc& mShow;
-    const CalChartConfiguration& config;
+    const CalChartConfiguration& mConfig;
 };
 
 // Main frame constructor
@@ -186,9 +197,9 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     : wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size)
     , mCanvas(NULL)
     , mAnimationFrame(NULL)
-    , config(config_)
+    , mConfig(config_)
 {
-    this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // Give it an icon
     SetBandIcon(this);
 
@@ -210,6 +221,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
     file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."), wxT("Print show to PostScript"));
     file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."), wxT("Print show to Encapsulated PostScript"));
+    file_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
     file_menu->Append(CALCHART__EXPORT_VIEWER_FILE, wxT("Export for Online Viewer..."), wxT("Export show to be viewed using the CalChart Online Viewer"));
     file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
     file_menu->Append(wxID_CLOSE, wxT("Close Window\tCTRL-W"), wxT("Close this window"));
@@ -241,9 +253,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
     edit_menu->Append(CALCHART__E7TransitionSolver, wxT("Solve transition"), wxT("Solve the transition to the next sheet automatically"));
 
-    wxMenu* anim_menu = new wxMenu;
-    anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
-
     wxMenu* backgroundimage_menu = new wxMenu;
     backgroundimage_menu->AppendCheckItem(CALCHART__ShowBackgroundImages, wxT("Show Background Images"), wxT("Toggle showing background images"));
     backgroundimage_menu->Append(CALCHART__AddBackgroundImage, wxT("Add Background Image..."), wxT("Add a background image"));
@@ -252,11 +261,19 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     backgroundimage_menu->Enable(CALCHART__AddBackgroundImage, true);
     backgroundimage_menu->Enable(CALCHART__AdjustBackgroundImageMode, true);
 
-    wxMenu* ghost_menu = new wxMenu;
-    ghost_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
-    ghost_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
-    ghost_menu->Append(CALCHART__GhostPreviousSheet, wxT("Ghost Previous Sheet"), wxT("Draw a ghost of the previous stuntsheet"));
-    ghost_menu->Append(CALCHART__GhostNthSheet, wxT("Ghost Particular Sheet..."), wxT("Draw a ghost of a particular stuntsheet"));
+    wxMenu* view_menu = new wxMenu;
+    view_menu->Append(CALCHART__ViewFieldThumbnail, wxT("Show Field Thumbnail"), wxT("Controls Displaying Field Thumbnail"));
+    view_menu->Append(CALCHART__ViewFieldControls, wxT("Show Control"), wxT("Controls Displaying Controls"));
+    view_menu->Append(CALCHART__ViewContinuityInfo, wxT("Show Continuity"), wxT("Controls Displaying Continuity Info"));
+    view_menu->AppendSeparator();
+    view_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
+    view_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
+    view_menu->Append(CALCHART__GhostPreviousSheet, wxT("Ghost Previous Sheet"), wxT("Draw a ghost of the previous stuntsheet"));
+    view_menu->Append(CALCHART__GhostNthSheet, wxT("Ghost Particular Sheet..."), wxT("Draw a ghost of a particular stuntsheet"));
+    view_menu->AppendSeparator();
+    view_menu->Append(CALCHART__ViewZoomFit, wxT("Zoom to Fit\tCTRL-0"), wxT("Zoom to fit"));
+    view_menu->Append(CALCHART__ViewZoomIn, wxT("Zoom In\tCTRL-+"), wxT("Zoom In"));
+    view_menu->Append(CALCHART__ViewZoomOut, wxT("Zoom In\tCTRL--"), wxT("Zoom Out"));
 
     wxMenu* help_menu = new wxMenu;
     help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
@@ -265,9 +282,8 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     wxMenuBar* menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, wxT("&File"));
     menu_bar->Append(edit_menu, wxT("&Edit"));
+    menu_bar->Append(view_menu, wxT("&View"));
     menu_bar->Append(backgroundimage_menu, wxT("&Field Image"));
-    menu_bar->Append(ghost_menu, wxT("&Ghost View"));
-    menu_bar->Append(anim_menu, wxT("&CalChart Viewer"));
     menu_bar->Append(help_menu, wxT("&Help"));
     SetMenuBar(menu_bar);
 
@@ -278,23 +294,43 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // sanity: Don't let the user zoom too low
     {
-        auto zoom_size = config.Get_FieldFrameZoom();
+        auto zoom_size = mConfig.Get_FieldFrameZoom();
         if (zoom_size < 0.01) {
-            config.Set_FieldFrameZoom(0.01);
+            mConfig.Set_FieldFrameZoom(0.01);
         }
     }
 
-    // split out the controls from the canvas
-    auto split_window = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
-    mControls = new FieldFrameControls(split_window, config.Get_FieldFrameZoom());
+    // Set up the splits
+    // we split 3 times, first, is vertical, with Field Browswer on Left
+    mFieldThumbnailSplit = new wxSplitterWindow(this, CALCHART__ViewFieldThumbnail, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
+    // middle split is then middle field, right continuity
+    mContinuityInfoSplit = new wxSplitterWindow(mFieldThumbnailSplit, CALCHART__ViewContinuityInfo, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
+    // field split is controls above field
+    mFieldControlSplit = new wxSplitterWindow(mContinuityInfoSplit, CALCHART__ViewFieldControls, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
 
-    mCanvas = new FieldCanvas(split_window, *static_cast<FieldView*>(view), this, config.Get_FieldFrameZoom());
+    mControls = new FieldFrameControls(mFieldControlSplit, mConfig.Get_FieldFrameZoom());
+    mCanvas = new FieldCanvas(mFieldControlSplit, *static_cast<FieldView*>(view), this, mConfig.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
-    split_window->SplitHorizontally(mControls, mCanvas);
+    mFieldControlSplit->SplitHorizontally(mControls, mCanvas);
     auto control_size = mControls->GetSizer()->GetMinSize();
-    split_window->SetSashPosition(control_size.y + 5);
+    mFieldControlSplit->SetSashPosition(control_size.y + 5);
+
+    mContinuityBrowser = new ContinuityBrowser(static_cast<CalChartDoc*>(GetDocument()), mContinuityInfoSplit, wxID_ANY, wxDefaultPosition, wxSize{ 150, 800 });
+    mContinuityInfoSplit->SplitVertically(mFieldControlSplit, mContinuityBrowser);
+    mContinuityInfoSplit->SetSashPosition(GetSize().x - mContinuityBrowser->GetSizer()->GetMinSize().x - 5);
+    mContinuityInfoSplit->SetSashGravity(1);
+
+    mFieldBrowser = new FieldBrowser(static_cast<CalChartDoc*>(GetDocument()), mFieldThumbnailSplit, wxID_ANY, wxDefaultPosition, wxSize{ 180, 800 });
+    mFieldThumbnailSplit->SplitVertically(mFieldBrowser, mContinuityInfoSplit);
+    mFieldThumbnailSplit->SetSashPosition(180 + 5);
+
+    // Now determine what to show and not show.
+    // adjust the menu items to reflect.
+    ChangeFieldThumbnailVisibility(mConfig.Get_FieldFrameFieldThumbnailVisibility());
+    ChangeFieldControlsVisibility(mConfig.Get_FieldFrameFieldControlsVisibility());
+    ChangeContinuityInfoVisibility(mConfig.Get_FieldFrameContinuityInfoVisibility());
 
     CalChartDoc* show = static_cast<CalChartDoc*>(doc);
     SetTitle(show->GetTitle());
@@ -333,7 +369,7 @@ void FieldFrame::OnCmdPrint(wxCommandEvent& event)
 {
     // grab our current page setup.
     wxPrinter printer(gPrintDialogData);
-    MyPrintout printout(wxT("My Printout"), *GetShow(), config);
+    MyPrintout printout(wxT("My Printout"), *GetShow(), mConfig);
     wxPrintDialogData& printDialog = printer.GetPrintDialogData();
 
     int minPage, maxPage, pageFrom, pageTo;
@@ -358,8 +394,8 @@ void FieldFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
     // grab our current page setup.
     wxPrintPreview* preview = new wxPrintPreview(
-        new MyPrintout(wxT("My Printout"), *GetShow(), config),
-        new MyPrintout(wxT("My Printout"), *GetShow(), config), gPrintDialogData);
+        new MyPrintout(wxT("My Printout"), *GetShow(), mConfig),
+        new MyPrintout(wxT("My Printout"), *GetShow(), mConfig), gPrintDialogData);
     if (!preview->Ok()) {
         delete preview;
         wxMessageBox(wxT("There was a problem previewing.\nPerhaps your current "
@@ -391,7 +427,7 @@ void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
         PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()),
             false, this);
         if (dialog.ShowModal() == wxID_OK) {
-            dialog.PrintShow(config);
+            dialog.PrintShow(mConfig);
         }
     }
 }
@@ -402,7 +438,7 @@ void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
         PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()),
             true, this);
         if (dialog.ShowModal() == wxID_OK) {
-            dialog.PrintShow(config);
+            dialog.PrintShow(mConfig);
         }
     }
 }
@@ -571,7 +607,7 @@ void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
 void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
 {
     if (GetShow()) {
-        ContinuityEditor* ce = new ContinuityEditor(static_cast<CalChartDoc*>(GetDocument()), this,
+        auto ce = new ContinuityEditor(static_cast<CalChartDoc*>(GetDocument()), this,
             wxID_ANY, wxT("Animation Continuity"));
         // make it modeless:
         ce->Show();
@@ -645,8 +681,8 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
         mAnimationFrame->Raise();
     } else if (GetShow()) {
         mAnimationFrame = new AnimationFrame(
-            [this]() { this->ClearAnimationFrame(); }, GetShow(), config, GetView(),
-            this, wxSize(static_cast<int>(config.Get_AnimationFrameWidth()), static_cast<int>(config.Get_AnimationFrameHeight())));
+            [this]() { this->ClearAnimationFrame(); }, GetShow(), mConfig, GetView(),
+            this, wxSize(static_cast<int>(mConfig.Get_AnimationFrameWidth()), static_cast<int>(mConfig.Get_AnimationFrameHeight())));
     }
 }
 
@@ -889,23 +925,28 @@ void FieldFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
 {
-    switch (event.GetId()) {
-    case CALCHART__GhostOff:
+    int which_option = (event.GetId() == CALCHART__GhostControls) ? mControls->GetGhostChoice() : (event.GetId() == CALCHART__GhostOff) ? 0 : (event.GetId() == CALCHART__GhostNextSheet) ? 1 : (event.GetId() == CALCHART__GhostPreviousSheet) ? 2 : 3;
+    switch (which_option) {
+    case 0:
         GetFieldView()->getGhostModule().setGhostSource(GhostModule::disabled);
+        mControls->SetGhostChoice(0);
         break;
-    case CALCHART__GhostNextSheet:
+    case 1:
         GetFieldView()->getGhostModule().setGhostSource(GhostModule::next);
+        mControls->SetGhostChoice(1);
         break;
-    case CALCHART__GhostPreviousSheet:
+    case 2:
         GetFieldView()->getGhostModule().setGhostSource(GhostModule::previous);
+        mControls->SetGhostChoice(2);
         break;
-    case CALCHART__GhostNthSheet: {
+    case 3: {
         wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:",
             "Ghost Sheet", "1", this);
         long targetSheetNum = 0;
         if (targetSheet.ToLong(&targetSheetNum)) {
             GetFieldView()->getGhostModule().setGhostSource(GhostModule::specific,
                 static_cast<int>(targetSheetNum) - 1);
+            mControls->SetGhostChoice(3);
         } else {
             wxMessageBox(wxT("The input must be a number."),
                 wxT("Operation failed."));
@@ -920,6 +961,79 @@ void FieldFrame::refreshGhostOptionStates()
 {
     bool active = GetFieldView()->getGhostModule().isActive();
     GetMenuBar()->FindItem(CALCHART__GhostOff)->Enable(active);
+}
+
+void FieldFrame::OnCmd_AdjustViews(wxCommandEvent& event)
+{
+    switch (event.GetId()) {
+    case CALCHART__ViewFieldThumbnail:
+        ChangeFieldThumbnailVisibility(!mConfig.Get_FieldFrameFieldThumbnailVisibility());
+        break;
+    case CALCHART__ViewFieldControls:
+        ChangeFieldControlsVisibility(!mConfig.Get_FieldFrameFieldControlsVisibility());
+        break;
+    case CALCHART__ViewContinuityInfo:
+        ChangeContinuityInfoVisibility(!mConfig.Get_FieldFrameContinuityInfoVisibility());
+        break;
+    }
+}
+
+void FieldFrame::OnSplitDclick(wxSplitterEvent& event)
+{
+    switch (event.GetId()) {
+    case CALCHART__ViewFieldThumbnail:
+        ChangeFieldThumbnailVisibility(false);
+        break;
+    case CALCHART__ViewFieldControls:
+        ChangeFieldControlsVisibility(false);
+        break;
+    case CALCHART__ViewContinuityInfo:
+        ChangeContinuityInfoVisibility(false);
+        break;
+    }
+}
+
+void FieldFrame::ChangeFieldThumbnailVisibility(bool show)
+{
+    if (show) {
+        GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Hide Field Thumbnail"));
+        mConfig.Set_FieldFrameFieldThumbnailVisibility(true);
+        mFieldThumbnailSplit->SplitVertically(mFieldBrowser, mContinuityInfoSplit);
+        mFieldThumbnailSplit->SetSashPosition(180 + 5);
+    } else {
+        GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Show Field Thumbnail"));
+        mConfig.Set_FieldFrameFieldThumbnailVisibility(false);
+        mFieldThumbnailSplit->Unsplit(mFieldBrowser);
+    }
+}
+
+void FieldFrame::ChangeFieldControlsVisibility(bool show)
+{
+    if (show) {
+        GetMenuBar()->FindItem(CALCHART__ViewFieldControls)->SetItemLabel(wxT("Hide Controls"));
+        mConfig.Set_FieldFrameFieldControlsVisibility(true);
+        mFieldControlSplit->SplitHorizontally(mControls, mCanvas);
+        mFieldControlSplit->SetSashPosition(mControls->GetSizer()->GetMinSize().y + 5);
+    } else {
+        GetMenuBar()->FindItem(CALCHART__ViewFieldControls)->SetItemLabel(wxT("Show Controls"));
+        mConfig.Set_FieldFrameFieldControlsVisibility(false);
+        mFieldControlSplit->Unsplit(mControls);
+    }
+}
+
+void FieldFrame::ChangeContinuityInfoVisibility(bool show)
+{
+    if (show) {
+        GetMenuBar()->FindItem(CALCHART__ViewContinuityInfo)->SetItemLabel(wxT("Hide Continuity"));
+        mConfig.Set_FieldFrameContinuityInfoVisibility(true);
+        mContinuityInfoSplit->SplitVertically(mFieldControlSplit, mContinuityBrowser);
+        mContinuityInfoSplit->SetSashPosition(GetSize().x - mContinuityBrowser->GetSizer()->GetMinSize().x - 5);
+        mContinuityInfoSplit->SetSashGravity(1);
+    } else {
+        GetMenuBar()->FindItem(CALCHART__ViewContinuityInfo)->SetItemLabel(wxT("Show Continuity"));
+        mConfig.Set_FieldFrameContinuityInfoVisibility(false);
+        mContinuityInfoSplit->Unsplit(mContinuityBrowser);
+    }
 }
 
 void FieldFrame::OnCmd_ResetReferencePoint(wxCommandEvent& event)
@@ -940,8 +1054,8 @@ void FieldFrame::OnSize(wxSizeEvent& event)
     // HACK: Prevent width and height from growing out of control
     int w = event.GetSize().GetWidth();
     int h = event.GetSize().GetHeight();
-    config.Set_FieldFrameWidth((w > 1200) ? 1200 : w);
-    config.Set_FieldFrameHeight((h > 700) ? 700 : h);
+    mConfig.Set_FieldFrameWidth((w > 1200) ? 1200 : w);
+    mConfig.Set_FieldFrameHeight((h > 700) ? 700 : h);
     super::OnSize(event);
 }
 
@@ -1061,6 +1175,32 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
     do_zoom(zoom_amount);
 }
 
+void FieldFrame::OnCmd_ZoomFit(wxCommandEvent& event)
+{
+    do_zoom(mCanvas->ZoomToFitFactor());
+}
+
+void FieldFrame::OnCmd_ZoomIn(wxCommandEvent& event)
+{
+    // because zoom is truncated to 2 decimal places, make sure we at least increment by 1.
+    auto original_zoom = mControls->GetZoomAmount();
+    auto new_zoom = mControls->GetZoomAmount() * 1.20;
+    if ((new_zoom - original_zoom) < 0.01) {
+        new_zoom += 0.01;
+    }
+    if (new_zoom < 5) {
+        do_zoom(new_zoom);
+    }
+}
+
+void FieldFrame::OnCmd_ZoomOut(wxCommandEvent& event)
+{
+    auto new_zoom = mControls->GetZoomAmount() * 0.8;
+    if (new_zoom > 0.01) {
+        do_zoom(new_zoom);
+    }
+}
+
 void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 {
     auto zoomtxt = static_cast<wxComboBox*>(FindWindow(event.GetId()))->GetValue();
@@ -1084,7 +1224,7 @@ void FieldFrame::do_zoom(float zoom_amount)
 {
     zoom_amount = std::max(zoom_amount, 0.01f);
     mControls->SetZoomAmount(zoom_amount);
-    config.Set_FieldFrameZoom(zoom_amount);
+    mConfig.Set_FieldFrameZoom(zoom_amount);
     mCanvas->SetZoom(zoom_amount);
 }
 

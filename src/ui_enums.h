@@ -95,6 +95,7 @@ enum {
     CALCHART__GhostNextSheet,
     CALCHART__GhostPreviousSheet,
     CALCHART__GhostNthSheet,
+    CALCHART__GhostControls,
 
     CALCHART__anim_reanimate,
     CALCHART__anim_select_coll,
@@ -125,4 +126,11 @@ enum {
     CALCHART__SplitViewSwapAnimateAndOmni,
 
     CALCHART__E7TransitionSolver,
+
+    CALCHART__ViewFieldThumbnail,
+    CALCHART__ViewFieldControls,
+    CALCHART__ViewContinuityInfo,
+    CALCHART__ViewZoomFit,
+    CALCHART__ViewZoomIn,
+    CALCHART__ViewZoomOut,
 };

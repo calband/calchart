@@ -100,6 +100,16 @@ FieldFrameControls::FieldFrameControls(wxWindow* parent, double zoom)
     auto checkbox = new wxCheckBox(this, CALCHART__draw_paths, wxT("Draw Paths"));
     checkbox->SetValue(false);
     staticSize->Add(checkbox, centerWidget);
+
+    // Reference choice
+    staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Ghost Sheet")), wxVERTICAL);
+    toprow->Add(staticSize, topRowSizerFlags);
+    mGhostChoice = new wxChoice(this, CALCHART__GhostControls);
+    staticSize->Add(mGhostChoice, centerWidget);
+    mGhostChoice->Append(wxT("Off"));
+    mGhostChoice->Append(wxT("Next"));
+    mGhostChoice->Append(wxT("Previous"));
+    mGhostChoice->Append(wxT("Sheet..."));
 }
 
 std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrameControls::GridChoice() const
@@ -135,4 +145,14 @@ void FieldFrameControls::SetZoomAmount(double zoom)
 int FieldFrameControls::GetRefChoice() const
 {
     return mRefChoice->GetSelection();
+}
+
+int FieldFrameControls::GetGhostChoice() const
+{
+    return mGhostChoice->GetSelection();
+}
+
+void FieldFrameControls::SetGhostChoice(int which)
+{
+    mGhostChoice->SetSelection(which);
 }

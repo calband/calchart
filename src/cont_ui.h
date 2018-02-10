@@ -29,6 +29,8 @@
 
 class ContinuityEditor;
 class FancyTextWin;
+class ContinuityBrowserView;
+class ContinuityBrowserPerCont;
 
 // View for linking CalChartDoc with ContinuityEditor
 class ContinuityEditorView : public wxView {
@@ -55,7 +57,7 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~ContinuityEditor();
+    ~ContinuityEditor() = default;
 
     void OnCloseWindow(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
@@ -93,10 +95,35 @@ private:
     void SetCurrent(unsigned i);
 
     CalChartDoc* mDoc;
-    ContinuityEditorView* mView;
+    std::unique_ptr<ContinuityEditorView> mView;
     wxChoice* mContinuityChoices;
     unsigned mCurrentContinuityChoice;
     FancyTextWin* mUserInput;
+
+    DECLARE_EVENT_TABLE()
+};
+
+class ContinuityBrowser : public wxScrolledWindow {
+    using super = wxScrolledWindow;
+
+public:
+    ContinuityBrowser(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxScrolledWindowStyle,
+        const wxString& name = wxPanelNameStr);
+    virtual ~ContinuityBrowser() override = default;
+
+    void OnCmdHelp(wxCommandEvent& event);
+    virtual void Update() override; // Refresh all window controls
+
+private:
+    void CreateControls();
+    void OnChar(wxKeyEvent& event);
+
+    CalChartDoc* mDoc;
+    std::unique_ptr<ContinuityBrowserView> mView;
+    std::vector<ContinuityBrowserPerCont*> mPerCont;
 
     DECLARE_EVENT_TABLE()
 };
