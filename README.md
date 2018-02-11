@@ -78,11 +78,14 @@ Features addressed in this release:
 * #187 Have yard markers "stick" to the top edge
 * #236 Relabel requires positions to be exact, makes it hard to use for script cal
 * #239 See if we can preserve the order of dots when creating a line
+* #250 Draw path should be in view.
+* #251 Make edit menu have sub-section
 
 Bugs addressed in this release:
 
 * #222 Don't display the "there aren't enough labels" dialog
 * #235 Rotate is broken
+* #249 Genius move doesn't work
 
 
 ## Release notes for 3.5.0
