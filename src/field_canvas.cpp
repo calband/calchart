@@ -438,11 +438,12 @@ void FieldCanvas::MoveDrag(const CalChart::Coord& end)
             selected_points[i] = mView.PointPosition(i);
         }
 
-        mMovePoints = m_move_points->TransformPoints(selected_points);
-        for (auto& i : mMovePoints) {
-            i.second = mView.ClipPositionToShowMode(SnapToGrid(i.second));
+        if (m_move_points->IsReadyForMoving()) {
+            mMovePoints = m_move_points->TransformPoints(selected_points);
+            for (auto& i : mMovePoints) {
+                i.second = mView.ClipPositionToShowMode(SnapToGrid(i.second));
+            }
         }
-        // saturate by mode
     }
 }
 

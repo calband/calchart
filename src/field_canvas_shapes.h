@@ -44,6 +44,7 @@ public:
 
     virtual void OnMouseLeftDown(CalChart::Coord pos) = 0;
     virtual bool OnMouseUpDone(CalChart::Coord const&) { return true; }
+    virtual bool IsReadyForMoving() const { return true; }
 
 protected:
     void BeginMoveDrag(CC_DRAG_TYPES type, const CalChart::Coord& start);

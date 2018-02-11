@@ -47,6 +47,7 @@ public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CalChart::Coord pos) override;
     virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual bool IsReadyForMoving() const override;
 };
 
 class MovePoints_CC_MOVE_SHEAR : public MovePoints {
@@ -54,6 +55,7 @@ public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CalChart::Coord pos) override;
     virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual bool IsReadyForMoving() const override;
 };
 
 class MovePoints_CC_MOVE_REFL : public MovePoints {
@@ -67,6 +69,7 @@ public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CalChart::Coord pos) override;
     virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual bool IsReadyForMoving() const override;
 };
 
 class MovePoints_CC_MOVE_GENIUS : public MovePoints {
@@ -74,6 +77,7 @@ public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
     virtual void OnMouseLeftDown(CalChart::Coord pos) override;
     virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual bool IsReadyForMoving() const override;
 };
 
 class MovePoints_CC_MOVE_SHAPE_LINE : public MovePoints {
@@ -296,6 +300,14 @@ bool MovePoints_CC_MOVE_ROTATE::OnMouseUpDone(CalChart::Coord const& pos)
     return false;
 }
 
+bool MovePoints_CC_MOVE_ROTATE::IsReadyForMoving() const
+{
+    if (m_shape_list.size() > 1) {
+        return true;
+    }
+    return false;
+}
+
 void MovePoints_CC_MOVE_SHEAR::OnMouseLeftDown(CalChart::Coord pos)
 {
     // shear is a 2-distinct mouse click action
@@ -339,6 +351,14 @@ bool MovePoints_CC_MOVE_SHEAR::OnMouseUpDone(CalChart::Coord const& pos)
             BeginMoveDrag(CC_DRAG_CROSSHAIRS, pos);
             return false;
         }
+        return true;
+    }
+    return false;
+}
+
+bool MovePoints_CC_MOVE_SHEAR::IsReadyForMoving() const
+{
+    if (m_shape_list.size() > 1) {
         return true;
     }
     return false;
@@ -415,17 +435,25 @@ bool MovePoints_CC_MOVE_SIZE::OnMouseUpDone(CalChart::Coord const& pos)
     return false;
 }
 
+bool MovePoints_CC_MOVE_SIZE::IsReadyForMoving() const
+{
+    if (m_shape_list.size() > 1) {
+        return true;
+    }
+    return false;
+}
+
 void MovePoints_CC_MOVE_GENIUS::OnMouseLeftDown(CalChart::Coord pos)
 {
     // move is a 2-distinct mouse click action
-    if (m_shape_list.size() < 2) {
+    if (m_shape_list.size() < 3) {
         AddMoveDrag(CC_DRAG_LINE, std::make_unique<CalChart::Shape_line>(pos));
     }
 }
 
 std::map<int, CalChart::Coord> MovePoints_CC_MOVE_GENIUS::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
-    if (m_shape_list.size() < 2) {
+    if (m_shape_list.size() < 3) {
         return select_list;
     } else {
         auto* v1 = (CalChart::Shape_2point*)m_shape_list[0].get();
@@ -460,6 +488,14 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_GENIUS::TransformPoints(std::m
 }
 
 bool MovePoints_CC_MOVE_GENIUS::OnMouseUpDone(CalChart::Coord const& pos)
+{
+    if (m_shape_list.size() > 2) {
+        return true;
+    }
+    return false;
+}
+
+bool MovePoints_CC_MOVE_GENIUS::IsReadyForMoving() const
 {
     if (m_shape_list.size() > 2) {
         return true;
