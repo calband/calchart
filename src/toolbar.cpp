@@ -88,7 +88,7 @@ std::vector<ToolBarEntry> GetSymbolsToolBar()
         { wxITEM_NORMAL, NULL, wxT("x men"), CALCHART__setsym4 },
         { wxITEM_NORMAL, NULL, wxT("solid backslash men"), CALCHART__setsym5 },
         { wxITEM_NORMAL, NULL, wxT("solid slash men"), CALCHART__setsym6 },
-        { wxITEM_NORMAL, NULL, wxT("solid x men"), CALCHART__setsym7 }
+        { wxITEM_NORMAL, NULL, wxT("solid x men"), CALCHART__setsym7, true }
     };
     static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb) / sizeof(tb[0]));
     // technically this is a race condition, but not worth fixing (how often do we
@@ -116,7 +116,7 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
         { wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
         { wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
-        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso, true },
+        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso },
         { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap, true },
         { wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
         { wxITEM_RADIO, NULL, wxT("Shape points in a line"), CALCHART__shape_line },
