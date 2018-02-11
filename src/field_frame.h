@@ -126,6 +126,7 @@ public:
 
     void OnCmd_GhostOption(wxCommandEvent& event);
     void OnCmd_AdjustViews(wxCommandEvent& event);
+    void OnCmd_DrawPaths(wxCommandEvent& event);
 
     void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 

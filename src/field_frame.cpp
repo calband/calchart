@@ -142,6 +142,7 @@ EVT_MENU(CALCHART__setsym6, FieldFrame::OnCmd_setsym6)
 EVT_MENU(CALCHART__setsym7, FieldFrame::OnCmd_setsym7)
 EVT_MENU(CALCHART__EXPORT_VIEWER_FILE, FieldFrame::OnCmdExportViewerFile)
 EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
+EVT_MENU(CALCHART__draw_paths, FieldFrame::OnCmd_DrawPaths)
 EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
 EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
 EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
@@ -265,6 +266,9 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     view_menu->Append(CALCHART__ViewFieldThumbnail, wxT("Show Field Thumbnail"), wxT("Controls Displaying Field Thumbnail"));
     view_menu->Append(CALCHART__ViewFieldControls, wxT("Show Control"), wxT("Controls Displaying Controls"));
     view_menu->Append(CALCHART__ViewContinuityInfo, wxT("Show Continuity"), wxT("Controls Displaying Continuity Info"));
+    view_menu->AppendSeparator();
+    view_menu->AppendCheckItem(CALCHART__draw_paths, wxT("Draw Paths"), wxT("Draw Paths"));
+    view_menu->Check(CALCHART__draw_paths, false);
     view_menu->AppendSeparator();
     view_menu->Append(CALCHART__GhostOff, wxT("Disable Ghost View"), wxT("Turn off ghost view"));
     view_menu->Append(CALCHART__GhostNextSheet, wxT("Ghost Next Sheet"), wxT("Draw a ghost of the next stuntsheet"));
@@ -1164,6 +1168,13 @@ void FieldFrame::refnum_callback(wxCommandEvent&)
 void FieldFrame::OnEnableDrawPaths(wxCommandEvent& event)
 {
     GetFieldView()->OnEnableDrawPaths(event.IsChecked());
+    GetMenuBar()->FindItem(CALCHART__draw_paths)->Check(event.IsChecked());
+}
+
+void FieldFrame::OnCmd_DrawPaths(wxCommandEvent& event)
+{
+    GetFieldView()->OnEnableDrawPaths(event.IsChecked());
+    mControls->SetDrawPath(event.IsChecked());
 }
 
 void FieldFrame::zoom_callback(wxCommandEvent& event)

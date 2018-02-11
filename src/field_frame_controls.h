@@ -39,10 +39,12 @@ public:
     int GetRefChoice() const;
     int GetGhostChoice() const;
     void SetGhostChoice(int which);
+    void SetDrawPath(bool enable);
 
 private:
     wxChoice* mGridChoice;
     wxComboBox* mZoomBox;
     wxChoice* mRefChoice;
     wxChoice* mGhostChoice;
+    wxCheckBox* mDrawPath;
 };

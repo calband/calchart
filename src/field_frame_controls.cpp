@@ -97,9 +97,9 @@ FieldFrameControls::FieldFrameControls(wxWindow* parent, double zoom)
 
     staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Draw Paths")), wxVERTICAL);
     toprow->Add(staticSize, topRowSizerFlags);
-    auto checkbox = new wxCheckBox(this, CALCHART__draw_paths, wxT("Draw Paths"));
-    checkbox->SetValue(false);
-    staticSize->Add(checkbox, centerWidget);
+    mDrawPath = new wxCheckBox(this, CALCHART__draw_paths, wxT("Draw Paths"));
+    mDrawPath->SetValue(false);
+    staticSize->Add(mDrawPath, centerWidget);
 
     // Reference choice
     staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Ghost Sheet")), wxVERTICAL);
@@ -155,4 +155,9 @@ int FieldFrameControls::GetGhostChoice() const
 void FieldFrameControls::SetGhostChoice(int which)
 {
     mGhostChoice->SetSelection(which);
+}
+
+void FieldFrameControls::SetDrawPath(bool enable)
+{
+    mDrawPath->SetValue(enable);
 }
