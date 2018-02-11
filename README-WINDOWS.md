@@ -5,7 +5,7 @@ Install all updates until it's happy
 
 ## Get the Tools
 
-Get the latest cygwin (I used 1.7.25).  Set up with the standard instation, and add the following
+Get the latest cygwin (I used 2.10.0).  Set up with the standard instation, and add the following
 packages:
 
 * git
@@ -13,15 +13,16 @@ packages:
 * bison
 * flex
 
-## Get Visual Studio Community 2015
-We tried Visual Studio Community 2015.
-You'll need to install the "Visual C++" "Common Tools for Visual C++ 2015".
+## Get Visual Studio Community 2017
+We tried Visual Studio Community 2017.
+You'll need to install the "Visual C++" "Common Tools for Visual C++ 2017".
 
 ## Download 3.1 of wxWidgets
 Go to wxwidgets.org.  Download and run the Windows Installer (which will put the source at c:\wxWidgets-3.1.0)
 
 ## Make wxWidgets
 Open the project wx_vc14.sln at wxWidgets-3.1.0\build\msw.
+Visual studio prompts you to upgrade the project.  Say yes.
 Build the following solutions
 
        Debug   | Win32
@@ -49,7 +50,7 @@ Add the following User variables:
 ## Get calchart (you'll need to log in with your source forge account):
 Open cygwin and run the following:
 
-	$ git clone https://github.com/calband/calchart.git /cygdrive/c/calchart
+	$ git clone --recursive https://github.com/calband/calchart.git /cygdrive/c/calchart
 
 (or cd to whereever you installed calchart)
 
