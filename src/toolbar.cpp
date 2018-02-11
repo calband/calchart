@@ -116,7 +116,7 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__next_ss, true },
         { wxITEM_RADIO, NULL, wxT("Select points with box"), CALCHART__box },
         { wxITEM_RADIO, NULL, wxT("Select points with polygon"), CALCHART__poly },
-        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso },
+        { wxITEM_RADIO, NULL, wxT("Select points with lasso"), CALCHART__lasso, true },
         { wxITEM_RADIO, NULL, wxT("Swap points"), CALCHART__swap, true },
         { wxITEM_RADIO, NULL, wxT("Translate points"), CALCHART__move },
         { wxITEM_RADIO, NULL, wxT("Shape points in a line"), CALCHART__shape_line },
@@ -131,13 +131,6 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         { wxITEM_RADIO, NULL, wxT("Reflect block"), CALCHART__reflect },
         { wxITEM_RADIO, NULL, wxT("Resize block"), CALCHART__size },
         { wxITEM_RADIO, NULL, wxT("Genius move"), CALCHART__genius, true },
-        { wxITEM_NORMAL, NULL, wxT("Label on left"), CALCHART__label_left },
-        { wxITEM_NORMAL, NULL, wxT("Flip label"), CALCHART__label_flip },
-        { wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
-        { wxITEM_NORMAL, NULL, wxT("Hide Label"), CALCHART__label_hide },
-        { wxITEM_NORMAL, NULL, wxT("Toggle Label Visibility"),
-            CALCHART__label_visibility_toggle },
-        { wxITEM_NORMAL, NULL, wxT("Show Label"), CALCHART__label_show, true },
     };
     static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb) / sizeof(tb[0]));
     static bool sFirstTime = true;
@@ -163,6 +156,25 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_ref));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_siz));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_gen));
+    }
+    return sTB;
+}
+
+std::vector<ToolBarEntry> GetSecondHalfOfMainToolBar()
+{
+    static const ToolBarEntry tb[] = {
+        { wxITEM_NORMAL, NULL, wxT("Label on left"), CALCHART__label_left },
+        { wxITEM_NORMAL, NULL, wxT("Flip label"), CALCHART__label_flip },
+        { wxITEM_NORMAL, NULL, wxT("Label on right"), CALCHART__label_right, true },
+        { wxITEM_NORMAL, NULL, wxT("Hide Label"), CALCHART__label_hide },
+        { wxITEM_NORMAL, NULL, wxT("Toggle Label Visibility"), CALCHART__label_visibility_toggle },
+        { wxITEM_NORMAL, NULL, wxT("Show Label"), CALCHART__label_show, true },
+    };
+    static std::vector<ToolBarEntry> sTB(tb, tb + sizeof(tb) / sizeof(tb[0]));
+    static bool sFirstTime = true;
+    if (sFirstTime) {
+        sFirstTime = false;
+        std::vector<ToolBarEntry>::iterator i = sTB.begin();
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_l));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_f));
         (i++)->bm = new wxBitmap(BITMAP_NAME(tb_lbl_r));
@@ -177,6 +189,8 @@ std::vector<ToolBarEntry> GetMainToolBar()
 {
     auto first_half = GetHalfOfMainToolBar();
     auto second_half = GetSymbolsToolBar();
+    first_half.insert(first_half.end(), second_half.begin(), second_half.end());
+    second_half = GetSecondHalfOfMainToolBar();
     first_half.insert(first_half.end(), second_half.begin(), second_half.end());
     return first_half;
 }

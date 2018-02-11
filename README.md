@@ -69,6 +69,22 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 # Release notes
 
 
+## Release notes for 3.5.1
+
+Features addressed in this release:
+
+* General clean-up the UI.
+* #179 Reset Ref points should obey selected
+* #187 Have yard markers "stick" to the top edge
+* #236 Relabel requires positions to be exact, makes it hard to use for script cal
+* #239 See if we can preserve the order of dots when creating a line
+
+Bugs addressed in this release:
+
+* #222 Don't display the "there aren't enough labels" dialog
+* #235 Rotate is broken
+
+
 ## Release notes for 3.5.0
 
 Features addressed in this release:

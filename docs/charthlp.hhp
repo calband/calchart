@@ -6,7 +6,7 @@ Compiled file=charthlp.chm
 Default Window=charthlpHelp
 Default topic=charthlp_contents.html
 Index file=charthlp.hhk
-Title=CalChart User's Manual 3.2.2
+Title=CalChart User's Manual 3.5.1
 
 [WINDOWS]
 charthlpHelp=,"charthlp.hhc","charthlp.hhk","charthlp_contents.html",,,,,,0x2420,,0x380e,,,,,0,,,
@@ -14,39 +14,45 @@ charthlpHelp=,"charthlp.hhc","charthlp.hhk","charthlp_contents.html",,,,,,0x2420
 [FILES]
 charthlp_contents.html
 charthlp_copyright.html
+charthlp_gpl.html
 charthlp_acknowledge.html
 charthlp_topic0.html
-charthlp_gpl.html
 charthlp_software.html
 charthlp_obtaining.html
 charthlp_installing.html
 charthlp_wininstall.html
-charthlp_easyinstall.html
-charthlp_winprinter.html
 charthlp_macosxinstall.html
-charthlp_macosxprinter.html
+charthlp_winprinter.html
 charthlp_overview.html
-charthlp_basics.html
 charthlp_newshow.html
+charthlp_basics.html
 charthlp_movement.html
+charthlp_selectingpoints.html
+charthlp_swappoints.html
 charthlp_translatepoints.html
 charthlp_movepointsintoaline.html
+charthlp_movepointsintoashape.html
+charthlp_movepointsintoacurve.html
+charthlp_projectpointsonaline.html
 charthlp_rotateblock.html
 charthlp_shearblock.html
 charthlp_reflectblock.html
 charthlp_resizeblock.html
 charthlp_geniusmove.html
 charthlp_symbols.html
+charthlp_fieldproperties.html
+charthlp_gridspacing.html
+charthlp_zoomlevel.html
+charthlp_referencegroup.html
+charthlp_drawpaths.html
+charthlp_ghostsheet.html
 charthlp_editcont.html
 charthlp_printcont.html
 charthlp_animwin.html
-charthlp_refpoints.html
 charthlp_refer.html
 charthlp_pcontcodes.html
 charthlp_bugs.html
 charthlp_reportingbugs.html
-charthlp_problems.html
-charthlp_notdone.html
 charthlp_animcont.html
 charthlp_comments.html
 charthlp_directions.html

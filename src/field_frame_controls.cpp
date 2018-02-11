@@ -84,7 +84,7 @@ FieldFrameControls::FieldFrameControls(wxWindow* parent, double zoom)
     mZoomBox->SetValue(zoomtxt);
 
     // Reference choice
-    staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Ref Group")), wxVERTICAL);
+    staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Reference Group")), wxVERTICAL);
     toprow->Add(staticSize, topRowSizerFlags);
     mRefChoice = new wxChoice(this, CALCHART__refnum_callback);
     staticSize->Add(mRefChoice, centerWidget);

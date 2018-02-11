@@ -6,6 +6,7 @@ LEX = flex
 LFLAGS = -B -i
 YACC = bison
 YFLAGS = -dv
+TEX2RTF = tex2rtf
 
 CXXFLAGS += `$(WXCONFIG) --cxxflags`
 CXXFLAGS += -I$(RESDIR) -I$(SRCDIR)
@@ -94,7 +95,7 @@ docs/charthlp.ps.gz: docs/charthlp.ps
 docs/charthlp_contents.html: $(DOCSRC)
 	mkdir -p docs
 	cp $(DOCSRC) docs
-	-cd docs; tex2rtf charthlp.tex charthlp.html -twice -html
+	-cd docs; $(TEX2RTF) charthlp.tex charthlp.html -twice -html
 
 docs/charthlp.html.tar.gz: docs/charthlp_contents.html
 	rm -f $@

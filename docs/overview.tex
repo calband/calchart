@@ -1,6 +1,6 @@
 \chapter{Overview}\label{overview}
 
-CalChart Version 3.2 is a update of of CalChart Version 3 (the version
+CalChart Version 3.5 is a update of of CalChart Version 3 (the version
 that has been used by the Cal Band from 1991 to the 2008).  The major
 improvements have been to port it to the MacOS X platform, integrating closer
 with the native windowing system functionality like file history and printing.
@@ -13,50 +13,17 @@ users.  Please document any bugs that you encounter on the CalChart developer
 website at:
 
 \begin{verbatim}
-http://sourceforge.net/projects/calchart
+https://github.com/calband/calchart/issues
 \end{verbatim}
 
 Also, we would very much like to hear any suggestions you may have to make
 CalChart even more useful.
 
-This chapter gives some hints on getting to know Version 3.2.  Much is
+This chapter gives some hints on getting to know Version 3.5.  Much is
 very similar to Version 3, and for users already familiar with Version 3 may 
 not even notice a difference.
 
-\section{Basics}\label{basics}
-
-The interface is mouse-driven and windows-based.  Many features cause a new
-windows to appear in addition to the main window displaying the stuntsheet.
-The user may have as many windows open as desired at any one time.  It
-is possible to have many windows of the same kind open simultaneously,
-and it is possible to have different windows displaying different shows
-simultaneously.
-
-To scroll the stuntsheet viewer, just move the mouse around the field
-display area of the window while holding the control key; scrolling happens
-automatically.
-
-Various operations can be performed by either clicking on an icon just
-above the stuntsheet display area or by using a pull-down menu.  Some
-features have keystroke commands also.
-
-Left-drag the cursor in the stuntsheet editor to select a set of points.
-Once points are selected many features can be applied to them.
-Use Shift-left-drag to add points to an already selected block.
-Use Alt-left-drag to toggle a points selection.
-
-Use the Undo feature under the Edit pull-down menu to undo actions.
-Repeating this causes older and older actions to be undone.  The user
-can retrace his steps all the way back to the most recent save
-(providing that the undo buffer, which defaults to 100 items, is big enough).
-
-Use the icons just above the stuntsheet display area to navigate through
-the show.  Use the slider to adjust the magnification of the display.
-
-Window sizes can be adjusted by dragging the corner of the window
-around.
-
-\section{Creating a Show}\label{newshow}
+\section{Opening/Creating a Show}\label{newshow}
 
 Starting the program causes a small window to appear.  From the File pull-down
 menu you may open an existing show via the "Open..." item (or the Alt-O hotkey),
@@ -69,11 +36,44 @@ number of points, the kind of labels, and the kind of background.  You must
 press finish to have the changes take effect, but you choose cancel and 
 then modify any of these settings later on.
 
+\section{Basics}\label{basics}
+
+At the heart of CalChart is the field view.
+
+To scroll the stuntsheet viewer, just move the mouse around the field
+display area of the window while holding the left mouse button and the control key; scrolling happens
+automatically.
+
+To zoom in or out of the field view you can use the pinch gesture, the zoom controller, or the control-+ or control-- shortcut.
+
+Use the Undo feature under the Edit pull-down menu to undo actions.
+Repeating this causes older and older actions to be undone.  The user
+can retrace his steps all the way back to the most recent save
+(providing that the undo buffer, which defaults to 100 items, is big enough).
+
+Various operations can be performed by either clicking on the toolbar icon just
+above the stuntsheet display area or by using a pull-down menu.  Some
+features have keystroke commands also.
+
+Use the icons just above the stuntsheet display area to navigate through the show.
+
 \section{Moving Points}\label{movement}
 
 There are several move methods of moving points around the field.  You select
 different move methods by clicking their toolbar icon.  After a move has been
 completed, the move method will default back to Translate Points.
+
+\subsection{Selecting Points}\label{selectingpoints}
+
+Points are selected by left-drag the cursor with the mouse press down.  You can choose 3 types of selections,
+box, clicking to make a polynomial, and a lasso to drag around the points.
+Once points are selected many features can be applied to them.
+Hold down Shift when selecting to add points to an already selected block.
+Hold down Alt to toggle a points selection.
+
+\subsection{Swap Points}\label{swappoints}
+
+This movement command is used to move swap two different points with each other.
 
 \subsection{Translate Points}\label{translatepoints}
 
@@ -96,6 +96,32 @@ left-click the point where the first point in the line should start.  While
 holding down the left-button, drag the mouse to where the second point in the
 line should be.  Release the mouse button and CalChart will move all of the 
 points into a straight line from that point.
+
+\subsection{Move Points Into a Shape}\label{movepointsintoashape}
+
+These movement command is used to move a block into several shapes, which are X, cross, box or ellipsis.
+
+First select the block of points you wish to have placed in a shape.  Then
+left-click the point where the first point in the shape should start.  While
+holding down the left-button, drag the mouse to where the second extent of the shape.
+Release the mouse button and CalChart will move all of the 
+points into a straight line from that point.
+
+\subsection{Move Points Into a Curve}\label{movepointsintoacurve}
+
+These movement command is used to move a block into a curve you drawn on the field.
+
+First select the block of points you wish to have placed in a shape.  Then
+left-click the point where the first point of the curve.  While
+holding down the left-button, drag the mouse in the curve that you wish to move the dots.
+Release the mouse button and CalChart will move all of the 
+points evenly spaced on the curve.
+
+\subsection{Project Points On a Line}\label{projectpointsonaline}
+
+This movement command is used to move a block onto a projected line.  This is similar to moving dots on a line
+but the points will extend it the distance, with the space between the first click and the the mouse location
+dictating the distance between each point.
 
 \subsection{Rotate Block}\label{rotateblock}
 
@@ -150,12 +176,40 @@ and if so, will apply a genious move to the block.
 Select a set of points, then click on one of the icons just above the
 stuntsheet display area for the desired action.
 
+\section{Field Properties}\label{fieldproperties}
+
+There are a variety of controls that change the properties of the field.
+
+\subsection{Grid Spacing}\label{gridspacing}
+
+The Grid Spacing controls the distance between where dots may be placed on the field.
+
+\subsection{Zoom}\label{zoomlevel}
+
+You can adjust the magnification of the field with the zoom level, or set to fit to see the 
+whole field at once.
+
+\subsection{Reference Group}\label{referencegroup}
+
+Each point has 3 reference points to assist with more complicated animation commands.  You can set which
+reference point is active by changing the Reference group.
+
+\subsection{Draw Paths}\label{drawpaths}
+
+The Draw Paths option causes a preview of the path that point will take to be displayed. 
+
+\subsection{Ghost Sheet}\label{ghostsheet}
+
+A Ghost sheet is the image of the a different sheet semi-imposed on the current sheet.
+You can choose to display the next, previous, or a specific page.
+
 \section{Editing Continuity}\label{editcont}
 
-Open an Edit Continuity window (under the Edit pull-down menu) to type
-continuity commands.  Set continuity groups by selecting points and then
-pressing the appropriate button.  New continuity groups can also be
-created from the menu.
+The Continuity commands are displayed on the right side of the field.  By double clicking on an entry, you can
+edit the command in place.
+
+Also, you can Open an Edit Continuity window (under the Edit pull-down menu) to type
+continuity commands.
 
 \section{Printed Continuity}\label{printcont}
 
@@ -168,16 +222,7 @@ pull-down menu.
 Open an Animation window (under the Window pull-down menu) to view animation.
 Use the icons to navigate through the show and the slider to set the tempo.
 Click on the check-box labeled Collisions to enable detection of collisions.
-If you make changes to the show, you can select Regenerate from the menu
-to recalculate everything.  When errors are encountered while generating
+When errors are encountered while generating
 the animation, a window will appear with the types of errors.  You can
 click on an error to select the points that caused this error.
 
-There are many significant improvements over Version 2.  First of all,
-there are no more animation files.  Everything is handled dynamically.
-You can also select points and follow them in the animation window
-(e.g. you can follow the percussion line.)
-
-\section{Reference Points}\label{refpoints}
-
-Click on the Ref pop-up menu to select a different reference group.

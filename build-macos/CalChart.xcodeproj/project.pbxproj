@@ -126,93 +126,12 @@
 		C7C5FBD61479B372004E5C5B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD51479B372004E5C5B /* AudioToolbox.framework */; };
 		C7C5FBD81479B385004E5C5B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBD71479B385004E5C5B /* OpenGL.framework */; };
 		C7C5FBDC1479B3F8004E5C5B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */; };
-		C7D177EA13B1A83700F65F4C /* charthlp_macosxinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */; };
-		C7D177EB13B1A83700F65F4C /* charthlp_macosxprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */; };
-		C7D1782513B7C6E800F65F4C /* charthlp_geniusmove.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1781E13B7C6E800F65F4C /* charthlp_geniusmove.html */; };
-		C7D1782613B7C6E800F65F4C /* charthlp_movepointsintoaline.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1781F13B7C6E800F65F4C /* charthlp_movepointsintoaline.html */; };
-		C7D1782713B7C6E800F65F4C /* charthlp_reflectblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782013B7C6E800F65F4C /* charthlp_reflectblock.html */; };
-		C7D1782813B7C6E800F65F4C /* charthlp_resizeblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782113B7C6E800F65F4C /* charthlp_resizeblock.html */; };
-		C7D1782913B7C6E800F65F4C /* charthlp_rotateblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782213B7C6E800F65F4C /* charthlp_rotateblock.html */; };
-		C7D1782A13B7C6E800F65F4C /* charthlp_shearblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782313B7C6E800F65F4C /* charthlp_shearblock.html */; };
-		C7D1782B13B7C6E800F65F4C /* charthlp_translatepoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */; };
 		C7D4E2C411D087CD007D3587 /* calchartapp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7D4E2C211D087CD007D3587 /* calchartapp.cpp */; };
 		C7E047C8155F279000D8C71B /* field_view.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047C6155F279000D8C71B /* field_view.cpp */; };
 		C7E047CC155F7B8A00D8C71B /* field_canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047CA155F7B8900D8C71B /* field_canvas.cpp */; };
 		C7E047CF155F892500D8C71B /* field_frame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047CD155F892400D8C71B /* field_frame.cpp */; };
 		C7E047D215609A1600D8C71B /* setup_wizards.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7E047D015609A1200D8C71B /* setup_wizards.cpp */; };
 		C7E8DED3117B6A4C00C9FAC9 /* calchart.icns in Resources */ = {isa = PBXBuildFile; fileRef = C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */; };
-		C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FC811CD594E001A4FA2 /* back.gif */; };
-		C7ED502811CD5A51001A4FA2 /* charthlp.con in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCB11CD594E001A4FA2 /* charthlp.con */; };
-		C7ED502911CD5A51001A4FA2 /* charthlp.hhc in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */; };
-		C7ED502A11CD5A51001A4FA2 /* charthlp.hhk in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */; };
-		C7ED502B11CD5A51001A4FA2 /* charthlp.hhp in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */; };
-		C7ED502D11CD5A51001A4FA2 /* charthlp.ref in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD011CD594E001A4FA2 /* charthlp.ref */; };
-		C7ED503011CD5A51001A4FA2 /* charthlp_acknowledge.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */; };
-		C7ED503211CD5A51001A4FA2 /* charthlp_animcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */; };
-		C7ED503311CD5A51001A4FA2 /* charthlp_animwin.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */; };
-		C7ED503411CD5A51001A4FA2 /* charthlp_basics.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD711CD594E001A4FA2 /* charthlp_basics.html */; };
-		C7ED503511CD5A51001A4FA2 /* charthlp_blam.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD811CD594E001A4FA2 /* charthlp_blam.html */; };
-		C7ED503611CD5A51001A4FA2 /* charthlp_bugs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FD911CD594E001A4FA2 /* charthlp_bugs.html */; };
-		C7ED503711CD5A51001A4FA2 /* charthlp_close.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDA11CD594E001A4FA2 /* charthlp_close.html */; };
-		C7ED503811CD5A51001A4FA2 /* charthlp_comments.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDB11CD594E001A4FA2 /* charthlp_comments.html */; };
-		C7ED503911CD5A51001A4FA2 /* charthlp_contents.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDC11CD594E001A4FA2 /* charthlp_contents.html */; };
-		C7ED503A11CD5A51001A4FA2 /* charthlp_copyright.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDD11CD594E001A4FA2 /* charthlp_copyright.html */; };
-		C7ED503B11CD5A51001A4FA2 /* charthlp_countermarch.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDE11CD594E001A4FA2 /* charthlp_countermarch.html */; };
-		C7ED503C11CD5A51001A4FA2 /* charthlp_dir.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FDF11CD594E001A4FA2 /* charthlp_dir.html */; };
-		C7ED503D11CD5A51001A4FA2 /* charthlp_directions.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE011CD594E001A4FA2 /* charthlp_directions.html */; };
-		C7ED503E11CD5A51001A4FA2 /* charthlp_dirfrom.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE111CD594E001A4FA2 /* charthlp_dirfrom.html */; };
-		C7ED503F11CD5A51001A4FA2 /* charthlp_dist.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE211CD594E001A4FA2 /* charthlp_dist.html */; };
-		C7ED504011CD5A51001A4FA2 /* charthlp_distfrom.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE311CD594E001A4FA2 /* charthlp_distfrom.html */; };
-		C7ED504111CD5A51001A4FA2 /* charthlp_dmcm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE411CD594E001A4FA2 /* charthlp_dmcm.html */; };
-		C7ED504211CD5A51001A4FA2 /* charthlp_dmhs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE511CD594E001A4FA2 /* charthlp_dmhs.html */; };
-		C7ED504311CD5A51001A4FA2 /* charthlp_easyinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE611CD594E001A4FA2 /* charthlp_easyinstall.html */; };
-		C7ED504411CD5A51001A4FA2 /* charthlp_editcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE711CD594E001A4FA2 /* charthlp_editcont.html */; };
-		C7ED504511CD5A51001A4FA2 /* charthlp_either.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE811CD594E001A4FA2 /* charthlp_either.html */; };
-		C7ED504611CD5A51001A4FA2 /* charthlp_even.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FE911CD594E001A4FA2 /* charthlp_even.html */; };
-		C7ED504711CD5A51001A4FA2 /* charthlp_ewns.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEA11CD594E001A4FA2 /* charthlp_ewns.html */; };
-		C7ED504811CD5A51001A4FA2 /* charthlp_fm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEB11CD594E001A4FA2 /* charthlp_fm.html */; };
-		C7ED504911CD5A51001A4FA2 /* charthlp_fmto.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEC11CD594E001A4FA2 /* charthlp_fmto.html */; };
-		C7ED504A11CD5A51001A4FA2 /* charthlp_fountain.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FED11CD594E001A4FA2 /* charthlp_fountain.html */; };
-		C7ED504B11CD5A51001A4FA2 /* charthlp_functions.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEE11CD594E001A4FA2 /* charthlp_functions.html */; };
-		C7ED504C11CD5A51001A4FA2 /* charthlp_future.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FEF11CD594E001A4FA2 /* charthlp_future.html */; };
-		C7ED504D11CD5A51001A4FA2 /* charthlp_gpl.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF011CD594E001A4FA2 /* charthlp_gpl.html */; };
-		C7ED504E11CD5A51001A4FA2 /* charthlp_grid.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF111CD594E001A4FA2 /* charthlp_grid.html */; };
-		C7ED504F11CD5A51001A4FA2 /* charthlp_hscm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF211CD594E001A4FA2 /* charthlp_hscm.html */; };
-		C7ED505011CD5A51001A4FA2 /* charthlp_hsdm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF311CD594E001A4FA2 /* charthlp_hsdm.html */; };
-		C7ED505111CD5A51001A4FA2 /* charthlp_installing.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF411CD594E001A4FA2 /* charthlp_installing.html */; };
-		C7ED505211CD5A51001A4FA2 /* charthlp_magic.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF511CD594E001A4FA2 /* charthlp_magic.html */; };
-		C7ED505311CD5A51001A4FA2 /* charthlp_march.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF611CD594E001A4FA2 /* charthlp_march.html */; };
-		C7ED505511CD5A51001A4FA2 /* charthlp_movement.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF811CD594E001A4FA2 /* charthlp_movement.html */; };
-		C7ED505611CD5A51001A4FA2 /* charthlp_mt.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FF911CD594E001A4FA2 /* charthlp_mt.html */; };
-		C7ED505711CD5A51001A4FA2 /* charthlp_mtrm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFA11CD594E001A4FA2 /* charthlp_mtrm.html */; };
-		C7ED505811CD5A51001A4FA2 /* charthlp_newshow.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFB11CD594E001A4FA2 /* charthlp_newshow.html */; };
-		C7ED505911CD5A51001A4FA2 /* charthlp_notdone.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFC11CD594E001A4FA2 /* charthlp_notdone.html */; };
-		C7ED505A11CD5A51001A4FA2 /* charthlp_nsew.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFD11CD594E001A4FA2 /* charthlp_nsew.html */; };
-		C7ED505B11CD5A51001A4FA2 /* charthlp_numbers.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFE11CD594E001A4FA2 /* charthlp_numbers.html */; };
-		C7ED505C11CD5A51001A4FA2 /* charthlp_obtaining.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED4FFF11CD594E001A4FA2 /* charthlp_obtaining.html */; };
-		C7ED505D11CD5A51001A4FA2 /* charthlp_opp.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500011CD594E001A4FA2 /* charthlp_opp.html */; };
-		C7ED505E11CD5A51001A4FA2 /* charthlp_overview.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500111CD594E001A4FA2 /* charthlp_overview.html */; };
-		C7ED505F11CD5A51001A4FA2 /* charthlp_pcontcodes.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500211CD594E001A4FA2 /* charthlp_pcontcodes.html */; };
-		C7ED506011CD5A51001A4FA2 /* charthlp_points.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500311CD594E001A4FA2 /* charthlp_points.html */; };
-		C7ED506111CD5A51001A4FA2 /* charthlp_printcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500411CD594E001A4FA2 /* charthlp_printcont.html */; };
-		C7ED506211CD5A51001A4FA2 /* charthlp_problems.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500511CD594E001A4FA2 /* charthlp_problems.html */; };
-		C7ED506311CD5A51001A4FA2 /* charthlp_procedures.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500611CD594E001A4FA2 /* charthlp_procedures.html */; };
-		C7ED506411CD5A51001A4FA2 /* charthlp_refer.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500711CD594E001A4FA2 /* charthlp_refer.html */; };
-		C7ED506511CD5A51001A4FA2 /* charthlp_refpoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500811CD594E001A4FA2 /* charthlp_refpoints.html */; };
-		C7ED506611CD5A51001A4FA2 /* charthlp_reportingbugs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500911CD594E001A4FA2 /* charthlp_reportingbugs.html */; };
-		C7ED506711CD5A51001A4FA2 /* charthlp_rotate.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500A11CD594E001A4FA2 /* charthlp_rotate.html */; };
-		C7ED506811CD5A51001A4FA2 /* charthlp_software.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500B11CD594E001A4FA2 /* charthlp_software.html */; };
-		C7ED506911CD5A51001A4FA2 /* charthlp_step.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500C11CD594E001A4FA2 /* charthlp_step.html */; };
-		C7ED506A11CD5A51001A4FA2 /* charthlp_steps.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500D11CD594E001A4FA2 /* charthlp_steps.html */; };
-		C7ED506B11CD5A51001A4FA2 /* charthlp_stepsizes.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500E11CD594E001A4FA2 /* charthlp_stepsizes.html */; };
-		C7ED506C11CD5A51001A4FA2 /* charthlp_symbols.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED500F11CD594E001A4FA2 /* charthlp_symbols.html */; };
-		C7ED506D11CD5A51001A4FA2 /* charthlp_topic0.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501011CD594E001A4FA2 /* charthlp_topic0.html */; };
-		C7ED507111CD5A51001A4FA2 /* charthlp_variables.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501411CD594E001A4FA2 /* charthlp_variables.html */; };
-		C7ED507211CD5A51001A4FA2 /* charthlp_wininstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501511CD594E001A4FA2 /* charthlp_wininstall.html */; };
-		C7ED507311CD5A51001A4FA2 /* charthlp_winprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */; };
-		C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501711CD594E001A4FA2 /* contents.gif */; };
-		C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED501811CD594E001A4FA2 /* forward.gif */; };
-		C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = C7ED502011CD594E001A4FA2 /* up.gif */; };
 		E807BD5F17ED71F60052A53F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E807BD5E17ED71F60052A53F /* main.cpp */; };
 		E807BD6117ED71F60052A53F /* calchart_cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = E807BD6017ED71F60052A53F /* calchart_cmd.1 */; };
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
@@ -251,6 +170,146 @@
 		E8C5F7CD1FDC6F5700C84D3E /* cc_show_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */; };
 		E8E2E10B19628731002453E8 /* ghost_module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8E2E1051962870B002453E8 /* ghost_module.cpp */; };
 		E8EA87FA1EA3E31E005D963F /* field_canvas_shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */; };
+		E8F4BA6A202FD51C004A3F1B /* anim.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA41202FD507004A3F1B /* anim.tex */; };
+		E8F4BA6B202FD51C004A3F1B /* back.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA3A202FD506004A3F1B /* back.gif */; };
+		E8F4BA6C202FD51C004A3F1B /* bugs.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA5C202FD50A004A3F1B /* bugs.tex */; };
+		E8F4BA6D202FD51C004A3F1B /* charthlp_acknowledge.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA30202FD505004A3F1B /* charthlp_acknowledge.html */; };
+		E8F4BA6E202FD51C004A3F1B /* charthlp_animcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA4F202FD509004A3F1B /* charthlp_animcont.html */; };
+		E8F4BA6F202FD51C004A3F1B /* charthlp_animwin.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA4E202FD508004A3F1B /* charthlp_animwin.html */; };
+		E8F4BA70202FD51C004A3F1B /* charthlp_basics.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA44202FD507004A3F1B /* charthlp_basics.html */; };
+		E8F4BA71202FD51C004A3F1B /* charthlp_blam.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA45202FD507004A3F1B /* charthlp_blam.html */; };
+		E8F4BA72202FD51C004A3F1B /* charthlp_bugs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA3E202FD507004A3F1B /* charthlp_bugs.html */; };
+		E8F4BA73202FD51C004A3F1B /* charthlp_close.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA51202FD509004A3F1B /* charthlp_close.html */; };
+		E8F4BA74202FD51C004A3F1B /* charthlp_comments.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA2A202FD505004A3F1B /* charthlp_comments.html */; };
+		E8F4BA75202FD51C004A3F1B /* charthlp_contents.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA1F202FD503004A3F1B /* charthlp_contents.html */; };
+		E8F4BA76202FD51C004A3F1B /* charthlp_copyright.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA5A202FD50A004A3F1B /* charthlp_copyright.html */; };
+		E8F4BA77202FD51C004A3F1B /* charthlp_countermarch.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA1B202FD503004A3F1B /* charthlp_countermarch.html */; };
+		E8F4BA78202FD51C004A3F1B /* charthlp_dir.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA67202FD50B004A3F1B /* charthlp_dir.html */; };
+		E8F4BA79202FD51C004A3F1B /* charthlp_directions.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA25202FD504004A3F1B /* charthlp_directions.html */; };
+		E8F4BA7A202FD51C004A3F1B /* charthlp_dirfrom.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA60202FD50A004A3F1B /* charthlp_dirfrom.html */; };
+		E8F4BA7B202FD51C004A3F1B /* charthlp_dist.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA2D202FD505004A3F1B /* charthlp_dist.html */; };
+		E8F4BA7C202FD51C004A3F1B /* charthlp_distfrom.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA4B202FD508004A3F1B /* charthlp_distfrom.html */; };
+		E8F4BA7D202FD51C004A3F1B /* charthlp_dmcm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA66202FD50B004A3F1B /* charthlp_dmcm.html */; };
+		E8F4BA7E202FD51C004A3F1B /* charthlp_dmhs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA3C202FD507004A3F1B /* charthlp_dmhs.html */; };
+		E8F4BA7F202FD51C004A3F1B /* charthlp_drawpaths.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA35202FD506004A3F1B /* charthlp_drawpaths.html */; };
+		E8F4BA80202FD51C004A3F1B /* charthlp_easyinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA20202FD504004A3F1B /* charthlp_easyinstall.html */; };
+		E8F4BA81202FD51C004A3F1B /* charthlp_editcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA5E202FD50A004A3F1B /* charthlp_editcont.html */; };
+		E8F4BA82202FD51C004A3F1B /* charthlp_either.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA69202FD50C004A3F1B /* charthlp_either.html */; };
+		E8F4BA83202FD51C004A3F1B /* charthlp_even.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA24202FD504004A3F1B /* charthlp_even.html */; };
+		E8F4BA84202FD51C004A3F1B /* charthlp_ewns.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA0B202FD501004A3F1B /* charthlp_ewns.html */; };
+		E8F4BA85202FD51C004A3F1B /* charthlp_fieldproperties.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA62202FD50B004A3F1B /* charthlp_fieldproperties.html */; };
+		E8F4BA86202FD51C004A3F1B /* charthlp_fm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA0C202FD502004A3F1B /* charthlp_fm.html */; };
+		E8F4BA87202FD51C004A3F1B /* charthlp_fmto.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA39202FD506004A3F1B /* charthlp_fmto.html */; };
+		E8F4BA88202FD51C004A3F1B /* charthlp_fountain.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA10202FD502004A3F1B /* charthlp_fountain.html */; };
+		E8F4BA89202FD51C004A3F1B /* charthlp_functions.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA47202FD508004A3F1B /* charthlp_functions.html */; };
+		E8F4BA8A202FD51C004A3F1B /* charthlp_future.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA27202FD504004A3F1B /* charthlp_future.html */; };
+		E8F4BA8B202FD51C004A3F1B /* charthlp_geniusmove.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA1A202FD503004A3F1B /* charthlp_geniusmove.html */; };
+		E8F4BA8C202FD51C004A3F1B /* charthlp_ghostsheet.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA5F202FD50A004A3F1B /* charthlp_ghostsheet.html */; };
+		E8F4BA8D202FD51C004A3F1B /* charthlp_gpl.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA43202FD507004A3F1B /* charthlp_gpl.html */; };
+		E8F4BA8E202FD51C004A3F1B /* charthlp_grid.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA46202FD508004A3F1B /* charthlp_grid.html */; };
+		E8F4BA8F202FD51C004A3F1B /* charthlp_gridspacing.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA34202FD506004A3F1B /* charthlp_gridspacing.html */; };
+		E8F4BA90202FD51C004A3F1B /* charthlp_hscm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA11202FD502004A3F1B /* charthlp_hscm.html */; };
+		E8F4BA91202FD51C004A3F1B /* charthlp_hsdm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA1E202FD503004A3F1B /* charthlp_hsdm.html */; };
+		E8F4BA92202FD51C004A3F1B /* charthlp_installing.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA09202FD501004A3F1B /* charthlp_installing.html */; };
+		E8F4BA93202FD51C004A3F1B /* charthlp_macosxinstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA3D202FD507004A3F1B /* charthlp_macosxinstall.html */; };
+		E8F4BA94202FD51C004A3F1B /* charthlp_macosxprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA63202FD50B004A3F1B /* charthlp_macosxprinter.html */; };
+		E8F4BA95202FD51C004A3F1B /* charthlp_magic.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA26202FD504004A3F1B /* charthlp_magic.html */; };
+		E8F4BA96202FD51C004A3F1B /* charthlp_march.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA1D202FD503004A3F1B /* charthlp_march.html */; };
+		E8F4BA97202FD51C004A3F1B /* charthlp_movement.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA06202FD501004A3F1B /* charthlp_movement.html */; };
+		E8F4BA98202FD51C004A3F1B /* charthlp_movepointsintoacurve.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA55202FD509004A3F1B /* charthlp_movepointsintoacurve.html */; };
+		E8F4BA99202FD51C004A3F1B /* charthlp_movepointsintoaline.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA2E202FD505004A3F1B /* charthlp_movepointsintoaline.html */; };
+		E8F4BA9A202FD51C004A3F1B /* charthlp_movepointsintoashape.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA68202FD50B004A3F1B /* charthlp_movepointsintoashape.html */; };
+		E8F4BA9B202FD51C004A3F1B /* charthlp_mt.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA61202FD50B004A3F1B /* charthlp_mt.html */; };
+		E8F4BA9C202FD51C004A3F1B /* charthlp_mtrm.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA52202FD509004A3F1B /* charthlp_mtrm.html */; };
+		E8F4BA9D202FD51C004A3F1B /* charthlp_newshow.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA28202FD504004A3F1B /* charthlp_newshow.html */; };
+		E8F4BA9E202FD51C004A3F1B /* charthlp_nsew.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA48202FD508004A3F1B /* charthlp_nsew.html */; };
+		E8F4BA9F202FD51C004A3F1B /* charthlp_numbers.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA50202FD509004A3F1B /* charthlp_numbers.html */; };
+		E8F4BAA0202FD51C004A3F1B /* charthlp_obtaining.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA23202FD504004A3F1B /* charthlp_obtaining.html */; };
+		E8F4BAA1202FD51C004A3F1B /* charthlp_opp.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA16202FD502004A3F1B /* charthlp_opp.html */; };
+		E8F4BAA2202FD51C004A3F1B /* charthlp_overview.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA14202FD502004A3F1B /* charthlp_overview.html */; };
+		E8F4BAA3202FD51C004A3F1B /* charthlp_pcontcodes.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA12202FD502004A3F1B /* charthlp_pcontcodes.html */; };
+		E8F4BAA4202FD51C004A3F1B /* charthlp_points.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA3F202FD507004A3F1B /* charthlp_points.html */; };
+		E8F4BAA5202FD51C004A3F1B /* charthlp_printcont.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA40202FD507004A3F1B /* charthlp_printcont.html */; };
+		E8F4BAA6202FD51C004A3F1B /* charthlp_procedures.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA37202FD506004A3F1B /* charthlp_procedures.html */; };
+		E8F4BAA7202FD51C004A3F1B /* charthlp_projectpointsonaline.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA18202FD503004A3F1B /* charthlp_projectpointsonaline.html */; };
+		E8F4BAA8202FD51C004A3F1B /* charthlp_refer.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA5D202FD50A004A3F1B /* charthlp_refer.html */; };
+		E8F4BAA9202FD51C004A3F1B /* charthlp_referencegroup.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA38202FD506004A3F1B /* charthlp_referencegroup.html */; };
+		E8F4BAAA202FD51C004A3F1B /* charthlp_reflectblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA19202FD503004A3F1B /* charthlp_reflectblock.html */; };
+		E8F4BAAB202FD51C004A3F1B /* charthlp_refpoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA54202FD509004A3F1B /* charthlp_refpoints.html */; };
+		E8F4BAAC202FD51C004A3F1B /* charthlp_reportingbugs.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA08202FD501004A3F1B /* charthlp_reportingbugs.html */; };
+		E8F4BAAD202FD51C004A3F1B /* charthlp_resizeblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA56202FD509004A3F1B /* charthlp_resizeblock.html */; };
+		E8F4BAAE202FD51C004A3F1B /* charthlp_rotate.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA0E202FD502004A3F1B /* charthlp_rotate.html */; };
+		E8F4BAAF202FD51C004A3F1B /* charthlp_rotateblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA22202FD504004A3F1B /* charthlp_rotateblock.html */; };
+		E8F4BAB0202FD51C004A3F1B /* charthlp_selectingpoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA33202FD506004A3F1B /* charthlp_selectingpoints.html */; };
+		E8F4BAB1202FD51C004A3F1B /* charthlp_shearblock.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA4D202FD508004A3F1B /* charthlp_shearblock.html */; };
+		E8F4BAB2202FD51C004A3F1B /* charthlp_software.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA49202FD508004A3F1B /* charthlp_software.html */; };
+		E8F4BAB3202FD51C004A3F1B /* charthlp_step.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA64202FD50B004A3F1B /* charthlp_step.html */; };
+		E8F4BAB4202FD51C004A3F1B /* charthlp_steps.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA0D202FD502004A3F1B /* charthlp_steps.html */; };
+		E8F4BAB5202FD51C004A3F1B /* charthlp_stepsizes.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA36202FD506004A3F1B /* charthlp_stepsizes.html */; };
+		E8F4BAB6202FD51C004A3F1B /* charthlp_swappoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA58202FD50A004A3F1B /* charthlp_swappoints.html */; };
+		E8F4BAB7202FD51C004A3F1B /* charthlp_symbols.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA53202FD509004A3F1B /* charthlp_symbols.html */; };
+		E8F4BAB8202FD51C004A3F1B /* charthlp_topic0.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA31202FD505004A3F1B /* charthlp_topic0.html */; };
+		E8F4BAB9202FD51C004A3F1B /* charthlp_translatepoints.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA21202FD504004A3F1B /* charthlp_translatepoints.html */; };
+		E8F4BABA202FD51C004A3F1B /* charthlp_variables.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA32202FD506004A3F1B /* charthlp_variables.html */; };
+		E8F4BABB202FD51C004A3F1B /* charthlp_wininstall.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA59202FD50A004A3F1B /* charthlp_wininstall.html */; };
+		E8F4BABC202FD51C004A3F1B /* charthlp_winprinter.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA07202FD501004A3F1B /* charthlp_winprinter.html */; };
+		E8F4BABD202FD51C004A3F1B /* charthlp_zoomlevel.html in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA4A202FD508004A3F1B /* charthlp_zoomlevel.html */; };
+		E8F4BABE202FD51C004A3F1B /* charthlp.con in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA0F202FD502004A3F1B /* charthlp.con */; };
+		E8F4BABF202FD51C004A3F1B /* charthlp.hhc in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA17202FD503004A3F1B /* charthlp.hhc */; };
+		E8F4BAC0202FD51C004A3F1B /* charthlp.hhk in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA29202FD505004A3F1B /* charthlp.hhk */; };
+		E8F4BAC1202FD51C004A3F1B /* charthlp.hhp in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA0A202FD501004A3F1B /* charthlp.hhp */; };
+		E8F4BAC2202FD51C004A3F1B /* charthlp.ref in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA3B202FD506004A3F1B /* charthlp.ref */; };
+		E8F4BAC3202FD51C004A3F1B /* charthlp.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA13202FD502004A3F1B /* charthlp.tex */; };
+		E8F4BAC4202FD51C004A3F1B /* contents.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA1C202FD503004A3F1B /* contents.gif */; };
+		E8F4BAC5202FD51C004A3F1B /* forward.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA4C202FD508004A3F1B /* forward.gif */; };
+		E8F4BAC6202FD51C004A3F1B /* gpl.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA2F202FD505004A3F1B /* gpl.tex */; };
+		E8F4BAC7202FD51C004A3F1B /* install.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA5B202FD50A004A3F1B /* install.tex */; };
+		E8F4BAC8202FD51C004A3F1B /* overview.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA57202FD509004A3F1B /* overview.tex */; };
+		E8F4BAC9202FD51C004A3F1B /* refer.tex in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA65202FD50B004A3F1B /* refer.tex */; };
+		E8F4BACA202FD51C004A3F1B /* t2rtf32.ini in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA2B202FD505004A3F1B /* t2rtf32.ini */; };
+		E8F4BACB202FD51C004A3F1B /* tex2rtf.ini in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA15202FD502004A3F1B /* tex2rtf.ini */; };
+		E8F4BACC202FD51C004A3F1B /* texhelp.sty in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA42202FD507004A3F1B /* texhelp.sty */; };
+		E8F4BACD202FD51C004A3F1B /* up.gif in Copy Docs */ = {isa = PBXBuildFile; fileRef = E8F4BA2C202FD505004A3F1B /* up.gif */; };
+		E8F4BACE202FD51C004A3F1B /* b0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A314DF77A800558ABA /* b0.tga */; };
+		E8F4BACF202FD51C004A3F1B /* b1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A414DF77A800558ABA /* b1.tga */; };
+		E8F4BAD0202FD51C004A3F1B /* b2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A514DF77A800558ABA /* b2.tga */; };
+		E8F4BAD1202FD51C004A3F1B /* bl0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A614DF77A800558ABA /* bl0.tga */; };
+		E8F4BAD2202FD51C004A3F1B /* bl1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A714DF77A800558ABA /* bl1.tga */; };
+		E8F4BAD3202FD51C004A3F1B /* bl2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A814DF77A800558ABA /* bl2.tga */; };
+		E8F4BAD4202FD51C004A3F1B /* bleachers.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2A914DF77A800558ABA /* bleachers.tga */; };
+		E8F4BAD5202FD51C004A3F1B /* br0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2AA14DF77A800558ABA /* br0.tga */; };
+		E8F4BAD6202FD51C004A3F1B /* br1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2AB14DF77A800558ABA /* br1.tga */; };
+		E8F4BAD7202FD51C004A3F1B /* br2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2AC14DF77A800558ABA /* br2.tga */; };
+		E8F4BAD8202FD51C004A3F1B /* C.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2AD14DF77A800558ABA /* C.tga */; };
+		E8F4BAD9202FD51C004A3F1B /* cal.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2AE14DF77A800558ABA /* cal.tga */; };
+		E8F4BADA202FD51C004A3F1B /* calband.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2AF14DF77A800558ABA /* calband.tga */; };
+		E8F4BADB202FD51C004A3F1B /* california.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B014DF77A800558ABA /* california.tga */; };
+		E8F4BADC202FD51C004A3F1B /* crowd.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B114DF77A800558ABA /* crowd.tga */; };
+		E8F4BADD202FD51C004A3F1B /* Direction.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B214DF77A800558ABA /* Direction.tga */; };
+		E8F4BADE202FD51C004A3F1B /* eecs.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B314DF77A800558ABA /* eecs.tga */; };
+		E8F4BADF202FD51C004A3F1B /* endofshow.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B414DF77A800558ABA /* endofshow.tga */; };
+		E8F4BAE0202FD51C004A3F1B /* f0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B514DF77A800558ABA /* f0.tga */; };
+		E8F4BAE1202FD51C004A3F1B /* f0big.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B614DF77A800558ABA /* f0big.tga */; };
+		E8F4BAE2202FD51C004A3F1B /* f1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B714DF77A800558ABA /* f1.tga */; };
+		E8F4BAE3202FD51C004A3F1B /* f2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B814DF77A800558ABA /* f2.tga */; };
+		E8F4BAE4202FD51C004A3F1B /* field.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2B914DF77A800558ABA /* field.tga */; };
+		E8F4BAE5202FD51C004A3F1B /* fl0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2BA14DF77A800558ABA /* fl0.tga */; };
+		E8F4BAE6202FD51C004A3F1B /* fl1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2BB14DF77A800558ABA /* fl1.tga */; };
+		E8F4BAE7202FD51C004A3F1B /* fl2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2BC14DF77A800558ABA /* fl2.tga */; };
+		E8F4BAE8202FD51C004A3F1B /* fr0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2BD14DF77A800558ABA /* fr0.tga */; };
+		E8F4BAE9202FD51C004A3F1B /* fr1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2BE14DF77A800558ABA /* fr1.tga */; };
+		E8F4BAEA202FD51C004A3F1B /* fr2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2BF14DF77A800558ABA /* fr2.tga */; };
+		E8F4BAEB202FD51C004A3F1B /* goalpost.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C014DF77A800558ABA /* goalpost.tga */; };
+		E8F4BAEC202FD51C004A3F1B /* l0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C114DF77A800558ABA /* l0.tga */; };
+		E8F4BAED202FD51C004A3F1B /* l1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C214DF77A800558ABA /* l1.tga */; };
+		E8F4BAEE202FD51C004A3F1B /* l2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C314DF77A800558ABA /* l2.tga */; };
+		E8F4BAEF202FD51C004A3F1B /* lines.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C414DF77A800558ABA /* lines.tga */; };
+		E8F4BAF0202FD51C004A3F1B /* pressbox.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C514DF77A800558ABA /* pressbox.tga */; };
+		E8F4BAF1202FD51C004A3F1B /* r0.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C614DF77A800558ABA /* r0.tga */; };
+		E8F4BAF2202FD51C004A3F1B /* r1.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C714DF77A800558ABA /* r1.tga */; };
+		E8F4BAF3202FD51C004A3F1B /* r2.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C814DF77A800558ABA /* r2.tga */; };
+		E8F4BAF4202FD51C004A3F1B /* sky.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2C914DF77A800558ABA /* sky.tga */; };
+		E8F4BAF5202FD51C004A3F1B /* wall.tga in Copy Docs */ = {isa = PBXBuildFile; fileRef = C774E2CA14DF77A800558ABA /* wall.tga */; };
 		E8FDB95E201D3C01004307CC /* field_frame_controls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FDB95D201D3BF3004307CC /* field_frame_controls.cpp */; };
 /* End PBXBuildFile section */
 
@@ -372,87 +431,146 @@
 			dstPath = docs;
 			dstSubfolderSpec = 1;
 			files = (
-				C7D177EA13B1A83700F65F4C /* charthlp_macosxinstall.html in Copy Docs */,
-				C7D177EB13B1A83700F65F4C /* charthlp_macosxprinter.html in Copy Docs */,
-				C7D1782513B7C6E800F65F4C /* charthlp_geniusmove.html in Copy Docs */,
-				C7D1782613B7C6E800F65F4C /* charthlp_movepointsintoaline.html in Copy Docs */,
-				C7D1782713B7C6E800F65F4C /* charthlp_reflectblock.html in Copy Docs */,
-				C7D1782813B7C6E800F65F4C /* charthlp_resizeblock.html in Copy Docs */,
-				C7D1782913B7C6E800F65F4C /* charthlp_rotateblock.html in Copy Docs */,
-				C7D1782A13B7C6E800F65F4C /* charthlp_shearblock.html in Copy Docs */,
-				C7D1782B13B7C6E800F65F4C /* charthlp_translatepoints.html in Copy Docs */,
-				C7ED502511CD5A51001A4FA2 /* back.gif in Copy Docs */,
-				C7ED502811CD5A51001A4FA2 /* charthlp.con in Copy Docs */,
-				C7ED502911CD5A51001A4FA2 /* charthlp.hhc in Copy Docs */,
-				C7ED502A11CD5A51001A4FA2 /* charthlp.hhk in Copy Docs */,
-				C7ED502B11CD5A51001A4FA2 /* charthlp.hhp in Copy Docs */,
-				C7ED502D11CD5A51001A4FA2 /* charthlp.ref in Copy Docs */,
-				C7ED503011CD5A51001A4FA2 /* charthlp_acknowledge.html in Copy Docs */,
-				C7ED503211CD5A51001A4FA2 /* charthlp_animcont.html in Copy Docs */,
-				C7ED503311CD5A51001A4FA2 /* charthlp_animwin.html in Copy Docs */,
-				C7ED503411CD5A51001A4FA2 /* charthlp_basics.html in Copy Docs */,
-				C7ED503511CD5A51001A4FA2 /* charthlp_blam.html in Copy Docs */,
-				C7ED503611CD5A51001A4FA2 /* charthlp_bugs.html in Copy Docs */,
-				C7ED503711CD5A51001A4FA2 /* charthlp_close.html in Copy Docs */,
-				C7ED503811CD5A51001A4FA2 /* charthlp_comments.html in Copy Docs */,
-				C7ED503911CD5A51001A4FA2 /* charthlp_contents.html in Copy Docs */,
-				C7ED503A11CD5A51001A4FA2 /* charthlp_copyright.html in Copy Docs */,
-				C7ED503B11CD5A51001A4FA2 /* charthlp_countermarch.html in Copy Docs */,
-				C7ED503C11CD5A51001A4FA2 /* charthlp_dir.html in Copy Docs */,
-				C7ED503D11CD5A51001A4FA2 /* charthlp_directions.html in Copy Docs */,
-				C7ED503E11CD5A51001A4FA2 /* charthlp_dirfrom.html in Copy Docs */,
-				C7ED503F11CD5A51001A4FA2 /* charthlp_dist.html in Copy Docs */,
-				C7ED504011CD5A51001A4FA2 /* charthlp_distfrom.html in Copy Docs */,
-				C7ED504111CD5A51001A4FA2 /* charthlp_dmcm.html in Copy Docs */,
-				C7ED504211CD5A51001A4FA2 /* charthlp_dmhs.html in Copy Docs */,
-				C7ED504311CD5A51001A4FA2 /* charthlp_easyinstall.html in Copy Docs */,
-				C7ED504411CD5A51001A4FA2 /* charthlp_editcont.html in Copy Docs */,
-				C7ED504511CD5A51001A4FA2 /* charthlp_either.html in Copy Docs */,
-				C7ED504611CD5A51001A4FA2 /* charthlp_even.html in Copy Docs */,
-				C7ED504711CD5A51001A4FA2 /* charthlp_ewns.html in Copy Docs */,
-				C7ED504811CD5A51001A4FA2 /* charthlp_fm.html in Copy Docs */,
-				C7ED504911CD5A51001A4FA2 /* charthlp_fmto.html in Copy Docs */,
-				C7ED504A11CD5A51001A4FA2 /* charthlp_fountain.html in Copy Docs */,
-				C7ED504B11CD5A51001A4FA2 /* charthlp_functions.html in Copy Docs */,
-				C7ED504C11CD5A51001A4FA2 /* charthlp_future.html in Copy Docs */,
-				C7ED504D11CD5A51001A4FA2 /* charthlp_gpl.html in Copy Docs */,
-				C7ED504E11CD5A51001A4FA2 /* charthlp_grid.html in Copy Docs */,
-				C7ED504F11CD5A51001A4FA2 /* charthlp_hscm.html in Copy Docs */,
-				C7ED505011CD5A51001A4FA2 /* charthlp_hsdm.html in Copy Docs */,
-				C7ED505111CD5A51001A4FA2 /* charthlp_installing.html in Copy Docs */,
-				C7ED505211CD5A51001A4FA2 /* charthlp_magic.html in Copy Docs */,
-				C7ED505311CD5A51001A4FA2 /* charthlp_march.html in Copy Docs */,
-				C7ED505511CD5A51001A4FA2 /* charthlp_movement.html in Copy Docs */,
-				C7ED505611CD5A51001A4FA2 /* charthlp_mt.html in Copy Docs */,
-				C7ED505711CD5A51001A4FA2 /* charthlp_mtrm.html in Copy Docs */,
-				C7ED505811CD5A51001A4FA2 /* charthlp_newshow.html in Copy Docs */,
-				C7ED505911CD5A51001A4FA2 /* charthlp_notdone.html in Copy Docs */,
-				C7ED505A11CD5A51001A4FA2 /* charthlp_nsew.html in Copy Docs */,
-				C7ED505B11CD5A51001A4FA2 /* charthlp_numbers.html in Copy Docs */,
-				C7ED505C11CD5A51001A4FA2 /* charthlp_obtaining.html in Copy Docs */,
-				C7ED505D11CD5A51001A4FA2 /* charthlp_opp.html in Copy Docs */,
-				C7ED505E11CD5A51001A4FA2 /* charthlp_overview.html in Copy Docs */,
-				C7ED505F11CD5A51001A4FA2 /* charthlp_pcontcodes.html in Copy Docs */,
-				C7ED506011CD5A51001A4FA2 /* charthlp_points.html in Copy Docs */,
-				C7ED506111CD5A51001A4FA2 /* charthlp_printcont.html in Copy Docs */,
-				C7ED506211CD5A51001A4FA2 /* charthlp_problems.html in Copy Docs */,
-				C7ED506311CD5A51001A4FA2 /* charthlp_procedures.html in Copy Docs */,
-				C7ED506411CD5A51001A4FA2 /* charthlp_refer.html in Copy Docs */,
-				C7ED506511CD5A51001A4FA2 /* charthlp_refpoints.html in Copy Docs */,
-				C7ED506611CD5A51001A4FA2 /* charthlp_reportingbugs.html in Copy Docs */,
-				C7ED506711CD5A51001A4FA2 /* charthlp_rotate.html in Copy Docs */,
-				C7ED506811CD5A51001A4FA2 /* charthlp_software.html in Copy Docs */,
-				C7ED506911CD5A51001A4FA2 /* charthlp_step.html in Copy Docs */,
-				C7ED506A11CD5A51001A4FA2 /* charthlp_steps.html in Copy Docs */,
-				C7ED506B11CD5A51001A4FA2 /* charthlp_stepsizes.html in Copy Docs */,
-				C7ED506C11CD5A51001A4FA2 /* charthlp_symbols.html in Copy Docs */,
-				C7ED506D11CD5A51001A4FA2 /* charthlp_topic0.html in Copy Docs */,
-				C7ED507111CD5A51001A4FA2 /* charthlp_variables.html in Copy Docs */,
-				C7ED507211CD5A51001A4FA2 /* charthlp_wininstall.html in Copy Docs */,
-				C7ED507311CD5A51001A4FA2 /* charthlp_winprinter.html in Copy Docs */,
-				C7ED507411CD5A51001A4FA2 /* contents.gif in Copy Docs */,
-				C7ED507511CD5A51001A4FA2 /* forward.gif in Copy Docs */,
-				C7ED507D11CD5A51001A4FA2 /* up.gif in Copy Docs */,
+				E8F4BA6A202FD51C004A3F1B /* anim.tex in Copy Docs */,
+				E8F4BA6B202FD51C004A3F1B /* back.gif in Copy Docs */,
+				E8F4BA6C202FD51C004A3F1B /* bugs.tex in Copy Docs */,
+				E8F4BA6D202FD51C004A3F1B /* charthlp_acknowledge.html in Copy Docs */,
+				E8F4BA6E202FD51C004A3F1B /* charthlp_animcont.html in Copy Docs */,
+				E8F4BA6F202FD51C004A3F1B /* charthlp_animwin.html in Copy Docs */,
+				E8F4BA70202FD51C004A3F1B /* charthlp_basics.html in Copy Docs */,
+				E8F4BA71202FD51C004A3F1B /* charthlp_blam.html in Copy Docs */,
+				E8F4BA72202FD51C004A3F1B /* charthlp_bugs.html in Copy Docs */,
+				E8F4BA73202FD51C004A3F1B /* charthlp_close.html in Copy Docs */,
+				E8F4BA74202FD51C004A3F1B /* charthlp_comments.html in Copy Docs */,
+				E8F4BA75202FD51C004A3F1B /* charthlp_contents.html in Copy Docs */,
+				E8F4BA76202FD51C004A3F1B /* charthlp_copyright.html in Copy Docs */,
+				E8F4BA77202FD51C004A3F1B /* charthlp_countermarch.html in Copy Docs */,
+				E8F4BA78202FD51C004A3F1B /* charthlp_dir.html in Copy Docs */,
+				E8F4BA79202FD51C004A3F1B /* charthlp_directions.html in Copy Docs */,
+				E8F4BA7A202FD51C004A3F1B /* charthlp_dirfrom.html in Copy Docs */,
+				E8F4BA7B202FD51C004A3F1B /* charthlp_dist.html in Copy Docs */,
+				E8F4BA7C202FD51C004A3F1B /* charthlp_distfrom.html in Copy Docs */,
+				E8F4BA7D202FD51C004A3F1B /* charthlp_dmcm.html in Copy Docs */,
+				E8F4BA7E202FD51C004A3F1B /* charthlp_dmhs.html in Copy Docs */,
+				E8F4BA7F202FD51C004A3F1B /* charthlp_drawpaths.html in Copy Docs */,
+				E8F4BA80202FD51C004A3F1B /* charthlp_easyinstall.html in Copy Docs */,
+				E8F4BA81202FD51C004A3F1B /* charthlp_editcont.html in Copy Docs */,
+				E8F4BA82202FD51C004A3F1B /* charthlp_either.html in Copy Docs */,
+				E8F4BA83202FD51C004A3F1B /* charthlp_even.html in Copy Docs */,
+				E8F4BA84202FD51C004A3F1B /* charthlp_ewns.html in Copy Docs */,
+				E8F4BA85202FD51C004A3F1B /* charthlp_fieldproperties.html in Copy Docs */,
+				E8F4BA86202FD51C004A3F1B /* charthlp_fm.html in Copy Docs */,
+				E8F4BA87202FD51C004A3F1B /* charthlp_fmto.html in Copy Docs */,
+				E8F4BA88202FD51C004A3F1B /* charthlp_fountain.html in Copy Docs */,
+				E8F4BA89202FD51C004A3F1B /* charthlp_functions.html in Copy Docs */,
+				E8F4BA8A202FD51C004A3F1B /* charthlp_future.html in Copy Docs */,
+				E8F4BA8B202FD51C004A3F1B /* charthlp_geniusmove.html in Copy Docs */,
+				E8F4BA8C202FD51C004A3F1B /* charthlp_ghostsheet.html in Copy Docs */,
+				E8F4BA8D202FD51C004A3F1B /* charthlp_gpl.html in Copy Docs */,
+				E8F4BA8E202FD51C004A3F1B /* charthlp_grid.html in Copy Docs */,
+				E8F4BA8F202FD51C004A3F1B /* charthlp_gridspacing.html in Copy Docs */,
+				E8F4BA90202FD51C004A3F1B /* charthlp_hscm.html in Copy Docs */,
+				E8F4BA91202FD51C004A3F1B /* charthlp_hsdm.html in Copy Docs */,
+				E8F4BA92202FD51C004A3F1B /* charthlp_installing.html in Copy Docs */,
+				E8F4BA93202FD51C004A3F1B /* charthlp_macosxinstall.html in Copy Docs */,
+				E8F4BA94202FD51C004A3F1B /* charthlp_macosxprinter.html in Copy Docs */,
+				E8F4BA95202FD51C004A3F1B /* charthlp_magic.html in Copy Docs */,
+				E8F4BA96202FD51C004A3F1B /* charthlp_march.html in Copy Docs */,
+				E8F4BA97202FD51C004A3F1B /* charthlp_movement.html in Copy Docs */,
+				E8F4BA98202FD51C004A3F1B /* charthlp_movepointsintoacurve.html in Copy Docs */,
+				E8F4BA99202FD51C004A3F1B /* charthlp_movepointsintoaline.html in Copy Docs */,
+				E8F4BA9A202FD51C004A3F1B /* charthlp_movepointsintoashape.html in Copy Docs */,
+				E8F4BA9B202FD51C004A3F1B /* charthlp_mt.html in Copy Docs */,
+				E8F4BA9C202FD51C004A3F1B /* charthlp_mtrm.html in Copy Docs */,
+				E8F4BA9D202FD51C004A3F1B /* charthlp_newshow.html in Copy Docs */,
+				E8F4BA9E202FD51C004A3F1B /* charthlp_nsew.html in Copy Docs */,
+				E8F4BA9F202FD51C004A3F1B /* charthlp_numbers.html in Copy Docs */,
+				E8F4BAA0202FD51C004A3F1B /* charthlp_obtaining.html in Copy Docs */,
+				E8F4BAA1202FD51C004A3F1B /* charthlp_opp.html in Copy Docs */,
+				E8F4BAA2202FD51C004A3F1B /* charthlp_overview.html in Copy Docs */,
+				E8F4BAA3202FD51C004A3F1B /* charthlp_pcontcodes.html in Copy Docs */,
+				E8F4BAA4202FD51C004A3F1B /* charthlp_points.html in Copy Docs */,
+				E8F4BAA5202FD51C004A3F1B /* charthlp_printcont.html in Copy Docs */,
+				E8F4BAA6202FD51C004A3F1B /* charthlp_procedures.html in Copy Docs */,
+				E8F4BAA7202FD51C004A3F1B /* charthlp_projectpointsonaline.html in Copy Docs */,
+				E8F4BAA8202FD51C004A3F1B /* charthlp_refer.html in Copy Docs */,
+				E8F4BAA9202FD51C004A3F1B /* charthlp_referencegroup.html in Copy Docs */,
+				E8F4BAAA202FD51C004A3F1B /* charthlp_reflectblock.html in Copy Docs */,
+				E8F4BAAB202FD51C004A3F1B /* charthlp_refpoints.html in Copy Docs */,
+				E8F4BAAC202FD51C004A3F1B /* charthlp_reportingbugs.html in Copy Docs */,
+				E8F4BAAD202FD51C004A3F1B /* charthlp_resizeblock.html in Copy Docs */,
+				E8F4BAAE202FD51C004A3F1B /* charthlp_rotate.html in Copy Docs */,
+				E8F4BAAF202FD51C004A3F1B /* charthlp_rotateblock.html in Copy Docs */,
+				E8F4BAB0202FD51C004A3F1B /* charthlp_selectingpoints.html in Copy Docs */,
+				E8F4BAB1202FD51C004A3F1B /* charthlp_shearblock.html in Copy Docs */,
+				E8F4BAB2202FD51C004A3F1B /* charthlp_software.html in Copy Docs */,
+				E8F4BAB3202FD51C004A3F1B /* charthlp_step.html in Copy Docs */,
+				E8F4BAB4202FD51C004A3F1B /* charthlp_steps.html in Copy Docs */,
+				E8F4BAB5202FD51C004A3F1B /* charthlp_stepsizes.html in Copy Docs */,
+				E8F4BAB6202FD51C004A3F1B /* charthlp_swappoints.html in Copy Docs */,
+				E8F4BAB7202FD51C004A3F1B /* charthlp_symbols.html in Copy Docs */,
+				E8F4BAB8202FD51C004A3F1B /* charthlp_topic0.html in Copy Docs */,
+				E8F4BAB9202FD51C004A3F1B /* charthlp_translatepoints.html in Copy Docs */,
+				E8F4BABA202FD51C004A3F1B /* charthlp_variables.html in Copy Docs */,
+				E8F4BABB202FD51C004A3F1B /* charthlp_wininstall.html in Copy Docs */,
+				E8F4BABC202FD51C004A3F1B /* charthlp_winprinter.html in Copy Docs */,
+				E8F4BABD202FD51C004A3F1B /* charthlp_zoomlevel.html in Copy Docs */,
+				E8F4BABE202FD51C004A3F1B /* charthlp.con in Copy Docs */,
+				E8F4BABF202FD51C004A3F1B /* charthlp.hhc in Copy Docs */,
+				E8F4BAC0202FD51C004A3F1B /* charthlp.hhk in Copy Docs */,
+				E8F4BAC1202FD51C004A3F1B /* charthlp.hhp in Copy Docs */,
+				E8F4BAC2202FD51C004A3F1B /* charthlp.ref in Copy Docs */,
+				E8F4BAC3202FD51C004A3F1B /* charthlp.tex in Copy Docs */,
+				E8F4BAC4202FD51C004A3F1B /* contents.gif in Copy Docs */,
+				E8F4BAC5202FD51C004A3F1B /* forward.gif in Copy Docs */,
+				E8F4BAC6202FD51C004A3F1B /* gpl.tex in Copy Docs */,
+				E8F4BAC7202FD51C004A3F1B /* install.tex in Copy Docs */,
+				E8F4BAC8202FD51C004A3F1B /* overview.tex in Copy Docs */,
+				E8F4BAC9202FD51C004A3F1B /* refer.tex in Copy Docs */,
+				E8F4BACA202FD51C004A3F1B /* t2rtf32.ini in Copy Docs */,
+				E8F4BACB202FD51C004A3F1B /* tex2rtf.ini in Copy Docs */,
+				E8F4BACC202FD51C004A3F1B /* texhelp.sty in Copy Docs */,
+				E8F4BACD202FD51C004A3F1B /* up.gif in Copy Docs */,
+				E8F4BACE202FD51C004A3F1B /* b0.tga in Copy Docs */,
+				E8F4BACF202FD51C004A3F1B /* b1.tga in Copy Docs */,
+				E8F4BAD0202FD51C004A3F1B /* b2.tga in Copy Docs */,
+				E8F4BAD1202FD51C004A3F1B /* bl0.tga in Copy Docs */,
+				E8F4BAD2202FD51C004A3F1B /* bl1.tga in Copy Docs */,
+				E8F4BAD3202FD51C004A3F1B /* bl2.tga in Copy Docs */,
+				E8F4BAD4202FD51C004A3F1B /* bleachers.tga in Copy Docs */,
+				E8F4BAD5202FD51C004A3F1B /* br0.tga in Copy Docs */,
+				E8F4BAD6202FD51C004A3F1B /* br1.tga in Copy Docs */,
+				E8F4BAD7202FD51C004A3F1B /* br2.tga in Copy Docs */,
+				E8F4BAD8202FD51C004A3F1B /* C.tga in Copy Docs */,
+				E8F4BAD9202FD51C004A3F1B /* cal.tga in Copy Docs */,
+				E8F4BADA202FD51C004A3F1B /* calband.tga in Copy Docs */,
+				E8F4BADB202FD51C004A3F1B /* california.tga in Copy Docs */,
+				E8F4BADC202FD51C004A3F1B /* crowd.tga in Copy Docs */,
+				E8F4BADD202FD51C004A3F1B /* Direction.tga in Copy Docs */,
+				E8F4BADE202FD51C004A3F1B /* eecs.tga in Copy Docs */,
+				E8F4BADF202FD51C004A3F1B /* endofshow.tga in Copy Docs */,
+				E8F4BAE0202FD51C004A3F1B /* f0.tga in Copy Docs */,
+				E8F4BAE1202FD51C004A3F1B /* f0big.tga in Copy Docs */,
+				E8F4BAE2202FD51C004A3F1B /* f1.tga in Copy Docs */,
+				E8F4BAE3202FD51C004A3F1B /* f2.tga in Copy Docs */,
+				E8F4BAE4202FD51C004A3F1B /* field.tga in Copy Docs */,
+				E8F4BAE5202FD51C004A3F1B /* fl0.tga in Copy Docs */,
+				E8F4BAE6202FD51C004A3F1B /* fl1.tga in Copy Docs */,
+				E8F4BAE7202FD51C004A3F1B /* fl2.tga in Copy Docs */,
+				E8F4BAE8202FD51C004A3F1B /* fr0.tga in Copy Docs */,
+				E8F4BAE9202FD51C004A3F1B /* fr1.tga in Copy Docs */,
+				E8F4BAEA202FD51C004A3F1B /* fr2.tga in Copy Docs */,
+				E8F4BAEB202FD51C004A3F1B /* goalpost.tga in Copy Docs */,
+				E8F4BAEC202FD51C004A3F1B /* l0.tga in Copy Docs */,
+				E8F4BAED202FD51C004A3F1B /* l1.tga in Copy Docs */,
+				E8F4BAEE202FD51C004A3F1B /* l2.tga in Copy Docs */,
+				E8F4BAEF202FD51C004A3F1B /* lines.tga in Copy Docs */,
+				E8F4BAF0202FD51C004A3F1B /* pressbox.tga in Copy Docs */,
+				E8F4BAF1202FD51C004A3F1B /* r0.tga in Copy Docs */,
+				E8F4BAF2202FD51C004A3F1B /* r1.tga in Copy Docs */,
+				E8F4BAF3202FD51C004A3F1B /* r2.tga in Copy Docs */,
+				E8F4BAF4202FD51C004A3F1B /* sky.tga in Copy Docs */,
+				E8F4BAF5202FD51C004A3F1B /* wall.tga in Copy Docs */,
 			);
 			name = "Copy Docs";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -589,15 +707,6 @@
 		C7C5FBD71479B385004E5C5B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		C7C5FBD91479B39A004E5C5B /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		C7C5FBDB1479B3F8004E5C5B /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxinstall.html; sourceTree = "<group>"; };
-		C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxprinter.html; sourceTree = "<group>"; };
-		C7D1781E13B7C6E800F65F4C /* charthlp_geniusmove.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_geniusmove.html; sourceTree = "<group>"; };
-		C7D1781F13B7C6E800F65F4C /* charthlp_movepointsintoaline.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_movepointsintoaline.html; sourceTree = "<group>"; };
-		C7D1782013B7C6E800F65F4C /* charthlp_reflectblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_reflectblock.html; sourceTree = "<group>"; };
-		C7D1782113B7C6E800F65F4C /* charthlp_resizeblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_resizeblock.html; sourceTree = "<group>"; };
-		C7D1782213B7C6E800F65F4C /* charthlp_rotateblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_rotateblock.html; sourceTree = "<group>"; };
-		C7D1782313B7C6E800F65F4C /* charthlp_shearblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_shearblock.html; sourceTree = "<group>"; };
-		C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_translatepoints.html; sourceTree = "<group>"; };
 		C7D4E2C211D087CD007D3587 /* calchartapp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = calchartapp.cpp; sourceTree = "<group>"; };
 		C7D4E2C311D087CD007D3587 /* calchartapp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = calchartapp.h; sourceTree = "<group>"; };
 		C7E047C6155F279000D8C71B /* field_view.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_view.cpp; sourceTree = "<group>"; };
@@ -609,78 +718,6 @@
 		C7E047D015609A1200D8C71B /* setup_wizards.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setup_wizards.cpp; sourceTree = "<group>"; };
 		C7E047D115609A1400D8C71B /* setup_wizards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setup_wizards.h; sourceTree = "<group>"; };
 		C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = calchart.icns; path = ../resources/calchart.icns; sourceTree = SOURCE_ROOT; };
-		C7ED4FC811CD594E001A4FA2 /* back.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = back.gif; sourceTree = "<group>"; };
-		C7ED4FCB11CD594E001A4FA2 /* charthlp.con */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.con; sourceTree = "<group>"; };
-		C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhc; sourceTree = "<group>"; };
-		C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhk; sourceTree = "<group>"; };
-		C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhp; sourceTree = "<group>"; };
-		C7ED4FD011CD594E001A4FA2 /* charthlp.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.ref; sourceTree = "<group>"; };
-		C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_acknowledge.html; sourceTree = "<group>"; };
-		C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_animcont.html; sourceTree = "<group>"; };
-		C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_animwin.html; sourceTree = "<group>"; };
-		C7ED4FD711CD594E001A4FA2 /* charthlp_basics.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_basics.html; sourceTree = "<group>"; };
-		C7ED4FD811CD594E001A4FA2 /* charthlp_blam.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_blam.html; sourceTree = "<group>"; };
-		C7ED4FD911CD594E001A4FA2 /* charthlp_bugs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_bugs.html; sourceTree = "<group>"; };
-		C7ED4FDA11CD594E001A4FA2 /* charthlp_close.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_close.html; sourceTree = "<group>"; };
-		C7ED4FDB11CD594E001A4FA2 /* charthlp_comments.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_comments.html; sourceTree = "<group>"; };
-		C7ED4FDC11CD594E001A4FA2 /* charthlp_contents.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_contents.html; sourceTree = "<group>"; };
-		C7ED4FDD11CD594E001A4FA2 /* charthlp_copyright.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_copyright.html; sourceTree = "<group>"; };
-		C7ED4FDE11CD594E001A4FA2 /* charthlp_countermarch.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_countermarch.html; sourceTree = "<group>"; };
-		C7ED4FDF11CD594E001A4FA2 /* charthlp_dir.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dir.html; sourceTree = "<group>"; };
-		C7ED4FE011CD594E001A4FA2 /* charthlp_directions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_directions.html; sourceTree = "<group>"; };
-		C7ED4FE111CD594E001A4FA2 /* charthlp_dirfrom.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dirfrom.html; sourceTree = "<group>"; };
-		C7ED4FE211CD594E001A4FA2 /* charthlp_dist.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dist.html; sourceTree = "<group>"; };
-		C7ED4FE311CD594E001A4FA2 /* charthlp_distfrom.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_distfrom.html; sourceTree = "<group>"; };
-		C7ED4FE411CD594E001A4FA2 /* charthlp_dmcm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dmcm.html; sourceTree = "<group>"; };
-		C7ED4FE511CD594E001A4FA2 /* charthlp_dmhs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dmhs.html; sourceTree = "<group>"; };
-		C7ED4FE611CD594E001A4FA2 /* charthlp_easyinstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_easyinstall.html; sourceTree = "<group>"; };
-		C7ED4FE711CD594E001A4FA2 /* charthlp_editcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_editcont.html; sourceTree = "<group>"; };
-		C7ED4FE811CD594E001A4FA2 /* charthlp_either.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_either.html; sourceTree = "<group>"; };
-		C7ED4FE911CD594E001A4FA2 /* charthlp_even.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_even.html; sourceTree = "<group>"; };
-		C7ED4FEA11CD594E001A4FA2 /* charthlp_ewns.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_ewns.html; sourceTree = "<group>"; };
-		C7ED4FEB11CD594E001A4FA2 /* charthlp_fm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fm.html; sourceTree = "<group>"; };
-		C7ED4FEC11CD594E001A4FA2 /* charthlp_fmto.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fmto.html; sourceTree = "<group>"; };
-		C7ED4FED11CD594E001A4FA2 /* charthlp_fountain.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fountain.html; sourceTree = "<group>"; };
-		C7ED4FEE11CD594E001A4FA2 /* charthlp_functions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_functions.html; sourceTree = "<group>"; };
-		C7ED4FEF11CD594E001A4FA2 /* charthlp_future.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_future.html; sourceTree = "<group>"; };
-		C7ED4FF011CD594E001A4FA2 /* charthlp_gpl.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_gpl.html; sourceTree = "<group>"; };
-		C7ED4FF111CD594E001A4FA2 /* charthlp_grid.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_grid.html; sourceTree = "<group>"; };
-		C7ED4FF211CD594E001A4FA2 /* charthlp_hscm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_hscm.html; sourceTree = "<group>"; };
-		C7ED4FF311CD594E001A4FA2 /* charthlp_hsdm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_hsdm.html; sourceTree = "<group>"; };
-		C7ED4FF411CD594E001A4FA2 /* charthlp_installing.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_installing.html; sourceTree = "<group>"; };
-		C7ED4FF511CD594E001A4FA2 /* charthlp_magic.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_magic.html; sourceTree = "<group>"; };
-		C7ED4FF611CD594E001A4FA2 /* charthlp_march.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_march.html; sourceTree = "<group>"; };
-		C7ED4FF811CD594E001A4FA2 /* charthlp_movement.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_movement.html; sourceTree = "<group>"; };
-		C7ED4FF911CD594E001A4FA2 /* charthlp_mt.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_mt.html; sourceTree = "<group>"; };
-		C7ED4FFA11CD594E001A4FA2 /* charthlp_mtrm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_mtrm.html; sourceTree = "<group>"; };
-		C7ED4FFB11CD594E001A4FA2 /* charthlp_newshow.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_newshow.html; sourceTree = "<group>"; };
-		C7ED4FFC11CD594E001A4FA2 /* charthlp_notdone.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_notdone.html; sourceTree = "<group>"; };
-		C7ED4FFD11CD594E001A4FA2 /* charthlp_nsew.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_nsew.html; sourceTree = "<group>"; };
-		C7ED4FFE11CD594E001A4FA2 /* charthlp_numbers.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_numbers.html; sourceTree = "<group>"; };
-		C7ED4FFF11CD594E001A4FA2 /* charthlp_obtaining.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_obtaining.html; sourceTree = "<group>"; };
-		C7ED500011CD594E001A4FA2 /* charthlp_opp.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_opp.html; sourceTree = "<group>"; };
-		C7ED500111CD594E001A4FA2 /* charthlp_overview.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_overview.html; sourceTree = "<group>"; };
-		C7ED500211CD594E001A4FA2 /* charthlp_pcontcodes.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_pcontcodes.html; sourceTree = "<group>"; };
-		C7ED500311CD594E001A4FA2 /* charthlp_points.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_points.html; sourceTree = "<group>"; };
-		C7ED500411CD594E001A4FA2 /* charthlp_printcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_printcont.html; sourceTree = "<group>"; };
-		C7ED500511CD594E001A4FA2 /* charthlp_problems.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_problems.html; sourceTree = "<group>"; };
-		C7ED500611CD594E001A4FA2 /* charthlp_procedures.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_procedures.html; sourceTree = "<group>"; };
-		C7ED500711CD594E001A4FA2 /* charthlp_refer.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_refer.html; sourceTree = "<group>"; };
-		C7ED500811CD594E001A4FA2 /* charthlp_refpoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_refpoints.html; sourceTree = "<group>"; };
-		C7ED500911CD594E001A4FA2 /* charthlp_reportingbugs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_reportingbugs.html; sourceTree = "<group>"; };
-		C7ED500A11CD594E001A4FA2 /* charthlp_rotate.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_rotate.html; sourceTree = "<group>"; };
-		C7ED500B11CD594E001A4FA2 /* charthlp_software.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_software.html; sourceTree = "<group>"; };
-		C7ED500C11CD594E001A4FA2 /* charthlp_step.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_step.html; sourceTree = "<group>"; };
-		C7ED500D11CD594E001A4FA2 /* charthlp_steps.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_steps.html; sourceTree = "<group>"; };
-		C7ED500E11CD594E001A4FA2 /* charthlp_stepsizes.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_stepsizes.html; sourceTree = "<group>"; };
-		C7ED500F11CD594E001A4FA2 /* charthlp_symbols.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_symbols.html; sourceTree = "<group>"; };
-		C7ED501011CD594E001A4FA2 /* charthlp_topic0.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_topic0.html; sourceTree = "<group>"; };
-		C7ED501411CD594E001A4FA2 /* charthlp_variables.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_variables.html; sourceTree = "<group>"; };
-		C7ED501511CD594E001A4FA2 /* charthlp_wininstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_wininstall.html; sourceTree = "<group>"; };
-		C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_winprinter.html; sourceTree = "<group>"; };
-		C7ED501711CD594E001A4FA2 /* contents.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = contents.gif; sourceTree = "<group>"; };
-		C7ED501811CD594E001A4FA2 /* forward.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = forward.gif; sourceTree = "<group>"; };
-		C7ED502011CD594E001A4FA2 /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
 		E803362617EE1A5E00A58457 /* cc_drawcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_drawcommand.h; sourceTree = "<group>"; };
 		E803362717EE1C3700A58457 /* cc_fileformat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cc_fileformat.h; sourceTree = "<group>"; };
 		E803362817EE1C5F00A58457 /* cc_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cc_shapes.cpp; sourceTree = "<group>"; };
@@ -743,6 +780,106 @@
 		E8E2E1061962870B002453E8 /* ghost_module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ghost_module.h; sourceTree = "<group>"; };
 		E8EA87F81EA3E2C3005D963F /* field_canvas_shapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_canvas_shapes.cpp; sourceTree = "<group>"; };
 		E8EA87F91EA3E2C3005D963F /* field_canvas_shapes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_canvas_shapes.h; sourceTree = "<group>"; };
+		E8F4BA06202FD501004A3F1B /* charthlp_movement.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_movement.html; sourceTree = "<group>"; };
+		E8F4BA07202FD501004A3F1B /* charthlp_winprinter.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_winprinter.html; sourceTree = "<group>"; };
+		E8F4BA08202FD501004A3F1B /* charthlp_reportingbugs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_reportingbugs.html; sourceTree = "<group>"; };
+		E8F4BA09202FD501004A3F1B /* charthlp_installing.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_installing.html; sourceTree = "<group>"; };
+		E8F4BA0A202FD501004A3F1B /* charthlp.hhp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhp; sourceTree = "<group>"; };
+		E8F4BA0B202FD501004A3F1B /* charthlp_ewns.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_ewns.html; sourceTree = "<group>"; };
+		E8F4BA0C202FD502004A3F1B /* charthlp_fm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fm.html; sourceTree = "<group>"; };
+		E8F4BA0D202FD502004A3F1B /* charthlp_steps.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_steps.html; sourceTree = "<group>"; };
+		E8F4BA0E202FD502004A3F1B /* charthlp_rotate.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_rotate.html; sourceTree = "<group>"; };
+		E8F4BA0F202FD502004A3F1B /* charthlp.con */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.con; sourceTree = "<group>"; };
+		E8F4BA10202FD502004A3F1B /* charthlp_fountain.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fountain.html; sourceTree = "<group>"; };
+		E8F4BA11202FD502004A3F1B /* charthlp_hscm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_hscm.html; sourceTree = "<group>"; };
+		E8F4BA12202FD502004A3F1B /* charthlp_pcontcodes.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_pcontcodes.html; sourceTree = "<group>"; };
+		E8F4BA13202FD502004A3F1B /* charthlp.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.tex; sourceTree = "<group>"; };
+		E8F4BA14202FD502004A3F1B /* charthlp_overview.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_overview.html; sourceTree = "<group>"; };
+		E8F4BA15202FD502004A3F1B /* tex2rtf.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tex2rtf.ini; sourceTree = "<group>"; };
+		E8F4BA16202FD502004A3F1B /* charthlp_opp.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_opp.html; sourceTree = "<group>"; };
+		E8F4BA17202FD503004A3F1B /* charthlp.hhc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhc; sourceTree = "<group>"; };
+		E8F4BA18202FD503004A3F1B /* charthlp_projectpointsonaline.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_projectpointsonaline.html; sourceTree = "<group>"; };
+		E8F4BA19202FD503004A3F1B /* charthlp_reflectblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_reflectblock.html; sourceTree = "<group>"; };
+		E8F4BA1A202FD503004A3F1B /* charthlp_geniusmove.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_geniusmove.html; sourceTree = "<group>"; };
+		E8F4BA1B202FD503004A3F1B /* charthlp_countermarch.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_countermarch.html; sourceTree = "<group>"; };
+		E8F4BA1C202FD503004A3F1B /* contents.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = contents.gif; sourceTree = "<group>"; };
+		E8F4BA1D202FD503004A3F1B /* charthlp_march.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_march.html; sourceTree = "<group>"; };
+		E8F4BA1E202FD503004A3F1B /* charthlp_hsdm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_hsdm.html; sourceTree = "<group>"; };
+		E8F4BA1F202FD503004A3F1B /* charthlp_contents.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_contents.html; sourceTree = "<group>"; };
+		E8F4BA20202FD504004A3F1B /* charthlp_easyinstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_easyinstall.html; sourceTree = "<group>"; };
+		E8F4BA21202FD504004A3F1B /* charthlp_translatepoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_translatepoints.html; sourceTree = "<group>"; };
+		E8F4BA22202FD504004A3F1B /* charthlp_rotateblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_rotateblock.html; sourceTree = "<group>"; };
+		E8F4BA23202FD504004A3F1B /* charthlp_obtaining.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_obtaining.html; sourceTree = "<group>"; };
+		E8F4BA24202FD504004A3F1B /* charthlp_even.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_even.html; sourceTree = "<group>"; };
+		E8F4BA25202FD504004A3F1B /* charthlp_directions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_directions.html; sourceTree = "<group>"; };
+		E8F4BA26202FD504004A3F1B /* charthlp_magic.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_magic.html; sourceTree = "<group>"; };
+		E8F4BA27202FD504004A3F1B /* charthlp_future.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_future.html; sourceTree = "<group>"; };
+		E8F4BA28202FD504004A3F1B /* charthlp_newshow.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_newshow.html; sourceTree = "<group>"; };
+		E8F4BA29202FD505004A3F1B /* charthlp.hhk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.hhk; sourceTree = "<group>"; };
+		E8F4BA2A202FD505004A3F1B /* charthlp_comments.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_comments.html; sourceTree = "<group>"; };
+		E8F4BA2B202FD505004A3F1B /* t2rtf32.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = t2rtf32.ini; sourceTree = "<group>"; };
+		E8F4BA2C202FD505004A3F1B /* up.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = up.gif; sourceTree = "<group>"; };
+		E8F4BA2D202FD505004A3F1B /* charthlp_dist.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dist.html; sourceTree = "<group>"; };
+		E8F4BA2E202FD505004A3F1B /* charthlp_movepointsintoaline.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_movepointsintoaline.html; sourceTree = "<group>"; };
+		E8F4BA2F202FD505004A3F1B /* gpl.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gpl.tex; sourceTree = "<group>"; };
+		E8F4BA30202FD505004A3F1B /* charthlp_acknowledge.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_acknowledge.html; sourceTree = "<group>"; };
+		E8F4BA31202FD505004A3F1B /* charthlp_topic0.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_topic0.html; sourceTree = "<group>"; };
+		E8F4BA32202FD506004A3F1B /* charthlp_variables.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_variables.html; sourceTree = "<group>"; };
+		E8F4BA33202FD506004A3F1B /* charthlp_selectingpoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_selectingpoints.html; sourceTree = "<group>"; };
+		E8F4BA34202FD506004A3F1B /* charthlp_gridspacing.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_gridspacing.html; sourceTree = "<group>"; };
+		E8F4BA35202FD506004A3F1B /* charthlp_drawpaths.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_drawpaths.html; sourceTree = "<group>"; };
+		E8F4BA36202FD506004A3F1B /* charthlp_stepsizes.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_stepsizes.html; sourceTree = "<group>"; };
+		E8F4BA37202FD506004A3F1B /* charthlp_procedures.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_procedures.html; sourceTree = "<group>"; };
+		E8F4BA38202FD506004A3F1B /* charthlp_referencegroup.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_referencegroup.html; sourceTree = "<group>"; };
+		E8F4BA39202FD506004A3F1B /* charthlp_fmto.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fmto.html; sourceTree = "<group>"; };
+		E8F4BA3A202FD506004A3F1B /* back.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = back.gif; sourceTree = "<group>"; };
+		E8F4BA3B202FD506004A3F1B /* charthlp.ref */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = charthlp.ref; sourceTree = "<group>"; };
+		E8F4BA3C202FD507004A3F1B /* charthlp_dmhs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dmhs.html; sourceTree = "<group>"; };
+		E8F4BA3D202FD507004A3F1B /* charthlp_macosxinstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxinstall.html; sourceTree = "<group>"; };
+		E8F4BA3E202FD507004A3F1B /* charthlp_bugs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_bugs.html; sourceTree = "<group>"; };
+		E8F4BA3F202FD507004A3F1B /* charthlp_points.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_points.html; sourceTree = "<group>"; };
+		E8F4BA40202FD507004A3F1B /* charthlp_printcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_printcont.html; sourceTree = "<group>"; };
+		E8F4BA41202FD507004A3F1B /* anim.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = anim.tex; sourceTree = "<group>"; };
+		E8F4BA42202FD507004A3F1B /* texhelp.sty */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = texhelp.sty; sourceTree = "<group>"; };
+		E8F4BA43202FD507004A3F1B /* charthlp_gpl.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_gpl.html; sourceTree = "<group>"; };
+		E8F4BA44202FD507004A3F1B /* charthlp_basics.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_basics.html; sourceTree = "<group>"; };
+		E8F4BA45202FD507004A3F1B /* charthlp_blam.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_blam.html; sourceTree = "<group>"; };
+		E8F4BA46202FD508004A3F1B /* charthlp_grid.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_grid.html; sourceTree = "<group>"; };
+		E8F4BA47202FD508004A3F1B /* charthlp_functions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_functions.html; sourceTree = "<group>"; };
+		E8F4BA48202FD508004A3F1B /* charthlp_nsew.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_nsew.html; sourceTree = "<group>"; };
+		E8F4BA49202FD508004A3F1B /* charthlp_software.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_software.html; sourceTree = "<group>"; };
+		E8F4BA4A202FD508004A3F1B /* charthlp_zoomlevel.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_zoomlevel.html; sourceTree = "<group>"; };
+		E8F4BA4B202FD508004A3F1B /* charthlp_distfrom.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_distfrom.html; sourceTree = "<group>"; };
+		E8F4BA4C202FD508004A3F1B /* forward.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = forward.gif; sourceTree = "<group>"; };
+		E8F4BA4D202FD508004A3F1B /* charthlp_shearblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_shearblock.html; sourceTree = "<group>"; };
+		E8F4BA4E202FD508004A3F1B /* charthlp_animwin.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_animwin.html; sourceTree = "<group>"; };
+		E8F4BA4F202FD509004A3F1B /* charthlp_animcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_animcont.html; sourceTree = "<group>"; };
+		E8F4BA50202FD509004A3F1B /* charthlp_numbers.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_numbers.html; sourceTree = "<group>"; };
+		E8F4BA51202FD509004A3F1B /* charthlp_close.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_close.html; sourceTree = "<group>"; };
+		E8F4BA52202FD509004A3F1B /* charthlp_mtrm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_mtrm.html; sourceTree = "<group>"; };
+		E8F4BA53202FD509004A3F1B /* charthlp_symbols.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_symbols.html; sourceTree = "<group>"; };
+		E8F4BA54202FD509004A3F1B /* charthlp_refpoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_refpoints.html; sourceTree = "<group>"; };
+		E8F4BA55202FD509004A3F1B /* charthlp_movepointsintoacurve.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_movepointsintoacurve.html; sourceTree = "<group>"; };
+		E8F4BA56202FD509004A3F1B /* charthlp_resizeblock.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_resizeblock.html; sourceTree = "<group>"; };
+		E8F4BA57202FD509004A3F1B /* overview.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = overview.tex; sourceTree = "<group>"; };
+		E8F4BA58202FD50A004A3F1B /* charthlp_swappoints.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_swappoints.html; sourceTree = "<group>"; };
+		E8F4BA59202FD50A004A3F1B /* charthlp_wininstall.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_wininstall.html; sourceTree = "<group>"; };
+		E8F4BA5A202FD50A004A3F1B /* charthlp_copyright.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_copyright.html; sourceTree = "<group>"; };
+		E8F4BA5B202FD50A004A3F1B /* install.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = install.tex; sourceTree = "<group>"; };
+		E8F4BA5C202FD50A004A3F1B /* bugs.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = bugs.tex; sourceTree = "<group>"; };
+		E8F4BA5D202FD50A004A3F1B /* charthlp_refer.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_refer.html; sourceTree = "<group>"; };
+		E8F4BA5E202FD50A004A3F1B /* charthlp_editcont.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_editcont.html; sourceTree = "<group>"; };
+		E8F4BA5F202FD50A004A3F1B /* charthlp_ghostsheet.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_ghostsheet.html; sourceTree = "<group>"; };
+		E8F4BA60202FD50A004A3F1B /* charthlp_dirfrom.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dirfrom.html; sourceTree = "<group>"; };
+		E8F4BA61202FD50B004A3F1B /* charthlp_mt.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_mt.html; sourceTree = "<group>"; };
+		E8F4BA62202FD50B004A3F1B /* charthlp_fieldproperties.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_fieldproperties.html; sourceTree = "<group>"; };
+		E8F4BA63202FD50B004A3F1B /* charthlp_macosxprinter.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_macosxprinter.html; sourceTree = "<group>"; };
+		E8F4BA64202FD50B004A3F1B /* charthlp_step.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_step.html; sourceTree = "<group>"; };
+		E8F4BA65202FD50B004A3F1B /* refer.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = refer.tex; sourceTree = "<group>"; };
+		E8F4BA66202FD50B004A3F1B /* charthlp_dmcm.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dmcm.html; sourceTree = "<group>"; };
+		E8F4BA67202FD50B004A3F1B /* charthlp_dir.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_dir.html; sourceTree = "<group>"; };
+		E8F4BA68202FD50B004A3F1B /* charthlp_movepointsintoashape.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_movepointsintoashape.html; sourceTree = "<group>"; };
+		E8F4BA69202FD50C004A3F1B /* charthlp_either.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = charthlp_either.html; sourceTree = "<group>"; };
 		E8FDB95C201D3BF3004307CC /* field_frame_controls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = field_frame_controls.h; sourceTree = "<group>"; };
 		E8FDB95D201D3BF3004307CC /* field_frame_controls.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = field_frame_controls.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1051,87 +1188,106 @@
 		C7ED4FC511CD594E001A4FA2 /* docs */ = {
 			isa = PBXGroup;
 			children = (
-				C7D1781E13B7C6E800F65F4C /* charthlp_geniusmove.html */,
-				C7D1781F13B7C6E800F65F4C /* charthlp_movepointsintoaline.html */,
-				C7D1782013B7C6E800F65F4C /* charthlp_reflectblock.html */,
-				C7D1782113B7C6E800F65F4C /* charthlp_resizeblock.html */,
-				C7D1782213B7C6E800F65F4C /* charthlp_rotateblock.html */,
-				C7D1782313B7C6E800F65F4C /* charthlp_shearblock.html */,
-				C7D1782413B7C6E800F65F4C /* charthlp_translatepoints.html */,
-				C7ED4FC811CD594E001A4FA2 /* back.gif */,
-				C7ED4FCB11CD594E001A4FA2 /* charthlp.con */,
-				C7ED4FCC11CD594E001A4FA2 /* charthlp.hhc */,
-				C7ED4FCD11CD594E001A4FA2 /* charthlp.hhk */,
-				C7ED4FCE11CD594E001A4FA2 /* charthlp.hhp */,
-				C7ED4FD011CD594E001A4FA2 /* charthlp.ref */,
-				C7ED4FD311CD594E001A4FA2 /* charthlp_acknowledge.html */,
-				C7ED4FD511CD594E001A4FA2 /* charthlp_animcont.html */,
-				C7ED4FD611CD594E001A4FA2 /* charthlp_animwin.html */,
-				C7ED4FD711CD594E001A4FA2 /* charthlp_basics.html */,
-				C7ED4FD811CD594E001A4FA2 /* charthlp_blam.html */,
-				C7ED4FD911CD594E001A4FA2 /* charthlp_bugs.html */,
-				C7ED4FDA11CD594E001A4FA2 /* charthlp_close.html */,
-				C7ED4FDB11CD594E001A4FA2 /* charthlp_comments.html */,
-				C7ED4FDC11CD594E001A4FA2 /* charthlp_contents.html */,
-				C7ED4FDD11CD594E001A4FA2 /* charthlp_copyright.html */,
-				C7ED4FDF11CD594E001A4FA2 /* charthlp_dir.html */,
-				C7ED4FDE11CD594E001A4FA2 /* charthlp_countermarch.html */,
-				C7ED4FE011CD594E001A4FA2 /* charthlp_directions.html */,
-				C7ED4FE111CD594E001A4FA2 /* charthlp_dirfrom.html */,
-				C7ED4FE211CD594E001A4FA2 /* charthlp_dist.html */,
-				C7ED4FE311CD594E001A4FA2 /* charthlp_distfrom.html */,
-				C7ED4FE411CD594E001A4FA2 /* charthlp_dmcm.html */,
-				C7ED4FE511CD594E001A4FA2 /* charthlp_dmhs.html */,
-				C7ED4FE611CD594E001A4FA2 /* charthlp_easyinstall.html */,
-				C7ED4FE711CD594E001A4FA2 /* charthlp_editcont.html */,
-				C7ED4FE811CD594E001A4FA2 /* charthlp_either.html */,
-				C7ED4FE911CD594E001A4FA2 /* charthlp_even.html */,
-				C7ED4FEA11CD594E001A4FA2 /* charthlp_ewns.html */,
-				C7ED4FEB11CD594E001A4FA2 /* charthlp_fm.html */,
-				C7ED4FEC11CD594E001A4FA2 /* charthlp_fmto.html */,
-				C7ED4FED11CD594E001A4FA2 /* charthlp_fountain.html */,
-				C7ED4FEE11CD594E001A4FA2 /* charthlp_functions.html */,
-				C7ED4FEF11CD594E001A4FA2 /* charthlp_future.html */,
-				C7ED4FF011CD594E001A4FA2 /* charthlp_gpl.html */,
-				C7ED4FF111CD594E001A4FA2 /* charthlp_grid.html */,
-				C7ED4FF211CD594E001A4FA2 /* charthlp_hscm.html */,
-				C7ED4FF311CD594E001A4FA2 /* charthlp_hsdm.html */,
-				C7ED4FF411CD594E001A4FA2 /* charthlp_installing.html */,
-				C7D177DE13B1A7E500F65F4C /* charthlp_macosxinstall.html */,
-				C7D177DF13B1A7E500F65F4C /* charthlp_macosxprinter.html */,
-				C7ED4FF511CD594E001A4FA2 /* charthlp_magic.html */,
-				C7ED4FF611CD594E001A4FA2 /* charthlp_march.html */,
-				C7ED4FF811CD594E001A4FA2 /* charthlp_movement.html */,
-				C7ED4FF911CD594E001A4FA2 /* charthlp_mt.html */,
-				C7ED4FFA11CD594E001A4FA2 /* charthlp_mtrm.html */,
-				C7ED4FFB11CD594E001A4FA2 /* charthlp_newshow.html */,
-				C7ED4FFC11CD594E001A4FA2 /* charthlp_notdone.html */,
-				C7ED4FFD11CD594E001A4FA2 /* charthlp_nsew.html */,
-				C7ED4FFE11CD594E001A4FA2 /* charthlp_numbers.html */,
-				C7ED4FFF11CD594E001A4FA2 /* charthlp_obtaining.html */,
-				C7ED500011CD594E001A4FA2 /* charthlp_opp.html */,
-				C7ED500111CD594E001A4FA2 /* charthlp_overview.html */,
-				C7ED500211CD594E001A4FA2 /* charthlp_pcontcodes.html */,
-				C7ED500311CD594E001A4FA2 /* charthlp_points.html */,
-				C7ED500411CD594E001A4FA2 /* charthlp_printcont.html */,
-				C7ED500511CD594E001A4FA2 /* charthlp_problems.html */,
-				C7ED500611CD594E001A4FA2 /* charthlp_procedures.html */,
-				C7ED500711CD594E001A4FA2 /* charthlp_refer.html */,
-				C7ED500811CD594E001A4FA2 /* charthlp_refpoints.html */,
-				C7ED500911CD594E001A4FA2 /* charthlp_reportingbugs.html */,
-				C7ED500A11CD594E001A4FA2 /* charthlp_rotate.html */,
-				C7ED500B11CD594E001A4FA2 /* charthlp_software.html */,
-				C7ED500C11CD594E001A4FA2 /* charthlp_step.html */,
-				C7ED500D11CD594E001A4FA2 /* charthlp_steps.html */,
-				C7ED500E11CD594E001A4FA2 /* charthlp_stepsizes.html */,
-				C7ED500F11CD594E001A4FA2 /* charthlp_symbols.html */,
-				C7ED501011CD594E001A4FA2 /* charthlp_topic0.html */,
-				C7ED501411CD594E001A4FA2 /* charthlp_variables.html */,
-				C7ED501511CD594E001A4FA2 /* charthlp_wininstall.html */,
-				C7ED501611CD594E001A4FA2 /* charthlp_winprinter.html */,
-				C7ED501711CD594E001A4FA2 /* contents.gif */,
-				C7ED501811CD594E001A4FA2 /* forward.gif */,
-				C7ED502011CD594E001A4FA2 /* up.gif */,
+				E8F4BA41202FD507004A3F1B /* anim.tex */,
+				E8F4BA3A202FD506004A3F1B /* back.gif */,
+				E8F4BA5C202FD50A004A3F1B /* bugs.tex */,
+				E8F4BA30202FD505004A3F1B /* charthlp_acknowledge.html */,
+				E8F4BA4F202FD509004A3F1B /* charthlp_animcont.html */,
+				E8F4BA4E202FD508004A3F1B /* charthlp_animwin.html */,
+				E8F4BA44202FD507004A3F1B /* charthlp_basics.html */,
+				E8F4BA45202FD507004A3F1B /* charthlp_blam.html */,
+				E8F4BA3E202FD507004A3F1B /* charthlp_bugs.html */,
+				E8F4BA51202FD509004A3F1B /* charthlp_close.html */,
+				E8F4BA2A202FD505004A3F1B /* charthlp_comments.html */,
+				E8F4BA1F202FD503004A3F1B /* charthlp_contents.html */,
+				E8F4BA5A202FD50A004A3F1B /* charthlp_copyright.html */,
+				E8F4BA1B202FD503004A3F1B /* charthlp_countermarch.html */,
+				E8F4BA67202FD50B004A3F1B /* charthlp_dir.html */,
+				E8F4BA25202FD504004A3F1B /* charthlp_directions.html */,
+				E8F4BA60202FD50A004A3F1B /* charthlp_dirfrom.html */,
+				E8F4BA2D202FD505004A3F1B /* charthlp_dist.html */,
+				E8F4BA4B202FD508004A3F1B /* charthlp_distfrom.html */,
+				E8F4BA66202FD50B004A3F1B /* charthlp_dmcm.html */,
+				E8F4BA3C202FD507004A3F1B /* charthlp_dmhs.html */,
+				E8F4BA35202FD506004A3F1B /* charthlp_drawpaths.html */,
+				E8F4BA20202FD504004A3F1B /* charthlp_easyinstall.html */,
+				E8F4BA5E202FD50A004A3F1B /* charthlp_editcont.html */,
+				E8F4BA69202FD50C004A3F1B /* charthlp_either.html */,
+				E8F4BA24202FD504004A3F1B /* charthlp_even.html */,
+				E8F4BA0B202FD501004A3F1B /* charthlp_ewns.html */,
+				E8F4BA62202FD50B004A3F1B /* charthlp_fieldproperties.html */,
+				E8F4BA0C202FD502004A3F1B /* charthlp_fm.html */,
+				E8F4BA39202FD506004A3F1B /* charthlp_fmto.html */,
+				E8F4BA10202FD502004A3F1B /* charthlp_fountain.html */,
+				E8F4BA47202FD508004A3F1B /* charthlp_functions.html */,
+				E8F4BA27202FD504004A3F1B /* charthlp_future.html */,
+				E8F4BA1A202FD503004A3F1B /* charthlp_geniusmove.html */,
+				E8F4BA5F202FD50A004A3F1B /* charthlp_ghostsheet.html */,
+				E8F4BA43202FD507004A3F1B /* charthlp_gpl.html */,
+				E8F4BA46202FD508004A3F1B /* charthlp_grid.html */,
+				E8F4BA34202FD506004A3F1B /* charthlp_gridspacing.html */,
+				E8F4BA11202FD502004A3F1B /* charthlp_hscm.html */,
+				E8F4BA1E202FD503004A3F1B /* charthlp_hsdm.html */,
+				E8F4BA09202FD501004A3F1B /* charthlp_installing.html */,
+				E8F4BA3D202FD507004A3F1B /* charthlp_macosxinstall.html */,
+				E8F4BA63202FD50B004A3F1B /* charthlp_macosxprinter.html */,
+				E8F4BA26202FD504004A3F1B /* charthlp_magic.html */,
+				E8F4BA1D202FD503004A3F1B /* charthlp_march.html */,
+				E8F4BA06202FD501004A3F1B /* charthlp_movement.html */,
+				E8F4BA55202FD509004A3F1B /* charthlp_movepointsintoacurve.html */,
+				E8F4BA2E202FD505004A3F1B /* charthlp_movepointsintoaline.html */,
+				E8F4BA68202FD50B004A3F1B /* charthlp_movepointsintoashape.html */,
+				E8F4BA61202FD50B004A3F1B /* charthlp_mt.html */,
+				E8F4BA52202FD509004A3F1B /* charthlp_mtrm.html */,
+				E8F4BA28202FD504004A3F1B /* charthlp_newshow.html */,
+				E8F4BA48202FD508004A3F1B /* charthlp_nsew.html */,
+				E8F4BA50202FD509004A3F1B /* charthlp_numbers.html */,
+				E8F4BA23202FD504004A3F1B /* charthlp_obtaining.html */,
+				E8F4BA16202FD502004A3F1B /* charthlp_opp.html */,
+				E8F4BA14202FD502004A3F1B /* charthlp_overview.html */,
+				E8F4BA12202FD502004A3F1B /* charthlp_pcontcodes.html */,
+				E8F4BA3F202FD507004A3F1B /* charthlp_points.html */,
+				E8F4BA40202FD507004A3F1B /* charthlp_printcont.html */,
+				E8F4BA37202FD506004A3F1B /* charthlp_procedures.html */,
+				E8F4BA18202FD503004A3F1B /* charthlp_projectpointsonaline.html */,
+				E8F4BA5D202FD50A004A3F1B /* charthlp_refer.html */,
+				E8F4BA38202FD506004A3F1B /* charthlp_referencegroup.html */,
+				E8F4BA19202FD503004A3F1B /* charthlp_reflectblock.html */,
+				E8F4BA54202FD509004A3F1B /* charthlp_refpoints.html */,
+				E8F4BA08202FD501004A3F1B /* charthlp_reportingbugs.html */,
+				E8F4BA56202FD509004A3F1B /* charthlp_resizeblock.html */,
+				E8F4BA0E202FD502004A3F1B /* charthlp_rotate.html */,
+				E8F4BA22202FD504004A3F1B /* charthlp_rotateblock.html */,
+				E8F4BA33202FD506004A3F1B /* charthlp_selectingpoints.html */,
+				E8F4BA4D202FD508004A3F1B /* charthlp_shearblock.html */,
+				E8F4BA49202FD508004A3F1B /* charthlp_software.html */,
+				E8F4BA64202FD50B004A3F1B /* charthlp_step.html */,
+				E8F4BA0D202FD502004A3F1B /* charthlp_steps.html */,
+				E8F4BA36202FD506004A3F1B /* charthlp_stepsizes.html */,
+				E8F4BA58202FD50A004A3F1B /* charthlp_swappoints.html */,
+				E8F4BA53202FD509004A3F1B /* charthlp_symbols.html */,
+				E8F4BA31202FD505004A3F1B /* charthlp_topic0.html */,
+				E8F4BA21202FD504004A3F1B /* charthlp_translatepoints.html */,
+				E8F4BA32202FD506004A3F1B /* charthlp_variables.html */,
+				E8F4BA59202FD50A004A3F1B /* charthlp_wininstall.html */,
+				E8F4BA07202FD501004A3F1B /* charthlp_winprinter.html */,
+				E8F4BA4A202FD508004A3F1B /* charthlp_zoomlevel.html */,
+				E8F4BA0F202FD502004A3F1B /* charthlp.con */,
+				E8F4BA17202FD503004A3F1B /* charthlp.hhc */,
+				E8F4BA29202FD505004A3F1B /* charthlp.hhk */,
+				E8F4BA0A202FD501004A3F1B /* charthlp.hhp */,
+				E8F4BA3B202FD506004A3F1B /* charthlp.ref */,
+				E8F4BA13202FD502004A3F1B /* charthlp.tex */,
+				E8F4BA1C202FD503004A3F1B /* contents.gif */,
+				E8F4BA4C202FD508004A3F1B /* forward.gif */,
+				E8F4BA2F202FD505004A3F1B /* gpl.tex */,
+				E8F4BA5B202FD50A004A3F1B /* install.tex */,
+				E8F4BA57202FD509004A3F1B /* overview.tex */,
+				E8F4BA65202FD50B004A3F1B /* refer.tex */,
+				E8F4BA2B202FD505004A3F1B /* t2rtf32.ini */,
+				E8F4BA15202FD502004A3F1B /* tex2rtf.ini */,
+				E8F4BA42202FD507004A3F1B /* texhelp.sty */,
+				E8F4BA2C202FD505004A3F1B /* up.gif */,
 			);
 			name = docs;
 			path = ../docs;
