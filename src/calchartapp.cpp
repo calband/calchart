@@ -35,7 +35,7 @@
 
 #include <wx/docview.h>
 
-std::unique_ptr<wxPrintDialogData> gPrintDialogData;
+wxPrintDialogData* gPrintDialogData;
 
 namespace CalChart {
 void Coord_UnitTests();
@@ -100,7 +100,7 @@ void CalChartApp::InitAppAsServer()
     (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
         CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
 
-    gPrintDialogData = std::make_unique<wxPrintDialogData>();
+    gPrintDialogData = new wxPrintDialogData;
     mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
 
     //// Create the main frame window
@@ -163,7 +163,8 @@ void CalChartApp::ExitAppAsServer()
     mDocManager->FileHistorySave(*config);
     config->Flush();
 
-    gPrintDialogData.reset();
+    if (gPrintDialogData)
+		delete gPrintDialogData;
 
     // delete the doc manager
     delete wxDocManager::GetDocumentManager();
