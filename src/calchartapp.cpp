@@ -100,7 +100,7 @@ void CalChartApp::InitAppAsServer()
     (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
         CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
 
-    gPrintDialogData = new wxPrintDialogData();
+    gPrintDialogData = new wxPrintDialogData;
     mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
 
     //// Create the main frame window

@@ -54,6 +54,7 @@
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.cpp" />
     <ClCompile Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.cpp" />
     <ClCompile Include="..\..\src\field_frame_controls.cpp" />
+    <ClCompile Include="..\..\src\field_mini_browser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\animation_canvas.h" />
@@ -121,6 +122,7 @@
     <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\boostmatrixadapter.h" />
     <ClInclude Include="..\..\submodules\munkres-cpp\src\adapters\std2darrayadapter.h" />
     <ClInclude Include="..\..\src\field_frame_controls.h" />
+    <ClInclude Include="..\..\src\field_mini_browser.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\calchart.rc" />
