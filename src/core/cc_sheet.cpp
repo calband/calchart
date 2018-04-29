@@ -741,14 +741,14 @@ using namespace Parser;
 void Sheet::sheet_round_trip_test()
 {
     {
-        auto blank_sheet = Sheet::Sheet(0);
+        auto blank_sheet = Sheet{0};
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
         auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
             blank_sheet_data.data() + blank_sheet_data.size());
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet::Sheet(0, std::get<1>(table.front()),
+        auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
@@ -756,14 +756,14 @@ void Sheet::sheet_round_trip_test()
         assert(is_equal);
     }
     {
-        auto blank_sheet = Sheet::Sheet(0, "new_sheet");
+        auto blank_sheet = Sheet(0, "new_sheet");
         auto blank_sheet_data = blank_sheet.SerializeSheet();
         // need to pull out the sheet data
         auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
             blank_sheet_data.data() + blank_sheet_data.size());
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet::Sheet(0, std::get<1>(table.front()),
+        auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
@@ -771,7 +771,7 @@ void Sheet::sheet_round_trip_test()
         assert(is_equal);
     }
     {
-        auto blank_sheet = Sheet::Sheet(1, "new_sheet");
+        auto blank_sheet = Sheet(1, "new_sheet");
         blank_sheet.SetName("new_name");
         blank_sheet.SetPosition(Coord(10, 10), 0);
         blank_sheet.SetPosition(Coord(20, 10), 0, 1);
@@ -788,7 +788,7 @@ void Sheet::sheet_round_trip_test()
             blank_sheet_data.data() + blank_sheet_data.size());
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet::Sheet(1, std::get<1>(table.front()),
+        auto re_read_sheet = Sheet(1, std::get<1>(table.front()),
             std::get<2>(table.front()),
             Current_version_and_later());
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
