@@ -23,6 +23,8 @@
 
 #include <cstdint>
 
+#include <boost/serialization/access.hpp>
+
 namespace CalChart {
 
 class Coord {
@@ -87,6 +89,15 @@ public:
     }
 
     units x, y;
+
+private:
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar& x;
+        ar& y;
+    }
 };
 
 inline Coord operator+(const Coord& a, const Coord& b)
@@ -135,7 +146,7 @@ constexpr auto COORD_DECIMAL = (1 << COORD_SHIFT);
 // RoundToCoordUnits: Use when number is already in Coord format, just needs to be
 // rounded
 template <typename T>
-constexpr auto RoundToCoordUnits(T inCoord)
+auto RoundToCoordUnits(T inCoord)
 {
     return static_cast<CalChart::Coord::units>((inCoord < 0) ? (inCoord - 0.5) : (inCoord + 0.5));
 }
@@ -143,12 +154,12 @@ constexpr auto RoundToCoordUnits(T inCoord)
 // RoundToCoordUnits, CoordUnits2Float
 //  Use when we want to convert to Coord system
 template <typename T>
-constexpr auto Float2CoordUnits(T a)
+auto Float2CoordUnits(T a)
 {
     return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * COORD_DECIMAL));
 }
 template <typename T>
-constexpr auto CoordUnits2Float(T a)
+auto CoordUnits2Float(T a)
 {
     return a / (float)COORD_DECIMAL;
 }
@@ -161,7 +172,7 @@ constexpr auto Int2CoordUnits(T a)
     return static_cast<CalChart::Coord::units>(a * COORD_DECIMAL);
 }
 template <typename T>
-constexpr auto CoordUnits2Int(T a)
+auto CoordUnits2Int(T a)
 {
     return static_cast<int>(a / COORD_DECIMAL);
 }

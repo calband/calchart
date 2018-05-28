@@ -21,28 +21,70 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string>
+#include "cont.h"
 
-// points have a symbol index and a continuity index.  The continuity
-// numbers is the way that the points know what continity they use.
-// This allows multiple points to have different symbols but the same
-// continuity.
+#include <string>
+#include <vector>
+
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/unique_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+
 namespace CalChart {
+
+class ContProcedure;
+
+struct ParseError : public std::runtime_error {
+    ParseError(std::string const& str, int l, int c)
+        : std::runtime_error(std::string("ParseError of ") + str + " at " + std::to_string(l) + ", " + std::to_string(c))
+        , line(l)
+        , column(c)
+    {
+    }
+    int line, column;
+};
 
 class Continuity {
 public:
-    Continuity();
+    // this could throw ParseError
+    Continuity(std::string const& s = "");
+    Continuity(std::vector<std::unique_ptr<ContProcedure>>);
     ~Continuity();
 
-    void SetText(const std::string& s);
-    void AppendText(const std::string& s);
-    const std::string& GetText() const;
+    Continuity(Continuity const&);
+    Continuity& operator=(Continuity const&);
+    Continuity(Continuity&&) noexcept;
+    Continuity& operator=(Continuity&&) noexcept;
+
+    auto GetText() const noexcept { return text; }
+
+    std::vector<std::unique_ptr<ContProcedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
+
+    static std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s);
+
+    friend void swap(Continuity& lhs, Continuity& rhs)
+    {
+        using std::swap;
+        swap(lhs.text, rhs.text);
+        swap(lhs.m_parsedContinuity, rhs.m_parsedContinuity);
+    }
+    friend bool operator==(Continuity const& lhs, Continuity const& rhs);
 
 private:
-    std::string text;
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar& text;
+        ar& m_parsedContinuity;
+    }
 
-    friend bool Check_Continuity(const Continuity&,
-        const struct Continuity_values&);
+    std::string text;
+    std::vector<std::unique_ptr<ContProcedure>> m_parsedContinuity;
+
+    friend bool Check_Continuity(const Continuity&, const struct Continuity_values&);
+    friend void Continuity_serialize_test();
     friend void Continuity_UnitTests();
 };
 

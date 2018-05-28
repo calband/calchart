@@ -22,6 +22,7 @@
 
 #include "animate.h"
 #include "animatecommand.h"
+#include "animatecompile.h"
 #include "cc_continuity.h"
 #include "cc_drawcommand.h"
 #include "cc_point.h"
@@ -35,10 +36,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-
-extern int parsecontinuity();
-extern const char* yyinputbuffer;
-extern std::list<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
 
 namespace CalChart {
 
@@ -71,19 +68,6 @@ AnimateDir AnimGetDirFromAngle(float ang)
     return ANIMDIR_N;
 }
 
-std::list<std::unique_ptr<ContProcedure>>
-Animation::ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol)
-{
-    yyinputbuffer = continuity.c_str();
-    // parse out the error
-    if (parsecontinuity() != 0) {
-        // Supply a generic parse error
-        ContToken dummy;
-        errors.RegisterError(ANIMERR_SYNTAX, &dummy, 0, current_symbol);
-    }
-    return std::move(ParsedContinuity);
-}
-
 Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList)
     : pts(show.GetNumPoints())
     , curr_cmds(pts.size())
@@ -113,7 +97,7 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
-                auto continuity = ParseContinuity(current_continuity.GetText(), errors, current_symbol);
+                auto& continuity = current_continuity.GetParsedContinuity();
                 if (notifyStatus) {
                     std::string message("Compiling \"");
                     message += curr_sheet->GetName().substr(0, 32);

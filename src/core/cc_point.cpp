@@ -84,45 +84,6 @@ Point::Point(const std::vector<uint8_t>& serialized_data)
     }
 }
 
-std::vector<uint8_t> Point::Serialize() const
-{
-    // how many reference points are we going to write?
-    uint8_t num_ref_pts = 0;
-    for (auto j = 1; j <= Point::kNumRefPoints; j++) {
-        if (GetPos(j) != GetPos(0)) {
-            ++num_ref_pts;
-        }
-    }
-    std::vector<uint8_t> result;
-    // Point positions
-    // Write block size
-
-    // Write POSITIONw
-    Parser::Append(result, uint16_t(GetPos().x));
-    Parser::Append(result, uint16_t(GetPos().y));
-
-    // Write REF_POS
-    Parser::Append(result, uint8_t(num_ref_pts));
-    if (num_ref_pts) {
-        for (auto j = 1; j <= Point::kNumRefPoints; j++) {
-            if (GetPos(j) != GetPos(0)) {
-                Parser::Append(result, uint8_t(j));
-                Parser::Append(result, uint16_t(GetPos(j).x));
-                Parser::Append(result, uint16_t(GetPos(j).y));
-            }
-        }
-    }
-
-    // Write POSITION
-    Parser::Append(result, uint8_t(GetSymbol()));
-
-    // Point labels (left or right)
-    Parser::Append(result, uint8_t(GetFlip()));
-    result.insert(result.begin(), uint8_t(result.size()));
-
-    return result;
-}
-
 void Point::Flip(bool val) { mFlags.set(kPointLabelFlipped, val); };
 
 void Point::SetLabelVisibility(bool isVisible) { mFlags.set(kLabelIsInvisible, !isVisible); }

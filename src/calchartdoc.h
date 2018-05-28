@@ -187,7 +187,7 @@ public:
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
     std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(int ref);
     std::unique_ptr<wxCommand> Create_SetSymbolCommand(SYMBOL_TYPE sym);
-    std::unique_ptr<wxCommand> Create_SetContinuityTextCommand(SYMBOL_TYPE i, const wxString& text);
+    std::unique_ptr<wxCommand> Create_SetContinuityCommand(SYMBOL_TYPE i, CalChart::Continuity const& new_cont);
     std::unique_ptr<wxCommand> Create_SetLabelRightCommand(bool right);
     std::unique_ptr<wxCommand> Create_ToggleLabelFlipCommand();
     std::unique_ptr<wxCommand> Create_SetLabelVisibleCommand(bool isVisible);

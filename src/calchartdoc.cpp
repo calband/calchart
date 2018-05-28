@@ -553,11 +553,11 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSymbolCommand(SYMBOL_TYPE sym)
     return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Continuity Symbol"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetContinuityTextCommand(SYMBOL_TYPE i, const wxString& text)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetContinuityCommand(SYMBOL_TYPE i, CalChart::Continuity const& new_cont)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityTextCommand(i, text.ToStdString())));
-    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Continuity Text"), cmds);
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityCommand(i, new_cont)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Setting Continuity"), cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetLabelRightCommand(bool right)
@@ -622,7 +622,7 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetTransitionCommand(const std::v
     cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_MovePointsCommand(GetCurrentSheetNum() + 1, positionAssignments, 0)));
 
     for (auto contIter = continuities.begin(); contIter != continuities.end(); contIter++) {
-        cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityTextCommand(contIter->first, contIter->second)));
+        cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetContinuityCommand(contIter->first, CalChart::Continuity{ contIter->second })));
     }
 
     std::set<SYMBOL_TYPE> processedSymbols;

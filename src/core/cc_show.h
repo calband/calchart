@@ -33,6 +33,10 @@
 #include <string>
 #include <vector>
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/vector.hpp>
+
 namespace CalChart {
 class Lasso;
 class Show;
@@ -62,7 +66,7 @@ private:
     Show();
     // using overloading with structs to determine which constructor to use
     Show(std::istream& stream, Version_3_3_and_earlier);
-    Show(const uint8_t* ptr, size_t size, Current_version_and_later);
+    Show(const uint8_t* ptr, size_t size, Version_3_4_and_3_5);
 
 public:
     ~Show();
@@ -88,7 +92,7 @@ public:
     Show_command_pair Create_SetReferencePointToRef0(int ref) const;
     Show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
     Show_command_pair Create_SetSymbolCommand(const SelectionList& whichDots, SYMBOL_TYPE sym) const;
-    Show_command_pair Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const;
+    Show_command_pair Create_SetContinuityCommand(SYMBOL_TYPE which_sym, Continuity const& cont) const;
     Show_command_pair Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const;
     Show_command_pair Create_SetLabelRightCommand(bool right) const;
     Show_command_pair Create_ToggleLabelFlipCommand() const;
@@ -166,8 +170,16 @@ private:
     auto GetNthSheet(unsigned n) { return GetSheetBegin() + n; }
     auto GetCurrentSheet() { return GetNthSheet(mSheetNum); }
 
-    // implementation and helper functions
-    std::vector<uint8_t> SerializeShowData() const;
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar& mDescr;
+        ar& mSheets;
+        ar& mPtLabels;
+        ar& mSelectionList;
+        ar& mSheetNum;
+    }
 
     // members
     std::string mDescr;

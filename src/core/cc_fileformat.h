@@ -30,6 +30,8 @@ namespace CalChart {
 
 struct Version_3_3_and_earlier {
 };
+struct Version_3_4_and_3_5 {
+};
 struct Current_version_and_later {
 };
 

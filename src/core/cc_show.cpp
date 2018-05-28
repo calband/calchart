@@ -35,6 +35,9 @@
 #include <iterator>
 #include <sstream>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 namespace CalChart {
 static const std::string k_nofile_str = "Unable to open file";
 static const std::string k_badcont_str = "Error in continuity file";
@@ -62,7 +65,7 @@ std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
     uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
     if (version <= 0x303) {
         return std::unique_ptr<Show>(
-            new Show(stream, Version_3_3_and_earlier()));
+            new Show(stream, Version_3_3_and_earlier{}));
     }
 
     // read the whole stream into a block, making sure we don't skip white space
@@ -72,10 +75,19 @@ std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
     // wxWidgets doesn't like it when we've reach the end of file.  Remove flags
     stream.clear();
 
-    // debug purposes, you can uncomment this line to have the show dumped
-    //	DoRecursiveParsing("", data.data(), data.data() + data.size());
-    return std::unique_ptr<Show>(
-        new Show(data.data(), data.size(), Current_version_and_later()));
+    if (version <= 0x305) {
+        return std::unique_ptr<Show>(
+            new Show(data.data(), data.size(), Version_3_4_and_3_5{}));
+    }
+
+    // make an empty show
+    auto show = Create_CC_show();
+
+    // now fill it in with the deserialized data.
+    std::istringstream ifs{ std::string(data.begin(), data.end()) };
+    boost::archive::text_iarchive ia(ifs);
+    ia >> *show;
+    return show;
 }
 
 // Create a new show
@@ -150,9 +162,8 @@ Show::Show(std::istream& stream, Version_3_3_and_earlier ver)
     // now set the show to sheet 0
     mSheetNum = 0;
 }
-// -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
 
-Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
+Show::Show(const uint8_t* ptr, size_t size, Version_3_4_and_3_5 ver)
     : mSheetNum(0)
 {
     // caller should have stripped off INGL and GURK headers
@@ -195,8 +206,7 @@ Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
         show->SetDescr(std::string(str, strlen(str)));
     };
     auto parse_INGL_SHET = [](Show* show, const uint8_t* ptr, size_t size) {
-        Sheet sheet(show->GetNumPoints(), ptr, size,
-            Current_version_and_later());
+        Sheet sheet(show->GetNumPoints(), ptr, size, Version_3_4_and_3_5{});
         auto sheet_num = show->GetCurrentSheetNum();
         show->InsertSheet(sheet, show->GetNumSheets());
         show->SetCurrentSheet(sheet_num);
@@ -250,55 +260,15 @@ Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
     }
 }
 
+// -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
+
 // Destroy a show
 Show::~Show() {}
-
-std::vector<uint8_t> Show::SerializeShowData() const
-{
-    using Parser::Append;
-    using Parser::AppendAndNullTerminate;
-    using Parser::Construct_block;
-    std::vector<uint8_t> result;
-    // SHOW_DATA          = NUM_MARCH , LABEL , [ DESCRIPTION ] , { SHEET }* ;
-    // Write NUM_MARCH
-    Append(result, Construct_block(INGL_SIZE, static_cast<uint32_t>(GetNumPoints())));
-
-    // Write LABEL
-    std::vector<char> labels;
-    for (auto& i : mPtLabels) {
-        AppendAndNullTerminate(labels, i);
-    }
-    Append(result, Construct_block(INGL_LABL, labels));
-
-    // write Description
-    if (!GetDescr().empty()) {
-        std::vector<char> descr;
-        AppendAndNullTerminate(descr, GetDescr());
-        Append(result, Construct_block(INGL_DESC, descr));
-    }
-
-    // Handle sheets
-    for (auto& sheet : mSheets) {
-        Append(result, sheet.SerializeSheet());
-    }
-
-    // add selection
-    if (!mSelectionList.empty()) {
-        std::vector<uint8_t> selections;
-        for (auto&& i : mSelectionList) {
-            Append(selections, uint32_t(i));
-        }
-        Append(result, Construct_block(INGL_SELE, selections));
-    }
-
-    // add current sheet
-    Append(result, Construct_block(INGL_CURR, static_cast<uint32_t>(mSheetNum)));
-    return result;
-}
 
 std::vector<uint8_t> Show::SerializeShow() const
 {
     using Parser::Append;
+    using Parser::AppendAndNullTerminate;
     using Parser::Construct_block;
     std::vector<uint8_t> result;
     // show               = START , SHOW ;
@@ -310,7 +280,12 @@ std::vector<uint8_t> Show::SerializeShow() const
     Append(result, uint16_t{ INGL_GURK >> 16 });
     Append(result, uint8_t{ CC_MAJOR_VERSION + '0' });
     Append(result, uint8_t{ CC_MINOR_VERSION + '0' });
-    Append(result, Construct_block(INGL_SHOW, SerializeShowData()));
+
+    std::vector<uint8_t> result2;
+    std::ostringstream ofs;
+    boost::archive::text_oarchive oa(ofs);
+    oa << *this;
+    AppendAndNullTerminate(result, ofs.str());
     return result;
 }
 
@@ -754,14 +729,14 @@ Show_command_pair Show::Create_SetSymbolCommand(const SelectionList& selectionLi
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const
+Show_command_pair Show::Create_SetContinuityCommand(SYMBOL_TYPE which_sym, CalChart::Continuity const& new_cont) const
 {
-    std::string original_cont = GetCurrentSheet()->GetContinuityBySymbol(which_sym).GetText();
-    auto action = [sheet_num = mSheetNum, which_sym, text](Show& show) {
-        show.GetNthSheet(sheet_num)->SetContinuityText(which_sym, text);
+    auto original_cont = GetCurrentSheet()->GetContinuityBySymbol(which_sym);
+    auto action = [sheet_num = mSheetNum, which_sym, new_cont](Show& show) {
+        show.GetNthSheet(sheet_num)->SetContinuity(which_sym, new_cont);
     };
     auto reaction = [sheet_num = mSheetNum, which_sym, original_cont](Show& show) {
-        show.GetNthSheet(sheet_num)->SetContinuityText(which_sym, original_cont);
+        show.GetNthSheet(sheet_num)->SetContinuity(which_sym, original_cont);
     };
     return { action, reaction };
 }
@@ -969,12 +944,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
     auto show_data = Construct_block(INGL_SHOW, data);
 
     Show show1((const uint8_t*)show_data.data(), show_data.size(),
-        Current_version_and_later());
-    auto show1_data = show1.SerializeShow();
-    // eat header
-    show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
-    auto is_equal = show1_data.size() == show_data.size() && std::equal(show1_data.begin(), show1_data.end(), show_data.begin());
-    assert(is_equal);
+        Version_3_4_and_3_5{});
 
     // now check that things loaded correctly
     assert(show1.GetNumPoints() == 1);
@@ -989,22 +959,19 @@ void Show::CC_show_blank_desc_test()
     Show show1(
         (const uint8_t*)show_zero_points_zero_labels_zero_description.data(),
         show_zero_points_zero_labels_zero_description.size(),
-        Current_version_and_later());
-    auto show1_data = show1.SerializeShow();
-    // eat header
-    show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
-    bool is_equal = show1_data.size() == show_zero_points_zero_labels_zero_description.size() && std::equal(show1_data.begin(), show1_data.end(), show_zero_points_zero_labels_zero_description.begin());
-    assert(!is_equal);
+        Version_3_4_and_3_5{});
+    assert(show1.GetNumPoints() == 0);
+    assert(show1.GetNumSheets() == 0);
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
     Show show2((const uint8_t*)show_zero_points_zero_labels.data(),
         show_zero_points_zero_labels.size(),
-        Current_version_and_later());
+        Version_3_4_and_3_5{});
     auto show2_data = show2.SerializeShow();
     show2_data.erase(show2_data.begin(), show2_data.begin() + 8);
-    is_equal = show2_data.size() == show_zero_points_zero_labels.size() && std::equal(show2_data.begin(), show2_data.end(), show_zero_points_zero_labels.begin());
-    assert(is_equal);
+    assert(show1.GetNumPoints() == 0);
+    assert(show1.GetNumSheets() == 0);
 }
 
 // confirm we try to handle shows from the future
@@ -1035,7 +1002,7 @@ void Show::CC_show_wrong_size_throws_exception()
     bool hit_exception = false;
     try {
         Show show1((const uint8_t*)show_data.data(), show_data.size(),
-            Current_version_and_later());
+            Version_3_4_and_3_5());
     } catch (const CC_FileException&) {
         hit_exception = true;
     }
@@ -1056,7 +1023,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         bool hit_exception = false;
         try {
             Show show1((const uint8_t*)show_data.data(), show_data.size(),
-                Current_version_and_later());
+                Version_3_4_and_3_5());
         } catch (const CC_FileException&) {
             hit_exception = true;
         }
@@ -1074,7 +1041,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         bool hit_exception = false;
         try {
             Show show1((const uint8_t*)show_data.data(), show_data.size(),
-                Current_version_and_later());
+                Version_3_4_and_3_5());
         } catch (const CC_FileException&) {
             hit_exception = true;
         }
@@ -1098,7 +1065,7 @@ void Show::CC_show_wrong_size_description()
         bool hit_exception = false;
         try {
             Show show1((const uint8_t*)show_data.data(), show_data.size(),
-                Current_version_and_later());
+                Version_3_4_and_3_5());
         } catch (const CC_FileException&) {
             hit_exception = true;
         }
@@ -1112,7 +1079,7 @@ void Show::CC_show_extra_cruft_ok()
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
     Show show1((const uint8_t*)extra_cruft.data(), extra_cruft.size(),
-        Current_version_and_later());
+        Version_3_4_and_3_5());
     auto show1_data = show1.SerializeShow();
 
     auto blank_show = Show::Create_CC_show();
@@ -1128,7 +1095,7 @@ void Show::CC_show_with_nothing_throws()
     bool hit_exception = false;
     try {
         Show show1((const uint8_t*)empty.data(), empty.size(),
-            Current_version_and_later());
+            Version_3_4_and_3_5());
     } catch (const CC_FileException&) {
         hit_exception = true;
     }

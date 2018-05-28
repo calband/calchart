@@ -292,15 +292,13 @@ Sheet::Sheet(size_t numPoints, std::istream& stream,
             }
         }
         std::string textstr(text);
-        mAnimationContinuity.at(symbol_index).SetText(textstr);
+        mAnimationContinuity.at(symbol_index) = Continuity{ textstr };
 
         name = ReadLong(stream);
     }
 }
-// -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
-    Current_version_and_later)
+Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Version_3_4_and_3_5)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
@@ -352,7 +350,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
             throw CC_FileException("No viable symbol for name", INGL_ECNT);
         }
         std::string textstr(text);
-        sheet->mAnimationContinuity.at(symbol_index).SetText(textstr);
+        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ textstr };
     };
     auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, const uint8_t* ptr,
                                size_t size) {
@@ -403,101 +401,9 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
         }
     }
 }
+// -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-std::vector<uint8_t> Sheet::SerializeAllPoints() const
-{
-    // for each of the points, serialize them.  Don't need to wrap in block
-    // because it's not specified that way
-    std::vector<uint8_t> result;
-    for (const auto& i : mPoints) {
-        Parser::Append(result, i.Serialize());
-    }
-    return result;
-}
-
-std::vector<uint8_t> Sheet::SerializeContinuityData() const
-{
-    // for each continuity in use, serialize them.
-    std::vector<uint8_t> result;
-    for (auto& current_symbol : k_symbols) {
-        if (ContinuityInUse(current_symbol)) {
-            std::vector<uint8_t> continuity;
-            Parser::Append(continuity,
-                static_cast<uint8_t>(current_symbol));
-            Parser::AppendAndNullTerminate(
-                continuity, mAnimationContinuity.at(current_symbol).GetText());
-            Parser::Append(
-                result, Parser::Construct_block(INGL_ECNT, continuity));
-        }
-    }
-    return result;
-}
-
-std::vector<uint8_t> Sheet::SerializePrintContinuityData() const
-{
-    std::vector<uint8_t> result;
-    Parser::AppendAndNullTerminate(
-        result, mPrintableContinuity.GetPrintNumber());
-    Parser::AppendAndNullTerminate(
-        result, mPrintableContinuity.GetOriginalLine());
-    return result;
-}
-
-std::vector<uint8_t> Sheet::SerializeBackgroundImageData() const
-{
-    std::vector<uint8_t> result;
-    Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
-    for (auto&& i : mBackgroundImages) {
-        Parser::Append(result, i.Serialize());
-    }
-    return result;
-}
-
-std::vector<uint8_t> Sheet::SerializeSheetData() const
-{
-    // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY,
-    // PRINT_CONTINUITY ;
-
-    std::vector<uint8_t> result;
-    // Write NAME
-    std::vector<uint8_t> tstring;
-    Parser::AppendAndNullTerminate(tstring, GetName());
-    Parser::Append(
-        result, Parser::Construct_block(INGL_NAME, tstring));
-
-    // Write DURATION
-    Parser::Append(result, Parser::Construct_block(INGL_DURA, uint32_t{ GetBeats() }));
-
-    // Write ALL_POINTS
-    Parser::Append(result, Parser::Construct_block(INGL_PNTS, SerializeAllPoints()));
-
-    // Write Continuity
-    Parser::Append(result, Parser::Construct_block(INGL_CONT, SerializeContinuityData()));
-
-    // Write Continuity
-    Parser::Append(result,
-        Parser::Construct_block(
-            INGL_PCNT, SerializePrintContinuityData()));
-
-    // Write Continuity
-    Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageData()));
-
-    return result;
-}
-
-// SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) ,
-// SHEET_DATA , SHEET_END ;
-// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, [
-// PRINT_CONTINUITY ] ;
-// SHEET_END          = INGL_END , INGL_SHET ;
-std::vector<uint8_t> Sheet::SerializeSheet() const
-{
-    std::vector<uint8_t> result;
-    Parser::Append(result, Parser::Construct_block(INGL_SHET, SerializeSheetData()));
-    return result;
-}
-
-Sheet::~Sheet() {}
+Sheet::~Sheet() = default;
 
 // Find point at certain coords
 int Sheet::FindPoint(Coord where, Coord::units searchBound,
@@ -566,9 +472,9 @@ const Continuity& Sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
     return mAnimationContinuity.at(i);
 }
 
-void Sheet::SetContinuityText(SYMBOL_TYPE which, const std::string& text)
+void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont)
 {
-    mAnimationContinuity.at(which).SetText(text);
+    mAnimationContinuity.at(which) = new_cont;
 }
 
 bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
@@ -737,71 +643,7 @@ void Sheet::SetPoints(const std::vector<Point>& points) { mPoints = points; }
 #include <assert.h>
 using namespace Parser;
 
-void Sheet::sheet_round_trip_test()
-{
-    {
-        auto blank_sheet = Sheet(0);
-        auto blank_sheet_data = blank_sheet.SerializeSheet();
-        // need to pull out the sheet data
-        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
-            blank_sheet_data.data() + blank_sheet_data.size());
-        assert(table.size() == 1);
-        assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
-            std::get<2>(table.front()),
-            Current_version_and_later());
-        auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
-        assert(is_equal);
-    }
-    {
-        auto blank_sheet = Sheet(0, "new_sheet");
-        auto blank_sheet_data = blank_sheet.SerializeSheet();
-        // need to pull out the sheet data
-        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
-            blank_sheet_data.data() + blank_sheet_data.size());
-        assert(table.size() == 1);
-        assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
-            std::get<2>(table.front()),
-            Current_version_and_later());
-        auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
-        assert(is_equal);
-    }
-    {
-        auto blank_sheet = Sheet(1, "new_sheet");
-        blank_sheet.SetName("new_name");
-        blank_sheet.SetPosition(Coord(10, 10), 0);
-        blank_sheet.SetPosition(Coord(20, 10), 0, 1);
-        blank_sheet.SetPosition(Coord(30, 40), 0, 2);
-        blank_sheet.SetPosition(Coord(52, 50), 0, 3);
-        blank_sheet.SetBeats(13);
-        blank_sheet.mAnimationContinuity.at(SYMBOL_PLAIN).SetText("continuity test");
-        blank_sheet.mPrintableContinuity = Print_continuity{
-            "number 1", "duuuude, writing this testing is boring"
-        };
-        auto blank_sheet_data = blank_sheet.SerializeSheet();
-        // need to pull out the sheet data
-        auto table = Parser::ParseOutLabels(blank_sheet_data.data(),
-            blank_sheet_data.data() + blank_sheet_data.size());
-        assert(table.size() == 1);
-        assert(std::get<0>(table.front()) == INGL_SHET);
-        auto re_read_sheet = Sheet(1, std::get<1>(table.front()),
-            std::get<2>(table.front()),
-            Current_version_and_later());
-        auto re_read_sheet_data = re_read_sheet.SerializeSheet();
-        bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
-        //		auto mismatch_at = std::mismatch(blank_sheet_data.begin(),
-        // blank_sheet_data.end(), re_read_sheet_data.begin());
-        //		std::cout<<"mismatch at
-        //"<<std::distance(blank_sheet_data.begin(),
-        // mismatch_at.first)<<"\n";
-        assert(is_equal);
-    }
-}
-
-void Sheet_UnitTests() { Sheet::sheet_round_trip_test(); }
+void Sheet_UnitTests() {}
 
 std::vector<ImageData> const& Sheet::GetBackgroundImages() const
 {

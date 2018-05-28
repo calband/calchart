@@ -11,8 +11,8 @@ cmake_minimum_required (VERSION 3.11)
 project (CalChart)
 
 set (CalChart_VERSION_MAJOR 3)
-set (CalChart_VERSION_MINOR 5)
-set (CalChart_VERSION_PATCH 4)
+set (CalChart_VERSION_MINOR 6)
+set (CalChart_VERSION_PATCH 0)
 
 set (CalChart_VERSION "${CalChart_VERSION_MAJOR}.${CalChart_VERSION_MINOR}.${CalChart_VERSION_PATCH}")
 

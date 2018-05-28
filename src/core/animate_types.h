@@ -41,6 +41,18 @@ enum {
     NUMCONTVARS
 };
 
+const std::string s_contvar_names[NUMCONTVARS]{
+    "A",
+    "B",
+    "C",
+    "D",
+    "X",
+    "Y",
+    "Z",
+    "DOF",
+    "DOH",
+};
+
 enum AnimateDir {
     ANIMDIR_N,
     ANIMDIR_NE,

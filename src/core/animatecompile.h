@@ -44,6 +44,8 @@ public:
     auto GetErrors() const { return mErrorMarkers; }
     void RegisterError(AnimateError err, const ContToken* token, unsigned curr_pt,
         SYMBOL_TYPE contsymbol);
+    void RegisterError(AnimateError err, int line, int col, unsigned curr_pt,
+        SYMBOL_TYPE contsymbol);
 
 private:
     std::map<AnimateError, ErrorMarker> mErrorMarkers;
@@ -64,7 +66,7 @@ public:
     Compile(const Show& show, AnimationVariables& variablesStates,
         AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
-        std::list<std::unique_ptr<ContProcedure>> const& proc);
+        std::vector<std::unique_ptr<ContProcedure>> const& proc);
 
 private:
     AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state);

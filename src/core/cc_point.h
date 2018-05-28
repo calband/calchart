@@ -25,6 +25,8 @@
 #include "cc_types.h"
 
 #include <bitset>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/bitset.hpp>
 #include <vector>
 
 namespace CalChart {
@@ -34,9 +36,7 @@ public:
     static constexpr auto kNumRefPoints = 3;
     Point();
     Point(const Coord& pos);
-
     Point(const std::vector<uint8_t>& serialized_data);
-    std::vector<uint8_t> Serialize() const;
 
     auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
     void Flip(bool val = true);
@@ -52,6 +52,16 @@ public:
     void SetPos(const Coord& c, unsigned ref = 0);
 
 private:
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar& mFlags;
+        ar& mSym;
+        ar& mPos;
+        ar& mRef;
+    }
+
     enum { kPointLabelFlipped,
         kLabelIsInvisible,
         kTotalBits };

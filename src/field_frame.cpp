@@ -61,7 +61,10 @@
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
 
-const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v2");
 
 static const wxChar* file_wild = FILE_WILDCARDS;
 
@@ -524,7 +527,10 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
             new wxCustomDataObject(kSheetDataClipboardFormat));
-        std::vector<uint8_t> serializedSheet = GetShow()->GetCurrentSheet()->SerializeSheet();
+        std::ostringstream ofs;
+        boost::archive::text_oarchive oa(ofs);
+        oa << *GetShow()->GetCurrentSheet();
+        auto serializedSheet = ofs.str();
 
         auto numPoints = GetShow()->GetNumPoints();
 
@@ -567,12 +573,15 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
             CalChart::ReadLong(sheetStream);
 
             sheetStream.unsetf(std::ios_base::skipws);
-            std::istream_iterator<uint8_t> theBegin(sheetStream);
-            std::istream_iterator<uint8_t> theEnd{};
-            std::vector<uint8_t> data(theBegin, theEnd);
+            std::istream_iterator<char> theBegin(sheetStream);
+            std::istream_iterator<char> theEnd{};
+            std::string data(theBegin, theEnd);
 
-            CalChart::Show::Sheet_container_t sht(
-                1, CalChart::Sheet(numPoints, data.data(), data.size(), CalChart::Current_version_and_later()));
+            std::istringstream ifs{ data };
+            boost::archive::text_iarchive ia(ifs);
+            CalChart::Sheet sheet{ 0 };
+            ia >> sheet;
+            std::vector<CalChart::Sheet> sht(1, sheet);
             GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
         }
         wxTheClipboard->Close();
@@ -1248,6 +1257,7 @@ void FieldFrame::UpdatePanel()
 
     SetTitle(GetDocument()->GetUserReadableName());
     mCanvas->Refresh();
+    mContinuityBrowser->Update();
 }
 
 const FieldView* FieldFrame::GetFieldView() const

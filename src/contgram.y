@@ -28,7 +28,7 @@
 #include "parse.h"
 #include "animate.h"
 
-#include <list>
+#include <vector>
 
 //#define YYDEBUG 1
 
@@ -36,7 +36,7 @@ int yyerror(const char *s);
 extern int yylex();
 extern void initscanner();
 
-std::list<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
+std::vector<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
 
 %}
 
