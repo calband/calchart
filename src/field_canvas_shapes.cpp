@@ -165,9 +165,9 @@ static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix& transma
 static std::vector<int> get_ordered_selection(std::map<int, CalChart::Coord> const& select_list)
 {
     // stuff all the points into a map, which will order them.  Then pull out the points.
-    std::map<CalChart::Coord, int> ordered;
+    std::multimap<CalChart::Coord, int> ordered;
     for (auto&& i : select_list) {
-        ordered[i.second] = i.first;
+        ordered.insert({ i.second, i.first });
     }
     std::vector<int> result;
     for (auto&& i : ordered) {
