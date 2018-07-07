@@ -65,6 +65,7 @@ protected:
     void SetZoom(float z);
     float GetZoom() const;
 
+public:
     void ChangeOffset(wxPoint deltaOffset);
 
 private:
