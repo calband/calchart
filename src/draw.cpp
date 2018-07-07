@@ -761,9 +761,11 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfigura
     const auto borderoffsetx = 0; //-border1.x;
     const auto borderoffsety = 0; //-border1.y;
 
-    // set color so when we make background box it blends
-    dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-    dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+    if (howToDraw != ShowMode_kPrinting) {
+        // set color so when we make background box it blends
+        dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+    }
     // Draw labels
     wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
         (int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
@@ -778,7 +780,9 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfigura
         const auto top_row_y = std::max(border1.y + borderoffsety - offsety - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0), dc.DeviceToLogicalY(0));
         const auto bottom_row_x = top_row_x;
         const auto bottom_row_y = border1.y + borderoffsety + fieldsize.y - offsety - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0);
-        dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
+        if (howToDraw != ShowMode_kPrinting) {
+            dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
+        }
         dc.DrawText(text, top_row_x, top_row_y);
         dc.DrawText(text, bottom_row_x, bottom_row_y);
     }
