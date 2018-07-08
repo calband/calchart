@@ -355,7 +355,7 @@ void CalChartDoc::SetMode(std::unique_ptr<const ShowMode> m)
     UpdateAllViews();
 }
 
-int CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview,
+int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
     int min_yards, const std::set<size_t>& isPicked,
     const CalChartConfiguration& config_) const
 {
@@ -384,7 +384,7 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool eps, bool overview,
         [&config_](size_t which) {
             return config_.Get_spr_line_text(which).ToStdString();
         });
-    return printShowToPS(buffer, eps, mShow->GetCurrentSheetNum(), isPicked,
+    return printShowToPS(buffer, mShow->GetCurrentSheetNum(), isPicked,
         GetTitle().ToStdString());
 }
 
