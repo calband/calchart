@@ -24,84 +24,8 @@
 
 #include "calchartdoc.h"
 
-#include <wx/dialog.h>
-#include <wx/docview.h>
-
-class ContinuityEditor;
-class FancyTextWin;
 class ContinuityBrowserView;
 class ContinuityBrowserPerCont;
-
-// View for linking CalChartDoc with ContinuityEditor
-class ContinuityEditorView : public wxView {
-public:
-    ContinuityEditorView();
-    ~ContinuityEditorView();
-    virtual void OnDraw(wxDC* dc);
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
-
-    void DoSetContinuityText(SYMBOL_TYPE which, const wxString& text);
-};
-
-// ContinuityEditor
-// The way you edit the continuity for individual marchers
-// This dialog should notify the user to save if there are any outstanding
-// edits.
-class ContinuityEditor : public wxFrame {
-    friend class ContinuityEditorView;
-
-public:
-    ContinuityEditor();
-    ContinuityEditor(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Edit Continuity"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~ContinuityEditor() = default;
-
-    void OnCloseWindow(wxCommandEvent& event);
-    void OnCmdHelp(wxCommandEvent& event);
-
-    void Update(); // Refresh all window controls
-    // Update text window to current continuity
-    // quick doesn't flush other windows
-    void UpdateText();
-
-    void FlushText(); // Flush changes in text window
-
-    void SetInsertionPoint(int x, int y);
-
-private:
-    void Init();
-
-    bool Create(CalChartDoc* shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Select Points"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-
-    void CreateControls();
-
-    void ContEditSet(wxCommandEvent&);
-    void ContEditSelect(wxCommandEvent&);
-    void OnSave(wxCommandEvent&);
-    void OnDiscard(wxCommandEvent&);
-    void ContEditCurrent(wxCommandEvent&);
-    void OnKeyPress(wxCommandEvent&);
-    SYMBOL_TYPE CurrentSymbolChoice() const;
-
-    void Save();
-    void Discard();
-    void SetCurrent(unsigned i);
-
-    CalChartDoc* mDoc;
-    std::unique_ptr<ContinuityEditorView> mView;
-    wxChoice* mContinuityChoices;
-    unsigned mCurrentContinuityChoice;
-    FancyTextWin* mUserInput;
-
-    DECLARE_EVENT_TABLE()
-};
 
 class ContinuityBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
