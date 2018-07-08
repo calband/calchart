@@ -579,8 +579,7 @@ bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
             return true;
         }
     }
-    // otherwise, is the text set.
-    return !GetContinuityBySymbol(idx).GetText().empty();
+    return false;
 }
 
 std::string Sheet::GetName() const { return mName; }

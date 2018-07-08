@@ -83,7 +83,6 @@ EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
 EVT_MENU(CALCHART__INSERT_OTHER_SHOW, FieldFrame::OnCmdInsertFromOtherShow)
 EVT_MENU(wxID_DELETE, FieldFrame::OnCmdDelete)
 EVT_MENU(CALCHART__RELABEL, FieldFrame::OnCmdRelabel)
-EVT_MENU(CALCHART__EDIT_CONTINUITY, FieldFrame::OnCmdEditCont)
 EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, FieldFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_SHEET_TITLE, FieldFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, FieldFrame::OnCmdSetBeats)
@@ -256,7 +255,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     edit_menu->Append(CALCHART__ResetReferencePoint, wxT("Reset reference point..."), wxT("Reset the current reference point"));
     edit_menu->AppendSeparator();
     edit_menu->Append(CALCHART__E7TransitionSolver, wxT("Solve transition"), wxT("Solve the transition to the next sheet automatically"));
-    edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
     edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
 
     wxMenu* backgroundimage_menu = new wxMenu;
@@ -610,16 +608,6 @@ void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
     } else {
         (void)wxMessageBox(wxT("This can't used on the last stuntsheet"),
             wxT("Relabel sheets"));
-    }
-}
-
-void FieldFrame::OnCmdEditCont(wxCommandEvent& event)
-{
-    if (GetShow()) {
-        auto ce = new ContinuityEditor(static_cast<CalChartDoc*>(GetDocument()), this,
-            wxID_ANY, wxT("Animation Continuity"));
-        // make it modeless:
-        ce->Show();
     }
 }
 
