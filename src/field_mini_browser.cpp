@@ -61,7 +61,6 @@ FieldBrowser::FieldBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, co
     mView->SetDocument(doc);
     mView->SetFrame(this);
 
-    SetScrollRate(1, 1);
     // now update the current screen
     OnUpdate();
 }
@@ -169,6 +168,8 @@ void FieldBrowser::OnUpdate()
 {
     auto size_of_one = SizeOfOneCell();
     SetVirtualSize(size_of_one.x, size_of_one.y * mDoc->GetNumSheets());
+
+    SetScrollRate(0, size_of_one.y/5);
 
     auto get_size = GetSize();
     auto scrolled_top = CalcUnscrolledPosition({ 0, 0 });
