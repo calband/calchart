@@ -58,7 +58,7 @@ public:
         std::function<std::string(size_t)> Get_yard_text,
         std::function<std::string(size_t)> Get_spr_line_text);
 
-    int operator()(std::ostream& buffer, bool eps, unsigned curr_ss,
+    int operator()(std::ostream& buffer, unsigned curr_ss,
         const std::set<size_t>& isPicked,
         std::string const& title) const;
 
@@ -74,11 +74,10 @@ private:
     void print_start_page(std::ostream& buffer, bool landscape,
         double translate_x, double translate_y) const;
     bool SplitSheet(const CalChart::Sheet& sheet) const;
-    void PrintHeader(std::ostream& buffer, bool eps,
-        const std::string& title) const;
+    void PrintHeader(std::ostream& buffer, const std::string& title) const;
     void PrintFieldDefinition(std::ostream& buffer) const;
     void PrintTrailer(std::ostream& buffer, short num_pages) const;
-    short PrintSheets(std::ostream& buffer, bool eps, unsigned curr_ss,
+    short PrintSheets(std::ostream& buffer, unsigned curr_ss,
         const std::set<size_t>& isPicked, short num_pages) const;
 
     const CalChart::Show& mShow;

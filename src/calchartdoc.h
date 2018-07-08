@@ -165,7 +165,7 @@ public:
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
-    int PrintToPS(std::ostream& buffer, bool eps, bool overview, int min_yards,
+    int PrintToPS(std::ostream& buffer, bool overview, int min_yards,
         const std::set<size_t>& isPicked,
         const CalChartConfiguration& config_) const;
 

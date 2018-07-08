@@ -75,7 +75,6 @@ EVT_MENU(CALCHART__wxID_PRINT, FieldFrame::OnCmdPrint)
 EVT_MENU(CALCHART__wxID_PREVIEW, FieldFrame::OnCmdPrintPreview)
 EVT_MENU(wxID_PAGE_SETUP, FieldFrame::OnCmdPageSetup)
 EVT_MENU(CALCHART__LEGACY_PRINT, FieldFrame::OnCmdLegacyPrint)
-EVT_MENU(CALCHART__LEGACY_PRINT_EPS, FieldFrame::OnCmdLegacyPrintEPS)
 EVT_MENU(CALCHART__COPY_SHEET, FieldFrame::OnCmdCopySheet)
 EVT_MENU(CALCHART__PASTE_SHEET, FieldFrame::OnCmdPasteSheet)
 EVT_MENU(CALCHART__INSERT_BEFORE, FieldFrame::OnCmdInsertBefore)
@@ -221,7 +220,6 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     file_menu->Append(CALCHART__wxID_PREVIEW, wxT("Preview...\tCTRL-SHIFT-P"), wxT("Preview this show"));
     file_menu->Append(wxID_PAGE_SETUP, wxT("Page Setup...\tCTRL-SHIFT-ALT-P"), wxT("Setup Pages"));
     file_menu->Append(CALCHART__LEGACY_PRINT, wxT("Print to PS..."), wxT("Print show to PostScript"));
-    file_menu->Append(CALCHART__LEGACY_PRINT_EPS, wxT("Print to EPS..."), wxT("Print show to Encapsulated PostScript"));
     file_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
     file_menu->Append(CALCHART__EXPORT_VIEWER_FILE, wxT("Export for Online Viewer..."), wxT("Export show to be viewed using the CalChart Online Viewer"));
     file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
@@ -433,19 +431,7 @@ void FieldFrame::OnCmdPageSetup(wxCommandEvent& event)
 void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
     if (GetShow()) {
-        PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()),
-            false, this);
-        if (dialog.ShowModal() == wxID_OK) {
-            dialog.PrintShow(mConfig);
-        }
-    }
-}
-
-void FieldFrame::OnCmdLegacyPrintEPS(wxCommandEvent& event)
-{
-    if (GetShow()) {
-        PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()),
-            true, this);
+        PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), this);
         if (dialog.ShowModal() == wxID_OK) {
             dialog.PrintShow(mConfig);
         }

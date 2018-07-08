@@ -37,7 +37,7 @@ class PrintPostScriptDialog : public wxDialog {
 
 public:
     PrintPostScriptDialog();
-    PrintPostScriptDialog(const CalChartDoc* doc, bool printEPS, wxFrame* parent,
+    PrintPostScriptDialog(const CalChartDoc* doc, wxFrame* parent,
         wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("Print Dialog"),
         const wxPoint& pos = wxDefaultPosition,
@@ -47,7 +47,7 @@ public:
 
     void Init();
 
-    bool Create(const CalChartDoc* show, bool printEPS, wxFrame* parent,
+    bool Create(const CalChartDoc* show, wxFrame* parent,
         wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("Print Dialog"),
         const wxPoint& pos = wxDefaultPosition,
@@ -69,7 +69,6 @@ public:
 
 private:
     const CalChartDoc* mShow;
-    bool eps;
     wxTextCtrl* text_cmd;
 #ifdef PRINT__RUN_CMD
     wxTextCtrl *text_opts, *text_view_cmd, *text_view_opts;

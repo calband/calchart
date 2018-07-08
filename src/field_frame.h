@@ -60,7 +60,6 @@ public:
     void OnCmdPrint(wxCommandEvent& event);
     void OnCmdPrintPreview(wxCommandEvent& event);
     void OnCmdLegacyPrint(wxCommandEvent& event);
-    void OnCmdLegacyPrintEPS(wxCommandEvent& event);
     void OnCmdPageSetup(wxCommandEvent& event);
     void OnCmdExportViewerFile(wxCommandEvent& event);
     void OnCmdPreferences(wxCommandEvent& event);

@@ -299,7 +299,7 @@ void PrintFontHeader(OS& buffer, std::array<std::string, 7> const& fonts)
     buffer << "/bolditalfont0 /" << fonts[6] << " def\n";
 }
 
-int PrintShowToPS::operator()(std::ostream& buffer, bool eps, unsigned curr_ss,
+int PrintShowToPS::operator()(std::ostream& buffer, unsigned curr_ss,
     const std::set<size_t>& isPicked,
     std::string const& title) const
 {
@@ -308,32 +308,27 @@ int PrintShowToPS::operator()(std::ostream& buffer, bool eps, unsigned curr_ss,
     buffer.precision(2);
 
     /* Now write postscript header */
-    PrintHeader(buffer, eps, title);
+    PrintHeader(buffer, title);
 
     PrintFieldDefinition(buffer);
 
     short num_pages = 0;
     /* print continuity sheets first */
-    if (mPrintDoContSheet && !eps && !mOverview) {
+    if (mPrintDoContSheet && !mOverview) {
         num_pages = PrintContinuitySheets(buffer, num_pages);
     }
 
     /* do stuntsheet pages now */
-    num_pages = PrintSheets(buffer, eps, curr_ss, isPicked, num_pages);
+    num_pages = PrintSheets(buffer, curr_ss, isPicked, num_pages);
     /* finally, write trailer */
     PrintTrailer(buffer, num_pages);
 
     return num_pages;
 }
 
-void PrintShowToPS::PrintHeader(std::ostream& buffer, bool eps,
-    const std::string& title) const
+void PrintShowToPS::PrintHeader(std::ostream& buffer, const std::string& title) const
 {
-    if (eps) {
-        buffer << "%!PS-Adobe-3.0 EPSF-3.0\n";
-    } else {
-        buffer << "%!PS-Adobe-3.0\n";
-    }
+    buffer << "%!PS-Adobe-3.0\n";
 
     {
         RAII_setprecision<std::ostream> tmp_(buffer);
@@ -442,27 +437,21 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
     }
 }
 
-short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps,
+short PrintShowToPS::PrintSheets(std::ostream& buffer,
     unsigned curr_ss,
     const std::set<size_t>& isPicked,
     short num_pages) const
 {
     auto curr_sheet = mShow.GetSheetBegin();
-    if (eps) {
-        curr_sheet += curr_ss;
-    }
     while (curr_sheet != mShow.GetSheetEnd()) {
-        if ((isPicked.count(std::distance(mShow.GetSheetBegin(), curr_sheet)) != 0) || eps) {
+        if ((isPicked.count(std::distance(mShow.GetSheetBegin(), curr_sheet)) != 0)) {
             num_pages++;
             if (!mOverview) {
                 switch (mMode.GetType()) {
                 case ShowMode::SHOW_STANDARD:
                     PrintStandard(buffer, *curr_sheet, false);
                     if (SplitSheet(*curr_sheet)) {
-                        if (eps)
-                            break;
-                        else
-                            PageBreak(buffer);
+                        PageBreak(buffer);
                         num_pages++;
                         PrintStandard(buffer, *curr_sheet, true);
                     }
@@ -474,11 +463,7 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer, bool eps,
             } else {
                 PrintOverview(buffer, *curr_sheet);
             }
-            if (eps)
-                break;
-            else {
-                PageBreak(buffer);
-            }
+            PageBreak(buffer);
         }
         ++curr_sheet;
     }

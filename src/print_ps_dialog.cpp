@@ -80,7 +80,7 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
     } break;
     case CC_PRINT_ACTION_FILE:
         s = wxFileSelector(wxT("Print to file"), wxEmptyString, wxEmptyString,
-            wxEmptyString, eps ? wxT("*.eps") : wxT("*.ps"),
+            wxEmptyString, wxT("*.ps"),
             wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
         if (s.empty())
             return;
@@ -99,7 +99,7 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 
     std::ostringstream buffer;
 
-    int n = mShow->PrintToPS(buffer, eps, overview, static_cast<int>(minyards), mIsSheetPicked, config);
+    int n = mShow->PrintToPS(buffer, overview, static_cast<int>(minyards), mIsSheetPicked, config);
     // stream to file:
     {
         wxFFileOutputStream outstream(s);
@@ -174,20 +174,20 @@ IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
 PrintPostScriptDialog::PrintPostScriptDialog() { Init(); }
 
 PrintPostScriptDialog::PrintPostScriptDialog(
-    const CalChartDoc* show, bool printEPS, wxFrame* parent, wxWindowID id,
+    const CalChartDoc* show, wxFrame* parent, wxWindowID id,
     const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
     : mShow(NULL)
 {
     Init();
 
-    Create(show, printEPS, parent, id, caption, pos, size, style);
+    Create(show, parent, id, caption, pos, size, style);
 }
 
 PrintPostScriptDialog::~PrintPostScriptDialog() {}
 
 void PrintPostScriptDialog::Init() {}
 
-bool PrintPostScriptDialog::Create(const CalChartDoc* show, bool printEPS,
+bool PrintPostScriptDialog::Create(const CalChartDoc* show,
     wxFrame* parent, wxWindowID id,
     const wxString& caption, const wxPoint& pos,
     const wxSize& size, long style)
@@ -199,7 +199,6 @@ bool PrintPostScriptDialog::Create(const CalChartDoc* show, bool printEPS,
          sheet != mShow->GetSheetEnd(); ++sheet) {
         mIsSheetPicked.insert(std::distance(mShow->GetSheetBegin(), sheet));
     }
-    eps = printEPS;
 
     CreateControls();
 
@@ -316,19 +315,13 @@ void PrintPostScriptDialog::CreateControls()
     check_cont = new wxCheckBox(this, -1, wxT("Continuit&y"));
     horizontalsizer->Add(check_cont, 0, wxALL, 5);
 
-    if (!eps) {
-        check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
-        horizontalsizer->Add(check_pages, 0, wxALL, 5);
-    } else {
-        check_pages = NULL;
-    }
+    check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
+    horizontalsizer->Add(check_pages, 0, wxALL, 5);
     topsizer->Add(horizontalsizer, 0, wxALL, 5);
 
-    if (!eps) {
-        topsizer->Add(
-            new wxButton(this, CC_PRINT_BUTTON_SELECT, wxT("S&elect sheets...")), 0,
-            wxALL, 5);
-    }
+    topsizer->Add(
+        new wxButton(this, CC_PRINT_BUTTON_SELECT, wxT("S&elect sheets...")), 0,
+        wxALL, 5);
 
     horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
     verticalsizer = new wxBoxSizer(wxVERTICAL);
