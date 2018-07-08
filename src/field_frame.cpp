@@ -259,6 +259,9 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     edit_menu->Append(CALCHART__EDIT_CONTINUITY, wxT("&Edit Continuity...\tCTRL-E"), wxT("Edit continuity for this stuntsheet"));
     edit_menu->Append(CALCHART__PRINT_EDIT_CONTINUITY, wxT("Edit Print Continuity..."), wxT("Edit Print continuity for this stuntsheet"));
 
+    wxMenu* anim_menu = new wxMenu;
+    anim_menu->Append(CALCHART__ANIMATE, wxT("Open in &Viewer...\tCTRL-RETURN"), wxT("Open show in CalChart Viewer"));
+
     wxMenu* backgroundimage_menu = new wxMenu;
     backgroundimage_menu->AppendCheckItem(CALCHART__ShowBackgroundImages, wxT("Show Background Images"), wxT("Toggle showing background images"));
     backgroundimage_menu->Append(CALCHART__AddBackgroundImage, wxT("Add Background Image..."), wxT("Add a background image"));
@@ -293,6 +296,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     menu_bar->Append(edit_menu, wxT("&Edit"));
     menu_bar->Append(view_menu, wxT("&View"));
     menu_bar->Append(backgroundimage_menu, wxT("&Field Image"));
+    menu_bar->Append(anim_menu, wxT("&CalChart Viewer"));
     menu_bar->Append(help_menu, wxT("&Help"));
     SetMenuBar(menu_bar);
 
