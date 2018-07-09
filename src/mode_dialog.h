@@ -1,5 +1,6 @@
+#pragma once
 /*
- * cc_preferences.h
+ * mode_dialog
  * Dialox box for preferences
  */
 
@@ -20,31 +21,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
 
 #include "confgr.h"
+#include "basic_ui.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
-class CalChartPreferences : public wxDialog {
-    DECLARE_CLASS(CalChartPreferences)
+class ShowModeDialogSetup;
+class ModeSetupDialog : public wxDialog {
+    DECLARE_CLASS(ModeSetupDialog)
     DECLARE_EVENT_TABLE()
 
 public:
-    CalChartPreferences(wxWindow* parent, wxWindowID id = wxID_ANY,
+    ModeSetupDialog(CalChart::ShowMode const& current_mode,
+        wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("CalChart Preferences"),
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~CalChartPreferences() = default;
+    ~ModeSetupDialog() = default;
 
-    bool TransferDataToWindow();
-    bool TransferDataFromWindow();
-
+    CalChart::ShowMode GetShowMode() const;
 private:
-    void OnCmdResetAll(wxCommandEvent&);
-    wxNotebook* mNotebook;
-    CalChartConfiguration mConfig;
+    ShowModeDialogSetup *m_setup;
 };

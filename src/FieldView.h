@@ -62,7 +62,7 @@ public:
     bool DoDeletePoints();
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
-    void DoSetMode(const wxString& mode);
+    void DoSetMode(CalChart::ShowMode const& mode);
     void DoSetShowInfo(const std::vector<wxString>& labels, int numColumns);
     void DoSetSheetTitle(const wxString& descr);
     bool DoSetSheetBeats(int beats);
@@ -82,9 +82,9 @@ public:
     auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
-    auto GetShowFieldOffset() const { return mShow->GetMode().Offset(); }
-    auto GetShowFieldSize() const { return mShow->GetMode().Size(); }
-    auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetMode().ClipPosition(pos); }
+    auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
+    auto GetShowFieldSize() const { return mShow->GetShowMode().Size(); }
+    auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
     void GoToSheet(int which);

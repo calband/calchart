@@ -126,7 +126,7 @@ public:
 
     std::unique_ptr<CalChart::Animation> NewAnimation(CalChart::NotifyStatus notifyStatus,
         CalChart::NotifyErrorList notifyErrorList);
-    void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<CalChart::ShowMode> newmode);
+    void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, CalChart::ShowMode const& newmode);
 
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
 
@@ -160,8 +160,7 @@ public:
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
 
-    const CalChart::ShowMode& GetMode() const;
-    void SetMode(std::unique_ptr<const CalChart::ShowMode> m);
+    const CalChart::ShowMode& GetShowMode() const;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
@@ -172,7 +171,7 @@ public:
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
     std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
-    std::unique_ptr<wxCommand> Create_SetModeCommand(const wxString& newmode);
+    std::unique_ptr<wxCommand> Create_SetShowModeCommand(CalChart::ShowMode const& newmode);
     std::unique_ptr<wxCommand> Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
     std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
@@ -231,6 +230,5 @@ private:
     };
 
     std::unique_ptr<CalChart::Show> mShow;
-    std::unique_ptr<const CalChart::ShowMode> mMode;
     AutoSaveTimer mTimer;
 };

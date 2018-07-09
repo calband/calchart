@@ -44,28 +44,28 @@ static const std::string k_badcont_str = "Error in continuity file";
 static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
 
 // you can create a show in two ways, from scratch, or from an input stream
-std::unique_ptr<Show> Show::Create_CC_show()
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode)
 {
-    auto show = std::unique_ptr<Show>(new Show());
+    auto show = std::unique_ptr<Show>(new Show(mode));
     show->InsertSheet(Sheet(show->GetNumPoints(), "1"), 0);
     show->SetCurrentSheet(0);
     return show;
 }
 
-std::unique_ptr<Show> Show::Create_CC_show(std::vector<std::string> const& labels, unsigned columns, Coord const& new_march_position)
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::vector<std::string> const& labels, unsigned columns)
 {
-    auto show = Create_CC_show();
-    show->SetNumPoints(labels, columns, new_march_position);
+    auto show = Create_CC_show(mode);
+    show->SetNumPoints(labels, columns, mode.FieldOffset());
     return show;
 }
 
-std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::istream& stream)
 {
     ReadAndCheckID(stream, INGL_INGL);
     uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
     if (version <= 0x303) {
         return std::unique_ptr<Show>(
-            new Show(stream, Version_3_3_and_earlier{}));
+            new Show(mode, stream, Version_3_3_and_earlier{}));
     }
 
     // read the whole stream into a block, making sure we don't skip white space
@@ -77,11 +77,11 @@ std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
 
     if (version <= 0x305) {
         return std::unique_ptr<Show>(
-            new Show(data.data(), data.size(), Version_3_4_and_3_5{}));
+            new Show(mode, data.data(), data.size(), Version_3_4_and_3_5{}));
     }
 
     // make an empty show
-    auto show = Create_CC_show();
+    auto show = Create_CC_show(mode);
 
     // now fill it in with the deserialized data.
     std::istringstream ifs{ std::string(data.begin(), data.end()) };
@@ -91,16 +91,18 @@ std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
 }
 
 // Create a new show
-Show::Show()
+Show::Show(ShowMode const& mode)
     : mSheetNum(0)
+    , mMode(mode)
 {
 }
 
 // -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
 // Recommend that you don't touch this unless you know what you are doing.
 // Constructor for shows 3.3 and ealier.
-Show::Show(std::istream& stream, Version_3_3_and_earlier ver)
+Show::Show(ShowMode const& mode, std::istream& stream, Version_3_3_and_earlier ver)
     : mSheetNum(0)
+    , mMode(mode)
 {
     // caller should have stripped off INGL and GURK headers
     /*
@@ -163,8 +165,9 @@ Show::Show(std::istream& stream, Version_3_3_and_earlier ver)
     mSheetNum = 0;
 }
 
-Show::Show(const uint8_t* ptr, size_t size, Version_3_4_and_3_5 ver)
+Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, Version_3_4_and_3_5 ver)
     : mSheetNum(0)
+    , mMode(mode)
 {
     // caller should have stripped off INGL and GURK headers
 
@@ -404,6 +407,16 @@ bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) co
     return false;
 }
 
+const ShowMode& Show::GetShowMode() const
+{
+    return mMode;
+}
+
+void Show::SetShowMode(ShowMode const& mode)
+{
+    mMode = mode;
+}
+
 SelectionList Show::MakeSelectAll() const
 {
     SelectionList sl;
@@ -518,6 +531,17 @@ Show_command_pair Show::Create_SetSelectionCommand(const SelectionList& sl) cons
 {
     auto action = [sl](Show& show) { show.SetSelection(sl); };
     auto reaction = [sl = mSelectionList](Show& show) { show.SetSelection(sl); };
+    return { action, reaction };
+}
+
+Show_command_pair Show::Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const
+{
+    auto action = [mode = newmode](Show& show) {
+        show.SetShowMode(mode);
+    };
+    auto reaction = [mode = GetShowMode()](Show& show) {
+        show.SetShowMode(mode);
+    };
     return { action, reaction };
 }
 
@@ -920,11 +944,11 @@ static std::vector<char> Construct_show_zero_points_zero_labels_1_sheet_and_rand
 
 void Show::CC_show_round_trip_test()
 {
-    auto blank_show = Show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
     std::istringstream is(std::string{ char_data.data(), char_data.size() });
-    auto re_read_show = Show::Create_CC_show(is);
+    auto re_read_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode(), is);
     auto re_read_show_data = re_read_show->SerializeShow();
     bool is_equal = blank_show_data.size() == re_read_show_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), re_read_show_data.begin());
     assert(is_equal);
@@ -943,7 +967,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
     Append(data, Construct_block(INGL_CURR, curr_data));
     auto show_data = Construct_block(INGL_SHOW, data);
 
-    Show show1((const uint8_t*)show_data.data(), show_data.size(),
+    Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
         Version_3_4_and_3_5{});
 
     // now check that things loaded correctly
@@ -956,7 +980,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
 void Show::CC_show_blank_desc_test()
 {
     auto show_zero_points_zero_labels_zero_description = Construct_show_zero_points_zero_labels_zero_description();
-    Show show1(
+    Show show1(ShowMode::GetDefaultShowMode(),
         (const uint8_t*)show_zero_points_zero_labels_zero_description.data(),
         show_zero_points_zero_labels_zero_description.size(),
         Version_3_4_and_3_5{});
@@ -965,7 +989,7 @@ void Show::CC_show_blank_desc_test()
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
-    Show show2((const uint8_t*)show_zero_points_zero_labels.data(),
+    Show show2(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_zero_points_zero_labels.data(),
         show_zero_points_zero_labels.size(),
         Version_3_4_and_3_5{});
     auto show2_data = show2.SerializeShow();
@@ -980,14 +1004,14 @@ void Show::CC_show_future_show_test()
     // how?  By creating a show from scratch, then modifying the version; make
     // sure that we load it, and it looks the same
     // except the data gets reverted
-    auto blank_show = Show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
     assert(char_data.at(6) - '0' == CC_MAJOR_VERSION && char_data.at(7) - '0' == CC_MINOR_VERSION);
     ++char_data.at(6);
     ++char_data.at(7);
     std::istringstream is(std::string{ char_data.data(), char_data.size() });
-    auto re_read_show = Show::Create_CC_show(is);
+    auto re_read_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode(), is);
     auto re_read_show_data = blank_show->SerializeShow();
     --char_data.at(6);
     --char_data.at(7);
@@ -1001,7 +1025,7 @@ void Show::CC_show_wrong_size_throws_exception()
     auto show_data = Construct_block(INGL_SHOW, points_3);
     bool hit_exception = false;
     try {
-        Show show1((const uint8_t*)show_data.data(), show_data.size(),
+        Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
             Version_3_4_and_3_5());
     } catch (const CC_FileException&) {
         hit_exception = true;
@@ -1022,7 +1046,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
                 Version_3_4_and_3_5());
         } catch (const CC_FileException&) {
             hit_exception = true;
@@ -1040,7 +1064,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
                 Version_3_4_and_3_5());
         } catch (const CC_FileException&) {
             hit_exception = true;
@@ -1064,7 +1088,7 @@ void Show::CC_show_wrong_size_description()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
                 Version_3_4_and_3_5());
         } catch (const CC_FileException&) {
             hit_exception = true;
@@ -1078,11 +1102,11 @@ void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    Show show1((const uint8_t*)extra_cruft.data(), extra_cruft.size(),
+    Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)extra_cruft.data(), extra_cruft.size(),
         Version_3_4_and_3_5());
     auto show1_data = show1.SerializeShow();
 
-    auto blank_show = Show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     auto is_equal = blank_show_data.size() == show1_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), show1_data.begin());
     assert(is_equal);
@@ -1094,7 +1118,7 @@ void Show::CC_show_with_nothing_throws()
     std::vector<char> empty{};
     bool hit_exception = false;
     try {
-        Show show1((const uint8_t*)empty.data(), empty.size(),
+        Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)empty.data(), empty.size(),
             Version_3_4_and_3_5());
     } catch (const CC_FileException&) {
         hit_exception = true;

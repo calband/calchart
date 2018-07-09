@@ -604,6 +604,10 @@ CCOmniView_Canvas::CCOmniView_Canvas(AnimationView* view, wxWindow* parent,
     , mFOV(60)
     , mShiftMoving(false)
 {
+#if defined(__APPLE__) && (__APPLE__)
+    m_glContext->UseForLines(
+        GetOmniLinesImage(config, mAnimationView->GetShow()->GetShowMode()));
+#endif
 }
 
 CCOmniView_Canvas::~CCOmniView_Canvas() {}
@@ -733,7 +737,7 @@ void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     CalChart::Coord fieldSize = mAnimationView
-        ? mAnimationView->GetShow()->GetMode().FieldSize()
+        ? mAnimationView->GetShow()->GetShowMode().FieldSize()
         : CalChart::Coord(160, 80);
     float FieldEW = CoordUnits2Float(fieldSize.y);
     float FieldNS = CoordUnits2Float(fieldSize.x);

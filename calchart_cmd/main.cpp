@@ -47,7 +47,7 @@ using namespace CalChart;
 void AnimateShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -60,7 +60,7 @@ void AnimateShow(const char* show)
 void PrintShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -92,7 +92,7 @@ void PrintShow(const char* show)
 void DumpContinuity(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<const Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<const Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     auto sheet_num = 0;
     for (auto i = p->GetSheetBegin(); i != p->GetSheetEnd(); ++i, ++sheet_num) {
         static const SYMBOL_TYPE k_symbols[] = {
@@ -229,7 +229,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     bool overview, std::string const& outfile)
 {
     std::ifstream input(show);
-    std::unique_ptr<const Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<const Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
 
     std::ofstream output(outfile);
 
@@ -266,18 +266,16 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
         };
         return yard_text[offset];
     };
-    auto Get_spr_line_text = Get_yard_text;
 
-    auto mode = ShowModeStandard::CreateShowMode(
-        "Standard", { { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } });
+    auto mode = ShowMode::GetDefaultShowMode();
 
     PrintShowToPS printShowToPS(
-        *p, landscape, cont, contsheet, overview, 50, *mode,
+        *p, landscape, cont, contsheet, overview, 50, mode,
         { { head_font_str, main_font_str, number_font_str, cont_font_str,
             bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, Get_yard_text, Get_spr_line_text);
+        ContRatio, Get_yard_text);
 
     std::set<size_t> picked;
     for (auto i = 0; i < p->GetNumSheets(); ++i)
@@ -294,7 +292,7 @@ bool ContinuityCountDifferentThanSymbol(const char* show)
     if (!input.is_open()) {
         throw std::runtime_error("could not open file");
     }
-    std::unique_ptr<Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     return false;
 }
 

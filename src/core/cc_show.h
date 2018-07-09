@@ -27,6 +27,7 @@
 
 #include "animate.h"
 #include "cc_sheet.h"
+#include "modes.h"
 #include <map>
 #include <memory>
 #include <set>
@@ -58,15 +59,15 @@ public:
     using const_Sheet_iterator_t = Sheet_container_t::const_iterator;
 
     // you can create a show in two ways, from nothing, or from an input stream
-    static std::unique_ptr<Show> Create_CC_show();
-    static std::unique_ptr<Show> Create_CC_show(std::vector<std::string> const& labels, unsigned columns, Coord const& new_march_position);
-    static std::unique_ptr<Show> Create_CC_show(std::istream& stream);
+    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode);
+    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::vector<std::string> const& labels, unsigned columns);
+    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::istream& stream);
 
 private:
-    Show();
+    Show(ShowMode const& mode);
     // using overloading with structs to determine which constructor to use
-    Show(std::istream& stream, Version_3_3_and_earlier);
-    Show(const uint8_t* ptr, size_t size, Version_3_4_and_3_5);
+    Show(ShowMode const& mode, std::istream& stream, Version_3_3_and_earlier);
+    Show(ShowMode const& mode, const uint8_t* ptr, size_t size, Version_3_4_and_3_5);
 
 public:
     ~Show();
@@ -78,6 +79,7 @@ public:
     // Create command, consists of an action and undo action
     Show_command_pair Create_SetCurrentSheetCommand(int n) const;
     Show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
+    Show_command_pair Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const;
     Show_command_pair Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, Coord const& new_march_position) const;
     Show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
     Show_command_pair Create_SetSheetBeatsCommand(int beats) const;
@@ -117,6 +119,8 @@ public:
     bool AlreadyHasPrintContinuity() const;
 
     bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
+
+    const ShowMode& GetShowMode() const;
 
     // utility
     std::pair<bool, std::vector<size_t>> GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
@@ -170,6 +174,8 @@ private:
     auto GetNthSheet(unsigned n) { return GetSheetBegin() + n; }
     auto GetCurrentSheet() { return GetNthSheet(mSheetNum); }
 
+    void SetShowMode(ShowMode const&);
+
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version)
@@ -179,6 +185,7 @@ private:
         ar& mPtLabels;
         ar& mSelectionList;
         ar& mSheetNum;
+        ar& mMode;
     }
 
     // members
@@ -187,6 +194,7 @@ private:
     std::vector<std::string> mPtLabels;
     SelectionList mSelectionList; // order of selections
     int mSheetNum;
+    ShowMode mMode;
 
     // unit tests
     friend void Show_UnitTests();

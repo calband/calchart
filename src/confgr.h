@@ -90,11 +90,6 @@ enum CalChartShowModes {
 
 extern const wxString kShowModeStrings[SHOWMODE_NUM];
 
-enum CalChartSpringShowModes { ZELLERBACH,
-    SPRINGSHOWMODE_NUM };
-
-extern const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM];
-
 // CalChartConfiguration interfaces with the system config and acts as a "cache"
 // for the values.
 // On Get, it reads the values from system config, and caches a copy.
@@ -226,7 +221,6 @@ public:
     std::vector<wxString> GetContCellDefaultColors() const;
     std::vector<int> GetContCellDefaultPenWidth() const;
     std::vector<wxString> Get_yard_text_index() const;
-    std::vector<wxString> Get_spr_line_text_index() const;
 
     // Colors
     using ColorWidth_t = std::pair<wxColour, int>;
@@ -250,27 +244,14 @@ public:
     void Set_ShowModeInfo(CalChartShowModes which, const ShowModeInfo_t& values);
     void Clear_ShowModeInfo(CalChartShowModes which);
 
-    static constexpr int kSpringShowModeValues = 21;
-    using SpringShowModeInfo_t = std::array<long, kSpringShowModeValues>;
-    mutable std::map<CalChartSpringShowModes, SpringShowModeInfo_t>
-        mSpringShowModeInfos;
-    SpringShowModeInfo_t
-    Get_SpringShowModeInfo(CalChartSpringShowModes which) const;
-    void Set_SpringShowModeInfo(CalChartSpringShowModes which,
-        const SpringShowModeInfo_t& values);
-    void Clear_SpringShowModeInfo(CalChartSpringShowModes which);
-
     // Yard Lines
     mutable std::map<size_t, wxString> mYardTextInfos;
     wxString Get_yard_text(size_t which) const;
+    static constexpr auto kYardTextValues = 53;
+    std::array<std::string, kYardTextValues> Get_yard_text_all() const;
     void Set_yard_text(size_t which, const wxString&);
     void Clear_yard_text(size_t which);
-
-    mutable std::map<size_t, wxString> mSprLineTextInfos;
-    wxString Get_spr_line_text(size_t which) const;
-    void Set_spr_line_text(size_t which, const wxString&);
-    void Clear_spr_line_text(size_t which);
 };
 
 // to find a specific Show:
-std::unique_ptr<CalChart::ShowMode> GetShowMode(const wxString& which);
+CalChart::ShowMode GetConfigShowMode(const wxString& which);

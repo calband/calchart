@@ -43,6 +43,9 @@
 #include "field_frame_controls.h"
 #include "FieldThumbnailBrowser.h"
 #include "FieldView.h"
+#include "field_mini_browser.h"
+#include "field_view.h"
+#include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
 #include "print_cont_ui.h"
@@ -1131,23 +1134,9 @@ void FieldFrame::Setup()
 void FieldFrame::SetMode()
 {
     if (GetShow()) {
-        wxArrayString modeStrings;
-        unsigned whichMode = 0, tmode = 0;
-        for (auto mode : kShowModeStrings) {
-            modeStrings.Add(mode);
-            if (mode == GetShow()->GetMode().GetName())
-                whichMode = tmode;
-        }
-        for (auto mode : kSpringShowModeStrings) {
-            modeStrings.Add(mode);
-            if (mode == GetShow()->GetMode().GetName())
-                whichMode = tmode;
-        }
-        wxSingleChoiceDialog dialog(this, wxT("Please select the show mode\n"),
-            wxT("Set show mode\n"), modeStrings);
-        dialog.SetSelection(whichMode);
+        ModeSetupDialog dialog(GetShow()->GetShowMode(), this);
         if (dialog.ShowModal() == wxID_OK) {
-            GetFieldView()->DoSetMode(dialog.GetStringSelection());
+            GetFieldView()->DoSetMode(dialog.GetShowMode());
         }
     }
 }

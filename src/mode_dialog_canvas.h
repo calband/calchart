@@ -1,5 +1,6 @@
+#pragma once
 /*
- * cc_preferences.h
+ * mode_dialog.h
  * Dialox box for preferences
  */
 
@@ -20,31 +21,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
 
 #include "confgr.h"
+#include "modes.h"
+#include "basic_ui.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
 
-class CalChartPreferences : public wxDialog {
-    DECLARE_CLASS(CalChartPreferences)
+class ShowModeSetupCanvas : public ClickDragCtrlScrollCanvas {
+    DECLARE_CLASS(ShowModeSetupCanvas)
     DECLARE_EVENT_TABLE()
+    using super = ClickDragCtrlScrollCanvas;
 
 public:
-    CalChartPreferences(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("CalChart Preferences"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~CalChartPreferences() = default;
+    ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent,
+        wxWindowID id = wxID_ANY);
 
-    bool TransferDataToWindow();
-    bool TransferDataFromWindow();
+    void OnPaint(wxPaintEvent& event);
+    void SetMode(CalChart::ShowMode const& mode);
+    virtual void SetZoom(float factor);
 
 private:
-    void OnCmdResetAll(wxCommandEvent&);
-    wxNotebook* mNotebook;
-    CalChartConfiguration mConfig;
+    CalChartConfiguration& mConfig;
+    CalChart::ShowMode mMode;
 };

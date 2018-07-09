@@ -55,8 +55,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
-    : mShow(Show::Create_CC_show())
-    , mMode(wxGetApp().GetMode(kShowModeStrings[0]))
+    : mShow(Show::Create_CC_show(wxGetApp().GetShowMode(kShowModeStrings[0])))
     , mTimer(*this)
 {
     mTimer.Start(static_cast<int>(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()) * 1000);
@@ -230,7 +229,7 @@ template <typename T>
 T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
     try {
-        mShow = Show::Create_CC_show(stream);
+        mShow = Show::Create_CC_show(wxGetApp().GetShowMode(kShowModeStrings[0]), stream);
     } catch (CC_FileException& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
@@ -325,10 +324,9 @@ CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
     return std::make_unique<Animation>(*mShow, notifyStatus, notifyErrorList);
 }
 
-void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, std::unique_ptr<ShowMode> newmode)
+void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, ShowMode const& newmode)
 {
-    SetMode(std::move(newmode));
-    mShow = Show::Create_CC_show(labels, columns, mMode->FieldOffset());
+    mShow = Show::Create_CC_show(newmode, labels, columns);
     UpdateAllViews();
 }
 
@@ -344,16 +342,7 @@ void CalChartDoc::SetSelection(const SelectionList& sl)
     UpdateAllViews();
 }
 
-const ShowMode& CalChartDoc::GetMode() const { return *mMode; }
-
-void CalChartDoc::SetMode(std::unique_ptr<const ShowMode> m)
-{
-    if (!m) {
-        throw std::runtime_error("Cannot use NULL ShowMode");
-    }
-    std::swap(mMode, m);
-    UpdateAllViews();
-}
+const ShowMode& CalChartDoc::GetShowMode() const { return mShow->GetShowMode(); }
 
 int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
     int min_yards, const std::set<size_t>& isPicked,
@@ -364,7 +353,7 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
     auto doContSheet = config_.Get_PrintPSDoContSheet();
 
     PrintShowToPS printShowToPS(
-        *mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetMode(),
+        *mShow, doLandscape, doCont, doContSheet, overview, min_yards, GetShowMode(),
         { { config_.Get_HeadFont().ToStdString(),
             config_.Get_MainFont().ToStdString(),
             config_.Get_NumberFont().ToStdString(),
@@ -378,11 +367,8 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
         config_.Get_YardsSize(), config_.Get_TextSize(), config_.Get_DotRatio(),
         config_.Get_NumRatio(), config_.Get_PLineRatio(),
         config_.Get_SLineRatio(), config_.Get_ContRatio(),
-        [&config_](size_t which) {
-            return config_.Get_yard_text(which).ToStdString();
-        },
-        [&config_](size_t which) {
-            return config_.Get_spr_line_text(which).ToStdString();
+        [this](size_t which) {
+            return this->GetShowMode().Get_yard_text()[which];
         });
     return printShowToPS(buffer, mShow->GetCurrentSheetNum(), isPicked,
         GetTitle().ToStdString());
@@ -426,27 +412,17 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSelectionCommand(const Selecti
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set Selection"), show_cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetModeCommand(const wxString& newmode)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowModeCommand(CalChart::ShowMode const& newmode)
 {
-    auto action = [mode = newmode](CalChartDoc& doc) {
-        auto newmode = wxGetApp().GetMode(mode);
-        if (newmode) {
-            doc.SetMode(std::move(newmode));
-        }
-    };
-    auto reaction = [mode = mMode->GetName()](CalChartDoc& doc) {
-        auto newmode = wxGetApp().GetMode(mode);
-        if (newmode) {
-            doc.SetMode(std::move(newmode));
-        }
-    };
-    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Mode"), CalChartDocCommand::CC_doc_command_pair{ action, reaction });
+    auto cmds = Create_SetSheetPair();
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetShowModeCommand(newmode)));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Mode"), cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns)
 {
     auto tlabels = std::vector<std::string>(labels.begin(), labels.end());
-    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetShowInfoCommand(tlabels, numColumns, mMode->FieldOffset()));
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetShowInfoCommand(tlabels, numColumns, GetShowMode().FieldOffset()));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set show info"), show_cmds);
 }
 

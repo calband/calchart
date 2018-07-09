@@ -15,7 +15,7 @@
 @implementation cc_show_tests
 
 - (void)test_default_equal {
-    auto empty_show = CalChart::Show::Create_CC_show();
+    auto empty_show = CalChart::Show::Create_CC_show(CalChart::ShowMode::GetDefaultShowMode());
     XCTAssert(empty_show);
 }
 

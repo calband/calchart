@@ -1,4 +1,4 @@
-/*
+    /*
  * cc_preferences_ui.cpp
  * Dialox box for preferences
  */
@@ -21,7 +21,6 @@
 */
 
 #include "cc_preferences_ui.h"
-#include "basic_ui.h"
 #include "calchartdoc.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
@@ -32,6 +31,8 @@
 #include "cont_composer.h"
 #include "draw.h"
 #include "modes.h"
+#include "mode_dialog.h"
+#include "mode_dialog_canvas.h"
 
 #include <wx/colordlg.h>
 #include <wx/dcbuffer.h>
@@ -60,10 +61,10 @@ using namespace CalChart;
 // setting them to the system on TransferDataFromWindow
 
 // convience sizers to change the view behavior in all at once.
-static wxSizerFlags sBasicSizerFlags;
-static wxSizerFlags sLeftBasicSizerFlags;
-static wxSizerFlags sRightBasicSizerFlags;
-static wxSizerFlags sExpandSizerFlags;
+static auto sBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proportion(0);
+static auto sLeftBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Left().Proportion(0);
+static auto sRightBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Right().Proportion(0);
+static auto sExpandSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proportion(0);
 
 static void AddTextboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
     int id, const wxString& caption,
@@ -280,7 +281,7 @@ private:
     void OnEraseBackground(wxEraseEvent& event);
 
     std::unique_ptr<CalChart::Show> mShow;
-    std::unique_ptr<const CalChart::ShowMode> mMode;
+    CalChart::ShowMode mMode;
     CalChartConfiguration& mConfig;
     std::vector<CalChart::DrawCommand> mPath;
     CalChart::Coord mPathEnd;
@@ -294,20 +295,21 @@ END_EVENT_TABLE()
 
 PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
     : super(parent, wxID_ANY, wxDefaultPosition, wxSize(640, 240))
-    , mMode(ShowModeStandard::CreateShowMode(
-          "", Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
+    , mMode(ShowMode::CreateShowMode(
+          Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
           Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
           Coord(Int2CoordUnits(4), Int2CoordUnits(4)),
-          Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52)))
+          Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52),
+          ShowMode::GetDefaultYardLines()))
     , mConfig(config)
 {
-    auto field_offset = mMode->FieldOffset();
-    auto offset = mMode->Offset();
-    SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
+    auto field_offset = mMode.FieldOffset();
+    auto offset = mMode.Offset();
+    SetCanvasSize(wxSize{ mMode.Size().x, mMode.Size().y });
 
     // Create a fake show with some points and selections to draw an example for
     // the user
-    mShow = Show::Create_CC_show();
+    mShow = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto labels = std::vector<std::string>{
         "unsel",
         "unsel",
@@ -368,7 +370,7 @@ void PrefCanvas::OnPaint(wxPaintEvent& event)
     dc.Clear();
 
     // Draw the field
-    DrawMode(dc, mConfig, *mMode, ShowMode_kFieldView);
+    DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
 
     auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
     auto nextSheet = sheet;
@@ -379,13 +381,13 @@ void PrefCanvas::OnPaint(wxPaintEvent& event)
     list.insert(3);
 
     // draw the ghost sheet
-    DrawGhostSheet(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(),
+    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
         mShow->GetPointLabels(), *nextSheet, 0);
 
     // Draw the points
-    DrawPoints(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(),
+    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
         mShow->GetPointLabels(), *sheet, 0, true);
-    DrawPoints(dc, mConfig, mMode->Offset(), list, mShow->GetNumPoints(),
+    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
         mShow->GetPointLabels(), *sheet, 1, false);
 
     // draw the path
@@ -706,10 +708,6 @@ public:
 private:
     wxString mFontNames[7];
     double mPrintValues[8];
-    // only one mode, not putting a choice controller in for now...
-    int mWhichMode = 0;
-    CalChartConfiguration::SpringShowModeInfo_t
-        mSpringShowModeValues[SPRINGSHOWMODE_NUM];
 };
 
 typedef enum {
@@ -725,18 +723,6 @@ typedef enum {
     YARDSSIZE,
     TEXTSIZE,
     CONTRATIO,
-    EPS_STAGE_X,
-    EPS_STAGE_Y,
-    EPS_STAGE_W,
-    EPS_STAGE_H,
-    EPS_FIELD_X,
-    EPS_FIELD_Y,
-    EPS_FIELD_W,
-    EPS_FIELD_H,
-    EPS_TEXT_X,
-    EPS_TEXT_Y,
-    EPS_TEXT_W,
-    EPS_TEXT_H,
 } PSPrintingSetUp_IDs;
 
 BEGIN_EVENT_TABLE(PSPrintingSetUp, PreferencePage)
@@ -779,27 +765,6 @@ void PSPrintingSetUp::CreateControls()
     AddTextboxWithCaption(this, horizontalsizer, CONTRATIO,
         wxT("Continuity Ratio:"));
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
-    AddTextboxWithCaption(this, horizontalsizer, EPS_STAGE_X, wxT("EPS Stage X"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_STAGE_Y, wxT("EPS Stage Y"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_STAGE_W, wxT("EPS Stage W"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_STAGE_H, wxT("EPS Stage H"));
-
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
-    AddTextboxWithCaption(this, horizontalsizer, EPS_FIELD_X, wxT("EPS Field X"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_FIELD_Y, wxT("EPS Field Y"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_FIELD_W, wxT("EPS Field W"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_FIELD_H, wxT("EPS Field H"));
-
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
-    AddTextboxWithCaption(this, horizontalsizer, EPS_TEXT_X, wxT("EPS Text X"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_TEXT_Y, wxT("EPS Text Y"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_TEXT_W, wxT("EPS Text W"));
-    AddTextboxWithCaption(this, horizontalsizer, EPS_TEXT_H, wxT("EPS Text H"));
-
     TransferDataToWindow();
 }
 
@@ -816,9 +781,6 @@ void PSPrintingSetUp::Init()
     mPrintValues[1] = mConfig.Get_YardsSize();
     mPrintValues[2] = mConfig.Get_TextSize();
     mPrintValues[7] = mConfig.Get_ContRatio();
-    for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
-        mSpringShowModeValues[i] = mConfig.Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
-    }
 }
 
 bool PSPrintingSetUp::TransferDataToWindow()
@@ -850,15 +812,6 @@ bool PSPrintingSetUp::TransferDataToWindow()
     text = (wxTextCtrl*)FindWindow(CONTRATIO);
     buf.Printf(wxT("%.2f"), mPrintValues[7]);
     text->SetValue(buf);
-
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x;
-         i != mSpringShowModeValues[mWhichMode].end(); ++i) {
-        wxString buf;
-        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            EPS_STAGE_X + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - ShowModeSprShow::keps_stage_x);
-        buf.Printf(wxT("%ld"), *i);
-        text->SetValue(buf);
-    }
 
     return true;
 }
@@ -902,21 +855,6 @@ bool PSPrintingSetUp::TransferDataFromWindow()
     mConfig.Set_TextSize(mPrintValues[2]);
     mConfig.Set_ContRatio(mPrintValues[7]);
 
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x;
-         i != mSpringShowModeValues[mWhichMode].end(); ++i) {
-        long val;
-        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            EPS_STAGE_X + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - ShowModeSprShow::keps_stage_x);
-        text->GetValue().ToLong(&val);
-        *i = val;
-    }
-
-    // write out the values defaults:
-    for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
-        mConfig.Set_SpringShowModeInfo(
-            static_cast<CalChartSpringShowModes>(mWhichMode),
-            mSpringShowModeValues[mWhichMode]);
-    }
     return true;
 }
 
@@ -942,80 +880,6 @@ bool PSPrintingSetUp::ClearValuesToDefault()
 ////////
 
 const int zoom_amounts[] = { 500, 200, 150, 100, 75, 50, 25, 10 };
-
-class ShowModeSetupCanvas : public ClickDragCtrlScrollCanvas {
-    DECLARE_EVENT_TABLE()
-    using super = ClickDragCtrlScrollCanvas;
-
-public:
-    ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID id = wxID_ANY);
-
-    void OnPaint(wxPaintEvent& event);
-    void SetMode(const std::string&, CalChartShowModes);
-    void SetMode(const std::string&, CalChartSpringShowModes);
-    virtual void SetZoom(float factor);
-
-private:
-    CalChartConfiguration& mConfig;
-    std::unique_ptr<const ShowMode> mMode;
-};
-
-BEGIN_EVENT_TABLE(ShowModeSetupCanvas, ClickDragCtrlScrollCanvas)
-EVT_PAINT(ShowModeSetupCanvas::OnPaint)
-EVT_MOTION(ShowModeSetupCanvas::OnMouseMove)
-EVT_MAGNIFY(ShowModeSetupCanvas::OnMousePinchToZoom)
-EVT_MOUSEWHEEL(ShowModeSetupCanvas::OnMouseWheel)
-END_EVENT_TABLE()
-
-ShowModeSetupCanvas::ShowModeSetupCanvas(CalChartConfiguration& config,
-    wxWindow* parent, wxWindowID id)
-    : super(parent, id, wxDefaultPosition, wxSize(640, 240))
-    , mConfig(config)
-{
-}
-
-// Define the repainting behaviour
-void ShowModeSetupCanvas::OnPaint(wxPaintEvent& event)
-{
-    wxBufferedPaintDC dc(this);
-    PrepareDC(dc);
-
-    // draw the background
-    dc.SetBackgroundMode(wxTRANSPARENT);
-    dc.SetBackground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-    dc.Clear();
-
-    // Draw the field
-    if (mMode) {
-        DrawMode(dc, mConfig, *mMode, ShowMode_kFieldView);
-    }
-}
-
-void ShowModeSetupCanvas::SetMode(const std::string& which,
-    CalChartShowModes item)
-{
-    mMode = ShowModeStandard::CreateShowMode(
-        which, [this, item]() { return this->mConfig.Get_ShowModeInfo(item); });
-    SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
-    Refresh();
-}
-
-void ShowModeSetupCanvas::SetMode(const std::string& which,
-    CalChartSpringShowModes item)
-{
-    mMode = ShowModeSprShow::CreateSpringShowMode(which, [this, item]() {
-        return this->mConfig.Get_SpringShowModeInfo(item);
-    });
-    SetCanvasSize(wxSize{ mMode->Size().x, mMode->Size().y });
-    Refresh();
-}
-
-void ShowModeSetupCanvas::SetZoom(float factor)
-{
-    super::SetZoom(factor);
-    Refresh();
-}
 
 class ShowModeSetup : public PreferencePage {
     DECLARE_CLASS(ShowModeSetup)
@@ -1047,7 +911,7 @@ private:
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice(wxCommandEvent&);
     CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];
-    wxString mYardText[kYardTextValues];
+    CalChart::ShowMode::YardLinesInfo_t mYardText;
     int mWhichMode;
     int mWhichYardLine;
 };
@@ -1166,7 +1030,7 @@ void ShowModeSetup::CreateControls()
     modeSetupCanvas->SetScrollRate(1, 1);
     topsizer->Add(modeSetupCanvas, 1, wxEXPAND);
 
-    modeSetupCanvas->SetMode("", static_cast<CalChartShowModes>(mWhichMode));
+    modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
     modeSetupCanvas->SetZoom(zoom_amounts[5] / 100.0);
     zoomBox->SetSelection(5);
 
@@ -1226,6 +1090,8 @@ bool ShowModeSetup::TransferDataFromWindow()
     for (size_t i = 0; i < kYardTextValues; ++i) {
         mConfig.Set_yard_text(i, mYardText[i]);
     }
+    // now set the canvas
+    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
 
     return true;
 }
@@ -1239,6 +1105,7 @@ bool ShowModeSetup::ClearValuesToDefault()
         mConfig.Clear_yard_text(i);
     }
     Init();
+    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
     return TransferDataToWindow();
 }
 
@@ -1256,7 +1123,7 @@ void ShowModeSetup::OnCmdChoice(wxCommandEvent&)
     wxChoice* modes = (wxChoice*)FindWindow(MODE_CHOICE);
     mWhichMode = modes->GetSelection();
     ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(CANVAS);
-    canvas->SetMode("", static_cast<CalChartShowModes>(mWhichMode));
+    canvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
@@ -1266,311 +1133,6 @@ void ShowModeSetup::OnCmdChoice(wxCommandEvent&)
     }
 
     modes = (wxChoice*)FindWindow(SHOW_LINE_MARKING);
-    mWhichYardLine = modes->GetSelection();
-    TransferDataToWindow();
-}
-
-//////// Spring Show Mode setup ////////
-// setup pringing values and colors
-////////
-
-class SpringShowModeSetup : public PreferencePage {
-    DECLARE_CLASS(SpringShowModeSetup)
-    DECLARE_EVENT_TABLE()
-
-public:
-    SpringShowModeSetup(CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Setup Modes"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
-        : PreferencePage(config)
-    {
-        Init();
-        Create(parent, id, caption, pos, size, style);
-    }
-    ~SpringShowModeSetup() {}
-
-    virtual void Init();
-    virtual void CreateControls();
-
-    // use these to get and set default values
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-    virtual bool ClearValuesToDefault();
-
-private:
-    void OnCmdChoice(wxCommandEvent&);
-    CalChartConfiguration::SpringShowModeInfo_t
-        mSpringShowModeValues[SPRINGSHOWMODE_NUM];
-    wxString mYardText[kSprLineTextValues];
-    int mWhichMode;
-    int mWhichYardLine;
-};
-
-enum {
-    SPRING_MODE_CHOICE = 1000,
-    DISPLAY_YARDLINE_BELOW,
-    DISPLAY_YARDLINE_ABOVE,
-    DISPLAY_YARDLINE_RIGHT,
-    DISPLAY_YARDLINE_LEFT,
-    SPRING_BORDER_LEFT,
-    SPRING_BORDER_TOP,
-    SPRING_BORDER_RIGHT,
-    SPRING_BORDER_BOTTOM,
-    MODE_STEPS_X,
-    MODE_STEPS_Y,
-    MODE_STEPS_W,
-    MODE_STEPS_H,
-    SPRING_SHOW_LINE_MARKING,
-    SPRING_SHOW_LINE_VALUE,
-    SPRING_CANVAS,
-};
-
-BEGIN_EVENT_TABLE(SpringShowModeSetup, PreferencePage)
-EVT_CHOICE(SPRING_MODE_CHOICE, SpringShowModeSetup::OnCmdChoice)
-EVT_CHOICE(SPRING_SHOW_LINE_MARKING, SpringShowModeSetup::OnCmdChoice)
-END_EVENT_TABLE()
-
-IMPLEMENT_CLASS(SpringShowModeSetup, PreferencePage)
-
-void SpringShowModeSetup::CreateControls()
-{
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
-    wxChoice* modes = new wxChoice(this, SPRING_MODE_CHOICE, wxDefaultPosition, wxDefaultSize,
-        SPRINGSHOWMODE_NUM, kSpringShowModeStrings);
-    modes->SetSelection(0);
-    topsizer->Add(modes, sLeftBasicSizerFlags);
-
-    wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(sizer1);
-    sizer1->Add(
-        new wxCheckBox(this, DISPLAY_YARDLINE_LEFT, wxT("Display Yardline Left")),
-        sBasicSizerFlags);
-    sizer1->Add(new wxCheckBox(this, DISPLAY_YARDLINE_RIGHT,
-                    wxT("Display Yardline Right")),
-        sBasicSizerFlags);
-    sizer1 = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(sizer1, sLeftBasicSizerFlags);
-    sizer1->Add(new wxCheckBox(this, DISPLAY_YARDLINE_ABOVE,
-                    wxT("Display Yardline Above")),
-        sBasicSizerFlags);
-    sizer1->Add(new wxCheckBox(this, DISPLAY_YARDLINE_BELOW,
-                    wxT("Display Yardline Below")),
-        sBasicSizerFlags);
-
-    auto refresh_action = [this](wxCommandEvent&) {
-        this->TransferDataFromWindow();
-        Refresh();
-    };
-
-    static_cast<wxCheckBox*>(FindWindow(DISPLAY_YARDLINE_LEFT))
-        ->Bind(wxEVT_CHECKBOX, refresh_action);
-    static_cast<wxCheckBox*>(FindWindow(DISPLAY_YARDLINE_RIGHT))
-        ->Bind(wxEVT_CHECKBOX, refresh_action);
-    static_cast<wxCheckBox*>(FindWindow(DISPLAY_YARDLINE_ABOVE))
-        ->Bind(wxEVT_CHECKBOX, refresh_action);
-    static_cast<wxCheckBox*>(FindWindow(DISPLAY_YARDLINE_BELOW))
-        ->Bind(wxEVT_CHECKBOX, refresh_action);
-
-    sizer1 = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(sizer1, sLeftBasicSizerFlags);
-    AddTextboxWithCaptionAndAction(this, sizer1, SPRING_BORDER_LEFT,
-        wxT("Left Border"), refresh_action,
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaptionAndAction(this, sizer1, SPRING_BORDER_TOP,
-        wxT("Top Border"), refresh_action,
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaptionAndAction(this, sizer1, SPRING_BORDER_RIGHT,
-        wxT("Right Border"), refresh_action,
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaptionAndAction(this, sizer1, SPRING_BORDER_BOTTOM,
-        wxT("Bottom Border"), refresh_action,
-        wxTE_PROCESS_ENTER);
-
-    sizer1 = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(sizer1, sLeftBasicSizerFlags);
-    AddTextboxWithCaptionAndAction(this, sizer1, MODE_STEPS_X,
-        wxT("Mode Offset X"), refresh_action,
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaptionAndAction(this, sizer1, MODE_STEPS_Y,
-        wxT("Mode Offset Y"), refresh_action,
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaptionAndAction(this, sizer1, MODE_STEPS_W,
-        wxT("Mode Offset W"), refresh_action,
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaptionAndAction(this, sizer1, MODE_STEPS_H,
-        wxT("Mode Offset H"), refresh_action,
-        wxTE_PROCESS_ENTER);
-
-    sizer1 = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(sizer1, sLeftBasicSizerFlags);
-    wxBoxSizer* textsizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer1->Add(textsizer, sBasicSizerFlags);
-    textsizer->Add(new wxStaticText(this, wxID_STATIC,
-                       wxT("Adjust yardline marker"),
-                       wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    wxChoice* textchoice = new wxChoice(this, SPRING_SHOW_LINE_MARKING, wxDefaultPosition,
-        wxDefaultSize,
-        wxArrayString{ mConfig.Get_spr_line_text_index().size(), mConfig.Get_spr_line_text_index().data() });
-    textchoice->SetSelection(0);
-    textsizer->Add(textchoice);
-    auto show_line_value = new wxTextCtrl(this, SPRING_SHOW_LINE_VALUE, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    show_line_value->Bind(wxEVT_TEXT_ENTER, refresh_action);
-    textsizer->Add(show_line_value, sBasicSizerFlags);
-
-    textsizer = new wxBoxSizer(wxHORIZONTAL);
-    sizer1->Add(textsizer, sBasicSizerFlags);
-    textsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Zoom"),
-                       wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    wxArrayString zoomtext;
-    for (auto& i : zoom_amounts) {
-        wxString buf;
-        buf.sprintf(wxT("%d%%"), i);
-        zoomtext.Add(buf);
-    }
-    auto zoomBox = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, zoomtext);
-    zoomBox->Bind(wxEVT_CHOICE, [=](wxCommandEvent& event) {
-        size_t sel = event.GetInt();
-        float zoom_amount = zoom_amounts[sel] / 100.0;
-        static_cast<ShowModeSetupCanvas*>(FindWindow(SPRING_CANVAS))
-            ->SetZoom(zoom_amount);
-    });
-
-    // set the text to the default zoom level
-    textsizer->Add(zoomBox, sLeftBasicSizerFlags);
-
-    auto modeSetupCanvas = new ShowModeSetupCanvas(mConfig, this, SPRING_CANVAS);
-    modeSetupCanvas->SetScrollRate(1, 1);
-    topsizer->Add(modeSetupCanvas, 1, wxEXPAND);
-
-    modeSetupCanvas->SetMode("",
-        static_cast<CalChartSpringShowModes>(mWhichMode));
-    modeSetupCanvas->SetZoom(zoom_amounts[5] / 100.0);
-    zoomBox->SetSelection(5);
-
-    TransferDataToWindow();
-}
-
-void SpringShowModeSetup::Init()
-{
-    mWhichMode = 0;
-    mWhichYardLine = 0;
-    for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
-        mSpringShowModeValues[i] = mConfig.Get_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
-    }
-    for (size_t i = 0; i < kSprLineTextValues; ++i) {
-        mYardText[i] = mConfig.Get_spr_line_text(i);
-    }
-}
-
-bool SpringShowModeSetup::TransferDataToWindow()
-{
-    // standard show
-    for (size_t i = 0; i < 4; ++i) {
-        wxCheckBox* checkbox = (wxCheckBox*)FindWindow(DISPLAY_YARDLINE_BELOW + i);
-        checkbox->SetValue((mSpringShowModeValues[mWhichMode][0] & (1 << i)) > 0);
-    }
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1;
-         i != (mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x);
-         ++i) {
-        wxString buf;
-        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            SPRING_BORDER_LEFT + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - 1);
-        buf.Printf(wxT("%ld"), *i);
-        text->ChangeValue(buf);
-    }
-
-    wxTextCtrl* text = (wxTextCtrl*)FindWindow(SPRING_SHOW_LINE_VALUE);
-    text->SetValue(mConfig.Get_spr_line_text(mWhichYardLine));
-    return true;
-}
-
-bool SpringShowModeSetup::TransferDataFromWindow()
-{
-    // read out the values from the window
-    // spring show
-    wxChoice* modes = (wxChoice*)FindWindow(SPRING_MODE_CHOICE);
-
-    mSpringShowModeValues[mWhichMode][0] = 0;
-    for (size_t i = 0; i < 4; ++i) {
-        wxCheckBox* checkbox = (wxCheckBox*)FindWindow(DISPLAY_YARDLINE_BELOW + i);
-        mSpringShowModeValues[mWhichMode][0] |= checkbox->IsChecked() ? (1 << i) : 0;
-    }
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1;
-         i != (mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x);
-         ++i) {
-        long val;
-        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            SPRING_BORDER_LEFT + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - 1);
-        text->GetValue().ToLong(&val);
-        *i = val;
-    }
-
-    // write out the values defaults:
-    for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
-        mConfig.Set_SpringShowModeInfo(
-            static_cast<CalChartSpringShowModes>(modes->GetSelection()),
-            mSpringShowModeValues[mWhichMode]);
-    }
-
-    wxTextCtrl* text = (wxTextCtrl*)FindWindow(SPRING_SHOW_LINE_VALUE);
-    mYardText[mWhichYardLine] = text->GetValue();
-    for (size_t i = 0; i < kSprLineTextValues; ++i) {
-        mConfig.Set_spr_line_text(i, mYardText[i]);
-    }
-
-    return true;
-}
-
-bool SpringShowModeSetup::ClearValuesToDefault()
-{
-    for (size_t i = 0; i < SPRINGSHOWMODE_NUM; ++i) {
-        mConfig.Clear_SpringShowModeInfo(static_cast<CalChartSpringShowModes>(i));
-    }
-    for (auto i = 0; i < kSprLineTextValues; ++i) {
-        mConfig.Clear_spr_line_text(i);
-    }
-    Init();
-    return TransferDataToWindow();
-}
-
-void SpringShowModeSetup::OnCmdChoice(wxCommandEvent&)
-{
-    // save off all the old values:
-    mSpringShowModeValues[mWhichMode][0] = 0;
-    for (size_t i = 0; i < 4; ++i) {
-        wxCheckBox* checkbox = (wxCheckBox*)FindWindow(DISPLAY_YARDLINE_BELOW + i);
-        mSpringShowModeValues[mWhichMode][0] |= checkbox->IsChecked() ? (1 << i) : 0;
-    }
-    for (auto i = mSpringShowModeValues[mWhichMode].begin() + 1;
-         i != (mSpringShowModeValues[mWhichMode].begin() + ShowModeSprShow::keps_stage_x);
-         ++i) {
-        long val;
-        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            SPRING_BORDER_LEFT + std::distance(mSpringShowModeValues[mWhichMode].begin(), i) - 1);
-        text->GetValue().ToLong(&val);
-        *i = val;
-    }
-    wxChoice* modes = (wxChoice*)FindWindow(SPRING_MODE_CHOICE);
-    mWhichMode = modes->GetSelection();
-    ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(SPRING_CANVAS);
-    canvas->SetMode("", static_cast<CalChartSpringShowModes>(mWhichMode));
-
-    wxTextCtrl* text = (wxTextCtrl*)FindWindow(SPRING_SHOW_LINE_VALUE);
-    mYardText[mWhichYardLine] = text->GetValue();
-    // update mode
-    for (size_t i = 0; i < kSprLineTextValues; ++i) {
-        mConfig.Set_spr_line_text(i, mYardText[i]);
-    }
-
-    modes = (wxChoice*)FindWindow(SPRING_SHOW_LINE_MARKING);
     mWhichYardLine = modes->GetSelection();
     TransferDataToWindow();
 }
@@ -1835,75 +1397,36 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(CalChartPreferences, wxDialog)
 
-CalChartPreferences::CalChartPreferences() { Init(); }
-
-CalChartPreferences::CalChartPreferences(wxWindow* parent, wxWindowID id,
-    const wxString& caption,
-    const wxPoint& pos, const wxSize& size,
-    long style)
-    : // make a copy of the config
-    mConfig(CalChartConfiguration::GetGlobalConfig())
+CalChartPreferences::CalChartPreferences(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
+    : wxDialog(parent, id, caption, pos, size, style)
+    , mConfig(CalChartConfiguration::GetGlobalConfig())
 {
-    Init();
-
-    Create(parent, id, caption, pos, size, style);
-}
-
-CalChartPreferences::~CalChartPreferences() {}
-
-void CalChartPreferences::Init()
-{
-    sBasicSizerFlags.Border(wxALL, 2).Center().Proportion(0);
-    sLeftBasicSizerFlags.Border(wxALL, 2).Left().Proportion(0);
-    sRightBasicSizerFlags.Border(wxALL, 2).Right().Proportion(0);
-    sExpandSizerFlags.Border(wxALL, 2).Center().Proportion(0);
-}
-
-bool CalChartPreferences::Create(wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
-{
-    if (!wxDialog::Create(parent, id, caption, pos, size, style))
-        return false;
-    CreateControls();
-    // This fits the dalog to the minimum size dictated by the sizers
-    GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
-    Center();
-    return true;
-}
-
-void CalChartPreferences::CreateControls()
-{
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+    auto topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
 
     mNotebook = new wxNotebook(this, wxID_ANY);
     topsizer->Add(mNotebook, sBasicSizerFlags);
 
-    wxPanel* window5 = new ContCellSetup(mConfig, mNotebook, wxID_ANY);
-    mNotebook->AddPage(window5, wxT("Continuity"));
-    wxPanel* window0 = new DrawingSetup(mConfig, mNotebook, wxID_ANY);
-    mNotebook->AddPage(window0, wxT("Drawing"));
-    wxPanel* window1 = new GeneralSetup(mConfig, mNotebook, wxID_ANY);
-    mNotebook->AddPage(window1, wxT("General"));
-    wxPanel* window2 = new PSPrintingSetUp(mConfig, mNotebook, wxID_ANY);
-    mNotebook->AddPage(window2, wxT("PS Printing"));
-    wxPanel* window3 = new ShowModeSetup(mConfig, mNotebook, wxID_ANY);
-    mNotebook->AddPage(window3, wxT("Show Mode Setup"));
-    wxPanel* window4 = new SpringShowModeSetup(mConfig, mNotebook, wxID_ANY);
-    mNotebook->AddPage(window4, wxT("SpringShow Mode Setup"));
+    mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook, wxID_ANY), wxT("Continuity"));
+    mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook, wxID_ANY), wxT("Drawing"));
+    mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook, wxID_ANY), wxT("General"));
+    mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook, wxID_ANY), wxT("PS Printing"));
+    mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook, wxID_ANY), wxT("Show Mode Setup"));
 
     // the buttons on the bottom
     wxBoxSizer* okCancelBox = new wxBoxSizer(wxHORIZONTAL);
     topsizer->Add(okCancelBox, sBasicSizerFlags);
 
     okCancelBox->Add(new wxButton(this, wxID_APPLY), sBasicSizerFlags);
-    okCancelBox->Add(new wxButton(this, wxID_RESET, wxT("&Reset All")),
-        sBasicSizerFlags);
+    okCancelBox->Add(new wxButton(this, wxID_RESET, wxT("&Reset All")), sBasicSizerFlags);
     okCancelBox->Add(new wxButton(this, wxID_OK), sBasicSizerFlags);
     okCancelBox->Add(new wxButton(this, wxID_CANCEL), sBasicSizerFlags);
+
+    // This fits the dalog to the minimum size dictated by the sizers
+    GetSizer()->Fit(this);
+    // This ensures that the dialog cannot be smaller than the minimum size
+    GetSizer()->SetSizeHints(this);
+    Center();
 }
 
 bool CalChartPreferences::TransferDataToWindow() { return true; }

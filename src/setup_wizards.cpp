@@ -53,9 +53,6 @@ ChooseShowModeWizard::ChooseShowModeWizard(wxWizard* parent)
     for (auto mode : kShowModeStrings) {
         modeStrings.Add(mode);
     }
-    for (auto mode : kSpringShowModeStrings) {
-        modeStrings.Add(mode);
-    }
 
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);

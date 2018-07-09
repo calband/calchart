@@ -173,9 +173,9 @@ void CalChartApp::ExitAppAsServer()
     mHelpController.reset();
 }
 
-std::unique_ptr<CalChart::ShowMode> CalChartApp::GetMode(const wxString& which)
+CalChart::ShowMode CalChartApp::GetShowMode(const wxString& which)
 {
-    return GetShowMode(which);
+    return GetConfigShowMode(which);
 }
 
 void CalChartApp::ExitAppAsClient() {}

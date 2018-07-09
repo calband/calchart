@@ -28,6 +28,9 @@
 #include <memory>
 #include <string>
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/array.hpp>
+
 namespace CalChart {
 
 static constexpr auto SPR_YARD_LEFT = 8;
@@ -47,50 +50,12 @@ static constexpr auto kFieldStepEastHashFromWestSideline = 52;
 
 class ShowMode {
 public:
-    typedef enum { SHOW_STANDARD,
-        SHOW_SPRINGSHOW } ShowType;
+    static ShowMode GetDefaultShowMode();
 
-    virtual ~ShowMode();
+    using YardLinesInfo_t = std::array<std::string, kYardTextValues>;
+    static YardLinesInfo_t GetDefaultYardLines();
 
-public:
-    virtual ShowType GetType() const = 0;
-    auto Offset() const { return mOffset() + mBorder1(); }
-    auto FieldOffset() const { return -mOffset(); }
-    auto Size() const { return mSize() + mBorder1() + mBorder2(); }
-    auto FieldSize() const { return mSize(); }
-    auto MinPosition() const { return -(mOffset() + mBorder1()); }
-    auto MaxPosition() const { return mSize() - mOffset() + mBorder2(); }
-    auto Border1() const { return mBorder1(); }
-    auto GetName() const { return mName; };
-    CalChart::Coord ClipPosition(const CalChart::Coord& pos) const;
-
-    virtual unsigned short HashW() const { return -1; }
-    virtual unsigned short HashE() const { return -1; }
-    virtual unsigned char WhichYards() const { return CalChart::SPR_YARD_ABOVE | CalChart::SPR_YARD_BELOW; }
-
-protected:
-    // Users shouldn't create show modes, it should be done through derived
-    // classes
-    ShowMode(const std::string& name, const CalChart::Coord& size,
-        const CalChart::Coord& offset, const CalChart::Coord& border1,
-        const CalChart::Coord& border2);
-
-    ShowMode(const std::string& name, const std::function<CalChart::Coord()>& size,
-        const std::function<CalChart::Coord()>& offset,
-        const std::function<CalChart::Coord()>& border1,
-        const std::function<CalChart::Coord()>& border2);
-
-private:
-    const std::function<CalChart::Coord()> mSize;
-    const std::function<CalChart::Coord()> mOffset;
-    const std::function<CalChart::Coord()> mBorder1;
-    const std::function<CalChart::Coord()> mBorder2;
-    std::string mName;
-};
-
-class ShowModeStandard : public ShowMode {
-public:
-    enum ArrayValues {
+    enum ShowModeArrayValues {
         kwhash,
         kehash,
         kbord1_x,
@@ -104,121 +69,60 @@ public:
         kShowModeValues
     };
     using ShowModeInfo_t = std::array<long, kShowModeValues>;
-    static std::unique_ptr<ShowMode> CreateShowMode(const std::string& which,
-        const ShowModeInfo_t& values);
-    // it is expected that the caller will keep the valueGetter alive
-    static std::unique_ptr<ShowMode>
-    CreateShowMode(const std::string& which,
-        const std::function<ShowModeInfo_t()>& valueGetter);
-    static std::unique_ptr<ShowMode>
-    CreateShowMode(const std::string& name, CalChart::Coord size, CalChart::Coord offset,
+
+    static ShowMode CreateShowMode(ShowModeInfo_t const& values, YardLinesInfo_t const& yardlines);
+    static ShowMode CreateShowMode(CalChart::Coord size, CalChart::Coord offset,
         CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
-        unsigned short ehash);
+        unsigned short ehash, YardLinesInfo_t const& yardlines);
+
+    ShowModeInfo_t GetShowModeInfo() const;
+
+    auto Offset() const { return mOffset + mBorder1; }
+    auto FieldOffset() const { return -mOffset; }
+    auto Size() const { return mSize + mBorder1 + mBorder2; }
+    auto FieldSize() const { return mSize; }
+    auto MinPosition() const { return -(mOffset + mBorder1); }
+    auto MaxPosition() const { return mSize - mOffset + mBorder2; }
+    auto Border1() const { return mBorder1; }
+    CalChart::Coord ClipPosition(const CalChart::Coord& pos) const;
+
+    auto HashW() const { return mHashW; }
+    auto HashE() const { return mHashE; }
+
+    // Yard Lines
+    YardLinesInfo_t const& Get_yard_text() const;
 
 private:
-    ShowModeStandard(const std::string& name, CalChart::Coord size, CalChart::Coord offset,
-        CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
-        unsigned short ehash);
-    ShowModeStandard(const std::string& name,
-        const std::function<CalChart::Coord()>& offset,
-        const std::function<CalChart::Coord()>& border1,
-        const std::function<CalChart::Coord()>& size,
-        const std::function<CalChart::Coord()>& border2,
-        const std::function<unsigned short()>& whash,
-        const std::function<unsigned short()>& ehash);
+    ShowMode(CalChart::Coord size,
+        CalChart::Coord offset,
+        CalChart::Coord border1,
+        CalChart::Coord border2,
+        unsigned short whash,
+        unsigned short ehash,
+        YardLinesInfo_t const& yardlines);
 
-public:
-    virtual ~ShowModeStandard() override;
+    CalChart::Coord mSize;
+    CalChart::Coord mOffset;
+    CalChart::Coord mBorder1;
+    CalChart::Coord mBorder2;
 
-    virtual ShowType GetType() const override;
-    unsigned short HashW() const override { return mHashW(); }
-    unsigned short HashE() const override { return mHashE(); }
+    unsigned short mHashW, mHashE;
 
-private:
-    const std::function<unsigned short()> mHashW, mHashE;
+    YardLinesInfo_t mYardLines;
+
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar& mSize;
+        ar& mOffset;
+        ar& mBorder1;
+        ar& mBorder2;
+        ar& mHashW;
+        ar& mHashE;
+        ar& mYardLines;
+    }
+
 };
 
-class ShowModeSprShow : public ShowMode {
-public:
-    enum ArrayValues {
-        kwhich_spr_yards,
-        kbord1_x,
-        kbord1_y,
-        kbord2_x,
-        kbord2_y,
-        kmode_steps_x,
-        kmode_steps_y,
-        kmode_steps_w,
-        kmode_steps_h,
-        keps_stage_x,
-        keps_stage_y,
-        keps_stage_w,
-        keps_stage_h,
-        keps_field_x,
-        keps_field_y,
-        keps_field_w,
-        keps_field_h,
-        keps_text_left,
-        keps_text_right,
-        keps_text_top,
-        keps_text_bottom,
-        kShowModeValues
-    };
-    using SpringShowModeInfo_t = std::array<long, kShowModeValues>;
-
-    static std::unique_ptr<ShowMode>
-    CreateSpringShowMode(const std::string& which,
-        const SpringShowModeInfo_t& values);
-    // it is expected that the caller will keep the valueGetter alive
-    static std::unique_ptr<ShowMode> CreateSpringShowMode(
-        const std::string& which,
-        const std::function<SpringShowModeInfo_t()>& valueGetter);
-
-private:
-    // Look at calchart.cfg for description of arguments
-    ShowModeSprShow(const std::string& name, CalChart::Coord border1, CalChart::Coord border2,
-        unsigned char which, short stps_x, short stps_y, short stps_w,
-        short stps_h, short stg_x, short stg_y, short stg_w,
-        short stg_h, short fld_x, short fld_y, short fld_w,
-        short fld_h, short txt_l, short txt_r, short txt_tp,
-        short txt_bm);
-    ShowModeSprShow(
-        const std::string& name, const std::function<CalChart::Coord()>& border1,
-        const std::function<CalChart::Coord()>& border2,
-        const std::function<unsigned char()>& which,
-        const std::function<short()>& stps_x,
-        const std::function<short()>& stps_y,
-        const std::function<short()>& stps_w,
-        const std::function<short()>& stps_h, const std::function<short()>& stg_x,
-        const std::function<short()>& stg_y, const std::function<short()>& stg_w,
-        const std::function<short()>& stg_h, const std::function<short()>& fld_x,
-        const std::function<short()>& fld_y, const std::function<short()>& fld_w,
-        const std::function<short()>& fld_h, const std::function<short()>& txt_l,
-        const std::function<short()>& txt_r, const std::function<short()>& txt_tp,
-        const std::function<short()>& txt_bm);
-
-public:
-    virtual ~ShowModeSprShow();
-
-    virtual ShowType GetType() const override;
-    unsigned char WhichYards() const override { return which_yards(); }
-    short StageX() const { return stage_x(); }
-    short StageY() const { return stage_y(); }
-    short StageW() const { return stage_w(); }
-    short StageH() const { return stage_h(); }
-    short FieldX() const { return field_x(); }
-    short FieldY() const { return field_y(); }
-    short FieldW() const { return field_w(); }
-    short FieldH() const { return field_h(); }
-    short TextLeft() const { return text_left(); }
-    short TextRight() const { return text_right(); }
-    short TextTop() const { return text_top(); }
-    short TextBottom() const { return text_bottom(); }
-
-private:
-    const std::function<unsigned char()> which_yards;
-    const std::function<short()> stage_x, stage_y, stage_w, stage_h;
-    const std::function<short()> field_x, field_y, field_w, field_h;
-    const std::function<short()> text_left, text_right, text_top, text_bottom;
-};
 }
