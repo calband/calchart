@@ -64,6 +64,10 @@ public:
     auto GetName() const { return mName; };
     CalChart::Coord ClipPosition(const CalChart::Coord& pos) const;
 
+    virtual unsigned short HashW() const { return -1; }
+    virtual unsigned short HashE() const { return -1; }
+    virtual unsigned char WhichYards() const { return CalChart::SPR_YARD_ABOVE | CalChart::SPR_YARD_BELOW; }
+
 protected:
     // Users shouldn't create show modes, it should be done through derived
     // classes
@@ -124,11 +128,11 @@ private:
         const std::function<unsigned short()>& ehash);
 
 public:
-    virtual ~ShowModeStandard();
+    virtual ~ShowModeStandard() override;
 
-    virtual ShowType GetType() const;
-    unsigned short HashW() const { return mHashW(); }
-    unsigned short HashE() const { return mHashE(); }
+    virtual ShowType GetType() const override;
+    unsigned short HashW() const override { return mHashW(); }
+    unsigned short HashE() const override { return mHashE(); }
 
 private:
     const std::function<unsigned short()> mHashW, mHashE;
@@ -196,8 +200,8 @@ private:
 public:
     virtual ~ShowModeSprShow();
 
-    virtual ShowType GetType() const;
-    unsigned char WhichYards() const { return which_yards(); }
+    virtual ShowType GetType() const override;
+    unsigned char WhichYards() const override { return which_yards(); }
     short StageX() const { return stage_x(); }
     short StageY() const { return stage_y(); }
     short StageW() const { return stage_w(); }

@@ -157,10 +157,10 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 
     /* first, calculate dimensions */
     if (!overview) {
+        std::tie(width, height, real_width, real_height, field_y) = CalcValues(
+            PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
         switch (mode.GetType()) {
         case ShowMode::SHOW_STANDARD:
-            std::tie(width, height, real_width, real_height, field_y) = CalcValues(
-                PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
             step_width = (short)(width / (height / (fullheight + 8.0)));
             if (step_width > CoordUnits2Int(fieldsize.x)) {
                 step_width = CoordUnits2Int(fieldsize.x);
@@ -190,8 +190,6 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
             // this may throw if not doing spring show..
             const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mode);
 
-            std::tie(width, height, real_width, real_height, field_y) = CalcValues(
-                PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
             field_h = height / (1 + 16 * springShow.FieldW() / ((float)springShow.StageW() * 80));
             field_w = field_h / springShow.StageH() * springShow.StageW();
             if (field_w > width) {
@@ -373,33 +371,23 @@ void PrintShowToPS::PrintTrailer(std::ostream& buffer, short num_pages) const
 void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
 {
     if (!mOverview) {
+        buffer << "%%BeginProlog\n";
+        buffer << "/fieldw " << field_w << " def\n";
+        buffer << "/fieldh " << field_h << " def\n";
+        buffer << "/fieldy " << field_y << " def\n";
         switch (mMode.GetType()) {
         case ShowMode::SHOW_STANDARD: {
             // this may throw if not doing spring show..
-            const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
-            buffer << "%%BeginProlog\n";
-            buffer << "/fieldw " << field_w << " def\n";
-            buffer << "/fieldh " << field_h << " def\n";
-            buffer << "/fieldy " << field_y << " def\n";
             buffer << "/stepw " << step_width << " def\n";
+            const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
             buffer << "/whash " << standardShow.HashW() << " def\n";
             buffer << "/ehash " << standardShow.HashE() << " def\n";
             buffer << "/headsize " << mHeaderSize << " def\n";
             buffer << "/yardsize " << mYardsSize << " def\n";
             buffer << prolog0_ps;
-            buffer << "%%EndProlog\n";
-            buffer << "%%BeginSetup\n";
-            PrintFontHeader(buffer, fonts);
-            buffer << setup0_ps;
-            buffer << "%%EndSetup\n";
         } break;
         case ShowMode::SHOW_SPRINGSHOW: {
             // this may throw if not doing spring show..
-            const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mMode);
-            buffer << "%%BeginProlog\n";
-            buffer << "/fieldw " << field_w << " def\n";
-            buffer << "/fieldh " << field_h << " def\n";
-            buffer << "/fieldy " << field_y << " def\n";
             buffer << "/sfieldw " << stage_field_w << " def\n";
             buffer << "/sfieldh " << stage_field_h << " def\n";
             buffer << "/sfieldx " << stage_field_x << " def\n";
@@ -410,17 +398,18 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
                 buffer << "/stepsize " << step_size << " def\n";
                 buffer << "/sprstepsize " << spr_step_size << " def\n";
             }
+            const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mMode);
             buffer << "/nfieldw " << springShow.StepsW() << " def\n";
             buffer << "/nfieldh " << springShow.StepsH() << " def\n";
             buffer << "/headsize " << mHeaderSize << " def\n";
             buffer << prolog1_ps;
-            buffer << "%%EndProlog\n";
-            buffer << "%%BeginSetup\n";
-            PrintFontHeader(buffer, fonts);
-            buffer << setup1_ps;
-            buffer << "%%EndSetup\n";
         } break;
         }
+        buffer << "%%EndProlog\n";
+        buffer << "%%BeginSetup\n";
+        PrintFontHeader(buffer, fonts);
+        buffer << setup0_ps;
+        buffer << "%%EndSetup\n";
     } else {
         // this may throw if not doing spring show..
         const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);

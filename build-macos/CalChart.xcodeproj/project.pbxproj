@@ -137,6 +137,7 @@
 		E878CCA017ACB426009B1F1C /* calchartdoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E878CC9E17ACB425009B1F1C /* calchartdoc.cpp */; };
 		E87C7C8F2027B5F10076092A /* field_mini_browser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87C7C8E2027B59A0076092A /* field_mini_browser.cpp */; };
 		E88D29261974E6F900323012 /* single_instance_ipc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88D29241974E6F900323012 /* single_instance_ipc.cpp */; };
+		E8A054EF20F2A97400BCF332 /* print_to_ps_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A054EE20F2A97400BCF332 /* print_to_ps_test.mm */; };
 		E8A9B7471FDC89020080015A /* cc_sheet_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B7461FDC89010080015A /* cc_sheet_test.mm */; };
 		E8A9B7481FDD88A40080015A /* print_ps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89A41F31A23B73F00A2FB3E /* print_ps.cpp */; };
 		E8A9B74C1FDD95D70080015A /* cc_point_test.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8A9B7491FDD95D70080015A /* cc_point_test.mm */; };
@@ -763,6 +764,8 @@
 		E89A41F41A23B73F00A2FB3E /* print_ps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = print_ps.h; sourceTree = "<group>"; };
 		E89A41F71A23B76B00A2FB3E /* modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modes.cpp; sourceTree = "<group>"; };
 		E89A41F81A23B76B00A2FB3E /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modes.h; sourceTree = "<group>"; };
+		E8A054EE20F2A97400BCF332 /* print_to_ps_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = print_to_ps_test.mm; sourceTree = "<group>"; };
+		E8A054F020F2BF0100BCF332 /* zllrbach.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zllrbach.h; path = ../resources/zllrbach.h; sourceTree = "<group>"; };
 		E8A9B7461FDC89010080015A /* cc_sheet_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_sheet_test.mm; sourceTree = "<group>"; };
 		E8A9B7491FDD95D70080015A /* cc_point_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_point_test.mm; sourceTree = "<group>"; };
 		E8A9B74A1FDD95D70080015A /* cc_coord_test.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cc_coord_test.mm; sourceTree = "<group>"; };
@@ -981,6 +984,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E8A054F020F2BF0100BCF332 /* zllrbach.h */,
 				C7E8DED2117B6A4C00C9FAC9 /* calchart.icns */,
 				8D1107310486CEB800E47090 /* CalChart-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
@@ -1362,6 +1366,7 @@
 				E8A9B7461FDC89010080015A /* cc_sheet_test.mm */,
 				E8C5F7CC1FDC6F5600C84D3E /* cc_show_test.mm */,
 				E8C5F7C51FDC6EE100C84D3E /* Info.plist */,
+				E8A054EE20F2A97400BCF332 /* print_to_ps_test.mm */,
 			);
 			path = calchart_core_tests;
 			sourceTree = "<group>";
@@ -1637,6 +1642,7 @@
 				E8A9B74C1FDD95D70080015A /* cc_point_test.mm in Sources */,
 				E8A9B74E1FDD95D70080015A /* cc_continuity_test.mm in Sources */,
 				E8A9B74D1FDD95D70080015A /* cc_coord_test.mm in Sources */,
+				E8A054EF20F2A97400BCF332 /* print_to_ps_test.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

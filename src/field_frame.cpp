@@ -390,8 +390,6 @@ void FieldFrame::OnCmdPrint(wxCommandEvent& event)
         if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
             wxMessageBox(wxT("A problem was encountered when trying to print"),
                 wxT("Printing"), wxOK);
-        } else {
-            wxMessageBox(wxT("Printing cancelled"), wxT("Printing"), wxOK);
         }
     } else {
         *gPrintDialogData = printer.GetPrintDialogData();
