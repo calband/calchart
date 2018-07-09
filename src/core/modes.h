@@ -210,10 +210,6 @@ public:
     short FieldY() const { return field_y(); }
     short FieldW() const { return field_w(); }
     short FieldH() const { return field_h(); }
-    short StepsX() const { return steps_x(); }
-    short StepsY() const { return steps_y(); }
-    short StepsW() const { return steps_w(); }
-    short StepsH() const { return steps_h(); }
     short TextLeft() const { return text_left(); }
     short TextRight() const { return text_right(); }
     short TextTop() const { return text_top(); }
@@ -223,7 +219,6 @@ private:
     const std::function<unsigned char()> which_yards;
     const std::function<short()> stage_x, stage_y, stage_w, stage_h;
     const std::function<short()> field_x, field_y, field_w, field_h;
-    const std::function<short()> steps_x, steps_y, steps_w, steps_h;
     const std::function<short()> text_left, text_right, text_top, text_bottom;
 };
 }
