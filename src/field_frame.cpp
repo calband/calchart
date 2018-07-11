@@ -552,7 +552,7 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
             wxCustomDataObject clipboardObject(kSheetDataClipboardFormat);
             wxTheClipboard->GetData(clipboardObject);
 
-            uint16_t numPoints;
+            auto numPoints = GetShow()->GetNumPoints();
             memcpy(&numPoints, clipboardObject.GetData(), sizeof(numPoints));
             if (numPoints != GetShow()->GetNumPoints()) {
                 wxMessageBox(wxString::Format(
