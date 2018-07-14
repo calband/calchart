@@ -157,10 +157,10 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
 
     /* first, calculate dimensions */
     if (!overview) {
+        std::tie(width, height, real_width, real_height, field_y) = CalcValues(
+            PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
         switch (mode.GetType()) {
         case ShowMode::SHOW_STANDARD:
-            std::tie(width, height, real_width, real_height, field_y) = CalcValues(
-                PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
             step_width = (short)(width / (height / (fullheight + 8.0)));
             if (step_width > CoordUnits2Int(fieldsize.x)) {
                 step_width = CoordUnits2Int(fieldsize.x);
@@ -190,8 +190,6 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
             // this may throw if not doing spring show..
             const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mode);
 
-            std::tie(width, height, real_width, real_height, field_y) = CalcValues(
-                PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
             field_h = height / (1 + 16 * springShow.FieldW() / ((float)springShow.StageW() * 80));
             field_w = field_h / springShow.StageH() * springShow.StageW();
             if (field_w > width) {
@@ -201,7 +199,7 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
             }
             stage_field_w = field_w * springShow.FieldW() / springShow.StageW();
             stage_field_h = field_h * springShow.FieldH() / springShow.StageH();
-            step_size = stage_field_w / springShow.StepsW();
+            step_size = stage_field_w / CoordUnits2Int(springShow.FieldSize().x);
             spr_step_size = (short)(field_w / 80.0);
             field_x = (width - field_w) / 2;
             field_y += height - (field_h + spr_step_size * 16);
@@ -373,33 +371,23 @@ void PrintShowToPS::PrintTrailer(std::ostream& buffer, short num_pages) const
 void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
 {
     if (!mOverview) {
+        buffer << "%%BeginProlog\n";
+        buffer << "/fieldw " << field_w << " def\n";
+        buffer << "/fieldh " << field_h << " def\n";
+        buffer << "/fieldy " << field_y << " def\n";
         switch (mMode.GetType()) {
         case ShowMode::SHOW_STANDARD: {
             // this may throw if not doing spring show..
-            const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
-            buffer << "%%BeginProlog\n";
-            buffer << "/fieldw " << field_w << " def\n";
-            buffer << "/fieldh " << field_h << " def\n";
-            buffer << "/fieldy " << field_y << " def\n";
             buffer << "/stepw " << step_width << " def\n";
+            const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
             buffer << "/whash " << standardShow.HashW() << " def\n";
             buffer << "/ehash " << standardShow.HashE() << " def\n";
             buffer << "/headsize " << mHeaderSize << " def\n";
             buffer << "/yardsize " << mYardsSize << " def\n";
             buffer << prolog0_ps;
-            buffer << "%%EndProlog\n";
-            buffer << "%%BeginSetup\n";
-            PrintFontHeader(buffer, fonts);
-            buffer << setup0_ps;
-            buffer << "%%EndSetup\n";
         } break;
         case ShowMode::SHOW_SPRINGSHOW: {
             // this may throw if not doing spring show..
-            const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mMode);
-            buffer << "%%BeginProlog\n";
-            buffer << "/fieldw " << field_w << " def\n";
-            buffer << "/fieldh " << field_h << " def\n";
-            buffer << "/fieldy " << field_y << " def\n";
             buffer << "/sfieldw " << stage_field_w << " def\n";
             buffer << "/sfieldh " << stage_field_h << " def\n";
             buffer << "/sfieldx " << stage_field_x << " def\n";
@@ -410,17 +398,18 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
                 buffer << "/stepsize " << step_size << " def\n";
                 buffer << "/sprstepsize " << spr_step_size << " def\n";
             }
-            buffer << "/nfieldw " << springShow.StepsW() << " def\n";
-            buffer << "/nfieldh " << springShow.StepsH() << " def\n";
+            const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mMode);
+            buffer << "/nfieldw " << CoordUnits2Int(springShow.FieldSize().x) << " def\n";
+            buffer << "/nfieldh " << CoordUnits2Int(springShow.FieldSize().y) << " def\n";
             buffer << "/headsize " << mHeaderSize << " def\n";
             buffer << prolog1_ps;
-            buffer << "%%EndProlog\n";
-            buffer << "%%BeginSetup\n";
-            PrintFontHeader(buffer, fonts);
-            buffer << setup1_ps;
-            buffer << "%%EndSetup\n";
         } break;
         }
+        buffer << "%%EndProlog\n";
+        buffer << "%%BeginSetup\n";
+        PrintFontHeader(buffer, fonts);
+        buffer << setup0_ps;
+        buffer << "%%EndSetup\n";
     } else {
         // this may throw if not doing spring show..
         const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
@@ -769,7 +758,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
         buffer << "/mainfont findfont " << (step_size * mYardsSize)
                << " scalefont setfont\n";
         if (modesprshow.WhichYards() & (SPR_YARD_ABOVE | SPR_YARD_BELOW))
-            for (short j = 0; j <= modesprshow.StepsW(); j += 8) {
+            for (short j = 0; j <= CoordUnits2Int(modesprshow.FieldSize().x); j += 8) {
                 buffer << "/lmargin " << (stage_field_x + step_size * j)
                        << " def /rmargin " << (stage_field_x + step_size * j)
                        << " def\n";
@@ -778,7 +767,7 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
                            << (field_h * (modesprshow.TextTop() - modesprshow.StageX()) / modesprshow.StageH())
                            << " def\n";
                     std::string yardstr(mGet_yard_text(
-                        (modesprshow.StepsX() + (kYardTextValues - 1) * 4 + j) / 8));
+                        (CoordUnits2Int(modesprshow.FieldOffset().x) + (kYardTextValues - 1) * 4 + j) / 8));
                     buffer << "(" << yardstr << ") centerText\n";
                 }
                 if (modesprshow.WhichYards() & SPR_YARD_BELOW) {
@@ -786,14 +775,14 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
                            << (field_h * (modesprshow.TextBottom() - modesprshow.StageX()) / modesprshow.StageH() - (step_size * mYardsSize))
                            << " def\n";
                     std::string yardstr(mGet_yard_text(
-                        (modesprshow.StepsX() + (kYardTextValues - 1) * 4 + j) / 8));
+                        (CoordUnits2Int(modesprshow.FieldOffset().x) + (kYardTextValues - 1) * 4 + j) / 8));
                     buffer << "(" << yardstr << ") centerText\n";
                 }
             }
         if (modesprshow.WhichYards() & (SPR_YARD_LEFT | SPR_YARD_RIGHT))
-            for (short j = 0; j <= modesprshow.StepsH(); j += 8) {
+            for (short j = 0; j <= CoordUnits2Int(modesprshow.FieldSize().y); j += 8) {
                 buffer << "/y "
-                       << (stage_field_y + stage_field_h * (modesprshow.StepsH() - j - mYardsSize / 2) / modesprshow.StepsH())
+                       << (stage_field_y + stage_field_h * (CoordUnits2Int(modesprshow.FieldSize().y) - j - mYardsSize / 2) / CoordUnits2Int(modesprshow.FieldSize().y))
                        << " def\n";
                 buffer << "/x "
                        << (field_w * (modesprshow.TextRight() - modesprshow.StageX()) / modesprshow.StageW())
@@ -821,8 +810,8 @@ void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
     buffer << "/numberfont findfont " << (dot_w * 2 * mNumRatio)
            << " scalefont setfont\n";
     for (auto i = 0; i < mShow.GetNumPoints(); i++) {
-        float dot_x = stage_field_x + (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - modesprshow.StepsX()) / modesprshow.StepsW() * stage_field_w;
-        float dot_y = stage_field_y + stage_field_h * (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - modesprshow.StepsY()) / modesprshow.StepsH());
+        float dot_x = stage_field_x + (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - CoordUnits2Int(modesprshow.FieldOffset().x)) / CoordUnits2Int(modesprshow.FieldSize().x) * stage_field_w;
+        float dot_y = stage_field_y + stage_field_h * (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - CoordUnits2Int(modesprshow.FieldOffset().y)) / CoordUnits2Int(modesprshow.FieldSize().y));
         buffer << dot_x << " " << dot_y << " "
                << dot_routines[sheet.GetPoint(i).GetSymbol()] << "\n";
         buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y

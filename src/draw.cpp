@@ -748,224 +748,192 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
 }
 
 static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfiguration& config,
-    const CalChart::ShowModeStandard& mode,
+    int yard_text_start,
+    int fieldsize_x, int fieldsize_y, int border1_x, int border1_y,
+    int whichDraw,
     HowToDraw howToDraw)
 {
+    // Draw labels
+    wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    dc.SetFont(*yardLabelFont);
+    if (whichDraw & CalChart::SPR_YARD_ABOVE || whichDraw & CalChart::SPR_YARD_BELOW)
+    {
+        for (int i = 0; i < CoordUnits2Int(fieldsize_x) / 8 + 1; i++) {
+            wxCoord textw, texth, textd;
+            auto text = config.Get_yard_text(i + (yard_text_start + (CalChart::kYardTextValues - 1) * 4) / 8);
+            dc.GetTextExtent(text, &textw, &texth, &textd);
+            const auto top_row_x = Int2CoordUnits(i * 8) - textw / 2 + border1_x;
+            const auto top_row_y = std::max(border1_y - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0), dc.DeviceToLogicalY(0));
+            const auto bottom_row_x = top_row_x;
+            const auto bottom_row_y = border1_y + fieldsize_y - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0);
+            if (whichDraw & CalChart::SPR_YARD_ABOVE) {
+                if (howToDraw != ShowMode_kPrinting) {
+                    // set color so when we make background box it blends
+                    dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+                    dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+                    dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
+                }
+                dc.DrawText(text, top_row_x, top_row_y);
+            }
+            if (whichDraw & CalChart::SPR_YARD_BELOW) {
+                dc.DrawText(text, bottom_row_x, bottom_row_y);
+            }
+        }
+    }
+    if (whichDraw & CalChart::SPR_YARD_LEFT || whichDraw & CalChart::SPR_YARD_RIGHT)
+    {
+        for (int i = 0; i < CoordUnits2Int(fieldsize_y) / 8 + 1; i++) {
+            wxCoord textw, texth, textd;
+            auto text = config.Get_spr_line_text(i);
+            dc.GetTextExtent(text, &textw, &texth, &textd);
+            if (whichDraw & CalChart::SPR_YARD_LEFT)
+                dc.DrawText(text, border1_x - textw, border1_y - texth / 2 + Int2CoordUnits(i * 8));
+            if (whichDraw & CalChart::SPR_YARD_RIGHT)
+                dc.DrawText(text, fieldsize_x + border1_x, border1_y - texth / 2 + Int2CoordUnits(i * 8));
+        }
+    }
+}
+
+
+static void ShowMode_DrawHelper_Outline(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y)
+{
+    wxPoint points[5] = {
+        { 0, 0 },
+        { fieldsize_x, 0 },
+        { fieldsize_x, fieldsize_y },
+        { 0, fieldsize_y },
+        { 0, 0 },
+    };
+    dc.DrawLines(5, points, border1_x, border1_y);
+}
+
+static void ShowMode_DrawHelper_VerticalSolid(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y)
+{
+    for (auto j = 0; j <= fieldsize_x; j += Int2CoordUnits(8)) {
+        // draw solid yardlines
+        wxPoint points[2] = {
+            { j, 0 },
+            { j, fieldsize_y },
+        };
+        dc.DrawLines(2, points, border1_x, border1_y);
+    }
+}
+
+static void ShowMode_DrawHelper_VerticalMidDotted(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y)
+{
+    for (auto j = Int2CoordUnits(4); j < fieldsize_x; j += Int2CoordUnits(8)) {
+        // draw mid-dotted lines
+        for (auto k = 0; k < fieldsize_y; k += Int2CoordUnits(2)) {
+            wxPoint points[2] = {
+                { j, k },
+                { j, k + Int2CoordUnits(1) },
+            };
+            dc.DrawLines(2, points, border1_x, border1_y);
+        }
+    }
+}
+
+static void ShowMode_DrawHelper_HorizontalSolid(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y)
+{
+    for (auto j = 0; j <= fieldsize_y; j += Int2CoordUnits(8)) {
+        // draw solid yardlines
+        wxPoint points[2] = {
+            { 0, j },
+            { fieldsize_x, j },
+        };
+        dc.DrawLines(2, points, border1_x, border1_y);
+    }
+}
+
+static void ShowMode_DrawHelper_HorizontalMidDotted(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y, int incr, int mode_HashW, int mode_HashE)
+{
+    for (auto j = Int2CoordUnits(4); j < fieldsize_y; j += Int2CoordUnits(incr)) {
+        if ((j == Int2CoordUnits(mode_HashW)) || j == Int2CoordUnits(mode_HashE))
+            continue;
+        for (auto k = 0; k < fieldsize_x; k += Int2CoordUnits(2)) {
+            wxPoint points[2] = {
+                { k, j },
+                { k + Int2CoordUnits(1), j },
+            };
+            dc.DrawLines(2, points, border1_x, border1_y);
+        }
+    }
+}
+
+static void ShowMode_DrawHelper_Hashes(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y, int mode_HashW, int mode_HashE)
+{
+    for (auto j = Int2CoordUnits(0); j < fieldsize_x; j += Int2CoordUnits(8)) {
+        wxPoint points[2] = {
+            { j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashW) },
+            { j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashW) },
+        };
+        dc.DrawLines(2, points, border1_x, border1_y);
+        points[0] = wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashW));
+        points[1] = wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashW));
+        dc.DrawLines(2, points, border1_x, border1_y);
+
+        points[0] = wxPoint(j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashE));
+        points[1] = wxPoint(j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashE));
+        dc.DrawLines(2, points, border1_x, border1_y);
+        points[0] = wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashE));
+        points[1] = wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashE));
+        dc.DrawLines(2, points, border1_x, border1_y);
+    }
+}
+
+static void ShowMode_DrawHelper_HashTicks(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y, int mode_HashW, int mode_HashE)
+{
+    for (auto j = Int2CoordUnits(0); j < fieldsize_x; j += Int2CoordUnits(8)) {
+        for (size_t midhash = 1; midhash < 5; ++midhash) {
+            wxPoint points[2] = {
+                { j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashW) },
+                { j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashW - (0.2 * 8)) },
+            };
+            dc.DrawLines(2, points, border1_x, border1_y);
+
+            points[0] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashE));
+            points[1] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashE + (0.2 * 8)));
+            dc.DrawLines(2, points, border1_x, border1_y);
+        }
+    }
+}
+
+static void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
+    const CalChart::ShowMode& mode,
+    HowToDraw howToDraw)
+{
+    const auto fieldsize = mode.FieldSize();
+    const auto border1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
+
+    ShowMode_DrawHelper_Outline(dc, fieldsize.x, fieldsize.y, border1.x, border1.y);
+
+    ShowMode_DrawHelper_VerticalSolid(dc, fieldsize.x, fieldsize.y, border1.x, border1.y);
+
+    if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
+        ShowMode_DrawHelper_VerticalMidDotted(dc, fieldsize.x, fieldsize.y, border1.x, border1.y);
+    }
+
+    if (mode.GetType() == CalChart::ShowMode::SHOW_SPRINGSHOW) {
+        ShowMode_DrawHelper_HorizontalSolid(dc, fieldsize.x, fieldsize.y, border1.x, border1.y);
+    }
+
+    auto spacing = mode.GetType() == CalChart::ShowMode::SHOW_SPRINGSHOW ? 8 : 4;
+    if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
+        ShowMode_DrawHelper_HorizontalMidDotted(dc, fieldsize.x, fieldsize.y, border1.x, border1.y, spacing, mode.HashW(), mode.HashE());
+    }
+
+    if (mode.HashW() != static_cast<unsigned short>(-1)) {
+        ShowMode_DrawHelper_Hashes(dc, fieldsize.x, fieldsize.y, border1.x, border1.y, mode.HashW(), mode.HashE());
+        if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
+            ShowMode_DrawHelper_HashTicks(dc, fieldsize.x, fieldsize.y, border1.x, border1.y, mode.HashW(), mode.HashE());
+        }
+    }
+
+    // Draw labels
     if (howToDraw == ShowMode_kAnimation) {
         return;
     }
-    const auto fieldsize = mode.FieldSize();
-    const auto border1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
-    const auto offsetx = 0; //-fieldsize.x/2;
-    const auto offsety = 0; //-fieldsize.y/2;
-    const auto borderoffsetx = 0; //-border1.x;
-    const auto borderoffsety = 0; //-border1.y;
-
-    if (howToDraw != ShowMode_kPrinting) {
-        // set color so when we make background box it blends
-        dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
-    }
-    // Draw labels
-    wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    dc.SetFont(*yardLabelFont);
-    for (int i = 0; i < CoordUnits2Int(fieldsize.x) / 8 + 1; i++) {
-        auto fieldedge = mode.Offset() - mode.Border1();
-        wxCoord textw, texth, textd;
-        auto text = config.Get_yard_text(
-            i + (-CoordUnits2Int(fieldedge.x) + (CalChart::kYardTextValues - 1) * 4) / 8);
-        dc.GetTextExtent(text, &textw, &texth, &textd);
-        const auto top_row_x = offsetx + Int2CoordUnits(i * 8) - textw / 2 + border1.x + borderoffsetx;
-        const auto top_row_y = std::max(border1.y + borderoffsety - offsety - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0), dc.DeviceToLogicalY(0));
-        const auto bottom_row_x = top_row_x;
-        const auto bottom_row_y = border1.y + borderoffsety + fieldsize.y - offsety - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0);
-        if (howToDraw != ShowMode_kPrinting) {
-            dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
-        }
-        dc.DrawText(text, top_row_x, top_row_y);
-        dc.DrawText(text, bottom_row_x, bottom_row_y);
-    }
-}
-
-void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
-    const CalChart::ShowModeStandard& mode,
-    HowToDraw howToDraw)
-{
-    wxPoint points[5];
-    const auto fieldsize = mode.FieldSize();
-    const auto border1 = (howToDraw == ShowMode_kOmniView) ? CalChart::Coord(0, 0) : mode.Border1();
-    const auto offsetx = 0; //-fieldsize.x/2;
-    const auto offsety = 0; //-fieldsize.y/2;
-    const auto borderoffsetx = 0; //-border1.x;
-    const auto borderoffsety = 0; //-border1.y;
-
-    points[0] = wxPoint(0 + offsetx, 0 + offsety);
-    points[1] = wxPoint(fieldsize.x + offsetx, 0 + offsety);
-    points[2] = wxPoint(fieldsize.x + offsetx, fieldsize.y + offsety);
-    points[3] = wxPoint(0 + offsetx, fieldsize.y + offsety);
-    points[4] = points[0];
-
-    // Draw outline
-    dc.DrawLines(5, points, border1.x + borderoffsetx, border1.y + borderoffsety);
-
-    // Draw vertical lines
-    for (auto j = Int2CoordUnits(8) + offsetx; j < fieldsize.x + offsetx;
-         j += Int2CoordUnits(8)) {
-        // draw solid yardlines
-        points[0] = wxPoint(j, 0 + offsety);
-        points[1] = wxPoint(j, fieldsize.y + offsety);
-        dc.DrawLines(2, points, border1.x + borderoffsetx,
-            border1.y + borderoffsety);
-    }
-
-    for (auto j = Int2CoordUnits(4) + offsetx;
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && j < fieldsize.x + offsetx;
-         j += Int2CoordUnits(8)) {
-        // draw mid-dotted lines
-        for (auto k = 0 + offsety; k < fieldsize.y + offsety; k += Int2CoordUnits(2)) {
-            points[0] = wxPoint(j, k);
-            points[1] = wxPoint(j, k + Int2CoordUnits(1));
-            dc.DrawLines(2, points, border1.x + borderoffsetx,
-                border1.y + borderoffsety);
-        }
-    }
-
-    // Draw horizontal mid-dotted lines
-    for (auto j = Int2CoordUnits(4) + offsety;
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && j < fieldsize.y + offsety;
-         j += Int2CoordUnits(4)) {
-        if ((j == Int2CoordUnits(mode.HashW())) || j == Int2CoordUnits(mode.HashE()))
-            continue;
-        for (auto k = 0 + offsetx; k < fieldsize.x + offsetx; k += Int2CoordUnits(2)) {
-            points[0] = wxPoint(k, j);
-            points[1] = wxPoint(k + Int2CoordUnits(1), j);
-            dc.DrawLines(2, points, border1.x + borderoffsetx,
-                border1.y + borderoffsety);
-        }
-    }
-
-    // Draw hashes
-    for (auto j = Int2CoordUnits(0) + offsetx; j < fieldsize.x + offsetx;
-         j += Int2CoordUnits(8)) {
-        points[0] = wxPoint(j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode.HashW()));
-        points[1] = wxPoint(j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode.HashW()));
-        dc.DrawLines(2, points, border1.x + borderoffsetx,
-            border1.y + borderoffsety);
-        points[0] = wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode.HashW()));
-        points[1] = wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode.HashW()));
-        dc.DrawLines(2, points, border1.x + borderoffsetx,
-            border1.y + borderoffsety);
-
-        points[0] = wxPoint(j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode.HashE()));
-        points[1] = wxPoint(j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode.HashE()));
-        dc.DrawLines(2, points, border1.x + borderoffsetx,
-            border1.y + borderoffsety);
-        points[0] = wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode.HashE()));
-        points[1] = wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode.HashE()));
-        dc.DrawLines(2, points, border1.x + borderoffsetx,
-            border1.y + borderoffsety);
-
-        for (size_t midhash = 1; (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && midhash < 5;
-             ++midhash) {
-            points[0] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode.HashW()));
-            points[1] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8),
-                Float2CoordUnits(mode.HashW() - (0.2 * 8)));
-            dc.DrawLines(2, points, border1.x + borderoffsetx,
-                border1.y + borderoffsety);
-
-            points[0] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode.HashE()));
-            points[1] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8),
-                Float2CoordUnits(mode.HashE() + (0.2 * 8)));
-            dc.DrawLines(2, points, border1.x + borderoffsetx,
-                border1.y + borderoffsety);
-        }
-    }
-
-    // Draw labels
-    ShowModeStandard_DrawHelper_Labels(dc, config, mode, howToDraw);
-}
-
-void ShowModeSprShow_DrawHelper(wxDC& dc, const CalChartConfiguration& config,
-    const CalChart::ShowModeSprShow& mode,
-    HowToDraw howToDraw)
-{
-    wxPoint points[2];
-    auto fieldsize = mode.FieldSize();
-
-    // Draw vertical lines
-    for (auto j = 0; j <= fieldsize.x; j += Int2CoordUnits(8)) {
-        // draw solid yardlines
-        points[0] = wxPoint(j, 0);
-        points[1] = wxPoint(j, fieldsize.y);
-        dc.DrawLines(2, points, mode.Border1().x, mode.Border1().y);
-    }
-
-    for (auto j = Int2CoordUnits(4);
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && j < fieldsize.x;
-         j += Int2CoordUnits(8)) {
-        // draw mid-dotted lines
-        for (auto k = 0; k < fieldsize.y; k += Int2CoordUnits(2)) {
-            points[0] = wxPoint(j, k);
-            points[1] = wxPoint(j, k + Int2CoordUnits(1));
-            dc.DrawLines(2, points, mode.Border1().x, mode.Border1().y);
-        }
-    }
-
-    // Draw horizontal lines
-    for (auto j = 0; j <= fieldsize.y; j += Int2CoordUnits(8)) {
-        // draw solid yardlines
-        points[0] = wxPoint(0, j);
-        points[1] = wxPoint(fieldsize.x, j);
-        dc.DrawLines(2, points, mode.Border1().x, mode.Border1().y);
-    }
-
-    // Draw horizontal mid-dotted lines
-    for (auto j = Int2CoordUnits(4);
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && j <= fieldsize.y;
-         j += Int2CoordUnits(8)) {
-        for (auto k = 0; k < fieldsize.x; k += Int2CoordUnits(2)) {
-            points[0] = wxPoint(k, j);
-            points[1] = wxPoint(k + Int2CoordUnits(1), j);
-            dc.DrawLines(2, points, mode.Border1().x, mode.Border1().y);
-        }
-    }
-
-    // Draw labels
-    wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont(
-        (int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    dc.SetFont(*yardLabelFont);
-    for (int i = 0;
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && i < CoordUnits2Int(fieldsize.x) / 8 + 1;
-         i++) {
-        wxCoord textw, texth, textd;
-        dc.GetTextExtent(config.Get_yard_text(
-                             i + (mode.StepsX() + (CalChart::kYardTextValues - 1) * 4) / 8),
-            &textw, &texth, &textd);
-        if (mode.WhichYards() & CalChart::SPR_YARD_ABOVE)
-            dc.DrawText(config.Get_yard_text(
-                            i + (mode.StepsX() + (CalChart::kYardTextValues - 1) * 4) / 8),
-                Int2CoordUnits(i * 8) - textw / 2 + mode.Border1().x,
-                mode.Border1().y - texth);
-        if (mode.WhichYards() & CalChart::SPR_YARD_BELOW)
-            dc.DrawText(config.Get_yard_text(
-                            i + (mode.StepsX() + (CalChart::kYardTextValues - 1) * 4) / 8),
-                Int2CoordUnits(i * 8) - textw / 2 + mode.Border1().x,
-                mode.FieldSize().y + mode.Border1().y);
-    }
-    for (int i = 0;
-         (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) && i <= CoordUnits2Int(fieldsize.y);
-         i += 8) {
-        wxCoord textw, texth, textd;
-        dc.GetTextExtent(config.Get_spr_line_text(i / 8), &textw, &texth, &textd);
-        if (mode.WhichYards() & CalChart::SPR_YARD_LEFT)
-            dc.DrawText(config.Get_spr_line_text(i / 8), mode.Border1().x - textw,
-                mode.Border1().y - texth / 2 + Int2CoordUnits(i));
-        if (mode.WhichYards() & CalChart::SPR_YARD_RIGHT)
-            dc.DrawText(config.Get_spr_line_text(i / 8),
-                fieldsize.x + mode.Border1().x,
-                mode.Border1().y - texth / 2 + Int2CoordUnits(i));
-    }
+    ShowModeStandard_DrawHelper_Labels(dc, config, -CoordUnits2Int((mode.Offset() - mode.Border1()).x), fieldsize.x, fieldsize.y, border1.x, border1.y, mode.WhichYards(), howToDraw);
 }
 
 void DrawMode(wxDC& dc, const CalChartConfiguration& config,
@@ -984,14 +952,7 @@ void DrawMode(wxDC& dc, const CalChartConfiguration& config,
         dc.SetTextForeground(*wxBLACK);
         break;
     }
-    try {
-        auto real_mode = dynamic_cast<const CalChart::ShowModeStandard&>(mode);
-        ShowModeStandard_DrawHelper(dc, config, real_mode, howToDraw);
-    } catch (std::bad_cast&) {
-        // now try as spring show
-        auto real_mode = dynamic_cast<const CalChart::ShowModeSprShow&>(mode);
-        ShowModeSprShow_DrawHelper(dc, config, real_mode, howToDraw);
-    }
+    ShowModeStandard_DrawHelper(dc, config, mode, howToDraw);
 }
 
 wxImage GetOmniLinesImage(const CalChartConfiguration& config,

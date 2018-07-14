@@ -64,6 +64,10 @@ public:
     auto GetName() const { return mName; };
     CalChart::Coord ClipPosition(const CalChart::Coord& pos) const;
 
+    virtual unsigned short HashW() const { return -1; }
+    virtual unsigned short HashE() const { return -1; }
+    virtual unsigned char WhichYards() const { return CalChart::SPR_YARD_ABOVE | CalChart::SPR_YARD_BELOW; }
+
 protected:
     // Users shouldn't create show modes, it should be done through derived
     // classes
@@ -124,11 +128,11 @@ private:
         const std::function<unsigned short()>& ehash);
 
 public:
-    virtual ~ShowModeStandard();
+    virtual ~ShowModeStandard() override;
 
-    virtual ShowType GetType() const;
-    unsigned short HashW() const { return mHashW(); }
-    unsigned short HashE() const { return mHashE(); }
+    virtual ShowType GetType() const override;
+    unsigned short HashW() const override { return mHashW(); }
+    unsigned short HashE() const override { return mHashE(); }
 
 private:
     const std::function<unsigned short()> mHashW, mHashE;
@@ -196,8 +200,8 @@ private:
 public:
     virtual ~ShowModeSprShow();
 
-    virtual ShowType GetType() const;
-    unsigned char WhichYards() const { return which_yards(); }
+    virtual ShowType GetType() const override;
+    unsigned char WhichYards() const override { return which_yards(); }
     short StageX() const { return stage_x(); }
     short StageY() const { return stage_y(); }
     short StageW() const { return stage_w(); }
@@ -206,10 +210,6 @@ public:
     short FieldY() const { return field_y(); }
     short FieldW() const { return field_w(); }
     short FieldH() const { return field_h(); }
-    short StepsX() const { return steps_x(); }
-    short StepsY() const { return steps_y(); }
-    short StepsW() const { return steps_w(); }
-    short StepsH() const { return steps_h(); }
     short TextLeft() const { return text_left(); }
     short TextRight() const { return text_right(); }
     short TextTop() const { return text_top(); }
@@ -219,7 +219,6 @@ private:
     const std::function<unsigned char()> which_yards;
     const std::function<short()> stage_x, stage_y, stage_w, stage_h;
     const std::function<short()> field_x, field_y, field_w, field_h;
-    const std::function<short()> steps_x, steps_y, steps_w, steps_h;
     const std::function<short()> text_left, text_right, text_top, text_bottom;
 };
 }
