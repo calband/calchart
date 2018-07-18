@@ -142,6 +142,7 @@ public:
 
     // Grid chioce distance (distance per beat), Grid placement lock (where to end)
     std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
+    std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice() const;
     void UpdatePanel();
 
     void SetCurrentLasso(CC_DRAG_TYPES type);

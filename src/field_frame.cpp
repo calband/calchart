@@ -1080,6 +1080,11 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::GridChoice
     return mControls->GridChoice();
 }
 
+std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::ToolGridChoice() const
+{
+    return mControls->ToolGridChoice();
+}
+
 void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 {
     // retoggle the tool because we want it to draw as selected

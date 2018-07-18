@@ -63,6 +63,12 @@ FieldFrameControls::FieldFrameControls(wxWindow* parent, double zoom)
     staticSize->Add(mGridChoice, centerWidget);
     mGridChoice->SetSelection(2);
 
+    staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Tool Grid Spacing")), wxVERTICAL);
+    toprow->Add(staticSize, topRowSizerFlags);
+    mToolGridChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, sizeof(gridtext) / sizeof(gridtext[0]), gridtext);
+    staticSize->Add(mToolGridChoice, centerWidget);
+    mToolGridChoice->SetSelection(2);
+
     // Zoom slider
     staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Zoom")), wxVERTICAL);
     toprow->Add(staticSize, topRowSizerFlags);
@@ -115,6 +121,11 @@ FieldFrameControls::FieldFrameControls(wxWindow* parent, double zoom)
 std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrameControls::GridChoice() const
 {
     return gridvalue[mGridChoice->GetSelection()];
+}
+
+std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrameControls::ToolGridChoice() const
+{
+    return gridvalue[mToolGridChoice->GetSelection()];
 }
 
 double FieldFrameControls::GetZoomAmount() const

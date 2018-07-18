@@ -152,7 +152,7 @@ void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CalChart::Coord p
         }
 
         m_move_points = Create_MovePoints(CC_MOVE_NORMAL);
-        m_move_points->OnMouseLeftDown(pos);
+        m_move_points->OnMouseLeftDown(SnapToolToGrid(pos));
     }
 }
 
@@ -252,7 +252,7 @@ void FieldCanvas::OnMouseLeftDown(wxMouseEvent& event)
             if (!m_move_points) {
                 m_move_points = Create_MovePoints(curr_move);
             }
-            m_move_points->OnMouseLeftDown(SnapToGrid(pos));
+            m_move_points->OnMouseLeftDown(SnapToolToGrid(pos));
         } else {
             OnMouseLeftDown_default(event, pos);
         }
@@ -429,10 +429,10 @@ void FieldCanvas::BeginSelectDrag(CC_DRAG_TYPES type, const CalChart::Coord& sta
 void FieldCanvas::MoveDrag(const CalChart::Coord& end)
 {
     if (!m_select_shape_list.empty()) {
-        m_select_shape_list.back()->OnMove(end, SnapToGrid(end));
+        m_select_shape_list.back()->OnMove(end, SnapToolToGrid(end));
     }
     if (m_move_points) {
-        m_move_points->OnMove(end, SnapToGrid(end));
+        m_move_points->OnMove(end, SnapToolToGrid(end));
         std::map<int, CalChart::Coord> selected_points;
         for (auto i : mView.GetSelectionList()) {
             selected_points[i] = mView.PointPosition(i);
@@ -481,6 +481,18 @@ CalChart::Coord FieldCanvas::SnapToGrid(CalChart::Coord c)
 {
     CalChart::Coord::units gridn, grids;
     std::tie(gridn, grids) = mFrame->GridChoice();
+
+    return {
+        c.x = SNAPGRID(c.x, gridn, grids),
+        // Adjust so 4 step grid will be on visible grid
+        c.y = SNAPGRID(c.y - Int2CoordUnits(2), gridn, grids) + Int2CoordUnits(2)
+    };
+}
+
+CalChart::Coord FieldCanvas::SnapToolToGrid(CalChart::Coord c)
+{
+    CalChart::Coord::units gridn, grids;
+    std::tie(gridn, grids) = mFrame->ToolGridChoice();
 
     return {
         c.x = SNAPGRID(c.x, gridn, grids),
