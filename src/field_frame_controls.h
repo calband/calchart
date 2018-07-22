@@ -34,6 +34,7 @@ public:
     virtual ~FieldFrameControls() = default;
 
     std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
+    std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice() const;
     double GetZoomAmount() const;
     void SetZoomAmount(double zoom);
     int GetRefChoice() const;
@@ -43,6 +44,7 @@ public:
 
 private:
     wxChoice* mGridChoice;
+    wxChoice* mToolGridChoice;
     wxComboBox* mZoomBox;
     wxChoice* mRefChoice;
     wxChoice* mGhostChoice;

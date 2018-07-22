@@ -96,6 +96,7 @@ private:
     void MoveByKey(direction);
     CalChart::Coord GetMoveAmount(direction dir);
     CalChart::Coord SnapToGrid(CalChart::Coord c);
+    CalChart::Coord SnapToolToGrid(CalChart::Coord c);
 
     // Background Picture
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
