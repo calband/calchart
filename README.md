@@ -71,118 +71,118 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 ## Release notes for 3.5.2
 
 * [#248](../../issues/248) Unused continuities are not automatically deleted
-* #252 Rotate Tool Snaps To Grid, Causing Strange Effects
-* #254 put back cal chart viewer at top level menu
-* #255 field preview scroll is slow on windows
-* #256 Collapsing everything to a point, then spreading the point doesn't work
-* #258 When printing, lines labels are "green"
-* #263 Remove ContinuityEditor
-* #265 Don't need a pop-up to tell me if I've cancelled printing
-* #267 copy/pasting stuntsheets doesn't work (Windows)
+* [#252](../../issues/252) Rotate Tool Snaps To Grid, Causing Strange Effects
+* [#254](../../issues/254) put back cal chart viewer at top level menu
+* [#255](../../issues/255) field preview scroll is slow on windows
+* [#256](../../issues/256) Collapsing everything to a point, then spreading the point doesn't work
+* [#258](../../issues/258) When printing, lines labels are "green"
+* [#263](../../issues/263) Remove ContinuityEditor
+* [#265](../../issues/265) Don't need a pop-up to tell me if I've cancelled printing
+* [#267](../../issues/267) copy/pasting stuntsheets doesn't work (Windows)
 
 ## Release notes for 3.5.1
 
 Features addressed in this release:
 
 * General clean-up the UI.
-* #179 Reset Ref points should obey selected
-* #187 Have yard markers "stick" to the top edge
-* #236 Relabel requires positions to be exact, makes it hard to use for script cal
-* #239 See if we can preserve the order of dots when creating a line
-* #250 Draw path should be in view.
-* #251 Make edit menu have sub-section
+* [#179](../../issues/179) Reset Ref points should obey selected
+* [#187](../../issues/187) Have yard markers "stick" to the top edge
+* [#236](../../issues/236) Relabel requires positions to be exact, makes it hard to use for script cal
+* [#239](../../issues/239) See if we can preserve the order of dots when creating a line
+* [#250](../../issues/250) Draw path should be in view.
+* [#251](../../issues/251) Make edit menu have sub-section
 
 Bugs addressed in this release:
 
-* #222 Don't display the "there aren't enough labels" dialog
-* #235 Rotate is broken
-* #249 Genius move doesn't work
+* [#222](../../issues/222) Don't display the "there aren't enough labels" dialog
+* [#235](../../issues/235) Rotate is broken
+* [#249](../../issues/249) Genius move doesn't work
 
 
 ## Release notes for 3.5.0
 
 Features addressed in this release:
 
-* #120, #121 Save current_sheet and selection list with the show when saving
-* #209 Delete one point
-* #198 Shape Palette, and able to draw curves
+* [#120](../../issues/120), [#121](../../issues/121) Save current_sheet and selection list with the show when saving
+* [#209](../../issues/209) Delete one point
+* [#198](../../issues/198) Shape Palette, and able to draw curves
 
 Bugs addressed in this release:
 
-* #199 Snap to grid when moving points
-* #203 Removing unused Description Field
-* #11 Background images should be undoable
-* #105, #104 Background images should be part of the show
+* [#199](../../issues/199) Snap to grid when moving points
+* [#203](../../issues/203) Removing unused Description Field
+* [#11](../../issues/11) Background images should be undoable
+* [#105](../../issues/105), [#104](../../issues/104) Background images should be part of the show
 
 Build infrastructure issues addressed in this release:
 
-* #128 clang-format all code
+* [#128](../../issues/128) clang-format all code
 
 
 ## Release notes for 3.4.4
 
 Features addressed in this release:
 
-* #117, #139, #149 CalChart Online Viewer File Exporter
-* #200 Have keys move selected dot
-* #183 Pinch to zoom
-* #185 We should try out treating Next/previous and Selection as undoable commands
-* #178 There should be a select all marchers command
+* [#117](../../issues/117), [#139](../../issues/139), [#149](../../issues/149) CalChart Online Viewer File Exporter
+* [#200](../../issues/200) Have keys move selected dot
+* [#183](../../issues/183) Pinch to zoom
+* [#185](../../issues/185) We should try out treating Next/previous and Selection as undoable commands
+* [#178](../../issues/178) There should be a select all marchers command
 
 Bugs addressed in this release:
 
-* #202 Have new show column default to 8
-* #189 Make sure to add scroll direction preference
-* #190 Add scrolling to preference pane
-* #153 Field doesn't redraw if the mode has changed
-* #206 Viewer File Exporter: Format an Empty Array Where Manual Input is Required
+* [#202](../../issues/202) Have new show column default to 8
+* [#189](../../issues/189) Make sure to add scroll direction preference
+* [#190](../../issues/190) Add scrolling to preference pane
+* [#153](../../issues/153) Field doesn't redraw if the mode has changed
+* [#206](../../issues/206) Viewer File Exporter: Format an Empty Array Where Manual Input is Required
 
 
 Build infrastructure issues addressed in this release:
 
-* #184 Revamp the command_do and undo
-* #174 update to wxWidgets 3.1
-* #148 Bring Back Boost
-* #155 Update authors
+* [#184](../../issues/184) Revamp the command_do and undo
+* [#174](../../issues/174) update to wxWidgets 3.1
+* [#148](../../issues/148) Bring Back Boost
+* [#155](../../issues/155) Update authors
 
 ## Release notes for 3.4.3
 
 Features addressed in this release:
 
-* #103 Preview where dots should go on "moves"
-* #109 Improved Preferences and config
-* #114 Auto-zoom on Animation
-* #116 use wxWidgets 3.0.2
+* [#103](../../issues/103) Preview where dots should go on "moves"
+* [#109](../../issues/109) Improved Preferences and config
+* [#114](../../issues/114) Auto-zoom on Animation
+* [#116](../../issues/116) use wxWidgets 3.0.2
 
 Bugs addressed in this release:
 
-* #19  Preferences - Reset-All should not require a close and open
-* #32  Make sure different versions play nicely
-* #92  Group Select Doesn't Properly Report Number of Selected Dots
-* #94  Inconsistent Use of Animation::GotoSheet(...)
-* #96  Occasional Unhandled Exception when Changing Dot Type in Continuity Editor
-* #98  Mac: cmd-c (copy) in Continuity editor closes instead of copies
-* #111 "Edit print continuity" should allow tab entry
-* #115 Preference color selection on Windows is screwed up
+* [#19](../../issues/19)  Preferences - Reset-All should not require a close and open
+* [#32](../../issues/32)  Make sure different versions play nicely
+* [#92](../../issues/92)  Group Select Doesn't Properly Report Number of Selected Dots
+* [#94](../../issues/94)  Inconsistent Use of Animation::GotoSheet(...)
+* [#96](../../issues/96)  Occasional Unhandled Exception when Changing Dot Type in Continuity Editor
+* [#98](../../issues/98)  Mac: cmd-c (copy) in Continuity editor closes instead of copies
+* [#111](../../issues/111) "Edit print continuity" should allow tab entry
+* [#115](../../issues/115) Preference color selection on Windows is screwed up
 
 Build infrastructure issues addressed in this release:
 
-* #42  Use precompiled headers
-* #90  Build warnings with Windows
-* #122 Build Release for distribution
-* #129 use pragma once instead of ifdef header guards
+* [#42](../../issues/42)  Use precompiled headers
+* [#90](../../issues/90)  Build warnings with Windows
+* [#122](../../issues/122) Build Release for distribution
+* [#129](../../issues/129) use pragma once instead of ifdef header guards
 
 
 ## Release notes for 3.4.2
 
 Bugs fixed and features added in this release:
 
-* #24 Dot swap feature: You can swap two points on a stunt sheet
-* #29 Add a ghost image of previous/next screen
-* #40 Show Setup dialog: grey out letter labels when on numbers
-* #68 Option to turn off point labels 
-* #77 Omniview shows purple dots even when they're not colliding 
-* #84 Copy and paste for pages in field view
+* [#24](../../issues/24) Dot swap feature: You can swap two points on a stunt sheet
+* [#29](../../issues/29) Add a ghost image of previous/next screen
+* [#40](../../issues/40) Show Setup dialog: grey out letter labels when on numbers
+* [#68](../../issues/68) Option to turn off point labels 
+* [#77](../../issues/77) Omniview shows purple dots even when they're not colliding 
+* [#84](../../issues/84) Copy and paste for pages in field view
 
 
 ## Release notes for 3.4.1
@@ -192,12 +192,12 @@ Updated VisualStudio runtime to VC2013.
 
 Bugs and features fixed in this release:
 
-* #20 MAC: Crash when quitting from the help menu 
-* #23 Add ability to insert stunt sheets from other shows
-* #66 Ctrl + Click Scrolling
-* #67 Include the most recent Visual C++ Redistribution with CalChart
-* #69 Continuity editor saves to incorrect dot types
-* #71 Saving/Loading shows with descriptions is broken
+* [#20](../../issues/20) MAC: Crash when quitting from the help menu 
+* [#23](../../issues/23) Add ability to insert stunt sheets from other shows
+* [#66](../../issues/66) Ctrl + Click Scrolling
+* [#67](../../issues/67) Include the most recent Visual C++ Redistribution with CalChart
+* [#69](../../issues/69) Continuity editor saves to incorrect dot types
+* [#71](../../issues/71) Saving/Loading shows with descriptions is broken
 
 
 ## Release notes for 3.4.0:
@@ -215,23 +215,23 @@ Non-user facing changes:
 
 Bugs and features fixed in this release:
 
-* #7 Make Point-Picker better
-* #15 Windows: Always propted to save changes after edit cont
-* #16 keyb buttons (right-left arrow) are ignored in view on win
-* #17 can not import a Mac continuity file
-* #31 Add a printed continuity editor.
-* #34 Adding printed continuity to be saved with the file
-* #43 Updated docs for GitHub
-* #53 Removed Boost and used std lib wherever possible
-* #54 Auto launching CalChart on startup on Windows.
-* #56 Keyboard shortcut for Reanimate
+* [#7](../../issues/7) Make Point-Picker better
+* [#15](../../issues/15) Windows: Always propted to save changes after edit cont
+* [#16](../../issues/16) keyb buttons (right-left arrow) are ignored in view on win
+* [#17](../../issues/17) can not import a Mac continuity file
+* [#31](../../issues/31) Add a printed continuity editor.
+* [#34](../../issues/34) Adding printed continuity to be saved with the file
+* [#43](../../issues/43) Updated docs for GitHub
+* [#53](../../issues/53) Removed Boost and used std lib wherever possible
+* [#54](../../issues/54) Auto launching CalChart on startup on Windows.
+* [#56](../../issues/56) Keyboard shortcut for Reanimate
 
 
 ## Release notes for 3.3.5:
 
 Bugs fixed in this release:
 
-* #74: 3.3.4: Hang when opening Preferences
+* [#74](../../issues/74): 3.3.4: Hang when opening Preferences
 
 
 ## Release notes for 3.3.4:
