@@ -28,7 +28,7 @@ For windows:
 w1.1 Follow the instructions in README-win.txt
 
 w1.1.1 Copy readme to build-win:
-cp README.txt build-win/README.txt
+cp README.md build-win/README.txt
 
 w1.2 Install InnoSetup
 I use InnoSetup for creating the installer.  Get it from:
@@ -44,7 +44,7 @@ Compile via Build->Compile.
 
 w1.5 The installer is called setup.exe.  Rename to:
 $ cd build-win/InstallerFiles
-$ mv setup.exe Install-CalChart-$CCVER.exe
+$ mv mysetup.exe Install-CalChart-$CCVER.exe
 
 The final product is Install-CalChart-$CCVER.exe
 
@@ -60,14 +60,14 @@ The final product is CalChart-$CCVER.dmg
 ---
 
 2. Tag the depot
-$ git tag -a v3.5.1 -m "calchart-3.5.1”
-$ git push origin v3.5.1
+$ git tag -a v3.5.2 -m "calchart-3.5.2”
+$ git push origin v3.5.2
 
 3. Go to a temporary directory on your system to recheck at the tag.  This is to avoid having any unwanted files
 $ cd /tmp
 $ git clone --recursive https://github.com/calband/calchart.git calchart
 $ cd calchart
-$ git checkout v3.5.1
+$ git checkout v3.5.2
 
 4. Rebuild the release now that you have the tag (repeat instructions for step 1)
 

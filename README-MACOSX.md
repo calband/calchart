@@ -39,7 +39,7 @@ Finally, install wxWidgets libraries on you system.  The install step puts them 
 
 Get calchart (you'll need to log in with your source forge account):
 
-	$ git clone https://github.com/calband/calchart.git ~/calchart
+	$ git clone --recursive https://github.com/calband/calchart.git ~/calchart
 
 If you need to rebuild the documentation, refer to the README-DOC.txt
 
