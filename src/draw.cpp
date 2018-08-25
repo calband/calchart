@@ -756,8 +756,7 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfigura
     // Draw labels
     wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*yardLabelFont);
-    if (whichDraw & CalChart::SPR_YARD_ABOVE || whichDraw & CalChart::SPR_YARD_BELOW)
-    {
+    if (whichDraw & CalChart::SPR_YARD_ABOVE || whichDraw & CalChart::SPR_YARD_BELOW) {
         for (int i = 0; i < CoordUnits2Int(fieldsize_x) / 8 + 1; i++) {
             wxCoord textw, texth, textd;
             auto text = config.Get_yard_text(i + (yard_text_start + (CalChart::kYardTextValues - 1) * 4) / 8);
@@ -780,8 +779,7 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfigura
             }
         }
     }
-    if (whichDraw & CalChart::SPR_YARD_LEFT || whichDraw & CalChart::SPR_YARD_RIGHT)
-    {
+    if (whichDraw & CalChart::SPR_YARD_LEFT || whichDraw & CalChart::SPR_YARD_RIGHT) {
         for (int i = 0; i < CoordUnits2Int(fieldsize_y) / 8 + 1; i++) {
             wxCoord textw, texth, textd;
             auto text = config.Get_spr_line_text(i);
@@ -793,7 +791,6 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfigura
         }
     }
 }
-
 
 static void ShowMode_DrawHelper_Outline(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y)
 {

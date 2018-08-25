@@ -169,7 +169,7 @@ void FieldBrowser::OnUpdate()
     auto size_of_one = SizeOfOneCell();
     SetVirtualSize(size_of_one.x, size_of_one.y * mDoc->GetNumSheets());
 
-    SetScrollRate(0, size_of_one.y/5);
+    SetScrollRate(0, size_of_one.y / 5);
 
     auto get_size = GetSize();
     auto scrolled_top = CalcUnscrolledPosition({ 0, 0 });
