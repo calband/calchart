@@ -68,6 +68,17 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 # Release notes
 
+## Release notes for 3.5.2
+
+* #248 Unused continuities are not automatically deleted
+* #252 Rotate Tool Snaps To Grid, Causing Strange Effects
+* #254 put back cal chart viewer at top level menu
+* #255 field preview scroll is slow on windows
+* #256 Collapsing everything to a point, then spreading the point doesn't work
+* #258 When printing, lines labels are "green"
+* #263 Remove ContinuityEditor
+* #265 Don't need a pop-up to tell me if I've cancelled printing
+* #267 copy/pasting stuntsheets doesn't work (Windows)
 
 ## Release notes for 3.5.1
 
