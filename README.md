@@ -1,4 +1,4 @@
-#What is CalChart?
+# What is CalChart?
 
 CalChart is the open source project created and maintained by members and
 alumni of the California Marching Band.  We use the software to chart our 
@@ -23,7 +23,7 @@ conversion tools are unsupported.  The generated HTML results are also
 distributed in the developer package.
 
 
-##Helping Develop CalChart:
+## Helping Develop CalChart:
 
 Visit the CalChart GitHub page:
 
@@ -39,12 +39,12 @@ principle development will be on GitHub.
 http://sourceforge.net/projects/calchart/
 
 
-##Reporting a bug or requesting a new feature.
+## Reporting a bug or requesting a new feature.
 
 CalChart uses an issues page on the github site for tracking bugs and features.
 To post issues, you will need to create a GitHub account at https://github.com.
 
-From the CalChart project page (https://github.net/calband/calchart/),
+From the CalChart project page (https://github.com/calband/calchart/),
 click on Issues.  This should list all of the issues logged against CalChart.
 Your bug may already be here.  If it is, then add any information to the bug.
 If not, click on "New Issue" to add a new bug.
@@ -58,7 +58,7 @@ anything that you think will help create the feature, such as describing the
 desired behavior.
 
 
-##Building CalChart
+## Building CalChart
 
 For building on MacOSX platforms, see the [README-MACOSX.md](README-MACOSX.md).  For building on
 Windows platforms, see the [README-WINDOWS.md](README-WINDOWS.md).
@@ -70,7 +70,7 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 ## Release notes for 3.5.2
 
-* #248 Unused continuities are not automatically deleted
+* [#248](../../issues/248) Unused continuities are not automatically deleted
 * #252 Rotate Tool Snaps To Grid, Causing Strange Effects
 * #254 put back cal chart viewer at top level menu
 * #255 field preview scroll is slow on windows
