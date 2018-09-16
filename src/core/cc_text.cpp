@@ -26,7 +26,7 @@
 
 namespace CalChart {
 
-Textline::Textline(std::string line, PSFONT_TYPE& currfontnum)
+Textline::Textline(std::string line, PSFONT currfontnum)
     : center(false)
     , on_main(true)
     , on_sheet(true)
@@ -50,7 +50,7 @@ Textline::Textline(std::string line, PSFONT_TYPE& currfontnum)
         if (line.at(0) == '\t') {
             if (line.length() > 1) {
                 Textchunk new_text;
-                new_text.font = PSFONT_TAB;
+                new_text.font = PSFONT::TAB;
                 chunks.push_back(new_text);
             }
             line.erase(0, 1);
@@ -59,7 +59,7 @@ Textline::Textline(std::string line, PSFONT_TYPE& currfontnum)
         // now check to see if we have any special person marks
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's'))) {
             Textchunk new_text;
-            new_text.font = PSFONT_SYMBOL;
+            new_text.font = PSFONT::SYMBOL;
             if (tolower(line.at(1)) == 'p') {
                 switch (tolower(line.at(2))) {
                 case 'o':
@@ -105,10 +105,10 @@ Textline::Textline(std::string line, PSFONT_TYPE& currfontnum)
         // now check to see if we have any font
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b') || (tolower(line.at(1)) == 'i'))) {
             if (tolower(line.at(2)) == 'e') {
-                currfontnum = PSFONT_NORM;
+                currfontnum = PSFONT::NORM;
             }
             if (tolower(line.at(2)) == 's') {
-                currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT_BOLD : PSFONT_ITAL;
+                currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT::BOLD : PSFONT::ITAL;
             }
             line.erase(0, 3);
             continue;
@@ -123,16 +123,14 @@ Textline::Textline(std::string line, PSFONT_TYPE& currfontnum)
     }
 }
 
-Print_continuity::Print_continuity() {}
-
 Print_continuity::Print_continuity(const std::string& data)
     : mOriginalLine(data)
 {
     std::istringstream reader(data);
     std::string line;
-    PSFONT_TYPE currfontnum = PSFONT_NORM;
+    auto currfontnum = PSFONT::NORM;
     while (std::getline(reader, line, '\n')) {
-        mPrintChunks.push_back(Textline(line, currfontnum));
+        mPrintChunks.emplace_back(line, currfontnum);
     }
 }
 
@@ -143,9 +141,9 @@ Print_continuity::Print_continuity(const std::string& number,
 {
     std::istringstream reader(data);
     std::string line;
-    PSFONT_TYPE currfontnum = PSFONT_NORM;
+    auto currfontnum = PSFONT::NORM;
     while (std::getline(reader, line, '\n')) {
-        mPrintChunks.push_back(Textline(line, currfontnum));
+        mPrintChunks.emplace_back(line, currfontnum);
     }
 }
 }

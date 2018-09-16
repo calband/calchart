@@ -25,6 +25,8 @@
 #include "draw.h"
 #include "modes.h"
 
+#include <wx/dcbuffer.h>
+
 //////// Show Mode setup ////////
 // setup drawing characteristics
 ////////

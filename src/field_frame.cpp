@@ -43,8 +43,6 @@
 #include "field_frame_controls.h"
 #include "FieldThumbnailBrowser.h"
 #include "FieldView.h"
-#include "field_mini_browser.h"
-#include "field_view.h"
 #include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
@@ -701,22 +699,22 @@ void FieldFrame::OnCmd_next_ss(wxCommandEvent& event)
 
 void FieldFrame::OnCmd_box(wxCommandEvent& event)
 {
-    SetCurrentLasso(CC_DRAG_BOX);
+    SetCurrentLasso(CC_DRAG::BOX);
 }
 
 void FieldFrame::OnCmd_poly(wxCommandEvent& event)
 {
-    SetCurrentLasso(CC_DRAG_POLY);
+    SetCurrentLasso(CC_DRAG::POLY);
 }
 
 void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
 {
-    SetCurrentLasso(CC_DRAG_LASSO);
+    SetCurrentLasso(CC_DRAG::LASSO);
 }
 
 void FieldFrame::OnCmd_swap(wxCommandEvent& event)
 {
-    SetCurrentLasso(CC_DRAG_SWAP);
+    SetCurrentLasso(CC_DRAG::SWAP);
 }
 
 void FieldFrame::OnCmd_move(wxCommandEvent& event)
@@ -1097,10 +1095,10 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::ToolGridCh
     return mControls->ToolGridChoice();
 }
 
-void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
+void FieldFrame::SetCurrentLasso(CC_DRAG type)
 {
     // retoggle the tool because we want it to draw as selected
-    int toggleID = (type == CC_DRAG_POLY) ? CALCHART__poly : (type == CC_DRAG_LASSO) ? CALCHART__lasso : (type == CC_DRAG_SWAP) ? CALCHART__swap : CALCHART__box;
+    int toggleID = (type == CC_DRAG::POLY) ? CALCHART__poly : (type == CC_DRAG::LASSO) ? CALCHART__lasso : (type == CC_DRAG::SWAP) ? CALCHART__swap : CALCHART__box;
     wxToolBar* tb = GetToolBar();
     tb->ToggleTool(toggleID, true);
 

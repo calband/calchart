@@ -34,7 +34,7 @@ namespace CalChart {
 struct Textchunk {
     Textchunk() = default;
     std::string text;
-    enum PSFONT_TYPE font = PSFONT_NORM;
+    PSFONT font = PSFONT::NORM;
 
 private:
     friend class boost::serialization::access;
@@ -49,18 +49,15 @@ private:
 using Textchunk_list = std::vector<Textchunk>;
 
 class Textline {
-private:
-    friend class Print_continuity;
-    Textline(std::string line, PSFONT_TYPE& currfontnum);
-
 public:
-    Textchunk_list GetChunks() const { return chunks; }
-    bool GetCenter() const { return center; }
-    bool GetOnMain() const { return on_main; }
-    bool GetOnSheet() const { return on_sheet; }
+    Textline() = default;
+    Textline(std::string line, PSFONT currfontnum);
+    auto GetChunks() const { return chunks; }
+    auto GetCenter() const { return center; }
+    auto GetOnMain() const { return on_main; }
+    auto GetOnSheet() const { return on_sheet; }
 
 private:
-    Textline() = default;
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version)
@@ -72,16 +69,16 @@ private:
     }
 
     Textchunk_list chunks;
-    bool center;
-    bool on_main;
-    bool on_sheet;
+    bool center{};
+    bool on_main{};
+    bool on_sheet{};
 };
 
 using Textline_list = std::vector<Textline>;
 
 class Print_continuity {
 public:
-    Print_continuity();
+    Print_continuity() = default;
     Print_continuity(const std::string& data);
     Print_continuity(const std::string& number, const std::string& data);
     auto GetChunks() const { return mPrintChunks; }

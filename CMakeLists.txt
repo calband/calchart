@@ -27,7 +27,7 @@ configure_file (
 # CalChart: The App itself
 
 # CalChart requires Boost.  Find it and include the directories here.
-find_package (Boost 1.60 REQUIRED)
+find_package (Boost 1.60 REQUIRED serialization)
 
 # CalChart requires BISON/FLEX for the grammar
 find_package (BISON REQUIRED)
@@ -212,7 +212,7 @@ set_target_properties (
   "${AllResources}"
   )
 
-target_link_libraries (CalChart calchart_core)
+target_link_libraries (CalChart calchart_core ${Boost_LIBRARIES})
 
 # We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
 # Have wxWidgets build as static libraries

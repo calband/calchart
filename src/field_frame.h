@@ -148,7 +148,7 @@ public:
     std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice() const;
     void UpdatePanel();
 
-    void SetCurrentLasso(CC_DRAG_TYPES type);
+    void SetCurrentLasso(CC_DRAG type);
     void SetCurrentMove(CC_MOVE_MODES type);
     void ToolbarSetCurrentMove(CC_MOVE_MODES type);
     float ToolbarSetZoom(float zoom); // set to an amount, returns what it was set to.

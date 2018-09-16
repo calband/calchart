@@ -41,7 +41,7 @@ enum {
     NUMCONTVARS
 };
 
-const std::string s_contvar_names[NUMCONTVARS]{
+const std::string s_contvar_names[] = {
     "A",
     "B",
     "C",
@@ -52,6 +52,8 @@ const std::string s_contvar_names[NUMCONTVARS]{
     "DOF",
     "DOH",
 };
+
+static_assert(sizeof(s_contvar_names)/sizeof(s_contvar_names[0]) == NUMCONTVARS, "");
 
 enum AnimateDir {
     ANIMDIR_N,

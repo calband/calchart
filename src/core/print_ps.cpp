@@ -425,7 +425,7 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
                     mTextSize);
             }
 
-            gen_cont_line(buffer, text, PSFONT_NORM, mTextSize);
+            gen_cont_line(buffer, text, PSFONT::NORM, mTextSize);
             lines_left--;
             need_eject = true;
         }
@@ -455,18 +455,18 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer,
     for (auto& text : continuity) {
         if (!text.GetOnSheet())
             continue;
-        gen_cont_line(buffer, text, PSFONT_NORM, this_size);
+        gen_cont_line(buffer, text, PSFONT::NORM, this_size);
     }
 }
 
 void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
-    PSFONT_TYPE currfontnum,
+    PSFONT currfontnum,
     float fontsize) const
 {
     buffer << "/x lmargin def\n";
     short tabstop = 0;
     for (auto& part : line.GetChunks()) {
-        if (part.font == PSFONT_TAB) {
+        if (part.font == PSFONT::TAB) {
             if (++tabstop > 3) {
                 buffer << "space_over\n";
             } else {
@@ -474,7 +474,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
             }
         } else {
             if (part.font != currfontnum) {
-                buffer << "/" << fontnames[part.font];
+                buffer << "/" << fontnames[static_cast<int>(part.font)];
                 buffer << " findfont " << fontsize << " scalefont setfont\n";
                 currfontnum = part.font;
             }

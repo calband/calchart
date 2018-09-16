@@ -305,28 +305,28 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
             for (auto& c : chunks) {
                 bool do_tab = false;
                 switch (c.font) {
-                case PSFONT_SYMBOL: {
+                case PSFONT::SYMBOL: {
                     wxCoord textw, texth;
                     dc.GetTextExtent(wxT("O"), &textw, &texth);
                     x += textw * c.text.length();
                 } break;
-                case PSFONT_NORM:
+                case PSFONT::NORM:
                     dc.SetFont(*contPlainFont);
                     break;
-                case PSFONT_BOLD:
+                case PSFONT::BOLD:
                     dc.SetFont(*contBoldFont);
                     break;
-                case PSFONT_ITAL:
+                case PSFONT::ITAL:
                     dc.SetFont(*contItalFont);
                     break;
-                case PSFONT_BOLDITAL:
+                case PSFONT::BOLDITAL:
                     dc.SetFont(*contBoldItalFont);
                     break;
-                case PSFONT_TAB:
+                case PSFONT::TAB:
                     do_tab = true;
                     break;
                 }
-                if (!do_tab && (c.font != PSFONT_SYMBOL)) {
+                if (!do_tab && (c.font != PSFONT::SYMBOL)) {
                     wxCoord textw, texth;
                     dc.GetTextExtent(c.text, &textw, &texth);
                     x -= textw / 2;
@@ -339,20 +339,20 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
         for (auto& c : chunks) {
             bool do_tab = false;
             switch (c.font) {
-            case PSFONT_NORM:
-            case PSFONT_SYMBOL:
+            case PSFONT::NORM:
+            case PSFONT::SYMBOL:
                 dc.SetFont(*contPlainFont);
                 break;
-            case PSFONT_BOLD:
+            case PSFONT::BOLD:
                 dc.SetFont(*contBoldFont);
                 break;
-            case PSFONT_ITAL:
+            case PSFONT::ITAL:
                 dc.SetFont(*contItalFont);
                 break;
-            case PSFONT_BOLDITAL:
+            case PSFONT::BOLDITAL:
                 dc.SetFont(*contBoldItalFont);
                 break;
-            case PSFONT_TAB: {
+            case PSFONT::TAB: {
                 tabnum++;
                 wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
                 if (textw >= x)
@@ -364,7 +364,7 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
             default:
                 break;
             }
-            if (c.font == PSFONT_SYMBOL) {
+            if (c.font == PSFONT::SYMBOL) {
                 wxCoord textw, texth, textd;
                 dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
                 const float d = textw;
