@@ -68,6 +68,10 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 # Release notes
 
+## Release notes for 3.5.3
+
+* [#271](../../issues/271) Unreliable viewer file generation
+
 ## Release notes for 3.5.2
 
 * [#248](../../issues/248) Unused continuities are not automatically deleted
