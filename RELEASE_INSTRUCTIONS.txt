@@ -18,6 +18,8 @@ The current calchart version is 3.5.2.  In all commands below, substitute that n
 
 0.4 Edit build-macos/dmg_maker.sh to have the right version
 
+0.5 Edit README.md and update what bugs have been fixed.
+
 Because you sometimes run into build issues on one platform instead of another, do a build before you do a tag:
 1. Prebuild the project to make sure its working
 1.0.1: Make sure you note the git HASH you are dealing with.  Make sure both Windows and Mac are on the same hash.
@@ -84,5 +86,7 @@ You'll need to be logged in as Administrator to modify the files.
 
 10. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
 
-11. Have a cookie.
+11. Update https://github.com/calband/calchart/releases
+
+12. Have a cookie.
 
