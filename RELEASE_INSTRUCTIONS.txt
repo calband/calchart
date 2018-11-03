@@ -62,7 +62,7 @@ The final product is CalChart-$CCVER.dmg
 ---
 
 2. Tag the depot
-$ git tag -a v3.5.3 -m "calchart-3.5.3”
+$ git tag -a v3.5.3 -m "calchart-3.5.3"
 $ git push origin v3.5.3
 
 3. Go to a temporary directory on your system to recheck at the tag.  This is to avoid having any unwanted files
