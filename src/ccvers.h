@@ -19,7 +19,7 @@
 
 #define CC_MAJOR_VERSION 3
 #define CC_MINOR_VERSION 5
-#define CC_SUB_MINOR_VERSION 2
+#define CC_SUB_MINOR_VERSION 3
 
 #define STRINGIZE_HELPER(name) #name
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
