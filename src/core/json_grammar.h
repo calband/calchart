@@ -8,6 +8,7 @@
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/karma_string.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/support_auto.hpp>
 
 #include "json.h"
 
@@ -44,12 +45,12 @@ struct JSONExportGrammar
         : JSONExportGrammar::base_type(mainObject)
     {
         indentationLevel = 0;
-        std::string indentation_string = "    ";
-        auto indentationLevelRef = phoenix::ref(indentationLevel);
-        auto increaseIndent = karma::eps[++indentationLevelRef];
-        auto decreaseIndent = karma::eps[--indentationLevelRef];
-        auto indent = karma::repeat(indentationLevelRef)[karma::lit(indentation_string)];
-        auto begin_newline = karma::eol << indent;
+        static const std::string indentation_string = "    ";
+        auto indentationLevelRef = boost::proto::deep_copy(phoenix::ref(indentationLevel));
+        auto increaseIndent = boost::proto::deep_copy(karma::eps[++indentationLevelRef]);
+        auto decreaseIndent = boost::proto::deep_copy(karma::eps[--indentationLevelRef]);
+        auto indent = boost::proto::deep_copy(karma::repeat(indentationLevelRef)[karma::lit(indentation_string)]);
+        auto begin_newline = boost::proto::deep_copy(karma::eol << indent);
 
         // Rules that will succeed only if the JSONElement is of a particular type
         isNumber = checkType(JSONData::JSONDataTypeNumber);
@@ -128,9 +129,9 @@ struct JSONExportGrammar
     karma::rule<OutputIterator> null;
     karma::rule<OutputIterator, const JSONElement&()> block_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataObject*>, JSONDataObjectConstAccessor()> object;
-    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>&()> objectContent;
+    karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>()> objectContent;
     karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&()> keyValPair;
     karma::rule<OutputIterator, karma::locals<const JSONDataArray*>, JSONDataArrayConstAccessor()> array;
-    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>&()> arrayContent;
+    karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>()> arrayContent;
 };
 }

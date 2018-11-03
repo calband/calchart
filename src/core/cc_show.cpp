@@ -518,11 +518,17 @@ void Show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) 
 
     // Fill in 'sheets' with the JSON representation of each sheet
     JSONDataArrayAccessor sheetsAccessor = showObjectAccessor["sheets"];
-    unsigned i = 0;
+    unsigned sheetIndex = 0;
     auto animateSheetIter = compiledShow.sheetsBegin();
-    for (auto iter = GetSheetBegin(); iter != GetSheetEnd(); iter++, i++, animateSheetIter++) {
-        sheetsAccessor->pushBack(JSONElement::makeNull());
-        (*iter).toOnlineViewerJSON(sheetsAccessor[i], i + 1, mPtLabels, *animateSheetIter);
+    auto showSheetIter = GetSheetBegin();
+    while (showSheetIter != GetSheetEnd()) {
+        if (showSheetIter->IsInAnimation()) {
+            sheetsAccessor->pushBack(JSONElement::makeNull());
+            showSheetIter->toOnlineViewerJSON(sheetsAccessor[sheetIndex], sheetIndex + 1, mPtLabels, *animateSheetIter);
+            animateSheetIter++;
+        }
+        sheetIndex++;
+        showSheetIter++;
     }
 }
 

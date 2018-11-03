@@ -93,13 +93,19 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
     // the variables are persistant through the entire compile process.
     AnimationVariables variablesStates;
 
-    int sheetIndex = 0;
+    int newSheetIndex = 0;
+    int prevSheetIndex = 0;
     for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet) {
-        mAnimSheetIndices.push_back(sheetIndex);
+        
         if (!curr_sheet->IsInAnimation())
+        {
+            mAnimSheetIndices.push_back(prevSheetIndex);
             continue;
+        }
 
-        sheetIndex++;
+        mAnimSheetIndices.push_back(newSheetIndex);
+        prevSheetIndex = newSheetIndex;
+        newSheetIndex++;
 
         // Now parse continuity
         AnimationErrors errors;
