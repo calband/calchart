@@ -520,8 +520,6 @@ bool TransitionSolverFrame::Create(CalChartDoc* show, wxWindow* parent,
 
     // This fits the dalog to the minimum size dictated by the sizers
     GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
 
     Center();
 
@@ -542,6 +540,10 @@ void TransitionSolverFrame::CreateControls()
     menu_bar->Append(cont_menu, wxT("&File"));
     SetMenuBar(menu_bar);
 
+    // create a scrollable window to contain all of the frame's content
+    wxScrolledWindow *scrolledWindow;
+    scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
+
     // create a sizer for laying things out top down:
     wxBoxSizer* topLevelSizer = new wxBoxSizer(wxVERTICAL);
     {
@@ -557,7 +559,7 @@ void TransitionSolverFrame::CreateControls()
         {
             wxStaticText* introText;
 
-            introText = new wxStaticText(this, wxID_STATIC, wxT("Welcome to the CalChart Transition Solver!\n"
+            introText = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Welcome to the CalChart Transition Solver!\n"
                                                                 "The algorithms used by this solver are credited to the E7 class  of Spring 2016.\n"
                                                                 "Staff: (Professor) Tina Chow, and (GSIs) Lucas Bastien and Bradley Harken\n"
                                                                 "Algorithms were selected from three different student groups:\n"
@@ -568,7 +570,7 @@ void TransitionSolverFrame::CreateControls()
             headerSizer->Add(introText);
         }
 
-        headerUnderLine = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+        headerUnderLine = new wxStaticLine(scrolledWindow, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
 
         algorithmSelectionRegion = new wxBoxSizer(wxHORIZONTAL);
         {
@@ -580,16 +582,16 @@ void TransitionSolverFrame::CreateControls()
 
             wxStaticText* label;
 
-            label = new wxStaticText(this, wxID_STATIC, wxT("Select an algorithm: "));
+            label = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Select an algorithm: "));
 
-            mAlgorithmChoiceControl = new wxChoice(this, CALCHART__TRANSITION_SOLVER__SELECT_ALGORITHM, wxDefaultPosition,
+            mAlgorithmChoiceControl = new wxChoice(scrolledWindow, CALCHART__TRANSITION_SOLVER__SELECT_ALGORITHM, wxDefaultPosition,
                 wxDefaultSize, CalChart::TransitionSolverParams::AlgorithmIdentifier::END, algorithmChoices);
 
             algorithmSelectionRegion->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
             algorithmSelectionRegion->Add(mAlgorithmChoiceControl, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
         }
 
-        algorithmUnderLine = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+        algorithmUnderLine = new wxStaticLine(scrolledWindow, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
 
         parameterEditor = new wxBoxSizer(wxVERTICAL);
         {
@@ -606,27 +608,27 @@ void TransitionSolverFrame::CreateControls()
                     wxStaticText* controlLabel;
                     wxStaticText* promptLabel;
 
-                    controlLabel = new wxStaticText(this, wxID_STATIC, wxT("Please select a set of marcher instructions to allow.\n (You may select up to 8)\n"));
+                    controlLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Please select a set of marcher instructions to allow.\n (You may select up to 8)\n"));
                     {
                         controlLabel->Wrap(180);
                     }
 
-                    promptLabel = new wxStaticText(this, wxID_STATIC, wxT("Selected Instructions:"));
+                    promptLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Selected Instructions:"));
 
-                    mNumSelectedInstructionsIndicator = new wxStaticText(this, wxID_ANY, wxT("0"));
+                    mNumSelectedInstructionsIndicator = new wxStaticText(scrolledWindow, wxID_ANY, wxT("0"));
 
                     helpArea->Add(controlLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
                     helpArea->Add(promptLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
                     helpArea->Add(mNumSelectedInstructionsIndicator, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
                 }
 
-                mAvailableCommandsControl = new wxListBox(this, CALCHART__TRANSITION_SOLVER__EDIT_ALLOWED_COMMANDS, wxDefaultPosition, wxSize(400, 100), 0, NULL, wxLB_EXTENDED);
+                mAvailableCommandsControl = new wxListBox(scrolledWindow, CALCHART__TRANSITION_SOLVER__EDIT_ALLOWED_COMMANDS, wxDefaultPosition, wxSize(400, 100), 0, NULL, wxLB_EXTENDED);
 
                 availableCommandsEditorRegion->Add(helpArea, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                 availableCommandsEditorRegion->Add(mAvailableCommandsControl, 0, wxGROW | wxALL, 5);
             }
 
-            editorSeparator = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+            editorSeparator = new wxStaticLine(scrolledWindow, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
 
             groupsEditor = new wxBoxSizer(wxVERTICAL);
             {
@@ -638,11 +640,11 @@ void TransitionSolverFrame::CreateControls()
                 {
                     wxStaticText* controlLabel;
 
-                    controlLabel = new wxStaticText(this, wxID_STATIC, wxT("New Group:"));
+                    controlLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("New Group:"));
 
-                    mNewGroupNameControl = new wxTextCtrl(this, wxID_ANY);
+                    mNewGroupNameControl = new wxTextCtrl(scrolledWindow, wxID_ANY);
 
-                    mAddGroupButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__ADD_NEW_GROUP, wxT("Add"));
+                    mAddGroupButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__ADD_NEW_GROUP, wxT("Add"));
 
                     addGroupRow->Add(controlLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                     addGroupRow->Add(mNewGroupNameControl, 0, wxGROW | wxALL, 5);
@@ -653,11 +655,11 @@ void TransitionSolverFrame::CreateControls()
                 {
                     wxStaticText* controlLabel;
 
-                    controlLabel = new wxStaticText(this, wxID_STATIC, wxT("Viewing Group:"));
+                    controlLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Viewing Group:"));
 
-                    mCurrentGroupControl = new wxListBox(this, CALCHART__TRANSITION_SOLVER__SELECT_GROUP, wxDefaultPosition, wxSize(400, 100), 0, NULL, wxLB_EXTENDED);
+                    mCurrentGroupControl = new wxListBox(scrolledWindow, CALCHART__TRANSITION_SOLVER__SELECT_GROUP, wxDefaultPosition, wxSize(400, 100), 0, NULL, wxLB_EXTENDED);
 
-                    mRemoveGroupControl = new wxButton(this, CALCHART__TRANSITION_SOLVER__REMOVE_GROUP, wxT("Remove"));
+                    mRemoveGroupControl = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__REMOVE_GROUP, wxT("Remove"));
 
                     selectGroupRow->Add(controlLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                     selectGroupRow->Add(mCurrentGroupControl, 0, wxGROW | wxALL, 5);
@@ -675,14 +677,14 @@ void TransitionSolverFrame::CreateControls()
                         wxStaticText* hint;
                         wxStaticText* numSelectedPointsPrompt;
 
-                        hint = new wxStaticText(this, wxID_STATIC, wxT("Select marchers on the field to enable adding them as members or destinations of the current group."));
+                        hint = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Select marchers on the field to enable adding them as members or destinations of the current group."));
                         {
                             hint->Wrap(150);
                         }
 
-                        numSelectedPointsPrompt = new wxStaticText(this, wxID_STATIC, wxT("Number of selected marchers:"));
+                        numSelectedPointsPrompt = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Number of selected marchers:"));
 
-                        mNumberOfSelectedPointsLabel = new wxStaticText(this, wxID_STATIC, wxT("0"));
+                        mNumberOfSelectedPointsLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("0"));
 
                         hintRegion->Add(hint, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
                         hintRegion->Add(numSelectedPointsPrompt, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
@@ -694,9 +696,9 @@ void TransitionSolverFrame::CreateControls()
                         wxStaticText* controlLabel;
                         wxBoxSizer* memberEditControls;
 
-                        controlLabel = new wxStaticText(this, wxID_STATIC, wxT("Group Members:"));
+                        controlLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Group Members:"));
 
-                        mCurrentGroupMembersList = new wxListBox(this, CALCHART__TRANSITION_SOLVER__NULL, wxDefaultPosition, wxSize(130, 100), 0, NULL, wxLB_EXTENDED);
+                        mCurrentGroupMembersList = new wxListBox(scrolledWindow, CALCHART__TRANSITION_SOLVER__NULL, wxDefaultPosition, wxSize(130, 100), 0, NULL, wxLB_EXTENDED);
 
                         memberEditControls = new wxBoxSizer(wxVERTICAL);
                         {
@@ -706,8 +708,8 @@ void TransitionSolverFrame::CreateControls()
 
                             firstRow = new wxBoxSizer(wxHORIZONTAL);
                             {
-                                mClearMembersButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_MEMBERS, wxT("Clear"));
-                                mSetMembersToSelectionButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__SET_GROUP_MEMBERS, wxT("Set"));
+                                mClearMembersButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_MEMBERS, wxT("Clear"));
+                                mSetMembersToSelectionButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__SET_GROUP_MEMBERS, wxT("Set"));
 
                                 firstRow->Add(mClearMembersButton);
                                 firstRow->Add(mSetMembersToSelectionButton);
@@ -715,8 +717,8 @@ void TransitionSolverFrame::CreateControls()
 
                             secondRow = new wxBoxSizer(wxHORIZONTAL);
                             {
-                                mAddSelectionToMembersButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__ADD_GROUP_MEMBERS, wxT("Add"));
-                                mRemoveSelectionFromMembersButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_MEMBERS, wxT("Remove"));
+                                mAddSelectionToMembersButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__ADD_GROUP_MEMBERS, wxT("Add"));
+                                mRemoveSelectionFromMembersButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_MEMBERS, wxT("Remove"));
 
                                 secondRow->Add(mAddSelectionToMembersButton);
                                 secondRow->Add(mRemoveSelectionFromMembersButton);
@@ -724,7 +726,7 @@ void TransitionSolverFrame::CreateControls()
 
                             thirdRow = new wxBoxSizer(wxHORIZONTAL);
                             {
-                                mSelectMembersButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__SELECT_GROUP_MEMBERS, wxT("Select"));
+                                mSelectMembersButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__SELECT_GROUP_MEMBERS, wxT("Select"));
 
                                 thirdRow->Add(mSelectMembersButton);
                             }
@@ -744,9 +746,9 @@ void TransitionSolverFrame::CreateControls()
                         wxStaticText* controlLabel;
                         wxBoxSizer* destinationEditControls;
 
-                        controlLabel = new wxStaticText(this, wxID_STATIC, wxT("Group Allowed Destinations:"));
+                        controlLabel = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Group Allowed Destinations:"));
 
-                        mCurrentGroupDestinationsList = new wxListBox(this, CALCHART__TRANSITION_SOLVER__NULL, wxDefaultPosition, wxSize(130, 100), 0, NULL, wxLB_EXTENDED);
+                        mCurrentGroupDestinationsList = new wxListBox(scrolledWindow, CALCHART__TRANSITION_SOLVER__NULL, wxDefaultPosition, wxSize(130, 100), 0, NULL, wxLB_EXTENDED);
 
                         destinationEditControls = new wxBoxSizer(wxVERTICAL);
                         {
@@ -756,8 +758,8 @@ void TransitionSolverFrame::CreateControls()
 
                             firstRow = new wxBoxSizer(wxHORIZONTAL);
                             {
-                                mClearDestinationsButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_DESTINATIONS, wxT("Clear"));
-                                mSetDestinationsToSelectionButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__SET_GROUP_DESTINATIONS, wxT("Set"));
+                                mClearDestinationsButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__CLEAR_GROUP_DESTINATIONS, wxT("Clear"));
+                                mSetDestinationsToSelectionButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__SET_GROUP_DESTINATIONS, wxT("Set"));
 
                                 firstRow->Add(mClearDestinationsButton);
                                 firstRow->Add(mSetDestinationsToSelectionButton);
@@ -765,8 +767,8 @@ void TransitionSolverFrame::CreateControls()
 
                             secondRow = new wxBoxSizer(wxHORIZONTAL);
                             {
-                                mAddSelectionToDestinationsButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__ADD_GROUP_DESTINATIONS, wxT("Add"));
-                                mRemoveSelectionFromDestinationsButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_DESTINATIONS, wxT("Remove"));
+                                mAddSelectionToDestinationsButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__ADD_GROUP_DESTINATIONS, wxT("Add"));
+                                mRemoveSelectionFromDestinationsButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__REMOVE_GROUP_DESTINATIONS, wxT("Remove"));
 
                                 secondRow->Add(mAddSelectionToDestinationsButton);
                                 secondRow->Add(mRemoveSelectionFromDestinationsButton);
@@ -774,7 +776,7 @@ void TransitionSolverFrame::CreateControls()
 
                             thirdRow = new wxBoxSizer(wxHORIZONTAL);
                             {
-                                mSelectDestinationsButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__SELECT_GROUP_DESTINATIONS, wxT("Select"));
+                                mSelectDestinationsButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__SELECT_GROUP_DESTINATIONS, wxT("Select"));
 
                                 thirdRow->Add(mSelectDestinationsButton);
                             }
@@ -804,12 +806,12 @@ void TransitionSolverFrame::CreateControls()
             parameterEditor->Add(groupsEditor, wxGROW | wxALL, 5);
         }
 
-        parameterEditorUnderLine = new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+        parameterEditorUnderLine = new wxStaticLine(scrolledWindow, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
 
         bottomButtonRowSizer = new wxBoxSizer(wxHORIZONTAL);
         {
-            mCloseButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__CLOSE, wxT("Close"));
-            mApplyButton = new wxButton(this, CALCHART__TRANSITION_SOLVER__APPLY, wxT("Apply (Solve Transition from This Sheet to Next)"));
+            mCloseButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__CLOSE, wxT("Close"));
+            mApplyButton = new wxButton(scrolledWindow, CALCHART__TRANSITION_SOLVER__APPLY, wxT("Apply (Solve Transition from This Sheet to Next)"));
 
             bottomButtonRowSizer->Add(mCloseButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
             bottomButtonRowSizer->Add(mApplyButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
@@ -824,8 +826,25 @@ void TransitionSolverFrame::CreateControls()
         topLevelSizer->Add(bottomButtonRowSizer);
     }
 
+    {
+        wxSize minFrameSize;
+        wxBoxSizer *frameSizer;
+
+        // add all of the frame content to the scrollable window
+        scrolledWindow->SetSizer(topLevelSizer);
+
+        // configure the minimum size of the window, and then add scroll bars
+        minFrameSize = scrolledWindow->GetSizer()->ComputeFittingWindowSize(scrolledWindow);
+        scrolledWindow->SetMinSize(minFrameSize);
+        scrolledWindow->SetScrollRate(5, 5);
+
+        // add the scrollable window to the frame
+        frameSizer = new wxBoxSizer(wxVERTICAL);
+        frameSizer->Add(scrolledWindow, 1, wxEXPAND);
+        SetSizer(frameSizer);
+    }
+
     SyncControlsWithCurrentState();
-    SetSizer(topLevelSizer);
 }
 
 TransitionSolverFrame::~TransitionSolverFrame()
