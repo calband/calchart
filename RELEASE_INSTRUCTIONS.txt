@@ -30,7 +30,7 @@ For windows:
 w1.1 Follow the instructions in README-win.txt
 
 w1.1.1 Copy readme to build-win:
-cp README.md build-win/README.txt
+awk 'sub("$", "\r")' README.md > build-win/README.txt
 
 w1.2 Install InnoSetup
 I use InnoSetup for creating the installer.  Get it from:
