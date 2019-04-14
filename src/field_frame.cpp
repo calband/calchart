@@ -36,13 +36,13 @@
 #include "cc_show.h"
 #include "ccvers.h"
 #include "confgr.h"
-#include "cont_ui.h"
+#include "ContinuityBrowser.h"
 #include "draw.h"
 #include "e7_transition_solver_ui.h"
-#include "field_canvas.h"
+#include "FieldCanvas.h"
 #include "field_frame_controls.h"
-#include "field_mini_browser.h"
-#include "field_view.h"
+#include "FieldThumbnailBrowser.h"
+#include "FieldView.h"
 #include "modes.h"
 #include "platconf.h"
 #include "print_cont_ui.h"
@@ -331,8 +331,8 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     mContinuityInfoSplit->SetSashPosition(GetSize().x - mContinuityBrowser->GetSizer()->GetMinSize().x - 5);
     mContinuityInfoSplit->SetSashGravity(1);
 
-    mFieldBrowser = new FieldBrowser(static_cast<CalChartDoc*>(GetDocument()), mFieldThumbnailSplit, wxID_ANY, wxDefaultPosition, wxSize{ 180, 800 });
-    mFieldThumbnailSplit->SplitVertically(mFieldBrowser, mContinuityInfoSplit);
+    mFieldThumbnailBrowser = new FieldThumbnailBrowser(static_cast<CalChartDoc*>(GetDocument()), mFieldThumbnailSplit, wxID_ANY, wxDefaultPosition, wxSize{ 180, 800 });
+    mFieldThumbnailSplit->SplitVertically(mFieldThumbnailBrowser, mContinuityInfoSplit);
     mFieldThumbnailSplit->SetSashPosition(180 + 5);
 
     // Now determine what to show and not show.
@@ -983,12 +983,12 @@ void FieldFrame::ChangeFieldThumbnailVisibility(bool show)
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Hide Field Thumbnail"));
         mConfig.Set_FieldFrameFieldThumbnailVisibility(true);
-        mFieldThumbnailSplit->SplitVertically(mFieldBrowser, mContinuityInfoSplit);
+        mFieldThumbnailSplit->SplitVertically(mFieldThumbnailBrowser, mContinuityInfoSplit);
         mFieldThumbnailSplit->SetSashPosition(180 + 5);
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Show Field Thumbnail"));
         mConfig.Set_FieldFrameFieldThumbnailVisibility(false);
-        mFieldThumbnailSplit->Unsplit(mFieldBrowser);
+        mFieldThumbnailSplit->Unsplit(mFieldThumbnailBrowser);
     }
 }
 
@@ -1097,15 +1097,12 @@ void FieldFrame::SetCurrentLasso(CC_DRAG_TYPES type)
 
 void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
 {
-    // retoggle the tool because we want it to draw as selected
-    wxToolBar* tb = GetToolBar();
-    tb->ToggleTool(CALCHART__move + type, true);
-
+    ToolbarSetCurrentMove(type);
     mCanvas->SetCurrentMove(type);
 }
 
 // call by the canvas to inform that the move has been set.  Don't call back to canvas
-void FieldFrame::CanvasSetCurrentMove(CC_MOVE_MODES type)
+void FieldFrame::ToolbarSetCurrentMove(CC_MOVE_MODES type)
 {
     // retoggle the tool because we want it to draw as selected
     wxToolBar* tb = GetToolBar();
@@ -1219,10 +1216,16 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
 
 void FieldFrame::do_zoom(float zoom_amount)
 {
+    zoom_amount = ToolbarSetZoom(zoom_amount);
+    mCanvas->SetZoom(zoom_amount);
+}
+
+float FieldFrame::ToolbarSetZoom(float zoom_amount)
+{
     zoom_amount = std::max(zoom_amount, 0.01f);
     mControls->SetZoomAmount(zoom_amount);
     mConfig.Set_FieldFrameZoom(zoom_amount);
-    mCanvas->SetZoom(zoom_amount);
+    return zoom_amount;
 }
 
 void FieldFrame::UpdatePanel()
@@ -1244,6 +1247,7 @@ void FieldFrame::UpdatePanel()
     SetStatusText(tempbuf, 2);
 
     SetTitle(GetDocument()->GetUserReadableName());
+    mCanvas->Refresh();
 }
 
 const FieldView* FieldFrame::GetFieldView() const

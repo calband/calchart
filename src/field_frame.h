@@ -34,10 +34,10 @@ class Show;
 }
 
 class FieldCanvas;
-class FieldFrameControls;
-class FieldBrowser;
-class ContinuityBrowser;
 class FieldView;
+class FieldFrameControls;
+class FieldThumbnailBrowser;
+class ContinuityBrowser;
 class CalChartDoc;
 class CalChartConfiguration;
 class wxSplitterWindow;
@@ -147,7 +147,8 @@ public:
 
     void SetCurrentLasso(CC_DRAG_TYPES type);
     void SetCurrentMove(CC_MOVE_MODES type);
-    void CanvasSetCurrentMove(CC_MOVE_MODES type);
+    void ToolbarSetCurrentMove(CC_MOVE_MODES type);
+    float ToolbarSetZoom(float zoom); // set to an amount, returns what it was set to.
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
     void refnum_callback(wxCommandEvent&);
@@ -177,7 +178,7 @@ private:
 
     FieldFrameControls* mControls;
     FieldCanvas* mCanvas;
-    FieldBrowser* mFieldBrowser;
+    FieldThumbnailBrowser* mFieldThumbnailBrowser;
     ContinuityBrowser* mContinuityBrowser;
     wxSplitterWindow* mFieldThumbnailSplit;
     wxSplitterWindow* mContinuityInfoSplit;

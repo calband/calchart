@@ -1,5 +1,6 @@
+#pragma once
 /*
- * field_canvas.h
+ * FieldCanvas.h
  * Canvas for the Field window
  */
 
@@ -19,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 #include "basic_ui.h"
 #include "cc_types.h"

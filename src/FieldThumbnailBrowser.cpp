@@ -1,5 +1,5 @@
 /*
- * field_mini_browser
+ * FieldThumbnailBrowser
  */
 
 /*
@@ -19,7 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "field_mini_browser.h"
+#include "FieldThumbnailBrowser.h"
 #include "calchartdoc.h"
 #include "cc_show.h"
 #include "confgr.h"
@@ -28,27 +28,27 @@
 
 #include <wx/dcbuffer.h>
 
-// View for linking CalChartDoc with FieldBrowser
-class FieldBrowserView : public wxView {
+// View for linking CalChartDoc with FieldThumbnailBrowser
+class FieldThumbnailBrowserView : public wxView {
 public:
-    FieldBrowserView() = default;
-    virtual ~FieldBrowserView() = default;
+    FieldThumbnailBrowserView() = default;
+    virtual ~FieldThumbnailBrowserView() = default;
     virtual void OnDraw(wxDC* dc) {}
     virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 };
 
-void FieldBrowserView::OnUpdate(wxView* sender, wxObject* hint)
+void FieldThumbnailBrowserView::OnUpdate(wxView* sender, wxObject* hint)
 {
-    dynamic_cast<FieldBrowser*>(GetFrame())->OnUpdate();
+    dynamic_cast<FieldThumbnailBrowser*>(GetFrame())->OnUpdate();
 }
 
-BEGIN_EVENT_TABLE(FieldBrowser, wxScrolledWindow)
-EVT_PAINT(FieldBrowser::OnPaint)
-EVT_CHAR(FieldBrowser::HandleKey)
-EVT_LEFT_DOWN(FieldBrowser::HandleMouseDown)
+BEGIN_EVENT_TABLE(FieldThumbnailBrowser, wxScrolledWindow)
+EVT_PAINT(FieldThumbnailBrowser::OnPaint)
+EVT_CHAR(FieldThumbnailBrowser::HandleKey)
+EVT_LEFT_DOWN(FieldThumbnailBrowser::HandleMouseDown)
 END_EVENT_TABLE()
 
-FieldBrowser::FieldBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+FieldThumbnailBrowser::FieldThumbnailBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxScrolledWindow(parent, id, pos, size, style, name)
     , mDoc(doc)
     , x_left_padding(4)
@@ -57,7 +57,7 @@ FieldBrowser::FieldBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, co
     , y_name_size(16)
     , y_name_padding(4)
 {
-    mView = std::make_unique<FieldBrowserView>();
+    mView = std::make_unique<FieldThumbnailBrowserView>();
     mView->SetDocument(doc);
     mView->SetFrame(this);
 
@@ -66,7 +66,7 @@ FieldBrowser::FieldBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, co
 }
 
 // calculate the size of the panel
-wxSize FieldBrowser::SizeOfOneCell() const
+wxSize FieldThumbnailBrowser::SizeOfOneCell() const
 {
     auto mode_size = mDoc->GetMode().Size();
     auto current_size_x = GetSize().x - x_left_padding - x_right_padding;
@@ -75,7 +75,7 @@ wxSize FieldBrowser::SizeOfOneCell() const
 }
 
 // calculate which sheet the user clicked in
-int FieldBrowser::WhichCell(wxPoint const& p) const
+int FieldThumbnailBrowser::WhichCell(wxPoint const& p) const
 {
     auto size_of_one = SizeOfOneCell();
     return p.y / size_of_one.y;
@@ -110,7 +110,7 @@ static auto CalcUserScale(wxSize const& box_size, CalChart::Coord const& mode_si
 // with an offset of 16 point font of the current sheet
 // with a boundary of 4 above and below.
 
-void FieldBrowser::OnPaint(wxPaintEvent& event)
+void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
 {
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
@@ -164,33 +164,36 @@ void FieldBrowser::OnPaint(wxPaintEvent& event)
     }
 }
 
-void FieldBrowser::OnUpdate()
+void FieldThumbnailBrowser::OnUpdate()
 {
     auto size_of_one = SizeOfOneCell();
     SetVirtualSize(size_of_one.x, size_of_one.y * mDoc->GetNumSheets());
 
-    SetScrollRate(0, size_of_one.y / 5);
+    SetScrollRate(0, size_of_one.y);
 
     auto get_size = GetSize();
     auto scrolled_top = CalcUnscrolledPosition({ 0, 0 });
     auto scrolled_bottom = CalcUnscrolledPosition({ 0, get_size.y });
+    // so how many are visible:
+    auto how_many_visible = get_size.y / size_of_one.y;
+    if (how_many_visible == 0) {
+        Scroll(0, mDoc->GetCurrentSheetNum());
+    }
+    else {
+        // if the upper part is above the view, move the view to contain it.
+        if (size_of_one.y * mDoc->GetCurrentSheetNum() < scrolled_top.y) {
+            Scroll(0, mDoc->GetCurrentSheetNum());
+        }
+        // if the lower part is below the view, move the view to contain it.
+        if ((size_of_one.y * (mDoc->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
+            Scroll(0, mDoc->GetCurrentSheetNum() - how_many_visible + 1);
+        }
+    }
 
-    // figure out what the view of cells would be.
-    // let's print out where the current cell would be.
-    //
-    // if the upper part is above the view, move the view to contain it.
-    if (size_of_one.y * mDoc->GetCurrentSheetNum() < scrolled_top.y) {
-        Scroll(0, size_of_one.y * mDoc->GetCurrentSheetNum());
-    }
-    // if the lower part is below the view, move the view to contain it.
-    if ((size_of_one.y * (mDoc->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
-        // we want to move to a place where the top amount we are over is the current top.
-        auto how_much_we_are_over = (size_of_one.y * (mDoc->GetCurrentSheetNum() + 1)) - scrolled_bottom.y;
-        Scroll(0, scrolled_top.y + how_much_we_are_over);
-    }
+    Refresh();
 }
 
-void FieldBrowser::HandleKey(wxKeyEvent& event)
+void FieldThumbnailBrowser::HandleKey(wxKeyEvent& event)
 {
     if (((event.GetKeyCode() == WXK_LEFT) || (event.GetKeyCode() == WXK_UP)) && mDoc->GetCurrentSheetNum() > 0) {
         mDoc->SetCurrentSheet(mDoc->GetCurrentSheetNum() - 1);
@@ -200,7 +203,7 @@ void FieldBrowser::HandleKey(wxKeyEvent& event)
     }
 }
 
-void FieldBrowser::HandleMouseDown(wxMouseEvent& event)
+void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 {
     auto which = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
     mDoc->SetCurrentSheet(which);

@@ -1,5 +1,5 @@
 /*
- * field_view.h
+ * FieldView.h
  * Header for field view
  */
 

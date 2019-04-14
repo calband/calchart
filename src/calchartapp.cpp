@@ -24,7 +24,7 @@
 #include "basic_ui.h"
 #include "calchartdoc.h"
 #include "confgr.h"
-#include "field_view.h"
+#include "FieldView.h"
 #include "modes.h"
 #include "platconf.h"
 #include "top_frame.h"

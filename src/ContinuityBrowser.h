@@ -1,6 +1,6 @@
-#pragma once
 /*
- * field_mini_browser
+ * ContinuityBrowser
+ * Header for continuity editors
  */
 
 /*
@@ -20,46 +20,35 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "calchartdoc.h"
+#pragma once
 
-#include <wx/dialog.h>
 #include <wx/docview.h>
 
-class FieldBrowserView;
-class FieldBrowserPerCont;
+class CalChartDoc;
+class ContinuityBrowserView;
+class ContinuityBrowserPerCont;
 
-class FieldBrowser : public wxScrolledWindow {
+class ContinuityBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
 
 public:
-    FieldBrowser(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
+    ContinuityBrowser(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxScrolledWindowStyle,
         const wxString& name = wxPanelNameStr);
-    virtual ~FieldBrowser() override = default;
+    virtual ~ContinuityBrowser() override = default;
 
     void OnCmdHelp(wxCommandEvent& event);
-    virtual void OnUpdate(); // Refresh all window controls
+    virtual void Update() override; // Refresh all window controls
 
 private:
     void CreateControls();
     void OnChar(wxKeyEvent& event);
-    void OnPaint(wxPaintEvent& event);
-    wxSize SizeOfOneCell() const;
-    int WhichCell(wxPoint const& p) const;
-    void HandleKey(wxKeyEvent& event);
-    void HandleMouseDown(wxMouseEvent& event);
 
     CalChartDoc* mDoc;
-    std::unique_ptr<FieldBrowserView> mView;
-    std::vector<FieldBrowserPerCont*> mPerCont;
-
-    const int x_left_padding;
-    const int x_right_padding;
-    const int y_upper_padding;
-    const int y_name_size;
-    const int y_name_padding;
+    std::unique_ptr<ContinuityBrowserView> mView;
+    std::vector<ContinuityBrowserPerCont*> mPerCont;
 
     DECLARE_EVENT_TABLE()
 };

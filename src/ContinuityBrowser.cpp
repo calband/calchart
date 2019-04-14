@@ -1,5 +1,5 @@
 /*
- * cont_ui.cpp
+ * ContinuityBrowser
  * Continuity editors
  */
 
@@ -20,7 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cont_ui.h"
+#include "ContinuityBrowser.h"
+#include "ContinuityEditorPopup.h"
 #include "basic_ui.h"
 #include "calchartapp.h"
 #include "calchartdoc.h"
@@ -35,95 +36,6 @@
 #include <wx/html/helpctrl.h>
 #include <wx/msgdlg.h>
 #include <wx/statline.h>
-
-// ContinuityEditorPopup, for browser style adjustments
-class ContinuityEditorPopup : public wxDialog {
-    using super = wxDialog;
-
-public:
-    // all in one function for editing
-    static void ProcessEditContinuity(CalChartDoc* doc, SYMBOL_TYPE sym, wxWindow* parent);
-
-    ContinuityEditorPopup(CalChartDoc* doc, SYMBOL_TYPE sym, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& caption = wxT("Edit Continuity"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    virtual ~ContinuityEditorPopup() override = default;
-
-    virtual void Update() override;
-    auto GetValue() const { return mUserInput->GetValue(); }
-
-private:
-    void CreateControls();
-
-    CalChartDoc* mDoc;
-    SYMBOL_TYPE mSym;
-    FancyTextWin* mUserInput;
-};
-
-ContinuityEditorPopup::ContinuityEditorPopup(CalChartDoc* doc, SYMBOL_TYPE sym, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, caption, pos, size, style, caption)
-    , mDoc(doc)
-    , mSym(sym)
-{
-    CreateControls();
-    // This fits the dalog to the minimum size dictated by the sizers
-    GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
-    Center();
-    // now update the current screen
-    Update();
-}
-
-void ContinuityEditorPopup::CreateControls()
-{
-    // create a sizer for laying things out top down:
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
-    auto top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer);
-    auto staticText = new wxStaticText(this, wxID_STATIC, CalChart::GetLongNameForSymbol(mSym), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    top_button_sizer->Add(staticText, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    mUserInput = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(60, 300));
-    topsizer->Add(mUserInput, 0, wxGROW | wxALL, 5);
-
-    // add a horizontal bar to make things clear:
-    topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
-
-    // add a discard, done
-    top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer);
-    auto button = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
-    top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    button = new wxButton(this, wxID_OK, wxT("Done"));
-    top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-}
-
-void ContinuityEditorPopup::Update()
-{
-    mUserInput->Clear();
-    auto current_sheet = mDoc->GetCurrentSheet();
-    auto& c = current_sheet->GetContinuityBySymbol(mSym);
-    if (!c.GetText().empty()) {
-        mUserInput->WriteText(c.GetText());
-        mUserInput->SetInsertionPoint(0);
-    }
-}
-
-void ContinuityEditorPopup::ProcessEditContinuity(CalChartDoc* doc, SYMBOL_TYPE sym, wxWindow* parent)
-{
-    ContinuityEditorPopup dialog(doc, sym, parent);
-    if (dialog.ShowModal() == wxID_OK) {
-        // set the continuity back
-        auto conttext = dialog.GetValue();
-        auto current_sheet = doc->GetCurrentSheet();
-        auto& cont = current_sheet->GetContinuityBySymbol(sym);
-        if (conttext != cont.GetText()) {
-            auto cmd = doc->Create_SetContinuityTextCommand(sym, conttext);
-            doc->GetCommandProcessor()->Submit(cmd.release());
-        }
-    }
-}
 
 class ContinuityBrowserCanvas : public wxScrolledWindow {
     using super = wxScrolledWindow;
