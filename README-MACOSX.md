@@ -1,6 +1,6 @@
 # Steps for building for MacOSX.
 
-These steps were written with Sierra 10.12 and XCode 8.2.1.  Both should be on the app store.  You *can* do earlier builds, but you may have to modify your install steps.
+These steps were written with 10.14 and XCode 10.2.  Both should be on the app store.  You *can* do earlier builds, but you may have to modify your install steps.
 
 You also need to install the command line tools for Xcode.  See https://developer.apple.com/library/ios/technotes/tn2339/_index.html
 
@@ -28,7 +28,7 @@ Now you can build.  You'll first need to create a work directory, then configure
 
 	$ mkdir build-results
 	$ cd build-results
-	$ ../configure --with-cocoa --with-macosx-version-min=10.10 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk --enable-debug --enable-debug_info --disable-shared --enable-cxx11 --disable-mediactrl
+	$ ../configure --with-cocoa --with-macosx-version-min=10.10 --with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk --enable-debug --enable-debug_info --disable-shared --enable-cxx11 --disable-mediactrl CC=clang CXX=clang
 	$ make -j4
 
 (see http://forums.wxwidgets.org/viewtopic.php?f=19&t=37432 for more information about why you need to add the build options.  Also, we are disabling mediactrl because of issue http://trac.wxwidgets.org/ticket/17639.  Because of this we will not have media playback until we move to a wxWidgets that supports it.)
