@@ -34,6 +34,7 @@
 #include <wx/html/helpctrl.h>
 
 #include <wx/docview.h>
+#include <wx/stdpaths.h>
 
 wxPrintDialogData* gPrintDialogData;
 
@@ -115,9 +116,9 @@ void CalChartApp::InitAppAsServer()
         wxFileSystem::AddHandler(new wxArchiveFSHandler);
 
 #if defined(__APPLE__) && (__APPLE__)
-        wxString helpfile(wxT("CalChart.app/docs"));
+        wxString helpfile(wxT("CalChart.app/Contents/Resources"));
 #else
-        wxString helpfile(wxT("docs"));
+        wxString helpfile = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("docs"));
 #endif
         helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
         if (!GetGlobalHelpController().AddBook(wxFileName(helpfile))) {

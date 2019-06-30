@@ -8,17 +8,11 @@ Checklist
 
 How to release calchart:
 
-The current calchart version is 3.5.3.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.5.3)
+The current calchart version is 3.5.4.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.5.4)
 
-0.1 Increment the versions in src/ccvers.h to CCVER
+0.1 Increment the CalChart_VERSION in CMakeLists.txt to CCVER
 
-0.2 Modify the release version in the install script, build-win/CalChartInstallScript.iss.
-
-0.3 Edit build-macos/CalChart.xcodeproj/project.pbxproj, and change CURRENT_PROJECT_VERSION to current version, $CCVER
-
-0.4 Edit build-macos/dmg_maker.sh to have the right version
-
-0.5 Edit README.md and update what bugs have been fixed.
+0.2 Edit README.md and update what bugs have been fixed.
 
 Because you sometimes run into build issues on one platform instead of another, do a build before you do a tag:
 1. Prebuild the project to make sure its working
@@ -32,44 +26,46 @@ w1.1 Follow the instructions in README-win.txt
 w1.1.1 Copy readme to build-win:
 awk 'sub("$", "\r")' README.md > build-win/README.txt
 
-w1.2 Install InnoSetup
-I use InnoSetup for creating the installer.  Get it from:
-http://www.jrsoftware.org/isinfo.php
+w1.2 Install Nullsoft Scriptable Install System
+We've configured CMake to use NSIS to do installations.
+https://sourceforge.net/projects/nsis/
 
-w1.3 CalChart is built having the C-runtime as a DLL.  Most users will not have the dll installed on their system.  We package up the redistribution installer with our package for them.
-  w1.3.a. Find the file on your system:
-     find /cygdrive/c/ -name "vcredist_x86.exe"
-  w1.3.b. copy it to \calchart\build-win.
+w1.3 Build the setup.exe installer:
+  Compile the ALL_BUILD target for Release by selecting the ALL_BUILD in the CMakePredefinedTargets and Build->Build ALL_BUILD.
+  Compile the INSTALL target for Release by selecting the INSTALL in the CMakePredefinedTargets and Build->Build INSTALL.
 
-w1.4 Build the setup.exe installer:
-Compile via Build->Compile.
+The final product is CalChart-$CCVER.exe
 
-w1.5 The installer is called setup.exe.  Rename to:
-$ cd build-win/InstallerFiles
-$ mv mysetup.exe Install-CalChart-$CCVER.exe
-
-The final product is Install-CalChart-$CCVER.exe
+misc info on Windows can be found here:
+https://dominoc925.blogspot.com/2016/09/create-windows-installer-using-cmake.html
+https://docs.microsoft.com/en-us/cpp/windows/determining-which-dlls-to-redistribute?view=vs-2019
 
 ---
 For Mac:
 m1.1 Follow the instructions in README-macos.txt
 
-m1.2 Run dmg_maker.sh
-$ bash dmg_maker.sh
+m1.2 Run the cmake build command to build for release (you may have to run several times)
 
-The final product is CalChart-$CCVER.dmg
+	$ cd build
+	$ xcodebuild -configuration Release
+
+m1.3 Run the cmake package command to build
+
+	$ cpack -G DragNDrop
+
+The final product is build/CalChart-$CCVER.dmg
 
 ---
 
 2. Tag the depot
-$ git tag -a v3.5.3 -m "calchart-3.5.3"
-$ git push origin v3.5.3
+$ git tag -a v3.5.4 -m "calchart-3.5.4"
+$ git push origin v3.5.4
 
 3. Go to a temporary directory on your system to recheck at the tag.  This is to avoid having any unwanted files
 $ cd /tmp
 $ git clone --recursive https://github.com/calband/calchart.git calchart
 $ cd calchart
-$ git checkout v3.5.3
+$ git checkout v3.5.4
 
 4. Rebuild the release now that you have the tag (repeat instructions for step 1)
 
@@ -82,9 +78,9 @@ You'll need to be logged in as Administrator to modify the files.
 
 8. Upload the README.txt to the new folder.  Click on README.txt and edit the file details to signify it's a release notes.
 
-9. Upload the CalChart-$CCVER.dmg to the folder.  Click on dmg and edit the file details to signify it's platform is Mac (OS X) and set the release_notes for the file.
+9. Upload the CalChart-$CCVER.dmg to the folder.  Click on dmg and edit the file details to signify its platform is Mac (OS X) and set the release_notes for the file.
 
-10. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify it's platform is Windows and set the release_notes for the file.
+10. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify its platform is Windows and set the release_notes for the file.
 
 11. Update https://github.com/calband/calchart/releases
 

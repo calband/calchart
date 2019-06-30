@@ -17,18 +17,6 @@ packages:
 We tried Visual Studio Community 2017.
 You'll need to install the "Visual C++" "Common Tools for Visual C++ 2017".
 
-## Download 3.1 of wxWidgets
-Go to wxwidgets.org.  Download and run the Windows Installer (which will put the source at c:\wxWidgets-3.1.0)
-
-## Make wxWidgets
-Open the project wx_vc14.sln at wxWidgets-3.1.0\build\msw.
-Visual studio prompts you to upgrade the project.  Say yes.
-Build the following solutions
-
-       Debug   | Win32
-       Release | Win32
-
-(additional instructions and information can be found at wiki.wxWidgets.org/Install)
 
 ## Download Boost
 Visit http://www.boost.org/ and download the latest version of Boost. 
@@ -42,10 +30,18 @@ Remember where you place this Boost directory. In the next section, I will refer
 Go to Control Panel->System->Advanced System Settings->Environment Variables
 Add the following User variables:
 
-	WXWIN=c:\wxWidgets-3.1.0
 	BOOST_DIR=$YOUR_BOOST_DIRECTORY
+	BOOST_ROOT=$YOUR_BOOST_DIRECTORY
+	CMAKE_PREFIX_PATH=$PATH_TO_BISON
 
 (see the `Download Boost` section above for the meaning of $YOUR_BOOST_DIRECTORY)
+
+
+## Get CMake
+Read instructions at 
+https://cmake.org/download/
+https://cmake.org/runningcmake/
+
 
 ## Get calchart (you'll need to log in with your source forge account):
 Open cygwin and run the following:
@@ -54,14 +50,20 @@ Open cygwin and run the following:
 
 (or cd to whereever you installed calchart)
 
-Make Calchart's generated files:
+## Configure build system with CMake
+See
+https://cmake.org/runningcmake/
 
-	$ make generate
+Set the "Where is the source code:" to c:/calchart
+Set the "Where to build the binaries:" to c:/calchart/build
+
+Press Configure
+Press Generate
+Press Open Project
 
 ## Make Calchart
-Open Visual Studio.
-Open the solution file:
-...\calchart\build-win\CalChart\CalChart.sln
-Build.  This will create the CalChart.exe.
+Build the target CalChart.  This will create the CalChart.exe.
+
+You can also build the ALL_BUILD target.
 
 
