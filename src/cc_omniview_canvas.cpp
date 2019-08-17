@@ -28,8 +28,11 @@
 #include "confgr.h"
 #include "draw.h"
 #include "modes.h"
+#include "platconf.h"
 
 #include <wx/dcbuffer.h>
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
 
 #if !wxUSE_GLCANVAS
 #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
@@ -54,11 +57,14 @@
 //
 // care must be taken to getting these correct
 
+auto GetImageDir() {
 #if defined(__APPLE__) && (__APPLE__)
-const static wxString kImageDir = wxT("CalChart.app/image/");
+	const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/");
 #else
-const static wxString kImageDir = wxT("image/");
+	const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("image") PATH_SEPARATOR);
 #endif
+	return kImageDir;
+}
 
 static const viewpoint_t KStartingViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
 static const float kStartingViewAngle = kViewAngle_1;
@@ -138,10 +144,7 @@ id_string_t ListOfImageFiles[] = { { kF0, wxT("f0.tga") },
     { kFR1, wxT("fr1.tga") },
     { kFR2, wxT("fr2.tga") },
     { kField, wxT("field.tga") },
-// lines are created when needed for each show.
-#if !(defined(__APPLE__) && (__APPLE__))
     { kLines, wxT("lines.tga") },
-#endif
     { kDirection, wxT("Direction.tga") },
     { kBleachers, wxT("bleachers.tga") },
     { kWall, wxT("wall.tga") },
@@ -387,7 +390,7 @@ CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas* canvas)
     wxInitAllImageHandlers();
     for (size_t i = 0; i < sizeof(ListOfImageFiles) / sizeof(ListOfImageFiles[0]);
          ++i) {
-        if (!LoadTexture(kImageDir + ListOfImageFiles[i].mImageFilename,
+        if (!LoadTexture(GetImageDir() + ListOfImageFiles[i].mImageFilename,
                 m_textures[ListOfImageFiles[i].mImageId])) {
             wxLogError(wxT("Could not load ") + ListOfImageFiles[i].mImageFilename);
         }
@@ -583,10 +586,10 @@ void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info,
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniView_Canvas::CCOmniView_Canvas(AnimationView* view, wxWindow* frame,
+CCOmniView_Canvas::CCOmniView_Canvas(AnimationView* view, wxWindow* parent,
     CalChartConfiguration& config_,
     const wxSize& size)
-    : wxGLCanvas(frame, wxID_ANY, NULL, wxDefaultPosition, size,
+    : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, size,
           wxFULL_REPAINT_ON_RESIZE)
     , m_glContext(new CCOmniView_GLContext(this))
     , mAnimationView(view)
@@ -601,10 +604,6 @@ CCOmniView_Canvas::CCOmniView_Canvas(AnimationView* view, wxWindow* frame,
     , mFOV(60)
     , mShiftMoving(false)
 {
-#if defined(__APPLE__) && (__APPLE__)
-    m_glContext->UseForLines(
-        GetOmniLinesImage(config, mAnimationView->GetShow()->GetMode()));
-#endif
 }
 
 CCOmniView_Canvas::~CCOmniView_Canvas() {}
@@ -1017,3 +1016,4 @@ void CCOmniView_Canvas::OnCmd_ToggleShowOnlySelected()
     mShowOnlySelected = !mShowOnlySelected;
     Refresh();
 }
+

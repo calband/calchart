@@ -55,8 +55,9 @@ struct MarcherInfo {
 };
 
 class CCOmniView_Canvas : public wxGLCanvas {
+    using super = wxGLCanvas;
 public:
-    CCOmniView_Canvas(AnimationView* view, wxWindow* frame,
+    CCOmniView_Canvas(AnimationView* view, wxWindow* parent,
         CalChartConfiguration& config,
         const wxSize& size = wxDefaultSize);
     ~CCOmniView_Canvas();

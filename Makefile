@@ -1,4 +1,6 @@
 # Makefile for calchart (UNIX).
+# this file is obsolete and CMake should be used instead
+# we keep it as a reference on how to rebuild the docs.
 
 #### TOOLS ####
 WXCONFIG = wx-config

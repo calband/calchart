@@ -38,7 +38,6 @@ principle development will be on GitHub.
 
 http://sourceforge.net/projects/calchart/
 
-
 ## Reporting a bug or requesting a new feature.
 
 CalChart uses an issues page on the github site for tracking bugs and features.
@@ -60,6 +59,8 @@ desired behavior.
 
 ## Building CalChart
 
+CalChart use CMake to help with making a central build system.
+
 For building on MacOSX platforms, see the [README-MACOSX.md](README-MACOSX.md).  For building on
 Windows platforms, see the [README-WINDOWS.md](README-WINDOWS.md).
 
@@ -67,6 +68,10 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 
 # Release notes
+
+## Release notes for 3.5.4
+
+* [#](../../issues/) Switch to CMake.
 
 ## Release notes for 3.5.3
 

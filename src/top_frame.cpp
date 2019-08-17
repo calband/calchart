@@ -107,7 +107,7 @@ void TopFrame::About()
         wxT("\nAuthors: Gurk Meeker, Richard Michael Powell\n")
         wxT("\nContributors: Brandon Chinn, Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n")
         wxT("http://calchart.sourceforge.net\n")
-        wxT("Copyright (c) 1994-2017\n")
+        wxT("Copyright (c) 1994-2019\n")
         wxT("\n")
         wxT("This program is free software: "
             "you can redistribute it and/or "
