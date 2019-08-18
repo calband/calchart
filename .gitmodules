@@ -4,3 +4,6 @@
 [submodule "submodules/wxWidgets"]
 	path = submodules/wxWidgets
 	url = https://github.com/wxWidgets/wxWidgets
+[submodule "submodules/docopt.cpp"]
+	path = submodules/docopt.cpp
+	url = https://github.com/docopt/docopt.cpp.git

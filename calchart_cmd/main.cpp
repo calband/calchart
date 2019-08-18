@@ -13,12 +13,33 @@
 #include "print_ps.h"
 #include "modes.h"
 #include "cont.h"
+#include "docopt.h"
 
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <unistd.h>
-#include <getopt.h>
+
+static const char USAGE[] =
+R"(calchart_cmd
+
+    Usage:
+      calchart_cmd parse [-acdpDU] <shows>...
+      calchart_cmd [--landscape --cont --contsheet --overview] print_to_postscript <show> <ps_file>
+      calchart_cmd (-h | --help)
+      calchart_cmd --version
+
+    Options:
+      -p, --print_show    Print out the show.
+      -c, --check_flag  Drifting mine.
+      -d, --dump_continuity  Drifting mine.
+      -D, --dump_continuity_text  Drifting mine.
+      -a, --animate_show  Drifting mine.
+      -U, --unit_test_continuity  Drifting mine.
+      -h --help     Show this screen.
+      --version     Show version.
+)";
+
+static const auto version = "calchart_cmd 1.0";
 
 using namespace CalChart;
 
@@ -275,92 +296,52 @@ void FindContinuityInconsistancies(const char* show)
     }
 }
 
-int verbose_flag = 1;
-int print_flag = 0;
-int animate_flag = 0;
-int dump_continuity = 0;
-int dump_continuity_text = 0;
-int unit_test_continuity = 0;
-int check_flag = 0;
-int psprint_flag = 0;
-
-static struct option long_options[] = {
-    /* These options set a flag. */
-    { "print_show", no_argument, &print_flag, 1 }, // p
-    { "check_flag", no_argument, &check_flag, 1 }, // c
-    { "dump_continuity", no_argument, &dump_continuity, 1 }, // d
-    { "dump_continuity_text", no_argument, &dump_continuity_text, 1 }, // D
-    { "unit_test_continuity", no_argument, &unit_test_continuity, 1 }, // U
-    { "animate_flag", no_argument, &animate_flag, 1 }, // a
-    { "psprint_flag", no_argument, &psprint_flag, 1 }, // P
-    { 0, 0, 0, 0 }
-};
-
 namespace calchart {
 int main(int argc, char* argv[]);
 }
 
 int main(int argc, char* argv[])
 {
-    opterr = 0;
-    int c = 0;
-    while ((c = getopt(argc, argv, "cpadDUP")) != -1)
-        switch (c) {
-        case 'p':
-            print_flag = true;
-            break;
-        case 'a':
-            animate_flag = true;
-            break;
-        case 'd':
-            dump_continuity = true;
-            break;
-        case 'D':
-            dump_continuity_text = true;
-            break;
-        case 'U':
-            unit_test_continuity = true;
-            break;
-        case 'c':
-            check_flag = true;
-            break;
-        case 'P':
-            psprint_flag = true;
-            break;
-        }
-    while (optind < argc) {
-        try {
+    std::map<std::string, docopt::value> args
+        = docopt::docopt(USAGE,
+                         { argv + 1, argv + argc },
+                         true,               // show help if requested
+                         version);  // version string
+
+    int print_flag = args["--print_show"].asBool();
+    int animate_flag = args["--animate_show"].asBool();
+    int dump_continuity = args["--dump_continuity"].asBool();
+    int dump_continuity_text = args["--dump_continuity_text"].asBool();
+    int unit_test_continuity = args["--unit_test_continuity"].asBool();
+    int check_flag = args["--check_flag"].asBool();
+
+    if (args["parse"]) {
+        auto list_of_files = args["<shows>"].asStringList();
+        for (auto file : list_of_files) {
             if (print_flag) {
-                PrintShow(argv[optind]);
+                PrintShow(file.c_str());
             }
             if (animate_flag) {
-                AnimateShow(argv[optind]);
+                AnimateShow(file.c_str());
             }
             if (dump_continuity) {
-                DumpContinuity(argv[optind]);
+                DumpContinuity(file.c_str());
             }
             if (dump_continuity_text) {
-                DumpContinuityText(argv[optind]);
+                DumpContinuityText(file.c_str());
             }
             if (unit_test_continuity) {
-                DoContinuityUnitTest(argv[optind]);
+                DoContinuityUnitTest(file.c_str());
             }
             if (check_flag) {
                 std::cout << "ContinuityCountDifferentThanSymbol ? "
-                          << ContinuityCountDifferentThanSymbol(argv[optind]) << "\n";
-                FindContinuityInconsistancies(argv[optind]);
-            }
-            if (psprint_flag) {
-                PrintToPS(argv[optind], atoi(argv[optind + 1]), atoi(argv[optind + 2]),
-                    atoi(argv[optind + 3]), atoi(argv[optind + 4]),
-                    argv[optind + 5]);
-                break;
+                          << ContinuityCountDifferentThanSymbol(file.c_str()) << "\n";
+                FindContinuityInconsistancies(file.c_str());
             }
         }
-        catch (const std::runtime_error& e) {
-            std::cerr << "Error on file " << argv[optind] << ": " << e.what() << "\n";
-        }
-        ++optind;
+    }
+    if (args["print_to_postscript"]) {
+        PrintToPS(args["<show>"].asString().c_str(), args["--landscape"].asBool(), args["--cont"].asBool(), args["--contsheet"].asBool(), args["--overview"].asBool(), args["<ps_file>"].asString().c_str());
     }
 
     return 0;
