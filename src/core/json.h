@@ -52,6 +52,7 @@ public:
      * JSONData object.
      */
     virtual JSONDataType type() const = 0;
+    virtual ~JSONData() = default;
 
 protected:
     /*!
