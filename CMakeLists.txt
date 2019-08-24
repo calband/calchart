@@ -89,9 +89,12 @@ add_executable (
   "${CMAKE_CURRENT_SOURCE_DIR}/calchart_cmd/main.cpp"
   )
 
+add_subdirectory (submodules/docopt.cpp EXCLUDE_FROM_ALL)
+
 target_link_libraries (
   ${target}
   calchart_core
+  docopt
   )
 
 install (
