@@ -44,17 +44,17 @@ public:
 };
 
 /**
- * A canvas that can be scrolled and zoomed in on.
+ * A window that can be scrolled and zoomed in on.
  * To use, call PrepareDC on your OnPaint routines with the dc.
  */
-class ScrollZoomCanvas : public wxScrolledWindow {
+class ScrollZoomWindow : public wxScrolledWindow {
     using super = wxScrolledWindow;
 
 public:
-    ScrollZoomCanvas(wxWindow* parent, wxWindowID id = wxID_ANY,
+    ScrollZoomWindow(wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = 0);
-    virtual ~ScrollZoomCanvas() override;
+    virtual ~ScrollZoomWindow() override;
 
 protected:
     virtual void PrepareDC(wxDC&) override;
@@ -81,8 +81,8 @@ private:
  * To make this work, OnMouseMove(...) should be called in response to mouse
  * move events.
  */
-class MouseMoveScrollCanvas : public ScrollZoomCanvas {
-    using super = ScrollZoomCanvas;
+class MouseMoveScrollCanvas : public ScrollZoomWindow {
+    using super = ScrollZoomWindow;
 
 public:
     MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id = wxID_ANY,

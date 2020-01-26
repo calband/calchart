@@ -82,7 +82,7 @@ wxString FancyTextWin::GetValue(void) const
 }
 #endif
 
-ScrollZoomCanvas::ScrollZoomCanvas(wxWindow* parent, wxWindowID id,
+ScrollZoomWindow::ScrollZoomWindow(wxWindow* parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size,
     long style)
     : wxScrolledWindow(parent, id, pos, size, wxHSCROLL | wxVSCROLL | style)
@@ -92,32 +92,32 @@ ScrollZoomCanvas::ScrollZoomCanvas(wxWindow* parent, wxWindowID id,
 {
 }
 
-ScrollZoomCanvas::~ScrollZoomCanvas() {}
+ScrollZoomWindow::~ScrollZoomWindow() {}
 
-void ScrollZoomCanvas::PrepareDC(wxDC& dc)
+void ScrollZoomWindow::PrepareDC(wxDC& dc)
 {
     super::PrepareDC(dc);
     dc.SetUserScale(mZoomFactor, mZoomFactor);
 }
 
-void ScrollZoomCanvas::SetCanvasSize(wxSize s)
+void ScrollZoomWindow::SetCanvasSize(wxSize s)
 {
     mCanvasSize = s;
 }
 
-void ScrollZoomCanvas::SetZoom(float z)
+void ScrollZoomWindow::SetZoom(float z)
 {
     mZoomFactor = z;
     auto newSize = mCanvasSize * mZoomFactor;
     SetVirtualSize(newSize);
 }
 
-float ScrollZoomCanvas::GetZoom() const
+float ScrollZoomWindow::GetZoom() const
 {
     return mZoomFactor;
 }
 
-void ScrollZoomCanvas::ChangeOffset(wxPoint deltaOffset)
+void ScrollZoomWindow::ChangeOffset(wxPoint deltaOffset)
 {
     auto offset = GetViewStart();
     offset += deltaOffset;

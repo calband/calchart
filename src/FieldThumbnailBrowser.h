@@ -1,6 +1,6 @@
+#pragma once
 /*
- * cont_ui.h
- * Header for continuity editors
+ * FieldThumbnailBrowser
  */
 
 /*
@@ -20,34 +20,41 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <wx/docview.h>
 
-#include "calchartdoc.h"
+class CalChartDoc;
+class FieldThumbnailBrowserView;
+class FieldThumbnailBrowserPerCont;
 
-class ContinuityBrowserView;
-class ContinuityBrowserPerCont;
-
-class ContinuityBrowser : public wxScrolledWindow {
+class FieldThumbnailBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
 
 public:
-    ContinuityBrowser(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
+    FieldThumbnailBrowser(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxScrolledWindowStyle,
         const wxString& name = wxPanelNameStr);
-    virtual ~ContinuityBrowser() override = default;
+    virtual ~FieldThumbnailBrowser() override = default;
 
-    void OnCmdHelp(wxCommandEvent& event);
-    virtual void Update() override; // Refresh all window controls
+    virtual void OnUpdate(); // Refresh all window controls
 
 private:
-    void CreateControls();
-    void OnChar(wxKeyEvent& event);
+    void OnPaint(wxPaintEvent& event);
+    void HandleKey(wxKeyEvent& event);
+    void HandleMouseDown(wxMouseEvent& event);
+
+    wxSize SizeOfOneCell() const;
+    int WhichCell(wxPoint const& p) const;
 
     CalChartDoc* mDoc;
-    std::unique_ptr<ContinuityBrowserView> mView;
-    std::vector<ContinuityBrowserPerCont*> mPerCont;
+    std::unique_ptr<FieldThumbnailBrowserView> mView;
+
+    const int x_left_padding;
+    const int x_right_padding;
+    const int y_upper_padding;
+    const int y_name_size;
+    const int y_name_padding;
 
     DECLARE_EVENT_TABLE()
 };

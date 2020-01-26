@@ -1,5 +1,5 @@
 /*
- * field_canvas.cpp
+ * FieldCanvas
  * Canvas for the Field window
  */
 
@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "field_canvas.h"
+#include "FieldCanvas.h"
 
 #include "background_image.h"
 #include "cc_drawcommand.h"
@@ -29,7 +29,7 @@
 #include "draw.h"
 #include "field_canvas_shapes.h"
 #include "field_frame.h"
-#include "field_view.h"
+#include "FieldView.h"
 #include "linmath.h"
 #include "math_utils.h"
 
@@ -279,7 +279,9 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
         if (m_move_points) {
             if (m_move_points->OnMouseUpDone(pos)) {
                 mView.DoMovePoints(mMovePoints);
-                mFrame->SetCurrentMove(CC_MOVE_NORMAL);
+                EndDrag();
+                curr_move = CC_MOVE_NORMAL;
+                mFrame->ToolbarSetCurrentMove(CC_MOVE_NORMAL);
             }
         }
         if (!(m_select_shape_list.empty())) {
@@ -349,8 +351,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
 void FieldCanvas::OnMousePinchToZoom(wxMouseEvent& event)
 {
     super::OnMousePinchToZoom(event);
-    mFrame->do_zoom(GetZoom());
-    Refresh();
+    SetZoom(mFrame->ToolbarSetZoom(GetZoom()));
 }
 
 // Intercept character input

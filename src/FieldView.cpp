@@ -1,6 +1,6 @@
 /*
- * field_view.cpp
- * Header for field view
+ * FieldView
+ * View for field canvas
  */
 
 /*
@@ -20,8 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "field_view.h"
-#include "field_canvas.h"
+#include "FieldView.h"
+#include "FieldCanvas.h"
 #include "field_frame.h"
 
 #include "animate.h"
