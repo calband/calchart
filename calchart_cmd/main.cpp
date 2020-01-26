@@ -315,7 +315,7 @@ int main(int argc, char* argv[])
     int unit_test_continuity = args["--unit_test_continuity"].asBool();
     int check_flag = args["--check_flag"].asBool();
 
-    if (args["parse"]) {
+    if (args["parse"].asBool()) {
         auto list_of_files = args["<shows>"].asStringList();
         for (auto file : list_of_files) {
             if (print_flag) {
@@ -340,7 +340,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    if (args["print_to_postscript"]) {
+    if (args["print_to_postscript"].asBool()) {
         PrintToPS(args["<show>"].asString().c_str(), args["--landscape"].asBool(), args["--cont"].asBool(), args["--contsheet"].asBool(), args["--overview"].asBool(), args["<ps_file>"].asString().c_str());
     }
 

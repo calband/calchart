@@ -40,3 +40,15 @@ Now open the xcode project in build/CalChart.xcodeproj and select the CalChart t
 
 Build and run!  I find I need to build several times in order to have it finish building.
 
+Note: I'm finding that wxWidgets doesn't seem to be correctly building the precompiled header phase on Xcode.  It fails with the error:
+
+	error: Build input file cannot be found: '.../build2/submodules/wxWidgets/libs/stc/Debug/cotire/stc_CXX_prefix.hxx' (in target 'stc' from project 'CalChart')
+
+I believe the problem is that Xcode isn't creating the derived directory before generating the PCH so it fails.  If you expand the error message you'll see something like:
+
+	-o /Users/richardpowell/Development/calchart/build2/submodules/wxWidgets/libs/stc/SharedPrecompiledHeaders/SharedPrecompiledHeaders/1685499250606124548/stc_CXX_prefix.hxx.gch 
+
+What I found fixes is by creating the directory manually:
+
+	mkdir -p /Users/richardpowell/Development/calchart/build2/submodules/wxWidgets/libs/stc/SharedPrecompiledHeaders/SharedPrecompiledHeaders/1685499250606124548/
+

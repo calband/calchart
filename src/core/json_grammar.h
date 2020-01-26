@@ -23,7 +23,7 @@ namespace CalChart {
  */
 template <typename OutputIterator>
 struct JSONExportGrammar
-    : karma::grammar<OutputIterator, const JSONElement&()> {
+    : karma::grammar<OutputIterator, JSONElement()> {
     /*!
      * @brief Generates a spirit::karma rule which determines 
      * whether or not a JSONElement has a particular type.
@@ -119,18 +119,18 @@ struct JSONExportGrammar
     karma::rule<OutputIterator, void(const JSONElement&)> isNull;
     karma::rule<OutputIterator, void(const JSONElement&)> isObject;
     karma::rule<OutputIterator, void(const JSONElement&)> isArray;
-    karma::rule<OutputIterator, const JSONElement&()> mainObject;
-    karma::rule<OutputIterator, const JSONElement&()> newline_element;
-    karma::rule<OutputIterator, const JSONElement&()> element;
-    karma::rule<OutputIterator, const JSONElement&()> inline_element;
+    karma::rule<OutputIterator, JSONElement()> mainObject;
+    karma::rule<OutputIterator, JSONElement()> newline_element;
+    karma::rule<OutputIterator, JSONElement()> element;
+    karma::rule<OutputIterator, JSONElement()> inline_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataNumber*>, JSONDataNumberConstAccessor()> number;
     karma::rule<OutputIterator, karma::locals<const JSONDataString*>, JSONDataStringConstAccessor()> string;
     karma::rule<OutputIterator, karma::locals<const JSONDataBoolean*>, JSONDataBooleanConstAccessor()> boolean;
     karma::rule<OutputIterator> null;
-    karma::rule<OutputIterator, const JSONElement&()> block_element;
+    karma::rule<OutputIterator, JSONElement()> block_element;
     karma::rule<OutputIterator, karma::locals<const JSONDataObject*>, JSONDataObjectConstAccessor()> object;
     karma::rule<OutputIterator, std::vector<std::pair<const std::string&, const JSONElement&>>()> objectContent;
-    karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>&()> keyValPair;
+    karma::rule<OutputIterator, std::pair<const std::string&, const JSONElement&>()> keyValPair;
     karma::rule<OutputIterator, karma::locals<const JSONDataArray*>, JSONDataArrayConstAccessor()> array;
     karma::rule<OutputIterator, std::vector<std::reference_wrapper<const JSONElement>>()> arrayContent;
 };
