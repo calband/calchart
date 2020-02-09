@@ -206,5 +206,5 @@ void FieldThumbnailBrowser::HandleKey(wxKeyEvent& event)
 void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 {
     auto which = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
-    mDoc->SetCurrentSheet(which);
+    mDoc->SetCurrentSheet(std::min(which, mDoc->GetNumSheets() - 1));
 }
