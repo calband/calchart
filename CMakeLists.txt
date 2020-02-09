@@ -217,10 +217,12 @@ target_link_libraries (CalChart calchart_core ${Boost_LIBRARIES})
 # We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
 # Have wxWidgets build as static libraries
 set (wxBUILD_SHARED OFF)
+set (wxUSE_STL ON)
+set (wxUSE_STD_CONTAINERS ON)
 add_subdirectory (submodules/wxWidgets)
 
 target_link_libraries (
-  CalChart gl core base adv html net
+  CalChart gl core base adv html net aui
   )
 
 set_target_properties (CalChart PROPERTIES CXX_STANDARD 14)

@@ -26,6 +26,7 @@
 #include "cc_types.h"
 
 #include <wx/docview.h>
+#include <wx/aui/framemanager.h>
 
 class wxComboBox;
 class wxSlider;
@@ -172,6 +173,7 @@ public:
     CalChartDoc* GetShow();
 
     void ClearAnimationFrame();
+    void IsClose(wxAuiManagerEvent& event);
 
 private:
     void refreshGhostOptionStates();
@@ -183,11 +185,10 @@ private:
     FieldCanvas* mCanvas;
     FieldThumbnailBrowser* mFieldThumbnailBrowser;
     ContinuityBrowser* mContinuityBrowser;
-    wxSplitterWindow* mFieldThumbnailSplit;
-    wxSplitterWindow* mContinuityInfoSplit;
-    wxSplitterWindow* mFieldControlSplit;
+
     wxWindow* mAnimationFrame;
     CalChartConfiguration& mConfig;
+    wxAuiManager m_mgr;
 
     DECLARE_EVENT_TABLE()
 };

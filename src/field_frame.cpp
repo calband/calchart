@@ -154,6 +154,7 @@ EVT_SIZE(FieldFrame::OnSize)
 EVT_SPLITTER_DCLICK(CALCHART__ViewFieldThumbnail, FieldFrame::OnSplitDclick)
 EVT_SPLITTER_DCLICK(CALCHART__ViewFieldControls, FieldFrame::OnSplitDclick)
 EVT_SPLITTER_DCLICK(CALCHART__ViewContinuityInfo, FieldFrame::OnSplitDclick)
+EVT_AUI_PANE_CLOSE(FieldFrame::IsClose)
 END_EVENT_TABLE()
 
 class MyPrintout : public wxPrintout {
@@ -199,6 +200,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     , mAnimationFrame(NULL)
     , mConfig(config_)
 {
+    m_mgr.SetManagedWindow(this);
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // Give it an icon
     SetBandIcon(this);
@@ -310,37 +312,26 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
         }
     }
 
-    // Set up the splits
-    // we split 3 times, first, is vertical, with Field Browswer on Left
-    mFieldThumbnailSplit = new wxSplitterWindow(this, CALCHART__ViewFieldThumbnail, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
-    // middle split is then middle field, right continuity
-    mContinuityInfoSplit = new wxSplitterWindow(mFieldThumbnailSplit, CALCHART__ViewContinuityInfo, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
-    // field split is controls above field
-    mFieldControlSplit = new wxSplitterWindow(mContinuityInfoSplit, CALCHART__ViewFieldControls, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
-
-    mControls = new FieldFrameControls(mFieldControlSplit, mConfig.Get_FieldFrameZoom());
-    mCanvas = new FieldCanvas(mFieldControlSplit, *static_cast<FieldView*>(view), this, mConfig.Get_FieldFrameZoom());
+    mControls = new FieldFrameControls(mConfig.Get_FieldFrameZoom(), this, wxID_ANY, wxDefaultPosition, wxSize{ 100, 60 });
+    mCanvas = new FieldCanvas(this, *static_cast<FieldView*>(view), this, mConfig.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
-    mFieldControlSplit->SplitHorizontally(mControls, mCanvas);
-    auto control_size = mControls->GetSizer()->GetMinSize();
-    mFieldControlSplit->SetSashPosition(control_size.y + 5);
+    mContinuityBrowser = new ContinuityBrowser(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxDefaultPosition, wxSize{ 150, 800 });
 
-    mContinuityBrowser = new ContinuityBrowser(static_cast<CalChartDoc*>(GetDocument()), mContinuityInfoSplit, wxID_ANY, wxDefaultPosition, wxSize{ 150, 800 });
-    mContinuityInfoSplit->SplitVertically(mFieldControlSplit, mContinuityBrowser);
-    mContinuityInfoSplit->SetSashPosition(GetSize().x - mContinuityBrowser->GetSizer()->GetMinSize().x - 5);
-    mContinuityInfoSplit->SetSashGravity(1);
-
-    mFieldThumbnailBrowser = new FieldThumbnailBrowser(static_cast<CalChartDoc*>(GetDocument()), mFieldThumbnailSplit, wxID_ANY, wxDefaultPosition, wxSize{ 180, 800 });
-    mFieldThumbnailSplit->SplitVertically(mFieldThumbnailBrowser, mContinuityInfoSplit);
-    mFieldThumbnailSplit->SetSashPosition(180 + 5);
+    mFieldThumbnailBrowser = new FieldThumbnailBrowser(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxDefaultPosition, wxSize{ 180, 800 });
 
     // Now determine what to show and not show.
     // adjust the menu items to reflect.
-    ChangeFieldThumbnailVisibility(mConfig.Get_FieldFrameFieldThumbnailVisibility());
-    ChangeFieldControlsVisibility(mConfig.Get_FieldFrameFieldControlsVisibility());
-    ChangeContinuityInfoVisibility(mConfig.Get_FieldFrameContinuityInfoVisibility());
+//    ChangeFieldThumbnailVisibility(mConfig.Get_FieldFrameFieldThumbnailVisibility());
+//    ChangeFieldControlsVisibility(mConfig.Get_FieldFrameFieldControlsVisibility());
+//    ChangeContinuityInfoVisibility(mConfig.Get_FieldFrameContinuityInfoVisibility());
+
+    m_mgr.AddPane(mCanvas, wxAuiPaneInfo().Caption(wxT("mCanvas")).Center());
+    m_mgr.AddPane(mContinuityBrowser, wxAuiPaneInfo().Caption(wxT("mContinuityBrowser")).Right());
+    m_mgr.AddPane(mFieldThumbnailBrowser, wxAuiPaneInfo().Caption(wxT("mFieldThumbnailBrowser")).Left());
+    m_mgr.InsertPane(mControls, wxAuiPaneInfo().Caption(wxT("mControls")).Bottom(), wxAUI_INSERT_DOCK);
+    m_mgr.Update();
 
     CalChartDoc* show = static_cast<CalChartDoc*>(doc);
     SetTitle(show->GetTitle());
@@ -366,9 +357,15 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     Show(true);
 }
 
-FieldFrame::~FieldFrame() {}
+FieldFrame::~FieldFrame() {
+    m_mgr.UnInit();
+}
 
 // Intercept menu commands
+
+void FieldFrame::IsClose(wxAuiManagerEvent& event) {
+    printf("hi");
+}
 
 void FieldFrame::OnCmdAppend(wxCommandEvent& event) { AppendShow(); }
 
@@ -984,12 +981,12 @@ void FieldFrame::ChangeFieldThumbnailVisibility(bool show)
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Hide Field Thumbnail"));
         mConfig.Set_FieldFrameFieldThumbnailVisibility(true);
-        mFieldThumbnailSplit->SplitVertically(mFieldThumbnailBrowser, mContinuityInfoSplit);
-        mFieldThumbnailSplit->SetSashPosition(180 + 5);
+//        mFieldThumbnailSplit->SplitVertically(mFieldThumbnailBrowser, mContinuityInfoSplit);
+//        mFieldThumbnailSplit->SetSashPosition(180 + 5);
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Show Field Thumbnail"));
         mConfig.Set_FieldFrameFieldThumbnailVisibility(false);
-        mFieldThumbnailSplit->Unsplit(mFieldThumbnailBrowser);
+//        mFieldThumbnailSplit->Unsplit(mFieldThumbnailBrowser);
     }
 }
 
@@ -998,12 +995,12 @@ void FieldFrame::ChangeFieldControlsVisibility(bool show)
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewFieldControls)->SetItemLabel(wxT("Hide Controls"));
         mConfig.Set_FieldFrameFieldControlsVisibility(true);
-        mFieldControlSplit->SplitHorizontally(mControls, mCanvas);
-        mFieldControlSplit->SetSashPosition(mControls->GetSizer()->GetMinSize().y + 5);
+//        mFieldControlSplit->SplitHorizontally(mControls, mCanvas);
+//        mFieldControlSplit->SetSashPosition(mControls->GetSizer()->GetMinSize().y + 5);
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewFieldControls)->SetItemLabel(wxT("Show Controls"));
         mConfig.Set_FieldFrameFieldControlsVisibility(false);
-        mFieldControlSplit->Unsplit(mControls);
+//        mFieldControlSplit->Unsplit(mControls);
     }
 }
 
@@ -1012,13 +1009,13 @@ void FieldFrame::ChangeContinuityInfoVisibility(bool show)
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewContinuityInfo)->SetItemLabel(wxT("Hide Continuity"));
         mConfig.Set_FieldFrameContinuityInfoVisibility(true);
-        mContinuityInfoSplit->SplitVertically(mFieldControlSplit, mContinuityBrowser);
-        mContinuityInfoSplit->SetSashPosition(GetSize().x - mContinuityBrowser->GetSizer()->GetMinSize().x - 5);
-        mContinuityInfoSplit->SetSashGravity(1);
+//        mContinuityInfoSplit->SplitVertically(mFieldControlSplit, mContinuityBrowser);
+//        mContinuityInfoSplit->SetSashPosition(GetSize().x - mContinuityBrowser->GetSizer()->GetMinSize().x - 5);
+//        mContinuityInfoSplit->SetSashGravity(1);
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewContinuityInfo)->SetItemLabel(wxT("Show Continuity"));
         mConfig.Set_FieldFrameContinuityInfoVisibility(false);
-        mContinuityInfoSplit->Unsplit(mContinuityBrowser);
+//        mContinuityInfoSplit->Unsplit(mContinuityBrowser);
     }
 }
 

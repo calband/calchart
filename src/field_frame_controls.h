@@ -30,7 +30,11 @@ class FieldFrameControls : public wxPanel {
 
 public:
     // FieldFrame will own the show that is passed in
-    FieldFrameControls(wxWindow* parent, double zoom);
+    FieldFrameControls(double zoom, wxWindow* parent, wxWindowID id = wxID_ANY,
+    const wxPoint& pos = wxDefaultPosition,
+    const wxSize& size = wxDefaultSize,
+    long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+    const wxString& name = wxPanelNameStr);
     virtual ~FieldFrameControls() = default;
 
     std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
