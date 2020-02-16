@@ -21,6 +21,7 @@
 */
 
 #include "modes.h"
+#include "cc_fileformat.h"
 
 #include <algorithm>
 
@@ -33,7 +34,8 @@ static constexpr const char* kYardTextDefaults[] = {
     "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
 };
 
-ShowMode::YardLinesInfo_t ShowMode::GetDefaultYardLines() {
+ShowMode::YardLinesInfo_t ShowMode::GetDefaultYardLines()
+{
     ShowMode::YardLinesInfo_t data;
     for (auto i = 0; i < kYardTextValues; ++i) {
         data[i] = kYardTextDefaults[i];
@@ -130,15 +132,72 @@ ShowMode ShowMode::CreateShowMode(CalChart::Coord size, CalChart::Coord offset, 
     };
 }
 
-    ShowMode::YardLinesInfo_t const& ShowMode::Get_yard_text() const
+ShowMode ShowMode::CreateShowMode(std::vector<uint8_t> const& data)
+{
+    auto begin = data.data();
+    auto end = data.data() + data.size();
+
+    ShowModeInfo_t values;
+    for (auto& i : values) {
+        if (std::distance(begin, end) < 4) {
+            throw std::runtime_error("Error, size of ShowMode is not correct");
+        }
+        i = Parser::get_big_long(begin);
+        begin += 4;
+    }
+    YardLinesInfo_t yardlines;
+    for (auto& i : yardlines) {
+        if (std::distance(begin, end) < 1) {
+            throw std::runtime_error("Error, yardtext does not have enough for a null terminator");
+        }
+        i = (char const*)begin;
+        begin += i.size() + 1; // 1 is for the null terminator
+    }
+    if (std::distance(begin, end) != 0) {
+        throw std::runtime_error("Error, size of ShowMode is not correct");
+    }
+    return ShowMode::CreateShowMode(values, yardlines);
+}
+
+std::vector<uint8_t> ShowMode::Serialize() const
+{
+    std::vector<uint8_t> result;
+    for (uint32_t i : GetShowModeInfo()) {
+        Parser::Append(result, i);
+    }
+    for (auto& i : Get_yard_text()) {
+        Parser::AppendAndNullTerminate(result, i);
+    }
+    return result;
+}
+
+ShowMode::YardLinesInfo_t const& ShowMode::Get_yard_text() const
 {
     return mYardLines;
 }
 
-
 ShowMode ShowMode::GetDefaultShowMode()
 {
     return ShowMode::CreateShowMode({ { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, GetDefaultYardLines());
+}
+
+bool operator==(ShowMode const& lhs, ShowMode const& rhs)
+{
+    return lhs.mSize == rhs.mSize
+        && lhs.mOffset == rhs.mOffset
+        && lhs.mBorder1 == rhs.mBorder1
+        && lhs.mBorder2 == rhs.mBorder2
+        && lhs.mHashW == rhs.mHashW
+        && lhs.mHashE == rhs.mHashE
+        && lhs.mYardLines == rhs.mYardLines;
+}
+
+void ShowMode_UnitTests()
+{
+    auto uut1 = ShowMode::GetDefaultShowMode();
+    auto data = uut1.Serialize();
+    auto uut2 = ShowMode::CreateShowMode(data);
+    assert(uut1 == uut2);
 }
 
 }

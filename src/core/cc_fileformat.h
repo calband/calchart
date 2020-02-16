@@ -30,8 +30,6 @@ namespace CalChart {
 
 struct Version_3_3_and_earlier {
 };
-struct Version_3_4_and_3_5 {
-};
 struct Current_version_and_later {
 };
 
@@ -65,6 +63,9 @@ struct Current_version_and_later {
 // DESCRIPTION        = INGL_DESC , BigEndianInt32(DataTill_DESCRIPTION_END) , DESCRIPTION_DATA , DESCRIPTION_END ;
 // DESCRIPTION_DATA   = Null-terminated_char* ;
 // DESCRIPTION_END    = INGL_END , INGL_DESC ;
+// SHOW_MODE          = INGL_MODE , BigEndianInt32(DataTill_SHOW_MODE_END) , SHOW_MODE_DATA , SHOW_MODE_END ;
+// SHOW_MODE_DATA     = ShowModeParseData ;
+// SHOW_MODE_END      = INGL_END , INGL_MODE ;
 // SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) , SHEET_DATA , SHEET_END ;
 // SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY , PRINT_CONTINUITY , /**/ ;
 // SHEET_END          = INGL_END , INGL_SHET ;
@@ -94,6 +95,12 @@ struct Current_version_and_later {
 // EACH_CONTINUITY    = INGL_ECNT , BigEndianInt32(DataTill_EACH_CONTINUITY_END)) , EACH_CONTINUITY_DATA , EACH_CONTINUITY_END ;
 // EACH_CONTINUITY_DATA = BigEndianInt8( symbol ) , Null-terminated char* ;
 // EACH_CONTINUITY_END  INGL_END , INGL_ECONT ;
+// VCONTINUITY         = INGL_VCNT , BigEndianInt32(DataTill_VCONTINUITY_END)) , VCONTINUITY_DATA , VCONTINUITY_END ;
+// VCONTINUITY_DATA    = { EACH_VCONTINUITY }* ;
+// VCONTINUITY_END     = INGL_END , INGL_VCNT ;
+// EACH_VCONTINUITY    = INGL_EVCT , BigEndianInt32(DataTill_EACH_VCONTINUITY_END)) , EACH_VCONTINUITY_DATA , EACH_VCONTINUITY_END ;
+// EACH_VCONTINUITY_DATA = VisualContParseData ;
+// EACH_VCONTINUITY_END  INGL_END , INGL_EVCT ;
 // PRINT_CONTINUITY   = INGL_PCNT , BigEndianInt32(DataTill_PRINT_CONTINUITY_END)) , PRINT_CONTINUITY_DATA , PRINT_CONTINUITY_END ;
 // PRINT_CONTINUITY_DATA = { Null-terminated char* }* ;
 // PRINT_CONTINUITY_END = INGL_END , INGL_PCNT ;
@@ -116,6 +123,8 @@ struct Current_version_and_later {
 // INGL_REFP = 'R','E','F','P' ;
 // INGL_CONT = 'C','O','N','T' ;
 // INGL_PCNT = 'P','C','N','T' ;
+// INGL_VCNT = 'V','C','N','T' ;
+// INGL_EVCT = 'E','V','C','T' ;
 // INGL_END  = 'E','N','D',' ' ;
 
 // Description of the CalChart file format layout, in modified Extended
@@ -210,6 +219,8 @@ struct Current_version_and_later {
 #define INGL_REFP Make4CharWord('R', 'E', 'F', 'P')
 #define INGL_CONT Make4CharWord('C', 'O', 'N', 'T')
 #define INGL_ECNT Make4CharWord('E', 'C', 'N', 'T')
+#define INGL_VCNT Make4CharWord('V', 'C', 'N', 'T')
+#define INGL_EVCT Make4CharWord('E', 'V', 'C', 'T')
 #define INGL_PCNT Make4CharWord('P', 'C', 'N', 'T')
 #define INGL_BACK Make4CharWord('B', 'A', 'C', 'K')
 #define INGL_PNTS Make4CharWord('P', 'N', 'T', 'S')
@@ -446,6 +457,17 @@ namespace Parser {
         return result;
     }
 
+    // oh ick, casting floating point to raw values... Sure hope things are ieee...
+    template <typename Iter>
+    float get_big_float(Iter ptr)
+    {
+        uint32_t result = (*ptr++ & 0xFF);
+        result = (result << 8) | (*ptr++ & 0xFF);
+        result = (result << 8) | (*ptr++ & 0xFF);
+        result = (result << 8) | (*ptr++ & 0xFF);
+        return *((float*)&result);
+    }
+
     template <typename Iter>
     std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin,
         Iter end)
@@ -528,6 +550,12 @@ namespace Parser {
     template <typename T>
     void Append(T& d, uint8_t v) { d.insert(d.end(), v); }
 
+    template <typename T>
+    void Append(T& d, float v)
+    {
+        Append(d, *((uint32_t*)&v));
+    }
+
     template <typename T, typename U>
     void AppendAndNullTerminate(T& d, const U& s)
     {
@@ -536,9 +564,9 @@ namespace Parser {
     }
 
     template <typename T>
-    std::vector<char> Construct_block(uint32_t type, const T& data)
+    auto Construct_block(uint32_t type, const T& data)
     {
-        std::vector<char> result;
+        std::vector<uint8_t> result;
         Append(result, uint32_t{ type });
         Append(result, static_cast<uint32_t>(data.size()));
         Append(result, data);
@@ -547,9 +575,9 @@ namespace Parser {
         return result;
     }
 
-    static inline std::vector<char> Construct_block(uint32_t type, uint32_t data)
+    static inline auto Construct_block(uint32_t type, uint32_t data)
     {
-        std::vector<char> result;
+        std::vector<uint8_t> result;
         Append(result, uint32_t{ type });
         Append(result, uint32_t{ sizeof(data) });
         Append(result, data);

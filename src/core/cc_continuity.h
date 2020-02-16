@@ -26,11 +26,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/unique_ptr.hpp>
-#include <boost/serialization/vector.hpp>
-
 namespace CalChart {
 
 class ContProcedure;
@@ -50,6 +45,7 @@ public:
     // this could throw ParseError
     Continuity(std::string const& s = "");
     Continuity(std::vector<std::unique_ptr<ContProcedure>>);
+    Continuity(std::vector<uint8_t> const&);
     ~Continuity();
 
     Continuity(Continuity const&);
@@ -57,30 +53,21 @@ public:
     Continuity(Continuity&&) noexcept;
     Continuity& operator=(Continuity&&) noexcept;
 
-    auto GetText() const noexcept { return text; }
+    std::vector<uint8_t> Serialize() const;
 
     std::vector<std::unique_ptr<ContProcedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
-
-    static std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s);
 
     friend void swap(Continuity& lhs, Continuity& rhs)
     {
         using std::swap;
-        swap(lhs.text, rhs.text);
         swap(lhs.m_parsedContinuity, rhs.m_parsedContinuity);
     }
     friend bool operator==(Continuity const& lhs, Continuity const& rhs);
 
 private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar& text;
-        ar& m_parsedContinuity;
-    }
+    static std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s);
+    static std::vector<std::unique_ptr<ContProcedure>> Deserialize(std::vector<uint8_t> const&);
 
-    std::string text;
     std::vector<std::unique_ptr<ContProcedure>> m_parsedContinuity;
 
     friend bool Check_Continuity(const Continuity&, const struct Continuity_values&);

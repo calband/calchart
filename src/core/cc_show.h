@@ -34,10 +34,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/vector.hpp>
-
 namespace CalChart {
 class Lasso;
 class Show;
@@ -67,7 +63,7 @@ private:
     Show(ShowMode const& mode);
     // using overloading with structs to determine which constructor to use
     Show(ShowMode const& mode, std::istream& stream, Version_3_3_and_earlier);
-    Show(ShowMode const& mode, const uint8_t* ptr, size_t size, Version_3_4_and_3_5);
+    Show(ShowMode const& mode, const uint8_t* ptr, size_t size, Current_version_and_later);
 
 public:
     ~Show();
@@ -176,17 +172,8 @@ private:
 
     void SetShowMode(ShowMode const&);
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar& mDescr;
-        ar& mSheets;
-        ar& mPtLabels;
-        ar& mSelectionList;
-        ar& mSheetNum;
-        ar& mMode;
-    }
+    // implementation and helper functions
+    std::vector<uint8_t> SerializeShowData() const;
 
     // members
     std::string mDescr;
@@ -200,6 +187,7 @@ private:
     friend void Show_UnitTests();
     static void CC_show_round_trip_test();
     static void CC_show_round_trip_test_with_number_label_description();
+    static void CC_show_round_trip_test_with_different_show_modes();
     static void CC_show_blank_desc_test();
     static void CC_show_future_show_test();
     static void CC_show_wrong_size_throws_exception();

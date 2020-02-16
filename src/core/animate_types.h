@@ -53,7 +53,7 @@ const std::string s_contvar_names[] = {
     "DOH",
 };
 
-static_assert(sizeof(s_contvar_names)/sizeof(s_contvar_names[0]) == NUMCONTVARS, "");
+static_assert(sizeof(s_contvar_names) / sizeof(s_contvar_names[0]) == NUMCONTVARS, "");
 
 enum AnimateDir {
     ANIMDIR_N,

@@ -27,6 +27,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/array.hpp>
@@ -75,6 +76,9 @@ public:
         CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
         unsigned short ehash, YardLinesInfo_t const& yardlines);
 
+    static ShowMode CreateShowMode(std::vector<uint8_t> const&);
+    std::vector<uint8_t> Serialize() const;
+
     ShowModeInfo_t GetShowModeInfo() const;
 
     auto Offset() const { return mOffset + mBorder1; }
@@ -122,7 +126,9 @@ private:
         ar& mHashE;
         ar& mYardLines;
     }
-
+    friend bool operator==(ShowMode const& lhs, ShowMode const& rhs);
 };
+
+void ShowMode_UnitTests();
 
 }

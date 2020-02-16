@@ -23,56 +23,61 @@
 #include "cont.h"
 #include "animatecommand.h"
 #include "animatecompile.h"
+#include "cc_fileformat.h"
 #include "cc_sheet.h"
 #include "math_utils.h"
 #include "parse.h"
 
 // for serialization we need to pre-register all of the different types that can exist in the continuity AST.
-BOOST_CLASS_EXPORT_GUID(CalChart::ContToken, "ContToken")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContPointUnset, "ContPointUnset")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContPoint, "ContPoint")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContStartPoint, "ContStartPoint")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContNextPoint, "ContNextPoint")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContRefPoint, "ContRefPoint")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValue, "ContValue")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueUnset, "ContValueUnset")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueFloat, "ContValueFloat")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueDefined, "ContValueDefined")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueAdd, "ContValueAdd")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueSub, "ContValueSub")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueMult, "ContValueMult")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueDiv, "ContValueDiv")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueNeg, "ContValueNeg")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueREM, "ContValueREM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContValueVar, "ContValueVar")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncDir, "ContFuncDir")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncDirFrom, "ContFuncDirFrom")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncDist, "ContFuncDist")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncDistFrom, "ContFuncDistFrom")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncEither, "ContFuncEither")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncOpp, "ContFuncOpp")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContFuncStep, "ContFuncStep")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcedure, "ContProcedure")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcUnset, "ContProcUnset")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcSet, "ContProcSet")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcBlam, "ContProcBlam")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcCM, "ContProcCM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcDMCM, "ContProcDMCM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcDMHS, "ContProcDMHS")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcEven, "ContProcEven")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcEWNS, "ContProcEWNS")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcFountain, "ContProcFountain")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcFM, "ContProcFM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcFMTO, "ContProcFMTO")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcGrid, "ContProcGrid")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcHSCM, "ContProcHSCM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcHSDM, "ContProcHSDM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcMagic, "ContProcMagic")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcMarch, "ContProcMarch")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcMT, "ContProcMT")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcMTRM, "ContProcMTRM")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcNSEW, "ContProcNSEW")
-BOOST_CLASS_EXPORT_GUID(CalChart::ContProcRotate, "ContProcRotate")
+
+enum class SerializationToken {
+    ContToken,
+    ContPointUnset,
+    ContPoint,
+    ContStartPoint,
+    ContNextPoint,
+    ContRefPoint,
+    ContValue,
+    ContValueUnset,
+    ContValueFloat,
+    ContValueDefined,
+    ContValueAdd,
+    ContValueSub,
+    ContValueMult,
+    ContValueDiv,
+    ContValueNeg,
+    ContValueREM,
+    ContValueVar,
+    ContValueVarUnset,
+    ContFuncDir,
+    ContFuncDirFrom,
+    ContFuncDist,
+    ContFuncDistFrom,
+    ContFuncEither,
+    ContFuncOpp,
+    ContFuncStep,
+    ContProcedure,
+    ContProcUnset,
+    ContProcSet,
+    ContProcBlam,
+    ContProcCM,
+    ContProcDMCM,
+    ContProcDMHS,
+    ContProcEven,
+    ContProcEWNS,
+    ContProcFountain,
+    ContProcFM,
+    ContProcFMTO,
+    ContProcGrid,
+    ContProcHSCM,
+    ContProcHSDM,
+    ContProcMagic,
+    ContProcMarch,
+    ContProcMT,
+    ContProcMTRM,
+    ContProcNSEW,
+    ContProcRotate,
+};
 
 namespace CalChart {
 
@@ -106,8 +111,6 @@ dynamic_unique_ptr_cast(std::unique_ptr<Base>&& p)
     return std::unique_ptr<Derived>(nullptr);
 }
 
-// helper function that examines each pointer to see if it shuold be replaced, and then replace it.
-// making sure to clean things up a the end.
 // helper function that examines each pointer to see if it shuold be replaced, and then replace it.
 // making sure to clean things up a the end.
 template <typename R, typename UP, typename T>
@@ -274,6 +277,195 @@ void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
     }
 }
 
+std::tuple<std::unique_ptr<ContProcedure>, uint8_t const*> DeserializeContProcedure(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContPoint is not correct");
+    }
+    auto v = std::unique_ptr<ContProcedure>();
+    switch (static_cast<SerializationToken>(*begin)) {
+    case SerializationToken::ContProcUnset:
+        v = std::make_unique<ContProcUnset>();
+        break;
+    case SerializationToken::ContProcSet:
+        v = std::make_unique<ContProcSet>();
+        break;
+    case SerializationToken::ContProcBlam:
+        v = std::make_unique<ContProcBlam>();
+        break;
+    case SerializationToken::ContProcCM:
+        v = std::make_unique<ContProcCM>();
+        break;
+    case SerializationToken::ContProcDMCM:
+        v = std::make_unique<ContProcDMCM>();
+        break;
+    case SerializationToken::ContProcDMHS:
+        v = std::make_unique<ContProcDMHS>();
+        break;
+    case SerializationToken::ContProcEven:
+        v = std::make_unique<ContProcEven>();
+        break;
+    case SerializationToken::ContProcEWNS:
+        v = std::make_unique<ContProcEWNS>();
+        break;
+    case SerializationToken::ContProcFountain:
+        v = std::make_unique<ContProcFountain>();
+        break;
+    case SerializationToken::ContProcFM:
+        v = std::make_unique<ContProcFM>();
+        break;
+    case SerializationToken::ContProcFMTO:
+        v = std::make_unique<ContProcFMTO>();
+        break;
+    case SerializationToken::ContProcGrid:
+        v = std::make_unique<ContProcGrid>();
+        break;
+    case SerializationToken::ContProcHSCM:
+        v = std::make_unique<ContProcHSCM>();
+        break;
+    case SerializationToken::ContProcHSDM:
+        v = std::make_unique<ContProcHSDM>();
+        break;
+    case SerializationToken::ContProcMagic:
+        v = std::make_unique<ContProcMagic>();
+        break;
+    case SerializationToken::ContProcMarch:
+        v = std::make_unique<ContProcMarch>();
+        break;
+    case SerializationToken::ContProcMT:
+        v = std::make_unique<ContProcMT>();
+        break;
+    case SerializationToken::ContProcMTRM:
+        v = std::make_unique<ContProcMTRM>();
+        break;
+    case SerializationToken::ContProcNSEW:
+        v = std::make_unique<ContProcNSEW>();
+        break;
+    case SerializationToken::ContProcRotate:
+        v = std::make_unique<ContProcRotate>();
+        break;
+    default:
+        throw std::runtime_error("Error, did not find ContPoint");
+    }
+    auto b = v->Deserialize(begin, end);
+    return { std::move(v), b };
+}
+
+static std::tuple<std::unique_ptr<ContPoint>, uint8_t const*> DeserializeContPoint(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContPoint is not correct");
+    }
+    auto v = std::unique_ptr<ContPoint>();
+    switch (static_cast<SerializationToken>(*begin)) {
+    case SerializationToken::ContPoint:
+        v = std::make_unique<ContPoint>();
+        break;
+    case SerializationToken::ContPointUnset:
+        v = std::make_unique<ContPointUnset>();
+        break;
+    case SerializationToken::ContStartPoint:
+        v = std::make_unique<ContStartPoint>();
+        break;
+    case SerializationToken::ContNextPoint:
+        v = std::make_unique<ContNextPoint>();
+        break;
+    case SerializationToken::ContRefPoint:
+        v = std::make_unique<ContRefPoint>();
+        break;
+    default:
+        throw std::runtime_error("Error, did not find ContPoint");
+    }
+    auto b = v->Deserialize(begin, end);
+    return { std::move(v), b };
+}
+
+static std::tuple<std::unique_ptr<ContValue>, uint8_t const*> DeserializeContValue(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContPoint is not correct");
+    }
+    auto v = std::unique_ptr<ContValue>();
+    switch (static_cast<SerializationToken>(*begin)) {
+    case SerializationToken::ContValueUnset:
+        v = std::make_unique<ContValueUnset>();
+        break;
+    case SerializationToken::ContValueFloat:
+        v = std::make_unique<ContValueFloat>();
+        break;
+    case SerializationToken::ContValueDefined:
+        v = std::make_unique<ContValueDefined>();
+        break;
+    case SerializationToken::ContValueAdd:
+        v = std::make_unique<ContValueAdd>();
+        break;
+    case SerializationToken::ContValueSub:
+        v = std::make_unique<ContValueSub>();
+        break;
+    case SerializationToken::ContValueMult:
+        v = std::make_unique<ContValueMult>();
+        break;
+    case SerializationToken::ContValueDiv:
+        v = std::make_unique<ContValueDiv>();
+        break;
+    case SerializationToken::ContValueNeg:
+        v = std::make_unique<ContValueNeg>();
+        break;
+    case SerializationToken::ContValueREM:
+        v = std::make_unique<ContValueREM>();
+        break;
+    case SerializationToken::ContValueVar:
+        v = std::make_unique<ContValueVar>();
+        break;
+    case SerializationToken::ContFuncDir:
+        v = std::make_unique<ContFuncDir>();
+        break;
+    case SerializationToken::ContFuncDirFrom:
+        v = std::make_unique<ContFuncDirFrom>();
+        break;
+    case SerializationToken::ContFuncDist:
+        v = std::make_unique<ContFuncDist>();
+        break;
+    case SerializationToken::ContFuncDistFrom:
+        v = std::make_unique<ContFuncDistFrom>();
+        break;
+    case SerializationToken::ContFuncEither:
+        v = std::make_unique<ContFuncEither>();
+        break;
+    case SerializationToken::ContFuncOpp:
+        v = std::make_unique<ContFuncOpp>();
+        break;
+    case SerializationToken::ContFuncStep:
+        v = std::make_unique<ContFuncStep>();
+        break;
+    default:
+        throw std::runtime_error("Error, did not find ContValue");
+    }
+    auto b = v->Deserialize(begin, end);
+    return { std::move(v), b };
+}
+
+static std::tuple<std::unique_ptr<ContValueVar>, uint8_t const*> DeserializeContValueVar(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContPoint is not correct");
+    }
+    auto v = std::unique_ptr<ContValueVar>();
+    switch (static_cast<SerializationToken>(*begin)) {
+    case SerializationToken::ContValueVar:
+        v = std::make_unique<ContValueVar>();
+        break;
+    case SerializationToken::ContValueVarUnset:
+        v = std::make_unique<ContValueVarUnset>();
+        break;
+    default:
+        throw std::runtime_error("Error, did not find ContValueVar");
+    }
+    auto b = v->Deserialize(begin, end);
+    return { std::move(v), b };
+}
+
+// ContToken
 ContToken::ContToken()
     : line(yylloc.first_line)
     , col(yylloc.first_column)
@@ -290,6 +482,32 @@ void ContToken::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     throw std::runtime_error("Error, replace not implemented on this class");
 }
 
+std::vector<uint8_t> ContToken::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContToken));
+    Parser::Append(result, static_cast<uint32_t>(line));
+    Parser::Append(result, static_cast<uint32_t>(col));
+    return result;
+}
+
+uint8_t const* ContToken::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 9) {
+        throw std::runtime_error("Error, size of ContToken is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContToken) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContToken");
+    }
+    ++begin;
+    line = Parser::get_big_long(begin);
+    begin += 4;
+    col = Parser::get_big_long(begin);
+    begin += 4;
+    return begin;
+}
+
+// ContPoint
 Coord ContPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetPointPosition();
@@ -317,6 +535,28 @@ std::unique_ptr<ContPoint> ContPoint::clone() const
     return std::make_unique<ContPoint>();
 }
 
+std::vector<uint8_t> ContPoint::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContPoint));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContPoint is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContPoint) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContPoint");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContPointUnset
 std::ostream& ContPointUnset::Print(std::ostream& os) const
 {
     super::Print(os);
@@ -339,6 +579,28 @@ std::unique_ptr<ContPoint> ContPointUnset::clone() const
     return std::make_unique<ContPointUnset>();
 }
 
+std::vector<uint8_t> ContPointUnset::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContPointUnset));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContPointUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContPointUnset is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContPointUnset) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContPointUnset");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContStartPoint
 Coord ContStartPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetStartingPosition();
@@ -366,6 +628,28 @@ std::unique_ptr<ContPoint> ContStartPoint::clone() const
     return std::make_unique<ContStartPoint>();
 }
 
+std::vector<uint8_t> ContStartPoint::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContStartPoint));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContStartPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContStartPoint is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContStartPoint) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContStartPoint");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContNextPoint
 Coord ContNextPoint::Get(AnimateCompile& anim) const
 {
     return anim.GetEndingPosition(this);
@@ -393,13 +677,30 @@ std::unique_ptr<ContPoint> ContNextPoint::clone() const
     return std::make_unique<ContNextPoint>();
 }
 
-ContRefPoint::ContRefPoint(unsigned n)
-    : refnum(n)
+std::vector<uint8_t> ContNextPoint::Serialize() const
 {
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContNextPoint));
+    Parser::Append(result, super::Serialize());
+    return result;
 }
 
-ContRefPoint::ContRefPoint()
-    : refnum(0)
+uint8_t const* ContNextPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContNextPoint is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContNextPoint) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContNextPoint");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContRefPoint
+ContRefPoint::ContRefPoint(unsigned n)
+    : refnum(n)
 {
 }
 
@@ -430,12 +731,59 @@ std::unique_ptr<ContPoint> ContRefPoint::clone() const
     return std::make_unique<ContRefPoint>(refnum);
 }
 
+std::vector<uint8_t> ContRefPoint::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContRefPoint));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, refnum);
+    return result;
+}
+
+uint8_t const* ContRefPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 5) {
+        throw std::runtime_error("Error, size of ContRefPoint is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContRefPoint) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContRefPoint");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    refnum = Parser::get_big_long(begin);
+    begin += 4;
+    return begin;
+}
+
+// ContValue
 std::ostream& ContValue::Print(std::ostream& os) const
 {
     super::Print(os);
     return os << "Value:";
 }
 
+std::vector<uint8_t> ContValue::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValue));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContValue::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValue is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValue) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValue");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContValueUnset
 std::ostream& ContValueUnset::Print(std::ostream& os) const
 {
     super::Print(os);
@@ -459,13 +807,30 @@ std::unique_ptr<ContValue> ContValueUnset::clone() const
     return std::make_unique<ContValueUnset>();
 }
 
-ContValueFloat::ContValueFloat(float v)
-    : val(v)
+std::vector<uint8_t> ContValueUnset::Serialize() const
 {
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueUnset));
+    Parser::Append(result, super::Serialize());
+    return result;
 }
 
-ContValueFloat::ContValueFloat()
-    : val(0)
+uint8_t const* ContValueUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueUnset is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueUnset) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueUnset");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContValueFloat
+ContValueFloat::ContValueFloat(float v)
+    : val(v)
 {
 }
 
@@ -491,13 +856,33 @@ std::unique_ptr<ContValue> ContValueFloat::clone() const
     return std::make_unique<ContValueFloat>(val);
 }
 
-ContValueDefined::ContValueDefined(ContDefinedValue v)
-    : val(v)
+std::vector<uint8_t> ContValueFloat::Serialize() const
 {
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueFloat));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, val);
+    return result;
 }
 
-ContValueDefined::ContValueDefined()
-    : val(CC_N)
+uint8_t const* ContValueFloat::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 5) {
+        throw std::runtime_error("Error, size of ContValueFloat is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueFloat) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueFloat");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    val = Parser::get_big_float(begin);
+    begin += 4;
+    return begin;
+}
+
+// ContValueDefined
+ContValueDefined::ContValueDefined(ContDefinedValue v)
+    : val(v)
 {
 }
 
@@ -558,6 +943,31 @@ std::unique_ptr<ContValue> ContValueDefined::clone() const
     return std::make_unique<ContValueDefined>(val);
 }
 
+std::vector<uint8_t> ContValueDefined::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueDefined));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, static_cast<uint8_t>(val));
+    return result;
+}
+
+uint8_t const* ContValueDefined::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 2) {
+        throw std::runtime_error("Error, size of ContValueDefined is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueDefined) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueDefined");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    val = static_cast<ContDefinedValue>(*begin);
+    ++begin;
+    return begin;
+}
+
+// ContValueAdd
 ContValueAdd::ContValueAdd(ContValue* v1, ContValue* v2)
     : val1(v1)
     , val2(v2)
@@ -604,6 +1014,32 @@ void ContValueAdd::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, val1, val2);
 }
 
+std::vector<uint8_t> ContValueAdd::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueAdd));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, val1->Serialize());
+    Parser::Append(result, val2->Serialize());
+    return result;
+}
+
+uint8_t const* ContValueAdd::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueAdd is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueAdd) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueAdd");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(val1, begin) = DeserializeContValue(begin, end);
+    std::tie(val2, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContValueSub
 ContValueSub::ContValueSub(ContValue* v1, ContValue* v2)
     : val1(v1)
     , val2(v2)
@@ -650,6 +1086,32 @@ void ContValueSub::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, val1, val2);
 }
 
+std::vector<uint8_t> ContValueSub::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueSub));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, val1->Serialize());
+    Parser::Append(result, val2->Serialize());
+    return result;
+}
+
+uint8_t const* ContValueSub::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueSub is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueSub) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueSub");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(val1, begin) = DeserializeContValue(begin, end);
+    std::tie(val2, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContValueMult
 ContValueMult::ContValueMult(ContValue* v1, ContValue* v2)
     : val1(v1)
     , val2(v2)
@@ -696,6 +1158,32 @@ void ContValueMult::replace(ContToken const* which, std::unique_ptr<ContToken> v
     replace_helper(this, which, v, val1, val2);
 }
 
+std::vector<uint8_t> ContValueMult::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueMult));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, val1->Serialize());
+    Parser::Append(result, val2->Serialize());
+    return result;
+}
+
+uint8_t const* ContValueMult::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueMult is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueMult) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueMult");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(val1, begin) = DeserializeContValue(begin, end);
+    std::tie(val2, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContValueDiv
 ContValueDiv::ContValueDiv(ContValue* v1, ContValue* v2)
     : val1(v1)
     , val2(v2)
@@ -748,6 +1236,32 @@ void ContValueDiv::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, val1, val2);
 }
 
+std::vector<uint8_t> ContValueDiv::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueDiv));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, val1->Serialize());
+    Parser::Append(result, val2->Serialize());
+    return result;
+}
+
+uint8_t const* ContValueDiv::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueDiv is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueDiv) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueDiv");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(val1, begin) = DeserializeContValue(begin, end);
+    std::tie(val2, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContValueNeg
 ContValueNeg::ContValueNeg(ContValue* v)
     : val(v)
 {
@@ -789,6 +1303,30 @@ void ContValueNeg::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, val);
 }
 
+std::vector<uint8_t> ContValueNeg::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueNeg));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, val->Serialize());
+    return result;
+}
+
+uint8_t const* ContValueNeg::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueNeg is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueNeg) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueNeg");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(val, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContValueREM
 float ContValueREM::Get(AnimateCompile& anim) const
 {
     return anim.GetBeatsRemaining();
@@ -816,13 +1354,30 @@ std::unique_ptr<ContValue> ContValueREM::clone() const
     return std::make_unique<ContValueREM>();
 }
 
-ContValueVar::ContValueVar(unsigned num)
-    : varnum(num)
+std::vector<uint8_t> ContValueREM::Serialize() const
 {
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueREM));
+    Parser::Append(result, super::Serialize());
+    return result;
 }
 
-ContValueVar::ContValueVar()
-    : varnum(0)
+uint8_t const* ContValueREM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueREM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueREM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueREM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContValueVar
+ContValueVar::ContValueVar(unsigned num)
+    : varnum(num)
 {
 }
 
@@ -858,6 +1413,31 @@ void ContValueVar::Set(AnimateCompile& anim, float v)
     anim.SetVarValue(varnum, v);
 }
 
+std::vector<uint8_t> ContValueVar::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueVar));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, static_cast<uint8_t>(varnum));
+    return result;
+}
+
+uint8_t const* ContValueVar::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueVar is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueVar) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueVar");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    varnum = static_cast<uint8_t>(*begin);
+    ++begin;
+    return begin;
+}
+
+// ContValueVarUnset
 std::ostream& ContValueVarUnset::Print(std::ostream& os) const
 {
     super::Print(os);
@@ -880,6 +1460,28 @@ std::unique_ptr<ContValue> ContValueVarUnset::clone() const
     return std::make_unique<ContValueVarUnset>();
 }
 
+std::vector<uint8_t> ContValueVarUnset::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContValueVarUnset));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContValueVarUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContValueVarUnset is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContValueVarUnset) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContValueVarUnset");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContFuncDir
 ContFuncDir::ContFuncDir(ContPoint* p)
     : pnt(p)
 {
@@ -928,6 +1530,30 @@ void ContFuncDir::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContFuncDir::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDir));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncDir::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncDir is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDir) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDir");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContFuncDirFrom
 ContFuncDirFrom::ContFuncDirFrom(ContPoint* start, ContPoint* end)
     : pnt_start(start)
     , pnt_end(end)
@@ -979,6 +1605,32 @@ void ContFuncDirFrom::replace(ContToken const* which, std::unique_ptr<ContToken>
     replace_helper(this, which, v, pnt_start, pnt_end);
 }
 
+std::vector<uint8_t> ContFuncDirFrom::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDirFrom));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt_start->Serialize());
+    Parser::Append(result, pnt_end->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncDirFrom::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncDirFrom is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDirFrom) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDirFrom");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt_start, begin) = DeserializeContPoint(begin, end);
+    std::tie(pnt_end, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContFuncDist
 ContFuncDist::ContFuncDist(ContPoint* p)
     : pnt(p)
 {
@@ -1024,6 +1676,30 @@ void ContFuncDist::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContFuncDist::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDist));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncDist::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncDist is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDist) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDist");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContFuncDistFrom
 ContFuncDistFrom::ContFuncDistFrom(ContPoint* start, ContPoint* end)
     : pnt_start(start)
     , pnt_end(end)
@@ -1071,6 +1747,32 @@ void ContFuncDistFrom::replace(ContToken const* which, std::unique_ptr<ContToken
     replace_helper(this, which, v, pnt_start, pnt_end);
 }
 
+std::vector<uint8_t> ContFuncDistFrom::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncDistFrom));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt_start->Serialize());
+    Parser::Append(result, pnt_end->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncDistFrom::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncDistFrom is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncDistFrom) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncDistFrom");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt_start, begin) = DeserializeContPoint(begin, end);
+    std::tie(pnt_end, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContFuncEither
 ContFuncEither::ContFuncEither(ContValue* d1, ContValue* d2, ContPoint* p)
     : dir1(d1)
     , dir2(d2)
@@ -1136,6 +1838,34 @@ void ContFuncEither::replace(ContToken const* which, std::unique_ptr<ContToken> 
     replace_helper(this, which, v, dir1, dir2, pnt);
 }
 
+std::vector<uint8_t> ContFuncEither::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncEither));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, dir1->Serialize());
+    Parser::Append(result, dir2->Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncEither::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncEither is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncEither) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncEither");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(dir1, begin) = DeserializeContValue(begin, end);
+    std::tie(dir2, begin) = DeserializeContValue(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContFuncOpp
 ContFuncOpp::ContFuncOpp(ContValue* d)
     : dir(d)
 {
@@ -1180,6 +1910,30 @@ void ContFuncOpp::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, dir);
 }
 
+std::vector<uint8_t> ContFuncOpp::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncOpp));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, dir->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncOpp::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncOpp is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncOpp) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncOpp");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(dir, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContFuncStep
 ContFuncStep::ContFuncStep(ContValue* beats, ContValue* blocksize, ContPoint* p)
     : numbeats(beats)
     , blksize(blocksize)
@@ -1230,12 +1984,62 @@ void ContFuncStep::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, blksize, pnt);
 }
 
+std::vector<uint8_t> ContFuncStep::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContFuncStep));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, numbeats->Serialize());
+    Parser::Append(result, blksize->Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContFuncStep::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContFuncStep is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContFuncStep) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContFuncStep");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
+    std::tie(blksize, begin) = DeserializeContValue(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcedure
 std::ostream& ContProcedure::Print(std::ostream& os) const
 {
     super::Print(os);
     return os << "Procedure: ";
 }
 
+std::vector<uint8_t> ContProcedure::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcedure));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContProcedure::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcedure is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcedure) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcedure");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContProcUnset
 std::ostream& ContProcUnset::Print(std::ostream& os) const
 {
     super::Print(os);
@@ -1259,6 +2063,28 @@ std::unique_ptr<ContProcedure> ContProcUnset::clone() const
     return std::make_unique<ContProcUnset>();
 }
 
+std::vector<uint8_t> ContProcUnset::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcUnset));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContProcUnset::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcUnset is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcUnset) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcUnset");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContProcSet
 ContProcSet::ContProcSet(ContValueVar* vr, ContValue* v)
     : var(vr)
     , val(v)
@@ -1331,6 +2157,32 @@ void ContProcSet::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     SetParentPtr_helper(this, var, val);
 }
 
+std::vector<uint8_t> ContProcSet::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcSet));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, var->Serialize());
+    Parser::Append(result, val->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcSet::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcSet is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcSet) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcSet");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(var, begin) = DeserializeContValueVar(begin, end);
+    std::tie(val, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcBlam
 void ContProcBlam::Compile(AnimateCompile& anim)
 {
     ContNextPoint np;
@@ -1361,6 +2213,28 @@ std::unique_ptr<ContProcedure> ContProcBlam::clone() const
     return std::make_unique<ContProcBlam>();
 }
 
+std::vector<uint8_t> ContProcBlam::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcBlam));
+    Parser::Append(result, super::Serialize());
+    return result;
+}
+
+uint8_t const* ContProcBlam::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcBlam is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcBlam) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcBlam");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    return begin;
+}
+
+// ContProcCM
 ContProcCM::ContProcCM(ContPoint* p1, ContPoint* p2, ContValue* steps, ContValue* d1,
     ContValue* d2, ContValue* beats)
     : pnt1(p1)
@@ -1419,6 +2293,40 @@ void ContProcCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt1, pnt2, stps, dir1, dir2, numbeats);
 }
 
+std::vector<uint8_t> ContProcCM::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcCM));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt1->Serialize());
+    Parser::Append(result, pnt2->Serialize());
+    Parser::Append(result, stps->Serialize());
+    Parser::Append(result, dir1->Serialize());
+    Parser::Append(result, dir2->Serialize());
+    Parser::Append(result, numbeats->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcCM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcCM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcCM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcCM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt1, begin) = DeserializeContPoint(begin, end);
+    std::tie(pnt2, begin) = DeserializeContPoint(begin, end);
+    std::tie(stps, begin) = DeserializeContValue(begin, end);
+    std::tie(dir1, begin) = DeserializeContValue(begin, end);
+    std::tie(dir2, begin) = DeserializeContValue(begin, end);
+    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcDMCM
 ContProcDMCM::ContProcDMCM(ContPoint* p1, ContPoint* p2, ContValue* beats)
     : pnt1(p1)
     , pnt2(p2)
@@ -1502,6 +2410,34 @@ void ContProcDMCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt1, pnt2, numbeats);
 }
 
+std::vector<uint8_t> ContProcDMCM::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcDMCM));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt1->Serialize());
+    Parser::Append(result, pnt2->Serialize());
+    Parser::Append(result, numbeats->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcDMCM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcDMCM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcDMCM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcDMCM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt1, begin) = DeserializeContPoint(begin, end);
+    std::tie(pnt2, begin) = DeserializeContPoint(begin, end);
+    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcDMHS
 ContProcDMHS::ContProcDMHS(ContPoint* p)
     : pnt(p)
 {
@@ -1577,6 +2513,30 @@ void ContProcDMHS::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContProcDMHS::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcDMHS));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcDMHS::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcDMHS is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcDMHS) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcDMHS");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcEven
 ContProcEven::ContProcEven(ContValue* steps, ContPoint* p)
     : stps(steps)
     , pnt(p)
@@ -1631,6 +2591,32 @@ void ContProcEven::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, stps, pnt);
 }
 
+std::vector<uint8_t> ContProcEven::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcEven));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, stps->Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcEven::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcEven is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcEven) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcEven");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(stps, begin) = DeserializeContValue(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcEWNS
 ContProcEWNS::ContProcEWNS(ContPoint* p)
     : pnt(p)
 {
@@ -1691,6 +2677,30 @@ void ContProcEWNS::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContProcEWNS::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcEWNS));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcEWNS::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcEWNS is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcEWNS) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcEWNS");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcFountain
 ContProcFountain::ContProcFountain(ContValue* d1, ContValue* d2, ContValue* s1, ContValue* s2,
     ContPoint* p)
     : dir1(d1)
@@ -1837,6 +2847,50 @@ void ContProcFountain::replace(ContToken const* which, std::unique_ptr<ContToken
     replace_helper(this, which, v, dir1, dir2, stepsize1, stepsize2, pnt);
 }
 
+std::vector<uint8_t> ContProcFountain::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcFountain));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, dir1->Serialize());
+    Parser::Append(result, dir2->Serialize());
+    Parser::Append(result, uint8_t(stepsize1 != nullptr));
+    if (stepsize1) {
+        Parser::Append(result, stepsize1->Serialize());
+    }
+    Parser::Append(result, uint8_t(stepsize2 != nullptr));
+    if (stepsize2) {
+        Parser::Append(result, stepsize2->Serialize());
+    }
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcFountain::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcFountain is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcFountain) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcFountain");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(dir1, begin) = DeserializeContValue(begin, end);
+    std::tie(dir2, begin) = DeserializeContValue(begin, end);
+    bool parsestepsize1 = static_cast<uint8_t>(*begin++);
+    if (parsestepsize1) {
+        std::tie(stepsize1, begin) = DeserializeContValue(begin, end);
+    }
+    bool parsestepsize2 = static_cast<uint8_t>(*begin++);
+    if (parsestepsize2) {
+        std::tie(stepsize2, begin) = DeserializeContValue(begin, end);
+    }
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcFM
 ContProcFM::ContProcFM(ContValue* steps, ContValue* d)
     : stps(steps)
     , dir(d)
@@ -1895,6 +2949,32 @@ void ContProcFM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, stps, dir);
 }
 
+std::vector<uint8_t> ContProcFM::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcFM));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, stps->Serialize());
+    Parser::Append(result, dir->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcFM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcFM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcFM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcFM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(stps, begin) = DeserializeContValue(begin, end);
+    std::tie(dir, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcFMTO
 ContProcFMTO::ContProcFMTO(ContPoint* p)
     : pnt(p)
 {
@@ -1957,6 +3037,30 @@ static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
     return a;
 }
 
+std::vector<uint8_t> ContProcFMTO::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcFMTO));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcFMTO::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcFMTO is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcFMTO) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcFMTO");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcGrid
 ContProcGrid::ContProcGrid(ContValue* g)
     : grid(g)
 {
@@ -2011,6 +3115,30 @@ void ContProcGrid::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, grid);
 }
 
+std::vector<uint8_t> ContProcGrid::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcGrid));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, grid->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcGrid::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcGrid is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcGrid) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcGrid");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(grid, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcHSCM
 ContProcHSCM::ContProcHSCM(ContPoint* p1, ContPoint* p2, ContValue* beats)
     : pnt1(p1)
     , pnt2(p2)
@@ -2079,6 +3207,34 @@ void ContProcHSCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt1, pnt2, numbeats);
 }
 
+std::vector<uint8_t> ContProcHSCM::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcHSCM));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt1->Serialize());
+    Parser::Append(result, pnt2->Serialize());
+    Parser::Append(result, numbeats->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcHSCM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcHSCM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcHSCM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcHSCM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt1, begin) = DeserializeContPoint(begin, end);
+    std::tie(pnt2, begin) = DeserializeContPoint(begin, end);
+    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcHSDM
 ContProcHSDM::ContProcHSDM(ContPoint* p)
     : pnt(p)
 {
@@ -2153,6 +3309,30 @@ void ContProcHSDM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContProcHSDM::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcHSDM));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcHSDM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcHSDM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcHSDM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcHSDM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcMagic
 ContProcMagic::ContProcMagic(ContPoint* p)
     : pnt(p)
 {
@@ -2198,6 +3378,30 @@ void ContProcMagic::replace(ContToken const* which, std::unique_ptr<ContToken> v
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContProcMagic::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMagic));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcMagic::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcMagic is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMagic) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcMagic");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcMarch
 ContProcMarch::ContProcMarch(ContValue* stepsize, ContValue* steps, ContValue* d,
     ContValue* face)
     : stpsize(stepsize)
@@ -2282,6 +3486,42 @@ void ContProcMarch::replace(ContToken const* which, std::unique_ptr<ContToken> v
     replace_helper(this, which, v, stpsize, stps, dir, facedir);
 }
 
+std::vector<uint8_t> ContProcMarch::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMarch));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, stpsize->Serialize());
+    Parser::Append(result, stps->Serialize());
+    Parser::Append(result, dir->Serialize());
+    Parser::Append(result, uint8_t(facedir != nullptr));
+    if (facedir) {
+        Parser::Append(result, facedir->Serialize());
+    }
+    return result;
+}
+
+uint8_t const* ContProcMarch::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcMarch is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMarch) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcMarch");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(stpsize, begin) = DeserializeContValue(begin, end);
+    std::tie(stps, begin) = DeserializeContValue(begin, end);
+    std::tie(dir, begin) = DeserializeContValue(begin, end);
+    bool parsefacedir = static_cast<uint8_t>(*begin++);
+    if (parsefacedir) {
+        std::tie(facedir, begin) = DeserializeContValue(begin, end);
+    }
+    return begin;
+}
+
+// ContProcMT
 ContProcMT::ContProcMT(ContValue* beats, ContValue* d)
     : numbeats(beats)
     , dir(d)
@@ -2333,6 +3573,32 @@ void ContProcMT::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, numbeats, dir);
 }
 
+std::vector<uint8_t> ContProcMT::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMT));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, numbeats->Serialize());
+    Parser::Append(result, dir->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcMT::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcMT is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMT) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcMT");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(numbeats, begin) = DeserializeContValue(begin, end);
+    std::tie(dir, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcMTRM
 ContProcMTRM::ContProcMTRM(ContValue* d)
     : dir(d)
 {
@@ -2379,6 +3645,30 @@ void ContProcMTRM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, dir);
 }
 
+std::vector<uint8_t> ContProcMTRM::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcMTRM));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, dir->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcMTRM::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcMTRM is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcMTRM) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcMTRM");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(dir, begin) = DeserializeContValue(begin, end);
+    return begin;
+}
+
+// ContProcNSEW
 ContProcNSEW::ContProcNSEW(ContPoint* p)
     : pnt(p)
 {
@@ -2439,6 +3729,30 @@ void ContProcNSEW::replace(ContToken const* which, std::unique_ptr<ContToken> v)
     replace_helper(this, which, v, pnt);
 }
 
+std::vector<uint8_t> ContProcNSEW::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcNSEW));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcNSEW::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcNSEW is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcNSEW) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcNSEW");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
+// ContProcRotate
 ContProcRotate::ContProcRotate(ContValue* angle, ContValue* steps, ContPoint* p)
     : ang(angle)
     , stps(steps)
@@ -2507,4 +3821,32 @@ void ContProcRotate::replace(ContToken const* which, std::unique_ptr<ContToken> 
 {
     replace_helper(this, which, v, ang, stps, pnt);
 }
+
+std::vector<uint8_t> ContProcRotate::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, static_cast<uint8_t>(SerializationToken::ContProcRotate));
+    Parser::Append(result, super::Serialize());
+    Parser::Append(result, ang->Serialize());
+    Parser::Append(result, stps->Serialize());
+    Parser::Append(result, pnt->Serialize());
+    return result;
+}
+
+uint8_t const* ContProcRotate::Deserialize(uint8_t const* begin, uint8_t const* end)
+{
+    if (std::distance(begin, end) < 1) {
+        throw std::runtime_error("Error, size of ContProcRotate is not correct");
+    }
+    if (static_cast<SerializationToken>(*begin) != SerializationToken::ContProcRotate) {
+        throw std::runtime_error("Error, token is not SerializationToken::ContProcRotate");
+    }
+    ++begin;
+    begin = super::Deserialize(begin, end);
+    std::tie(ang, begin) = DeserializeContValue(begin, end);
+    std::tie(stps, begin) = DeserializeContValue(begin, end);
+    std::tie(pnt, begin) = DeserializeContPoint(begin, end);
+    return begin;
+}
+
 }

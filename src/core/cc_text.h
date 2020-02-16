@@ -26,31 +26,18 @@
 #include <string>
 #include <vector>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/vector.hpp>
-
 namespace CalChart {
 
 struct Textchunk {
     Textchunk() = default;
     std::string text;
     PSFONT font = PSFONT::NORM;
-
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar& text;
-        ar& font;
-    }
 };
 
 using Textchunk_list = std::vector<Textchunk>;
 
 class Textline {
 public:
-    Textline() = default;
     Textline(std::string line, PSFONT currfontnum);
     auto GetChunks() const { return chunks; }
     auto GetCenter() const { return center; }
@@ -58,16 +45,6 @@ public:
     auto GetOnSheet() const { return on_sheet; }
 
 private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar& chunks;
-        ar& center;
-        ar& on_main;
-        ar& on_sheet;
-    }
-
     Textchunk_list chunks;
     bool center{};
     bool on_main{};
@@ -86,15 +63,6 @@ public:
     auto GetPrintNumber() const { return mNumber; }
 
 private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar& mPrintChunks;
-        ar& mOriginalLine;
-        ar& mNumber;
-    }
-
     Textline_list mPrintChunks;
     std::string mOriginalLine;
     std::string mNumber;

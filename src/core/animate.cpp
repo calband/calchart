@@ -80,9 +80,8 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
     int newSheetIndex = 0;
     int prevSheetIndex = 0;
     for (auto curr_sheet = show.GetSheetBegin(); curr_sheet != show.GetSheetEnd(); ++curr_sheet) {
-        
-        if (!curr_sheet->IsInAnimation())
-        {
+
+        if (!curr_sheet->IsInAnimation()) {
             mAnimSheetIndices.push_back(prevSheetIndex);
             continue;
         }

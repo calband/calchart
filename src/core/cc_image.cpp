@@ -59,4 +59,22 @@ ImageData::ImageData(uint8_t const*& d)
     alpha.assign(d, d + alpha_size);
     d += alpha_size;
 }
+
+std::vector<uint8_t> ImageData::Serialize() const
+{
+    std::vector<uint8_t> result;
+    Parser::Append(result, uint32_t(left));
+    Parser::Append(result, uint32_t(top));
+    Parser::Append(result, uint32_t(scaled_width));
+    Parser::Append(result, uint32_t(scaled_height));
+    Parser::Append(result, uint32_t(image_width));
+    Parser::Append(result, uint32_t(image_height));
+    // we know data size, but let's put it in anyways
+    Parser::Append(result, uint32_t(data.size()));
+    Parser::Append(result, data);
+    // alpha could be zero
+    Parser::Append(result, uint32_t(alpha.size()));
+    Parser::Append(result, alpha);
+    return result;
+}
 }

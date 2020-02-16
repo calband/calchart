@@ -27,7 +27,7 @@ configure_file (
 # CalChart: The App itself
 
 # CalChart requires Boost.  Find it and include the directories here.
-find_package (Boost 1.60 REQUIRED serialization)
+find_package (Boost 1.60 REQUIRED)
 
 # CalChart requires BISON/FLEX for the grammar
 find_package (BISON REQUIRED)

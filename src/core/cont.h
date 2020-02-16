@@ -24,11 +24,8 @@
 #include "cc_coord.h"
 
 #include <iosfwd>
-
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/unique_ptr.hpp>
+#include <string>
+#include <vector>
 
 // what follows it effectively the Abstract Syntax Tree for CalChart continuities.
 //
@@ -83,6 +80,15 @@ struct DrawableCont {
     std::vector<DrawableCont> args;
 };
 
+// A note about serialization/deserialation.
+// Serialization is straight forward; each object can serialize itself, members
+// and parents into a vector of bytes.
+// Deserializtion is a little more complicated.  Essentially we give the
+// object a pointer to the beginning of a datablob and the end.  It will deserialize
+// members and super objects into it.  It returns where it ended.  If at the end
+// where it ends is the actual end, it was a good parse
+//
+
 class ContToken {
 public:
     ContToken();
@@ -91,24 +97,18 @@ public:
     void SetParentPtr(ContToken* p) { parent_ptr = p; }
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v);
 
-    int line, col;
+    virtual std::vector<uint8_t> Serialize() const;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end);
+
+    uint32_t line, col;
 
 protected:
     ContToken* parent_ptr = nullptr;
 
-private:
     friend bool operator==(ContToken const& lhs, ContToken const& rhs);
     virtual bool is_equal(ContToken const& other) const
     {
         return line == other.line && col == other.col;
-    }
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar& line;
-        ar& col;
     }
 };
 
@@ -132,19 +132,14 @@ public:
     virtual DrawableCont GetDrawableCont() const;
     virtual std::unique_ptr<ContPoint> clone() const;
 
-private:
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+
+protected:
     // we use the assumption that we've already checked that the types match before calling.
     virtual bool is_equal(ContToken const& other) const override
     {
-        return true;
-    }
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
+        return super::is_equal(other);
     }
 };
 
@@ -156,14 +151,8 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
 
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-    }
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 };
 
 class ContStartPoint : public ContPoint {
@@ -176,19 +165,14 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
 
-private:
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+
+protected:
     // we use the assumption that we've already checked that the types match before calling.
     virtual bool is_equal(ContToken const& other) const override
     {
-        return true;
-    }
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
+        return super::is_equal(other);
     }
 };
 
@@ -202,19 +186,14 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
 
-private:
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+
+protected:
     // we use the assumption that we've already checked that the types match before calling.
     virtual bool is_equal(ContToken const& other) const override
     {
-        return true;
-    }
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
+        return super::is_equal(other);
     }
 };
 
@@ -222,31 +201,24 @@ class ContRefPoint : public ContPoint {
     using super = ContPoint;
 
 public:
+    ContRefPoint() = default;
     ContRefPoint(unsigned n);
     virtual Coord Get(AnimateCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
 
-private:
-    // default constructor for serialization
-    ContRefPoint();
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return refnum == dynamic_cast<ContRefPoint const&>(other).refnum;
+        return super::is_equal(other) && refnum == dynamic_cast<ContRefPoint const&>(other).refnum;
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& refnum;
-    }
-
-    unsigned refnum;
+private:
+    uint32_t refnum{};
 };
 
 class ContValue : public ContToken {
@@ -259,14 +231,8 @@ public:
     virtual DrawableCont GetDrawableCont() const = 0;
     virtual std::unique_ptr<ContValue> clone() const = 0;
 
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-    }
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 };
 
 class ContValueUnset : public ContValue {
@@ -278,82 +244,63 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
 
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-    }
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 };
 
 class ContValueFloat : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueFloat() = default;
     ContValueFloat(float v);
     virtual float Get(AnimateCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
 
-private:
-    // default constructor for serialization
-    ContValueFloat();
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return val == dynamic_cast<ContValueFloat const&>(other).val;
+        return super::is_equal(other) && val == dynamic_cast<ContValueFloat const&>(other).val;
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val;
-    }
-
-    float val;
+private:
+    float val{};
 };
 
 class ContValueDefined : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueDefined() = default;
     ContValueDefined(ContDefinedValue v);
     virtual float Get(AnimateCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
 
-private:
-    // default constructor for serialization
-    ContValueDefined();
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return val == dynamic_cast<ContValueDefined const&>(other).val;
+        return super::is_equal(other) && val == dynamic_cast<ContValueDefined const&>(other).val;
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val;
-    }
-
-    ContDefinedValue val;
+private:
+    ContDefinedValue val{ CC_N };
 };
 
 class ContValueAdd : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueAdd() = default;
     ContValueAdd(ContValue* v1, ContValue* v2);
     ContValueAdd(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
     virtual float Get(AnimateCompile& anim) const override;
@@ -362,26 +309,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContValueAdd() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContValueAdd const&>(other);
-        return (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
+        return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val1;
-        ar& val2;
-    }
-
+private:
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -389,6 +327,7 @@ class ContValueSub : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueSub() = default;
     ContValueSub(ContValue* v1, ContValue* v2);
     ContValueSub(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
     virtual float Get(AnimateCompile& anim) const override;
@@ -397,26 +336,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContValueSub() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContValueSub const&>(other);
-        return (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
+        return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val1;
-        ar& val2;
-    }
-
+private:
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -424,6 +354,7 @@ class ContValueMult : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueMult() = default;
     ContValueMult(ContValue* v1, ContValue* v2);
     ContValueMult(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
     virtual float Get(AnimateCompile& anim) const override;
@@ -432,26 +363,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContValueMult() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContValueMult const&>(other);
-        return (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
+        return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val1;
-        ar& val2;
-    }
-
+private:
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -459,6 +381,7 @@ class ContValueDiv : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueDiv() = default;
     ContValueDiv(ContValue* v1, ContValue* v2);
     ContValueDiv(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
     virtual float Get(AnimateCompile& anim) const override;
@@ -467,26 +390,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContValueDiv() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContValueDiv const&>(other);
-        return (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
+        return super::is_equal(other) && (*val1 == *der_other.val1) && (*val2 == *der_other.val2);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val1;
-        ar& val2;
-    }
-
+private:
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -494,6 +408,7 @@ class ContValueNeg : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueNeg() = default;
     ContValueNeg(ContValue* v);
     ContValueNeg(std::unique_ptr<ContValue> v);
     virtual float Get(AnimateCompile& anim) const override;
@@ -502,24 +417,16 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContValueNeg() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return (*val == *dynamic_cast<ContValueNeg const&>(other).val);
+        return super::is_equal(other) && (*val == *dynamic_cast<ContValueNeg const&>(other).val);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& val;
-    }
-
+private:
     std::unique_ptr<ContValue> val;
 };
 
@@ -532,19 +439,14 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
 
-private:
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+
+protected:
     // we use the assumption that we've already checked that the types match before calling.
     virtual bool is_equal(ContToken const& other) const override
     {
-        return true;
-    }
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
+        return super::is_equal(other) && true;
     }
 };
 
@@ -552,6 +454,7 @@ class ContValueVar : public ContValue {
     using super = ContValue;
 
 public:
+    ContValueVar() = default;
     ContValueVar(unsigned num);
     virtual float Get(AnimateCompile& anim) const override;
     void Set(AnimateCompile& anim, float v);
@@ -559,25 +462,17 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
 
-protected:
-    // default constructor for serialization
-    ContValueVar();
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return (varnum == dynamic_cast<ContValueVar const&>(other).varnum);
+        return super::is_equal(other) && (varnum == dynamic_cast<ContValueVar const&>(other).varnum);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& varnum;
-    }
-
-    unsigned varnum;
+private:
+    uint8_t varnum{};
 };
 
 class ContValueVarUnset : public ContValueVar {
@@ -589,20 +484,15 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
 
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-    }
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 };
 
 class ContFuncDir : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncDir() = default;
     ContFuncDir(ContPoint* p);
     ContFuncDir(std::unique_ptr<ContPoint> p);
     virtual float Get(AnimateCompile& anim) const override;
@@ -611,24 +501,16 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncDir() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return (*pnt == *dynamic_cast<ContFuncDir const&>(other).pnt);
+        return super::is_equal(other) && (*pnt == *dynamic_cast<ContFuncDir const&>(other).pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -636,6 +518,7 @@ class ContFuncDirFrom : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncDirFrom() = default;
     ContFuncDirFrom(ContPoint* start, ContPoint* end);
     ContFuncDirFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end);
     virtual float Get(AnimateCompile& anim) const override;
@@ -644,26 +527,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncDirFrom() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContFuncDirFrom const&>(other);
-        return (*pnt_start == *der_other.pnt_start) && (*pnt_end == *der_other.pnt_end);
+        return super::is_equal(other) && (*pnt_start == *der_other.pnt_start) && (*pnt_end == *der_other.pnt_end);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt_start;
-        ar& pnt_end;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt_start, pnt_end;
 };
 
@@ -671,6 +545,7 @@ class ContFuncDist : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncDist() = default;
     ContFuncDist(ContPoint* p);
     ContFuncDist(std::unique_ptr<ContPoint> p);
     virtual float Get(AnimateCompile& anim) const override;
@@ -679,24 +554,16 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncDist() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return (*pnt == *dynamic_cast<ContFuncDist const&>(other).pnt);
+        return super::is_equal(other) && (*pnt == *dynamic_cast<ContFuncDist const&>(other).pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -704,6 +571,7 @@ class ContFuncDistFrom : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncDistFrom() = default;
     ContFuncDistFrom(ContPoint* start, ContPoint* end);
     ContFuncDistFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end);
     virtual float Get(AnimateCompile& anim) const override;
@@ -712,26 +580,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncDistFrom() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContFuncDistFrom const&>(other);
-        return (*pnt_start == *der_other.pnt_start) && (*pnt_end == *der_other.pnt_end);
+        return super::is_equal(other) && (*pnt_start == *der_other.pnt_start) && (*pnt_end == *der_other.pnt_end);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt_start;
-        ar& pnt_end;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt_start, pnt_end;
 };
 
@@ -739,6 +598,7 @@ class ContFuncEither : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncEither() = default;
     ContFuncEither(ContValue* d1, ContValue* d2, ContPoint* p);
     ContFuncEither(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContPoint> p);
     virtual float Get(AnimateCompile& anim) const override;
@@ -747,27 +607,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncEither() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContFuncEither const&>(other);
-        return (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& dir1;
-        ar& dir2;
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContValue> dir1, dir2;
     std::unique_ptr<ContPoint> pnt;
 };
@@ -776,6 +626,7 @@ class ContFuncOpp : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncOpp() = default;
     ContFuncOpp(ContValue* d);
     ContFuncOpp(std::unique_ptr<ContValue> d);
     virtual float Get(AnimateCompile& anim) const override;
@@ -784,24 +635,16 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncOpp() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
-        return (*dir == *dynamic_cast<ContFuncOpp const&>(other).dir);
+        return super::is_equal(other) && (*dir == *dynamic_cast<ContFuncOpp const&>(other).dir);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& dir;
-    }
-
+private:
     std::unique_ptr<ContValue> dir;
 };
 
@@ -809,6 +652,7 @@ class ContFuncStep : public ContValue {
     using super = ContValue;
 
 public:
+    ContFuncStep() = default;
     ContFuncStep(ContValue* beats, ContValue* blocksize, ContPoint* p);
     ContFuncStep(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> blocksize, std::unique_ptr<ContPoint> p);
     virtual float Get(AnimateCompile& anim) const override;
@@ -817,27 +661,17 @@ public:
     virtual std::unique_ptr<ContValue> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContFuncStep() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContFuncStep const&>(other);
-        return (*numbeats == *der_other.numbeats) && (*blksize == *der_other.blksize) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*numbeats == *der_other.numbeats) && (*blksize == *der_other.blksize) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& numbeats;
-        ar& blksize;
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContValue> numbeats, blksize;
     std::unique_ptr<ContPoint> pnt;
 };
@@ -853,14 +687,8 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const = 0;
     virtual bool IsValid() const { return true; }
 
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-    }
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 };
 
 class ContProcUnset : public ContProcedure {
@@ -873,20 +701,15 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual bool IsValid() const override { return false; }
 
-private:
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-    }
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 };
 
 class ContProcSet : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcSet() = default;
     ContProcSet(ContValueVar* vr, ContValue* v);
     ContProcSet(std::unique_ptr<ContValueVar> vr, std::unique_ptr<ContValue> v);
     virtual void Compile(AnimateCompile& anim) override;
@@ -897,26 +720,17 @@ public:
     };
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcSet() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcSet const&>(other);
-        return (*var == *der_other.var) && (*val == *der_other.val);
+        return super::is_equal(other) && (*var == *der_other.var) && (*val == *der_other.val);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& var;
-        ar& val;
-    }
-
+private:
     std::unique_ptr<ContValueVar> var;
     std::unique_ptr<ContValue> val;
 };
@@ -930,19 +744,14 @@ public:
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
 
-private:
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
+
+protected:
     // we use the assumption that we've already checked that the types match before calling.
     virtual bool is_equal(ContToken const& other) const override
     {
-        return true;
-    }
-
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
+        return super::is_equal(other) && true;
     }
 };
 
@@ -950,6 +759,7 @@ class ContProcCM : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcCM() = default;
     ContProcCM(ContPoint* p1, ContPoint* p2, ContValue* steps, ContValue* d1,
         ContValue* d2, ContValue* beats);
     ContProcCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d1,
@@ -960,30 +770,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcCM() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcCM const&>(other);
-        return (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*stps == *der_other.stps) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*numbeats == *der_other.numbeats);
+        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*stps == *der_other.stps) && (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*numbeats == *der_other.numbeats);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt1;
-        ar& pnt2;
-        ar& stps;
-        ar& dir1;
-        ar& dir2;
-        ar& numbeats;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt1, pnt2;
     std::unique_ptr<ContValue> stps, dir1, dir2, numbeats;
 };
@@ -992,6 +789,7 @@ class ContProcDMCM : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcDMCM() = default;
     ContProcDMCM(ContPoint* p1, ContPoint* p2, ContValue* beats);
     ContProcDMCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> beats);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1000,27 +798,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcDMCM() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcDMCM const&>(other);
-        return (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
+        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt1;
-        ar& pnt2;
-        ar& numbeats;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt1, pnt2;
     std::unique_ptr<ContValue> numbeats;
 };
@@ -1029,6 +817,7 @@ class ContProcDMHS : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcDMHS() = default;
     ContProcDMHS(ContPoint* p);
     ContProcDMHS(std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1037,25 +826,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcDMHS() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcDMHS const&>(other);
-        return (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1063,6 +844,7 @@ class ContProcEven : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcEven() = default;
     ContProcEven(ContValue* steps, ContPoint* p);
     ContProcEven(std::unique_ptr<ContValue> steps, std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1071,26 +853,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcEven() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcEven const&>(other);
-        return (*stps == *der_other.stps) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*stps == *der_other.stps) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& stps;
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContValue> stps;
     std::unique_ptr<ContPoint> pnt;
 };
@@ -1099,6 +872,7 @@ class ContProcEWNS : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcEWNS() = default;
     ContProcEWNS(ContPoint* p);
     ContProcEWNS(std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1107,25 +881,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcEWNS() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcEWNS const&>(other);
-        return (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1133,6 +899,7 @@ class ContProcFountain : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcFountain() = default;
     ContProcFountain(ContValue* d1, ContValue* d2, ContValue* s1, ContValue* s2,
         ContPoint* p);
     ContProcFountain(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContValue> s1, std::unique_ptr<ContValue> s2,
@@ -1143,29 +910,31 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcFountain() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
+        if (!super::is_equal(other)) {
+            return false;
+        }
+
         auto&& der_other = dynamic_cast<ContProcFountain const&>(other);
-        return (*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*stepsize1 == *der_other.stepsize1) && (*stepsize2 == *der_other.stepsize2) && (*pnt == *der_other.pnt);
+        // stepsize1, 2 can be null.  So this gets complicated
+        if (!((*dir1 == *der_other.dir1) && (*dir2 == *der_other.dir2) && (*pnt == *der_other.pnt))) {
+            return false;
+        }
+        if (stepsize1 || der_other.stepsize1) {
+            return (stepsize1 && der_other.stepsize1) ? (*stepsize1 == *der_other.stepsize1) : false;
+        }
+        if (stepsize2 || der_other.stepsize2) {
+            return (stepsize2 && der_other.stepsize2) ? (*stepsize2 == *der_other.stepsize2) : false;
+        }
+        return true;
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& dir1;
-        ar& dir2;
-        ar& stepsize1;
-        ar& stepsize2;
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContValue> dir1, dir2;
     std::unique_ptr<ContValue> stepsize1, stepsize2;
     std::unique_ptr<ContPoint> pnt;
@@ -1175,6 +944,7 @@ class ContProcFM : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcFM() = default;
     ContProcFM(ContValue* steps, ContValue* d);
     ContProcFM(std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1183,26 +953,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcFM() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcFM const&>(other);
-        return (*stps == *der_other.stps) && (*dir == *der_other.dir);
+        return super::is_equal(other) && (*stps == *der_other.stps) && (*dir == *der_other.dir);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& stps;
-        ar& dir;
-    }
-
+private:
     std::unique_ptr<ContValue> stps, dir;
 };
 
@@ -1210,6 +971,7 @@ class ContProcFMTO : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcFMTO() = default;
     ContProcFMTO(ContPoint* p);
     ContProcFMTO(std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1218,25 +980,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcFMTO() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcFMTO const&>(other);
-        return (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1244,6 +998,7 @@ class ContProcGrid : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcGrid() = default;
     ContProcGrid(ContValue* g);
     ContProcGrid(std::unique_ptr<ContValue> g);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1252,25 +1007,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcGrid() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcGrid const&>(other);
-        return (*grid == *der_other.grid);
+        return super::is_equal(other) && (*grid == *der_other.grid);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& grid;
-    }
-
+private:
     std::unique_ptr<ContValue> grid;
 };
 
@@ -1278,6 +1025,7 @@ class ContProcHSCM : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcHSCM() = default;
     ContProcHSCM(ContPoint* p1, ContPoint* p2, ContValue* beats);
     ContProcHSCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> beats);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1286,27 +1034,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcHSCM() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcHSCM const&>(other);
-        return (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
+        return super::is_equal(other) && (*pnt1 == *der_other.pnt1) && (*pnt2 == *der_other.pnt2) && (*numbeats == *der_other.numbeats);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt1;
-        ar& pnt2;
-        ar& numbeats;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt1, pnt2;
     std::unique_ptr<ContValue> numbeats;
 };
@@ -1315,6 +1053,7 @@ class ContProcHSDM : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcHSDM() = default;
     ContProcHSDM(ContPoint* p);
     ContProcHSDM(std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1323,25 +1062,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcHSDM() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcHSDM const&>(other);
-        return (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1349,6 +1080,7 @@ class ContProcMagic : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcMagic() = default;
     ContProcMagic(ContPoint* p);
     ContProcMagic(std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1357,25 +1089,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcMagic() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcMagic const&>(other);
-        return (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1383,6 +1107,7 @@ class ContProcMarch : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcMarch() = default;
     ContProcMarch(ContValue* stepsize, ContValue* steps, ContValue* d,
         ContValue* face);
     ContProcMarch(std::unique_ptr<ContValue> stepsize, std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d,
@@ -1393,28 +1118,27 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcMarch() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
+        if (!super::is_equal(other)) {
+            return false;
+        }
         auto&& der_other = dynamic_cast<ContProcMarch const&>(other);
-        return (*stpsize == *der_other.stpsize) && (*stps == *der_other.stps) && (*dir == *der_other.dir) && (*facedir == *der_other.facedir);
+        // facedir can be null.  So this gets complicated
+        if (!((*stpsize == *der_other.stpsize) && (*stps == *der_other.stps) && (*dir == *der_other.dir))) {
+            return false;
+        }
+        if (facedir || der_other.facedir) {
+            return (facedir && der_other.facedir) ? (*facedir == *der_other.facedir) : false;
+        }
+        return true;
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& stpsize;
-        ar& stps;
-        ar& dir;
-        ar& facedir;
-    }
-
+private:
     std::unique_ptr<ContValue> stpsize, stps, dir, facedir;
 };
 
@@ -1422,6 +1146,7 @@ class ContProcMT : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcMT() = default;
     ContProcMT(ContValue* beats, ContValue* d);
     ContProcMT(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> d);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1430,26 +1155,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcMT() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcMT const&>(other);
-        return (*numbeats == *der_other.numbeats) && (*dir == *der_other.dir);
+        return super::is_equal(other) && (*numbeats == *der_other.numbeats) && (*dir == *der_other.dir);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& numbeats;
-        ar& dir;
-    }
-
+private:
     std::unique_ptr<ContValue> numbeats, dir;
 };
 
@@ -1457,6 +1173,7 @@ class ContProcMTRM : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcMTRM() = default;
     ContProcMTRM(ContValue* d);
     ContProcMTRM(std::unique_ptr<ContValue> d);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1465,25 +1182,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcMTRM() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcMTRM const&>(other);
-        return (*dir == *der_other.dir);
+        return super::is_equal(other) && (*dir == *der_other.dir);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& dir;
-    }
-
+private:
     std::unique_ptr<ContValue> dir;
 };
 
@@ -1491,6 +1200,7 @@ class ContProcNSEW : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcNSEW() = default;
     ContProcNSEW(ContPoint* p);
     ContProcNSEW(std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1499,25 +1209,17 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcNSEW() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcNSEW const&>(other);
-        return (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1525,6 +1227,7 @@ class ContProcRotate : public ContProcedure {
     using super = ContProcedure;
 
 public:
+    ContProcRotate() = default;
     ContProcRotate(ContValue* angle, ContValue* steps, ContPoint* p);
     ContProcRotate(std::unique_ptr<ContValue> angle, std::unique_ptr<ContValue> steps, std::unique_ptr<ContPoint> p);
     virtual void Compile(AnimateCompile& anim) override;
@@ -1533,28 +1236,22 @@ public:
     virtual std::unique_ptr<ContProcedure> clone() const override;
     virtual void replace(ContToken const* which, std::unique_ptr<ContToken> v) override;
 
-private:
-    // default constructor for serialization
-    ContProcRotate() = default;
+    virtual std::vector<uint8_t> Serialize() const override;
+    virtual uint8_t const* Deserialize(uint8_t const* begin, uint8_t const* end) override;
 
+protected:
     virtual bool is_equal(ContToken const& other) const override
     {
         auto&& der_other = dynamic_cast<ContProcRotate const&>(other);
-        return (*ang == *der_other.ang) && (*stps == *der_other.stps) && (*pnt == *der_other.pnt);
+        return super::is_equal(other) && (*ang == *der_other.ang) && (*stps == *der_other.stps) && (*pnt == *der_other.pnt);
     }
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        // serialize base class information
-        ar& boost::serialization::base_object<super>(*this);
-        ar& ang;
-        ar& stps;
-        ar& pnt;
-    }
-
+private:
     std::unique_ptr<ContValue> ang, stps;
     std::unique_ptr<ContPoint> pnt;
 };
+
+// this is the top level Deserialization function
+std::tuple<std::unique_ptr<ContProcedure>, uint8_t const*> DeserializeContProcedure(uint8_t const* begin, uint8_t const* end);
+
 }
