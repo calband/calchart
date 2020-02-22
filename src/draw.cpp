@@ -305,28 +305,28 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
             for (auto& c : chunks) {
                 bool do_tab = false;
                 switch (c.font) {
-                case PSFONT_SYMBOL: {
+                case PSFONT::SYMBOL: {
                     wxCoord textw, texth;
                     dc.GetTextExtent(wxT("O"), &textw, &texth);
                     x += textw * c.text.length();
                 } break;
-                case PSFONT_NORM:
+                case PSFONT::NORM:
                     dc.SetFont(*contPlainFont);
                     break;
-                case PSFONT_BOLD:
+                case PSFONT::BOLD:
                     dc.SetFont(*contBoldFont);
                     break;
-                case PSFONT_ITAL:
+                case PSFONT::ITAL:
                     dc.SetFont(*contItalFont);
                     break;
-                case PSFONT_BOLDITAL:
+                case PSFONT::BOLDITAL:
                     dc.SetFont(*contBoldItalFont);
                     break;
-                case PSFONT_TAB:
+                case PSFONT::TAB:
                     do_tab = true;
                     break;
                 }
-                if (!do_tab && (c.font != PSFONT_SYMBOL)) {
+                if (!do_tab && (c.font != PSFONT::SYMBOL)) {
                     wxCoord textw, texth;
                     dc.GetTextExtent(c.text, &textw, &texth);
                     x -= textw / 2;
@@ -339,20 +339,20 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
         for (auto& c : chunks) {
             bool do_tab = false;
             switch (c.font) {
-            case PSFONT_NORM:
-            case PSFONT_SYMBOL:
+            case PSFONT::NORM:
+            case PSFONT::SYMBOL:
                 dc.SetFont(*contPlainFont);
                 break;
-            case PSFONT_BOLD:
+            case PSFONT::BOLD:
                 dc.SetFont(*contBoldFont);
                 break;
-            case PSFONT_ITAL:
+            case PSFONT::ITAL:
                 dc.SetFont(*contItalFont);
                 break;
-            case PSFONT_BOLDITAL:
+            case PSFONT::BOLDITAL:
                 dc.SetFont(*contBoldItalFont);
                 break;
-            case PSFONT_TAB: {
+            case PSFONT::TAB: {
                 tabnum++;
                 wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
                 if (textw >= x)
@@ -364,7 +364,7 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
             default:
                 break;
             }
-            if (c.font == PSFONT_SYMBOL) {
+            if (c.font == PSFONT::SYMBOL) {
                 wxCoord textw, texth, textd;
                 dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
                 const float d = textw;
@@ -431,8 +431,8 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
 #endif
 }
 
-static std::unique_ptr<CalChart::ShowMode>
-CreateFieldForPrinting(int left_limit, int right_limit, bool landscape)
+CalChart::ShowMode
+CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart::ShowMode::YardLinesInfo_t const& yardlines)
 {
     CalChart::Coord siz = { Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[landscape]),
         Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
@@ -449,9 +449,9 @@ CreateFieldForPrinting(int left_limit, int right_limit, bool landscape)
     CalChart::Coord off = { Int2CoordUnits(-left_edge),
         Int2CoordUnits(CalChart::kFieldStepSizeWestEdgeFromCenter) };
 
-    return CalChart::ShowModeStandard::CreateShowMode("Standard", siz, off, { 0, 0 }, { 0, 0 },
+    return CalChart::ShowMode::CreateShowMode(siz, off, { 0, 0 }, { 0, 0 },
         CalChart::kFieldStepWestHashFromWestSideline,
-        CalChart::kFieldStepEastHashFromWestSideline);
+        CalChart::kFieldStepEastHashFromWestSideline, yardlines);
 }
 
 // Return a bounding box of the show of where the marchers are.  If they are
@@ -494,22 +494,22 @@ void DrawForPrintingHelper(wxDC& dc, const CalChartConfiguration& config,
     const auto pts = sheet.GetPoints();
     auto boundingBox = GetMarcherBoundingBox(pts);
     auto mode = CreateFieldForPrinting(CoordUnits2Int(boundingBox.first.x),
-        CoordUnits2Int(boundingBox.second.x), landscape);
+        CoordUnits2Int(boundingBox.second.x), landscape, show.GetShowMode().Get_yard_text());
 
     // set the origin and scaling for drawing the field
     dc.SetDeviceOrigin(kFieldBorderOffset * pageW, kFieldTop * pageH);
-    auto scale = (pageW - 2 * kFieldBorderOffset * pageW) / (double)mode->Size().x;
+    auto scale = (pageW - 2 * kFieldBorderOffset * pageW) / (double)mode.Size().x;
     dc.SetUserScale(scale, scale);
 
     // draw the field.
-    DrawMode(dc, config, *mode, ShowMode_kPrinting);
+    DrawMode(dc, config, mode, ShowMode_kPrinting);
     wxFont* pointLabelFont = wxTheFontList->FindOrCreateFont(
         (int)Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()), wxFONTFAMILY_SWISS,
         wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*pointLabelFont);
     for (auto i = 0u; i < pts.size(); i++) {
         const auto point = pts.at(i);
-        const auto pos = point.GetPos(ref) + mode->Offset();
+        const auto pos = point.GetPos(ref) + mode.Offset();
         dc.SetBrush(*wxBLACK_BRUSH);
         DrawPointHelper(dc, config, pos, point, show.GetPointLabel(i));
     }
@@ -701,7 +701,7 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
         (int)Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()), wxFONTFAMILY_SWISS,
         wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*pointLabelFont);
-    auto origin = show.GetMode().Offset();
+    auto origin = show.GetShowMode().Offset();
     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT);
     dc.SetPen(brushAndPen.second);
     dc.SetBrush(brushAndPen.first);
@@ -747,48 +747,31 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     dc.DrawEllipse(end.x - circ_r / 2, end.y - circ_r / 2, circ_r, circ_r);
 }
 
-static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, const CalChartConfiguration& config,
+static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, CalChartConfiguration const& config,
+    CalChart::ShowMode const& mode,
     int yard_text_start,
     int fieldsize_x, int fieldsize_y, int border1_x, int border1_y,
-    int whichDraw,
     HowToDraw howToDraw)
 {
     // Draw labels
     wxFont* yardLabelFont = wxTheFontList->FindOrCreateFont((int)Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
     dc.SetFont(*yardLabelFont);
-    if (whichDraw & CalChart::SPR_YARD_ABOVE || whichDraw & CalChart::SPR_YARD_BELOW) {
-        for (int i = 0; i < CoordUnits2Int(fieldsize_x) / 8 + 1; i++) {
-            wxCoord textw, texth, textd;
-            auto text = config.Get_yard_text(i + (yard_text_start + (CalChart::kYardTextValues - 1) * 4) / 8);
-            dc.GetTextExtent(text, &textw, &texth, &textd);
-            const auto top_row_x = Int2CoordUnits(i * 8) - textw / 2 + border1_x;
-            const auto top_row_y = std::max(border1_y - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0), dc.DeviceToLogicalY(0));
-            const auto bottom_row_x = top_row_x;
-            const auto bottom_row_y = border1_y + fieldsize_y - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0);
-            if (whichDraw & CalChart::SPR_YARD_ABOVE) {
-                if (howToDraw != ShowMode_kPrinting) {
-                    // set color so when we make background box it blends
-                    dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-                    dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
-                    dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
-                }
-                dc.DrawText(text, top_row_x, top_row_y);
-            }
-            if (whichDraw & CalChart::SPR_YARD_BELOW) {
-                dc.DrawText(text, bottom_row_x, bottom_row_y);
-            }
+    for (int i = 0; i < CoordUnits2Int(fieldsize_x) / 8 + 1; i++) {
+        wxCoord textw, texth, textd;
+        auto text = mode.Get_yard_text()[i + (yard_text_start + (CalChart::kYardTextValues - 1) * 4) / 8];
+        dc.GetTextExtent(text, &textw, &texth, &textd);
+        const auto top_row_x = Int2CoordUnits(i * 8) - textw / 2 + border1_x;
+        const auto top_row_y = std::max(border1_y - texth + ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0), dc.DeviceToLogicalY(0));
+        const auto bottom_row_x = top_row_x;
+        const auto bottom_row_y = border1_y + fieldsize_y - ((howToDraw == ShowMode_kOmniView) ? Int2CoordUnits(8) : 0);
+        if (howToDraw != ShowMode_kPrinting) {
+            // set color so when we make background box it blends
+            dc.SetBrush(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+            dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD).second);
+            dc.DrawRectangle(top_row_x, top_row_y, textw, texth);
         }
-    }
-    if (whichDraw & CalChart::SPR_YARD_LEFT || whichDraw & CalChart::SPR_YARD_RIGHT) {
-        for (int i = 0; i < CoordUnits2Int(fieldsize_y) / 8 + 1; i++) {
-            wxCoord textw, texth, textd;
-            auto text = config.Get_spr_line_text(i);
-            dc.GetTextExtent(text, &textw, &texth, &textd);
-            if (whichDraw & CalChart::SPR_YARD_LEFT)
-                dc.DrawText(text, border1_x - textw, border1_y - texth / 2 + Int2CoordUnits(i * 8));
-            if (whichDraw & CalChart::SPR_YARD_RIGHT)
-                dc.DrawText(text, fieldsize_x + border1_x, border1_y - texth / 2 + Int2CoordUnits(i * 8));
-        }
+        dc.DrawText(text, top_row_x, top_row_y);
+        dc.DrawText(text, bottom_row_x, bottom_row_y);
     }
 }
 
@@ -827,18 +810,6 @@ static void ShowMode_DrawHelper_VerticalMidDotted(wxDC& dc, int fieldsize_x, int
             };
             dc.DrawLines(2, points, border1_x, border1_y);
         }
-    }
-}
-
-static void ShowMode_DrawHelper_HorizontalSolid(wxDC& dc, int fieldsize_x, int fieldsize_y, int border1_x, int border1_y)
-{
-    for (auto j = 0; j <= fieldsize_y; j += Int2CoordUnits(8)) {
-        // draw solid yardlines
-        wxPoint points[2] = {
-            { 0, j },
-            { fieldsize_x, j },
-        };
-        dc.DrawLines(2, points, border1_x, border1_y);
     }
 }
 
@@ -910,11 +881,7 @@ static void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& c
         ShowMode_DrawHelper_VerticalMidDotted(dc, fieldsize.x, fieldsize.y, border1.x, border1.y);
     }
 
-    if (mode.GetType() == CalChart::ShowMode::SHOW_SPRINGSHOW) {
-        ShowMode_DrawHelper_HorizontalSolid(dc, fieldsize.x, fieldsize.y, border1.x, border1.y);
-    }
-
-    auto spacing = mode.GetType() == CalChart::ShowMode::SHOW_SPRINGSHOW ? 8 : 4;
+    auto spacing = 4;
     if (howToDraw == ShowMode_kFieldView || howToDraw == ShowMode_kPrinting) {
         ShowMode_DrawHelper_HorizontalMidDotted(dc, fieldsize.x, fieldsize.y, border1.x, border1.y, spacing, mode.HashW(), mode.HashE());
     }
@@ -930,7 +897,7 @@ static void ShowModeStandard_DrawHelper(wxDC& dc, const CalChartConfiguration& c
     if (howToDraw == ShowMode_kAnimation) {
         return;
     }
-    ShowModeStandard_DrawHelper_Labels(dc, config, -CoordUnits2Int((mode.Offset() - mode.Border1()).x), fieldsize.x, fieldsize.y, border1.x, border1.y, mode.WhichYards(), howToDraw);
+    ShowModeStandard_DrawHelper_Labels(dc, config, mode, -CoordUnits2Int((mode.Offset() - mode.Border1()).x), fieldsize.x, fieldsize.y, border1.x, border1.y, howToDraw);
 }
 
 void DrawMode(wxDC& dc, const CalChartConfiguration& config,

@@ -1,7 +1,6 @@
 #pragma once
 /*
- * ContinuityBrowser
- * Header for continuity editors
+ * cont_browser_panel
  */
 
 /*
@@ -21,31 +20,43 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "cc_continuity.h"
+#include "cc_types.h"
+#include "custom_listview.h"
+
 #include <wx/wx.h>
 
 class CalChartDoc;
-class ContinuityBrowser;
-class ContinuityBrowserPerCont;
+class CalChartConfiguration;
 
-// ContinuityBrowser
-// The way you view the continuity for marchers
-
-class ContinuityBrowser : public wxScrolledWindow {
-    using super = wxScrolledWindow;
+class ContinuityBrowserPanel : public CustomListViewPanel {
+    using super = CustomListViewPanel;
 
 public:
-    ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id = wxID_ANY,
+    // Basic functions
+    ContinuityBrowserPanel(CalChartDoc* doc, SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
+        wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxScrolledWindowStyle,
         const wxString& name = wxPanelNameStr);
-    ~ContinuityBrowser();
-
-    void Update(); // Refresh data with doc
+    virtual ~ContinuityBrowserPanel() = default;
+    void DoSetContinuity(CalChart::Continuity const& new_cont);
 
 private:
-    void CreateControls();
+    virtual void OnNewEntry(int cell) override;
+    virtual void OnEditEntry(int cell) override;
+    virtual void OnDeleteEntry(int cell) override;
+    virtual void OnMoveEntry(int start_cell, int end_cell) override;
+
+    void DoSetFocus(wxFocusEvent& event);
+    void DoKillFocus(wxFocusEvent& event);
+
+    void UpdateCont(CalChart::Continuity const& new_cont);
 
     CalChartDoc* mDoc;
-    std::vector<ContinuityBrowserPerCont*> mPerCont;
+    CalChart::Continuity mCont;
+    SYMBOL_TYPE mSym;
+    CalChartConfiguration& mConfig;
+    DECLARE_EVENT_TABLE()
 };

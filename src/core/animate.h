@@ -87,8 +87,6 @@ public:
     Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorList notifyErrorList);
     ~Animation();
 
-    static std::list<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& continuity, AnimationErrors& errors, SYMBOL_TYPE current_symbol);
-
     // Returns true if changes made
     void GotoSheet(unsigned i);
     void GotoAnimationSheet(unsigned i);

@@ -14,6 +14,7 @@
 #include "modes.h"
 #include "cont.h"
 #include "docopt.h"
+#include "cc_continuity.h"
 
 #include <iostream>
 #include <fstream>
@@ -46,7 +47,7 @@ using namespace CalChart;
 void AnimateShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -59,7 +60,7 @@ void AnimateShow(const char* show)
 void PrintShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -91,7 +92,7 @@ void PrintShow(const char* show)
 void DumpContinuity(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<const Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<const Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     auto sheet_num = 0;
     for (auto i = p->GetSheetBegin(); i != p->GetSheetEnd(); ++i, ++sheet_num) {
         static const SYMBOL_TYPE k_symbols[] = {
@@ -106,15 +107,14 @@ void DumpContinuity(const char* show)
                 std::cout << "<--EndText sheet num " << sheet_num << ": symbol " << GetNameForSymbol(symbol) << "-->\n";
 
                 AnimationErrors e;
-                auto continuity = Animation::ParseContinuity(cont.GetText(), e, symbol);
-				std::cout << "<--Errors during compile-->\n";
+                auto&& continuity = cont.GetParsedContinuity();
+                std::cout << "<--Errors during compile-->\n";
                 if (e.AnyErrors()) {
-					for (auto&& i : e.GetErrors())
-					{
-						std::cout<<"Error at ["<<i.second.line<<","<<i.second.col<<"] of type "<<i.first<<"\n";
-					}
+                    for (auto&& i : e.GetErrors()) {
+                        std::cout << "Error at [" << i.second.line << "," << i.second.col << "] of type " << i.first << "\n";
+                    }
                 }
-				std::cout << "<--End errors-->\n";
+                std::cout << "<--End errors-->\n";
                 std::cout << "<--StartParsed-->\n";
                 for (auto& proc : continuity) {
                     std::cout << *proc << "\n";
@@ -127,99 +127,109 @@ void DumpContinuity(const char* show)
 
 void DumpContinuityText(std::string const& text)
 {
-	AnimationErrors e;
-	auto continuity = Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
-	if (e.AnyErrors()) {
-		std::cout << "Errors during compile\n";
-	}
-	for (auto& proc : continuity) {
-		std::cout << *proc << "\n";
-	}
+    try {
+        auto&& continuity = Continuity(text);
+        for (auto& proc : continuity.GetParsedContinuity()) {
+            std::cout << *proc << "\n";
+        }
+    }
+    catch (ParseError const& error) {
+        AnimationErrors e;
+        // Supply a generic parse error
+        e.RegisterError(ANIMERR_SYNTAX, error.line, error.column, 0, SYMBOL_PLAIN);
+        if (e.AnyErrors()) {
+            std::cout << "Errors during compile: " << error.what() << "\n";
+        }
+    }
 }
 
 void DoContinuityUnitTest(const char* test_cases)
 {
-	static const std::string BeginText = "<--StartText";
-	static const std::string EndText = "<--EndText";
-	static const std::string BeginParsed = "<--StartParsed-->";
-	static const std::string EndParsed = "<--EndParsed-->";
-	static const std::string BeginErrors = "<--Errors during compile-->";
-	static const std::string EndErrors = "<--End errors-->";
+    static const std::string BeginText = "<--StartText";
+    static const std::string EndText = "<--EndText";
+    static const std::string BeginParsed = "<--StartParsed-->";
+    static const std::string EndParsed = "<--EndParsed-->";
+    static const std::string BeginErrors = "<--Errors during compile-->";
+    static const std::string EndErrors = "<--End errors-->";
 
-	size_t numTestsRun = 0, numTestsPassed = 0;
+    size_t numTestsRun = 0, numTestsPassed = 0;
     std::ifstream input(test_cases);
-	while (!input.eof())
-	{
-		std::string d;
-		do {
-			getline(input, d);
-		} while (!input.eof() && (d.size() < BeginText.size() || !std::equal(BeginText.begin(), BeginText.end(), d.begin())));
-		std::string text;
-		getline(input, d);
-		bool firsttime = true;
-		while (!input.eof() && (d.size() < EndText.size() || !std::equal(EndText.begin(), EndText.end(), d.begin()))) {
-			if (!firsttime) {
-				text += "\n";
-			}
-			firsttime = false;
-			text += d;
-			getline(input, d);
-		}
-		do {
-			getline(input, d);
-		} while (!input.eof() && (d.size() < BeginErrors.size() || !std::equal(BeginErrors.begin(), BeginErrors.end(), d.begin())));
-		std::string errors;
-		getline(input, d);
-		while (!input.eof() && (d.size() < EndErrors.size() || !std::equal(EndErrors.begin(), EndErrors.end(), d.begin()))) {
-			errors += d + "\n";
-			getline(input, d);
-		}
+    while (!input.eof()) {
+        std::string d;
+        do {
+            getline(input, d);
+        } while (!input.eof() && (d.size() < BeginText.size() || !std::equal(BeginText.begin(), BeginText.end(), d.begin())));
+        std::string text;
+        getline(input, d);
+        bool firsttime = true;
+        while (!input.eof() && (d.size() < EndText.size() || !std::equal(EndText.begin(), EndText.end(), d.begin()))) {
+            if (!firsttime) {
+                text += "\n";
+            }
+            firsttime = false;
+            text += d;
+            getline(input, d);
+        }
+        do {
+            getline(input, d);
+        } while (!input.eof() && (d.size() < BeginErrors.size() || !std::equal(BeginErrors.begin(), BeginErrors.end(), d.begin())));
+        std::string errors;
+        getline(input, d);
+        while (!input.eof() && (d.size() < EndErrors.size() || !std::equal(EndErrors.begin(), EndErrors.end(), d.begin()))) {
+            errors += d + "\n";
+            getline(input, d);
+        }
 
-		do {
-			getline(input, d);
-		} while (!input.eof() && (d.size() < BeginParsed.size() || !std::equal(BeginParsed.begin(), BeginParsed.end(), d.begin())));
-		std::string parsed;
-		getline(input, d);
-		while (!input.eof() && (d.size() < EndParsed.size() || !std::equal(EndParsed.begin(), EndParsed.end(), d.begin()))) {
-			parsed += d + "\n";
-			getline(input, d);
-		}
+        do {
+            getline(input, d);
+        } while (!input.eof() && (d.size() < BeginParsed.size() || !std::equal(BeginParsed.begin(), BeginParsed.end(), d.begin())));
+        std::string parsed;
+        getline(input, d);
+        while (!input.eof() && (d.size() < EndParsed.size() || !std::equal(EndParsed.begin(), EndParsed.end(), d.begin()))) {
+            parsed += d + "\n";
+            getline(input, d);
+        }
 
-		AnimationErrors e;
-		auto continuity = Animation::ParseContinuity(text, e, SYMBOL_PLAIN);
-		std::stringstream parsed_continuity;
-		for (auto& proc : continuity) {
-			parsed_continuity << *proc << "\n";
-		}
-		std::stringstream parse_errors;
-		if (e.AnyErrors()) {
-			for (auto&& i : e.GetErrors())
-			{
-				parse_errors<<"Error at ["<<i.second.line<<","<<i.second.col<<"] of type "<<i.first<<"\n";
-			}
-		}
-		auto parsed_cont = parsed_continuity.str();
-		if ((e.AnyErrors() && parse_errors.str() != errors) || !std::equal(parsed.begin(), parsed.end(), parsed_cont.begin(), parsed_cont.end())) {
-			std::cout<<"parse failed!\n";
-			std::cout<<"Found text: \n"<< text <<"\n";
-			std::cout<<"Found parse: \n"<< parsed <<"\n";
-			std::cout<<"Parse errors: \n"<< errors <<"\n";
-			std::cout<<"parsed_continuity: \n"<< parsed_cont <<"\n";
-			std::cout<<"has Parse Errors: \n"<<parse_errors.str()<<"\n";
-		}
-		else {
-			++numTestsPassed;
-		}
-		++numTestsRun;
-	}
-	std::cout<<"ContinuityTest "<<test_cases<<" complete.  Passed "<<numTestsPassed<<" out of "<<numTestsRun<<"\n";
+        std::stringstream parsed_continuity;
+        std::stringstream parse_errors;
+        AnimationErrors e;
+        try {
+            auto&& continuity = Continuity(text);
+            for (auto& proc : continuity.GetParsedContinuity()) {
+                parsed_continuity << *proc << "\n";
+            }
+        }
+        catch (ParseError const& error) {
+            // Supply a generic parse error
+            e.RegisterError(ANIMERR_SYNTAX, error.line, error.column, 0, SYMBOL_PLAIN);
+            if (e.AnyErrors()) {
+                for (auto&& i : e.GetErrors()) {
+                    parse_errors << "Error at [" << i.second.line << "," << i.second.col << "] of type " << i.first << "\n";
+                }
+            }
+        }
+        auto parsed_cont = parsed_continuity.str();
+        if ((e.AnyErrors() && parse_errors.str() != errors) || !std::equal(parsed.begin(), parsed.end(), parsed_cont.begin(), parsed_cont.end())) {
+            std::cout << "parse failed!\n";
+            std::cout << "Found text: \n" << text << "\n";
+            std::cout << "Found parse: \n" << parsed << "\n";
+            std::cout << "Parse errors: \n" << errors << "\n";
+            std::cout << "parsed_continuity: \n" << parsed_cont << "\n";
+            std::cout << "has Parse Errors: \n" << parse_errors.str() << "\n";
+        }
+        else {
+            ++numTestsPassed;
+        }
+        ++numTestsRun;
+    }
+    std::cout << "ContinuityTest " << test_cases << " complete.  Passed " << numTestsPassed << " out of " << numTestsRun << "\n";
 }
 
 void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     bool overview, std::string const& outfile)
 {
     std::ifstream input(show);
-    std::unique_ptr<const Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<const Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
 
     std::ofstream output(outfile);
 
@@ -256,18 +266,16 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
         };
         return yard_text[offset];
     };
-    auto Get_spr_line_text = Get_yard_text;
 
-    auto mode = ShowModeStandard::CreateShowMode(
-        "Standard", { { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } });
+    auto mode = ShowMode::GetDefaultShowMode();
 
     PrintShowToPS printShowToPS(
-        *p, landscape, cont, contsheet, overview, 50, *mode,
+        *p, landscape, cont, contsheet, overview, 50, mode,
         { { head_font_str, main_font_str, number_font_str, cont_font_str,
             bold_font_str, ital_font_str, bold_ital_font_str } },
         PageWidth, PageHeight, PageOffsetX, PageOffsetY, PaperLength, HeaderSize,
         YardsSize, TextSize, DotRatio, NumRatio, PLineRatio, SLineRatio,
-        ContRatio, Get_yard_text, Get_spr_line_text);
+        ContRatio, Get_yard_text);
 
     std::set<size_t> picked;
     for (auto i = 0; i < p->GetNumSheets(); ++i)
@@ -284,7 +292,7 @@ bool ContinuityCountDifferentThanSymbol(const char* show)
     if (!input.is_open()) {
         throw std::runtime_error("could not open file");
     }
-    std::unique_ptr<Show> p(Show::Create_CC_show(input));
+    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
     return false;
 }
 

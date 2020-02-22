@@ -68,6 +68,17 @@ enum CalChartColors {
     COLOR_NUM
 };
 
+enum ContCellColors {
+    COLOR_CONTCELLS_PROC,
+    COLOR_CONTCELLS_VALUE,
+    COLOR_CONTCELLS_FUNCTION,
+    COLOR_CONTCELLS_DIRECTION,
+    COLOR_CONTCELLS_STEPTYPE,
+    COLOR_CONTCELLS_POINT,
+    COLOR_CONTCELLS_UNSET,
+    COLOR_CONTCELLS_NUM,
+};
+
 enum CalChartShowModes {
     STANDARD,
     FULL_FIELD,
@@ -78,11 +89,6 @@ enum CalChartShowModes {
 };
 
 extern const wxString kShowModeStrings[SHOWMODE_NUM];
-
-enum CalChartSpringShowModes { ZELLERBACH,
-    SPRINGSHOWMODE_NUM };
-
-extern const wxString kSpringShowModeStrings[SPRINGSHOWMODE_NUM];
 
 // CalChartConfiguration interfaces with the system config and acts as a "cache"
 // for the values.
@@ -200,13 +206,21 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameFieldControlsVisibility, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameContinuityInfoVisibility, bool);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(ContCellFontSize, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(ContCellRounding, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(ContCellTextPadding, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(ContCellBoxPadding, long);
+
 public:
     // helpers for displaying different config attributes
     std::vector<wxString> GetColorNames() const;
     std::vector<wxString> GetDefaultColors() const;
     std::vector<int> GetDefaultPenWidth() const;
+    std::vector<wxString> GetContCellColorNames() const;
+    std::vector<wxString> GetContCellDefaultColors() const;
+    std::vector<int> GetContCellDefaultPenWidth() const;
     std::vector<wxString> Get_yard_text_index() const;
-    std::vector<wxString> Get_spr_line_text_index() const;
 
     // Colors
     using ColorWidth_t = std::pair<wxColour, int>;
@@ -214,7 +228,13 @@ public:
     std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
     void Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush,
         const wxPen& pen);
-    void Clear_ConfigColor(size_t selection);
+    void Clear_CalChartConfigColor(CalChartColors selection);
+
+    mutable std::map<ContCellColors, ColorWidth_t> mContCellColorsAndWidth;
+    std::pair<wxBrush, wxPen> Get_ContCellBrushAndPen(ContCellColors c) const;
+    void Set_ContCellBrushAndPen(ContCellColors c, const wxBrush& brush,
+        const wxPen& pen);
+    void Clear_ContCellConfigColor(ContCellColors selection);
 
     // Shows
     static constexpr auto kShowModeValues = 10;
@@ -224,27 +244,14 @@ public:
     void Set_ShowModeInfo(CalChartShowModes which, const ShowModeInfo_t& values);
     void Clear_ShowModeInfo(CalChartShowModes which);
 
-    static constexpr int kSpringShowModeValues = 21;
-    using SpringShowModeInfo_t = std::array<long, kSpringShowModeValues>;
-    mutable std::map<CalChartSpringShowModes, SpringShowModeInfo_t>
-        mSpringShowModeInfos;
-    SpringShowModeInfo_t
-    Get_SpringShowModeInfo(CalChartSpringShowModes which) const;
-    void Set_SpringShowModeInfo(CalChartSpringShowModes which,
-        const SpringShowModeInfo_t& values);
-    void Clear_SpringShowModeInfo(CalChartSpringShowModes which);
-
     // Yard Lines
     mutable std::map<size_t, wxString> mYardTextInfos;
     wxString Get_yard_text(size_t which) const;
+    static constexpr auto kYardTextValues = 53;
+    std::array<std::string, kYardTextValues> Get_yard_text_all() const;
     void Set_yard_text(size_t which, const wxString&);
     void Clear_yard_text(size_t which);
-
-    mutable std::map<size_t, wxString> mSprLineTextInfos;
-    wxString Get_spr_line_text(size_t which) const;
-    void Set_spr_line_text(size_t which, const wxString&);
-    void Clear_spr_line_text(size_t which);
 };
 
 // to find a specific Show:
-std::unique_ptr<CalChart::ShowMode> GetShowMode(const wxString& which);
+CalChart::ShowMode GetConfigShowMode(const wxString& which);

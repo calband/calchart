@@ -38,6 +38,15 @@ void AnimationErrors::RegisterError(AnimateError err, const ContToken* token,
     mErrorMarkers[err].pntgroup.insert(curr_pt);
 }
 
+void AnimationErrors::RegisterError(AnimateError err, int line, int col,
+    unsigned curr_pt, SYMBOL_TYPE contsymbol)
+{
+    mErrorMarkers[err].contsymbol = contsymbol;
+    mErrorMarkers[err].line = line;
+    mErrorMarkers[err].col = col;
+    mErrorMarkers[err].pntgroup.insert(curr_pt);
+}
+
 AnimateCompile::AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state)
     : mShow(show)
     , contsymbol(cont_symbol)
@@ -52,7 +61,7 @@ AnimateCompile::Compile(
     const Show& show, AnimationVariables& variablesStates,
     AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
     unsigned pt_num, SYMBOL_TYPE cont_symbol,
-    std::list<std::unique_ptr<ContProcedure>> const& procs)
+    std::vector<std::unique_ptr<ContProcedure>> const& procs)
 {
     AnimateState state{
         c_sheet->GetPosition(pt_num),

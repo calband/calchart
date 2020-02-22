@@ -292,15 +292,14 @@ Sheet::Sheet(size_t numPoints, std::istream& stream,
             }
         }
         std::string textstr(text);
-        mAnimationContinuity.at(symbol_index).SetText(textstr);
+        mAnimationContinuity.at(symbol_index) = Continuity{ textstr };
 
         name = ReadLong(stream);
     }
 }
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
-    Current_version_and_later)
+Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_and_later)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
@@ -352,13 +351,40 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
             throw CC_FileException("No viable symbol for name", INGL_ECNT);
         }
         std::string textstr(text);
-        sheet->mAnimationContinuity.at(symbol_index).SetText(textstr);
+        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ textstr };
     };
     auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, const uint8_t* ptr,
                                size_t size) {
         static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
             parser = {
                 { INGL_ECNT, parse_INGL_ECNT },
+            };
+
+        auto table = Parser::ParseOutLabels(ptr, ptr + size);
+        for (auto& i : table) {
+            auto the_parser = parser.find(std::get<0>(i));
+            if (the_parser != parser.end()) {
+                the_parser->second(sheet, std::get<1>(i), std::get<2>(i));
+            }
+        }
+    };
+    auto parse_INGL_EVCT = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+        auto begin = ptr;
+        auto end = ptr + size;
+        if (std::distance(begin, end) < 1) // one byte for symbol
+        {
+            throw CC_FileException("Bad cont chunk", INGL_EVCT);
+        }
+        SYMBOL_TYPE symbol_index = static_cast<SYMBOL_TYPE>(*begin++);
+        if (symbol_index >= MAX_NUM_SYMBOLS) {
+            throw CC_FileException("No viable symbol for name", INGL_EVCT);
+        }
+        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ std::vector<uint8_t>{ begin, end } };
+    };
+    auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, const uint8_t* ptr, size_t size) {
+        static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+            parser = {
+                { INGL_EVCT, parse_INGL_EVCT },
             };
 
         auto table = Parser::ParseOutLabels(ptr, ptr + size);
@@ -391,6 +417,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
             { INGL_DURA, parse_INGL_DURA },
             { INGL_PNTS, parse_INGL_PNTS },
             { INGL_CONT, parse_INGL_CONT },
+            { INGL_VCNT, parse_INGL_VCNT },
             { INGL_PCNT, parse_INGL_PCNT },
             { INGL_BACK, parse_INGL_BACK },
         };
@@ -422,12 +449,9 @@ std::vector<uint8_t> Sheet::SerializeContinuityData() const
     for (auto& current_symbol : k_symbols) {
         if (ContinuityInUse(current_symbol)) {
             std::vector<uint8_t> continuity;
-            Parser::Append(continuity,
-                static_cast<uint8_t>(current_symbol));
-            Parser::AppendAndNullTerminate(
-                continuity, mAnimationContinuity.at(current_symbol).GetText());
-            Parser::Append(
-                result, Parser::Construct_block(INGL_ECNT, continuity));
+            Parser::Append(continuity, static_cast<uint8_t>(current_symbol));
+            Parser::Append(continuity, mAnimationContinuity.at(current_symbol).Serialize());
+            Parser::Append(result, Parser::Construct_block(INGL_EVCT, continuity));
         }
     }
     return result;
@@ -472,7 +496,7 @@ std::vector<uint8_t> Sheet::SerializeSheetData() const
     Parser::Append(result, Parser::Construct_block(INGL_PNTS, SerializeAllPoints()));
 
     // Write Continuity
-    Parser::Append(result, Parser::Construct_block(INGL_CONT, SerializeContinuityData()));
+    Parser::Append(result, Parser::Construct_block(INGL_VCNT, SerializeContinuityData()));
 
     // Write Continuity
     Parser::Append(result,
@@ -487,7 +511,7 @@ std::vector<uint8_t> Sheet::SerializeSheetData() const
 
 // SHEET              = INGL_SHET , BigEndianInt32(DataTill_SHEET_END) ,
 // SHEET_DATA , SHEET_END ;
-// SHEET_DATA         = NAME , DURATION , ALL_POINTS , CONTINUITY, [
+// SHEET_DATA         = NAME , DURATION , ALL_POINTS , VCONTINUITY, [
 // PRINT_CONTINUITY ] ;
 // SHEET_END          = INGL_END , INGL_SHET ;
 std::vector<uint8_t> Sheet::SerializeSheet() const
@@ -497,7 +521,7 @@ std::vector<uint8_t> Sheet::SerializeSheet() const
     return result;
 }
 
-Sheet::~Sheet() {}
+Sheet::~Sheet() = default;
 
 // Find point at certain coords
 int Sheet::FindPoint(Coord where, Coord::units searchBound,
@@ -566,9 +590,9 @@ const Continuity& Sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
     return mAnimationContinuity.at(i);
 }
 
-void Sheet::SetContinuityText(SYMBOL_TYPE which, const std::string& text)
+void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont)
 {
-    mAnimationContinuity.at(which).SetText(text);
+    mAnimationContinuity.at(which) = new_cont;
 }
 
 bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
@@ -777,7 +801,7 @@ void Sheet::sheet_round_trip_test()
         blank_sheet.SetPosition(Coord(30, 40), 0, 2);
         blank_sheet.SetPosition(Coord(52, 50), 0, 3);
         blank_sheet.SetBeats(13);
-        blank_sheet.mAnimationContinuity.at(SYMBOL_PLAIN).SetText("continuity test");
+        blank_sheet.mAnimationContinuity.at(SYMBOL_PLAIN) = Continuity{ "MT E REM" };
         blank_sheet.mPrintableContinuity = Print_continuity{
             "number 1", "duuuude, writing this testing is boring"
         };

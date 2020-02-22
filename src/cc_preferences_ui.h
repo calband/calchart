@@ -33,23 +33,12 @@ class CalChartPreferences : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    CalChartPreferences();
     CalChartPreferences(wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxString& caption = wxT("CalChart Preferences"),
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~CalChartPreferences();
-
-    void Init();
-
-    bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("CalChart Preferences"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-
-    void CreateControls();
+    ~CalChartPreferences() = default;
 
     bool TransferDataToWindow();
     bool TransferDataFromWindow();

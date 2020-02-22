@@ -42,6 +42,7 @@ namespace CalChart {
 void Coord_UnitTests();
 void Point_UnitTests();
 void Show_UnitTests();
+void ShowMode_UnitTests();
 void Sheet_UnitTests();
 void Continuity_UnitTests();
 }
@@ -139,6 +140,7 @@ void CalChartApp::InitAppAsServer()
     CalChart::Continuity_UnitTests();
     CalChart::Point_UnitTests();
     CalChart::Coord_UnitTests();
+    CalChart::ShowMode_UnitTests();
     CalChart::Show_UnitTests();
     CalChart::Sheet_UnitTests();
 
@@ -173,9 +175,9 @@ void CalChartApp::ExitAppAsServer()
     mHelpController.reset();
 }
 
-std::unique_ptr<CalChart::ShowMode> CalChartApp::GetMode(const wxString& which)
+CalChart::ShowMode CalChartApp::GetShowMode(const wxString& which)
 {
-    return GetShowMode(which);
+    return GetConfigShowMode(which);
 }
 
 void CalChartApp::ExitAppAsClient() {}

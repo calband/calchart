@@ -68,7 +68,7 @@ public:
     virtual void SetZoom(float factor);
 
     auto GetCurrentLasso() const { return curr_lasso; }
-    void SetCurrentLasso(CC_DRAG_TYPES lasso);
+    void SetCurrentLasso(CC_DRAG lasso);
     auto GetCurrentMove() const { return curr_move; }
     // implies a call to EndDrag()
     void SetCurrentMove(CC_MOVE_MODES move);
@@ -77,15 +77,15 @@ private:
     // Variables
     FieldFrame* mFrame;
     FieldView& mView;
-    CC_DRAG_TYPES curr_lasso = CC_DRAG_BOX;
+    CC_DRAG curr_lasso = CC_DRAG::BOX;
     CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
     std::unique_ptr<MovePoints> m_move_points;
     std::map<int, CalChart::Coord> mMovePoints;
-    CC_DRAG_TYPES select_drag = CC_DRAG_NONE;
+    CC_DRAG select_drag = CC_DRAG::NONE;
     ShapeList m_select_shape_list;
 
-    void BeginSelectDrag(CC_DRAG_TYPES type, const CalChart::Coord& start);
-    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CalChart::Shape> shape);
+    void BeginSelectDrag(CC_DRAG type, const CalChart::Coord& start);
+    void AddMoveDrag(CC_DRAG type, std::unique_ptr<CalChart::Shape> shape);
     void MoveDrag(const CalChart::Coord& end);
     void EndDrag();
     enum class direction { north,

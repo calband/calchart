@@ -44,7 +44,7 @@ public:
     virtual void MacOpenFiles(const wxArrayString& fileNames);
     int OnExit();
 
-    std::unique_ptr<CalChart::ShowMode> GetMode(const wxString& which);
+    CalChart::ShowMode GetShowMode(const wxString& which);
 
     // the global help system:
     wxHtmlHelpController& GetGlobalHelpController();

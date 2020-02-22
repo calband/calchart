@@ -41,28 +41,28 @@ static const std::string k_badcont_str = "Error in continuity file";
 static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
 
 // you can create a show in two ways, from scratch, or from an input stream
-std::unique_ptr<Show> Show::Create_CC_show()
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode)
 {
-    auto show = std::unique_ptr<Show>(new Show());
+    auto show = std::unique_ptr<Show>(new Show(mode));
     show->InsertSheet(Sheet(show->GetNumPoints(), "1"), 0);
     show->SetCurrentSheet(0);
     return show;
 }
 
-std::unique_ptr<Show> Show::Create_CC_show(std::vector<std::string> const& labels, unsigned columns, Coord const& new_march_position)
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::vector<std::string> const& labels, unsigned columns)
 {
-    auto show = Create_CC_show();
-    show->SetNumPoints(labels, columns, new_march_position);
+    auto show = Create_CC_show(mode);
+    show->SetNumPoints(labels, columns, mode.FieldOffset());
     return show;
 }
 
-std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::istream& stream)
 {
     ReadAndCheckID(stream, INGL_INGL);
     uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
     if (version <= 0x303) {
         return std::unique_ptr<Show>(
-            new Show(stream, Version_3_3_and_earlier()));
+            new Show(mode, stream, Version_3_3_and_earlier{}));
     }
 
     // read the whole stream into a block, making sure we don't skip white space
@@ -75,20 +75,22 @@ std::unique_ptr<Show> Show::Create_CC_show(std::istream& stream)
     // debug purposes, you can uncomment this line to have the show dumped
     //	DoRecursiveParsing("", data.data(), data.data() + data.size());
     return std::unique_ptr<Show>(
-        new Show(data.data(), data.size(), Current_version_and_later()));
+        new Show(mode, data.data(), data.size(), Current_version_and_later{}));
 }
 
 // Create a new show
-Show::Show()
+Show::Show(ShowMode const& mode)
     : mSheetNum(0)
+    , mMode(mode)
 {
 }
 
 // -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
 // Recommend that you don't touch this unless you know what you are doing.
 // Constructor for shows 3.3 and ealier.
-Show::Show(std::istream& stream, Version_3_3_and_earlier ver)
+Show::Show(ShowMode const& mode, std::istream& stream, Version_3_3_and_earlier ver)
     : mSheetNum(0)
+    , mMode(mode)
 {
     // caller should have stripped off INGL and GURK headers
     /*
@@ -152,8 +154,9 @@ Show::Show(std::istream& stream, Version_3_3_and_earlier ver)
 }
 // -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
 
-Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
+Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, Current_version_and_later ver)
     : mSheetNum(0)
+    , mMode(mode)
 {
     // caller should have stripped off INGL and GURK headers
 
@@ -217,6 +220,9 @@ Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
         }
         show->mSheetNum = get_big_long(ptr);
     };
+    auto parse_INGL_MODE = [](Show* show, const uint8_t* ptr, size_t size) {
+        show->mMode = ShowMode::CreateShowMode({ ptr, ptr + size });
+    };
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](Show* show, const uint8_t* ptr, size_t size) {
         static const std::map<uint32_t, std::function<void(Show * show, const uint8_t*, size_t)>>
@@ -227,6 +233,7 @@ Show::Show(const uint8_t* ptr, size_t size, Current_version_and_later ver)
                 { INGL_SHET, parse_INGL_SHET },
                 { INGL_SELE, parse_INGL_SELE },
                 { INGL_CURR, parse_INGL_CURR },
+                { INGL_MODE, parse_INGL_MODE },
             };
         auto table = Parser::ParseOutLabels(ptr, ptr + size);
         for (auto& i : table) {
@@ -264,7 +271,7 @@ std::vector<uint8_t> Show::SerializeShowData() const
     Append(result, Construct_block(INGL_SIZE, static_cast<uint32_t>(GetNumPoints())));
 
     // Write LABEL
-    std::vector<char> labels;
+    std::vector<uint8_t> labels;
     for (auto& i : mPtLabels) {
         AppendAndNullTerminate(labels, i);
     }
@@ -272,7 +279,7 @@ std::vector<uint8_t> Show::SerializeShowData() const
 
     // write Description
     if (!GetDescr().empty()) {
-        std::vector<char> descr;
+        std::vector<uint8_t> descr;
         AppendAndNullTerminate(descr, GetDescr());
         Append(result, Construct_block(INGL_DESC, descr));
     }
@@ -293,6 +300,10 @@ std::vector<uint8_t> Show::SerializeShowData() const
 
     // add current sheet
     Append(result, Construct_block(INGL_CURR, static_cast<uint32_t>(mSheetNum)));
+
+    // add the mode
+    Append(result, Construct_block(INGL_MODE, mMode.Serialize()));
+
     return result;
 }
 
@@ -429,6 +440,16 @@ bool Show::WillMovePoints(std::map<int, Coord> const& new_positions, int ref) co
     return false;
 }
 
+const ShowMode& Show::GetShowMode() const
+{
+    return mMode;
+}
+
+void Show::SetShowMode(ShowMode const& mode)
+{
+    mMode = mode;
+}
+
 SelectionList Show::MakeSelectAll() const
 {
     SelectionList sl;
@@ -543,6 +564,17 @@ Show_command_pair Show::Create_SetSelectionCommand(const SelectionList& sl) cons
 {
     auto action = [sl](Show& show) { show.SetSelection(sl); };
     auto reaction = [sl = mSelectionList](Show& show) { show.SetSelection(sl); };
+    return { action, reaction };
+}
+
+Show_command_pair Show::Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const
+{
+    auto action = [mode = newmode](Show& show) {
+        show.SetShowMode(mode);
+    };
+    auto reaction = [mode = GetShowMode()](Show& show) {
+        show.SetShowMode(mode);
+    };
     return { action, reaction };
 }
 
@@ -754,14 +786,14 @@ Show_command_pair Show::Create_SetSymbolCommand(const SelectionList& selectionLi
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetContinuityTextCommand(SYMBOL_TYPE which_sym, std::string const& text) const
+Show_command_pair Show::Create_SetContinuityCommand(SYMBOL_TYPE which_sym, CalChart::Continuity const& new_cont) const
 {
-    std::string original_cont = GetCurrentSheet()->GetContinuityBySymbol(which_sym).GetText();
-    auto action = [sheet_num = mSheetNum, which_sym, text](Show& show) {
-        show.GetNthSheet(sheet_num)->SetContinuityText(which_sym, text);
+    auto original_cont = GetCurrentSheet()->GetContinuityBySymbol(which_sym);
+    auto action = [sheet_num = mSheetNum, which_sym, new_cont](Show& show) {
+        show.GetNthSheet(sheet_num)->SetContinuity(which_sym, new_cont);
     };
     auto reaction = [sheet_num = mSheetNum, which_sym, original_cont](Show& show) {
-        show.GetNthSheet(sheet_num)->SetContinuityText(which_sym, original_cont);
+        show.GetNthSheet(sheet_num)->SetContinuity(which_sym, original_cont);
     };
     return { action, reaction };
 }
@@ -901,55 +933,57 @@ Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, i
 #include <assert.h>
 using namespace Parser;
 
-static std::vector<char>
+static auto
 Construct_show_zero_points_zero_labels_zero_description()
 {
-    std::vector<char> show_data;
-    Append(show_data, Construct_block(INGL_SIZE, std::vector<char>(4)));
-    Append(show_data, Construct_block(INGL_LABL, std::vector<char>{}));
-    Append(show_data, Construct_block(INGL_DESC, std::vector<char>(1)));
-    Append(show_data, Construct_block(INGL_CURR, std::vector<char>(4)));
+    std::vector<uint8_t> show_data;
+    Append(show_data, Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
+    Append(show_data, Construct_block(INGL_LABL, std::vector<uint8_t>{}));
+    Append(show_data, Construct_block(INGL_DESC, std::vector<uint8_t>(1)));
+    Append(show_data, Construct_block(INGL_CURR, std::vector<uint8_t>(4)));
+    Append(show_data, Construct_block(INGL_MODE, ShowMode::GetDefaultShowMode().Serialize()));
     return Construct_block(INGL_SHOW, show_data);
 }
 
-static std::vector<char> Construct_show_zero_points_zero_labels()
+static auto Construct_show_zero_points_zero_labels()
 {
-    std::vector<char> show_data;
-    Append(show_data, Construct_block(INGL_SIZE, std::vector<char>(4)));
-    Append(show_data, Construct_block(INGL_LABL, std::vector<char>{}));
-    Append(show_data, Construct_block(INGL_CURR, std::vector<char>(4)));
+    std::vector<uint8_t> show_data;
+    Append(show_data, Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
+    Append(show_data, Construct_block(INGL_LABL, std::vector<uint8_t>{}));
+    Append(show_data, Construct_block(INGL_CURR, std::vector<uint8_t>(4)));
+    Append(show_data, Construct_block(INGL_MODE, ShowMode::GetDefaultShowMode().Serialize()));
     return Construct_block(INGL_SHOW, show_data);
 }
 
-static std::vector<char> Construct_show_zero_points_zero_labels_1_sheet_and_random()
+static auto Construct_show_zero_points_zero_labels_1_sheet_and_random()
 {
-    std::vector<char> show_data;
-    Append(show_data, Construct_block(0x12345678, std::vector<char>(4)));
-    Append(show_data, Construct_block(INGL_SIZE, std::vector<char>(4)));
-    Append(show_data, Construct_block(0x87654321, std::vector<char>(13)));
-    Append(show_data, Construct_block(INGL_LABL, std::vector<char>{}));
-    Append(show_data, Construct_block(0xDEADBEEF, std::vector<char>(1)));
+    std::vector<uint8_t> show_data;
+    Append(show_data, Construct_block(0x12345678, std::vector<uint8_t>(4)));
+    Append(show_data, Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
+    Append(show_data, Construct_block(0x87654321, std::vector<uint8_t>(13)));
+    Append(show_data, Construct_block(INGL_LABL, std::vector<uint8_t>{}));
+    Append(show_data, Construct_block(0xDEADBEEF, std::vector<uint8_t>(1)));
 
-    std::vector<char> sheet_data;
-    Append(sheet_data, Construct_block(INGL_NAME, std::vector<char>{ '1', '\0' }));
-    Append(sheet_data, Construct_block(INGL_DURA, std::vector<char>{ 0, 0, 0, 1 }));
-    Append(sheet_data, Construct_block(INGL_PNTS, std::vector<char>{}));
-    Append(sheet_data, Construct_block(INGL_CONT, std::vector<char>{}));
-    Append(sheet_data, Construct_block(INGL_PCNT, std::vector<char>{ '\0', '\0' }));
+    std::vector<uint8_t> sheet_data;
+    Append(sheet_data, Construct_block(INGL_NAME, std::vector<uint8_t>{ '1', '\0' }));
+    Append(sheet_data, Construct_block(INGL_DURA, std::vector<uint8_t>{ 0, 0, 0, 1 }));
+    Append(sheet_data, Construct_block(INGL_PNTS, std::vector<uint8_t>{}));
+    Append(sheet_data, Construct_block(INGL_CONT, std::vector<uint8_t>{}));
+    Append(sheet_data, Construct_block(INGL_PCNT, std::vector<uint8_t>{ '\0', '\0' }));
     Append(show_data, Construct_block(INGL_SHET, sheet_data));
 
-    Append(show_data, Construct_block(INGL_CURR, std::vector<char>(4)));
+    Append(show_data, Construct_block(INGL_CURR, std::vector<uint8_t>(4)));
 
     return Construct_block(INGL_SHOW, show_data);
 }
 
 void Show::CC_show_round_trip_test()
 {
-    auto blank_show = Show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
     std::istringstream is(std::string{ char_data.data(), char_data.size() });
-    auto re_read_show = Show::Create_CC_show(is);
+    auto re_read_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode(), is);
     auto re_read_show_data = re_read_show->SerializeShow();
     bool is_equal = blank_show_data.size() == re_read_show_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), re_read_show_data.begin());
     assert(is_equal);
@@ -957,22 +991,27 @@ void Show::CC_show_round_trip_test()
 
 void Show::CC_show_round_trip_test_with_number_label_description()
 {
-    std::vector<char> point_data;
+    std::vector<uint8_t> point_data;
     Append(point_data, uint32_t{ 1 });
-    std::vector<char> data;
+    std::vector<uint8_t> data;
     Append(data, Construct_block(INGL_SIZE, point_data));
     Append(data, Construct_block(INGL_LABL, std::vector<char>{ 'p', 'o', 'i', 'n', 't', '\0' }));
     Append(data, Construct_block(INGL_DESC, std::vector<char>{ 'd', 'e', 's', 'c', 'r', 'i', 'p', 't', 'i', 'o', 'n', '\0' }));
-    std::vector<char> curr_data;
+    std::vector<uint8_t> curr_data;
     Append(curr_data, uint32_t{ 0 });
     Append(data, Construct_block(INGL_CURR, curr_data));
+    Append(data, Construct_block(INGL_MODE, ShowMode::GetDefaultShowMode().Serialize()));
     auto show_data = Construct_block(INGL_SHOW, data);
 
-    Show show1((const uint8_t*)show_data.data(), show_data.size(),
+    Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
         Current_version_and_later());
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
+    for (auto i = 0; i < show1_data.size(); ++i) {
+        if (show1_data.at(i) != show_data.at(i))
+            printf("Wrong at %d, %d, %d", i, show1_data.at(i), show_data.at(i));
+    }
     auto is_equal = show1_data.size() == show_data.size() && std::equal(show1_data.begin(), show1_data.end(), show_data.begin());
     assert(is_equal);
 
@@ -983,10 +1022,22 @@ void Show::CC_show_round_trip_test_with_number_label_description()
     assert(show1.GetDescr() == "description");
 }
 
+void Show::CC_show_round_trip_test_with_different_show_modes()
+{
+    Show show1(ShowMode::CreateShowMode({ { 36, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, ShowMode::GetDefaultYardLines()));
+    assert(show1.GetShowMode().HashW() == 36);
+    auto show1_data = show1.SerializeShow();
+    // eat header
+    show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
+
+    Show show2(ShowMode::GetDefaultShowMode(), (const uint8_t*)show1_data.data(), show1_data.size(), Current_version_and_later());
+    assert(show2.GetShowMode().HashW() == 36);
+}
+
 void Show::CC_show_blank_desc_test()
 {
     auto show_zero_points_zero_labels_zero_description = Construct_show_zero_points_zero_labels_zero_description();
-    Show show1(
+    Show show1(ShowMode::GetDefaultShowMode(),
         (const uint8_t*)show_zero_points_zero_labels_zero_description.data(),
         show_zero_points_zero_labels_zero_description.size(),
         Current_version_and_later());
@@ -995,16 +1046,20 @@ void Show::CC_show_blank_desc_test()
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
     bool is_equal = show1_data.size() == show_zero_points_zero_labels_zero_description.size() && std::equal(show1_data.begin(), show1_data.end(), show_zero_points_zero_labels_zero_description.begin());
     assert(!is_equal);
+    assert(show1.GetNumPoints() == 0);
+    assert(show1.GetNumSheets() == 0);
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
-    Show show2((const uint8_t*)show_zero_points_zero_labels.data(),
+    Show show2(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_zero_points_zero_labels.data(),
         show_zero_points_zero_labels.size(),
         Current_version_and_later());
     auto show2_data = show2.SerializeShow();
     show2_data.erase(show2_data.begin(), show2_data.begin() + 8);
     is_equal = show2_data.size() == show_zero_points_zero_labels.size() && std::equal(show2_data.begin(), show2_data.end(), show_zero_points_zero_labels.begin());
     assert(is_equal);
+    assert(show1.GetNumPoints() == 0);
+    assert(show1.GetNumSheets() == 0);
 }
 
 // confirm we try to handle shows from the future
@@ -1013,14 +1068,14 @@ void Show::CC_show_future_show_test()
     // how?  By creating a show from scratch, then modifying the version; make
     // sure that we load it, and it looks the same
     // except the data gets reverted
-    auto blank_show = Show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     std::vector<char> char_data{ blank_show_data.begin(), blank_show_data.end() };
     assert(char_data.at(6) - '0' == CC_MAJOR_VERSION && char_data.at(7) - '0' == CC_MINOR_VERSION);
     ++char_data.at(6);
     ++char_data.at(7);
     std::istringstream is(std::string{ char_data.data(), char_data.size() });
-    auto re_read_show = Show::Create_CC_show(is);
+    auto re_read_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode(), is);
     auto re_read_show_data = blank_show->SerializeShow();
     --char_data.at(6);
     --char_data.at(7);
@@ -1030,11 +1085,11 @@ void Show::CC_show_future_show_test()
 
 void Show::CC_show_wrong_size_throws_exception()
 {
-    auto points_3(Construct_block(INGL_SIZE, std::vector<char>(3)));
+    auto points_3(Construct_block(INGL_SIZE, std::vector<uint8_t>(3)));
     auto show_data = Construct_block(INGL_SHOW, points_3);
     bool hit_exception = false;
     try {
-        Show show1((const uint8_t*)show_data.data(), show_data.size(),
+        Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
             Current_version_and_later());
     } catch (const CC_FileException&) {
         hit_exception = true;
@@ -1046,16 +1101,16 @@ void Show::CC_show_wrong_size_throws_exception()
 void Show::CC_show_wrong_size_number_labels_throws()
 {
     {
-        std::vector<char> point_data(4);
+        std::vector<uint8_t> point_data(4);
         put_big_long(point_data.data(), 1);
         auto points(Construct_block(INGL_SIZE, point_data));
-        auto no_labels(Construct_block(INGL_LABL, std::vector<char>{}));
+        auto no_labels(Construct_block(INGL_LABL, std::vector<uint8_t>{}));
         auto t_show_data = points;
         t_show_data.insert(t_show_data.end(), no_labels.begin(), no_labels.end());
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
                 Current_version_and_later());
         } catch (const CC_FileException&) {
             hit_exception = true;
@@ -1063,7 +1118,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         assert(hit_exception);
     }
     {
-        std::vector<char> point_data(4);
+        std::vector<uint8_t> point_data(4);
         put_big_long(point_data.data(), 1);
         auto points(Construct_block(INGL_SIZE, point_data));
         auto labels(
@@ -1073,7 +1128,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
                 Current_version_and_later());
         } catch (const CC_FileException&) {
             hit_exception = true;
@@ -1086,8 +1141,8 @@ void Show::CC_show_wrong_size_number_labels_throws()
 void Show::CC_show_wrong_size_description()
 {
     {
-        auto no_points(Construct_block(INGL_SIZE, std::vector<char>(4)));
-        auto no_labels(Construct_block(INGL_LABL, std::vector<char>{}));
+        auto no_points(Construct_block(INGL_SIZE, std::vector<uint8_t>(4)));
+        auto no_labels(Construct_block(INGL_LABL, std::vector<uint8_t>{}));
         auto descr(
             Construct_block(INGL_DESC, std::vector<char>{ 'a', 'b', 'c', '\0' }));
         descr.at(9) = '\0';
@@ -1097,7 +1152,7 @@ void Show::CC_show_wrong_size_description()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1((const uint8_t*)show_data.data(), show_data.size(),
+            Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size(),
                 Current_version_and_later());
         } catch (const CC_FileException&) {
             hit_exception = true;
@@ -1111,11 +1166,11 @@ void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    Show show1((const uint8_t*)extra_cruft.data(), extra_cruft.size(),
+    Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)extra_cruft.data(), extra_cruft.size(),
         Current_version_and_later());
     auto show1_data = show1.SerializeShow();
 
-    auto blank_show = Show::Create_CC_show();
+    auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     auto is_equal = blank_show_data.size() == show1_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), show1_data.begin());
     assert(is_equal);
@@ -1124,10 +1179,10 @@ void Show::CC_show_extra_cruft_ok()
 // show with nothing should fail:
 void Show::CC_show_with_nothing_throws()
 {
-    std::vector<char> empty{};
+    std::vector<uint8_t> empty{};
     bool hit_exception = false;
     try {
-        Show show1((const uint8_t*)empty.data(), empty.size(),
+        Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)empty.data(), empty.size(),
             Current_version_and_later());
     } catch (const CC_FileException&) {
         hit_exception = true;
@@ -1139,6 +1194,7 @@ void Show_UnitTests()
 {
     Show::CC_show_round_trip_test();
     Show::CC_show_round_trip_test_with_number_label_description();
+    Show::CC_show_round_trip_test_with_different_show_modes();
     Show::CC_show_blank_desc_test();
     Show::CC_show_future_show_test();
     Show::CC_show_wrong_size_throws_exception();

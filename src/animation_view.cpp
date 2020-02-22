@@ -54,7 +54,7 @@ void AnimationView::OnDraw(wxDC* dc)
 void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
 {
     dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-    DrawMode(dc, config, GetShow()->GetMode(), ShowMode_kAnimation);
+    DrawMode(dc, config, GetShow()->GetShowMode(), ShowMode_kAnimation);
     const bool checkForCollision = mCollisionWarningType != COLLISION_RESPONSE_NONE;
     if (mAnimation) {
         for (auto i = 0; i < GetShow()->GetNumPoints(); ++i) {
@@ -117,8 +117,8 @@ void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
                 }
             }
             Coord position = info.mPosition;
-            auto x = position.x + GetShow()->GetMode().Offset().x;
-            auto y = position.y + GetShow()->GetMode().Offset().y;
+            auto x = position.x + GetShow()->GetShowMode().Offset().x;
+            auto y = position.y + GetShow()->GetShowMode().Offset().y;
             dc.DrawRectangle(x - Int2CoordUnits(1) / 2, y - Int2CoordUnits(1) / 2,
                 Int2CoordUnits(1), Int2CoordUnits(1));
         }
@@ -303,7 +303,7 @@ wxString AnimationView::GetStatusText() const
 // Return a bounding box of the show
 std::pair<Coord, Coord> AnimationView::GetShowSizeAndOffset() const
 {
-    auto size = GetShow()->GetMode().Size();
+    auto size = GetShow()->GetShowMode().Size();
     return { size, Coord(0, 0) };
 }
 
@@ -311,7 +311,7 @@ std::pair<Coord, Coord> AnimationView::GetShowSizeAndOffset() const
 // outside the show, we don't see them.
 std::pair<Coord, Coord> AnimationView::GetMarcherSizeAndOffset() const
 {
-    auto mode_size = GetShow()->GetMode().Size();
+    auto mode_size = GetShow()->GetShowMode().Size();
     Coord bounding_box_upper_left = mode_size;
     Coord bounding_box_low_right(0, 0);
 
@@ -337,8 +337,8 @@ void AnimationView::SelectMarchersInBox(long mouseXStart, long mouseYStart,
     bool altDown)
 {
     // otherwise, Select points within rectangle
-    auto x_off = GetShow()->GetMode().Offset().x;
-    auto y_off = GetShow()->GetMode().Offset().y;
+    auto x_off = GetShow()->GetShowMode().Offset().x;
+    auto y_off = GetShow()->GetShowMode().Offset().y;
     Lasso lasso(Coord(mouseXStart - x_off, mouseYStart - y_off));
     lasso.Append(Coord(mouseXStart - x_off, mouseYEnd - y_off));
     lasso.Append(Coord(mouseXEnd - x_off, mouseYEnd - y_off));

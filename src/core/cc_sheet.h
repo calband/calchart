@@ -65,7 +65,7 @@ public:
     // continuity Functions
     const Continuity& GetContinuityBySymbol(SYMBOL_TYPE i) const;
     bool ContinuityInUse(SYMBOL_TYPE idx) const;
-    void SetContinuityText(SYMBOL_TYPE sym, const std::string& text);
+    void SetContinuity(SYMBOL_TYPE sym, Continuity const& new_cont);
 
     // print continuity
     void SetPrintableContinuity(const std::string& name, const std::string& lines);

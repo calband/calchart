@@ -47,11 +47,11 @@ public:
     virtual bool IsReadyForMoving() const { return true; }
 
 protected:
-    void BeginMoveDrag(CC_DRAG_TYPES type, const CalChart::Coord& start);
-    void AddMoveDrag(CC_DRAG_TYPES type, std::unique_ptr<CalChart::Shape> shape);
+    void BeginMoveDrag(CC_DRAG type, const CalChart::Coord& start);
+    void AddMoveDrag(CC_DRAG type, std::unique_ptr<CalChart::Shape> shape);
 
     std::vector<std::unique_ptr<CalChart::Shape>> m_shape_list;
-    CC_DRAG_TYPES move_drag = CC_DRAG_NONE;
+    CC_DRAG move_drag = CC_DRAG::NONE;
 };
 
 class MovePoints : public FieldCanvasShapes {

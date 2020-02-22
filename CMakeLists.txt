@@ -11,8 +11,8 @@ cmake_minimum_required (VERSION 3.11)
 project (CalChart)
 
 set (CalChart_VERSION_MAJOR 3)
-set (CalChart_VERSION_MINOR 5)
-set (CalChart_VERSION_PATCH 4)
+set (CalChart_VERSION_MINOR 6)
+set (CalChart_VERSION_PATCH 0)
 
 set (CalChart_VERSION "${CalChart_VERSION_MAJOR}.${CalChart_VERSION_MINOR}.${CalChart_VERSION_PATCH}")
 
@@ -212,7 +212,7 @@ set_target_properties (
   "${AllResources}"
   )
 
-target_link_libraries (CalChart calchart_core)
+target_link_libraries (CalChart calchart_core ${Boost_LIBRARIES})
 
 # We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
 # Have wxWidgets build as static libraries

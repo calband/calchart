@@ -129,10 +129,10 @@ void FieldCanvas::OnEraseBackground(wxEraseEvent& event) {}
 
 void FieldCanvas::OnMouseLeftDown_default(wxMouseEvent& event, CalChart::Coord pos)
 {
-    if (select_drag == CC_DRAG_POLY) {
+    if (select_drag == CC_DRAG::POLY) {
         return;
     }
-    if (curr_lasso == CC_DRAG_SWAP) {
+    if (curr_lasso == CC_DRAG::SWAP) {
         OnMouseLeftDown_CC_DRAG_SWAP(pos);
     }
     if (!(event.ShiftDown() || event.AltDown())) {
@@ -198,13 +198,13 @@ void FieldCanvas::OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CalChart::Coor
 void FieldCanvas::OnMouseLeftUp_default(wxMouseEvent& event, CalChart::Coord pos)
 {
     switch (select_drag) {
-    case CC_DRAG_BOX:
+    case CC_DRAG::BOX:
         OnMouseLeftUp_CC_DRAG_BOX(event, pos);
         break;
-    case CC_DRAG_LASSO:
+    case CC_DRAG::LASSO:
         OnMouseLeftUp_CC_DRAG_LASSO(event, pos);
         break;
-    case CC_DRAG_POLY:
+    case CC_DRAG::POLY:
         OnMouseLeftUp_CC_DRAG_POLY(event, pos);
         break;
     default:
@@ -297,7 +297,7 @@ void FieldCanvas::OnMouseLeftDoubleClick(wxMouseEvent& event)
     wxClientDC dc(this);
     PrepareDC(dc);
 
-    if (!m_select_shape_list.empty() && (CC_DRAG_POLY == select_drag)) {
+    if (!m_select_shape_list.empty() && (CC_DRAG::POLY == select_drag)) {
         mView.SelectWithLasso((CalChart::Lasso*)m_select_shape_list.back().get(), event.AltDown());
         EndDrag();
     }
@@ -310,7 +310,7 @@ void FieldCanvas::OnMouseRightDown(wxMouseEvent& event)
     wxClientDC dc(this);
     PrepareDC(dc);
 
-    if (!m_select_shape_list.empty() && (CC_DRAG_POLY == select_drag)) {
+    if (!m_select_shape_list.empty() && (CC_DRAG::POLY == select_drag)) {
         mView.SelectWithLasso((CalChart::Lasso*)m_select_shape_list.back().get(), event.AltDown());
         EndDrag();
     }
@@ -339,7 +339,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
             if (event.Dragging() && event.LeftIsDown()) {
                 MoveDrag(pos);
             }
-            if (event.Moving() && !m_select_shape_list.empty() && (CC_DRAG_POLY == select_drag)) {
+            if (event.Moving() && !m_select_shape_list.empty() && (CC_DRAG::POLY == select_drag)) {
                 MoveDrag(pos);
             }
         }
@@ -393,33 +393,33 @@ void FieldCanvas::SetZoom(float factor)
     Refresh();
 }
 
-void FieldCanvas::BeginSelectDrag(CC_DRAG_TYPES type, const CalChart::Coord& start)
+void FieldCanvas::BeginSelectDrag(CC_DRAG type, const CalChart::Coord& start)
 {
     select_drag = type;
     m_select_shape_list.clear();
     switch (type) {
-    case CC_DRAG_BOX:
+    case CC_DRAG::BOX:
         m_select_shape_list.emplace_back(new CalChart::Shape_rect(start));
         break;
-    case CC_DRAG_POLY:
+    case CC_DRAG::POLY:
         m_select_shape_list.emplace_back(new CalChart::Poly(start));
         break;
-    case CC_DRAG_LASSO:
+    case CC_DRAG::LASSO:
         m_select_shape_list.emplace_back(new CalChart::Lasso(start));
         break;
-    case CC_DRAG_LINE:
+    case CC_DRAG::LINE:
         m_select_shape_list.emplace_back(new CalChart::Shape_line(start));
         break;
-    case CC_DRAG_CROSSHAIRS:
+    case CC_DRAG::CROSSHAIRS:
         m_select_shape_list.emplace_back(new CalChart::Shape_crosshairs(start, Int2CoordUnits(2)));
         break;
-    case CC_DRAG_SHAPE_ELLIPSE:
+    case CC_DRAG::SHAPE_ELLIPSE:
         m_select_shape_list.emplace_back(new CalChart::Shape_ellipse(start));
         break;
-    case CC_DRAG_SHAPE_X:
+    case CC_DRAG::SHAPE_X:
         m_select_shape_list.emplace_back(new CalChart::Shape_x(start));
         break;
-    case CC_DRAG_SHAPE_CROSS:
+    case CC_DRAG::SHAPE_CROSS:
         m_select_shape_list.emplace_back(new CalChart::Shape_cross(start));
         break;
     default:
@@ -521,10 +521,10 @@ void FieldCanvas::EndDrag()
     mMovePoints.clear();
     m_move_points.reset();
     m_select_shape_list.clear();
-    select_drag = CC_DRAG_NONE;
+    select_drag = CC_DRAG::NONE;
 }
 
-void FieldCanvas::SetCurrentLasso(CC_DRAG_TYPES lasso) { curr_lasso = lasso; }
+void FieldCanvas::SetCurrentLasso(CC_DRAG lasso) { curr_lasso = lasso; }
 
 // implies a call to EndDrag()
 void FieldCanvas::SetCurrentMove(CC_MOVE_MODES move)

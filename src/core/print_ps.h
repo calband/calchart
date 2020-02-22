@@ -55,8 +55,7 @@ public:
         double YardsSize, double TextSize, double DotRatio,
         double NumRatio, double PLineRatio, double SLineRatio,
         double ContRatio,
-        std::function<std::string(size_t)> Get_yard_text,
-        std::function<std::string(size_t)> Get_spr_line_text);
+        std::function<std::string(size_t)> Get_yard_text);
 
     int operator()(std::ostream& buffer, unsigned curr_ss,
         const std::set<size_t>& isPicked,
@@ -67,10 +66,9 @@ private:
     void PrintContSections(std::ostream& buffer, const CalChart::Sheet& sheet) const;
     void PrintStandard(std::ostream& buffer, const CalChart::Sheet& sheet,
         bool split_sheet) const;
-    void PrintSpringshow(std::ostream& buffer, const CalChart::Sheet& sheet) const;
     void PrintOverview(std::ostream& buffer, const CalChart::Sheet& sheet) const;
     void gen_cont_line(std::ostream& buffer, const CalChart::Textline& line,
-        PSFONT_TYPE currfontnum, float fontsize) const;
+        PSFONT currfontnum, float fontsize) const;
     void print_start_page(std::ostream& buffer, bool landscape,
         double translate_x, double translate_y) const;
     bool SplitSheet(const CalChart::Sheet& sheet) const;
@@ -105,13 +103,11 @@ private:
     double mContRatio;
 
     std::function<std::string(size_t)> mGet_yard_text;
-    std::function<std::string(size_t)> mGet_spr_line_text;
 
     float width, height, real_width, real_height;
     float field_x, field_y, field_w, field_h;
     float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
     float step_size;
-    float spr_step_size;
     short step_width;
 };
 }

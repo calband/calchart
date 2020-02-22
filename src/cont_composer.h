@@ -1,10 +1,5 @@
 #pragma once
 /*
- * ContinuityBrowser
- * Header for continuity editors
- */
-
-/*
    Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
    This program is free software: you can redistribute it and/or modify
@@ -23,29 +18,29 @@
 
 #include <wx/wx.h>
 
-class CalChartDoc;
-class ContinuityBrowser;
-class ContinuityBrowserPerCont;
+namespace CalChart {
+class ContProcedure;
+}
 
-// ContinuityBrowser
-// The way you view the continuity for marchers
+class ContComposerPanel;
 
-class ContinuityBrowser : public wxScrolledWindow {
-    using super = wxScrolledWindow;
+class ContComposerDialog : public wxDialog {
+    using super = wxDialog;
+    DECLARE_CLASS(ContComposerDialog)
 
 public:
-    ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id = wxID_ANY,
+    ContComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity,
+        wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Compose Continuity"),
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    ~ContinuityBrowser();
+        long style = wxDEFAULT_DIALOG_STYLE,
+        const wxString& name = wxDialogNameStr);
+    ~ContComposerDialog() = default;
 
-    void Update(); // Refresh data with doc
+    std::unique_ptr<CalChart::ContProcedure> GetContinuity();
+    virtual bool Validate() override;
 
 private:
-    void CreateControls();
-
-    CalChartDoc* mDoc;
-    std::vector<ContinuityBrowserPerCont*> mPerCont;
+    ContComposerPanel* mPanel;
 };

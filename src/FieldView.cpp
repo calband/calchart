@@ -81,8 +81,8 @@ void FieldView::OnDraw(wxDC* dc)
 {
     if (mShow) {
         // draw the field
-        auto origin = mShow->GetMode().Offset();
-        DrawMode(*dc, mConfig, mShow->GetMode(), ShowMode_kFieldView);
+        auto origin = mShow->GetShowMode().Offset();
+        DrawMode(*dc, mConfig, mShow->GetShowMode(), ShowMode_kFieldView);
 
         auto ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
 
@@ -185,9 +185,9 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
         auto labels = page1->GetLabels();
         auto columns = page1->GetNumberColumns();
         std::vector<std::string> tlabels(labels.begin(), labels.end());
-        auto newmode = wxGetApp().GetMode(page2->GetValue());
+        auto newmode = wxGetApp().GetShowMode(page2->GetValue());
 
-        show.WizardSetupNewShow(tlabels, columns, std::move(newmode));
+        show.WizardSetupNewShow(tlabels, columns, newmode);
     } else {
         wxMessageBox(wxT("Show setup not completed.\n")
                          wxT("You can change the number of marchers\n")
@@ -242,9 +242,9 @@ bool FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
     return true;
 }
 
-void FieldView::DoSetMode(const wxString& mode)
+void FieldView::DoSetMode(CalChart::ShowMode const& mode)
 {
-    auto cmd = mShow->Create_SetModeCommand(mode);
+    auto cmd = mShow->Create_SetShowModeCommand(mode);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 

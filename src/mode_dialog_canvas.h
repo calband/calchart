@@ -1,7 +1,7 @@
 #pragma once
 /*
- * ContinuityBrowser
- * Header for continuity editors
+ * mode_dialog.h
+ * Dialox box for preferences
  */
 
 /*
@@ -21,31 +21,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+#include "confgr.h"
+#include "modes.h"
+#include "basic_ui.h"
+#include <wx/bmpcbox.h>
+#include <wx/notebook.h>
+#include <wx/spinctrl.h>
 #include <wx/wx.h>
 
-class CalChartDoc;
-class ContinuityBrowser;
-class ContinuityBrowserPerCont;
-
-// ContinuityBrowser
-// The way you view the continuity for marchers
-
-class ContinuityBrowser : public wxScrolledWindow {
-    using super = wxScrolledWindow;
+class ShowModeSetupCanvas : public ClickDragCtrlScrollCanvas {
+    DECLARE_CLASS(ShowModeSetupCanvas)
+    DECLARE_EVENT_TABLE()
+    using super = ClickDragCtrlScrollCanvas;
 
 public:
-    ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    ~ContinuityBrowser();
+    ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent,
+        wxWindowID id = wxID_ANY);
 
-    void Update(); // Refresh data with doc
+    void OnPaint(wxPaintEvent& event);
+    void SetMode(CalChart::ShowMode const& mode);
+    virtual void SetZoom(float factor);
 
 private:
-    void CreateControls();
-
-    CalChartDoc* mDoc;
-    std::vector<ContinuityBrowserPerCont*> mPerCont;
+    CalChartConfiguration& mConfig;
+    CalChart::ShowMode mMode;
 };

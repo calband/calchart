@@ -136,7 +136,7 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth,
 }
 
 static std::tuple<float, float, float, float, float, float, float, float, float,
-    float, float, float, float, float, short>
+    float, float, float, float, short>
 CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
     double PageWidth, double PageHeight, double ContRatio,
     int min_yards, ShowMode const& mode)
@@ -145,7 +145,6 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
     float field_x, field_y, field_w, field_h;
     float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
     float step_size;
-    float spr_step_size;
     short step_width;
 
     auto fullsize = mode.Size();
@@ -159,54 +158,30 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
     if (!overview) {
         std::tie(width, height, real_width, real_height, field_y) = CalcValues(
             PrintLandscape, PrintDoCont, PageWidth, PageHeight, ContRatio);
-        switch (mode.GetType()) {
-        case ShowMode::SHOW_STANDARD:
-            step_width = (short)(width / (height / (fullheight + 8.0)));
-            if (step_width > CoordUnits2Int(fieldsize.x)) {
-                step_width = CoordUnits2Int(fieldsize.x);
-            }
-            min_yards = min_yards * 16 / 10;
-            if (step_width > min_yards) {
-                /* We can get the minimum size */
-                step_width = (step_width / 8) * 8;
-                field_w = step_width * (height / (fullheight + 8.0));
-                field_h = height * (fieldheight / (fullheight + 8.0));
-                if ((field_w / step_width * (step_width + 4)) > width) {
-                    /* Oops, we didn't made it big enough */
-                    field_h *= width * step_width / (step_width + 4) / field_w;
-                    field_w = width * step_width / (step_width + 4);
-                }
-            } else {
-                /* Decrease height to get minimum size */
-                field_w = width;
-                field_h = width * fieldheight / min_yards;
-                step_width = min_yards;
-            }
-            step_size = field_w / step_width;
-            field_x = (width - field_w) / 2;
-            field_y += height - (field_h + step_size * 16);
-            break;
-        case ShowMode::SHOW_SPRINGSHOW: {
-            // this may throw if not doing spring show..
-            const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mode);
-
-            field_h = height / (1 + 16 * springShow.FieldW() / ((float)springShow.StageW() * 80));
-            field_w = field_h / springShow.StageH() * springShow.StageW();
-            if (field_w > width) {
-                /* reduce stage to fit on page */
-                field_h *= width / field_w;
-                field_w = width;
-            }
-            stage_field_w = field_w * springShow.FieldW() / springShow.StageW();
-            stage_field_h = field_h * springShow.FieldH() / springShow.StageH();
-            step_size = stage_field_w / CoordUnits2Int(springShow.FieldSize().x);
-            spr_step_size = (short)(field_w / 80.0);
-            field_x = (width - field_w) / 2;
-            field_y += height - (field_h + spr_step_size * 16);
-            stage_field_x = field_w * springShow.FieldX() / springShow.StageW();
-            stage_field_y = field_h * springShow.FieldY() / springShow.StageH();
-        } break;
+        step_width = (short)(width / (height / (fullheight + 8.0)));
+        if (step_width > CoordUnits2Int(fieldsize.x)) {
+            step_width = CoordUnits2Int(fieldsize.x);
         }
+        min_yards = min_yards * 16 / 10;
+        if (step_width > min_yards) {
+            /* We can get the minimum size */
+            step_width = (step_width / 8) * 8;
+            field_w = step_width * (height / (fullheight + 8.0));
+            field_h = height * (fieldheight / (fullheight + 8.0));
+            if ((field_w / step_width * (step_width + 4)) > width) {
+                /* Oops, we didn't made it big enough */
+                field_h *= width * step_width / (step_width + 4) / field_w;
+                field_w = width * step_width / (step_width + 4);
+            }
+        } else {
+            /* Decrease height to get minimum size */
+            field_w = width;
+            field_h = width * fieldheight / min_yards;
+            step_width = min_yards;
+        }
+        step_size = field_w / step_width;
+        field_x = (width - field_w) / 2;
+        field_y += height - (field_h + step_size * 16);
     } else {
         if (PrintLandscape) {
             width = PageHeight * DPI;
@@ -234,11 +209,11 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
         width *= fieldwidth / fullwidth;
         height *= fieldheight / fullheight;
     }
-    return std::tuple<float, float, float, float, float, float, float, float,
+    return std::tuple<float, float, float, float, float, float, float,
         float, float, float, float, float, float, short>(
         width, height, real_width, real_height, field_x, field_y, field_w,
         field_h, stage_field_x, stage_field_y, stage_field_w, stage_field_h,
-        step_size, spr_step_size, step_width);
+        step_size, step_width);
 }
 
 PrintShowToPS::PrintShowToPS(
@@ -248,8 +223,7 @@ PrintShowToPS::PrintShowToPS(
     double PageWidth, double PageHeight, double PageOffsetX, double PageOffsetY,
     double PaperLength, double HeaderSize, double YardsSize, double TextSize,
     double DotRatio, double NumRatio, double PLineRatio, double SLineRatio,
-    double ContRatio, std::function<std::string(size_t)> Get_yard_text,
-    std::function<std::string(size_t)> Get_spr_line_text)
+    double ContRatio, std::function<std::string(size_t)> Get_yard_text)
     : mShow(show)
     , mPrintLandscape(PrintLandscape)
     , mPrintDoCont(PrintDoCont)
@@ -271,11 +245,10 @@ PrintShowToPS::PrintShowToPS(
     , mSLineRatio(SLineRatio)
     , mContRatio(ContRatio)
     , mGet_yard_text(Get_yard_text)
-    , mGet_spr_line_text(Get_spr_line_text)
 {
     std::tie(width, height, real_width, real_height, field_x, field_y, field_w,
         field_h, stage_field_x, stage_field_y, stage_field_w, stage_field_h,
-        step_size, spr_step_size, step_width)
+        step_size, step_width)
         = CalcAllValues(mPrintLandscape, mPrintDoCont, mOverview, mPageWidth,
             mPageHeight, mContRatio, min_yards, mMode);
 }
@@ -375,47 +348,21 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
         buffer << "/fieldw " << field_w << " def\n";
         buffer << "/fieldh " << field_h << " def\n";
         buffer << "/fieldy " << field_y << " def\n";
-        switch (mMode.GetType()) {
-        case ShowMode::SHOW_STANDARD: {
-            // this may throw if not doing spring show..
-            buffer << "/stepw " << step_width << " def\n";
-            const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
-            buffer << "/whash " << standardShow.HashW() << " def\n";
-            buffer << "/ehash " << standardShow.HashE() << " def\n";
-            buffer << "/headsize " << mHeaderSize << " def\n";
-            buffer << "/yardsize " << mYardsSize << " def\n";
-            buffer << prolog0_ps;
-        } break;
-        case ShowMode::SHOW_SPRINGSHOW: {
-            // this may throw if not doing spring show..
-            buffer << "/sfieldw " << stage_field_w << " def\n";
-            buffer << "/sfieldh " << stage_field_h << " def\n";
-            buffer << "/sfieldx " << stage_field_x << " def\n";
-            buffer << "/sfieldy " << stage_field_y << " def\n";
-            {
-                RAII_setprecision<std::ostream> tmp_(buffer);
-                buffer.precision(6);
-                buffer << "/stepsize " << step_size << " def\n";
-                buffer << "/sprstepsize " << spr_step_size << " def\n";
-            }
-            const ShowModeSprShow& springShow = dynamic_cast<const ShowModeSprShow&>(mMode);
-            buffer << "/nfieldw " << CoordUnits2Int(springShow.FieldSize().x) << " def\n";
-            buffer << "/nfieldh " << CoordUnits2Int(springShow.FieldSize().y) << " def\n";
-            buffer << "/headsize " << mHeaderSize << " def\n";
-            buffer << prolog1_ps;
-        } break;
-        }
+        buffer << "/stepw " << step_width << " def\n";
+        buffer << "/whash " << mMode.HashW() << " def\n";
+        buffer << "/ehash " << mMode.HashE() << " def\n";
+        buffer << "/headsize " << mHeaderSize << " def\n";
+        buffer << "/yardsize " << mYardsSize << " def\n";
+        buffer << prolog0_ps;
         buffer << "%%EndProlog\n";
         buffer << "%%BeginSetup\n";
         PrintFontHeader(buffer, fonts);
         buffer << setup0_ps;
         buffer << "%%EndSetup\n";
     } else {
-        // this may throw if not doing spring show..
-        const ShowModeStandard& standardShow = dynamic_cast<const ShowModeStandard&>(mMode);
         buffer << "%%BeginProlog\n";
-        buffer << "/whash " << standardShow.HashW() << " def\n";
-        buffer << "/ehash " << standardShow.HashE() << " def\n";
+        buffer << "/whash " << mMode.HashW() << " def\n";
+        buffer << "/ehash " << mMode.HashE() << " def\n";
         buffer << "/fieldw " << width << " def\n";
         buffer << "/fieldh " << height << " def\n";
         buffer << prolog2_ps;
@@ -436,18 +383,11 @@ short PrintShowToPS::PrintSheets(std::ostream& buffer,
         if ((isPicked.count(std::distance(mShow.GetSheetBegin(), curr_sheet)) != 0)) {
             num_pages++;
             if (!mOverview) {
-                switch (mMode.GetType()) {
-                case ShowMode::SHOW_STANDARD:
-                    PrintStandard(buffer, *curr_sheet, false);
-                    if (SplitSheet(*curr_sheet)) {
-                        PageBreak(buffer);
-                        num_pages++;
-                        PrintStandard(buffer, *curr_sheet, true);
-                    }
-                    break;
-                case ShowMode::SHOW_SPRINGSHOW:
-                    PrintSpringshow(buffer, *curr_sheet);
-                    break;
+                PrintStandard(buffer, *curr_sheet, false);
+                if (SplitSheet(*curr_sheet)) {
+                    PageBreak(buffer);
+                    num_pages++;
+                    PrintStandard(buffer, *curr_sheet, true);
                 }
             } else {
                 PrintOverview(buffer, *curr_sheet);
@@ -485,7 +425,7 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
                     mTextSize);
             }
 
-            gen_cont_line(buffer, text, PSFONT_NORM, mTextSize);
+            gen_cont_line(buffer, text, PSFONT::NORM, mTextSize);
             lines_left--;
             need_eject = true;
         }
@@ -515,18 +455,18 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer,
     for (auto& text : continuity) {
         if (!text.GetOnSheet())
             continue;
-        gen_cont_line(buffer, text, PSFONT_NORM, this_size);
+        gen_cont_line(buffer, text, PSFONT::NORM, this_size);
     }
 }
 
 void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
-    PSFONT_TYPE currfontnum,
+    PSFONT currfontnum,
     float fontsize) const
 {
     buffer << "/x lmargin def\n";
     short tabstop = 0;
     for (auto& part : line.GetChunks()) {
-        if (part.font == PSFONT_TAB) {
+        if (part.font == PSFONT::TAB) {
             if (++tabstop > 3) {
                 buffer << "space_over\n";
             } else {
@@ -534,7 +474,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
             }
         } else {
             if (part.font != currfontnum) {
-                buffer << "/" << fontnames[part.font];
+                buffer << "/" << fontnames[static_cast<int>(part.font)];
                 buffer << " findfont " << fontsize << " scalefont setfont\n";
                 currfontnum = part.font;
             }
@@ -717,105 +657,6 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
                << dot_routines[sheet.GetPoint(i).GetSymbol()] << "\n";
         buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y
                << " " << (sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber")
-               << "\n";
-    }
-    if (mPrintDoCont) {
-        buffer << (-field_x) << " " << (-field_y) << " translate\n";
-        PrintContSections(buffer, sheet);
-    }
-}
-
-void PrintShowToPS::PrintSpringshow(std::ostream& buffer,
-    const Sheet& sheet) const
-{
-    std::string namestr(sheet.GetName());
-    std::string numberstr(sheet.GetNumber());
-
-    buffer << "%%Page: " << namestr << "\n";
-    if (!sheet.GetNumber().empty()) {
-        buffer << "/pagenumtext (" << numberstr << ") def\n";
-    } else {
-        buffer << "/pagenumtext () def\n";
-    }
-
-    print_start_page(buffer, mPrintLandscape, field_x, field_y);
-
-    ShowModeSprShow const& modesprshow = dynamic_cast<const ShowModeSprShow&>(mMode);
-    buffer << "   BeginEPSF\n";
-    buffer << "   " << (field_w / modesprshow.StageW()) << " "
-           << (field_h / modesprshow.StageH()) << " scale\n";
-    buffer << "   " << static_cast<short>(-modesprshow.StageX()) << " "
-           << (static_cast<short>(-modesprshow.StageY())) << " translate\n";
-    buffer << "%%BeginDocument: zllrbach.eps\n";
-    // sprint show is special.  We put down the special stage:
-    // subtract 1 because we don't want to write the '\0' at the end
-    buffer << zllrbach_eps;
-    buffer << "%%EndDocument\n";
-    buffer << "EndEPSF\n";
-    /* Draw field */
-    buffer << "drawfield\n";
-    if (modesprshow.WhichYards()) {
-        buffer << "/mainfont findfont " << (step_size * mYardsSize)
-               << " scalefont setfont\n";
-        if (modesprshow.WhichYards() & (SPR_YARD_ABOVE | SPR_YARD_BELOW))
-            for (short j = 0; j <= CoordUnits2Int(modesprshow.FieldSize().x); j += 8) {
-                buffer << "/lmargin " << (stage_field_x + step_size * j)
-                       << " def /rmargin " << (stage_field_x + step_size * j)
-                       << " def\n";
-                if (modesprshow.WhichYards() & SPR_YARD_ABOVE) {
-                    buffer << "/y "
-                           << (field_h * (modesprshow.TextTop() - modesprshow.StageX()) / modesprshow.StageH())
-                           << " def\n";
-                    std::string yardstr(mGet_yard_text(
-                        (CoordUnits2Int(modesprshow.FieldOffset().x) + (kYardTextValues - 1) * 4 + j) / 8));
-                    buffer << "(" << yardstr << ") centerText\n";
-                }
-                if (modesprshow.WhichYards() & SPR_YARD_BELOW) {
-                    buffer << "/y "
-                           << (field_h * (modesprshow.TextBottom() - modesprshow.StageX()) / modesprshow.StageH() - (step_size * mYardsSize))
-                           << " def\n";
-                    std::string yardstr(mGet_yard_text(
-                        (CoordUnits2Int(modesprshow.FieldOffset().x) + (kYardTextValues - 1) * 4 + j) / 8));
-                    buffer << "(" << yardstr << ") centerText\n";
-                }
-            }
-        if (modesprshow.WhichYards() & (SPR_YARD_LEFT | SPR_YARD_RIGHT))
-            for (short j = 0; j <= CoordUnits2Int(modesprshow.FieldSize().y); j += 8) {
-                buffer << "/y "
-                       << (stage_field_y + stage_field_h * (CoordUnits2Int(modesprshow.FieldSize().y) - j - mYardsSize / 2) / CoordUnits2Int(modesprshow.FieldSize().y))
-                       << " def\n";
-                buffer << "/x "
-                       << (field_w * (modesprshow.TextRight() - modesprshow.StageX()) / modesprshow.StageW())
-                       << " def /rmargin "
-                       << (field_w * (modesprshow.TextLeft() - modesprshow.StageX()) / modesprshow.StageW())
-                       << " def\n";
-                std::string spr_text_str(mGet_spr_line_text(j / 8));
-                if (modesprshow.WhichYards() & SPR_YARD_RIGHT) {
-                    buffer << "(" << spr_text_str << ") leftText\n";
-                }
-                if (modesprshow.WhichYards() & SPR_YARD_LEFT) {
-                    buffer << "(" << spr_text_str << ") rightText\n";
-                }
-            }
-    }
-
-    float dot_w = step_size / 2 * mDotRatio;
-    {
-        RAII_setprecision<std::ostream> tmp_(buffer);
-        buffer.precision(4);
-        buffer << "/w " << dot_w << " def\n";
-        buffer << "/plinew " << (dot_w * mPLineRatio) << " def\n";
-        buffer << "/slinew " << (dot_w * mSLineRatio) << " def\n";
-    }
-    buffer << "/numberfont findfont " << (dot_w * 2 * mNumRatio)
-           << " scalefont setfont\n";
-    for (auto i = 0; i < mShow.GetNumPoints(); i++) {
-        float dot_x = stage_field_x + (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - CoordUnits2Int(modesprshow.FieldOffset().x)) / CoordUnits2Int(modesprshow.FieldSize().x) * stage_field_w;
-        float dot_y = stage_field_y + stage_field_h * (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - CoordUnits2Int(modesprshow.FieldOffset().y)) / CoordUnits2Int(modesprshow.FieldSize().y));
-        buffer << dot_x << " " << dot_y << " "
-               << dot_routines[sheet.GetPoint(i).GetSymbol()] << "\n";
-        buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y
-               << " " << ((sheet.GetPoint(i).GetFlip()) ? "donumber2" : "donumber")
                << "\n";
     }
     if (mPrintDoCont) {

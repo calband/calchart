@@ -21,36 +21,44 @@
 */
 
 #include "modes.h"
+#include "cc_fileformat.h"
 
 #include <algorithm>
 
 namespace CalChart {
 
-ShowMode::ShowMode(const std::string& name, const CalChart::Coord& size,
-    const CalChart::Coord& offset, const CalChart::Coord& border1,
-    const CalChart::Coord& border2)
-    : mSize([=]() { return size; })
-    , mOffset([=]() { return offset; })
-    , mBorder1([=]() { return border1; })
-    , mBorder2([=]() { return border2; })
-    , mName(name)
+static constexpr const char* kYardTextDefaults[] = {
+    "N", "M", "L", "K", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "-10", "-5",
+    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50",
+    "45", "40", "35", "30", "25", "20", "15", "10", "5", "0",
+    "-5", "-10", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N"
+};
+
+ShowMode::YardLinesInfo_t ShowMode::GetDefaultYardLines()
 {
+    ShowMode::YardLinesInfo_t data;
+    for (auto i = 0; i < kYardTextValues; ++i) {
+        data[i] = kYardTextDefaults[i];
+    }
+    return data;
 }
 
-ShowMode::ShowMode(const std::string& name,
-    const std::function<CalChart::Coord()>& size,
-    const std::function<CalChart::Coord()>& offset,
-    const std::function<CalChart::Coord()>& border1,
-    const std::function<CalChart::Coord()>& border2)
+ShowMode::ShowMode(CalChart::Coord size,
+    CalChart::Coord offset,
+    CalChart::Coord border1,
+    CalChart::Coord border2,
+    unsigned short whash,
+    unsigned short ehash,
+    YardLinesInfo_t const& yardlines)
     : mSize(size)
     , mOffset(offset)
     , mBorder1(border1)
     , mBorder2(border2)
-    , mName(name)
+    , mHashW(whash)
+    , mHashE(ehash)
+    , mYardLines(yardlines)
 {
 }
-
-ShowMode::~ShowMode() {}
 
 CalChart::Coord ShowMode::ClipPosition(const CalChart::Coord& pos) const
 {
@@ -73,101 +81,25 @@ CalChart::Coord ShowMode::ClipPosition(const CalChart::Coord& pos) const
     return clipped;
 }
 
-ShowModeStandard::ShowModeStandard(const std::string& name, CalChart::Coord size,
-    CalChart::Coord offset, CalChart::Coord border1,
-    CalChart::Coord border2, unsigned short hashw,
-    unsigned short hashe)
-    : ShowMode(name, size, offset, border1, border2)
-    , mHashW([=]() { return hashw; })
-    , mHashE([=]() { return hashe; })
+ShowMode::ShowModeInfo_t
+ShowMode::GetShowModeInfo() const
 {
+    return { {
+        mHashW,
+        mHashE,
+        CoordUnits2Int(mBorder1.x),
+        CoordUnits2Int(mBorder1.y),
+        CoordUnits2Int(mBorder2.x),
+        CoordUnits2Int(mBorder2.y),
+        CoordUnits2Int(-mOffset.x),
+        CoordUnits2Int(-mOffset.y),
+        CoordUnits2Int(mSize.x),
+        CoordUnits2Int(mSize.y),
+    } };
 }
 
-ShowModeStandard::ShowModeStandard(const std::string& name,
-    const std::function<CalChart::Coord()>& size,
-    const std::function<CalChart::Coord()>& offset,
-    const std::function<CalChart::Coord()>& border1,
-    const std::function<CalChart::Coord()>& border2,
-    const std::function<unsigned short()>& whash,
-    const std::function<unsigned short()>& ehash)
-    : ShowMode(name, size, offset, border1, border2)
-    , mHashW(whash)
-    , mHashE(ehash)
-{
-}
-
-ShowModeStandard::~ShowModeStandard() {}
-
-ShowMode::ShowType ShowModeStandard::GetType() const { return SHOW_STANDARD; }
-
-ShowModeSprShow::ShowModeSprShow(const std::string& nam, CalChart::Coord bord1,
-    CalChart::Coord bord2, unsigned char which,
-    short stps_x, short stps_y, short stps_w,
-    short stps_h, short stg_x, short stg_y,
-    short stg_w, short stg_h, short fld_x,
-    short fld_y, short fld_w, short fld_h,
-    short txt_l, short txt_r, short txt_tp,
-    short txt_bm)
-    : ShowMode(nam, CalChart::Coord(Int2CoordUnits(stps_w), Int2CoordUnits(stps_h)),
-          CalChart::Coord(Int2CoordUnits(-stps_x), Int2CoordUnits(-stps_y)), bord1, bord2)
-    , which_yards([=]() { return which; })
-    , stage_x([=]() { return stg_x; })
-    , stage_y([=]() { return stg_y; })
-    , stage_w([=]() { return stg_w; })
-    , stage_h([=]() { return stg_h; })
-    , field_x([=]() { return fld_x; })
-    , field_y([=]() { return fld_y; })
-    , field_w([=]() { return fld_w; })
-    , field_h([=]() { return fld_h; })
-    , text_left([=]() { return txt_l; })
-    , text_right([=]() { return txt_r; })
-    , text_top([=]() { return txt_tp; })
-    , text_bottom([=]() { return txt_bm; })
-{
-}
-
-ShowModeSprShow::ShowModeSprShow(
-    const std::string& nam, const std::function<CalChart::Coord()>& bord1,
-    const std::function<CalChart::Coord()>& bord2,
-    const std::function<unsigned char()>& which,
-    const std::function<short()>& stps_x, const std::function<short()>& stps_y,
-    const std::function<short()>& stps_w, const std::function<short()>& stps_h,
-    const std::function<short()>& stg_x, const std::function<short()>& stg_y,
-    const std::function<short()>& stg_w, const std::function<short()>& stg_h,
-    const std::function<short()>& fld_x, const std::function<short()>& fld_y,
-    const std::function<short()>& fld_w, const std::function<short()>& fld_h,
-    const std::function<short()>& txt_l, const std::function<short()>& txt_r,
-    const std::function<short()>& txt_tp, const std::function<short()>& txt_bm)
-    : ShowMode(
-          nam,
-          [=]() { return CalChart::Coord(Int2CoordUnits(stps_w()), Int2CoordUnits(stps_h())); },
-          [=]() {
-              return CalChart::Coord(Int2CoordUnits(-stps_x()), Int2CoordUnits(-stps_y()));
-          },
-          bord1, bord2)
-    , which_yards(which)
-    , stage_x(stg_x)
-    , stage_y(stg_y)
-    , stage_w(stg_w)
-    , stage_h(stg_h)
-    , field_x(fld_x)
-    , field_y(fld_y)
-    , field_w(fld_w)
-    , field_h(fld_h)
-    , text_left(txt_l)
-    , text_right(txt_r)
-    , text_top(txt_tp)
-    , text_bottom(txt_bm)
-{
-}
-
-ShowModeSprShow::~ShowModeSprShow() {}
-
-ShowMode::ShowType ShowModeSprShow::GetType() const { return SHOW_SPRINGSHOW; }
-
-std::unique_ptr<ShowMode>
-ShowModeStandard::CreateShowMode(const std::string& which,
-    const ShowModeInfo_t& values)
+ShowMode
+ShowMode::CreateShowMode(ShowModeInfo_t const& values, YardLinesInfo_t const& yardlines)
 {
     unsigned short whash = values[kwhash];
     unsigned short ehash = values[kehash];
@@ -175,120 +107,97 @@ ShowModeStandard::CreateShowMode(const std::string& which,
     CalChart::Coord bord2{ Int2CoordUnits(values[kbord2_x]), Int2CoordUnits(values[kbord2_y]) };
     CalChart::Coord offset{ Int2CoordUnits(-values[koffset_x]), Int2CoordUnits(-values[koffset_y]) };
     CalChart::Coord size{ Int2CoordUnits(values[ksize_x]), Int2CoordUnits(values[ksize_y]) };
-    return std::unique_ptr<ShowMode>(
-        new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
+    return {
+        size,
+        offset,
+        bord1,
+        bord2,
+        whash,
+        ehash,
+        yardlines
+    };
 }
 
-std::unique_ptr<ShowMode> ShowModeStandard::CreateShowMode(
-    const std::string& which,
-    const std::function<ShowModeInfo_t()>& valueGetter)
+ShowMode ShowMode::CreateShowMode(CalChart::Coord size, CalChart::Coord offset, CalChart::Coord border1,
+    CalChart::Coord border2, unsigned short whash, unsigned short ehash, YardLinesInfo_t const& yardlines)
 {
-    auto whash = [valueGetter]() { return valueGetter()[kwhash]; };
-    auto ehash = [valueGetter]() { return valueGetter()[kehash]; };
-    auto bord1 = [valueGetter]() {
-        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord1_x]),
-            Int2CoordUnits(valueGetter()[kbord1_y]) };
+    return {
+        size,
+        offset,
+        border1,
+        border2,
+        whash,
+        ehash,
+        yardlines
     };
-    auto bord2 = [valueGetter]() {
-        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord2_x]),
-            Int2CoordUnits(valueGetter()[kbord2_y]) };
-    };
-    auto offset = [valueGetter]() {
-        return CalChart::Coord{ Int2CoordUnits(-valueGetter()[koffset_x]),
-            Int2CoordUnits(-valueGetter()[koffset_y]) };
-    };
-    auto size = [valueGetter]() {
-        return CalChart::Coord{ Int2CoordUnits(valueGetter()[ksize_x]),
-            Int2CoordUnits(valueGetter()[ksize_y]) };
-    };
-    return std::unique_ptr<ShowMode>(
-        new ShowModeStandard(which, size, offset, bord1, bord2, whash, ehash));
 }
 
-std::unique_ptr<ShowMode> ShowModeStandard::CreateShowMode(
-    const std::string& name, CalChart::Coord size, CalChart::Coord offset, CalChart::Coord border1,
-    CalChart::Coord border2, unsigned short whash, unsigned short ehash)
+ShowMode ShowMode::CreateShowMode(std::vector<uint8_t> const& data)
 {
-    return std::unique_ptr<ShowMode>(
-        new ShowModeStandard(name, size, offset, border1, border2, whash, ehash));
+    auto begin = data.data();
+    auto end = data.data() + data.size();
+
+    ShowModeInfo_t values;
+    for (auto& i : values) {
+        if (std::distance(begin, end) < 4) {
+            throw std::runtime_error("Error, size of ShowMode is not correct");
+        }
+        i = Parser::get_big_long(begin);
+        begin += 4;
+    }
+    YardLinesInfo_t yardlines;
+    for (auto& i : yardlines) {
+        if (std::distance(begin, end) < 1) {
+            throw std::runtime_error("Error, yardtext does not have enough for a null terminator");
+        }
+        i = (char const*)begin;
+        begin += i.size() + 1; // 1 is for the null terminator
+    }
+    if (std::distance(begin, end) != 0) {
+        throw std::runtime_error("Error, size of ShowMode is not correct");
+    }
+    return ShowMode::CreateShowMode(values, yardlines);
 }
 
-std::unique_ptr<ShowMode>
-ShowModeSprShow::CreateSpringShowMode(const std::string& which,
-    const SpringShowModeInfo_t& values)
+std::vector<uint8_t> ShowMode::Serialize() const
 {
-    unsigned char which_spr_yards = values[kwhich_spr_yards];
-    CalChart::Coord bord1, bord2;
-    bord1.x = Int2CoordUnits(values[kbord1_x]);
-    bord1.y = Int2CoordUnits(values[kbord1_y]);
-    bord2.x = Int2CoordUnits(values[kbord2_x]);
-    bord2.y = Int2CoordUnits(values[kbord2_y]);
-
-    short mode_steps_x = values[kmode_steps_x];
-    short mode_steps_y = values[kmode_steps_y];
-    short mode_steps_w = values[kmode_steps_w];
-    short mode_steps_h = values[kmode_steps_h];
-    short eps_stage_x = values[keps_stage_x];
-    short eps_stage_y = values[keps_stage_y];
-    short eps_stage_w = values[keps_stage_w];
-    short eps_stage_h = values[keps_stage_h];
-    short eps_field_x = values[keps_field_x];
-    short eps_field_y = values[keps_field_y];
-    short eps_field_w = values[keps_field_w];
-    short eps_field_h = values[keps_field_h];
-    short eps_text_left = values[keps_text_left];
-    short eps_text_right = values[keps_text_right];
-    short eps_text_top = values[keps_text_top];
-    short eps_text_bottom = values[keps_text_bottom];
-    return std::unique_ptr<ShowMode>(new ShowModeSprShow(
-        which, bord1, bord2, which_spr_yards, mode_steps_x, mode_steps_y,
-        mode_steps_w, mode_steps_h, eps_stage_x, eps_stage_y, eps_stage_w,
-        eps_stage_h, eps_field_x, eps_field_y, eps_field_w, eps_field_h,
-        eps_text_left, eps_text_right, eps_text_top, eps_text_bottom));
+    std::vector<uint8_t> result;
+    for (uint32_t i : GetShowModeInfo()) {
+        Parser::Append(result, i);
+    }
+    for (auto& i : Get_yard_text()) {
+        Parser::AppendAndNullTerminate(result, i);
+    }
+    return result;
 }
 
-std::unique_ptr<ShowMode> ShowModeSprShow::CreateSpringShowMode(
-    const std::string& which,
-    const std::function<SpringShowModeInfo_t()>& valueGetter)
+ShowMode::YardLinesInfo_t const& ShowMode::Get_yard_text() const
 {
-    auto which_spr_yards = [valueGetter]() {
-        return valueGetter()[kwhich_spr_yards];
-    };
-    auto bord1 = [valueGetter]() {
-        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord1_x]),
-            Int2CoordUnits(valueGetter()[kbord1_y]) };
-    };
-    auto bord2 = [valueGetter]() {
-        return CalChart::Coord{ Int2CoordUnits(valueGetter()[kbord2_x]),
-            Int2CoordUnits(valueGetter()[kbord2_y]) };
-    };
-
-    auto mode_steps_x = [valueGetter]() { return valueGetter()[kmode_steps_x]; };
-    auto mode_steps_y = [valueGetter]() { return valueGetter()[kmode_steps_y]; };
-    auto mode_steps_w = [valueGetter]() { return valueGetter()[kmode_steps_w]; };
-    auto mode_steps_h = [valueGetter]() { return valueGetter()[kmode_steps_h]; };
-    auto eps_stage_x = [valueGetter]() { return valueGetter()[keps_stage_x]; };
-    auto eps_stage_y = [valueGetter]() { return valueGetter()[keps_stage_y]; };
-    auto eps_stage_w = [valueGetter]() { return valueGetter()[keps_stage_w]; };
-    auto eps_stage_h = [valueGetter]() { return valueGetter()[keps_stage_h]; };
-    auto eps_field_x = [valueGetter]() { return valueGetter()[keps_field_x]; };
-    auto eps_field_y = [valueGetter]() { return valueGetter()[keps_field_y]; };
-    auto eps_field_w = [valueGetter]() { return valueGetter()[keps_field_w]; };
-    auto eps_field_h = [valueGetter]() { return valueGetter()[keps_field_h]; };
-    auto eps_text_left = [valueGetter]() {
-        return valueGetter()[keps_text_left];
-    };
-    auto eps_text_right = [valueGetter]() {
-        return valueGetter()[keps_text_right];
-    };
-    auto eps_text_top = [valueGetter]() { return valueGetter()[keps_text_top]; };
-    auto eps_text_bottom = [valueGetter]() {
-        return valueGetter()[keps_text_bottom];
-    };
-    return std::unique_ptr<ShowMode>(new ShowModeSprShow(
-        which, bord1, bord2, which_spr_yards, mode_steps_x, mode_steps_y,
-        mode_steps_w, mode_steps_h, eps_stage_x, eps_stage_y, eps_stage_w,
-        eps_stage_h, eps_field_x, eps_field_y, eps_field_w, eps_field_h,
-        eps_text_left, eps_text_right, eps_text_top, eps_text_bottom));
+    return mYardLines;
 }
+
+ShowMode ShowMode::GetDefaultShowMode()
+{
+    return ShowMode::CreateShowMode({ { 32, 52, 8, 8, 8, 8, -80, -42, 160, 84 } }, GetDefaultYardLines());
+}
+
+bool operator==(ShowMode const& lhs, ShowMode const& rhs)
+{
+    return lhs.mSize == rhs.mSize
+        && lhs.mOffset == rhs.mOffset
+        && lhs.mBorder1 == rhs.mBorder1
+        && lhs.mBorder2 == rhs.mBorder2
+        && lhs.mHashW == rhs.mHashW
+        && lhs.mHashE == rhs.mHashE
+        && lhs.mYardLines == rhs.mYardLines;
+}
+
+void ShowMode_UnitTests()
+{
+    auto uut1 = ShowMode::GetDefaultShowMode();
+    auto data = uut1.Serialize();
+    auto uut2 = ShowMode::CreateShowMode(data);
+    assert(uut1 == uut2);
+}
+
 }

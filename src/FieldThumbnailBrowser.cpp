@@ -68,7 +68,7 @@ FieldThumbnailBrowser::FieldThumbnailBrowser(CalChartDoc* doc, wxWindow* parent,
 // calculate the size of the panel
 wxSize FieldThumbnailBrowser::SizeOfOneCell() const
 {
-    auto mode_size = mDoc->GetMode().Size();
+    auto mode_size = mDoc->GetShowMode().Size();
     auto current_size_x = GetSize().x - x_left_padding - x_right_padding;
     auto box_size_y = mode_size.y * (current_size_x / double(mode_size.x));
     return { GetSize().x - x_right_padding - wxSystemSettings::GetMetric(wxSYS_VSCROLL_X), y_upper_padding + y_name_size + y_name_padding + int(box_size_y) };
@@ -128,7 +128,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
         dc.SetBrush((config.Get_CalChartBrushAndPen(COLOR_FIELD).first));
         dc.DrawText(sheet->GetName(), offset_x + x_left_padding, offset_y + y_upper_padding);
         offset_y += y_upper_padding + y_name_size + y_name_padding;
-        auto mode_size = mDoc->GetMode().Size();
+        auto mode_size = mDoc->GetShowMode().Size();
         auto current_size_x = GetSize().x - x_left_padding - x_right_padding;
         auto box_size_y = mode_size.y * (current_size_x / double(mode_size.x));
 
@@ -148,14 +148,14 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
         dc.SetDeviceOrigin(origin.x + offset_x + x_left_padding, origin.y + offset_y);
 
         dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
-        DrawMode(dc, config, mDoc->GetMode(), ShowMode_kAnimation);
+        DrawMode(dc, config, mDoc->GetShowMode(), ShowMode_kAnimation);
         for (auto i = 0; i < mDoc->GetNumPoints(); ++i) {
             auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
             dc.SetBrush(brushAndPen.first);
             dc.SetPen(brushAndPen.second);
             auto position = sheet->GetPoint(i).GetPos();
-            auto x = position.x + mDoc->GetMode().Offset().x;
-            auto y = position.y + mDoc->GetMode().Offset().y;
+            auto x = position.x + mDoc->GetShowMode().Offset().x;
+            auto y = position.y + mDoc->GetShowMode().Offset().y;
             dc.DrawRectangle(x - Int2CoordUnits(1) / 2, y - Int2CoordUnits(1) / 2, Int2CoordUnits(1), Int2CoordUnits(1));
         }
         dc.SetDeviceOrigin(origin.x, origin.y);

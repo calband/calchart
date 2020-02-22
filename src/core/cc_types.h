@@ -24,17 +24,16 @@
 #include <set>
 #include <string>
 
-enum PSFONT_TYPE {
-    PSFONT_SYMBOL,
-    PSFONT_NORM,
-    PSFONT_BOLD,
-    PSFONT_ITAL,
-    PSFONT_BOLDITAL,
-    PSFONT_TAB
+enum class PSFONT {
+    SYMBOL,
+    NORM,
+    BOLD,
+    ITAL,
+    BOLDITAL,
+    TAB
 };
 
 enum SYMBOL_TYPE {
-    SYMBOLS_START = 0,
     SYMBOL_PLAIN = 0,
     SYMBOL_SOL,
     SYMBOL_BKSL,
@@ -57,17 +56,17 @@ std::string GetLongNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
 }
 
-enum CC_DRAG_TYPES {
-    CC_DRAG_NONE,
-    CC_DRAG_BOX,
-    CC_DRAG_POLY,
-    CC_DRAG_LASSO,
-    CC_DRAG_LINE,
-    CC_DRAG_CROSSHAIRS,
-    CC_DRAG_SHAPE_ELLIPSE,
-    CC_DRAG_SHAPE_X,
-    CC_DRAG_SHAPE_CROSS,
-    CC_DRAG_SWAP,
+enum class CC_DRAG {
+    NONE,
+    BOX,
+    POLY,
+    LASSO,
+    LINE,
+    CROSSHAIRS,
+    SHAPE_ELLIPSE,
+    SHAPE_X,
+    SHAPE_CROSS,
+    SWAP,
 };
 
 enum CC_MOVE_MODES {
