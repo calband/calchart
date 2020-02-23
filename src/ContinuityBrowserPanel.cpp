@@ -50,10 +50,10 @@ ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfigur
     SetMinSize(current_size);
 }
 
-void ContinuityBrowserPanel::DoSetContinuity(CalChart::Continuity const& text)
+void ContinuityBrowserPanel::DoSetContinuity(CalChart::Continuity const& new_cont)
 {
     std::vector<std::unique_ptr<DrawableCell>> contCells;
-    mCont = text;
+    mCont = new_cont;
     for (auto&& i : mCont.GetParsedContinuity()) {
         contCells.emplace_back(std::make_unique<ContinuityBoxDrawer>(i->GetDrawableCont(), mConfig));
     }

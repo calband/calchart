@@ -67,6 +67,7 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_fileformat.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_image.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_parse_errors.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_point.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_point.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_shapes.cpp

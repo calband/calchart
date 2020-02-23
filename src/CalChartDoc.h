@@ -74,6 +74,7 @@ class CalChartDoc_setup : public wxObject {
 // CalChart Document.
 // This holds the CalChart::Show, the core part of CalChart.
 class CalChartDoc : public wxDocument {
+    using super = wxDocument;
     DECLARE_DYNAMIC_CLASS(CalChartDoc)
 public:
     CalChartDoc();

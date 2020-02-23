@@ -42,14 +42,15 @@
 namespace CalChart {
 
 class Continuity;
+struct ParseErrorHandlers;
 
+// error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
 class Sheet {
 public:
     Sheet(size_t numPoints);
     Sheet(size_t numPoints, const std::string& newname);
-    Sheet(size_t numPoints, std::istream& stream, Version_3_3_and_earlier);
-    Sheet(size_t numPoints, const uint8_t* ptr, size_t size,
-        Current_version_and_later);
+    Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
+    Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction = nullptr);
     ~Sheet();
 
 private:

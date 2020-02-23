@@ -474,7 +474,8 @@ ContToken::ContToken()
 
 std::ostream& ContToken::Print(std::ostream& os) const
 {
-    return os << "[" << line << "," << col << "]: ";
+    os << "[CT]";
+    return os;
 }
 
 void ContToken::replace(ContToken const* which, std::unique_ptr<ContToken> v)
@@ -516,6 +517,7 @@ Coord ContPoint::Get(AnimateCompile& anim) const
 std::ostream& ContPoint::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CP]";
     return os << "Point:";
 }
 
@@ -560,6 +562,7 @@ uint8_t const* ContPoint::Deserialize(uint8_t const* begin, uint8_t const* end)
 std::ostream& ContPointUnset::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPU]";
     return os << "Unset";
 }
 
@@ -609,6 +612,7 @@ Coord ContStartPoint::Get(AnimateCompile& anim) const
 std::ostream& ContStartPoint::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CSP]";
     return os << "Start Point";
 }
 
@@ -658,6 +662,7 @@ Coord ContNextPoint::Get(AnimateCompile& anim) const
 std::ostream& ContNextPoint::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CNP]";
     return os << "Next Point";
 }
 
@@ -712,6 +717,7 @@ Coord ContRefPoint::Get(AnimateCompile& anim) const
 std::ostream& ContRefPoint::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CRP]";
     return os << "Ref Point " << refnum;
 }
 
@@ -759,6 +765,7 @@ uint8_t const* ContRefPoint::Deserialize(uint8_t const* begin, uint8_t const* en
 std::ostream& ContValue::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CV]";
     return os << "Value:";
 }
 
@@ -787,6 +794,7 @@ uint8_t const* ContValue::Deserialize(uint8_t const* begin, uint8_t const* end)
 std::ostream& ContValueUnset::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVU]";
     return os << "Unset";
 }
 
@@ -839,6 +847,7 @@ float ContValueFloat::Get(AnimateCompile&) const { return val; }
 std::ostream& ContValueFloat::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVF]";
     return os << val;
 }
 
@@ -914,6 +923,7 @@ float ContValueDefined::Get(AnimateCompile&) const
 std::ostream& ContValueDefined::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVC]";
     return os << "Defined:" << ContDefinedValue_strings[val];
 }
 
@@ -990,6 +1000,7 @@ float ContValueAdd::Get(AnimateCompile& anim) const
 std::ostream& ContValueAdd::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVA]";
     return os << *val1 << " + " << *val2;
 }
 
@@ -1062,6 +1073,7 @@ float ContValueSub::Get(AnimateCompile& anim) const
 std::ostream& ContValueSub::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVS]";
     return os << *val1 << " - " << *val2;
 }
 
@@ -1134,6 +1146,7 @@ float ContValueMult::Get(AnimateCompile& anim) const
 std::ostream& ContValueMult::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVM]";
     return os << *val1 << " * " << *val2;
 }
 
@@ -1212,6 +1225,7 @@ float ContValueDiv::Get(AnimateCompile& anim) const
 std::ostream& ContValueDiv::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVD]";
     return os << *val1 << " / " << *val2;
 }
 
@@ -1279,6 +1293,7 @@ float ContValueNeg::Get(AnimateCompile& anim) const { return -val->Get(anim); }
 std::ostream& ContValueNeg::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVN]";
     return os << "- " << *val;
 }
 
@@ -1335,6 +1350,7 @@ float ContValueREM::Get(AnimateCompile& anim) const
 std::ostream& ContValueREM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVR]";
     return os << "REM";
 }
 
@@ -1389,6 +1405,7 @@ float ContValueVar::Get(AnimateCompile& anim) const
 std::ostream& ContValueVar::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVV]";
     return os << "Var " << varnum;
 }
 
@@ -1441,6 +1458,7 @@ uint8_t const* ContValueVar::Deserialize(uint8_t const* begin, uint8_t const* en
 std::ostream& ContValueVarUnset::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CVVU]";
     return os << "Unset";
 }
 
@@ -1506,6 +1524,7 @@ float ContFuncDir::Get(AnimateCompile& anim) const
 std::ostream& ContFuncDir::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFD]";
     return os << "Direction to " << *pnt;
 }
 
@@ -1581,6 +1600,7 @@ float ContFuncDirFrom::Get(AnimateCompile& anim) const
 std::ostream& ContFuncDirFrom::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFDF]";
     return os << "Direction from " << *pnt_start << " to " << *pnt_end;
 }
 
@@ -1652,6 +1672,7 @@ float ContFuncDist::Get(AnimateCompile& anim) const
 std::ostream& ContFuncDist::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFd]";
     return os << "Distance to " << *pnt;
 }
 
@@ -1723,6 +1744,7 @@ float ContFuncDistFrom::Get(AnimateCompile& anim) const
 std::ostream& ContFuncDistFrom::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFdF]";
     return os << "Distance from " << *pnt_start << " to " << *pnt_end;
 }
 
@@ -1813,6 +1835,7 @@ float ContFuncEither::Get(AnimateCompile& anim) const
 std::ostream& ContFuncEither::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFE]";
     return os << "Either direction to " << *dir1 << " or " << *dir2
               << ", depending on whichever is a shorter angle to " << *pnt;
 }
@@ -1886,6 +1909,7 @@ float ContFuncOpp::Get(AnimateCompile& anim) const
 std::ostream& ContFuncOpp::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFO]";
     return os << "opposite direction of " << *dir;
 }
 
@@ -1959,6 +1983,7 @@ float ContFuncStep::Get(AnimateCompile& anim) const
 std::ostream& ContFuncStep::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CFS]";
     return os << "Step drill at " << *numbeats << " beats for a block size of "
               << *blksize << " from point " << *pnt;
 }
@@ -2015,6 +2040,7 @@ uint8_t const* ContFuncStep::Deserialize(uint8_t const* begin, uint8_t const* en
 std::ostream& ContProcedure::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPr]";
     return os << "Procedure: ";
 }
 
@@ -2043,6 +2069,7 @@ uint8_t const* ContProcedure::Deserialize(uint8_t const* begin, uint8_t const* e
 std::ostream& ContProcUnset::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrU]";
     return os << "Unset";
 }
 
@@ -2107,6 +2134,7 @@ void ContProcSet::Compile(AnimateCompile& anim)
 std::ostream& ContProcSet::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrS]";
     return os << "Setting variable " << *var << " to " << *val;
 }
 
@@ -2194,6 +2222,7 @@ void ContProcBlam::Compile(AnimateCompile& anim)
 std::ostream& ContProcBlam::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrB]";
     return os << "BLAM";
 }
 
@@ -2267,6 +2296,7 @@ void ContProcCM::Compile(AnimateCompile& anim)
 std::ostream& ContProcCM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrCM]";
     return os << "CounterMarch starting at " << *pnt1 << " passing through "
               << *pnt2 << " stepping " << *stps << " off points, first moving "
               << *dir1 << " then " << *dir2 << " for number beats " << *numbeats;
@@ -2385,6 +2415,7 @@ void ContProcDMCM::Compile(AnimateCompile& anim)
 std::ostream& ContProcDMCM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrDC]";
     return os << "Diagonal march CounterMarch starting at " << *pnt1
               << " passing through " << *pnt2 << " for number beats" << *numbeats;
 }
@@ -2489,6 +2520,7 @@ void ContProcDMHS::Compile(AnimateCompile& anim)
 std::ostream& ContProcDMHS::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrDH]";
     return os << "Diagonal march then HighStep to " << *pnt;
 }
 
@@ -2567,6 +2599,7 @@ void ContProcEven::Compile(AnimateCompile& anim)
 std::ostream& ContProcEven::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrE]";
     return os << "Even march of step size " << *stps << " to " << *pnt;
 }
 
@@ -2653,6 +2686,7 @@ void ContProcEWNS::Compile(AnimateCompile& anim)
 std::ostream& ContProcEWNS::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrEWNS]";
     return os << "March EastWest/NorthSouth to " << *pnt;
 }
 
@@ -2791,6 +2825,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
 std::ostream& ContProcFountain::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrF]";
     os << "Fountain step, first going " << *dir1 << " then " << *dir2;
     if (stepsize1)
         os << ", first at " << *stepsize1;
@@ -2925,6 +2960,7 @@ void ContProcFM::Compile(AnimateCompile& anim)
 std::ostream& ContProcFM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrFM]";
     return os << "Forward march for steps " << *stps << " in direction " << *dir;
 }
 
@@ -3000,6 +3036,7 @@ void ContProcFMTO::Compile(AnimateCompile& anim)
 std::ostream& ContProcFMTO::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrFMT]";
     return os << "Forward march to " << *pnt;
 }
 
@@ -3091,6 +3128,7 @@ void ContProcGrid::Compile(AnimateCompile& anim)
 std::ostream& ContProcGrid::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrG]";
     return os << "Move on Grid of " << *grid << " spacing";
 }
 
@@ -3182,6 +3220,7 @@ void ContProcHSCM::Compile(AnimateCompile& anim)
 std::ostream& ContProcHSCM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrHCM]";
     return os << "High Step CounterMarch starting at " << *pnt1
               << " passing through " << *pnt2 << " for number beats" << *numbeats;
 }
@@ -3285,6 +3324,7 @@ void ContProcHSDM::Compile(AnimateCompile& anim)
 std::ostream& ContProcHSDM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrHD]";
     return os << "HighStep then Diagonal march to " << *pnt;
 }
 
@@ -3354,6 +3394,7 @@ void ContProcMagic::Compile(AnimateCompile& anim)
 std::ostream& ContProcMagic::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrM]";
     return os << "Magic step to " << *pnt;
 }
 
@@ -3449,6 +3490,7 @@ void ContProcMarch::Compile(AnimateCompile& anim)
 std::ostream& ContProcMarch::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrm]";
     os << "March step size" << *stpsize << " for steps " << *stps
        << " in direction " << *dir;
     if (facedir)
@@ -3549,6 +3591,7 @@ void ContProcMT::Compile(AnimateCompile& anim)
 std::ostream& ContProcMT::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrMT]";
     return os << "MarkTime for " << *numbeats << " facing " << *dir;
 }
 
@@ -3621,6 +3664,7 @@ void ContProcMTRM::Compile(AnimateCompile& anim)
 std::ostream& ContProcMTRM::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrMTR]";
     return os << "MarkTime for Remaining Beats facing " << *dir;
 }
 
@@ -3705,6 +3749,7 @@ void ContProcNSEW::Compile(AnimateCompile& anim)
 std::ostream& ContProcNSEW::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrNSEW]";
     return os << "March NorthSouth/EastWest to " << *pnt;
 }
 
@@ -3797,6 +3842,7 @@ void ContProcRotate::Compile(AnimateCompile& anim)
 std::ostream& ContProcRotate::Print(std::ostream& os) const
 {
     super::Print(os);
+    os << "[CPrR]";
     return os << "Rotate at angle " << *ang << " for " << *stps
               << " around pivot point " << *pnt;
 }

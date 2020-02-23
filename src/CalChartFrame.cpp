@@ -591,7 +591,7 @@ void CalChartFrame::OnCmdPasteSheet(wxCommandEvent& event)
             std::vector<uint8_t> data(theBegin, theEnd);
 
             CalChart::Show::Sheet_container_t sht(
-                1, CalChart::Sheet(numPoints, data.data(), data.size(), CalChart::Current_version_and_later()));
+                1, CalChart::Sheet(numPoints, data.data(), data.size()));
             GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
         }
         wxTheClipboard->Close();
