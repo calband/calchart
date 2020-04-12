@@ -173,7 +173,7 @@ public:
     CalChartDoc* GetShow();
 
     void ClearAnimationFrame();
-    void IsClose(wxAuiManagerEvent& event);
+    void AUIIsClose(wxAuiManagerEvent& event);
 
 private:
     void refreshGhostOptionStates();
@@ -188,7 +188,7 @@ private:
 
     wxWindow* mAnimationFrame;
     CalChartConfiguration& mConfig;
-    wxAuiManager m_mgr;
+    wxAuiManager mAUIManager;
 
     DECLARE_EVENT_TABLE()
 };
