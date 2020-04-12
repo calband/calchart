@@ -44,8 +44,12 @@ static constexpr std::pair<CalChart::Coord::units, CalChart::Coord::units> gridv
     { Int2CoordUnits(4), static_cast<CalChart::Coord::units>(Int2CoordUnits(4) / 3) },
     { Int2CoordUnits(8), static_cast<CalChart::Coord::units>(Int2CoordUnits(8) / 3) } };
 
-FieldFrameControls::FieldFrameControls(wxWindow* parent, double zoom)
-    : wxPanel(parent)
+FieldFrameControls::FieldFrameControls(double zoom, wxWindow* parent, wxWindowID id,
+const wxPoint& pos,
+const wxSize& size,
+long style,
+const wxString& name)
+    : wxPanel(parent, id, pos, size, style, name)
 {
     auto topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
     auto centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5);
