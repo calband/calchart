@@ -173,6 +173,8 @@ file (
   GLOB CalChartResources
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.xbm"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.icns"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.ico"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.png"
   )
 
 file (

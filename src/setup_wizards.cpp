@@ -22,7 +22,7 @@
 
 #include "setup_wizards.h"
 #include "basic_ui.h"
-#include "calchartapp.h"
+#include "CalChartApp.h"
 #include "confgr.h"
 #include "modes.h"
 

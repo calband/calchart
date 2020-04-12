@@ -28,8 +28,8 @@
 #include "confgr.h"
 #include "draw.h"
 #include "field_canvas_shapes.h"
-#include "field_frame.h"
-#include "FieldView.h"
+#include "CalChartFrame.h"
+#include "CalChartView.h"
 #include "linmath.h"
 #include "math_utils.h"
 
@@ -49,7 +49,7 @@ EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(wxWindow* win, FieldView& view, FieldFrame* frame, float def_zoom)
+FieldCanvas::FieldCanvas(wxWindow* win, CalChartView& view, CalChartFrame* frame, float def_zoom)
     : ClickDragCtrlScrollCanvas(win, wxID_ANY)
     , mFrame(frame)
     , mView(view)

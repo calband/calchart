@@ -31,7 +31,7 @@
 #include <wx/pen.h>
 #include <wx/utils.h>
 
-#include "calchartapp.h"
+#include "CalChartApp.h"
 #include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "modes.h"

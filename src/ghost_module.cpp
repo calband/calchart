@@ -1,6 +1,6 @@
 #include "ghost_module.h"
 
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cc_sheet.h"
 
 void GhostModule::setGhostSource(GhostSource source, int which)

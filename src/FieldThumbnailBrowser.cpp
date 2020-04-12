@@ -20,7 +20,7 @@
 */
 
 #include "FieldThumbnailBrowser.h"
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cc_show.h"
 #include "confgr.h"
 #include "draw.h"

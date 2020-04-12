@@ -30,7 +30,7 @@
 #include <memory>
 
 class AnimationFrame;
-class FieldView;
+class CalChartView;
 class CalChartConfiguration;
 namespace CalChart {
 class Continuity;

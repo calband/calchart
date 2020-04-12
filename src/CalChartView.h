@@ -1,6 +1,6 @@
+#pragma once
 /*
- * FieldView.h
- * Header for field view
+ * CalChartView.h
  */
 
 /*
@@ -20,36 +20,32 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cc_coord.h"
+#include "cc_types.h"
+#include "ghost_module.h"
 #include "modes.h"
 
-#include "background_image.h"
-#include "ghost_module.h"
-
+#include <map>
 #include <wx/docview.h>
 
-#include <memory>
+// CalChartView connects together the Frames and the Doc.
 
-class FieldFrame;
+class BackgroundImage;
+class CalChartFrame;
 class AnimationFrame;
 class Animation;
 class Matrix;
 class CalChartConfiguration;
 
-// Field:
-// Field is the editable overhead view of the marchers on the field.
-// This is where in the app you edit a marcher's location and continuity
-class FieldView : public wxView {
+class CalChartView : public wxView {
 public:
-    FieldView();
-    ~FieldView();
+    CalChartView();
+    ~CalChartView() = default;
 
     bool OnCreate(wxDocument* doc, long flags);
     void OnDraw(wxDC* dc);
-    void DrawOtherPoints(wxDC& dc, const std::map<int, CalChart::Coord>& positions);
+    void DrawOtherPoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions);
     void OnDrawBackground(wxDC& dc);
     void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
     bool OnClose(bool deleteWindow = true);
@@ -58,19 +54,19 @@ public:
 
     ///// Modify the show /////
     bool DoRotatePointPositions(int rotateAmount);
-    bool DoMovePoints(const std::map<int, CalChart::Coord>& transmat);
+    bool DoMovePoints(std::map<int, CalChart::Coord> const& transmat);
     bool DoDeletePoints();
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
     void DoSetMode(CalChart::ShowMode const& mode);
-    void DoSetShowInfo(const std::vector<wxString>& labels, int numColumns);
-    void DoSetSheetTitle(const wxString& descr);
+    void DoSetShowInfo(std::vector<wxString> const& labels, int numColumns);
+    void DoSetSheetTitle(wxString const& descr);
     bool DoSetSheetBeats(int beats);
     bool DoSetPointsLabel(bool right);
     bool DoSetPointsLabelFlip();
     bool DoSetPointsLabelVisibility(bool isVisible);
     bool DoTogglePointsLabelVisibility();
-    void DoInsertSheets(const CalChart::Show::Sheet_container_t& sht, int where);
+    void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, int where);
     bool DoDeleteSheet(int where);
     bool DoImportPrintableContinuity(const wxString& file);
     bool DoRelabel();
@@ -120,21 +116,14 @@ public:
     void OnBackgroundImageDelete();
 
 private:
-#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-    AnimationFrame* mFrame;
-#else
-    FieldFrame* mFrame;
-#endif
-
     void DrawPaths(wxDC& dc, const CalChart::Sheet& sheet);
     void GeneratePaths();
-    std::unique_ptr<CalChart::Animation> mAnimation;
-    bool mDrawPaths;
     void UpdateBackgroundImages();
 
-private:
+    CalChartFrame* mFrame{};
+    bool mDrawPaths{};
+    std::unique_ptr<CalChart::Animation> mAnimation;
     GhostModule mGhostModule{};
-
     CalChartDoc* mShow{};
     int mCurrentReferencePoint{};
     CalChartConfiguration& mConfig;
@@ -143,5 +132,5 @@ private:
     bool mAdjustBackgroundMode{};
     int mWhichBackgroundIndex{};
 
-    DECLARE_DYNAMIC_CLASS(FieldView)
+    DECLARE_DYNAMIC_CLASS(CalChartView)
 };

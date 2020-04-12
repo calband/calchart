@@ -11,7 +11,7 @@
 #include <wx/dialog.h>
 #include <wx/docview.h>
 
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "e7_transition_solver.h"
 
 // View for linking CalChartDoc with the Transition Solver

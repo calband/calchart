@@ -1,6 +1,5 @@
 /*
- * field_frame.h
- * Frame for the field window
+ * CalChartFrame.cpp
  */
 
 /*
@@ -24,10 +23,10 @@
 #include <fstream>
 #include <sstream>
 
-#include "field_frame.h"
+#include "CalChartFrame.h"
 
 #include "animation_frame.h"
-#include "calchartapp.h"
+#include "CalChartApp.h"
 #include "cc_coord.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
@@ -42,7 +41,7 @@
 #include "FieldCanvas.h"
 #include "field_frame_controls.h"
 #include "FieldThumbnailBrowser.h"
-#include "FieldView.h"
+#include "CalChartView.h"
 #include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
@@ -50,7 +49,7 @@
 #include "print_ps_dialog.h"
 #include "show_ui.h"
 #include "toolbar.h"
-#include "top_frame.h"
+#include "TopFrame.h"
 #include "ui_enums.h"
 
 #include <wx/help.h>
@@ -68,90 +67,90 @@ static const wxChar* file_wild = FILE_WILDCARDS;
 
 extern wxPrintDialogData* gPrintDialogData;
 
-BEGIN_EVENT_TABLE(FieldFrame, wxDocChildFrame)
-EVT_CHAR(FieldFrame::OnChar)
-EVT_MENU(CALCHART__APPEND_FILE, FieldFrame::OnCmdAppend)
-EVT_MENU(CALCHART__IMPORT_CONT_FILE, FieldFrame::OnCmdImportCont)
-EVT_MENU(CALCHART__wxID_PRINT, FieldFrame::OnCmdPrint)
-EVT_MENU(CALCHART__wxID_PREVIEW, FieldFrame::OnCmdPrintPreview)
-EVT_MENU(wxID_PAGE_SETUP, FieldFrame::OnCmdPageSetup)
-EVT_MENU(CALCHART__LEGACY_PRINT, FieldFrame::OnCmdLegacyPrint)
-EVT_MENU(CALCHART__COPY_SHEET, FieldFrame::OnCmdCopySheet)
-EVT_MENU(CALCHART__PASTE_SHEET, FieldFrame::OnCmdPasteSheet)
-EVT_MENU(CALCHART__INSERT_BEFORE, FieldFrame::OnCmdInsertBefore)
-EVT_MENU(CALCHART__INSERT_AFTER, FieldFrame::OnCmdInsertAfter)
-EVT_MENU(CALCHART__INSERT_OTHER_SHOW, FieldFrame::OnCmdInsertFromOtherShow)
-EVT_MENU(wxID_DELETE, FieldFrame::OnCmdDelete)
-EVT_MENU(CALCHART__RELABEL, FieldFrame::OnCmdRelabel)
-EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, FieldFrame::OnCmdEditPrintCont)
-EVT_MENU(CALCHART__SET_SHEET_TITLE, FieldFrame::OnCmdSetSheetTitle)
-EVT_MENU(CALCHART__SET_BEATS, FieldFrame::OnCmdSetBeats)
-EVT_MENU(CALCHART__SETUP, FieldFrame::OnCmdSetup)
-EVT_MENU(CALCHART__SETMODE, FieldFrame::OnCmdSetMode)
-EVT_MENU(CALCHART__POINTS, FieldFrame::OnCmdPoints)
-EVT_MENU(CALCHART__SELECT_ALL, FieldFrame::OnCmdSelectAll)
-EVT_MENU(CALCHART__ANIMATE, FieldFrame::OnCmdAnimate)
-EVT_MENU(wxID_ABOUT, FieldFrame::OnCmdAbout)
-EVT_MENU(wxID_HELP, FieldFrame::OnCmdHelp)
-EVT_MENU(CALCHART__ShowBackgroundImages, FieldFrame::OnCmd_ShowBackgroundImages)
-EVT_MENU(CALCHART__AddBackgroundImage, FieldFrame::OnCmd_AddBackgroundImage)
-EVT_MENU(CALCHART__AdjustBackgroundImageMode, FieldFrame::OnCmd_AdjustBackgroundImageMode)
-EVT_MENU(CALCHART__GhostOff, FieldFrame::OnCmd_GhostOption)
-EVT_MENU(CALCHART__GhostNextSheet, FieldFrame::OnCmd_GhostOption)
-EVT_MENU(CALCHART__GhostPreviousSheet, FieldFrame::OnCmd_GhostOption)
-EVT_MENU(CALCHART__GhostNthSheet, FieldFrame::OnCmd_GhostOption)
-EVT_MENU(CALCHART__ViewFieldThumbnail, FieldFrame::OnCmd_AdjustViews)
-EVT_MENU(CALCHART__ViewFieldControls, FieldFrame::OnCmd_AdjustViews)
-EVT_MENU(CALCHART__ViewContinuityInfo, FieldFrame::OnCmd_AdjustViews)
-EVT_MENU(CALCHART__ViewZoomFit, FieldFrame::OnCmd_ZoomFit)
-EVT_MENU(CALCHART__ViewZoomIn, FieldFrame::OnCmd_ZoomIn)
-EVT_MENU(CALCHART__ViewZoomOut, FieldFrame::OnCmd_ZoomOut)
-EVT_MENU(CALCHART__prev_ss, FieldFrame::OnCmd_prev_ss)
-EVT_MENU(CALCHART__next_ss, FieldFrame::OnCmd_next_ss)
-EVT_MENU(CALCHART__box, FieldFrame::OnCmd_box)
-EVT_MENU(CALCHART__poly, FieldFrame::OnCmd_poly)
-EVT_MENU(CALCHART__lasso, FieldFrame::OnCmd_lasso)
-EVT_MENU(CALCHART__move, FieldFrame::OnCmd_move)
-EVT_MENU(CALCHART__swap, FieldFrame::OnCmd_swap)
-EVT_MENU(CALCHART__shape_line, FieldFrame::OnCmd_shape_line)
-EVT_MENU(CALCHART__shape_x, FieldFrame::OnCmd_shape_x)
-EVT_MENU(CALCHART__shape_cross, FieldFrame::OnCmd_shape_cross)
-EVT_MENU(CALCHART__shape_box, FieldFrame::OnCmd_shape_box)
-EVT_MENU(CALCHART__shape_ellipse, FieldFrame::OnCmd_shape_ellipse)
-EVT_MENU(CALCHART__shape_draw, FieldFrame::OnCmd_shape_draw)
-EVT_MENU(CALCHART__line, FieldFrame::OnCmd_line)
-EVT_MENU(CALCHART__rot, FieldFrame::OnCmd_rot)
-EVT_MENU(CALCHART__shear, FieldFrame::OnCmd_shear)
-EVT_MENU(CALCHART__reflect, FieldFrame::OnCmd_reflect)
-EVT_MENU(CALCHART__size, FieldFrame::OnCmd_size)
-EVT_MENU(CALCHART__genius, FieldFrame::OnCmd_genius)
-EVT_MENU(CALCHART__label_left, FieldFrame::OnCmd_label_left)
-EVT_MENU(CALCHART__label_right, FieldFrame::OnCmd_label_right)
-EVT_MENU(CALCHART__label_flip, FieldFrame::OnCmd_label_flip)
-EVT_MENU(CALCHART__label_hide, FieldFrame::OnCmd_label_hide)
-EVT_MENU(CALCHART__label_show, FieldFrame::OnCmd_label_show)
-EVT_MENU(CALCHART__label_visibility_toggle, FieldFrame::OnCmd_label_visibility_toggle)
-EVT_MENU(CALCHART__setsym0, FieldFrame::OnCmd_setsym0)
-EVT_MENU(CALCHART__setsym1, FieldFrame::OnCmd_setsym1)
-EVT_MENU(CALCHART__setsym2, FieldFrame::OnCmd_setsym2)
-EVT_MENU(CALCHART__setsym3, FieldFrame::OnCmd_setsym3)
-EVT_MENU(CALCHART__setsym4, FieldFrame::OnCmd_setsym4)
-EVT_MENU(CALCHART__setsym5, FieldFrame::OnCmd_setsym5)
-EVT_MENU(CALCHART__setsym6, FieldFrame::OnCmd_setsym6)
-EVT_MENU(CALCHART__setsym7, FieldFrame::OnCmd_setsym7)
-EVT_MENU(CALCHART__EXPORT_VIEWER_FILE, FieldFrame::OnCmdExportViewerFile)
-EVT_MENU(wxID_PREFERENCES, FieldFrame::OnCmdPreferences)
-EVT_MENU(CALCHART__draw_paths, FieldFrame::OnCmd_DrawPaths)
-EVT_COMBOBOX(CALCHART__slider_zoom, FieldFrame::zoom_callback)
-EVT_TEXT_ENTER(CALCHART__slider_zoom, FieldFrame::zoom_callback_textenter)
-EVT_CHOICE(CALCHART__refnum_callback, FieldFrame::refnum_callback)
-EVT_CHOICE(CALCHART__GhostControls, FieldFrame::OnCmd_GhostOption)
-EVT_CHECKBOX(CALCHART__draw_paths, FieldFrame::OnEnableDrawPaths)
-EVT_MENU(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
-EVT_BUTTON(CALCHART__ResetReferencePoint, FieldFrame::OnCmd_ResetReferencePoint)
-EVT_MENU(CALCHART__E7TransitionSolver, FieldFrame::OnCmd_SolveTransition)
-EVT_SIZE(FieldFrame::OnSize)
-EVT_AUI_PANE_CLOSE(FieldFrame::AUIIsClose)
+BEGIN_EVENT_TABLE(CalChartFrame, wxDocChildFrame)
+EVT_CHAR(CalChartFrame::OnChar)
+EVT_MENU(CALCHART__APPEND_FILE, CalChartFrame::OnCmdAppend)
+EVT_MENU(CALCHART__IMPORT_CONT_FILE, CalChartFrame::OnCmdImportCont)
+EVT_MENU(CALCHART__wxID_PRINT, CalChartFrame::OnCmdPrint)
+EVT_MENU(CALCHART__wxID_PREVIEW, CalChartFrame::OnCmdPrintPreview)
+EVT_MENU(wxID_PAGE_SETUP, CalChartFrame::OnCmdPageSetup)
+EVT_MENU(CALCHART__LEGACY_PRINT, CalChartFrame::OnCmdLegacyPrint)
+EVT_MENU(CALCHART__COPY_SHEET, CalChartFrame::OnCmdCopySheet)
+EVT_MENU(CALCHART__PASTE_SHEET, CalChartFrame::OnCmdPasteSheet)
+EVT_MENU(CALCHART__INSERT_BEFORE, CalChartFrame::OnCmdInsertBefore)
+EVT_MENU(CALCHART__INSERT_AFTER, CalChartFrame::OnCmdInsertAfter)
+EVT_MENU(CALCHART__INSERT_OTHER_SHOW, CalChartFrame::OnCmdInsertFromOtherShow)
+EVT_MENU(wxID_DELETE, CalChartFrame::OnCmdDelete)
+EVT_MENU(CALCHART__RELABEL, CalChartFrame::OnCmdRelabel)
+EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, CalChartFrame::OnCmdEditPrintCont)
+EVT_MENU(CALCHART__SET_SHEET_TITLE, CalChartFrame::OnCmdSetSheetTitle)
+EVT_MENU(CALCHART__SET_BEATS, CalChartFrame::OnCmdSetBeats)
+EVT_MENU(CALCHART__SETUP, CalChartFrame::OnCmdSetup)
+EVT_MENU(CALCHART__SETMODE, CalChartFrame::OnCmdSetMode)
+EVT_MENU(CALCHART__POINTS, CalChartFrame::OnCmdPoints)
+EVT_MENU(CALCHART__SELECT_ALL, CalChartFrame::OnCmdSelectAll)
+EVT_MENU(CALCHART__ANIMATE, CalChartFrame::OnCmdAnimate)
+EVT_MENU(wxID_ABOUT, CalChartFrame::OnCmdAbout)
+EVT_MENU(wxID_HELP, CalChartFrame::OnCmdHelp)
+EVT_MENU(CALCHART__ShowBackgroundImages, CalChartFrame::OnCmd_ShowBackgroundImages)
+EVT_MENU(CALCHART__AddBackgroundImage, CalChartFrame::OnCmd_AddBackgroundImage)
+EVT_MENU(CALCHART__AdjustBackgroundImageMode, CalChartFrame::OnCmd_AdjustBackgroundImageMode)
+EVT_MENU(CALCHART__GhostOff, CalChartFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostNextSheet, CalChartFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostPreviousSheet, CalChartFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__GhostNthSheet, CalChartFrame::OnCmd_GhostOption)
+EVT_MENU(CALCHART__ViewFieldThumbnail, CalChartFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewFieldControls, CalChartFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewContinuityInfo, CalChartFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewZoomFit, CalChartFrame::OnCmd_ZoomFit)
+EVT_MENU(CALCHART__ViewZoomIn, CalChartFrame::OnCmd_ZoomIn)
+EVT_MENU(CALCHART__ViewZoomOut, CalChartFrame::OnCmd_ZoomOut)
+EVT_MENU(CALCHART__prev_ss, CalChartFrame::OnCmd_prev_ss)
+EVT_MENU(CALCHART__next_ss, CalChartFrame::OnCmd_next_ss)
+EVT_MENU(CALCHART__box, CalChartFrame::OnCmd_box)
+EVT_MENU(CALCHART__poly, CalChartFrame::OnCmd_poly)
+EVT_MENU(CALCHART__lasso, CalChartFrame::OnCmd_lasso)
+EVT_MENU(CALCHART__move, CalChartFrame::OnCmd_move)
+EVT_MENU(CALCHART__swap, CalChartFrame::OnCmd_swap)
+EVT_MENU(CALCHART__shape_line, CalChartFrame::OnCmd_shape_line)
+EVT_MENU(CALCHART__shape_x, CalChartFrame::OnCmd_shape_x)
+EVT_MENU(CALCHART__shape_cross, CalChartFrame::OnCmd_shape_cross)
+EVT_MENU(CALCHART__shape_box, CalChartFrame::OnCmd_shape_box)
+EVT_MENU(CALCHART__shape_ellipse, CalChartFrame::OnCmd_shape_ellipse)
+EVT_MENU(CALCHART__shape_draw, CalChartFrame::OnCmd_shape_draw)
+EVT_MENU(CALCHART__line, CalChartFrame::OnCmd_line)
+EVT_MENU(CALCHART__rot, CalChartFrame::OnCmd_rot)
+EVT_MENU(CALCHART__shear, CalChartFrame::OnCmd_shear)
+EVT_MENU(CALCHART__reflect, CalChartFrame::OnCmd_reflect)
+EVT_MENU(CALCHART__size, CalChartFrame::OnCmd_size)
+EVT_MENU(CALCHART__genius, CalChartFrame::OnCmd_genius)
+EVT_MENU(CALCHART__label_left, CalChartFrame::OnCmd_label_left)
+EVT_MENU(CALCHART__label_right, CalChartFrame::OnCmd_label_right)
+EVT_MENU(CALCHART__label_flip, CalChartFrame::OnCmd_label_flip)
+EVT_MENU(CALCHART__label_hide, CalChartFrame::OnCmd_label_hide)
+EVT_MENU(CALCHART__label_show, CalChartFrame::OnCmd_label_show)
+EVT_MENU(CALCHART__label_visibility_toggle, CalChartFrame::OnCmd_label_visibility_toggle)
+EVT_MENU(CALCHART__setsym0, CalChartFrame::OnCmd_setsym0)
+EVT_MENU(CALCHART__setsym1, CalChartFrame::OnCmd_setsym1)
+EVT_MENU(CALCHART__setsym2, CalChartFrame::OnCmd_setsym2)
+EVT_MENU(CALCHART__setsym3, CalChartFrame::OnCmd_setsym3)
+EVT_MENU(CALCHART__setsym4, CalChartFrame::OnCmd_setsym4)
+EVT_MENU(CALCHART__setsym5, CalChartFrame::OnCmd_setsym5)
+EVT_MENU(CALCHART__setsym6, CalChartFrame::OnCmd_setsym6)
+EVT_MENU(CALCHART__setsym7, CalChartFrame::OnCmd_setsym7)
+EVT_MENU(CALCHART__EXPORT_VIEWER_FILE, CalChartFrame::OnCmdExportViewerFile)
+EVT_MENU(wxID_PREFERENCES, CalChartFrame::OnCmdPreferences)
+EVT_MENU(CALCHART__draw_paths, CalChartFrame::OnCmd_DrawPaths)
+EVT_COMBOBOX(CALCHART__slider_zoom, CalChartFrame::zoom_callback)
+EVT_TEXT_ENTER(CALCHART__slider_zoom, CalChartFrame::zoom_callback_textenter)
+EVT_CHOICE(CALCHART__refnum_callback, CalChartFrame::refnum_callback)
+EVT_CHOICE(CALCHART__GhostControls, CalChartFrame::OnCmd_GhostOption)
+EVT_CHECKBOX(CALCHART__draw_paths, CalChartFrame::OnEnableDrawPaths)
+EVT_MENU(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
+EVT_BUTTON(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
+EVT_MENU(CALCHART__E7TransitionSolver, CalChartFrame::OnCmd_SolveTransition)
+EVT_SIZE(CalChartFrame::OnSize)
+EVT_AUI_PANE_CLOSE(CalChartFrame::AUIIsClose)
 END_EVENT_TABLE()
 
 class MyPrintout : public wxPrintout {
@@ -189,7 +188,7 @@ public:
 };
 
 // Main frame constructor
-FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
+CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     CalChartConfiguration& config_, wxDocParentFrame* frame,
     const wxPoint& pos, const wxSize& size)
     : wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size)
@@ -310,7 +309,7 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     }
 
     mControls = new FieldFrameControls(mConfig.Get_FieldFrameZoom(), this, wxID_ANY, wxDefaultPosition, wxSize{ 100, 70 });
-    mCanvas = new FieldCanvas(this, *static_cast<FieldView*>(view), this, mConfig.Get_FieldFrameZoom());
+    mCanvas = new FieldCanvas(this, *static_cast<CalChartView*>(view), this, mConfig.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
@@ -354,18 +353,18 @@ FieldFrame::FieldFrame(wxDocument* doc, wxView* view,
     Show(true);
 }
 
-FieldFrame::~FieldFrame() {
+CalChartFrame::~CalChartFrame() {
     mAUIManager.UnInit();
 }
 
 // Intercept menu commands
 
-void FieldFrame::OnCmdAppend(wxCommandEvent& event) { AppendShow(); }
+void CalChartFrame::OnCmdAppend(wxCommandEvent& event) { AppendShow(); }
 
-void FieldFrame::OnCmdImportCont(wxCommandEvent& event) { ImportContFile(); }
+void CalChartFrame::OnCmdImportCont(wxCommandEvent& event) { ImportContFile(); }
 
 // the default wxView print doesn't handle landscape.  rolling our own
-void FieldFrame::OnCmdPrint(wxCommandEvent& event)
+void CalChartFrame::OnCmdPrint(wxCommandEvent& event)
 {
     // grab our current page setup.
     wxPrinter printer(gPrintDialogData);
@@ -388,7 +387,7 @@ void FieldFrame::OnCmdPrint(wxCommandEvent& event)
 }
 
 // the default wxView print doesn't handle landscape.  rolling our own
-void FieldFrame::OnCmdPrintPreview(wxCommandEvent& event)
+void CalChartFrame::OnCmdPrintPreview(wxCommandEvent& event)
 {
     // grab our current page setup.
     wxPrintPreview* preview = new wxPrintPreview(
@@ -407,7 +406,7 @@ void FieldFrame::OnCmdPrintPreview(wxCommandEvent& event)
     frame->Show(true);
 }
 
-void FieldFrame::OnCmdPageSetup(wxCommandEvent& event)
+void CalChartFrame::OnCmdPageSetup(wxCommandEvent& event)
 {
     wxPageSetupData mPageSetupData;
     mPageSetupData.EnableOrientation(true);
@@ -419,7 +418,7 @@ void FieldFrame::OnCmdPageSetup(wxCommandEvent& event)
     gPrintDialogData->SetPrintData(mPageSetupData.GetPrintData());
 }
 
-void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
+void CalChartFrame::OnCmdLegacyPrint(wxCommandEvent& event)
 {
     if (GetShow()) {
         PrintPostScriptDialog dialog(static_cast<CalChartDoc*>(GetDocument()), this);
@@ -429,7 +428,7 @@ void FieldFrame::OnCmdLegacyPrint(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event)
+void CalChartFrame::OnCmdExportViewerFile(wxCommandEvent& event)
 {
     if (GetShow()) {
         wxFileDialog saveFileDialog(this, _("Save viewer file"), "", "", "viewer files (*.viewer)|*.viewer", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -444,28 +443,28 @@ void FieldFrame::OnCmdExportViewerFile(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdPreferences(wxCommandEvent& event)
+void CalChartFrame::OnCmdPreferences(wxCommandEvent& event)
 {
     CalChartPreferences dialog1(this);
     if (dialog1.ShowModal() == wxID_OK) {
     }
 }
 
-void FieldFrame::OnCmdInsertBefore(wxCommandEvent& event)
+void CalChartFrame::OnCmdInsertBefore(wxCommandEvent& event)
 {
     CalChart::Show::Sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
     GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum());
     GetFieldView()->GoToPrevSheet();
 }
 
-void FieldFrame::OnCmdInsertAfter(wxCommandEvent& event)
+void CalChartFrame::OnCmdInsertAfter(wxCommandEvent& event)
 {
     CalChart::Show::Sheet_container_t sht(1, *GetShow()->GetCurrentSheet());
     GetFieldView()->DoInsertSheets(sht, GetFieldView()->GetCurrentSheetNum() + 1);
     GetFieldView()->GoToNextSheet();
 }
 
-void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
+void CalChartFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
 {
     wxString s = wxFileSelector(wxT("Add Sheets from Other Shows"), wxEmptyString,
         wxEmptyString, wxEmptyString, file_wild);
@@ -510,7 +509,7 @@ void FieldFrame::OnCmdInsertFromOtherShow(wxCommandEvent& event)
         sheets, GetFieldView()->GetCurrentSheetNum() + 1);
 }
 
-void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
+void CalChartFrame::OnCmdCopySheet(wxCommandEvent& event)
 {
     if (wxTheClipboard->Open()) {
         std::unique_ptr<wxCustomDataObject> clipboardObject(
@@ -534,7 +533,7 @@ void FieldFrame::OnCmdCopySheet(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
+void CalChartFrame::OnCmdPasteSheet(wxCommandEvent& event)
 {
     if (wxTheClipboard->Open()) {
         if (wxTheClipboard->IsSupported(kSheetDataClipboardFormat)) {
@@ -570,7 +569,7 @@ void FieldFrame::OnCmdPasteSheet(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdDelete(wxCommandEvent& event)
+void CalChartFrame::OnCmdDelete(wxCommandEvent& event)
 {
     if (GetFieldView()->GetNumSheets() > 1) {
         GetFieldView()->DoDeleteSheet(GetFieldView()->GetCurrentSheetNum());
@@ -578,7 +577,7 @@ void FieldFrame::OnCmdDelete(wxCommandEvent& event)
 }
 
 // grey out if we're on a sheet
-void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
+void CalChartFrame::OnCmdRelabel(wxCommandEvent& event)
 {
     if (GetFieldView()->GetCurrentSheetNum() + 1 < GetFieldView()->GetNumSheets()) {
         if (!GetFieldView()->DoRelabel()) {
@@ -590,7 +589,7 @@ void FieldFrame::OnCmdRelabel(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdEditPrintCont(wxCommandEvent& event)
+void CalChartFrame::OnCmdEditPrintCont(wxCommandEvent& event)
 {
     if (GetShow()) {
         PrintContinuityEditor* ce = new PrintContinuityEditor(
@@ -600,7 +599,7 @@ void FieldFrame::OnCmdEditPrintCont(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
+void CalChartFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
 {
     wxString s;
     if (GetShow()) {
@@ -613,7 +612,7 @@ void FieldFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
+void CalChartFrame::OnCmdSetBeats(wxCommandEvent& event)
 {
     wxString s;
     if (GetShow()) {
@@ -630,11 +629,11 @@ void FieldFrame::OnCmdSetBeats(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdSetup(wxCommandEvent& event) { Setup(); }
+void CalChartFrame::OnCmdSetup(wxCommandEvent& event) { Setup(); }
 
-void FieldFrame::OnCmdSetMode(wxCommandEvent& event) { SetMode(); }
+void CalChartFrame::OnCmdSetMode(wxCommandEvent& event) { SetMode(); }
 
-void FieldFrame::OnCmdPoints(wxCommandEvent& event)
+void CalChartFrame::OnCmdPoints(wxCommandEvent& event)
 {
     if (GetShow()) {
         PointPicker* pp = new PointPicker(*GetShow(), this);
@@ -643,14 +642,14 @@ void FieldFrame::OnCmdPoints(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmdSelectAll(wxCommandEvent& event)
+void CalChartFrame::OnCmdSelectAll(wxCommandEvent& event)
 {
     if (GetShow()) {
         GetShow()->SetSelection(GetShow()->MakeSelectAll());
     }
 }
 
-void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
+void CalChartFrame::OnCmdAnimate(wxCommandEvent& event)
 {
     // we want to have only animation frame at a time
     if (mAnimationFrame) {
@@ -662,180 +661,180 @@ void FieldFrame::OnCmdAnimate(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::ClearAnimationFrame() { mAnimationFrame = NULL; }
+void CalChartFrame::ClearAnimationFrame() { mAnimationFrame = NULL; }
 
-void FieldFrame::OnCmdAbout(wxCommandEvent& event) { TopFrame::About(); }
+void CalChartFrame::OnCmdAbout(wxCommandEvent& event) { TopFrame::About(); }
 
-void FieldFrame::OnCmdHelp(wxCommandEvent& event) { TopFrame::Help(); }
+void CalChartFrame::OnCmdHelp(wxCommandEvent& event) { TopFrame::Help(); }
 
-void FieldFrame::OnCmd_prev_ss(wxCommandEvent& event)
+void CalChartFrame::OnCmd_prev_ss(wxCommandEvent& event)
 {
     GetFieldView()->GoToPrevSheet();
 }
 
-void FieldFrame::OnCmd_next_ss(wxCommandEvent& event)
+void CalChartFrame::OnCmd_next_ss(wxCommandEvent& event)
 {
     GetFieldView()->GoToNextSheet();
 }
 
-void FieldFrame::OnCmd_box(wxCommandEvent& event)
+void CalChartFrame::OnCmd_box(wxCommandEvent& event)
 {
     SetCurrentLasso(CC_DRAG::BOX);
 }
 
-void FieldFrame::OnCmd_poly(wxCommandEvent& event)
+void CalChartFrame::OnCmd_poly(wxCommandEvent& event)
 {
     SetCurrentLasso(CC_DRAG::POLY);
 }
 
-void FieldFrame::OnCmd_lasso(wxCommandEvent& event)
+void CalChartFrame::OnCmd_lasso(wxCommandEvent& event)
 {
     SetCurrentLasso(CC_DRAG::LASSO);
 }
 
-void FieldFrame::OnCmd_swap(wxCommandEvent& event)
+void CalChartFrame::OnCmd_swap(wxCommandEvent& event)
 {
     SetCurrentLasso(CC_DRAG::SWAP);
 }
 
-void FieldFrame::OnCmd_move(wxCommandEvent& event)
+void CalChartFrame::OnCmd_move(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_NORMAL);
 }
 
-void FieldFrame::OnCmd_shape_line(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shape_line(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_LINE);
 }
 
-void FieldFrame::OnCmd_shape_x(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shape_x(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_X);
 }
 
-void FieldFrame::OnCmd_shape_cross(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shape_cross(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_CROSS);
 }
 
-void FieldFrame::OnCmd_shape_box(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shape_box(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_RECTANGLE);
 }
 
-void FieldFrame::OnCmd_shape_ellipse(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shape_ellipse(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_ELLIPSE);
 }
 
-void FieldFrame::OnCmd_shape_draw(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shape_draw(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHAPE_DRAW);
 }
 
-void FieldFrame::OnCmd_line(wxCommandEvent& event)
+void CalChartFrame::OnCmd_line(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_LINE);
 }
 
-void FieldFrame::OnCmd_rot(wxCommandEvent& event)
+void CalChartFrame::OnCmd_rot(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_ROTATE);
 }
 
-void FieldFrame::OnCmd_shear(wxCommandEvent& event)
+void CalChartFrame::OnCmd_shear(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SHEAR);
 }
 
-void FieldFrame::OnCmd_reflect(wxCommandEvent& event)
+void CalChartFrame::OnCmd_reflect(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_REFL);
 }
 
-void FieldFrame::OnCmd_size(wxCommandEvent& event)
+void CalChartFrame::OnCmd_size(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_SIZE);
 }
 
-void FieldFrame::OnCmd_genius(wxCommandEvent& event)
+void CalChartFrame::OnCmd_genius(wxCommandEvent& event)
 {
     SetCurrentMove(CC_MOVE_GENIUS);
 }
 
-void FieldFrame::OnCmd_label_left(wxCommandEvent& event)
+void CalChartFrame::OnCmd_label_left(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsLabel(false);
 }
 
-void FieldFrame::OnCmd_label_right(wxCommandEvent& event)
+void CalChartFrame::OnCmd_label_right(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsLabel(true);
 }
 
-void FieldFrame::OnCmd_label_flip(wxCommandEvent& event)
+void CalChartFrame::OnCmd_label_flip(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsLabelFlip();
 }
 
-void FieldFrame::OnCmd_label_hide(wxCommandEvent& event)
+void CalChartFrame::OnCmd_label_hide(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsLabelVisibility(false);
 }
 
-void FieldFrame::OnCmd_label_show(wxCommandEvent& event)
+void CalChartFrame::OnCmd_label_show(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsLabelVisibility(true);
 }
 
-void FieldFrame::OnCmd_label_visibility_toggle(wxCommandEvent& event)
+void CalChartFrame::OnCmd_label_visibility_toggle(wxCommandEvent& event)
 {
     GetFieldView()->DoTogglePointsLabelVisibility();
 }
 
-void FieldFrame::OnCmd_setsym0(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym0(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_PLAIN);
 }
 
-void FieldFrame::OnCmd_setsym1(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym1(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_SOL);
 }
 
-void FieldFrame::OnCmd_setsym2(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym2(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_BKSL);
 }
 
-void FieldFrame::OnCmd_setsym3(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym3(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_SL);
 }
 
-void FieldFrame::OnCmd_setsym4(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym4(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_X);
 }
 
-void FieldFrame::OnCmd_setsym5(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym5(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLBKSL);
 }
 
-void FieldFrame::OnCmd_setsym6(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym6(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLSL);
 }
 
-void FieldFrame::OnCmd_setsym7(wxCommandEvent& event)
+void CalChartFrame::OnCmd_setsym7(wxCommandEvent& event)
 {
     GetFieldView()->DoSetPointsSymbol(SYMBOL_SOLX);
 }
 
-void FieldFrame::OnChar(wxKeyEvent& event) { mCanvas->OnChar(event); }
+void CalChartFrame::OnChar(wxKeyEvent& event) { mCanvas->OnChar(event); }
 
-void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
+void CalChartFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
 {
     wxString filename;
     wxInitAllImageHandlers();
@@ -875,7 +874,7 @@ void FieldFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
+void CalChartFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
 {
     bool toggle = !GetFieldView()->DoingPictureAdjustment();
     GetFieldView()->DoPictureAdjustment(toggle);
@@ -887,7 +886,7 @@ void FieldFrame::OnCmd_AdjustBackgroundImageMode(wxCommandEvent& event)
     mCanvas->Refresh();
 }
 
-void FieldFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
+void CalChartFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
 {
     bool toggle = !GetFieldView()->DoingDrawBackground();
     GetFieldView()->DoDrawBackground(toggle);
@@ -899,7 +898,7 @@ void FieldFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
     mCanvas->Refresh();
 }
 
-void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
+void CalChartFrame::OnCmd_GhostOption(wxCommandEvent& event)
 {
     int which_option = (event.GetId() == CALCHART__GhostControls) ? mControls->GetGhostChoice() : (event.GetId() == CALCHART__GhostOff) ? 0 : (event.GetId() == CALCHART__GhostNextSheet) ? 1 : (event.GetId() == CALCHART__GhostPreviousSheet) ? 2 : 3;
     switch (which_option) {
@@ -933,13 +932,13 @@ void FieldFrame::OnCmd_GhostOption(wxCommandEvent& event)
     GetCanvas()->Refresh();
 }
 
-void FieldFrame::refreshGhostOptionStates()
+void CalChartFrame::refreshGhostOptionStates()
 {
     bool active = GetFieldView()->getGhostModule().isActive();
     GetMenuBar()->FindItem(CALCHART__GhostOff)->Enable(active);
 }
 
-void FieldFrame::OnCmd_AdjustViews(wxCommandEvent& event)
+void CalChartFrame::OnCmd_AdjustViews(wxCommandEvent& event)
 {
     switch (event.GetId()) {
     case CALCHART__ViewFieldThumbnail:
@@ -954,7 +953,7 @@ void FieldFrame::OnCmd_AdjustViews(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::AUIIsClose(wxAuiManagerEvent& event) {
+void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event) {
     if (event.GetPane()->window == mFieldThumbnailBrowser) {
         ChangeFieldThumbnailVisibility(false);
     }
@@ -966,7 +965,7 @@ void FieldFrame::AUIIsClose(wxAuiManagerEvent& event) {
     }
 }
 
-void FieldFrame::ChangeFieldThumbnailVisibility(bool show)
+void CalChartFrame::ChangeFieldThumbnailVisibility(bool show)
 {
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Hide Field Thumbnails"));
@@ -978,7 +977,7 @@ void FieldFrame::ChangeFieldThumbnailVisibility(bool show)
     mAUIManager.Update();
 }
 
-void FieldFrame::ChangeFieldControlsVisibility(bool show)
+void CalChartFrame::ChangeFieldControlsVisibility(bool show)
 {
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewFieldControls)->SetItemLabel(wxT("Hide Controls"));
@@ -990,7 +989,7 @@ void FieldFrame::ChangeFieldControlsVisibility(bool show)
     mAUIManager.Update();
 }
 
-void FieldFrame::ChangeContinuityInfoVisibility(bool show)
+void CalChartFrame::ChangeContinuityInfoVisibility(bool show)
 {
     if (show) {
         GetMenuBar()->FindItem(CALCHART__ViewContinuityInfo)->SetItemLabel(wxT("Hide Continuities"));
@@ -1002,12 +1001,12 @@ void FieldFrame::ChangeContinuityInfoVisibility(bool show)
     mAUIManager.Update();
 }
 
-void FieldFrame::OnCmd_ResetReferencePoint(wxCommandEvent& event)
+void CalChartFrame::OnCmd_ResetReferencePoint(wxCommandEvent& event)
 {
     GetFieldView()->DoResetReferencePoint();
 }
 
-void FieldFrame::OnCmd_SolveTransition(wxCommandEvent& event)
+void CalChartFrame::OnCmd_SolveTransition(wxCommandEvent& event)
 {
     if (GetShow()) {
         TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxT("Transition Solver"));
@@ -1015,7 +1014,7 @@ void FieldFrame::OnCmd_SolveTransition(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnSize(wxSizeEvent& event)
+void CalChartFrame::OnSize(wxSizeEvent& event)
 {
     // HACK: Prevent width and height from growing out of control
     int w = event.GetSize().GetWidth();
@@ -1026,7 +1025,7 @@ void FieldFrame::OnSize(wxSizeEvent& event)
 }
 
 // Append a show with file selector
-void FieldFrame::AppendShow()
+void CalChartFrame::AppendShow()
 {
     auto s = wxFileSelector(wxT("Append show"), wxEmptyString, wxEmptyString, wxEmptyString, file_wild);
     if (s.IsEmpty()) {
@@ -1045,7 +1044,7 @@ void FieldFrame::AppendShow()
 }
 
 // Append a show with file selector
-void FieldFrame::ImportContFile()
+void CalChartFrame::ImportContFile()
 {
     wxString s;
 
@@ -1056,17 +1055,17 @@ void FieldFrame::ImportContFile()
     }
 }
 
-std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::GridChoice() const
+std::pair<CalChart::Coord::units, CalChart::Coord::units> CalChartFrame::GridChoice() const
 {
     return mControls->GridChoice();
 }
 
-std::pair<CalChart::Coord::units, CalChart::Coord::units> FieldFrame::ToolGridChoice() const
+std::pair<CalChart::Coord::units, CalChart::Coord::units> CalChartFrame::ToolGridChoice() const
 {
     return mControls->ToolGridChoice();
 }
 
-void FieldFrame::SetCurrentLasso(CC_DRAG type)
+void CalChartFrame::SetCurrentLasso(CC_DRAG type)
 {
     // retoggle the tool because we want it to draw as selected
     int toggleID = (type == CC_DRAG::POLY) ? CALCHART__poly : (type == CC_DRAG::LASSO) ? CALCHART__lasso : (type == CC_DRAG::SWAP) ? CALCHART__swap : CALCHART__box;
@@ -1076,21 +1075,21 @@ void FieldFrame::SetCurrentLasso(CC_DRAG type)
     mCanvas->SetCurrentLasso(type);
 }
 
-void FieldFrame::SetCurrentMove(CC_MOVE_MODES type)
+void CalChartFrame::SetCurrentMove(CC_MOVE_MODES type)
 {
     ToolbarSetCurrentMove(type);
     mCanvas->SetCurrentMove(type);
 }
 
 // call by the canvas to inform that the move has been set.  Don't call back to canvas
-void FieldFrame::ToolbarSetCurrentMove(CC_MOVE_MODES type)
+void CalChartFrame::ToolbarSetCurrentMove(CC_MOVE_MODES type)
 {
     // retoggle the tool because we want it to draw as selected
     wxToolBar* tb = GetToolBar();
     tb->ToggleTool(CALCHART__move + type, true);
 }
 
-void FieldFrame::Setup()
+void CalChartFrame::Setup()
 {
     if (GetShow()) {
         ShowInfoReq dialog(*GetShow(), this);
@@ -1100,7 +1099,7 @@ void FieldFrame::Setup()
     }
 }
 
-void FieldFrame::SetMode()
+void CalChartFrame::SetMode()
 {
     if (GetShow()) {
         ModeSetupDialog dialog(GetShow()->GetShowMode(), this);
@@ -1110,24 +1109,24 @@ void FieldFrame::SetMode()
     }
 }
 
-void FieldFrame::refnum_callback(wxCommandEvent&)
+void CalChartFrame::refnum_callback(wxCommandEvent&)
 {
     GetFieldView()->SetReferencePoint(mControls->GetRefChoice());
 }
 
-void FieldFrame::OnEnableDrawPaths(wxCommandEvent& event)
+void CalChartFrame::OnEnableDrawPaths(wxCommandEvent& event)
 {
     GetFieldView()->OnEnableDrawPaths(event.IsChecked());
     GetMenuBar()->FindItem(CALCHART__draw_paths)->Check(event.IsChecked());
 }
 
-void FieldFrame::OnCmd_DrawPaths(wxCommandEvent& event)
+void CalChartFrame::OnCmd_DrawPaths(wxCommandEvent& event)
 {
     GetFieldView()->OnEnableDrawPaths(event.IsChecked());
     mControls->SetDrawPath(event.IsChecked());
 }
 
-void FieldFrame::zoom_callback(wxCommandEvent& event)
+void CalChartFrame::zoom_callback(wxCommandEvent& event)
 {
     auto zoom_amount = mControls->GetZoomAmount();
     if (zoom_amount == 0) {
@@ -1136,12 +1135,12 @@ void FieldFrame::zoom_callback(wxCommandEvent& event)
     do_zoom(zoom_amount);
 }
 
-void FieldFrame::OnCmd_ZoomFit(wxCommandEvent& event)
+void CalChartFrame::OnCmd_ZoomFit(wxCommandEvent& event)
 {
     do_zoom(mCanvas->ZoomToFitFactor());
 }
 
-void FieldFrame::OnCmd_ZoomIn(wxCommandEvent& event)
+void CalChartFrame::OnCmd_ZoomIn(wxCommandEvent& event)
 {
     // because zoom is truncated to 2 decimal places, make sure we at least increment by 1.
     auto original_zoom = mControls->GetZoomAmount();
@@ -1154,7 +1153,7 @@ void FieldFrame::OnCmd_ZoomIn(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::OnCmd_ZoomOut(wxCommandEvent& event)
+void CalChartFrame::OnCmd_ZoomOut(wxCommandEvent& event)
 {
     auto new_zoom = mControls->GetZoomAmount() * 0.8;
     if (new_zoom > 0.01) {
@@ -1162,7 +1161,7 @@ void FieldFrame::OnCmd_ZoomOut(wxCommandEvent& event)
     }
 }
 
-void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
+void CalChartFrame::zoom_callback_textenter(wxCommandEvent& event)
 {
     auto zoomtxt = static_cast<wxComboBox*>(FindWindow(event.GetId()))->GetValue();
     // strip the trailing '%' if it exists
@@ -1181,13 +1180,13 @@ void FieldFrame::zoom_callback_textenter(wxCommandEvent& event)
     do_zoom(zoom_amount);
 }
 
-void FieldFrame::do_zoom(float zoom_amount)
+void CalChartFrame::do_zoom(float zoom_amount)
 {
     zoom_amount = ToolbarSetZoom(zoom_amount);
     mCanvas->SetZoom(zoom_amount);
 }
 
-float FieldFrame::ToolbarSetZoom(float zoom_amount)
+float CalChartFrame::ToolbarSetZoom(float zoom_amount)
 {
     zoom_amount = std::max(zoom_amount, 0.01f);
     mControls->SetZoomAmount(zoom_amount);
@@ -1195,7 +1194,7 @@ float FieldFrame::ToolbarSetZoom(float zoom_amount)
     return zoom_amount;
 }
 
-void FieldFrame::UpdatePanel()
+void CalChartFrame::UpdatePanel()
 {
     wxString tempbuf;
     auto sht = GetShow()->GetCurrentSheet();
@@ -1218,22 +1217,22 @@ void FieldFrame::UpdatePanel()
     mContinuityBrowser->Update();
 }
 
-const FieldView* FieldFrame::GetFieldView() const
+const CalChartView* CalChartFrame::GetFieldView() const
 {
-    return static_cast<const FieldView*>(GetView());
+    return static_cast<const CalChartView*>(GetView());
 }
 
-FieldView* FieldFrame::GetFieldView()
+CalChartView* CalChartFrame::GetFieldView()
 {
-    return static_cast<FieldView*>(GetView());
+    return static_cast<CalChartView*>(GetView());
 }
 
-const CalChartDoc* FieldFrame::GetShow() const
+const CalChartDoc* CalChartFrame::GetShow() const
 {
     return static_cast<const CalChartDoc*>(GetDocument());
 }
 
-CalChartDoc* FieldFrame::GetShow()
+CalChartDoc* CalChartFrame::GetShow()
 {
     return static_cast<CalChartDoc*>(GetDocument());
 }

@@ -1,6 +1,7 @@
+#pragma once
 /*
- * top_frame.h
- * Header for TopFrame, the wxMDI parent frame
+ * CalChartDocCommand.h
+ * Handles interaction from View to Doc
  */
 
 /*
@@ -20,24 +21,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include <vector>
+#include <wx/cmdproc.h>
 
-#include <wx/docview.h>
+class CalChartDoc;
 
-// TopFrame
-// Serves as the top frame that gets displayed when CalChart starts
-class TopFrame : public wxDocParentFrame {
-    DECLARE_CLASS(TopFrame)
+class CalChartDocCommand : public wxCommand {
 public:
-    TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title);
-    ~TopFrame();
+    using CC_doc_command = std::function<void(CalChartDoc&)>;
+    using CC_doc_command_pair = std::pair<CC_doc_command, CC_doc_command>;
 
-    void OnCmdAbout(wxCommandEvent& event);
-    void OnCmdHelp(wxCommandEvent& event);
-    void OnCmdPreferences(wxCommandEvent& event);
+    CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, CC_doc_command_pair const& cmds);
+    CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, std::vector<CC_doc_command_pair> const& cmds);
 
-    static void About();
-    static void Help();
+    virtual bool Do();
+    virtual bool Undo();
 
-    DECLARE_EVENT_TABLE()
+protected:
+    CalChartDoc& mDoc;
+    bool mDocModified;
+    std::vector<CC_doc_command_pair> mCmds;
 };

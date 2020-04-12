@@ -1,6 +1,7 @@
+#pragma once
 /*
- * calchartapp.h
- * Header for CalChartApp
+ * CalChartApp.h
+ * Central App for CalChart
  */
 
 /*
@@ -20,29 +21,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "single_instance_ipc.h"
-
-#include <memory>
 #include <wx/docview.h>
 #include <wx/wx.h>
 
+// CalChartApp represents the wxWidgets App for CalChart.  The document manager creates
+// the actual CalChart Document instances.  This just serves the purpose of being the first
+// thing that runs, holds much of the top level logic.
+
 class CalChartApp;
+class HostAppInterface;
+class wxHtmlHelpController;
 namespace CalChart {
 class ShowMode;
 }
-class wxHtmlHelpController;
 
 DECLARE_APP(CalChartApp)
 
 // Define a new application
 class CalChartApp : public wxApp {
 public:
-    virtual bool OnInit();
-    virtual void MacOpenFile(const wxString& fileName);
-    virtual void MacOpenFiles(const wxArrayString& fileNames);
-    int OnExit();
+    virtual bool OnInit() override;
+    virtual void MacOpenFile(const wxString& fileName) override;
+    virtual void MacOpenFiles(const wxArrayString& fileNames) override;
+    int OnExit() override;
 
     CalChart::ShowMode GetShowMode(const wxString& which);
 
@@ -60,8 +61,7 @@ private:
     void ExitAppAsServer();
     void ExitAppAsClient();
 
-    wxDocManager* mDocManager;
+    wxDocManager* mDocManager{};
     std::unique_ptr<wxHtmlHelpController> mHelpController;
-
     std::unique_ptr<HostAppInterface> mHostInterface;
 };

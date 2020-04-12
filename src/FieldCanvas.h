@@ -25,14 +25,13 @@
 #include "cc_types.h"
 
 #include <wx/docview.h>
-
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
 
-class FieldView;
-class FieldFrame;
+class CalChartView;
+class CalChartFrame;
 class BackgroundImage;
 namespace CalChart {
 class Shape;
@@ -51,7 +50,7 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(wxWindow* win, FieldView& view, FieldFrame* frame, float def_zoom);
+    FieldCanvas(wxWindow* win, CalChartView& view, CalChartFrame* frame, float def_zoom);
     virtual ~FieldCanvas() = default;
     void OnPaint(wxPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
@@ -75,8 +74,8 @@ public:
 
 private:
     // Variables
-    FieldFrame* mFrame;
-    FieldView& mView;
+    CalChartFrame* mFrame;
+    CalChartView& mView;
     CC_DRAG curr_lasso = CC_DRAG::BOX;
     CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
     std::unique_ptr<MovePoints> m_move_points;

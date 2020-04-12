@@ -1,6 +1,5 @@
 /*
- * FieldView
- * View for field canvas
+ * CalChartView.h
  */
 
 /*
@@ -20,54 +19,45 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FieldView.h"
+#include "CalChartView.h"
+#include "CalChartApp.h"
+#include "CalChartDoc.h"
+#include "CalChartDocCommand.h"
 #include "FieldCanvas.h"
-#include "field_frame.h"
-
 #include "animate.h"
 #include "animatecommand.h"
 #include "animation_frame.h"
-#include "calchartapp.h"
-#include "cc_command.h"
+#include "background_image.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "draw.h"
+#include "CalChartFrame.h"
+#include "ghost_module.h"
 #include "setup_wizards.h"
 #include "show_ui.h"
-#include "top_frame.h"
 
+#include <memory>
+#include <wx/docview.h>
 #include <wx/textfile.h>
 #include <wx/wizard.h>
 
-IMPLEMENT_DYNAMIC_CLASS(FieldView, wxView)
+IMPLEMENT_DYNAMIC_CLASS(CalChartView, wxView)
 
-FieldView::FieldView()
-    : mFrame(NULL)
-    , mDrawPaths(false)
-    , mCurrentReferencePoint(0)
-    , mConfig(CalChartConfiguration::GetGlobalConfig())
+CalChartView::CalChartView()
+    : mConfig(CalChartConfiguration::GetGlobalConfig())
 {
 }
 
-FieldView::~FieldView() {}
-
-// What to do when a view is created. Creates actual
-// windows for displaying the view.
-bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
+// What to do when a view is created. Creates actual windows for displaying the view.
+bool CalChartView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
 {
     mShow = static_cast<CalChartDoc*>(doc);
     mShow->SetCurrentSheet(0);
-#if defined(BUILD_FOR_VIEWER) && (BUILD_FOR_VIEWER != 0)
-    mFrame = new AnimationFrame(
-        NULL, doc, this,
-        wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame));
-#else
-    mFrame = new FieldFrame(doc, this, mConfig,
+    mFrame = new CalChartFrame(doc, this, mConfig,
         wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
         wxPoint(50, 50), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()), static_cast<int>(mConfig.Get_FieldFrameHeight())));
-#endif
 
     UpdateBackgroundImages();
     mFrame->Show(true);
@@ -75,9 +65,8 @@ bool FieldView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
     return true;
 }
 
-// Sneakily gets used for default print/preview
-// as well as drawing on the screen.
-void FieldView::OnDraw(wxDC* dc)
+// Sneakily gets used for default print/preview as well as drawing on the screen.
+void CalChartView::OnDraw(wxDC* dc)
 {
     if (mShow) {
         // draw the field
@@ -111,24 +100,22 @@ void FieldView::OnDraw(wxDC* dc)
     }
 }
 
-// Sneakily gets used for default print/preview
-// as well as drawing on the screen.
-void FieldView::DrawOtherPoints(wxDC& dc,
-    const std::map<int, CalChart::Coord>& positions)
+void CalChartView::DrawOtherPoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
     DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
 
-void FieldView::OnDrawBackground(wxDC& dc)
+void CalChartView::OnDrawBackground(wxDC& dc)
 {
-    if (!mDrawBackground)
+    if (!mDrawBackground) {
         return;
+    }
     for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
         mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
     }
 }
 
-void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
+void CalChartView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
 {
     if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_setup))) {
         // give our show a first page
@@ -151,14 +138,15 @@ void FieldView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
 }
 
 // Clean up windows used for displaying the view.
-bool FieldView::OnClose(bool deleteWindow)
+bool CalChartView::OnClose(bool deleteWindow)
 {
-    SetFrame((wxFrame*)NULL);
+    SetFrame(static_cast<wxFrame*>(nullptr));
 
     Activate(false);
 
-    if (!GetDocument()->Close())
+    if (!GetDocument()->Close()) {
         return false;
+    }
 
     if (deleteWindow) {
         delete mFrame;
@@ -166,7 +154,7 @@ bool FieldView::OnClose(bool deleteWindow)
     return true;
 }
 
-void FieldView::OnWizardSetup(CalChartDoc& show)
+void CalChartView::OnWizardSetup(CalChartDoc& show)
 {
     wxWizard* wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
     // page 1:
@@ -197,127 +185,136 @@ void FieldView::OnWizardSetup(CalChartDoc& show)
     wizard->Destroy();
 }
 
-bool FieldView::DoRotatePointPositions(int rotateAmount)
+bool CalChartView::DoRotatePointPositions(int rotateAmount)
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount, mCurrentReferencePoint);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
+bool CalChartView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
 {
-    if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint))
+    if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint)) {
         return false;
+    }
     auto cmd = mShow->Create_MovePointsCommand(newPositions, mCurrentReferencePoint);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoDeletePoints()
+bool CalChartView::DoDeletePoints()
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_DeletePointsCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoResetReferencePoint()
+bool CalChartView::DoResetReferencePoint()
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_SetReferencePointToRef0(mCurrentReferencePoint);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoSetPointsSymbol(SYMBOL_TYPE sym)
+bool CalChartView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_SetSymbolCommand(sym);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-void FieldView::DoSetMode(CalChart::ShowMode const& mode)
+void CalChartView::DoSetMode(CalChart::ShowMode const& mode)
 {
     auto cmd = mShow->Create_SetShowModeCommand(mode);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void FieldView::DoSetShowInfo(const std::vector<wxString>& labels, int numColumns)
+void CalChartView::DoSetShowInfo(const std::vector<wxString>& labels, int numColumns)
 {
     auto cmd = mShow->Create_SetShowInfoCommand(labels, numColumns);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void FieldView::DoSetSheetTitle(const wxString& descr)
+void CalChartView::DoSetSheetTitle(const wxString& descr)
 {
     auto cmd = mShow->Create_SetSheetTitleCommand(descr);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoSetSheetBeats(int beats)
+bool CalChartView::DoSetSheetBeats(int beats)
 {
     auto cmd = mShow->Create_SetSheetBeatsCommand(beats);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoSetPointsLabel(bool right)
+bool CalChartView::DoSetPointsLabel(bool right)
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_SetLabelRightCommand(right);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoSetPointsLabelFlip()
+bool CalChartView::DoSetPointsLabelFlip()
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_ToggleLabelFlipCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoSetPointsLabelVisibility(bool isVisible)
+bool CalChartView::DoSetPointsLabelVisibility(bool isVisible)
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_SetLabelVisibleCommand(isVisible);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoTogglePointsLabelVisibility()
+bool CalChartView::DoTogglePointsLabelVisibility()
 {
-    if (mShow->GetSelectionList().size() == 0)
+    if (mShow->GetSelectionList().size() == 0) {
         return false;
+    }
     auto cmd = mShow->Create_ToggleLabelVisibilityCommand();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-void FieldView::DoInsertSheets(const CalChart::Show::Sheet_container_t& sht,
+void CalChartView::DoInsertSheets(const CalChart::Show::Sheet_container_t& sht,
     int where)
 {
     auto cmd = mShow->Create_AddSheetsCommand(sht, where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-bool FieldView::DoDeleteSheet(int where)
+bool CalChartView::DoDeleteSheet(int where)
 {
     auto cmd = mShow->Create_RemoveSheetCommand(where);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
-bool FieldView::DoImportPrintableContinuity(const wxString& file)
+bool CalChartView::DoImportPrintableContinuity(const wxString& file)
 {
     wxTextFile fp;
     fp.Open(file);
@@ -350,7 +347,7 @@ bool FieldView::DoImportPrintableContinuity(const wxString& file)
     return false;
 }
 
-bool FieldView::DoRelabel()
+bool CalChartView::DoRelabel()
 {
     auto sheet_num = GetCurrentSheetNum();
     auto current_sheet = mShow->GetNthSheet(GetCurrentSheetNum());
@@ -368,7 +365,7 @@ bool FieldView::DoRelabel()
 }
 
 // append is an insert with a relabel
-std::pair<bool, std::string> FieldView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show)
+std::pair<bool, std::string> CalChartView::DoAppendShow(std::unique_ptr<CalChartDoc> other_show)
 {
     if (other_show->GetNumPoints() != mShow->GetNumPoints()) {
         return { false, "The blocksize doesn't match" };
@@ -385,19 +382,19 @@ std::pair<bool, std::string> FieldView::DoAppendShow(std::unique_ptr<CalChartDoc
     return { true, "" };
 }
 
-int FieldView::FindPoint(CalChart::Coord pos) const
+int CalChartView::FindPoint(CalChart::Coord pos) const
 {
     return mShow->GetCurrentSheet()->FindPoint(
         pos, Float2CoordUnits(mConfig.Get_DotRatio()),
         mCurrentReferencePoint);
 }
 
-CalChart::Coord FieldView::PointPosition(int which) const
+CalChart::Coord CalChartView::PointPosition(int which) const
 {
     return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
 }
 
-void FieldView::GoToSheet(int which)
+void CalChartView::GoToSheet(int which)
 {
     if (which >= 0 && which < mShow->GetNumSheets()) {
         // This *could* be run through a command or run directly...
@@ -410,7 +407,7 @@ void FieldView::GoToSheet(int which)
     }
 }
 
-void FieldView::SetReferencePoint(int which)
+void CalChartView::SetReferencePoint(int which)
 {
     mCurrentReferencePoint = which;
     OnUpdate(this);
@@ -418,7 +415,7 @@ void FieldView::SetReferencePoint(int which)
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-void FieldView::SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected)
+void CalChartView::SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected)
 {
     auto select = mShow->MakeSelectWithLasso(*lasso, mCurrentReferencePoint);
     if (toggleSelected) {
@@ -430,7 +427,7 @@ void FieldView::SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelecte
 }
 
 // Select points within rectangle
-void FieldView::SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2,
+void CalChartView::SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2,
     bool toggleSelected)
 {
     CalChart::Lasso lasso(c1);
@@ -441,7 +438,7 @@ void FieldView::SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Co
     SelectWithLasso(&lasso, toggleSelected);
 }
 
-void FieldView::SetSelection(const SelectionList& sl)
+void CalChartView::SetSelection(const SelectionList& sl)
 {
     auto current_sl = mShow->GetSelectionList();
     if (std::equal(current_sl.begin(), current_sl.end(), sl.begin(), sl.end()))
@@ -455,7 +452,7 @@ void FieldView::SetSelection(const SelectionList& sl)
     }
 }
 
-void FieldView::OnEnableDrawPaths(bool enable)
+void CalChartView::OnEnableDrawPaths(bool enable)
 {
     mDrawPaths = enable;
     if (mDrawPaths) {
@@ -464,7 +461,7 @@ void FieldView::OnEnableDrawPaths(bool enable)
     mFrame->Refresh();
 }
 
-void FieldView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
+void CalChartView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
 {
     if (mDrawPaths && mAnimation && mAnimation->GetNumberSheets() && (mAnimation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         auto origin = GetShowFieldOffset();
@@ -476,32 +473,32 @@ void FieldView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
     }
 }
 
-void FieldView::GeneratePaths()
+void CalChartView::GeneratePaths()
 {
     mAnimation = mShow->NewAnimation(CalChart::NotifyStatus{}, CalChart::NotifyErrorList{});
 }
 
-void FieldView::DoDrawBackground(bool enable)
+void CalChartView::DoDrawBackground(bool enable)
 {
     mDrawBackground = enable;
 }
 
-bool FieldView::DoingDrawBackground() const
+bool CalChartView::DoingDrawBackground() const
 {
     return mDrawBackground;
 }
 
-void FieldView::DoPictureAdjustment(bool enable)
+void CalChartView::DoPictureAdjustment(bool enable)
 {
     mAdjustBackgroundMode = enable;
 }
 
-bool FieldView::DoingPictureAdjustment() const
+bool CalChartView::DoingPictureAdjustment() const
 {
     return mAdjustBackgroundMode;
 }
 
-bool FieldView::AddBackgroundImage(const wxImage& image)
+bool CalChartView::AddBackgroundImage(const wxImage& image)
 {
     if (!image.IsOk()) {
         return false;
@@ -526,10 +523,11 @@ bool FieldView::AddBackgroundImage(const wxImage& image)
     return true;
 }
 
-void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
+void CalChartView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
 {
-    if (!mAdjustBackgroundMode)
+    if (!mAdjustBackgroundMode) {
         return;
+    }
     mWhichBackgroundIndex = -1;
     for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
         if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
@@ -541,10 +539,11 @@ void FieldView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
     }
 }
 
-void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
+void CalChartView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
-    if (!mAdjustBackgroundMode)
+    if (!mAdjustBackgroundMode) {
         return;
+    }
     if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
         auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
         auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
@@ -552,25 +551,27 @@ void FieldView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
     }
 }
 
-void FieldView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
+void CalChartView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
 {
-    if (!mAdjustBackgroundMode)
+    if (!mAdjustBackgroundMode) {
         return;
+    }
     if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
         mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
     }
 }
 
-void FieldView::OnBackgroundImageDelete()
+void CalChartView::OnBackgroundImageDelete()
 {
-    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())))
+    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size()))) {
         return;
+    }
     // let the doc know we've removed a picture.
     auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void FieldView::UpdateBackgroundImages()
+void CalChartView::UpdateBackgroundImages()
 {
     mBackgroundImages.clear();
     if (mShow && mShow->GetNumSheets()) {
