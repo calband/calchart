@@ -128,6 +128,7 @@ enum {
     CALCHART__ViewFieldThumbnail,
     CALCHART__ViewFieldControls,
     CALCHART__ViewContinuityInfo,
+    CALCHART__ViewAnimationErrors,
     CALCHART__ViewZoomFit,
     CALCHART__ViewZoomIn,
     CALCHART__ViewZoomOut,

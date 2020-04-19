@@ -22,9 +22,9 @@
 
 #include "draw.h"
 
+#include "CalChartDoc.h"
 #include "animate.h"
 #include "animatecommand.h"
-#include "CalChartDoc.h"
 #include "cc_drawcommand.h"
 #include "cc_point.h"
 #include "cc_sheet.h"

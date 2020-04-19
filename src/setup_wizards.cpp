@@ -21,8 +21,8 @@
 */
 
 #include "setup_wizards.h"
-#include "basic_ui.h"
 #include "CalChartApp.h"
+#include "basic_ui.h"
 #include "confgr.h"
 #include "modes.h"
 

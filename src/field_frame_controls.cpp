@@ -45,10 +45,10 @@ static constexpr std::pair<CalChart::Coord::units, CalChart::Coord::units> gridv
     { Int2CoordUnits(8), static_cast<CalChart::Coord::units>(Int2CoordUnits(8) / 3) } };
 
 FieldFrameControls::FieldFrameControls(double zoom, wxWindow* parent, wxWindowID id,
-const wxPoint& pos,
-const wxSize& size,
-long style,
-const wxString& name)
+    const wxPoint& pos,
+    const wxSize& size,
+    long style,
+    const wxString& name)
     : wxPanel(parent, id, pos, size, style, name)
 {
     auto topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);

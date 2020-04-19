@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "custom_listview.h"
+#include "CustomListViewPanel.h"
 
 class CalChartConfiguration;
 namespace CalChart {

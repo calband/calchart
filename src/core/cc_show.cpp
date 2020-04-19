@@ -567,6 +567,13 @@ Show_command_pair Show::Create_SetSelectionCommand(const SelectionList& sl) cons
     return { action, reaction };
 }
 
+Show_command_pair Show::Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const
+{
+    auto action = [n, sl](Show& show) { show.SetCurrentSheet(n); show.SetSelection(sl); };
+    auto reaction = [n = mSheetNum, sl = mSelectionList](Show& show) { show.SetCurrentSheet(n); show.SetSelection(sl); };
+    return { action, reaction };
+}
+
 Show_command_pair Show::Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const
 {
     auto action = [mode = newmode](Show& show) {
@@ -742,7 +749,7 @@ Show_command_pair Show::Create_RotatePointPositionsCommand(int rotateAmount, int
     return Create_MovePointsCommand(positions, ref);
 }
 
-Show_command_pair Show::Create_SetReferencePointToRef0(int ref) const
+Show_command_pair Show::Create_ResetReferencePointToRef0(int ref) const
 {
     std::map<int, Coord> positions;
     auto sheet = GetCurrentSheet();

@@ -21,10 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+#include "basic_ui.h"
 #include "confgr.h"
 #include "modes.h"
-#include "basic_ui.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>

@@ -105,7 +105,7 @@ const std::array<long, CalChartConfiguration::kShowModeValues>
     };
 
 // Yard lines
-const std::array<wxString, kYardTextValues> yard_text_defaults = [](){
+const std::array<wxString, kYardTextValues> yard_text_defaults = []() {
     std::array<wxString, kYardTextValues> values;
     auto default_yards = ShowMode::GetDefaultYardLines();
     for (auto i = 0; i < kYardTextValues; ++i) {
@@ -394,9 +394,7 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool, false);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameFieldThumbnailVisibility, bool, true);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameFieldControlsVisibility, bool, true);
-IMPLEMENT_CONFIGURATION_FUNCTIONS(FieldFrameContinuityInfoVisibility, bool, true);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout, wxString, wxT(""));
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellFontSize, long, 14);

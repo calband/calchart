@@ -43,18 +43,25 @@ private:
     void OnPaint(wxPaintEvent& event);
     void HandleKey(wxKeyEvent& event);
     void HandleMouseDown(wxMouseEvent& event);
+    void HandleSizeEvent(wxSizeEvent& event);
 
     wxSize SizeOfOneCell() const;
+    wxSize SizeOfOneCell(bool horizontal) const;
     int WhichCell(wxPoint const& p) const;
 
     CalChartDoc* mDoc;
     std::unique_ptr<FieldThumbnailBrowserView> mView;
 
-    const int x_left_padding;
-    const int x_right_padding;
-    const int y_upper_padding;
-    const int y_name_size;
-    const int y_name_padding;
+    const int mXLeftPadding{ 4 };
+    const int mXRightPadding{ 4 };
+    const int mXScrollPadding{};
+    const int mYUpperPadding{ 4 };
+    const int mYNameSize{ 16 };
+    const int mYNamePadding{ 4 };
+    const int mYBottomPadding{ 4 };
+    const int mYScrollPadding{};
+
+    bool mLayoutHorizontal{ false };
 
     DECLARE_EVENT_TABLE()
 };

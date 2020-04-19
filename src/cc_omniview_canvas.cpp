@@ -21,9 +21,9 @@
 */
 
 #include "cc_omniview_canvas.h"
+#include "CalChartDoc.h"
 #include "animation_frame.h"
 #include "animation_view.h"
-#include "CalChartDoc.h"
 #include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "draw.h"
@@ -31,8 +31,8 @@
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
-#include <wx/stdpaths.h>
 #include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 #if !wxUSE_GLCANVAS
 #error "OpenGL required: set wxUSE_GLCANVAS to 1 and rebuild the library"
@@ -57,13 +57,14 @@
 //
 // care must be taken to getting these correct
 
-auto GetImageDir() {
+auto GetImageDir()
+{
 #if defined(__APPLE__) && (__APPLE__)
-	const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/");
+    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/");
 #else
-	const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("image") PATH_SEPARATOR);
+    const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("image") PATH_SEPARATOR);
 #endif
-	return kImageDir;
+    return kImageDir;
 }
 
 static const viewpoint_t KStartingViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
@@ -1020,4 +1021,3 @@ void CCOmniView_Canvas::OnCmd_ToggleShowOnlySelected()
     mShowOnlySelected = !mShowOnlySelected;
     Refresh();
 }
-

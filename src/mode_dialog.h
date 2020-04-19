@@ -21,9 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include "confgr.h"
 #include "basic_ui.h"
+#include "confgr.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
@@ -44,6 +43,7 @@ public:
     ~ModeSetupDialog() = default;
 
     CalChart::ShowMode GetShowMode() const;
+
 private:
-    ShowModeDialogSetup *m_setup;
+    ShowModeDialogSetup* m_setup;
 };

@@ -27,8 +27,8 @@
 #include <wx/dnd.h>
 #include <wx/icon.h>
 
-#include "calchart.xpm"
 #include "calchart.xbm"
+#include "calchart.xpm"
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame)
@@ -51,23 +51,22 @@ wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
         if (size != wxDefaultSize) {
             image = image.Scale(size.GetX(), size.GetY(), wxIMAGE_QUALITY_HIGH);
         }
-        bitmap = wxBitmap{image};
+        bitmap = wxBitmap{ image };
     }
     return new wxStaticBitmap(parent, wxID_STATIC, bitmap, wxDefaultPosition, size);
 }
 
-wxStaticText* TextStringWithSize(wxWindow *parent, std::string const& label, int pointSize)
+wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int pointSize)
 {
     auto result = new wxStaticText(parent, wxID_STATIC, label, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
     result->SetFont(*wxTheFontList->FindOrCreateFont(pointSize, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     return result;
 }
 
-wxStaticLine* LineWithLength(wxWindow *parent, int length, long style)
+wxStaticLine* LineWithLength(wxWindow* parent, int length, long style)
 {
     return new wxStaticLine(parent, wxID_STATIC, wxDefaultPosition, wxSize(length, -1), style);
 }
-
 
 class FancyTextWinDropTarget : public wxFileDropTarget {
 public:
@@ -249,13 +248,16 @@ wxSizerFlags RightBasicSizerFlags()
 
 wxSizerFlags ExpandSizerFlags()
 {
-    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0);
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Proportion(1).Expand();
     return sizerFlags;
 }
-
 
 void AddToSizerBasic(wxSizer* sizer, wxWindow* window)
 {
     sizer->Add(window, BasicSizerFlags());
 }
 
+void AddToSizerExpand(wxSizer* sizer, wxWindow* window)
+{
+    sizer->Add(window, ExpandSizerFlags());
+}

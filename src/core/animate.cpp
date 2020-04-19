@@ -73,6 +73,7 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
     , curr_cmds(pts.size())
     , curr_sheetnum(0)
     , mCollisionAction(NULL)
+, mAnimationErrors(show.GetNumSheets())
 {
     // the variables are persistant through the entire compile process.
     AnimationVariables variablesStates;
@@ -130,6 +131,9 @@ Animation::Animation(const Show& show, NotifyStatus notifyStatus, NotifyErrorLis
             if (theCommands[j].empty()) {
                 theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
             }
+        }
+        if (errors.AnyErrors()) {
+            mAnimationErrors[std::distance(show.GetSheetBegin(), curr_sheet)] = errors;
         }
         if (errors.AnyErrors() && notifyErrorList) {
             std::string message("Errors for \"");
@@ -315,33 +319,30 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 
 int Animation::GetNumberSheets() const { return static_cast<int>(sheets.size()); }
 
-AnimateCommands Animation::GetCommands(unsigned whichPoint) const
+AnimateCommands Animation::GetCommands(unsigned whichSheet, unsigned whichPoint) const
 {
-    return sheets.at(curr_sheetnum).GetCommands(whichPoint);
+    return sheets.at(whichSheet).GetCommands(whichPoint);
 }
 
 std::vector<DrawCommand>
-Animation::GenPathToDraw(unsigned point, const Coord& offset) const
+Animation::GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset) const
 {
-    auto animation_commands = GetCommands(point);
-    auto position = pts.at(point);
+    auto animation_commands = GetCommands(whichSheet, point);
+    auto position = sheets.at(whichSheet).GetPoints().at(point);
     std::vector<DrawCommand> draw_commands;
-    for (auto commands = animation_commands.begin();
-         commands != animation_commands.end(); ++commands) {
-        draw_commands.push_back((*commands)->GenCC_DrawCommand(position, offset));
-        (*commands)->ApplyForward(position);
+    for (auto&& commands : animation_commands) {
+        draw_commands.push_back(commands->GenCC_DrawCommand(position, offset));
+        commands->ApplyForward(position);
     }
     return draw_commands;
 }
 
-AnimatePoint Animation::EndPosition(unsigned point,
-    const Coord& offset) const
+AnimatePoint Animation::EndPosition(unsigned whichSheet, unsigned point, const Coord& offset) const
 {
-    auto animation_commands = GetCommands(point);
-    auto position = pts.at(point);
-    for (auto commands = animation_commands.begin();
-         commands != animation_commands.end(); ++commands) {
-        (*commands)->ApplyForward(position);
+    auto animation_commands = GetCommands(whichSheet, point);
+    auto position = sheets.at(whichSheet).GetPoints().at(point);
+    for (auto&& commands : animation_commands) {
+        commands->ApplyForward(position);
     }
     position += offset;
     return position;
@@ -376,4 +377,10 @@ std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const
 {
     return sheets.end();
 }
+
+std::vector<AnimationErrors> Animation::GetAnimationErrors() const
+{
+    return mAnimationErrors;
+}
+
 }

@@ -22,12 +22,12 @@
 
 #include "cc_show.h"
 
-#include <wx/cmdproc.h>
-#include <wx/docview.h> // For basic wx defines
-#include <wx/wx.h> // For basic wx defines
 #include <functional>
 #include <map>
 #include <vector>
+#include <wx/cmdproc.h>
+#include <wx/docview.h> // For basic wx defines
+#include <wx/wx.h> // For basic wx defines
 
 // CalChartDoc is the document in the CalChart Document/View model.  It represents
 // the loaded show.  Commands to manipulate the documents are processed as commands
@@ -154,7 +154,9 @@ public:
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
 
-    const CalChart::ShowMode& GetShowMode() const;
+    CalChart::ShowMode const& GetShowMode() const;
+    // nullptr if there is no animation
+    CalChart::Animation const* GetAnimation() const;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
@@ -163,6 +165,7 @@ public:
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
     std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
+    std::unique_ptr<wxCommand> Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetShowModeCommand(CalChart::ShowMode const& newmode);
     std::unique_ptr<wxCommand> Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
@@ -176,7 +179,7 @@ public:
     std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions, int ref);
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
-    std::unique_ptr<wxCommand> Create_SetReferencePointToRef0(int ref);
+    std::unique_ptr<wxCommand> Create_ResetReferencePointToRef0(int ref);
     std::unique_ptr<wxCommand> Create_SetSymbolCommand(SYMBOL_TYPE sym);
     std::unique_ptr<wxCommand> Create_SetContinuityCommand(SYMBOL_TYPE i, CalChart::Continuity const& new_cont);
     std::unique_ptr<wxCommand> Create_SetLabelRightCommand(bool right);
@@ -222,5 +225,6 @@ private:
     };
 
     std::unique_ptr<CalChart::Show> mShow;
+    std::unique_ptr<CalChart::Animation> mAnimation;
     AutoSaveTimer mTimer;
 };

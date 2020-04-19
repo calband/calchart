@@ -22,9 +22,9 @@
 
 #pragma once
 
+#include <wx/statline.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
-#include <wx/statline.h>
 
 #include <vector>
 
@@ -33,8 +33,8 @@ void SetBandIcon(wxFrame* frame);
 
 // Set icon to band's insignia
 wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size = wxDefaultSize);
-wxStaticText* TextStringWithSize(wxWindow *parent, std::string const& label, int pointSize);
-wxStaticLine* LineWithLength(wxWindow *parent, int length, long style = wxLI_HORIZONTAL);
+wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int pointSize);
+wxStaticLine* LineWithLength(wxWindow* parent, int length, long style = wxLI_HORIZONTAL);
 
 // class for saving and restoring
 class SaveAndRestoreBrushAndPen {
@@ -154,4 +154,4 @@ wxSizerFlags RightBasicSizerFlags();
 wxSizerFlags ExpandSizerFlags();
 
 void AddToSizerBasic(wxSizer* sizer, wxWindow* window);
-
+void AddToSizerExpand(wxSizer* sizer, wxWindow* window);

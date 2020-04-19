@@ -21,9 +21,9 @@
 */
 
 #include "mode_dialog.h"
-#include "mode_dialog_canvas.h"
 #include "basic_ui.h"
 #include "draw.h"
+#include "mode_dialog_canvas.h"
 #include "modes.h"
 
 // convience sizers to change the view behavior in all at once.
@@ -275,7 +275,7 @@ void ShowModeDialogSetup::OnCmdChoice(wxCommandEvent&)
     auto whichMode = modes->GetSelection();
     if (whichMode > 0) {
         modes->SetSelection(0);
-        mShowModeValues = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(whichMode-1));
+        mShowModeValues = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(whichMode - 1));
         ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(CANVAS);
         canvas->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
     }
@@ -292,8 +292,6 @@ CalChart::ShowMode ShowModeDialogSetup::GetShowMode() const
 {
     return CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText);
 }
-
-
 
 ////////////////
 

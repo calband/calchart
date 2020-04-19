@@ -21,6 +21,7 @@
 */
 
 #include "CalChartDoc.h"
+#include "animatecompile.h"
 #include "cc_coord.h"
 #include "cc_types.h"
 #include "ghost_module.h"
@@ -80,6 +81,9 @@ public:
 
     auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
     auto GetShowFieldSize() const { return mShow->GetShowMode().Size(); }
+
+    std::vector<CalChart::AnimationErrors> GetAnimationErrors() const;
+
     auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 
     ///// Change show attributes /////
@@ -87,7 +91,7 @@ public:
     void GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
     void GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
 
-    void SetReferencePoint(int which);
+    void SetActiveReferencePoint(int which);
 
     ///// Select /////
     void UnselectAll() { SetSelection(mShow->MakeUnselectAll()); }
@@ -98,6 +102,7 @@ public:
         bool toggleSelected);
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
     void SetSelection(const SelectionList& sl);
+    void GoToSheetAndSetSelection(int which, const SelectionList& sl);
 
     ///// Drawing marcher's paths /////
     // call this when we need to generate the marcher's paths.

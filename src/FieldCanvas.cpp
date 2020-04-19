@@ -22,14 +22,14 @@
 
 #include "FieldCanvas.h"
 
+#include "CalChartFrame.h"
+#include "CalChartView.h"
 #include "background_image.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
 #include "confgr.h"
 #include "draw.h"
 #include "field_canvas_shapes.h"
-#include "CalChartFrame.h"
-#include "CalChartView.h"
 #include "linmath.h"
 #include "math_utils.h"
 

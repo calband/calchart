@@ -20,8 +20,8 @@
 */
 
 #include "CalChartDoc.h"
-#include "CalChartDocCommand.h"
 #include "CalChartApp.h"
+#include "CalChartDocCommand.h"
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
@@ -223,6 +223,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
     }
+    mAnimation = std::make_unique<Animation>(*mShow, NotifyStatus{}, NotifyErrorList{});
     CalChartDoc_FinishedLoading finishedLoading;
     UpdateAllViews(NULL, &finishedLoading);
     return stream;
@@ -262,6 +263,15 @@ void CalChartDoc::Modify(bool b)
 {
     wxDocument::Modify(b);
     CalChartDoc_modified showMod;
+    // generate a new animation
+    // uncomment below to see how long it takes to print
+    //    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    mAnimation = std::make_unique<Animation>(*mShow, NotifyStatus{}, NotifyErrorList{});
+    //    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    //    std::cout << "generation "
+    //             << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+    //             << "us.\n";
+
     UpdateAllViews(NULL, &showMod);
 }
 
@@ -302,6 +312,12 @@ CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
     NotifyErrorList notifyErrorList)
 {
     return std::make_unique<Animation>(*mShow, notifyStatus, notifyErrorList);
+}
+
+Animation const*
+CalChartDoc::GetAnimation() const
+{
+    return mAnimation ? mAnimation.get() : nullptr;
 }
 
 void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, ShowMode const& newmode)
@@ -389,6 +405,12 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetSelectionCommand(const Selecti
 {
     auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetSelectionCommand(sl));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set Selection"), show_cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl)
+{
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetCurrentSheetAndSelectionCommand(n, sl));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set Current Sheet and Selection"), show_cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowModeCommand(CalChart::ShowMode const& newmode)
@@ -494,10 +516,10 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_RotatePointPositionsCommand(int r
     return std::make_unique<CalChartDocCommand>(*this, wxT("Rotate Points"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetReferencePointToRef0(int ref)
+std::unique_ptr<wxCommand> CalChartDoc::Create_ResetReferencePointToRef0(int ref)
 {
     auto cmds = Create_SetSheetAndSelectionPair();
-    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_SetReferencePointToRef0(ref)));
+    cmds.emplace_back(Inject_CalChartDocArg(mShow->Create_ResetReferencePointToRef0(ref)));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Reset Reference Point"), cmds);
 }
 
