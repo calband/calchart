@@ -22,11 +22,13 @@
 
 #include "basic_ui.h"
 #include "confgr.h"
+#include "platconf.h"
 
 #include <wx/dnd.h>
 #include <wx/icon.h>
 
 #include "calchart.xpm"
+#include "calchart.xbm"
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame)
@@ -34,6 +36,38 @@ void SetBandIcon(wxFrame* frame)
     wxIcon icon = wxICON(calchart);
     frame->SetIcon(icon);
 }
+
+wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
+{
+    wxInitAllImageHandlers();
+    wxBitmap bitmap(BITMAP_NAME(calchart));
+    wxImage image;
+#if defined(__APPLE__) && (__APPLE__)
+    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/calchart.png");
+#else
+    const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("image") PATH_SEPARATOR wxT("calchart.pgn")));
+#endif
+    if (image.LoadFile(kImageDir)) {
+        if (size != wxDefaultSize) {
+            image = image.Scale(size.GetX(), size.GetY(), wxIMAGE_QUALITY_HIGH);
+        }
+        bitmap = wxBitmap{image};
+    }
+    return new wxStaticBitmap(parent, wxID_STATIC, bitmap, wxDefaultPosition, size);
+}
+
+wxStaticText* TextStringWithSize(wxWindow *parent, std::string const& label, int pointSize)
+{
+    auto result = new wxStaticText(parent, wxID_STATIC, label, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+    result->SetFont(*wxTheFontList->FindOrCreateFont(pointSize, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    return result;
+}
+
+wxStaticLine* LineWithLength(wxWindow *parent, int length, long style)
+{
+    return new wxStaticLine(parent, wxID_STATIC, wxDefaultPosition, wxSize(length, -1), style);
+}
+
 
 class FancyTextWinDropTarget : public wxFileDropTarget {
 public:
@@ -194,3 +228,34 @@ bool ClickDragCtrlScrollCanvas::ShouldScrollOnMouseEvent(
 {
     return event.Dragging() && event.ControlDown();
 }
+
+wxSizerFlags BasicSizerFlags()
+{
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0);
+    return sizerFlags;
+}
+
+wxSizerFlags LeftBasicSizerFlags()
+{
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Left().Proportion(0);
+    return sizerFlags;
+}
+
+wxSizerFlags RightBasicSizerFlags()
+{
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Right().Proportion(0);
+    return sizerFlags;
+}
+
+wxSizerFlags ExpandSizerFlags()
+{
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0);
+    return sizerFlags;
+}
+
+
+void AddToSizerBasic(wxSizer* sizer, wxWindow* window)
+{
+    sizer->Add(window, BasicSizerFlags());
+}
+

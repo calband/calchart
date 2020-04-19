@@ -29,7 +29,7 @@ class FieldFrameControls : public wxPanel {
     typedef wxPanel super;
 
 public:
-    // FieldFrame will own the show that is passed in
+    // CalChartFrame will own the show that is passed in
     FieldFrameControls(double zoom, wxWindow* parent, wxWindowID id = wxID_ANY,
     const wxPoint& pos = wxDefaultPosition,
     const wxSize& size = wxDefaultSize,

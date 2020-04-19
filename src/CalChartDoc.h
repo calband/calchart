@@ -1,6 +1,6 @@
+#pragma once
 /*
  * CalChartDoc.h
- * Definitions for the wxDoc for calchart shows
  */
 
 /*
@@ -20,18 +20,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "cc_coord.h"
 #include "cc_show.h"
 
 #include <wx/cmdproc.h>
 #include <wx/docview.h> // For basic wx defines
 #include <wx/wx.h> // For basic wx defines
-
-#include <memory>
-#include <set>
+#include <functional>
+#include <map>
 #include <vector>
+
+// CalChartDoc is the document in the CalChart Document/View model.  It represents
+// the loaded show.  Commands to manipulate the documents are processed as commands
+// so we may maintain an undo history.
 
 class CalChartDoc;
 namespace CalChart {
@@ -91,14 +91,9 @@ public:
     // Update the views that the doc been modified
     virtual void Modify(bool b);
 
-// How we save and load a show:
-#if wxUSE_STD_IOSTREAM
+    // How we save and load a show:
     virtual wxSTD ostream& SaveObject(wxSTD ostream& stream);
     virtual wxSTD istream& LoadObject(wxSTD istream& stream);
-#else
-    virtual wxOutputStream& SaveObject(wxOutputStream& stream);
-    virtual wxInputStream& LoadObject(wxInputStream& stream);
-#endif
 
     /*!
      * @brief Exports the show to a file that can be animated by
@@ -124,8 +119,7 @@ public:
 
     void FlushAllTextWindows();
 
-    std::unique_ptr<CalChart::Animation> NewAnimation(CalChart::NotifyStatus notifyStatus,
-        CalChart::NotifyErrorList notifyErrorList);
+    std::unique_ptr<CalChart::Animation> NewAnimation(CalChart::NotifyStatus notifyStatus, CalChart::NotifyErrorList notifyErrorList);
     void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, CalChart::ShowMode const& newmode);
 
     auto GetNumSheets() const { return mShow->GetNumSheets(); }
@@ -164,9 +158,7 @@ public:
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
     auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
-    int PrintToPS(std::ostream& buffer, bool overview, int min_yards,
-        const std::set<size_t>& isPicked,
-        const CalChartConfiguration& config_) const;
+    int PrintToPS(std::ostream& buffer, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);

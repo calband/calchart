@@ -1,6 +1,5 @@
 /*
  * CalChartDoc.cpp
- * Member functions for calchart show classes
  */
 
 /*
@@ -20,12 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <fstream>
-
-#include "calchartdoc.h"
-
-#include "calchartapp.h"
-#include "cc_command.h"
+#include "CalChartDoc.h"
+#include "CalChartDocCommand.h"
+#include "CalChartApp.h"
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
@@ -40,7 +36,6 @@
 #include "platconf.h"
 #include "print_ps.h"
 
-#include <list>
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
 
@@ -196,17 +191,10 @@ T& CalChartDoc::SaveObjectGeneric(T& stream)
     return SaveObjectInternal(stream);
 }
 
-#if wxUSE_STD_IOSTREAM
 wxSTD ostream& CalChartDoc::SaveObject(wxSTD ostream& stream)
 {
     return SaveObjectGeneric<wxSTD ostream>(stream);
 }
-#else
-wxOutputStream& CalChartDoc::SaveObject(wxOutputStream& stream)
-{
-    return SaveObjectGeneric<wxOutputStream>(stream);
-}
-#endif
 
 template <typename T>
 T& CalChartDoc::SaveObjectInternal(T& stream)
@@ -240,17 +228,10 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
     return stream;
 }
 
-#if wxUSE_STD_IOSTREAM
 wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream)
 {
     return LoadObjectGeneric<wxSTD istream>(stream);
 }
-#else
-wxInputStream& CalChartDoc::LoadObject(wxInputStream& stream)
-{
-    return LoadObjectGeneric<wxInputStream>(stream);
-}
-#endif
 
 bool CalChartDoc::exportViewerFile(const wxString& filepath)
 {
@@ -304,8 +285,7 @@ void CalChartDoc::Autosave()
             SaveObjectInternal(outputStream);
         }
         if (!outputStream.IsOk()) {
-            wxMessageBox(wxT("Error creating recovery file.  Take heed, save often!"),
-                wxT("Recovery Error"));
+            wxMessageBox(wxT("Error creating recovery file.  Take heed, save often!"), wxT("Recovery Error"));
         }
     }
 }
@@ -370,8 +350,7 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
         [this](size_t which) {
             return this->GetShowMode().Get_yard_text()[which];
         });
-    return printShowToPS(buffer, mShow->GetCurrentSheetNum(), isPicked,
-        GetTitle().ToStdString());
+    return printShowToPS(buffer, mShow->GetCurrentSheetNum(), isPicked, GetTitle().ToStdString());
 }
 
 // CalChartDocCommand consist of the action to perform, and the reverse action to undo.

@@ -14,9 +14,9 @@
 #include <atomic>
 
 #include "basic_ui.h"
-#include "calchartapp.h"
-#include "calchartdoc.h"
-#include "cc_command.h"
+#include "CalChartApp.h"
+#include "CalChartDoc.h"
+#include "CalChartDocCommand.h"
 #include "cc_continuity.h"
 #include "cc_sheet.h"
 #include "cc_show.h"

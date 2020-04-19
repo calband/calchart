@@ -20,7 +20,7 @@
 */
 
 #include "cont_browser_panel.h"
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cont.h"
 #include "cont_box_draw.h"
 #include "cont_composer.h"

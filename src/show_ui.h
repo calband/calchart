@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include <wx/docview.h>
 #include <wx/wizard.h>
 

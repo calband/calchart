@@ -23,7 +23,7 @@
 #include "cc_omniview_canvas.h"
 #include "animation_frame.h"
 #include "animation_view.h"
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "draw.h"

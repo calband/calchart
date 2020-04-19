@@ -23,14 +23,13 @@
 #include "animation_view.h"
 #include "animation_frame.h"
 #include "basic_ui.h"
-#include "calchartapp.h"
-#include "calchartdoc.h"
+#include "CalChartApp.h"
+#include "CalChartDoc.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "draw.h"
 #include "modes.h"
-#include "top_frame.h"
 
 #include <wx/dcbuffer.h>
 

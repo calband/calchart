@@ -1,6 +1,6 @@
 
 #include "single_instance_ipc.h"
-#include "calchartapp.h"
+#include "CalChartApp.h"
 
 #include <algorithm>
 #include <vector>

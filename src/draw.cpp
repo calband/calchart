@@ -24,7 +24,7 @@
 
 #include "animate.h"
 #include "animatecommand.h"
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cc_drawcommand.h"
 #include "cc_point.h"
 #include "cc_sheet.h"

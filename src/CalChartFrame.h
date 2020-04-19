@@ -1,6 +1,6 @@
+#pragma once
 /*
- * field_frame.h
- * Frame for the field window
+ * CalChartFrame.h
  */
 
 /*
@@ -20,42 +20,31 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "cc_coord.h"
 #include "cc_types.h"
 
 #include <wx/docview.h>
 #include <wx/aui/framemanager.h>
 
-class wxComboBox;
-class wxSlider;
-namespace CalChart {
-class Show;
-}
+// CalChartFrame is the central frame of the CalChart app.  Manipulation of
+// the CalChartDoc happens via the CalChartView.
 
+class CalChartConfiguration;
+class CalChartDoc;
+class CalChartView;
+class ContinuityBrowser;
 class FieldCanvas;
-class FieldView;
 class FieldFrameControls;
 class FieldThumbnailBrowser;
-class ContinuityBrowser;
-class FieldBrowser;
-class LocalContinuityBrowser;
-class FieldView;
-class CalChartDoc;
-class CalChartConfiguration;
-class wxSplitterWindow;
-class wxSplitterEvent;
 
 // Define the main editing frame
-class FieldFrame : public wxDocChildFrame {
-    typedef wxDocChildFrame super;
+class CalChartFrame : public wxDocChildFrame {
+    using super = wxDocChildFrame;
 
 public:
-    // FieldFrame will own the show that is passed in
-    FieldFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config_,
-        wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
-    ~FieldFrame();
+    // CalChartFrame will own the show that is passed in
+    CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config_, wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
+    ~CalChartFrame();
 
     void OnCmdAppend(wxCommandEvent& event);
     void OnCmdImportCont(wxCommandEvent& event);
@@ -136,7 +125,6 @@ public:
 
     void OnSize(wxSizeEvent& event);
 
-    void OnSplitDclick(wxSplitterEvent& event);
     void OnCmd_ZoomFit(wxCommandEvent&);
     void OnCmd_ZoomIn(wxCommandEvent&);
     void OnCmd_ZoomOut(wxCommandEvent&);
@@ -166,8 +154,8 @@ public:
     const FieldCanvas* GetCanvas() const { return mCanvas; }
     FieldCanvas* GetCanvas() { return mCanvas; }
 
-    const FieldView* GetFieldView() const;
-    FieldView* GetFieldView();
+    const CalChartView* GetFieldView() const;
+    CalChartView* GetFieldView();
 
     const CalChartDoc* GetShow() const;
     CalChartDoc* GetShow();

@@ -1,5 +1,5 @@
 /*
- * calchartapp.cpp
+ * CalChartApp.cpp
  * Central App for CalChart
  */
 
@@ -20,14 +20,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "calchartapp.h"
+#include "CalChartApp.h"
+#include "CalChartDoc.h"
+#include "CalChartView.h"
+#include "TopFrame.h"
 #include "basic_ui.h"
-#include "calchartdoc.h"
 #include "confgr.h"
-#include "FieldView.h"
 #include "modes.h"
 #include "platconf.h"
-#include "top_frame.h"
+#include "single_instance_ipc.h"
 
 #include <wx/fs_zip.h>
 #include <wx/help.h>
@@ -99,8 +100,7 @@ void CalChartApp::InitAppAsServer()
     mDocManager = new wxDocManager;
 
     //// Create a template relating drawing documents to their views
-    (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart"), _T("Field View"),
-        CLASSINFO(CalChartDoc), CLASSINFO(FieldView));
+    (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart Doc"), _T("CalChart View"), CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
 
     gPrintDialogData = new wxPrintDialogData;
     mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());

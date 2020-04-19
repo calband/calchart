@@ -21,8 +21,8 @@
 */
 
 #include "ContinuityBrowser.h"
-#include "calchartapp.h"
-#include "calchartdoc.h"
+#include "CalChartApp.h"
+#include "CalChartDoc.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "cont_browser_panel.h"

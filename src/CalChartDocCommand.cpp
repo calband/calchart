@@ -20,12 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_command.h"
-#include "calchartapp.h"
-#include "cc_continuity.h"
-#include "cc_sheet.h"
-#include "linmath.h"
-#include <wx/utils.h>
+#include "CalChartDocCommand.h"
+#include "CalChartDoc.h"
 
 // SetDescriptionCommand
 // Set the description of this show

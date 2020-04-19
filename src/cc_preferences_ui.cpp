@@ -21,7 +21,7 @@
 */
 
 #include "cc_preferences_ui.h"
-#include "calchartdoc.h"
+#include "CalChartDoc.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"

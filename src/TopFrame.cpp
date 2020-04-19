@@ -20,14 +20,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "top_frame.h"
+#include "TopFrame.h"
 #include "basic_ui.h"
-#include "calchartapp.h"
+#include "CalChartApp.h"
 #include "cc_preferences_ui.h"
 #include "ccvers.h"
+#include "calchart.xbm"
 
 #include <wx/dnd.h>
 #include <wx/html/helpctrl.h>
+#include <wx/wx.h>
+#include <wx/statline.h>
 
 IMPLEMENT_CLASS(TopFrame, wxDocParentFrame)
 
@@ -43,20 +46,25 @@ public:
         : mManager(manager)
     {
     }
-    virtual bool OnDropFiles(wxCoord x, wxCoord y,
-        const wxArrayString& filenames);
+    virtual bool OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& filenames);
 
 private:
     wxDocManager* mManager;
 };
 
-bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y,
-    const wxArrayString& filenames)
+bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& filenames)
 {
-    for (size_t i = 0; i < filenames.Count(); i++) {
-        mManager->CreateDocument(filenames[i], wxDOC_SILENT);
+    for (auto&& filename : filenames) {
+        mManager->CreateDocument(filename, wxDOC_SILENT);
     }
     return true;
+}
+
+static auto testString(wxWindow *parent) {
+    auto result = new wxStaticText(parent, wxID_STATIC, wxT("CalChart v") wxT(STRINGIZE(CC_MAJOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_MINOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_SUB_MINOR_VERSION)));
+    wxFont* contPlainFont = wxTheFontList->FindOrCreateFont(16, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    result->SetFont(*contPlainFont);
+    return result;
 }
 
 TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
@@ -66,10 +74,8 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     SetBandIcon(this);
 
     wxMenu* file_menu = new wxMenu;
-    file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"),
-        wxT("Create a new show"));
-    file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"),
-        wxT("Load a saved show"));
+    file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
+    file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
     file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
     file_menu->Append(wxID_EXIT, wxT("&Quit\tCTRL-Q"), wxT("Quit CalChart"));
 
@@ -77,11 +83,9 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     manager->FileHistoryUseMenu(file_menu);
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."),
-        wxT("Information about the program"));
+    help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
     // this comes up as a leak on Mac?
-    help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"),
-        wxT("Help on using CalChart"));
+    help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
 
     wxMenuBar* menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, wxT("&File"));
@@ -89,6 +93,18 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     SetMenuBar(menu_bar);
 
     SetDropTarget(new TopFrameDropTarget(manager));
+
+    auto topsizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topsizer);
+
+    // add a horizontal bar to make things clear:
+    AddToSizerBasic(topsizer, BitmapWithBandIcon(this, wxSize(150, 150)));
+    AddToSizerBasic(topsizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), 16));
+    AddToSizerBasic(topsizer, LineWithLength(this, 150));
+
+    AddToSizerBasic(topsizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", 14));
+    AddToSizerBasic(topsizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", 11));
+
     Show(true);
 }
 
