@@ -20,9 +20,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animation_frame.h"
+#if 0
+
+#include "OmniviewPanel.h"
+#include "AnimationCanvas.h"
 #include "CalChartDoc.h"
-#include "animation_canvas.h"
 #include "basic_ui.h"
 #include "cc_omniview_canvas.h"
 #include "confgr.h"
@@ -652,3 +654,5 @@ void AnimationFrame::OnNotifyErrorList(
         mErrorMarkers.emplace_back(i.second, sheetnum);
     }
 }
+
+#endif

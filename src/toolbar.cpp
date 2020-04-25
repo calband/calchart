@@ -195,31 +195,3 @@ std::vector<ToolBarEntry> GetMainToolBar()
     return first_half;
 }
 
-std::vector<ToolBarEntry> GetAnimationToolBar()
-{
-    static const ToolBarEntry anim_tb[] = {
-        { wxITEM_NORMAL, NULL, wxT("Stop (space toggle)"), CALCHART__anim_stop },
-        { wxITEM_NORMAL, NULL, wxT("Play (space toggle)"), CALCHART__anim_play },
-        { wxITEM_NORMAL, NULL, wxT("Previous beat (left arrow)"),
-            CALCHART__anim_prev_beat },
-        { wxITEM_NORMAL, NULL, wxT("Next beat (right arrow)"),
-            CALCHART__anim_next_beat },
-        { wxITEM_NORMAL, NULL, wxT("Previous stuntsheet"),
-            CALCHART__anim_prev_sheet },
-        { wxITEM_NORMAL, NULL, wxT("Next stuntsheet"), CALCHART__anim_next_sheet }
-    };
-    static std::vector<ToolBarEntry> sAnimTB(
-        anim_tb, anim_tb + sizeof(anim_tb) / sizeof(anim_tb[0]));
-    static bool sFirstTime = true;
-    if (sFirstTime) {
-        sFirstTime = false;
-        std::vector<ToolBarEntry>::iterator i = sAnimTB.begin();
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_stop));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_play));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_pbeat));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_nbeat));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_pshet));
-        (i++)->bm = new wxBitmap(BITMAP_NAME(tb_nshet));
-    }
-    return sAnimTB;
-}

@@ -102,14 +102,6 @@ enum MarchingStyle {
     STYLE_Close
 };
 
-enum CollisionWarning {
-    COLLISION_RESPONSE_NONE,
-    COLLISION_RESPONSE_SHOW,
-    COLLISION_RESPONSE_BEEP
-};
-
-using AnimatePoint = Coord;
-
 struct ErrorMarker {
     SelectionList pntgroup; // which points have this error
     SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity

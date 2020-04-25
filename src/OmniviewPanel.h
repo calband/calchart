@@ -21,8 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "AnimationView.h"
 #include "animate_types.h"
-#include "animation_view.h"
 
 #include <wx/docview.h>
 #include <wx/wx.h>

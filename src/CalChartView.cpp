@@ -26,9 +26,9 @@
 #include "CalChartFrame.h"
 #include "FieldCanvas.h"
 #include "animate.h"
+#include "animate_types.h"
 #include "animatecommand.h"
 #include "animatecompile.h"
-#include "animation_frame.h"
 #include "background_image.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
@@ -131,7 +131,7 @@ void CalChartView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
     UpdateBackgroundImages();
 
     if (mFrame) {
-        mFrame->UpdatePanel();
+        mFrame->OnUpdate();
         mFrame->Refresh();
     }
 }
@@ -381,6 +381,14 @@ std::pair<bool, std::string> CalChartView::DoAppendShow(std::unique_ptr<CalChart
     return { true, "" };
 }
 
+// append is an insert with a relabel
+bool CalChartView::DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity const& new_cont)
+{
+    auto cmd = mShow->Create_SetContinuityCommand(sym, new_cont);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+    return true;
+}
+
 int CalChartView::FindPoint(CalChart::Coord pos) const
 {
     return mShow->GetCurrentSheet()->FindPoint(
@@ -400,6 +408,15 @@ std::vector<CalChart::AnimationErrors> CalChartView::GetAnimationErrors() const
     }
     auto animation = mShow->GetAnimation();
     return animation ? animation->GetAnimationErrors() : std::vector<CalChart::AnimationErrors>{};
+}
+
+std::unique_ptr<CalChart::Animation> CalChartView::GetAnimationInstance() const
+{
+    if (!mShow) {
+        return {};
+    }
+    auto animation = mShow->GetAnimation();
+    return animation ? std::make_unique<CalChart::Animation>(*animation) : std::unique_ptr<CalChart::Animation>{};
 }
 
 void CalChartView::GoToSheet(int which)

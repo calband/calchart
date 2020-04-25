@@ -153,5 +153,14 @@ wxSizerFlags LeftBasicSizerFlags();
 wxSizerFlags RightBasicSizerFlags();
 wxSizerFlags ExpandSizerFlags();
 
-void AddToSizerBasic(wxSizer* sizer, wxWindow* window);
-void AddToSizerExpand(wxSizer* sizer, wxWindow* window);
+template <typename T>
+void AddToSizerBasic(wxSizer* sizer, T window)
+{
+    sizer->Add(window, BasicSizerFlags());
+}
+
+template <typename T>
+void AddToSizerExpand(wxSizer* sizer, T window)
+{
+    sizer->Add(window, ExpandSizerFlags());
+}

@@ -27,13 +27,18 @@
 #include <wx/artprov.h>
 #include <wx/treelist.h>
 
-BEGIN_EVENT_TABLE(AnimationErrorsPanel, wxScrolledWindow)
+BEGIN_EVENT_TABLE(AnimationErrorsPanel, wxPanel)
 EVT_TREELIST_SELECTION_CHANGED(wxID_ANY, AnimationErrorsPanel::OnSelectionChanged)
 EVT_TREELIST_ITEM_ACTIVATED(wxID_ANY, AnimationErrorsPanel::OnItemActivated)
 END_EVENT_TABLE()
 
-AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent)
-    : super(parent)
+AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent,
+    wxWindowID winid,
+    const wxPoint& pos,
+    const wxSize& size,
+    long style,
+    const wxString& name)
+    : super(parent, winid, pos, size, style, name)
 {
     // create a sizer and populate
     auto topSizer = new wxBoxSizer(wxVERTICAL);
@@ -61,6 +66,42 @@ AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent)
     OnUpdate();
 }
 
+void AnimationErrorsPanel::OnUpdate()
+{
+    if (!mView) {
+        return;
+    }
+
+    auto errors = mView->GetAnimationErrors();
+    UpdateErrors(errors);
+    Refresh();
+}
+
+void AnimationErrorsPanel::OnSelectionChanged(wxTreeListEvent& event)
+{
+    if (!mView) {
+        return;
+    }
+
+    if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
+        printf("Found error at %d\n", std::get<0>(error->second));
+        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second).pntgroup);
+    }
+}
+
+void AnimationErrorsPanel::OnItemActivated(wxTreeListEvent& event)
+{
+    if (!mView) {
+        return;
+    }
+
+    if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
+        printf("Found error at %d\n", std::get<0>(error->second));
+        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second).pntgroup);
+    }
+}
+
+// Implementation details
 void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors)
 {
     if (errors == mCurrentErrors) {
@@ -91,30 +132,5 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
                 mErrorLookup[itemId2] = error;
             }
         }
-    }
-}
-
-void AnimationErrorsPanel::OnUpdate()
-{
-    if (mView) {
-        auto errors = mView->GetAnimationErrors();
-        UpdateErrors(errors);
-    }
-    Refresh();
-}
-
-void AnimationErrorsPanel::OnSelectionChanged(wxTreeListEvent& event)
-{
-    if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        printf("Found error at %d\n", std::get<0>(error->second));
-        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second).pntgroup);
-    }
-}
-
-void AnimationErrorsPanel::OnItemActivated(wxTreeListEvent& event)
-{
-    if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        printf("Found error at %d\n", std::get<0>(error->second));
-        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second).pntgroup);
     }
 }

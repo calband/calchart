@@ -181,6 +181,7 @@ private:
     void OnCmdResetAll(wxCommandEvent&);
 
     wxString mAutoSave_Interval;
+    bool mBeep_On_Collisions;
     bool mScroll_Natural;
     bool mSetSheet_Undo;
     bool mSelection_Undo;
@@ -188,6 +189,7 @@ private:
 
 enum {
     AUTOSAVE_INTERVAL = 1000,
+    BEEP_ON_COLLISIONS,
     SCROLL_NATURAL,
     SETSHEET_UNDO,
     SELECTION_UNDO,
@@ -212,6 +214,8 @@ void GeneralSetup::CreateControls()
 
     AddTextboxWithCaption(this, sizer1, AUTOSAVE_INTERVAL,
         wxT("Autosave Interval"));
+    AddCheckboxWithCaption(this, sizer1, BEEP_ON_COLLISIONS,
+        wxT("Beep on animation collisions"));
     AddCheckboxWithCaption(this, sizer1, SCROLL_NATURAL,
         wxT("Scroll Direction: Natural"));
     AddCheckboxWithCaption(this, sizer1, SETSHEET_UNDO,
@@ -225,6 +229,7 @@ void GeneralSetup::CreateControls()
 void GeneralSetup::Init()
 {
     mAutoSave_Interval.Printf(wxT("%ld"), mConfig.Get_AutosaveInterval());
+    mBeep_On_Collisions = mConfig.Get_BeepOnCollisions();
     mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
     mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
     mSelection_Undo = mConfig.Get_CommandUndoSelection();
@@ -233,6 +238,7 @@ void GeneralSetup::Init()
 bool GeneralSetup::TransferDataToWindow()
 {
     ((wxTextCtrl*)FindWindow(AUTOSAVE_INTERVAL))->SetValue(mAutoSave_Interval);
+    ((wxCheckBox*)FindWindow(BEEP_ON_COLLISIONS))->SetValue(mBeep_On_Collisions);
     ((wxCheckBox*)FindWindow(SCROLL_NATURAL))->SetValue(mScroll_Natural);
     ((wxCheckBox*)FindWindow(SETSHEET_UNDO))->SetValue(mSetSheet_Undo);
     ((wxCheckBox*)FindWindow(SELECTION_UNDO))->SetValue(mSelection_Undo);
@@ -247,6 +253,8 @@ bool GeneralSetup::TransferDataFromWindow()
     if (mAutoSave_Interval.ToLong(&val)) {
         mConfig.Set_AutosaveInterval(val);
     }
+    mBeep_On_Collisions = ((wxCheckBox*)FindWindow(BEEP_ON_COLLISIONS))->GetValue();
+    mConfig.Set_BeepOnCollisions(mBeep_On_Collisions);
     mScroll_Natural = ((wxCheckBox*)FindWindow(SCROLL_NATURAL))->GetValue();
     mConfig.Set_ScrollDirectionNatural(mScroll_Natural);
     mSetSheet_Undo = ((wxCheckBox*)FindWindow(SETSHEET_UNDO))->GetValue();
@@ -259,6 +267,7 @@ bool GeneralSetup::TransferDataFromWindow()
 bool GeneralSetup::ClearValuesToDefault()
 {
     mConfig.Clear_AutosaveInterval();
+    mConfig.Clear_CalChartFrameAUILayout();
     Init();
     TransferDataToWindow();
     return true;
@@ -1274,7 +1283,7 @@ void ContCellSetup::CreateControls()
     spin = new wxSpinCtrl(this, SPIN_Box_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellBoxPadding());
     boxsizer->Add(spin, sBasicSizerFlags);
 
-    auto canvas = new ContinuityBrowserPanel(nullptr, SYMBOL_PLAIN, mConfig, this);
+    auto canvas = new ContinuityBrowserPanel(SYMBOL_PLAIN, mConfig, this);
     topsizer->Add(canvas, 1, wxEXPAND);
     auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
     auto clonedOut = do_cloning(basic_cont);
@@ -1407,9 +1416,9 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent, wxWindowID id, const 
     mNotebook = new wxNotebook(this, wxID_ANY);
     topsizer->Add(mNotebook, sBasicSizerFlags);
 
+    mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook, wxID_ANY), wxT("General"));
     mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook, wxID_ANY), wxT("Continuity"));
     mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook, wxID_ANY), wxT("Drawing"));
-    mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook, wxID_ANY), wxT("General"));
     mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook, wxID_ANY), wxT("PS Printing"));
     mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook, wxID_ANY), wxT("Show Mode Setup"));
 

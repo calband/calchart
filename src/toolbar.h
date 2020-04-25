@@ -38,4 +38,3 @@ struct ToolBarEntry {
 void AddCoolToolBar(const std::vector<ToolBarEntry>& entries, wxFrame& frame);
 std::vector<ToolBarEntry> GetSymbolsToolBar();
 std::vector<ToolBarEntry> GetMainToolBar();
-std::vector<ToolBarEntry> GetAnimationToolBar();

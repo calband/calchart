@@ -44,12 +44,13 @@ public:
     CalChartView();
     ~CalChartView() = default;
 
-    bool OnCreate(wxDocument* doc, long flags);
-    void OnDraw(wxDC* dc);
+    bool OnCreate(wxDocument* doc, long flags) override;
+    void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
+    bool OnClose(bool deleteWindow = true) override;
+
+    void OnDraw(wxDC* dc) override;
     void DrawOtherPoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions);
     void OnDrawBackground(wxDC& dc);
-    void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
-    bool OnClose(bool deleteWindow = true);
 
     void OnWizardSetup(CalChartDoc& show);
 
@@ -72,17 +73,25 @@ public:
     bool DoImportPrintableContinuity(const wxString& file);
     bool DoRelabel();
     std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
+    bool DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);
 
     ///// query show attributes /////
     int FindPoint(CalChart::Coord pos) const;
     CalChart::Coord PointPosition(int which) const;
-    auto GetCurrentSheetNum() const { return mShow->GetCurrentSheetNum(); }
-    auto GetNumSheets() const { return mShow->GetNumSheets(); }
+    auto GetCurrentSheetNum() const { return mShow ? mShow->GetCurrentSheetNum() : 0; }
+    auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
+    auto GetNumPoints() const { return mShow ? mShow->GetNumPoints() : 0; }
 
+    CalChart::ShowMode const& GetShowMode() { return mShow->GetShowMode(); }
     auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
     auto GetShowFieldSize() const { return mShow->GetShowMode().Size(); }
 
+    auto GetSheetBegin() const { return mShow->GetSheetBegin(); }
+    auto GetSheetEnd() const { return mShow->GetSheetEnd(); }
+    auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
+
     std::vector<CalChart::AnimationErrors> GetAnimationErrors() const;
+    std::unique_ptr<CalChart::Animation> GetAnimationInstance() const;
 
     auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }
 
@@ -90,6 +99,7 @@ public:
     void GoToSheet(int which);
     void GoToNextSheet() { GoToSheet(mShow->GetCurrentSheetNum() + 1); }
     void GoToPrevSheet() { GoToSheet(mShow->GetCurrentSheetNum() - 1); }
+    auto GetNthSheet(int n) const { return mShow->GetNthSheet(n); }
 
     void SetActiveReferencePoint(int which);
 
@@ -98,11 +108,11 @@ public:
     void AddToSelection(const SelectionList& sl) { SetSelection(mShow->MakeAddToSelection(sl)); }
     void ToggleSelection(const SelectionList& sl) { SetSelection(mShow->MakeToggleSelection(sl)); }
     void SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected);
-    void SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2,
-        bool toggleSelected);
+    void SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2, bool toggleSelected);
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
     void SetSelection(const SelectionList& sl);
     void GoToSheetAndSetSelection(int which, const SelectionList& sl);
+    auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
     // call this when we need to generate the marcher's paths.
@@ -127,7 +137,6 @@ private:
 
     CalChartFrame* mFrame{};
     bool mDrawPaths{};
-    std::unique_ptr<CalChart::Animation> mAnimation;
     GhostModule mGhostModule{};
     CalChartDoc* mShow{};
     int mCurrentReferencePoint{};

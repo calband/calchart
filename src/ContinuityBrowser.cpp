@@ -23,6 +23,7 @@
 #include "ContinuityBrowser.h"
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
+#include "CalChartView.h"
 #include "ContinuityBrowserPanel.h"
 #include "cc_sheet.h"
 #include "confgr.h"
@@ -35,16 +36,20 @@ class ContinuityBrowserPerCont : public wxPanel {
     using super = wxPanel;
 
 public:
-    ContinuityBrowserPerCont(CalChartDoc* doc, SYMBOL_TYPE sym, wxWindow* parent);
+    ContinuityBrowserPerCont(SYMBOL_TYPE sym, wxWindow* parent);
     virtual ~ContinuityBrowserPerCont() = default;
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
 
+    void SetView(CalChartView* view);
+    auto GetView() const { return mView; }
+
 private:
+    CalChartView* mView;
     ContinuityBrowserPanel* mCanvas;
 };
 
-ContinuityBrowserPerCont::ContinuityBrowserPerCont(CalChartDoc* doc, SYMBOL_TYPE sym, wxWindow* parent)
+ContinuityBrowserPerCont::ContinuityBrowserPerCont(SYMBOL_TYPE sym, wxWindow* parent)
     : wxPanel(parent)
 {
     auto topsizer = new wxBoxSizer(wxVERTICAL);
@@ -54,7 +59,7 @@ ContinuityBrowserPerCont::ContinuityBrowserPerCont(CalChartDoc* doc, SYMBOL_TYPE
     topsizer->Add(staticText, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
 
     // here's a canvas
-    mCanvas = new ContinuityBrowserPanel(doc, sym, CalChartConfiguration::GetGlobalConfig(), this);
+    mCanvas = new ContinuityBrowserPanel(sym, CalChartConfiguration::GetGlobalConfig(), this);
     topsizer->Add(mCanvas, 1, wxEXPAND);
     topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
 }
@@ -64,9 +69,14 @@ void ContinuityBrowserPerCont::DoSetContinuity(CalChart::Continuity const& text)
     mCanvas->DoSetContinuity(text);
 }
 
-ContinuityBrowser::ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+void ContinuityBrowserPerCont::SetView(CalChartView* view)
+{
+    mView = view;
+    mCanvas->SetView(view);
+}
+
+ContinuityBrowser::ContinuityBrowser(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxScrolledWindow(parent, id, pos, size, style, name)
-    , mDoc(doc)
 {
     // create a sizer for laying things out top down:
     auto topsizer = new wxBoxSizer(wxVERTICAL);
@@ -76,8 +86,8 @@ ContinuityBrowser::ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindo
     topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
 
     // we lay things out from top to bottom, saying what point we're dealing with, then the continuity
-    for (auto& eachcont : k_symbols) {
-        mPerCont.push_back(new ContinuityBrowserPerCont(doc, eachcont, this));
+    for (auto&& eachcont : k_symbols) {
+        mPerCont.push_back(new ContinuityBrowserPerCont(eachcont, this));
         topsizer->Add(mPerCont.back(), 0, wxGROW | wxALL, 5);
         mPerCont.back()->Show(false);
     }
@@ -100,13 +110,21 @@ ContinuityBrowser::ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindo
 
 ContinuityBrowser::~ContinuityBrowser() = default;
 
-void ContinuityBrowser::Update()
+void ContinuityBrowser::OnUpdate()
 {
-    auto sht = mDoc->GetCurrentSheet();
+    auto sht = mView->GetCurrentSheet();
 
     for (auto i = 0ul; i < sizeof(k_symbols) / sizeof(k_symbols[0]); ++i) {
         mPerCont.at(i)->Show(sht->ContinuityInUse(k_symbols[i]));
         mPerCont.at(i)->DoSetContinuity(sht->GetContinuityBySymbol(k_symbols[i]));
     }
     GetSizer()->FitInside(this);
+}
+
+void ContinuityBrowser::SetView(CalChartView* view)
+{
+    mView = view;
+    for (auto&& cont : mPerCont) {
+        cont->SetView(view);
+    }
 }

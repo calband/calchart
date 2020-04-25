@@ -23,8 +23,7 @@
 
 #include <wx/wx.h>
 
-class CalChartDoc;
-class ContinuityBrowser;
+class CalChartView;
 class ContinuityBrowserPerCont;
 
 // ContinuityBrowser
@@ -34,18 +33,20 @@ class ContinuityBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
 
 public:
-    ContinuityBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id = wxID_ANY,
+    ContinuityBrowser(wxWindow* parent, wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxScrolledWindowStyle,
         const wxString& name = wxPanelNameStr);
     ~ContinuityBrowser();
 
-    void Update(); // Refresh data with doc
+    void OnUpdate(); // Refresh from the View
+    void SetView(CalChartView* view);
+    auto GetView() const { return mView; }
 
 private:
     void CreateControls();
 
-    CalChartDoc* mDoc;
+    CalChartView* mView{};
     std::vector<ContinuityBrowserPerCont*> mPerCont;
 };

@@ -150,12 +150,12 @@ void AnimateCompile::SetVarValue(int varnum, float value)
     mState.mVars[varnum][curr_pt] = value;
 }
 
-AnimatePoint AnimateCompile::GetStartingPosition() const
+Coord AnimateCompile::GetStartingPosition() const
 {
     return curr_sheet->GetPosition(GetCurrentPoint());
 }
 
-AnimatePoint AnimateCompile::GetEndingPosition(const ContToken* token) const
+Coord AnimateCompile::GetEndingPosition(const ContToken* token) const
 {
     auto sheet = curr_sheet + 1;
 
@@ -171,7 +171,7 @@ AnimatePoint AnimateCompile::GetEndingPosition(const ContToken* token) const
     }
 }
 
-AnimatePoint AnimateCompile::GetReferencePointPosition(unsigned refnum) const
+Coord AnimateCompile::GetReferencePointPosition(unsigned refnum) const
 {
     return curr_sheet->GetPosition(GetCurrentPoint(), refnum + 1);
 }

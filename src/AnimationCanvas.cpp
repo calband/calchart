@@ -20,9 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animation_canvas.h"
-#include "animation_view.h"
+#include "AnimationCanvas.h"
+#include "AnimationView.h"
 #include "confgr.h"
+#include "cc_coord.h"
 
 #include <wx/dcbuffer.h>
 
@@ -35,18 +36,25 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(AnimationView* view, wxWindow* parent)
-    : wxPanel(parent)
-    , mAnimationView(view)
+AnimationCanvas::AnimationCanvas(wxWindow* parent,
+    wxWindowID winid,
+    const wxPoint& pos,
+    const wxSize& size,
+    long style,
+    const wxString& name)
+    : super(parent, winid, pos, size, style, name)
 {
 }
 
 void AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
+    if (!mView) {
+        return;
+    }
     // update the scale and origin
     UpdateScaleAndOrigin();
 
-    wxBufferedPaintDC dc(this);
+    auto dc = wxBufferedPaintDC{ this };
     auto& config = CalChartConfiguration::GetGlobalConfig();
 
     dc.SetBackground(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
@@ -58,17 +66,14 @@ void AnimationCanvas::OnPaint(wxPaintEvent& event)
     if (mMouseDown) {
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
-        dc.DrawRectangle(mMouseXStart, mMouseYStart, mMouseXEnd - mMouseXStart,
-            mMouseYEnd - mMouseYStart);
+        dc.DrawRectangle(mMouseStart.x, mMouseStart.y, mMouseEnd.x - mMouseStart.x, mMouseEnd.y - mMouseStart.y);
     }
     // draw the view
-    if (mAnimationView) {
-        mAnimationView->OnDraw(dc, config);
-    }
+    mView->OnDraw(&dc);
 }
 
 // utilities
-static auto CalcUserScaleAndOffset(std::pair<CalChart::Coord, CalChart::Coord> const& sizeAndOffset, wxSize const& windowSize)
+static auto CalcUserScaleAndOffset(std::pair<wxPoint, wxPoint> const& sizeAndOffset, wxSize const& windowSize)
 {
     auto newX = static_cast<float>(windowSize.x);
     auto newY = static_cast<float>(windowSize.y);
@@ -101,15 +106,15 @@ static auto CalcUserScaleAndOffset(std::pair<CalChart::Coord, CalChart::Coord> c
 
 void AnimationCanvas::UpdateScaleAndOrigin()
 {
-    if (!mAnimationView)
+    if (!mView) {
         return;
+    }
     auto window_size = GetSize();
-    auto boundingBox = mZoomOnMarchers ? mAnimationView->GetMarcherSizeAndOffset()
-                                       : mAnimationView->GetShowSizeAndOffset();
+    auto boundingBox = mZoomOnMarchers ? mView->GetMarcherSizeAndOffset() : mView->GetShowSizeAndOffset();
     if (mZoomOnMarchers) {
         auto amount = Int2CoordUnits(mStepsOutForMarcherZoom);
-        boundingBox.first += CalChart::Coord(amount, amount) * 2;
-        boundingBox.second -= CalChart::Coord(amount, amount);
+        boundingBox.first += wxPoint(amount, amount) * 2;
+        boundingBox.second -= wxPoint(amount, amount);
     }
     auto userScaleAndOffset = CalcUserScaleAndOffset(boundingBox, window_size);
     mUserScale = userScaleAndOffset.first;
@@ -118,82 +123,78 @@ void AnimationCanvas::UpdateScaleAndOrigin()
 
 void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
 {
-    wxClientDC dc(this);
-    dc.SetUserScale(mUserScale, mUserScale);
-    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    auto point = event.GetPosition();
-    auto x = dc.DeviceToLogicalX(point.x);
-    auto y = dc.DeviceToLogicalY(point.y);
+    if (!mView) {
+        return;
+    }
+    auto point = TranslatePosition(event.GetPosition());
 
     if (!event.AltDown() && !event.ShiftDown()) {
-        mAnimationView->UnselectMarchers();
+        mView->UnselectAll();
     }
 
-    mMouseXEnd = mMouseXStart = x;
-    mMouseYEnd = mMouseYStart = y;
+    mMouseEnd = mMouseStart = point;
     mMouseDown = true;
 }
 
 void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
 {
-    wxClientDC dc(this);
-    dc.SetUserScale(mUserScale, mUserScale);
-    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    auto point = event.GetPosition();
-    mMouseXEnd = dc.DeviceToLogicalX(point.x);
-    mMouseYEnd = dc.DeviceToLogicalY(point.y);
+    if (!mView) {
+        return;
+    }
+    auto point = TranslatePosition(event.GetPosition());
+    mMouseEnd = point;
     mMouseDown = false;
 
     // if mouse lifted very close to where clicked, then it is a previous beat
     // move
-    if ((std::abs(mMouseXEnd - mMouseXStart) < Int2CoordUnits(1) / 2) && (std::abs(mMouseYEnd - mMouseYStart) < Int2CoordUnits(1) / 2)) {
-        if (mAnimationView) {
-            mAnimationView->PrevBeat();
-        }
+    if ((std::abs(mMouseEnd.x - mMouseStart.x) < Int2CoordUnits(1) / 2) && (std::abs(mMouseEnd.y - mMouseStart.y) < Int2CoordUnits(1) / 2)) {
+        mView->PrevBeat();
     } else {
-        if (mAnimationView) {
-            mAnimationView->SelectMarchersInBox(
-                mMouseXStart, mMouseYStart, mMouseXEnd, mMouseYEnd, event.AltDown());
-        }
+        mView->SelectMarchersInBox(mMouseStart, mMouseEnd, event.AltDown());
     }
     Refresh();
 }
 
 void AnimationCanvas::OnRightUpMouseEvent(wxMouseEvent& event)
 {
-    if (mAnimationView) {
-        mAnimationView->NextBeat();
+    if (!mView) {
+        return;
     }
+    mView->NextBeat();
 }
 
 void AnimationCanvas::OnMouseMove(wxMouseEvent& event)
 {
-    wxClientDC dc(this);
-    dc.SetUserScale(mUserScale, mUserScale);
-    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    auto point = event.GetPosition();
-    mMouseXEnd = dc.DeviceToLogicalX(point.x);
-    mMouseYEnd = dc.DeviceToLogicalY(point.y);
+    mMouseEnd = TranslatePosition(event.GetPosition());
     if (event.Dragging()) {
         Refresh();
     }
 }
 
+wxPoint AnimationCanvas::TranslatePosition(wxPoint const& point)
+{
+    auto dc = wxClientDC{ this };
+    dc.SetUserScale(mUserScale, mUserScale);
+    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
+    return { dc.DeviceToLogicalX(point.x), dc.DeviceToLogicalY(point.y) };
+}
+
 void AnimationCanvas::OnChar(wxKeyEvent& event)
 {
-    if (mAnimationView) {
-        if (event.GetKeyCode() == WXK_LEFT)
-            mAnimationView->PrevBeat();
-        else if (event.GetKeyCode() == WXK_RIGHT)
-            mAnimationView->NextBeat();
-        else if (event.GetKeyCode() == WXK_SPACE) {
-            mAnimationView->ToggleTimer();
-        } else {
-            event.Skip();
-        }
+    if (!mView) {
+        event.Skip();
+        return;
+    }
+    if (event.GetKeyCode() == WXK_LEFT)
+        mView->PrevBeat();
+    else if (event.GetKeyCode() == WXK_RIGHT)
+        mView->NextBeat();
+    else if (event.GetKeyCode() == WXK_SPACE) {
+        mView->ToggleTimer();
     } else {
         event.Skip();
     }
+    Refresh();
 }
 
 void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
