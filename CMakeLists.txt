@@ -110,7 +110,7 @@ add_library (
 
 target_compile_definitions (calchart_core PUBLIC YY_NO_UNISTD_H)
 
-set_target_properties (calchart_core PROPERTIES CXX_STANDARD 14)
+set_target_properties (calchart_core PROPERTIES CXX_STANDARD 17)
 
 target_include_directories (
   calchart_core
@@ -142,7 +142,7 @@ install (
   COMPONENT tools
   )
 
-set_target_properties (calchart_cmd PROPERTIES CXX_STANDARD 14)
+set_target_properties (calchart_cmd PROPERTIES CXX_STANDARD 17)
 
 target_include_directories (
   calchart_cmd
@@ -227,7 +227,7 @@ target_link_libraries (
   CalChart gl core base adv html net aui
   )
 
-set_target_properties (CalChart PROPERTIES CXX_STANDARD 14)
+set_target_properties (CalChart PROPERTIES CXX_STANDARD 17)
 
 target_include_directories (
   CalChart

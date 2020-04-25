@@ -21,9 +21,9 @@
 */
 
 #include "print_cont_ui.h"
-#include "basic_ui.h"
 #include "CalChartApp.h"
 #include "CalChartDocCommand.h"
+#include "basic_ui.h"
 #include "cc_sheet.h"
 #include "cc_text.h"
 #include "draw.h"

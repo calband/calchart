@@ -25,6 +25,10 @@
 #include "parse.h"
 #include "contgram.hpp"
 
+#if __cplusplus > 199711L
+#define register      // Deprecated in C++11.
+#endif  // #if __cplusplus > 199711L
+
 /* Globals to communicate with parser */
 extern YYSTYPE yylval;	/* lexical value of current token */
 YYLTYPE yylloc;		/* line and column of token */

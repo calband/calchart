@@ -24,11 +24,11 @@
 #include "basic_ui.h"
 #include "cc_types.h"
 
-#include <wx/docview.h>
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
+#include <wx/docview.h>
 
 class CalChartView;
 class CalChartFrame;

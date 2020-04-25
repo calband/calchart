@@ -13,10 +13,10 @@
 
 #include <atomic>
 
-#include "basic_ui.h"
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
+#include "basic_ui.h"
 #include "cc_continuity.h"
 #include "cc_sheet.h"
 #include "cc_show.h"
@@ -541,7 +541,7 @@ void TransitionSolverFrame::CreateControls()
     SetMenuBar(menu_bar);
 
     // create a scrollable window to contain all of the frame's content
-    wxScrolledWindow *scrolledWindow;
+    wxScrolledWindow* scrolledWindow;
     scrolledWindow = new wxScrolledWindow(this, wxID_ANY);
 
     // create a sizer for laying things out top down:
@@ -560,12 +560,12 @@ void TransitionSolverFrame::CreateControls()
             wxStaticText* introText;
 
             introText = new wxStaticText(scrolledWindow, wxID_STATIC, wxT("Welcome to the CalChart Transition Solver!\n"
-                                                                "The algorithms used by this solver are credited to the E7 class  of Spring 2016.\n"
-                                                                "Staff: (Professor) Tina Chow, and (GSIs) Lucas Bastien and Bradley Harken\n"
-                                                                "Algorithms were selected from three different student groups:\n"
-                                                                "(1) Chiu, Zamora, Malani (2) Namini Asl, Ramirez, Zhang (3) Sover, Eliceiri, Hershkovitz\n"
-                                                                "Additional thanks to professor Scott Moura for helping the Cal Band get support from the UC Berkeley\n"
-                                                                "Civil Engineering Department for developing these algorithms."));
+                                                                          "The algorithms used by this solver are credited to the E7 class  of Spring 2016.\n"
+                                                                          "Staff: (Professor) Tina Chow, and (GSIs) Lucas Bastien and Bradley Harken\n"
+                                                                          "Algorithms were selected from three different student groups:\n"
+                                                                          "(1) Chiu, Zamora, Malani (2) Namini Asl, Ramirez, Zhang (3) Sover, Eliceiri, Hershkovitz\n"
+                                                                          "Additional thanks to professor Scott Moura for helping the Cal Band get support from the UC Berkeley\n"
+                                                                          "Civil Engineering Department for developing these algorithms."));
 
             headerSizer->Add(introText);
         }
@@ -828,7 +828,7 @@ void TransitionSolverFrame::CreateControls()
 
     {
         wxSize minFrameSize;
-        wxBoxSizer *frameSizer;
+        wxBoxSizer* frameSizer;
 
         // add all of the frame content to the scrollable window
         scrolledWindow->SetSizer(topLevelSizer);

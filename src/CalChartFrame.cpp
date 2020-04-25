@@ -25,8 +25,14 @@
 
 #include "CalChartFrame.h"
 
-#include "animation_frame.h"
+#include "AnimationErrorsPanel.h"
 #include "CalChartApp.h"
+#include "CalChartView.h"
+#include "ContinuityBrowser.h"
+#include "FieldCanvas.h"
+#include "FieldThumbnailBrowser.h"
+#include "TopFrame.h"
+#include "animation_frame.h"
 #include "cc_coord.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
@@ -35,13 +41,9 @@
 #include "cc_show.h"
 #include "ccvers.h"
 #include "confgr.h"
-#include "ContinuityBrowser.h"
 #include "draw.h"
 #include "e7_transition_solver_ui.h"
-#include "FieldCanvas.h"
 #include "field_frame_controls.h"
-#include "FieldThumbnailBrowser.h"
-#include "CalChartView.h"
 #include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
@@ -49,7 +51,6 @@
 #include "print_ps_dialog.h"
 #include "show_ui.h"
 #include "toolbar.h"
-#include "TopFrame.h"
 #include "ui_enums.h"
 
 #include <wx/help.h>
@@ -102,6 +103,7 @@ EVT_MENU(CALCHART__GhostNthSheet, CalChartFrame::OnCmd_GhostOption)
 EVT_MENU(CALCHART__ViewFieldThumbnail, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewFieldControls, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewContinuityInfo, CalChartFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewAnimationErrors, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewZoomFit, CalChartFrame::OnCmd_ZoomFit)
 EVT_MENU(CALCHART__ViewZoomIn, CalChartFrame::OnCmd_ZoomIn)
 EVT_MENU(CALCHART__ViewZoomOut, CalChartFrame::OnCmd_ZoomOut)
@@ -269,6 +271,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     view_menu->Append(CALCHART__ViewFieldThumbnail, wxT("Show Field Thumbnail"), wxT("Controls Displaying Field Thumbnail"));
     view_menu->Append(CALCHART__ViewFieldControls, wxT("Show Control"), wxT("Controls Displaying Controls"));
     view_menu->Append(CALCHART__ViewContinuityInfo, wxT("Show Continuity"), wxT("Controls Displaying Continuity Info"));
+    view_menu->Append(CALCHART__ViewAnimationErrors, wxT("Show Animation Errors"), wxT("Controls Displaying Animation Errors"));
     view_menu->AppendSeparator();
     view_menu->AppendCheckItem(CALCHART__draw_paths, wxT("Draw Paths"), wxT("Draw Paths"));
     view_menu->Check(CALCHART__draw_paths, false);
@@ -308,27 +311,39 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
         }
     }
 
-    mControls = new FieldFrameControls(mConfig.Get_FieldFrameZoom(), this, wxID_ANY, wxDefaultPosition, wxSize{ 100, 70 });
     mCanvas = new FieldCanvas(this, *static_cast<CalChartView*>(view), this, mConfig.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
 
+    // Create all the other things attached to the frame:
+    mControls = new FieldFrameControls(mConfig.Get_FieldFrameZoom(), this, wxID_ANY, wxDefaultPosition, wxSize{ 100, 70 });
     mContinuityBrowser = new ContinuityBrowser(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxDefaultPosition, wxSize{ 150, 800 });
-
     mFieldThumbnailBrowser = new FieldThumbnailBrowser(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxDefaultPosition, wxSize{ 180, 800 });
+    mAnimationErrorsPanel = new AnimationErrorsPanel(this);
+
+    // now patch up the controls with the views:
+    mAnimationErrorsPanel->SetView(GetFieldView());
 
     // Now determine what to show and not show.
     mAUIManager.AddPane(mCanvas, wxAuiPaneInfo().Name(wxT("Field")).CenterPane().PaneBorder(false));
-    mAUIManager.AddPane(mContinuityBrowser, wxAuiPaneInfo().Caption(wxT("Continuities")).Right());
-    mAUIManager.AddPane(mFieldThumbnailBrowser, wxAuiPaneInfo().Caption(wxT("Field Thumbnails")).Left());
-    mAUIManager.AddPane(mControls, wxAuiPaneInfo().Caption(wxT("Controls")).Top());
+    mAUIManager.AddPane(mContinuityBrowser, wxAuiPaneInfo().Name(wxT("Continuities")).Caption(wxT("Continuities")).Right());
+    mAUIManager.AddPane(mAnimationErrorsPanel, wxAuiPaneInfo().Name(wxT("Errors")).Caption(wxT("Errors")).Right());
+    mAUIManager.AddPane(mFieldThumbnailBrowser, wxAuiPaneInfo().Name(wxT("Field Thumbnails")).Caption(wxT("Field Thumbnails")).Left());
+    mAUIManager.AddPane(mControls, wxAuiPaneInfo().Name(wxT("Controls")).Caption(wxT("Controls")).Top());
 
     mAUIManager.Update();
 
+    // restore the manager with the Current visability
+    if (auto lastLayout = mConfig.Get_CalChartFrameAUILayout(); lastLayout != wxT("")) {
+        printf("This is the layout\n%s\n", lastLayout.ToStdString().c_str());
+        mAUIManager.LoadPerspective(lastLayout, true);
+    }
+
     // adjust the menu items to reflect.
-    ChangeFieldThumbnailVisibility(mConfig.Get_FieldFrameFieldThumbnailVisibility());
-    ChangeFieldControlsVisibility(mConfig.Get_FieldFrameFieldControlsVisibility());
-    ChangeContinuityInfoVisibility(mConfig.Get_FieldFrameContinuityInfoVisibility());
+    ChangeFieldThumbnailVisibility(mAUIManager.GetPane(mFieldThumbnailBrowser).IsShown());
+    ChangeFieldControlsVisibility(mAUIManager.GetPane(mControls).IsShown());
+    ChangeContinuityInfoVisibility(mAUIManager.GetPane(mContinuityBrowser).IsShown());
+    ChangeAnimationErrorsVisibility(mAUIManager.GetPane(mAnimationErrorsPanel).IsShown());
 
     SetTitle(static_cast<CalChartDoc*>(doc)->GetTitle());
 
@@ -353,7 +368,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     Show(true);
 }
 
-CalChartFrame::~CalChartFrame() {
+CalChartFrame::~CalChartFrame()
+{
+    mConfig.Set_CalChartFrameAUILayout(mAUIManager.SavePerspective());
     mAUIManager.UnInit();
 }
 
@@ -942,18 +959,22 @@ void CalChartFrame::OnCmd_AdjustViews(wxCommandEvent& event)
 {
     switch (event.GetId()) {
     case CALCHART__ViewFieldThumbnail:
-        ChangeFieldThumbnailVisibility(!mConfig.Get_FieldFrameFieldThumbnailVisibility());
+        ChangeFieldThumbnailVisibility(!mAUIManager.GetPane(mFieldThumbnailBrowser).IsShown());
         break;
     case CALCHART__ViewFieldControls:
-        ChangeFieldControlsVisibility(!mConfig.Get_FieldFrameFieldControlsVisibility());
+        ChangeFieldControlsVisibility(!mAUIManager.GetPane(mControls).IsShown());
         break;
     case CALCHART__ViewContinuityInfo:
-        ChangeContinuityInfoVisibility(!mConfig.Get_FieldFrameContinuityInfoVisibility());
+        ChangeContinuityInfoVisibility(!mAUIManager.GetPane(mContinuityBrowser).IsShown());
+        break;
+    case CALCHART__ViewAnimationErrors:
+        ChangeAnimationErrorsVisibility(!mAUIManager.GetPane(mAnimationErrorsPanel).IsShown());
         break;
     }
 }
 
-void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event) {
+void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event)
+{
     if (event.GetPane()->window == mFieldThumbnailBrowser) {
         ChangeFieldThumbnailVisibility(false);
     }
@@ -962,6 +983,9 @@ void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event) {
     }
     if (event.GetPane()->window == mContinuityBrowser) {
         ChangeContinuityInfoVisibility(false);
+    }
+    if (event.GetPane()->window == mAnimationErrorsPanel) {
+        ChangeAnimationErrorsVisibility(false);
     }
 }
 
@@ -972,7 +996,6 @@ void CalChartFrame::ChangeFieldThumbnailVisibility(bool show)
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewFieldThumbnail)->SetItemLabel(wxT("Show Field Thumbnails"));
     }
-    mConfig.Set_FieldFrameFieldThumbnailVisibility(show);
     mAUIManager.GetPane(mFieldThumbnailBrowser).Show(show);
     mAUIManager.Update();
 }
@@ -984,7 +1007,6 @@ void CalChartFrame::ChangeFieldControlsVisibility(bool show)
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewFieldControls)->SetItemLabel(wxT("Show Controls"));
     }
-    mConfig.Set_FieldFrameFieldControlsVisibility(show);
     mAUIManager.GetPane(mControls).Show(show);
     mAUIManager.Update();
 }
@@ -996,8 +1018,18 @@ void CalChartFrame::ChangeContinuityInfoVisibility(bool show)
     } else {
         GetMenuBar()->FindItem(CALCHART__ViewContinuityInfo)->SetItemLabel(wxT("Show Continuities"));
     }
-    mConfig.Set_FieldFrameContinuityInfoVisibility(show);
     mAUIManager.GetPane(mContinuityBrowser).Show(show);
+    mAUIManager.Update();
+}
+
+void CalChartFrame::ChangeAnimationErrorsVisibility(bool show)
+{
+    if (show) {
+        GetMenuBar()->FindItem(CALCHART__ViewAnimationErrors)->SetItemLabel(wxT("Hide Animation Errors"));
+    } else {
+        GetMenuBar()->FindItem(CALCHART__ViewAnimationErrors)->SetItemLabel(wxT("Show Animation Errors"));
+    }
+    mAUIManager.GetPane(mAnimationErrorsPanel).Show(show);
     mAUIManager.Update();
 }
 
@@ -1111,7 +1143,7 @@ void CalChartFrame::SetMode()
 
 void CalChartFrame::refnum_callback(wxCommandEvent&)
 {
-    GetFieldView()->SetReferencePoint(mControls->GetRefChoice());
+    GetFieldView()->SetActiveReferencePoint(mControls->GetRefChoice());
 }
 
 void CalChartFrame::OnEnableDrawPaths(wxCommandEvent& event)
@@ -1215,6 +1247,7 @@ void CalChartFrame::UpdatePanel()
     SetTitle(GetDocument()->GetUserReadableName());
     mCanvas->Refresh();
     mContinuityBrowser->Update();
+    mAnimationErrorsPanel->OnUpdate();
 }
 
 const CalChartView* CalChartFrame::GetFieldView() const

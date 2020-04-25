@@ -46,16 +46,15 @@ BEGIN_EVENT_TABLE(FieldThumbnailBrowser, wxScrolledWindow)
 EVT_PAINT(FieldThumbnailBrowser::OnPaint)
 EVT_CHAR(FieldThumbnailBrowser::HandleKey)
 EVT_LEFT_DOWN(FieldThumbnailBrowser::HandleMouseDown)
+EVT_SIZE(FieldThumbnailBrowser::HandleSizeEvent)
 END_EVENT_TABLE()
 
 FieldThumbnailBrowser::FieldThumbnailBrowser(CalChartDoc* doc, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxScrolledWindow(parent, id, pos, size, style, name)
     , mDoc(doc)
-    , x_left_padding(4)
-    , x_right_padding(4 + wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
-    , y_upper_padding(4)
-    , y_name_size(16)
-    , y_name_padding(4)
+    , mXScrollPadding(wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
+    , mYScrollPadding(wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y))
+    , mLayoutHorizontal{ true }
 {
     mView = std::make_unique<FieldThumbnailBrowserView>();
     mView->SetDocument(doc);
@@ -65,20 +64,26 @@ FieldThumbnailBrowser::FieldThumbnailBrowser(CalChartDoc* doc, wxWindow* parent,
     OnUpdate();
 }
 
-// calculate the size of the panel
-wxSize FieldThumbnailBrowser::SizeOfOneCell() const
+// calculate the size of the panel depending on orientation
+wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
 {
     auto mode_size = mDoc->GetShowMode().Size();
-    auto current_size_x = GetSize().x - x_left_padding - x_right_padding;
+    if (horizontal) {
+        auto current_size_y = GetSize().y - mYUpperPadding - mYNameSize - mYNamePadding - mYBottomPadding - mYScrollPadding;
+        auto box_size_x = mode_size.x * (current_size_y / double(mode_size.y));
+        return { int(box_size_x) + mXLeftPadding + mXRightPadding, GetSize().y };
+    }
+    auto current_size_x = GetSize().x - mXLeftPadding - mXRightPadding - mXScrollPadding;
     auto box_size_y = mode_size.y * (current_size_x / double(mode_size.x));
-    return { GetSize().x - x_right_padding - wxSystemSettings::GetMetric(wxSYS_VSCROLL_X), y_upper_padding + y_name_size + y_name_padding + int(box_size_y) };
+    return { GetSize().x, int(box_size_y) + mYUpperPadding + mYNameSize + mYNamePadding };
 }
 
 // calculate which sheet the user clicked in
 int FieldThumbnailBrowser::WhichCell(wxPoint const& p) const
 {
-    auto size_of_one = SizeOfOneCell();
-    return p.y / size_of_one.y;
+    auto size_of_one = SizeOfOneCell(mLayoutHorizontal);
+    printf("click at %d, %d, size of one is %d, %d\n", p.x, p.y, size_of_one.x, size_of_one.y);
+    return (mLayoutHorizontal) ? p.x / size_of_one.x : p.y / size_of_one.y;
 }
 
 static auto CalcUserScale(wxSize const& box_size, CalChart::Coord const& mode_size)
@@ -126,11 +131,15 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
 
         dc.SetUserScale(1, 1);
         dc.SetBrush((config.Get_CalChartBrushAndPen(COLOR_FIELD).first));
-        dc.DrawText(sheet->GetName(), offset_x + x_left_padding, offset_y + y_upper_padding);
-        offset_y += y_upper_padding + y_name_size + y_name_padding;
+        dc.DrawText(sheet->GetName(), offset_x + mXLeftPadding, offset_y + mYUpperPadding);
+        auto newOffsetX = offset_x + mXLeftPadding;
+        auto newOffsetY = offset_y + mYUpperPadding + mYNameSize + mYNamePadding;
+
         auto mode_size = mDoc->GetShowMode().Size();
-        auto current_size_x = GetSize().x - x_left_padding - x_right_padding;
-        auto box_size_y = mode_size.y * (current_size_x / double(mode_size.x));
+        auto current_size_x = GetSize().x - mXLeftPadding - mXRightPadding - mXScrollPadding;
+        auto current_size_y = GetSize().y - mYNameSize - mYNamePadding - mYUpperPadding - mYBottomPadding - mYScrollPadding;
+        auto box_size_x = (mLayoutHorizontal) ? mode_size.x * (current_size_y / double(mode_size.y)) : current_size_x;
+        auto box_size_y = (mLayoutHorizontal) ? current_size_y : mode_size.y * (current_size_x / double(mode_size.x));
 
         dc.SetPen(*wxBLACK_PEN);
         if (mDoc->GetCurrentSheet() == sheet) {
@@ -139,13 +148,13 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
             dc.SetPen(copy_of_pen);
         }
 
-        dc.DrawRectangle(offset_x + x_left_padding, offset_y, current_size_x, box_size_y);
+        dc.DrawRectangle(newOffsetX, newOffsetY, box_size_x, box_size_y);
         dc.SetPen(*wxBLACK_PEN);
 
         auto origin = dc.GetDeviceOrigin();
-        auto userScale = CalcUserScale({ current_size_x, int(box_size_y) }, mode_size);
+        auto userScale = CalcUserScale({ int(box_size_x), int(box_size_y) }, mode_size);
         dc.SetUserScale(userScale, userScale);
-        dc.SetDeviceOrigin(origin.x + offset_x + x_left_padding, origin.y + offset_y);
+        dc.SetDeviceOrigin(origin.x + newOffsetX, origin.y + newOffsetY);
 
         dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
         DrawMode(dc, config, mDoc->GetShowMode(), ShowMode_kAnimation);
@@ -160,33 +169,43 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
         }
         dc.SetDeviceOrigin(origin.x, origin.y);
 
-        offset_y += box_size_y;
+        offset_x += (mLayoutHorizontal) ? box_size_x + mXLeftPadding + mXRightPadding : 0;
+        offset_y += (mLayoutHorizontal) ? 0 : box_size_y + mYUpperPadding + mYNameSize + mYNamePadding;
     }
 }
 
 void FieldThumbnailBrowser::OnUpdate()
 {
-    auto size_of_one = SizeOfOneCell();
-    SetVirtualSize(size_of_one.x, size_of_one.y * mDoc->GetNumSheets());
+    auto size_of_one = SizeOfOneCell(mLayoutHorizontal);
+    SetVirtualSize(size_of_one.x * (mLayoutHorizontal ? mDoc->GetNumSheets() : 1.0), size_of_one.y * (mLayoutHorizontal ? 1.0 : mDoc->GetNumSheets()));
 
-    SetScrollRate(0, size_of_one.y);
+    SetScrollRate(mLayoutHorizontal ? size_of_one.x : 0, mLayoutHorizontal ? 0 : size_of_one.y);
 
     auto get_size = GetSize();
     auto scrolled_top = CalcUnscrolledPosition({ 0, 0 });
-    auto scrolled_bottom = CalcUnscrolledPosition({ 0, get_size.y });
+    auto scrolled_bottom = CalcUnscrolledPosition({ get_size.x, get_size.y });
     // so how many are visible:
-    auto how_many_visible = get_size.y / size_of_one.y;
+    auto how_many_visible = mLayoutHorizontal ? get_size.x / size_of_one.x : get_size.y / size_of_one.y;
     if (how_many_visible == 0) {
-        Scroll(0, mDoc->GetCurrentSheetNum());
-    }
-    else {
+        Scroll(mLayoutHorizontal ? mDoc->GetCurrentSheetNum() : 0, mLayoutHorizontal ? 0 : mDoc->GetCurrentSheetNum());
+    } else {
         // if the upper part is above the view, move the view to contain it.
-        if (size_of_one.y * mDoc->GetCurrentSheetNum() < scrolled_top.y) {
-            Scroll(0, mDoc->GetCurrentSheetNum());
-        }
-        // if the lower part is below the view, move the view to contain it.
-        if ((size_of_one.y * (mDoc->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
-            Scroll(0, mDoc->GetCurrentSheetNum() - how_many_visible + 1);
+        if (mLayoutHorizontal) {
+            if (size_of_one.x * mDoc->GetCurrentSheetNum() < scrolled_top.x) {
+                Scroll(mDoc->GetCurrentSheetNum(), 0);
+            }
+            // if the lower part is below the view, move the view to contain it.
+            if ((size_of_one.x * (mDoc->GetCurrentSheetNum() + 1)) > scrolled_bottom.x) {
+                Scroll(mDoc->GetCurrentSheetNum() - how_many_visible + 1, 0);
+            }
+        } else {
+            if (size_of_one.y * mDoc->GetCurrentSheetNum() < scrolled_top.y) {
+                Scroll(0, mDoc->GetCurrentSheetNum());
+            }
+            // if the lower part is below the view, move the view to contain it.
+            if ((size_of_one.y * (mDoc->GetCurrentSheetNum() + 1)) > scrolled_bottom.y) {
+                Scroll(0, mDoc->GetCurrentSheetNum() - how_many_visible + 1);
+            }
         }
     }
 
@@ -207,4 +226,10 @@ void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 {
     auto which = WhichCell(CalcUnscrolledPosition(event.GetPosition()));
     mDoc->SetCurrentSheet(std::min(which, mDoc->GetNumSheets() - 1));
+}
+
+void FieldThumbnailBrowser::HandleSizeEvent(wxSizeEvent& event)
+{
+    mLayoutHorizontal = float(event.m_size.x) / float(event.m_size.y) > 1;
+    OnUpdate();
 }

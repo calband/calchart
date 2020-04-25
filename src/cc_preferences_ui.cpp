@@ -1,4 +1,4 @@
-    /*
+/*
  * cc_preferences_ui.cpp
  * Dialox box for preferences
  */
@@ -22,17 +22,17 @@
 
 #include "cc_preferences_ui.h"
 #include "CalChartDoc.h"
+#include "ContinuityBrowserPanel.h"
+#include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "cont.h"
-#include "cont_browser_panel.h"
-#include "cont_composer.h"
 #include "draw.h"
-#include "modes.h"
 #include "mode_dialog.h"
 #include "mode_dialog_canvas.h"
+#include "modes.h"
 
 #include <wx/colordlg.h>
 #include <wx/dcbuffer.h>

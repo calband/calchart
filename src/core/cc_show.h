@@ -75,6 +75,7 @@ public:
     // Create command, consists of an action and undo action
     Show_command_pair Create_SetCurrentSheetCommand(int n) const;
     Show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
+    Show_command_pair Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const;
     Show_command_pair Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const;
     Show_command_pair Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, Coord const& new_march_position) const;
     Show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
@@ -87,7 +88,7 @@ public:
     Show_command_pair Create_MovePointsCommand(int whichSheet, std::map<int, Coord> const& new_positions, int ref) const;
     Show_command_pair Create_DeletePointsCommand() const;
     Show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
-    Show_command_pair Create_SetReferencePointToRef0(int ref) const;
+    Show_command_pair Create_ResetReferencePointToRef0(int ref) const;
     Show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
     Show_command_pair Create_SetSymbolCommand(const SelectionList& whichDots, SYMBOL_TYPE sym) const;
     Show_command_pair Create_SetContinuityCommand(SYMBOL_TYPE which_sym, Continuity const& cont) const;

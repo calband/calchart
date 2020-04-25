@@ -23,9 +23,9 @@
 #include "ContinuityBrowser.h"
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
+#include "ContinuityBrowserPanel.h"
 #include "cc_sheet.h"
 #include "confgr.h"
-#include "cont_browser_panel.h"
 
 #include <wx/help.h>
 #include <wx/statline.h>

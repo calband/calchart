@@ -21,10 +21,10 @@
 */
 
 #include "animation_view.h"
-#include "animation_frame.h"
-#include "basic_ui.h"
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
+#include "animation_frame.h"
+#include "basic_ui.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"

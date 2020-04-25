@@ -21,9 +21,9 @@
 */
 
 #include "animation_frame.h"
+#include "CalChartDoc.h"
 #include "animation_canvas.h"
 #include "basic_ui.h"
-#include "CalChartDoc.h"
 #include "cc_omniview_canvas.h"
 #include "confgr.h"
 #include "toolbar.h"
@@ -652,4 +652,3 @@ void AnimationFrame::OnNotifyErrorList(
         mErrorMarkers.emplace_back(i.second, sheetnum);
     }
 }
-

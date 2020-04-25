@@ -10,6 +10,7 @@
 #include <fstream>
 #include <limits>
 #include <math.h>
+#include <random>
 
 #include "e7_transition_solver.h"
 #include "munkres.h"
@@ -1908,7 +1909,8 @@ namespace e7NaminiaslRamirezZhang {
 
                 lastCollisionPairs = collisionSpace.collectCollisionPairs();
 
-                std::random_shuffle(collisionPairs.begin(), collisionPairs.end());
+                std::random_device rd;
+                std::shuffle(collisionPairs.begin(), collisionPairs.end(), std::mt19937{rd()});
                 for (unsigned collisionIndex = 0; collisionIndex < collisionPairs.size(); collisionIndex++) {
 
                     Collision& col = collisionPairs[collisionIndex];
@@ -2104,7 +2106,8 @@ namespace e7SoverEliceiriHershkovitz {
             }
 
             // Shuffle the people who need priority of replacement
-            std::random_shuffle(unplacedMarchers.begin(), unplacedMarchers.end());
+            std::random_device rd;
+            std::shuffle(unplacedMarchers.begin(), unplacedMarchers.end(), std::mt19937{rd()});
 
             // Re-add the unplaced marchers with higher priority
             marchOrder.insert(marchOrder.begin(), unplacedMarchers.begin(), unplacedMarchers.end());

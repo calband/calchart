@@ -23,12 +23,13 @@
 #include "cc_coord.h"
 #include "cc_types.h"
 
-#include <wx/docview.h>
 #include <wx/aui/framemanager.h>
+#include <wx/docview.h>
 
 // CalChartFrame is the central frame of the CalChart app.  Manipulation of
 // the CalChartDoc happens via the CalChartView.
 
+class AnimationErrorsPanel;
 class CalChartConfiguration;
 class CalChartDoc;
 class CalChartView;
@@ -168,11 +169,13 @@ private:
     void ChangeFieldThumbnailVisibility(bool show);
     void ChangeFieldControlsVisibility(bool show);
     void ChangeContinuityInfoVisibility(bool show);
+    void ChangeAnimationErrorsVisibility(bool show);
 
     FieldFrameControls* mControls;
     FieldCanvas* mCanvas;
     FieldThumbnailBrowser* mFieldThumbnailBrowser;
     ContinuityBrowser* mContinuityBrowser;
+    AnimationErrorsPanel* mAnimationErrorsPanel;
 
     wxWindow* mAnimationFrame;
     CalChartConfiguration& mConfig;

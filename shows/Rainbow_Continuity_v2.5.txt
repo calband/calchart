@@ -1,0 +1,270 @@
+%%1
+1
+~\bsUniversity of California Marching Band
+~\bsThe Rainbow Show
+~\bsUnder Pressure\be
+1	1/1	\po:	Even 16 MMFE to SS 2
+		\so:	Even 16 MMFW to SS 2
+		
+16 Beats Total
+
+%%2
+2	5/1	\po:	FMHS EW/NS to SS 3 [MTHS E]
+		\so:	FMHS NS/EW to SS 3 [MTHS E]
+		\pb:	FMHS/DMHS to SS 3 [MTHS E]
+		\ps:	DMHS/FMHS to SS 3 [MTHS E]
+
+32 Beats Total
+
+%%3
+3	13/1	\po:	FMHS NS/EW to SS 4 [MTHS E]
+		\so:	Even 12 MM FACING DIRECTION OF TRAVEL to SS 4 [MTHS W]
+
+16 Beats Total 
+
+%%4
+4	17/1	\po:	FMHS NS/EW to SS 5 [MTHS E]
+		\so:	Even 16 MM FACING DIRECTION OF TRAVEL to SS 5 [MTHS E]
+
+16 Beats Total 
+
+%%5
+5	21/1	\po:	FMHS NS/EW to SS 6 [MTHS E]
+		\so:	FMHS EW/NS to SS 6 [MTHS E]
+		\pb:	DMHS/FMHS to SS 6 [MTHS E]
+		\ps:	FMHS/DMHS to SS 6 [MTHS E]
+
+40 Beats Total
+
+%%6 Ref
+
+6 	21/1	\po: 	[MTHS E]
+		\so: 	[MTHS W]	
+
+0 Beats Total
+
+%%7
+
+7	31/1	\po:	FMHS EW/NS to SS 8 [MTHS E]
+		\so:	FMHS NS/EW to SS 8 [MTHS E]
+		\pb:	DMHS/FMHS to SS 8 [MTHS E]
+		\ps:	FMHS/DMHS to SS 8 [MTHS E]
+		
+24 Beats Total 
+
+%%8
+~\bsIm Still Standing\be
+
+8	37/1	\po:	Stand & Play 32 W
+		\so:	Stand & Play 32 E
+
+32 Beats Total
+
+%%9
+
+9	45/1	\po:	FMMM EW/NS to SS 10 [MTMM W]
+		\so:	FMMM NS/EW to SS 10 [MTMM W]
+		\pb:	DMMM/FMMM to SS 10 [MTMM W]
+		\ps:	FMMM/DMMM to SS 10 [MTMM W]
+
+40 Beats Total
+
+%%10
+10	55/1	\po:	FMMM EW/NS to SS 11 [MTMM W]
+		\so:	FMMM NS/EW to SS 11 [MTMM W]
+		\pb:	DMMM/FMMM to SS 11 [MTMM W]
+		\ps:	FMMM/DMMM to SS 11 [MTMM W]
+		
+40 Beats Total
+
+%%11
+11	65/1	\po:	FMMM EW/NS to SS 12 [MTMM W]
+		\so:	FMMM NS/EW to SS 12 [MTMM W]
+		\pb:	[MTMM W]
+			
+16 Beats Total
+
+%%12
+12	69/1	\po:	Even 16 MM FACING DIRECTION OF TRAVEL to SS Hogballs
+		\so:	[MTMM W]
+
+16 Beats Total
+
+%%HOGBALLS
+HB	73/1	\po:	MTMM 8 W
+			Even 16 MMFW to SS 14 [MTMM W]
+		\so:	Even 8 MMFW to SS 14 [MTMM W]
+
+32 Beats Total
+
+%%14
+14	81/1	\po:	FMMM NS/EW to SS 15 [MTMM E]
+		\so:	FMMM EW/NS to SS 15 [MTMM E]
+		\pb:	FMMM/DMMM to SS 15 [MTMM E]
+		\ps:	DMMM/FMMM to SS 15 [MTMM E]
+
+32 Beats Total
+
+%%15
+~\bsIm Coming Out\be
+15	89/1 	\po:	GTMM 16 Counts 90 Degrees CW to SS 16 [MTMM E]
+		\so:	GTMM 16 Counts 90 Degrees CCW to SS 16 [MTMM E]
+			
+16 Beats Total
+
+%%16
+16	93/1	\po:	FMHS EW/NS to SS 17 [MTHS E]
+		\so:	FMHS NS/EW to SS 17 [MTHS E]
+		\pb:	DMHS/FMHS to SS 17 [MTHS E]
+		\ps:	FMHS/DMHS to SS 17 [MTHS E]
+
+32 Beats Total
+
+%%17
+17	101/1 	\po:	FMHS NS/EW to SS 18 [MTHS E]
+		\so:	FMHS EW/NS to SS 18 [MTHS E]
+			
+16 Beats Total
+
+%%18
+18	105/1	\po:	FMHS EW/NS to SS 19 [MTHS E]
+		\so:	FMHS NS/EW to SS 19 [MTHS E]
+	
+32 Beats Total
+
+%%19
+19	113/1	\po:	FMHS EW/NS to SS 20 [MTHS W]
+		\so:	FMHS NS/EW to SS 20 [MTHS W]
+		\ps:	FMHS/DMHS to SS 20 [MTHS W]
+		
+32 Beats Total
+
+%%20
+20	121/1	ALL:	Execute Step 2 Drill:
+			MTHS W
+			MTHS E
+			
+16 Beats Total
+
+%%21
+21	125/1	\po:	Even 16 MMFE to SS 22 [Close E]
+		
+16 Beats Total
+
+%%22
+~\bsFreedom\be
+22	129/1	\po:	Stand & Play 16 E
+
+16 Beats Total 
+
+%%23
+23	133/1	\po: 	FMHS EW/NS to SS 24
+		\so: 	FMHS NS/EW to SS 24
+		\pb: 	DMHS/FMHS to SS 24
+		\ps: 	FMHS/DMHS to SS 24
+
+32 Beats Total
+
+%%24
+24	141/1	\po:	Follow the Leader HS to SS 25
+		\so:      Line Leader 
+		\sx:	Stand & Play 48 E
+			Even 16 HS to SS 25 [MTHS E]
+
+64 Beats Total 
+
+%%P Ref
+24A	141/1	\po:	Follow the Leader to SS 25 
+		\so:	Line Leader
+
+0 Beats Total 
+
+%%R/I Ref
+24B	141/1	\po:	Follow the Leader to SS 25 
+		\so:	Line Leader	
+
+0 Beats Total 
+
+%%D/E Ref
+24C	141/1	\po:	Follow the Leader to SS 25 
+		\so:	Line Leader	
+
+0 Beats Total 
+
+%%25
+25	157/1	\po:	Execute FREEDOM Continuity
+
+32 Beats Total
+
+%%26
+~\bsBorn This Way\be
+26	165/1	\po:	EVEN 16 MMFE to SS 27 [MTMM E]
+
+16 Beats Total
+
+%%27
+27	169/1	\po:	FMHS EW/NS to SS 28 [MTHS E]
+		\so:	FMHS NS/EW to SS 28 [MTHS E]
+		\pb:	DMHS/FMHS to SS 28 [MTHS E]
+		\ps:	FMHS/DMHS to SS 28 [MTHS E]
+
+32 Beats Total
+
+%%28
+28	177/1	\po:	[MTHS E]
+		\so:	[MTHS W]
+					
+16 Beats Total
+
+%%29
+29	181/1	\po:	FMHS EW/NS to SS 30 [MTHS E]
+		\so:	FMHS NS/EW to SS 30 [MTHS E]
+		\pb:	DMHS/FMHS to SS 30 [MTHS E]
+				
+16 Beats Total
+
+%%30
+30	185/1	\po:	[MTHS E]
+		\so:	[MTHS W]
+
+16 Beats Total
+
+%%31
+31	189/1	\po:	FMHS EW/NS to SS 32 [MTHS E] 
+		\so:	FMHS NS/EW to SS 32 [MTHS E]
+		\pb:	DMHS/FMHS to SS 32 [MTHS E]
+		\ps:	FMHS/DMHS to SS 32 [MTHS E]
+			
+32 Beats Total
+
+%%32
+32	198/1	\po:	FMHS EW/NS to SS 33 [MTHS E]
+		\so:	FMHS EW/NS to SS 33 [MTHS W]
+
+8 Beats Total
+
+%%33
+33	200/1	\po:	MTMM 8 W
+			Even 16 MMFW to SS 34 [Close W]
+		\so:	MTMM 8 W
+			Even 16 MMFE to SS 34 [Close E]
+
+24 Beats Total
+
+%%34
+34	206/1	\po:	[Close E]
+		\so:	[Close W]
+
+32 Beats Total
+
+~\bsGo Bears, beat the Cougars! Love, Stunt <3\be
+
+%35 
+35  	206/1	\po:	Extra Stuntsheet
+
+0 Beats
+
+%36 
+36  	206/1	\po:	Extra Stuntsheet
+
+0 Beats

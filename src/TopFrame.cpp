@@ -21,16 +21,16 @@
 */
 
 #include "TopFrame.h"
-#include "basic_ui.h"
 #include "CalChartApp.h"
+#include "basic_ui.h"
+#include "calchart.xbm"
 #include "cc_preferences_ui.h"
 #include "ccvers.h"
-#include "calchart.xbm"
 
 #include <wx/dnd.h>
 #include <wx/html/helpctrl.h>
-#include <wx/wx.h>
 #include <wx/statline.h>
+#include <wx/wx.h>
 
 IMPLEMENT_CLASS(TopFrame, wxDocParentFrame)
 
@@ -60,13 +60,6 @@ bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& 
     return true;
 }
 
-static auto testString(wxWindow *parent) {
-    auto result = new wxStaticText(parent, wxID_STATIC, wxT("CalChart v") wxT(STRINGIZE(CC_MAJOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_MINOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_SUB_MINOR_VERSION)));
-    wxFont* contPlainFont = wxTheFontList->FindOrCreateFont(16, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    result->SetFont(*contPlainFont);
-    return result;
-}
-
 TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     : wxDocParentFrame(manager, frame, wxID_ANY, title)
 {
@@ -94,16 +87,21 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
 
     SetDropTarget(new TopFrameDropTarget(manager));
 
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    // create a sizer and populate
+    auto topSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topSizer);
 
     // add a horizontal bar to make things clear:
-    AddToSizerBasic(topsizer, BitmapWithBandIcon(this, wxSize(150, 150)));
-    AddToSizerBasic(topsizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), 16));
-    AddToSizerBasic(topsizer, LineWithLength(this, 150));
+    AddToSizerBasic(topSizer, BitmapWithBandIcon(this, wxSize(150, 150)));
+    AddToSizerBasic(topSizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), 16));
+    AddToSizerBasic(topSizer, LineWithLength(this, 150));
 
-    AddToSizerBasic(topsizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", 14));
-    AddToSizerBasic(topsizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", 11));
+    AddToSizerBasic(topSizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", 14));
+    AddToSizerBasic(topSizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", 11));
+
+    // now fit the frame to the elements
+    topSizer->Fit(this);
+    topSizer->SetSizeHints(this);
 
     Show(true);
 }

@@ -57,7 +57,7 @@ public:
         const std::vector<AnimateCommands>& theCommands,
         const std::string& s, unsigned beats)
         : mPoints(thePoints)
-        , commands(theCommands)
+        , mCommands(theCommands)
         , name(s)
         , numbeats(beats)
     {
@@ -65,19 +65,19 @@ public:
     auto GetName() const { return name; }
     auto GetNumBeats() const { return numbeats; }
     auto GetPoints() const { return mPoints; }
-    auto GetCommands(int which) const { return commands.at(which); }
+    auto GetCommands(int which) const { return mCommands.at(which); }
     auto GetCommandsBegin(int which) const
     {
-        return commands.at(which).begin();
+        return mCommands.at(which).begin();
     }
     auto GetCommandsEnd(int which) const
     {
-        return commands.at(which).end();
+        return mCommands.at(which).end();
     }
 
 private:
     std::vector<AnimatePoint> mPoints; // should probably be const
-    std::vector<AnimateCommands> commands;
+    std::vector<AnimateCommands> mCommands;
     std::string name;
     unsigned numbeats;
 };
@@ -127,17 +127,19 @@ public:
     auto GetNumberBeats() const { return sheets.at(curr_sheetnum).GetNumBeats(); }
     auto GetCurrentBeat() const { return curr_beat; }
     auto GetCurrentSheetName() const { return sheets.at(curr_sheetnum).GetName(); }
+    std::vector<AnimationErrors> GetAnimationErrors() const;
 
     // collection of position of each point, for debugging purposes
     std::pair<std::string, std::vector<std::string>> GetCurrentInfo() const;
 
-    std::vector<DrawCommand> GenPathToDraw(unsigned point, const Coord& offset) const;
-    AnimatePoint EndPosition(unsigned point, const Coord& offset) const;
+    std::vector<DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset) const;
+    AnimatePoint EndPosition(unsigned whichSheet, unsigned point, const Coord& offset) const;
 
     std::vector<AnimateSheet>::const_iterator sheetsBegin() const;
     std::vector<AnimateSheet>::const_iterator sheetsEnd() const;
 
 private:
+    // 
     std::vector<AnimatePoint> pts;
     std::vector<std::vector<std::shared_ptr<AnimateCommand>>::const_iterator> curr_cmds; // pointer to the current command
     std::map<unsigned, Coord::CollisionType> mCollisions;
@@ -146,6 +148,7 @@ private:
     std::vector<AnimateSheet> sheets;
     CollisionAction_t mCollisionAction;
     std::vector<int> mAnimSheetIndices;
+    std::vector<AnimationErrors> mAnimationErrors;
 
     void BeginCmd(unsigned i);
     void EndCmd(unsigned i);
@@ -153,6 +156,6 @@ private:
     void RefreshSheet();
     void CheckCollisions();
 
-    std::vector<std::shared_ptr<AnimateCommand>> GetCommands(unsigned whichPoint) const;
+    std::vector<std::shared_ptr<AnimateCommand>> GetCommands(unsigned whichSheet, unsigned whichPoint) const;
 };
 }
