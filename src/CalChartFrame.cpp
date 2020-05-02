@@ -152,7 +152,6 @@ EVT_CHECKBOX(CALCHART__draw_paths, CalChartFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
 EVT_MENU(CALCHART__E7TransitionSolver, CalChartFrame::OnCmd_SolveTransition)
-EVT_SIZE(CalChartFrame::OnSize)
 EVT_AUI_PANE_CLOSE(CalChartFrame::AUIIsClose)
 END_EVENT_TABLE()
 
@@ -311,6 +310,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     mCanvas = new FieldCanvas(this, *static_cast<CalChartView*>(view), this, mConfig.Get_FieldFrameZoom());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
+    mCanvas->Scroll(mConfig.Get_FieldCanvasScrollX(), mConfig.Get_FieldCanvasScrollY());
 
     // Create all the other things attached to the frame:
     mControls = new FieldFrameControls(mConfig.Get_FieldFrameZoom(), this, wxID_ANY, wxDefaultPosition, wxSize{ 100, 70 });
@@ -380,6 +380,13 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
 
 CalChartFrame::~CalChartFrame()
 {
+    mConfig.Set_FieldFramePositionX(GetPosition().x);
+    mConfig.Set_FieldFramePositionY(GetPosition().y);
+    mConfig.Set_FieldFrameWidth(GetSize().x);
+    mConfig.Set_FieldFrameHeight(GetSize().y);
+    mConfig.Set_FieldCanvasScrollX(mCanvas->GetViewStart().x);
+    mConfig.Set_FieldCanvasScrollY(mCanvas->GetViewStart().y);
+
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
     mConfig.Set_CalChartFrameAUILayout(mAUIManager.SavePerspective());
@@ -680,11 +687,14 @@ void CalChartFrame::OnCmdSelectAll(wxCommandEvent& event)
 
 void CalChartFrame::ShowFieldAndHideAnimation(bool showField)
 {
+    // when we are going to show field, pause the animation
+    if (showField) {
+        mShadowAnimationPanel->SetPlayState(false);
+    }
     mAUIManager.GetPane("Field").Show(showField);
     mAUIManager.GetPane("ShadowAnimation").Show(!showField);
     mAUIManager.Update();
 }
-
 
 void CalChartFrame::OnCmdAbout(wxCommandEvent& event) { TopFrame::About(); }
 
@@ -860,7 +870,6 @@ void CalChartFrame::OnChar(wxKeyEvent& event) { mCanvas->OnChar(event); }
 void CalChartFrame::OnCmd_AddBackgroundImage(wxCommandEvent& event)
 {
     wxString filename;
-    wxInitAllImageHandlers();
     filename = wxLoadFileSelector(wxT("Select a background image"),
         wxT("BMP files (*.bmp)|*.bmp")
 #if wxUSE_LIBPNG
@@ -1078,16 +1087,6 @@ void CalChartFrame::OnCmd_SolveTransition(wxCommandEvent& event)
         TransitionSolverFrame* transitionSolver = new TransitionSolverFrame(static_cast<CalChartDoc*>(GetDocument()), this, wxID_ANY, wxT("Transition Solver"));
         transitionSolver->Show();
     }
-}
-
-void CalChartFrame::OnSize(wxSizeEvent& event)
-{
-    // HACK: Prevent width and height from growing out of control
-    int w = event.GetSize().GetWidth();
-    int h = event.GetSize().GetHeight();
-    mConfig.Set_FieldFrameWidth((w > 1200) ? 1200 : w);
-    mConfig.Set_FieldFrameHeight((h > 700) ? 700 : h);
-    super::OnSize(event);
 }
 
 // Append a show with file selector

@@ -47,9 +47,11 @@ public:
     void RegisterError(AnimateError err, int line, int col, unsigned curr_pt,
         SYMBOL_TYPE contsymbol);
 
-    bool operator==(AnimationErrors const& rhs) const {
+    bool operator==(AnimationErrors const& rhs) const
+    {
         return mErrorMarkers == rhs.mErrorMarkers;
     }
+
 private:
     std::map<AnimateError, ErrorMarker> mErrorMarkers;
 };

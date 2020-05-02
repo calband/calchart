@@ -22,8 +22,9 @@
 
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
-#include "confgr.h"
 #include "cc_coord.h"
+#include "confgr.h"
+#include "ui_enums.h"
 
 #include <wx/dcbuffer.h>
 
@@ -31,7 +32,6 @@ BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
 EVT_CHAR(AnimationCanvas::OnChar)
 EVT_LEFT_DOWN(AnimationCanvas::OnLeftDownMouseEvent)
 EVT_LEFT_UP(AnimationCanvas::OnLeftUpMouseEvent)
-EVT_RIGHT_UP(AnimationCanvas::OnRightUpMouseEvent)
 EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
@@ -148,19 +148,11 @@ void AnimationCanvas::OnLeftUpMouseEvent(wxMouseEvent& event)
     // if mouse lifted very close to where clicked, then it is a previous beat
     // move
     if ((std::abs(mMouseEnd.x - mMouseStart.x) < Int2CoordUnits(1) / 2) && (std::abs(mMouseEnd.y - mMouseStart.y) < Int2CoordUnits(1) / 2)) {
-        mView->PrevBeat();
+        mView->ToggleTimer();
     } else {
         mView->SelectMarchersInBox(mMouseStart, mMouseEnd, event.AltDown());
     }
     Refresh();
-}
-
-void AnimationCanvas::OnRightUpMouseEvent(wxMouseEvent& event)
-{
-    if (!mView) {
-        return;
-    }
-    mView->NextBeat();
 }
 
 void AnimationCanvas::OnMouseMove(wxMouseEvent& event)

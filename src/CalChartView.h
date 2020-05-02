@@ -91,6 +91,8 @@ public:
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
 
     std::vector<CalChart::AnimationErrors> GetAnimationErrors() const;
+    // Sheet -> all collisions
+    std::map<int, SelectionList> GetAnimationCollisions() const;
     std::unique_ptr<CalChart::Animation> GetAnimationInstance() const;
 
     auto ClipPositionToShowMode(CalChart::Coord const& pos) const { return mShow->GetShowMode().ClipPosition(pos); }

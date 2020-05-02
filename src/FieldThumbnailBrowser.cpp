@@ -67,7 +67,6 @@ wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
 int FieldThumbnailBrowser::WhichCell(wxPoint const& p) const
 {
     auto size_of_one = SizeOfOneCell(mLayoutHorizontal);
-    printf("click at %d, %d, size of one is %d, %d\n", p.x, p.y, size_of_one.x, size_of_one.y);
     return (mLayoutHorizontal) ? p.x / size_of_one.x : p.y / size_of_one.y;
 }
 

@@ -118,15 +118,6 @@ public:
     bool NextBeat();
     void GotoTotalBeat(int i);
 
-    typedef void (*CollisionAction_t)();
-    // set collision action returns the previous collision action
-    CollisionAction_t SetCollisionAction(CollisionAction_t col)
-    {
-        CollisionAction_t oldaction = mCollisionAction;
-        mCollisionAction = col;
-        return oldaction;
-    }
-
     // For drawing:
     struct animate_info_t {
         int mCollision;
@@ -152,6 +143,8 @@ public:
     int GetTotalCurrentBeat() const;
     auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
     std::vector<AnimationErrors> GetAnimationErrors() const;
+    std::map<std::tuple<int, int, int>, Coord::CollisionType> GetCollisions() const { return mCollisions; }
+    bool CurrentBeatHasCollision() const;
 
     // collection of position of each point, for debugging purposes
     std::pair<std::string, std::vector<std::string>> GetCurrentInfo() const;
@@ -167,7 +160,7 @@ private:
     void EndCmd(unsigned i);
 
     void RefreshSheet();
-    void CheckCollisions();
+    void FindAllCollisions();
 
     std::vector<std::shared_ptr<AnimateCommand>> GetCommands(unsigned whichSheet, unsigned whichPoint) const;
     AnimateCommand& GetCommand(unsigned whichSheet, unsigned whichPoint) const;
@@ -176,12 +169,12 @@ private:
     std::vector<AnimateSheet> mSheets;
     std::vector<Coord> mPoints; // current position of these points
     std::vector<size_t> mCurrentCmdIndex; // pointer to the current command in the sheet
-    std::map<unsigned, Coord::CollisionType> mCollisions;
+
+    // mapping of Which, Sheet, Beat to a collision
+    std::map<std::tuple<int, int, int>, Coord::CollisionType> mCollisions;
     unsigned mCurrentSheetNumber{};
     unsigned mCurrentBeatNumber{};
-    CollisionAction_t mCollisionAction;
     std::vector<int> mAnimSheetIndices;
     std::vector<AnimationErrors> mAnimationErrors;
-
 };
 }

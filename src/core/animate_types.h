@@ -106,11 +106,9 @@ struct ErrorMarker {
     SelectionList pntgroup; // which points have this error
     SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity
     int line = -1, col = -1; // where
-    bool operator==(ErrorMarker const& rhs) const {
-        return pntgroup == rhs.pntgroup &&
-        contsymbol == rhs.contsymbol &&
-        line == rhs.line &&
-        col == rhs.col;
+    bool operator==(ErrorMarker const& rhs) const
+    {
+        return pntgroup == rhs.pntgroup && contsymbol == rhs.contsymbol && line == rhs.line && col == rhs.col;
     }
 };
 

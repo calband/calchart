@@ -25,6 +25,14 @@
 
 #include <wx/dc.h>
 
+struct ViewPoint {
+    float x, y, z;
+};
+
+struct MarcherInfo {
+    float direction, x, y;
+};
+
 // helper classes for saving and restoring state
 class SaveAndRestore_DeviceOrigin {
     wxDC& dc;

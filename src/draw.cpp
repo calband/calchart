@@ -919,8 +919,7 @@ void DrawMode(wxDC& dc, const CalChartConfiguration& config,
     ShowModeStandard_DrawHelper(dc, config, mode, howToDraw);
 }
 
-wxImage GetOmniLinesImage(const CalChartConfiguration& config,
-    const CalChart::ShowMode& mode)
+wxImage GetOmniLinesImage(const CalChartConfiguration& config, const CalChart::ShowMode& mode)
 {
     auto fieldsize = mode.FieldSize();
     wxBitmap bmp(fieldsize.x, fieldsize.y, 32);
@@ -929,5 +928,14 @@ wxImage GetOmniLinesImage(const CalChartConfiguration& config,
     dc.SetBackground(*wxTRANSPARENT_BRUSH);
     dc.Clear();
     DrawMode(dc, config, mode, ShowMode_kOmniView);
-    return bmp.ConvertToImage();
+    auto image = bmp.ConvertToImage();
+    image.InitAlpha();
+    for (auto x = 0; x < fieldsize.x; ++x) {
+        for (auto y = 0; y < fieldsize.y; ++y) {
+            if (!image.GetRed(x, y) && !image.GetGreen(x, y) && !image.GetBlue(x, y)) {
+                image.SetAlpha(x, y, 0);
+            }
+        }
+    }
+    return image;
 }

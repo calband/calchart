@@ -22,6 +22,7 @@
 
 #include "animatecompile.h"
 
+#include <map>
 #include <wx/treelist.h>
 #include <wx/wx.h>
 
@@ -48,10 +49,10 @@ private:
     void OnSelectionChanged(wxTreeListEvent& event);
     void OnItemActivated(wxTreeListEvent& event);
 
-    void UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors);
+    void UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors, std::map<int, SelectionList> const& collisions);
 
     CalChartView* mView{};
     wxTreeListCtrl* mTreeCtrl{};
     std::vector<CalChart::AnimationErrors> mCurrentErrors{};
-    std::map<wxTreeListItem, std::tuple<int, CalChart::ErrorMarker>> mErrorLookup{};
+    std::map<wxTreeListItem, std::tuple<int, SelectionList>> mErrorLookup{};
 };

@@ -23,15 +23,15 @@
 #include "AnimationPanel.h"
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
+#include "CCOmniviewCanvas.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "cc_omniview_canvas.h"
 #include "confgr.h"
 #include "platconf.h"
 #include "ui_enums.h"
 
-#include "tb_stop.xbm"
 #include "tb_play.xbm"
+#include "tb_stop.xbm"
 
 #include <wx/artprov.h>
 #include <wx/spinctrl.h>
@@ -46,8 +46,8 @@ EVT_SPINCTRL(CALCHART__anim_tempo, AnimationPanel::OnSlider_anim_tempo)
 EVT_COMMAND_SCROLL(CALCHART__anim_gotobeat, AnimationPanel::OnSlider_anim_gotobeat)
 EVT_TIMER(CALCHART__anim_next_beat_timer, AnimationPanel::OnCmd_anim_next_beat_timer)
 EVT_TOGGLEBUTTON(CALCHART__anim_play_button, AnimationPanel::OnCmd_PlayButton)
+EVT_BUTTON(CALCHART__anim_toggle_anim_omni, AnimationPanel::OnCmd_ToggleAnimOmni)
 END_EVENT_TABLE()
-
 
 AnimationPanel::AnimationPanel(wxWindow* parent,
     wxWindowID winid,
@@ -66,9 +66,12 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     wxBoxSizer* toprow = new wxBoxSizer(wxHORIZONTAL);
     AddToSizerBasic(topsizer, toprow);
 
-    auto button = new wxBitmapToggleButton(this, CALCHART__anim_play_button, wxBitmap(BITMAP_NAME(tb_play)));
-    button->SetBitmapPressed(wxBitmap(BITMAP_NAME(tb_stop)));
-    AddToSizerBasic(toprow, button);
+    mAnimateOmniToggle = new wxButton(this, CALCHART__anim_toggle_anim_omni, wxT("Omni"));
+    AddToSizerBasic(toprow, mAnimateOmniToggle);
+
+    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, wxBitmap(BITMAP_NAME(tb_play)));
+    mPlayPauseButton->SetBitmapPressed(wxBitmap(BITMAP_NAME(tb_stop)));
+    AddToSizerBasic(toprow, mPlayPauseButton);
 
     // Sheet slider (will get set later with UpdatePanel())
     mBeatSlider = new wxSlider(this, CALCHART__anim_gotobeat, 1, 1, 2, wxDefaultPosition, wxSize(-1, -1), wxSL_HORIZONTAL | wxSL_LABELS);
@@ -93,14 +96,30 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     });
     mZoomCheckbox->SetValue(mCanvas->GetZoomOnMarchers());
     AddToSizerBasic(sizer1, mZoomCheckbox);
-    mCollisionCheckbox = new wxCheckBox(this, wxID_ANY, wxT("Collision"));
+    mCollisionCheckbox = new wxCheckBox(this, wxID_ANY, wxT("Collisions"));
     mCollisionCheckbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& event) {
-        if (mView) { mView->SetDrawCollisionWarning(event.IsChecked()); }
+        if (mView) {
+            mView->SetDrawCollisionWarning(event.IsChecked());
+        }
     });
     AddToSizerBasic(sizer1, mCollisionCheckbox);
     AddToSizerBasic(toprow, sizer1);
 
+    mOmniHelpButton = new wxButton(this, wxID_HELP, wxT("&Help"));
+    AddToSizerBasic(toprow, mOmniHelpButton);
+    mOmniHelpButton->Bind(wxEVT_BUTTON, [this](auto const&) {
+        mOmniCanvas->OnCmd_ShowKeyboardControls();
+    });
+
+    mOmniCanvas = new CCOmniviewCanvas(this, CalChartConfiguration::GetGlobalConfig());
+
     AddToSizerExpand(topsizer, mCanvas);
+    AddToSizerExpand(topsizer, mOmniCanvas);
+
+    // we default to animate view
+    mCanvas->Show();
+    mOmniCanvas->Hide();
+    mOmniHelpButton->Hide();
 
     SetMainViewMode(false);
     SetSizer(topsizer);
@@ -128,13 +147,14 @@ void AnimationPanel::SetMainViewMode(bool mainViewMode)
         mTempoCtrl->Show();
         mZoomCheckbox->Show();
         mCollisionCheckbox->Show();
-    }
-    else {
+        mAnimateOmniToggle->Show();
+    } else {
         mBeatSlider->SetSizeHints(-1, -1);
         mTempoLabel->Hide();
         mTempoCtrl->Hide();
         mZoomCheckbox->Hide();
         mCollisionCheckbox->Hide();
+        mAnimateOmniToggle->Hide();
     }
     Layout();
 }
@@ -153,10 +173,36 @@ void AnimationPanel::OnCmd_PlayButton(wxCommandEvent& event)
     ToggleTimer();
 }
 
+void AnimationPanel::OnCmd_ToggleAnimOmni(wxCommandEvent& event)
+{
+    mShowOmni = !mShowOmni;
+    if (mShowOmni) {
+        mCanvas->Hide();
+        mZoomCheckbox->Hide();
+        mCollisionCheckbox->Hide();
+        mOmniCanvas->Show();
+        mOmniHelpButton->Show();
+        mAnimateOmniToggle->SetLabel(wxT("Animate"));
+    } else {
+        mCanvas->Show();
+        mZoomCheckbox->Show();
+        mCollisionCheckbox->Show();
+        mOmniCanvas->Hide();
+        mOmniHelpButton->Hide();
+        mAnimateOmniToggle->SetLabel(wxT("Omni"));
+    }
+    Layout();
+    Refresh();
+}
+
 void AnimationPanel::OnSlider_anim_tempo(wxSpinEvent& event)
 {
     SetTempo(event.GetPosition());
-    StartTimer();
+    if (mTimerOn) {
+        StopTimer();
+        StartTimer();
+    }
+    UpdatePanel();
 }
 
 void AnimationPanel::OnSlider_anim_gotobeat(wxScrollEvent& event)
@@ -170,6 +216,7 @@ void AnimationPanel::ToggleTimer()
         StopTimer();
     else
         StartTimer();
+    UpdatePanel();
 }
 
 void AnimationPanel::UpdatePanel()
@@ -190,9 +237,19 @@ void AnimationPanel::UpdatePanel()
     } else {
         mBeatSlider->Enable(false);
     }
+    mPlayPauseButton->SetValue(mTimerOn);
 }
 
 bool AnimationPanel::OnBeat() const { return mBeatSlider->GetValue() & 1; }
+
+void AnimationPanel::SetPlayState(bool playState)
+{
+    if (playState) {
+        StartTimer();
+    } else {
+        StopTimer();
+    }
+}
 
 void AnimationPanel::StartTimer()
 {
@@ -260,7 +317,9 @@ void AnimationPanel::SetView(CalChartView* view)
     mView = std::make_unique<AnimationView>(view, this);
     mView->SetDocument(view->GetDocument());
     mView->SetFrame(this);
+    mView->SetPlayCollisionWarning(mMainViewMode);
     mCanvas->SetView(mView.get());
+    mOmniCanvas->SetView(mView.get());
 
     mCollisionCheckbox->SetValue(mView->GetDrawCollisionWarning());
 }

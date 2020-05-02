@@ -70,6 +70,7 @@ void CalChartApp::MacOpenFiles(const wxArrayString& fileNames)
 
 bool CalChartApp::OnInit()
 {
+    wxInitAllImageHandlers();
     StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); },
         [=]() { this->ExitAppAsServer(); } };
     StartStopFunc_t asClient{ [=]() { this->InitAppAsClient(); },
@@ -109,9 +110,6 @@ void CalChartApp::InitAppAsServer()
     wxFrame* frame = new TopFrame(mDocManager, (wxFrame*)NULL, _T("CalChart"));
 
     {
-        // Required for images in the online documentation
-        wxImage::AddHandler(new wxGIFHandler);
-
         // Required for advanced HTML help
         wxFileSystem::AddHandler(new wxZipFSHandler);
         wxFileSystem::AddHandler(new wxArchiveFSHandler);
