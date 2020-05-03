@@ -202,6 +202,8 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(BeepOnCollisions, bool);
+
     DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout, wxString);
 
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool);

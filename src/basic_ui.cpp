@@ -251,13 +251,3 @@ wxSizerFlags ExpandSizerFlags()
     static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Proportion(1).Expand();
     return sizerFlags;
 }
-
-void AddToSizerBasic(wxSizer* sizer, wxWindow* window)
-{
-    sizer->Add(window, BasicSizerFlags());
-}
-
-void AddToSizerExpand(wxSizer* sizer, wxWindow* window)
-{
-    sizer->Add(window, ExpandSizerFlags());
-}

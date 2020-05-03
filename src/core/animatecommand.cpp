@@ -35,12 +35,12 @@ AnimateCommand::AnimateCommand(unsigned beats)
 {
 }
 
-DrawCommand AnimateCommand::GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const
+DrawCommand AnimateCommand::GenCC_DrawCommand(const Coord& pt, const Coord& offset) const
 {
     return DrawCommand();
 }
 
-bool AnimateCommand::Begin(AnimatePoint& pt)
+bool AnimateCommand::Begin(Coord& pt)
 {
     mBeat = 0;
     if (mNumBeats == 0) {
@@ -50,7 +50,7 @@ bool AnimateCommand::Begin(AnimatePoint& pt)
     return true;
 }
 
-bool AnimateCommand::End(AnimatePoint& pt)
+bool AnimateCommand::End(Coord& pt)
 {
     mBeat = mNumBeats;
     if (mNumBeats == 0) {
@@ -60,7 +60,7 @@ bool AnimateCommand::End(AnimatePoint& pt)
     return true;
 }
 
-bool AnimateCommand::NextBeat(AnimatePoint&)
+bool AnimateCommand::NextBeat(Coord&)
 {
     ++mBeat;
     if (mBeat >= mNumBeats)
@@ -68,7 +68,7 @@ bool AnimateCommand::NextBeat(AnimatePoint&)
     return true;
 }
 
-bool AnimateCommand::PrevBeat(AnimatePoint&)
+bool AnimateCommand::PrevBeat(Coord&)
 {
     if (mBeat == 0)
         return false;
@@ -78,9 +78,9 @@ bool AnimateCommand::PrevBeat(AnimatePoint&)
     }
 }
 
-void AnimateCommand::ApplyForward(AnimatePoint&) { mBeat = mNumBeats; }
+void AnimateCommand::ApplyForward(Coord&) { mBeat = mNumBeats; }
 
-void AnimateCommand::ApplyBackward(AnimatePoint&) { mBeat = 0; }
+void AnimateCommand::ApplyBackward(Coord&) { mBeat = 0; }
 
 float AnimateCommand::MotionDirection() const { return RealDirection(); }
 
@@ -98,6 +98,11 @@ AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
     , dir(AnimGetDirFromAngle(direction))
     , realdir(direction)
 {
+}
+
+std::unique_ptr<AnimateCommand> AnimateCommandMT::clone() const
+{
+    return std::make_unique<AnimateCommandMT>(*this);
 }
 
 AnimateDir AnimateCommandMT::Direction() const { return dir; }
@@ -121,6 +126,11 @@ AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement)
 {
 }
 
+std::unique_ptr<AnimateCommand> AnimateCommandMove::clone() const
+{
+    return std::make_unique<AnimateCommandMove>(*this);
+}
+
 AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement,
     float direction)
     : AnimateCommandMT(beats, direction)
@@ -128,7 +138,7 @@ AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement,
 {
 }
 
-bool AnimateCommandMove::NextBeat(AnimatePoint& pt)
+bool AnimateCommandMove::NextBeat(Coord& pt)
 {
     bool b = AnimateCommand::NextBeat(pt);
     pt.x += (mNumBeats)
@@ -140,7 +150,7 @@ bool AnimateCommandMove::NextBeat(AnimatePoint& pt)
     return b;
 }
 
-bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
+bool AnimateCommandMove::PrevBeat(Coord& pt)
 {
     if (AnimateCommand::PrevBeat(pt)) {
         pt.x += mNumBeats
@@ -155,13 +165,13 @@ bool AnimateCommandMove::PrevBeat(AnimatePoint& pt)
     }
 }
 
-void AnimateCommandMove::ApplyForward(AnimatePoint& pt)
+void AnimateCommandMove::ApplyForward(Coord& pt)
 {
     AnimateCommand::ApplyForward(pt);
     pt += mVector;
 }
 
-void AnimateCommandMove::ApplyBackward(AnimatePoint& pt)
+void AnimateCommandMove::ApplyBackward(Coord& pt)
 {
     AnimateCommand::ApplyBackward(pt);
     pt -= mVector;
@@ -178,7 +188,7 @@ void AnimateCommandMove::ClipBeats(unsigned beats)
 }
 
 DrawCommand
-AnimateCommandMove::GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const
+AnimateCommandMove::GenCC_DrawCommand(const Coord& pt, const Coord& offset) const
 {
     return { pt.x + offset.x, pt.y + offset.y,
         pt.x + mVector.x + offset.x,
@@ -214,7 +224,12 @@ AnimateCommandRotate::AnimateCommandRotate(unsigned beats, Coord cntr,
         mFace = 90;
 }
 
-bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
+std::unique_ptr<AnimateCommand> AnimateCommandRotate::clone() const
+{
+    return std::make_unique<AnimateCommandRotate>(*this);
+}
+
+bool AnimateCommandRotate::NextBeat(Coord& pt)
 {
     bool b = AnimateCommand::NextBeat(pt);
     float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
@@ -225,7 +240,7 @@ bool AnimateCommandRotate::NextBeat(AnimatePoint& pt)
     return b;
 }
 
-bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
+bool AnimateCommandRotate::PrevBeat(Coord& pt)
 {
     if (AnimateCommand::PrevBeat(pt)) {
         float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
@@ -239,14 +254,14 @@ bool AnimateCommandRotate::PrevBeat(AnimatePoint& pt)
     }
 }
 
-void AnimateCommandRotate::ApplyForward(AnimatePoint& pt)
+void AnimateCommandRotate::ApplyForward(Coord& pt)
 {
     AnimateCommand::ApplyForward(pt);
     pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngEnd * M_PI / 180.0) * mR);
     pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngEnd * M_PI / 180.0) * mR);
 }
 
-void AnimateCommandRotate::ApplyBackward(AnimatePoint& pt)
+void AnimateCommandRotate::ApplyBackward(Coord& pt)
 {
     AnimateCommand::ApplyBackward(pt);
     pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngStart * M_PI / 180.0) * mR);
@@ -276,7 +291,7 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 }
 
 DrawCommand
-AnimateCommandRotate::GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const
+AnimateCommandRotate::GenCC_DrawCommand(const Coord& pt, const Coord& offset) const
 {
     float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;

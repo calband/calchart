@@ -26,7 +26,7 @@
 
 #include <wx/wx.h>
 
-class CalChartDoc;
+class CalChartView;
 class CalChartConfiguration;
 
 class ContinuityBrowserPanel : public CustomListViewPanel {
@@ -34,13 +34,17 @@ class ContinuityBrowserPanel : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityBrowserPanel(CalChartDoc* doc, SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
+    ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
         wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxScrolledWindowStyle,
         const wxString& name = wxPanelNameStr);
     virtual ~ContinuityBrowserPanel() = default;
+
+    void SetView(CalChartView* view) { mView = view; }
+    auto GetView() const { return mView; }
+
     void DoSetContinuity(CalChart::Continuity const& new_cont);
 
 private:
@@ -54,9 +58,9 @@ private:
 
     void UpdateCont(CalChart::Continuity const& new_cont);
 
-    CalChartDoc* mDoc;
-    CalChart::Continuity mCont;
-    SYMBOL_TYPE mSym;
+    CalChartView* mView{};
+    CalChart::Continuity mCont{};
+    SYMBOL_TYPE mSym{};
     CalChartConfiguration& mConfig;
     DECLARE_EVENT_TABLE()
 };

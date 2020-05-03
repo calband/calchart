@@ -20,7 +20,7 @@
 */
 
 #include "ContinuityBrowserPanel.h"
-#include "CalChartDoc.h"
+#include "CalChartView.h"
 #include "ContinuityComposerDialog.h"
 #include "cont.h"
 #include "cont_box_draw.h"
@@ -33,14 +33,13 @@ EVT_KILL_FOCUS(ContinuityBrowserPanel::DoKillFocus)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-ContinuityBrowserPanel::ContinuityBrowserPanel(CalChartDoc* doc, SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
+ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
     wxWindowID winid,
     const wxPoint& pos,
     const wxSize& size,
     long style,
     const wxString& name)
     : super(parent, winid, pos, size, style, name)
-    , mDoc(doc)
     , mSym(sym)
     , mConfig(config)
 {
@@ -80,8 +79,10 @@ static auto do_cloning(T const& cont)
 
 void ContinuityBrowserPanel::OnNewEntry(int cell)
 {
-    if (!mDoc)
+    if (!mView) {
         return;
+    }
+
     ContinuityComposerDialog dialog(nullptr, this);
 
     if (dialog.ShowModal() != wxID_OK) {
@@ -100,8 +101,10 @@ void ContinuityBrowserPanel::OnNewEntry(int cell)
 
 void ContinuityBrowserPanel::OnEditEntry(int cell)
 {
-    if (!mDoc)
+    if (!mView) {
         return;
+    }
+
     ContinuityComposerDialog dialog(mCont.GetParsedContinuity().at(cell)->clone(), this);
 
     if (dialog.ShowModal() != wxID_OK) {
@@ -120,8 +123,10 @@ void ContinuityBrowserPanel::OnEditEntry(int cell)
 
 void ContinuityBrowserPanel::OnDeleteEntry(int cell)
 {
-    if (!mDoc)
+    if (!mView) {
         return;
+    }
+
     // make a copy, then delete it, then set as new continuity:
     if (cell < static_cast<int>(mCont.GetParsedContinuity().size())) {
         auto copied_cont = do_cloning(mCont);
@@ -145,18 +150,21 @@ void ContinuityBrowserPanel::OnMoveEntry(int start_cell, int end_cell)
 
 void ContinuityBrowserPanel::UpdateCont(Continuity const& new_cont)
 {
-    if (!mDoc)
+    if (!mView) {
         return;
-    auto cmd = mDoc->Create_SetContinuityCommand(mSym, new_cont);
-    mDoc->GetCommandProcessor()->Submit(cmd.release());
+    }
+
+    mView->DoSetContinuityCommand(mSym, new_cont);
 }
 
 void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent& event)
 {
-    if (!mDoc)
+    if (!mView) {
         return;
-    auto&& sht = mDoc->GetCurrentSheet();
-    mDoc->SetSelection(sht->MakeSelectPointsBySymbol(mSym));
+    }
+
+    auto&& sht = mView->GetCurrentSheet();
+    mView->SetSelection(sht->MakeSelectPointsBySymbol(mSym));
 }
 
 void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent& event)

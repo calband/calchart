@@ -33,15 +33,17 @@ public:
     AnimateCommand(unsigned beats);
     virtual ~AnimateCommand() = default;
 
+    virtual std::unique_ptr<AnimateCommand> clone() const = 0;
+
     // returns false if end of command
-    virtual bool Begin(AnimatePoint& pt);
-    virtual bool End(AnimatePoint& pt);
-    virtual bool NextBeat(AnimatePoint& pt);
-    virtual bool PrevBeat(AnimatePoint& pt);
+    virtual bool Begin(Coord& pt);
+    virtual bool End(Coord& pt);
+    virtual bool NextBeat(Coord& pt);
+    virtual bool PrevBeat(Coord& pt);
 
     // go through all beats at once
-    virtual void ApplyForward(AnimatePoint& pt);
-    virtual void ApplyBackward(AnimatePoint& pt);
+    virtual void ApplyForward(Coord& pt);
+    virtual void ApplyBackward(Coord& pt);
 
     virtual AnimateDir Direction() const = 0;
     virtual float RealDirection() const = 0;
@@ -54,7 +56,7 @@ public:
     virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
 
     // when we want to have the path drawn:
-    virtual DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
 
     /*!
      * @brief Manipulates dest so that it contains a JSONElement that
@@ -81,6 +83,8 @@ public:
     AnimateCommandMT(unsigned beats, float direction);
     virtual ~AnimateCommandMT() = default;
 
+    std::unique_ptr<AnimateCommand> clone() const;
+
     virtual AnimateDir Direction() const;
     virtual float RealDirection() const;
 
@@ -97,16 +101,18 @@ public:
     AnimateCommandMove(unsigned beats, Coord movement, float direction);
     virtual ~AnimateCommandMove() = default;
 
-    virtual bool NextBeat(AnimatePoint& pt);
-    virtual bool PrevBeat(AnimatePoint& pt);
+    std::unique_ptr<AnimateCommand> clone() const;
 
-    virtual void ApplyForward(AnimatePoint& pt);
-    virtual void ApplyBackward(AnimatePoint& pt);
+    virtual bool NextBeat(Coord& pt);
+    virtual bool PrevBeat(Coord& pt);
+
+    virtual void ApplyForward(Coord& pt);
+    virtual void ApplyBackward(Coord& pt);
 
     virtual float MotionDirection() const;
     virtual void ClipBeats(unsigned beats);
 
-    virtual DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
 
     void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
 
@@ -120,17 +126,19 @@ public:
         float ang2, bool backwards = false);
     virtual ~AnimateCommandRotate() = default;
 
-    virtual bool NextBeat(AnimatePoint& pt);
-    virtual bool PrevBeat(AnimatePoint& pt);
+    std::unique_ptr<AnimateCommand> clone() const;
 
-    virtual void ApplyForward(AnimatePoint& pt);
-    virtual void ApplyBackward(AnimatePoint& pt);
+    virtual bool NextBeat(Coord& pt);
+    virtual bool PrevBeat(Coord& pt);
+
+    virtual void ApplyForward(Coord& pt);
+    virtual void ApplyBackward(Coord& pt);
 
     virtual AnimateDir Direction() const;
     virtual float RealDirection() const;
     virtual void ClipBeats(unsigned beats);
 
-    virtual DrawCommand GenCC_DrawCommand(const AnimatePoint& pt, const Coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
 
     void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
 

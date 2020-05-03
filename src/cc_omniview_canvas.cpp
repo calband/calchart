@@ -20,10 +20,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if 0
 #include "cc_omniview_canvas.h"
+#include "AnimationView.h"
 #include "CalChartDoc.h"
-#include "animation_frame.h"
-#include "animation_view.h"
+#include "OmniviewPanel.h"
 #include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "draw.h"
@@ -1021,3 +1022,5 @@ void CCOmniView_Canvas::OnCmd_ToggleShowOnlySelected()
     mShowOnlySelected = !mShowOnlySelected;
     Refresh();
 }
+
+#endif

@@ -743,7 +743,7 @@ void Sheet::toOnlineViewerJSON(JSONElement& dest, unsigned sheetNum, std::vector
     for (unsigned ptIndex = 0; ptIndex < mPoints.size(); ptIndex++) {
         JSONDataArrayAccessor pointMovementsAccessor = movementsAccessor[dotLabels[ptIndex]] = JSONElement::makeArray();
 
-        AnimatePoint currPos(mPoints[ptIndex].GetPos().x, mPoints[ptIndex].GetPos().y);
+        Coord currPos(mPoints[ptIndex].GetPos().x, mPoints[ptIndex].GetPos().y);
 
         for (auto commandIter = compiledSheet.GetCommandsBegin(ptIndex); commandIter != compiledSheet.GetCommandsEnd(ptIndex); commandIter++) {
 

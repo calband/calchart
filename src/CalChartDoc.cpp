@@ -223,7 +223,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
     }
-    mAnimation = std::make_unique<Animation>(*mShow, NotifyStatus{}, NotifyErrorList{});
+    mAnimation = std::make_unique<Animation>(*mShow);
     CalChartDoc_FinishedLoading finishedLoading;
     UpdateAllViews(NULL, &finishedLoading);
     return stream;
@@ -248,7 +248,7 @@ bool CalChartDoc::exportViewerFile(const wxString& filepath)
     metaObjectAccessor["index_name"] = "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)"; // TODO; for now, manually add index_name to viewer file after saving
     metaObjectAccessor["type"] = "viewer";
 
-    mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow, nullptr, nullptr));
+    mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow));
 
     return JSONExporter::exportJSON(filepath.ToStdString(), mainObject);
 }
@@ -266,7 +266,7 @@ void CalChartDoc::Modify(bool b)
     // generate a new animation
     // uncomment below to see how long it takes to print
     //    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    mAnimation = std::make_unique<Animation>(*mShow, NotifyStatus{}, NotifyErrorList{});
+    mAnimation = std::make_unique<Animation>(*mShow);
     //    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     //    std::cout << "generation "
     //             << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
@@ -305,13 +305,6 @@ void CalChartDoc::SetCurrentSheet(int n)
     auto cmd = mShow->Create_SetCurrentSheetCommand(n);
     cmd.first(*mShow);
     UpdateAllViews();
-}
-
-std::unique_ptr<Animation>
-CalChartDoc::NewAnimation(NotifyStatus notifyStatus,
-    NotifyErrorList notifyErrorList)
-{
-    return std::make_unique<Animation>(*mShow, notifyStatus, notifyErrorList);
 }
 
 Animation const*

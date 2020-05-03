@@ -55,7 +55,7 @@ private:
 };
 
 struct AnimateState {
-    AnimatePoint pt;
+    Coord pt;
     unsigned beats_rem;
     AnimationVariables& mVars;
     AnimationErrors& error_markers;
@@ -85,9 +85,9 @@ public:
     auto GetPointPosition() const { return mState.pt; }
     auto GetCurrentPoint() const { return curr_pt; }
     auto GetBeatsRemaining() const { return mState.beats_rem; }
-    AnimatePoint GetStartingPosition() const;
-    AnimatePoint GetEndingPosition(const ContToken* token) const;
-    AnimatePoint GetReferencePointPosition(unsigned refnum) const;
+    Coord GetStartingPosition() const;
+    Coord GetEndingPosition(const ContToken* token) const;
+    Coord GetReferencePointPosition(unsigned refnum) const;
 
 private:
     const Show& mShow;

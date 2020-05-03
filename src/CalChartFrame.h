@@ -30,6 +30,7 @@
 // the CalChartDoc happens via the CalChartView.
 
 class AnimationErrorsPanel;
+class AnimationPanel;
 class CalChartConfiguration;
 class CalChartDoc;
 class CalChartView;
@@ -73,9 +74,9 @@ public:
     void OnCmdSetMode(wxCommandEvent& event);
     void OnCmdPoints(wxCommandEvent& event);
     void OnCmdSelectAll(wxCommandEvent& event);
-    void OnCmdAnimate(wxCommandEvent& event);
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
+    void OnCmdAnimate(wxCommandEvent& event);
 
     void OnCmd_prev_ss(wxCommandEvent& event);
     void OnCmd_next_ss(wxCommandEvent& event);
@@ -136,7 +137,7 @@ public:
     // Grid chioce distance (distance per beat), Grid placement lock (where to end)
     std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
     std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice() const;
-    void UpdatePanel();
+    void OnUpdate();
 
     void SetCurrentLasso(CC_DRAG type);
     void SetCurrentMove(CC_MOVE_MODES type);
@@ -161,7 +162,6 @@ public:
     const CalChartDoc* GetShow() const;
     CalChartDoc* GetShow();
 
-    void ClearAnimationFrame();
     void AUIIsClose(wxAuiManagerEvent& event);
 
 private:
@@ -170,16 +170,24 @@ private:
     void ChangeFieldControlsVisibility(bool show);
     void ChangeContinuityInfoVisibility(bool show);
     void ChangeAnimationErrorsVisibility(bool show);
+    void ChangeAnimationVisibility(bool show);
+    void ChangeMainFieldVisibility(bool show);
 
-    FieldFrameControls* mControls;
-    FieldCanvas* mCanvas;
-    FieldThumbnailBrowser* mFieldThumbnailBrowser;
-    ContinuityBrowser* mContinuityBrowser;
-    AnimationErrorsPanel* mAnimationErrorsPanel;
+    void ShowFieldAndHideAnimation(bool showField);
 
-    wxWindow* mAnimationFrame;
+    FieldFrameControls* mControls{};
+    FieldCanvas* mCanvas{};
+    FieldThumbnailBrowser* mFieldThumbnailBrowser{};
+    ContinuityBrowser* mContinuityBrowser{};
+    AnimationErrorsPanel* mAnimationErrorsPanel{};
+    AnimationPanel* mAnimationPanel{};
+    AnimationPanel* mShadowAnimationPanel{};
+
     CalChartConfiguration& mConfig;
     wxAuiManager mAUIManager;
+
+    bool mMainFieldVisible = true;
+
 
     DECLARE_EVENT_TABLE()
 };

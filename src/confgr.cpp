@@ -394,6 +394,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool, false);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(BeepOnCollisions, bool, true);
+
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout, wxString, wxT(""));
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool, false);

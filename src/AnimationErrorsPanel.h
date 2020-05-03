@@ -32,21 +32,26 @@ class AnimationErrorsPanel : public wxPanel {
     DECLARE_EVENT_TABLE()
 
 public:
-    AnimationErrorsPanel(wxWindow* parent);
+    AnimationErrorsPanel(wxWindow* parent,
+        wxWindowID winid = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+        const wxString& name = wxPanelNameStr);
     virtual ~AnimationErrorsPanel() override = default;
 
-    virtual void OnUpdate(); // Refresh all window controls
-
+    void OnUpdate(); // Refresh from the View
     void SetView(CalChartView* view) { mView = view; }
     auto GetView() const { return mView; }
+
+private:
     void OnSelectionChanged(wxTreeListEvent& event);
     void OnItemActivated(wxTreeListEvent& event);
 
-private:
     void UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors);
 
-    CalChartView* mView;
-    wxTreeListCtrl* mTreeCtrl;
-    std::vector<CalChart::AnimationErrors> mCurrentErrors;
-    std::map<wxTreeListItem, std::tuple<int, CalChart::ErrorMarker>> mErrorLookup;
+    CalChartView* mView{};
+    wxTreeListCtrl* mTreeCtrl{};
+    std::vector<CalChart::AnimationErrors> mCurrentErrors{};
+    std::map<wxTreeListItem, std::tuple<int, CalChart::ErrorMarker>> mErrorLookup{};
 };

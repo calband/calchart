@@ -22,22 +22,24 @@
 
 #include <wx/docview.h>
 
-class CalChartDoc;
-class FieldThumbnailBrowserView;
-class FieldThumbnailBrowserPerCont;
+class CalChartView;
 
 class FieldThumbnailBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
+    DECLARE_EVENT_TABLE()
 
 public:
-    FieldThumbnailBrowser(CalChartDoc* dcr, wxWindow* parent, wxWindowID id = wxID_ANY,
+    FieldThumbnailBrowser(wxWindow* parent,
+        wxWindowID id = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxScrolledWindowStyle,
         const wxString& name = wxPanelNameStr);
     virtual ~FieldThumbnailBrowser() override = default;
 
-    virtual void OnUpdate(); // Refresh all window controls
+    void OnUpdate(); // Refresh from the View
+    void SetView(CalChartView* view) { mView = view; }
+    auto GetView() const { return mView; }
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -49,8 +51,7 @@ private:
     wxSize SizeOfOneCell(bool horizontal) const;
     int WhichCell(wxPoint const& p) const;
 
-    CalChartDoc* mDoc;
-    std::unique_ptr<FieldThumbnailBrowserView> mView;
+    CalChartView* mView{};
 
     const int mXLeftPadding{ 4 };
     const int mXRightPadding{ 4 };
@@ -62,6 +63,4 @@ private:
     const int mYScrollPadding{};
 
     bool mLayoutHorizontal{ false };
-
-    DECLARE_EVENT_TABLE()
 };

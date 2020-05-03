@@ -25,40 +25,48 @@
 
 class AnimationView;
 
+// holds an instance of animation for the reference to draw.
 class AnimationCanvas : public wxPanel {
+    using super = wxPanel;
+    wxDECLARE_EVENT_TABLE();
+
 public:
-    AnimationCanvas(AnimationView* view, wxWindow* parent);
+    AnimationCanvas(wxWindow* parent,
+        wxWindowID winid = wxID_ANY,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+        const wxString& name = wxPanelNameStr);
     ~AnimationCanvas() = default;
 
-    void SetView(AnimationView* view) { mAnimationView = view; }
+    void SetView(AnimationView* view) { mView = view; }
+    auto GetView() const { return mView; }
 
-    void OnPaint(wxPaintEvent& event);
-    void OnLeftDownMouseEvent(wxMouseEvent& event);
-    void OnLeftUpMouseEvent(wxMouseEvent& event);
-    void OnRightUpMouseEvent(wxMouseEvent& event);
-    void OnMouseMove(wxMouseEvent& event);
-    void OnChar(wxKeyEvent& event);
     void SetZoomOnMarchers(bool zoomOnMarchers);
     auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
     void SetStepsOutForMarchersZoom(int steps);
     auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
 
 private:
-    AnimationView* mAnimationView;
+    void OnPaint(wxPaintEvent& event);
+    void OnLeftDownMouseEvent(wxMouseEvent& event);
+    void OnLeftUpMouseEvent(wxMouseEvent& event);
+    void OnRightUpMouseEvent(wxMouseEvent& event);
+    void OnMouseMove(wxMouseEvent& event);
+    void OnChar(wxKeyEvent& event);
+
+    wxPoint TranslatePosition(wxPoint const& point);
+    void UpdateScaleAndOrigin();
+
+    AnimationView* mView{};
 
     float mUserScale = 1.0f;
     std::pair<wxCoord, wxCoord> mUserOrigin = { 0, 0 };
-    bool mZoomOnMarchers = false;
-    int mStepsOutForMarcherZoom = 4;
-
-    void UpdateScaleAndOrigin();
+    bool mZoomOnMarchers = true;
+    int mStepsOutForMarcherZoom = 8;
 
     // for mouse and drawing
     bool mMouseDown{};
-    wxCoord mMouseXStart{};
-    wxCoord mMouseYStart{};
-    wxCoord mMouseXEnd{};
-    wxCoord mMouseYEnd{};
-
-    wxDECLARE_EVENT_TABLE();
+    wxPoint mMouseStart{};
+    wxPoint mMouseEnd{};
 };

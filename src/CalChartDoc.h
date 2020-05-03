@@ -119,10 +119,9 @@ public:
 
     void FlushAllTextWindows();
 
-    std::unique_ptr<CalChart::Animation> NewAnimation(CalChart::NotifyStatus notifyStatus, CalChart::NotifyErrorList notifyErrorList);
     void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, CalChart::ShowMode const& newmode);
 
-    auto GetNumSheets() const { return mShow->GetNumSheets(); }
+    auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
 
     auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
     auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
