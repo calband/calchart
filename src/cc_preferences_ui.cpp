@@ -1314,6 +1314,16 @@ bool ContCellSetup::TransferDataFromWindow()
 
 bool ContCellSetup::ClearValuesToDefault()
 {
+    mConfig.Clear_ContCellLongForm();
+    mConfig.Clear_ContCellFontSize();
+    mConfig.Clear_ContCellRounding();
+    mConfig.Clear_ContCellTextPadding();
+    mConfig.Clear_ContCellBoxPadding();
+
+    for (ContCellColors i = COLOR_CONTCELLS_PROC; i < COLOR_CONTCELLS_NUM; i = static_cast<ContCellColors>(static_cast<int>(i) + 1)) {
+        SetColor(i, mConfig.GetContCellDefaultColors()[i]);
+        mConfig.Clear_ContCellConfigColor(i);
+    }
     Init();
     TransferDataToWindow();
     return true;

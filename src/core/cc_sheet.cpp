@@ -24,6 +24,7 @@
 
 #include "animatecommand.h"
 #include "cc_fileformat.h"
+#include "cc_parse_errors.h"
 #include "cc_show.h"
 #include "viewer_translate.h"
 
@@ -146,8 +147,7 @@ CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
 }
 
 // Constructor for shows 3.3 and ealier.
-Sheet::Sheet(size_t numPoints, std::istream& stream,
-    Version_3_3_and_earlier)
+Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* correction)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
@@ -292,14 +292,14 @@ Sheet::Sheet(size_t numPoints, std::istream& stream,
             }
         }
         std::string textstr(text);
-        mAnimationContinuity.at(symbol_index) = Continuity{ textstr };
+        mAnimationContinuity.at(symbol_index) = Continuity{ textstr, correction };
 
         name = ReadLong(stream);
     }
 }
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_and_later)
+Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
@@ -331,7 +331,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_
             throw CC_FileException("Incorrect size", INGL_PNTS);
         }
     };
-    auto parse_INGL_ECNT = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_ECNT = [correction](Sheet* sheet, const uint8_t* ptr, size_t size) {
         if (size < 2) // one byte num + 1 nil minimum
         {
             throw CC_FileException("Bad cont chunk", INGL_ECNT);
@@ -351,11 +351,11 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_
             throw CC_FileException("No viable symbol for name", INGL_ECNT);
         }
         std::string textstr(text);
-        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ textstr };
+        sheet->mAnimationContinuity.at(symbol_index) = Continuity{ textstr, correction };
     };
     auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, const uint8_t* ptr,
                                size_t size) {
-        static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+        const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
             parser = {
                 { INGL_ECNT, parse_INGL_ECNT },
             };
@@ -382,7 +382,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_
         sheet->mAnimationContinuity.at(symbol_index) = Continuity{ std::vector<uint8_t>{ begin, end } };
     };
     auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, const uint8_t* ptr, size_t size) {
-        static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+        const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
             parser = {
                 { INGL_EVCT, parse_INGL_EVCT },
             };
@@ -411,7 +411,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, Current_version_
         }
     };
 
-    static const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+    const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
         parser = {
             { INGL_NAME, parse_INGL_NAME },
             { INGL_DURA, parse_INGL_DURA },
@@ -772,8 +772,7 @@ void Sheet::sheet_round_trip_test()
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
         auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
-            std::get<2>(table.front()),
-            Current_version_and_later());
+            std::get<2>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         assert(is_equal);
@@ -787,8 +786,7 @@ void Sheet::sheet_round_trip_test()
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
         auto re_read_sheet = Sheet(0, std::get<1>(table.front()),
-            std::get<2>(table.front()),
-            Current_version_and_later());
+            std::get<2>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         assert(is_equal);
@@ -812,8 +810,7 @@ void Sheet::sheet_round_trip_test()
         assert(table.size() == 1);
         assert(std::get<0>(table.front()) == INGL_SHET);
         auto re_read_sheet = Sheet(1, std::get<1>(table.front()),
-            std::get<2>(table.front()),
-            Current_version_and_later());
+            std::get<2>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
         //		auto mismatch_at = std::mismatch(blank_sheet_data.begin(),

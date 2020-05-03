@@ -29,6 +29,7 @@
 namespace CalChart {
 
 class ContProcedure;
+struct ParseErrorHandlers;
 
 struct ParseError : public std::runtime_error {
     ParseError(std::string const& str, int l, int c)
@@ -42,8 +43,9 @@ struct ParseError : public std::runtime_error {
 
 class Continuity {
 public:
+
     // this could throw ParseError
-    Continuity(std::string const& s = "");
+    Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
     Continuity(std::vector<std::unique_ptr<ContProcedure>>);
     Continuity(std::vector<uint8_t> const&);
     ~Continuity();
@@ -56,6 +58,7 @@ public:
     std::vector<uint8_t> Serialize() const;
 
     std::vector<std::unique_ptr<ContProcedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
+    auto GetText() const { return m_legacyText; }
 
     friend void swap(Continuity& lhs, Continuity& rhs)
     {
@@ -65,10 +68,11 @@ public:
     friend bool operator==(Continuity const& lhs, Continuity const& rhs);
 
 private:
-    static std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s);
+    static std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correction = nullptr);
     static std::vector<std::unique_ptr<ContProcedure>> Deserialize(std::vector<uint8_t> const&);
 
     std::vector<std::unique_ptr<ContProcedure>> m_parsedContinuity;
+    std::string m_legacyText;
 
     friend bool Check_Continuity(const Continuity&, const struct Continuity_values&);
     friend void Continuity_serialize_test();

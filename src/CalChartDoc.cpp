@@ -27,6 +27,7 @@
 #include "cc_point.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
+#include "cc_parse_errors.h"
 #include "confgr.h"
 #include "draw.h"
 #include "json.h"
@@ -35,6 +36,7 @@
 #include "modes.h"
 #include "platconf.h"
 #include "print_ps.h"
+#include "ContinuityEditorPopup.h"
 
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
@@ -46,7 +48,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_FlushAllViews, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_FinishedLoading, wxObject)
 IMPLEMENT_DYNAMIC_CLASS(CalChartDoc_setup, wxObject)
 
-IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, wxDocument);
+IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, CalChartDoc::super);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
@@ -82,7 +84,7 @@ bool CalChartDoc::OnOpenDocument(const wxString& filename)
             return false;
         }
     }
-    bool success = wxDocument::OnOpenDocument(filename) && mShow;
+    bool success = super::OnOpenDocument(filename) && mShow;
     if (success) {
         // at this point the recover file is no longer useful.
         if (wxFileExists(recoveryFile)) {
@@ -97,7 +99,7 @@ bool CalChartDoc::OnOpenDocument(const wxString& filename)
 // file, it may confuse the user.
 bool CalChartDoc::OnCloseDocument()
 {
-    bool success = wxDocument::OnCloseDocument();
+    bool success = super::OnCloseDocument();
     // first check to see if there is a recover file:
     wxString recoveryFile = TranslateNameToAutosaveName(GetFilename());
     if (!IsModified() && wxFileExists(recoveryFile)) {
@@ -108,7 +110,7 @@ bool CalChartDoc::OnCloseDocument()
 
 bool CalChartDoc::OnNewDocument()
 {
-    bool success = wxDocument::OnNewDocument();
+    bool success = super::OnNewDocument();
     if (success) {
         // notify the views that we are a new document.  That should prompt a wizard
         // to set up the show
@@ -122,7 +124,7 @@ bool CalChartDoc::OnNewDocument()
 // a false detection that the file writing failed.
 bool CalChartDoc::OnSaveDocument(const wxString& filename)
 {
-    bool result = wxDocument::OnSaveDocument(filename);
+    bool result = super::OnSaveDocument(filename);
     wxString recoveryFile = TranslateNameToAutosaveName(filename);
     if (result && wxFileExists(recoveryFile)) {
         wxRemoveFile(recoveryFile);
@@ -216,13 +218,29 @@ wxFFileOutputStream& CalChartDoc::SaveObjectInternal<wxFFileOutputStream>(
 template <typename T>
 T& CalChartDoc::LoadObjectGeneric(T& stream)
 {
+    // here's where we would put up the correction box
+    bool modified = false;
     try {
-        mShow = Show::Create_CC_show(wxGetApp().GetShowMode(kShowModeStrings[0]), stream);
-    } catch (CC_FileException& e) {
+        ParseErrorHandlers handlers = {
+            [this, &modified](std::string const& description, std::string const& what, int line, int column) {
+                wxString message = wxT("Error encountered when importing on parsing continuity:\n");
+                message += description + "\n";
+                message += "Please correct\n";
+                wxMessageBox(message, wxT("Error!"));
+                // if we got here, then the user is forced to make a change to their show.  We set it as modified
+                modified = true;
+                return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
+            }
+        };
+        mShow = Show::Create_CC_show(wxGetApp().GetShowMode(kShowModeStrings[0]), stream, &handlers);
+    } catch (std::exception const& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
         wxMessageBox(message, wxT("Error!"));
+        // if we got here, then the user is did not do edits, and the show is in weird state.  Don't force a save on exit.
+        modified = false;
     }
+    super::Modify(modified);
     mAnimation = std::make_unique<Animation>(*mShow);
     CalChartDoc_FinishedLoading finishedLoading;
     UpdateAllViews(NULL, &finishedLoading);
@@ -261,7 +279,7 @@ void CalChartDoc::FlushAllTextWindows()
 
 void CalChartDoc::Modify(bool b)
 {
-    wxDocument::Modify(b);
+    super::Modify(b);
     CalChartDoc_modified showMod;
     // generate a new animation
     // uncomment below to see how long it takes to print

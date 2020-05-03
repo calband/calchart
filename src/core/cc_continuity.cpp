@@ -22,7 +22,9 @@
 
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
+#include "cc_parse_errors.h"
 #include "cont.h"
+#include "parse.h"
 #include <assert.h>
 #include <sstream>
 
@@ -33,15 +35,24 @@ extern std::vector<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
 namespace CalChart {
 
 std::vector<std::unique_ptr<ContProcedure>>
-Continuity::ParseContinuity(std::string const& s)
+Continuity::ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
 {
-    yyinputbuffer = s.c_str();
-    // parse out the error
-    if (parsecontinuity() != 0) {
-        ContToken dummy;
-        throw ParseError(s, dummy.line, dummy.col);
+    std::string thisParse = s;
+    while (1) {
+        yyinputbuffer = thisParse.c_str();
+        // parse out the error
+        if (parsecontinuity() == 0) {
+            return std::move(ParsedContinuity);
+        }
+        if (correct && correct->mContinuityParseCorrectionHandler) {
+            // give the user a chance to correct.
+            thisParse = correct->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
+        }
+        else {
+            ContToken dummy;
+            throw ParseError(s, dummy.line, dummy.col);
+        }
     }
-    return std::move(ParsedContinuity);
 }
 
 std::vector<std::unique_ptr<ContProcedure>>
@@ -62,8 +73,9 @@ Continuity::Deserialize(std::vector<uint8_t> const& data)
     return result;
 }
 
-Continuity::Continuity(std::string const& s)
-    : m_parsedContinuity(ParseContinuity(s))
+Continuity::Continuity(std::string const& s, ParseErrorHandlers const* correction)
+    : m_parsedContinuity(ParseContinuity(s, correction))
+    , m_legacyText(s)
 {
 }
 
@@ -180,6 +192,10 @@ void Continuity_UnitTests()
     assert(Check_Continuity(underTest2, values));
 
     // Set some text
+    values.text = "mt E REM";
+    values.GetText = values.text;
+    assert(Check_Continuity(underTest2, values));
+
     underTest2 = Continuity{ "mt E REM" };
     values.text = "mt E REM";
     values.GetText = values.text;

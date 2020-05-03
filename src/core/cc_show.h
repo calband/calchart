@@ -38,6 +38,7 @@ namespace CalChart {
 class Lasso;
 class Show;
 class Sheet;
+struct ParseErrorHandlers;
 
 using Show_command = std::function<void(Show&)>;
 using Show_command_pair = std::pair<Show_command, Show_command>;
@@ -57,13 +58,14 @@ public:
     // you can create a show in two ways, from nothing, or from an input stream
     static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode);
     static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::vector<std::string> const& labels, unsigned columns);
-    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::istream& stream);
+    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
 
 private:
     Show(ShowMode const& mode);
-    // using overloading with structs to determine which constructor to use
-    Show(ShowMode const& mode, std::istream& stream, Version_3_3_and_earlier);
-    Show(ShowMode const& mode, const uint8_t* ptr, size_t size, Current_version_and_later);
+    // calchart 3.3 and earlier is parsed via the istream.
+    Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
+    // calchart 3.4 and later are given a data blob to parse.
+    Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction = nullptr);
 
 public:
     ~Show();

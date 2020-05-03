@@ -1,5 +1,5 @@
 /*
- * cc_command.cpp
+ * CalChartDocCommand.cpp
  * Handle commands from view to doc
  */
 

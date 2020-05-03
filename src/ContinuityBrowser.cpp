@@ -64,9 +64,9 @@ ContinuityBrowserPerCont::ContinuityBrowserPerCont(SYMBOL_TYPE sym, wxWindow* pa
     topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
 }
 
-void ContinuityBrowserPerCont::DoSetContinuity(CalChart::Continuity const& text)
+void ContinuityBrowserPerCont::DoSetContinuity(CalChart::Continuity const& new_cont)
 {
-    mCanvas->DoSetContinuity(text);
+    mCanvas->DoSetContinuity(new_cont);
 }
 
 void ContinuityBrowserPerCont::SetView(CalChartView* view)
