@@ -84,8 +84,11 @@ void DrawArrow(wxDC& dc, const wxPoint& pt, wxCoord lineLength,
 }
 
 // calculate the distance for tab stops
-auto TabStops(size_t which, bool landscape)
+auto TabStops(int which, bool landscape, int useConstantTabs)
 {
+    if (useConstantTabs != 0) {
+        return which * useConstantTabs;
+    }
     auto tab = 0;
     while (which > 4) {
         which--;
@@ -103,7 +106,7 @@ auto TabStops(size_t which, bool landscape)
 }
 
 // these are the sizes that the page is set up to do.
-static const double kBitmapScale = 2.0; // the factor to scale the bitmap
+static const double kBitmapScale = 8.0; // the factor to scale the bitmap
 static const double kFieldTop = 0.14;
 static const double kFieldBorderOffset = 0.06;
 static const double kSizeX = 576, kSizeY = 734;
@@ -259,8 +262,12 @@ void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CalChart::Coord o
 }
 
 // draw the continuity starting at a specific offset
-void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
-    const wxRect& bounding, bool landscape)
+void DrawContForPreview(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding)
+{
+    return DrawCont(dc, print_continuity, bounding, false, 6);
+}
+
+void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape, int useConstantTabs)
 {
     SaveAndRestore_DeviceOrigin orig_dev(dc);
     SaveAndRestore_UserScale orig_scale(dc);
@@ -354,7 +361,7 @@ void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
                 break;
             case PSFONT::TAB: {
                 tabnum++;
-                wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape);
+                wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape, useConstantTabs);
                 if (textw >= x)
                     x = textw;
                 else

@@ -61,8 +61,8 @@ void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config,
     const CalChart::Sheet& sheet, unsigned ref);
 void Draw(wxDC& dc, const CalChartDoc& show, const CalChart::Sheet& sheet,
     unsigned ref, bool primary);
-void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity,
-    const wxRect& bounding, bool landscape);
+void DrawContForPreview(wxDC& dc, const CalChart::Textline_list& print_continuity, const wxRect& bounding);
+void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity, const wxRect& bounding, bool landscape, int useConstantTabs = 0);
 void DrawForPrinting(wxDC* dc, const CalChartConfiguration& config,
     const CalChartDoc& show, const CalChart::Sheet& sheet,
     unsigned ref, bool landscape);

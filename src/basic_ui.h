@@ -1,3 +1,4 @@
+#pragma once
 /*
  * basic_ui.h
  * Header for basic wxWindows classes
@@ -20,13 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <wx/statline.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
 
 #include <vector>
+
+class CalChartView;
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame);

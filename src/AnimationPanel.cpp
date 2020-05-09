@@ -60,6 +60,7 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
     , mTempo(120)
     , mTimerOn(false)
+    , mInMiniMode(true)
 {
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 
@@ -68,6 +69,7 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
 
     mAnimateOmniToggle = new wxButton(this, CALCHART__anim_toggle_anim_omni, wxT("Omni"));
     AddToSizerBasic(toprow, mAnimateOmniToggle);
+    mItemsToHide.push_back(mAnimateOmniToggle);
 
     mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, wxBitmap(BITMAP_NAME(tb_play)));
     mPlayPauseButton->SetBitmapPressed(wxBitmap(BITMAP_NAME(tb_stop)));
@@ -81,6 +83,7 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     AddToSizerBasic(toprow, boxsizer);
     mTempoLabel = new wxStaticText(this, wxID_ANY, wxT("Tempo"));
     AddToSizerBasic(boxsizer, mTempoLabel);
+    mItemsToHide.push_back(mTempoLabel);
     // defect 3538572: Callings set may update tempo, cache value before call.
     unsigned tmp = GetTempo();
     mTempoCtrl = new wxSpinCtrl(this, CALCHART__anim_tempo, wxEmptyString, wxDefaultPosition, wxSize(48, -1));
@@ -88,6 +91,7 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     mTempoCtrl->SetValue(tmp);
     SetTempo(tmp);
     AddToSizerBasic(boxsizer, mTempoCtrl);
+    mItemsToHide.push_back(mTempoCtrl);
 
     auto sizer1 = new wxBoxSizer(wxVERTICAL);
     mZoomCheckbox = new wxCheckBox(this, wxID_ANY, wxT("Zoom"));
@@ -96,6 +100,7 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     });
     mZoomCheckbox->SetValue(mCanvas->GetZoomOnMarchers());
     AddToSizerBasic(sizer1, mZoomCheckbox);
+    mItemsToHide.push_back(mZoomCheckbox);
     mCollisionCheckbox = new wxCheckBox(this, wxID_ANY, wxT("Collisions"));
     mCollisionCheckbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& event) {
         if (mView) {
@@ -103,13 +108,15 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
         }
     });
     AddToSizerBasic(sizer1, mCollisionCheckbox);
+    mItemsToHide.push_back(mCollisionCheckbox);
     AddToSizerBasic(toprow, sizer1);
 
     mOmniHelpButton = new wxButton(this, wxID_HELP, wxT("&Help"));
-    AddToSizerBasic(toprow, mOmniHelpButton);
     mOmniHelpButton->Bind(wxEVT_BUTTON, [this](auto const&) {
         mOmniCanvas->OnCmd_ShowKeyboardControls();
     });
+    AddToSizerBasic(toprow, mOmniHelpButton);
+    mItemsToHide.push_back(mOmniHelpButton);
 
     mOmniCanvas = new CCOmniviewCanvas(this, CalChartConfiguration::GetGlobalConfig());
 
@@ -119,15 +126,18 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     // we default to animate view
     mCanvas->Show();
     mOmniCanvas->Hide();
-    mOmniHelpButton->Hide();
 
-    SetMainViewMode(false);
+    for (auto&& i : mItemsToHide) {
+        i->Show(!mInMiniMode);
+    }
+
     SetSizer(topsizer);
 
     // now fit the frame to the elements
     topsizer->Fit(this);
     topsizer->SetSizeHints(this);
 
+    SetInMiniMode(mInMiniMode);
     // now update the current screen
     OnUpdate();
 }
@@ -137,25 +147,14 @@ AnimationPanel::~AnimationPanel()
     mTimer->Stop();
 }
 
-void AnimationPanel::SetMainViewMode(bool mainViewMode)
+void AnimationPanel::SetInMiniMode(bool miniMode)
 {
-    mMainViewMode = mainViewMode;
-    if (mMainViewMode) {
-        // expand the slider to fill everything!
-        mBeatSlider->SetSizeHints(800, -1);
-        mTempoLabel->Show();
-        mTempoCtrl->Show();
-        mZoomCheckbox->Show();
-        mCollisionCheckbox->Show();
-        mAnimateOmniToggle->Show();
-    } else {
-        mBeatSlider->SetSizeHints(-1, -1);
-        mTempoLabel->Hide();
-        mTempoCtrl->Hide();
-        mZoomCheckbox->Hide();
-        mCollisionCheckbox->Hide();
-        mAnimateOmniToggle->Hide();
+    mInMiniMode = miniMode;
+    for (auto&& i : mItemsToHide) {
+        i->Show(!mInMiniMode);
     }
+    // expand the slider to fill everything!
+    mBeatSlider->SetSizeHints(mInMiniMode ? -1 : 800, -1);
     Layout();
 }
 
@@ -317,7 +316,7 @@ void AnimationPanel::SetView(CalChartView* view)
     mView = std::make_unique<AnimationView>(view, this);
     mView->SetDocument(view->GetDocument());
     mView->SetFrame(this);
-    mView->SetPlayCollisionWarning(mMainViewMode);
+    mView->SetPlayCollisionWarning(!mInMiniMode);
     mCanvas->SetView(mView.get());
     mOmniCanvas->SetView(mView.get());
 
