@@ -89,6 +89,8 @@ enum {
     CALCHART__ShowBackgroundImages,
     CALCHART__ResetReferencePoint,
 
+    CALCHART__ChangedColorPalette,
+
     CALCHART__GhostOff,
     CALCHART__GhostNextSheet,
     CALCHART__GhostPreviousSheet,

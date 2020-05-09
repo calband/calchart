@@ -123,6 +123,8 @@ public:
 
     void OnCmd_ResetReferencePoint(wxCommandEvent& event);
 
+    void OnCmd_ChangedColorPalette(wxCommandEvent& event);
+
     void OnCmd_SolveTransition(wxCommandEvent& event);
 
     void OnCmd_ZoomFit(wxCommandEvent&);

@@ -70,6 +70,7 @@ void CalChartApp::MacOpenFiles(const wxArrayString& fileNames)
 
 bool CalChartApp::OnInit()
 {
+    SetAppName(wxT("CalChart"));
     wxInitAllImageHandlers();
     StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); },
         [=]() { this->ExitAppAsServer(); } };

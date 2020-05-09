@@ -35,6 +35,9 @@ find_package (FLEX REQUIRED)
 
 add_subdirectory (submodules/munkres-cpp EXCLUDE_FROM_ALL)
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory (submodules/nlohmann_json EXCLUDE_FROM_ALL)
+
 # calchart_core
 BISON_TARGET (
   calchart_core_parser
@@ -216,6 +219,16 @@ set_target_properties (
   )
 
 target_link_libraries (CalChart calchart_core ${Boost_LIBRARIES})
+target_link_libraries (CalChart nlohmann_json::nlohmann_json)
+
+#target_link_libraries (
+#  CalChart
+#  PRIVATE
+#  calchart_core
+#  ${Boost_LIBRARIES}
+#  nlohmann_json::nlohmann_json
+#  )
+
 
 # We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
 # Have wxWidgets build as static libraries

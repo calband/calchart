@@ -164,3 +164,14 @@ void AddToSizerExpand(wxSizer* sizer, T window)
 {
     sizer->Add(window, ExpandSizerFlags());
 }
+
+template <typename T, typename Int, typename Brush>
+void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
+{
+    wxBitmap temp_bitmap(16, 16);
+    wxMemoryDC temp_dc;
+    temp_dc.SelectObject(temp_bitmap);
+    temp_dc.SetBackground(brush);
+    temp_dc.Clear();
+    target->SetItemBitmap(which, temp_bitmap);
+}

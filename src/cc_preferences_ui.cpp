@@ -22,6 +22,7 @@
 
 #include "cc_preferences_ui.h"
 #include "CalChartDoc.h"
+#include "ColorSetupCanvas.h"
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
@@ -273,144 +274,6 @@ bool GeneralSetup::ClearValuesToDefault()
     return true;
 }
 
-//////// Draw setup ////////
-// handling Drawing colors
-////////
-
-class PrefCanvas : public ClickDragCtrlScrollCanvas {
-    DECLARE_EVENT_TABLE()
-    using super = ClickDragCtrlScrollCanvas;
-
-public:
-    PrefCanvas(CalChartConfiguration& config, wxWindow* parent);
-
-    void OnPaint(wxPaintEvent& event);
-
-private:
-    void OnEraseBackground(wxEraseEvent& event);
-
-    std::unique_ptr<CalChart::Show> mShow;
-    CalChart::ShowMode mMode;
-    CalChartConfiguration& mConfig;
-    std::vector<CalChart::DrawCommand> mPath;
-    CalChart::Coord mPathEnd;
-    std::vector<CalChart::DrawCommand> mShape;
-};
-
-BEGIN_EVENT_TABLE(PrefCanvas, ClickDragCtrlScrollCanvas)
-EVT_PAINT(PrefCanvas::OnPaint)
-EVT_ERASE_BACKGROUND(PrefCanvas::OnEraseBackground)
-END_EVENT_TABLE()
-
-PrefCanvas::PrefCanvas(CalChartConfiguration& config, wxWindow* parent)
-    : super(parent, wxID_ANY, wxDefaultPosition, wxSize(640, 240))
-    , mMode(ShowMode::CreateShowMode(
-          Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
-          Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
-          Coord(Int2CoordUnits(4), Int2CoordUnits(4)),
-          Coord(Int2CoordUnits(4), Int2CoordUnits(4)), Int2CoordUnits(32), Int2CoordUnits(52),
-          ShowMode::GetDefaultYardLines()))
-    , mConfig(config)
-{
-    auto field_offset = mMode.FieldOffset();
-    auto offset = mMode.Offset();
-    SetCanvasSize(wxSize{ mMode.Size().x, mMode.Size().y });
-
-    // Create a fake show with some points and selections to draw an example for
-    // the user
-    mShow = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
-    auto labels = std::vector<std::string>{
-        "unsel",
-        "unsel",
-        "sel",
-        "sel",
-    };
-    mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
-    mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
-    mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);
-    mShow->Create_SetSymbolCommand(SYMBOL_SOLX).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{}).first(*mShow);
-
-    for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 3).first(*mShow);
-
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(6)) } }, 1).first(*mShow);
-    }
-
-    mShow->Create_AddSheetsCommand(Show::Sheet_container_t{ *static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet() }, 1).first(*mShow);
-    mShow->Create_SetCurrentSheetCommand(1).first(*mShow);
-    for (auto i = 0; i < 4; ++i) {
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 0).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 1).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 2).first(*mShow);
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 2)) } }, 3).first(*mShow);
-
-        mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(18 + i * 4), Int2CoordUnits(2 + 6)) } }, 1).first(*mShow);
-    }
-    mShow->Create_SetCurrentSheetCommand(0).first(*mShow);
-
-    auto point_start = offset + field_offset + Coord(Int2CoordUnits(4), Int2CoordUnits(2));
-    mPathEnd = point_start + Coord(Int2CoordUnits(0), Int2CoordUnits(2));
-    mPath.emplace_back(point_start, mPathEnd);
-    point_start = mPathEnd;
-    mPathEnd += Coord(Int2CoordUnits(18), Int2CoordUnits(0));
-    mPath.emplace_back(point_start, mPathEnd);
-
-    auto shape_start = field_offset + Coord(Int2CoordUnits(18), Int2CoordUnits(-2));
-    auto shape_end = shape_start + Coord(Int2CoordUnits(4), Int2CoordUnits(4));
-    Shape_rect rect(shape_start, shape_end);
-    mShape = rect.GetCC_DrawCommand(offset.x, offset.y);
-}
-
-// Define the repainting behaviour
-void PrefCanvas::OnPaint(wxPaintEvent& event)
-{
-    wxBufferedPaintDC dc(this);
-    PrepareDC(dc);
-
-    // draw the background
-    dc.SetBackgroundMode(wxTRANSPARENT);
-    dc.SetBackground(mConfig.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-    dc.Clear();
-
-    // Draw the field
-    DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
-
-    auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
-    auto nextSheet = sheet;
-    ++nextSheet;
-
-    SelectionList list;
-    list.insert(2);
-    list.insert(3);
-
-    // draw the ghost sheet
-    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
-        mShow->GetPointLabels(), *nextSheet, 0);
-
-    // Draw the points
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
-        mShow->GetPointLabels(), *sheet, 0, true);
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
-        mShow->GetPointLabels(), *sheet, 1, false);
-
-    // draw the path
-    DrawPath(dc, mConfig, mPath, mPathEnd);
-
-    // draw the shap
-    dc.SetBrush(*wxTRANSPARENT_BRUSH);
-    dc.SetPen(mConfig.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
-    DrawCC_DrawCommandList(dc, mShape);
-}
-
-// We have a empty erase background to improve redraw performance.
-void PrefCanvas::OnEraseBackground(wxEraseEvent& event) {}
-
 class DrawingSetup : public PreferencePage {
     DECLARE_CLASS(DrawingSetup)
     DECLARE_EVENT_TABLE()
@@ -443,14 +306,23 @@ private:
     void OnCmdResetColors(wxCommandEvent&);
     void OnCmdResetAll(wxCommandEvent&);
     void OnCmdChooseNewColor(wxCommandEvent&);
+    void OnCmdChooseNewPalette(wxCommandEvent&);
     void OnCmdTextChanged(wxCommandEvent&);
+    void OnCmdChangePaletteColor(wxCommandEvent&);
+    void OnCmdChangePaletteName(wxCommandEvent&);
 
     void SetColor(int selection, int width, const wxColour& color);
+    void SetPaletteColor(int selection, const wxColour& color);
+    void SetPaletteName(int selection, const wxString& name);
     wxBitmapComboBox* nameBox;
+    wxBitmapComboBox* mPaletteNameBox;
     wxSpinCtrl* spin;
 
-    wxPen mCalChartPens[COLOR_NUM];
-    wxBrush mCalChartBrushes[COLOR_NUM];
+    int mActiveColorPalette{};
+    std::vector<wxString> mColorPaletteNames;
+    std::vector<wxBrush> mColorPaletteColors;
+    wxPen mCalChartPens[kNumberPalettes][COLOR_NUM];
+    wxBrush mCalChartBrushes[kNumberPalettes][COLOR_NUM];
 
     double mPrintValues[5];
 };
@@ -463,7 +335,10 @@ enum {
     DOTRATIO,
     NUMRATIO,
     PLINERATIO,
-    SLINERATIO
+    SLINERATIO,
+    BUTTON_EDIT_PALETTE_COLOR,
+    BUTTON_EDIT_PALETTE_NAME,
+    NEW_COLOR_PALETTE,
 };
 
 BEGIN_EVENT_TABLE(DrawingSetup, PreferencePage)
@@ -471,10 +346,13 @@ EVT_BUTTON(BUTTON_SELECT, DrawingSetup::OnCmdSelectColors)
 EVT_BUTTON(BUTTON_RESTORE, DrawingSetup::OnCmdResetColors)
 EVT_SPINCTRL(SPIN_WIDTH, DrawingSetup::OnCmdSelectWidth)
 EVT_COMBOBOX(NEW_COLOR_CHOICE, DrawingSetup::OnCmdChooseNewColor)
+EVT_COMBOBOX(NEW_COLOR_PALETTE, DrawingSetup::OnCmdChooseNewPalette)
 EVT_TEXT_ENTER(DOTRATIO, DrawingSetup::OnCmdTextChanged)
 EVT_TEXT_ENTER(NUMRATIO, DrawingSetup::OnCmdTextChanged)
 EVT_TEXT_ENTER(PLINERATIO, DrawingSetup::OnCmdTextChanged)
 EVT_TEXT_ENTER(SLINERATIO, DrawingSetup::OnCmdTextChanged)
+EVT_BUTTON(BUTTON_EDIT_PALETTE_COLOR, DrawingSetup::OnCmdChangePaletteColor)
+EVT_BUTTON(BUTTON_EDIT_PALETTE_NAME, DrawingSetup::OnCmdChangePaletteName)
 END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(DrawingSetup, PreferencePage)
@@ -484,61 +362,59 @@ void DrawingSetup::CreateControls()
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
 
-    wxStaticBoxSizer* boxsizer = new wxStaticBoxSizer(
-        new wxStaticBox(this, -1, wxT("Color settings")), wxVERTICAL);
+    wxStaticBoxSizer* boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Palette Selector")), wxVERTICAL);
     topsizer->Add(boxsizer);
 
-    wxBoxSizer* horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    nameBox = new wxBitmapComboBox(
-        this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition,
-        wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(),
-        wxCB_READONLY | wxCB_DROPDOWN);
+    mPaletteNameBox = new wxBitmapComboBox(this, NEW_COLOR_PALETTE, mColorPaletteNames.at(0), wxDefaultPosition, wxSize(200, -1), kNumberPalettes, mColorPaletteNames.data(), wxCB_READONLY | wxCB_DROPDOWN);
+    boxsizer->Add(mPaletteNameBox, sLeftBasicSizerFlags);
+
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        CreateAndSetItemBitmap(mPaletteNameBox, i, mColorPaletteColors.at(i));
+    }
+    mPaletteNameBox->SetSelection(mActiveColorPalette);
+
+    auto horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
+    boxsizer->Add(horizontalsizer, sBasicSizerFlags);
+
+    horizontalsizer->Add(new wxButton(this, BUTTON_EDIT_PALETTE_COLOR, wxT("&Edit Color")), sBasicSizerFlags);
+    horizontalsizer->Add(new wxButton(this, BUTTON_EDIT_PALETTE_NAME, wxT("&Edit Name")), sBasicSizerFlags);
+
+    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Color settings")), wxVERTICAL);
+    topsizer->Add(boxsizer);
+
+    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
+    nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
     horizontalsizer->Add(nameBox, sBasicSizerFlags);
 
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM;
-         i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        wxBitmap temp_bitmap(16, 16);
-        wxMemoryDC temp_dc;
-        temp_dc.SelectObject(temp_bitmap);
-        temp_dc.SetBackground(mConfig.Get_CalChartBrushAndPen(i).first);
-        temp_dc.Clear();
-        nameBox->SetItemBitmap(i, temp_bitmap);
+    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+        CreateAndSetItemBitmap(nameBox, i, mConfig.Get_CalChartBrushAndPen(i).first);
     }
     nameBox->SetSelection(0);
 
-    spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition,
-        wxDefaultSize, wxSP_ARROW_KEYS, 1, 10,
-        mCalChartPens[nameBox->GetSelection()].GetWidth());
-    spin->SetValue(mCalChartPens[nameBox->GetSelection()].GetWidth());
+    spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mCalChartPens[mActiveColorPalette][nameBox->GetSelection()].GetWidth());
+    spin->SetValue(mCalChartPens[mActiveColorPalette][nameBox->GetSelection()].GetWidth());
     horizontalsizer->Add(spin, sBasicSizerFlags);
     boxsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
 
     horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
 
-    horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")),
-        sBasicSizerFlags);
-    horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")),
-        sBasicSizerFlags);
+    horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")), sBasicSizerFlags);
+    horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")), sBasicSizerFlags);
 
     boxsizer->Add(horizontalsizer, sBasicSizerFlags);
 
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("ratios")),
-        wxVERTICAL);
+    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("ratios")), wxVERTICAL);
     topsizer->Add(boxsizer);
 
     horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
     boxsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
 
-    AddTextboxWithCaption(this, horizontalsizer, DOTRATIO, wxT("Dot Ratio:"),
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaption(this, horizontalsizer, NUMRATIO, wxT("Num Ratio:"),
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaption(this, horizontalsizer, PLINERATIO, wxT("P-Line Ratio:"),
-        wxTE_PROCESS_ENTER);
-    AddTextboxWithCaption(this, horizontalsizer, SLINERATIO, wxT("S-Line Ratio:"),
-        wxTE_PROCESS_ENTER);
+    AddTextboxWithCaption(this, horizontalsizer, DOTRATIO, wxT("Dot Ratio:"), wxTE_PROCESS_ENTER);
+    AddTextboxWithCaption(this, horizontalsizer, NUMRATIO, wxT("Num Ratio:"), wxTE_PROCESS_ENTER);
+    AddTextboxWithCaption(this, horizontalsizer, PLINERATIO, wxT("P-Line Ratio:"), wxTE_PROCESS_ENTER);
+    AddTextboxWithCaption(this, horizontalsizer, SLINERATIO, wxT("S-Line Ratio:"), wxTE_PROCESS_ENTER);
 
-    auto prefCanvas = new PrefCanvas(mConfig, this);
+    auto prefCanvas = new ColorSetupCanvas(mConfig, this);
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     topsizer->Add(prefCanvas, 1, wxEXPAND);
     //	mCanvas->SetScrollRate(1, 1);
@@ -549,11 +425,16 @@ void DrawingSetup::CreateControls()
 void DrawingSetup::Init()
 {
     // first read out the defaults:
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM;
-         i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        auto brushAndPen = mConfig.Get_CalChartBrushAndPen(i);
-        mCalChartPens[i] = brushAndPen.second;
-        mCalChartBrushes[i] = brushAndPen.first;
+    mActiveColorPalette = mConfig.GetActiveColorPalette();
+    mColorPaletteNames = mConfig.GetColorPaletteNames();
+    mColorPaletteColors = mConfig.GetColorPaletteColors();
+
+    for (auto palette = 0; palette < kNumberPalettes; ++palette) {
+        for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+            auto brushAndPen = mConfig.Get_CalChartBrushAndPen(palette, i);
+            mCalChartPens[palette][i] = brushAndPen.second;
+            mCalChartBrushes[palette][i] = brushAndPen.first;
+        }
     }
 
     mPrintValues[0] = mConfig.Get_DotRatio();
@@ -565,6 +446,20 @@ void DrawingSetup::Init()
 
 bool DrawingSetup::TransferDataToWindow()
 {
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        CreateAndSetItemBitmap(mPaletteNameBox, i, mColorPaletteColors.at(i));
+    }
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        mPaletteNameBox->SetString(i, mColorPaletteNames.at(i));
+    }
+    mPaletteNameBox->SetSelection(mActiveColorPalette);
+
+    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM;
+         i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+        CreateAndSetItemBitmap(nameBox, i, mCalChartBrushes[mActiveColorPalette][i]);
+    }
+    spin->SetValue(mCalChartPens[mActiveColorPalette][nameBox->GetSelection()].GetWidth());
+
     wxString buf;
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(DOTRATIO);
     buf.Printf(wxT("%.2f"), mPrintValues[0]);
@@ -584,43 +479,61 @@ bool DrawingSetup::TransferDataToWindow()
 
 bool DrawingSetup::TransferDataFromWindow()
 {
-    // write out the values defaults:
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM;
-         i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        mConfig.Set_CalChartBrushAndPen(i, mCalChartBrushes[i], mCalChartPens[i]);
-    }
+    // Data is already transferred when we update the controls, so nothing to do here.
+    mConfig.SetActiveColorPalette(mActiveColorPalette);
     return true;
 }
 
 bool DrawingSetup::ClearValuesToDefault()
 {
-    for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
-        SetColor(i, mConfig.GetDefaultPenWidth()[i], mConfig.GetDefaultColors()[i]);
-        mConfig.Clear_CalChartConfigColor(i);
+    mConfig.ClearActiveColorPalette();
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        mConfig.ClearColorPaletteColor(i);
+        mConfig.ClearColorPaletteName(i);
+    }
+
+    for (auto palette = 0; palette < kNumberPalettes; ++palette) {
+        for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
+            mConfig.Clear_CalChartConfigColor(palette, i);
+        }
     }
     Init();
     TransferDataToWindow();
     return true;
 }
 
+// when the palette changes
 void DrawingSetup::SetColor(int selection, int width, const wxColour& color)
 {
-    mCalChartPens[selection] = *wxThePenList->FindOrCreatePen(color, width, wxPENSTYLE_SOLID);
-    mCalChartBrushes[selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
+    mCalChartPens[mActiveColorPalette][selection] = *wxThePenList->FindOrCreatePen(color, width, wxPENSTYLE_SOLID);
+    mCalChartBrushes[mActiveColorPalette][selection] = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
 
-    mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection),
-        mCalChartBrushes[selection],
-        mCalChartPens[selection]);
+    mConfig.Set_CalChartBrushAndPen(static_cast<CalChartColors>(selection), mCalChartBrushes[mActiveColorPalette][selection], mCalChartPens[mActiveColorPalette][selection]);
 
     // update the namebox list
-    {
-        wxBitmap test_bitmap(16, 16);
-        wxMemoryDC temp_dc;
-        temp_dc.SelectObject(test_bitmap);
-        temp_dc.SetBackground(mCalChartBrushes[selection]);
-        temp_dc.Clear();
-        nameBox->SetItemBitmap(selection, test_bitmap);
-    }
+    CreateAndSetItemBitmap(nameBox, selection, mCalChartBrushes[mActiveColorPalette][selection]);
+    Refresh();
+}
+
+void DrawingSetup::SetPaletteColor(int selection, wxColour const& color)
+{
+    mColorPaletteColors.at(selection) = *wxTheBrushList->FindOrCreateBrush(color, wxBRUSHSTYLE_SOLID);
+
+    // this is needed so we draw things out on the page correctly.
+    mConfig.SetColorPaletteColor(selection, mColorPaletteColors.at(selection));
+
+    CreateAndSetItemBitmap(mPaletteNameBox, selection, mColorPaletteColors.at(selection));
+    Refresh();
+}
+
+void DrawingSetup::SetPaletteName(int selection, wxString const& name)
+{
+    mColorPaletteNames.at(selection) = name;
+
+    // this is needed so we draw things out on the page correctly.
+    mConfig.SetColorPaletteName(selection, name);
+
+    mPaletteNameBox->SetString(selection, mColorPaletteNames.at(selection));
     Refresh();
 }
 
@@ -629,19 +542,46 @@ void DrawingSetup::OnCmdSelectColors(wxCommandEvent&)
     int selection = nameBox->GetSelection();
     wxColourData data;
     data.SetChooseFull(true);
-    data.SetColour(mCalChartBrushes[selection].GetColour());
+    data.SetColour(mCalChartBrushes[mActiveColorPalette][selection].GetColour());
     wxColourDialog dialog(this, &data);
     if (dialog.ShowModal() == wxID_OK) {
         wxColourData retdata = dialog.GetColourData();
         wxColour c = retdata.GetColour();
-        SetColor(selection, mCalChartPens[selection].GetWidth(), c);
+        SetColor(selection, mCalChartPens[mActiveColorPalette][selection].GetWidth(), c);
     }
+}
+
+void DrawingSetup::OnCmdChangePaletteColor(wxCommandEvent&)
+{
+    int selection = mPaletteNameBox->GetSelection();
+    wxColourData data;
+    data.SetChooseFull(true);
+    data.SetColour(mColorPaletteColors.at(selection).GetColour());
+    wxColourDialog dialog(this, &data);
+    if (dialog.ShowModal() == wxID_OK) {
+        wxColourData retdata = dialog.GetColourData();
+        wxColour c = retdata.GetColour();
+        SetPaletteColor(selection, c);
+    }
+    Refresh();
+}
+
+void DrawingSetup::OnCmdChangePaletteName(wxCommandEvent&)
+{
+    int selection = mPaletteNameBox->GetSelection();
+    auto v = mPaletteNameBox->GetValue();
+    wxTextEntryDialog dialog(this, wxT("Enter name for Palette"), wxT("Enter name for Palette"), v, wxOK | wxCANCEL);
+    if (dialog.ShowModal() == wxID_OK) {
+        SetPaletteName(selection, dialog.GetValue());
+        mPaletteNameBox->SetSelection(selection);
+    }
+    Refresh();
 }
 
 void DrawingSetup::OnCmdSelectWidth(wxSpinEvent& e)
 {
     int selection = nameBox->GetSelection();
-    SetColor(selection, e.GetPosition(), mCalChartPens[selection].GetColour());
+    SetColor(selection, e.GetPosition(), mCalChartPens[mActiveColorPalette][selection].GetColour());
 }
 
 void DrawingSetup::OnCmdResetColors(wxCommandEvent&)
@@ -654,7 +594,16 @@ void DrawingSetup::OnCmdResetColors(wxCommandEvent&)
 
 void DrawingSetup::OnCmdChooseNewColor(wxCommandEvent&)
 {
-    spin->SetValue(mCalChartPens[nameBox->GetSelection()].GetWidth());
+    spin->SetValue(mCalChartPens[mActiveColorPalette][nameBox->GetSelection()].GetWidth());
+}
+
+void DrawingSetup::OnCmdChooseNewPalette(wxCommandEvent&)
+{
+    // we set the active palette, and now need to refresh everything
+    mActiveColorPalette = mPaletteNameBox->GetSelection();
+    mConfig.SetActiveColorPalette(mActiveColorPalette);
+    TransferDataToWindow();
+    Refresh();
 }
 
 void DrawingSetup::OnCmdTextChanged(wxCommandEvent& e)
@@ -1240,12 +1189,7 @@ void ContCellSetup::CreateControls()
     horizontalsizer->Add(nameBox, sBasicSizerFlags);
 
     for (auto i = 0; i < COLOR_CONTCELLS_NUM; ++i) {
-        wxBitmap temp_bitmap(16, 16);
-        wxMemoryDC temp_dc;
-        temp_dc.SelectObject(temp_bitmap);
-        temp_dc.SetBackground(mConfig.Get_ContCellBrushAndPen(static_cast<ContCellColors>(i)).first);
-        temp_dc.Clear();
-        nameBox->SetItemBitmap(i, temp_bitmap);
+        CreateAndSetItemBitmap(nameBox, i, mConfig.Get_ContCellBrushAndPen(static_cast<ContCellColors>(i)).first);
     }
     nameBox->SetSelection(0);
 

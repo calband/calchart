@@ -21,8 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <string>
 #include <functional>
+#include <string>
 
 namespace CalChart {
 
@@ -30,8 +30,7 @@ namespace CalChart {
 // return a string of what to try parsing.
 using ContinuityParseCorrection_t = std::function<std::string(std::string const&, std::string const&, int line, int column)>;
 
-struct ParseErrorHandlers
-{
+struct ParseErrorHandlers {
     ContinuityParseCorrection_t mContinuityParseCorrectionHandler;
 };
 
