@@ -73,7 +73,8 @@ void AnimationErrorsPanel::OnUpdate()
     }
 
     auto errors = mView->GetAnimationErrors();
-    UpdateErrors(errors);
+    auto collisions = mView->GetAnimationCollisions();
+    UpdateErrors(errors, collisions);
     Refresh();
 }
 
@@ -84,8 +85,7 @@ void AnimationErrorsPanel::OnSelectionChanged(wxTreeListEvent& event)
     }
 
     if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        printf("Found error at %d\n", std::get<0>(error->second));
-        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second).pntgroup);
+        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second));
     }
 }
 
@@ -96,13 +96,12 @@ void AnimationErrorsPanel::OnItemActivated(wxTreeListEvent& event)
     }
 
     if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        printf("Found error at %d\n", std::get<0>(error->second));
-        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second).pntgroup);
+        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second));
     }
 }
 
 // Implementation details
-void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors)
+void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> const& errors, std::map<int, SelectionList> const& collisions)
 {
     if (errors == mCurrentErrors) {
         return;
@@ -115,10 +114,10 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
 
     // we create a mapping between the generated errors and the items we've put in the list
     // categorize by animation error, mapping them to the sheet and ErrorMarker
-    std::map<CalChart::AnimateError, std::vector<std::tuple<int, CalChart::ErrorMarker>>> allErrors;
+    std::map<CalChart::AnimateError, std::vector<std::tuple<int, SelectionList>>> allErrors;
     for (auto i = 0; i < mCurrentErrors.size(); ++i) {
         for (auto&& error : mCurrentErrors[i].GetErrors()) {
-            allErrors[error.first].push_back({ i, error.second });
+            allErrors[error.first].push_back({ i, error.second.pntgroup });
         }
     }
 
@@ -131,6 +130,15 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
                 // now we need to be able to get back to the errors and select things
                 mErrorLookup[itemId2] = error;
             }
+        }
+    }
+
+    if (collisions.size()) {
+        auto itemId1 = mTreeCtrl->AppendItem(mTreeCtrl->GetRootItem(), "Collisions", 0, 0);
+        for (auto&& collision : collisions) {
+            auto itemId2 = mTreeCtrl->AppendItem(itemId1, std::string("Sheet ") + std::to_string(collision.first));
+            // now we need to be able to get back to the errors and select things
+            mErrorLookup[itemId2] = collision;
         }
     }
 }

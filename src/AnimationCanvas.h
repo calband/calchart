@@ -51,7 +51,6 @@ private:
     void OnPaint(wxPaintEvent& event);
     void OnLeftDownMouseEvent(wxMouseEvent& event);
     void OnLeftUpMouseEvent(wxMouseEvent& event);
-    void OnRightUpMouseEvent(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
     void OnChar(wxKeyEvent& event);
 

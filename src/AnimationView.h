@@ -21,6 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "draw_utils.h"
+#include <map>
 #include <wx/docview.h>
 
 class AnimationPanel;
@@ -29,6 +31,7 @@ class CalChartConfiguration;
 namespace CalChart {
 class Continuity;
 class Animation;
+class ShowMode;
 }
 
 class AnimationView : public wxView {
@@ -61,7 +64,7 @@ public:
     int GetCurrentBeat() const;
     int GetTotalNumberBeats() const;
     int GetTotalCurrentBeat() const;
-    
+
     std::pair<wxPoint, wxPoint> GetShowSizeAndOffset() const;
     std::pair<wxPoint, wxPoint> GetMarcherSizeAndOffset() const;
 
@@ -70,6 +73,14 @@ public:
 
     void ToggleTimer();
     bool OnBeat() const;
+
+    void SetPlayCollisionWarning(bool b) { mPlayCollisionWarning = b; }
+    auto GetPlayCollisionWarning() const { return mPlayCollisionWarning; }
+
+    CalChart::ShowMode const& GetShowMode() const;
+    MarcherInfo GetMarcherInfo(int which) const;
+    std::multimap<double, MarcherInfo> GetMarchersByDistance(ViewPoint const& from) const;
+    int GetNumPoints() const;
 
 private:
     void Generate();
@@ -83,4 +94,5 @@ private:
 
     std::unique_ptr<CalChart::Animation> mAnimation;
     bool mDrawCollisionWarning = true;
+    bool mPlayCollisionWarning = false;
 };

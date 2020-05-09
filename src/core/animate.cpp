@@ -33,8 +33,8 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <numeric>
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <string>
 
@@ -71,10 +71,10 @@ AnimateDir AnimGetDirFromAngle(float ang)
 
 // make things copiable
 AnimateSheet::AnimateSheet(AnimateSheet const& other)
-: mPoints(other.mPoints)
-, mCommands(other.mCommands.size())
-, name (other.name)
-, numbeats(other.numbeats)
+    : mPoints(other.mPoints)
+    , mCommands(other.mCommands.size())
+    , name(other.name)
+    , numbeats(other.numbeats)
 {
     std::transform(other.mCommands.cbegin(), other.mCommands.cend(), mCommands.begin(), [](auto&& a) {
         AnimateCommands result(a.size());
@@ -92,16 +92,16 @@ AnimateSheet& AnimateSheet::operator=(AnimateSheet other)
 }
 
 AnimateSheet::AnimateSheet(AnimateSheet&& other) noexcept
-: mPoints(std::move(other.mPoints))
-, mCommands(std::move(other.mCommands))
-, name (std::move(other.name))
-, numbeats(std::move(other.numbeats))
+    : mPoints(std::move(other.mPoints))
+    , mCommands(std::move(other.mCommands))
+    , name(std::move(other.name))
+    , numbeats(std::move(other.numbeats))
 {
 }
 
 AnimateSheet& AnimateSheet::operator=(AnimateSheet&& other) noexcept
 {
-    AnimateSheet tmp { std::move(other) };
+    AnimateSheet tmp{ std::move(other) };
     swap(tmp);
     return *this;
 }
@@ -115,13 +115,11 @@ void AnimateSheet::swap(AnimateSheet& other) noexcept
     swap(numbeats, other.numbeats);
 }
 
-
 Animation::Animation(const Show& show)
     : mPoints(show.GetNumPoints())
     , mCurrentCmdIndex(mPoints.size())
     , mCurrentSheetNumber(0)
-    , mCollisionAction(NULL)
-, mAnimationErrors(show.GetNumSheets())
+    , mAnimationErrors(show.GetNumSheets())
 {
     // the variables are persistant through the entire compile process.
     AnimationVariables variablesStates;
@@ -175,7 +173,7 @@ Animation::Animation(const Show& show)
         }
         mSheets.emplace_back(thePoints, theCommands, curr_sheet->GetName(), curr_sheet->GetBeats());
     }
-    // now refresh the show
+    FindAllCollisions();
     RefreshSheet();
 }
 
@@ -189,7 +187,7 @@ bool Animation::PrevSheet()
         }
     }
     RefreshSheet();
-    CheckCollisions();
+    FindAllCollisions();
     return true;
 }
 
@@ -198,7 +196,6 @@ bool Animation::NextSheet()
     if ((mCurrentSheetNumber + 1) != mSheets.size()) {
         mCurrentSheetNumber++;
         RefreshSheet();
-        CheckCollisions();
     } else {
         if (mCurrentBeatNumber >= mSheets.at(mCurrentSheetNumber).GetNumBeats()) {
             if (mSheets.at(mCurrentSheetNumber).GetNumBeats() == 0) {
@@ -240,7 +237,6 @@ bool Animation::PrevBeat()
     }
     if (mCurrentBeatNumber > 0)
         mCurrentBeatNumber--;
-    CheckCollisions();
     return true;
 }
 
@@ -261,7 +257,6 @@ bool Animation::NextBeat()
             }
         }
     }
-    CheckCollisions();
     return true;
 }
 
@@ -284,7 +279,6 @@ void Animation::GotoAnimationSheet(unsigned i)
 {
     mCurrentSheetNumber = i;
     RefreshSheet();
-    CheckCollisions();
 }
 
 void Animation::GotoTotalBeat(int i)
@@ -325,31 +319,48 @@ void Animation::RefreshSheet()
     mCurrentBeatNumber = 0;
 }
 
-void Animation::CheckCollisions()
+void Animation::FindAllCollisions()
 {
     mCollisions.clear();
-    for (unsigned i = 0; i < mPoints.size(); i++) {
-        for (unsigned j = i + 1; j < mPoints.size(); j++) {
-            auto collisionResult = mPoints[i].DetectCollision(mPoints[j]);
-            if (collisionResult) {
-                if (!mCollisions.count(i) || mCollisions[i] < collisionResult) {
-                    mCollisions[i] = collisionResult;
-                }
-                if (!mCollisions.count(j) || mCollisions[j] < collisionResult) {
-                    mCollisions[j] = collisionResult;
+    auto oldSheet = mCurrentSheetNumber;
+    auto oldBeat = mCurrentBeatNumber;
+    mCurrentSheetNumber = 0;
+    mCurrentBeatNumber = 0;
+    RefreshSheet();
+    while (NextBeat()) {
+        for (unsigned i = 0; i < mPoints.size(); i++) {
+            for (unsigned j = i + 1; j < mPoints.size(); j++) {
+                auto collisionResult = mPoints[i].DetectCollision(mPoints[j]);
+                if (collisionResult) {
+                    if (!mCollisions.count({ i, mCurrentSheetNumber, mCurrentBeatNumber }) || mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] < collisionResult) {
+                        mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] = collisionResult;
+                    }
+                    if (!mCollisions.count({ j, mCurrentSheetNumber, mCurrentBeatNumber }) || mCollisions[{ j, mCurrentSheetNumber, mCurrentBeatNumber }] < collisionResult) {
+                        mCollisions[{ j, mCurrentSheetNumber, mCurrentBeatNumber }] = collisionResult;
+                    }
                 }
             }
         }
     }
-    if (!mCollisions.empty() && mCollisionAction) {
-        mCollisionAction();
+    mCurrentSheetNumber = oldSheet;
+    mCurrentBeatNumber = oldBeat;
+    RefreshSheet();
+}
+
+bool Animation::CurrentBeatHasCollision() const
+{
+    for (unsigned i = 0; i < mPoints.size(); i++) {
+        if (mCollisions.count({ i, mCurrentSheetNumber, mCurrentBeatNumber })) {
+            return true;
+        }
     }
+    return false;
 }
 
 Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 {
     return Animation::animate_info_t(
-        mCollisions.count(which) ? mCollisions.find(which)->second : Coord::COLLISION_NONE,
+        mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::COLLISION_NONE,
         GetCommand(mCurrentSheetNumber, which).Direction(),
         GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which));
 }

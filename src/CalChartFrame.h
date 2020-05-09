@@ -125,8 +125,6 @@ public:
 
     void OnCmd_SolveTransition(wxCommandEvent& event);
 
-    void OnSize(wxSizeEvent& event);
-
     void OnCmd_ZoomFit(wxCommandEvent&);
     void OnCmd_ZoomIn(wxCommandEvent&);
     void OnCmd_ZoomOut(wxCommandEvent&);
@@ -187,7 +185,6 @@ private:
     wxAuiManager mAUIManager;
 
     bool mMainFieldVisible = true;
-
 
     DECLARE_EVENT_TABLE()
 };

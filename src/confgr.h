@@ -132,8 +132,12 @@ private:                                           \
 
     // page setup and zoom
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameZoom, double);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldCanvasScrollX, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldCanvasScrollY, long);
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameWidth, long);
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameHeight, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldFramePositionX, long);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldFramePositionY, long);
 
     // printing configurations
     DECLARE_CONFIGURATION_FUNCTIONS(PrintFile, wxString);

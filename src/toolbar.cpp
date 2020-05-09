@@ -194,4 +194,3 @@ std::vector<ToolBarEntry> GetMainToolBar()
     first_half.insert(first_half.end(), second_half.begin(), second_half.end());
     return first_half;
 }
-

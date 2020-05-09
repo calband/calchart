@@ -27,8 +27,11 @@
 class AnimationView;
 class AnimationCanvas;
 class CalChartView;
+class wxBitmapToggleButton;
 class wxStaticText;
 class wxSpinCtrl;
+class wxButton;
+class CCOmniviewCanvas;
 
 // Animiation Panel is a little bit different because it has it's own view.
 // When we are animating a show we are taking an CalChart animation object
@@ -64,8 +67,10 @@ public:
     void OnSlider_anim_gotobeat(wxScrollEvent& event);
 
     void OnCmd_PlayButton(wxCommandEvent& event);
+    void OnCmd_ToggleAnimOmni(wxCommandEvent& event);
 
     // Called by the view
+    void SetPlayState(bool playState);
     void ToggleTimer();
     void UpdatePanel();
 
@@ -75,7 +80,6 @@ public:
     void SetMainViewMode(bool);
 
 private:
-
     // timer stuff:
     void StartTimer();
     void StopTimer();
@@ -84,13 +88,18 @@ private:
 
     std::unique_ptr<AnimationView> mView{};
     AnimationCanvas* mCanvas{};
+    CCOmniviewCanvas* mOmniCanvas{};
     wxStaticText* mTempoLabel{};
     wxSpinCtrl* mTempoCtrl{};
     wxSlider* mBeatSlider{};
     wxCheckBox* mZoomCheckbox{};
     wxCheckBox* mCollisionCheckbox{};
+    wxBitmapToggleButton* mPlayPauseButton{};
+    wxButton* mAnimateOmniToggle{};
+    wxButton* mOmniHelpButton{};
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};
     bool mMainViewMode{};
+    bool mShowOmni{};
 };

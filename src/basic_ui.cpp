@@ -39,7 +39,6 @@ void SetBandIcon(wxFrame* frame)
 
 wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
 {
-    wxInitAllImageHandlers();
     wxBitmap bitmap(BITMAP_NAME(calchart));
     wxImage image;
 #if defined(__APPLE__) && (__APPLE__)

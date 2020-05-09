@@ -20,12 +20,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate.h"
-#include "animate_types.h"
 #include "AnimationView.h"
 #include "AnimationPanel.h"
 #include "CalChartApp.h"
 #include "CalChartView.h"
+#include "animate.h"
+#include "animate_types.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
@@ -38,6 +38,18 @@
 
 using namespace CalChart;
 // IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
+
+template <typename Float>
+static auto NormalizeAngle(Float angle)
+{
+    while (angle > 2 * M_PI) {
+        angle -= (Float)(2 * M_PI);
+    }
+    while (angle < 0.0) {
+        angle += (Float)(2 * M_PI);
+    }
+    return angle;
+}
 
 AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     : mView(view)
@@ -138,6 +150,9 @@ void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 
 void AnimationView::RefreshFrame()
 {
+    if (mPlayCollisionWarning && mAnimation && mAnimation->CurrentBeatHasCollision() && CalChartConfiguration::GetGlobalConfig().Get_BeepOnCollisions()) {
+        wxBell();
+    }
     GetAnimationFrame()->UpdatePanel();
     GetAnimationFrame()->Refresh();
 }
@@ -159,10 +174,6 @@ int AnimationView::GetTotalCurrentBeat() const { return (mAnimation) ? mAnimatio
 void AnimationView::Generate()
 {
     mAnimation = mView->GetAnimationInstance();
-    if (mAnimation) {
-        auto& config = CalChartConfiguration::GetGlobalConfig();
-        mAnimation->SetCollisionAction(config.Get_BeepOnCollisions() ? wxBell : nullptr);
-    }
 }
 
 // true if changes made
@@ -236,7 +247,7 @@ void AnimationView::GotoAnimationSheet(unsigned i)
 
 static wxPoint towxPoint(CalChart::Coord const& c)
 {
-    return {c.x, c.y};
+    return { c.x, c.y };
 }
 
 // Return a bounding box of the show
@@ -299,4 +310,45 @@ AnimationPanel* AnimationView::GetAnimationFrame()
 const AnimationPanel* AnimationView::GetAnimationFrame() const
 {
     return static_cast<const AnimationPanel*>(GetFrame());
+}
+
+CalChart::ShowMode const& AnimationView::GetShowMode() const
+{
+    return mView->GetShowMode();
+}
+
+MarcherInfo AnimationView::GetMarcherInfo(int which) const
+{
+    MarcherInfo info{};
+    if (mAnimation) {
+        auto anim_info = mAnimation->GetAnimateInfo(which);
+        info.direction = NormalizeAngle((anim_info.mRealDirection * M_PI / 180.0));
+
+        auto position = anim_info.mPosition;
+        info.x = CoordUnits2Float(position.x);
+        // because the coordinate system for continuity and OpenGL are different,
+        // correct here.
+        info.y = -1.0 * CoordUnits2Float(position.y);
+    }
+    return info;
+}
+
+std::multimap<double, MarcherInfo> AnimationView::GetMarchersByDistance(ViewPoint const& from) const
+{
+    auto anySelected = !mView->GetSelectionList().empty();
+    std::multimap<double, MarcherInfo> result;
+    for (auto i = 0; (i < mView->GetNumPoints()); ++i) {
+        if (anySelected && !mView->IsSelected(i)) {
+            continue;
+        }
+        auto info = GetMarcherInfo(i);
+        auto distance = sqrt(pow(from.x - info.x, 2) + pow(from.y - info.y, 2));
+        result.insert(std::pair<double, MarcherInfo>(distance, info));
+    }
+    return result;
+}
+
+int AnimationView::GetNumPoints() const
+{
+    return mView->GetNumPoints();
 }

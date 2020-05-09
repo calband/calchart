@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_onmiview_canvas.h
  * Header for animation canvas interface
@@ -20,50 +21,25 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <wx/glcanvas.h>
-
-#include <memory>
-
+#include "draw_utils.h"
 #include <map>
+#include <memory>
+#include <wx/glcanvas.h>
 
 class AnimationView;
 class CCOmniView_GLContext;
 class CalChartConfiguration;
 
-struct viewpoint_t {
-    viewpoint_t(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f)
-        : x(x_)
-        , y(y_)
-        , z(z_)
-    {
-    }
-    float x, y, z;
-};
-
-struct MarcherInfo {
-    MarcherInfo(float x_ = 0, float y_ = 0, float dir = 0)
-        : direction(dir)
-        , x(x_)
-        , y(y_)
-    {
-    }
-    float direction;
-    float x;
-    float y;
-};
-
-class CCOmniView_Canvas : public wxGLCanvas {
+class CCOmniviewCanvas : public wxGLCanvas {
     using super = wxGLCanvas;
+    wxDECLARE_EVENT_TABLE();
 
 public:
-    CCOmniView_Canvas(AnimationView* view, wxWindow* parent,
-        CalChartConfiguration& config,
-        const wxSize& size = wxDefaultSize);
-    ~CCOmniView_Canvas();
+    CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, const wxSize& size = wxDefaultSize);
+    ~CCOmniviewCanvas();
 
     void SetView(AnimationView* view);
+    auto GetView() const { return mView; }
 
     void OnPaint(wxPaintEvent& event);
     void OnChar(wxKeyEvent& event);
@@ -76,20 +52,17 @@ public:
     void OnCmd_ToggleCrowd();
     void OnCmd_ToggleMarching();
     void OnCmd_ToggleShowOnlySelected();
+    void OnCmd_ShowKeyboardControls();
 
 private:
-    MarcherInfo GetMarcherInfo(int which) const;
-    std::multimap<double, MarcherInfo> ParseAndDraw3dMarchers() const;
-
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
-    AnimationView* mAnimationView;
+    AnimationView* mView{};
     CalChartConfiguration& config;
-    viewpoint_t mViewPoint;
+    ViewPoint mViewPoint;
 
     // a -1 means not following any marcher
     int mFollowMarcher;
     bool mCrowdOn;
-    bool mShowOnlySelected;
     bool mShowMarching;
     float mViewAngle, mViewAngleZ;
     float mFOV;
@@ -98,6 +71,4 @@ private:
     bool mShiftMoving;
     wxPoint mStartShiftMoveMousePosition;
     float mStartShiftMoveViewAngle, mStartShiftMoveViewAngleZ;
-
-    wxDECLARE_EVENT_TABLE();
 };

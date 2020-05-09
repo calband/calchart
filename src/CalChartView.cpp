@@ -58,7 +58,7 @@ bool CalChartView::OnCreate(wxDocument* doc, long WXUNUSED(flags))
     mShow->SetCurrentSheet(0);
     mFrame = new CalChartFrame(doc, this, mConfig,
         wxStaticCast(wxGetApp().GetTopWindow(), wxDocParentFrame),
-        wxPoint(50, 50), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()), static_cast<int>(mConfig.Get_FieldFrameHeight())));
+        wxPoint(mConfig.Get_FieldFramePositionX(), mConfig.Get_FieldFramePositionY()), wxSize(static_cast<int>(mConfig.Get_FieldFrameWidth()), static_cast<int>(mConfig.Get_FieldFrameHeight())));
 
     UpdateBackgroundImages();
     mFrame->Show(true);
@@ -408,6 +408,22 @@ std::vector<CalChart::AnimationErrors> CalChartView::GetAnimationErrors() const
     }
     auto animation = mShow->GetAnimation();
     return animation ? animation->GetAnimationErrors() : std::vector<CalChart::AnimationErrors>{};
+}
+
+std::map<int, SelectionList> CalChartView::GetAnimationCollisions() const
+{
+    auto result = std::map<int, SelectionList>{};
+    if (!mShow) {
+        return result;
+    }
+    if (!mShow->GetAnimation()) {
+        return result;
+    }
+    // first map all the collisions to a sheet with a point group.
+    for (auto&& i : mShow->GetAnimation()->GetCollisions()) {
+        result[std::get<1>(i.first)].insert(std::get<0>(i.first));
+    }
+    return result;
 }
 
 std::unique_ptr<CalChart::Animation> CalChartView::GetAnimationInstance() const

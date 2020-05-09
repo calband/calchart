@@ -20,11 +20,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if 0
-#include "cc_omniview_canvas.h"
+#ifndef GL_SILENCE_DEPRECATION
+#define GL_SILENCE_DEPRECATION 1
+#endif
+
+#include "CCOmniviewCanvas.h"
 #include "AnimationView.h"
 #include "CalChartDoc.h"
-#include "OmniviewPanel.h"
 #include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "draw.h"
@@ -68,7 +70,7 @@ auto GetImageDir()
     return kImageDir;
 }
 
-static const viewpoint_t KStartingViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
+static const auto kStartingViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
 static const float kStartingViewAngle = kViewAngle_1;
 static const float kStartingViewAngleZ = kViewAngle_z_1;
 
@@ -171,10 +173,10 @@ typedef enum {
     kRightGrapeVine,
 } WhichMarchingStyle;
 
-BEGIN_EVENT_TABLE(CCOmniView_Canvas, wxGLCanvas)
-EVT_CHAR(CCOmniView_Canvas::OnChar)
-EVT_MOTION(CCOmniView_Canvas::OnMouseMove)
-EVT_PAINT(CCOmniView_Canvas::OnPaint)
+BEGIN_EVENT_TABLE(CCOmniviewCanvas, wxGLCanvas)
+EVT_CHAR(CCOmniviewCanvas::OnChar)
+EVT_MOTION(CCOmniviewCanvas::OnMouseMove)
+EVT_PAINT(CCOmniviewCanvas::OnPaint)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -258,8 +260,7 @@ static bool LoadTexture(const wxString& filename, GLuint& texture)
 }
 
 // We always draw from the upper left, upper right, lower right, lower left
-static void DrawTextureOnBox(const double points[4][3], size_t repeat_x,
-    size_t repeat_y, const GLuint& texture)
+static void DrawTextureOnBox(const double points[4][3], size_t repeat_x, size_t repeat_y, const GLuint& texture)
 {
     glBindTexture(GL_TEXTURE_2D, texture);
     glBegin(GL_QUADS);
@@ -351,22 +352,21 @@ static WhichImageEnum GetMarcherTextureAndPoints(float cameraAngleToMarcher,
 }
 
 // Returns the angle in regards to the camera.
-static float GetAngle(float x, float y, const viewpoint_t& viewpoint)
+static float GetAngle(float x, float y, ViewPoint const& viewpoint)
 {
-    viewpoint_t v = viewpoint_t(x - viewpoint.x, y - viewpoint.y);
-    float mag = (sqrt(v.x * v.x + v.y * v.y));
+    auto v = ViewPoint{ x - viewpoint.x, y - viewpoint.y };
+    float mag = sqrt(v.x * v.x + v.y * v.y);
     float ang = acos(v.x / mag); // normalize
     return (v.y < 0) ? -ang : ang;
 }
 
-// the rendering context used by CCOmniView_Canvas
+// the rendering context used by CCOmniviewCanvas
 class CCOmniView_GLContext : public wxGLContext {
 public:
     CCOmniView_GLContext(wxGLCanvas* canvas);
 
     void DrawField(float FieldEW, float FieldNS, bool crowdOn);
-    void Draw3dMarcher(const MarcherInfo& info, const viewpoint_t& viewpoint,
-        WhichMarchingStyle style);
+    void Draw3dMarcher(const MarcherInfo& info, const ViewPoint& viewpoint, WhichMarchingStyle style);
 
     bool UseForLines(const wxImage& lines);
 
@@ -389,11 +389,9 @@ CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas* canvas)
 
     glGenTextures(WXSIZEOF(m_textures), m_textures);
 
-    wxInitAllImageHandlers();
     for (size_t i = 0; i < sizeof(ListOfImageFiles) / sizeof(ListOfImageFiles[0]);
          ++i) {
-        if (!LoadTexture(GetImageDir() + ListOfImageFiles[i].mImageFilename,
-                m_textures[ListOfImageFiles[i].mImageId])) {
+        if (!LoadTexture(GetImageDir() + ListOfImageFiles[i].mImageFilename, m_textures[ListOfImageFiles[i].mImageId])) {
             wxLogError(wxT("Could not load ") + ListOfImageFiles[i].mImageFilename);
         }
     }
@@ -555,7 +553,7 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS,
 }
 
 void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info,
-    const viewpoint_t& viewpoint,
+    ViewPoint const& viewpoint,
     WhichMarchingStyle style)
 {
     float ang = NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
@@ -588,78 +586,44 @@ void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info,
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniView_Canvas::CCOmniView_Canvas(AnimationView* view, wxWindow* parent,
-    CalChartConfiguration& config_,
-    const wxSize& size)
-    : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, size,
-          wxFULL_REPAINT_ON_RESIZE)
+CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config_, const wxSize& size)
+    : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE)
     , m_glContext(new CCOmniView_GLContext(this))
-    , mAnimationView(view)
     , config(config_)
-    , mViewPoint(KStartingViewPoint)
+    , mViewPoint(kStartingViewPoint)
     , mFollowMarcher(-1)
     , mCrowdOn(false)
-    , mShowOnlySelected(false)
     , mShowMarching(true)
     , mViewAngle(kStartingViewAngle)
     , mViewAngleZ(kStartingViewAngleZ)
     , mFOV(60)
     , mShiftMoving(false)
 {
-#if defined(__APPLE__) && (__APPLE__)
-    m_glContext->UseForLines(
-        GetOmniLinesImage(config, mAnimationView->GetShow()->GetShowMode()));
-#endif
 }
 
-CCOmniView_Canvas::~CCOmniView_Canvas() {}
+CCOmniviewCanvas::~CCOmniviewCanvas() {}
 
-void CCOmniView_Canvas::SetView(AnimationView* view) { mAnimationView = view; }
-
-MarcherInfo CCOmniView_Canvas::GetMarcherInfo(int which) const
+void CCOmniviewCanvas::SetView(AnimationView* view)
 {
-    MarcherInfo info;
-    if (mAnimationView && mAnimationView->GetAnimation()) {
-        auto anim_info = mAnimationView->GetAnimation()->GetAnimateInfo(which);
-        info.direction = NormalizeAngle((anim_info.mRealDirection * M_PI / 180.0));
-
-        CalChart::Coord position = anim_info.mPosition;
-        info.x = CoordUnits2Float(position.x);
-        // because the coordinate system for continuity and OpenGL are different,
-        // correct here.
-        info.y = -1.0 * CoordUnits2Float(position.y);
-    }
-    return info;
-}
-
-std::multimap<double, MarcherInfo>
-CCOmniView_Canvas::ParseAndDraw3dMarchers() const
-{
-    std::multimap<double, MarcherInfo> result;
-    for (auto i = 0; (i < mAnimationView->GetShow()->GetNumPoints()); ++i) {
-        if (mShowOnlySelected && !mAnimationView->GetShow()->IsSelected(i)) {
-            continue;
-        }
-        MarcherInfo info = GetMarcherInfo(i);
-        float distance = sqrt(pow(mViewPoint.x - info.x, 2) + pow(mViewPoint.y - info.y, 2));
-        result.insert(std::pair<double, MarcherInfo>(distance, info));
-    }
-    return result;
+    mView = view;
+    // line drawing for CCOmniView doesn't look right on Mac. See issue #305
+    //#if defined(__APPLE__) && (__APPLE__)
+    //    m_glContext->UseForLines(GetOmniLinesImage(config, mView->GetShowMode()));
+    //#endif
 }
 
 // rolling my own gluperspective
 // http://nehe.gamedev.net/article/replacement_for_gluperspective/21002/
-static void myGLUPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear,
-    GLdouble zFar)
+static void myGLUPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
-    GLdouble fH = tan(fovY / 360.0 * M_PI) * zNear;
-    GLdouble fW = fH * aspect;
+    auto fH = tan(fovY / 360.0 * M_PI) * zNear;
+    auto fW = fH * aspect;
     glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 }
 
 static void NormalizeVector(float v[3])
 {
-    float mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    auto mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     v[0] /= mag;
     v[1] /= mag;
     v[2] /= mag;
@@ -722,7 +686,7 @@ static void mygluLookAt(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ,
     glTranslated(-eyeX, -eyeY, -eyeZ);
 }
 
-void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
+void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
 {
     // This is required even though dc is not used otherwise.
     wxPaintDC dc(this);
@@ -734,12 +698,12 @@ void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
     // multiple canvases: If we updated the viewport in the wxSizeEvent
     // handler, changing the size of one canvas causes a viewport setting that
     // is wrong when next another canvas is repainted.
-    const wxSize ClientSize = GetClientSize();
+    const wxSize ClientSize = GetClientSize() * GetContentScaleFactor();
 
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-    CalChart::Coord fieldSize = mAnimationView
-        ? mAnimationView->GetShow()->GetShowMode().FieldSize()
+    CalChart::Coord fieldSize = mView
+        ? mView->GetShowMode().FieldSize()
         : CalChart::Coord(160, 80);
     float FieldEW = CoordUnits2Float(fieldSize.y);
     float FieldNS = CoordUnits2Float(fieldSize.x);
@@ -753,7 +717,7 @@ void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     if (mFollowMarcher != -1) {
-        MarcherInfo info = GetMarcherInfo(mFollowMarcher);
+        auto info = mView->GetMarcherInfo(mFollowMarcher);
         mViewPoint.x = info.x;
         mViewPoint.y = info.y;
         mViewPoint.z = 2;
@@ -767,13 +731,12 @@ void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
 
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
-    if (mAnimationView) {
-        std::multimap<double, MarcherInfo> marchers = ParseAndDraw3dMarchers();
-        for (std::multimap<double, MarcherInfo>::reverse_iterator i = marchers.rbegin();
-             i != marchers.rend(); ++i) {
+    if (mView) {
+        auto marchers = mView->GetMarchersByDistance(mViewPoint);
+        for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
             m_glContext->Draw3dMarcher(
                 i->second, mViewPoint,
-                mShowMarching ? (mAnimationView->OnBeat() ? kLeftHSHup : kRightHSHup)
+                mShowMarching ? (mView->OnBeat() ? kLeftHSHup : kRightHSHup)
                               : kClosed);
         }
     }
@@ -781,7 +744,7 @@ void CCOmniView_Canvas::OnPaint(wxPaintEvent& event)
     SwapBuffers();
 }
 
-void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
+void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 {
     const float stepIncr = 0.3f * 3;
     const float AngleStepIncr = 0.1f * 3;
@@ -790,7 +753,7 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
     case '1':
     case '!':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = viewpoint_t(kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1);
+        mViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
         mViewAngle = kViewAngle_1;
         mViewAngleZ = kViewAngle_z_1;
         if (event.GetKeyCode() == '!') {
@@ -802,7 +765,7 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
     case '2':
     case '@':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = viewpoint_t(kViewPoint_x_2, kViewPoint_y_2, kViewPoint_z_2);
+        mViewPoint = ViewPoint{ kViewPoint_x_2, kViewPoint_y_2, kViewPoint_z_2 };
         mViewAngle = kViewAngle_2;
         mViewAngleZ = kViewAngle_z_2;
         if (event.GetKeyCode() == '@') {
@@ -814,7 +777,7 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
     case '3':
     case '#':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = viewpoint_t(kViewPoint_x_3, kViewPoint_y_3, kViewPoint_z_3);
+        mViewPoint = ViewPoint{ kViewPoint_x_3, kViewPoint_y_3, kViewPoint_z_3 };
         mViewAngle = kViewAngle_3;
         mViewAngleZ = kViewAngle_z_3;
         if (event.GetKeyCode() == '#') {
@@ -826,23 +789,23 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
 
     case '4':
         OnCmd_FollowMarcher(-1);
-        mViewPoint = viewpoint_t(config.Get_OmniViewPoint_X_4(),
+        mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_4(),
             config.Get_OmniViewPoint_Y_4(),
-            config.Get_OmniViewPoint_Z_4());
+            config.Get_OmniViewPoint_Z_4() };
         mViewAngle = config.Get_OmniViewAngle_4();
         mViewAngleZ = config.Get_OmniViewAngle_Z_4();
         break;
     case '5':
-        mViewPoint = viewpoint_t(config.Get_OmniViewPoint_X_5(),
+        mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_5(),
             config.Get_OmniViewPoint_Y_5(),
-            config.Get_OmniViewPoint_Z_5());
+            config.Get_OmniViewPoint_Z_5() };
         mViewAngle = config.Get_OmniViewAngle_5();
         mViewAngleZ = config.Get_OmniViewAngle_Z_5();
         break;
     case '6':
-        mViewPoint = viewpoint_t(config.Get_OmniViewPoint_X_6(),
+        mViewPoint = ViewPoint{ config.Get_OmniViewPoint_X_6(),
             config.Get_OmniViewPoint_Y_6(),
-            config.Get_OmniViewPoint_Z_6());
+            config.Get_OmniViewPoint_Z_6() };
         mViewAngle = config.Get_OmniViewAngle_6();
         mViewAngleZ = config.Get_OmniViewAngle_Z_6();
         break;
@@ -928,10 +891,6 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
         OnCmd_ToggleCrowd();
         break;
 
-    case 't':
-        OnCmd_ToggleShowOnlySelected();
-        break;
-
     // move, following the FPS model
     case 'a':
         OnCmd_FollowMarcher(-1);
@@ -959,13 +918,13 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
         break;
 
     case WXK_LEFT:
-        mAnimationView->PrevBeat();
+        mView->PrevBeat();
         break;
     case WXK_RIGHT:
-        mAnimationView->NextBeat();
+        mView->NextBeat();
         break;
     case WXK_SPACE:
-        mAnimationView->ToggleTimer();
+        mView->ToggleTimer();
         break;
 
     default:
@@ -975,7 +934,7 @@ void CCOmniView_Canvas::OnChar(wxKeyEvent& event)
     Refresh();
 }
 
-void CCOmniView_Canvas::OnMouseMove(wxMouseEvent& event)
+void CCOmniviewCanvas::OnMouseMove(wxMouseEvent& event)
 {
     if (event.ShiftDown()) {
         wxPoint thisPos = event.GetPosition();
@@ -995,32 +954,54 @@ void CCOmniView_Canvas::OnMouseMove(wxMouseEvent& event)
     }
 }
 
-void CCOmniView_Canvas::OnCmd_FollowMarcher(int which)
+void CCOmniviewCanvas::OnCmd_FollowMarcher(int which)
 {
     mFollowMarcher = which;
     Refresh();
 }
 
-void CCOmniView_Canvas::OnCmd_SaveCameraAngle(size_t which) {}
+void CCOmniviewCanvas::OnCmd_SaveCameraAngle(size_t which) {}
 
-void CCOmniView_Canvas::OnCmd_GoToCameraAngle(size_t which) {}
+void CCOmniviewCanvas::OnCmd_GoToCameraAngle(size_t which) {}
 
-void CCOmniView_Canvas::OnCmd_ToggleCrowd()
+void CCOmniviewCanvas::OnCmd_ToggleCrowd()
 {
     mCrowdOn = !mCrowdOn;
     Refresh();
 }
 
-void CCOmniView_Canvas::OnCmd_ToggleMarching()
+void CCOmniviewCanvas::OnCmd_ToggleMarching()
 {
     mShowMarching = !mShowMarching;
     Refresh();
 }
 
-void CCOmniView_Canvas::OnCmd_ToggleShowOnlySelected()
+void CCOmniviewCanvas::OnCmd_ShowKeyboardControls()
 {
-    mShowOnlySelected = !mShowOnlySelected;
-    Refresh();
+    wxMessageDialog dialog(
+        this,
+        wxT("1, 2, 3 : Select different camera angles (student, field, upper corner)\n")
+            wxT("shift-1, shift-2, shift-3 : Select ALUMNI different camera angles (Alumni, field viewing east, upper corner)\n")
+                wxT("4, 5, 6 : Select custom camera angles (set to student, field, upper corner by default)\n")
+                    wxT("shift-4, shift-5, shift-6 : Set custom camera angle\n")
+                        wxT("+ : Move camera up\n")
+                            wxT("- : Move camera down\n")
+                                wxT("w : Move camera forward\n")
+                                    wxT("s : Move camera backward\n")
+                                        wxT("a : Move camera left\n")
+                                            wxT("d : Move camera right\n")
+                                                wxT("q : Pan camera left\n")
+                                                    wxT("e : Pan camera right\n")
+                                                        wxT("r : Pan camera up\n")
+                                                            wxT("f : Pan camera down\n")
+                                                                wxT("< : Decrease Field Of View\n")
+                                                                    wxT("> : Increase Field Of View\n")
+                                                                        wxT("o : Toggle Crowd\n")
+                                                                            wxT("left arrow : Back 1 beat\n")
+                                                                                wxT("right arrow : Forward 1 beat\n")
+                                                                                    wxT("space : Toggle Marching\n"),
+        wxT("Keyboard Commands"),
+        wxOK);
+    dialog.ShowModal();
+    return;
 }
-
-#endif
