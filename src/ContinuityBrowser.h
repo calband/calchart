@@ -33,20 +33,18 @@ class ContinuityBrowser : public wxScrolledWindow {
     using super = wxScrolledWindow;
 
 public:
-    ContinuityBrowser(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    ~ContinuityBrowser();
+    ContinuityBrowser(wxWindow* parent, wxWindowID id = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
+    ~ContinuityBrowser() override;
 
     void OnUpdate(); // Refresh from the View
     void SetView(CalChartView* view);
     auto GetView() const { return mView; }
 
 private:
+    void Init();
     void CreateControls();
 
+    // Internals
     CalChartView* mView{};
     std::vector<ContinuityBrowserPerCont*> mPerCont;
 };

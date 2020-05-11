@@ -40,6 +40,7 @@ class FieldCanvas;
 class FieldFrameControls;
 class FieldThumbnailBrowser;
 class PrintContinuityEditor;
+class wxAuiToolBar;
 
 // Define the main editing frame
 class CalChartFrame : public wxDocChildFrame {
@@ -48,7 +49,7 @@ class CalChartFrame : public wxDocChildFrame {
 public:
     // CalChartFrame will own the show that is passed in
     CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguration& config_, wxDocParentFrame* frame, const wxPoint& pos, const wxSize& size);
-    ~CalChartFrame();
+    ~CalChartFrame() override;
 
     void OnCmdAppend(wxCommandEvent& event);
     void OnCmdImportCont(wxCommandEvent& event);
@@ -134,6 +135,8 @@ public:
     void OnCmd_ZoomIn(wxCommandEvent&);
     void OnCmd_ZoomOut(wxCommandEvent&);
 
+    void OnClose();
+
     void AppendShow();
     void ImportContFile();
 
@@ -186,6 +189,7 @@ private:
     AnimationPanel* mAnimationPanel{};
     AnimationPanel* mShadowAnimationPanel{};
     PrintContinuityEditor* mPrintContinuityEditor{};
+    wxAuiToolBar* mToolbar;
 
     std::map<int, wxWindow*> mLookupEnumToSubWindow;
     std::map<wxWindow*, int> mLookupSubWindowToEnum;

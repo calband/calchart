@@ -43,43 +43,33 @@ class AnimationPanel : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationPanel(wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        const wxString& name = wxPanelNameStr);
-    ~AnimationPanel();
+    AnimationPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ~AnimationPanel() override;
 
     void OnUpdate(); // Refresh from the View
     void SetView(CalChartView* view);
 
-    void OnCmd_anim_stop(wxCommandEvent& event) { StopTimer(); }
-    void OnCmd_anim_play(wxCommandEvent& event) { StartTimer(); }
-    void OnCmd_anim_prev_beat(wxCommandEvent& event);
-    void OnCmd_anim_next_beat(wxCommandEvent& event);
-    void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
-    void OnCmd_anim_prev_sheet(wxCommandEvent& event);
-    void OnCmd_anim_next_sheet(wxCommandEvent& event);
-    void OnCmd_anim_errors(wxCommandEvent& event);
-    void OnSlider_anim_tempo(wxSpinEvent& event);
-    void OnSlider_anim_gotosheet(wxScrollEvent& event);
-    void OnSlider_anim_gotobeat(wxScrollEvent& event);
-
-    void OnCmd_PlayButton(wxCommandEvent& event);
-    void OnCmd_ToggleAnimOmni(wxCommandEvent& event);
-
     // Called by the view
     void SetPlayState(bool playState);
     void ToggleTimer();
-    void UpdatePanel();
-
+    void UpdatePanel(); // specfically to update the controls
     bool OnBeat() const;
 
     auto GetInMiniMode() const { return mInMiniMode; }
     void SetInMiniMode(bool);
 
 private:
+    void Init();
+    void CreateControls();
+
+    // Event Handlers
+    void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
+    void OnSlider_anim_tempo(wxSpinEvent& event);
+    void OnSlider_anim_gotobeat(wxScrollEvent& event);
+    void OnCmd_PlayButton(wxCommandEvent& event);
+    void OnCmd_ToggleAnimOmni(wxCommandEvent& event);
+
+    // Internals
     // timer stuff:
     void StartTimer();
     void StopTimer();

@@ -24,6 +24,7 @@
 #include "cc_fileformat.h"
 
 #include <algorithm>
+#include <cassert>
 
 namespace CalChart {
 

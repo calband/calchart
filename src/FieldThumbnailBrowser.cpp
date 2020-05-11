@@ -21,6 +21,7 @@
 
 #include "FieldThumbnailBrowser.h"
 #include "CalChartView.h"
+#include "CalChartSizes.h"
 #include "cc_show.h"
 #include "confgr.h"
 #include "draw.h"
@@ -52,7 +53,7 @@ wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
         return {};
     }
 
-    auto mode_size = mView->GetShowMode().Size();
+    auto mode_size = fDIP(wxSize{mView->GetShowMode().Size().x, mView->GetShowMode().Size().y});
     if (horizontal) {
         auto current_size_y = GetSize().y - mYUpperPadding - mYNameSize - mYNamePadding - mYBottomPadding - mYScrollPadding;
         auto box_size_x = mode_size.x * (current_size_y / double(mode_size.y));
@@ -70,7 +71,7 @@ int FieldThumbnailBrowser::WhichCell(wxPoint const& p) const
     return (mLayoutHorizontal) ? p.x / size_of_one.x : p.y / size_of_one.y;
 }
 
-static auto CalcUserScale(wxSize const& box_size, CalChart::Coord const& mode_size)
+static auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
 {
     auto newX = static_cast<float>(box_size.x);
     auto newY = static_cast<float>(box_size.y);
@@ -123,7 +124,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
         auto newOffsetX = offset_x + mXLeftPadding;
         auto newOffsetY = offset_y + mYUpperPadding + mYNameSize + mYNamePadding;
 
-        auto mode_size = mView->GetShowMode().Size();
+        auto mode_size = fDIP(wxSize{mView->GetShowMode().Size().x, mView->GetShowMode().Size().y});
         auto current_size_x = GetSize().x - mXLeftPadding - mXRightPadding - mXScrollPadding;
         auto current_size_y = GetSize().y - mYNameSize - mYNamePadding - mYUpperPadding - mYBottomPadding - mYScrollPadding;
         auto box_size_x = (mLayoutHorizontal) ? mode_size.x * (current_size_y / double(mode_size.y)) : current_size_x;

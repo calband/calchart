@@ -127,6 +127,7 @@ enum {
     CALCHART__ViewAnimationErrors,
     CALCHART__ViewAnimation,
     CALCHART__ViewPrintContinuity,
+    CALCHART__ViewToolbar,
 
     CALCHART__ViewSwapFieldAndAnimate,
     CALCHART__ViewZoomFit,

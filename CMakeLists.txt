@@ -113,6 +113,11 @@ add_library (
   )
 
 target_compile_definitions (calchart_core PUBLIC YY_NO_UNISTD_H)
+if (MSVC)
+target_compile_options (calchart_core PRIVATE -Wall)
+else ()
+target_compile_options (calchart_core PRIVATE -Werror -Wall -Wextra)
+endif ()
 
 set_target_properties (calchart_core PROPERTIES CXX_STANDARD 17)
 
@@ -290,6 +295,8 @@ add_custom_command (
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${CMAKE_CURRENT_SOURCE_DIR}/docs" $<TARGET_FILE_DIR:CalChart>/docs
   )
+
+target_sources(CalChart PRIVATE build-windows/WindowsHiDPI.manifest)
 
 endif ()
 

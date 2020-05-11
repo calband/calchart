@@ -27,25 +27,25 @@
 
 using namespace CalChart;
 
-BEGIN_EVENT_TABLE(ContinuityBrowserPanel, CustomListViewPanel)
+BEGIN_EVENT_TABLE(ContinuityBrowserPanel, ContinuityBrowserPanel::super)
 EVT_SET_FOCUS(ContinuityBrowserPanel::DoSetFocus)
 EVT_KILL_FOCUS(ContinuityBrowserPanel::DoKillFocus)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+ContinuityBrowserPanel::ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mSym(sym)
     , mConfig(config)
 {
-    // make room for about 5
+    Init();
+}
+
+void ContinuityBrowserPanel::Init()
+{
+    // make room for about 3.5
     auto current_size = GetMinSize();
-    current_size.y = ContinuityBoxDrawer::GetHeight(config);
+    current_size.y = ContinuityBoxDrawer::GetHeight(mConfig);
     current_size.y *= 3.5;
     SetMinSize(current_size);
 }

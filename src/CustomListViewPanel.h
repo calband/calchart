@@ -40,16 +40,20 @@ public:
 // View for linking CalChartDoc with ContinuityBrowser
 class CustomListViewPanel : public wxScrolledWindow {
     using super = wxScrolledWindow;
+    DECLARE_EVENT_TABLE()
 
 public:
     // Basic functions
-    CustomListViewPanel(wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    virtual ~CustomListViewPanel() = default;
+    CustomListViewPanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
+    virtual ~CustomListViewPanel() override = default;
+
+    void SetSelection(int which) { m_selected = static_cast<size_t>(which); }
+    auto GetSelection() const { return m_selected; }
+    void SetCells(std::vector<std::unique_ptr<DrawableCell>> cells);
+    void SetHighlight(void const* highlight);
+
+private:
+    // events
     void OnPaint(wxPaintEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnLeftDoubleClick(wxMouseEvent& event);
@@ -57,12 +61,8 @@ public:
     void OnLeftUpMouseEvent(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
-    void SetSelection(int which) { m_selected = static_cast<size_t>(which); }
-    auto GetSelection() const { return m_selected; }
-    void SetCells(std::vector<std::unique_ptr<DrawableCell>> cells);
-    void SetHighlight(void const* highlight);
 
-private:
+    // internals
     virtual void OnNewEntry(int cell);
     virtual void OnEditEntry(int cell);
     virtual void OnDeleteEntry(int cell);
@@ -76,5 +76,4 @@ private:
     size_t m_selected;
     bool m_dragging;
 
-    DECLARE_EVENT_TABLE()
 };

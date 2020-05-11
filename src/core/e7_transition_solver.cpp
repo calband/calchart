@@ -2017,7 +2017,7 @@ namespace e7NaminiaslRamirezZhang {
 
 namespace e7SoverEliceiriHershkovitz {
 
-    void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned maxBeats, const DestinationConstraints& destinationConstraints, const std::vector<TransitionSolverParams::MarcherInstruction>& instructionOptions, TransitionSolverDelegate* delegate)
+    void iterateSolution(std::vector<MarcherSolution>& marcherSolutions, CollisionSpace& collisionSpace, unsigned /*maxBeats*/, const DestinationConstraints& /*destinationConstraints*/, const std::vector<TransitionSolverParams::MarcherInstruction>& instructionOptions, TransitionSolverDelegate* delegate)
     {
         // Prioritize commands in the order that we will be willing to give them to a marcher
         // We're much more willing to change direction than to increase the number of wait beats

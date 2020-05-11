@@ -29,18 +29,12 @@ class ContinuityComposerDialog : public wxDialog {
     DECLARE_CLASS(ContinuityComposerDialog)
 
 public:
-    ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity,
-        wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Compose Continuity"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxDEFAULT_DIALOG_STYLE,
-        const wxString& name = wxDialogNameStr);
-    ~ContinuityComposerDialog() = default;
+    ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent, wxWindowID id = wxID_ANY, wxString const& caption = wxT("Compose Continuity"), wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE, wxString const& name = wxDialogNameStr);
+    ~ContinuityComposerDialog() override = default;
 
     std::unique_ptr<CalChart::ContProcedure> GetContinuity();
-    virtual bool Validate() override;
+    bool Validate() override;
 
 private:
-    ContinuityComposerPanel* mPanel;
+    ContinuityComposerPanel* mPanel{};
 };

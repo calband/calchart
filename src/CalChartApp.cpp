@@ -56,26 +56,26 @@ wxHtmlHelpController& CalChartApp::GetGlobalHelpController()
     return *mHelpController;
 }
 
-void CalChartApp::MacOpenFile(const wxString& fileName)
+#if defined(__APPLE__) && (__APPLE__)
+void CalChartApp::MacOpenFile(wxString const& fileName)
 {
     OpenFileOnHost(fileName);
 }
 
-void CalChartApp::MacOpenFiles(const wxArrayString& fileNames)
+void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
 {
     for (auto index = 0; index < static_cast<int>(fileNames.GetCount()); ++index) {
         MacOpenFile(fileNames[index]);
     }
 }
+#endif // defined(__APPLE__) && (__APPLE__)
 
 bool CalChartApp::OnInit()
 {
     SetAppName(wxT("CalChart"));
     wxInitAllImageHandlers();
-    StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); },
-        [=]() { this->ExitAppAsServer(); } };
-    StartStopFunc_t asClient{ [=]() { this->InitAppAsClient(); },
-        [=]() { this->ExitAppAsClient(); } };
+    StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); }, [=]() { this->ExitAppAsServer(); } };
+    StartStopFunc_t asClient{ [=]() { this->InitAppAsClient(); }, [=]() { this->ExitAppAsClient(); } };
     mHostInterface = HostAppInterface::Make(this, asServer, asClient);
     return mHostInterface->OnInit();
 }
@@ -108,7 +108,7 @@ void CalChartApp::InitAppAsServer()
     mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
 
     //// Create the main frame window
-    wxFrame* frame = new TopFrame(mDocManager, (wxFrame*)NULL, _T("CalChart"));
+    auto frame = new TopFrame(mDocManager, (wxFrame*)NULL, _T("CalChart"));
 
     {
         // Required for advanced HTML help
@@ -174,7 +174,7 @@ void CalChartApp::ExitAppAsServer()
     mHelpController.reset();
 }
 
-CalChart::ShowMode CalChartApp::GetShowMode(const wxString& which)
+CalChart::ShowMode CalChartApp::GetShowMode(wxString const& which)
 {
     return GetConfigShowMode(which);
 }

@@ -237,7 +237,7 @@ bool ShowModeDialogSetup::TransferDataToWindow()
     for (auto i = mShowModeValues.begin(); i != mShowModeValues.end(); ++i) {
         wxString buf;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(WESTHASH + std::distance(mShowModeValues.begin(), i));
-        buf.Printf(wxT("%ld"), *i);
+        buf.Printf(wxT("%d"), static_cast<int>(*i));
         text->ChangeValue(buf);
     }
 

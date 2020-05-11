@@ -27,18 +27,26 @@
 #include <wx/artprov.h>
 #include <wx/treelist.h>
 
-BEGIN_EVENT_TABLE(AnimationErrorsPanel, wxPanel)
+BEGIN_EVENT_TABLE(AnimationErrorsPanel, AnimationErrorsPanel::super)
 EVT_TREELIST_SELECTION_CHANGED(wxID_ANY, AnimationErrorsPanel::OnSelectionChanged)
 EVT_TREELIST_ITEM_ACTIVATED(wxID_ANY, AnimationErrorsPanel::OnItemActivated)
 END_EVENT_TABLE()
 
-AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
+{
+    Init();
+    CreateControls();
+    GetSizer()->Fit(this);
+    GetSizer()->SetSizeHints(this);
+    OnUpdate();
+}
+
+void AnimationErrorsPanel::Init()
+{
+}
+
+void AnimationErrorsPanel::CreateControls()
 {
     // create a sizer and populate
     auto topSizer = new wxBoxSizer(wxVERTICAL);
@@ -57,13 +65,6 @@ AnimationErrorsPanel::AnimationErrorsPanel(wxWindow* parent,
     mTreeCtrl->SetImageList(mImageList);
 
     AddToSizerExpand(topSizer, mTreeCtrl);
-
-    // now fit the frame to the elements
-    topSizer->Fit(this);
-    topSizer->SetSizeHints(this);
-
-    // now update the current screen
-    OnUpdate();
 }
 
 void AnimationErrorsPanel::OnUpdate()

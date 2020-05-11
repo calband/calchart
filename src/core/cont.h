@@ -24,6 +24,7 @@
 #include "cc_coord.h"
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -239,7 +240,7 @@ class ContValueUnset : public ContValue {
     using super = ContValue;
 
 public:
-    virtual float Get(AnimateCompile& anim) const override { return 0; }
+    virtual float Get(AnimateCompile&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -479,7 +480,7 @@ class ContValueVarUnset : public ContValueVar {
     using super = ContValueVar;
 
 public:
-    virtual float Get(AnimateCompile& anim) const override { return 0; }
+    virtual float Get(AnimateCompile&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -695,7 +696,7 @@ class ContProcUnset : public ContProcedure {
     using super = ContProcedure;
 
 public:
-    virtual void Compile(AnimateCompile& anim) override {}
+    virtual void Compile(AnimateCompile&) override {}
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;

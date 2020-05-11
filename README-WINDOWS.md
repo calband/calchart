@@ -32,6 +32,7 @@ Add the following User variables:
 
 	BOOST_DIR=$YOUR_BOOST_DIRECTORY
 	BOOST_ROOT=$YOUR_BOOST_DIRECTORY
+	Boost_INCLUDE_DIR=$YOUR_BOOST_DIRECTORY
 	CMAKE_PREFIX_PATH=$PATH_TO_BISON
 
 (see the `Download Boost` section above for the meaning of $YOUR_BOOST_DIRECTORY)

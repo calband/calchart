@@ -28,7 +28,7 @@
 
 #include <wx/dcbuffer.h>
 
-BEGIN_EVENT_TABLE(AnimationCanvas, wxPanel)
+BEGIN_EVENT_TABLE(AnimationCanvas, AnimationCanvas::super)
 EVT_CHAR(AnimationCanvas::OnChar)
 EVT_LEFT_DOWN(AnimationCanvas::OnLeftDownMouseEvent)
 EVT_LEFT_UP(AnimationCanvas::OnLeftUpMouseEvent)
@@ -36,43 +36,38 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+AnimationCanvas::AnimationCanvas(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
 {
+    Init();
+    CreateControls();
+    GetSizer()->Fit(this);
+    GetSizer()->SetSizeHints(this);
 }
 
-void AnimationCanvas::OnPaint(wxPaintEvent& event)
+void AnimationCanvas::Init()
 {
-    if (!mView) {
-        return;
-    }
-    // update the scale and origin
-    UpdateScaleAndOrigin();
-
-    auto dc = wxBufferedPaintDC{ this };
-    auto& config = CalChartConfiguration::GetGlobalConfig();
-
-    dc.SetBackground(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
-    dc.Clear();
-    dc.SetUserScale(mUserScale, mUserScale);
-    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-
-    // draw the box
-    if (mMouseDown) {
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
-        dc.DrawRectangle(mMouseStart.x, mMouseStart.y, mMouseEnd.x - mMouseStart.x, mMouseEnd.y - mMouseStart.y);
-    }
-    // draw the view
-    mView->OnDraw(&dc);
 }
 
-// utilities
+void AnimationCanvas::CreateControls()
+{
+    auto topSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topSizer);
+}
+
+void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
+{
+    mZoomOnMarchers = zoomOnMarchers;
+    Refresh();
+}
+
+void AnimationCanvas::SetStepsOutForMarchersZoom(int steps)
+{
+    mStepsOutForMarcherZoom = steps;
+    Refresh();
+}
+
+// predeclared utility function
 static auto CalcUserScaleAndOffset(std::pair<wxPoint, wxPoint> const& sizeAndOffset, wxSize const& windowSize)
 {
     auto newX = static_cast<float>(windowSize.x);
@@ -104,21 +99,34 @@ static auto CalcUserScaleAndOffset(std::pair<wxPoint, wxPoint> const& sizeAndOff
     return std::pair<double, std::pair<wxCoord, wxCoord>>{ userScale, { plus_windowx, plus_windowy } };
 }
 
-void AnimationCanvas::UpdateScaleAndOrigin()
+void AnimationCanvas::OnUpdate()
+{
+}
+
+void AnimationCanvas::OnPaint(wxPaintEvent& event)
 {
     if (!mView) {
         return;
     }
-    auto window_size = GetSize();
-    auto boundingBox = mZoomOnMarchers ? mView->GetMarcherSizeAndOffset() : mView->GetShowSizeAndOffset();
-    if (mZoomOnMarchers) {
-        auto amount = Int2CoordUnits(mStepsOutForMarcherZoom);
-        boundingBox.first += wxPoint(amount, amount) * 2;
-        boundingBox.second -= wxPoint(amount, amount);
+    // update the scale and origin
+    UpdateScaleAndOrigin();
+
+    wxBufferedPaintDC dc(this);
+    auto& config = CalChartConfiguration::GetGlobalConfig();
+
+    dc.SetBackground(config.Get_CalChartBrushAndPen(COLOR_FIELD).first);
+    dc.Clear();
+    dc.SetUserScale(mUserScale, mUserScale);
+    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
+
+    // draw the box
+    if (mMouseDown) {
+        dc.SetBrush(*wxTRANSPARENT_BRUSH);
+        dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_SHAPES).second);
+        dc.DrawRectangle(mMouseStart.x, mMouseStart.y, mMouseEnd.x - mMouseStart.x, mMouseEnd.y - mMouseStart.y);
     }
-    auto userScaleAndOffset = CalcUserScaleAndOffset(boundingBox, window_size);
-    mUserScale = userScaleAndOffset.first;
-    mUserOrigin = userScaleAndOffset.second;
+    // draw the view
+    mView->OnDraw(&dc);
 }
 
 void AnimationCanvas::OnLeftDownMouseEvent(wxMouseEvent& event)
@@ -163,14 +171,6 @@ void AnimationCanvas::OnMouseMove(wxMouseEvent& event)
     }
 }
 
-wxPoint AnimationCanvas::TranslatePosition(wxPoint const& point)
-{
-    auto dc = wxClientDC{ this };
-    dc.SetUserScale(mUserScale, mUserScale);
-    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
-    return { dc.DeviceToLogicalX(point.x), dc.DeviceToLogicalY(point.y) };
-}
-
 void AnimationCanvas::OnChar(wxKeyEvent& event)
 {
     if (!mView) {
@@ -189,14 +189,27 @@ void AnimationCanvas::OnChar(wxKeyEvent& event)
     Refresh();
 }
 
-void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
+wxPoint AnimationCanvas::TranslatePosition(wxPoint const& point)
 {
-    mZoomOnMarchers = zoomOnMarchers;
-    Refresh();
+    wxClientDC dc{ this };
+    dc.SetUserScale(mUserScale, mUserScale);
+    dc.SetDeviceOrigin(mUserOrigin.first, mUserOrigin.second);
+    return { dc.DeviceToLogicalX(point.x), dc.DeviceToLogicalY(point.y) };
 }
 
-void AnimationCanvas::SetStepsOutForMarchersZoom(int steps)
+void AnimationCanvas::UpdateScaleAndOrigin()
 {
-    mStepsOutForMarcherZoom = steps;
-    Refresh();
+    if (!mView) {
+        return;
+    }
+    auto window_size = GetSize();
+    auto boundingBox = mZoomOnMarchers ? mView->GetMarcherSizeAndOffset() : mView->GetShowSizeAndOffset();
+    if (mZoomOnMarchers) {
+        auto amount = Int2CoordUnits(mStepsOutForMarcherZoom);
+        boundingBox.first += wxPoint(amount, amount) * 2;
+        boundingBox.second -= wxPoint(amount, amount);
+    }
+    auto userScaleAndOffset = CalcUserScaleAndOffset(boundingBox, window_size);
+    mUserScale = userScaleAndOffset.first;
+    mUserOrigin = userScaleAndOffset.second;
 }

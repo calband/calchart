@@ -35,7 +35,7 @@ AnimateCommand::AnimateCommand(unsigned beats)
 {
 }
 
-DrawCommand AnimateCommand::GenCC_DrawCommand(const Coord& pt, const Coord& offset) const
+DrawCommand AnimateCommand::GenCC_DrawCommand(const Coord& /*pt*/, const Coord& /*offset*/) const
 {
     return DrawCommand();
 }
@@ -291,7 +291,7 @@ void AnimateCommandRotate::ClipBeats(unsigned beats)
 }
 
 DrawCommand
-AnimateCommandRotate::GenCC_DrawCommand(const Coord& pt, const Coord& offset) const
+AnimateCommandRotate::GenCC_DrawCommand(const Coord& /*pt*/, const Coord& offset) const
 {
     float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;

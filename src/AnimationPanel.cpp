@@ -24,6 +24,7 @@
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
 #include "CCOmniviewCanvas.h"
+#include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
 #include "confgr.h"
@@ -49,30 +50,45 @@ EVT_TOGGLEBUTTON(CALCHART__anim_play_button, AnimationPanel::OnCmd_PlayButton)
 EVT_BUTTON(CALCHART__anim_toggle_anim_omni, AnimationPanel::OnCmd_ToggleAnimOmni)
 END_EVENT_TABLE()
 
-AnimationPanel::AnimationPanel(wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+AnimationPanel::AnimationPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
-    , mCanvas(new AnimationCanvas(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 100)))
+    , mCanvas(new AnimationCanvas(this, wxID_ANY, wxDefaultPosition, wxSize(-1, GetAnimationCanvasMinY())))
     , mTimer(new wxTimer(this, CALCHART__anim_next_beat_timer))
     , mTempo(120)
     , mTimerOn(false)
     , mInMiniMode(true)
 {
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+    Init();
+    CreateControls();
+    GetSizer()->Fit(this);
+    GetSizer()->SetSizeHints(this);
+    OnUpdate();
+}
 
-    wxBoxSizer* toprow = new wxBoxSizer(wxHORIZONTAL);
-    AddToSizerBasic(topsizer, toprow);
+AnimationPanel::~AnimationPanel()
+{
+    mTimer->Stop();
+}
+
+void AnimationPanel::Init()
+{
+}
+
+void AnimationPanel::CreateControls()
+{
+    // create a sizer and populate
+    auto topSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topSizer);
+
+    auto toprow = new wxBoxSizer(wxHORIZONTAL);
+    AddToSizerBasic(topSizer, toprow);
 
     mAnimateOmniToggle = new wxButton(this, CALCHART__anim_toggle_anim_omni, wxT("Omni"));
     AddToSizerBasic(toprow, mAnimateOmniToggle);
     mItemsToHide.push_back(mAnimateOmniToggle);
 
-    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, wxBitmap(BITMAP_NAME(tb_play)));
-    mPlayPauseButton->SetBitmapPressed(wxBitmap(BITMAP_NAME(tb_stop)));
+    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_play) }), wxDefaultPosition, GetBitmapButtonSize());
+    mPlayPauseButton->SetBitmapPressed(ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_stop) }));
     AddToSizerBasic(toprow, mPlayPauseButton);
 
     // Sheet slider (will get set later with UpdatePanel())
@@ -85,8 +101,8 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     AddToSizerBasic(boxsizer, mTempoLabel);
     mItemsToHide.push_back(mTempoLabel);
     // defect 3538572: Callings set may update tempo, cache value before call.
-    unsigned tmp = GetTempo();
-    mTempoCtrl = new wxSpinCtrl(this, CALCHART__anim_tempo, wxEmptyString, wxDefaultPosition, wxSize(48, -1));
+    auto tmp = GetTempo();
+    mTempoCtrl = new wxSpinCtrl(this, CALCHART__anim_tempo, wxEmptyString, wxDefaultPosition, wxSize(GetAnimationViewTempoSpinnerMinX(), -1));
     mTempoCtrl->SetRange(10, 300);
     mTempoCtrl->SetValue(tmp);
     SetTempo(tmp);
@@ -120,8 +136,8 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
 
     mOmniCanvas = new CCOmniviewCanvas(this, CalChartConfiguration::GetGlobalConfig());
 
-    AddToSizerExpand(topsizer, mCanvas);
-    AddToSizerExpand(topsizer, mOmniCanvas);
+    AddToSizerExpand(topSizer, mCanvas);
+    AddToSizerExpand(topSizer, mOmniCanvas);
 
     // we default to animate view
     mCanvas->Show();
@@ -130,21 +146,7 @@ AnimationPanel::AnimationPanel(wxWindow* parent,
     for (auto&& i : mItemsToHide) {
         i->Show(!mInMiniMode);
     }
-
-    SetSizer(topsizer);
-
-    // now fit the frame to the elements
-    topsizer->Fit(this);
-    topsizer->SetSizeHints(this);
-
     SetInMiniMode(mInMiniMode);
-    // now update the current screen
-    OnUpdate();
-}
-
-AnimationPanel::~AnimationPanel()
-{
-    mTimer->Stop();
 }
 
 void AnimationPanel::SetInMiniMode(bool miniMode)
@@ -154,14 +156,15 @@ void AnimationPanel::SetInMiniMode(bool miniMode)
         i->Show(!mInMiniMode);
     }
     // expand the slider to fill everything!
-    mBeatSlider->SetSizeHints(mInMiniMode ? -1 : 800, -1);
+    mBeatSlider->SetSizeHints(mInMiniMode ? -1 : GetAnimationViewBeatSliderInNonMinimode(), -1);
     Layout();
 }
 
 void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 {
     // next_beat could come from the timer.  If so, stop the timer.
-    if (!mView->NextBeat()) {
+    mView->NextBeat();
+    if (mView->AtEndOfShow()) {
         StopTimer();
     }
     Refresh();
@@ -211,10 +214,11 @@ void AnimationPanel::OnSlider_anim_gotobeat(wxScrollEvent& event)
 
 void AnimationPanel::ToggleTimer()
 {
-    if (mTimerOn)
+    if (mTimerOn) {
         StopTimer();
-    else
+    } else {
         StartTimer();
+    }
     UpdatePanel();
 }
 
@@ -265,49 +269,13 @@ void AnimationPanel::StopTimer()
     mTimerOn = false;
 }
 
-void AnimationPanel::OnCmd_anim_prev_beat(wxCommandEvent& event)
-{
-    if (!mView) {
-        return;
-    }
-    mView->PrevBeat();
-    Refresh();
-}
-
-void AnimationPanel::OnCmd_anim_next_beat(wxCommandEvent& event)
-{
-    if (!mView) {
-        return;
-    }
-    mView->NextBeat();
-    Refresh();
-}
-
-void AnimationPanel::OnCmd_anim_prev_sheet(wxCommandEvent& event)
-{
-    if (!mView) {
-        return;
-    }
-    mView->PrevSheet();
-    Refresh();
-}
-
-void AnimationPanel::OnCmd_anim_next_sheet(wxCommandEvent& event)
-{
-    if (!mView) {
-        return;
-    }
-    mView->NextSheet();
-    Refresh();
-}
-
 void AnimationPanel::OnUpdate()
 {
     if (!mView) {
         return;
     }
     UpdatePanel();
-    mView->RefreshSheet();
+    mView->RefreshAnimationSheet();
     Refresh();
 }
 

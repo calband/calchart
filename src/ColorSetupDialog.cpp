@@ -44,6 +44,7 @@
 #include <wx/stattext.h>
 
 #include <fstream>
+#include <iomanip>
 #include <nlohmann/json.hpp>
 
 using namespace CalChart;
@@ -60,48 +61,6 @@ static auto sBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proporti
 static auto sLeftBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Left().Proportion(0);
 static auto sRightBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Right().Proportion(0);
 static auto sExpandSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proportion(0);
-
-static void AddTextboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-    long style = 0)
-{
-    wxBoxSizer* textsizer = new wxBoxSizer(wxVERTICAL);
-    textsizer->Add(new wxStaticText(parent, wxID_STATIC, caption,
-                       wxDefaultPosition, wxDefaultSize, 0),
-        sLeftBasicSizerFlags);
-    textsizer->Add(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition,
-                       wxDefaultSize, style),
-        sBasicSizerFlags);
-    verticalsizer->Add(textsizer, sBasicSizerFlags);
-}
-
-static void AddCheckboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-    long style = 0)
-{
-    wxBoxSizer* textsizer = new wxBoxSizer(wxVERTICAL);
-    textsizer->Add(new wxCheckBox(parent, id, caption, wxDefaultPosition,
-                       wxDefaultSize, style),
-        sBasicSizerFlags);
-    verticalsizer->Add(textsizer, sBasicSizerFlags);
-}
-
-template <typename Function>
-void AddTextboxWithCaptionAndAction(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-    Function&& f, long style = 0)
-{
-    wxBoxSizer* textsizer = new wxBoxSizer(wxVERTICAL);
-    textsizer->Add(new wxStaticText(parent, wxID_STATIC, caption,
-                       wxDefaultPosition, wxDefaultSize, 0),
-        sLeftBasicSizerFlags);
-    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition,
-        wxDefaultSize, style);
-    textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT,
-        f);
-    textsizer->Add(textCtrl, sBasicSizerFlags);
-    verticalsizer->Add(textsizer, sBasicSizerFlags);
-}
 
 //////// Draw setup ////////
 // handling Drawing colors
@@ -143,17 +102,14 @@ ColorSetupDialog::ColorSetupDialog(wxWindow* parent,
 {
     Init();
     CreateControls();
-
-    // This fits the dalog to the minimum size dictated by the sizers
     GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
     GetSizer()->SetSizeHints(this);
 }
 
 template <typename Color>
 auto CreateTempBitmap(Color const& c)
 {
-    wxBitmap temp_bitmap(24, 24);
+    wxBitmap temp_bitmap(GetColorBoxSize());
     wxMemoryDC temp_dc;
     temp_dc.SelectObject(temp_bitmap);
     temp_dc.SetBackground(c);

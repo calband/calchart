@@ -23,6 +23,7 @@
 
 #include "cont.h"
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 

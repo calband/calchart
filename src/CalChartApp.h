@@ -41,8 +41,10 @@ DECLARE_APP(CalChartApp)
 class CalChartApp : public wxApp {
 public:
     virtual bool OnInit() override;
-    virtual void MacOpenFile(const wxString& fileName) override;
-    virtual void MacOpenFiles(const wxArrayString& fileNames) override;
+#if defined(__APPLE__) && (__APPLE__)
+    virtual void MacOpenFile(wxString const& fileName) override;
+    virtual void MacOpenFiles(wxArrayString const& fileNames) override;
+#endif // defined(__APPLE__) && (__APPLE__)
     int OnExit() override;
 
     CalChart::ShowMode GetShowMode(const wxString& which);

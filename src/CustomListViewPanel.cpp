@@ -20,12 +20,13 @@
 */
 
 #include "CustomListViewPanel.h"
+#include "basic_ui.h"
 #include "confgr.h"
 #include <wx/dcbuffer.h>
 
 #include <numeric>
 
-BEGIN_EVENT_TABLE(CustomListViewPanel, wxScrolledWindow)
+BEGIN_EVENT_TABLE(CustomListViewPanel, CustomListViewPanel::super)
 EVT_PAINT(CustomListViewPanel::OnPaint)
 EVT_CHAR(CustomListViewPanel::OnChar)
 EVT_LEFT_DOWN(CustomListViewPanel::OnLeftDownMouseEvent)
@@ -36,12 +37,7 @@ EVT_ERASE_BACKGROUND(CustomListViewPanel::OnEraseBackground)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-CustomListViewPanel::CustomListViewPanel(wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+CustomListViewPanel::CustomListViewPanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , m_selected(-1)
     , m_dragging(false)
@@ -125,7 +121,7 @@ void CustomListViewPanel::OnPaint(wxPaintEvent& event)
         dc.SetDeviceOrigin(x_start, y_start + y_delta);
         mCells.at(i)->DrawToDC(dc);
         dc.SetDeviceOrigin(0, 0);
-        y_start += mCells.at(i)->Height();
+        y_start += height;
     }
 }
 

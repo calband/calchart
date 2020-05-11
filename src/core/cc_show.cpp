@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <iterator>
 #include <sstream>
 
@@ -1011,9 +1012,9 @@ void Show::CC_show_round_trip_test_with_number_label_description()
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
-    for (auto i = 0; i < show1_data.size(); ++i) {
+    for (auto i = 0llu; i < show1_data.size(); ++i) {
         if (show1_data.at(i) != show_data.at(i))
-            printf("Wrong at %d, %d, %d", i, show1_data.at(i), show_data.at(i));
+            std::cout << "Wrong at " << i << ", " << show1_data.at(i) << "\n";
     }
     auto is_equal = show1_data.size() == show_data.size() && std::equal(show1_data.begin(), show1_data.end(), show_data.begin());
     assert(is_equal);

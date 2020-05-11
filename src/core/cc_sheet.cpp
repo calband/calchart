@@ -406,6 +406,9 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
     auto parse_INGL_BACK = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
         auto num = get_big_long(ptr);
         ptr += 4;
+        if ((num + 4) != size) {
+            throw CC_FileException("Bad Background chunk", INGL_BACK);
+        }
         while (num--) {
             sheet->mBackgroundImages.emplace_back(ptr);
         }

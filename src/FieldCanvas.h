@@ -47,20 +47,14 @@ using ShapeList = std::vector<std::unique_ptr<CalChart::Shape>>;
 // Field Canvas controls how to paint and the first line control of user input
 class FieldCanvas : public ClickDragCtrlScrollCanvas {
     using super = ClickDragCtrlScrollCanvas;
+    DECLARE_EVENT_TABLE()
 
 public:
     // Basic functions
-    FieldCanvas(wxWindow* win, CalChartView& view, CalChartFrame* frame, float def_zoom);
-    virtual ~FieldCanvas() = default;
-    void OnPaint(wxPaintEvent& event);
-    void OnEraseBackground(wxEraseEvent& event);
-    virtual void OnMouseLeftDown(wxMouseEvent& event);
-    virtual void OnMouseLeftUp(wxMouseEvent& event);
-    virtual void OnMouseLeftDoubleClick(wxMouseEvent& event);
-    virtual void OnMouseRightDown(wxMouseEvent& event);
-    virtual void OnMouseMove(wxMouseEvent& event);
-    virtual void OnMousePinchToZoom(wxMouseEvent& event);
-    void OnChar(wxKeyEvent& event);
+    FieldCanvas(float def_zoom, CalChartView* view, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER);
+    ~FieldCanvas() override = default;
+
+    void SetView(CalChartView* view);
 
     // Misc show functions
     float ZoomToFitFactor() const;
@@ -72,17 +66,23 @@ public:
     // implies a call to EndDrag()
     void SetCurrentMove(CC_MOVE_MODES move);
 
-private:
-    // Variables
-    CalChartFrame* mFrame;
-    CalChartView& mView;
-    CC_DRAG curr_lasso = CC_DRAG::BOX;
-    CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
-    std::unique_ptr<MovePoints> m_move_points;
-    std::map<int, CalChart::Coord> mMovePoints;
-    CC_DRAG select_drag = CC_DRAG::NONE;
-    ShapeList m_select_shape_list;
+    void OnChar(wxKeyEvent& event);
 
+private:
+    void Init();
+
+    // Event Handlers
+    void OnPaint(wxPaintEvent& event);
+    void OnEraseBackground(wxEraseEvent& event);
+    void OnMouseLeftDown(wxMouseEvent& event);
+    void OnMouseLeftUp(wxMouseEvent& event);
+    void OnMouseLeftDoubleClick(wxMouseEvent& event);
+    void OnMouseRightDown(wxMouseEvent& event);
+    void OnMouseMove(wxMouseEvent& event) override;
+    void OnMousePinchToZoom(wxMouseEvent& event) override;
+
+
+    // Internals
     void BeginSelectDrag(CC_DRAG type, const CalChart::Coord& start);
     void AddMoveDrag(CC_DRAG type, std::unique_ptr<CalChart::Shape> shape);
     void MoveDrag(const CalChart::Coord& end);
@@ -112,5 +112,12 @@ private:
     void OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CalChart::Coord);
     void OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CalChart::Coord);
 
-    DECLARE_EVENT_TABLE()
+    CalChartView* mView{};
+    CC_DRAG curr_lasso = CC_DRAG::BOX;
+    CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
+    std::unique_ptr<MovePoints> m_move_points;
+    std::map<int, CalChart::Coord> mMovePoints;
+    CC_DRAG select_drag = CC_DRAG::NONE;
+    ShapeList m_select_shape_list;
+
 };

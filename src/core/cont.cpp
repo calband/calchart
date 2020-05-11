@@ -478,7 +478,7 @@ std::ostream& ContToken::Print(std::ostream& os) const
     return os;
 }
 
-void ContToken::replace(ContToken const* which, std::unique_ptr<ContToken> v)
+void ContToken::replace(ContToken const* /*which*/, std::unique_ptr<ContToken> /*v*/)
 {
     throw std::runtime_error("Error, replace not implemented on this class");
 }

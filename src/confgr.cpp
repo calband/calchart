@@ -781,7 +781,7 @@ wxString CalChartConfiguration::Get_yard_text(size_t which) const
 
     if (!mYardTextInfos.count(which)) {
         wxString key;
-        key.Printf(wxT("YardLines_%ld"), which);
+        key.Printf(wxT("YardLines_%d"), static_cast<int>(which));
         mYardTextInfos[which] = GetConfigValue(key, yard_text_defaults[which]);
     }
     return mYardTextInfos[which];
@@ -802,7 +802,7 @@ void CalChartConfiguration::Set_yard_text(size_t which, const wxString& value)
         throw std::runtime_error("Error, exceeding kYardTextValues size");
 
     wxString key;
-    key.Printf(wxT("YardLines_%ld"), which);
+    key.Printf(wxT("YardLines_%d"), static_cast<int>(which));
     auto default_value = yard_text_defaults[which];
     mWriteQueue[key] = [key, value, default_value]() {
         SetConfigValue(key, value, default_value);
@@ -816,7 +816,7 @@ void CalChartConfiguration::Clear_yard_text(size_t which)
         throw std::runtime_error("Error, exceeding kYardTextValues size");
 
     wxString key;
-    key.Printf(wxT("YardLines_%ld"), which);
+    key.Printf(wxT("YardLines_%d"), static_cast<int>(which));
     auto default_value = yard_text_defaults[which];
     SetConfigValue(key, default_value, default_value);
     mYardTextInfos.erase(which);

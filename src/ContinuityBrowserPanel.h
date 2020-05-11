@@ -31,6 +31,7 @@ class CalChartConfiguration;
 
 class ContinuityBrowserPanel : public CustomListViewPanel {
     using super = CustomListViewPanel;
+    DECLARE_EVENT_TABLE()
 
 public:
     // Basic functions
@@ -48,11 +49,15 @@ public:
     void DoSetContinuity(CalChart::Continuity const& new_cont);
 
 private:
-    virtual void OnNewEntry(int cell) override;
-    virtual void OnEditEntry(int cell) override;
-    virtual void OnDeleteEntry(int cell) override;
-    virtual void OnMoveEntry(int start_cell, int end_cell) override;
+    void Init();
 
+    // Event Handlers
+    void OnNewEntry(int cell) override;
+    void OnEditEntry(int cell) override;
+    void OnDeleteEntry(int cell) override;
+    void OnMoveEntry(int start_cell, int end_cell) override;
+
+    // Internals
     void DoSetFocus(wxFocusEvent& event);
     void DoKillFocus(wxFocusEvent& event);
 
@@ -62,5 +67,4 @@ private:
     CalChart::Continuity mCont{};
     SYMBOL_TYPE mSym{};
     CalChartConfiguration& mConfig;
-    DECLARE_EVENT_TABLE()
 };

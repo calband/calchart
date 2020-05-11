@@ -30,21 +30,22 @@ class ColorPalettePanel : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    ColorPalettePanel(wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        wxPoint const& pos = wxDefaultPosition,
-        wxSize const& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        wxString const& name = wxPanelNameStr);
-    ~ColorPalettePanel() = default;
+    ColorPalettePanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ~ColorPalettePanel() override = default;
 
+    void OnUpdate(); // Refresh from the View
     void SetView(CalChartView* view) { mView = view; }
     auto GetView() const { return mView; }
 
 private:
+    void Init();
+
+    // Event Handlers
     void OnPaint(wxPaintEvent& event);
     void OnLeftClick(wxMouseEvent& event);
     void OnLeftDoubleClick(wxMouseEvent& event);
+
+    // Internals
     int WhichBox(wxPoint const& where);
 
     CalChartView* mView{};

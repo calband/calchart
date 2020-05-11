@@ -136,6 +136,11 @@ PrintContinuityEditor::PrintContinuityEditor(wxWindow* parent,
     Update();
 }
 
+PrintContinuityEditor::~PrintContinuityEditor()
+{
+    mTimer->Stop();
+}
+
 void PrintContinuityEditor::CreateControls()
 {
     // Add the field canvas here so that it gets the focus when we switch to

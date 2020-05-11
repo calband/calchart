@@ -78,9 +78,9 @@ public:
     {
         return mCommands.at(which).begin();
     }
-    auto GetCommandsBeginIndex(int which) const
+    auto GetCommandsBeginIndex(int /*which*/) const
     {
-        return 0;
+        return std::vector<AnimateCommands>::size_type(0);
     }
     auto GetCommandsEnd(int which) const
     {
