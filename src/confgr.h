@@ -90,6 +90,8 @@ enum CalChartShowModes {
 
 extern const wxString kShowModeStrings[SHOWMODE_NUM];
 
+constexpr auto kNumberPalettes = 4; // arbitrary, could go more, but 4 is a good starting point
+
 // CalChartConfiguration interfaces with the system config and acts as a "cache"
 // for the values.
 // On Get, it reads the values from system config, and caches a copy.
@@ -226,13 +228,35 @@ public:
     std::vector<int> GetContCellDefaultPenWidth() const;
     std::vector<wxString> Get_yard_text_index() const;
 
+    // color palettes:  The color Palettes allow you to set different "blocks" of
+    // colors.
+    // When a Palette is set all the sets and gets are treated against that palette
+    long GetActiveColorPalette() const;
+    void SetActiveColorPalette(long);
+    void ClearActiveColorPalette();
+    wxBrush GetColorPaletteColor(long which) const;
+    std::vector<wxBrush> GetColorPaletteColors() const;
+    void SetColorPaletteColor(long which, wxBrush const&);
+    void ClearColorPaletteColor(long which);
+    std::vector<wxBrush> GetDefaultColorPaletteColors() const;
+    wxString GetColorPaletteName(long which) const;
+    std::vector<wxString> GetColorPaletteNames() const;
+    void SetColorPaletteName(long which, wxString const&);
+    void ClearColorPaletteName(long which);
+    std::vector<wxString> GetDefaultColorPaletteNames() const;
+
     // Colors
     using ColorWidth_t = std::pair<wxColour, int>;
-    mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth;
+    mutable int mActiveColorPalette = -1;
+    mutable std::map<CalChartColors, ColorWidth_t> mColorsAndWidth[kNumberPalettes];
     std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(CalChartColors c) const;
     void Set_CalChartBrushAndPen(CalChartColors c, const wxBrush& brush,
         const wxPen& pen);
     void Clear_CalChartConfigColor(CalChartColors selection);
+
+    std::pair<wxBrush, wxPen> Get_CalChartBrushAndPen(int palette, CalChartColors c) const;
+    void Set_CalChartBrushAndPen(int palette, CalChartColors c, const wxBrush& brush, const wxPen& pen);
+    void Clear_CalChartConfigColor(int palette, CalChartColors selection);
 
     mutable std::map<ContCellColors, ColorWidth_t> mContCellColorsAndWidth;
     std::pair<wxBrush, wxPen> Get_ContCellBrushAndPen(ContCellColors c) const;

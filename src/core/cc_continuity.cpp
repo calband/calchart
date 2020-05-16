@@ -47,8 +47,7 @@ Continuity::ParseContinuity(std::string const& s, ParseErrorHandlers const* corr
         if (correct && correct->mContinuityParseCorrectionHandler) {
             // give the user a chance to correct.
             thisParse = correct->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
-        }
-        else {
+        } else {
             ContToken dummy;
             throw ParseError(s, dummy.line, dummy.col);
         }

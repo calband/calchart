@@ -151,6 +151,7 @@ EVT_CHOICE(CALCHART__GhostControls, CalChartFrame::OnCmd_GhostOption)
 EVT_CHECKBOX(CALCHART__draw_paths, CalChartFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
+EVT_BUTTON(CALCHART__ChangedColorPalette, CalChartFrame::OnCmd_ChangedColorPalette)
 EVT_MENU(CALCHART__E7TransitionSolver, CalChartFrame::OnCmd_SolveTransition)
 EVT_AUI_PANE_CLOSE(CalChartFrame::AUIIsClose)
 END_EVENT_TABLE()
@@ -483,6 +484,7 @@ void CalChartFrame::OnCmdPreferences(wxCommandEvent& event)
 {
     CalChartPreferences dialog1(this);
     if (dialog1.ShowModal() == wxID_OK) {
+        GetFieldView()->OnUpdate(nullptr);
     }
 }
 
@@ -1079,6 +1081,11 @@ void CalChartFrame::ChangeMainFieldVisibility(bool show)
 void CalChartFrame::OnCmd_ResetReferencePoint(wxCommandEvent& event)
 {
     GetFieldView()->DoResetReferencePoint();
+}
+
+void CalChartFrame::OnCmd_ChangedColorPalette(wxCommandEvent& event)
+{
+    GetFieldView()->OnUpdate(nullptr);
 }
 
 void CalChartFrame::OnCmd_SolveTransition(wxCommandEvent& event)

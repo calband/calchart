@@ -43,7 +43,6 @@ struct ParseError : public std::runtime_error {
 
 class Continuity {
 public:
-
     // this could throw ParseError
     Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
     Continuity(std::vector<std::unique_ptr<ContProcedure>>);

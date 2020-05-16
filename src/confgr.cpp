@@ -38,50 +38,80 @@
 
 using namespace CalChart;
 
-const std::tuple<wxString, wxString, int> ColorInfo[COLOR_NUM] = {
-    std::tuple<wxString, wxString, int>(wxT("FIELD"), wxT("FOREST GREEN"), 1),
-    std::tuple<wxString, wxString, int>(wxT("FIELD DETAIL"), wxT("WHITE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("FIELD TEXT"), wxT("BLACK"), 1),
-    std::tuple<wxString, wxString, int>(wxT("POINT"), wxT("WHITE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("POINT TEXT"), wxT("BLACK"), 1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT POINT"), wxT("YELLOW"), 1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT POINT TEXT"), wxT("YELLOW"),
-        1),
-    std::tuple<wxString, wxString, int>(wxT("REF POINT"), wxT("PURPLE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("REF POINT TEXT"), wxT("BLACK"), 1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT REF POINT"), wxT("PURPLE"),
-        1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT REF POINT TEXT"),
-        wxT("BLACK"), 1),
-    std::tuple<wxString, wxString, int>(wxT("GHOST POINT"), wxT("BLUE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("GHOST POINT TEXT"), wxT("NAVY"),
-        1),
-    std::tuple<wxString, wxString, int>(wxT("HLIT GHOST POINT"), wxT("PURPLE"),
-        1),
-    std::tuple<wxString, wxString, int>(wxT("HLIT GHOST POINT TEXT"),
-        wxT("PLUM"), 1),
-    std::tuple<wxString, wxString, int>(wxT("ANIM FRONT"), wxT("WHITE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("ANIM BACK"), wxT("YELLOW"), 1),
-    std::tuple<wxString, wxString, int>(wxT("ANIM SIDE"), wxT("SKY BLUE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT ANIM FRONT"), wxT("RED"), 1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT ANIM BACK"), wxT("RED"), 1),
-    std::tuple<wxString, wxString, int>(wxT("HILIT ANIM SIDE"), wxT("RED"), 1),
-    std::tuple<wxString, wxString, int>(wxT("ANIM COLLISION"), wxT("PURPLE"),
-        1),
-    std::tuple<wxString, wxString, int>(wxT("ANIM COLLISION WARNING"),
-        wxT("CORAL"), 1),
-    std::tuple<wxString, wxString, int>(wxT("SHAPES"), wxT("ORANGE"), 2),
-    std::tuple<wxString, wxString, int>(wxT("CONTINUITY PATHS"), wxT("RED"), 1),
+const wxString ColorInfo[COLOR_NUM] = {
+    wxT("FIELD"),
+    wxT("FIELD DETAIL"),
+    wxT("FIELD TEXT"),
+    wxT("POINT"),
+    wxT("POINT TEXT"),
+    wxT("HILIT POINT"),
+    wxT("HILIT POINT TEXT"),
+    wxT("REF POINT"),
+    wxT("REF POINT TEXT"),
+    wxT("HILIT REF POINT"),
+    wxT("HILIT REF POINT TEXT"),
+    wxT("GHOST POINT"),
+    wxT("GHOST POINT TEXT"),
+    wxT("HLIT GHOST POINT"),
+    wxT("HLIT GHOST POINT TEXT"),
+    wxT("ANIM FRONT"),
+    wxT("ANIM BACK"),
+    wxT("ANIM SIDE"),
+    wxT("HILIT ANIM FRONT"),
+    wxT("HILIT ANIM BACK"),
+    wxT("HILIT ANIM SIDE"),
+    wxT("ANIM COLLISION"),
+    wxT("ANIM COLLISION WARNING"),
+    wxT("SHAPES"),
+    wxT("CONTINUITY PATHS"),
 };
 
-const std::tuple<wxString, wxString, int> ContCellColorInfo[COLOR_CONTCELLS_NUM] = {
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL PROCEDURE"), wxT("LIME GREEN"), 1),
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL VALUE"), wxT("YELLOW"), 1),
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL FUNCTION"), wxT("SLATE BLUE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL DIRECTION"), wxT("MEDIUM ORCHID"), 1),
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL STEPTYPE"), wxT("SKY BLUE"), 1),
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL POINT"), wxT("GOLD"), 1),
-    std::tuple<wxString, wxString, int>(wxT("CONT CELL UNSET"), wxT("WHITE"), 1),
+const std::tuple<wxString, int> ColorInfoDefaults[COLOR_NUM] = {
+    { wxT("FOREST GREEN"), 1 },
+    { wxT("WHITE"), 1 },
+    { wxT("BLACK"), 1 },
+    { wxT("WHITE"), 1 },
+    { wxT("BLACK"), 1 },
+    { wxT("YELLOW"), 1 },
+    { wxT("YELLOW"), 1 },
+    { wxT("PURPLE"), 1 },
+    { wxT("BLACK"), 1 },
+    { wxT("PURPLE"), 1 },
+    { wxT("BLACK"), 1 },
+    { wxT("BLUE"), 1 },
+    { wxT("NAVY"), 1 },
+    { wxT("PURPLE"), 1 },
+    { wxT("PLUM"), 1 },
+    { wxT("WHITE"), 1 },
+    { wxT("YELLOW"), 1 },
+    { wxT("SKY BLUE"), 1 },
+    { wxT("RED"), 1 },
+    { wxT("RED"), 1 },
+    { wxT("RED"), 1 },
+    { wxT("PURPLE"), 1 },
+    { wxT("CORAL"), 1 },
+    { wxT("ORANGE"), 2 },
+    { wxT("RED"), 1 },
+};
+
+const wxString ContCellColorInfo[COLOR_CONTCELLS_NUM] = {
+    "CONT CELL PROCEDURE",
+    "CONT CELL VALUE",
+    "CONT CELL FUNCTION",
+    "CONT CELL DIRECTION",
+    "CONT CELL STEPTYPE",
+    "CONT CELL POINT",
+    "CONT CELL UNSET",
+};
+
+const std::tuple<wxString, int> ContCellColorInfoDefaults[COLOR_CONTCELLS_NUM] = {
+    { "LIME GREEN", 1 },
+    { "YELLOW", 1 },
+    { "SLATE BLUE", 1 },
+    { "MEDIUM ORCHID", 1 },
+    { "SKY BLUE", 1 },
+    { "GOLD", 1 },
+    { "WHITE", 1 },
 };
 
 ///// Show mode configuration /////
@@ -115,6 +145,20 @@ const std::array<wxString, kYardTextValues> yard_text_defaults = []() {
 }();
 
 const auto yard_text_index = yard_text_defaults;
+
+const wxString kPaletteColorDefault[kNumberPalettes] = {
+    wxT("FOREST GREEN"),
+    wxT("GREY"),
+    wxT("GREY"),
+    wxT("GREY"),
+};
+
+const wxString kPaletteNameDefault[kNumberPalettes] = {
+    wxT("Default"),
+    wxT("[Unset]"),
+    wxT("[Unset]"),
+    wxT("[Unset]"),
+};
 
 static CalChartConfiguration& GetConfig()
 {
@@ -198,26 +242,62 @@ void SetConfigValue(const wxString& key, const T& value, const T& def)
     SetConfigPathKey(wxT("/CalChart"), key, value);
 }
 
+static CalChartConfiguration::ColorWidth_t
+GetColorConfigValueForPalette(int palette, const wxString& key, const CalChartConfiguration::ColorWidth_t& def)
+{
+    auto r = std::get<0>(def).Red();
+    auto g = std::get<0>(def).Green();
+    auto b = std::get<0>(def).Blue();
+    auto rkey = key + wxT("_Red");
+    auto gkey = key + wxT("_Green");
+    auto bkey = key + wxT("_Blue");
+    auto palettekey = std::string("/PALETTE") + std::to_string(palette) + "/COLORS";
+    r = GetConfigPathKey<long>(palettekey, rkey, r);
+    g = GetConfigPathKey<long>(palettekey, gkey, g);
+    b = GetConfigPathKey<long>(palettekey, bkey, b);
+
+    auto w = std::get<1>(def);
+    w = GetConfigPathKey<long>(palettekey + "/WIDTH", key, w);
+
+    return CalChartConfiguration::ColorWidth_t(wxColour(r, g, b), w);
+}
+
 // Specialize on Color
 template <>
 CalChartConfiguration::ColorWidth_t
-GetConfigValue(const wxString& key,
-    const CalChartConfiguration::ColorWidth_t& def)
+GetConfigValue(wxString const& key, CalChartConfiguration::ColorWidth_t const& def)
 {
-    long r = std::get<0>(def).Red();
-    long g = std::get<0>(def).Green();
-    long b = std::get<0>(def).Blue();
-    wxString rkey = key + wxT("_Red");
-    wxString gkey = key + wxT("_Green");
-    wxString bkey = key + wxT("_Blue");
-    r = GetConfigPathKey<long>(wxT("/COLORS"), rkey, r);
-    g = GetConfigPathKey<long>(wxT("/COLORS"), gkey, g);
-    b = GetConfigPathKey<long>(wxT("/COLORS"), bkey, b);
+    return GetColorConfigValueForPalette(GetConfigValue(wxT("ActiveColorPalette"), 0), key, def);
+}
 
-    long w = std::get<1>(def);
-    w = GetConfigPathKey<long>(wxT("/COLORS/WIDTH"), key, w);
+static void SetColorConfigValueForPalette(int palette, wxString const& key, CalChartConfiguration::ColorWidth_t const& value, CalChartConfiguration::ColorWidth_t const& def)
+{
+    // don't write if we don't have to
+    if (GetColorConfigValueForPalette(palette, key, def) == value)
+        return;
+    auto rkey = key + wxT("_Red");
+    auto gkey = key + wxT("_Green");
+    auto bkey = key + wxT("_Blue");
 
-    return CalChartConfiguration::ColorWidth_t(wxColour(r, g, b), w);
+    // TODO: fix this so it clears
+    // clear out the value if it's the same as the default
+    auto palettekey = std::string("/PALETTE") + std::to_string(palette) + "/COLORS";
+    if (def == value) {
+        ClearConfigPathKey<long>(palettekey, rkey);
+        ClearConfigPathKey<long>(palettekey, gkey);
+        ClearConfigPathKey<long>(palettekey, bkey);
+        ClearConfigPathKey<long>(palettekey + "/WIDTH", key);
+        return;
+    }
+
+    auto r = std::get<0>(value).Red();
+    auto g = std::get<0>(value).Green();
+    auto b = std::get<0>(value).Blue();
+    auto w = std::get<1>(value);
+    SetConfigPathKey<long>(palettekey, rkey, r);
+    SetConfigPathKey<long>(palettekey, gkey, g);
+    SetConfigPathKey<long>(palettekey, bkey, b);
+    SetConfigPathKey<long>(palettekey + "/WIDTH", key, w);
 }
 
 // Specialize on Color
@@ -226,31 +306,7 @@ void SetConfigValue(const wxString& key,
     const CalChartConfiguration::ColorWidth_t& value,
     const CalChartConfiguration::ColorWidth_t& def)
 {
-    // don't write if we don't have to
-    if (GetConfigValue<CalChartConfiguration::ColorWidth_t>(key, def) == value)
-        return;
-    wxString rkey = key + wxT("_Red");
-    wxString gkey = key + wxT("_Green");
-    wxString bkey = key + wxT("_Blue");
-
-    // TODO: fix this so it clears
-    // clear out the value if it's the same as the default
-    if (def == value) {
-        ClearConfigPathKey<long>(wxT("/COLORS"), rkey);
-        ClearConfigPathKey<long>(wxT("/COLORS"), gkey);
-        ClearConfigPathKey<long>(wxT("/COLORS"), bkey);
-        ClearConfigPathKey<long>(wxT("/COLORS/WIDTH"), key);
-        return;
-    }
-
-    long r = std::get<0>(value).Red();
-    long g = std::get<0>(value).Green();
-    long b = std::get<0>(value).Blue();
-    long w = std::get<1>(def);
-    SetConfigPathKey<long>(wxT("/COLORS"), rkey, r);
-    SetConfigPathKey<long>(wxT("/COLORS"), gkey, g);
-    SetConfigPathKey<long>(wxT("/COLORS"), bkey, b);
-    SetConfigPathKey<long>(wxT("/COLORS/WIDTH"), key, w);
+    SetColorConfigValueForPalette(GetConfigValue(wxT("ActiveColorPalette"), 0), key, value, def);
 }
 
 // Specialize on show mode
@@ -432,32 +488,32 @@ auto GetFromColorArray(ColorArray const& array)
 
 std::vector<wxString> CalChartConfiguration::GetColorNames() const
 {
-    return GetFromColorArray<0>(ColorInfo);
+    return { ColorInfo, ColorInfo + sizeof(ColorInfo) / sizeof(ColorInfo[0]) };
 }
 
 std::vector<wxString> CalChartConfiguration::GetDefaultColors() const
 {
-    return GetFromColorArray<1>(ColorInfo);
+    return GetFromColorArray<0>(ColorInfoDefaults);
 }
 
 std::vector<int> CalChartConfiguration::GetDefaultPenWidth() const
 {
-    return GetFromColorArray<2>(ColorInfo);
+    return GetFromColorArray<1>(ColorInfoDefaults);
 }
 
 std::vector<wxString> CalChartConfiguration::GetContCellColorNames() const
 {
-    return GetFromColorArray<0>(ContCellColorInfo);
+    return { ContCellColorInfo, ContCellColorInfo + sizeof(ContCellColorInfo) / sizeof(ContCellColorInfo[0]) };
 }
 
 std::vector<wxString> CalChartConfiguration::GetContCellDefaultColors() const
 {
-    return GetFromColorArray<1>(ContCellColorInfo);
+    return GetFromColorArray<0>(ContCellColorInfoDefaults);
 }
 
 std::vector<int> CalChartConfiguration::GetContCellDefaultPenWidth() const
 {
-    return GetFromColorArray<2>(ContCellColorInfo);
+    return GetFromColorArray<1>(ContCellColorInfoDefaults);
 }
 
 std::vector<wxString> CalChartConfiguration::Get_yard_text_index() const
@@ -467,14 +523,110 @@ std::vector<wxString> CalChartConfiguration::Get_yard_text_index() const
 
 ///// Color Configuration /////
 
-template <typename Color, typename Map, typename Info>
+long CalChartConfiguration::GetActiveColorPalette() const
+{
+    if (mActiveColorPalette == -1) {
+        mActiveColorPalette = GetConfigValue("ActiveColorPalette", 0);
+    }
+    return mActiveColorPalette;
+}
+
+void CalChartConfiguration::SetActiveColorPalette(long which)
+{
+    mActiveColorPalette = which;
+    SetConfigValue<long>("ActiveColorPalette", which, 0);
+}
+
+void CalChartConfiguration::ClearActiveColorPalette()
+{
+    SetActiveColorPalette(0);
+}
+
+wxBrush CalChartConfiguration::GetColorPaletteColor(long which) const
+{
+    auto colorWidth = GetColorConfigValueForPalette(which, std::string("PaletteColor"), { kPaletteColorDefault[which], 1 });
+    return *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorWidth), wxBRUSHSTYLE_SOLID);
+}
+
+std::vector<wxBrush> CalChartConfiguration::GetColorPaletteColors() const
+{
+    auto result = std::vector<wxBrush>{};
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        result.push_back(GetColorPaletteColor(i));
+    }
+    return result;
+}
+
+void CalChartConfiguration::SetColorPaletteColor(long which, wxBrush const& brush)
+{
+    CalChartConfiguration::ColorWidth_t v{ brush.GetColour(), 1 };
+    mWriteQueue[std::string("PaletteColor") + std::to_string(which)] = [which, v]() {
+        SetColorConfigValueForPalette(which, std::string("PaletteColor"), v, { kPaletteColorDefault[which], 1 });
+    };
+}
+
+void CalChartConfiguration::ClearColorPaletteColor(long which)
+{
+    CalChartConfiguration::ColorWidth_t v{ kPaletteColorDefault[which], 1 };
+    mWriteQueue[std::string("PaletteColor") + std::to_string(which)] = [which, v]() {
+        SetColorConfigValueForPalette(which, std::string("PaletteColor"), v, v);
+    };
+}
+
+std::vector<wxBrush> CalChartConfiguration::GetDefaultColorPaletteColors() const
+{
+    auto results = std::vector<wxBrush>{};
+    std::transform(std::begin(kPaletteColorDefault), std::end(kPaletteColorDefault), std::back_inserter(results), [](auto&& i) {
+        return *wxTheBrushList->FindOrCreateBrush(i, wxBRUSHSTYLE_SOLID);
+    });
+
+    return results;
+}
+
+wxString CalChartConfiguration::GetColorPaletteName(long which) const
+{
+    if (which > kNumberPalettes) {
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    }
+    return GetConfigValue<wxString>(std::string("PaletteName") + std::to_string(which), kPaletteNameDefault[which]);
+}
+
+std::vector<wxString> CalChartConfiguration::GetColorPaletteNames() const
+{
+    auto result = std::vector<wxString>{};
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        result.push_back(GetColorPaletteName(i));
+    }
+    return result;
+}
+
+void CalChartConfiguration::SetColorPaletteName(long which, wxString const& name)
+{
+    mWriteQueue[std::string("PaletteName") + std::to_string(which)] = [which, name]() {
+        SetConfigValue<wxString>(std::string("PaletteName") + std::to_string(which), name, kPaletteNameDefault[which]);
+    };
+}
+
+void CalChartConfiguration::ClearColorPaletteName(long which)
+{
+    mWriteQueue[std::string("PaletteName") + std::to_string(which)] = [which]() {
+        SetConfigValue<wxString>(std::string("PaletteName") + std::to_string(which), kPaletteNameDefault[which], kPaletteNameDefault[which]);
+    };
+}
+
+std::vector<wxString> CalChartConfiguration::GetDefaultColorPaletteNames() const
+{
+    return { std::begin(kPaletteNameDefault), std::end(kPaletteNameDefault) };
+}
+
+template <typename Color, typename Map, typename Info, typename InfoDefault>
 std::pair<wxBrush, wxPen>
-Get_BrushAndPen(Color c, Map& colorsAndWidth, Info const& InfoArray)
+Get_BrushAndPen(Color c, Map& colorsAndWidth, Info const& InfoArray, InfoDefault const& InfoDefaultArray)
 {
     if (!colorsAndWidth.count(c)) {
         colorsAndWidth[c] = GetConfigValue<CalChartConfiguration::ColorWidth_t>(
-            std::get<0>(InfoArray[c]),
-            CalChartConfiguration::ColorWidth_t(std::get<1>(InfoArray[c]), std::get<2>(InfoArray[c])));
+            InfoArray[c],
+            CalChartConfiguration::ColorWidth_t(std::get<0>(InfoDefaultArray[c]), std::get<1>(InfoDefaultArray[c])));
     }
     auto colorAndWidth = colorsAndWidth[c];
     return {
@@ -483,25 +635,25 @@ Get_BrushAndPen(Color c, Map& colorsAndWidth, Info const& InfoArray)
     };
 }
 
-template <typename Color, typename Map, typename Info, typename WriteQueue>
-void Set_BrushAndPen(Color c, const wxBrush& brush, const wxPen& pen, Map& colorsAndWidth, Info const& InfoArray, WriteQueue& writeQueue)
+template <typename Color, typename Map, typename Info, typename InfoDefault, typename WriteQueue>
+void Set_BrushAndPen(Color c, const wxBrush& brush, const wxPen& pen, Map& colorsAndWidth, Info const& InfoArray, InfoDefault const& InfoDefaultArray, WriteQueue& writeQueue)
 {
     CalChartConfiguration::ColorWidth_t v{ brush.GetColour(), pen.GetWidth() };
 
-    writeQueue[std::get<0>(InfoArray[c])] = [info = InfoArray[c], v]() {
+    writeQueue[InfoArray[c]] = [info = InfoArray[c], infodefault = InfoDefaultArray[c], v]() {
         SetConfigValue<CalChartConfiguration::ColorWidth_t>(
-            std::get<0>(info), v,
-            CalChartConfiguration::ColorWidth_t(std::get<1>(info), std::get<2>(info)));
+            info, v,
+            CalChartConfiguration::ColorWidth_t(std::get<0>(infodefault), std::get<1>(infodefault)));
     };
     colorsAndWidth[c] = v;
 }
 
-template <typename Color, typename Map, typename Info>
-void Clear_ConfigColor(Color selection, Map& colorsAndWidth, Info const& InfoArray)
+template <typename Color, typename Map, typename Info, typename InfoDefault>
+void Clear_ConfigColor(Color selection, Map& colorsAndWidth, Info const& InfoArray, InfoDefault const& InfoDefaultArray)
 {
-    auto default_value = CalChartConfiguration::ColorWidth_t(std::get<1>(InfoArray[selection]),
-        std::get<2>(InfoArray[selection]));
-    SetConfigValue<CalChartConfiguration::ColorWidth_t>(std::get<0>(InfoArray[selection]), default_value,
+    auto default_value = CalChartConfiguration::ColorWidth_t(std::get<0>(InfoDefaultArray[selection]),
+        std::get<1>(InfoDefaultArray[selection]));
+    SetConfigValue<CalChartConfiguration::ColorWidth_t>(InfoArray[selection], default_value,
         default_value);
     // clear out the cached value
     colorsAndWidth.erase(selection);
@@ -510,28 +662,49 @@ void Clear_ConfigColor(Color selection, Map& colorsAndWidth, Info const& InfoArr
 std::pair<wxBrush, wxPen>
 CalChartConfiguration::Get_CalChartBrushAndPen(CalChartColors c) const
 {
-    if (c >= COLOR_NUM)
-        throw std::runtime_error("Error, exceeding COLOR_NUM size");
-
-    return Get_BrushAndPen(c, mColorsAndWidth, ColorInfo);
+    return Get_CalChartBrushAndPen(GetActiveColorPalette(), c);
 }
 
 void CalChartConfiguration::Set_CalChartBrushAndPen(CalChartColors c,
     const wxBrush& brush,
     const wxPen& pen)
 {
-    if (c >= COLOR_NUM)
-        throw std::runtime_error("Error, exceeding COLOR_NUM size");
-
-    Set_BrushAndPen(c, brush, pen, mColorsAndWidth, ColorInfo, mWriteQueue);
+    return Set_CalChartBrushAndPen(GetActiveColorPalette(), c, brush, pen);
 }
 
 void CalChartConfiguration::Clear_CalChartConfigColor(CalChartColors selection)
 {
+    return Clear_CalChartConfigColor(GetActiveColorPalette(), selection);
+}
+
+std::pair<wxBrush, wxPen>
+CalChartConfiguration::Get_CalChartBrushAndPen(int palette, CalChartColors c) const
+{
+    if (c >= COLOR_NUM)
+        throw std::runtime_error("Error, exceeding COLOR_NUM size");
+    if (palette >= kNumberPalettes)
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+    return Get_BrushAndPen(c, mColorsAndWidth[palette], ColorInfo, ColorInfoDefaults);
+}
+
+void CalChartConfiguration::Set_CalChartBrushAndPen(int palette, CalChartColors c, wxBrush const& brush, wxPen const& pen)
+{
+    if (c >= COLOR_NUM)
+        throw std::runtime_error("Error, exceeding COLOR_NUM size");
+    if (palette >= kNumberPalettes)
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
+
+    Set_BrushAndPen(c, brush, pen, mColorsAndWidth[palette], ColorInfo, ColorInfoDefaults, mWriteQueue);
+}
+
+void CalChartConfiguration::Clear_CalChartConfigColor(int palette, CalChartColors selection)
+{
     if (selection >= COLOR_NUM)
         throw std::runtime_error("Error, exceeding COLOR_NUM size");
+    if (palette >= kNumberPalettes)
+        throw std::runtime_error("Error, exceeding kNumberPalettes size");
 
-    Clear_ConfigColor(selection, mColorsAndWidth, ColorInfo);
+    Clear_ConfigColor(selection, mColorsAndWidth[palette], ColorInfo, ColorInfoDefaults);
 }
 
 std::pair<wxBrush, wxPen>
@@ -540,7 +713,7 @@ CalChartConfiguration::Get_ContCellBrushAndPen(ContCellColors c) const
     if (c >= COLOR_CONTCELLS_NUM)
         throw std::runtime_error("Error, exceeding COLOR_CONTCELLS_NUM size");
 
-    return Get_BrushAndPen(c, mContCellColorsAndWidth, ContCellColorInfo);
+    return Get_BrushAndPen(c, mContCellColorsAndWidth, ContCellColorInfo, ContCellColorInfoDefaults);
 }
 
 void CalChartConfiguration::Set_ContCellBrushAndPen(ContCellColors c,
@@ -550,7 +723,7 @@ void CalChartConfiguration::Set_ContCellBrushAndPen(ContCellColors c,
     if (c >= COLOR_CONTCELLS_NUM)
         throw std::runtime_error("Error, exceeding COLOR_CONTCELLS_NUM size");
 
-    Set_BrushAndPen(c, brush, pen, mContCellColorsAndWidth, ContCellColorInfo, mWriteQueue);
+    Set_BrushAndPen(c, brush, pen, mContCellColorsAndWidth, ContCellColorInfo, ContCellColorInfoDefaults, mWriteQueue);
 }
 
 void CalChartConfiguration::Clear_ContCellConfigColor(ContCellColors selection)
@@ -558,7 +731,7 @@ void CalChartConfiguration::Clear_ContCellConfigColor(ContCellColors selection)
     if (selection >= COLOR_CONTCELLS_NUM)
         throw std::runtime_error("Error, exceeding COLOR_CONTCELLS_NUM size");
 
-    Clear_ConfigColor(selection, mContCellColorsAndWidth, ContCellColorInfo);
+    Clear_ConfigColor(selection, mContCellColorsAndWidth, ContCellColorInfo, ContCellColorInfoDefaults);
 }
 
 ///// Show Configuration /////

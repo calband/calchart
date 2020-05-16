@@ -21,11 +21,11 @@
 */
 
 #include "ContinuityEditorPopup.h"
-#include "ContinuityBrowser.h"
-#include "basic_ui.h"
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
+#include "ContinuityBrowser.h"
+#include "basic_ui.h"
 #include "cc_continuity.h"
 #include "cc_sheet.h"
 #include "cc_show.h"
@@ -82,7 +82,7 @@ void ContinuityEditorPopup::SetValue(wxString const& value, int line, int column
 {
     mUserInput->Clear();
     mUserInput->WriteText(value);
-    mUserInput->SetInsertionPoint(mUserInput->XYToPosition(column-1, line-1));
+    mUserInput->SetInsertionPoint(mUserInput->XYToPosition(column - 1, line - 1));
 }
 
 wxString ContinuityEditorPopup::ProcessEditContinuity(wxWindow* parent, wxString const& whatError, wxString const& input, int line, int column)
@@ -95,4 +95,3 @@ wxString ContinuityEditorPopup::ProcessEditContinuity(wxWindow* parent, wxString
     }
     throw std::runtime_error("Did not parse file correctly");
 }
-

@@ -20,6 +20,8 @@
 */
 
 #include "field_frame_controls.h"
+#include "ColorPalette.h"
+#include "basic_ui.h"
 #include "cc_point.h"
 #include "ui_enums.h"
 
@@ -51,17 +53,23 @@ FieldFrameControls::FieldFrameControls(double zoom, wxWindow* parent, wxWindowID
     const wxString& name)
     : wxPanel(parent, id, pos, size, style, name)
 {
-    auto topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 5);
-    auto centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 5);
+    auto topRowSizerFlags = wxSizerFlags(1).Expand().Border(0, 1);
+    auto centerWidget = wxSizerFlags(0).Expand().Border(wxALL, 1);
 
     auto fullsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(fullsizer);
 
     auto toprow = new wxBoxSizer(wxHORIZONTAL);
-    fullsizer->Add(toprow, wxSizerFlags(0).Border(0, 5));
+    AddToSizerBasic(fullsizer, toprow);
+
+    // Color palette
+    auto staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Colors")), wxVERTICAL);
+    toprow->Add(staticSize, topRowSizerFlags);
+    auto color = new ColorPalettePanel(this);
+    staticSize->Add(color, centerWidget);
 
     // Grid choice
-    auto staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Grid Spacing")), wxVERTICAL);
+    staticSize = new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, wxT("Grid Spacing")), wxVERTICAL);
     toprow->Add(staticSize, topRowSizerFlags);
     mGridChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, sizeof(gridtext) / sizeof(gridtext[0]), gridtext);
     staticSize->Add(mGridChoice, centerWidget);

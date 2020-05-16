@@ -22,12 +22,13 @@
 #include "CalChartDoc.h"
 #include "CalChartApp.h"
 #include "CalChartDocCommand.h"
+#include "ContinuityEditorPopup.h"
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
+#include "cc_parse_errors.h"
 #include "cc_point.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
-#include "cc_parse_errors.h"
 #include "confgr.h"
 #include "draw.h"
 #include "json.h"
@@ -36,7 +37,6 @@
 #include "modes.h"
 #include "platconf.h"
 #include "print_ps.h"
-#include "ContinuityEditorPopup.h"
 
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
