@@ -71,6 +71,7 @@ public:
     void DoInsertSheets(CalChart::Show::Sheet_container_t const& sht, int where);
     bool DoDeleteSheet(int where);
     bool DoImportPrintableContinuity(const wxString& file);
+    void DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont);
     bool DoRelabel();
     std::pair<bool, std::string> DoAppendShow(std::unique_ptr<CalChartDoc> other_show);
     bool DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity const& new_cont);

@@ -23,6 +23,7 @@
 #include "cc_coord.h"
 #include "cc_types.h"
 
+#include <map>
 #include <wx/aui/framemanager.h>
 #include <wx/docview.h>
 
@@ -38,6 +39,7 @@ class ContinuityBrowser;
 class FieldCanvas;
 class FieldFrameControls;
 class FieldThumbnailBrowser;
+class PrintContinuityEditor;
 
 // Define the main editing frame
 class CalChartFrame : public wxDocChildFrame {
@@ -119,6 +121,7 @@ public:
 
     void OnCmd_GhostOption(wxCommandEvent& event);
     void OnCmd_AdjustViews(wxCommandEvent& event);
+    void OnCmd_SwapAnimation(wxCommandEvent& event);
     void OnCmd_DrawPaths(wxCommandEvent& event);
 
     void OnCmd_ResetReferencePoint(wxCommandEvent& event);
@@ -167,8 +170,8 @@ public:
 private:
     void refreshGhostOptionStates();
     void ChangeFieldThumbnailVisibility(bool show);
-    void ChangeFieldControlsVisibility(bool show);
-    void ChangeContinuityInfoVisibility(bool show);
+    void ChangeVisibility(wxWindow* window, bool show, int itemid, std::string const& name);
+    void ChangeVisibility(bool show, int itemid);
     void ChangeAnimationErrorsVisibility(bool show);
     void ChangeAnimationVisibility(bool show);
     void ChangeMainFieldVisibility(bool show);
@@ -182,6 +185,10 @@ private:
     AnimationErrorsPanel* mAnimationErrorsPanel{};
     AnimationPanel* mAnimationPanel{};
     AnimationPanel* mShadowAnimationPanel{};
+    PrintContinuityEditor* mPrintContinuityEditor{};
+
+    std::map<int, wxWindow*> mLookupEnumToSubWindow;
+    std::map<wxWindow*, int> mLookupSubWindowToEnum;
 
     CalChartConfiguration& mConfig;
     wxAuiManager mAUIManager;

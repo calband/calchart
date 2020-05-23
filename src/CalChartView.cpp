@@ -346,6 +346,13 @@ bool CalChartView::DoImportPrintableContinuity(const wxString& file)
     return false;
 }
 
+void CalChartView::DoSetPrintContinuity(int which_sheet, const wxString& number, const wxString& cont)
+{
+    std::map<int, std::pair<std::string, std::string>> data{ { which_sheet, { number.ToStdString(), cont.ToStdString() } } };
+    auto cmd = static_cast<CalChartDoc*>(GetDocument())->Create_SetPrintableContinuity(data);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
 bool CalChartView::DoRelabel()
 {
     auto sheet_num = GetCurrentSheetNum();

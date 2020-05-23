@@ -1,5 +1,6 @@
+#pragma once
 /*
- * cont_ui.h
+ * PrintContinuityEditor.h
  * Header for continuity editors
  */
 
@@ -20,49 +21,37 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "CalChartDoc.h"
-
 #include <wx/dialog.h>
 #include <wx/docview.h>
+#include <wx/wx.h>
 
+class CalChartView;
 class PrintContinuityEditor;
 class FancyTextWin;
-class FancyTextPanel;
+class PrintContinuityPreview;
 class wxSplitterWindow;
-
-// View for linking CalChartDoc with PrintContinuityEditor
-class PrintContinuityEditorView : public wxView {
-public:
-    PrintContinuityEditorView();
-    ~PrintContinuityEditorView();
-    virtual void OnDraw(wxDC* dc);
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
-
-    void DoSetPrintContinuity(int which_sheet, const wxString& number,
-        const wxString& cont);
-};
 
 // PrintContinuityEditor
 // The way you edit the continuity for individual marchers
 // This dialog should notify the user to save if there are any outstanding
 // edits.
-class PrintContinuityEditor : public wxFrame {
-    friend class PrintContinuityEditorView;
+class PrintContinuityEditor : public wxPanel {
+    using super = wxPanel;
+    DECLARE_EVENT_TABLE()
 
 public:
-    PrintContinuityEditor();
-    PrintContinuityEditor(CalChartDoc* dcr, wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Edit Print Continuity"),
+    PrintContinuityEditor(wxWindow* parent,
+        wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~PrintContinuityEditor();
+        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+        const wxString& name = wxPanelNameStr);
+    ~PrintContinuityEditor() = default;
 
-    void OnCloseWindow(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
+
+    void SetView(CalChartView* view) { mView = view; }
+    void OnUpdate() { Update(); }
 
     void Update(); // Refresh all window controls
     // Update text window to current continuity
@@ -72,32 +61,37 @@ public:
     void FlushText(); // Flush changes in text window
 
     void SetInsertionPoint(int x, int y);
-    void UpdateOrientation(wxCommandEvent&);
+
+    auto GetInMiniMode() const { return mInMiniMode; }
+    void SetInMiniMode(bool);
 
 private:
     void Init();
 
-    bool Create(CalChartDoc* shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Select Points"),
+    bool Create(wxWindow* parent,
+        wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
+        const wxString& name = wxPanelNameStr);
 
     void CreateControls();
 
-    void OnSave(wxCommandEvent&);
-    void OnDiscard(wxCommandEvent&);
     void ContEditCurrent(wxCommandEvent&);
     void OnKeyPress(wxCommandEvent&);
+    void OnNameEnter(wxCommandEvent&);
+    void OnPrevious(wxCommandEvent&);
+    void OnNext(wxCommandEvent&);
+    void OnSaveTimerExpired(wxTimerEvent& event);
+    void OnSizeEvent(wxSizeEvent& event);
 
-    void Save();
-    void Discard();
+    CalChartView* mView{};
+    FancyTextWin* mUserInput{};
+    PrintContinuityPreview* mPrintContDisplay{};
+    wxSplitterWindow* mSplitter{};
+    wxTimer* mTimer{};
+    std::vector<wxWindow*> mItemsToHide;
 
-    CalChartDoc* mDoc;
-    PrintContinuityEditorView* mView;
-    FancyTextWin* mUserInput;
-    FancyTextPanel* mPrintContDisplay;
-    wxSplitterWindow* mSplitter;
-
-    DECLARE_EVENT_TABLE()
+    wxString mPreviousText{};
+    bool mInMiniMode{};
 };

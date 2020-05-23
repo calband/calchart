@@ -76,8 +76,8 @@ public:
 
     bool OnBeat() const;
 
-    auto GetMainViewMode() const { return mMainViewMode; }
-    void SetMainViewMode(bool);
+    auto GetInMiniMode() const { return mInMiniMode; }
+    void SetInMiniMode(bool);
 
 private:
     // timer stuff:
@@ -100,6 +100,7 @@ private:
     wxTimer* mTimer{};
     unsigned mTempo{};
     bool mTimerOn{};
-    bool mMainViewMode{};
+    bool mInMiniMode{};
     bool mShowOmni{};
+    std::vector<wxWindow*> mItemsToHide;
 };

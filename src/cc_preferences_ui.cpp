@@ -549,6 +549,7 @@ void DrawingSetup::OnCmdSelectColors(wxCommandEvent&)
         wxColour c = retdata.GetColour();
         SetColor(selection, mCalChartPens[mActiveColorPalette][selection].GetWidth(), c);
     }
+    Refresh();
 }
 
 void DrawingSetup::OnCmdChangePaletteColor(wxCommandEvent&)
@@ -573,7 +574,6 @@ void DrawingSetup::OnCmdChangePaletteName(wxCommandEvent&)
     wxTextEntryDialog dialog(this, wxT("Enter name for Palette"), wxT("Enter name for Palette"), v, wxOK | wxCANCEL);
     if (dialog.ShowModal() == wxID_OK) {
         SetPaletteName(selection, dialog.GetValue());
-        mPaletteNameBox->SetSelection(selection);
     }
     Refresh();
 }
