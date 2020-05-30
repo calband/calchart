@@ -195,7 +195,7 @@ private:
     std::map<wxWindow*, int> mLookupSubWindowToEnum;
 
     CalChartConfiguration& mConfig;
-    wxAuiManager mAUIManager;
+    wxAuiManager* mAUIManager;
 
     bool mMainFieldVisible = true;
 

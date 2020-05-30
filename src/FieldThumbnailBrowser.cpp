@@ -53,7 +53,7 @@ wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
         return {};
     }
 
-    auto mode_size = fDIP(wxSize{mView->GetShowMode().Size().x, mView->GetShowMode().Size().y});
+    auto mode_size = fDIP(mView->GetShowFieldSize());
     if (horizontal) {
         auto current_size_y = GetSize().y - mYUpperPadding - mYNameSize - mYNamePadding - mYBottomPadding - mYScrollPadding;
         auto box_size_x = mode_size.x * (current_size_y / double(mode_size.y));
@@ -124,7 +124,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
         auto newOffsetX = offset_x + mXLeftPadding;
         auto newOffsetY = offset_y + mYUpperPadding + mYNameSize + mYNamePadding;
 
-        auto mode_size = fDIP(wxSize{mView->GetShowMode().Size().x, mView->GetShowMode().Size().y});
+        auto mode_size = fDIP(mView->GetShowFieldSize());
         auto current_size_x = GetSize().x - mXLeftPadding - mXRightPadding - mXScrollPadding;
         auto current_size_y = GetSize().y - mYNameSize - mYNamePadding - mYUpperPadding - mYBottomPadding - mYScrollPadding;
         auto box_size_x = (mLayoutHorizontal) ? mode_size.x * (current_size_y / double(mode_size.y)) : current_size_x;

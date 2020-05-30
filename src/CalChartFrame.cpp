@@ -209,8 +209,8 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     const wxPoint& pos, const wxSize& size)
     : wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size)
     , mConfig(config_)
+    , mAUIManager( new wxAuiManager(this) )
 {
-    mAUIManager.SetManagedWindow(this);
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // Give it an icon
     SetBandIcon(this);
@@ -363,27 +363,27 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     mShadowAnimationPanel->SetView(GetFieldView());
 
     // Now determine what to show and not show.
-    mAUIManager.AddPane(mCanvas, wxAuiPaneInfo().Name(wxT("Field")).CenterPane().Show());
-    mAUIManager.AddPane(mShadowAnimationPanel, wxAuiPaneInfo().Name(wxT("ShadowAnimation")).CenterPane().Hide());
+    mAUIManager->AddPane(mCanvas, wxAuiPaneInfo().Name(wxT("Field")).CenterPane().Show());
+    mAUIManager->AddPane(mShadowAnimationPanel, wxAuiPaneInfo().Name(wxT("ShadowAnimation")).CenterPane().Hide());
 
-    mAUIManager.AddPane(mFieldThumbnailBrowser, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewFieldThumbnail]).Caption(kAUIEnumToString[CALCHART__ViewFieldThumbnail]).Left());
-    mAUIManager.AddPane(mControls, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewFieldControls]).Caption(kAUIEnumToString[CALCHART__ViewFieldControls]).Top());
-    mAUIManager.AddPane(mContinuityBrowser, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewContinuityInfo]).Caption(kAUIEnumToString[CALCHART__ViewContinuityInfo]).Right());
-    mAUIManager.AddPane(mAnimationErrorsPanel, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewAnimationErrors]).Caption(kAUIEnumToString[CALCHART__ViewAnimationErrors]).Right());
-    mAUIManager.AddPane(mAnimationPanel, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewAnimation]).Caption(kAUIEnumToString[CALCHART__ViewAnimation]).Left());
-    mAUIManager.AddPane(mPrintContinuityEditor, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewPrintContinuity]).Caption(kAUIEnumToString[CALCHART__ViewPrintContinuity]).Right());
-    mAUIManager.AddPane(mToolbar, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewToolbar]).Caption(kAUIEnumToString[CALCHART__ViewToolbar]).ToolbarPane().Top());
+    mAUIManager->AddPane(mFieldThumbnailBrowser, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewFieldThumbnail]).Caption(kAUIEnumToString[CALCHART__ViewFieldThumbnail]).Left());
+    mAUIManager->AddPane(mControls, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewFieldControls]).Caption(kAUIEnumToString[CALCHART__ViewFieldControls]).Top());
+    mAUIManager->AddPane(mContinuityBrowser, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewContinuityInfo]).Caption(kAUIEnumToString[CALCHART__ViewContinuityInfo]).Right());
+    mAUIManager->AddPane(mAnimationErrorsPanel, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewAnimationErrors]).Caption(kAUIEnumToString[CALCHART__ViewAnimationErrors]).Right());
+    mAUIManager->AddPane(mAnimationPanel, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewAnimation]).Caption(kAUIEnumToString[CALCHART__ViewAnimation]).Left());
+    mAUIManager->AddPane(mPrintContinuityEditor, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewPrintContinuity]).Caption(kAUIEnumToString[CALCHART__ViewPrintContinuity]).Right());
+    mAUIManager->AddPane(mToolbar, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewToolbar]).Caption(kAUIEnumToString[CALCHART__ViewToolbar]).ToolbarPane().Top());
 
-    mAUIManager.Update();
+    mAUIManager->Update();
 
     // restore the manager with the Current visability
     if (auto lastLayout = mConfig.Get_CalChartFrameAUILayout(); lastLayout != wxT("")) {
-        mAUIManager.LoadPerspective(lastLayout, true);
+        mAUIManager->LoadPerspective(lastLayout, true);
     }
 
     // adjust the menu items to reflect.
     for (int i = CALCHART__ViewFieldThumbnail; i <= CALCHART__ViewToolbar; ++i) {
-        ChangeVisibility(mAUIManager.GetPane(mLookupEnumToSubWindow[i]).IsShown(), i);
+        ChangeVisibility(mAUIManager->GetPane(mLookupEnumToSubWindow[i]).IsShown(), i);
     }
 
     ChangeMainFieldVisibility(mMainFieldVisible);
@@ -413,7 +413,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
 
 CalChartFrame::~CalChartFrame()
 {
-    mAUIManager.UnInit();
+    mAUIManager->UnInit();
 }
 
 // View has closed us, clean things up for next time.
@@ -428,7 +428,7 @@ void CalChartFrame::OnClose()
 
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
-    mConfig.Set_CalChartFrameAUILayout(mAUIManager.SavePerspective());
+    mConfig.Set_CalChartFrameAUILayout(mAUIManager->SavePerspective());
 }
 
 void CalChartFrame::OnCmdAppend(wxCommandEvent& event) { AppendShow(); }
@@ -664,8 +664,8 @@ void CalChartFrame::OnCmdRelabel(wxCommandEvent& event)
 
 void CalChartFrame::OnCmdEditPrintCont(wxCommandEvent& event)
 {
-    mAUIManager.GetPane("Print Continuity").Show(true);
-    mAUIManager.Update();
+    mAUIManager->GetPane("Print Continuity").Show(true);
+    mAUIManager->Update();
 }
 
 void CalChartFrame::OnCmdSetSheetTitle(wxCommandEvent& event)
@@ -724,9 +724,9 @@ void CalChartFrame::ShowFieldAndHideAnimation(bool showField)
     if (showField) {
         mShadowAnimationPanel->SetPlayState(false);
     }
-    mAUIManager.GetPane("Field").Show(showField);
-    mAUIManager.GetPane("ShadowAnimation").Show(!showField);
-    mAUIManager.Update();
+    mAUIManager->GetPane("Field").Show(showField);
+    mAUIManager->GetPane("ShadowAnimation").Show(!showField);
+    mAUIManager->Update();
 }
 
 void CalChartFrame::OnCmdAbout(wxCommandEvent& event) { TopFrame::About(); }
@@ -1005,7 +1005,7 @@ void CalChartFrame::refreshGhostOptionStates()
 
 void CalChartFrame::OnCmd_AdjustViews(wxCommandEvent& event)
 {
-    ChangeVisibility(!mAUIManager.GetPane(mLookupEnumToSubWindow[event.GetId()]).IsShown(), event.GetId());
+    ChangeVisibility(!mAUIManager->GetPane(mLookupEnumToSubWindow[event.GetId()]).IsShown(), event.GetId());
 }
 
 void CalChartFrame::OnCmd_SwapAnimation(wxCommandEvent& event)
@@ -1016,7 +1016,7 @@ void CalChartFrame::OnCmd_SwapAnimation(wxCommandEvent& event)
 void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event)
 {
     auto id = mLookupSubWindowToEnum[event.GetPane()->window];
-    ChangeVisibility(!mAUIManager.GetPane(mLookupEnumToSubWindow[id]).IsShown(), id);
+    ChangeVisibility(!mAUIManager->GetPane(mLookupEnumToSubWindow[id]).IsShown(), id);
 }
 
 void CalChartFrame::ChangeVisibility(bool show, int itemid)
@@ -1030,8 +1030,8 @@ void CalChartFrame::ChangeVisibility(bool show, int itemid)
     } else {
         GetMenuBar()->FindItem(itemid)->SetItemLabel(std::string("Show ") + name);
     }
-    mAUIManager.GetPane(mLookupEnumToSubWindow[itemid]).Show(show);
-    mAUIManager.Update();
+    mAUIManager->GetPane(mLookupEnumToSubWindow[itemid]).Show(show);
+    mAUIManager->Update();
 }
 
 void CalChartFrame::ChangeMainFieldVisibility(bool show)

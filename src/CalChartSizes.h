@@ -23,11 +23,15 @@
 
 #include <wx/wx.h>
 
+#include "cc_coord.h"
+
 template <typename T>
 static auto fDIP(T const& t) { return wxWindow::FromDIP(t, nullptr); }
 
 template <typename T>
 static auto tDIP(T const& t) { return wxWindow::ToDIP(t, nullptr); }
+
+static auto fDIP(CalChart::Coord const& t) { return wxWindow::FromDIP(wxSize{ t.x, t.y }, nullptr); }
 
 // Generic sizes
 static inline auto GetBitmapButtonSize() { return fDIP(wxSize { 16, 16 } ); };
