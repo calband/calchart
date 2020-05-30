@@ -1,8 +1,8 @@
 #pragma once
 
 /*
- * toolbar.h
- * Header for adding toolbars to windows
+ * CalChartToolBar.h
+ * Header for adding toolbars to CalChart
  */
 
 /*

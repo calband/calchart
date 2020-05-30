@@ -133,19 +133,24 @@ ScrollZoomWindow::~ScrollZoomWindow() {}
 void ScrollZoomWindow::PrepareDC(wxDC& dc)
 {
     super::PrepareDC(dc);
-    dc.SetUserScale(mZoomFactor, mZoomFactor);
+    auto screenRatio = static_cast<float>(GetSize().x)/static_cast<float>(mCanvasSize.x);
+    dc.SetUserScale(mZoomFactor*screenRatio, mZoomFactor*screenRatio);
 }
 
 void ScrollZoomWindow::SetCanvasSize(wxSize s)
 {
     mCanvasSize = s;
+    auto virtualSizeX = GetSize().x * mZoomFactor;
+    auto virtualSizeY = (virtualSizeX * mCanvasSize.y) / mCanvasSize.x;
+    SetVirtualSize(wxSize( virtualSizeX, virtualSizeY ));
 }
 
 void ScrollZoomWindow::SetZoom(float z)
 {
     mZoomFactor = z;
-    auto newSize = mCanvasSize * mZoomFactor;
-    SetVirtualSize(newSize);
+    auto virtualSizeX = GetSize().x * mZoomFactor;
+    auto virtualSizeY = (virtualSizeX * mCanvasSize.y) / mCanvasSize.x;
+    SetVirtualSize(wxSize( virtualSizeX, virtualSizeY ));
 }
 
 float ScrollZoomWindow::GetZoom() const

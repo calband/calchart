@@ -991,6 +991,7 @@ void Show::CC_show_round_trip_test()
     auto re_read_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode(), is);
     auto re_read_show_data = re_read_show->SerializeShow();
     bool is_equal = blank_show_data.size() == re_read_show_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), re_read_show_data.begin());
+    (void)is_equal;
     assert(is_equal);
 }
 
@@ -1017,6 +1018,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
             std::cout << "Wrong at " << i << ", " << show1_data.at(i) << "\n";
     }
     auto is_equal = show1_data.size() == show_data.size() && std::equal(show1_data.begin(), show1_data.end(), show_data.begin());
+    (void)is_equal;
     assert(is_equal);
 
     // now check that things loaded correctly
@@ -1082,6 +1084,7 @@ void Show::CC_show_future_show_test()
     --char_data.at(6);
     --char_data.at(7);
     bool is_equal = blank_show_data.size() == re_read_show_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), re_read_show_data.begin());
+    (void)is_equal;
     assert(is_equal);
 }
 
@@ -1170,6 +1173,7 @@ void Show::CC_show_extra_cruft_ok()
     auto blank_show = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto blank_show_data = blank_show->SerializeShow();
     auto is_equal = blank_show_data.size() == show1_data.size() && std::equal(blank_show_data.begin(), blank_show_data.end(), show1_data.begin());
+    (void)is_equal;
     assert(is_equal);
 }
 

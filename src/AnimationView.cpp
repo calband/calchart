@@ -210,7 +210,7 @@ static auto towxPoint(CalChart::Coord const& c)
 // Return a bounding box of the show
 std::pair<wxPoint, wxPoint> AnimationView::GetShowSizeAndOffset() const
 {
-    auto size = mView->GetShowMode().Size();
+    auto size = mView->GetShowFieldSize();
     return { towxPoint(size), towxPoint({ 0, 0 }) };
 }
 
@@ -218,7 +218,7 @@ std::pair<wxPoint, wxPoint> AnimationView::GetShowSizeAndOffset() const
 // outside the show, we don't see them.
 std::pair<wxPoint, wxPoint> AnimationView::GetMarcherSizeAndOffset() const
 {
-    auto mode_size = towxPoint(mView->GetShowMode().Size());
+    auto mode_size = towxPoint(mView->GetShowFieldSize());
     auto bounding_box_upper_left = mode_size;
     auto bounding_box_low_right = towxPoint({ 0, 0 });
 

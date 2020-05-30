@@ -778,6 +778,7 @@ void Sheet::sheet_round_trip_test()
             std::get<2>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
+        (void)is_equal;
         assert(is_equal);
     }
     {
@@ -792,6 +793,7 @@ void Sheet::sheet_round_trip_test()
             std::get<2>(table.front()));
         auto re_read_sheet_data = re_read_sheet.SerializeSheet();
         bool is_equal = blank_sheet_data.size() == re_read_sheet_data.size() && std::equal(blank_sheet_data.begin(), blank_sheet_data.end(), re_read_sheet_data.begin());
+        (void)is_equal;
         assert(is_equal);
     }
     {
@@ -821,6 +823,7 @@ void Sheet::sheet_round_trip_test()
         //		std::cout<<"mismatch at
         //"<<std::distance(blank_sheet_data.begin(),
         // mismatch_at.first)<<"\n";
+        (void)is_equal;
         assert(is_equal);
     }
 }

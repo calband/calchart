@@ -548,15 +548,6 @@ wxBrush CalChartConfiguration::GetColorPaletteColor(long which) const
     return *wxTheBrushList->FindOrCreateBrush(std::get<0>(colorWidth), wxBRUSHSTYLE_SOLID);
 }
 
-std::vector<wxBrush> CalChartConfiguration::GetColorPaletteColors() const
-{
-    auto result = std::vector<wxBrush>{};
-    for (auto i = 0; i < kNumberPalettes; ++i) {
-        result.push_back(GetColorPaletteColor(i));
-    }
-    return result;
-}
-
 void CalChartConfiguration::SetColorPaletteColor(long which, wxBrush const& brush)
 {
     CalChartConfiguration::ColorWidth_t v{ brush.GetColour(), 1 };
@@ -589,15 +580,6 @@ wxString CalChartConfiguration::GetColorPaletteName(long which) const
         throw std::runtime_error("Error, exceeding kNumberPalettes size");
     }
     return GetConfigValue<wxString>(std::string("PaletteName") + std::to_string(which), kPaletteNameDefault[which]);
-}
-
-std::vector<wxString> CalChartConfiguration::GetColorPaletteNames() const
-{
-    auto result = std::vector<wxString>{};
-    for (auto i = 0; i < kNumberPalettes; ++i) {
-        result.push_back(GetColorPaletteName(i));
-    }
-    return result;
 }
 
 void CalChartConfiguration::SetColorPaletteName(long which, wxString const& name)
@@ -787,15 +769,6 @@ wxString CalChartConfiguration::Get_yard_text(size_t which) const
     return mYardTextInfos[which];
 }
 
-std::array<std::string, kYardTextValues> CalChartConfiguration::Get_yard_text_all() const
-{
-    std::array<std::string, kYardTextValues> values;
-    for (auto i = 0; i < kYardTextValues; ++i) {
-        values[i] = Get_yard_text(i);
-    }
-    return values;
-}
-
 void CalChartConfiguration::Set_yard_text(size_t which, const wxString& value)
 {
     if (which >= kYardTextValues)
@@ -838,7 +811,35 @@ ShowMode GetConfigShowMode(const wxString& which)
     if (iter != std::end(kShowModeStrings)) {
         auto item = static_cast<CalChartShowModes>(
             std::distance(std::begin(kShowModeStrings), iter));
-        return ShowMode::CreateShowMode(CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(item), CalChartConfiguration::GetGlobalConfig().Get_yard_text_all());
+        return ShowMode::CreateShowMode(CalChartConfiguration::GetGlobalConfig().Get_ShowModeInfo(item), Get_yard_text_all(CalChartConfiguration::GetGlobalConfig()));
     }
     throw std::runtime_error("No such show");
 }
+
+std::vector<wxBrush> GetColorPaletteColors(CalChartConfiguration const& config)
+{
+    auto result = std::vector<wxBrush>{};
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        result.push_back(config.GetColorPaletteColor(i));
+    }
+    return result;
+}
+
+std::vector<wxString> GetColorPaletteNames(CalChartConfiguration const& config)
+{
+    auto result = std::vector<wxString>{};
+    for (auto i = 0; i < kNumberPalettes; ++i) {
+        result.push_back(config.GetColorPaletteName(i));
+    }
+    return result;
+}
+
+std::array<std::string, kYardTextValues> Get_yard_text_all(CalChartConfiguration const& config)
+{
+    std::array<std::string, kYardTextValues> values;
+    for (auto i = 0; i < kYardTextValues; ++i) {
+        values[i] = config.Get_yard_text(i);
+    }
+    return values;
+}
+

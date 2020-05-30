@@ -61,6 +61,7 @@ ChooseShowModeWizard::ChooseShowModeWizard(wxWizard* parent)
         wxDefaultPosition, wxDefaultSize, 0);
     topsizer->Add(label, 0, wxALL, 5);
     mChoice = new wxChoice(this, wxID_ANY, wxPoint(5, 5), wxDefaultSize, modeStrings);
+    mChoice->SetSelection(0);
     topsizer->Add(mChoice, 0, wxALL, 5);
     topsizer->Fit(this);
 }

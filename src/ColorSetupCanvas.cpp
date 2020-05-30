@@ -48,7 +48,7 @@ using namespace CalChart;
 // handling Drawing colors
 ////////
 
-BEGIN_EVENT_TABLE(ColorSetupCanvas, ClickDragCtrlScrollCanvas)
+BEGIN_EVENT_TABLE(ColorSetupCanvas, ColorSetupCanvas::super)
 EVT_PAINT(ColorSetupCanvas::OnPaint)
 EVT_ERASE_BACKGROUND(ColorSetupCanvas::OnEraseBackground)
 END_EVENT_TABLE()
@@ -67,6 +67,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
     auto field_offset = mMode.FieldOffset();
     auto offset = mMode.Offset();
     SetCanvasSize(wxSize{ mMode.Size().x, mMode.Size().y });
+    SetZoom(4.0);
 
     // Create a fake show with some points and selections to draw an example for
     // the user

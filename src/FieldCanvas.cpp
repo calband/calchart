@@ -312,7 +312,7 @@ void FieldCanvas::OnMouseLeftUp(wxMouseEvent& event)
                 mView->DoMovePoints(mMovePoints);
                 EndDrag();
                 curr_move = CC_MOVE_NORMAL;
-                static_cast<CalChartFrame*>(GetParent())->ToolbarSetCurrentMove(CC_MOVE_NORMAL);
+                static_cast<CalChartFrame*>(GetParent())->ToolBarSetCurrentMove(CC_MOVE_NORMAL);
             }
         }
         if (!(m_select_shape_list.empty())) {
@@ -391,7 +391,7 @@ void FieldCanvas::OnMousePinchToZoom(wxMouseEvent& event)
         return;
     }
     super::OnMousePinchToZoom(event);
-    SetZoom(static_cast<CalChartFrame*>(GetParent())->ToolbarSetZoom(GetZoom()));
+    SetZoom(static_cast<CalChartFrame*>(GetParent())->ToolBarSetZoom(GetZoom()));
 }
 
 // Intercept character input

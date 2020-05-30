@@ -39,8 +39,8 @@ EVT_LEFT_DCLICK(ColorPalettePanel::OnLeftDoubleClick)
 EVT_PAINT(ColorPalettePanel::OnPaint)
 END_EVENT_TABLE()
 
-ColorPalettePanel::ColorPalettePanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : super(parent, winid, pos, size, style, name)
+ColorPalettePanel::ColorPalettePanel(wxWindow* parent, wxWindowID winid)
+    : super(parent, winid)
 {
     Init();
 }

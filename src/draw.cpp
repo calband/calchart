@@ -649,12 +649,12 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     dc.DrawCircle(where, circ_r);
 }
 
-static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, int yard_text_start, wxSize const& fieldsize, wxPoint const& border1, HowToDraw howToDraw)
+static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, CalChartConfiguration const& config, std::string const* yard_text, wxSize const& fieldsize, wxPoint const& border1, HowToDraw howToDraw)
 {
     // Draw labels
     dc.SetFont(CreateFont(Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     for (int i = 0; i < CoordUnits2Int(tDIP(fieldsize.x)) / 8 + 1; i++) {
-        auto text = mode.Get_yard_text()[i + (yard_text_start + (CalChart::kYardTextValues - 1) * 4) / 8];
+        auto text = yard_text[i];
         auto textSize = dc.GetTextExtent(text);
         const auto top_row_x = i * kStep8 - textSize.x/2 + border1.x;
         const auto top_row_y = std::max(border1.y - textSize.y + ((howToDraw == ShowMode_kOmniView) ? kStep8 : 0), dc.DeviceToLogicalY(0));
@@ -794,7 +794,10 @@ static void ShowModeStandard_DrawHelper(wxDC& dc, CalChartConfiguration const& c
     if (howToDraw == ShowMode_kAnimation) {
         return;
     }
-    ShowModeStandard_DrawHelper_Labels(dc, config, mode, -CoordUnits2Int((mode.Offset() - mode.Border1()).x), fieldsize, border1, howToDraw);
+    auto yard_text = mode.Get_yard_text().data();
+    yard_text += (-CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8;
+    
+    ShowModeStandard_DrawHelper_Labels(dc, config, yard_text, fieldsize, border1, howToDraw);
 }
 
 void DrawMode(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw)
