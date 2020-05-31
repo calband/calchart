@@ -96,25 +96,25 @@ std::vector<ToolBarEntry> GetSymbolsToolBar()
 std::vector<ToolBarEntry> GetHalfOfMainToolBar()
 {
     static auto const tb = std::vector<ToolBarEntry>{
-        { wxITEM_NORMAL, wxT("Prev"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_left))), wxT("Previous stuntsheet"), CALCHART__prev_ss },
-        { wxITEM_NORMAL, wxT("Nex"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_right))), wxT("Next stuntsheet"), CALCHART__next_ss, true },
-        { wxITEM_RADIO, wxT("Box"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_box))), wxT("Select points with box"), CALCHART__box },
-        { wxITEM_RADIO, wxT("Poly"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_poly))), wxT("Select points with polygon"), CALCHART__poly },
-        { wxITEM_RADIO, wxT("Lasso"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lasso))), wxT("Select points with lasso"), CALCHART__lasso },
-        { wxITEM_RADIO, wxT("Swap"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_swap))), wxT("Swap points"), CALCHART__swap, true },
-        { wxITEM_RADIO, wxT("Trans"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_mv))), wxT("Translate points"), CALCHART__move },
-        { wxITEM_RADIO, wxT("Line"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_line))), wxT("Shape points in a line"), CALCHART__shape_line },
-        { wxITEM_RADIO, wxT("X"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_x))), wxT("Shape points in an x"), CALCHART__shape_x },
-        { wxITEM_RADIO, wxT("Cross"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_cross))), wxT("Shape points in a cross"), CALCHART__shape_cross },
-        { wxITEM_RADIO, wxT("Box"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_box))), wxT("Shape points in a box"), CALCHART__shape_box },
-        { wxITEM_RADIO, wxT("Ellipse"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_ellipse))), wxT("Shape points in an ellipse"), CALCHART__shape_ellipse },
-        { wxITEM_RADIO, wxT("Draw"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_draw))), wxT("Shape points by drawing"), CALCHART__shape_draw },
-        { wxITEM_RADIO, wxT("MoveLine"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_line))), wxT("Move points into line"), CALCHART__line },
-        { wxITEM_RADIO, wxT("Rotate"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_rot))), wxT("Rotate block"), CALCHART__rot },
-        { wxITEM_RADIO, wxT("Shear"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shr))), wxT("Shear block"), CALCHART__shear },
-        { wxITEM_RADIO, wxT("Reflect"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_ref))), wxT("Reflect block"), CALCHART__reflect },
-        { wxITEM_RADIO, wxT("Resize"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_siz))), wxT("Resize block"), CALCHART__size },
-        { wxITEM_RADIO, wxT("Genius"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_gen))), wxT("Genius move"), CALCHART__genius, true },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_left))), wxT("Previous stuntsheet"), CALCHART__prev_ss },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_right))), wxT("Next stuntsheet"), CALCHART__next_ss, true },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_box))), wxT("Select points with box"), CALCHART__box },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_poly))), wxT("Select points with polygon"), CALCHART__poly },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lasso))), wxT("Select points with lasso"), CALCHART__lasso },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_swap))), wxT("Swap points"), CALCHART__swap, true },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_mv))), wxT("Translate points"), CALCHART__move },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_line))), wxT("Shape points in a line"), CALCHART__shape_line },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_x))), wxT("Shape points in an x"), CALCHART__shape_x },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_cross))), wxT("Shape points in a cross"), CALCHART__shape_cross },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_box))), wxT("Shape points in a box"), CALCHART__shape_box },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_ellipse))), wxT("Shape points in an ellipse"), CALCHART__shape_ellipse },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shape_draw))), wxT("Shape points by drawing"), CALCHART__shape_draw },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_line))), wxT("Move points into line"), CALCHART__line },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_rot))), wxT("Rotate block"), CALCHART__rot },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_shr))), wxT("Shear block"), CALCHART__shear },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_ref))), wxT("Reflect block"), CALCHART__reflect },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_siz))), wxT("Resize block"), CALCHART__size },
+        { wxITEM_RADIO, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_gen))), wxT("Genius move"), CALCHART__genius, true },
     };
     return tb;
 }
@@ -122,12 +122,12 @@ std::vector<ToolBarEntry> GetHalfOfMainToolBar()
 std::vector<ToolBarEntry> GetSecondHalfOfMainToolBar()
 {
     static const auto tb = std::vector<ToolBarEntry>{
-        { wxITEM_NORMAL, wxT("Left"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_l))), wxT("Label on left"), CALCHART__label_left },
-        { wxITEM_NORMAL, wxT("Flip"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_f))), wxT("Flip label"), CALCHART__label_flip },
-        { wxITEM_NORMAL, wxT("Right"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_r))), wxT("Label on right"), CALCHART__label_right, true },
-        { wxITEM_NORMAL, wxT("Hide"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_hide))), wxT("Hide Label"), CALCHART__label_hide },
-        { wxITEM_NORMAL, wxT("Toggle"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_vis_toggle))), wxT("Toggle Label Visibility"), CALCHART__label_visibility_toggle },
-        { wxITEM_NORMAL, wxT("Show"), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_show))), wxT("Show Label"), CALCHART__label_show, true },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_l))), wxT("Label on left"), CALCHART__label_left },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_f))), wxT("Flip label"), CALCHART__label_flip },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_r))), wxT("Label on right"), CALCHART__label_right, true },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_hide))), wxT("Hide Label"), CALCHART__label_hide },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_vis_toggle))), wxT("Toggle Label Visibility"), CALCHART__label_visibility_toggle },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_lbl_show))), wxT("Show Label"), CALCHART__label_show, true },
     };
     return tb;
 }

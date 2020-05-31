@@ -88,6 +88,8 @@ enum {
     CALCHART__AddBackgroundImage,
     CALCHART__ShowBackgroundImages,
     CALCHART__ResetReferencePoint,
+    CALCHART__GridSize,
+    CALCHART__GridToolSize,
 
     CALCHART__ChangedColorPalette,
 

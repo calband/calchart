@@ -24,33 +24,17 @@
 #include "cc_coord.h"
 #include <wx/wx.h>
 
-// Frame for holding on to the controls
-class FieldFrameControls : public wxPanel {
-    typedef wxPanel super;
+class wxAuiToolBar;
 
-public:
-    // CalChartFrame will own the show that is passed in
-    FieldFrameControls(double zoom, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        const wxString& name = wxPanelNameStr);
-    virtual ~FieldFrameControls() = default;
+namespace FieldControls {
 
-    std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice() const;
-    std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice() const;
-    double GetZoomAmount() const;
-    void SetZoomAmount(double zoom);
-    int GetRefChoice() const;
-    int GetGhostChoice() const;
-    void SetGhostChoice(int which);
-    void SetDrawPath(bool enable);
+wxAuiToolBar* CreateFieldControlsToolBar(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
+std::pair<CalChart::Coord::units, CalChart::Coord::units> GridChoice(wxWindow* target);
+std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindow* target);
+double GetZoomAmount(wxWindow* target);
+void SetZoomAmount(wxWindow* target, double zoom);
+int GetRefChoice(wxWindow* target);
+int GetGhostChoice(wxWindow* target);
+void SetGhostChoice(wxWindow* target, int which);
 
-private:
-    wxChoice* mGridChoice;
-    wxChoice* mToolGridChoice;
-    wxComboBox* mZoomBox;
-    wxChoice* mRefChoice;
-    wxChoice* mGhostChoice;
-    wxCheckBox* mDrawPath;
-};
+}

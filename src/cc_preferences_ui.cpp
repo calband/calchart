@@ -270,6 +270,10 @@ bool GeneralSetup::ClearValuesToDefault()
 {
     mConfig.Clear_AutosaveInterval();
     mConfig.Clear_CalChartFrameAUILayout();
+    mConfig.Clear_FieldFrameWidth();
+    mConfig.Clear_FieldFrameHeight();
+    mConfig.Clear_FieldFramePositionX();
+    mConfig.Clear_FieldFramePositionY();
     Init();
     TransferDataToWindow();
     return true;

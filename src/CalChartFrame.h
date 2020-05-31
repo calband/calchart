@@ -151,7 +151,7 @@ public:
     float ToolbarSetZoom(float zoom); // set to an amount, returns what it was set to.
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
-    void refnum_callback(wxCommandEvent&);
+    void OnCmd_ReferenceNumber(wxCommandEvent&);
     void OnEnableDrawPaths(wxCommandEvent&);
 
     void do_zoom(float zoom_amount);
@@ -181,7 +181,6 @@ private:
 
     void ShowFieldAndHideAnimation(bool showField);
 
-    FieldFrameControls* mControls{};
     FieldCanvas* mCanvas{};
     FieldThumbnailBrowser* mFieldThumbnailBrowser{};
     ContinuityBrowser* mContinuityBrowser{};
@@ -190,6 +189,7 @@ private:
     AnimationPanel* mShadowAnimationPanel{};
     PrintContinuityEditor* mPrintContinuityEditor{};
     wxAuiToolBar* mToolbar;
+    wxAuiToolBar* mControls;
 
     std::map<int, wxWindow*> mLookupEnumToSubWindow;
     std::map<wxWindow*, int> mLookupSubWindowToEnum;

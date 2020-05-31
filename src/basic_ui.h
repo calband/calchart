@@ -180,3 +180,11 @@ void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
 
 wxFont CreateFont(int pixelSize, wxFontFamily family = wxFONTFAMILY_SWISS, wxFontStyle style = wxFONTSTYLE_NORMAL, wxFontWeight weight = wxFONTWEIGHT_NORMAL);
 wxFont ResizeFont(wxFont const& font, int pixelSize);
+
+template <typename Strings>
+auto BestSizeX(wxControl* controller, Strings const& strings)
+{
+    return controller->GetTextExtent(*std::max_element(std::begin(strings), std::end(strings), [controller](auto a, auto b) {
+        return controller->GetTextExtent(a).x < controller->GetTextExtent(b).x;
+    })).x;
+}
