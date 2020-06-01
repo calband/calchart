@@ -87,7 +87,7 @@ void AnimationPanel::CreateControls()
     AddToSizerBasic(toprow, mAnimateOmniToggle);
     mItemsToHide.push_back(mAnimateOmniToggle);
 
-    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_play) }), wxDefaultPosition, GetBitmapButtonSize());
+    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_play) }), wxDefaultPosition);
     mPlayPauseButton->SetBitmapPressed(ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_stop) }));
     AddToSizerBasic(toprow, mPlayPauseButton);
 

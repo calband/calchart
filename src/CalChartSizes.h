@@ -62,9 +62,16 @@ static inline auto GetColorPaletteBoxRadiusSize() { return fDIP(4); }
 
 // CalChartFrame sizes that shows up in color palette, etc
 static inline auto GetToolBarFontSize() { return 12; }
-static inline auto GetFieldFrameControlSize() { return fDIP(wxSize{ 100, 70 }); }
-static inline auto GetContinuityBrowserSize() { return wxSize{ fDIP(180), -1 }; }
-static inline auto GetFieldThumbnailBrowserSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetContinuityBrowserConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetContinuityBrowserSize() { return fDIP(wxSize{ 180, 90 }); }
+static inline auto GetFieldThumbnailBrowserConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetFieldThumbnailBrowserSize() { return fDIP(wxSize{ 180, 360 }); }
+static inline auto GetAnimationConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetAnimationSize() { return fDIP(wxSize{ 180, 360 }); }
+static inline auto GetAnimationErrorsConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetAnimationErrorsSize() { return fDIP(wxSize{ 180, 360 }); }
+static inline auto GetPrintContinuityConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetPrintContinuitySize() { return fDIP(wxSize{ 180, 360 }); }
 
 // toolbar sizers
 static inline auto GetToolBarControlsPadding() { return fDIP(32); }
