@@ -87,15 +87,14 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
         zoomtext.Add(buf);
     }
     zoomtext.Add(wxT("Fit"));
-    auto zoomBox = new wxSlider(tb, CALCHART__slider_zoom, 10, 0, 20, wxDefaultPosition, wxSize(-1, -1), wxSL_HORIZONTAL);
-//    auto zoomBox = new wxComboBox(tb, CALCHART__slider_zoom, wxEmptyString, wxDefaultPosition, wxSize{-1, -1}, zoomtext, wxTE_PROCESS_ENTER);
-//    zoomBox->SetMaxSize(wxSize{ BestSizeX(zoomBox, std::vector<std::string>{ "500%" })+GetToolBarControlsPadding(), -1 });
-    // set the text to the default zoom level
-//    wxString zoomtxt;
-//    zoomtxt.sprintf("%d%%", (int)(1 * 100));
-//    zoomBox->SetValue(zoomtxt);
+    auto zoomBox = new wxComboBox(tb, CALCHART__slider_zoom, wxEmptyString, wxDefaultPosition, wxSize{-1, -1}, zoomtext, wxTE_PROCESS_ENTER);
+    zoomBox->SetMaxSize(wxSize{ BestSizeX(zoomBox, std::vector<std::string>{ "500%" })+GetToolBarControlsPadding(), -1 });
 
     tb->AddControl(zoomBox, "Zoom");
+    // set the text to the default zoom level
+    wxString zoomtxt;
+    zoomtxt.sprintf("%d%%", (int)(1 * 100));
+    zoomBox->SetValue(zoomtxt);
 
     tb->AddTool(CALCHART__ViewZoomIn, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)), "Zoom out", wxITEM_NORMAL);
 
@@ -161,28 +160,27 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindo
 
 double GetZoomAmount(wxWindow* target)
 {
-    auto zoomtxt = static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom))->GetValue();
+    auto zoomtxt = static_cast<wxComboBox*>(target->FindWindow(CALCHART__slider_zoom))->GetValue();
     // if it equals 'fit', return 0 to indicate we should fit.
     // strip the trailing '%' if it exists
-//    if (zoomtxt == wxT("Fit")) {
-//        return 0;
-//    }
-//    if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%'))) {
-//        zoomtxt.RemoveLast();
-//    }
-    return 10.0 / zoomtxt;
-//    double zoom_amount = 1.0;
-//    if (zoomtxt.ToDouble(&zoom_amount)) {
-//        return zoom_amount / 100.0;
-//    }
-//    return 1;
+    if (zoomtxt == wxT("Fit")) {
+        return 0;
+    }
+    if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%'))) {
+        zoomtxt.RemoveLast();
+    }
+    double zoom_amount = 1.0;
+    if (zoomtxt.ToDouble(&zoom_amount)) {
+        return zoom_amount / 100.0;
+    }
+    return 1;
 }
 
 void SetZoomAmount(wxWindow* target, double zoom)
 {
     wxString zoomtxt;
     zoomtxt.sprintf(wxT("%d%%"), int(zoom * 100.0));
-    static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom))->SetValue(10/zoom);
+    static_cast<wxComboBox*>(target->FindWindow(CALCHART__slider_zoom))->SetValue(zoomtxt);
 }
 
 int GetRefChoice(wxWindow* target)
