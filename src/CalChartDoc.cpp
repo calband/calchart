@@ -122,7 +122,7 @@ bool CalChartDoc::OnNewDocument()
 
 // When we save a file, the recovery file should be removed to prevent
 // a false detection that the file writing failed.
-bool CalChartDoc::OnSaveDocument(const wxString& filename)
+bool CalChartDoc::OnSaveDocument(wxString const& filename)
 {
     bool result = super::OnSaveDocument(filename);
     wxString recoveryFile = TranslateNameToAutosaveName(filename);
@@ -132,11 +132,7 @@ bool CalChartDoc::OnSaveDocument(const wxString& filename)
     return true;
 }
 
-// Destroy a show
-CalChartDoc::~CalChartDoc() {}
-
-std::pair<bool, std::map<int, std::pair<std::string, std::string>>> CalChartDoc::ImportPrintableContinuity(
-    const std::vector<std::string>& lines) const
+std::pair<bool, std::map<int, std::pair<std::string, std::string>>> CalChartDoc::ImportPrintableContinuity(std::vector<std::string> const& lines) const
 {
     std::map<int, std::pair<std::string, std::string>> result;
     // should this first clear out all the continuity?
@@ -377,7 +373,7 @@ int CalChartDoc::PrintToPS(std::ostream& buffer, bool overview,
         [this](size_t which) {
             return this->GetShowMode().Get_yard_text()[which];
         });
-    return printShowToPS(buffer, mShow->GetCurrentSheetNum(), isPicked, GetTitle().ToStdString());
+    return printShowToPS(buffer, isPicked, GetTitle().ToStdString());
 }
 
 // CalChartDocCommand consist of the action to perform, and the reverse action to undo.

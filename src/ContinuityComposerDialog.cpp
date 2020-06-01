@@ -29,14 +29,8 @@ class ContinuityComposerCanvas : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityComposerCanvas(CalChartConfiguration& config,
-        wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxScrolledWindowStyle,
-        const wxString& name = wxPanelNameStr);
-    virtual ~ContinuityComposerCanvas() = default;
+    ContinuityComposerCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxScrolledWindowStyle, wxString const& name = wxPanelNameStr);
+    ~ContinuityComposerCanvas() override = default;
     void DoSetContinuity(CalChart::DrawableCont const& drawableCont, std::function<void(CalChart::DrawableCont const&)> action);
 
 private:
@@ -44,13 +38,7 @@ private:
 };
 
 // Define a constructor for field canvas
-ContinuityComposerCanvas::ContinuityComposerCanvas(CalChartConfiguration& config,
-    wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+ContinuityComposerCanvas::ContinuityComposerCanvas(CalChartConfiguration& config, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
     , mConfig(config)
 {
@@ -74,28 +62,30 @@ class ContinuityComposerPanel : public wxPanel {
     DECLARE_CLASS(ContinuityComposerPanel)
 
 public:
-    ContinuityComposerPanel(std::unique_ptr<CalChart::ContProcedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        const wxString& name = wxPanelNameStr);
-    virtual ~ContinuityComposerPanel() {}
+    ContinuityComposerPanel(std::unique_ptr<CalChart::ContProcedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ~ContinuityComposerPanel() override = default;
 
     std::unique_ptr<CalChart::ContProcedure> GetContinuity();
-    virtual bool Validate() override;
+    bool Validate() override;
+
+    void OnUpdate();
 
 private:
+    void Init();
+    void CreateControls();
+
+    // Event Handlers
     void OnDrawableContClick(CalChart::DrawableCont const& c);
     void OnCmdTextEnterKeyPressed(wxCommandEvent const& event);
-    void UpdatePanel();
+
     std::unique_ptr<CalChart::ContProcedure> mCont;
     CalChart::DrawableCont mDrawableCont;
-    ContinuityComposerCanvas* mCanvas;
-    wxComboBox* mComboSelection;
+    ContinuityComposerCanvas* mCanvas{};
+    wxComboBox* mComboSelection{};
     CalChart::ContToken const* mCurrentSelected = nullptr;
     CalChart::ContToken* mCurrentParent = nullptr;
     std::function<void(CalChart::DrawableCont const& c)> const mAction;
+    CalChartConfiguration& mConfig;
 };
 
 IMPLEMENT_CLASS(ContinuityComposerPanel, wxPanel)
@@ -121,26 +111,32 @@ std::pair<CalChart::ContToken const*, CalChart::ContToken*> first_unset(CalChart
 }
 
 ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::ContProcedure> starting_continuity, CalChartConfiguration& config, wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+    wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : wxPanel(parent, winid, pos, size, style, name)
     , mCont(std::move(starting_continuity))
     , mAction([this](CalChart::DrawableCont const& c) { this->OnDrawableContClick(c); })
+    , mConfig(config)
+{
+    Init();
+    CreateControls();
+    GetSizer()->Fit(this);
+    GetSizer()->SetSizeHints(this);
+    OnUpdate();
+}
+
+void ContinuityComposerPanel::Init()
+{
+}
+
+void ContinuityComposerPanel::CreateControls()
 {
     auto topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
 
-    mCanvas = new ContinuityComposerCanvas(config, this);
+    mCanvas = new ContinuityComposerCanvas(mConfig, this);
     topsizer->Add(mCanvas, 1, wxEXPAND);
 
-    mComboSelection = new wxComboBox(
-        this, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize,
-        0, nullptr,
-        (long)wxTE_PROCESS_ENTER);
+    mComboSelection = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr, (long)wxTE_PROCESS_ENTER);
     topsizer->Add(mComboSelection, 0, wxEXPAND | wxALL, 5);
     mComboSelection->Bind(wxEVT_TEXT_ENTER, [this](auto const& event) { this->OnCmdTextEnterKeyPressed(event); });
 
@@ -152,8 +148,6 @@ ContinuityComposerPanel::ContinuityComposerPanel(std::unique_ptr<CalChart::ContP
     // preset the highlighted
     mCanvas->DoSetContinuity(mDrawableCont, mAction);
     mCanvas->SetHighlight(mCurrentSelected);
-
-    UpdatePanel();
 }
 
 enum class TokenType {
@@ -438,7 +432,7 @@ bool string_matches_upper_case(std::string const& target, std::string const& che
     return std::equal(target.begin(), target.end(), new_string.begin(), new_string.end(), [](auto&& a, auto&& b) { return tolower(a) == tolower(b); });
 }
 
-TokenType WhatType(CalChart::ContToken const* ptr)
+auto WhatType(CalChart::ContToken const* ptr)
 {
     if (dynamic_cast<CalChart::ContProcedure const*>(ptr)) {
         return TokenType::Do_Continuity;
@@ -554,10 +548,10 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
             std::tie(mCurrentSelected, mCurrentParent) = first_unset(mDrawableCont);
         }
     }
-    UpdatePanel();
+    OnUpdate();
 }
 
-void ContinuityComposerPanel::UpdatePanel()
+void ContinuityComposerPanel::OnUpdate()
 {
     // save off what's in the list.
     auto list_of_strings = GetCurrentList(mCurrentSelected, mComboSelection->GetValue().ToStdString());
@@ -578,7 +572,7 @@ void ContinuityComposerPanel::OnDrawableContClick(CalChart::DrawableCont const& 
 {
     mCurrentSelected = c.self_ptr;
     mCurrentParent = c.parent_ptr;
-    UpdatePanel();
+    OnUpdate();
 }
 
 bool ContinuityComposerPanel::Validate()
@@ -594,13 +588,7 @@ ContinuityComposerPanel::GetContinuity()
 
 IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 
-ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity,
-    wxWindow* parent, wxWindowID id,
-    const wxString& caption,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent, wxWindowID id, wxString const& caption, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : wxDialog(parent, id, caption, pos, size, style)
 {
     // create a sizer for laying things out top down:

@@ -46,7 +46,7 @@ public:
         const wxSize& size = wxDefaultSize,
         long style = wxTAB_TRAVERSAL | wxNO_BORDER,
         const wxString& name = wxPanelNameStr);
-    ~PrintContinuityEditor() = default;
+    ~PrintContinuityEditor() override;
 
     void OnCmdHelp(wxCommandEvent& event);
 

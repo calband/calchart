@@ -34,7 +34,7 @@ void Shape_1point::OnMove(const Coord& p, const Coord&)
     MoveOrigin(p);
 }
 
-void Shape_crosshairs::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_crosshairs::OnMove(const Coord&, const Coord& snapped_p)
 {
     MoveOrigin(snapped_p);
 }
@@ -50,12 +50,12 @@ std::vector<DrawCommand> Shape_crosshairs::GetCC_DrawCommand(float x,
     return result;
 }
 
-void Shape_2point::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_2point::OnMove(const Coord& p, const Coord&)
 {
     MovePoint(p);
 }
 
-void Shape_line::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_line::OnMove(const Coord&, const Coord& snapped_p)
 {
     MovePoint(snapped_p);
 }
@@ -68,7 +68,7 @@ std::vector<DrawCommand> Shape_line::GetCC_DrawCommand(float x,
     return result;
 }
 
-void Shape_x::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_x::OnMove(const Coord&, const Coord& snapped_p)
 {
     MovePoint(snapped_p);
 }
@@ -82,7 +82,7 @@ std::vector<DrawCommand> Shape_x::GetCC_DrawCommand(float x,
     return result;
 }
 
-void Shape_cross::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_cross::OnMove(const Coord&, const Coord& snapped_p)
 {
     MovePoint(snapped_p);
 }
@@ -96,7 +96,7 @@ std::vector<DrawCommand> Shape_cross::GetCC_DrawCommand(float x,
     return result;
 }
 
-void Shape_ellipse::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_ellipse::OnMove(const Coord&, const Coord& snapped_p)
 {
     MovePoint(snapped_p);
 }
@@ -109,7 +109,7 @@ std::vector<DrawCommand> Shape_ellipse::GetCC_DrawCommand(float x,
     return result;
 }
 
-void Shape_angline::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_angline::OnMove(const Coord&, const Coord& snapped_p)
 {
     auto o = GetOrigin();
     auto p1 = snapped_p - o;
@@ -139,7 +139,7 @@ Shape_arc::Shape_arc(const Coord& c, const Coord& p1,
     r = (p2 - c).Direction();
 }
 
-void Shape_arc::OnMove(const Coord& p, const Coord& snapped_p)
+void Shape_arc::OnMove(const Coord&, const Coord& snapped_p)
 {
     auto p1 = snapped_p;
 

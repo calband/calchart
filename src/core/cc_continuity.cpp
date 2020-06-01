@@ -130,8 +130,7 @@ struct Continuity_values {
     std::string GetText;
 };
 
-bool Check_Continuity(const Continuity& underTest,
-    const Continuity_values& values)
+bool Check_Continuity(Continuity const&, Continuity_values const&)
 {
     return true;
 }

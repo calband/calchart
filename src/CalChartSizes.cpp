@@ -1,8 +1,6 @@
-#pragma once
-
 /*
- * toolbar.h
- * Header for adding toolbars to windows
+ * ui_enums.h
+ * Central place for all UI id enumerations
  */
 
 /*
@@ -22,14 +20,4 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/toolbar.h>
-#include <wx/wx.h>
-
-#include <vector>
-
-class wxAuiToolBar;
-struct ToolBarEntry;
-
-std::vector<wxBitmap> GetSymbolsBitmap();
-
-wxAuiToolBar* CreateMainAuiToolBar(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
+#include "CalChartSizes.h"

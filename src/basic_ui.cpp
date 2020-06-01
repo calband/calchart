@@ -25,7 +25,9 @@
 #include "platconf.h"
 
 #include <wx/dnd.h>
+#include <wx/filename.h>
 #include <wx/icon.h>
+#include <wx/stdpaths.h>
 
 #include "calchart.xbm"
 #include "calchart.xpm"
@@ -44,7 +46,7 @@ wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
 #if defined(__APPLE__) && (__APPLE__)
     const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/calchart.png");
 #else
-    const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("image") PATH_SEPARATOR wxT("calchart.pgn")));
+    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("calchart.png"));
 #endif
     if (image.LoadFile(kImageDir)) {
         if (size != wxDefaultSize) {
@@ -58,7 +60,7 @@ wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
 wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int pointSize)
 {
     auto result = new wxStaticText(parent, wxID_STATIC, label, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
-    result->SetFont(*wxTheFontList->FindOrCreateFont(pointSize, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    result->SetFont(CreateFont(pointSize));
     return result;
 }
 
@@ -95,9 +97,9 @@ FancyTextWin::FancyTextWin(wxWindow* parent, wxWindowID id,
     SetDropTarget(new FancyTextWinDropTarget(this));
 }
 
-#ifdef TEXT_DOS_STYLE
 wxString FancyTextWin::GetValue(void) const
 {
+#ifdef TEXT_DOS_STYLE
     wxString result;
     unsigned i;
 
@@ -111,8 +113,10 @@ wxString FancyTextWin::GetValue(void) const
     }
 
     return result;
-}
+#else
+    return super::GetValue();
 #endif
+}
 
 ScrollZoomWindow::ScrollZoomWindow(wxWindow* parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size,
@@ -249,4 +253,17 @@ wxSizerFlags ExpandSizerFlags()
 {
     static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Proportion(1).Expand();
     return sizerFlags;
+}
+
+wxFont CreateFont(int pixelSize, wxFontFamily family, wxFontStyle style, wxFontWeight weight)
+{
+    auto size = wxSize{ 0, fDIP(pixelSize) };
+    return wxFont(size, family, style, weight);
+}
+
+wxFont ResizeFont(wxFont const& font, int pixelSize)
+{
+    auto newFont = font;
+    newFont.SetPixelSize(wxSize{ 0, fDIP(pixelSize) });
+    return newFont;
 }

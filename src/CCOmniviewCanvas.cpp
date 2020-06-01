@@ -71,10 +71,10 @@ auto GetImageDir()
 }
 
 static const auto kStartingViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
-static const float kStartingViewAngle = kViewAngle_1;
-static const float kStartingViewAngleZ = kViewAngle_z_1;
+static const auto kStartingViewAngle = static_cast<float>(kViewAngle_1);
+static const auto kStartingViewAngleZ = static_cast<float>(kViewAngle_z_1);
 
-typedef enum {
+enum WhichImage {
     kImageFirst = 0,
     kF0 = kImageFirst,
     kFL0,
@@ -116,54 +116,51 @@ typedef enum {
     kGoalpost,
     kEndOfShow,
     kImageLast
-} WhichImageEnum;
+};
 
-typedef struct {
-    WhichImageEnum mImageId;
-    wxString mImageFilename;
-} id_string_t;
+std::map<WhichImage, wxString> ListOfImageFiles = {
+    { WhichImage::kF0, wxT("f0.tga") },
+    { WhichImage::kF1, wxT("f1.tga") },
+    { WhichImage::kF2, wxT("f2.tga") },
+    { WhichImage::kFL0, wxT("fl0.tga") },
+    { WhichImage::kFL1, wxT("fl1.tga") },
+    { WhichImage::kFL2, wxT("fl2.tga") },
+    { WhichImage::kL0, wxT("l0.tga") },
+    { WhichImage::kL1, wxT("l1.tga") },
+    { WhichImage::kL2, wxT("l2.tga") },
+    { WhichImage::kBL0, wxT("bl0.tga") },
+    { WhichImage::kBL1, wxT("bl1.tga") },
+    { WhichImage::kBL2, wxT("bl2.tga") },
+    { WhichImage::kB0, wxT("b0.tga") },
+    { WhichImage::kB1, wxT("b1.tga") },
+    { WhichImage::kB2, wxT("b2.tga") },
+    { WhichImage::kBR0, wxT("br0.tga") },
+    { WhichImage::kBR1, wxT("br1.tga") },
+    { WhichImage::kBR2, wxT("br2.tga") },
+    { WhichImage::kR0, wxT("r0.tga") },
+    { WhichImage::kR1, wxT("r1.tga") },
+    { WhichImage::kR2, wxT("r2.tga") },
+    { WhichImage::kFR0, wxT("fr0.tga") },
+    { WhichImage::kFR1, wxT("fr1.tga") },
+    { WhichImage::kFR2, wxT("fr2.tga") },
+    { WhichImage::kField, wxT("field.tga") },
+    { WhichImage::kLines, wxT("lines.tga") },
+    { WhichImage::kDirection, wxT("Direction.tga") },
+    { WhichImage::kBleachers, wxT("bleachers.tga") },
+    { WhichImage::kWall, wxT("wall.tga") },
+    { WhichImage::kSky, wxT("sky.tga") },
+    { WhichImage::kCalband, wxT("calband.tga") },
+    { WhichImage::kC, wxT("C.tga") },
+    { WhichImage::kCal, wxT("cal.tga") },
+    { WhichImage::kCalifornia, wxT("california.tga") },
+    { WhichImage::kEECS, wxT("eecs.tga") },
+    { WhichImage::kPressbox, wxT("pressbox.tga") },
+    { WhichImage::kCrowd, wxT("crowd.tga") },
+    { WhichImage::kGoalpost, wxT("goalpost.tga") },
+    { WhichImage::kEndOfShow, wxT("endofshow.tga") }
+};
 
-id_string_t ListOfImageFiles[] = { { kF0, wxT("f0.tga") },
-    { kF1, wxT("f1.tga") },
-    { kF2, wxT("f2.tga") },
-    { kFL0, wxT("fl0.tga") },
-    { kFL1, wxT("fl1.tga") },
-    { kFL2, wxT("fl2.tga") },
-    { kL0, wxT("l0.tga") },
-    { kL1, wxT("l1.tga") },
-    { kL2, wxT("l2.tga") },
-    { kBL0, wxT("bl0.tga") },
-    { kBL1, wxT("bl1.tga") },
-    { kBL2, wxT("bl2.tga") },
-    { kB0, wxT("b0.tga") },
-    { kB1, wxT("b1.tga") },
-    { kB2, wxT("b2.tga") },
-    { kBR0, wxT("br0.tga") },
-    { kBR1, wxT("br1.tga") },
-    { kBR2, wxT("br2.tga") },
-    { kR0, wxT("r0.tga") },
-    { kR1, wxT("r1.tga") },
-    { kR2, wxT("r2.tga") },
-    { kFR0, wxT("fr0.tga") },
-    { kFR1, wxT("fr1.tga") },
-    { kFR2, wxT("fr2.tga") },
-    { kField, wxT("field.tga") },
-    { kLines, wxT("lines.tga") },
-    { kDirection, wxT("Direction.tga") },
-    { kBleachers, wxT("bleachers.tga") },
-    { kWall, wxT("wall.tga") },
-    { kSky, wxT("sky.tga") },
-    { kCalband, wxT("calband.tga") },
-    { kC, wxT("C.tga") },
-    { kCal, wxT("cal.tga") },
-    { kCalifornia, wxT("california.tga") },
-    { kEECS, wxT("eecs.tga") },
-    { kPressbox, wxT("pressbox.tga") },
-    { kCrowd, wxT("crowd.tga") },
-    { kGoalpost, wxT("goalpost.tga") },
-    { kEndOfShow, wxT("endofshow.tga") } };
-
-typedef enum {
+enum WhichMarchingStyle {
     kClosed,
     kLeftHSHup,
     kRightHSHup,
@@ -171,7 +168,7 @@ typedef enum {
     kRightMilitaryPoof,
     kLeftGrapeVine,
     kRightGrapeVine,
-} WhichMarchingStyle;
+};
 
 BEGIN_EVENT_TABLE(CCOmniviewCanvas, wxGLCanvas)
 EVT_CHAR(CCOmniviewCanvas::OnChar)
@@ -206,18 +203,19 @@ static void CheckGLError()
     }
 }
 
-static float NormalizeAngle(float angle)
+template <typename Float>
+auto NormalizeAngle(Float angle)
 {
     while (angle > 2 * M_PI) {
-        angle -= (float)(2 * M_PI);
+        angle -= 2 * M_PI;
     }
     while (angle < 0.0) {
-        angle += (float)(2 * M_PI);
+        angle += 2 * M_PI;
     }
     return angle;
 }
 
-static bool LoadTextureWithImage(const wxImage& image, GLuint& texture)
+static auto LoadTextureWithImage(wxImage const& image, GLuint& texture)
 {
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -240,16 +238,14 @@ static bool LoadTextureWithImage(const wxImage& image, GLuint& texture)
                 mixedAlpha.at(x * 4 + (y * width * 4) + 3) = image.GetAlpha(x, y);
             }
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-            GL_UNSIGNED_BYTE, &mixedAlpha[0]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &mixedAlpha[0]);
     } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.GetWidth(), image.GetHeight(),
-            0, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.GetWidth(), image.GetHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
     }
     return true;
 }
 
-static bool LoadTexture(const wxString& filename, GLuint& texture)
+static auto LoadTexture(wxString const& filename, GLuint& texture)
 {
     wxImage image;
     if (!image.LoadFile(filename)) {
@@ -260,7 +256,7 @@ static bool LoadTexture(const wxString& filename, GLuint& texture)
 }
 
 // We always draw from the upper left, upper right, lower right, lower left
-static void DrawTextureOnBox(const double points[4][3], size_t repeat_x, size_t repeat_y, const GLuint& texture)
+static void DrawTextureOnBox(double const points[4][3], size_t repeat_x, size_t repeat_y, GLuint const& texture)
 {
     glBindTexture(GL_TEXTURE_2D, texture);
     glBegin(GL_QUADS);
@@ -275,7 +271,7 @@ static void DrawTextureOnBox(const double points[4][3], size_t repeat_x, size_t 
     glEnd();
 }
 
-static void DrawBox(const double points[4][3])
+static void DrawBox(double const points[4][3])
 {
     glBegin(GL_QUADS);
     glVertex3f(points[0][0], points[0][1], points[0][2]);
@@ -285,10 +281,7 @@ static void DrawBox(const double points[4][3])
     glEnd();
 }
 
-static WhichImageEnum GetMarcherTextureAndPoints(float cameraAngleToMarcher,
-    float marcherDirection,
-    float& x1, float& x2,
-    float& y1, float& y2)
+auto GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirection, float& x1, float& x2, float& y1, float& y2)
 {
     // Returns which direction they are facing in regards to the camera.
     float relativeAngle = marcherDirection - cameraAngleToMarcher; // convert to relative angle;
@@ -331,32 +324,32 @@ static WhichImageEnum GetMarcherTextureAndPoints(float cameraAngleToMarcher,
     }
 
     if (relativeAngle >= 1.0 * M_PI / 8.0 && relativeAngle < 3.0 * M_PI / 8.0) {
-        return kBR0;
+        return WhichImage::kBR0;
     } else if (relativeAngle >= 3.0 * M_PI / 8.0 && relativeAngle < 5.0 * M_PI / 8.0) {
-        return kR0;
+        return WhichImage::kR0;
     } else if (relativeAngle >= 5.0 * M_PI / 8.0 && relativeAngle < 7.0 * M_PI / 8.0) {
-        return kFR0;
+        return WhichImage::kFR0;
     } else if (relativeAngle >= 7.0 * M_PI / 8.0 && relativeAngle < 9.0 * M_PI / 8.0) {
-        return kF0;
+        return WhichImage::kF0;
     } else if (relativeAngle >= 9.0 * M_PI / 8.0 && relativeAngle < 11.0 * M_PI / 8.0) {
-        return kFL0;
+        return WhichImage::kFL0;
     } else if (relativeAngle >= 11.0 * M_PI / 8.0 && relativeAngle < 13.0 * M_PI / 8.0) {
-        return kL0;
+        return WhichImage::kL0;
     } else if (relativeAngle >= 13.0 * M_PI / 8.0 && relativeAngle < 15.0 * M_PI / 8.0) {
-        return kBL0;
+        return WhichImage::kBL0;
     } else // if (relativeAngle >= 15.0*M_PI/8.0 || relativeAngle < 1.0*M_PI/8.0)
     // // and everything else
     {
-        return kB0;
+        return WhichImage::kB0;
     }
 }
 
 // Returns the angle in regards to the camera.
-static float GetAngle(float x, float y, ViewPoint const& viewpoint)
+static auto GetAngle(float x, float y, ViewPoint const& viewpoint)
 {
     auto v = ViewPoint{ x - viewpoint.x, y - viewpoint.y };
-    float mag = sqrt(v.x * v.x + v.y * v.y);
-    float ang = acos(v.x / mag); // normalize
+    auto mag = sqrt(v.x * v.x + v.y * v.y);
+    auto ang = acos(v.x / mag); // normalize
     return (v.y < 0) ? -ang : ang;
 }
 
@@ -366,13 +359,13 @@ public:
     CCOmniView_GLContext(wxGLCanvas* canvas);
 
     void DrawField(float FieldEW, float FieldNS, bool crowdOn);
-    void Draw3dMarcher(const MarcherInfo& info, const ViewPoint& viewpoint, WhichMarchingStyle style);
+    void Draw3dMarcher(MarcherInfo const& info, const ViewPoint& viewpoint, WhichMarchingStyle style);
 
-    bool UseForLines(const wxImage& lines);
+    bool UseForLines(wxImage const& lines);
 
 private:
     // textures for the cube faces
-    GLuint m_textures[kImageLast];
+    GLuint m_textures[static_cast<int>(WhichImage::kImageLast)];
 };
 
 CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas* canvas)
@@ -383,107 +376,104 @@ CCOmniView_GLContext::CCOmniView_GLContext(wxGLCanvas* canvas)
     // set up the parameters we want to use
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND); // to allow alpha values to be considered
-    glBlendFunc(GL_SRC_ALPHA,
-        GL_ONE_MINUS_SRC_ALPHA); // to allow alpha values to be considered
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // to allow alpha values to be considered
     glClearColor(0.289f, 0.941f, 1.0f, 1.0f); // Default Background Color
 
     glGenTextures(WXSIZEOF(m_textures), m_textures);
 
-    for (size_t i = 0; i < sizeof(ListOfImageFiles) / sizeof(ListOfImageFiles[0]);
-         ++i) {
-        if (!LoadTexture(GetImageDir() + ListOfImageFiles[i].mImageFilename, m_textures[ListOfImageFiles[i].mImageId])) {
-            wxLogError(wxT("Could not load ") + ListOfImageFiles[i].mImageFilename);
+    for (auto i : ListOfImageFiles) {
+        if (!LoadTexture(GetImageDir() + i.second, m_textures[i.first])) {
+            wxLogError(wxT("Could not load ") + i.second);
         }
     }
 
     CheckGLError();
 }
 
-bool CCOmniView_GLContext::UseForLines(const wxImage& lines)
+bool CCOmniView_GLContext::UseForLines(wxImage const& lines)
 {
-    return LoadTextureWithImage(lines, m_textures[kLines]);
+    return LoadTextureWithImage(lines, m_textures[WhichImage::kLines]);
 }
 
-void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS,
-    bool crowdOn)
+void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
     // because we look up to see the sky, make sure the texture is pointing down:
-    const double points00[][3] = { { 1000, -1000, 30 },
+    double const points00[][3] = { { 1000, -1000, 30 },
         { -1000, -1000, 30 },
         { -1000, 1000, 30 },
         { 1000, 1000, 30 } };
-    DrawTextureOnBox(points00, 20, 20, m_textures[kSky]);
-    const double points01[][3] = {
+    DrawTextureOnBox(points00, 20, 20, m_textures[WhichImage::kSky]);
+    double const points01[][3] = {
         { -1 * (FieldNS / 2.0 + 25), (FieldEW / 2.0 + 10), 0 },
         { (FieldNS / 2.0 + 25), (FieldEW / 2.0 + 10), 0 },
         { (FieldNS / 2.0 + 25), -1 * (FieldEW / 2.0 + 10), 0 },
         { -1 * (FieldNS / 2.0 + 25), -1 * (FieldEW / 2.0 + 10), 0 }
     };
-    DrawTextureOnBox(points01, 2, 2, m_textures[kField]);
-    const double points02[][3] = { { FieldNS / 2.0 + 16, +FieldEW / 2.0, 0 },
+    DrawTextureOnBox(points01, 2, 2, m_textures[WhichImage::kField]);
+    double const points02[][3] = { { FieldNS / 2.0 + 16, +FieldEW / 2.0, 0 },
         { FieldNS / 2.0 + 16, -FieldEW / 2.0, 0 },
         { FieldNS / 2.0, -FieldEW / 2.0, 0 },
         { FieldNS / 2.0, FieldEW / 2.0, 0 } };
-    DrawTextureOnBox(points02, 1, 1, m_textures[kCalifornia]);
-    const double points03[][3] = {
+    DrawTextureOnBox(points02, 1, 1, m_textures[WhichImage::kCalifornia]);
+    double const points03[][3] = {
         { -1 * (FieldNS / 2.0 + 16), -1 * (FieldEW / 2.0), 0 },
         { -1 * (FieldNS / 2.0 + 16), -1 * (-FieldEW / 2.0), 0 },
         { -1 * (FieldNS / 2.0), -1 * (-FieldEW / 2.0), 0 },
         { -1 * (FieldNS / 2.0), -1 * (FieldEW / 2.0), 0 }
     };
-    DrawTextureOnBox(points03, 1, 1, m_textures[kEECS]);
-    const double points04[][3] = { { -FieldNS / 2.0, FieldEW / 2.0, 0 },
+    DrawTextureOnBox(points03, 1, 1, m_textures[WhichImage::kEECS]);
+    double const points04[][3] = { { -FieldNS / 2.0, FieldEW / 2.0, 0 },
         { FieldNS / 2.0, FieldEW / 2.0, 0 },
         { FieldNS / 2.0, -FieldEW / 2.0, 0 },
         { -FieldNS / 2.0, -FieldEW / 2.0, 0 } };
-    DrawTextureOnBox(points04, 1, 1, m_textures[kLines]);
-    const double points05[][3] = {
+    DrawTextureOnBox(points04, 1, 1, m_textures[WhichImage::kLines]);
+    double const points05[][3] = {
         { -10, 10, 0 }, { 10, 10, 0 }, { 10, -10, 0 }, { -10, -10, 0 }
     };
-    DrawTextureOnBox(points05, 1, 1, m_textures[kCalband]);
+    DrawTextureOnBox(points05, 1, 1, m_textures[WhichImage::kCalband]);
 
     // stands:
-    const double points06[][3] = { { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 30, 25 },
+    double const points06[][3] = { { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 30, 25 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 30, 25 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 0 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 } };
     DrawTextureOnBox(points06, 5, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points07[][3] = {
+    double const points07[][3] = {
         { -(-FieldNS / 2.0 - 25), -(FieldEW / 2.0 + 30), 25 },
         { -(FieldNS / 2.0 + 25), -(FieldEW / 2.0 + 30), 25 },
         { -(FieldNS / 2.0 + 25), -(FieldEW / 2.0 + 10), 0 },
         { -(-FieldNS / 2.0 - 25), -(FieldEW / 2.0 + 10), 0 }
     };
     DrawTextureOnBox(points07, 5, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points08[][3] = { { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
+    double const points08[][3] = { { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
         { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
         { -FieldNS / 2.0 - 50, -FieldEW / 2.0 - 10, 25 },
         { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 30, 25 } };
     DrawTextureOnBox(points08, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points09[][3] = { { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
+    double const points09[][3] = { { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 30, 25 },
         { -FieldNS / 2.0 - 50, FieldEW / 2.0 + 10, 25 } };
     DrawTextureOnBox(points09, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points10[][3] = { { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 0 },
+    double const points10[][3] = { { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 0 },
         { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 0 },
         { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 30, 25 },
         { FieldNS / 2.0 + 50, -FieldEW / 2.0 - 10, 25 } };
     DrawTextureOnBox(points10, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points11[][3] = { { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 0 },
+    double const points11[][3] = { { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 0 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 0 },
         { FieldNS / 2.0 + 50, FieldEW / 2.0 + 10, 25 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 30, 25 } };
     DrawTextureOnBox(points11, 1, 10, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points12[][3] = { { -FieldNS / 2.0 - 50, -FieldEW / 2.0 - 10, 25 },
+    double const points12[][3] = { { -FieldNS / 2.0 - 50, -FieldEW / 2.0 - 10, 25 },
         { -FieldNS / 2.0 - 50, FieldEW / 2.0 + 10, 25 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
         { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 } };
     DrawTextureOnBox(points12, 4, 5, m_textures[crowdOn ? kCrowd : kBleachers]);
-    const double points13[][3] = {
+    double const points13[][3] = {
         { -(-FieldNS / 2.0 - 50), -(-FieldEW / 2.0 - 10), 25 },
         { -(-FieldNS / 2.0 - 50), -(FieldEW / 2.0 + 10), 25 },
         { -(-FieldNS / 2.0 - 25), -(FieldEW / 2.0 + 10), 0 },
@@ -492,87 +482,87 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS,
     DrawTextureOnBox(points13, 4, 5, m_textures[crowdOn ? kCrowd : kBleachers]);
 
     glColor3f(0.0, 0.0, 0.0);
-    const double points14[][3] = { { FieldNS / 2.0 + 25, 8, 0 },
+    double const points14[][3] = { { FieldNS / 2.0 + 25, 8, 0 },
         { FieldNS / 2.0 + 25, -8, 0 },
         { FieldNS / 2.0 + 32, -8, 6 },
         { FieldNS / 2.0 + 32, 8, 6 } };
     DrawBox(points14); // North Tunnel
-    const double points15[][3] = { { -FieldNS / 2.0 - 25, 8, 0 },
+    double const points15[][3] = { { -FieldNS / 2.0 - 25, 8, 0 },
         { -FieldNS / 2.0 - 25, -8, 0 },
         { -FieldNS / 2.0 - 32, -8, 6 },
         { -FieldNS / 2.0 - 32, 8, 6 } };
     DrawBox(points15); // South Tunnel
     glColor3f(1.0, 1.0, 1.0);
 
-    const double points16[][3] = { { -40, FieldEW / 2.0 + 30, 35 },
+    double const points16[][3] = { { -40, FieldEW / 2.0 + 30, 35 },
         { 40, FieldEW / 2.0 + 30, 35 },
         { 40, FieldEW / 2.0 + 30, 25 },
         { -40, FieldEW / 2.0 + 30, 25 } };
-    DrawTextureOnBox(points16, 1, 1, m_textures[kPressbox]);
+    DrawTextureOnBox(points16, 1, 1, m_textures[WhichImage::kPressbox]);
 
-    const double points17[][3] = { { 10, -(FieldEW / 2.0 + 30), 25 },
+    double const points17[][3] = { { 10, -(FieldEW / 2.0 + 30), 25 },
         { -10, -(FieldEW / 2.0 + 30), 25 },
         { -10, -(FieldEW / 2.0 + 10), 0 },
         { 10, -(FieldEW / 2.0 + 10), 0 } };
-    DrawTextureOnBox(points17, 1, 1, m_textures[kC]);
+    DrawTextureOnBox(points17, 1, 1, m_textures[WhichImage::kC]);
 
-    const double points18[][3] = { { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
+    double const points18[][3] = { { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 0 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 3 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 3 } };
-    DrawTextureOnBox(points18, 5, 1, m_textures[kWall]);
-    const double points19[][3] = { { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
+    DrawTextureOnBox(points18, 5, 1, m_textures[WhichImage::kWall]);
+    double const points19[][3] = { { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
         { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 0 },
         { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 3 },
         { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 3 } };
-    DrawTextureOnBox(points19, 5, 1, m_textures[kWall]);
-    const double points20[][3] = { { -FieldNS / 2.0 - 25, 8, 0 },
+    DrawTextureOnBox(points19, 5, 1, m_textures[WhichImage::kWall]);
+    double const points20[][3] = { { -FieldNS / 2.0 - 25, 8, 0 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 0 },
         { -FieldNS / 2.0 - 25, FieldEW / 2.0 + 10, 3 },
         { -FieldNS / 2.0 - 25, 8, 3 } };
-    DrawTextureOnBox(points20, 2, 1, m_textures[kWall]);
-    const double points21[][3] = { { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
+    DrawTextureOnBox(points20, 2, 1, m_textures[WhichImage::kWall]);
+    double const points21[][3] = { { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 0 },
         { -FieldNS / 2.0 - 25, -8, 0 },
         { -FieldNS / 2.0 - 25, -8, 3 },
         { -FieldNS / 2.0 - 25, -FieldEW / 2.0 - 10, 3 } };
-    DrawTextureOnBox(points21, 2, 1, m_textures[kWall]);
-    const double points22[][3] = { { FieldNS / 2.0 + 25, 8, 0 },
+    DrawTextureOnBox(points21, 2, 1, m_textures[WhichImage::kWall]);
+    double const points22[][3] = { { FieldNS / 2.0 + 25, 8, 0 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 0 },
         { FieldNS / 2.0 + 25, FieldEW / 2.0 + 10, 3 },
         { FieldNS / 2.0 + 25, 8, 3 } };
-    DrawTextureOnBox(points22, 2, 1, m_textures[kWall]);
-    const double points23[][3] = { { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 0 },
+    DrawTextureOnBox(points22, 2, 1, m_textures[WhichImage::kWall]);
+    double const points23[][3] = { { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 0 },
         { FieldNS / 2.0 + 25, -8, 0 },
         { FieldNS / 2.0 + 25, -8, 3 },
         { FieldNS / 2.0 + 25, -FieldEW / 2.0 - 10, 3 } };
-    DrawTextureOnBox(points23, 2, 1, m_textures[kWall]);
+    DrawTextureOnBox(points23, 2, 1, m_textures[WhichImage::kWall]);
 
     glFlush();
 
     CheckGLError();
 }
 
-void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info,
-    ViewPoint const& viewpoint,
-    WhichMarchingStyle style)
+void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info, ViewPoint const& viewpoint, WhichMarchingStyle style)
 {
-    float ang = NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
-    float dir = info.direction;
+    auto ang = NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
+    auto dir = info.direction;
 
-    float x1, x2, y1, y2;
-    x1 = x2 = info.x;
-    y1 = y2 = info.y;
-    float z1 = 3, z2 = 0;
+    auto x2 = info.x;
+    auto x1 = x2;
+    auto y2 = info.y;
+    auto y1 = y2;
+    auto z1 = 3.f;
+    auto z2 = 0.f;
 
-    WhichImageEnum face = GetMarcherTextureAndPoints(ang, dir, x1, x2, y1, y2);
+    auto face = GetMarcherTextureAndPoints(ang, dir, x1, x2, y1, y2);
 
     // if we want to modify the marching:
     switch (style) {
     case kLeftHSHup:
-        face = static_cast<WhichImageEnum>(face + kF1);
+        face = static_cast<WhichImage>(face + kF1);
         break;
     case kRightHSHup:
-        face = static_cast<WhichImageEnum>(face + kF2);
+        face = static_cast<WhichImage>(face + kF2);
         break;
     default:
         break;
@@ -580,28 +570,35 @@ void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info,
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-    const double points[][3] = {
+    double const points[][3] = {
         { x1, y1, z1 }, { x2, y2, z1 }, { x2, y2, z2 }, { x1, y1, z2 }
     };
     DrawTextureOnBox(points, 1, 1, m_textures[face]);
 }
 
-CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config_, const wxSize& size)
+CCOmniviewCanvas::CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config_, wxSize const& size)
     : wxGLCanvas(parent, wxID_ANY, NULL, wxDefaultPosition, size, wxFULL_REPAINT_ON_RESIZE)
     , m_glContext(new CCOmniView_GLContext(this))
     , config(config_)
     , mViewPoint(kStartingViewPoint)
-    , mFollowMarcher(-1)
-    , mCrowdOn(false)
-    , mShowMarching(true)
     , mViewAngle(kStartingViewAngle)
     , mViewAngleZ(kStartingViewAngleZ)
-    , mFOV(60)
-    , mShiftMoving(false)
+{
+    Init();
+    CreateControls();
+    GetSizer()->Fit(this);
+    GetSizer()->SetSizeHints(this);
+}
+
+void CCOmniviewCanvas::Init()
 {
 }
 
-CCOmniviewCanvas::~CCOmniviewCanvas() {}
+void CCOmniviewCanvas::CreateControls()
+{
+    auto topSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topSizer);
+}
 
 void CCOmniviewCanvas::SetView(AnimationView* view)
 {
@@ -621,7 +618,8 @@ static void myGLUPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLd
     glFrustum(-fW, fW, -fH, fH, zNear, zFar);
 }
 
-static void NormalizeVector(float v[3])
+template <typename Float>
+static void NormalizeVector(Float v[3])
 {
     auto mag = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     v[0] /= mag;
@@ -629,7 +627,8 @@ static void NormalizeVector(float v[3])
     v[2] /= mag;
 }
 
-static void CrossVector(float dst[3], float a[3], float b[3])
+template <typename Float>
+static void CrossVector(Float dst[3], Float a[3], Float b[3])
 {
     dst[0] = a[1] * b[2] - a[2] * b[1];
     dst[1] = a[2] * b[0] - a[0] * b[2];
@@ -637,9 +636,7 @@ static void CrossVector(float dst[3], float a[3], float b[3])
 }
 
 // rolling my own gluLookAt from http://www.opengl.org/wiki/GluLookAt_code
-static void mygluLookAt(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ,
-    GLdouble centerX, GLdouble centerY, GLdouble centerZ,
-    GLdouble upX, GLdouble upY, GLdouble upZ)
+static void mygluLookAt(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble centerX, GLdouble centerY, GLdouble centerZ, GLdouble upX, GLdouble upY, GLdouble upZ)
 {
     GLfloat m[16];
     float forward[3];
@@ -702,9 +699,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
 
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-    CalChart::Coord fieldSize = mView
-        ? mView->GetShowMode().FieldSize()
-        : CalChart::Coord(160, 80);
+    CalChart::Coord fieldSize = mView ? mView->GetShowMode().FieldSize() : CalChart::Coord(160, 80);
     float FieldEW = CoordUnits2Float(fieldSize.y);
     float FieldNS = CoordUnits2Float(fieldSize.x);
 
@@ -712,8 +707,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
     // set our view point:
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    myGLUPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y),
-        0.1, 2 * FieldNS);
+    myGLUPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1, 2 * FieldNS);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     if (mFollowMarcher != -1) {
@@ -725,19 +719,14 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
         mViewAngleZ = 0;
     }
 
-    mygluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z,
-        mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle),
-        mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
+    mygluLookAt(mViewPoint.x, mViewPoint.y, mViewPoint.z, mViewPoint.x + cos(mViewAngle), mViewPoint.y + sin(mViewAngle), mViewPoint.z + sin(mViewAngleZ), 0.0, 0.0, 1.0);
 
     // Render the graphics and swap the buffers.
     m_glContext->DrawField(FieldEW, FieldNS, mCrowdOn);
     if (mView) {
         auto marchers = mView->GetMarchersByDistance(mViewPoint);
         for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
-            m_glContext->Draw3dMarcher(
-                i->second, mViewPoint,
-                mShowMarching ? (mView->OnBeat() ? kLeftHSHup : kRightHSHup)
-                              : kClosed);
+            m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mView->OnBeat() ? kLeftHSHup : kRightHSHup) : kClosed);
         }
     }
 
@@ -746,8 +735,8 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
 
 void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 {
-    const float stepIncr = 0.3f * 3;
-    const float AngleStepIncr = 0.1f * 3;
+    auto const stepIncr = 0.3f * 3;
+    auto const AngleStepIncr = 0.1f * 3;
     switch (event.GetKeyCode()) {
     // predetermined camera angles:
     case '1':
@@ -812,9 +801,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
 
     case '$':
         OnCmd_FollowMarcher(-1);
-        if (wxMessageBox(wxT("Set Custom Viewpoint 4?"), wxT("Custom Viewpoint"),
-                wxYES_NO)
-            == wxYES) {
+        if (wxMessageBox(wxT("Set Custom Viewpoint 4?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
             config.Set_OmniViewPoint_X_4(mViewPoint.x);
             config.Set_OmniViewPoint_Y_4(mViewPoint.y);
             config.Set_OmniViewPoint_Z_4(mViewPoint.z);
@@ -824,9 +811,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
     case '%':
         OnCmd_FollowMarcher(-1);
-        if (wxMessageBox(wxT("Set Custom Viewpoint 5?"), wxT("Custom Viewpoint"),
-                wxYES_NO)
-            == wxYES) {
+        if (wxMessageBox(wxT("Set Custom Viewpoint 5?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
             config.Set_OmniViewPoint_X_5(mViewPoint.x);
             config.Set_OmniViewPoint_Y_5(mViewPoint.y);
             config.Set_OmniViewPoint_Z_5(mViewPoint.z);
@@ -836,9 +821,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         break;
     case '^':
         OnCmd_FollowMarcher(-1);
-        if (wxMessageBox(wxT("Set Custom Viewpoint 6?"), wxT("Custom Viewpoint"),
-                wxYES_NO)
-            == wxYES) {
+        if (wxMessageBox(wxT("Set Custom Viewpoint 6?"), wxT("Custom Viewpoint"), wxYES_NO) == wxYES) {
             config.Set_OmniViewPoint_X_6(mViewPoint.x);
             config.Set_OmniViewPoint_Y_6(mViewPoint.y);
             config.Set_OmniViewPoint_Z_6(mViewPoint.z);

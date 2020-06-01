@@ -74,6 +74,7 @@ void initscanner() {
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-register"
+#pragma clang diagnostic ignored "-Wunused-function"
 #endif // __clang__
 %}
 

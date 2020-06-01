@@ -71,7 +71,7 @@ ContinuityBoxSubPartDrawer::ContinuityBoxSubPartDrawer(CalChart::DrawableCont co
 int ContinuityBoxSubPartDrawer::GetTextBoxSize(wxDC const& dc, CalChartConfiguration const& config) const
 {
     auto total_size = 0;
-    auto text_padding = config.Get_ContCellTextPadding();
+    auto text_padding = fDIP(config.Get_ContCellTextPadding());
 
     auto format_sub_size = dc.GetTextExtent("%@").x;
     for (auto&& i : mChildren) {
@@ -85,9 +85,9 @@ int ContinuityBoxSubPartDrawer::GetTextBoxSize(wxDC const& dc, CalChartConfigura
 
 void ContinuityBoxSubPartDrawer::DrawProcCellBox(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const
 {
-    auto text_padding = config.Get_ContCellTextPadding();
-    auto rounding = config.Get_ContCellRounding();
-    auto box_size_y = config.Get_ContCellFontSize() + 2 * text_padding;
+    auto text_padding = fDIP(config.Get_ContCellTextPadding());
+    auto rounding = fDIP(config.Get_ContCellRounding());
+    auto box_size_y = fDIP(config.Get_ContCellFontSize()) + 2 * text_padding;
     // first draw the box of the total size
     auto box_size_x = GetTextBoxSize(dc, config) + 2 * text_padding;
     {
@@ -115,24 +115,22 @@ void ContinuityBoxSubPartDrawer::DrawProcCellBox(wxDC& dc, CalChartConfiguration
     std::smatch format_match;
     auto string_to_print = config.Get_ContCellLongForm() ? mDrawCont.description : mDrawCont.short_description;
     auto count = 0u;
-    const auto text_top = y_start + text_padding;
-    auto text_left = x_start + text_padding;
+    auto textPoint = wxPoint{ x_start + text_padding, y_start + text_padding };
     while (regex_search(string_to_print, format_match, format_substr)) {
         auto t_str_to_print = wxString(format_match.prefix());
-        auto text_size = dc.GetTextExtent(t_str_to_print).x;
-        dc.DrawText(t_str_to_print, text_left, text_top);
-        text_left += text_size;
-        mChildren.at(count).DrawProcCellBox(dc, config, highlight, text_left, y_start);
-        text_left += mChildren.at(count).GetTextBoxSize(dc, config) + 2 * text_padding;
+        dc.DrawText(t_str_to_print, textPoint);
+        textPoint.x += dc.GetTextExtent(t_str_to_print).x;
+        mChildren.at(count).DrawProcCellBox(dc, config, highlight, textPoint.x, y_start);
+        textPoint.x += mChildren.at(count).GetTextBoxSize(dc, config) + 2 * text_padding;
         ++count;
         string_to_print = format_match.suffix();
     }
-    dc.DrawText(string_to_print, text_left, text_top);
+    dc.DrawText(string_to_print, textPoint);
 }
 
 void ContinuityBoxSubPartDrawer::DrawCell(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const
 {
-    auto box_padding = config.Get_ContCellBoxPadding();
+    auto box_padding = fDIP(config.Get_ContCellBoxPadding());
 
     DrawProcCellBox(dc, config, highlight, x_start + box_padding, y_start + box_padding);
 }
@@ -163,9 +161,7 @@ ContinuityBoxDrawer::~ContinuityBoxDrawer() = default;
 
 void ContinuityBoxDrawer::DrawToDC(wxDC& dc)
 {
-    wxFont* contPlainFont = wxTheFontList->FindOrCreateFont(mConfig.Get_ContCellFontSize(), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    dc.SetFont(*contPlainFont);
-
+    dc.SetFont(CreateFont(mConfig.Get_ContCellFontSize()));
     mContToken->DrawCell(dc, mConfig, mHighlight, 0, 0);
 }
 
@@ -176,13 +172,13 @@ int ContinuityBoxDrawer::Height() const
 
 int ContinuityBoxDrawer::GetHeight(CalChartConfiguration const& config)
 {
-    return config.Get_ContCellFontSize() + 2 * config.Get_ContCellBoxPadding() + 2 * config.Get_ContCellTextPadding();
+    return fDIP(config.Get_ContCellFontSize() + 2 * config.Get_ContCellBoxPadding() + 2 * config.Get_ContCellTextPadding());
 }
 
 int ContinuityBoxDrawer::Width() const
 {
     wxMemoryDC temp_dc;
-    return mContToken->GetTextBoxSize(temp_dc, mConfig) + 2 * mConfig.Get_ContCellBoxPadding() + 2 * mConfig.Get_ContCellTextPadding();
+    return mContToken->GetTextBoxSize(temp_dc, mConfig) + fDIP(2 * mConfig.Get_ContCellBoxPadding() + 2 * mConfig.Get_ContCellTextPadding());
 }
 
 void ContinuityBoxDrawer::OnClick(wxPoint const& point)

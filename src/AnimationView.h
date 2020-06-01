@@ -34,39 +34,36 @@ class Animation;
 class ShowMode;
 }
 
+// AnimationView is sort of a "proxy" view.  It allows a separate view for Animation into the show.
+// So it sort-of wraps CalChartView.
 class AnimationView : public wxView {
+    using super = wxView;
+
 public:
     AnimationView(CalChartView* view, wxWindow* frame);
-    ~AnimationView() = default;
+    ~AnimationView() override = default;
 
-    virtual void OnDraw(wxDC* dc) override;
-    void OnDraw(wxDC& dc, const CalChartConfiguration& config);
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
+    void OnDraw(wxDC* dc) override;
+    void OnDraw(wxDC& dc, CalChartConfiguration const& config);
+    void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)nullptr) override;
 
-    void SetDrawCollisionWarning(bool b) { mDrawCollisionWarning = b; }
-    auto GetDrawCollisionWarning() const { return mDrawCollisionWarning; }
-
-    // true if changes made
-    bool PrevBeat();
-    bool NextBeat();
-    void GotoBeat(unsigned i);
+    void PrevBeat();
+    void NextBeat();
     void GotoTotalBeat(unsigned i);
-    bool PrevSheet();
-    bool NextSheet();
-    void GotoSheet(unsigned i);
-    void GotoAnimationSheet(unsigned i);
-    void RefreshSheet();
+    bool AtEndOfShow() const;
+
+    void RefreshAnimationSheet();
 
     // info
-    int GetNumberSheets() const;
-    int GetCurrentSheet() const;
-    int GetNumberBeats() const;
-    int GetCurrentBeat() const;
     int GetTotalNumberBeats() const;
     int GetTotalCurrentBeat() const;
 
     std::pair<wxPoint, wxPoint> GetShowSizeAndOffset() const;
     std::pair<wxPoint, wxPoint> GetMarcherSizeAndOffset() const;
+
+    CalChart::ShowMode const& GetShowMode() const;
+    MarcherInfo GetMarcherInfo(int which) const;
+    std::multimap<double, MarcherInfo> GetMarchersByDistance(ViewPoint const& from) const;
 
     void UnselectAll();
     void SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown);
@@ -74,22 +71,20 @@ public:
     void ToggleTimer();
     bool OnBeat() const;
 
+    void SetDrawCollisionWarning(bool b) { mDrawCollisionWarning = b; }
+    auto GetDrawCollisionWarning() const { return mDrawCollisionWarning; }
+
     void SetPlayCollisionWarning(bool b) { mPlayCollisionWarning = b; }
     auto GetPlayCollisionWarning() const { return mPlayCollisionWarning; }
-
-    CalChart::ShowMode const& GetShowMode() const;
-    MarcherInfo GetMarcherInfo(int which) const;
-    std::multimap<double, MarcherInfo> GetMarchersByDistance(ViewPoint const& from) const;
-    int GetNumPoints() const;
 
 private:
     void Generate();
     void RefreshFrame();
 
-    const AnimationPanel* GetAnimationFrame() const;
+    AnimationPanel const* GetAnimationFrame() const;
     AnimationPanel* GetAnimationFrame();
 
-    // Yes, this view has a view.
+    // Yes, this view has a view...
     CalChartView* mView{};
 
     std::unique_ptr<CalChart::Animation> mAnimation;

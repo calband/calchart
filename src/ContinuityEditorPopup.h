@@ -22,8 +22,8 @@
 
 #pragma once
 
+#include "CalChartDoc.h"
 #include "basic_ui.h"
-#include "calchartdoc.h"
 
 class ContinuityBrowserPerCont;
 

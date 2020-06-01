@@ -139,6 +139,7 @@ void CalChartView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
 // Clean up windows used for displaying the view.
 bool CalChartView::OnClose(bool deleteWindow)
 {
+    mFrame->OnClose();
     SetFrame(static_cast<wxFrame*>(nullptr));
 
     Activate(false);

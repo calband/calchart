@@ -19,7 +19,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include "print_ps.h"
 
 #include "cc_sheet.h"
@@ -270,7 +269,7 @@ void PrintFontHeader(OS& buffer, std::array<std::string, 7> const& fonts)
     buffer << "/bolditalfont0 /" << fonts[6] << " def\n";
 }
 
-int PrintShowToPS::operator()(std::ostream& buffer, unsigned curr_ss,
+int PrintShowToPS::operator()(std::ostream& buffer,
     const std::set<size_t>& isPicked,
     std::string const& title) const
 {
@@ -290,7 +289,7 @@ int PrintShowToPS::operator()(std::ostream& buffer, unsigned curr_ss,
     }
 
     /* do stuntsheet pages now */
-    num_pages = PrintSheets(buffer, curr_ss, isPicked, num_pages);
+    num_pages = PrintSheets(buffer, isPicked, num_pages);
     /* finally, write trailer */
     PrintTrailer(buffer, num_pages);
 
@@ -374,7 +373,6 @@ void PrintShowToPS::PrintFieldDefinition(std::ostream& buffer) const
 }
 
 short PrintShowToPS::PrintSheets(std::ostream& buffer,
-    unsigned curr_ss,
     const std::set<size_t>& isPicked,
     short num_pages) const
 {

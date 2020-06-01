@@ -103,11 +103,11 @@ void PointPicker::CreateControls()
     top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
     topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
 
-    auto symbols = GetSymbolsToolBar();
-    for (auto iter = symbols.begin(); iter != symbols.end(); ++iter) {
-        button = new wxBitmapButton(this, wxID_ANY, *(iter->bm));
+    auto counter = 0;
+    for (auto&& i : GetSymbolsBitmap()) {
+        button = new wxBitmapButton(this, wxID_ANY, i);
         top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 2));
-        auto which = static_cast<SYMBOL_TYPE>(std::distance(symbols.begin(), iter));
+        auto which = static_cast<SYMBOL_TYPE>(counter++);
         button->Bind(wxEVT_BUTTON, [this, which](wxCommandEvent&) {
             mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
         });

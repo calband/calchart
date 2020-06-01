@@ -22,6 +22,7 @@
 
 #include "TopFrame.h"
 #include "CalChartApp.h"
+#include "CalChartSizes.h"
 #include "basic_ui.h"
 #include "calchart.xbm"
 #include "cc_preferences_ui.h"
@@ -92,12 +93,12 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     SetSizer(topSizer);
 
     // add a horizontal bar to make things clear:
-    AddToSizerBasic(topSizer, BitmapWithBandIcon(this, wxSize(150, 150)));
-    AddToSizerBasic(topSizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), 16));
-    AddToSizerBasic(topSizer, LineWithLength(this, 150));
+    AddToSizerBasic(topSizer, BitmapWithBandIcon(this, GetLogoSize()));
+    AddToSizerBasic(topSizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), GetTitleFontSize()));
+    AddToSizerBasic(topSizer, LineWithLength(this, GetLogoLineSize()));
 
-    AddToSizerBasic(topSizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", 14));
-    AddToSizerBasic(topSizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", 11));
+    AddToSizerBasic(topSizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", GetSubTitleFontSize()));
+    AddToSizerBasic(topSizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", GetSubSubTitleFontSize()));
 
     // now fit the frame to the elements
     topSizer->Fit(this);

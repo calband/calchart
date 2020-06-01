@@ -21,11 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartSizes.h"
+
+#include <vector>
 #include <wx/statline.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
-
-#include <vector>
 
 class CalChartView;
 
@@ -59,15 +60,15 @@ public:
 
 // Define a text subwindow that can respond to drag-and-drop
 class FancyTextWin : public wxTextCtrl {
+    using super = wxTextCtrl;
+
 public:
     FancyTextWin(wxWindow* parent, wxWindowID id,
         const wxString& value = wxEmptyString,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxTE_MULTILINE | wxHSCROLL | wxTE_PROCESS_TAB);
-#ifdef TEXT_DOS_STYLE
-    wxString GetValue(void) const;
-#endif
+    wxString GetValue(void) const override;
 };
 
 /**
@@ -169,10 +170,13 @@ void AddToSizerExpand(wxSizer* sizer, T window)
 template <typename T, typename Int, typename Brush>
 void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
 {
-    wxBitmap temp_bitmap(16, 16);
+    wxBitmap temp_bitmap(GetColorBoxSize());
     wxMemoryDC temp_dc;
     temp_dc.SelectObject(temp_bitmap);
     temp_dc.SetBackground(brush);
     temp_dc.Clear();
     target->SetItemBitmap(which, temp_bitmap);
 }
+
+wxFont CreateFont(int pixelSize, wxFontFamily family = wxFONTFAMILY_SWISS, wxFontStyle style = wxFONTSTYLE_NORMAL, wxFontWeight weight = wxFONTWEIGHT_NORMAL);
+wxFont ResizeFont(wxFont const& font, int pixelSize);

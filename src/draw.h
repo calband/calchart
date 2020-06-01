@@ -49,42 +49,23 @@ typedef enum {
 } HowToDraw;
 
 // draw the continuity starting at a specific offset
-void DrawPoints(wxDC& dc, const CalChartConfiguration& config, CalChart::Coord origin,
-    const SelectionList& selection_list,
-    unsigned short numberPoints,
-    const std::vector<std::string>& labels, const CalChart::Sheet& sheet,
-    unsigned ref, bool primary);
-void DrawGhostSheet(wxDC& dc, const CalChartConfiguration& config,
-    CalChart::Coord origin, const SelectionList& selection_list,
-    unsigned short numberPoints,
-    const std::vector<std::string>& labels,
-    const CalChart::Sheet& sheet, unsigned ref);
-void Draw(wxDC& dc, const CalChartDoc& show, const CalChart::Sheet& sheet,
-    unsigned ref, bool primary);
-void DrawContForPreview(wxDC& dc, const CalChart::Textline_list& print_continuity, const wxRect& bounding);
-void DrawCont(wxDC& dc, const CalChart::Textline_list& print_continuity, const wxRect& bounding, bool landscape, int useConstantTabs = 0);
-void DrawForPrinting(wxDC* dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CalChart::Sheet& sheet,
-    unsigned ref, bool landscape);
-void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
-    const CalChartDoc& show, const CalChart::Sheet& sheet,
-    const std::map<int, CalChart::Coord>& positions);
-void DrawMode(wxDC& dc, const CalChartConfiguration& config,
-    const CalChart::ShowMode& mode, HowToDraw howToDraw);
-wxImage GetOmniLinesImage(const CalChartConfiguration& config,
-    const CalChart::ShowMode& mode);
+void Draw(wxDC& dc, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool primary);
+void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary);
+void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref);
+void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding, bool landscape, int useConstantTabs = 0);
+void DrawContForPreview(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect const& bounding);
+void DrawForPrinting(wxDC* dc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape);
+void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config, CalChartDoc const& show, CalChart::Sheet const& sheet, std::map<int, CalChart::Coord> const& positions);
+void DrawMode(wxDC& dc, CalChartConfiguration const& config, CalChart::ShowMode const& mode, HowToDraw howToDraw);
+wxImage GetOmniLinesImage(const CalChartConfiguration& config, CalChart::ShowMode const& mode);
 
-void PrintStandard(std::ostream& buffer, const CalChart::Sheet& sheet);
-void PrintSpringshow(std::ostream& buffer, const CalChart::Sheet& sheet);
-void PrintOverview(std::ostream& buffer, const CalChart::Sheet& sheet);
-void PrintCont(std::ostream& buffer, const CalChart::Sheet& sheet);
+void PrintStandard(std::ostream& buffer, CalChart::Sheet const& sheet);
+void PrintSpringshow(std::ostream& buffer, CalChart::Sheet const& sheet);
+void PrintOverview(std::ostream& buffer, CalChart::Sheet const& sheet);
+void PrintCont(std::ostream& buffer, CalChart::Sheet const& sheet);
 
 // We break this out of the class to make CalChart internals more cross platform
 // Draw the point
-void DrawPath(wxDC& dc, const CalChartConfiguration& config,
-    const std::vector<CalChart::DrawCommand>& draw_commands,
-    const CalChart::Coord& end);
+void DrawPath(wxDC& dc, CalChartConfiguration const& config, std::vector<CalChart::DrawCommand> const& draw_commands, CalChart::Coord const& end);
 
-void DrawCC_DrawCommandList(wxDC& dc,
-    const std::vector<CalChart::DrawCommand>& draw_commands);
-// void DrawShape(wxDC& dc, const CC_shape& shape, float x, float y);
+void DrawCC_DrawCommandList(wxDC& dc, std::vector<CalChart::DrawCommand> const& draw_commands);

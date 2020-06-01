@@ -21,6 +21,7 @@
 */
 
 #include "ColorPalette.h"
+#include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "ColorSetupDialog.h"
 #include "confgr.h"
@@ -28,9 +29,9 @@
 
 #include <wx/dcbuffer.h>
 
-constexpr auto kBoxSize = 20;
-constexpr auto kBoxBorder = 4;
-constexpr auto kBoxRadius = 4;
+static const auto kBoxSize = GetColorPaletteBoxSize();
+static const auto kBoxBorder = GetColorPaletteBoxBorderSize();
+static const auto kBoxRadius = GetColorPaletteBoxRadiusSize();
 
 BEGIN_EVENT_TABLE(ColorPalettePanel, ColorPalettePanel::super)
 EVT_LEFT_UP(ColorPalettePanel::OnLeftClick)
@@ -38,13 +39,13 @@ EVT_LEFT_DCLICK(ColorPalettePanel::OnLeftDoubleClick)
 EVT_PAINT(ColorPalettePanel::OnPaint)
 END_EVENT_TABLE()
 
-ColorPalettePanel::ColorPalettePanel(wxWindow* parent,
-    wxWindowID winid,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style,
-    const wxString& name)
+ColorPalettePanel::ColorPalettePanel(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
+{
+    Init();
+}
+
+void ColorPalettePanel::Init()
 {
     SetMinClientSize(wxSize(kBoxBorder + kNumberPalettes * (kBoxSize + kBoxBorder), 2 * kBoxBorder + kBoxSize));
 }
@@ -57,6 +58,8 @@ void ColorPalettePanel::OnPaint(wxPaintEvent& event)
     dc.Clear();
 
     // draw the rounded rectangles
+    auto point = wxPoint{ kBoxBorder, kBoxBorder };
+    auto size = wxSize{ kBoxSize, kBoxSize };
     for (auto i = 0; i < kNumberPalettes; ++i) {
         if (config.GetActiveColorPalette() == i) {
             dc.SetPen(*wxYELLOW_PEN);
@@ -64,7 +67,8 @@ void ColorPalettePanel::OnPaint(wxPaintEvent& event)
             dc.SetPen(*wxBLACK_PEN);
         }
         dc.SetBrush(config.GetColorPaletteColor(i));
-        dc.DrawRoundedRectangle(kBoxBorder + i * (kBoxSize + kBoxBorder), kBoxBorder, kBoxSize, kBoxSize, kBoxRadius);
+        dc.DrawRoundedRectangle(point, size, kBoxRadius);
+        point.x += kBoxBorder + kBoxSize;
     }
 }
 

@@ -68,6 +68,7 @@ AnimateCompile::Compile(
         c_sheet->GetBeats(),
         variablesStates,
         errors,
+        {},
     };
 
     AnimateCompile ac(show, cont_symbol, pt_num, c_sheet, state);

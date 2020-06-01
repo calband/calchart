@@ -78,23 +78,23 @@ class CalChartDoc : public wxDocument {
     DECLARE_DYNAMIC_CLASS(CalChartDoc)
 public:
     CalChartDoc();
-    virtual ~CalChartDoc();
+    ~CalChartDoc() override = default;
 
     // Override the wxDocument functions:
     // Need to override OnOpenDoc so we can report errors, handle recovery file
-    virtual bool OnOpenDocument(const wxString& filename);
+    bool OnOpenDocument(wxString const& filename) override;
     // Need to override OnOpenDoc so we can report errors, handle recovery file
-    virtual bool OnCloseDocument();
+    bool OnCloseDocument() override;
     // Need to override OnNewDoc so we can start the setup wizard
-    virtual bool OnNewDocument();
+    bool OnNewDocument() override;
     // Need to override OnSaveDoc so we can handle recovery files
-    virtual bool OnSaveDocument(const wxString& filename);
+    bool OnSaveDocument(const wxString& filename) override;
     // Update the views that the doc been modified
-    virtual void Modify(bool b);
+    void Modify(bool b) override;
 
     // How we save and load a show:
-    virtual wxSTD ostream& SaveObject(wxSTD ostream& stream);
-    virtual wxSTD istream& LoadObject(wxSTD istream& stream);
+    wxSTD ostream& SaveObject(wxSTD ostream& stream) override;
+    wxSTD istream& LoadObject(wxSTD istream& stream) override;
 
     /*!
      * @brief Exports the show to a file that can be animated by
@@ -104,7 +104,7 @@ public:
      * expects a viewer file to end with the '.viewer' extension.
      * @return True if the file was saved successfully; false otherwise.
      */
-    bool exportViewerFile(const wxString& filepath);
+    bool exportViewerFile(wxString const& filepath);
 
 private:
     template <typename T>
@@ -116,7 +116,7 @@ private:
 
 public:
     // translates input into a mapping of which sheet to number,lines pair.
-    std::pair<bool, std::map<int, std::pair<std::string, std::string>>> ImportPrintableContinuity(const std::vector<std::string>& lines) const;
+    std::pair<bool, std::map<int, std::pair<std::string, std::string>>> ImportPrintableContinuity(std::vector<std::string> const& lines) const;
 
     void FlushAllTextWindows();
 
@@ -218,6 +218,7 @@ private:
             : mShow(show)
         {
         }
+        ~AutoSaveTimer() { Stop(); }
         void Notify();
 
     private:

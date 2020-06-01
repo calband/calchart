@@ -281,7 +281,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     for (auto i = 0; i < p->GetNumSheets(); ++i)
         picked.insert(i);
 
-    printShowToPS(output, 0, picked, "show");
+    printShowToPS(output, picked, "show");
 }
 
 int IndexForContNames(const std::string& name);

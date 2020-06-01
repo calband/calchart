@@ -22,6 +22,7 @@
 
 #include "ColorSetupCanvas.h"
 #include "CalChartDoc.h"
+#include "CalChartSizes.h"
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
@@ -53,7 +54,8 @@ EVT_ERASE_BACKGROUND(ColorSetupCanvas::OnEraseBackground)
 END_EVENT_TABLE()
 
 ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* parent)
-    : super(parent, wxID_ANY, wxDefaultPosition, wxSize(640, 240))
+    : super(parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
+    , mShow(Show::Create_CC_show(ShowMode::GetDefaultShowMode()))
     , mMode(ShowMode::CreateShowMode(
           Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
           Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
@@ -68,7 +70,6 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 
     // Create a fake show with some points and selections to draw an example for
     // the user
-    mShow = Show::Create_CC_show(ShowMode::GetDefaultShowMode());
     auto labels = std::vector<std::string>{
         "unsel",
         "unsel",
@@ -140,14 +141,11 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent& event)
     list.insert(3);
 
     // draw the ghost sheet
-    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
-        mShow->GetPointLabels(), *nextSheet, 0);
+    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *nextSheet, 0);
 
     // Draw the points
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
-        mShow->GetPointLabels(), *sheet, 0, true);
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(),
-        mShow->GetPointLabels(), *sheet, 1, false);
+    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 0, true);
+    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 1, false);
 
     // draw the path
     DrawPath(dc, mConfig, mPath, mPathEnd);

@@ -22,6 +22,7 @@
 
 #include "cc_preferences_ui.h"
 #include "CalChartDoc.h"
+#include "CalChartSizes.h"
 #include "ColorSetupCanvas.h"
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
@@ -229,7 +230,7 @@ void GeneralSetup::CreateControls()
 
 void GeneralSetup::Init()
 {
-    mAutoSave_Interval.Printf(wxT("%ld"), mConfig.Get_AutosaveInterval());
+    mAutoSave_Interval.Printf(wxT("%d"), static_cast<int>(mConfig.Get_AutosaveInterval()));
     mBeep_On_Collisions = mConfig.Get_BeepOnCollisions();
     mScroll_Natural = mConfig.Get_ScrollDirectionNatural();
     mSetSheet_Undo = mConfig.Get_CommandUndoSetSheet();
@@ -1015,7 +1016,7 @@ bool ShowModeSetup::TransferDataToWindow()
         wxString buf;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
             WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
-        buf.Printf(wxT("%ld"), *i);
+        buf.Printf(wxT("%d"), static_cast<int>(*i));
         text->ChangeValue(buf);
     }
 
@@ -1313,14 +1314,7 @@ void ContCellSetup::SetColor(int selection, const wxColour& color)
         pen);
 
     // update the namebox list
-    {
-        wxBitmap test_bitmap(16, 16);
-        wxMemoryDC temp_dc;
-        temp_dc.SelectObject(test_bitmap);
-        temp_dc.SetBackground(mContCellBrushes[selection]);
-        temp_dc.Clear();
-        nameBox->SetItemBitmap(selection, test_bitmap);
-    }
+    CreateAndSetItemBitmap(nameBox, selection, mContCellBrushes[selection]);
     Refresh();
 }
 

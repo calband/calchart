@@ -57,9 +57,7 @@ public:
         double ContRatio,
         std::function<std::string(size_t)> Get_yard_text);
 
-    int operator()(std::ostream& buffer, unsigned curr_ss,
-        const std::set<size_t>& isPicked,
-        std::string const& title) const;
+    int operator()(std::ostream& buffer, std::set<size_t> const& isPicked, std::string const& title) const;
 
 private:
     short PrintContinuitySheets(std::ostream& buffer, short num_pages) const;
@@ -75,8 +73,7 @@ private:
     void PrintHeader(std::ostream& buffer, const std::string& title) const;
     void PrintFieldDefinition(std::ostream& buffer) const;
     void PrintTrailer(std::ostream& buffer, short num_pages) const;
-    short PrintSheets(std::ostream& buffer, unsigned curr_ss,
-        const std::set<size_t>& isPicked, short num_pages) const;
+    short PrintSheets(std::ostream& buffer, std::set<size_t> const& isPicked, short num_pages) const;
 
     const CalChart::Show& mShow;
     bool mPrintLandscape;

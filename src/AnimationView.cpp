@@ -23,6 +23,7 @@
 #include "AnimationView.h"
 #include "AnimationPanel.h"
 #include "CalChartApp.h"
+#include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "animate.h"
 #include "animate_types.h"
@@ -33,11 +34,6 @@
 #include "modes.h"
 
 #include <wx/dcbuffer.h>
-
-#include <fstream>
-
-using namespace CalChart;
-// IMPLEMENT_DYNAMIC_CLASS(AnimationView, wxView)
 
 template <typename Float>
 static auto NormalizeAngle(Float angle)
@@ -63,38 +59,37 @@ void AnimationView::OnDraw(wxDC* dc)
     OnDraw(*dc, config);
 }
 
-void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
+void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
 {
     dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
     DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
-    const bool checkForCollision = mDrawCollisionWarning;
+    auto checkForCollision = mDrawCollisionWarning;
     if (mAnimation) {
         for (auto i = 0; i < mView->GetNumPoints(); ++i) {
             auto info = mAnimation->GetAnimateInfo(i);
 
             if (checkForCollision && info.mCollision) {
-                if (info.mCollision == Coord::COLLISION_WARNING) {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(
-                        COLOR_POINT_ANIM_COLLISION_WARNING);
+                if (info.mCollision == CalChart::Coord::COLLISION_WARNING) {
+                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
-                } else if (info.mCollision == Coord::COLLISION_INTERSECT) {
+                } else if (info.mCollision == CalChart::Coord::COLLISION_INTERSECT) {
                     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
                 }
             } else if (mView->IsSelected(i)) {
                 switch (info.mDirection) {
-                case ANIMDIR_SW:
-                case ANIMDIR_W:
-                case ANIMDIR_NW: {
+                case CalChart::ANIMDIR_SW:
+                case CalChart::ANIMDIR_W:
+                case CalChart::ANIMDIR_NW: {
                     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
                 } break;
-                case ANIMDIR_SE:
-                case ANIMDIR_E:
-                case ANIMDIR_NE: {
+                case CalChart::ANIMDIR_SE:
+                case CalChart::ANIMDIR_E:
+                case CalChart::ANIMDIR_NE: {
                     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
@@ -107,16 +102,16 @@ void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
                 }
             } else {
                 switch (info.mDirection) {
-                case ANIMDIR_SW:
-                case ANIMDIR_W:
-                case ANIMDIR_NW: {
+                case CalChart::ANIMDIR_SW:
+                case CalChart::ANIMDIR_W:
+                case CalChart::ANIMDIR_NW: {
                     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
                 } break;
-                case ANIMDIR_SE:
-                case ANIMDIR_E:
-                case ANIMDIR_NE: {
+                case CalChart::ANIMDIR_SE:
+                case CalChart::ANIMDIR_E:
+                case CalChart::ANIMDIR_NE: {
                     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
                     dc.SetBrush(brushAndPen.first);
                     dc.SetPen(brushAndPen.second);
@@ -128,18 +123,20 @@ void AnimationView::OnDraw(wxDC& dc, const CalChartConfiguration& config)
                 }
                 }
             }
-            Coord position = info.mPosition;
+            auto position = info.mPosition;
             auto x = position.x + mView->GetShowMode().Offset().x;
             auto y = position.y + mView->GetShowMode().Offset().y;
-            dc.DrawRectangle(x - Int2CoordUnits(1) / 2, y - Int2CoordUnits(1) / 2,
-                Int2CoordUnits(1), Int2CoordUnits(1));
+            auto drawPosition = fDIP(wxPoint(x, y));
+            auto rectangleSize = fDIP(wxSize(Int2CoordUnits(1), Int2CoordUnits(1)));
+
+            dc.DrawRectangle(drawPosition - rectangleSize / 2, rectangleSize);
         }
     }
 }
 
 void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 {
-    wxView::OnUpdate(sender, hint);
+    super::OnUpdate(sender, hint);
     if (hint && hint->IsKindOf(CLASSINFO(CalChartDoc_modified))) {
         Generate();
     }
@@ -157,15 +154,14 @@ void AnimationView::RefreshFrame()
     GetAnimationFrame()->Refresh();
 }
 
-void AnimationView::RefreshSheet()
+void AnimationView::RefreshAnimationSheet()
 {
-    GotoSheet(mView->GetCurrentSheetNum());
+    if (mAnimation) {
+        mAnimation->GotoSheet(mView->GetCurrentSheetNum());
+        RefreshFrame();
+    }
 }
 
-int AnimationView::GetNumberSheets() const { return (mAnimation) ? mAnimation->GetNumberSheets() : 0; }
-int AnimationView::GetCurrentSheet() const { return (mAnimation) ? mAnimation->GetCurrentSheet() : 0; }
-int AnimationView::GetNumberBeats() const { return (mAnimation) ? mAnimation->GetNumberBeats() : 0; }
-int AnimationView::GetCurrentBeat() const { return (mAnimation) ? mAnimation->GetCurrentBeat() : 0; }
 int AnimationView::GetTotalNumberBeats() const { return (mAnimation) ? mAnimation->GetTotalNumberBeats() : 0; }
 int AnimationView::GetTotalCurrentBeat() const { return (mAnimation) ? mAnimation->GetTotalCurrentBeat() : 0; }
 
@@ -176,29 +172,16 @@ void AnimationView::Generate()
     mAnimation = mView->GetAnimationInstance();
 }
 
-// true if changes made
-bool AnimationView::PrevBeat()
+void AnimationView::PrevBeat()
 {
     if (mAnimation && mAnimation->PrevBeat()) {
         RefreshFrame();
-        return true;
     }
-    return false;
 }
 
-bool AnimationView::NextBeat()
+void AnimationView::NextBeat()
 {
     if (mAnimation && mAnimation->NextBeat()) {
-        RefreshFrame();
-        return true;
-    }
-    return false;
-}
-
-void AnimationView::GotoBeat(unsigned i)
-{
-    if (mAnimation) {
-        mAnimation->GotoBeat(i);
         RefreshFrame();
     }
 }
@@ -211,50 +194,24 @@ void AnimationView::GotoTotalBeat(unsigned i)
     }
 }
 
-bool AnimationView::PrevSheet()
+bool AnimationView::AtEndOfShow() const
 {
-    if (mAnimation && mAnimation->PrevSheet()) {
-        RefreshFrame();
-        return true;
+    if (mAnimation) {
+        return (mAnimation->GetCurrentBeat() == mAnimation->GetTotalNumberBeats());
     }
     return false;
 }
 
-bool AnimationView::NextSheet()
+static auto towxPoint(CalChart::Coord const& c)
 {
-    if (mAnimation && mAnimation->NextSheet()) {
-        RefreshFrame();
-        return true;
-    }
-    return false;
-}
-
-void AnimationView::GotoSheet(unsigned i)
-{
-    if (mAnimation) {
-        mAnimation->GotoSheet(i);
-        RefreshFrame();
-    }
-}
-
-void AnimationView::GotoAnimationSheet(unsigned i)
-{
-    if (mAnimation) {
-        mAnimation->GotoAnimationSheet(i);
-        RefreshFrame();
-    }
-}
-
-static wxPoint towxPoint(CalChart::Coord const& c)
-{
-    return { c.x, c.y };
+    return fDIP(wxPoint{ c.x, c.y });
 }
 
 // Return a bounding box of the show
 std::pair<wxPoint, wxPoint> AnimationView::GetShowSizeAndOffset() const
 {
     auto size = mView->GetShowMode().Size();
-    return { towxPoint(size), wxPoint(0, 0) };
+    return { towxPoint(size), towxPoint({ 0, 0 }) };
 }
 
 // Return a bounding box of the show of where the marchers are.  If they are
@@ -263,18 +220,15 @@ std::pair<wxPoint, wxPoint> AnimationView::GetMarcherSizeAndOffset() const
 {
     auto mode_size = towxPoint(mView->GetShowMode().Size());
     auto bounding_box_upper_left = mode_size;
-    auto bounding_box_low_right = wxPoint(0, 0);
+    auto bounding_box_low_right = towxPoint({ 0, 0 });
 
     for (auto i = 0; mAnimation && i < mView->GetNumPoints(); ++i) {
         auto position = towxPoint(mAnimation->GetAnimateInfo(i).mPosition);
-        bounding_box_upper_left = wxPoint(std::min(bounding_box_upper_left.x, position.x),
-            std::min(bounding_box_upper_left.y, position.y));
-        bounding_box_low_right = wxPoint(std::max(bounding_box_low_right.x, position.x),
-            std::max(bounding_box_low_right.y, position.y));
+        bounding_box_upper_left = wxPoint(std::min(bounding_box_upper_left.x, position.x), std::min(bounding_box_upper_left.y, position.y));
+        bounding_box_low_right = wxPoint(std::max(bounding_box_low_right.x, position.x), std::max(bounding_box_low_right.y, position.y));
     }
 
-    return { bounding_box_low_right - bounding_box_upper_left,
-        mode_size / 2 + bounding_box_upper_left };
+    return { bounding_box_low_right - bounding_box_upper_left, mode_size / 2 + bounding_box_upper_left };
 }
 
 void AnimationView::UnselectAll()
@@ -285,13 +239,15 @@ void AnimationView::UnselectAll()
 void AnimationView::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const& mouseEnd, bool altDown)
 {
     using namespace CalChart;
-    // otherwise, Select points within rectangle
+    auto mouseStartTranslated = tDIP(mouseStart);
+    auto mouseEndTranslated = tDIP(mouseEnd);
+
     auto x_off = mView->GetShowMode().Offset().x;
     auto y_off = mView->GetShowMode().Offset().y;
-    Lasso lasso(Coord(mouseStart.x - x_off, mouseStart.y - y_off));
-    lasso.Append(Coord(mouseStart.x - x_off, mouseEnd.y - y_off));
-    lasso.Append(Coord(mouseEnd.x - x_off, mouseEnd.y - y_off));
-    lasso.Append(Coord(mouseEnd.x - x_off, mouseStart.y - y_off));
+    Lasso lasso(Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off));
+    lasso.Append(Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off));
+    lasso.Append(Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off));
+    lasso.Append(Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off));
     lasso.End();
     mView->SelectWithLasso(&lasso, altDown);
 }
@@ -302,14 +258,14 @@ void AnimationView::ToggleTimer() { GetAnimationFrame()->ToggleTimer(); }
 
 bool AnimationView::OnBeat() const { return GetAnimationFrame()->OnBeat(); }
 
+AnimationPanel const* AnimationView::GetAnimationFrame() const
+{
+    return static_cast<AnimationPanel const*>(GetFrame());
+}
+
 AnimationPanel* AnimationView::GetAnimationFrame()
 {
     return static_cast<AnimationPanel*>(GetFrame());
-}
-
-const AnimationPanel* AnimationView::GetAnimationFrame() const
-{
-    return static_cast<const AnimationPanel*>(GetFrame());
 }
 
 CalChart::ShowMode const& AnimationView::GetShowMode() const
@@ -346,9 +302,4 @@ std::multimap<double, MarcherInfo> AnimationView::GetMarchersByDistance(ViewPoin
         result.insert(std::pair<double, MarcherInfo>(distance, info));
     }
     return result;
-}
-
-int AnimationView::GetNumPoints() const
-{
-    return mView->GetNumPoints();
 }

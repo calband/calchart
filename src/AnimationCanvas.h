@@ -31,14 +31,10 @@ class AnimationCanvas : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationCanvas(wxWindow* parent,
-        wxWindowID winid = wxID_ANY,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxTAB_TRAVERSAL | wxNO_BORDER,
-        const wxString& name = wxPanelNameStr);
-    ~AnimationCanvas() = default;
+    AnimationCanvas(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ~AnimationCanvas() override = default;
 
+    void OnUpdate(); // Refresh from the View
     void SetView(AnimationView* view) { mView = view; }
     auto GetView() const { return mView; }
 
@@ -48,12 +44,17 @@ public:
     auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
 
 private:
+    void Init();
+    void CreateControls();
+
+    // Event Handlers
     void OnPaint(wxPaintEvent& event);
     void OnLeftDownMouseEvent(wxMouseEvent& event);
     void OnLeftUpMouseEvent(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
     void OnChar(wxKeyEvent& event);
 
+    // Internals
     wxPoint TranslatePosition(wxPoint const& point);
     void UpdateScaleAndOrigin();
 

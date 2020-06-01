@@ -35,40 +35,46 @@ class CCOmniviewCanvas : public wxGLCanvas {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, const wxSize& size = wxDefaultSize);
-    ~CCOmniviewCanvas();
+    CCOmniviewCanvas(wxWindow* parent, CalChartConfiguration& config, wxSize const& size = wxDefaultSize);
+    ~CCOmniviewCanvas() override = default;
 
+    void OnUpdate(); // Refresh from the View
     void SetView(AnimationView* view);
     auto GetView() const { return mView; }
 
+    void OnCmd_ShowKeyboardControls();
+
+private:
+    void Init();
+    void CreateControls();
+
+    // Event Handlers
     void OnPaint(wxPaintEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-
-    // negative -1 is to stop following
     void OnCmd_FollowMarcher(int which);
     void OnCmd_SaveCameraAngle(size_t which);
     void OnCmd_GoToCameraAngle(size_t which);
     void OnCmd_ToggleCrowd();
     void OnCmd_ToggleMarching();
     void OnCmd_ToggleShowOnlySelected();
-    void OnCmd_ShowKeyboardControls();
 
-private:
     std::shared_ptr<CCOmniView_GLContext> m_glContext;
     AnimationView* mView{};
     CalChartConfiguration& config;
-    ViewPoint mViewPoint;
+    ViewPoint mViewPoint{};
 
     // a -1 means not following any marcher
-    int mFollowMarcher;
-    bool mCrowdOn;
-    bool mShowMarching;
-    float mViewAngle, mViewAngleZ;
-    float mFOV;
+    int mFollowMarcher = -1;
+    bool mCrowdOn = false;
+    bool mShowMarching = true;
+    float mViewAngle{};
+    float mViewAngleZ{};
+    float mFOV = 60;
 
     // for mouse camera move:
-    bool mShiftMoving;
-    wxPoint mStartShiftMoveMousePosition;
-    float mStartShiftMoveViewAngle, mStartShiftMoveViewAngleZ;
+    bool mShiftMoving = false;
+    wxPoint mStartShiftMoveMousePosition{};
+    float mStartShiftMoveViewAngle{};
+    float mStartShiftMoveViewAngleZ{};
 };

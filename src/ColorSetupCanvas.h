@@ -45,12 +45,13 @@ public:
     void OnPaint(wxPaintEvent& event);
 
 private:
+    // Internals
     void OnEraseBackground(wxEraseEvent& event);
 
     std::unique_ptr<CalChart::Show> mShow;
     CalChart::ShowMode mMode;
     CalChartConfiguration& mConfig;
     std::vector<CalChart::DrawCommand> mPath;
-    CalChart::Coord mPathEnd;
+    CalChart::Coord mPathEnd{};
     std::vector<CalChart::DrawCommand> mShape;
 };
