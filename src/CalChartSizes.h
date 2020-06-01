@@ -61,10 +61,10 @@ static inline auto GetColorPaletteBoxBorderSize() { return fDIP(2); }
 static inline auto GetColorPaletteBoxRadiusSize() { return fDIP(4); }
 
 // CalChartFrame sizes that shows up in color palette, etc
-static inline auto GetToolbarFontSize() { return 12; }
+static inline auto GetToolBarFontSize() { return 12; }
 static inline auto GetFieldFrameControlSize() { return fDIP(wxSize{ 100, 70 }); }
 static inline auto GetContinuityBrowserSize() { return wxSize{ fDIP(180), -1 }; }
 static inline auto GetFieldThumbnailBrowserSize() { return wxSize{ fDIP(180), -1 }; }
 
-// Toolbar sizers
-static inline auto GetToolbarControlsPadding() { return fDIP(32); }
+// toolbar sizers
+static inline auto GetToolBarControlsPadding() { return fDIP(32); }

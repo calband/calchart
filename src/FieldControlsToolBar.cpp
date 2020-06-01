@@ -19,7 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "field_frame_controls.h"
+#include "FieldControlsToolBar.h"
 #include "CalChartSizes.h"
 #include "ColorPalette.h"
 #include "basic_ui.h"
@@ -27,6 +27,7 @@
 #include "ui_enums.h"
 #include "platconf.h"
 
+#include <wx/artprov.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
 #include <wx/aui/auibar.h>
@@ -65,29 +66,17 @@ static constexpr std::pair<CalChart::Coord::units, CalChart::Coord::units> gridv
 
 namespace FieldControls {
 
-wxAuiToolBar* CreateFieldControlsToolBar(wxWindow* parent, wxWindowID id, long style)
+wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
 {
     auto tb = new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style);
 
+    // colors
     tb->AddControl(new ColorPalettePanel(tb), "Colors");
+
     tb->AddSeparator();
 
-    // Grid choice
-    auto gridChoice = new wxChoice(tb, CALCHART__GridSize);
-    for (auto&& i : gridtext) {
-        gridChoice->Append(i);
-    }
-    gridChoice->SetMaxSize(wxSize{ BestSizeX(gridChoice, gridtext)+GetToolbarControlsPadding(), -1 });
-    gridChoice->SetSelection(2);
-    tb->AddControl(gridChoice, "Grid");
-
-    auto toolGridChoice = new wxChoice(tb, CALCHART__GridToolSize);
-    for (auto&& i : gridtext) {
-        toolGridChoice->Append(i);
-    }
-    toolGridChoice->SetMaxSize(wxSize{ BestSizeX(toolGridChoice, gridtext)+GetToolbarControlsPadding(), -1 });
-    toolGridChoice->SetSelection(2);
-    tb->AddControl(toolGridChoice, "Tool");
+    // zoom
+    tb->AddTool(CALCHART__ViewZoomOut, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_MINUS)), "Zoom out", wxITEM_NORMAL);
 
     wxArrayString zoomtext;
     for (auto&& zoom_amount : zoom_amounts) {
@@ -98,14 +87,36 @@ wxAuiToolBar* CreateFieldControlsToolBar(wxWindow* parent, wxWindowID id, long s
         zoomtext.Add(buf);
     }
     zoomtext.Add(wxT("Fit"));
-    auto zoomBox = new wxComboBox(tb, CALCHART__slider_zoom, wxEmptyString, wxDefaultPosition, wxSize{-1, -1}, zoomtext, wxTE_PROCESS_ENTER);
-    zoomBox->SetMaxSize(wxSize{ BestSizeX(zoomBox, std::vector<std::string>{ "500%" })+GetToolbarControlsPadding(), -1 });
+    auto zoomBox = new wxSlider(tb, CALCHART__slider_zoom, 10, 0, 20, wxDefaultPosition, wxSize(-1, -1), wxSL_HORIZONTAL);
+//    auto zoomBox = new wxComboBox(tb, CALCHART__slider_zoom, wxEmptyString, wxDefaultPosition, wxSize{-1, -1}, zoomtext, wxTE_PROCESS_ENTER);
+//    zoomBox->SetMaxSize(wxSize{ BestSizeX(zoomBox, std::vector<std::string>{ "500%" })+GetToolBarControlsPadding(), -1 });
+    // set the text to the default zoom level
+//    wxString zoomtxt;
+//    zoomtxt.sprintf("%d%%", (int)(1 * 100));
+//    zoomBox->SetValue(zoomtxt);
 
     tb->AddControl(zoomBox, "Zoom");
-    // set the text to the default zoom level
-    wxString zoomtxt;
-    zoomtxt.sprintf("%d%%", (int)(1 * 100));
-    zoomBox->SetValue(zoomtxt);
+
+    tb->AddTool(CALCHART__ViewZoomIn, "", ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)), "Zoom out", wxITEM_NORMAL);
+
+    tb->AddSeparator();
+
+    // Grid choice
+    auto gridChoice = new wxChoice(tb, CALCHART__GridSize);
+    for (auto&& i : gridtext) {
+        gridChoice->Append(i);
+    }
+    gridChoice->SetMaxSize(wxSize{ BestSizeX(gridChoice, gridtext)+GetToolBarControlsPadding(), -1 });
+    gridChoice->SetSelection(2);
+    tb->AddControl(gridChoice, "Grid");
+
+    auto toolGridChoice = new wxChoice(tb, CALCHART__GridToolSize);
+    for (auto&& i : gridtext) {
+        toolGridChoice->Append(i);
+    }
+    toolGridChoice->SetMaxSize(wxSize{ BestSizeX(toolGridChoice, gridtext)+GetToolBarControlsPadding(), -1 });
+    toolGridChoice->SetSelection(2);
+    tb->AddControl(toolGridChoice, "Tool");
 
     // Reference choice
     auto refChoice = new wxChoice(tb, CALCHART__refnum_callback);
@@ -115,7 +126,7 @@ wxAuiToolBar* CreateFieldControlsToolBar(wxWindow* parent, wxWindowID id, long s
         buf.sprintf(wxT("%u"), i);
         refChoice->Append(buf);
     }
-    refChoice->SetMaxSize(wxSize{ BestSizeX(zoomBox, std::vector<std::string>{ "Off" })+GetToolbarControlsPadding(), -1 });
+    refChoice->SetMaxSize(wxSize{ BestSizeX(zoomBox, std::vector<std::string>{ "Off" })+GetToolBarControlsPadding(), -1 });
     refChoice->SetSelection(0);
     tb->AddControl(refChoice, "Ref Group");
 
@@ -127,11 +138,11 @@ wxAuiToolBar* CreateFieldControlsToolBar(wxWindow* parent, wxWindowID id, long s
     for (auto&& i : ghostChoice) {
         ghostChioce->Append(i);
     }
-    ghostChioce->SetMaxSize(wxSize{ BestSizeX(ghostChioce, gridtext)+GetToolbarControlsPadding(), -1 });
+    ghostChioce->SetMaxSize(wxSize{ BestSizeX(ghostChioce, gridtext)+GetToolBarControlsPadding(), -1 });
     ghostChioce->SetSelection(0);
     tb->AddControl(ghostChioce, "Ghost");
 
-    tb->SetFont(ResizeFont(tb->GetFont(), GetToolbarFontSize()));
+    tb->SetFont(ResizeFont(tb->GetFont(), GetToolBarFontSize()));
 
     tb->Realize();
 
@@ -150,27 +161,28 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindo
 
 double GetZoomAmount(wxWindow* target)
 {
-    auto zoomtxt = static_cast<wxComboBox*>(target->FindWindow(CALCHART__slider_zoom))->GetValue();
+    auto zoomtxt = static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom))->GetValue();
     // if it equals 'fit', return 0 to indicate we should fit.
     // strip the trailing '%' if it exists
-    if (zoomtxt == wxT("Fit")) {
-        return 0;
-    }
-    if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%'))) {
-        zoomtxt.RemoveLast();
-    }
-    double zoom_amount = 1.0;
-    if (zoomtxt.ToDouble(&zoom_amount)) {
-        return zoom_amount / 100.0;
-    }
-    return 1;
+//    if (zoomtxt == wxT("Fit")) {
+//        return 0;
+//    }
+//    if (zoomtxt.Length() && (zoomtxt.Last() == wxT('%'))) {
+//        zoomtxt.RemoveLast();
+//    }
+    return 10.0 / zoomtxt;
+//    double zoom_amount = 1.0;
+//    if (zoomtxt.ToDouble(&zoom_amount)) {
+//        return zoom_amount / 100.0;
+//    }
+//    return 1;
 }
 
 void SetZoomAmount(wxWindow* target, double zoom)
 {
     wxString zoomtxt;
     zoomtxt.sprintf(wxT("%d%%"), int(zoom * 100.0));
-    static_cast<wxComboBox*>(target->FindWindow(CALCHART__slider_zoom))->SetValue(zoomtxt);
+    static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom))->SetValue(10/zoom);
 }
 
 int GetRefChoice(wxWindow* target)

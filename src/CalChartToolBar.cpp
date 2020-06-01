@@ -1,6 +1,6 @@
 /*
- * toolbar.cpp
- * Handle adding toolbars
+ * CalChartToolBar.cpp
+ * Header for adding toolbars to CalChart
  */
 
 /*
@@ -21,7 +21,7 @@
 */
 
 #include "CalChartSizes.h"
-#include "toolbar.h"
+#include "CalChartToolBar.h"
 #include "platconf.h"
 #include "ui_enums.h"
 

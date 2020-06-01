@@ -147,8 +147,8 @@ public:
 
     void SetCurrentLasso(CC_DRAG type);
     void SetCurrentMove(CC_MOVE_MODES type);
-    void ToolbarSetCurrentMove(CC_MOVE_MODES type);
-    float ToolbarSetZoom(float zoom); // set to an amount, returns what it was set to.
+    void ToolBarSetCurrentMove(CC_MOVE_MODES type);
+    float ToolBarSetZoom(float zoom); // set to an amount, returns what it was set to.
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
     void OnCmd_ReferenceNumber(wxCommandEvent&);
@@ -188,7 +188,7 @@ private:
     AnimationPanel* mAnimationPanel{};
     AnimationPanel* mShadowAnimationPanel{};
     PrintContinuityEditor* mPrintContinuityEditor{};
-    wxAuiToolBar* mToolbar;
+    wxAuiToolBar* mToolBar;
     wxAuiToolBar* mControls;
 
     std::map<int, wxWindow*> mLookupEnumToSubWindow;
