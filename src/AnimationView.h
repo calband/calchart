@@ -41,7 +41,7 @@ class AnimationView : public wxView {
 
 public:
     AnimationView(CalChartView* view, wxWindow* frame);
-    ~AnimationView() override = default;
+    ~AnimationView() override;
 
     void OnDraw(wxDC* dc) override;
     void OnDraw(wxDC& dc, CalChartConfiguration const& config);

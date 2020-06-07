@@ -76,7 +76,7 @@ private:
     auto GetTempo() const { return mTempo; }
     void SetTempo(unsigned tempo) { mTempo = tempo; }
 
-    std::unique_ptr<AnimationView> mView{};
+    AnimationView* mView{};
     AnimationCanvas* mCanvas{};
     CCOmniviewCanvas* mOmniCanvas{};
     wxStaticText* mTempoLabel{};

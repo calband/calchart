@@ -53,6 +53,11 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     SetFrame(frame);
 }
 
+AnimationView::~AnimationView()
+{
+    printf("deleting the view");
+}
+
 void AnimationView::OnDraw(wxDC* dc)
 {
     auto& config = CalChartConfiguration::GetGlobalConfig();
