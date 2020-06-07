@@ -281,12 +281,13 @@ void AnimationPanel::OnUpdate()
 
 void AnimationPanel::SetView(CalChartView* view)
 {
-    mView = std::make_unique<AnimationView>(view, this);
+    mView = new AnimationView(view, this);
     mView->SetDocument(view->GetDocument());
+    // at this point the document is manging the view.
     mView->SetFrame(this);
     mView->SetPlayCollisionWarning(!mInMiniMode);
-    mCanvas->SetView(mView.get());
-    mOmniCanvas->SetView(mView.get());
+    mCanvas->SetView(mView);
+    mOmniCanvas->SetView(mView);
 
     mCollisionCheckbox->SetValue(mView->GetDrawCollisionWarning());
 }
