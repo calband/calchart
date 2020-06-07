@@ -72,6 +72,11 @@ void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
 
 bool CalChartApp::OnInit()
 {
+    wxLog* logger = new wxLogStream(&std::cout);
+    wxLog::SetActiveTarget(logger);
+    wxLog::SetLogLevel(wxLOG_Trace);
+    wxLog::AddTraceMask("focus");
+    wxLogError("Testing log");
     SetAppName(wxT("CalChart"));
     wxInitAllImageHandlers();
     StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); }, [=]() { this->ExitAppAsServer(); } };

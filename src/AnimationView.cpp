@@ -55,7 +55,6 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
 
 AnimationView::~AnimationView()
 {
-    printf("deleting the view");
 }
 
 void AnimationView::OnDraw(wxDC* dc)
