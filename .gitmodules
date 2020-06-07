@@ -3,7 +3,7 @@
 	url = https://github.com/saebyn/munkres-cpp.git
 [submodule "submodules/wxWidgets"]
 	path = submodules/wxWidgets
-	url = https://github.com/wxWidgets/wxWidgets
+	url = https://github.com/rmpowell77/wxWidgets.git
 [submodule "submodules/docopt.cpp"]
 	path = submodules/docopt.cpp
 	url = https://github.com/docopt/docopt.cpp.git
