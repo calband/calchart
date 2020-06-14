@@ -270,6 +270,10 @@ bool GeneralSetup::ClearValuesToDefault()
 {
     mConfig.Clear_AutosaveInterval();
     mConfig.Clear_CalChartFrameAUILayout();
+    mConfig.Clear_FieldFrameWidth();
+    mConfig.Clear_FieldFrameHeight();
+    mConfig.Clear_FieldFramePositionX();
+    mConfig.Clear_FieldFramePositionY();
     Init();
     TransferDataToWindow();
     return true;
@@ -427,8 +431,8 @@ void DrawingSetup::Init()
 {
     // first read out the defaults:
     mActiveColorPalette = mConfig.GetActiveColorPalette();
-    mColorPaletteNames = mConfig.GetColorPaletteNames();
-    mColorPaletteColors = mConfig.GetColorPaletteColors();
+    mColorPaletteNames = GetColorPaletteNames(mConfig);
+    mColorPaletteColors = GetColorPaletteColors(mConfig);
 
     for (auto palette = 0; palette < kNumberPalettes; ++palette) {
         for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {

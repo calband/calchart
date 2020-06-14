@@ -25,12 +25,12 @@
 
 class CalChartView;
 // holds an instance of animation for the reference to draw.
-class ColorPalettePanel : public wxPanel {
-    using super = wxPanel;
+class ColorPalettePanel : public wxControl {
+    using super = wxControl;
     wxDECLARE_EVENT_TABLE();
 
 public:
-    ColorPalettePanel(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    ColorPalettePanel(wxWindow* parent, wxWindowID winid = wxID_ANY);
     ~ColorPalettePanel() override = default;
 
     void OnUpdate(); // Refresh from the View

@@ -88,6 +88,8 @@ enum {
     CALCHART__AddBackgroundImage,
     CALCHART__ShowBackgroundImages,
     CALCHART__ResetReferencePoint,
+    CALCHART__GridSize,
+    CALCHART__GridToolSize,
 
     CALCHART__ChangedColorPalette,
 
@@ -127,7 +129,7 @@ enum {
     CALCHART__ViewAnimationErrors,
     CALCHART__ViewAnimation,
     CALCHART__ViewPrintContinuity,
-    CALCHART__ViewToolbar,
+    CALCHART__ViewToolBar,
 
     CALCHART__ViewSwapFieldAndAnimate,
     CALCHART__ViewZoomFit,

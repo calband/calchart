@@ -175,8 +175,8 @@ void ColorSetupDialog::CreateControls()
 void ColorSetupDialog::Init()
 {
     // first read out the defaults:
-    mColorPaletteNames = mConfig.GetColorPaletteNames();
-    mColorPaletteColors = mConfig.GetColorPaletteColors();
+    mColorPaletteNames = GetColorPaletteNames(mConfig);
+    mColorPaletteColors = GetColorPaletteColors(mConfig);
 
     for (auto palette = 0; palette < kNumberPalettes; ++palette) {
         for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {

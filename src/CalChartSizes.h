@@ -23,11 +23,15 @@
 
 #include <wx/wx.h>
 
+#include "cc_coord.h"
+
 template <typename T>
 static auto fDIP(T const& t) { return wxWindow::FromDIP(t, nullptr); }
 
 template <typename T>
 static auto tDIP(T const& t) { return wxWindow::ToDIP(t, nullptr); }
+
+static inline auto fDIP(CalChart::Coord const& t) { return wxWindow::FromDIP(wxSize{ t.x, t.y }, nullptr); }
 
 // Generic sizes
 static inline auto GetBitmapButtonSize() { return fDIP(wxSize { 16, 16 } ); };
@@ -52,12 +56,23 @@ static inline auto GetAnimationViewTempoSpinnerMinX() { return fDIP(48); }
 static inline auto GetAnimationViewBeatSliderInNonMinimode() { return fDIP(800); }
 
 // color palette Canvas values
-static inline auto GetColorPaletteBoxSize() { return fDIP(20); }
-static inline auto GetColorPaletteBoxBorderSize() { return fDIP(4); }
+static inline auto GetColorPaletteBoxSize() { return fDIP(16); }
+static inline auto GetColorPaletteBoxBorderSize() { return fDIP(2); }
 static inline auto GetColorPaletteBoxRadiusSize() { return fDIP(4); }
 
 // CalChartFrame sizes that shows up in color palette, etc
-static inline auto GetToolbarFontSize() { return 8; }
-static inline auto GetFieldFrameControlSize() { return fDIP(wxSize{ 100, 70 }); }
-static inline auto GetContinuityBrowserSize() { return wxSize{ fDIP(180), -1 }; }
-static inline auto GetFieldThumbnailBrowserSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetToolBarFontSize() { return 12; }
+static inline auto GetContinuityBrowserConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetContinuityBrowserSize() { return fDIP(wxSize{ 180, 90 }); }
+static inline auto GetFieldThumbnailBrowserConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetFieldThumbnailBrowserSize() { return fDIP(wxSize{ 180, 360 }); }
+static inline auto GetAnimationConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetAnimationSize() { return fDIP(wxSize{ 180, 360 }); }
+static inline auto GetAnimationErrorsConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetAnimationErrorsSize() { return fDIP(wxSize{ 180, 360 }); }
+static inline auto GetPrintContinuityConstructSize() { return wxSize{ fDIP(180), -1 }; }
+static inline auto GetPrintContinuitySize() { return fDIP(wxSize{ 180, 360 }); }
+
+// toolbar sizers
+static inline auto GetToolBarControlsPadding() { return fDIP(32); }
+static inline auto GetToolBarControlsZoomSize() { return fDIP(64); }

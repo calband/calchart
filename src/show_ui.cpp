@@ -22,7 +22,7 @@
 
 #include "show_ui.h"
 #include "cc_sheet.h"
-#include "toolbar.h"
+#include "CalChartToolBar.h"
 #include <algorithm>
 #include <ctype.h>
 #include <wx/spinctrl.h>
