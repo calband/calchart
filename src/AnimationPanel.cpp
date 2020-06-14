@@ -281,6 +281,11 @@ void AnimationPanel::OnUpdate()
 
 void AnimationPanel::SetView(CalChartView* view)
 {
+    if (!view)
+    {
+        mView = nullptr;
+        return;
+    }
     mView = new AnimationView(view, this);
     mView->SetDocument(view->GetDocument());
     // at this point the document is manging the view.

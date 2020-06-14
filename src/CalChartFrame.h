@@ -180,7 +180,9 @@ private:
     void ChangeMainFieldVisibility(bool show);
 
     void ShowFieldAndHideAnimation(bool showField);
+    void SetViewsOnComponents(CalChartView * showField);
 
+    // the components
     FieldCanvas* mCanvas{};
     FieldThumbnailBrowser* mFieldThumbnailBrowser{};
     ContinuityBrowser* mContinuityBrowser{};

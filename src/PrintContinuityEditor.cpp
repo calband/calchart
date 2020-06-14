@@ -263,6 +263,9 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
 
 void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent& event)
 {
+    if (!mView) {
+        return;
+    }
     if (mPreviousText != mUserInput->GetValue()) {
         mPreviousText = mUserInput->GetValue();
         mTimer->StartOnce(1000);
