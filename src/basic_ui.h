@@ -77,6 +77,7 @@ public:
  */
 class ScrollZoomWindow : public wxScrolledWindow {
     using super = wxScrolledWindow;
+    DECLARE_EVENT_TABLE()
 
 public:
     ScrollZoomWindow(wxWindow* parent, wxWindowID id = wxID_ANY,
@@ -97,6 +98,9 @@ public:
     void ChangeOffset(wxPoint deltaOffset);
 
 private:
+    void HandleSizeEvent(wxSizeEvent& event);
+
+    void SetupSize();
     wxPoint mOffset;
     float mZoomFactor;
     wxSize mCanvasSize;
