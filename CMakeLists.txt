@@ -86,11 +86,6 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cont.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/json.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/json.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/json_export.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/json_export.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/json_grammar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/math_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/math_utils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/modes.cpp
@@ -129,6 +124,8 @@ target_include_directories (
   ${PROJECT_BINARY_DIR}/version
   ${CMAKE_CURRENT_SOURCE_DIR}/submodules/munkres-cpp/src
   )
+
+target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json)
 
 # calchart_cmd, Mac only
 if (APPLE)

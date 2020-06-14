@@ -22,7 +22,7 @@
 */
 
 #include "animate.h"
-#include "json.h"
+#include <nlohmann/json.hpp>
 
 namespace CalChart {
 
@@ -59,19 +59,10 @@ public:
     virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
 
     /*!
-     * @brief Manipulates dest so that it contains a JSONElement that
-     * could represent this movement in an Online Viewer '.viewer' file.
+     * @brief json  that represent this movement in an Online Viewer '.viewer' file.
      * @param start The position at which this movement begins.
      */
-    JSONElement toOnlineViewerJSON(const Coord& start) const;
-    /*!
-     * @brief Manipulates dest so that it contains a JSONElement that
-     * could represent this movement in an Online Viewer '.viewer' file.
-     * @param dest A reference to the JSONElement which will be transformed
-     * into a JSON representation of this movement.
-     * @param start The position at which this movement begins.
-     */
-    virtual void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const = 0;
+    virtual nlohmann::json toOnlineViewerJSON(const Coord& start) const = 0;
 
 protected:
     unsigned mNumBeats;
@@ -83,12 +74,12 @@ public:
     AnimateCommandMT(unsigned beats, float direction);
     virtual ~AnimateCommandMT() = default;
 
-    std::unique_ptr<AnimateCommand> clone() const;
+    std::unique_ptr<AnimateCommand> clone() const override;
 
-    virtual AnimateDir Direction() const;
-    virtual float RealDirection() const;
+    AnimateDir Direction() const override;
+    float RealDirection() const override;
 
-    void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
+    nlohmann::json toOnlineViewerJSON(const Coord& start) const override;
 
 protected:
     AnimateDir dir;
@@ -101,20 +92,20 @@ public:
     AnimateCommandMove(unsigned beats, Coord movement, float direction);
     virtual ~AnimateCommandMove() = default;
 
-    std::unique_ptr<AnimateCommand> clone() const;
+    std::unique_ptr<AnimateCommand> clone() const override;
 
-    virtual bool NextBeat(Coord& pt);
-    virtual bool PrevBeat(Coord& pt);
+    bool NextBeat(Coord& pt) override;
+    bool PrevBeat(Coord& pt) override;
 
-    virtual void ApplyForward(Coord& pt);
-    virtual void ApplyBackward(Coord& pt);
+    void ApplyForward(Coord& pt) override;
+    void ApplyBackward(Coord& pt) override;
 
-    virtual float MotionDirection() const;
-    virtual void ClipBeats(unsigned beats);
+    float MotionDirection() const override;
+    void ClipBeats(unsigned beats) override;
 
-    virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
+    DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const override;
 
-    void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
+    nlohmann::json toOnlineViewerJSON(const Coord& start) const override;
 
 private:
     Coord mVector;
@@ -126,21 +117,21 @@ public:
         float ang2, bool backwards = false);
     virtual ~AnimateCommandRotate() = default;
 
-    std::unique_ptr<AnimateCommand> clone() const;
+    std::unique_ptr<AnimateCommand> clone() const override;
 
-    virtual bool NextBeat(Coord& pt);
-    virtual bool PrevBeat(Coord& pt);
+    bool NextBeat(Coord& pt) override;
+    bool PrevBeat(Coord& pt) override;
 
-    virtual void ApplyForward(Coord& pt);
-    virtual void ApplyBackward(Coord& pt);
+    void ApplyForward(Coord& pt) override;
+    void ApplyBackward(Coord& pt) override;
 
-    virtual AnimateDir Direction() const;
-    virtual float RealDirection() const;
-    virtual void ClipBeats(unsigned beats);
+    AnimateDir Direction() const override;
+    float RealDirection() const override;
+    void ClipBeats(unsigned beats) override;
 
-    virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
+    DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const override;
 
-    void toOnlineViewerJSON(JSONElement& dest, const Coord& start) const;
+    nlohmann::json toOnlineViewerJSON(const Coord& start) const override;
 
 private:
     Coord mOrigin;

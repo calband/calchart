@@ -31,13 +31,12 @@
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "draw.h"
-#include "json.h"
-#include "json_export.h"
 #include "math_utils.h"
 #include "modes.h"
 #include "platconf.h"
 #include "print_ps.h"
 
+#include <fstream>
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
 
@@ -248,23 +247,21 @@ wxSTD istream& CalChartDoc::LoadObject(wxSTD istream& stream)
     return LoadObjectGeneric<wxSTD istream>(stream);
 }
 
-bool CalChartDoc::exportViewerFile(const wxString& filepath)
+bool CalChartDoc::exportViewerFile(wxString const& filepath)
 {
-    auto mainObject = JSONElement::makeObject();
+    nlohmann::json j;
 
-    JSONDataObjectAccessor mainObjectAccessor = mainObject;
+    j["meta"] = {
+        { "version", "1.0.0" },
+        { "index_name", "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)" },  // TODO; for now, manually add index_name to viewer file after saving
+        { "type", "viewer" },
+    };
 
-    mainObjectAccessor["meta"] = JSONElement::makeObject();
-    mainObjectAccessor["show"] = JSONElement::makeNull();
+    j["show"] = mShow->toOnlineViewerJSON(Animation(*mShow));
 
-    JSONDataObjectAccessor metaObjectAccessor = mainObjectAccessor["meta"];
-    metaObjectAccessor["version"] = ("1.0.0");
-    metaObjectAccessor["index_name"] = "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)"; // TODO; for now, manually add index_name to viewer file after saving
-    metaObjectAccessor["type"] = "viewer";
-
-    mShow->toOnlineViewerJSON(mainObjectAccessor["show"], Animation(*mShow));
-
-    return JSONExporter::exportJSON(filepath.ToStdString(), mainObject);
+    auto o = std::ofstream(filepath.ToStdString());
+    o << std::setw(4) << j << std::endl;
+    return true;
 }
 
 void CalChartDoc::FlushAllTextWindows()

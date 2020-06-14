@@ -23,11 +23,12 @@
 
 #include "cc_fileformat.h"
 #include "cc_types.h"
-#include "json.h"
 
 #include "animate.h"
 #include "cc_sheet.h"
 #include "modes.h"
+
+#include <nlohmann/json.hpp>
 #include <map>
 #include <memory>
 #include <set>
@@ -135,22 +136,13 @@ public:
     auto GetSelectionList() const { return mSelectionList; }
 
     /*!
-     * @brief Generates a JSONElement that could represent this
+     * @brief Generates a JSON that could represent this
      * show in an Online Viewer '.viewer' file.
      * @param compiledShow An up-to-date Animation of the show.
-     * @return A JSONElement which could represent this show in
+     * @return A JSON which could represent this show in
      * a '.viewer' file.
      */
-    JSONElement toOnlineViewerJSON(const Animation& compiledShow) const;
-
-    /*!
-     * @brief Manipulates dest so that it contains a JSONElement that
-     * could represent this show in an Online Viewer '.viewer' file.
-     * @param dest A reference to the JSONElement which will be transformed
-     * into a JSON representation of this show.
-     * @param compiledShow An up-to-date Animation of the show.
-     */
-    void toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const;
+    nlohmann::json toOnlineViewerJSON(const Animation& compiledShow) const;
 
 private:
     // modification of show is private, and externally done through create and exeucte commands

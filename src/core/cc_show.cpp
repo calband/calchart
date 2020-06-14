@@ -28,7 +28,6 @@
 #include "cc_shapes.h"
 #include "cc_sheet.h"
 #include "ccvers.h"
-#include "json.h"
 
 #include <algorithm>
 #include <functional>
@@ -511,44 +510,28 @@ SelectionList Show::MakeSelectWithLasso(const Lasso& lasso, int ref) const
     return sl;
 }
 
-JSONElement Show::toOnlineViewerJSON(const Animation& compiledShow) const
+nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
 {
-    JSONElement newViewerObject = JSONElement::makeNull();
-    toOnlineViewerJSON(newViewerObject, compiledShow);
-    return newViewerObject;
-}
-
-void Show::toOnlineViewerJSON(JSONElement& dest, const Animation& compiledShow) const
-{
-    JSONDataObjectAccessor showObjectAccessor = dest = JSONElement::makeObject();
+    nlohmann::json j;
 
     // Setup the skeleton for the show's JSON representation
-    showObjectAccessor["title"] = "(MANUAL) the show title that you want people to see goes here"; // TODO; For now, this will be manually added to the exported file
-    showObjectAccessor["year"] = "(MANUAL) enter show year (e.g. 2017)"; // TODO; Should eventually save automatically
-    showObjectAccessor["description"] = mDescr;
-    showObjectAccessor["labels"] = JSONElement::makeArray();
-    showObjectAccessor["sheets"] = JSONElement::makeArray();
+    j["title"] = "(MANUAL) the show title that you want people to see goes here"; // TODO; For now, this will be manually added to the exported file
+    j["year"] = "(MANUAL) enter show year (e.g. 2017)"; // TODO; Should eventually save automatically
+    j["description"] = mDescr;
+    j["labels"] = mPtLabels;
 
-    // Fill in 'dot_labels' with the labels for each dot (e.g. A0, A1, A2, ...)
-    JSONDataArrayAccessor dotLabelsAccessor = showObjectAccessor["labels"];
-    for (unsigned i = 0; i < mPtLabels.size(); i++) {
-        dotLabelsAccessor->pushBack(mPtLabels[i]);
-    }
-
-    // Fill in 'sheets' with the JSON representation of each sheet
-    JSONDataArrayAccessor sheetsAccessor = showObjectAccessor["sheets"];
-    unsigned sheetIndex = 0;
+    std::vector<nlohmann::json> sheetData;
     auto animateSheetIter = compiledShow.sheetsBegin();
-    auto showSheetIter = GetSheetBegin();
-    while (showSheetIter != GetSheetEnd()) {
-        if (showSheetIter->IsInAnimation()) {
-            sheetsAccessor->pushBack(JSONElement::makeNull());
-            showSheetIter->toOnlineViewerJSON(sheetsAccessor[sheetIndex], sheetIndex + 1, mPtLabels, *animateSheetIter);
-            animateSheetIter++;
-        }
-        sheetIndex++;
-        showSheetIter++;
+    auto sheetIndex = 0;
+    for (auto showSheetIter = GetSheetBegin(); showSheetIter != GetSheetEnd(); ++showSheetIter) {
+        sheetData.push_back(showSheetIter->toOnlineViewerJSON(sheetIndex + 1, mPtLabels, *animateSheetIter));
+        ++animateSheetIter;
+        ++sheetIndex;
     }
+    
+    j["sheets"] = sheetData;
+
+    return j;
 }
 
 Show_command_pair Show::Create_SetCurrentSheetCommand(int n) const

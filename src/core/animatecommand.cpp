@@ -86,13 +86,6 @@ float AnimateCommand::MotionDirection() const { return RealDirection(); }
 
 void AnimateCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
-JSONElement AnimateCommand::toOnlineViewerJSON(const Coord& start) const
-{
-    JSONElement newViewerObject = JSONElement::makeNull();
-    toOnlineViewerJSON(newViewerObject, start);
-    return newViewerObject;
-}
-
 AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
     : AnimateCommand(beats)
     , dir(AnimGetDirFromAngle(direction))
@@ -109,15 +102,16 @@ AnimateDir AnimateCommandMT::Direction() const { return dir; }
 
 float AnimateCommandMT::RealDirection() const { return realdir; }
 
-void AnimateCommandMT::toOnlineViewerJSON(JSONElement& dest, const Coord& start) const
+nlohmann::json AnimateCommandMT::toOnlineViewerJSON(const Coord& start) const
 {
-    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
+    nlohmann::json j;
 
-    moveAccessor["type"] = "mark";
-    moveAccessor["beats"] = NumBeats();
-    moveAccessor["facing"] = ToOnlineViewer::angle(RealDirection());
-    moveAccessor["x"] = ToOnlineViewer::xPosition(start.x);
-    moveAccessor["y"] = ToOnlineViewer::yPosition(start.y);
+    j["type"] = "mark";
+    j["beats"] = static_cast<double>(NumBeats());
+    j["facing"] = ToOnlineViewer::angle(RealDirection());
+    j["x"] = ToOnlineViewer::xPosition(start.x);
+    j["y"] = ToOnlineViewer::yPosition(start.y);
+    return j;
 }
 
 AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement)
@@ -195,18 +189,19 @@ AnimateCommandMove::GenCC_DrawCommand(const Coord& pt, const Coord& offset) cons
         pt.y + mVector.y + offset.y };
 }
 
-void AnimateCommandMove::toOnlineViewerJSON(JSONElement& dest, const Coord& start) const
+nlohmann::json AnimateCommandMove::toOnlineViewerJSON(const Coord& start) const
 {
-    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
+    nlohmann::json j;
 
-    moveAccessor["type"] = "even";
-    moveAccessor["beats"] = NumBeats();
-    moveAccessor["beats_per_step"] = 1;
-    moveAccessor["x1"] = ToOnlineViewer::xPosition(start.x);
-    moveAccessor["y1"] = ToOnlineViewer::yPosition(start.y);
-    moveAccessor["x2"] = ToOnlineViewer::xPosition(start.x + mVector.x);
-    moveAccessor["y2"] = ToOnlineViewer::yPosition(start.y + mVector.y);
-    moveAccessor["facing"] = ToOnlineViewer::angle(MotionDirection());
+    j["type"] = "even";
+    j["beats"] = static_cast<double>(NumBeats());
+    j["beats_per_step"] = static_cast<double>(1);
+    j["x1"] = ToOnlineViewer::xPosition(start.x);
+    j["y1"] = ToOnlineViewer::yPosition(start.y);
+    j["x2"] = ToOnlineViewer::xPosition(start.x + mVector.x);
+    j["y2"] = ToOnlineViewer::yPosition(start.y + mVector.y);
+    j["facing"] = ToOnlineViewer::angle(MotionDirection());
+    return j;
 }
 
 AnimateCommandRotate::AnimateCommandRotate(unsigned beats, Coord cntr,
@@ -303,18 +298,19 @@ AnimateCommandRotate::GenCC_DrawCommand(const Coord& /*pt*/, const Coord& offset
     return { x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
 }
 
-void AnimateCommandRotate::toOnlineViewerJSON(JSONElement& dest, const Coord& start) const
+nlohmann::json AnimateCommandRotate::toOnlineViewerJSON(const Coord& start) const
 {
-    JSONDataObjectAccessor moveAccessor = dest = JSONElement::makeObject();
+    nlohmann::json j;
 
-    moveAccessor["type"] = "arc";
-    moveAccessor["start_x"] = ToOnlineViewer::xPosition(start.x);
-    moveAccessor["start_y"] = ToOnlineViewer::yPosition(start.y);
-    moveAccessor["center_x"] = ToOnlineViewer::xPosition(mOrigin.x);
-    moveAccessor["center_y"] = ToOnlineViewer::yPosition(mOrigin.y);
-    moveAccessor["angle"] = -(mAngEnd - mAngStart);
-    moveAccessor["beats"] = NumBeats();
-    moveAccessor["beats_per_step"] = 1;
-    moveAccessor["facing_offset"] = -mFace + 90;
+    j["type"] = "arc";
+    j["start_x"] = ToOnlineViewer::xPosition(start.x);
+    j["start_y"] = ToOnlineViewer::yPosition(start.y);
+    j["center_x"] = ToOnlineViewer::xPosition(mOrigin.x);
+    j["center_y"] = ToOnlineViewer::yPosition(mOrigin.y);
+    j["angle"] = -(mAngEnd - mAngStart);
+    j["beats"] = static_cast<double>(NumBeats());
+    j["beats_per_step"] = static_cast<double>(1);
+    j["facing_offset"] = -mFace + 90;
+    return j;
 }
 }
