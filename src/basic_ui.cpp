@@ -118,6 +118,10 @@ wxString FancyTextWin::GetValue(void) const
 #endif
 }
 
+BEGIN_EVENT_TABLE(ScrollZoomWindow, ScrollZoomWindow::super)
+EVT_SIZE(ScrollZoomWindow::HandleSizeEvent)
+END_EVENT_TABLE()
+
 ScrollZoomWindow::ScrollZoomWindow(wxWindow* parent, wxWindowID id,
     const wxPoint& pos, const wxSize& size,
     long style)
@@ -140,17 +144,13 @@ void ScrollZoomWindow::PrepareDC(wxDC& dc)
 void ScrollZoomWindow::SetCanvasSize(wxSize s)
 {
     mCanvasSize = s;
-    auto virtualSizeX = GetSize().x * mZoomFactor;
-    auto virtualSizeY = (virtualSizeX * mCanvasSize.y) / mCanvasSize.x;
-    SetVirtualSize(wxSize( virtualSizeX, virtualSizeY ));
+    SetupSize();
 }
 
 void ScrollZoomWindow::SetZoom(float z)
 {
     mZoomFactor = z;
-    auto virtualSizeX = GetSize().x * mZoomFactor;
-    auto virtualSizeY = (virtualSizeX * mCanvasSize.y) / mCanvasSize.x;
-    SetVirtualSize(wxSize( virtualSizeX, virtualSizeY ));
+    SetupSize();
 }
 
 float ScrollZoomWindow::GetZoom() const
@@ -163,6 +163,18 @@ void ScrollZoomWindow::ChangeOffset(wxPoint deltaOffset)
     auto offset = GetViewStart();
     offset += deltaOffset;
     Scroll(offset);
+}
+
+void ScrollZoomWindow::HandleSizeEvent(wxSizeEvent& event)
+{
+    SetupSize();
+}
+
+void ScrollZoomWindow::SetupSize()
+{
+    auto virtualSizeX = GetSize().x * mZoomFactor;
+    auto virtualSizeY = (virtualSizeX * mCanvasSize.y) / mCanvasSize.x;
+    SetVirtualSize(wxSize( virtualSizeX, virtualSizeY ));
 }
 
 MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id,
