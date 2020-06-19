@@ -22,6 +22,7 @@
 #include "FieldThumbnailBrowser.h"
 #include "CalChartView.h"
 #include "CalChartSizes.h"
+#include "basic_ui.h"
 #include "cc_show.h"
 #include "confgr.h"
 #include "draw.h"
@@ -39,9 +40,11 @@ END_EVENT_TABLE()
 FieldThumbnailBrowser::FieldThumbnailBrowser(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name)
     : wxScrolledWindow(parent, id, pos, size, style, name)
     , mXScrollPadding(wxSystemSettings::GetMetric(wxSYS_VSCROLL_X))
+    , mYNameSize(GetThumbnailFontSize())
     , mYScrollPadding(wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y))
     , mLayoutHorizontal{ true }
 {
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
     // now update the current screen
     OnUpdate();
 }
@@ -111,6 +114,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
     auto& config = CalChartConfiguration::GetGlobalConfig();
     dc.SetBackgroundMode(wxTRANSPARENT);
     dc.Clear();
+    dc.SetFont(ResizeFont(dc.GetFont(), mYNameSize));
 
     // let's draw the boxes
     auto offset_x = 0;
