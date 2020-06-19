@@ -53,6 +53,10 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     SetFrame(frame);
 }
 
+AnimationView::~AnimationView()
+{
+}
+
 void AnimationView::OnDraw(wxDC* dc)
 {
     auto& config = CalChartConfiguration::GetGlobalConfig();

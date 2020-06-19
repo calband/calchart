@@ -39,6 +39,7 @@ END_EVENT_TABLE()
 AnimationCanvas::AnimationCanvas(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
     : super(parent, winid, pos, size, style, name)
 {
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
     Init();
     CreateControls();
     GetSizer()->Fit(this);

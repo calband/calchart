@@ -37,6 +37,7 @@
 #include "print_ps.h"
 
 #include <fstream>
+#include <iomanip>
 #include <wx/textfile.h>
 #include <wx/wfstream.h>
 

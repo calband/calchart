@@ -357,14 +357,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     mShadowAnimationPanel->SetInMiniMode(false);
 
     // now patch up the controls with the views:
-    mCanvas->SetView(GetFieldView());
-    mContinuityBrowser->SetView(GetFieldView());
-    mFieldThumbnailBrowser->SetView(GetFieldView());
-    mAnimationErrorsPanel->SetView(GetFieldView());
-    mAnimationPanel->SetView(GetFieldView());
-    mPrintContinuityEditor->SetView(GetFieldView());
-
-    mShadowAnimationPanel->SetView(GetFieldView());
+    SetViewsOnComponents(GetFieldView());
 
     // Now determine what to show and not show.
     mAUIManager->AddPane(mCanvas, wxAuiPaneInfo().Name(wxT("Field")).CenterPane().Show());
@@ -433,6 +426,7 @@ void CalChartFrame::OnClose()
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
     mConfig.Set_CalChartFrameAUILayout(mAUIManager->SavePerspective());
+    SetViewsOnComponents(nullptr);
 }
 
 void CalChartFrame::OnCmdAppend(wxCommandEvent& event) { AppendShow(); }
@@ -1284,3 +1278,16 @@ CalChartDoc* CalChartFrame::GetShow()
 {
     return static_cast<CalChartDoc*>(GetDocument());
 }
+
+void CalChartFrame::SetViewsOnComponents(CalChartView* view)
+{
+    mCanvas->SetView(view);
+    mContinuityBrowser->SetView(view);
+    mFieldThumbnailBrowser->SetView(view);
+    mAnimationErrorsPanel->SetView(view);
+    mAnimationPanel->SetView(view);
+    mPrintContinuityEditor->SetView(view);
+    mShadowAnimationPanel->SetView(view);
+}
+
+

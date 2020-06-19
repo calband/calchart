@@ -73,6 +73,9 @@ static inline auto GetAnimationErrorsSize() { return fDIP(wxSize{ 180, 360 }); }
 static inline auto GetPrintContinuityConstructSize() { return wxSize{ fDIP(180), -1 }; }
 static inline auto GetPrintContinuitySize() { return fDIP(wxSize{ 180, 360 }); }
 
+// Field Thumbnail sizes
+static inline auto GetThumbnailFontSize() { return 16; };
+
 // toolbar sizers
 static inline auto GetToolBarControlsPadding() { return fDIP(32); }
 static inline auto GetToolBarControlsZoomSize() { return fDIP(64); }
