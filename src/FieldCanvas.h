@@ -103,15 +103,18 @@ private:
     void PaintSelectShapes(wxDC& dc, CalChartConfiguration const& config);
     void PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config);
 
-    void OnMouseLeftDown_default(wxMouseEvent& event, CalChart::Coord pos);
-    void OnMouseLeftUp_default(wxMouseEvent& event, CalChart::Coord pos);
+    void OnMouseLeftDown_default(CalChart::Coord pos, bool shiftDown, bool altDown);
+    void OnMouseLeftUp_default(CalChart::Coord pos, bool altDown);
 
     void OnMouseLeftDown_CC_DRAG_SWAP(CalChart::Coord pos);
 
-    void OnMouseLeftUp_CC_DRAG_BOX(wxMouseEvent& event, CalChart::Coord pos);
-    void OnMouseLeftUp_CC_DRAG_LASSO(wxMouseEvent& event, CalChart::Coord);
-    void OnMouseLeftUp_CC_DRAG_POLY(wxMouseEvent& event, CalChart::Coord);
+    void OnMouseLeftUp_CC_DRAG_BOX(CalChart::Coord pos, bool altDown);
+    void OnMouseLeftUp_CC_DRAG_LASSO(CalChart::Coord pos, bool altDown);
+    void OnMouseLeftUp_CC_DRAG_POLY(CalChart::Coord pos, bool altDown);
 
+    // utility
+    CalChart::Coord TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event);
+    
     CalChartView* mView{};
     CC_DRAG curr_lasso = CC_DRAG::BOX;
     CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
