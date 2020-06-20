@@ -317,20 +317,20 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // sanity: Don't let the user zoom too low
     {
-        auto zoom_size = mConfig.Get_FieldFrameZoom();
+        auto zoom_size = mConfig.Get_FieldFrameZoom_3_6_0();
         if (zoom_size < 0.01) {
-            mConfig.Set_FieldFrameZoom(0.01);
+            mConfig.Set_FieldFrameZoom_3_6_0(0.01);
         }
     }
 
-    mCanvas = new FieldCanvas(mConfig.Get_FieldFrameZoom(), static_cast<CalChartView*>(view), this);
+    mCanvas = new FieldCanvas(mConfig.Get_FieldFrameZoom_3_6_0(), static_cast<CalChartView*>(view), this);
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
     mCanvas->Scroll(mConfig.Get_FieldCanvasScrollX(), mConfig.Get_FieldCanvasScrollY());
 
     // Create all the other things attached to the frame:
     mControls = FieldControls::CreateToolBar(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_TEXT);
-    FieldControls::SetZoomAmount(this, mConfig.Get_FieldFrameZoom());
+    FieldControls::SetZoomAmount(this, mConfig.Get_FieldFrameZoom_3_6_0());
 
     mContinuityBrowser = new ContinuityBrowser(this, wxID_ANY, wxDefaultPosition, GetContinuityBrowserConstructSize());
     mFieldThumbnailBrowser = new FieldThumbnailBrowser(this, wxID_ANY, wxDefaultPosition, GetFieldThumbnailBrowserConstructSize());
@@ -374,7 +374,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     mAUIManager->Update();
 
     // restore the manager with the Current visability
-    if (auto lastLayout = mConfig.Get_CalChartFrameAUILayout(); lastLayout != wxT("")) {
+    if (auto lastLayout = mConfig.Get_CalChartFrameAUILayout_3_6_0(); lastLayout != wxT("")) {
         mAUIManager->LoadPerspective(lastLayout, true);
     }
 
@@ -425,7 +425,7 @@ void CalChartFrame::OnClose()
 
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
-    mConfig.Set_CalChartFrameAUILayout(mAUIManager->SavePerspective());
+    mConfig.Set_CalChartFrameAUILayout_3_6_0(mAUIManager->SavePerspective());
     SetViewsOnComponents(nullptr);
 }
 
@@ -1225,7 +1225,7 @@ float CalChartFrame::ToolBarSetZoom(float zoom_amount)
 {
     zoom_amount = std::max(zoom_amount, 0.01f);
     FieldControls::SetZoomAmount(this, zoom_amount);
-    mConfig.Set_FieldFrameZoom(zoom_amount);
+    mConfig.Set_FieldFrameZoom_3_6_0(zoom_amount);
     return zoom_amount;
 }
 

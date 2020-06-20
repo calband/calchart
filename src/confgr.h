@@ -133,7 +133,7 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(AutosaveInterval, long);
 
     // page setup and zoom
-    DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameZoom, double);
+    DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameZoom_3_6_0, double);
     DECLARE_CONFIGURATION_FUNCTIONS(FieldCanvasScrollX, long);
     DECLARE_CONFIGURATION_FUNCTIONS(FieldCanvasScrollY, long);
     DECLARE_CONFIGURATION_FUNCTIONS(FieldFrameWidth, long);
@@ -210,7 +210,7 @@ private:                                           \
 
     DECLARE_CONFIGURATION_FUNCTIONS(BeepOnCollisions, bool);
 
-    DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout, wxString);
+    DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_0, wxString);
 
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellFontSize, long);
