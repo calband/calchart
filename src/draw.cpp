@@ -253,7 +253,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
     auto contBoldItalFont = CreateFont(font_size, wxFONTFAMILY_MODERN, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_BOLD);
 
     dc.SetFont(contPlainFont);
-    const wxCoord maxtexth = contPlainFont.GetPointSize() + 2;
+    const wxCoord maxtexth = font_size + 2;
 
     float y = bounding.GetTop();
     const wxCoord charWidth = dc.GetCharWidth();
@@ -447,7 +447,8 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
 
     // set the origin and scaling for drawing the field
     dc.SetDeviceOrigin(kFieldBorderOffset * page.x, kFieldTop * page.y);
-    auto scale = (page.x - 2 * kFieldBorderOffset * page.x) / (double)mode.Size().x;
+    // Because we are drawing to a bitmap, DIP isn't happening.  So we compensate by changing the scaling.
+    auto scale = tDIP(page.x - 2 * kFieldBorderOffset * page.x) / (double)mode.Size().x;
     dc.SetUserScale(scale, scale);
 
     // draw the field.
@@ -466,15 +467,12 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
 
     // set the page for drawing:
     page = dc.GetSize();
-    if (landscape) {
-        dc.SetUserScale(page.x / kSizeXLandscape, page.y / kSizeYLandscape);
-        page.x = kSizeXLandscape;
-        page.y = kSizeYLandscape;
-    } else {
-        dc.SetUserScale(page.x / kSizeX, page.y / kSizeY);
-        page.x = kSizeX;
-        page.y = kSizeY;
-    }
+    auto sizeX = (landscape) ? kSizeXLandscape : kSizeX;
+    auto sizeY = (landscape) ? kSizeYLandscape : kSizeY;
+    // because we are drawing to a bitmap, we manipulate the scaling factor so it just draws as normal
+    dc.SetUserScale(tDIP(page.x) / sizeX, tDIP(page.y) / sizeY);
+    page.x = fDIP(sizeX);
+    page.y = fDIP(sizeY);
 
     // draw the header
     dc.SetFont(CreateFont(16, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
@@ -514,7 +512,7 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
 
     auto bitmapWidth = (landscape || forced_landscape ? kSizeXLandscape : kSizeX) * kBitmapScale;
     auto bitmapHeight = (landscape || forced_landscape ? kSizeYLandscape : kSizeY) * kBitmapScale;
-    // construct a bitmap for drawing on.  This should
+    // construct a bitmap for drawing on.
     wxBitmap membm(bitmapWidth, bitmapHeight);
     // first convert to image
     wxMemoryDC memdc(membm);
