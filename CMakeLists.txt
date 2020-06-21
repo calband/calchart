@@ -274,7 +274,7 @@ set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 add_custom_command (
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${CMAKE_CURRENT_SOURCE_DIR}/resources/" $<TARGET_FILE_DIR:CalChart>
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources" $<TARGET_FILE_DIR:CalChart>/resources
   )
 
 add_custom_command (
