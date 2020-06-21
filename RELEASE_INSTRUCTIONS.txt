@@ -24,7 +24,7 @@ For windows:
 w1.1 Follow the instructions in README-win.txt
 
 w1.1.1 Copy readme to build-win:
-awk 'sub("$", "\r")' README.md > build-win/README.txt
+awk 'sub("$", "\r")' README.md > build-windows/README.txt
 
 w1.2 Install Nullsoft Scriptable Install System
 We've configured CMake to use NSIS to do installations.
@@ -32,7 +32,7 @@ https://sourceforge.net/projects/nsis/
 
 w1.3 Build the setup.exe installer:
   Compile the ALL_BUILD target for Release by selecting the ALL_BUILD in the CMakePredefinedTargets and Build->Build ALL_BUILD.
-  Compile the INSTALL target for Release by selecting the INSTALL in the CMakePredefinedTargets and Build->Build INSTALL.
+  Compile the INSTALL target for Release by selecting the PACKAGE in the CMakePredefinedTargets and Build->Build PACKAGE.
 
 The final product is CalChart-$CCVER.exe
 
