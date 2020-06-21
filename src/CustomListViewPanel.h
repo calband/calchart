@@ -75,5 +75,4 @@ private:
     wxPoint m_lastLocation;
     size_t m_selected;
     bool m_dragging;
-
 };

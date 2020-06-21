@@ -528,7 +528,7 @@ nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
         ++animateSheetIter;
         ++sheetIndex;
     }
-    
+
     j["sheets"] = sheetData;
 
     return j;

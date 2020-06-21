@@ -643,7 +643,7 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     DrawCC_DrawCommandList(dc, draw_commands);
     dc.SetBrush(brushAndPen.first);
     auto where = fDIP(wxPoint{ end.x, end.y });
-    float circ_r = fDIP(Float2CoordUnits(config.Get_DotRatio())/2);
+    float circ_r = fDIP(Float2CoordUnits(config.Get_DotRatio()) / 2);
     dc.DrawCircle(where, circ_r);
 }
 
@@ -654,7 +654,7 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, CalChartConfiguration c
     for (int i = 0; i < CoordUnits2Int(tDIP(fieldsize.x)) / 8 + 1; i++) {
         auto text = yard_text[i];
         auto textSize = dc.GetTextExtent(text);
-        const auto top_row_x = i * kStep8 - textSize.x/2 + border1.x;
+        const auto top_row_x = i * kStep8 - textSize.x / 2 + border1.x;
         const auto top_row_y = std::max(border1.y - textSize.y + ((howToDraw == ShowMode_kOmniView) ? kStep8 : 0), dc.DeviceToLogicalY(0));
         const auto bottom_row_x = top_row_x;
         const auto bottom_row_y = border1.y + fieldsize.y - ((howToDraw == ShowMode_kOmniView) ? kStep8 : 0);
@@ -794,7 +794,7 @@ static void ShowModeStandard_DrawHelper(wxDC& dc, CalChartConfiguration const& c
     }
     auto yard_text = mode.Get_yard_text().data();
     yard_text += (-CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8;
-    
+
     ShowModeStandard_DrawHelper_Labels(dc, config, yard_text, fieldsize, border1, howToDraw);
 }
 

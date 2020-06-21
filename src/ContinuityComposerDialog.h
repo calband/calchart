@@ -37,4 +37,5 @@ public:
 
 private:
     ContinuityComposerPanel* mPanel{};
+    wxButton* mCloseButton{};
 };

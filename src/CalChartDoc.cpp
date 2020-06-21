@@ -254,7 +254,7 @@ bool CalChartDoc::exportViewerFile(wxString const& filepath)
 
     j["meta"] = {
         { "version", "1.0.0" },
-        { "index_name", "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)" },  // TODO; for now, manually add index_name to viewer file after saving
+        { "index_name", "(MANUAL) Give a unique name for this show; this is effectively a filename, and won't be displayed to CalChart Online Viewer users (recommended format: show-name-year, e.g. taylor-swift-2016)" }, // TODO; for now, manually add index_name to viewer file after saving
         { "type", "viewer" },
     };
 

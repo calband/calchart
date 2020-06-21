@@ -87,8 +87,8 @@ void AnimationPanel::CreateControls()
     AddToSizerBasic(toprow, mAnimateOmniToggle);
     mItemsToHide.push_back(mAnimateOmniToggle);
 
-    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_play) }), wxDefaultPosition);
-    mPlayPauseButton->SetBitmapPressed(ScaleButtonBitmap(wxBitmap { BITMAP_NAME(tb_stop) }));
+    mPlayPauseButton = new wxBitmapToggleButton(this, CALCHART__anim_play_button, ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_play) }), wxDefaultPosition);
+    mPlayPauseButton->SetBitmapPressed(ScaleButtonBitmap(wxBitmap{ BITMAP_NAME(tb_stop) }));
     AddToSizerBasic(toprow, mPlayPauseButton);
 
     // Sheet slider (will get set later with UpdatePanel())
@@ -162,6 +162,9 @@ void AnimationPanel::SetInMiniMode(bool miniMode)
 
 void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
 {
+    if (!mView) {
+        return;
+    }
     // next_beat could come from the timer.  If so, stop the timer.
     mView->NextBeat();
     if (mView->AtEndOfShow()) {
@@ -281,8 +284,7 @@ void AnimationPanel::OnUpdate()
 
 void AnimationPanel::SetView(CalChartView* view)
 {
-    if (!view)
-    {
+    if (!view) {
         mView = nullptr;
         return;
     }

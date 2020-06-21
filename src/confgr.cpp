@@ -842,4 +842,3 @@ std::array<std::string, kYardTextValues> Get_yard_text_all(CalChartConfiguration
     }
     return values;
 }
-

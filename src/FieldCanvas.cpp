@@ -259,7 +259,7 @@ void FieldCanvas::OnMouseLeftDown_CC_DRAG_SWAP(CalChart::Coord pos)
 CalChart::Coord FieldCanvas::TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event)
 {
     auto mousePos = event.GetPosition();
-    return CalChart::Coord( tDIP(dc.DeviceToLogicalX(mousePos.x)), tDIP(dc.DeviceToLogicalY(mousePos.y)) );
+    return CalChart::Coord(tDIP(dc.DeviceToLogicalX(mousePos.x)), tDIP(dc.DeviceToLogicalY(mousePos.y)));
 }
 
 // Allow clicking within pixels to close polygons

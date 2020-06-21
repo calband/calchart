@@ -24,6 +24,7 @@
 #include "CalChartSizes.h"
 
 #include <vector>
+#include <wx/hyperlink.h>
 #include <wx/statline.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
@@ -36,6 +37,7 @@ void SetBandIcon(wxFrame* frame);
 // Set icon to band's insignia
 wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size = wxDefaultSize);
 wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int pointSize);
+wxHyperlinkCtrl* LinkStringWithSize(wxWindow* parent, std::string const& label, std::string const& url, int pointSize);
 wxStaticLine* LineWithLength(wxWindow* parent, int length, long style = wxLI_HORIZONTAL);
 
 // class for saving and restoring
@@ -171,6 +173,12 @@ void AddToSizerExpand(wxSizer* sizer, T window)
     sizer->Add(window, ExpandSizerFlags());
 }
 
+template <typename T>
+void AddToSizerRight(wxSizer* sizer, T window)
+{
+    sizer->Add(window, RightBasicSizerFlags());
+}
+
 template <typename T, typename Int, typename Brush>
 void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
 {
@@ -189,6 +197,7 @@ template <typename Strings>
 auto BestSizeX(wxControl* controller, Strings const& strings)
 {
     return controller->GetTextExtent(*std::max_element(std::begin(strings), std::end(strings), [controller](auto a, auto b) {
-        return controller->GetTextExtent(a).x < controller->GetTextExtent(b).x;
-    })).x;
+                         return controller->GetTextExtent(a).x < controller->GetTextExtent(b).x;
+                     }))
+        .x;
 }

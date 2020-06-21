@@ -97,6 +97,14 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     AddToSizerBasic(topSizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), GetTitleFontSize()));
     AddToSizerBasic(topSizer, LineWithLength(this, GetLogoLineSize()));
 
+    {
+        auto lineSizer = new wxBoxSizer(wxHORIZONTAL);
+        AddToSizerBasic(topSizer, lineSizer);
+        AddToSizerBasic(lineSizer, LinkStringWithSize(this, "Check for latest.", "https://sourceforge.net/projects/calchart/", GetSubTitleFontSize()));
+        AddToSizerBasic(lineSizer, TextStringWithSize(this, "        ", GetSubTitleFontSize()));
+        AddToSizerBasic(lineSizer, LinkStringWithSize(this, "Report an issue.", "https://github.com/calband/calchart/issues/new", GetSubTitleFontSize()));
+    }
+    AddToSizerBasic(topSizer, LineWithLength(this, GetLogoLineSize()));
     AddToSizerBasic(topSizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", GetSubTitleFontSize()));
     AddToSizerBasic(topSizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", GetSubSubTitleFontSize()));
 

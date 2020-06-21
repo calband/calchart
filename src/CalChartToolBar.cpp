@@ -20,8 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartSizes.h"
 #include "CalChartToolBar.h"
+#include "CalChartSizes.h"
 #include "platconf.h"
 #include "ui_enums.h"
 
@@ -65,9 +65,9 @@
 #include "tb_sym6.xbm"
 #include "tb_sym7.xbm"
 
+#include <wx/aui/auibar.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
-#include <wx/aui/auibar.h>
 
 struct ToolBarEntry {
     wxItemKind kind;
@@ -81,14 +81,14 @@ struct ToolBarEntry {
 std::vector<ToolBarEntry> GetSymbolsToolBar()
 {
     static auto const tb = std::vector<ToolBarEntry>{
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym0))), wxT("plainmen"), CALCHART__setsym0 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym1))), wxT("solidmen"), CALCHART__setsym1 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym2))), wxT("backslash men"), CALCHART__setsym2 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym3))), wxT("slash men"), CALCHART__setsym3 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym4))), wxT("x men"), CALCHART__setsym4 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym5))), wxT("solid backslash men"), CALCHART__setsym5 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym6))), wxT("solid slash men"), CALCHART__setsym6 },
-        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym7))), wxT("solid x men"), CALCHART__setsym7, true }
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym0))), wxT("plain"), CALCHART__setsym0 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym1))), wxT("solid"), CALCHART__setsym1 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym2))), wxT("backslash"), CALCHART__setsym2 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym3))), wxT("slash"), CALCHART__setsym3 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym4))), wxT("x"), CALCHART__setsym4 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym5))), wxT("solid backslash"), CALCHART__setsym5 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym6))), wxT("solid slash"), CALCHART__setsym6 },
+        { wxITEM_NORMAL, wxT(""), ScaleButtonBitmap(wxBitmap(BITMAP_NAME(tb_sym7))), wxT("solid x"), CALCHART__setsym7, true }
     };
     return tb;
 }
@@ -164,4 +164,3 @@ wxAuiToolBar* CreateMainAuiToolBar(wxWindow* parent, wxWindowID id, long style)
     tb->Realize();
     return tb;
 }
-

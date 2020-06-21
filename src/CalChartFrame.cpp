@@ -28,9 +28,12 @@
 #include "AnimationErrorsPanel.h"
 #include "AnimationPanel.h"
 #include "CalChartApp.h"
+#include "CalChartToolBar.h"
 #include "CalChartView.h"
+#include "ColorPalette.h"
 #include "ContinuityBrowser.h"
 #include "FieldCanvas.h"
+#include "FieldControlsToolBar.h"
 #include "FieldThumbnailBrowser.h"
 #include "PrintContinuityEditor.h"
 #include "TopFrame.h"
@@ -44,25 +47,22 @@
 #include "confgr.h"
 #include "draw.h"
 #include "e7_transition_solver_ui.h"
-#include "FieldControlsToolBar.h"
 #include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
 #include "print_ps_dialog.h"
 #include "show_ui.h"
-#include "CalChartToolBar.h"
 #include "ui_enums.h"
-#include "ColorPalette.h"
 
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
 #ifdef __WXMSW__
 #include <wx/helpwin.h>
 #endif
+#include <wx/aui/auibar.h>
 #include <wx/clipbrd.h>
 #include <wx/cmdproc.h>
 #include <wx/tglbtn.h>
-#include <wx/aui/auibar.h>
 
 const wxString kSheetDataClipboardFormat = wxT("CC_sheet_clipboard_v1");
 
@@ -74,7 +74,7 @@ static std::map<int, std::string> kAUIEnumToString = {
     { CALCHART__ViewFieldThumbnail, "Field Thumbnails" },
     { CALCHART__ViewFieldControls, "Controls ToolBar" },
     { CALCHART__ViewContinuityInfo, "Continuities" },
-    { CALCHART__ViewAnimationErrors, "Animation Errors" },
+    { CALCHART__ViewAnimationErrors, "Marching Errors" },
     { CALCHART__ViewAnimation, "Animation" },
     { CALCHART__ViewPrintContinuity, "Print Continuity" },
     { CALCHART__ViewToolBar, "ToolBar" },
@@ -211,7 +211,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     const wxPoint& pos, const wxSize& size)
     : wxDocChildFrame(doc, view, frame, -1, wxT("CalChart"), pos, size)
     , mConfig(config_)
-    , mAUIManager( new wxAuiManager(this) )
+    , mAUIManager(new wxAuiManager(this))
 {
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // Give it an icon
@@ -1289,5 +1289,3 @@ void CalChartFrame::SetViewsOnComponents(CalChartView* view)
     mPrintContinuityEditor->SetView(view);
     mShadowAnimationPanel->SetView(view);
 }
-
-
