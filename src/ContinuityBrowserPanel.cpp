@@ -77,6 +77,11 @@ static auto do_cloning(T const& cont)
     return copied_cont;
 }
 
+void ContinuityBrowserPanel::AddNewEntry()
+{
+    OnNewEntry(mCont.GetParsedContinuity().size());
+}
+
 void ContinuityBrowserPanel::OnNewEntry(int cell)
 {
     if (!mView) {

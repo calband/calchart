@@ -81,7 +81,6 @@ private:
     void OnMouseMove(wxMouseEvent& event) override;
     void OnMousePinchToZoom(wxMouseEvent& event) override;
 
-
     // Internals
     void BeginSelectDrag(CC_DRAG type, const CalChart::Coord& start);
     void AddMoveDrag(CC_DRAG type, std::unique_ptr<CalChart::Shape> shape);
@@ -114,7 +113,7 @@ private:
 
     // utility
     CalChart::Coord TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event);
-    
+
     CalChartView* mView{};
     CC_DRAG curr_lasso = CC_DRAG::BOX;
     CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
@@ -122,5 +121,4 @@ private:
     std::map<int, CalChart::Coord> mMovePoints;
     CC_DRAG select_drag = CC_DRAG::NONE;
     ShapeList m_select_shape_list;
-
 };

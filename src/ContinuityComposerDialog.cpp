@@ -67,6 +67,8 @@ public:
 
     std::unique_ptr<CalChart::ContProcedure> GetContinuity();
     bool Validate() override;
+    void SetOnUpdateIsValid(std::function<void(bool)> const& f) { mOnUpdateIsValid = f; }
+    auto GetOnUpdateIsValid() const { return mOnUpdateIsValid; }
 
     void OnUpdate();
 
@@ -86,6 +88,7 @@ private:
     CalChart::ContToken* mCurrentParent = nullptr;
     std::function<void(CalChart::DrawableCont const& c)> const mAction;
     CalChartConfiguration& mConfig;
+    std::function<void(bool)> mOnUpdateIsValid{};
 };
 
 IMPLEMENT_CLASS(ContinuityComposerPanel, wxPanel)
@@ -138,7 +141,12 @@ void ContinuityComposerPanel::CreateControls()
 
     mComboSelection = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr, (long)wxTE_PROCESS_ENTER);
     topsizer->Add(mComboSelection, 0, wxEXPAND | wxALL, 5);
-    mComboSelection->Bind(wxEVT_TEXT_ENTER, [this](auto const& event) { this->OnCmdTextEnterKeyPressed(event); });
+    mComboSelection->Bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
+        this->OnCmdTextEnterKeyPressed(event);
+    });
+    mComboSelection->Bind(wxEVT_COMBOBOX, [this](auto const& event) {
+        this->OnCmdTextEnterKeyPressed(event);
+    });
 
     if (!mCont) {
         mCont = std::make_unique<CalChart::ContProcUnset>();
@@ -565,6 +573,9 @@ void ContinuityComposerPanel::OnUpdate()
     mCanvas->SetHighlight(mCurrentSelected);
     mComboSelection->SetFocus();
 
+    if (mOnUpdateIsValid) {
+        mOnUpdateIsValid(Validate());
+    }
     Refresh();
 }
 
@@ -602,9 +613,13 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
     topsizer->Add(button_sizer, sRightBasicSizerFlags);
 
     button_sizer->Add(new wxButton(this, wxID_CANCEL, wxT("&Cancel")), sBasicSizerFlags);
-    auto closeBut = new wxButton(this, wxID_OK, wxT("&Done"));
-    button_sizer->Add(closeBut, sBasicSizerFlags);
-    closeBut->SetDefault();
+    mCloseButton = new wxButton(this, wxID_OK, wxT("&Done"));
+    button_sizer->Add(mCloseButton, sBasicSizerFlags);
+    mCloseButton->SetDefault();
+    mCloseButton->Enable(mPanel->Validate());
+    mPanel->SetOnUpdateIsValid([this](bool enable) {
+        static_cast<wxButton*>(FindWindow(wxID_OK))->Enable(enable);
+    });
 
     Update();
 }

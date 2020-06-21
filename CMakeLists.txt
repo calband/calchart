@@ -177,22 +177,13 @@ file (
 
 file (
   GLOB CalChartResources
-    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.xbm"
-    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.icns"
-    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.ico"
-    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*.png"
-  )
-
-file (
-  GLOB CalChartImages
-    "${CMAKE_CURRENT_SOURCE_DIR}/resources/image/*"
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources/*"
   )
 
 source_group(
   "Resources" FILES
   ${CalChartDocs}
   ${CalChartResources}
-  ${CalChartImages}
   )
 
 add_executable (
@@ -201,7 +192,6 @@ add_executable (
   ${CalChartHeaders}
   ${CalChartDocs}
   ${CalChartResources}
-  ${CalChartImages}
   "${CMAKE_CURRENT_SOURCE_DIR}/calchart.rc"
   )
 
@@ -212,7 +202,7 @@ install (
   )
 
 
-set(AllResources ${CalChartDocs} ${CalChartResources} ${CalChartImages}) 
+set(AllResources ${CalChartDocs} ${CalChartResources}) 
 
 set_target_properties (
   CalChart PROPERTIES
@@ -284,7 +274,7 @@ set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 add_custom_command (
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  "${CMAKE_CURRENT_SOURCE_DIR}/resources/" $<TARGET_FILE_DIR:CalChart>
+  "${CMAKE_CURRENT_SOURCE_DIR}/resources" $<TARGET_FILE_DIR:CalChart>/resources
   )
 
 add_custom_command (
@@ -306,9 +296,9 @@ install (
   )
 
 install (
-  FILES ${CalChartImages}
-  DESTINATION image
-  COMPONENT Images
+  FILES ${CalChartResources}
+  DESTINATION resources
+  COMPONENT Resources
   )
 
 # Installer section
@@ -320,7 +310,7 @@ include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_NAME CalChart)
 set (CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 if (MSVC)
-  set (CPACK_COMPONENTS_ALL applications Docs Images)
+  set (CPACK_COMPONENTS_ALL applications Docs Resources)
 else ()
   set (CPACK_COMPONENTS_ALL applications)
 endif ()

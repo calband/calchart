@@ -21,8 +21,8 @@
 */
 
 #include "show_ui.h"
-#include "cc_sheet.h"
 #include "CalChartToolBar.h"
+#include "cc_sheet.h"
 #include <algorithm>
 #include <ctype.h>
 #include <wx/spinctrl.h>

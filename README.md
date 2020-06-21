@@ -69,6 +69,34 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 # Release notes
 
+## Release notes for 3.6
+
+Features addressed in this release:
+
+* General clean-up the UI.
+* [#28](../../issues/28) set of color palettes
+* [#177](../../issues/177) Should we get rid of "mode"
+* [#196](../../issues/196) Could mode be per show, per stunt sheet.
+* [#201](../../issues/201) Add Better Continuity editor, get away from text
+* [#291](../../issues/291) CalChart should top-level several color choices
+* [#297](../../issues/297) Look to use wxAuiManager
+* [#301](../../issues/301) Add a better starting page
+
+Bugs addressed in this release:
+
+* [#279](../../issues/279) pressing on arrow keys doesn't seem to update thumbnails
+* [#235](../../issues/235) Rotate is broken
+* [#293](../../issues/293) Get rid of unused EPS printing.
+* [#294](../../issues/294) Get rid of Spring Show mode to simplify
+* [#307](../../issues/307) When importing a file with bad continuity, offer some way to correct it.
+* [#308](../../issues/308) have calchart remember the size, position, and layout
+
+Other changes:
+
+* [#287](../../issues/287) Increment wxWidgets to 3.1.3
+* [#303](../../issues/303) Switch to c++17
+* [#309](../../issues/309) Animation view flickers sometimes
+
 ## Release notes for 3.5.4
 
 * [#](../../issues/) Switch to CMake.

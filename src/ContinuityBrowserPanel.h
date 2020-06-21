@@ -47,6 +47,7 @@ public:
     auto GetView() const { return mView; }
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
+    void AddNewEntry();
 
 private:
     void Init();

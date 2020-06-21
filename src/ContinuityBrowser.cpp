@@ -24,12 +24,15 @@
 #include "CalChartApp.h"
 #include "CalChartView.h"
 #include "ContinuityBrowserPanel.h"
+#include "basic_ui.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 
+#include <wx/artprov.h>
 #include <wx/help.h>
 #include <wx/html/helpctrl.h>
 #include <wx/statline.h>
+#include <wx/tglbtn.h>
 
 // a panel consists of the name, canvas
 class ContinuityBrowserPerCont : public wxPanel {
@@ -72,16 +75,25 @@ void ContinuityBrowserPerCont::Init()
 
 void ContinuityBrowserPerCont::CreateControls()
 {
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    auto topSizer = new wxBoxSizer(wxVERTICAL);
+    SetSizer(topSizer);
+
+    auto lineSizer = new wxBoxSizer(wxHORIZONTAL);
+    AddToSizerBasic(topSizer, lineSizer);
 
     auto staticText = new wxStaticText(this, wxID_STATIC, CalChart::GetLongNameForSymbol(mSym), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    topsizer->Add(staticText, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
+    AddToSizerExpand(lineSizer, staticText);
+
+    auto button = new wxBitmapButton(this, wxID_ANY, ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)));
+    AddToSizerBasic(lineSizer, button);
+    button->Bind(wxEVT_BUTTON, [this](auto const&) {
+        mCanvas->AddNewEntry();
+    });
 
     // here's a canvas
     mCanvas = new ContinuityBrowserPanel(mSym, CalChartConfiguration::GetGlobalConfig(), this);
-    topsizer->Add(mCanvas, 1, wxEXPAND);
-    topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
+    topSizer->Add(mCanvas, 1, wxEXPAND);
+    topSizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
 }
 
 void ContinuityBrowserPerCont::OnUpdate()

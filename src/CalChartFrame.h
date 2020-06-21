@@ -180,7 +180,7 @@ private:
     void ChangeMainFieldVisibility(bool show);
 
     void ShowFieldAndHideAnimation(bool showField);
-    void SetViewsOnComponents(CalChartView * showField);
+    void SetViewsOnComponents(CalChartView* showField);
 
     // the components
     FieldCanvas* mCanvas{};

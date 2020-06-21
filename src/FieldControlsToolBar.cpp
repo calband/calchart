@@ -24,13 +24,13 @@
 #include "ColorPalette.h"
 #include "basic_ui.h"
 #include "cc_point.h"
-#include "ui_enums.h"
 #include "platconf.h"
+#include "ui_enums.h"
 
 #include <wx/artprov.h>
+#include <wx/aui/auibar.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
-#include <wx/aui/auibar.h>
 
 #include "tb_paths.xbm"
 
@@ -87,7 +87,7 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
     for (auto&& i : gridtext) {
         gridChoice->Append(i);
     }
-    gridChoice->SetMaxSize(wxSize{ BestSizeX(gridChoice, gridtext)+GetToolBarControlsPadding(), -1 });
+    gridChoice->SetMaxSize(wxSize{ BestSizeX(gridChoice, gridtext) + GetToolBarControlsPadding(), -1 });
     gridChoice->SetSelection(2);
     tb->AddControl(gridChoice, "Grid");
 
@@ -95,7 +95,7 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
     for (auto&& i : gridtext) {
         toolGridChoice->Append(i);
     }
-    toolGridChoice->SetMaxSize(wxSize{ BestSizeX(toolGridChoice, gridtext)+GetToolBarControlsPadding(), -1 });
+    toolGridChoice->SetMaxSize(wxSize{ BestSizeX(toolGridChoice, gridtext) + GetToolBarControlsPadding(), -1 });
     toolGridChoice->SetSelection(2);
     tb->AddControl(toolGridChoice, "Tool");
 
@@ -107,7 +107,7 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
         buf.sprintf(wxT("%u"), i);
         refChoice->Append(buf);
     }
-    refChoice->SetMaxSize(wxSize{ BestSizeX(refChoice, std::vector<std::string>{ "Off" })+GetToolBarControlsPadding(), -1 });
+    refChoice->SetMaxSize(wxSize{ BestSizeX(refChoice, std::vector<std::string>{ "Off" }) + GetToolBarControlsPadding(), -1 });
     refChoice->SetSelection(0);
     tb->AddControl(refChoice, "Ref Group");
 
@@ -119,7 +119,7 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
     for (auto&& i : ghostChoice) {
         ghostChioce->Append(i);
     }
-    ghostChioce->SetMaxSize(wxSize{ BestSizeX(ghostChioce, gridtext)+GetToolBarControlsPadding(), -1 });
+    ghostChioce->SetMaxSize(wxSize{ BestSizeX(ghostChioce, gridtext) + GetToolBarControlsPadding(), -1 });
     ghostChioce->SetSelection(0);
     tb->AddControl(ghostChioce, "Ghost");
 
@@ -143,12 +143,12 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice(wxWindo
 double GetZoomAmount(wxWindow* target)
 {
     auto zoom = static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom))->GetValue();
-    return zoom_min + (zoom_max - zoom_min) * (zoom/static_cast<double>(zoom_steps));
+    return zoom_min + (zoom_max - zoom_min) * (zoom / static_cast<double>(zoom_steps));
 }
 
 void SetZoomAmount(wxWindow* target, double zoom)
 {
-    auto newSliderValue = (zoom <= zoom_min) ? 0 : (zoom >= zoom_max) ? zoom_steps : (zoom - zoom_min)/(zoom_max - zoom_min) * zoom_steps;
+    auto newSliderValue = (zoom <= zoom_min) ? 0 : (zoom >= zoom_max) ? zoom_steps : (zoom - zoom_min) / (zoom_max - zoom_min) * zoom_steps;
     auto slider = static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom));
     if (newSliderValue == slider->GetValue()) {
         return;

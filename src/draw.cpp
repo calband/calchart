@@ -643,7 +643,7 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     DrawCC_DrawCommandList(dc, draw_commands);
     dc.SetBrush(brushAndPen.first);
     auto where = fDIP(wxPoint{ end.x, end.y });
-    float circ_r = fDIP(Float2CoordUnits(config.Get_DotRatio())/2);
+    float circ_r = fDIP(Float2CoordUnits(config.Get_DotRatio()) / 2);
     dc.DrawCircle(where, circ_r);
 }
 
@@ -654,7 +654,7 @@ static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, CalChartConfiguration c
     for (int i = 0; i < CoordUnits2Int(tDIP(fieldsize.x)) / 8 + 1; i++) {
         auto text = yard_text[i];
         auto textSize = dc.GetTextExtent(text);
-        const auto top_row_x = i * kStep8 - textSize.x/2 + border1.x;
+        const auto top_row_x = i * kStep8 - textSize.x / 2 + border1.x;
         const auto top_row_y = std::max(border1.y - textSize.y + ((howToDraw == ShowMode_kOmniView) ? kStep8 : 0), dc.DeviceToLogicalY(0));
         const auto bottom_row_x = top_row_x;
         const auto bottom_row_y = border1.y + fieldsize.y - ((howToDraw == ShowMode_kOmniView) ? kStep8 : 0);
@@ -726,37 +726,37 @@ static void ShowMode_DrawHelper_HorizontalMidDotted(wxDC& dc, wxSize const& fiel
 
 static void ShowMode_DrawHelper_Hashes(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1, int mode_HashW, int mode_HashE)
 {
-    for (auto j = Int2CoordUnits(0); j < fieldsize.x; j += kStep8) {
+    for (auto j = tDIP(Int2CoordUnits(0)); j < tDIP(fieldsize.x); j += tDIP(kStep8)) {
         wxPoint points[2] = {
-            { j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashW) },
-            { j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashW) },
+            fDIP(wxPoint{ j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashW) }),
+            fDIP(wxPoint{ j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashW) }),
         };
         dc.DrawLines(2, points, border1.x, border1.y);
-        points[0] = wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashW));
-        points[1] = wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashW));
+        points[0] = fDIP(wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashW)));
+        points[1] = fDIP(wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashW)));
         dc.DrawLines(2, points, border1.x, border1.y);
 
-        points[0] = wxPoint(j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashE));
-        points[1] = wxPoint(j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashE));
+        points[0] = fDIP(wxPoint(j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashE)));
+        points[1] = fDIP(wxPoint(j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashE)));
         dc.DrawLines(2, points, border1.x, border1.y);
-        points[0] = wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashE));
-        points[1] = wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashE));
+        points[0] = fDIP(wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashE)));
+        points[1] = fDIP(wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashE)));
         dc.DrawLines(2, points, border1.x, border1.y);
     }
 }
 
 static void ShowMode_DrawHelper_HashTicks(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1, int mode_HashW, int mode_HashE)
 {
-    for (auto j = Int2CoordUnits(0); j < fieldsize.x; j += kStep8) {
+    for (auto j = tDIP(Int2CoordUnits(0)); j < tDIP(fieldsize.x); j += tDIP(kStep8)) {
         for (size_t midhash = 1; midhash < 5; ++midhash) {
             wxPoint points[2] = {
-                { j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashW) },
-                { j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashW - (0.2 * 8)) },
+                fDIP(wxPoint{ j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashW) }),
+                fDIP(wxPoint{ j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashW - (0.2 * 8)) }),
             };
             dc.DrawLines(2, points, border1.x, border1.y);
 
-            points[0] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashE));
-            points[1] = wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashE + (0.2 * 8)));
+            points[0] = fDIP(wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashE)));
+            points[1] = fDIP(wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashE + (0.2 * 8))));
             dc.DrawLines(2, points, border1.x, border1.y);
         }
     }
@@ -794,7 +794,7 @@ static void ShowModeStandard_DrawHelper(wxDC& dc, CalChartConfiguration const& c
     }
     auto yard_text = mode.Get_yard_text().data();
     yard_text += (-CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8;
-    
+
     ShowModeStandard_DrawHelper_Labels(dc, config, yard_text, fieldsize, border1, howToDraw);
 }
 

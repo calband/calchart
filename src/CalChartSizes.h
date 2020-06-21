@@ -34,7 +34,7 @@ static auto tDIP(T const& t) { return wxWindow::ToDIP(t, nullptr); }
 static inline auto fDIP(CalChart::Coord const& t) { return wxWindow::FromDIP(wxSize{ t.x, t.y }, nullptr); }
 
 // Generic sizes
-static inline auto GetBitmapButtonSize() { return fDIP(wxSize { 16, 16 } ); };
+static inline auto GetBitmapButtonSize() { return fDIP(wxSize{ 16, 16 }); };
 static inline auto ScaleButtonBitmap(wxBitmap const& data) { return data.ConvertToImage().Scale(GetBitmapButtonSize().x, GetBitmapButtonSize().y); };
 
 // Top frame related sizes

@@ -46,7 +46,7 @@ wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
 #if defined(__APPLE__) && (__APPLE__)
     const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/calchart.png");
 #else
-    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("calchart.png"));
+    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("calchart.png"));
 #endif
     if (image.LoadFile(kImageDir)) {
         if (size != wxDefaultSize) {
@@ -60,6 +60,13 @@ wxStaticBitmap* BitmapWithBandIcon(wxWindow* parent, wxSize const& size)
 wxStaticText* TextStringWithSize(wxWindow* parent, std::string const& label, int pointSize)
 {
     auto result = new wxStaticText(parent, wxID_STATIC, label, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE_HORIZONTAL);
+    result->SetFont(CreateFont(pointSize));
+    return result;
+}
+
+wxHyperlinkCtrl* LinkStringWithSize(wxWindow* parent, std::string const& label, std::string const& url, int pointSize)
+{
+    auto result = new wxHyperlinkCtrl(parent, wxID_STATIC, label, url);
     result->SetFont(CreateFont(pointSize));
     return result;
 }
@@ -137,8 +144,8 @@ ScrollZoomWindow::~ScrollZoomWindow() {}
 void ScrollZoomWindow::PrepareDC(wxDC& dc)
 {
     super::PrepareDC(dc);
-    auto screenRatio = static_cast<float>(GetSize().x)/static_cast<float>(mCanvasSize.x);
-    dc.SetUserScale(mZoomFactor*screenRatio, mZoomFactor*screenRatio);
+    auto screenRatio = static_cast<float>(GetSize().x) / static_cast<float>(mCanvasSize.x);
+    dc.SetUserScale(mZoomFactor * screenRatio, mZoomFactor * screenRatio);
 }
 
 void ScrollZoomWindow::SetCanvasSize(wxSize s)
@@ -174,7 +181,7 @@ void ScrollZoomWindow::SetupSize()
 {
     auto virtualSizeX = GetSize().x * mZoomFactor;
     auto virtualSizeY = (virtualSizeX * mCanvasSize.y) / mCanvasSize.x;
-    SetVirtualSize(wxSize( virtualSizeX, virtualSizeY ));
+    SetVirtualSize(wxSize(virtualSizeX, virtualSizeY));
 }
 
 MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id,

@@ -697,7 +697,7 @@ nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::str
 {
     nlohmann::json j;
     // TODO; add printed continuities to viewer file manually for now
-    const auto boilerplate = std::vector<std::string> {
+    const auto boilerplate = std::vector<std::string>{
         std::string("(MANUAL) first continuity instruction goes here for SS") + std::to_string(sheetNum),
         std::string("(MANUAL) second instruction"),
         std::string("(MANUAL) third instruction..."),
