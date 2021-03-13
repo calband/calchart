@@ -203,6 +203,10 @@ private:                                           \
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool);
 
+    DECLARE_CONFIGURATION_FUNCTIONS(UseSprites, bool);
+    DECLARE_CONFIGURATION_FUNCTIONS(SpriteBitmapScale, double);
+    DECLARE_CONFIGURATION_FUNCTIONS(SpriteBitmapOffsetY, double);
+
     DECLARE_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool);
 
     DECLARE_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool);

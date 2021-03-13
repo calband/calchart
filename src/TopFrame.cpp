@@ -25,7 +25,7 @@
 #include "CalChartSizes.h"
 #include "basic_ui.h"
 #include "calchart.xbm"
-#include "cc_preferences_ui.h"
+#include "CalChartPreferences.h"
 #include "ccvers.h"
 
 #include <wx/dnd.h>

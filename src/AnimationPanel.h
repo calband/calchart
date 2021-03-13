@@ -54,6 +54,7 @@ public:
     void ToggleTimer();
     void UpdatePanel(); // specfically to update the controls
     bool OnBeat() const;
+    auto TimerOn() const { return mTimerOn; }
 
     auto GetInMiniMode() const { return mInMiniMode; }
     void SetInMiniMode(bool);
@@ -82,6 +83,7 @@ private:
     wxStaticText* mTempoLabel{};
     wxSpinCtrl* mTempoCtrl{};
     wxSlider* mBeatSlider{};
+    wxCheckBox* mSpritesCheckbox{};
     wxCheckBox* mZoomCheckbox{};
     wxCheckBox* mCollisionCheckbox{};
     wxBitmapToggleButton* mPlayPauseButton{};

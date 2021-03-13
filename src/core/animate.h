@@ -120,19 +120,15 @@ public:
 
     // For drawing:
     struct animate_info_t {
+        int index;
         int mCollision;
         AnimateDir mDirection;
         float mRealDirection;
         Coord mPosition;
-        animate_info_t(int col, AnimateDir dir, float rdir, Coord pos)
-            : mCollision(col)
-            , mDirection(dir)
-            , mRealDirection(rdir)
-            , mPosition(pos)
-        {
-        }
     };
     animate_info_t GetAnimateInfo(int which) const;
+
+    std::vector<animate_info_t> GetAllAnimateInfo() const;
 
     int GetNumberSheets() const;
     auto GetCurrentSheet() const { return mCurrentSheetNumber; }

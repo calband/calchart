@@ -1,3 +1,4 @@
+build/*
 build-macos/CalChart.xcodeproj/project.xcworkspace/*
 build-macos/CalChart.xcodeproj/xcuserdata/*
 build-win/README.txt

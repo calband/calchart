@@ -28,17 +28,6 @@
 #include <list>
 #include <tuple>
 
-float BoundDirection(float f)
-{
-    while (f >= 360.0)
-        f -= 360.0;
-    while (f < 0.0)
-        f += 360.0;
-    return f;
-}
-
-float NormalizeAngle(float ang) { return BoundDirection(ang); }
-
 float BoundDirectionSigned(float f)
 {
     while (f >= 180.0)
