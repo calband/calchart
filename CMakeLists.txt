@@ -230,7 +230,7 @@ set (wxUSE_STD_CONTAINERS ON)
 add_subdirectory (submodules/wxWidgets)
 
 target_link_libraries (
-  CalChart gl core base adv html net aui
+  CalChart wx::gl wx::core wx::base wx::adv wx::html wx::net wx::aui
   )
 
 set_target_properties (CalChart PROPERTIES CXX_STANDARD 17)
