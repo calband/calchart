@@ -147,10 +147,10 @@ void FieldCanvas::OnMouseLeftDown_default(CalChart::Coord pos, bool shiftDown, b
     if (curr_lasso == CC_DRAG::SWAP) {
         OnMouseLeftDown_CC_DRAG_SWAP(pos);
     }
-    if (!(shiftDown || altDown)) {
+    auto i = mView->FindPoint(pos);
+    if ((i < 0) && !(shiftDown || altDown)) {
         mView->UnselectAll();
     }
-    auto i = mView->FindPoint(pos);
     if (i < 0) {
         // if no point selected, we grab using the current lasso
         BeginSelectDrag(curr_lasso, pos);
