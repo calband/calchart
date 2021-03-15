@@ -404,13 +404,14 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
         sheet->mPrintableContinuity = Print_continuity(print_name, print_cont);
     };
     auto parse_INGL_BACK = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+        auto end_ptr = ptr + size;
         auto num = get_big_long(ptr);
         ptr += 4;
-        if ((num + 4) != size) {
-            throw CC_FileException("Bad Background chunk", INGL_BACK);
-        }
         while (num--) {
             sheet->mBackgroundImages.emplace_back(ptr);
+        }
+        if (ptr != end_ptr) {
+            throw CC_FileException("Bad Background chunk", INGL_BACK);
         }
     };
 
@@ -506,7 +507,7 @@ std::vector<uint8_t> Sheet::SerializeSheetData() const
         Parser::Construct_block(
             INGL_PCNT, SerializePrintContinuityData()));
 
-    // Write Continuity
+    // Write Background
     Parser::Append(result, Parser::Construct_block(INGL_BACK, SerializeBackgroundImageData()));
 
     return result;
