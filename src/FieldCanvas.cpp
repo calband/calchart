@@ -43,7 +43,7 @@ EVT_LEFT_DCLICK(FieldCanvas::OnMouseLeftDoubleClick)
 EVT_RIGHT_DOWN(FieldCanvas::OnMouseRightDown)
 EVT_MAGNIFY(FieldCanvas::OnMousePinchToZoom)
 EVT_MOTION(FieldCanvas::OnMouseMove)
-EVT_PAINT(FieldCanvas::OnPaint)
+EVT_PAINT(FieldCanvas::OnFieldPaint)
 EVT_ERASE_BACKGROUND(FieldCanvas::OnEraseBackground)
 EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
@@ -68,7 +68,7 @@ void FieldCanvas::SetView(CalChartView* view)
 }
 
 // Define the repainting behaviour
-void FieldCanvas::OnPaint(wxPaintEvent& event)
+void FieldCanvas::OnFieldPaint(wxPaintEvent& event)
 {
     const auto& config = CalChartConfiguration::GetGlobalConfig();
     OnPaint(event, config);

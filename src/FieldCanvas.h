@@ -72,7 +72,7 @@ private:
     void Init();
 
     // Event Handlers
-    void OnPaint(wxPaintEvent& event);
+    void OnFieldPaint(wxPaintEvent& event);
     void OnEraseBackground(wxEraseEvent& event);
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseLeftUp(wxMouseEvent& event);
