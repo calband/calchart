@@ -696,7 +696,7 @@ class ContProcUnset : public ContProcedure {
     using super = ContProcedure;
 
 public:
-    virtual void Compile(AnimateCompile&) override {}
+    virtual void Compile(AnimateCompile&) override { }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;

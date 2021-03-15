@@ -67,8 +67,8 @@ private:
     void OnCmd_anim_next_beat_timer(wxTimerEvent& event);
     void OnSlider_anim_tempo(wxSpinEvent& event);
     void OnSlider_anim_gotobeat(wxScrollEvent& event);
-    void OnCmd_PlayButton(wxCommandEvent& event);
-    void OnCmd_ToggleAnimOmni(wxCommandEvent& event);
+    void OnCmd_PlayButton();
+    void OnCmd_ToggleAnimOmni();
 
     // Internals
     // timer stuff:

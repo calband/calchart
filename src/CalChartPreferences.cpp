@@ -57,26 +57,24 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent, wxWindowID id, const 
     : wxDialog(parent, id, caption, pos, size, style)
     , mConfig(CalChartConfiguration::GetGlobalConfig())
 {
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    SetSizer(VStack([this](auto sizer) {
+        mNotebook = new wxNotebook(this, wxID_ANY);
+        sizer->Add(mNotebook, BasicSizerFlags());
 
-    mNotebook = new wxNotebook(this, wxID_ANY);
-    topsizer->Add(mNotebook, BasicSizerFlags());
+        mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook, wxID_ANY), wxT("General"));
+        mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook, wxID_ANY), wxT("Continuity"));
+        mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook, wxID_ANY), wxT("Drawing"));
+        mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook, wxID_ANY), wxT("PS Printing"));
+        mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook, wxID_ANY), wxT("Show Mode Setup"));
 
-    mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook, wxID_ANY), wxT("General"));
-    mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook, wxID_ANY), wxT("Continuity"));
-    mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook, wxID_ANY), wxT("Drawing"));
-    mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook, wxID_ANY), wxT("PS Printing"));
-    mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook, wxID_ANY), wxT("Show Mode Setup"));
-
-    // the buttons on the bottom
-    wxBoxSizer* okCancelBox = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(okCancelBox, BasicSizerFlags());
-
-    okCancelBox->Add(new wxButton(this, wxID_APPLY), BasicSizerFlags());
-    okCancelBox->Add(new wxButton(this, wxID_RESET, wxT("&Reset All")), BasicSizerFlags());
-    okCancelBox->Add(new wxButton(this, wxID_OK), BasicSizerFlags());
-    okCancelBox->Add(new wxButton(this, wxID_CANCEL), BasicSizerFlags());
+        // the buttons on the bottom
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            CreateButton(this, sizer, wxID_APPLY);
+            CreateButton(this, sizer, wxID_RESET, "&Reset All");
+            CreateButton(this, sizer, wxID_OK);
+            CreateButton(this, sizer, wxID_CANCEL);
+        });
+    }));
 
     // This fits the dalog to the minimum size dictated by the sizers
     GetSizer()->Fit(this);

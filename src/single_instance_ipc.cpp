@@ -330,7 +330,7 @@ HostAppInterface::HostAppInterface(StartStopFunc_t serverStartStop,
 {
 }
 
-HostAppInterface::~HostAppInterface() {}
+HostAppInterface::~HostAppInterface() { }
 
 std::unique_ptr<HostAppInterface>
 ServerSideHostAppInterface::Make(CalChartApp* app,

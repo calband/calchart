@@ -31,10 +31,10 @@
 #include <wx/wx.h>
 
 const int zoom_amounts[] = { 500, 200, 150, 100, 75, 50, 25, 10 };
+constexpr auto defaultZoom = 3;
 
 class ShowModeSetup : public PreferencePage {
     DECLARE_CLASS(ShowModeSetup)
-    DECLARE_EVENT_TABLE()
 
 public:
     ShowModeSetup(CalChartConfiguration& config, wxWindow* parent,
@@ -48,7 +48,7 @@ public:
         Init();
         Create(parent, id, caption, pos, size, style);
     }
-    ~ShowModeSetup() {}
+    ~ShowModeSetup() { }
 
     virtual void Init();
     virtual void CreateControls();
@@ -60,7 +60,7 @@ public:
 
 private:
     void OnCmdLineText(wxCommandEvent&);
-    void OnCmdChoice(wxCommandEvent&);
+    void OnCmdChoice();
     CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];
     CalChart::ShowMode::YardLinesInfo_t mYardText;
     int mWhichMode;

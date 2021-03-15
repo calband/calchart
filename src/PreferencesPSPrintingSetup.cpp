@@ -21,12 +21,12 @@
 */
 
 #include "PreferencesPSPrintingSetup.h"
-#include "PreferencesUtils.h"
 #include "CalChartDoc.h"
 #include "CalChartSizes.h"
 #include "ColorSetupCanvas.h"
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
+#include "PreferencesUtils.h"
 #include "cc_drawcommand.h"
 #include "cc_shapes.h"
 #include "cc_sheet.h"
@@ -45,7 +45,6 @@
 #include <wx/stattext.h>
 
 using namespace CalChart;
-
 
 typedef enum {
     RESET = 1000,
@@ -69,38 +68,30 @@ IMPLEMENT_CLASS(PSPrintingSetUp, PreferencePage)
 
 void PSPrintingSetUp::CreateControls()
 {
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    SetSizer(VStack([this](auto& sizer) {
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
+            CreateTextboxWithCaption(this, sizer, HEADFONT, "Header Font:");
+            CreateTextboxWithCaption(this, sizer, MAINFONT, "Main Font:");
+            CreateTextboxWithCaption(this, sizer, NUMBERFONT, "Number Font:");
+            CreateTextboxWithCaption(this, sizer, CONTFONT, "Continuity Font:");
+        });
 
-    wxBoxSizer* horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, LeftBasicSizerFlags());
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
+            CreateTextboxWithCaption(this, sizer, BOLDFONT, "Bold Font:");
+            CreateTextboxWithCaption(this, sizer, ITALFONT, "Italic Font:");
+            CreateTextboxWithCaption(this, sizer, BOLDITALFONT, "Bold Italic Font:");
+        });
 
-    AddTextboxWithCaption(this, horizontalsizer, HEADFONT, wxT("Header Font:"));
-    AddTextboxWithCaption(this, horizontalsizer, MAINFONT, wxT("Main Font:"));
-    AddTextboxWithCaption(this, horizontalsizer, NUMBERFONT, wxT("Number Font:"));
-    AddTextboxWithCaption(this, horizontalsizer, CONTFONT,
-        wxT("Continuity Font:"));
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
+            CreateTextboxWithCaption(this, sizer, HEADERSIZE, "Header Size:");
+            CreateTextboxWithCaption(this, sizer, YARDSSIZE, "Yards Side:");
+            CreateTextboxWithCaption(this, sizer, TEXTSIZE, "Text Side:");
+        });
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, LeftBasicSizerFlags());
-
-    AddTextboxWithCaption(this, horizontalsizer, BOLDFONT, wxT("Bold Font:"));
-    AddTextboxWithCaption(this, horizontalsizer, ITALFONT, wxT("Italic Font:"));
-    AddTextboxWithCaption(this, horizontalsizer, BOLDITALFONT,
-        wxT("Bold Italic Font:"));
-
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, LeftBasicSizerFlags());
-
-    AddTextboxWithCaption(this, horizontalsizer, HEADERSIZE, wxT("Header Size:"));
-    AddTextboxWithCaption(this, horizontalsizer, YARDSSIZE, wxT("Yards Side:"));
-    AddTextboxWithCaption(this, horizontalsizer, TEXTSIZE, wxT("Text Side:"));
-
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(horizontalsizer, LeftBasicSizerFlags());
-
-    AddTextboxWithCaption(this, horizontalsizer, CONTRATIO,
-        wxT("Continuity Ratio:"));
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
+            CreateTextboxWithCaption(this, sizer, CONTRATIO, "Continuity Ratio:");
+        });
+    }));
 
     TransferDataToWindow();
 }
@@ -211,4 +202,3 @@ bool PSPrintingSetUp::ClearValuesToDefault()
     Init();
     return TransferDataToWindow();
 }
-

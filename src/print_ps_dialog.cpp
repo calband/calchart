@@ -23,6 +23,7 @@
 
 #include "print_ps_dialog.h"
 
+#include "basic_ui.h"
 #include "cc_sheet.h"
 #include "cc_show.h"
 #include "confgr.h"
@@ -183,9 +184,9 @@ PrintPostScriptDialog::PrintPostScriptDialog(
     Create(show, parent, id, caption, pos, size, style);
 }
 
-PrintPostScriptDialog::~PrintPostScriptDialog() {}
+PrintPostScriptDialog::~PrintPostScriptDialog() { }
 
-void PrintPostScriptDialog::Init() {}
+void PrintPostScriptDialog::Init() { }
 
 bool PrintPostScriptDialog::Create(const CalChartDoc* show,
     wxFrame* parent, wxWindowID id,
@@ -214,168 +215,105 @@ bool PrintPostScriptDialog::Create(const CalChartDoc* show,
 
 void PrintPostScriptDialog::CreateControls()
 {
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    SetSizer(VStack([this](auto sizer) {
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
+            CreateButton(this, sizer, BasicSizerFlags(), wxID_OK, "&Print");
+            auto close = CreateButton(this, sizer, BasicSizerFlags(), wxID_CANCEL, "&Cancel");
+            close->SetDefault();
+            CreateButton(this, sizer, BasicSizerFlags(), CC_PRINT_BUTTON_RESET_DEFAULTS, "&Reset Values");
+        });
 
-    wxBoxSizer* horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-
-    wxButton* print = new wxButton(this, wxID_OK, wxT("&Print"));
-    horizontalsizer->Add(print, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    wxButton* close = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
-    horizontalsizer->Add(close, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    close->SetDefault();
-
-    wxButton* resetdefaults = new wxButton(this, CC_PRINT_BUTTON_RESET_DEFAULTS, wxT("&Reset Values"));
-    horizontalsizer->Add(resetdefaults, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
-
-    wxBoxSizer* verticalsizer = NULL;
 #ifdef PRINT__RUN_CMD
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC,
-                           wxT("Printer Command:"),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_cmd = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_cmd, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Printer Command:");
+                text_cmd = CreateTextCtrl(this, sizer);
+            });
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Printer Options:");
+                text_opts = CreateTextCtrl(this, sizer);
+            });
+        });
 
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC,
-                           wxT("Printer Options:"),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_opts = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_opts, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
-
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC,
-                           wxT("Preview Command:"),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_view_cmd = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_view_cmd, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC,
-                           wxT("Preview Options:"),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_view_opts = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_view_opts, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Preview Command:");
+                text_view_cmd = CreateTextCtrl(this, sizer);
+            });
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Preview Options:");
+                text_view_opts = CreateTextCtrl(this, sizer);
+            });
+        });
 
 #else // PRINT__RUN_CMD
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC,
-                           wxT("Printer &Device:"),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_cmd = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_cmd, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
+        HStack(sizer, LeftBasicSizerFlags(), [this](auto sizer) {
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Printer &Device:");
+                text_cmd = CreateTextCtrl(this, sizer);
+            });
+        });
+
 #endif
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    wxString orientation[] = { wxT("Portrait"), wxT("Landscape") };
-    radio_orient = new wxRadioBox(
-        this, wxID_ANY, wxT("&Orientation:"), wxDefaultPosition, wxDefaultSize,
-        sizeof(orientation) / sizeof(wxString), orientation);
-    horizontalsizer->Add(radio_orient, 0, wxALL, 5);
-
+        HStack(sizer, [this](auto sizer) {
+            wxString orientation[] = { wxT("Portrait"), wxT("Landscape") };
+            radio_orient = new wxRadioBox(this, wxID_ANY, wxT("&Orientation:"), wxDefaultPosition, wxDefaultSize, sizeof(orientation) / sizeof(wxString), orientation);
+            sizer->Add(radio_orient, 0, wxALL, 5);
 #ifdef PRINT__RUN_CMD
-    wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File"),
-        wxT("Preview Only") };
+            wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File"), wxT("Preview Only") };
 #else
-    wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File") };
+            wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File") };
 #endif
-    radio_method = new wxRadioBox(
-        this, -1, wxT("Post&Script:"), wxDefaultPosition, wxDefaultSize,
-        sizeof(print_modes) / sizeof(wxString), print_modes);
-    horizontalsizer->Add(radio_method, 0, wxALL, 5);
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
+            radio_method = new wxRadioBox(this, -1, "Post&Script:", wxDefaultPosition, wxDefaultSize, sizeof(print_modes) / sizeof(wxString), print_modes);
+            sizer->Add(radio_method, 0, wxALL, 5);
+        });
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    check_overview = new wxCheckBox(this, -1, wxT("Over&view"));
-    horizontalsizer->Add(check_overview, 0, wxALL, 5);
+        HStack(sizer, [this](auto sizer) {
+            check_overview = new wxCheckBox(this, -1, "Over&view");
+            sizer->Add(check_overview, 0, wxALL, 5);
 
-    check_cont = new wxCheckBox(this, -1, wxT("Continuit&y"));
-    horizontalsizer->Add(check_cont, 0, wxALL, 5);
+            check_cont = new wxCheckBox(this, -1, "Continuit&y");
+            sizer->Add(check_cont, 0, wxALL, 5);
 
-    check_pages = new wxCheckBox(this, -1, wxT("Cove&r pages"));
-    horizontalsizer->Add(check_pages, 0, wxALL, 5);
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
+            check_pages = new wxCheckBox(this, -1, "Cove&r pages");
+            sizer->Add(check_pages, 0, wxALL, 5);
+        });
 
-    topsizer->Add(
-        new wxButton(this, CC_PRINT_BUTTON_SELECT, wxT("S&elect sheets...")), 0,
-        wxALL, 5);
+        CreateButton(this, sizer, LeftBasicSizerFlags(), CC_PRINT_BUTTON_SELECT, "S&elect sheets...");
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Page &width: "),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_width = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_width, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+        HStack(sizer, [this](auto sizer) {
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Page &width:");
+                text_width = CreateTextCtrl(this, sizer);
+            });
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Page &height:");
+                text_height = CreateTextCtrl(this, sizer);
+            });
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "&Left margin:");
+                text_x = CreateTextCtrl(this, sizer);
+            });
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "&Top margin:");
+                text_y = CreateTextCtrl(this, sizer);
+            });
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Paper &length:");
+                text_length = CreateTextCtrl(this, sizer);
+            });
+        });
 
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Page &height: "),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_height = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_height, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Left margin: "),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_x = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_x, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("&Top margin: "),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_y = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_y, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Paper &length: "),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_length = new wxTextCtrl(this, wxID_ANY);
-    verticalsizer->Add(text_length, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
-
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    verticalsizer = new wxBoxSizer(wxVERTICAL);
-    verticalsizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Yards: "),
-                           wxDefaultPosition, wxDefaultSize, 0),
-        0, wxALIGN_LEFT | wxALL, 5);
-    text_minyards = new wxTextCtrl(this, wxID_ANY, wxT("50"));
-    verticalsizer->Add(text_minyards, 0, wxGROW | wxALL, 5);
-    horizontalsizer->Add(verticalsizer, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-    topsizer->Add(horizontalsizer, 0, wxALL, 5);
+        HStack(sizer, [this](auto sizer) {
+            VStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+                CreateText(this, sizer, BasicSizerFlags(), "Yards: ");
+                text_minyards = CreateTextCtrl(this, sizer);
+                text_minyards->ChangeValue("50");
+            });
+        });
+    }));
 }
 
 bool PrintPostScriptDialog::TransferDataToWindow()

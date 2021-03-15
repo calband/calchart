@@ -43,7 +43,7 @@ public:
         Init();
         Create(parent, id, caption, pos, size, style);
     }
-    virtual ~DrawingSetup() {}
+    virtual ~DrawingSetup() { }
 
     virtual void Init();
     virtual void CreateControls();
@@ -54,20 +54,20 @@ public:
     virtual bool ClearValuesToDefault();
 
 private:
-    void OnCmdSelectColors(wxCommandEvent&);
+    void OnCmdSelectColors();
     void OnCmdSelectWidth(wxSpinEvent&);
-    void OnCmdResetColors(wxCommandEvent&);
+    void OnCmdResetColors();
     void OnCmdResetAll(wxCommandEvent&);
     void OnCmdChooseNewColor(wxCommandEvent&);
     void OnCmdChooseNewPalette(wxCommandEvent&);
     void OnCmdTextChanged(wxCommandEvent&);
-    void OnCmdChangePaletteColor(wxCommandEvent&);
-    void OnCmdChangePaletteName(wxCommandEvent&);
+    void OnCmdChangePaletteColor();
+    void OnCmdChangePaletteName();
 
     void SetColor(int selection, int width, const wxColour& color);
     void SetPaletteColor(int selection, const wxColour& color);
     void SetPaletteName(int selection, const wxString& name);
-    wxBitmapComboBox* nameBox;
+    wxBitmapComboBox* mNameBox;
     wxBitmapComboBox* mPaletteNameBox;
     wxSpinCtrl* spin;
 

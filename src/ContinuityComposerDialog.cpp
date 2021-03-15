@@ -131,20 +131,19 @@ void ContinuityComposerPanel::Init()
 
 void ContinuityComposerPanel::CreateControls()
 {
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
     mCanvas = new ContinuityComposerCanvas(mConfig, this);
-    topsizer->Add(mCanvas, 1, wxEXPAND);
+    SetSizer(VStack([this](auto sizer) {
+        sizer->Add(mCanvas, 1, wxEXPAND);
 
-    mComboSelection = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr, (long)wxTE_PROCESS_ENTER);
-    topsizer->Add(mComboSelection, 0, wxEXPAND | wxALL, 5);
-    mComboSelection->Bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
-        this->OnCmdTextEnterKeyPressed(event);
-    });
-    mComboSelection->Bind(wxEVT_COMBOBOX, [this](auto const& event) {
-        this->OnCmdTextEnterKeyPressed(event);
-    });
+        mComboSelection = new wxComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr, (long)wxTE_PROCESS_ENTER);
+        sizer->Add(mComboSelection, 0, wxEXPAND | wxALL, 5);
+        mComboSelection->Bind(wxEVT_TEXT_ENTER, [this](auto const& event) {
+            this->OnCmdTextEnterKeyPressed(event);
+        });
+        mComboSelection->Bind(wxEVT_COMBOBOX, [this](auto const& event) {
+            this->OnCmdTextEnterKeyPressed(event);
+        });
+    }));
 
     if (!mCont) {
         mCont = std::make_unique<CalChart::ContProcUnset>();
@@ -601,20 +600,17 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
     : wxDialog(parent, id, caption, pos, size, style)
 {
     // create a sizer for laying things out top down:
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
     mPanel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);
-    topsizer->Add(mPanel, 0, wxEXPAND | wxALL, 5);
+    SetSizer(VStack([this](auto sizer) {
+        sizer->Add(mPanel, 0, wxEXPAND | wxALL, 5);
 
-    auto button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(button_sizer, sRightBasicSizerFlags);
-
-    button_sizer->Add(new wxButton(this, wxID_CANCEL, wxT("&Cancel")), BasicSizerFlags());
-    mCloseButton = new wxButton(this, wxID_OK, wxT("&Done"));
-    button_sizer->Add(mCloseButton, BasicSizerFlags());
-    mCloseButton->SetDefault();
-    mCloseButton->Enable(mPanel->Validate());
+        HStack(sizer, sRightBasicSizerFlags, [this](auto sizer) {
+            CreateButton(this, sizer, wxID_CANCEL, wxT("&Cancel"));
+            mCloseButton = CreateButton(this, sizer, wxID_OK, wxT("&Done"));
+            mCloseButton->SetDefault();
+            mCloseButton->Enable(mPanel->Validate());
+        });
+    }));
     mPanel->SetOnUpdateIsValid([this](bool enable) {
         static_cast<wxButton*>(FindWindow(wxID_OK))->Enable(enable);
     });

@@ -26,6 +26,7 @@
 #include <vector>
 #include <wx/hyperlink.h>
 #include <wx/statline.h>
+#include <wx/tglbtn.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
 
@@ -161,6 +162,8 @@ wxSizerFlags BasicSizerFlags();
 wxSizerFlags LeftBasicSizerFlags();
 wxSizerFlags RightBasicSizerFlags();
 wxSizerFlags ExpandSizerFlags();
+wxSizerFlags HorizontalSizerFlags();
+wxSizerFlags VerticalSizerFlags();
 
 template <typename T>
 void AddToSizerBasic(wxSizer* sizer, T window)
@@ -195,10 +198,322 @@ wxFont CreateFont(int pixelSize, wxFontFamily family = wxFONTFAMILY_SWISS, wxFon
 wxFont ResizeFont(wxFont const& font, int pixelSize);
 
 template <typename Strings>
-auto BestSizeX(wxControl* controller, Strings const& strings)
+inline auto BestSizeX(wxControl* controller, Strings const& strings)
 {
     return controller->GetTextExtent(*std::max_element(std::begin(strings), std::end(strings), [controller](auto a, auto b) {
                          return controller->GetTextExtent(a).x < controller->GetTextExtent(b).x;
                      }))
         .x;
+}
+
+#pragma mark - These are intented to make something similar to SwiftUI.
+
+// The HStacks and VStacks are conviences layouts to make the system more "declarative".  The idea is that
+// when you want to lay out elements of the UI horizontally or vertically, you would have a block of code
+// that adds the elements to a sizer.  So you would write something along the lines of:
+// VStack(sizer, [](auto sizer) {
+//     CreateItemOne(sizer);
+//     CreateItemTwo(sizer);
+// });
+
+template <typename Handler>
+inline auto HStack(wxSizer* sizer, Handler h)
+{
+    auto horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+    h(horizontalSizer);
+    sizer->Add(horizontalSizer);
+    return horizontalSizer;
+}
+
+template <typename Handler>
+inline auto HStack(wxSizer* sizer, wxSizerFlags flags, Handler h)
+{
+    auto horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+    h(horizontalSizer);
+    sizer->Add(horizontalSizer, flags);
+    return horizontalSizer;
+}
+
+// generally this is the top level stack as it has no sizer to add itself to
+template <typename Handler>
+inline auto VStack(Handler h)
+{
+    auto vSizer = new wxBoxSizer(wxVERTICAL);
+    h(vSizer);
+    return vSizer;
+}
+
+template <typename Handler>
+inline auto VStack(wxSizer* sizer, Handler h)
+{
+    auto vSizer = new wxBoxSizer(wxVERTICAL);
+    h(vSizer);
+    sizer->Add(vSizer);
+    return vSizer;
+}
+
+template <typename Handler>
+inline auto VStack(wxSizer* sizer, wxSizerFlags flags, Handler h)
+{
+    auto vSizer = new wxBoxSizer(wxVERTICAL);
+    h(vSizer);
+    sizer->Add(vSizer, flags);
+    return vSizer;
+}
+
+template <typename String, typename Handler>
+inline auto NamedVBoxStack(wxWindow* parent, wxSizer* sizer, String caption, Handler h)
+{
+    auto boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, caption), wxVERTICAL);
+    h(boxsizer);
+    sizer->Add(boxsizer);
+    return boxsizer;
+}
+
+template <typename String, typename Handler>
+inline auto NamedVBoxStack(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, String caption, Handler h)
+{
+    auto boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, caption), wxVERTICAL);
+    h(boxsizer);
+    sizer->Add(boxsizer, flags);
+    return boxsizer;
+}
+
+template <typename String, typename Handler>
+inline auto NamedHBoxStack(wxWindow* parent, wxSizer* sizer, String caption, Handler h)
+{
+    auto boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, caption), wxHORIZONTAL);
+    h(boxsizer);
+    sizer->Add(boxsizer);
+    return boxsizer;
+}
+
+template <typename String, typename Handler>
+inline auto NamedHBoxStack(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, String caption, Handler h)
+{
+    auto boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, caption), wxHORIZONTAL);
+    h(boxsizer);
+    sizer->Add(boxsizer, flags);
+    return boxsizer;
+}
+
+inline auto CreateButton(wxWindow* parent, wxSizer* sizer, int id = wxID_ANY)
+{
+    auto button = new wxButton(parent, id);
+    sizer->Add(button);
+    return button;
+}
+
+inline auto CreateButton(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id)
+{
+    auto button = new wxButton(parent, id);
+    sizer->Add(button, flags);
+    return button;
+}
+
+template <typename String>
+inline auto CreateButton(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id, String name)
+{
+    auto button = new wxButton(parent, id, name);
+    sizer->Add(button, flags);
+    return button;
+}
+
+template <typename String>
+inline auto CreateButton(wxWindow* parent, wxSizer* sizer, int id, String name)
+{
+    auto button = new wxButton(parent, id, name);
+    sizer->Add(button);
+    return button;
+}
+
+template <typename String, typename Handler>
+inline auto CreateButtonWithHandler(wxWindow* parent, String name, Handler handler)
+{
+    auto button = new wxButton(parent, wxID_ANY, name);
+    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent& event) {
+        handler();
+    });
+    return button;
+}
+
+template <typename String, typename Handler>
+inline auto CreateButtonWithHandler(wxWindow* parent, int id, String name, Handler handler)
+{
+    auto button = new wxButton(parent, id, name);
+    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent& event) {
+        handler();
+    });
+    return button;
+}
+
+template <typename String, typename Handler>
+inline auto CreateButtonWithHandler(wxWindow* parent, wxSizer* sizer, String name, Handler handler)
+{
+    auto button = CreateButtonWithHandler(parent, std::forward<String>(name), std::forward<Handler>(handler));
+    sizer->Add(button);
+    return button;
+}
+
+template <typename String, typename Handler>
+inline auto CreateButtonWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, String name, Handler handler)
+{
+    auto button = CreateButtonWithHandler(parent, std::forward<String>(name), std::forward<Handler>(handler));
+    sizer->Add(button, flags);
+    return button;
+}
+
+template <typename Image>
+inline auto CreateBitmapButton(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id, Image bitmap)
+{
+    auto button = new wxBitmapButton(parent, id, bitmap);
+    sizer->Add(button, flags);
+    return button;
+}
+
+template <typename Image, typename Handler>
+inline auto CreateBitmapButtonWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, Image bitmap, Handler handler)
+{
+    auto button = new wxBitmapButton(parent, wxID_ANY, bitmap);
+    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent& event) {
+        handler();
+    });
+    sizer->Add(button, flags);
+    return button;
+}
+
+template <typename Image, typename Handler>
+inline auto CreateBitmapToggleWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, Image bitmap, Image pressed, Handler handler)
+{
+    auto button = new wxBitmapToggleButton(parent, wxID_ANY, bitmap, wxDefaultPosition);
+    button->SetBitmapPressed(pressed);
+    button->Bind(wxEVT_TOGGLEBUTTON, [handler](wxCommandEvent& event) {
+        handler();
+    });
+    sizer->Add(button, flags);
+    return button;
+}
+
+// Creates a wxChoice with a handler that sets selection to 0
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id, std::vector<wxString> const& choices)
+{
+    auto choice = new wxChoice(parent, id, wxDefaultPosition, wxDefaultSize, choices.size(), choices.data());
+    choice->SetSelection(0);
+    sizer->Add(choice, flags);
+    return choice;
+}
+
+template <typename Handler>
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, int id, std::vector<wxString> const& choices, Handler handler)
+{
+    auto choice = new wxChoice(parent, id, wxDefaultPosition, wxDefaultSize, choices.size(), choices.data());
+    choice->Bind(wxEVT_CHOICE, [handler](wxCommandEvent& event) {
+        handler(event);
+    });
+    choice->SetSelection(0);
+    sizer->Add(choice);
+    return choice;
+}
+
+template <typename Handler>
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id, std::vector<wxString> const& choices, Handler handler)
+{
+    auto choice = new wxChoice(parent, id, wxDefaultPosition, wxDefaultSize, choices.size(), choices.data());
+    choice->Bind(wxEVT_CHOICE, [handler](wxCommandEvent& event) {
+        handler(event);
+    });
+    choice->SetSelection(0);
+    sizer->Add(choice, flags);
+    return choice;
+}
+
+template <typename Handler>
+inline auto CreateChoiceWithHandler(wxWindow* parent, wxSizer* sizer, std::vector<wxString> const& choices, Handler handler)
+{
+    return CreateChoiceWithHandler(parent, sizer, wxID_ANY, choices, std::forward<Handler>(handler));
+}
+
+template <typename String>
+inline auto CreateText(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, String text)
+{
+    auto staticText = new wxStaticText(parent, wxID_STATIC, text);
+    sizer->Add(staticText, flags);
+    return staticText;
+}
+
+template <typename String>
+inline auto CreateText(wxWindow* parent, wxSizer* sizer, String text)
+{
+    return CreateText(parent, sizer, BasicSizerFlags(), std::forward<String>(text));
+}
+
+inline auto CreateTextCtrl(wxWindow* parent, wxSizer* sizer, int id = wxID_ANY, long style = 0)
+{
+    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+    sizer->Add(textCtrl, 0, wxGROW | wxALL, 5);
+    return textCtrl;
+}
+
+inline auto CreateTextCtrl(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, int id = wxID_ANY, long style = 0)
+{
+    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+    sizer->Add(textCtrl, flags);
+    return textCtrl;
+}
+
+template <typename Function>
+auto CreateTextboxWithAction(wxWindow* parent, wxSizer* sizer, int id, Function&& f, long style = 0)
+{
+    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+    textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT, f);
+    sizer->Add(textCtrl, BasicSizerFlags());
+    return textCtrl;
+}
+
+inline auto CreateHLine(wxWindow* parent, wxSizer* sizer)
+{
+    auto line = new wxStaticLine(parent, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    sizer->Add(line, 0, wxGROW | wxALL, 5);
+    return line;
+}
+
+template <typename String, typename Handler>
+auto CreateCheckbox(wxWindow* parent, wxSizer* sizer, String caption, Handler handler)
+{
+    auto checkBox = new wxCheckBox(parent, wxID_ANY, caption, wxDefaultPosition, wxDefaultSize);
+    checkBox->Bind(wxEVT_CHECKBOX, [handler](wxCommandEvent& event) {
+        handler(event);
+    });
+    sizer->Add(checkBox);
+    return checkBox;
+}
+
+template <typename String>
+auto CreateCheckboxWithCaption(wxWindow* parent, wxSizer* sizer, int id, String caption)
+{
+    auto checkBox = new wxCheckBox(parent, id, caption, wxDefaultPosition, wxDefaultSize);
+    VStack(sizer, LeftBasicSizerFlags(), [checkBox](auto& sizer) {
+        sizer->Add(checkBox);
+    });
+    return checkBox;
+}
+
+template <typename String>
+auto CreateTextboxWithCaption(wxWindow* parent, wxSizer* sizer, int id, String caption, long style = 0)
+{
+    VStack(sizer, LeftBasicSizerFlags(), [parent, caption, id, style](auto& sizer) {
+        sizer->Add(new wxStaticText(parent, wxID_STATIC, caption, wxDefaultPosition, wxDefaultSize, 0), LeftBasicSizerFlags());
+        sizer->Add(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style), BasicSizerFlags());
+    });
+}
+
+template <typename String, typename Function>
+auto CreateTextboxWithCaptionAndAction(wxWindow* parent, wxSizer* sizer, int id, String caption, Function&& f, long style = 0)
+{
+    VStack(sizer, LeftBasicSizerFlags(), [parent, caption, id, style, f](auto& sizer) {
+        sizer->Add(new wxStaticText(parent, wxID_STATIC, caption, wxDefaultPosition, wxDefaultSize, 0), LeftBasicSizerFlags());
+        auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, style);
+        textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT, f);
+        sizer->Add(textCtrl, BasicSizerFlags());
+    });
 }

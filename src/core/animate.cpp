@@ -177,7 +177,7 @@ Animation::Animation(const Show& show)
     RefreshSheet();
 }
 
-Animation::~Animation() {}
+Animation::~Animation() { }
 
 bool Animation::PrevSheet()
 {
@@ -363,7 +363,8 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
         which,
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::COLLISION_NONE,
         GetCommand(mCurrentSheetNumber, which).Direction(),
-        GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)};
+        GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)
+    };
 }
 
 std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
@@ -383,7 +384,6 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
         return a.mPosition < b.mPosition;
     });
     return animates;
-
 }
 
 int Animation::GetNumberSheets() const { return static_cast<int>(mSheets.size()); }

@@ -28,6 +28,7 @@
 #include "AnimationErrorsPanel.h"
 #include "AnimationPanel.h"
 #include "CalChartApp.h"
+#include "CalChartPreferences.h"
 #include "CalChartToolBar.h"
 #include "CalChartView.h"
 #include "ColorPalette.h"
@@ -37,16 +38,16 @@
 #include "FieldThumbnailBrowser.h"
 #include "PrintContinuityEditor.h"
 #include "TopFrame.h"
+#include "TransitionSolverFrame.h"
+#include "TransitionSolverView.h"
 #include "cc_coord.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
-#include "CalChartPreferences.h"
 #include "cc_sheet.h"
 #include "cc_show.h"
 #include "ccvers.h"
 #include "confgr.h"
 #include "draw.h"
-#include "e7_transition_solver_ui.h"
 #include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
@@ -180,7 +181,7 @@ public:
         , mConfig(config_)
     {
     }
-    virtual ~MyPrintout() {}
+    virtual ~MyPrintout() { }
     virtual bool HasPage(int pageNum) { return pageNum <= mShow.GetNumSheets(); }
     virtual void GetPageInfo(int* minPage, int* maxPage, int* pageFrom,
         int* pageTo)
@@ -964,7 +965,10 @@ void CalChartFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
 void CalChartFrame::OnCmd_GhostOption(wxCommandEvent& event)
 {
     auto selection = static_cast<wxChoice*>(FindWindow(CALCHART__GhostControls))->GetSelection();
-    auto which_option = (event.GetId() == CALCHART__GhostControls) ? selection : (event.GetId() == CALCHART__GhostOff) ? 0 : (event.GetId() == CALCHART__GhostNextSheet) ? 1 : (event.GetId() == CALCHART__GhostPreviousSheet) ? 2 : 3;
+    auto which_option = (event.GetId() == CALCHART__GhostControls) ? selection : (event.GetId() == CALCHART__GhostOff) ? 0
+        : (event.GetId() == CALCHART__GhostNextSheet)                                                                  ? 1
+        : (event.GetId() == CALCHART__GhostPreviousSheet)                                                              ? 2
+                                                                                                                       : 3;
     switch (which_option) {
     case 0:
         GetFieldView()->getGhostModule().setGhostSource(GhostModule::disabled);
@@ -1106,7 +1110,9 @@ std::pair<CalChart::Coord::units, CalChart::Coord::units> CalChartFrame::ToolGri
 void CalChartFrame::SetCurrentLasso(CC_DRAG type)
 {
     // retoggle the tool because we want it to draw as selected
-    int toggleID = (type == CC_DRAG::POLY) ? CALCHART__poly : (type == CC_DRAG::LASSO) ? CALCHART__lasso : (type == CC_DRAG::SWAP) ? CALCHART__swap : CALCHART__box;
+    int toggleID = (type == CC_DRAG::POLY) ? CALCHART__poly : (type == CC_DRAG::LASSO) ? CALCHART__lasso
+        : (type == CC_DRAG::SWAP)                                                      ? CALCHART__swap
+                                                                                       : CALCHART__box;
     mToolBar->ToggleTool(toggleID, true);
 
     mCanvas->SetCurrentLasso(type);

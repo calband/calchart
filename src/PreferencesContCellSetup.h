@@ -46,19 +46,18 @@ public:
     virtual bool ClearValuesToDefault() override;
 
 private:
-    void OnCmdLongForm(wxCommandEvent&);
     void OnCmdFontSize(wxSpinEvent&);
     void OnCmdRounding(wxSpinEvent&);
     void OnCmdTextPadding(wxSpinEvent&);
     void OnCmdBoxPadding(wxSpinEvent&);
     void OnCmdSelectWidth(wxSpinEvent&);
 
-    void OnCmdSelectColors(wxCommandEvent&);
+    void OnCmdSelectColors();
     void OnCmdChooseNewColor(wxCommandEvent&);
-    void OnCmdResetColors(wxCommandEvent&);
+    void OnCmdResetColors();
     void SetColor(int selection, const wxColour& color);
 
     // we can set up the Font, colors, size.
-    wxBitmapComboBox* nameBox;
+    wxBitmapComboBox* mNameBox;
     wxBrush mContCellBrushes[COLOR_CONTCELLS_NUM];
 };

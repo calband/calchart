@@ -32,8 +32,11 @@
 #include "confgr.h"
 #include "draw.h"
 #include "modes.h"
+#include "platconf.h"
 
 #include <wx/dcbuffer.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
 
 template <typename Float>
 static auto NormalizeAngle(Float angle)
@@ -57,9 +60,7 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
 #else
     const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("default_sprite_strip.png"));
 #endif
-    constexpr auto image_X = 64;
-    constexpr auto image_Y = 128;
-    auto image = [](){
+    auto image = []() {
         wxImage image;
         if (!image.LoadFile(kImageDir)) {
             wxLogError(wxT("Couldn't load image from ") + kImageDir + wxT("."));
@@ -71,7 +72,9 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     auto points = std::vector<int>(mSpriteImages.size());
     std::iota(points.begin(), points.end(), 0);
     std::transform(points.begin(), points.end(), mSpriteImages.begin(), [&image](auto i) {
-        return image.GetSubImage({ i*image_X + 0, 0, image_X, image_Y });
+        constexpr auto image_X = 64;
+        constexpr auto image_Y = 128;
+        return image.GetSubImage({ i * image_X + 0, 0, image_X, image_Y });
     });
 }
 
@@ -176,10 +179,11 @@ void AnimationView::OnDrawSprites(wxDC& dc, CalChartConfiguration const& config)
     auto comp_Y = config.Get_SpriteBitmapOffsetY();
 
     for (auto info : mAnimation->GetAllAnimateInfo()) {
-        auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1 : 2;
+        auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1
+                                                                           : 2;
         auto image_index = static_cast<int>(info.mDirection) + image_offset * 8;
         auto image = mSpriteImages[image_index];
-        image = image.Scale(image.GetWidth()*scale, image.GetHeight()*scale);
+        image = image.Scale(image.GetWidth() * scale, image.GetHeight() * scale);
         if (mView->IsSelected(info.index)) {
             image = image.ConvertToGreyscale();
         }
@@ -188,12 +192,11 @@ void AnimationView::OnDrawSprites(wxDC& dc, CalChartConfiguration const& config)
         auto x = position.x + mView->GetShowMode().Offset().x;
         auto y = position.y + mView->GetShowMode().Offset().y;
         auto drawPosition = fDIP(wxPoint(x, y));
-        auto rectangleSize = fDIP(wxSize(image.GetWidth()*comp_X , image.GetHeight()*comp_Y));
+        auto rectangleSize = fDIP(wxSize(image.GetWidth() * comp_X, image.GetHeight() * comp_Y));
 
-        dc.DrawBitmap (image, drawPosition - rectangleSize);
+        dc.DrawBitmap(image, drawPosition - rectangleSize);
     }
 }
-
 
 void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 {

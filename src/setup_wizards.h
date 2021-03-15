@@ -29,18 +29,6 @@
 class FancyTextWin;
 class wxChoice;
 
-// page for giving a description
-class SetDescriptionWizard : public wxWizardPageSimple {
-public:
-    SetDescriptionWizard(wxWizard* parent);
-
-    wxString GetValue();
-
-private:
-    wxArrayString modeStrings;
-    FancyTextWin* mText;
-};
-
 // page for deciding the field type
 class ChooseShowModeWizard : public wxWizardPageSimple {
 public:

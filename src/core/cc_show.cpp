@@ -255,7 +255,7 @@ Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHand
 }
 
 // Destroy a show
-Show::~Show() {}
+Show::~Show() { }
 
 std::vector<uint8_t> Show::SerializeShowData() const
 {

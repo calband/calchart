@@ -68,8 +68,8 @@ private:
     nlohmann::json Export() const;
     void Import(nlohmann::json const&);
 
-    wxBitmapComboBox* nameBox{};
-    wxSpinCtrl* spin{};
+    wxBitmapComboBox* mNameBox{};
+    wxSpinCtrl* mSpin{};
 
     int const mActiveColorPalette{};
     std::vector<wxString> mColorPaletteNames;

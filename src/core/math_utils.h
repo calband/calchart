@@ -59,7 +59,6 @@ T BoundDirection(T f)
 template <typename T>
 T NormalizeAngle(T ang) { return BoundDirection(ang); }
 
-
 float BoundDirectionSigned(float f);
 
 bool IsDiagonalDirection(float f);

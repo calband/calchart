@@ -75,25 +75,19 @@ void ContinuityBrowserPerCont::Init()
 
 void ContinuityBrowserPerCont::CreateControls()
 {
-    auto topSizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topSizer);
+    SetSizer(VStack([this](auto sizer) {
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            CreateText(this, sizer, ExpandSizerFlags(), CalChart::GetLongNameForSymbol(mSym));
+            CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)), [this]() {
+                mCanvas->AddNewEntry();
+            });
+        });
 
-    auto lineSizer = new wxBoxSizer(wxHORIZONTAL);
-    AddToSizerBasic(topSizer, lineSizer);
-
-    auto staticText = new wxStaticText(this, wxID_STATIC, CalChart::GetLongNameForSymbol(mSym), wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    AddToSizerExpand(lineSizer, staticText);
-
-    auto button = new wxBitmapButton(this, wxID_ANY, ScaleButtonBitmap(wxArtProvider::GetBitmap(wxART_PLUS)));
-    AddToSizerBasic(lineSizer, button);
-    button->Bind(wxEVT_BUTTON, [this](auto const&) {
-        mCanvas->AddNewEntry();
-    });
-
-    // here's a canvas
-    mCanvas = new ContinuityBrowserPanel(mSym, CalChartConfiguration::GetGlobalConfig(), this);
-    topSizer->Add(mCanvas, 1, wxEXPAND);
-    topSizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
+        // here's a canvas
+        mCanvas = new ContinuityBrowserPanel(mSym, CalChartConfiguration::GetGlobalConfig(), this);
+        sizer->Add(mCanvas, 1, wxEXPAND);
+        CreateHLine(this, sizer);
+    }));
 }
 
 void ContinuityBrowserPerCont::OnUpdate()
@@ -130,28 +124,25 @@ void ContinuityBrowser::Init()
 void ContinuityBrowser::CreateControls()
 {
     // create a sizer for laying things out top down:
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    SetSizer(VStack([this](auto sizer) {
+        // add a horizontal bar to make things clear:
+        CreateHLine(this, sizer);
 
-    // add a horizontal bar to make things clear:
-    topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
+        // we lay things out from top to bottom, saying what point we're dealing with, then the continuity
+        for (auto&& eachcont : k_symbols) {
+            mPerCont.push_back(new ContinuityBrowserPerCont(eachcont, this));
+            sizer->Add(mPerCont.back(), 0, wxGROW | wxALL, 5);
+            mPerCont.back()->Show(false);
+        }
 
-    // we lay things out from top to bottom, saying what point we're dealing with, then the continuity
-    for (auto&& eachcont : k_symbols) {
-        mPerCont.push_back(new ContinuityBrowserPerCont(eachcont, this));
-        topsizer->Add(mPerCont.back(), 0, wxGROW | wxALL, 5);
-        mPerCont.back()->Show(false);
-    }
-
-    // add help
-    auto top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer);
-    auto button = new wxButton(this, wxID_HELP, wxT("&Help"));
-    top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    button->Bind(wxEVT_BUTTON, [](auto const&) {
-        wxGetApp().GetGlobalHelpController().LoadFile();
-        wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
-    });
+        // add help
+        HStack(sizer, [this](auto sizer) {
+            CreateButtonWithHandler(this, sizer, wxID_HELP, "&Help", [this]() {
+                wxGetApp().GetGlobalHelpController().LoadFile();
+                wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
+            });
+        });
+    }));
 
     SetScrollRate(1, 1);
     // now update the current screen

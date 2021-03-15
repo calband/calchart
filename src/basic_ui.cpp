@@ -139,7 +139,7 @@ ScrollZoomWindow::ScrollZoomWindow(wxWindow* parent, wxWindowID id,
 {
 }
 
-ScrollZoomWindow::~ScrollZoomWindow() {}
+ScrollZoomWindow::~ScrollZoomWindow() { }
 
 void ScrollZoomWindow::PrepareDC(wxDC& dc)
 {
@@ -193,7 +193,7 @@ MouseMoveScrollCanvas::MouseMoveScrollCanvas(wxWindow* parent, wxWindowID id,
 {
 }
 
-MouseMoveScrollCanvas::~MouseMoveScrollCanvas() {}
+MouseMoveScrollCanvas::~MouseMoveScrollCanvas() { }
 
 void MouseMoveScrollCanvas::OnMouseMove(wxMouseEvent& event)
 {
@@ -247,7 +247,7 @@ ClickDragCtrlScrollCanvas::ClickDragCtrlScrollCanvas(wxWindow* parent,
 {
 }
 
-ClickDragCtrlScrollCanvas::~ClickDragCtrlScrollCanvas() {}
+ClickDragCtrlScrollCanvas::~ClickDragCtrlScrollCanvas() { }
 
 bool ClickDragCtrlScrollCanvas::ShouldScrollOnMouseEvent(
     const wxMouseEvent& event) const
@@ -276,6 +276,18 @@ wxSizerFlags RightBasicSizerFlags()
 wxSizerFlags ExpandSizerFlags()
 {
     static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Proportion(1).Expand();
+    return sizerFlags;
+}
+
+wxSizerFlags HorizontalSizerFlags()
+{
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Proportion(1).CenterHorizontal();
+    return sizerFlags;
+}
+
+wxSizerFlags VerticalSizerFlags()
+{
+    static const auto sizerFlags = wxSizerFlags{}.Border(wxALL, 2).Proportion(1).CenterVertical();
     return sizerFlags;
 }
 

@@ -21,9 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-#include "confgr.h"
 #include "basic_ui.h"
+#include "confgr.h"
 #include <wx/wx.h>
 
 // the basic class panel we use for all the pages.
@@ -37,8 +36,8 @@ public:
     {
         Init();
     }
-    virtual ~PreferencePage() {}
-    virtual void Init() {}
+    virtual ~PreferencePage() { }
+    virtual void Init() { }
     virtual bool Create(wxWindow* parent, wxWindowID id, const wxString& caption,
         const wxPoint& pos, const wxSize& size, long style)
     {
@@ -62,28 +61,3 @@ private:
 protected:
     CalChartConfiguration& mConfig;
 };
-
-// should this move to basic_ui.h?
-template <typename Function>
-void AddTextboxWithCaptionAndAction(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-    Function&& f, long style = 0)
-{
-    wxBoxSizer* textsizer = new wxBoxSizer(wxVERTICAL);
-    textsizer->Add(new wxStaticText(parent, wxID_STATIC, caption,
-                       wxDefaultPosition, wxDefaultSize, 0),
-                   LeftBasicSizerFlags());
-    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition,
-        wxDefaultSize, style);
-    textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT,
-        f);
-    textsizer->Add(textCtrl, BasicSizerFlags());
-    verticalsizer->Add(textsizer, BasicSizerFlags());
-}
-
-void AddTextboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-                           long style = 0);
-void AddCheckboxWithCaption(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-                            long style = 0);

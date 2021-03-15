@@ -152,34 +152,22 @@ void PrintContinuityEditor::CreateControls()
     mSplitter->SetWindowStyleFlag(mSplitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
 
     // create a sizer for laying things out top down:
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
-    // add buttons to the top row
-    // New, delete, choices
-    wxBoxSizer* top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-
-    mItemsToHide.push_back(new wxBitmapButton(this, CALCHART__prev_ss, wxArtProvider::GetBitmap(wxART_GO_BACK)));
-    AddToSizerBasic(top_button_sizer, mItemsToHide.back());
-    mItemsToHide.push_back(new wxBitmapButton(this, CALCHART__next_ss, wxArtProvider::GetBitmap(wxART_GO_FORWARD)));
-    AddToSizerBasic(top_button_sizer, mItemsToHide.back());
-    mItemsToHide.push_back(new wxStaticText(this, wxID_STATIC, "Name:"));
-    AddToSizerBasic(top_button_sizer, mItemsToHide.back());
-    mItemsToHide.push_back(new wxTextCtrl(this, PrintContinuityEditor_PrintNumber, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER));
-    AddToSizerBasic(top_button_sizer, mItemsToHide.back());
-    mItemsToHide.push_back(new wxButton(this, wxID_HELP, wxT("&Help")));
-    AddToSizerBasic(top_button_sizer, mItemsToHide.back());
-
-    // Set, select
-    topsizer->Add(top_button_sizer);
+    SetSizer(VStack([this](auto sizer) {
+        HStack(sizer, [this](auto sizer) {
+            mItemsToHide.push_back(CreateBitmapButton(this, sizer, BasicSizerFlags(), CALCHART__prev_ss, wxArtProvider::GetBitmap(wxART_GO_BACK)));
+            mItemsToHide.push_back(CreateBitmapButton(this, sizer, BasicSizerFlags(), CALCHART__next_ss, wxArtProvider::GetBitmap(wxART_GO_FORWARD)));
+            mItemsToHide.push_back(CreateText(this, sizer, BasicSizerFlags(), "Name:"));
+            mItemsToHide.push_back(CreateTextCtrl(this, sizer, BasicSizerFlags(), PrintContinuityEditor_PrintNumber, wxTE_PROCESS_ENTER));
+            mItemsToHide.push_back(CreateButton(this, sizer, BasicSizerFlags(), wxID_HELP, wxT("&Help")));
+        });
+        sizer->Add(mSplitter, wxSizerFlags(1).Expand());
+    }));
 
     mUserInput = new FancyTextWin(mSplitter, PrintContinuityEditor_KeyPress);
 
     mPrintContDisplay = new PrintContinuityPreview(mSplitter);
     mSplitter->Initialize(mPrintContDisplay);
     mSplitter->SplitHorizontally(mPrintContDisplay, mUserInput);
-
-    topsizer->Add(mSplitter, wxSizerFlags(1).Expand());
 }
 
 void PrintContinuityEditor::OnCmdHelp(wxCommandEvent& event)

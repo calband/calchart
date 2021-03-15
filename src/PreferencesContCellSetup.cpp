@@ -21,33 +21,16 @@
 */
 
 #include "PreferencesContCellSetup.h"
-#include "PreferencesUtils.h"
 #include "ContinuityBrowserPanel.h"
+#include "PreferencesUtils.h"
 
 #include <wx/bmpcbox.h>
 #include <wx/colordlg.h>
 #include <wx/spinctrl.h>
 
-
 enum {
-    BUTTON_SELECT = 1000,
-    BUTTON_RESTORE,
-    SPIN_WIDTH,
+    SPIN_WIDTH = 1000,
     NEW_COLOR_CHOICE,
-    DOTRATIO,
-    NUMRATIO,
-    PLINERATIO,
-    SLINERATIO,
-    SPRITESCALE,
-    SPRITEHEIGHT,
-    BUTTON_EDIT_PALETTE_COLOR,
-    BUTTON_EDIT_PALETTE_NAME,
-    NEW_COLOR_PALETTE,
-};
-
-
-enum {
-    CHECK_LongForm,
     SPIN_Font_Size,
     SPIN_Rouding,
     SPIN_Text_Padding,
@@ -55,13 +38,10 @@ enum {
 };
 
 BEGIN_EVENT_TABLE(ContCellSetup, PreferencePage)
-EVT_CHECKBOX(CHECK_LongForm, ContCellSetup::OnCmdLongForm)
 EVT_SPINCTRL(SPIN_Font_Size, ContCellSetup::OnCmdFontSize)
 EVT_SPINCTRL(SPIN_Rouding, ContCellSetup::OnCmdRounding)
 EVT_SPINCTRL(SPIN_Text_Padding, ContCellSetup::OnCmdTextPadding)
 EVT_SPINCTRL(SPIN_Box_Padding, ContCellSetup::OnCmdBoxPadding)
-EVT_BUTTON(BUTTON_SELECT, ContCellSetup::OnCmdSelectColors)
-EVT_BUTTON(BUTTON_RESTORE, ContCellSetup::OnCmdResetColors)
 EVT_COMBOBOX(NEW_COLOR_CHOICE, ContCellSetup::OnCmdChooseNewColor)
 END_EVENT_TABLE()
 
@@ -86,62 +66,67 @@ ContCellSetup::ContCellSetup(CalChartConfiguration& config, wxWindow* parent, wx
 
 void ContCellSetup::CreateControls()
 {
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    SetSizer(VStack([this](auto sizer) {
+        NamedVBoxStack(this, sizer, "Color settings", [this](auto& sizer) {
+            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
+                mNameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetContCellColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_CONTCELLS_NUM, mConfig.GetContCellColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
+                sizer->Add(mNameBox, BasicSizerFlags());
 
-    auto boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Color settings")), wxVERTICAL);
-    topsizer->Add(boxsizer);
+                for (auto i = 0; i < COLOR_CONTCELLS_NUM; ++i) {
+                    CreateAndSetItemBitmap(mNameBox, i, mConfig.Get_ContCellBrushAndPen(static_cast<ContCellColors>(i)).first);
+                }
+                mNameBox->SetSelection(0);
+            });
 
-    auto horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    boxsizer->Add(horizontalsizer, LeftBasicSizerFlags());
-    nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetContCellColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_CONTCELLS_NUM, mConfig.GetContCellColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
-    horizontalsizer->Add(nameBox, BasicSizerFlags());
+            HStack(sizer, LeftBasicSizerFlags(), [this](auto& sizer) {
+                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Change Color", [this]() {
+                    OnCmdSelectColors();
+                });
+                CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&Reset Color", [this]() {
+                    OnCmdResetColors();
+                });
+            });
+        });
 
-    for (auto i = 0; i < COLOR_CONTCELLS_NUM; ++i) {
-        CreateAndSetItemBitmap(nameBox, i, mConfig.Get_ContCellBrushAndPen(static_cast<ContCellColors>(i)).first);
-    }
-    nameBox->SetSelection(0);
+        NamedHBoxStack(this, sizer, "Cont Cell settings", [this](auto& sizer) {
+            NamedVBoxStack(this, sizer, "Long form", [this](auto& sizer) {
+                auto checkbox = new wxCheckBox(this, wxID_ANY, wxT("Long form"));
+                checkbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& e) {
+                    mConfig.Set_ContCellLongForm(e.IsChecked());
+                    Refresh();
+                });
+                checkbox->SetValue(mConfig.Get_ContCellLongForm());
+                sizer->Add(checkbox, BasicSizerFlags());
+            });
 
-    horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
-    boxsizer->Add(horizontalsizer, LeftBasicSizerFlags());
-    horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")), BasicSizerFlags());
-    horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")), BasicSizerFlags());
+            NamedVBoxStack(this, sizer, "Font Size", [this](auto& sizer) {
+                auto spin = new wxSpinCtrl(this, SPIN_Font_Size, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 30, mConfig.Get_ContCellFontSize());
+                sizer->Add(spin, BasicSizerFlags());
+            });
 
-    horizontalsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Cont Cell settings")), wxHORIZONTAL);
-    topsizer->Add(horizontalsizer);
+            NamedVBoxStack(this, sizer, "Rounding", [this](auto& sizer) {
+                auto spin = new wxSpinCtrl(this, SPIN_Rouding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellRounding());
+                sizer->Add(spin, BasicSizerFlags());
+            });
 
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Long form")), wxVERTICAL);
-    horizontalsizer->Add(boxsizer, BasicSizerFlags());
-    auto checkbox = new wxCheckBox(this, CHECK_LongForm, wxT("Long form"));
-    checkbox->SetValue(mConfig.Get_ContCellLongForm());
-    boxsizer->Add(checkbox, BasicSizerFlags());
+            NamedVBoxStack(this, sizer, "Text Padding", [this](auto& sizer) {
+                auto spin = new wxSpinCtrl(this, SPIN_Text_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellTextPadding());
+                sizer->Add(spin, BasicSizerFlags());
+            });
 
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Font Size")), wxVERTICAL);
-    horizontalsizer->Add(boxsizer, BasicSizerFlags());
-    auto spin = new wxSpinCtrl(this, SPIN_Font_Size, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 30, mConfig.Get_ContCellFontSize());
-    boxsizer->Add(spin, BasicSizerFlags());
+            NamedVBoxStack(this, sizer, "Box Padding", [this](auto& sizer) {
+                auto spin = new wxSpinCtrl(this, SPIN_Box_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellBoxPadding());
+                sizer->Add(spin, BasicSizerFlags());
+            });
+        });
 
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Rounding")), wxVERTICAL);
-    horizontalsizer->Add(boxsizer, BasicSizerFlags());
-    spin = new wxSpinCtrl(this, SPIN_Rouding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellRounding());
-    boxsizer->Add(spin, BasicSizerFlags());
-
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Text Padding")), wxVERTICAL);
-    horizontalsizer->Add(boxsizer, BasicSizerFlags());
-    spin = new wxSpinCtrl(this, SPIN_Text_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellTextPadding());
-    boxsizer->Add(spin, BasicSizerFlags());
-
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Box Padding")), wxVERTICAL);
-    horizontalsizer->Add(boxsizer, BasicSizerFlags());
-    spin = new wxSpinCtrl(this, SPIN_Box_Padding, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mConfig.Get_ContCellBoxPadding());
-    boxsizer->Add(spin, BasicSizerFlags());
-
-    auto canvas = new ContinuityBrowserPanel(SYMBOL_PLAIN, mConfig, this);
-    topsizer->Add(canvas, 1, wxEXPAND);
-    auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
-    auto clonedOut = do_cloning(basic_cont);
-    clonedOut.emplace_back(std::make_unique<CalChart::ContProcMT>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()));
-    canvas->DoSetContinuity(CalChart::Continuity{ std::move(clonedOut) });
+        auto canvas = new ContinuityBrowserPanel(SYMBOL_PLAIN, mConfig, this);
+        sizer->Add(canvas, 1, wxEXPAND);
+        auto basic_cont = CalChart::Continuity{ "ewns np\nX = distfrom(sp r2)\nmt (24-X)w\nmarch gv dist(np) dir(np) w\nmtrm e" };
+        auto clonedOut = do_cloning(basic_cont);
+        clonedOut.emplace_back(std::make_unique<CalChart::ContProcMT>(std::make_unique<CalChart::ContValueUnset>(), std::make_unique<CalChart::ContValueUnset>()));
+        canvas->DoSetContinuity(CalChart::Continuity{ std::move(clonedOut) });
+    }));
 
     TransferDataToWindow();
 }
@@ -182,12 +167,6 @@ bool ContCellSetup::ClearValuesToDefault()
     return true;
 }
 
-void ContCellSetup::OnCmdLongForm(wxCommandEvent& e)
-{
-    mConfig.Set_ContCellLongForm(e.IsChecked());
-    Refresh();
-}
-
 void ContCellSetup::OnCmdFontSize(wxSpinEvent& e)
 {
     mConfig.Set_ContCellFontSize(e.GetValue());
@@ -220,13 +199,13 @@ void ContCellSetup::SetColor(int selection, const wxColour& color)
     mConfig.Set_ContCellBrushAndPen(static_cast<ContCellColors>(selection), mContCellBrushes[selection], pen);
 
     // update the namebox list
-    CreateAndSetItemBitmap(nameBox, selection, mContCellBrushes[selection]);
+    CreateAndSetItemBitmap(mNameBox, selection, mContCellBrushes[selection]);
     Refresh();
 }
 
-void ContCellSetup::OnCmdSelectColors(wxCommandEvent&)
+void ContCellSetup::OnCmdSelectColors()
 {
-    auto selection = nameBox->GetSelection();
+    auto selection = mNameBox->GetSelection();
     auto data = wxColourData{};
     data.SetChooseFull(true);
     data.SetColour(mContCellBrushes[selection].GetColour());
@@ -239,9 +218,9 @@ void ContCellSetup::OnCmdSelectColors(wxCommandEvent&)
     Refresh();
 }
 
-void ContCellSetup::OnCmdResetColors(wxCommandEvent&)
+void ContCellSetup::OnCmdResetColors()
 {
-    auto selection = nameBox->GetSelection();
+    auto selection = mNameBox->GetSelection();
     SetColor(selection, mConfig.GetContCellDefaultColors()[selection]);
     mConfig.Clear_ContCellConfigColor(static_cast<ContCellColors>(selection));
     Refresh();
@@ -251,4 +230,3 @@ void ContCellSetup::OnCmdChooseNewColor(wxCommandEvent&)
 {
     Refresh();
 }
-

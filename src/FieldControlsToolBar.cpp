@@ -148,7 +148,8 @@ double GetZoomAmount(wxWindow* target)
 
 void SetZoomAmount(wxWindow* target, double zoom)
 {
-    auto newSliderValue = (zoom <= zoom_min) ? 0 : (zoom >= zoom_max) ? zoom_steps : (zoom - zoom_min) / (zoom_max - zoom_min) * zoom_steps;
+    auto newSliderValue = (zoom <= zoom_min) ? 0 : (zoom >= zoom_max) ? zoom_steps
+                                                                      : (zoom - zoom_min) / (zoom_max - zoom_min) * zoom_steps;
     auto slider = static_cast<wxSlider*>(target->FindWindow(CALCHART__slider_zoom));
     if (newSliderValue == slider->GetValue()) {
         return;
