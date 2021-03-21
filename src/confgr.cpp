@@ -449,6 +449,10 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameOmniAnimation, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitScreen, bool, true);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(AnimationFrameSplitVertical, bool, false);
 
+IMPLEMENT_CONFIGURATION_FUNCTIONS(UseSprites, bool, false);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(SpriteBitmapScale, double, 0.5);
+IMPLEMENT_CONFIGURATION_FUNCTIONS(SpriteBitmapOffsetY, double, 0.5);
+
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ScrollDirectionNatural, bool, true);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSetSheet, bool, false);

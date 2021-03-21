@@ -56,6 +56,17 @@ void AnimationCanvas::CreateControls()
     SetSizer(topSizer);
 }
 
+bool AnimationCanvas::GetUseSprites() const
+{
+    return CalChartConfiguration::GetGlobalConfig().Get_UseSprites();
+}
+
+void AnimationCanvas::SetUseSprites(bool useSprites)
+{
+    CalChartConfiguration::GetGlobalConfig().Set_UseSprites(useSprites);
+    Refresh();
+}
+
 void AnimationCanvas::SetZoomOnMarchers(bool zoomOnMarchers)
 {
     mZoomOnMarchers = zoomOnMarchers;

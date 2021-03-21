@@ -1,5 +1,5 @@
 /*
- * mode_dialog.cpp
+ * CalChartPreferences.cpp
  * Dialox box for preferences
  */
 
@@ -20,71 +20,32 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "mode_dialog.h"
-#include "basic_ui.h"
+#include "PreferencesShowModeSetup.h"
+#include "PreferencesUtils.h"
+#include "CalChartDoc.h"
+#include "CalChartSizes.h"
+#include "ColorSetupCanvas.h"
+#include "ContinuityBrowserPanel.h"
+#include "ContinuityComposerDialog.h"
+#include "cc_drawcommand.h"
+#include "cc_shapes.h"
+#include "cc_sheet.h"
+#include "confgr.h"
+#include "cont.h"
 #include "draw.h"
+#include "mode_dialog.h"
 #include "mode_dialog_canvas.h"
 #include "modes.h"
 
-// convience sizers to change the view behavior in all at once.
-static auto sRightBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Right().Proportion(0);
-static auto sExpandSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proportion(0);
+#include <wx/colordlg.h>
+#include <wx/dcbuffer.h>
+#include <wx/listbook.h>
+#include <wx/notebook.h>
+#include <wx/statline.h>
+#include <wx/stattext.h>
 
-template <typename Function>
-void AddTextboxWithCaptionAndAction(wxWindow* parent, wxBoxSizer* verticalsizer,
-    int id, const wxString& caption,
-    Function&& f, long style = 0)
-{
-    wxBoxSizer* textsizer = new wxBoxSizer(wxVERTICAL);
-    textsizer->Add(new wxStaticText(parent, wxID_STATIC, caption,
-                       wxDefaultPosition, wxDefaultSize, 0),
-                   LeftBasicSizerFlags());
-    auto textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition,
-        wxDefaultSize, style);
-    textCtrl->Bind((style & wxTE_PROCESS_ENTER) ? wxEVT_TEXT_ENTER : wxEVT_TEXT,
-        f);
-    textsizer->Add(textCtrl, BasicSizerFlags());
-    verticalsizer->Add(textsizer, BasicSizerFlags());
-}
+using namespace CalChart;
 
-//////// Show Mode setup ////////
-// setup drawing characteristics
-////////
-
-const int zoom_amounts[] = { 500, 200, 150, 100, 75, 50, 25, 10 };
-
-class ShowModeDialogSetup : public wxPanel {
-    DECLARE_CLASS(ShowModeDialogSetup)
-    DECLARE_EVENT_TABLE()
-
-public:
-    ShowModeDialogSetup(CalChart::ShowMode const& current_mode,
-        wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Setup Modes"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~ShowModeDialogSetup() = default;
-
-    virtual void Init(CalChart::ShowMode const& current_mode);
-    virtual void CreateControls();
-
-    // use these to get and set default values
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-
-    CalChart::ShowMode GetShowMode() const;
-
-private:
-    void OnCmdLineText(wxCommandEvent&);
-    void OnCmdChoice(wxCommandEvent&);
-
-    CalChartConfiguration::ShowModeInfo_t mShowModeValues;
-    CalChart::ShowMode::YardLinesInfo_t mYardText;
-    int mWhichYardLine;
-    CalChartConfiguration mConfig;
-};
 
 enum {
     MODE_CHOICE = 1000,
@@ -103,35 +64,20 @@ enum {
     CANVAS,
 };
 
-BEGIN_EVENT_TABLE(ShowModeDialogSetup, wxPanel)
-EVT_CHOICE(MODE_CHOICE, ShowModeDialogSetup::OnCmdChoice)
-EVT_CHOICE(SHOW_LINE_MARKING, ShowModeDialogSetup::OnCmdChoice)
+BEGIN_EVENT_TABLE(ShowModeSetup, PreferencePage)
+EVT_CHOICE(MODE_CHOICE, ShowModeSetup::OnCmdChoice)
+EVT_CHOICE(SHOW_LINE_MARKING, ShowModeSetup::OnCmdChoice)
 END_EVENT_TABLE()
 
-IMPLEMENT_CLASS(ShowModeDialogSetup, wxPanel)
+IMPLEMENT_CLASS(ShowModeSetup, PreferencePage)
 
-ShowModeDialogSetup::ShowModeDialogSetup(CalChart::ShowMode const& current_mode, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : wxPanel(parent, id, pos, size, style, caption)
-    , mConfig(CalChartConfiguration::GetGlobalConfig())
-{
-    Init(current_mode);
-    CreateControls();
-    GetSizer()->Fit(this);
-    GetSizer()->SetSizeHints(this);
-    Center();
-}
-
-void ShowModeDialogSetup::CreateControls()
+void ShowModeSetup::CreateControls()
 {
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     SetSizer(topsizer);
 
-    std::vector<wxString> choices;
-    choices.emplace_back("Reload from...");
-    choices.insert(choices.end(), std::begin(kShowModeStrings), std::end(kShowModeStrings));
-
     wxChoice* modes = new wxChoice(this, MODE_CHOICE, wxDefaultPosition,
-        wxDefaultSize, choices.size(), choices.data());
+        wxDefaultSize, SHOWMODE_NUM, kShowModeStrings);
     modes->SetSelection(0);
     topsizer->Add(modes, LeftBasicSizerFlags());
 
@@ -215,26 +161,33 @@ void ShowModeDialogSetup::CreateControls()
     modeSetupCanvas->SetScrollRate(1, 1);
     topsizer->Add(modeSetupCanvas, 1, wxEXPAND);
 
-    modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
+    modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
     modeSetupCanvas->SetZoom(zoom_amounts[5] / 100.0);
     zoomBox->SetSelection(5);
 
     TransferDataToWindow();
 }
 
-void ShowModeDialogSetup::Init(CalChart::ShowMode const& current_mode)
+void ShowModeSetup::Init()
 {
+    mWhichMode = 0;
     mWhichYardLine = 0;
-    mShowModeValues = current_mode.GetShowModeInfo();
-    mYardText = current_mode.Get_yard_text();
+    for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
+        mShowModeValues[i] = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(i));
+    }
+    for (size_t i = 0; i < kYardTextValues; ++i) {
+        mYardText[i] = mConfig.Get_yard_text(i);
+    }
 }
 
-bool ShowModeDialogSetup::TransferDataToWindow()
+bool ShowModeSetup::TransferDataToWindow()
 {
     // standard show
-    for (auto i = mShowModeValues.begin(); i != mShowModeValues.end(); ++i) {
+    for (auto i = mShowModeValues[mWhichMode].begin();
+         i != mShowModeValues[mWhichMode].end(); ++i) {
         wxString buf;
-        wxTextCtrl* text = (wxTextCtrl*)FindWindow(WESTHASH + std::distance(mShowModeValues.begin(), i));
+        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
+            WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
         buf.Printf(wxT("%d"), static_cast<int>(*i));
         text->ChangeValue(buf);
     }
@@ -244,85 +197,74 @@ bool ShowModeDialogSetup::TransferDataToWindow()
     return true;
 }
 
-bool ShowModeDialogSetup::TransferDataFromWindow()
+bool ShowModeSetup::TransferDataFromWindow()
 {
     // read out the values from the window
     // standard show
-    for (auto i = mShowModeValues.begin(); i != mShowModeValues.end(); ++i) {
+    for (auto i = mShowModeValues[mWhichMode].begin();
+         i != mShowModeValues[mWhichMode].end(); ++i) {
         long val;
         wxTextCtrl* text = (wxTextCtrl*)FindWindow(
-            WESTHASH + std::distance(mShowModeValues.begin(), i));
+            WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
         text->GetValue().ToLong(&val);
         *i = val;
+    }
+    // write out the values defaults:
+    for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
+        mConfig.Set_ShowModeInfo(static_cast<CalChartShowModes>(i),
+            mShowModeValues[i]);
     }
 
     // grab whatever's in the box
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
-
-    ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(CANVAS);
-    canvas->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
+    for (size_t i = 0; i < kYardTextValues; ++i) {
+        mConfig.Set_yard_text(i, mYardText[i]);
+    }
+    // now set the canvas
+    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
 
     return true;
 }
 
-void ShowModeDialogSetup::OnCmdChoice(wxCommandEvent&)
+bool ShowModeSetup::ClearValuesToDefault()
+{
+    for (size_t i = 0; i < SHOWMODE_NUM; ++i) {
+        mConfig.Clear_ShowModeInfo(static_cast<CalChartShowModes>(i));
+    }
+    for (auto i = 0; i < kYardTextValues; ++i) {
+        mConfig.Clear_yard_text(i);
+    }
+    Init();
+    ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
+    return TransferDataToWindow();
+}
+
+void ShowModeSetup::OnCmdChoice(wxCommandEvent&)
 {
     // save off all the old values:
-    wxChoice* modes = (wxChoice*)FindWindow(MODE_CHOICE);
-    auto whichMode = modes->GetSelection();
-    if (whichMode > 0) {
-        modes->SetSelection(0);
-        mShowModeValues = mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(whichMode - 1));
-        ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(CANVAS);
-        canvas->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
+    for (auto i = mShowModeValues[mWhichMode].begin();
+         i != mShowModeValues[mWhichMode].end(); ++i) {
+        long val;
+        wxTextCtrl* text = (wxTextCtrl*)FindWindow(
+            WESTHASH + std::distance(mShowModeValues[mWhichMode].begin(), i));
+        text->GetValue().ToLong(&val);
+        *i = val;
     }
+    wxChoice* modes = (wxChoice*)FindWindow(MODE_CHOICE);
+    mWhichMode = modes->GetSelection();
+    ShowModeSetupCanvas* canvas = (ShowModeSetupCanvas*)FindWindow(CANVAS);
+    canvas->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
 
     wxTextCtrl* text = (wxTextCtrl*)FindWindow(SHOW_LINE_VALUE);
     mYardText[mWhichYardLine] = text->GetValue();
+    // update mode
+    for (size_t i = 0; i < kYardTextValues; ++i) {
+        mConfig.Set_yard_text(i, mYardText[i]);
+    }
 
     modes = (wxChoice*)FindWindow(SHOW_LINE_MARKING);
     mWhichYardLine = modes->GetSelection();
     TransferDataToWindow();
 }
 
-CalChart::ShowMode ShowModeDialogSetup::GetShowMode() const
-{
-    return CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText);
-}
-
-////////////////
-
-BEGIN_EVENT_TABLE(ModeSetupDialog, wxDialog)
-END_EVENT_TABLE()
-
-IMPLEMENT_CLASS(ModeSetupDialog, wxDialog)
-
-ModeSetupDialog::ModeSetupDialog(CalChart::ShowMode const& current_mode, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, caption, pos, size, style)
-{
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
-    m_setup = new ShowModeDialogSetup(current_mode, this, wxID_ANY);
-
-    topsizer->Add(m_setup, BasicSizerFlags());
-
-    // the buttons on the bottom
-    wxBoxSizer* okCancelBox = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(okCancelBox, BasicSizerFlags());
-
-    okCancelBox->Add(new wxButton(this, wxID_CANCEL), BasicSizerFlags());
-    okCancelBox->Add(new wxButton(this, wxID_OK), BasicSizerFlags());
-
-    // This fits the dalog to the minimum size dictated by the sizers
-    GetSizer()->Fit(this);
-    // This ensures that the dialog cannot be smaller than the minimum size
-    GetSizer()->SetSizeHints(this);
-    Center();
-}
-
-CalChart::ShowMode ModeSetupDialog::GetShowMode() const
-{
-    return m_setup->GetShowMode();
-}

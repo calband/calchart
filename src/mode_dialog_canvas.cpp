@@ -1,5 +1,5 @@
 /*
- * cc_preferences_ui.cpp
+ * mode_dialog_canvas.cpp
  * Dialox box for preferences
  */
 

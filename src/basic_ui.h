@@ -156,6 +156,7 @@ protected:
     virtual bool ShouldScrollOnMouseEvent(const wxMouseEvent& event) const override;
 };
 
+// common sizers all in one places
 wxSizerFlags BasicSizerFlags();
 wxSizerFlags LeftBasicSizerFlags();
 wxSizerFlags RightBasicSizerFlags();

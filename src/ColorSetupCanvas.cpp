@@ -1,5 +1,5 @@
 /*
- * cc_preferences_ui.cpp
+ * CalChartPreferences.cpp
  * Dialox box for preferences
  */
 

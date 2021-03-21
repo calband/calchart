@@ -93,8 +93,6 @@ private:
 
 IMPLEMENT_CLASS(ContinuityComposerPanel, wxPanel)
 
-static const auto sBasicSizerFlags = wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0);
-static const auto sLeftBasicSizerFlags = wxSizerFlags{}.Border(wxALL, 2).Left().Proportion(0);
 static const auto sRightBasicSizerFlags = wxSizerFlags{}.Border(wxALL, 2).Right().Proportion(0);
 static const auto sExpandSizerFlags = wxSizerFlags{}.Border(wxALL, 2).Center().Proportion(0);
 
@@ -612,9 +610,9 @@ ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::Con
     auto button_sizer = new wxBoxSizer(wxHORIZONTAL);
     topsizer->Add(button_sizer, sRightBasicSizerFlags);
 
-    button_sizer->Add(new wxButton(this, wxID_CANCEL, wxT("&Cancel")), sBasicSizerFlags);
+    button_sizer->Add(new wxButton(this, wxID_CANCEL, wxT("&Cancel")), BasicSizerFlags());
     mCloseButton = new wxButton(this, wxID_OK, wxT("&Done"));
-    button_sizer->Add(mCloseButton, sBasicSizerFlags);
+    button_sizer->Add(mCloseButton, BasicSizerFlags());
     mCloseButton->SetDefault();
     mCloseButton->Enable(mPanel->Validate());
     mPanel->SetOnUpdateIsValid([this](bool enable) {

@@ -1,5 +1,5 @@
 /*
- * cc_preferences_ui.cpp
+ * ColorSetupDialog.cpp
  * Dialox box for preferences
  */
 
@@ -56,8 +56,6 @@ using namespace CalChart;
 // out when the user presses apply.
 
 // convience sizers to change the view behavior in all at once.
-static auto sBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proportion(0);
-static auto sLeftBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Left().Proportion(0);
 static auto sRightBasicSizerFlags = wxSizerFlags().Border(wxALL, 2).Right().Proportion(0);
 static auto sExpandSizerFlags = wxSizerFlags().Border(wxALL, 2).Center().Proportion(0);
 
@@ -124,12 +122,12 @@ void ColorSetupDialog::CreateControls()
     wxStaticBoxSizer* boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Palette")), wxHORIZONTAL);
     topsizer->Add(boxsizer);
 
-    boxsizer->Add(new wxBitmapButton(this, BUTTON_EDIT_PALETTE_COLOR, CreateTempBitmap(mColorPaletteColors.at(mActiveColorPalette))), sBasicSizerFlags);
+    boxsizer->Add(new wxBitmapButton(this, BUTTON_EDIT_PALETTE_COLOR, CreateTempBitmap(mColorPaletteColors.at(mActiveColorPalette))), BasicSizerFlags());
 
-    boxsizer->Add(new wxTextCtrl(this, PALETTE_NAME, mColorPaletteNames.at(mActiveColorPalette), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), sBasicSizerFlags);
+    boxsizer->Add(new wxTextCtrl(this, PALETTE_NAME, mColorPaletteNames.at(mActiveColorPalette), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), BasicSizerFlags());
 
-    boxsizer->Add(new wxButton(this, BUTTON_EXPORT, wxT("&Export...")), sBasicSizerFlags);
-    boxsizer->Add(new wxButton(this, BUTTON_IMPORT, wxT("&Import...")), sBasicSizerFlags);
+    boxsizer->Add(new wxButton(this, BUTTON_EXPORT, wxT("&Export...")), BasicSizerFlags());
+    boxsizer->Add(new wxButton(this, BUTTON_IMPORT, wxT("&Import...")), BasicSizerFlags());
 
     boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Color settings")), wxVERTICAL);
     topsizer->Add(boxsizer);
@@ -137,7 +135,7 @@ void ColorSetupDialog::CreateControls()
     auto horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
 
     nameBox = new wxBitmapComboBox(this, NEW_COLOR_CHOICE, mConfig.GetColorNames().at(0), wxDefaultPosition, wxDefaultSize, COLOR_NUM, mConfig.GetColorNames().data(), wxCB_READONLY | wxCB_DROPDOWN);
-    horizontalsizer->Add(nameBox, sBasicSizerFlags);
+    horizontalsizer->Add(nameBox, BasicSizerFlags());
 
     for (CalChartColors i = COLOR_FIELD; i < COLOR_NUM; i = static_cast<CalChartColors>(static_cast<int>(i) + 1)) {
         CreateAndSetItemBitmap(nameBox, i, mConfig.Get_CalChartBrushAndPen(i).first);
@@ -146,14 +144,14 @@ void ColorSetupDialog::CreateControls()
 
     spin = new wxSpinCtrl(this, SPIN_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10, mCalChartPens[mActiveColorPalette][nameBox->GetSelection()].GetWidth());
     spin->SetValue(mCalChartPens[mActiveColorPalette][nameBox->GetSelection()].GetWidth());
-    horizontalsizer->Add(spin, sBasicSizerFlags);
-    boxsizer->Add(horizontalsizer, sLeftBasicSizerFlags);
+    horizontalsizer->Add(spin, BasicSizerFlags());
+    boxsizer->Add(horizontalsizer, LeftBasicSizerFlags());
 
     horizontalsizer = new wxBoxSizer(wxHORIZONTAL);
 
-    horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")), sBasicSizerFlags);
-    horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")), sBasicSizerFlags);
-    boxsizer->Add(horizontalsizer, sBasicSizerFlags);
+    horizontalsizer->Add(new wxButton(this, BUTTON_SELECT, wxT("&Change Color")), BasicSizerFlags());
+    horizontalsizer->Add(new wxButton(this, BUTTON_RESTORE, wxT("&Reset Color")), BasicSizerFlags());
+    boxsizer->Add(horizontalsizer, BasicSizerFlags());
 
     auto prefCanvas = new ColorSetupCanvas(mConfig, this);
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
@@ -162,11 +160,11 @@ void ColorSetupDialog::CreateControls()
 
     // the buttons on the bottom
     wxBoxSizer* okCancelBox = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(okCancelBox, sBasicSizerFlags);
+    topsizer->Add(okCancelBox, BasicSizerFlags());
 
-    okCancelBox->Add(new wxButton(this, wxID_RESET, wxT("&Reset")), sBasicSizerFlags);
-    okCancelBox->Add(new wxButton(this, wxID_OK), sBasicSizerFlags);
-    okCancelBox->Add(new wxButton(this, wxID_CANCEL), sBasicSizerFlags);
+    okCancelBox->Add(new wxButton(this, wxID_RESET, wxT("&Reset")), BasicSizerFlags());
+    okCancelBox->Add(new wxButton(this, wxID_OK), BasicSizerFlags());
+    okCancelBox->Add(new wxButton(this, wxID_CANCEL), BasicSizerFlags());
 
     TransferDataToWindow();
 }

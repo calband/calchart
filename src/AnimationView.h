@@ -23,6 +23,7 @@
 
 #include "draw_utils.h"
 #include <map>
+#include <array>
 #include <wx/docview.h>
 
 class AnimationPanel;
@@ -45,6 +46,8 @@ public:
 
     void OnDraw(wxDC* dc) override;
     void OnDraw(wxDC& dc, CalChartConfiguration const& config);
+    void OnDrawDots(wxDC& dc, CalChartConfiguration const& config);
+    void OnDrawSprites(wxDC& dc, CalChartConfiguration const& config);
     void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)nullptr) override;
 
     void PrevBeat();
@@ -90,4 +93,13 @@ private:
     std::unique_ptr<CalChart::Animation> mAnimation;
     bool mDrawCollisionWarning = true;
     bool mPlayCollisionWarning = false;
+
+    enum ImageBeat {
+        Standing,
+        Right,
+        Left,
+        Size
+    };
+
+    std::array<wxImage, 8 * ImageBeat::Size> mSpriteImages;
 };

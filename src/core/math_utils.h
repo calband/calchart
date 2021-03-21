@@ -46,8 +46,19 @@ T Deg2Rad(const T& a) { return a * M_PI / 180.0; }
 
 #define SQRT2 1.4142136
 
-float BoundDirection(float f);
-float NormalizeAngle(float ang);
+template <typename T>
+T BoundDirection(T f)
+{
+    while (f >= 360.0)
+        f -= 360.0;
+    while (f < 0.0)
+        f += 360.0;
+    return f;
+}
+
+template <typename T>
+T NormalizeAngle(T ang) { return BoundDirection(ang); }
+
 
 float BoundDirectionSigned(float f);
 

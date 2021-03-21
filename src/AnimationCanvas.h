@@ -35,13 +35,15 @@ public:
     ~AnimationCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View
-    void SetView(AnimationView* view) { mView = view; }
     auto GetView() const { return mView; }
+    void SetView(AnimationView* view) { mView = view; }
 
-    void SetZoomOnMarchers(bool zoomOnMarchers);
+    bool GetUseSprites() const;
+    void SetUseSprites(bool useSprites);
     auto GetZoomOnMarchers() const { return mZoomOnMarchers; }
-    void SetStepsOutForMarchersZoom(int steps);
+    void SetZoomOnMarchers(bool zoomOnMarchers);
     auto GetStepsOutForMarchersZoom() const { return mStepsOutForMarcherZoom; }
+    void SetStepsOutForMarchersZoom(int steps);
 
 private:
     void Init();

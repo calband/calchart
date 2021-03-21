@@ -359,10 +359,31 @@ bool Animation::CurrentBeatHasCollision() const
 
 Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 {
-    return Animation::animate_info_t(
+    return {
+        which,
         mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::COLLISION_NONE,
         GetCommand(mCurrentSheetNumber, which).Direction(),
-        GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which));
+        GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)};
+}
+
+std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
+{
+    auto points = std::vector<int>(mPoints.size());
+    std::iota(points.begin(), points.end(), 0);
+    auto animates = std::vector<Animation::animate_info_t>();
+    std::transform(points.begin(), points.end(), std::back_inserter(animates), [this](auto which) -> Animation::animate_info_t {
+        return {
+            which,
+            mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::COLLISION_NONE,
+            GetCommand(mCurrentSheetNumber, which).Direction(),
+            GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)
+        };
+    });
+    std::sort(animates.begin(), animates.end(), [](auto& a, auto& b) {
+        return a.mPosition < b.mPosition;
+    });
+    return animates;
+
 }
 
 int Animation::GetNumberSheets() const { return static_cast<int>(mSheets.size()); }

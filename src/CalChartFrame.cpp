@@ -40,7 +40,7 @@
 #include "cc_coord.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
-#include "cc_preferences_ui.h"
+#include "CalChartPreferences.h"
 #include "cc_sheet.h"
 #include "cc_show.h"
 #include "ccvers.h"

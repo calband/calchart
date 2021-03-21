@@ -51,6 +51,28 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     : mView(view)
 {
     SetFrame(frame);
+
+#if defined(__APPLE__) && (__APPLE__)
+    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/default_sprite_strip.png");
+#else
+    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("default_sprite_strip.png"));
+#endif
+    constexpr auto image_X = 64;
+    constexpr auto image_Y = 128;
+    auto image = [](){
+        wxImage image;
+        if (!image.LoadFile(kImageDir)) {
+            wxLogError(wxT("Couldn't load image from ") + kImageDir + wxT("."));
+            return image;
+        }
+        return image;
+    }();
+    // now slice up all the images
+    auto points = std::vector<int>(mSpriteImages.size());
+    std::iota(points.begin(), points.end(), 0);
+    std::transform(points.begin(), points.end(), mSpriteImages.begin(), [&image](auto i) {
+        return image.GetSubImage({ i*image_X + 0, 0, image_X, image_Y });
+    });
 }
 
 AnimationView::~AnimationView()
@@ -65,78 +87,113 @@ void AnimationView::OnDraw(wxDC* dc)
 
 void AnimationView::OnDraw(wxDC& dc, CalChartConfiguration const& config)
 {
+    if (!mAnimation) {
+        // no animation, our job is done.
+        return;
+    }
     dc.SetPen(config.Get_CalChartBrushAndPen(COLOR_FIELD_DETAIL).second);
     DrawMode(dc, config, mView->GetShowMode(), ShowMode_kAnimation);
+    auto useSprites = config.Get_UseSprites();
+    if (useSprites) {
+        return OnDrawSprites(dc, config);
+    }
+    return OnDrawDots(dc, config);
+}
+
+void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
+{
     auto checkForCollision = mDrawCollisionWarning;
-    if (mAnimation) {
-        for (auto i = 0; i < mView->GetNumPoints(); ++i) {
-            auto info = mAnimation->GetAnimateInfo(i);
-
-            if (checkForCollision && info.mCollision) {
-                if (info.mCollision == CalChart::Coord::COLLISION_WARNING) {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                } else if (info.mCollision == CalChart::Coord::COLLISION_INTERSECT) {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                }
-            } else if (mView->IsSelected(i)) {
-                switch (info.mDirection) {
-                case CalChart::ANIMDIR_SW:
-                case CalChart::ANIMDIR_W:
-                case CalChart::ANIMDIR_NW: {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                } break;
-                case CalChart::ANIMDIR_SE:
-                case CalChart::ANIMDIR_E:
-                case CalChart::ANIMDIR_NE: {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                } break;
-                default: {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_SIDE);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                }
-                }
-            } else {
-                switch (info.mDirection) {
-                case CalChart::ANIMDIR_SW:
-                case CalChart::ANIMDIR_W:
-                case CalChart::ANIMDIR_NW: {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                } break;
-                case CalChart::ANIMDIR_SE:
-                case CalChart::ANIMDIR_E:
-                case CalChart::ANIMDIR_NE: {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                } break;
-                default: {
-                    auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_SIDE);
-                    dc.SetBrush(brushAndPen.first);
-                    dc.SetPen(brushAndPen.second);
-                }
-                }
+    for (auto info : mAnimation->GetAllAnimateInfo()) {
+        if (checkForCollision && info.mCollision) {
+            if (info.mCollision == CalChart::Coord::COLLISION_WARNING) {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            } else if (info.mCollision == CalChart::Coord::COLLISION_INTERSECT) {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
             }
-            auto position = info.mPosition;
-            auto x = position.x + mView->GetShowMode().Offset().x;
-            auto y = position.y + mView->GetShowMode().Offset().y;
-            auto drawPosition = fDIP(wxPoint(x, y));
-            auto rectangleSize = fDIP(wxSize(Int2CoordUnits(1), Int2CoordUnits(1)));
-
-            dc.DrawRectangle(drawPosition - rectangleSize / 2, rectangleSize);
+        } else if (mView->IsSelected(info.index)) {
+            switch (info.mDirection) {
+            case CalChart::ANIMDIR_SW:
+            case CalChart::ANIMDIR_W:
+            case CalChart::ANIMDIR_NW: {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            } break;
+            case CalChart::ANIMDIR_SE:
+            case CalChart::ANIMDIR_E:
+            case CalChart::ANIMDIR_NE: {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            } break;
+            default: {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_SIDE);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            }
+            }
+        } else {
+            switch (info.mDirection) {
+            case CalChart::ANIMDIR_SW:
+            case CalChart::ANIMDIR_W:
+            case CalChart::ANIMDIR_NW: {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            } break;
+            case CalChart::ANIMDIR_SE:
+            case CalChart::ANIMDIR_E:
+            case CalChart::ANIMDIR_NE: {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            } break;
+            default: {
+                auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_SIDE);
+                dc.SetBrush(brushAndPen.first);
+                dc.SetPen(brushAndPen.second);
+            }
+            }
         }
+        auto position = info.mPosition;
+        auto x = position.x + mView->GetShowMode().Offset().x;
+        auto y = position.y + mView->GetShowMode().Offset().y;
+        auto drawPosition = fDIP(wxPoint(x, y));
+        auto rectangleSize = fDIP(wxSize(Int2CoordUnits(1), Int2CoordUnits(1)));
+
+        dc.DrawRectangle(drawPosition - rectangleSize / 2, rectangleSize);
     }
 }
+
+void AnimationView::OnDrawSprites(wxDC& dc, CalChartConfiguration const& config)
+{
+    auto scale = config.Get_SpriteBitmapScale();
+    constexpr auto comp_X = 0.5;
+    auto comp_Y = config.Get_SpriteBitmapOffsetY();
+
+    for (auto info : mAnimation->GetAllAnimateInfo()) {
+        auto image_offset = !GetAnimationFrame()->TimerOn() ? 0 : OnBeat() ? 1 : 2;
+        auto image_index = static_cast<int>(info.mDirection) + image_offset * 8;
+        auto image = mSpriteImages[image_index];
+        image = image.Scale(image.GetWidth()*scale, image.GetHeight()*scale);
+        if (mView->IsSelected(info.index)) {
+            image = image.ConvertToGreyscale();
+        }
+
+        auto position = info.mPosition;
+        auto x = position.x + mView->GetShowMode().Offset().x;
+        auto y = position.y + mView->GetShowMode().Offset().y;
+        auto drawPosition = fDIP(wxPoint(x, y));
+        auto rectangleSize = fDIP(wxSize(image.GetWidth()*comp_X , image.GetHeight()*comp_Y));
+
+        dc.DrawBitmap (image, drawPosition - rectangleSize);
+    }
+}
+
 
 void AnimationView::OnUpdate(wxView* sender, wxObject* hint)
 {

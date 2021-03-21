@@ -109,6 +109,14 @@ void AnimationPanel::CreateControls()
     AddToSizerBasic(boxsizer, mTempoCtrl);
     mItemsToHide.push_back(mTempoCtrl);
 
+    mSpritesCheckbox = new wxCheckBox(this, wxID_ANY, wxT("Sprites"));
+    mSpritesCheckbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& event) {
+        mCanvas->SetUseSprites(event.IsChecked());
+    });
+    mSpritesCheckbox->SetValue(mCanvas->GetUseSprites());
+    AddToSizerBasic(toprow, mSpritesCheckbox);
+    mItemsToHide.push_back(mSpritesCheckbox);
+
     auto sizer1 = new wxBoxSizer(wxVERTICAL);
     mZoomCheckbox = new wxCheckBox(this, wxID_ANY, wxT("Zoom"));
     mZoomCheckbox->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent& event) {
@@ -183,6 +191,7 @@ void AnimationPanel::OnCmd_ToggleAnimOmni(wxCommandEvent& event)
     mShowOmni = !mShowOmni;
     if (mShowOmni) {
         mCanvas->Hide();
+        mSpritesCheckbox->Hide();
         mZoomCheckbox->Hide();
         mCollisionCheckbox->Hide();
         mOmniCanvas->Show();
@@ -190,6 +199,7 @@ void AnimationPanel::OnCmd_ToggleAnimOmni(wxCommandEvent& event)
         mAnimateOmniToggle->SetLabel(wxT("Animate"));
     } else {
         mCanvas->Show();
+        mSpritesCheckbox->Show();
         mZoomCheckbox->Show();
         mCollisionCheckbox->Show();
         mOmniCanvas->Hide();
