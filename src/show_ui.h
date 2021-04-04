@@ -28,36 +28,6 @@
 
 #include <vector>
 
-class PointPickerView;
-
-class PointPicker : public wxDialog {
-    using super = wxDialog;
-
-public:
-    PointPicker(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Select Points"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~PointPicker() = default;
-
-    void Update();
-
-private:
-    CalChartDoc& mShow;
-    std::unique_ptr<PointPickerView> mView;
-    wxListBox* mList;
-    std::vector<wxString> mCachedLabels;
-    SelectionList mCachedSelection;
-
-    void CreateControls();
-
-    void PointPickerAll(wxCommandEvent&);
-    void PointPickerSelect(wxCommandEvent&);
-
-    DECLARE_EVENT_TABLE()
-};
-
 class ShowInfoReq : public wxDialog {
     DECLARE_CLASS(ShowInfoReq)
     DECLARE_EVENT_TABLE()

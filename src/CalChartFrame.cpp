@@ -36,6 +36,7 @@
 #include "FieldCanvas.h"
 #include "FieldControlsToolBar.h"
 #include "FieldThumbnailBrowser.h"
+#include "PointPicker.h"
 #include "PrintContinuityEditor.h"
 #include "TopFrame.h"
 #include "TransitionSolverFrame.h"

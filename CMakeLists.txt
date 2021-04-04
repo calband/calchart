@@ -228,6 +228,8 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FieldControlsToolBar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FieldThumbnailBrowser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FieldThumbnailBrowser.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PointPicker.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PointPicker.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PreferencesContCellSetup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PreferencesContCellSetup.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PreferencesDrawingSetup.cpp
