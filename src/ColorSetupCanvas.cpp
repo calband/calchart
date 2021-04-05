@@ -71,14 +71,14 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 
     // Create a fake show with some points and selections to draw an example for
     // the user
-    auto labels = std::vector<std::string>{
-        "unsel",
-        "unsel",
-        "sel",
-        "sel",
+    auto labels = std::vector<std::pair<std::string, std::string>>{
+        { "unsel", "" },
+        { "unsel", "" },
+        { "sel", "" },
+        { "sel", "" },
     };
-    mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
-    mShow->Create_SetShowInfoCommand(labels, 4, field_offset).first(*mShow);
+    mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
+    mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
     mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
     mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);
@@ -142,11 +142,11 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent& event)
     list.insert(3);
 
     // draw the ghost sheet
-    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *nextSheet, 0);
+    DrawGhostSheet(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *nextSheet, 0);
 
     // Draw the points
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 0, true);
-    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointLabels(), *sheet, 1, false);
+    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 0, true);
+    DrawPoints(dc, mConfig, mMode.Offset(), list, mShow->GetNumPoints(), mShow->GetPointsLabel(), *sheet, 1, false);
 
     // draw the path
     DrawPath(dc, mConfig, mPath, mPathEnd);

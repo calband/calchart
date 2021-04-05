@@ -214,7 +214,7 @@ private:                                           \
 
     DECLARE_CONFIGURATION_FUNCTIONS(BeepOnCollisions, bool);
 
-    DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_0, wxString);
+    DECLARE_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_1, wxString);
 
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool);
     DECLARE_CONFIGURATION_FUNCTIONS(ContCellFontSize, long);

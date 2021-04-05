@@ -25,6 +25,8 @@
 #include "CalChartDocCommand.h"
 #include "CalChartFrame.h"
 #include "FieldCanvas.h"
+#include "SetupInstruments.h"
+#include "SetupMarchers.h"
 #include "animate.h"
 #include "animate_types.h"
 #include "animatecommand.h"
@@ -37,7 +39,6 @@
 #include "draw.h"
 #include "ghost_module.h"
 #include "setup_wizards.h"
-#include "show_ui.h"
 
 #include <memory>
 #include <wx/docview.h>
@@ -78,7 +79,7 @@ void CalChartView::OnDraw(wxDC* dc)
 
         if (ghostSheet != nullptr) {
             DrawGhostSheet(*dc, mConfig, origin, SelectionList(),
-                mShow->GetNumPoints(), mShow->GetPointLabels(),
+                mShow->GetNumPoints(), mShow->GetPointsLabel(),
                 *ghostSheet, 0);
         }
 
@@ -86,14 +87,14 @@ void CalChartView::OnDraw(wxDC* dc)
         if (sheet != mShow->GetSheetEnd()) {
             if (mCurrentReferencePoint > 0) {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
-                    mShow->GetNumPoints(), mShow->GetPointLabels(),
+                    mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), 0, false);
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
-                    mShow->GetNumPoints(), mShow->GetPointLabels(),
+                    mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
             } else {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
-                    mShow->GetNumPoints(), mShow->GetPointLabels(),
+                    mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
             }
             DrawPaths(*dc, *sheet);
@@ -163,7 +164,7 @@ void CalChartView::OnWizardSetup(CalChartDoc& show)
     wxWizard* wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
     // page 1:
     // set the number of points and the labels
-    ShowInfoReqWizard* page1 = new ShowInfoReqWizard(wizard);
+    SetupMarchersWizard* page1 = new SetupMarchersWizard(wizard);
 
     // page 2:
     // choose the show mode
@@ -174,12 +175,19 @@ void CalChartView::OnWizardSetup(CalChartDoc& show)
 
     wizard->GetPageAreaSizer()->Add(page1);
     if (wizard->RunWizard(page1)) {
-        auto labels = page1->GetLabels();
+        auto labels = page1->GetLabelsAndInstruments();
         auto columns = page1->GetNumberColumns();
-        std::vector<std::string> tlabels(labels.begin(), labels.end());
         auto newmode = wxGetApp().GetShowMode(page2->GetValue());
 
-        show.WizardSetupNewShow(tlabels, columns, newmode);
+        show.WizardSetupNewShow(labels, columns, newmode);
+        SetupInstruments dialog(show, mFrame);
+        if (dialog.ShowModal() == wxID_OK) {
+            auto instrumentMapping = dialog.GetInstruments();
+            for (auto& i : instrumentMapping) {
+                labels.at(i.first).second = i.second;
+            }
+            show.WizardSetupNewShow(labels, columns, newmode);
+        }
     } else {
         wxMessageBox(wxT("Show setup not completed.\n")
                          wxT("You can change the number of marchers\n")
@@ -232,7 +240,8 @@ bool CalChartView::DoResetReferencePoint()
 bool CalChartView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
     if (mShow->GetSelectionList().size() == 0) {
-        return false;
+        SetSelection(mShow->MakeSelectBySymbol(sym));
+        return true;
     }
     auto cmd = mShow->Create_SetSymbolCommand(sym);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -245,9 +254,15 @@ void CalChartView::DoSetMode(CalChart::ShowMode const& mode)
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
-void CalChartView::DoSetShowInfo(const std::vector<wxString>& labels, int numColumns)
+void CalChartView::DoSetupMarchers(const std::vector<std::pair<std::string, std::string>>& labelsAndInstruments, int numColumns)
 {
-    auto cmd = mShow->Create_SetShowInfoCommand(labels, numColumns);
+    auto cmd = mShow->Create_SetupMarchersCommand(labelsAndInstruments, numColumns);
+    GetDocument()->GetCommandProcessor()->Submit(cmd.release());
+}
+
+void CalChartView::DoSetInstruments(std::map<int, std::string> const& dotToInstrument)
+{
+    auto cmd = mShow->Create_SetInstrumentsCommand(dotToInstrument);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 

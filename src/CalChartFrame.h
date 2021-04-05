@@ -73,9 +73,10 @@ public:
     void OnCmdEditPrintCont(wxCommandEvent& event);
     void OnCmdSetSheetTitle(wxCommandEvent& event);
     void OnCmdSetBeats(wxCommandEvent& event);
-    void OnCmdSetup(wxCommandEvent& event);
+    void OnCmdSetupMarchers(wxCommandEvent& event);
+    void OnCmdSetupInstruments(wxCommandEvent& event);
     void OnCmdSetMode(wxCommandEvent& event);
-    void OnCmdPoints(wxCommandEvent& event);
+    void OnCmdPointPicker(wxCommandEvent& event);
     void OnCmdSelectAll(wxCommandEvent& event);
     void OnCmdAbout(wxCommandEvent& event);
     void OnCmdHelp(wxCommandEvent& event);
@@ -121,6 +122,9 @@ public:
     void OnCmd_ShowBackgroundImages(wxCommandEvent& event);
 
     void OnCmd_GhostOption(wxCommandEvent& event);
+    void OnCmd_InstrumentSelection(wxCommandEvent& event);
+    void OnCmd_SymbolSelection(wxCommandEvent& event);
+    void OnCmd_MarcherSelection(wxCommandEvent& event);
     void OnCmd_AdjustViews(wxCommandEvent& event);
     void OnCmd_SwapAnimation(wxCommandEvent& event);
     void OnCmd_DrawPaths(wxCommandEvent& event);
@@ -156,7 +160,6 @@ public:
 
     void do_zoom(float zoom_amount);
 
-    void Setup();
     void SetMode();
 
     const FieldCanvas* GetCanvas() const { return mCanvas; }
@@ -172,6 +175,7 @@ public:
 
 private:
     void refreshGhostOptionStates();
+    void refreshInUse();
     void ChangeFieldThumbnailVisibility(bool show);
     void ChangeVisibility(wxWindow* window, bool show, int itemid, std::string const& name);
     void ChangeVisibility(bool show, int itemid);
@@ -181,6 +185,8 @@ private:
 
     void ShowFieldAndHideAnimation(bool showField);
     void SetViewsOnComponents(CalChartView* showField);
+    wxString BeatStatusText() const;
+    wxString PointStatusText() const;
 
     // the components
     FieldCanvas* mCanvas{};
@@ -190,8 +196,9 @@ private:
     AnimationPanel* mAnimationPanel{};
     AnimationPanel* mShadowAnimationPanel{};
     PrintContinuityEditor* mPrintContinuityEditor{};
-    wxAuiToolBar* mToolBar;
     wxAuiToolBar* mControls;
+    wxAuiToolBar* mLassosToolBar;
+    wxAuiToolBar* mMarcherToolBar;
 
     std::map<int, wxWindow*> mLookupEnumToSubWindow;
     std::map<wxWindow*, int> mLookupSubWindowToEnum;

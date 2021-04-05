@@ -24,10 +24,20 @@
 #include "cc_coord.h"
 #include "cc_types.h"
 
+#include <array>
 #include <bitset>
 #include <vector>
 
 namespace CalChart {
+
+// A point in CalChart is a marcher on the field
+// It maintains the reference points positions, and it's positions, as well as Symbol and some visualization
+// information (like Flipped).
+//
+// In general we should try to keep point simple, and instead have the visualization data and other concepts
+// maintained in the larger container, such as instrument or name, which should be per show.  Symbol should
+// probably be in per show, but as such the serialization code would make this difficult to restructure, so
+// it will likely need to continue to be in Point.
 
 class Point {
 public:
@@ -44,9 +54,6 @@ public:
     auto LabelIsVisible() const { return !mFlags.test(kLabelIsInvisible); }
     void SetLabelVisibility(bool isVisible);
 
-    auto GetSymbol() const { return mSym; }
-    void SetSymbol(SYMBOL_TYPE sym);
-
     // reference points 0 is the point, refs are [1, kNumRefPoints]
     Coord GetPos(unsigned ref = 0) const;
     void SetPos(const Coord& c, unsigned ref = 0);
@@ -57,11 +64,14 @@ private:
         kTotalBits };
 
     std::bitset<kTotalBits> mFlags;
-    // by having both a sym type and cont index, we can have several
-    // points share the same symbol but have different continuities.
     SYMBOL_TYPE mSym;
     Coord mPos;
-    Coord mRef[kNumRefPoints];
+    std::array<Coord, kNumRefPoints> mRef;
+
+    auto GetSymbol() const { return mSym; }
+    void SetSymbol(SYMBOL_TYPE sym);
+
+    friend class Sheet;
 
     friend struct Point_values;
     friend bool Check_Point(const Point&, const struct Point_values&);

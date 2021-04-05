@@ -32,4 +32,5 @@ struct ToolBarEntry;
 
 std::vector<wxBitmap> GetSymbolsBitmap();
 
-wxAuiToolBar* CreateMainAuiToolBar(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
+wxAuiToolBar* CreateLassosAndMoves(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
+wxAuiToolBar* CreateDotModifiers(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);

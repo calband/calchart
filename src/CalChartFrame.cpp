@@ -38,6 +38,8 @@
 #include "FieldThumbnailBrowser.h"
 #include "PointPicker.h"
 #include "PrintContinuityEditor.h"
+#include "SetupInstruments.h"
+#include "SetupMarchers.h"
 #include "TopFrame.h"
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
@@ -53,7 +55,6 @@
 #include "modes.h"
 #include "platconf.h"
 #include "print_ps_dialog.h"
-#include "show_ui.h"
 #include "ui_enums.h"
 
 #include <wx/help.h>
@@ -79,7 +80,8 @@ static std::map<int, std::string> kAUIEnumToString = {
     { CALCHART__ViewAnimationErrors, "Marching Errors" },
     { CALCHART__ViewAnimation, "Animation" },
     { CALCHART__ViewPrintContinuity, "Print Continuity" },
-    { CALCHART__ViewToolBar, "ToolBar" },
+    { CALCHART__ViewLassosToolBar, "Lassos ToolBar" },
+    { CALCHART__ViewMarcherToolBar, "Marcher ToolBar" },
 };
 
 BEGIN_EVENT_TABLE(CalChartFrame, wxDocChildFrame)
@@ -100,9 +102,10 @@ EVT_MENU(CALCHART__RELABEL, CalChartFrame::OnCmdRelabel)
 EVT_MENU(CALCHART__PRINT_EDIT_CONTINUITY, CalChartFrame::OnCmdEditPrintCont)
 EVT_MENU(CALCHART__SET_SHEET_TITLE, CalChartFrame::OnCmdSetSheetTitle)
 EVT_MENU(CALCHART__SET_BEATS, CalChartFrame::OnCmdSetBeats)
-EVT_MENU(CALCHART__SETUP, CalChartFrame::OnCmdSetup)
+EVT_MENU(CALCHART__SETUPMARCHERS, CalChartFrame::OnCmdSetupMarchers)
+EVT_MENU(CALCHART__SETUPINSTRUMENTS, CalChartFrame::OnCmdSetupInstruments)
 EVT_MENU(CALCHART__SETMODE, CalChartFrame::OnCmdSetMode)
-EVT_MENU(CALCHART__POINTS, CalChartFrame::OnCmdPoints)
+EVT_MENU(CALCHART__POINTPICKER, CalChartFrame::OnCmdPointPicker)
 EVT_MENU(CALCHART__SELECT_ALL, CalChartFrame::OnCmdSelectAll)
 EVT_MENU(wxID_ABOUT, CalChartFrame::OnCmdAbout)
 EVT_MENU(wxID_HELP, CalChartFrame::OnCmdHelp)
@@ -119,7 +122,8 @@ EVT_MENU(CALCHART__ViewContinuityInfo, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewAnimationErrors, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewAnimation, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewPrintContinuity, CalChartFrame::OnCmd_AdjustViews)
-EVT_MENU(CALCHART__ViewToolBar, CalChartFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewLassosToolBar, CalChartFrame::OnCmd_AdjustViews)
+EVT_MENU(CALCHART__ViewMarcherToolBar, CalChartFrame::OnCmd_AdjustViews)
 EVT_MENU(CALCHART__ViewSwapFieldAndAnimate, CalChartFrame::OnCmd_SwapAnimation)
 EVT_MENU(CALCHART__ViewZoomFit, CalChartFrame::OnCmd_ZoomFit)
 EVT_MENU(CALCHART__ViewZoomIn, CalChartFrame::OnCmd_ZoomIn)
@@ -165,6 +169,9 @@ EVT_MENU(CALCHART__draw_paths, CalChartFrame::OnCmd_DrawPaths)
 EVT_SLIDER(CALCHART__slider_zoom, CalChartFrame::zoom_callback)
 EVT_CHOICE(CALCHART__refnum_callback, CalChartFrame::OnCmd_ReferenceNumber)
 EVT_CHOICE(CALCHART__GhostControls, CalChartFrame::OnCmd_GhostOption)
+EVT_CHOICE(CALCHART__InstrumentChoice, CalChartFrame::OnCmd_InstrumentSelection)
+EVT_CHOICE(CALCHART__SymbolChoice, CalChartFrame::OnCmd_SymbolSelection)
+EVT_CHOICE(CALCHART__MarcherChoice, CalChartFrame::OnCmd_MarcherSelection)
 EVT_CHECKBOX(CALCHART__draw_paths, CalChartFrame::OnEnableDrawPaths)
 EVT_MENU(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
 EVT_BUTTON(CALCHART__ResetReferencePoint, CalChartFrame::OnCmd_ResetReferencePoint)
@@ -229,7 +236,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     wxMenu* file_menu = new wxMenu;
     file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
     file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
-    file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity...\tCTRL-I"), wxT("Import continuity text"));
+    file_menu->Append(CALCHART__IMPORT_CONT_FILE, wxT("&Import Continuity...\tCTRL-SHIFT-I"), wxT("Import continuity text"));
     file_menu->Append(wxID_SAVE, wxT("&Save\tCTRL-S"), wxT("Save show"));
     file_menu->Append(wxID_SAVEAS, wxT("Save &As...\tCTRL-SHIFT-S"), wxT("Save show as a new name"));
     file_menu->Append(CALCHART__wxID_PRINT, wxT("&Print...\tCTRL-P"), wxT("Print this show"));
@@ -258,10 +265,11 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     edit_menu->Append(CALCHART__RELABEL, wxT("&Relabel Sheets\tCTRL-R"), wxT("Relabel all stuntsheets after this one"));
     edit_menu->Append(CALCHART__APPEND_FILE, wxT("Append Show..."), wxT("Append a show to the end"));
     edit_menu->AppendSeparator();
-    edit_menu->Append(CALCHART__SETUP, wxT("Set &Up Marchers...\tCTRL-U"), wxT("Setup number of marchers"));
+    edit_menu->Append(CALCHART__SETUPMARCHERS, wxT("Set &Up Marchers...\tCTRL-U"), wxT("Setup number of marchers"));
+    edit_menu->Append(CALCHART__SETUPINSTRUMENTS, wxT("Set &Instruments...\tCTRL-I"), wxT("Set instruments"));
     edit_menu->Append(CALCHART__SETMODE, wxT("Set Show &Mode..."), wxT("Set the show mode"));
     edit_menu->AppendSeparator();
-    edit_menu->Append(CALCHART__POINTS, wxT("&Point Selections..."), wxT("Select Points"));
+    edit_menu->Append(CALCHART__POINTPICKER, wxT("Point Picker...\tCTRL-SHIFT-A"), wxT("Point Picker"));
     edit_menu->Append(CALCHART__SELECT_ALL, wxT("Select &All...\tCTRL-A"), wxT("Select All Points"));
     edit_menu->AppendSeparator();
     edit_menu->Append(CALCHART__SET_SHEET_TITLE, wxT("Set Sheet &Title...\tCTRL-T"), wxT("Change the title of this stuntsheet"));
@@ -282,7 +290,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     wxMenu* view_menu = new wxMenu;
     view_menu->Append(CALCHART__ViewSwapFieldAndAnimate, wxT("View Animation\tCTRL-RETURN"), wxT("View Animation or Field"));
     view_menu->AppendSeparator();
-    for (int i = CALCHART__ViewFieldThumbnail; i <= CALCHART__ViewToolBar; ++i) {
+    for (int i = CALCHART__ViewFieldThumbnail; i <= CALCHART__ViewMarcherToolBar; ++i) {
         view_menu->Append(i, std::string("Show ") + kAUIEnumToString[i], std::string("Controls Displaying ") + kAUIEnumToString[i]);
     }
     view_menu->AppendSeparator();
@@ -313,8 +321,10 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     refreshGhostOptionStates();
 
     // Add a toolbar
-    mToolBar = CreateMainAuiToolBar(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
-    mToolBar->SetFont(ResizeFont(mToolBar->GetFont(), GetToolBarFontSize()));
+    mLassosToolBar = CreateLassosAndMoves(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
+    mLassosToolBar->SetFont(ResizeFont(mLassosToolBar->GetFont(), GetToolBarFontSize()));
+    mMarcherToolBar = CreateDotModifiers(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
+    mMarcherToolBar->SetFont(ResizeFont(mMarcherToolBar->GetFont(), GetToolBarFontSize()));
 
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENU));
     // sanity: Don't let the user zoom too low
@@ -350,7 +360,9 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     mLookupEnumToSubWindow[CALCHART__ViewAnimationErrors] = mAnimationErrorsPanel;
     mLookupEnumToSubWindow[CALCHART__ViewAnimation] = mAnimationPanel;
     mLookupEnumToSubWindow[CALCHART__ViewPrintContinuity] = mPrintContinuityEditor;
-    mLookupEnumToSubWindow[CALCHART__ViewToolBar] = mToolBar;
+    mLookupEnumToSubWindow[CALCHART__ViewLassosToolBar] = mLassosToolBar;
+    mLookupEnumToSubWindow[CALCHART__ViewMarcherToolBar] = mMarcherToolBar;
+
     for (auto&& i : mLookupEnumToSubWindow) {
         mLookupSubWindowToEnum[i.second] = i.first;
     }
@@ -371,17 +383,18 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     mAUIManager->AddPane(mAnimationErrorsPanel, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewAnimationErrors]).Caption(kAUIEnumToString[CALCHART__ViewAnimationErrors]).Right().BestSize(GetAnimationErrorsSize()));
     mAUIManager->AddPane(mPrintContinuityEditor, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewPrintContinuity]).Caption(kAUIEnumToString[CALCHART__ViewPrintContinuity]).Right().BestSize(GetPrintContinuitySize()));
     mAUIManager->AddPane(mControls, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewFieldControls]).Caption(kAUIEnumToString[CALCHART__ViewFieldControls]).ToolbarPane().Top());
-    mAUIManager->AddPane(mToolBar, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewToolBar]).Caption(kAUIEnumToString[CALCHART__ViewToolBar]).ToolbarPane().Top());
+    mAUIManager->AddPane(mLassosToolBar, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewLassosToolBar]).Caption(kAUIEnumToString[CALCHART__ViewLassosToolBar]).ToolbarPane().Left());
+    mAUIManager->AddPane(mMarcherToolBar, wxAuiPaneInfo().Name(kAUIEnumToString[CALCHART__ViewMarcherToolBar]).Caption(kAUIEnumToString[CALCHART__ViewMarcherToolBar]).ToolbarPane().Top());
 
     mAUIManager->Update();
 
     // restore the manager with the Current visability
-    if (auto lastLayout = mConfig.Get_CalChartFrameAUILayout_3_6_0(); lastLayout != wxT("")) {
+    if (auto lastLayout = mConfig.Get_CalChartFrameAUILayout_3_6_1(); lastLayout != wxT("")) {
         mAUIManager->LoadPerspective(lastLayout, true);
     }
 
     // adjust the menu items to reflect.
-    for (int i = CALCHART__ViewFieldThumbnail; i <= CALCHART__ViewToolBar; ++i) {
+    for (int i = CALCHART__ViewFieldThumbnail; i <= CALCHART__ViewMarcherToolBar; ++i) {
         ChangeVisibility(mAUIManager->GetPane(mLookupEnumToSubWindow[i]).IsShown(), i);
     }
 
@@ -427,7 +440,7 @@ void CalChartFrame::OnClose()
 
     // just to make sure we never end up hiding the Field
     ShowFieldAndHideAnimation(true);
-    mConfig.Set_CalChartFrameAUILayout_3_6_0(mAUIManager->SavePerspective());
+    mConfig.Set_CalChartFrameAUILayout_3_6_1(mAUIManager->SavePerspective());
     SetViewsOnComponents(nullptr);
 }
 
@@ -698,16 +711,35 @@ void CalChartFrame::OnCmdSetBeats(wxCommandEvent& event)
     }
 }
 
-void CalChartFrame::OnCmdSetup(wxCommandEvent& event) { Setup(); }
+void CalChartFrame::OnCmdSetupMarchers(wxCommandEvent& event)
+{
+    if (GetShow()) {
+        SetupMarchers dialog(*GetShow(), this);
+        if (dialog.ShowModal() == wxID_OK) {
+            GetFieldView()->DoSetupMarchers(dialog.GetLabelsAndInstruments(), dialog.GetNumberColumns());
+        }
+    }
+}
+
+void CalChartFrame::OnCmdSetupInstruments(wxCommandEvent& event)
+{
+    if (GetShow()) {
+        SetupInstruments dialog(*GetShow(), this);
+        if (dialog.ShowModal() == wxID_OK) {
+            GetFieldView()->DoSetInstruments(dialog.GetInstruments());
+        }
+    }
+}
 
 void CalChartFrame::OnCmdSetMode(wxCommandEvent& event) { SetMode(); }
 
-void CalChartFrame::OnCmdPoints(wxCommandEvent& event)
+void CalChartFrame::OnCmdPointPicker(wxCommandEvent& event)
 {
     if (GetShow()) {
-        PointPicker* pp = new PointPicker(*GetShow(), this);
-        // make it modeless:
-        pp->Show();
+        PointPicker dialog(*GetShow(), this);
+        if (dialog.ShowModal() == wxID_OK) {
+            GetShow()->SetSelection(dialog.GetSelection());
+        }
     }
 }
 
@@ -1001,10 +1033,48 @@ void CalChartFrame::OnCmd_GhostOption(wxCommandEvent& event)
     GetCanvas()->Refresh();
 }
 
+void CalChartFrame::OnCmd_InstrumentSelection(wxCommandEvent& event)
+{
+    auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__InstrumentChoice));
+    auto selection = choice->GetString(choice->GetSelection());
+    if (selection != "" && GetShow()) {
+        GetShow()->SetSelection(GetShow()->MakeSelectByInstrument(selection));
+    }
+}
+
+void CalChartFrame::OnCmd_SymbolSelection(wxCommandEvent& event)
+{
+    auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__SymbolChoice));
+    auto selection = choice->GetString(choice->GetSelection());
+    if (selection != "" && GetShow()) {
+        GetShow()->SetSelection(GetShow()->MakeSelectByInstrument(selection));
+    }
+}
+
+void CalChartFrame::OnCmd_MarcherSelection(wxCommandEvent& event)
+{
+    auto choice = static_cast<wxChoice*>(FindWindow(CALCHART__MarcherChoice));
+    auto selection = choice->GetString(choice->GetSelection());
+    if (selection != "" && GetShow()) {
+        GetShow()->SetSelection(GetShow()->MakeSelectByLabel(selection));
+    }
+}
+
 void CalChartFrame::refreshGhostOptionStates()
 {
     bool active = GetFieldView()->getGhostModule().isActive();
     GetMenuBar()->FindItem(CALCHART__GhostOff)->Enable(active);
+}
+
+void CalChartFrame::refreshInUse()
+{
+    // handle any changes to the instrument, and update the instrument selector
+    auto instruments = GetShow()->GetPointsInstrument();
+    auto currentInstruments = std::set(instruments.begin(), instruments.end());
+    FieldControls::SetInstrumentsInUse(this, { currentInstruments.begin(), currentInstruments.end() });
+    auto symbols = GetShow()->GetPointsSymbol();
+    auto currentsymbols = std::set(symbols.begin(), symbols.end());
+    FieldControls::SetLabelsInUse(this, GetShow()->GetPointsLabel());
 }
 
 void CalChartFrame::OnCmd_AdjustViews(wxCommandEvent& event)
@@ -1025,7 +1095,7 @@ void CalChartFrame::AUIIsClose(wxAuiManagerEvent& event)
 
 void CalChartFrame::ChangeVisibility(bool show, int itemid)
 {
-    if (itemid < CALCHART__ViewFieldThumbnail || itemid > CALCHART__ViewToolBar) {
+    if (itemid < CALCHART__ViewFieldThumbnail || itemid > CALCHART__ViewMarcherToolBar) {
         return;
     }
     auto name = kAUIEnumToString[itemid];
@@ -1114,7 +1184,7 @@ void CalChartFrame::SetCurrentLasso(CC_DRAG type)
     int toggleID = (type == CC_DRAG::POLY) ? CALCHART__poly : (type == CC_DRAG::LASSO) ? CALCHART__lasso
         : (type == CC_DRAG::SWAP)                                                      ? CALCHART__swap
                                                                                        : CALCHART__box;
-    mToolBar->ToggleTool(toggleID, true);
+    mLassosToolBar->ToggleTool(toggleID, true);
 
     mCanvas->SetCurrentLasso(type);
 }
@@ -1129,17 +1199,7 @@ void CalChartFrame::SetCurrentMove(CC_MOVE_MODES type)
 void CalChartFrame::ToolBarSetCurrentMove(CC_MOVE_MODES type)
 {
     // retoggle the tool because we want it to draw as selected
-    mToolBar->ToggleTool(CALCHART__move + type, true);
-}
-
-void CalChartFrame::Setup()
-{
-    if (GetShow()) {
-        ShowInfoReq dialog(*GetShow(), this);
-        if (dialog.ShowModal() == wxID_OK) {
-            GetFieldView()->DoSetShowInfo(dialog.GetLabels(), dialog.GetNumberColumns());
-        }
-    }
+    mLassosToolBar->ToggleTool(CALCHART__move + type, true);
 }
 
 void CalChartFrame::SetMode()
@@ -1236,23 +1296,51 @@ float CalChartFrame::ToolBarSetZoom(float zoom_amount)
     return zoom_amount;
 }
 
-void CalChartFrame::OnUpdate()
+wxString CalChartFrame::BeatStatusText() const
 {
-    wxString tempbuf;
+    wxString result;
     auto sht = GetShow()->GetCurrentSheet();
-    unsigned num = GetShow()->GetNumSheets();
-    unsigned curr = GetFieldView()->GetCurrentSheetNum() + 1;
+    auto num = GetShow()->GetNumSheets();
+    auto curr = GetFieldView()->GetCurrentSheetNum() + 1;
 
-    tempbuf.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
+    result.sprintf(wxT("%s%d of %d \"%.32s\" %d beats"),
         GetShow()->IsModified() ? wxT("* ") : wxT(""), curr, num,
         (sht != GetShow()->GetSheetEnd()) ? wxString(sht->GetName())
                                           : wxT(""),
         (sht != GetShow()->GetSheetEnd()) ? sht->GetBeats() : 0);
-    SetStatusText(tempbuf, 1);
-    tempbuf.Clear();
-    tempbuf << GetShow()->GetSelectionList().size() << wxT(" of ")
-            << GetShow()->GetNumPoints() << wxT(" selected");
-    SetStatusText(tempbuf, 2);
+    return result;
+}
+
+wxString CalChartFrame::PointStatusText() const
+{
+    auto show = GetShow();
+    wxString result;
+    auto sl = show->GetSelectionList();
+    result << show->GetSelectionList().size() << wxT(" of ")
+           << show->GetNumPoints() << wxT(" selected");
+    std::set<std::string> instruments;
+    std::transform(sl.begin(), sl.end(), std::inserter(instruments, instruments.begin()), [&show](auto&& i) {
+        return show->GetPointInstrument(i);
+    });
+    if (instruments.size()) {
+        result << " [ ";
+        auto firstTime = true;
+        for (auto&& i : instruments) {
+            if (!firstTime) {
+                result << ", ";
+            }
+            firstTime = false;
+            result << i;
+        }
+        result << " ]";
+    }
+    return result;
+}
+
+void CalChartFrame::OnUpdate()
+{
+    SetStatusText(BeatStatusText(), 1);
+    SetStatusText(PointStatusText(), 2);
 
     SetTitle(GetDocument()->GetUserReadableName());
     mCanvas->Refresh();
@@ -1264,6 +1352,8 @@ void CalChartFrame::OnUpdate()
     mPrintContinuityEditor->OnUpdate();
 
     mShadowAnimationPanel->OnUpdate();
+
+    refreshInUse();
 }
 
 const CalChartView* CalChartFrame::GetFieldView() const

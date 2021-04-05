@@ -81,7 +81,10 @@ public:
     // points
     const Point& GetPoint(unsigned i) const;
     Point& GetPoint(unsigned i);
+    SYMBOL_TYPE GetSymbol(unsigned i) const;
+    void SetSymbol(unsigned i, SYMBOL_TYPE sym);
     std::vector<Point> GetPoints() const;
+    std::vector<SYMBOL_TYPE> GetSymbols() const;
     void SetPoints(const std::vector<Point>& points);
     int FindPoint(Coord where, Coord::units searchBound, unsigned ref = 0) const;
     std::vector<Point> RemapPoints(const std::vector<size_t>& table) const;

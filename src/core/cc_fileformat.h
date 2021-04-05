@@ -209,6 +209,7 @@ struct Current_version_and_later {
 #define INGL_SIZE Make4CharWord('S', 'I', 'Z', 'E')
 #define INGL_CURR Make4CharWord('C', 'U', 'R', 'R')
 #define INGL_LABL Make4CharWord('L', 'A', 'B', 'L')
+#define INGL_INST Make4CharWord('I', 'N', 'S', 'T')
 #define INGL_MODE Make4CharWord('M', 'O', 'D', 'E')
 #define INGL_DESC Make4CharWord('D', 'E', 'S', 'C')
 #define INGL_NAME Make4CharWord('N', 'A', 'M', 'E')

@@ -652,7 +652,7 @@ void PrintShowToPS::PrintStandard(std::ostream& buffer, const Sheet& sheet,
         float dot_x = (CoordUnits2Float(sheet.GetPoint(i).GetPos().x) - fieldoffx - step_offset) / step_width * field_w;
         float dot_y = (1.0 - (CoordUnits2Float(sheet.GetPoint(i).GetPos().y) - fieldoffy) / fieldheight) * field_h;
         buffer << dot_x << " " << dot_y << " "
-               << dot_routines[sheet.GetPoint(i).GetSymbol()] << "\n";
+               << dot_routines[sheet.GetSymbol(i)] << "\n";
         buffer << "(" << mShow.GetPointLabel(i) << ") " << dot_x << " " << dot_y
                << " " << (sheet.GetPoint(i).GetFlip() ? "donumber2" : "donumber")
                << "\n";

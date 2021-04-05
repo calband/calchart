@@ -61,7 +61,8 @@ public:
     bool DoResetReferencePoint();
     bool DoSetPointsSymbol(SYMBOL_TYPE sym);
     void DoSetMode(CalChart::ShowMode const& mode);
-    void DoSetShowInfo(std::vector<wxString> const& labels, int numColumns);
+    void DoSetupMarchers(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns);
+    void DoSetInstruments(std::map<int, std::string> const& dotToInstrument);
     void DoSetSheetTitle(wxString const& descr);
     bool DoSetSheetBeats(int beats);
     bool DoSetPointsLabel(bool right);

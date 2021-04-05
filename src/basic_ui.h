@@ -32,6 +32,30 @@
 
 class CalChartView;
 
+static constexpr auto kMultiple = "[multiple]";
+static constexpr auto kDefaultInstrument = "default";
+static constexpr auto kCustom = "custom...";
+
+static constexpr auto kInstruments = {
+    kDefaultInstrument, // this is the same as a blank
+    "Picc",
+    "Clarinet",
+    "Alto Sax",
+    "Tenor Sax",
+    "Trumpet",
+    "Mello",
+    "Trombone",
+    "Baritone",
+    "Basses",
+    "Snare",
+    "Bass Drum",
+    "Quad Drum",
+    "Cymbals",
+    "Glock",
+    "Perc",
+    "Drum Major",
+};
+
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame);
 
@@ -196,6 +220,12 @@ void CreateAndSetItemBitmap(T* target, Int which, Brush const& brush)
 
 wxFont CreateFont(int pixelSize, wxFontFamily family = wxFONTFAMILY_SWISS, wxFontStyle style = wxFONTSTYLE_NORMAL, wxFontWeight weight = wxFONTWEIGHT_NORMAL);
 wxFont ResizeFont(wxFont const& font, int pixelSize);
+
+template <typename String>
+inline auto StringSizeX(wxControl* controller, String const& string)
+{
+    return controller->GetTextExtent(string).x;
+}
 
 template <typename Strings>
 inline auto BestSizeX(wxControl* controller, Strings const& strings)

@@ -244,6 +244,10 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PreferencesUtils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintContinuityEditor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintContinuityEditor.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupInstruments.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupInstruments.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupMarchers.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupMarchers.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TopFrame.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TopFrame.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverFrame.cpp
@@ -280,8 +284,6 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/print_ps_dialog.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/setup_wizards.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/setup_wizards.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/show_ui.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/show_ui.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/single_instance_ipc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/single_instance_ipc.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ui_enums.h

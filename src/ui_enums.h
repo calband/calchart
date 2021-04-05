@@ -39,9 +39,10 @@ enum {
     CALCHART__PRINT_EDIT_CONTINUITY,
     CALCHART__SET_SHEET_TITLE,
     CALCHART__SET_BEATS,
-    CALCHART__SETUP,
+    CALCHART__SETUPMARCHERS,
+    CALCHART__SETUPINSTRUMENTS,
     CALCHART__SETMODE,
-    CALCHART__POINTS,
+    CALCHART__POINTPICKER,
     CALCHART__SELECT_ALL,
     CALCHART__ANIMATE,
     CALCHART__OMNIVIEW,
@@ -99,6 +100,10 @@ enum {
     CALCHART__GhostNthSheet,
     CALCHART__GhostControls,
 
+    CALCHART__InstrumentChoice,
+    CALCHART__SymbolChoice,
+    CALCHART__MarcherChoice,
+
     CALCHART__anim_reanimate,
     CALCHART__anim_select_coll,
     CALCHART__anim_next_beat_timer,
@@ -128,7 +133,8 @@ enum {
     CALCHART__ViewAnimationErrors,
     CALCHART__ViewAnimation,
     CALCHART__ViewPrintContinuity,
-    CALCHART__ViewToolBar,
+    CALCHART__ViewLassosToolBar,
+    CALCHART__ViewMarcherToolBar,
 
     CALCHART__ViewSwapFieldAndAnimate,
     CALCHART__ViewZoomFit,

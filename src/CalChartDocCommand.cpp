@@ -23,8 +23,6 @@
 #include "CalChartDocCommand.h"
 #include "CalChartDoc.h"
 
-// SetDescriptionCommand
-// Set the description of this show
 CalChartDocCommand::CalChartDocCommand(CalChartDoc& doc, const wxString& cmd_descr, CC_doc_command_pair const& cmds)
     : CalChartDocCommand(doc, cmd_descr, std::vector<CC_doc_command_pair>{ cmds })
 {
