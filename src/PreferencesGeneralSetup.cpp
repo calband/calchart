@@ -107,6 +107,8 @@ bool GeneralSetup::ClearValuesToDefault()
     mConfig.Clear_FieldFramePositionX();
     mConfig.Clear_FieldFramePositionY();
     mConfig.Clear_UseSprites();
+    mConfig.Clear_SpriteBitmapScale();
+    mConfig.Clear_SpriteBitmapOffsetY();
     Init();
     TransferDataToWindow();
     return true;
