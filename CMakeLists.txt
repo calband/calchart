@@ -12,7 +12,7 @@ project (CalChart)
 
 set (CalChart_VERSION_MAJOR 3)
 set (CalChart_VERSION_MINOR 6)
-set (CalChart_VERSION_PATCH 0)
+set (CalChart_VERSION_PATCH 1)
 
 set (CalChart_VERSION "${CalChart_VERSION_MAJOR}.${CalChart_VERSION_MINOR}.${CalChart_VERSION_PATCH}")
 
