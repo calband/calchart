@@ -38,9 +38,7 @@ Point::Point(const Coord& p)
     : mSym(SYMBOL_PLAIN)
     , mPos(p)
 {
-    for (unsigned j = 0; j < Point::kNumRefPoints; j++) {
-        mRef[j] = mPos;
-    }
+    mRef.fill(mPos);
 }
 
 // EACH_POINT_DATA    = BigEndianInt8(Size_rest_of_EACH_POINT_DATA) ,
@@ -97,7 +95,7 @@ std::vector<uint8_t> Point::Serialize() const
     // Point positions
     // Write block size
 
-    // Write POSITIONw
+    // Write POSITION
     Parser::Append(result, uint16_t(GetPos().x));
     Parser::Append(result, uint16_t(GetPos().y));
 
@@ -113,7 +111,7 @@ std::vector<uint8_t> Point::Serialize() const
         }
     }
 
-    // Write POSITION
+    // Write SYMBOL
     Parser::Append(result, uint8_t(GetSymbol()));
 
     // Point labels (left or right)

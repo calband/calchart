@@ -325,9 +325,9 @@ CalChartDoc::GetAnimation() const
     return mAnimation ? mAnimation.get() : nullptr;
 }
 
-void CalChartDoc::WizardSetupNewShow(std::vector<std::string> const& labels, int columns, ShowMode const& newmode)
+void CalChartDoc::WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, ShowMode const& newmode)
 {
-    mShow = Show::Create_CC_show(newmode, labels, columns);
+    mShow = Show::Create_CC_show(newmode, labelsAndInstruments, columns);
     UpdateAllViews();
 }
 
@@ -425,11 +425,17 @@ std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowModeCommand(CalChart::Show
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set Mode"), cmds);
 }
 
-std::unique_ptr<wxCommand> CalChartDoc::Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns)
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns)
 {
-    auto tlabels = std::vector<std::string>(labels.begin(), labels.end());
-    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetShowInfoCommand(tlabels, numColumns, GetShowMode().FieldOffset()));
+    auto tlabels = std::vector(labelsAndInstruments.begin(), labelsAndInstruments.end());
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetupMarchersCommand(tlabels, numColumns, GetShowMode().FieldOffset()));
     return std::make_unique<CalChartDocCommand>(*this, wxT("Set show info"), show_cmds);
+}
+
+std::unique_ptr<wxCommand> CalChartDoc::Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument)
+{
+    auto show_cmds = Inject_CalChartDocArg(mShow->Create_SetInstrumentsCommand(dotToInstrument));
+    return std::make_unique<CalChartDocCommand>(*this, wxT("Set instruments"), show_cmds);
 }
 
 std::unique_ptr<wxCommand> CalChartDoc::Create_SetSheetTitleCommand(const wxString& newname)

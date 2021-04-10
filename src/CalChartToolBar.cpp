@@ -132,12 +132,10 @@ std::vector<ToolBarEntry> GetSecondHalfOfMainToolBar()
     return tb;
 }
 
-std::vector<ToolBarEntry> GetMainToolBar()
+auto GetSymbolsToolbar()
 {
-    auto first_half = GetHalfOfMainToolBar();
-    auto second_half = GetSymbolsToolBar();
-    first_half.insert(first_half.end(), second_half.begin(), second_half.end());
-    second_half = GetSecondHalfOfMainToolBar();
+    auto first_half = GetSymbolsToolBar();
+    auto second_half = GetSecondHalfOfMainToolBar();
     first_half.insert(first_half.end(), second_half.begin(), second_half.end());
     return first_half;
 }
@@ -151,11 +149,10 @@ std::vector<wxBitmap> GetSymbolsBitmap()
     return result;
 }
 
-wxAuiToolBar* CreateMainAuiToolBar(wxWindow* parent, wxWindowID id, long style)
+template <typename T>
+auto CreateAuiToolBar(wxAuiToolBar* tb, T toolbarBits)
 {
-    auto tb = new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style);
-
-    for (auto&& i : GetMainToolBar()) {
+    for (auto&& i : toolbarBits) {
         tb->AddTool(i.id, i.caption, i.bm, i.desc, i.kind);
         if (i.space) {
             tb->AddSeparator();
@@ -163,4 +160,14 @@ wxAuiToolBar* CreateMainAuiToolBar(wxWindow* parent, wxWindowID id, long style)
     }
     tb->Realize();
     return tb;
+}
+
+wxAuiToolBar* CreateLassosAndMoves(wxWindow* parent, wxWindowID id, long style)
+{
+    return CreateAuiToolBar(new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style), GetHalfOfMainToolBar());
+}
+
+wxAuiToolBar* CreateDotModifiers(wxWindow* parent, wxWindowID id, long style)
+{
+    return CreateAuiToolBar(new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style), GetSymbolsToolbar());
 }

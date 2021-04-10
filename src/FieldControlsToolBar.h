@@ -22,6 +22,7 @@
 */
 
 #include "cc_coord.h"
+#include "cc_types.h"
 #include <wx/wx.h>
 
 class wxAuiToolBar;
@@ -36,5 +37,7 @@ void SetZoomAmount(wxWindow* target, double zoom);
 int GetRefChoice(wxWindow* target);
 int GetGhostChoice(wxWindow* target);
 void SetGhostChoice(wxWindow* target, int which);
+void SetInstrumentsInUse(wxWindow* target, std::vector<std::string> const& instruments);
+void SetLabelsInUse(wxWindow* target, std::vector<std::string> const& labels);
 
 }

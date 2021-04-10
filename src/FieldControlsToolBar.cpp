@@ -21,6 +21,7 @@
 
 #include "FieldControlsToolBar.h"
 #include "CalChartSizes.h"
+#include "CalChartToolBar.h"
 #include "ColorPalette.h"
 #include "basic_ui.h"
 #include "cc_point.h"
@@ -29,6 +30,7 @@
 
 #include <wx/artprov.h>
 #include <wx/aui/auibar.h>
+#include <wx/bmpcbox.h>
 #include <wx/toolbar.h>
 #include <wx/wx.h>
 
@@ -123,6 +125,16 @@ wxAuiToolBar* CreateToolBar(wxWindow* parent, wxWindowID id, long style)
     ghostChioce->SetSelection(0);
     tb->AddControl(ghostChioce, "Ghost");
 
+    auto instrumentChoice = new wxChoice(tb, CALCHART__InstrumentChoice);
+    instrumentChoice->SetMaxSize(wxSize{ StringSizeX(instrumentChoice, "Instrument"), -1 });
+    instrumentChoice->SetSelection(wxNOT_FOUND);
+    tb->AddControl(instrumentChoice, "Instruments");
+
+    auto marcherChoice = new wxChoice(tb, CALCHART__MarcherChoice);
+    marcherChoice->SetMaxSize(wxSize{ StringSizeX(marcherChoice, "Marcher"), -1 });
+    marcherChoice->SetSelection(wxNOT_FOUND);
+    tb->AddControl(marcherChoice, "Marcher");
+
     tb->SetFont(ResizeFont(tb->GetFont(), GetToolBarFontSize()));
 
     tb->Realize();
@@ -170,6 +182,20 @@ int GetGhostChoice(wxWindow* target)
 void SetGhostChoice(wxWindow* target, int which)
 {
     static_cast<wxChoice*>(target->FindWindow(CALCHART__GhostControls))->SetSelection(which);
+}
+
+void SetInstrumentsInUse(wxWindow* target, std::vector<std::string> const& instruments)
+{
+    auto instrumentChoice = static_cast<wxChoice*>(target->FindWindow(CALCHART__InstrumentChoice));
+    instrumentChoice->Set(std::vector<wxString>(instruments.begin(), instruments.end()));
+    instrumentChoice->SetSelection(wxNOT_FOUND);
+}
+
+void SetLabelsInUse(wxWindow* target, std::vector<std::string> const& labels)
+{
+    auto choice = static_cast<wxChoice*>(target->FindWindow(CALCHART__MarcherChoice));
+    choice->Set(std::vector<wxString>(labels.begin(), labels.end()));
+    choice->SetSelection(wxNOT_FOUND);
 }
 
 }

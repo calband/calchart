@@ -1,6 +1,5 @@
 /*
- * show_ui.h
- * Classes for interacting with shows
+ * SetupMarchers.h
  */
 
 /*
@@ -28,21 +27,21 @@
 
 #include <vector>
 
-class ShowInfoReq : public wxDialog {
-    DECLARE_CLASS(ShowInfoReq)
+class SetupMarchers : public wxDialog {
+    DECLARE_CLASS(SetupMarchers)
     DECLARE_EVENT_TABLE()
 
 public:
-    ShowInfoReq(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Show Info"),
+    SetupMarchers(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
+        const wxString& caption = wxT("Setup Marchers"),
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    ~ShowInfoReq();
+    ~SetupMarchers();
 
 private:
     bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Show Info"),
+        const wxString& caption = wxT("Setup Marchers"),
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
@@ -56,23 +55,23 @@ private:
     // The data this dialog sets for the user
 private:
     unsigned mNumberColumns;
-    std::vector<wxString> mLabels;
+    std::vector<std::pair<std::string, std::string>> mLabelsAndInstruments;
     void OnCmd_label_type(wxCommandEvent& event);
 
 public:
     auto GetNumberColumns() const { return mNumberColumns; }
-    auto GetLabels() const { return mLabels; }
+    auto GetLabelsAndInstruments() const { return mLabelsAndInstruments; }
 
 private:
     CalChartDoc& mShow;
     void OnReset(wxCommandEvent&);
 };
 
-class ShowInfoReqWizard : public wxWizardPageSimple {
-    DECLARE_CLASS(ShowInfoReqWizard)
+class SetupMarchersWizard : public wxWizardPageSimple {
+    DECLARE_CLASS(SetupMarchersWizard)
     DECLARE_EVENT_TABLE()
 public:
-    ShowInfoReqWizard(wxWizard* parent);
+    SetupMarchersWizard(wxWizard* parent);
 
     virtual bool TransferDataToWindow();
     virtual bool TransferDataFromWindow();
@@ -82,10 +81,10 @@ public:
 private:
     bool mTransferDataToWindowFirstTime;
     unsigned mNumberColumns;
-    std::vector<wxString> mLabels;
+    std::vector<std::pair<std::string, std::string>> mLabelsAndInstruments;
     void OnCmd_label_type(wxCommandEvent& event);
 
 public:
     auto GetNumberColumns() const { return mNumberColumns; }
-    auto GetLabels() const { return mLabels; }
+    auto GetLabelsAndInstruments() const { return mLabelsAndInstruments; }
 };

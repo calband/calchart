@@ -460,7 +460,8 @@ IMPLEMENT_CONFIGURATION_FUNCTIONS(CommandUndoSelection, bool, false);
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(BeepOnCollisions, bool, true);
 
-IMPLEMENT_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_0, wxString, wxT(""));
+// if the layout changes, this is what you increment in order to force a refresh of the layout
+IMPLEMENT_CONFIGURATION_FUNCTIONS(CalChartFrameAUILayout_3_6_1, wxString, wxT(""));
 
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellLongForm, bool, false);
 IMPLEMENT_CONFIGURATION_FUNCTIONS(ContCellFontSize, long, 14);

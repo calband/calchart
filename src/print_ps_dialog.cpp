@@ -23,12 +23,13 @@
 
 #include "print_ps_dialog.h"
 
+#include "CalChartDoc.h"
 #include "basic_ui.h"
 #include "cc_sheet.h"
 #include "cc_show.h"
 #include "confgr.h"
 #include "print_ps.h"
-#include "show_ui.h"
+
 #include <set>
 
 #include <iterator>

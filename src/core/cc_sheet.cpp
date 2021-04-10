@@ -209,7 +209,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
         }
         uint8_t* d = &data[0];
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            mPoints.at(i).SetSymbol((SYMBOL_TYPE)(*(d++)));
+            SetSymbol(i, (SYMBOL_TYPE)(*(d++)));
         }
         name = ReadLong(stream);
     }
@@ -225,7 +225,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
         }
         uint8_t* d = &data[0];
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            CheckInconsistancy(mPoints[i].GetSymbol(), *(d++), continity_for_symbol,
+            CheckInconsistancy(GetSymbol(i), *(d++), continity_for_symbol,
                 symbol_for_continuity, mName, i);
         }
         name = ReadLong(stream);
@@ -235,7 +235,7 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
     if (!has_type) {
         // when a point doesn't have a cont_index, it is assumed to be 0
         for (unsigned i = 0; i < mPoints.size(); i++) {
-            CheckInconsistancy(mPoints[i].GetSymbol(), 0, continity_for_symbol,
+            CheckInconsistancy(GetSymbol(i), 0, continity_for_symbol,
                 symbol_for_continuity, mName, i);
         }
     }
@@ -544,7 +544,7 @@ SelectionList Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
 {
     SelectionList select;
     for (auto j = 0; j < static_cast<int>(mPoints.size()); j++) {
-        if (mPoints.at(j).GetSymbol() == i) {
+        if (GetSymbol(j) == i) {
             select.insert(j);
         }
     }
@@ -601,9 +601,11 @@ void Sheet::SetContinuity(SYMBOL_TYPE which, Continuity const& new_cont)
 
 bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
 {
+    auto points = std::vector<int>(mPoints.size());
+    std::iota(points.begin(), points.end(), 0);
     // is any point using this symbol?
-    for (auto& point : mPoints) {
-        if (point.GetSymbol() == idx) {
+    for (auto& point : points) {
+        if (GetSymbol(point) == idx) {
             return true;
         }
     }
@@ -692,7 +694,21 @@ const Point& Sheet::GetPoint(unsigned i) const { return mPoints[i]; }
 
 Point& Sheet::GetPoint(unsigned i) { return mPoints[i]; }
 
+SYMBOL_TYPE Sheet::GetSymbol(unsigned i) const { return mPoints[i].GetSymbol(); }
+
+void Sheet::SetSymbol(unsigned i, SYMBOL_TYPE sym)
+{
+    mPoints[i].SetSymbol(sym);
+}
+
 std::vector<Point> Sheet::GetPoints() const { return mPoints; }
+
+std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
+{
+    std::vector<SYMBOL_TYPE> result;
+    std::transform(mPoints.begin(), mPoints.end(), std::back_inserter(result), [](auto&& i) { return i.GetSymbol(); });
+    return result;
+}
 
 nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
 {
@@ -709,7 +725,7 @@ nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::str
     std::map<std::string, std::vector<std::string>> continuities;
 
     for (unsigned i = 0; i < mPoints.size(); i++) {
-        auto symbolName = ToOnlineViewer::symbolName(mPoints[i].GetSymbol());
+        auto symbolName = ToOnlineViewer::symbolName(GetSymbol(i));
         uniqueDotTypes.insert(symbolName);
         labelToSymbol[dotLabels[i]] = symbolName;
         continuities[symbolName] = boilerplate;

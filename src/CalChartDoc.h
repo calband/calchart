@@ -120,7 +120,7 @@ public:
 
     void FlushAllTextWindows();
 
-    void WizardSetupNewShow(std::vector<std::string> const& labels, int columns, CalChart::ShowMode const& newmode);
+    void WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, CalChart::ShowMode const& newmode);
 
     auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
 
@@ -136,8 +136,11 @@ public:
     std::pair<bool, std::vector<size_t>> GetRelabelMapping(CalChart::Show::const_Sheet_iterator_t source_sheet, CalChart::Show::const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
 
     auto GetPointLabel(int i) const { return mShow->GetPointLabel(i); }
-
-    auto GetPointLabels() const { return mShow->GetPointLabels(); }
+    auto GetPointsLabel() const { return mShow->GetPointsLabel(); }
+    auto GetPointInstrument(int i) const { return mShow->GetPointInstrument(i); }
+    auto GetPointsInstrument() const { return mShow->GetPointsInstrument(); }
+    auto GetPointSymbol(int i) const { return mShow->GetPointSymbol(i); }
+    auto GetPointsSymbol() const { return mShow->GetPointsSymbol(); }
 
     // how to select points
     // Utility functions for constructing new selection lists
@@ -148,6 +151,9 @@ public:
     auto MakeRemoveFromSelection(const SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
     auto MakeToggleSelection(const SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
     auto MakeSelectWithLasso(const CalChart::Lasso& lasso, int ref) const { return mShow->MakeSelectWithLasso(lasso, ref); }
+    auto MakeSelectBySymbol(SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
+    auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
+    auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
 
     void SetSelection(const SelectionList& sl);
 
@@ -167,7 +173,8 @@ public:
     std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetShowModeCommand(CalChart::ShowMode const& newmode);
-    std::unique_ptr<wxCommand> Create_SetShowInfoCommand(std::vector<wxString> const& labels, int numColumns);
+    std::unique_ptr<wxCommand> Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labels, int numColumns);
+    std::unique_ptr<wxCommand> Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument);
     std::unique_ptr<wxCommand> Create_SetSheetTitleCommand(const wxString& newname);
     std::unique_ptr<wxCommand> Create_SetSheetBeatsCommand(int beats);
     std::unique_ptr<wxCommand> Create_AddSheetsCommand(const CalChart::Show::Sheet_container_t& sheets, int where);

@@ -58,7 +58,7 @@ public:
 
     // you can create a show in two ways, from nothing, or from an input stream
     static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode);
-    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::vector<std::string> const& labels, unsigned columns);
+    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns);
     static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
 
 private:
@@ -80,7 +80,8 @@ public:
     Show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
     Show_command_pair Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const;
     Show_command_pair Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const;
-    Show_command_pair Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, Coord const& new_march_position) const;
+    Show_command_pair Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const;
+    Show_command_pair Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const;
     Show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
     Show_command_pair Create_SetSheetBeatsCommand(int beats) const;
     Show_command_pair Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const;
@@ -112,9 +113,13 @@ public:
     auto GetCurrentSheet() const { return GetNthSheet(mSheetNum); }
     int GetNumSheets() const;
     auto GetCurrentSheetNum() const { return mSheetNum; }
-    auto GetNumPoints() const { return static_cast<int>(mPtLabels.size()); }
+    auto GetNumPoints() const { return static_cast<int>(mDotLabelAndInstrument.size()); }
     std::string GetPointLabel(int i) const;
-    auto GetPointLabels() const { return mPtLabels; }
+    std::vector<std::string> GetPointsLabel() const;
+    std::string GetPointInstrument(int i) const;
+    std::vector<std::string> GetPointsInstrument() const;
+    SYMBOL_TYPE GetPointSymbol(int i) const;
+    std::vector<SYMBOL_TYPE> GetPointsSymbol() const;
 
     bool AlreadyHasPrintContinuity() const;
 
@@ -130,6 +135,9 @@ public:
     SelectionList MakeRemoveFromSelection(const SelectionList& sl) const;
     SelectionList MakeToggleSelection(const SelectionList& sl) const;
     SelectionList MakeSelectWithLasso(const Lasso& lasso, int ref) const;
+    SelectionList MakeSelectBySymbol(SYMBOL_TYPE i) const;
+    SelectionList MakeSelectByInstrument(std::string const& instrumentName) const;
+    SelectionList MakeSelectByLabel(std::string const& labelName) const;
 
     // Point selection
     auto IsSelected(int i) const { return mSelectionList.count(i) != 0; }
@@ -152,9 +160,9 @@ private:
     void SetCurrentSheet(int n);
     void SetSelection(const SelectionList& sl);
 
-    void SetNumPoints(std::vector<std::string> const& labels, int columns, Coord const& new_march_position);
+    void SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position);
     void DeletePoints(SelectionList const& sl);
-    void SetPointLabel(const std::vector<std::string>& labels);
+    void SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::string>> const& labels);
 
     // Descriptions aren't used, but keeping this alive.  See issue #203
     auto GetDescr() const { return mDescr; }
@@ -173,7 +181,8 @@ private:
     // members
     std::string mDescr;
     Sheet_container_t mSheets;
-    std::vector<std::string> mPtLabels;
+    // labels and instruments go hand in hand, put them together to make sure we don't have extras or missing
+    std::vector<std::pair<std::string, std::string>> mDotLabelAndInstrument;
     SelectionList mSelectionList; // order of selections
     int mSheetNum;
     ShowMode mMode;

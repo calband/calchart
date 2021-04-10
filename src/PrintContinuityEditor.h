@@ -53,7 +53,7 @@ public:
     void SetView(CalChartView* view) { mView = view; }
     void OnUpdate() { Update(); }
 
-    void Update(); // Refresh all window controls
+    void Update() override; // Refresh all window controls
     // Update text window to current continuity
     // quick doesn't flush other windows
     void UpdateText();

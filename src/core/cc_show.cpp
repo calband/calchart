@@ -36,6 +36,7 @@
 #include <sstream>
 
 namespace CalChart {
+static constexpr auto kDefault = "default";
 static const std::string k_nofile_str = "Unable to open file";
 static const std::string k_badcont_str = "Error in continuity file";
 static const std::string k_contnohead_str = "Continuity file doesn't begin with header";
@@ -49,10 +50,10 @@ std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode)
     return show;
 }
 
-std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::vector<std::string> const& labels, unsigned columns)
+std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns)
 {
     auto show = Create_CC_show(mode);
-    show->SetNumPoints(labels, columns, mode.FieldOffset());
+    show->SetNumPoints(labelsAndInstruments, columns, mode.FieldOffset());
     return show;
 }
 
@@ -101,7 +102,7 @@ Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const*
     // read in the size:
     // <INGL_SIZE><4><# points>
     auto numpoints = ReadCheckIDandSize(stream, INGL_SIZE);
-    mPtLabels.assign(numpoints, std::string());
+    mDotLabelAndInstrument.assign(numpoints, std::pair<std::string, std::string>{ "", kDefault });
 
     uint32_t name = ReadLong(stream);
     // Optional: read in the point labels
@@ -114,7 +115,9 @@ Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const*
             labels.push_back(str);
             str += strlen(str) + 1;
         }
-        SetPointLabel(labels);
+        std::vector<std::pair<std::string, std::string>> labelsAndInstruments;
+        std::transform(labels.begin(), labels.end(), std::back_inserter(labelsAndInstruments), [](auto&& i) { return std::pair<std::string, std::string>{ i, kDefault }; });
+        SetPointLabelAndInstrument(labelsAndInstruments);
         // peek for the next name
         name = ReadLong(stream);
     } else {
@@ -165,17 +168,17 @@ Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHand
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
         auto numpoints = get_big_long(ptr);
-        show->mPtLabels.assign(numpoints, std::string());
+        show->mDotLabelAndInstrument.assign(numpoints, std::pair<std::string, std::string>{ "", kDefault });
     };
     auto parse_INGL_LABL = [](Show* show, const uint8_t* ptr, size_t size) {
-        std::vector<std::string> labels;
+        std::vector<std::pair<std::string, std::string>> labels;
         if (!size && show->GetNumPoints()) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
         // restrict search to the size we're given
         auto str = (const char*)ptr;
         for (auto i = 0; i < show->GetNumPoints(); i++) {
-            labels.push_back(str);
+            labels.push_back({ str, kDefault });
             auto length = strlen(str) + 1;
             if (length > size) {
                 throw CC_FileException("Label too large", INGL_LABL);
@@ -186,7 +189,29 @@ Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHand
         if (size != 0) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
-        show->SetPointLabel(labels);
+        show->SetPointLabelAndInstrument(labels);
+    };
+    auto parse_INGL_INST = [](Show* show, const uint8_t* ptr, size_t size) {
+        auto currentLabels = show->mDotLabelAndInstrument;
+        if (!size && show->GetNumPoints()) {
+            throw CC_FileException("Label the wrong size", INGL_LABL);
+        }
+        // restrict search to the size we're given
+        auto str = (const char*)ptr;
+        for (auto i = 0; i < show->GetNumPoints(); i++) {
+            auto thisInst = std::string{ str };
+            currentLabels.at(i).second = thisInst == "" ? kDefault : thisInst;
+            auto length = strlen(str) + 1;
+            if (length > size) {
+                throw CC_FileException("Label too large", INGL_LABL);
+            }
+            str += length;
+            size -= length;
+        }
+        if (size != 0) {
+            throw CC_FileException("Label the wrong size", INGL_LABL);
+        }
+        show->SetPointLabelAndInstrument(currentLabels);
     };
     auto parse_INGL_DESC = [](Show* show, const uint8_t* ptr, size_t size) {
         auto str = (const char*)ptr;
@@ -226,6 +251,7 @@ Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHand
             parser = {
                 { INGL_SIZE, parse_INGL_SIZE },
                 { INGL_LABL, parse_INGL_LABL },
+                { INGL_INST, parse_INGL_INST },
                 { INGL_DESC, parse_INGL_DESC },
                 { INGL_SHET, parse_INGL_SHET },
                 { INGL_SELE, parse_INGL_SELE },
@@ -257,6 +283,14 @@ Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHand
 // Destroy a show
 Show::~Show() { }
 
+template <typename T>
+auto anyInstrumentsBesidesDefault(T const& all)
+{
+    auto instruments = std::set(all.begin(), all.end());
+    instruments.erase(kDefault);
+    return instruments.size();
+}
+
 std::vector<uint8_t> Show::SerializeShowData() const
 {
     using Parser::Append;
@@ -269,10 +303,19 @@ std::vector<uint8_t> Show::SerializeShowData() const
 
     // Write LABEL
     std::vector<uint8_t> labels;
-    for (auto& i : mPtLabels) {
-        AppendAndNullTerminate(labels, i);
+    for (auto& i : mDotLabelAndInstrument) {
+        AppendAndNullTerminate(labels, i.first);
     }
     Append(result, Construct_block(INGL_LABL, labels));
+
+    // Write INSTRUMENTS
+    if (anyInstrumentsBesidesDefault(GetPointsInstrument())) {
+        std::vector<uint8_t> instruments;
+        for (auto& i : mDotLabelAndInstrument) {
+            AppendAndNullTerminate(instruments, i.second == kDefault ? "" : i.second);
+        }
+        Append(result, Construct_block(INGL_INST, instruments));
+    }
 
     // write Description
     if (!GetDescr().empty()) {
@@ -358,28 +401,28 @@ void Show::InsertSheet(const Sheet_container_t& sheet,
 }
 
 // warning, the labels might not match up
-void Show::SetNumPoints(std::vector<std::string> const& labels, int columns, Coord const& new_march_position)
+void Show::SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position)
 {
     for (auto sht = GetSheetBegin(); sht != GetSheetEnd(); ++sht) {
-        auto pts = sht->NewNumPointsPositions(static_cast<int>(labels.size()), columns, new_march_position);
+        auto pts = sht->NewNumPointsPositions(static_cast<int>(labelsAndInstruments.size()), columns, new_march_position);
         sht->SetPoints(pts);
     }
-    SetPointLabel(labels);
+    SetPointLabelAndInstrument(labelsAndInstruments);
 }
 
 void Show::DeletePoints(SelectionList const& sl)
 {
     for (auto iter = sl.rbegin(); iter != sl.rend(); ++iter) {
-        mPtLabels.erase(mPtLabels.begin() + *iter);
+        mDotLabelAndInstrument.erase(mDotLabelAndInstrument.begin() + *iter);
     }
     for (auto&& sht : mSheets) {
         sht.DeletePoints(sl);
     }
 }
 
-void Show::SetPointLabel(const std::vector<std::string>& labels)
+void Show::SetPointLabelAndInstrument(std::vector<std::pair<std::string, std::string>> const& labels)
 {
-    mPtLabels = labels;
+    mDotLabelAndInstrument = labels;
 }
 
 // A relabel mapping is the mapping you would need to apply to sheet_next (and all following sheets)
@@ -411,9 +454,42 @@ std::pair<bool, std::vector<size_t>> Show::GetRelabelMapping(const_Sheet_iterato
 
 std::string Show::GetPointLabel(int i) const
 {
-    if (i >= static_cast<int>(mPtLabels.size()))
+    if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
         return "";
-    return mPtLabels.at(i);
+    return mDotLabelAndInstrument.at(i).first;
+}
+
+std::vector<std::string> Show::GetPointsLabel() const
+{
+    std::vector<std::string> labels;
+    std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(labels), [](auto&& i) { return i.first; });
+    return labels;
+}
+
+std::string Show::GetPointInstrument(int i) const
+{
+    if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
+        return "";
+    return mDotLabelAndInstrument.at(i).second;
+}
+
+std::vector<std::string> Show::GetPointsInstrument() const
+{
+    std::vector<std::string> instruments;
+    std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(instruments), [](auto&& i) { return i.second; });
+    return instruments;
+}
+
+SYMBOL_TYPE Show::GetPointSymbol(int i) const
+{
+    if (i >= static_cast<int>(mDotLabelAndInstrument.size()))
+        return SYMBOL_PLAIN;
+    return GetCurrentSheet()->GetSymbol(i);
+}
+
+std::vector<SYMBOL_TYPE> Show::GetPointsSymbol() const
+{
+    return GetCurrentSheet()->GetSymbols();
 }
 
 bool Show::AlreadyHasPrintContinuity() const
@@ -450,7 +526,7 @@ void Show::SetShowMode(ShowMode const& mode)
 SelectionList Show::MakeSelectAll() const
 {
     SelectionList sl;
-    for (auto i = 0u; i < mPtLabels.size(); ++i)
+    for (auto i = 0u; i < mDotLabelAndInstrument.size(); ++i)
         sl.insert(i);
     return sl;
 }
@@ -510,6 +586,33 @@ SelectionList Show::MakeSelectWithLasso(const Lasso& lasso, int ref) const
     return sl;
 }
 
+SelectionList Show::MakeSelectBySymbol(SYMBOL_TYPE symbol) const
+{
+    return GetCurrentSheet()->MakeSelectPointsBySymbol(symbol);
+}
+
+SelectionList Show::MakeSelectByInstrument(std::string const& instrumentName) const
+{
+    SelectionList sl;
+    for (auto i = 0ul; i < mDotLabelAndInstrument.size(); ++i) {
+        if (mDotLabelAndInstrument[i].second == instrumentName) {
+            sl.insert(i);
+        }
+    }
+    return sl;
+}
+
+SelectionList Show::MakeSelectByLabel(std::string const& label) const
+{
+    SelectionList sl;
+    for (auto i = 0ul; i < mDotLabelAndInstrument.size(); ++i) {
+        if (mDotLabelAndInstrument[i].first == label) {
+            sl.insert(i);
+        }
+    }
+    return sl;
+}
+
 nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
 {
     nlohmann::json j;
@@ -518,13 +621,15 @@ nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
     j["title"] = "(MANUAL) the show title that you want people to see goes here"; // TODO; For now, this will be manually added to the exported file
     j["year"] = "(MANUAL) enter show year (e.g. 2017)"; // TODO; Should eventually save automatically
     j["description"] = mDescr;
-    j["labels"] = mPtLabels;
+    std::vector<std::string> ptLabels;
+    std::transform(mDotLabelAndInstrument.begin(), mDotLabelAndInstrument.end(), std::back_inserter(ptLabels), [](auto&& i) { return i.first; });
+    j["labels"] = ptLabels;
 
     std::vector<nlohmann::json> sheetData;
     auto animateSheetIter = compiledShow.sheetsBegin();
     auto sheetIndex = 0;
     for (auto showSheetIter = GetSheetBegin(); showSheetIter != GetSheetEnd(); ++showSheetIter) {
-        sheetData.push_back(showSheetIter->toOnlineViewerJSON(sheetIndex + 1, mPtLabels, *animateSheetIter));
+        sheetData.push_back(showSheetIter->toOnlineViewerJSON(sheetIndex + 1, ptLabels, *animateSheetIter));
         ++animateSheetIter;
         ++sheetIndex;
     }
@@ -566,11 +671,11 @@ Show_command_pair Show::Create_SetShowModeCommand(CalChart::ShowMode const& newm
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetShowInfoCommand(std::vector<std::string> const& labels, int numColumns, Coord const& new_march_position) const
+Show_command_pair Show::Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const
 {
-    auto action = [labels, numColumns, new_march_position](Show& show) { show.SetNumPoints(labels, numColumns, new_march_position); };
+    auto action = [labelsAndInstruments, numColumns, new_march_position](Show& show) { show.SetNumPoints(labelsAndInstruments, numColumns, new_march_position); };
     // need to go through and save all the positions and labels for later
-    auto old_labels = mPtLabels;
+    auto old_labels = mDotLabelAndInstrument;
     std::vector<std::vector<Point>> old_points;
     for (auto&& sheet : mSheets) {
         old_points.emplace_back(sheet.GetPoints());
@@ -579,7 +684,23 @@ Show_command_pair Show::Create_SetShowInfoCommand(std::vector<std::string> const
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
             show.mSheets.at(i).SetPoints(old_points.at(i));
         }
-        show.SetPointLabel(old_labels);
+        show.SetPointLabelAndInstrument(old_labels);
+    };
+    return { action, reaction };
+}
+
+Show_command_pair Show::Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const
+{
+    auto old_labels = mDotLabelAndInstrument;
+    auto new_labels = old_labels;
+    std::for_each(dotToInstrument.begin(), dotToInstrument.end(), [&new_labels](auto&& i) {
+        new_labels.at(i.first).second = i.second;
+    });
+    auto action = [new_labels](Show& show) {
+        show.SetPointLabelAndInstrument(new_labels);
+    };
+    auto reaction = [old_labels](Show& show) {
+        show.SetPointLabelAndInstrument(old_labels);
     };
     return { action, reaction };
 }
@@ -692,7 +813,7 @@ Show_command_pair Show::Create_DeletePointsCommand() const
         show.SetSelection({});
     };
     // need to go through and save all the positions and labels for later
-    auto old_labels = mPtLabels;
+    auto old_labels = mDotLabelAndInstrument;
     std::vector<std::vector<Point>> old_points;
     for (auto&& sheet : mSheets) {
         old_points.emplace_back(sheet.GetPoints());
@@ -701,7 +822,7 @@ Show_command_pair Show::Create_DeletePointsCommand() const
         for (auto i = 0ul; i < show.mSheets.size(); ++i) {
             show.mSheets.at(i).SetPoints(old_points.at(i));
         }
-        show.SetPointLabel(old_labels);
+        show.SetPointLabelAndInstrument(old_labels);
     };
     return { action, reaction };
 }
@@ -754,21 +875,21 @@ Show_command_pair Show::Create_SetSymbolCommand(const SelectionList& selectionLi
     auto sheet = GetCurrentSheet();
     for (auto&& i : selectionList) {
         // Only do work on points that have different symbols
-        if (sym != sheet->GetPoint(i).GetSymbol()) {
+        if (sym != sheet->GetSymbol(i)) {
             new_sym[i] = sym;
-            original_sym[i] = sheet->GetPoint(i).GetSymbol();
+            original_sym[i] = sheet->GetSymbol(i);
         }
     }
     auto action = [sheet_num = mSheetNum, new_sym](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : new_sym) {
-            sheet->GetPoint(i.first).SetSymbol(i.second);
+            sheet->SetSymbol(i.first, i.second);
         }
     };
     auto reaction = [sheet_num = mSheetNum, original_sym](Show& show) {
         auto sheet = show.GetNthSheet(sheet_num);
         for (auto&& i : original_sym) {
-            sheet->GetPoint(i.first).SetSymbol(i.second);
+            sheet->SetSymbol(i.first, i.second);
         }
     };
     return { action, reaction };

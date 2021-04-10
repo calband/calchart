@@ -183,8 +183,8 @@ static const double kLowerNorthArrow[2][3] = {
 
 static const double kContinuityStart[2] = { 606 / kSizeY, 556 / kSizeYLandscape };
 
-static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, int reference, CalChart::Coord const& origin, wxString const& label);
-static void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, wxString const& label);
+static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label);
+static void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, SYMBOL_TYPE symbol, wxString const& label);
 
 void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
 {
@@ -203,7 +203,7 @@ void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
             dc.SetPen(brushAndPen.second);
             dc.SetTextForeground(config.Get_CalChartBrushAndPen(unselectedTextColor).second.GetColour());
         }
-        DrawPoint(dc, config, sheet.GetPoint(i), ref, origin, labels.at(i));
+        DrawPoint(dc, config, sheet.GetPoint(i), sheet.GetSymbol(i), ref, origin, labels.at(i));
     }
 }
 
@@ -458,7 +458,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
         const auto point = pts.at(i);
         const auto pos = point.GetPos(ref) + mode.Offset();
         dc.SetBrush(*wxBLACK_BRUSH);
-        DrawPointHelper(dc, config, pos, point, show.GetPointLabel(i));
+        DrawPointHelper(dc, config, pos, point, sheet.GetSymbol(i), show.GetPointLabel(i));
     }
 
     // now reset everything to draw the rest of the text
@@ -532,10 +532,10 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
     printerdc->Blit(0, 0, rotate_membm.GetWidth(), rotate_membm.GetHeight(), &tmemdc, 0, 0);
 }
 
-void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, wxString const& label)
+void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, SYMBOL_TYPE symbol, wxString const& label)
 {
     SaveAndRestore_Brush restore(dc);
-    switch (point.GetSymbol()) {
+    switch (symbol) {
     case SYMBOL_SOL:
     case SYMBOL_SOLBKSL:
     case SYMBOL_SOLSL:
@@ -552,7 +552,7 @@ void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
 
     auto where = fDIP(wxPoint{ pos.x, pos.y });
     dc.DrawCircle(where, circ_r);
-    switch (point.GetSymbol()) {
+    switch (symbol) {
     case SYMBOL_SL:
     case SYMBOL_X:
         dc.DrawLine(where.x - plineoff, where.y + plineoff, where.x + plineoff, where.y - plineoff);
@@ -564,7 +564,7 @@ void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
     default:
         break;
     }
-    switch (point.GetSymbol()) {
+    switch (symbol) {
     case SYMBOL_BKSL:
     case SYMBOL_X:
         dc.DrawLine(where.x - plineoff, where.y - plineoff, where.x + plineoff, where.y + plineoff);
@@ -583,9 +583,9 @@ void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
     }
 }
 
-static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, int reference, CalChart::Coord const& origin, wxString const& label)
+static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
 {
-    DrawPointHelper(dc, config, point.GetPos(reference) + origin, point, label);
+    DrawPointHelper(dc, config, point.GetPos(reference) + origin, point, symbol, label);
 }
 
 void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
@@ -602,7 +602,7 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT_TEXT).first.GetColour());
 
     for (auto& i : positions) {
-        DrawPointHelper(dc, config, i.second + origin, sheet.GetPoint(i.first), show.GetPointLabel(i.first));
+        DrawPointHelper(dc, config, i.second + origin, sheet.GetPoint(i.first), sheet.GetSymbol(i.first), show.GetPointLabel(i.first));
     }
 }
 

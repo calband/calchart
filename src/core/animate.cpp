@@ -152,7 +152,7 @@ Animation::Animation(const Show& show)
                 }
 #endif
                 for (unsigned j = 0; j < mPoints.size(); j++) {
-                    if (curr_sheet->GetPoint(j).GetSymbol() == current_symbol) {
+                    if (curr_sheet->GetSymbol(j) == current_symbol) {
                         theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
                     }
                 }

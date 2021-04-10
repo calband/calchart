@@ -28,19 +28,6 @@
 #include <wx/spinctrl.h>
 #include <wx/statline.h>
 
-class PointPickerView : public wxView {
-public:
-    PointPickerView() = default;
-    ~PointPickerView() = default;
-    virtual void OnDraw(wxDC* dc) { }
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
-};
-
-void PointPickerView::OnUpdate(wxView* sender, wxObject* hint)
-{
-    static_cast<PointPicker*>(GetFrame())->Update();
-}
-
 enum {
     PointPicker_PointPickerList = 1100,
 };
@@ -50,17 +37,12 @@ EVT_LISTBOX(PointPicker_PointPickerList, PointPicker::PointPickerSelect)
 EVT_LISTBOX_DCLICK(PointPicker_PointPickerList, PointPicker::PointPickerAll)
 END_EVENT_TABLE()
 
-PointPicker::PointPicker(CalChartDoc& shw, wxWindow* parent, wxWindowID id,
+PointPicker::PointPicker(CalChartDoc const& shw, wxWindow* parent, wxWindowID id,
     const wxString& caption, const wxPoint& pos,
     const wxSize& size, long style)
     : super(parent, id, caption, pos, size, style)
     , mShow(shw)
-    , mView(new PointPickerView)
 {
-    // give this a view so it can pick up document changes
-    mView->SetDocument(&mShow);
-    mView->SetFrame(this);
-
     CreateControls();
 
     // This fits the dalog to the minimum size dictated by the sizers
@@ -75,28 +57,45 @@ void PointPicker::CreateControls()
 {
     SetSizer(VStack([this](auto sizer) {
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
-            auto button = CreateButton(this, sizer, BasicSizerFlags(), wxID_OK, "&Close");
-            button->SetDefault();
             CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&All", [this]() {
-                mShow.SetSelection(mShow.MakeSelectAll());
+                mSelection = mShow.MakeSelectAll();
+                EndModal(wxID_OK);
             });
             CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&None", [this]() {
-                mShow.SetSelection(mShow.MakeUnselectAll());
+                mSelection = mShow.MakeUnselectAll();
+                EndModal(wxID_OK);
             });
+            auto button = CreateButton(this, sizer, BasicSizerFlags(), wxID_OK);
+            button->SetDefault();
         });
 
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
             auto counter = 0;
             for (auto&& i : GetSymbolsBitmap()) {
                 auto which = static_cast<SYMBOL_TYPE>(counter++);
-                CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), i, [this, which]() {
-                    mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
-                });
+                if (mShow.MakeSelectBySymbol(which).size()) {
+                    CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), i, [this, which]() {
+                        mSelection = mShow.MakeSelectBySymbol(which);
+                        EndModal(wxID_OK);
+                    });
+                }
             }
         });
 
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            CreateText(this, sizer, BasicSizerFlags(), "Select Instrument");
+
+            auto instruments = mShow.GetPointsInstrument();
+            auto currentInstruments = std::set(instruments.begin(), instruments.end());
+            auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), wxID_ANY, { currentInstruments.begin(), currentInstruments.end() }, [this](wxCommandEvent& e) {
+                mSelection = mShow.MakeSelectByInstrument(e.GetString());
+                EndModal(wxID_OK);
+            });
+            choice->SetSelection(wxNOT_FOUND);
+        });
+
         mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
-            wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
+            wxSize(50, 250), 0, NULL, wxLB_EXTENDED);
         sizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
     }));
 
@@ -105,7 +104,7 @@ void PointPicker::CreateControls()
 
 void PointPicker::PointPickerAll(wxCommandEvent&)
 {
-    mShow.SetSelection(mShow.MakeSelectAll());
+    mSelection = mShow.MakeSelectAll();
 }
 
 void PointPicker::PointPickerSelect(wxCommandEvent&)
@@ -113,15 +112,15 @@ void PointPicker::PointPickerSelect(wxCommandEvent&)
     wxArrayInt selections;
     size_t n = mList->GetSelections(selections);
 
-    mCachedSelection.clear();
-    for (size_t i = 0; i < n; ++i)
-        mCachedSelection.insert(selections[i]);
-    mShow.SetSelection(mCachedSelection);
+    mSelection.clear();
+    for (size_t i = 0; i < n; ++i) {
+        mSelection.insert(selections[i]);
+    }
 }
 
 void PointPicker::Update()
 {
-    auto&& tshowLabels = mShow.GetPointLabels();
+    auto&& tshowLabels = mShow.GetPointsLabel();
     std::vector<wxString> showLabels(tshowLabels.begin(), tshowLabels.end());
     if (mCachedLabels != showLabels) {
         mCachedLabels = showLabels;
@@ -129,12 +128,11 @@ void PointPicker::Update()
         mList->Set(wxArrayString{ mCachedLabels.size(), &mCachedLabels[0] });
     }
     auto showSelectionList = mShow.GetSelectionList();
-    if (mCachedSelection != showSelectionList) {
+    if (mSelection != showSelectionList) {
         mList->DeselectAll();
-        mCachedSelection = showSelectionList;
-        for (auto n = mCachedSelection.begin(); n != mCachedSelection.end(); ++n) {
+        mSelection = showSelectionList;
+        for (auto n = mSelection.begin(); n != mSelection.end(); ++n) {
             mList->SetSelection(*n);
         }
     }
 }
-
