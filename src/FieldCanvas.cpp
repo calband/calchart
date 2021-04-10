@@ -134,7 +134,7 @@ void FieldCanvas::PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config)
 }
 
 // We have a empty erase background to improve redraw performance.
-void FieldCanvas::OnEraseBackground(wxEraseEvent& event) {}
+void FieldCanvas::OnEraseBackground(wxEraseEvent& event) { }
 
 void FieldCanvas::OnMouseLeftDown_default(CalChart::Coord pos, bool shiftDown, bool altDown)
 {

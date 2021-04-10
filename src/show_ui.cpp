@@ -22,6 +22,7 @@
 
 #include "show_ui.h"
 #include "CalChartToolBar.h"
+#include "basic_ui.h"
 #include "cc_sheet.h"
 #include <algorithm>
 #include <ctype.h>
@@ -34,7 +35,7 @@ class PointPickerView : public wxView {
 public:
     PointPickerView() = default;
     ~PointPickerView() = default;
-    virtual void OnDraw(wxDC* dc) {}
+    virtual void OnDraw(wxDC* dc) { }
     virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL);
 };
 
@@ -44,8 +45,7 @@ void PointPickerView::OnUpdate(wxView* sender, wxObject* hint)
 }
 
 enum {
-    PointPicker_PointPickerAll = 1100,
-    PointPicker_PointPickerList,
+    PointPicker_PointPickerList = 1100,
 };
 
 BEGIN_EVENT_TABLE(PointPicker, wxDialog)
@@ -76,46 +76,33 @@ PointPicker::PointPicker(CalChartDoc& shw, wxWindow* parent, wxWindowID id,
 
 void PointPicker::CreateControls()
 {
-    // create a sizer for laying things out top down:
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
-    // add buttons to the top row
-    auto top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
-
-    auto button = new wxButton(this, wxID_OK, wxT("&Close"));
-    top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 5));
-    button->SetDefault();
-
-    button = new wxButton(this, PointPicker_PointPickerAll, wxT("&All"));
-    top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 5));
-    button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
-        mShow.SetSelection(mShow.MakeSelectAll());
-    });
-
-    button = new wxButton(this, wxID_ANY, wxT("&None"));
-    top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 5));
-    button->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
-        mShow.SetSelection(mShow.MakeUnselectAll());
-    });
-
-    top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer, wxSizerFlags(0).Border(wxALL, 5).Center());
-
-    auto counter = 0;
-    for (auto&& i : GetSymbolsBitmap()) {
-        button = new wxBitmapButton(this, wxID_ANY, i);
-        top_button_sizer->Add(button, wxSizerFlags(0).Border(wxALL, 2));
-        auto which = static_cast<SYMBOL_TYPE>(counter++);
-        button->Bind(wxEVT_BUTTON, [this, which](wxCommandEvent&) {
-            mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
+    SetSizer(VStack([this](auto sizer) {
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            auto button = CreateButton(this, sizer, BasicSizerFlags(), wxID_OK, "&Close");
+            button->SetDefault();
+            CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&All", [this]() {
+                mShow.SetSelection(mShow.MakeSelectAll());
+            });
+            CreateButtonWithHandler(this, sizer, BasicSizerFlags(), "&None", [this]() {
+                mShow.SetSelection(mShow.MakeUnselectAll());
+            });
         });
-    }
 
-    mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
-        wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
-    topsizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            auto counter = 0;
+            for (auto&& i : GetSymbolsBitmap()) {
+                auto which = static_cast<SYMBOL_TYPE>(counter++);
+                CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), i, [this, which]() {
+                    mShow.SetSelection(mShow.GetCurrentSheet()->MakeSelectPointsBySymbol(which));
+                });
+            }
+        });
+
+        mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
+            wxSize(50, 500), 0, NULL, wxLB_EXTENDED);
+        sizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
+    }));
+
     Update();
 }
 
@@ -210,7 +197,7 @@ ShowInfoReq::ShowInfoReq(CalChartDoc& shw, wxWindow* parent, wxWindowID id,
     Create(parent, id, caption, pos, size, style);
 }
 
-ShowInfoReq::~ShowInfoReq() {}
+ShowInfoReq::~ShowInfoReq() { }
 
 bool ShowInfoReq::Create(wxWindow* parent, wxWindowID id,
     const wxString& caption, const wxPoint& pos,
@@ -243,104 +230,78 @@ void EnableLetter(wxWindow& window, bool letters)
 //  wxSlider *lettersize;
 void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
 {
-    // create a sizer for laying things out top down:
-    wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-    parent->SetSizer(topsizer);
+    parent->SetSizer(VStack([parent, putLastRowButtons](auto sizer) {
+        // now we add a left and a right side, putting boxes around things
+        // special attention about box sizers
+        // "the order in which you create
+        // new controls is important. Create your wxStaticBox control before any
+        // siblings that are to appear inside the wxStaticBox in order to preserve
+        // the correct Z-Order of controls."
+        HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
+            VStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
+                // add the left side
+                HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
+                    CreateText(parent, sizer, "&Points:");
+                    wxSpinCtrl* numPoints = new wxSpinCtrl(
+                        parent, ShowInfoReq_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition,
+                        wxSize(60, -1), wxSP_ARROW_KEYS, 1, kMaxPoints, 10);
+                    sizer->Add(numPoints, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                });
 
-    // now we add a left and a right side, putting boxes around things
-    // special attention about box sizers
-    // "the order in which you create
-    // new controls is important. Create your wxStaticBox control before any
-    // siblings that are to appear inside the wxStaticBox in order to preserve
-    // the correct Z-Order of controls."
-    wxBoxSizer* middle_sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* left_middle_sizer = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* right_middle_sizer = new wxBoxSizer(wxVERTICAL);
-    wxStaticBoxSizer* boxsizer;
+                HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
+                    CreateText(parent, sizer, "&Columns:");
+                    wxSpinCtrl* numberColumns = new wxSpinCtrl(
+                        parent, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition,
+                        wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
+                    sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                });
 
-    // add the left side
-    wxBoxSizer* horizontal_sizer = new wxBoxSizer(wxHORIZONTAL);
-    right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10);
-    wxStaticText* pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Points:"), wxDefaultPosition,
-        wxDefaultSize, 0);
-    horizontal_sizer->Add(pointLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    wxSpinCtrl* numPoints = new wxSpinCtrl(
-        parent, ShowInfoReq_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition,
-        wxSize(60, -1), wxSP_ARROW_KEYS, 1, kMaxPoints, 10);
-    horizontal_sizer->Add(numPoints, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                auto label_type = CreateChoiceWithHandler(parent, sizer, BasicSizerFlags(), ShowInfoReq_ID_LABEL_TYPE, { wxT("Numbers"), wxT("Letters") }, [parent](auto& event) {
+                    EnableLetter(*parent, event.GetInt() == 1);
+                    parent->Refresh();
+                });
 
-    horizontal_sizer = new wxBoxSizer(wxHORIZONTAL);
-    right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10);
-    pointLabel = new wxStaticText(parent, wxID_STATIC, wxT("&Columns:"),
-        wxDefaultPosition, wxDefaultSize, 0);
-    horizontal_sizer->Add(pointLabel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    wxSpinCtrl* numberColumns = new wxSpinCtrl(
-        parent, ShowInfoReq_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition,
-        wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
-    horizontal_sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
+                    CreateText(parent, sizer, "P&oints per letter");
+                    wxSpinCtrl* lettersize = new wxSpinCtrl(
+                        parent, ShowInfoReq_ID_POINTS_PER_LETTER, wxEmptyString,
+                        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 99, 10);
+                    sizer->Add(lettersize, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+                });
+            });
 
-    // changing from radio box to choice
-    wxString strs[2] = { wxT("Numbers"), wxT("Letters") };
-    wxChoice* label_type = new wxChoice(parent, ShowInfoReq_ID_LABEL_TYPE, wxDefaultPosition,
-        wxDefaultSize, 2, strs);
-    label_type->SetSelection(0);
-    right_middle_sizer->Add(label_type, 0, wxALL, 10);
+            VStack(sizer, [parent](auto sizer) {
+                // now add right side
+                NamedHBoxStack(parent, sizer, "&Letters", [parent](auto sizer) {
+                    wxListBox* labels = new wxListBox(parent, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition,
+                        wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+                    for (int i = 0; i < 26; ++i) {
+                        wxString buf(static_cast<char>('A' + i));
+                        buf += wxString(static_cast<char>('A' + i));
+                        labels->InsertItems(1, &buf, i);
+                    }
+                    for (int i = 0; i < 26; ++i) {
+                        wxString buf(static_cast<char>('A' + i));
+                        labels->InsertItems(1, &buf, i);
+                    }
+                    labels->EnsureVisible(0);
+                    sizer->Add(labels, 0, wxGROW | wxALL, 0);
+                });
+            });
+        });
 
-    horizontal_sizer = new wxBoxSizer(wxHORIZONTAL);
-    right_middle_sizer->Add(horizontal_sizer, 0, wxALL, 10);
-    wxStaticText* label = new wxStaticText(parent, wxID_STATIC, wxT("P&oints per letter"),
-        wxDefaultPosition, wxDefaultSize, 0);
-    horizontal_sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    wxSpinCtrl* lettersize = new wxSpinCtrl(
-        parent, ShowInfoReq_ID_POINTS_PER_LETTER, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 99, 10);
-    horizontal_sizer->Add(lettersize, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+        if (putLastRowButtons) {
+            // put a line between the controls and the buttons
+            CreateHLine(parent, sizer);
 
-    middle_sizer->Add(right_middle_sizer, 0, wxALIGN_CENTER);
-
-    // now add right side
-    boxsizer = new wxStaticBoxSizer(new wxStaticBox(parent, -1, wxT("&Letters")),
-        wxHORIZONTAL);
-    wxListBox* labels = new wxListBox(parent, ShowInfoReq_ID_LABEL_LETTERS, wxDefaultPosition,
-        wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-    for (int i = 0; i < 26; ++i) {
-        wxString buf(static_cast<char>('A' + i));
-        buf += wxString(static_cast<char>('A' + i));
-        labels->InsertItems(1, &buf, i);
-    }
-    for (int i = 0; i < 26; ++i) {
-        wxString buf(static_cast<char>('A' + i));
-        labels->InsertItems(1, &buf, i);
-    }
-    labels->EnsureVisible(0);
-    boxsizer->Add(labels, 0, wxGROW | wxALL, 0);
-    left_middle_sizer->Add(boxsizer, 0, wxALL, 5);
-
-    middle_sizer->Add(left_middle_sizer, 0, wxALIGN_CENTER);
-
-    topsizer->Add(middle_sizer, 0, wxALIGN_CENTER);
-
-    if (putLastRowButtons) {
-        // put a line between the controls and the buttons
-        wxStaticLine* line = new wxStaticLine(
-            parent, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-        topsizer->Add(line, 0, wxGROW | wxALL, 5);
-
-        // the buttons on the bottom
-        wxBoxSizer* okCancelBox = new wxBoxSizer(wxHORIZONTAL);
-        topsizer->Add(okCancelBox, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
-
-        wxButton* reset = new wxButton(parent, wxID_RESET, wxT("&Reset"));
-        okCancelBox->Add(reset, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-        wxButton* ok = new wxButton(parent, wxID_OK);
-        ok->SetDefault();
-        okCancelBox->Add(ok, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-
-        wxButton* cancel = new wxButton(parent, wxID_CANCEL);
-        okCancelBox->Add(cancel, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    }
-    EnableLetter(*parent, label_type->GetSelection() == 1);
+            // the buttons on the bottom
+            HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
+                CreateButton(parent, sizer, wxID_RESET, wxT("&Reset"));
+                CreateButton(parent, sizer, wxID_OK);
+                CreateButton(parent, sizer, wxID_CANCEL);
+            });
+        }
+    }));
 }
 
 std::vector<wxString> GenNumberLabels(int num)

@@ -45,20 +45,17 @@ GeneralSetup::GeneralSetup(CalChartConfiguration& config, wxWindow* parent, wxWi
 
 void GeneralSetup::CreateControls()
 {
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
-
-    auto boxsizer = new wxStaticBoxSizer(new wxStaticBox(this, -1, wxT("Autosave settings")), wxVERTICAL);
-    topsizer->Add(boxsizer);
-
-    auto sizer1 = new wxBoxSizer(wxVERTICAL);
-    boxsizer->Add(sizer1, LeftBasicSizerFlags());
-
-    AddTextboxWithCaption(this, sizer1, AUTOSAVE_INTERVAL, wxT("Autosave Interval"));
-    AddCheckboxWithCaption(this, sizer1, BEEP_ON_COLLISIONS, wxT("Beep on animation collisions"));
-    AddCheckboxWithCaption(this, sizer1, SCROLL_NATURAL, wxT("Scroll Direction: Natural"));
-    AddCheckboxWithCaption(this, sizer1, SETSHEET_UNDO, wxT("Set Sheet is undo-able"));
-    AddCheckboxWithCaption(this, sizer1, SELECTION_UNDO, wxT("Point selection is undo-able"));
+    SetSizer(VStack([this](auto& sizer) {
+        NamedVBoxStack(this, sizer, "General settings", [this](auto& sizer) {
+            VStack(sizer, [this](auto& sizer) {
+                CreateTextboxWithCaption(this, sizer, AUTOSAVE_INTERVAL, "Autosave Interval");
+                CreateCheckboxWithCaption(this, sizer, BEEP_ON_COLLISIONS, "Beep on animation collisions");
+                CreateCheckboxWithCaption(this, sizer, SCROLL_NATURAL, "Scroll Direction: Natural");
+                CreateCheckboxWithCaption(this, sizer, SETSHEET_UNDO, "Set Sheet is undo-able");
+                CreateCheckboxWithCaption(this, sizer, SELECTION_UNDO, "Point selection is undo-able");
+            });
+        });
+    }));
 
     TransferDataToWindow();
 }
@@ -114,4 +111,3 @@ bool GeneralSetup::ClearValuesToDefault()
     TransferDataToWindow();
     return true;
 }
-

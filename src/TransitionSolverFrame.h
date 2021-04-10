@@ -1,12 +1,11 @@
+#pragma once
 //
-//  e7_transition_solver_ui.h
+//  TransitionSolverFrame.h
 //  CalChart
 //
 //  Created by Kevin Durand on 6/24/17.
 //
 //
-
-#pragma once
 
 #include <wx/dialog.h>
 #include <wx/docview.h>
@@ -14,20 +13,7 @@
 #include "CalChartDoc.h"
 #include "e7_transition_solver.h"
 
-// View for linking CalChartDoc with the Transition Solver
-class TransitionSolverView : public wxView {
-    using super = wxView;
-
-public:
-    TransitionSolverView();
-    ~TransitionSolverView();
-
-    virtual void OnDraw(wxDC* dc) override;
-    virtual void OnUpdate(wxView* sender, wxObject* hint = (wxObject*)NULL) override;
-
-    void ApplyTransitionSolution(CalChart::TransitionSolverResult solution);
-    void SelectMarchers(std::set<unsigned> marchers);
-};
+class TransitionSolverView;
 
 // TransitionSolverFrame
 // This offers a UI for editing the options that will affect transition calculation
@@ -45,24 +31,8 @@ public:
     ~TransitionSolverFrame();
 
     void OnCloseWindow(wxCommandEvent& event);
-    void OnApply(wxCommandEvent& event);
     void OnSolutionCompleted(wxEvent& event);
-    void OnChooseAlgorithm(wxCommandEvent& event);
-    void OnEditAllowedCommands(wxCommandEvent& event);
-    void OnAddNewGroup(wxCommandEvent& event);
-    void OnRemoveGroup(wxCommandEvent& event);
-    void OnSelectGroup(wxCommandEvent& event);
     void OnNullEvent(wxCommandEvent& event);
-    void OnClearMembers(wxCommandEvent& event);
-    void OnSetMembers(wxCommandEvent& event);
-    void OnAddMembers(wxCommandEvent& event);
-    void OnRemoveMembers(wxCommandEvent& event);
-    void OnSelectMembers(wxCommandEvent& event);
-    void OnClearDestinations(wxCommandEvent& event);
-    void OnSetDestinations(wxCommandEvent& event);
-    void OnAddDestinations(wxCommandEvent& event);
-    void OnRemoveDestinations(wxCommandEvent& event);
-    void OnSelectDestinations(wxCommandEvent& event);
 
     void Update() override;
     void SyncControlsWithCurrentState();
@@ -78,22 +48,25 @@ private:
         long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
     void CreateControls();
 
+    void OnApply();
     void Apply();
+    void EditAllowedCommands();
     std::pair<std::vector<std::string>, std::vector<std::string>> ValidateForTransitionSolver();
     void ChooseAlgorithm(CalChart::TransitionSolverParams::AlgorithmIdentifier algorithm);
     void SetAllowedCommands(std::vector<unsigned> commandIndices);
     void AddNewGroup(std::string groupName);
     void RemoveGroup(unsigned groupIndex);
+    void SelectGroup();
     void SelectGroup(unsigned groupIndex);
     void UnselectGroup();
     void ClearMembers();
-    void SetMembers(std::set<unsigned> marchers);
-    void AddMembers(std::set<unsigned> marchers);
-    void RemoveMembers(std::set<unsigned> marchers);
+    void SetMembers(std::set<int> marchers);
+    void AddMembers(std::set<int> marchers);
+    void RemoveMembers(std::set<int> marchers);
     void ClearDestinations();
-    void SetDestinations(std::set<unsigned> marchers);
-    void AddDestinations(std::set<unsigned> marchers);
-    void RemoveDestinations(std::set<unsigned> marchers);
+    void SetDestinations(std::set<int> marchers);
+    void AddDestinations(std::set<int> marchers);
+    void RemoveDestinations(std::set<int> marchers);
 
     std::vector<CalChart::TransitionSolverParams::MarcherInstruction> mInstructionOptions;
     int mSelectedGroup;

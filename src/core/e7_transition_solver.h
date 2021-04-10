@@ -77,9 +77,9 @@ struct TransitionSolverParams {
             END
         };
 
-        MarcherInstruction()
-            : movementPattern(EWNS)
-            , waitBeats(0){};
+        MarcherInstruction(Pattern p = EWNS, unsigned beats = 0)
+            : movementPattern(p)
+            , waitBeats(beats){};
 
         /*!
          * @brief The movement pattern that will be assigned to any

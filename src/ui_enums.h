@@ -106,7 +106,6 @@ enum {
     CALCHART__anim_gotosheet,
     CALCHART__anim_gotobeat,
     CALCHART__anim_play_button,
-    CALCHART__anim_toggle_anim_omni,
 
     CALCHART__FollowMarcher,
     CALCHART__SaveCameraAngle,

@@ -27,6 +27,7 @@
 #include "CCOmniviewCanvas.h"
 #include "AnimationView.h"
 #include "CalChartDoc.h"
+#include "basic_ui.h"
 #include "cc_omniview_constants.h"
 #include "confgr.h"
 #include "draw.h"
@@ -596,8 +597,8 @@ void CCOmniviewCanvas::Init()
 
 void CCOmniviewCanvas::CreateControls()
 {
-    auto topSizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topSizer);
+    SetSizer(VStack([this](auto sizer) {
+    }));
 }
 
 void CCOmniviewCanvas::SetView(AnimationView* view)
@@ -943,9 +944,9 @@ void CCOmniviewCanvas::OnCmd_FollowMarcher(int which)
     Refresh();
 }
 
-void CCOmniviewCanvas::OnCmd_SaveCameraAngle(size_t which) {}
+void CCOmniviewCanvas::OnCmd_SaveCameraAngle(size_t which) { }
 
-void CCOmniviewCanvas::OnCmd_GoToCameraAngle(size_t which) {}
+void CCOmniviewCanvas::OnCmd_GoToCameraAngle(size_t which) { }
 
 void CCOmniviewCanvas::OnCmd_ToggleCrowd()
 {

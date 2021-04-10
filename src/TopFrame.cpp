@@ -22,10 +22,10 @@
 
 #include "TopFrame.h"
 #include "CalChartApp.h"
+#include "CalChartPreferences.h"
 #include "CalChartSizes.h"
 #include "basic_ui.h"
 #include "calchart.xbm"
-#include "CalChartPreferences.h"
 #include "ccvers.h"
 
 #include <wx/dnd.h>
@@ -89,33 +89,30 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     SetDropTarget(new TopFrameDropTarget(manager));
 
     // create a sizer and populate
-    auto topSizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topSizer);
+    SetSizer(VStack([this](auto sizer) {
+        // add a horizontal bar to make things clear:
+        AddToSizerBasic(sizer, BitmapWithBandIcon(this, GetLogoSize()));
+        AddToSizerBasic(sizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), GetTitleFontSize()));
+        AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
 
-    // add a horizontal bar to make things clear:
-    AddToSizerBasic(topSizer, BitmapWithBandIcon(this, GetLogoSize()));
-    AddToSizerBasic(topSizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), GetTitleFontSize()));
-    AddToSizerBasic(topSizer, LineWithLength(this, GetLogoLineSize()));
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            AddToSizerBasic(sizer, LinkStringWithSize(this, "Check for latest.", "https://sourceforge.net/projects/calchart/", GetSubTitleFontSize()));
+            AddToSizerBasic(sizer, TextStringWithSize(this, "        ", GetSubTitleFontSize()));
+            AddToSizerBasic(sizer, LinkStringWithSize(this, "Report an issue.", "https://github.com/calband/calchart/issues/new", GetSubTitleFontSize()));
+        });
+        AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
+        AddToSizerBasic(sizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", GetSubTitleFontSize()));
+        AddToSizerBasic(sizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", GetSubSubTitleFontSize()));
 
-    {
-        auto lineSizer = new wxBoxSizer(wxHORIZONTAL);
-        AddToSizerBasic(topSizer, lineSizer);
-        AddToSizerBasic(lineSizer, LinkStringWithSize(this, "Check for latest.", "https://sourceforge.net/projects/calchart/", GetSubTitleFontSize()));
-        AddToSizerBasic(lineSizer, TextStringWithSize(this, "        ", GetSubTitleFontSize()));
-        AddToSizerBasic(lineSizer, LinkStringWithSize(this, "Report an issue.", "https://github.com/calband/calchart/issues/new", GetSubTitleFontSize()));
-    }
-    AddToSizerBasic(topSizer, LineWithLength(this, GetLogoLineSize()));
-    AddToSizerBasic(topSizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", GetSubTitleFontSize()));
-    AddToSizerBasic(topSizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", GetSubSubTitleFontSize()));
-
-    // now fit the frame to the elements
-    topSizer->Fit(this);
-    topSizer->SetSizeHints(this);
+        // now fit the frame to the elements
+        sizer->Fit(this);
+        sizer->SetSizeHints(this);
+    }));
 
     Show(true);
 }
 
-TopFrame::~TopFrame() {}
+TopFrame::~TopFrame() { }
 
 void TopFrame::OnCmdAbout(wxCommandEvent& event) { TopFrame::About(); }
 

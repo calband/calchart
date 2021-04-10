@@ -158,4 +158,4 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent& event)
 }
 
 // We have a empty erase background to improve redraw performance.
-void ColorSetupCanvas::OnEraseBackground(wxEraseEvent& event) {}
+void ColorSetupCanvas::OnEraseBackground(wxEraseEvent& event) { }

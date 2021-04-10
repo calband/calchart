@@ -179,4 +179,4 @@ CalChart::ShowMode CalChartApp::GetShowMode(wxString const& which)
     return GetConfigShowMode(which);
 }
 
-void CalChartApp::ExitAppAsClient() {}
+void CalChartApp::ExitAppAsClient() { }

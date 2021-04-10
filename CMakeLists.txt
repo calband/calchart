@@ -163,14 +163,6 @@ endif()
 
 # CalChart
 file (
-  GLOB CalChartSources "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-  )
-
-file (
-  GLOB CalChartHeaders "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
-  )
-
-file (
   GLOB CalChartDocs
     "${CMAKE_CURRENT_SOURCE_DIR}/docs/*"
   )
@@ -252,6 +244,12 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintContinuityEditor.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TopFrame.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TopFrame.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverFrame.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverFrame.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverProgressFrame.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverProgressFrame.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverView.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverView.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/background_image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/background_image.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/basic_ui.cpp
@@ -264,8 +262,6 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw_utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/e7_transition_solver_ui.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/e7_transition_solver_ui.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/field_canvas_shapes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/field_canvas_shapes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ghost_module.cpp

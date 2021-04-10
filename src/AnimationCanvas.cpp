@@ -22,6 +22,7 @@
 
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
+#include "basic_ui.h"
 #include "cc_coord.h"
 #include "confgr.h"
 #include "ui_enums.h"
@@ -52,8 +53,8 @@ void AnimationCanvas::Init()
 
 void AnimationCanvas::CreateControls()
 {
-    auto topSizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topSizer);
+    SetSizer(VStack([this](auto sizer) {
+    }));
 }
 
 bool AnimationCanvas::GetUseSprites() const

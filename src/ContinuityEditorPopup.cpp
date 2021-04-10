@@ -53,29 +53,21 @@ ContinuityEditorPopup::ContinuityEditorPopup(wxString const& whatError, wxWindow
 
 void ContinuityEditorPopup::CreateControls()
 {
-    // create a sizer for laying things out top down:
-    auto topsizer = new wxBoxSizer(wxVERTICAL);
-    SetSizer(topsizer);
+    SetSizer(VStack([this](auto sizer) {
+        CreateText(this, sizer, mWhatError);
 
-    auto top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer);
+        mUserInput = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(60, 100));
+        sizer->Add(mUserInput, 0, wxGROW | wxALL, 5);
 
-    auto staticText = new wxStaticText(this, wxID_STATIC, mWhatError, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    top_button_sizer->Add(staticText, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+        // add a horizontal bar to make things clear:
+        CreateHLine(this, sizer);
 
-    mUserInput = new FancyTextWin(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(60, 100));
-    topsizer->Add(mUserInput, 0, wxGROW | wxALL, 5);
-
-    // add a horizontal bar to make things clear:
-    topsizer->Add(new wxStaticLine(this, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxGROW | wxALL, 5);
-
-    // add a discard, done
-    top_button_sizer = new wxBoxSizer(wxHORIZONTAL);
-    topsizer->Add(top_button_sizer);
-    auto button = new wxButton(this, wxID_CANCEL, wxT("&Cancel"));
-    top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-    button = new wxButton(this, wxID_OK, wxT("Done"));
-    top_button_sizer->Add(button, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+        // add a discard, done
+        HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
+            CreateButton(this, sizer, wxID_CANCEL, "&Cancel");
+            CreateButton(this, sizer, wxID_OK, "Done");
+        });
+    }));
 }
 
 void ContinuityEditorPopup::SetValue(wxString const& value, int line, int column)

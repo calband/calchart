@@ -244,4 +244,4 @@ void CustomListViewPanel::OnMoveEntry(int start_cell, int end_cell)
 {
 }
 
-void CustomListViewPanel::OnEraseBackground(wxEraseEvent& event) {}
+void CustomListViewPanel::OnEraseBackground(wxEraseEvent& event) { }

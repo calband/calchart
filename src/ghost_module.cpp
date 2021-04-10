@@ -14,7 +14,8 @@ CalChart::Sheet const* GhostModule::getGhostSheet(CalChartDoc const* doc, int cu
     if ((doc == nullptr) || (mCurrentSource == disabled)) {
         return nullptr;
     }
-    auto targetSheet = (mCurrentSource == next) ? currentSheet + 1 : (mCurrentSource == previous) ? currentSheet - 1 : mWhich;
+    auto targetSheet = (mCurrentSource == next) ? currentSheet + 1 : (mCurrentSource == previous) ? currentSheet - 1
+                                                                                                  : mWhich;
     if (targetSheet >= 0 && targetSheet < doc->GetNumSheets()) {
         return &(*(doc->GetNthSheet(targetSheet)));
     }

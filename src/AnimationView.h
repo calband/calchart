@@ -22,8 +22,8 @@
 */
 
 #include "draw_utils.h"
-#include <map>
 #include <array>
+#include <map>
 #include <wx/docview.h>
 
 class AnimationPanel;

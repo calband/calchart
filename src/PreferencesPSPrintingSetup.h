@@ -50,7 +50,7 @@ public:
         Init();
         Create(parent, id, caption, pos, size, style);
     }
-    virtual ~PSPrintingSetUp() {}
+    virtual ~PSPrintingSetUp() { }
 
     virtual void Init();
     virtual void CreateControls();
