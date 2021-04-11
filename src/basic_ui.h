@@ -46,7 +46,7 @@ static constexpr auto kInstruments = {
     "Mello",
     "Trombone",
     "Baritone",
-    "Basses",
+    "Sousaphone",
     "Snare",
     "Bass Drum",
     "Quad Drum",

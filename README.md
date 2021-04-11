@@ -69,7 +69,25 @@ If you need to regenerate the help documentation, see the [README-docs.txt](READ
 
 # Release notes
 
-## Release notes for 3.6
+## Release notes for 3.6.1
+
+Features addressed in this release:
+
+* [#326](../../issues/326) Improving click and drag by not unselecting groups.
+* [#327](../../issues/327) Adding sprites to Animation screen.
+* [#331](../../issues/331) Adding ability to label Instruments
+
+Bugs addressed in this release:
+
+* [#323](../../issues/323) cannot open old calchart files when they have images.
+* [#324](../../issues/324) Transition solver doesn't seem to add groups on Windows.
+* [#328](../../issues/328) Point picker crashes if you open, close then quit a show
+
+Other changes:
+
+* [#322](../../issues/322) Increment wxWidgets to 3.1.4
+
+## Release notes for 3.6.0
 
 Features addressed in this release:
 
