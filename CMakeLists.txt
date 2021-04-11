@@ -114,7 +114,7 @@ else ()
 target_compile_options (calchart_core PRIVATE -Werror -Wall -Wextra)
 endif ()
 
-set_target_properties (calchart_core PROPERTIES CXX_STANDARD 17)
+set_target_properties (calchart_core PROPERTIES CXX_STANDARD 20)
 
 target_include_directories (
   calchart_core

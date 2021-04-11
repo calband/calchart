@@ -82,7 +82,9 @@ You'll need to be logged in as Administrator to modify the files.
 
 10. Repeat for Install-CalChart-$CCVER.exe.  Click on zip and edit the file details to signify its platform is Windows and set the release_notes for the file.
 
-11. Update https://github.com/calband/calchart/releases
+11. Update https://github.com/calband/calchart/releases with Readme version updates.
 
-12. Have a cookie.
+12. Update https://github.com/calband/calchart/milestone by closing the shipped milestone and starting the next one.
+
+13. Have a cookie.
 

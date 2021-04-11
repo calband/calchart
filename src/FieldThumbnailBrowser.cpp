@@ -227,6 +227,10 @@ void FieldThumbnailBrowser::HandleMouseDown(wxMouseEvent& event)
 
 void FieldThumbnailBrowser::HandleSizeEvent(wxSizeEvent& event)
 {
-    mLayoutHorizontal = float(event.m_size.x) / float(event.m_size.y) > 1;
+    auto mode_size = mView->GetShowFieldSize();
+    auto ratioMode = mode_size.y ? mode_size.x / float(mode_size.y) : 0;
+    auto ratioSize = event.m_size.y ? event.m_size.x / float(event.m_size.y) : 0;
+
+    mLayoutHorizontal = ratioSize > ratioMode;
     OnUpdate();
 }
