@@ -149,9 +149,10 @@ void replace_helper2(R replace, UP& new_value, T& t, Ts&... ts)
     }
 }
 
-template <typename P, typename R, typename UP, typename T, typename... Ts>
+template <int N, typename P, typename R, typename UP, typename T, typename... Ts>
 void replace_helper(P parent, R replace, UP& new_value, T& t, Ts&... ts)
 {
+    static_assert(N == (sizeof...(Ts) + 1));
     replace_helper2(replace, new_value, t, ts...);
     SetParentPtr_helper(parent, t, ts...);
 }
@@ -1022,7 +1023,7 @@ std::unique_ptr<ContValue> ContValueAdd::clone() const
 
 void ContValueAdd::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, val1, val2);
+    replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
 std::vector<uint8_t> ContValueAdd::Serialize() const
@@ -1095,7 +1096,7 @@ std::unique_ptr<ContValue> ContValueSub::clone() const
 
 void ContValueSub::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, val1, val2);
+    replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
 std::vector<uint8_t> ContValueSub::Serialize() const
@@ -1168,7 +1169,7 @@ std::unique_ptr<ContValue> ContValueMult::clone() const
 
 void ContValueMult::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, val1, val2);
+    replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
 std::vector<uint8_t> ContValueMult::Serialize() const
@@ -1247,7 +1248,7 @@ std::unique_ptr<ContValue> ContValueDiv::clone() const
 
 void ContValueDiv::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, val1, val2);
+    replace_helper<NumParts>(this, which, v, val1, val2);
 }
 
 std::vector<uint8_t> ContValueDiv::Serialize() const
@@ -1315,7 +1316,7 @@ std::unique_ptr<ContValue> ContValueNeg::clone() const
 
 void ContValueNeg::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, val);
+    replace_helper<NumParts>(this, which, v, val);
 }
 
 std::vector<uint8_t> ContValueNeg::Serialize() const
@@ -1546,7 +1547,7 @@ std::unique_ptr<ContValue> ContFuncDir::clone() const
 
 void ContFuncDir::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContFuncDir::Serialize() const
@@ -1622,7 +1623,7 @@ std::unique_ptr<ContValue> ContFuncDirFrom::clone() const
 
 void ContFuncDirFrom::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt_start, pnt_end);
+    replace_helper<NumParts>(this, which, v, pnt_start, pnt_end);
 }
 
 std::vector<uint8_t> ContFuncDirFrom::Serialize() const
@@ -1694,7 +1695,7 @@ std::unique_ptr<ContValue> ContFuncDist::clone() const
 
 void ContFuncDist::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContFuncDist::Serialize() const
@@ -1766,7 +1767,7 @@ std::unique_ptr<ContValue> ContFuncDistFrom::clone() const
 
 void ContFuncDistFrom::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt_start, pnt_end);
+    replace_helper<NumParts>(this, which, v, pnt_start, pnt_end);
 }
 
 std::vector<uint8_t> ContFuncDistFrom::Serialize() const
@@ -1858,7 +1859,7 @@ std::unique_ptr<ContValue> ContFuncEither::clone() const
 
 void ContFuncEither::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, dir1, dir2, pnt);
+    replace_helper<NumParts>(this, which, v, dir1, dir2, pnt);
 }
 
 std::vector<uint8_t> ContFuncEither::Serialize() const
@@ -1931,7 +1932,7 @@ std::unique_ptr<ContValue> ContFuncOpp::clone() const
 
 void ContFuncOpp::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, dir);
+    replace_helper<NumParts>(this, which, v, dir);
 }
 
 std::vector<uint8_t> ContFuncOpp::Serialize() const
@@ -2006,7 +2007,7 @@ std::unique_ptr<ContValue> ContFuncStep::clone() const
 
 void ContFuncStep::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, blksize, pnt);
+    replace_helper<NumParts>(this, which, v, numbeats, blksize, pnt);
 }
 
 std::vector<uint8_t> ContFuncStep::Serialize() const
@@ -2320,7 +2321,7 @@ std::unique_ptr<ContProcedure> ContProcCM::clone() const
 
 void ContProcCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt1, pnt2, stps, dir1, dir2, numbeats);
+    replace_helper<NumParts>(this, which, v, pnt1, pnt2, stps, dir1, dir2, numbeats);
 }
 
 std::vector<uint8_t> ContProcCM::Serialize() const
@@ -2438,7 +2439,7 @@ std::unique_ptr<ContProcedure> ContProcDMCM::clone() const
 
 void ContProcDMCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt1, pnt2, numbeats);
+    replace_helper<NumParts>(this, which, v, pnt1, pnt2, numbeats);
 }
 
 std::vector<uint8_t> ContProcDMCM::Serialize() const
@@ -2542,7 +2543,7 @@ std::unique_ptr<ContProcedure> ContProcDMHS::clone() const
 
 void ContProcDMHS::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContProcDMHS::Serialize() const
@@ -2621,7 +2622,7 @@ std::unique_ptr<ContProcedure> ContProcEven::clone() const
 
 void ContProcEven::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, stps, pnt);
+    replace_helper<NumParts>(this, which, v, stps, pnt);
 }
 
 std::vector<uint8_t> ContProcEven::Serialize() const
@@ -2708,7 +2709,7 @@ std::unique_ptr<ContProcedure> ContProcEWNS::clone() const
 
 void ContProcEWNS::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContProcEWNS::Serialize() const
@@ -2879,7 +2880,7 @@ std::unique_ptr<ContProcedure> ContProcFountain::clone() const
 
 void ContProcFountain::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, dir1, dir2, stepsize1, stepsize2, pnt);
+    replace_helper<NumParts>(this, which, v, dir1, dir2, stepsize1, stepsize2, pnt);
 }
 
 std::vector<uint8_t> ContProcFountain::Serialize() const
@@ -2982,7 +2983,7 @@ std::unique_ptr<ContProcedure> ContProcFM::clone() const
 
 void ContProcFM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, stps, dir);
+    replace_helper<NumParts>(this, which, v, stps, dir);
 }
 
 std::vector<uint8_t> ContProcFM::Serialize() const
@@ -3058,7 +3059,7 @@ std::unique_ptr<ContProcedure> ContProcFMTO::clone() const
 
 void ContProcFMTO::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 static inline Coord::units roundcoord(Coord::units a, Coord::units mod)
@@ -3150,7 +3151,7 @@ std::unique_ptr<ContProcedure> ContProcGrid::clone() const
 
 void ContProcGrid::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, grid);
+    replace_helper<NumParts>(this, which, v, grid);
 }
 
 std::vector<uint8_t> ContProcGrid::Serialize() const
@@ -3243,7 +3244,7 @@ std::unique_ptr<ContProcedure> ContProcHSCM::clone() const
 
 void ContProcHSCM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt1, pnt2, numbeats);
+    replace_helper<NumParts>(this, which, v, pnt1, pnt2, numbeats);
 }
 
 std::vector<uint8_t> ContProcHSCM::Serialize() const
@@ -3346,7 +3347,7 @@ std::unique_ptr<ContProcedure> ContProcHSDM::clone() const
 
 void ContProcHSDM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContProcHSDM::Serialize() const
@@ -3416,7 +3417,7 @@ std::unique_ptr<ContProcedure> ContProcMagic::clone() const
 
 void ContProcMagic::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContProcMagic::Serialize() const
@@ -3525,7 +3526,7 @@ std::unique_ptr<ContProcedure> ContProcMarch::clone() const
 
 void ContProcMarch::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, stpsize, stps, dir, facedir);
+    replace_helper<NumParts>(this, which, v, stpsize, stps, dir, facedir);
 }
 
 std::vector<uint8_t> ContProcMarch::Serialize() const
@@ -3613,7 +3614,7 @@ std::unique_ptr<ContProcedure> ContProcMT::clone() const
 
 void ContProcMT::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, numbeats, dir);
+    replace_helper<NumParts>(this, which, v, numbeats, dir);
 }
 
 std::vector<uint8_t> ContProcMT::Serialize() const
@@ -3686,7 +3687,7 @@ std::unique_ptr<ContProcedure> ContProcMTRM::clone() const
 
 void ContProcMTRM::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, dir);
+    replace_helper<NumParts>(this, which, v, dir);
 }
 
 std::vector<uint8_t> ContProcMTRM::Serialize() const
@@ -3771,7 +3772,7 @@ std::unique_ptr<ContProcedure> ContProcNSEW::clone() const
 
 void ContProcNSEW::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, pnt);
+    replace_helper<NumParts>(this, which, v, pnt);
 }
 
 std::vector<uint8_t> ContProcNSEW::Serialize() const
@@ -3865,7 +3866,7 @@ std::unique_ptr<ContProcedure> ContProcRotate::clone() const
 
 void ContProcRotate::replace(ContToken const* which, std::unique_ptr<ContToken> v)
 {
-    replace_helper(this, which, v, ang, stps, pnt);
+    replace_helper<NumParts>(this, which, v, ang, stps, pnt);
 }
 
 std::vector<uint8_t> ContProcRotate::Serialize() const
