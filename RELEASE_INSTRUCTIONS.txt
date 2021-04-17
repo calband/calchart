@@ -8,7 +8,7 @@ Checklist
 
 How to release calchart:
 
-The current calchart version is 3.6.1.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.6.1)
+The current calchart version is 3.6.2.  In all commands below, substitute that number for $CCVER (meaning when you read $CCVER, type 3.6.2)
 
 0.1 Increment the CalChart_VERSION in CMakeLists.txt to CCVER
 
@@ -58,14 +58,14 @@ The final product is build/CalChart-$CCVER.dmg
 ---
 
 2. Tag the depot
-$ git tag -a v3.6.1 -m "calchart-3.6.1"
-$ git push origin v3.6.1
+$ git tag -a v3.6.2 -m "calchart-3.6.2"
+$ git push origin v3.6.2
 
 3. Go to a temporary directory on your system to recheck at the tag.  This is to avoid having any unwanted files
 $ cd /tmp
 $ git clone --recursive https://github.com/calband/calchart.git calchart
 $ cd calchart
-$ git checkout v3.6.1
+$ git checkout v3.6.2
 
 4. Rebuild the release now that you have the tag (repeat instructions for step 1)
 
