@@ -321,6 +321,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -348,6 +349,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -375,6 +377,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -402,6 +405,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> val1, val2;
 };
 
@@ -428,6 +432,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContValue> val;
 };
 
@@ -512,6 +517,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -539,6 +545,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContPoint> pnt_start, pnt_end;
 };
 
@@ -565,6 +572,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -592,6 +600,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContPoint> pnt_start, pnt_end;
 };
 
@@ -619,6 +628,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 3;
     std::unique_ptr<ContValue> dir1, dir2;
     std::unique_ptr<ContPoint> pnt;
 };
@@ -646,6 +656,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContValue> dir;
 };
 
@@ -673,6 +684,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 3;
     std::unique_ptr<ContValue> numbeats, blksize;
     std::unique_ptr<ContPoint> pnt;
 };
@@ -732,6 +744,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValueVar> var;
     std::unique_ptr<ContValue> val;
 };
@@ -782,6 +795,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 6;
     std::unique_ptr<ContPoint> pnt1, pnt2;
     std::unique_ptr<ContValue> stps, dir1, dir2, numbeats;
 };
@@ -810,6 +824,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 3;
     std::unique_ptr<ContPoint> pnt1, pnt2;
     std::unique_ptr<ContValue> numbeats;
 };
@@ -838,6 +853,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -865,6 +881,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> stps;
     std::unique_ptr<ContPoint> pnt;
 };
@@ -893,6 +910,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -936,6 +954,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 5;
     std::unique_ptr<ContValue> dir1, dir2;
     std::unique_ptr<ContValue> stepsize1, stepsize2;
     std::unique_ptr<ContPoint> pnt;
@@ -965,6 +984,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> stps, dir;
 };
 
@@ -992,6 +1012,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1019,6 +1040,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContValue> grid;
 };
 
@@ -1046,6 +1068,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 3;
     std::unique_ptr<ContPoint> pnt1, pnt2;
     std::unique_ptr<ContValue> numbeats;
 };
@@ -1074,6 +1097,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1101,6 +1125,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1140,6 +1165,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 4;
     std::unique_ptr<ContValue> stpsize, stps, dir, facedir;
 };
 
@@ -1167,6 +1193,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 2;
     std::unique_ptr<ContValue> numbeats, dir;
 };
 
@@ -1194,6 +1221,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContValue> dir;
 };
 
@@ -1221,6 +1249,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 1;
     std::unique_ptr<ContPoint> pnt;
 };
 
@@ -1248,6 +1277,7 @@ protected:
     }
 
 private:
+    static constexpr auto NumParts = 3;
     std::unique_ptr<ContValue> ang, stps;
     std::unique_ptr<ContPoint> pnt;
 };
