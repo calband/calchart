@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 
 namespace CalChart {
 

@@ -1,6 +1,6 @@
 #pragma once
 /*
- * animate.h
+ * CalChartAnimation.h
  * Classes for animating shows
  */
 
@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate.h"
+#include "CalChartAnimation.h"
 #include "animate_types.h"
 #include "cc_show.h"
 
@@ -34,50 +34,32 @@ namespace CalChart {
 
 class ContProcedure;
 class ContToken;
-class AnimateCommand;
+class AnimationCommand;
 using AnimationVariables = std::array<std::map<unsigned, float>, NUMCONTVARS>;
-using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
-
-class AnimationErrors {
-public:
-    auto AnyErrors() const { return !mErrorMarkers.empty(); }
-    auto GetErrors() const { return mErrorMarkers; }
-    void RegisterError(AnimateError err, const ContToken* token, unsigned curr_pt,
-        SYMBOL_TYPE contsymbol);
-    void RegisterError(AnimateError err, int line, int col, unsigned curr_pt,
-        SYMBOL_TYPE contsymbol);
-
-    bool operator==(AnimationErrors const& rhs) const
-    {
-        return mErrorMarkers == rhs.mErrorMarkers;
-    }
-
-private:
-    std::map<AnimateError, ErrorMarker> mErrorMarkers;
-};
+using AnimationCommands = std::vector<std::shared_ptr<AnimationCommand>>;
 
 struct AnimateState {
     Coord pt;
     unsigned beats_rem;
     AnimationVariables& mVars;
     AnimationErrors& error_markers;
-    AnimateCommands cmds;
+    AnimationCommands cmds;
 };
 
-class AnimateCompile {
+class AnimationCompile {
 public:
     // Compile a point
-    static AnimateCommands
+    static AnimationCommands
     Compile(const Show& show, AnimationVariables& variablesStates,
         AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
         unsigned pt_num, SYMBOL_TYPE cont_symbol,
         std::vector<std::unique_ptr<ContProcedure>> const& proc);
 
 private:
-    AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state);
+    AnimationCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state);
 
 public:
-    bool Append(std::shared_ptr<AnimateCommand> cmd, const ContToken* token);
+    bool Append(std::shared_ptr<AnimationCommand> cmd, const ContToken* token);
     void RegisterError(AnimateError err, const ContToken* token) const;
 
     float GetVarValue(int varnum, const ContToken* token) const;

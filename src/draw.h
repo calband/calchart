@@ -35,7 +35,7 @@ class Sheet;
 class Textline;
 using Textline_list = std::vector<Textline>;
 class Point;
-class Coord;
+struct Coord;
 struct DrawCommand;
 }
 class CalChartDoc;

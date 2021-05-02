@@ -1,7 +1,7 @@
 #pragma once
 /*
- * animate.h
- * Classes for animating shows
+ * CalChartAnimationCommand.h
+ * Classes for the Animation Commands
  */
 
 /*
@@ -21,19 +21,31 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate.h"
+#include "animate_types.h"
 #include <nlohmann/json.hpp>
+
+/**
+ * Animation Commands
+ * Continuities can be broken down into 3 distinct types:
+ *  MarkTime: A direction to be facing
+ *  Moving: A vector along which to be moving (indicating how far to move each point)
+ *  Rotate: A point which to rotate, radius, start and end angles
+ * AnimationCommand is an object that represents a particular part of a continuity.  When we decompose
+ * continuities into these parts, we can then "transform" a point from a starting position to the end of the
+ * Animation by "stepping" it along each AnimationCommand
+ */
 
 namespace CalChart {
 
 struct DrawCommand;
+struct Coord;
 
-class AnimateCommand {
+class AnimationCommand {
 public:
-    AnimateCommand(unsigned beats);
-    virtual ~AnimateCommand() = default;
+    AnimationCommand(unsigned beats);
+    virtual ~AnimationCommand() = default;
 
-    virtual std::unique_ptr<AnimateCommand> clone() const = 0;
+    virtual std::unique_ptr<AnimationCommand> clone() const = 0;
 
     // returns false if end of command
     virtual bool Begin(Coord& pt);
@@ -56,43 +68,43 @@ public:
     virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
 
     // when we want to have the path drawn:
-    virtual DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const;
+    virtual DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const;
 
     /*!
      * @brief json  that represent this movement in an Online Viewer '.viewer' file.
      * @param start The position at which this movement begins.
      */
-    virtual nlohmann::json toOnlineViewerJSON(const Coord& start) const = 0;
+    virtual nlohmann::json toOnlineViewerJSON(Coord start) const = 0;
 
 protected:
     unsigned mNumBeats;
     unsigned mBeat;
 };
 
-class AnimateCommandMT : public AnimateCommand {
+class AnimationCommandMT : public AnimationCommand {
 public:
-    AnimateCommandMT(unsigned beats, float direction);
-    virtual ~AnimateCommandMT() = default;
+    AnimationCommandMT(unsigned beats, float direction);
+    virtual ~AnimationCommandMT() = default;
 
-    std::unique_ptr<AnimateCommand> clone() const override;
+    std::unique_ptr<AnimationCommand> clone() const override;
 
     AnimateDir Direction() const override;
     float RealDirection() const override;
 
-    nlohmann::json toOnlineViewerJSON(const Coord& start) const override;
+    nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
 protected:
     AnimateDir dir;
     float realdir;
 };
 
-class AnimateCommandMove : public AnimateCommandMT {
+class AnimationCommandMove : public AnimationCommandMT {
 public:
-    AnimateCommandMove(unsigned beats, Coord movement);
-    AnimateCommandMove(unsigned beats, Coord movement, float direction);
-    virtual ~AnimateCommandMove() = default;
+    AnimationCommandMove(unsigned beats, Coord movement);
+    AnimationCommandMove(unsigned beats, Coord movement, float direction);
+    virtual ~AnimationCommandMove() = default;
 
-    std::unique_ptr<AnimateCommand> clone() const override;
+    std::unique_ptr<AnimationCommand> clone() const override;
 
     bool NextBeat(Coord& pt) override;
     bool PrevBeat(Coord& pt) override;
@@ -103,21 +115,21 @@ public:
     float MotionDirection() const override;
     void ClipBeats(unsigned beats) override;
 
-    DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const override;
+    DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const override;
 
-    nlohmann::json toOnlineViewerJSON(const Coord& start) const override;
+    nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
 private:
     Coord mVector;
 };
 
-class AnimateCommandRotate : public AnimateCommand {
+class AnimationCommandRotate : public AnimationCommand {
 public:
-    AnimateCommandRotate(unsigned beats, Coord cntr, float rad, float ang1,
+    AnimationCommandRotate(unsigned beats, Coord cntr, float rad, float ang1,
         float ang2, bool backwards = false);
-    virtual ~AnimateCommandRotate() = default;
+    virtual ~AnimationCommandRotate() = default;
 
-    std::unique_ptr<AnimateCommand> clone() const override;
+    std::unique_ptr<AnimationCommand> clone() const override;
 
     bool NextBeat(Coord& pt) override;
     bool PrevBeat(Coord& pt) override;
@@ -129,9 +141,9 @@ public:
     float RealDirection() const override;
     void ClipBeats(unsigned beats) override;
 
-    DrawCommand GenCC_DrawCommand(const Coord& pt, const Coord& offset) const override;
+    DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const override;
 
-    nlohmann::json toOnlineViewerJSON(const Coord& start) const override;
+    nlohmann::json toOnlineViewerJSON(Coord start) const override;
 
 private:
     Coord mOrigin;

@@ -1,8 +1,8 @@
+#pragma once
 /*
- * background_image.h
- * Header for background image
+ * BackgroundImage.h
+ * Maintains the background image data
  */
-
 /*
  Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
@@ -20,8 +20,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include <array>
 #include <memory>
 #include <wx/dc.h>
@@ -29,24 +27,25 @@
 
 class BackgroundImage {
 public:
-    BackgroundImage(const wxImage& image, int x, int y, int scaled_width, int scaled_height);
+    BackgroundImage(wxImage const& image, int x, int y, int scaled_width, int scaled_height);
 
-    bool MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const;
-    void OnMouseLeftDown(const wxMouseEvent& event, const wxDC& dc);
+    bool MouseClickIsHit(wxMouseEvent const& event, wxDC const& dc) const;
+    void OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc);
     // returns left, top, width, height
-    std::array<int, 4> OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc);
-    void OnMouseMove(const wxMouseEvent& event, const wxDC& dc);
+    std::array<int, 4> OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc);
+
+    void OnMouseMove(wxMouseEvent const& event, wxDC const& dc);
     void OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const;
 
 private:
-    static const long kCircleSize = 6;
+    static constexpr auto kCircleSize = 6;
 
     wxImage mImage;
     wxBitmap mBitmap;
-    wxCoord mBitmapX, mBitmapY;
+    wxPoint mBitmapPoint;
 
     // what type of background adjustments could we do
-    typedef enum {
+    enum class BackgroundAdjustType {
         kUpperLeft = 0,
         kUpper,
         kUpperRight,
@@ -57,21 +56,18 @@ private:
         kLower,
         kLowerRight,
         kLast,
-    } eBackgroundAdjustType;
-    eBackgroundAdjustType mBackgroundAdjustType;
-
-    class CalculateScaleAndMove {
-    public:
-        CalculateScaleAndMove(const wxPoint& startClick, wxCoord x, wxCoord y,
-            wxCoord width, wxCoord height,
-            eBackgroundAdjustType adjustType);
-        void operator()(wxCoord x, wxCoord y, wxCoord& topX, wxCoord& topY,
-            wxCoord& width, wxCoord& height);
-        wxPoint mStartClick;
-        wxCoord mLeft, mTop;
-        wxCoord mRight, mBottom;
-        float mAspectRatio;
-        eBackgroundAdjustType mAdjustType;
     };
-    std::shared_ptr<CalculateScaleAndMove> mScaleAndMove;
+    BackgroundAdjustType mBackgroundAdjustType;
+
+    struct CalculateScaleAndMove {
+    public:
+        CalculateScaleAndMove(wxPoint startClick, wxRect rect, BackgroundAdjustType adjustType);
+        
+        wxRect operator()(wxCoord x, wxCoord y, wxRect wxRect);
+        wxPoint mStartClick;
+        wxRect mRect;
+        float mAspectRatio;
+        BackgroundAdjustType mAdjustType;
+    };
+    std::unique_ptr<CalculateScaleAndMove> mScaleAndMove;
 };

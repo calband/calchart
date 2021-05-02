@@ -1,6 +1,6 @@
 #pragma once
 /*
- * animate.h
+ * CalChartAnimation.h
  * Classes for animating shows
  */
 
@@ -22,94 +22,28 @@
 */
 
 #include "animate_types.h"
-#include "cc_coord.h"
+#include "CalChartAnimationSheet.h"
+#include "CalChartCoord.h"
 
-#include <functional>
-#include <list>
 #include <map>
 #include <memory>
-#include <set>
 #include <vector>
 
 namespace CalChart {
 
-AnimateDir AnimGetDirFromAngle(float ang);
-
-class AnimateCommand;
-class AnimateSheet;
+class AnimationCommand;
+class AnimationSheet;
 struct DrawCommand;
 class Show;
 class AnimationErrors;
-class ContProcedure;
-
-typedef std::function<void(const std::string& notice)> NotifyStatus;
-typedef std::function<bool(
-    const std::map<AnimateError, ErrorMarker>& error_markers, size_t sheetnum,
-    const std::string& message)>
-    NotifyErrorList;
-
-using AnimateCommands = std::vector<std::shared_ptr<AnimateCommand>>;
-
-// AnimateSheet is a snapshot of CC_sheet
-class AnimateSheet {
-public:
-    AnimateSheet(const std::vector<Coord>& thePoints,
-        const std::vector<AnimateCommands>& theCommands,
-        const std::string& s, unsigned beats)
-        : mPoints(thePoints)
-        , mCommands(theCommands)
-        , name(s)
-        , numbeats(beats)
-    {
-    }
-
-    // make things copiable
-    AnimateSheet(AnimateSheet const&);
-    AnimateSheet& operator=(AnimateSheet);
-    AnimateSheet(AnimateSheet&&) noexcept;
-    AnimateSheet& operator=(AnimateSheet&&) noexcept;
-    void swap(AnimateSheet&) noexcept;
-
-    auto GetName() const { return name; }
-    auto GetNumBeats() const { return numbeats; }
-    auto GetPoints() const { return mPoints; }
-    auto GetCommands(int which) const { return mCommands.at(which); }
-    auto GetCommandsBegin(int which) const
-    {
-        return mCommands.at(which).begin();
-    }
-    auto GetCommandsBeginIndex(int /*which*/) const
-    {
-        return std::vector<AnimateCommands>::size_type(0);
-    }
-    auto GetCommandsEnd(int which) const
-    {
-        return mCommands.at(which).end();
-    }
-    auto GetCommandsEndIndex(int which) const
-    {
-        return mCommands.at(which).size();
-    }
-    auto GetCommandsAt(int which, int index) const
-    {
-        return mCommands.at(which).at(index);
-    }
-
-private:
-    std::vector<Coord> mPoints; // should probably be const
-    std::vector<AnimateCommands> mCommands;
-    std::string name;
-    unsigned numbeats;
-};
 
 class Animation {
 public:
     Animation(const Show& show);
     ~Animation();
 
-    // Returns true if changes made
     void GotoSheet(unsigned i);
-    void GotoAnimationSheet(unsigned i);
+    // Returns true if changes made
     bool PrevSheet();
     bool NextSheet();
 
@@ -121,7 +55,7 @@ public:
     // For drawing:
     struct animate_info_t {
         int index;
-        int mCollision;
+        CalChart::Coord::CollisionType mCollision;
         AnimateDir mDirection;
         float mRealDirection;
         Coord mPosition;
@@ -148,8 +82,8 @@ public:
     std::vector<DrawCommand> GenPathToDraw(unsigned whichSheet, unsigned point, const Coord& offset) const;
     Coord EndPosition(unsigned whichSheet, unsigned point, const Coord& offset) const;
 
-    std::vector<AnimateSheet>::const_iterator sheetsBegin() const;
-    std::vector<AnimateSheet>::const_iterator sheetsEnd() const;
+    std::vector<AnimationSheet>::const_iterator sheetsBegin() const;
+    std::vector<AnimationSheet>::const_iterator sheetsEnd() const;
 
 private:
     void BeginCmd(unsigned i);
@@ -158,11 +92,11 @@ private:
     void RefreshSheet();
     void FindAllCollisions();
 
-    std::vector<std::shared_ptr<AnimateCommand>> GetCommands(unsigned whichSheet, unsigned whichPoint) const;
-    AnimateCommand& GetCommand(unsigned whichSheet, unsigned whichPoint) const;
+    std::vector<std::shared_ptr<AnimationCommand>> GetCommands(unsigned whichSheet, unsigned whichPoint) const;
+    AnimationCommand& GetCommand(unsigned whichSheet, unsigned whichPoint) const;
 
     // There are two types of data, the ones that are set when we are created, and the ones that modify over time.
-    std::vector<AnimateSheet> mSheets;
+    std::vector<AnimationSheet> mSheets;
     std::vector<Coord> mPoints; // current position of these points
     std::vector<size_t> mCurrentCmdIndex; // pointer to the current command in the sheet
 

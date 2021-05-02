@@ -20,34 +20,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animatecompile.h"
-#include "animatecommand.h"
+#include "CalChartAnimationCompile.h"
+#include "CalChartAnimationErrors.h"
+#include "CalChartAnimationCommand.h"
 #include "cc_sheet.h"
 #include "cont.h"
 
 namespace CalChart {
 
-void AnimationErrors::RegisterError(AnimateError err, const ContToken* token,
-    unsigned curr_pt, SYMBOL_TYPE contsymbol)
-{
-    mErrorMarkers[err].contsymbol = contsymbol;
-    if (token != NULL) {
-        mErrorMarkers[err].line = token->line;
-        mErrorMarkers[err].col = token->col;
-    }
-    mErrorMarkers[err].pntgroup.insert(curr_pt);
-}
-
-void AnimationErrors::RegisterError(AnimateError err, int line, int col,
-    unsigned curr_pt, SYMBOL_TYPE contsymbol)
-{
-    mErrorMarkers[err].contsymbol = contsymbol;
-    mErrorMarkers[err].line = line;
-    mErrorMarkers[err].col = col;
-    mErrorMarkers[err].pntgroup.insert(curr_pt);
-}
-
-AnimateCompile::AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state)
+AnimationCompile::AnimationCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state)
     : mShow(show)
     , contsymbol(cont_symbol)
     , curr_pt(pt_num)
@@ -56,8 +37,8 @@ AnimateCompile::AnimateCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsign
 {
 }
 
-AnimateCommands
-AnimateCompile::Compile(
+AnimationCommands
+AnimationCompile::Compile(
     const Show& show, AnimationVariables& variablesStates,
     AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
     unsigned pt_num, SYMBOL_TYPE cont_symbol,
@@ -71,7 +52,7 @@ AnimateCompile::Compile(
         {},
     };
 
-    AnimateCompile ac(show, cont_symbol, pt_num, c_sheet, state);
+    AnimationCompile ac(show, cont_symbol, pt_num, c_sheet, state);
 
     if (procs.empty()) {
         // no continuity was specified
@@ -101,17 +82,17 @@ AnimateCompile::Compile(
         if (state.pt != next_point) {
             auto c = next_point - state.pt;
             ac.RegisterError(ANIMERR_WRONGPLACE, NULL);
-            ac.Append(std::make_shared<AnimateCommandMove>(state.beats_rem, c), NULL);
+            ac.Append(std::make_shared<AnimationCommandMove>(state.beats_rem, c), NULL);
         }
     }
     if (state.beats_rem) {
         ac.RegisterError(ANIMERR_EXTRATIME, NULL);
-        ac.Append(std::make_shared<AnimateCommandMT>(state.beats_rem, ANIMDIR_E), NULL);
+        ac.Append(std::make_shared<AnimationCommandMT>(state.beats_rem, ANIMDIR_E), NULL);
     }
     return state.cmds;
 }
 
-bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd,
+bool AnimationCompile::Append(std::shared_ptr<AnimationCommand> cmd,
     const ContToken* token)
 {
     if (mState.beats_rem < cmd->NumBeats()) {
@@ -130,13 +111,13 @@ bool AnimateCompile::Append(std::shared_ptr<AnimateCommand> cmd,
     return true;
 }
 
-void AnimateCompile::RegisterError(AnimateError err,
+void AnimationCompile::RegisterError(AnimateError err,
     const ContToken* token) const
 {
     mState.error_markers.RegisterError(err, token, curr_pt, contsymbol);
 }
 
-float AnimateCompile::GetVarValue(int varnum, const ContToken* token) const
+float AnimationCompile::GetVarValue(int varnum, const ContToken* token) const
 {
     auto i = mState.mVars[varnum].find(curr_pt);
     if (i != mState.mVars[varnum].end()) {
@@ -146,17 +127,17 @@ float AnimateCompile::GetVarValue(int varnum, const ContToken* token) const
     return 0.0;
 }
 
-void AnimateCompile::SetVarValue(int varnum, float value)
+void AnimationCompile::SetVarValue(int varnum, float value)
 {
     mState.mVars[varnum][curr_pt] = value;
 }
 
-Coord AnimateCompile::GetStartingPosition() const
+Coord AnimationCompile::GetStartingPosition() const
 {
     return curr_sheet->GetPosition(GetCurrentPoint());
 }
 
-Coord AnimateCompile::GetEndingPosition(const ContToken* token) const
+Coord AnimationCompile::GetEndingPosition(const ContToken* token) const
 {
     auto sheet = curr_sheet + 1;
 
@@ -172,8 +153,9 @@ Coord AnimateCompile::GetEndingPosition(const ContToken* token) const
     }
 }
 
-Coord AnimateCompile::GetReferencePointPosition(unsigned refnum) const
+Coord AnimationCompile::GetReferencePointPosition(unsigned refnum) const
 {
     return curr_sheet->GetPosition(GetCurrentPoint(), refnum + 1);
 }
+
 }

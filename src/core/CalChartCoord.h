@@ -1,7 +1,7 @@
 #pragma once
 /*
- * cc_coord.h
- * Definitions for the coordinate classes
+ * CalChartCoord.h
+ * Definitions for the coordinate object
  */
 
 /*
@@ -23,13 +23,22 @@
 
 #include <cstdint>
 
+
 namespace CalChart {
 
-class Coord {
-public:
+constexpr auto kCoordShift = 4;
+constexpr auto kCoordDecimal = (1 << kCoordShift);
+
+struct Coord {
     using units = int16_t;
 
-    Coord(Coord::units xval = 0, Coord::units yval = 0)
+    enum class CollisionType {
+        none = 0,
+        warning,
+        intersect,
+    };
+
+    constexpr Coord(Coord::units xval = 0, Coord::units yval = 0)
         : x(xval)
         , y(yval)
     {
@@ -39,46 +48,45 @@ public:
     float Distance(Coord const&) const;
     float DM_Magnitude() const; // check for diagonal military also
     float Direction() const;
-    float Direction(const Coord& c) const;
+    float Direction(Coord const& c) const;
 
-    enum CollisionType {
-        COLLISION_NONE = 0,
-        COLLISION_WARNING,
-        COLLISION_INTERSECT
-    };
+    CollisionType DetectCollision(Coord const& c) const;
 
-    CollisionType DetectCollision(const Coord& c) const;
-
-    Coord& operator+=(const Coord& c)
+    constexpr Coord& operator+=(Coord const& c)
     {
         x += c.x;
         y += c.y;
         return *this;
     }
-    Coord& operator-=(const Coord& c)
+
+    constexpr Coord& operator-=(Coord const& c)
     {
         x -= c.x;
         y -= c.y;
         return *this;
     }
+
     Coord& operator*=(int s)
     {
         x *= s;
         y *= s;
         return *this;
     }
+
     Coord& operator/=(int s)
     {
         x /= s;
         y /= s;
         return *this;
     }
+
     Coord& operator*=(double s)
     {
         x *= s;
         y *= s;
         return *this;
     }
+
     Coord& operator/=(double s)
     {
         x /= s;
@@ -89,48 +97,45 @@ public:
     units x, y;
 };
 
-inline Coord operator+(const Coord& a, const Coord& b)
+inline Coord operator+(Coord const& a, Coord const& b)
 {
     return Coord(a.x + b.x, a.y + b.y);
 }
 
-inline Coord operator-(const Coord& a, const Coord& b)
+inline Coord operator-(Coord const& a, Coord const& b)
 {
     return Coord(a.x - b.x, a.y - b.y);
 }
 
-inline Coord operator*(const Coord& a, int s)
+inline Coord operator*(Coord const& a, int s)
 {
     return Coord(a.x * s, a.y * s);
 }
 
-inline Coord operator/(const Coord& a, int s)
+inline Coord operator/(Coord const& a, int s)
 {
     return Coord(a.x / s, a.y / s);
 }
 
-inline Coord operator-(const Coord& c) { return Coord(-c.x, -c.y); }
+inline Coord operator-(Coord const& c) { return Coord(-c.x, -c.y); }
 
-inline bool operator==(const Coord& a, const Coord& b)
+inline bool operator==(Coord const& a, Coord const& b)
 {
     return ((a.x == b.x) && (a.y == b.y));
 }
 
-inline bool operator<(const Coord& a, const Coord& b)
+inline bool operator<(Coord const& a, Coord const& b)
 {
     return (a.y == b.y) ? (a.x < b.x) : (a.y < b.y);
 }
 
-inline bool operator!=(const Coord& a, const Coord& b)
+inline bool operator!=(Coord const& a, Coord const& b)
 {
     return ((a.x != b.x) || (a.y != b.y));
 }
 
 void Coord_UnitTests();
 }
-
-constexpr auto COORD_SHIFT = 4;
-constexpr auto COORD_DECIMAL = (1 << COORD_SHIFT);
 
 // RoundToCoordUnits: Use when number is already in Coord format, just needs to be
 // rounded
@@ -145,12 +150,12 @@ constexpr auto RoundToCoordUnits(T inCoord)
 template <typename T>
 constexpr auto Float2CoordUnits(T a)
 {
-    return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * COORD_DECIMAL));
+    return static_cast<CalChart::Coord::units>(RoundToCoordUnits(a * CalChart::kCoordDecimal));
 }
 template <typename T>
 constexpr auto CoordUnits2Float(T a)
 {
-    return a / (float)COORD_DECIMAL;
+    return a / (float)CalChart::kCoordDecimal;
 }
 
 // Int2CoordUnits, CoordUnits2Int
@@ -158,10 +163,10 @@ constexpr auto CoordUnits2Float(T a)
 template <typename T>
 constexpr auto Int2CoordUnits(T a)
 {
-    return static_cast<CalChart::Coord::units>(a * COORD_DECIMAL);
+    return static_cast<CalChart::Coord::units>(a * CalChart::kCoordDecimal);
 }
 template <typename T>
 constexpr auto CoordUnits2Int(T a)
 {
-    return static_cast<int>(a / COORD_DECIMAL);
+    return static_cast<int>(a / CalChart::kCoordDecimal);
 }

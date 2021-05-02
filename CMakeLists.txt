@@ -55,17 +55,27 @@ FLEX_TARGET (
 add_library (
   calchart_core
   STATIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animate.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animate.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationErrors.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationSheet.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationSheet.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCommand.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCommand.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCompile.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCompile.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartMovePointsTool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartMovePointsTool.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSelectTool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSelectTool.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShapes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShapes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartTypes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animate_types.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animatecommand.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animatecommand.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animatecompile.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animatecompile.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_continuity.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_continuity.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_coord.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_coord.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_drawcommand.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_fileformat.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_image.cpp
@@ -73,19 +83,17 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_parse_errors.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_point.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_point.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_shapes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_shapes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_sheet.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_sheet.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_show.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_show.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_types.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cont.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cont.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/linmath.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/math_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/math_utils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/modes.cpp
@@ -188,6 +196,8 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimationPanel.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimationView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimationView.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundImage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundImage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CCOmniviewCanvas.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CCOmniviewCanvas.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartApp.cpp
@@ -202,6 +212,8 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartPreferences.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartSizes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartSizes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartSplash.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartSplash.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartToolBar.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartToolBar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartView.cpp
@@ -228,6 +240,8 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FieldControlsToolBar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FieldThumbnailBrowser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FieldThumbnailBrowser.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/HostAppInterface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/HostAppInterface.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PointPicker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PointPicker.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PreferencesContCellSetup.cpp
@@ -244,20 +258,18 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PreferencesUtils.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintContinuityEditor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintContinuityEditor.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintPostScriptDialog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PrintPostScriptDialog.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupInstruments.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupInstruments.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupMarchers.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SetupMarchers.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/TopFrame.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/TopFrame.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverFrame.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverFrame.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverProgressFrame.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverProgressFrame.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/TransitionSolverView.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/background_image.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/background_image.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/basic_ui.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/basic_ui.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cc_omniview_constants.h
@@ -268,24 +280,14 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw_utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/field_canvas_shapes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/field_canvas_shapes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ghost_module.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ghost_module.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/linmath.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/GhostModule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog_canvas.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog_canvas.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/platconf.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/precomp.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/precomp.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/print_ps_dialog.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/print_ps_dialog.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/setup_wizards.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/setup_wizards.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/single_instance_ipc.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/single_instance_ipc.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ui_enums.h
   ${CalChartDocs}
   ${CalChartResources}

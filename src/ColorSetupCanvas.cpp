@@ -26,7 +26,7 @@
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
-#include "cc_shapes.h"
+#include "CalChartShapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "cont.h"
@@ -79,11 +79,11 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
     };
     mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
     mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
+    mShow->Create_SetSelectionListCommand(SelectionList{ 0, 2 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);
+    mShow->Create_SetSelectionListCommand(SelectionList{ 1, 3 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_SOLX).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{}).first(*mShow);
+    mShow->Create_SetSelectionListCommand(SelectionList{}).first(*mShow);
 
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);

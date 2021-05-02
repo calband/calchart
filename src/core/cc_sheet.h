@@ -21,13 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate.h"
+#include "CalChartAnimation.h"
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
 #include "cc_image.h"
 #include "cc_point.h"
 #include "cc_text.h"
-#include "cc_types.h"
+#include "CalChartTypes.h"
 
 #include <nlohmann/json.hpp>
 #include <set>
@@ -119,7 +119,7 @@ public:
      * @return A JSON which could represent this sheet in
      * a '.viewer' file.
      */
-    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const;
+    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimationSheet& compiledSheet) const;
 
 private:
     std::vector<Continuity> mAnimationContinuity;

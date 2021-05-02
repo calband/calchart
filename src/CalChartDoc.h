@@ -124,6 +124,13 @@ public:
 
     auto GetNumSheets() const { return mShow ? mShow->GetNumSheets() : 0; }
 
+    struct CalChartDocSheetRange {
+        CalChart::Show const& mShow;
+        auto begin() { return mShow.GetSheetBegin(); }
+        auto end() { return mShow.GetSheetEnd(); }
+    };
+    CalChartDocSheetRange GetSheets() const { return CalChartDocSheetRange{*mShow}; }
+
     auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
     auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
     auto GetNthSheet(int n) const { return static_cast<CalChart::Show const&>(*mShow).GetNthSheet(n); }
@@ -144,33 +151,42 @@ public:
 
     // how to select points
     // Utility functions for constructing new selection lists
-    // Then you push the selection list with the Create_SetSelectionCommand
+    // Then you push the selection list with the Create_SetSelectionListCommand
     auto MakeSelectAll() const { return mShow->MakeSelectAll(); }
     auto MakeUnselectAll() const { return mShow->MakeUnselectAll(); }
     auto MakeAddToSelection(const SelectionList& sl) const { return mShow->MakeAddToSelection(sl); }
     auto MakeRemoveFromSelection(const SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
     auto MakeToggleSelection(const SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
-    auto MakeSelectWithLasso(const CalChart::Lasso& lasso, int ref) const { return mShow->MakeSelectWithLasso(lasso, ref); }
+    auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mCurrentReferencePoint); }
     auto MakeSelectBySymbol(SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
     auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
 
-    void SetSelection(const SelectionList& sl);
+    void SetSelectionList(SelectionList const& sl);
 
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
+
+    auto GetSelect() const { return mSelect; }
+    void SetSelect(CalChart::Select select);
+    auto GetCurrentReferencePoint() const { return mCurrentReferencePoint; }
+    void SetCurrentReferencePoint(int currentReferencePoint);
+    auto GetDrawPaths() const { return mDrawPaths; }
+    void SetDrawPaths(bool drawPaths);
+    auto GetDrawBackground() const { return mDrawBackground; }
+    void SetDrawBackground(bool drawBackground);
 
     CalChart::ShowMode const& GetShowMode() const;
     // nullptr if there is no animation
     CalChart::Animation const* GetAnimation() const;
 
     auto AlreadyHasPrintContinuity() const { return mShow->AlreadyHasPrintContinuity(); }
-    auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions, int ref) const { return mShow->WillMovePoints(new_positions, ref); }
+    auto WillMovePoints(std::map<int, CalChart::Coord> const& new_positions) const { return mShow->WillMovePoints(new_positions, mCurrentReferencePoint); }
     int PrintToPS(std::ostream& buffer, bool overview, int min_yards, const std::set<size_t>& isPicked, const CalChartConfiguration& config_) const;
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
-    std::unique_ptr<wxCommand> Create_SetSelectionCommand(const SelectionList& sl);
+    std::unique_ptr<wxCommand> Create_SetSelectionListCommand(const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetShowModeCommand(CalChart::ShowMode const& newmode);
     std::unique_ptr<wxCommand> Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labels, int numColumns);
@@ -182,11 +198,11 @@ public:
     std::unique_ptr<wxCommand> Create_ApplyRelabelMapping(int sheet, std::vector<size_t> const& mapping);
     std::unique_ptr<wxCommand> Create_AppendShow(std::unique_ptr<CalChartDoc> sheets, CalChart::Coord::units tolerance);
     std::unique_ptr<wxCommand> Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions, int ref);
-    std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions, int ref);
+    std::unique_ptr<wxCommand> Create_MovePointsCommand(std::map<int, CalChart::Coord> const& new_positions);
+    std::unique_ptr<wxCommand> Create_MovePointsCommand(unsigned whichSheet, std::map<int, CalChart::Coord> const& new_positions);
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
-    std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount, int ref);
-    std::unique_ptr<wxCommand> Create_ResetReferencePointToRef0(int ref);
+    std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount);
+    std::unique_ptr<wxCommand> Create_ResetReferencePointToRef0();
     std::unique_ptr<wxCommand> Create_SetSymbolCommand(SYMBOL_TYPE sym);
     std::unique_ptr<wxCommand> Create_SetContinuityCommand(SYMBOL_TYPE i, CalChart::Continuity const& new_cont);
     std::unique_ptr<wxCommand> Create_SetLabelRightCommand(bool right);
@@ -232,7 +248,14 @@ private:
         CalChartDoc& mShow;
     };
 
+    // CalChart doc contains the state of the show and all ancillary data objects for displaying/manipulating the show
+    // This include temporary non-saved aspects like what configuration tools are in (select mode), or what reference
+    // points are currently being moved.
     std::unique_ptr<CalChart::Show> mShow;
     std::unique_ptr<CalChart::Animation> mAnimation;
+    CalChart::Select mSelect = CalChart::Select::Box;
+    int mCurrentReferencePoint{};
+    bool mDrawPaths{};
+    bool mDrawBackground{};
     AutoSaveTimer mTimer;
 };

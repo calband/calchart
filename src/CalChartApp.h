@@ -21,7 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/docview.h>
 #include <wx/wx.h>
 
 // CalChartApp represents the wxWidgets App for CalChart.  The document manager creates
@@ -31,6 +30,8 @@
 class CalChartApp;
 class HostAppInterface;
 class wxHtmlHelpController;
+class wxDocManager;
+class wxPrintDialogData;
 namespace CalChart {
 class ShowMode;
 }
@@ -38,22 +39,22 @@ class ShowMode;
 DECLARE_APP(CalChartApp)
 
 // Define a new application
-class CalChartApp : public wxApp {
+class CalChartApp : public wxApp
+{
 public:
     virtual bool OnInit() override;
+    int OnExit() override;
+
+    void OpenFile(wxString const& fileName);
+    void OpenFileOnHost(wxString const& filename);
 #if defined(__APPLE__) && (__APPLE__)
     virtual void MacOpenFile(wxString const& fileName) override;
     virtual void MacOpenFiles(wxArrayString const& fileNames) override;
 #endif // defined(__APPLE__) && (__APPLE__)
-    int OnExit() override;
-
-    CalChart::ShowMode GetShowMode(const wxString& which);
 
     // the global help system:
     wxHtmlHelpController& GetGlobalHelpController();
-
-    void OpenFile(const wxString& fileName);
-    void OpenFileOnHost(const wxString& filename);
+    wxPrintDialogData& GetGlobalPrintDialog();
 
 private:
     void ProcessArguments();
@@ -66,4 +67,5 @@ private:
     wxDocManager* mDocManager{};
     std::unique_ptr<wxHtmlHelpController> mHelpController;
     std::unique_ptr<HostAppInterface> mHostInterface;
+    std::unique_ptr<wxPrintDialogData> mPrintDialogData;
 };

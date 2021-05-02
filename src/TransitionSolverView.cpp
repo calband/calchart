@@ -47,5 +47,5 @@ void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers)
     for (unsigned marcher : marchers) {
         selectionList.insert(marcher);
     }
-    GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionCommand(selectionList).release());
+    GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionListCommand(selectionList).release());
 }

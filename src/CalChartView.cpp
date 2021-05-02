@@ -24,20 +24,19 @@
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
 #include "CalChartFrame.h"
+#include "CalChartAnimationErrors.h"
 #include "FieldCanvas.h"
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
-#include "animate.h"
-#include "animate_types.h"
-#include "animatecommand.h"
-#include "animatecompile.h"
-#include "background_image.h"
+#include "CalChartAnimation.h"
+#include "CalChartAnimationCommand.h"
+#include "CalChartAnimationCompile.h"
+#include "BackgroundImage.h"
 #include "cc_drawcommand.h"
-#include "cc_shapes.h"
+#include "CalChartShapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "draw.h"
-#include "ghost_module.h"
 #include "setup_wizards.h"
 
 #include <memory>
@@ -85,31 +84,31 @@ void CalChartView::OnDraw(wxDC* dc)
 
         auto sheet = mShow->GetCurrentSheet();
         if (sheet != mShow->GetSheetEnd()) {
-            if (mCurrentReferencePoint > 0) {
+            if (mShow->GetCurrentReferencePoint() > 0) {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), 0, false);
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
-                    *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+                    *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
             } else {
                 DrawPoints(*dc, mConfig, origin, mShow->GetSelectionList(),
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
-                    *mShow->GetCurrentSheet(), mCurrentReferencePoint, true);
+                    *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
             }
             DrawPaths(*dc, *sheet);
         }
     }
 }
 
-void CalChartView::DrawOtherPoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
+void CalChartView::DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions)
 {
     DrawPhatomPoints(dc, mConfig, *mShow, *mShow->GetCurrentSheet(), positions);
 }
 
 void CalChartView::OnDrawBackground(wxDC& dc)
 {
-    if (!mDrawBackground) {
+    if (!mShow->GetDrawBackground()) {
         return;
     }
     for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
@@ -177,7 +176,7 @@ void CalChartView::OnWizardSetup(CalChartDoc& show)
     if (wizard->RunWizard(page1)) {
         auto labels = page1->GetLabelsAndInstruments();
         auto columns = page1->GetNumberColumns();
-        auto newmode = wxGetApp().GetShowMode(page2->GetValue());
+        auto newmode = GetConfigShowMode(page2->GetValue());
 
         show.WizardSetupNewShow(labels, columns, newmode);
         SetupInstruments dialog(show, mFrame);
@@ -202,17 +201,17 @@ bool CalChartView::DoRotatePointPositions(int rotateAmount)
     if (mShow->GetSelectionList().size() == 0) {
         return false;
     }
-    auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount, mCurrentReferencePoint);
+    auto cmd = mShow->Create_RotatePointPositionsCommand(rotateAmount);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
 
 bool CalChartView::DoMovePoints(const std::map<int, CalChart::Coord>& newPositions)
 {
-    if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions, mCurrentReferencePoint)) {
+    if (mShow->GetSelectionList().size() == 0 || !mShow->WillMovePoints(newPositions)) {
         return false;
     }
-    auto cmd = mShow->Create_MovePointsCommand(newPositions, mCurrentReferencePoint);
+    auto cmd = mShow->Create_MovePointsCommand(newPositions);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -232,7 +231,7 @@ bool CalChartView::DoResetReferencePoint()
     if (mShow->GetSelectionList().size() == 0) {
         return false;
     }
-    auto cmd = mShow->Create_ResetReferencePointToRef0(mCurrentReferencePoint);
+    auto cmd = mShow->Create_ResetReferencePointToRef0();
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return true;
 }
@@ -240,7 +239,7 @@ bool CalChartView::DoResetReferencePoint()
 bool CalChartView::DoSetPointsSymbol(SYMBOL_TYPE sym)
 {
     if (mShow->GetSelectionList().size() == 0) {
-        SetSelection(mShow->MakeSelectBySymbol(sym));
+        SetSelectionList(mShow->MakeSelectBySymbol(sym));
         return true;
     }
     auto cmd = mShow->Create_SetSymbolCommand(sym);
@@ -418,14 +417,12 @@ bool CalChartView::DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity 
 
 int CalChartView::FindPoint(CalChart::Coord pos) const
 {
-    return mShow->GetCurrentSheet()->FindPoint(
-        pos, Float2CoordUnits(mConfig.Get_DotRatio()),
-        mCurrentReferencePoint);
+    return mShow->GetCurrentSheet()->FindPoint(pos, Float2CoordUnits(mConfig.Get_DotRatio()), mShow->GetCurrentReferencePoint());
 }
 
 CalChart::Coord CalChartView::PointPosition(int which) const
 {
-    return mShow->GetCurrentSheet()->GetPosition(which, mCurrentReferencePoint);
+    return mShow->GetCurrentSheet()->GetPosition(which, mShow->GetCurrentReferencePoint());
 }
 
 std::vector<CalChart::AnimationErrors> CalChartView::GetAnimationErrors() const
@@ -477,50 +474,46 @@ void CalChartView::GoToSheet(int which)
 
 void CalChartView::SetActiveReferencePoint(int which)
 {
-    mCurrentReferencePoint = which;
-    OnUpdate(this);
+    mShow->SetCurrentReferencePoint(which);
 }
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-void CalChartView::SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected)
+void CalChartView::SelectWithinPolygon(CalChart::RawPolygon_t const& lasso, bool toggleSelected)
 {
-    auto select = mShow->MakeSelectWithLasso(*lasso, mCurrentReferencePoint);
+    auto select = mShow->MakeSelectWithinPolygon(lasso);
     if (toggleSelected) {
         select = mShow->MakeToggleSelection(select);
     } else {
         select = mShow->MakeAddToSelection(select);
     }
-    SetSelection(select);
+    SetSelectionList(select);
 }
 
-// Select points within rectangle
-void CalChartView::SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2,
-    bool toggleSelected)
-{
-    CalChart::Lasso lasso(c1);
-    lasso.Append(CalChart::Coord(c1.x, c2.y));
-    lasso.Append(c2);
-    lasso.Append(CalChart::Coord(c2.x, c1.y));
-    lasso.End();
-    SelectWithLasso(&lasso, toggleSelected);
-}
-
-void CalChartView::SetSelection(const SelectionList& sl)
+void CalChartView::SetSelectionList(const SelectionList& sl)
 {
     auto current_sl = mShow->GetSelectionList();
     if (std::equal(current_sl.begin(), current_sl.end(), sl.begin(), sl.end()))
         return;
     // This *could* be run through a command or run directly...
     if (mConfig.Get_CommandUndoSelection()) {
-        auto cmd = mShow->Create_SetSelectionCommand(sl);
+        auto cmd = mShow->Create_SetSelectionListCommand(sl);
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     } else {
-        mShow->SetSelection(sl);
+        mShow->SetSelectionList(sl);
     }
 }
 
-void CalChartView::GoToSheetAndSetSelection(int which, const SelectionList& sl)
+void CalChartView::SetSelect(CalChart::Select select)
+{
+    if (select == mShow->GetSelect()) {
+        return;
+    }
+    // select is special, directly manipulates the show without going through undo system...
+    mShow->SetSelect(select);
+}
+
+void CalChartView::GoToSheetAndSetSelectionList(int which, const SelectionList& sl)
 {
     if (which < 0 || which >= mShow->GetNumSheets()) {
         return;
@@ -535,20 +528,19 @@ void CalChartView::GoToSheetAndSetSelection(int which, const SelectionList& sl)
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     } else {
         mShow->SetCurrentSheet(which);
-        mShow->SetSelection(sl);
+        mShow->SetSelectionList(sl);
     }
 }
 
 void CalChartView::OnEnableDrawPaths(bool enable)
 {
-    mDrawPaths = enable;
-    mFrame->Refresh();
+    mShow->SetDrawPaths(enable);
 }
 
 void CalChartView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
 {
     auto animation = mShow->GetAnimation();
-    if (mDrawPaths && animation && animation->GetNumberSheets() && (animation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
+    if (mShow->GetDrawPaths() && animation && animation->GetNumberSheets() && (animation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {
         auto origin = GetShowFieldOffset();
         for (auto&& point : mShow->GetSelectionList()) {
             DrawPath(dc, mConfig, animation->GenPathToDraw(mShow->GetCurrentSheetNum(), point, origin), animation->EndPosition(mShow->GetCurrentSheetNum(), point, origin));
@@ -558,12 +550,12 @@ void CalChartView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
 
 void CalChartView::DoDrawBackground(bool enable)
 {
-    mDrawBackground = enable;
+    mShow->SetDrawBackground(enable);
 }
 
 bool CalChartView::DoingDrawBackground() const
 {
-    return mDrawBackground;
+    return mShow->GetDrawBackground();
 }
 
 void CalChartView::DoPictureAdjustment(bool enable)

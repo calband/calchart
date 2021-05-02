@@ -1,8 +1,7 @@
 #pragma once
-
 /*
- * CalChartToolBar.h
- * Header for adding toolbars to CalChart
+ * CalChartSplash.h
+ * Header for CalChartSplash, the wxMDI parent frame
  */
 
 /*
@@ -22,15 +21,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/toolbar.h>
-#include <wx/wx.h>
+#include <wx/docview.h>
 
-#include <vector>
+// CalChartSplash
+// Serves as the top frame that gets displayed when CalChart starts
+class CalChartSplash : public wxDocParentFrame {
+    using super = wxDocParentFrame;
+    DECLARE_CLASS(CalChartSplash)
+    DECLARE_EVENT_TABLE()
+public:
+    CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title);
+    ~CalChartSplash() = default;
 
-class wxAuiToolBar;
-struct ToolBarEntry;
+    void OnCmdAbout(wxCommandEvent& event);
+    void OnCmdHelp(wxCommandEvent& event);
+    void OnCmdPreferences(wxCommandEvent& event);
 
-std::vector<wxBitmap> GetSymbolsBitmap();
+    static void About();
+    static void Help();
 
-wxAuiToolBar* CreateSelectAndMoves(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
-wxAuiToolBar* CreateDotModifiers(wxWindow* parent, wxWindowID id = wxID_ANY, long style = 0);
+};

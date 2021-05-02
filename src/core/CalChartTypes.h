@@ -1,7 +1,7 @@
 #pragma once
 /*
- * top_frame.h
- * Header for TopFrame, the wxMDI parent frame
+ * cc_types.h
+ * Definitions for the types
  */
 
 /*
@@ -21,22 +21,39 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <wx/docview.h>
+#include <set>
+#include <string>
 
-// TopFrame
-// Serves as the top frame that gets displayed when CalChart starts
-class TopFrame : public wxDocParentFrame {
-    DECLARE_CLASS(TopFrame)
-public:
-    TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title);
-    ~TopFrame();
-
-    void OnCmdAbout(wxCommandEvent& event);
-    void OnCmdHelp(wxCommandEvent& event);
-    void OnCmdPreferences(wxCommandEvent& event);
-
-    static void About();
-    static void Help();
-
-    DECLARE_EVENT_TABLE()
+enum class PSFONT {
+    SYMBOL,
+    NORM,
+    BOLD,
+    ITAL,
+    BOLDITAL,
+    TAB
 };
+
+enum SYMBOL_TYPE {
+    SYMBOL_PLAIN = 0,
+    SYMBOL_SOL,
+    SYMBOL_BKSL,
+    SYMBOL_SL,
+    SYMBOL_X,
+    SYMBOL_SOLBKSL,
+    SYMBOL_SOLSL,
+    SYMBOL_SOLX,
+    MAX_NUM_SYMBOLS
+};
+
+static const SYMBOL_TYPE k_symbols[] = {
+    SYMBOL_PLAIN, SYMBOL_SOL, SYMBOL_BKSL, SYMBOL_SL,
+    SYMBOL_X, SYMBOL_SOLBKSL, SYMBOL_SOLSL, SYMBOL_SOLX
+};
+
+namespace CalChart {
+std::string GetNameForSymbol(SYMBOL_TYPE which);
+std::string GetLongNameForSymbol(SYMBOL_TYPE which);
+SYMBOL_TYPE GetSymbolForName(const std::string& name);
+}
+
+typedef std::set<int> SelectionList;

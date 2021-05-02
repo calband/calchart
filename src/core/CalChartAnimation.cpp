@@ -1,5 +1,5 @@
 /*
- * animate.cpp
+ * CalChartAnimations.cpp
  * Classes for animating shows
  */
 
@@ -20,9 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate.h"
-#include "animatecommand.h"
-#include "animatecompile.h"
+#include "CalChartAnimation.h"
+#include "CalChartAnimationErrors.h"
+#include "CalChartAnimationCommand.h"
+#include "CalChartAnimationCompile.h"
 #include "cc_continuity.h"
 #include "cc_drawcommand.h"
 #include "cc_point.h"
@@ -38,82 +39,14 @@
 #include <sstream>
 #include <string>
 
+template<typename E>
+constexpr auto toUType(E enumerator)
+{
+    return static_cast<std::underlying_type_t<E>>(enumerator);
+}
+
+
 namespace CalChart {
-
-AnimateDir AnimGetDirFromAngle(float ang)
-{
-    ang = NormalizeAngle(ang);
-    // rotate angle by 22.5:
-    ang += 22.5;
-    size_t quadrant = ang / 45.0;
-    switch (quadrant) {
-    case 0:
-        return ANIMDIR_N;
-    case 1:
-        return ANIMDIR_NW;
-    case 2:
-        return ANIMDIR_W;
-    case 3:
-        return ANIMDIR_SW;
-    case 4:
-        return ANIMDIR_S;
-    case 5:
-        return ANIMDIR_SE;
-    case 6:
-        return ANIMDIR_E;
-    case 7:
-        return ANIMDIR_NE;
-    case 8:
-        return ANIMDIR_N;
-    }
-    return ANIMDIR_N;
-}
-
-// make things copiable
-AnimateSheet::AnimateSheet(AnimateSheet const& other)
-    : mPoints(other.mPoints)
-    , mCommands(other.mCommands.size())
-    , name(other.name)
-    , numbeats(other.numbeats)
-{
-    std::transform(other.mCommands.cbegin(), other.mCommands.cend(), mCommands.begin(), [](auto&& a) {
-        AnimateCommands result(a.size());
-        std::transform(a.cbegin(), a.cend(), result.begin(), [](auto&& b) {
-            return b->clone();
-        });
-        return result;
-    });
-}
-
-AnimateSheet& AnimateSheet::operator=(AnimateSheet other)
-{
-    swap(other);
-    return *this;
-}
-
-AnimateSheet::AnimateSheet(AnimateSheet&& other) noexcept
-    : mPoints(std::move(other.mPoints))
-    , mCommands(std::move(other.mCommands))
-    , name(std::move(other.name))
-    , numbeats(std::move(other.numbeats))
-{
-}
-
-AnimateSheet& AnimateSheet::operator=(AnimateSheet&& other) noexcept
-{
-    AnimateSheet tmp{ std::move(other) };
-    swap(tmp);
-    return *this;
-}
-
-void AnimateSheet::swap(AnimateSheet& other) noexcept
-{
-    using std::swap;
-    swap(mPoints, other.mPoints);
-    swap(mCommands, other.mCommands);
-    swap(name, other.name);
-    swap(numbeats, other.numbeats);
-}
 
 Animation::Animation(const Show& show)
     : mPoints(show.GetNumPoints())
@@ -139,7 +72,7 @@ Animation::Animation(const Show& show)
 
         // Now parse continuity
         AnimationErrors errors;
-        std::vector<AnimateCommands> theCommands(mPoints.size());
+        std::vector<AnimationCommands> theCommands(mPoints.size());
         for (auto& current_symbol : k_symbols) {
             if (curr_sheet->ContinuityInUse(current_symbol)) {
                 auto& current_continuity = curr_sheet->GetContinuityBySymbol(current_symbol);
@@ -153,7 +86,7 @@ Animation::Animation(const Show& show)
 #endif
                 for (unsigned j = 0; j < mPoints.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
-                        theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
+                        theCommands[j] = AnimationCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
                     }
                 }
             }
@@ -161,7 +94,7 @@ Animation::Animation(const Show& show)
         // Handle points that don't have continuity (shouldn't happen)
         for (unsigned j = 0; j < mPoints.size(); j++) {
             if (theCommands[j].empty()) {
-                theCommands[j] = AnimateCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
+                theCommands[j] = AnimationCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
             }
         }
         if (errors.AnyErrors()) {
@@ -272,11 +205,6 @@ void Animation::GotoBeat(unsigned i)
 
 void Animation::GotoSheet(unsigned i)
 {
-    GotoAnimationSheet(mAnimSheetIndices[i]);
-}
-
-void Animation::GotoAnimationSheet(unsigned i)
-{
     mCurrentSheetNumber = i;
     RefreshSheet();
 }
@@ -331,7 +259,7 @@ void Animation::FindAllCollisions()
         for (unsigned i = 0; i < mPoints.size(); i++) {
             for (unsigned j = i + 1; j < mPoints.size(); j++) {
                 auto collisionResult = mPoints[i].DetectCollision(mPoints[j]);
-                if (collisionResult) {
+                if (collisionResult != Coord::CollisionType::none) {
                     if (!mCollisions.count({ i, mCurrentSheetNumber, mCurrentBeatNumber }) || mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] < collisionResult) {
                         mCollisions[{ i, mCurrentSheetNumber, mCurrentBeatNumber }] = collisionResult;
                     }
@@ -361,7 +289,7 @@ Animation::animate_info_t Animation::GetAnimateInfo(int which) const
 {
     return {
         which,
-        mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::COLLISION_NONE,
+        mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
         GetCommand(mCurrentSheetNumber, which).Direction(),
         GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)
     };
@@ -375,7 +303,7 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
     std::transform(points.begin(), points.end(), std::back_inserter(animates), [this](auto which) -> Animation::animate_info_t {
         return {
             which,
-            mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::COLLISION_NONE,
+            mCollisions.count({ which, mCurrentSheetNumber, mCurrentBeatNumber }) ? mCollisions.find({ which, mCurrentSheetNumber, mCurrentBeatNumber })->second : Coord::CollisionType::none,
             GetCommand(mCurrentSheetNumber, which).Direction(),
             GetCommand(mCurrentSheetNumber, which).RealDirection(), mPoints.at(which)
         };
@@ -400,12 +328,12 @@ int Animation::GetTotalCurrentBeat() const
     return GetTotalNumberBeatsUpTo(mCurrentSheetNumber) + mCurrentBeatNumber;
 }
 
-AnimateCommands Animation::GetCommands(unsigned whichSheet, unsigned whichPoint) const
+AnimationCommands Animation::GetCommands(unsigned whichSheet, unsigned whichPoint) const
 {
     return mSheets.at(whichSheet).GetCommands(whichPoint);
 }
 
-AnimateCommand& Animation::GetCommand(unsigned whichSheet, unsigned whichPoint) const
+AnimationCommand& Animation::GetCommand(unsigned whichSheet, unsigned whichPoint) const
 {
     return *GetCommands(whichSheet, whichPoint).at(mCurrentCmdIndex.at(whichPoint));
 }
@@ -444,7 +372,7 @@ Animation::GetCurrentInfo() const
         each_string << "pt " << i << ": (" << info.mPosition.x << ", "
                     << info.mPosition.y << "), dir=" << info.mDirection
                     << ", realdir=" << info.mRealDirection
-                    << (info.mCollision ? ", collision!" : "");
+                    << ((info.mCollision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");
         each.push_back(each_string.str());
     }
     std::ostringstream output;
@@ -454,12 +382,12 @@ Animation::GetCurrentInfo() const
     return std::pair<std::string, std::vector<std::string>>(output.str(), each);
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsBegin() const
+std::vector<AnimationSheet>::const_iterator Animation::sheetsBegin() const
 {
     return mSheets.begin();
 }
 
-std::vector<AnimateSheet>::const_iterator Animation::sheetsEnd() const
+std::vector<AnimationSheet>::const_iterator Animation::sheetsEnd() const
 {
     return mSheets.end();
 }

@@ -23,24 +23,25 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "animatecommand.h"
+#include "CalChartAnimationCommand.h"
+#include "CalChartAnimation.h"
 #include "cc_drawcommand.h"
 #include "viewer_translate.h"
 
 namespace CalChart {
 
-AnimateCommand::AnimateCommand(unsigned beats)
+AnimationCommand::AnimationCommand(unsigned beats)
     : mNumBeats(beats)
     , mBeat(0)
 {
 }
 
-DrawCommand AnimateCommand::GenCC_DrawCommand(const Coord& /*pt*/, const Coord& /*offset*/) const
+DrawCommand AnimationCommand::GenCC_DrawCommand(Coord /*pt*/, Coord /*offset*/) const
 {
     return DrawCommand();
 }
 
-bool AnimateCommand::Begin(Coord& pt)
+bool AnimationCommand::Begin(Coord& pt)
 {
     mBeat = 0;
     if (mNumBeats == 0) {
@@ -50,7 +51,7 @@ bool AnimateCommand::Begin(Coord& pt)
     return true;
 }
 
-bool AnimateCommand::End(Coord& pt)
+bool AnimationCommand::End(Coord& pt)
 {
     mBeat = mNumBeats;
     if (mNumBeats == 0) {
@@ -60,7 +61,7 @@ bool AnimateCommand::End(Coord& pt)
     return true;
 }
 
-bool AnimateCommand::NextBeat(Coord&)
+bool AnimationCommand::NextBeat(Coord&)
 {
     ++mBeat;
     if (mBeat >= mNumBeats)
@@ -68,7 +69,7 @@ bool AnimateCommand::NextBeat(Coord&)
     return true;
 }
 
-bool AnimateCommand::PrevBeat(Coord&)
+bool AnimationCommand::PrevBeat(Coord&)
 {
     if (mBeat == 0)
         return false;
@@ -78,31 +79,31 @@ bool AnimateCommand::PrevBeat(Coord&)
     }
 }
 
-void AnimateCommand::ApplyForward(Coord&) { mBeat = mNumBeats; }
+void AnimationCommand::ApplyForward(Coord&) { mBeat = mNumBeats; }
 
-void AnimateCommand::ApplyBackward(Coord&) { mBeat = 0; }
+void AnimationCommand::ApplyBackward(Coord&) { mBeat = 0; }
 
-float AnimateCommand::MotionDirection() const { return RealDirection(); }
+float AnimationCommand::MotionDirection() const { return RealDirection(); }
 
-void AnimateCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
+void AnimationCommand::ClipBeats(unsigned beats) { mNumBeats = beats; }
 
-AnimateCommandMT::AnimateCommandMT(unsigned beats, float direction)
-    : AnimateCommand(beats)
+AnimationCommandMT::AnimationCommandMT(unsigned beats, float direction)
+    : AnimationCommand(beats)
     , dir(AnimGetDirFromAngle(direction))
     , realdir(direction)
 {
 }
 
-std::unique_ptr<AnimateCommand> AnimateCommandMT::clone() const
+std::unique_ptr<AnimationCommand> AnimationCommandMT::clone() const
 {
-    return std::make_unique<AnimateCommandMT>(*this);
+    return std::make_unique<AnimationCommandMT>(*this);
 }
 
-AnimateDir AnimateCommandMT::Direction() const { return dir; }
+AnimateDir AnimationCommandMT::Direction() const { return dir; }
 
-float AnimateCommandMT::RealDirection() const { return realdir; }
+float AnimationCommandMT::RealDirection() const { return realdir; }
 
-nlohmann::json AnimateCommandMT::toOnlineViewerJSON(const Coord& start) const
+nlohmann::json AnimationCommandMT::toOnlineViewerJSON(Coord start) const
 {
     nlohmann::json j;
 
@@ -114,27 +115,27 @@ nlohmann::json AnimateCommandMT::toOnlineViewerJSON(const Coord& start) const
     return j;
 }
 
-AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement)
-    : AnimateCommandMT(beats, movement.Direction())
+AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement)
+    : AnimationCommandMT(beats, movement.Direction())
     , mVector(movement)
 {
 }
 
-std::unique_ptr<AnimateCommand> AnimateCommandMove::clone() const
+std::unique_ptr<AnimationCommand> AnimationCommandMove::clone() const
 {
-    return std::make_unique<AnimateCommandMove>(*this);
+    return std::make_unique<AnimationCommandMove>(*this);
 }
 
-AnimateCommandMove::AnimateCommandMove(unsigned beats, Coord movement,
+AnimationCommandMove::AnimationCommandMove(unsigned beats, Coord movement,
     float direction)
-    : AnimateCommandMT(beats, direction)
+    : AnimationCommandMT(beats, direction)
     , mVector(movement)
 {
 }
 
-bool AnimateCommandMove::NextBeat(Coord& pt)
+bool AnimationCommandMove::NextBeat(Coord& pt)
 {
-    bool b = AnimateCommand::NextBeat(pt);
+    bool b = AnimationCommand::NextBeat(pt);
     pt.x += (mNumBeats)
         ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat - 1) * mVector.x / (short)mNumBeats)
         : 0;
@@ -144,9 +145,9 @@ bool AnimateCommandMove::NextBeat(Coord& pt)
     return b;
 }
 
-bool AnimateCommandMove::PrevBeat(Coord& pt)
+bool AnimationCommandMove::PrevBeat(Coord& pt)
 {
-    if (AnimateCommand::PrevBeat(pt)) {
+    if (AnimationCommand::PrevBeat(pt)) {
         pt.x += mNumBeats
             ? ((long)mBeat * mVector.x / (short)mNumBeats) - ((long)(mBeat + 1) * mVector.x / (short)mNumBeats)
             : 0;
@@ -159,37 +160,37 @@ bool AnimateCommandMove::PrevBeat(Coord& pt)
     }
 }
 
-void AnimateCommandMove::ApplyForward(Coord& pt)
+void AnimationCommandMove::ApplyForward(Coord& pt)
 {
-    AnimateCommand::ApplyForward(pt);
+    AnimationCommand::ApplyForward(pt);
     pt += mVector;
 }
 
-void AnimateCommandMove::ApplyBackward(Coord& pt)
+void AnimationCommandMove::ApplyBackward(Coord& pt)
 {
-    AnimateCommand::ApplyBackward(pt);
+    AnimationCommand::ApplyBackward(pt);
     pt -= mVector;
 }
 
-float AnimateCommandMove::MotionDirection() const
+float AnimationCommandMove::MotionDirection() const
 {
     return mVector.Direction();
 }
 
-void AnimateCommandMove::ClipBeats(unsigned beats)
+void AnimationCommandMove::ClipBeats(unsigned beats)
 {
-    AnimateCommand::ClipBeats(beats);
+    AnimationCommand::ClipBeats(beats);
 }
 
 DrawCommand
-AnimateCommandMove::GenCC_DrawCommand(const Coord& pt, const Coord& offset) const
+AnimationCommandMove::GenCC_DrawCommand(Coord pt, Coord offset) const
 {
     return { pt.x + offset.x, pt.y + offset.y,
         pt.x + mVector.x + offset.x,
         pt.y + mVector.y + offset.y };
 }
 
-nlohmann::json AnimateCommandMove::toOnlineViewerJSON(const Coord& start) const
+nlohmann::json AnimationCommandMove::toOnlineViewerJSON(Coord start) const
 {
     nlohmann::json j;
 
@@ -204,10 +205,10 @@ nlohmann::json AnimateCommandMove::toOnlineViewerJSON(const Coord& start) const
     return j;
 }
 
-AnimateCommandRotate::AnimateCommandRotate(unsigned beats, Coord cntr,
+AnimationCommandRotate::AnimationCommandRotate(unsigned beats, Coord cntr,
     float rad, float ang1, float ang2,
     bool backwards)
-    : AnimateCommand(beats)
+    : AnimationCommand(beats)
     , mOrigin(cntr)
     , mR(rad)
     , mAngStart(ang1)
@@ -219,14 +220,14 @@ AnimateCommandRotate::AnimateCommandRotate(unsigned beats, Coord cntr,
         mFace = 90;
 }
 
-std::unique_ptr<AnimateCommand> AnimateCommandRotate::clone() const
+std::unique_ptr<AnimationCommand> AnimationCommandRotate::clone() const
 {
-    return std::make_unique<AnimateCommandRotate>(*this);
+    return std::make_unique<AnimationCommandRotate>(*this);
 }
 
-bool AnimateCommandRotate::NextBeat(Coord& pt)
+bool AnimationCommandRotate::NextBeat(Coord& pt)
 {
-    bool b = AnimateCommand::NextBeat(pt);
+    bool b = AnimationCommand::NextBeat(pt);
     float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
                                 : mAngStart)
         * M_PI / 180.0;
@@ -235,9 +236,9 @@ bool AnimateCommandRotate::NextBeat(Coord& pt)
     return b;
 }
 
-bool AnimateCommandRotate::PrevBeat(Coord& pt)
+bool AnimationCommandRotate::PrevBeat(Coord& pt)
 {
-    if (AnimateCommand::PrevBeat(pt)) {
+    if (AnimationCommand::PrevBeat(pt)) {
         float curr_ang = (mNumBeats ? ((mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart)
                                     : mAngStart)
             * M_PI / 180.0;
@@ -249,26 +250,26 @@ bool AnimateCommandRotate::PrevBeat(Coord& pt)
     }
 }
 
-void AnimateCommandRotate::ApplyForward(Coord& pt)
+void AnimationCommandRotate::ApplyForward(Coord& pt)
 {
-    AnimateCommand::ApplyForward(pt);
+    AnimationCommand::ApplyForward(pt);
     pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngEnd * M_PI / 180.0) * mR);
     pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngEnd * M_PI / 180.0) * mR);
 }
 
-void AnimateCommandRotate::ApplyBackward(Coord& pt)
+void AnimationCommandRotate::ApplyBackward(Coord& pt)
 {
-    AnimateCommand::ApplyBackward(pt);
+    AnimationCommand::ApplyBackward(pt);
     pt.x = RoundToCoordUnits(mOrigin.x + cos(mAngStart * M_PI / 180.0) * mR);
     pt.y = RoundToCoordUnits(mOrigin.y - sin(mAngStart * M_PI / 180.0) * mR);
 }
 
-AnimateDir AnimateCommandRotate::Direction() const
+AnimateDir AnimationCommandRotate::Direction() const
 {
     return AnimGetDirFromAngle(RealDirection());
 }
 
-float AnimateCommandRotate::RealDirection() const
+float AnimationCommandRotate::RealDirection() const
 {
     float curr_ang = mNumBeats
         ? (mAngEnd - mAngStart) * mBeat / mNumBeats + mAngStart
@@ -280,13 +281,13 @@ float AnimateCommandRotate::RealDirection() const
     }
 }
 
-void AnimateCommandRotate::ClipBeats(unsigned beats)
+void AnimationCommandRotate::ClipBeats(unsigned beats)
 {
-    AnimateCommand::ClipBeats(beats);
+    AnimationCommand::ClipBeats(beats);
 }
 
 DrawCommand
-AnimateCommandRotate::GenCC_DrawCommand(const Coord& /*pt*/, const Coord& offset) const
+AnimationCommandRotate::GenCC_DrawCommand(Coord /*pt*/, Coord offset) const
 {
     float start = (mAngStart < mAngEnd) ? mAngStart : mAngEnd;
     float end = (mAngStart < mAngEnd) ? mAngEnd : mAngStart;
@@ -298,7 +299,7 @@ AnimateCommandRotate::GenCC_DrawCommand(const Coord& /*pt*/, const Coord& offset
     return { x_start, y_start, x_end, y_end, mOrigin.x + offset.x, mOrigin.y + offset.y };
 }
 
-nlohmann::json AnimateCommandRotate::toOnlineViewerJSON(const Coord& start) const
+nlohmann::json AnimationCommandRotate::toOnlineViewerJSON(Coord start) const
 {
     nlohmann::json j;
 

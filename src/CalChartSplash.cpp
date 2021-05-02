@@ -1,6 +1,5 @@
 /*
- * main_ui.cpp
- * Handle wxWindows interface
+ * CalChartSplash.cpp
  */
 
 /*
@@ -20,54 +19,48 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "TopFrame.h"
+#include "CalChartSplash.h"
 #include "CalChartApp.h"
 #include "CalChartPreferences.h"
-#include "CalChartSizes.h"
 #include "basic_ui.h"
-#include "calchart.xbm"
 #include "ccvers.h"
 
 #include <wx/dnd.h>
 #include <wx/html/helpctrl.h>
-#include <wx/statline.h>
-#include <wx/wx.h>
 
-IMPLEMENT_CLASS(TopFrame, wxDocParentFrame)
+IMPLEMENT_CLASS(CalChartSplash, wxDocParentFrame)
 
-BEGIN_EVENT_TABLE(TopFrame, wxDocParentFrame)
-EVT_MENU(wxID_ABOUT, TopFrame::OnCmdAbout)
-EVT_MENU(wxID_HELP, TopFrame::OnCmdHelp)
-EVT_MENU(wxID_PREFERENCES, TopFrame::OnCmdPreferences)
+BEGIN_EVENT_TABLE(CalChartSplash, wxDocParentFrame)
+EVT_MENU(wxID_ABOUT, CalChartSplash::OnCmdAbout)
+EVT_MENU(wxID_HELP, CalChartSplash::OnCmdHelp)
+EVT_MENU(wxID_PREFERENCES, CalChartSplash::OnCmdPreferences)
 END_EVENT_TABLE()
 
-class TopFrameDropTarget : public wxFileDropTarget {
+struct CalChartSplashDropTarget : public wxFileDropTarget {
 public:
-    TopFrameDropTarget(wxDocManager* manager)
+    CalChartSplashDropTarget(wxDocManager* manager)
         : mManager(manager)
     {
     }
-    virtual bool OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& filenames);
+    virtual bool OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& filenames) override
+    {
+        for (auto&& filename : filenames) {
+            mManager->CreateDocument(filename, wxDOC_SILENT);
+        }
+        return true;
+    }
 
 private:
     wxDocManager* mManager;
 };
 
-bool TopFrameDropTarget::OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& filenames)
-{
-    for (auto&& filename : filenames) {
-        mManager->CreateDocument(filename, wxDOC_SILENT);
-    }
-    return true;
-}
-
-TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
-    : wxDocParentFrame(manager, frame, wxID_ANY, title)
+CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title)
+    : super(manager, frame, wxID_ANY, title)
 {
     // Give it an icon
     SetBandIcon(this);
 
-    wxMenu* file_menu = new wxMenu;
+    auto file_menu = new wxMenu;
     file_menu->Append(wxID_NEW, wxT("&New Show\tCTRL-N"), wxT("Create a new show"));
     file_menu->Append(wxID_OPEN, wxT("&Open...\tCTRL-O"), wxT("Load a saved show"));
     file_menu->Append(wxID_PREFERENCES, wxT("&Preferences\tCTRL-,"));
@@ -76,17 +69,17 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     // A nice touch: a history of files visited. Use this menu.
     manager->FileHistoryUseMenu(file_menu);
 
-    wxMenu* help_menu = new wxMenu;
+    auto help_menu = new wxMenu;
     help_menu->Append(wxID_ABOUT, wxT("&About CalChart..."), wxT("Information about the program"));
     // this comes up as a leak on Mac?
     help_menu->Append(wxID_HELP, wxT("&Help on CalChart...\tCTRL-H"), wxT("Help on using CalChart"));
 
-    wxMenuBar* menu_bar = new wxMenuBar;
+    auto menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, wxT("&File"));
     menu_bar->Append(help_menu, wxT("&Help"));
     SetMenuBar(menu_bar);
 
-    SetDropTarget(new TopFrameDropTarget(manager));
+    SetDropTarget(new CalChartSplashDropTarget(manager));
 
     // create a sizer and populate
     SetSizer(VStack([this](auto sizer) {
@@ -112,64 +105,41 @@ TopFrame::TopFrame(wxDocManager* manager, wxFrame* frame, const wxString& title)
     Show(true);
 }
 
-TopFrame::~TopFrame() { }
+void CalChartSplash::OnCmdAbout(wxCommandEvent& event) { CalChartSplash::About(); }
 
-void TopFrame::OnCmdAbout(wxCommandEvent& event) { TopFrame::About(); }
+void CalChartSplash::OnCmdHelp(wxCommandEvent& event) { CalChartSplash::Help(); }
 
-void TopFrame::OnCmdHelp(wxCommandEvent& event) { TopFrame::Help(); }
-
-void TopFrame::About()
+void CalChartSplash::About()
 {
     // clang-format off
     (void)wxMessageBox(
-        wxT("CalChart v")
-        wxT(STRINGIZE(CC_MAJOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_MINOR_VERSION)) wxT(".") wxT(STRINGIZE(CC_SUB_MINOR_VERSION))
-        wxT("\nAuthors: Gurk Meeker, Richard Michael Powell\n")
-        wxT("\nContributors: Brandon Chinn, Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n")
-        wxT("http://calchart.sourceforge.net\n")
-        wxT("Copyright (c) 1994-2019\n")
-        wxT("\n")
-        wxT("This program is free software: "
-            "you can redistribute it and/or "
-            "modify\n")
-        wxT("it under the terms of the GNU General Public License as "
-            "published by\n")
-        wxT("the Free Software Foundation, "
-            "either "
-            "version 3 of the License, or\n")
-        wxT("(at your option) any later version.\n")
-        wxT("\n")
-        wxT("This program is distributed in the hope "
-            "that it will be "
-            "useful,\n")
-        wxT("but WITHOUT ANY WARRANTY; without even "
-            "the implied warranty of\n")
-        wxT("MERCHANTABILITY or FITNESS FOR A PARTICULAR "
-            "PURPOSE.  See the\n")
-        wxT("GNU General Public License for more "
-            "details.\n")
-        wxT("\n")
-        wxT("You should have received a copy of "
-            "the GNU General Public License\n")
-        wxT("along with this program.  If not, "
-            "see "
-            "<http://www.gnu.org/licenses/>.\n")
-        wxT("\n")
-        wxT("Report issues to:\nhttps://github.com/calband/calchart/issues/new\n")
-        wxT("\n")
-        wxT("Compiled on ")
-        __TDATE__ wxT(" at ") __TTIME__,
-        wxT("About CalChart"));
+        "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION) "\n"
+        "Authors: Gurk Meeker, Richard Michael Powell\n"
+        "\n"
+        "Contributors: Brandon Chinn, Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n"
+        "http://calchart.sourceforge.net\n"
+        "Copyright (c) 1994-2019\n"
+        "\n"
+        "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n"
+        "\n"
+        "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
+        "\n"
+        "You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.\n"
+        "\n"
+        "Report issues to:\nhttps://github.com/calband/calchart/issues/new\n"
+        "\n"
+        "Compiled on " __TDATE__ " at " __TTIME__,
+        "About CalChart");
     // clang-format on
 }
 
-void TopFrame::Help()
+void CalChartSplash::Help()
 {
     wxGetApp().GetGlobalHelpController().LoadFile();
     wxGetApp().GetGlobalHelpController().DisplayContents();
 }
 
-void TopFrame::OnCmdPreferences(wxCommandEvent& event)
+void CalChartSplash::OnCmdPreferences(wxCommandEvent& event)
 {
     CalChartPreferences dialog1(this);
     if (dialog1.ShowModal() == wxID_OK) {

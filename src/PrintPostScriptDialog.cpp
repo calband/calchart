@@ -1,6 +1,5 @@
-
 /*
- * print_ps_dialog.h
+ * PrintPostScriptDialog.cpp
  * Dialox box for printing postscript
  */
 
@@ -21,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "print_ps_dialog.h"
+#include "PrintPostScriptDialog.h"
 
 #include "CalChartDoc.h"
 #include "basic_ui.h"
@@ -37,12 +36,16 @@
 #include <wx/filename.h>
 #include <wx/wfstream.h>
 
-enum { CC_PRINT_ORIENT_PORTRAIT,
-    CC_PRINT_ORIENT_LANDSCAPE };
+enum {
+    CC_PRINT_ORIENT_PORTRAIT,
+    CC_PRINT_ORIENT_LANDSCAPE
+};
 
-enum { CC_PRINT_ACTION_PRINTER,
+enum {
+    CC_PRINT_ACTION_PRINTER,
     CC_PRINT_ACTION_FILE,
-    CC_PRINT_ACTION_PREVIEW };
+    CC_PRINT_ACTION_PREVIEW
+};
 
 enum {
     CC_PRINT_BUTTON_PRINT = 1000,
@@ -55,43 +58,55 @@ EVT_BUTTON(CC_PRINT_BUTTON_SELECT, PrintPostScriptDialog::ShowPrintSelect)
 EVT_BUTTON(CC_PRINT_BUTTON_RESET_DEFAULTS, PrintPostScriptDialog::ResetDefaults)
 END_EVENT_TABLE()
 
+IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
+
+PrintPostScriptDialog::PrintPostScriptDialog() { Init(); }
+
+PrintPostScriptDialog::PrintPostScriptDialog(
+    const CalChartDoc* show, wxFrame* parent, wxWindowID id,
+    const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
+    : mShow(NULL)
+{
+    Init();
+
+    Create(show, parent, id, caption, pos, size, style);
+}
+
+PrintPostScriptDialog::~PrintPostScriptDialog() { }
+
+void PrintPostScriptDialog::Init() { }
+
 void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 {
-    wxString s;
 #ifdef PRINT__RUN_CMD
     wxString buf;
 #endif
-    bool overview;
-    long minyards;
 
+    long minyards;
     text_minyards->GetValue().ToLong(&minyards);
     if (minyards < 10 || minyards > 100) {
-        wxLogError(wxT(
-            "Yards entered invalid.  Please enter a number between 10 and 100."));
+        wxLogError("Yards entered invalid.  Please enter a number between 10 and 100.");
         return;
     }
-    overview = config.Get_PrintPSOverview();
+    auto overview = config.Get_PrintPSOverview();
 
+    wxString s;
     switch (config.Get_PrintPSModes()) {
     case CC_PRINT_ACTION_PREVIEW: {
 #ifdef PRINT__RUN_CMD
-        s = wxFileName::CreateTempFileName(wxT("cc_"));
-        buf.sprintf(wxT("%s %s \"%s\""), config.Get_PrintViewCmd().c_str(),
-            config.Get_PrintViewCmd().c_str(), s.c_str());
+        s = wxFileName::CreateTempFileName("cc_");
+        buf.sprintf("%s %s \"%s\"", config.Get_PrintViewCmd().c_str(), config.Get_PrintViewCmd().c_str(), s.c_str());
 #endif
     } break;
     case CC_PRINT_ACTION_FILE:
-        s = wxFileSelector(wxT("Print to file"), wxEmptyString, wxEmptyString,
-            wxEmptyString, wxT("*.ps"),
-            wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+        s = wxFileSelector("Print to file", wxEmptyString, wxEmptyString, wxEmptyString, "*.ps", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
         if (s.empty())
             return;
         break;
     case CC_PRINT_ACTION_PRINTER: {
 #ifdef PRINT__RUN_CMD
-        s = wxFileName::CreateTempFileName(wxT("cc_"));
-        buf.sprintf(wxT("%s %s \"%s\""), config.Get_PrintCmd().c_str(),
-            config.Get_PrintOpts().c_str(), s.c_str());
+        s = wxFileName::CreateTempFileName("cc_");
+        buf.sprintf("%s %s \"%s\"", config.Get_PrintCmd().c_str(), config.Get_PrintOpts().c_str(), s.c_str());
 #else
 #endif
     } break;
@@ -100,13 +115,9 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
     }
 
     std::ostringstream buffer;
-
-    int n = mShow->PrintToPS(buffer, overview, static_cast<int>(minyards), mIsSheetPicked, config);
+    auto n = mShow->PrintToPS(buffer, overview, static_cast<int>(minyards), mIsSheetPicked, config);
     // stream to file:
-    {
-        wxFFileOutputStream outstream(s);
-        outstream.Write(buffer.str().c_str(), buffer.str().size());
-    }
+    wxFFileOutputStream(s).Write(buffer.str().c_str(), buffer.str().size());
 
 #ifdef PRINT__RUN_CMD
     switch (config.Get_PrintPSModes()) {
@@ -120,33 +131,24 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
 #endif
 
     wxString tempbuf;
-    tempbuf.sprintf(wxT("Printed %d pages."), n);
+    tempbuf.sprintf("Printed %d pages.", n);
     (void)wxMessageBox(tempbuf, mShow->GetTitle());
 }
 
 void PrintPostScriptDialog::ShowPrintSelect(wxCommandEvent&)
 {
     wxArrayString choices;
-    for (auto sheet = mShow->GetSheetBegin();
-         sheet != mShow->GetSheetEnd(); ++sheet) {
-        choices.Add(sheet->GetName());
+    for (auto&& sheet : mShow->GetSheets()) {
+        choices.Add(sheet.GetName());
     }
-    wxMultiChoiceDialog dialog(this, wxT("Choose which pages to print"),
-        wxT("Pagest to Print"), choices);
-    wxArrayInt markedChoices;
-    for (auto sheet = mShow->GetSheetBegin();
-         sheet != mShow->GetSheetEnd(); ++sheet) {
-        if (mIsSheetPicked.count(std::distance(mShow->GetSheetBegin(), sheet))) {
-            markedChoices.Add(static_cast<int>(std::distance(mShow->GetSheetBegin(), sheet)));
-        }
-    }
+    wxMultiChoiceDialog dialog(this, "Choose which pages to print", "Pages to Print", choices);
+    wxArrayInt markedChoices(mIsSheetPicked.begin(), mIsSheetPicked.end());
     dialog.SetSelections(markedChoices);
     if (dialog.ShowModal() == wxID_OK) {
-        wxArrayInt selections = dialog.GetSelections();
         mIsSheetPicked.clear();
         // build up a set of what's been selected:
-        for (size_t n = 0; n < selections.GetCount(); ++n)
-            mIsSheetPicked.insert(selections[n]);
+        for (auto&& selection : dialog.GetSelections())
+            mIsSheetPicked.insert(selection);
     }
 }
 
@@ -171,35 +173,17 @@ void PrintPostScriptDialog::ResetDefaults(wxCommandEvent&)
     TransferDataToWindow();
 }
 
-IMPLEMENT_CLASS(PrintPostScriptDialog, wxDialog)
-
-PrintPostScriptDialog::PrintPostScriptDialog() { Init(); }
-
-PrintPostScriptDialog::PrintPostScriptDialog(
-    const CalChartDoc* show, wxFrame* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : mShow(NULL)
-{
-    Init();
-
-    Create(show, parent, id, caption, pos, size, style);
-}
-
-PrintPostScriptDialog::~PrintPostScriptDialog() { }
-
-void PrintPostScriptDialog::Init() { }
-
 bool PrintPostScriptDialog::Create(const CalChartDoc* show,
     wxFrame* parent, wxWindowID id,
     const wxString& caption, const wxPoint& pos,
     const wxSize& size, long style)
 {
-    if (!wxDialog::Create(parent, id, caption, pos, size, style))
+    if (!wxDialog::Create(parent, id, caption, pos, size, style)) {
         return false;
+    }
     mShow = show;
-    for (auto sheet = mShow->GetSheetBegin();
-         sheet != mShow->GetSheetEnd(); ++sheet) {
-        mIsSheetPicked.insert(std::distance(mShow->GetSheetBegin(), sheet));
+    for (auto i = 0; i < mShow->GetNumSheets(); ++i) {
+        mIsSheetPicked.insert(i);
     }
 
     CreateControls();
@@ -259,13 +243,13 @@ void PrintPostScriptDialog::CreateControls()
 #endif
 
         HStack(sizer, [this](auto sizer) {
-            wxString orientation[] = { wxT("Portrait"), wxT("Landscape") };
-            radio_orient = new wxRadioBox(this, wxID_ANY, wxT("&Orientation:"), wxDefaultPosition, wxDefaultSize, sizeof(orientation) / sizeof(wxString), orientation);
+            wxString orientation[] = { "Portrait", "Landscape" };
+            radio_orient = new wxRadioBox(this, wxID_ANY, "&Orientation:", wxDefaultPosition, wxDefaultSize, sizeof(orientation) / sizeof(wxString), orientation);
             sizer->Add(radio_orient, 0, wxALL, 5);
 #ifdef PRINT__RUN_CMD
-            wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File"), wxT("Preview Only") };
+            wxString print_modes[] = { "Send to Printer", "Print to File", "Preview Only" };
 #else
-            wxString print_modes[] = { wxT("Send to Printer"), wxT("Print to File") };
+            wxString print_modes[] = { "Send to Printer", "Print to File" };
 #endif
             radio_method = new wxRadioBox(this, -1, "Post&Script:", wxDefaultPosition, wxDefaultSize, sizeof(print_modes) / sizeof(wxString), print_modes);
             sizer->Add(radio_method, 0, wxALL, 5);
@@ -337,15 +321,15 @@ bool PrintPostScriptDialog::TransferDataToWindow()
     }
 
     wxString buf;
-    buf.Printf(wxT("%.2f"), config.Get_PageOffsetX());
+    buf.Printf("%.2f", config.Get_PageOffsetX());
     text_x->SetValue(buf);
-    buf.Printf(wxT("%.2f"), config.Get_PageOffsetY());
+    buf.Printf("%.2f", config.Get_PageOffsetY());
     text_y->SetValue(buf);
-    buf.Printf(wxT("%.2f"), config.Get_PageWidth());
+    buf.Printf("%.2f", config.Get_PageWidth());
     text_width->SetValue(buf);
-    buf.Printf(wxT("%.2f"), config.Get_PageHeight());
+    buf.Printf("%.2f", config.Get_PageHeight());
     text_height->SetValue(buf);
-    buf.Printf(wxT("%.2f"), config.Get_PaperLength());
+    buf.Printf("%.2f", config.Get_PaperLength());
     text_length->SetValue(buf);
     return true;
 }

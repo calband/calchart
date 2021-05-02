@@ -25,7 +25,7 @@
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
 #include "cc_point.h"
-#include "cc_shapes.h"
+#include "CalChartShapes.h"
 #include "cc_sheet.h"
 #include "ccvers.h"
 
@@ -79,8 +79,7 @@ std::unique_ptr<Show> Show::Create_CC_show(ShowMode const& mode, std::istream& s
 
 // Create a new show
 Show::Show(ShowMode const& mode)
-    : mSheetNum(0)
-    , mMode(mode)
+    : mMode(mode)
 {
 }
 
@@ -88,8 +87,7 @@ Show::Show(ShowMode const& mode)
 // Recommend that you don't touch this unless you know what you are doing.
 // Constructor for shows 3.3 and ealier.
 Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction)
-    : mSheetNum(0)
-    , mMode(mode)
+    : mMode(mode)
 {
     // caller should have stripped off INGL and GURK headers
     /*
@@ -156,8 +154,7 @@ Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const*
 // -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
 
 Show::Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction)
-    : mSheetNum(0)
-    , mMode(mode)
+    : mMode(mode)
 {
     // caller should have stripped off INGL and GURK headers
 
@@ -536,7 +533,7 @@ SelectionList Show::MakeUnselectAll() const
     return {};
 }
 
-void Show::SetSelection(const SelectionList& sl)
+void Show::SetSelectionList(const SelectionList& sl)
 {
     mSelectionList = sl;
 }
@@ -570,16 +567,16 @@ SelectionList Show::MakeToggleSelection(const SelectionList& sl) const
 
 // toggle selection means toggle it as selected to unselected
 // otherwise, always select it
-SelectionList Show::MakeSelectWithLasso(const Lasso& lasso, int ref) const
+SelectionList Show::MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const
 {
-    if (!lasso.FirstPoint()) {
+    if (polygon.size() < 3) {
         return {};
     }
 
     SelectionList sl;
     auto sheet = GetCurrentSheet();
     for (int i = 0; i < GetNumPoints(); i++) {
-        if (lasso.Inside(sheet->GetPosition(i, ref))) {
+        if (CalChart::Inside(sheet->GetPosition(i, ref), polygon)) {
             sl.insert(i);
         }
     }
@@ -626,11 +623,11 @@ nlohmann::json Show::toOnlineViewerJSON(const Animation& compiledShow) const
     j["labels"] = ptLabels;
 
     std::vector<nlohmann::json> sheetData;
-    auto animateSheetIter = compiledShow.sheetsBegin();
+    auto animationSheetIter = compiledShow.sheetsBegin();
     auto sheetIndex = 0;
     for (auto showSheetIter = GetSheetBegin(); showSheetIter != GetSheetEnd(); ++showSheetIter) {
-        sheetData.push_back(showSheetIter->toOnlineViewerJSON(sheetIndex + 1, ptLabels, *animateSheetIter));
-        ++animateSheetIter;
+        sheetData.push_back(showSheetIter->toOnlineViewerJSON(sheetIndex + 1, ptLabels, *animationSheetIter));
+        ++animationSheetIter;
         ++sheetIndex;
     }
 
@@ -646,17 +643,17 @@ Show_command_pair Show::Create_SetCurrentSheetCommand(int n) const
     return { action, reaction };
 }
 
-Show_command_pair Show::Create_SetSelectionCommand(const SelectionList& sl) const
+Show_command_pair Show::Create_SetSelectionListCommand(const SelectionList& sl) const
 {
-    auto action = [sl](Show& show) { show.SetSelection(sl); };
-    auto reaction = [sl = mSelectionList](Show& show) { show.SetSelection(sl); };
+    auto action = [sl](Show& show) { show.SetSelectionList(sl); };
+    auto reaction = [sl = mSelectionList](Show& show) { show.SetSelectionList(sl); };
     return { action, reaction };
 }
 
 Show_command_pair Show::Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const
 {
-    auto action = [n, sl](Show& show) { show.SetCurrentSheet(n); show.SetSelection(sl); };
-    auto reaction = [n = mSheetNum, sl = mSelectionList](Show& show) { show.SetCurrentSheet(n); show.SetSelection(sl); };
+    auto action = [n, sl](Show& show) { show.SetCurrentSheet(n); show.SetSelectionList(sl); };
+    auto reaction = [n = mSheetNum, sl = mSelectionList](Show& show) { show.SetCurrentSheet(n); show.SetSelectionList(sl); };
     return { action, reaction };
 }
 
@@ -810,7 +807,7 @@ Show_command_pair Show::Create_DeletePointsCommand() const
 {
     auto action = [selectionList = mSelectionList](Show& show) {
         show.DeletePoints(selectionList);
-        show.SetSelection({});
+        show.SetSelectionList({});
     };
     // need to go through and save all the positions and labels for later
     auto old_labels = mDotLabelAndInstrument;

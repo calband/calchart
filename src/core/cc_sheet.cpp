@@ -22,7 +22,7 @@
 
 #include "cc_sheet.h"
 
-#include "animatecommand.h"
+#include "CalChartAnimationCommand.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
 #include "cc_show.h"
@@ -710,7 +710,7 @@ std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
     return result;
 }
 
-nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimateSheet& compiledSheet) const
+nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimationSheet& compiledSheet) const
 {
     nlohmann::json j;
     // TODO; add printed continuities to viewer file manually for now

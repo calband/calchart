@@ -1,6 +1,6 @@
 /*
- * field_canvas_shapes.cpp
- * Canvas for the Field window
+ * CalChartMovePointsTool.cpp
+ * MovePointsTool represent the shapes and transformation of Marcher moves.
  */
 
 /*
@@ -20,131 +20,133 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "field_canvas_shapes.h"
+#include "CalChartMovePointsTool.h"
 
-#include "cc_shapes.h"
-#include "confgr.h"
-#include "draw.h"
+#include "CalChartShapes.h"
 #include "linmath.h"
 #include "math_utils.h"
 
-#include <wx/dcbuffer.h>
+namespace CalChart {
 
-class MovePoints_CC_MOVE_NORMAL : public MovePoints {
+class MovePointsTool_Normal : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_LINE : public MovePoints {
+class MovePointsTool_MoveLine : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_ROTATE : public MovePoints {
+class MovePointsTool_MoveRotate : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
-    virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
+    virtual void OnClickUp(CalChart::Coord pos) override;
+    virtual bool IsDone() const override;
     virtual bool IsReadyForMoving() const override;
 };
 
-class MovePoints_CC_MOVE_SHEAR : public MovePoints {
+class MovePointsTool_MoveShear : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
-    virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
+    virtual void OnClickUp(CalChart::Coord pos) override;
+    virtual bool IsDone() const override;
     virtual bool IsReadyForMoving() const override;
 };
 
-class MovePoints_CC_MOVE_REFL : public MovePoints {
+class MovePointsTool_MoveReflect : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SIZE : public MovePoints {
+class MovePointsTool_MoveSize : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
-    virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
+    virtual void OnClickUp(CalChart::Coord pos) override;
+    virtual bool IsDone() const override;
     virtual bool IsReadyForMoving() const override;
 };
 
-class MovePoints_CC_MOVE_GENIUS : public MovePoints {
+class MovePointsTool_MoveGenius : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
-    virtual bool OnMouseUpDone(CalChart::Coord const&) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
+    virtual void OnClickUp(CalChart::Coord pos) override;
+    virtual bool IsDone() const override;
     virtual bool IsReadyForMoving() const override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_LINE : public MovePoints {
+class MovePointsTool_ShapeLine : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_ELLIPSE : public MovePoints {
+class MovePointsTool_ShapeEllipse : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_RECTANGLE : public MovePoints {
+class MovePointsTool_ShapeRectangle : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_DRAW : public MovePoints {
+class MovePointsTool_ShapeDraw : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_X : public MovePoints {
+class MovePointsTool_ShapeX : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-class MovePoints_CC_MOVE_SHAPE_CROSS : public MovePoints {
+class MovePointsTool_ShapeCross : public MovePointsTool {
 public:
     virtual std::map<int, CalChart::Coord> TransformPoints(std::map<int, CalChart::Coord> const& select_list) const override;
-    virtual void OnMouseLeftDown(CalChart::Coord pos) override;
+    virtual void OnClickDown(CalChart::Coord pos) override;
 };
 
-std::unique_ptr<MovePoints> Create_MovePoints(CC_MOVE_MODES curr_move)
+std::unique_ptr<MovePointsTool> MovePointsTool::Create(CalChart::MoveMode curr_move)
 {
     switch (curr_move) {
-    case CC_MOVE_NORMAL:
-        return std::make_unique<MovePoints_CC_MOVE_NORMAL>();
-    case CC_MOVE_SHAPE_LINE:
-        return std::make_unique<MovePoints_CC_MOVE_SHAPE_LINE>();
-    case CC_MOVE_SHAPE_X:
-        return std::make_unique<MovePoints_CC_MOVE_SHAPE_X>();
-    case CC_MOVE_SHAPE_CROSS:
-        return std::make_unique<MovePoints_CC_MOVE_SHAPE_CROSS>();
-    case CC_MOVE_SHAPE_RECTANGLE:
-        return std::make_unique<MovePoints_CC_MOVE_SHAPE_RECTANGLE>();
-    case CC_MOVE_SHAPE_ELLIPSE:
-        return std::make_unique<MovePoints_CC_MOVE_SHAPE_ELLIPSE>();
-    case CC_MOVE_SHAPE_DRAW:
-        return std::make_unique<MovePoints_CC_MOVE_SHAPE_DRAW>();
-    case CC_MOVE_LINE:
-        return std::make_unique<MovePoints_CC_MOVE_LINE>();
-    case CC_MOVE_ROTATE:
-        return std::make_unique<MovePoints_CC_MOVE_ROTATE>();
-    case CC_MOVE_SHEAR:
-        return std::make_unique<MovePoints_CC_MOVE_SHEAR>();
-    case CC_MOVE_REFL:
-        return std::make_unique<MovePoints_CC_MOVE_REFL>();
-    case CC_MOVE_SIZE:
-        return std::make_unique<MovePoints_CC_MOVE_SIZE>();
-    case CC_MOVE_GENIUS:
-        return std::make_unique<MovePoints_CC_MOVE_GENIUS>();
+        case CalChart::MoveMode::Normal:
+        return std::make_unique<MovePointsTool_Normal>();
+        case CalChart::MoveMode::ShapeLine:
+        return std::make_unique<MovePointsTool_ShapeLine>();
+        case CalChart::MoveMode::ShapeX:
+        return std::make_unique<MovePointsTool_ShapeX>();
+        case CalChart::MoveMode::ShapeCross:
+        return std::make_unique<MovePointsTool_ShapeCross>();
+        case CalChart::MoveMode::ShapeRectange:
+        return std::make_unique<MovePointsTool_ShapeRectangle>();
+        case CalChart::MoveMode::ShapeEllipse:
+        return std::make_unique<MovePointsTool_ShapeEllipse>();
+        case CalChart::MoveMode::ShapeDraw:
+        return std::make_unique<MovePointsTool_ShapeDraw>();
+        case CalChart::MoveMode::MoveLine:
+        return std::make_unique<MovePointsTool_MoveLine>();
+        case CalChart::MoveMode::MoveRotate:
+        return std::make_unique<MovePointsTool_MoveRotate>();
+        case CalChart::MoveMode::MoveShear:
+        return std::make_unique<MovePointsTool_MoveShear>();
+        case CalChart::MoveMode::MoveReflect:
+        return std::make_unique<MovePointsTool_MoveReflect>();
+        case CalChart::MoveMode::MoveSize:
+        return std::make_unique<MovePointsTool_MoveSize>();
+        case CalChart::MoveMode::MoveGenius:
+        return std::make_unique<MovePointsTool_MoveGenius>();
     }
 }
 
@@ -176,33 +178,33 @@ static std::vector<int> get_ordered_selection(std::map<int, CalChart::Coord> con
     return result;
 }
 
-void FieldCanvasShapes::BeginMoveDrag(CC_DRAG type, const CalChart::Coord& start)
+void MovePointsTool::BeginMoveDrag(Drag type, CalChart::Coord start)
 {
     move_drag = type;
     m_shape_list.clear();
     switch (type) {
-    case CC_DRAG::BOX:
+    case Drag::BOX:
         AddMoveDrag(type, std::make_unique<CalChart::Shape_rect>(start));
         break;
-    case CC_DRAG::POLY:
+    case Drag::POLY:
         AddMoveDrag(type, std::make_unique<CalChart::Poly>(start));
         break;
-    case CC_DRAG::LASSO:
+    case Drag::LASSO:
         AddMoveDrag(type, std::make_unique<CalChart::Lasso>(start));
         break;
-    case CC_DRAG::LINE:
+    case Drag::LINE:
         AddMoveDrag(type, std::make_unique<CalChart::Shape_line>(start));
         break;
-    case CC_DRAG::CROSSHAIRS:
+    case Drag::CROSSHAIRS:
         AddMoveDrag(type, std::make_unique<CalChart::Shape_crosshairs>(start, Int2CoordUnits(2)));
         break;
-    case CC_DRAG::SHAPE_ELLIPSE:
+    case Drag::SHAPE_ELLIPSE:
         AddMoveDrag(type, std::make_unique<CalChart::Shape_ellipse>(start));
         break;
-    case CC_DRAG::SHAPE_X:
+    case Drag::SHAPE_X:
         AddMoveDrag(type, std::make_unique<CalChart::Shape_x>(start));
         break;
-    case CC_DRAG::SHAPE_CROSS:
+    case Drag::SHAPE_CROSS:
         AddMoveDrag(type, std::make_unique<CalChart::Shape_cross>(start));
         break;
     default:
@@ -210,25 +212,25 @@ void FieldCanvasShapes::BeginMoveDrag(CC_DRAG type, const CalChart::Coord& start
     }
 }
 
-void FieldCanvasShapes::AddMoveDrag(CC_DRAG type, std::unique_ptr<CalChart::Shape> shape)
+void MovePointsTool::AddMoveDrag(Drag type, std::unique_ptr<CalChart::Shape> shape)
 {
     move_drag = type;
     m_shape_list.emplace_back(std::move(shape));
 }
 
-void FieldCanvasShapes::OnMove(const CalChart::Coord& p, const CalChart::Coord& snapped_p)
+void MovePointsTool::OnMove(CalChart::Coord p, CalChart::Coord snapped_p)
 {
     if (!m_shape_list.empty()) {
         m_shape_list.back()->OnMove(p, snapped_p);
     }
 }
 
-void MovePoints_CC_MOVE_LINE::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_MoveLine::OnClickDown(CalChart::Coord pos)
 {
-    BeginMoveDrag(CC_DRAG::LINE, pos);
+    BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_LINE::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_MoveLine::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = static_cast<CalChart::Shape_2point const*>(m_shape_list.back().get());
@@ -245,12 +247,12 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_LINE::TransformPoints(std::map
     return result;
 }
 
-void MovePoints_CC_MOVE_NORMAL::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_Normal::OnClickDown(CalChart::Coord pos)
 {
-    BeginMoveDrag(CC_DRAG::LINE, pos);
+    BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_NORMAL::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_Normal::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     auto* shape = static_cast<CalChart::Shape_2point const*>(m_shape_list.back().get());
     auto pos = shape->GetPoint() - shape->GetOrigin();
@@ -261,20 +263,20 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_NORMAL::TransformPoints(std::m
     return result;
 }
 
-void MovePoints_CC_MOVE_ROTATE::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_MoveRotate::OnClickDown(CalChart::Coord pos)
 {
     // rotate is a 2-distinct mouse click action
     if (m_shape_list.empty()) {
-        BeginMoveDrag(CC_DRAG::CROSSHAIRS, pos);
+        BeginMoveDrag(Drag::CROSSHAIRS, pos);
     } else if (static_cast<CalChart::Shape_1point*>(m_shape_list.back().get())->GetOrigin() != pos) {
         // and this is a point not on the origin.
-        AddMoveDrag(CC_DRAG::LINE,
+        AddMoveDrag(Drag::LINE,
             std::make_unique<CalChart::Shape_arc>(
                 static_cast<CalChart::Shape_1point*>(m_shape_list.back().get())->GetOrigin(), pos));
     }
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_ROTATE::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_MoveRotate::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     if (m_shape_list.size() < 2) {
         return select_list;
@@ -286,21 +288,23 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_ROTATE::TransformPoints(std::m
     }
 }
 
-bool MovePoints_CC_MOVE_ROTATE::OnMouseUpDone(CalChart::Coord const& pos)
+void MovePointsTool_MoveRotate::OnClickUp(CalChart::Coord pos)
 {
-    if (m_shape_list.size() > 1) {
+    if (IsReadyForMoving()) {
         auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
         if (shape->GetOrigin() == shape->GetPoint()) {
             // reset
-            BeginMoveDrag(CC_DRAG::CROSSHAIRS, pos);
-            return false;
+            BeginMoveDrag(Drag::CROSSHAIRS, pos);
         }
-        return true;
     }
-    return false;
 }
 
-bool MovePoints_CC_MOVE_ROTATE::IsReadyForMoving() const
+bool MovePointsTool_MoveRotate::IsDone() const
+{
+    return IsReadyForMoving();
+}
+
+bool MovePointsTool_MoveRotate::IsReadyForMoving() const
 {
     if (m_shape_list.size() > 1) {
         return true;
@@ -308,19 +312,19 @@ bool MovePoints_CC_MOVE_ROTATE::IsReadyForMoving() const
     return false;
 }
 
-void MovePoints_CC_MOVE_SHEAR::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_MoveShear::OnClickDown(CalChart::Coord pos)
 {
     // shear is a 2-distinct mouse click action
     if (m_shape_list.empty()) {
-        BeginMoveDrag(CC_DRAG::CROSSHAIRS, pos);
+        BeginMoveDrag(Drag::CROSSHAIRS, pos);
     } else if (((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin() != pos) {
         CalChart::Coord vect(pos - ((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin());
         // rotate vect 90 degrees
-        AddMoveDrag(CC_DRAG::LINE, std::make_unique<CalChart::Shape_angline>(pos, CalChart::Coord(-vect.y, vect.x)));
+        AddMoveDrag(Drag::LINE, std::make_unique<CalChart::Shape_angline>(pos, CalChart::Coord(-vect.y, vect.x)));
     }
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHEAR::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_MoveShear::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     if (m_shape_list.size() < 2) {
         return select_list;
@@ -342,21 +346,23 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHEAR::TransformPoints(std::ma
     }
 }
 
-bool MovePoints_CC_MOVE_SHEAR::OnMouseUpDone(CalChart::Coord const& pos)
+void MovePointsTool_MoveShear::OnClickUp(CalChart::Coord pos)
 {
-    if (m_shape_list.size() > 1) {
+    if (IsReadyForMoving()) {
         auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
         if (shape->GetOrigin() == shape->GetPoint()) {
             // reset
-            BeginMoveDrag(CC_DRAG::CROSSHAIRS, pos);
-            return false;
+            BeginMoveDrag(Drag::CROSSHAIRS, pos);
         }
-        return true;
     }
-    return false;
 }
 
-bool MovePoints_CC_MOVE_SHEAR::IsReadyForMoving() const
+bool MovePointsTool_MoveShear::IsDone() const
+{
+    return IsReadyForMoving();
+}
+
+bool MovePointsTool_MoveShear::IsReadyForMoving() const
 {
     if (m_shape_list.size() > 1) {
         return true;
@@ -364,13 +370,13 @@ bool MovePoints_CC_MOVE_SHEAR::IsReadyForMoving() const
     return false;
 }
 
-void MovePoints_CC_MOVE_REFL::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_MoveReflect::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::LINE, pos);
+    BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_REFL::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_MoveReflect::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -381,17 +387,17 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_REFL::TransformPoints(std::map
     return GetTransformedPoints(m, select_list);
 }
 
-void MovePoints_CC_MOVE_SIZE::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_MoveSize::OnClickDown(CalChart::Coord pos)
 {
     // move is a 2-distinct mouse click action
     if (m_shape_list.empty()) {
-        BeginMoveDrag(CC_DRAG::CROSSHAIRS, pos);
+        BeginMoveDrag(Drag::CROSSHAIRS, pos);
     } else if (((CalChart::Shape_1point*)m_shape_list.back().get())->GetOrigin() != pos) {
-        AddMoveDrag(CC_DRAG::LINE, std::make_unique<CalChart::Shape_line>(pos));
+        AddMoveDrag(Drag::LINE, std::make_unique<CalChart::Shape_line>(pos));
     }
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SIZE::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_MoveSize::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     if (m_shape_list.size() < 2) {
         return select_list;
@@ -421,21 +427,23 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SIZE::TransformPoints(std::map
     }
 }
 
-bool MovePoints_CC_MOVE_SIZE::OnMouseUpDone(CalChart::Coord const& pos)
+void MovePointsTool_MoveSize::OnClickUp(CalChart::Coord pos)
 {
-    if (m_shape_list.size() > 1) {
+    if (IsReadyForMoving()) {
         auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
         if (shape->GetOrigin() == shape->GetPoint()) {
             // reset
-            BeginMoveDrag(CC_DRAG::CROSSHAIRS, pos);
-            return false;
+            BeginMoveDrag(Drag::CROSSHAIRS, pos);
         }
-        return true;
     }
-    return false;
 }
 
-bool MovePoints_CC_MOVE_SIZE::IsReadyForMoving() const
+bool MovePointsTool_MoveSize::IsDone() const
+{
+    return IsReadyForMoving();
+}
+
+bool MovePointsTool_MoveSize::IsReadyForMoving() const
 {
     if (m_shape_list.size() > 1) {
         return true;
@@ -443,15 +451,15 @@ bool MovePoints_CC_MOVE_SIZE::IsReadyForMoving() const
     return false;
 }
 
-void MovePoints_CC_MOVE_GENIUS::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_MoveGenius::OnClickDown(CalChart::Coord pos)
 {
     // move is a 2-distinct mouse click action
     if (m_shape_list.size() < 3) {
-        AddMoveDrag(CC_DRAG::LINE, std::make_unique<CalChart::Shape_line>(pos));
+        AddMoveDrag(Drag::LINE, std::make_unique<CalChart::Shape_line>(pos));
     }
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_GENIUS::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_MoveGenius::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     if (m_shape_list.size() < 3) {
         return select_list;
@@ -487,7 +495,16 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_GENIUS::TransformPoints(std::m
     }
 }
 
-bool MovePoints_CC_MOVE_GENIUS::OnMouseUpDone(CalChart::Coord const& pos)
+void MovePointsTool_MoveGenius::OnClickUp(CalChart::Coord)
+{
+}
+
+bool MovePointsTool_MoveGenius::IsDone() const
+{
+    return IsReadyForMoving();
+}
+
+bool MovePointsTool_MoveGenius::IsReadyForMoving() const
 {
     if (m_shape_list.size() > 2) {
         return true;
@@ -495,21 +512,13 @@ bool MovePoints_CC_MOVE_GENIUS::OnMouseUpDone(CalChart::Coord const& pos)
     return false;
 }
 
-bool MovePoints_CC_MOVE_GENIUS::IsReadyForMoving() const
-{
-    if (m_shape_list.size() > 2) {
-        return true;
-    }
-    return false;
-}
-
-void MovePoints_CC_MOVE_SHAPE_LINE::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_ShapeLine::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::LINE, pos);
+    BeginMoveDrag(Drag::LINE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_LINE::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_ShapeLine::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -526,13 +535,13 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_LINE::TransformPoints(st
     return result;
 }
 
-void MovePoints_CC_MOVE_SHAPE_ELLIPSE::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_ShapeEllipse::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::SHAPE_ELLIPSE, pos);
+    BeginMoveDrag(Drag::SHAPE_ELLIPSE, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_ELLIPSE::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_ShapeEllipse::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -557,13 +566,13 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_ELLIPSE::TransformPoints
     return result;
 }
 
-void MovePoints_CC_MOVE_SHAPE_RECTANGLE::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_ShapeRectangle::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::BOX, pos);
+    BeginMoveDrag(Drag::BOX, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_RECTANGLE::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_ShapeRectangle::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -591,13 +600,13 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_RECTANGLE::TransformPoin
     return result;
 }
 
-void MovePoints_CC_MOVE_SHAPE_DRAW::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_ShapeDraw::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::LASSO, pos);
+    BeginMoveDrag(Drag::LASSO, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_DRAW::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_ShapeDraw::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Lasso const*)m_shape_list.back().get();
@@ -613,13 +622,13 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_DRAW::TransformPoints(st
     return result;
 }
 
-void MovePoints_CC_MOVE_SHAPE_X::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_ShapeX::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::SHAPE_X, pos);
+    BeginMoveDrag(Drag::SHAPE_X, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_X::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_ShapeX::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -657,13 +666,13 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_X::TransformPoints(std::
     return result;
 }
 
-void MovePoints_CC_MOVE_SHAPE_CROSS::OnMouseLeftDown(CalChart::Coord pos)
+void MovePointsTool_ShapeCross::OnClickDown(CalChart::Coord pos)
 {
     // reflect is a 1 mouse click action
-    BeginMoveDrag(CC_DRAG::SHAPE_CROSS, pos);
+    BeginMoveDrag(Drag::SHAPE_CROSS, pos);
 }
 
-std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_CROSS::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
+std::map<int, CalChart::Coord> MovePointsTool_ShapeCross::TransformPoints(std::map<int, CalChart::Coord> const& select_list) const
 {
     assert(m_shape_list.size() == 1);
     auto* shape = (CalChart::Shape_2point const*)m_shape_list.back().get();
@@ -701,4 +710,6 @@ std::map<int, CalChart::Coord> MovePoints_CC_MOVE_SHAPE_CROSS::TransformPoints(s
     }
     assert(iter == select_list.end());
     return result;
+}
+
 }

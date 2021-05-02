@@ -20,8 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_coord.h"
-#include "cc_types.h"
+#include "CalChartCoord.h"
+#include "CalChartTypes.h"
+#include "CalChartMovePointsTool.h"
+#include "CalChartSelectTool.h"
 
 #include <map>
 #include <wx/aui/framemanager.h>
@@ -149,9 +151,9 @@ public:
     std::pair<CalChart::Coord::units, CalChart::Coord::units> ToolGridChoice() const;
     void OnUpdate();
 
-    void SetCurrentLasso(CC_DRAG type);
-    void SetCurrentMove(CC_MOVE_MODES type);
-    void ToolBarSetCurrentMove(CC_MOVE_MODES type);
+    void SetCurrentSelect(CalChart::Select type);
+    void SetCurrentMove(CalChart::MoveMode type);
+    void ToolBarSetCurrentMove(CalChart::MoveMode type);
     float ToolBarSetZoom(float zoom); // set to an amount, returns what it was set to.
     void zoom_callback(wxCommandEvent&);
     void zoom_callback_textenter(wxCommandEvent&);
@@ -197,7 +199,7 @@ private:
     AnimationPanel* mShadowAnimationPanel{};
     PrintContinuityEditor* mPrintContinuityEditor{};
     wxAuiToolBar* mControls;
-    wxAuiToolBar* mLassosToolBar;
+    wxAuiToolBar* mSelectAndMoveToolBar;
     wxAuiToolBar* mMarcherToolBar;
 
     std::map<int, wxWindow*> mLookupEnumToSubWindow;

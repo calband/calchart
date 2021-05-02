@@ -23,7 +23,7 @@
 
 #include <wx/wx.h>
 
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 
 template <typename T>
 static auto fDIP(T const& t) { return wxWindow::FromDIP(t, nullptr); }

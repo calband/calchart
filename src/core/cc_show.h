@@ -22,9 +22,12 @@
 */
 
 #include "cc_fileformat.h"
-#include "cc_types.h"
+#include "CalChartTypes.h"
+#include "CalChartMovePointsTool.h"
+#include "CalChartSelectTool.h"
+#include "CalChartShapes.h"
 
-#include "animate.h"
+#include "CalChartAnimation.h"
 #include "cc_sheet.h"
 #include "modes.h"
 
@@ -36,7 +39,6 @@
 #include <vector>
 
 namespace CalChart {
-class Lasso;
 class Show;
 class Sheet;
 struct ParseErrorHandlers;
@@ -77,7 +79,7 @@ public:
 
     // Create command, consists of an action and undo action
     Show_command_pair Create_SetCurrentSheetCommand(int n) const;
-    Show_command_pair Create_SetSelectionCommand(const SelectionList& sl) const;
+    Show_command_pair Create_SetSelectionListCommand(const SelectionList& sl) const;
     Show_command_pair Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const;
     Show_command_pair Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const;
     Show_command_pair Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const;
@@ -134,7 +136,7 @@ public:
     SelectionList MakeAddToSelection(const SelectionList& sl) const;
     SelectionList MakeRemoveFromSelection(const SelectionList& sl) const;
     SelectionList MakeToggleSelection(const SelectionList& sl) const;
-    SelectionList MakeSelectWithLasso(const Lasso& lasso, int ref) const;
+    SelectionList MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon, int ref) const;
     SelectionList MakeSelectBySymbol(SYMBOL_TYPE i) const;
     SelectionList MakeSelectByInstrument(std::string const& instrumentName) const;
     SelectionList MakeSelectByLabel(std::string const& labelName) const;
@@ -158,7 +160,7 @@ private:
     void InsertSheet(const Sheet& nsheet, int sheetidx);
     void InsertSheet(const Sheet_container_t& nsheet, int sheetidx);
     void SetCurrentSheet(int n);
-    void SetSelection(const SelectionList& sl);
+    void SetSelectionList(const SelectionList& sl);
 
     void SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position);
     void DeletePoints(SelectionList const& sl);
@@ -180,12 +182,14 @@ private:
 
     // members
     std::string mDescr;
-    Sheet_container_t mSheets;
     // labels and instruments go hand in hand, put them together to make sure we don't have extras or missing
     std::vector<std::pair<std::string, std::string>> mDotLabelAndInstrument;
-    SelectionList mSelectionList; // order of selections
-    int mSheetNum;
+    Sheet_container_t mSheets;
     ShowMode mMode;
+
+    // the more "transient" settings, representing a current set of manipulations by the user
+    SelectionList mSelectionList; // order of selections
+    int mSheetNum{};
 
     // unit tests
     friend void Show_UnitTests();

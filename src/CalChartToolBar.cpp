@@ -162,7 +162,7 @@ auto CreateAuiToolBar(wxAuiToolBar* tb, T toolbarBits)
     return tb;
 }
 
-wxAuiToolBar* CreateLassosAndMoves(wxWindow* parent, wxWindowID id, long style)
+wxAuiToolBar* CreateSelectAndMoves(wxWindow* parent, wxWindowID id, long style)
 {
     return CreateAuiToolBar(new wxAuiToolBar(parent, id, wxDefaultPosition, wxDefaultSize, style), GetHalfOfMainToolBar());
 }

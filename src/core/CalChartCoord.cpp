@@ -1,6 +1,6 @@
 /*
- * cc_coord.cpp
- * Member functions for coordinate classes
+ * CalChartCoord.cpp
+ * Definitions for the coordinate object
  */
 
 /*
@@ -23,7 +23,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 #include <cstdlib>
 
 namespace CalChart {
@@ -65,29 +65,29 @@ float Coord::Direction() const
 }
 
 // Get direction from this coord to another
-float Coord::Direction(const Coord& c) const
+float Coord::Direction(Coord const& c) const
 {
     return (c - *this).Direction();
 }
 
 // Returns the type of collision between this point and another
-Coord::CollisionType Coord::DetectCollision(const Coord& c) const
+Coord::CollisionType Coord::DetectCollision(Coord const& c) const
 {
     auto dx = x - c.x;
     auto dy = y - c.y;
     // Check for special cases to avoid multiplications
     if (std::abs(dx) > Int2CoordUnits(1))
-        return COLLISION_NONE;
+        return CollisionType::none;
     if (std::abs(dy) > Int2CoordUnits(1))
-        return COLLISION_NONE;
+        return CollisionType::none;
     auto squaredDist = ((dx * dx) + (dy * dy));
     auto distOfOne = Int2CoordUnits(1) * Int2CoordUnits(1);
     if (squaredDist < distOfOne) {
-        return COLLISION_INTERSECT;
+        return CollisionType::intersect;
     } else if (squaredDist == distOfOne) {
-        return COLLISION_WARNING;
+        return CollisionType::warning;
     } else {
-        return COLLISION_NONE;
+        return CollisionType::none;
     }
 }
 
@@ -98,14 +98,14 @@ struct Coord_values {
     Coord::units x, y;
 };
 
-bool Check_Coord(const Coord& underTest, const Coord_values& values)
+bool Check_Coord(Coord const& underTest, Coord_values const& values)
 {
     return (underTest.x == values.x) && (underTest.y == values.y);
 }
 
 void Coord_UnitTests()
 {
-    static const size_t kNumRand = 10;
+    static constexpr auto kNumRand = 10;
     // test some defaults:
     {
         Coord undertest;
@@ -132,11 +132,9 @@ void Coord_UnitTests()
         assert(!(Coord(x1, y1) != undertest1));
         assert(!(Coord(x2, y2) != undertest2));
 
-        Coord newValue;
-
         Coord::units x3, y3;
 
-        newValue = undertest1 + undertest2;
+        auto newValue = undertest1 + undertest2;
         x3 = undertest1.x + undertest2.x;
         y3 = undertest1.y + undertest2.y;
         assert((x3) == newValue.x);

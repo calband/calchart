@@ -8,8 +8,8 @@
 
 #include "cc_show.h"
 #include "cc_sheet.h"
-#include "animate.h"
-#include "animatecompile.h"
+#include "CalChartAnimation.h"
+#include "CalChartAnimationCompile.h"
 #include "print_ps.h"
 #include "modes.h"
 #include "cont.h"

@@ -22,7 +22,9 @@
 */
 
 #include "basic_ui.h"
-#include "cc_types.h"
+#include "CalChartTypes.h"
+#include "CalChartMovePointsTool.h"
+#include "CalChartSelectTool.h"
 
 #include <functional>
 #include <map>
@@ -35,12 +37,12 @@ class CalChartFrame;
 class BackgroundImage;
 namespace CalChart {
 class Shape;
-class Coord;
+struct Coord;
 class Shape_2point;
+class MovePoints;
 }
 class Matrix;
 class CalChartConfiguration;
-class MovePoints;
 
 using ShapeList = std::vector<std::unique_ptr<CalChart::Shape>>;
 
@@ -60,11 +62,11 @@ public:
     float ZoomToFitFactor() const;
     virtual void SetZoom(float factor);
 
-    auto GetCurrentLasso() const { return curr_lasso; }
-    void SetCurrentLasso(CC_DRAG lasso);
-    auto GetCurrentMove() const { return curr_move; }
+    CalChart::Select GetCurrentSelect() const;
+    void SetCurrentSelect(CalChart::Select select);
+    CalChart::MoveMode GetCurrentMove() const;
     // implies a call to EndDrag()
-    void SetCurrentMove(CC_MOVE_MODES move);
+    void SetCurrentMove(CalChart::MoveMode move);
 
     void OnChar(wxKeyEvent& event);
 
@@ -82,14 +84,17 @@ private:
     void OnMousePinchToZoom(wxMouseEvent& event) override;
 
     // Internals
-    void BeginSelectDrag(CC_DRAG type, const CalChart::Coord& start);
-    void AddMoveDrag(CC_DRAG type, std::unique_ptr<CalChart::Shape> shape);
-    void MoveDrag(const CalChart::Coord& end);
+    void BeginSelectDrag(CalChart::Select select, CalChart::Coord start);
+    void AddMoveDrag(CalChart::Select select, std::unique_ptr<CalChart::Shape> shape);
+    void MoveDrag(CalChart::Coord end);
     void EndDrag();
-    enum class direction { north,
+
+    enum class direction {
+        north,
         east,
         south,
-        west };
+        west
+    };
     void MoveByKey(direction);
     CalChart::Coord GetMoveAmount(direction dir);
     CalChart::Coord SnapToGrid(CalChart::Coord c);
@@ -99,26 +104,18 @@ private:
     void OnPaint(wxPaintEvent& event, const CalChartConfiguration& config);
     void PaintBackground(wxDC& dc, const CalChartConfiguration& config);
     void PaintShapes(wxDC& dc, CalChartConfiguration const& config, ShapeList const&);
+    void PaintShapes(wxDC& dc, CalChartConfiguration const& config, CalChart::Shape const*);
     void PaintSelectShapes(wxDC& dc, CalChartConfiguration const& config);
     void PaintMoveShapes(wxDC& dc, CalChartConfiguration const& config);
 
-    void OnMouseLeftDown_default(CalChart::Coord pos, bool shiftDown, bool altDown);
-    void OnMouseLeftUp_default(CalChart::Coord pos, bool altDown);
-
-    void OnMouseLeftDown_CC_DRAG_SWAP(CalChart::Coord pos);
-
-    void OnMouseLeftUp_CC_DRAG_BOX(CalChart::Coord pos, bool altDown);
-    void OnMouseLeftUp_CC_DRAG_LASSO(CalChart::Coord pos, bool altDown);
-    void OnMouseLeftUp_CC_DRAG_POLY(CalChart::Coord pos, bool altDown);
-
-    // utility
-    CalChart::Coord TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event);
+    void OnMouseLeftDown_NormalMove(CalChart::Coord pos, bool shiftDown, bool altDown);
+    void OnMouseLeftDown_Swap(CalChart::Coord pos);
 
     CalChartView* mView{};
-    CC_DRAG curr_lasso = CC_DRAG::BOX;
-    CC_MOVE_MODES curr_move = CC_MOVE_NORMAL;
-    std::unique_ptr<MovePoints> m_move_points;
-    std::map<int, CalChart::Coord> mMovePoints;
-    CC_DRAG select_drag = CC_DRAG::NONE;
-    ShapeList m_select_shape_list;
+    // The current selection
+    std::unique_ptr<CalChart::SelectTool> mSelectTool;
+    // we maintain the transient movement of points, and the selection list in Canvas.
+    std::unique_ptr<CalChart::MovePointsTool> mMovePointsTool;
+    // A cached list of the place where the selection list will move
+    std::map<int, CalChart::Coord> mUncommittedMovePoints;
 };

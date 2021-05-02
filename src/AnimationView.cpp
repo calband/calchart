@@ -25,9 +25,8 @@
 #include "CalChartApp.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
-#include "animate.h"
-#include "animate_types.h"
-#include "cc_shapes.h"
+#include "CalChartAnimation.h"
+#include "CalChartShapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "draw.h"
@@ -37,18 +36,6 @@
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
-
-template <typename Float>
-static auto NormalizeAngle(Float angle)
-{
-    while (angle > 2 * M_PI) {
-        angle -= (Float)(2 * M_PI);
-    }
-    while (angle < 0.0) {
-        angle += (Float)(2 * M_PI);
-    }
-    return angle;
-}
 
 AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     : mView(view)
@@ -107,12 +94,12 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
 {
     auto checkForCollision = mDrawCollisionWarning;
     for (auto info : mAnimation->GetAllAnimateInfo()) {
-        if (checkForCollision && info.mCollision) {
-            if (info.mCollision == CalChart::Coord::COLLISION_WARNING) {
+        if (checkForCollision && (info.mCollision != CalChart::Coord::CollisionType::none)) {
+            if (info.mCollision == CalChart::Coord::CollisionType::warning) {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION_WARNING);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
-            } else if (info.mCollision == CalChart::Coord::COLLISION_INTERSECT) {
+            } else if (info.mCollision == CalChart::Coord::CollisionType::intersect) {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_COLLISION);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
@@ -308,12 +295,13 @@ void AnimationView::SelectMarchersInBox(wxPoint const& mouseStart, wxPoint const
 
     auto x_off = mView->GetShowMode().Offset().x;
     auto y_off = mView->GetShowMode().Offset().y;
-    Lasso lasso(Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off));
-    lasso.Append(Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off));
-    lasso.Append(Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off));
-    lasso.Append(Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off));
-    lasso.End();
-    mView->SelectWithLasso(&lasso, altDown);
+    auto polygon = CalChart::RawPolygon_t{
+        Coord(mouseStartTranslated.x - x_off, mouseStartTranslated.y - y_off),
+        Coord(mouseStartTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        Coord(mouseEndTranslated.x - x_off, mouseEndTranslated.y - y_off),
+        Coord(mouseEndTranslated.x - x_off, mouseStartTranslated.y - y_off),
+    };
+    mView->SelectWithinPolygon(polygon, altDown);
 }
 
 // Keystroke command toggles the timer, but the timer

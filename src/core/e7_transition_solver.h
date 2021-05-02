@@ -10,7 +10,7 @@
 #include <array>
 #include <vector>
 
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 #include "cc_sheet.h"
 
 namespace CalChart {

@@ -28,7 +28,7 @@
 #include "ContinuityComposerDialog.h"
 #include "PreferencesUtils.h"
 #include "cc_drawcommand.h"
-#include "cc_shapes.h"
+#include "CalChartShapes.h"
 #include "cc_sheet.h"
 #include "confgr.h"
 #include "cont.h"

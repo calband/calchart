@@ -133,7 +133,7 @@ enum {
     CALCHART__ViewAnimationErrors,
     CALCHART__ViewAnimation,
     CALCHART__ViewPrintContinuity,
-    CALCHART__ViewLassosToolBar,
+    CALCHART__ViewSelectAndMoveToolBar,
     CALCHART__ViewMarcherToolBar,
 
     CALCHART__ViewSwapFieldAndAnimate,

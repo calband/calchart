@@ -21,8 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_coord.h"
-#include "cc_types.h"
+#include "CalChartCoord.h"
+#include "CalChartTypes.h"
 #include <wx/wx.h>
 
 class wxAuiToolBar;

@@ -21,8 +21,8 @@
 */
 
 #include "cont.h"
-#include "animatecommand.h"
-#include "animatecompile.h"
+#include "CalChartAnimationCommand.h"
+#include "CalChartAnimationCompile.h"
 #include "cc_fileformat.h"
 #include "cc_sheet.h"
 #include "math_utils.h"
@@ -162,16 +162,16 @@ static const std::string ContDefinedValue_strings[] = {
     "HS", "MM", "SH", "JS", "GV", "M", "DM"
 };
 
-int float2int(const ContProcedure* proc, AnimateCompile& anim, float f)
+int float2int(const ContProcedure* proc, AnimationCompile& anim, float f)
 {
     auto v = (int)floor(f + 0.5);
-    if (std::abs(f - (float)v) >= COORD_DECIMAL) {
+    if (std::abs(f - (float)v) >= kCoordDecimal) {
         anim.RegisterError(ANIMERR_NONINT, proc);
     }
     return v;
 }
 
-unsigned float2unsigned(const ContProcedure* proc, AnimateCompile& anim,
+unsigned float2unsigned(const ContProcedure* proc, AnimationCompile& anim,
     float f)
 {
     auto v = float2int(proc, anim, f);
@@ -183,7 +183,7 @@ unsigned float2unsigned(const ContProcedure* proc, AnimateCompile& anim,
     }
 }
 
-void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
+void DoCounterMarch(const ContProcedure& proc, AnimationCompile& anim,
     const ContPoint& pnt1, const ContPoint& pnt2,
     const ContValue& stps, const ContValue& dir1,
     const ContValue& dir2, const ContValue& numbeats)
@@ -247,7 +247,7 @@ void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
         c = v1.DM_Magnitude();
         if (c <= beats) {
             beats -= c;
-            if (!anim.Append(std::make_shared<AnimateCommandMove>(
+            if (!anim.Append(std::make_shared<AnimationCommandMove>(
                                  float2unsigned(&proc, anim, c), v1),
                     &proc)) {
                 return;
@@ -267,7 +267,7 @@ void DoCounterMarch(const ContProcedure& proc, AnimateCompile& anim,
                 v1 = CreateVector(d1 + 180.0f, beats);
                 break;
             }
-            anim.Append(std::make_shared<AnimateCommandMove>(
+            anim.Append(std::make_shared<AnimationCommandMove>(
                             float2unsigned(&proc, anim, beats), v1),
                 &proc);
             return;
@@ -510,7 +510,7 @@ uint8_t const* ContToken::Deserialize(uint8_t const* begin, uint8_t const* end)
 }
 
 // ContPoint
-Coord ContPoint::Get(AnimateCompile& anim) const
+Coord ContPoint::Get(AnimationCompile& anim) const
 {
     return anim.GetPointPosition();
 }
@@ -605,7 +605,7 @@ uint8_t const* ContPointUnset::Deserialize(uint8_t const* begin, uint8_t const* 
 }
 
 // ContStartPoint
-Coord ContStartPoint::Get(AnimateCompile& anim) const
+Coord ContStartPoint::Get(AnimationCompile& anim) const
 {
     return anim.GetStartingPosition();
 }
@@ -655,7 +655,7 @@ uint8_t const* ContStartPoint::Deserialize(uint8_t const* begin, uint8_t const* 
 }
 
 // ContNextPoint
-Coord ContNextPoint::Get(AnimateCompile& anim) const
+Coord ContNextPoint::Get(AnimationCompile& anim) const
 {
     return anim.GetEndingPosition(this);
 }
@@ -710,7 +710,7 @@ ContRefPoint::ContRefPoint(unsigned n)
 {
 }
 
-Coord ContRefPoint::Get(AnimateCompile& anim) const
+Coord ContRefPoint::Get(AnimationCompile& anim) const
 {
     return anim.GetReferencePointPosition(refnum);
 }
@@ -843,7 +843,7 @@ ContValueFloat::ContValueFloat(float v)
 {
 }
 
-float ContValueFloat::Get(AnimateCompile&) const { return val; }
+float ContValueFloat::Get(AnimationCompile&) const { return val; }
 
 std::ostream& ContValueFloat::Print(std::ostream& os) const
 {
@@ -896,7 +896,7 @@ ContValueDefined::ContValueDefined(ContDefinedValue v)
 {
 }
 
-float ContValueDefined::Get(AnimateCompile&) const
+float ContValueDefined::Get(AnimationCompile&) const
 {
     static const std::map<ContDefinedValue, float> mapping = {
         { CC_NW, 45.0 },
@@ -993,7 +993,7 @@ ContValueAdd::ContValueAdd(std::unique_ptr<ContValue> v1, std::unique_ptr<ContVa
     SetParentPtr_helper(this, val1, val2);
 }
 
-float ContValueAdd::Get(AnimateCompile& anim) const
+float ContValueAdd::Get(AnimationCompile& anim) const
 {
     return (val1->Get(anim) + val2->Get(anim));
 }
@@ -1066,7 +1066,7 @@ ContValueSub::ContValueSub(std::unique_ptr<ContValue> v1, std::unique_ptr<ContVa
     SetParentPtr_helper(this, val1, val2);
 }
 
-float ContValueSub::Get(AnimateCompile& anim) const
+float ContValueSub::Get(AnimationCompile& anim) const
 {
     return (val1->Get(anim) - val2->Get(anim));
 }
@@ -1139,7 +1139,7 @@ ContValueMult::ContValueMult(std::unique_ptr<ContValue> v1, std::unique_ptr<Cont
     SetParentPtr_helper(this, val1, val2);
 }
 
-float ContValueMult::Get(AnimateCompile& anim) const
+float ContValueMult::Get(AnimationCompile& anim) const
 {
     return (val1->Get(anim) * val2->Get(anim));
 }
@@ -1212,7 +1212,7 @@ ContValueDiv::ContValueDiv(std::unique_ptr<ContValue> v1, std::unique_ptr<ContVa
     SetParentPtr_helper(this, val1, val2);
 }
 
-float ContValueDiv::Get(AnimateCompile& anim) const
+float ContValueDiv::Get(AnimationCompile& anim) const
 {
     auto f = val2->Get(anim);
     if (IS_ZERO(f)) {
@@ -1289,7 +1289,7 @@ ContValueNeg::ContValueNeg(std::unique_ptr<ContValue> v)
     SetParentPtr_helper(this, val);
 }
 
-float ContValueNeg::Get(AnimateCompile& anim) const { return -val->Get(anim); }
+float ContValueNeg::Get(AnimationCompile& anim) const { return -val->Get(anim); }
 
 std::ostream& ContValueNeg::Print(std::ostream& os) const
 {
@@ -1343,7 +1343,7 @@ uint8_t const* ContValueNeg::Deserialize(uint8_t const* begin, uint8_t const* en
 }
 
 // ContValueREM
-float ContValueREM::Get(AnimateCompile& anim) const
+float ContValueREM::Get(AnimationCompile& anim) const
 {
     return anim.GetBeatsRemaining();
 }
@@ -1398,7 +1398,7 @@ ContValueVar::ContValueVar(unsigned num)
 {
 }
 
-float ContValueVar::Get(AnimateCompile& anim) const
+float ContValueVar::Get(AnimationCompile& anim) const
 {
     return anim.GetVarValue(varnum, this);
 }
@@ -1426,7 +1426,7 @@ std::unique_ptr<ContValue> ContValueVar::clone() const
     return std::make_unique<ContValueVar>(varnum);
 }
 
-void ContValueVar::Set(AnimateCompile& anim, float v)
+void ContValueVar::Set(AnimationCompile& anim, float v)
 {
     anim.SetVarValue(varnum, v);
 }
@@ -1513,7 +1513,7 @@ ContFuncDir::ContFuncDir(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-float ContFuncDir::Get(AnimateCompile& anim) const
+float ContFuncDir::Get(AnimationCompile& anim) const
 {
     auto c = pnt->Get(anim);
     if (c == anim.GetPointPosition()) {
@@ -1588,7 +1588,7 @@ ContFuncDirFrom::ContFuncDirFrom(std::unique_ptr<ContPoint> start, std::unique_p
     SetParentPtr_helper(this, pnt_start, pnt_end);
 }
 
-float ContFuncDirFrom::Get(AnimateCompile& anim) const
+float ContFuncDirFrom::Get(AnimationCompile& anim) const
 {
     auto start = pnt_start->Get(anim);
     auto end = pnt_end->Get(anim);
@@ -1664,7 +1664,7 @@ ContFuncDist::ContFuncDist(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-float ContFuncDist::Get(AnimateCompile& anim) const
+float ContFuncDist::Get(AnimationCompile& anim) const
 {
     auto vector = pnt->Get(anim) - anim.GetPointPosition();
     return vector.DM_Magnitude();
@@ -1736,7 +1736,7 @@ ContFuncDistFrom::ContFuncDistFrom(std::unique_ptr<ContPoint> start, std::unique
     SetParentPtr_helper(this, pnt_start, pnt_end);
 }
 
-float ContFuncDistFrom::Get(AnimateCompile& anim) const
+float ContFuncDistFrom::Get(AnimationCompile& anim) const
 {
     auto vector = pnt_end->Get(anim) - pnt_start->Get(anim);
     return vector.Magnitude();
@@ -1812,7 +1812,7 @@ ContFuncEither::ContFuncEither(std::unique_ptr<ContValue> d1, std::unique_ptr<Co
     SetParentPtr_helper(this, dir1, dir2, pnt);
 }
 
-float ContFuncEither::Get(AnimateCompile& anim) const
+float ContFuncEither::Get(AnimationCompile& anim) const
 {
     auto c = pnt->Get(anim);
     if (anim.GetPointPosition() == c) {
@@ -1902,7 +1902,7 @@ ContFuncOpp::ContFuncOpp(std::unique_ptr<ContValue> d)
     SetParentPtr_helper(this, dir);
 }
 
-float ContFuncOpp::Get(AnimateCompile& anim) const
+float ContFuncOpp::Get(AnimationCompile& anim) const
 {
     return (dir->Get(anim) + 180.0f);
 }
@@ -1975,7 +1975,7 @@ ContFuncStep::ContFuncStep(std::unique_ptr<ContValue> beats, std::unique_ptr<Con
     SetParentPtr_helper(this, numbeats, blksize, pnt);
 }
 
-float ContFuncStep::Get(AnimateCompile& anim) const
+float ContFuncStep::Get(AnimationCompile& anim) const
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     return (c.DM_Magnitude() * numbeats->Get(anim) / blksize->Get(anim));
@@ -2127,7 +2127,7 @@ ContProcSet::ContProcSet(std::unique_ptr<ContValueVar> vr, std::unique_ptr<ContV
     SetParentPtr_helper(this, var, val);
 }
 
-void ContProcSet::Compile(AnimateCompile& anim)
+void ContProcSet::Compile(AnimationCompile& anim)
 {
     var->Set(anim, val->Get(anim));
 }
@@ -2212,11 +2212,11 @@ uint8_t const* ContProcSet::Deserialize(uint8_t const* begin, uint8_t const* end
 }
 
 // ContProcBlam
-void ContProcBlam::Compile(AnimateCompile& anim)
+void ContProcBlam::Compile(AnimationCompile& anim)
 {
     ContNextPoint np;
     auto c = np.Get(anim) - anim.GetPointPosition();
-    anim.Append(std::make_shared<AnimateCommandMove>(anim.GetBeatsRemaining(), c),
+    anim.Append(std::make_shared<AnimationCommandMove>(anim.GetBeatsRemaining(), c),
         this);
 }
 
@@ -2289,7 +2289,7 @@ ContProcCM::ContProcCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint>
     SetParentPtr_helper(this, pnt1, pnt2, stps, dir1, dir2, numbeats);
 }
 
-void ContProcCM::Compile(AnimateCompile& anim)
+void ContProcCM::Compile(AnimationCompile& anim)
 {
     DoCounterMarch(*this, anim, *pnt1, *pnt2, *stps, *dir1, *dir2, *numbeats);
 }
@@ -2374,7 +2374,7 @@ ContProcDMCM::ContProcDMCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPo
     SetParentPtr_helper(this, pnt1, pnt2, numbeats);
 }
 
-void ContProcDMCM::Compile(AnimateCompile& anim)
+void ContProcDMCM::Compile(AnimationCompile& anim)
 {
     ContValueFloat steps(1.0);
 
@@ -2482,7 +2482,7 @@ ContProcDMHS::ContProcDMHS(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-void ContProcDMHS::Compile(AnimateCompile& anim)
+void ContProcDMHS::Compile(AnimationCompile& anim)
 {
     short b_hs;
 
@@ -2507,13 +2507,13 @@ void ContProcDMHS::Compile(AnimateCompile& anim)
     }
     if (c_dm != 0) {
         auto b = CoordUnits2Int(c_dm.x);
-        if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm),
+        if (!anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c_dm),
                 this)) {
             return;
         }
     }
     if (c_hs != 0) {
-        anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b_hs), c_hs),
+        anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b_hs), c_hs),
             this);
     }
 }
@@ -2584,16 +2584,16 @@ ContProcEven::ContProcEven(std::unique_ptr<ContValue> steps, std::unique_ptr<Con
     SetParentPtr_helper(this, stps, pnt);
 }
 
-void ContProcEven::Compile(AnimateCompile& anim)
+void ContProcEven::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     auto steps = float2int(this, anim, stps->Get(anim));
     if (steps < 0) {
-        anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-steps, c,
+        anim.Append(std::make_shared<AnimationCommandMove>((unsigned)-steps, c,
                         -c.Direction()),
             this);
     } else {
-        anim.Append(std::make_shared<AnimateCommandMove>((unsigned)steps, c), this);
+        anim.Append(std::make_shared<AnimationCommandMove>((unsigned)steps, c), this);
     }
 }
 
@@ -2663,13 +2663,13 @@ ContProcEWNS::ContProcEWNS(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-void ContProcEWNS::Compile(AnimateCompile& anim)
+void ContProcEWNS::Compile(AnimationCompile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.y != 0) {
         Coord c2{ 0, c1.y };
         auto b = CoordUnits2Int(c2.y);
-        if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
+        if (!anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c2),
                 this)) {
             return;
         }
@@ -2677,7 +2677,7 @@ void ContProcEWNS::Compile(AnimateCompile& anim)
     if (c1.x != 0) {
         Coord c2{ c1.x, 0 };
         auto b = CoordUnits2Int(c2.x);
-        if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
+        if (!anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c2),
                 this)) {
             return;
         }
@@ -2758,7 +2758,7 @@ ContProcFountain::ContProcFountain(std::unique_ptr<ContValue> d1, std::unique_pt
     SetParentPtr_helper(this, dir1, dir2, stepsize1, stepsize2, pnt);
 }
 
-void ContProcFountain::Compile(AnimateCompile& anim)
+void ContProcFountain::Compile(AnimationCompile& anim)
 {
     float a, b, c, d;
 
@@ -2790,7 +2790,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
             } else {
                 f1 = e / a;
             }
-            if (!anim.Append(std::make_shared<AnimateCommandMove>(
+            if (!anim.Append(std::make_shared<AnimationCommandMove>(
                                  float2unsigned(this, anim, f1), v),
                     this)) {
                 return;
@@ -2804,7 +2804,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
         if (!IS_ZERO(f2)) {
             v.x = Float2CoordUnits(f2 * a);
             v.y = Float2CoordUnits(f2 * c);
-            if (!anim.Append(std::make_shared<AnimateCommandMove>(
+            if (!anim.Append(std::make_shared<AnimationCommandMove>(
                                  float2unsigned(this, anim, f2), v),
                     this)) {
                 return;
@@ -2814,7 +2814,7 @@ void ContProcFountain::Compile(AnimateCompile& anim)
         if (!IS_ZERO(f2)) {
             v.x = Float2CoordUnits(f2 * b);
             v.y = Float2CoordUnits(f2 * d);
-            if (!anim.Append(std::make_shared<AnimateCommandMove>(
+            if (!anim.Append(std::make_shared<AnimationCommandMove>(
                                  float2unsigned(this, anim, f2), v),
                     this)) {
                 return;
@@ -2941,18 +2941,18 @@ ContProcFM::ContProcFM(std::unique_ptr<ContValue> steps, std::unique_ptr<ContVal
     SetParentPtr_helper(this, stps, dir);
 }
 
-void ContProcFM::Compile(AnimateCompile& anim)
+void ContProcFM::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, stps->Get(anim));
     if (b != 0) {
         auto c = CreateVector(dir->Get(anim), stps->Get(anim));
         if (c != 0) {
             if (b < 0) {
-                anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c,
+                anim.Append(std::make_shared<AnimationCommandMove>((unsigned)-b, c,
                                 -c.Direction()),
                     this);
             } else {
-                anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), this);
+                anim.Append(std::make_shared<AnimationCommandMove>((unsigned)b, c), this);
             }
         }
     }
@@ -3024,12 +3024,12 @@ ContProcFMTO::ContProcFMTO(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-void ContProcFMTO::Compile(AnimateCompile& anim)
+void ContProcFMTO::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
     if (c != 0) {
         anim.Append(
-            std::make_shared<AnimateCommandMove>((unsigned)c.DM_Magnitude(), c),
+            std::make_shared<AnimationCommandMove>((unsigned)c.DM_Magnitude(), c),
             this);
     }
 }
@@ -3111,7 +3111,7 @@ ContProcGrid::ContProcGrid(std::unique_ptr<ContValue> g)
     SetParentPtr_helper(this, grid);
 }
 
-void ContProcGrid::Compile(AnimateCompile& anim)
+void ContProcGrid::Compile(AnimationCompile& anim)
 {
     auto gridc = Float2CoordUnits(grid->Get(anim));
 
@@ -3122,7 +3122,7 @@ void ContProcGrid::Compile(AnimateCompile& anim)
 
     c -= anim.GetPointPosition();
     if (c != 0) {
-        anim.Append(std::make_shared<AnimateCommandMove>(0, c), this);
+        anim.Append(std::make_shared<AnimationCommandMove>(0, c), this);
     }
 }
 
@@ -3194,7 +3194,7 @@ ContProcHSCM::ContProcHSCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPo
     SetParentPtr_helper(this, pnt1, pnt2, numbeats);
 }
 
-void ContProcHSCM::Compile(AnimateCompile& anim)
+void ContProcHSCM::Compile(AnimationCompile& anim)
 {
     ContValueFloat steps(1.0);
 
@@ -3287,7 +3287,7 @@ ContProcHSDM::ContProcHSDM(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-void ContProcHSDM::Compile(AnimateCompile& anim)
+void ContProcHSDM::Compile(AnimationCompile& anim)
 {
     Coord c_hs, c_dm;
     short b;
@@ -3311,14 +3311,14 @@ void ContProcHSDM::Compile(AnimateCompile& anim)
         b = CoordUnits2Int(c_hs.y);
     }
     if (c_hs != 0) {
-        if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_hs),
+        if (!anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c_hs),
                 this)) {
             return;
         }
     }
     if (c_dm != 0) {
         b = CoordUnits2Int(c_dm.x);
-        anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c_dm), this);
+        anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c_dm), this);
     }
 }
 
@@ -3386,10 +3386,10 @@ ContProcMagic::ContProcMagic(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-void ContProcMagic::Compile(AnimateCompile& anim)
+void ContProcMagic::Compile(AnimationCompile& anim)
 {
     auto c = pnt->Get(anim) - anim.GetPointPosition();
-    anim.Append(std::make_shared<AnimateCommandMove>(0, c), this);
+    anim.Append(std::make_shared<AnimationCommandMove>(0, c), this);
 }
 
 std::ostream& ContProcMagic::Print(std::ostream& os) const
@@ -3464,7 +3464,7 @@ ContProcMarch::ContProcMarch(std::unique_ptr<ContValue> stepsize, std::unique_pt
     SetParentPtr_helper(this, stpsize, stps, dir, facedir);
 }
 
-void ContProcMarch::Compile(AnimateCompile& anim)
+void ContProcMarch::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, stps->Get(anim));
     if (b != 0) {
@@ -3474,15 +3474,15 @@ void ContProcMarch::Compile(AnimateCompile& anim)
             static_cast<Coord::units>(-Float2CoordUnits(sin(rads) * mag)) };
         if (c != 0) {
             if (facedir)
-                anim.Append(std::make_shared<AnimateCommandMove>((unsigned)std::abs(b),
+                anim.Append(std::make_shared<AnimationCommandMove>((unsigned)std::abs(b),
                                 c, facedir->Get(anim)),
                     this);
             else if (b < 0) {
-                anim.Append(std::make_shared<AnimateCommandMove>((unsigned)-b, c,
+                anim.Append(std::make_shared<AnimationCommandMove>((unsigned)-b, c,
                                 -c.Direction()),
                     this);
             } else {
-                anim.Append(std::make_shared<AnimateCommandMove>((unsigned)b, c), this);
+                anim.Append(std::make_shared<AnimationCommandMove>((unsigned)b, c), this);
             }
         }
     }
@@ -3579,11 +3579,11 @@ ContProcMT::ContProcMT(std::unique_ptr<ContValue> beats, std::unique_ptr<ContVal
     SetParentPtr_helper(this, numbeats, dir);
 }
 
-void ContProcMT::Compile(AnimateCompile& anim)
+void ContProcMT::Compile(AnimationCompile& anim)
 {
     auto b = float2int(this, anim, numbeats->Get(anim));
     if (b != 0) {
-        anim.Append(std::make_shared<AnimateCommandMT>((unsigned)std::abs(b),
+        anim.Append(std::make_shared<AnimationCommandMT>((unsigned)std::abs(b),
                         dir->Get(anim)),
             this);
     }
@@ -3655,9 +3655,9 @@ ContProcMTRM::ContProcMTRM(std::unique_ptr<ContValue> d)
     SetParentPtr_helper(this, dir);
 }
 
-void ContProcMTRM::Compile(AnimateCompile& anim)
+void ContProcMTRM::Compile(AnimationCompile& anim)
 {
-    anim.Append(std::make_shared<AnimateCommandMT>(anim.GetBeatsRemaining(),
+    anim.Append(std::make_shared<AnimationCommandMT>(anim.GetBeatsRemaining(),
                     dir->Get(anim)),
         this);
 }
@@ -3726,13 +3726,13 @@ ContProcNSEW::ContProcNSEW(std::unique_ptr<ContPoint> p)
     SetParentPtr_helper(this, pnt);
 }
 
-void ContProcNSEW::Compile(AnimateCompile& anim)
+void ContProcNSEW::Compile(AnimationCompile& anim)
 {
     auto c1 = pnt->Get(anim) - anim.GetPointPosition();
     if (c1.x != 0) {
         Coord c2{ c1.x, 0 };
         auto b = CoordUnits2Int(c2.x);
-        if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
+        if (!anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c2),
                 this)) {
             return;
         }
@@ -3740,7 +3740,7 @@ void ContProcNSEW::Compile(AnimateCompile& anim)
     if (c1.y != 0) {
         Coord c2{ 0, c1.y };
         auto b = CoordUnits2Int(c2.y);
-        if (!anim.Append(std::make_shared<AnimateCommandMove>(std::abs(b), c2),
+        if (!anim.Append(std::make_shared<AnimationCommandMove>(std::abs(b), c2),
                 this)) {
             return;
         }
@@ -3815,7 +3815,7 @@ ContProcRotate::ContProcRotate(std::unique_ptr<ContValue> angle, std::unique_ptr
     SetParentPtr_helper(this, ang, stps, pnt);
 }
 
-void ContProcRotate::Compile(AnimateCompile& anim)
+void ContProcRotate::Compile(AnimationCompile& anim)
 {
     // Most of the work is converting to polar coordinates
     auto c = pnt->Get(anim);
@@ -3831,7 +3831,7 @@ void ContProcRotate::Compile(AnimateCompile& anim)
     if (b < 0) {
         backwards = true;
     }
-    anim.Append(std::make_shared<AnimateCommandRotate>(
+    anim.Append(std::make_shared<AnimationCommandRotate>(
                     (unsigned)std::abs(b), c,
                     // Don't use Magnitude() because
                     // we want Coord numbers
