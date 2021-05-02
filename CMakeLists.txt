@@ -10,6 +10,7 @@ cmake_minimum_required (VERSION 3.11)
 
 project (CalChart)
 
+set (CMAKE_OSX_ARCHITECTURES "\$(ARCHS_STANDARD)")
 set (CalChart_VERSION_MAJOR 3)
 set (CalChart_VERSION_MINOR 6)
 set (CalChart_VERSION_PATCH 2)
