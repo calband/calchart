@@ -25,7 +25,7 @@
 #include "CalChartView.h"
 #include "ContinuityBrowserPanel.h"
 #include "basic_ui.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 #include "confgr.h"
 
 #include <wx/artprov.h>

@@ -27,7 +27,7 @@
 #include "CalChartView.h"
 #include "CalChartAnimation.h"
 #include "CalChartShapes.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 #include "confgr.h"
 #include "draw.h"
 #include "modes.h"

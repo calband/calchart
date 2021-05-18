@@ -24,7 +24,6 @@
 
 #include "CalChartFrame.h"
 #include "CalChartView.h"
-#include "BackgroundImage.h"
 #include "cc_drawcommand.h"
 #include "CalChartShapes.h"
 #include "confgr.h"

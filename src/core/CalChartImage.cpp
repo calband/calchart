@@ -1,5 +1,5 @@
 /*
- * cc_image.cpp
+ * CalChartImage.cpp
  */
 
 /*
@@ -19,7 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_image.h"
+#include "CalChartImage.h"
 #include "cc_fileformat.h"
 
 namespace CalChart {
@@ -36,7 +36,7 @@ ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int
 {
 }
 
-ImageData::ImageData(uint8_t const*& d)
+ImageData::ImageData(uint8_t const* d)
 {
     left = get_big_long(d);
     d += 4;
@@ -58,6 +58,8 @@ ImageData::ImageData(uint8_t const*& d)
     d += 4;
     alpha.assign(d, d + alpha_size);
     d += alpha_size;
+    scaled_width = (scaled_width == 0) ? image_width : scaled_width;
+    scaled_height = (scaled_height == 0) ? image_height : scaled_height;
 }
 
 std::vector<uint8_t> ImageData::Serialize() const

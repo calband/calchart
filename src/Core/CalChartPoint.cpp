@@ -1,5 +1,5 @@
 /*
- * cc_point.cpp
+ * CalChartPoint.cpp
  * Definition for the point classes
  */
 
@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_point.h"
+#include "CalChartPoint.h"
 #include "cc_fileformat.h"
 
 #include <assert.h>
@@ -34,7 +34,7 @@ Point::Point()
 {
 }
 
-Point::Point(const Coord& p)
+Point::Point(Coord const& p)
     : mSym(SYMBOL_PLAIN)
     , mPos(p)
 {
@@ -48,7 +48,7 @@ Point::Point(const Coord& p)
 // reference point ) , BigEndianInt16( x ) , BigEndianInt16( y ) }* ;
 // POINT_SYMBOL_DATA  = BigEndianInt8( which symbol type ) ;
 // POINT_LABEL_FLIP_DATA = BigEndianInt8( label flipped ) ;
-Point::Point(const std::vector<uint8_t>& serialized_data)
+Point::Point(std::vector<uint8_t> const& serialized_data)
     : mSym(SYMBOL_PLAIN)
 {
     const uint8_t* d = &serialized_data[0];
@@ -136,7 +136,7 @@ Coord Point::GetPos(unsigned ref) const
     return mRef[ref - 1];
 }
 
-void Point::SetPos(const Coord& c, unsigned ref)
+void Point::SetPos(Coord c, unsigned ref)
 {
     if (ref == 0) {
         mPos = c;
@@ -160,7 +160,7 @@ struct Point_values {
     bool Visable;
 };
 
-bool Check_Point(const Point& underTest, const Point_values& values)
+bool Check_Point(Point const& underTest, Point_values const& values)
 {
     bool running_value = true;
     for (unsigned i = 0; i < Point::kNumRefPoints; ++i)

@@ -31,10 +31,10 @@
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
-#include "BackgroundImage.h"
+#include "BackgroundImages.h"
 #include "cc_drawcommand.h"
 #include "CalChartShapes.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 #include "confgr.h"
 #include "draw.h"
 #include "setup_wizards.h"
@@ -111,9 +111,7 @@ void CalChartView::OnDrawBackground(wxDC& dc)
     if (!mShow->GetDrawBackground()) {
         return;
     }
-    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
-        mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
-    }
+    mBackgroundImages.OnPaint(dc);
 }
 
 void CalChartView::OnUpdate(wxView* WXUNUSED(sender), wxObject* hint)
@@ -560,12 +558,12 @@ bool CalChartView::DoingDrawBackground() const
 
 void CalChartView::DoPictureAdjustment(bool enable)
 {
-    mAdjustBackgroundMode = enable;
+    mBackgroundImages.SetAdjustBackgroundMode(enable);
 }
 
 bool CalChartView::DoingPictureAdjustment() const
 {
-    return mAdjustBackgroundMode;
+    return mBackgroundImages.GetAdjustBackgroundMode();
 }
 
 bool CalChartView::AddBackgroundImage(const wxImage& image)
@@ -595,71 +593,37 @@ bool CalChartView::AddBackgroundImage(const wxImage& image)
 
 void CalChartView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
 {
-    if (!mAdjustBackgroundMode) {
-        return;
-    }
-    mWhichBackgroundIndex = -1;
-    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
-        if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
-            mWhichBackgroundIndex = i;
-        }
-    }
-    if (mWhichBackgroundIndex != -1) {
-        mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftDown(event, dc);
-    }
+    mBackgroundImages.OnMouseLeftDown(event, dc);
 }
 
 void CalChartView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
-    if (!mAdjustBackgroundMode) {
-        return;
-    }
-    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
-        auto result = mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc);
-        auto cmd = mShow->Create_MoveBackgroundImageCommand(mWhichBackgroundIndex, std::get<0>(result), std::get<1>(result), std::get<2>(result), std::get<3>(result));
+    if (auto result = mBackgroundImages.OnMouseLeftUp(event, dc); result) {
+        auto [ index, resultArray ] = *result;
+        auto cmd = mShow->Create_MoveBackgroundImageCommand(index, std::get<0>(resultArray), std::get<1>(resultArray), std::get<2>(resultArray), std::get<3>(resultArray));
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     }
 }
 
 void CalChartView::OnBackgroundMouseMove(wxMouseEvent& event, wxDC& dc)
 {
-    if (!mAdjustBackgroundMode) {
-        return;
-    }
-    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
-        mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
-    }
+    mBackgroundImages.OnMouseMove(event, dc);
 }
 
 void CalChartView::OnBackgroundImageDelete()
 {
-    if (!mAdjustBackgroundMode || !(mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size()))) {
+    auto currentIndex = mBackgroundImages.GetCurrentIndex();
+    if (!mBackgroundImages.GetAdjustBackgroundMode() || !currentIndex) {
         return;
     }
     // let the doc know we've removed a picture.
-    auto cmd = mShow->Create_RemoveBackgroundImageCommand(mWhichBackgroundIndex);
+    auto cmd = mShow->Create_RemoveBackgroundImageCommand(*currentIndex);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
 }
 
 void CalChartView::UpdateBackgroundImages()
 {
-    mBackgroundImages.clear();
     if (mShow && mShow->GetNumSheets()) {
-        auto images = mShow->GetCurrentSheet()->GetBackgroundImages();
-        for (auto&& image : images) {
-            // ugh...  not sure if there's a better way to pass data to image.
-            auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
-            std::copy(image.data.begin(), image.data.end(), d);
-            auto a = static_cast<unsigned char*>(nullptr);
-            if (image.alpha.size()) {
-                a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
-                std::copy(image.alpha.begin(), image.alpha.end(), a);
-                wxImage img(image.image_width, image.image_height, d, a);
-                mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-            } else {
-                wxImage img(image.image_width, image.image_height, d);
-                mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
-            }
-        }
+        mBackgroundImages.SetBackgroundImages(mShow->GetCurrentSheet()->GetBackgroundImages());
     }
 }

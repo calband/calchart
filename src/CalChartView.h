@@ -24,6 +24,7 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartCoord.h"
 #include "CalChartTypes.h"
+#include "BackgroundImages.h"
 #include "GhostModule.h"
 #include "modes.h"
 
@@ -32,7 +33,7 @@
 
 // CalChartView connects together the Frames and the Doc.
 
-class BackgroundImage;
+class BackgroundImages;
 class CalChartFrame;
 class AnimationFrame;
 class Animation;
@@ -118,8 +119,8 @@ public:
     void SetSelectionList(const SelectionList& sl);
     auto GetSelect() const { return mShow->GetSelect(); }
     void SetSelect(CalChart::Select select);
-    auto GetCurrentMove() const { return mCurrentMove; }
-    void SetCurrentMove(CalChart::MoveMode move) { mCurrentMove = move; }
+    auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
+    void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
     void GoToSheetAndSetSelectionList(int which, const SelectionList& sl);
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
@@ -148,11 +149,7 @@ private:
     GhostModule mGhostModule{};
     CalChartDoc* mShow{};
     CalChartConfiguration& mConfig;
-    std::vector<BackgroundImage> mBackgroundImages;
-    bool mDrawBackground{};
-    bool mAdjustBackgroundMode{};
-    int mWhichBackgroundIndex{};
-    CalChart::MoveMode mCurrentMove = CalChart::MoveMode::Normal;
+    BackgroundImages mBackgroundImages;
 
     DECLARE_DYNAMIC_CLASS(CalChartView)
 };

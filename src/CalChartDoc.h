@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_show.h"
+#include "CalChartShow.h"
 
 #include <functional>
 #include <map>
@@ -175,6 +175,8 @@ public:
     void SetDrawPaths(bool drawPaths);
     auto GetDrawBackground() const { return mDrawBackground; }
     void SetDrawBackground(bool drawBackground);
+    auto GetCurrentMove() const { return mCurrentMove; }
+    void SetCurrentMove(CalChart::MoveMode move);
 
     CalChart::ShowMode const& GetShowMode() const;
     // nullptr if there is no animation
@@ -254,6 +256,7 @@ private:
     std::unique_ptr<CalChart::Show> mShow;
     std::unique_ptr<CalChart::Animation> mAnimation;
     CalChart::Select mSelect = CalChart::Select::Box;
+    CalChart::MoveMode mCurrentMove = CalChart::MoveMode::Normal;
     int mCurrentReferencePoint{};
     bool mDrawPaths{};
     bool mDrawBackground{};

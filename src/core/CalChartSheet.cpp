@@ -1,5 +1,5 @@
 /*
- * cc_sheet.cpp
+ * CalChartSheet.cpp
  * Defintion for calchart sheet class
  */
 
@@ -20,12 +20,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 
 #include "CalChartAnimationCommand.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
-#include "cc_show.h"
+#include "CalChartShow.h"
 #include "viewer_translate.h"
 
 #include <algorithm>
@@ -37,11 +37,11 @@
 
 namespace CalChart {
 
-const std::string contnames[MAX_NUM_SYMBOLS] = {
+std::string const contnames[MAX_NUM_SYMBOLS] = {
     "Plain", "Sol", "Bksl", "Sl", "X", "Solbksl", "Solsl", "Solx"
 };
 
-const std::string long_contnames[MAX_NUM_SYMBOLS] = {
+std::string const long_contnames[MAX_NUM_SYMBOLS] = {
     "Plain", "Solid", "Backslash", "Slash", "Crossed", "Solid Backslash", "Solid Slash", "Solid Crossed"
 };
 
@@ -52,7 +52,7 @@ Sheet::Sheet(size_t numPoints)
 {
 }
 
-Sheet::Sheet(size_t numPoints, const std::string& newname)
+Sheet::Sheet(size_t numPoints, std::string const& newname)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mBeats(1)
     , mPoints(numPoints)
@@ -62,7 +62,7 @@ Sheet::Sheet(size_t numPoints, const std::string& newname)
 
 // -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
 // Recommend that you don't touch this unless you know what you are doing.
-bool are_equal_helper(const std::string& a, const std::string& b)
+bool are_equal_helper(std::string const& a, std::string const& b)
 {
     auto p = std::mismatch(a.begin(), a.end(), b.begin(), [](char c1, char c2) {
         return std::tolower(c1) == std::tolower(c2);
@@ -70,12 +70,12 @@ bool are_equal_helper(const std::string& a, const std::string& b)
     return (p.first == a.end() && p.second == b.end());
 }
 
-bool are_equal(const std::string& a, const std::string& b)
+bool are_equal(std::string const& a, std::string const& b)
 {
     return a.size() <= b.size() ? are_equal_helper(a, b) : are_equal_helper(b, a);
 }
 
-SYMBOL_TYPE GetSymbolForName(const std::string& name)
+SYMBOL_TYPE GetSymbolForName(std::string const& name)
 {
     for (auto i = contnames;
          i != (contnames + sizeof(contnames) / sizeof(contnames[0])); ++i) {
@@ -109,7 +109,7 @@ static void
 CheckInconsistancy(SYMBOL_TYPE symbol, uint8_t cont_index,
     std::map<SYMBOL_TYPE, uint8_t>& continity_for_symbol,
     std::map<uint8_t, SYMBOL_TYPE>& symbol_for_continuity,
-    const std::string& sheet_name, uint32_t pointNum)
+    std::string const& sheet_name, uint32_t pointNum)
 {
     // need to check for symbol inconsistency here.
     if (continity_for_symbol.count(symbol) == 0) {
@@ -260,12 +260,12 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
         {
             throw CC_FileException("Bad cont chunk");
         }
-        const char* d = (const char*)&data[0];
+        auto d = (char const*)&data[0];
         if (d[data.size() - 1] != '\0') {
             throw CC_FileException("Bad cont chunk");
         }
 
-        const char* text = d + 1;
+        auto text = d + 1;
         size_t num = strlen(text);
         if (data.size() < num + 3) // check for room for text string
         {
@@ -299,25 +299,25 @@ Sheet::Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* c
 }
 // -=-=-=-=-=- LEGACY CODE</end> -=-=-=-=-=-
 
-Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction)
+Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandlers const* correction)
     : mAnimationContinuity(MAX_NUM_SYMBOLS)
     , mPoints(numPoints)
 {
     // construct the parser handlers
-    auto parse_INGL_NAME = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
-        auto str = (const char*)ptr;
+    auto parse_INGL_NAME = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
+        auto str = (char const*)ptr;
         if (size != (strlen(str) + 1)) {
             throw CC_FileException("Description the wrong size", INGL_NAME);
         }
         sheet->mName = str;
     };
-    auto parse_INGL_DURA = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_DURA = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
         if (4 != size) {
             throw CC_FileException("Incorrect size", INGL_DURA);
         }
         sheet->mBeats = get_big_long(ptr);
     };
-    auto parse_INGL_PNTS = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_PNTS = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
         for (auto i = 0u; i < sheet->mPoints.size(); ++i) {
             auto this_size = *ptr;
             if (this_size > size) {
@@ -331,16 +331,16 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
             throw CC_FileException("Incorrect size", INGL_PNTS);
         }
     };
-    auto parse_INGL_ECNT = [correction](Sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_ECNT = [correction](Sheet* sheet, uint8_t const* ptr, size_t size) {
         if (size < 2) // one byte num + 1 nil minimum
         {
             throw CC_FileException("Bad cont chunk", INGL_ECNT);
         }
-        const char* d = (const char*)ptr;
+        auto d = (char const*)ptr;
         if (d[size - 1] != '\0') {
             throw CC_FileException("Cont chunk not NULL terminated", INGL_ECNT);
         }
-        const char* text = d + 1;
+        auto text = d + 1;
         size_t num = strlen(text);
         if (size < num + 2) // check for room for text string
         {
@@ -353,9 +353,8 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
         std::string textstr(text);
         sheet->mAnimationContinuity.at(symbol_index) = Continuity{ textstr, correction };
     };
-    auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, const uint8_t* ptr,
-                               size_t size) {
-        const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+    auto parse_INGL_CONT = [parse_INGL_ECNT](Sheet* sheet, uint8_t const* ptr, size_t size) {
+        const std::map<uint32_t, std::function<void(Sheet*, uint8_t const*, size_t)>>
             parser = {
                 { INGL_ECNT, parse_INGL_ECNT },
             };
@@ -368,7 +367,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
             }
         }
     };
-    auto parse_INGL_EVCT = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_EVCT = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
         auto begin = ptr;
         auto end = ptr + size;
         if (std::distance(begin, end) < 1) // one byte for symbol
@@ -381,8 +380,8 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
         }
         sheet->mAnimationContinuity.at(symbol_index) = Continuity{ std::vector<uint8_t>{ begin, end } };
     };
-    auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, const uint8_t* ptr, size_t size) {
-        const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+    auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, uint8_t const* ptr, size_t size) {
+        std::map<uint32_t, std::function<void(Sheet*, uint8_t const*, size_t)>> const
             parser = {
                 { INGL_EVCT, parse_INGL_EVCT },
             };
@@ -395,15 +394,15 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
             }
         }
     };
-    auto parse_INGL_PCNT = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
-        const char* print_name = (const char*)ptr;
-        const char* print_cont = print_name + strlen(print_name) + 1;
+    auto parse_INGL_PCNT = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
+        auto print_name = (char const*)ptr;
+        auto print_cont = print_name + strlen(print_name) + 1;
         if ((strlen(print_name) + 1 + strlen(print_cont) + 1) != size) {
             throw CC_FileException("Bad Print cont chunk", INGL_PCNT);
         }
         sheet->mPrintableContinuity = Print_continuity(print_name, print_cont);
     };
-    auto parse_INGL_BACK = [](Sheet* sheet, const uint8_t* ptr, size_t size) {
+    auto parse_INGL_BACK = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
         auto end_ptr = ptr + size;
         auto num = get_big_long(ptr);
         ptr += 4;
@@ -415,7 +414,7 @@ Sheet::Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandle
         }
     };
 
-    const std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>>
+    std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>> const
         parser = {
             { INGL_NAME, parse_INGL_NAME },
             { INGL_DURA, parse_INGL_DURA },
@@ -440,7 +439,7 @@ std::vector<uint8_t> Sheet::SerializeAllPoints() const
     // for each of the points, serialize them.  Don't need to wrap in block
     // because it's not specified that way
     std::vector<uint8_t> result;
-    for (const auto& i : mPoints) {
+    for (auto&& i : mPoints) {
         Parser::Append(result, i.Serialize());
     }
     return result;
@@ -528,8 +527,7 @@ std::vector<uint8_t> Sheet::SerializeSheet() const
 Sheet::~Sheet() = default;
 
 // Find point at certain coords
-int Sheet::FindPoint(Coord where, Coord::units searchBound,
-    unsigned ref) const
+int Sheet::FindPoint(Coord where, Coord::units searchBound, unsigned ref) const
 {
     for (auto i = 0; i < static_cast<int>(mPoints.size()); i++) {
         Coord c = GetPosition(i, ref);
@@ -551,7 +549,7 @@ SelectionList Sheet::MakeSelectPointsBySymbol(SYMBOL_TYPE i) const
     return select;
 }
 
-std::vector<Point> Sheet::NewNumPointsPositions(int num, int columns, const Coord& new_march_position) const
+std::vector<Point> Sheet::NewNumPointsPositions(int num, int columns, Coord new_march_position) const
 {
     std::vector<Point> newpts(mPoints.begin(), mPoints.begin() + std::min<size_t>(mPoints.size(), num));
     auto c = new_march_position;
@@ -577,7 +575,7 @@ void Sheet::DeletePoints(SelectionList const& sl)
     }
 }
 
-std::vector<Point> Sheet::RemapPoints(const std::vector<size_t>& table) const
+std::vector<Point> Sheet::RemapPoints(std::vector<size_t> const& table) const
 {
     if (mPoints.size() != table.size()) {
         throw std::runtime_error("wrong size for Relabel");
@@ -589,7 +587,7 @@ std::vector<Point> Sheet::RemapPoints(const std::vector<size_t>& table) const
     return newpts;
 }
 
-const Continuity& Sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
+Continuity const& Sheet::GetContinuityBySymbol(SYMBOL_TYPE i) const
 {
     return mAnimationContinuity.at(i);
 }
@@ -614,7 +612,7 @@ bool Sheet::ContinuityInUse(SYMBOL_TYPE idx) const
 
 std::string Sheet::GetName() const { return mName; }
 
-void Sheet::SetName(const std::string& newname) { mName = newname; }
+void Sheet::SetName(std::string const& newname) { mName = newname; }
 
 std::string Sheet::GetNumber() const
 {
@@ -637,7 +635,7 @@ Coord Sheet::GetPosition(unsigned i, unsigned ref) const
 }
 
 // Set position of point and all refs
-void Sheet::SetAllPositions(const Coord& val, unsigned i)
+void Sheet::SetAllPositions(Coord val, unsigned i)
 {
     for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {
         mPoints[i].SetPos(val, j);
@@ -645,7 +643,7 @@ void Sheet::SetAllPositions(const Coord& val, unsigned i)
 }
 
 // Set position of point
-void Sheet::SetPosition(const Coord& val, unsigned i, unsigned ref)
+void Sheet::SetPosition(Coord val, unsigned i, unsigned ref)
 {
     unsigned j;
     if (ref == 0) {
@@ -679,8 +677,7 @@ void Sheet::SetPosition(const Coord& val, unsigned i, unsigned ref)
  * also, there are three tab stops set for standard continuity format
  */
 
-void Sheet::SetPrintableContinuity(const std::string& name,
-    const std::string& lines)
+void Sheet::SetPrintableContinuity(std::string const & name, std::string const& lines)
 {
     mPrintableContinuity = Print_continuity(name, lines);
 }
@@ -690,7 +687,7 @@ Textline_list Sheet::GetPrintableContinuity() const
     return mPrintableContinuity.GetChunks();
 }
 
-const Point& Sheet::GetPoint(unsigned i) const { return mPoints[i]; }
+Point const& Sheet::GetPoint(unsigned i) const { return mPoints[i]; }
 
 Point& Sheet::GetPoint(unsigned i) { return mPoints[i]; }
 
@@ -710,11 +707,11 @@ std::vector<SYMBOL_TYPE> Sheet::GetSymbols() const
     return result;
 }
 
-nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimationSheet& compiledSheet) const
+nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, AnimationSheet const& compiledSheet) const
 {
     nlohmann::json j;
     // TODO; add printed continuities to viewer file manually for now
-    const auto boilerplate = std::vector<std::string>{
+    auto boilerplate = std::vector<std::string>{
         std::string("(MANUAL) first continuity instruction goes here for SS") + std::to_string(sheetNum),
         std::string("(MANUAL) second instruction"),
         std::string("(MANUAL) third instruction..."),
@@ -754,7 +751,7 @@ nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::str
     return j;
 }
 
-void Sheet::SetPoints(const std::vector<Point>& points) { mPoints = points; }
+void Sheet::SetPoints(std::vector<Point> const& points) { mPoints = points; }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
 #include <assert.h>

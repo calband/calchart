@@ -5,7 +5,7 @@
  */
 
 #include "CalChartDoc.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 
 namespace CalChart {
 class Sheet;

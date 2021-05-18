@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cc_point.h
+ * CalChartPoint.h
  * Definitions for the point classes
  */
 
@@ -43,9 +43,9 @@ class Point {
 public:
     static constexpr auto kNumRefPoints = 3;
     Point();
-    Point(const Coord& pos);
+    Point(Coord const& pos);
 
-    Point(const std::vector<uint8_t>& serialized_data);
+    Point(std::vector<uint8_t> const& serialized_data);
     std::vector<uint8_t> Serialize() const;
 
     auto GetFlip() const { return mFlags.test(kPointLabelFlipped); }
@@ -56,7 +56,7 @@ public:
 
     // reference points 0 is the point, refs are [1, kNumRefPoints]
     Coord GetPos(unsigned ref = 0) const;
-    void SetPos(const Coord& c, unsigned ref = 0);
+    void SetPos(Coord c, unsigned ref = 0);
 
 private:
     enum { kPointLabelFlipped,

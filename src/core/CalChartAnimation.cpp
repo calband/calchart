@@ -26,9 +26,9 @@
 #include "CalChartAnimationCompile.h"
 #include "cc_continuity.h"
 #include "cc_drawcommand.h"
-#include "cc_point.h"
-#include "cc_sheet.h"
-#include "cc_show.h"
+#include "CalChartPoint.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
 #include "cont.h"
 #include "math_utils.h"
 

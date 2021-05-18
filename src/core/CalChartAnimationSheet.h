@@ -43,7 +43,7 @@ class AnimationCommand;
 
 using AnimationCommands = std::vector<std::shared_ptr<AnimationCommand>>;
 
-// AnimationSheet is a snapshot of CC_sheet
+// AnimationSheet is a snapshot of CalChartSheet
 class AnimationSheet {
 public:
     AnimationSheet(std::vector<Coord> const& thePoints, std::vector<AnimationCommands> const& theCommands, std::string const& s, unsigned beats)

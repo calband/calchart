@@ -6,8 +6,8 @@
 //
 //
 
-#include "cc_show.h"
-#include "cc_sheet.h"
+#include "CalChartShow.h"
+#include "CalChartSheet.h"
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCompile.h"
 #include "print_ps.h"
@@ -47,7 +47,7 @@ using namespace CalChart;
 void AnimateShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
+    std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -60,7 +60,7 @@ void AnimateShow(const char* show)
 void PrintShow(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
+    std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
     Animation a(*p,
         [](const std::string& notice) { std::cout << notice << "\n"; },
         [](const std::map<AnimateError, ErrorMarker>&, unsigned,
@@ -92,7 +92,7 @@ void PrintShow(const char* show)
 void DumpContinuity(const char* show)
 {
     std::ifstream input(show);
-    std::unique_ptr<const Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
+    std::unique_ptr<const Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
     auto sheet_num = 0;
     for (auto i = p->GetSheetBegin(); i != p->GetSheetEnd(); ++i, ++sheet_num) {
         static const SYMBOL_TYPE k_symbols[] = {
@@ -229,7 +229,7 @@ void PrintToPS(const char* show, bool landscape, bool cont, bool contsheet,
     bool overview, std::string const& outfile)
 {
     std::ifstream input(show);
-    std::unique_ptr<const Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
+    std::unique_ptr<const Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
 
     std::ofstream output(outfile);
 
@@ -292,7 +292,7 @@ bool ContinuityCountDifferentThanSymbol(const char* show)
     if (!input.is_open()) {
         throw std::runtime_error("could not open file");
     }
-    std::unique_ptr<Show> p(Show::Create_CC_show(ShowMode::GetDefaultShowMode(), input));
+    std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
     return false;
 }
 

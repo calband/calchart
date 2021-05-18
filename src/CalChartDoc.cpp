@@ -26,9 +26,9 @@
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
-#include "cc_point.h"
+#include "CalChartPoint.h"
 #include "CalChartShapes.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 #include "confgr.h"
 #include "draw.h"
 #include "math_utils.h"
@@ -52,7 +52,7 @@ IMPLEMENT_DYNAMIC_CLASS(CalChartDoc, CalChartDoc::super);
 
 // Create a new show
 CalChartDoc::CalChartDoc()
-    : mShow(Show::Create_CC_show(GetConfigShowMode(kShowModeStrings[0])))
+    : mShow(Show::Create(GetConfigShowMode(kShowModeStrings[0])))
     , mTimer(*this)
 {
     mTimer.Start(static_cast<int>(CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval()) * 1000);
@@ -228,7 +228,7 @@ T& CalChartDoc::LoadObjectGeneric(T& stream)
                 return ContinuityEditorPopup::ProcessEditContinuity(GetDocumentWindow(), description, what, line, column).ToStdString();
             }
         };
-        mShow = Show::Create_CC_show(GetConfigShowMode(kShowModeStrings[0]), stream, &handlers);
+        mShow = Show::Create(GetConfigShowMode(kShowModeStrings[0]), stream, &handlers);
     } catch (std::exception const& e) {
         wxString message = wxT("Error encountered:\n");
         message += e.what();
@@ -327,7 +327,7 @@ CalChartDoc::GetAnimation() const
 
 void CalChartDoc::WizardSetupNewShow(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, ShowMode const& newmode)
 {
-    mShow = Show::Create_CC_show(newmode, labelsAndInstruments, columns);
+    mShow = Show::Create(newmode, labelsAndInstruments, columns);
     UpdateAllViews();
 }
 
@@ -364,6 +364,12 @@ void CalChartDoc::SetDrawPaths(bool drawPaths)
 void CalChartDoc::SetDrawBackground(bool drawBackground)
 {
     mDrawBackground = drawBackground;
+    UpdateAllViews();
+}
+
+void CalChartDoc::SetCurrentMove(CalChart::MoveMode move)
+{
+    mCurrentMove = move;
     UpdateAllViews();
 }
 

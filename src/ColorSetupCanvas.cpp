@@ -27,7 +27,7 @@
 #include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
 #include "CalChartShapes.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 #include "confgr.h"
 #include "cont.h"
 #include "draw.h"
@@ -55,7 +55,7 @@ END_EVENT_TABLE()
 
 ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* parent)
     : super(parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
-    , mShow(Show::Create_CC_show(ShowMode::GetDefaultShowMode()))
+    , mShow(Show::Create(ShowMode::GetDefaultShowMode()))
     , mMode(ShowMode::CreateShowMode(
           Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
           Coord(Int2CoordUnits(80), Int2CoordUnits(42)),

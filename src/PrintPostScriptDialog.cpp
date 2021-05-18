@@ -24,8 +24,8 @@
 
 #include "CalChartDoc.h"
 #include "basic_ui.h"
-#include "cc_sheet.h"
-#include "cc_show.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
 #include "confgr.h"
 #include "print_ps.h"
 

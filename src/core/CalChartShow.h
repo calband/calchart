@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cc_show.h
+ * CalChartShow.h
  * Definitions for the calchart show classes
  */
 
@@ -28,7 +28,7 @@
 #include "CalChartShapes.h"
 
 #include "CalChartAnimation.h"
-#include "cc_sheet.h"
+#include "CalChartSheet.h"
 #include "modes.h"
 
 #include <map>
@@ -48,7 +48,7 @@ using Show_command_pair = std::pair<Show_command, Show_command>;
 
 // CalChart Show
 // The CalChart show object is what most parts of the system interact with
-// It is essentially a collection of CC_sheets that you iterate through to
+// It is essentially a collection of CalChartSheets that you iterate through to
 // either look at, or change.
 // A show can be loaded from a input stream
 
@@ -59,9 +59,9 @@ public:
     using const_Sheet_iterator_t = Sheet_container_t::const_iterator;
 
     // you can create a show in two ways, from nothing, or from an input stream
-    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode);
-    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns);
-    static std::unique_ptr<Show> Create_CC_show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
+    static std::unique_ptr<Show> Create(ShowMode const& mode);
+    static std::unique_ptr<Show> Create(ShowMode const& mode, std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, unsigned columns);
+    static std::unique_ptr<Show> Create(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
 
 private:
     Show(ShowMode const& mode);
@@ -79,14 +79,14 @@ public:
 
     // Create command, consists of an action and undo action
     Show_command_pair Create_SetCurrentSheetCommand(int n) const;
-    Show_command_pair Create_SetSelectionListCommand(const SelectionList& sl) const;
-    Show_command_pair Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl) const;
+    Show_command_pair Create_SetSelectionListCommand(SelectionList const& sl) const;
+    Show_command_pair Create_SetCurrentSheetAndSelectionCommand(int n, SelectionList const& sl) const;
     Show_command_pair Create_SetShowModeCommand(CalChart::ShowMode const& newmode) const;
     Show_command_pair Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int numColumns, Coord const& new_march_position) const;
     Show_command_pair Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument) const;
     Show_command_pair Create_SetSheetTitleCommand(std::string const& newname) const;
     Show_command_pair Create_SetSheetBeatsCommand(int beats) const;
-    Show_command_pair Create_AddSheetsCommand(const Show::Sheet_container_t& sheets, int where) const;
+    Show_command_pair Create_AddSheetsCommand(Show::Sheet_container_t const& sheets, int where) const;
     Show_command_pair Create_RemoveSheetCommand(int where) const;
     Show_command_pair Create_ApplyRelabelMapping(int sheet_num_first, std::vector<size_t> const& mapping) const;
     Show_command_pair Create_SetPrintableContinuity(std::map<int, std::pair<std::string, std::string>> const& data) const;
@@ -96,7 +96,7 @@ public:
     Show_command_pair Create_RotatePointPositionsCommand(int rotateAmount, int ref) const;
     Show_command_pair Create_ResetReferencePointToRef0(int ref) const;
     Show_command_pair Create_SetSymbolCommand(SYMBOL_TYPE sym) const;
-    Show_command_pair Create_SetSymbolCommand(const SelectionList& whichDots, SYMBOL_TYPE sym) const;
+    Show_command_pair Create_SetSymbolCommand(SelectionList const& whichDots, SYMBOL_TYPE sym) const;
     Show_command_pair Create_SetContinuityCommand(SYMBOL_TYPE which_sym, Continuity const& cont) const;
     Show_command_pair Create_SetLabelFlipCommand(std::map<int, bool> const& new_flip) const;
     Show_command_pair Create_SetLabelRightCommand(bool right) const;
@@ -127,7 +127,7 @@ public:
 
     bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
 
-    const ShowMode& GetShowMode() const;
+    ShowMode const& GetShowMode() const;
 
     // utility
     std::pair<bool, std::vector<size_t>> GetRelabelMapping(const_Sheet_iterator_t source_sheet, const_Sheet_iterator_t target_sheets, CalChart::Coord::units tolerance) const;
@@ -152,15 +152,15 @@ public:
      * @return A JSON which could represent this show in
      * a '.viewer' file.
      */
-    nlohmann::json toOnlineViewerJSON(const Animation& compiledShow) const;
+    nlohmann::json toOnlineViewerJSON(Animation const& compiledShow) const;
 
 private:
     // modification of show is private, and externally done through create and exeucte commands
     Sheet_container_t RemoveNthSheet(int sheetidx);
-    void InsertSheet(const Sheet& nsheet, int sheetidx);
-    void InsertSheet(const Sheet_container_t& nsheet, int sheetidx);
+    void InsertSheet(Sheet const& nsheet, int sheetidx);
+    void InsertSheet(Sheet_container_t const& nsheet, int sheetidx);
     void SetCurrentSheet(int n);
-    void SetSelectionList(const SelectionList& sl);
+    void SetSelectionList(SelectionList const& sl);
 
     void SetNumPoints(std::vector<std::pair<std::string, std::string>> const& labelsAndInstruments, int columns, Coord const& new_march_position);
     void DeletePoints(SelectionList const& sl);

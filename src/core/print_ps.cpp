@@ -21,8 +21,8 @@
 */
 #include "print_ps.h"
 
-#include "cc_sheet.h"
-#include "cc_show.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
 #include "modes.h"
 
 #include "prolog0.h"

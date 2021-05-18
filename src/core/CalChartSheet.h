@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cc_sheet.h
+ * CalChartSheet.h
  * Definitions for the calchart sheet classes
  */
 
@@ -24,8 +24,8 @@
 #include "CalChartAnimation.h"
 #include "cc_continuity.h"
 #include "cc_fileformat.h"
-#include "cc_image.h"
-#include "cc_point.h"
+#include "CalChartImage.h"
+#include "CalChartPoint.h"
 #include "cc_text.h"
 #include "CalChartTypes.h"
 
@@ -36,8 +36,7 @@
 
 // CalChart Sheet
 // The CalChart sheet object is a collection of CC_point locations, the number
-// of
-// beats and the different marcher's continuity.
+// of beats and the different marcher's continuity.
 
 namespace CalChart {
 
@@ -48,9 +47,9 @@ struct ParseErrorHandlers;
 class Sheet {
 public:
     Sheet(size_t numPoints);
-    Sheet(size_t numPoints, const std::string& newname);
+    Sheet(size_t numPoints, std::string const& newname);
     Sheet(size_t numPoints, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
-    Sheet(size_t numPoints, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction = nullptr);
+    Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandlers const* correction = nullptr);
     ~Sheet();
 
 private:
@@ -69,7 +68,7 @@ public:
     void SetContinuity(SYMBOL_TYPE sym, Continuity const& new_cont);
 
     // print continuity
-    void SetPrintableContinuity(const std::string& name, const std::string& lines);
+    void SetPrintableContinuity(std::string const& name, std::string const& lines);
     Textline_list GetPrintableContinuity() const;
     std::string GetRawPrintContinuity() const;
 
@@ -79,28 +78,28 @@ public:
     bool IsInAnimation() const { return (GetBeats() != 0); }
 
     // points
-    const Point& GetPoint(unsigned i) const;
+    Point const& GetPoint(unsigned i) const;
     Point& GetPoint(unsigned i);
     SYMBOL_TYPE GetSymbol(unsigned i) const;
     void SetSymbol(unsigned i, SYMBOL_TYPE sym);
     std::vector<Point> GetPoints() const;
     std::vector<SYMBOL_TYPE> GetSymbols() const;
-    void SetPoints(const std::vector<Point>& points);
+    void SetPoints(std::vector<Point> const& points);
     int FindPoint(Coord where, Coord::units searchBound, unsigned ref = 0) const;
-    std::vector<Point> RemapPoints(const std::vector<size_t>& table) const;
+    std::vector<Point> RemapPoints(std::vector<size_t> const& table) const;
     Coord GetPosition(unsigned i, unsigned ref = 0) const;
-    void SetAllPositions(const Coord& val, unsigned i);
-    void SetPosition(const Coord& val, unsigned i, unsigned ref = 0);
+    void SetAllPositions(Coord val, unsigned i);
+    void SetPosition(Coord val, unsigned i, unsigned ref = 0);
     void SetAllPoints(std::vector<Point> const& newpts);
     SelectionList MakeSelectPointsBySymbol(SYMBOL_TYPE i) const;
-    std::vector<Point> NewNumPointsPositions(int num, int columns, const Coord& new_march_position) const;
+    std::vector<Point> NewNumPointsPositions(int num, int columns, Coord new_march_position) const;
     void DeletePoints(SelectionList const& sl);
 
     // titles
     std::string GetName() const;
-    void SetName(const std::string& newname);
+    void SetName(std::string const& newname);
     std::string GetNumber() const;
-    void SetNumber(const std::string& newnumber);
+    void SetNumber(std::string const& newnumber);
 
     // image
     std::vector<ImageData> const& GetBackgroundImages() const;
@@ -119,7 +118,7 @@ public:
      * @return A JSON which could represent this sheet in
      * a '.viewer' file.
      */
-    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, const AnimationSheet& compiledSheet) const;
+    nlohmann::json toOnlineViewerJSON(unsigned sheetNum, std::vector<std::string> dotLabels, AnimationSheet const& compiledSheet) const;
 
 private:
     std::vector<Continuity> mAnimationContinuity;

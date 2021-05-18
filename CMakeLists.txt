@@ -66,27 +66,27 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCompile.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartImage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartImage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartMovePointsTool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartMovePointsTool.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartPoint.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartPoint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSelectTool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSelectTool.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShapes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShapes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSheet.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSheet.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartTypes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animate_types.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_continuity.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_continuity.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_drawcommand.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_fileformat.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_image.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_image.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_parse_errors.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_point.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_point.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_sheet.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_sheet.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_show.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_show.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cont.cpp
@@ -196,8 +196,8 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimationPanel.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimationView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AnimationView.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundImage.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundImage.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundImages.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/BackgroundImages.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CCOmniviewCanvas.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CCOmniviewCanvas.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CalChartApp.cpp

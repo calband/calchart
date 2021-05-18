@@ -1,5 +1,5 @@
 /*
- * BackgroundImage.cpp
+ * BackgroundImages.cpp
  * Maintains the background image data
  */
 
@@ -20,8 +20,56 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BackgroundImage.h"
+#include "BackgroundImages.h"
+#include "CalChartImage.h"
 #include <algorithm>
+
+class BackgroundImage {
+public:
+    BackgroundImage(wxImage const& image, int x, int y, int scaled_width, int scaled_height);
+
+    bool MouseClickIsHit(wxMouseEvent const& event, wxDC const& dc) const;
+    void OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc);
+    // returns left, top, width, height
+    std::array<int, 4> OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc);
+
+    void OnMouseMove(wxMouseEvent const& event, wxDC const& dc);
+    void OnPaint(wxDC& dc, bool drawPicAdjustDots, bool selected) const;
+
+private:
+    static constexpr auto kCircleSize = 6;
+
+    wxImage mImage;
+    wxBitmap mBitmap;
+    wxPoint mBitmapPoint;
+
+    // what type of background adjustments could we do
+    enum class BackgroundAdjustType {
+        kUpperLeft = 0,
+        kUpper,
+        kUpperRight,
+        kLeft,
+        kMove,
+        kRight,
+        kLowerLeft,
+        kLower,
+        kLowerRight,
+        kLast,
+    };
+    BackgroundAdjustType mBackgroundAdjustType;
+
+    struct CalculateScaleAndMove {
+    public:
+        CalculateScaleAndMove(wxPoint startClick, wxRect rect, BackgroundAdjustType adjustType);
+        
+        wxRect operator()(wxCoord x, wxCoord y, wxRect wxRect);
+        wxPoint mStartClick;
+        wxRect mRect;
+        float mAspectRatio;
+        BackgroundAdjustType mAdjustType;
+    };
+    std::unique_ptr<CalculateScaleAndMove> mScaleAndMove;
+};
 
 BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_width, int scaled_height)
     : mImage(image)
@@ -253,3 +301,72 @@ wxRect BackgroundImage::CalculateScaleAndMove::operator()(wxCoord x, wxCoord y, 
             return rect;
     }
 }
+
+BackgroundImages::BackgroundImages() = default;
+BackgroundImages::~BackgroundImages() = default;
+
+void BackgroundImages::SetBackgroundImages(std::vector<CalChart::ImageData> const& images)
+{
+    mBackgroundImages.clear();
+    mWhichBackgroundIndex = -1;
+    for (auto&& image : images) {
+        // ugh...  not sure if there's a better way to pass data to image.
+        auto d = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height * 3));
+        std::copy(image.data.begin(), image.data.end(), d);
+        auto a = static_cast<unsigned char*>(nullptr);
+        if (image.alpha.size()) {
+            a = static_cast<unsigned char*>(malloc(sizeof(unsigned char) * image.image_width * image.image_height));
+            std::copy(image.alpha.begin(), image.alpha.end(), a);
+            wxImage img(image.image_width, image.image_height, d, a);
+            mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+        } else {
+            wxImage img(image.image_width, image.image_height, d);
+            mBackgroundImages.emplace_back(img, image.left, image.top, image.scaled_width, image.scaled_height);
+        }
+    }
+}
+
+void BackgroundImages::OnPaint(wxDC& dc) const
+{
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
+        mBackgroundImages[i].OnPaint(dc, mAdjustBackgroundMode, mWhichBackgroundIndex == i);
+    }
+}
+
+void BackgroundImages::OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc)
+{
+    if (!mAdjustBackgroundMode) {
+        return;
+    }
+    mWhichBackgroundIndex = -1;
+    for (auto i = 0; i < static_cast<int>(mBackgroundImages.size()); ++i) {
+        if (mBackgroundImages[i].MouseClickIsHit(event, dc)) {
+            mWhichBackgroundIndex = i;
+        }
+    }
+    if (mWhichBackgroundIndex != -1) {
+        mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftDown(event, dc);
+    }
+}
+
+std::optional<std::tuple<int, std::array<int, 4>>> BackgroundImages::OnMouseLeftUp(wxMouseEvent const& event, wxDC const& dc)
+{
+    if (!mAdjustBackgroundMode) {
+        return {};
+    }
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
+        return { { mWhichBackgroundIndex, mBackgroundImages[mWhichBackgroundIndex].OnMouseLeftUp(event, dc) } };
+    }
+    return {};
+}
+
+void BackgroundImages::OnMouseMove(wxMouseEvent const& event, wxDC const& dc)
+{
+    if (!mAdjustBackgroundMode) {
+        return;
+    }
+    if (mWhichBackgroundIndex >= 0 && mWhichBackgroundIndex < static_cast<int>(mBackgroundImages.size())) {
+        mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
+    }
+}
+

@@ -13,8 +13,8 @@
 #include "TransitionSolverFrame.h"
 #include "basic_ui.h"
 #include "cc_continuity.h"
-#include "cc_sheet.h"
-#include "cc_show.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
 #include "confgr.h"
 
 #include <wx/help.h>
@@ -43,9 +43,5 @@ void TransitionSolverView::ApplyTransitionSolution(CalChart::TransitionSolverRes
 
 void TransitionSolverView::SelectMarchers(std::set<unsigned> marchers)
 {
-    std::set<int> selectionList;
-    for (unsigned marcher : marchers) {
-        selectionList.insert(marcher);
-    }
-    GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionListCommand(selectionList).release());
+    GetDocument()->GetCommandProcessor()->Submit(static_cast<CalChartDoc*>(GetDocument())->Create_SetSelectionListCommand({marchers.begin(), marchers.end()}).release());
 }

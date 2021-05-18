@@ -23,7 +23,7 @@
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "cc_show.h"
+#include "CalChartShow.h"
 #include "confgr.h"
 #include "draw.h"
 #include "modes.h"

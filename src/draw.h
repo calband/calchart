@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_show.h"
+#include "CalChartShow.h"
 #include "confgr.h"
 #include <map>
 #include <set>
