@@ -13,11 +13,14 @@ You also need to install the command line tools for Xcode.  See https://develope
 ### CMake
 
 CalChart uses CMake to build its projects.  I recommend you read through this tutorial to help you make sure you've got CMake set up for you system.
-https://cgold.readthedocs.io/en/latest/first-step.html
+https://cgold.readthedocs.io/en/latest/first-step.html.
+
+Avoid using macport version of cmake due to this issue:
+https://trac.macports.org/ticket/58450
 
 ### Boost
 
-CalChart uses Boost.  See boost.org for more information about what Boost is.  You will need to make sure it is installed on your system somewhere common so CMake can find it.  I recommend using macports to install it.  See http://www.macports.org/.
+CalChart uses Boost.  See boost.org for more information about what Boost is.  You will need to make sure it is installed on your system somewhere common so CMake can find it.  I recommend using brew to install it.  See https://brew.sh.
 
 ## Building CalChart:
 
