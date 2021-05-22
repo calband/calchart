@@ -26,7 +26,7 @@
 
 #include "cont.h"
 #include "parse.h"
-#include "animate.h"
+#include "CalChartAnimation.h"
 
 #include <vector>
 

@@ -169,7 +169,7 @@ void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent& event)
     }
 
     auto&& sht = mView->GetCurrentSheet();
-    mView->SetSelection(sht->MakeSelectPointsBySymbol(mSym));
+    mView->SetSelectionList(sht->MakeSelectPointsBySymbol(mSym));
 }
 
 void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent& event)

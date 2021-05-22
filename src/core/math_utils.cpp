@@ -22,7 +22,7 @@
 
 #include "math_utils.h"
 
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 
 #include <ctype.h>
 #include <list>

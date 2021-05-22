@@ -21,8 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_coord.h"
-#include "cc_types.h"
+#include "CalChartCoord.h"
+#include "CalChartTypes.h"
+#include "math_utils.h"
 #include <string>
 
 namespace CalChart {
@@ -111,5 +112,34 @@ struct ErrorMarker {
         return pntgroup == rhs.pntgroup && contsymbol == rhs.contsymbol && line == rhs.line && col == rhs.col;
     }
 };
+
+inline AnimateDir AnimGetDirFromAngle(float ang)
+{
+    ang = NormalizeAngle(ang);
+    // rotate angle by 22.5:
+    ang += 22.5;
+    size_t quadrant = ang / 45.0;
+    switch (quadrant) {
+    case 0:
+        return ANIMDIR_N;
+    case 1:
+        return ANIMDIR_NW;
+    case 2:
+        return ANIMDIR_W;
+    case 3:
+        return ANIMDIR_SW;
+    case 4:
+        return ANIMDIR_S;
+    case 5:
+        return ANIMDIR_SE;
+    case 6:
+        return ANIMDIR_E;
+    case 7:
+        return ANIMDIR_NE;
+    case 8:
+        return ANIMDIR_N;
+    }
+    return ANIMDIR_N;
+}
 
 }

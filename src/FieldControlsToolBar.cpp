@@ -24,7 +24,7 @@
 #include "CalChartToolBar.h"
 #include "ColorPalette.h"
 #include "basic_ui.h"
-#include "cc_point.h"
+#include "CalChartPoint.h"
 #include "platconf.h"
 #include "ui_enums.h"
 

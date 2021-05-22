@@ -10,8 +10,8 @@
 #include <array>
 #include <vector>
 
-#include "cc_coord.h"
-#include "cc_sheet.h"
+#include "CalChartCoord.h"
+#include "CalChartSheet.h"
 
 namespace CalChart {
 

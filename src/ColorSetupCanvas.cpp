@@ -26,8 +26,8 @@
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
-#include "cc_shapes.h"
-#include "cc_sheet.h"
+#include "CalChartShapes.h"
+#include "CalChartSheet.h"
 #include "confgr.h"
 #include "cont.h"
 #include "draw.h"
@@ -55,7 +55,7 @@ END_EVENT_TABLE()
 
 ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* parent)
     : super(parent, wxID_ANY, wxDefaultPosition, GetColorSetupCanvas())
-    , mShow(Show::Create_CC_show(ShowMode::GetDefaultShowMode()))
+    , mShow(Show::Create(ShowMode::GetDefaultShowMode()))
     , mMode(ShowMode::CreateShowMode(
           Coord(Int2CoordUnits(160), Int2CoordUnits(84)),
           Coord(Int2CoordUnits(80), Int2CoordUnits(42)),
@@ -79,11 +79,11 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
     };
     mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
     mShow->Create_SetupMarchersCommand(labels, 4, field_offset).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{ 0, 2 }).first(*mShow);
+    mShow->Create_SetSelectionListCommand(SelectionList{ 0, 2 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_X).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{ 1, 3 }).first(*mShow);
+    mShow->Create_SetSelectionListCommand(SelectionList{ 1, 3 }).first(*mShow);
     mShow->Create_SetSymbolCommand(SYMBOL_SOLX).first(*mShow);
-    mShow->Create_SetSelectionCommand(SelectionList{}).first(*mShow);
+    mShow->Create_SetSelectionListCommand(SelectionList{}).first(*mShow);
 
     for (auto i = 0; i < 4; ++i) {
         mShow->Create_MovePointsCommand({ { i, field_offset + Coord(Int2CoordUnits(i * 4), Int2CoordUnits(2)) } }, 0).first(*mShow);

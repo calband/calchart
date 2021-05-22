@@ -23,21 +23,14 @@
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
 #include "CalChartView.h"
-#include "TopFrame.h"
+#include "CalChartSplash.h"
 #include "basic_ui.h"
 #include "confgr.h"
-#include "modes.h"
 #include "platconf.h"
-#include "single_instance_ipc.h"
+#include "HostAppInterface.h"
 
 #include <wx/fs_zip.h>
 #include <wx/help.h>
-#include <wx/html/helpctrl.h>
-
-#include <wx/docview.h>
-#include <wx/stdpaths.h>
-
-wxPrintDialogData* gPrintDialogData;
 
 namespace CalChart {
 void Coord_UnitTests();
@@ -51,31 +44,12 @@ void Continuity_UnitTests();
 // This statement initializes the whole application and calls OnInit
 IMPLEMENT_APP(CalChartApp)
 
-wxHtmlHelpController& CalChartApp::GetGlobalHelpController()
-{
-    return *mHelpController;
-}
-
-#if defined(__APPLE__) && (__APPLE__)
-void CalChartApp::MacOpenFile(wxString const& fileName)
-{
-    OpenFileOnHost(fileName);
-}
-
-void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
-{
-    for (auto index = 0; index < static_cast<int>(fileNames.GetCount()); ++index) {
-        MacOpenFile(fileNames[index]);
-    }
-}
-#endif // defined(__APPLE__) && (__APPLE__)
-
 bool CalChartApp::OnInit()
 {
-    SetAppName(wxT("CalChart"));
+    SetAppName("CalChart");
     wxInitAllImageHandlers();
-    StartStopFunc_t asServer{ [=]() { this->InitAppAsServer(); }, [=]() { this->ExitAppAsServer(); } };
-    StartStopFunc_t asClient{ [=]() { this->InitAppAsClient(); }, [=]() { this->ExitAppAsClient(); } };
+    auto asServer = StartStopFunc_t{ [this]() { InitAppAsServer(); }, [this]() { ExitAppAsServer(); } };
+    auto asClient = StartStopFunc_t{ [this]() { InitAppAsClient(); }, [this]() { ExitAppAsClient(); } };
     mHostInterface = HostAppInterface::Make(this, asServer, asClient);
     return mHostInterface->OnInit();
 }
@@ -86,14 +60,38 @@ int CalChartApp::OnExit()
     return wxApp::OnExit();
 }
 
-void CalChartApp::OpenFileOnHost(const wxString& filename)
+void CalChartApp::OpenFile(wxString const& fileName)
+{
+    mDocManager->CreateDocument(fileName, wxDOC_SILENT);
+}
+
+void CalChartApp::OpenFileOnHost(wxString const& filename)
 {
     mHostInterface->OpenFile(filename);
 }
 
-void CalChartApp::OpenFile(const wxString& fileName)
+#if defined(__APPLE__) && (__APPLE__)
+void CalChartApp::MacOpenFile(wxString const& fileName)
 {
-    mDocManager->CreateDocument(fileName, wxDOC_SILENT);
+    OpenFileOnHost(fileName);
+}
+
+void CalChartApp::MacOpenFiles(wxArrayString const& fileNames)
+{
+    for (auto file : fileNames) {
+        MacOpenFile(file);
+    }
+}
+#endif // defined(__APPLE__) && (__APPLE__)
+
+wxHtmlHelpController& CalChartApp::GetGlobalHelpController()
+{
+    return *mHelpController;
+}
+
+wxPrintDialogData& CalChartApp::GetGlobalPrintDialog()
+{
+    return *mPrintDialogData;
 }
 
 void CalChartApp::InitAppAsServer()
@@ -102,28 +100,26 @@ void CalChartApp::InitAppAsServer()
     mDocManager = new wxDocManager;
 
     //// Create a template relating drawing documents to their views
-    (void)new wxDocTemplate(mDocManager, _T("CalChart Show"), _T("*.shw"), _T(""), _T("shw"), _T("CalChart Doc"), _T("CalChart View"), CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
+    (void)new wxDocTemplate(mDocManager, "CalChart Show", "*.shw", "", "shw", "CalChart Doc", "CalChart View", CLASSINFO(CalChartDoc), CLASSINFO(CalChartView));
 
-    gPrintDialogData = new wxPrintDialogData;
-    mHelpController = std::unique_ptr<wxHtmlHelpController>(new wxHtmlHelpController());
+    mHelpController = std::make_unique<wxHtmlHelpController>();
+    mPrintDialogData = std::make_unique<wxPrintDialogData>();
 
     //// Create the main frame window
-    auto frame = new TopFrame(mDocManager, (wxFrame*)NULL, _T("CalChart"));
+    auto frame = new CalChartSplash(mDocManager, nullptr, "CalChart");
 
-    {
-        // Required for advanced HTML help
-        wxFileSystem::AddHandler(new wxZipFSHandler);
-        wxFileSystem::AddHandler(new wxArchiveFSHandler);
+    // Required for advanced HTML help
+    wxFileSystem::AddHandler(new wxZipFSHandler);
+    wxFileSystem::AddHandler(new wxArchiveFSHandler);
 
 #if defined(__APPLE__) && (__APPLE__)
-        wxString helpfile(wxT("CalChart.app/Contents/Resources"));
+    auto helpfile = wxString("CalChart.app/Contents/Resources");
 #else
-        wxString helpfile = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("docs"));
+    auto helpfile = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "docs");
 #endif
-        helpfile.Append(PATH_SEPARATOR wxT("charthlp.hhp"));
-        if (!GetGlobalHelpController().AddBook(wxFileName(helpfile))) {
-            wxLogError(wxT("Cannot find the help system."));
-        }
+    helpfile.Append(PATH_SEPARATOR "charthlp.hhp");
+    if (!GetGlobalHelpController().AddBook(wxFileName(helpfile))) {
+        wxLogError("Cannot find the help system.");
     }
 
 #ifndef __WXMAC__
@@ -132,10 +128,11 @@ void CalChartApp::InitAppAsServer()
     SetTopWindow(frame);
 
     // Get the file history
-    wxConfigBase* config = wxConfigBase::Get();
-    config->SetPath(wxT("/FileHistory"));
+    auto config = wxConfigBase::Get();
+    config->SetPath("/FileHistory");
     mDocManager->FileHistoryLoad(*config);
 
+    // run the built in self tests.
     CalChart::Continuity_UnitTests();
     CalChart::Point_UnitTests();
     CalChart::Coord_UnitTests();
@@ -160,23 +157,15 @@ void CalChartApp::ExitAppAsServer()
     // Flush out the other commands
     CalChartConfiguration::GetGlobalConfig().FlushWriteQueue();
     // Get the file history
-    wxConfigBase* config = wxConfigBase::Get();
-    config->SetPath(wxT("/FileHistory"));
+    auto config = wxConfigBase::Get();
+    config->SetPath("/FileHistory");
     mDocManager->FileHistorySave(*config);
     config->Flush();
-
-    if (gPrintDialogData)
-        delete gPrintDialogData;
 
     // delete the doc manager
     delete wxDocManager::GetDocumentManager();
 
     mHelpController.reset();
-}
-
-CalChart::ShowMode CalChartApp::GetShowMode(wxString const& which)
-{
-    return GetConfigShowMode(which);
 }
 
 void CalChartApp::ExitAppAsClient() { }

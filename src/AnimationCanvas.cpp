@@ -23,7 +23,7 @@
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
 #include "basic_ui.h"
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 #include "confgr.h"
 #include "ui_enums.h"
 

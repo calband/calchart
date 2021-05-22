@@ -204,18 +204,6 @@ static void CheckGLError()
     }
 }
 
-template <typename Float>
-auto NormalizeAngle(Float angle)
-{
-    while (angle > 2 * M_PI) {
-        angle -= 2 * M_PI;
-    }
-    while (angle < 0.0) {
-        angle += 2 * M_PI;
-    }
-    return angle;
-}
-
 static auto LoadTextureWithImage(wxImage const& image, GLuint& texture)
 {
     glBindTexture(GL_TEXTURE_2D, texture);

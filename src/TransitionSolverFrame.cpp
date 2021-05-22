@@ -14,8 +14,8 @@
 #include "TransitionSolverView.h"
 #include "basic_ui.h"
 #include "cc_continuity.h"
-#include "cc_sheet.h"
-#include "cc_show.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
 #include "confgr.h"
 
 #include <wx/help.h>

@@ -21,10 +21,11 @@
 */
 
 #include "CalChartDoc.h"
-#include "animatecompile.h"
-#include "cc_coord.h"
-#include "cc_types.h"
-#include "ghost_module.h"
+#include "CalChartAnimationCompile.h"
+#include "CalChartCoord.h"
+#include "CalChartTypes.h"
+#include "BackgroundImages.h"
+#include "GhostModule.h"
 #include "modes.h"
 
 #include <map>
@@ -32,7 +33,7 @@
 
 // CalChartView connects together the Frames and the Doc.
 
-class BackgroundImage;
+class BackgroundImages;
 class CalChartFrame;
 class AnimationFrame;
 class Animation;
@@ -49,7 +50,7 @@ public:
     bool OnClose(bool deleteWindow = true) override;
 
     void OnDraw(wxDC* dc) override;
-    void DrawOtherPoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions);
+    void DrawUncommitedMovePoints(wxDC& dc, std::map<int, CalChart::Coord> const& positions);
     void OnDrawBackground(wxDC& dc);
 
     void OnWizardSetup(CalChartDoc& show);
@@ -88,6 +89,7 @@ public:
     auto GetShowFieldOffset() const { return mShow->GetShowMode().Offset(); }
     auto GetShowFieldSize() const { return mShow->GetShowMode().Size(); }
 
+    auto GetSheets() const { return mShow->GetSheets(); }
     auto GetSheetBegin() const { return mShow->GetSheetBegin(); }
     auto GetSheetEnd() const { return mShow->GetSheetEnd(); }
     auto GetCurrentSheet() const { return mShow->GetCurrentSheet(); }
@@ -108,14 +110,18 @@ public:
     void SetActiveReferencePoint(int which);
 
     ///// Select /////
-    void UnselectAll() { SetSelection(mShow->MakeUnselectAll()); }
-    void AddToSelection(const SelectionList& sl) { SetSelection(mShow->MakeAddToSelection(sl)); }
-    void ToggleSelection(const SelectionList& sl) { SetSelection(mShow->MakeToggleSelection(sl)); }
-    void SelectWithLasso(const CalChart::Lasso* lasso, bool toggleSelected);
+    void UnselectAll() { SetSelectionList(mShow->MakeUnselectAll()); }
+    void AddToSelection(const SelectionList& sl) { SetSelectionList(mShow->MakeAddToSelection(sl)); }
+    void ToggleSelection(const SelectionList& sl) { SetSelectionList(mShow->MakeToggleSelection(sl)); }
+    void SelectWithinPolygon(CalChart::RawPolygon_t const& polygon, bool toggleSelected);
     void SelectPointsInRect(const CalChart::Coord& c1, const CalChart::Coord& c2, bool toggleSelected);
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
-    void SetSelection(const SelectionList& sl);
-    void GoToSheetAndSetSelection(int which, const SelectionList& sl);
+    void SetSelectionList(const SelectionList& sl);
+    auto GetSelect() const { return mShow->GetSelect(); }
+    void SetSelect(CalChart::Select select);
+    auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
+    void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
+    void GoToSheetAndSetSelectionList(int which, const SelectionList& sl);
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
@@ -140,15 +146,10 @@ private:
     void UpdateBackgroundImages();
 
     CalChartFrame* mFrame{};
-    bool mDrawPaths{};
     GhostModule mGhostModule{};
     CalChartDoc* mShow{};
-    int mCurrentReferencePoint{};
     CalChartConfiguration& mConfig;
-    std::vector<BackgroundImage> mBackgroundImages;
-    bool mDrawBackground{};
-    bool mAdjustBackgroundMode{};
-    int mWhichBackgroundIndex{};
+    BackgroundImages mBackgroundImages;
 
     DECLARE_DYNAMIC_CLASS(CalChartView)
 };

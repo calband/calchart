@@ -31,7 +31,7 @@
 #endif
 
 namespace CalChart {
-class Coord;
+struct Coord;
 }
 
 static const double kEpsilon = 0.00001;
@@ -47,7 +47,7 @@ T Deg2Rad(const T& a) { return a * M_PI / 180.0; }
 #define SQRT2 1.4142136
 
 template <typename T>
-T BoundDirection(T f)
+constexpr T BoundDirection(T f)
 {
     while (f >= 360.0)
         f -= 360.0;
@@ -57,7 +57,7 @@ T BoundDirection(T f)
 }
 
 template <typename T>
-T NormalizeAngle(T ang) { return BoundDirection(ang); }
+constexpr T NormalizeAngle(T ang) { return BoundDirection(ang); }
 
 float BoundDirectionSigned(float f);
 

@@ -19,9 +19,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartAnimationErrors.h"
 #include "AnimationErrorsPanel.h"
 #include "CalChartView.h"
-#include "animate_types.h"
 #include "basic_ui.h"
 
 #include <wx/artprov.h>
@@ -85,7 +85,7 @@ void AnimationErrorsPanel::OnSelectionChanged(wxTreeListEvent& event)
     }
 
     if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second));
+        mView->GoToSheetAndSetSelectionList(std::get<0>(error->second), std::get<1>(error->second));
     }
 }
 
@@ -96,7 +96,7 @@ void AnimationErrorsPanel::OnItemActivated(wxTreeListEvent& event)
     }
 
     if (auto error = mErrorLookup.find(event.GetItem()); error != mErrorLookup.end()) {
-        mView->GoToSheetAndSetSelection(std::get<0>(error->second), std::get<1>(error->second));
+        mView->GoToSheetAndSetSelectionList(std::get<0>(error->second), std::get<1>(error->second));
     }
 }
 

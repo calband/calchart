@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_coord.h"
+#include "CalChartCoord.h"
 
 #include <iosfwd>
 #include <memory>
@@ -69,7 +69,7 @@ enum class ContType {
 };
 
 class ContToken;
-class AnimateCompile;
+class AnimationCompile;
 
 // DrawableCont is a structure that describes the continuity for drawing
 struct DrawableCont {
@@ -128,7 +128,7 @@ class ContPoint : public ContToken {
 
 public:
     ContPoint() = default;
-    virtual Coord Get(AnimateCompile& anim) const;
+    virtual Coord Get(AnimationCompile& anim) const;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const;
     virtual std::unique_ptr<ContPoint> clone() const;
@@ -161,7 +161,7 @@ class ContStartPoint : public ContPoint {
 
 public:
     ContStartPoint() = default;
-    virtual Coord Get(AnimateCompile& anim) const override;
+    virtual Coord Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
@@ -182,7 +182,7 @@ class ContNextPoint : public ContPoint {
 
 public:
     ContNextPoint() = default;
-    virtual Coord Get(AnimateCompile& anim) const override;
+    virtual Coord Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
@@ -204,7 +204,7 @@ class ContRefPoint : public ContPoint {
 public:
     ContRefPoint() = default;
     ContRefPoint(unsigned n);
-    virtual Coord Get(AnimateCompile& anim) const override;
+    virtual Coord Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
@@ -227,7 +227,7 @@ class ContValue : public ContToken {
 
 public:
     ContValue() = default;
-    virtual float Get(AnimateCompile& anim) const = 0;
+    virtual float Get(AnimationCompile& anim) const = 0;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const = 0;
     virtual std::unique_ptr<ContValue> clone() const = 0;
@@ -240,7 +240,7 @@ class ContValueUnset : public ContValue {
     using super = ContValue;
 
 public:
-    virtual float Get(AnimateCompile&) const override { return 0; }
+    virtual float Get(AnimationCompile&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -255,7 +255,7 @@ class ContValueFloat : public ContValue {
 public:
     ContValueFloat() = default;
     ContValueFloat(float v);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -279,7 +279,7 @@ class ContValueDefined : public ContValue {
 public:
     ContValueDefined() = default;
     ContValueDefined(ContDefinedValue v);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -304,7 +304,7 @@ public:
     ContValueAdd() = default;
     ContValueAdd(ContValue* v1, ContValue* v2);
     ContValueAdd(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -332,7 +332,7 @@ public:
     ContValueSub() = default;
     ContValueSub(ContValue* v1, ContValue* v2);
     ContValueSub(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -360,7 +360,7 @@ public:
     ContValueMult() = default;
     ContValueMult(ContValue* v1, ContValue* v2);
     ContValueMult(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -388,7 +388,7 @@ public:
     ContValueDiv() = default;
     ContValueDiv(ContValue* v1, ContValue* v2);
     ContValueDiv(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -416,7 +416,7 @@ public:
     ContValueNeg() = default;
     ContValueNeg(ContValue* v);
     ContValueNeg(std::unique_ptr<ContValue> v);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -440,7 +440,7 @@ class ContValueREM : public ContValue {
     using super = ContValue;
 
 public:
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -462,8 +462,8 @@ class ContValueVar : public ContValue {
 public:
     ContValueVar() = default;
     ContValueVar(unsigned num);
-    virtual float Get(AnimateCompile& anim) const override;
-    void Set(AnimateCompile& anim, float v);
+    virtual float Get(AnimationCompile& anim) const override;
+    void Set(AnimationCompile& anim, float v);
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -485,7 +485,7 @@ class ContValueVarUnset : public ContValueVar {
     using super = ContValueVar;
 
 public:
-    virtual float Get(AnimateCompile&) const override { return 0; }
+    virtual float Get(AnimationCompile&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -501,7 +501,7 @@ public:
     ContFuncDir() = default;
     ContFuncDir(ContPoint* p);
     ContFuncDir(std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -528,7 +528,7 @@ public:
     ContFuncDirFrom() = default;
     ContFuncDirFrom(ContPoint* start, ContPoint* end);
     ContFuncDirFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -556,7 +556,7 @@ public:
     ContFuncDist() = default;
     ContFuncDist(ContPoint* p);
     ContFuncDist(std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -583,7 +583,7 @@ public:
     ContFuncDistFrom() = default;
     ContFuncDistFrom(ContPoint* start, ContPoint* end);
     ContFuncDistFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -611,7 +611,7 @@ public:
     ContFuncEither() = default;
     ContFuncEither(ContValue* d1, ContValue* d2, ContPoint* p);
     ContFuncEither(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -640,7 +640,7 @@ public:
     ContFuncOpp() = default;
     ContFuncOpp(ContValue* d);
     ContFuncOpp(std::unique_ptr<ContValue> d);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -667,7 +667,7 @@ public:
     ContFuncStep() = default;
     ContFuncStep(ContValue* beats, ContValue* blocksize, ContPoint* p);
     ContFuncStep(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> blocksize, std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimateCompile& anim) const override;
+    virtual float Get(AnimationCompile& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -694,7 +694,7 @@ class ContProcedure : public ContToken {
 
 public:
     ContProcedure() = default;
-    virtual void Compile(AnimateCompile& anim) = 0;
+    virtual void Compile(AnimationCompile& anim) = 0;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const = 0;
     virtual std::unique_ptr<ContProcedure> clone() const = 0;
@@ -708,7 +708,7 @@ class ContProcUnset : public ContProcedure {
     using super = ContProcedure;
 
 public:
-    virtual void Compile(AnimateCompile&) override { }
+    virtual void Compile(AnimationCompile&) override { }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -725,7 +725,7 @@ public:
     ContProcSet() = default;
     ContProcSet(ContValueVar* vr, ContValue* v);
     ContProcSet(std::unique_ptr<ContValueVar> vr, std::unique_ptr<ContValue> v);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -753,7 +753,7 @@ class ContProcBlam : public ContProcedure {
     using super = ContProcedure;
 
 public:
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -778,7 +778,7 @@ public:
         ContValue* d2, ContValue* beats);
     ContProcCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d1,
         std::unique_ptr<ContValue> d2, std::unique_ptr<ContValue> beats);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -807,7 +807,7 @@ public:
     ContProcDMCM() = default;
     ContProcDMCM(ContPoint* p1, ContPoint* p2, ContValue* beats);
     ContProcDMCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> beats);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -836,7 +836,7 @@ public:
     ContProcDMHS() = default;
     ContProcDMHS(ContPoint* p);
     ContProcDMHS(std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -864,7 +864,7 @@ public:
     ContProcEven() = default;
     ContProcEven(ContValue* steps, ContPoint* p);
     ContProcEven(std::unique_ptr<ContValue> steps, std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -893,7 +893,7 @@ public:
     ContProcEWNS() = default;
     ContProcEWNS(ContPoint* p);
     ContProcEWNS(std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -923,7 +923,7 @@ public:
         ContPoint* p);
     ContProcFountain(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContValue> s1, std::unique_ptr<ContValue> s2,
         std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -967,7 +967,7 @@ public:
     ContProcFM() = default;
     ContProcFM(ContValue* steps, ContValue* d);
     ContProcFM(std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -995,7 +995,7 @@ public:
     ContProcFMTO() = default;
     ContProcFMTO(ContPoint* p);
     ContProcFMTO(std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1023,7 +1023,7 @@ public:
     ContProcGrid() = default;
     ContProcGrid(ContValue* g);
     ContProcGrid(std::unique_ptr<ContValue> g);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1051,7 +1051,7 @@ public:
     ContProcHSCM() = default;
     ContProcHSCM(ContPoint* p1, ContPoint* p2, ContValue* beats);
     ContProcHSCM(std::unique_ptr<ContPoint> p1, std::unique_ptr<ContPoint> p2, std::unique_ptr<ContValue> beats);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1080,7 +1080,7 @@ public:
     ContProcHSDM() = default;
     ContProcHSDM(ContPoint* p);
     ContProcHSDM(std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1108,7 +1108,7 @@ public:
     ContProcMagic() = default;
     ContProcMagic(ContPoint* p);
     ContProcMagic(std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1138,7 +1138,7 @@ public:
         ContValue* face);
     ContProcMarch(std::unique_ptr<ContValue> stepsize, std::unique_ptr<ContValue> steps, std::unique_ptr<ContValue> d,
         std::unique_ptr<ContValue> face);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1176,7 +1176,7 @@ public:
     ContProcMT() = default;
     ContProcMT(ContValue* beats, ContValue* d);
     ContProcMT(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> d);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1204,7 +1204,7 @@ public:
     ContProcMTRM() = default;
     ContProcMTRM(ContValue* d);
     ContProcMTRM(std::unique_ptr<ContValue> d);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1232,7 +1232,7 @@ public:
     ContProcNSEW() = default;
     ContProcNSEW(ContPoint* p);
     ContProcNSEW(std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;
@@ -1260,7 +1260,7 @@ public:
     ContProcRotate() = default;
     ContProcRotate(ContValue* angle, ContValue* steps, ContPoint* p);
     ContProcRotate(std::unique_ptr<ContValue> angle, std::unique_ptr<ContValue> steps, std::unique_ptr<ContPoint> p);
-    virtual void Compile(AnimateCompile& anim) override;
+    virtual void Compile(AnimationCompile& anim) override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContProcedure> clone() const override;

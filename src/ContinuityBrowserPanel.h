@@ -22,7 +22,7 @@
 
 #include "CustomListViewPanel.h"
 #include "cc_continuity.h"
-#include "cc_types.h"
+#include "CalChartTypes.h"
 
 #include <wx/wx.h>
 
