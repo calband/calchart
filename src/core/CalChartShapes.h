@@ -21,16 +21,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartCoord.h"
-#include <vector>
-#include <optional>
-
 /**
  * CalChart Shapes
  * These are general objects that represent Shapes in CalChart.
  * A shape object returns a vector of DrawCommands that represent how to draw the shape.  This keeps the implementation details
  * of "how" to draw seperate from the "what" to draw, allowing reusablity.
  */
+
+#include "CalChartCoord.h"
+#include <vector>
+#include <optional>
 
 namespace CalChart {
 struct DrawCommand;

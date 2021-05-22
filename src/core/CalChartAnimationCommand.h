@@ -21,7 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate_types.h"
+#include "CalChartAnimationTypes.h"
+#include "CalChartCoord.h"
 #include <nlohmann/json.hpp>
 
 /**
@@ -38,7 +39,6 @@
 namespace CalChart {
 
 struct DrawCommand;
-struct Coord;
 
 class AnimationCommand {
 public:
@@ -65,7 +65,7 @@ public:
     virtual unsigned NumBeats() const { return mNumBeats; }
 
     // What style to display
-    virtual MarchingStyle StepStyle() { return STYLE_HighStep; }
+    virtual MarchingStyle StepStyle() { return MarchingStyle::HighStep; }
 
     // when we want to have the path drawn:
     virtual DrawCommand GenCC_DrawCommand(Coord pt, Coord offset) const;
@@ -84,6 +84,7 @@ protected:
 class AnimationCommandMT : public AnimationCommand {
 public:
     AnimationCommandMT(unsigned beats, float direction);
+    AnimationCommandMT(unsigned beats, AnimateDir direction);
     virtual ~AnimationCommandMT() = default;
 
     std::unique_ptr<AnimationCommand> clone() const override;

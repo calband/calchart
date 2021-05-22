@@ -26,9 +26,62 @@
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimation.h"
 #include "cc_drawcommand.h"
+#include "math_utils.h"
 #include "viewer_translate.h"
 
+
 namespace CalChart {
+
+inline auto AnimGetDirFromAngle(float ang)
+{
+    ang = NormalizeAngle(ang);
+    // rotate angle by 22.5:
+    ang += 22.5;
+    size_t quadrant = ang / 45.0;
+    switch (quadrant) {
+    case 0:
+        return AnimateDir::N;
+    case 1:
+        return AnimateDir::NW;
+    case 2:
+        return AnimateDir::W;
+    case 3:
+        return AnimateDir::SW;
+    case 4:
+        return AnimateDir::S;
+    case 5:
+        return AnimateDir::SE;
+    case 6:
+        return AnimateDir::E;
+    case 7:
+        return AnimateDir::NE;
+    case 8:
+        return AnimateDir::N;
+    }
+    return AnimateDir::N;
+}
+
+inline auto AngleFromAnimGetDir(AnimateDir dir)
+{
+    switch (dir) {
+    case AnimateDir::N:
+        return 0.0;
+    case AnimateDir::NW:
+        return 45.0;
+    case AnimateDir::W:
+        return 90.0;
+    case AnimateDir::SW:
+        return 135.0;
+    case AnimateDir::S:
+        return 180.0;
+    case AnimateDir::SE:
+        return 225.0;
+    case AnimateDir::E:
+        return 270.0;
+    case AnimateDir::NE:
+        return 315.0;
+    }
+}
 
 AnimationCommand::AnimationCommand(unsigned beats)
     : mNumBeats(beats)
@@ -91,6 +144,13 @@ AnimationCommandMT::AnimationCommandMT(unsigned beats, float direction)
     : AnimationCommand(beats)
     , dir(AnimGetDirFromAngle(direction))
     , realdir(direction)
+{
+}
+
+AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::AnimateDir direction)
+    : AnimationCommand(beats)
+    , dir(direction)
+, realdir(AngleFromAnimGetDir(direction))
 {
 }
 

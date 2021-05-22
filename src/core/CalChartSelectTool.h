@@ -21,6 +21,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * CalChart SelectTool
+ * SelectTool represent the way the selection tool that for the field, effectively the collection of points that represents
+ * the box/polygon/lasso that you use to select the points.
+ */
+
 #include "CalChartTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartShapes.h"
@@ -29,22 +35,6 @@
 #include <map>
 #include <memory>
 #include <vector>
-
-/**
- * CalChart MovePoints
- * MovePoints represent the way that a user may move Marchers around on a field.  These objects control both the shapes
- * that should be drawn to represent the move, but also the calculations on where the marchers will be after they move.
- * This allows the UI to create objects that represent how the user wants to move marchers on the field.  The "what" to draw
- * is returned by reading the ShapeList of the Move Points, and TransformPoints translates each point position to the new placement.
- *
- * Some MovePoints objects require multiple "clicks", for example like Rotate.  You would first click at the radius, then click
- * and drag around the arc.  So multiple clicks state are stored in each MovePoint.  Only when the "IsReadyForMoving" is true
- * does the TransformPoints result in meaningful data.
- *
- * Because the user may click again in a place they have clicked, we have the concept of "Done".  For example, on a rotate move
- * command the user may press on the Radius twice, for example to re-center.  So the IsDone means that this MovePoints object
- * will not handle any more "Clicks.
- */
 
 
 namespace CalChart {

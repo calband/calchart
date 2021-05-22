@@ -13,9 +13,9 @@
 #include "CalChartAnimationErrors.h"
 #include "print_ps.h"
 #include "modes.h"
-#include "cont.h"
+#include "CalChartContinuityToken.h"
 #include "docopt.h"
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 
 #include <iostream>
 #include <fstream>
@@ -132,13 +132,8 @@ void DumpContinuityText(std::string const& text)
             std::cout << *proc << "\n";
         }
     }
-    catch (ParseError const& error) {
-        AnimationErrors e;
-        // Supply a generic parse error
-        e.RegisterError(ANIMERR_SYNTAX, error.line, error.column, 0, SYMBOL_PLAIN);
-        if (e.AnyErrors()) {
-            std::cout << "Errors during compile: " << error.what() << "\n";
-        }
+    catch (std::runtime_error const& error) {
+        std::cout << "Errors during compile: " << error.what() << "\n";
     }
 }
 
@@ -198,14 +193,9 @@ void DoContinuityUnitTest(const char* test_cases)
                 parsed_continuity << *proc << "\n";
             }
         }
-        catch (ParseError const& error) {
+        catch (std::runtime_error const& error) {
             // Supply a generic parse error
-            e.RegisterError(ANIMERR_SYNTAX, error.line, error.column, 0, SYMBOL_PLAIN);
-            if (e.AnyErrors()) {
-                for (auto&& i : e.GetErrors()) {
-                    parse_errors << "Error at [" << i.second.line << "," << i.second.col << "] of type " << i.first << "\n";
-                }
-            }
+            parse_errors << "Error: "<< error.what()<<"\n";
         }
         auto parsed_cont = parsed_continuity.str();
         if ((e.AnyErrors() && parse_errors.str() != errors) || !std::equal(parsed.begin(), parsed.end(), parsed_cont.begin(), parsed_cont.end())) {

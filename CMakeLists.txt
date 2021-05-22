@@ -65,6 +65,11 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCommand.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCompile.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationCompile.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartAnimationTypes.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartContinuity.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartContinuity.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartContinuityToken.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartContinuityToken.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartImage.cpp
@@ -82,16 +87,11 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartTypes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/animate_types.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_continuity.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_continuity.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_drawcommand.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_fileformat.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_parse_errors.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cont.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cont.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/linmath.h
@@ -282,7 +282,6 @@ add_executable (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/draw_utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/GhostModule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/mode_dialog_canvas.cpp

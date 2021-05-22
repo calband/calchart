@@ -21,6 +21,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * CalChartPoint
+ *  A point in CalChart is a marcher on the field. It maintains the reference points positions, and it's positions,
+ *  as well as Symbol and some visualization information (like Flipped).
+ *
+ *  In general we should try to keep point simple, and instead have the visualization data and other concepts
+ *  maintained in the larger container, such as instrument or name, which should be per show.  Symbol should
+ *  probably be in per show, but as such the serialization code would make this difficult to restructure, so it will
+ *  likely need to continue to be in Point.
+ */
+
 #include "CalChartCoord.h"
 #include "CalChartTypes.h"
 
@@ -29,15 +40,6 @@
 #include <vector>
 
 namespace CalChart {
-
-// A point in CalChart is a marcher on the field
-// It maintains the reference points positions, and it's positions, as well as Symbol and some visualization
-// information (like Flipped).
-//
-// In general we should try to keep point simple, and instead have the visualization data and other concepts
-// maintained in the larger container, such as instrument or name, which should be per show.  Symbol should
-// probably be in per show, but as such the serialization code would make this difficult to restructure, so
-// it will likely need to continue to be in Point.
 
 class Point {
 public:

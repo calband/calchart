@@ -43,6 +43,13 @@ class Animation;
 }
 class CalChartConfiguration;
 
+enum class GhostSource {
+    disabled,
+    next,
+    previous,
+    specific,
+};
+
 using CC_doc_command = std::function<void(CalChartDoc&)>;
 using CC_doc_command_pair = std::pair<CC_doc_command, CC_doc_command>;
 
@@ -178,6 +185,11 @@ public:
     auto GetCurrentMove() const { return mCurrentMove; }
     void SetCurrentMove(CalChart::MoveMode move);
 
+    CalChart::Sheet const* GetGhostSheet(int currentSheet) const;
+    auto GetGhostModuleIsActive() const { return mGhostSource != GhostSource::disabled; }
+    auto GetGhostSource() const { return mGhostSource; };
+    void SetGhostSource(GhostSource source, int which = 0);
+    
     CalChart::ShowMode const& GetShowMode() const;
     // nullptr if there is no animation
     CalChart::Animation const* GetAnimation() const;
@@ -260,5 +272,7 @@ private:
     int mCurrentReferencePoint{};
     bool mDrawPaths{};
     bool mDrawBackground{};
+    GhostSource mGhostSource = GhostSource::disabled;
+    int mGhostSheet = 0;
     AutoSaveTimer mTimer;
 };

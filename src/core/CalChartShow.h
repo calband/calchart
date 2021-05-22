@@ -21,6 +21,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * CalChart Show
+ *
+ *  The CalChart show object is what most parts of the system interact with.  It is essentially a collection of
+ *  CalChartSheets that you iterate through to either look at, or change.
+ *
+ * Show Modification
+ *  There are a large number of functions to read the current values from the show.  However, in order to
+ *  "modify" the show, you do so by creating a Show_command_pair, which is effectively a "Do/Undo" pair of
+ *  functions that execute the desired modification.  This convention is done so that it is straightfoward to
+ *  use these in a command "stack" where in order to do or undo an action you simply call the functions.
+ *
+ */
+
 #include "cc_fileformat.h"
 #include "CalChartTypes.h"
 #include "CalChartMovePointsTool.h"
@@ -46,12 +60,6 @@ struct ParseErrorHandlers;
 using Show_command = std::function<void(Show&)>;
 using Show_command_pair = std::pair<Show_command, Show_command>;
 
-// CalChart Show
-// The CalChart show object is what most parts of the system interact with
-// It is essentially a collection of CalChartSheets that you iterate through to
-// either look at, or change.
-// A show can be loaded from a input stream
-
 class Show {
 public:
     using Sheet_container_t = std::vector<Sheet>;
@@ -74,7 +82,6 @@ public:
     ~Show();
 
 public:
-    // How we save and load a show:
     std::vector<uint8_t> SerializeShow() const;
 
     // Create command, consists of an action and undo action
@@ -122,11 +129,7 @@ public:
     std::vector<std::string> GetPointsInstrument() const;
     SYMBOL_TYPE GetPointSymbol(int i) const;
     std::vector<SYMBOL_TYPE> GetPointsSymbol() const;
-
     bool AlreadyHasPrintContinuity() const;
-
-    bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
-
     ShowMode const& GetShowMode() const;
 
     // utility
@@ -144,6 +147,7 @@ public:
     // Point selection
     auto IsSelected(int i) const { return mSelectionList.count(i) != 0; }
     auto GetSelectionList() const { return mSelectionList; }
+    bool WillMovePoints(std::map<int, Coord> const& new_positions, int ref) const;
 
     /*!
      * @brief Generates a JSON that could represent this

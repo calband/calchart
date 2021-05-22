@@ -22,7 +22,7 @@
 
 #include "CalChartShow.h"
 
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "cc_fileformat.h"
 #include "CalChartPoint.h"
 #include "CalChartShapes.h"

@@ -21,11 +21,9 @@
 */
 
 #include "CalChartDoc.h"
-#include "CalChartAnimationCompile.h"
 #include "CalChartCoord.h"
 #include "CalChartTypes.h"
 #include "BackgroundImages.h"
-#include "GhostModule.h"
 #include "modes.h"
 
 #include <map>
@@ -121,14 +119,16 @@ public:
     void SetSelect(CalChart::Select select);
     auto GetCurrentMove() const { return mShow->GetCurrentMove(); }
     void SetCurrentMove(CalChart::MoveMode move) { mShow->SetCurrentMove(move); }
+    auto GetGhostModuleIsActive() const { return mShow->GetGhostModuleIsActive(); }
+    auto GetGhostSource() const { return mShow->GetGhostSource(); };
+    void SetGhostSource(GhostSource source, int which = 0) { mShow->SetGhostSource(source, which); }
+
     void GoToSheetAndSetSelectionList(int which, const SelectionList& sl);
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
 
     ///// Drawing marcher's paths /////
     // call this when we need to generate the marcher's paths.
     void OnEnableDrawPaths(bool enable);
-
-    GhostModule& getGhostModule() { return mGhostModule; };
 
     void DoDrawBackground(bool enable);
     bool DoingDrawBackground() const;
@@ -146,9 +146,9 @@ private:
     void UpdateBackgroundImages();
 
     CalChartFrame* mFrame{};
-    GhostModule mGhostModule{};
     CalChartDoc* mShow{};
     CalChartConfiguration& mConfig;
+    // a cached version of the sheet background images for convenience.
     BackgroundImages mBackgroundImages;
 
     DECLARE_DYNAMIC_CLASS(CalChartView)

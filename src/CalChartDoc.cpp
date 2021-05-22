@@ -23,7 +23,7 @@
 #include "CalChartApp.h"
 #include "CalChartDocCommand.h"
 #include "ContinuityEditorPopup.h"
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
 #include "CalChartPoint.h"
@@ -372,6 +372,27 @@ void CalChartDoc::SetCurrentMove(CalChart::MoveMode move)
     mCurrentMove = move;
     UpdateAllViews();
 }
+
+
+CalChart::Sheet const* CalChartDoc::GetGhostSheet(int currentSheet) const
+{
+    if (!GetGhostModuleIsActive()) {
+        return nullptr;
+    }
+    auto targetSheet = (mGhostSource == GhostSource::next) ? currentSheet + 1 : (mGhostSource == GhostSource::previous) ? currentSheet - 1 : mGhostSheet;
+    if (targetSheet >= 0 && targetSheet < GetNumSheets()) {
+        return &(*(GetNthSheet(targetSheet)));
+    }
+    return nullptr;
+}
+
+void CalChartDoc::SetGhostSource(GhostSource source, int which)
+{
+    mGhostSource = source;
+    mGhostSheet = which;
+    UpdateAllViews();
+}
+
 
 const ShowMode& CalChartDoc::GetShowMode() const { return mShow->GetShowMode(); }
 

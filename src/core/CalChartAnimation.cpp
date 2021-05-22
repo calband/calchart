@@ -24,12 +24,12 @@
 #include "CalChartAnimationErrors.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "cc_drawcommand.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
-#include "cont.h"
+#include "CalChartContinuityToken.h"
 #include "math_utils.h"
 
 #define _USE_MATH_DEFINES
@@ -86,7 +86,7 @@ Animation::Animation(const Show& show)
 #endif
                 for (unsigned j = 0; j < mPoints.size(); j++) {
                     if (curr_sheet->GetSymbol(j) == current_symbol) {
-                        theCommands[j] = AnimationCompile::Compile(show, variablesStates, errors, curr_sheet, j, current_symbol, continuity);
+                        theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, current_symbol, continuity);
                     }
                 }
             }
@@ -94,7 +94,7 @@ Animation::Animation(const Show& show)
         // Handle points that don't have continuity (shouldn't happen)
         for (unsigned j = 0; j < mPoints.size(); j++) {
             if (theCommands[j].empty()) {
-                theCommands[j] = AnimationCompile::Compile(show, variablesStates, errors, curr_sheet, j, MAX_NUM_SYMBOLS, {});
+                theCommands[j] = CalChart::Compile(variablesStates, errors, curr_sheet, show.GetSheetEnd(), j, MAX_NUM_SYMBOLS, {});
             }
         }
         if (errors.AnyErrors()) {
@@ -370,7 +370,7 @@ Animation::GetCurrentInfo() const
         std::ostringstream each_string;
         auto info = GetAnimateInfo(i);
         each_string << "pt " << i << ": (" << info.mPosition.x << ", "
-                    << info.mPosition.y << "), dir=" << info.mDirection
+                    << info.mPosition.y << "), dir=" << toUType(info.mDirection)
                     << ", realdir=" << info.mRealDirection
                     << ((info.mCollision != CalChart::Coord::CollisionType::none) ? ", collision!" : "");
         each.push_back(each_string.str());

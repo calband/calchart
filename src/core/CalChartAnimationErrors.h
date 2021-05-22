@@ -21,8 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate_types.h"
-#include "cont.h"
+#include "CalChartAnimationTypes.h"
+#include "CalChartContinuityToken.h"
+#include "CalChartTypes.h"
 #include <map>
 #include <array>
 
@@ -32,6 +33,29 @@
  */
 
 namespace CalChart {
+
+enum class AnimateError {
+    OUTOFTIME,
+    EXTRATIME,
+    WRONGPLACE,
+    INVALID_CM,
+    INVALID_FNTN,
+    DIVISION_ZERO,
+    UNDEFINED,
+    SYNTAX,
+    NONINT,
+    NEGINT,
+};
+
+struct ErrorMarker {
+    SelectionList pntgroup; // which points have this error
+    SYMBOL_TYPE contsymbol = SYMBOL_PLAIN; // which continuity
+    int line = -1, col = -1; // where
+    bool operator==(ErrorMarker const& rhs) const
+    {
+        return pntgroup == rhs.pntgroup && contsymbol == rhs.contsymbol && line == rhs.line && col == rhs.col;
+    }
+};
 
 class AnimationErrors {
 public:
@@ -60,4 +84,28 @@ private:
     std::map<AnimateError, ErrorMarker> mErrorMarkers;
 };
 
+static inline auto AnimateErrorToString(AnimateError error) {
+    switch (error) {
+        case AnimateError::OUTOFTIME:
+            return "Ran out of time";
+        case AnimateError::EXTRATIME:
+            return "Not enough to do";
+        case AnimateError::WRONGPLACE:
+            return "Didn't make it to position";
+        case AnimateError::INVALID_CM:
+            return "Invalid countermarch";
+        case AnimateError::INVALID_FNTN:
+            return "Invalid fountain";
+        case AnimateError::DIVISION_ZERO:
+            return "Division by zero";
+        case AnimateError::UNDEFINED:
+            return "Undefined value";
+        case AnimateError::SYNTAX:
+            return "Syntax error";
+        case AnimateError::NONINT:
+            return "Non-integer value";
+        case AnimateError::NEGINT:
+            return "Negative value";
+    }
+}
 }

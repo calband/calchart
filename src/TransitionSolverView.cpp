@@ -12,7 +12,7 @@
 #include "CalChartDocCommand.h"
 #include "TransitionSolverFrame.h"
 #include "basic_ui.h"
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "confgr.h"

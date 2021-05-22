@@ -33,6 +33,7 @@
 #include "draw.h"
 #include "modes.h"
 #include "platconf.h"
+#include "math_utils.h"
 
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>
