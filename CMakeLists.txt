@@ -149,6 +149,7 @@ target_link_libraries (
   calchart_cmd
   calchart_core
   docopt
+  nlohmann_json::nlohmann_json
   )
 
 install (
