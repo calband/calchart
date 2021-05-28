@@ -10,6 +10,7 @@
 #include "CalChartSheet.h"
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCompile.h"
+#include "CalChartAnimationErrors.h"
 #include "print_ps.h"
 #include "modes.h"
 #include "cont.h"
@@ -48,26 +49,24 @@ void AnimateShow(const char* show)
 {
     std::ifstream input(show);
     std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
-    Animation a(*p,
-        [](const std::string& notice) { std::cout << notice << "\n"; },
-        [](const std::map<AnimateError, ErrorMarker>&, unsigned,
-            const std::string& error) {
-            std::cout << "error" << error << "\n";
-            return true;
-        });
+    Animation a(*p);
+    for (auto&& errors : a.GetAnimationErrors()) {
+        for (auto&& [key, value] : errors.GetErrors()) {
+            std::cout << "error " << key <<"\n";
+        };
+    };
 }
 
 void PrintShow(const char* show)
 {
     std::ifstream input(show);
     std::unique_ptr<Show> p(Show::Create(ShowMode::GetDefaultShowMode(), input));
-    Animation a(*p,
-        [](const std::string& notice) { std::cout << notice << "\n"; },
-        [](const std::map<AnimateError, ErrorMarker>&, unsigned,
-            const std::string& error) {
-            std::cout << "error" << error << "\n";
-            return true;
-        });
+    Animation a(*p);
+    for (auto&& errors : a.GetAnimationErrors()) {
+        for (auto&& [key, value] : errors.GetErrors()) {
+            std::cout << "error " << key <<"\n";
+        };
+    };
     a.GotoSheet(0);
     auto currentInfo = a.GetCurrentInfo();
     std::cout << currentInfo.first << "\n";
