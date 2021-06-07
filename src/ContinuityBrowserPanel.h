@@ -21,7 +21,7 @@
 */
 
 #include "CustomListViewPanel.h"
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "CalChartTypes.h"
 
 #include <wx/wx.h>

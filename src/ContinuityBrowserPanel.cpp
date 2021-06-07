@@ -22,7 +22,7 @@
 #include "ContinuityBrowserPanel.h"
 #include "CalChartView.h"
 #include "ContinuityComposerDialog.h"
-#include "cont.h"
+#include "CalChartContinuityToken.h"
 #include "cont_box_draw.h"
 
 using namespace CalChart;

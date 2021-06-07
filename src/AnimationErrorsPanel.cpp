@@ -124,7 +124,7 @@ void AnimationErrorsPanel::UpdateErrors(std::vector<CalChart::AnimationErrors> c
     // now if we have any, create an error node, and then start filling it up.
     if (allErrors.size()) {
         for (auto&& errorType : allErrors) {
-            auto itemId1 = mTreeCtrl->AppendItem(mTreeCtrl->GetRootItem(), CalChart::s_animate_err_msgs[errorType.first], 0, 0);
+            auto itemId1 = mTreeCtrl->AppendItem(mTreeCtrl->GetRootItem(), CalChart::AnimateErrorToString(errorType.first), 0, 0);
             for (auto&& error : errorType.second) {
                 auto itemId2 = mTreeCtrl->AppendItem(itemId1, std::string("Sheet ") + std::to_string(std::get<0>(error)));
                 // now we need to be able to get back to the errors and select things

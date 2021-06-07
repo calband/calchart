@@ -21,13 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartCoord.h"
-
-#include <functional>
-#include <map>
-#include <memory>
-#include <vector>
-
 /**
  * CalChart MovePoints
  * MovePoints represent the way that a user may move Marchers around on a field.  These objects control both the shapes
@@ -43,6 +36,13 @@
  * command the user may press on the Radius twice, for example to re-center.  So the IsDone means that this MovePoints object
  * will not handle any more "Clicks.
  */
+
+#include "CalChartCoord.h"
+
+#include <functional>
+#include <map>
+#include <memory>
+#include <vector>
 
 
 namespace CalChart {

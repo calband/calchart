@@ -29,7 +29,7 @@
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "confgr.h"
-#include "cont.h"
+#include "CalChartContinuityToken.h"
 #include "draw.h"
 #include "mode_dialog.h"
 #include "mode_dialog_canvas.h"

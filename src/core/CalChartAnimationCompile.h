@@ -1,7 +1,7 @@
 #pragma once
 /*
- * CalChartAnimation.h
- * Classes for animating shows
+ * CalChartAnimationCompile.h
+ * Classes for compiling the animation command
  */
 
 /*
@@ -21,8 +21,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * AnimationCompile
+ *
+ * Compiling the animation is the way we get from a show layout with a set of continuities to the actual
+ * movements of marchers on the field.  Effectively what we are doing is mapping the ContinuityProceedures
+ * on to the Show in order to get the vector of AnimationCommands.
+ *
+ * ContinuityValues and Points are abstract concepts.  They represent the concept of a point or value.  In order
+ * to go from the concept to a specific value, they need to be given a state that represents the show.  The
+ * AnimationCompile object represents the portion of the show that is being converted from an abstract concept
+ * (the StartPoint for example) to a specific value (the position of a specific marcher on the field.
+ *
+ */
+
 #include "CalChartAnimation.h"
-#include "animate_types.h"
+#include "CalChartAnimationErrors.h"
+#include "CalChartAnimationTypes.h"
 #include "CalChartShow.h"
 
 #include <array>
@@ -38,47 +53,32 @@ class AnimationCommand;
 using AnimationVariables = std::array<std::map<unsigned, float>, NUMCONTVARS>;
 using AnimationCommands = std::vector<std::shared_ptr<AnimationCommand>>;
 
-struct AnimateState {
-    Coord pt;
-    unsigned beats_rem;
-    AnimationVariables& mVars;
-    AnimationErrors& error_markers;
-    AnimationCommands cmds;
-};
+// Compile a point into the Animation Commands
+// Variables and Errors are passed as references as they maintain state over all the compiles,
+// and unfortunately, it is faster to pass them this way.
+AnimationCommands
+Compile(
+    AnimationVariables& variablesStates,
+    AnimationErrors& errors,
+    Show::const_Sheet_iterator_t c_sheet,
+    Show::const_Sheet_iterator_t endSheet,
+    unsigned pt_num,
+    SYMBOL_TYPE cont_symbol,
+    std::vector<std::unique_ptr<ContProcedure>> const& proc);
 
-class AnimationCompile {
-public:
-    // Compile a point
-    static AnimationCommands
-    Compile(const Show& show, AnimationVariables& variablesStates,
-        AnimationErrors& errors, Show::const_Sheet_iterator_t c_sheet,
-        unsigned pt_num, SYMBOL_TYPE cont_symbol,
-        std::vector<std::unique_ptr<ContProcedure>> const& proc);
+struct AnimationCompile {
+    virtual bool Append(std::unique_ptr<AnimationCommand> cmd, ContToken const* token) = 0;
+    virtual void RegisterError(AnimateError err, ContToken const* token) const = 0;
 
-private:
-    AnimationCompile(const Show& show, SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, AnimateState& state);
-
-public:
-    bool Append(std::shared_ptr<AnimationCommand> cmd, const ContToken* token);
-    void RegisterError(AnimateError err, const ContToken* token) const;
-
-    float GetVarValue(int varnum, const ContToken* token) const;
-    void SetVarValue(int varnum, float value);
+    virtual float GetVarValue(int varnum, ContToken const* token) const = 0;
+    virtual void SetVarValue(int varnum, float value) = 0;
 
     // helper functions to get information for building a command
-    auto GetPointPosition() const { return mState.pt; }
-    auto GetCurrentPoint() const { return curr_pt; }
-    auto GetBeatsRemaining() const { return mState.beats_rem; }
-    Coord GetStartingPosition() const;
-    Coord GetEndingPosition(const ContToken* token) const;
-    Coord GetReferencePointPosition(unsigned refnum) const;
-
-private:
-    const Show& mShow;
-    const SYMBOL_TYPE contsymbol;
-    const unsigned curr_pt;
-    const Show::const_Sheet_iterator_t curr_sheet;
-
-    AnimateState& mState;
+    virtual Coord GetPointPosition() const = 0;
+    virtual Coord GetStartingPosition() const = 0;
+    virtual Coord GetEndingPosition(ContToken const* token) const = 0;
+    virtual Coord GetReferencePointPosition(unsigned refnum) const = 0;
+    virtual unsigned GetCurrentPoint() const = 0;
+    virtual unsigned GetBeatsRemaining() const = 0;
 };
 }

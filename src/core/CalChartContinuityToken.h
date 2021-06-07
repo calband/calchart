@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cont.h
+ * CalChartContinuityToken.h
  * Classes for continuity
  */
 
@@ -21,22 +21,67 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * CalChartContinuityToken
+ *
+ *  Continuities in CalChart are quite complicated as we want to provide a flexible data structure that can represent a number of
+ *  different realizations.  To illustrate, we would want to have a data structure that could be used for the continuity "Mark Time 8
+ *  in the direction of the last flow" as well as "Mark Time remaining facing East".  This is accomplished by having a data structure
+ *  of "tokens" that can represent different parts of the continuity "sentance".
+ *
+ *  To accomplish this "abstract syntax tree" data structure we have the basic concept of a ContinuityToken, which is the basic
+ *  parsing unit.  The ContinuityToken can have a "parent" which allows bidirectional searching of the tree (any node can then reach
+ *  each other node).  We then have these continuity specialization "types"
+ *
+ *      procedure : A ContinuityToken that represents a continuity that a marcher will follow.
+ *      value : A ContinuityToken that represents a specific Value, like a float
+ *      function : A ContValue that has composes one or more ContValues for a new Value.
+ *      direction : A ContValue that is specifically a Direction.
+ *      steptype : A ContValue that is specifically a step type.
+ *      point : A ContinuityToken that represents a Point on the field.
+ *      unset : A special ContinuityToken that represents that the type has not yet been specified.
+ *
+ *  With these building blocks we can represent a large number of continuities.  For example, let's say that the continuity we would
+ *  like to describe is "Mark Time East for the number of beats a reference point would take to reach this location", typical of a step drill.
+ *  This would be represented as:
+ *
+ * ContProcMT ( ContFuncDistFrom ( ContStartPoint , ContRefPoint(1) ) , ContValue ( E ) ) )
+ *
+ *  In a tree view this would look something like:
+ *
+ *               ContProcMT
+ *                 /              \
+ *      ContFuncDistFrom       ContValue(E)
+ *         /         \
+ * ContStartPoint  ContRefPoint(1)
+ *
+ *  As each part of the tree is a ContinuityToken, creating drawing representation can be done in a straightforward recursive way, with
+ *  each ContinuityToken specialization simply calling the drawing of each of it's nodes.
+ *
+ * Get(AnimationCompile):
+ *  ContPoint and ContValue need to be able to supply an actual value.  But because these are abstract representations of a point or value,
+ *  they need actual state to act upon.  The AnimationCompile object represents the portion of the show that is being converted from an
+ *  abstract concept (the StartPoint for example) to a specific value (the position of a specific marcher on the field.
+ *
+ * Memory Considerations:
+ *  Memory ownership of each node is done by it's parent.  That means that when a new node is inserted, memory ownership should
+ *  be transfered to the parent, which may require "setting" the parent node.  In addition, when a Continuity needs to be "copied", it
+ *  should be "cloned" into a new datastructure to preserve the runtime data structure.
+ *
+ * Serialization and Deserialization
+ *  In order to be saved and restored from a file, the continuites need to be able to be serailized and deserialized.  Serialization is
+ *  straight forward; each object can serialize itself and it's children into a vector of bytes.  Deserializtion is a little more complicated.
+ *  Essentially we give the object a pointer to the beginning of a datablob and the end.  It will deserialize members and from the data,
+ *  and return the data pointer where it ended the parse.  If at the conclusion of the process, if the data pointer end and the original end
+ *  match, it was a good parse
+ */
+
 #include "CalChartCoord.h"
 
 #include <iosfwd>
 #include <memory>
 #include <string>
 #include <vector>
-
-// what follows it effectively the Abstract Syntax Tree for CalChart continuities.
-//
-// Everything derives from a ContToken, which is the basic parsing unit.
-// To make the objects more "value" type, there is a clone and is_equal function they
-// all implement.
-// We use boost::serialize to archive and restore these objects.
-// We have both raw pointer constructors and unique_ptr constructors.
-// The raw pointer constructors come from the cont parser, and implies that the newly
-// formed objects owns the pointers it was given
 
 namespace CalChart {
 
@@ -69,7 +114,7 @@ enum class ContType {
 };
 
 class ContToken;
-class AnimationCompile;
+struct AnimationCompile;
 
 // DrawableCont is a structure that describes the continuity for drawing
 struct DrawableCont {
@@ -80,15 +125,6 @@ struct DrawableCont {
     std::string short_description;
     std::vector<DrawableCont> args;
 };
-
-// A note about serialization/deserialation.
-// Serialization is straight forward; each object can serialize itself, members
-// and parents into a vector of bytes.
-// Deserializtion is a little more complicated.  Essentially we give the
-// object a pointer to the beginning of a datablob and the end.  It will deserialize
-// members and super objects into it.  It returns where it ended.  If at the end
-// where it ends is the actual end, it was a good parse
-//
 
 class ContToken {
 public:
@@ -128,7 +164,7 @@ class ContPoint : public ContToken {
 
 public:
     ContPoint() = default;
-    virtual Coord Get(AnimationCompile& anim) const;
+    virtual Coord Get(AnimationCompile const& anim) const;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const;
     virtual std::unique_ptr<ContPoint> clone() const;
@@ -161,7 +197,7 @@ class ContStartPoint : public ContPoint {
 
 public:
     ContStartPoint() = default;
-    virtual Coord Get(AnimationCompile& anim) const override;
+    virtual Coord Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
@@ -182,7 +218,7 @@ class ContNextPoint : public ContPoint {
 
 public:
     ContNextPoint() = default;
-    virtual Coord Get(AnimationCompile& anim) const override;
+    virtual Coord Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
@@ -204,7 +240,7 @@ class ContRefPoint : public ContPoint {
 public:
     ContRefPoint() = default;
     ContRefPoint(unsigned n);
-    virtual Coord Get(AnimationCompile& anim) const override;
+    virtual Coord Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContPoint> clone() const override;
@@ -227,7 +263,7 @@ class ContValue : public ContToken {
 
 public:
     ContValue() = default;
-    virtual float Get(AnimationCompile& anim) const = 0;
+    virtual float Get(AnimationCompile const& anim) const = 0;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const = 0;
     virtual std::unique_ptr<ContValue> clone() const = 0;
@@ -240,7 +276,7 @@ class ContValueUnset : public ContValue {
     using super = ContValue;
 
 public:
-    virtual float Get(AnimationCompile&) const override { return 0; }
+    virtual float Get(AnimationCompile const&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -255,7 +291,7 @@ class ContValueFloat : public ContValue {
 public:
     ContValueFloat() = default;
     ContValueFloat(float v);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -279,7 +315,7 @@ class ContValueDefined : public ContValue {
 public:
     ContValueDefined() = default;
     ContValueDefined(ContDefinedValue v);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -304,7 +340,7 @@ public:
     ContValueAdd() = default;
     ContValueAdd(ContValue* v1, ContValue* v2);
     ContValueAdd(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -332,7 +368,7 @@ public:
     ContValueSub() = default;
     ContValueSub(ContValue* v1, ContValue* v2);
     ContValueSub(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -360,7 +396,7 @@ public:
     ContValueMult() = default;
     ContValueMult(ContValue* v1, ContValue* v2);
     ContValueMult(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -388,7 +424,7 @@ public:
     ContValueDiv() = default;
     ContValueDiv(ContValue* v1, ContValue* v2);
     ContValueDiv(std::unique_ptr<ContValue> v1, std::unique_ptr<ContValue> v2);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -416,7 +452,7 @@ public:
     ContValueNeg() = default;
     ContValueNeg(ContValue* v);
     ContValueNeg(std::unique_ptr<ContValue> v);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -440,7 +476,7 @@ class ContValueREM : public ContValue {
     using super = ContValue;
 
 public:
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -462,7 +498,7 @@ class ContValueVar : public ContValue {
 public:
     ContValueVar() = default;
     ContValueVar(unsigned num);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     void Set(AnimationCompile& anim, float v);
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
@@ -485,7 +521,7 @@ class ContValueVarUnset : public ContValueVar {
     using super = ContValueVar;
 
 public:
-    virtual float Get(AnimationCompile&) const override { return 0; }
+    virtual float Get(AnimationCompile const&) const override { return 0; }
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -501,7 +537,7 @@ public:
     ContFuncDir() = default;
     ContFuncDir(ContPoint* p);
     ContFuncDir(std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -528,7 +564,7 @@ public:
     ContFuncDirFrom() = default;
     ContFuncDirFrom(ContPoint* start, ContPoint* end);
     ContFuncDirFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -556,7 +592,7 @@ public:
     ContFuncDist() = default;
     ContFuncDist(ContPoint* p);
     ContFuncDist(std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -583,7 +619,7 @@ public:
     ContFuncDistFrom() = default;
     ContFuncDistFrom(ContPoint* start, ContPoint* end);
     ContFuncDistFrom(std::unique_ptr<ContPoint> start, std::unique_ptr<ContPoint> end);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -611,7 +647,7 @@ public:
     ContFuncEither() = default;
     ContFuncEither(ContValue* d1, ContValue* d2, ContPoint* p);
     ContFuncEither(std::unique_ptr<ContValue> d1, std::unique_ptr<ContValue> d2, std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -640,7 +676,7 @@ public:
     ContFuncOpp() = default;
     ContFuncOpp(ContValue* d);
     ContFuncOpp(std::unique_ptr<ContValue> d);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;
@@ -667,7 +703,7 @@ public:
     ContFuncStep() = default;
     ContFuncStep(ContValue* beats, ContValue* blocksize, ContPoint* p);
     ContFuncStep(std::unique_ptr<ContValue> beats, std::unique_ptr<ContValue> blocksize, std::unique_ptr<ContPoint> p);
-    virtual float Get(AnimationCompile& anim) const override;
+    virtual float Get(AnimationCompile const& anim) const override;
     virtual std::ostream& Print(std::ostream&) const override;
     virtual DrawableCont GetDrawableCont() const override;
     virtual std::unique_ptr<ContValue> clone() const override;

@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cc_continuity.h
+ * CalChartContinuity.h
  * Definitions for the continuity classes
  */
 
@@ -21,7 +21,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cont.h"
+/**
+ * CalChartContinuity
+ *
+ * CalChart::Continuity represents the continuity for a specific squad of marchers.  In CalChart3.6 and earlier, Continuity was represent
+ * as a list of marching commands in text that would then be parsed into an abstract syntax tree of ContProcedures.  In newer versions
+ * the data structure is created via the Continuity Composer.
+ *
+ * CalChartContinuity requires that the ContProcedures it holds to be valid objects.  Because the CalChart string represented in older
+ * calchart files may not parse correctly, we provide a way that upon detection of error that the procedure can be "re-written".  This allows
+ * us to have the user attempt to correct a unusal CalChart syntax before we "give up".
+ *
+ */
+
+#include "CalChartContinuityToken.h"
 
 #include <stdexcept>
 #include <string>
@@ -32,19 +45,9 @@ namespace CalChart {
 class ContProcedure;
 struct ParseErrorHandlers;
 
-struct ParseError : public std::runtime_error {
-    ParseError(std::string const& str, int l, int c)
-        : std::runtime_error(std::string("ParseError of ") + str + " at " + std::to_string(l) + ", " + std::to_string(c))
-        , line(l)
-        , column(c)
-    {
-    }
-    int line, column;
-};
-
 class Continuity {
 public:
-    // this could throw ParseError
+    // this could throw runtime_error on bad parses.
     Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
     Continuity(std::vector<std::unique_ptr<ContProcedure>>);
     Continuity(std::vector<uint8_t> const&);
@@ -68,9 +71,6 @@ public:
     friend bool operator==(Continuity const& lhs, Continuity const& rhs);
 
 private:
-    static std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correction = nullptr);
-    static std::vector<std::unique_ptr<ContProcedure>> Deserialize(std::vector<uint8_t> const&);
-
     std::vector<std::unique_ptr<ContProcedure>> m_parsedContinuity;
     std::string m_legacyText;
 

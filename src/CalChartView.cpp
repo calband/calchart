@@ -30,7 +30,6 @@
 #include "SetupMarchers.h"
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
-#include "CalChartAnimationCompile.h"
 #include "BackgroundImages.h"
 #include "cc_drawcommand.h"
 #include "CalChartShapes.h"
@@ -74,7 +73,7 @@ void CalChartView::OnDraw(wxDC* dc)
         auto origin = mShow->GetShowMode().Offset();
         DrawMode(*dc, mConfig, mShow->GetShowMode(), ShowMode_kFieldView);
 
-        auto ghostSheet = mGhostModule.getGhostSheet(mShow, GetCurrentSheetNum());
+        auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum());
 
         if (ghostSheet != nullptr) {
             DrawGhostSheet(*dc, mConfig, origin, SelectionList(),

@@ -21,7 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cont.h"
+#include "CalChartContinuityToken.h"
 #include "parse.h"
 #include "contgram.hpp"
 

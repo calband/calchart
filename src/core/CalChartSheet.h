@@ -21,8 +21,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * CalChart Sheet
+ *
+ *  The CalChart sheet object is a collection of CC_point locations, the number of beats and the different marcher's continuity.
+ *
+ */
+
 #include "CalChartAnimation.h"
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "cc_fileformat.h"
 #include "CalChartImage.h"
 #include "CalChartPoint.h"
@@ -33,10 +40,6 @@
 #include <set>
 #include <string>
 #include <vector>
-
-// CalChart Sheet
-// The CalChart sheet object is a collection of CC_point locations, the number
-// of beats and the different marcher's continuity.
 
 namespace CalChart {
 

@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartAnimationCompile.h"
+#include "CalChartAnimationErrors.h"
 
 #include <map>
 #include <vector>

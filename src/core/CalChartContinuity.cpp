@@ -20,22 +20,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_continuity.h"
+#include "CalChartContinuity.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
-#include "cont.h"
+#include "CalChartContinuityToken.h"
 #include "parse.h"
 #include <assert.h>
 #include <sstream>
 
+// These are the "magic" global variables that are in contgram and contscan.
+// The are the data objects used by the lexer and parser of the older calchart syntax.
 extern int parsecontinuity();
 extern const char* yyinputbuffer;
 extern std::vector<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
 
 namespace CalChart {
 
-std::vector<std::unique_ptr<ContProcedure>>
-Continuity::ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
+// if any errors happen during parse, a ParseError may be thrown.
+std::runtime_error ParseError(std::string const& str, int l, int c)
+{
+    return std::runtime_error{ std::string("ParseError of ") + str + " at " + std::to_string(l) + ", " + std::to_string(c) };
+}
+
+std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
 {
     std::string thisParse = s;
     while (1) {
@@ -54,8 +61,7 @@ Continuity::ParseContinuity(std::string const& s, ParseErrorHandlers const* corr
     }
 }
 
-std::vector<std::unique_ptr<ContProcedure>>
-Continuity::Deserialize(std::vector<uint8_t> const& data)
+std::vector<std::unique_ptr<ContProcedure>> Deserialize(std::vector<uint8_t> const& data)
 {
     auto result = std::vector<std::unique_ptr<ContProcedure>>{};
 
@@ -93,7 +99,7 @@ Continuity::Continuity(std::vector<std::unique_ptr<ContProcedure>> from_cont)
 }
 
 Continuity::Continuity(std::vector<uint8_t> const& data)
-    : m_parsedContinuity(Continuity::Deserialize(data))
+    : m_parsedContinuity(Deserialize(data))
 {
 }
 

@@ -323,8 +323,6 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     menu_bar->Append(help_menu, wxT("&Help"));
     SetMenuBar(menu_bar);
 
-    refreshGhostOptionStates();
-
     // Add a toolbar
     mSelectAndMoveToolBar = CreateSelectAndMoves(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW);
     mSelectAndMoveToolBar->SetFont(ResizeFont(mSelectAndMoveToolBar->GetFont(), GetToolBarFontSize()));
@@ -416,6 +414,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view,
     // Update the tool bar
     SetCurrentSelect(mCanvas->GetCurrentSelect());
     SetCurrentMove(mCanvas->GetCurrentMove());
+    refreshGhostOptionStates();
 
     // Show the frame
     OnUpdate();
@@ -1003,34 +1002,28 @@ void CalChartFrame::OnCmd_ShowBackgroundImages(wxCommandEvent& event)
 void CalChartFrame::OnCmd_GhostOption(wxCommandEvent& event)
 {
     auto selection = static_cast<wxChoice*>(FindWindow(CALCHART__GhostControls))->GetSelection();
-    auto which_option = (event.GetId() == CALCHART__GhostControls) ? selection : (event.GetId() == CALCHART__GhostOff) ? 0
+    auto which_option = (event.GetId() == CALCHART__GhostControls) ? selection
+        : (event.GetId() == CALCHART__GhostOff) ? 0
         : (event.GetId() == CALCHART__GhostNextSheet)                                                                  ? 1
         : (event.GetId() == CALCHART__GhostPreviousSheet)                                                              ? 2
                                                                                                                        : 3;
     switch (which_option) {
     case 0:
-        GetFieldView()->getGhostModule().setGhostSource(GhostSource::disabled);
-        FieldControls::SetGhostChoice(mControls, 0);
+        GetFieldView()->SetGhostSource(GhostSource::disabled);
         break;
     case 1:
-        GetFieldView()->getGhostModule().setGhostSource(GhostSource::next);
-        FieldControls::SetGhostChoice(mControls, 1);
+        GetFieldView()->SetGhostSource(GhostSource::next);
         break;
     case 2:
-        GetFieldView()->getGhostModule().setGhostSource(GhostSource::previous);
-        FieldControls::SetGhostChoice(mControls, 2);
+        GetFieldView()->SetGhostSource(GhostSource::previous);
         break;
     case 3: {
-        wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:",
-            "Ghost Sheet", "1", this);
+        wxString targetSheet = wxGetTextFromUser("Enter the sheet number to ghost:", "Ghost Sheet", "1", this);
         long targetSheetNum = 0;
         if (targetSheet.ToLong(&targetSheetNum)) {
-            GetFieldView()->getGhostModule().setGhostSource(GhostSource::specific,
-                static_cast<int>(targetSheetNum) - 1);
-            FieldControls::SetGhostChoice(mControls, 3);
+            GetFieldView()->SetGhostSource(GhostSource::specific, static_cast<int>(targetSheetNum) - 1);
         } else {
-            wxMessageBox(wxT("The input must be a number."),
-                wxT("Operation failed."));
+            wxMessageBox("The input must be a number.", "Operation failed.");
         }
     } break;
     }
@@ -1067,8 +1060,9 @@ void CalChartFrame::OnCmd_MarcherSelection(wxCommandEvent& event)
 
 void CalChartFrame::refreshGhostOptionStates()
 {
-    bool active = GetFieldView()->getGhostModule().isActive();
+    bool active = GetFieldView()->GetGhostModuleIsActive();
     GetMenuBar()->FindItem(CALCHART__GhostOff)->Enable(active);
+    FieldControls::SetGhostChoice(mControls, static_cast<int>(GetFieldView()->GetGhostSource()));
 }
 
 void CalChartFrame::refreshInUse()

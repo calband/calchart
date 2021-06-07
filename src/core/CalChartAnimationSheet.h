@@ -21,9 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "animate_types.h"
+#include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 
+#include <string>
 #include <vector>
 
 /**
