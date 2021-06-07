@@ -23,15 +23,14 @@
 #include "FieldCanvas.h"
 
 #include "CalChartFrame.h"
+#include "CalChartMovePointsTool.h"
+#include "CalChartShapes.h"
 #include "CalChartView.h"
 #include "cc_drawcommand.h"
-#include "CalChartShapes.h"
 #include "confgr.h"
 #include "draw.h"
-#include "CalChartMovePointsTool.h"
 
 #include <wx/dcbuffer.h>
-
 
 static inline auto TranslateMouseToCoord(wxClientDC& dc, wxMouseEvent& event)
 {
@@ -154,7 +153,7 @@ void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, Cal
 }
 
 // We have a empty erase background to improve redraw performance.
-void FieldCanvas::OnEraseBackground(wxEraseEvent& event) {}
+void FieldCanvas::OnEraseBackground(wxEraseEvent& event) { }
 
 // When a left click down occurs:
 // We could be doing picture adjustments, so handle that first
@@ -334,8 +333,7 @@ void FieldCanvas::OnMouseMove(wxMouseEvent& event)
     auto pos = mousePos - mView->GetShowFieldOffset();
 
     // if we are dragging with the left mouse down OR we are moving with the poly selection tool
-    if ((event.Dragging() && event.LeftIsDown()) ||
-        (event.Moving() && mSelectTool && (CalChart::Select::Poly == mView->GetSelect()))) {
+    if ((event.Dragging() && event.LeftIsDown()) || (event.Moving() && mSelectTool && (CalChart::Select::Poly == mView->GetSelect()))) {
         MoveDrag(pos);
     }
     Refresh();
@@ -388,14 +386,11 @@ void FieldCanvas::OnChar(wxKeyEvent& event)
     }
     if (event.GetKeyCode() == 'w') {
         MoveByKey(direction::north);
-    }
-    else if (event.GetKeyCode() == 'd') {
+    } else if (event.GetKeyCode() == 'd') {
         MoveByKey(direction::east);
-    }
-    else if (event.GetKeyCode() == 's') {
+    } else if (event.GetKeyCode() == 's') {
         MoveByKey(direction::south);
-    }
-    else if (event.GetKeyCode() == 'a') {
+    } else if (event.GetKeyCode() == 'a') {
         MoveByKey(direction::west);
     } else
         event.Skip();

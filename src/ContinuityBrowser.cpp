@@ -22,10 +22,10 @@
 
 #include "ContinuityBrowser.h"
 #include "CalChartApp.h"
+#include "CalChartSheet.h"
 #include "CalChartView.h"
 #include "ContinuityBrowserPanel.h"
 #include "basic_ui.h"
-#include "CalChartSheet.h"
 #include "confgr.h"
 
 #include <wx/artprov.h>

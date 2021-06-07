@@ -20,20 +20,20 @@
 */
 
 #include "CalChartView.h"
+#include "BackgroundImages.h"
+#include "CalChartAnimation.h"
+#include "CalChartAnimationCommand.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
 #include "CalChartFrame.h"
-#include "CalChartAnimationErrors.h"
+#include "CalChartShapes.h"
+#include "CalChartSheet.h"
 #include "FieldCanvas.h"
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
-#include "CalChartAnimation.h"
-#include "CalChartAnimationCommand.h"
-#include "BackgroundImages.h"
 #include "cc_drawcommand.h"
-#include "CalChartShapes.h"
-#include "CalChartSheet.h"
 #include "confgr.h"
 #include "draw.h"
 #include "setup_wizards.h"
@@ -598,7 +598,7 @@ void CalChartView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
 void CalChartView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
     if (auto result = mBackgroundImages.OnMouseLeftUp(event, dc); result) {
-        auto [ index, resultArray ] = *result;
+        auto [index, resultArray] = *result;
         auto cmd = mShow->Create_MoveBackgroundImageCommand(index, std::get<0>(resultArray), std::get<1>(resultArray), std::get<2>(resultArray), std::get<3>(resultArray));
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     }

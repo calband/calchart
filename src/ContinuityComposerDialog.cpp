@@ -16,12 +16,12 @@
 */
 
 #include "ContinuityComposerDialog.h"
-#include "CustomListViewPanel.h"
 #include "CalChartAnimationTypes.h"
-#include "basic_ui.h"
 #include "CalChartContinuity.h"
-#include "confgr.h"
 #include "CalChartContinuityToken.h"
+#include "CustomListViewPanel.h"
+#include "basic_ui.h"
+#include "confgr.h"
 #include "cont_box_draw.h"
 
 class ContinuityComposerCanvas : public CustomListViewPanel {

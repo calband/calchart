@@ -35,14 +35,14 @@ SelectTool::SelectTool(CalChart::Select select, CalChart::Coord start, std::func
     // Factory for creating a specific move.
     switch (select) {
     case CalChart::Select::Box:
-            mLassoShape = std::make_unique<CalChart::Shape_rect>(start);
+        mLassoShape = std::make_unique<CalChart::Shape_rect>(start);
         break;
     case CalChart::Select::Poly:
-            mLassoShape = std::make_unique<CalChart::Poly>(start);
-            mSelectComplete = false;
+        mLassoShape = std::make_unique<CalChart::Poly>(start);
+        mSelectComplete = false;
         break;
     case CalChart::Select::Lasso:
-            mLassoShape = std::make_unique<CalChart::Lasso>(start);
+        mLassoShape = std::make_unique<CalChart::Lasso>(start);
         break;
     default:
         break;
@@ -59,7 +59,7 @@ void SelectTool::OnMove(CalChart::Coord p, CalChart::Coord snapped_p)
 void SelectTool::OnClickUp(CalChart::Coord pos)
 {
     if (mSelect != CalChart::Select::Poly) {
-        return ;
+        return;
     }
     static constexpr auto CLOSE_ENOUGH_TO_CLOSE = 10;
     auto* p = ((CalChart::Lasso*)mLassoShape.get())->FirstPoint();

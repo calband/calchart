@@ -39,8 +39,7 @@ class ShowMode;
 DECLARE_APP(CalChartApp)
 
 // Define a new application
-class CalChartApp : public wxApp
-{
+class CalChartApp : public wxApp {
 public:
     virtual bool OnInit() override;
     int OnExit() override;

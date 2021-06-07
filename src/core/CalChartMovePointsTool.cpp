@@ -121,31 +121,31 @@ public:
 std::unique_ptr<MovePointsTool> MovePointsTool::Create(CalChart::MoveMode curr_move)
 {
     switch (curr_move) {
-        case CalChart::MoveMode::Normal:
+    case CalChart::MoveMode::Normal:
         return std::make_unique<MovePointsTool_Normal>();
-        case CalChart::MoveMode::ShapeLine:
+    case CalChart::MoveMode::ShapeLine:
         return std::make_unique<MovePointsTool_ShapeLine>();
-        case CalChart::MoveMode::ShapeX:
+    case CalChart::MoveMode::ShapeX:
         return std::make_unique<MovePointsTool_ShapeX>();
-        case CalChart::MoveMode::ShapeCross:
+    case CalChart::MoveMode::ShapeCross:
         return std::make_unique<MovePointsTool_ShapeCross>();
-        case CalChart::MoveMode::ShapeRectange:
+    case CalChart::MoveMode::ShapeRectange:
         return std::make_unique<MovePointsTool_ShapeRectangle>();
-        case CalChart::MoveMode::ShapeEllipse:
+    case CalChart::MoveMode::ShapeEllipse:
         return std::make_unique<MovePointsTool_ShapeEllipse>();
-        case CalChart::MoveMode::ShapeDraw:
+    case CalChart::MoveMode::ShapeDraw:
         return std::make_unique<MovePointsTool_ShapeDraw>();
-        case CalChart::MoveMode::MoveLine:
+    case CalChart::MoveMode::MoveLine:
         return std::make_unique<MovePointsTool_MoveLine>();
-        case CalChart::MoveMode::MoveRotate:
+    case CalChart::MoveMode::MoveRotate:
         return std::make_unique<MovePointsTool_MoveRotate>();
-        case CalChart::MoveMode::MoveShear:
+    case CalChart::MoveMode::MoveShear:
         return std::make_unique<MovePointsTool_MoveShear>();
-        case CalChart::MoveMode::MoveReflect:
+    case CalChart::MoveMode::MoveReflect:
         return std::make_unique<MovePointsTool_MoveReflect>();
-        case CalChart::MoveMode::MoveSize:
+    case CalChart::MoveMode::MoveSize:
         return std::make_unique<MovePointsTool_MoveSize>();
-        case CalChart::MoveMode::MoveGenius:
+    case CalChart::MoveMode::MoveGenius:
         return std::make_unique<MovePointsTool_MoveGenius>();
     }
 }

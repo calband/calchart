@@ -25,11 +25,16 @@
 
 #include "CalChartFrame.h"
 
-#include "CalChartAnimationErrors.h"
 #include "AnimationErrorsPanel.h"
 #include "AnimationPanel.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
+#include "CalChartCoord.h"
+#include "CalChartPoint.h"
 #include "CalChartPreferences.h"
+#include "CalChartSheet.h"
+#include "CalChartShow.h"
+#include "CalChartSplash.h"
 #include "CalChartToolBar.h"
 #include "CalChartView.h"
 #include "ColorPalette.h"
@@ -39,23 +44,18 @@
 #include "FieldThumbnailBrowser.h"
 #include "PointPicker.h"
 #include "PrintContinuityEditor.h"
+#include "PrintPostScriptDialog.h"
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
-#include "CalChartSplash.h"
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
-#include "CalChartCoord.h"
 #include "cc_fileformat.h"
-#include "CalChartPoint.h"
-#include "CalChartSheet.h"
-#include "CalChartShow.h"
 #include "ccvers.h"
 #include "confgr.h"
 #include "draw.h"
 #include "mode_dialog.h"
 #include "modes.h"
 #include "platconf.h"
-#include "PrintPostScriptDialog.h"
 #include "ui_enums.h"
 
 #include <wx/help.h>
@@ -83,7 +83,7 @@ static std::map<int, std::string> kAUIEnumToString = {
     { CALCHART__ViewMarcherToolBar, "Marcher ToolBar" },
 };
 
-template<typename E>
+template <typename E>
 constexpr auto toUType(E enumerator)
 {
     return static_cast<std::underlying_type_t<E>>(enumerator);
@@ -1003,10 +1003,10 @@ void CalChartFrame::OnCmd_GhostOption(wxCommandEvent& event)
 {
     auto selection = static_cast<wxChoice*>(FindWindow(CALCHART__GhostControls))->GetSelection();
     auto which_option = (event.GetId() == CALCHART__GhostControls) ? selection
-        : (event.GetId() == CALCHART__GhostOff) ? 0
-        : (event.GetId() == CALCHART__GhostNextSheet)                                                                  ? 1
-        : (event.GetId() == CALCHART__GhostPreviousSheet)                                                              ? 2
-                                                                                                                       : 3;
+        : (event.GetId() == CALCHART__GhostOff)                    ? 0
+        : (event.GetId() == CALCHART__GhostNextSheet)              ? 1
+        : (event.GetId() == CALCHART__GhostPreviousSheet)          ? 2
+                                                                   : 3;
     switch (which_option) {
     case 0:
         GetFieldView()->SetGhostSource(GhostSource::disabled);
@@ -1181,9 +1181,9 @@ void CalChartFrame::SetCurrentSelect(CalChart::Select select)
 {
     // retoggle the tool because we want it to draw as selected
     int toggleID = (select == CalChart::Select::Poly) ? CALCHART__poly
-        : (select == CalChart::Select::Lasso) ? CALCHART__lasso
-        : (select == CalChart::Select::Swap) ? CALCHART__swap
-        : CALCHART__box;
+        : (select == CalChart::Select::Lasso)         ? CALCHART__lasso
+        : (select == CalChart::Select::Swap)          ? CALCHART__swap
+                                                      : CALCHART__box;
     mSelectAndMoveToolBar->ToggleTool(toggleID, true);
 
     mCanvas->SetCurrentSelect(select);

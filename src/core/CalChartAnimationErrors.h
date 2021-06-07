@@ -24,8 +24,8 @@
 #include "CalChartAnimationTypes.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartTypes.h"
-#include <map>
 #include <array>
+#include <map>
 
 /**
  * Animation Errors
@@ -59,7 +59,8 @@ struct ErrorMarker {
 
 class AnimationErrors {
 public:
-    void RegisterError(AnimateError err, ContToken const* token, unsigned curr_pt, SYMBOL_TYPE contsymbol) {
+    void RegisterError(AnimateError err, ContToken const* token, unsigned curr_pt, SYMBOL_TYPE contsymbol)
+    {
         mErrorMarkers[err].contsymbol = contsymbol;
         if (token != NULL) {
             mErrorMarkers[err].line = token->line;
@@ -67,7 +68,8 @@ public:
         }
         mErrorMarkers[err].pntgroup.insert(curr_pt);
     }
-    void RegisterError(AnimateError err, int line, int col, unsigned curr_pt, SYMBOL_TYPE contsymbol) {
+    void RegisterError(AnimateError err, int line, int col, unsigned curr_pt, SYMBOL_TYPE contsymbol)
+    {
         mErrorMarkers[err].contsymbol = contsymbol;
         mErrorMarkers[err].line = line;
         mErrorMarkers[err].col = col;
@@ -76,7 +78,8 @@ public:
     auto AnyErrors() const { return !mErrorMarkers.empty(); }
     auto GetErrors() const { return mErrorMarkers; }
 
-    bool operator==(AnimationErrors const& rhs) const {
+    bool operator==(AnimationErrors const& rhs) const
+    {
         return mErrorMarkers == rhs.mErrorMarkers;
     }
 
@@ -84,28 +87,29 @@ private:
     std::map<AnimateError, ErrorMarker> mErrorMarkers;
 };
 
-static inline auto AnimateErrorToString(AnimateError error) {
+static inline auto AnimateErrorToString(AnimateError error)
+{
     switch (error) {
-        case AnimateError::OUTOFTIME:
-            return "Ran out of time";
-        case AnimateError::EXTRATIME:
-            return "Not enough to do";
-        case AnimateError::WRONGPLACE:
-            return "Didn't make it to position";
-        case AnimateError::INVALID_CM:
-            return "Invalid countermarch";
-        case AnimateError::INVALID_FNTN:
-            return "Invalid fountain";
-        case AnimateError::DIVISION_ZERO:
-            return "Division by zero";
-        case AnimateError::UNDEFINED:
-            return "Undefined value";
-        case AnimateError::SYNTAX:
-            return "Syntax error";
-        case AnimateError::NONINT:
-            return "Non-integer value";
-        case AnimateError::NEGINT:
-            return "Negative value";
+    case AnimateError::OUTOFTIME:
+        return "Ran out of time";
+    case AnimateError::EXTRATIME:
+        return "Not enough to do";
+    case AnimateError::WRONGPLACE:
+        return "Didn't make it to position";
+    case AnimateError::INVALID_CM:
+        return "Invalid countermarch";
+    case AnimateError::INVALID_FNTN:
+        return "Invalid fountain";
+    case AnimateError::DIVISION_ZERO:
+        return "Division by zero";
+    case AnimateError::UNDEFINED:
+        return "Undefined value";
+    case AnimateError::SYNTAX:
+        return "Syntax error";
+    case AnimateError::NONINT:
+        return "Non-integer value";
+    case AnimateError::NEGINT:
+        return "Negative value";
     }
 }
 }

@@ -44,7 +44,6 @@
 #include <memory>
 #include <vector>
 
-
 namespace CalChart {
 class Shape;
 
@@ -77,7 +76,7 @@ public:
     void OnMove(CalChart::Coord p, CalChart::Coord snapped_p);
 
     virtual void OnClickDown(CalChart::Coord pos) = 0;
-    virtual void OnClickUp(CalChart::Coord) {};
+    virtual void OnClickUp(CalChart::Coord){};
     virtual bool IsDone() const { return true; }
     virtual bool IsReadyForMoving() const { return true; }
 

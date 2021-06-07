@@ -21,15 +21,15 @@
 */
 
 #include "ColorSetupDialog.h"
+#include "CalChartContinuityToken.h"
 #include "CalChartDoc.h"
+#include "CalChartShapes.h"
+#include "CalChartSheet.h"
 #include "ColorSetupCanvas.h"
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
 #include "cc_drawcommand.h"
-#include "CalChartShapes.h"
-#include "CalChartSheet.h"
 #include "confgr.h"
-#include "CalChartContinuityToken.h"
 #include "draw.h"
 #include "mode_dialog.h"
 #include "mode_dialog_canvas.h"

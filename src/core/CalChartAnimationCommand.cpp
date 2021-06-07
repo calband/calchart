@@ -23,12 +23,11 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "CalChartAnimationCommand.h"
 #include "CalChartAnimation.h"
+#include "CalChartAnimationCommand.h"
 #include "cc_drawcommand.h"
 #include "math_utils.h"
 #include "viewer_translate.h"
-
 
 namespace CalChart {
 
@@ -150,7 +149,7 @@ AnimationCommandMT::AnimationCommandMT(unsigned beats, float direction)
 AnimationCommandMT::AnimationCommandMT(unsigned beats, CalChart::AnimateDir direction)
     : AnimationCommand(beats)
     , dir(direction)
-, realdir(AngleFromAnimGetDir(direction))
+    , realdir(AngleFromAnimGetDir(direction))
 {
 }
 
