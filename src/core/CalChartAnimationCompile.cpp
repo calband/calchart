@@ -21,10 +21,10 @@
 */
 
 #include "CalChartAnimationCompile.h"
-#include "CalChartAnimationErrors.h"
 #include "CalChartAnimationCommand.h"
-#include "CalChartSheet.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartContinuityToken.h"
+#include "CalChartSheet.h"
 
 namespace CalChart {
 
@@ -79,8 +79,7 @@ Compile(
             // use MTRM E
             ContProcMTRM defcont(std::make_unique<ContValueDefined>(CC_E));
             defcont.Compile(ac);
-        }
-        else {
+        } else {
             // use EVEN REM NP
             ContProcEven defcont(std::make_unique<ContValueFloat>(ac.GetBeatsRemaining()), std::make_unique<ContNextPoint>());
             defcont.Compile(ac);

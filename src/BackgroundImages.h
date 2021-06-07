@@ -26,7 +26,7 @@
 #include <wx/event.h>
 
 namespace CalChart {
-    class ImageData;
+class ImageData;
 }
 
 class BackgroundImage;
@@ -53,5 +53,4 @@ private:
     std::vector<BackgroundImage> mBackgroundImages;
     bool mAdjustBackgroundMode{};
     int mWhichBackgroundIndex = -1;
-
 };

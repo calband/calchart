@@ -23,9 +23,9 @@
 #include "PrintPostScriptDialog.h"
 
 #include "CalChartDoc.h"
-#include "basic_ui.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
+#include "basic_ui.h"
 #include "confgr.h"
 #include "print_ps.h"
 

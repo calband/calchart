@@ -16,9 +16,9 @@
 */
 
 #include "cont_box_draw.h"
+#include "CalChartContinuityToken.h"
 #include "basic_ui.h"
 #include "confgr.h"
-#include "CalChartContinuityToken.h"
 
 #include <regex>
 

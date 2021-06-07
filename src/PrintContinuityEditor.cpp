@@ -22,9 +22,9 @@
 
 #include "PrintContinuityEditor.h"
 #include "CalChartApp.h"
+#include "CalChartSheet.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "CalChartSheet.h"
 #include "cc_text.h"
 #include "draw.h"
 #include "ui_enums.h"

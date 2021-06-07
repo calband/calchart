@@ -21,10 +21,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "basic_ui.h"
-#include "CalChartTypes.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartSelectTool.h"
+#include "CalChartTypes.h"
+#include "basic_ui.h"
 
 #include <functional>
 #include <map>

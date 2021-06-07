@@ -20,9 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CustomListViewPanel.h"
 #include "CalChartContinuity.h"
 #include "CalChartTypes.h"
+#include "CustomListViewPanel.h"
 
 #include <wx/wx.h>
 

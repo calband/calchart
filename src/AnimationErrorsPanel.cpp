@@ -19,8 +19,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartAnimationErrors.h"
 #include "AnimationErrorsPanel.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
 

@@ -20,9 +20,9 @@
 */
 
 #include "SetupMarchers.h"
+#include "CalChartSheet.h"
 #include "CalChartToolBar.h"
 #include "basic_ui.h"
-#include "CalChartSheet.h"
 #include <algorithm>
 #include <ctype.h>
 #include <wx/spinctrl.h>

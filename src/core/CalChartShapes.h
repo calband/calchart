@@ -29,8 +29,8 @@
  */
 
 #include "CalChartCoord.h"
-#include <vector>
 #include <optional>
+#include <vector>
 
 namespace CalChart {
 struct DrawCommand;

@@ -22,8 +22,8 @@
 
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
-#include "basic_ui.h"
 #include "CalChartCoord.h"
+#include "basic_ui.h"
 #include "confgr.h"
 #include "ui_enums.h"
 

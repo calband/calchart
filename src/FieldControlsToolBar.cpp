@@ -20,11 +20,11 @@
 */
 
 #include "FieldControlsToolBar.h"
+#include "CalChartPoint.h"
 #include "CalChartSizes.h"
 #include "CalChartToolBar.h"
 #include "ColorPalette.h"
 #include "basic_ui.h"
-#include "CalChartPoint.h"
 #include "platconf.h"
 #include "ui_enums.h"
 

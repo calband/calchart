@@ -21,9 +21,9 @@
 */
 
 #include "CalChartCoord.h"
-#include "CalChartTypes.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartSelectTool.h"
+#include "CalChartTypes.h"
 
 #include <map>
 #include <wx/aui/framemanager.h>

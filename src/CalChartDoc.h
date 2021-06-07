@@ -136,7 +136,7 @@ public:
         auto begin() { return mShow.GetSheetBegin(); }
         auto end() { return mShow.GetSheetEnd(); }
     };
-    CalChartDocSheetRange GetSheets() const { return CalChartDocSheetRange{*mShow}; }
+    CalChartDocSheetRange GetSheets() const { return CalChartDocSheetRange{ *mShow }; }
 
     auto GetSheetBegin() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetBegin(); }
     auto GetSheetEnd() const { return static_cast<CalChart::Show const&>(*mShow).GetSheetEnd(); }
@@ -189,7 +189,7 @@ public:
     auto GetGhostModuleIsActive() const { return mGhostSource != GhostSource::disabled; }
     auto GetGhostSource() const { return mGhostSource; };
     void SetGhostSource(GhostSource source, int which = 0);
-    
+
     CalChart::ShowMode const& GetShowMode() const;
     // nullptr if there is no animation
     CalChart::Animation const* GetAnimation() const;

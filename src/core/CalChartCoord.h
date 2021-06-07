@@ -23,7 +23,6 @@
 
 #include <cstdint>
 
-
 namespace CalChart {
 
 constexpr auto kCoordShift = 4;

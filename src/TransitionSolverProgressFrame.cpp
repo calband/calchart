@@ -8,13 +8,13 @@
 
 #include "TransitionSolverProgressFrame.h"
 #include "CalChartApp.h"
+#include "CalChartContinuity.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
-#include "TransitionSolverView.h"
-#include "basic_ui.h"
-#include "CalChartContinuity.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
+#include "TransitionSolverView.h"
+#include "basic_ui.h"
 #include "confgr.h"
 
 #include <wx/help.h>
