@@ -39,5 +39,4 @@ public:
 
     static void About();
     static void Help();
-
 };

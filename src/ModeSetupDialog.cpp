@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "mode_dialog.h"
+#include "ModeSetupDialog.h"
+#include "ShowModeSetupCanvas.h"
 #include "basic_ui.h"
 #include "draw.h"
-#include "mode_dialog_canvas.h"
 #include "modes.h"
 
 template <typename Function>

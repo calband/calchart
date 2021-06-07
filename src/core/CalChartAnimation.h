@@ -21,8 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartAnimationTypes.h"
 #include "CalChartAnimationSheet.h"
+#include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 
 #include <map>

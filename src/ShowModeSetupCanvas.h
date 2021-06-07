@@ -1,6 +1,6 @@
 #pragma once
 /*
- * mode_dialog.h
+ * ModeSetupDialog.h
  * Dialox box for preferences
  */
 
@@ -21,8 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConfiguration.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include "modes.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>

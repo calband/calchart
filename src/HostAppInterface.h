@@ -4,7 +4,6 @@
  * Object for communicating across different app instances
  */
 
-
 #include <functional>
 #include <memory>
 

@@ -30,11 +30,11 @@
 
 #include "CalChartAnimation.h"
 #include "CalChartContinuity.h"
-#include "cc_fileformat.h"
 #include "CalChartImage.h"
 #include "CalChartPoint.h"
-#include "cc_text.h"
 #include "CalChartTypes.h"
+#include "cc_fileformat.h"
+#include "cc_text.h"
 
 #include <nlohmann/json.hpp>
 #include <set>

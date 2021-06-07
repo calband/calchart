@@ -21,10 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartAnimationTypes.h"
-#include "CalChartCoord.h"
-#include <nlohmann/json.hpp>
-
 /**
  * Animation Commands
  * Continuities can be broken down into 3 distinct types:
@@ -35,6 +31,10 @@
  * continuities into these parts, we can then "transform" a point from a starting position to the end of the
  * Animation by "stepping" it along each AnimationCommand
  */
+
+#include "CalChartAnimationTypes.h"
+#include "CalChartCoord.h"
+#include <nlohmann/json.hpp>
 
 namespace CalChart {
 

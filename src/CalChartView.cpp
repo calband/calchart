@@ -20,23 +20,23 @@
 */
 
 #include "CalChartView.h"
+#include "BackgroundImages.h"
+#include "CalChartAnimation.h"
+#include "CalChartAnimationCommand.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
 #include "CalChartFrame.h"
-#include "CalChartAnimationErrors.h"
+#include "CalChartShapes.h"
+#include "CalChartSheet.h"
 #include "FieldCanvas.h"
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
-#include "CalChartAnimation.h"
-#include "CalChartAnimationCommand.h"
-#include "BackgroundImages.h"
+#include "ShowModeWizard.h"
 #include "cc_drawcommand.h"
-#include "CalChartShapes.h"
-#include "CalChartSheet.h"
-#include "confgr.h"
 #include "draw.h"
-#include "setup_wizards.h"
 
 #include <memory>
 #include <wx/docview.h>
@@ -157,14 +157,14 @@ bool CalChartView::OnClose(bool deleteWindow)
 
 void CalChartView::OnWizardSetup(CalChartDoc& show)
 {
-    wxWizard* wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
+    auto wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
     // page 1:
     // set the number of points and the labels
-    SetupMarchersWizard* page1 = new SetupMarchersWizard(wizard);
+    auto page1 = new SetupMarchersWizard(wizard);
 
     // page 2:
     // choose the show mode
-    ChooseShowModeWizard* page2 = new ChooseShowModeWizard(wizard);
+    auto page2 = new ShowModeWizard(wizard);
 
     // page 3:
     wxWizardPageSimple::Chain(page1, page2);
@@ -598,7 +598,7 @@ void CalChartView::OnBackgroundMouseLeftDown(wxMouseEvent& event, wxDC& dc)
 void CalChartView::OnBackgroundMouseLeftUp(wxMouseEvent& event, wxDC& dc)
 {
     if (auto result = mBackgroundImages.OnMouseLeftUp(event, dc); result) {
-        auto [ index, resultArray ] = *result;
+        auto [index, resultArray] = *result;
         auto cmd = mShow->Create_MoveBackgroundImageCommand(index, std::get<0>(resultArray), std::get<1>(resultArray), std::get<2>(resultArray), std::get<3>(resultArray));
         GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     }

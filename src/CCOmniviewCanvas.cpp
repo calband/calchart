@@ -26,14 +26,14 @@
 
 #include "CCOmniviewCanvas.h"
 #include "AnimationView.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "basic_ui.h"
 #include "cc_omniview_constants.h"
-#include "confgr.h"
 #include "draw.h"
+#include "math_utils.h"
 #include "modes.h"
 #include "platconf.h"
-#include "math_utils.h"
 
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>

@@ -1,5 +1,5 @@
 /*
- * setup_wizards.h
+ * ShowModeWizard.h
  * Classes for setting up the shows
  */
 
@@ -30,9 +30,9 @@ class FancyTextWin;
 class wxChoice;
 
 // page for deciding the field type
-class ChooseShowModeWizard : public wxWizardPageSimple {
+class ShowModeWizard : public wxWizardPageSimple {
 public:
-    ChooseShowModeWizard(wxWizard* parent);
+    ShowModeWizard(wxWizard* parent);
     wxString GetValue();
 
 private:

@@ -23,8 +23,8 @@
 
 #pragma once
 
+#include "CalChartConfiguration.h"
 #include "PreferencesUtils.h"
-#include "confgr.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>

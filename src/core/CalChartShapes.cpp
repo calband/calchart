@@ -24,8 +24,8 @@
 #include <cmath>
 #include <numeric>
 
-#include "cc_drawcommand.h"
 #include "CalChartShapes.h"
+#include "cc_drawcommand.h"
 
 namespace CalChart {
 
@@ -67,7 +67,6 @@ bool Inside(Coord p, RawPolygon_t const& polygon)
     return parity;
 }
 
-
 void Shape_1point::OnMove(Coord p, Coord)
 {
     MoveOrigin(p);
@@ -81,8 +80,8 @@ void Shape_crosshairs::OnMove(Coord, Coord snapped_p)
 std::vector<DrawCommand> Shape_crosshairs::GetCC_DrawCommand(float x, float y) const
 {
     return {
-        DrawCommand( origin.x + x - crosshairs_width, origin.y + y - crosshairs_width, origin.x + x + crosshairs_width, origin.y + y + crosshairs_width ),
-        DrawCommand( origin.x + x + crosshairs_width, origin.y + y - crosshairs_width, origin.x + x - crosshairs_width, origin.y + y + crosshairs_width ),
+        DrawCommand(origin.x + x - crosshairs_width, origin.y + y - crosshairs_width, origin.x + x + crosshairs_width, origin.y + y + crosshairs_width),
+        DrawCommand(origin.x + x + crosshairs_width, origin.y + y - crosshairs_width, origin.x + x - crosshairs_width, origin.y + y + crosshairs_width),
     };
 }
 

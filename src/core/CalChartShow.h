@@ -35,11 +35,11 @@
  *
  */
 
-#include "cc_fileformat.h"
-#include "CalChartTypes.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartSelectTool.h"
 #include "CalChartShapes.h"
+#include "CalChartTypes.h"
+#include "cc_fileformat.h"
 
 #include "CalChartAnimation.h"
 #include "CalChartSheet.h"

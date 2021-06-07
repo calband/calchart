@@ -20,16 +20,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "setup_wizards.h"
+#include "ShowModeWizard.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include "modes.h"
 
 #include <wx/wx.h>
 
 // page for deciding the field type
-ChooseShowModeWizard::ChooseShowModeWizard(wxWizard* parent)
+ShowModeWizard::ShowModeWizard(wxWizard* parent)
     : wxWizardPageSimple(parent)
 {
     for (auto mode : kShowModeStrings) {
@@ -42,7 +42,7 @@ ChooseShowModeWizard::ChooseShowModeWizard(wxWizard* parent)
     }));
 }
 
-wxString ChooseShowModeWizard::GetValue()
+wxString ShowModeWizard::GetValue()
 {
     return modeStrings[mChoice->GetSelection()];
 }

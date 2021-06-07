@@ -27,15 +27,14 @@
  * the box/polygon/lasso that you use to select the points.
  */
 
-#include "CalChartTypes.h"
 #include "CalChartCoord.h"
 #include "CalChartShapes.h"
+#include "CalChartTypes.h"
 
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
-
 
 namespace CalChart {
 class Shape;
@@ -62,7 +61,6 @@ public:
     virtual bool SelectDone() const { return mSelectComplete; }
 
 protected:
-
     std::unique_ptr<CalChart::Shape> mLassoShape;
     CalChart::Select mSelect = CalChart::Select::Box;
     bool mSelectComplete = true;

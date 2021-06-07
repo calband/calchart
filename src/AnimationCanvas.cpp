@@ -22,9 +22,9 @@
 
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
-#include "basic_ui.h"
+#include "CalChartConfiguration.h"
 #include "CalChartCoord.h"
-#include "confgr.h"
+#include "basic_ui.h"
 #include "ui_enums.h"
 
 #include <wx/dcbuffer.h>

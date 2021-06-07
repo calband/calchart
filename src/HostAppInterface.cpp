@@ -3,7 +3,6 @@
  * Central App for CalChart
  */
 
-
 #include "HostAppInterface.h"
 #include "CalChartApp.h"
 
@@ -21,12 +20,14 @@ struct CCAppClientConnection;
 struct CCAppServerConnection;
 
 struct CCAppServer : public wxServer {
-    static auto GetServerName() {
+    static auto GetServerName()
+    {
         auto name = wxGetUserId() + wxStandardPaths::Get().GetExecutablePath();
         return std::to_string(static_cast<int16_t>(std::hash<std::string>{}(name)));
     }
 
-    static std::unique_ptr<CCAppServer> MakeServer(CalChartApp* app) {
+    static std::unique_ptr<CCAppServer> MakeServer(CalChartApp* app)
+    {
         auto newServer = std::make_unique<CCAppServer>(app);
         if (!newServer->Create(GetServerName())) {
             return nullptr;
@@ -42,12 +43,14 @@ struct CCAppServer : public wxServer {
     virtual ~CCAppServer() override;
     virtual wxConnectionBase* OnAcceptConnection(wxString const& topic) override;
 
-    void OpenFile(wxString const& filename) {
+    void OpenFile(wxString const& filename)
+    {
         mApp->OpenFile(filename);
     }
 
     // should only be called by the connection
-    void DestroyConnection(CCAppServerConnection* connection) {
+    void DestroyConnection(CCAppServerConnection* connection)
+    {
         mActiveConnections.erase(std::remove(mActiveConnections.begin(), mActiveConnections.end(), connection));
     }
 
@@ -58,7 +61,8 @@ private:
 };
 
 struct CCAppClient : public wxClient {
-    static std::unique_ptr<CCAppClient> MakeClient() {
+    static std::unique_ptr<CCAppClient> MakeClient()
+    {
         auto newClient = std::make_unique<CCAppClient>();
         if (newClient->Connect("localhost", CCAppServer::GetServerName(), "Client")) {
             return newClient;
@@ -183,7 +187,6 @@ wxConnectionBase* CCAppClient::OnMakeConnection()
 {
     return new CCAppClientConnection(this);
 }
-
 
 // Server, Client, and Independent are all derived from HostAppInterface.
 // Mostly it's all boilerplate, with "smarts" done in the Make functions

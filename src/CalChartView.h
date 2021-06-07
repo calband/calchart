@@ -20,10 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartDoc.h"
-#include "CalChartCoord.h"
-#include "CalChartTypes.h"
 #include "BackgroundImages.h"
+#include "CalChartCoord.h"
+#include "CalChartDoc.h"
+#include "CalChartTypes.h"
 #include "modes.h"
 
 #include <map>

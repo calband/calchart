@@ -23,9 +23,9 @@
 #include "CalChartSheet.h"
 
 #include "CalChartAnimationCommand.h"
+#include "CalChartShow.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
-#include "CalChartShow.h"
 #include "viewer_translate.h"
 
 #include <algorithm>
@@ -382,9 +382,10 @@ Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandle
     };
     auto parse_INGL_VCNT = [parse_INGL_EVCT](Sheet* sheet, uint8_t const* ptr, size_t size) {
         std::map<uint32_t, std::function<void(Sheet*, uint8_t const*, size_t)>> const
-            parser = {
-                { INGL_EVCT, parse_INGL_EVCT },
-            };
+            parser
+            = {
+                  { INGL_EVCT, parse_INGL_EVCT },
+              };
 
         auto table = Parser::ParseOutLabels(ptr, ptr + size);
         for (auto& i : table) {
@@ -415,15 +416,16 @@ Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandle
     };
 
     std::map<uint32_t, std::function<void(Sheet*, const uint8_t*, size_t)>> const
-        parser = {
-            { INGL_NAME, parse_INGL_NAME },
-            { INGL_DURA, parse_INGL_DURA },
-            { INGL_PNTS, parse_INGL_PNTS },
-            { INGL_CONT, parse_INGL_CONT },
-            { INGL_VCNT, parse_INGL_VCNT },
-            { INGL_PCNT, parse_INGL_PCNT },
-            { INGL_BACK, parse_INGL_BACK },
-        };
+        parser
+        = {
+              { INGL_NAME, parse_INGL_NAME },
+              { INGL_DURA, parse_INGL_DURA },
+              { INGL_PNTS, parse_INGL_PNTS },
+              { INGL_CONT, parse_INGL_CONT },
+              { INGL_VCNT, parse_INGL_VCNT },
+              { INGL_PCNT, parse_INGL_PCNT },
+              { INGL_BACK, parse_INGL_BACK },
+          };
 
     auto table = Parser::ParseOutLabels(ptr, ptr + size);
     for (auto& i : table) {
@@ -677,7 +679,7 @@ void Sheet::SetPosition(Coord val, unsigned i, unsigned ref)
  * also, there are three tab stops set for standard continuity format
  */
 
-void Sheet::SetPrintableContinuity(std::string const & name, std::string const& lines)
+void Sheet::SetPrintableContinuity(std::string const& name, std::string const& lines)
 {
     mPrintableContinuity = Print_continuity(name, lines);
 }

@@ -23,10 +23,10 @@
 #include "CalChartShow.h"
 
 #include "CalChartContinuity.h"
-#include "cc_fileformat.h"
 #include "CalChartPoint.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
+#include "cc_fileformat.h"
 #include "ccvers.h"
 
 #include <algorithm>
@@ -245,15 +245,15 @@ Show::Show(ShowMode const& mode, uint8_t const* ptr, size_t size, ParseErrorHand
     // [=] needed here to pull in the parse functions
     auto parse_INGL_SHOW = [=](Show* show, uint8_t const* ptr, size_t size) {
         std::map<uint32_t, std::function<void(Show * show, const uint8_t*, size_t)>> const parser = {
-                { INGL_SIZE, parse_INGL_SIZE },
-                { INGL_LABL, parse_INGL_LABL },
-                { INGL_INST, parse_INGL_INST },
-                { INGL_DESC, parse_INGL_DESC },
-                { INGL_SHET, parse_INGL_SHET },
-                { INGL_SELE, parse_INGL_SELE },
-                { INGL_CURR, parse_INGL_CURR },
-                { INGL_MODE, parse_INGL_MODE },
-            };
+            { INGL_SIZE, parse_INGL_SIZE },
+            { INGL_LABL, parse_INGL_LABL },
+            { INGL_INST, parse_INGL_INST },
+            { INGL_DESC, parse_INGL_DESC },
+            { INGL_SHET, parse_INGL_SHET },
+            { INGL_SELE, parse_INGL_SELE },
+            { INGL_CURR, parse_INGL_CURR },
+            { INGL_MODE, parse_INGL_MODE },
+        };
         auto table = Parser::ParseOutLabels(ptr, ptr + size);
         for (auto& i : table) {
             auto the_parser = parser.find(std::get<0>(i));
@@ -1195,7 +1195,7 @@ void Show::CC_show_wrong_size_throws_exception()
     bool hit_exception = false;
     try {
         Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)show_data.data(), show_data.size());
-    } catch (CC_FileException const &) {
+    } catch (CC_FileException const&) {
         hit_exception = true;
     }
     assert(hit_exception);

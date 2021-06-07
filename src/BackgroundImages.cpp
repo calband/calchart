@@ -61,7 +61,7 @@ private:
     struct CalculateScaleAndMove {
     public:
         CalculateScaleAndMove(wxPoint startClick, wxRect rect, BackgroundAdjustType adjustType);
-        
+
         wxRect operator()(wxCoord x, wxCoord y, wxRect wxRect);
         wxPoint mStartClick;
         wxRect mRect;
@@ -80,7 +80,7 @@ BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_
     mBitmap = wxBitmap(mImage.Scale(scaled_width, scaled_height, wxIMAGE_QUALITY_HIGH));
 }
 
-template<typename E>
+template <typename E>
 constexpr auto toUType(E enumerator)
 {
     return static_cast<std::underlying_type_t<E>>(enumerator);
@@ -96,12 +96,12 @@ bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc)
     auto bitmapSize = mBitmap.GetSize();
     auto middle = mBitmapPoint + bitmapSize / 2;
     for (auto where = toUType(BackgroundAdjustType::kUpperLeft); where < toUType(BackgroundAdjustType::kLast); ++where) {
-        if (where == toUType(BackgroundAdjustType::kMove) && wxRect{mBitmapPoint, mBitmap.GetSize()}.Contains(x, y)) {
+        if (where == toUType(BackgroundAdjustType::kMove) && wxRect{ mBitmapPoint, mBitmap.GetSize() }.Contains(x, y)) {
             return true;
         }
         auto offsetX = (where % 3) - 1;
         auto offsetY = (where / 3) - 1;
-        auto grabPoint = wxRect {
+        auto grabPoint = wxRect{
             middle.x + (offsetX * (bitmapSize.x / 2 + dc.DeviceToLogicalXRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
             middle.y + (offsetY * (bitmapSize.y / 2 + dc.DeviceToLogicalYRel(kCircleSize / 3))) - dc.DeviceToLogicalXRel(kCircleSize),
             dc.DeviceToLogicalXRel(kCircleSize * 2),
@@ -144,12 +144,12 @@ void BackgroundImage::OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc)
     }
     mBackgroundAdjustType = static_cast<BackgroundAdjustType>(where);
     if (mBackgroundAdjustType == BackgroundAdjustType::kLast) {
-        if (wxRect{mBitmapPoint, wxSize{ mBitmap.GetWidth(), mBitmap.GetHeight() } }.Contains(x, y)) {
+        if (wxRect{ mBitmapPoint, wxSize{ mBitmap.GetWidth(), mBitmap.GetHeight() } }.Contains(x, y)) {
             mBackgroundAdjustType = BackgroundAdjustType::kMove;
         }
     }
     if (mBackgroundAdjustType != BackgroundAdjustType::kLast) {
-        mScaleAndMove = std::make_unique<CalculateScaleAndMove>(wxPoint{x, y}, wxRect{ mBitmapPoint, mBitmap.GetSize() }, mBackgroundAdjustType);
+        mScaleAndMove = std::make_unique<CalculateScaleAndMove>(wxPoint{ x, y }, wxRect{ mBitmapPoint, mBitmap.GetSize() }, mBackgroundAdjustType);
     }
 }
 
@@ -224,34 +224,34 @@ BackgroundImage::CalculateScaleAndMove::CalculateScaleAndMove(wxPoint startClick
 wxRect BackgroundImage::CalculateScaleAndMove::operator()(wxCoord x, wxCoord y, wxRect rect)
 {
     switch (mAdjustType) {
-        case BackgroundAdjustType::kUpper:
+    case BackgroundAdjustType::kUpper:
         // for upper: make sure we never go lower than the bottom
         // don't modify where the top is, but adjust the heigth
         if (y < mRect.GetBottom()) {
             rect.y = y;
             rect.height = mRect.GetBottom() - y;
         }
-            return rect;
-        case BackgroundAdjustType::kLower:
+        return rect;
+    case BackgroundAdjustType::kLower:
         // for lower: make sure we never go higher than the top
         // don't modify where the top is, but adjust the heigth
-            if (rect.y < y) {
+        if (rect.y < y) {
             rect.height = y - rect.y;
-            }
-            return rect;
-        case BackgroundAdjustType::kLeft:
+        }
+        return rect;
+    case BackgroundAdjustType::kLeft:
         if (x < mRect.GetRight()) {
             rect.x = x;
             rect.width = mRect.GetRight() - x;
         }
-            return rect;
-        case BackgroundAdjustType::kRight:
-            if (rect.x < x) {
-                rect.width = x - rect.x;
-            }
-            return rect;
-    // we should keep the aspect ratio
-        case BackgroundAdjustType::kUpperLeft:
+        return rect;
+    case BackgroundAdjustType::kRight:
+        if (rect.x < x) {
+            rect.width = x - rect.x;
+        }
+        return rect;
+        // we should keep the aspect ratio
+    case BackgroundAdjustType::kUpperLeft:
         x = std::max<wxCoord>(x, mRect.GetRight() - std::abs(y - mRect.GetBottom()) * mAspectRatio / 1.0);
         y = std::max<wxCoord>(y, mRect.GetBottom() - std::abs(x - mRect.GetRight()) * 1.0 / mAspectRatio);
         if (x < mRect.GetRight()) {
@@ -262,8 +262,8 @@ wxRect BackgroundImage::CalculateScaleAndMove::operator()(wxCoord x, wxCoord y, 
             rect.y = y;
             rect.height = mRect.GetBottom() - y;
         }
-            return rect;
-        case BackgroundAdjustType::kUpperRight:
+        return rect;
+    case BackgroundAdjustType::kUpperRight:
         x = std::min<wxCoord>(x, mRect.GetLeft() + std::abs(y - mRect.GetBottom()) * mAspectRatio / 1.0);
         y = std::max<wxCoord>(y, mRect.GetBottom() - std::abs(x - mRect.GetLeft()) * 1.0 / mAspectRatio);
         if (rect.x < x)
@@ -272,33 +272,33 @@ wxRect BackgroundImage::CalculateScaleAndMove::operator()(wxCoord x, wxCoord y, 
             rect.y = y;
             rect.height = mRect.GetBottom() - y;
         }
-            return rect;
-        case BackgroundAdjustType::kLowerLeft:
+        return rect;
+    case BackgroundAdjustType::kLowerLeft:
         x = std::max<wxCoord>(x, mRect.GetRight() - std::abs(y - mRect.GetTop()) * mAspectRatio / 1.0);
         y = std::min<wxCoord>(y, mRect.GetTop() + std::abs(x - mRect.GetRight()) * 1.0 / mAspectRatio);
         if (x < mRect.GetRight()) {
             rect.x = x;
             rect.width = mRect.GetRight() - x;
         }
-            if (rect.y < y) {
-                rect.height = y - rect.y;
-            }
-            return rect;
-        case BackgroundAdjustType::kLowerRight:
+        if (rect.y < y) {
+            rect.height = y - rect.y;
+        }
+        return rect;
+    case BackgroundAdjustType::kLowerRight:
         x = std::min<wxCoord>(x, mRect.GetLeft() + std::abs(y - mRect.GetTop()) * mAspectRatio / 1.0);
         y = std::min<wxCoord>(y, mRect.GetTop() + std::abs(x - mRect.GetLeft()) * 1.0 / mAspectRatio);
         if (rect.x < x)
             rect.width = x - rect.x;
-            if (rect.y < y) {
-                rect.height = y - rect.y;
-            }
-            return rect;
-        case BackgroundAdjustType::kMove:
-            rect.x = mRect.GetLeft() + (x - mStartClick.x);
-            rect.y = mRect.GetTop() + (y - mStartClick.y);
-            return rect;
+        if (rect.y < y) {
+            rect.height = y - rect.y;
+        }
+        return rect;
+    case BackgroundAdjustType::kMove:
+        rect.x = mRect.GetLeft() + (x - mStartClick.x);
+        rect.y = mRect.GetTop() + (y - mStartClick.y);
+        return rect;
     default:
-            return rect;
+        return rect;
     }
 }
 
@@ -369,4 +369,3 @@ void BackgroundImages::OnMouseMove(wxMouseEvent const& event, wxDC const& dc)
         mBackgroundImages[mWhichBackgroundIndex].OnMouseMove(event, dc);
     }
 }
-

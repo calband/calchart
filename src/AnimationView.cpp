@@ -22,17 +22,17 @@
 
 #include "AnimationView.h"
 #include "AnimationPanel.h"
-#include "CalChartApp.h"
-#include "CalChartSizes.h"
-#include "CalChartView.h"
 #include "CalChartAnimation.h"
+#include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
-#include "confgr.h"
+#include "CalChartSizes.h"
+#include "CalChartView.h"
 #include "draw.h"
+#include "math_utils.h"
 #include "modes.h"
 #include "platconf.h"
-#include "math_utils.h"
 
 #include <wx/dcbuffer.h>
 #include <wx/filename.h>
@@ -107,16 +107,16 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
             }
         } else if (mView->IsSelected(info.index)) {
             switch (info.mDirection) {
-                case CalChart::AnimateDir::SW:
-                case CalChart::AnimateDir::W:
-                case CalChart::AnimateDir::NW: {
+            case CalChart::AnimateDir::SW:
+            case CalChart::AnimateDir::W:
+            case CalChart::AnimateDir::NW: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_BACK);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
             } break;
-                case CalChart::AnimateDir::SE:
-                case CalChart::AnimateDir::E:
-                case CalChart::AnimateDir::NE: {
+            case CalChart::AnimateDir::SE:
+            case CalChart::AnimateDir::E:
+            case CalChart::AnimateDir::NE: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_HILIT_FRONT);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
@@ -129,16 +129,16 @@ void AnimationView::OnDrawDots(wxDC& dc, CalChartConfiguration const& config)
             }
         } else {
             switch (info.mDirection) {
-                case CalChart::AnimateDir::SW:
-                case CalChart::AnimateDir::W:
-                case CalChart::AnimateDir::NW: {
+            case CalChart::AnimateDir::SW:
+            case CalChart::AnimateDir::W:
+            case CalChart::AnimateDir::NW: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_BACK);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);
             } break;
-                case CalChart::AnimateDir::SE:
-                case CalChart::AnimateDir::E:
-                case CalChart::AnimateDir::NE: {
+            case CalChart::AnimateDir::SE:
+            case CalChart::AnimateDir::E:
+            case CalChart::AnimateDir::NE: {
                 auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_POINT_ANIM_FRONT);
                 dc.SetBrush(brushAndPen.first);
                 dc.SetPen(brushAndPen.second);

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "confgr.h"
+#include "CalChartConfiguration.h"
 #include <nlohmann/json.hpp>
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>

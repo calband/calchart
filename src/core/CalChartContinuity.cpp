@@ -21,9 +21,9 @@
 */
 
 #include "CalChartContinuity.h"
+#include "CalChartContinuityToken.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
-#include "CalChartContinuityToken.h"
 #include "parse.h"
 #include <assert.h>
 #include <sstream>

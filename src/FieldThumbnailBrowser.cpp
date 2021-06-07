@@ -20,11 +20,11 @@
 */
 
 #include "FieldThumbnailBrowser.h"
+#include "CalChartConfiguration.h"
+#include "CalChartShow.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "CalChartShow.h"
-#include "confgr.h"
 #include "draw.h"
 #include "modes.h"
 

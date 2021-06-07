@@ -21,7 +21,7 @@
 */
 
 #include "basic_ui.h"
-#include "confgr.h"
+#include "CalChartConfiguration.h"
 #include "platconf.h"
 
 #include <wx/dnd.h>

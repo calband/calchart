@@ -21,13 +21,13 @@
 */
 
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
-#include "CalChartView.h"
 #include "CalChartSplash.h"
-#include "basic_ui.h"
-#include "confgr.h"
-#include "platconf.h"
+#include "CalChartView.h"
 #include "HostAppInterface.h"
+#include "basic_ui.h"
+#include "platconf.h"
 
 #include <wx/fs_zip.h>
 #include <wx/help.h>

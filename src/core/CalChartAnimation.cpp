@@ -21,15 +21,15 @@
 */
 
 #include "CalChartAnimation.h"
-#include "CalChartAnimationErrors.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationCompile.h"
+#include "CalChartAnimationErrors.h"
 #include "CalChartContinuity.h"
-#include "cc_drawcommand.h"
+#include "CalChartContinuityToken.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
-#include "CalChartContinuityToken.h"
+#include "cc_drawcommand.h"
 #include "math_utils.h"
 
 #define _USE_MATH_DEFINES
@@ -39,12 +39,11 @@
 #include <sstream>
 #include <string>
 
-template<typename E>
+template <typename E>
 constexpr auto toUType(E enumerator)
 {
     return static_cast<std::underlying_type_t<E>>(enumerator);
 }
-
 
 namespace CalChart {
 

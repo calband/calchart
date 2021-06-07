@@ -20,10 +20,10 @@
 */
 
 #include "ContinuityBrowserPanel.h"
-#include "CalChartView.h"
-#include "ContinuityComposerDialog.h"
 #include "CalChartContinuityToken.h"
-#include "cont_box_draw.h"
+#include "CalChartView.h"
+#include "ContinuityBoxDrawer.h"
+#include "ContinuityComposerDialog.h"
 
 using namespace CalChart;
 

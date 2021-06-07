@@ -22,16 +22,16 @@
 
 #include "draw.h"
 
-#include "CalChartDoc.h"
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
-#include "basic_ui.h"
-#include "cc_drawcommand.h"
+#include "CalChartConfiguration.h"
+#include "CalChartDoc.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
+#include "basic_ui.h"
+#include "cc_drawcommand.h"
 #include "cc_text.h"
-#include "confgr.h"
 #include "draw_utils.h"
 #include "modes.h"
 #include <memory>
