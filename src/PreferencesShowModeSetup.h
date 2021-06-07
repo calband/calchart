@@ -23,7 +23,7 @@
 
 #include "PreferencesUtils.h"
 
-#include "confgr.h"
+#include "CalChartConfiguration.h"
 #include "modes.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>

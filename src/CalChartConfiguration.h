@@ -1,5 +1,6 @@
+#pragma once
 /*
- * config.h
+ * CalChartConfiguration.h
  * Functions for manipulating configuration Settings
  */
 
@@ -20,7 +21,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+/**
+ * CalChartConfiguration
+ *
+ * CalChartConfiguration interfaces with the system config and acts as a "cache" for the values.
+ *
+ * On Get, it reads the values from system config, and caches a local copy.
+ * On Set (or clear), it updates it's cache, and puts the command into a write-queue.
+ * The write-queue needs to be explicitly flushed or the values will be lost.
+ *
+ * To use a config value, first get the Global config, and then Get_ the value from it.  For example:
+ *
+ * auto save_interval = CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval();
+ *
+ * To add a new config value:
+ *  Add DECLARE_CONFIGURATION_FUNCTIONS in the class declaration of the right type.  This
+ *  will make the Get_, Set_ and Clear_ functions available.  Then in the implementation file, declare
+ *  IMPLEMENT_CONFIGURATION_FUNCTIONS with the default.
+ */
 
 #include <array>
 #include <functional>
@@ -92,23 +110,6 @@ extern wxString const kShowModeStrings[SHOWMODE_NUM];
 
 constexpr auto kNumberPalettes = 4; // arbitrary, could go more, but 4 is a good starting point
 
-// CalChartConfiguration interfaces with the system config and acts as a "cache"
-// for the values.
-// On Get, it reads the values from system config, and caches a copy.
-// On Set (and clear), it updates it's cache, and puts the command into a
-// write-queue.
-// The write-queue needs to be explicitly flushed or the values will be lost
-//
-// To use a config value, first get the Global config, and then Get_ the value
-// from it:
-// auto save_interval =
-// CalChartConfiguration::GetGlobalConfig().Get_AutosaveInterval();
-//
-// To add a new config value:
-// Add DECLARE_CONFIGURATION_FUNCTIONS in the class declaration of the right
-// type; this will make the Get_, Set_ and Clear_
-// functions available.  Then in the implementation file, declare
-// IMPLEMENT_CONFIGURATION_FUNCTIONS with the default.
 class CalChartConfiguration {
 public:
     static CalChartConfiguration& GetGlobalConfig();

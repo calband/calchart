@@ -21,6 +21,7 @@
 */
 
 #include "ColorSetupCanvas.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartDoc.h"
 #include "CalChartShapes.h"
@@ -28,11 +29,10 @@
 #include "CalChartSizes.h"
 #include "ContinuityBrowserPanel.h"
 #include "ContinuityComposerDialog.h"
+#include "ModeSetupDialog.h"
+#include "ShowModeSetupCanvas.h"
 #include "cc_drawcommand.h"
-#include "confgr.h"
 #include "draw.h"
-#include "mode_dialog.h"
-#include "mode_dialog_canvas.h"
 #include "modes.h"
 
 #include <wx/colordlg.h>

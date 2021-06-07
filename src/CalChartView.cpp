@@ -25,6 +25,7 @@
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationErrors.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
 #include "CalChartFrame.h"
@@ -33,10 +34,9 @@
 #include "FieldCanvas.h"
 #include "SetupInstruments.h"
 #include "SetupMarchers.h"
+#include "ShowModeWizard.h"
 #include "cc_drawcommand.h"
-#include "confgr.h"
 #include "draw.h"
-#include "setup_wizards.h"
 
 #include <memory>
 #include <wx/docview.h>
@@ -157,14 +157,14 @@ bool CalChartView::OnClose(bool deleteWindow)
 
 void CalChartView::OnWizardSetup(CalChartDoc& show)
 {
-    wxWizard* wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
+    auto wizard = new wxWizard(mFrame, wxID_ANY, wxT("New Show Setup Wizard"));
     // page 1:
     // set the number of points and the labels
-    SetupMarchersWizard* page1 = new SetupMarchersWizard(wizard);
+    auto page1 = new SetupMarchersWizard(wizard);
 
     // page 2:
     // choose the show mode
-    ChooseShowModeWizard* page2 = new ChooseShowModeWizard(wizard);
+    auto page2 = new ShowModeWizard(wizard);
 
     // page 3:
     wxWizardPageSimple::Chain(page1, page2);

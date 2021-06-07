@@ -21,6 +21,7 @@
 
 #include "CalChartDoc.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartDocCommand.h"
 #include "CalChartPoint.h"
@@ -29,7 +30,6 @@
 #include "ContinuityEditorPopup.h"
 #include "cc_fileformat.h"
 #include "cc_parse_errors.h"
-#include "confgr.h"
 #include "draw.h"
 #include "math_utils.h"
 #include "modes.h"

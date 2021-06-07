@@ -22,6 +22,7 @@
 
 #include "ContinuityEditorPopup.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
@@ -29,7 +30,6 @@
 #include "CalChartShow.h"
 #include "ContinuityBrowser.h"
 #include "basic_ui.h"
-#include "confgr.h"
 
 #include <wx/dcbuffer.h>
 #include <wx/help.h>

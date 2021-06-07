@@ -24,10 +24,10 @@
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
 #include "CCOmniviewCanvas.h"
+#include "CalChartConfiguration.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include "platconf.h"
 #include "ui_enums.h"
 
