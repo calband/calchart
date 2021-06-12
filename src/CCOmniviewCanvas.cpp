@@ -28,11 +28,11 @@
 #include "AnimationView.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
+#include "CalChartShowMode.h"
 #include "basic_ui.h"
 #include "cc_omniview_constants.h"
 #include "draw.h"
 #include "math_utils.h"
-#include "modes.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -65,9 +65,9 @@
 auto GetImageDir()
 {
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/");
+    const static wxString kImageDir = "CalChart.app/Contents/Resources/";
 #else
-    const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("Resources") PATH_SEPARATOR);
+    const static wxString kImageDir = wxFileName(::wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "Resources" PATH_SEPARATOR);
 #endif
     return kImageDir;
 }
@@ -120,46 +120,46 @@ enum WhichImage {
     kImageLast
 };
 
-std::map<WhichImage, wxString> ListOfImageFiles = {
-    { WhichImage::kF0, wxT("f0.tga") },
-    { WhichImage::kF1, wxT("f1.tga") },
-    { WhichImage::kF2, wxT("f2.tga") },
-    { WhichImage::kFL0, wxT("fl0.tga") },
-    { WhichImage::kFL1, wxT("fl1.tga") },
-    { WhichImage::kFL2, wxT("fl2.tga") },
-    { WhichImage::kL0, wxT("l0.tga") },
-    { WhichImage::kL1, wxT("l1.tga") },
-    { WhichImage::kL2, wxT("l2.tga") },
-    { WhichImage::kBL0, wxT("bl0.tga") },
-    { WhichImage::kBL1, wxT("bl1.tga") },
-    { WhichImage::kBL2, wxT("bl2.tga") },
-    { WhichImage::kB0, wxT("b0.tga") },
-    { WhichImage::kB1, wxT("b1.tga") },
-    { WhichImage::kB2, wxT("b2.tga") },
-    { WhichImage::kBR0, wxT("br0.tga") },
-    { WhichImage::kBR1, wxT("br1.tga") },
-    { WhichImage::kBR2, wxT("br2.tga") },
-    { WhichImage::kR0, wxT("r0.tga") },
-    { WhichImage::kR1, wxT("r1.tga") },
-    { WhichImage::kR2, wxT("r2.tga") },
-    { WhichImage::kFR0, wxT("fr0.tga") },
-    { WhichImage::kFR1, wxT("fr1.tga") },
-    { WhichImage::kFR2, wxT("fr2.tga") },
-    { WhichImage::kField, wxT("field.tga") },
-    { WhichImage::kLines, wxT("lines.tga") },
-    { WhichImage::kDirection, wxT("Direction.tga") },
-    { WhichImage::kBleachers, wxT("bleachers.tga") },
-    { WhichImage::kWall, wxT("wall.tga") },
-    { WhichImage::kSky, wxT("sky.tga") },
-    { WhichImage::kCalband, wxT("calband.tga") },
-    { WhichImage::kC, wxT("C.tga") },
-    { WhichImage::kCal, wxT("cal.tga") },
-    { WhichImage::kCalifornia, wxT("california.tga") },
-    { WhichImage::kEECS, wxT("eecs.tga") },
-    { WhichImage::kPressbox, wxT("pressbox.tga") },
-    { WhichImage::kCrowd, wxT("crowd.tga") },
-    { WhichImage::kGoalpost, wxT("goalpost.tga") },
-    { WhichImage::kEndOfShow, wxT("endofshow.tga") }
+std::map<WhichImage, std::string> ListOfImageFiles = {
+    { WhichImage::kF0, "f0.tga" },
+    { WhichImage::kF1, "f1.tga" },
+    { WhichImage::kF2, "f2.tga" },
+    { WhichImage::kFL0, "fl0.tga" },
+    { WhichImage::kFL1, "fl1.tga" },
+    { WhichImage::kFL2, "fl2.tga" },
+    { WhichImage::kL0, "l0.tga" },
+    { WhichImage::kL1, "l1.tga" },
+    { WhichImage::kL2, "l2.tga" },
+    { WhichImage::kBL0, "bl0.tga" },
+    { WhichImage::kBL1, "bl1.tga" },
+    { WhichImage::kBL2, "bl2.tga" },
+    { WhichImage::kB0, "b0.tga" },
+    { WhichImage::kB1, "b1.tga" },
+    { WhichImage::kB2, "b2.tga" },
+    { WhichImage::kBR0, "br0.tga" },
+    { WhichImage::kBR1, "br1.tga" },
+    { WhichImage::kBR2, "br2.tga" },
+    { WhichImage::kR0, "r0.tga" },
+    { WhichImage::kR1, "r1.tga" },
+    { WhichImage::kR2, "r2.tga" },
+    { WhichImage::kFR0, "fr0.tga" },
+    { WhichImage::kFR1, "fr1.tga" },
+    { WhichImage::kFR2, "fr2.tga" },
+    { WhichImage::kField, "field.tga" },
+    { WhichImage::kLines, "lines.tga" },
+    { WhichImage::kDirection, "Direction.tga" },
+    { WhichImage::kBleachers, "bleachers.tga" },
+    { WhichImage::kWall, "wall.tga" },
+    { WhichImage::kSky, "sky.tga" },
+    { WhichImage::kCalband, "calband.tga" },
+    { WhichImage::kC, "C.tga" },
+    { WhichImage::kCal, "cal.tga" },
+    { WhichImage::kCalifornia, "california.tga" },
+    { WhichImage::kEECS, "eecs.tga" },
+    { WhichImage::kPressbox, "pressbox.tga" },
+    { WhichImage::kCrowd, "crowd.tga" },
+    { WhichImage::kGoalpost, "goalpost.tga" },
+    { WhichImage::kEndOfShow, "endofshow.tga" }
 };
 
 enum WhichMarchingStyle {

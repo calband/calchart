@@ -37,8 +37,8 @@ EVT_MOTION(AnimationCanvas::OnMouseMove)
 EVT_PAINT(AnimationCanvas::OnPaint)
 END_EVENT_TABLE()
 
-AnimationCanvas::AnimationCanvas(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : super(parent, winid, pos, size, style, name)
+AnimationCanvas::AnimationCanvas(wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size)
+    : super(parent, winid, pos, size, wxTAB_TRAVERSAL | wxNO_BORDER)
 {
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     Init();

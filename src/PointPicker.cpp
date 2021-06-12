@@ -1,6 +1,6 @@
 /*
- * show_ui.cpp
- * Classes for interacting with shows
+ * PointPicker.cpp
+ * Dialog for picking points
  */
 
 /*
@@ -23,10 +23,6 @@
 #include "PointPicker.h"
 #include "CalChartToolBar.h"
 #include "basic_ui.h"
-#include <algorithm>
-#include <ctype.h>
-#include <wx/spinctrl.h>
-#include <wx/statline.h>
 
 enum {
     PointPicker_PointPickerList = 1100,
@@ -37,10 +33,8 @@ EVT_LISTBOX(PointPicker_PointPickerList, PointPicker::PointPickerSelect)
 EVT_LISTBOX_DCLICK(PointPicker_PointPickerList, PointPicker::PointPickerAll)
 END_EVENT_TABLE()
 
-PointPicker::PointPicker(CalChartDoc const& shw, wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
-    : super(parent, id, caption, pos, size, style)
+PointPicker::PointPicker(CalChartDoc const& shw, wxWindow* parent)
+    : super(parent, wxID_ANY, "Select Points", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
     , mShow(shw)
 {
     CreateControls();
@@ -94,8 +88,7 @@ void PointPicker::CreateControls()
             choice->SetSelection(wxNOT_FOUND);
         });
 
-        mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition,
-            wxSize(50, 250), 0, NULL, wxLB_EXTENDED);
+        mList = new wxListBox(this, PointPicker_PointPickerList, wxDefaultPosition, wxSize(50, 250), 0, NULL, wxLB_EXTENDED);
         sizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
     }));
 
@@ -110,18 +103,14 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 void PointPicker::PointPickerSelect(wxCommandEvent&)
 {
     wxArrayInt selections;
-    size_t n = mList->GetSelections(selections);
-
-    mSelection.clear();
-    for (size_t i = 0; i < n; ++i) {
-        mSelection.insert(selections[i]);
-    }
+    auto n = mList->GetSelections(selections);
+    mSelection = SelectionList(selections.begin(), selections.end());
 }
 
 void PointPicker::Update()
 {
-    auto&& tshowLabels = mShow.GetPointsLabel();
-    std::vector<wxString> showLabels(tshowLabels.begin(), tshowLabels.end());
+    auto tshowLabels = mShow.GetPointsLabel();
+    auto showLabels = std::vector<wxString>(tshowLabels.begin(), tshowLabels.end());
     if (mCachedLabels != showLabels) {
         mCachedLabels = showLabels;
         mList->Clear();
@@ -131,8 +120,8 @@ void PointPicker::Update()
     if (mSelection != showSelectionList) {
         mList->DeselectAll();
         mSelection = showSelectionList;
-        for (auto n = mSelection.begin(); n != mSelection.end(); ++n) {
-            mList->SetSelection(*n);
+        for (auto&& n : mSelection) {
+            mList->SetSelection(n);
         }
     }
 }

@@ -38,7 +38,7 @@
 #include <wx/statline.h>
 
 ContinuityEditorPopup::ContinuityEditorPopup(wxString const& whatError, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, caption, pos, size, style, caption)
+    : super(parent, id, caption, pos, size, style, caption)
     , mWhatError(whatError)
 {
     CreateControls();

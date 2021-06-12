@@ -1,6 +1,7 @@
+#pragma once
 /*
- * show_ui.h
- * Classes for interacting with shows
+ * PointPicker.h
+ * Dialog for picking points
  */
 
 /*
@@ -20,23 +21,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "CalChartDoc.h"
+#include <vector>
 #include <wx/docview.h>
 #include <wx/wizard.h>
-
-#include <vector>
 
 class PointPicker : public wxDialog {
     using super = wxDialog;
 
 public:
-    PointPicker(CalChartDoc const& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Select Points"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    PointPicker(CalChartDoc const& shw, wxWindow* parent);
     ~PointPicker() = default;
 
     SelectionList GetSelection() const { return mSelection; }

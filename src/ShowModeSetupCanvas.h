@@ -22,8 +22,8 @@
 */
 
 #include "CalChartConfiguration.h"
+#include "CalChartShowMode.h"
 #include "basic_ui.h"
-#include "modes.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>

@@ -86,6 +86,8 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartSheet.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShowMode.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShowMode.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartTypes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_drawcommand.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_fileformat.h
@@ -97,8 +99,6 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/linmath.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/math_utils.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/math_utils.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/modes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/modes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/parse.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/print_ps.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/print_ps.h

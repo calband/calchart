@@ -21,25 +21,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "CalChartConfiguration.h"
-#include "basic_ui.h"
-#include <wx/bmpcbox.h>
-#include <wx/notebook.h>
-#include <wx/spinctrl.h>
 #include <wx/wx.h>
 
 class ShowModeDialogSetup;
+namespace CalChart {
+class ShowMode;
+}
+
 class ModeSetupDialog : public wxDialog {
+    using super = wxDialog;
     DECLARE_CLASS(ModeSetupDialog)
     DECLARE_EVENT_TABLE()
 
 public:
-    ModeSetupDialog(CalChart::ShowMode const& current_mode,
-        wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("CalChart Preferences"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ModeSetupDialog(CalChart::ShowMode const& current_mode, wxWindow* parent);
     ~ModeSetupDialog() = default;
 
     CalChart::ShowMode GetShowMode() const;

@@ -597,7 +597,7 @@ ContinuityComposerPanel::GetContinuity()
 IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 
 ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent, wxWindowID id, wxString const& caption, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : wxDialog(parent, id, caption, pos, size, style)
+    : super(parent, id, caption, pos, size, style)
 {
     // create a sizer for laying things out top down:
     mPanel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);

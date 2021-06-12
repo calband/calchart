@@ -43,7 +43,7 @@
 
 #include "CalChartAnimation.h"
 #include "CalChartSheet.h"
-#include "modes.h"
+#include "CalChartShowMode.h"
 
 #include <map>
 #include <memory>

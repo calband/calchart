@@ -1,6 +1,7 @@
+#pragma once
 /*
- * cc_preferences.h
- * Dialox box for preferences
+ * ColorSetupCanvas.h
+ * Dialox box for setting up colors
  */
 
 /*
@@ -20,8 +21,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "CalChartConfiguration.h"
 #include <nlohmann/json.hpp>
 #include <wx/bmpcbox.h>
@@ -33,13 +32,7 @@ class ColorSetupDialog : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
-    ColorSetupDialog(wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        int palette = 0,
-        const wxString& caption = wxT("Color Setup"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    ColorSetupDialog(wxWindow* parent, int palette);
     virtual ~ColorSetupDialog() = default;
 
 private:
@@ -47,8 +40,8 @@ private:
     void CreateControls();
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow() override;
-    virtual bool TransferDataFromWindow() override;
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
 
     void OnCmdSelectColors(wxCommandEvent&);
     void OnCmdSelectWidth(wxSpinEvent&);

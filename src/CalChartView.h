@@ -23,8 +23,8 @@
 #include "BackgroundImages.h"
 #include "CalChartCoord.h"
 #include "CalChartDoc.h"
+#include "CalChartShowMode.h"
 #include "CalChartTypes.h"
-#include "modes.h"
 
 #include <map>
 #include <wx/docview.h>

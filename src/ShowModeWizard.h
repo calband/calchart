@@ -1,3 +1,4 @@
+#pragma once
 /*
  * ShowModeWizard.h
  * Classes for setting up the shows
@@ -20,11 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <wx/wizard.h>
-
 #include <vector>
+#include <wx/wizard.h>
 
 class FancyTextWin;
 class wxChoice;

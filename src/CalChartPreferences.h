@@ -23,25 +23,21 @@
 #pragma once
 
 #include "CalChartConfiguration.h"
-#include <wx/bmpcbox.h>
-#include <wx/notebook.h>
-#include <wx/spinctrl.h>
 #include <wx/wx.h>
 
+class wxNotebook;
+
 class CalChartPreferences : public wxDialog {
+    using super = wxDialog;
     DECLARE_CLASS(CalChartPreferences)
     DECLARE_EVENT_TABLE()
 
 public:
-    CalChartPreferences(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("CalChart Preferences"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    CalChartPreferences(wxWindow* parent);
     ~CalChartPreferences() = default;
 
-    bool TransferDataToWindow();
-    bool TransferDataFromWindow();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
 
 private:
     void OnCmdResetAll(wxCommandEvent&);

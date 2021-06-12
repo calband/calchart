@@ -33,8 +33,8 @@
 
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
+#include "CalChartShowMode.h"
 #include "cc_omniview_constants.h"
-#include "modes.h"
 
 using namespace CalChart;
 

@@ -53,7 +53,7 @@ class FieldCanvas : public ClickDragCtrlScrollCanvas {
 
 public:
     // Basic functions
-    FieldCanvas(float def_zoom, CalChartView* view, wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER);
+    FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom);
     ~FieldCanvas() override = default;
 
     void SetView(CalChartView* view);

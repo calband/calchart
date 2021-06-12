@@ -53,8 +53,8 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(CalChartPreferences, wxDialog)
 
-CalChartPreferences::CalChartPreferences(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, caption, pos, size, style)
+CalChartPreferences::CalChartPreferences(wxWindow* parent)
+    : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
     , mConfig(CalChartConfiguration::GetGlobalConfig())
 {
     SetSizer(VStack([this](auto sizer) {
@@ -88,10 +88,9 @@ bool CalChartPreferences::TransferDataToWindow() { return true; }
 bool CalChartPreferences::TransferDataFromWindow()
 {
     // transfer everything to the config...
-    size_t pages = mNotebook->GetPageCount();
-    for (size_t i = 0; i < pages; ++i) {
-        PreferencePage* page = static_cast<PreferencePage*>(mNotebook->GetPage(i));
-        page->TransferDataFromWindow();
+    auto pages = mNotebook->GetPageCount();
+    for (auto i = 0; i < pages; ++i) {
+        static_cast<PreferencePage*>(mNotebook->GetPage(i))->TransferDataFromWindow();
     }
     CalChartConfiguration::AssignConfig(mConfig);
     return true;
@@ -100,10 +99,9 @@ bool CalChartPreferences::TransferDataFromWindow()
 void CalChartPreferences::OnCmdResetAll(wxCommandEvent&)
 {
     // transfer everything to the config...
-    size_t pages = mNotebook->GetPageCount();
-    for (size_t i = 0; i < pages; ++i) {
-        PreferencePage* page = static_cast<PreferencePage*>(mNotebook->GetPage(i));
-        page->ClearValuesToDefault();
+    auto pages = mNotebook->GetPageCount();
+    for (auto i = 0; i < pages; ++i) {
+        static_cast<PreferencePage*>(mNotebook->GetPage(i))->ClearValuesToDefault();
     }
     CalChartConfiguration::AssignConfig(mConfig);
 }

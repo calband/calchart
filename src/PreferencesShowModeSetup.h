@@ -24,7 +24,7 @@
 #include "PreferencesUtils.h"
 
 #include "CalChartConfiguration.h"
-#include "modes.h"
+#include "CalChartShowMode.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>

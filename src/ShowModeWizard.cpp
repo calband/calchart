@@ -23,8 +23,8 @@
 #include "ShowModeWizard.h"
 #include "CalChartApp.h"
 #include "CalChartConfiguration.h"
+#include "CalChartShowMode.h"
 #include "basic_ui.h"
-#include "modes.h"
 
 #include <wx/wx.h>
 

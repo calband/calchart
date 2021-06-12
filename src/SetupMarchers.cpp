@@ -20,6 +20,7 @@
 */
 
 #include "SetupMarchers.h"
+#include "CalChartDoc.h"
 #include "CalChartSheet.h"
 #include "CalChartToolBar.h"
 #include "basic_ui.h"
@@ -28,7 +29,7 @@
 #include <wx/spinctrl.h>
 #include <wx/statline.h>
 
-static const size_t kMaxPoints = 1000;
+static constexpr auto kMaxPoints = 1000;
 
 // returns [letters, use_letters, maxnum]
 static std::tuple<std::set<unsigned>, bool, long> CalculateLabels(std::vector<std::string> labels);
@@ -39,7 +40,6 @@ enum {
     SetupMarchers_ID_LABEL_TYPE,
     SetupMarchers_ID_POINTS_PER_LETTER,
     SetupMarchers_ID_LABEL_LETTERS,
-    SetupMarchers_ID_RESET,
 };
 
 BEGIN_EVENT_TABLE(SetupMarchers, wxDialog)
@@ -49,24 +49,11 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(SetupMarchers, wxDialog)
 
-SetupMarchers::SetupMarchers(CalChartDoc& shw, wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
-    : mNumberColumns(8)
+SetupMarchers::SetupMarchers(CalChartDoc& shw, wxWindow* parent)
+    : super(parent, wxID_ANY, "Setup Marchers", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
+    , mNumberColumns(8)
     , mShow(shw)
 {
-    Create(parent, id, caption, pos, size, style);
-}
-
-SetupMarchers::~SetupMarchers() { }
-
-bool SetupMarchers::Create(wxWindow* parent, wxWindowID id,
-    const wxString& caption, const wxPoint& pos,
-    const wxSize& size, long style)
-{
-    if (!wxDialog::Create(parent, id, caption, pos, size, style))
-        return false;
-
     CreateControls();
 
     // This fits the dalog to the minimum size dictated by the sizers
@@ -78,6 +65,8 @@ bool SetupMarchers::Create(wxWindow* parent, wxWindowID id,
 
     return true;
 }
+
+SetupMarchers::~SetupMarchers() { }
 
 static void EnableLetter(wxWindow& window, bool letters)
 {
@@ -103,17 +92,13 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
                 // add the left side
                 HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
                     CreateText(parent, sizer, "&Points:");
-                    wxSpinCtrl* numPoints = new wxSpinCtrl(
-                        parent, SetupMarchers_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition,
-                        wxSize(60, -1), wxSP_ARROW_KEYS, 1, kMaxPoints, 10);
+                    auto numPoints = new wxSpinCtrl(parent, SetupMarchers_ID_POINTS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, kMaxPoints, 10);
                     sizer->Add(numPoints, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                 });
 
                 HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
                     CreateText(parent, sizer, "&Columns:");
-                    wxSpinCtrl* numberColumns = new wxSpinCtrl(
-                        parent, SetupMarchers_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition,
-                        wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
+                    auto numberColumns = new wxSpinCtrl(parent, SetupMarchers_ID_COLUMNS_SPIN, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 0, kMaxPoints, 10);
                     sizer->Add(numberColumns, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                 });
 
@@ -124,9 +109,7 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
 
                 HStack(sizer, BasicSizerFlags(), [parent](auto sizer) {
                     CreateText(parent, sizer, "P&oints per letter");
-                    wxSpinCtrl* lettersize = new wxSpinCtrl(
-                        parent, SetupMarchers_ID_POINTS_PER_LETTER, wxEmptyString,
-                        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 99, 10);
+                    auto lettersize = new wxSpinCtrl(parent, SetupMarchers_ID_POINTS_PER_LETTER, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 99, 10);
                     sizer->Add(lettersize, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
                 });
             });
@@ -134,14 +117,13 @@ static void LayoutShowInfo(wxWindow* parent, bool putLastRowButtons)
             VStack(sizer, [parent](auto sizer) {
                 // now add right side
                 NamedHBoxStack(parent, sizer, "&Letters", [parent](auto sizer) {
-                    wxListBox* labels = new wxListBox(parent, SetupMarchers_ID_LABEL_LETTERS, wxDefaultPosition,
-                        wxDefaultSize, 0, NULL, wxLB_EXTENDED);
-                    for (int i = 0; i < 26; ++i) {
+                    auto labels = new wxListBox(parent, SetupMarchers_ID_LABEL_LETTERS, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+                    for (auto i = 0; i < 26; ++i) {
                         wxString buf(static_cast<char>('A' + i));
                         buf += wxString(static_cast<char>('A' + i));
                         labels->InsertItems(1, &buf, i);
                     }
-                    for (int i = 0; i < 26; ++i) {
+                    for (auto i = 0; i < 26; ++i) {
                         wxString buf(static_cast<char>('A' + i));
                         labels->InsertItems(1, &buf, i);
                     }
@@ -193,11 +175,9 @@ static auto GenLetterLabels(int numPerLetter, int num, wxListBox const* label_le
         auto letr = 0;
         while (num > 0) {
             if (label_letters->IsSelected(letr)) {
-                int n = std::min(num, numPerLetter);
-                for (int i = 0; i < n; ++i) {
-                    wxString buffer;
-                    buffer.Printf(wxT("%s%u"), label_letters->GetString(letr), i);
-                    results.push_back({ buffer, kDefaultInstrument });
+                auto n = std::min(num, numPerLetter);
+                for (auto i = 0; i < n; ++i) {
+                    results.push_back({ label_letters->GetString(letr) + std::to_string(i), kDefaultInstrument });
                 }
                 num -= n;
             }
@@ -224,22 +204,20 @@ static auto GenLetterLabels(int numPerLetter, int num, wxListBox const* label_le
 }
 
 // Validate is to give verify show layout to both wizard and dialog
-static bool ValidateInfo(wxWindow* parent)
+static auto ValidateInfo(wxWindow* parent)
 {
-    wxChoice* labelType = (wxChoice*)parent->FindWindow(SetupMarchers_ID_LABEL_TYPE);
+    auto labelType = static_cast<wxChoice*>(parent->FindWindow(SetupMarchers_ID_LABEL_TYPE));
     if (labelType->GetSelection() == 0) {
         return true;
     }
-    wxSpinCtrl* pointsCtrl = (wxSpinCtrl*)parent->FindWindow(SetupMarchers_ID_POINTS_SPIN);
-    wxSpinCtrl* pointsPerLine = (wxSpinCtrl*)parent->FindWindow(SetupMarchers_ID_POINTS_PER_LETTER);
-    wxListBox* label_letters = (wxListBox*)parent->FindWindow(SetupMarchers_ID_LABEL_LETTERS);
 
-    int num = pointsPerLine->GetValue();
-    int numlabels = NumberLabelsSet(label_letters);
-    bool canDo = (numlabels == 0) || (num * numlabels >= pointsCtrl->GetValue());
-    if (!canDo)
-        wxMessageBox(wxT("There are not enough labels defined."),
-            wxT("Set labels"));
+    auto num = static_cast<wxSpinCtrl*>(parent->FindWindow(SetupMarchers_ID_POINTS_PER_LETTER))->GetValue();
+    auto numlabels = NumberLabelsSet(static_cast<wxListBox*>(parent->FindWindow(SetupMarchers_ID_LABEL_LETTERS)));
+    auto pointsCtrl = static_cast<wxSpinCtrl*>(parent->FindWindow(SetupMarchers_ID_POINTS_SPIN));
+    auto canDo = (numlabels == 0) || (num * numlabels >= pointsCtrl->GetValue());
+    if (!canDo) {
+        wxMessageBox("There are not enough labels defined.", "Set labels");
+    }
     return canDo;
 }
 
@@ -252,11 +230,11 @@ bool SetupMarchers::TransferDataToWindow()
 {
     auto [letters, use_letters, maxnum] = CalculateLabels(mShow.GetPointsLabel());
 
-    wxSpinCtrl* pointsCtrl = (wxSpinCtrl*)FindWindow(SetupMarchers_ID_POINTS_SPIN);
-    wxSpinCtrl* columnsCtrl = (wxSpinCtrl*)FindWindow(SetupMarchers_ID_COLUMNS_SPIN);
-    wxChoice* labelType = (wxChoice*)FindWindow(SetupMarchers_ID_LABEL_TYPE);
-    wxSpinCtrl* pointsPerLine = (wxSpinCtrl*)FindWindow(SetupMarchers_ID_POINTS_PER_LETTER);
-    wxListBox* label_letters = (wxListBox*)FindWindow(SetupMarchers_ID_LABEL_LETTERS);
+    auto pointsCtrl = static_cast<wxSpinCtrl*>(FindWindow(SetupMarchers_ID_POINTS_SPIN));
+    auto columnsCtrl = static_cast<wxSpinCtrl*>(FindWindow(SetupMarchers_ID_COLUMNS_SPIN));
+    auto labelType = static_cast<wxChoice*>(FindWindow(SetupMarchers_ID_LABEL_TYPE));
+    auto pointsPerLine = static_cast<wxSpinCtrl*>(FindWindow(SetupMarchers_ID_POINTS_PER_LETTER));
+    auto label_letters = static_cast<wxListBox*>(FindWindow(SetupMarchers_ID_LABEL_LETTERS));
 
     pointsCtrl->SetValue(mShow.GetNumPoints());
     columnsCtrl->SetValue(mNumberColumns);
@@ -274,11 +252,11 @@ bool SetupMarchers::TransferDataToWindow()
 
 bool SetupMarchers::TransferDataFromWindow()
 {
-    auto pointsCtrl = (wxSpinCtrl const*)FindWindow(SetupMarchers_ID_POINTS_SPIN);
-    auto columnsCtrl = (wxSpinCtrl const*)FindWindow(SetupMarchers_ID_COLUMNS_SPIN);
-    auto labelType = (wxChoice const*)FindWindow(SetupMarchers_ID_LABEL_TYPE);
-    auto pointsPerLine = (wxSpinCtrl const*)FindWindow(SetupMarchers_ID_POINTS_PER_LETTER);
-    auto label_letters = (wxListBox const*)FindWindow(SetupMarchers_ID_LABEL_LETTERS);
+    auto pointsCtrl = static_cast<wxSpinCtrl const*>(FindWindow(SetupMarchers_ID_POINTS_SPIN));
+    auto columnsCtrl = static_cast<wxSpinCtrl const*>(FindWindow(SetupMarchers_ID_COLUMNS_SPIN));
+    auto labelType = static_cast<wxChoice const*>(FindWindow(SetupMarchers_ID_LABEL_TYPE));
+    auto pointsPerLine = static_cast<wxSpinCtrl const*>(FindWindow(SetupMarchers_ID_POINTS_PER_LETTER));
+    auto label_letters = static_cast<wxListBox const*>(FindWindow(SetupMarchers_ID_LABEL_LETTERS));
 
     auto numberPoints = pointsCtrl->GetValue();
     mNumberColumns = columnsCtrl->GetValue();
@@ -349,11 +327,11 @@ bool SetupMarchersWizard::TransferDataToWindow()
 {
     // on first time, we need to set up values
     if (mTransferDataToWindowFirstTime) {
-        wxSpinCtrl* pointsCtrl = (wxSpinCtrl*)FindWindow(SetupMarchers_ID_POINTS_SPIN);
-        wxSpinCtrl* columnsCtrl = (wxSpinCtrl*)FindWindow(SetupMarchers_ID_COLUMNS_SPIN);
-        wxChoice* labelType = (wxChoice*)FindWindow(SetupMarchers_ID_LABEL_TYPE);
-        wxSpinCtrl* pointsPerLine = (wxSpinCtrl*)FindWindow(SetupMarchers_ID_POINTS_PER_LETTER);
-        wxListBox* label_letters = (wxListBox*)FindWindow(SetupMarchers_ID_LABEL_LETTERS);
+        auto pointsCtrl = static_cast<wxSpinCtrl*>(FindWindow(SetupMarchers_ID_POINTS_SPIN));
+        auto columnsCtrl = static_cast<wxSpinCtrl*>(FindWindow(SetupMarchers_ID_COLUMNS_SPIN));
+        auto labelType = static_cast<wxChoice*>(FindWindow(SetupMarchers_ID_LABEL_TYPE));
+        auto pointsPerLine = static_cast<wxSpinCtrl*>(FindWindow(SetupMarchers_ID_POINTS_PER_LETTER));
+        auto label_letters = static_cast<wxListBox*>(FindWindow(SetupMarchers_ID_LABEL_LETTERS));
 
         pointsCtrl->SetValue(1);
         columnsCtrl->SetValue(mNumberColumns);
@@ -368,11 +346,11 @@ bool SetupMarchersWizard::TransferDataToWindow()
 
 bool SetupMarchersWizard::TransferDataFromWindow()
 {
-    auto pointsCtrl = (wxSpinCtrl const*)FindWindow(SetupMarchers_ID_POINTS_SPIN);
-    auto columnsCtrl = (wxSpinCtrl const*)FindWindow(SetupMarchers_ID_COLUMNS_SPIN);
-    auto labelType = (wxChoice const*)FindWindow(SetupMarchers_ID_LABEL_TYPE);
-    auto pointsPerLine = (wxSpinCtrl const*)FindWindow(SetupMarchers_ID_POINTS_PER_LETTER);
-    auto label_letters = (wxListBox const*)FindWindow(SetupMarchers_ID_LABEL_LETTERS);
+    auto pointsCtrl = static_cast<wxSpinCtrl const*>(FindWindow(SetupMarchers_ID_POINTS_SPIN));
+    auto columnsCtrl = static_cast<wxSpinCtrl const*>(FindWindow(SetupMarchers_ID_COLUMNS_SPIN));
+    auto labelType = static_cast<wxChoice const*>(FindWindow(SetupMarchers_ID_LABEL_TYPE));
+    auto pointsPerLine = static_cast<wxSpinCtrl const*>(FindWindow(SetupMarchers_ID_POINTS_PER_LETTER));
+    auto label_letters = static_cast<wxListBox const*>(FindWindow(SetupMarchers_ID_LABEL_LETTERS));
 
     auto numberPoints = pointsCtrl->GetValue();
     mNumberColumns = columnsCtrl->GetValue();

@@ -23,7 +23,7 @@
 
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
-#include "modes.h"
+#include "CalChartShowMode.h"
 
 #include "prolog0.h"
 #include "prolog1.h"

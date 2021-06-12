@@ -21,9 +21,9 @@
 */
 
 #include "ShowModeSetupCanvas.h"
+#include "CalChartShowMode.h"
 #include "basic_ui.h"
 #include "draw.h"
-#include "modes.h"
 
 #include <wx/dcbuffer.h>
 
