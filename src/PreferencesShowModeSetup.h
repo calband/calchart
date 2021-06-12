@@ -34,35 +34,31 @@ const int zoom_amounts[] = { 500, 200, 150, 100, 75, 50, 25, 10 };
 constexpr auto defaultZoom = 3;
 
 class ShowModeSetup : public PreferencePage {
+    using super = PreferencePage;
     DECLARE_CLASS(ShowModeSetup)
 
 public:
-    ShowModeSetup(CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Setup Modes"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
-        : PreferencePage(config)
+    ShowModeSetup(CalChartConfiguration& config, wxWindow* parent)
+        : super(config)
     {
         Init();
-        Create(parent, id, caption, pos, size, style);
+        Create(parent, "Setup Modes");
     }
-    ~ShowModeSetup() { }
+    ~ShowModeSetup() override = default;
 
-    virtual void Init();
-    virtual void CreateControls();
+    void Init() override;
+    void CreateControls() override;
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-    virtual bool ClearValuesToDefault();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool ClearValuesToDefault() override;
 
 private:
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice();
     CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];
     CalChart::ShowMode::YardLinesInfo_t mYardText;
-    int mWhichMode;
-    int mWhichYardLine;
+    int mWhichMode{};
+    int mWhichYardLine{};
 };

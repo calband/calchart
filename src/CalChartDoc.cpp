@@ -29,8 +29,6 @@
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
 #include "ContinuityEditorPopup.h"
-#include "cc_fileformat.h"
-#include "cc_parse_errors.h"
 #include "draw.h"
 #include "math_utils.h"
 #include "platconf.h"

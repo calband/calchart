@@ -72,9 +72,9 @@ auto GetImageDir()
     return kImageDir;
 }
 
-static const auto kStartingViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
-static const auto kStartingViewAngle = static_cast<float>(kViewAngle_1);
-static const auto kStartingViewAngleZ = static_cast<float>(kViewAngle_z_1);
+static constexpr auto kStartingViewPoint = ViewPoint{ kViewPoint_x_1, kViewPoint_y_1, kViewPoint_z_1 };
+static constexpr auto kStartingViewAngle = kViewAngle_1;
+static constexpr auto kStartingViewAngleZ = kViewAngle_z_1;
 
 enum WhichImage {
     kImageFirst = 0,
@@ -162,7 +162,7 @@ std::map<WhichImage, std::string> ListOfImageFiles = {
     { WhichImage::kEndOfShow, "endofshow.tga" }
 };
 
-enum WhichMarchingStyle {
+enum class WhichMarchingStyle {
     kClosed,
     kLeftHSHup,
     kRightHSHup,
@@ -205,7 +205,7 @@ static void CheckGLError()
     }
 }
 
-static auto LoadTextureWithImage(wxImage const& image, GLuint& texture)
+static auto LoadTextureWithImage(wxImage const& image, GLuint const& texture)
 {
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -235,7 +235,7 @@ static auto LoadTextureWithImage(wxImage const& image, GLuint& texture)
     return true;
 }
 
-static auto LoadTexture(wxString const& filename, GLuint& texture)
+static auto LoadTexture(wxString const& filename, GLuint const& texture)
 {
     wxImage image;
     if (!image.LoadFile(filename)) {
@@ -275,7 +275,7 @@ auto GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirecti
 {
     // Returns which direction they are facing in regards to the camera.
     float relativeAngle = marcherDirection - cameraAngleToMarcher; // convert to relative angle;
-    relativeAngle = NormalizeAngle(relativeAngle);
+    relativeAngle = NormalizeAngleRad(relativeAngle);
 
     if (cameraAngleToMarcher >= 1.0 * M_PI / 8.0 && cameraAngleToMarcher < 3.0 * M_PI / 8.0) {
         y1 += 0.45f;
@@ -534,7 +534,7 @@ void CCOmniView_GLContext::DrawField(float FieldEW, float FieldNS, bool crowdOn)
 
 void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info, ViewPoint const& viewpoint, WhichMarchingStyle style)
 {
-    auto ang = NormalizeAngle(GetAngle(info.x, info.y, viewpoint));
+    auto ang = NormalizeAngleRad(GetAngle(info.x, info.y, viewpoint));
     auto dir = info.direction;
 
     auto x2 = info.x;
@@ -548,10 +548,10 @@ void CCOmniView_GLContext::Draw3dMarcher(const MarcherInfo& info, ViewPoint cons
 
     // if we want to modify the marching:
     switch (style) {
-    case kLeftHSHup:
+    case WhichMarchingStyle::kLeftHSHup:
         face = static_cast<WhichImage>(face + kF1);
         break;
-    case kRightHSHup:
+    case WhichMarchingStyle::kRightHSHup:
         face = static_cast<WhichImage>(face + kF2);
         break;
     default:
@@ -716,7 +716,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
     if (mView) {
         auto marchers = mView->GetMarchersByDistance(mViewPoint);
         for (auto i = marchers.rbegin(); i != marchers.rend(); ++i) {
-            m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mView->OnBeat() ? kLeftHSHup : kRightHSHup) : kClosed);
+            m_glContext->Draw3dMarcher(i->second, mViewPoint, mShowMarching ? (mView->OnBeat() ? WhichMarchingStyle::kLeftHSHup : WhichMarchingStyle::kRightHSHup) : WhichMarchingStyle::kClosed);
         }
     }
 
@@ -738,7 +738,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '!') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = NormalizeAngle(mViewAngle + M_PI);
+            mViewAngle = NormalizeAngleRad(mViewAngle + M_PI);
         }
         break;
     case '2':
@@ -750,7 +750,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '@') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = NormalizeAngle(mViewAngle + M_PI);
+            mViewAngle = NormalizeAngleRad(mViewAngle + M_PI);
         }
         break;
     case '3':
@@ -762,7 +762,7 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
         if (event.GetKeyCode() == '#') {
             mViewPoint.y *= -1;
             mViewPoint.x *= -1;
-            mViewAngle = NormalizeAngle(mViewAngle + M_PI);
+            mViewAngle = NormalizeAngleRad(mViewAngle + M_PI);
         }
         break;
 
@@ -835,12 +835,12 @@ void CCOmniviewCanvas::OnChar(wxKeyEvent& event)
     case 'q':
         OnCmd_FollowMarcher(-1);
         mViewAngle += AngleStepIncr;
-        mViewAngle = NormalizeAngle(mViewAngle);
+        mViewAngle = NormalizeAngleRad(mViewAngle);
         break;
     case 'e':
         OnCmd_FollowMarcher(-1);
         mViewAngle -= AngleStepIncr;
-        mViewAngle = NormalizeAngle(mViewAngle);
+        mViewAngle = NormalizeAngleRad(mViewAngle);
         break;
     case 'r':
         OnCmd_FollowMarcher(-1);

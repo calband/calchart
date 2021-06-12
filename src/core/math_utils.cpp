@@ -28,21 +28,6 @@
 #include <list>
 #include <tuple>
 
-float BoundDirectionSigned(float f)
-{
-    while (f >= 180.0)
-        f -= 360.0;
-    while (f < -180.0)
-        f += 360.0;
-    return f;
-}
-
-bool IsDiagonalDirection(float f)
-{
-    f = BoundDirection(f);
-    return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) || IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
-}
-
 CalChart::Coord CreateVector(float dir, float mag)
 {
     dir = BoundDirection(dir);
@@ -56,20 +41,5 @@ CalChart::Coord CreateVector(float dir, float mag)
     } else {
         return { Float2CoordUnits(mag * cos(Deg2Rad(dir))),
             Float2CoordUnits(mag * -sin(Deg2Rad(dir))) };
-    }
-}
-
-std::tuple<float, float> CreateUnitVector(float dir)
-{
-    dir = BoundDirection(dir);
-    if (IsDiagonalDirection(dir)) {
-        std::tuple<float, float> result{ 1.0, 1.0 };
-        if ((dir > 50.0) && (dir < 310.0))
-            std::get<0>(result) = -std::get<0>(result);
-        if (dir < 180.0)
-            std::get<1>(result) = -std::get<0>(result);
-        return result;
-    } else {
-        return std::tuple<float, float>{ cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
     }
 }

@@ -61,11 +61,11 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent)
         mNotebook = new wxNotebook(this, wxID_ANY);
         sizer->Add(mNotebook, BasicSizerFlags());
 
-        mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook, wxID_ANY), wxT("General"));
-        mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook, wxID_ANY), wxT("Continuity"));
-        mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook, wxID_ANY), wxT("Drawing"));
-        mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook, wxID_ANY), wxT("PS Printing"));
-        mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook, wxID_ANY), wxT("Show Mode Setup"));
+        mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook), wxT("General"));
+        mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook), wxT("Continuity"));
+        mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook), wxT("Drawing"));
+        mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook), wxT("PS Printing"));
+        mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook), wxT("Show Mode Setup"));
 
         // the buttons on the bottom
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {

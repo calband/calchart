@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cc_fileformat.h
+ * CalChartFileFormat.h
  * File format layout and utilities
  */
 

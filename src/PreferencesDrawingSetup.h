@@ -28,30 +28,26 @@
 #include <wx/wx.h>
 
 class DrawingSetup : public PreferencePage {
+    using super = PreferencePage;
     DECLARE_CLASS(DrawingSetup)
     DECLARE_EVENT_TABLE()
 
 public:
-    DrawingSetup(CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("General Setup"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
-        : PreferencePage(config)
+    DrawingSetup(CalChartConfiguration& config, wxWindow* parent)
+        : super(config)
     {
         Init();
-        Create(parent, id, caption, pos, size, style);
+        Create(parent, "General Setup");
     }
-    virtual ~DrawingSetup() { }
+    ~DrawingSetup() override = default;
 
-    virtual void Init();
-    virtual void CreateControls();
+    void Init() override;
+    void CreateControls() override;
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-    virtual bool ClearValuesToDefault();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool ClearValuesToDefault() override;
 
 private:
     void OnCmdSelectColors();
@@ -67,9 +63,9 @@ private:
     void SetColor(int selection, int width, const wxColour& color);
     void SetPaletteColor(int selection, const wxColour& color);
     void SetPaletteName(int selection, const wxString& name);
-    wxBitmapComboBox* mNameBox;
-    wxBitmapComboBox* mPaletteNameBox;
-    wxSpinCtrl* spin;
+    wxBitmapComboBox* mNameBox{};
+    wxBitmapComboBox* mPaletteNameBox{};
+    wxSpinCtrl* spin{};
 
     int mActiveColorPalette{};
     std::vector<wxString> mColorPaletteNames;
@@ -77,5 +73,5 @@ private:
     wxPen mCalChartPens[kNumberPalettes][COLOR_NUM];
     wxBrush mCalChartBrushes[kNumberPalettes][COLOR_NUM];
 
-    double mDrawingValues[6];
+    double mDrawingValues[6]{};
 };

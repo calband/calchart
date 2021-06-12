@@ -24,8 +24,8 @@
 #include <cmath>
 #include <numeric>
 
+#include "CalChartDrawCommand.h"
 #include "CalChartShapes.h"
-#include "cc_drawcommand.h"
 
 namespace CalChart {
 

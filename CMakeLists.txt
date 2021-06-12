@@ -72,6 +72,8 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartContinuityToken.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartCoord.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartDrawCommand.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartFileFormat.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartImage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartImage.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartMovePointsTool.cpp
@@ -88,12 +90,9 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShow.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShowMode.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartShowMode.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartText.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartText.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/CalChartTypes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_drawcommand.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_fileformat.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_parse_errors.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/cc_text.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/e7_transition_solver.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/linmath.h

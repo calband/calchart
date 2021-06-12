@@ -52,7 +52,6 @@
 #include "SetupMarchers.h"
 #include "TransitionSolverFrame.h"
 #include "TransitionSolverView.h"
-#include "cc_fileformat.h"
 #include "ccvers.h"
 #include "draw.h"
 #include "platconf.h"

@@ -24,6 +24,7 @@
 #include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
 #include "CalChartDoc.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
@@ -34,7 +35,6 @@
 #include "ModeSetupDialog.h"
 #include "PreferencesUtils.h"
 #include "ShowModeSetupCanvas.h"
-#include "cc_drawcommand.h"
 #include "draw.h"
 
 #include <wx/colordlg.h>

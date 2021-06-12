@@ -23,9 +23,8 @@
 #include "CalChartSheet.h"
 
 #include "CalChartAnimationCommand.h"
+#include "CalChartFileFormat.h"
 #include "CalChartShow.h"
-#include "cc_fileformat.h"
-#include "cc_parse_errors.h"
 #include "viewer_translate.h"
 
 #include <algorithm>
@@ -401,7 +400,7 @@ Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandle
         if ((strlen(print_name) + 1 + strlen(print_cont) + 1) != size) {
             throw CC_FileException("Bad Print cont chunk", INGL_PCNT);
         }
-        sheet->mPrintableContinuity = Print_continuity(print_name, print_cont);
+        sheet->mPrintableContinuity = PrintContinuity(print_name, print_cont);
     };
     auto parse_INGL_BACK = [](Sheet* sheet, uint8_t const* ptr, size_t size) {
         auto end_ptr = ptr + size;
@@ -681,7 +680,7 @@ void Sheet::SetPosition(Coord val, unsigned i, unsigned ref)
 
 void Sheet::SetPrintableContinuity(std::string const& name, std::string const& lines)
 {
-    mPrintableContinuity = Print_continuity(name, lines);
+    mPrintableContinuity = PrintContinuity(name, lines);
 }
 
 Textline_list Sheet::GetPrintableContinuity() const
@@ -800,7 +799,7 @@ void Sheet::sheet_round_trip_test()
         blank_sheet.SetPosition(Coord(52, 50), 0, 3);
         blank_sheet.SetBeats(13);
         blank_sheet.mAnimationContinuity.at(SYMBOL_PLAIN) = Continuity{ "MT E REM" };
-        blank_sheet.mPrintableContinuity = Print_continuity{
+        blank_sheet.mPrintableContinuity = PrintContinuity{
             "number 1", "duuuude, writing this testing is boring"
         };
         auto blank_sheet_data = blank_sheet.SerializeSheet();

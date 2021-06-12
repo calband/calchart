@@ -331,7 +331,7 @@ MarcherInfo AnimationView::GetMarcherInfo(int which) const
     MarcherInfo info{};
     if (mAnimation) {
         auto anim_info = mAnimation->GetAnimateInfo(which);
-        info.direction = NormalizeAngle((anim_info.mRealDirection * M_PI / 180.0));
+        info.direction = NormalizeAngleRad((anim_info.mRealDirection * M_PI / 180.0));
 
         auto position = anim_info.mPosition;
         info.x = CoordUnits2Float(position.x);

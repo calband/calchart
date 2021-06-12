@@ -57,12 +57,52 @@ constexpr T BoundDirection(T f)
 }
 
 template <typename T>
+constexpr T BoundDirectionRad(T f)
+{
+    while (f >= 2 * M_PI)
+        f -= 2 * M_PI;
+    while (f < 0.0)
+        f += 2 * M_PI;
+    return f;
+}
+
+template <typename T>
 constexpr T NormalizeAngle(T ang) { return BoundDirection(ang); }
 
-float BoundDirectionSigned(float f);
+template <typename T>
+constexpr T NormalizeAngleRad(T ang) { return BoundDirectionRad(ang); }
 
-bool IsDiagonalDirection(float f);
+template <typename T>
+T BoundDirectionSigned(T f)
+{
+    while (f >= 180.0)
+        f -= 360.0;
+    while (f < -180.0)
+        f += 360.0;
+    return f;
+}
+
+template <typename T>
+auto IsDiagonalDirection(T f)
+{
+    f = BoundDirection(f);
+    return (IS_ZERO(f - 45.0) || IS_ZERO(f - 135.0) || IS_ZERO(f - 225.0) || IS_ZERO(f - 315.0));
+}
+
+template <typename T>
+std::tuple<T, T> CreateUnitVector(T dir)
+{
+    dir = BoundDirection(dir);
+    if (IsDiagonalDirection(dir)) {
+        std::tuple<T, T> result{ 1.0, 1.0 };
+        if ((dir > 50.0) && (dir < 310.0))
+            std::get<0>(result) = -std::get<0>(result);
+        if (dir < 180.0)
+            std::get<1>(result) = -std::get<0>(result);
+        return result;
+    } else {
+        return std::tuple<T, T>{ cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
+    }
+}
 
 CalChart::Coord CreateVector(float dir, float mag);
-
-std::tuple<float, float> CreateUnitVector(float dir);

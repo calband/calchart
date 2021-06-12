@@ -23,7 +23,7 @@
 #include "ColorSetupCanvas.h"
 #include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
-#include "cc_drawcommand.h"
+#include "CalChartDrawCommand.h"
 #include "draw.h"
 
 #include <wx/dcbuffer.h>

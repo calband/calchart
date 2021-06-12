@@ -22,27 +22,8 @@
 
 #include "PreferencesPSPrintingSetup.h"
 #include "CalChartConfiguration.h"
-#include "CalChartContinuityToken.h"
-#include "CalChartDoc.h"
-#include "CalChartShapes.h"
-#include "CalChartSheet.h"
-#include "CalChartShowMode.h"
-#include "CalChartSizes.h"
-#include "ColorSetupCanvas.h"
-#include "ContinuityBrowserPanel.h"
-#include "ContinuityComposerDialog.h"
-#include "ModeSetupDialog.h"
-#include "PreferencesUtils.h"
-#include "ShowModeSetupCanvas.h"
-#include "cc_drawcommand.h"
-#include "draw.h"
 
-#include <wx/colordlg.h>
-#include <wx/dcbuffer.h>
 #include <wx/listbook.h>
-#include <wx/notebook.h>
-#include <wx/statline.h>
-#include <wx/stattext.h>
 
 using namespace CalChart;
 

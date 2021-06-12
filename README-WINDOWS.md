@@ -9,7 +9,7 @@ Get the latest cygwin (I used 2.10.0).  Set up with the standard instation, and 
 packages:
 
 * git
-* make
+* cmake
 * bison
 * flex
 

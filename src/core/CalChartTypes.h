@@ -54,6 +54,15 @@ namespace CalChart {
 std::string GetNameForSymbol(SYMBOL_TYPE which);
 std::string GetLongNameForSymbol(SYMBOL_TYPE which);
 SYMBOL_TYPE GetSymbolForName(const std::string& name);
+
+// error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
+// return a string of what to try parsing.
+using ContinuityParseCorrection_t = std::function<std::string(std::string const&, std::string const&, int line, int column)>;
+
+struct ParseErrorHandlers {
+    ContinuityParseCorrection_t mContinuityParseCorrectionHandler;
+};
+
 }
 
 typedef std::set<int> SelectionList;

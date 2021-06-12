@@ -28,27 +28,28 @@
 ///
 
 class GeneralSetup : public PreferencePage {
+    using super = PreferencePage;
     DECLARE_CLASS(GeneralSetup)
     DECLARE_EVENT_TABLE()
 
 public:
-    GeneralSetup(CalChartConfiguration& config, wxWindow* parent, wxWindowID id = wxID_ANY, wxString const& caption = wxT("General Setup"), wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    virtual ~GeneralSetup() = default;
+    GeneralSetup(CalChartConfiguration& config, wxWindow* parent);
+    ~GeneralSetup() override = default;
 
-    virtual void Init() override;
-    virtual void CreateControls() override;
+    void Init() override;
+    void CreateControls() override;
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow() override;
-    virtual bool TransferDataFromWindow() override;
-    virtual bool ClearValuesToDefault() override;
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool ClearValuesToDefault() override;
 
 private:
     void OnCmdResetAll(wxCommandEvent&);
 
-    wxString mAutoSave_Interval;
-    bool mBeep_On_Collisions;
-    bool mScroll_Natural;
-    bool mSetSheet_Undo;
-    bool mSelection_Undo;
+    wxString mAutoSave_Interval{};
+    bool mBeep_On_Collisions{};
+    bool mScroll_Natural{};
+    bool mSetSheet_Undo{};
+    bool mSelection_Undo{};
 };

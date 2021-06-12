@@ -25,7 +25,7 @@
 
 #include "CalChartAnimation.h"
 #include "CalChartAnimationCommand.h"
-#include "cc_drawcommand.h"
+#include "CalChartDrawCommand.h"
 #include "math_utils.h"
 #include "viewer_translate.h"
 

@@ -23,11 +23,11 @@
 #include "FieldCanvas.h"
 
 #include "CalChartConfiguration.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartFrame.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartShapes.h"
 #include "CalChartView.h"
-#include "cc_drawcommand.h"
 #include "draw.h"
 
 #include <wx/dcbuffer.h>
