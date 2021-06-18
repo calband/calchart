@@ -1,6 +1,6 @@
 #pragma once
 /*
- * modes.h
+ * CalChartShowMode.h
  * Definitions for the show mode classes
  */
 

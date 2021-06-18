@@ -22,12 +22,12 @@
 
 #include "FieldCanvas.h"
 
+#include "CalChartConfiguration.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartFrame.h"
 #include "CalChartMovePointsTool.h"
 #include "CalChartShapes.h"
 #include "CalChartView.h"
-#include "cc_drawcommand.h"
-#include "confgr.h"
 #include "draw.h"
 
 #include <wx/dcbuffer.h>
@@ -64,8 +64,8 @@ EVT_MOUSEWHEEL(FieldCanvas::OnMouseWheel)
 END_EVENT_TABLE()
 
 // Define a constructor for field canvas
-FieldCanvas::FieldCanvas(float def_zoom, CalChartView* view, wxWindow* parent, wxWindowID winid, wxPoint const& pos, wxSize const& size, long style)
-    : super(parent, winid, pos, size, style)
+FieldCanvas::FieldCanvas(wxWindow* parent, CalChartView* view, float def_zoom)
+    : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER)
     , mView(view)
 {
     Init();

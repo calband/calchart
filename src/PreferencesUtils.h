@@ -21,14 +21,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "CalChartConfiguration.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include <wx/wx.h>
 
 // the basic class panel we use for all the pages.
 // Each page gets a references to the CalChartConfig which will be used for
 // getting and setting
 class PreferencePage : public wxPanel {
+    using super = wxPanel;
     DECLARE_ABSTRACT_CLASS(GeneralSetup)
 public:
     PreferencePage(CalChartConfiguration& config)
@@ -36,12 +37,11 @@ public:
     {
         Init();
     }
-    virtual ~PreferencePage() { }
+    ~PreferencePage() override = default;
     virtual void Init() { }
-    virtual bool Create(wxWindow* parent, wxWindowID id, const wxString& caption,
-        const wxPoint& pos, const wxSize& size, long style)
+    virtual bool Create(wxWindow* parent, const wxString& caption)
     {
-        if (!wxPanel::Create(parent, id, pos, size, style, caption))
+        if (!super::Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption))
             return false;
         CreateControls();
         GetSizer()->Fit(this);

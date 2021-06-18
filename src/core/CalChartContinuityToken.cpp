@@ -25,7 +25,6 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationTypes.h"
 #include "CalChartSheet.h"
-#include "cc_fileformat.h"
 #include "math_utils.h"
 #include "parse.h"
 

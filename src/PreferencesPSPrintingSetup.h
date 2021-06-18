@@ -21,44 +21,33 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include "PreferencesUtils.h"
-#include "confgr.h"
-#include <wx/bmpcbox.h>
-#include <wx/notebook.h>
-#include <wx/spinctrl.h>
-#include <wx/wx.h>
 
 //////// General setup ////////
 // setup pringing values and colors
 ////////
 
 class PSPrintingSetUp : public PreferencePage {
+    using super = PreferencePage;
     DECLARE_CLASS(PSPrintingSetUp)
     DECLARE_EVENT_TABLE()
 
 public:
-    PSPrintingSetUp(CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Printing Values"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
-        : PreferencePage(config)
+    PSPrintingSetUp(CalChartConfiguration& config, wxWindow* parent)
+        : super(config)
     {
         Init();
-        Create(parent, id, caption, pos, size, style);
+        Create(parent, "Printing Values");
     }
-    virtual ~PSPrintingSetUp() { }
+    ~PSPrintingSetUp() override = default;
 
-    virtual void Init();
-    virtual void CreateControls();
+    void Init() override;
+    void CreateControls() override;
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-    virtual bool ClearValuesToDefault();
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool ClearValuesToDefault() override;
 
 private:
     wxString mFontNames[7];

@@ -1,7 +1,7 @@
 #pragma once
 /*
- * cc_parse_errors.cpp
- * A way to coordinate parse errors to the caller.
+ * ModeSetupDialog.h
+ * Dialox box for preferences
  */
 
 /*
@@ -21,17 +21,28 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <functional>
-#include <string>
+#include "CalChartConfiguration.h"
+#include "CalChartShowMode.h"
+#include "basic_ui.h"
+#include <wx/bmpcbox.h>
+#include <wx/notebook.h>
+#include <wx/spinctrl.h>
+#include <wx/wx.h>
 
-namespace CalChart {
+class ShowModeSetupCanvas : public ClickDragCtrlScrollCanvas {
+    DECLARE_CLASS(ShowModeSetupCanvas)
+    DECLARE_EVENT_TABLE()
+    using super = ClickDragCtrlScrollCanvas;
 
-// error occurred on parsing.  First arg is what went wrong, second is the values that need to be fixed.
-// return a string of what to try parsing.
-using ContinuityParseCorrection_t = std::function<std::string(std::string const&, std::string const&, int line, int column)>;
+public:
+    ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent,
+        wxWindowID id = wxID_ANY);
 
-struct ParseErrorHandlers {
-    ContinuityParseCorrection_t mContinuityParseCorrectionHandler;
+    void OnPaint(wxPaintEvent& event);
+    void SetMode(CalChart::ShowMode const& mode);
+    virtual void SetZoom(float factor);
+
+private:
+    CalChartConfiguration& mConfig;
+    CalChart::ShowMode mMode;
 };
-
-}

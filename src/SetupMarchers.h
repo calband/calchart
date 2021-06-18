@@ -1,3 +1,4 @@
+#pragma once
 /*
  * SetupMarchers.h
  */
@@ -19,72 +20,56 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "CalChartDoc.h"
+#include <vector>
 #include <wx/docview.h>
 #include <wx/wizard.h>
 
-#include <vector>
+class CalChartDoc;
 
 class SetupMarchers : public wxDialog {
+    using super = wxDialog;
     DECLARE_CLASS(SetupMarchers)
     DECLARE_EVENT_TABLE()
 
 public:
-    SetupMarchers(CalChartDoc& shw, wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Setup Marchers"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
+    SetupMarchers(CalChartDoc& shw, wxWindow* parent);
     ~SetupMarchers();
 
-private:
-    bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
-        const wxString& caption = wxT("Setup Marchers"),
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-
-    void CreateControls();
-
-    virtual bool Validate();
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-
-    // The data this dialog sets for the user
-private:
-    unsigned mNumberColumns;
-    std::vector<std::pair<std::string, std::string>> mLabelsAndInstruments;
-    void OnCmd_label_type(wxCommandEvent& event);
-
-public:
     auto GetNumberColumns() const { return mNumberColumns; }
     auto GetLabelsAndInstruments() const { return mLabelsAndInstruments; }
 
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool Validate() override;
+
 private:
-    CalChartDoc& mShow;
+    void CreateControls();
+    void OnCmd_label_type(wxCommandEvent& event);
     void OnReset(wxCommandEvent&);
+
+    int mNumberColumns = 8;
+    std::vector<std::pair<std::string, std::string>> mLabelsAndInstruments;
+    CalChartDoc& mShow;
 };
 
 class SetupMarchersWizard : public wxWizardPageSimple {
+    using super = wxWizardPageSimple;
     DECLARE_CLASS(SetupMarchersWizard)
     DECLARE_EVENT_TABLE()
 public:
     SetupMarchersWizard(wxWizard* parent);
 
-    virtual bool TransferDataToWindow();
-    virtual bool TransferDataFromWindow();
-    virtual bool Validate();
+    auto GetNumberColumns() const { return mNumberColumns; }
+    auto GetLabelsAndInstruments() const { return mLabelsAndInstruments; }
+
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool Validate() override;
 
     // The data this dialog sets for the user
 private:
     bool mTransferDataToWindowFirstTime;
-    unsigned mNumberColumns;
+    int mNumberColumns;
     std::vector<std::pair<std::string, std::string>> mLabelsAndInstruments;
     void OnCmd_label_type(wxCommandEvent& event);
-
-public:
-    auto GetNumberColumns() const { return mNumberColumns; }
-    auto GetLabelsAndInstruments() const { return mLabelsAndInstruments; }
 };

@@ -30,11 +30,11 @@
 
 #include "CalChartAnimation.h"
 #include "CalChartContinuity.h"
+#include "CalChartFileFormat.h"
 #include "CalChartImage.h"
 #include "CalChartPoint.h"
+#include "CalChartText.h"
 #include "CalChartTypes.h"
-#include "cc_fileformat.h"
-#include "cc_text.h"
 
 #include <nlohmann/json.hpp>
 #include <set>
@@ -125,7 +125,7 @@ public:
 
 private:
     std::vector<Continuity> mAnimationContinuity;
-    Print_continuity mPrintableContinuity;
+    PrintContinuity mPrintableContinuity;
     unsigned short mBeats;
     std::vector<Point> mPoints;
     std::string mName;

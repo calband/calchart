@@ -24,14 +24,14 @@
 #include "AnimationPanel.h"
 #include "CalChartAnimation.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
+#include "CalChartShowMode.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
-#include "confgr.h"
 #include "draw.h"
 #include "math_utils.h"
-#include "modes.h"
 #include "platconf.h"
 
 #include <wx/dcbuffer.h>
@@ -44,14 +44,14 @@ AnimationView::AnimationView(CalChartView* view, wxWindow* frame)
     SetFrame(frame);
 
 #if defined(__APPLE__) && (__APPLE__)
-    const static wxString kImageDir = wxT("CalChart.app/Contents/Resources/default_sprite_strip.png");
+    const static wxString kImageDir = "CalChart.app/Contents/Resources/default_sprite_strip.png";
 #else
-    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR wxT("resources") PATH_SEPARATOR wxT("default_sprite_strip.png"));
+    const static wxString kImageDir = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath().Append(PATH_SEPARATOR "resources" PATH_SEPARATOR "default_sprite_strip.png");
 #endif
     auto image = []() {
         wxImage image;
         if (!image.LoadFile(kImageDir)) {
-            wxLogError(wxT("Couldn't load image from ") + kImageDir + wxT("."));
+            wxLogError("Couldn't load image from " + kImageDir + ".");
             return image;
         }
         return image;
@@ -331,7 +331,7 @@ MarcherInfo AnimationView::GetMarcherInfo(int which) const
     MarcherInfo info{};
     if (mAnimation) {
         auto anim_info = mAnimation->GetAnimateInfo(which);
-        info.direction = NormalizeAngle((anim_info.mRealDirection * M_PI / 180.0));
+        info.direction = NormalizeAngleRad((anim_info.mRealDirection * M_PI / 180.0));
 
         auto position = anim_info.mPosition;
         info.x = CoordUnits2Float(position.x);

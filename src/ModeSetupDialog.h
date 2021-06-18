@@ -1,6 +1,6 @@
 #pragma once
 /*
- * mode_dialog.h
+ * mode_dialog
  * Dialox box for preferences
  */
 
@@ -21,28 +21,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "basic_ui.h"
-#include "confgr.h"
-#include "modes.h"
-#include <wx/bmpcbox.h>
-#include <wx/notebook.h>
-#include <wx/spinctrl.h>
 #include <wx/wx.h>
 
-class ShowModeSetupCanvas : public ClickDragCtrlScrollCanvas {
-    DECLARE_CLASS(ShowModeSetupCanvas)
+class ShowModeDialogSetup;
+namespace CalChart {
+class ShowMode;
+}
+
+class ModeSetupDialog : public wxDialog {
+    using super = wxDialog;
+    DECLARE_CLASS(ModeSetupDialog)
     DECLARE_EVENT_TABLE()
-    using super = ClickDragCtrlScrollCanvas;
 
 public:
-    ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow* parent,
-        wxWindowID id = wxID_ANY);
+    ModeSetupDialog(CalChart::ShowMode const& current_mode, wxWindow* parent);
+    ~ModeSetupDialog() = default;
 
-    void OnPaint(wxPaintEvent& event);
-    void SetMode(CalChart::ShowMode const& mode);
-    virtual void SetZoom(float factor);
+    CalChart::ShowMode GetShowMode() const;
 
 private:
-    CalChartConfiguration& mConfig;
-    CalChart::ShowMode mMode;
+    ShowModeDialogSetup* m_setup;
 };

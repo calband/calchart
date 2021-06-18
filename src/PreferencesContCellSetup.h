@@ -30,20 +30,21 @@
 class wxBitmapComboBox;
 
 class ContCellSetup : public PreferencePage {
+    using super = PreferencePage;
     DECLARE_CLASS(ContCellSetup)
     DECLARE_EVENT_TABLE()
 
 public:
-    ContCellSetup(CalChartConfiguration& config, wxWindow* parent, wxWindowID id = wxID_ANY, wxString const& caption = wxT("ContCell Setup"), wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU);
-    virtual ~ContCellSetup() = default;
+    ContCellSetup(CalChartConfiguration& config, wxWindow* parent);
+    ~ContCellSetup() override = default;
 
-    virtual void Init() override;
-    virtual void CreateControls() override;
+    void Init() override;
+    void CreateControls() override;
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow() override;
-    virtual bool TransferDataFromWindow() override;
-    virtual bool ClearValuesToDefault() override;
+    bool TransferDataToWindow() override;
+    bool TransferDataFromWindow() override;
+    bool ClearValuesToDefault() override;
 
 private:
     void OnCmdFontSize(wxSpinEvent&);
@@ -58,6 +59,6 @@ private:
     void SetColor(int selection, const wxColour& color);
 
     // we can set up the Font, colors, size.
-    wxBitmapComboBox* mNameBox;
-    wxBrush mContCellBrushes[COLOR_CONTCELLS_NUM];
+    wxBitmapComboBox* mNameBox{};
+    wxBrush mContCellBrushes[COLOR_CONTCELLS_NUM]{};
 };

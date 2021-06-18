@@ -21,38 +21,19 @@
 */
 
 #include "ColorSetupDialog.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuityToken.h"
-#include "CalChartDoc.h"
-#include "CalChartShapes.h"
-#include "CalChartSheet.h"
 #include "ColorSetupCanvas.h"
-#include "ContinuityBrowserPanel.h"
-#include "ContinuityComposerDialog.h"
-#include "cc_drawcommand.h"
-#include "confgr.h"
-#include "draw.h"
-#include "mode_dialog.h"
-#include "mode_dialog_canvas.h"
-#include "modes.h"
-
-#include <wx/bmpbuttn.h>
-#include <wx/colordlg.h>
-#include <wx/dcbuffer.h>
-#include <wx/listbook.h>
-#include <wx/notebook.h>
-#include <wx/statline.h>
-#include <wx/stattext.h>
 
 #include <fstream>
 #include <iomanip>
+#include <wx/colordlg.h>
 
 using namespace CalChart;
 
 // how the preferences work:
-// preference dialog create a copy of the CalChart config from which to read and
-// set values
-// CalChart config doesn't automatically write values to main config, it must be
-// flushed
+// preference dialog create a copy of the CalChart config from which to read and set values
+// CalChart config doesn't automatically write values to main config, it must be flushed
 // out when the user presses apply.
 
 //////// Draw setup ////////
@@ -82,14 +63,8 @@ EVT_COMBOBOX(NEW_COLOR_CHOICE, ColorSetupDialog::OnCmdChooseNewColor)
 EVT_TEXT_ENTER(PALETTE_NAME, ColorSetupDialog::OnCmdTextChanged)
 END_EVENT_TABLE()
 
-ColorSetupDialog::ColorSetupDialog(wxWindow* parent,
-    wxWindowID id,
-    int palette,
-    const wxString& caption,
-    const wxPoint& pos,
-    const wxSize& size,
-    long style)
-    : ColorSetupDialog::super(parent, id, caption)
+ColorSetupDialog::ColorSetupDialog(wxWindow* parent, int palette)
+    : ColorSetupDialog::super(parent, wxID_ANY, "Color Setup")
     , mActiveColorPalette(palette)
     , mConfig(CalChartConfiguration::GetGlobalConfig())
 {
@@ -276,13 +251,13 @@ void ColorSetupDialog::OnCmdChangePaletteColor(wxCommandEvent&)
 
 void ColorSetupDialog::OnCmdSelectWidth(wxSpinEvent& e)
 {
-    int selection = mNameBox->GetSelection();
+    auto selection = mNameBox->GetSelection();
     SetColor(selection, e.GetPosition(), mCalChartPens[mActiveColorPalette][selection].GetColour());
 }
 
 void ColorSetupDialog::OnCmdResetColors(wxCommandEvent&)
 {
-    int selection = mNameBox->GetSelection();
+    auto selection = mNameBox->GetSelection();
     SetColor(selection, mConfig.GetDefaultPenWidth()[selection], mConfig.GetDefaultColors()[selection]);
     mConfig.Clear_CalChartConfigColor(static_cast<CalChartColors>(selection));
 }
@@ -295,8 +270,8 @@ void ColorSetupDialog::OnCmdChooseNewColor(wxCommandEvent&)
 void ColorSetupDialog::OnCmdTextChanged(wxCommandEvent& e)
 {
     auto id = e.GetId();
-    wxTextCtrl* text = (wxTextCtrl*)FindWindow(id);
     if (id == PALETTE_NAME) {
+        auto text = static_cast<wxTextCtrl*>(FindWindow(id));
         mColorPaletteNames.at(mActiveColorPalette) = text->GetValue();
         mConfig.SetColorPaletteName(mActiveColorPalette, text->GetValue());
     }

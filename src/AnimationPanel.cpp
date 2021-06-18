@@ -24,10 +24,10 @@
 #include "AnimationCanvas.h"
 #include "AnimationView.h"
 #include "CCOmniviewCanvas.h"
+#include "CalChartConfiguration.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include "platconf.h"
 #include "ui_enums.h"
 
@@ -124,7 +124,7 @@ void AnimationPanel::CreateControls()
                 mItemsToHide.push_back(mCollisionCheckbox);
             });
 
-            mOmniHelpButton = new wxButton(this, wxID_HELP, wxT("&Help"));
+            mOmniHelpButton = new wxButton(this, wxID_HELP, "&Help");
             mOmniHelpButton->Bind(wxEVT_BUTTON, [this](auto const&) {
                 mOmniCanvas->OnCmd_ShowKeyboardControls();
             });
@@ -187,7 +187,7 @@ void AnimationPanel::OnCmd_ToggleAnimOmni()
         mCollisionCheckbox->Hide();
         mOmniCanvas->Show();
         mOmniHelpButton->Show();
-        mAnimateOmniToggle->SetLabel(wxT("Animate"));
+        mAnimateOmniToggle->SetLabel("Animate");
     } else {
         mCanvas->Show();
         mSpritesCheckbox->Show();
@@ -195,7 +195,7 @@ void AnimationPanel::OnCmd_ToggleAnimOmni()
         mCollisionCheckbox->Show();
         mOmniCanvas->Hide();
         mOmniHelpButton->Hide();
-        mAnimateOmniToggle->SetLabel(wxT("Omni"));
+        mAnimateOmniToggle->SetLabel("Omni");
     }
     Layout();
     Refresh();

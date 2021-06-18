@@ -23,9 +23,9 @@
 #include "PrintContinuityEditor.h"
 #include "CalChartApp.h"
 #include "CalChartSheet.h"
+#include "CalChartText.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "cc_text.h"
 #include "draw.h"
 #include "ui_enums.h"
 
@@ -49,15 +49,15 @@ public:
     PrintContinuityPreview(wxWindow* parent);
 
     void OnPaint(wxPaintEvent& event);
-    void SetPrintContinuity(const CalChart::Textline_list& print_continuity)
+    void SetPrintContinuity(const CalChart::Textline_list& printContinuity)
     {
-        m_print_continuity = print_continuity;
+        mPrintContinuity = printContinuity;
     }
     void SetOrientation(bool landscape) { m_landscape = landscape; }
     void OnSizeEvent(wxSizeEvent& event);
 
 private:
-    CalChart::Textline_list m_print_continuity;
+    CalChart::Textline_list mPrintContinuity;
     bool m_landscape;
 };
 
@@ -86,7 +86,7 @@ void PrintContinuityPreview::OnPaint(wxPaintEvent& event)
 
     dc.Clear();
     dc.DrawRectangle(wxRect(wxPoint(0, 0), virtSize));
-    DrawContForPreview(dc, m_print_continuity, wxRect(wxPoint(0, 0), virtSize));
+    DrawContForPreview(dc, mPrintContinuity, wxRect(wxPoint(0, 0), virtSize));
 }
 
 void PrintContinuityPreview::OnSizeEvent(wxSizeEvent& event)

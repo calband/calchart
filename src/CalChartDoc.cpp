@@ -21,18 +21,16 @@
 
 #include "CalChartDoc.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartDocCommand.h"
 #include "CalChartPoint.h"
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
+#include "CalChartShowMode.h"
 #include "ContinuityEditorPopup.h"
-#include "cc_fileformat.h"
-#include "cc_parse_errors.h"
-#include "confgr.h"
 #include "draw.h"
 #include "math_utils.h"
-#include "modes.h"
 #include "platconf.h"
 #include "print_ps.h"
 
@@ -67,18 +65,11 @@ bool CalChartDoc::OnOpenDocument(const wxString& filename)
     wxString recoveryFile = TranslateNameToAutosaveName(filename);
     if (wxFileExists(recoveryFile)) {
         // prompt the user to find out if they would like to use the recovery file
-        int userchoice = wxMessageBox(
-            wxT("CalChart has detected a recovery file (possibly from a previous "
-                "crash).  ") wxT("Would you like to use the recovery file "
-                                 "(Warning: choosing recover will ")
-                wxT("destroy the original file)?"),
-            wxT("Recovery File Detected"), wxYES_NO | wxCANCEL);
+        auto userchoice = wxMessageBox("CalChart has detected a recovery file (possibly from a previous crash).  Would you like to use the recovery file (Warning: choosing recover will destroy the original file)?", "Recovery File Detected", wxYES_NO | wxCANCEL);
         if (userchoice == wxYES) {
             // move the recovery file to the filename, destroying the file and using
             // the recovery
             wxCopyFile(recoveryFile, filename);
-        }
-        if (userchoice == wxNO) {
         }
         if (userchoice == wxCANCEL) {
             return false;

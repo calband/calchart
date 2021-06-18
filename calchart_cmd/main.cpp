@@ -12,7 +12,7 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationErrors.h"
 #include "print_ps.h"
-#include "modes.h"
+#include "CalChartShowMode.h"
 #include "CalChartContinuityToken.h"
 #include "docopt.h"
 #include "CalChartContinuity.h"

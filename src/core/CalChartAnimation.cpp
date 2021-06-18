@@ -26,10 +26,10 @@
 #include "CalChartAnimationErrors.h"
 #include "CalChartContinuity.h"
 #include "CalChartContinuityToken.h"
+#include "CalChartDrawCommand.h"
 #include "CalChartPoint.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
-#include "cc_drawcommand.h"
 #include "math_utils.h"
 
 #define _USE_MATH_DEFINES

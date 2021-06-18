@@ -22,6 +22,7 @@
 
 #include "ContinuityEditorPopup.h"
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartDoc.h"
 #include "CalChartDocCommand.h"
@@ -29,7 +30,6 @@
 #include "CalChartShow.h"
 #include "ContinuityBrowser.h"
 #include "basic_ui.h"
-#include "confgr.h"
 
 #include <wx/dcbuffer.h>
 #include <wx/help.h>
@@ -38,7 +38,7 @@
 #include <wx/statline.h>
 
 ContinuityEditorPopup::ContinuityEditorPopup(wxString const& whatError, wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, caption, pos, size, style, caption)
+    : super(parent, id, caption, pos, size, style, caption)
     , mWhatError(whatError)
 {
     CreateControls();

@@ -21,10 +21,10 @@
 */
 
 #include "ColorPalette.h"
+#include "CalChartConfiguration.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "ColorSetupDialog.h"
-#include "confgr.h"
 #include "ui_enums.h"
 
 #include <wx/dcbuffer.h>
@@ -110,7 +110,7 @@ void ColorPalettePanel::OnLeftDoubleClick(wxMouseEvent& event)
         return;
     }
     // this opens the dialog that
-    ColorSetupDialog dialog(this, wxID_ANY, box);
+    ColorSetupDialog dialog(this, box);
     if (dialog.ShowModal() == wxID_OK) {
         QueueEvent(new wxCommandEvent{ wxEVT_BUTTON, CALCHART__ChangedColorPalette });
     }

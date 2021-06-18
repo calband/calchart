@@ -57,11 +57,11 @@ static auto do_cloning(T const& cont)
     return copied_cont;
 }
 
-ContCellSetup::ContCellSetup(CalChartConfiguration& config, wxWindow* parent, wxWindowID id, wxString const& caption, wxPoint const& pos, wxSize const& size, long style)
-    : PreferencePage(config)
+ContCellSetup::ContCellSetup(CalChartConfiguration& config, wxWindow* parent)
+    : super(config)
 {
     Init();
-    Create(parent, id, caption, pos, size, style);
+    Create(parent, "ContCell Setup");
 }
 
 void ContCellSetup::CreateControls()

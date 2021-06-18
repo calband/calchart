@@ -31,7 +31,7 @@ class AnimationCanvas : public wxPanel {
     wxDECLARE_EVENT_TABLE();
 
 public:
-    AnimationCanvas(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxTAB_TRAVERSAL | wxNO_BORDER, wxString const& name = wxPanelNameStr);
+    AnimationCanvas(wxWindow* parent, wxWindowID winid = wxID_ANY, wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize);
     ~AnimationCanvas() override = default;
 
     void OnUpdate(); // Refresh from the View

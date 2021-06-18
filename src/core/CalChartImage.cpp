@@ -20,7 +20,7 @@
 */
 
 #include "CalChartImage.h"
-#include "cc_fileformat.h"
+#include "CalChartFileFormat.h"
 
 namespace CalChart {
 

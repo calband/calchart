@@ -22,11 +22,11 @@
 
 #include "PrintPostScriptDialog.h"
 
+#include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
 #include "CalChartSheet.h"
 #include "CalChartShow.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include "print_ps.h"
 
 #include <set>

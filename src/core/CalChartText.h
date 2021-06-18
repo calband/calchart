@@ -1,6 +1,6 @@
 #pragma once
 /*
- * cc_text.h
+ * CalChartText.h
  * textchunk and textline
  */
 
@@ -29,12 +29,9 @@
 namespace CalChart {
 
 struct Textchunk {
-    Textchunk() = default;
     std::string text;
     PSFONT font = PSFONT::NORM;
 };
-
-using Textchunk_list = std::vector<Textchunk>;
 
 class Textline {
 public:
@@ -45,7 +42,7 @@ public:
     auto GetOnSheet() const { return on_sheet; }
 
 private:
-    Textchunk_list chunks;
+    std::vector<Textchunk> chunks;
     bool center{};
     bool on_main{};
     bool on_sheet{};
@@ -53,11 +50,9 @@ private:
 
 using Textline_list = std::vector<Textline>;
 
-class Print_continuity {
+class PrintContinuity {
 public:
-    Print_continuity() = default;
-    Print_continuity(const std::string& data);
-    Print_continuity(const std::string& number, const std::string& data);
+    PrintContinuity(std::string const& number = "", std::string const& data = "");
     auto GetChunks() const { return mPrintChunks; }
     auto GetOriginalLine() const { return mOriginalLine; }
     auto GetPrintNumber() const { return mNumber; }

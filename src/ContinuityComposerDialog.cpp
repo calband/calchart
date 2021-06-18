@@ -17,12 +17,12 @@
 
 #include "ContinuityComposerDialog.h"
 #include "CalChartAnimationTypes.h"
+#include "CalChartConfiguration.h"
 #include "CalChartContinuity.h"
 #include "CalChartContinuityToken.h"
+#include "ContinuityBoxDrawer.h"
 #include "CustomListViewPanel.h"
 #include "basic_ui.h"
-#include "confgr.h"
-#include "cont_box_draw.h"
 
 class ContinuityComposerCanvas : public CustomListViewPanel {
     using super = CustomListViewPanel;
@@ -597,7 +597,7 @@ ContinuityComposerPanel::GetContinuity()
 IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 
 ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent, wxWindowID id, wxString const& caption, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : wxDialog(parent, id, caption, pos, size, style)
+    : super(parent, id, caption, pos, size, style)
 {
     // create a sizer for laying things out top down:
     mPanel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);

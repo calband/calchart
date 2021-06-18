@@ -1,6 +1,6 @@
 /*
- * setup_wizards.h
- * Classes for setting up the shows
+ * setup_wizards.cpp
+ * Classes for setting up shows
  */
 
 /*
@@ -20,22 +20,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
+#include "ShowModeWizard.h"
+#include "CalChartApp.h"
+#include "CalChartConfiguration.h"
+#include "CalChartShowMode.h"
+#include "basic_ui.h"
 
-#include <wx/wizard.h>
-
-#include <vector>
-
-class FancyTextWin;
-class wxChoice;
+#include <wx/wx.h>
 
 // page for deciding the field type
-class ChooseShowModeWizard : public wxWizardPageSimple {
-public:
-    ChooseShowModeWizard(wxWizard* parent);
-    wxString GetValue();
+ShowModeWizard::ShowModeWizard(wxWizard* parent)
+    : wxWizardPageSimple(parent)
+{
+    for (auto mode : kShowModeStrings) {
+        modeStrings.Add(mode);
+    }
 
-private:
-    wxArrayString modeStrings;
-    wxChoice* mChoice;
-};
+    SetSizer(VStack([this](auto sizer) {
+        CreateText(this, sizer, BasicSizerFlags(), "Choose a field to set your show:");
+        mChoice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), wxID_ANY, modeStrings);
+    }));
+}
+
+wxString ShowModeWizard::GetValue()
+{
+    return modeStrings[mChoice->GetSelection()];
+}

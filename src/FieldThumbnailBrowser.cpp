@@ -20,13 +20,13 @@
 */
 
 #include "FieldThumbnailBrowser.h"
+#include "CalChartConfiguration.h"
 #include "CalChartShow.h"
+#include "CalChartShowMode.h"
 #include "CalChartSizes.h"
 #include "CalChartView.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include "draw.h"
-#include "modes.h"
 
 #include <wx/dcbuffer.h>
 

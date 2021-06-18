@@ -1,6 +1,7 @@
+#pragma once
 /*
- * cc_preferences.h
- * Dialox box for preferences
+ * ColorSetupCanvas.h
+ * Canvas for setting up colors
  */
 
 /*
@@ -20,11 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
+#include "CalChartShowMode.h"
 #include "basic_ui.h"
-#include "cc_drawcommand.h"
-#include "modes.h"
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
@@ -33,11 +31,12 @@
 class CalChartConfiguration;
 namespace CalChart {
 class Show;
+class DrawCommand;
 }
 
 class ColorSetupCanvas : public ClickDragCtrlScrollCanvas {
-    DECLARE_EVENT_TABLE()
     using super = ClickDragCtrlScrollCanvas;
+    DECLARE_EVENT_TABLE()
 
 public:
     ColorSetupCanvas(CalChartConfiguration& config, wxWindow* parent);

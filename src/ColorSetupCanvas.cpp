@@ -1,6 +1,6 @@
 /*
- * CalChartPreferences.cpp
- * Dialox box for preferences
+ * ColorSetupCanvas.cpp
+ * Canvas for setting up colors
  */
 
 /*
@@ -21,26 +21,12 @@
 */
 
 #include "ColorSetupCanvas.h"
-#include "CalChartContinuityToken.h"
+#include "CalChartConfiguration.h"
 #include "CalChartDoc.h"
-#include "CalChartShapes.h"
-#include "CalChartSheet.h"
-#include "CalChartSizes.h"
-#include "ContinuityBrowserPanel.h"
-#include "ContinuityComposerDialog.h"
-#include "cc_drawcommand.h"
-#include "confgr.h"
+#include "CalChartDrawCommand.h"
 #include "draw.h"
-#include "mode_dialog.h"
-#include "mode_dialog_canvas.h"
-#include "modes.h"
 
-#include <wx/colordlg.h>
 #include <wx/dcbuffer.h>
-#include <wx/listbook.h>
-#include <wx/notebook.h>
-#include <wx/statline.h>
-#include <wx/stattext.h>
 
 using namespace CalChart;
 
@@ -134,8 +120,7 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent& event)
     DrawMode(dc, mConfig, mMode, ShowMode_kFieldView);
 
     auto sheet = static_cast<CalChart::Show const&>(*mShow).GetCurrentSheet();
-    auto nextSheet = sheet;
-    ++nextSheet;
+    auto nextSheet = sheet + 1;
 
     SelectionList list;
     list.insert(2);

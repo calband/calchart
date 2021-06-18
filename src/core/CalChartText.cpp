@@ -1,5 +1,5 @@
 /*
- * cc_text.cpp
+ * CalChartText.cpp
  * textchunk and textline
  */
 
@@ -20,7 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "cc_text.h"
+#include "CalChartText.h"
 
 #include <sstream>
 
@@ -58,8 +58,7 @@ Textline::Textline(std::string line, PSFONT currfontnum)
         }
         // now check to see if we have any special person marks
         if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'p') || (tolower(line.at(1)) == 's'))) {
-            Textchunk new_text;
-            new_text.font = PSFONT::SYMBOL;
+            auto new_text = Textchunk{ "", PSFONT::SYMBOL };
             if (tolower(line.at(1)) == 'p') {
                 switch (tolower(line.at(2))) {
                 case 'o':
@@ -115,35 +114,19 @@ Textline::Textline(std::string line, PSFONT currfontnum)
         }
         auto pos = line.find_first_of("\\\t", 1);
 
-        Textchunk new_text;
-        new_text.font = currfontnum;
-        new_text.text = line.substr(0, pos);
-        chunks.push_back(new_text);
+        chunks.push_back({ line.substr(0, pos), currfontnum });
         line.erase(0, pos);
     }
 }
 
-Print_continuity::Print_continuity(const std::string& data)
-    : mOriginalLine(data)
-{
-    std::istringstream reader(data);
-    std::string line;
-    auto currfontnum = PSFONT::NORM;
-    while (std::getline(reader, line, '\n')) {
-        mPrintChunks.emplace_back(line, currfontnum);
-    }
-}
-
-Print_continuity::Print_continuity(const std::string& number,
-    const std::string& data)
+PrintContinuity::PrintContinuity(std::string const& number, std::string const& data)
     : mOriginalLine(data)
     , mNumber(number)
 {
     std::istringstream reader(data);
     std::string line;
-    auto currfontnum = PSFONT::NORM;
     while (std::getline(reader, line, '\n')) {
-        mPrintChunks.emplace_back(line, currfontnum);
+        mPrintChunks.emplace_back(line, PSFONT::NORM);
     }
 }
 }

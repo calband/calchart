@@ -20,8 +20,8 @@
 */
 
 #include "CustomListViewPanel.h"
+#include "CalChartConfiguration.h"
 #include "basic_ui.h"
-#include "confgr.h"
 #include <wx/dcbuffer.h>
 
 #include <numeric>

@@ -74,13 +74,6 @@ public:
         return (this->x == scalar && this->y == scalar);
     }
 
-    SolverCoord& operator=(const SolverCoord& other)
-    {
-        this->x = other.x;
-        this->y = other.y;
-        return *this;
-    }
-
     SolverCoord& operator+=(const SolverCoord& other)
     {
         this->x += other.x;

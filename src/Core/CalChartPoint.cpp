@@ -21,7 +21,7 @@
 */
 
 #include "CalChartPoint.h"
-#include "cc_fileformat.h"
+#include "CalChartFileFormat.h"
 
 #include <assert.h>
 #include <sstream>

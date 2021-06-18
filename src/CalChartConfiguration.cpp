@@ -1,6 +1,6 @@
 /*
- * confgr.cpp
- * Basic configuration initialization for all systems
+ * CalChartConfiguration.cpp
+ * Functions for manipulating configuration Settings
  */
 
 /*
@@ -32,9 +32,9 @@
 #include <wx/utils.h>
 
 #include "CalChartApp.h"
+#include "CalChartConfiguration.h"
+#include "CalChartShowMode.h"
 #include "cc_omniview_constants.h"
-#include "confgr.h"
-#include "modes.h"
 
 using namespace CalChart;
 

@@ -36,11 +36,11 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(GeneralSetup, PreferencePage)
 
-GeneralSetup::GeneralSetup(CalChartConfiguration& config, wxWindow* parent, wxWindowID id, wxString const& caption, wxPoint const& pos, wxSize const& size, long style)
-    : PreferencePage(config)
+GeneralSetup::GeneralSetup(CalChartConfiguration& config, wxWindow* parent)
+    : super(config)
 {
     Init();
-    Create(parent, id, caption, pos, size, style);
+    Create(parent, "General Setup");
 }
 
 void GeneralSetup::CreateControls()
