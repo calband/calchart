@@ -213,21 +213,21 @@ void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
     auto point_before = [this](auto&& event) {
         wxClientDC dc(this);
         PrepareDC(dc);
-        auto mouse_point = mLastPos;
+        auto mouse_point = event;
         mouse_point.x = dc.DeviceToLogicalX(mouse_point.x);
         mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
         return mouse_point;
-    }(event);
+    }(mLastPos);
     SetZoom(GetZoom() * (1.0 + event.GetMagnification()));
     auto point_after = [this](auto&& event) {
         wxClientDC dc(this);
         PrepareDC(dc);
-        auto mouse_point = mLastPos;
-        mouse_point.x = dc.DeviceToLogicalX(mouse_point.x);
-        mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
+        auto mouse_point = event;
+        mouse_point.x = dc.LogicalToDeviceX(mouse_point.x);
+        mouse_point.y = dc.LogicalToDeviceY(mouse_point.y);
         return mouse_point;
-    }(event);
-    ChangeOffset((point_before - point_after) * GetZoom());
+    }(point_before);
+    ChangeOffset(point_after - mLastPos);
 }
 
 void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)
