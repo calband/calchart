@@ -62,8 +62,6 @@ SetupMarchers::SetupMarchers(CalChartDoc& shw, wxWindow* parent)
     GetSizer()->SetSizeHints(this);
 
     Center();
-
-    return true;
 }
 
 SetupMarchers::~SetupMarchers() { }

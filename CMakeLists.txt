@@ -10,10 +10,22 @@ cmake_minimum_required (VERSION 3.11)
 
 project (CalChart)
 
-set (CMAKE_OSX_ARCHITECTURES "\$(ARCHS_STANDARD)")
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  set (CMAKE_OSX_ARCHITECTURES "\$(ARCHS_STANDARD)")
+endif()
+
 set (CalChart_VERSION_MAJOR 3)
 set (CalChart_VERSION_MINOR 6)
 set (CalChart_VERSION_PATCH 2)
+
+# fix for #348 
+if (APPLE)
+  set (CMAKE_THREAD_LIBS_INIT "-lpthread")
+  set (CMAKE_HAVE_THREADS_LIBRARY 1)
+  set (CMAKE_USE_WIN32_THREADS_INIT 0)
+  set (CMAKE_USE_PTHREADS_INIT 1)
+  set (THREADS_PREFER_PTHREAD_FLAG ON)
+endif()
 
 set (CalChart_VERSION "${CalChart_VERSION_MAJOR}.${CalChart_VERSION_MINOR}.${CalChart_VERSION_PATCH}")
 
