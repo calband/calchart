@@ -26,6 +26,7 @@
 #include "CalChartTypes.h"
 #include <array>
 #include <map>
+#include <ostream>
 
 /**
  * Animation Errors
@@ -46,6 +47,10 @@ enum class AnimateError {
     NONINT,
     NEGINT,
 };
+
+static inline std::ostream& operator<<(std::ostream& os, AnimateError e) {
+    return os<<static_cast<int>(e);
+}
 
 struct ErrorMarker {
     SelectionList pntgroup; // which points have this error
