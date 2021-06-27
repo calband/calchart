@@ -22,6 +22,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <random>
 
 #include "CalChartCoord.h"
 #include <cstdlib>
@@ -114,13 +115,16 @@ void Coord_UnitTests()
         assert(0.0 == undertest.Direction());
     }
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<Coord::units> distrib;
     // test equality:
     for (size_t i = 0; i < kNumRand; ++i) {
         Coord::units x1, y1, x2, y2;
-        x1 = rand();
-        y1 = rand();
-        x2 = rand();
-        y2 = rand();
+        x1 = distrib(gen);
+        y1 = distrib(gen);
+        x2 = distrib(gen);
+        y2 = distrib(gen);
         Coord undertest1(x1, y1);
         Coord undertest2(x2, y2);
         assert(x1 == undertest1.x);
@@ -157,7 +161,7 @@ void Coord_UnitTests()
         assert((-undertest1.x) == newValue.x);
         assert((-undertest1.y) == newValue.y);
 
-        short factor = rand();
+        short factor = distrib(gen);
         newValue = undertest1 * factor;
         x3 = undertest1.x * factor;
         y3 = undertest1.y * factor;

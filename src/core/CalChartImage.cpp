@@ -36,6 +36,7 @@ ImageData::ImageData(int left, int top, int scaled_width, int scaled_height, int
 {
 }
 
+// we don't have an end pointer, we just consum until we've finished.
 ImageData::ImageData(uint8_t const* d)
 {
     left = get_big_long(d);
@@ -57,7 +58,6 @@ ImageData::ImageData(uint8_t const* d)
     auto alpha_size = get_big_long(d);
     d += 4;
     alpha.assign(d, d + alpha_size);
-    d += alpha_size;
     scaled_width = (scaled_width == 0) ? image_width : scaled_width;
     scaled_height = (scaled_height == 0) ? image_height : scaled_height;
 }

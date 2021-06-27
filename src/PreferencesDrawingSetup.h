@@ -33,16 +33,21 @@ class DrawingSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    DrawingSetup(CalChartConfiguration& config, wxWindow* parent)
-        : super(config)
+    static DrawingSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
     {
-        Init();
-        Create(parent, "General Setup");
+        auto pref = new DrawingSetup(config, parent);
+        pref->Initialize();
+        return pref;
     }
-    ~DrawingSetup() override = default;
 
-    void Init() override;
-    void CreateControls() override;
+private:
+    // private, use the CreatePreference method
+    DrawingSetup(CalChartConfiguration& config, wxWindow* parent)
+        : super(config, parent, "Drawing Setup")
+    {
+    }
+public:
+    ~DrawingSetup() override = default;
 
     // use these to get and set default values
     bool TransferDataToWindow() override;
@@ -50,6 +55,9 @@ public:
     bool ClearValuesToDefault() override;
 
 private:
+    void InitFromConfig() override;
+    void CreateControls() override;
+
     void OnCmdSelectColors();
     void OnCmdSelectWidth(wxSpinEvent&);
     void OnCmdResetColors();

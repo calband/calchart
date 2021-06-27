@@ -136,7 +136,7 @@ void DrawingSetup::CreateControls()
     TransferDataToWindow();
 }
 
-void DrawingSetup::Init()
+void DrawingSetup::InitFromConfig()
 {
     // first read out the defaults:
     mActiveColorPalette = mConfig.GetActiveColorPalette();
@@ -218,9 +218,8 @@ bool DrawingSetup::ClearValuesToDefault()
             mConfig.Clear_CalChartConfigColor(palette, i);
         }
     }
-    Init();
-    TransferDataToWindow();
-    return true;
+    InitFromConfig();
+    return TransferDataToWindow();
 }
 
 // when the palette changes

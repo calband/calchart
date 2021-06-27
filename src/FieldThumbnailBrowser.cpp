@@ -53,7 +53,7 @@ FieldThumbnailBrowser::FieldThumbnailBrowser(wxWindow* parent, wxWindowID id, co
 wxSize FieldThumbnailBrowser::SizeOfOneCell(bool horizontal) const
 {
     if (!mView) {
-        return {};
+        return { 1, 1 };
     }
 
     auto mode_size = fDIP(mView->GetShowFieldSize());

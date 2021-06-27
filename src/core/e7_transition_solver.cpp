@@ -2296,13 +2296,9 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
 
     TransitionSolverResult finalResult;
     TransitionSolverResult recentResult;
-    unsigned scaledHighestBeatCap;
-    unsigned scaledBeatCapForBestSolution;
-    unsigned scaledBeatCapForCurrentCalculation;
 
-    scaledBeatCapForBestSolution = 0;
-    scaledHighestBeatCap = (sheet1.GetBeats() + (sheet1.GetBeats() / 2)) / 2;
-    scaledBeatCapForCurrentCalculation = 0;
+    auto scaledHighestBeatCap = (sheet1.GetBeats() + (sheet1.GetBeats() / 2)) / 2;
+    auto scaledBeatCapForCurrentCalculation = 0;
     finalResult.successfullySolved = false;
     finalResult.numBeatsOfMovement = sheet1.GetBeats();
 
@@ -2325,7 +2321,6 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
         // If a solution was successfully found, compare it to our current favorite solution, and remember the new one instead if it is better
         if (recentResult.successfullySolved) {
             if (recentResult.numBeatsOfMovement <= finalResult.numBeatsOfMovement) {
-                scaledBeatCapForBestSolution = scaledBeatCapForCurrentCalculation;
                 finalResult = recentResult;
                 if (delegate) {
                     delegate->OnNewPreferredSolution(finalResult.numBeatsOfMovement);

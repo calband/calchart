@@ -1,3 +1,4 @@
+#pragma once
 /*
  * ui_enums.h
  * Central place for all UI id enumerations
@@ -19,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 enum {
     CALCHART__APPEND_FILE = wxID_HIGHEST,

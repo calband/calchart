@@ -77,7 +77,7 @@ void PSPrintingSetUp::CreateControls()
     TransferDataToWindow();
 }
 
-void PSPrintingSetUp::Init()
+void PSPrintingSetUp::InitFromConfig()
 {
     mFontNames[0] = mConfig.Get_HeadFont();
     mFontNames[1] = mConfig.Get_MainFont();
@@ -180,6 +180,6 @@ bool PSPrintingSetUp::ClearValuesToDefault()
     mConfig.Clear_YardsSize();
     mConfig.Clear_TextSize();
     mConfig.Clear_ContRatio();
-    Init();
+    InitFromConfig();
     return TransferDataToWindow();
 }

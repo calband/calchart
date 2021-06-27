@@ -38,16 +38,21 @@ class ShowModeSetup : public PreferencePage {
     DECLARE_CLASS(ShowModeSetup)
 
 public:
-    ShowModeSetup(CalChartConfiguration& config, wxWindow* parent)
-        : super(config)
+    static ShowModeSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
     {
-        Init();
-        Create(parent, "Setup Modes");
+        auto pref = new ShowModeSetup(config, parent);
+        pref->Initialize();
+        return pref;
     }
-    ~ShowModeSetup() override = default;
 
-    void Init() override;
-    void CreateControls() override;
+private:
+    // private, use the CreatePreference method
+    ShowModeSetup(CalChartConfiguration& config, wxWindow* parent)
+        : super(config, parent, "Setup Modes")
+    {
+    }
+public:
+    ~ShowModeSetup() override = default;
 
     // use these to get and set default values
     bool TransferDataToWindow() override;
@@ -55,6 +60,9 @@ public:
     bool ClearValuesToDefault() override;
 
 private:
+    void InitFromConfig() override;
+    void CreateControls() override;
+
     void OnCmdLineText(wxCommandEvent&);
     void OnCmdChoice();
     CalChartConfiguration::ShowModeInfo_t mShowModeValues[SHOWMODE_NUM];

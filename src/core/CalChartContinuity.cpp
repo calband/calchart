@@ -44,6 +44,7 @@ std::runtime_error ParseError(std::string const& str, int l, int c)
 
 std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
 {
+    ParsedContinuity = std::vector<std::unique_ptr<CalChart::ContProcedure>>{};
     std::string thisParse = s;
     while (1) {
         yyinputbuffer = thisParse.c_str();

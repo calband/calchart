@@ -61,11 +61,11 @@ CalChartPreferences::CalChartPreferences(wxWindow* parent)
         mNotebook = new wxNotebook(this, wxID_ANY);
         sizer->Add(mNotebook, BasicSizerFlags());
 
-        mNotebook->AddPage(new GeneralSetup(mConfig, mNotebook), wxT("General"));
-        mNotebook->AddPage(new ContCellSetup(mConfig, mNotebook), wxT("Continuity"));
-        mNotebook->AddPage(new DrawingSetup(mConfig, mNotebook), wxT("Drawing"));
-        mNotebook->AddPage(new PSPrintingSetUp(mConfig, mNotebook), wxT("PS Printing"));
-        mNotebook->AddPage(new ShowModeSetup(mConfig, mNotebook), wxT("Show Mode Setup"));
+        mNotebook->AddPage(GeneralSetup::CreatePreference(mConfig, mNotebook), wxT("General"));
+        mNotebook->AddPage(ContCellSetup::CreatePreference(mConfig, mNotebook), wxT("Continuity"));
+        mNotebook->AddPage(DrawingSetup::CreatePreference(mConfig, mNotebook), wxT("Drawing"));
+        mNotebook->AddPage(PSPrintingSetUp::CreatePreference(mConfig, mNotebook), wxT("PS Printing"));
+        mNotebook->AddPage(ShowModeSetup::CreatePreference(mConfig, mNotebook), wxT("Show Mode Setup"));
 
         // the buttons on the bottom
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
@@ -90,7 +90,7 @@ bool CalChartPreferences::TransferDataFromWindow()
     // transfer everything to the config...
     auto pages = mNotebook->GetPageCount();
     for (auto i = 0; i < pages; ++i) {
-        static_cast<PreferencePage*>(mNotebook->GetPage(i))->TransferDataFromWindow();
+        mNotebook->GetPage(i)->TransferDataFromWindow();
     }
     CalChartConfiguration::AssignConfig(mConfig);
     return true;

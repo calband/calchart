@@ -30,9 +30,9 @@ struct DrawCommand {
         Line,
         Arc,
         Ellipse } DrawType;
-    DrawType mType;
-    int x1, y1, x2, y2;
-    int xc, yc;
+    DrawType mType = Ignore;
+    int x1{}, y1{}, x2{}, y2{};
+    int xc{}, yc{};
     // nothing version
     DrawCommand()
         : mType(Ignore)

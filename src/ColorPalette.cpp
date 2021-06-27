@@ -110,8 +110,8 @@ void ColorPalettePanel::OnLeftDoubleClick(wxMouseEvent& event)
         return;
     }
     // this opens the dialog that
-    ColorSetupDialog dialog(this, box);
-    if (dialog.ShowModal() == wxID_OK) {
+    auto dialog = ColorSetupDialog::CreateDialog(this, box);
+    if (dialog->ShowModal() == wxID_OK) {
         QueueEvent(new wxCommandEvent{ wxEVT_BUTTON, CALCHART__ChangedColorPalette });
     }
 }

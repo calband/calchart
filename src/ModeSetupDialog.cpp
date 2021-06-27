@@ -39,7 +39,16 @@ class ShowModeDialogSetup : public wxPanel {
     DECLARE_EVENT_TABLE()
 
 public:
+    static auto CreateDialog(CalChart::ShowMode const& current_mode, wxWindow* parent)
+    {
+        auto dialog = new ShowModeDialogSetup{current_mode, parent};
+        dialog->TransferDataToWindow();
+        return dialog;
+    }
+private:
+    // private, use the CreateDialog method
     ShowModeDialogSetup(CalChart::ShowMode const& current_mode, wxWindow* parent);
+public:
     ~ShowModeDialogSetup() = default;
 
     void Init(CalChart::ShowMode const& current_mode);
@@ -161,8 +170,6 @@ void ShowModeDialogSetup::CreateControls()
         modeSetupCanvas->SetMode(CalChart::ShowMode::CreateShowMode(mShowModeValues, mYardText));
         modeSetupCanvas->SetZoom(zoom_amounts[defaultZoom] / 100.0);
     }));
-
-    TransferDataToWindow();
 }
 
 void ShowModeDialogSetup::Init(CalChart::ShowMode const& current_mode)
@@ -233,7 +240,7 @@ IMPLEMENT_CLASS(ModeSetupDialog, wxDialog)
 ModeSetupDialog::ModeSetupDialog(CalChart::ShowMode const& current_mode, wxWindow* parent)
     : super(parent, wxID_ANY, "CalChart Preferences", wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU)
 {
-    m_setup = new ShowModeDialogSetup(current_mode, this);
+    m_setup = ShowModeDialogSetup::CreateDialog(current_mode, this);
     SetSizer(VStack([this](auto sizer) {
         sizer->Add(m_setup, BasicSizerFlags());
         // the buttons on the bottom

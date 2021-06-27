@@ -36,13 +36,6 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(GeneralSetup, PreferencePage)
 
-GeneralSetup::GeneralSetup(CalChartConfiguration& config, wxWindow* parent)
-    : super(config)
-{
-    Init();
-    Create(parent, "General Setup");
-}
-
 void GeneralSetup::CreateControls()
 {
     SetSizer(VStack([this](auto& sizer) {
@@ -60,7 +53,7 @@ void GeneralSetup::CreateControls()
     TransferDataToWindow();
 }
 
-void GeneralSetup::Init()
+void GeneralSetup::InitFromConfig()
 {
     mAutoSave_Interval.Printf(wxT("%d"), static_cast<int>(mConfig.Get_AutosaveInterval()));
     mBeep_On_Collisions = mConfig.Get_BeepOnCollisions();
@@ -109,7 +102,7 @@ bool GeneralSetup::ClearValuesToDefault()
     mConfig.Clear_UseSprites();
     mConfig.Clear_SpriteBitmapScale();
     mConfig.Clear_SpriteBitmapOffsetY();
-    Init();
+    InitFromConfig();
     TransferDataToWindow();
     return true;
 }

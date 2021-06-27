@@ -92,7 +92,7 @@ void PointPicker::CreateControls()
         sizer->Add(mList, wxSizerFlags(0).Border(wxALL, 5).Center());
     }));
 
-    Update();
+    RereadFromShow();
 }
 
 void PointPicker::PointPickerAll(wxCommandEvent&)
@@ -103,11 +103,11 @@ void PointPicker::PointPickerAll(wxCommandEvent&)
 void PointPicker::PointPickerSelect(wxCommandEvent&)
 {
     wxArrayInt selections;
-    auto n = mList->GetSelections(selections);
+    mList->GetSelections(selections);
     mSelection = SelectionList(selections.begin(), selections.end());
 }
 
-void PointPicker::Update()
+void PointPicker::RereadFromShow()
 {
     auto tshowLabels = mShow.GetPointsLabel();
     auto showLabels = std::vector<wxString>(tshowLabels.begin(), tshowLabels.end());

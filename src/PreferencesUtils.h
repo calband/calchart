@@ -27,37 +27,42 @@
 
 // the basic class panel we use for all the pages.
 // Each page gets a references to the CalChartConfig which will be used for
-// getting and setting
+// getting and setting.
+// The idea is that we init the data by reading the values into the pref,
+// then we transfer the data to the.
+// So we have a CreatePreference function for each, and then what?  does it
+// just Call Initialize?  Which sucks the data over from Config and then updates?
+// Yes.
 class PreferencePage : public wxPanel {
     using super = wxPanel;
     DECLARE_ABSTRACT_CLASS(GeneralSetup)
 public:
-    PreferencePage(CalChartConfiguration& config)
-        : mConfig(config)
+    PreferencePage(CalChartConfiguration& config, wxWindow* parent, const wxString& caption)
+    : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption)
+    , mConfig(config)
     {
-        Init();
     }
     ~PreferencePage() override = default;
-    virtual void Init() { }
-    virtual bool Create(wxWindow* parent, const wxString& caption)
+    void Initialize()
     {
-        if (!super::Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption))
-            return false;
+        InitFromConfig();
         CreateControls();
         GetSizer()->Fit(this);
         GetSizer()->SetSizeHints(this);
         Center();
-        return true;
+        TransferDataToWindow();
     }
 
     // use these to get and set default values
-    virtual bool TransferDataToWindow() = 0;
-    virtual bool TransferDataFromWindow() = 0;
+    virtual bool TransferDataToWindow() override = 0;
+    virtual bool TransferDataFromWindow() override = 0;
     virtual bool ClearValuesToDefault() = 0;
 
 private:
     virtual void CreateControls() = 0;
 
 protected:
+    // force a readread of the config
+    virtual void InitFromConfig() = 0;
     CalChartConfiguration& mConfig;
 };
