@@ -26,12 +26,9 @@
 #include "CalChartShowMode.h"
 
 #include "prolog0.h"
-#include "prolog1.h"
 #include "prolog2.h"
 #include "setup0.h"
-#include "setup1.h"
 #include "setup2.h"
-#include "zllrbach.h"
 
 #include <sstream>
 #include <string>
@@ -134,17 +131,15 @@ CalcValues(bool PrintLandscape, bool PrintDoCont, double PageWidth,
         width, height, real_width, real_height, field_y);
 }
 
-static std::tuple<float, float, float, float, float, float, float, float, float,
-    float, float, float, float, short>
+static auto
 CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
     double PageWidth, double PageHeight, double ContRatio,
     int min_yards, ShowMode const& mode)
 {
-    float width, height, real_width, real_height;
-    float field_x, field_y, field_w, field_h;
-    float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
-    float step_size;
-    short step_width;
+    float width{}, height{}, real_width{}, real_height{};
+    float field_x{}, field_y{}, field_w{}, field_h{};
+    float step_size{};
+    short step_width{};
 
     auto fullsize = mode.Size();
     auto fieldsize = mode.FieldSize();
@@ -208,10 +203,10 @@ CalcAllValues(bool PrintLandscape, bool PrintDoCont, bool overview,
         width *= fieldwidth / fullwidth;
         height *= fieldheight / fullheight;
     }
-    return std::tuple<float, float, float, float, float, float, float,
-        float, float, float, float, float, float, short>(
+    return std::tuple<float, float, float, float, float,
+        float, float, float, float, short>(
         width, height, real_width, real_height, field_x, field_y, field_w,
-        field_h, stage_field_x, stage_field_y, stage_field_w, stage_field_h,
+        field_h,
         step_size, step_width);
 }
 
@@ -246,7 +241,7 @@ PrintShowToPS::PrintShowToPS(
     , mGet_yard_text(Get_yard_text)
 {
     std::tie(width, height, real_width, real_height, field_x, field_y, field_w,
-        field_h, stage_field_x, stage_field_y, stage_field_w, stage_field_h,
+        field_h,
         step_size, step_width)
         = CalcAllValues(mPrintLandscape, mPrintDoCont, mOverview, mPageWidth,
             mPageHeight, mContRatio, min_yards, mMode);

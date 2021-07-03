@@ -25,6 +25,7 @@
 #include "CalChartShapes.h"
 #include "linmath.h"
 #include "math_utils.h"
+#include <cassert>
 
 namespace CalChart {
 
@@ -148,6 +149,8 @@ std::unique_ptr<MovePointsTool> MovePointsTool::Create(CalChart::MoveMode curr_m
     case CalChart::MoveMode::MoveGenius:
         return std::make_unique<MovePointsTool_MoveGenius>();
     }
+    // last chance fall through
+    return std::make_unique<MovePointsTool_Normal>();
 }
 
 static std::map<int, CalChart::Coord> GetTransformedPoints(const Matrix& transmat, std::map<int, CalChart::Coord> const& select_list)

@@ -27,6 +27,7 @@
 #include "CalChartTypes.h"
 
 #include <map>
+#include <memory>
 #include <wx/docview.h>
 
 // CalChartView connects together the Frames and the Doc.

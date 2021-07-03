@@ -23,7 +23,7 @@
 #include "CalChartPoint.h"
 #include "CalChartFileFormat.h"
 
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 #include <stdexcept>
 

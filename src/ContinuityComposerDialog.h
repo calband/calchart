@@ -17,6 +17,8 @@
 */
 
 #include <wx/wx.h>
+#include <memory>
+
 
 namespace CalChart {
 class ContProcedure;

@@ -17,6 +17,7 @@
 */
 
 #include "CustomListViewPanel.h"
+#include <memory>
 
 class CalChartConfiguration;
 namespace CalChart {

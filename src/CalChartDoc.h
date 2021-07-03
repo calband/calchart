@@ -25,6 +25,7 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <memory>
 #include <wx/cmdproc.h>
 #include <wx/docview.h> // For basic wx defines
 #include <wx/wx.h> // For basic wx defines

@@ -111,14 +111,11 @@ add_library (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/print_ps.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/print_ps.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/prolog0.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/prolog1.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/prolog2.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/setup0.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/setup1.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/setup2.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/viewer_translate.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core/viewer_translate.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/core/zllrbach.h
   ${PROJECT_BINARY_DIR}/version/ccvers.h
   ${BISON_calchart_core_parser_OUTPUTS}
   ${FLEX_calchart_core_lexer_OUTPUTS}
@@ -128,7 +125,7 @@ target_compile_definitions (calchart_core PUBLIC YY_NO_UNISTD_H)
 if (MSVC)
 target_compile_options (calchart_core PRIVATE -Wall)
 else ()
-target_compile_options (calchart_core PRIVATE -Werror -Wall -Wextra)
+target_compile_options (calchart_core PRIVATE -Wall -Wextra -Wno-error=unknown-pragmas)
 endif ()
 
 set_target_properties (calchart_core PROPERTIES CXX_STANDARD 20)

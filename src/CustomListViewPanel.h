@@ -22,6 +22,8 @@
 
 #include <set>
 #include <vector>
+#include <memory>
+
 #include <wx/wx.h>
 
 // Drawable Cells are anything that is a small drawing surface

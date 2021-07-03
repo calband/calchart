@@ -137,7 +137,7 @@ void ContinuityBrowser::CreateControls()
 
         // add help
         HStack(sizer, [this](auto sizer) {
-            CreateButtonWithHandler(this, sizer, wxID_HELP, "&Help", [this]() {
+            CreateButtonWithHandler(this, sizer, wxID_HELP, "&Help", []() {
                 wxGetApp().GetGlobalHelpController().LoadFile();
                 wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
             });

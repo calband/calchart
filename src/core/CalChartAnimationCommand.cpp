@@ -80,6 +80,7 @@ inline auto AngleFromAnimGetDir(AnimateDir dir)
     case AnimateDir::NE:
         return 315.0;
     }
+    return 0.0;
 }
 
 AnimationCommand::AnimationCommand(unsigned beats)

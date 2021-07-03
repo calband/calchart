@@ -26,7 +26,7 @@
 #include <wx/event.h>
 
 namespace CalChart {
-class ImageData;
+struct ImageData;
 }
 
 class BackgroundImage;

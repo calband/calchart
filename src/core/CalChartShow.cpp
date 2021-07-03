@@ -1035,7 +1035,7 @@ Show_command_pair Show::Create_MoveBackgroundImageCommand(int which, int left, i
 }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
-#include <assert.h>
+#include <cassert>
 using namespace Parser;
 
 static auto
@@ -1150,6 +1150,7 @@ void Show::CC_show_blank_desc_test()
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
     bool is_equal = show1_data.size() == show_zero_points_zero_labels_zero_description.size() && std::equal(show1_data.begin(), show1_data.end(), show_zero_points_zero_labels_zero_description.begin());
+    (void)is_equal;
     assert(!is_equal);
     assert(show1.GetNumPoints() == 0);
     assert(show1.GetNumSheets() == 0);
@@ -1198,6 +1199,7 @@ void Show::CC_show_wrong_size_throws_exception()
     } catch (CC_FileException const&) {
         hit_exception = true;
     }
+    (void)hit_exception;
     assert(hit_exception);
 }
 
@@ -1218,6 +1220,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
+        (void)hit_exception;
         assert(hit_exception);
     }
     {
@@ -1234,6 +1237,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
+        (void)hit_exception;
         assert(hit_exception);
     }
 }
@@ -1257,6 +1261,7 @@ void Show::CC_show_wrong_size_description()
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
+        (void)hit_exception;
         assert(hit_exception);
     }
 }
@@ -1286,6 +1291,7 @@ void Show::CC_show_with_nothing_throws()
     } catch (CC_FileException const&) {
         hit_exception = true;
     }
+    (void)hit_exception;
     assert(hit_exception);
 }
 

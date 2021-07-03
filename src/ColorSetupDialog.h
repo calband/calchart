@@ -26,6 +26,7 @@
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
+#include <memory>
 
 class ColorSetupDialog : public wxDialog {
     using super = wxDialog;

@@ -23,6 +23,7 @@
 
 #include <set>
 #include <string>
+#include <functional>
 
 enum class PSFONT {
     SYMBOL,

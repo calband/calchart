@@ -22,6 +22,8 @@
 */
 
 #include <wx/wx.h>
+#include <memory>
+
 
 // CalChartApp represents the wxWidgets App for CalChart.  The document manager creates
 // the actual CalChart Document instances.  This just serves the purpose of being the first
