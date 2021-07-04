@@ -1,15 +1,81 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
+
+
 orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
+  win: circleci/windows@2.4.0
+
 workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
+  hello-world:
     jobs:
-      steps:
-        - checkout
+      - build
+  integration-tests:
+    jobs:
+      - browser-tests
+      - ui-tests
+
+jobs:
+  build:
+    executor:
+      name: win/default
+    working_directory: C:\Users\circleci\project\HelloWorld
+    steps:
+      - checkout:
+          path: C:\Users\circleci\project
+      - restore_cache:
+          keys:
+            - dotnet-packages-v1-{{ checksum "circleci-demo-windows.csproj" }}
+      - run:
+          name: "Install project dependencies"
+          command: dotnet.exe restore
+      - save_cache:
+          paths:
+            - C:\Users\circleci\project\HelloWorld\.nuget\packages
+          key: dotnet-packages-v1-{{ checksum "circleci-demo-windows.csproj" }}
+      - run:
+          name: "Run Build step"
+          command: dotnet.exe publish -c Release -r win10-x64
+      - run:
+          name: "Test the executable"
+          command: .\bin\Release\netcoreapp2.1\win10-x64\publish\circleci-demo-windows.exe 
+      - store_artifacts:
+          path: .\bin\Release\netcoreapp2.1\win10-x64\publish\circleci-demo-windows.exe
+
+
+  browser-tests:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: Run browser tests
+          command: |
+              cd WebBrowserTestsSample/tests/WebBrowserTests
+              dotnet test
+  ui-tests:
+    executor:
+      name: win/default
+      shell: powershell.exe
+    steps:
+      - checkout
+      - run: choco install winappdriver
+      - run: 
+          name: Run winappdriver in background
+          background: true
+          command: | 
+              cd "C:\Program Files (x86)\Windows Application Driver\"
+              Start-Process -FilePath "WinAppDriver.exe" -Wait
+      - run:
+          name: Restore and build
+          command: |
+            cd NotepadTest
+            nuget restore
+            cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\msbuild\current\bin\"
+            .\msbuild.exe "C:\Users\circleci\project\NotepadTest\NotepadTest.csproj"
+      - run: 
+          name: Run UI tests
+          command: |
+              cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\common7\ide\extensions\TestPlatform"
+              .\vstest.console.exe C:\Users\circleci\project\NotepadTest\bin\debug\NotepadTest.dll
+
 
