@@ -10,7 +10,7 @@ jobs:
   build:
     executor: exec1
     steps:
-      - checkout:
+      - checkout
       - run:
           name: Setup submodules
           command: |
