@@ -32,6 +32,10 @@ jobs:
             cd submodules
             git submodule update --init --recursive
       - run:
+          name: install cmake
+          command: |
+            choco install cmake
+      - run:
           name: Setup cmake and build
           command: |
             mkdir build
