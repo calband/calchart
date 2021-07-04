@@ -10,9 +10,6 @@ workflows:
   welcome:
     # Run the welcome/run job in its own container
     jobs:
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-
+      steps:
+        - checkout
 
