@@ -39,7 +39,9 @@ jobs:
           name: install cmake
           command: |
             choco install cmake
+            Get-Variable
             $Env:PATH += ";$Env:CMAKE_DIR"
+            Get-Variable
 
       - run:
           name: Setup cmake and build
