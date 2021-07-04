@@ -2,7 +2,7 @@
 version: 2.1
 
 orbs:
-  windows: circleci/windows@2.4.0
+  win: circleci/windows@2.4.0
 
 jobs:
   build-mac:
