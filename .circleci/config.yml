@@ -24,18 +24,23 @@ jobs:
             cmake --build
   build-win:
     executor: win/default # executor type
+    environment:
+      - CMAKE_DIR: 'C:\Program Files\CMake\bin'
     steps:
       - checkout
+
       - run:
           name: Setup submodules
           command: |
             cd submodules
             git submodule update --init --recursive
+
       - run:
           name: install cmake
           command: |
             choco install cmake
-            $env:Path+=";$Env:ProgramFiles\CMake\bin"
+            $Env:PATH += ";$Env:CMAKE_DIR"
+
       - run:
           name: Setup cmake and build
           command: |
