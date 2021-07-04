@@ -35,6 +35,7 @@ jobs:
           name: install cmake
           command: |
             choco install cmake
+            $env:Path+=";$Env:ProgramFiles\CMake\bin"
       - run:
           name: Setup cmake and build
           command: |
