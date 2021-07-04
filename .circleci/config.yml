@@ -1,81 +1,32 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-
-orbs:
-  win: circleci/windows@2.4.0
-
-workflows:
-  hello-world:
-    jobs:
-      - build
-  integration-tests:
-    jobs:
-      - browser-tests
-      - ui-tests
+executors:
+  exec1:
+    docker:
+      - image: silverlinings89/cpp_build_environment:latest
 
 jobs:
   build:
-    executor:
-      name: win/default
-    working_directory: C:\Users\circleci\project\HelloWorld
+    executor: exec1
     steps:
       - checkout:
-          path: C:\Users\circleci\project
-      - restore_cache:
-          keys:
-            - dotnet-packages-v1-{{ checksum "circleci-demo-windows.csproj" }}
       - run:
-          name: "Install project dependencies"
-          command: dotnet.exe restore
-      - save_cache:
-          paths:
-            - C:\Users\circleci\project\HelloWorld\.nuget\packages
-          key: dotnet-packages-v1-{{ checksum "circleci-demo-windows.csproj" }}
+          name: Setup submodules
+          command: |
+            cd submodules
+            git submodule update --init --recursive
       - run:
-          name: "Run Build step"
-          command: dotnet.exe publish -c Release -r win10-x64
-      - run:
-          name: "Test the executable"
-          command: .\bin\Release\netcoreapp2.1\win10-x64\publish\circleci-demo-windows.exe 
-      - store_artifacts:
-          path: .\bin\Release\netcoreapp2.1\win10-x64\publish\circleci-demo-windows.exe
+          name: Setup cmake and build
+          command: |
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build
 
 
-  browser-tests:
-    executor:
-      name: win/default
-    steps:
-      - checkout
-      - run:
-          name: Run browser tests
-          command: |
-              cd WebBrowserTestsSample/tests/WebBrowserTests
-              dotnet test
-  ui-tests:
-    executor:
-      name: win/default
-      shell: powershell.exe
-    steps:
-      - checkout
-      - run: choco install winappdriver
-      - run: 
-          name: Run winappdriver in background
-          background: true
-          command: | 
-              cd "C:\Program Files (x86)\Windows Application Driver\"
-              Start-Process -FilePath "WinAppDriver.exe" -Wait
-      - run:
-          name: Restore and build
-          command: |
-            cd NotepadTest
-            nuget restore
-            cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\msbuild\current\bin\"
-            .\msbuild.exe "C:\Users\circleci\project\NotepadTest\NotepadTest.csproj"
-      - run: 
-          name: Run UI tests
-          command: |
-              cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\common7\ide\extensions\TestPlatform"
-              .\vstest.console.exe C:\Users\circleci\project\NotepadTest\bin\debug\NotepadTest.dll
-
+workflows:
+  build:
+    jobs:
+      - build
 
