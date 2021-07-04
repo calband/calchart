@@ -1,5 +1,4 @@
 #pragma once
-
 /*
  * CalChartToolBar.h
  * Header for adding toolbars to CalChart

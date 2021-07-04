@@ -42,7 +42,7 @@ private:
     SelectionList mSelection;
 
     void CreateControls();
-    void Update();
+    void RereadFromShow();
 
     void PointPickerAll(wxCommandEvent&);
     void PointPickerSelect(wxCommandEvent&);

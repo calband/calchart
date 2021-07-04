@@ -32,7 +32,16 @@ class ColorSetupDialog : public wxDialog {
     DECLARE_EVENT_TABLE()
 
 public:
+    static std::unique_ptr<ColorSetupDialog> CreateDialog(wxWindow* parent, int palette)
+    {
+        auto dialog = std::unique_ptr<ColorSetupDialog>(new ColorSetupDialog{parent, palette});
+        dialog->TransferDataToWindow();
+        return dialog;
+    }
+private:
+    // private, use the CreateDialog method
     ColorSetupDialog(wxWindow* parent, int palette);
+public:
     virtual ~ColorSetupDialog() = default;
 
 private:

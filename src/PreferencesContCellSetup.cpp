@@ -57,13 +57,6 @@ static auto do_cloning(T const& cont)
     return copied_cont;
 }
 
-ContCellSetup::ContCellSetup(CalChartConfiguration& config, wxWindow* parent)
-    : super(config)
-{
-    Init();
-    Create(parent, "ContCell Setup");
-}
-
 void ContCellSetup::CreateControls()
 {
     SetSizer(VStack([this](auto sizer) {
@@ -131,7 +124,7 @@ void ContCellSetup::CreateControls()
     TransferDataToWindow();
 }
 
-void ContCellSetup::Init()
+void ContCellSetup::InitFromConfig()
 {
     // first read out the defaults:
     for (auto i = 0; i < COLOR_CONTCELLS_NUM; ++i) {
@@ -162,7 +155,7 @@ bool ContCellSetup::ClearValuesToDefault()
         SetColor(i, mConfig.GetContCellDefaultColors()[i]);
         mConfig.Clear_ContCellConfigColor(i);
     }
-    Init();
+    InitFromConfig();
     TransferDataToWindow();
     return true;
 }

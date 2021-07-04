@@ -134,7 +134,7 @@ void ShowModeSetup::CreateControls()
     TransferDataToWindow();
 }
 
-void ShowModeSetup::Init()
+void ShowModeSetup::InitFromConfig()
 {
     mWhichMode = 0;
     mWhichYardLine = 0;
@@ -201,7 +201,7 @@ bool ShowModeSetup::ClearValuesToDefault()
     for (auto i = 0; i < kYardTextValues; ++i) {
         mConfig.Clear_yard_text(i);
     }
-    Init();
+    InitFromConfig();
     ((ShowModeSetupCanvas*)FindWindow(CANVAS))->SetMode(CalChart::ShowMode::CreateShowMode(mConfig.Get_ShowModeInfo(static_cast<CalChartShowModes>(mWhichMode)), mYardText));
     return TransferDataToWindow();
 }

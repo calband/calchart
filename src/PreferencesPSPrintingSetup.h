@@ -33,16 +33,21 @@ class PSPrintingSetUp : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    PSPrintingSetUp(CalChartConfiguration& config, wxWindow* parent)
-        : super(config)
+    static PSPrintingSetUp* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
     {
-        Init();
-        Create(parent, "Printing Values");
+        auto pref = new PSPrintingSetUp(config, parent);
+        pref->Initialize();
+        return pref;
     }
-    ~PSPrintingSetUp() override = default;
 
-    void Init() override;
-    void CreateControls() override;
+private:
+    // private, use the CreatePreference method
+    PSPrintingSetUp(CalChartConfiguration& config, wxWindow* parent)
+        : super(config, parent, "Printing Values")
+    {
+    }
+public:
+    ~PSPrintingSetUp() override = default;
 
     // use these to get and set default values
     bool TransferDataToWindow() override;
@@ -50,6 +55,9 @@ public:
     bool ClearValuesToDefault() override;
 
 private:
+    void InitFromConfig() override;
+    void CreateControls() override;
+
     wxString mFontNames[7];
     double mPrintValues[8];
 };

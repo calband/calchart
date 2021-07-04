@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_omniview_constants.h
  * CalChart omniview constants
@@ -19,8 +20,6 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#pragma once
 
 #define _USE_MATH_DEFINES
 #include <cmath>

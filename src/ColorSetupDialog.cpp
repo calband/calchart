@@ -127,8 +127,6 @@ void ColorSetupDialog::CreateControls()
             CreateButton(this, sizer, wxID_CANCEL);
         });
     }));
-
-    TransferDataToWindow();
 }
 
 void ColorSetupDialog::Init()

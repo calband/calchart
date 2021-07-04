@@ -700,7 +700,7 @@ void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
     myGLUPerspective(mFOV, static_cast<float>(ClientSize.x) / static_cast<float>(ClientSize.y), 0.1, 2 * FieldNS);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    if (mFollowMarcher != -1) {
+    if (mFollowMarcher != -1 && mView) {
         auto info = mView->GetMarcherInfo(mFollowMarcher);
         mViewPoint.x = info.x;
         mViewPoint.y = info.y;

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * cc_preferences.h
  * Dialox box for preferences
@@ -19,8 +20,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#pragma once
 
 #include "CalChartConfiguration.h"
 #include <wx/wx.h>

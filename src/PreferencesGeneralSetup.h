@@ -33,11 +33,21 @@ class GeneralSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    GeneralSetup(CalChartConfiguration& config, wxWindow* parent);
-    ~GeneralSetup() override = default;
+    static GeneralSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    {
+        auto pref = new GeneralSetup(config, parent);
+        pref->Initialize();
+        return pref;
+    }
 
-    void Init() override;
-    void CreateControls() override;
+private:
+    // private, use the CreatePreference method
+    GeneralSetup(CalChartConfiguration& config, wxWindow* parent)
+        : super(config, parent, "General Setup")
+    {
+    }
+public:
+    ~GeneralSetup() override = default;
 
     // use these to get and set default values
     bool TransferDataToWindow() override;
@@ -45,6 +55,9 @@ public:
     bool ClearValuesToDefault() override;
 
 private:
+    void InitFromConfig() override;
+    void CreateControls() override;
+
     void OnCmdResetAll(wxCommandEvent&);
 
     wxString mAutoSave_Interval{};

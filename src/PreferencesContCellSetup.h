@@ -35,11 +35,21 @@ class ContCellSetup : public PreferencePage {
     DECLARE_EVENT_TABLE()
 
 public:
-    ContCellSetup(CalChartConfiguration& config, wxWindow* parent);
-    ~ContCellSetup() override = default;
+    static ContCellSetup* CreatePreference(CalChartConfiguration& config, wxWindow* parent)
+    {
+        auto pref = new ContCellSetup(config, parent);
+        pref->Initialize();
+        return pref;
+    }
 
-    void Init() override;
-    void CreateControls() override;
+private:
+    // private, use the CreatePreference method
+    ContCellSetup(CalChartConfiguration& config, wxWindow* parent)
+        : super(config, parent, "ContCell Setup")
+    {
+    }
+private:
+    ~ContCellSetup() override = default;
 
     // use these to get and set default values
     bool TransferDataToWindow() override;
@@ -47,6 +57,9 @@ public:
     bool ClearValuesToDefault() override;
 
 private:
+    void InitFromConfig() override;
+    void CreateControls() override;
+
     void OnCmdFontSize(wxSpinEvent&);
     void OnCmdRounding(wxSpinEvent&);
     void OnCmdTextPadding(wxSpinEvent&);
