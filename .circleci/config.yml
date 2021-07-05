@@ -33,10 +33,10 @@ jobs:
           name: install cmake
           command: |
             echo "Here"
-            echo $CMAKE_DIR
-            echo $env:CMAKE_DIR
-            echo $Env:CMAKE_DIR
-            choco install cmake
+            echo "1 : $CMAKE_DIR"
+            echo "2 : $env:CMAKE_DIR"
+            echo "3 : $Env:CMAKE_DIR"
+            choco install cmake --no-progress 
             Get-Variable
             Set-Item -Path Env:Path -Value ($Env:Path + ";C:\Temp")
             Set-Item -Path Env:Path -Value ($Env:Path + ";C:\Program Files\CMake\bin")
