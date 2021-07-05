@@ -23,7 +23,9 @@ jobs:
             cmake ..
             cmake --build
   build-win:
-    executor: win/default # executor type
+    executor:
+      name: win/default # executor type
+      shell: powershell.exe
     environment:
       - CMAKE_DIR: 'C:\Program Files\CMake\bin'
       - CMAKE_CMD: 'C:\Program Files\CMake\bin\cmake.exe'
@@ -38,6 +40,7 @@ jobs:
             echo "2 : $env:CMAKE_DIR"
             echo "3 : $Env:CMAKE_DIR"
             choco install cmake --no-progress 
+            if (-not $?) { throw "Failed to install CMake" }
             Get-Variable
             Set-Item -Path Env:Path -Value ($Env:Path + ";C:\Temp")
             Set-Item -Path Env:Path -Value ($Env:Path + ";C:\Program Files\CMake\bin")
@@ -54,11 +57,10 @@ jobs:
       - run:
           name: Setup cmake and build
           command: |
+            $Env:PATH += ";$Env:CMAKE_DIR"
             mkdir build
             cd build
-            echo "2 : $env:CMAKE_CMD"
-            C:\Program Files\CMake\bin\cmake.exe ..
-            C:\Program Files\CMake\bin\cmake.exe --build
+            cmake --build . --target github-cli-release --config Release
 
 
 workflows:
