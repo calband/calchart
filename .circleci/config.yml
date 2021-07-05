@@ -40,7 +40,9 @@ jobs:
           command: |
             choco install cmake
             Get-Variable
-            $Env:PATH += ";$Env:CMAKE_DIR"
+            Set-Item -Path Env:Path -Value ($Env:Path + ";C:\Temp")
+            Set-Item -Path Env:Path -Value ($Env:Path + ";C:\Program Files\CMake\bin")
+            #  $Env:PATH += ";$Env:CMAKE_DIR"
             Get-Variable
 
       - run:
