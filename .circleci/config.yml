@@ -56,7 +56,7 @@ jobs:
           command: |
             mkdir build
             cd build
-            echo "2 : $env:CMAKE_DIR\cmake.exe"
+            echo "2 : $env:CMAKE_CMD"
             $env:CMAKE_CMD ..
             $env:CMAKE_CMD --build
 
