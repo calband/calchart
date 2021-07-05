@@ -60,7 +60,8 @@ jobs:
             $Env:PATH += ";$Env:CMAKE_DIR"
             mkdir build
             cd build
-            cmake --build . --target github-cli-release --config Release
+            cmake .. 
+            cmake --build . --config Release
 
 
 workflows:
