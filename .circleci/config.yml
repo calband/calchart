@@ -57,8 +57,8 @@ jobs:
             mkdir build
             cd build
             echo "2 : $env:CMAKE_CMD"
-            C:\Program\ Files\CMake\bin\cmake.exe ..
-            C:\Program\ Files\CMake\bin\cmake.exe --build
+            C:\Program Files\CMake\bin\cmake.exe ..
+            C:\Program Files\CMake\bin\cmake.exe --build
 
 
 workflows:
