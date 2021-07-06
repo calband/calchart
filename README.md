@@ -6,14 +6,6 @@ marching shows.  This program allows us to plot how we want marchers to move,
 and how formations to flow.  It is used to animate a show, and to print out
 continuity (poop sheets).
 
-Calchart uses several open source tools for building an executable for a target
-system.  There are different UI windowing systems (like Cocoa for Mac, or GNOME
-for linux, or QT for cross platform), but wxWidgets was chosen as a good
-balance of features, cross-platform, and support.  This allows one version to
-be built on Windows/MacOS/Linux, but also means that proprietary UI Kits like
-iOS would be difficult to support, requiring a complete rewrite.  Currently,
-Calchart uses wxWidgets version 3.1.
-
 Calchart also has an internal compiling language for interpreting the
 continuity commands into movement.  This language description is converted into
 source code using bison and flex.  The Calchart documentation is done with a
@@ -22,15 +14,14 @@ tex files can be re-edited and used to regenerate the documentation, but the
 conversion tools are unsupported.  The generated HTML results are also
 distributed in the developer package.
 
-
 ## Helping Develop CalChart:
-
-Visit the CalChart GitHub page:
 
 CalChart is hosted on github.com in the Calband/CalChart section.  You can
 think of this as the "developer" site of CalChart.
 
 https://github.com/calband/calchart
+
+For information on the CalChart Architecture, please refer to [Architecture Guide](README-architecture.md).
 
 note:
 The CalChart sourceforge.net will be used for hosting CalChart deliverables files, but
