@@ -27,12 +27,6 @@ https://trac.macports.org/ticket/58450
 
 $ brew install cmake
 
-### Boost
-
-CalChart uses Boost.  See boost.org for more information about what Boost is.  You will need to make sure it is installed on your system somewhere common so CMake can find it.  I recommend using brew to install it.  See https://brew.sh.
-
-$ brew install boost
-
 ## Building CalChart:
 
 CalChart uses cmake to configure and run the platform specific build system.  For Mac we use Xcode.

@@ -39,9 +39,6 @@ configure_file (
 # calchart_cmd: CLI for parsing files and testing
 # CalChart: The App itself
 
-# CalChart requires Boost.  Find it and include the directories here.
-find_package (Boost 1.60 REQUIRED)
-
 # CalChart requires BISON/FLEX for the grammar
 find_package (BISON REQUIRED)
 find_package (FLEX REQUIRED)
@@ -140,7 +137,6 @@ target_include_directories (
   calchart_core
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core
-  ${Boost_INCLUDE_DIRS}
   ${PROJECT_BINARY_DIR}/version
   ${CMAKE_CURRENT_SOURCE_DIR}/submodules/munkres-cpp/src
   )
@@ -176,7 +172,6 @@ target_include_directories (
   PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
-  "${Boost_INCLUDE_DIRS}"
   "${PROJECT_BINARY_DIR}/version"
   )
 
@@ -321,14 +316,13 @@ set_target_properties (
   "${AllResources}"
   )
 
-target_link_libraries (CalChart calchart_core ${Boost_LIBRARIES})
+target_link_libraries (CalChart calchart_core)
 target_link_libraries (CalChart nlohmann_json::nlohmann_json)
 
 #target_link_libraries (
 #  CalChart
 #  PRIVATE
 #  calchart_core
-#  ${Boost_LIBRARIES}
 #  nlohmann_json::nlohmann_json
 #  )
 
@@ -353,7 +347,6 @@ target_include_directories (
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
   "${CMAKE_CURRENT_SOURCE_DIR}/resources"
   "${CMAKE_CURRENT_SOURCE_DIR}/submodules/munkres-cpp/src"
-  "${Boost_INCLUDE_DIRS}"
   "${PROJECT_BINARY_DIR}/version"
   )
 
