@@ -29,9 +29,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/array.hpp>
-
 namespace CalChart {
 
 static constexpr auto SPR_YARD_LEFT = 8;
@@ -114,18 +111,6 @@ private:
 
     YardLinesInfo_t mYardLines;
 
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int /*version*/)
-    {
-        ar& mSize;
-        ar& mOffset;
-        ar& mBorder1;
-        ar& mBorder2;
-        ar& mHashW;
-        ar& mHashE;
-        ar& mYardLines;
-    }
     friend bool operator==(ShowMode const& lhs, ShowMode const& rhs);
 };
 

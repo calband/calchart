@@ -18,25 +18,11 @@ We tried Visual Studio Community 2017.
 You'll need to install the "Visual C++" "Common Tools for Visual C++ 2017".
 
 
-## Download Boost
-Visit http://www.boost.org/ and download the latest version of Boost. 
-Place the downloaded Boost directory somewhere on your computer:
-
-	e.g. c:\boost
-
-Remember where you place this Boost directory. In the next section, I will refer to the directory as $YOUR_BOOST_DIRECTORY. In the example above, $YOUR_BOOST_DIRECTORY = `c:\boost`
-
 ## Add environment variables
 Go to Control Panel->System->Advanced System Settings->Environment Variables
 Add the following User variables:
 
-	BOOST_DIR=$YOUR_BOOST_DIRECTORY
-	BOOST_ROOT=$YOUR_BOOST_DIRECTORY
-	Boost_INCLUDE_DIR=$YOUR_BOOST_DIRECTORY
 	CMAKE_PREFIX_PATH=$PATH_TO_BISON
-
-(see the `Download Boost` section above for the meaning of $YOUR_BOOST_DIRECTORY)
-
 
 ## Get CMake
 Read instructions at 
