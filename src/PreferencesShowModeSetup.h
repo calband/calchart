@@ -51,6 +51,7 @@ private:
         : super(config, parent, "Setup Modes")
     {
     }
+
 public:
     ~ShowModeSetup() override = default;
 

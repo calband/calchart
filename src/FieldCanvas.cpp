@@ -89,7 +89,7 @@ void FieldCanvas::OnFieldPaint(wxPaintEvent& event)
     OnPaint(event, CalChartConfiguration::GetGlobalConfig());
 }
 
-void FieldCanvas::OnPaint(wxPaintEvent& event, CalChartConfiguration const& config)
+void FieldCanvas::OnPaint(wxPaintEvent&, CalChartConfiguration const& config)
 {
     if (!mView) {
         return;
@@ -153,7 +153,7 @@ void FieldCanvas::PaintShapes(wxDC& dc, CalChartConfiguration const& config, Cal
 }
 
 // We have a empty erase background to improve redraw performance.
-void FieldCanvas::OnEraseBackground(wxEraseEvent& event) { }
+void FieldCanvas::OnEraseBackground(wxEraseEvent&) { }
 
 // When a left click down occurs:
 // We could be doing picture adjustments, so handle that first

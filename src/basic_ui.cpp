@@ -82,8 +82,7 @@ public:
         : win(w)
     {
     }
-    virtual bool OnDropFiles(wxCoord x, wxCoord y,
-        const wxArrayString& filenames)
+    virtual bool OnDropFiles(wxCoord, wxCoord, wxArrayString const& filenames)
     {
         if (filenames.Count() > 0) {
             win->LoadFile(filenames[0]);
@@ -172,7 +171,7 @@ void ScrollZoomWindow::ChangeOffset(wxPoint deltaOffset)
     Scroll(offset);
 }
 
-void ScrollZoomWindow::HandleSizeEvent(wxSizeEvent& event)
+void ScrollZoomWindow::HandleSizeEvent(wxSizeEvent&)
 {
     SetupSize();
 }

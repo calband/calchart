@@ -124,7 +124,8 @@ void PrintPostScriptDialog::PrintShow(const CalChartConfiguration& config)
     case CC_PRINT_ACTION_FILE:
         break;
     default:
-        system(buf.utf8_str());
+        // intentionally ignoring the result
+        (void)system(buf.utf8_str());
         wxRemoveFile(s);
         break;
     }

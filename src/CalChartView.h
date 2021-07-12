@@ -142,7 +142,7 @@ public:
     void OnBackgroundImageDelete();
 
 private:
-    void DrawPaths(wxDC& dc, const CalChart::Sheet& sheet);
+    void DrawPaths(wxDC& dc);
     void GeneratePaths();
     void UpdateBackgroundImages();
 

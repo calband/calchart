@@ -38,8 +38,8 @@ class PreferencePage : public wxPanel {
     DECLARE_ABSTRACT_CLASS(GeneralSetup)
 public:
     PreferencePage(CalChartConfiguration& config, wxWindow* parent, const wxString& caption)
-    : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption)
-    , mConfig(config)
+        : super(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxCAPTION | wxRESIZE_BORDER | wxSYSTEM_MENU, caption)
+        , mConfig(config)
     {
     }
     ~PreferencePage() override = default;

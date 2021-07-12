@@ -315,7 +315,7 @@ std::vector<Animation::animate_info_t> Animation::GetAllAnimateInfo() const
 
 int Animation::GetNumberSheets() const { return static_cast<int>(mSheets.size()); }
 
-int Animation::GetTotalNumberBeatsUpTo(int sheet) const
+unsigned Animation::GetTotalNumberBeatsUpTo(int sheet) const
 {
     return std::accumulate(mSheets.cbegin(), mSheets.cbegin() + sheet, 0, [](auto&& a, auto&& b) {
         return a + b.GetNumBeats();

@@ -153,7 +153,7 @@ void BackgroundImage::OnMouseLeftDown(wxMouseEvent const& event, wxDC const& dc)
     }
 }
 
-std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent& event, const wxDC& dc)
+std::array<int, 4> BackgroundImage::OnMouseLeftUp(const wxMouseEvent&, const wxDC&)
 {
     if (mScaleAndMove) {
         // done moving, lock down the picture and make it pretty:

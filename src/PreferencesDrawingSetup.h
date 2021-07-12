@@ -46,6 +46,7 @@ private:
         : super(config, parent, "Drawing Setup")
     {
     }
+
 public:
     ~DrawingSetup() override = default;
 

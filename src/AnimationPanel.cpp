@@ -159,7 +159,7 @@ void AnimationPanel::SetInMiniMode(bool miniMode)
     Layout();
 }
 
-void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent& event)
+void AnimationPanel::OnCmd_anim_next_beat_timer(wxTimerEvent&)
 {
     if (!mView) {
         return;

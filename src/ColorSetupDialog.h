@@ -22,11 +22,11 @@
 */
 
 #include "CalChartConfiguration.h"
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <wx/bmpcbox.h>
 #include <wx/spinctrl.h>
 #include <wx/wx.h>
-#include <memory>
 
 class ColorSetupDialog : public wxDialog {
     using super = wxDialog;
@@ -35,13 +35,15 @@ class ColorSetupDialog : public wxDialog {
 public:
     static std::unique_ptr<ColorSetupDialog> CreateDialog(wxWindow* parent, int palette)
     {
-        auto dialog = std::unique_ptr<ColorSetupDialog>(new ColorSetupDialog{parent, palette});
+        auto dialog = std::unique_ptr<ColorSetupDialog>(new ColorSetupDialog{ parent, palette });
         dialog->TransferDataToWindow();
         return dialog;
     }
+
 private:
     // private, use the CreateDialog method
     ColorSetupDialog(wxWindow* parent, int palette);
+
 public:
     virtual ~ColorSetupDialog() = default;
 

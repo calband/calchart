@@ -106,7 +106,7 @@ ColorSetupCanvas::ColorSetupCanvas(CalChartConfiguration& config, wxWindow* pare
 }
 
 // Define the repainting behaviour
-void ColorSetupCanvas::OnPaint(wxPaintEvent& event)
+void ColorSetupCanvas::OnPaint(wxPaintEvent&)
 {
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
@@ -143,4 +143,4 @@ void ColorSetupCanvas::OnPaint(wxPaintEvent& event)
 }
 
 // We have a empty erase background to improve redraw performance.
-void ColorSetupCanvas::OnEraseBackground(wxEraseEvent& event) { }
+void ColorSetupCanvas::OnEraseBackground(wxEraseEvent&) { }

@@ -50,7 +50,7 @@ void ColorPalettePanel::Init()
     SetMinClientSize(wxSize(kBoxBorder + kNumberPalettes * (kBoxSize + kBoxBorder), 2 * kBoxBorder + kBoxSize));
 }
 
-void ColorPalettePanel::OnPaint(wxPaintEvent& event)
+void ColorPalettePanel::OnPaint(wxPaintEvent&)
 {
     auto dc = wxBufferedPaintDC{ this };
     auto& config = CalChartConfiguration::GetGlobalConfig();

@@ -95,7 +95,7 @@ void CalChartView::OnDraw(wxDC* dc)
                     mShow->GetNumPoints(), mShow->GetPointsLabel(),
                     *mShow->GetCurrentSheet(), mShow->GetCurrentReferencePoint(), true);
             }
-            DrawPaths(*dc, *sheet);
+            DrawPaths(*dc);
         }
     }
 }
@@ -534,7 +534,7 @@ void CalChartView::OnEnableDrawPaths(bool enable)
     mShow->SetDrawPaths(enable);
 }
 
-void CalChartView::DrawPaths(wxDC& dc, const CalChart::Sheet& sheet)
+void CalChartView::DrawPaths(wxDC& dc)
 {
     auto animation = mShow->GetAnimation();
     if (mShow->GetDrawPaths() && animation && animation->GetNumberSheets() && (animation->GetNumberSheets() > mShow->GetCurrentSheetNum())) {

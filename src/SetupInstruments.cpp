@@ -71,7 +71,7 @@ SetupInstruments::SetupInstruments(CalChartDoc const& shw, wxWindow* parent, wxW
     std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mInstruments), [&shw](auto&& i) {
         return shw.GetPointInstrument(i);
     });
-    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mSymbols), [&shw, dotSymbols](auto&& i) {
+    std::transform(mDotIndices.begin(), mDotIndices.end(), std::back_inserter(mSymbols), [dotSymbols](auto&& i) {
         return dotSymbols.at(i);
     });
 
@@ -142,7 +142,7 @@ void SetupInstruments::CreateControls()
             CreateText(this, sizer, BasicSizerFlags(), "Select Instrument");
             auto currentInstruments = std::set(mInstruments.begin(), mInstruments.end());
             auto choices = std::vector<wxString>(currentInstruments.begin(), currentInstruments.end());
-            auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), SetupInstruments_SelectInstrument, choices, [this](wxCommandEvent& e) {
+            auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), SetupInstruments_SelectInstrument, choices, [this](wxCommandEvent&) {
                 SelectInstrument();
             });
             choice->SetSelection(wxNOT_FOUND);
@@ -158,7 +158,7 @@ void SetupInstruments::CreateControls()
                 std::vector<wxString> choices;
                 choices.insert(choices.end(), mInstrumentChoices.begin(), mInstrumentChoices.end());
                 choices.push_back(kCustom);
-                auto choice = CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), SetupInstruments_SetInstrumentChoice, choices, [this](wxCommandEvent& e) {
+                CreateChoiceWithHandler(this, sizer, BasicSizerFlags(), SetupInstruments_SetInstrumentChoice, choices, [this](wxCommandEvent&) {
                     OnCmdChoice();
                 });
             });
@@ -226,7 +226,7 @@ void SetupInstruments::SelectAll(wxCommandEvent&)
 void SetupInstruments::SelectAllPoints()
 {
     auto list = static_cast<wxListBox*>(FindWindow(SetupInstruments_SetupInstrumentsList));
-    for (auto i = 0; i < list->GetCount(); ++i) {
+    for (auto i = 0ul; i < list->GetCount(); ++i) {
         list->SetSelection(i);
     }
     SelectionListChanged();

@@ -337,7 +337,7 @@ auto GetMarcherTextureAndPoints(float cameraAngleToMarcher, float marcherDirecti
 // Returns the angle in regards to the camera.
 static auto GetAngle(float x, float y, ViewPoint const& viewpoint)
 {
-    auto v = ViewPoint{ x - viewpoint.x, y - viewpoint.y };
+    auto v = ViewPoint{ x - viewpoint.x, y - viewpoint.y, 0.f };
     auto mag = sqrt(v.x * v.x + v.y * v.y);
     auto ang = acos(v.x / mag); // normalize
     return (v.y < 0) ? -ang : ang;
@@ -586,8 +586,7 @@ void CCOmniviewCanvas::Init()
 
 void CCOmniviewCanvas::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-    }));
+    SetSizer(VStack([](auto) {}));
 }
 
 void CCOmniviewCanvas::SetView(AnimationView* view)
@@ -673,7 +672,7 @@ static void mygluLookAt(GLdouble eyeX, GLdouble eyeY, GLdouble eyeZ, GLdouble ce
     glTranslated(-eyeX, -eyeY, -eyeZ);
 }
 
-void CCOmniviewCanvas::OnPaint(wxPaintEvent& event)
+void CCOmniviewCanvas::OnPaint(wxPaintEvent&)
 {
     // This is required even though dc is not used otherwise.
     wxPaintDC dc(this);
@@ -933,9 +932,9 @@ void CCOmniviewCanvas::OnCmd_FollowMarcher(int which)
     Refresh();
 }
 
-void CCOmniviewCanvas::OnCmd_SaveCameraAngle(size_t which) { }
+void CCOmniviewCanvas::OnCmd_SaveCameraAngle(size_t) { }
 
-void CCOmniviewCanvas::OnCmd_GoToCameraAngle(size_t which) { }
+void CCOmniviewCanvas::OnCmd_GoToCameraAngle(size_t) { }
 
 void CCOmniviewCanvas::OnCmd_ToggleCrowd()
 {

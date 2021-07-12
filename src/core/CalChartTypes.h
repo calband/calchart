@@ -21,9 +21,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <functional>
 #include <set>
 #include <string>
-#include <functional>
 
 enum class PSFONT {
     SYMBOL,

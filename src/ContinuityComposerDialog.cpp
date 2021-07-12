@@ -454,7 +454,7 @@ auto WhatType(CalChart::ContToken const* ptr)
     throw std::runtime_error("unknown pointer type");
 }
 
-std::vector<std::string> GetCurrentList(CalChart::ContToken const* selected, std::string text_entered)
+auto GetCurrentList(CalChart::ContToken const* selected)
 {
     std::vector<std::string> result;
     if (selected) {
@@ -559,7 +559,7 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
 void ContinuityComposerPanel::OnUpdate()
 {
     // save off what's in the list.
-    auto list_of_strings = GetCurrentList(mCurrentSelected, mComboSelection->GetValue().ToStdString());
+    auto list_of_strings = GetCurrentList(mCurrentSelected);
     // this is where we would filter things out.
     std::vector<wxString> wxStringsCont(list_of_strings.begin(), list_of_strings.end());
     mComboSelection->Set(wxStringsCont.size(), wxStringsCont.data());
@@ -596,8 +596,8 @@ ContinuityComposerPanel::GetContinuity()
 
 IMPLEMENT_CLASS(ContinuityComposerDialog, wxDialog)
 
-ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent, wxWindowID id, wxString const& caption, wxPoint const& pos, wxSize const& size, long style, wxString const& name)
-    : super(parent, id, caption, pos, size, style)
+ContinuityComposerDialog::ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent)
+    : super(parent, wxID_ANY, "Compose Continuity")
 {
     // create a sizer for laying things out top down:
     mPanel = new ContinuityComposerPanel(std::move(starting_continuity), CalChartConfiguration::GetGlobalConfig(), this);

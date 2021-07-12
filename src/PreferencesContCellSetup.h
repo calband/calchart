@@ -48,6 +48,7 @@ private:
         : super(config, parent, "ContCell Setup")
     {
     }
+
 private:
     ~ContCellSetup() override = default;
 

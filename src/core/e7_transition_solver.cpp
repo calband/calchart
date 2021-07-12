@@ -1275,8 +1275,8 @@ std::pair<SolverCoord, SolverCoord> calcStepVectors(PathAxes axes, const Transit
         break;
     case TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
         majorStepIsFirst = true;
-            minorStep += majorStep;
-            break;
+        minorStep += majorStep;
+        break;
     case TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
         minorStep += majorStep;
         break;

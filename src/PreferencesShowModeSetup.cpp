@@ -31,7 +31,6 @@
 #include "CalChartSizes.h"
 #include "ColorSetupCanvas.h"
 #include "ContinuityBrowserPanel.h"
-#include "ContinuityComposerDialog.h"
 #include "ModeSetupDialog.h"
 #include "PreferencesUtils.h"
 #include "ShowModeSetupCanvas.h"
@@ -68,7 +67,7 @@ IMPLEMENT_CLASS(ShowModeSetup, PreferencePage)
 void ShowModeSetup::CreateControls()
 {
     SetSizer(VStack([this](auto& sizer) {
-        CreateChoiceWithHandler(this, sizer, MODE_CHOICE, { std::begin(kShowModeStrings), std::end(kShowModeStrings) }, [this](wxCommandEvent& e) {
+        CreateChoiceWithHandler(this, sizer, MODE_CHOICE, { std::begin(kShowModeStrings), std::end(kShowModeStrings) }, [this](wxCommandEvent&) {
             OnCmdChoice();
         });
 
@@ -99,13 +98,13 @@ void ShowModeSetup::CreateControls()
         HStack(sizer, LeftBasicSizerFlags(), [this, refresh_action](auto& sizer) {
             HStack(sizer, BasicSizerFlags(), [this, refresh_action](auto& sizer) {
                 CreateText(this, sizer, "Adjust yardline marker");
-                CreateChoiceWithHandler(this, sizer, SHOW_LINE_MARKING, mConfig.Get_yard_text_index(), [this](wxCommandEvent& e) {
+                CreateChoiceWithHandler(this, sizer, SHOW_LINE_MARKING, mConfig.Get_yard_text_index(), [this](wxCommandEvent&) {
                     OnCmdChoice();
                 });
                 CreateTextboxWithAction(this, sizer, SHOW_LINE_VALUE, refresh_action, wxTE_PROCESS_ENTER);
             });
 
-            HStack(sizer, BasicSizerFlags(), [this, refresh_action](auto& sizer) {
+            HStack(sizer, BasicSizerFlags(), [this](auto& sizer) {
                 CreateText(this, sizer, "Zoom");
 
                 wxArrayString zoomtext;

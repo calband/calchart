@@ -464,10 +464,10 @@ namespace Parser {
     float get_big_float(Iter ptr)
     {
         unsigned char rawd[sizeof(float)];
-        std::copy(ptr, ptr+sizeof(float), rawd);
+        std::copy(ptr, ptr + sizeof(float), rawd);
         ptr += sizeof(float);
         float result = 0.f;
-        void * fptr = &result;
+        void* fptr = &result;
         std::memcpy(fptr, rawd, sizeof(float));
         return result;
     }

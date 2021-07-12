@@ -31,7 +31,6 @@
 #include "CalChartSizes.h"
 #include "ColorSetupCanvas.h"
 #include "ContinuityBrowserPanel.h"
-#include "ContinuityComposerDialog.h"
 #include "ModeSetupDialog.h"
 #include "PreferencesUtils.h"
 #include "ShowModeSetupCanvas.h"

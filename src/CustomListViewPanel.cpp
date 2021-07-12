@@ -69,7 +69,7 @@ void CustomListViewPanel::SetHighlight(void const* highlight)
 }
 
 // Define the repainting behaviour
-void CustomListViewPanel::OnPaint(wxPaintEvent& event)
+void CustomListViewPanel::OnPaint(wxPaintEvent&)
 {
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);
@@ -228,20 +228,20 @@ void CustomListViewPanel::OnChar(wxKeyEvent& event)
     Refresh();
 }
 
-void CustomListViewPanel::OnNewEntry(int cell)
+void CustomListViewPanel::OnNewEntry(int)
 {
 }
 
-void CustomListViewPanel::OnEditEntry(int cell)
+void CustomListViewPanel::OnEditEntry(int)
 {
 }
 
-void CustomListViewPanel::OnDeleteEntry(int cell)
+void CustomListViewPanel::OnDeleteEntry(int)
 {
 }
 
-void CustomListViewPanel::OnMoveEntry(int start_cell, int end_cell)
+void CustomListViewPanel::OnMoveEntry(int, int)
 {
 }
 
-void CustomListViewPanel::OnEraseBackground(wxEraseEvent& event) { }
+void CustomListViewPanel::OnEraseBackground(wxEraseEvent&) { }

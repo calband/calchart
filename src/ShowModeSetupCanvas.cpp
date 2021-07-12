@@ -48,7 +48,7 @@ ShowModeSetupCanvas::ShowModeSetupCanvas(CalChartConfiguration& config, wxWindow
 }
 
 // Define the repainting behaviour
-void ShowModeSetupCanvas::OnPaint(wxPaintEvent& event)
+void ShowModeSetupCanvas::OnPaint(wxPaintEvent&)
 {
     wxBufferedPaintDC dc(this);
     PrepareDC(dc);

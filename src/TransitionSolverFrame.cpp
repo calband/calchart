@@ -113,7 +113,7 @@ void TransitionSolverFrame::CreateControls()
 
     // add all of the frame content to the scrollable window
     scrolledWindow->SetSizer(VStack([this, scrolledWindow](auto sizer) {
-        HStack(sizer, [this, scrolledWindow](auto& sizer) {
+        HStack(sizer, [scrolledWindow](auto& sizer) {
             CreateText(scrolledWindow, sizer, R"T(Welcome to the CalChart Transition Solver!
 The algorithms used by this solver are credited to the E7 class  of Spring 2016.
 Staff: (Professor) Tina Chow, and (GSIs) Lucas Bastien and Bradley Harken
@@ -309,7 +309,7 @@ TransitionSolverFrame::~TransitionSolverFrame()
     }
 }
 
-void TransitionSolverFrame::OnCloseWindow(wxCommandEvent& event)
+void TransitionSolverFrame::OnCloseWindow(wxCommandEvent&)
 {
     Close();
 }
@@ -354,7 +354,7 @@ void TransitionSolverFrame::SyncInstructionOptionsControlWithCurrentState()
     mAvailableCommandsControl->Set(commandLabels);
 
     // Update the commands
-    for (auto i = 0; i < mSolverParams.availableInstructions.size(); i++) {
+    for (auto i = 0lu; i < mSolverParams.availableInstructions.size(); i++) {
         auto instruction = mSolverParams.availableInstructions[i];
         auto commandIndex = (unsigned)CalChart::TransitionSolverParams::MarcherInstruction::Pattern::END * (instruction.waitBeats / 2) + ((unsigned)instruction.movementPattern);
 
@@ -470,7 +470,6 @@ void TransitionSolverFrame::OnApply()
 void TransitionSolverFrame::EditAllowedCommands()
 {
     auto rawListSelections = wxArrayInt(mAvailableCommandsControl->GetCount());
-    auto numListSelections = mAvailableCommandsControl->GetSelections(rawListSelections);
 
     auto listSelections = std::set<unsigned>{ rawListSelections.begin(), rawListSelections.end() };
 
@@ -520,7 +519,7 @@ void TransitionSolverFrame::SelectGroup()
     SyncGroupControlsWithCurrentState();
 }
 
-void TransitionSolverFrame::OnNullEvent(wxCommandEvent& event)
+void TransitionSolverFrame::OnNullEvent(wxCommandEvent&)
 {
     SyncGroupControlsWithCurrentState();
 }

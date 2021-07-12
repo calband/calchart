@@ -42,7 +42,7 @@ public:
         : mManager(manager)
     {
     }
-    virtual bool OnDropFiles(wxCoord x, wxCoord y, wxArrayString const& filenames) override
+    virtual bool OnDropFiles(wxCoord, wxCoord, wxArrayString const& filenames) override
     {
         for (auto&& filename : filenames) {
             mManager->CreateDocument(filename, wxDOC_SILENT);
@@ -105,9 +105,9 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     Show(true);
 }
 
-void CalChartSplash::OnCmdAbout(wxCommandEvent& event) { CalChartSplash::About(); }
+void CalChartSplash::OnCmdAbout(wxCommandEvent&) { CalChartSplash::About(); }
 
-void CalChartSplash::OnCmdHelp(wxCommandEvent& event) { CalChartSplash::Help(); }
+void CalChartSplash::OnCmdHelp(wxCommandEvent&) { CalChartSplash::Help(); }
 
 void CalChartSplash::About()
 {
@@ -139,7 +139,7 @@ void CalChartSplash::Help()
     wxGetApp().GetGlobalHelpController().DisplayContents();
 }
 
-void CalChartSplash::OnCmdPreferences(wxCommandEvent& event)
+void CalChartSplash::OnCmdPreferences(wxCommandEvent&)
 {
     CalChartPreferences dialog1(this);
     if (dialog1.ShowModal() == wxID_OK) {

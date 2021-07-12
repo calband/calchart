@@ -53,8 +53,7 @@ void AnimationCanvas::Init()
 
 void AnimationCanvas::CreateControls()
 {
-    SetSizer(VStack([this](auto sizer) {
-    }));
+    SetSizer(VStack([](auto) {}));
 }
 
 bool AnimationCanvas::GetUseSprites() const
@@ -116,7 +115,7 @@ void AnimationCanvas::OnUpdate()
 {
 }
 
-void AnimationCanvas::OnPaint(wxPaintEvent& event)
+void AnimationCanvas::OnPaint(wxPaintEvent&)
 {
     if (!mView) {
         return;

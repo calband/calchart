@@ -89,7 +89,7 @@ bool CalChartPreferences::TransferDataFromWindow()
 {
     // transfer everything to the config...
     auto pages = mNotebook->GetPageCount();
-    for (auto i = 0; i < pages; ++i) {
+    for (auto i = 0ul; i < pages; ++i) {
         mNotebook->GetPage(i)->TransferDataFromWindow();
     }
     CalChartConfiguration::AssignConfig(mConfig);
@@ -100,7 +100,7 @@ void CalChartPreferences::OnCmdResetAll(wxCommandEvent&)
 {
     // transfer everything to the config...
     auto pages = mNotebook->GetPageCount();
-    for (auto i = 0; i < pages; ++i) {
+    for (auto i = 0ul; i < pages; ++i) {
         static_cast<PreferencePage*>(mNotebook->GetPage(i))->ClearValuesToDefault();
     }
     CalChartConfiguration::AssignConfig(mConfig);

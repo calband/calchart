@@ -27,8 +27,8 @@ TransitionSolverView::TransitionSolverView()
 }
 TransitionSolverView::~TransitionSolverView() { }
 
-void TransitionSolverView::OnDraw(wxDC* dc) { }
-void TransitionSolverView::OnUpdate(wxView* sender, wxObject* hint)
+void TransitionSolverView::OnDraw(wxDC*) { }
+void TransitionSolverView::OnUpdate(wxView*, wxObject*)
 {
     TransitionSolverFrame* frame = static_cast<TransitionSolverFrame*>(GetFrame());
     frame->Update();

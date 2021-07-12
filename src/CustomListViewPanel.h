@@ -20,9 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <memory>
 #include <set>
 #include <vector>
-#include <memory>
 
 #include <wx/wx.h>
 
