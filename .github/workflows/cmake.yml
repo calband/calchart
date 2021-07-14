@@ -41,7 +41,11 @@ jobs:
           }
 
     steps:
-    - uses: actions/checkout@v1
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+
 
     - name: Download Ninja and CMake
       id: cmake_and_ninja
