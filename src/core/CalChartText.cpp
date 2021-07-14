@@ -26,22 +26,39 @@
 
 namespace CalChart {
 
-Textline::Textline(std::string line, PSFONT currfontnum)
-    : center(false)
-    , on_main(true)
-    , on_sheet(true)
+/* This is the format text line:
+ * normal ascii text possibly containing the following codes:
+ * \bs \be \is \ie for bold start, bold end, italics start, italics end
+ * \po plainman : A
+ * \pb backslashman : C
+ * \ps slashman : D
+ * \px xman : E
+ * \so solidman : B
+ * \sb solidbackslashman :F
+ * \ss solidslashman : G
+ * \sx solidxman : H
+ * a line may begin with these symbols in order: <>~
+ * < don't print continuity on individual sheets
+ * > don't print continuity on master sheet
+ * ~ center this line
+ * also, there are three tab stops set for standard continuity format
+ */
+
+Textline ParseTextLine(std::string line)
 {
+    auto result = Textline{};
+    auto currfontnum = PSFONT::NORM;
     // peel off the '<>~'
     if (!line.empty() && line.at(0) == '<') {
-        on_sheet = false;
+        result.on_sheet = false;
         line.erase(0, 1);
     }
     if (!line.empty() && line.at(0) == '>') {
-        on_main = false;
+        result.on_main = false;
         line.erase(0, 1);
     }
     if (!line.empty() && line.at(0) == '~') {
-        center = true;
+        result.center = true;
         line.erase(0, 1);
     }
     // break the line into substrings
@@ -51,7 +68,7 @@ Textline::Textline(std::string line, PSFONT currfontnum)
             if (line.length() > 1) {
                 Textchunk new_text;
                 new_text.font = PSFONT::TAB;
-                chunks.push_back(new_text);
+                result.chunks.push_back(new_text);
             }
             line.erase(0, 1);
             continue;
@@ -97,26 +114,47 @@ Textline::Textline(std::string line, PSFONT currfontnum)
                     throw std::runtime_error("Print continuity not recognized");
                 }
             }
-            chunks.push_back(new_text);
+            result.chunks.push_back(new_text);
             line.erase(0, 3);
             continue;
         }
-        // now check to see if we have any font
-        if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b') || (tolower(line.at(1)) == 'i'))) {
-            if (tolower(line.at(2)) == 'e') {
-                currfontnum = PSFONT::NORM;
-            }
+        // now check to see if we have bold
+        if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'b'))) {
             if (tolower(line.at(2)) == 's') {
-                currfontnum = (tolower(line.at(1)) == 'b') ? PSFONT::BOLD : PSFONT::ITAL;
+                currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::BOLD) ? PSFONT::BOLD : PSFONT::BOLDITAL;
+            }
+            else if (tolower(line.at(2)) == 'e') {
+                currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::BOLD) ? PSFONT::NORM : PSFONT::ITAL;
+            }
+            else {
+                // code not recognized
+                throw std::runtime_error("Print continuity not recognized");
             }
             line.erase(0, 3);
             continue;
+        }
+        // now check to see if we have ital
+        if ((line.length() >= 3) && (line.at(0) == '\\') && ((tolower(line.at(1)) == 'i'))) {
+            if (tolower(line.at(2)) == 's') {
+                currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::ITAL) ? PSFONT::ITAL : PSFONT::BOLDITAL;
+            }
+            else if (tolower(line.at(2)) == 'e') {
+                currfontnum = (currfontnum == PSFONT::NORM || currfontnum == PSFONT::ITAL) ? PSFONT::NORM : PSFONT::BOLD;
+            }
+            else {
+                // code not recognized
+                throw std::runtime_error("Print continuity not recognized");
+            }
+            line.erase(0, 3);
+            continue;
+
         }
         auto pos = line.find_first_of("\\\t", 1);
 
-        chunks.push_back({ line.substr(0, pos), currfontnum });
+        result.chunks.push_back({ line.substr(0, pos), currfontnum });
         line.erase(0, pos);
     }
+    return result;
 }
 
 PrintContinuity::PrintContinuity(std::string const& number, std::string const& data)
@@ -126,7 +164,7 @@ PrintContinuity::PrintContinuity(std::string const& number, std::string const& d
     std::istringstream reader(data);
     std::string line;
     while (std::getline(reader, line, '\n')) {
-        mPrintChunks.emplace_back(line, PSFONT::NORM);
+        mPrintChunks.push_back(ParseTextLine(line));
     }
 }
 }

@@ -32,7 +32,7 @@ namespace CalChart {
 
 class Show;
 class Sheet;
-class Textline;
+struct Textline;
 class ShowMode;
 
 // intented to print a show to a buffer.

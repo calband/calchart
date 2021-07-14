@@ -33,20 +33,21 @@ struct Textchunk {
     PSFONT font = PSFONT::NORM;
 };
 
-class Textline {
-public:
-    Textline(std::string line, PSFONT currfontnum);
-    auto GetChunks() const { return chunks; }
-    auto GetCenter() const { return center; }
-    auto GetOnMain() const { return on_main; }
-    auto GetOnSheet() const { return on_sheet; }
+// helper for comparisions
+static inline bool operator==(Textchunk const &a, Textchunk const& b)
+{
+    return (a.text == b.text)
+        && (a.font == b.font);
+}
 
-private:
+struct Textline {
     std::vector<Textchunk> chunks;
-    bool center{};
-    bool on_main{};
-    bool on_sheet{};
+    bool center = false;
+    bool on_main = true;
+    bool on_sheet = true;
 };
+
+Textline ParseTextLine(std::string line);
 
 using Textline_list = std::vector<Textline>;
 

@@ -10,3 +10,6 @@
 [submodule "submodules/nlohmann_json"]
 	path = submodules/nlohmann_json
 	url = https://github.com/nlohmann/json.git
+[submodule "submodules/Catch2"]
+	path = submodules/Catch2
+	url = https://github.com/catchorg/Catch2.git

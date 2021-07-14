@@ -32,7 +32,7 @@ class wxBrush;
 class wxString;
 namespace CalChart {
 class Sheet;
-class Textline;
+struct Textline;
 using Textline_list = std::vector<Textline>;
 class Point;
 struct Coord;
