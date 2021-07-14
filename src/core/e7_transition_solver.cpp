@@ -15,6 +15,9 @@
 #include "e7_transition_solver.h"
 #include "munkres.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+
 namespace CalChart {
 
 #pragma mark - Shared
@@ -1272,6 +1275,8 @@ std::pair<SolverCoord, SolverCoord> calcStepVectors(PathAxes axes, const Transit
         break;
     case TransitionSolverParams::MarcherInstruction::Pattern::HSDM:
         majorStepIsFirst = true;
+        minorStep += majorStep;
+        break;
     case TransitionSolverParams::MarcherInstruction::Pattern::DMHS:
         minorStep += majorStep;
         break;
@@ -2338,3 +2343,5 @@ TransitionSolverResult runTransitionSolver(const CalChart::Sheet& sheet1, const 
     return finalResult;
 }
 }
+
+#pragma GCC diagnostic pop

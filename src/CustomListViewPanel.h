@@ -20,8 +20,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <memory>
 #include <set>
 #include <vector>
+
 #include <wx/wx.h>
 
 // Drawable Cells are anything that is a small drawing surface

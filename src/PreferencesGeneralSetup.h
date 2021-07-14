@@ -46,6 +46,7 @@ private:
         : super(config, parent, "General Setup")
     {
     }
+
 public:
     ~GeneralSetup() override = default;
 

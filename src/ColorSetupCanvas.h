@@ -23,6 +23,7 @@
 
 #include "CalChartShowMode.h"
 #include "basic_ui.h"
+#include <memory>
 #include <wx/bmpcbox.h>
 #include <wx/notebook.h>
 #include <wx/spinctrl.h>
@@ -31,7 +32,7 @@
 class CalChartConfiguration;
 namespace CalChart {
 class Show;
-class DrawCommand;
+struct DrawCommand;
 }
 
 class ColorSetupCanvas : public ClickDragCtrlScrollCanvas {

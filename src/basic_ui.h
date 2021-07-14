@@ -361,7 +361,7 @@ template <typename String, typename Handler>
 inline auto CreateButtonWithHandler(wxWindow* parent, String name, Handler handler)
 {
     auto button = new wxButton(parent, wxID_ANY, name);
-    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent& event) {
+    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent&) {
         handler();
     });
     return button;
@@ -371,7 +371,7 @@ template <typename String, typename Handler>
 inline auto CreateButtonWithHandler(wxWindow* parent, int id, String name, Handler handler)
 {
     auto button = new wxButton(parent, id, name);
-    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent& event) {
+    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent&) {
         handler();
     });
     return button;
@@ -405,7 +405,7 @@ template <typename Image, typename Handler>
 inline auto CreateBitmapButtonWithHandler(wxWindow* parent, wxSizer* sizer, wxSizerFlags flags, Image bitmap, Handler handler)
 {
     auto button = new wxBitmapButton(parent, wxID_ANY, bitmap);
-    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent& event) {
+    button->Bind(wxEVT_BUTTON, [handler](wxCommandEvent&) {
         handler();
     });
     sizer->Add(button, flags);
@@ -417,7 +417,7 @@ inline auto CreateBitmapToggleWithHandler(wxWindow* parent, wxSizer* sizer, wxSi
 {
     auto button = new wxBitmapToggleButton(parent, wxID_ANY, bitmap, wxDefaultPosition);
     button->SetBitmapPressed(pressed);
-    button->Bind(wxEVT_TOGGLEBUTTON, [handler](wxCommandEvent& event) {
+    button->Bind(wxEVT_TOGGLEBUTTON, [handler](wxCommandEvent&) {
         handler();
     });
     sizer->Add(button, flags);

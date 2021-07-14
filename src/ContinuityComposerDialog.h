@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <memory>
 #include <wx/wx.h>
 
 namespace CalChart {
@@ -29,7 +30,7 @@ class ContinuityComposerDialog : public wxDialog {
     DECLARE_CLASS(ContinuityComposerDialog)
 
 public:
-    ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent, wxWindowID id = wxID_ANY, wxString const& caption = wxT("Compose Continuity"), wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE, wxString const& name = wxDialogNameStr);
+    ContinuityComposerDialog(std::unique_ptr<CalChart::ContProcedure> starting_continuity, wxWindow* parent);
     ~ContinuityComposerDialog() override = default;
 
     std::unique_ptr<CalChart::ContProcedure> GetContinuity();

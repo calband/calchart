@@ -31,6 +31,7 @@
 
 #include <wx/fs_zip.h>
 #include <wx/help.h>
+#include <wx/stdpaths.h>
 
 namespace CalChart {
 void Coord_UnitTests();

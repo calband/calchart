@@ -49,7 +49,7 @@ enum class Select {
 class SelectTool {
 public:
     SelectTool(CalChart::Select, CalChart::Coord start, std::function<int(int)> userScale);
-    ~SelectTool() = default;
+    virtual ~SelectTool() = default;
 
     CalChart::Shape const* GetShapeList() const { return mLassoShape.get(); }
     std::optional<CalChart::RawPolygon_t> GetPolygon() const { return mLassoShape ? mLassoShape->GetPolygon() : std::optional<CalChart::RawPolygon_t>{}; }

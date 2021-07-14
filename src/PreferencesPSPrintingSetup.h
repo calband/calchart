@@ -46,6 +46,7 @@ private:
         : super(config, parent, "Printing Values")
     {
     }
+
 public:
     ~PSPrintingSetUp() override = default;
 

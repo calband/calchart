@@ -103,7 +103,6 @@ private:
 
     float width, height, real_width, real_height;
     float field_x, field_y, field_w, field_h;
-    float stage_field_x, stage_field_y, stage_field_w, stage_field_h;
     float step_size;
     short step_width;
 };

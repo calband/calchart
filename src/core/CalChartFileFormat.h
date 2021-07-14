@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstring>
 #include <map>
 #include <sstream>
 #include <stdexcept>
@@ -462,11 +463,13 @@ namespace Parser {
     template <typename Iter>
     float get_big_float(Iter ptr)
     {
-        uint32_t result = (*ptr++ & 0xFF);
-        result = (result << 8) | (*ptr++ & 0xFF);
-        result = (result << 8) | (*ptr++ & 0xFF);
-        result = (result << 8) | (*ptr++ & 0xFF);
-        return *((float*)&result);
+        unsigned char rawd[sizeof(float)];
+        std::copy(ptr, ptr + sizeof(float), rawd);
+        ptr += sizeof(float);
+        float result = 0.f;
+        void* fptr = &result;
+        std::memcpy(fptr, rawd, sizeof(float));
+        return result;
     }
 
     template <typename Iter>
@@ -554,7 +557,10 @@ namespace Parser {
     template <typename T>
     void Append(T& d, float v)
     {
-        Append(d, *((uint32_t*)&v));
+        char rawd[sizeof(float)];
+        void const* fptr = &v;
+        std::memcpy(rawd, fptr, sizeof(float));
+        d.insert(d.end(), std::begin(rawd), std::end(rawd));
     }
 
     template <typename T, typename U>

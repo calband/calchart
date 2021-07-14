@@ -24,6 +24,7 @@
 #include "CalChartAnimationTypes.h"
 #include "CalChartCoord.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 

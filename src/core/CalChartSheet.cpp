@@ -755,7 +755,7 @@ nlohmann::json Sheet::toOnlineViewerJSON(unsigned sheetNum, std::vector<std::str
 void Sheet::SetPoints(std::vector<Point> const& points) { mPoints = points; }
 
 // -=-=-=-=-=-=- Unit Tests -=-=-=-=-=-=-=-
-#include <assert.h>
+#include <cassert>
 using namespace Parser;
 
 void Sheet::sheet_round_trip_test()

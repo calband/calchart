@@ -68,8 +68,8 @@ public:
     auto GetCurrentSheet() const { return mCurrentSheetNumber; }
     auto GetNumberBeats() const { return mSheets.at(mCurrentSheetNumber).GetNumBeats(); }
     auto GetCurrentBeat() const { return mCurrentBeatNumber; }
-    int GetTotalNumberBeatsUpTo(int sheet) const;
-    int GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(mSheets.size()); }
+    unsigned GetTotalNumberBeatsUpTo(int sheet) const;
+    auto GetTotalNumberBeats() const { return GetTotalNumberBeatsUpTo(mSheets.size()); }
     int GetTotalCurrentBeat() const;
     auto GetCurrentSheetName() const { return mSheets.at(mCurrentSheetNumber).GetName(); }
     std::vector<AnimationErrors> GetAnimationErrors() const;

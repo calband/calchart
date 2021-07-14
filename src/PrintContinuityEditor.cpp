@@ -78,7 +78,7 @@ PrintContinuityPreview::PrintContinuityPreview(wxWindow* parent)
     Connect(wxEVT_PAINT, wxPaintEventHandler(PrintContinuityPreview::OnPaint));
 }
 
-void PrintContinuityPreview::OnPaint(wxPaintEvent& event)
+void PrintContinuityPreview::OnPaint(wxPaintEvent&)
 {
     wxPaintDC dc(this);
     PrepareDC(dc);
@@ -170,7 +170,7 @@ void PrintContinuityEditor::CreateControls()
     mSplitter->SplitHorizontally(mPrintContDisplay, mUserInput);
 }
 
-void PrintContinuityEditor::OnCmdHelp(wxCommandEvent& event)
+void PrintContinuityEditor::OnCmdHelp(wxCommandEvent&)
 {
     wxGetApp().GetGlobalHelpController().LoadFile();
     wxGetApp().GetGlobalHelpController().KeywordSearch(wxT("Animation Commands"));
@@ -249,7 +249,7 @@ void PrintContinuityEditor::OnKeyPress(wxCommandEvent&)
     mTimer->StartOnce(1000);
 }
 
-void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent& event)
+void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent&)
 {
     if (!mView) {
         return;
@@ -267,7 +267,7 @@ void PrintContinuityEditor::OnSaveTimerExpired(wxTimerEvent& event)
     FlushText();
 }
 
-void PrintContinuityEditor::OnNameEnter(wxCommandEvent& event)
+void PrintContinuityEditor::OnNameEnter(wxCommandEvent&)
 {
     if (!mView) {
         return;
@@ -275,7 +275,7 @@ void PrintContinuityEditor::OnNameEnter(wxCommandEvent& event)
     FlushText();
 }
 
-void PrintContinuityEditor::OnPrevious(wxCommandEvent& event)
+void PrintContinuityEditor::OnPrevious(wxCommandEvent&)
 {
     if (!mView) {
         return;
@@ -283,7 +283,7 @@ void PrintContinuityEditor::OnPrevious(wxCommandEvent& event)
     mView->GoToPrevSheet();
 }
 
-void PrintContinuityEditor::OnNext(wxCommandEvent& event)
+void PrintContinuityEditor::OnNext(wxCommandEvent&)
 {
     if (!mView) {
         return;

@@ -92,7 +92,7 @@ Coord::CollisionType Coord::DetectCollision(Coord const& c) const
     }
 }
 
-#include <assert.h>
+#include <cassert>
 
 // Test Suite stuff
 struct Coord_values {
@@ -141,6 +141,8 @@ void Coord_UnitTests()
         auto newValue = undertest1 + undertest2;
         x3 = undertest1.x + undertest2.x;
         y3 = undertest1.y + undertest2.y;
+        (void)x3;
+        (void)y3;
         assert((x3) == newValue.x);
         assert((y3) == newValue.y);
         newValue = undertest1;

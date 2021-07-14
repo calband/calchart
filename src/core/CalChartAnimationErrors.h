@@ -48,8 +48,9 @@ enum class AnimateError {
     NEGINT,
 };
 
-static inline std::ostream& operator<<(std::ostream& os, AnimateError e) {
-    return os<<static_cast<int>(e);
+static inline std::ostream& operator<<(std::ostream& os, AnimateError e)
+{
+    return os << static_cast<int>(e);
 }
 
 struct ErrorMarker {
@@ -116,5 +117,6 @@ static inline auto AnimateErrorToString(AnimateError error)
     case AnimateError::NEGINT:
         return "Negative value";
     }
+    return "Generic error";
 }
 }

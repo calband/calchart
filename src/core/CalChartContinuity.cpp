@@ -25,7 +25,7 @@
 #include "CalChartFileFormat.h"
 #include "CalChartTypes.h"
 #include "parse.h"
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 
 // These are the "magic" global variables that are in contgram and contscan.

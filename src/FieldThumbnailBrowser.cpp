@@ -103,7 +103,7 @@ static auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
 // with an offset of 16 point font of the current sheet
 // with a boundary of 4 above and below.
 
-void FieldThumbnailBrowser::OnPaint(wxPaintEvent& event)
+void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
 {
     if (!mView) {
         return;

@@ -162,7 +162,7 @@ void ContinuityBrowserPanel::UpdateCont(Continuity const& new_cont)
     mView->DoSetContinuityCommand(mSym, new_cont);
 }
 
-void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent& event)
+void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent&)
 {
     if (!mView) {
         return;
@@ -172,7 +172,7 @@ void ContinuityBrowserPanel::DoSetFocus(wxFocusEvent& event)
     mView->SetSelectionList(sht->MakeSelectPointsBySymbol(mSym));
 }
 
-void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent& event)
+void ContinuityBrowserPanel::DoKillFocus(wxFocusEvent&)
 {
     SetSelection(-1);
 }

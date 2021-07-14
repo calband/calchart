@@ -41,13 +41,15 @@ class ShowModeDialogSetup : public wxPanel {
 public:
     static auto CreateDialog(CalChart::ShowMode const& current_mode, wxWindow* parent)
     {
-        auto dialog = new ShowModeDialogSetup{current_mode, parent};
+        auto dialog = new ShowModeDialogSetup{ current_mode, parent };
         dialog->TransferDataToWindow();
         return dialog;
     }
+
 private:
     // private, use the CreateDialog method
     ShowModeDialogSetup(CalChart::ShowMode const& current_mode, wxWindow* parent);
+
 public:
     ~ShowModeDialogSetup() = default;
 
@@ -109,7 +111,7 @@ void ShowModeDialogSetup::CreateControls()
         std::vector<wxString> choices;
         choices.emplace_back("Reload from...");
         choices.insert(choices.end(), std::begin(kShowModeStrings), std::end(kShowModeStrings));
-        CreateChoiceWithHandler(this, sizer, LeftBasicSizerFlags(), MODE_CHOICE, choices, [this](wxCommandEvent& e) {
+        CreateChoiceWithHandler(this, sizer, LeftBasicSizerFlags(), MODE_CHOICE, choices, [this](wxCommandEvent&) {
             OnCmdChoice();
         });
 
@@ -139,13 +141,13 @@ void ShowModeDialogSetup::CreateControls()
         HStack(sizer, LeftBasicSizerFlags(), [this, refresh_action](auto& sizer) {
             HStack(sizer, BasicSizerFlags(), [this, refresh_action](auto& sizer) {
                 CreateText(this, sizer, "Adjust yardline marker");
-                CreateChoiceWithHandler(this, sizer, SHOW_LINE_MARKING, mConfig.Get_yard_text_index(), [this](wxCommandEvent& e) {
+                CreateChoiceWithHandler(this, sizer, SHOW_LINE_MARKING, mConfig.Get_yard_text_index(), [this](wxCommandEvent&) {
                     OnCmdChoice();
                 });
                 CreateTextboxWithAction(this, sizer, SHOW_LINE_VALUE, refresh_action, wxTE_PROCESS_ENTER);
             });
 
-            HStack(sizer, BasicSizerFlags(), [this, refresh_action](auto& sizer) {
+            HStack(sizer, BasicSizerFlags(), [this](auto& sizer) {
                 CreateText(this, sizer, "Zoom");
 
                 wxArrayString zoomtext;

@@ -27,6 +27,7 @@
 #include "CalChartTypes.h"
 
 #include <map>
+#include <memory>
 #include <wx/docview.h>
 
 // CalChartView connects together the Frames and the Doc.
@@ -141,7 +142,7 @@ public:
     void OnBackgroundImageDelete();
 
 private:
-    void DrawPaths(wxDC& dc, const CalChart::Sheet& sheet);
+    void DrawPaths(wxDC& dc);
     void GeneratePaths();
     void UpdateBackgroundImages();
 

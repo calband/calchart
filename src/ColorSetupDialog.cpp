@@ -355,7 +355,7 @@ void ColorSetupDialog::Import(nlohmann::json const& j)
     }
 }
 
-void ColorSetupDialog::OnCmdExport(wxCommandEvent& e)
+void ColorSetupDialog::OnCmdExport(wxCommandEvent&)
 {
     wxString s = wxFileSelector("Export CalChart Color Palette", wxEmptyString,
         wxEmptyString, wxEmptyString, "calchart color palette (*.ccpalette)|*.ccpalette", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -366,7 +366,7 @@ void ColorSetupDialog::OnCmdExport(wxCommandEvent& e)
     o << std::setw(4) << j << std::endl;
 }
 
-void ColorSetupDialog::OnCmdImport(wxCommandEvent& e)
+void ColorSetupDialog::OnCmdImport(wxCommandEvent&)
 {
     wxString s = wxFileSelector(wxT("Import CalChart Color Palette"), wxEmptyString,
         wxEmptyString, wxEmptyString, "calchart color palette (*.ccpalette)|*.ccpalette");

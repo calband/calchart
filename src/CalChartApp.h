@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <memory>
 #include <wx/wx.h>
 
 // CalChartApp represents the wxWidgets App for CalChart.  The document manager creates
