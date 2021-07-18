@@ -89,6 +89,12 @@ jobs:
           )
         endif()
 
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          execute_process(
+            choco install bison flex
+          )
+
+
     - name: Configure
       shell: cmake -P {0}
       run: |
