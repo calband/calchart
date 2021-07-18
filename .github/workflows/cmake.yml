@@ -28,34 +28,26 @@ jobs:
             artifact: "Windows-MSVC.tar.xz",
             os: windows-latest,
             build_type: "Release",
-            cc: "cl",
-            cxx: "cl",
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
-        - {
-            name: "Windows Latest MinGW",
-            artifact: "Windows-MinGW.tar.xz",
-            os: windows-latest,
-            build_type: "Release",
-            cc: "gcc",
-            cxx: "g++"
-          }
+          #  cc: "cl",
+          #  cxx: "cl",
         - {
             name: "Ubuntu Latest GCC",
             artifact: "Linux.tar.xz",
             os: ubuntu-latest,
             build_type: "Release",
-            cc: "gcc",
-            cxx: "g++"
           }
+          #  cc: "gcc",
+          #  cxx: "g++"
         - {
             name: "macOS Latest Clang",
             artifact: "macOS.tar.xz",
             os: macos-latest,
             build_type: "Release",
-            cc: "clang",
-            cxx: "clang++"
           }
+          #  cc: "clang",
+          #  cxx: "clang++"
 
     steps:
     - name: checkout
@@ -85,10 +77,7 @@ jobs:
     - name: Configure
       shell: cmake -P {0}
       run: |
-        set(ENV{CC} ${{ matrix.config.cc }})
-        set(ENV{CXX} ${{ matrix.config.cxx }})
-
-        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+        if ("${{ runner.os }}" STREQUAL "Windows")
           execute_process(
             COMMAND "${{ matrix.config.environment_script }}" && set
             OUTPUT_FILE environment_script_output.txt
@@ -104,7 +93,7 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/ninja" ninja_program)
 
         execute_process(
-          COMMAND ${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake
+          COMMAND cmake
             -S .
             -B build
             -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
@@ -122,7 +111,7 @@ jobs:
       run: |
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
 
-        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+        if ("${{ runner.os }}" STREQUAL "Windows")
           file(STRINGS environment_script_output.txt output_lines)
           foreach(line IN LISTS output_lines)
             if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
@@ -132,7 +121,7 @@ jobs:
         endif()
 
         execute_process(
-          COMMAND ${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake --build build
+          COMMAND cmake --build build
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)
@@ -147,7 +136,7 @@ jobs:
         ProcessorCount(N)
 
         execute_process(
-          COMMAND ${{ steps.cmake_and_ninja.outputs.cmake_dir }}/ctest -j ${N}
+          COMMAND ctest -j ${N}
           WORKING_DIRECTORY build
           RESULT_VARIABLE result
         )
@@ -157,12 +146,12 @@ jobs:
 
 
     - name: Install Strip
-      run: ${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake --install build --prefix instdir --strip
+      run: cmake --install build --prefix instdir --strip
 
 
     - name: Pack
       working-directory: instdir
-      run: ${{ steps.cmake_and_ninja.outputs.cmake_dir }}/cmake -E tar cJfv ../${{ matrix.config.artifact }} .
+      run: cmake -E tar cJfv ../${{ matrix.config.artifact }} .
 
 
     - name: Upload
