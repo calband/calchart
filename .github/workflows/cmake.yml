@@ -91,7 +91,7 @@ jobs:
 
         if ("${{ runner.os }}" STREQUAL "Windows")
           execute_process(
-            choco install bison flex
+            COMMAND choco install bison flex
           )
         endif()
 
