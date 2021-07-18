@@ -28,26 +28,26 @@ jobs:
             artifact: "Windows-MSVC.tar.xz",
             os: windows-latest,
             build_type: "Release",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+            cc: "cl",
+            cxx: "cl",
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
           }
-          #  cc: "cl",
-          #  cxx: "cl",
         - {
             name: "Ubuntu Latest GCC",
             artifact: "Linux.tar.xz",
             os: ubuntu-latest,
             build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
           }
-          #  cc: "gcc",
-          #  cxx: "g++"
         - {
             name: "macOS Latest Clang",
             artifact: "macOS.tar.xz",
             os: macos-latest,
             build_type: "Release",
+            cc: "clang",
+            cxx: "clang++",
           }
-          #  cc: "clang",
-          #  cxx: "clang++"
 
     steps:
     - name: checkout
@@ -77,6 +77,9 @@ jobs:
     - name: Configure
       shell: cmake -P {0}
       run: |
+        set(ENV{CC} ${{ matrix.config.cc }})
+        set(ENV{CXX} ${{ matrix.config.cxx }})
+
         if ("${{ runner.os }}" STREQUAL "Windows")
           execute_process(
             COMMAND "${{ matrix.config.environment_script }}" && set
