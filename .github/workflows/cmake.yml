@@ -61,14 +61,14 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Windows")
           execute_process(
-            COMMAND choco install ninja winflexbison
+            COMMAND choco install winflexbison
           )
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(
             COMMAND sudo apt-get update
           )
           execute_process(
-            COMMAND sudo apt-get install ninja-build build-essential libgtk-3-dev
+            COMMAND sudo apt-get install build-essential libgtk-3-dev
           )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
         endif()
@@ -93,15 +93,10 @@ jobs:
           endforeach()
         endif()
 
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/ninja" ninja_program)
-
         execute_process(
           COMMAND cmake
             -S .
             -B build
-            -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
-            -G Ninja
-            -D CMAKE_MAKE_PROGRAM=${ninja_program}
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)
@@ -112,8 +107,6 @@ jobs:
     - name: Build
       shell: cmake -P {0}
       run: |
-        set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
-
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(STRINGS environment_script_output.txt output_lines)
           foreach(line IN LISTS output_lines)
