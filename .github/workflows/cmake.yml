@@ -89,10 +89,14 @@ jobs:
           )
         endif()
 
+
+    - name: Installing dependencies
+      run: |
         if ("${{ runner.os }}" STREQUAL "Windows")
-          execute_process(
-            COMMAND choco install winflexbison
-          )
+          choco install winflexbison
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
         endif()
 
 
