@@ -93,6 +93,7 @@ jobs:
           execute_process(
             choco install bison flex
           )
+        endif()
 
 
     - name: Configure
