@@ -74,18 +74,21 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Run tests
-      run: ctest
+      run: ctest --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Pack (macOS)
-      working-directory: instdir
-      run: cpack -G DragNDrop
+      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
       if: matrix.config.os == 'macos-latest'
 
-    - name: Pack (macOS)
-      working-directory: instdir
-      run: cpack -G DragNDrop
+    - name: Strip (Linux)
+      run: cmake --install build --prefix instdir --strip
       if: matrix.config.os == 'ubuntu-latest'
-
+    
+    - name: Pack (Linux)
+      working-directory: instdir
+      run: cmake -E tar cJfv ../${ { matrix.config.artifact } } .
+      if: matrix.config.os == 'ubuntu-latest'
+    
     - name: Upload
       uses: actions/upload-artifact@v1
       with:
