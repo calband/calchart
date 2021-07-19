@@ -59,10 +59,7 @@ desired behavior.
 
 ## Building CalChart
 
-CalChart use CMake to help with making a central build system.
-
-For building on MacOSX platforms, see the [README-MACOSX.md](README-MACOSX.md).  For building on
-Windows platforms, see the [README-WINDOWS.md](README-WINDOWS.md).
+Please check out the [Getting Started](GETTING_STARTED.md) guide.
 
 If you need to regenerate the help documentation, see the [README-docs.txt](README-docs.txt).
 
