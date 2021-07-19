@@ -140,7 +140,6 @@ target_include_directories (
 target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json)
 
 # calchart_cmd, Mac only
-if (APPLE)
 add_executable (
   calchart_cmd
   "${CMAKE_CURRENT_SOURCE_DIR}/calchart_cmd/main.cpp"
@@ -175,8 +174,6 @@ target_include_directories (
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
   "${PROJECT_BINARY_DIR}/version"
   )
-
-endif()
 
 # CalChart
 file (

@@ -42,7 +42,7 @@ jobs:
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "macOS.tar.xz",
+            artifact: "CalChart-3.6.2.dmg",
             os: macos-latest,
             build_type: "Release",
             cc: "clang",
@@ -61,89 +61,35 @@ jobs:
       if: matrix.config.os == 'windows-latest'
 
     - name: Installing Dependencies (Linux)
-      run: sudo apt-get update
+      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
       if: matrix.config.os == 'ubuntu-latest'
 
-    - name: Configure
-      shell: cmake -P {0}
-      run: |
-        set(ENV{CC} ${{ matrix.config.cc }})
-        set(ENV{CXX} ${{ matrix.config.cxx }})
-
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          execute_process(
-            COMMAND "${{ matrix.config.environment_script }}" && set
-            OUTPUT_FILE environment_script_output.txt
-          )
-          file(STRINGS environment_script_output.txt output_lines)
-          foreach(line IN LISTS output_lines)
-            if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
-              set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
-            endif()
-          endforeach()
-        endif()
-
-        execute_process(
-          COMMAND cmake
-            -S .
-            -B build
-          RESULT_VARIABLE result
-        )
-        if (NOT result EQUAL 0)
-          message(FATAL_ERROR "Bad exit status")
-        endif()
-
-
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+ 
     - name: Build
-      shell: cmake -P {0}
-      run: |
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          file(STRINGS environment_script_output.txt output_lines)
-          foreach(line IN LISTS output_lines)
-            if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
-              set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
-            endif()
-          endforeach()
-        endif()
-
-        execute_process(
-          COMMAND cmake --build build
-          RESULT_VARIABLE result
-        )
-        if (NOT result EQUAL 0)
-          message(FATAL_ERROR "Bad exit status")
-        endif()
-
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Run tests
-      shell: cmake -P {0}
-      run: |
-        include(ProcessorCount)
-        ProcessorCount(N)
+      run: ctest
 
-        execute_process(
-          COMMAND ctest -j ${N}
-          WORKING_DIRECTORY build
-          RESULT_VARIABLE result
-        )
-        if (NOT result EQUAL 0)
-          message(FATAL_ERROR "Running tests failed!")
-        endif()
-
-
-    - name: Install Strip
-      run: cmake --install build --prefix instdir --strip
-
-
-    - name: Pack
+    - name: Pack (macOS)
       working-directory: instdir
-      run: cmake -E tar cJfv ../${{ matrix.config.artifact }} .
+      run: cpack -G DragNDrop
+      if: matrix.config.os == 'macos-latest'
 
+    - name: Pack (macOS)
+      working-directory: instdir
+      run: cpack -G DragNDrop
+      if: matrix.config.os == 'ubuntu-latest'
 
     - name: Upload
       uses: actions/upload-artifact@v1
       with:
-        path: ./${{ matrix.config.artifact }}
+        path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact }}
 
   release:
