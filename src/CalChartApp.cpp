@@ -29,8 +29,10 @@
 #include "basic_ui.h"
 #include "platconf.h"
 
+#include <wx/config.h>
 #include <wx/fs_zip.h>
 #include <wx/help.h>
+#include <wx/html/helpctrl.h>
 #include <wx/stdpaths.h>
 
 namespace CalChart {

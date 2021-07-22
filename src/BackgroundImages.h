@@ -22,6 +22,7 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 #include <wx/dc.h>
 #include <wx/event.h>
 
