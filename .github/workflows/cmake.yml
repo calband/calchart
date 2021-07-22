@@ -57,12 +57,12 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Installing Dependencies (Windows)
-      run: choco install winflexbison
       if: matrix.config.os == 'windows-latest'
+      run: choco install winflexbison
 
     - name: Installing Dependencies (Linux)
-      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
       if: matrix.config.os == 'ubuntu-latest'
+      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -77,17 +77,21 @@ jobs:
       run: ctest --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Pack (macOS)
-      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
       if: matrix.config.os == 'macos-latest'
+      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
+
+    - name: Pack (Windows)
+      if: matrix.config.os == 'windows-latest'
+      run: pushd ${{github.workspace}}/build && cpack
 
     - name: Strip (Linux)
-      run: cmake --install build --prefix instdir --strip
       if: matrix.config.os == 'ubuntu-latest'
+      run: cmake --install build --prefix instdir --strip
     
     - name: Pack (Linux)
-      working-directory: instdir
-      run: cmake -E tar cJfv ../${ { matrix.config.artifact } } .
       if: matrix.config.os == 'ubuntu-latest'
+      working-directory: instdir
+      run: cmake -E tar cJfv ${{github.workspace}}/build/Linux.tar.xz .
     
     - name: Upload
       uses: actions/upload-artifact@v1
