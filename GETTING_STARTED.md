@@ -4,11 +4,11 @@ This guide is to help you get CalChart3 building.  This guide is written to help
 
 CalChart3 utilizes [CMake](https://cmake.org) to allow several different build platforms and environments.  This tutorial is helpful and may serve as a good reference if you get stuck: https://cgold.readthedocs.io/en/latest/first-step.html.
 
-## Setting up your dependencies and Packages
+## Setting up your dependencies and Packages -- estimated time: 10 minutes
 
 The CalChart3 code tries to be self contained, but it has several external dependencies.
 
-### macOS Steps -- estimated time: 20 minutes
+### macOS Steps
 
 Next, you will need to install a package manager to install `cmake`. I recommend using [brew](https://brew.sh) to install the tools that may be missing on your Mac.
 
@@ -22,7 +22,7 @@ Note:
 Avoid using macport version of cmake due to this issue:
 https://trac.macports.org/ticket/58450
 
-### Windows Steps -- estimated time: 10 minutes
+### Windows Steps
 
 We recommend using [chocolatey](https://chocolatey.org) for the package manager for Windows.  
 
@@ -32,7 +32,7 @@ First, go to https://chocolatey.org/install and follow the installation instruct
 choco install cmake git winflexbison
 ```
 
-### Linux Steps -- estimated time: 10 minutes
+### Linux Steps
 
 We recommend using apt-get to install `git`, `cmake`, `bison`, `flex`, and the gtk:
 
