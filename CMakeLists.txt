@@ -123,7 +123,6 @@ add_library (
 
 target_compile_definitions (calchart_core PUBLIC YY_NO_UNISTD_H)
 if (MSVC)
-target_compile_options (calchart_core PRIVATE -Wall)
 else ()
 target_compile_options (calchart_core PRIVATE -Wall -Wextra)
 endif ()
@@ -161,7 +160,6 @@ install (
   )
 
 if (MSVC)
-target_compile_options (calchart_cmd PRIVATE -Wall)
 else ()
 target_compile_options (calchart_cmd PRIVATE -Wall -Wextra)
 endif ()
@@ -337,7 +335,6 @@ target_link_libraries (
   )
 
 if (MSVC)
-target_compile_options (CalChart PRIVATE -Wall)
 else ()
 target_compile_options (CalChart PRIVATE -Wall -Wextra)
 endif ()
