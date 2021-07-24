@@ -123,7 +123,6 @@ add_library (
 
 target_compile_definitions (calchart_core PUBLIC YY_NO_UNISTD_H)
 if (MSVC)
-target_compile_options (calchart_core PRIVATE -Wall)
 else ()
 target_compile_options (calchart_core PRIVATE -Wall -Wextra)
 endif ()
@@ -140,7 +139,6 @@ target_include_directories (
 target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json)
 
 # calchart_cmd, Mac only
-if (APPLE)
 add_executable (
   calchart_cmd
   "${CMAKE_CURRENT_SOURCE_DIR}/calchart_cmd/main.cpp"
@@ -162,7 +160,6 @@ install (
   )
 
 if (MSVC)
-target_compile_options (calchart_cmd PRIVATE -Wall)
 else ()
 target_compile_options (calchart_cmd PRIVATE -Wall -Wextra)
 endif ()
@@ -175,8 +172,6 @@ target_include_directories (
   "${CMAKE_CURRENT_SOURCE_DIR}/src"
   "${PROJECT_BINARY_DIR}/version"
   )
-
-endif()
 
 # CalChart
 file (
@@ -340,7 +335,6 @@ target_link_libraries (
   )
 
 if (MSVC)
-target_compile_options (CalChart PRIVATE -Wall)
 else ()
 target_compile_options (CalChart PRIVATE -Wall -Wextra)
 endif ()
