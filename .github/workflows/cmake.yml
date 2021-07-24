@@ -1,7 +1,7 @@
 # much of this inspired from: https://cristianadam.eu/20191222/using-github-actions-with-c-plus-plus-and-cmake/
 # and also the excellent series from:
 # https://www.edwardthomson.com/blog/github_actions_advent_calendar.html
-name: CMake action for CalChart
+name: CI action for CalChart
 
 on:
   push:
@@ -24,17 +24,8 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest MSVC",
-            artifact: "Windows-MSVC.tar.xz",
-            os: windows-latest,
-            build_type: "Release",
-            cc: "cl",
-            cxx: "cl",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
-          }
-        - {
             name: "Ubuntu Latest GCC",
-            artifact: "Linux.tar.xz",
+            artifact: "CalChart.tar.xz",
             os: ubuntu-latest,
             build_type: "Release",
             cc: "gcc",
@@ -42,12 +33,21 @@ jobs:
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "CalChart-3.6.2.dmg",
+            artifact: "CalChart.dmg",
             os: macos-latest,
             build_type: "Release",
             cc: "clang",
             cxx: "clang++",
           }
+        # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
+        #- {
+        #    name: "Windows Latest MSVC",
+        #    artifact: "Windows-MSVC.tar.xz",
+        #    os: windows-latest,
+        #    build_type: "Release",
+        #    cc: "cl",
+        #    cxx: "cl",
+        #  }
 
     steps:
     - name: checkout
@@ -91,7 +91,7 @@ jobs:
     - name: Pack (Linux)
       if: matrix.config.os == 'ubuntu-latest'
       working-directory: instdir
-      run: cmake -E tar cJfv ${{github.workspace}}/build/Linux.tar.xz .
+      run: cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
     
     - name: Upload
       uses: actions/upload-artifact@v1
@@ -134,25 +134,21 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest MSVC",
-            artifact: "Windows-MSVC.tar.xz",
-            os: ubuntu-latest
-          }
-        - {
-            name: "Windows Latest MinGW",
-            artifact: "Windows-MinGW.tar.xz",
-            os: ubuntu-latest
-          }
-        - {
             name: "Ubuntu Latest GCC",
-            artifact: "Linux.tar.xz",
+            artifact: "CalChart.tar.xz",
             os: ubuntu-latest
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "macOS.tar.xz",
+            artifact: "CalChart.dmg",
             os: ubuntu-latest
           }
+        # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
+        #- {
+        #    name: "Windows Latest MSVC",
+        #    artifact: "Windows-MSVC.tar.xz",
+        #    os: ubuntu-latest
+        #  }
     needs: release
 
     steps:
