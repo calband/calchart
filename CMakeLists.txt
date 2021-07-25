@@ -355,7 +355,7 @@ if (APPLE)
 
 set_target_properties (
   CalChart PROPERTIES
-  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/build-macos/CalChart-Info.plist.in"
+  MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resources-macos/CalChart-Info.plist.in"
   MACOSX_BUNDLE_ICON_FILE calchart.icns
   MACOSX_BUNDLE TRUE
   MACOSX_FRAMEWORK_IDENTIFIER com.calband.CalChart
@@ -387,7 +387,7 @@ add_custom_command (
   "${CMAKE_CURRENT_SOURCE_DIR}/docs" $<TARGET_FILE_DIR:CalChart>/docs
   )
 
-target_sources(CalChart PRIVATE build-windows/WindowsHiDPI.manifest)
+target_sources(CalChart PRIVATE resources-windows/WindowsHiDPI.manifest)
 
 endif ()
 
@@ -418,8 +418,8 @@ if (MSVC)
 else ()
   set (CPACK_COMPONENTS_ALL applications)
 endif ()
-set (CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/build-macos/CalChart_CMakeDMGSetup.scpt")
-set (CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/build-macos/CalChart_DMGBackground.png")
+set (CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/resources-macos/CalChart_CMakeDMGSetup.scpt")
+set (CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/resources-macos/CalChart_DMGBackground.png")
 
 set (CPACK_PACKAGE_VERSION_MAJOR "${CalChart_VERSION_MAJOR}")
 set (CPACK_PACKAGE_VERSION_MINOR "${CalChart_VERSION_MINOR}")
