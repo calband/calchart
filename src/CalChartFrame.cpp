@@ -184,38 +184,34 @@ EVT_MENU(CALCHART__E7TransitionSolver, CalChartFrame::OnCmd_SolveTransition)
 EVT_AUI_PANE_CLOSE(CalChartFrame::AUIIsClose)
 END_EVENT_TABLE()
 
-class MyPrintout : public wxPrintout {
+class CalChartPrintout : public wxPrintout {
 public:
-    MyPrintout(const wxString& title, const CalChartDoc& show,
-        const CalChartConfiguration& config_)
+    CalChartPrintout(wxString const& title, CalChartDoc const& show, CalChartConfiguration const& config_)
         : wxPrintout(title)
         , mShow(show)
         , mConfig(config_)
     {
     }
-    virtual ~MyPrintout() { }
-    virtual bool HasPage(int pageNum) { return pageNum <= mShow.GetNumSheets(); }
-    virtual void GetPageInfo(int* minPage, int* maxPage, int* pageFrom,
-        int* pageTo)
+    ~CalChartPrintout() override = default;
+    bool HasPage(int pageNum) override { return pageNum <= mShow.GetNumSheets(); }
+    void GetPageInfo(int* minPage, int* maxPage, int* pageFrom, int* pageTo) override
     {
         *minPage = 1;
         *maxPage = mShow.GetNumSheets();
         *pageFrom = 1;
         *pageTo = mShow.GetNumSheets();
     }
-    virtual bool OnPrintPage(int pageNum)
+    bool OnPrintPage(int pageNum) override
     {
-        wxDC* dc = wxPrintout::GetDC();
+        auto dc = wxPrintout::GetDC();
         auto sheet = mShow.GetNthSheet(pageNum - 1);
-
-        int size = wxGetApp().GetGlobalPrintDialog().GetPrintData().GetOrientation();
+        auto size = wxGetApp().GetGlobalPrintDialog().GetPrintData().GetOrientation();
 
         DrawForPrinting(dc, mConfig, mShow, *sheet, 0, 2 == size);
-
         return true;
     }
-    const CalChartDoc& mShow;
-    const CalChartConfiguration& mConfig;
+    CalChartDoc const& mShow;
+    CalChartConfiguration const& mConfig;
 };
 
 // Main frame constructor
@@ -452,7 +448,7 @@ void CalChartFrame::OnCmdPrint(wxCommandEvent&)
 {
     // grab our current page setup.
     wxPrinter printer(&(wxGetApp().GetGlobalPrintDialog()));
-    MyPrintout printout("My Printout", *GetShow(), mConfig);
+    CalChartPrintout printout("My Printout", *GetShow(), mConfig);
     wxPrintDialogData& printDialog = printer.GetPrintDialogData();
 
     int minPage, maxPage, pageFrom, pageTo;
@@ -474,8 +470,8 @@ void CalChartFrame::OnCmdPrintPreview(wxCommandEvent&)
 {
     // grab our current page setup.
     auto preview = new wxPrintPreview(
-        new MyPrintout("My Printout", *GetShow(), mConfig),
-        new MyPrintout("My Printout", *GetShow(), mConfig),
+        new CalChartPrintout("My Printout", *GetShow(), mConfig),
+        new CalChartPrintout("My Printout", *GetShow(), mConfig),
         &wxGetApp().GetGlobalPrintDialog());
     if (!preview->Ok()) {
         delete preview;

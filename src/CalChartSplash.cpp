@@ -55,7 +55,7 @@ private:
 };
 
 CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title)
-    : super(manager, frame, wxID_ANY, title)
+    : super(manager, frame, wxID_ANY, title)//, wxDefaultPosition, wxSize(154, 174))
 {
     // Give it an icon
     SetBandIcon(this);
@@ -84,7 +84,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     // create a sizer and populate
     SetSizer(VStack([this](auto sizer) {
         // add a horizontal bar to make things clear:
-        AddToSizerBasic(sizer, BitmapWithBandIcon(this, GetLogoSize()));
+        AddToSizerExpand(sizer, BitmapWithBandIcon(this, GetLogoSize()));
         AddToSizerBasic(sizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), GetTitleFontSize()));
         AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
 
@@ -95,11 +95,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
         });
         AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
         AddToSizerBasic(sizer, TextStringWithSize(this, "Authors: Gurk Meeker, Richard Michael Powell", GetSubTitleFontSize()));
-        AddToSizerBasic(sizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson,\nAllan Yu", GetSubSubTitleFontSize()));
-
-        // now fit the frame to the elements
-        sizer->Fit(this);
-        sizer->SetSizeHints(this);
+        AddToSizerBasic(sizer, TextStringWithSize(this, "Contributors: Brandon Chinn, Kevin Durand,\nNoah Gilmore, David Strachan-Olson, Allan Yu", GetSubSubTitleFontSize()));
     }));
 
     Show(true);
