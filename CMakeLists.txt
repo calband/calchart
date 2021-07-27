@@ -5,18 +5,27 @@
 # CGold (https://cgold.readthedocs.io/en/latest/index.html)
 # Effective Modern CMake (https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1)
 # Creating Mac OS X Packages with CMake (https://blog.kitware.com/creating-mac-os-x-packages-with-cmake/)
+#
+# How to add files:
+# We've structured CMake so that it will include the subdirectories needed.
+# That means that when you want to add a new file, you'll have to modify the
+# cmake file in that directory.
 
 cmake_minimum_required (VERSION 3.11)
 
 project (CalChart)
 
+# prevent In-source builds:
+# https://towardsdatascience.com/7-tips-for-clean-cmake-scripts-c8d276587389
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+message(FATAL_ERROR “In-source build detected!”)
+endif()
+
 if(CMAKE_GENERATOR STREQUAL Xcode)
   set (CMAKE_OSX_ARCHITECTURES "\$(ARCHS_STANDARD)")
 endif()
 
-set (CalChart_VERSION_MAJOR 3)
-set (CalChart_VERSION_MINOR 6)
-set (CalChart_VERSION_PATCH 2)
+include (${PROJECT_SOURCE_DIR}/cmake/version.cmake)
 
 # fix for #348 
 if (APPLE)
@@ -26,8 +35,6 @@ if (APPLE)
   set (CMAKE_USE_PTHREADS_INIT 1)
   set (THREADS_PREFER_PTHREAD_FLAG ON)
 endif()
-
-set (CalChart_VERSION "${CalChart_VERSION_MAJOR}.${CalChart_VERSION_MINOR}.${CalChart_VERSION_PATCH}")
 
 configure_file (
   ${CMAKE_CURRENT_SOURCE_DIR}/ccvers.h.in
