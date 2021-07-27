@@ -39,15 +39,14 @@ jobs:
             cc: "clang",
             cxx: "clang++",
           }
-        # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
-        #- {
-        #    name: "Windows Latest MSVC",
-        #    artifact: "Windows-MSVC.tar.xz",
-        #    os: windows-latest,
-        #    build_type: "Release",
-        #    cc: "cl",
-        #    cxx: "cl",
-        #  }
+        - {
+            name: "Windows Latest MSVC",
+            artifact: "CalChart-3.6.2.exe",
+            os: windows-latest,
+            build_type: "Release",
+            cc: "cl",
+            cxx: "cl",
+          }
 
     steps:
     - name: checkout
@@ -144,11 +143,11 @@ jobs:
             os: ubuntu-latest
           }
         # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
-        #- {
-        #    name: "Windows Latest MSVC",
-        #    artifact: "Windows-MSVC.tar.xz",
-        #    os: ubuntu-latest
-        #  }
+        - {
+            name: "Windows Latest MSVC",
+            artifact: "CalChart-3.6.2.exe",
+            os: ubuntu-latest
+          }
     needs: release
 
     steps:
