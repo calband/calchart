@@ -332,7 +332,6 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguratio
     mCanvas = new FieldCanvas(this, static_cast<CalChartView*>(view), mConfig.Get_FieldFrameZoom_3_6_0());
     // set scroll rate 1 to 1, so we can have even scrolling of whole field
     mCanvas->SetScrollRate(1, 1);
-    mCanvas->Scroll(mConfig.Get_FieldCanvasScrollX(), mConfig.Get_FieldCanvasScrollY());
 
     // Create all the other things attached to the frame:
     mControls = FieldControls::CreateToolBar(this, wxID_ANY, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_TEXT);
@@ -410,6 +409,8 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguratio
     // Show the frame
     OnUpdate();
     mCanvas->wxWindow::SetFocus();
+    // make sure we restore the scroll to the last place we were.
+    mCanvas->Scroll(mConfig.Get_FieldCanvasScrollX(), mConfig.Get_FieldCanvasScrollY());
 
     mCanvas->Refresh();
 
