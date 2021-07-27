@@ -146,7 +146,7 @@ target_include_directories (
 target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json)
 
 # calchart_cmd, Mac, Linux only
-if (!MSVC)
+if (NOT MSVC)
 add_executable (
   calchart_cmd
   "${CMAKE_CURRENT_SOURCE_DIR}/calchart_cmd/main.cpp"
@@ -366,30 +366,12 @@ set_target_properties (
 
 endif ()
 
-if (!MSVC)
-add_executable(CalChartTests
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartContinuityTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartCoordTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartPointTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartSheetTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartShowTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartTextTests.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/PrintToPSTests.cpp
-)
-
-set_target_properties (CalChartTests PROPERTIES CXX_STANDARD 20)
-target_include_directories (
-  CalChartTests
-  PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/submodules/Catch2/single_include"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
-)
-target_link_libraries (
-  CalChartTests
-  calchart_core
-  nlohmann_json::nlohmann_json
-)
+# CTests area
+if (NOT MSVC)
+  add_subdirectory(tests)
+  include(CTest)
+  add_test (TutorialRuns calchart_cmd --version)
+  add_test (CalChartTests CalChartTests)
 endif ()
 
 
@@ -456,11 +438,5 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
 include (CPack)
 
-# tests for calchart_core
-include(CTest)
-if (!MSVC)
-add_test (TutorialRuns calchart_cmd --version)
-add_test (CalChartTests CalChartTests)
-endif ()
 
 
