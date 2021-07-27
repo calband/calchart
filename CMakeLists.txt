@@ -315,14 +315,6 @@ set_target_properties (
 target_link_libraries (CalChart calchart_core)
 target_link_libraries (CalChart nlohmann_json::nlohmann_json)
 
-#target_link_libraries (
-#  CalChart
-#  PRIVATE
-#  calchart_core
-#  nlohmann_json::nlohmann_json
-#  )
-
-
 # We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
 # Have wxWidgets build as static libraries
 set (wxBUILD_SHARED OFF)
@@ -367,6 +359,34 @@ set_target_properties (
   )
 
 endif ()
+
+
+add_executable(CalChartTests
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartContinuityTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartCoordTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartPointTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartSheetTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartShowTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CalChartTextTests.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/PrintToPSTests.cpp
+
+)
+
+set_target_properties (CalChartTests PROPERTIES CXX_STANDARD 20)
+target_include_directories (
+  CalChartTests
+  PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/submodules/Catch2/single_include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/core"
+)
+target_link_libraries (
+  CalChartTests
+  calchart_core
+  nlohmann_json::nlohmann_json
+)
+
+
 
 # special stuff for Windows
 if (MSVC)
@@ -433,5 +453,6 @@ include (CPack)
 # tests for calchart_core
 include(CTest)
 add_test (TutorialRuns calchart_cmd --version)
+add_test (CalChartTests CalChartTests)
 
 

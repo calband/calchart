@@ -241,7 +241,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
 
     auto pageMiddle = (bounding.GetWidth() / 2);
 
-    auto numLines = std::count_if(print_continuity.begin(), print_continuity.end(), [](auto&& i) { return i.GetOnSheet(); });
+    auto numLines = std::count_if(print_continuity.begin(), print_continuity.end(), [](auto&& i) { return i.on_sheet; });
 
     auto font_size = ((bounding.GetBottom() - bounding.GetTop()) - (numLines - 1) * 2) / (numLines ? numLines : 1);
     // font size, we scale to be no more than 256 pixels.
@@ -260,9 +260,9 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
     for (auto& cont : print_continuity) {
         float x = bounding.GetLeft();
         // Determine how to center the text
-        if (cont.GetCenter()) {
+        if (cont.center) {
             x += pageMiddle;
-            auto chunks = cont.GetChunks();
+            auto chunks = cont.chunks;
             for (auto& c : chunks) {
                 bool do_tab = false;
                 switch (c.font) {
@@ -296,7 +296,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
         }
         // now draw the text
         unsigned tabnum = 0;
-        auto chunks = cont.GetChunks();
+        auto chunks = cont.chunks;
         for (auto& c : chunks) {
             bool do_tab = false;
             switch (c.font) {

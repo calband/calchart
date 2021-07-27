@@ -401,7 +401,7 @@ short PrintShowToPS::PrintContinuitySheets(std::ostream& buffer,
          ++sheet) {
         auto continuity = sheet->GetPrintableContinuity();
         for (auto& text : continuity) {
-            if (!text.GetOnMain())
+            if (!text.on_main)
                 continue;
             if (lines_left <= 0) {
                 if (num_pages > 0) {
@@ -434,7 +434,7 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer,
 {
     const auto& continuity = sheet.GetPrintableContinuity();
     auto cont_len = std::count_if(continuity.begin(), continuity.end(),
-        [](auto&& c) { return c.GetOnSheet(); });
+        [](auto&& c) { return c.on_sheet; });
     if (cont_len == 0)
         return;
 
@@ -446,7 +446,7 @@ void PrintShowToPS::PrintContSections(std::ostream& buffer,
         width * 0.5 / 7.5, width * 1.5 / 7.5,
         width * 2.0 / 7.5, this_size);
     for (auto& text : continuity) {
-        if (!text.GetOnSheet())
+        if (!text.on_sheet)
             continue;
         gen_cont_line(buffer, text, PSFONT::NORM, this_size);
     }
@@ -458,7 +458,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
 {
     buffer << "/x lmargin def\n";
     short tabstop = 0;
-    for (auto& part : line.GetChunks()) {
+    for (auto& part : line.chunks) {
         if (part.font == PSFONT::TAB) {
             if (++tabstop > 3) {
                 buffer << "space_over\n";
@@ -484,7 +484,7 @@ void PrintShowToPS::gen_cont_line(std::ostream& buffer, const Textline& line,
                 }
 
                 if (!temp_buf.empty()) {
-                    if (line.GetCenter()) {
+                    if (line.center) {
                         buffer << "(" << temp_buf << ") centerText\n";
                     } else {
                         buffer << "(" << temp_buf << ") leftText\n";
