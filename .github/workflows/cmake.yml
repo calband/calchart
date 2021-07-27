@@ -23,31 +23,31 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - {
-            name: "Ubuntu Latest GCC",
-            artifact: "CalChart.tar.xz",
-            os: ubuntu-latest,
-            build_type: "Release",
-            cc: "gcc",
-            cxx: "g++",
-          }
-        - {
-            name: "macOS Latest Clang",
-            artifact: "CalChart-3.6.2.dmg",
-            os: macos-latest,
-            build_type: "Release",
-            cc: "clang",
-            cxx: "clang++",
-          }
-        # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
         #- {
-        #    name: "Windows Latest MSVC",
-        #    artifact: "Windows-MSVC.tar.xz",
-        #    os: windows-latest,
+        #    name: "Ubuntu Latest GCC",
+        #    artifact: "CalChart.tar.xz",
+        #    os: ubuntu-latest,
         #    build_type: "Release",
-        #    cc: "cl",
-        #    cxx: "cl",
+        #    cc: "gcc",
+        #    cxx: "g++",
         #  }
+        #- {
+        #    name: "macOS Latest Clang",
+        #    artifact: "CalChart-3.6.2.dmg",
+        #    os: macos-latest,
+        #    build_type: "Release",
+        #    cc: "clang",
+        #    cxx: "clang++",
+        #  }
+        # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
+        - {
+            name: "Windows Latest MSVC",
+            artifact: "Windows-MSVC.tar.xz",
+            os: windows-latest,
+            build_type: "Release",
+            cc: "cl",
+            cxx: "cl",
+          }
 
     steps:
     - name: checkout
@@ -71,7 +71,7 @@ jobs:
  
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -v
 
     - name: Run tests
       run: ctest --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
