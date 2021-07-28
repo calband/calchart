@@ -2,7 +2,8 @@
 
 execute_process(COMMAND git describe --tags
                 OUTPUT_VARIABLE GIT_VERS
-                ERROR_QUIET)
+                )
+message ("Found version  " ${GIT_VERS})
 # get rid of 'v'
 string(STRIP ${GIT_VERS} GIT_VERS)
 string(SUBSTRING ${GIT_VERS} 1 -1 GIT_VERS)
