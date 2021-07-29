@@ -55,11 +55,11 @@ jobs:
     - name: checkout
       uses: actions/checkout@v2
 
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
-
     - name: Checkout unshallow
       run: git fetch --unshallow
+
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
 
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
