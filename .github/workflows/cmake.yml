@@ -58,6 +58,9 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
 
+    - name: Checkout unshallow
+      run: git fetch --unshallow
+
     - name: Installing Dependencies (Windows)
       if: matrix.config.os == 'windows-latest'
       run: choco install winflexbison
