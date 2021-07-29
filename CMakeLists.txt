@@ -21,11 +21,17 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 message(FATAL_ERROR “In-source build detected!”)
 endif()
 
+
 if(CMAKE_GENERATOR STREQUAL Xcode)
   set (CMAKE_OSX_ARCHITECTURES "\$(ARCHS_STANDARD)")
 endif()
 
-include (${PROJECT_SOURCE_DIR}/cmake/version.cmake)
+#include (${PROJECT_SOURCE_DIR}/cmake/version.cmake)
+set (CalChart_VERSION_MAJOR 3)
+set (CalChart_VERSION_MINOR 6)
+set (CalChart_VERSION_PATCH 2)
+set (CalChart_VERSION "${CalChart_VERSION_MAJOR}.${CalChart_VERSION_MINOR}.${CalChart_VERSION_PATCH}")
+
 
 # fix for #348 
 if (APPLE)
