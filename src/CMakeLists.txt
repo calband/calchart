@@ -196,7 +196,7 @@ add_custom_command (
   "${PROJECT_SOURCE_DIR}/docs" $<TARGET_FILE_DIR:CalChart>/docs
   )
 
-target_sources(CalChart PRIVATE resources-windows/WindowsHiDPI.manifest)
+target_sources(CalChart PRIVATE ${PROJECT_SOURCE_DIR}/resources-windows/WindowsHiDPI.manifest)
 
 endif ()
 

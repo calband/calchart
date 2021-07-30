@@ -26,7 +26,6 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             artifact: "CalChart.tar.xz",
-            artifact_name: "CalChart.tar.xz",
             os: ubuntu-latest,
             build_type: "Release",
             cc: "gcc",
@@ -35,7 +34,6 @@ jobs:
         - {
             name: "macOS Latest Clang",
             artifact: "CalChart-*.dmg",
-            artifact_name: "CalChart-macOS.dmg",
             os: macos-latest,
             build_type: "Release",
             cc: "clang",
@@ -44,7 +42,6 @@ jobs:
         - {
             name: "Windows Latest MSVC",
             artifact: "CalChart-*.exe",
-            artifact_name: "CalChart-windows.exe",
             os: windows-latest,
             build_type: "Release",
             cc: "cl",
@@ -102,7 +99,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
-        name: ${{ matrix.config.artifact_name }}
 
   release:
     if: contains(github.ref, 'tags/v')
@@ -141,20 +137,17 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             artifact: "CalChart.tar.xz",
-            artifact_name: "CalChart.tar.xz",
             os: ubuntu-latest
           }
         - {
             name: "macOS Latest Clang",
             artifact: "CalChart-*.dmg",
-            artifact_name: "CalChart-macOS.dmg",
             os: ubuntu-latest
           }
         # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
         - {
             name: "Windows Latest MSVC",
             artifact: "CalChart-*.exe",
-            artifact_name: "CalChart-windows.exe",
             os: ubuntu-latest
           }
     needs: release
@@ -184,5 +177,4 @@ jobs:
       with:
         upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
         asset_path: ./${{ matrix.config.artifact }}
-        asset_name: ${{ matrix.config.artifact_name }}
         asset_content_type: application/x-gtar
