@@ -1270,7 +1270,7 @@ void CalChartFrame::zoom_callback_textenter(wxCommandEvent& event)
 void CalChartFrame::do_zoom(float zoom_amount)
 {
     zoom_amount = ToolBarSetZoom(zoom_amount);
-    mCanvas->SetZoom(zoom_amount);
+    mCanvas->SetZoomAroundCenter(zoom_amount);
 }
 
 float CalChartFrame::ToolBarSetZoom(float zoom_amount)

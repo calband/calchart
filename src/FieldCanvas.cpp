@@ -409,6 +409,13 @@ void FieldCanvas::SetZoom(float factor)
     Refresh();
 }
 
+void FieldCanvas::SetZoomAroundCenter(float factor)
+{
+    auto size = GetSize();
+    super::SetZoom(factor, { size.x/2, size.y/2 });
+    Refresh();
+}
+
 void FieldCanvas::BeginSelectDrag(CalChart::Select type, CalChart::Coord start)
 {
     mSelectTool = std::make_unique<CalChart::SelectTool>(type, start, [this](int input) {

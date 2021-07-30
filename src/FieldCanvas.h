@@ -61,6 +61,7 @@ public:
     // Misc show functions
     float ZoomToFitFactor() const;
     virtual void SetZoom(float factor);
+    virtual void SetZoomAroundCenter(float factor);
 
     CalChart::Select GetCurrentSelect() const;
     void SetCurrentSelect(CalChart::Select select);

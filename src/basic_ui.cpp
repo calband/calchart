@@ -159,6 +159,29 @@ void ScrollZoomWindow::SetZoom(float z)
     SetupSize();
 }
 
+void ScrollZoomWindow::SetZoom(float z, wxPoint center)
+{
+    // calculate where the point will be before and after, then adjust.
+    auto point_before = [this](auto&& event) {
+        wxClientDC dc(this);
+        PrepareDC(dc);
+        auto mouse_point = event;
+        mouse_point.x = dc.DeviceToLogicalX(mouse_point.x);
+        mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
+        return mouse_point;
+    }(center);
+    SetZoom(z);
+    auto point_after = [this](auto&& event) {
+        wxClientDC dc(this);
+        PrepareDC(dc);
+        auto mouse_point = event;
+        mouse_point.x = dc.LogicalToDeviceX(mouse_point.x);
+        mouse_point.y = dc.LogicalToDeviceY(mouse_point.y);
+        return mouse_point;
+    }(point_before);
+    ChangeOffset(point_after - center);
+}
+
 float ScrollZoomWindow::GetZoom() const
 {
     return mZoomFactor;
@@ -208,25 +231,7 @@ void MouseMoveScrollCanvas::OnMouseMove(wxMouseEvent& event)
 
 void MouseMoveScrollCanvas::OnMousePinchToZoom(wxMouseEvent& event)
 {
-    // calculate where the point will be before and after, then adjust.
-    auto point_before = [this](auto&& event) {
-        wxClientDC dc(this);
-        PrepareDC(dc);
-        auto mouse_point = event;
-        mouse_point.x = dc.DeviceToLogicalX(mouse_point.x);
-        mouse_point.y = dc.DeviceToLogicalY(mouse_point.y);
-        return mouse_point;
-    }(mLastPos);
-    SetZoom(GetZoom() * (1.0 + event.GetMagnification()));
-    auto point_after = [this](auto&& event) {
-        wxClientDC dc(this);
-        PrepareDC(dc);
-        auto mouse_point = event;
-        mouse_point.x = dc.LogicalToDeviceX(mouse_point.x);
-        mouse_point.y = dc.LogicalToDeviceY(mouse_point.y);
-        return mouse_point;
-    }(point_before);
-    ChangeOffset(point_after - mLastPos);
+    SetZoom(GetZoom() * (1.0 + event.GetMagnification()), mLastPos);
 }
 
 void MouseMoveScrollCanvas::OnMouseWheel(wxMouseEvent& event)

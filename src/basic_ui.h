@@ -120,6 +120,7 @@ public:
     void SetCanvasSize(wxSize z);
 
     void SetZoom(float z);
+    void SetZoom(float z, wxPoint center);
     float GetZoom() const;
 
     void ChangeOffset(wxPoint deltaOffset);
