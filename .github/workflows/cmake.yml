@@ -108,15 +108,15 @@ jobs:
         config:
         - {
             name: "Ubuntu Latest GCC",
-            artifact: CalChart-${{github.ref}}.tar.xz,
+            artifact: "CalChart-Linux.tar.xz",
           }
         - {
             name: "macOS Latest Clang",
-            artifact: CalChart-${{github.ref}}.tar.xz,
+            artifact: "CalChart-*.dmg",
           }
         - {
             name: "Windows Latest MSVC",
-            artifact: CalChart-${{github.ref}}.exe,
+            artifact: "CalChart-Windows.exe",
           }
     needs: build
     steps:
