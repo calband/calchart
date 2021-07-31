@@ -85,7 +85,7 @@ CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString c
     SetSizer(VStack([this](auto sizer) {
         // add a horizontal bar to make things clear:
         AddToSizerExpand(sizer, BitmapWithBandIcon(this, GetLogoSize()));
-        AddToSizerBasic(sizer, TextStringWithSize(this, "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION), GetTitleFontSize()));
+        AddToSizerBasic(sizer, TextStringWithSize(this, "CalChart v" CC_VERSION, GetTitleFontSize()));
         AddToSizerBasic(sizer, LineWithLength(this, GetLogoLineSize()));
 
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
@@ -109,7 +109,7 @@ void CalChartSplash::About()
 {
     // clang-format off
     (void)wxMessageBox(
-        "CalChart v" STRINGIZE(CC_MAJOR_VERSION) "." STRINGIZE(CC_MINOR_VERSION) "." STRINGIZE(CC_SUB_MINOR_VERSION) "\n"
+        "CalChart v" CC_VERSION "\n"
         "Authors: Gurk Meeker, Richard Michael Powell\n"
         "\n"
         "Contributors: Brandon Chinn, Kevin Durand, Noah Gilmore, David Strachan-Olson, Allan Yu\n"

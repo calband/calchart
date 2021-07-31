@@ -26,31 +26,28 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             artifact: "CalChart.tar.xz",
+            artifact_name: "CalChart-Linux.tar.xz",
             os: ubuntu-latest,
-            build_type: "Release",
-            cc: "gcc",
-            cxx: "g++",
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "CalChart-3.6.2.dmg",
+            artifact: "CalChart-*.dmg",
+            artifact_name: "CalChart-macOS.dmg",
             os: macos-latest,
-            build_type: "Release",
-            cc: "clang",
-            cxx: "clang++",
           }
         - {
             name: "Windows Latest MSVC",
-            artifact: "CalChart-3.6.2.exe",
+            artifact: "CalChart-*.exe",
+            artifact_name: "CalChart-Windows.exe",
             os: windows-latest,
-            build_type: "Release",
-            cc: "cl",
-            cxx: "cl",
           }
 
     steps:
     - name: checkout
       uses: actions/checkout@v2
+
+    - name: Checkout unshallow
+      run: git fetch --unshallow
 
     - name: Checkout submodules
       run: git submodule update --init --recursive
@@ -73,7 +70,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Run tests
-      run: ctest --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: ctest --test-dir ${{github.workspace}}/build
 
     - name: Pack (macOS)
       if: matrix.config.os == 'macos-latest'
@@ -93,87 +90,30 @@ jobs:
       run: cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
     
     - name: Upload
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v2
       with:
         path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
-        name: ${{ matrix.config.artifact }}
+        name: ${{ matrix.config.artifact_name }}
 
   release:
     if: contains(github.ref, 'tags/v')
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1.0.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Store Release url
-      run: |
-        echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-
-    - uses: actions/upload-artifact@v1
-      with:
-        path: ./upload_url
-        name: upload_url
-
-  publish:
-    if: contains(github.ref, 'tags/v')
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         config:
-        - {
-            name: "Ubuntu Latest GCC",
-            artifact: "CalChart.tar.xz",
-            os: ubuntu-latest
-          }
-        - {
-            name: "macOS Latest Clang",
-            artifact: "CalChart-3.6.2.dmg",
-            os: ubuntu-latest
-          }
-        # CI for Windows doesn't seem functional.  Need to investigate, (see https://github.com/calband/calchart/issues/363)
-        - {
-            name: "Windows Latest MSVC",
-            artifact: "CalChart-3.6.2.exe",
-            os: ubuntu-latest
-          }
-    needs: release
-
+        - artifact: "CalChart.tar.xz"
+        - artifact: "CalChart-*.dmg"
+        - artifact: "CalChart-*.exe"
+    needs: build
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v1
+      # using https://github.com/ncipollo/release-action
+    - name: release
+      uses: ncipollo/release-action@v1
       with:
-        name: ${{ matrix.config.artifact }}
-        path: ./
-
-    - name: Download URL
-      uses: actions/download-artifact@v1
-      with:
-        name: upload_url
-        path: ./
-    - id: set_upload_url
-      run: |
-        upload_url=`cat ./upload_url`
-        echo ::set-output name=upload_url::$upload_url
-
-    - name: Upload to Release
-      id: upload_to_release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
-        asset_path: ./${{ matrix.config.artifact }}
-        asset_name: ${{ matrix.config.artifact }}
-        asset_content_type: application/x-gtar
+        artifacts: ${{github.workspace}}/build/${{ matrix.config.artifact }}
+        bodyFile: "LATEST_RELEASE_NOTES.md"
+        draft: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
