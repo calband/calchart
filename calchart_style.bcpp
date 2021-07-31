@@ -1,6 +1,0 @@
-function_spacing = 2
-use_tabs = yes
-comments_with_code = 50
-comments_with_nocode = 0
-place_brace_on_new_line = on
-
