@@ -2,23 +2,24 @@
 
 # CalChart
 add_subdirectory(core)
-file (
+
+file(
   GLOB CalChartDocs
     "${PROJECT_SOURCE_DIR}/docs/*"
-  )
+)
 
-file (
+file(
   GLOB CalChartResources
     "${PROJECT_SOURCE_DIR}/resources/*"
-  )
+)
 
 source_group(
   "Resources" FILES
   ${CalChartDocs}
   ${CalChartResources}
-  )
+)
 
-add_executable (
+add_executable(
   CalChart
   AnimationCanvas.cpp
   AnimationCanvas.h
@@ -114,6 +115,7 @@ add_executable (
   TransitionSolverView.h
   basic_ui.cpp
   basic_ui.h
+  calchart.rc
   cc_omniview_constants.h
   draw.cpp
   draw.h
@@ -122,47 +124,35 @@ add_executable (
   ui_enums.h
   ${CalChartDocs}
   ${CalChartResources}
-  "${PROJECT_SOURCE_DIR}/calchart.rc"
-  )
-
-install (
-  TARGETS CalChart
-  DESTINATION .
-  COMPONENT applications
-  )
+)
 
 set(AllResources ${CalChartDocs} ${CalChartResources}) 
 
-set_target_properties (
+set_target_properties(
   CalChart PROPERTIES
   RESOURCE
   "${AllResources}"
-  )
+)
 
-target_link_libraries (CalChart calchart_core)
-target_link_libraries (CalChart nlohmann_json::nlohmann_json)
+SetupCompilerForTarget(CalChart)
 
-target_link_libraries (
-  CalChart wx::gl wx::core wx::base wx::adv wx::html wx::net wx::aui
-  )
-
-if (MSVC)
-else ()
-target_compile_options (CalChart PRIVATE -Wall -Wextra)
-endif ()
-set_target_properties (CalChart PROPERTIES CXX_STANDARD 20)
-
-target_include_directories (
+target_include_directories(
   CalChart
   PRIVATE
   "${PROJECT_SOURCE_DIR}/resources"
-  "${PROJECT_BINARY_DIR}/version"
-  )
+)
+
+target_link_libraries(
+  CalChart
+  calchart_core
+  nlohmann_json::nlohmann_json
+  wx::gl wx::core wx::base wx::adv wx::html wx::net wx::aui
+)
 
 # Special stuff for Mac
-if (APPLE)
+if(APPLE)
 
-set_target_properties (
+set_target_properties(
   CalChart PROPERTIES
   MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/resources-macos/CalChart-Info.plist.in"
   MACOSX_BUNDLE_ICON_FILE calchart.icns
@@ -173,28 +163,26 @@ set_target_properties (
   MACOSX_BUNDLE_BUNDLE_VERSION ${CalChart_VERSION}
   MACOSX_BUNDLE_SHORT_VERSION_STRING ${CalChart_VERSION}
   MACOSX_BUNDLE_LONG_VERSION_STRING ${CalChart_VERSION}
-  )
+)
 
-endif ()
+endif()
 
 # special stuff for Windows
-if (MSVC)
+if(MSVC)
 
-set_property (DIRECTORY PROPERTY VS_STARTUP_PROJECT "CalChart")
-
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
-
-add_custom_command (
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT "CalChart")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+add_custom_command(
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${PROJECT_SOURCE_DIR}/resources" $<TARGET_FILE_DIR:CalChart>/resources
-  )
+)
 
-add_custom_command (
+add_custom_command(
   TARGET CalChart POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
   "${PROJECT_SOURCE_DIR}/docs" $<TARGET_FILE_DIR:CalChart>/docs
-  )
+)
 
 target_sources(CalChart PRIVATE ${PROJECT_SOURCE_DIR}/resources-windows/WindowsHiDPI.manifest)
 
@@ -202,16 +190,22 @@ endif ()
 
 # we add some targets for docs and images so we can pack them for windows
 # see http://yanivresearch.info/software/CPackWindowsTutorial/CPackForWindows.html
-install (
+install(
+  TARGETS CalChart
+  DESTINATION .
+  COMPONENT applications
+)
+
+install(
   FILES ${CalChartDocs}
   DESTINATION docs
   COMPONENT Docs
-  )
+)
 
-install (
+install(
   FILES ${CalChartResources}
   DESTINATION resources
   COMPONENT Resources
-  )
+)
 
 

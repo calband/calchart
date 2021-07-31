@@ -11,89 +11,74 @@
 # That means that when you want to add a new file, you'll have to modify the
 # cmake file in that directory.
 
-cmake_minimum_required (VERSION 3.11)
+cmake_minimum_required(VERSION 3.11)
 
-project (CalChart)
+project(CalChart)
 
 # prevent In-source builds:
 # https://towardsdatascience.com/7-tips-for-clean-cmake-scripts-c8d276587389
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-message(FATAL_ERROR “In-source build detected!”)
+message(FATAL_ERROR "In-source build detected!")
 endif()
 
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  set (CMAKE_OSX_ARCHITECTURES "\$(ARCHS_STANDARD)")
-endif()
+include(${PROJECT_SOURCE_DIR}/cmake/compiler.cmake)
 
-include (${PROJECT_SOURCE_DIR}/cmake/version.cmake)
-
-# fix for #348 
-if (APPLE)
-  set (CMAKE_THREAD_LIBS_INIT "-lpthread")
-  set (CMAKE_HAVE_THREADS_LIBRARY 1)
-  set (CMAKE_USE_WIN32_THREADS_INIT 0)
-  set (CMAKE_USE_PTHREADS_INIT 1)
-  set (THREADS_PREFER_PTHREAD_FLAG ON)
-endif()
-
-configure_file (
+include(${PROJECT_SOURCE_DIR}/cmake/version.cmake)
+configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/ccvers.h.in
   ${PROJECT_BINARY_DIR}/version/ccvers.h
   )
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/version)
 
 # Add the submodules for the project
-add_subdirectory (submodules/munkres-cpp EXCLUDE_FROM_ALL)
-add_subdirectory (submodules/nlohmann_json EXCLUDE_FROM_ALL)
-add_subdirectory (submodules/docopt.cpp EXCLUDE_FROM_ALL)
+add_subdirectory(submodules/munkres-cpp EXCLUDE_FROM_ALL)
+add_subdirectory(submodules/nlohmann_json EXCLUDE_FROM_ALL)
+add_subdirectory(submodules/docopt.cpp EXCLUDE_FROM_ALL)
 # We include wxWidgets as a submodule (see https://docs.wxwidgets.org/trunk/overview_cmake.html for info)
 # Have wxWidgets build as static libraries
-set (wxBUILD_SHARED OFF)
-set (wxUSE_STL ON)
-set (wxUSE_STD_CONTAINERS ON)
-add_subdirectory (submodules/wxWidgets)
+set(wxBUILD_SHARED OFF)
+set(wxUSE_STL ON)
+set(wxUSE_STD_CONTAINERS ON)
+add_subdirectory(submodules/wxWidgets)
 
 # calchart_cmd, Mac, Linux only
-if (NOT MSVC)
+if(NOT MSVC)
   add_subdirectory(calchart_cmd)
-endif ()
+endif()
 
 # CalChart
-add_subdirectory (src)
+add_subdirectory(src)
 
-# CTests area
-if (NOT MSVC)
+# CTests section
+if(NOT MSVC)
   add_subdirectory(tests)
   include(CTest)
-  add_test (TutorialRuns calchart_cmd --version)
-  add_test (CalChartTests CalChartTests)
-endif ()
+  add_test(TutorialRuns calchart_cmd --version)
+  add_test(CalChartTests CalChartTests)
+endif()
 
+# CPack section
 
+set(CPACK_PACKAGE_NAME CalChart)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+if(MSVC)
+  set(CPACK_COMPONENTS_ALL applications Docs Resources)
+else()
+  set(CPACK_COMPONENTS_ALL applications)
+endif()
 
-# Installer section
 # information about the DragNDrop installer was from:
 # https://blog.kitware.com/creating-mac-os-x-packages-with-cmake/
+include(InstallRequiredSystemLibraries)
+set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${PROJECT_BINARY_DIR}/resources-macos/CalChart_CMakeDMGSetup.scpt")
+set(CPACK_DMG_BACKGROUND_IMAGE "${PROJECT_BINARY_DIR}/resources-macos/CalChart_DMGBackground.png")
 
-include (InstallRequiredSystemLibraries)
-
-set (CPACK_PACKAGE_NAME CalChart)
-set (CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-if (MSVC)
-  set (CPACK_COMPONENTS_ALL applications Docs Resources)
-else ()
-  set (CPACK_COMPONENTS_ALL applications)
-endif ()
-set (CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/resources-macos/CalChart_CMakeDMGSetup.scpt")
-set (CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/resources-macos/CalChart_DMGBackground.png")
-
-set (CPACK_PACKAGE_VERSION_MAJOR "${CalChart_VERSION_MAJOR}")
-set (CPACK_PACKAGE_VERSION_MINOR "${CalChart_VERSION_MINOR}")
-set (CPACK_PACKAGE_VERSION_PATCH "${CalChart_VERSION_PATCH}")
-set (CPACK_PACKAGE_VERSION "${CalChart_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${CalChart_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${CalChart_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${CalChart_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION "${CalChart_VERSION}")
 
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 
-include (CPack)
-
-
+include(CPack)
 

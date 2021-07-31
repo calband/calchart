@@ -1,3 +1,4 @@
+#pragma once
 /*
    Copyright (C) 1995-2011  Garrick Brian Meeker, Richard Michael Powell
 
@@ -15,18 +16,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CC_VERSION
-
 #define CC_MAJOR_VERSION @CalChart_VERSION_MAJOR@
 #define CC_MINOR_VERSION @CalChart_VERSION_MINOR@
-#define CC_SUB_MINOR_VERSION @CalChart_VERSION_PATCH@
+#define CC_PATCH_VERSION @CalChart_VERSION_PATCH@
 
 #define STRINGIZE_HELPER(name) #name
 #define STRINGIZE(x) STRINGIZE_HELPER(x)
 
-#define MK_CC_VERSION(major, minor, subminor) \
-    "v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(subminor)
+#define MK_CC_VERSION(major, minor, patch) \
+    "v" STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(patch)
 #define CC_VERSION \
-    MK_CC_VERSION(CC_MAJOR_VERSION, CC_MINOR_VERSION, CC_SUB_MINOR_VERSION)
+    MK_CC_VERSION(CC_MAJOR_VERSION, CC_MINOR_VERSION, CC_PATCH_VERSION)
 
-#endif

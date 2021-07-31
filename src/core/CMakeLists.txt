@@ -1,25 +1,25 @@
 # calchart_core
 
 # CalChart requires BISON/FLEX for the grammar
-find_package (BISON REQUIRED)
-find_package (FLEX REQUIRED)
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
 
 # calchart_core
-BISON_TARGET (
+BISON_TARGET(
   calchart_core_parser
   contgram.y
   ${CMAKE_CURRENT_BINARY_DIR}/contgram.cpp
-  )
+)
 
-FLEX_TARGET (
+FLEX_TARGET(
   calchart_core_lexer
   contscan.l
   ${CMAKE_CURRENT_BINARY_DIR}/contscan.cpp
   COMPILE_FLAGS -i
-  )
+)
 
 
-add_library (
+add_library(
   calchart_core
   STATIC
   CalChartAnimation.cpp
@@ -73,32 +73,27 @@ add_library (
   setup2.h
   viewer_translate.cpp
   viewer_translate.h
-  ${PROJECT_BINARY_DIR}/version/ccvers.h
   ${BISON_calchart_core_parser_OUTPUTS}
   ${FLEX_calchart_core_lexer_OUTPUTS}
-  )
+)
 
-target_compile_definitions (calchart_core PUBLIC YY_NO_UNISTD_H)
-if (NOT MSVC)
-target_compile_options (calchart_core PRIVATE -Wall -Wextra)
-endif ()
-set_target_properties (calchart_core PROPERTIES CXX_STANDARD 20)
+target_compile_definitions(calchart_core PUBLIC YY_NO_UNISTD_H)
+SetupCompilerForTarget(calchart_core)
 
-target_include_directories (
+target_include_directories(
   calchart_core
   PRIVATE
-  ${PROJECT_BINARY_DIR}/version
   ${PROJECT_SOURCE_DIR}/submodules/munkres-cpp/src
-  )
+)
 
 # this is a hack to get contgram to build
-target_include_directories (
+target_include_directories(
   calchart_core
   PRIVATE
   ${PROJECT_SOURCE_DIR}/src/core
   INTERFACE
   ${PROJECT_SOURCE_DIR}/src/core
-  )
+)
 
 target_link_libraries(calchart_core PRIVATE nlohmann_json::nlohmann_json)
 

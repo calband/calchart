@@ -106,18 +106,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - {
-            name: "Ubuntu Latest GCC",
-            artifact: "CalChart-Linux.tar.xz",
-          }
-        - {
-            name: "macOS Latest Clang",
-            artifact: "CalChart-*.dmg",
-          }
-        - {
-            name: "Windows Latest MSVC",
-            artifact: "CalChart-Windows.exe",
-          }
+        - artifact: "CalChart.tar.xz"
+        - artifact: "CalChart-*.dmg"
+        - artifact: "CalChart-*.exe"
     needs: build
     steps:
       # using https://github.com/ncipollo/release-action
@@ -125,5 +116,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: ${{github.workspace}}/build/${{ matrix.config.artifact }}
+        bodyFile: "LATEST_RELEASE_NOTES.md"
+        draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
       
