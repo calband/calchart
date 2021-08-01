@@ -79,6 +79,8 @@ private:
     // Event Handlers
     void OnDrawableContClick(CalChart::DrawableCont const& c);
     void OnCmdTextEnterKeyPressed(wxCommandEvent const& event);
+    void OnComboPressed(wxCommandEvent const& event);
+    void OnComboText(wxCommandEvent const& event);
 
     std::unique_ptr<CalChart::ContProcedure> mCont;
     CalChart::DrawableCont mDrawableCont;
@@ -89,6 +91,7 @@ private:
     std::function<void(CalChart::DrawableCont const& c)> const mAction;
     CalChartConfiguration& mConfig;
     std::function<void(bool)> mOnUpdateIsValid{};
+    std::string mLastValue;
 };
 
 IMPLEMENT_CLASS(ContinuityComposerPanel, wxPanel)
@@ -141,7 +144,10 @@ void ContinuityComposerPanel::CreateControls()
             this->OnCmdTextEnterKeyPressed(event);
         });
         mComboSelection->Bind(wxEVT_COMBOBOX, [this](auto const& event) {
-            this->OnCmdTextEnterKeyPressed(event);
+            this->OnComboPressed(event);
+        });
+        mComboSelection->Bind(wxEVT_TEXT, [this](auto const& event) {
+            this->OnComboText(event);
         });
     }));
 
@@ -551,18 +557,54 @@ void ContinuityComposerPanel::OnCmdTextEnterKeyPressed(wxCommandEvent const& eve
         if (changed) {
             mDrawableCont = mCont->GetDrawableCont();
             std::tie(mCurrentSelected, mCurrentParent) = first_unset(mDrawableCont);
+            // clear out the text
+            mComboSelection->SetValue("");
         }
     }
     OnUpdate();
 }
 
+// how this works:  Go through each char of input str and find the in order matches of the
+// input list given.
+// We do this by keeping a tally of the match points, and prune off the strings that don't match
+auto findStringsThatMatchString(std::string const& str, std::vector<std::string> const& input)
+{
+    auto listOfStrings = std::vector<std::pair<std::string, size_t>>{};
+    std::transform(input.begin(), input.end(), std::back_inserter(listOfStrings), [](auto&& i) -> std::pair<std::string, size_t> {
+        return { i, 0 };
+    });
+    for (auto&& l : str) {
+        std::transform(listOfStrings.begin(), listOfStrings.end(), listOfStrings.begin(), [l](auto&& i) -> std::pair<std::string, size_t> {
+            auto result = std::min(i.first.find(tolower(l), i.second), i.first.find(toupper(l), i.second));
+            return { i.first, result };
+        });
+        listOfStrings.erase(std::remove_copy_if(listOfStrings.begin(), listOfStrings.end(), listOfStrings.begin(), [](auto&& i) {
+            return i.second == std::string::npos; }), listOfStrings.cend());
+    }
+    auto result = std::vector<std::string>{};
+    std::transform(listOfStrings.cbegin(), listOfStrings.cend(), std::back_inserter(result), [](auto&& i) { return i.first; });
+
+    return result;
+}
+
+// we take the list of strings, filter them based on the char.
 void ContinuityComposerPanel::OnUpdate()
 {
-    // save off what's in the list.
+    // Get the master list.
     auto list_of_strings = GetCurrentList(mCurrentSelected);
-    // this is where we would filter things out.
-    std::vector<wxString> wxStringsCont(list_of_strings.begin(), list_of_strings.end());
-    mComboSelection->Set(wxStringsCont.size(), wxStringsCont.data());
+
+    // filter out the selected
+    auto filteredStrings = findStringsThatMatchString(mComboSelection->GetValue(), std::vector(list_of_strings.begin(), list_of_strings.end()));
+    auto stringsCont = std::vector<wxString>(filteredStrings.begin(), filteredStrings.end());
+    // if we *not* in the middle of browsing the list, or there's currently no strings, put in the culled list.
+    if (wxNOT_FOUND == mComboSelection->GetSelection() || mComboSelection->GetCount() == 0) {
+        while (mComboSelection->GetCount()) {
+            mComboSelection->Delete(0);
+        }
+        if (!stringsCont.empty()) {
+            mComboSelection->Insert(stringsCont, 0);
+        }
+    }
 
     mCanvas->DoSetContinuity(mDrawableCont, mAction);
     // is it valid?
@@ -574,6 +616,20 @@ void ContinuityComposerPanel::OnUpdate()
         mOnUpdateIsValid(Validate());
     }
     Refresh();
+}
+
+// currently unused
+void ContinuityComposerPanel::OnComboPressed(wxCommandEvent const& /*event*/)
+{
+}
+
+void ContinuityComposerPanel::OnComboText(wxCommandEvent const& /*event*/)
+{
+    // we only do updates when the text changes
+    if (mLastValue != mComboSelection->GetValue()) {
+        mLastValue = mComboSelection->GetValue();
+        OnUpdate();
+    }
 }
 
 void ContinuityComposerPanel::OnDrawableContClick(CalChart::DrawableCont const& c)
