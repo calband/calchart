@@ -4,6 +4,12 @@
 name: CI action for CalChart
 
 on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
   create:
 
 env:
