@@ -10,6 +10,7 @@ on:
   pull_request:
     branches:
     - main
+  create:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
