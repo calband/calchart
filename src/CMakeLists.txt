@@ -126,6 +126,13 @@ add_executable(
   ${CalChartResources}
 )
 
+# it is important to put this before we set the resources as the CPack for Mac likes to have a minimum set of files to look good.
+install(
+  TARGETS CalChart
+  DESTINATION .
+  COMPONENT applications
+)
+
 set(AllResources ${CalChartDocs} ${CalChartResources}) 
 
 set_target_properties(
@@ -190,12 +197,6 @@ endif ()
 
 # we add some targets for docs and images so we can pack them for windows
 # see http://yanivresearch.info/software/CPackWindowsTutorial/CPackForWindows.html
-install(
-  TARGETS CalChart
-  DESTINATION .
-  COMPONENT applications
-)
-
 install(
   FILES ${CalChartDocs}
   DESTINATION docs
