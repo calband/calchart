@@ -96,25 +96,13 @@ jobs:
         path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact_name }}
 
-  release:
-    if: contains(github.ref, 'tags/v')
-    name: ${{ matrix.config.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - artifact: "CalChart.tar.xz"
-        - artifact: "CalChart-*.dmg"
-        - artifact: "CalChart-*.exe"
-    needs: build
-    steps:
+    - name: Release
+      if: contains(github.ref, 'tags/v')
       # using https://github.com/ncipollo/release-action
-    - name: release
       uses: ncipollo/release-action@v1
       with:
         artifacts: ${{github.workspace}}/build/${{ matrix.config.artifact }}
-        bodyFile: ${{github.workspace}}/LATEST_RELEASE_NOTES.md
+        #bodyFile: ${{github.workspace}}/LATEST_RELEASE_NOTES.md
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
       
