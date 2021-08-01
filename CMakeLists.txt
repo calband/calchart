@@ -77,9 +77,9 @@ set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${PROJECT_SOURCE_DIR}/resources-macos/CalCh
 set(CPACK_DMG_BACKGROUND_IMAGE "${PROJECT_SOURCE_DIR}/resources-macos/CalChart_DMGBackground.png")
 
 # information about windows NSIS installer
-set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
-set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
-set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
+#set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
+#set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
+#set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
 
 set(CPACK_PACKAGE_VERSION_MAJOR "${CalChart_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${CalChart_VERSION_MINOR}")
