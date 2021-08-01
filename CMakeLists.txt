@@ -62,6 +62,7 @@ endif()
 set(CPACK_PACKAGE_NAME CalChart)
 set(CPACK_PACKAGE_VENDOR "The University of California Marching Band Computer Comm")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CalChart, the tool to chart shows for the Cal Band.")
+set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 if(MSVC)
@@ -77,9 +78,8 @@ set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${PROJECT_SOURCE_DIR}/resources-macos/CalCh
 set(CPACK_DMG_BACKGROUND_IMAGE "${PROJECT_SOURCE_DIR}/resources-macos/CalChart_DMGBackground.png")
 
 # information about windows NSIS installer
-#set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
-#set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
-#set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
+set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
+set(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}/resources/calchart.ico")
 
 set(CPACK_PACKAGE_VERSION_MAJOR "${CalChart_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${CalChart_VERSION_MINOR}")
