@@ -7,10 +7,11 @@ on:
   push:
     branches:
     - main
+    tags:
+    - '*'
   pull_request:
     branches:
     - main
-  create:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -27,19 +28,19 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             artifact: "CalChart.tar.xz",
-            artifact_name: "CalChart-Linux.tar.xz",
+            artifact_name: "CalChart-Linux",
             os: ubuntu-latest,
           }
         - {
             name: "macOS Latest Clang",
             artifact: "CalChart-*.dmg",
-            artifact_name: "CalChart-macOS.dmg",
+            artifact_name: "CalChart-macOS",
             os: macos-latest,
           }
         - {
             name: "Windows Latest MSVC",
             artifact: "CalChart-*.exe",
-            artifact_name: "CalChart-Windows.exe",
+            artifact_name: "CalChart-Windows",
             os: windows-latest,
           }
 
@@ -96,25 +97,30 @@ jobs:
         path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
         name: ${{ matrix.config.artifact_name }}
 
+
   release:
     if: contains(github.ref, 'tags/v')
-    name: ${{ matrix.config.name }}
+    name: Release
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - artifact: "CalChart.tar.xz"
-        - artifact: "CalChart-*.dmg"
-        - artifact: "CalChart-*.exe"
     needs: build
     steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        path: ./
+
+    - name: Display structure of downloaded files
+      run: ls -R
+
       # using https://github.com/ncipollo/release-action
-    - name: release
+    - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ${{github.workspace}}/build/${{ matrix.config.artifact }}
-        bodyFile: "LATEST_RELEASE_NOTES.md"
+        artifacts: CalChart-*/*
+        bodyFile: ./LATEST_RELEASE_NOTES.md
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
-      
+ 
