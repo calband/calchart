@@ -26,20 +26,17 @@ jobs:
         config:
         - {
             name: "Ubuntu Latest GCC",
-            artifact: "CalChart.tar.xz",
-            artifact_name: "CalChart-Linux.tar.xz",
+            artifact: "CalChart-Linux.txt",
             os: ubuntu-latest,
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "CalChart-*.dmg",
-            artifact_name: "CalChart-macOS.dmg",
+            artifact: "CalChart-macOS.txt",
             os: macos-latest,
           }
         - {
             name: "Windows Latest MSVC",
-            artifact: "CalChart-*.exe",
-            artifact_name: "CalChart-Windows.exe",
+            artifact: "CalChart-Windows.txt",
             os: windows-latest,
           }
 
@@ -47,54 +44,11 @@ jobs:
     - name: checkout
       uses: actions/checkout@v2
 
-    - name: Checkout unshallow
-      run: git fetch --unshallow
-
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
-
-    - name: Installing Dependencies (Windows)
-      if: matrix.config.os == 'windows-latest'
-      run: choco install winflexbison
-
-    - name: Installing Dependencies (Linux)
-      if: matrix.config.os == 'ubuntu-latest'
-      run: sudo apt-get update && sudo apt-get install build-essential libgtk-3-dev
-
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
- 
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-    - name: Run tests
-      run: ctest --test-dir ${{github.workspace}}/build
-
-    - name: Pack (macOS)
-      if: matrix.config.os == 'macos-latest'
-      run: pushd ${{github.workspace}}/build && cpack -G DragNDrop
-
-    - name: Pack (Windows)
-      if: matrix.config.os == 'windows-latest'
-      run: pushd ${{github.workspace}}/build && cpack
-
-    - name: Strip (Linux)
-      if: matrix.config.os == 'ubuntu-latest'
-      run: cmake --install build --prefix instdir --strip
-    
-    - name: Pack (Linux)
-      if: matrix.config.os == 'ubuntu-latest'
-      working-directory: instdir
-      run: cmake -E tar cJfv ${{github.workspace}}/build/CalChart.tar.xz .
-    
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        path: ${{github.workspace}}/build/${{ matrix.config.artifact }}
-        name: ${{ matrix.config.artifact_name }}
+        path: ${{github.workspace}}/${{ matrix.config.artifact }}
+        name: ${{ matrix.config.artifact }}
 
   release:
     if: contains(github.ref, 'tags/v')
