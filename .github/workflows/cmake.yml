@@ -52,23 +52,29 @@ jobs:
 
   release:
     if: contains(github.ref, 'tags/v')
-    name: ${{ matrix.config.name }}
+    name: Release
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         config:
-        - artifact: "CalChart.tar.xz"
-        - artifact: "CalChart-*.dmg"
-        - artifact: "CalChart-*.exe"
+        - artifact: "CalChart-Linux.txt"
+        - artifact: "CalChart-macOS.txt"
+        - artifact: "CalChart-Windows.txt"
     needs: build
     steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: ./
+
       # using https://github.com/ncipollo/release-action
     - name: release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ${{github.workspace}}/build/${{ matrix.config.artifact }}
-        bodyFile: "LATEST_RELEASE_NOTES.md"
+        artifacts: "CalChart-Linux.txt,CalChart-macOS.txt,CalChart-Windows.txt"
+        #bodyFile: "LATEST_RELEASE_NOTES.md"
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
       
