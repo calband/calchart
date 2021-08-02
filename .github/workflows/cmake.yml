@@ -26,17 +26,17 @@ jobs:
         config:
         - {
             name: "Ubuntu Latest GCC",
-            artifact: "CalChart-Linux.txt",
+            artifact: "CalChart-3.6.txt",
             os: ubuntu-latest,
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "CalChart-macOS.txt",
+            artifact: "CalChart-3.6.txt",
             os: macos-latest,
           }
         - {
             name: "Windows Latest MSVC",
-            artifact: "CalChart-Windows.txt",
+            artifact: "CalChart-3.6.txt",
             os: windows-latest,
           }
 
@@ -54,26 +54,22 @@ jobs:
     if: contains(github.ref, 'tags/v')
     name: Release
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - artifact: "CalChart-Linux.txt"
-        - artifact: "CalChart-macOS.txt"
-        - artifact: "CalChart-Windows.txt"
     needs: build
     steps:
+    - name: Display structure of downloaded files
+      run: ls -R
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: ${{ matrix.config.artifact }}
         path: ./
+    - name: Display structure of downloaded files
+      run: ls -R
 
       # using https://github.com/ncipollo/release-action
     - name: release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "CalChart-Linux.txt,CalChart-macOS.txt,CalChart-Windows.txt"
+        artifacts: "CalChart-*"
         #bodyFile: "LATEST_RELEASE_NOTES.md"
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
