@@ -103,11 +103,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        config:
-        - artifact: "CalChart.tar.xz"
-        - artifact: "CalChart-*.dmg"
-        - artifact: "CalChart-*.exe"
     needs: build
     steps:
     - name: checkout
@@ -116,14 +111,14 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: ${{matrix.config.artifact}}
+        name: CalChart*
         path: ./
 
       # using https://github.com/ncipollo/release-action
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: CalChart.tar.xz,CalChart-*.dmg,CalChart-*.exe
+        artifacts: CalChart*
         #bodyFile: ${{github.workspace}}/LATEST_RELEASE_NOTES.md
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
