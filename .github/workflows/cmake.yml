@@ -27,19 +27,19 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             artifact: "CalChart-Linux.txt",
-            artifact_name: "CalChart-L",
+            artifact_name: "Upload-CalChart-L",
             os: ubuntu-latest,
           }
         - {
             name: "macOS Latest Clang",
             artifact: "CalChart-macOS.txt",
-            artifact_name: "CalChart-m",
+            artifact_name: "Upload-CalChart-m",
             os: macos-latest,
           }
         - {
             name: "Windows Latest MSVC",
             artifact: "CalChart-Windows.txt",
-            artifact_name: "CalChart-W",
+            artifact_name: "Upload-CalChart-W",
             os: windows-latest,
           }
 
@@ -75,8 +75,8 @@ jobs:
     - name: release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "CalChart-*/*"
-        #bodyFile: ${{github.workspace}}/LATEST_RELEASE_NOTES.md
+        artifacts: "Upload-CalChart-*/*"
+        bodyFile: ./LATEST_RELEASE_NOTES.md
         draft: true
         token: ${{ secrets.GITHUB_TOKEN }}
       
