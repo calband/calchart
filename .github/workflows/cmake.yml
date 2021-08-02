@@ -26,17 +26,17 @@ jobs:
         config:
         - {
             name: "Ubuntu Latest GCC",
-            artifact: "CalChart-3.6.txt",
+            artifact: "CalChart-Linux.txt",
             os: ubuntu-latest,
           }
         - {
             name: "macOS Latest Clang",
-            artifact: "CalChart-3.6.txt",
+            artifact: "CalChart-macOS.txt",
             os: macos-latest,
           }
         - {
             name: "Windows Latest MSVC",
-            artifact: "CalChart-3.6.txt",
+            artifact: "CalChart-Windows.txt",
             os: windows-latest,
           }
 
