@@ -226,7 +226,7 @@ CalChartFrame::CalChartFrame(wxDocument* doc, wxView* view, CalChartConfiguratio
 
     // Give it a status line
     CreateStatusBar(3);
-    SetStatusText("Welcome to Calchart v" CC_VERSION);
+    SetStatusText("Welcome to Calchart " CC_VERSION);
 
     // Make a menubar
     auto file_menu = new wxMenu;
