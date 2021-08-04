@@ -106,10 +106,6 @@ void ContinuityBrowserPanel::OnNewEntry(int cell)
 
 void ContinuityBrowserPanel::OnEditEntry(int cell)
 {
-    if (!mView) {
-        return;
-    }
-
     ContinuityComposerDialog dialog(mCont.GetParsedContinuity().at(cell)->clone(), this);
 
     if (dialog.ShowModal() != wxID_OK) {
