@@ -24,30 +24,19 @@
 
 namespace CalChart {
 
-std::pair<ImageData, uint8_t const*> CreateImageData(uint8_t const* d)
+std::pair<ImageData, Reader> CreateImageData(Reader reader)
 {
-    auto left = static_cast<int>(get_big_long(d));
-    d += 4;
-    auto top = static_cast<int>(get_big_long(d));
-    d += 4;
-    auto scaled_width = static_cast<int>(get_big_long(d));
-    d += 4;
-    auto scaled_height = static_cast<int>(get_big_long(d));
-    d += 4;
-    auto image_width = static_cast<int>(get_big_long(d));
-    d += 4;
-    auto image_height = static_cast<int>(get_big_long(d));
-    d += 4;
-    auto data_size = get_big_long(d);
-    d += 4;
-    auto data = std::vector<unsigned char>(d, d + data_size);
-    d += data_size;
-    auto alpha_size = get_big_long(d);
-    d += 4;
-    auto alpha = std::vector<unsigned char>(d, d + alpha_size);
+    auto left = reader.Get<int32_t>();
+    auto top = reader.Get<int32_t>();
+    auto scaled_width = reader.Get<int32_t>();
+    auto scaled_height = reader.Get<int32_t>();
+    auto image_width = reader.Get<int32_t>();
+    auto image_height = reader.Get<int32_t>();
+    auto data = reader.GetVector<unsigned char>();
+    auto alpha = reader.GetVector<unsigned char>();
     scaled_width = (scaled_width == 0) ? image_width : scaled_width;
     scaled_height = (scaled_height == 0) ? image_height : scaled_height;
-    return { ImageData{ left, top, scaled_width, scaled_height, image_width, image_height, data, alpha }, d };
+    return { ImageData{ left, top, scaled_width, scaled_height, image_width, image_height, data, alpha }, reader };
 }
 
 std::vector<uint8_t> Serialize(ImageData const& image)

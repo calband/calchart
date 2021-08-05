@@ -31,6 +31,8 @@
 
 namespace CalChart {
 
+class Reader;
+
 static constexpr auto SPR_YARD_LEFT = 8;
 static constexpr auto SPR_YARD_RIGHT = 4;
 static constexpr auto SPR_YARD_ABOVE = 2;
@@ -73,7 +75,7 @@ public:
         CalChart::Coord border1, CalChart::Coord border2, unsigned short whash,
         unsigned short ehash, YardLinesInfo_t const& yardlines);
 
-    static ShowMode CreateShowMode(std::vector<uint8_t> const&);
+    static ShowMode CreateShowMode(CalChart::Reader reader);
     std::vector<uint8_t> Serialize() const;
 
     ShowModeInfo_t GetShowModeInfo() const;

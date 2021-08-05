@@ -26,6 +26,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <span>
+
+#include "ccvers.h"
 
 namespace CalChart {
 
@@ -229,18 +232,6 @@ struct Current_version_and_later {
 #define INGL_PONT Make4CharWord('P', 'O', 'N', 'T')
 #define INGL_END Make4CharWord('E', 'N', 'D', ' ')
 
-template <typename T>
-uint16_t get_big_word(const T* ptr)
-{
-    return ((ptr[0] & 0xFF) << 8) | ((ptr[1] & 0xFF));
-}
-
-template <typename T>
-uint32_t get_big_long(const T* ptr)
-{
-    return ((ptr[0] & 0xFF) << 24) | ((ptr[1] & 0xFF) << 16) | ((ptr[2] & 0xFF) << 8) | ((ptr[3] & 0xFF));
-}
-
 inline void put_big_word(void* p, uint16_t v)
 {
     uint8_t* ptr = static_cast<uint8_t*>(p);
@@ -280,229 +271,7 @@ public:
         : std::runtime_error(reason + " : " + GetErrorFromID(nameID)){};
 };
 
-template <typename T>
-inline uint8_t ReadByte(T& stream)
-{
-    char data;
-    stream.read(&data, sizeof(data));
-    return data;
-}
-
-template <typename T>
-inline uint32_t ReadLong(T& stream)
-{
-    char rawd[4];
-    stream.read(rawd, sizeof(rawd));
-    return get_big_long(rawd);
-}
-
-// return false if you don't read the inname
-template <typename T>
-inline void ReadAndCheckID(T& stream, uint32_t inname)
-{
-    uint32_t name = ReadLong(stream);
-    if (inname != name) {
-        throw CC_FileException(inname);
-    }
-}
-
-// return false if you don't read the inname
-template <typename T>
-inline uint32_t ReadGurkSymbolAndGetVersion(T& stream, uint32_t inname)
-{
-    uint32_t name = ReadLong(stream);
-    if (inname == name) {
-        // if we have an exact match, this is version 0
-        return 0x0;
-    }
-    if ((((name >> 24) & 0xFF) == ((inname >> 24) & 0xFF)) && (((name >> 16) & 0xFF) == ((inname >> 16) & 0xFF))) {
-        char major_vers = (name >> 8) & 0xFF;
-        char minor_vers = (name)&0xFF;
-        if (isdigit(major_vers) && isdigit(minor_vers)) {
-            return ((major_vers - '0') << 8) | (minor_vers - '0');
-        }
-    }
-    throw CC_FileException(inname);
-}
-
-// return false if you don't read the inname
-template <typename T>
-inline uint32_t ReadCheckIDandSize(T& stream, uint32_t inname)
-{
-    uint32_t name = ReadLong(stream);
-    if (inname != name) {
-        throw CC_FileException(inname);
-    }
-    name = ReadLong(stream);
-    if (4 != name) {
-        uint8_t rawd[4];
-        put_big_long(rawd, inname);
-        std::stringstream buf;
-        buf << "Wrong size " << name << " for name " << rawd[0] << rawd[1]
-            << rawd[2] << rawd[3];
-        throw CC_FileException(buf.str());
-    }
-    return ReadLong(stream);
-}
-
-// return false if you don't read the inname
-template <typename T>
-inline std::vector<uint8_t> ReadCheckIDandFillData(T& stream, uint32_t inname)
-{
-    uint32_t name = ReadLong(stream);
-    if (inname != name) {
-        throw CC_FileException(inname);
-    }
-    std::vector<uint8_t> data(ReadLong(stream));
-    stream.read(reinterpret_cast<char*>(&data[0]), data.size());
-    return data;
-}
-
-// Just fill the data
-template <typename T>
-inline std::vector<uint8_t> FillData(T& stream, size_t size)
-{
-    std::vector<uint8_t> data(size);
-    stream.read(reinterpret_cast<char*>(&data[0]), data.size());
-    return data;
-}
-
-// Just fill the data
-template <typename T>
-inline std::vector<uint8_t> FillData(T& stream)
-{
-    uint32_t name = ReadLong(stream);
-    return FillData(stream, name);
-}
-
-template <typename T>
-inline void Write(T& stream, const void* data, uint32_t size)
-{
-    stream.write(reinterpret_cast<const char*>(data), size);
-}
-
-template <typename T>
-inline void WriteLong(T& stream, uint32_t d)
-{
-    char rawd[4];
-    put_big_long(rawd, d);
-    Write(stream, rawd, sizeof(rawd));
-}
-
-template <typename T>
-inline void WriteHeader(T& stream)
-{
-    WriteLong(stream, INGL_INGL);
-}
-
-template <typename T>
-inline void WriteGurk(T& stream, uint32_t name)
-{
-    WriteLong(stream, INGL_GURK);
-    WriteLong(stream, name);
-}
-
-template <typename T>
-inline void WriteGurkAndVersion(T& stream, uint8_t major, uint8_t minor)
-{
-    uint32_t gurk_version = ((INGL_GURK)&0xFFFF0000) | (('0' + major) << 8) | ('0' + minor);
-
-    WriteLong(stream, gurk_version);
-}
-
-template <typename T>
-inline void WriteChunkHeader(T& stream, uint32_t name, uint32_t size)
-{
-    WriteLong(stream, name);
-    WriteLong(stream, size);
-}
-
-template <typename T>
-inline void WriteChunk(T& stream, uint32_t name, uint32_t size,
-    const void* data)
-{
-    WriteLong(stream, name);
-    WriteLong(stream, size);
-    if (size > 0)
-        Write(stream, data, size);
-}
-
-template <typename T>
-inline void WriteChunkStr(T& stream, uint32_t name, const char* str)
-{
-    WriteChunk(stream, name, strlen(str) + 1,
-        reinterpret_cast<const unsigned char*>(str));
-}
-
-template <typename T>
-inline void WriteEnd(T& stream, uint32_t name)
-{
-    WriteLong(stream, INGL_END);
-    WriteLong(stream, name);
-}
-
-template <typename T>
-inline void WriteStr(T& stream, const char* str)
-{
-    Write(stream, str, strlen(str) + 1);
-}
-
 namespace Parser {
-
-    template <typename Iter>
-    uint32_t get_big_long(Iter ptr)
-    {
-        uint32_t result = (*ptr++ & 0xFF);
-        result = (result << 8) | (*ptr++ & 0xFF);
-        result = (result << 8) | (*ptr++ & 0xFF);
-        result = (result << 8) | (*ptr++ & 0xFF);
-        return result;
-    }
-
-    // oh ick, casting floating point to raw values... Sure hope things are ieee...
-    template <typename Iter>
-    float get_big_float(Iter ptr)
-    {
-        unsigned char rawd[sizeof(float)];
-        std::copy(ptr, ptr + sizeof(float), rawd);
-        ptr += sizeof(float);
-        float result = 0.f;
-        void* fptr = &result;
-        std::memcpy(fptr, rawd, sizeof(float));
-        return result;
-    }
-
-    template <typename Iter>
-    std::vector<std::tuple<uint32_t, Iter, size_t>> ParseOutLabels(Iter begin,
-        Iter end)
-    {
-        std::vector<std::tuple<uint32_t, Iter, size_t>> result;
-        while (begin != end) {
-            auto length = std::distance(begin, end);
-            if (length < 8) {
-                return result;
-            }
-            auto name = get_big_long(begin);
-            begin += 4;
-            auto size = get_big_long(begin);
-            begin += 4;
-            length = std::distance(begin, end);
-            if (static_cast<uint32_t>(length) < size + 8) {
-                return result;
-            }
-            auto data = begin;
-            begin += size;
-            auto end = get_big_long(begin);
-            begin += 4;
-            auto end_name = get_big_long(begin);
-            begin += 4;
-            if ((end != INGL_END) || (end_name != name)) {
-                return result;
-            }
-            result.push_back(std::tuple<uint32_t, Iter, size_t>(name, data, size));
-        }
-        return result;
-    }
 
     struct PrintHeader {
         uint32_t d;
@@ -593,4 +362,172 @@ namespace Parser {
         return result;
     }
 }
+
+class Reader
+{
+public:
+    Reader(std::span<uint8_t const> data, uint32_t version = kVersion) : data(data), version(version) {}
+
+    auto size() const { return data.size(); }
+    auto first(std::size_t n) const { auto copy = *this; copy.data = copy.data.first(n); return copy; }
+    auto subspan(std::size_t n) const { auto copy = *this; copy.data = copy.data.subspan(n); return copy; }
+
+    template <typename T>
+    T Peek() const;
+
+    template <typename T>
+    T Get()
+    {
+        auto result = Peek<T>();
+        data = data.subspan(sizeof(T));
+        return result;
+    }
+
+    template <>
+    uint8_t Peek<uint8_t>() const
+    {
+        if (data.size() < 1) {
+            throw std::runtime_error(std::string("not enough data for uint8_t.  Need 1, currently have ") + std::to_string(data.size()));
+        }
+        return (data[0] & 0xFF);
+    }
+
+    template <>
+    uint16_t Peek<uint16_t>() const
+    {
+        if (data.size() < 2) {
+            throw std::runtime_error(std::string("not enough data for uint16_t.  Need 2, currently have ") + std::to_string(data.size()));
+        }
+        return ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+    }
+
+    template <>
+    uint32_t Peek<uint32_t>() const
+    {
+        if (data.size() < 4) {
+            throw std::runtime_error(std::string("not enough data for uint32_t.  Need 4, currently have ") + std::to_string(data.size()));
+        }
+        return ((data[0] & 0xFF) << 24) | ((data[1] & 0xFF) << 16) | ((data[2] & 0xFF) << 8) | ((data[3] & 0xFF));
+    }
+
+    template <>
+    int32_t Peek<int32_t>() const
+    {
+        if (data.size() < 4) {
+            throw std::runtime_error(std::string("not enough data for int32_t.  Need 4, currently have ") + std::to_string(data.size()));
+        }
+        return ((data[0] & 0xFF) << 24) | ((data[1] & 0xFF) << 16) | ((data[2] & 0xFF) << 8) | ((data[3] & 0xFF));
+    }
+
+    template <>
+    float Peek<float>() const
+    {
+        if (data.size() < sizeof(float)) {
+            throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(data.size()));
+        }
+        unsigned char rawd[sizeof(float)];
+        std::copy(data.data(), data.data() + sizeof(float), rawd);
+        float result = 0.f;
+        void* fptr = &result;
+        std::memcpy(fptr, rawd, sizeof(float));
+        return result;
+    }
+
+    template <typename T>
+    std::vector<T> GetVector()
+    {
+        if (data.size() < 4) {
+            throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(data.size()));
+        }
+        auto size = Get<uint32_t>();
+        auto result = std::vector<T>(data.data(), data.data()+size);
+        data = data.subspan(size);
+        return result;
+    }
+
+    template <>
+    std::string Get<std::string>()
+    {
+        auto result = std::string(reinterpret_cast<char const*>(data.data()));
+        if (data.size() < (result.size() + 1)) {
+            throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(data.size()));
+        }
+        data = data.subspan(result.size()+1); // +1 for the null terminator
+        return result;
+    }
+
+    std::vector<std::tuple<uint32_t, Reader>> ParseOutLabels()
+    {
+        std::vector<std::tuple<uint32_t, Reader>> result;
+        while (data.size()) {
+            auto length = data.size();
+            if (length < 8) {
+                return result;
+            }
+            auto name = Get<uint32_t>();
+            auto size = Get<uint32_t>();
+            if (data.size() < size + 8) {
+                return result;
+            }
+            auto reader = first(size);
+            data = data.subspan(size);
+            auto end = Get<uint32_t>();
+            auto end_name = Get<uint32_t>();
+            if ((end != INGL_END) || (end_name != name)) {
+                return result;
+            }
+            result.push_back({name, reader});
+        }
+        return result;
+    }
+
+    void ReadAndCheckID(uint32_t inname)
+    {
+        uint32_t name = Get<uint32_t>();
+        if (inname != name) {
+            throw CC_FileException(inname);
+        }
+    }
+
+    auto ReadCheckIDandSize(uint32_t inname)
+    {
+        ReadAndCheckID(inname);
+        auto size = Get<uint32_t>();
+        if (4 != size) {
+            throw CC_FileException(inname);
+        }
+        return Get<uint32_t>();
+    }
+
+    // return false if you don't read the inname
+    auto ReadCheckIDandFillData(uint32_t inname)
+    {
+        ReadAndCheckID(inname);
+        return GetVector<uint8_t>();
+    }
+
+    // return false if you don't read the inname
+    auto ReadGurkSymbolAndGetVersion(uint32_t inname)
+    {
+        auto name = Get<uint32_t>();
+        if (inname == name) {
+            // if we have an exact match, this is version 0
+            return 0x0;
+        }
+        if ((((name >> 24) & 0xFF) == ((inname >> 24) & 0xFF)) && (((name >> 16) & 0xFF) == ((inname >> 16) & 0xFF))) {
+            char major_vers = (name >> 8) & 0xFF;
+            char minor_vers = (name)&0xFF;
+            if (isdigit(major_vers) && isdigit(minor_vers)) {
+                return ((major_vers - '0') << 8) | (minor_vers - '0');
+            }
+        }
+        throw CC_FileException(inname);
+    }
+
+private:
+    std::span<uint8_t const> data;
+    uint32_t version;
+};
+
+
 }

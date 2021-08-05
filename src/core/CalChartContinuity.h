@@ -50,7 +50,7 @@ public:
     // this could throw runtime_error on bad parses.
     Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
     Continuity(std::vector<std::unique_ptr<ContProcedure>>);
-    Continuity(std::vector<uint8_t> const&);
+    Continuity(Reader);
     ~Continuity();
 
     Continuity(Continuity const&);

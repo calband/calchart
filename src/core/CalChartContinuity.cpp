@@ -62,18 +62,16 @@ std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s
     }
 }
 
-std::vector<std::unique_ptr<ContProcedure>> Deserialize(std::vector<uint8_t> const& data)
+std::vector<std::unique_ptr<ContProcedure>> Deserialize(Reader reader)
 {
     auto result = std::vector<std::unique_ptr<ContProcedure>>{};
 
-    auto begin = data.data();
-    auto end = data.data() + data.size();
-    while (std::distance(begin, end) > 0) {
-        auto next_result = std::unique_ptr<ContProcedure>{};
-        std::tie(next_result, begin) = DeserializeContProcedure(begin, end);
+    while (reader.size() > 0) {
+        auto [ next_result, new_reader ] = DeserializeContProcedure(reader);
         result.push_back(std::move(next_result));
+        reader = new_reader;
     }
-    if (begin != end) {
+    if (reader.size() != 0) {
         throw std::runtime_error("Error, did not parse all the data correctly");
     }
     return result;
@@ -99,8 +97,8 @@ Continuity::Continuity(std::vector<std::unique_ptr<ContProcedure>> from_cont)
 {
 }
 
-Continuity::Continuity(std::vector<uint8_t> const& data)
-    : m_parsedContinuity(Deserialize(data))
+Continuity::Continuity(Reader reader)
+    : m_parsedContinuity(Deserialize(reader))
 {
 }
 
@@ -175,7 +173,8 @@ void Continuity_serialize_test()
          }) {
         auto uut1 = Continuity{ i };
         auto serialize_result = uut1.Serialize();
-        auto uut2 = Continuity{ serialize_result };
+             auto reader = Reader({ serialize_result.data(), serialize_result.size()});
+             auto uut2 = Continuity{ reader };
         assert(uut1 == uut2);
     }
 }

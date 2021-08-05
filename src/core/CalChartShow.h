@@ -55,6 +55,7 @@
 namespace CalChart {
 class Show;
 class Sheet;
+class Reader;
 struct ParseErrorHandlers;
 
 using Show_command = std::function<void(Show&)>;
@@ -74,9 +75,9 @@ public:
 private:
     Show(ShowMode const& mode);
     // calchart 3.3 and earlier is parsed via the istream.
-    Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction = nullptr);
+    Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
     // calchart 3.4 and later are given a data blob to parse.
-    Show(ShowMode const& mode, const uint8_t* ptr, size_t size, ParseErrorHandlers const* correction = nullptr);
+    Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction = nullptr);
 
 public:
     ~Show();

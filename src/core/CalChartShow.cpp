@@ -59,22 +59,24 @@ std::unique_ptr<Show> Show::Create(ShowMode const& mode, std::vector<std::pair<s
 
 std::unique_ptr<Show> Show::Create(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction)
 {
-    ReadAndCheckID(stream, INGL_INGL);
-    uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
-    if (version <= 0x303) {
-        return std::unique_ptr<Show>(new Show(mode, stream, correction));
-    }
-
     // read the whole stream into a block, making sure we don't skip white space
     stream.unsetf(std::ios::skipws);
     std::vector<uint8_t> data(std::istream_iterator<uint8_t>{ stream },
         std::istream_iterator<uint8_t>{});
     // wxWidgets doesn't like it when we've reach the end of file.  Remove flags
     stream.clear();
+    auto reader = Reader({data.data(), data.size()});
+
+    reader.ReadAndCheckID(INGL_INGL);
+    auto version = reader.ReadGurkSymbolAndGetVersion(INGL_GURK);
+
+    if (version <= 0x303) {
+        return std::unique_ptr<Show>(new Show(Version_3_3_and_earlier{}, mode, reader, correction));
+    }
 
     // debug purposes, you can uncomment this line to have the show dumped
     //	DoRecursiveParsing("", data.data(), data.data() + data.size());
-    return std::unique_ptr<Show>(new Show(mode, data.data(), data.size(), correction));
+    return std::unique_ptr<Show>(new Show(mode, reader, correction));
 }
 
 // Create a new show
@@ -86,27 +88,23 @@ Show::Show(ShowMode const& mode)
 // -=-=-=-=-=- LEGACY CODE -=-=-=-=-=-
 // Recommend that you don't touch this unless you know what you are doing.
 // Constructor for shows 3.3 and ealier.
-Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const* correction)
-    : mMode(mode)
+Show::Show(Version_3_3_and_earlier, ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction)
+    : Show(mode)
 {
     // caller should have stripped off INGL and GURK headers
-    /*
-  ReadAndCheckID(stream, INGL_INGL);
-  uint32_t version = ReadGurkSymbolAndGetVersion(stream, INGL_GURK);
-  */
-    ReadAndCheckID(stream, INGL_SHOW);
+    reader.ReadAndCheckID(INGL_SHOW);
 
     // Handle show info
     // read in the size:
     // <INGL_SIZE><4><# points>
-    auto numpoints = ReadCheckIDandSize(stream, INGL_SIZE);
+    auto numpoints = reader.ReadCheckIDandSize(INGL_SIZE);
     mDotLabelAndInstrument.assign(numpoints, std::pair<std::string, std::string>{ "", kDefault });
 
-    uint32_t name = ReadLong(stream);
+    uint32_t name = reader.Get<uint32_t>();
     // Optional: read in the point labels
     // <INGL_LABL><SIZE>
     if (INGL_LABL == name) {
-        std::vector<uint8_t> data = FillData(stream);
+        std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         std::vector<std::string> labels;
         auto str = (char const*)&data[0];
         for (auto i = 0; i < GetNumPoints(); i++) {
@@ -117,7 +115,7 @@ Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const*
         std::transform(labels.begin(), labels.end(), std::back_inserter(labelsAndInstruments), [](auto&& i) { return std::pair<std::string, std::string>{ i, kDefault }; });
         SetPointLabelAndInstrument(labelsAndInstruments);
         // peek for the next name
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     } else {
         // fail?
     }
@@ -125,126 +123,111 @@ Show::Show(ShowMode const& mode, std::istream& stream, ParseErrorHandlers const*
     // Optional: read in the description
     // <INGL_DESC><SIZE>
     if (INGL_DESC == name) {
-        std::vector<uint8_t> data = FillData(stream);
+        std::vector<uint8_t> data = reader.GetVector<uint8_t>();
         auto str = (char const*)&data[0];
         SetDescr(std::string(str, strlen(str)));
         // peek for the next name
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
 
     // Read in sheets
     // <INGL_GURK><INGL_SHET>
     while (INGL_GURK == name) {
-        ReadAndCheckID(stream, INGL_SHET);
+        reader.ReadAndCheckID(INGL_SHET);
 
-        Sheet sheet(GetNumPoints(), stream, correction);
+        Sheet sheet(Version_3_3_and_earlier{}, GetNumPoints(), reader, correction);
         InsertSheet(sheet, GetNumSheets());
 
         // ReadAndCheckID(stream, INGL_END);
-        ReadAndCheckID(stream, INGL_SHET);
+        reader.ReadAndCheckID(INGL_SHET);
         // peek for the next name
-        name = ReadLong(stream);
+        name = reader.Get<uint32_t>();
     }
     // ReadAndCheckID(stream, INGL_END);
-    ReadAndCheckID(stream, INGL_SHOW);
+    reader.ReadAndCheckID(INGL_SHOW);
 
     // now set the show to sheet 0
     mSheetNum = 0;
 }
 // -=-=-=-=-=- LEGACY CODE </end>-=-=-=-=-=-
 
-Show::Show(ShowMode const& mode, uint8_t const* ptr, size_t size, ParseErrorHandlers const* correction)
-    : mMode(mode)
+Show::Show(ShowMode const& mode, Reader reader, ParseErrorHandlers const* correction)
+    : Show(mode)
 {
     // caller should have stripped off INGL and GURK headers
 
     // construct the parser handlers
     // TODO: Why can't I capture this here?
-    auto parse_INGL_SIZE = [](Show* show, uint8_t const* ptr, size_t size) {
-        if (4 != size) {
+    auto parse_INGL_SIZE = [](Show& show, Reader reader) {
+        if (reader.size() != 4) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
-        auto numpoints = get_big_long(ptr);
-        show->mDotLabelAndInstrument.assign(numpoints, std::pair<std::string, std::string>{ "", kDefault });
+        auto numpoints = reader.Get<uint32_t>();
+        show.mDotLabelAndInstrument.assign(numpoints, std::pair<std::string, std::string>{ "", kDefault });
     };
-    auto parse_INGL_LABL = [](Show* show, uint8_t const* ptr, size_t size) {
+    auto parse_INGL_LABL = [](Show& show, Reader reader) {
         std::vector<std::pair<std::string, std::string>> labels;
-        if (!size && show->GetNumPoints()) {
+        if (reader.size() == 0 && show.GetNumPoints()) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
         // restrict search to the size we're given
-        auto str = (char const*)ptr;
-        for (auto i = 0; i < show->GetNumPoints(); i++) {
+        for (auto i = 0; i < show.GetNumPoints(); i++) {
+            auto str = reader.Get<std::string>();
             labels.push_back({ str, kDefault });
-            auto length = strlen(str) + 1;
-            if (length > size) {
-                throw CC_FileException("Label too large", INGL_LABL);
-            }
-            str += length;
-            size -= length;
         }
-        if (size != 0) {
+        if (reader.size() != 0) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
-        show->SetPointLabelAndInstrument(labels);
+        show.SetPointLabelAndInstrument(labels);
     };
-    auto parse_INGL_INST = [](Show* show, uint8_t const* ptr, size_t size) {
-        auto currentLabels = show->mDotLabelAndInstrument;
-        if (!size && show->GetNumPoints()) {
+    auto parse_INGL_INST = [](Show& show, Reader reader) {
+        auto currentLabels = show.mDotLabelAndInstrument;
+        if (reader.size() == 0 && show.GetNumPoints()) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
         // restrict search to the size we're given
-        auto str = (char const*)ptr;
-        for (auto i = 0; i < show->GetNumPoints(); i++) {
-            auto thisInst = std::string{ str };
+        for (auto i = 0; i < show.GetNumPoints(); i++) {
+            auto thisInst = reader.Get<std::string>();
             currentLabels.at(i).second = thisInst == "" ? kDefault : thisInst;
-            auto length = strlen(str) + 1;
-            if (length > size) {
-                throw CC_FileException("Label too large", INGL_LABL);
-            }
-            str += length;
-            size -= length;
         }
-        if (size != 0) {
+        if (reader.size() != 0) {
             throw CC_FileException("Label the wrong size", INGL_LABL);
         }
-        show->SetPointLabelAndInstrument(currentLabels);
+        show.SetPointLabelAndInstrument(currentLabels);
     };
-    auto parse_INGL_DESC = [](Show* show, uint8_t const* ptr, size_t size) {
-        auto str = (char const*)ptr;
-        if (size != (strlen(str) + 1)) {
+    auto parse_INGL_DESC = [](Show& show, Reader reader) {
+        auto str = reader.Get<std::string>();
+        if (reader.size() != 0) {
             throw CC_FileException("Description the wrong size", INGL_DESC);
         }
-        show->SetDescr(std::string(str, strlen(str)));
+        show.SetDescr(str);
     };
-    auto parse_INGL_SHET = [correction](Show* show, uint8_t const* ptr, size_t size) {
-        Sheet sheet(show->GetNumPoints(), ptr, size, correction);
-        auto sheet_num = show->GetCurrentSheetNum();
-        show->InsertSheet(sheet, show->GetNumSheets());
-        show->SetCurrentSheet(sheet_num);
+    auto parse_INGL_SHET = [correction](Show& show, Reader reader) {
+        Sheet sheet(show.GetNumPoints(), reader, correction);
+        auto sheet_num = show.GetCurrentSheetNum();
+        show.InsertSheet(sheet, show.GetNumSheets());
+        show.SetCurrentSheet(sheet_num);
     };
-    auto parse_INGL_SELE = [](Show* show, uint8_t const* ptr, size_t size) {
-        if ((size % 4) != 0) {
+    auto parse_INGL_SELE = [](Show& show, Reader reader) {
+        if ((reader.size() % 4) != 0) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
-        while (size) {
-            show->mSelectionList.insert(get_big_long(ptr));
-            ptr += 4;
-            size -= 4;
+        while (reader.size()) {
+            show.mSelectionList.insert(reader.Get<uint32_t>());
         }
     };
-    auto parse_INGL_CURR = [](Show* show, uint8_t const* ptr, size_t size) {
-        if (4 != size) {
+    auto parse_INGL_CURR = [](Show& show, Reader reader) {
+        if (reader.size() != 4) {
             throw CC_FileException("Incorrect size", INGL_SIZE);
         }
-        show->mSheetNum = get_big_long(ptr);
+        show.mSheetNum = reader.Get<uint32_t>();
     };
-    auto parse_INGL_MODE = [](Show* show, uint8_t const* ptr, size_t size) {
-        show->mMode = ShowMode::CreateShowMode({ ptr, ptr + size });
+    auto parse_INGL_MODE = [](Show& show, Reader reader) {
+        show.mMode = ShowMode::CreateShowMode(reader);
     };
     // [=] needed here to pull in the parse functions
-    auto parse_INGL_SHOW = [=](Show* show, uint8_t const* ptr, size_t size) {
-        std::map<uint32_t, std::function<void(Show * show, const uint8_t*, size_t)>> const parser = {
+    auto parse_INGL_SHOW = [=](Show& show, Reader reader) {
+        std::map<uint32_t, std::function<void(Show& show, Reader)>> const parser = {
             { INGL_SIZE, parse_INGL_SIZE },
             { INGL_LABL, parse_INGL_LABL },
             { INGL_INST, parse_INGL_INST },
@@ -254,20 +237,20 @@ Show::Show(ShowMode const& mode, uint8_t const* ptr, size_t size, ParseErrorHand
             { INGL_CURR, parse_INGL_CURR },
             { INGL_MODE, parse_INGL_MODE },
         };
-        auto table = Parser::ParseOutLabels(ptr, ptr + size);
+        auto table = reader.ParseOutLabels();
         for (auto& i : table) {
             auto the_parser = parser.find(std::get<0>(i));
             if (the_parser != parser.end()) {
-                the_parser->second(show, std::get<1>(i), std::get<2>(i));
+                the_parser->second(show, std::get<1>(i));
             }
         }
     };
 
-    auto table = Parser::ParseOutLabels(ptr, ptr + size);
+    auto table = reader.ParseOutLabels();
     bool found_show = false;
     for (auto& i : table) {
         if (std::get<0>(i) == INGL_SHOW) {
-            parse_INGL_SHOW(this, std::get<1>(i), std::get<2>(i));
+            parse_INGL_SHOW(*this, std::get<1>(i));
             found_show = true;
         }
     }
@@ -1109,7 +1092,7 @@ void Show::CC_show_round_trip_test_with_number_label_description()
     Append(data, Construct_block(INGL_MODE, ShowMode::GetDefaultShowMode().Serialize()));
     auto show_data = Construct_block(INGL_SHOW, data);
 
-    Show show1(ShowMode::GetDefaultShowMode(), (const uint8_t*)show_data.data(), show_data.size());
+    Show show1(ShowMode::GetDefaultShowMode(), Reader({(const uint8_t*)show_data.data(), show_data.size()}));
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
@@ -1136,7 +1119,7 @@ void Show::CC_show_round_trip_test_with_different_show_modes()
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
 
-    Show show2(ShowMode::GetDefaultShowMode(), (uint8_t const*)show1_data.data(), show1_data.size());
+    Show show2(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show1_data.data(), show1_data.size()}));
     assert(show2.GetShowMode().HashW() == 36);
 }
 
@@ -1144,8 +1127,8 @@ void Show::CC_show_blank_desc_test()
 {
     auto show_zero_points_zero_labels_zero_description = Construct_show_zero_points_zero_labels_zero_description();
     Show show1(ShowMode::GetDefaultShowMode(),
-        (uint8_t const*)show_zero_points_zero_labels_zero_description.data(),
-        show_zero_points_zero_labels_zero_description.size());
+               Reader({(uint8_t const*)show_zero_points_zero_labels_zero_description.data(),
+        show_zero_points_zero_labels_zero_description.size()}));
     auto show1_data = show1.SerializeShow();
     // eat header
     show1_data.erase(show1_data.begin(), show1_data.begin() + 8);
@@ -1157,8 +1140,8 @@ void Show::CC_show_blank_desc_test()
 
     // now remove the description and they should be equal
     auto show_zero_points_zero_labels = Construct_show_zero_points_zero_labels();
-    Show show2(ShowMode::GetDefaultShowMode(), (uint8_t const*)show_zero_points_zero_labels.data(),
-        show_zero_points_zero_labels.size());
+    Show show2(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_zero_points_zero_labels.data(),
+        show_zero_points_zero_labels.size()}));
     auto show2_data = show2.SerializeShow();
     show2_data.erase(show2_data.begin(), show2_data.begin() + 8);
     is_equal = show2_data.size() == show_zero_points_zero_labels.size() && std::equal(show2_data.begin(), show2_data.end(), show_zero_points_zero_labels.begin());
@@ -1195,7 +1178,7 @@ void Show::CC_show_wrong_size_throws_exception()
     auto show_data = Construct_block(INGL_SHOW, points_3);
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)show_data.data(), show_data.size());
+        Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
     } catch (CC_FileException const&) {
         hit_exception = true;
     }
@@ -1216,7 +1199,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)show_data.data(), show_data.size());
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1233,7 +1216,7 @@ void Show::CC_show_wrong_size_number_labels_throws()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)show_data.data(), show_data.size());
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1257,7 +1240,7 @@ void Show::CC_show_wrong_size_description()
         auto show_data = Construct_block(INGL_SHOW, t_show_data);
         bool hit_exception = false;
         try {
-            Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)show_data.data(), show_data.size());
+            Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)show_data.data(), show_data.size()}));
         } catch (CC_FileException const&) {
             hit_exception = true;
         }
@@ -1271,7 +1254,7 @@ void Show::CC_show_extra_cruft_ok()
 {
     // now remove the description and they should be equal
     auto extra_cruft = Construct_show_zero_points_zero_labels_1_sheet_and_random();
-    Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)extra_cruft.data(), extra_cruft.size());
+    Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)extra_cruft.data(), extra_cruft.size()}));
     auto show1_data = show1.SerializeShow();
 
     auto blank_show = Show::Create(ShowMode::GetDefaultShowMode());
@@ -1287,7 +1270,7 @@ void Show::CC_show_with_nothing_throws()
     std::vector<uint8_t> empty{};
     bool hit_exception = false;
     try {
-        Show show1(ShowMode::GetDefaultShowMode(), (uint8_t const*)empty.data(), empty.size());
+        Show show1(ShowMode::GetDefaultShowMode(), Reader({(uint8_t const*)empty.data(), empty.size()}));
     } catch (CC_FileException const&) {
         hit_exception = true;
     }
