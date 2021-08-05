@@ -65,7 +65,7 @@ struct ErrorMarker {
 
 class AnimationErrors {
 public:
-    void RegisterError(AnimateError err, ContToken const* token, unsigned curr_pt, SYMBOL_TYPE contsymbol)
+    void RegisterError(AnimateError err, Cont::Token const* token, unsigned curr_pt, SYMBOL_TYPE contsymbol)
     {
         mErrorMarkers[err].contsymbol = contsymbol;
         if (token != NULL) {

@@ -34,22 +34,25 @@
  *
  */
 
-#include "CalChartContinuityToken.h"
+#include "CalChartFileFormat.h"
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace CalChart {
 
-class ContProcedure;
+namespace Cont {
+    class Procedure;
+}
 struct ParseErrorHandlers;
 
 class Continuity {
 public:
     // this could throw runtime_error on bad parses.
     Continuity(std::string const& s = "", ParseErrorHandlers const* correction = nullptr);
-    Continuity(std::vector<std::unique_ptr<ContProcedure>>);
+    Continuity(std::vector<std::unique_ptr<Cont::Procedure>>);
     Continuity(Reader);
     ~Continuity();
 
@@ -60,7 +63,7 @@ public:
 
     std::vector<uint8_t> Serialize() const;
 
-    std::vector<std::unique_ptr<ContProcedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
+    std::vector<std::unique_ptr<Cont::Procedure>> const& GetParsedContinuity() const noexcept { return m_parsedContinuity; }
     auto GetText() const { return m_legacyText; }
 
     friend void swap(Continuity& lhs, Continuity& rhs)
@@ -71,7 +74,7 @@ public:
     friend bool operator==(Continuity const& lhs, Continuity const& rhs);
 
 private:
-    std::vector<std::unique_ptr<ContProcedure>> m_parsedContinuity;
+    std::vector<std::unique_ptr<Cont::Procedure>> m_parsedContinuity;
     std::string m_legacyText;
 
     friend bool Check_Continuity(const Continuity&, const struct Continuity_values&);

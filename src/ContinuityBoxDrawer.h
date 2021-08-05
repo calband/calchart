@@ -20,9 +20,9 @@
 #include <memory>
 
 class CalChartConfiguration;
-namespace CalChart {
-class ContToken;
-struct DrawableCont;
+namespace CalChart::Cont {
+class Token;
+struct Drawable;
 }
 
 // class for drawing continuity in box form on a dc.
@@ -31,7 +31,7 @@ class ContinuityBoxSubPartDrawer;
 
 class ContinuityBoxDrawer : public DrawableCell {
 public:
-    ContinuityBoxDrawer(CalChart::DrawableCont const& proc, CalChartConfiguration const& config, std::function<void(CalChart::DrawableCont const&)> action = nullptr);
+    ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, CalChartConfiguration const& config, std::function<void(CalChart::Cont::Drawable const&)> action = nullptr);
     virtual ~ContinuityBoxDrawer();
     void SetHighlight(void const* ptr) override { mHighlight = ptr; }
     virtual void DrawToDC(wxDC& dc) override;
@@ -44,6 +44,6 @@ public:
 private:
     CalChartConfiguration const& mConfig;
     std::unique_ptr<ContinuityBoxSubPartDrawer> mContToken;
-    std::function<void(CalChart::DrawableCont const&)> mClickAction;
+    std::function<void(CalChart::Cont::Drawable const&)> mClickAction;
     void const* mHighlight = nullptr;
 };

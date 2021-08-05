@@ -42,10 +42,10 @@
 // Drawing constants
 
 static const auto ArrowSize = fDIP(4);
-static const auto kStep8 = fDIP(Int2CoordUnits(8));
-static const auto kStep4 = fDIP(Int2CoordUnits(4));
-static const auto kStep2 = fDIP(Int2CoordUnits(2));
-static const auto kStep1 = fDIP(Int2CoordUnits(1));
+static const auto kStep8 = fDIP(CalChart::Int2CoordUnits(8));
+static const auto kStep4 = fDIP(CalChart::Int2CoordUnits(4));
+static const auto kStep2 = fDIP(CalChart::Int2CoordUnits(2));
+static const auto kStep1 = fDIP(CalChart::Int2CoordUnits(1));
 
 // draw text centered around x (though still at y down)
 void DrawCenteredText(wxDC& dc, const wxString& text, wxPoint pt)
@@ -183,13 +183,13 @@ static const double kLowerNorthArrow[2][3] = {
 
 static const double kContinuityStart[2] = { 606 / kSizeY, 556 / kSizeYLandscape };
 
-static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label);
-static void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, SYMBOL_TYPE symbol, wxString const& label);
+static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label);
+static void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, wxString const& label);
 
-void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
+void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, CalChartColors unselectedColor, CalChartColors selectedColor, CalChartColors unselectedTextColor, CalChartColors selectedTextColor)
 {
     SaveAndRestore_Font orig_font(dc);
-    dc.SetFont(CreateFont(Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
+    dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     dc.SetTextForeground(config.Get_CalChartBrushAndPen(COLOR_POINT_TEXT).first.GetColour());
     for (auto i = 0; i < numberPoints; i++) {
         if (selection_list.count(i)) {
@@ -207,12 +207,12 @@ void DrawSheetPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
     }
 }
 
-void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref)
+void DrawGhostSheet(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref)
 {
     DrawSheetPoints(dc, config, origin, selection_list, numberPoints, labels, sheet, ref, COLOR_GHOST_POINT, COLOR_GHOST_POINT_HLIT, COLOR_GHOST_POINT_TEXT, COLOR_GHOST_POINT_HLIT_TEXT);
 }
 
-void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary)
+void DrawPoints(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord origin, CalChart::SelectionList const& selection_list, int numberPoints, std::vector<std::string> const& labels, CalChart::Sheet const& sheet, int ref, bool primary)
 {
     auto unselectedColor = primary ? COLOR_POINT : COLOR_REF_POINT;
     auto selectedColor = primary ? COLOR_POINT_HILIT : COLOR_REF_POINT_HILIT;
@@ -266,28 +266,28 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
             for (auto& c : chunks) {
                 bool do_tab = false;
                 switch (c.font) {
-                case PSFONT::SYMBOL: {
+                case CalChart::PSFONT::SYMBOL: {
                     wxCoord textw, texth;
                     dc.GetTextExtent(wxT("O"), &textw, &texth);
                     x += textw * c.text.length();
                 } break;
-                case PSFONT::NORM:
+                case CalChart::PSFONT::NORM:
                     dc.SetFont(contPlainFont);
                     break;
-                case PSFONT::BOLD:
+                case CalChart::PSFONT::BOLD:
                     dc.SetFont(contBoldFont);
                     break;
-                case PSFONT::ITAL:
+                case CalChart::PSFONT::ITAL:
                     dc.SetFont(contItalFont);
                     break;
-                case PSFONT::BOLDITAL:
+                case CalChart::PSFONT::BOLDITAL:
                     dc.SetFont(contBoldItalFont);
                     break;
-                case PSFONT::TAB:
+                case CalChart::PSFONT::TAB:
                     do_tab = true;
                     break;
                 }
-                if (!do_tab && (c.font != PSFONT::SYMBOL)) {
+                if (!do_tab && (c.font != CalChart::PSFONT::SYMBOL)) {
                     wxCoord textw, texth;
                     dc.GetTextExtent(c.text, &textw, &texth);
                     x -= textw / 2;
@@ -300,20 +300,20 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
         for (auto& c : chunks) {
             bool do_tab = false;
             switch (c.font) {
-            case PSFONT::NORM:
-            case PSFONT::SYMBOL:
+            case CalChart::PSFONT::NORM:
+            case CalChart::PSFONT::SYMBOL:
                 dc.SetFont(contPlainFont);
                 break;
-            case PSFONT::BOLD:
+            case CalChart::PSFONT::BOLD:
                 dc.SetFont(contBoldFont);
                 break;
-            case PSFONT::ITAL:
+            case CalChart::PSFONT::ITAL:
                 dc.SetFont(contItalFont);
                 break;
-            case PSFONT::BOLDITAL:
+            case CalChart::PSFONT::BOLDITAL:
                 dc.SetFont(contBoldItalFont);
                 break;
-            case PSFONT::TAB: {
+            case CalChart::PSFONT::TAB: {
                 tabnum++;
                 wxCoord textw = bounding.GetLeft() + charWidth * TabStops(tabnum, landscape, useConstantTabs);
                 if (textw >= x)
@@ -325,7 +325,7 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
             default:
                 break;
             }
-            if (c.font == PSFONT::SYMBOL) {
+            if (c.font == CalChart::PSFONT::SYMBOL) {
                 wxCoord textw, texth, textd;
                 dc.GetTextExtent(wxT("O"), &textw, &texth, &textd);
                 const float d = textw;
@@ -335,12 +335,12 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
                      s++) {
                     {
                         dc.SetPen(*wxBLACK_PEN);
-                        SYMBOL_TYPE sym = (SYMBOL_TYPE)(*s - 'A');
+                        CalChart::SYMBOL_TYPE sym = (CalChart::SYMBOL_TYPE)(*s - 'A');
                         switch (sym) {
-                        case SYMBOL_SOL:
-                        case SYMBOL_SOLBKSL:
-                        case SYMBOL_SOLSL:
-                        case SYMBOL_SOLX:
+                        case CalChart::SYMBOL_SOL:
+                        case CalChart::SYMBOL_SOLBKSL:
+                        case CalChart::SYMBOL_SOLSL:
+                        case CalChart::SYMBOL_SOLX:
                             dc.SetBrush(*wxBLACK_BRUSH);
                             break;
                         default:
@@ -348,20 +348,20 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
                         }
                         dc.DrawEllipse(x, top_y, d, d);
                         switch (sym) {
-                        case SYMBOL_SL:
-                        case SYMBOL_X:
-                        case SYMBOL_SOLSL:
-                        case SYMBOL_SOLX:
+                        case CalChart::SYMBOL_SL:
+                        case CalChart::SYMBOL_X:
+                        case CalChart::SYMBOL_SOLSL:
+                        case CalChart::SYMBOL_SOLX:
                             dc.DrawLine(x - 1, top_y + d + 1, x + d + 1, top_y - 1);
                             break;
                         default:
                             break;
                         }
                         switch (sym) {
-                        case SYMBOL_BKSL:
-                        case SYMBOL_X:
-                        case SYMBOL_SOLBKSL:
-                        case SYMBOL_SOLX:
+                        case CalChart::SYMBOL_BKSL:
+                        case CalChart::SYMBOL_X:
+                        case CalChart::SYMBOL_SOLBKSL:
+                        case CalChart::SYMBOL_SOLX:
                             dc.DrawLine(x - 1, top_y - 1, x + d + 1, top_y + d + 1);
                             break;
                         default:
@@ -398,7 +398,7 @@ CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart
     right_limit = (right_limit / 8) * 8 + (right_limit % 8 ? (right_limit < 0 ? -8 : 8) : 0);
 
     auto size_x = std::max(CalChart::kFieldStepSizeNorthSouth[landscape], right_limit - left_limit);
-    auto size = CalChart::Coord{ Int2CoordUnits(size_x), Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
+    auto size = CalChart::Coord{ CalChart::Int2CoordUnits(size_x), CalChart::Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
 
     auto left_edge = -CalChart::kFieldStepSizeSouthEdgeFromCenter[landscape];
     if (left_limit < left_edge) {
@@ -406,7 +406,7 @@ CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart
     } else if ((left_edge + size.x) < right_limit) {
         left_edge = right_limit - size.x;
     }
-    CalChart::Coord off = { Int2CoordUnits(-left_edge), Int2CoordUnits(CalChart::kFieldStepSizeWestEdgeFromCenter) };
+    CalChart::Coord off = { CalChart::Int2CoordUnits(-left_edge), CalChart::Int2CoordUnits(CalChart::kFieldStepSizeWestEdgeFromCenter) };
 
     return CalChart::ShowMode::CreateShowMode(size, off, { 0, 0 }, { 0, 0 }, CalChart::kFieldStepWestHashFromWestSideline, CalChart::kFieldStepEastHashFromWestSideline, yardlines);
 }
@@ -445,7 +445,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     // create a field for drawing:
     const auto pts = sheet.GetPoints();
     auto boundingBox = GetMarcherBoundingBox(pts);
-    auto mode = CreateFieldForPrinting(CoordUnits2Int(boundingBox.first.x), CoordUnits2Int(boundingBox.second.x), landscape, show.GetShowMode().Get_yard_text());
+    auto mode = CreateFieldForPrinting(CalChart::CoordUnits2Int(boundingBox.first.x), CalChart::CoordUnits2Int(boundingBox.second.x), landscape, show.GetShowMode().Get_yard_text());
 
     // set the origin and scaling for drawing the field
     dc.SetDeviceOrigin(kFieldBorderOffset * page.x, kFieldTop * page.y);
@@ -456,7 +456,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
 
     // draw the field.
     DrawMode(dc, config, mode, ShowMode_kPrinting);
-    dc.SetFont(CreateFont(Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
+    dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio())));
     for (auto i = 0u; i < pts.size(); i++) {
         const auto point = pts.at(i);
         const auto pos = point.GetPos(ref) + mode.Offset();
@@ -465,7 +465,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     }
 
     // now reset everything to draw the rest of the text
-    dc.SetDeviceOrigin(Int2CoordUnits(0), Int2CoordUnits(0));
+    dc.SetDeviceOrigin(CalChart::Int2CoordUnits(0), CalChart::Int2CoordUnits(0));
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
 
     // set the page for drawing:
@@ -511,7 +511,7 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
 void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalChartDoc const& show, CalChart::Sheet const& sheet, int ref, bool landscape)
 {
     auto boundingBox = GetMarcherBoundingBox(sheet.GetPoints());
-    auto forced_landscape = !landscape && (boundingBox.second.x - boundingBox.first.x) > Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
+    auto forced_landscape = !landscape && (boundingBox.second.x - boundingBox.first.x) > CalChart::Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[0]);
 
     auto bitmapWidth = (landscape || forced_landscape ? kSizeXLandscape : kSizeX) * kBitmapScale;
     auto bitmapHeight = (landscape || forced_landscape ? kSizeYLandscape : kSizeY) * kBitmapScale;
@@ -535,20 +535,20 @@ void DrawForPrinting(wxDC* printerdc, CalChartConfiguration const& config, CalCh
     printerdc->Blit(0, 0, rotate_membm.GetWidth(), rotate_membm.GetHeight(), &tmemdc, 0, 0);
 }
 
-void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, SYMBOL_TYPE symbol, wxString const& label)
+void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Coord const& pos, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, wxString const& label)
 {
     SaveAndRestore_Brush restore(dc);
     switch (symbol) {
-    case SYMBOL_SOL:
-    case SYMBOL_SOLBKSL:
-    case SYMBOL_SOLSL:
-    case SYMBOL_SOLX:
+    case CalChart::SYMBOL_SOL:
+    case CalChart::SYMBOL_SOLBKSL:
+    case CalChart::SYMBOL_SOLSL:
+    case CalChart::SYMBOL_SOLX:
         break;
     default:
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
     }
 
-    auto const circ_r = fDIP(Float2CoordUnits(config.Get_DotRatio()) / 2.0);
+    auto const circ_r = fDIP(CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2.0);
     auto const plineoff = circ_r * config.Get_PLineRatio();
     auto const slineoff = circ_r * config.Get_SLineRatio();
     auto const textoff = circ_r * 1.25;
@@ -556,24 +556,24 @@ void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
     auto where = fDIP(wxPoint{ pos.x, pos.y });
     dc.DrawCircle(where, circ_r);
     switch (symbol) {
-    case SYMBOL_SL:
-    case SYMBOL_X:
+    case CalChart::SYMBOL_SL:
+    case CalChart::SYMBOL_X:
         dc.DrawLine(where.x - plineoff, where.y + plineoff, where.x + plineoff, where.y - plineoff);
         break;
-    case SYMBOL_SOLSL:
-    case SYMBOL_SOLX:
+    case CalChart::SYMBOL_SOLSL:
+    case CalChart::SYMBOL_SOLX:
         dc.DrawLine(where.x - slineoff, where.y + slineoff, where.x + slineoff, where.y - slineoff);
         break;
     default:
         break;
     }
     switch (symbol) {
-    case SYMBOL_BKSL:
-    case SYMBOL_X:
+    case CalChart::SYMBOL_BKSL:
+    case CalChart::SYMBOL_X:
         dc.DrawLine(where.x - plineoff, where.y - plineoff, where.x + plineoff, where.y + plineoff);
         break;
-    case SYMBOL_SOLBKSL:
-    case SYMBOL_SOLX:
+    case CalChart::SYMBOL_SOLBKSL:
+    case CalChart::SYMBOL_SOLX:
         dc.DrawLine(where.x - slineoff, where.y - slineoff, where.x + slineoff, where.y + slineoff);
         break;
     default:
@@ -586,7 +586,7 @@ void DrawPointHelper(wxDC& dc, CalChartConfiguration const& config, CalChart::Co
     }
 }
 
-static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
+static void DrawPoint(wxDC& dc, CalChartConfiguration const& config, CalChart::Point const& point, CalChart::SYMBOL_TYPE symbol, int reference, CalChart::Coord const& origin, wxString const& label)
 {
     DrawPointHelper(dc, config, point.GetPos(reference) + origin, point, symbol, label);
 }
@@ -596,7 +596,7 @@ void DrawPhatomPoints(wxDC& dc, const CalChartConfiguration& config,
     const std::map<int, CalChart::Coord>& positions)
 {
     SaveAndRestore_Font orig_font(dc);
-    auto pointLabelFont = CreateFont(Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()));
+    auto pointLabelFont = CreateFont(CalChart::Float2CoordUnits(config.Get_DotRatio() * config.Get_NumRatio()));
     dc.SetFont(pointLabelFont);
     auto origin = show.GetShowMode().Offset();
     auto brushAndPen = config.Get_CalChartBrushAndPen(COLOR_GHOST_POINT);
@@ -646,15 +646,15 @@ void DrawPath(wxDC& dc, const CalChartConfiguration& config,
     DrawCC_DrawCommandList(dc, draw_commands);
     dc.SetBrush(brushAndPen.first);
     auto where = fDIP(wxPoint{ end.x, end.y });
-    float circ_r = fDIP(Float2CoordUnits(config.Get_DotRatio()) / 2);
+    float circ_r = fDIP(CalChart::Float2CoordUnits(config.Get_DotRatio()) / 2);
     dc.DrawCircle(where, circ_r);
 }
 
 static void ShowModeStandard_DrawHelper_Labels(wxDC& dc, CalChartConfiguration const& config, std::string const* yard_text, wxSize const& fieldsize, wxPoint const& border1, HowToDraw howToDraw)
 {
     // Draw labels
-    dc.SetFont(CreateFont(Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
-    for (int i = 0; i < CoordUnits2Int(tDIP(fieldsize.x)) / 8 + 1; i++) {
+    dc.SetFont(CreateFont(CalChart::Float2CoordUnits(config.Get_YardsSize()), wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    for (int i = 0; i < CalChart::CoordUnits2Int(tDIP(fieldsize.x)) / 8 + 1; i++) {
         auto text = yard_text[i];
         auto textSize = dc.GetTextExtent(text);
         const auto top_row_x = i * kStep8 - textSize.x / 2 + border1.x;
@@ -715,7 +715,7 @@ static void ShowMode_DrawHelper_VerticalMidDotted(wxDC& dc, wxSize const& fields
 static void ShowMode_DrawHelper_HorizontalMidDotted(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1, int mode_HashW, int mode_HashE)
 {
     for (auto j = kStep4; j < fieldsize.y; j += kStep4) {
-        if ((j == Int2CoordUnits(mode_HashW)) || j == Int2CoordUnits(mode_HashE))
+        if ((j == CalChart::Int2CoordUnits(mode_HashW)) || j == CalChart::Int2CoordUnits(mode_HashE))
             continue;
         for (auto k = 0; k < fieldsize.x; k += kStep2) {
             wxPoint points[2] = {
@@ -729,37 +729,37 @@ static void ShowMode_DrawHelper_HorizontalMidDotted(wxDC& dc, wxSize const& fiel
 
 static void ShowMode_DrawHelper_Hashes(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1, int mode_HashW, int mode_HashE)
 {
-    for (auto j = tDIP(Int2CoordUnits(0)); j < tDIP(fieldsize.x); j += tDIP(kStep8)) {
+    for (auto j = tDIP(CalChart::Int2CoordUnits(0)); j < tDIP(fieldsize.x); j += tDIP(kStep8)) {
         wxPoint points[2] = {
-            fDIP(wxPoint{ j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashW) }),
-            fDIP(wxPoint{ j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashW) }),
+            fDIP(wxPoint{ j + CalChart::Float2CoordUnits(0.0 * 8), CalChart::Int2CoordUnits(mode_HashW) }),
+            fDIP(wxPoint{ j + CalChart::Float2CoordUnits(0.1 * 8), CalChart::Int2CoordUnits(mode_HashW) }),
         };
         dc.DrawLines(2, points, border1.x, border1.y);
-        points[0] = fDIP(wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashW)));
-        points[1] = fDIP(wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashW)));
+        points[0] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(0.9 * 8), CalChart::Int2CoordUnits(mode_HashW)));
+        points[1] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(1.0 * 8), CalChart::Int2CoordUnits(mode_HashW)));
         dc.DrawLines(2, points, border1.x, border1.y);
 
-        points[0] = fDIP(wxPoint(j + Float2CoordUnits(0.0 * 8), Int2CoordUnits(mode_HashE)));
-        points[1] = fDIP(wxPoint(j + Float2CoordUnits(0.1 * 8), Int2CoordUnits(mode_HashE)));
+        points[0] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(0.0 * 8), CalChart::Int2CoordUnits(mode_HashE)));
+        points[1] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(0.1 * 8), CalChart::Int2CoordUnits(mode_HashE)));
         dc.DrawLines(2, points, border1.x, border1.y);
-        points[0] = fDIP(wxPoint(j + Float2CoordUnits(0.9 * 8), Int2CoordUnits(mode_HashE)));
-        points[1] = fDIP(wxPoint(j + Float2CoordUnits(1.0 * 8), Int2CoordUnits(mode_HashE)));
+        points[0] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(0.9 * 8), CalChart::Int2CoordUnits(mode_HashE)));
+        points[1] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(1.0 * 8), CalChart::Int2CoordUnits(mode_HashE)));
         dc.DrawLines(2, points, border1.x, border1.y);
     }
 }
 
 static void ShowMode_DrawHelper_HashTicks(wxDC& dc, wxSize const& fieldsize, wxPoint const& border1, int mode_HashW, int mode_HashE)
 {
-    for (auto j = tDIP(Int2CoordUnits(0)); j < tDIP(fieldsize.x); j += tDIP(kStep8)) {
+    for (auto j = tDIP(CalChart::Int2CoordUnits(0)); j < tDIP(fieldsize.x); j += tDIP(kStep8)) {
         for (size_t midhash = 1; midhash < 5; ++midhash) {
             wxPoint points[2] = {
-                fDIP(wxPoint{ j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashW) }),
-                fDIP(wxPoint{ j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashW - (0.2 * 8)) }),
+                fDIP(wxPoint{ j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Int2CoordUnits(mode_HashW) }),
+                fDIP(wxPoint{ j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashW - (0.2 * 8)) }),
             };
             dc.DrawLines(2, points, border1.x, border1.y);
 
-            points[0] = fDIP(wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Int2CoordUnits(mode_HashE)));
-            points[1] = fDIP(wxPoint(j + Float2CoordUnits(midhash / 5.0 * 8), Float2CoordUnits(mode_HashE + (0.2 * 8))));
+            points[0] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Int2CoordUnits(mode_HashE)));
+            points[1] = fDIP(wxPoint(j + CalChart::Float2CoordUnits(midhash / 5.0 * 8), CalChart::Float2CoordUnits(mode_HashE + (0.2 * 8))));
             dc.DrawLines(2, points, border1.x, border1.y);
         }
     }
@@ -796,7 +796,7 @@ static void ShowModeStandard_DrawHelper(wxDC& dc, CalChartConfiguration const& c
         return;
     }
     auto yard_text = mode.Get_yard_text().data();
-    yard_text += (-CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8;
+    yard_text += (-CalChart::CoordUnits2Int((mode.Offset() - mode.Border1()).x) + (CalChart::kYardTextValues - 1) * 4) / 8;
 
     ShowModeStandard_DrawHelper_Labels(dc, config, yard_text, fieldsize, border1, howToDraw);
 }

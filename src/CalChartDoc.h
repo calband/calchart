@@ -162,15 +162,15 @@ public:
     // Then you push the selection list with the Create_SetSelectionListCommand
     auto MakeSelectAll() const { return mShow->MakeSelectAll(); }
     auto MakeUnselectAll() const { return mShow->MakeUnselectAll(); }
-    auto MakeAddToSelection(const SelectionList& sl) const { return mShow->MakeAddToSelection(sl); }
-    auto MakeRemoveFromSelection(const SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
-    auto MakeToggleSelection(const SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
+    auto MakeAddToSelection(const CalChart::SelectionList& sl) const { return mShow->MakeAddToSelection(sl); }
+    auto MakeRemoveFromSelection(const CalChart::SelectionList& sl) const { return mShow->MakeRemoveFromSelection(sl); }
+    auto MakeToggleSelection(const CalChart::SelectionList& sl) const { return mShow->MakeToggleSelection(sl); }
     auto MakeSelectWithinPolygon(CalChart::RawPolygon_t const& polygon) const { return mShow->MakeSelectWithinPolygon(polygon, mCurrentReferencePoint); }
-    auto MakeSelectBySymbol(SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
+    auto MakeSelectBySymbol(CalChart::SYMBOL_TYPE symbol) const { return mShow->MakeSelectBySymbol(symbol); }
     auto MakeSelectByInstrument(std::string const& instrument) const { return mShow->MakeSelectByInstrument(instrument); }
     auto MakeSelectByLabel(std::string const& label) const { return mShow->MakeSelectByLabel(label); }
 
-    void SetSelectionList(SelectionList const& sl);
+    void SetSelectionList(CalChart::SelectionList const& sl);
 
     auto IsSelected(int i) const { return mShow->IsSelected(i); }
     auto GetSelectionList() const { return mShow->GetSelectionList(); }
@@ -201,8 +201,8 @@ public:
 
     // create a set of commands to apply to the document.  This is the best way to interact with the doc.
     std::unique_ptr<wxCommand> Create_SetCurrentSheetCommand(int n);
-    std::unique_ptr<wxCommand> Create_SetSelectionListCommand(const SelectionList& sl);
-    std::unique_ptr<wxCommand> Create_SetCurrentSheetAndSelectionCommand(int n, const SelectionList& sl);
+    std::unique_ptr<wxCommand> Create_SetSelectionListCommand(const CalChart::SelectionList& sl);
+    std::unique_ptr<wxCommand> Create_SetCurrentSheetAndSelectionCommand(int n, const CalChart::SelectionList& sl);
     std::unique_ptr<wxCommand> Create_SetShowModeCommand(CalChart::ShowMode const& newmode);
     std::unique_ptr<wxCommand> Create_SetupMarchersCommand(std::vector<std::pair<std::string, std::string>> const& labels, int numColumns);
     std::unique_ptr<wxCommand> Create_SetInstrumentsCommand(std::map<int, std::string> const& dotToInstrument);
@@ -218,8 +218,8 @@ public:
     std::unique_ptr<wxCommand> Create_DeletePointsCommand();
     std::unique_ptr<wxCommand> Create_RotatePointPositionsCommand(int rotateAmount);
     std::unique_ptr<wxCommand> Create_ResetReferencePointToRef0();
-    std::unique_ptr<wxCommand> Create_SetSymbolCommand(SYMBOL_TYPE sym);
-    std::unique_ptr<wxCommand> Create_SetContinuityCommand(SYMBOL_TYPE i, CalChart::Continuity const& new_cont);
+    std::unique_ptr<wxCommand> Create_SetSymbolCommand(CalChart::SYMBOL_TYPE sym);
+    std::unique_ptr<wxCommand> Create_SetContinuityCommand(CalChart::SYMBOL_TYPE i, CalChart::Continuity const& new_cont);
     std::unique_ptr<wxCommand> Create_SetLabelRightCommand(bool right);
     std::unique_ptr<wxCommand> Create_ToggleLabelFlipCommand();
     std::unique_ptr<wxCommand> Create_SetLabelVisibleCommand(bool isVisible);
@@ -227,7 +227,7 @@ public:
     std::unique_ptr<wxCommand> Create_AddNewBackgroundImageCommand(int left, int top, int image_width, int image_height, std::vector<unsigned char> const& data, std::vector<unsigned char> const& alpha);
     std::unique_ptr<wxCommand> Create_RemoveBackgroundImageCommand(int which);
     std::unique_ptr<wxCommand> Create_MoveBackgroundImageCommand(int which, int left, int top, int scaled_width, int scaled_height);
-    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord>& finalPositions, const std::map<SYMBOL_TYPE, std::string>& continuities, const std::vector<SYMBOL_TYPE>& marcherDotTypes);
+    std::unique_ptr<wxCommand> Create_SetTransitionCommand(const std::vector<CalChart::Coord>& finalPositions, const std::map<CalChart::SYMBOL_TYPE, std::string>& continuities, const std::vector<CalChart::SYMBOL_TYPE>& marcherDotTypes);
 
 private:
     static CC_doc_command_pair Inject_CalChartDocArg(CalChart::Show_command_pair);

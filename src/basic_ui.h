@@ -30,31 +30,14 @@
 #include <wx/toolbar.h>
 #include <wx/wx.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+
 class CalChartView;
 
 static constexpr auto kMultiple = "[multiple]";
 static constexpr auto kDefaultInstrument = "default";
 static constexpr auto kCustom = "custom...";
-
-static constexpr auto kInstruments = {
-    kDefaultInstrument, // this is the same as a blank
-    "Picc",
-    "Clarinet",
-    "Alto Sax",
-    "Tenor Sax",
-    "Trumpet",
-    "Mello",
-    "Trombone",
-    "Baritone",
-    "Sousaphone",
-    "Snare",
-    "Bass Drum",
-    "Quad Drum",
-    "Cymbals",
-    "Glock",
-    "Perc",
-    "Drum Major",
-};
 
 // Set icon to band's insignia
 void SetBandIcon(wxFrame* frame);
@@ -548,3 +531,5 @@ auto CreateTextboxWithCaptionAndAction(wxWindow* parent, wxSizer* sizer, int id,
         sizer->Add(textCtrl, BasicSizerFlags());
     });
 }
+
+#pragma GCC diagnostic pop

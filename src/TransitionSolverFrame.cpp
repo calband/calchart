@@ -23,6 +23,9 @@
 #include <wx/msgdlg.h>
 #include <wx/statline.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+
 using namespace std::string_literals;
 
 #pragma mark -
@@ -663,3 +666,5 @@ void TransitionSolverFrame::RemoveDestinations(std::set<int> marchers)
         mSolverParams.groups[mSelectedGroup].allowedDestinations.erase(*iter);
     }
 }
+
+#pragma GCC diagnostic pop

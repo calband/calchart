@@ -55,7 +55,7 @@ private:
 };
 
 CalChartSplash::CalChartSplash(wxDocManager* manager, wxFrame* frame, wxString const& title)
-    : super(manager, frame, wxID_ANY, title)//, wxDefaultPosition, wxSize(154, 174))
+    : super(manager, frame, wxID_ANY, title)
 {
     // Give it an icon
     SetBandIcon(this);

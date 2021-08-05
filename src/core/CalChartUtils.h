@@ -1,7 +1,7 @@
 #pragma once
 /*
- * math_utils.h
- * Math utility functions
+ * CalChartUtils.h
+ * General Utilities
  */
 
 /*
@@ -26,6 +26,8 @@
 #include <cstdlib>
 #include <tuple>
 
+#include "CalChartTypes.h"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -34,20 +36,18 @@ namespace CalChart {
 struct Coord;
 }
 
-static const double kEpsilon = 0.00001;
-template <typename T>
-bool IS_ZERO(const T& a)
-{
-    return std::abs(a) < kEpsilon;
-}
+constexpr auto kEpsilon = 0.00001;
+constexpr auto SQRT2 = 1.4142136;
 
 template <typename T>
-T Deg2Rad(const T& a) { return a * M_PI / 180.0; }
-
-#define SQRT2 1.4142136
+constexpr auto IS_ZERO(T a) { return std::abs(a) < kEpsilon; }
+template <typename T>
+constexpr auto Deg2Rad(T a) { return a * M_PI / 180.0; }
+template <typename T>
+constexpr auto Rad2Deg(T a) { return a * 180.0 / M_PI; }
 
 template <typename T>
-constexpr T BoundDirection(T f)
+constexpr auto BoundDirection(T f)
 {
     while (f >= 360.0)
         f -= 360.0;
@@ -55,22 +55,6 @@ constexpr T BoundDirection(T f)
         f += 360.0;
     return f;
 }
-
-template <typename T>
-constexpr T BoundDirectionRad(T f)
-{
-    while (f >= 2 * M_PI)
-        f -= 2 * M_PI;
-    while (f < 0.0)
-        f += 2 * M_PI;
-    return f;
-}
-
-template <typename T>
-constexpr T NormalizeAngle(T ang) { return BoundDirection(ang); }
-
-template <typename T>
-constexpr T NormalizeAngleRad(T ang) { return BoundDirectionRad(ang); }
 
 template <typename T>
 T BoundDirectionSigned(T f)
@@ -83,6 +67,38 @@ T BoundDirectionSigned(T f)
 }
 
 template <typename T>
+constexpr auto BoundDirectionRad(T f)
+{
+    while (f >= 2 * M_PI)
+        f -= 2 * M_PI;
+    while (f < 0.0)
+        f += 2 * M_PI;
+    return f;
+}
+
+template <typename T>
+constexpr auto NormalizeAngle(T ang) { return BoundDirection(ang); }
+template <typename T>
+constexpr auto NormalizeAngleRad(T ang) { return BoundDirectionRad(ang); }
+
+// we assume the layout of quadrants are
+template <typename T>
+auto AngleToQuadrant(T ang)
+{
+    // rotate angle by 22.5:
+    auto ang1 = ang + 22.5;
+    ang1 = NormalizeAngle(ang1);
+
+    return (8 + static_cast<int>(-ang1 / 45.0)) % 8;
+}
+
+template <typename T>
+auto AngleToDirection(T ang)
+{
+    return static_cast<CalChart::Direction>(AngleToQuadrant(ang));
+}
+
+template <typename T>
 auto IsDiagonalDirection(T f)
 {
     f = BoundDirection(f);
@@ -90,19 +106,17 @@ auto IsDiagonalDirection(T f)
 }
 
 template <typename T>
-std::tuple<T, T> CreateUnitVector(T dir)
+auto CreateUnitVector(T dir)
 {
-    dir = BoundDirection(dir);
+    dir = -BoundDirection(dir);
+    auto result = std::tuple<decltype(dir), decltype(dir)>{ cos(Deg2Rad(dir)), sin(Deg2Rad(dir)) };
+    // we 'normalize' the diagonal direction to 1,1 because that be the CalChart way.
     if (IsDiagonalDirection(dir)) {
-        std::tuple<T, T> result{ 1.0, 1.0 };
-        if ((dir > 50.0) && (dir < 310.0))
-            std::get<0>(result) = -std::get<0>(result);
-        if (dir < 180.0)
-            std::get<1>(result) = -std::get<0>(result);
-        return result;
-    } else {
-        return std::tuple<T, T>{ cos(Deg2Rad(dir)), -sin(Deg2Rad(dir)) };
+        std::get<0>(result) /= SQRT2 / 2;
+        std::get<1>(result) /= SQRT2 / 2;
     }
+    if (dir > 180) {
+        std::get<1>(result) = -std::get<1>(result);
+    }
+    return result;
 }
-
-CalChart::Coord CreateVector(float dir, float mag);

@@ -22,7 +22,6 @@
 
 #include "PreferencesShowModeSetup.h"
 #include "CalChartConfiguration.h"
-#include "CalChartContinuityToken.h"
 #include "CalChartDoc.h"
 #include "CalChartDrawCommand.h"
 #include "CalChartShapes.h"

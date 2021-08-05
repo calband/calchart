@@ -76,7 +76,7 @@ void CalChartView::OnDraw(wxDC* dc)
         auto ghostSheet = mShow->GetGhostSheet(GetCurrentSheetNum());
 
         if (ghostSheet != nullptr) {
-            DrawGhostSheet(*dc, mConfig, origin, SelectionList(),
+            DrawGhostSheet(*dc, mConfig, origin, CalChart::SelectionList(),
                 mShow->GetNumPoints(), mShow->GetPointsLabel(),
                 *ghostSheet, 0);
         }
@@ -233,7 +233,7 @@ bool CalChartView::DoResetReferencePoint()
     return true;
 }
 
-bool CalChartView::DoSetPointsSymbol(SYMBOL_TYPE sym)
+bool CalChartView::DoSetPointsSymbol(CalChart::SYMBOL_TYPE sym)
 {
     if (mShow->GetSelectionList().size() == 0) {
         SetSelectionList(mShow->MakeSelectBySymbol(sym));
@@ -375,7 +375,7 @@ bool CalChartView::DoRelabel()
     auto current_sheet = mShow->GetNthSheet(GetCurrentSheetNum());
     auto next_sheet = current_sheet + 1;
     // get a relabel mapping based on the current sheet.
-    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, Float2CoordUnits(mConfig.Get_DotRatio()));
+    auto result = mShow->GetRelabelMapping(current_sheet, next_sheet, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
     // check to see if there's a valid remapping
     if (!result.first) {
         return false;
@@ -394,18 +394,18 @@ std::pair<bool, std::string> CalChartView::DoAppendShow(std::unique_ptr<CalChart
     }
     auto last_sheet = mShow->GetNthSheet(GetNumSheets() - 1);
     auto next_sheet = other_show->GetSheetBegin();
-    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, Float2CoordUnits(mConfig.Get_DotRatio()));
+    auto result = mShow->GetRelabelMapping(last_sheet, next_sheet, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
     // check to see if there's a valid remapping
     if (!result.first) {
         return { false, "Last sheet doesn't match first sheet of other show" };
     }
-    auto cmd = mShow->Create_AppendShow(std::move(other_show), Float2CoordUnits(mConfig.Get_DotRatio()));
+    auto cmd = mShow->Create_AppendShow(std::move(other_show), CalChart::Float2CoordUnits(mConfig.Get_DotRatio()));
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
     return { true, "" };
 }
 
 // append is an insert with a relabel
-bool CalChartView::DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity const& new_cont)
+bool CalChartView::DoSetContinuityCommand(CalChart::SYMBOL_TYPE sym, CalChart::Continuity const& new_cont)
 {
     auto cmd = mShow->Create_SetContinuityCommand(sym, new_cont);
     GetDocument()->GetCommandProcessor()->Submit(cmd.release());
@@ -414,7 +414,7 @@ bool CalChartView::DoSetContinuityCommand(SYMBOL_TYPE sym, CalChart::Continuity 
 
 int CalChartView::FindPoint(CalChart::Coord pos) const
 {
-    return mShow->GetCurrentSheet()->FindPoint(pos, Float2CoordUnits(mConfig.Get_DotRatio()), mShow->GetCurrentReferencePoint());
+    return mShow->GetCurrentSheet()->FindPoint(pos, CalChart::Float2CoordUnits(mConfig.Get_DotRatio()), mShow->GetCurrentReferencePoint());
 }
 
 CalChart::Coord CalChartView::PointPosition(int which) const
@@ -431,9 +431,9 @@ std::vector<CalChart::AnimationErrors> CalChartView::GetAnimationErrors() const
     return animation ? animation->GetAnimationErrors() : std::vector<CalChart::AnimationErrors>{};
 }
 
-std::map<int, SelectionList> CalChartView::GetAnimationCollisions() const
+std::map<int, CalChart::SelectionList> CalChartView::GetAnimationCollisions() const
 {
-    auto result = std::map<int, SelectionList>{};
+    auto result = std::map<int, CalChart::SelectionList>{};
     if (!mShow) {
         return result;
     }
@@ -487,7 +487,7 @@ void CalChartView::SelectWithinPolygon(CalChart::RawPolygon_t const& lasso, bool
     SetSelectionList(select);
 }
 
-void CalChartView::SetSelectionList(const SelectionList& sl)
+void CalChartView::SetSelectionList(const CalChart::SelectionList& sl)
 {
     auto current_sl = mShow->GetSelectionList();
     if (std::equal(current_sl.begin(), current_sl.end(), sl.begin(), sl.end()))
@@ -510,7 +510,7 @@ void CalChartView::SetSelect(CalChart::Select select)
     mShow->SetSelect(select);
 }
 
-void CalChartView::GoToSheetAndSetSelectionList(int which, const SelectionList& sl)
+void CalChartView::GoToSheetAndSetSelectionList(int which, const CalChart::SelectionList& sl)
 {
     if (which < 0 || which >= mShow->GetNumSheets()) {
         return;

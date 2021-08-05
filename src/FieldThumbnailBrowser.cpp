@@ -87,11 +87,11 @@ static auto CalcUserScale(wxSize const& box_size, wxSize const& mode_size)
     // always choose x when the new aspect ratio is smaller than the show.
     // This will keep the whole field on in the canvas
     if (newSizeRatio < showAspectRatio) {
-        newvalue = newX / (float)CoordUnits2Int(showSizeX);
+        newvalue = newX / (float)CalChart::CoordUnits2Int(showSizeX);
     } else {
-        newvalue = newY / (float)CoordUnits2Int(showSizeY);
+        newvalue = newY / (float)CalChart::CoordUnits2Int(showSizeY);
     }
-    auto userScale = newvalue * (CoordUnits2Int(1 << 16) / 65536.0);
+    auto userScale = newvalue * (CalChart::CoordUnits2Int(1 << 16) / 65536.0);
 
     return userScale;
 }
@@ -158,7 +158,7 @@ void FieldThumbnailBrowser::OnPaint(wxPaintEvent&)
             auto position = sheet->GetPoint(i).GetPos();
             auto x = position.x + mView->GetShowMode().Offset().x;
             auto y = position.y + mView->GetShowMode().Offset().y;
-            dc.DrawRectangle(x - Int2CoordUnits(1) / 2, y - Int2CoordUnits(1) / 2, Int2CoordUnits(1), Int2CoordUnits(1));
+            dc.DrawRectangle(x - CalChart::Int2CoordUnits(1) / 2, y - CalChart::Int2CoordUnits(1) / 2, CalChart::Int2CoordUnits(1), CalChart::Int2CoordUnits(1));
         }
         dc.SetDeviceOrigin(origin.x, origin.y);
 

@@ -26,43 +26,43 @@
 // Also handle
 class ContinuityBoxSubPartDrawer {
 public:
-    ContinuityBoxSubPartDrawer(CalChart::DrawableCont const& proc);
+    ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc);
     int GetTextBoxSize(wxDC const& dc, CalChartConfiguration const& config) const;
     void DrawCell(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const;
     auto GetLastTextBoxSize() const { return std::pair<wxPoint, wxSize>(mRectStart, mRectSize); }
-    void OnClick(wxPoint const& point, std::function<void(CalChart::DrawableCont const&)> if_hit) const;
+    void OnClick(wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> if_hit) const;
 
 private:
     void DrawProcCellBox(wxDC& dc, CalChartConfiguration const& config, void const* highlight, int x_start, int y_start) const;
 
-    CalChart::DrawableCont mDrawCont;
+    CalChart::Cont::Drawable mDrawCont;
     std::vector<ContinuityBoxSubPartDrawer> mChildren;
     mutable wxPoint mRectStart;
     mutable wxSize mRectSize;
 };
 
-auto GetBrush(CalChart::ContType contType, CalChartConfiguration const& config)
+auto GetBrush(CalChart::Cont::Type contType, CalChartConfiguration const& config)
 {
     switch (contType) {
-    case CalChart::ContType::procedure:
+    case CalChart::Cont::Type::procedure:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_PROC).first;
-    case CalChart::ContType::value:
+    case CalChart::Cont::Type::value:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_VALUE).first;
-    case CalChart::ContType::function:
+    case CalChart::Cont::Type::function:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_FUNCTION).first;
-    case CalChart::ContType::direction:
+    case CalChart::Cont::Type::direction:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_DIRECTION).first;
-    case CalChart::ContType::steptype:
+    case CalChart::Cont::Type::steptype:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_STEPTYPE).first;
-    case CalChart::ContType::point:
+    case CalChart::Cont::Type::point:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_POINT).first;
-    case CalChart::ContType::unset:
+    case CalChart::Cont::Type::unset:
         return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_UNSET).first;
     }
     return config.Get_ContCellBrushAndPen(COLOR_CONTCELLS_PROC).first;
 }
 
-ContinuityBoxSubPartDrawer::ContinuityBoxSubPartDrawer(CalChart::DrawableCont const& proc)
+ContinuityBoxSubPartDrawer::ContinuityBoxSubPartDrawer(CalChart::Cont::Drawable const& proc)
     : mDrawCont(proc)
 {
     std::copy(mDrawCont.args.begin(), mDrawCont.args.end(), std::back_inserter(mChildren));
@@ -95,7 +95,7 @@ void ContinuityBoxSubPartDrawer::DrawProcCellBox(wxDC& dc, CalChartConfiguration
         auto restore = SaveAndRestoreBrushAndPen(dc);
         // fill with the color for this continuity
         dc.SetBrush(GetBrush(mDrawCont.type, config));
-        if (mDrawCont.type == CalChart::ContType::unset) {
+        if (mDrawCont.type == CalChart::Cont::Type::unset) {
             dc.SetPen(*wxBLACK_DASHED_PEN);
         } else {
             dc.SetPen(*wxBLACK_PEN);
@@ -135,7 +135,7 @@ void ContinuityBoxSubPartDrawer::DrawCell(wxDC& dc, CalChartConfiguration const&
     DrawProcCellBox(dc, config, highlight, x_start + box_padding, y_start + box_padding);
 }
 
-void ContinuityBoxSubPartDrawer::OnClick(wxPoint const& point, std::function<void(CalChart::DrawableCont const&)> onClickAction) const
+void ContinuityBoxSubPartDrawer::OnClick(wxPoint const& point, std::function<void(CalChart::Cont::Drawable const&)> onClickAction) const
 {
     for (auto&& i : mChildren) {
         if ((point.x >= i.mRectStart.x && point.x < (i.mRectStart.x + i.mRectSize.x)) && (point.y >= i.mRectStart.y && point.y < (i.mRectStart.y + i.mRectSize.y))) {
@@ -150,7 +150,7 @@ void ContinuityBoxSubPartDrawer::OnClick(wxPoint const& point, std::function<voi
     }
 }
 
-ContinuityBoxDrawer::ContinuityBoxDrawer(CalChart::DrawableCont const& proc, CalChartConfiguration const& config, std::function<void(CalChart::DrawableCont const&)> action)
+ContinuityBoxDrawer::ContinuityBoxDrawer(CalChart::Cont::Drawable const& proc, CalChartConfiguration const& config, std::function<void(CalChart::Cont::Drawable const&)> action)
     : mConfig(config)
     , mContToken(std::make_unique<ContinuityBoxSubPartDrawer>(proc))
     , mClickAction(action)

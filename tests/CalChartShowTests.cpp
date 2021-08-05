@@ -1,6 +1,7 @@
-#include "catch2/catch.hpp"
 #include "CalChartShow.h"
+#include "catch2/catch.hpp"
 
-TEST_CASE( "CalChartShowTests" ) {
+TEST_CASE("CalChartShowTests")
+{
     CalChart::Show_UnitTests();
 }

@@ -39,7 +39,7 @@ class ContinuityBrowserPerCont : public wxPanel {
     using super = wxPanel;
 
 public:
-    ContinuityBrowserPerCont(SYMBOL_TYPE sym, wxWindow* parent);
+    ContinuityBrowserPerCont(CalChart::SYMBOL_TYPE sym, wxWindow* parent);
     ~ContinuityBrowserPerCont() override = default;
 
     void DoSetContinuity(CalChart::Continuity const& new_cont);
@@ -55,10 +55,10 @@ private:
     // Internals
     CalChartView* mView{};
     ContinuityBrowserPanel* mCanvas{};
-    SYMBOL_TYPE mSym{};
+    CalChart::SYMBOL_TYPE mSym{};
 };
 
-ContinuityBrowserPerCont::ContinuityBrowserPerCont(SYMBOL_TYPE sym, wxWindow* parent)
+ContinuityBrowserPerCont::ContinuityBrowserPerCont(CalChart::SYMBOL_TYPE sym, wxWindow* parent)
     : super(parent)
     , mSym(sym)
 {
@@ -129,7 +129,7 @@ void ContinuityBrowser::CreateControls()
         CreateHLine(this, sizer);
 
         // we lay things out from top to bottom, saying what point we're dealing with, then the continuity
-        for (auto&& eachcont : k_symbols) {
+        for (auto&& eachcont : CalChart::k_symbols) {
             mPerCont.push_back(new ContinuityBrowserPerCont(eachcont, this));
             sizer->Add(mPerCont.back(), 0, wxGROW | wxALL, 5);
             mPerCont.back()->Show(false);
@@ -155,9 +155,9 @@ void ContinuityBrowser::OnUpdate()
     }
     auto sht = mView->GetCurrentSheet();
 
-    for (auto i = 0ul; i < sizeof(k_symbols) / sizeof(k_symbols[0]); ++i) {
-        mPerCont.at(i)->Show(sht->ContinuityInUse(k_symbols[i]));
-        mPerCont.at(i)->DoSetContinuity(sht->GetContinuityBySymbol(k_symbols[i]));
+    for (auto i = 0ul; i < sizeof(CalChart::k_symbols) / sizeof(CalChart::k_symbols[0]); ++i) {
+        mPerCont.at(i)->Show(sht->ContinuityInUse(CalChart::k_symbols[i]));
+        mPerCont.at(i)->DoSetContinuity(sht->GetContinuityBySymbol(CalChart::k_symbols[i]));
     }
     GetSizer()->FitInside(this);
 }

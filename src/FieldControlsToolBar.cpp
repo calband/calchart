@@ -59,11 +59,11 @@ static constexpr auto zoom_steps = 100;
 
 static constexpr std::pair<CalChart::Coord::units, CalChart::Coord::units> gridvalue[] = {
     { 1, 0 },
-    { Int2CoordUnits(1), 0 },
-    { Int2CoordUnits(2), 0 },
-    { Int2CoordUnits(4), 0 },
-    { Int2CoordUnits(4), static_cast<CalChart::Coord::units>(Int2CoordUnits(4) / 3) },
-    { Int2CoordUnits(8), static_cast<CalChart::Coord::units>(Int2CoordUnits(8) / 3) },
+    { CalChart::Int2CoordUnits(1), 0 },
+    { CalChart::Int2CoordUnits(2), 0 },
+    { CalChart::Int2CoordUnits(4), 0 },
+    { CalChart::Int2CoordUnits(4), static_cast<CalChart::Coord::units>(CalChart::Int2CoordUnits(4) / 3) },
+    { CalChart::Int2CoordUnits(8), static_cast<CalChart::Coord::units>(CalChart::Int2CoordUnits(8) / 3) },
 };
 
 namespace FieldControls {

@@ -55,7 +55,7 @@ void ContinuityBrowserPanel::DoSetContinuity(CalChart::Continuity const& new_con
     std::vector<std::unique_ptr<DrawableCell>> contCells;
     mCont = new_cont;
     for (auto&& i : mCont.GetParsedContinuity()) {
-        contCells.emplace_back(std::make_unique<ContinuityBoxDrawer>(i->GetDrawableCont(), mConfig));
+        contCells.emplace_back(std::make_unique<ContinuityBoxDrawer>(i->GetDrawable(), mConfig));
     }
 
     // resize based on the new number of continuities.
@@ -70,7 +70,7 @@ void ContinuityBrowserPanel::DoSetContinuity(CalChart::Continuity const& new_con
 template <typename T>
 static auto do_cloning(T const& cont)
 {
-    std::vector<std::unique_ptr<ContProcedure>> copied_cont;
+    std::vector<std::unique_ptr<Cont::Procedure>> copied_cont;
     for (auto&& i : cont.GetParsedContinuity()) {
         copied_cont.emplace_back(i->clone());
     }

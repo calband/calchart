@@ -22,6 +22,7 @@
 
 #include "BackgroundImages.h"
 #include "CalChartImage.h"
+#include "CalChartTypes.h"
 #include <algorithm>
 
 class BackgroundImage {
@@ -78,12 +79,6 @@ BackgroundImage::BackgroundImage(const wxImage& image, int x, int y, int scaled_
     mBackgroundAdjustType(BackgroundAdjustType::kLast)
 {
     mBitmap = wxBitmap(mImage.Scale(scaled_width, scaled_height, wxIMAGE_QUALITY_HIGH));
-}
-
-template <typename E>
-constexpr auto toUType(E enumerator)
-{
-    return static_cast<std::underlying_type_t<E>>(enumerator);
 }
 
 bool BackgroundImage::MouseClickIsHit(const wxMouseEvent& event, const wxDC& dc) const

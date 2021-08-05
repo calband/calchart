@@ -32,7 +32,7 @@
 // The are the data objects used by the lexer and parser of the older calchart syntax.
 extern int parsecontinuity();
 extern const char* yyinputbuffer;
-extern std::vector<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
+extern std::vector<std::unique_ptr<CalChart::Cont::Procedure>> ParsedContinuity;
 
 namespace CalChart {
 
@@ -42,9 +42,9 @@ std::runtime_error ParseError(std::string const& str, int l, int c)
     return std::runtime_error{ std::string("ParseError of ") + str + " at " + std::to_string(l) + ", " + std::to_string(c) };
 }
 
-std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
+std::vector<std::unique_ptr<Cont::Procedure>> ParseContinuity(std::string const& s, ParseErrorHandlers const* correct)
 {
-    ParsedContinuity = std::vector<std::unique_ptr<CalChart::ContProcedure>>{};
+    ParsedContinuity = std::vector<std::unique_ptr<CalChart::Cont::Procedure>>{};
     std::string thisParse = s;
     while (1) {
         yyinputbuffer = thisParse.c_str();
@@ -56,18 +56,18 @@ std::vector<std::unique_ptr<ContProcedure>> ParseContinuity(std::string const& s
             // give the user a chance to correct.
             thisParse = correct->mContinuityParseCorrectionHandler(std::string("Could not parse line ") + std::to_string(yylloc.first_line) + " at " + std::to_string(yylloc.first_column), thisParse, yylloc.first_line, yylloc.first_column);
         } else {
-            ContToken dummy;
+            Cont::Token dummy;
             throw ParseError(s, dummy.line, dummy.col);
         }
     }
 }
 
-std::vector<std::unique_ptr<ContProcedure>> Deserialize(Reader reader)
+std::vector<std::unique_ptr<Cont::Procedure>> Deserialize(Reader reader)
 {
-    auto result = std::vector<std::unique_ptr<ContProcedure>>{};
+    auto result = std::vector<std::unique_ptr<Cont::Procedure>>{};
 
     while (reader.size() > 0) {
-        auto [ next_result, new_reader ] = DeserializeContProcedure(reader);
+        auto [next_result, new_reader] = Cont::DeserializeProcedure(reader);
         result.push_back(std::move(next_result));
         reader = new_reader;
     }
@@ -92,7 +92,7 @@ Continuity::Continuity(Continuity const& other)
     }
 }
 
-Continuity::Continuity(std::vector<std::unique_ptr<ContProcedure>> from_cont)
+Continuity::Continuity(std::vector<std::unique_ptr<Cont::Procedure>> from_cont)
     : m_parsedContinuity(std::move(from_cont))
 {
 }
@@ -173,8 +173,8 @@ void Continuity_serialize_test()
          }) {
         auto uut1 = Continuity{ i };
         auto serialize_result = uut1.Serialize();
-             auto reader = Reader({ serialize_result.data(), serialize_result.size()});
-             auto uut2 = Continuity{ reader };
+        auto reader = Reader({ serialize_result.data(), serialize_result.size() });
+        auto uut2 = Continuity{ reader };
         assert(uut1 == uut2);
     }
 }

@@ -23,31 +23,6 @@
 
 namespace CalChart {
 
-// Number of variables in continuity language (A B C D X Y Z DOF DOH)
-enum {
-    CONTVAR_A,
-    CONTVAR_B,
-    CONTVAR_C,
-    CONTVAR_D,
-    CONTVAR_X,
-    CONTVAR_Y,
-    CONTVAR_Z,
-    CONTVAR_DOF,
-    CONTVAR_DOH,
-    NUMCONTVARS
-};
-
-enum class AnimateDir {
-    N,
-    NE,
-    E,
-    SE,
-    S,
-    SW,
-    W,
-    NW
-};
-
 enum class MarchingStyle {
     HighStep,
     Military,

@@ -22,7 +22,6 @@
 
 #include "ColorSetupDialog.h"
 #include "CalChartConfiguration.h"
-#include "CalChartContinuityToken.h"
 #include "ColorSetupCanvas.h"
 
 #include <fstream>

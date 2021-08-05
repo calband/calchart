@@ -23,8 +23,8 @@
 #include "CalChartSelectTool.h"
 
 #include "CalChartShapes.h"
+#include "CalChartUtils.h"
 #include "linmath.h"
-#include "math_utils.h"
 
 namespace CalChart {
 

@@ -35,7 +35,7 @@ class ContinuityBrowserPanel : public CustomListViewPanel {
 
 public:
     // Basic functions
-    ContinuityBrowserPanel(SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
+    ContinuityBrowserPanel(CalChart::SYMBOL_TYPE sym, CalChartConfiguration& config, wxWindow* parent,
         wxWindowID winid = wxID_ANY,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
@@ -66,6 +66,6 @@ private:
 
     CalChartView* mView{};
     CalChart::Continuity mCont{};
-    SYMBOL_TYPE mSym{};
+    CalChart::SYMBOL_TYPE mSym{};
     CalChartConfiguration& mConfig;
 };

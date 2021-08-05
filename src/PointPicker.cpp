@@ -66,7 +66,7 @@ void PointPicker::CreateControls()
         HStack(sizer, BasicSizerFlags(), [this](auto sizer) {
             auto counter = 0;
             for (auto&& i : GetSymbolsBitmap()) {
-                auto which = static_cast<SYMBOL_TYPE>(counter++);
+                auto which = static_cast<CalChart::SYMBOL_TYPE>(counter++);
                 if (mShow.MakeSelectBySymbol(which).size()) {
                     CreateBitmapButtonWithHandler(this, sizer, BasicSizerFlags(), i, [this, which]() {
                         mSelection = mShow.MakeSelectBySymbol(which);
@@ -104,7 +104,7 @@ void PointPicker::PointPickerSelect(wxCommandEvent&)
 {
     wxArrayInt selections;
     mList->GetSelections(selections);
-    mSelection = SelectionList(selections.begin(), selections.end());
+    mSelection = CalChart::SelectionList(selections.begin(), selections.end());
 }
 
 void PointPicker::RereadFromShow()

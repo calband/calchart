@@ -40,7 +40,7 @@ int yyerror(const char *s);
 extern int yylex();
 extern void initscanner();
 
-std::vector<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
+std::vector<std::unique_ptr<CalChart::Cont::Procedure>> ParsedContinuity;
 
 %}
 
@@ -77,11 +77,11 @@ std::vector<std::unique_ptr<CalChart::ContProcedure>> ParsedContinuity;
 %union {
 	char v;
 	float f;
-	CalChart::ContDefinedValue d;
-	CalChart::ContProcedure *proc;
-	CalChart::ContPoint *pnt;
-	CalChart::ContValue *value;
-	CalChart::ContValueVar *var;
+	CalChart::Cont::DefinedValue d;
+	CalChart::Cont::Procedure *proc;
+	CalChart::Cont::Point *pnt;
+	CalChart::Cont::Value *value;
+	CalChart::Cont::ValueVar *var;
 }
 
 %type <list> proc_list
@@ -105,83 +105,83 @@ proc_list
 
 procedure
 	: varvalue '=' value
-		{ $$ = new CalChart::ContProcSet($1, $3); }
+		{ $$ = new CalChart::Cont::ProcSet($1, $3); }
 	| pBLAM
-		{ $$ = new CalChart::ContProcBlam(); }
+		{ $$ = new CalChart::Cont::ProcBlam(); }
 	| pCOUNTERMARCH point point value value value value
-		{ $$ = new CalChart::ContProcCM($2, $3, $4, $5, $6, $7); }
+		{ $$ = new CalChart::Cont::ProcCM($2, $3, $4, $5, $6, $7); }
 	| pDMCM point point value
-		{ $$ = new CalChart::ContProcDMCM($2, $3, $4); }
+		{ $$ = new CalChart::Cont::ProcDMCM($2, $3, $4); }
 	| pDMHS point
-		{ $$ = new CalChart::ContProcDMHS($2); }
+		{ $$ = new CalChart::Cont::ProcDMHS($2); }
 	| pEVEN value point
-		{ $$ = new CalChart::ContProcEven($2, $3); }
+		{ $$ = new CalChart::Cont::ProcEven($2, $3); }
 	| pEWNS point
-		{ $$ = new CalChart::ContProcEWNS($2); }
+		{ $$ = new CalChart::Cont::ProcEWNS($2); }
 	| pFOUNTAIN value value point
-		{ $$ = new CalChart::ContProcFountain($2, $3, NULL, NULL, $4); }
+		{ $$ = new CalChart::Cont::ProcFountain($2, $3, NULL, NULL, $4); }
 	| pFOUNTAIN value value value value point
-		{ $$ = new CalChart::ContProcFountain($2, $3, $4, $5, $6); }
+		{ $$ = new CalChart::Cont::ProcFountain($2, $3, $4, $5, $6); }
 	| pFM value value
-		{ $$ = new CalChart::ContProcFM($2, $3); }
+		{ $$ = new CalChart::Cont::ProcFM($2, $3); }
 	| pFMTO point
-		{ $$ = new CalChart::ContProcFMTO($2); }
+		{ $$ = new CalChart::Cont::ProcFMTO($2); }
 	| pGRID value
-		{ $$ = new CalChart::ContProcGrid($2); }
+		{ $$ = new CalChart::Cont::ProcGrid($2); }
 	| pHSCM point point value
-		{ $$ = new CalChart::ContProcHSCM($2, $3, $4); }
+		{ $$ = new CalChart::Cont::ProcHSCM($2, $3, $4); }
 	| pHSDM point
-		{ $$ = new CalChart::ContProcHSDM($2); }
+		{ $$ = new CalChart::Cont::ProcHSDM($2); }
 	| pMAGIC point
-		{ $$ = new CalChart::ContProcMagic($2); }
+		{ $$ = new CalChart::Cont::ProcMagic($2); }
 	| pMARCH value value value
-		{ $$ = new CalChart::ContProcMarch($2, $3, $4, NULL); }
+		{ $$ = new CalChart::Cont::ProcMarch($2, $3, $4, NULL); }
 	| pMARCH value value value value
-		{ $$ = new CalChart::ContProcMarch($2, $3, $4, $5); }
+		{ $$ = new CalChart::Cont::ProcMarch($2, $3, $4, $5); }
 	| pMT value value
-		{ $$ = new CalChart::ContProcMT($2, $3); }
+		{ $$ = new CalChart::Cont::ProcMT($2, $3); }
 	| pMTRM value
-		{ $$ = new CalChart::ContProcMTRM($2); }
+		{ $$ = new CalChart::Cont::ProcMTRM($2); }
 	| pNSEW point
-		{ $$ = new CalChart::ContProcNSEW($2); }
+		{ $$ = new CalChart::Cont::ProcNSEW($2); }
 	| pROTATE value value point
-		{ $$ = new CalChart::ContProcRotate($2, $3, $4); }
+		{ $$ = new CalChart::Cont::ProcRotate($2, $3, $4); }
 	;
 
 point
 	: rwP
-		{ $$ = new CalChart::ContPoint(); }
+		{ $$ = new CalChart::Cont::Point(); }
 	| rwSP
-		{ $$ = new CalChart::ContStartPoint(); }
+		{ $$ = new CalChart::Cont::StartPoint(); }
 	| rwNP
-		{ $$ = new CalChart::ContNextPoint(); }
+		{ $$ = new CalChart::Cont::NextPoint(); }
 	| rwR FLOATCONST
-		{ $$ = new CalChart::ContRefPoint((unsigned)$2 - 1); }
+		{ $$ = new CalChart::Cont::RefPoint((unsigned)$2 - 1); }
 	;
 
 value
 	: FLOATCONST
-		{ $$ = new CalChart::ContValueFloat($1); }
+		{ $$ = new CalChart::Cont::ValueFloat($1); }
 	| DEFINECONST
-		{ $$ = new CalChart::ContValueDefined($1); }
+		{ $$ = new CalChart::Cont::ValueDefined($1); }
 	| value '+' value
-		{ $$ = new CalChart::ContValueAdd($1, $3); }
+		{ $$ = new CalChart::Cont::ValueAdd($1, $3); }
 	| value '-' value
-		{ $$ = new CalChart::ContValueSub($1, $3); }
+		{ $$ = new CalChart::Cont::ValueSub($1, $3); }
 	| value '*' value
-		{ $$ = new CalChart::ContValueMult($1, $3); }
+		{ $$ = new CalChart::Cont::ValueMult($1, $3); }
 	| value '/' value
-		{ $$ = new CalChart::ContValueDiv($1, $3); }
+		{ $$ = new CalChart::Cont::ValueDiv($1, $3); }
 	| '-' value %prec UNARY
-		{ $$ = new CalChart::ContValueNeg($2); }
+		{ $$ = new CalChart::Cont::ValueNeg($2); }
 	| '(' value ')'
 		{ $$ = $2; }
 	| rwREM
-		{ $$ = new CalChart::ContValueREM(); }
+		{ $$ = new CalChart::Cont::ValueREM(); }
 	| rwDOF
-		{ $$ = new CalChart::ContValueVar(CalChart::CONTVAR_DOF); }
+		{ $$ = new CalChart::Cont::ValueVar(CalChart::Cont::Variable::DOF); }
 	| rwDOH
-		{ $$ = new CalChart::ContValueVar(CalChart::CONTVAR_DOH); }
+		{ $$ = new CalChart::Cont::ValueVar(CalChart::Cont::Variable::DOH); }
 	| varvalue
 		{ $$ = $1; }
 	| function
@@ -190,19 +190,19 @@ value
 
 function
 	: fDIR '(' point ')'
-		{ $$ = new CalChart::ContFuncDir($3); }
+		{ $$ = new CalChart::Cont::FuncDir($3); }
 	| fDIRFROM '(' point point ')'
-		{ $$ = new CalChart::ContFuncDirFrom($3, $4); }
+		{ $$ = new CalChart::Cont::FuncDirFrom($3, $4); }
 	| fDIST '(' point ')'
-		{ $$ = new CalChart::ContFuncDist($3); }
+		{ $$ = new CalChart::Cont::FuncDist($3); }
 	| fDISTFROM '(' point point ')'
-		{ $$ = new CalChart::ContFuncDistFrom($3, $4); }
+		{ $$ = new CalChart::Cont::FuncDistFrom($3, $4); }
 	| fEITHER '(' value value point ')'
-		{ $$ = new CalChart::ContFuncEither($3, $4, $5); }
+		{ $$ = new CalChart::Cont::FuncEither($3, $4, $5); }
 	| fOPP '(' value ')'
-		{ $$ = new CalChart::ContFuncOpp($3); }
+		{ $$ = new CalChart::Cont::FuncOpp($3); }
 	| fSTEP '(' value value point ')'
-		{ $$ = new CalChart::ContFuncStep($3, $4, $5); }
+		{ $$ = new CalChart::Cont::FuncStep($3, $4, $5); }
 	;
 
 varvalue
@@ -239,7 +239,7 @@ varvalue
 		    i = 6;
 		    break;
 		  }
-		  $$ = new CalChart::ContValueVar(i);
+		  $$ = new CalChart::Cont::ValueVar(static_cast<CalChart::Cont::Variable>(i));
 		}
 	;
 

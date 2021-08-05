@@ -23,7 +23,6 @@
 #include "CalChartAnimationCompile.h"
 #include "CalChartAnimationCommand.h"
 #include "CalChartAnimationErrors.h"
-#include "CalChartContinuityToken.h"
 #include "CalChartSheet.h"
 
 namespace CalChart {
@@ -31,15 +30,15 @@ namespace CalChart {
 struct AnimationCompileState : public AnimationCompile {
     AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned pt_num, Show::const_Sheet_iterator_t c_sheet, Show::const_Sheet_iterator_t endSheet, AnimationVariables& variablesStates, AnimationErrors& errors);
 
-    bool Append(std::unique_ptr<AnimationCommand> cmd, ContToken const* token) override;
-    void RegisterError(AnimateError err, ContToken const* token) const override { mErrors.RegisterError(err, token, mWhichPoint, contsymbol); }
+    bool Append(std::unique_ptr<AnimationCommand> cmd, Cont::Token const* token) override;
+    void RegisterError(AnimateError err, Cont::Token const* token) const override { mErrors.RegisterError(err, token, mWhichPoint, contsymbol); }
 
-    float GetVarValue(int varnum, ContToken const* token) const override;
-    void SetVarValue(int varnum, float value) override { mVars[varnum][mWhichPoint] = value; }
+    float GetVarValue(Cont::Variable varnum, Cont::Token const* token) const override;
+    void SetVarValue(Cont::Variable varnum, float value) override { mVars[toUType(varnum)][mWhichPoint] = value; }
 
     virtual Coord GetPointPosition() const override { return mWhichPos; }
     virtual Coord GetStartingPosition() const override { return mCurrentSheet->GetPosition(GetCurrentPoint()); }
-    virtual Coord GetEndingPosition(ContToken const* token) const override;
+    virtual Coord GetEndingPosition(Cont::Token const* token) const override;
     virtual Coord GetReferencePointPosition(unsigned refnum) const override { return mCurrentSheet->GetPosition(GetCurrentPoint(), refnum); }
     virtual unsigned GetCurrentPoint() const override { return mWhichPoint; }
     virtual unsigned GetBeatsRemaining() const override { return mBeatsRem; }
@@ -66,7 +65,7 @@ Compile(
     Show::const_Sheet_iterator_t endSheet,
     unsigned pt_num,
     SYMBOL_TYPE cont_symbol,
-    std::vector<std::unique_ptr<ContProcedure>> const& procs)
+    std::vector<std::unique_ptr<Cont::Procedure>> const& procs)
 {
     AnimationCompileState ac(cont_symbol, pt_num, c_sheet, endSheet, variablesStates, errors);
 
@@ -77,11 +76,11 @@ Compile(
 
         if (s == endSheet) {
             // use MTRM E
-            ContProcMTRM defcont(std::make_unique<ContValueDefined>(CC_E));
+            Cont::ProcMTRM defcont(std::make_unique<Cont::ValueDefined>(Cont::CC_E));
             defcont.Compile(ac);
         } else {
             // use EVEN REM NP
-            ContProcEven defcont(std::make_unique<ContValueFloat>(ac.GetBeatsRemaining()), std::make_unique<ContNextPoint>());
+            Cont::ProcEven defcont(std::make_unique<Cont::ValueFloat>(ac.GetBeatsRemaining()), std::make_unique<Cont::NextPoint>());
             defcont.Compile(ac);
         }
     }
@@ -104,7 +103,7 @@ Compile(
     // report if we have extra time.
     if (ac.GetBeatsRemaining()) {
         ac.RegisterError(AnimateError::EXTRATIME, NULL);
-        ac.Append(std::make_unique<AnimationCommandMT>(ac.GetBeatsRemaining(), AnimateDir::E), NULL);
+        ac.Append(std::make_unique<AnimationCommandMT>(ac.GetBeatsRemaining(), 90), NULL);
     }
 
     return ac.GetCommands();
@@ -122,7 +121,7 @@ AnimationCompileState::AnimationCompileState(SYMBOL_TYPE cont_symbol, unsigned p
 {
 }
 
-bool AnimationCompileState::Append(std::unique_ptr<AnimationCommand> cmd, ContToken const* token)
+bool AnimationCompileState::Append(std::unique_ptr<AnimationCommand> cmd, Cont::Token const* token)
 {
     if (mBeatsRem < cmd->NumBeats()) {
         RegisterError(AnimateError::OUTOFTIME, token);
@@ -134,23 +133,23 @@ bool AnimationCompileState::Append(std::unique_ptr<AnimationCommand> cmd, ContTo
     mBeatsRem -= cmd->NumBeats();
 
     cmd->ApplyForward(mWhichPos); // Move current point to new position
-    SetVarValue(CONTVAR_DOF, cmd->MotionDirection());
-    SetVarValue(CONTVAR_DOH, cmd->RealDirection());
+    SetVarValue(Cont::Variable::DOF, cmd->MotionDirection());
+    SetVarValue(Cont::Variable::DOH, cmd->FacingDirection());
     mCmds.emplace_back(cmd.release());
     return true;
 }
 
-float AnimationCompileState::GetVarValue(int varnum, const ContToken* token) const
+float AnimationCompileState::GetVarValue(Cont::Variable varnum, Cont::Token const* token) const
 {
-    auto i = mVars[varnum].find(mWhichPoint);
-    if (i != mVars[varnum].end()) {
+    auto i = mVars[toUType(varnum)].find(mWhichPoint);
+    if (i != mVars[toUType(varnum)].end()) {
         return i->second;
     }
     RegisterError(AnimateError::UNDEFINED, token);
     return 0.0;
 }
 
-Coord AnimationCompileState::GetEndingPosition(const ContToken* token) const
+Coord AnimationCompileState::GetEndingPosition(Cont::Token const* token) const
 {
     auto sheet = mCurrentSheet + 1;
 

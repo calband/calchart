@@ -28,9 +28,9 @@
 #include "CalChartShapes.h"
 #include "CalChartSheet.h"
 #include "CalChartShowMode.h"
+#include "CalChartUtils.h"
 #include "ContinuityEditorPopup.h"
 #include "draw.h"
-#include "math_utils.h"
 #include "platconf.h"
 #include "print_ps.h"
 
