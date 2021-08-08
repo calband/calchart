@@ -393,11 +393,13 @@ void DrawCont(wxDC& dc, CalChart::Textline_list const& print_continuity, wxRect 
 CalChart::ShowMode
 CreateFieldForPrinting(int left_limit, int right_limit, bool landscape, CalChart::ShowMode::YardLinesInfo_t const& yardlines)
 {
-    auto size = CalChart::Coord{ Int2CoordUnits(CalChart::kFieldStepSizeNorthSouth[landscape]), Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
-
     // extend the limit to the next largest 5 yard line
     left_limit = (left_limit / 8) * 8 + (left_limit % 8 ? (left_limit < 0 ? -8 : 8) : 0);
     right_limit = (right_limit / 8) * 8 + (right_limit % 8 ? (right_limit < 0 ? -8 : 8) : 0);
+
+    auto size_x = std::max(CalChart::kFieldStepSizeNorthSouth[landscape], right_limit - left_limit);
+    auto size = CalChart::Coord{ Int2CoordUnits(size_x), Int2CoordUnits(CalChart::kFieldStepSizeEastWest) };
+
     auto left_edge = -CalChart::kFieldStepSizeSouthEdgeFromCenter[landscape];
     if (left_limit < left_edge) {
         left_edge = left_limit;
@@ -448,7 +450,8 @@ void DrawForPrintingHelper(wxDC& dc, CalChartConfiguration const& config, CalCha
     // set the origin and scaling for drawing the field
     dc.SetDeviceOrigin(kFieldBorderOffset * page.x, kFieldTop * page.y);
     // Because we are drawing to a bitmap, DIP isn't happening.  So we compensate by changing the scaling.
-    auto scale = tDIP(page.x - 2 * kFieldBorderOffset * page.x) / (double)mode.Size().x;
+    auto scale_x = static_cast<double>(mode.Size().x); //std::max<double>(mode.Size().x, (boundingBox.second.x - boundingBox.first.x));
+    auto scale = tDIP(page.x - 2 * kFieldBorderOffset * page.x) / scale_x;
     dc.SetUserScale(scale, scale);
 
     // draw the field.
