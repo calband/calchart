@@ -407,7 +407,9 @@ Sheet::Sheet(size_t numPoints, uint8_t const* ptr, size_t size, ParseErrorHandle
         auto num = get_big_long(ptr);
         ptr += 4;
         while (num--) {
-            sheet->mBackgroundImages.emplace_back(ptr);
+            auto [ image, new_ptr ] = CreateImageData(ptr);
+            sheet->mBackgroundImages.push_back(image);
+            ptr = new_ptr;
         }
         if (ptr != end_ptr) {
             throw CC_FileException("Bad Background chunk", INGL_BACK);
@@ -476,7 +478,7 @@ std::vector<uint8_t> Sheet::SerializeBackgroundImageData() const
     std::vector<uint8_t> result;
     Parser::Append(result, static_cast<uint32_t>(mBackgroundImages.size()));
     for (auto&& i : mBackgroundImages) {
-        Parser::Append(result, i.Serialize());
+        Parser::Append(result, Serialize(i));
     }
     return result;
 }
