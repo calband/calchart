@@ -5,6 +5,7 @@ Checklist
  *  Did you run clang format on all the files? (`clang-format -style="{BasedOnStyle: webkit}" -i src/*`)
  *  Did it build on both windows and mac?
  *  Did you open and close some files?
+ *  Did you open and close some files with images in them?
 
 ---
 
@@ -12,7 +13,7 @@ Checklist
 
 CalChart uses CMake and Github actions to automate the release process.  When you push a tag for the repository, github will build and package the release.
 
-The current calchart version is 3.6.3.  In all commands below, substitute that number for `$CCVER` (meaning when you read `$CCVER`, type 3.6.3)
+The current calchart version is 3.6.4.  In all commands below, substitute that number for `$CCVER` (meaning when you read `$CCVER`, type 3.6.4)
 
  1. Prebuild the project to make sure its working
 
@@ -27,8 +28,8 @@ awk '//; /^# Release notes/{while(getline<"LATEST_RELEASE_NOTES.md"){print}}' RE
  4. Tag the depot
 
 ```
-$ git tag -a v3.6.3 -m "calchart-3.6.3"
-$ git push origin v3.6.3
+$ git tag -a v3.6.4 -m "calchart-3.6.4"
+$ git push origin v3.6.4
 ```
 
 This should trigger the github action, which should publish release notes in Draft form.
