@@ -168,7 +168,7 @@ Sheet::Sheet(Version_3_3_and_earlier, size_t numPoints, Reader& reader, ParseErr
         throw CC_FileException("bad POS chunk");
     }
     {
-        auto reader = CalChart::Reader(data);
+        auto reader = CalChart::Reader({data.data(), data.size()});
         for (unsigned i = 0; i < mPoints.size(); ++i) {
             auto c = Coord(reader.Get<uint16_t>(), reader.Get<uint16_t>());
             for (unsigned j = 0; j <= Point::kNumRefPoints; j++) {

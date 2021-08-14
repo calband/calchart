@@ -366,11 +366,19 @@ namespace Parser {
 class Reader
 {
 public:
-    Reader(std::span<uint8_t const> data, uint32_t version = kVersion) : data(data), version(version) {}
+    Reader(std::pair<uint8_t const*, size_t> data, uint32_t version = kVersion) : data(data), version(version) {}
 
-    auto size() const { return data.size(); }
-    auto first(std::size_t n) const { auto copy = *this; copy.data = copy.data.first(n); return copy; }
-    auto subspan(std::size_t n) const { auto copy = *this; copy.data = copy.data.subspan(n); return copy; }
+    auto size() const { return data.second; }
+    auto first(std::size_t n) const
+    {
+        if (size() < n) {
+            throw std::runtime_error(std::string("not enough data for first.  Need ") + std::to_string(n) + ", currently have " + std::to_string(size()));
+        }
+        auto copy = *this;
+        copy.data.second = n;
+        return copy;
+    }
+    auto subspan(std::size_t n) const { auto copy = *this; copy.subspanImpl(n); return copy; }
 
     template <typename T>
     T Peek() const;
@@ -379,54 +387,54 @@ public:
     T Get()
     {
         auto result = Peek<T>();
-        data = data.subspan(sizeof(T));
+        subspanImpl(sizeof(T));
         return result;
     }
 
     template <>
     uint8_t Peek<uint8_t>() const
     {
-        if (data.size() < 1) {
-            throw std::runtime_error(std::string("not enough data for uint8_t.  Need 1, currently have ") + std::to_string(data.size()));
+        if (size() < 1) {
+            throw std::runtime_error(std::string("not enough data for uint8_t.  Need 1, currently have ") + std::to_string(size()));
         }
-        return (data[0] & 0xFF);
+        return (data.first[0] & 0xFF);
     }
 
     template <>
     uint16_t Peek<uint16_t>() const
     {
-        if (data.size() < 2) {
-            throw std::runtime_error(std::string("not enough data for uint16_t.  Need 2, currently have ") + std::to_string(data.size()));
+        if (size() < 2) {
+            throw std::runtime_error(std::string("not enough data for uint16_t.  Need 2, currently have ") + std::to_string(size()));
         }
-        return ((data[0] & 0xFF) << 8) | (data[1] & 0xFF);
+        return ((data.first[0] & 0xFF) << 8) | (data.first[1] & 0xFF);
     }
 
     template <>
     uint32_t Peek<uint32_t>() const
     {
-        if (data.size() < 4) {
-            throw std::runtime_error(std::string("not enough data for uint32_t.  Need 4, currently have ") + std::to_string(data.size()));
+        if (size() < 4) {
+            throw std::runtime_error(std::string("not enough data for uint32_t.  Need 4, currently have ") + std::to_string(size()));
         }
-        return ((data[0] & 0xFF) << 24) | ((data[1] & 0xFF) << 16) | ((data[2] & 0xFF) << 8) | ((data[3] & 0xFF));
+        return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
     }
 
     template <>
     int32_t Peek<int32_t>() const
     {
-        if (data.size() < 4) {
-            throw std::runtime_error(std::string("not enough data for int32_t.  Need 4, currently have ") + std::to_string(data.size()));
+        if (size() < 4) {
+            throw std::runtime_error(std::string("not enough data for int32_t.  Need 4, currently have ") + std::to_string(size()));
         }
-        return ((data[0] & 0xFF) << 24) | ((data[1] & 0xFF) << 16) | ((data[2] & 0xFF) << 8) | ((data[3] & 0xFF));
+        return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
     }
 
     template <>
     float Peek<float>() const
     {
-        if (data.size() < sizeof(float)) {
-            throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(data.size()));
+        if (size() < sizeof(float)) {
+            throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(size()));
         }
         unsigned char rawd[sizeof(float)];
-        std::copy(data.data(), data.data() + sizeof(float), rawd);
+        std::copy(data.first, data.first + sizeof(float), rawd);
         float result = 0.f;
         void* fptr = &result;
         std::memcpy(fptr, rawd, sizeof(float));
@@ -436,41 +444,41 @@ public:
     template <typename T>
     std::vector<T> GetVector()
     {
-        if (data.size() < 4) {
-            throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(data.size()));
+        if (size() < 4) {
+            throw std::runtime_error(std::string("not enough data for vector size.  Need 4, currently have ") + std::to_string(size()));
         }
         auto size = Get<uint32_t>();
-        auto result = std::vector<T>(data.data(), data.data()+size);
-        data = data.subspan(size);
+        auto result = std::vector<T>(data.first, data.first+size);
+        subspanImpl(size);
         return result;
     }
 
     template <>
     std::string Get<std::string>()
     {
-        auto result = std::string(reinterpret_cast<char const*>(data.data()));
-        if (data.size() < (result.size() + 1)) {
-            throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(data.size()));
+        auto result = std::string(reinterpret_cast<char const*>(data.first));
+        if (size() < (result.size() + 1)) {
+            throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
         }
-        data = data.subspan(result.size()+1); // +1 for the null terminator
+        subspanImpl(result.size()+1); // +1 for the null terminator
         return result;
     }
 
     std::vector<std::tuple<uint32_t, Reader>> ParseOutLabels()
     {
         std::vector<std::tuple<uint32_t, Reader>> result;
-        while (data.size()) {
-            auto length = data.size();
+        while (size()) {
+            auto length = size();
             if (length < 8) {
                 return result;
             }
             auto name = Get<uint32_t>();
             auto size = Get<uint32_t>();
-            if (data.size() < size + 8) {
+            if (data.second < size + 8) {
                 return result;
             }
             auto reader = first(size);
-            data = data.subspan(size);
+            subspanImpl(size);
             auto end = Get<uint32_t>();
             auto end_name = Get<uint32_t>();
             if ((end != INGL_END) || (end_name != name)) {
@@ -525,7 +533,19 @@ public:
     }
 
 private:
-    std::span<uint8_t const> data;
+
+    // privateSubspan
+    void subspanImpl(std::size_t n)
+    {
+        if (data.second < n) {
+            throw std::runtime_error(std::string("not enough data for subspan.  Need ") + std::to_string(n) + ", currently have " + std::to_string(size()));
+        }
+        data.first += n;
+        data.second -= n;
+    }
+
+
+    std::pair<uint8_t const*, size_t> data;
     uint32_t version;
 };
 
