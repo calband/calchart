@@ -1,5 +1,5 @@
 #include "catch2/catch.hpp"
-#include "CalChartParser.h"
+#include "CalChartFileFormat.h"
 
 TEST_CASE( "CalChartParserBasics" ) {
     auto a = std::vector<uint8_t>{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };

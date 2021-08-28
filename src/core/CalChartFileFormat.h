@@ -26,7 +26,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
-#include <span>
 
 #include "ccvers.h"
 
