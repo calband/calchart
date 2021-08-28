@@ -390,56 +390,6 @@ public:
         return result;
     }
 
-    template <>
-    uint8_t Peek<uint8_t>() const
-    {
-        if (size() < 1) {
-            throw std::runtime_error(std::string("not enough data for uint8_t.  Need 1, currently have ") + std::to_string(size()));
-        }
-        return (data.first[0] & 0xFF);
-    }
-
-    template <>
-    uint16_t Peek<uint16_t>() const
-    {
-        if (size() < 2) {
-            throw std::runtime_error(std::string("not enough data for uint16_t.  Need 2, currently have ") + std::to_string(size()));
-        }
-        return ((data.first[0] & 0xFF) << 8) | (data.first[1] & 0xFF);
-    }
-
-    template <>
-    uint32_t Peek<uint32_t>() const
-    {
-        if (size() < 4) {
-            throw std::runtime_error(std::string("not enough data for uint32_t.  Need 4, currently have ") + std::to_string(size()));
-        }
-        return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
-    }
-
-    template <>
-    int32_t Peek<int32_t>() const
-    {
-        if (size() < 4) {
-            throw std::runtime_error(std::string("not enough data for int32_t.  Need 4, currently have ") + std::to_string(size()));
-        }
-        return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
-    }
-
-    template <>
-    float Peek<float>() const
-    {
-        if (size() < sizeof(float)) {
-            throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(size()));
-        }
-        unsigned char rawd[sizeof(float)];
-        std::copy(data.first, data.first + sizeof(float), rawd);
-        float result = 0.f;
-        void* fptr = &result;
-        std::memcpy(fptr, rawd, sizeof(float));
-        return result;
-    }
-
     template <typename T>
     std::vector<T> GetVector()
     {
@@ -449,17 +399,6 @@ public:
         auto size = Get<uint32_t>();
         auto result = std::vector<T>(data.first, data.first+size);
         subspanImpl(size);
-        return result;
-    }
-
-    template <>
-    std::string Get<std::string>()
-    {
-        auto result = std::string(reinterpret_cast<char const*>(data.first));
-        if (size() < (result.size() + 1)) {
-            throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
-        }
-        subspanImpl(result.size()+1); // +1 for the null terminator
         return result;
     }
 
@@ -547,6 +486,68 @@ private:
     std::pair<uint8_t const*, size_t> data;
     uint32_t version;
 };
+
+template <>
+inline uint8_t Reader::Peek<uint8_t>() const
+{
+    if (size() < 1) {
+        throw std::runtime_error(std::string("not enough data for uint8_t.  Need 1, currently have ") + std::to_string(size()));
+    }
+    return (data.first[0] & 0xFF);
+}
+
+template <>
+inline uint16_t Reader::Peek<uint16_t>() const
+{
+    if (size() < 2) {
+        throw std::runtime_error(std::string("not enough data for uint16_t.  Need 2, currently have ") + std::to_string(size()));
+    }
+    return ((data.first[0] & 0xFF) << 8) | (data.first[1] & 0xFF);
+}
+
+template <>
+inline uint32_t Reader::Peek<uint32_t>() const
+{
+    if (size() < 4) {
+        throw std::runtime_error(std::string("not enough data for uint32_t.  Need 4, currently have ") + std::to_string(size()));
+    }
+    return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
+}
+
+template <>
+inline int32_t Reader::Peek<int32_t>() const
+{
+    if (size() < 4) {
+        throw std::runtime_error(std::string("not enough data for int32_t.  Need 4, currently have ") + std::to_string(size()));
+    }
+    return ((data.first[0] & 0xFF) << 24) | ((data.first[1] & 0xFF) << 16) | ((data.first[2] & 0xFF) << 8) | ((data.first[3] & 0xFF));
+}
+
+template <>
+inline float Reader::Peek<float>() const
+{
+    if (size() < sizeof(float)) {
+        throw std::runtime_error(std::string("not enough data for float.  Need " + std::to_string(sizeof(float)) + ", currently have ") + std::to_string(size()));
+    }
+    unsigned char rawd[sizeof(float)];
+    std::copy(data.first, data.first + sizeof(float), rawd);
+    float result = 0.f;
+    void* fptr = &result;
+    std::memcpy(fptr, rawd, sizeof(float));
+    return result;
+}
+
+template <>
+inline std::string Reader::Get<std::string>()
+{
+    auto result = std::string(reinterpret_cast<char const*>(data.first));
+    if (size() < (result.size() + 1)) {
+        throw std::runtime_error(std::string("not enough data for string.  Need " + std::to_string(result.size() + 1) + ", currently have ") + std::to_string(size()));
+    }
+    subspanImpl(result.size()+1); // +1 for the null terminator
+    return result;
+}
+
 
 
 }
